@@ -13,8 +13,8 @@ Index Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Create slice branch from `dev`.
 - [x] T11.1 Indexed ticket model.
 - [x] T11.2 Ticket Markdown parser.
-- [ ] T11.3 Validation and documentation.
-- [ ] Run validation.
+- [x] T11.3 Validation and documentation.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -23,11 +23,11 @@ Index Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - T11.1: `feat(ticket): add indexed ticket model`
 - T11.2: `feat(ticket): parse markdown tickets`
-- T11.3: pending
+- T11.3: `docs(ticket): document ticket parser`
 
 ## Validation
 
-- `make verify`: pending
+- `make verify`: pass
 
 ## Notes
 

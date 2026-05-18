@@ -65,6 +65,7 @@ func parseTicketFrontmatter(content string) (map[string]string, error) {
 	}
 
 	remaining := strings.TrimPrefix(content, "---\n")
+
 	end := strings.Index(remaining, "\n---")
 	if end < 0 {
 		return nil, fmt.Errorf("ticket frontmatter closing delimiter is required")
@@ -166,6 +167,7 @@ func parseMetadataStringList(value string) []string {
 	value = strings.TrimSuffix(value, "]")
 
 	parts := strings.Split(value, ",")
+
 	values := make([]string, 0, len(parts))
 	for _, part := range parts {
 		if parsed := unquoteMetadataString(part); parsed != "" {

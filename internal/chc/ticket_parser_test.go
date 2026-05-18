@@ -46,37 +46,9 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 		t.Fatalf("ParseTicket returned error: %v", err)
 	}
 
-	if ticket.ProjectID != "project-1" {
-		t.Fatalf("ProjectID = %q, want project-1", ticket.ProjectID)
-	}
-
-	if ticket.RelativePath != "onboarding/CHC-1-Do-something.md" {
-		t.Fatalf("RelativePath = %q, want onboarding/CHC-1-Do-something.md", ticket.RelativePath)
-	}
-
-	if ticket.Key != "CHC-1" || ticket.Title != "Do something" || ticket.Status != "open" {
-		t.Fatalf("parsed metadata = %#v", ticket)
-	}
-
-	if len(ticket.Tags) != 2 || ticket.Tags[0] != "uxui" || ticket.Tags[1] != "onboarding" {
-		t.Fatalf("Tags = %#v, want uxui and onboarding", ticket.Tags)
-	}
-
-	if ticket.CreatedAt == nil || !ticket.CreatedAt.Equal(createdAt) {
-		t.Fatalf("CreatedAt = %v, want %s", ticket.CreatedAt, createdAt)
-	}
-
-	if ticket.UpdatedAt == nil || !ticket.UpdatedAt.Equal(updatedAt) {
-		t.Fatalf("UpdatedAt = %v, want %s", ticket.UpdatedAt, updatedAt)
-	}
-
-	if ticket.ContentHash == "" {
-		t.Fatal("ContentHash is empty")
-	}
-
-	if ticket.FileSize == 0 {
-		t.Fatal("FileSize is zero")
-	}
+	assertParsedTicketMetadata(t, ticket)
+	assertParsedTicketTimes(t, ticket, createdAt, updatedAt)
+	assertParsedTicketFileState(t, ticket)
 }
 
 func TestTicketParserRejectsMissingFrontmatter(t *testing.T) {
@@ -98,5 +70,49 @@ func writeTicketFile(t *testing.T, path, content string) {
 
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatalf("write ticket file: %v", err)
+	}
+}
+
+func assertParsedTicketMetadata(t *testing.T, ticket IndexedTicket) {
+	t.Helper()
+
+	if ticket.ProjectID != "project-1" {
+		t.Fatalf("ProjectID = %q, want project-1", ticket.ProjectID)
+	}
+
+	if ticket.RelativePath != "onboarding/CHC-1-Do-something.md" {
+		t.Fatalf("RelativePath = %q, want onboarding/CHC-1-Do-something.md", ticket.RelativePath)
+	}
+
+	if ticket.Key != "CHC-1" || ticket.Title != "Do something" || ticket.Status != "open" {
+		t.Fatalf("parsed metadata = %#v", ticket)
+	}
+
+	if len(ticket.Tags) != 2 || ticket.Tags[0] != "uxui" || ticket.Tags[1] != "onboarding" {
+		t.Fatalf("Tags = %#v, want uxui and onboarding", ticket.Tags)
+	}
+}
+
+func assertParsedTicketTimes(t *testing.T, ticket IndexedTicket, createdAt, updatedAt time.Time) {
+	t.Helper()
+
+	if ticket.CreatedAt == nil || !ticket.CreatedAt.Equal(createdAt) {
+		t.Fatalf("CreatedAt = %v, want %s", ticket.CreatedAt, createdAt)
+	}
+
+	if ticket.UpdatedAt == nil || !ticket.UpdatedAt.Equal(updatedAt) {
+		t.Fatalf("UpdatedAt = %v, want %s", ticket.UpdatedAt, updatedAt)
+	}
+}
+
+func assertParsedTicketFileState(t *testing.T, ticket IndexedTicket) {
+	t.Helper()
+
+	if ticket.ContentHash == "" {
+		t.Fatal("ContentHash is empty")
+	}
+
+	if ticket.FileSize == 0 {
+		t.Fatal("FileSize is zero")
 	}
 }
