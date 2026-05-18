@@ -11,7 +11,7 @@ Spec: `.prj/specs/specs/ticket-template.md`
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Create slice branch from `dev`.
 - [x] T5.1 Ticket model and renderer.
-- [ ] T5.2 Ticket repository and key generation.
+- [x] T5.2 Ticket repository and key generation.
 - [ ] T5.3 CLI command.
 - [ ] Run validation.
 - [ ] Push slice branch.
@@ -21,7 +21,7 @@ Spec: `.prj/specs/specs/ticket-template.md`
 ## Task Commits
 
 - T5.1: `feat(ticket): render markdown tickets`
-- T5.2: pending
+- T5.2: `feat(ticket): create ticket files`
 - T5.3: pending
 
 ## Validation
