@@ -118,6 +118,7 @@ func (m *migrator) applyMigration(ctx context.Context, db *sql.DB, migration Mig
 	}
 
 	appliedAt := m.now().UTC().Format(time.RFC3339)
+
 	_, err = tx.ExecContext(
 		ctx,
 		"INSERT INTO schema_migrations (version, name, applied_at) VALUES (?, ?, ?)",
@@ -170,6 +171,7 @@ func readMigration(assetsFS fs.FS, name string) (Migration, error) {
 	}
 
 	path := filepath.ToSlash(filepath.Join(sqliteMigrationDir, name))
+
 	content, err := fs.ReadFile(assetsFS, path)
 	if err != nil {
 		return Migration{}, fmt.Errorf("read migration %s: %w", name, err)
@@ -190,6 +192,7 @@ func readMigration(assetsFS fs.FS, name string) (Migration, error) {
 
 func parseMigrationName(filename string) (string, string, error) {
 	filename = strings.TrimSuffix(filename, filepath.Ext(filename))
+
 	version, name, ok := strings.Cut(filename, "-")
 	if !ok || version == "" || name == "" {
 		return "", "", fmt.Errorf("invalid migration filename: %s", filename)
@@ -230,6 +233,7 @@ func splitMigrationSQL(content string) (string, string, error) {
 
 func migrationApplied(ctx context.Context, db *sql.DB, version string) (bool, error) {
 	var found string
+
 	err := db.QueryRowContext(
 		ctx,
 		"SELECT version FROM schema_migrations WHERE version = ?",

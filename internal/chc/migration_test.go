@@ -63,6 +63,7 @@ func TestMigratorSkipsAppliedMigrations(t *testing.T) {
 	}
 
 	var count int
+
 	err := db.QueryRow("SELECT COUNT(*) FROM schema_migrations WHERE version = ?", "20260518000001").Scan(&count)
 	if err != nil {
 		t.Fatalf("count migrations: %v", err)
@@ -114,6 +115,7 @@ func assertTableExists(t *testing.T, db *sql.DB, name string) {
 	t.Helper()
 
 	var found string
+
 	err := db.QueryRow(
 		"SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
 		name,
@@ -127,7 +129,9 @@ func assertMigrationApplied(t *testing.T, db *sql.DB, version, name, appliedAt s
 	t.Helper()
 
 	var gotName string
+
 	var gotAppliedAt string
+
 	err := db.QueryRow(
 		"SELECT name, applied_at FROM schema_migrations WHERE version = ?",
 		version,

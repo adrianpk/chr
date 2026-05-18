@@ -13,8 +13,8 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Create slice branch from `dev`.
 - [x] T8.1 SQLite driver and migration asset.
 - [x] T8.2 Migrator core primitive.
-- [ ] T8.3 Validation and documentation.
-- [ ] Run validation.
+- [x] T8.3 Validation and documentation.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -23,11 +23,11 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - T8.1: `feat(db): add sqlite migration asset`
 - T8.2: `feat(db): add sqlite migrator`
-- T8.3: pending
+- T8.3: `docs(db): document sqlite migrations`
 
 ## Validation
 
-- `make verify`: pending
+- `make verify`: pass
 
 ## Notes
 
