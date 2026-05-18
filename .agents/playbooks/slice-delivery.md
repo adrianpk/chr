@@ -4,10 +4,33 @@
 
 1. Evaluate single-slice vs multi-slice execution.
 2. Define behavior-first slice boundaries.
-3. Create and commit the slice plan and tracker on `dev`.
+3. Create and commit the slicing plan and tracker on `dev`.
 4. Create the slice branch from `dev`.
 5. Implement and validate per slice.
 6. Integrate incrementally while keeping repository healthy.
+
+## Slicing Map Requirement
+
+Before starting any implementation slice, the repository must contain a
+committed slicing plan and tracker that define the complete local slice map for
+that slicing.
+
+The map must include:
+
+- slicing name;
+- ordered slice list starting at `Slice 1`;
+- active slice number;
+- active slice short name;
+- expected branch name;
+- expected PR title;
+- prerequisite PRs or delivered work that are not part of this slicing.
+
+The slice number in `feat(slice-<n>): ...` must come from this local map. It
+must not be inferred from the PR number, from the previous repository PR title,
+or from a different slicing.
+
+If the local map is missing, ambiguous, or inconsistent with the tracker, stop
+and correct the plan/tracker before creating or editing a branch or PR.
 
 ## Slice Creation Gate
 
@@ -22,10 +45,15 @@
 1. Use `Slice 1`, `Slice 2`, `Slice 3`, ... for slice identifiers.
 2. Use `T1.1`, `T1.2`, `T2.1`, ... for task identifiers.
 3. Do not use letter-based or Roman numeral variants for slices/tasks.
+4. Restart slice numbering at `Slice 1` for each slicing plan.
+5. Never continue slice numbering across unrelated slicing plans.
 
 ## PR Title
 
 - Required: `feat(slice-<n>): <short slice name>`
+- `<n>` must match the active slice number in the committed slicing plan.
+- `<short slice name>` must match the active slice short name in the plan/tracker.
+- Do not open or rename a PR when the expected PR title is not written in the plan or tracker.
 
 ## PR Body
 
@@ -57,10 +85,18 @@
 ## Traceability Contract
 
 - Keep explicit correlation across:
-  - plan artifact
-  - tracker artifact
+  - slicing plan artifact
+  - slicing tracker artifact
   - branch name and PR title
   - commit list mapped to slice tasks
+
+Before opening or editing a PR, verify and record:
+
+- plan path;
+- tracker path;
+- active slice number;
+- expected PR title;
+- actual PR title after creation or edit.
 
 ## Blocker Handling
 
@@ -103,3 +139,5 @@
 9. Return to `dev` before continuing.
 10. Report implementation and validation status.
 11. Start next slice only after previous slice is fully closed.
+12. Never derive slice numbers from PR history.
+13. Never mix numbering from two slicing plans in one PR title.
