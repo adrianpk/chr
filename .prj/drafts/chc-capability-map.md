@@ -2,19 +2,35 @@
 
 Status: draft
 
+Current alignment: partially superseded by `.prj/specs/specs/user-daemon-and-global-index.md`
+
 ## Purpose
 
 Capture the current capability map for `chc` so product shaping can continue without prematurely locking implementation details.
 
 This is not an implementation plan. It is a map of the areas ChrysoCoord is expected to cover.
 
+## Evolution Note
+
+This draft captured the early project-local model.
+
+Later design work refined the runtime model:
+
+- `chc` remains project-local for canonical project artifacts under `.chc/`;
+- Markdown tickets remain canonical and portable;
+- a user-level daemon may know multiple local projects;
+- a user-level project registry is needed so one daemon can coordinate multiple projects;
+- a global user SQLite database is used as a derived operational index, not as the canonical ticket source.
+
+The early statement that ChrysoCoord should not keep a global project registry is superseded by the user-daemon model. The replacement decision is narrower: user-level state may record registered local projects and derived indexes, while canonical project state remains in each project's `.chc/`.
+
 ## Product Shape
 
-ChrysoCoord is a Go-focused CLI tool for managing agent-assisted development workflows inside a project-local workspace.
+ChrysoCoord is a Go-focused CLI tool for managing agent-assisted development workflows across local Go projects.
 
 The tool creates and manages `.chc/` in target Go projects.
 
-The tool should be mostly stateless outside the project it is operating on. State should live in `.chc/`, not in a global registry of projects.
+Project-local artifacts should live in `.chc/`. User-level runtime state may exist outside the project for the multi-project daemon, registered project list, and derived SQLite indexes.
 
 ## Workspace Initialization
 

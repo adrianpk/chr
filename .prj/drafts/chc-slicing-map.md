@@ -2,11 +2,34 @@
 
 Status: draft
 
+Current alignment: historical draft, superseded by committed slice plans and runtime specs
+
 ## Purpose
 
 Define an initial implementation slicing map for ChrysoCoord.
 
 This is not a formal delivery plan. It is a working sequence to help turn the capability map into small implementation slices.
+
+## Evolution Note
+
+This draft predates the committed slice workflow and the user-daemon/global-index decision.
+
+The repository now treats a slice as executable only after a plan and tracker are committed to `dev`. The authoritative slice record is the set of committed files under:
+
+```text
+.prj/plans/
+.prj/trackers/
+```
+
+The sequence below remains historical context for the early product direction. It should not be read as the current executable roadmap.
+
+Important later changes:
+
+- root-level `AGENTS.md`, asset profiles, and protocol defaults were delivered through committed slices;
+- the ticket model was formalized in `.prj/specs/specs/ticket-template.md`;
+- the runtime model moved from project-only state to a user-centric daemon with a local project registry;
+- the global SQLite database is a derived operational index for registered projects and tickets;
+- slices after the early workspace work followed the committed plan/tracker flow, not this initial draft numbering.
 
 ## Slice 1: Asset Profiles
 
