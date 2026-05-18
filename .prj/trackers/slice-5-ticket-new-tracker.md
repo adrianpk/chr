@@ -9,8 +9,8 @@ Spec: `.prj/specs/specs/ticket-template.md`
 
 - [x] Create local plan and tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Create slice branch from `dev`.
-- [ ] T5.1 Ticket model and renderer.
+- [x] Create slice branch from `dev`.
+- [x] T5.1 Ticket model and renderer.
 - [ ] T5.2 Ticket repository and key generation.
 - [ ] T5.3 CLI command.
 - [ ] Run validation.
@@ -20,7 +20,7 @@ Spec: `.prj/specs/specs/ticket-template.md`
 
 ## Task Commits
 
-- T5.1: pending
+- T5.1: `feat(ticket): render markdown tickets`
 - T5.2: pending
 - T5.3: pending
 
