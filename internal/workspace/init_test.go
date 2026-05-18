@@ -5,12 +5,14 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"testing/fstest"
 )
 
 func TestInitCreatesProjectWorkspace(t *testing.T) {
 	dir := t.TempDir()
+	initializer := newTestInitializer()
 
-	result, err := Init(context.Background(), InitOptions{ProjectDir: dir})
+	result, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
@@ -24,10 +26,12 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 	assertDir(t, dir, ".chc/runtime/traces")
 	assertFile(t, dir, ".chc/manifest.md")
 	assertFile(t, dir, ".chc/config.yml")
+	assertFile(t, dir, ".chc/agents/CONVENTIONS.md")
 }
 
 func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 	dir := t.TempDir()
+	initializer := newTestInitializer()
 
 	configPath := filepath.Join(dir, ".chc", "config.yml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
@@ -38,7 +42,7 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 		t.Fatalf("write config: %v", err)
 	}
 
-	_, err := Init(context.Background(), InitOptions{ProjectDir: dir})
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
@@ -55,8 +59,9 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 
 func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 	dir := t.TempDir()
+	initializer := newTestInitializer()
 
-	result, err := Init(context.Background(), InitOptions{ProjectDir: dir, DryRun: true})
+	result, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir, DryRun: true})
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
@@ -72,12 +77,13 @@ func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 
 func TestInitDryRunReportsExistingPaths(t *testing.T) {
 	dir := t.TempDir()
+	initializer := newTestInitializer()
 
 	if err := os.MkdirAll(filepath.Join(dir, ".chc", "agents"), 0o755); err != nil {
 		t.Fatalf("create existing dir: %v", err)
 	}
 
-	result, err := Init(context.Background(), InitOptions{ProjectDir: dir, DryRun: true})
+	result, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir, DryRun: true})
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
@@ -89,16 +95,72 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 
 func TestInitRejectsFileProjectDir(t *testing.T) {
 	dir := t.TempDir()
+	initializer := newTestInitializer()
 
 	path := filepath.Join(dir, "not-a-dir")
 	if err := os.WriteFile(path, []byte("x"), 0o644); err != nil {
 		t.Fatalf("write file: %v", err)
 	}
 
-	_, err := Init(context.Background(), InitOptions{ProjectDir: path})
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: path})
 	if err == nil {
 		t.Fatal("Init returned nil error for file project dir")
 	}
+}
+
+func TestInitUsesRequestedProfile(t *testing.T) {
+	dir := t.TempDir()
+	initializer := newTestInitializer()
+
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir, Profile: "minimal"})
+	if err != nil {
+		t.Fatalf("Init returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(dir, ".chc", "manifest.md"))
+	if err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+
+	if string(content) != "# Minimal Workspace\n" {
+		t.Fatalf("manifest content = %q, want minimal profile content", string(content))
+	}
+}
+
+func TestInitRejectsUnknownProfile(t *testing.T) {
+	dir := t.TempDir()
+	initializer := newTestInitializer()
+
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir, Profile: "unknown"})
+	if err == nil {
+		t.Fatal("Init returned nil error for unknown profile")
+	}
+}
+
+func newTestInitializer() Initializer {
+	return NewInitializer(fstest.MapFS{
+		"assets/workspace/profiles/standard/config.yml": {
+			Data: []byte("version: 1\nworkspace_root: .chc\n"),
+		},
+		"assets/workspace/profiles/standard/manifest.md": {
+			Data: []byte("# ChrysoCoord Workspace\n"),
+		},
+		"assets/workspace/profiles/standard/agents/CONVENTIONS.md": {
+			Data: []byte("# Conventions\n"),
+		},
+		"assets/workspace/profiles/minimal/config.yml": {
+			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: minimal\n"),
+		},
+		"assets/workspace/profiles/minimal/manifest.md": {
+			Data: []byte("# Minimal Workspace\n"),
+		},
+		"assets/workspace/profiles/personal/config.yml": {
+			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: personal\n"),
+		},
+		"assets/workspace/profiles/personal/manifest.md": {
+			Data: []byte("# Personal Workspace\n"),
+		},
+	})
 }
 
 func contains(values []string, want string) bool {
