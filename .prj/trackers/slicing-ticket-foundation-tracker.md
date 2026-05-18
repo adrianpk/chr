@@ -24,7 +24,7 @@ Specs:
 
 | Slice | Status | Expected Branch | Expected PR Title | Notes |
 | --- | --- | --- | --- | --- |
-| Slice 1: Ticket List | Planned | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | List tickets for the resolved project. |
+| Slice 1: Ticket List | Reviewing | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | List tickets for the resolved project. |
 | Slice 2: Ticket Show | Planned | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Show one ticket by key. |
 | Slice 3: Ticket Comments | Planned | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Append durable comments to ticket Markdown. |
 | Slice 4: Ticket Status Transitions | Planned | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Update ticket status through controlled commands. |
@@ -43,16 +43,27 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Resolve project context for `ticket list`.
-- [ ] Read indexed tickets for the resolved project.
-- [ ] Print stable ticket rows.
-- [ ] Add focused CLI tests.
-- [ ] Run `make verify`.
+- [x] Resolve project context for `ticket list`.
+- [x] Read indexed tickets for the resolved project.
+- [x] Print stable ticket rows.
+- [x] Add focused CLI tests.
+- [x] Run `make verify`.
+
+Task commits:
+
+- T1.1: `feat(cli): resolve ticket list project context`
+- T1.2: `feat(ticket): open user ticket index`
+- T1.3: `feat(cli): add ticket list command`
+- T1.4: `test(cli): cover ticket list output`
+- T1.5: `docs(planning): record ticket list validation`
 
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
 - Planning validation: `make verify` pass.
+- Slice 1 validation: `go test ./cmd/chc` pass.
+- Slice 1 validation: `go test ./internal/chc` pass.
+- Slice 1 validation: `make verify` pass.
 
 ## Notes
 

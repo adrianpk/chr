@@ -87,7 +87,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Ticket List
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-1-ticket-list`
 Expected PR title: `feat(slice-1): ticket list`
