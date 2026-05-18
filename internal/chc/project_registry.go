@@ -15,10 +15,14 @@ import (
 
 const userDatabaseName = "chc.db"
 
+var ErrProjectNotFound = errors.New("project not found")
+
 type ProjectRegistry interface {
 	AddProject(ctx context.Context, project Project) error
 	ListProjects(ctx context.Context) ([]Project, error)
+	GetProjectByID(ctx context.Context, id string) (Project, error)
 	GetProjectByName(ctx context.Context, name string) (Project, error)
+	GetProjectByPath(ctx context.Context, path string) (Project, error)
 	Close() error
 }
 
@@ -121,17 +125,34 @@ ORDER BY name`,
 }
 
 func (r *sqliteProjectRegistry) GetProjectByName(ctx context.Context, name string) (Project, error) {
+	return r.getProject(ctx, "name", name)
+}
+
+func (r *sqliteProjectRegistry) GetProjectByID(ctx context.Context, id string) (Project, error) {
+	return r.getProject(ctx, "id", id)
+}
+
+func (r *sqliteProjectRegistry) GetProjectByPath(ctx context.Context, path string) (Project, error) {
+	return r.getProject(ctx, "path", path)
+}
+
+func (r *sqliteProjectRegistry) getProject(ctx context.Context, field, value string) (Project, error) {
+	column, err := projectLookupColumn(field)
+	if err != nil {
+		return Project{}, err
+	}
+
 	row := r.db.QueryRowContext(
 		ctx,
-		`SELECT id, name, path, enabled, registered_at, last_indexed_at
+		fmt.Sprintf(`SELECT id, name, path, enabled, registered_at, last_indexed_at
 FROM projects
-WHERE name = ?`,
-		name,
+WHERE %s = ?`, column),
+		value,
 	)
 
 	project, err := scanProject(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return Project{}, fmt.Errorf("project not found: %s", name)
+		return Project{}, fmt.Errorf("%w: %s=%s", ErrProjectNotFound, field, value)
 	}
 
 	if err != nil {
@@ -139,6 +160,15 @@ WHERE name = ?`,
 	}
 
 	return project, nil
+}
+
+func projectLookupColumn(field string) (string, error) {
+	switch field {
+	case "id", "name", "path":
+		return field, nil
+	default:
+		return "", fmt.Errorf("unsupported project lookup field: %s", field)
+	}
 }
 
 func (r *sqliteProjectRegistry) Close() error {

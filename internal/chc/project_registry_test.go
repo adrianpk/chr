@@ -3,6 +3,7 @@ package chc
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -49,6 +50,20 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 	project, err := registry.GetProjectByName(context.Background(), "chrysocoord")
 	if err != nil {
 		t.Fatalf("GetProjectByName returned error: %v", err)
+	}
+
+	assertProject(t, project, projects[0])
+
+	project, err = registry.GetProjectByID(context.Background(), "project-1")
+	if err != nil {
+		t.Fatalf("GetProjectByID returned error: %v", err)
+	}
+
+	assertProject(t, project, projects[0])
+
+	project, err = registry.GetProjectByPath(context.Background(), "/home/adrian/Projects/chrysocoord")
+	if err != nil {
+		t.Fatalf("GetProjectByPath returned error: %v", err)
 	}
 
 	assertProject(t, project, projects[0])
@@ -100,6 +115,15 @@ func TestProjectRegistryRejectsDuplicateName(t *testing.T) {
 
 	if err := registry.AddProject(context.Background(), project); err == nil {
 		t.Fatal("AddProject returned nil error for duplicate project name")
+	}
+}
+
+func TestProjectRegistryReturnsNotFoundError(t *testing.T) {
+	registry := newTestProjectRegistry(t)
+
+	_, err := registry.GetProjectByName(context.Background(), "missing")
+	if !errors.Is(err, ErrProjectNotFound) {
+		t.Fatalf("GetProjectByName error = %v, want ErrProjectNotFound", err)
 	}
 }
 
