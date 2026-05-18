@@ -26,7 +26,7 @@ Specs:
 | Project Registry Persistence | Delivered | SQLite registry and repository exist. |
 | Project Registry CLI | Delivered | `project add` and `project list` exist. |
 | Active Project Persistence | Delivered | Store and load selected project state. |
-| Project Select and Current CLI | Pending | Add `project select` and `project current`. |
+| Project Select and Current CLI | Delivered | Add `project select` and `project current`. |
 | Project Context Resolver | Pending | Reusable project resolution for later commands. |
 | Project Validation and Recovery | Pending | Clear stale/missing/disabled project behavior. |
 
@@ -79,6 +79,7 @@ Candidate tasks:
 ## Validation Record
 
 - Active Project Persistence: `make verify` pass.
+- Project Select and Current CLI: `make verify` pass.
 
 ## Notes
 
