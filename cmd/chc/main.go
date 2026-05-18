@@ -11,7 +11,6 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chc/internal/chc"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 //go:embed assets
@@ -47,7 +46,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 }
 
 func newInitCommand(stdout io.Writer) *cli.Command {
-	initializer := workspace.NewInitializer(assetsFS)
+	initializer := chc.NewInitializer(assetsFS)
 
 	return &cli.Command{
 		Name:  "init",
@@ -61,7 +60,7 @@ func newInitCommand(stdout io.Writer) *cli.Command {
 			&cli.StringFlag{
 				Name:  "profile",
 				Usage: "workspace profile: standard, personal, minimal",
-				Value: workspace.DefaultProfile,
+				Value: chc.DefaultProfile,
 			},
 			&cli.BoolFlag{
 				Name:  "dry-run",
@@ -73,7 +72,7 @@ func newInitCommand(stdout io.Writer) *cli.Command {
 				return fmt.Errorf("init does not accept positional arguments")
 			}
 
-			result, err := initializer.Init(ctx, workspace.InitOptions{
+			result, err := initializer.Init(ctx, chc.InitOptions{
 				ProjectDir: cmd.String("dir"),
 				Profile:    cmd.String("profile"),
 				DryRun:     cmd.Bool("dry-run"),
@@ -186,7 +185,7 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 	return nil
 }
 
-func printInitResult(stdout io.Writer, result workspace.InitResult) error {
+func printInitResult(stdout io.Writer, result chc.InitResult) error {
 	if _, err := fmt.Fprintf(stdout, "workspace: %s\n", result.Root); err != nil {
 		return fmt.Errorf("write workspace result: %w", err)
 	}
