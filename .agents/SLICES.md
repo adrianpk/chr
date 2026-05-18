@@ -27,12 +27,30 @@ Do not mix alternative numbering styles for these entities:
 Use a single slice only when scope and integration risk are low.
 Otherwise decompose into multiple behavior-first vertical slices.
 
+Slices are not created conversationally or invented on the fly during implementation.
+A proposed next slice becomes executable only after its plan and tracker exist in the repository and are committed to `dev`.
+
+The normal discovery-to-delivery chain is:
+
+1. dump and/or quiz when useful
+2. draft and/or spec when useful
+3. plan
+4. tracker
+5. one branch and one PR per slice
+6. one conventional commit per tracker task
+7. user review and merge
+8. return to `dev` before the next slice
+
+Any early phase may be skipped when the work is already sufficiently specified, but plan and tracker are mandatory before implementation.
+
 ## 3. Slice rules
 
 Each slice must:
 - deliver a functional increment
 - be testable in isolation
 - integrate without breaking existing behavior
+- have a versioned plan before code changes begin
+- have a versioned tracker before code changes begin
 
 ## 4. Commit strategy
 
@@ -52,15 +70,16 @@ Each slice must:
 ## 6. Traceable execution
 
 For approved multi-slice work:
-1. Create a dedicated branch: `fix/slice-<n>-<slug>`.
-2. Implement only that slice's tasks.
-3. Keep a one-to-one mapping between task IDs and commits.
-4. Open one PR scoped to that slice.
-5. Never open PRs per task or per commit.
-6. Update `ops/trackers/*` with tasks, commits, and validation outcomes.
-7. Complete review (manual and/or automated) before merge.
-8. Merge the approved slice PR into `dev`.
-9. Report slice status before starting the next slice.
+1. Commit the slice plan and tracker to `dev`.
+2. Create a dedicated branch from `dev`: `feat/slice-<n>-<slug>` or another approved type prefix.
+3. Implement only that slice's tracker tasks.
+4. Keep a one-to-one mapping between task IDs and commits.
+5. Open one PR scoped to that slice.
+6. Never open PRs per task or per commit.
+7. Update trackers with tasks, commits, and validation outcomes.
+8. Complete user review before merge.
+9. Merge the approved slice PR into `dev`.
+10. Return to `dev`, sync, and validate before the next slice.
 
 ## 7. Execution gate
 
@@ -68,3 +87,4 @@ For non-trivial work:
 - approve slice plan first
 - execute only approved slices
 - capture extra ideas as backlog candidates
+- do not implement a slice that exists only as a suggestion in conversation
