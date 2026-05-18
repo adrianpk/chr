@@ -19,6 +19,7 @@ var defaultManifest string
 
 type InitOptions struct {
 	ProjectDir string
+	DryRun     bool
 }
 
 type InitResult struct {
@@ -71,94 +72,147 @@ func Init(ctx context.Context, opts InitOptions) (InitResult, error) {
 		return InitResult{}, err
 	}
 
-	projectDir := opts.ProjectDir
+	absProjectDir, err := resolveProjectDir(opts.ProjectDir)
+	if err != nil {
+		return InitResult{}, err
+	}
+
+	result := InitResult{Root: filepath.Join(absProjectDir, DirectoryName)}
+
+	if err := initDirectories(ctx, absProjectDir, opts.DryRun, &result); err != nil {
+		return InitResult{}, err
+	}
+
+	if err := initFiles(ctx, absProjectDir, opts.DryRun, &result); err != nil {
+		return InitResult{}, err
+	}
+
+	return result, nil
+}
+
+func resolveProjectDir(projectDir string) (string, error) {
 	if projectDir == "" {
 		projectDir = "."
 	}
 
 	absProjectDir, err := filepath.Abs(projectDir)
 	if err != nil {
-		return InitResult{}, fmt.Errorf("resolve project directory: %w", err)
+		return "", fmt.Errorf("resolve project directory: %w", err)
 	}
 
 	info, err := os.Stat(absProjectDir)
 	if err != nil {
-		return InitResult{}, fmt.Errorf("inspect project directory: %w", err)
+		return "", fmt.Errorf("inspect project directory: %w", err)
 	}
+
 	if !info.IsDir() {
-		return InitResult{}, fmt.Errorf("project directory is not a directory: %s", absProjectDir)
+		return "", fmt.Errorf("project directory is not a directory: %s", absProjectDir)
 	}
 
-	root := filepath.Join(absProjectDir, DirectoryName)
-	result := InitResult{Root: root}
-
-	for _, dir := range directories {
-		if err := ctx.Err(); err != nil {
-			return InitResult{}, err
-		}
-		rel := filepath.Join(DirectoryName, filepath.FromSlash(dir))
-		target := filepath.Join(absProjectDir, rel)
-		created, err := ensureDir(target)
-		if err != nil {
-			return InitResult{}, err
-		}
-		if created {
-			result.Created = append(result.Created, filepath.ToSlash(rel))
-		} else {
-			result.Skipped = append(result.Skipped, filepath.ToSlash(rel))
-		}
-	}
-
-	for _, file := range files {
-		if err := ctx.Err(); err != nil {
-			return InitResult{}, err
-		}
-		rel := filepath.Join(DirectoryName, filepath.FromSlash(file.path))
-		target := filepath.Join(absProjectDir, rel)
-		created, err := createFile(target, file.content)
-		if err != nil {
-			return InitResult{}, err
-		}
-		if created {
-			result.Created = append(result.Created, filepath.ToSlash(rel))
-		} else {
-			result.Skipped = append(result.Skipped, filepath.ToSlash(rel))
-		}
-	}
-
-	return result, nil
+	return absProjectDir, nil
 }
 
-func ensureDir(path string) (bool, error) {
+func initDirectories(ctx context.Context, projectDir string, dryRun bool, result *InitResult) error {
+	for _, dir := range directories {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		rel := filepath.Join(DirectoryName, filepath.FromSlash(dir))
+		target := filepath.Join(projectDir, rel)
+
+		created, err := ensureDir(target, dryRun)
+		if err != nil {
+			return err
+		}
+
+		recordPath(result, rel, created)
+	}
+
+	return nil
+}
+
+func initFiles(ctx context.Context, projectDir string, dryRun bool, result *InitResult) error {
+	for _, file := range files {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		rel := filepath.Join(DirectoryName, filepath.FromSlash(file.path))
+		target := filepath.Join(projectDir, rel)
+
+		created, err := createFile(target, file.content, dryRun)
+		if err != nil {
+			return err
+		}
+
+		recordPath(result, rel, created)
+	}
+
+	return nil
+}
+
+func recordPath(result *InitResult, rel string, created bool) {
+	path := filepath.ToSlash(rel)
+	if created {
+		result.Created = append(result.Created, path)
+
+		return
+	}
+
+	result.Skipped = append(result.Skipped, path)
+}
+
+func ensureDir(path string, dryRun bool) (bool, error) {
 	info, err := os.Stat(path)
 	if err == nil {
 		if !info.IsDir() {
 			return false, fmt.Errorf("path exists and is not a directory: %s", path)
 		}
+
 		return false, nil
 	}
+
 	if !errors.Is(err, os.ErrNotExist) {
 		return false, fmt.Errorf("inspect directory: %w", err)
 	}
+
+	if dryRun {
+		return true, nil
+	}
+
 	if err := os.MkdirAll(path, 0o755); err != nil {
 		return false, fmt.Errorf("create directory: %w", err)
 	}
+
 	return true, nil
 }
 
-func createFile(path string, content string) (bool, error) {
-	_, err := os.Stat(path)
+func createFile(path, content string, dryRun bool) (bool, error) {
+	info, err := os.Stat(path)
 	if err == nil {
+		if info.IsDir() {
+			return false, fmt.Errorf("path exists and is not a file: %s", path)
+		}
+
 		return false, nil
 	}
+
 	if !errors.Is(err, os.ErrNotExist) {
 		return false, fmt.Errorf("inspect file: %w", err)
 	}
+
+	if dryRun {
+		return true, nil
+	}
+
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return false, fmt.Errorf("create parent directory: %w", err)
 	}
+
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		return false, fmt.Errorf("create file: %w", err)
 	}
+
 	return true, nil
 }

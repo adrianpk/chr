@@ -2,24 +2,14 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 
+	"github.com/urfave/cli/v3"
+
 	"forge.adrianpk.com/chc/internal/workspace"
 )
-
-const usage = `chc coordinates project-local agent development workflows.
-
-Usage:
-  chc init [--dir PATH]
-  chc help
-
-Commands:
-  init    Create a .chc workspace in a project directory
-  help    Show this help text
-`
 
 func main() {
 	if err := run(context.Background(), os.Args[1:], os.Stdout, os.Stderr); err != nil {
@@ -28,49 +18,80 @@ func main() {
 	}
 }
 
-func run(ctx context.Context, args []string, stdout io.Writer, stderr io.Writer) error {
-	if len(args) == 0 {
-		fmt.Fprint(stdout, usage)
-		return nil
-	}
+func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	cmd := newRootCommand(stdout, stderr)
 
-	switch args[0] {
-	case "help", "-h", "--help":
-		fmt.Fprint(stdout, usage)
-		return nil
-	case "init":
-		return runInit(ctx, args[1:], stdout, stderr)
-	default:
-		return fmt.Errorf("unknown command %q\n\n%s", args[0], usage)
+	osArgs := append([]string{"chc"}, args...)
+
+	return cmd.Run(ctx, osArgs)
+}
+
+func newRootCommand(stdout, stderr io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:                  "chc",
+		Usage:                 "Coordinate project-local agent development workflows",
+		Writer:                stdout,
+		ErrWriter:             stderr,
+		EnableShellCompletion: true,
+		Commands: []*cli.Command{
+			newInitCommand(stdout),
+		},
 	}
 }
 
-func runInit(ctx context.Context, args []string, stdout io.Writer, stderr io.Writer) error {
-	fs := flag.NewFlagSet("init", flag.ContinueOnError)
-	fs.SetOutput(stderr)
+func newInitCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "init",
+		Usage: "Create a .chc workspace in a project directory",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "dir",
+				Usage: "project directory",
+				Value: ".",
+			},
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print planned changes without writing files",
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.NArg() != 0 {
+				return fmt.Errorf("init does not accept positional arguments")
+			}
 
-	var dir string
-	fs.StringVar(&dir, "dir", ".", "project directory")
+			result, err := workspace.Init(ctx, workspace.InitOptions{
+				ProjectDir: cmd.String("dir"),
+				DryRun:     cmd.Bool("dry-run"),
+			})
+			if err != nil {
+				return err
+			}
 
-	if err := fs.Parse(args); err != nil {
-		return err
+			return printInitResult(stdout, result)
+		},
 	}
-	if fs.NArg() != 0 {
-		return fmt.Errorf("init does not accept positional arguments")
+}
+
+func printInitResult(stdout io.Writer, result workspace.InitResult) error {
+	if _, err := fmt.Fprintf(stdout, "workspace: %s\n", result.Root); err != nil {
+		return fmt.Errorf("write workspace result: %w", err)
 	}
 
-	result, err := workspace.Init(ctx, workspace.InitOptions{ProjectDir: dir})
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(stdout, "workspace: %s\n", result.Root)
 	for _, created := range result.Created {
-		fmt.Fprintf(stdout, "create %s\n", created)
+		if _, err := fmt.Fprintf(stdout, "create %s\n", created); err != nil {
+			return fmt.Errorf("write created path: %w", err)
+		}
 	}
+
 	for _, skipped := range result.Skipped {
-		fmt.Fprintf(stdout, "skip existing %s\n", skipped)
+		if _, err := fmt.Fprintf(stdout, "skip existing %s\n", skipped); err != nil {
+			return fmt.Errorf("write skipped path: %w", err)
+		}
 	}
-	fmt.Fprintln(stdout, "done")
+
+	if _, err := fmt.Fprintln(stdout, "done"); err != nil {
+		return fmt.Errorf("write completion result: %w", err)
+	}
+
 	return nil
 }

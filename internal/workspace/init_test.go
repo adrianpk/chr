@@ -28,10 +28,12 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 
 func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 	dir := t.TempDir()
+
 	configPath := filepath.Join(dir, ".chc", "config.yml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
 		t.Fatalf("create .chc: %v", err)
 	}
+
 	if err := os.WriteFile(configPath, []byte("custom: true\n"), 0o644); err != nil {
 		t.Fatalf("write config: %v", err)
 	}
@@ -45,13 +47,49 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read config: %v", err)
 	}
+
 	if string(content) != "custom: true\n" {
 		t.Fatalf("config content = %q, want custom content unchanged", string(content))
 	}
 }
 
+func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
+	dir := t.TempDir()
+
+	result, err := Init(context.Background(), InitOptions{ProjectDir: dir, DryRun: true})
+	if err != nil {
+		t.Fatalf("Init returned error: %v", err)
+	}
+
+	if len(result.Created) == 0 {
+		t.Fatal("dry run reported no planned creates")
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, DirectoryName)); !os.IsNotExist(err) {
+		t.Fatalf("dry run created workspace or returned unexpected stat error: %v", err)
+	}
+}
+
+func TestInitDryRunReportsExistingPaths(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := os.MkdirAll(filepath.Join(dir, ".chc", "agents"), 0o755); err != nil {
+		t.Fatalf("create existing dir: %v", err)
+	}
+
+	result, err := Init(context.Background(), InitOptions{ProjectDir: dir, DryRun: true})
+	if err != nil {
+		t.Fatalf("Init returned error: %v", err)
+	}
+
+	if !contains(result.Skipped, ".chc/agents") {
+		t.Fatalf("Skipped = %#v, want .chc/agents", result.Skipped)
+	}
+}
+
 func TestInitRejectsFileProjectDir(t *testing.T) {
 	dir := t.TempDir()
+
 	path := filepath.Join(dir, "not-a-dir")
 	if err := os.WriteFile(path, []byte("x"), 0o644); err != nil {
 		t.Fatalf("write file: %v", err)
@@ -63,23 +101,37 @@ func TestInitRejectsFileProjectDir(t *testing.T) {
 	}
 }
 
-func assertDir(t *testing.T, root string, rel string) {
+func contains(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+
+	return false
+}
+
+func assertDir(t *testing.T, root, rel string) {
 	t.Helper()
+
 	info, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel)))
 	if err != nil {
 		t.Fatalf("stat dir %s: %v", rel, err)
 	}
+
 	if !info.IsDir() {
 		t.Fatalf("%s is not a directory", rel)
 	}
 }
 
-func assertFile(t *testing.T, root string, rel string) {
+func assertFile(t *testing.T, root, rel string) {
 	t.Helper()
+
 	info, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel)))
 	if err != nil {
 		t.Fatalf("stat file %s: %v", rel, err)
 	}
+
 	if info.IsDir() {
 		t.Fatalf("%s is a directory", rel)
 	}
