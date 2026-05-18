@@ -12,7 +12,7 @@ Index Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Create slice branch from `dev`.
 - [x] T11.1 Indexed ticket model.
-- [ ] T11.2 Ticket Markdown parser.
+- [x] T11.2 Ticket Markdown parser.
 - [ ] T11.3 Validation and documentation.
 - [ ] Run validation.
 - [ ] Push slice branch.
@@ -22,7 +22,7 @@ Index Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 ## Task Commits
 
 - T11.1: `feat(ticket): add indexed ticket model`
-- T11.2: pending
+- T11.2: `feat(ticket): parse markdown tickets`
 - T11.3: pending
 
 ## Validation
