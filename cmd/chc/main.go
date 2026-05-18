@@ -381,6 +381,10 @@ func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return fmt.Errorf("project is disabled: %s", project.Name)
 	}
 
+	if _, err := resolveRegisteredProjectDirectory(project); err != nil {
+		return err
+	}
+
 	activeProject, err := chc.NewActiveProject(project.ID)
 	if err != nil {
 		return err
