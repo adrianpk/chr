@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/urfave/cli/v3"
 
+	"forge.adrianpk.com/chc/internal/chc"
 	"forge.adrianpk.com/chc/internal/workspace"
 )
 
@@ -39,6 +41,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
 			newInitCommand(stdout),
+			newTicketCommand(stdout),
 		},
 	}
 }
@@ -82,6 +85,105 @@ func newInitCommand(stdout io.Writer) *cli.Command {
 			return printInitResult(stdout, result)
 		},
 	}
+}
+
+func newTicketCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "ticket",
+		Usage: "Manage workspace tickets",
+		Commands: []*cli.Command{
+			newTicketNewCommand(stdout),
+		},
+	}
+}
+
+func newTicketNewCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "new",
+		Usage:  "Create a ticket in the current workspace",
+		Flags:  ticketNewFlags(),
+		Action: ticketNewAction(stdout),
+	}
+}
+
+func ticketNewFlags() []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:  "dir",
+			Usage: "project directory override",
+			Value: ".",
+		},
+		&cli.StringFlag{
+			Name:  "priority",
+			Usage: "ticket priority",
+		},
+		&cli.StringFlag{
+			Name:  "severity",
+			Usage: "ticket severity",
+		},
+		&cli.StringFlag{
+			Name:  "type",
+			Usage: "ticket type",
+		},
+		&cli.StringSliceFlag{
+			Name:  "tag",
+			Usage: "ticket tag",
+		},
+		&cli.StringFlag{
+			Name:  "use-case",
+			Usage: "ticket use case",
+		},
+		&cli.StringFlag{
+			Name:  "project-area",
+			Usage: "ticket project area",
+		},
+	}
+}
+
+func ticketNewAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketNew(ctx, cmd, stdout)
+	}
+}
+
+func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("ticket new requires exactly one title argument")
+	}
+
+	projectDir, err := filepath.Abs(cmd.String("dir"))
+	if err != nil {
+		return fmt.Errorf("resolve project directory: %w", err)
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectDir)
+	if err != nil {
+		return err
+	}
+
+	repository := chc.NewTicketRepository(
+		projectDir,
+		chc.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
+	)
+
+	result, err := repository.CreateTicket(ctx, chc.CreateTicketOptions{
+		Title:       cmd.Args().First(),
+		Priority:    cmd.String("priority"),
+		Severity:    cmd.String("severity"),
+		Type:        cmd.String("type"),
+		Tags:        cmd.StringSlice("tag"),
+		UseCase:     cmd.String("use-case"),
+		ProjectArea: cmd.String("project-area"),
+	})
+	if err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintf(stdout, "ticket: %s\n", result.Path); err != nil {
+		return fmt.Errorf("write ticket result: %w", err)
+	}
+
+	return nil
 }
 
 func printInitResult(stdout io.Writer, result workspace.InitResult) error {

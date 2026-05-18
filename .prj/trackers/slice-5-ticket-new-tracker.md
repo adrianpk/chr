@@ -12,8 +12,8 @@ Spec: `.prj/specs/specs/ticket-template.md`
 - [x] Create slice branch from `dev`.
 - [x] T5.1 Ticket model and renderer.
 - [x] T5.2 Ticket repository and key generation.
-- [ ] T5.3 CLI command.
-- [ ] Run validation.
+- [x] T5.3 CLI command.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -22,12 +22,12 @@ Spec: `.prj/specs/specs/ticket-template.md`
 
 - T5.1: `feat(ticket): render markdown tickets`
 - T5.2: `feat(ticket): create ticket files`
-- T5.3: pending
+- T5.3: `feat(cli): add ticket new command`
 
 ## Validation
 
-- `make verify`: pending
-- Manual `chc init` and `chc ticket new`: pending
+- `make verify`: pass
+- Manual `chc init` and `chc ticket new`: pass
 
 ## Notes
 

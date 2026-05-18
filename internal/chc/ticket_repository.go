@@ -199,6 +199,7 @@ func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
 
 func keyNumberFromText(prefix, text string) (int, bool) {
 	pattern := regexp.MustCompile(regexp.QuoteMeta(prefix) + `-(\d+)`)
+
 	match := pattern.FindStringSubmatch(text)
 	if len(match) != 2 {
 		return 0, false
@@ -225,12 +226,15 @@ func truncatedName(value string) string {
 
 func slugify(value string) string {
 	value = strings.TrimSpace(value)
+
 	var output strings.Builder
+
 	lastDash := false
 
 	for _, char := range value {
 		if unicode.IsLetter(char) || unicode.IsDigit(char) {
 			output.WriteRune(char)
+
 			lastDash = false
 
 			continue
@@ -238,6 +242,7 @@ func slugify(value string) string {
 
 		if !lastDash && output.Len() > 0 {
 			output.WriteByte('-')
+
 			lastDash = true
 		}
 	}
