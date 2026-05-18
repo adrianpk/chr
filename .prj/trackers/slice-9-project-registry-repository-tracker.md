@@ -12,7 +12,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Create slice branch from `dev`.
 - [x] T9.1 Project model.
-- [ ] T9.2 Project registry repository.
+- [x] T9.2 Project registry repository.
 - [ ] T9.3 Validation and documentation.
 - [ ] Run validation.
 - [ ] Push slice branch.
@@ -22,7 +22,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 ## Task Commits
 
 - T9.1: `feat(project): add project model`
-- T9.2: pending
+- T9.2: `feat(project): add sqlite project registry`
 - T9.3: pending
 
 ## Validation
