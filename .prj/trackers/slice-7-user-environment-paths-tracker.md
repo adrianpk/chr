@@ -11,7 +11,7 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Create slice branch from `dev`.
 - [x] T7.1 User environment model.
-- [ ] T7.2 Normal and development path resolution.
+- [x] T7.2 Normal and development path resolution.
 - [ ] T7.3 Documentation and validation.
 - [ ] Run validation.
 - [ ] Push slice branch.
@@ -21,7 +21,7 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 ## Task Commits
 
 - T7.1: `feat(runtime): add user environment model`
-- T7.2: pending
+- T7.2: `feat(runtime): resolve user environment paths`
 - T7.3: pending
 
 ## Validation

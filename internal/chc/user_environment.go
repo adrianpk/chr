@@ -26,6 +26,11 @@ type UserEnvironmentOptions struct {
 	DataDir   string
 	CacheDir  string
 	StateDir  string
+	HomeDir   string
+	XDGConfig string
+	XDGData   string
+	XDGCache  string
+	XDGState  string
 	DevMode   bool
 	DevRoot   string
 }
@@ -48,6 +53,10 @@ func NewUserEnvironment(opts UserEnvironmentOptions) (UserEnvironment, error) {
 		env.dataDir = filepath.Join(opts.DevRoot, "data", "chc")
 		env.cacheDir = filepath.Join(opts.DevRoot, "cache", "chc")
 		env.stateDir = filepath.Join(opts.DevRoot, "state", "chc")
+	}
+
+	if !opts.DevMode {
+		env.applyDefaults(opts)
 	}
 
 	if err := env.validate(); err != nil {
@@ -77,6 +86,24 @@ func (e *userEnvironment) DevMode() bool {
 	return e.devMode
 }
 
+func (e *userEnvironment) applyDefaults(opts UserEnvironmentOptions) {
+	if e.configDir == "" {
+		e.configDir = userConfigDir(opts)
+	}
+
+	if e.dataDir == "" {
+		e.dataDir = userDataDir(opts)
+	}
+
+	if e.cacheDir == "" {
+		e.cacheDir = userCacheDir(opts)
+	}
+
+	if e.stateDir == "" {
+		e.stateDir = userStateDir(opts)
+	}
+}
+
 func (e *userEnvironment) validate() error {
 	if e.configDir == "" {
 		return fmt.Errorf("config directory is required")
@@ -95,4 +122,52 @@ func (e *userEnvironment) validate() error {
 	}
 
 	return nil
+}
+
+func userConfigDir(opts UserEnvironmentOptions) string {
+	if opts.XDGConfig != "" {
+		return filepath.Join(opts.XDGConfig, "chc")
+	}
+
+	if opts.HomeDir == "" {
+		return ""
+	}
+
+	return filepath.Join(opts.HomeDir, ".config", "chc")
+}
+
+func userDataDir(opts UserEnvironmentOptions) string {
+	if opts.XDGData != "" {
+		return filepath.Join(opts.XDGData, "chc")
+	}
+
+	if opts.HomeDir == "" {
+		return ""
+	}
+
+	return filepath.Join(opts.HomeDir, ".local", "share", "chc")
+}
+
+func userCacheDir(opts UserEnvironmentOptions) string {
+	if opts.XDGCache != "" {
+		return filepath.Join(opts.XDGCache, "chc")
+	}
+
+	if opts.HomeDir == "" {
+		return ""
+	}
+
+	return filepath.Join(opts.HomeDir, ".cache", "chc")
+}
+
+func userStateDir(opts UserEnvironmentOptions) string {
+	if opts.XDGState != "" {
+		return filepath.Join(opts.XDGState, "chc")
+	}
+
+	if opts.HomeDir == "" {
+		return ""
+	}
+
+	return filepath.Join(opts.HomeDir, ".local", "state", "chc")
 }
