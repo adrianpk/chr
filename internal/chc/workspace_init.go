@@ -19,16 +19,16 @@ const (
 	rootAssetDir         = "root"
 )
 
-type Initializer interface {
+type Workspace interface {
 	Init(ctx context.Context, opts InitOptions) (InitResult, error)
 }
 
-type initializer struct {
+type workspace struct {
 	assetsFS fs.FS
 }
 
-func NewInitializer(assetsFS fs.FS) Initializer {
-	return &initializer{assetsFS: assetsFS}
+func NewWorkspace(assetsFS fs.FS) Workspace {
+	return &workspace{assetsFS: assetsFS}
 }
 
 type InitOptions struct {
@@ -77,7 +77,7 @@ var directories = []string{
 	"notifications",
 }
 
-func (i *initializer) Init(ctx context.Context, opts InitOptions) (InitResult, error) {
+func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, error) {
 	if err := ctx.Err(); err != nil {
 		return InitResult{}, err
 	}
@@ -98,11 +98,11 @@ func (i *initializer) Init(ctx context.Context, opts InitOptions) (InitResult, e
 		profile = DefaultProfile
 	}
 
-	if err := i.initWorkspaceFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
+	if err := w.initWorkspaceFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
 		return InitResult{}, err
 	}
 
-	if err := i.initRootFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
+	if err := w.initRootFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
 		return InitResult{}, err
 	}
 
@@ -151,8 +151,8 @@ func initDirectories(ctx context.Context, projectDir string, dryRun bool, result
 	return nil
 }
 
-func (i *initializer) initWorkspaceFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
-	files, err := i.profileFiles(profile, workspaceFile)
+func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
+	files, err := w.profileFiles(profile, workspaceFile)
 	if err != nil {
 		return err
 	}
@@ -176,8 +176,8 @@ func (i *initializer) initWorkspaceFiles(ctx context.Context, projectDir, profil
 	return nil
 }
 
-func (i *initializer) initRootFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
-	files, err := i.profileFiles(profile, rootFile)
+func (w *workspace) initRootFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
+	files, err := w.profileFiles(profile, rootFile)
 	if err != nil {
 		return err
 	}
@@ -207,23 +207,23 @@ const (
 	rootFile
 )
 
-func (i *initializer) profileFiles(profile string, kind profileFileKind) ([]entry, error) {
+func (w *workspace) profileFiles(profile string, kind profileFileKind) ([]entry, error) {
 	profileDir, err := profileDir(profile)
 	if err != nil {
 		return nil, err
 	}
 
 	files := []entry{}
-	walk := i.profileFileWalker(profileDir, kind, &files)
+	walk := w.profileFileWalker(profileDir, kind, &files)
 
-	if err := fs.WalkDir(i.assetsFS, profileDir, walk); err != nil {
+	if err := fs.WalkDir(w.assetsFS, profileDir, walk); err != nil {
 		return nil, fmt.Errorf("read embedded workspace profile %q: %w", profile, err)
 	}
 
 	return files, nil
 }
 
-func (i *initializer) profileFileWalker(profileDir string, kind profileFileKind, files *[]entry) fs.WalkDirFunc {
+func (w *workspace) profileFileWalker(profileDir string, kind profileFileKind, files *[]entry) fs.WalkDirFunc {
 	return func(path string, dirEntry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
@@ -233,7 +233,7 @@ func (i *initializer) profileFileWalker(profileDir string, kind profileFileKind,
 			return nil
 		}
 
-		file, include, err := i.profileFile(profileDir, path, kind)
+		file, include, err := w.profileFile(profileDir, path, kind)
 		if err != nil {
 			return err
 		}
@@ -246,7 +246,7 @@ func (i *initializer) profileFileWalker(profileDir string, kind profileFileKind,
 	}
 }
 
-func (i *initializer) profileFile(profileDir, path string, kind profileFileKind) (entry, bool, error) {
+func (w *workspace) profileFile(profileDir, path string, kind profileFileKind) (entry, bool, error) {
 	rel, err := filepath.Rel(profileDir, path)
 	if err != nil {
 		return entry{}, false, fmt.Errorf("resolve embedded workspace profile path %s: %w", path, err)
@@ -256,7 +256,7 @@ func (i *initializer) profileFile(profileDir, path string, kind profileFileKind)
 		return entry{}, false, nil
 	}
 
-	content, err := fs.ReadFile(i.assetsFS, path)
+	content, err := fs.ReadFile(w.assetsFS, path)
 	if err != nil {
 		return entry{}, false, fmt.Errorf("read embedded workspace profile file %s: %w", path, err)
 	}

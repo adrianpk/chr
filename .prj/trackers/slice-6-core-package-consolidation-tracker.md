@@ -11,7 +11,7 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 - [ ] Commit spec, plan, and tracker directly to `dev`.
 - [x] Create slice branch from `dev`.
 - [x] T6.1 Move workspace initialization into core package.
-- [ ] T6.2 Introduce workspace-oriented API names.
+- [x] T6.2 Introduce workspace-oriented API names.
 - [ ] T6.3 Documentation and tracker alignment.
 - [ ] Run validation.
 - [ ] Push slice branch.
@@ -21,7 +21,7 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 ## Task Commits
 
 - T6.1: `refactor(chc): move workspace init into core package`
-- T6.2: pending
+- T6.2: `refactor(chc): expose workspace API`
 - T6.3: pending
 
 ## Validation

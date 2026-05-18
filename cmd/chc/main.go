@@ -46,7 +46,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 }
 
 func newInitCommand(stdout io.Writer) *cli.Command {
-	initializer := chc.NewInitializer(assetsFS)
+	workspace := chc.NewWorkspace(assetsFS)
 
 	return &cli.Command{
 		Name:  "init",
@@ -72,7 +72,7 @@ func newInitCommand(stdout io.Writer) *cli.Command {
 				return fmt.Errorf("init does not accept positional arguments")
 			}
 
-			result, err := initializer.Init(ctx, chc.InitOptions{
+			result, err := workspace.Init(ctx, chc.InitOptions{
 				ProjectDir: cmd.String("dir"),
 				Profile:    cmd.String("profile"),
 				DryRun:     cmd.Bool("dry-run"),

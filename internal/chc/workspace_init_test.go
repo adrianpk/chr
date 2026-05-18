@@ -164,8 +164,8 @@ func TestInitRejectsUnknownProfile(t *testing.T) {
 	}
 }
 
-func newTestInitializer() Initializer {
-	return NewInitializer(fstest.MapFS{
+func newTestInitializer() Workspace {
+	return NewWorkspace(fstest.MapFS{
 		"assets/workspace/profiles/standard/config.yml": {
 			Data: []byte("version: 1\nworkspace_root: .chc\n"),
 		},
