@@ -4,7 +4,7 @@ BIN_DIR := $(DEV_ROOT)/bin
 BIN := $(BIN_DIR)/chc
 RUN_ARGS ?= --help
 
-.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run clean-dev
+.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev
 
 fmt:
 	@$(GO) fmt ./...
@@ -42,6 +42,9 @@ build: dev-dirs
 
 build-run: build
 	@$(BIN) $(RUN_ARGS)
+
+install:
+	@$(GO) install ./cmd/chc
 
 clean-dev:
 	@rm -rf $(DEV_ROOT)
