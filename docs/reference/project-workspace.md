@@ -4,7 +4,9 @@
 
 ChrysoCoord uses `.chc/` as the project-local hidden directory.
 
-The `chc` command creates and manages this directory inside a target project. The directory is intentionally tied to the CLI name rather than the target repository name.
+The `chc` command creates and manages this directory inside the project where it runs. The directory is intentionally tied to the CLI name rather than the target repository name.
+
+ChrysoCoord does not keep a global project registry. Project state is local to `.chc/` inside each managed project.
 
 ## Initialization
 
@@ -20,10 +22,12 @@ Create the workspace in another project directory:
 chc init --dir /path/to/project
 ```
 
+`--dir` is an override for scripts or external initialization. The normal workflow is to change into the project and run `chc init`.
+
 Preview initialization without writing files:
 
 ```sh
-chc init --dir /path/to/project --dry-run
+chc init --dry-run
 ```
 
 ## Initial Layout

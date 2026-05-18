@@ -29,7 +29,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:                  "chc",
-		Usage:                 "Coordinate project-local agent development workflows",
+		Usage:                 "Coordinate agent development workflows from the current project",
 		Writer:                stdout,
 		ErrWriter:             stderr,
 		EnableShellCompletion: true,
@@ -42,11 +42,11 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 func newInitCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "init",
-		Usage: "Create a .chc workspace in a project directory",
+		Usage: "Create a .chc workspace in the current project",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "dir",
-				Usage: "project directory",
+				Usage: "project directory override",
 				Value: ".",
 			},
 			&cli.BoolFlag{
