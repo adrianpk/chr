@@ -15,8 +15,8 @@ Specs:
 - [x] Review existing project registry, CLI, and user environment implementation.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 
 ## Slice Status
 
@@ -25,7 +25,7 @@ Specs:
 | User Environment Paths | Delivered | Implemented by the existing user environment path work. |
 | Project Registry Persistence | Delivered | SQLite registry and repository exist. |
 | Project Registry CLI | Delivered | `project add` and `project list` exist. |
-| Active Project Persistence | Pending | Store and load selected project state. |
+| Active Project Persistence | Delivered | Store and load selected project state. |
 | Project Select and Current CLI | Pending | Add `project select` and `project current`. |
 | Project Context Resolver | Pending | Reusable project resolution for later commands. |
 | Project Validation and Recovery | Pending | Clear stale/missing/disabled project behavior. |
@@ -78,7 +78,7 @@ Candidate tasks:
 
 ## Validation Record
 
-No implementation validation has been run for this tracker yet.
+- Active Project Persistence: `make verify` pass.
 
 ## Notes
 

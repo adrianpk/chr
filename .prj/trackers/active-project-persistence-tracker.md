@@ -16,7 +16,7 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 - [x] Run validation.
 - [x] Push implementation branch.
 - [x] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Await user approval before merge.
 
 ## Task Commits
 
@@ -33,3 +33,4 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 
 - This slice intentionally does not add CLI commands.
 - CLI selection and inspection belong to a later slice in the same slicing.
+- PR #13 was merged into `dev`.
