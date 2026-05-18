@@ -12,6 +12,7 @@ import (
 
 type commandProjectContext struct {
 	ProjectDir string
+	ProjectID  string
 }
 
 type commandProjectContextOptions struct {
@@ -88,7 +89,10 @@ func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
 		return commandProjectContext{}, err
 	}
 
-	return commandProjectContext{ProjectDir: absProjectDir}, nil
+	return commandProjectContext{
+		ProjectDir: absProjectDir,
+		ProjectID:  projectID(absProjectDir),
+	}, nil
 }
 
 func resolveRegisteredProjectDirectory(project chc.Project) (commandProjectContext, error) {
@@ -116,5 +120,8 @@ func resolveRegisteredProjectDirectory(project chc.Project) (commandProjectConte
 		return commandProjectContext{}, fmt.Errorf("registered project workspace is not a directory: %s", workspacePath)
 	}
 
-	return commandProjectContext{ProjectDir: project.Path}, nil
+	return commandProjectContext{
+		ProjectDir: project.Path,
+		ProjectID:  project.ID,
+	}, nil
 }
