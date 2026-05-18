@@ -1,7 +1,10 @@
 GO := go
 DEV_ROOT ?= _workspace
-BIN_DIR := $(DEV_ROOT)/bin
+CHC_DEV_HOME := $(DEV_ROOT)/chc
+CHC_DEV_CONFIG := $(DEV_ROOT)/config/chc
+BIN_DIR := bin
 BIN := $(BIN_DIR)/chc
+COVERAGE_OUT ?= /tmp/chc-coverage.out
 RUN_ARGS ?= --help
 
 .PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev
@@ -13,9 +16,8 @@ test:
 	@$(GO) test ./...
 
 test-coverage:
-	@mkdir -p $(DEV_ROOT)/coverage
-	@$(GO) test -coverprofile=$(DEV_ROOT)/coverage/coverage.out ./...
-	@$(GO) tool cover -func=$(DEV_ROOT)/coverage/coverage.out
+	@$(GO) test -coverprofile=$(COVERAGE_OUT) ./...
+	@$(GO) tool cover -func=$(COVERAGE_OUT)
 
 lint:
 	@golangci-lint run ./...
@@ -28,16 +30,14 @@ check: fmt test
 verify: lint-strict test
 
 dev-dirs:
-	@mkdir -p $(DEV_ROOT)/config/chc
-	@mkdir -p $(DEV_ROOT)/data/chc
-	@mkdir -p $(DEV_ROOT)/cache/chc
-	@mkdir -p $(DEV_ROOT)/state/chc
-	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(CHC_DEV_HOME)
+	@mkdir -p $(CHC_DEV_CONFIG)
 
 run: dev-dirs
 	@$(GO) run ./cmd/chc $(RUN_ARGS)
 
-build: dev-dirs
+build:
+	@mkdir -p $(BIN_DIR)
 	@$(GO) build -o $(BIN) ./cmd/chc
 
 build-run: build
