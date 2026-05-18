@@ -26,6 +26,30 @@ The main value of messaging appears when execution is decoupled from the active 
 - a ticket loop is processing eligible work;
 - the system needs a user decision to unblock progress.
 
+## MVP Priority
+
+The first practical milestone is not a saleable product surface. It is a personal operational MVP that can replicate the current manual workflow with `chc` doing the coordination work.
+
+The target MVP is:
+
+- initialize a Go project as managed by `chc`;
+- keep tickets as durable project files;
+- keep a derived SQLite index aligned with those files;
+- start one specific ticket;
+- start a filtered loop over tickets;
+- run an agent inside a Docker-based execution boundary;
+- update ticket files and related operational docs with state, comments, and validation evidence;
+- notify the user only when the loop, agent, or daemon has something actionable to report;
+- continue to the next eligible ticket when no human intervention is needed.
+
+This means the first usable product path is:
+
+```text
+project context -> ticket visibility -> sync/index trust -> Docker runtime -> ticket execution -> loop -> notification
+```
+
+Document workflows such as drafts, specs, dumps, quizzes, and slice helpers remain important because they describe and preserve the workflow. They are not the blocking path for the first operational MVP unless a specific slice needs them to coordinate implementation.
+
 ## Command Surface Model
 
 ### CLI
@@ -221,9 +245,9 @@ chc loop start --order-by priority,severity,updated_at
 
 ## Priority Guidance for Later Slicing
 
-### Priority 1: Project and Document Discovery
+### Priority 1: Project Context and Ticket Visibility
 
-The next usable layer should make existing artifacts visible and selectable.
+The next usable layer should make the active project and ticket queue visible and selectable.
 
 Candidate scope:
 
@@ -231,28 +255,12 @@ Candidate scope:
 - `project current`;
 - list tickets;
 - show one ticket;
-- list drafts;
-- list specs.
 
-Reason: before richer execution exists, the user needs to see and select the operating context.
+Reason: before execution exists, the user needs to see and select the operating context and the work queue.
 
-### Priority 2: Document Creation Flows
+### Priority 2: Reconciliation and Indexing
 
-After discovery, add first-class document creation.
-
-Candidate scope:
-
-- create draft, with optional use-case grouping;
-- create spec, with optional use-case grouping;
-- start dump;
-- start quiz;
-- promote draft to spec.
-
-Reason: this captures the workflow that already exists manually and makes it repeatable through `chc`.
-
-### Priority 3: Reconciliation and Indexing
-
-Before daemon or messaging, make file edits and SQLite agree.
+Make file edits and SQLite agree before execution relies on the index.
 
 Candidate scope:
 
@@ -262,17 +270,33 @@ Candidate scope:
 - index status;
 - stale index detection.
 
-Reason: the user can edit files directly, so the derived database must be trustworthy or explicitly marked stale.
+Reason: the user can edit files directly, so the derived database must be trustworthy or explicitly marked stale before loops select work from it.
+
+### Priority 3: Agent Runtime Boundary
+
+Define the Docker-based execution boundary for agent work.
+
+Candidate scope:
+
+- agent runtime Dockerfile template;
+- runtime configuration location under `.chc/`;
+- validation command contract;
+- result artifact paths;
+- execution root constraints.
+
+Reason: ticket execution should run in a controlled boundary before `chc` starts delegating real work to an agent.
 
 ### Priority 4: Ticket Start and Single-Ticket Execution
 
-Add the first execution entrypoint after the model is visible and reconcilable.
+Add the first execution entrypoint after the model is visible, indexed, and bounded.
 
 Candidate scope:
 
 - start a specific ticket;
+- invoke the selected agent harness;
 - create an execution record;
 - enforce project root boundaries;
+- update ticket state and comments;
 - record result status and validation output.
 
 Reason: single-ticket execution is the smallest useful unit before loops.
@@ -319,6 +343,22 @@ Candidate scope:
 - email reports.
 
 Reason: messaging is valuable when triggered by daemon, loop, or ticket execution events, not as a standalone terminal-driven workflow.
+
+### Priority 8: Document Creation Flows
+
+Add first-class document creation after the operational MVP path is moving, unless a specific implementation slice needs these commands earlier.
+
+Candidate scope:
+
+- list drafts;
+- list specs;
+- create draft, with optional use-case grouping;
+- create spec, with optional use-case grouping;
+- start dump;
+- start quiz;
+- promote draft to spec.
+
+Reason: this captures the broader manual workflow and improves ergonomics, but the fastest path to value is ticket execution and loop operation.
 
 ## Open Questions
 
