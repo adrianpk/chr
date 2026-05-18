@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"forge.adrianpk.com/chc/internal/chc"
@@ -74,7 +75,7 @@ func (r commandProjectContextResolver) resolveActiveProject(
 		return commandProjectContext{}, fmt.Errorf("project is disabled: %s", project.Name)
 	}
 
-	return resolveProjectDirectory(project.Path)
+	return resolveRegisteredProjectDirectory(project)
 }
 
 func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
@@ -88,4 +89,32 @@ func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
 	}
 
 	return commandProjectContext{ProjectDir: absProjectDir}, nil
+}
+
+func resolveRegisteredProjectDirectory(project chc.Project) (commandProjectContext, error) {
+	if project.Path == "" {
+		return commandProjectContext{}, fmt.Errorf("registered project path is required: %s", project.Name)
+	}
+
+	info, err := os.Stat(project.Path)
+	if err != nil {
+		return commandProjectContext{}, fmt.Errorf("inspect registered project path %q: %w", project.Path, err)
+	}
+
+	if !info.IsDir() {
+		return commandProjectContext{}, fmt.Errorf("registered project path is not a directory: %s", project.Path)
+	}
+
+	workspacePath := filepath.Join(project.Path, chc.DirectoryName)
+
+	info, err = os.Stat(workspacePath)
+	if err != nil {
+		return commandProjectContext{}, fmt.Errorf("inspect registered project workspace %q: %w", workspacePath, err)
+	}
+
+	if !info.IsDir() {
+		return commandProjectContext{}, fmt.Errorf("registered project workspace is not a directory: %s", workspacePath)
+	}
+
+	return commandProjectContext{ProjectDir: project.Path}, nil
 }
