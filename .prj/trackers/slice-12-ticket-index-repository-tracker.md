@@ -13,8 +13,8 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Create slice branch from `dev`.
 - [x] T12.1 Ticket index migration.
 - [x] T12.2 Ticket index repository.
-- [ ] T12.3 Validation and documentation.
-- [ ] Run validation.
+- [x] T12.3 Validation and documentation.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -23,11 +23,11 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - T12.1: `feat(db): add ticket index migration`
 - T12.2: `feat(ticket): add sqlite ticket index`
-- T12.3: pending
+- T12.3: `docs(ticket): document ticket index`
 
 ## Validation
 
-- `make verify`: pending
+- `make verify`: pass
 
 ## Notes
 

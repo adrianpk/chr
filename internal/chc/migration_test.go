@@ -96,7 +96,16 @@ func openTestSQLite(t *testing.T) *sql.DB {
 func testMigrationFS() fstest.MapFS {
 	return fstest.MapFS{
 		"assets/migration/sqlite/20260518000001-create_projects.sql": {
-			Data: []byte(`-- +migrate Up
+			Data: []byte(testCreateProjectsMigration()),
+		},
+		"assets/migration/sqlite/20260518000002-create_indexed_tickets.sql": {
+			Data: []byte(testCreateIndexedTicketsMigration()),
+		},
+	}
+}
+
+func testCreateProjectsMigration() string {
+	return `-- +migrate Up
 CREATE TABLE projects (
     id text PRIMARY KEY,
     name text NOT NULL UNIQUE,
@@ -108,10 +117,11 @@ CREATE TABLE projects (
 
 -- +migrate Down
 DROP TABLE IF EXISTS projects;
-`),
-		},
-		"assets/migration/sqlite/20260518000002-create_indexed_tickets.sql": {
-			Data: []byte(`-- +migrate Up
+`
+}
+
+func testCreateIndexedTicketsMigration() string {
+	return `-- +migrate Up
 CREATE TABLE indexed_tickets (
     project_id text NOT NULL,
     path text NOT NULL,
@@ -159,9 +169,7 @@ ON indexed_ticket_tags (project_id, tag);
 -- +migrate Down
 DROP TABLE IF EXISTS indexed_ticket_tags;
 DROP TABLE IF EXISTS indexed_tickets;
-`),
-		},
-	}
+`
 }
 
 func assertTableExists(t *testing.T, db *sql.DB, name string) {
