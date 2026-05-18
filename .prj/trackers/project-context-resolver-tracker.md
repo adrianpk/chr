@@ -14,8 +14,8 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 - [x] T1.2 Ticket new integration.
 - [x] T1.3 Tests and tracker.
 - [x] Run validation.
-- [ ] Push implementation branch.
-- [ ] Open PR against `dev`.
+- [x] Push implementation branch.
+- [x] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
@@ -33,3 +33,4 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 
 - This slice depends on `project select` and `project current`.
 - Project validation and recovery belongs to a later slice in the same slicing.
+- PR #15 is open against `dev`.
