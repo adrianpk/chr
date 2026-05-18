@@ -1,6 +1,6 @@
 # User Project Context Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -28,7 +28,7 @@ Prerequisite delivered plans:
 
 ## Current State
 
-The user-level project foundation is partially delivered.
+The user-level project foundation is delivered for the current MVP scope.
 
 Already delivered:
 
@@ -40,7 +40,7 @@ Already delivered:
 - `chc project list`;
 - project path validation for registration.
 
-Still missing:
+Delivered by this slicing:
 
 - active project persistence;
 - `chc project select`;
@@ -196,7 +196,7 @@ Historical delivery:
 
 ### Slice 6: Project Validation and Recovery
 
-Status: active.
+Status: delivered.
 
 Goal:
 
@@ -214,7 +214,7 @@ Expected outcome:
 
 - project context failures are actionable and do not silently select the wrong project.
 
-Planned delivery:
+Delivery:
 
 - Repository PR: `#16`
 - PR title: `feat(slice-6): project validation recovery`
@@ -261,4 +261,5 @@ chc project current --dev-root _workspace
 ## Notes
 
 - No quiz was needed for this slicing because the target behavior follows directly from the operational MVP path.
+- This slicing was completed after PR #16 merged into `dev`.
 - Manual sync or ticket indexing behavior belongs to later slicings.

@@ -65,7 +65,7 @@ Use case:
 
 > A user registers local projects and selects which project `chc` should operate on by default.
 
-Current state: partially delivered through project registry add/list.
+Current state: completed for the current MVP scope.
 
 Candidate slices:
 
@@ -84,7 +84,7 @@ Use case:
 
 > A user creates and inspects durable project tickets that agents can later execute.
 
-Current state: partially delivered through ticket creation, parser, and index repository.
+Current state: active. Ticket creation, parser, and index repository are delivered prerequisites; ticket visibility and lifecycle commands are planned next.
 
 Candidate slices:
 
