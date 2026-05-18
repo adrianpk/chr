@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
 )
@@ -138,6 +139,44 @@ func TestTicketNewRejectsMissingTitle(t *testing.T) {
 	err := run(t.Context(), []string{"ticket", "new"}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("run returned nil error")
+	}
+}
+
+func TestTicketListPrintsIndexedTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
+		Key:          "CHC-1",
+		Title:        "Do something",
+		Status:       "open",
+		Priority:     "high",
+		Severity:     "medium",
+		Type:         "task",
+		UseCase:      "onboarding",
+		ProjectArea:  "uxui",
+		RelativePath: filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
+		Path:         filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"list",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket list returned error: %v", err)
+	}
+
+	want := "CHC-1\tDo something\topen\thigh\tmedium\ttask\tonboarding\t" + filepath.Join(".chc", "tickets", "CHC-1-Do-something.md")
+	if !strings.Contains(stdout.String(), want) {
+		t.Fatalf("stdout = %q, want ticket row %q", stdout.String(), want)
 	}
 }
 
@@ -442,6 +481,41 @@ func selectProject(t *testing.T, devRoot, selector string) {
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("project select returned error: %v", err)
+	}
+}
+
+func indexTicket(t *testing.T, devRoot, projectDir string, ticket chc.IndexedTicket) {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	index, err := chc.NewTicketIndex(t.Context(), env, assetsFS)
+	if err != nil {
+		t.Fatalf("NewTicketIndex returned error: %v", err)
+	}
+
+	defer func() {
+		if err := index.Close(); err != nil {
+			t.Fatalf("close ticket index: %v", err)
+		}
+	}()
+
+	now := time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)
+
+	ticket.ProjectID = projectID(projectDir)
+	ticket.FileMTime = now
+	ticket.FileSize = 100
+	ticket.ContentHash = "hash"
+	ticket.IndexedAt = now
+
+	if err := index.UpsertTicket(t.Context(), ticket); err != nil {
+		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 }
 
