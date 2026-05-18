@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -142,21 +145,91 @@ func newUserEnvironmentFromCommand(cmd *cli.Command) (chc.UserEnvironment, error
 
 func newProjectAddCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
-		Name:   "add",
-		Usage:  "Register a local project",
-		Flags:  projectRegistryFlags(),
+		Name:  "add",
+		Usage: "Register a local project",
+		Flags: append(projectRegistryFlags(), &cli.StringFlag{
+			Name:  "name",
+			Usage: "registered project name",
+		}),
 		Action: projectAddAction(stdout),
 	}
 }
 
 func projectAddAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
-		if _, err := fmt.Fprintln(stdout, "project add pending"); err != nil {
-			return fmt.Errorf("write project add result: %w", err)
-		}
-
-		return nil
+		return runProjectAdd(ctx, cmd, stdout)
 	}
+}
+
+func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("project add requires exactly one project directory argument")
+	}
+
+	projectDir, err := filepath.Abs(cmd.Args().First())
+	if err != nil {
+		return fmt.Errorf("resolve project directory: %w", err)
+	}
+
+	if err := requireWorkspace(projectDir); err != nil {
+		return err
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		_ = registry.Close()
+	}()
+
+	projectName := cmd.String("name")
+	if projectName == "" {
+		projectName = filepath.Base(projectDir)
+	}
+
+	project := chc.Project{
+		ID:           projectID(projectDir),
+		Name:         projectName,
+		Path:         projectDir,
+		Enabled:      true,
+		RegisteredAt: time.Now().UTC(),
+	}
+
+	if err := registry.AddProject(ctx, project); err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintf(stdout, "project: %s %s\n", project.Name, project.Path); err != nil {
+		return fmt.Errorf("write project add result: %w", err)
+	}
+
+	return nil
+}
+
+func requireWorkspace(projectDir string) error {
+	info, err := os.Stat(filepath.Join(projectDir, chc.DirectoryName))
+	if err != nil {
+		return fmt.Errorf("inspect project workspace: %w", err)
+	}
+
+	if !info.IsDir() {
+		return fmt.Errorf("project workspace is not a directory: %s", filepath.Join(projectDir, chc.DirectoryName))
+	}
+
+	return nil
+}
+
+func projectID(projectDir string) string {
+	sum := sha256.Sum256([]byte(projectDir))
+
+	return "project-" + hex.EncodeToString(sum[:8])
 }
 
 func newProjectListCommand(stdout io.Writer) *cli.Command {

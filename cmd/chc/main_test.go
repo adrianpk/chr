@@ -77,6 +77,49 @@ func TestTicketNewRejectsMissingTitle(t *testing.T) {
 	}
 }
 
+func TestProjectAddRegistersProject(t *testing.T) {
+	projectDir := t.TempDir()
+	devRoot := t.TempDir()
+
+	if err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755); err != nil {
+		t.Fatalf("create project workspace: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"project",
+		"add",
+		"--dev-root",
+		devRoot,
+		"--name",
+		"example",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("run returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "project: example "+projectDir) {
+		t.Fatalf("stdout = %q, want registered project", stdout.String())
+	}
+
+	assertPathExists(t, filepath.Join(devRoot, "data", "chc", "chc.db"))
+}
+
+func TestProjectAddRejectsProjectWithoutWorkspace(t *testing.T) {
+	err := run(t.Context(), []string{
+		"project",
+		"add",
+		"--dev-root",
+		t.TempDir(),
+		t.TempDir(),
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("run returned nil error")
+	}
+}
+
 func assertPathExists(t *testing.T, path string) {
 	t.Helper()
 
