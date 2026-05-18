@@ -15,8 +15,8 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 - [x] T1.3 Project current command.
 - [x] T1.4 Tests and tracker.
 - [x] Run validation.
-- [ ] Push implementation branch.
-- [ ] Open PR against `dev`.
+- [x] Push implementation branch.
+- [x] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
@@ -35,3 +35,4 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 
 - This slice depends on `ActiveProjectStore`.
 - Project context resolution for other commands belongs to a later slice in the same slicing.
+- PR #14 is open against `dev`.
