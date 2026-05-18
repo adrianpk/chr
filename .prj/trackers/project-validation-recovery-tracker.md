@@ -14,8 +14,8 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 - [x] T1.2 Apply validation to selection and active context.
 - [x] T1.3 Tests and tracker.
 - [x] Run validation.
-- [ ] Push implementation branch.
-- [ ] Open PR against `dev`.
+- [x] Push implementation branch.
+- [x] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
@@ -33,3 +33,4 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 
 - This slice closes the planned `User Project Context` slicing.
 - Project removal or repair commands are explicitly out of scope.
+- PR #16 is open against `dev`.
