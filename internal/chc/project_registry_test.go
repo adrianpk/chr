@@ -105,6 +105,7 @@ func TestProjectRegistryRejectsDuplicateName(t *testing.T) {
 
 func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 	root := t.TempDir()
+
 	env, err := NewUserEnvironment(UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: root,

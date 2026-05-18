@@ -13,8 +13,8 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Create slice branch from `dev`.
 - [x] T9.1 Project model.
 - [x] T9.2 Project registry repository.
-- [ ] T9.3 Validation and documentation.
-- [ ] Run validation.
+- [x] T9.3 Validation and documentation.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -23,11 +23,11 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - T9.1: `feat(project): add project model`
 - T9.2: `feat(project): add sqlite project registry`
-- T9.3: pending
+- T9.3: `docs(project): document project registry`
 
 ## Validation
 
-- `make verify`: pending
+- `make verify`: pass
 
 ## Notes
 

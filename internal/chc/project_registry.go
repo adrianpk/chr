@@ -96,10 +96,12 @@ ORDER BY name`,
 	}
 
 	defer func() {
+		//nolint:errcheck // Row iteration errors are checked through rows.Err below.
 		_ = rows.Close()
 	}()
 
 	projects := []Project{}
+
 	for rows.Next() {
 		project, err := scanProject(rows)
 		if err != nil {
@@ -151,8 +153,11 @@ type projectScanner interface {
 
 func scanProject(scanner projectScanner) (Project, error) {
 	var project Project
+
 	var enabled int
+
 	var registeredAt string
+
 	var lastIndexedAt sql.NullString
 
 	err := scanner.Scan(
