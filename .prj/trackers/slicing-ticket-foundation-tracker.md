@@ -25,7 +25,7 @@ Specs:
 | Slice | Status | Expected Branch | Expected PR Title | Notes |
 | --- | --- | --- | --- | --- |
 | Slice 1: Ticket List | Delivered | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | Repository PR #17. |
-| Slice 2: Ticket Show | Planned | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Show one ticket by key. |
+| Slice 2: Ticket Show | Reviewing | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Show one ticket by key. |
 | Slice 3: Ticket Comments | Planned | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Append durable comments to ticket Markdown. |
 | Slice 4: Ticket Status Transitions | Planned | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Update ticket status through controlled commands. |
 | Slice 5: Ticket Lifecycle Validation | Planned | `feat/slice-5-ticket-lifecycle-validation` | `feat(slice-5): ticket lifecycle validation` | Validate metadata and lifecycle consistency. |
@@ -57,6 +57,31 @@ Task commits:
 - T1.4: `test(cli): cover ticket list output`
 - T1.5: `docs(planning): record ticket list validation`
 
+## Slice 2: Ticket Show
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-ticket-foundation-plan.md`
+- Tracker: `.prj/trackers/slicing-ticket-foundation-tracker.md`
+- Slicing: `Ticket Foundation`
+- Slice: `Slice 2`
+- Expected branch: `feat/slice-2-ticket-show`
+- Expected PR title: `feat(slice-2): ticket show`
+
+Candidate tasks:
+
+- [x] Add indexed ticket lookup by key.
+- [x] Add `chc ticket show`.
+- [x] Add focused CLI tests.
+- [x] Run `make verify`.
+
+Task commits:
+
+- T2.1: `feat(ticket): find indexed ticket by key`
+- T2.2: `feat(cli): add ticket show command`
+- T2.3: `test(cli): cover ticket show command`
+- T2.4: `docs(planning): record ticket show validation`
+
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
@@ -65,6 +90,9 @@ Task commits:
 - Slice 1 validation: `go test ./internal/chc` pass.
 - Slice 1 validation: `make verify` pass.
 - Slice 1 merged into `dev` as PR #17.
+- Slice 2 validation: `go test ./cmd/chc` pass.
+- Slice 2 validation: `go test ./internal/chc` pass.
+- Slice 2 validation: `make verify` pass.
 
 ## Notes
 

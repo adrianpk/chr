@@ -115,7 +115,7 @@ Delivery:
 
 ### Slice 2: Ticket Show
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-2-ticket-show`
 Expected PR title: `feat(slice-2): ticket show`
