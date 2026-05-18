@@ -2,34 +2,23 @@ package workspace
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 )
 
 const DirectoryName = ".chc"
 
-const DefaultProfile = "standard"
+//go:embed templates/config.yml
+var defaultConfig string
 
-const workspaceProfilesDir = "assets/workspace/profiles"
-
-type Initializer interface {
-	Init(ctx context.Context, opts InitOptions) (InitResult, error)
-}
-
-type initializer struct {
-	assetsFS fs.FS
-}
-
-func NewInitializer(assetsFS fs.FS) Initializer {
-	return &initializer{assetsFS: assetsFS}
-}
+//go:embed templates/manifest.md
+var defaultManifest string
 
 type InitOptions struct {
 	ProjectDir string
-	Profile    string
 	DryRun     bool
 }
 
@@ -73,7 +62,12 @@ var directories = []string{
 	"notifications",
 }
 
-func (i *initializer) Init(ctx context.Context, opts InitOptions) (InitResult, error) {
+var files = []entry{
+	{path: "manifest.md", content: defaultManifest},
+	{path: "config.yml", content: defaultConfig},
+}
+
+func Init(ctx context.Context, opts InitOptions) (InitResult, error) {
 	if err := ctx.Err(); err != nil {
 		return InitResult{}, err
 	}
@@ -89,12 +83,7 @@ func (i *initializer) Init(ctx context.Context, opts InitOptions) (InitResult, e
 		return InitResult{}, err
 	}
 
-	profile := opts.Profile
-	if profile == "" {
-		profile = DefaultProfile
-	}
-
-	if err := i.initFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
+	if err := initFiles(ctx, absProjectDir, opts.DryRun, &result); err != nil {
 		return InitResult{}, err
 	}
 
@@ -143,12 +132,7 @@ func initDirectories(ctx context.Context, projectDir string, dryRun bool, result
 	return nil
 }
 
-func (i *initializer) initFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
-	files, err := i.profileFiles(profile)
-	if err != nil {
-		return err
-	}
-
+func initFiles(ctx context.Context, projectDir string, dryRun bool, result *InitResult) error {
 	for _, file := range files {
 		if err := ctx.Err(); err != nil {
 			return err
@@ -166,55 +150,6 @@ func (i *initializer) initFiles(ctx context.Context, projectDir, profile string,
 	}
 
 	return nil
-}
-
-func (i *initializer) profileFiles(profile string) ([]entry, error) {
-	profileDir, err := profileDir(profile)
-	if err != nil {
-		return nil, err
-	}
-
-	files := []entry{}
-
-	if err := fs.WalkDir(i.assetsFS, profileDir, func(path string, dirEntry fs.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-
-		if dirEntry.IsDir() {
-			return nil
-		}
-
-		content, err := fs.ReadFile(i.assetsFS, path)
-		if err != nil {
-			return fmt.Errorf("read embedded workspace profile file %s: %w", path, err)
-		}
-
-		rel, err := filepath.Rel(profileDir, path)
-		if err != nil {
-			return fmt.Errorf("resolve embedded workspace profile path %s: %w", path, err)
-		}
-
-		files = append(files, entry{path: rel, content: string(content)})
-
-		return nil
-	}); err != nil {
-		return nil, fmt.Errorf("read embedded workspace profile %q: %w", profile, err)
-	}
-
-	return files, nil
-}
-
-func profileDir(profile string) (string, error) {
-	if profile == "" {
-		profile = DefaultProfile
-	}
-
-	if profile != "standard" && profile != "personal" && profile != "minimal" {
-		return "", fmt.Errorf("unknown workspace profile %q", profile)
-	}
-
-	return filepath.ToSlash(filepath.Join(workspaceProfilesDir, profile)), nil
 }
 
 func recordPath(result *InitResult, rel string, created bool) {

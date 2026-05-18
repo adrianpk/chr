@@ -16,20 +16,6 @@ Create the workspace in the current directory:
 chc init
 ```
 
-`chc init` uses the `standard` profile by default.
-
-Create the workspace with a specific profile:
-
-```sh
-chc init --profile minimal
-```
-
-Supported initial profiles:
-
-- `standard`: default useful profile.
-- `personal`: full opinionated workflow for the author's own use.
-- `minimal`: lightweight scaffold.
-
 Create the workspace in another project directory:
 
 ```sh
