@@ -8,6 +8,8 @@ The `chc` command creates and manages this directory inside the project where it
 
 ChrysoCoord does not keep a global project registry. Project state is local to `.chc/` inside each managed project.
 
+Managed projects also receive a root-level `AGENTS.md` for compatibility with agent tooling that looks for this file at the repository root.
+
 ## Initialization
 
 Create the workspace in the current directory:
@@ -47,6 +49,7 @@ chc init --dry-run
 ## Initial Layout
 
 ```text
+AGENTS.md
 .chc/
   manifest.md
   config.yml

@@ -27,6 +27,8 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 	assertFile(t, dir, ".chc/manifest.md")
 	assertFile(t, dir, ".chc/config.yml")
 	assertFile(t, dir, ".chc/agents/CONVENTIONS.md")
+	assertFile(t, dir, "AGENTS.md")
+	assertNotExists(t, dir, ".chc/root/AGENTS.md")
 }
 
 func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
@@ -54,6 +56,30 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 
 	if string(content) != "custom: true\n" {
 		t.Fatalf("config content = %q, want custom content unchanged", string(content))
+	}
+}
+
+func TestInitDoesNotOverwriteExistingRootAgents(t *testing.T) {
+	dir := t.TempDir()
+	initializer := newTestInitializer()
+
+	agentsPath := filepath.Join(dir, "AGENTS.md")
+	if err := os.WriteFile(agentsPath, []byte("custom agents\n"), 0o644); err != nil {
+		t.Fatalf("write AGENTS.md: %v", err)
+	}
+
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
+	if err != nil {
+		t.Fatalf("Init returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(agentsPath)
+	if err != nil {
+		t.Fatalf("read AGENTS.md: %v", err)
+	}
+
+	if string(content) != "custom agents\n" {
+		t.Fatalf("AGENTS.md content = %q, want custom content unchanged", string(content))
 	}
 }
 
@@ -148,17 +174,26 @@ func newTestInitializer() Initializer {
 		"assets/workspace/profiles/standard/agents/CONVENTIONS.md": {
 			Data: []byte("# Conventions\n"),
 		},
+		"assets/workspace/profiles/standard/root/AGENTS.md": {
+			Data: []byte("# Agent Operating Contract\n"),
+		},
 		"assets/workspace/profiles/minimal/config.yml": {
 			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: minimal\n"),
 		},
 		"assets/workspace/profiles/minimal/manifest.md": {
 			Data: []byte("# Minimal Workspace\n"),
 		},
+		"assets/workspace/profiles/minimal/root/AGENTS.md": {
+			Data: []byte("# Minimal Agents\n"),
+		},
 		"assets/workspace/profiles/personal/config.yml": {
 			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: personal\n"),
 		},
 		"assets/workspace/profiles/personal/manifest.md": {
 			Data: []byte("# Personal Workspace\n"),
+		},
+		"assets/workspace/profiles/personal/root/AGENTS.md": {
+			Data: []byte("# Personal Agents\n"),
 		},
 	})
 }
@@ -196,5 +231,13 @@ func assertFile(t *testing.T, root, rel string) {
 
 	if info.IsDir() {
 		t.Fatalf("%s is a directory", rel)
+	}
+}
+
+func assertNotExists(t *testing.T, root, rel string) {
+	t.Helper()
+
+	if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); !os.IsNotExist(err) {
+		t.Fatalf("%s exists or returned unexpected stat error: %v", rel, err)
 	}
 }

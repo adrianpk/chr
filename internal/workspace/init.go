@@ -7,13 +7,17 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const DirectoryName = ".chc"
 
 const DefaultProfile = "standard"
 
-const workspaceProfilesDir = "assets/workspace/profiles"
+const (
+	workspaceProfilesDir = "assets/workspace/profiles"
+	rootAssetDir         = "root"
+)
 
 type Initializer interface {
 	Init(ctx context.Context, opts InitOptions) (InitResult, error)
@@ -94,7 +98,11 @@ func (i *initializer) Init(ctx context.Context, opts InitOptions) (InitResult, e
 		profile = DefaultProfile
 	}
 
-	if err := i.initFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
+	if err := i.initWorkspaceFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
+		return InitResult{}, err
+	}
+
+	if err := i.initRootFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
 		return InitResult{}, err
 	}
 
@@ -143,8 +151,8 @@ func initDirectories(ctx context.Context, projectDir string, dryRun bool, result
 	return nil
 }
 
-func (i *initializer) initFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
-	files, err := i.profileFiles(profile)
+func (i *initializer) initWorkspaceFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
+	files, err := i.profileFiles(profile, workspaceFile)
 	if err != nil {
 		return err
 	}
@@ -168,15 +176,55 @@ func (i *initializer) initFiles(ctx context.Context, projectDir, profile string,
 	return nil
 }
 
-func (i *initializer) profileFiles(profile string) ([]entry, error) {
+func (i *initializer) initRootFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
+	files, err := i.profileFiles(profile, rootFile)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		target := filepath.Join(projectDir, filepath.FromSlash(file.path))
+
+		created, err := createFile(target, file.content, dryRun)
+		if err != nil {
+			return err
+		}
+
+		recordPath(result, file.path, created)
+	}
+
+	return nil
+}
+
+type profileFileKind int
+
+const (
+	workspaceFile profileFileKind = iota
+	rootFile
+)
+
+func (i *initializer) profileFiles(profile string, kind profileFileKind) ([]entry, error) {
 	profileDir, err := profileDir(profile)
 	if err != nil {
 		return nil, err
 	}
 
 	files := []entry{}
+	walk := i.profileFileWalker(profileDir, kind, &files)
 
-	if err := fs.WalkDir(i.assetsFS, profileDir, func(path string, dirEntry fs.DirEntry, walkErr error) error {
+	if err := fs.WalkDir(i.assetsFS, profileDir, walk); err != nil {
+		return nil, fmt.Errorf("read embedded workspace profile %q: %w", profile, err)
+	}
+
+	return files, nil
+}
+
+func (i *initializer) profileFileWalker(profileDir string, kind profileFileKind, files *[]entry) fs.WalkDirFunc {
+	return func(path string, dirEntry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
@@ -185,24 +233,59 @@ func (i *initializer) profileFiles(profile string) ([]entry, error) {
 			return nil
 		}
 
-		content, err := fs.ReadFile(i.assetsFS, path)
+		file, include, err := i.profileFile(profileDir, path, kind)
 		if err != nil {
-			return fmt.Errorf("read embedded workspace profile file %s: %w", path, err)
+			return err
 		}
 
-		rel, err := filepath.Rel(profileDir, path)
-		if err != nil {
-			return fmt.Errorf("resolve embedded workspace profile path %s: %w", path, err)
+		if include {
+			*files = append(*files, file)
 		}
-
-		files = append(files, entry{path: rel, content: string(content)})
 
 		return nil
-	}); err != nil {
-		return nil, fmt.Errorf("read embedded workspace profile %q: %w", profile, err)
+	}
+}
+
+func (i *initializer) profileFile(profileDir, path string, kind profileFileKind) (entry, bool, error) {
+	rel, err := filepath.Rel(profileDir, path)
+	if err != nil {
+		return entry{}, false, fmt.Errorf("resolve embedded workspace profile path %s: %w", path, err)
 	}
 
-	return files, nil
+	if !includeProfileFile(rel, kind) {
+		return entry{}, false, nil
+	}
+
+	content, err := fs.ReadFile(i.assetsFS, path)
+	if err != nil {
+		return entry{}, false, fmt.Errorf("read embedded workspace profile file %s: %w", path, err)
+	}
+
+	outputPath, err := outputProfilePath(rel, kind)
+	if err != nil {
+		return entry{}, false, fmt.Errorf("resolve embedded root profile path %s: %w", path, err)
+	}
+
+	return entry{path: outputPath, content: string(content)}, true, nil
+}
+
+func outputProfilePath(path string, kind profileFileKind) (string, error) {
+	if kind != rootFile {
+		return path, nil
+	}
+
+	return filepath.Rel(rootAssetDir, path)
+}
+
+func includeProfileFile(path string, kind profileFileKind) bool {
+	slashPath := filepath.ToSlash(path)
+	isRootFile := slashPath == rootAssetDir || strings.HasPrefix(slashPath, rootAssetDir+"/")
+
+	if kind == rootFile {
+		return isRootFile
+	}
+
+	return !isRootFile
 }
 
 func profileDir(profile string) (string, error) {
