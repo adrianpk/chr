@@ -104,6 +104,43 @@ The index is derived from registered projects and their Markdown ticket files. I
 
 The index is not the canonical ticket source.
 
+The global index requires a schema migration system before registry or ticket index tables become durable behavior.
+
+Migration files should be embedded SQL assets with deterministic ordering and explicit up/down sections:
+
+```text
+assets/migration/sqlite/20260518000001-create_projects.sql
+```
+
+```sql
+-- +migrate Up
+CREATE TABLE projects (...);
+
+-- +migrate Down
+DROP TABLE IF EXISTS projects;
+```
+
+The migrator should be a small core primitive owned by `chc`, not an external framework dependency. It should apply pending migrations in order, record applied versions, and make schema setup deterministic for CLI and daemon code.
+
+The current implementation package direction is `internal/chc`. If a `pkg/core` package is introduced for reusable core primitives, that move should be explicit in its own slice rather than incidental to persistence work.
+
+## Project Model
+
+The user daemon needs a project entity.
+
+A registered project represents a local project known by the user daemon. It does not replace project-local `.chc/config.yml`; it is the user-level record that allows one daemon to observe and operate across multiple local projects.
+
+The initial project attributes are:
+
+- stable local project id;
+- human-readable project name;
+- absolute project path;
+- enabled flag;
+- registered timestamp;
+- last indexed timestamp.
+
+The project entity must have a relational shape because it will be persisted in the global user database.
+
 ## Markdown and Index Contract
 
 Markdown ticket files and the global index must match.

@@ -46,6 +46,76 @@ Fields:
 | `registered_at` | Timestamp when the project was registered locally. |
 | `last_indexed_at` | Timestamp of last successful index refresh. |
 
+Relational shape:
+
+```sql
+CREATE TABLE projects (
+    id text PRIMARY KEY,
+    name text NOT NULL UNIQUE,
+    path text NOT NULL UNIQUE,
+    enabled integer NOT NULL,
+    registered_at text NOT NULL,
+    last_indexed_at text
+);
+```
+
+Rules:
+
+- `id` is stable on the local machine.
+- `name` is the human-facing identifier used by CLI and messaging surfaces.
+- `path` points to the project root, not the `.chc/` directory.
+- `enabled` controls whether the daemon should observe the project.
+- `last_indexed_at` is operational metadata for the derived index.
+- The row does not replace project-local `.chc/config.yml`.
+
+## Migration
+
+Represents one embedded database schema migration.
+
+Fields:
+
+| Field | Semantics |
+| --- | --- |
+| `version` | Ordered migration identifier derived from the filename prefix. |
+| `name` | Human-readable migration name derived from the filename suffix. |
+| `driver` | Database driver namespace, initially `sqlite`. |
+| `up_sql` | SQL statements in the `-- +migrate Up` section. |
+| `down_sql` | SQL statements in the `-- +migrate Down` section. |
+
+Migration files use deterministic filenames:
+
+```text
+assets/migration/sqlite/<version>-<name>.sql
+```
+
+Migration files use explicit sections:
+
+```sql
+-- +migrate Up
+...
+
+-- +migrate Down
+...
+```
+
+Applied migration tracking table:
+
+```sql
+CREATE TABLE schema_migrations (
+    version text PRIMARY KEY,
+    name text NOT NULL,
+    applied_at text NOT NULL
+);
+```
+
+Rules:
+
+- Migrations are embedded assets.
+- Migrations are applied in filename order.
+- Already applied versions are skipped.
+- Failed migrations stop execution and return an error.
+- The migrator is a core `chc` primitive and must not require an external framework dependency.
+
 ## Indexed Ticket
 
 Represents a ticket row derived from a Markdown file.
@@ -80,9 +150,11 @@ Tags may be modeled as a separate indexed table.
 - A single `chc daemon` process may observe multiple registered projects.
 - Project-local `.chc/` state and user-level `chc` state are separate concepts.
 - Development mode must be able to redirect user-level paths away from real user config and data directories.
+- The global database schema must be created through embedded migrations.
+- The `projects` table is the relational source for registered project records.
 
 ## Open Questions
 
-- Exact SQL schema is not yet defined.
 - Exact project id generation is not yet defined.
 - Exact content hash algorithm is not yet defined.
+- Exact SQLite Go driver is not yet selected.
