@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"embed"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -107,6 +108,7 @@ func newProjectCommand(stdout io.Writer) *cli.Command {
 		Commands: []*cli.Command{
 			newProjectAddCommand(stdout),
 			newProjectListCommand(stdout),
+			newProjectSelectCommand(stdout),
 		},
 	}
 }
@@ -280,6 +282,90 @@ func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	return nil
+}
+
+func newProjectSelectCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "select",
+		Usage:  "Select the active project",
+		Flags:  projectRegistryFlags(),
+		Action: projectSelectAction(stdout),
+	}
+}
+
+func projectSelectAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runProjectSelect(ctx, cmd, stdout)
+	}
+}
+
+func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("project select requires exactly one project name or path argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	project, err := resolveProjectSelection(ctx, registry, cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	if !project.Enabled {
+		return fmt.Errorf("project is disabled: %s", project.Name)
+	}
+
+	activeProject, err := chc.NewActiveProject(project.ID)
+	if err != nil {
+		return err
+	}
+
+	store := chc.NewActiveProjectStore(env)
+	if err := store.SetActiveProject(activeProject); err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintf(stdout, "project: %s %s\n", project.Name, project.Path); err != nil {
+		return fmt.Errorf("write project select result: %w", err)
+	}
+
+	return nil
+}
+
+func resolveProjectSelection(ctx context.Context, registry chc.ProjectRegistry, selector string) (chc.Project, error) {
+	project, err := registry.GetProjectByName(ctx, selector)
+	if err == nil {
+		return project, nil
+	}
+
+	if !errors.Is(err, chc.ErrProjectNotFound) {
+		return chc.Project{}, err
+	}
+
+	projectPath, pathErr := filepath.Abs(selector)
+	if pathErr != nil {
+		return chc.Project{}, fmt.Errorf("resolve project selector path: %w", pathErr)
+	}
+
+	project, err = registry.GetProjectByPath(ctx, projectPath)
+	if err != nil {
+		return chc.Project{}, fmt.Errorf("resolve project selection: %w", err)
+	}
+
+	return project, nil
 }
 
 func newTicketNewCommand(stdout io.Writer) *cli.Command {
