@@ -98,6 +98,7 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 		Commands: []*cli.Command{
 			newTicketListCommand(stdout),
 			newTicketNewCommand(stdout),
+			newTicketShowCommand(stdout),
 		},
 	}
 }
@@ -444,6 +445,15 @@ func newTicketListCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newTicketShowCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "show",
+		Usage:  "Show one ticket by key",
+		Flags:  ticketProjectFlags(),
+		Action: ticketShowAction(stdout),
+	}
+}
+
 func ticketProjectFlags() []cli.Flag {
 	return append(projectRegistryFlags(),
 		&cli.StringFlag{
@@ -487,6 +497,71 @@ func ticketListAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketList(ctx, cmd, stdout)
 	}
+}
+
+func ticketShowAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketShow(ctx, cmd, stdout)
+	}
+}
+
+func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("ticket show requires exactly one ticket key argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	return printTicketShow(stdout, ticket)
+}
+
+func printTicketShow(stdout io.Writer, ticket chc.IndexedTicket) error {
+	lines := []string{
+		"key: " + ticket.Key,
+		"title: " + ticket.Title,
+		"status: " + ticket.Status,
+		"priority: " + ticket.Priority,
+		"severity: " + ticket.Severity,
+		"type: " + ticket.Type,
+		"use_case: " + ticket.UseCase,
+		"project_area: " + ticket.ProjectArea,
+		"path: " + ticket.RelativePath,
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write ticket show result: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
