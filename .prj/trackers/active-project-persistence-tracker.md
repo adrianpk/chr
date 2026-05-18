@@ -14,8 +14,8 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 - [x] T2 Active project store.
 - [x] T3 Tests.
 - [x] Run validation.
-- [ ] Push implementation branch.
-- [ ] Open PR against `dev`.
+- [x] Push implementation branch.
+- [x] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
