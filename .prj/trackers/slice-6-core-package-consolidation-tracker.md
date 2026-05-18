@@ -12,8 +12,8 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 - [x] Create slice branch from `dev`.
 - [x] T6.1 Move workspace initialization into core package.
 - [x] T6.2 Introduce workspace-oriented API names.
-- [ ] T6.3 Documentation and tracker alignment.
-- [ ] Run validation.
+- [x] T6.3 Documentation and tracker alignment.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -22,12 +22,12 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 
 - T6.1: `refactor(chc): move workspace init into core package`
 - T6.2: `refactor(chc): expose workspace API`
-- T6.3: pending
+- T6.3: `docs(workspace): align core package boundary`
 
 ## Validation
 
-- `make verify`: pending
-- Manual `chc init`: pending
+- `make verify`: pass
+- Manual `chc init`: pass
 
 ## Notes
 

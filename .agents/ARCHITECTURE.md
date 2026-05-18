@@ -24,6 +24,7 @@ AGENTS.md     # top-level agent operating contract
 
 - Command packages under `cmd/` should assemble dependencies, parse process-level configuration, start lifecycle components, and stay thin.
 - Application behavior should live in `internal/` by default.
+- ChrysoCoord core behavior should live under `internal/chc`.
 - Use `pkg/` only for contracts, envelope types, or libraries that are intentionally shared outside the module.
 - Keep package boundaries aligned to behavior and ownership, not generic utility buckets.
 - Isolate IO adapters, persistence, transport, and external service integration from domain decisions.

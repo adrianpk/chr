@@ -6,7 +6,9 @@ ChrysoCoord uses `.chc/` as the project-local hidden directory.
 
 The `chc` command creates and manages this directory inside the project where it runs. The directory is intentionally tied to the CLI name rather than the target repository name.
 
-ChrysoCoord does not keep a global project registry. Project state is local to `.chc/` inside each managed project.
+Project ticket files and project protocol assets are local to `.chc/` inside each managed project.
+
+ChrysoCoord may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chc/` source files.
 
 Managed projects also receive a root-level `AGENTS.md` for compatibility with agent tooling that looks for this file at the repository root.
 
@@ -84,3 +86,9 @@ AGENTS.md
 Markdown files are canonical assets.
 
 Indexes, databases, runtime traces, and notification state are supporting artifacts. They may be rebuilt or regenerated when their source assets allow it.
+
+## Go Package Boundary
+
+Project workspace behavior lives in the core `internal/chc` package.
+
+The CLI entrypoint under `cmd/chc` wires commands and delegates workspace behavior to `chc.Workspace`.
