@@ -158,6 +158,136 @@ func TestProjectListPrintsRegisteredProjects(t *testing.T) {
 	}
 }
 
+func TestProjectSelectByNameStoresCurrentProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var selectStdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		devRoot,
+		"example",
+	}, &selectStdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project select returned error: %v", err)
+	}
+
+	if !strings.Contains(selectStdout.String(), "project: example "+projectDir) {
+		t.Fatalf("stdout = %q, want selected project", selectStdout.String())
+	}
+
+	var currentStdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"project",
+		"current",
+		"--dev-root",
+		devRoot,
+	}, &currentStdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project current returned error: %v", err)
+	}
+
+	if !strings.Contains(currentStdout.String(), "project: example "+projectDir) {
+		t.Fatalf("stdout = %q, want current project", currentStdout.String())
+	}
+
+	assertPathExists(t, filepath.Join(devRoot, "config", "chc", "active-project"))
+}
+
+func TestProjectSelectByPathStoresCurrentProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		devRoot,
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project select returned error: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"project",
+		"current",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project current returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "project: example "+projectDir) {
+		t.Fatalf("stdout = %q, want current project", stdout.String())
+	}
+}
+
+func TestProjectCurrentRejectsMissingSelection(t *testing.T) {
+	err := run(t.Context(), []string{
+		"project",
+		"current",
+		"--dev-root",
+		t.TempDir(),
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("project current returned nil error")
+	}
+}
+
+func TestProjectSelectRejectsUnknownProject(t *testing.T) {
+	err := run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		t.TempDir(),
+		"missing",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("project select returned nil error")
+	}
+}
+
+func addProject(t *testing.T, devRoot, name, projectDir string) {
+	t.Helper()
+
+	err := run(t.Context(), []string{
+		"project",
+		"add",
+		"--dev-root",
+		devRoot,
+		"--name",
+		name,
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project add returned error: %v", err)
+	}
+}
+
+func newTestWorkspace(t *testing.T) string {
+	t.Helper()
+
+	projectDir := t.TempDir()
+
+	if err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755); err != nil {
+		t.Fatalf("create project workspace: %v", err)
+	}
+
+	return projectDir
+}
+
 func assertPathExists(t *testing.T, path string) {
 	t.Helper()
 

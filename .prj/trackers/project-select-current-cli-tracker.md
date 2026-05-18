@@ -8,27 +8,28 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 ## Checklist
 
 - [x] Create local plan and tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Create implementation branch from `dev`.
-- [ ] T1.1 Project registry lookup support.
-- [ ] T1.2 Project select command.
-- [ ] T1.3 Project current command.
-- [ ] T1.4 Tests and tracker.
-- [ ] Run validation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Create implementation branch from `dev`.
+- [x] T1.1 Project registry lookup support.
+- [x] T1.2 Project select command.
+- [x] T1.3 Project current command.
+- [x] T1.4 Tests and tracker.
+- [x] Run validation.
 - [ ] Push implementation branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
+- T1.1: `feat(project): add registry lookups`
+- T1.2: `feat(cli): add project select command`
+- T1.3: `feat(cli): add project current command`
+- T1.4: `test(cli): cover project selection commands`
 
 ## Validation
 
-- `make verify`: pending
+- `go test ./cmd/chc`: pass
+- `make verify`: pass
 
 ## Notes
 
