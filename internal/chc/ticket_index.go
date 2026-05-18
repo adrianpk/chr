@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"io/fs"
+	"os"
+	"path/filepath"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -19,6 +21,26 @@ type TicketIndex interface {
 
 type sqliteTicketIndex struct {
 	db *sql.DB
+}
+
+func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (TicketIndex, error) {
+	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+		return nil, fmt.Errorf("create user data directory: %w", err)
+	}
+
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	if err != nil {
+		return nil, fmt.Errorf("open ticket index database: %w", err)
+	}
+
+	db.SetMaxOpenConns(1)
+
+	index, err := NewTicketIndexFromDB(ctx, db, assetsFS)
+	if err != nil {
+		return nil, closeDBWithError(db, err)
+	}
+
+	return index, nil
 }
 
 func NewTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (TicketIndex, error) {
