@@ -1,0 +1,11 @@
+version: 1
+workspace_root: .chc
+canonical_assets: markdown
+indexes:
+  sqlite:
+    enabled: false
+notifications:
+  telegram:
+    enabled: false
+  email:
+    enabled: false
