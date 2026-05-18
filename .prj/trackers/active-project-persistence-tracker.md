@@ -8,25 +8,26 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 ## Checklist
 
 - [x] Create local plan and tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Create implementation branch from `dev`.
-- [ ] T1 Active project model.
-- [ ] T2 Active project store.
-- [ ] T3 Tests.
-- [ ] Run validation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Create implementation branch from `dev`.
+- [x] T1 Active project model.
+- [x] T2 Active project store.
+- [x] T3 Tests.
+- [x] Run validation.
 - [ ] Push implementation branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
 
-- T1: pending
-- T2: pending
-- T3: pending
+- T1: `feat(chc): add active project model`
+- T2: `feat(chc): persist active project state`
+- T3: `test(chc): cover active project store`
 
 ## Validation
 
-- `make verify`: pending
+- `go test ./internal/chc`: pass
+- `make verify`: pass
 
 ## Notes
 
