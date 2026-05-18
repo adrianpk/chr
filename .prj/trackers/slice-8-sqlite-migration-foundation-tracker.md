@@ -10,8 +10,8 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - [x] Create local plan and tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Create slice branch from `dev`.
-- [ ] T8.1 SQLite driver and migration asset.
+- [x] Create slice branch from `dev`.
+- [x] T8.1 SQLite driver and migration asset.
 - [ ] T8.2 Migrator core primitive.
 - [ ] T8.3 Validation and documentation.
 - [ ] Run validation.
@@ -21,7 +21,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 ## Task Commits
 
-- T8.1: pending
+- T8.1: `feat(db): add sqlite migration asset`
 - T8.2: pending
 - T8.3: pending
 
