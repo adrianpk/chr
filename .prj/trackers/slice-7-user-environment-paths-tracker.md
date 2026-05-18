@@ -12,8 +12,8 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 - [x] Create slice branch from `dev`.
 - [x] T7.1 User environment model.
 - [x] T7.2 Normal and development path resolution.
-- [ ] T7.3 Documentation and validation.
-- [ ] Run validation.
+- [x] T7.3 Documentation and validation.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -22,11 +22,11 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 
 - T7.1: `feat(runtime): add user environment model`
 - T7.2: `feat(runtime): resolve user environment paths`
-- T7.3: pending
+- T7.3: `docs(runtime): document user environment paths`
 
 ## Validation
 
-- `make verify`: pending
+- `make verify`: pass
 
 ## Notes
 
