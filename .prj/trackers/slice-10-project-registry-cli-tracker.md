@@ -10,8 +10,8 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - [x] Create local plan and tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Create slice branch from `dev`.
-- [ ] T10.1 CLI user environment wiring.
+- [x] Create slice branch from `dev`.
+- [x] T10.1 CLI user environment wiring.
 - [ ] T10.2 Project add command.
 - [ ] T10.3 Project list command.
 - [ ] Run validation.
@@ -21,7 +21,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 ## Task Commits
 
-- T10.1: pending
+- T10.1: `feat(cli): wire project user environment`
 - T10.2: pending
 - T10.3: pending
 

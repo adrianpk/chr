@@ -40,6 +40,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
 			newInitCommand(stdout),
+			newProjectCommand(stdout),
 			newTicketCommand(stdout),
 		},
 	}
@@ -93,6 +94,87 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 		Commands: []*cli.Command{
 			newTicketNewCommand(stdout),
 		},
+	}
+}
+
+func newProjectCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "project",
+		Usage: "Manage registered projects",
+		Commands: []*cli.Command{
+			newProjectAddCommand(stdout),
+			newProjectListCommand(stdout),
+		},
+	}
+}
+
+func projectRegistryFlags() []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:  "dev-root",
+			Usage: "development user environment root",
+		},
+	}
+}
+
+func newUserEnvironmentFromCommand(cmd *cli.Command) (chc.UserEnvironment, error) {
+	devRoot := cmd.String("dev-root")
+	if devRoot != "" {
+		return chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+			DevMode: true,
+			DevRoot: devRoot,
+		})
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("resolve user home directory: %w", err)
+	}
+
+	return chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		HomeDir:   homeDir,
+		XDGConfig: os.Getenv("XDG_CONFIG_HOME"),
+		XDGData:   os.Getenv("XDG_DATA_HOME"),
+		XDGCache:  os.Getenv("XDG_CACHE_HOME"),
+		XDGState:  os.Getenv("XDG_STATE_HOME"),
+	})
+}
+
+func newProjectAddCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "add",
+		Usage:  "Register a local project",
+		Flags:  projectRegistryFlags(),
+		Action: projectAddAction(stdout),
+	}
+}
+
+func projectAddAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		if _, err := fmt.Fprintln(stdout, "project add pending"); err != nil {
+			return fmt.Errorf("write project add result: %w", err)
+		}
+
+		return nil
+	}
+}
+
+func newProjectListCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "list",
+		Usage:  "List registered projects",
+		Flags:  projectRegistryFlags(),
+		Action: projectListAction(stdout),
+	}
+}
+
+func projectListAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		if _, err := fmt.Fprintln(stdout, "project list pending"); err != nil {
+			return fmt.Errorf("write project list result: %w", err)
+		}
+
+		return nil
 	}
 }
 
