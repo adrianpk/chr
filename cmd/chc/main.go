@@ -96,6 +96,7 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 		Name:  "ticket",
 		Usage: "Manage workspace tickets",
 		Commands: []*cli.Command{
+			newTicketListCommand(stdout),
 			newTicketNewCommand(stdout),
 		},
 	}
@@ -434,13 +435,27 @@ func newTicketNewCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
-func ticketNewFlags() []cli.Flag {
+func newTicketListCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "list",
+		Usage:  "List tickets for the resolved project",
+		Flags:  ticketProjectFlags(),
+		Action: ticketListAction(stdout),
+	}
+}
+
+func ticketProjectFlags() []cli.Flag {
 	return append(projectRegistryFlags(),
 		&cli.StringFlag{
 			Name:  "dir",
 			Usage: "project directory override",
 			Value: ".",
 		},
+	)
+}
+
+func ticketNewFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
 		&cli.StringFlag{
 			Name:  "priority",
 			Usage: "ticket priority",
@@ -466,6 +481,66 @@ func ticketNewFlags() []cli.Flag {
 			Usage: "ticket project area",
 		},
 	)
+}
+
+func ticketListAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketList(ctx, cmd, stdout)
+	}
+}
+
+func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("ticket list does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
+	if err != nil {
+		return err
+	}
+
+	for _, ticket := range tickets {
+		if _, err := fmt.Fprintf(
+			stdout,
+			"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+			ticket.Key,
+			ticket.Title,
+			ticket.Status,
+			ticket.Priority,
+			ticket.Severity,
+			ticket.Type,
+			ticket.UseCase,
+			ticket.RelativePath,
+		); err != nil {
+			return fmt.Errorf("write ticket list result: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func ticketNewAction(stdout io.Writer) cli.ActionFunc {
