@@ -12,7 +12,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Create slice branch from `dev`.
 - [x] T12.1 Ticket index migration.
-- [ ] T12.2 Ticket index repository.
+- [x] T12.2 Ticket index repository.
 - [ ] T12.3 Validation and documentation.
 - [ ] Run validation.
 - [ ] Push slice branch.
@@ -22,7 +22,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 ## Task Commits
 
 - T12.1: `feat(db): add ticket index migration`
-- T12.2: pending
+- T12.2: `feat(ticket): add sqlite ticket index`
 - T12.3: pending
 
 ## Validation

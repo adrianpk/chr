@@ -136,6 +136,8 @@ func newTestProjectRegistry(t *testing.T) ProjectRegistry {
 		t.Fatalf("open sqlite: %v", err)
 	}
 
+	db.SetMaxOpenConns(1)
+
 	registry, err := NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		if closeErr := db.Close(); closeErr != nil {

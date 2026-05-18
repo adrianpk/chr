@@ -38,6 +38,8 @@ func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS
 		return nil, fmt.Errorf("open project registry database: %w", err)
 	}
 
+	db.SetMaxOpenConns(1)
+
 	migrator := NewMigrator(assetsFS)
 	if err := migrator.Migrate(ctx, db); err != nil {
 		return nil, closeDBWithError(db, fmt.Errorf("migrate project registry database: %w", err))
