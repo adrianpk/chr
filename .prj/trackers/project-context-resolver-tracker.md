@@ -8,25 +8,26 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 ## Checklist
 
 - [x] Create local plan and tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Create implementation branch from `dev`.
-- [ ] T1.1 Project context type and resolver.
-- [ ] T1.2 Ticket new integration.
-- [ ] T1.3 Tests and tracker.
-- [ ] Run validation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Create implementation branch from `dev`.
+- [x] T1.1 Project context type and resolver.
+- [x] T1.2 Ticket new integration.
+- [x] T1.3 Tests and tracker.
+- [x] Run validation.
 - [ ] Push implementation branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
+- T1.1: `feat(cli): add project context resolver`
+- T1.2: `feat(cli): resolve ticket project context`
+- T1.3: `test(cli): cover project context resolver`
 
 ## Validation
 
-- `make verify`: pending
+- `go test ./cmd/chc`: pass
+- `make verify`: pass
 
 ## Notes
 

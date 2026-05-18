@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chc/internal/chc"
 )
 
 func TestTicketNewCreatesTicket(t *testing.T) {
@@ -68,6 +70,68 @@ func TestTicketNewUsesConfigKeyPrefix(t *testing.T) {
 	}
 
 	assertPathExists(t, filepath.Join(dir, ".chc", "tickets", "PRJ-1-Do-something.md"))
+}
+
+func TestTicketNewUsesActiveProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		devRoot,
+		"example",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project select returned error: %v", err)
+	}
+
+	err = run(t.Context(), []string{
+		"ticket",
+		"new",
+		"--dev-root",
+		devRoot,
+		"Active project ticket",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket new returned error: %v", err)
+	}
+
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Active-project-ticket.md"))
+}
+
+func TestTicketNewFallsBackToCurrentDirectory(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	runInDirectory(t, projectDir, func() {
+		err := run(t.Context(), []string{
+			"ticket",
+			"new",
+			"--dev-root",
+			t.TempDir(),
+			"Current project ticket",
+		}, &bytes.Buffer{}, &bytes.Buffer{})
+		if err != nil {
+			t.Fatalf("ticket new returned error: %v", err)
+		}
+	})
+
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Current-project-ticket.md"))
+}
+
+func TestProjectContextResolverRejectsMissingContext(t *testing.T) {
+	env, err := chcTestUserEnvironment(t)
+	if err != nil {
+		t.Fatalf("chcTestUserEnvironment returned error: %v", err)
+	}
+
+	_, err = newCommandProjectContextResolver(env).Resolve(t.Context(), commandProjectContextOptions{})
+	if err == nil {
+		t.Fatal("Resolve returned nil error")
+	}
 }
 
 func TestTicketNewRejectsMissingTitle(t *testing.T) {
@@ -286,6 +350,36 @@ func newTestWorkspace(t *testing.T) string {
 	}
 
 	return projectDir
+}
+
+func chcTestUserEnvironment(t *testing.T) (chc.UserEnvironment, error) {
+	t.Helper()
+
+	return chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: t.TempDir(),
+	})
+}
+
+func runInDirectory(t *testing.T, dir string, runFunc func()) {
+	t.Helper()
+
+	previousDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+
+	if err := os.Chdir(dir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+
+	t.Cleanup(func() {
+		if err := os.Chdir(previousDir); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	runFunc()
 }
 
 func assertPathExists(t *testing.T, path string) {
