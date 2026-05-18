@@ -72,9 +72,18 @@ This slicing does not include:
 - daemon process lifecycle;
 - notifications.
 
+## Slice Numbering
+
+This slicing uses local slice numbering. The slice number is scoped to this
+plan, starts at `Slice 1`, and is the number used in branch names, PR titles,
+trackers, and reports for this slicing.
+
+Repository PR numbers are review records only. They do not define slice
+numbers.
+
 ## Slices
 
-### User Environment Paths
+### Slice 1: User Environment Paths
 
 Status: delivered.
 
@@ -84,7 +93,11 @@ Delivery:
 - development-mode path redirection;
 - CLI construction of `chc.UserEnvironment`.
 
-### Project Registry Persistence
+Historical delivery:
+
+- Repository PR: `#7`
+
+### Slice 2: Project Registry Persistence
 
 Status: delivered.
 
@@ -95,7 +108,11 @@ Delivery:
 - add and list repository operations;
 - lookup by project name.
 
-### Project Registry CLI
+Historical delivery:
+
+- Repository PR: `#9`
+
+### Slice 3: Project Registry CLI
 
 Status: delivered.
 
@@ -107,9 +124,13 @@ Delivery:
 - stable project id generation;
 - `.chc/` requirement for registered projects.
 
-### Active Project Persistence
+Historical delivery:
 
-Status: pending.
+- Repository PR: `#10`
+
+### Slice 4: Active Project Persistence
+
+Status: delivered.
 
 Goal:
 
@@ -128,9 +149,14 @@ Expected outcome:
 
 - core code can store and load the active project independently from CLI commands.
 
-### Project Select and Current CLI
+Historical delivery:
 
-Status: pending.
+- Repository PR: `#13`
+- PR title: `feat(slice-4): active project persistence`
+
+### Slice 5: Project Select and Current CLI
+
+Status: delivered.
 
 Goal:
 
@@ -150,9 +176,14 @@ Expected outcome:
 
 - the user can choose an active project once and inspect it later.
 
-### Project Context Resolver
+Historical delivery:
 
-Status: pending.
+- Repository PR: `#14`
+- PR title: `feat(slice-5): project select current cli`
+
+### Slice 6: Project Context Resolver
+
+Status: delivered.
 
 Goal:
 
@@ -171,9 +202,14 @@ Expected outcome:
 
 - later ticket, execution, and loop commands can use the same project context behavior.
 
-### Project Validation and Recovery
+Historical delivery:
 
-Status: pending.
+- Repository PR: `#15`
+- PR title: `feat(slice-6): project context resolver`
+
+### Slice 7: Project Validation and Recovery
+
+Status: active.
 
 Goal:
 
@@ -190,6 +226,11 @@ Candidate scope:
 Expected outcome:
 
 - project context failures are actionable and do not silently select the wrong project.
+
+Planned delivery:
+
+- Repository PR: `#16`
+- PR title: `feat(slice-7): project validation recovery`
 
 ## Acceptance Criteria
 

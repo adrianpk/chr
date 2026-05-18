@@ -4,6 +4,8 @@ Status: planned
 
 Plan: `.prj/plans/project-validation-recovery-plan.md`
 Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
+Slice: `Slice 7`
+Expected PR title: `feat(slice-7): project validation recovery`
 
 ## Checklist
 
@@ -33,4 +35,4 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 
 - This slice closes the planned `User Project Context` slicing.
 - Project removal or repair commands are explicitly out of scope.
-- PR #16 is open against `dev`.
+- PR #16 is open against `dev` and should use title `feat(slice-7): project validation recovery`.

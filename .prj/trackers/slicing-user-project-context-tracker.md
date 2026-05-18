@@ -22,15 +22,15 @@ Specs:
 
 | Slice | Status | Notes |
 | --- | --- | --- |
-| User Environment Paths | Delivered | Implemented by the existing user environment path work. |
-| Project Registry Persistence | Delivered | SQLite registry and repository exist. |
-| Project Registry CLI | Delivered | `project add` and `project list` exist. |
-| Active Project Persistence | Delivered | Store and load selected project state. |
-| Project Select and Current CLI | Delivered | Add `project select` and `project current`. |
-| Project Context Resolver | Delivered | Reusable project resolution for later commands. |
-| Project Validation and Recovery | Pending | Clear stale/missing/disabled project behavior. |
+| Slice 1: User Environment Paths | Delivered | Repository PR #7. |
+| Slice 2: Project Registry Persistence | Delivered | Repository PR #9. |
+| Slice 3: Project Registry CLI | Delivered | Repository PR #10. |
+| Slice 4: Active Project Persistence | Delivered | Store and load selected project state. Repository PR #13 title: `feat(slice-4): active project persistence`. |
+| Slice 5: Project Select and Current CLI | Delivered | Add `project select` and `project current`. Repository PR #14 title: `feat(slice-5): project select current cli`. |
+| Slice 6: Project Context Resolver | Delivered | Reusable project resolution for later commands. Repository PR #15 title: `feat(slice-6): project context resolver`. |
+| Slice 7: Project Validation and Recovery | Active | Clear stale/missing/disabled project behavior. Repository PR #16 title: `feat(slice-7): project validation recovery`. |
 
-## Pending Slice Candidate: Active Project Persistence
+## Slice 4: Active Project Persistence
 
 Candidate tasks:
 
@@ -41,7 +41,7 @@ Candidate tasks:
 - [ ] Keep development-mode state under `_workspace`.
 - [ ] Run `make verify`.
 
-## Pending Slice Candidate: Project Select and Current CLI
+## Slice 5: Project Select and Current CLI
 
 Candidate tasks:
 
@@ -53,7 +53,7 @@ Candidate tasks:
 - [ ] Add focused CLI tests.
 - [ ] Run `make verify`.
 
-## Pending Slice Candidate: Project Context Resolver
+## Slice 6: Project Context Resolver
 
 Candidate tasks:
 
@@ -65,7 +65,7 @@ Candidate tasks:
 - [ ] Add tests for explicit, active, current-directory, and missing-context cases.
 - [ ] Run `make verify`.
 
-## Pending Slice Candidate: Project Validation and Recovery
+## Slice 7: Project Validation and Recovery
 
 Candidate tasks:
 
@@ -85,5 +85,7 @@ Candidate tasks:
 ## Notes
 
 - This tracker is for the full `User Project Context` slicing.
-- Implementation branches should be created one pending slice at a time.
+- Slice numbers are local to this slicing and start at `Slice 1`.
+- Repository PR numbers are review records only and do not define slice numbers.
+- Implementation branches should be created one planned slice at a time.
 - Ticket visibility starts in the next slicing, after project context is reliable.
