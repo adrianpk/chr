@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +11,9 @@ import (
 
 	"forge.adrianpk.com/chc/internal/workspace"
 )
+
+//go:embed assets
+var assetsFS embed.FS
 
 func main() {
 	if err := run(context.Background(), os.Args[1:], os.Stdout, os.Stderr); err != nil {
@@ -40,6 +44,8 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 }
 
 func newInitCommand(stdout io.Writer) *cli.Command {
+	initializer := workspace.NewInitializer(assetsFS)
+
 	return &cli.Command{
 		Name:  "init",
 		Usage: "Create a .chc workspace in the current project",
@@ -48,6 +54,11 @@ func newInitCommand(stdout io.Writer) *cli.Command {
 				Name:  "dir",
 				Usage: "project directory override",
 				Value: ".",
+			},
+			&cli.StringFlag{
+				Name:  "profile",
+				Usage: "workspace profile: standard, personal, minimal",
+				Value: workspace.DefaultProfile,
 			},
 			&cli.BoolFlag{
 				Name:  "dry-run",
@@ -59,8 +70,9 @@ func newInitCommand(stdout io.Writer) *cli.Command {
 				return fmt.Errorf("init does not accept positional arguments")
 			}
 
-			result, err := workspace.Init(ctx, workspace.InitOptions{
+			result, err := initializer.Init(ctx, workspace.InitOptions{
 				ProjectDir: cmd.String("dir"),
+				Profile:    cmd.String("profile"),
 				DryRun:     cmd.Bool("dry-run"),
 			})
 			if err != nil {
