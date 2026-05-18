@@ -180,6 +180,76 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 	}
 }
 
+func TestTicketShowPrintsIndexedTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
+		Key:          "CHC-1",
+		Title:        "Do something",
+		Status:       "open",
+		Priority:     "high",
+		Severity:     "medium",
+		Type:         "task",
+		UseCase:      "onboarding",
+		ProjectArea:  "uxui",
+		RelativePath: filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
+		Path:         filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"show",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket show returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"key: CHC-1",
+		"title: Do something",
+		"status: open",
+		"priority: high",
+		"severity: medium",
+		"type: task",
+		"use_case: onboarding",
+		"project_area: uxui",
+		"path: " + filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestTicketShowRejectsMissingTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"show",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket show returned nil error")
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
