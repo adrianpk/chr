@@ -3,6 +3,7 @@ package chc
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"testing"
 	"time"
 
@@ -55,6 +56,31 @@ func TestTicketIndexReplacesTagsOnUpsert(t *testing.T) {
 
 	if len(tickets[0].Tags) != 1 || tickets[0].Tags[0] != "new" {
 		t.Fatalf("Tags = %#v, want new", tickets[0].Tags)
+	}
+}
+
+func TestTicketIndexGetsTicketByKey(t *testing.T) {
+	index := newTestTicketIndex(t)
+	ticket := testIndexedTicket("CHC-1", []string{"uxui"})
+
+	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
+		t.Fatalf("UpsertTicket returned error: %v", err)
+	}
+
+	got, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	if err != nil {
+		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
+	}
+
+	assertIndexedTicket(t, got, ticket)
+}
+
+func TestTicketIndexGetTicketByKeyRejectsMissingTicket(t *testing.T) {
+	index := newTestTicketIndex(t)
+
+	_, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	if !errors.Is(err, ErrTicketNotFound) {
+		t.Fatalf("err = %v, want ErrTicketNotFound", err)
 	}
 }
 

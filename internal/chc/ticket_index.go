@@ -3,6 +3,7 @@ package chc
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -12,9 +13,12 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+var ErrTicketNotFound = errors.New("ticket not found")
+
 type TicketIndex interface {
 	UpsertTicket(ctx context.Context, ticket IndexedTicket) error
 	ListProjectTickets(ctx context.Context, projectID string) ([]IndexedTicket, error)
+	GetProjectTicketByKey(ctx context.Context, projectID, key string) (IndexedTicket, error)
 	DeleteProjectTickets(ctx context.Context, projectID string) error
 	Close() error
 }
@@ -120,6 +124,36 @@ ORDER BY key`,
 	}
 
 	return tickets, nil
+}
+
+func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID, key string) (IndexedTicket, error) {
+	row := i.db.QueryRowContext(
+		ctx,
+		`SELECT project_id, path, relative_path, key, title, status, priority, severity, type,
+    use_case, project_area, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+FROM indexed_tickets
+WHERE project_id = ? AND key = ?`,
+		projectID,
+		key,
+	)
+
+	ticket, err := scanIndexedTicket(row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return IndexedTicket{}, ErrTicketNotFound
+	}
+
+	if err != nil {
+		return IndexedTicket{}, err
+	}
+
+	tags, err := i.ticketTags(ctx, ticket.ProjectID, ticket.Path)
+	if err != nil {
+		return IndexedTicket{}, err
+	}
+
+	ticket.Tags = tags
+
+	return ticket, nil
 }
 
 func (i *sqliteTicketIndex) DeleteProjectTickets(ctx context.Context, projectID string) error {
