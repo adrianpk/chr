@@ -1,6 +1,6 @@
 # Slice 5 Ticket New Tracker
 
-Status: planned
+Status: merged
 
 Plan: `.prj/plans/slice-5-ticket-new-plan.md`
 Spec: `.prj/specs/specs/ticket-template.md`
@@ -14,9 +14,10 @@ Spec: `.prj/specs/specs/ticket-template.md`
 - [x] T5.2 Ticket repository and key generation.
 - [x] T5.3 CLI command.
 - [x] Run validation.
-- [ ] Push slice branch.
-- [ ] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Push slice branch.
+- [x] Open PR against `dev`.
+- [x] Await user approval before merge.
+- [x] Merge PR into `dev`.
 
 ## Task Commits
 
@@ -35,3 +36,4 @@ Spec: `.prj/specs/specs/ticket-template.md`
 - Project-wise tickets use an empty or absent `use_case` and live directly under `.chc/tickets/`.
 - Use-case tickets live under `.chc/tickets/<use_case>/`.
 - This slice intentionally avoids SQLite and status transitions.
+- PR #5 was merged into `dev`.
