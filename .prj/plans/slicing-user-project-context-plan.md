@@ -21,11 +21,10 @@ Related specifications:
 - `.prj/specs/specs/user-daemon-and-global-index.md`
 - `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
-Related delivered plans:
+Prerequisite delivered plans:
 
 - `.prj/plans/slice-7-user-environment-paths-plan.md`
-- `.prj/plans/slice-9-project-registry-repository-plan.md`
-- `.prj/plans/slice-10-project-registry-cli-plan.md`
+- `.prj/plans/slice-8-sqlite-migration-foundation-plan.md`
 
 ## Current State
 
@@ -83,21 +82,7 @@ numbers.
 
 ## Slices
 
-### Slice 1: User Environment Paths
-
-Status: delivered.
-
-Delivery:
-
-- normal-mode user paths;
-- development-mode path redirection;
-- CLI construction of `chc.UserEnvironment`.
-
-Historical delivery:
-
-- Repository PR: `#7`
-
-### Slice 2: Project Registry Persistence
+### Slice 1: Project Registry Persistence
 
 Status: delivered.
 
@@ -111,8 +96,9 @@ Delivery:
 Historical delivery:
 
 - Repository PR: `#9`
+- PR title: `feat(slice-1): project registry repository`
 
-### Slice 3: Project Registry CLI
+### Slice 2: Project Registry CLI
 
 Status: delivered.
 
@@ -127,8 +113,9 @@ Delivery:
 Historical delivery:
 
 - Repository PR: `#10`
+- PR title: `feat(slice-2): project registry cli`
 
-### Slice 4: Active Project Persistence
+### Slice 3: Active Project Persistence
 
 Status: delivered.
 
@@ -152,9 +139,9 @@ Expected outcome:
 Historical delivery:
 
 - Repository PR: `#13`
-- PR title: `feat(slice-4): active project persistence`
+- PR title: `feat(slice-3): active project persistence`
 
-### Slice 5: Project Select and Current CLI
+### Slice 4: Project Select and Current CLI
 
 Status: delivered.
 
@@ -179,9 +166,9 @@ Expected outcome:
 Historical delivery:
 
 - Repository PR: `#14`
-- PR title: `feat(slice-5): project select current cli`
+- PR title: `feat(slice-4): project select current cli`
 
-### Slice 6: Project Context Resolver
+### Slice 5: Project Context Resolver
 
 Status: delivered.
 
@@ -205,9 +192,9 @@ Expected outcome:
 Historical delivery:
 
 - Repository PR: `#15`
-- PR title: `feat(slice-6): project context resolver`
+- PR title: `feat(slice-5): project context resolver`
 
-### Slice 7: Project Validation and Recovery
+### Slice 6: Project Validation and Recovery
 
 Status: active.
 
@@ -230,7 +217,7 @@ Expected outcome:
 Planned delivery:
 
 - Repository PR: `#16`
-- PR title: `feat(slice-7): project validation recovery`
+- PR title: `feat(slice-6): project validation recovery`
 
 ## Acceptance Criteria
 

@@ -22,15 +22,14 @@ Specs:
 
 | Slice | Status | Notes |
 | --- | --- | --- |
-| Slice 1: User Environment Paths | Delivered | Repository PR #7. |
-| Slice 2: Project Registry Persistence | Delivered | Repository PR #9. |
-| Slice 3: Project Registry CLI | Delivered | Repository PR #10. |
-| Slice 4: Active Project Persistence | Delivered | Store and load selected project state. Repository PR #13 title: `feat(slice-4): active project persistence`. |
-| Slice 5: Project Select and Current CLI | Delivered | Add `project select` and `project current`. Repository PR #14 title: `feat(slice-5): project select current cli`. |
-| Slice 6: Project Context Resolver | Delivered | Reusable project resolution for later commands. Repository PR #15 title: `feat(slice-6): project context resolver`. |
-| Slice 7: Project Validation and Recovery | Active | Clear stale/missing/disabled project behavior. Repository PR #16 title: `feat(slice-7): project validation recovery`. |
+| Slice 1: Project Registry Persistence | Delivered | Repository PR #9 title: `feat(slice-1): project registry repository`. |
+| Slice 2: Project Registry CLI | Delivered | Repository PR #10 title: `feat(slice-2): project registry cli`. |
+| Slice 3: Active Project Persistence | Delivered | Store and load selected project state. Repository PR #13 title: `feat(slice-3): active project persistence`. |
+| Slice 4: Project Select and Current CLI | Delivered | Add `project select` and `project current`. Repository PR #14 title: `feat(slice-4): project select current cli`. |
+| Slice 5: Project Context Resolver | Delivered | Reusable project resolution for later commands. Repository PR #15 title: `feat(slice-5): project context resolver`. |
+| Slice 6: Project Validation and Recovery | Active | Clear stale/missing/disabled project behavior. Repository PR #16 title: `feat(slice-6): project validation recovery`. |
 
-## Slice 4: Active Project Persistence
+## Slice 3: Active Project Persistence
 
 Candidate tasks:
 
@@ -41,7 +40,7 @@ Candidate tasks:
 - [ ] Keep development-mode state under `_workspace`.
 - [ ] Run `make verify`.
 
-## Slice 5: Project Select and Current CLI
+## Slice 4: Project Select and Current CLI
 
 Candidate tasks:
 
@@ -53,7 +52,7 @@ Candidate tasks:
 - [ ] Add focused CLI tests.
 - [ ] Run `make verify`.
 
-## Slice 6: Project Context Resolver
+## Slice 5: Project Context Resolver
 
 Candidate tasks:
 
@@ -65,7 +64,7 @@ Candidate tasks:
 - [ ] Add tests for explicit, active, current-directory, and missing-context cases.
 - [ ] Run `make verify`.
 
-## Slice 7: Project Validation and Recovery
+## Slice 6: Project Validation and Recovery
 
 Candidate tasks:
 

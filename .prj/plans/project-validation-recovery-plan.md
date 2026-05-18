@@ -4,8 +4,8 @@ Status: active
 
 Slicing: `.prj/plans/slicing-user-project-context-plan.md`
 Tracker: `.prj/trackers/project-validation-recovery-tracker.md`
-Slice: `Slice 7`
-Expected PR title: `feat(slice-7): project validation recovery`
+Slice: `Slice 6`
+Expected PR title: `feat(slice-6): project validation recovery`
 
 ## Purpose
 
