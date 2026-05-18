@@ -1,0 +1,91 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"path/filepath"
+
+	"forge.adrianpk.com/chc/internal/chc"
+)
+
+type commandProjectContext struct {
+	ProjectDir string
+}
+
+type commandProjectContextOptions struct {
+	ExplicitDir           string
+	UseExplicitDir        bool
+	AllowCurrentDirectory bool
+}
+
+type commandProjectContextResolver struct {
+	env chc.UserEnvironment
+}
+
+func newCommandProjectContextResolver(env chc.UserEnvironment) commandProjectContextResolver {
+	return commandProjectContextResolver{env: env}
+}
+
+func (r commandProjectContextResolver) Resolve(
+	ctx context.Context,
+	opts commandProjectContextOptions,
+) (commandProjectContext, error) {
+	if opts.UseExplicitDir {
+		return resolveProjectDirectory(opts.ExplicitDir)
+	}
+
+	activeProject, err := chc.NewActiveProjectStore(r.env).LoadActiveProject()
+	if err == nil {
+		return r.resolveActiveProject(ctx, activeProject)
+	}
+
+	if !errors.Is(err, chc.ErrActiveProjectNotSelected) {
+		return commandProjectContext{}, err
+	}
+
+	if opts.AllowCurrentDirectory {
+		return resolveProjectDirectory(".")
+	}
+
+	return commandProjectContext{}, fmt.Errorf("project context is required")
+}
+
+func (r commandProjectContextResolver) resolveActiveProject(
+	ctx context.Context,
+	activeProject chc.ActiveProject,
+) (commandProjectContext, error) {
+	registry, err := chc.NewProjectRegistry(ctx, r.env, assetsFS)
+	if err != nil {
+		return commandProjectContext{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Resolution result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	project, err := registry.GetProjectByID(ctx, activeProject.ProjectID)
+	if err != nil {
+		return commandProjectContext{}, err
+	}
+
+	if !project.Enabled {
+		return commandProjectContext{}, fmt.Errorf("project is disabled: %s", project.Name)
+	}
+
+	return resolveProjectDirectory(project.Path)
+}
+
+func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
+	absProjectDir, err := filepath.Abs(projectDir)
+	if err != nil {
+		return commandProjectContext{}, fmt.Errorf("resolve project directory: %w", err)
+	}
+
+	if err := requireWorkspace(absProjectDir); err != nil {
+		return commandProjectContext{}, err
+	}
+
+	return commandProjectContext{ProjectDir: absProjectDir}, nil
+}
