@@ -186,6 +186,7 @@ func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	}
 
 	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
 		_ = registry.Close()
 	}()
 
@@ -243,12 +244,42 @@ func newProjectListCommand(stdout io.Writer) *cli.Command {
 
 func projectListAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
-		if _, err := fmt.Fprintln(stdout, "project list pending"); err != nil {
+		return runProjectList(ctx, cmd, stdout)
+	}
+}
+
+func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("project list does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	projects, err := registry.ListProjects(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, project := range projects {
+		if _, err := fmt.Fprintf(stdout, "%s\t%s\t%t\t%s\n", project.Name, project.Path, project.Enabled, project.ID); err != nil {
 			return fmt.Errorf("write project list result: %w", err)
 		}
-
-		return nil
 	}
+
+	return nil
 }
 
 func newTicketNewCommand(stdout io.Writer) *cli.Command {

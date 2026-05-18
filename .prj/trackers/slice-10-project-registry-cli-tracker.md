@@ -13,8 +13,8 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] Create slice branch from `dev`.
 - [x] T10.1 CLI user environment wiring.
 - [x] T10.2 Project add command.
-- [ ] T10.3 Project list command.
-- [ ] Run validation.
+- [x] T10.3 Project list command.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
@@ -23,11 +23,11 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - T10.1: `feat(cli): wire project user environment`
 - T10.2: `feat(cli): add project add command`
-- T10.3: pending
+- T10.3: `feat(cli): add project list command`
 
 ## Validation
 
-- `make verify`: pending
+- `make verify`: pass
 
 ## Notes
 

@@ -120,6 +120,44 @@ func TestProjectAddRejectsProjectWithoutWorkspace(t *testing.T) {
 	}
 }
 
+func TestProjectListPrintsRegisteredProjects(t *testing.T) {
+	projectDir := t.TempDir()
+	devRoot := t.TempDir()
+
+	if err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755); err != nil {
+		t.Fatalf("create project workspace: %v", err)
+	}
+
+	err := run(t.Context(), []string{
+		"project",
+		"add",
+		"--dev-root",
+		devRoot,
+		"--name",
+		"example",
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project add returned error: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"project",
+		"list",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project list returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "example\t"+projectDir+"\ttrue\tproject-") {
+		t.Fatalf("stdout = %q, want listed project", stdout.String())
+	}
+}
+
 func assertPathExists(t *testing.T, path string) {
 	t.Helper()
 
