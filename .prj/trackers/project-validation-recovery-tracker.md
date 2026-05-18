@@ -8,25 +8,26 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 ## Checklist
 
 - [x] Create local plan and tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Create implementation branch from `dev`.
-- [ ] T1.1 Project workspace validation helpers.
-- [ ] T1.2 Apply validation to selection and active context.
-- [ ] T1.3 Tests and tracker.
-- [ ] Run validation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Create implementation branch from `dev`.
+- [x] T1.1 Project workspace validation helpers.
+- [x] T1.2 Apply validation to selection and active context.
+- [x] T1.3 Tests and tracker.
+- [x] Run validation.
 - [ ] Push implementation branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
 
 ## Task Commits
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
+- T1.1: `feat(cli): validate registered project workspaces`
+- T1.2: `feat(cli): validate selected project workspace`
+- T1.3: `test(cli): cover project validation recovery`
 
 ## Validation
 
-- `make verify`: pending
+- `go test ./cmd/chc`: pass
+- `make verify`: pass
 
 ## Notes
 

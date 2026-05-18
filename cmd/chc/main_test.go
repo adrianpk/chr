@@ -323,6 +323,96 @@ func TestProjectSelectRejectsUnknownProject(t *testing.T) {
 	}
 }
 
+func TestProjectSelectRejectsMissingRegisteredPath(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	if err := os.RemoveAll(projectDir); err != nil {
+		t.Fatalf("remove project dir: %v", err)
+	}
+
+	err := run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		devRoot,
+		"example",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("project select returned nil error")
+	}
+}
+
+func TestProjectSelectRejectsRegisteredPathWithoutWorkspace(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	if err := os.RemoveAll(filepath.Join(projectDir, ".chc")); err != nil {
+		t.Fatalf("remove project workspace: %v", err)
+	}
+
+	err := run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		devRoot,
+		"example",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("project select returned nil error")
+	}
+}
+
+func TestTicketNewRejectsMissingActiveProjectPath(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	selectProject(t, devRoot, "example")
+
+	if err := os.RemoveAll(projectDir); err != nil {
+		t.Fatalf("remove project dir: %v", err)
+	}
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"new",
+		"--dev-root",
+		devRoot,
+		"Do something",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket new returned nil error")
+	}
+}
+
+func TestTicketNewRejectsActiveProjectWithoutWorkspace(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	selectProject(t, devRoot, "example")
+
+	if err := os.RemoveAll(filepath.Join(projectDir, ".chc")); err != nil {
+		t.Fatalf("remove project workspace: %v", err)
+	}
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"new",
+		"--dev-root",
+		devRoot,
+		"Do something",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket new returned nil error")
+	}
+}
+
 func addProject(t *testing.T, devRoot, name, projectDir string) {
 	t.Helper()
 
@@ -337,6 +427,21 @@ func addProject(t *testing.T, devRoot, name, projectDir string) {
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("project add returned error: %v", err)
+	}
+}
+
+func selectProject(t *testing.T, devRoot, selector string) {
+	t.Helper()
+
+	err := run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		devRoot,
+		selector,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project select returned error: %v", err)
 	}
 }
 
