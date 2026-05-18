@@ -28,7 +28,7 @@ chc init --profile minimal
 
 Supported initial profiles:
 
-- `standard`: default useful profile.
+- `standard`: default useful profile with agent protocol files.
 - `personal`: full opinionated workflow for the author's own use.
 - `minimal`: lightweight scaffold.
 
@@ -54,6 +54,17 @@ AGENTS.md
   manifest.md
   config.yml
   agents/
+    ARCHITECTURE.md
+    CONVENTIONS.md
+    DOCUMENTING.md
+    INVARIANTS.md
+    LIFECYCLE.md
+    LINTING.md
+    PLAYBOOKS.md
+    ROUTING.md
+    SLICES.md
+    VERSIONING.md
+    playbooks/
   docs/
   specs/
   tickets/

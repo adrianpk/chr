@@ -27,6 +27,7 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 	assertFile(t, dir, ".chc/manifest.md")
 	assertFile(t, dir, ".chc/config.yml")
 	assertFile(t, dir, ".chc/agents/CONVENTIONS.md")
+	assertFile(t, dir, ".chc/agents/playbooks/ticket-workflow.md")
 	assertFile(t, dir, "AGENTS.md")
 	assertNotExists(t, dir, ".chc/root/AGENTS.md")
 }
@@ -173,6 +174,9 @@ func newTestInitializer() Initializer {
 		},
 		"assets/workspace/profiles/standard/agents/CONVENTIONS.md": {
 			Data: []byte("# Conventions\n"),
+		},
+		"assets/workspace/profiles/standard/agents/playbooks/ticket-workflow.md": {
+			Data: []byte("# Ticket Workflow\n"),
 		},
 		"assets/workspace/profiles/standard/root/AGENTS.md": {
 			Data: []byte("# Agent Operating Contract\n"),
