@@ -9,7 +9,7 @@ import (
 )
 
 func TestTicketNewCreatesTicket(t *testing.T) {
-	dir := t.TempDir()
+	dir := newTestWorkspace(t)
 
 	var stdout bytes.Buffer
 

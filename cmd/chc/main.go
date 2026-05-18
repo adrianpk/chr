@@ -431,7 +431,7 @@ func newTicketNewCommand(stdout io.Writer) *cli.Command {
 }
 
 func ticketNewFlags() []cli.Flag {
-	return []cli.Flag{
+	return append(projectRegistryFlags(),
 		&cli.StringFlag{
 			Name:  "dir",
 			Usage: "project directory override",
@@ -461,7 +461,7 @@ func ticketNewFlags() []cli.Flag {
 			Name:  "project-area",
 			Usage: "ticket project area",
 		},
-	}
+	)
 }
 
 func ticketNewAction(stdout io.Writer) cli.ActionFunc {
@@ -475,18 +475,27 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return fmt.Errorf("ticket new requires exactly one title argument")
 	}
 
-	projectDir, err := filepath.Abs(cmd.String("dir"))
+	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
-		return fmt.Errorf("resolve project directory: %w", err)
+		return err
 	}
 
-	config, err := chc.LoadWorkspaceConfig(projectDir)
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
 
 	repository := chc.NewTicketRepository(
-		projectDir,
+		projectContext.ProjectDir,
 		chc.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
 	)
 
