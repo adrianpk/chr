@@ -24,7 +24,7 @@ Specs:
 
 | Slice | Status | Expected Branch | Expected PR Title | Notes |
 | --- | --- | --- | --- | --- |
-| Slice 1: Ticket List | Reviewing | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | List tickets for the resolved project. |
+| Slice 1: Ticket List | Delivered | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | Repository PR #17. |
 | Slice 2: Ticket Show | Planned | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Show one ticket by key. |
 | Slice 3: Ticket Comments | Planned | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Append durable comments to ticket Markdown. |
 | Slice 4: Ticket Status Transitions | Planned | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Update ticket status through controlled commands. |
@@ -64,6 +64,7 @@ Task commits:
 - Slice 1 validation: `go test ./cmd/chc` pass.
 - Slice 1 validation: `go test ./internal/chc` pass.
 - Slice 1 validation: `make verify` pass.
+- Slice 1 merged into `dev` as PR #17.
 
 ## Notes
 

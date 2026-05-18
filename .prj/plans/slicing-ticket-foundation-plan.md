@@ -87,7 +87,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Ticket List
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-1-ticket-list`
 Expected PR title: `feat(slice-1): ticket list`
@@ -107,6 +107,11 @@ Candidate scope:
 Expected outcome:
 
 - the user can inspect known tickets without opening the filesystem manually.
+
+Delivery:
+
+- Repository PR: `#17`
+- PR title: `feat(slice-1): ticket list`
 
 ### Slice 2: Ticket Show
 
