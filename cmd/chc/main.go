@@ -107,6 +107,7 @@ func newProjectCommand(stdout io.Writer) *cli.Command {
 		Usage: "Manage registered projects",
 		Commands: []*cli.Command{
 			newProjectAddCommand(stdout),
+			newProjectCurrentCommand(stdout),
 			newProjectListCommand(stdout),
 			newProjectSelectCommand(stdout),
 		},
@@ -279,6 +280,58 @@ func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		if _, err := fmt.Fprintf(stdout, "%s\t%s\t%t\t%s\n", project.Name, project.Path, project.Enabled, project.ID); err != nil {
 			return fmt.Errorf("write project list result: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func newProjectCurrentCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "current",
+		Usage:  "Print the active project",
+		Flags:  projectRegistryFlags(),
+		Action: projectCurrentAction(stdout),
+	}
+}
+
+func projectCurrentAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runProjectCurrent(ctx, cmd, stdout)
+	}
+}
+
+func runProjectCurrent(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("project current does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	activeProject, err := chc.NewActiveProjectStore(env).LoadActiveProject()
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	project, err := registry.GetProjectByID(ctx, activeProject.ProjectID)
+	if err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintf(stdout, "project: %s %s\n", project.Name, project.Path); err != nil {
+		return fmt.Errorf("write project current result: %w", err)
 	}
 
 	return nil
