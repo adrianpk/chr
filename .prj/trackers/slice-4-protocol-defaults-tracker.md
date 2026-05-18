@@ -5,12 +5,12 @@ Status: active
 ## Checklist
 
 - [x] Create local plan and tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Create slice branch from `dev`.
-- [ ] Add standard profile protocol files.
-- [ ] Add standard profile playbook files.
-- [ ] Update documentation.
-- [ ] Run validation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Create slice branch from `dev`.
+- [x] Add standard profile protocol files.
+- [x] Add standard profile playbook files.
+- [x] Update documentation.
+- [x] Run validation.
 - [ ] Push slice branch.
 - [ ] Open PR against `dev`.
 - [ ] Await user approval before merge.
