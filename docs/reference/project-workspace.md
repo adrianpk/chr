@@ -165,6 +165,46 @@ Docker mount contract:
 The planner only computes paths and mount metadata. It does not create
 directories, build images, run Docker, or execute validation commands.
 
+## Runtime Validation
+
+Validate the configured runtime boundary:
+
+```sh
+chc runtime validate
+```
+
+Preview the validation plan without invoking Docker or running the configured
+validation command:
+
+```sh
+chc runtime validate --dry-run
+```
+
+Validate another managed project:
+
+```sh
+chc runtime validate --dir /path/to/project --dry-run
+```
+
+Runtime validation loads `.chc/config.yml`, computes the runtime plan, prints
+the Docker build/run inputs, and checks required local paths:
+
+- `.chc/` workspace directory;
+- configured runtime Dockerfile;
+- configured runtime artifact directory.
+
+Validation output includes:
+
+- image tag;
+- Dockerfile path;
+- container workdir;
+- artifact, result, and log paths;
+- project mount;
+- one `check:` line per required local path.
+
+This command does not build Docker images, run containers, execute agents, or
+run `runtime.validation_command`.
+
 ## Go Package Boundary
 
 Project workspace behavior lives in the core `internal/chc` package.
