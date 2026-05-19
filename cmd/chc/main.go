@@ -674,6 +674,10 @@ type ticketStartSelection struct {
 	Ticket         chc.IndexedTicket
 }
 
+var newTicketStartHarnessExecutor = func() chc.HarnessExecutor {
+	return chc.OSHarnessExecutor{}
+}
+
 func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 2 {
 		return fmt.Errorf("ticket status requires exactly one ticket key and one status argument")
@@ -747,12 +751,32 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	if !cmd.Bool("dry-run") {
-		if err := createPendingExecution(ctx, preflight.Env, preflight.Record); err != nil {
+		record, err := runAndPrintTicketStartExecution(ctx, stdout, preflight)
+		if err != nil {
 			return err
 		}
+
+		preflight.Record = record
 	}
 
 	return printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
+}
+
+func runAndPrintTicketStartExecution(
+	ctx context.Context,
+	stdout io.Writer,
+	preflight ticketStartPreflight,
+) (chc.ExecutionRecord, error) {
+	record, err := runTicketStartExecution(ctx, preflight.Env, preflight.Record, preflight.Runtime)
+	if err == nil {
+		return record, nil
+	}
+
+	if printErr := printTicketStartResult(stdout, preflight.Ticket, record, preflight.Runtime, false); printErr != nil {
+		return chc.ExecutionRecord{}, printErr
+	}
+
+	return record, err
 }
 
 func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketStartPreflight, error) {
@@ -843,10 +867,15 @@ func newPendingExecutionRecord(projectID string, ticket chc.IndexedTicket) chc.E
 	}
 }
 
-func createPendingExecution(ctx context.Context, env chc.UserEnvironment, record chc.ExecutionRecord) error {
+func runTicketStartExecution(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	record chc.ExecutionRecord,
+	result chc.RuntimeValidationResult,
+) (chc.ExecutionRecord, error) {
 	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
-		return err
+		return chc.ExecutionRecord{}, err
 	}
 
 	defer func() {
@@ -855,10 +884,24 @@ func createPendingExecution(ctx context.Context, env chc.UserEnvironment, record
 	}()
 
 	if err := repository.CreateExecution(ctx, record); err != nil {
-		return err
+		return chc.ExecutionRecord{}, err
 	}
 
-	return nil
+	invocation, err := chc.NewHarnessInvocation(chc.HarnessInvocationOptions{
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Plan:        result.Plan,
+	})
+	if err != nil {
+		return chc.ExecutionRecord{}, err
+	}
+
+	runner := chc.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
+
+	return runner.Run(ctx, chc.RunExecutionOptions{
+		Record:     record,
+		Invocation: invocation,
+	})
 }
 
 func executionID(projectID, ticketKey string, createdAt time.Time) string {
