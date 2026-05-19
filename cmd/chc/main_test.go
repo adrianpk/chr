@@ -250,6 +250,98 @@ func TestTicketShowRejectsMissingTicket(t *testing.T) {
 	}
 }
 
+func TestTicketCommentAppendsComment(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md")
+
+	content, err := chc.NewTicketRenderer().RenderTicket(chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
+		t.Fatalf("create ticket dir: %v", err)
+	}
+
+	if err := os.WriteFile(ticketPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write ticket: %v", err)
+	}
+
+	addProject(t, devRoot, "example", projectDir)
+	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
+		Key:          "CHC-1",
+		Title:        "Do something",
+		Status:       "open",
+		RelativePath: filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
+		Path:         ticketPath,
+	})
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"ticket",
+		"comment",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--author",
+		"adrian",
+		"CHC-1",
+		"Looks ready.",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket comment returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "ticket: "+ticketPath) {
+		t.Fatalf("stdout = %q, want ticket path", stdout.String())
+	}
+
+	updatedContent, err := os.ReadFile(ticketPath)
+	if err != nil {
+		t.Fatalf("read ticket: %v", err)
+	}
+
+	for _, want := range []string{
+		"# Comments",
+		"adrian",
+		"\"Looks ready.\"",
+	} {
+		if !strings.Contains(string(updatedContent), want) {
+			t.Fatalf("updated content does not contain %q:\n%s", want, string(updatedContent))
+		}
+	}
+}
+
+func TestTicketCommentRejectsMissingTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"comment",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		"Looks ready.",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket comment returned nil error")
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
