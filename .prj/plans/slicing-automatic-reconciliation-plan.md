@@ -144,7 +144,7 @@ Delivery:
 
 ### Slice 3: Index Status
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-3-index-status`
 Expected PR title: `feat(slice-3): index status`

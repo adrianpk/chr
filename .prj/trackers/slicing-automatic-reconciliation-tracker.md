@@ -27,7 +27,7 @@ Specs:
 | --- | --- | --- | --- | --- |
 | Slice 1: Ticket File Discovery | Delivered | `feat/slice-1-ticket-file-discovery` | `feat(slice-1): ticket file discovery` | Repository PR #22. |
 | Slice 2: Ticket Index Rebuild | Delivered | `feat/slice-2-ticket-index-rebuild` | `feat(slice-2): ticket index rebuild` | Repository PR #23. |
-| Slice 3: Index Status | Planned | `feat/slice-3-index-status` | `feat(slice-3): index status` | Report stale, missing, orphaned, and invalid index state. |
+| Slice 3: Index Status | Reviewing | `feat/slice-3-index-status` | `feat(slice-3): index status` | Report stale, missing, orphaned, and invalid index state. |
 | Slice 4: Index Rebuild CLI | Planned | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Expose manual rebuild for recovery. |
 | Slice 5: Index Status CLI | Planned | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Expose index health inspection. |
 | Slice 6: Refresh Before Ticket Reads | Planned | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Make ticket read commands refresh automatically. |
@@ -100,23 +100,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add index status core model.
-- [ ] Detect missing index rows.
-- [ ] Detect stale index rows.
-- [ ] Detect orphaned index rows.
-- [ ] Report parse errors separately.
-- [ ] Add focused status tests.
-- [ ] Run `make verify`.
+- [x] Add index status core model.
+- [x] Detect missing index rows.
+- [x] Detect stale index rows.
+- [x] Detect orphaned index rows.
+- [x] Report parse errors separately.
+- [x] Add focused status tests.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
-- T3.7: pending
+- T3.1: `feat(ticket): add index status checker`
+- T3.2: `test(ticket): cover index status`
+- T3.3: `docs(ticket): document index status`
+- T3.4: `refactor(ticket): satisfy index status lint`
+- T3.5: `docs(planning): record index status validation`
 
 ## Slice 4: Index Rebuild CLI
 
@@ -247,6 +245,8 @@ Task commits:
 - Slice 2 validation: initial `make verify` failed on lint whitespace.
 - Slice 2 validation: `make verify` pass after lint-focused refactor.
 - Slice 2 merged into `dev` as PR #23.
+- Slice 3 validation: initial `make verify` failed on formatting and staticcheck.
+- Slice 3 validation: `make verify` pass after lint-focused refactor.
 
 ## Notes
 
