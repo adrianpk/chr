@@ -5,7 +5,7 @@ Slicing: Ticket Result Application
 Plan: `.prj/plans/slicing-ticket-result-application-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-result-application-tracker.md`
 Branch: `feat/slice-3-execution-comment-writer`
-PR: pending
+PR: `#43`
 
 ## Purpose
 
