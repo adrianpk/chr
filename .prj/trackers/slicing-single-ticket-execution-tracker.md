@@ -26,7 +26,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 3: Ticket Start Preflight | Delivered | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Repository PR #36. |
 | Slice 4: Harness Invocation Contract | Delivered | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Repository PR #37. |
 | Slice 5: Agent Harness Invocation | Delivered | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Repository PR #38. |
-| Slice 6: Execution Result Capture | Planned | `feat/slice-6-execution-result-capture` | `feat(slice-6): execution result capture` | `.prj/reports/slices/single-ticket-execution/slice-6-execution-result-capture.md` | Capture structured result artifacts. |
+| Slice 6: Execution Result Capture | Reviewing | `feat/slice-6-execution-result-capture` | `feat(slice-6): execution result capture` | `.prj/reports/slices/single-ticket-execution/slice-6-execution-result-capture.md` | Capture structured result artifacts. |
 | Slice 7: Execution Failure Handling | Planned | `feat/slice-7-execution-failure-handling` | `feat(slice-7): execution failure handling` | `.prj/reports/slices/single-ticket-execution/slice-7-execution-failure-handling.md` | Record clear execution failure states. |
 
 ## Slice 1: Execution Record Model
@@ -217,25 +217,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define result envelope shape.
-- [ ] Write result artifacts under runtime run directories.
-- [ ] Record artifact paths in execution records.
-- [ ] Handle missing or malformed result output.
-- [ ] Add focused result capture tests.
-- [ ] Document execution artifact semantics.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define result envelope shape.
+- [x] Write result artifacts under runtime run directories.
+- [x] Record artifact paths in execution records.
+- [x] Handle missing or malformed result output.
+- [x] Add focused result capture tests.
+- [x] Document execution artifact semantics.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
-- T6.8: pending
+- T6.1: `42585f0` `feat(execution): capture harness result`
+- T6.2: `42585f0` `feat(execution): capture harness result`
+- T6.3: `42585f0` `feat(execution): capture harness result`
+- T6.4: `42585f0` `feat(execution): capture harness result`
+- T6.5: `b343b9f` `test(execution): cover result capture`
+- T6.6: `d04f411` `docs(execution): document result capture`
+- T6.7: `d04f411` `docs(execution): document result capture`
+- T6.8: `docs(execution): record result capture validation`
 
 ## Slice 7: Execution Failure Handling
 
