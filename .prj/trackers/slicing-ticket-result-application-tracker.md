@@ -269,7 +269,7 @@ Candidate tasks:
 - [x] Add focused CLI tests.
 - [x] Document command behavior.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -282,7 +282,7 @@ Task commits:
 - T8.7: `89edb59` `test(result): cover result apply cli`
 - T8.8: `docs(result): document result apply cli`
 - T8.9: `docs(result): document result apply cli`
-- T8.10: pending
+- T8.10: `docs(result): record result apply cli validation`
 
 ## Validation Record
 
