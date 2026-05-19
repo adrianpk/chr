@@ -63,8 +63,6 @@ func TestTicketParserRejectsMissingFrontmatter(t *testing.T) {
 }
 
 func TestTicketParserRejectsInvalidMetadata(t *testing.T) {
-	createdAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
-	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
 	content := renderParserTestTicket(t, Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
@@ -72,15 +70,33 @@ func TestTicketParserRejectsInvalidMetadata(t *testing.T) {
 		Priority:  "high",
 		Severity:  "critical",
 		Type:      "feature",
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		CreatedAt: time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC),
 	})
 
-	tests := []struct {
-		name    string
-		content string
-		wantErr string
-	}{
+	for _, tt := range invalidTicketMetadataCases(content) {
+		t.Run(tt.name, func(t *testing.T) {
+			assertParseTicketRejects(t, tt.content, tt.wantErr)
+		})
+	}
+}
+
+type ticketMetadataValidationCase struct {
+	name    string
+	content string
+	wantErr string
+}
+
+func invalidTicketMetadataCases(content string) []ticketMetadataValidationCase {
+	cases := invalidRequiredTicketMetadataCases(content)
+	cases = append(cases, invalidClassificationTicketMetadataCases(content)...)
+	cases = append(cases, invalidTimeTicketMetadataCases(content)...)
+
+	return cases
+}
+
+func invalidRequiredTicketMetadataCases(content string) []ticketMetadataValidationCase {
+	return []ticketMetadataValidationCase{
 		{
 			name:    "missing key",
 			content: strings.Replace(content, `key: "CHC-1"`, `key: ""`, 1),
@@ -96,6 +112,11 @@ func TestTicketParserRejectsInvalidMetadata(t *testing.T) {
 			content: strings.Replace(content, `status: "open"`, `status: "unknown"`, 1),
 			wantErr: "invalid ticket status: unknown",
 		},
+	}
+}
+
+func invalidClassificationTicketMetadataCases(content string) []ticketMetadataValidationCase {
+	return []ticketMetadataValidationCase{
 		{
 			name:    "invalid priority",
 			content: strings.Replace(content, `priority: "high"`, `priority: "urgent"`, 1),
@@ -111,6 +132,11 @@ func TestTicketParserRejectsInvalidMetadata(t *testing.T) {
 			content: strings.Replace(content, `type: "feature"`, `type: "chore"`, 1),
 			wantErr: "invalid ticket type: chore",
 		},
+	}
+}
+
+func invalidTimeTicketMetadataCases(content string) []ticketMetadataValidationCase {
+	return []ticketMetadataValidationCase{
 		{
 			name: "missing created_at",
 			content: strings.Replace(
@@ -142,24 +168,24 @@ func TestTicketParserRejectsInvalidMetadata(t *testing.T) {
 			wantErr: "ticket updated_at cannot be before created_at",
 		},
 	}
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			path := filepath.Join(t.TempDir(), "ticket.md")
-			writeTicketFile(t, path, tt.content)
+func assertParseTicketRejects(t *testing.T, content, wantErr string) {
+	t.Helper()
 
-			_, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{
-				Path:         path,
-				RelativeBase: filepath.Dir(path),
-			})
-			if err == nil {
-				t.Fatal("ParseTicket returned nil error")
-			}
+	path := filepath.Join(t.TempDir(), "ticket.md")
+	writeTicketFile(t, path, content)
 
-			if !strings.Contains(err.Error(), tt.wantErr) {
-				t.Fatalf("ParseTicket error = %q, want %q", err.Error(), tt.wantErr)
-			}
-		})
+	_, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{
+		Path:         path,
+		RelativeBase: filepath.Dir(path),
+	})
+	if err == nil {
+		t.Fatal("ParseTicket returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), wantErr) {
+		t.Fatalf("ParseTicket error = %q, want %q", err.Error(), wantErr)
 	}
 }
 

@@ -6,6 +6,18 @@ import (
 )
 
 func ValidateIndexedTicket(ticket IndexedTicket) error {
+	if err := validateRequiredTicketMetadata(ticket); err != nil {
+		return err
+	}
+
+	if err := validateTicketClassification(ticket); err != nil {
+		return err
+	}
+
+	return validateTicketTimes(ticket)
+}
+
+func validateRequiredTicketMetadata(ticket IndexedTicket) error {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return fmt.Errorf("ticket key is required")
 	}
@@ -18,6 +30,10 @@ func ValidateIndexedTicket(ticket IndexedTicket) error {
 		return fmt.Errorf("invalid ticket status: %s", ticket.Status)
 	}
 
+	return nil
+}
+
+func validateTicketClassification(ticket IndexedTicket) error {
 	if !isValidTicketPriority(ticket.Priority) {
 		return fmt.Errorf("invalid ticket priority: %s", ticket.Priority)
 	}
@@ -36,6 +52,10 @@ func ValidateIndexedTicket(ticket IndexedTicket) error {
 		}
 	}
 
+	return nil
+}
+
+func validateTicketTimes(ticket IndexedTicket) error {
 	if ticket.CreatedAt == nil {
 		return fmt.Errorf("ticket created_at is required")
 	}
