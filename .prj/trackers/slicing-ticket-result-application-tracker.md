@@ -175,7 +175,7 @@ Candidate tasks:
 - [x] Handle empty changed-file lists.
 - [x] Add focused summary tests.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -183,8 +183,8 @@ Task commits:
 - T5.2: `5196fde` `feat(result): add changed files summary writer`
 - T5.3: `83e2f1f` `test(result): cover changed files summary writer`
 - T5.4: `83e2f1f` `test(result): cover changed files summary writer`
-- T5.5: `docs(result): document changed files summary`
-- T5.6: pending
+- T5.5: `8f8ac78` `docs(result): document changed files summary`
+- T5.6: `docs(result): record changed files validation`
 
 ## Slice 6: Blocked Reason Writer
 

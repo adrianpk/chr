@@ -1,6 +1,6 @@
 # Slice 5: Changed Files Summary
 
-Status: reviewing
+Status: delivered
 Slicing: Ticket Result Application
 Plan: `.prj/plans/slicing-ticket-result-application-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-result-application-tracker.md`
@@ -50,7 +50,7 @@ New functions:
 ## Validation
 
 - `go test ./internal/chc`: pass
-- `make verify`: pending
+- `make verify`: pass
 
 ## Risks and Follow-ups
 
