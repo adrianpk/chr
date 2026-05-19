@@ -26,7 +26,7 @@ Specs:
 | --- | --- | --- | --- | --- |
 | Slice 1: Ticket List | Delivered | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | Repository PR #17. |
 | Slice 2: Ticket Show | Delivered | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Repository PR #18. |
-| Slice 3: Ticket Comments | Planned | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Append durable comments to ticket Markdown. |
+| Slice 3: Ticket Comments | Reviewing | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Append durable comments to ticket Markdown. |
 | Slice 4: Ticket Status Transitions | Planned | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Update ticket status through controlled commands. |
 | Slice 5: Ticket Lifecycle Validation | Planned | `feat/slice-5-ticket-lifecycle-validation` | `feat(slice-5): ticket lifecycle validation` | Validate metadata and lifecycle consistency. |
 
@@ -82,6 +82,34 @@ Task commits:
 - T2.3: `test(cli): cover ticket show command`
 - T2.4: `docs(planning): record ticket show validation`
 
+## Slice 3: Ticket Comments
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-ticket-foundation-plan.md`
+- Tracker: `.prj/trackers/slicing-ticket-foundation-tracker.md`
+- Slicing: `Ticket Foundation`
+- Slice: `Slice 3`
+- Expected branch: `feat/slice-3-ticket-comments`
+- Expected PR title: `feat(slice-3): ticket comments`
+
+Candidate tasks:
+
+- [x] Add ticket Markdown comment writer.
+- [x] Add `chc ticket comment`.
+- [x] Add focused CLI tests.
+- [x] Document ticket comment behavior.
+- [x] Run `make verify`.
+
+Task commits:
+
+- T3.1: `feat(ticket): append ticket comments`
+- T3.2: `feat(cli): add ticket comment command`
+- T3.3: `test(cli): cover ticket comments`
+- T3.4: `test(cli): satisfy ticket comment lint`
+- T3.5: `docs(ticket): document ticket comments`
+- T3.6: `docs(planning): record ticket comments validation`
+
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
@@ -94,6 +122,9 @@ Task commits:
 - Slice 2 validation: `go test ./internal/chc` pass.
 - Slice 2 validation: `make verify` pass.
 - Slice 2 merged into `dev` as PR #18.
+- Slice 3 validation: `go test ./cmd/chc` pass.
+- Slice 3 validation: `go test ./internal/chc` pass.
+- Slice 3 validation: `make verify` pass.
 
 ## Notes
 

@@ -143,7 +143,7 @@ Delivery:
 
 ### Slice 3: Ticket Comments
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-3-ticket-comments`
 Expected PR title: `feat(slice-3): ticket comments`
