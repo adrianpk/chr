@@ -27,7 +27,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 4: Harness Invocation Contract | Delivered | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Repository PR #37. |
 | Slice 5: Agent Harness Invocation | Delivered | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Repository PR #38. |
 | Slice 6: Execution Result Capture | Delivered | `feat/slice-6-execution-result-capture` | `feat(slice-6): execution result capture` | `.prj/reports/slices/single-ticket-execution/slice-6-execution-result-capture.md` | Repository PR #39. |
-| Slice 7: Execution Failure Handling | Planned | `feat/slice-7-execution-failure-handling` | `feat(slice-7): execution failure handling` | `.prj/reports/slices/single-ticket-execution/slice-7-execution-failure-handling.md` | Record clear execution failure states. |
+| Slice 7: Execution Failure Handling | Reviewing | `feat/slice-7-execution-failure-handling` | `feat(slice-7): execution failure handling` | `.prj/reports/slices/single-ticket-execution/slice-7-execution-failure-handling.md` | Record clear execution failure states. |
 
 ## Slice 1: Execution Record Model
 
@@ -251,23 +251,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Classify preflight, runtime, harness, validation, and result-capture failures.
-- [ ] Record failure reason and diagnostic paths.
-- [ ] Print concise failure output from `ticket start`.
-- [ ] Add focused failure tests.
-- [ ] Document failure semantics.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Classify preflight, runtime, harness, validation, and result-capture failures.
+- [x] Record failure reason and diagnostic paths.
+- [x] Print concise failure output from `ticket start`.
+- [x] Add focused failure tests.
+- [x] Document failure semantics.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
-- T7.6: pending
-- T7.7: pending
+- T7.1: `c3c6bd9` `feat(execution): classify execution failures`
+- T7.2: `c3c6bd9` `feat(execution): classify execution failures`
+- T7.3: `c3c6bd9` `feat(execution): classify execution failures`
+- T7.4: `eece8d3` `test(execution): cover failure handling`
+- T7.5: `e2473ec` `docs(execution): document failure handling`
+- T7.6: `e2473ec` `docs(execution): document failure handling`
+- T7.7: `docs(execution): record failure handling validation`
 
 ## Validation Record
 
