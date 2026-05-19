@@ -100,6 +100,7 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 			newTicketListCommand(stdout),
 			newTicketNewCommand(stdout),
 			newTicketShowCommand(stdout),
+			newTicketStatusCommand(stdout),
 		},
 	}
 }
@@ -464,6 +465,15 @@ func newTicketCommentCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newTicketStatusCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "status",
+		Usage:  "Update one ticket status",
+		Flags:  ticketProjectFlags(),
+		Action: ticketStatusAction(stdout),
+	}
+}
+
 func ticketProjectFlags() []cli.Flag {
 	return append(projectRegistryFlags(),
 		&cli.StringFlag{
@@ -529,6 +539,62 @@ func ticketCommentAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketComment(ctx, cmd, stdout)
 	}
+}
+
+func ticketStatusAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketStatus(ctx, cmd, stdout)
+	}
+}
+
+func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 2 {
+		return fmt.Errorf("ticket status requires exactly one ticket key and one status argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().Get(0))
+	if err != nil {
+		return err
+	}
+
+	status := cmd.Args().Get(1)
+	if err := chc.NewTicketStatusUpdater().UpdateStatus(ctx, chc.UpdateTicketStatusOptions{
+		Path:      ticket.Path,
+		Status:    status,
+		UpdatedAt: time.Now().UTC(),
+	}); err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintf(stdout, "ticket: %s %s\n", ticket.Key, status); err != nil {
+		return fmt.Errorf("write ticket status result: %w", err)
+	}
+
+	return nil
 }
 
 func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
