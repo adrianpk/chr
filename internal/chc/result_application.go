@@ -1,0 +1,145 @@
+package chc
+
+import "fmt"
+
+const (
+	TicketResultStatusReviewing = "reviewing"
+	TicketResultStatusBlocked   = "blocked"
+)
+
+type ResultApplication struct {
+	ExecutionID   string
+	ProjectID     string
+	TicketKey     string
+	TicketPath    string
+	TicketStatus  string
+	Execution     ResultApplicationExecution
+	Summary       string
+	Comment       ResultApplicationComment
+	Evidence      ResultApplicationEvidence
+	ChangedFiles  []ResultApplicationChangedFile
+	BlockedReason ResultApplicationBlockedReason
+}
+
+type ResultApplicationExecution struct {
+	Status        ExecutionStatus
+	FailureKind   ExecutionFailureKind
+	FailureReason string
+}
+
+type ResultApplicationComment struct {
+	Author string
+	Body   string
+}
+
+type ResultApplicationEvidence struct {
+	ValidationCommand string
+	ResultPath        string
+	LogPath           string
+	ValidationPath    string
+}
+
+type ResultApplicationChangedFile struct {
+	Path    string
+	Summary string
+}
+
+type ResultApplicationBlockedReason struct {
+	Kind           ExecutionFailureKind
+	Reason         string
+	LogPath        string
+	ResultPath     string
+	ValidationPath string
+}
+
+type ResultApplicationOptions struct {
+	Execution     ExecutionRecord
+	Result        ExecutionResult
+	ChangedFiles  []ResultApplicationChangedFile
+	CommentAuthor string
+}
+
+func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, error) {
+	if err := validateResultApplicationInputs(opts); err != nil {
+		return ResultApplication{}, err
+	}
+
+	application := ResultApplication{
+		ExecutionID:  opts.Execution.ID,
+		ProjectID:    opts.Execution.ProjectID,
+		TicketKey:    opts.Execution.TicketKey,
+		TicketPath:   opts.Execution.TicketPath,
+		TicketStatus: ticketStatusForResultApplication(opts.Execution, opts.Result),
+		Execution: ResultApplicationExecution{
+			Status:        opts.Execution.Status,
+			FailureKind:   ExecutionFailureKindFromReason(opts.Execution.FailureReason),
+			FailureReason: opts.Execution.FailureReason,
+		},
+		Summary:      opts.Result.Summary,
+		ChangedFiles: append([]ResultApplicationChangedFile(nil), opts.ChangedFiles...),
+		Evidence: ResultApplicationEvidence{
+			ValidationCommand: opts.Execution.Runtime.ValidationCommand,
+			ResultPath:        opts.Execution.Artifacts.ResultPath,
+			LogPath:           opts.Execution.Artifacts.LogPath,
+			ValidationPath:    opts.Execution.Artifacts.ValidationPath,
+		},
+	}
+
+	application.Comment = resultApplicationComment(opts.CommentAuthor, application)
+	application.BlockedReason = resultApplicationBlockedReason(application)
+
+	return application, nil
+}
+
+func validateResultApplicationInputs(opts ResultApplicationOptions) error {
+	if err := ValidateExecutionRecord(opts.Execution); err != nil {
+		return err
+	}
+
+	if err := ValidateExecutionResult(opts.Result); err != nil {
+		return err
+	}
+
+	if opts.Execution.ID != opts.Result.ExecutionID {
+		return fmt.Errorf("result application execution id mismatch: %s", opts.Result.ExecutionID)
+	}
+
+	if opts.Execution.TicketKey != opts.Result.TicketKey {
+		return fmt.Errorf("result application ticket key mismatch: %s", opts.Result.TicketKey)
+	}
+
+	return nil
+}
+
+func ticketStatusForResultApplication(record ExecutionRecord, result ExecutionResult) string {
+	if record.Status == ExecutionStatusSucceeded && result.Status == ExecutionResultStatusSucceeded {
+		return TicketResultStatusReviewing
+	}
+
+	return TicketResultStatusBlocked
+}
+
+func resultApplicationComment(author string, application ResultApplication) ResultApplicationComment {
+	if author == "" {
+		author = "chc"
+	}
+
+	return ResultApplicationComment{
+		Author: author,
+		Body:   fmt.Sprintf("Execution %s finished with status %s. %s", application.ExecutionID, application.Execution.Status, application.Summary),
+	}
+}
+
+func resultApplicationBlockedReason(application ResultApplication) ResultApplicationBlockedReason {
+	if application.TicketStatus != TicketResultStatusBlocked {
+		return ResultApplicationBlockedReason{}
+	}
+
+	return ResultApplicationBlockedReason{
+		Kind:           application.Execution.FailureKind,
+		Reason:         application.Execution.FailureReason,
+		LogPath:        application.Evidence.LogPath,
+		ResultPath:     application.Evidence.ResultPath,
+		ValidationPath: application.Evidence.ValidationPath,
+	}
+}
