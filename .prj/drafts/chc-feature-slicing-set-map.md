@@ -84,7 +84,7 @@ Use case:
 
 > A user creates and inspects durable project tickets that agents can later execute.
 
-Current state: active. Ticket creation, parser, and index repository are delivered prerequisites; ticket visibility and lifecycle commands are planned next.
+Current state: completed for the current MVP scope. Ticket creation, parsing, indexing, listing, showing, comments, status transitions, and lifecycle validation are delivered.
 
 Candidate slices:
 
@@ -104,7 +104,7 @@ Use case:
 
 > A user can edit ticket files directly without remembering manual synchronization commands.
 
-Current state: not delivered.
+Current state: completed for the current MVP scope. Ticket file discovery, index rebuild, index status, manual recovery commands, automatic refresh before ticket reads, and the reconciliation boundary for future execution are delivered.
 
 Candidate slices:
 
@@ -147,7 +147,7 @@ Use case:
 
 > A managed project has a Docker-based runtime contract for agent ticket execution.
 
-Current state: not delivered.
+Current state: planned next in the operational MVP path.
 
 Candidate slices:
 

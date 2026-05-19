@@ -1,0 +1,207 @@
+# Agent Runtime Boundary Slicing Tracker
+
+Status: active
+
+Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
+Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
+
+## Slicing Checklist
+
+- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Confirm `Automatic Reconciliation` is completed.
+- [x] Create slicing plan.
+- [x] Create slicing tracker.
+- [ ] Commit plan and tracker directly to `dev`.
+- [ ] Select the first pending slice for implementation.
+- [ ] Complete all planned slices.
+- [ ] Validate completed slicing with `make verify`.
+
+## Slice Status
+
+| Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Slice 1: Runtime Config Model | Planned | `feat/slice-1-runtime-config-model` | `feat(slice-1): runtime config model` | `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md` | Load runtime config from `.chc/config.yml`. |
+| Slice 2: Runtime Asset Template | Planned | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Provide default agent-runtime Dockerfile template. |
+| Slice 3: Runtime Init CLI | Planned | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Materialize runtime defaults for existing projects. |
+| Slice 4: Runtime Plan Contract | Planned | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Compute Docker boundary paths and mounts. |
+| Slice 5: Runtime Validate CLI | Planned | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
+
+## Slice 1: Runtime Config Model
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
+- Tracker: `.prj/trackers/slicing-agent-runtime-boundary-tracker.md`
+- Slicing: `Agent Runtime Boundary`
+- Slice: `Slice 1`
+- Expected branch: `feat/slice-1-runtime-config-model`
+- Expected PR title: `feat(slice-1): runtime config model`
+- Expected report: `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md`
+
+Candidate tasks:
+
+- [ ] Extend `WorkspaceConfig` with runtime fields.
+- [ ] Provide safe runtime config defaults.
+- [ ] Parse runtime config from `.chc/config.yml`.
+- [ ] Add focused config tests.
+- [ ] Document runtime config fields.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T1.1: pending
+- T1.2: pending
+- T1.3: pending
+- T1.4: pending
+- T1.5: pending
+- T1.6: pending
+- T1.7: pending
+
+## Slice 2: Runtime Asset Template
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
+- Tracker: `.prj/trackers/slicing-agent-runtime-boundary-tracker.md`
+- Slicing: `Agent Runtime Boundary`
+- Slice: `Slice 2`
+- Expected branch: `feat/slice-2-runtime-asset-template`
+- Expected PR title: `feat(slice-2): runtime asset template`
+- Expected report: `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md`
+
+Candidate tasks:
+
+- [ ] Add embedded agent-runtime Dockerfile template.
+- [ ] Add default runtime config fields to profiles.
+- [ ] Ensure init creates runtime template safely.
+- [ ] Add focused init tests.
+- [ ] Document runtime template ownership.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T2.1: pending
+- T2.2: pending
+- T2.3: pending
+- T2.4: pending
+- T2.5: pending
+- T2.6: pending
+- T2.7: pending
+
+## Slice 3: Runtime Init CLI
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
+- Tracker: `.prj/trackers/slicing-agent-runtime-boundary-tracker.md`
+- Slicing: `Agent Runtime Boundary`
+- Slice: `Slice 3`
+- Expected branch: `feat/slice-3-runtime-init-cli`
+- Expected PR title: `feat(slice-3): runtime init cli`
+- Expected report: `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md`
+
+Candidate tasks:
+
+- [ ] Add runtime command group.
+- [ ] Add `chc runtime init`.
+- [ ] Resolve project context through the existing resolver.
+- [ ] Support dry-run and skip-existing behavior.
+- [ ] Add focused CLI tests.
+- [ ] Document command behavior.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T3.1: pending
+- T3.2: pending
+- T3.3: pending
+- T3.4: pending
+- T3.5: pending
+- T3.6: pending
+- T3.7: pending
+- T3.8: pending
+
+## Slice 4: Runtime Plan Contract
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
+- Tracker: `.prj/trackers/slicing-agent-runtime-boundary-tracker.md`
+- Slicing: `Agent Runtime Boundary`
+- Slice: `Slice 4`
+- Expected branch: `feat/slice-4-runtime-plan-contract`
+- Expected PR title: `feat(slice-4): runtime plan contract`
+- Expected report: `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md`
+
+Candidate tasks:
+
+- [ ] Add side-effect-free runtime planner.
+- [ ] Resolve project and workspace runtime paths.
+- [ ] Define Docker mount and workdir contract.
+- [ ] Define result artifact path contract.
+- [ ] Add focused planner tests.
+- [ ] Document runtime path semantics.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T4.1: pending
+- T4.2: pending
+- T4.3: pending
+- T4.4: pending
+- T4.5: pending
+- T4.6: pending
+- T4.7: pending
+- T4.8: pending
+
+## Slice 5: Runtime Validate CLI
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
+- Tracker: `.prj/trackers/slicing-agent-runtime-boundary-tracker.md`
+- Slicing: `Agent Runtime Boundary`
+- Slice: `Slice 5`
+- Expected branch: `feat/slice-5-runtime-validate-cli`
+- Expected PR title: `feat(slice-5): runtime validate cli`
+- Expected report: `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md`
+
+Candidate tasks:
+
+- [ ] Add `chc runtime validate`.
+- [ ] Resolve project context and runtime config.
+- [ ] Verify required runtime files and directories.
+- [ ] Print computed Docker build/run plan.
+- [ ] Support dry-run validation without Docker execution.
+- [ ] Add focused CLI tests.
+- [ ] Document validation behavior.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T5.1: pending
+- T5.2: pending
+- T5.3: pending
+- T5.4: pending
+- T5.5: pending
+- T5.6: pending
+- T5.7: pending
+- T5.8: pending
+- T5.9: pending
+
+## Validation Record
+
+- Planning validation: documentation diff reviewed.
+
+## Notes
+
+- Slice numbers are local to this slicing and start at `Slice 1`.
+- Repository PR numbers are review records only and do not define slice numbers.
+- This slicing prepares a Docker runtime boundary but does not execute agents.
+- Each implementation slice must include a Markdown implementation report before PR creation.
