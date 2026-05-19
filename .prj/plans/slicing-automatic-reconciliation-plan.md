@@ -200,7 +200,7 @@ Delivery:
 
 ### Slice 5: Index Status CLI
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-5-index-status-cli`
 Expected PR title: `feat(slice-5): index status cli`
@@ -223,7 +223,7 @@ Expected outcome:
 
 Delivery:
 
-- Repository PR: pending review.
+- Repository PR: `#26`
 - PR title: `feat(slice-5): index status cli`
 
 ### Slice 6: Refresh Before Ticket Reads
