@@ -917,6 +917,18 @@ func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 }
 
 func printIndexStatusResult(stdout io.Writer, status chc.TicketIndexStatus) error {
+	if err := printIndexStatusCounts(stdout, status); err != nil {
+		return err
+	}
+
+	if err := printIndexStatusDetails(stdout, status); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func printIndexStatusCounts(stdout io.Writer, status chc.TicketIndexStatus) error {
 	if _, err := fmt.Fprintf(stdout, "missing: %d\n", len(status.Missing)); err != nil {
 		return fmt.Errorf("write index status result: %w", err)
 	}
@@ -933,6 +945,10 @@ func printIndexStatusResult(stdout io.Writer, status chc.TicketIndexStatus) erro
 		return fmt.Errorf("write index status result: %w", err)
 	}
 
+	return nil
+}
+
+func printIndexStatusDetails(stdout io.Writer, status chc.TicketIndexStatus) error {
 	for _, missing := range status.Missing {
 		if _, err := fmt.Fprintf(stdout, "missing_ticket: %s\n", missing.RelativePath); err != nil {
 			return fmt.Errorf("write index status result: %w", err)
