@@ -2,6 +2,7 @@ package chc
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -27,6 +28,18 @@ func TestNewResultApplicationMapsSucceededExecutionToReviewing(t *testing.T) {
 
 	if application.Comment.Author != "chc" {
 		t.Fatalf("Comment.Author = %q, want chc", application.Comment.Author)
+	}
+
+	for _, want := range []string{
+		"Execution exec-1 finished with status succeeded.",
+		"Summary: ready for review",
+		"Result: " + record.Artifacts.ResultPath,
+		"Log: " + record.Artifacts.LogPath,
+		"Validation: " + record.Artifacts.ValidationPath,
+	} {
+		if !strings.Contains(application.Comment.Body, want) {
+			t.Fatalf("Comment.Body does not contain %q:\n%s", want, application.Comment.Body)
+		}
 	}
 
 	if application.Evidence.ValidationCommand != "make verify" {
