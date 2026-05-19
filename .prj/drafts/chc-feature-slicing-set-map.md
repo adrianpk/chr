@@ -147,7 +147,7 @@ Use case:
 
 > A managed project has a Docker-based runtime contract for agent ticket execution.
 
-Current state: planned next in the operational MVP path.
+Current state: completed for the current MVP scope. Runtime config, runtime asset template, runtime init, runtime plan, and runtime validation are delivered.
 
 Candidate slices:
 
@@ -168,7 +168,7 @@ Use case:
 
 > A user starts one specific ticket and `chc` records what happened.
 
-Current state: not delivered.
+Current state: planned next in the operational MVP path.
 
 Candidate slices:
 
