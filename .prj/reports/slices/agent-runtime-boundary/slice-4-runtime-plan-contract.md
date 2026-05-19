@@ -5,7 +5,7 @@ Slicing: Agent Runtime Boundary
 Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
 Tracker: `.prj/trackers/slicing-agent-runtime-boundary-tracker.md`
 Branch: `feat/slice-4-runtime-plan-contract`
-PR: pending
+PR: `#32`
 
 ## Purpose
 
