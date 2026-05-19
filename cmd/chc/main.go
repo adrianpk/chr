@@ -807,19 +807,19 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 }
 
 func refreshProjectTicketIndex(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext) error {
-	result, err := chc.NewTicketIndexRebuilder(index).RebuildProjectTickets(ctx, chc.RebuildProjectTicketsOptions{
-		ProjectID:  projectContext.ProjectID,
-		ProjectDir: projectContext.ProjectDir,
-		IndexedAt:  time.Now().UTC(),
+	result, err := chc.NewTicketReconciler(index).ReconcileProjectTickets(ctx, chc.ReconcileProjectTicketsOptions{
+		ProjectID:    projectContext.ProjectID,
+		ProjectDir:   projectContext.ProjectDir,
+		ReconciledAt: time.Now().UTC(),
 	})
 	if err != nil {
 		return err
 	}
 
-	if len(result.ParseErrors) > 0 {
-		firstErr := result.ParseErrors[0]
+	if result.HasBlockers() {
+		firstBlocker, _ := result.FirstBlocker()
 
-		return fmt.Errorf("refresh ticket index: %d parse errors: %s %w", len(result.ParseErrors), firstErr.RelativePath, firstErr.Err)
+		return fmt.Errorf("refresh ticket index: %d blockers: %s %w", len(result.Blockers), firstBlocker.RelativePath, firstBlocker.Err)
 	}
 
 	return nil
