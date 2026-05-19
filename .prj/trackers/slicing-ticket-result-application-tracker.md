@@ -26,7 +26,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 3: Execution Comment Writer | Delivered | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Repository PR #43. |
 | Slice 4: Validation Evidence Writer | Delivered | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Repository PR #44. |
 | Slice 5: Changed Files Summary | Delivered | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Repository PR #45. |
-| Slice 6: Blocked Reason Writer | Reviewing | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Record blocked/failure reasons. |
+| Slice 6: Blocked Reason Writer | Reviewing | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Repository PR #46. |
 | Slice 7: Markdown Index Consistency | Planned | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Reconcile index after ticket writes. |
 | Slice 8: Result Apply CLI | Planned | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Expose result application command. |
 
