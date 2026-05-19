@@ -190,6 +190,7 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 			newTicketListCommand(stdout),
 			newTicketNewCommand(stdout),
 			newTicketShowCommand(stdout),
+			newTicketStartCommand(stdout),
 			newTicketStatusCommand(stdout),
 		},
 	}
@@ -564,12 +565,30 @@ func newTicketStatusCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newTicketStartCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "start",
+		Usage:  "Prepare one ticket execution",
+		Flags:  ticketStartFlags(),
+		Action: ticketStartAction(stdout),
+	}
+}
+
 func ticketProjectFlags() []cli.Flag {
 	return append(projectRegistryFlags(),
 		&cli.StringFlag{
 			Name:  "dir",
 			Usage: "project directory override",
 			Value: ".",
+		},
+	)
+}
+
+func ticketStartFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the execution preflight without creating an execution record",
 		},
 	)
 }
@@ -637,6 +656,24 @@ func ticketStatusAction(stdout io.Writer) cli.ActionFunc {
 	}
 }
 
+func ticketStartAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketStart(ctx, cmd, stdout)
+	}
+}
+
+type ticketStartPreflight struct {
+	Env     chc.UserEnvironment
+	Ticket  chc.IndexedTicket
+	Record  chc.ExecutionRecord
+	Runtime chc.RuntimeValidationResult
+}
+
+type ticketStartSelection struct {
+	ProjectContext commandProjectContext
+	Ticket         chc.IndexedTicket
+}
+
 func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 2 {
 		return fmt.Errorf("ticket status requires exactly one ticket key and one status argument")
@@ -689,6 +726,168 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	}
 
 	return nil
+}
+
+func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("ticket start requires exactly one ticket key argument")
+	}
+
+	preflight, err := buildTicketStartPreflight(ctx, cmd)
+	if err != nil {
+		return err
+	}
+
+	if !chc.RuntimeValidationPassed(preflight.Runtime.Checks) {
+		if err := printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run")); err != nil {
+			return err
+		}
+
+		return fmt.Errorf("runtime validation failed")
+	}
+
+	if !cmd.Bool("dry-run") {
+		if err := createPendingExecution(ctx, preflight.Env, preflight.Record); err != nil {
+			return err
+		}
+	}
+
+	return printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
+}
+
+func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketStartPreflight, error) {
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+
+	selection, err := selectTicketStartTicket(ctx, cmd, env)
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(selection.ProjectContext.ProjectDir)
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+
+	record := newPendingExecutionRecord(selection.ProjectContext.ProjectID, selection.Ticket)
+
+	result, err := chc.ValidateRuntime(chc.RuntimeValidationOptions{
+		ProjectDir: selection.ProjectContext.ProjectDir,
+		Config:     config.Runtime,
+		RunID:      record.ID,
+	})
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+
+	record = chc.ExecutionRecordFromRuntimePlan(record, result.Plan)
+	record.Artifacts.ValidationPath = filepath.Join(record.Artifacts.RunDir, "validation.log")
+
+	return ticketStartPreflight{
+		Env:     env,
+		Ticket:  selection.Ticket,
+		Record:  record,
+		Runtime: result,
+	}, nil
+}
+
+func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env chc.UserEnvironment) (ticketStartSelection, error) {
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return ticketStartSelection{}, err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return ticketStartSelection{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+		return ticketStartSelection{}, err
+	}
+
+	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().First())
+	if err != nil {
+		return ticketStartSelection{}, err
+	}
+
+	return ticketStartSelection{
+		ProjectContext: projectContext,
+		Ticket:         ticket,
+	}, nil
+}
+
+func newPendingExecutionRecord(projectID string, ticket chc.IndexedTicket) chc.ExecutionRecord {
+	now := time.Now().UTC()
+
+	return chc.ExecutionRecord{
+		ID:         executionID(projectID, ticket.Key, now),
+		ProjectID:  projectID,
+		TicketKey:  ticket.Key,
+		TicketPath: ticket.Path,
+		Status:     chc.ExecutionStatusPending,
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}
+}
+
+func createPendingExecution(ctx context.Context, env chc.UserEnvironment, record chc.ExecutionRecord) error {
+	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	if err := repository.CreateExecution(ctx, record); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func executionID(projectID, ticketKey string, createdAt time.Time) string {
+	sum := sha256.Sum256([]byte(projectID + "\x00" + ticketKey + "\x00" + createdAt.Format(time.RFC3339Nano)))
+
+	return "exec-" + hex.EncodeToString(sum[:8])
+}
+
+func printTicketStartResult(
+	stdout io.Writer,
+	ticket chc.IndexedTicket,
+	record chc.ExecutionRecord,
+	result chc.RuntimeValidationResult,
+	dryRun bool,
+) error {
+	lines := []string{
+		fmt.Sprintf("execution: %s", record.ID),
+		fmt.Sprintf("ticket: %s", ticket.Key),
+		fmt.Sprintf("ticket_path: %s", ticket.Path),
+		fmt.Sprintf("ticket_relative_path: %s", ticket.RelativePath),
+		fmt.Sprintf("status: %s", record.Status),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write ticket start result: %w", err)
+		}
+	}
+
+	return printRuntimeValidateResult(stdout, result, dryRun)
 }
 
 func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
