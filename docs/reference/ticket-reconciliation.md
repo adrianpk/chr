@@ -16,6 +16,7 @@ The core contract lives in `internal/chc`:
 ```go
 type TicketReconciler interface {
     ReconcileProjectTickets(ctx context.Context, opts ReconcileProjectTicketsOptions) (TicketReconciliationResult, error)
+    ReconcileProjectTicket(ctx context.Context, opts ReconcileProjectTicketOptions) (TicketReconciliationResult, error)
 }
 ```
 
@@ -33,11 +34,22 @@ type ReconcileProjectTicketsOptions struct {
     ProjectDir   string
     ReconciledAt time.Time
 }
+
+type ReconcileProjectTicketOptions struct {
+    ProjectID    string
+    ProjectDir   string
+    TicketPath   string
+    ReconciledAt time.Time
+}
 ```
 
 - `ProjectID` identifies the registered project in the user-level index.
 - `ProjectDir` points to the project root that owns `.chc/tickets`.
+- `TicketPath` points to one affected Markdown ticket file.
 - `ReconciledAt` records the refresh time used for indexed rows.
+
+Use `ReconcileProjectTickets` when a full project refresh is required. Use
+`ReconcileProjectTicket` after a result application mutates one known ticket.
 
 ## Result
 
@@ -53,6 +65,9 @@ reconciliation pass.
 
 `Blockers` contains conditions that should prevent ticket execution from
 continuing.
+
+For single-ticket reconciliation, parse errors are returned as blockers instead
+of hard errors. Storage failures remain hard errors.
 
 Use `HasBlockers` and `FirstBlocker` when callers only need execution gating:
 
@@ -90,3 +105,21 @@ blocker details to the user or notification channel.
 
 Manual `chc index rebuild` and `chc index status` remain maintenance and
 diagnostic commands. They are not the execution precondition.
+
+## Result Application Consistency
+
+Result application writers mutate canonical Markdown ticket files. After those
+writes complete, callers should reconcile the affected ticket before reading the
+derived SQLite index again:
+
+```go
+result, err := reconciler.ReconcileProjectTicket(ctx, chc.ReconcileProjectTicketOptions{
+    ProjectID:    application.ProjectID,
+    ProjectDir:   projectDir,
+    TicketPath:   application.TicketPath,
+    ReconciledAt: time.Now().UTC(),
+})
+```
+
+If `result.HasBlockers()` is true, the caller should surface the blocker and
+avoid treating the index as current for that ticket.

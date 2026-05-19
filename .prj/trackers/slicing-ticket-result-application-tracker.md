@@ -27,7 +27,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 4: Validation Evidence Writer | Delivered | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Repository PR #44. |
 | Slice 5: Changed Files Summary | Delivered | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Repository PR #45. |
 | Slice 6: Blocked Reason Writer | Delivered | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Repository PR #46. |
-| Slice 7: Markdown Index Consistency | Planned | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Reconcile index after ticket writes. |
+| Slice 7: Markdown Index Consistency | Reviewing | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Reconcile index after ticket writes. |
 | Slice 8: Result Apply CLI | Planned | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Expose result application command. |
 
 ## Slice 1: Result Application Model
@@ -230,20 +230,20 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Refresh the affected ticket after writes.
-- [ ] Ensure SQLite index reflects updated ticket status and metadata.
-- [ ] Surface reconciliation blockers.
-- [ ] Add focused consistency tests.
-- [ ] Add slice implementation report.
+- [x] Refresh the affected ticket after writes.
+- [x] Ensure SQLite index reflects updated ticket status and metadata.
+- [x] Surface reconciliation blockers.
+- [x] Add focused consistency tests.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
+- T7.1: `7c7a01a` `feat(result): refresh affected ticket index`
+- T7.2: `7c7a01a` `feat(result): refresh affected ticket index`
+- T7.3: `7c7a01a` `feat(result): refresh affected ticket index`
+- T7.4: `7c7a01a` `feat(result): refresh affected ticket index`
+- T7.5: `docs(result): document markdown index consistency`
 - T7.6: pending
 
 ## Slice 8: Result Apply CLI

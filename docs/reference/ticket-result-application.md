@@ -121,6 +121,16 @@ Applications that do not target `blocked` are treated as no-op and do not
 mutate the ticket. Existing blocker entries are preserved, new blocker entries
 are prepended, and `updated_at` is refreshed when a blocker entry is written.
 
+## Index Consistency
+
+Ticket Markdown remains canonical. After result application writers mutate a
+ticket, callers should reconcile the affected ticket through
+`TicketReconciler.ReconcileProjectTicket`.
+
+Affected-ticket reconciliation reparses the ticket and upserts the derived
+SQLite index row. Parse failures are surfaced as reconciliation blockers so the
+caller can avoid treating stale indexed state as current.
+
 ## Application Fields
 
 The application contract carries:
