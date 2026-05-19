@@ -1,6 +1,6 @@
 # Ticket Result Application Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-ticket-result-application-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -14,8 +14,8 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -28,7 +28,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 5: Changed Files Summary | Delivered | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Repository PR #45. |
 | Slice 6: Blocked Reason Writer | Delivered | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Repository PR #46. |
 | Slice 7: Markdown Index Consistency | Delivered | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Repository PR #47. |
-| Slice 8: Result Apply CLI | Reviewing | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Repository PR #48. |
+| Slice 8: Result Apply CLI | Delivered | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Repository PR #48. |
 
 ## Slice 1: Result Application Model
 
@@ -287,6 +287,7 @@ Task commits:
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
+- Completed slicing validation: `make verify` passed after Slice 8 merge.
 
 ## Notes
 

@@ -188,7 +188,7 @@ Use case:
 
 > After an execution attempt, `chc` updates durable project state with status, evidence, and comments.
 
-Current state: planned next in the operational MVP path.
+Current state: completed for the current MVP scope. Result application model, ticket state writing, comments, validation evidence, changed-file summaries, blocked reasons, affected-ticket index refresh, and `ticket apply-result` are delivered.
 
 Candidate slices:
 

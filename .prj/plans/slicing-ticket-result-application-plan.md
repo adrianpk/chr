@@ -1,6 +1,6 @@
 # Ticket Result Application Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -41,7 +41,7 @@ Already delivered:
 - durable execution records;
 - harness result capture and classified execution failures.
 
-Still missing:
+Delivered by this slicing:
 
 - applying execution result state to ticket Markdown;
 - writing execution comments to tickets;
@@ -91,7 +91,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Result Application Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-result-application-model`
 Expected PR title: `feat(slice-1): result application model`
@@ -116,7 +116,7 @@ Expected outcome:
 
 ### Slice 2: Ticket State Writer
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-ticket-state-writer`
 Expected PR title: `feat(slice-2): ticket state writer`
@@ -140,7 +140,7 @@ Expected outcome:
 
 ### Slice 3: Execution Comment Writer
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-execution-comment-writer`
 Expected PR title: `feat(slice-3): execution comment writer`
@@ -163,7 +163,7 @@ Expected outcome:
 
 ### Slice 4: Validation Evidence Writer
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-validation-evidence-writer`
 Expected PR title: `feat(slice-4): validation evidence writer`
@@ -186,7 +186,7 @@ Expected outcome:
 
 ### Slice 5: Changed Files Summary
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-changed-files-summary`
 Expected PR title: `feat(slice-5): changed files summary`
@@ -209,7 +209,7 @@ Expected outcome:
 
 ### Slice 6: Blocked Reason Writer
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-blocked-reason-writer`
 Expected PR title: `feat(slice-6): blocked reason writer`
@@ -232,7 +232,7 @@ Expected outcome:
 
 ### Slice 7: Markdown Index Consistency
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-markdown-index-consistency`
 Expected PR title: `feat(slice-7): markdown index consistency`
@@ -256,7 +256,7 @@ Expected outcome:
 
 ### Slice 8: Result Apply CLI
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-8-result-apply-cli`
 Expected PR title: `feat(slice-8): result apply cli`
@@ -284,9 +284,8 @@ Expected outcome:
 
 ## Validation
 
-Each implementation slice must run targeted tests and `make verify`.
-
-The completed slicing must run `make verify` after the final slice is merged.
+- Each implementation slice ran targeted tests and `make verify`.
+- The completed slicing ran `make verify` after the final slice was merged.
 
 ## Risks
 
