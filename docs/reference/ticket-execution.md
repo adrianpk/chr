@@ -51,6 +51,35 @@ Execution records copy runtime references from the computed runtime plan at the
 time of execution. This keeps later review tied to the runtime boundary that was
 used for that attempt, even if project config changes later.
 
+## Ticket Start Preflight
+
+`chc ticket start <ticket-key>` prepares one ticket execution without invoking
+an agent harness.
+
+The command resolves the project through the standard project resolver, refreshes
+the ticket index, selects the requested indexed ticket, loads workspace runtime
+configuration, and validates the runtime boundary. Runtime validation must pass
+before a durable execution record is created.
+
+On success, the command creates a `pending` execution record with:
+
+- the resolved project ID;
+- the selected ticket key and absolute ticket path;
+- runtime image, Dockerfile, container workdir, and validation command;
+- execution-scoped run, result, log, and validation artifact paths;
+- required lifecycle timestamps.
+
+The execution ID is used as the runtime run ID, so artifact paths are scoped
+under the configured runtime run directory.
+
+`--dry-run` prints the same preflight output and runtime validation checks but
+does not create an execution record. Ticket index reconciliation may still update
+the user-level index because ticket selection always uses the indexed ticket
+view.
+
+If runtime validation fails, the command prints the failed checks and exits with
+an error without creating an execution record.
+
 ## Persistence
 
 Execution records are stored in the user-level SQLite database alongside the
