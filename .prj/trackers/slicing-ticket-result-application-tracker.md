@@ -23,7 +23,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Result Application Model | Delivered | `feat/slice-1-result-application-model` | `feat(slice-1): result application model` | `.prj/reports/slices/ticket-result-application/slice-1-result-application-model.md` | Repository PR #41. |
 | Slice 2: Ticket State Writer | Delivered | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Repository PR #42. |
-| Slice 3: Execution Comment Writer | Planned | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Append execution summary comments. |
+| Slice 3: Execution Comment Writer | Reviewing | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Append execution summary comments. |
 | Slice 4: Validation Evidence Writer | Planned | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Record validation evidence. |
 | Slice 5: Changed Files Summary | Planned | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Record changed-file summaries. |
 | Slice 6: Blocked Reason Writer | Planned | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Record blocked/failure reasons. |
@@ -110,21 +110,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Write execution ID, status, summary, and failure reason comments.
-- [ ] Include artifact paths in the comment.
-- [ ] Preserve existing comments.
-- [ ] Add focused comment writer tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Write execution ID, status, summary, and failure reason comments.
+- [x] Include artifact paths in the comment.
+- [x] Preserve existing comments.
+- [x] Add focused comment writer tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
+- T3.1: `25511be` `feat(result): add execution comment writer`
+- T3.2: `25511be` `feat(result): add execution comment writer`
+- T3.3: `25511be` `feat(result): add execution comment writer`
+- T3.4: `b93c889` `test(result): cover execution comment writer`
+- T3.5: `fc39558` `docs(result): document execution comment writer`
+- T3.6: `docs(result): record execution comment validation`
 
 ## Slice 4: Validation Evidence Writer
 
