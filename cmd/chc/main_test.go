@@ -460,8 +460,8 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 		"ticket_path: " + filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
 		"status: pending",
 		"dry_run: true",
-		"run_artifact_dir: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "exec-"),
-		"result_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "exec-"),
+		"run_artifact_dir: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", "exec-"),
+		"result_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", "exec-"),
 		"check: ok dockerfile " + filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile") + " ok",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -520,7 +520,7 @@ func TestTicketStartCreatesPendingExecution(t *testing.T) {
 		t.Fatalf("ID = %q, want exec prefix", record.ID)
 	}
 
-	if record.Artifacts.RunDir != filepath.Join(projectDir, ".chc", "runtime", "runs", record.ID) {
+	if record.Artifacts.RunDir != filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", record.ID) {
 		t.Fatalf("Artifacts.RunDir = %q, want execution run dir", record.Artifacts.RunDir)
 	}
 

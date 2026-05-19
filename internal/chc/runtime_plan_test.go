@@ -109,6 +109,28 @@ func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 	}
 }
 
+func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
+	dir := t.TempDir()
+
+	plan, err := PlanRuntime(RuntimePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  "CHC-1",
+		RunID:      "exec-123",
+	})
+	if err != nil {
+		t.Fatalf("PlanRuntime returned error: %v", err)
+	}
+
+	wantRunDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-123")
+	if plan.RunArtifactDir != wantRunDir {
+		t.Fatalf("RunArtifactDir = %q, want %q", plan.RunArtifactDir, wantRunDir)
+	}
+
+	if plan.ResultPath != filepath.Join(wantRunDir, "result.json") {
+		t.Fatalf("ResultPath = %q, want ticket-scoped result path", plan.ResultPath)
+	}
+}
+
 func TestPlanRuntimeNormalizesRelativeContainerWorkdirMount(t *testing.T) {
 	dir := t.TempDir()
 
