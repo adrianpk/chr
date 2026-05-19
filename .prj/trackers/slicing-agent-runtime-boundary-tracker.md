@@ -22,7 +22,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Runtime Config Model | Delivered | `feat/slice-1-runtime-config-model` | `feat(slice-1): runtime config model` | `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md` | Repository PR #29. |
-| Slice 2: Runtime Asset Template | Planned | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Provide default agent-runtime Dockerfile template. |
+| Slice 2: Runtime Asset Template | Reviewing | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Provide default agent-runtime Dockerfile template. |
 | Slice 3: Runtime Init CLI | Planned | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Materialize runtime defaults for existing projects. |
 | Slice 4: Runtime Plan Contract | Planned | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Compute Docker boundary paths and mounts. |
 | Slice 5: Runtime Validate CLI | Planned | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
@@ -73,23 +73,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add embedded agent-runtime Dockerfile template.
-- [ ] Add default runtime config fields to profiles.
-- [ ] Ensure init creates runtime template safely.
-- [ ] Add focused init tests.
-- [ ] Document runtime template ownership.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add embedded agent-runtime Dockerfile template.
+- [x] Add default runtime config fields to profiles.
+- [x] Ensure init creates runtime template safely.
+- [x] Add focused init tests.
+- [x] Document runtime template ownership.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
+- T2.1: `a6bd87e` `feat(runtime): add agent runtime Dockerfile template`
+- T2.2: `af3466d` `feat(runtime): add default runtime profile config`
+- T2.3: `521e576` `test(runtime): cover runtime template init`
+- T2.4: `521e576` `test(runtime): cover runtime template init`
+- T2.5: `47f777e` `docs(runtime): document runtime template ownership`
+- T2.6: `64164ef` `docs(runtime): report runtime asset template slice`
+- T2.7: `docs(runtime): record runtime asset validation`
 
 ## Slice 3: Runtime Init CLI
 
@@ -200,6 +200,8 @@ Task commits:
 - Planning validation: documentation diff reviewed.
 - Slice 1 validation: `go test ./internal/chc` pass.
 - Slice 1 validation: `make verify` pass.
+- Slice 2 validation: `go test ./internal/chc` pass.
+- Slice 2 validation: `make verify` pass.
 
 ## Notes
 
