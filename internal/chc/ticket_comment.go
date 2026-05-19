@@ -93,23 +93,6 @@ func addTicketComment(content string, comment ticketComment) (string, error) {
 	return updatedContent[:insertAt] + renderedComment + "\n" + updatedContent[insertAt:], nil
 }
 
-func updateTicketUpdatedAt(content string, updatedAt time.Time) (string, error) {
-	lineStart := strings.Index(content, "updated_at:")
-	if lineStart < 0 {
-		return "", fmt.Errorf("ticket updated_at metadata is required")
-	}
-
-	lineEnd := strings.IndexByte(content[lineStart:], '\n')
-	if lineEnd < 0 {
-		return "", fmt.Errorf("ticket updated_at metadata line is incomplete")
-	}
-
-	lineEnd += lineStart
-	line := "updated_at: " + yamlTimestamp(updatedAt)
-
-	return content[:lineStart] + line + content[lineEnd:], nil
-}
-
 func renderTicketComment(comment ticketComment) string {
 	author := strings.TrimSpace(comment.Author)
 	if author == "" {
