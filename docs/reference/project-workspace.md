@@ -78,6 +78,8 @@ AGENTS.md
   reports/
   indexes/
   runtime/
+    agent/
+      Dockerfile
   notifications/
 ```
 
@@ -110,6 +112,15 @@ runtime:
   artifact_dir: .chc/runtime/runs
   validation_command: make verify
 ```
+
+## Runtime Template
+
+`chc init` creates `.chc/runtime/agent/Dockerfile` for new managed projects.
+This file is the project-local agent runtime template. It is owned by the
+managed project after initialization and may be edited to install project
+dependencies, agent tooling, or validation prerequisites.
+
+`chc init` does not overwrite an existing runtime Dockerfile.
 
 ## Go Package Boundary
 
