@@ -26,7 +26,7 @@ Specs:
 | Slice | Status | Expected Branch | Expected PR Title | Notes |
 | --- | --- | --- | --- | --- |
 | Slice 1: Ticket File Discovery | Delivered | `feat/slice-1-ticket-file-discovery` | `feat(slice-1): ticket file discovery` | Repository PR #22. |
-| Slice 2: Ticket Index Rebuild | Planned | `feat/slice-2-ticket-index-rebuild` | `feat(slice-2): ticket index rebuild` | Rebuild derived ticket index for one project. |
+| Slice 2: Ticket Index Rebuild | Reviewing | `feat/slice-2-ticket-index-rebuild` | `feat(slice-2): ticket index rebuild` | Rebuild derived ticket index for one project. |
 | Slice 3: Index Status | Planned | `feat/slice-3-index-status` | `feat(slice-3): index status` | Report stale, missing, orphaned, and invalid index state. |
 | Slice 4: Index Rebuild CLI | Planned | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Expose manual rebuild for recovery. |
 | Slice 5: Index Status CLI | Planned | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Expose index health inspection. |
@@ -73,19 +73,19 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add project ticket index rebuild service.
-- [ ] Replace one project's indexed ticket set from parsed Markdown.
-- [ ] Preserve parse errors in rebuild results.
-- [ ] Add focused rebuild tests.
-- [ ] Run `make verify`.
+- [x] Add project ticket index rebuild service.
+- [x] Replace one project's indexed ticket set from parsed Markdown.
+- [x] Preserve parse errors in rebuild results.
+- [x] Add focused rebuild tests.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
+- T2.1: `feat(ticket): add index rebuild service`
+- T2.2: `test(ticket): cover index rebuild`
+- T2.3: `docs(ticket): document index rebuild`
+- T2.4: `refactor(ticket): satisfy index rebuild lint`
+- T2.5: `docs(planning): record ticket index rebuild validation`
 
 ## Slice 3: Index Status
 
@@ -244,6 +244,8 @@ Task commits:
 - Slice 1 validation: `go test ./internal/chc` pass.
 - Slice 1 validation: `make verify` pass.
 - Slice 1 merged into `dev` as PR #22.
+- Slice 2 validation: initial `make verify` failed on lint whitespace.
+- Slice 2 validation: `make verify` pass after lint-focused refactor.
 
 ## Notes
 

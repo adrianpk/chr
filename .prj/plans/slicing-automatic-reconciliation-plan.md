@@ -117,7 +117,7 @@ Delivery:
 
 ### Slice 2: Ticket Index Rebuild
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-2-ticket-index-rebuild`
 Expected PR title: `feat(slice-2): ticket index rebuild`
