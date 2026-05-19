@@ -160,6 +160,33 @@ Task commits:
 - T4.5: `docs(ticket): document ticket status`
 - T4.6: `docs(planning): record ticket status validation`
 
+## Slice 5: Ticket Lifecycle Validation
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-ticket-foundation-plan.md`
+- Tracker: `.prj/trackers/slicing-ticket-foundation-tracker.md`
+- Slicing: `Ticket Foundation`
+- Slice: `Slice 5`
+- Expected branch: `feat/slice-5-ticket-lifecycle-validation`
+- Expected PR title: `feat(slice-5): ticket lifecycle validation`
+
+Candidate tasks:
+
+- [ ] Add reusable ticket metadata validation.
+- [ ] Apply validation from the ticket parser.
+- [ ] Add focused parser validation tests.
+- [ ] Document ticket lifecycle validation behavior.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T5.1: pending
+- T5.2: pending
+- T5.3: pending
+- T5.4: pending
+- T5.5: pending
+
 ## Notes
 
 - Slice numbers are local to this slicing and start at `Slice 1`.
