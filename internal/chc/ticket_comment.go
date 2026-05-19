@@ -75,12 +75,14 @@ func addTicketComment(content string, comment ticketComment) (string, error) {
 
 	renderedComment := renderTicketComment(comment)
 	commentsHeading := "# Comments\n"
+
 	commentsIndex := strings.Index(updatedContent, commentsHeading)
 	if commentsIndex < 0 {
 		return "", fmt.Errorf("ticket comments section is required")
 	}
 
 	insertAt := commentsIndex + len(commentsHeading)
+
 	nextHeadingIndex := strings.Index(updatedContent[insertAt:], "\n# ")
 	if nextHeadingIndex < 0 {
 		return updatedContent[:insertAt] + "\n" + renderedComment, nil

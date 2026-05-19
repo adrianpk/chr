@@ -253,39 +253,13 @@ func TestTicketShowRejectsMissingTicket(t *testing.T) {
 func TestTicketCommentAppendsComment(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md")
-
-	content, err := chc.NewTicketRenderer().RenderTicket(chc.Ticket{
-		Key:       "CHC-1",
-		Title:     "Do something",
-		Status:    "open",
-		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
-		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
-	})
-	if err != nil {
-		t.Fatalf("RenderTicket returned error: %v", err)
-	}
-
-	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
-		t.Fatalf("create ticket dir: %v", err)
-	}
-
-	if err := os.WriteFile(ticketPath, []byte(content), 0o644); err != nil {
-		t.Fatalf("write ticket: %v", err)
-	}
+	ticketPath := writeIndexedTicketFile(t, devRoot, projectDir)
 
 	addProject(t, devRoot, "example", projectDir)
-	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
-		Key:          "CHC-1",
-		Title:        "Do something",
-		Status:       "open",
-		RelativePath: filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
-		Path:         ticketPath,
-	})
 
 	var stdout bytes.Buffer
 
-	err = run(t.Context(), []string{
+	err := run(t.Context(), []string{
 		"ticket",
 		"comment",
 		"--dev-root",
@@ -319,6 +293,41 @@ func TestTicketCommentAppendsComment(t *testing.T) {
 			t.Fatalf("updated content does not contain %q:\n%s", want, string(updatedContent))
 		}
 	}
+}
+
+func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
+	t.Helper()
+
+	ticketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md")
+
+	content, err := chc.NewTicketRenderer().RenderTicket(chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
+		t.Fatalf("create ticket dir: %v", err)
+	}
+
+	if err := os.WriteFile(ticketPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write ticket: %v", err)
+	}
+
+	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
+		Key:          "CHC-1",
+		Title:        "Do something",
+		Status:       "open",
+		RelativePath: filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
+		Path:         ticketPath,
+	})
+
+	return ticketPath
 }
 
 func TestTicketCommentRejectsMissingTicket(t *testing.T) {
