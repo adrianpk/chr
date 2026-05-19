@@ -104,6 +104,124 @@ func TestTicketNewUsesActiveProject(t *testing.T) {
 	assertPathExists(t, filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Active-project-ticket.md"))
 }
 
+func TestRuntimeInitCreatesTemplateWithExplicitDir(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"runtime",
+		"init",
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("runtime init returned error: %v", err)
+	}
+
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"))
+	if !strings.Contains(stdout.String(), "create .chc/runtime/agent/Dockerfile") {
+		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
+	}
+}
+
+func TestRuntimeInitDryRunDoesNotCreateTemplate(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"runtime",
+		"init",
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("runtime init returned error: %v", err)
+	}
+
+	assertPathNotExists(t, filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"))
+	if !strings.Contains(stdout.String(), "create .chc/runtime/agent/Dockerfile") {
+		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
+	}
+}
+
+func TestRuntimeInitSkipsExistingTemplate(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	dockerfilePath := filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile")
+	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+		t.Fatalf("create runtime template directory: %v", err)
+	}
+
+	if err := os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644); err != nil {
+		t.Fatalf("write runtime template: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"runtime",
+		"init",
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("runtime init returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(dockerfilePath)
+	if err != nil {
+		t.Fatalf("read runtime template: %v", err)
+	}
+
+	if string(content) != "FROM custom\n" {
+		t.Fatalf("runtime template content = %q, want custom content unchanged", string(content))
+	}
+
+	if !strings.Contains(stdout.String(), "skip existing .chc/runtime/agent/Dockerfile") {
+		t.Fatalf("stdout = %q, want runtime Dockerfile skip", stdout.String())
+	}
+}
+
+func TestRuntimeInitUsesActiveProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	selectProject(t, devRoot, "example")
+
+	err := run(t.Context(), []string{
+		"runtime",
+		"init",
+		"--dev-root",
+		devRoot,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("runtime init returned error: %v", err)
+	}
+
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"))
+}
+
+func TestRuntimeInitFallsBackToCurrentDirectory(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	runInDirectory(t, projectDir, func() {
+		err := run(t.Context(), []string{
+			"runtime",
+			"init",
+			"--dev-root",
+			t.TempDir(),
+		}, &bytes.Buffer{}, &bytes.Buffer{})
+		if err != nil {
+			t.Fatalf("runtime init returned error: %v", err)
+		}
+	})
+
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"))
+}
+
 func TestTicketNewFallsBackToCurrentDirectory(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
@@ -1143,5 +1261,13 @@ func assertPathExists(t *testing.T, path string) {
 
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("stat path %s: %v", path, err)
+	}
+}
+
+func assertPathNotExists(t *testing.T, path string) {
+	t.Helper()
+
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("path %s exists or returned unexpected stat error: %v", path, err)
 	}
 }
