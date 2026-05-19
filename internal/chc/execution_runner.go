@@ -2,6 +2,7 @@ package chc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -21,7 +22,7 @@ func (e OSHarnessExecutor) Run(ctx context.Context, command HarnessCommand, stdo
 	cmd.Stderr = stderr
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("run harness command %s: %w", command.Program, err)
+		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("run harness command %s: %w", command.Program, err))
 	}
 
 	return nil
@@ -106,20 +107,29 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 
 func (r ExecutionRunner) runHarness(ctx context.Context, invocation HarnessInvocation, log io.Writer) error {
 	if err := r.Executor.Run(ctx, invocation.Build, log, log); err != nil {
-		return err
+		return harnessFailure(err)
 	}
 
 	if err := r.Executor.Run(ctx, invocation.Run, log, log); err != nil {
-		return err
+		return harnessFailure(err)
 	}
 
 	return nil
 }
 
+func harnessFailure(err error) error {
+	var failure ExecutionFailure
+	if errors.As(err, &failure) {
+		return err
+	}
+
+	return NewExecutionFailure(ExecutionFailureHarness, err)
+}
+
 func captureExecutionResult(record ExecutionRecord) error {
 	result, err := LoadExecutionResult(record.Artifacts.ResultPath)
 	if err != nil {
-		return err
+		return NewExecutionFailure(ExecutionFailureResultCapture, err)
 	}
 
 	return validateExecutionResultForRecord(result, record)
@@ -127,15 +137,21 @@ func captureExecutionResult(record ExecutionRecord) error {
 
 func validateExecutionResultForRecord(result ExecutionResult, record ExecutionRecord) error {
 	if result.ExecutionID != record.ID {
-		return fmt.Errorf("execution result id mismatch: %s", result.ExecutionID)
+		return NewExecutionFailure(
+			ExecutionFailureResultCapture,
+			fmt.Errorf("execution result id mismatch: %s", result.ExecutionID),
+		)
 	}
 
 	if result.TicketKey != record.TicketKey {
-		return fmt.Errorf("execution result ticket key mismatch: %s", result.TicketKey)
+		return NewExecutionFailure(
+			ExecutionFailureResultCapture,
+			fmt.Errorf("execution result ticket key mismatch: %s", result.TicketKey),
+		)
 	}
 
 	if result.Status == ExecutionResultStatusFailed {
-		return fmt.Errorf("execution result failed: %s", result.Summary)
+		return NewExecutionFailure(ExecutionFailureValidation, fmt.Errorf("execution result failed: %s", result.Summary))
 	}
 
 	return nil

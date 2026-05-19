@@ -739,15 +739,21 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 
 	preflight, err := buildTicketStartPreflight(ctx, cmd)
 	if err != nil {
-		return err
+		return chc.NewExecutionFailure(chc.ExecutionFailurePreflight, err)
 	}
 
 	if !chc.RuntimeValidationPassed(preflight.Runtime.Checks) {
+		preflight.Record.Status = chc.ExecutionStatusBlocked
+		preflight.Record.FailureReason = chc.NewExecutionFailure(
+			chc.ExecutionFailureRuntime,
+			fmt.Errorf("runtime validation failed"),
+		).Error()
+
 		if err := printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run")); err != nil {
 			return err
 		}
 
-		return fmt.Errorf("runtime validation failed")
+		return chc.NewExecutionFailure(chc.ExecutionFailureRuntime, fmt.Errorf("runtime validation failed"))
 	}
 
 	if !cmd.Bool("dry-run") {
@@ -931,7 +937,53 @@ func printTicketStartResult(
 		}
 	}
 
+	if err := printTicketStartFailure(stdout, record); err != nil {
+		return err
+	}
+
 	return printRuntimeValidateResult(stdout, result, dryRun)
+}
+
+func printTicketStartFailure(stdout io.Writer, record chc.ExecutionRecord) error {
+	if record.FailureReason == "" {
+		return nil
+	}
+
+	kind := chc.ExecutionFailureKindFromReason(record.FailureReason)
+	if kind != "" {
+		if _, err := fmt.Fprintf(stdout, "failure_kind: %s\n", kind); err != nil {
+			return fmt.Errorf("write ticket start failure kind: %w", err)
+		}
+	}
+
+	if _, err := fmt.Fprintf(stdout, "failure_reason: %s\n", record.FailureReason); err != nil {
+		return fmt.Errorf("write ticket start failure reason: %w", err)
+	}
+
+	return printTicketStartDiagnostics(stdout, record)
+}
+
+func printTicketStartDiagnostics(stdout io.Writer, record chc.ExecutionRecord) error {
+	diagnostics := []struct {
+		name string
+		path string
+	}{
+		{name: "diagnostic_log_path", path: record.Artifacts.LogPath},
+		{name: "diagnostic_result_path", path: record.Artifacts.ResultPath},
+		{name: "diagnostic_validation_path", path: record.Artifacts.ValidationPath},
+	}
+
+	for _, diagnostic := range diagnostics {
+		if diagnostic.path == "" {
+			continue
+		}
+
+		if _, err := fmt.Fprintf(stdout, "%s: %s\n", diagnostic.name, diagnostic.path); err != nil {
+			return fmt.Errorf("write ticket start diagnostic path: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
