@@ -131,6 +131,26 @@ Affected-ticket reconciliation reparses the ticket and upserts the derived
 SQLite index row. Parse failures are surfaced as reconciliation blockers so the
 caller can avoid treating stale indexed state as current.
 
+## Apply Result CLI
+
+`chc ticket apply-result <execution-id>` applies one stored execution result to
+its ticket.
+
+The command:
+
+- resolves the target project;
+- loads the execution record from the user-level SQLite database;
+- loads the execution result envelope from the execution artifact path;
+- builds a `ResultApplication`;
+- writes ticket status, execution comment, validation evidence, changed files,
+  and blocked reason content;
+- reconciles the affected ticket into the derived SQLite index;
+- writes a `result-application.md` report artifact in the execution run
+  directory.
+
+Use `--dry-run` to print the planned application without mutating ticket
+Markdown, refreshing the index, or writing the report artifact.
+
 ## Application Fields
 
 The application contract carries:

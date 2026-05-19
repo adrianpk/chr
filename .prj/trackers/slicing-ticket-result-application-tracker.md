@@ -28,7 +28,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 5: Changed Files Summary | Delivered | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Repository PR #45. |
 | Slice 6: Blocked Reason Writer | Delivered | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Repository PR #46. |
 | Slice 7: Markdown Index Consistency | Delivered | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Repository PR #47. |
-| Slice 8: Result Apply CLI | Planned | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Expose result application command. |
+| Slice 8: Result Apply CLI | Reviewing | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Expose result application command. |
 
 ## Slice 1: Result Application Model
 
@@ -260,28 +260,28 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc ticket apply-result <execution-id>`.
-- [ ] Resolve project context.
-- [ ] Load one execution record.
-- [ ] Apply ticket status, comments, evidence, and diagnostics.
-- [ ] Write an application report artifact.
-- [ ] Support dry-run output.
-- [ ] Add focused CLI tests.
-- [ ] Document command behavior.
-- [ ] Add slice implementation report.
+- [x] Add `chc ticket apply-result <execution-id>`.
+- [x] Resolve project context.
+- [x] Load one execution record.
+- [x] Apply ticket status, comments, evidence, and diagnostics.
+- [x] Write an application report artifact.
+- [x] Support dry-run output.
+- [x] Add focused CLI tests.
+- [x] Document command behavior.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T8.1: pending
-- T8.2: pending
-- T8.3: pending
-- T8.4: pending
-- T8.5: pending
-- T8.6: pending
-- T8.7: pending
-- T8.8: pending
-- T8.9: pending
+- T8.1: `c94f45d` `feat(result): add result apply cli`
+- T8.2: `c94f45d` `feat(result): add result apply cli`
+- T8.3: `c94f45d` `feat(result): add result apply cli`
+- T8.4: `c94f45d` `feat(result): add result apply cli`
+- T8.5: `c94f45d` `feat(result): add result apply cli`
+- T8.6: `c94f45d` `feat(result): add result apply cli`
+- T8.7: `89edb59` `test(result): cover result apply cli`
+- T8.8: `docs(result): document result apply cli`
+- T8.9: `docs(result): document result apply cli`
 - T8.10: pending
 
 ## Validation Record
