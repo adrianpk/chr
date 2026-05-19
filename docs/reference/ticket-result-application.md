@@ -45,6 +45,27 @@ The writer maps the already-computed application status directly:
 Comment, validation evidence, changed-file summary, and blocked reason writing
 are handled by later slices.
 
+## Execution Comment Writer
+
+The execution comment writer appends one comment to the ticket `# Comments`
+section using the result application comment payload.
+
+The generated comment includes:
+
+- execution ID;
+- execution status;
+- result summary;
+- result artifact path;
+- runtime log artifact path;
+- validation artifact path;
+- failure reason when present.
+
+The writer preserves existing comments and ticket body sections. It also updates
+`updated_at` through the existing ticket comment writer.
+
+Validation evidence, changed-file summaries, and blocked reason section content
+are still handled by later slices.
+
 ## Application Fields
 
 The application contract carries:
