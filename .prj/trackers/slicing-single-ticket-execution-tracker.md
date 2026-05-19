@@ -25,7 +25,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 2: Execution Repository | Delivered | `feat/slice-2-execution-repository` | `feat(slice-2): execution repository` | `.prj/reports/slices/single-ticket-execution/slice-2-execution-repository.md` | Repository PR #35. |
 | Slice 3: Ticket Start Preflight | Delivered | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Repository PR #36. |
 | Slice 4: Harness Invocation Contract | Delivered | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Repository PR #37. |
-| Slice 5: Agent Harness Invocation | Planned | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Run one bounded harness attempt. |
+| Slice 5: Agent Harness Invocation | Reviewing | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Run one bounded harness attempt. |
 | Slice 6: Execution Result Capture | Planned | `feat/slice-6-execution-result-capture` | `feat(slice-6): execution result capture` | `.prj/reports/slices/single-ticket-execution/slice-6-execution-result-capture.md` | Capture structured result artifacts. |
 | Slice 7: Execution Failure Handling | Planned | `feat/slice-7-execution-failure-handling` | `feat(slice-7): execution failure handling` | `.prj/reports/slices/single-ticket-execution/slice-7-execution-failure-handling.md` | Record clear execution failure states. |
 
@@ -181,27 +181,27 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add execution runner service.
-- [ ] Invoke harness command from runtime plan.
-- [ ] Capture stdout and stderr to execution artifacts.
-- [ ] Update execution status on start, success, and failure.
-- [ ] Preserve dry-run behavior.
-- [ ] Add focused runner tests with a fake executor.
-- [ ] Document invocation limits.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add execution runner service.
+- [x] Invoke harness command from runtime plan.
+- [x] Capture stdout and stderr to execution artifacts.
+- [x] Update execution status on start, success, and failure.
+- [x] Preserve dry-run behavior.
+- [x] Add focused runner tests with a fake executor.
+- [x] Document invocation limits.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
-- T5.8: pending
-- T5.9: pending
+- T5.1: `594a7f9` `feat(execution): run ticket harness`
+- T5.2: `594a7f9` `feat(execution): run ticket harness`
+- T5.3: `594a7f9` `feat(execution): run ticket harness`
+- T5.4: `594a7f9` `feat(execution): run ticket harness`
+- T5.5: `594a7f9` `feat(execution): run ticket harness`
+- T5.6: `b640680` `test(execution): cover harness runner`
+- T5.7: `8defcdf` `docs(execution): document harness invocation run`
+- T5.8: `8defcdf` `docs(execution): document harness invocation run`
+- T5.9: `docs(execution): record harness invocation run validation`
 
 ## Slice 6: Execution Result Capture
 
