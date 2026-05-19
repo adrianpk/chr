@@ -120,6 +120,7 @@ func TestRuntimeInitCreatesTemplateWithExplicitDir(t *testing.T) {
 	}
 
 	assertPathExists(t, filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"))
+
 	if !strings.Contains(stdout.String(), "create .chc/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
 	}
@@ -142,6 +143,7 @@ func TestRuntimeInitDryRunDoesNotCreateTemplate(t *testing.T) {
 	}
 
 	assertPathNotExists(t, filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"))
+
 	if !strings.Contains(stdout.String(), "create .chc/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
 	}
@@ -149,6 +151,7 @@ func TestRuntimeInitDryRunDoesNotCreateTemplate(t *testing.T) {
 
 func TestRuntimeInitSkipsExistingTemplate(t *testing.T) {
 	projectDir := newTestWorkspace(t)
+
 	dockerfilePath := filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile")
 	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
 		t.Fatalf("create runtime template directory: %v", err)

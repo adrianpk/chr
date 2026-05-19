@@ -122,6 +122,25 @@ dependencies, agent tooling, or validation prerequisites.
 
 `chc init` does not overwrite an existing runtime Dockerfile.
 
+Existing managed projects can install missing runtime defaults without running
+full workspace initialization:
+
+```sh
+chc runtime init
+```
+
+Preview runtime initialization without writing files:
+
+```sh
+chc runtime init --dry-run
+```
+
+Initialize runtime defaults for another project directory:
+
+```sh
+chc runtime init --dir /path/to/project
+```
+
 ## Go Package Boundary
 
 Project workspace behavior lives in the core `internal/chc` package.

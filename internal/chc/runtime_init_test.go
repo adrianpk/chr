@@ -11,6 +11,7 @@ import (
 func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
+
 	runtimeAssets := newTestRuntimeAssets()
 
 	result, err := runtimeAssets.Init(context.Background(), RuntimeInitOptions{ProjectDir: dir})
@@ -23,6 +24,7 @@ func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 	}
 
 	assertFile(t, dir, ".chc/runtime/agent/Dockerfile")
+
 	if !contains(result.Created, ".chc/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
@@ -31,6 +33,7 @@ func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
+
 	runtimeAssets := newTestRuntimeAssets()
 
 	result, err := runtimeAssets.Init(context.Background(), RuntimeInitOptions{
@@ -42,6 +45,7 @@ func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
 	}
 
 	assertNotExists(t, dir, ".chc/runtime/agent/Dockerfile")
+
 	if !contains(result.Created, ".chc/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
@@ -50,6 +54,7 @@ func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
 func TestRuntimeInitSkipsExistingRuntimeTemplate(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
+
 	dockerfilePath := filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile")
 	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
 		t.Fatalf("create runtime template directory: %v", err)
