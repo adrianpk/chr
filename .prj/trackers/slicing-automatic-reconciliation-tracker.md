@@ -1,0 +1,250 @@
+# Automatic Reconciliation Slicing Tracker
+
+Status: active
+
+Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
+Specs:
+
+- `.prj/specs/specs/user-daemon-and-global-index.md`
+- `.prj/specs/specs/user-daemon-and-global-index-model.md`
+
+## Slicing Checklist
+
+- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Confirm `Ticket Foundation` is completed.
+- [x] Create slicing plan.
+- [x] Create slicing tracker.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
+- [ ] Complete all planned slices.
+- [ ] Validate completed slicing with `make verify`.
+
+## Slice Status
+
+| Slice | Status | Expected Branch | Expected PR Title | Notes |
+| --- | --- | --- | --- | --- |
+| Slice 1: Ticket File Discovery | Planned | `feat/slice-1-ticket-file-discovery` | `feat(slice-1): ticket file discovery` | Discover canonical Markdown ticket files. |
+| Slice 2: Ticket Index Rebuild | Planned | `feat/slice-2-ticket-index-rebuild` | `feat(slice-2): ticket index rebuild` | Rebuild derived ticket index for one project. |
+| Slice 3: Index Status | Planned | `feat/slice-3-index-status` | `feat(slice-3): index status` | Report stale, missing, orphaned, and invalid index state. |
+| Slice 4: Index Rebuild CLI | Planned | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Expose manual rebuild for recovery. |
+| Slice 5: Index Status CLI | Planned | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Expose index health inspection. |
+| Slice 6: Refresh Before Ticket Reads | Planned | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Make ticket read commands refresh automatically. |
+| Slice 7: Reconciliation Boundary for Execution | Planned | `feat/slice-7-reconciliation-execution-boundary` | `feat(slice-7): reconciliation execution boundary` | Prepare future execution and loop use. |
+
+## Slice 1: Ticket File Discovery
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+- Tracker: `.prj/trackers/slicing-automatic-reconciliation-tracker.md`
+- Slicing: `Automatic Reconciliation`
+- Slice: `Slice 1`
+- Expected branch: `feat/slice-1-ticket-file-discovery`
+- Expected PR title: `feat(slice-1): ticket file discovery`
+
+Candidate tasks:
+
+- [ ] Add project ticket discovery core primitive.
+- [ ] Return stable relative and absolute ticket paths.
+- [ ] Add focused discovery tests.
+- [ ] Document ticket discovery behavior.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T1.1: pending
+- T1.2: pending
+- T1.3: pending
+- T1.4: pending
+- T1.5: pending
+
+## Slice 2: Ticket Index Rebuild
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+- Tracker: `.prj/trackers/slicing-automatic-reconciliation-tracker.md`
+- Slicing: `Automatic Reconciliation`
+- Slice: `Slice 2`
+- Expected branch: `feat/slice-2-ticket-index-rebuild`
+- Expected PR title: `feat(slice-2): ticket index rebuild`
+
+Candidate tasks:
+
+- [ ] Add project ticket index rebuild service.
+- [ ] Replace one project's indexed ticket set from parsed Markdown.
+- [ ] Preserve parse errors in rebuild results.
+- [ ] Add focused rebuild tests.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T2.1: pending
+- T2.2: pending
+- T2.3: pending
+- T2.4: pending
+- T2.5: pending
+
+## Slice 3: Index Status
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+- Tracker: `.prj/trackers/slicing-automatic-reconciliation-tracker.md`
+- Slicing: `Automatic Reconciliation`
+- Slice: `Slice 3`
+- Expected branch: `feat/slice-3-index-status`
+- Expected PR title: `feat(slice-3): index status`
+
+Candidate tasks:
+
+- [ ] Add index status core model.
+- [ ] Detect missing index rows.
+- [ ] Detect stale index rows.
+- [ ] Detect orphaned index rows.
+- [ ] Report parse errors separately.
+- [ ] Add focused status tests.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T3.1: pending
+- T3.2: pending
+- T3.3: pending
+- T3.4: pending
+- T3.5: pending
+- T3.6: pending
+- T3.7: pending
+
+## Slice 4: Index Rebuild CLI
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+- Tracker: `.prj/trackers/slicing-automatic-reconciliation-tracker.md`
+- Slicing: `Automatic Reconciliation`
+- Slice: `Slice 4`
+- Expected branch: `feat/slice-4-index-rebuild-cli`
+- Expected PR title: `feat(slice-4): index rebuild cli`
+
+Candidate tasks:
+
+- [ ] Add index command group.
+- [ ] Add `chc index rebuild`.
+- [ ] Resolve project context through the existing resolver.
+- [ ] Print rebuild results.
+- [ ] Add focused CLI tests.
+- [ ] Document command behavior.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T4.1: pending
+- T4.2: pending
+- T4.3: pending
+- T4.4: pending
+- T4.5: pending
+- T4.6: pending
+- T4.7: pending
+
+## Slice 5: Index Status CLI
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+- Tracker: `.prj/trackers/slicing-automatic-reconciliation-tracker.md`
+- Slicing: `Automatic Reconciliation`
+- Slice: `Slice 5`
+- Expected branch: `feat/slice-5-index-status-cli`
+- Expected PR title: `feat(slice-5): index status cli`
+
+Candidate tasks:
+
+- [ ] Add `chc index status`.
+- [ ] Resolve project context through the existing resolver.
+- [ ] Print index health summary.
+- [ ] Return non-zero for stale or invalid state.
+- [ ] Add focused CLI tests.
+- [ ] Document command behavior.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T5.1: pending
+- T5.2: pending
+- T5.3: pending
+- T5.4: pending
+- T5.5: pending
+- T5.6: pending
+- T5.7: pending
+
+## Slice 6: Refresh Before Ticket Reads
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+- Tracker: `.prj/trackers/slicing-automatic-reconciliation-tracker.md`
+- Slicing: `Automatic Reconciliation`
+- Slice: `Slice 6`
+- Expected branch: `feat/slice-6-refresh-before-ticket-reads`
+- Expected PR title: `feat(slice-6): refresh before ticket reads`
+
+Candidate tasks:
+
+- [ ] Refresh before `ticket list`.
+- [ ] Refresh before `ticket show`.
+- [ ] Refresh before `ticket comment`.
+- [ ] Refresh before `ticket status`.
+- [ ] Add focused CLI tests for direct Markdown edits.
+- [ ] Document automatic refresh behavior.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T6.1: pending
+- T6.2: pending
+- T6.3: pending
+- T6.4: pending
+- T6.5: pending
+- T6.6: pending
+- T6.7: pending
+
+## Slice 7: Reconciliation Boundary for Execution
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
+- Tracker: `.prj/trackers/slicing-automatic-reconciliation-tracker.md`
+- Slicing: `Automatic Reconciliation`
+- Slice: `Slice 7`
+- Expected branch: `feat/slice-7-reconciliation-execution-boundary`
+- Expected PR title: `feat(slice-7): reconciliation execution boundary`
+
+Candidate tasks:
+
+- [ ] Add reusable reconciliation service boundary.
+- [ ] Define result semantics for future execution blockers.
+- [ ] Add tests for clean refresh and parse-error outcomes.
+- [ ] Document execution precondition.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T7.1: pending
+- T7.2: pending
+- T7.3: pending
+- T7.4: pending
+- T7.5: pending
+
+## Validation Record
+
+- Planning validation: documentation diff reviewed.
+
+## Notes
+
+- Slice numbers are local to this slicing and start at `Slice 1`.
+- Repository PR numbers are review records only and do not define slice numbers.
+- Manual rebuild and status commands are recovery tools, not normal workflow requirements.
+- Automatic refresh before ticket reads is required before ticket execution or loops rely on the index.
