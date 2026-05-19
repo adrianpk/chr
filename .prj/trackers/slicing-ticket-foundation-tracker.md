@@ -27,7 +27,7 @@ Specs:
 | Slice 1: Ticket List | Delivered | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | Repository PR #17. |
 | Slice 2: Ticket Show | Delivered | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Repository PR #18. |
 | Slice 3: Ticket Comments | Delivered | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Repository PR #19. |
-| Slice 4: Ticket Status Transitions | Planned | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Update ticket status through controlled commands. |
+| Slice 4: Ticket Status Transitions | Reviewing | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Update ticket status through controlled commands. |
 | Slice 5: Ticket Lifecycle Validation | Planned | `feat/slice-5-ticket-lifecycle-validation` | `feat(slice-5): ticket lifecycle validation` | Validate metadata and lifecycle consistency. |
 
 ## Slice 1: Ticket List
@@ -126,6 +126,38 @@ Task commits:
 - Slice 3 validation: `go test ./internal/chc` pass.
 - Slice 3 validation: `make verify` pass.
 - Slice 3 merged into `dev` as PR #19.
+- Slice 4 validation: `go test ./cmd/chc` pass.
+- Slice 4 validation: `go test ./internal/chc` pass.
+- Slice 4 validation: `make verify` pass.
+
+## Slice 4: Ticket Status Transitions
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-ticket-foundation-plan.md`
+- Tracker: `.prj/trackers/slicing-ticket-foundation-tracker.md`
+- Slicing: `Ticket Foundation`
+- Slice: `Slice 4`
+- Expected branch: `feat/slice-4-ticket-status-transitions`
+- Expected PR title: `feat(slice-4): ticket status transitions`
+
+Candidate tasks:
+
+- [x] Share ticket metadata update helpers.
+- [x] Add ticket status writer with allowed values.
+- [x] Add `chc ticket status`.
+- [x] Add focused CLI tests.
+- [x] Document ticket status behavior.
+- [x] Run `make verify`.
+
+Task commits:
+
+- T4.1: `refactor(ticket): share metadata updates`
+- T4.2: `feat(ticket): update ticket status`
+- T4.3: `feat(cli): add ticket status command`
+- T4.4: `test(cli): cover ticket status command`
+- T4.5: `docs(ticket): document ticket status`
+- T4.6: `docs(planning): record ticket status validation`
 
 ## Notes
 

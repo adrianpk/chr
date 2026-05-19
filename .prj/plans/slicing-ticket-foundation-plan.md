@@ -170,7 +170,7 @@ Delivery:
 
 ### Slice 4: Ticket Status Transitions
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-4-ticket-status-transitions`
 Expected PR title: `feat(slice-4): ticket status transitions`
