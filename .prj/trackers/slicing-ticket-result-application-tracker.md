@@ -26,7 +26,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 3: Execution Comment Writer | Delivered | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Repository PR #43. |
 | Slice 4: Validation Evidence Writer | Delivered | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Repository PR #44. |
 | Slice 5: Changed Files Summary | Delivered | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Repository PR #45. |
-| Slice 6: Blocked Reason Writer | Planned | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Record blocked/failure reasons. |
+| Slice 6: Blocked Reason Writer | Reviewing | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Record blocked/failure reasons. |
 | Slice 7: Markdown Index Consistency | Planned | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Reconcile index after ticket writes. |
 | Slice 8: Result Apply CLI | Planned | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Expose result application command. |
 
@@ -200,20 +200,20 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Write blocked reason from execution failure classification.
-- [ ] Include diagnostic artifact paths.
-- [ ] Keep failure details concise.
-- [ ] Add focused blocked reason tests.
-- [ ] Add slice implementation report.
+- [x] Write blocked reason from execution failure classification.
+- [x] Include diagnostic artifact paths.
+- [x] Keep failure details concise.
+- [x] Add focused blocked reason tests.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
+- T6.1: `4814729` `feat(result): add blocked reason writer`
+- T6.2: `4814729` `feat(result): add blocked reason writer`
+- T6.3: `4814729` `feat(result): add blocked reason writer`
+- T6.4: `3081406` `test(result): cover blocked reason writer`
+- T6.5: `docs(result): document blocked reason writer`
 - T6.6: pending
 
 ## Slice 7: Markdown Index Consistency

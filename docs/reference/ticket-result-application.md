@@ -101,7 +101,25 @@ The writer preserves existing comments and ticket body sections. It also updates
 `updated_at` through the existing ticket comment writer when a summary is
 written.
 
-Blocked reason section content is handled by a later slice.
+Blocked reason section content is handled by another writer.
+
+## Blocked Reason Writer
+
+The blocked reason writer prepends one entry to the ticket `# Blocker` section
+when a result application targets the `blocked` ticket status.
+
+The entry includes:
+
+- execution ID;
+- failure kind;
+- failure reason;
+- result artifact path;
+- runtime log artifact path;
+- validation artifact path.
+
+Applications that do not target `blocked` are treated as no-op and do not
+mutate the ticket. Existing blocker entries are preserved, new blocker entries
+are prepended, and `updated_at` is refreshed when a blocker entry is written.
 
 ## Application Fields
 
