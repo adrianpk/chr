@@ -88,6 +88,10 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		return r.failExecution(ctx, record, err)
 	}
 
+	if err := captureExecutionResult(record); err != nil {
+		return r.failExecution(ctx, record, err)
+	}
+
 	finishedAt := r.now()
 	record.Status = ExecutionStatusSucceeded
 	record.FinishedAt = &finishedAt
@@ -107,6 +111,31 @@ func (r ExecutionRunner) runHarness(ctx context.Context, invocation HarnessInvoc
 
 	if err := r.Executor.Run(ctx, invocation.Run, log, log); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func captureExecutionResult(record ExecutionRecord) error {
+	result, err := LoadExecutionResult(record.Artifacts.ResultPath)
+	if err != nil {
+		return err
+	}
+
+	return validateExecutionResultForRecord(result, record)
+}
+
+func validateExecutionResultForRecord(result ExecutionResult, record ExecutionRecord) error {
+	if result.ExecutionID != record.ID {
+		return fmt.Errorf("execution result id mismatch: %s", result.ExecutionID)
+	}
+
+	if result.TicketKey != record.TicketKey {
+		return fmt.Errorf("execution result ticket key mismatch: %s", result.TicketKey)
+	}
+
+	if result.Status == ExecutionResultStatusFailed {
+		return fmt.Errorf("execution result failed: %s", result.Summary)
 	}
 
 	return nil
