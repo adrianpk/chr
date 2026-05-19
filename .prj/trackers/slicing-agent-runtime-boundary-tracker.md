@@ -21,7 +21,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Runtime Config Model | Planned | `feat/slice-1-runtime-config-model` | `feat(slice-1): runtime config model` | `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md` | Load runtime config from `.chc/config.yml`. |
+| Slice 1: Runtime Config Model | Reviewing | `feat/slice-1-runtime-config-model` | `feat(slice-1): runtime config model` | `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md` | Load runtime config from `.chc/config.yml`. |
 | Slice 2: Runtime Asset Template | Planned | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Provide default agent-runtime Dockerfile template. |
 | Slice 3: Runtime Init CLI | Planned | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Materialize runtime defaults for existing projects. |
 | Slice 4: Runtime Plan Contract | Planned | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Compute Docker boundary paths and mounts. |
@@ -41,23 +41,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Extend `WorkspaceConfig` with runtime fields.
-- [ ] Provide safe runtime config defaults.
-- [ ] Parse runtime config from `.chc/config.yml`.
-- [ ] Add focused config tests.
-- [ ] Document runtime config fields.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Extend `WorkspaceConfig` with runtime fields.
+- [x] Provide safe runtime config defaults.
+- [x] Parse runtime config from `.chc/config.yml`.
+- [x] Add focused config tests.
+- [x] Document runtime config fields.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
+- T1.1: `a56e0e5` `feat(runtime): add workspace runtime config model`
+- T1.2: `a56e0e5` `feat(runtime): add workspace runtime config model`
+- T1.3: `a56e0e5` `feat(runtime): add workspace runtime config model`
+- T1.4: `ca1b5e0` `test(runtime): cover workspace runtime config`
+- T1.5: `26a3621` `docs(runtime): document workspace runtime config`
+- T1.6: `6fcc8a8` `docs(runtime): report runtime config model slice`
+- T1.7: `docs(runtime): record runtime config validation`
 
 ## Slice 2: Runtime Asset Template
 
@@ -198,6 +198,8 @@ Task commits:
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
+- Slice 1 validation: `go test ./internal/chc` pass.
+- Slice 1 validation: `make verify` pass.
 
 ## Notes
 
