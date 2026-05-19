@@ -27,7 +27,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 4: Harness Invocation Contract | Delivered | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Repository PR #37. |
 | Slice 5: Agent Harness Invocation | Delivered | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Repository PR #38. |
 | Slice 6: Execution Result Capture | Delivered | `feat/slice-6-execution-result-capture` | `feat(slice-6): execution result capture` | `.prj/reports/slices/single-ticket-execution/slice-6-execution-result-capture.md` | Repository PR #39. |
-| Slice 7: Execution Failure Handling | Reviewing | `feat/slice-7-execution-failure-handling` | `feat(slice-7): execution failure handling` | `.prj/reports/slices/single-ticket-execution/slice-7-execution-failure-handling.md` | Record clear execution failure states. |
+| Slice 7: Execution Failure Handling | Reviewing | `feat/slice-7-execution-failure-handling` | `feat(slice-7): execution failure handling` | `.prj/reports/slices/single-ticket-execution/slice-7-execution-failure-handling.md` | Repository PR #40. |
 
 ## Slice 1: Execution Record Model
 

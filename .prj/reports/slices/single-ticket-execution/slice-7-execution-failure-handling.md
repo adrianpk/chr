@@ -5,7 +5,7 @@ Slicing: Single Ticket Execution
 Plan: `.prj/plans/slicing-single-ticket-execution-plan.md`
 Tracker: `.prj/trackers/slicing-single-ticket-execution-tracker.md`
 Branch: `feat/slice-7-execution-failure-handling`
-PR: pending
+PR: `#40`
 
 ## Purpose
 
