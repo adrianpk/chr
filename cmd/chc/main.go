@@ -606,6 +606,10 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		_ = index.Close()
 	}()
 
+	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+		return err
+	}
+
 	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().Get(0))
 	if err != nil {
 		return err
@@ -656,6 +660,10 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		_ = index.Close()
 	}()
 
+	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+		return err
+	}
+
 	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().Get(0))
 	if err != nil {
 		return err
@@ -705,6 +713,10 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		//nolint:errcheck // Command result already comes from the main operation.
 		_ = index.Close()
 	}()
+
+	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+		return err
+	}
 
 	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().First())
 	if err != nil {
@@ -765,6 +777,10 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		_ = index.Close()
 	}()
 
+	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+		return err
+	}
+
 	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
 		return err
@@ -785,6 +801,25 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		); err != nil {
 			return fmt.Errorf("write ticket list result: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func refreshProjectTicketIndex(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext) error {
+	result, err := chc.NewTicketIndexRebuilder(index).RebuildProjectTickets(ctx, chc.RebuildProjectTicketsOptions{
+		ProjectID:  projectContext.ProjectID,
+		ProjectDir: projectContext.ProjectDir,
+		IndexedAt:  time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+
+	if len(result.ParseErrors) > 0 {
+		firstErr := result.ParseErrors[0]
+
+		return fmt.Errorf("refresh ticket index: %d parse errors: %s %w", len(result.ParseErrors), firstErr.RelativePath, firstErr.Err)
 	}
 
 	return nil
