@@ -24,6 +24,27 @@ The model maps execution state to ticket-facing status:
 
 Later writer slices are responsible for applying this status to ticket Markdown.
 
+## Ticket State Writer
+
+The ticket result state writer applies only the ticket status from a result
+application.
+
+It updates ticket frontmatter:
+
+- `status`;
+- `updated_at`.
+
+It preserves existing ticket metadata, body sections, comments, blocker text,
+and validation text.
+
+The writer maps the already-computed application status directly:
+
+- `reviewing` for successful review-ready applications;
+- `blocked` for failed or blocked applications.
+
+Comment, validation evidence, changed-file summary, and blocked reason writing
+are handled by later slices.
+
 ## Application Fields
 
 The application contract carries:
