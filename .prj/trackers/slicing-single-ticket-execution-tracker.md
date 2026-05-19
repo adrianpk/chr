@@ -12,8 +12,8 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 - [x] Confirm `Agent Runtime Boundary` is completed.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -21,7 +21,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Execution Record Model | Planned | `feat/slice-1-execution-record-model` | `feat(slice-1): execution record model` | `.prj/reports/slices/single-ticket-execution/slice-1-execution-record-model.md` | Define execution attempt domain model. |
+| Slice 1: Execution Record Model | Reviewing | `feat/slice-1-execution-record-model` | `feat(slice-1): execution record model` | `.prj/reports/slices/single-ticket-execution/slice-1-execution-record-model.md` | Define execution attempt domain model. |
 | Slice 2: Execution Repository | Planned | `feat/slice-2-execution-repository` | `feat(slice-2): execution repository` | `.prj/reports/slices/single-ticket-execution/slice-2-execution-repository.md` | Persist execution attempts. |
 | Slice 3: Ticket Start Preflight | Planned | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Prepare one ticket execution without invoking an agent. |
 | Slice 4: Harness Invocation Contract | Planned | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Build deterministic harness invocation metadata. |
@@ -43,23 +43,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add execution record domain types.
-- [ ] Define execution status values.
-- [ ] Define ticket, project, runtime, and artifact references.
-- [ ] Add focused model tests.
-- [ ] Document execution record contract.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add execution record domain types.
+- [x] Define execution status values.
+- [x] Define ticket, project, runtime, and artifact references.
+- [x] Add focused model tests.
+- [x] Document execution record contract.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
+- T1.1: `7c73f87` `feat(execution): add execution record model`
+- T1.2: `7c73f87` `feat(execution): add execution record model`
+- T1.3: `7c73f87` `feat(execution): add execution record model`
+- T1.4: `59c1ec7` `test(execution): cover execution record model`
+- T1.5: `6fd8a01` `docs(execution): document execution record contract`
+- T1.6: `accbae6` `docs(execution): report execution record model slice`
+- T1.7: `docs(execution): record execution model validation`
 
 ## Slice 2: Execution Repository
 
@@ -272,6 +272,8 @@ Task commits:
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
+- Slice 1 validation: `go test ./internal/chc` pass.
+- Slice 1 validation: `make verify` pass.
 
 ## Notes
 
