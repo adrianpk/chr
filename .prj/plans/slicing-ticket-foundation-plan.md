@@ -115,7 +115,7 @@ Delivery:
 
 ### Slice 2: Ticket Show
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-2-ticket-show`
 Expected PR title: `feat(slice-2): ticket show`
@@ -135,6 +135,11 @@ Candidate scope:
 Expected outcome:
 
 - the user can inspect one ticket by key from the CLI.
+
+Delivery:
+
+- Repository PR: `#18`
+- PR title: `feat(slice-2): ticket show`
 
 ### Slice 3: Ticket Comments
 
