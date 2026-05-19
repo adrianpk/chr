@@ -1,0 +1,101 @@
+package chc
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"strings"
+	"time"
+)
+
+type TicketResultValidationWriter interface {
+	WriteResultValidation(ctx context.Context, opts WriteResultValidationOptions) error
+}
+
+type WriteResultValidationOptions struct {
+	Application ResultApplication
+	CreatedAt   time.Time
+}
+
+type ticketResultValidationWriter struct{}
+
+func NewTicketResultValidationWriter() TicketResultValidationWriter {
+	return &ticketResultValidationWriter{}
+}
+
+func (w *ticketResultValidationWriter) WriteResultValidation(
+	ctx context.Context,
+	opts WriteResultValidationOptions,
+) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	if opts.Application.TicketPath == "" {
+		return fmt.Errorf("result application ticket path is required")
+	}
+
+	content, err := os.ReadFile(opts.Application.TicketPath)
+	if err != nil {
+		return fmt.Errorf("read ticket file: %w", err)
+	}
+
+	createdAt := opts.CreatedAt.UTC()
+	if createdAt.IsZero() {
+		createdAt = time.Now().UTC()
+	}
+
+	updated, err := addResultValidationEvidence(string(content), opts.Application, createdAt)
+	if err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(opts.Application.TicketPath, []byte(updated), 0o644); err != nil {
+		return fmt.Errorf("write ticket file: %w", err)
+	}
+
+	return nil
+}
+
+func addResultValidationEvidence(content string, application ResultApplication, createdAt time.Time) (string, error) {
+	updatedContent, err := updateTicketUpdatedAt(content, createdAt)
+	if err != nil {
+		return "", err
+	}
+
+	validationHeading := "# Validation\n"
+
+	validationIndex := strings.Index(updatedContent, validationHeading)
+	if validationIndex < 0 {
+		return "", fmt.Errorf("ticket validation section is required")
+	}
+
+	insertAt := validationIndex + len(validationHeading)
+	evidence := renderResultValidationEvidence(application, createdAt)
+
+	return updatedContent[:insertAt] + "\n" + evidence + updatedContent[insertAt:], nil
+}
+
+func renderResultValidationEvidence(application ResultApplication, createdAt time.Time) string {
+	var output strings.Builder
+
+	output.WriteString("## ")
+	output.WriteString(createdAt.UTC().Format(time.RFC3339))
+	output.WriteString(" ")
+	output.WriteString(application.ExecutionID)
+	output.WriteString("\n\n")
+	output.WriteString("- command: ")
+	output.WriteString(application.Evidence.ValidationCommand)
+	output.WriteString("\n")
+	output.WriteString("- result: ")
+	output.WriteString(application.Evidence.ResultPath)
+	output.WriteString("\n")
+	output.WriteString("- log: ")
+	output.WriteString(application.Evidence.LogPath)
+	output.WriteString("\n")
+	output.WriteString("- validation: ")
+	output.WriteString(application.Evidence.ValidationPath)
+	output.WriteString("\n\n")
+
+	return output.String()
+}
