@@ -168,6 +168,35 @@ execution is marked `succeeded`.
 
 Process stdout and stderr continue to be written to `CHC_LOG_PATH`.
 
+## Failure Handling
+
+Execution failures use stable failure kind prefixes in `failure_reason`.
+
+Failure kinds:
+
+- `preflight`: project resolution, ticket reconciliation, ticket lookup, or
+  workspace config failed before runtime validation.
+- `runtime`: runtime boundary validation failed before creating an execution
+  record.
+- `harness`: Docker build or run invocation failed.
+- `validation`: the harness completed but the result envelope reported
+  `failed`.
+- `result_capture`: result artifact reading, JSON decoding, envelope validation,
+  or identity matching failed.
+
+`ticket start` prints failure diagnostics when an execution record exists or a
+runtime preflight record can be rendered:
+
+- `failure_kind`
+- `failure_reason`
+- `diagnostic_log_path`
+- `diagnostic_result_path`
+- `diagnostic_validation_path`
+
+Diagnostic paths are planned artifact locations. A path may be printed even when
+the artifact was not created because the failure happened before that artifact
+could be written.
+
 ## Persistence
 
 Execution records are stored in the user-level SQLite database alongside the
