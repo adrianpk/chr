@@ -103,7 +103,7 @@ func indexedTicketFromMetadata(
 		return IndexedTicket{}, err
 	}
 
-	return IndexedTicket{
+	ticket := IndexedTicket{
 		ProjectID:    opts.ProjectID,
 		Path:         opts.Path,
 		RelativePath: relativePath,
@@ -122,7 +122,13 @@ func indexedTicketFromMetadata(
 		FileSize:     info.Size(),
 		ContentHash:  contentHash(content),
 		IndexedAt:    opts.IndexedAt.UTC(),
-	}, nil
+	}
+
+	if err := ValidateIndexedTicket(ticket); err != nil {
+		return IndexedTicket{}, err
+	}
+
+	return ticket, nil
 }
 
 func relativeTicketPath(opts ParseTicketOptions) (string, error) {
