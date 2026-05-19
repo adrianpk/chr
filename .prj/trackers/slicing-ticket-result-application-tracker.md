@@ -235,7 +235,7 @@ Candidate tasks:
 - [x] Surface reconciliation blockers.
 - [x] Add focused consistency tests.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -243,8 +243,8 @@ Task commits:
 - T7.2: `7c7a01a` `feat(result): refresh affected ticket index`
 - T7.3: `7c7a01a` `feat(result): refresh affected ticket index`
 - T7.4: `7c7a01a` `feat(result): refresh affected ticket index`
-- T7.5: `docs(result): document markdown index consistency`
-- T7.6: pending
+- T7.5: `79c1c58` `docs(result): document markdown index consistency`
+- T7.6: `docs(result): record markdown index consistency validation`
 
 ## Slice 8: Result Apply CLI
 
