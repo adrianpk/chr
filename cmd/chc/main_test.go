@@ -528,6 +528,43 @@ func TestTicketStartCreatesPendingExecution(t *testing.T) {
 	}
 }
 
+func TestTicketStartPrintsHarnessFailure(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, fmt.Errorf("docker unavailable"))
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket start returned nil error")
+	}
+
+	for _, want := range []string{
+		"status: failed",
+		"failure_kind: harness",
+		"failure_reason: harness: docker unavailable",
+		"diagnostic_log_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1"),
+		"diagnostic_result_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func assertTicketStartSucceededExecution(t *testing.T, record chc.ExecutionRecord, projectDir string) {
 	t.Helper()
 
@@ -580,6 +617,10 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 
 	if !strings.Contains(stdout.String(), "check: fail dockerfile") {
 		t.Fatalf("stdout = %q, want failed Dockerfile check", stdout.String())
+	}
+
+	if !strings.Contains(stdout.String(), "failure_kind: runtime") {
+		t.Fatalf("stdout = %q, want runtime failure kind", stdout.String())
 	}
 
 	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")

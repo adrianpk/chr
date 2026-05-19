@@ -102,6 +102,10 @@ func TestExecutionRunnerMarksFailedWhenHarnessFails(t *testing.T) {
 		t.Fatal("FailureReason is empty, want error")
 	}
 
+	if !strings.HasPrefix(got.FailureReason, "harness:") {
+		t.Fatalf("FailureReason = %q, want harness prefix", got.FailureReason)
+	}
+
 	stored, err := repository.GetExecution(t.Context(), record.ID)
 	if err != nil {
 		t.Fatalf("GetExecution returned error: %v", err)
@@ -136,8 +140,8 @@ func TestExecutionRunnerMarksFailedWhenResultIsMissing(t *testing.T) {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
-	if !strings.Contains(got.FailureReason, "open execution result") {
-		t.Fatalf("FailureReason = %q, want missing result error", got.FailureReason)
+	if !strings.HasPrefix(got.FailureReason, "result_capture:") {
+		t.Fatalf("FailureReason = %q, want result_capture prefix", got.FailureReason)
 	}
 }
 
@@ -168,8 +172,40 @@ func TestExecutionRunnerMarksFailedWhenResultIsMalformed(t *testing.T) {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
-	if !strings.Contains(got.FailureReason, "decode execution result") {
-		t.Fatalf("FailureReason = %q, want malformed result error", got.FailureReason)
+	if !strings.HasPrefix(got.FailureReason, "result_capture:") {
+		t.Fatalf("FailureReason = %q, want result_capture prefix", got.FailureReason)
+	}
+}
+
+func TestExecutionRunnerClassifiesFailedResultAsValidationFailure(t *testing.T) {
+	repository := newTestExecutionRunnerRepository(t)
+
+	record := testRunnerExecutionRecord(t.TempDir())
+	if err := repository.CreateExecution(t.Context(), record); err != nil {
+		t.Fatalf("CreateExecution returned error: %v", err)
+	}
+
+	executor := &fakeHarnessExecutor{
+		resultPath:    record.Artifacts.ResultPath,
+		resultContent: `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"failed","summary":"tests failed"}`,
+	}
+	runner := NewExecutionRunner(repository, executor)
+	runner.Now = fixedRunnerClock()
+
+	got, err := runner.Run(t.Context(), RunExecutionOptions{
+		Record:     record,
+		Invocation: testRunnerInvocation(record),
+	})
+	if err == nil {
+		t.Fatal("Run returned nil error")
+	}
+
+	if got.Status != ExecutionStatusFailed {
+		t.Fatalf("Status = %q, want failed", got.Status)
+	}
+
+	if !strings.HasPrefix(got.FailureReason, "validation:") {
+		t.Fatalf("FailureReason = %q, want validation prefix", got.FailureReason)
 	}
 }
 
