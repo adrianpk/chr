@@ -198,7 +198,7 @@ Delivery:
 
 ### Slice 5: Ticket Lifecycle Validation
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-5-ticket-lifecycle-validation`
 Expected PR title: `feat(slice-5): ticket lifecycle validation`
