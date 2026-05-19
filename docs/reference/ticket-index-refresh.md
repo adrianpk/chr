@@ -25,19 +25,20 @@ For the resolved project, each command:
 - opens the user-level SQLite ticket index;
 - discovers Markdown tickets under `.chc/tickets`;
 - rebuilds indexed rows for that project from canonical files;
-- stops before reading ticket rows when parse errors exist.
+- stops before reading ticket rows when reconciliation blockers exist.
 
 Refresh is scoped to the resolved project only. It does not scan or mutate other
 registered projects.
 
-## Parse Errors
+## Blockers
 
-If one or more ticket files cannot be parsed, the command exits with an error.
+If one or more ticket files cannot be parsed, reconciliation returns blockers
+and the command exits with an error.
 
-The error includes the parse error count and the first invalid ticket path:
+The error includes the blocker count and the first invalid ticket path:
 
 ```text
-refresh ticket index: 1 parse errors: CHC-1-Bad.md ticket frontmatter opening delimiter is required
+refresh ticket index: 1 blockers: CHC-1-Bad.md ticket frontmatter opening delimiter is required
 ```
 
 ## Scope
