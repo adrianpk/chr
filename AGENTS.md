@@ -53,5 +53,6 @@ It is not a product or runtime specification.
 - `.agents/SLICES.md` — task decomposition and delivery strategy.
 - `.agents/ROUTING.md` — request classification for execution workflow.
 - `.agents/PLAYBOOKS.md` — operational procedures.
+- `.agents/REPORTING.md` — persistent implementation reporting rules.
 - `.agents/LINTING.md` — linting policy and quality-gate setup.
 - `.agents/INVARIANTS.md` — non-negotiable collaboration invariants.

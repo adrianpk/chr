@@ -16,6 +16,7 @@ Use one naming scheme consistently across plans, trackers, tickets, PR notes, an
 - Slice labels: `Slice 1`, `Slice 2`, `Slice 3`, ...
 - Task labels: `T1.1`, `T1.2`, `T2.1`, ...
 - Completion reporting: `Slice N of M completed`
+- Slice implementation reports: `.prj/reports/slices/<slicing-slug>/slice-<n>-<slice-slug>.md`
 
 Slice numbers are scoped to one slicing plan. They are not repository-global,
 they are not PR numbers, and they are not inferred from previously merged PRs.
@@ -62,8 +63,9 @@ The normal discovery-to-delivery chain is:
 4. tracker
 5. one branch and one PR per slice
 6. one conventional commit per tracker task
-7. user review and merge
-8. return to `dev` before the next slice
+7. one persistent implementation report per slice
+8. user review and merge
+9. return to `dev` before the next slice
 
 Any early phase may be skipped when the work is already sufficiently specified, but plan and tracker are mandatory before implementation.
 
@@ -100,10 +102,11 @@ For approved multi-slice work:
 4. Keep a one-to-one mapping between task IDs and commits.
 5. Open one PR scoped to that slice.
 6. Never open PRs per task or per commit.
-7. Update trackers with tasks, commits, and validation outcomes.
-8. Complete user review before merge.
-9. Merge the approved slice PR into `dev`.
-10. Return to `dev`, sync, and validate before the next slice.
+7. Create or update the slice implementation report before opening the PR.
+8. Update trackers with tasks, commits, report path, and validation outcomes.
+9. Complete user review before merge.
+10. Merge the approved slice PR into `dev`.
+11. Return to `dev`, sync, and validate before the next slice.
 
 ## 7. Execution gate
 

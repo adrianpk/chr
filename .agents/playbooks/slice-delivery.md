@@ -7,7 +7,8 @@
 3. Create and commit the slicing plan and tracker on `dev`.
 4. Create the slice branch from `dev`.
 5. Implement and validate per slice.
-6. Integrate incrementally while keeping repository healthy.
+6. Create or update the slice implementation report.
+7. Integrate incrementally while keeping repository healthy.
 
 ## Slicing Map Requirement
 
@@ -23,6 +24,7 @@ The map must include:
 - active slice short name;
 - expected branch name;
 - expected PR title;
+- expected report path;
 - prerequisite PRs or delivered work that are not part of this slicing.
 
 The slice number in `feat(slice-<n>): ...` must come from this local map. It
@@ -75,10 +77,26 @@ and correct the plan/tracker before creating or editing a branch or PR.
 - <command and result>
 ```
 
+## Slice Report
+
+Before opening the PR, create or update the slice implementation report using
+the Slice Reporting playbook.
+
+The report path must follow:
+
+```text
+.prj/reports/slices/<slicing-slug>/slice-<n>-<slice-slug>.md
+```
+
+Set report status to `reviewing` before opening the PR.
+
+After merge, set report status to `delivered` and record the PR number during
+slice closure on `dev`.
+
 ## Ordering Rules
 
 1. `Summary`: primary behavior change first.
-2. `Changes`: runtime/library code, tests, docs, ops artifacts.
+2. `Changes`: runtime/library code, tests, docs, report, ops artifacts.
 3. `Validation`: targeted to broad.
 4. Report validation outcomes as `pass`/`fail`.
 
@@ -88,6 +106,7 @@ and correct the plan/tracker before creating or editing a branch or PR.
   - slicing plan artifact
   - slicing tracker artifact
   - branch name and PR title
+  - report path
   - commit list mapped to slice tasks
 
 Before opening or editing a PR, verify and record:
@@ -96,6 +115,7 @@ Before opening or editing a PR, verify and record:
 - tracker path;
 - active slice number;
 - expected PR title;
+- expected report path;
 - actual PR title after creation or edit.
 
 ## Blocker Handling
@@ -108,8 +128,9 @@ Before opening or editing a PR, verify and record:
 
 1. Scope implemented.
 2. Relevant checks run.
-3. Tracker/plan status updated.
-4. Final status reported with concrete outcomes.
+3. Slice implementation report created or updated.
+4. Tracker/plan status updated.
+5. Final status reported with concrete outcomes.
 
 ## Post-Slice Tuning
 
@@ -132,12 +153,13 @@ Before opening or editing a PR, verify and record:
 2. Commit plan and tracker before implementation.
 3. Implement tasks in order.
 4. Create one conventional commit per task.
-5. Open one PR per slice.
-6. Do not open PRs per task or per commit.
-7. Complete user review.
-8. Merge the approved slice PR into `dev`.
-9. Return to `dev` before continuing.
-10. Report implementation and validation status.
-11. Start next slice only after previous slice is fully closed.
-12. Never derive slice numbers from PR history.
-13. Never mix numbering from two slicing plans in one PR title.
+5. Create or update one implementation report per slice.
+6. Open one PR per slice.
+7. Do not open PRs per task or per commit.
+8. Complete user review.
+9. Merge the approved slice PR into `dev`.
+10. Return to `dev` before continuing.
+11. Report implementation and validation status.
+12. Start next slice only after previous slice is fully closed.
+13. Never derive slice numbers from PR history.
+14. Never mix numbering from two slicing plans in one PR title.
