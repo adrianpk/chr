@@ -143,7 +143,7 @@ Delivery:
 
 ### Slice 3: Ticket Comments
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-3-ticket-comments`
 Expected PR title: `feat(slice-3): ticket comments`
@@ -162,6 +162,11 @@ Candidate scope:
 Expected outcome:
 
 - tickets can capture review notes, agent notes, and user feedback.
+
+Delivery:
+
+- Repository PR: `#19`
+- PR title: `feat(slice-3): ticket comments`
 
 ### Slice 4: Ticket Status Transitions
 
