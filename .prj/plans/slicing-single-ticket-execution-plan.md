@@ -1,6 +1,6 @@
 # Single Ticket Execution Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -42,7 +42,7 @@ Already delivered:
 - reconciliation blockers for future execution;
 - runtime config, template, init, planning, and validation.
 
-Still missing:
+Delivered in this slicing:
 
 - durable execution record model;
 - execution persistence;
@@ -96,7 +96,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Execution Record Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-execution-record-model`
 Expected PR title: `feat(slice-1): execution record model`
@@ -121,7 +121,7 @@ Expected outcome:
 
 ### Slice 2: Execution Repository
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-execution-repository`
 Expected PR title: `feat(slice-2): execution repository`
@@ -145,7 +145,7 @@ Expected outcome:
 
 ### Slice 3: Ticket Start Preflight
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-ticket-start-preflight`
 Expected PR title: `feat(slice-3): ticket start preflight`
@@ -175,7 +175,7 @@ Expected outcome:
 
 ### Slice 4: Harness Invocation Contract
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-harness-invocation-contract`
 Expected PR title: `feat(slice-4): harness invocation contract`
@@ -202,7 +202,7 @@ Expected outcome:
 
 ### Slice 5: Agent Harness Invocation
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-agent-harness-invocation`
 Expected PR title: `feat(slice-5): agent harness invocation`
@@ -229,7 +229,7 @@ Expected outcome:
 
 ### Slice 6: Execution Result Capture
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-execution-result-capture`
 Expected PR title: `feat(slice-6): execution result capture`
@@ -255,7 +255,7 @@ Expected outcome:
 
 ### Slice 7: Execution Failure Handling
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-execution-failure-handling`
 Expected PR title: `feat(slice-7): execution failure handling`

@@ -168,7 +168,7 @@ Use case:
 
 > A user starts one specific ticket and `chc` records what happened.
 
-Current state: planned next in the operational MVP path.
+Current state: delivered.
 
 Candidate slices:
 
