@@ -103,6 +103,7 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 	})
 
 	reconcileAllProjectTickets(t, index, projectDir)
+
 	ticketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Good.md")
 
 	err := NewTicketResultStateWriter().WriteResultState(context.Background(), WriteResultStateOptions{

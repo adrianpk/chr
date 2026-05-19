@@ -103,25 +103,10 @@ func (r *ticketReconciler) ReconcileProjectTicket(
 		indexedAt = time.Now().UTC()
 	}
 
-	ticket, err := r.parser.ParseTicket(ctx, ParseTicketOptions{
-		ProjectID:    opts.ProjectID,
-		ProjectDir:   opts.ProjectDir,
-		Path:         opts.TicketPath,
-		IndexedAt:    indexedAt,
-		RelativeBase: ticketsDirectory(opts.ProjectDir),
-	})
-	if err != nil {
-		relativePath := relativeTicketPathForBlocker(opts.ProjectDir, opts.TicketPath)
-
+	ticket, blocker, blocked := r.parseProjectTicket(ctx, opts, indexedAt)
+	if blocked {
 		return TicketReconciliationResult{
-			Blockers: []TicketReconciliationBlocker{
-				{
-					Kind:         TicketReconciliationBlockerParseError,
-					Path:         opts.TicketPath,
-					RelativePath: relativePath,
-					Err:          err,
-				},
-			},
+			Blockers: []TicketReconciliationBlocker{blocker},
 		}, nil
 	}
 
@@ -130,6 +115,30 @@ func (r *ticketReconciler) ReconcileProjectTicket(
 	}
 
 	return TicketReconciliationResult{IndexedTickets: 1}, nil
+}
+
+func (r *ticketReconciler) parseProjectTicket(
+	ctx context.Context,
+	opts ReconcileProjectTicketOptions,
+	indexedAt time.Time,
+) (IndexedTicket, TicketReconciliationBlocker, bool) {
+	ticket, err := r.parser.ParseTicket(ctx, ParseTicketOptions{
+		ProjectID:    opts.ProjectID,
+		ProjectDir:   opts.ProjectDir,
+		Path:         opts.TicketPath,
+		IndexedAt:    indexedAt,
+		RelativeBase: ticketsDirectory(opts.ProjectDir),
+	})
+	if err != nil {
+		return IndexedTicket{}, TicketReconciliationBlocker{
+			Kind:         TicketReconciliationBlockerParseError,
+			Path:         opts.TicketPath,
+			RelativePath: relativeTicketPathForBlocker(opts.ProjectDir, opts.TicketPath),
+			Err:          err,
+		}, true
+	}
+
+	return ticket, TicketReconciliationBlocker{}, false
 }
 
 func validateReconcileProjectTicketsOptions(opts ReconcileProjectTicketsOptions) error {
