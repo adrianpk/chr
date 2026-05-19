@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -478,6 +481,7 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 func TestTicketStartCreatesPendingExecution(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
+	executor := installFakeTicketStartHarnessExecutor(t, nil)
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
@@ -508,8 +512,27 @@ func TestTicketStartCreatesPendingExecution(t *testing.T) {
 	}
 
 	record := records[0]
-	if record.Status != chc.ExecutionStatusPending {
-		t.Fatalf("Status = %q, want pending", record.Status)
+	assertTicketStartSucceededExecution(t, record, projectDir)
+
+	if !strings.Contains(strings.Join(executor.commands, ","), "docker build,docker run") {
+		t.Fatalf("commands = %#v, want build and run", executor.commands)
+	}
+
+	logContent, err := os.ReadFile(record.Artifacts.LogPath)
+	if err != nil {
+		t.Fatalf("read execution log: %v", err)
+	}
+
+	if !strings.Contains(string(logContent), "stdout: docker build") {
+		t.Fatalf("log content = %q, want harness output", string(logContent))
+	}
+}
+
+func assertTicketStartSucceededExecution(t *testing.T, record chc.ExecutionRecord, projectDir string) {
+	t.Helper()
+
+	if record.Status != chc.ExecutionStatusSucceeded {
+		t.Fatalf("Status = %q, want succeeded", record.Status)
 	}
 
 	if record.TicketPath != filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md") {
@@ -1453,6 +1476,47 @@ func testTicket() chc.Ticket {
 		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	}
+}
+
+type fakeTicketStartHarnessExecutor struct {
+	commands []string
+	err      error
+}
+
+func (e *fakeTicketStartHarnessExecutor) Run(
+	_ context.Context,
+	command chc.HarnessCommand,
+	stdout io.Writer,
+	stderr io.Writer,
+) error {
+	name := command.Program + " " + command.Args[0]
+	e.commands = append(e.commands, name)
+
+	if _, err := fmt.Fprintln(stdout, "stdout: "+name); err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintln(stderr, "stderr: "+name); err != nil {
+		return err
+	}
+
+	return e.err
+}
+
+func installFakeTicketStartHarnessExecutor(t *testing.T, err error) *fakeTicketStartHarnessExecutor {
+	t.Helper()
+
+	executor := &fakeTicketStartHarnessExecutor{err: err}
+	previous := newTicketStartHarnessExecutor
+	newTicketStartHarnessExecutor = func() chc.HarnessExecutor {
+		return executor
+	}
+
+	t.Cleanup(func() {
+		newTicketStartHarnessExecutor = previous
+	})
+
+	return executor
 }
 
 func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket chc.Ticket) string {
