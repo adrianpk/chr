@@ -24,7 +24,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 1: Result Application Model | Delivered | `feat/slice-1-result-application-model` | `feat(slice-1): result application model` | `.prj/reports/slices/ticket-result-application/slice-1-result-application-model.md` | Repository PR #41. |
 | Slice 2: Ticket State Writer | Delivered | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Repository PR #42. |
 | Slice 3: Execution Comment Writer | Delivered | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Repository PR #43. |
-| Slice 4: Validation Evidence Writer | Planned | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Record validation evidence. |
+| Slice 4: Validation Evidence Writer | Reviewing | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Record validation evidence. |
 | Slice 5: Changed Files Summary | Planned | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Record changed-file summaries. |
 | Slice 6: Blocked Reason Writer | Planned | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Record blocked/failure reasons. |
 | Slice 7: Markdown Index Consistency | Planned | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Reconcile index after ticket writes. |
@@ -140,21 +140,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define validation evidence fields.
-- [ ] Write validation command and artifact path.
-- [ ] Preserve validation history.
-- [ ] Add focused evidence writer tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define validation evidence fields.
+- [x] Write validation command and artifact path.
+- [x] Preserve validation history.
+- [x] Add focused evidence writer tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
+- T4.1: `8c98885` `feat(result): add validation evidence writer`
+- T4.2: `8c98885` `feat(result): add validation evidence writer`
+- T4.3: `8c98885` `feat(result): add validation evidence writer`
+- T4.4: `54d9ea4` `test(result): cover validation evidence writer`
+- T4.5: `fa1be7a` `docs(result): document validation evidence writer`
+- T4.6: `docs(result): record validation evidence validation`
 
 ## Slice 5: Changed Files Summary
 
