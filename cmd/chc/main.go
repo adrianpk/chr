@@ -186,6 +186,7 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 		Name:  "ticket",
 		Usage: "Manage workspace tickets",
 		Commands: []*cli.Command{
+			newTicketApplyResultCommand(stdout),
 			newTicketCommentCommand(stdout),
 			newTicketListCommand(stdout),
 			newTicketNewCommand(stdout),
@@ -556,6 +557,15 @@ func newTicketCommentCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newTicketApplyResultCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "apply-result",
+		Usage:  "Apply one completed execution result to its ticket",
+		Flags:  ticketApplyResultFlags(),
+		Action: ticketApplyResultAction(stdout),
+	}
+}
+
 func newTicketStatusCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "status",
@@ -589,6 +599,15 @@ func ticketStartFlags() []cli.Flag {
 		&cli.BoolFlag{
 			Name:  "dry-run",
 			Usage: "print the execution preflight without creating an execution record",
+		},
+	)
+}
+
+func ticketApplyResultFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the planned result application without writing ticket state",
 		},
 	)
 }
@@ -662,6 +681,12 @@ func ticketStartAction(stdout io.Writer) cli.ActionFunc {
 	}
 }
 
+func ticketApplyResultAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketApplyResult(ctx, cmd, stdout)
+	}
+}
+
 type ticketStartPreflight struct {
 	Env     chc.UserEnvironment
 	Ticket  chc.IndexedTicket
@@ -672,6 +697,14 @@ type ticketStartPreflight struct {
 type ticketStartSelection struct {
 	ProjectContext commandProjectContext
 	Ticket         chc.IndexedTicket
+}
+
+type ticketApplyResultPlan struct {
+	ProjectContext commandProjectContext
+	Record         chc.ExecutionRecord
+	Result         chc.ExecutionResult
+	Application    chc.ResultApplication
+	ReportPath     string
 }
 
 var newTicketStartHarnessExecutor = func() chc.HarnessExecutor {
@@ -766,6 +799,205 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	return printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
+}
+
+func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("ticket apply-result requires exactly one execution id argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	plan, err := buildTicketApplyResultPlan(ctx, cmd, env)
+	if err != nil {
+		return err
+	}
+
+	if !cmd.Bool("dry-run") {
+		if err := applyTicketResult(ctx, env, plan); err != nil {
+			return err
+		}
+	}
+
+	return printTicketApplyResult(stdout, plan, cmd.Bool("dry-run"))
+}
+
+func buildTicketApplyResultPlan(
+	ctx context.Context,
+	cmd *cli.Command,
+	env chc.UserEnvironment,
+) (ticketApplyResultPlan, error) {
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
+	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // The command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	record, err := repository.GetExecution(ctx, cmd.Args().First())
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
+	if record.ProjectID != projectContext.ProjectID {
+		return ticketApplyResultPlan{}, fmt.Errorf("execution project mismatch: %s", record.ProjectID)
+	}
+
+	result, err := chc.LoadExecutionResult(record.Artifacts.ResultPath)
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
+	application, err := chc.NewResultApplication(chc.ResultApplicationOptions{
+		Execution:     record,
+		Result:        result,
+		CommentAuthor: "chc",
+	})
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
+	return ticketApplyResultPlan{
+		ProjectContext: projectContext,
+		Record:         record,
+		Result:         result,
+		Application:    application,
+		ReportPath:     filepath.Join(record.Artifacts.RunDir, "result-application.md"),
+	}, nil
+}
+
+func applyTicketResult(ctx context.Context, env chc.UserEnvironment, plan ticketApplyResultPlan) error {
+	appliedAt := time.Now().UTC()
+
+	if err := chc.NewTicketResultStateWriter().WriteResultState(ctx, chc.WriteResultStateOptions{
+		Application: plan.Application,
+		UpdatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := chc.NewTicketResultCommentWriter().WriteResultComment(ctx, chc.WriteResultCommentOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := chc.NewTicketResultValidationWriter().WriteResultValidation(ctx, chc.WriteResultValidationOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := chc.NewTicketResultChangedFilesWriter().WriteChangedFiles(ctx, chc.WriteChangedFilesOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := chc.NewTicketResultBlockedReasonWriter().WriteBlockedReason(ctx, chc.WriteBlockedReasonOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := refreshAppliedTicketIndex(ctx, env, plan, appliedAt); err != nil {
+		return err
+	}
+
+	return writeTicketApplyResultReport(plan, appliedAt)
+}
+
+func refreshAppliedTicketIndex(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	plan ticketApplyResultPlan,
+	appliedAt time.Time,
+) error {
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // The command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	result, err := chc.NewTicketReconciler(index).ReconcileProjectTicket(ctx, chc.ReconcileProjectTicketOptions{
+		ProjectID:    plan.ProjectContext.ProjectID,
+		ProjectDir:   plan.ProjectContext.ProjectDir,
+		TicketPath:   plan.Application.TicketPath,
+		ReconciledAt: appliedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	if result.HasBlockers() {
+		firstBlocker, _ := result.FirstBlocker()
+
+		return fmt.Errorf("refresh applied ticket index: %d blockers: %s %w", len(result.Blockers), firstBlocker.RelativePath, firstBlocker.Err)
+	}
+
+	return nil
+}
+
+func writeTicketApplyResultReport(plan ticketApplyResultPlan, appliedAt time.Time) error {
+	report := fmt.Sprintf(
+		"# Result Application\n\nexecution: %s\nticket: %s\nstatus: %s\napplied_at: %s\nresult: %s\nlog: %s\nvalidation: %s\n",
+		plan.Application.ExecutionID,
+		plan.Application.TicketKey,
+		plan.Application.TicketStatus,
+		appliedAt.Format(time.RFC3339),
+		plan.Application.Evidence.ResultPath,
+		plan.Application.Evidence.LogPath,
+		plan.Application.Evidence.ValidationPath,
+	)
+
+	if err := os.WriteFile(plan.ReportPath, []byte(report), 0o644); err != nil {
+		return fmt.Errorf("write result application report: %w", err)
+	}
+
+	return nil
+}
+
+func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun bool) error {
+	lines := []string{
+		fmt.Sprintf("execution: %s", plan.Application.ExecutionID),
+		fmt.Sprintf("ticket: %s", plan.Application.TicketKey),
+		fmt.Sprintf("ticket_path: %s", plan.Application.TicketPath),
+		fmt.Sprintf("status: %s", plan.Application.TicketStatus),
+		fmt.Sprintf("result_status: %s", plan.Result.Status),
+		fmt.Sprintf("report_path: %s", plan.ReportPath),
+		fmt.Sprintf("dry_run: %t", dryRun),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write ticket apply-result output: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func runAndPrintTicketStartExecution(
