@@ -23,6 +23,9 @@ tags: ["uxui"]
 
 Missing frontmatter delimiters are rejected.
 
+Ticket metadata is validated before the parser returns an indexable model. See
+`docs/reference/ticket-validation.md` for the validation contract.
+
 ## Output
 
 The parser returns `chc.IndexedTicket`.
