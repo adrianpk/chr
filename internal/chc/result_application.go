@@ -126,8 +126,26 @@ func resultApplicationComment(author string, application ResultApplication) Resu
 
 	return ResultApplicationComment{
 		Author: author,
-		Body:   fmt.Sprintf("Execution %s finished with status %s. %s", application.ExecutionID, application.Execution.Status, application.Summary),
+		Body:   RenderResultApplicationCommentBody(application),
 	}
+}
+
+func RenderResultApplicationCommentBody(application ResultApplication) string {
+	body := fmt.Sprintf(
+		"Execution %s finished with status %s.\n\nSummary: %s\n\nResult: %s\nLog: %s\nValidation: %s",
+		application.ExecutionID,
+		application.Execution.Status,
+		application.Summary,
+		application.Evidence.ResultPath,
+		application.Evidence.LogPath,
+		application.Evidence.ValidationPath,
+	)
+
+	if application.Execution.FailureReason != "" {
+		body += fmt.Sprintf("\n\nFailure: %s", application.Execution.FailureReason)
+	}
+
+	return body
 }
 
 func resultApplicationBlockedReason(application ResultApplication) ResultApplicationBlockedReason {
