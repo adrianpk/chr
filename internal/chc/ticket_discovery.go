@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 )
 
 type TicketFileDiscoverer interface {
@@ -17,7 +18,8 @@ type DiscoverTicketFilesOptions struct {
 }
 
 type DiscoveredTicketFile struct {
-	Path string
+	Path         string
+	RelativePath string
 }
 
 type ticketFileDiscoverer struct{}
@@ -50,7 +52,15 @@ func (d *ticketFileDiscoverer) DiscoverTicketFiles(
 			return nil
 		}
 
-		files = append(files, DiscoveredTicketFile{Path: path})
+		relativePath, err := filepath.Rel(ticketsDir, path)
+		if err != nil {
+			return fmt.Errorf("resolve relative ticket path: %w", err)
+		}
+
+		files = append(files, DiscoveredTicketFile{
+			Path:         path,
+			RelativePath: filepath.ToSlash(relativePath),
+		})
 
 		return nil
 	})
@@ -62,5 +72,21 @@ func (d *ticketFileDiscoverer) DiscoverTicketFiles(
 		return nil, fmt.Errorf("discover ticket files: %w", err)
 	}
 
-	return files, nil
+	return sortDiscoveredTicketFiles(files), nil
+}
+
+func sortDiscoveredTicketFiles(files []DiscoveredTicketFile) []DiscoveredTicketFile {
+	slices.SortFunc(files, func(left, right DiscoveredTicketFile) int {
+		if left.RelativePath < right.RelativePath {
+			return -1
+		}
+
+		if left.RelativePath > right.RelativePath {
+			return 1
+		}
+
+		return 0
+	})
+
+	return files
 }
