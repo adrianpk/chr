@@ -66,6 +66,25 @@ The writer preserves existing comments and ticket body sections. It also updates
 Validation evidence, changed-file summaries, and blocked reason section content
 are still handled by later slices.
 
+## Validation Evidence Writer
+
+The validation evidence writer appends one entry to the ticket `# Validation`
+section.
+
+The entry includes:
+
+- execution ID;
+- validation command;
+- result artifact path;
+- runtime log artifact path;
+- validation artifact path.
+
+Existing validation entries are preserved. New evidence is prepended at the top
+of the validation section and `updated_at` is refreshed.
+
+Changed-file summaries and blocked reason section content are handled by later
+slices.
+
 ## Application Fields
 
 The application contract carries:
