@@ -25,7 +25,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 2: Runtime Asset Template | Delivered | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Repository PR #30. |
 | Slice 3: Runtime Init CLI | Delivered | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Repository PR #31. |
 | Slice 4: Runtime Plan Contract | Delivered | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Repository PR #32. |
-| Slice 5: Runtime Validate CLI | Planned | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
+| Slice 5: Runtime Validate CLI | Reviewing | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
 
 ## Slice 1: Runtime Config Model
 
@@ -173,27 +173,27 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc runtime validate`.
-- [ ] Resolve project context and runtime config.
-- [ ] Verify required runtime files and directories.
-- [ ] Print computed Docker build/run plan.
-- [ ] Support dry-run validation without Docker execution.
-- [ ] Add focused CLI tests.
-- [ ] Document validation behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add `chc runtime validate`.
+- [x] Resolve project context and runtime config.
+- [x] Verify required runtime files and directories.
+- [x] Print computed Docker build/run plan.
+- [x] Support dry-run validation without Docker execution.
+- [x] Add focused CLI tests.
+- [x] Document validation behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
-- T5.8: pending
-- T5.9: pending
+- T5.1: `0045f7b` `feat(cli): add runtime validate command`
+- T5.2: `0045f7b` `feat(cli): add runtime validate command`
+- T5.3: `f2d3d3c` `feat(runtime): add runtime validation checks`
+- T5.4: `0045f7b` `feat(cli): add runtime validate command`
+- T5.5: `0045f7b` `feat(cli): add runtime validate command`
+- T5.6: `c779919` `test(runtime): cover runtime validate command`
+- T5.7: `09d9d54` `docs(runtime): document runtime validation`
+- T5.8: `ee6f6d7` `docs(runtime): report runtime validate cli slice`
+- T5.9: `docs(runtime): record runtime validate validation`
 
 ## Validation Record
 
@@ -206,6 +206,8 @@ Task commits:
 - Slice 3 validation: `make verify` pass.
 - Slice 4 validation: `go test ./internal/chc` pass.
 - Slice 4 validation: `make verify` pass.
+- Slice 5 validation: `go test ./internal/chc ./cmd/chc` pass.
+- Slice 5 validation: `make verify` pass.
 
 ## Notes
 
