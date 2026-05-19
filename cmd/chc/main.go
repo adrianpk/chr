@@ -96,6 +96,7 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 		Name:  "ticket",
 		Usage: "Manage workspace tickets",
 		Commands: []*cli.Command{
+			newTicketCommentCommand(stdout),
 			newTicketListCommand(stdout),
 			newTicketNewCommand(stdout),
 			newTicketShowCommand(stdout),
@@ -454,12 +455,31 @@ func newTicketShowCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newTicketCommentCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "comment",
+		Usage:  "Append a comment to one ticket",
+		Flags:  ticketCommentFlags(),
+		Action: ticketCommentAction(stdout),
+	}
+}
+
 func ticketProjectFlags() []cli.Flag {
 	return append(projectRegistryFlags(),
 		&cli.StringFlag{
 			Name:  "dir",
 			Usage: "project directory override",
 			Value: ".",
+		},
+	)
+}
+
+func ticketCommentFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.StringFlag{
+			Name:  "author",
+			Usage: "comment author",
+			Value: "user",
 		},
 	)
 }
@@ -503,6 +523,62 @@ func ticketShowAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketShow(ctx, cmd, stdout)
 	}
+}
+
+func ticketCommentAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketComment(ctx, cmd, stdout)
+	}
+}
+
+func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 2 {
+		return fmt.Errorf("ticket comment requires exactly one ticket key and one comment argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().Get(0))
+	if err != nil {
+		return err
+	}
+
+	if err := chc.NewTicketCommenter().AddComment(ctx, chc.AddTicketCommentOptions{
+		Path:      ticket.Path,
+		Author:    cmd.String("author"),
+		Body:      cmd.Args().Get(1),
+		CreatedAt: time.Now().UTC(),
+	}); err != nil {
+		return err
+	}
+
+	if _, err := fmt.Fprintf(stdout, "ticket: %s\n", ticket.Path); err != nil {
+		return fmt.Errorf("write ticket comment result: %w", err)
+	}
+
+	return nil
 }
 
 func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
