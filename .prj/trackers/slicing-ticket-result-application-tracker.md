@@ -21,7 +21,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Result Application Model | Planned | `feat/slice-1-result-application-model` | `feat(slice-1): result application model` | `.prj/reports/slices/ticket-result-application/slice-1-result-application-model.md` | Define side-effect free application contract. |
+| Slice 1: Result Application Model | Reviewing | `feat/slice-1-result-application-model` | `feat(slice-1): result application model` | `.prj/reports/slices/ticket-result-application/slice-1-result-application-model.md` | Define side-effect free application contract. |
 | Slice 2: Ticket State Writer | Planned | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Update ticket status from application outcome. |
 | Slice 3: Execution Comment Writer | Planned | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Append execution summary comments. |
 | Slice 4: Validation Evidence Writer | Planned | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Record validation evidence. |
@@ -44,25 +44,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add result application domain types.
-- [ ] Map execution statuses and result outcomes to ticket-facing outcomes.
-- [ ] Define comment, evidence, changed-file, and blocked-reason fields.
-- [ ] Validate required references.
-- [ ] Add focused model tests.
-- [ ] Document result application contract.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add result application domain types.
+- [x] Map execution statuses and result outcomes to ticket-facing outcomes.
+- [x] Define comment, evidence, changed-file, and blocked-reason fields.
+- [x] Validate required references.
+- [x] Add focused model tests.
+- [x] Document result application contract.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
-- T1.8: pending
+- T1.1: `b5d1017` `feat(result): add result application model`
+- T1.2: `b5d1017` `feat(result): add result application model`
+- T1.3: `b5d1017` `feat(result): add result application model`
+- T1.4: `b5d1017` `feat(result): add result application model`
+- T1.5: `689d99e` `test(result): cover result application model`
+- T1.6: `b802623` `docs(result): document result application model`
+- T1.7: `b802623` `docs(result): document result application model`
+- T1.8: `docs(result): record result application validation`
 
 ## Slice 2: Ticket State Writer
 
