@@ -225,6 +225,84 @@ func TestRuntimeInitFallsBackToCurrentDirectory(t *testing.T) {
 	assertPathExists(t, filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"))
 }
 
+func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeRuntimeTemplate(t, projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"runtime",
+		"validate",
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("runtime validate returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"dry_run: true",
+		"image: chc-agent-runtime:local",
+		"dockerfile: " + filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
+		"workdir: /workspace",
+		"artifact_dir: " + filepath.Join(projectDir, ".chc", "runtime", "runs"),
+		"mount: " + projectDir + " -> /workspace read_only=false",
+		"check: ok workspace " + filepath.Join(projectDir, ".chc") + " ok",
+		"check: ok dockerfile " + filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile") + " ok",
+		"check: ok artifact_dir " + filepath.Join(projectDir, ".chc", "runtime", "runs") + " ok",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestRuntimeValidateFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755); err != nil {
+		t.Fatalf("create runtime runs dir: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"runtime",
+		"validate",
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("runtime validate returned nil error")
+	}
+
+	if !strings.Contains(stdout.String(), "check: fail dockerfile") {
+		t.Fatalf("stdout = %q, want failed Dockerfile check", stdout.String())
+	}
+}
+
+func TestRuntimeValidateUsesActiveProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeRuntimeTemplate(t, projectDir)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	selectProject(t, devRoot, "example")
+
+	err := run(t.Context(), []string{
+		"runtime",
+		"validate",
+		"--dev-root",
+		devRoot,
+		"--dry-run",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("runtime validate returned error: %v", err)
+	}
+}
+
 func TestTicketNewFallsBackToCurrentDirectory(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
@@ -1227,6 +1305,23 @@ func newTestWorkspace(t *testing.T) string {
 	}
 
 	return projectDir
+}
+
+func writeRuntimeTemplate(t *testing.T, projectDir string) {
+	t.Helper()
+
+	dockerfilePath := filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile")
+	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+		t.Fatalf("create runtime template directory: %v", err)
+	}
+
+	if err := os.WriteFile(dockerfilePath, []byte("FROM ubuntu:24.04\n"), 0o644); err != nil {
+		t.Fatalf("write runtime template: %v", err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755); err != nil {
+		t.Fatalf("create runtime runs directory: %v", err)
+	}
 }
 
 func chcTestUserEnvironment(t *testing.T) (chc.UserEnvironment, error) {
