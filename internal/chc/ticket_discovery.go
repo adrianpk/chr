@@ -36,7 +36,7 @@ func (d *ticketFileDiscoverer) DiscoverTicketFiles(
 		return nil, err
 	}
 
-	ticketsDir := filepath.Join(opts.ProjectDir, DirectoryName, "tickets")
+	ticketsDir := ticketsDirectory(opts.ProjectDir)
 	files := []DiscoveredTicketFile{}
 
 	err := filepath.WalkDir(ticketsDir, func(path string, entry os.DirEntry, walkErr error) error {
@@ -89,4 +89,8 @@ func sortDiscoveredTicketFiles(files []DiscoveredTicketFile) []DiscoveredTicketF
 	})
 
 	return files
+}
+
+func ticketsDirectory(projectDir string) string {
+	return filepath.Join(projectDir, DirectoryName, "tickets")
 }
