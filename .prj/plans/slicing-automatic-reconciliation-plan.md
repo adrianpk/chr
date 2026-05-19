@@ -172,7 +172,7 @@ Delivery:
 
 ### Slice 4: Index Rebuild CLI
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-4-index-rebuild-cli`
 Expected PR title: `feat(slice-4): index rebuild cli`
