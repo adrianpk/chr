@@ -22,7 +22,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Result Application Model | Delivered | `feat/slice-1-result-application-model` | `feat(slice-1): result application model` | `.prj/reports/slices/ticket-result-application/slice-1-result-application-model.md` | Repository PR #41. |
-| Slice 2: Ticket State Writer | Planned | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Update ticket status from application outcome. |
+| Slice 2: Ticket State Writer | Reviewing | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Update ticket status from application outcome. |
 | Slice 3: Execution Comment Writer | Planned | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Append execution summary comments. |
 | Slice 4: Validation Evidence Writer | Planned | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Record validation evidence. |
 | Slice 5: Changed Files Summary | Planned | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Record changed-file summaries. |
@@ -78,23 +78,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add a ticket result state writer.
-- [ ] Map success to review-ready ticket state.
-- [ ] Map execution failure to blocked or failed ticket state.
-- [ ] Preserve existing ticket metadata and comments.
-- [ ] Add focused writer tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add a ticket result state writer.
+- [x] Map success to review-ready ticket state.
+- [x] Map execution failure to blocked or failed ticket state.
+- [x] Preserve existing ticket metadata and comments.
+- [x] Add focused writer tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
+- T2.1: `507c562` `feat(result): add ticket state writer`
+- T2.2: `507c562` `feat(result): add ticket state writer`
+- T2.3: `507c562` `feat(result): add ticket state writer`
+- T2.4: `507c562` `feat(result): add ticket state writer`
+- T2.5: `a349b26` `test(result): cover ticket state writer`
+- T2.6: `3222e76` `docs(result): document ticket state writer`
+- T2.7: `docs(result): record ticket state writer validation`
 
 ## Slice 3: Execution Comment Writer
 
