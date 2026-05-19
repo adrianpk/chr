@@ -144,7 +144,7 @@ Delivery:
 
 ### Slice 3: Index Status
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-3-index-status`
 Expected PR title: `feat(slice-3): index status`
@@ -164,6 +164,11 @@ Candidate scope:
 Expected outcome:
 
 - a user or agent can inspect index health without mutating state.
+
+Delivery:
+
+- Repository PR: `#24`
+- PR title: `feat(slice-3): index status`
 
 ### Slice 4: Index Rebuild CLI
 
