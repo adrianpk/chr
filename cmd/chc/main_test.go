@@ -147,17 +147,17 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
-		Key:          "CHC-1",
-		Title:        "Do something",
-		Status:       "open",
-		Priority:     "high",
-		Severity:     "medium",
-		Type:         "task",
-		UseCase:      "onboarding",
-		ProjectArea:  "uxui",
-		RelativePath: filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
-		Path:         filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:         "CHC-1",
+		Title:       "Do something",
+		Status:      "open",
+		Priority:    "high",
+		Severity:    "normal",
+		Type:        "task",
+		UseCase:     "onboarding",
+		ProjectArea: "uxui",
+		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 
 	var stdout bytes.Buffer
@@ -174,7 +174,7 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 		t.Fatalf("ticket list returned error: %v", err)
 	}
 
-	want := "CHC-1\tDo something\topen\thigh\tmedium\ttask\tonboarding\t" + filepath.Join(".chc", "tickets", "CHC-1-Do-something.md")
+	want := "CHC-1\tDo something\topen\thigh\tnormal\ttask\tonboarding\tCHC-1-Do-something.md"
 	if !strings.Contains(stdout.String(), want) {
 		t.Fatalf("stdout = %q, want ticket row %q", stdout.String(), want)
 	}
@@ -185,17 +185,17 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
-		Key:          "CHC-1",
-		Title:        "Do something",
-		Status:       "open",
-		Priority:     "high",
-		Severity:     "medium",
-		Type:         "task",
-		UseCase:      "onboarding",
-		ProjectArea:  "uxui",
-		RelativePath: filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
-		Path:         filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:         "CHC-1",
+		Title:       "Do something",
+		Status:      "open",
+		Priority:    "high",
+		Severity:    "normal",
+		Type:        "task",
+		UseCase:     "onboarding",
+		ProjectArea: "uxui",
+		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 
 	var stdout bytes.Buffer
@@ -218,11 +218,11 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 		"title: Do something",
 		"status: open",
 		"priority: high",
-		"severity: medium",
+		"severity: normal",
 		"type: task",
 		"use_case: onboarding",
 		"project_area: uxui",
-		"path: " + filepath.Join(".chc", "tickets", "CHC-1-Do-something.md"),
+		"path: CHC-1-Do-something.md",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -253,7 +253,13 @@ func TestTicketShowRejectsMissingTicket(t *testing.T) {
 func TestTicketCommentAppendsComment(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeIndexedTicketFile(t, devRoot, projectDir)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -354,7 +360,13 @@ func TestTicketCommentRejectsMissingTicket(t *testing.T) {
 func TestTicketStatusUpdatesTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeIndexedTicketFile(t, devRoot, projectDir)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
 
 	addProject(t, devRoot, "example", projectDir)
 
