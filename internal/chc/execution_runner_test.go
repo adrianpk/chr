@@ -21,7 +21,7 @@ func TestExecutionRunnerRunsHarnessAndMarksSucceeded(t *testing.T) {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
-	executor := &fakeHarnessExecutor{}
+	executor := &fakeHarnessExecutor{resultPath: record.Artifacts.ResultPath}
 	runner := NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
@@ -112,6 +112,67 @@ func TestExecutionRunnerMarksFailedWhenHarnessFails(t *testing.T) {
 	}
 }
 
+func TestExecutionRunnerMarksFailedWhenResultIsMissing(t *testing.T) {
+	repository := newTestExecutionRunnerRepository(t)
+
+	record := testRunnerExecutionRecord(t.TempDir())
+	if err := repository.CreateExecution(t.Context(), record); err != nil {
+		t.Fatalf("CreateExecution returned error: %v", err)
+	}
+
+	executor := &fakeHarnessExecutor{}
+	runner := NewExecutionRunner(repository, executor)
+	runner.Now = fixedRunnerClock()
+
+	got, err := runner.Run(t.Context(), RunExecutionOptions{
+		Record:     record,
+		Invocation: testRunnerInvocation(record),
+	})
+	if err == nil {
+		t.Fatal("Run returned nil error")
+	}
+
+	if got.Status != ExecutionStatusFailed {
+		t.Fatalf("Status = %q, want failed", got.Status)
+	}
+
+	if !strings.Contains(got.FailureReason, "open execution result") {
+		t.Fatalf("FailureReason = %q, want missing result error", got.FailureReason)
+	}
+}
+
+func TestExecutionRunnerMarksFailedWhenResultIsMalformed(t *testing.T) {
+	repository := newTestExecutionRunnerRepository(t)
+
+	record := testRunnerExecutionRecord(t.TempDir())
+	if err := repository.CreateExecution(t.Context(), record); err != nil {
+		t.Fatalf("CreateExecution returned error: %v", err)
+	}
+
+	executor := &fakeHarnessExecutor{
+		resultPath:    record.Artifacts.ResultPath,
+		resultContent: `{`,
+	}
+	runner := NewExecutionRunner(repository, executor)
+	runner.Now = fixedRunnerClock()
+
+	got, err := runner.Run(t.Context(), RunExecutionOptions{
+		Record:     record,
+		Invocation: testRunnerInvocation(record),
+	})
+	if err == nil {
+		t.Fatal("Run returned nil error")
+	}
+
+	if got.Status != ExecutionStatusFailed {
+		t.Fatalf("Status = %q, want failed", got.Status)
+	}
+
+	if !strings.Contains(got.FailureReason, "decode execution result") {
+		t.Fatalf("FailureReason = %q, want malformed result error", got.FailureReason)
+	}
+}
+
 func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
@@ -151,8 +212,10 @@ func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 }
 
 type fakeHarnessExecutor struct {
-	commands []string
-	failAt   string
+	commands      []string
+	failAt        string
+	resultPath    string
+	resultContent string
 }
 
 func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, stdout, stderr io.Writer) error {
@@ -169,6 +232,17 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, std
 
 	if e.failAt == command.Args[0] {
 		return fmt.Errorf("failed %s", name)
+	}
+
+	if command.Args[0] == "run" && e.resultPath != "" {
+		content := e.resultContent
+		if content == "" {
+			content = `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"succeeded","summary":"done"}`
+		}
+
+		if err := os.WriteFile(e.resultPath, []byte(content), 0o644); err != nil {
+			return err
+		}
 	}
 
 	return nil

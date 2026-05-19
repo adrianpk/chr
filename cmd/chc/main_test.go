@@ -1500,7 +1500,52 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 		return err
 	}
 
+	if err := writeFakeTicketStartResult(command); err != nil {
+		return err
+	}
+
 	return e.err
+}
+
+func writeFakeTicketStartResult(command chc.HarnessCommand) error {
+	if command.Args[0] != "run" {
+		return nil
+	}
+
+	resultPath := harnessEnvValue(command, "CHC_RESULT_PATH")
+	if resultPath == "" {
+		return nil
+	}
+
+	content := `{"execution_id":"` + harnessEnvValue(command, "CHC_EXECUTION_ID") +
+		`","ticket_key":"` + harnessEnvValue(command, "CHC_TICKET_KEY") +
+		`","status":"succeeded","summary":"done"}`
+
+	return os.WriteFile(containerPathToProjectPath(command, resultPath), []byte(content), 0o644)
+}
+
+func harnessEnvValue(command chc.HarnessCommand, name string) string {
+	prefix := name + "="
+	for _, arg := range command.Args {
+		if strings.HasPrefix(arg, prefix) {
+			return strings.TrimPrefix(arg, prefix)
+		}
+	}
+
+	return ""
+}
+
+func containerPathToProjectPath(command chc.HarnessCommand, path string) string {
+	for index, arg := range command.Args {
+		if arg == "--volume" && index+1 < len(command.Args) {
+			parts := strings.SplitN(command.Args[index+1], ":", 2)
+			if len(parts) == 2 && strings.HasPrefix(path, parts[1]) {
+				return filepath.Join(parts[0], strings.TrimPrefix(path, parts[1]))
+			}
+		}
+	}
+
+	return path
 }
 
 func installFakeTicketStartHarnessExecutor(t *testing.T, err error) *fakeTicketStartHarnessExecutor {
