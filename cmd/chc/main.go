@@ -43,10 +43,30 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 		ErrWriter:             stderr,
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
+			newIndexCommand(stdout),
 			newInitCommand(stdout),
 			newProjectCommand(stdout),
 			newTicketCommand(stdout),
 		},
+	}
+}
+
+func newIndexCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "index",
+		Usage: "Manage derived project indexes",
+		Commands: []*cli.Command{
+			newIndexRebuildCommand(stdout),
+		},
+	}
+}
+
+func newIndexRebuildCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "rebuild",
+		Usage:  "Rebuild the resolved project's ticket index",
+		Flags:  ticketProjectFlags(),
+		Action: indexRebuildAction(stdout),
 	}
 }
 
@@ -764,6 +784,71 @@ func ticketNewAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketNew(ctx, cmd, stdout)
 	}
+}
+
+func indexRebuildAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runIndexRebuild(ctx, cmd, stdout)
+	}
+}
+
+func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("index rebuild does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	result, err := chc.NewTicketIndexRebuilder(index).RebuildProjectTickets(ctx, chc.RebuildProjectTicketsOptions{
+		ProjectID:  projectContext.ProjectID,
+		ProjectDir: projectContext.ProjectDir,
+		IndexedAt:  time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+
+	return printIndexRebuildResult(stdout, result)
+}
+
+func printIndexRebuildResult(stdout io.Writer, result chc.RebuildProjectTicketsResult) error {
+	if _, err := fmt.Fprintf(stdout, "indexed: %d\n", result.IndexedTickets); err != nil {
+		return fmt.Errorf("write index rebuild result: %w", err)
+	}
+
+	if _, err := fmt.Fprintf(stdout, "parse_errors: %d\n", len(result.ParseErrors)); err != nil {
+		return fmt.Errorf("write index rebuild result: %w", err)
+	}
+
+	for _, parseErr := range result.ParseErrors {
+		if _, err := fmt.Fprintf(stdout, "parse_error: %s %v\n", parseErr.RelativePath, parseErr.Err); err != nil {
+			return fmt.Errorf("write index rebuild result: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
