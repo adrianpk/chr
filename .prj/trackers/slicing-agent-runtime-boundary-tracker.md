@@ -23,7 +23,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Runtime Config Model | Delivered | `feat/slice-1-runtime-config-model` | `feat(slice-1): runtime config model` | `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md` | Repository PR #29. |
 | Slice 2: Runtime Asset Template | Delivered | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Repository PR #30. |
-| Slice 3: Runtime Init CLI | Planned | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Materialize runtime defaults for existing projects. |
+| Slice 3: Runtime Init CLI | Reviewing | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Materialize runtime defaults for existing projects. |
 | Slice 4: Runtime Plan Contract | Planned | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Compute Docker boundary paths and mounts. |
 | Slice 5: Runtime Validate CLI | Planned | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
 
@@ -105,25 +105,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add runtime command group.
-- [ ] Add `chc runtime init`.
-- [ ] Resolve project context through the existing resolver.
-- [ ] Support dry-run and skip-existing behavior.
-- [ ] Add focused CLI tests.
-- [ ] Document command behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add runtime command group.
+- [x] Add `chc runtime init`.
+- [x] Resolve project context through the existing resolver.
+- [x] Support dry-run and skip-existing behavior.
+- [x] Add focused CLI tests.
+- [x] Document command behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
-- T3.7: pending
-- T3.8: pending
+- T3.1: `b2bc397` `feat(cli): add runtime init command`
+- T3.2: `b2bc397` `feat(cli): add runtime init command`
+- T3.3: `b2bc397` `feat(cli): add runtime init command`
+- T3.4: `aa549e0` `feat(runtime): add runtime asset initializer`
+- T3.5: `f7b65a4` `test(runtime): cover runtime init command`
+- T3.6: `5b5b2c3` `docs(runtime): document runtime init command`
+- T3.7: `0d581a6` `docs(runtime): report runtime init cli slice`
+- T3.8: `docs(runtime): record runtime init validation`
 
 ## Slice 4: Runtime Plan Contract
 
@@ -202,6 +202,8 @@ Task commits:
 - Slice 1 validation: `make verify` pass.
 - Slice 2 validation: `go test ./internal/chc` pass.
 - Slice 2 validation: `make verify` pass.
+- Slice 3 validation: `go test ./internal/chc ./cmd/chc` pass.
+- Slice 3 validation: `make verify` pass.
 
 ## Notes
 
