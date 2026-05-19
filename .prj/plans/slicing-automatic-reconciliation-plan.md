@@ -172,7 +172,7 @@ Delivery:
 
 ### Slice 4: Index Rebuild CLI
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-4-index-rebuild-cli`
 Expected PR title: `feat(slice-4): index rebuild cli`
@@ -192,6 +192,11 @@ Candidate scope:
 Expected outcome:
 
 - a cloned or drifted project can rebuild derived ticket index state explicitly.
+
+Delivery:
+
+- Repository PR: `#25`
+- PR title: `feat(slice-4): index rebuild cli`
 
 ### Slice 5: Index Status CLI
 
