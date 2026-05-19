@@ -5,7 +5,7 @@ Slicing: Ticket Result Application
 Plan: `.prj/plans/slicing-ticket-result-application-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-result-application-tracker.md`
 Branch: `feat/slice-4-validation-evidence-writer`
-PR: pending
+PR: `#44`
 
 ## Purpose
 
