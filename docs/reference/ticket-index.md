@@ -32,6 +32,7 @@ Initial operations:
 
 - upsert one indexed ticket;
 - list indexed tickets for a project;
+- get one indexed ticket by project id and ticket key;
 - delete all indexed tickets for a project.
 
 Upserting a ticket replaces its tag rows transactionally.
