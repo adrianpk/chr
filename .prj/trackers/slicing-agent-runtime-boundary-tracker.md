@@ -1,6 +1,6 @@
 # Agent Runtime Boundary Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-agent-runtime-boundary-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -14,8 +14,8 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -25,7 +25,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 2: Runtime Asset Template | Delivered | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Repository PR #30. |
 | Slice 3: Runtime Init CLI | Delivered | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Repository PR #31. |
 | Slice 4: Runtime Plan Contract | Delivered | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Repository PR #32. |
-| Slice 5: Runtime Validate CLI | Reviewing | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
+| Slice 5: Runtime Validate CLI | Delivered | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Repository PR #33. |
 
 ## Slice 1: Runtime Config Model
 
