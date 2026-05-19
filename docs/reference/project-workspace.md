@@ -87,6 +87,30 @@ Markdown files are canonical assets.
 
 Indexes, databases, runtime traces, and notification state are supporting artifacts. They may be rebuilt or regenerated when their source assets allow it.
 
+## Runtime Config
+
+`.chc/config.yml` may define the project-local agent runtime contract under
+`runtime:`.
+
+Supported runtime fields:
+
+- `image`: Docker image tag used for the agent runtime.
+- `dockerfile`: project-relative path to the agent runtime Dockerfile.
+- `workdir`: container working directory used by future execution commands.
+- `artifact_dir`: project-relative directory for host-readable runtime results.
+- `validation_command`: command future runtime validation uses inside the configured boundary.
+
+When runtime fields are absent, `chc` uses safe local defaults:
+
+```yml
+runtime:
+  image: chc-agent-runtime:local
+  dockerfile: .chc/runtime/agent/Dockerfile
+  workdir: /workspace
+  artifact_dir: .chc/runtime/runs
+  validation_command: make verify
+```
+
 ## Go Package Boundary
 
 Project workspace behavior lives in the core `internal/chc` package.
