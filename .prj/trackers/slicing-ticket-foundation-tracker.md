@@ -27,7 +27,7 @@ Specs:
 | Slice 1: Ticket List | Delivered | `feat/slice-1-ticket-list` | `feat(slice-1): ticket list` | Repository PR #17. |
 | Slice 2: Ticket Show | Delivered | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Repository PR #18. |
 | Slice 3: Ticket Comments | Delivered | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Repository PR #19. |
-| Slice 4: Ticket Status Transitions | Reviewing | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Update ticket status through controlled commands. |
+| Slice 4: Ticket Status Transitions | Delivered | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Repository PR #20. |
 | Slice 5: Ticket Lifecycle Validation | Planned | `feat/slice-5-ticket-lifecycle-validation` | `feat(slice-5): ticket lifecycle validation` | Validate metadata and lifecycle consistency. |
 
 ## Slice 1: Ticket List
@@ -129,6 +129,7 @@ Task commits:
 - Slice 4 validation: `go test ./cmd/chc` pass.
 - Slice 4 validation: `go test ./internal/chc` pass.
 - Slice 4 validation: `make verify` pass.
+- Slice 4 merged into `dev` as PR #20.
 
 ## Slice 4: Ticket Status Transitions
 

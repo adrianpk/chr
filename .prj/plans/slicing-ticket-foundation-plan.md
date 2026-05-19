@@ -170,7 +170,7 @@ Delivery:
 
 ### Slice 4: Ticket Status Transitions
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-4-ticket-status-transitions`
 Expected PR title: `feat(slice-4): ticket status transitions`
@@ -190,6 +190,11 @@ Candidate scope:
 Expected outcome:
 
 - tickets can move through the initial lifecycle without manual frontmatter editing.
+
+Delivery:
+
+- Repository PR: `#20`
+- PR title: `feat(slice-4): ticket status transitions`
 
 ### Slice 5: Ticket Lifecycle Validation
 
