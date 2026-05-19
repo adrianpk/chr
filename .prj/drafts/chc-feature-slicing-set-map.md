@@ -188,7 +188,7 @@ Use case:
 
 > After an execution attempt, `chc` updates durable project state with status, evidence, and comments.
 
-Current state: not delivered.
+Current state: planned next in the operational MVP path.
 
 Candidate slices:
 
