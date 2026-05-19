@@ -128,6 +128,7 @@ func newRuntimeCommand(stdout io.Writer) *cli.Command {
 		Usage: "Manage project runtime assets",
 		Commands: []*cli.Command{
 			newRuntimeInitCommand(stdout),
+			newRuntimeValidateCommand(stdout),
 		},
 	}
 }
@@ -150,9 +151,33 @@ func newRuntimeInitCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newRuntimeValidateCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "validate",
+		Usage: "Validate the resolved project's runtime boundary",
+		Flags: append(projectRegistryFlags(),
+			&cli.StringFlag{
+				Name:  "dir",
+				Usage: "project directory override",
+			},
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print the validation plan without running Docker",
+			},
+		),
+		Action: runtimeValidateAction(stdout),
+	}
+}
+
 func runtimeInitAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runRuntimeInit(ctx, cmd, stdout)
+	}
+}
+
+func runtimeValidateAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runRuntimeValidate(ctx, cmd, stdout)
 	}
 }
 
@@ -1130,6 +1155,98 @@ func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	return printRuntimeInitResult(stdout, result)
+}
+
+func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("runtime validate does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
+
+	result, err := chc.ValidateRuntime(chc.RuntimeValidationOptions{
+		ProjectDir: projectContext.ProjectDir,
+		Config:     config.Runtime,
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := printRuntimeValidateResult(stdout, result, cmd.Bool("dry-run")); err != nil {
+		return err
+	}
+
+	if !chc.RuntimeValidationPassed(result.Checks) {
+		return fmt.Errorf("runtime validation failed")
+	}
+
+	return nil
+}
+
+func printRuntimeValidateResult(
+	stdout io.Writer,
+	result chc.RuntimeValidationResult,
+	dryRun bool,
+) error {
+	plan := result.Plan
+
+	if _, err := fmt.Fprintf(stdout, "runtime: %s\n", filepath.Join(plan.ProjectDir, chc.DirectoryName, "runtime")); err != nil {
+		return fmt.Errorf("write runtime result: %w", err)
+	}
+
+	lines := []string{
+		fmt.Sprintf("dry_run: %t", dryRun),
+		fmt.Sprintf("image: %s", plan.Image),
+		fmt.Sprintf("dockerfile: %s", plan.DockerfilePath),
+		fmt.Sprintf("workdir: %s", plan.ContainerWorkdir),
+		fmt.Sprintf("artifact_dir: %s", plan.ArtifactDir),
+		fmt.Sprintf("run_artifact_dir: %s", plan.RunArtifactDir),
+		fmt.Sprintf("result_path: %s", plan.ResultPath),
+		fmt.Sprintf("log_path: %s", plan.LogPath),
+		fmt.Sprintf("validation_command: %s", plan.ValidationCommand),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write runtime plan: %w", err)
+		}
+	}
+
+	for _, mount := range plan.Mounts {
+		if _, err := fmt.Fprintf(stdout, "mount: %s -> %s read_only=%t\n", mount.Source, mount.Target, mount.ReadOnly); err != nil {
+			return fmt.Errorf("write runtime mount: %w", err)
+		}
+	}
+
+	for _, check := range result.Checks {
+		status := "fail"
+		if check.OK {
+			status = "ok"
+		}
+
+		if _, err := fmt.Fprintf(stdout, "check: %s %s %s %s\n", status, check.Name, check.Path, check.Message); err != nil {
+			return fmt.Errorf("write runtime check: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func printRuntimeInitResult(stdout io.Writer, result chc.RuntimeInitResult) error {
