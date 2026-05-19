@@ -25,7 +25,7 @@ Specs:
 
 | Slice | Status | Expected Branch | Expected PR Title | Notes |
 | --- | --- | --- | --- | --- |
-| Slice 1: Ticket File Discovery | Planned | `feat/slice-1-ticket-file-discovery` | `feat(slice-1): ticket file discovery` | Discover canonical Markdown ticket files. |
+| Slice 1: Ticket File Discovery | Reviewing | `feat/slice-1-ticket-file-discovery` | `feat(slice-1): ticket file discovery` | Discover canonical Markdown ticket files. |
 | Slice 2: Ticket Index Rebuild | Planned | `feat/slice-2-ticket-index-rebuild` | `feat(slice-2): ticket index rebuild` | Rebuild derived ticket index for one project. |
 | Slice 3: Index Status | Planned | `feat/slice-3-index-status` | `feat(slice-3): index status` | Report stale, missing, orphaned, and invalid index state. |
 | Slice 4: Index Rebuild CLI | Planned | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Expose manual rebuild for recovery. |
@@ -46,19 +46,19 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add project ticket discovery core primitive.
-- [ ] Return stable relative and absolute ticket paths.
-- [ ] Add focused discovery tests.
-- [ ] Document ticket discovery behavior.
-- [ ] Run `make verify`.
+- [x] Add project ticket discovery core primitive.
+- [x] Return stable relative and absolute ticket paths.
+- [x] Add focused discovery tests.
+- [x] Document ticket discovery behavior.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
+- T1.1: `feat(ticket): add file discovery primitive`
+- T1.2: `feat(ticket): return stable discovered paths`
+- T1.3: `test(ticket): cover file discovery`
+- T1.4: `docs(ticket): document file discovery`
+- T1.5: `docs(planning): record ticket discovery validation`
 
 ## Slice 2: Ticket Index Rebuild
 
@@ -241,6 +241,8 @@ Task commits:
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
+- Slice 1 validation: `go test ./internal/chc` pass.
+- Slice 1 validation: `make verify` pass.
 
 ## Notes
 
