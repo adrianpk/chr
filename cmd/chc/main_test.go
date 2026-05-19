@@ -629,6 +629,96 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 	}
 }
 
+func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	addProject(t, devRoot, "example", projectDir)
+	record := createApplyResultExecution(t, devRoot, projectDir, chc.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, chc.ExecutionResultStatusSucceeded, "ready for review")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"apply-result",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		record.ID,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket apply-result returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"execution: exec-apply",
+		"ticket: CHC-1",
+		"status: reviewing",
+		"result_status: succeeded",
+		"dry_run: false",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	content := readFile(t, ticketPath)
+	for _, want := range []string{
+		`status: "reviewing"`,
+		"Execution exec-apply finished with status succeeded.",
+		"Summary: ready for review",
+		"## ",
+		"- command: make verify",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
+		}
+	}
+
+	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "result-application.md"))
+
+	tickets := listProjectTickets(t, devRoot, projectDir)
+	if len(tickets) != 1 || tickets[0].Status != "reviewing" {
+		t.Fatalf("indexed tickets = %#v, want reviewing CHC-1", tickets)
+	}
+}
+
+func TestTicketApplyResultDryRunDoesNotMutateTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	addProject(t, devRoot, "example", projectDir)
+	record := createApplyResultExecution(t, devRoot, projectDir, chc.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, chc.ExecutionResultStatusSucceeded, "ready for review")
+
+	before := readFile(t, ticketPath)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"apply-result",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+		record.ID,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket apply-result returned error: %v", err)
+	}
+
+	after := readFile(t, ticketPath)
+	if after != before {
+		t.Fatalf("dry-run mutated ticket:\n%s", after)
+	}
+
+	assertPathNotExists(t, filepath.Join(record.Artifacts.RunDir, "result-application.md"))
+}
+
 func TestTicketShowRejectsMissingTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -1502,6 +1592,110 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 	}
 
 	return records
+}
+
+func createApplyResultExecution(
+	t *testing.T,
+	devRoot string,
+	projectDir string,
+	status chc.ExecutionStatus,
+	failureReason string,
+) chc.ExecutionRecord {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	repository, err := chc.NewExecutionRepository(t.Context(), env, assetsFS)
+	if err != nil {
+		t.Fatalf("NewExecutionRepository returned error: %v", err)
+	}
+
+	defer func() {
+		if err := repository.Close(); err != nil {
+			t.Fatalf("close execution repository: %v", err)
+		}
+	}()
+
+	record := testApplyResultExecutionRecord(projectDir, status, failureReason)
+	if err := repository.CreateExecution(t.Context(), record); err != nil {
+		t.Fatalf("CreateExecution returned error: %v", err)
+	}
+
+	return record
+}
+
+func testApplyResultExecutionRecord(
+	projectDir string,
+	status chc.ExecutionStatus,
+	failureReason string,
+) chc.ExecutionRecord {
+	runDir := filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", "exec-apply")
+	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
+
+	return chc.ExecutionRecord{
+		ID:            "exec-apply",
+		ProjectID:     projectID(projectDir),
+		TicketKey:     "CHC-1",
+		TicketPath:    filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
+		Status:        status,
+		FailureReason: failureReason,
+		Runtime: chc.ExecutionRuntimeRef{
+			Image:             "chc-runtime:latest",
+			DockerfilePath:    filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
+			ContainerWorkdir:  "/workspace",
+			ValidationCommand: "make verify",
+		},
+		Artifacts: chc.ExecutionArtifacts{
+			RunDir:         runDir,
+			ResultPath:     filepath.Join(runDir, "result.json"),
+			LogPath:        filepath.Join(runDir, "runtime.log"),
+			ValidationPath: filepath.Join(runDir, "validation.log"),
+		},
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+}
+
+func writeApplyResultFile(
+	t *testing.T,
+	record chc.ExecutionRecord,
+	status chc.ExecutionResultStatus,
+	summary string,
+) {
+	t.Helper()
+
+	if err := os.MkdirAll(record.Artifacts.RunDir, 0o755); err != nil {
+		t.Fatalf("create execution run dir: %v", err)
+	}
+
+	content := fmt.Sprintf(
+		`{"execution_id":%q,"ticket_key":%q,"status":%q,"summary":%q}`,
+		record.ID,
+		record.TicketKey,
+		status,
+		summary,
+	)
+
+	if err := os.WriteFile(record.Artifacts.ResultPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write result file: %v", err)
+	}
+}
+
+func readFile(t *testing.T, path string) string {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read file: %v", err)
+	}
+
+	return string(content)
 }
 
 func testTicket() chc.Ticket {
