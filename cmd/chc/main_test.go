@@ -635,6 +635,7 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
 
 	addProject(t, devRoot, "example", projectDir)
+
 	record := createApplyResultExecution(t, devRoot, projectDir, chc.ExecutionStatusSucceeded, "")
 	writeApplyResultFile(t, record, chc.ExecutionResultStatusSucceeded, "ready for review")
 
@@ -692,6 +693,7 @@ func TestTicketApplyResultDryRunDoesNotMutateTicket(t *testing.T) {
 	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
 
 	addProject(t, devRoot, "example", projectDir)
+
 	record := createApplyResultExecution(t, devRoot, projectDir, chc.ExecutionStatusSucceeded, "")
 	writeApplyResultFile(t, record, chc.ExecutionResultStatusSucceeded, "ready for review")
 
