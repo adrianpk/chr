@@ -30,7 +30,7 @@ Specs:
 | Slice 3: Index Status | Delivered | `feat/slice-3-index-status` | `feat(slice-3): index status` | Repository PR #24. |
 | Slice 4: Index Rebuild CLI | Delivered | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Repository PR #25. |
 | Slice 5: Index Status CLI | Delivered | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Repository PR #26. |
-| Slice 6: Refresh Before Ticket Reads | Planned | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Make ticket read commands refresh automatically. |
+| Slice 6: Refresh Before Ticket Reads | Reviewing | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Make ticket read commands refresh automatically. |
 | Slice 7: Reconciliation Boundary for Execution | Planned | `feat/slice-7-reconciliation-execution-boundary` | `feat(slice-7): reconciliation execution boundary` | Prepare future execution and loop use. |
 
 ## Slice 1: Ticket File Discovery
@@ -188,23 +188,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Refresh before `ticket list`.
-- [ ] Refresh before `ticket show`.
-- [ ] Refresh before `ticket comment`.
-- [ ] Refresh before `ticket status`.
-- [ ] Add focused CLI tests for direct Markdown edits.
-- [ ] Document automatic refresh behavior.
-- [ ] Run `make verify`.
+- [x] Refresh before `ticket list`.
+- [x] Refresh before `ticket show`.
+- [x] Refresh before `ticket comment`.
+- [x] Refresh before `ticket status`.
+- [x] Add focused CLI tests for direct Markdown edits.
+- [x] Document automatic refresh behavior.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
+- T6.1: `feat(cli): refresh index before ticket reads`
+- T6.2: `feat(cli): refresh index before ticket reads`
+- T6.3: `feat(cli): refresh index before ticket reads`
+- T6.4: `feat(cli): refresh index before ticket reads`
+- T6.5: `test(cli): cover ticket read refresh`
+- T6.6: `docs(ticket): document automatic index refresh`
+- T6.7: `docs(planning): record ticket read refresh validation`
 
 ## Slice 7: Reconciliation Boundary for Execution
 
@@ -251,6 +251,8 @@ Task commits:
 - Slice 5 validation: initial `make verify` failed on output helper complexity.
 - Slice 5 validation: `make verify` pass after lint-focused refactor.
 - Slice 5 merged into `dev` as PR #26.
+- Slice 6 validation: `go test ./cmd/chc` pass.
+- Slice 6 validation: `make verify` pass.
 
 ## Notes
 

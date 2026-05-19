@@ -228,7 +228,7 @@ Delivery:
 
 ### Slice 6: Refresh Before Ticket Reads
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-6-refresh-before-ticket-reads`
 Expected PR title: `feat(slice-6): refresh before ticket reads`
@@ -249,6 +249,11 @@ Candidate scope:
 Expected outcome:
 
 - ticket commands observe direct Markdown edits without user babysitting.
+
+Delivery:
+
+- Repository PR: pending review.
+- PR title: `feat(slice-6): refresh before ticket reads`
 
 ### Slice 7: Reconciliation Boundary for Execution
 
