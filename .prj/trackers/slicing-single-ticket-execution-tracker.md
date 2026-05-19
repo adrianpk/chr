@@ -22,7 +22,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Execution Record Model | Delivered | `feat/slice-1-execution-record-model` | `feat(slice-1): execution record model` | `.prj/reports/slices/single-ticket-execution/slice-1-execution-record-model.md` | Repository PR #34. |
-| Slice 2: Execution Repository | Planned | `feat/slice-2-execution-repository` | `feat(slice-2): execution repository` | `.prj/reports/slices/single-ticket-execution/slice-2-execution-repository.md` | Persist execution attempts. |
+| Slice 2: Execution Repository | Reviewing | `feat/slice-2-execution-repository` | `feat(slice-2): execution repository` | `.prj/reports/slices/single-ticket-execution/slice-2-execution-repository.md` | Persist execution attempts. |
 | Slice 3: Ticket Start Preflight | Planned | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Prepare one ticket execution without invoking an agent. |
 | Slice 4: Harness Invocation Contract | Planned | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Build deterministic harness invocation metadata. |
 | Slice 5: Agent Harness Invocation | Planned | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Run one bounded harness attempt. |
@@ -75,23 +75,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add execution record migration.
-- [ ] Add execution repository APIs.
-- [ ] Store project ID and ticket key references.
-- [ ] Add focused repository tests.
-- [ ] Document execution persistence layout.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add execution record migration.
+- [x] Add execution repository APIs.
+- [x] Store project ID and ticket key references.
+- [x] Add focused repository tests.
+- [x] Document execution persistence layout.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
+- T2.1: `69a13bc` `feat(execution): add execution record migration`
+- T2.2: `5e8b502` `feat(execution): add execution repository`
+- T2.3: `5e8b502` `feat(execution): add execution repository`
+- T2.4: `b28cfa2` `test(execution): cover execution repository`
+- T2.5: `318c5b5` `docs(execution): document execution persistence`
+- T2.6: `9c2f75a` `docs(execution): report execution repository slice`
+- T2.7: `docs(execution): record execution repository validation`
 
 ## Slice 3: Ticket Start Preflight
 
@@ -274,6 +274,8 @@ Task commits:
 - Planning validation: documentation diff reviewed.
 - Slice 1 validation: `go test ./internal/chc` pass.
 - Slice 1 validation: `make verify` pass.
+- Slice 2 validation: `go test ./internal/chc` pass.
+- Slice 2 validation: `make verify` pass.
 
 ## Notes
 
