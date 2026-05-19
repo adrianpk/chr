@@ -50,3 +50,27 @@ earlier than `started_at`.
 Execution records copy runtime references from the computed runtime plan at the
 time of execution. This keeps later review tied to the runtime boundary that was
 used for that attempt, even if project config changes later.
+
+## Persistence
+
+Execution records are stored in the user-level SQLite database alongside the
+project registry and ticket index.
+
+The `execution_records` table is keyed by execution `id` and stores:
+
+- project and ticket references;
+- execution status;
+- runtime image, Dockerfile, workdir, and validation command;
+- run, result, log, and validation artifact paths;
+- failure reason;
+- lifecycle timestamps.
+
+The repository supports:
+
+- creating an execution record;
+- updating an execution record;
+- getting one execution record by ID;
+- listing execution records for one project ticket.
+
+Execution records are linked to `projects(id)` and are deleted when their
+project is deleted.
