@@ -164,6 +164,7 @@ func (r *sqliteExecutionRepository) ListTicketExecutions(
 	}()
 
 	records := []ExecutionRecord{}
+
 	for rows.Next() {
 		record, err := scanExecution(rows)
 		if err != nil {
@@ -194,8 +195,11 @@ type executionScanner interface {
 
 func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
 	var record ExecutionRecord
+
 	var status string
+
 	var createdAt, updatedAt string
+
 	var startedAt, finishedAt sql.NullString
 
 	err := scanner.Scan(
@@ -235,6 +239,7 @@ func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
 	record.Status = ExecutionStatus(status)
 	record.CreatedAt = parsedCreatedAt
 	record.UpdatedAt = parsedUpdatedAt
+
 	record.StartedAt, err = parseOptionalExecutionTime(startedAt)
 	if err != nil {
 		return ExecutionRecord{}, err

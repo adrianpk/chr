@@ -161,9 +161,10 @@ func assertExecutionRecord(t *testing.T, got, want ExecutionRecord) {
 	got.FinishedAt = nil
 	want.FinishedAt = nil
 
-	if got != want ||
-		!gotStartedAt.Equal(wantStartedAt) ||
-		!gotFinishedAt.Equal(wantFinishedAt) {
+	matches := got == want &&
+		gotStartedAt.Equal(wantStartedAt) &&
+		gotFinishedAt.Equal(wantFinishedAt)
+	if !matches {
 		t.Fatalf("ExecutionRecord = %#v, want %#v", got, want)
 	}
 }
