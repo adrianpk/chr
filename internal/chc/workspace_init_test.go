@@ -28,6 +28,7 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 	assertFile(t, dir, ".chc/config.yml")
 	assertFile(t, dir, ".chc/agents/CONVENTIONS.md")
 	assertFile(t, dir, ".chc/agents/playbooks/ticket-workflow.md")
+	assertFile(t, dir, ".chc/runtime/agent/Dockerfile")
 	assertFile(t, dir, "AGENTS.md")
 	assertNotExists(t, dir, ".chc/root/AGENTS.md")
 }
@@ -84,6 +85,34 @@ func TestInitDoesNotOverwriteExistingRootAgents(t *testing.T) {
 	}
 }
 
+func TestInitDoesNotOverwriteExistingRuntimeTemplate(t *testing.T) {
+	dir := t.TempDir()
+	initializer := newTestInitializer()
+
+	dockerfilePath := filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile")
+	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+		t.Fatalf("create runtime template directory: %v", err)
+	}
+
+	if err := os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644); err != nil {
+		t.Fatalf("write runtime template: %v", err)
+	}
+
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
+	if err != nil {
+		t.Fatalf("Init returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(dockerfilePath)
+	if err != nil {
+		t.Fatalf("read runtime template: %v", err)
+	}
+
+	if string(content) != "FROM custom\n" {
+		t.Fatalf("runtime template content = %q, want custom content unchanged", string(content))
+	}
+}
+
 func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
@@ -99,6 +128,10 @@ func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 
 	if _, err := os.Stat(filepath.Join(dir, DirectoryName)); !os.IsNotExist(err) {
 		t.Fatalf("dry run created workspace or returned unexpected stat error: %v", err)
+	}
+
+	if !contains(result.Created, ".chc/runtime/agent/Dockerfile") {
+		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 }
 
@@ -167,7 +200,10 @@ func TestInitRejectsUnknownProfile(t *testing.T) {
 func newTestInitializer() Workspace {
 	return NewWorkspace(fstest.MapFS{
 		"assets/workspace/profiles/standard/config.yml": {
-			Data: []byte("version: 1\nworkspace_root: .chc\n"),
+			Data: []byte("version: 1\nworkspace_root: .chc\nruntime:\n  dockerfile: .chc/runtime/agent/Dockerfile\n"),
+		},
+		"assets/workspace/profiles/standard/runtime/agent/Dockerfile": {
+			Data: []byte("FROM ubuntu:24.04\n"),
 		},
 		"assets/workspace/profiles/standard/manifest.md": {
 			Data: []byte("# ChrysoCoord Workspace\n"),
@@ -182,7 +218,10 @@ func newTestInitializer() Workspace {
 			Data: []byte("# Agent Operating Contract\n"),
 		},
 		"assets/workspace/profiles/minimal/config.yml": {
-			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: minimal\n"),
+			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: minimal\nruntime:\n  dockerfile: .chc/runtime/agent/Dockerfile\n"),
+		},
+		"assets/workspace/profiles/minimal/runtime/agent/Dockerfile": {
+			Data: []byte("FROM ubuntu:24.04\n"),
 		},
 		"assets/workspace/profiles/minimal/manifest.md": {
 			Data: []byte("# Minimal Workspace\n"),
@@ -191,7 +230,10 @@ func newTestInitializer() Workspace {
 			Data: []byte("# Minimal Agents\n"),
 		},
 		"assets/workspace/profiles/personal/config.yml": {
-			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: personal\n"),
+			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: personal\nruntime:\n  dockerfile: .chc/runtime/agent/Dockerfile\n"),
+		},
+		"assets/workspace/profiles/personal/runtime/agent/Dockerfile": {
+			Data: []byte("FROM ubuntu:24.04\n"),
 		},
 		"assets/workspace/profiles/personal/manifest.md": {
 			Data: []byte("# Personal Workspace\n"),
