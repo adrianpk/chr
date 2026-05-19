@@ -22,7 +22,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Runtime Config Model | Delivered | `feat/slice-1-runtime-config-model` | `feat(slice-1): runtime config model` | `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md` | Repository PR #29. |
-| Slice 2: Runtime Asset Template | Reviewing | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Provide default agent-runtime Dockerfile template. |
+| Slice 2: Runtime Asset Template | Delivered | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Repository PR #30. |
 | Slice 3: Runtime Init CLI | Planned | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Materialize runtime defaults for existing projects. |
 | Slice 4: Runtime Plan Contract | Planned | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Compute Docker boundary paths and mounts. |
 | Slice 5: Runtime Validate CLI | Planned | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
