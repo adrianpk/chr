@@ -24,7 +24,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 1: Execution Record Model | Delivered | `feat/slice-1-execution-record-model` | `feat(slice-1): execution record model` | `.prj/reports/slices/single-ticket-execution/slice-1-execution-record-model.md` | Repository PR #34. |
 | Slice 2: Execution Repository | Delivered | `feat/slice-2-execution-repository` | `feat(slice-2): execution repository` | `.prj/reports/slices/single-ticket-execution/slice-2-execution-repository.md` | Repository PR #35. |
 | Slice 3: Ticket Start Preflight | Delivered | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Repository PR #36. |
-| Slice 4: Harness Invocation Contract | Planned | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Build deterministic harness invocation metadata. |
+| Slice 4: Harness Invocation Contract | Reviewing | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Build deterministic harness invocation metadata. |
 | Slice 5: Agent Harness Invocation | Planned | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Run one bounded harness attempt. |
 | Slice 6: Execution Result Capture | Planned | `feat/slice-6-execution-result-capture` | `feat(slice-6): execution result capture` | `.prj/reports/slices/single-ticket-execution/slice-6-execution-result-capture.md` | Capture structured result artifacts. |
 | Slice 7: Execution Failure Handling | Planned | `feat/slice-7-execution-failure-handling` | `feat(slice-7): execution failure handling` | `.prj/reports/slices/single-ticket-execution/slice-7-execution-failure-handling.md` | Record clear execution failure states. |
@@ -147,25 +147,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add harness invocation model.
-- [ ] Render Docker build/run command arguments from `RuntimePlan`.
-- [ ] Include ticket key and execution ID in artifact paths.
-- [ ] Keep command construction side-effect free.
-- [ ] Add focused command rendering tests.
-- [ ] Document harness invocation contract.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add harness invocation model.
+- [x] Render Docker build/run command arguments from `RuntimePlan`.
+- [x] Include ticket key and execution ID in artifact paths.
+- [x] Keep command construction side-effect free.
+- [x] Add focused command rendering tests.
+- [x] Document harness invocation contract.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
-- T4.8: pending
+- T4.1: `4d1d0ed` `feat(execution): add harness invocation contract`
+- T4.2: `4d1d0ed` `feat(execution): add harness invocation contract`
+- T4.3: `4d1d0ed` `feat(execution): add harness invocation contract`
+- T4.4: `4d1d0ed` `feat(execution): add harness invocation contract`
+- T4.5: `509aff9` `test(execution): cover harness invocation contract`
+- T4.6: `2e34812` `docs(execution): document harness invocation contract`
+- T4.7: `2e34812` `docs(execution): document harness invocation contract`
+- T4.8: `docs(execution): record harness invocation validation`
 
 ## Slice 5: Agent Harness Invocation
 
