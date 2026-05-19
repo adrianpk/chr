@@ -121,10 +121,7 @@ func (c *ticketIndexStatusChecker) compareProjectTicketIndex(
 
 		indexed, found := indexedByRelativePath[file.RelativePath]
 		if !found {
-			status.Missing = append(status.Missing, TicketIndexStatusFile{
-				Path:         file.Path,
-				RelativePath: file.RelativePath,
-			})
+			status.Missing = append(status.Missing, TicketIndexStatusFile(file))
 
 			continue
 		}
@@ -173,7 +170,7 @@ func indexedTicketsByRelativePath(tickets []IndexedTicket) map[string]IndexedTic
 	return indexed
 }
 
-func ticketFileStateChanged(indexed IndexedTicket, parsed IndexedTicket) bool {
+func ticketFileStateChanged(indexed, parsed IndexedTicket) bool {
 	return indexed.FileSize != parsed.FileSize ||
 		indexed.ContentHash != parsed.ContentHash
 }
