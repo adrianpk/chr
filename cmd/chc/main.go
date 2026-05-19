@@ -46,6 +46,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 			newIndexCommand(stdout),
 			newInitCommand(stdout),
 			newProjectCommand(stdout),
+			newRuntimeCommand(stdout),
 			newTicketCommand(stdout),
 		},
 	}
@@ -118,6 +119,40 @@ func newInitCommand(stdout io.Writer) *cli.Command {
 
 			return printInitResult(stdout, result)
 		},
+	}
+}
+
+func newRuntimeCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "runtime",
+		Usage: "Manage project runtime assets",
+		Commands: []*cli.Command{
+			newRuntimeInitCommand(stdout),
+		},
+	}
+}
+
+func newRuntimeInitCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "init",
+		Usage: "Install missing runtime defaults in the resolved project",
+		Flags: append(projectRegistryFlags(),
+			&cli.StringFlag{
+				Name:  "dir",
+				Usage: "project directory override",
+			},
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print planned changes without writing files",
+			},
+		),
+		Action: runtimeInitAction(stdout),
+	}
+}
+
+func runtimeInitAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runRuntimeInit(ctx, cmd, stdout)
 	}
 }
 
@@ -1062,6 +1097,60 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 
 	if _, err := fmt.Fprintf(stdout, "ticket: %s\n", result.Path); err != nil {
 		return fmt.Errorf("write ticket result: %w", err)
+	}
+
+	return nil
+}
+
+func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("runtime init does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	result, err := chc.NewRuntimeAssets(assetsFS).Init(ctx, chc.RuntimeInitOptions{
+		ProjectDir: projectContext.ProjectDir,
+		DryRun:     cmd.Bool("dry-run"),
+	})
+	if err != nil {
+		return err
+	}
+
+	return printRuntimeInitResult(stdout, result)
+}
+
+func printRuntimeInitResult(stdout io.Writer, result chc.RuntimeInitResult) error {
+	if _, err := fmt.Fprintf(stdout, "runtime: %s\n", result.Root); err != nil {
+		return fmt.Errorf("write runtime result: %w", err)
+	}
+
+	for _, created := range result.Created {
+		if _, err := fmt.Fprintf(stdout, "create %s\n", created); err != nil {
+			return fmt.Errorf("write created path: %w", err)
+		}
+	}
+
+	for _, skipped := range result.Skipped {
+		if _, err := fmt.Fprintf(stdout, "skip existing %s\n", skipped); err != nil {
+			return fmt.Errorf("write skipped path: %w", err)
+		}
+	}
+
+	if _, err := fmt.Fprintln(stdout, "done"); err != nil {
+		return fmt.Errorf("write completion result: %w", err)
 	}
 
 	return nil
