@@ -146,8 +146,27 @@ the execution moves through the lifecycle.
 does not create an execution record, create artifact directories, or invoke the
 harness.
 
-The runner only captures process output in this slice. Structured result parsing
-and result artifact interpretation belong to later execution-result slices.
+## Execution Result Artifact
+
+The harness run command must write a JSON result envelope to `CHC_RESULT_PATH`.
+
+Envelope fields:
+
+- `execution_id`: execution attempt ID.
+- `ticket_key`: selected ticket key.
+- `status`: `succeeded` or `failed`.
+- `summary`: human-readable result summary.
+
+The runner reads the result artifact after the harness commands complete. A
+missing result file, malformed JSON, invalid status, mismatched execution ID, or
+mismatched ticket key marks the execution `failed` and records the diagnostic in
+`failure_reason`.
+
+When the result status is `failed`, the execution is marked `failed` even if the
+Docker commands exited successfully. When the result status is `succeeded`, the
+execution is marked `succeeded`.
+
+Process stdout and stderr continue to be written to `CHC_LOG_PATH`.
 
 ## Persistence
 
