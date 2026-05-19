@@ -31,7 +31,7 @@ Specs:
 | Slice 4: Index Rebuild CLI | Delivered | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Repository PR #25. |
 | Slice 5: Index Status CLI | Delivered | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Repository PR #26. |
 | Slice 6: Refresh Before Ticket Reads | Delivered | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Repository PR #27. |
-| Slice 7: Reconciliation Boundary for Execution | Planned | `feat/slice-7-reconciliation-execution-boundary` | `feat(slice-7): reconciliation execution boundary` | Prepare future execution and loop use. |
+| Slice 7: Reconciliation Boundary for Execution | Reviewing | `feat/slice-7-reconciliation-execution-boundary` | `feat(slice-7): reconciliation execution boundary` | Prepare future execution and loop use. |
 
 ## Slice 1: Ticket File Discovery
 
@@ -219,19 +219,19 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add reusable reconciliation service boundary.
-- [ ] Define result semantics for future execution blockers.
-- [ ] Add tests for clean refresh and parse-error outcomes.
-- [ ] Document execution precondition.
-- [ ] Run `make verify`.
+- [x] Add reusable reconciliation service boundary.
+- [x] Define result semantics for future execution blockers.
+- [x] Add tests for clean refresh and parse-error outcomes.
+- [x] Document execution precondition.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
+- T7.1: `feat(ticket): add reconciliation boundary`
+- T7.2: `feat(ticket): add reconciliation boundary`
+- T7.3: `test(ticket): cover reconciliation boundary`
+- T7.4: `docs(ticket): document reconciliation boundary`
+- T7.5: `docs(planning): record reconciliation boundary validation`
 
 ## Validation Record
 
@@ -254,6 +254,8 @@ Task commits:
 - Slice 6 validation: `go test ./cmd/chc` pass.
 - Slice 6 validation: `make verify` pass.
 - Slice 6 merged into `dev` as PR #27.
+- Slice 7 validation: `go test ./internal/chc` pass.
+- Slice 7 validation: `make verify` pass.
 
 ## Notes
 

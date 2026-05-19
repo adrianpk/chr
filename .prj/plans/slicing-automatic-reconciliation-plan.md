@@ -257,7 +257,7 @@ Delivery:
 
 ### Slice 7: Reconciliation Boundary for Execution
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-7-reconciliation-execution-boundary`
 Expected PR title: `feat(slice-7): reconciliation execution boundary`
@@ -276,6 +276,11 @@ Candidate scope:
 Expected outcome:
 
 - future single-ticket execution and loop slicings can depend on one reconciliation contract instead of rebuilding their own sync logic.
+
+Delivery:
+
+- Repository PR: pending review.
+- PR title: `feat(slice-7): reconciliation execution boundary`
 
 ## Acceptance Criteria
 
