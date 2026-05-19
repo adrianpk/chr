@@ -26,68 +26,123 @@ func TestValidateExecutionRecordAcceptsValidRecord(t *testing.T) {
 func TestValidateExecutionRecordRejectsMissingRequiredFields(t *testing.T) {
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
-	tests := []struct {
-		name   string
-		record ExecutionRecord
-	}{
-		{
-			name: "id",
-			record: ExecutionRecord{
-				ProjectID: "project-1",
-				TicketKey: "CHC-1",
-				Status:    ExecutionStatusPending,
-				CreatedAt: now,
-				UpdatedAt: now,
-			},
-		},
-		{
-			name: "project id",
-			record: ExecutionRecord{
-				ID:        "exec-1",
-				TicketKey: "CHC-1",
-				Status:    ExecutionStatusPending,
-				CreatedAt: now,
-				UpdatedAt: now,
-			},
-		},
-		{
-			name: "ticket key",
-			record: ExecutionRecord{
-				ID:        "exec-1",
-				ProjectID: "project-1",
-				Status:    ExecutionStatusPending,
-				CreatedAt: now,
-				UpdatedAt: now,
-			},
-		},
-		{
-			name: "created at",
-			record: ExecutionRecord{
-				ID:        "exec-1",
-				ProjectID: "project-1",
-				TicketKey: "CHC-1",
-				Status:    ExecutionStatusPending,
-				UpdatedAt: now,
-			},
-		},
-		{
-			name: "updated at",
-			record: ExecutionRecord{
-				ID:        "exec-1",
-				ProjectID: "project-1",
-				TicketKey: "CHC-1",
-				Status:    ExecutionStatusPending,
-				CreatedAt: now,
-			},
-		},
-	}
-
-	for _, test := range tests {
+	for _, test := range missingRequiredExecutionRecordTests(now) {
 		t.Run(test.name, func(t *testing.T) {
 			if err := ValidateExecutionRecord(test.record); err == nil {
 				t.Fatal("ValidateExecutionRecord returned nil error")
 			}
 		})
+	}
+}
+
+func missingRequiredExecutionRecordTests(now time.Time) []struct {
+	name   string
+	record ExecutionRecord
+} {
+	return []struct {
+		name   string
+		record ExecutionRecord
+	}{
+		missingExecutionIDTest(now),
+		missingExecutionProjectIDTest(now),
+		missingExecutionTicketKeyTest(now),
+		missingExecutionCreatedAtTest(now),
+		missingExecutionUpdatedAtTest(now),
+	}
+}
+
+func missingExecutionIDTest(now time.Time) struct {
+	name   string
+	record ExecutionRecord
+} {
+	return struct {
+		name   string
+		record ExecutionRecord
+	}{
+		name: "id",
+		record: ExecutionRecord{
+			ProjectID: "project-1",
+			TicketKey: "CHC-1",
+			Status:    ExecutionStatusPending,
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
+	}
+}
+
+func missingExecutionProjectIDTest(now time.Time) struct {
+	name   string
+	record ExecutionRecord
+} {
+	return struct {
+		name   string
+		record ExecutionRecord
+	}{
+		name: "project id",
+		record: ExecutionRecord{
+			ID:        "exec-1",
+			TicketKey: "CHC-1",
+			Status:    ExecutionStatusPending,
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
+	}
+}
+
+func missingExecutionTicketKeyTest(now time.Time) struct {
+	name   string
+	record ExecutionRecord
+} {
+	return struct {
+		name   string
+		record ExecutionRecord
+	}{
+		name: "ticket key",
+		record: ExecutionRecord{
+			ID:        "exec-1",
+			ProjectID: "project-1",
+			Status:    ExecutionStatusPending,
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
+	}
+}
+
+func missingExecutionCreatedAtTest(now time.Time) struct {
+	name   string
+	record ExecutionRecord
+} {
+	return struct {
+		name   string
+		record ExecutionRecord
+	}{
+		name: "created at",
+		record: ExecutionRecord{
+			ID:        "exec-1",
+			ProjectID: "project-1",
+			TicketKey: "CHC-1",
+			Status:    ExecutionStatusPending,
+			UpdatedAt: now,
+		},
+	}
+}
+
+func missingExecutionUpdatedAtTest(now time.Time) struct {
+	name   string
+	record ExecutionRecord
+} {
+	return struct {
+		name   string
+		record ExecutionRecord
+	}{
+		name: "updated at",
+		record: ExecutionRecord{
+			ID:        "exec-1",
+			ProjectID: "project-1",
+			TicketKey: "CHC-1",
+			Status:    ExecutionStatusPending,
+			CreatedAt: now,
+		},
 	}
 }
 
