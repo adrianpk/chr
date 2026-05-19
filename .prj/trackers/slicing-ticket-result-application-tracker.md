@@ -22,7 +22,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Result Application Model | Delivered | `feat/slice-1-result-application-model` | `feat(slice-1): result application model` | `.prj/reports/slices/ticket-result-application/slice-1-result-application-model.md` | Repository PR #41. |
-| Slice 2: Ticket State Writer | Reviewing | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Update ticket status from application outcome. |
+| Slice 2: Ticket State Writer | Reviewing | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Repository PR #42. |
 | Slice 3: Execution Comment Writer | Planned | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Append execution summary comments. |
 | Slice 4: Validation Evidence Writer | Planned | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Record validation evidence. |
 | Slice 5: Changed Files Summary | Planned | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Record changed-file summaries. |
