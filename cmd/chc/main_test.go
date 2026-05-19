@@ -431,6 +431,95 @@ func TestTicketStatusRejectsMissingTicket(t *testing.T) {
 	}
 }
 
+func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+	indexTicket(t, devRoot, projectDir, chc.IndexedTicket{
+		Key:          "CHC-9",
+		Title:        "Old",
+		Status:       "open",
+		RelativePath: "CHC-9-Old.md",
+		Path:         filepath.Join(projectDir, ".chc", "tickets", "CHC-9-Old.md"),
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"index",
+		"rebuild",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("index rebuild returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"indexed: 1",
+		"parse_errors: 0",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+
+	tickets := listProjectTickets(t, devRoot, projectDir)
+	if len(tickets) != 1 {
+		t.Fatalf("len(tickets) = %d, want 1", len(tickets))
+	}
+
+	if tickets[0].Key != "CHC-1" || tickets[0].Title != "Do something" {
+		t.Fatalf("ticket = %#v, want rebuilt CHC-1", tickets[0])
+	}
+}
+
+func TestIndexRebuildReportsParseErrors(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	badTicketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Bad.md")
+	if err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755); err != nil {
+		t.Fatalf("create ticket dir: %v", err)
+	}
+
+	if err := os.WriteFile(badTicketPath, []byte("# Bad\n"), 0o644); err != nil {
+		t.Fatalf("write bad ticket: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"index",
+		"rebuild",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("index rebuild returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"indexed: 0",
+		"parse_errors: 1",
+		"parse_error: CHC-1-Bad.md",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
@@ -768,6 +857,57 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket chc.IndexedTic
 	if err := index.UpsertTicket(t.Context(), ticket); err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
+}
+
+func listProjectTickets(t *testing.T, devRoot, projectDir string) []chc.IndexedTicket {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	index, err := chc.NewTicketIndex(t.Context(), env, assetsFS)
+	if err != nil {
+		t.Fatalf("NewTicketIndex returned error: %v", err)
+	}
+
+	defer func() {
+		if err := index.Close(); err != nil {
+			t.Fatalf("close ticket index: %v", err)
+		}
+	}()
+
+	tickets, err := index.ListProjectTickets(t.Context(), projectID(projectDir))
+	if err != nil {
+		t.Fatalf("ListProjectTickets returned error: %v", err)
+	}
+
+	return tickets
+}
+
+func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket chc.Ticket) string {
+	t.Helper()
+
+	ticketPath := filepath.Join(projectDir, ".chc", "tickets", filepath.FromSlash(relativePath))
+
+	content, err := chc.NewTicketRenderer().RenderTicket(ticket)
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
+		t.Fatalf("create ticket dir: %v", err)
+	}
+
+	if err := os.WriteFile(ticketPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write ticket: %v", err)
+	}
+
+	return ticketPath
 }
 
 func newTestWorkspace(t *testing.T) string {
