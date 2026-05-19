@@ -24,11 +24,7 @@ type RuntimeValidationCheck struct {
 }
 
 func ValidateRuntime(opts RuntimeValidationOptions) (RuntimeValidationResult, error) {
-	plan, err := PlanRuntime(RuntimePlanOptions{
-		ProjectDir: opts.ProjectDir,
-		Config:     opts.Config,
-		RunID:      opts.RunID,
-	})
+	plan, err := PlanRuntime(RuntimePlanOptions(opts))
 	if err != nil {
 		return RuntimeValidationResult{}, err
 	}

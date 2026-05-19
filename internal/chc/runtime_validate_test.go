@@ -23,6 +23,7 @@ func TestValidateRuntimePassesWhenRequiredPathsExist(t *testing.T) {
 func TestValidateRuntimeFailsWhenDockerfileIsMissing(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
+
 	if err := os.MkdirAll(filepath.Join(dir, ".chc", "runtime", "runs"), 0o755); err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}

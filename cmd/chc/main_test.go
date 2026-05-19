@@ -286,6 +286,7 @@ func TestRuntimeValidateFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 func TestRuntimeValidateUsesActiveProject(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeRuntimeTemplate(t, projectDir)
+
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
