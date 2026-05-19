@@ -228,7 +228,7 @@ Delivery:
 
 ### Slice 6: Refresh Before Ticket Reads
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-6-refresh-before-ticket-reads`
 Expected PR title: `feat(slice-6): refresh before ticket reads`
@@ -252,7 +252,7 @@ Expected outcome:
 
 Delivery:
 
-- Repository PR: pending review.
+- Repository PR: `#27`
 - PR title: `feat(slice-6): refresh before ticket reads`
 
 ### Slice 7: Reconciliation Boundary for Execution

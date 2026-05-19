@@ -30,7 +30,7 @@ Specs:
 | Slice 3: Index Status | Delivered | `feat/slice-3-index-status` | `feat(slice-3): index status` | Repository PR #24. |
 | Slice 4: Index Rebuild CLI | Delivered | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Repository PR #25. |
 | Slice 5: Index Status CLI | Delivered | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Repository PR #26. |
-| Slice 6: Refresh Before Ticket Reads | Reviewing | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Make ticket read commands refresh automatically. |
+| Slice 6: Refresh Before Ticket Reads | Delivered | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Repository PR #27. |
 | Slice 7: Reconciliation Boundary for Execution | Planned | `feat/slice-7-reconciliation-execution-boundary` | `feat(slice-7): reconciliation execution boundary` | Prepare future execution and loop use. |
 
 ## Slice 1: Ticket File Discovery
@@ -253,6 +253,7 @@ Task commits:
 - Slice 5 merged into `dev` as PR #26.
 - Slice 6 validation: `go test ./cmd/chc` pass.
 - Slice 6 validation: `make verify` pass.
+- Slice 6 merged into `dev` as PR #27.
 
 ## Notes
 
