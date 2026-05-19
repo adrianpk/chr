@@ -21,7 +21,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Execution Record Model | Reviewing | `feat/slice-1-execution-record-model` | `feat(slice-1): execution record model` | `.prj/reports/slices/single-ticket-execution/slice-1-execution-record-model.md` | Define execution attempt domain model. |
+| Slice 1: Execution Record Model | Delivered | `feat/slice-1-execution-record-model` | `feat(slice-1): execution record model` | `.prj/reports/slices/single-ticket-execution/slice-1-execution-record-model.md` | Repository PR #34. |
 | Slice 2: Execution Repository | Planned | `feat/slice-2-execution-repository` | `feat(slice-2): execution repository` | `.prj/reports/slices/single-ticket-execution/slice-2-execution-repository.md` | Persist execution attempts. |
 | Slice 3: Ticket Start Preflight | Planned | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Prepare one ticket execution without invoking an agent. |
 | Slice 4: Harness Invocation Contract | Planned | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Build deterministic harness invocation metadata. |
