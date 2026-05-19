@@ -1,6 +1,6 @@
 # Ticket Foundation Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-ticket-foundation-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -19,6 +19,8 @@ Specs:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -28,7 +30,7 @@ Specs:
 | Slice 2: Ticket Show | Delivered | `feat/slice-2-ticket-show` | `feat(slice-2): ticket show` | Repository PR #18. |
 | Slice 3: Ticket Comments | Delivered | `feat/slice-3-ticket-comments` | `feat(slice-3): ticket comments` | Repository PR #19. |
 | Slice 4: Ticket Status Transitions | Delivered | `feat/slice-4-ticket-status-transitions` | `feat(slice-4): ticket status transitions` | Repository PR #20. |
-| Slice 5: Ticket Lifecycle Validation | Reviewing | `feat/slice-5-ticket-lifecycle-validation` | `feat(slice-5): ticket lifecycle validation` | Validate metadata and lifecycle consistency. |
+| Slice 5: Ticket Lifecycle Validation | Delivered | `feat/slice-5-ticket-lifecycle-validation` | `feat(slice-5): ticket lifecycle validation` | Repository PR #21. |
 
 ## Slice 1: Ticket List
 
@@ -133,6 +135,8 @@ Task commits:
 - Slice 5 validation: `go test ./internal/chc` pass.
 - Slice 5 validation: initial `make verify` failed on lint complexity and test length.
 - Slice 5 validation: `make verify` pass after lint-focused refactor.
+- Slice 5 merged into `dev` as PR #21.
+- Completed slicing validation: `make verify` pass.
 
 ## Slice 4: Ticket Status Transitions
 

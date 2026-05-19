@@ -1,6 +1,6 @@
 # Ticket Foundation Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -35,7 +35,7 @@ renumbered by this slicing plan.
 
 ## Current State
 
-Already delivered:
+Delivered before this slicing:
 
 - `chc ticket new`;
 - ticket Markdown rendering;
@@ -44,7 +44,7 @@ Already delivered:
 - SQLite ticket index repository;
 - active project context resolution for ticket commands.
 
-Still missing:
+Delivered by this slicing:
 
 - a user-facing ticket list command;
 - a user-facing ticket show command;
@@ -198,7 +198,7 @@ Delivery:
 
 ### Slice 5: Ticket Lifecycle Validation
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-5-ticket-lifecycle-validation`
 Expected PR title: `feat(slice-5): ticket lifecycle validation`
@@ -217,6 +217,11 @@ Candidate scope:
 Expected outcome:
 
 - ticket commands can fail clearly when ticket files are malformed or inconsistent.
+
+Delivery:
+
+- Repository PR: `#21`
+- PR title: `feat(slice-5): ticket lifecycle validation`
 
 ## Acceptance Criteria
 
