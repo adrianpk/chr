@@ -776,6 +776,7 @@ func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketSta
 	result, err := chc.ValidateRuntime(chc.RuntimeValidationOptions{
 		ProjectDir: selection.ProjectContext.ProjectDir,
 		Config:     config.Runtime,
+		TicketKey:  selection.Ticket.Key,
 		RunID:      record.ID,
 	})
 	if err != nil {

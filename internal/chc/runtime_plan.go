@@ -9,6 +9,7 @@ import (
 type RuntimePlanOptions struct {
 	ProjectDir string
 	Config     RuntimeConfig
+	TicketKey  string
 	RunID      string
 }
 
@@ -51,7 +52,9 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	artifactDir := resolveProjectPath(projectDir, config.ArtifactDir)
 	runArtifactDir := artifactDir
 
-	if opts.RunID != "" {
+	if opts.TicketKey != "" && opts.RunID != "" {
+		runArtifactDir = filepath.Join(artifactDir, opts.TicketKey, opts.RunID)
+	} else if opts.RunID != "" {
 		runArtifactDir = filepath.Join(artifactDir, opts.RunID)
 	}
 

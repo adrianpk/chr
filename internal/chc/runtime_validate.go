@@ -8,6 +8,7 @@ import (
 type RuntimeValidationOptions struct {
 	ProjectDir string
 	Config     RuntimeConfig
+	TicketKey  string
 	RunID      string
 }
 
