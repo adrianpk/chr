@@ -91,6 +91,7 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(
 	}
 
 	result := RebuildProjectTicketsResult{}
+
 	indexedAt := opts.IndexedAt.UTC()
 	if indexedAt.IsZero() {
 		indexedAt = r.now().UTC()

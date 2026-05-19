@@ -100,6 +100,7 @@ func writeRebuildTestTicket(t *testing.T, projectDir, relativePath string, ticke
 	}
 
 	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chc", "tickets", relativePath))
+
 	path := filepath.Join(projectDir, ".chc", "tickets", filepath.FromSlash(relativePath))
 	writeFile(t, path, content)
 }
