@@ -351,6 +351,86 @@ func TestTicketCommentRejectsMissingTicket(t *testing.T) {
 	}
 }
 
+func TestTicketStatusUpdatesTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeIndexedTicketFile(t, devRoot, projectDir)
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		"ready",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket status returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "ticket: CHC-1 ready") {
+		t.Fatalf("stdout = %q, want status result", stdout.String())
+	}
+
+	updatedContent, err := os.ReadFile(ticketPath)
+	if err != nil {
+		t.Fatalf("read ticket: %v", err)
+	}
+
+	if !strings.Contains(string(updatedContent), `status: "ready"`) {
+		t.Fatalf("updated content does not contain ready status:\n%s", string(updatedContent))
+	}
+}
+
+func TestTicketStatusRejectsInvalidStatus(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeIndexedTicketFile(t, devRoot, projectDir)
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		"unknown",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket status returned nil error")
+	}
+}
+
+func TestTicketStatusRejectsMissingTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		"ready",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket status returned nil error")
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
