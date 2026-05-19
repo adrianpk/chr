@@ -25,7 +25,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 2: Ticket State Writer | Delivered | `feat/slice-2-ticket-state-writer` | `feat(slice-2): ticket state writer` | `.prj/reports/slices/ticket-result-application/slice-2-ticket-state-writer.md` | Repository PR #42. |
 | Slice 3: Execution Comment Writer | Delivered | `feat/slice-3-execution-comment-writer` | `feat(slice-3): execution comment writer` | `.prj/reports/slices/ticket-result-application/slice-3-execution-comment-writer.md` | Repository PR #43. |
 | Slice 4: Validation Evidence Writer | Delivered | `feat/slice-4-validation-evidence-writer` | `feat(slice-4): validation evidence writer` | `.prj/reports/slices/ticket-result-application/slice-4-validation-evidence-writer.md` | Repository PR #44. |
-| Slice 5: Changed Files Summary | Planned | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Record changed-file summaries. |
+| Slice 5: Changed Files Summary | Reviewing | `feat/slice-5-changed-files-summary` | `feat(slice-5): changed files summary` | `.prj/reports/slices/ticket-result-application/slice-5-changed-files-summary.md` | Record changed-file summaries. |
 | Slice 6: Blocked Reason Writer | Planned | `feat/slice-6-blocked-reason-writer` | `feat(slice-6): blocked reason writer` | `.prj/reports/slices/ticket-result-application/slice-6-blocked-reason-writer.md` | Record blocked/failure reasons. |
 | Slice 7: Markdown Index Consistency | Planned | `feat/slice-7-markdown-index-consistency` | `feat(slice-7): markdown index consistency` | `.prj/reports/slices/ticket-result-application/slice-7-markdown-index-consistency.md` | Reconcile index after ticket writes. |
 | Slice 8: Result Apply CLI | Planned | `feat/slice-8-result-apply-cli` | `feat(slice-8): result apply cli` | `.prj/reports/slices/ticket-result-application/slice-8-result-apply-cli.md` | Expose result application command. |
@@ -170,20 +170,20 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Extend result application data with changed files.
-- [ ] Write changed-file summary comments or section content.
-- [ ] Handle empty changed-file lists.
-- [ ] Add focused summary tests.
-- [ ] Add slice implementation report.
+- [x] Extend result application data with changed files.
+- [x] Write changed-file summary comments or section content.
+- [x] Handle empty changed-file lists.
+- [x] Add focused summary tests.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
+- T5.1: `5196fde` `feat(result): add changed files summary writer`
+- T5.2: `5196fde` `feat(result): add changed files summary writer`
+- T5.3: `83e2f1f` `test(result): cover changed files summary writer`
+- T5.4: `83e2f1f` `test(result): cover changed files summary writer`
+- T5.5: `docs(result): document changed files summary`
 - T5.6: pending
 
 ## Slice 6: Blocked Reason Writer

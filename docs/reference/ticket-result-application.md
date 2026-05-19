@@ -43,7 +43,7 @@ The writer maps the already-computed application status directly:
 - `blocked` for failed or blocked applications.
 
 Comment, validation evidence, changed-file summary, and blocked reason writing
-are handled by later slices.
+are handled by other writers.
 
 ## Execution Comment Writer
 
@@ -82,8 +82,26 @@ The entry includes:
 Existing validation entries are preserved. New evidence is prepended at the top
 of the validation section and `updated_at` is refreshed.
 
-Changed-file summaries and blocked reason section content are handled by later
-slices.
+Changed-file summaries and blocked reason section content are handled by other
+writers.
+
+## Changed Files Summary Writer
+
+The changed files summary writer appends one comment to the ticket `# Comments`
+section when a result application carries changed files.
+
+The generated comment includes:
+
+- execution ID;
+- changed file path;
+- changed file summary when present.
+
+Empty changed-file lists are treated as no-op and do not mutate the ticket.
+The writer preserves existing comments and ticket body sections. It also updates
+`updated_at` through the existing ticket comment writer when a summary is
+written.
+
+Blocked reason section content is handled by a later slice.
 
 ## Application Fields
 
