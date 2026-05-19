@@ -24,7 +24,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | Slice 1: Runtime Config Model | Delivered | `feat/slice-1-runtime-config-model` | `feat(slice-1): runtime config model` | `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-config-model.md` | Repository PR #29. |
 | Slice 2: Runtime Asset Template | Delivered | `feat/slice-2-runtime-asset-template` | `feat(slice-2): runtime asset template` | `.prj/reports/slices/agent-runtime-boundary/slice-2-runtime-asset-template.md` | Repository PR #30. |
 | Slice 3: Runtime Init CLI | Delivered | `feat/slice-3-runtime-init-cli` | `feat(slice-3): runtime init cli` | `.prj/reports/slices/agent-runtime-boundary/slice-3-runtime-init-cli.md` | Repository PR #31. |
-| Slice 4: Runtime Plan Contract | Planned | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Compute Docker boundary paths and mounts. |
+| Slice 4: Runtime Plan Contract | Reviewing | `feat/slice-4-runtime-plan-contract` | `feat(slice-4): runtime plan contract` | `.prj/reports/slices/agent-runtime-boundary/slice-4-runtime-plan-contract.md` | Compute Docker boundary paths and mounts. |
 | Slice 5: Runtime Validate CLI | Planned | `feat/slice-5-runtime-validate-cli` | `feat(slice-5): runtime validate cli` | `.prj/reports/slices/agent-runtime-boundary/slice-5-runtime-validate-cli.md` | Validate runtime readiness without agent execution. |
 
 ## Slice 1: Runtime Config Model
@@ -139,25 +139,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add side-effect-free runtime planner.
-- [ ] Resolve project and workspace runtime paths.
-- [ ] Define Docker mount and workdir contract.
-- [ ] Define result artifact path contract.
-- [ ] Add focused planner tests.
-- [ ] Document runtime path semantics.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add side-effect-free runtime planner.
+- [x] Resolve project and workspace runtime paths.
+- [x] Define Docker mount and workdir contract.
+- [x] Define result artifact path contract.
+- [x] Add focused planner tests.
+- [x] Document runtime path semantics.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
-- T4.8: pending
+- T4.1: `00a109d` `feat(runtime): add runtime plan contract`
+- T4.2: `00a109d` `feat(runtime): add runtime plan contract`
+- T4.3: `00a109d` `feat(runtime): add runtime plan contract`
+- T4.4: `00a109d` `feat(runtime): add runtime plan contract`
+- T4.5: `5500682` `test(runtime): cover runtime plan contract`
+- T4.6: `e863658` `docs(runtime): document runtime plan semantics`
+- T4.7: `6e6a1cc` `docs(runtime): report runtime plan contract slice`
+- T4.8: `docs(runtime): record runtime plan validation`
 
 ## Slice 5: Runtime Validate CLI
 
@@ -204,6 +204,8 @@ Task commits:
 - Slice 2 validation: `make verify` pass.
 - Slice 3 validation: `go test ./internal/chc ./cmd/chc` pass.
 - Slice 3 validation: `make verify` pass.
+- Slice 4 validation: `go test ./internal/chc` pass.
+- Slice 4 validation: `make verify` pass.
 
 ## Notes
 
