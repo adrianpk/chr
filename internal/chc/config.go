@@ -61,40 +61,34 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 		_ = file.Close()
 	}()
 
+	if err := readWorkspaceConfig(file, &config); err != nil {
+		return WorkspaceConfig{}, err
+	}
+
+	return config, nil
+}
+
+func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
 	scanner := bufio.NewScanner(file)
 	section := ""
 
 	for scanner.Scan() {
-		rawLine := scanner.Text()
-		line := strings.TrimSpace(rawLine)
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
+		key, value, updatedSection, ok := parseWorkspaceConfigLine(scanner.Text(), section)
+		section = updatedSection
 
-		indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
-		if indent == 0 && strings.HasSuffix(line, ":") {
-			section = strings.TrimSuffix(line, ":")
-			continue
-		}
-		if indent == 0 {
-			section = ""
-		}
-
-		key, value, ok := strings.Cut(line, ":")
 		if !ok {
 			continue
 		}
 
-		key = strings.TrimSpace(key)
-		value = configStringValue(value)
-
 		if section == "" && key == "key_prefix" {
 			setString(&config.TicketKeyPrefix, value)
+
 			continue
 		}
 
 		if section == "tickets" && key == "key_prefix" {
 			setString(&config.TicketKeyPrefix, value)
+
 			continue
 		}
 
@@ -104,10 +98,33 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return WorkspaceConfig{}, fmt.Errorf("read workspace config: %w", err)
+		return fmt.Errorf("read workspace config: %w", err)
 	}
 
-	return config, nil
+	return nil
+}
+
+func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, bool) {
+	line := strings.TrimSpace(rawLine)
+	if line == "" || strings.HasPrefix(line, "#") {
+		return "", "", section, false
+	}
+
+	indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
+	if indent == 0 && strings.HasSuffix(line, ":") {
+		return "", "", strings.TrimSuffix(line, ":"), false
+	}
+
+	if indent == 0 {
+		section = ""
+	}
+
+	key, value, ok := strings.Cut(line, ":")
+	if !ok {
+		return "", "", section, false
+	}
+
+	return strings.TrimSpace(key), configStringValue(value), section, true
 }
 
 func setRuntimeConfigValue(config *RuntimeConfig, key, value string) {
