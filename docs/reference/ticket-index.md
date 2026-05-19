@@ -44,3 +44,6 @@ The repository does not parse Markdown files.
 The repository does not decide stale detection policy.
 
 The repository does not implement rebuild commands or daemon watcher behavior.
+
+Project-level rebuild behavior is documented in
+`docs/reference/ticket-index-rebuild.md`.
