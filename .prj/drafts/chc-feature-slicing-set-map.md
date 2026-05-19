@@ -222,6 +222,27 @@ Candidate slices:
 - blocked-ticket handling;
 - loop status reporting.
 
+## Slicing: Codex Runtime Worker
+
+Use case:
+
+> `chc` runs Codex inside the project runtime container so one ticket can
+> produce workspace edits, validation output, and a structured execution result.
+
+Current state: not delivered. The runtime boundary and harness invocation exist,
+but the worker that invokes Codex inside the container is not yet explicit.
+
+Candidate slices:
+
+- Codex command contract inside the runtime container;
+- ticket and workspace context injection;
+- mounted workspace write behavior;
+- structured `result.json` production;
+- changed-file discovery after the worker run;
+- validation command execution after Codex edits;
+- Codex failure classification;
+- worker documentation and dry-run visibility.
+
 ## Slicing: Daemon Coordination
 
 Use case:
@@ -304,9 +325,9 @@ Candidate slices:
 - runtime artifact cleanup;
 - diagnostic bundle creation.
 
-## MVP Path
+## Operational Cutoff Path
 
-The operational MVP should prioritize slicings in this order:
+The first useful local system should prioritize slicings in this order:
 
 1. User Project Context.
 2. Ticket Foundation.
@@ -314,11 +335,36 @@ The operational MVP should prioritize slicings in this order:
 4. Agent Runtime Boundary.
 5. Single Ticket Execution.
 6. Ticket Result Application.
-7. Filtered Ticket Loop.
-8. Daemon Coordination.
-9. Notification and Remote Commands.
+7. Codex Runtime Worker.
+8. Filtered Ticket Loop.
 
-Operational Documents, Reporting and Evidence, and Maintenance and Recovery remain important cross-cutting areas. They should be pulled into the MVP path when they are needed to keep execution understandable, recoverable, or reviewable.
+At this cutoff, `chc` can take local tickets, run Codex in the runtime
+container, apply workspace edits, validate, record evidence, and update ticket
+state.
+
+The loop at this cutoff is a foreground runner. A user starts it from a
+terminal, it processes eligible tickets until completion, blocker, or limit,
+and then exits. This is enough for local utility, but it is not the final
+coordination model.
+
+## Post-Cutoff Path
+
+These slicings are expected after the first useful local system. They are not
+required for the operational cutoff, but they remain part of the product
+direction and should not be dropped from planning:
+
+1. Daemon Coordination.
+2. Notification and Remote Commands.
+3. Reporting and Evidence.
+4. Maintenance and Recovery.
+5. Operational Documents.
+
+Post-cutoff work can be pulled earlier only when it directly blocks local loop
+operation, debugging, or evidence quality.
+
+Daemon Coordination turns the foreground runner into a persistent background
+coordinator with multi-project ownership, status reporting, remote-control
+surfaces, and stale-process recovery.
 
 ## Open Questions
 
