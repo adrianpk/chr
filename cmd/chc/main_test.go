@@ -520,6 +520,180 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 	}
 }
 
+func TestIndexStatusReportsCleanIndex(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+
+	if err := run(t.Context(), []string{
+		"index",
+		"rebuild",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+		t.Fatalf("index rebuild returned error: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"index",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("index status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"missing: 0",
+		"stale: 0",
+		"orphaned: 0",
+		"invalid: 0",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestIndexStatusReportsMissingTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"index",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("index status returned nil error")
+	}
+
+	for _, want := range []string{
+		"missing: 1",
+		"missing_ticket: CHC-1-Do-something.md",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestIndexStatusReportsStaleTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+
+	if err := run(t.Context(), []string{
+		"index",
+		"rebuild",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+		t.Fatalf("index rebuild returned error: %v", err)
+	}
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something else",
+		Status:    "open",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC),
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"index",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("index status returned nil error")
+	}
+
+	for _, want := range []string{
+		"stale: 1",
+		"stale_ticket: CHC-1-Do-something.md",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestIndexStatusReportsInvalidTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	badTicketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Bad.md")
+	if err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755); err != nil {
+		t.Fatalf("create ticket dir: %v", err)
+	}
+
+	if err := os.WriteFile(badTicketPath, []byte("# Bad\n"), 0o644); err != nil {
+		t.Fatalf("write bad ticket: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"index",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("index status returned nil error")
+	}
+
+	for _, want := range []string{
+		"invalid: 1",
+		"invalid_ticket: CHC-1-Bad.md",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
