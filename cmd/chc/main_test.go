@@ -430,6 +430,141 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	}
 }
 
+func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket start returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"execution: exec-",
+		"ticket: CHC-1",
+		"ticket_path: " + filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
+		"status: pending",
+		"dry_run: true",
+		"run_artifact_dir: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "exec-"),
+		"result_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "exec-"),
+		"check: ok dockerfile " + filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile") + " ok",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(records) != 0 {
+		t.Fatalf("execution records = %d, want 0", len(records))
+	}
+}
+
+func TestTicketStartCreatesPendingExecution(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket start returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "dry_run: false") {
+		t.Fatalf("stdout = %q, want dry_run false", stdout.String())
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(records) != 1 {
+		t.Fatalf("execution records = %d, want 1", len(records))
+	}
+
+	record := records[0]
+	if record.Status != chc.ExecutionStatusPending {
+		t.Fatalf("Status = %q, want pending", record.Status)
+	}
+
+	if record.TicketPath != filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md") {
+		t.Fatalf("TicketPath = %q, want ticket path", record.TicketPath)
+	}
+
+	if !strings.HasPrefix(record.ID, "exec-") {
+		t.Fatalf("ID = %q, want exec prefix", record.ID)
+	}
+
+	if record.Artifacts.RunDir != filepath.Join(projectDir, ".chc", "runtime", "runs", record.ID) {
+		t.Fatalf("Artifacts.RunDir = %q, want execution run dir", record.Artifacts.RunDir)
+	}
+
+	if record.Artifacts.ValidationPath != filepath.Join(record.Artifacts.RunDir, "validation.log") {
+		t.Fatalf("Artifacts.ValidationPath = %q, want validation log path", record.Artifacts.ValidationPath)
+	}
+}
+
+func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755); err != nil {
+		t.Fatalf("create runtime runs dir: %v", err)
+	}
+
+	addProject(t, devRoot, "example", projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket start returned nil error")
+	}
+
+	if !strings.Contains(stdout.String(), "check: fail dockerfile") {
+		t.Fatalf("stdout = %q, want failed Dockerfile check", stdout.String())
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(records) != 0 {
+		t.Fatalf("execution records = %d, want 0", len(records))
+	}
+}
+
 func TestTicketShowRejectsMissingTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -1273,6 +1408,51 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []chc.IndexedT
 	}
 
 	return tickets
+}
+
+func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []chc.ExecutionRecord {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	repository, err := chc.NewExecutionRepository(t.Context(), env, assetsFS)
+	if err != nil {
+		t.Fatalf("NewExecutionRepository returned error: %v", err)
+	}
+
+	defer func() {
+		if err := repository.Close(); err != nil {
+			t.Fatalf("close execution repository: %v", err)
+		}
+	}()
+
+	records, err := repository.ListTicketExecutions(t.Context(), projectID, ticketKey)
+	if err != nil {
+		t.Fatalf("ListTicketExecutions returned error: %v", err)
+	}
+
+	return records
+}
+
+func testTicket() chc.Ticket {
+	return chc.Ticket{
+		Key:         "CHC-1",
+		Title:       "Do something",
+		Status:      "open",
+		Priority:    "high",
+		Severity:    "normal",
+		Type:        "task",
+		UseCase:     "onboarding",
+		ProjectArea: "uxui",
+		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	}
 }
 
 func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket chc.Ticket) string {
