@@ -123,6 +123,32 @@ The command renderer does not execute Docker, create directories, or write
 artifacts. Later execution slices are responsible for invoking the rendered
 commands and capturing outputs.
 
+## Agent Harness Invocation
+
+In non-dry-run mode, `chc ticket start <ticket-key>` creates the pending
+execution record and then invokes the rendered harness commands.
+
+The execution runner:
+
+- creates the execution run artifact directory;
+- marks the execution `running` before invoking the harness;
+- runs the rendered Docker build command;
+- runs the rendered Docker run command;
+- writes command stdout and stderr to the runtime log artifact;
+- marks the execution `succeeded` when both commands complete;
+- marks the execution `failed` and records the failure reason when either
+  command fails.
+
+The runner updates `started_at`, `finished_at`, and `updated_at` timestamps as
+the execution moves through the lifecycle.
+
+`--dry-run` still performs preflight and prints the planned runtime output, but
+does not create an execution record, create artifact directories, or invoke the
+harness.
+
+The runner only captures process output in this slice. Structured result parsing
+and result artifact interpretation belong to later execution-result slices.
+
 ## Persistence
 
 Execution records are stored in the user-level SQLite database alongside the
