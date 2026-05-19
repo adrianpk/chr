@@ -174,8 +174,7 @@ func indexedTicketsByRelativePath(tickets []IndexedTicket) map[string]IndexedTic
 }
 
 func ticketFileStateChanged(indexed IndexedTicket, parsed IndexedTicket) bool {
-	return !indexed.FileMTime.Equal(parsed.FileMTime) ||
-		indexed.FileSize != parsed.FileSize ||
+	return indexed.FileSize != parsed.FileSize ||
 		indexed.ContentHash != parsed.ContentHash
 }
 
