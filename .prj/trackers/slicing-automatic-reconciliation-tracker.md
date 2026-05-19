@@ -29,7 +29,7 @@ Specs:
 | Slice 2: Ticket Index Rebuild | Delivered | `feat/slice-2-ticket-index-rebuild` | `feat(slice-2): ticket index rebuild` | Repository PR #23. |
 | Slice 3: Index Status | Delivered | `feat/slice-3-index-status` | `feat(slice-3): index status` | Repository PR #24. |
 | Slice 4: Index Rebuild CLI | Delivered | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Repository PR #25. |
-| Slice 5: Index Status CLI | Planned | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Expose index health inspection. |
+| Slice 5: Index Status CLI | Reviewing | `feat/slice-5-index-status-cli` | `feat(slice-5): index status cli` | Expose index health inspection. |
 | Slice 6: Refresh Before Ticket Reads | Planned | `feat/slice-6-refresh-before-ticket-reads` | `feat(slice-6): refresh before ticket reads` | Make ticket read commands refresh automatically. |
 | Slice 7: Reconciliation Boundary for Execution | Planned | `feat/slice-7-reconciliation-execution-boundary` | `feat(slice-7): reconciliation execution boundary` | Prepare future execution and loop use. |
 
@@ -157,23 +157,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc index status`.
-- [ ] Resolve project context through the existing resolver.
-- [ ] Print index health summary.
-- [ ] Return non-zero for stale or invalid state.
-- [ ] Add focused CLI tests.
-- [ ] Document command behavior.
-- [ ] Run `make verify`.
+- [x] Add `chc index status`.
+- [x] Resolve project context through the existing resolver.
+- [x] Print index health summary.
+- [x] Return non-zero for stale or invalid state.
+- [x] Add focused CLI tests.
+- [x] Document command behavior.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
+- T5.1: `feat(cli): add index status command`
+- T5.2: `feat(cli): add index status command`
+- T5.3: `feat(cli): add index status command`
+- T5.4: `feat(cli): add index status command`
+- T5.5: `test(cli): cover index status command`
+- T5.6: `docs(index): document status command`
+- T5.7: `docs(planning): record index status cli validation`
 
 ## Slice 6: Refresh Before Ticket Reads
 
@@ -248,6 +248,8 @@ Task commits:
 - Slice 4 validation: `go test ./cmd/chc` pass.
 - Slice 4 validation: `make verify` pass.
 - Slice 4 merged into `dev` as PR #25.
+- Slice 5 validation: initial `make verify` failed on output helper complexity.
+- Slice 5 validation: `make verify` pass after lint-focused refactor.
 
 ## Notes
 

@@ -200,7 +200,7 @@ Delivery:
 
 ### Slice 5: Index Status CLI
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-5-index-status-cli`
 Expected PR title: `feat(slice-5): index status cli`
@@ -220,6 +220,11 @@ Candidate scope:
 Expected outcome:
 
 - advanced users and agents can diagnose stale derived state without rebuilding blindly.
+
+Delivery:
+
+- Repository PR: pending review.
+- PR title: `feat(slice-5): index status cli`
 
 ### Slice 6: Refresh Before Ticket Reads
 
