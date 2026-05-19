@@ -80,6 +80,49 @@ view.
 If runtime validation fails, the command prints the failed checks and exits with
 an error without creating an execution record.
 
+## Harness Invocation Contract
+
+A harness invocation is a side-effect free rendering of the Docker commands
+needed to build and run the configured runtime for one ticket execution.
+
+The invocation requires:
+
+- execution ID;
+- ticket key;
+- runtime plan.
+
+The build command renders:
+
+- `docker build`;
+- the runtime Dockerfile path;
+- the configured runtime image tag;
+- the project directory as build context.
+
+The run command renders:
+
+- `docker run --rm`;
+- a deterministic container name derived from the execution ID;
+- runtime plan mounts;
+- the configured container workdir;
+- execution environment variables;
+- the configured runtime validation command.
+
+The run environment includes:
+
+- `CHC_EXECUTION_ID`;
+- `CHC_TICKET_KEY`;
+- `CHC_RESULT_PATH`;
+- `CHC_LOG_PATH`.
+
+Runtime artifact paths are scoped by ticket key and execution ID when both are
+available:
+
+`<artifact_dir>/<ticket_key>/<execution_id>/`
+
+The command renderer does not execute Docker, create directories, or write
+artifacts. Later execution slices are responsible for invoking the rendered
+commands and capturing outputs.
+
 ## Persistence
 
 Execution records are stored in the user-level SQLite database alongside the
