@@ -89,7 +89,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Ticket File Discovery
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-1-ticket-file-discovery`
 Expected PR title: `feat(slice-1): ticket file discovery`
@@ -109,6 +109,11 @@ Candidate scope:
 Expected outcome:
 
 - reconciliation code can enumerate canonical ticket files without duplicating filesystem walking logic.
+
+Delivery:
+
+- Repository PR: `#22`
+- PR title: `feat(slice-1): ticket file discovery`
 
 ### Slice 2: Ticket Index Rebuild
 

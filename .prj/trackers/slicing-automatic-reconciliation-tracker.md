@@ -25,7 +25,7 @@ Specs:
 
 | Slice | Status | Expected Branch | Expected PR Title | Notes |
 | --- | --- | --- | --- | --- |
-| Slice 1: Ticket File Discovery | Reviewing | `feat/slice-1-ticket-file-discovery` | `feat(slice-1): ticket file discovery` | Discover canonical Markdown ticket files. |
+| Slice 1: Ticket File Discovery | Delivered | `feat/slice-1-ticket-file-discovery` | `feat(slice-1): ticket file discovery` | Repository PR #22. |
 | Slice 2: Ticket Index Rebuild | Planned | `feat/slice-2-ticket-index-rebuild` | `feat(slice-2): ticket index rebuild` | Rebuild derived ticket index for one project. |
 | Slice 3: Index Status | Planned | `feat/slice-3-index-status` | `feat(slice-3): index status` | Report stale, missing, orphaned, and invalid index state. |
 | Slice 4: Index Rebuild CLI | Planned | `feat/slice-4-index-rebuild-cli` | `feat(slice-4): index rebuild cli` | Expose manual rebuild for recovery. |
@@ -243,6 +243,7 @@ Task commits:
 - Planning validation: documentation diff reviewed.
 - Slice 1 validation: `go test ./internal/chc` pass.
 - Slice 1 validation: `make verify` pass.
+- Slice 1 merged into `dev` as PR #22.
 
 ## Notes
 
