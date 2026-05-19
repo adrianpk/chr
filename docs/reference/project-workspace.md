@@ -141,6 +141,30 @@ Initialize runtime defaults for another project directory:
 chc runtime init --dir /path/to/project
 ```
 
+## Runtime Plan
+
+The runtime planner computes a side-effect-free Docker boundary plan from the
+project directory and `.chc/config.yml` runtime fields.
+
+Path semantics:
+
+- `project_root`: absolute path to the managed project.
+- `workspace_root`: absolute path to `.chc/` inside the project.
+- `dockerfile`: absolute path resolved from `runtime.dockerfile`.
+- `artifact_dir`: absolute path resolved from `runtime.artifact_dir`.
+- `run_artifact_dir`: `artifact_dir` or `artifact_dir/<run_id>` when a run ID is supplied.
+- `result_path`: `run_artifact_dir/result.json`.
+- `log_path`: `run_artifact_dir/runtime.log`.
+
+Docker mount contract:
+
+- the project root is mounted read-write into the container;
+- the container target is `runtime.workdir`;
+- relative container workdirs are normalized to absolute paths.
+
+The planner only computes paths and mount metadata. It does not create
+directories, build images, run Docker, or execute validation commands.
+
 ## Go Package Boundary
 
 Project workspace behavior lives in the core `internal/chc` package.
