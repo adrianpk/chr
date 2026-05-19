@@ -5,7 +5,7 @@ Slicing: Ticket Result Application
 Plan: `.prj/plans/slicing-ticket-result-application-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-result-application-tracker.md`
 Branch: `feat/slice-8-result-apply-cli`
-PR: pending
+PR: `#48`
 
 ## Purpose
 
