@@ -117,7 +117,7 @@ Delivery:
 
 ### Slice 2: Ticket Index Rebuild
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-2-ticket-index-rebuild`
 Expected PR title: `feat(slice-2): ticket index rebuild`
@@ -136,6 +136,11 @@ Candidate scope:
 Expected outcome:
 
 - a project can rehydrate its derived ticket index from `.chc/tickets/*.md`.
+
+Delivery:
+
+- Repository PR: `#23`
+- PR title: `feat(slice-2): ticket index rebuild`
 
 ### Slice 3: Index Status
 
