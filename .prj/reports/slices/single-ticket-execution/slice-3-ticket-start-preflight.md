@@ -54,7 +54,7 @@ The command also prints the existing runtime validation plan and check output.
 ## Validation
 
 - `go test ./cmd/chc ./internal/chc`: pass
-- `make verify`: pending
+- `make verify`: pass
 
 ## Risks and Follow-ups
 

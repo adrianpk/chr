@@ -23,7 +23,7 @@ Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Execution Record Model | Delivered | `feat/slice-1-execution-record-model` | `feat(slice-1): execution record model` | `.prj/reports/slices/single-ticket-execution/slice-1-execution-record-model.md` | Repository PR #34. |
 | Slice 2: Execution Repository | Delivered | `feat/slice-2-execution-repository` | `feat(slice-2): execution repository` | `.prj/reports/slices/single-ticket-execution/slice-2-execution-repository.md` | Repository PR #35. |
-| Slice 3: Ticket Start Preflight | Planned | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Prepare one ticket execution without invoking an agent. |
+| Slice 3: Ticket Start Preflight | Reviewing | `feat/slice-3-ticket-start-preflight` | `feat(slice-3): ticket start preflight` | `.prj/reports/slices/single-ticket-execution/slice-3-ticket-start-preflight.md` | Prepare one ticket execution without invoking an agent. |
 | Slice 4: Harness Invocation Contract | Planned | `feat/slice-4-harness-invocation-contract` | `feat(slice-4): harness invocation contract` | `.prj/reports/slices/single-ticket-execution/slice-4-harness-invocation-contract.md` | Build deterministic harness invocation metadata. |
 | Slice 5: Agent Harness Invocation | Planned | `feat/slice-5-agent-harness-invocation` | `feat(slice-5): agent harness invocation` | `.prj/reports/slices/single-ticket-execution/slice-5-agent-harness-invocation.md` | Run one bounded harness attempt. |
 | Slice 6: Execution Result Capture | Planned | `feat/slice-6-execution-result-capture` | `feat(slice-6): execution result capture` | `.prj/reports/slices/single-ticket-execution/slice-6-execution-result-capture.md` | Capture structured result artifacts. |
@@ -107,31 +107,31 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc ticket start`.
-- [ ] Resolve project context through the existing resolver.
-- [ ] Reconcile tickets before selecting work.
-- [ ] Select one indexed ticket by key.
-- [ ] Run runtime validation before execution.
-- [ ] Create pending execution record.
-- [ ] Support dry-run output.
-- [ ] Add focused CLI tests.
-- [ ] Document command behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add `chc ticket start`.
+- [x] Resolve project context through the existing resolver.
+- [x] Reconcile tickets before selecting work.
+- [x] Select one indexed ticket by key.
+- [x] Run runtime validation before execution.
+- [x] Create pending execution record.
+- [x] Support dry-run output.
+- [x] Add focused CLI tests.
+- [x] Document command behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
-- T3.7: pending
-- T3.8: pending
-- T3.9: pending
-- T3.10: pending
-- T3.11: pending
+- T3.1: `e75bca1` `feat(cli): add ticket start preflight`
+- T3.2: `e75bca1` `feat(cli): add ticket start preflight`
+- T3.3: `e75bca1` `feat(cli): add ticket start preflight`
+- T3.4: `e75bca1` `feat(cli): add ticket start preflight`
+- T3.5: `e75bca1` `feat(cli): add ticket start preflight`
+- T3.6: `e75bca1` `feat(cli): add ticket start preflight`
+- T3.7: `e75bca1` `feat(cli): add ticket start preflight`
+- T3.8: `74e6875` `test(cli): cover ticket start preflight`
+- T3.9: `7161384` `docs(execution): document ticket start preflight`
+- T3.10: `7161384` `docs(execution): document ticket start preflight`
+- T3.11: `docs(execution): record ticket start validation`
 
 ## Slice 4: Harness Invocation Contract
 
