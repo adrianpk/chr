@@ -1,6 +1,6 @@
 # Slice 6: Blocked Reason Writer
 
-Status: reviewing
+Status: delivered
 Slicing: Ticket Result Application
 Plan: `.prj/plans/slicing-ticket-result-application-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-result-application-tracker.md`
@@ -54,7 +54,7 @@ New function:
 ## Validation
 
 - `go test ./internal/chc`: pass
-- `make verify`: pending
+- `make verify`: pass
 
 ## Risks and Follow-ups
 

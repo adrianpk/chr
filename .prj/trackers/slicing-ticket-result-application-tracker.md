@@ -205,7 +205,7 @@ Candidate tasks:
 - [x] Keep failure details concise.
 - [x] Add focused blocked reason tests.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -213,8 +213,8 @@ Task commits:
 - T6.2: `4814729` `feat(result): add blocked reason writer`
 - T6.3: `4814729` `feat(result): add blocked reason writer`
 - T6.4: `3081406` `test(result): cover blocked reason writer`
-- T6.5: `docs(result): document blocked reason writer`
-- T6.6: pending
+- T6.5: `7f98f1f` `docs(result): document blocked reason writer`
+- T6.6: `docs(result): record blocked reason validation`
 
 ## Slice 7: Markdown Index Consistency
 
