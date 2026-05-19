@@ -57,6 +57,7 @@ func newIndexCommand(stdout io.Writer) *cli.Command {
 		Usage: "Manage derived project indexes",
 		Commands: []*cli.Command{
 			newIndexRebuildCommand(stdout),
+			newIndexStatusCommand(stdout),
 		},
 	}
 }
@@ -67,6 +68,15 @@ func newIndexRebuildCommand(stdout io.Writer) *cli.Command {
 		Usage:  "Rebuild the resolved project's ticket index",
 		Flags:  ticketProjectFlags(),
 		Action: indexRebuildAction(stdout),
+	}
+}
+
+func newIndexStatusCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "status",
+		Usage:  "Report the resolved project's ticket index status",
+		Flags:  ticketProjectFlags(),
+		Action: indexStatusAction(stdout),
 	}
 }
 
@@ -792,6 +802,12 @@ func indexRebuildAction(stdout io.Writer) cli.ActionFunc {
 	}
 }
 
+func indexStatusAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runIndexStatus(ctx, cmd, stdout)
+	}
+}
+
 func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("index rebuild does not accept positional arguments")
@@ -849,6 +865,106 @@ func printIndexRebuildResult(stdout io.Writer, result chc.RebuildProjectTicketsR
 	}
 
 	return nil
+}
+
+func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("index status does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	status, err := chc.NewTicketIndexStatusChecker(index).CheckProjectTicketIndex(ctx, chc.CheckProjectTicketIndexOptions{
+		ProjectID:  projectContext.ProjectID,
+		ProjectDir: projectContext.ProjectDir,
+		IndexedAt:  time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := printIndexStatusResult(stdout, status); err != nil {
+		return err
+	}
+
+	if ticketIndexHasDrift(status) {
+		return fmt.Errorf("ticket index is not current")
+	}
+
+	return nil
+}
+
+func printIndexStatusResult(stdout io.Writer, status chc.TicketIndexStatus) error {
+	if _, err := fmt.Fprintf(stdout, "missing: %d\n", len(status.Missing)); err != nil {
+		return fmt.Errorf("write index status result: %w", err)
+	}
+
+	if _, err := fmt.Fprintf(stdout, "stale: %d\n", len(status.Stale)); err != nil {
+		return fmt.Errorf("write index status result: %w", err)
+	}
+
+	if _, err := fmt.Fprintf(stdout, "orphaned: %d\n", len(status.Orphaned)); err != nil {
+		return fmt.Errorf("write index status result: %w", err)
+	}
+
+	if _, err := fmt.Fprintf(stdout, "invalid: %d\n", len(status.Invalid)); err != nil {
+		return fmt.Errorf("write index status result: %w", err)
+	}
+
+	for _, missing := range status.Missing {
+		if _, err := fmt.Fprintf(stdout, "missing_ticket: %s\n", missing.RelativePath); err != nil {
+			return fmt.Errorf("write index status result: %w", err)
+		}
+	}
+
+	for _, stale := range status.Stale {
+		if _, err := fmt.Fprintf(stdout, "stale_ticket: %s\n", stale.Parsed.RelativePath); err != nil {
+			return fmt.Errorf("write index status result: %w", err)
+		}
+	}
+
+	for _, orphaned := range status.Orphaned {
+		if _, err := fmt.Fprintf(stdout, "orphaned_ticket: %s\n", orphaned.RelativePath); err != nil {
+			return fmt.Errorf("write index status result: %w", err)
+		}
+	}
+
+	for _, invalid := range status.Invalid {
+		if _, err := fmt.Fprintf(stdout, "invalid_ticket: %s %v\n", invalid.RelativePath, invalid.Err); err != nil {
+			return fmt.Errorf("write index status result: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func ticketIndexHasDrift(status chc.TicketIndexStatus) bool {
+	return len(status.Missing) > 0 ||
+		len(status.Stale) > 0 ||
+		len(status.Orphaned) > 0 ||
+		len(status.Invalid) > 0
 }
 
 func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
