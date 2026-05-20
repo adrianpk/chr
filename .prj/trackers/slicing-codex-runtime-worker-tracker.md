@@ -81,7 +81,7 @@ Candidate tasks:
 - [x] Keep the context deterministic and reviewable.
 - [x] Add focused materialization tests.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -90,7 +90,7 @@ Task commits:
 - T2.3: `9553dcd` `feat(codex-worker): add worker context materializer`
 - T2.4: `379702d` `test(codex-worker): cover worker context materializer`
 - T2.5: `docs(codex-worker): document worker context materialization`
-- T2.6: pending
+- T2.6: `docs(codex-worker): record worker context validation`
 
 ## Slice 3: Harness Worker Invocation
 
