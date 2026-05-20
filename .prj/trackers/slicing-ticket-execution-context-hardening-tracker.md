@@ -21,7 +21,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Context Composer Contract | Delivered | `feat/slice-1-context-composer-contract` | `feat(slice-1): context composer contract` | `.prj/reports/slices/ticket-execution-context-hardening/slice-1-context-composer-contract.md` | Repository PR #78 merged. |
-| Slice 2: Agent Identity and Protocol Context | Planned | `feat/slice-2-context-agent-protocols` | `feat(slice-2): context agent protocols` | `.prj/reports/slices/ticket-execution-context-hardening/slice-2-context-agent-protocols.md` | AGENTS and `.chc`. |
+| Slice 2: Agent Identity and Protocol Context | Reviewing | `feat/slice-2-context-agent-protocols` | `feat(slice-2): context agent protocols` | `.prj/reports/slices/ticket-execution-context-hardening/slice-2-context-agent-protocols.md` | AGENTS and `.chc`. |
 | Slice 3: Project and Use-Case Document Context | Planned | `feat/slice-3-context-project-documents` | `feat(slice-3): context project documents` | `.prj/reports/slices/ticket-execution-context-hardening/slice-3-context-project-documents.md` | Specs, drafts, plans, trackers, dumps, quizzes. |
 | Slice 4: Tree and Search Context | Planned | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Cheap orientation. |
 | Slice 5: Go Graph Context Provider | Planned | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | `gograph` CLI first. |
@@ -77,25 +77,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define default Go/software/infrastructure agent identity.
-- [ ] Load applicable root and nested `AGENTS.md` files.
-- [ ] Load selected `.chc/` workflow and runtime context.
-- [ ] Render `agent.md`.
-- [ ] Render `protocols.md`.
-- [ ] Record source provenance.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define default Go/software/infrastructure agent identity.
+- [x] Load applicable root and nested `AGENTS.md` files.
+- [x] Load selected `.chc/` workflow and runtime context.
+- [x] Render `agent.md`.
+- [x] Render `protocols.md`.
+- [x] Record source provenance.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
-- T2.8: pending
+- T2.1: `e46fe56`
+- T2.2: `e46fe56`
+- T2.3: `e46fe56`
+- T2.4: `e46fe56`
+- T2.5: `e46fe56`
+- T2.6: `e46fe56`
+- T2.7: `docs(slice-2): record agent protocol report`
+- T2.8: `e46fe56`
 
 ## Slice 3: Project and Use-Case Document Context
 
