@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Worker Contract Model | Reviewing | `feat/codex-worker-slice-1-contract-model` | `feat(codex-worker-slice-1): contract model` | `.prj/reports/slices/codex-runtime-worker/slice-1-contract-model.md` | Define worker command contract. |
+| Slice 1: Worker Contract Model | Reviewing | `feat/codex-worker-slice-1-contract-model` | `feat(codex-worker-slice-1): contract model` | `.prj/reports/slices/codex-runtime-worker/slice-1-contract-model.md` | Repository PR #49. |
 | Slice 2: Worker Context Materialization | Planned | `feat/codex-worker-slice-2-context-materialization` | `feat(codex-worker-slice-2): context materialization` | `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md` | Write Codex input artifact. |
 | Slice 3: Harness Worker Invocation | Planned | `feat/codex-worker-slice-3-harness-invocation` | `feat(codex-worker-slice-3): harness invocation` | `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md` | Invoke worker through Docker harness. |
 | Slice 4: Result Envelope Changed Files | Planned | `feat/codex-worker-slice-4-result-changed-files` | `feat(codex-worker-slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Carry changed files through result JSON. |
