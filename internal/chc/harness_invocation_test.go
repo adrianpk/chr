@@ -13,6 +13,7 @@ func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
 		TicketKey:   "CHC-1",
+		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -44,6 +45,7 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
 		TicketKey:   "CHC-1",
+		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -64,13 +66,19 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 		"--env",
 		"CHC_TICKET_KEY=CHC-1",
 		"--env",
+		"CHC_TICKET_PATH=/workspace/.chc/tickets/CHC-1.md",
+		"--env",
+		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/context.md",
+		"--env",
 		"CHC_RESULT_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/result.json",
 		"--env",
 		"CHC_LOG_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/runtime.log",
+		"--env",
+		"CHC_VALIDATION_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log",
 		"chc-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
-		"make verify",
+		"CHC_EXECUTION_ID='exec-123' CHC_TICKET_KEY='CHC-1' CHC_TICKET_PATH='/workspace/.chc/tickets/CHC-1.md' CHC_WORKER_CONTEXT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/context.md' CHC_RESULT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/result.json' CHC_LOG_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/runtime.log' CHC_VALIDATION_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--full-auto' < \"$CHC_WORKER_CONTEXT_PATH\"",
 	}
 
 	if invocation.Run.Program != "docker" {
@@ -84,8 +92,9 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	_, err := NewHarnessInvocation(HarnessInvocationOptions{
-		TicketKey: "CHC-1",
-		Plan:      testHarnessRuntimePlan(t.TempDir()),
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(t.TempDir(), ".chc", "tickets", "CHC-1.md"),
+		Plan:       testHarnessRuntimePlan(t.TempDir()),
 	})
 	if err == nil {
 		t.Fatal("NewHarnessInvocation returned nil error")
@@ -102,8 +111,10 @@ func testHarnessRuntimePlan(projectDir string) RuntimePlan {
 		ContainerWorkdir:  "/workspace",
 		Mounts:            runtimeMounts(projectDir, "/workspace"),
 		RunArtifactDir:    runDir,
+		WorkerContextPath: filepath.Join(runDir, "context.md"),
 		ResultPath:        filepath.Join(runDir, "result.json"),
 		LogPath:           filepath.Join(runDir, "runtime.log"),
+		ValidationPath:    filepath.Join(runDir, "validation.log"),
 		ValidationCommand: "make verify",
 	}
 }

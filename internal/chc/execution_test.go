@@ -191,8 +191,10 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 		DockerfilePath:    filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile"),
 		ContainerWorkdir:  "/workspace",
 		RunArtifactDir:    filepath.Join(dir, ".chc", "runtime", "runs", "exec-1"),
+		WorkerContextPath: filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "context.md"),
 		ResultPath:        filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "result.json"),
 		LogPath:           filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "runtime.log"),
+		ValidationPath:    filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "validation.log"),
 		ValidationCommand: "make verify",
 	}
 
@@ -208,6 +210,10 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 
 	if record.Artifacts.ResultPath != plan.ResultPath {
 		t.Fatalf("Artifacts.ResultPath = %q, want %q", record.Artifacts.ResultPath, plan.ResultPath)
+	}
+
+	if record.Artifacts.ValidationPath != plan.ValidationPath {
+		t.Fatalf("Artifacts.ValidationPath = %q, want %q", record.Artifacts.ValidationPath, plan.ValidationPath)
 	}
 }
 

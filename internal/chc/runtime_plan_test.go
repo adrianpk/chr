@@ -40,6 +40,14 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 	if plan.ResultPath != filepath.Join(dir, ".chc", "runtime", "runs", "result.json") {
 		t.Fatalf("ResultPath = %q, want default result path", plan.ResultPath)
 	}
+
+	if plan.WorkerContextPath != filepath.Join(dir, ".chc", "runtime", "runs", "context.md") {
+		t.Fatalf("WorkerContextPath = %q, want default context path", plan.WorkerContextPath)
+	}
+
+	if plan.ValidationPath != filepath.Join(dir, ".chc", "runtime", "runs", "validation.log") {
+		t.Fatalf("ValidationPath = %q, want default validation path", plan.ValidationPath)
+	}
 }
 
 func TestPlanRuntimeUsesCustomConfig(t *testing.T) {
@@ -107,6 +115,14 @@ func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 	if plan.LogPath != filepath.Join(wantRunDir, "runtime.log") {
 		t.Fatalf("LogPath = %q, want run log path", plan.LogPath)
 	}
+
+	if plan.WorkerContextPath != filepath.Join(wantRunDir, "context.md") {
+		t.Fatalf("WorkerContextPath = %q, want run context path", plan.WorkerContextPath)
+	}
+
+	if plan.ValidationPath != filepath.Join(wantRunDir, "validation.log") {
+		t.Fatalf("ValidationPath = %q, want run validation path", plan.ValidationPath)
+	}
 }
 
 func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
@@ -128,6 +144,10 @@ func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
 
 	if plan.ResultPath != filepath.Join(wantRunDir, "result.json") {
 		t.Fatalf("ResultPath = %q, want ticket-scoped result path", plan.ResultPath)
+	}
+
+	if plan.WorkerContextPath != filepath.Join(wantRunDir, "context.md") {
+		t.Fatalf("WorkerContextPath = %q, want ticket-scoped context path", plan.WorkerContextPath)
 	}
 }
 
