@@ -5,7 +5,7 @@ Slicing: Daemon Coordination
 Plan: `.prj/plans/slicing-daemon-coordination-plan.md`
 Tracker: `.prj/trackers/slicing-daemon-coordination-tracker.md`
 Branch: `feat/slice-1-daemon-command-skeleton`
-PR: pending
+PR: #64
 
 ## Purpose
 
