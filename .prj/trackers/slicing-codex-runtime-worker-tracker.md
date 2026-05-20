@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 2: Worker Context Materialization | Delivered | `feat/slice-2-worker-context-materialization` | `feat(slice-2): worker context materialization` | `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md` | Repository PR #50. |
 | Slice 3: Harness Worker Invocation | Delivered | `feat/slice-3-harness-worker-invocation` | `feat(slice-3): harness worker invocation` | `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md` | Repository PR #51. |
 | Slice 4: Result Envelope Changed Files | Delivered | `feat/slice-4-result-changed-files` | `feat(slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Repository PR #52. |
-| Slice 5: Changed File Discovery | Planned | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Discover actual workspace changes. |
+| Slice 5: Changed File Discovery | Reviewing | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Discover actual workspace changes. |
 | Slice 6: Post-Worker Validation | Planned | `feat/slice-6-post-worker-validation` | `feat(slice-6): post worker validation` | `.prj/reports/slices/codex-runtime-worker/slice-6-post-worker-validation.md` | Validate after Codex edits. |
 | Slice 7: Worker Failure Classification and Docs | Planned | `feat/slice-7-worker-failure-docs` | `feat(slice-7): worker failure classification and docs` | `.prj/reports/slices/codex-runtime-worker/slice-7-failure-docs.md` | Document and classify worker failures. |
 
@@ -170,22 +170,22 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Inspect git changed files after execution.
-- [ ] Scope discovery to the project workspace.
-- [ ] Handle clean worktrees.
-- [ ] Avoid reverting or mutating changes.
-- [ ] Add focused discovery tests.
-- [ ] Add slice implementation report.
+- [x] Inspect git changed files after execution.
+- [x] Scope discovery to the project workspace.
+- [x] Handle clean worktrees.
+- [x] Avoid reverting or mutating changes.
+- [x] Add focused discovery tests.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
+- T5.1: `2729b2d` `feat(codex-worker): discover changed files`
+- T5.2: `2729b2d` `feat(codex-worker): discover changed files`
+- T5.3: `2729b2d` `feat(codex-worker): discover changed files`
+- T5.4: `2729b2d` `feat(codex-worker): discover changed files`
+- T5.5: `5d57dcd` `test(codex-worker): cover changed file discovery`
+- T5.6: `docs(codex-worker): document changed file discovery`
 - T5.7: pending
 
 ## Slice 6: Post-Worker Validation

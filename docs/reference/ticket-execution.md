@@ -230,6 +230,22 @@ Changed file objects contain:
 Changed file paths must be relative to the workspace. Absolute paths and paths
 that escape the workspace are rejected.
 
+## Changed File Discovery
+
+The changed-file discoverer inspects the project git worktree with:
+
+```sh
+git status --porcelain=v1 --untracked-files=all
+```
+
+It returns workspace-relative changed paths as execution result changed-file
+entries. The discoverer does not mutate the worktree, stage files, commit,
+revert, or clean files.
+
+Operational runtime artifacts under `.chc/runtime/` are ignored so worker
+context, logs, result envelopes, and validation artifacts are not reported as
+workspace edits.
+
 The runner reads the result artifact after the harness commands complete. A
 missing result file, malformed JSON, invalid status, mismatched execution ID, or
 mismatched ticket key marks the execution `failed` and records the diagnostic in
