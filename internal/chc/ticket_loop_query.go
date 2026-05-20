@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 )
 
 var defaultLoopEligibleStatuses = []string{"ready"}
@@ -11,6 +12,16 @@ var defaultLoopEligibleStatuses = []string{"ready"}
 type TicketLoopQueryOptions struct {
 	ProjectID string
 	Statuses  []string
+	Filters   TicketLoopFilters
+}
+
+type TicketLoopFilters struct {
+	Priorities   []string
+	Severities   []string
+	ProjectAreas []string
+	Tags         []string
+	Types        []string
+	UseCases     []string
 }
 
 type TicketLoopQuery struct {
@@ -35,6 +46,11 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 		return nil, err
 	}
 
+	filters, err := normalizeTicketLoopFilters(opts.Filters)
+	if err != nil {
+		return nil, err
+	}
+
 	tickets, err := q.Index.ListProjectTickets(ctx, opts.ProjectID)
 	if err != nil {
 		return nil, err
@@ -42,7 +58,7 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 
 	eligible := make([]IndexedTicket, 0, len(tickets))
 	for _, ticket := range tickets {
-		if slices.Contains(statuses, ticket.Status) {
+		if slices.Contains(statuses, ticket.Status) && filters.match(ticket) {
 			eligible = append(eligible, ticket)
 		}
 	}
@@ -50,6 +66,80 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 	slices.SortFunc(eligible, compareIndexedTicketsByKey)
 
 	return eligible, nil
+}
+
+func normalizeTicketLoopFilters(filters TicketLoopFilters) (TicketLoopFilters, error) {
+	var err error
+
+	if filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", isValidTicketPriority); err != nil {
+		return TicketLoopFilters{}, err
+	}
+
+	if filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", isValidTicketSeverity); err != nil {
+		return TicketLoopFilters{}, err
+	}
+
+	if filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", isValidTicketType); err != nil {
+		return TicketLoopFilters{}, err
+	}
+
+	filters.ProjectAreas = normalizeTicketLoopFreeformValues(filters.ProjectAreas)
+	filters.Tags = normalizeTicketLoopFreeformValues(filters.Tags)
+	filters.UseCases = normalizeTicketLoopFreeformValues(filters.UseCases)
+
+	return filters, nil
+}
+
+func normalizeTicketLoopValues(values []string, name string, valid func(string) bool) ([]string, error) {
+	normalized := normalizeTicketLoopFreeformValues(values)
+	for _, value := range normalized {
+		if !valid(value) {
+			return nil, fmt.Errorf("invalid ticket %s: %s", name, value)
+		}
+	}
+
+	return normalized, nil
+}
+
+func normalizeTicketLoopFreeformValues(values []string) []string {
+	normalized := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" || slices.Contains(normalized, value) {
+			continue
+		}
+
+		normalized = append(normalized, value)
+	}
+
+	return normalized
+}
+
+func (filters TicketLoopFilters) match(ticket IndexedTicket) bool {
+	return matchesTicketLoopValues(filters.Priorities, ticket.Priority) &&
+		matchesTicketLoopValues(filters.Severities, ticket.Severity) &&
+		matchesTicketLoopValues(filters.ProjectAreas, ticket.ProjectArea) &&
+		matchesTicketLoopValues(filters.Types, ticket.Type) &&
+		matchesTicketLoopValues(filters.UseCases, ticket.UseCase) &&
+		matchesTicketLoopTags(filters.Tags, ticket.Tags)
+}
+
+func matchesTicketLoopValues(values []string, ticketValue string) bool {
+	return len(values) == 0 || slices.Contains(values, ticketValue)
+}
+
+func matchesTicketLoopTags(filters, ticketTags []string) bool {
+	if len(filters) == 0 {
+		return true
+	}
+
+	for _, filter := range filters {
+		if !slices.Contains(ticketTags, filter) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func loopEligibleStatuses(statuses []string) ([]string, error) {

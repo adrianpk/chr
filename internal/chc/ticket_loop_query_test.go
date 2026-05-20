@@ -61,6 +61,91 @@ func TestTicketLoopQueryScopesToProject(t *testing.T) {
 	}
 }
 
+func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
+	index := newTestTicketIndex(t)
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:         "CHC-1",
+		Status:      "ready",
+		Priority:    "high",
+		Severity:    "critical",
+		Type:        "feature",
+		UseCase:     "onboarding",
+		ProjectArea: "frontend",
+		Tags:        []string{"uxui", "quick"},
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:         "CHC-2",
+		Status:      "ready",
+		Priority:    "normal",
+		Severity:    "normal",
+		Type:        "bug",
+		UseCase:     "maintenance",
+		ProjectArea: "backend",
+		Tags:        []string{"api"},
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:         "CHC-3",
+		Status:      "ready",
+		Priority:    "high",
+		Severity:    "critical",
+		Type:        "feature",
+		UseCase:     "onboarding",
+		ProjectArea: "frontend",
+		Tags:        []string{"uxui"},
+	})
+
+	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+		ProjectID: "project-1",
+		Filters: TicketLoopFilters{
+			Priorities:   []string{"high"},
+			Severities:   []string{"critical"},
+			ProjectAreas: []string{"frontend"},
+			Tags:         []string{"uxui", "quick"},
+			Types:        []string{"feature"},
+			UseCases:     []string{"onboarding"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("EligibleTickets returned error: %v", err)
+	}
+
+	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-1"}) {
+		t.Fatalf("keys = %#v, want filtered ticket", gotKeys)
+	}
+}
+
+func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
+	index := newTestTicketIndex(t)
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-1",
+		Status:   "ready",
+		Priority: "high",
+		Severity: "critical",
+		Type:     "feature",
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-2",
+		Status:   "ready",
+		Priority: "normal",
+		Severity: "normal",
+		Type:     "bug",
+	})
+
+	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+		ProjectID: "project-1",
+		Filters: TicketLoopFilters{
+			Priorities: []string{"normal"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("EligibleTickets returned error: %v", err)
+	}
+
+	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-2"}) {
+		t.Fatalf("keys = %#v, want priority-filtered ticket", gotKeys)
+	}
+}
+
 func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 	index := newTestTicketIndex(t)
 
@@ -79,6 +164,30 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 			opts: TicketLoopQueryOptions{ProjectID: "project-1", Statuses: []string{"unknown"}},
 			want: "invalid ticket status: unknown",
 		},
+		{
+			name: "invalid priority",
+			opts: TicketLoopQueryOptions{
+				ProjectID: "project-1",
+				Filters:   TicketLoopFilters{Priorities: []string{"urgent"}},
+			},
+			want: "invalid ticket priority: urgent",
+		},
+		{
+			name: "invalid severity",
+			opts: TicketLoopQueryOptions{
+				ProjectID: "project-1",
+				Filters:   TicketLoopFilters{Severities: []string{"maximum"}},
+			},
+			want: "invalid ticket severity: maximum",
+		},
+		{
+			name: "invalid type",
+			opts: TicketLoopQueryOptions{
+				ProjectID: "project-1",
+				Filters:   TicketLoopFilters{Types: []string{"unknown"}},
+			},
+			want: "invalid ticket type: unknown",
+		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			_, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), testCase.opts)
@@ -94,6 +203,20 @@ func upsertLoopQueryTicket(t *testing.T, index TicketIndex, key, status string) 
 
 	ticket := testIndexedTicket(key, nil)
 	ticket.Status = status
+
+	upsertLoopQueryTicketWithMetadata(t, index, ticket)
+}
+
+func upsertLoopQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata IndexedTicket) {
+	t.Helper()
+
+	ticket := testIndexedTicket(metadata.Key, metadata.Tags)
+	ticket.Status = metadata.Status
+	ticket.Priority = metadata.Priority
+	ticket.Severity = metadata.Severity
+	ticket.Type = metadata.Type
+	ticket.UseCase = metadata.UseCase
+	ticket.ProjectArea = metadata.ProjectArea
 
 	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)

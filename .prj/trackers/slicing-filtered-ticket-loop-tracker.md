@@ -21,7 +21,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Eligible Ticket Query | Delivered | `feat/slice-1-eligible-ticket-query` | `feat(slice-1): eligible ticket query` | `.prj/reports/slices/filtered-ticket-loop/slice-1-eligible-ticket-query.md` | Repository PR #56. |
-| Slice 2: Loop Filters | Planned | `feat/slice-2-loop-filters` | `feat(slice-2): loop filters` | `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md` | Filter by ticket metadata. |
+| Slice 2: Loop Filters | In Review | `feat/slice-2-loop-filters` | `feat(slice-2): loop filters` | `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md` | Filter by ticket metadata. |
 | Slice 3: Loop Ordering | Planned | `feat/slice-3-loop-ordering` | `feat(slice-3): loop ordering` | `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md` | Deterministic loop order. |
 | Slice 4: Loop Command Skeleton | Planned | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Foreground command preview. |
 | Slice 5: Loop Run Records | Planned | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Persist loop metadata. |
@@ -77,21 +77,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add priority, severity, area, tag, type, use-case, and status filters.
-- [ ] Validate filter values where existing ticket validation rules apply.
-- [ ] Keep filtering independent from CLI parsing.
-- [ ] Add focused filter tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add priority, severity, area, tag, type, use-case, and status filters.
+- [x] Validate filter values where existing ticket validation rules apply.
+- [x] Keep filtering independent from CLI parsing.
+- [x] Add focused filter tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
+- T2.1: `feat(slice-2): loop filters`
+- T2.2: `feat(slice-2): loop filters`
+- T2.3: `feat(slice-2): loop filters`
+- T2.4: `feat(slice-2): loop filters`
+- T2.5: `feat(slice-2): loop filters`
+- T2.6: `feat(slice-2): loop filters`
 
 ## Slice 3: Loop Ordering
 
