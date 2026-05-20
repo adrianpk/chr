@@ -25,7 +25,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Harness Worker Invocation | Delivered | `feat/slice-3-harness-worker-invocation` | `feat(slice-3): harness worker invocation` | `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md` | Repository PR #51. |
 | Slice 4: Result Envelope Changed Files | Delivered | `feat/slice-4-result-changed-files` | `feat(slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Repository PR #52. |
 | Slice 5: Changed File Discovery | Delivered | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Repository PR #53. |
-| Slice 6: Post-Worker Validation | Planned | `feat/slice-6-post-worker-validation` | `feat(slice-6): post worker validation` | `.prj/reports/slices/codex-runtime-worker/slice-6-post-worker-validation.md` | Validate after Codex edits. |
+| Slice 6: Post-Worker Validation | In Review | `feat/slice-6-post-worker-validation` | `feat(slice-6): post worker validation` | `.prj/reports/slices/codex-runtime-worker/slice-6-post-worker-validation.md` | Validate after Codex edits. |
 | Slice 7: Worker Failure Classification and Docs | Planned | `feat/slice-7-worker-failure-docs` | `feat(slice-7): worker failure classification and docs` | `.prj/reports/slices/codex-runtime-worker/slice-7-failure-docs.md` | Document and classify worker failures. |
 
 ## Slice 1: Worker Contract Model
@@ -202,23 +202,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Run the configured validation command after the worker command.
-- [ ] Preserve validation output artifact paths.
-- [ ] Classify validation failures distinctly.
-- [ ] Ensure result capture sees validation failure correctly.
-- [ ] Add focused execution runner tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run the configured validation command after the worker command.
+- [x] Preserve validation output artifact paths.
+- [x] Classify validation failures distinctly.
+- [x] Ensure result capture sees validation failure correctly.
+- [x] Add focused execution runner tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
+- T6.1: `feat(slice-6): post worker validation`
+- T6.2: `feat(slice-6): post worker validation`
+- T6.3: `feat(slice-6): post worker validation`
+- T6.4: `feat(slice-6): post worker validation`
+- T6.5: `feat(slice-6): post worker validation`
+- T6.6: `feat(slice-6): post worker validation`
+- T6.7: `feat(slice-6): post worker validation`
 
 ## Slice 7: Worker Failure Classification and Docs
 

@@ -105,6 +105,15 @@ The run command renders:
 - runtime plan mounts;
 - the configured container workdir;
 - execution environment variables;
+- the Codex worker shell command.
+
+The validation command renders:
+
+- `docker run --rm`;
+- a deterministic validation container name derived from the execution ID;
+- runtime plan mounts;
+- the configured container workdir;
+- validation artifact environment variables;
 - the configured runtime validation command.
 
 The run environment includes:
@@ -198,10 +207,13 @@ The execution runner:
 - marks the execution `running` before invoking the harness;
 - runs the rendered Docker build command;
 - runs the rendered Docker run command;
-- writes command stdout and stderr to the runtime log artifact;
-- marks the execution `succeeded` when both commands complete;
-- marks the execution `failed` and records the failure reason when either
-  command fails.
+- runs the rendered Docker validation command;
+- writes build and worker stdout and stderr to the runtime log artifact;
+- writes validation stdout and stderr to the validation artifact;
+- marks the execution `succeeded` when all commands complete and the result
+  envelope is valid;
+- marks the execution `failed` and records the failure reason when any command
+  fails.
 
 The runner updates `started_at`, `finished_at`, and `updated_at` timestamps as
 the execution moves through the lifecycle.
@@ -267,9 +279,9 @@ Failure kinds:
   workspace config failed before runtime validation.
 - `runtime`: runtime boundary validation failed before creating an execution
   record.
-- `harness`: Docker build or run invocation failed.
-- `validation`: the harness completed but the result envelope reported
-  `failed`.
+- `harness`: Docker build or worker invocation failed.
+- `validation`: the validation invocation failed, or the harness completed but
+  the result envelope reported `failed`.
 - `result_capture`: result artifact reading, JSON decoding, envelope validation,
   or identity matching failed.
 

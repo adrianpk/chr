@@ -18,6 +18,7 @@ type HarnessInvocation struct {
 	TicketKey   string
 	Build       HarnessCommand
 	Run         HarnessCommand
+	Validation  HarnessCommand
 	ResultPath  string
 	LogPath     string
 }
@@ -54,6 +55,7 @@ func NewHarnessInvocation(opts HarnessInvocationOptions) (HarnessInvocation, err
 		TicketKey:   opts.TicketKey,
 		Build:       harnessBuildCommand(opts.Plan),
 		Run:         run,
+		Validation:  harnessValidationCommand(opts.ExecutionID, opts.Plan),
 		ResultPath:  opts.Plan.ResultPath,
 		LogPath:     opts.Plan.LogPath,
 	}, nil
@@ -109,6 +111,34 @@ func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePl
 		Program: "docker",
 		Args:    args,
 	}, nil
+}
+
+func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessCommand {
+	args := []string{
+		"run",
+		"--rm",
+		"--name",
+		cleanDockerName("chc-" + executionID + "-validation"),
+	}
+
+	for _, mount := range plan.Mounts {
+		args = append(args, "--volume", dockerVolumeArg(mount))
+	}
+
+	args = append(args,
+		"--workdir", plan.ContainerWorkdir,
+		"--env", "CHC_EXECUTION_ID="+executionID,
+		"--env", "CHC_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
+		plan.Image,
+		"/bin/sh",
+		"-lc",
+		plan.ValidationCommand,
+	)
+
+	return HarnessCommand{
+		Program: "docker",
+		Args:    args,
+	}
 }
 
 func harnessWorkerShellScript(executionID, ticketKey, ticketPath string, plan RuntimePlan) (string, error) {

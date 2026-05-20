@@ -90,6 +90,48 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 	}
 }
 
+func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
+	dir := t.TempDir()
+	plan := testHarnessRuntimePlan(dir)
+
+	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		ExecutionID: "exec-123",
+		TicketKey:   "CHC-1",
+		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1.md"),
+		Plan:        plan,
+	})
+	if err != nil {
+		t.Fatalf("NewHarnessInvocation returned error: %v", err)
+	}
+
+	wantArgs := []string{
+		"run",
+		"--rm",
+		"--name",
+		"chc-exec-123-validation",
+		"--volume",
+		dir + ":/workspace",
+		"--workdir",
+		"/workspace",
+		"--env",
+		"CHC_EXECUTION_ID=exec-123",
+		"--env",
+		"CHC_VALIDATION_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log",
+		"chc-agent-runtime:local",
+		"/bin/sh",
+		"-lc",
+		"make verify",
+	}
+
+	if invocation.Validation.Program != "docker" {
+		t.Fatalf("Validation.Program = %q, want docker", invocation.Validation.Program)
+	}
+
+	if !slices.Equal(invocation.Validation.Args, wantArgs) {
+		t.Fatalf("Validation.Args = %#v, want %#v", invocation.Validation.Args, wantArgs)
+	}
+}
+
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	_, err := NewHarnessInvocation(HarnessInvocationOptions{
 		TicketKey:  "CHC-1",

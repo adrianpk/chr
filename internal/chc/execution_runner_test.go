@@ -35,8 +35,8 @@ func TestExecutionRunnerRunsHarnessAndMarksSucceeded(t *testing.T) {
 
 	assertSucceededRunnerRecord(t, got)
 
-	if !slices.Equal(executor.commands, []string{"docker build", "docker run"}) {
-		t.Fatalf("commands = %#v, want build and run", executor.commands)
+	if !slices.Equal(executor.commands, []string{"docker build", "docker run", "docker run"}) {
+		t.Fatalf("commands = %#v, want build, run, and validation", executor.commands)
 	}
 
 	content, err := os.ReadFile(record.Artifacts.LogPath)
@@ -46,6 +46,15 @@ func TestExecutionRunnerRunsHarnessAndMarksSucceeded(t *testing.T) {
 
 	if !strings.Contains(string(content), "stdout: docker build") {
 		t.Fatalf("log content = %q, want build stdout", string(content))
+	}
+
+	validationContent, err := os.ReadFile(record.Artifacts.ValidationPath)
+	if err != nil {
+		t.Fatalf("read validation artifact: %v", err)
+	}
+
+	if !strings.Contains(string(validationContent), "stdout: docker run") {
+		t.Fatalf("validation content = %q, want validation stdout", string(validationContent))
 	}
 
 	stored, err := repository.GetExecution(t.Context(), record.ID)
@@ -209,6 +218,47 @@ func TestExecutionRunnerClassifiesFailedResultAsValidationFailure(t *testing.T) 
 	}
 }
 
+func TestExecutionRunnerClassifiesValidationCommandFailure(t *testing.T) {
+	repository := newTestExecutionRunnerRepository(t)
+
+	record := testRunnerExecutionRecord(t.TempDir())
+	if err := repository.CreateExecution(t.Context(), record); err != nil {
+		t.Fatalf("CreateExecution returned error: %v", err)
+	}
+
+	executor := &fakeHarnessExecutor{
+		resultPath:     record.Artifacts.ResultPath,
+		failValidation: true,
+	}
+	runner := NewExecutionRunner(repository, executor)
+	runner.Now = fixedRunnerClock()
+
+	got, err := runner.Run(t.Context(), RunExecutionOptions{
+		Record:     record,
+		Invocation: testRunnerInvocation(record),
+	})
+	if err == nil {
+		t.Fatal("Run returned nil error")
+	}
+
+	if got.Status != ExecutionStatusFailed {
+		t.Fatalf("Status = %q, want failed", got.Status)
+	}
+
+	if !strings.HasPrefix(got.FailureReason, "validation:") {
+		t.Fatalf("FailureReason = %q, want validation prefix", got.FailureReason)
+	}
+
+	content, err := os.ReadFile(record.Artifacts.ValidationPath)
+	if err != nil {
+		t.Fatalf("read validation artifact: %v", err)
+	}
+
+	if !strings.Contains(string(content), "stdout: docker run") {
+		t.Fatalf("validation content = %q, want validation stdout", string(content))
+	}
+}
+
 func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
@@ -248,10 +298,11 @@ func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 }
 
 type fakeHarnessExecutor struct {
-	commands      []string
-	failAt        string
-	resultPath    string
-	resultContent string
+	commands       []string
+	failAt         string
+	failValidation bool
+	resultPath     string
+	resultContent  string
 }
 
 func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, stdout, stderr io.Writer) error {
@@ -270,18 +321,32 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, std
 		return fmt.Errorf("failed %s", name)
 	}
 
-	if command.Args[0] == "run" && e.resultPath != "" {
-		content := e.resultContent
-		if content == "" {
-			content = `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"succeeded","summary":"done"}`
-		}
+	if e.failValidation && isValidationHarnessCommand(command) {
+		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("failed %s", name))
+	}
 
-		if err := os.WriteFile(e.resultPath, []byte(content), 0o644); err != nil {
-			return err
-		}
+	if err := e.writeResultForWorkerRun(command); err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func (e *fakeHarnessExecutor) writeResultForWorkerRun(command HarnessCommand) error {
+	if command.Args[0] != "run" || isValidationHarnessCommand(command) || e.resultPath == "" {
+		return nil
+	}
+
+	content := e.resultContent
+	if content == "" {
+		content = `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"succeeded","summary":"done"}`
+	}
+
+	return os.WriteFile(e.resultPath, []byte(content), 0o644)
+}
+
+func isValidationHarnessCommand(command HarnessCommand) bool {
+	return slices.Contains(command.Args, "chc-exec-1-validation")
 }
 
 func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
@@ -344,6 +409,10 @@ func testRunnerInvocation(record ExecutionRecord) HarnessInvocation {
 		Run: HarnessCommand{
 			Program: "docker",
 			Args:    []string{"run"},
+		},
+		Validation: HarnessCommand{
+			Program: "docker",
+			Args:    []string{"run", "--name", "chc-exec-1-validation"},
 		},
 		ResultPath: record.Artifacts.ResultPath,
 		LogPath:    record.Artifacts.LogPath,

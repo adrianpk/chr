@@ -66,14 +66,19 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		return ExecutionRecord{}, fmt.Errorf("create execution artifact directory: %w", err)
 	}
 
-	logFile, err := os.OpenFile(record.Artifacts.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	logFile, validationFile, err := openExecutionOutputArtifacts(record.Artifacts)
 	if err != nil {
-		return ExecutionRecord{}, fmt.Errorf("open execution log artifact: %w", err)
+		return ExecutionRecord{}, err
 	}
 
 	defer func() {
 		//nolint:errcheck // Main command result is already determined by execution.
 		_ = logFile.Close()
+	}()
+
+	defer func() {
+		//nolint:errcheck // Main command result is already determined by execution.
+		_ = validationFile.Close()
 	}()
 
 	startedAt := r.now()
@@ -85,7 +90,7 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		return ExecutionRecord{}, err
 	}
 
-	if err := r.runHarness(ctx, opts.Invocation, logFile); err != nil {
+	if err := r.runHarness(ctx, opts.Invocation, logFile, validationFile); err != nil {
 		return r.failExecution(ctx, record, err)
 	}
 
@@ -105,13 +110,35 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 	return record, nil
 }
 
-func (r ExecutionRunner) runHarness(ctx context.Context, invocation HarnessInvocation, log io.Writer) error {
+func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (*os.File, *os.File, error) {
+	logFile, err := os.OpenFile(artifacts.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		return nil, nil, fmt.Errorf("open execution log artifact: %w", err)
+	}
+
+	validationFile, err := os.OpenFile(artifacts.ValidationPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		if closeErr := logFile.Close(); closeErr != nil {
+			return nil, nil, fmt.Errorf("open validation artifact: %w; close execution log artifact: %w", err, closeErr)
+		}
+
+		return nil, nil, fmt.Errorf("open validation artifact: %w", err)
+	}
+
+	return logFile, validationFile, nil
+}
+
+func (r ExecutionRunner) runHarness(ctx context.Context, invocation HarnessInvocation, log, validationLog io.Writer) error {
 	if err := r.Executor.Run(ctx, invocation.Build, log, log); err != nil {
 		return harnessFailure(err)
 	}
 
 	if err := r.Executor.Run(ctx, invocation.Run, log, log); err != nil {
 		return harnessFailure(err)
+	}
+
+	if err := r.Executor.Run(ctx, invocation.Validation, validationLog, validationLog); err != nil {
+		return validationFailure(err)
 	}
 
 	return nil
@@ -124,6 +151,19 @@ func harnessFailure(err error) error {
 	}
 
 	return NewExecutionFailure(ExecutionFailureHarness, err)
+}
+
+func validationFailure(err error) error {
+	var failure ExecutionFailure
+	if errors.As(err, &failure) {
+		if failure.Kind == ExecutionFailureValidation {
+			return err
+		}
+
+		return NewExecutionFailure(ExecutionFailureValidation, failure.Err)
+	}
+
+	return NewExecutionFailure(ExecutionFailureValidation, err)
 }
 
 func captureExecutionResult(record ExecutionRecord) error {
