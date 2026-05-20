@@ -229,8 +229,9 @@ Use case:
 > `chc` runs Codex inside the project runtime container so one ticket can
 > produce workspace edits, validation output, and a structured execution result.
 
-Current state: not delivered. The runtime boundary and harness invocation exist,
-but the worker that invokes Codex inside the container is not yet explicit.
+Current state: planned next in the operational cutoff path. The runtime boundary
+and harness invocation exist, but the worker that invokes Codex inside the
+container is not yet delivered.
 
 Candidate slices:
 
