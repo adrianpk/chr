@@ -5,7 +5,7 @@ Slicing: Ticket Execution Context Hardening
 Plan: `.prj/plans/slicing-ticket-execution-context-hardening-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 Branch: `feat/slice-6-context-ralph-attempts`
-PR: pending
+PR: #83
 
 ## Purpose
 
