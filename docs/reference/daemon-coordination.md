@@ -45,3 +45,31 @@ The command skeleton does not:
 - send notifications.
 
 Those behaviors are delivered by later daemon coordination slices.
+
+## Lifecycle State
+
+Daemon lifecycle state records the local coordinator status and process
+identity.
+
+Supported statuses:
+
+- `stopped`;
+- `starting`;
+- `running`;
+- `stopping`;
+- `stale`;
+- `failed`.
+
+Lifecycle fields:
+
+- `status`;
+- `pid`;
+- `started_at`;
+- `heartbeat_at`;
+- `stop_requested_at`;
+- `failure_reason`;
+- `updated_at`.
+
+Running process states require a positive PID and a start time. Heartbeats
+cannot precede the start time. Stop requests are valid only for stopping or
+stopped daemon state.
