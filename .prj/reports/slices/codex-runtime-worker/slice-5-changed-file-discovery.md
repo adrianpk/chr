@@ -1,6 +1,6 @@
 # Slice 5: Changed File Discovery
 
-Status: reviewing
+Status: delivered
 Slicing: Codex Runtime Worker
 Plan: `.prj/plans/slicing-codex-runtime-worker-plan.md`
 Tracker: `.prj/trackers/slicing-codex-runtime-worker-tracker.md`
@@ -50,7 +50,7 @@ New function:
 ## Validation
 
 - `go test ./internal/chc`: pass
-- `make verify`: pending
+- `make verify`: pass
 
 ## Risks and Follow-ups
 

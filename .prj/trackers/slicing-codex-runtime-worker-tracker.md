@@ -176,7 +176,7 @@ Candidate tasks:
 - [x] Avoid reverting or mutating changes.
 - [x] Add focused discovery tests.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -186,7 +186,7 @@ Task commits:
 - T5.4: `2729b2d` `feat(codex-worker): discover changed files`
 - T5.5: `5d57dcd` `test(codex-worker): cover changed file discovery`
 - T5.6: `docs(codex-worker): document changed file discovery`
-- T5.7: pending
+- T5.7: `docs(codex-worker): record changed file discovery validation`
 
 ## Slice 6: Post-Worker Validation
 
