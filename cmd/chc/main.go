@@ -1046,7 +1046,6 @@ func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketSta
 	}
 
 	record = chc.ExecutionRecordFromRuntimePlan(record, result.Plan)
-	record.Artifacts.ValidationPath = filepath.Join(record.Artifacts.RunDir, "validation.log")
 
 	return ticketStartPreflight{
 		Env:     env,
@@ -1128,6 +1127,7 @@ func runTicketStartExecution(
 	invocation, err := chc.NewHarnessInvocation(chc.HarnessInvocationOptions{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
+		TicketPath:  record.TicketPath,
 		Plan:        result.Plan,
 	})
 	if err != nil {

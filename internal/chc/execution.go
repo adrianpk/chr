@@ -52,9 +52,10 @@ func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan RuntimePlan) Ex
 		ValidationCommand: plan.ValidationCommand,
 	}
 	record.Artifacts = ExecutionArtifacts{
-		RunDir:     plan.RunArtifactDir,
-		ResultPath: plan.ResultPath,
-		LogPath:    plan.LogPath,
+		RunDir:         plan.RunArtifactDir,
+		ResultPath:     plan.ResultPath,
+		LogPath:        plan.LogPath,
+		ValidationPath: plan.ValidationPath,
 	}
 
 	return record

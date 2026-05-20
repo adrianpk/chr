@@ -9,6 +9,7 @@ import (
 type HarnessInvocationOptions struct {
 	ExecutionID string
 	TicketKey   string
+	TicketPath  string
 	Plan        RuntimePlan
 }
 
@@ -35,15 +36,24 @@ func NewHarnessInvocation(opts HarnessInvocationOptions) (HarnessInvocation, err
 		return HarnessInvocation{}, fmt.Errorf("ticket key is required")
 	}
 
+	if opts.TicketPath == "" {
+		return HarnessInvocation{}, fmt.Errorf("ticket path is required")
+	}
+
 	if opts.Plan.ProjectDir == "" {
 		return HarnessInvocation{}, fmt.Errorf("runtime project dir is required")
+	}
+
+	run, err := harnessRunCommand(opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan)
+	if err != nil {
+		return HarnessInvocation{}, err
 	}
 
 	return HarnessInvocation{
 		ExecutionID: opts.ExecutionID,
 		TicketKey:   opts.TicketKey,
 		Build:       harnessBuildCommand(opts.Plan),
-		Run:         harnessRunCommand(opts.ExecutionID, opts.TicketKey, opts.Plan),
+		Run:         run,
 		ResultPath:  opts.Plan.ResultPath,
 		LogPath:     opts.Plan.LogPath,
 	}, nil
@@ -63,7 +73,12 @@ func harnessBuildCommand(plan RuntimePlan) HarnessCommand {
 	}
 }
 
-func harnessRunCommand(executionID, ticketKey string, plan RuntimePlan) HarnessCommand {
+func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePlan) (HarnessCommand, error) {
+	workerScript, err := harnessWorkerShellScript(executionID, ticketKey, ticketPath, plan)
+	if err != nil {
+		return HarnessCommand{}, err
+	}
+
 	args := []string{
 		"run",
 		"--rm",
@@ -79,18 +94,38 @@ func harnessRunCommand(executionID, ticketKey string, plan RuntimePlan) HarnessC
 		"--workdir", plan.ContainerWorkdir,
 		"--env", "CHC_EXECUTION_ID="+executionID,
 		"--env", "CHC_TICKET_KEY="+ticketKey,
+		"--env", "CHC_TICKET_PATH="+containerProjectPath(plan, ticketPath),
+		"--env", "CHC_WORKER_CONTEXT_PATH="+containerProjectPath(plan, plan.WorkerContextPath),
 		"--env", "CHC_RESULT_PATH="+containerProjectPath(plan, plan.ResultPath),
 		"--env", "CHC_LOG_PATH="+containerProjectPath(plan, plan.LogPath),
+		"--env", "CHC_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
 		plan.Image,
 		"/bin/sh",
 		"-lc",
-		plan.ValidationCommand,
+		workerScript,
 	)
 
 	return HarnessCommand{
 		Program: "docker",
 		Args:    args,
+	}, nil
+}
+
+func harnessWorkerShellScript(executionID, ticketKey, ticketPath string, plan RuntimePlan) (string, error) {
+	command, err := NewCodexWorkerCommand(CodexWorkerCommandOptions{
+		ExecutionID:    executionID,
+		TicketKey:      ticketKey,
+		TicketPath:     containerProjectPath(plan, ticketPath),
+		ContextPath:    containerProjectPath(plan, plan.WorkerContextPath),
+		ResultPath:     containerProjectPath(plan, plan.ResultPath),
+		LogPath:        containerProjectPath(plan, plan.LogPath),
+		ValidationPath: containerProjectPath(plan, plan.ValidationPath),
+	})
+	if err != nil {
+		return "", err
 	}
+
+	return RenderCodexWorkerShellScript(command), nil
 }
 
 func dockerVolumeArg(mount RuntimeMount) string {
