@@ -73,3 +73,19 @@ Lifecycle fields:
 Running process states require a positive PID and a start time. Heartbeats
 cannot precede the start time. Stop requests are valid only for stopping or
 stopped daemon state.
+
+## State Persistence
+
+Daemon lifecycle state is persisted in the user-level SQLite database.
+
+The daemon state repository stores one singleton row for the local user
+environment. It supports:
+
+- read current daemon state;
+- upsert daemon state;
+- update heartbeat time;
+- clear daemon state.
+
+The repository does not start, stop, or signal processes. It only persists the
+lifecycle state that later daemon slices use for process ownership and status
+reporting.

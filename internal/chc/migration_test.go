@@ -48,6 +48,7 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 
 	assertTableExists(t, db, "projects")
 	assertTableExists(t, db, "loop_runs")
+	assertTableExists(t, db, "daemon_state")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -107,6 +108,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260520000004-create_loop_runs.sql": {
 			Data: []byte(testCreateLoopRunsMigration()),
+		},
+		"assets/migration/sqlite/20260520000005-create_daemon_state.sql": {
+			Data: []byte(testCreateDaemonStateMigration()),
 		},
 	}
 }
@@ -240,6 +244,24 @@ ON loop_runs (project_id, created_at);
 
 -- +migrate Down
 DROP TABLE IF EXISTS loop_runs;
+`
+}
+
+func testCreateDaemonStateMigration() string {
+	return `-- +migrate Up
+CREATE TABLE daemon_state (
+    id text PRIMARY KEY,
+    status text NOT NULL,
+    pid integer NOT NULL,
+    started_at text,
+    heartbeat_at text,
+    stop_requested_at text,
+    failure_reason text NOT NULL,
+    updated_at text NOT NULL
+);
+
+-- +migrate Down
+DROP TABLE IF EXISTS daemon_state;
 `
 }
 
