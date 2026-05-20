@@ -113,6 +113,23 @@ The default stale threshold is five minutes. Stale classification in this slice
 is a decision result only; persisted stale-state mutation is handled by a later
 recovery slice.
 
+## Project Loading
+
+Daemon project loading reads registered projects from the user-level project
+registry.
+
+Only enabled projects are returned for daemon work.
+
+Each enabled project is classified before work starts:
+
+- `ready`: project path exists, is a directory, and contains `.chc/`;
+- `missing`: project path does not exist;
+- `invalid`: project path is not usable for daemon work.
+
+Invalid classifications include non-directory project paths and missing
+workspace directories. Later daemon run-loop slices can skip or report these
+projects without failing the whole daemon process.
+
 ## Status Reporting
 
 `chc daemon status` reads the persisted daemon state.
