@@ -76,7 +76,7 @@ func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, err
 			FailureReason: opts.Execution.FailureReason,
 		},
 		Summary:      opts.Result.Summary,
-		ChangedFiles: append([]ResultApplicationChangedFile(nil), opts.ChangedFiles...),
+		ChangedFiles: resultApplicationChangedFiles(opts),
 		Evidence: ResultApplicationEvidence{
 			ValidationCommand: opts.Execution.Runtime.ValidationCommand,
 			ResultPath:        opts.Execution.Artifacts.ResultPath,
@@ -89,6 +89,19 @@ func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, err
 	application.BlockedReason = resultApplicationBlockedReason(application)
 
 	return application, nil
+}
+
+func resultApplicationChangedFiles(opts ResultApplicationOptions) []ResultApplicationChangedFile {
+	changedFiles := append([]ResultApplicationChangedFile(nil), opts.ChangedFiles...)
+
+	for _, changedFile := range opts.Result.ChangedFiles {
+		changedFiles = append(changedFiles, ResultApplicationChangedFile{
+			Path:    changedFile.Path,
+			Summary: changedFile.Summary,
+		})
+	}
+
+	return changedFiles
 }
 
 func validateResultApplicationInputs(opts ResultApplicationOptions) error {

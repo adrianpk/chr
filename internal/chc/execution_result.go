@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type ExecutionResultStatus string
@@ -14,10 +16,16 @@ const (
 )
 
 type ExecutionResult struct {
-	ExecutionID string                `json:"execution_id"`
-	TicketKey   string                `json:"ticket_key"`
-	Status      ExecutionResultStatus `json:"status"`
-	Summary     string                `json:"summary"`
+	ExecutionID  string                       `json:"execution_id"`
+	TicketKey    string                       `json:"ticket_key"`
+	Status       ExecutionResultStatus        `json:"status"`
+	Summary      string                       `json:"summary"`
+	ChangedFiles []ExecutionResultChangedFile `json:"changed_files,omitempty"`
+}
+
+type ExecutionResultChangedFile struct {
+	Path    string `json:"path"`
+	Summary string `json:"summary,omitempty"`
 }
 
 func LoadExecutionResult(path string) (ExecutionResult, error) {
@@ -57,6 +65,25 @@ func ValidateExecutionResult(result ExecutionResult) error {
 
 	if !result.Status.Valid() {
 		return fmt.Errorf("execution result status is invalid: %s", result.Status)
+	}
+
+	if err := validateExecutionResultChangedFiles(result.ChangedFiles); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateExecutionResultChangedFiles(changedFiles []ExecutionResultChangedFile) error {
+	for _, changedFile := range changedFiles {
+		path := strings.TrimSpace(changedFile.Path)
+		if path == "" {
+			return fmt.Errorf("execution result changed file path is required")
+		}
+
+		if filepath.IsAbs(path) || strings.HasPrefix(filepath.Clean(path), "..") {
+			return fmt.Errorf("execution result changed file path must be workspace relative: %s", changedFile.Path)
+		}
 	}
 
 	return nil
