@@ -23,7 +23,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 1: Context Composer Contract | Delivered | `feat/slice-1-context-composer-contract` | `feat(slice-1): context composer contract` | `.prj/reports/slices/ticket-execution-context-hardening/slice-1-context-composer-contract.md` | Repository PR #78 merged. |
 | Slice 2: Agent Identity and Protocol Context | Delivered | `feat/slice-2-context-agent-protocols` | `feat(slice-2): context agent protocols` | `.prj/reports/slices/ticket-execution-context-hardening/slice-2-context-agent-protocols.md` | Repository PR #79 merged. |
 | Slice 3: Project and Use-Case Document Context | Delivered | `feat/slice-3-context-project-documents` | `feat(slice-3): context project documents` | `.prj/reports/slices/ticket-execution-context-hardening/slice-3-context-project-documents.md` | Repository PR #80 merged. |
-| Slice 4: Tree and Search Context | Planned | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Cheap orientation. |
+| Slice 4: Tree and Search Context | Reviewing | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Cheap orientation. |
 | Slice 5: Go Graph Context Provider | Planned | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | `gograph` CLI first. |
 | Slice 6: Ralph Attempt Context | Planned | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Retry evidence. |
 | Slice 7: Docker-Compatible Context Materialization | Planned | `feat/slice-7-context-docker-materialization` | `feat(slice-7): context docker materialization` | `.prj/reports/slices/ticket-execution-context-hardening/slice-7-context-docker-materialization.md` | Runtime artifact layout. |
@@ -145,25 +145,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Capture bounded filesystem tree output.
-- [ ] Derive text-search terms from ticket and validation context.
-- [ ] Run targeted text searches.
-- [ ] Render tree and search sections into `code-context.md`.
-- [ ] Include relevant source, test, doc, and `.chc/` paths.
-- [ ] Keep output deterministic enough for tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Capture bounded filesystem tree output.
+- [x] Derive text-search terms from ticket and validation context.
+- [x] Run targeted text searches.
+- [x] Render tree and search sections into `code-context.md`.
+- [x] Include relevant source, test, doc, and `.chc/` paths.
+- [x] Keep output deterministic enough for tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
-- T4.8: pending
+- T4.1: `49381ac`
+- T4.2: `49381ac`
+- T4.3: `49381ac`
+- T4.4: `49381ac`
+- T4.5: `49381ac`
+- T4.6: `49381ac`
+- T4.7: `docs(slice-4): record tree search report`
+- T4.8: `49381ac`
 
 ## Slice 5: Go Graph Context Provider
 
