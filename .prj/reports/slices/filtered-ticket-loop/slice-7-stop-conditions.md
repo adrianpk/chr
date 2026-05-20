@@ -5,7 +5,7 @@ Slicing: Filtered Ticket Loop
 Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
 Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
 Branch: `feat/slice-7-stop-conditions`
-PR: pending
+PR: #62
 
 ## Purpose
 
