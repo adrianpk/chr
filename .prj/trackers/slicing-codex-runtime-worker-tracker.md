@@ -11,8 +11,8 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Confirm prerequisite execution and result-application slicings are completed.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Worker Contract Model | Planned | `feat/codex-worker-slice-1-contract-model` | `feat(codex-worker-slice-1): contract model` | `.prj/reports/slices/codex-runtime-worker/slice-1-contract-model.md` | Define worker command contract. |
+| Slice 1: Worker Contract Model | Reviewing | `feat/codex-worker-slice-1-contract-model` | `feat(codex-worker-slice-1): contract model` | `.prj/reports/slices/codex-runtime-worker/slice-1-contract-model.md` | Define worker command contract. |
 | Slice 2: Worker Context Materialization | Planned | `feat/codex-worker-slice-2-context-materialization` | `feat(codex-worker-slice-2): context materialization` | `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md` | Write Codex input artifact. |
 | Slice 3: Harness Worker Invocation | Planned | `feat/codex-worker-slice-3-harness-invocation` | `feat(codex-worker-slice-3): harness invocation` | `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md` | Invoke worker through Docker harness. |
 | Slice 4: Result Envelope Changed Files | Planned | `feat/codex-worker-slice-4-result-changed-files` | `feat(codex-worker-slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Carry changed files through result JSON. |
@@ -42,24 +42,24 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add worker command/domain types.
-- [ ] Define ticket, execution, result, log, and validation paths.
-- [ ] Render the shell command that invokes Codex inside the container.
-- [ ] Validate required command inputs.
-- [ ] Add focused command-rendering tests.
-- [ ] Document the worker contract.
-- [ ] Add slice implementation report.
+- [x] Add worker command/domain types.
+- [x] Define ticket, execution, result, log, and validation paths.
+- [x] Render the shell command that invokes Codex inside the container.
+- [x] Validate required command inputs.
+- [x] Add focused command-rendering tests.
+- [x] Document the worker contract.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
+- T1.1: `87d430a` `feat(codex-worker): add worker command contract`
+- T1.2: `87d430a` `feat(codex-worker): add worker command contract`
+- T1.3: `87d430a` `feat(codex-worker): add worker command contract`
+- T1.4: `87d430a` `feat(codex-worker): add worker command contract`
+- T1.5: `67b32c9` `test(codex-worker): cover worker command contract`
+- T1.6: `docs(codex-worker): document worker contract`
+- T1.7: `docs(codex-worker): document worker contract`
 - T1.8: pending
 
 ## Slice 2: Worker Context Materialization

@@ -123,6 +123,41 @@ The command renderer does not execute Docker, create directories, or write
 artifacts. Later execution slices are responsible for invoking the rendered
 commands and capturing outputs.
 
+## Codex Worker Command Contract
+
+A Codex worker command is a side-effect free rendering of the command that runs
+inside the runtime container.
+
+The worker command requires:
+
+- execution ID;
+- ticket key;
+- ticket path;
+- worker context artifact path;
+- result artifact path;
+- runtime log artifact path;
+- validation artifact path.
+
+The command invokes:
+
+```sh
+codex exec --skip-git-repo-check --full-auto < "$CHC_WORKER_CONTEXT_PATH"
+```
+
+The rendered command exports these environment variables for the worker process:
+
+- `CHC_EXECUTION_ID`;
+- `CHC_TICKET_KEY`;
+- `CHC_TICKET_PATH`;
+- `CHC_WORKER_CONTEXT_PATH`;
+- `CHC_RESULT_PATH`;
+- `CHC_LOG_PATH`;
+- `CHC_VALIDATION_PATH`.
+
+The worker command renderer does not execute Codex, run Docker, create context
+files, or write result artifacts. Later slices are responsible for context
+materialization and harness integration.
+
 ## Agent Harness Invocation
 
 In non-dry-run mode, `chc ticket start <ticket-key>` creates the pending
