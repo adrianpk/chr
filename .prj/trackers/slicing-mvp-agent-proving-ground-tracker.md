@@ -21,7 +21,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Todolist Fixture Project | Delivered | `feat/slice-1-proving-ground-fixture` | `feat(slice-1): proving ground fixture` | `.prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md` | Repository PR #72. |
 | Slice 2: Direct Proving Objective Contract | Delivered | `feat/slice-2-proving-objective-contract` | `feat(slice-2): proving objective contract` | `.prj/reports/slices/mvp-agent-proving-ground/slice-2-proving-objective-contract.md` | Repository PR #73. |
-| Slice 3: Sandbox Codex Runner | In Review | `feat/slice-3-proving-sandbox-runner` | `feat(slice-3): proving sandbox runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-3-proving-sandbox-runner.md` | Codex in sandbox. |
+| Slice 3: Sandbox Codex Runner | In Review | `feat/slice-3-proving-sandbox-runner` | `feat(slice-3): proving sandbox runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-3-proving-sandbox-runner.md` | Repository PR #74. |
 | Slice 4: Validation Runner | Planned | `feat/slice-4-proving-validation-runner` | `feat(slice-4): proving validation runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-4-proving-validation-runner.md` | Compile, lint, tests. |
 | Slice 5: Minimal Ralph Loop | Planned | `feat/slice-5-proving-ralph-loop` | `feat(slice-5): proving ralph loop` | `.prj/reports/slices/mvp-agent-proving-ground/slice-5-proving-ralph-loop.md` | Bounded retries. |
 | Slice 6: End-to-End Agent Proof | Planned | `feat/slice-6-proving-e2e-agent-proof` | `feat(slice-6): proving e2e agent proof` | `.prj/reports/slices/mvp-agent-proving-ground/slice-6-proving-e2e-agent-proof.md` | Final proof. |
@@ -119,14 +119,14 @@ Candidate tasks:
 
 Task commits:
 
-- T3.1: pending commit
-- T3.2: pending commit
-- T3.3: pending commit
-- T3.4: pending commit
-- T3.5: pending commit
-- T3.6: pending commit
-- T3.7: pending commit
-- T3.8: pending commit
+- T3.1: `021879b`
+- T3.2: `021879b`
+- T3.3: `021879b`
+- T3.4: `021879b`
+- T3.5: `021879b`
+- T3.6: `021879b`
+- T3.7: `021879b`
+- T3.8: `021879b`
 
 ## Slice 4: Validation Runner
 
