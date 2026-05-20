@@ -111,8 +111,11 @@ The run environment includes:
 
 - `CHC_EXECUTION_ID`;
 - `CHC_TICKET_KEY`;
+- `CHC_TICKET_PATH`;
+- `CHC_WORKER_CONTEXT_PATH`;
 - `CHC_RESULT_PATH`;
 - `CHC_LOG_PATH`.
+- `CHC_VALIDATION_PATH`.
 
 Runtime artifact paths are scoped by ticket key and execution ID when both are
 available:
@@ -157,6 +160,10 @@ The rendered command exports these environment variables for the worker process:
 The worker command renderer does not execute Codex, run Docker, create context
 files, or write result artifacts. Later slices are responsible for context
 materialization and harness integration.
+
+Harness invocation now renders the Docker run command so the container executes
+the Codex worker command. The worker context path and artifact paths are passed
+as container paths through environment variables and through the shell command.
 
 ## Codex Worker Context
 
