@@ -25,8 +25,9 @@ Supported skeleton commands:
 The skeleton resolves the user environment and prints the user-level data and
 state directories that later lifecycle slices will use.
 
-`daemon status` is read-only and reports `stopped` until lifecycle state is
-delivered.
+`daemon status` is read-only. It reports `stopped` when no daemon state exists,
+or prints the stored daemon status, process ID, lifecycle timestamps, failure
+reason, and user-level state paths.
 
 `daemon start` and `daemon stop` require `--dry-run` until lifecycle state and
 process ownership are delivered. Without `--dry-run`, they return an explicit
@@ -89,3 +90,24 @@ environment. It supports:
 The repository does not start, stop, or signal processes. It only persists the
 lifecycle state that later daemon slices use for process ownership and status
 reporting.
+
+## Status Reporting
+
+`chc daemon status` reads the persisted daemon state.
+
+When state is missing, the output includes:
+
+- `daemon: stopped`;
+- `state: missing`.
+
+When state exists, the output includes:
+
+- daemon status;
+- `state: stored`;
+- PID;
+- start time;
+- heartbeat time;
+- stop request time;
+- failure reason;
+- update time;
+- data and state directories.

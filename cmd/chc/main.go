@@ -133,7 +133,7 @@ func runDaemonStart(_ context.Context, cmd *cli.Command, stdout io.Writer) error
 	return printDaemonPlan(stdout, "start", env)
 }
 
-func runDaemonStatus(_ context.Context, cmd *cli.Command, stdout io.Writer) error {
+func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("daemon status does not accept positional arguments")
 	}
@@ -143,14 +143,62 @@ func runDaemonStatus(_ context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
+	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	state, err := repository.GetDaemonState(ctx)
+	if errors.Is(err, chc.ErrDaemonStateNotFound) {
+		return printDaemonStoppedStatus(stdout, env)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return printDaemonStateStatus(stdout, env, state)
+}
+
+func printDaemonStoppedStatus(stdout io.Writer, env chc.UserEnvironment) error {
 	lines := []string{
 		"daemon: stopped",
-		"state: unavailable",
+		"state: missing",
 		fmt.Sprintf("data_dir: %s", env.DataDir()),
 		fmt.Sprintf("state_dir: %s", env.StateDir()),
 	}
 
 	return printDaemonLines(stdout, lines)
+}
+
+func printDaemonStateStatus(stdout io.Writer, env chc.UserEnvironment, state chc.DaemonState) error {
+	lines := []string{
+		fmt.Sprintf("daemon: %s", state.Status),
+		"state: stored",
+		fmt.Sprintf("pid: %d", state.PID),
+		fmt.Sprintf("started_at: %s", formatDaemonStatusTime(state.StartedAt)),
+		fmt.Sprintf("heartbeat_at: %s", formatDaemonStatusTime(state.HeartbeatAt)),
+		fmt.Sprintf("stop_requested_at: %s", formatDaemonStatusTime(state.StopRequestedAt)),
+		fmt.Sprintf("failure_reason: %s", state.FailureReason),
+		fmt.Sprintf("updated_at: %s", state.UpdatedAt.Format(time.RFC3339)),
+		fmt.Sprintf("data_dir: %s", env.DataDir()),
+		fmt.Sprintf("state_dir: %s", env.StateDir()),
+	}
+
+	return printDaemonLines(stdout, lines)
+}
+
+func formatDaemonStatusTime(value *time.Time) string {
+	if value == nil {
+		return ""
+	}
+
+	return value.Format(time.RFC3339)
 }
 
 func runDaemonStop(_ context.Context, cmd *cli.Command, stdout io.Writer) error {

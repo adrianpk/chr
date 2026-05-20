@@ -14,7 +14,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func TestDaemonStatusPrintsStoppedSkeleton(t *testing.T) {
+func TestDaemonStatusPrintsStoppedWhenStateIsMissing(t *testing.T) {
 	devRoot := t.TempDir()
 
 	var stdout bytes.Buffer
@@ -31,9 +31,123 @@ func TestDaemonStatusPrintsStoppedSkeleton(t *testing.T) {
 
 	for _, want := range []string{
 		"daemon: stopped",
-		"state: unavailable",
+		"state: missing",
 		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
 		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStatusPrintsStoredRunningState(t *testing.T) {
+	devRoot := t.TempDir()
+	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
+	heartbeatAt := startedAt.Add(time.Minute)
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:        chc.DaemonStatusRunning,
+		PID:           1234,
+		StartedAt:     &startedAt,
+		HeartbeatAt:   &heartbeatAt,
+		FailureReason: "",
+		UpdatedAt:     heartbeatAt,
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: running",
+		"state: stored",
+		"pid: 1234",
+		"started_at: 2026-05-20T12:00:00Z",
+		"heartbeat_at: 2026-05-20T12:01:00Z",
+		"updated_at: 2026-05-20T12:01:00Z",
+		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStatusPrintsStoredStoppingState(t *testing.T) {
+	devRoot := t.TempDir()
+	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
+	stopRequestedAt := startedAt.Add(time.Minute)
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:          chc.DaemonStatusStopping,
+		PID:             1234,
+		StartedAt:       &startedAt,
+		StopRequestedAt: &stopRequestedAt,
+		UpdatedAt:       stopRequestedAt,
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: stopping",
+		"state: stored",
+		"pid: 1234",
+		"stop_requested_at: 2026-05-20T12:01:00Z",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStatusPrintsStoredStaleState(t *testing.T) {
+	devRoot := t.TempDir()
+	updatedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:        chc.DaemonStatusStale,
+		PID:           1234,
+		FailureReason: "missing process",
+		UpdatedAt:     updatedAt,
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: stale",
+		"state: stored",
+		"pid: 1234",
+		"failure_reason: missing process",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -1936,6 +2050,33 @@ func selectProject(t *testing.T, devRoot, selector string) {
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("project select returned error: %v", err)
+	}
+}
+
+func upsertDaemonState(t *testing.T, devRoot string, state chc.DaemonState) {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	repository, err := chc.NewDaemonStateRepository(t.Context(), env, assetsFS)
+	if err != nil {
+		t.Fatalf("NewDaemonStateRepository returned error: %v", err)
+	}
+
+	defer func() {
+		if err := repository.Close(); err != nil {
+			t.Fatalf("close daemon state repository: %v", err)
+		}
+	}()
+
+	if err := repository.UpsertDaemonState(t.Context(), state); err != nil {
+		t.Fatalf("UpsertDaemonState returned error: %v", err)
 	}
 }
 
