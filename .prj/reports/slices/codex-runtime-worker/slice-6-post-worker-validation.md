@@ -5,7 +5,7 @@ Slicing: Codex Runtime Worker
 Plan: `.prj/plans/slicing-codex-runtime-worker-plan.md`
 Tracker: `.prj/trackers/slicing-codex-runtime-worker-tracker.md`
 Branch: `feat/slice-6-post-worker-validation`
-PR: pending
+PR: `#54`
 
 ## Purpose
 
