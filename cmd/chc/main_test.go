@@ -493,6 +493,7 @@ func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 		"status: succeeded",
 		"eligible: 1",
 		"processed: 1",
+		"skipped: 0",
 		"blocked: 0",
 		"failed: 0",
 		"execution: exec-",
@@ -553,8 +554,9 @@ func TestTicketLoopHonorsMaxIterations(t *testing.T) {
 
 	for _, want := range []string{
 		"status: succeeded",
-		"eligible: 1",
+		"eligible: 2",
 		"processed: 1",
+		"skipped: 1",
 		"execution: exec-",
 		"CHC-1",
 	} {
@@ -602,6 +604,7 @@ func TestTicketLoopCompletesWithNoEligibleTickets(t *testing.T) {
 		"status: succeeded",
 		"eligible: 0",
 		"processed: 0",
+		"skipped: 0",
 		"blocked: 0",
 		"failed: 0",
 	} {
@@ -642,6 +645,19 @@ func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 	}, &stdout, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket loop returned nil error")
+	}
+
+	for _, want := range []string{
+		"status: failed",
+		"eligible: 2",
+		"processed: 0",
+		"skipped: 1",
+		"blocked: 0",
+		"failed: 1",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
 	}
 
 	if strings.Contains(stdout.String(), "CHC-2") {

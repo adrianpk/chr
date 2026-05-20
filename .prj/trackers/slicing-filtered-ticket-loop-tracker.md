@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 5: Loop Run Records | Delivered | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Repository PR #60. |
 | Slice 6: Repeated Ticket Execution | Delivered | `feat/slice-6-repeated-ticket-execution` | `feat(slice-6): repeated ticket execution` | `.prj/reports/slices/filtered-ticket-loop/slice-6-repeated-ticket-execution.md` | Repository PR #61. |
 | Slice 7: Stop Conditions and Thresholds | Delivered | `feat/slice-7-stop-conditions` | `feat(slice-7): stop conditions` | `.prj/reports/slices/filtered-ticket-loop/slice-7-stop-conditions.md` | Repository PR #62. |
-| Slice 8: Loop Status Reporting | Planned | `feat/slice-8-loop-status-reporting` | `feat(slice-8): loop status reporting` | `.prj/reports/slices/filtered-ticket-loop/slice-8-loop-status-reporting.md` | Summarize loop outcome. |
+| Slice 8: Loop Status Reporting | In Review | `feat/slice-8-loop-status-reporting` | `feat(slice-8): loop status reporting` | `.prj/reports/slices/filtered-ticket-loop/slice-8-loop-status-reporting.md` | Summarize loop outcome. |
 
 ## Slice 1: Eligible Ticket Query
 
@@ -265,13 +265,13 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Print loop run summary.
-- [ ] Print processed, skipped, blocked, and failed counts.
-- [ ] Expose execution IDs per iteration.
-- [ ] Add loop report artifact or lookup boundary if needed.
-- [ ] Document foreground loop behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Print loop run summary.
+- [x] Print processed, skipped, blocked, and failed counts.
+- [x] Expose execution IDs per iteration.
+- [x] Add loop report artifact or lookup boundary if needed.
+- [x] Document foreground loop behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 

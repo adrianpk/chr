@@ -917,15 +917,11 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	tickets = ticketsForTicketLoopRun(tickets, runOptions)
+	eligibleTickets := deduplicateTicketLoopTickets(tickets)
+	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
 
 	if !cmd.Bool("dry-run") {
-		result, err := runTicketLoopExecution(ctx, env, projectContext, tickets)
-		if err != nil {
-			return err
-		}
-
-		return printTicketLoopExecution(stdout, result)
+		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, len(eligibleTickets))
 	}
 
 	return printTicketLoopPlan(stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
@@ -959,6 +955,14 @@ func ticketLoopRunOptionsFromCommand(cmd *cli.Command) (ticketLoopRunOptions, er
 }
 
 func ticketsForTicketLoopRun(tickets []chc.IndexedTicket, opts ticketLoopRunOptions) []chc.IndexedTicket {
+	if opts.MaxIterations == 0 || len(tickets) <= opts.MaxIterations {
+		return tickets
+	}
+
+	return tickets[:opts.MaxIterations]
+}
+
+func deduplicateTicketLoopTickets(tickets []chc.IndexedTicket) []chc.IndexedTicket {
 	selected := make([]chc.IndexedTicket, 0, len(tickets))
 	seen := map[string]struct{}{}
 
@@ -969,13 +973,29 @@ func ticketsForTicketLoopRun(tickets []chc.IndexedTicket, opts ticketLoopRunOpti
 
 		seen[ticket.Key] = struct{}{}
 		selected = append(selected, ticket)
-
-		if opts.MaxIterations > 0 && len(selected) >= opts.MaxIterations {
-			break
-		}
 	}
 
 	return selected
+}
+
+func runAndPrintTicketLoopExecution(
+	ctx context.Context,
+	stdout io.Writer,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+	tickets []chc.IndexedTicket,
+	eligibleCount int,
+) error {
+	result, err := runTicketLoopExecution(ctx, env, projectContext, tickets, eligibleCount)
+	if result.Record.ID == "" {
+		return err
+	}
+
+	if printErr := printTicketLoopExecution(stdout, result); printErr != nil {
+		return printErr
+	}
+
+	return err
 }
 
 func printTicketLoopPlan(
@@ -1029,6 +1049,7 @@ func runTicketLoopExecution(
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
 	tickets []chc.IndexedTicket,
+	eligibleCount int,
 ) (ticketLoopExecutionResult, error) {
 	repository, err := chc.NewLoopRunRepository(ctx, env, assetsFS)
 	if err != nil {
@@ -1040,7 +1061,7 @@ func runTicketLoopExecution(
 		_ = repository.Close()
 	}()
 
-	record := newRunningLoopRunRecord(projectContext.ProjectID, len(tickets))
+	record := newRunningLoopRunRecord(projectContext.ProjectID, eligibleCount)
 	if err := repository.CreateLoopRun(ctx, record); err != nil {
 		return ticketLoopExecutionResult{}, err
 	}
@@ -1057,7 +1078,9 @@ func runTicketLoopExecution(
 				return ticketLoopExecutionResult{}, updateErr
 			}
 
-			return ticketLoopExecutionResult{}, err
+			result.Record = record
+
+			return result, err
 		}
 
 		result.Executions = append(result.Executions, execution)
@@ -1154,11 +1177,17 @@ func loopRunID(projectID string, createdAt time.Time) string {
 }
 
 func printTicketLoopExecution(stdout io.Writer, result ticketLoopExecutionResult) error {
+	skippedCount := result.Record.EligibleCount - result.Record.ProcessedCount - result.Record.FailedCount
+	if skippedCount < 0 {
+		skippedCount = 0
+	}
+
 	lines := []string{
 		fmt.Sprintf("loop: %s", result.Record.ID),
 		fmt.Sprintf("status: %s", result.Record.Status),
 		fmt.Sprintf("eligible: %d", result.Record.EligibleCount),
 		fmt.Sprintf("processed: %d", result.Record.ProcessedCount),
+		fmt.Sprintf("skipped: %d", skippedCount),
 		fmt.Sprintf("blocked: %d", result.Record.BlockedCount),
 		fmt.Sprintf("failed: %d", result.Record.FailedCount),
 	}

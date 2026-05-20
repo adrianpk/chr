@@ -108,6 +108,17 @@ Without `--dry-run`, the command creates a loop run, executes eligible tickets
 one at a time through the existing single-ticket execution path, applies each
 execution result, and prints the loop summary.
 
+Loop execution output includes:
+
+- loop run ID;
+- loop run status;
+- eligible ticket count;
+- processed ticket count;
+- skipped ticket count;
+- blocked ticket count;
+- failed ticket count;
+- execution IDs for attempted tickets.
+
 The foreground loop reuses:
 
 - runtime validation;
@@ -126,6 +137,9 @@ Loop stop conditions:
 
 When `--max-iterations` is zero or omitted, the loop uses every selected
 eligible ticket until another stop condition is reached.
+
+Skipped tickets are eligible tickets that were not attempted because a stop
+condition ended the run first.
 
 ## Loop Run Records
 
