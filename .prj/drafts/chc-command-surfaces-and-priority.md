@@ -21,6 +21,17 @@ This is not an executable slice plan. A slice becomes executable only after a pl
 
 These surfaces should not imply that the user sends messages to themselves from the terminal. Manual notification commands are only useful as setup and validation tools.
 
+ChrysoCoord is a single-operator orchestration tool. Its goal is to let one
+operator bootstrap a project, create or refine tickets, and then let `chc`
+drive serial agent work with minimal intervention. CLI, Telegram, and email are
+control surfaces for the same local coordinator, not separate collaboration
+roles.
+
+The system should not optimize for multi-user coordination or multiple agents
+editing the same repository concurrently. The daemon may own loops and remote
+commands, but per project it should preserve a single-active-agent execution
+model.
+
 The main value of messaging appears when execution is decoupled from the active terminal session:
 
 - a daemon is running;
@@ -50,7 +61,12 @@ This means the first usable product path is:
 project context -> ticket visibility -> sync/index trust -> Docker runtime -> ticket execution -> loop -> notification
 ```
 
-Document workflows such as drafts, specs, dumps, quizzes, and slice helpers remain important because they describe and preserve the workflow. They are not the blocking path for the first operational MVP unless a specific slice needs them to coordinate implementation.
+Document workflows such as drafts, specs, dumps, quizzes, and slice helpers
+remain important because they help turn rough project knowledge into executable
+tickets. They are not the blocking path for the first operational MVP unless a
+specific slice needs them to coordinate implementation. After bootstrap, the
+normal operator workflow should narrow to creating or editing tickets and then
+letting the single active agent or loop work through them.
 
 ## Command Surface Model
 

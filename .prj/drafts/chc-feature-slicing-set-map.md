@@ -12,6 +12,31 @@ In this document:
 - a slicing is a connected group of slices that covers one use case, feature, or workflow;
 - a slice is one branch and one PR with a concrete, reviewable delivery unit.
 
+## Product Boundary
+
+ChrysoCoord is a simple orchestration tool for working on one local project with
+minimal operator intervention after bootstrap.
+
+The steady-state workflow is:
+
+```text
+tickets -> one active agent -> validation -> result application
+tickets -> serial loop -> repeated single-agent execution
+```
+
+The operator may command or observe the system from the CLI, Telegram, or email.
+Remote command surfaces exist to unblock work, inspect status, and provide
+decisions when a running loop or daemon needs input.
+
+ChrysoCoord is not a multi-user collaboration system and not a concurrent
+multi-agent editing system. The assumed operating model is one local operator
+and at most one active agent mutating a workspace at a time. A daemon may
+coordinate registered projects and loops, but it should serialize work for a
+project rather than run multiple agents against the same repository.
+
+Authoring exists to turn rough project knowledge into executable tickets. It is
+not a standalone editorial product.
+
 ## Slicing Size Rule
 
 A slicing should be large enough to justify multiple slices and small enough to remain conceptually coherent.
@@ -209,7 +234,10 @@ Candidate slices:
 This slicing supports the broader workflow but is not the shortest path to the
 ticket-execution MVP. After Docker execution and context composition exist, it
 becomes important because otherwise dumps, quizzes, specs, and plans remain
-dependent on external conversations rather than product-owned workflows.
+dependent on external conversations rather than product-owned workflows. The
+purpose is to move from rough knowledge to executable tickets; once a project is
+bootstrapped, the normal workflow should be ticket creation, ticket editing, and
+serial agent or loop execution.
 
 ## Slicing: Agent Runtime Boundary
 
