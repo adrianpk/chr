@@ -134,7 +134,7 @@ func (r ExecutionRunner) runHarness(ctx context.Context, invocation HarnessInvoc
 	}
 
 	if err := r.Executor.Run(ctx, invocation.Run, log, log); err != nil {
-		return harnessFailure(err)
+		return workerFailure(err)
 	}
 
 	if err := r.Executor.Run(ctx, invocation.Validation, validationLog, validationLog); err != nil {
@@ -151,6 +151,19 @@ func harnessFailure(err error) error {
 	}
 
 	return NewExecutionFailure(ExecutionFailureHarness, err)
+}
+
+func workerFailure(err error) error {
+	var failure ExecutionFailure
+	if errors.As(err, &failure) {
+		if failure.Kind == ExecutionFailureWorker {
+			return err
+		}
+
+		return NewExecutionFailure(ExecutionFailureWorker, failure.Err)
+	}
+
+	return NewExecutionFailure(ExecutionFailureWorker, err)
 }
 
 func validationFailure(err error) error {

@@ -565,6 +565,45 @@ func TestTicketStartPrintsHarnessFailure(t *testing.T) {
 	}
 }
 
+func TestTicketStartPrintsWorkerFailure(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	executor := installFakeTicketStartHarnessExecutor(t, nil)
+	executor.failWorker = true
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket start returned nil error")
+	}
+
+	for _, want := range []string{
+		"status: failed",
+		"failure_kind: worker",
+		"failure_reason: worker: codex failed",
+		"diagnostic_log_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1"),
+		"diagnostic_result_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1"),
+		"diagnostic_validation_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func assertTicketStartSucceededExecution(t *testing.T, record chc.ExecutionRecord, projectDir string) {
 	t.Helper()
 
@@ -1716,8 +1755,9 @@ func testTicket() chc.Ticket {
 }
 
 type fakeTicketStartHarnessExecutor struct {
-	commands []string
-	err      error
+	commands   []string
+	err        error
+	failWorker bool
 }
 
 func (e *fakeTicketStartHarnessExecutor) Run(
@@ -1737,11 +1777,19 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 		return err
 	}
 
+	if e.failWorker && isFakeTicketStartWorkerCommand(command) {
+		return chc.NewExecutionFailure(chc.ExecutionFailureHarness, fmt.Errorf("codex failed"))
+	}
+
 	if err := writeFakeTicketStartResult(command); err != nil {
 		return err
 	}
 
 	return e.err
+}
+
+func isFakeTicketStartWorkerCommand(command chc.HarnessCommand) bool {
+	return command.Args[0] == "run" && harnessEnvValue(command, "CHC_RESULT_PATH") != ""
 }
 
 func writeFakeTicketStartResult(command chc.HarnessCommand) error {

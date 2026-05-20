@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 4: Result Envelope Changed Files | Delivered | `feat/slice-4-result-changed-files` | `feat(slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Repository PR #52. |
 | Slice 5: Changed File Discovery | Delivered | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Repository PR #53. |
 | Slice 6: Post-Worker Validation | Delivered | `feat/slice-6-post-worker-validation` | `feat(slice-6): post worker validation` | `.prj/reports/slices/codex-runtime-worker/slice-6-post-worker-validation.md` | Repository PR #54. |
-| Slice 7: Worker Failure Classification and Docs | Planned | `feat/slice-7-worker-failure-docs` | `feat(slice-7): worker failure classification and docs` | `.prj/reports/slices/codex-runtime-worker/slice-7-failure-docs.md` | Document and classify worker failures. |
+| Slice 7: Worker Failure Classification and Docs | In Review | `feat/slice-7-worker-failure-docs` | `feat(slice-7): worker failure classification and docs` | `.prj/reports/slices/codex-runtime-worker/slice-7-failure-docs.md` | Document and classify worker failures. |
 
 ## Slice 1: Worker Contract Model
 
@@ -234,23 +234,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add Codex worker failure classification.
-- [ ] Surface worker diagnostics in execution output.
-- [ ] Document container prerequisites and result contract.
-- [ ] Document dry-run visibility.
-- [ ] Add focused failure tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add Codex worker failure classification.
+- [x] Surface worker diagnostics in execution output.
+- [x] Document container prerequisites and result contract.
+- [x] Document dry-run visibility.
+- [x] Add focused failure tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
-- T7.6: pending
-- T7.7: pending
+- T7.1: `feat(slice-7): worker failure classification and docs`
+- T7.2: `feat(slice-7): worker failure classification and docs`
+- T7.3: `feat(slice-7): worker failure classification and docs`
+- T7.4: `feat(slice-7): worker failure classification and docs`
+- T7.5: `feat(slice-7): worker failure classification and docs`
+- T7.6: `feat(slice-7): worker failure classification and docs`
+- T7.7: `feat(slice-7): worker failure classification and docs`
 
 ## Validation Record
 

@@ -14,9 +14,9 @@ func TestExecutionFailurePrefixesErrorWithKind(t *testing.T) {
 }
 
 func TestExecutionFailureKindFromReasonParsesKnownKind(t *testing.T) {
-	kind := ExecutionFailureKindFromReason("result_capture: missing result")
+	kind := ExecutionFailureKindFromReason("worker: codex failed")
 
-	if kind != ExecutionFailureResultCapture {
-		t.Fatalf("kind = %q, want result_capture", kind)
+	if kind != ExecutionFailureWorker {
+		t.Fatalf("kind = %q, want worker", kind)
 	}
 }

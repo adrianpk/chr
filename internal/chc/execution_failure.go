@@ -12,6 +12,7 @@ const (
 	ExecutionFailurePreflight     ExecutionFailureKind = "preflight"
 	ExecutionFailureRuntime       ExecutionFailureKind = "runtime"
 	ExecutionFailureHarness       ExecutionFailureKind = "harness"
+	ExecutionFailureWorker        ExecutionFailureKind = "worker"
 	ExecutionFailureValidation    ExecutionFailureKind = "validation"
 	ExecutionFailureResultCapture ExecutionFailureKind = "result_capture"
 )
@@ -59,6 +60,7 @@ func ExecutionFailureKindFromReason(reason string) ExecutionFailureKind {
 	case ExecutionFailurePreflight,
 		ExecutionFailureRuntime,
 		ExecutionFailureHarness,
+		ExecutionFailureWorker,
 		ExecutionFailureValidation,
 		ExecutionFailureResultCapture:
 		return ExecutionFailureKind(kind)

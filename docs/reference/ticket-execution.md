@@ -156,6 +156,13 @@ The command invokes:
 codex exec --skip-git-repo-check --full-auto < "$CHC_WORKER_CONTEXT_PATH"
 ```
 
+The runtime image must provide:
+
+- a POSIX shell at `/bin/sh`;
+- the `codex` executable on `PATH`;
+- access to any credentials or configuration required by `codex exec`;
+- the project workspace mounted at the configured container workdir.
+
 The rendered command exports these environment variables for the worker process:
 
 - `CHC_EXECUTION_ID`;
@@ -218,9 +225,10 @@ The execution runner:
 The runner updates `started_at`, `finished_at`, and `updated_at` timestamps as
 the execution moves through the lifecycle.
 
-`--dry-run` still performs preflight and prints the planned runtime output, but
-does not create an execution record, create artifact directories, or invoke the
-harness.
+`--dry-run` still performs preflight and prints the planned runtime output,
+including execution-scoped artifact paths. It does not create an execution
+record, create artifact directories, build the image, invoke Codex, capture a
+result envelope, or run validation.
 
 ## Execution Result Artifact
 
@@ -241,6 +249,10 @@ Changed file objects contain:
 
 Changed file paths must be relative to the workspace. Absolute paths and paths
 that escape the workspace are rejected.
+
+The worker must write this envelope before it exits successfully. If the worker
+process fails before writing a valid envelope, the execution failure kind is
+`worker`, and the planned result path is printed as diagnostic context.
 
 ## Changed File Discovery
 
@@ -279,7 +291,8 @@ Failure kinds:
   workspace config failed before runtime validation.
 - `runtime`: runtime boundary validation failed before creating an execution
   record.
-- `harness`: Docker build or worker invocation failed.
+- `harness`: Docker build invocation failed.
+- `worker`: Codex worker invocation failed before post-worker validation.
 - `validation`: the validation invocation failed, or the harness completed but
   the result envelope reported `failed`.
 - `result_capture`: result artifact reading, JSON decoding, envelope validation,

@@ -83,7 +83,7 @@ func assertSucceededRunnerRecord(t *testing.T, record ExecutionRecord) {
 	}
 }
 
-func TestExecutionRunnerMarksFailedWhenHarnessFails(t *testing.T) {
+func TestExecutionRunnerMarksFailedWhenBuildHarnessFails(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
@@ -91,7 +91,7 @@ func TestExecutionRunnerMarksFailedWhenHarnessFails(t *testing.T) {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
-	executor := &fakeHarnessExecutor{failAt: "run"}
+	executor := &fakeHarnessExecutor{failAt: "build"}
 	runner := NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
@@ -122,6 +122,39 @@ func TestExecutionRunnerMarksFailedWhenHarnessFails(t *testing.T) {
 
 	if stored.Status != ExecutionStatusFailed {
 		t.Fatalf("stored Status = %q, want failed", stored.Status)
+	}
+}
+
+func TestExecutionRunnerClassifiesWorkerCommandFailure(t *testing.T) {
+	repository := newTestExecutionRunnerRepository(t)
+
+	record := testRunnerExecutionRecord(t.TempDir())
+	if err := repository.CreateExecution(t.Context(), record); err != nil {
+		t.Fatalf("CreateExecution returned error: %v", err)
+	}
+
+	executor := &fakeHarnessExecutor{failWorker: true}
+	runner := NewExecutionRunner(repository, executor)
+	runner.Now = fixedRunnerClock()
+
+	got, err := runner.Run(t.Context(), RunExecutionOptions{
+		Record:     record,
+		Invocation: testRunnerInvocation(record),
+	})
+	if err == nil {
+		t.Fatal("Run returned nil error")
+	}
+
+	if got.Status != ExecutionStatusFailed {
+		t.Fatalf("Status = %q, want failed", got.Status)
+	}
+
+	if !strings.HasPrefix(got.FailureReason, "worker:") {
+		t.Fatalf("FailureReason = %q, want worker prefix", got.FailureReason)
+	}
+
+	if !slices.Equal(executor.commands, []string{"docker build", "docker run"}) {
+		t.Fatalf("commands = %#v, want build and worker run only", executor.commands)
 	}
 }
 
@@ -300,6 +333,7 @@ func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 type fakeHarnessExecutor struct {
 	commands       []string
 	failAt         string
+	failWorker     bool
 	failValidation bool
 	resultPath     string
 	resultContent  string
@@ -319,6 +353,10 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, std
 
 	if e.failAt == command.Args[0] {
 		return fmt.Errorf("failed %s", name)
+	}
+
+	if e.failWorker && isWorkerHarnessCommand(command) {
+		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("failed %s", name))
 	}
 
 	if e.failValidation && isValidationHarnessCommand(command) {
@@ -343,6 +381,10 @@ func (e *fakeHarnessExecutor) writeResultForWorkerRun(command HarnessCommand) er
 	}
 
 	return os.WriteFile(e.resultPath, []byte(content), 0o644)
+}
+
+func isWorkerHarnessCommand(command HarnessCommand) bool {
+	return command.Args[0] == "run" && !isValidationHarnessCommand(command)
 }
 
 func isValidationHarnessCommand(command HarnessCommand) bool {
