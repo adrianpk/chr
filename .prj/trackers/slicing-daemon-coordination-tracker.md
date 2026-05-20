@@ -12,7 +12,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Daemon Command Skeleton | Planned | `feat/slice-1-daemon-command-skeleton` | `feat(slice-1): daemon command skeleton` | `.prj/reports/slices/daemon-coordination/slice-1-daemon-command-skeleton.md` | Command surface only. |
+| Slice 1: Daemon Command Skeleton | In Review | `feat/slice-1-daemon-command-skeleton` | `feat(slice-1): daemon command skeleton` | `.prj/reports/slices/daemon-coordination/slice-1-daemon-command-skeleton.md` | Command surface only. |
 | Slice 2: Daemon Lifecycle State Model | Planned | `feat/slice-2-daemon-lifecycle-state` | `feat(slice-2): daemon lifecycle state` | `.prj/reports/slices/daemon-coordination/slice-2-daemon-lifecycle-state.md` | State contract. |
 | Slice 3: Daemon State Repository | Planned | `feat/slice-3-daemon-state-repository` | `feat(slice-3): daemon state repository` | `.prj/reports/slices/daemon-coordination/slice-3-daemon-state-repository.md` | User database persistence. |
 | Slice 4: Daemon Status Reporting | Planned | `feat/slice-4-daemon-status-reporting` | `feat(slice-4): daemon status reporting` | `.prj/reports/slices/daemon-coordination/slice-4-daemon-status-reporting.md` | Read lifecycle state. |
@@ -43,14 +43,14 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc daemon` command group.
-- [ ] Add `daemon status`, `daemon start --dry-run`, and `daemon stop --dry-run`.
-- [ ] Resolve user environment for daemon commands.
-- [ ] Keep daemon commands side-effect free in this slice.
-- [ ] Add focused CLI tests.
-- [ ] Document the daemon command boundary.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add `chc daemon` command group.
+- [x] Add `daemon status`, `daemon start --dry-run`, and `daemon stop --dry-run`.
+- [x] Resolve user environment for daemon commands.
+- [x] Keep daemon commands side-effect free in this slice.
+- [x] Add focused CLI tests.
+- [x] Document the daemon command boundary.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 

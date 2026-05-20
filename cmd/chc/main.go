@@ -43,6 +43,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 		ErrWriter:             stderr,
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
+			newDaemonCommand(stdout),
 			newIndexCommand(stdout),
 			newInitCommand(stdout),
 			newProjectCommand(stdout),
@@ -50,6 +51,145 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 			newTicketCommand(stdout),
 		},
 	}
+}
+
+func newDaemonCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "daemon",
+		Usage: "Coordinate long-running local work",
+		Commands: []*cli.Command{
+			newDaemonStartCommand(stdout),
+			newDaemonStatusCommand(stdout),
+			newDaemonStopCommand(stdout),
+		},
+	}
+}
+
+func newDaemonStartCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "start",
+		Usage: "Start daemon coordination",
+		Flags: append(projectRegistryFlags(), &cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the daemon start plan without writing state",
+		}),
+		Action: daemonStartAction(stdout),
+	}
+}
+
+func newDaemonStatusCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "status",
+		Usage:  "Report daemon coordination status",
+		Flags:  projectRegistryFlags(),
+		Action: daemonStatusAction(stdout),
+	}
+}
+
+func newDaemonStopCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "stop",
+		Usage: "Stop daemon coordination",
+		Flags: append(projectRegistryFlags(), &cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the daemon stop plan without writing state",
+		}),
+		Action: daemonStopAction(stdout),
+	}
+}
+
+func daemonStartAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runDaemonStart(ctx, cmd, stdout)
+	}
+}
+
+func daemonStatusAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runDaemonStatus(ctx, cmd, stdout)
+	}
+}
+
+func daemonStopAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runDaemonStop(ctx, cmd, stdout)
+	}
+}
+
+func runDaemonStart(_ context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("daemon start does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	if !cmd.Bool("dry-run") {
+		return fmt.Errorf("daemon start requires --dry-run until lifecycle state is delivered")
+	}
+
+	return printDaemonPlan(stdout, "start", env)
+}
+
+func runDaemonStatus(_ context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("daemon status does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	lines := []string{
+		"daemon: stopped",
+		"state: unavailable",
+		fmt.Sprintf("data_dir: %s", env.DataDir()),
+		fmt.Sprintf("state_dir: %s", env.StateDir()),
+	}
+
+	return printDaemonLines(stdout, lines)
+}
+
+func runDaemonStop(_ context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("daemon stop does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	if !cmd.Bool("dry-run") {
+		return fmt.Errorf("daemon stop requires --dry-run until lifecycle state is delivered")
+	}
+
+	return printDaemonPlan(stdout, "stop", env)
+}
+
+func printDaemonPlan(stdout io.Writer, action string, env chc.UserEnvironment) error {
+	lines := []string{
+		"daemon: planned",
+		fmt.Sprintf("action: %s", action),
+		"dry_run: true",
+		fmt.Sprintf("data_dir: %s", env.DataDir()),
+		fmt.Sprintf("state_dir: %s", env.StateDir()),
+	}
+
+	return printDaemonLines(stdout, lines)
+}
+
+func printDaemonLines(stdout io.Writer, lines []string) error {
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write daemon result: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func newIndexCommand(stdout io.Writer) *cli.Command {

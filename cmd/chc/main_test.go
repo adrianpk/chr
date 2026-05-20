@@ -14,6 +14,109 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+func TestDaemonStatusPrintsStoppedSkeleton(t *testing.T) {
+	devRoot := t.TempDir()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: stopped",
+		"state: unavailable",
+		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStartDryRunPrintsPlan(t *testing.T) {
+	devRoot := t.TempDir()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon start returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: planned",
+		"action: start",
+		"dry_run: true",
+		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStopDryRunPrintsPlan(t *testing.T) {
+	devRoot := t.TempDir()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"stop",
+		"--dev-root",
+		devRoot,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon stop returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: planned",
+		"action: stop",
+		"dry_run: true",
+		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStartAndStopRequireDryRun(t *testing.T) {
+	devRoot := t.TempDir()
+
+	for _, args := range [][]string{
+		{"daemon", "start", "--dev-root", devRoot},
+		{"daemon", "stop", "--dev-root", devRoot},
+	} {
+		err := run(t.Context(), args, &bytes.Buffer{}, &bytes.Buffer{})
+		if err == nil {
+			t.Fatalf("run(%v) returned nil error", args)
+		}
+
+		if !strings.Contains(err.Error(), "requires --dry-run") {
+			t.Fatalf("run(%v) error = %v, want dry-run requirement", args, err)
+		}
+	}
+}
+
 func TestTicketNewCreatesTicket(t *testing.T) {
 	dir := newTestWorkspace(t)
 
