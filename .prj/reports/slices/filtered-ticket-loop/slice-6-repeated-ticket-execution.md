@@ -1,6 +1,6 @@
 # Slice 6: Repeated Ticket Execution
 
-Status: in review
+Status: delivered
 Slicing: Filtered Ticket Loop
 Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
 Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
