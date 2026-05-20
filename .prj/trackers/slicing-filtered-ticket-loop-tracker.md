@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Eligible Ticket Query | Delivered | `feat/slice-1-eligible-ticket-query` | `feat(slice-1): eligible ticket query` | `.prj/reports/slices/filtered-ticket-loop/slice-1-eligible-ticket-query.md` | Repository PR #56. |
 | Slice 2: Loop Filters | Delivered | `feat/slice-2-loop-filters` | `feat(slice-2): loop filters` | `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md` | Repository PR #57. |
-| Slice 3: Loop Ordering | Planned | `feat/slice-3-loop-ordering` | `feat(slice-3): loop ordering` | `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md` | Deterministic loop order. |
+| Slice 3: Loop Ordering | In Review | `feat/slice-3-loop-ordering` | `feat(slice-3): loop ordering` | `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md` | Deterministic loop order. |
 | Slice 4: Loop Command Skeleton | Planned | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Foreground command preview. |
 | Slice 5: Loop Run Records | Planned | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Persist loop metadata. |
 | Slice 6: Repeated Ticket Execution | Planned | `feat/slice-6-repeated-ticket-execution` | `feat(slice-6): repeated ticket execution` | `.prj/reports/slices/filtered-ticket-loop/slice-6-repeated-ticket-execution.md` | Reuse single-ticket execution. |
@@ -107,21 +107,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define default ordering.
-- [ ] Support priority and severity ordering.
-- [ ] Tie-break by ticket key or created time.
-- [ ] Add focused ordering tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define default ordering.
+- [x] Support priority and severity ordering.
+- [x] Tie-break by ticket key or created time.
+- [x] Add focused ordering tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
+- T3.1: `feat(slice-3): loop ordering`
+- T3.2: `feat(slice-3): loop ordering`
+- T3.3: `feat(slice-3): loop ordering`
+- T3.4: `feat(slice-3): loop ordering`
+- T3.5: `feat(slice-3): loop ordering`
+- T3.6: `feat(slice-3): loop ordering`
 
 ## Slice 4: Loop Command Skeleton
 

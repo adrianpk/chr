@@ -146,6 +146,125 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 	}
 }
 
+func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
+	index := newTestTicketIndex(t)
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-1",
+		Status:   "ready",
+		Priority: "low",
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-2",
+		Status:   "ready",
+		Priority: "critical",
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-3",
+		Status:   "ready",
+		Priority: "high",
+	})
+
+	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+		ProjectID: "project-1",
+		Order:     TicketLoopOrderPriority,
+	})
+	if err != nil {
+		t.Fatalf("EligibleTickets returned error: %v", err)
+	}
+
+	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
+		t.Fatalf("keys = %#v, want priority order", gotKeys)
+	}
+}
+
+func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
+	index := newTestTicketIndex(t)
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-1",
+		Status:   "ready",
+		Severity: "normal",
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-2",
+		Status:   "ready",
+		Severity: "critical",
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-3",
+		Status:   "ready",
+		Severity: "high",
+	})
+
+	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+		ProjectID: "project-1",
+		Order:     TicketLoopOrderSeverity,
+	})
+	if err != nil {
+		t.Fatalf("EligibleTickets returned error: %v", err)
+	}
+
+	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
+		t.Fatalf("keys = %#v, want severity order", gotKeys)
+	}
+}
+
+func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
+	index := newTestTicketIndex(t)
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-3",
+		Status:   "ready",
+		Priority: "high",
+		Severity: "normal",
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-1",
+		Status:   "ready",
+		Priority: "high",
+		Severity: "critical",
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:      "CHC-2",
+		Status:   "ready",
+		Priority: "high",
+		Severity: "critical",
+	})
+
+	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+		ProjectID: "project-1",
+		Order:     TicketLoopOrderPrioritySeverity,
+	})
+	if err != nil {
+		t.Fatalf("EligibleTickets returned error: %v", err)
+	}
+
+	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-1", "CHC-2", "CHC-3"}) {
+		t.Fatalf("keys = %#v, want priority, severity, and key order", gotKeys)
+	}
+}
+
+func TestTicketLoopQueryOrdersByCreatedAt(t *testing.T) {
+	index := newTestTicketIndex(t)
+	older := testLoopQueryTicketWithCreatedAt("CHC-1", "2026-05-18T12:00:00Z")
+	newer := testLoopQueryTicketWithCreatedAt("CHC-2", "2026-05-18T14:00:00Z")
+	middle := testLoopQueryTicketWithCreatedAt("CHC-3", "2026-05-18T13:00:00Z")
+
+	upsertLoopQueryTicketWithMetadata(t, index, newer)
+	upsertLoopQueryTicketWithMetadata(t, index, middle)
+	upsertLoopQueryTicketWithMetadata(t, index, older)
+
+	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+		ProjectID: "project-1",
+		Order:     TicketLoopOrderCreatedAt,
+	})
+	if err != nil {
+		t.Fatalf("EligibleTickets returned error: %v", err)
+	}
+
+	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-1", "CHC-3", "CHC-2"}) {
+		t.Fatalf("keys = %#v, want created_at order", gotKeys)
+	}
+}
+
 func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 	index := newTestTicketIndex(t)
 
@@ -188,6 +307,14 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 			},
 			want: "invalid ticket type: unknown",
 		},
+		{
+			name: "invalid order",
+			opts: TicketLoopQueryOptions{
+				ProjectID: "project-1",
+				Order:     TicketLoopOrder("unknown"),
+			},
+			want: "invalid ticket loop order: unknown",
+		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			_, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), testCase.opts)
@@ -217,9 +344,26 @@ func upsertLoopQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata
 	ticket.Type = metadata.Type
 	ticket.UseCase = metadata.UseCase
 	ticket.ProjectArea = metadata.ProjectArea
+	ticket.CreatedAt = metadata.CreatedAt
 
 	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
+	}
+}
+
+func testLoopQueryTicketWithCreatedAt(key, createdAt string) IndexedTicket {
+	parsed, err := parseProjectTime(createdAt)
+	if err != nil {
+		panic(err)
+	}
+
+	return IndexedTicket{
+		Key:       key,
+		Status:    "ready",
+		Priority:  "normal",
+		Severity:  "normal",
+		Type:      "task",
+		CreatedAt: &parsed,
 	}
 }
 

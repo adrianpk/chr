@@ -22,6 +22,7 @@ Optional input:
 
 - eligible ticket statuses.
 - metadata filters.
+- ordering.
 
 When no statuses are provided, the default eligible status is:
 
@@ -48,7 +49,28 @@ Empty filter dimensions are ignored. Multiple values inside one filter
 dimension are treated as alternatives, except tags: every requested tag must be
 present on the ticket.
 
-Returned tickets are sorted by ticket key so repeated reads are deterministic.
+When no ordering is provided, returned tickets are sorted by ticket key.
+
+Supported order values:
+
+- `key`;
+- `created_at`;
+- `priority`;
+- `severity`;
+- `priority_severity`.
+
+Priority and severity order use this rank from highest to lowest:
+
+```text
+critical
+high
+normal
+low
+```
+
+All ordering modes are deterministic. Priority and severity ordering use
+`created_at` as the first tie-breaker, and all modes eventually tie-break by
+ticket key.
 
 ## Scope
 
