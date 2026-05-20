@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Daemon Command Skeleton | Delivered | `feat/slice-1-daemon-command-skeleton` | `feat(slice-1): daemon command skeleton` | `.prj/reports/slices/daemon-coordination/slice-1-daemon-command-skeleton.md` | Repository PR #64. |
 | Slice 2: Daemon Lifecycle State Model | Delivered | `feat/slice-2-daemon-lifecycle-state` | `feat(slice-2): daemon lifecycle state` | `.prj/reports/slices/daemon-coordination/slice-2-daemon-lifecycle-state.md` | Repository PR #65. |
-| Slice 3: Daemon State Repository | In Review | `feat/slice-3-daemon-state-repository` | `feat(slice-3): daemon state repository` | `.prj/reports/slices/daemon-coordination/slice-3-daemon-state-repository.md` | User database persistence. |
+| Slice 3: Daemon State Repository | In Review | `feat/slice-3-daemon-state-repository` | `feat(slice-3): daemon state repository` | `.prj/reports/slices/daemon-coordination/slice-3-daemon-state-repository.md` | Repository PR #66. |
 | Slice 4: Daemon Status Reporting | Planned | `feat/slice-4-daemon-status-reporting` | `feat(slice-4): daemon status reporting` | `.prj/reports/slices/daemon-coordination/slice-4-daemon-status-reporting.md` | Read lifecycle state. |
 | Slice 5: Single-Instance Guard | Planned | `feat/slice-5-daemon-single-instance` | `feat(slice-5): daemon single instance` | `.prj/reports/slices/daemon-coordination/slice-5-daemon-single-instance.md` | Prevent duplicate owners. |
 | Slice 6: Registered Project Loading | Planned | `feat/slice-6-daemon-project-loading` | `feat(slice-6): daemon project loading` | `.prj/reports/slices/daemon-coordination/slice-6-daemon-project-loading.md` | Load registered projects. |
