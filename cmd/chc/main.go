@@ -764,6 +764,12 @@ type ticketApplyResultPlan struct {
 	ReportPath     string
 }
 
+type ticketLoopExecutionResult struct {
+	Record       chc.LoopRunRecord
+	Executions   []chc.ExecutionRecord
+	Applications []chc.ResultApplication
+}
+
 var newTicketStartHarnessExecutor = func() chc.HarnessExecutor {
 	return chc.OSHarnessExecutor{}
 }
@@ -863,10 +869,6 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return fmt.Errorf("ticket loop does not accept positional arguments")
 	}
 
-	if !cmd.Bool("dry-run") {
-		return fmt.Errorf("ticket loop execution is not implemented; use --dry-run")
-	}
-
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
 		return err
@@ -900,6 +902,15 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
 	if err != nil {
 		return err
+	}
+
+	if !cmd.Bool("dry-run") {
+		result, err := runTicketLoopExecution(ctx, env, projectContext, tickets)
+		if err != nil {
+			return err
+		}
+
+		return printTicketLoopExecution(stdout, result)
 	}
 
 	return printTicketLoopPlan(stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
@@ -967,6 +978,151 @@ func printTicketLoopPlan(
 	return nil
 }
 
+func runTicketLoopExecution(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+	tickets []chc.IndexedTicket,
+) (ticketLoopExecutionResult, error) {
+	repository, err := chc.NewLoopRunRepository(ctx, env, assetsFS)
+	if err != nil {
+		return ticketLoopExecutionResult{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	record := newRunningLoopRunRecord(projectContext.ProjectID, len(tickets))
+	if err := repository.CreateLoopRun(ctx, record); err != nil {
+		return ticketLoopExecutionResult{}, err
+	}
+
+	result := ticketLoopExecutionResult{Record: record}
+
+	for _, ticket := range tickets {
+		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket)
+		if err != nil {
+			record = failLoopRunRecord(record, err)
+			if updateErr := repository.UpdateLoopRun(ctx, record); updateErr != nil {
+				return ticketLoopExecutionResult{}, updateErr
+			}
+
+			return ticketLoopExecutionResult{}, err
+		}
+
+		result.Executions = append(result.Executions, execution)
+		result.Applications = append(result.Applications, application)
+
+		record.ProcessedCount++
+		if application.TicketStatus == chc.TicketResultStatusBlocked {
+			record.BlockedCount++
+		}
+	}
+
+	record = finishLoopRunRecord(record)
+	if err := repository.UpdateLoopRun(ctx, record); err != nil {
+		return ticketLoopExecutionResult{}, err
+	}
+
+	result.Record = record
+
+	return result, nil
+}
+
+func executeLoopTicket(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+	ticket chc.IndexedTicket,
+) (chc.ExecutionRecord, chc.ResultApplication, error) {
+	preflight, err := buildTicketStartPreflightForTicket(ctx, env, projectContext, ticket)
+	if err != nil {
+		return chc.ExecutionRecord{}, chc.ResultApplication{}, err
+	}
+
+	record, err := runTicketStartExecution(ctx, env, preflight.Record, preflight.Runtime)
+	if err != nil {
+		return record, chc.ResultApplication{}, err
+	}
+
+	plan, err := buildTicketApplyResultPlanForRecord(projectContext, record)
+	if err != nil {
+		return record, chc.ResultApplication{}, err
+	}
+
+	if err := applyTicketResult(ctx, env, plan); err != nil {
+		return record, chc.ResultApplication{}, err
+	}
+
+	return record, plan.Application, nil
+}
+
+func newRunningLoopRunRecord(projectID string, eligibleCount int) chc.LoopRunRecord {
+	now := time.Now().UTC()
+
+	return chc.LoopRunRecord{
+		ID:            loopRunID(projectID, now),
+		ProjectID:     projectID,
+		Status:        chc.LoopRunStatusRunning,
+		EligibleCount: eligibleCount,
+		CreatedAt:     now,
+		StartedAt:     &now,
+		UpdatedAt:     now,
+	}
+}
+
+func finishLoopRunRecord(record chc.LoopRunRecord) chc.LoopRunRecord {
+	finishedAt := time.Now().UTC()
+	record.Status = chc.LoopRunStatusSucceeded
+	record.FinishedAt = &finishedAt
+	record.UpdatedAt = finishedAt
+
+	return record
+}
+
+func failLoopRunRecord(record chc.LoopRunRecord, cause error) chc.LoopRunRecord {
+	finishedAt := time.Now().UTC()
+	record.Status = chc.LoopRunStatusFailed
+	record.FinishedAt = &finishedAt
+	record.UpdatedAt = finishedAt
+	record.FailureReason = cause.Error()
+
+	return record
+}
+
+func loopRunID(projectID string, createdAt time.Time) string {
+	sum := sha256.Sum256([]byte(projectID + "\x00loop\x00" + createdAt.Format(time.RFC3339Nano)))
+
+	return "loop-" + hex.EncodeToString(sum[:8])
+}
+
+func printTicketLoopExecution(stdout io.Writer, result ticketLoopExecutionResult) error {
+	lines := []string{
+		fmt.Sprintf("loop: %s", result.Record.ID),
+		fmt.Sprintf("status: %s", result.Record.Status),
+		fmt.Sprintf("eligible: %d", result.Record.EligibleCount),
+		fmt.Sprintf("processed: %d", result.Record.ProcessedCount),
+		fmt.Sprintf("blocked: %d", result.Record.BlockedCount),
+		fmt.Sprintf("failed: %d", result.Record.FailedCount),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write ticket loop execution result: %w", err)
+		}
+	}
+
+	for _, execution := range result.Executions {
+		if _, err := fmt.Fprintf(stdout, "execution: %s\t%s\t%s\n", execution.ID, execution.TicketKey, execution.Status); err != nil {
+			return fmt.Errorf("write ticket loop execution result: %w", err)
+		}
+	}
+
+	return nil
+}
+
 func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 1 {
 		return fmt.Errorf("ticket apply-result requires exactly one execution id argument")
@@ -1020,6 +1176,13 @@ func buildTicketApplyResultPlan(
 		return ticketApplyResultPlan{}, err
 	}
 
+	return buildTicketApplyResultPlanForRecord(projectContext, record)
+}
+
+func buildTicketApplyResultPlanForRecord(
+	projectContext commandProjectContext,
+	record chc.ExecutionRecord,
+) (ticketApplyResultPlan, error) {
 	if record.ProjectID != projectContext.ProjectID {
 		return ticketApplyResultPlan{}, fmt.Errorf("execution project mismatch: %s", record.ProjectID)
 	}
@@ -1194,17 +1357,26 @@ func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketSta
 		return ticketStartPreflight{}, err
 	}
 
-	config, err := chc.LoadWorkspaceConfig(selection.ProjectContext.ProjectDir)
+	return buildTicketStartPreflightForTicket(ctx, env, selection.ProjectContext, selection.Ticket)
+}
+
+func buildTicketStartPreflightForTicket(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+	ticket chc.IndexedTicket,
+) (ticketStartPreflight, error) {
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
-	record := newPendingExecutionRecord(selection.ProjectContext.ProjectID, selection.Ticket)
+	record := newPendingExecutionRecord(projectContext.ProjectID, ticket)
 
 	result, err := chc.ValidateRuntime(chc.RuntimeValidationOptions{
-		ProjectDir: selection.ProjectContext.ProjectDir,
+		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
-		TicketKey:  selection.Ticket.Key,
+		TicketKey:  ticket.Key,
 		RunID:      record.ID,
 	})
 	if err != nil {
@@ -1215,7 +1387,7 @@ func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketSta
 
 	return ticketStartPreflight{
 		Env:     env,
-		Ticket:  selection.Ticket,
+		Ticket:  ticket,
 		Record:  record,
 		Runtime: result,
 	}, nil

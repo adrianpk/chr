@@ -463,14 +463,61 @@ func testLoopTicket(
 	}
 }
 
-func TestTicketLoopRequiresDryRunUntilExecutionSlices(t *testing.T) {
-	err := run(t.Context(), []string{"ticket", "loop"}, &bytes.Buffer{}, &bytes.Buffer{})
-	if err == nil {
-		t.Fatal("ticket loop returned nil error")
+func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	executor := installFakeTicketStartHarnessExecutor(t, nil)
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"loop",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket loop returned error: %v", err)
 	}
 
-	if err.Error() != "ticket loop execution is not implemented; use --dry-run" {
-		t.Fatalf("err = %v, want dry-run requirement", err)
+	for _, want := range []string{
+		"loop: loop-",
+		"status: succeeded",
+		"eligible: 1",
+		"processed: 1",
+		"blocked: 0",
+		"failed: 0",
+		"execution: exec-",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	if !strings.Contains(strings.Join(executor.commands, ","), "docker build,docker run,docker run") {
+		t.Fatalf("commands = %#v, want build, worker run, and validation run", executor.commands)
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(records) != 1 {
+		t.Fatalf("execution records = %d, want 1", len(records))
+	}
+
+	loopRuns := listProjectLoopRuns(t, devRoot, projectID(projectDir))
+	if len(loopRuns) != 1 {
+		t.Fatalf("loop runs = %d, want 1", len(loopRuns))
+	}
+
+	if loopRuns[0].Status != chc.LoopRunStatusSucceeded || loopRuns[0].ProcessedCount != 1 {
+		t.Fatalf("loop run = %#v, want succeeded with one processed ticket", loopRuns[0])
 	}
 }
 
@@ -1721,6 +1768,36 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 	records, err := repository.ListTicketExecutions(t.Context(), projectID, ticketKey)
 	if err != nil {
 		t.Fatalf("ListTicketExecutions returned error: %v", err)
+	}
+
+	return records
+}
+
+func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []chc.LoopRunRecord {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	repository, err := chc.NewLoopRunRepository(t.Context(), env, assetsFS)
+	if err != nil {
+		t.Fatalf("NewLoopRunRepository returned error: %v", err)
+	}
+
+	defer func() {
+		if err := repository.Close(); err != nil {
+			t.Fatalf("close loop run repository: %v", err)
+		}
+	}()
+
+	records, err := repository.ListProjectLoopRuns(t.Context(), projectID)
+	if err != nil {
+		t.Fatalf("ListProjectLoopRuns returned error: %v", err)
 	}
 
 	return records

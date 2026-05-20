@@ -103,7 +103,19 @@ Supported preview flags:
 The preview command does not create loop records, create execution records,
 invoke the runtime worker, apply results, or mutate ticket files.
 
-Until execution slices are delivered, `ticket loop` requires `--dry-run`.
+Without `--dry-run`, the command creates a loop run, executes eligible tickets
+one at a time through the existing single-ticket execution path, applies each
+execution result, and prints the loop summary.
+
+The foreground loop reuses:
+
+- runtime validation;
+- execution record creation;
+- harness invocation;
+- execution result capture;
+- ticket result application.
+
+The loop does not yet expose configurable stop conditions or thresholds.
 
 ## Loop Run Records
 
