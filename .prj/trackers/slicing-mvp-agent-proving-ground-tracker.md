@@ -10,8 +10,8 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Identify temporary MVP proving-ground need.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -19,7 +19,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Todolist Fixture Project | Planned | `feat/slice-1-proving-ground-fixture` | `feat(slice-1): proving ground fixture` | `.prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md` | Fixture source and materialization. |
+| Slice 1: Todolist Fixture Project | In Review | `feat/slice-1-proving-ground-fixture` | `feat(slice-1): proving ground fixture` | `.prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md` | Fixture source and materialization. |
 | Slice 2: Direct Proving Objective Contract | Planned | `feat/slice-2-proving-objective-contract` | `feat(slice-2): proving objective contract` | `.prj/reports/slices/mvp-agent-proving-ground/slice-2-proving-objective-contract.md` | Direct objective input. |
 | Slice 3: Sandbox Codex Runner | Planned | `feat/slice-3-proving-sandbox-runner` | `feat(slice-3): proving sandbox runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-3-proving-sandbox-runner.md` | Codex in sandbox. |
 | Slice 4: Validation Runner | Planned | `feat/slice-4-proving-validation-runner` | `feat(slice-4): proving validation runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-4-proving-validation-runner.md` | Compile, lint, tests. |
@@ -40,25 +40,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add fixture source files.
-- [ ] Include a deliberate backend bug.
-- [ ] Include a missing "mark task completed" feature.
-- [ ] Include `.chc/` runtime config and hand-authored sandbox Dockerfile.
-- [ ] Include compile, lint, and test validation commands.
-- [ ] Include fixture materialization documentation or helper.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add fixture source files.
+- [x] Include a deliberate backend bug.
+- [x] Include a missing "mark task completed" feature.
+- [x] Include `.chc/` runtime config and hand-authored sandbox Dockerfile.
+- [x] Include compile, lint, and test validation commands.
+- [x] Include fixture materialization documentation or helper.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
-- T1.8: pending
+- T1.1: pending commit
+- T1.2: pending commit
+- T1.3: pending commit
+- T1.4: pending commit
+- T1.5: pending commit
+- T1.6: pending commit
+- T1.7: pending commit
+- T1.8: pending commit
 
 ## Slice 2: Direct Proving Objective Contract
 
