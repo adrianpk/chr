@@ -212,7 +212,7 @@ Expected outcome:
 
 ### Slice 6: End-to-End Agent Proof
 
-Status: planned.
+Status: in review.
 
 Expected branch: `feat/slice-6-proving-e2e-agent-proof`
 Expected PR title: `feat(slice-6): proving e2e agent proof`

@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Sandbox Codex Runner | Delivered | `feat/slice-3-proving-sandbox-runner` | `feat(slice-3): proving sandbox runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-3-proving-sandbox-runner.md` | Repository PR #74. |
 | Slice 4: Validation Runner | Delivered | `feat/slice-4-proving-validation-runner` | `feat(slice-4): proving validation runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-4-proving-validation-runner.md` | Repository PR #75 merged. |
 | Slice 5: Minimal Ralph Loop | Delivered | `feat/slice-5-proving-ralph-loop` | `feat(slice-5): proving ralph loop` | `.prj/reports/slices/mvp-agent-proving-ground/slice-5-proving-ralph-loop.md` | Repository PR #76 merged. |
-| Slice 6: End-to-End Agent Proof | Planned | `feat/slice-6-proving-e2e-agent-proof` | `feat(slice-6): proving e2e agent proof` | `.prj/reports/slices/mvp-agent-proving-ground/slice-6-proving-e2e-agent-proof.md` | Final proof. |
+| Slice 6: End-to-End Agent Proof | In Review | `feat/slice-6-proving-e2e-agent-proof` | `feat(slice-6): proving e2e agent proof` | `.prj/reports/slices/mvp-agent-proving-ground/slice-6-proving-e2e-agent-proof.md` | Repository proof captured. |
 
 ## Slice 1: Todolist Fixture Project
 
@@ -206,14 +206,14 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Materialize the fixture under `_workspace/testing/projects/todolist`.
-- [ ] Run the bugfix objective.
-- [ ] Run the feature objective.
-- [ ] Verify compile, lint, and tests pass.
-- [ ] Capture final evidence.
-- [ ] Document limitations and follow-up generalization.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Materialize the fixture under `_workspace/testing/projects/todolist`.
+- [x] Run the bugfix objective.
+- [x] Run the feature objective.
+- [x] Verify compile, lint, and tests pass.
+- [x] Capture final evidence.
+- [x] Document limitations and follow-up generalization.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 

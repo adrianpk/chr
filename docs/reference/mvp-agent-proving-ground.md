@@ -118,6 +118,27 @@ Each Codex invocation is independent. The loop does not rely on implicit
 conversation memory. Context transfer between attempts is explicit through the
 generated worker context artifact.
 
+## Agent Runtime Authentication
+
+The proving runtime mounts local Codex credentials into the container when they
+exist:
+
+- `~/.codex/auth.json` to `/root/.codex/auth.json`;
+- `~/.codex/config.toml` to `/root/.codex/config.toml`.
+
+Both mounts are read-only. The Docker run command also passes
+`OPENAI_API_KEY` by environment-variable name, so the value can be inherited by
+the container without being rendered into command artifacts.
+
+Codex runs with `--dangerously-bypass-approvals-and-sandbox` inside the
+container. Docker is the sandbox boundary for this proving runtime; Codex's
+inner bubblewrap sandbox is intentionally disabled because nested namespace
+creation is not available in the container.
+
+Future clone, commit, and push execution should inherit a repository-scoped PAT
+through an explicit secret environment variable. That PAT is not required for
+the current proving-ground flow because it works on the mounted workspace.
+
 ## Boundaries
 
 This command intentionally allows fixture-specific behavior. It does not clone
