@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Context Composer Contract | Delivered | `feat/slice-1-context-composer-contract` | `feat(slice-1): context composer contract` | `.prj/reports/slices/ticket-execution-context-hardening/slice-1-context-composer-contract.md` | Repository PR #78 merged. |
 | Slice 2: Agent Identity and Protocol Context | Delivered | `feat/slice-2-context-agent-protocols` | `feat(slice-2): context agent protocols` | `.prj/reports/slices/ticket-execution-context-hardening/slice-2-context-agent-protocols.md` | Repository PR #79 merged. |
-| Slice 3: Project and Use-Case Document Context | Planned | `feat/slice-3-context-project-documents` | `feat(slice-3): context project documents` | `.prj/reports/slices/ticket-execution-context-hardening/slice-3-context-project-documents.md` | Specs, drafts, plans, trackers, dumps, quizzes. |
+| Slice 3: Project and Use-Case Document Context | Reviewing | `feat/slice-3-context-project-documents` | `feat(slice-3): context project documents` | `.prj/reports/slices/ticket-execution-context-hardening/slice-3-context-project-documents.md` | Specs, drafts, plans, trackers, dumps, quizzes. |
 | Slice 4: Tree and Search Context | Planned | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Cheap orientation. |
 | Slice 5: Go Graph Context Provider | Planned | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | `gograph` CLI first. |
 | Slice 6: Ralph Attempt Context | Planned | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Retry evidence. |
@@ -111,25 +111,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Summarize project identity and validation commands.
-- [ ] Follow ticket references to related documents.
-- [ ] Render `project.md`.
-- [ ] Render `documents.md`.
-- [ ] Record included sources in `source-inventory.md`.
-- [ ] Avoid implicit conversation history.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Summarize project identity and validation commands.
+- [x] Follow ticket references to related documents.
+- [x] Render `project.md`.
+- [x] Render `documents.md`.
+- [x] Record included sources in `source-inventory.md`.
+- [x] Avoid implicit conversation history.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
-- T3.7: pending
-- T3.8: pending
+- T3.1: `b29ac1d`
+- T3.2: `b29ac1d`
+- T3.3: `b29ac1d`
+- T3.4: `b29ac1d`
+- T3.5: `b29ac1d`
+- T3.6: `b29ac1d`
+- T3.7: `docs(slice-3): record project document report`
+- T3.8: `b29ac1d`
 
 ## Slice 4: Tree and Search Context
 
