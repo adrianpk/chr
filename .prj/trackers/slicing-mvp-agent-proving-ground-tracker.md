@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Todolist Fixture Project | Delivered | `feat/slice-1-proving-ground-fixture` | `feat(slice-1): proving ground fixture` | `.prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md` | Repository PR #72. |
-| Slice 2: Direct Proving Objective Contract | In Review | `feat/slice-2-proving-objective-contract` | `feat(slice-2): proving objective contract` | `.prj/reports/slices/mvp-agent-proving-ground/slice-2-proving-objective-contract.md` | Direct objective input. |
+| Slice 2: Direct Proving Objective Contract | Delivered | `feat/slice-2-proving-objective-contract` | `feat(slice-2): proving objective contract` | `.prj/reports/slices/mvp-agent-proving-ground/slice-2-proving-objective-contract.md` | Repository PR #73. |
 | Slice 3: Sandbox Codex Runner | Planned | `feat/slice-3-proving-sandbox-runner` | `feat(slice-3): proving sandbox runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-3-proving-sandbox-runner.md` | Codex in sandbox. |
 | Slice 4: Validation Runner | Planned | `feat/slice-4-proving-validation-runner` | `feat(slice-4): proving validation runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-4-proving-validation-runner.md` | Compile, lint, tests. |
 | Slice 5: Minimal Ralph Loop | Planned | `feat/slice-5-proving-ralph-loop` | `feat(slice-5): proving ralph loop` | `.prj/reports/slices/mvp-agent-proving-ground/slice-5-proving-ralph-loop.md` | Bounded retries. |
@@ -85,14 +85,14 @@ Candidate tasks:
 
 Task commits:
 
-- T2.1: pending commit
-- T2.2: pending commit
-- T2.3: pending commit
-- T2.4: pending commit
-- T2.5: pending commit
-- T2.6: pending commit
-- T2.7: pending commit
-- T2.8: pending commit
+- T2.1: `564189c`
+- T2.2: `564189c`
+- T2.3: `564189c`
+- T2.4: `564189c`
+- T2.5: `564189c`
+- T2.6: `564189c`
+- T2.7: `564189c`
+- T2.8: `564189c`
 
 ## Slice 3: Sandbox Codex Runner
 
