@@ -207,7 +207,10 @@ Use case:
 
 > A user starts a loop and `chc` keeps working through eligible tickets until completion, threshold, or blocker.
 
-Current state: not delivered.
+Current state: planned next in the operational cutoff path. The single-ticket
+execution, Codex worker, and result application paths are delivered; the
+foreground loop that repeatedly selects and executes eligible tickets is not yet
+delivered.
 
 Candidate slices:
 
@@ -229,9 +232,10 @@ Use case:
 > `chc` runs Codex inside the project runtime container so one ticket can
 > produce workspace edits, validation output, and a structured execution result.
 
-Current state: planned next in the operational cutoff path. The runtime boundary
-and harness invocation exist, but the worker that invokes Codex inside the
-container is not yet delivered.
+Current state: completed for the current operational cutoff scope. The runtime
+worker command, context materialization, Docker invocation, result envelope,
+changed-file discovery, post-worker validation, and worker failure
+classification are delivered.
 
 Candidate slices:
 

@@ -1,0 +1,295 @@
+# Filtered Ticket Loop Slicing Tracker
+
+Status: active
+
+Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+
+## Slicing Checklist
+
+- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Confirm prerequisite execution and result-application slicings are completed.
+- [x] Create slicing plan.
+- [x] Create slicing tracker.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
+- [ ] Complete all planned slices.
+- [ ] Validate completed slicing with `make verify`.
+
+## Slice Status
+
+| Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Slice 1: Eligible Ticket Query | Planned | `feat/slice-1-eligible-ticket-query` | `feat(slice-1): eligible ticket query` | `.prj/reports/slices/filtered-ticket-loop/slice-1-eligible-ticket-query.md` | Query loop candidates. |
+| Slice 2: Loop Filters | Planned | `feat/slice-2-loop-filters` | `feat(slice-2): loop filters` | `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md` | Filter by ticket metadata. |
+| Slice 3: Loop Ordering | Planned | `feat/slice-3-loop-ordering` | `feat(slice-3): loop ordering` | `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md` | Deterministic loop order. |
+| Slice 4: Loop Command Skeleton | Planned | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Foreground command preview. |
+| Slice 5: Loop Run Records | Planned | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Persist loop metadata. |
+| Slice 6: Repeated Ticket Execution | Planned | `feat/slice-6-repeated-ticket-execution` | `feat(slice-6): repeated ticket execution` | `.prj/reports/slices/filtered-ticket-loop/slice-6-repeated-ticket-execution.md` | Reuse single-ticket execution. |
+| Slice 7: Stop Conditions and Thresholds | Planned | `feat/slice-7-stop-conditions` | `feat(slice-7): stop conditions` | `.prj/reports/slices/filtered-ticket-loop/slice-7-stop-conditions.md` | Terminate safely. |
+| Slice 8: Loop Status Reporting | Planned | `feat/slice-8-loop-status-reporting` | `feat(slice-8): loop status reporting` | `.prj/reports/slices/filtered-ticket-loop/slice-8-loop-status-reporting.md` | Summarize loop outcome. |
+
+## Slice 1: Eligible Ticket Query
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 1`
+- Expected branch: `feat/slice-1-eligible-ticket-query`
+- Expected PR title: `feat(slice-1): eligible ticket query`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-1-eligible-ticket-query.md`
+
+Candidate tasks:
+
+- [ ] Add loop eligibility option types.
+- [ ] Select tickets by project and eligible statuses.
+- [ ] Keep selection read-only.
+- [ ] Return deterministic results.
+- [ ] Add focused query tests.
+- [ ] Document the eligibility contract.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T1.1: pending
+- T1.2: pending
+- T1.3: pending
+- T1.4: pending
+- T1.5: pending
+- T1.6: pending
+- T1.7: pending
+- T1.8: pending
+
+## Slice 2: Loop Filters
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 2`
+- Expected branch: `feat/slice-2-loop-filters`
+- Expected PR title: `feat(slice-2): loop filters`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md`
+
+Candidate tasks:
+
+- [ ] Add priority, severity, area, tag, type, use-case, and status filters.
+- [ ] Validate filter values where existing ticket validation rules apply.
+- [ ] Keep filtering independent from CLI parsing.
+- [ ] Add focused filter tests.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T2.1: pending
+- T2.2: pending
+- T2.3: pending
+- T2.4: pending
+- T2.5: pending
+- T2.6: pending
+
+## Slice 3: Loop Ordering
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 3`
+- Expected branch: `feat/slice-3-loop-ordering`
+- Expected PR title: `feat(slice-3): loop ordering`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md`
+
+Candidate tasks:
+
+- [ ] Define default ordering.
+- [ ] Support priority and severity ordering.
+- [ ] Tie-break by ticket key or created time.
+- [ ] Add focused ordering tests.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T3.1: pending
+- T3.2: pending
+- T3.3: pending
+- T3.4: pending
+- T3.5: pending
+- T3.6: pending
+
+## Slice 4: Loop Command Skeleton
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 4`
+- Expected branch: `feat/slice-4-loop-command-skeleton`
+- Expected PR title: `feat(slice-4): loop command skeleton`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md`
+
+Candidate tasks:
+
+- [ ] Add CLI command and flags.
+- [ ] Resolve project and refresh index like ticket reads.
+- [ ] Call the eligible ticket query.
+- [ ] Support dry-run output.
+- [ ] Add focused CLI tests.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T4.1: pending
+- T4.2: pending
+- T4.3: pending
+- T4.4: pending
+- T4.5: pending
+- T4.6: pending
+- T4.7: pending
+
+## Slice 5: Loop Run Records
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 5`
+- Expected branch: `feat/slice-5-loop-run-records`
+- Expected PR title: `feat(slice-5): loop run records`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md`
+
+Candidate tasks:
+
+- [ ] Add loop run model.
+- [ ] Add SQLite migration and repository.
+- [ ] Track lifecycle status and timestamps.
+- [ ] Link loop runs to project IDs.
+- [ ] Add repository tests.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T5.1: pending
+- T5.2: pending
+- T5.3: pending
+- T5.4: pending
+- T5.5: pending
+- T5.6: pending
+- T5.7: pending
+
+## Slice 6: Repeated Ticket Execution
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 6`
+- Expected branch: `feat/slice-6-repeated-ticket-execution`
+- Expected PR title: `feat(slice-6): repeated ticket execution`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-6-repeated-ticket-execution.md`
+
+Candidate tasks:
+
+- [ ] Run one execution per selected ticket.
+- [ ] Refresh ticket state between iterations.
+- [ ] Apply successful or blocked results through existing result application.
+- [ ] Record iteration summaries.
+- [ ] Add focused runner tests.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T6.1: pending
+- T6.2: pending
+- T6.3: pending
+- T6.4: pending
+- T6.5: pending
+- T6.6: pending
+- T6.7: pending
+
+## Slice 7: Stop Conditions and Thresholds
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 7`
+- Expected branch: `feat/slice-7-stop-conditions`
+- Expected PR title: `feat(slice-7): stop conditions`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-7-stop-conditions.md`
+
+Candidate tasks:
+
+- [ ] Add max-iteration threshold.
+- [ ] Add no-eligible-ticket completion.
+- [ ] Stop on blocker or execution failure.
+- [ ] Avoid repeated attempts on the same ticket in one run.
+- [ ] Add focused stop-condition tests.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T7.1: pending
+- T7.2: pending
+- T7.3: pending
+- T7.4: pending
+- T7.5: pending
+- T7.6: pending
+- T7.7: pending
+
+## Slice 8: Loop Status Reporting
+
+Pre-flight:
+
+- Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
+- Tracker: `.prj/trackers/slicing-filtered-ticket-loop-tracker.md`
+- Slicing: `Filtered Ticket Loop`
+- Slice: `Slice 8`
+- Expected branch: `feat/slice-8-loop-status-reporting`
+- Expected PR title: `feat(slice-8): loop status reporting`
+- Expected report: `.prj/reports/slices/filtered-ticket-loop/slice-8-loop-status-reporting.md`
+
+Candidate tasks:
+
+- [ ] Print loop run summary.
+- [ ] Print processed, skipped, blocked, and failed counts.
+- [ ] Expose execution IDs per iteration.
+- [ ] Add loop report artifact or lookup boundary if needed.
+- [ ] Document foreground loop behavior.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- T8.1: pending
+- T8.2: pending
+- T8.3: pending
+- T8.4: pending
+- T8.5: pending
+- T8.6: pending
+- T8.7: pending
+
+## Validation Record
+
+- Planning validation: documentation diff reviewed.
+
+## Notes
+
+- Slice numbers are local to this slicing and start at `Slice 1`.
+- Repository PR numbers are review records only and do not define slice numbers.
+- This slicing keeps the loop as a foreground runner. Daemon ownership remains
+  post-cutoff.
