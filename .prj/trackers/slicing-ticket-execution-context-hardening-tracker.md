@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 5: Go Graph Context Provider | Delivered | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | Repository PR #82 merged. |
 | Slice 6: Ralph Attempt Context | Delivered | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Repository PR #83 merged. |
 | Slice 7: Docker-Compatible Context Materialization | Delivered | `feat/slice-7-context-docker-materialization` | `feat(slice-7): context docker materialization` | `.prj/reports/slices/ticket-execution-context-hardening/slice-7-context-docker-materialization.md` | Repository PR #84 merged. |
-| Slice 8: Execution Readiness and Handoff | Planned | `feat/slice-8-context-readiness-handoff` | `feat(slice-8): context readiness handoff` | `.prj/reports/slices/ticket-execution-context-hardening/slice-8-context-readiness-handoff.md` | Readiness and evidence links. |
+| Slice 8: Execution Readiness and Handoff | Reviewing | `feat/slice-8-context-readiness-handoff` | `feat(slice-8): context readiness handoff` | `.prj/reports/slices/ticket-execution-context-hardening/slice-8-context-readiness-handoff.md` | Readiness and evidence links. |
 
 ## Slice 1: Context Composer Contract
 
@@ -281,25 +281,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define required context fields.
-- [ ] Report missing ticket, protocol, validation, or runtime context.
-- [ ] Record context completeness and warnings.
-- [ ] Link context artifacts from execution records or reports.
-- [ ] Document remaining worktree and PAT-backed push requirements.
-- [ ] Add focused tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define required context fields.
+- [x] Report missing ticket, protocol, validation, or runtime context.
+- [x] Record context completeness and warnings.
+- [x] Link context artifacts from execution records or reports.
+- [x] Document remaining worktree and PAT-backed push requirements.
+- [x] Add focused tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T8.1: pending
-- T8.2: pending
-- T8.3: pending
-- T8.4: pending
-- T8.5: pending
-- T8.6: pending
-- T8.7: pending
-- T8.8: pending
+- T8.1: `4eb7048`
+- T8.2: `4eb7048`
+- T8.3: `4eb7048`
+- T8.4: `4eb7048`
+- T8.5: `4eb7048`
+- T8.6: `4eb7048`
+- T8.7: `docs(slice-8): record readiness handoff report`
+- T8.8: `4eb7048`
 
 ## Validation Record
 
