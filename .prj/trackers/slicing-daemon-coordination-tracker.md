@@ -1,6 +1,6 @@
 # Daemon Coordination Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-daemon-coordination-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -13,8 +13,8 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 5: Single-Instance Guard | Delivered | `feat/slice-5-daemon-single-instance` | `feat(slice-5): daemon single instance` | `.prj/reports/slices/daemon-coordination/slice-5-daemon-single-instance.md` | Repository PR #68. |
 | Slice 6: Registered Project Loading | Delivered | `feat/slice-6-daemon-project-loading` | `feat(slice-6): daemon project loading` | `.prj/reports/slices/daemon-coordination/slice-6-daemon-project-loading.md` | Repository PR #69. |
 | Slice 7: Daemon Foreground Run Loop | Delivered | `feat/slice-7-daemon-foreground-run-loop` | `feat(slice-7): daemon foreground run loop` | `.prj/reports/slices/daemon-coordination/slice-7-daemon-foreground-run-loop.md` | Repository PR #70. |
-| Slice 8: Graceful Stop and Stale Recovery | In Review | `feat/slice-8-daemon-stop-recovery` | `feat(slice-8): daemon stop recovery` | `.prj/reports/slices/daemon-coordination/slice-8-daemon-stop-recovery.md` | Repository PR #71. |
+| Slice 8: Graceful Stop and Stale Recovery | Delivered | `feat/slice-8-daemon-stop-recovery` | `feat(slice-8): daemon stop recovery` | `.prj/reports/slices/daemon-coordination/slice-8-daemon-stop-recovery.md` | Repository PR #71. |
 
 ## Slice 1: Daemon Command Skeleton
 
@@ -289,6 +289,7 @@ Task commits:
 
 - Planning validation: documentation diff reviewed.
 - Slice 8 validation: `make verify` passed.
+- Completed slicing validation: `make verify` passed on `dev` after PR #71 merge.
 
 ## Notes
 

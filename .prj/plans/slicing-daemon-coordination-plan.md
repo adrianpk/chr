@@ -1,6 +1,6 @@
 # Daemon Coordination Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -42,14 +42,13 @@ Delivered prerequisites:
 - foreground filtered ticket loops can execute eligible tickets;
 - loop run records persist foreground loop outcomes.
 
-Still missing:
+Delivered by this slicing:
 
 - daemon command surface;
 - daemon lifecycle state;
 - single-instance ownership;
 - project loading for daemon runs;
-- daemon-owned loop execution;
-- periodic reconciliation;
+- daemon-owned foreground loop execution;
 - daemon status reporting;
 - graceful stop and stale process recovery.
 
@@ -91,7 +90,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Daemon Command Skeleton
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-daemon-command-skeleton`
 Expected PR title: `feat(slice-1): daemon command skeleton`
@@ -118,7 +117,7 @@ Expected outcome:
 
 ### Slice 2: Daemon Lifecycle State Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-daemon-lifecycle-state`
 Expected PR title: `feat(slice-2): daemon lifecycle state`
@@ -142,7 +141,7 @@ Expected outcome:
 
 ### Slice 3: Daemon State Repository
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-daemon-state-repository`
 Expected PR title: `feat(slice-3): daemon state repository`
@@ -165,7 +164,7 @@ Expected outcome:
 
 ### Slice 4: Daemon Status Reporting
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-daemon-status-reporting`
 Expected PR title: `feat(slice-4): daemon status reporting`
@@ -188,7 +187,7 @@ Expected outcome:
 
 ### Slice 5: Single-Instance Guard
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-daemon-single-instance`
 Expected PR title: `feat(slice-5): daemon single instance`
@@ -212,7 +211,7 @@ Expected outcome:
 
 ### Slice 6: Registered Project Loading
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-daemon-project-loading`
 Expected PR title: `feat(slice-6): daemon project loading`
@@ -235,7 +234,7 @@ Expected outcome:
 
 ### Slice 7: Daemon Foreground Run Loop
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-daemon-foreground-run-loop`
 Expected PR title: `feat(slice-7): daemon foreground run loop`
@@ -262,7 +261,7 @@ Expected outcome:
 
 ### Slice 8: Graceful Stop and Stale Recovery
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-8-daemon-stop-recovery`
 Expected PR title: `feat(slice-8): daemon stop recovery`
@@ -288,6 +287,7 @@ Expected outcome:
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
+- Completed slicing validation: `make verify` passed on `dev` after PR #71 merge.
 
 ## Notes
 
