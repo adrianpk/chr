@@ -105,6 +105,30 @@ func TestNewResultApplicationPreservesChangedFiles(t *testing.T) {
 	}
 }
 
+func TestNewResultApplicationMapsResultChangedFiles(t *testing.T) {
+	record := testResultApplicationExecutionRecord(t.TempDir())
+	result := testResultApplicationResult(record)
+	result.ChangedFiles = []ExecutionResultChangedFile{
+		{Path: "internal/chc/execution_result.go", Summary: "add changed files"},
+	}
+
+	application, err := NewResultApplication(ResultApplicationOptions{
+		Execution: record,
+		Result:    result,
+	})
+	if err != nil {
+		t.Fatalf("NewResultApplication returned error: %v", err)
+	}
+
+	if len(application.ChangedFiles) != 1 {
+		t.Fatalf("ChangedFiles len = %d, want 1", len(application.ChangedFiles))
+	}
+
+	if application.ChangedFiles[0].Summary != "add changed files" {
+		t.Fatalf("ChangedFiles[0].Summary = %q, want summary", application.ChangedFiles[0].Summary)
+	}
+}
+
 func TestNewResultApplicationRejectsMismatchedExecutionID(t *testing.T) {
 	record := testResultApplicationExecutionRecord(t.TempDir())
 	result := testResultApplicationResult(record)
