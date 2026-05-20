@@ -1,6 +1,6 @@
 # MVP Agent Proving Ground Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-mvp-agent-proving-ground-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -12,8 +12,8 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Sandbox Codex Runner | Delivered | `feat/slice-3-proving-sandbox-runner` | `feat(slice-3): proving sandbox runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-3-proving-sandbox-runner.md` | Repository PR #74. |
 | Slice 4: Validation Runner | Delivered | `feat/slice-4-proving-validation-runner` | `feat(slice-4): proving validation runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-4-proving-validation-runner.md` | Repository PR #75 merged. |
 | Slice 5: Minimal Ralph Loop | Delivered | `feat/slice-5-proving-ralph-loop` | `feat(slice-5): proving ralph loop` | `.prj/reports/slices/mvp-agent-proving-ground/slice-5-proving-ralph-loop.md` | Repository PR #76 merged. |
-| Slice 6: End-to-End Agent Proof | In Review | `feat/slice-6-proving-e2e-agent-proof` | `feat(slice-6): proving e2e agent proof` | `.prj/reports/slices/mvp-agent-proving-ground/slice-6-proving-e2e-agent-proof.md` | Repository PR #77. |
+| Slice 6: End-to-End Agent Proof | Delivered | `feat/slice-6-proving-e2e-agent-proof` | `feat(slice-6): proving e2e agent proof` | `.prj/reports/slices/mvp-agent-proving-ground/slice-6-proving-e2e-agent-proof.md` | Repository PR #77 merged. |
 
 ## Slice 1: Todolist Fixture Project
 

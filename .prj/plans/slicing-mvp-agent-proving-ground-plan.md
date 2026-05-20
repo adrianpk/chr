@@ -1,6 +1,6 @@
 # MVP Agent Proving Ground Slicing Plan
 
-Status: active
+Status: delivered
 
 ## Purpose
 
@@ -212,7 +212,7 @@ Expected outcome:
 
 ### Slice 6: End-to-End Agent Proof
 
-Status: in review.
+Status: delivered.
 
 Expected branch: `feat/slice-6-proving-e2e-agent-proof`
 Expected PR title: `feat(slice-6): proving e2e agent proof`
