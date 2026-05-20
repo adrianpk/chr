@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 2: Agent Identity and Protocol Context | Delivered | `feat/slice-2-context-agent-protocols` | `feat(slice-2): context agent protocols` | `.prj/reports/slices/ticket-execution-context-hardening/slice-2-context-agent-protocols.md` | Repository PR #79 merged. |
 | Slice 3: Project and Use-Case Document Context | Delivered | `feat/slice-3-context-project-documents` | `feat(slice-3): context project documents` | `.prj/reports/slices/ticket-execution-context-hardening/slice-3-context-project-documents.md` | Repository PR #80 merged. |
 | Slice 4: Tree and Search Context | Delivered | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Repository PR #81 merged. |
-| Slice 5: Go Graph Context Provider | Planned | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | `gograph` CLI first. |
+| Slice 5: Go Graph Context Provider | Reviewing | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | `gograph` CLI first. |
 | Slice 6: Ralph Attempt Context | Planned | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Retry evidence. |
 | Slice 7: Docker-Compatible Context Materialization | Planned | `feat/slice-7-context-docker-materialization` | `feat(slice-7): context docker materialization` | `.prj/reports/slices/ticket-execution-context-hardening/slice-7-context-docker-materialization.md` | Runtime artifact layout. |
 | Slice 8: Execution Readiness and Handoff | Planned | `feat/slice-8-context-readiness-handoff` | `feat(slice-8): context readiness handoff` | `.prj/reports/slices/ticket-execution-context-hardening/slice-8-context-readiness-handoff.md` | Readiness and evidence links. |
@@ -179,25 +179,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Detect whether `gograph` is available.
-- [ ] Run `gograph build .` by default.
-- [ ] Support optional `gograph build . --precise`.
-- [ ] Query selected source, callers, callees, tests, deps, changes, and hotspots.
-- [ ] Render selected output into `code-context.md`.
-- [ ] Degrade gracefully when `gograph` is unavailable.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Detect whether `gograph` is available.
+- [x] Run `gograph build .` by default.
+- [x] Support optional `gograph build . --precise`.
+- [x] Query selected source, callers, callees, tests, deps, changes, and hotspots.
+- [x] Render selected output into `code-context.md`.
+- [x] Degrade gracefully when `gograph` is unavailable.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
-- T5.8: pending
+- T5.1: `5ef69cb`
+- T5.2: `5ef69cb`
+- T5.3: `5ef69cb`
+- T5.4: `5ef69cb`
+- T5.5: `5ef69cb`
+- T5.6: `5ef69cb`
+- T5.7: `docs(slice-5): record gograph provider report`
+- T5.8: `5ef69cb`
 
 ## Slice 6: Ralph Attempt Context
 
