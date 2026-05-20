@@ -217,14 +217,14 @@ Candidate tasks:
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
-- T6.8: pending
+- T6.1: `9c374da`
+- T6.2: `9c374da`
+- T6.3: `9c374da`
+- T6.4: `9c374da`
+- T6.5: `9c374da`
+- T6.6: `9c374da`
+- T6.7: `9c374da`
+- T6.8: `9c374da`
 
 ## Validation Record
 
