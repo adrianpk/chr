@@ -137,7 +137,7 @@ Expected outcome:
 
 ### Slice 3: Sandbox Codex Runner
 
-Status: planned.
+Status: in review.
 
 Expected branch: `feat/slice-3-proving-sandbox-runner`
 Expected PR title: `feat(slice-3): proving sandbox runner`

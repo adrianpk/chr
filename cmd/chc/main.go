@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/urfave/cli/v3"
@@ -47,6 +48,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 			newIndexCommand(stdout),
 			newInitCommand(stdout),
 			newProjectCommand(stdout),
+			newProvingCommand(stdout),
 			newRuntimeCommand(stdout),
 			newTicketCommand(stdout),
 		},
@@ -638,6 +640,39 @@ func newRuntimeCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newProvingCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "proving",
+		Usage: "Run temporary MVP proving-ground workflows",
+		Commands: []*cli.Command{
+			newProvingRunCommand(stdout),
+		},
+	}
+}
+
+func newProvingRunCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "run",
+		Usage: "Run one direct proving objective in the agent sandbox",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "dir",
+				Usage: "project directory override",
+				Value: ".",
+			},
+			&cli.StringFlag{
+				Name:  "objective",
+				Usage: "project-relative proving objective path",
+			},
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print the proving sandbox plan without running Docker",
+			},
+		},
+		Action: provingRunAction(stdout),
+	}
+}
+
 func newRuntimeInitCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "init",
@@ -677,6 +712,12 @@ func newRuntimeValidateCommand(stdout io.Writer) *cli.Command {
 func runtimeInitAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runRuntimeInit(ctx, cmd, stdout)
+	}
+}
+
+func provingRunAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runProvingRun(ctx, cmd, stdout)
 	}
 }
 
@@ -2652,6 +2693,64 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	}
 
 	return nil
+}
+
+func runProvingRun(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("proving run does not accept positional arguments")
+	}
+
+	objectivePath := cmd.String("objective")
+	if objectivePath == "" {
+		return fmt.Errorf("proving run requires --objective")
+	}
+
+	result, err := chc.RunProvingSandbox(ctx, chc.ProvingSandboxRunOptions{
+		ProjectDir:    cmd.String("dir"),
+		ObjectivePath: objectivePath,
+		DryRun:        cmd.Bool("dry-run"),
+	})
+	if err != nil {
+		return err
+	}
+
+	return printProvingRunResult(stdout, result)
+}
+
+func printProvingRunResult(stdout io.Writer, result chc.ProvingSandboxRunResult) error {
+	status := "completed"
+	if result.DryRun {
+		status = "planned"
+	}
+
+	lines := []string{
+		fmt.Sprintf("proving: %s", status),
+		fmt.Sprintf("dry_run: %t", result.DryRun),
+		fmt.Sprintf("objective_id: %s", result.Objective.ID),
+		fmt.Sprintf("ticket_key: %s", result.Objective.TicketKey),
+		fmt.Sprintf("image: %s", result.Plan.Image),
+		fmt.Sprintf("dockerfile: %s", result.Plan.DockerfilePath),
+		fmt.Sprintf("context_path: %s", result.Plan.WorkerContextPath),
+		fmt.Sprintf("result_path: %s", result.Plan.ResultPath),
+		fmt.Sprintf("log_path: %s", result.Plan.LogPath),
+		fmt.Sprintf("validation_path: %s", result.Plan.ValidationPath),
+		fmt.Sprintf("build_command: %s", formatHarnessCommand(result.Build)),
+		fmt.Sprintf("run_command: %s", formatHarnessCommand(result.Run)),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write proving result: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func formatHarnessCommand(command chc.HarnessCommand) string {
+	parts := append([]string{command.Program}, command.Args...)
+
+	return strings.Join(parts, " ")
 }
 
 func printRuntimeValidateResult(
