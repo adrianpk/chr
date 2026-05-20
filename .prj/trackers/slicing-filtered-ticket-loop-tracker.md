@@ -1,6 +1,6 @@
 # Filtered Ticket Loop Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -13,8 +13,8 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
