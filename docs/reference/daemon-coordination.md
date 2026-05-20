@@ -130,6 +130,27 @@ Invalid classifications include non-directory project paths and missing
 workspace directories. Later daemon run-loop slices can skip or report these
 projects without failing the whole daemon process.
 
+## Foreground Run Loop
+
+`chc daemon start` runs daemon coordination in the foreground.
+
+The foreground run:
+
+- evaluates the single-instance guard;
+- writes running daemon state with the current process ID;
+- updates heartbeat state once per iteration;
+- loads enabled registered projects;
+- skips projects that are not ready;
+- refreshes ticket indexes for ready projects;
+- stops after `--max-iterations`;
+- writes stopped daemon state on normal completion.
+
+`--max-iterations` is required to be greater than zero and defaults to `1`.
+
+The foreground loop does not run as an OS service and does not observe stop
+requests yet. Graceful stop handling is delivered by the stop and stale recovery
+slice.
+
 ## Status Reporting
 
 `chc daemon status` reads the persisted daemon state.

@@ -69,10 +69,17 @@ func newDaemonStartCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "start",
 		Usage: "Start daemon coordination",
-		Flags: append(projectRegistryFlags(), &cli.BoolFlag{
-			Name:  "dry-run",
-			Usage: "print the daemon start plan without writing state",
-		}),
+		Flags: append(projectRegistryFlags(),
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print the daemon start plan without writing state",
+			},
+			&cli.IntFlag{
+				Name:  "max-iterations",
+				Usage: "maximum foreground daemon loop iterations",
+				Value: 1,
+			},
+		),
 		Action: daemonStartAction(stdout),
 	}
 }
@@ -126,8 +133,9 @@ func runDaemonStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	if !cmd.Bool("dry-run") {
-		return fmt.Errorf("daemon start requires --dry-run until lifecycle state is delivered")
+	maxIterations := cmd.Int("max-iterations")
+	if maxIterations <= 0 {
+		return fmt.Errorf("max-iterations must be greater than zero")
 	}
 
 	decision, err := daemonStartGuardDecision(ctx, env)
@@ -135,7 +143,11 @@ func runDaemonStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	return printDaemonStartPlan(stdout, env, decision)
+	if cmd.Bool("dry-run") {
+		return printDaemonStartPlan(stdout, env, decision)
+	}
+
+	return runDaemonForegroundLoop(ctx, stdout, env, decision, maxIterations)
 }
 
 func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -230,6 +242,170 @@ func printDaemonPlan(stdout io.Writer, action string, env chc.UserEnvironment) e
 		"dry_run: true",
 		fmt.Sprintf("data_dir: %s", env.DataDir()),
 		fmt.Sprintf("state_dir: %s", env.StateDir()),
+	}
+
+	return printDaemonLines(stdout, lines)
+}
+
+type daemonForegroundLoopResult struct {
+	Iterations        int
+	ProjectsLoaded    int
+	ProjectsReady     int
+	ProjectsSkipped   int
+	ProjectsRefreshed int
+}
+
+func runDaemonForegroundLoop(
+	ctx context.Context,
+	stdout io.Writer,
+	env chc.UserEnvironment,
+	decision chc.DaemonStartGuardDecision,
+	maxIterations int,
+) error {
+	if !decision.Allowed {
+		return fmt.Errorf("daemon start blocked: %s", decision.Reason)
+	}
+
+	stateRepository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = stateRepository.Close()
+	}()
+
+	startedAt := time.Now().UTC()
+
+	runningState := chc.DaemonState{
+		Status:      chc.DaemonStatusRunning,
+		PID:         os.Getpid(),
+		StartedAt:   &startedAt,
+		HeartbeatAt: &startedAt,
+		UpdatedAt:   startedAt,
+	}
+	if err := stateRepository.UpsertDaemonState(ctx, runningState); err != nil {
+		return err
+	}
+
+	result, err := runDaemonForegroundIterations(ctx, env, stateRepository, maxIterations)
+	if err != nil {
+		failDaemonForegroundState(ctx, stateRepository, err)
+
+		return err
+	}
+
+	stoppedAt := time.Now().UTC()
+	if err := stateRepository.UpsertDaemonState(ctx, chc.NewStoppedDaemonState(stoppedAt)); err != nil {
+		return err
+	}
+
+	return printDaemonForegroundLoopResult(stdout, result)
+}
+
+func runDaemonForegroundIterations(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	stateRepository chc.DaemonStateRepository,
+	maxIterations int,
+) (daemonForegroundLoopResult, error) {
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return daemonForegroundLoopResult{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return daemonForegroundLoopResult{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	result := daemonForegroundLoopResult{}
+
+	for range maxIterations {
+		heartbeatAt := time.Now().UTC()
+		if err := stateRepository.UpdateDaemonHeartbeat(ctx, heartbeatAt); err != nil {
+			return daemonForegroundLoopResult{}, err
+		}
+
+		projects, err := chc.LoadDaemonProjects(ctx, registry)
+		if err != nil {
+			return daemonForegroundLoopResult{}, err
+		}
+
+		result.Iterations++
+		result.ProjectsLoaded += len(projects)
+
+		if err := refreshDaemonProjects(ctx, index, projects, &result); err != nil {
+			return daemonForegroundLoopResult{}, err
+		}
+	}
+
+	return result, nil
+}
+
+func refreshDaemonProjects(
+	ctx context.Context,
+	index chc.TicketIndex,
+	projects []chc.DaemonProject,
+	result *daemonForegroundLoopResult,
+) error {
+	for _, project := range projects {
+		if project.Status != chc.DaemonProjectStatusReady {
+			result.ProjectsSkipped++
+
+			continue
+		}
+
+		projectContext := commandProjectContext{
+			ProjectDir: project.Project.Path,
+			ProjectID:  project.Project.ID,
+		}
+		if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+			return err
+		}
+
+		result.ProjectsReady++
+		result.ProjectsRefreshed++
+	}
+
+	return nil
+}
+
+func failDaemonForegroundState(
+	ctx context.Context,
+	stateRepository chc.DaemonStateRepository,
+	cause error,
+) {
+	failedAt := time.Now().UTC()
+	failedState := chc.DaemonState{
+		Status:        chc.DaemonStatusFailed,
+		FailureReason: cause.Error(),
+		UpdatedAt:     failedAt,
+	}
+
+	//nolint:errcheck // The original daemon run error is the command result.
+	_ = stateRepository.UpsertDaemonState(ctx, failedState)
+}
+
+func printDaemonForegroundLoopResult(stdout io.Writer, result daemonForegroundLoopResult) error {
+	lines := []string{
+		"daemon: stopped",
+		fmt.Sprintf("iterations: %d", result.Iterations),
+		fmt.Sprintf("projects_loaded: %d", result.ProjectsLoaded),
+		fmt.Sprintf("projects_ready: %d", result.ProjectsReady),
+		fmt.Sprintf("projects_skipped: %d", result.ProjectsSkipped),
+		fmt.Sprintf("projects_refreshed: %d", result.ProjectsRefreshed),
 	}
 
 	return printDaemonLines(stdout, lines)

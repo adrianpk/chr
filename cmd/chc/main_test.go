@@ -298,21 +298,105 @@ func TestDaemonStopDryRunPrintsPlan(t *testing.T) {
 	}
 }
 
-func TestDaemonStartAndStopRequireDryRun(t *testing.T) {
+func TestDaemonStartRunsForegroundLoop(t *testing.T) {
+	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	for _, args := range [][]string{
-		{"daemon", "start", "--dev-root", devRoot},
-		{"daemon", "stop", "--dev-root", devRoot},
-	} {
-		err := run(t.Context(), args, &bytes.Buffer{}, &bytes.Buffer{})
-		if err == nil {
-			t.Fatalf("run(%v) returned nil error", args)
-		}
+	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "tickets"), 0o755); err != nil {
+		t.Fatalf("create tickets directory: %v", err)
+	}
 
-		if !strings.Contains(err.Error(), "requires --dry-run") {
-			t.Fatalf("run(%v) error = %v, want dry-run requirement", args, err)
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--max-iterations",
+		"1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon start returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: stopped",
+		"iterations: 1",
+		"projects_loaded: 1",
+		"projects_ready: 1",
+		"projects_skipped: 0",
+		"projects_refreshed: 1",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
+	}
+
+	state := getDaemonState(t, devRoot)
+	if state.Status != chc.DaemonStatusStopped {
+		t.Fatalf("daemon state = %#v, want stopped", state)
+	}
+}
+
+func TestDaemonStartRejectsInvalidMaxIterations(t *testing.T) {
+	err := run(t.Context(), []string{
+		"daemon",
+		"start",
+		"--dev-root",
+		t.TempDir(),
+		"--max-iterations",
+		"0",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("daemon start returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "max-iterations must be greater than zero") {
+		t.Fatalf("daemon start error = %v, want max-iterations validation", err)
+	}
+}
+
+func TestDaemonStartRejectsFreshRunningState(t *testing.T) {
+	devRoot := t.TempDir()
+	startedAt := time.Now().UTC()
+	heartbeatAt := startedAt
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:      chc.DaemonStatusRunning,
+		PID:         1234,
+		StartedAt:   &startedAt,
+		HeartbeatAt: &heartbeatAt,
+		UpdatedAt:   heartbeatAt,
+	})
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"start",
+		"--dev-root",
+		devRoot,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("daemon start returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "daemon start blocked: daemon already running with pid 1234") {
+		t.Fatalf("daemon start error = %v, want blocked running daemon", err)
+	}
+}
+
+func TestDaemonStopRequiresDryRun(t *testing.T) {
+	devRoot := t.TempDir()
+
+	err := run(t.Context(), []string{"daemon", "stop", "--dev-root", devRoot}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("daemon stop returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "requires --dry-run") {
+		t.Fatalf("daemon stop error = %v, want dry-run requirement", err)
 	}
 }
 
@@ -2141,6 +2225,28 @@ func selectProject(t *testing.T, devRoot, selector string) {
 func upsertDaemonState(t *testing.T, devRoot string, state chc.DaemonState) {
 	t.Helper()
 
+	repository := newDaemonStateRepositoryForTest(t, devRoot)
+	if err := repository.UpsertDaemonState(t.Context(), state); err != nil {
+		t.Fatalf("UpsertDaemonState returned error: %v", err)
+	}
+}
+
+func getDaemonState(t *testing.T, devRoot string) chc.DaemonState {
+	t.Helper()
+
+	repository := newDaemonStateRepositoryForTest(t, devRoot)
+
+	state, err := repository.GetDaemonState(t.Context())
+	if err != nil {
+		t.Fatalf("GetDaemonState returned error: %v", err)
+	}
+
+	return state
+}
+
+func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) chc.DaemonStateRepository {
+	t.Helper()
+
 	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
@@ -2154,15 +2260,13 @@ func upsertDaemonState(t *testing.T, devRoot string, state chc.DaemonState) {
 		t.Fatalf("NewDaemonStateRepository returned error: %v", err)
 	}
 
-	defer func() {
+	t.Cleanup(func() {
 		if err := repository.Close(); err != nil {
 			t.Fatalf("close daemon state repository: %v", err)
 		}
-	}()
+	})
 
-	if err := repository.UpsertDaemonState(t.Context(), state); err != nil {
-		t.Fatalf("UpsertDaemonState returned error: %v", err)
-	}
+	return repository
 }
 
 func indexTicket(t *testing.T, devRoot, projectDir string, ticket chc.IndexedTicket) {

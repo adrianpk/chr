@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 4: Daemon Status Reporting | Delivered | `feat/slice-4-daemon-status-reporting` | `feat(slice-4): daemon status reporting` | `.prj/reports/slices/daemon-coordination/slice-4-daemon-status-reporting.md` | Repository PR #67. |
 | Slice 5: Single-Instance Guard | Delivered | `feat/slice-5-daemon-single-instance` | `feat(slice-5): daemon single instance` | `.prj/reports/slices/daemon-coordination/slice-5-daemon-single-instance.md` | Repository PR #68. |
 | Slice 6: Registered Project Loading | Delivered | `feat/slice-6-daemon-project-loading` | `feat(slice-6): daemon project loading` | `.prj/reports/slices/daemon-coordination/slice-6-daemon-project-loading.md` | Repository PR #69. |
-| Slice 7: Daemon Foreground Run Loop | Planned | `feat/slice-7-daemon-foreground-run-loop` | `feat(slice-7): daemon foreground run loop` | `.prj/reports/slices/daemon-coordination/slice-7-daemon-foreground-run-loop.md` | Supervised foreground daemon. |
+| Slice 7: Daemon Foreground Run Loop | In Review | `feat/slice-7-daemon-foreground-run-loop` | `feat(slice-7): daemon foreground run loop` | `.prj/reports/slices/daemon-coordination/slice-7-daemon-foreground-run-loop.md` | Supervised foreground daemon. |
 | Slice 8: Graceful Stop and Stale Recovery | Planned | `feat/slice-8-daemon-stop-recovery` | `feat(slice-8): daemon stop recovery` | `.prj/reports/slices/daemon-coordination/slice-8-daemon-stop-recovery.md` | Stop and recovery. |
 
 ## Slice 1: Daemon Command Skeleton
@@ -231,14 +231,14 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add foreground `daemon start` execution path.
-- [ ] Update heartbeat state while running.
-- [ ] Periodically refresh registered projects.
-- [ ] Invoke existing foreground-safe loop boundaries.
-- [ ] Support a small testable iteration limit.
-- [ ] Add focused run-loop tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add foreground `daemon start` execution path.
+- [x] Update heartbeat state while running.
+- [x] Periodically refresh registered projects.
+- [x] Invoke existing foreground-safe loop boundaries.
+- [x] Support a small testable iteration limit.
+- [x] Add focused run-loop tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
