@@ -184,13 +184,13 @@ Candidate tasks:
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
+- T5.1: `b41d3ca`
+- T5.2: `b41d3ca`
+- T5.3: `b41d3ca`
+- T5.4: `b41d3ca`
+- T5.5: `b41d3ca`
+- T5.6: `b41d3ca`
+- T5.7: `b41d3ca`
 
 ## Slice 6: End-to-End Agent Proof
 
