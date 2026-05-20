@@ -95,10 +95,7 @@ func resultApplicationChangedFiles(opts ResultApplicationOptions) []ResultApplic
 	changedFiles := append([]ResultApplicationChangedFile(nil), opts.ChangedFiles...)
 
 	for _, changedFile := range opts.Result.ChangedFiles {
-		changedFiles = append(changedFiles, ResultApplicationChangedFile{
-			Path:    changedFile.Path,
-			Summary: changedFile.Summary,
-		})
+		changedFiles = append(changedFiles, ResultApplicationChangedFile(changedFile))
 	}
 
 	return changedFiles
