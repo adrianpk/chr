@@ -187,7 +187,7 @@ Expected outcome:
 
 ### Slice 5: Minimal Ralph Loop
 
-Status: in review.
+Status: delivered.
 
 Expected branch: `feat/slice-5-proving-ralph-loop`
 Expected PR title: `feat(slice-5): proving ralph loop`
