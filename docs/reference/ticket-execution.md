@@ -158,6 +158,28 @@ The worker command renderer does not execute Codex, run Docker, create context
 files, or write result artifacts. Later slices are responsible for context
 materialization and harness integration.
 
+## Codex Worker Context
+
+The Codex worker context is a deterministic Markdown artifact written before
+the worker runs.
+
+The context includes:
+
+- execution ID;
+- ticket key;
+- ticket path;
+- result artifact path;
+- runtime log artifact path;
+- validation artifact path;
+- the JSON result contract the worker must satisfy.
+
+The runtime plan reserves `context.md` in the execution run artifact directory:
+
+`<artifact_dir>/<ticket_key>/<execution_id>/context.md`
+
+Context materialization creates parent directories and writes the context file.
+It does not execute Codex, run validation, or write the result envelope.
+
 ## Agent Harness Invocation
 
 In non-dry-run mode, `chc ticket start <ticket-key>` creates the pending
