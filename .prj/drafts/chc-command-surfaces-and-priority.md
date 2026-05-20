@@ -14,6 +14,8 @@ This is not an executable slice plan. A slice becomes executable only after a pl
 
 - CLI commands;
 - direct file edits inside the managed project workspace;
+- agent-assisted authoring sessions;
+- TUI authoring sessions;
 - Telegram commands or replies;
 - email commands or replies.
 
@@ -88,6 +90,57 @@ Expected responsibilities:
 - comments or execution notes when represented as file content.
 
 Direct file editing creates a synchronization requirement. `chc` needs explicit or automatic reconciliation so derived indexes do not become stale.
+
+Markdown is the primary storage and review layer for document workflows. The
+CLI should not become the main editor for long-form specs, plans, or curated
+notes. Commands should initialize artifacts, validate them, promote them,
+generate skeletons, show relationships, and preserve provenance.
+
+Commands must tolerate hand-authored Markdown. A user who knows the structure
+should be able to create or edit a spec, plan, dump, quiz, slice set, or ticket
+without going through an interactive command.
+
+### Agent-Assisted Authoring
+
+Agent-assisted authoring is a product-owned version of the current manual
+conversation workflow.
+
+Expected responsibilities:
+
+- start a bounded discovery session for a dump, quiz, draft, spec, plan, slice
+  set, slice, or ticket;
+- ask adaptive follow-up questions when an answer exposes missing context;
+- capture transcript and curated answers;
+- synthesize Markdown artifacts from the session;
+- preserve links from generated artifacts back to their source session;
+- support pause, resume, and finalize operations.
+
+This surface requires a model-backed runner, but that is a base condition for
+assisted `chc` capabilities rather than a special risk of authoring. The
+important product boundary is persistence: the session must leave enough
+evidence for a user to review, edit, and regenerate outputs.
+
+Agent-assisted authoring is host-side coordination. It prepares knowledge and
+documents. It should not be mixed with the Docker ticket worker, whose job is to
+resolve executable ticket work.
+
+### TUI Authoring
+
+A TUI can make authoring sessions ergonomic without changing the underlying
+storage model.
+
+Expected responsibilities:
+
+- select an authoring target and topic;
+- present questions and accept answers;
+- allow limited recursive follow-up depth during assisted sessions;
+- show transcript, curated answers, and generated artifact paths;
+- pause and resume sessions;
+- open or refresh generated Markdown artifacts;
+- finalize or discard a session.
+
+The TUI should sit on the same authoring-session backend as CLI-driven
+assisted sessions. It should not define a separate document workflow.
 
 ### Telegram
 
@@ -180,6 +233,17 @@ chc draft promote
 chc spec list
 chc spec new
 chc spec from-draft
+
+chc author session start
+chc author session resume
+chc author session finalize
+chc author session list
+
+chc author quiz new
+chc author quiz start
+chc author quiz synthesize
+
+chc author tui
 
 chc dump start
 chc dump append
@@ -360,6 +424,26 @@ Candidate scope:
 
 Reason: this captures the broader manual workflow and improves ergonomics, but the fastest path to value is ticket execution and loop operation.
 
+### Priority 9: Authoring Sessions
+
+Add product-owned authoring sessions after Docker execution and context
+composition are established.
+
+Candidate scope:
+
+- static generated questionnaires as Markdown;
+- authoring session model;
+- agent-assisted quiz and dump sessions;
+- transcript and curated answer persistence;
+- artifact synthesis into draft, spec, plan, slice set, slice, or ticket;
+- pause, resume, and finalize commands;
+- later TUI over the same backend.
+
+Reason: direct Markdown already exists, but adaptive discovery is valuable when
+the user cannot know all useful questions upfront. The first durable backend
+should be CLI-driven and model-backed. A Bubble Tea TUI can follow once the
+session lifecycle is stable.
+
 ## Open Questions
 
 - Should `project select` write active project state into user config or into the user-level database?
@@ -367,3 +451,7 @@ Reason: this captures the broader manual workflow and improves ergonomics, but t
 - Which document families need SQLite indexing in the first pass: tickets only, or drafts and specs too?
 - Should Telegram commands map to the same command handlers as CLI commands, or to a narrower interaction API?
 - Which loop filters are required before the first usable loop: priority, severity, area, tag, use case, or status?
+- Should authoring sessions share the ticket execution runtime family or use a
+  separate host-side model runner?
+- What is the smallest persisted session shape that supports adaptive
+  questioning, pause/resume, and Markdown regeneration?

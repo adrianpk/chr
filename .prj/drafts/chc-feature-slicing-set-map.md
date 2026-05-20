@@ -33,6 +33,7 @@ Known and inferred feature areas:
 - ticket model, indexing, inspection, and lifecycle;
 - automatic reconciliation between Markdown and SQLite;
 - operational document workflows;
+- authoring sessions for dumps, quizzes, drafts, specs, plans, and slices;
 - agent runtime boundary;
 - ticket execution;
 - ticket execution context hardening;
@@ -121,27 +122,94 @@ Candidate slices:
 
 Manual synchronization commands are maintenance tools, not normal workflow requirements.
 
-## Slicing: Operational Documents
+## Slicing: Operational Documents and Authoring
 
 Use case:
 
-> A user captures and promotes working context through drafts, specs, dumps, quizzes, plans, and trackers.
+> A user captures and promotes working context through dumps, quizzes,
+> drafts, specs, plans, slice sets, slices, tickets, and trackers.
 
 Current state: manually practiced in this repository, not productized in `chc`.
+Markdown files already act as the durable editing surface. The missing product
+layer is ergonomic creation, validation, promotion, and optional agent-assisted
+authoring.
+
+This slicing is not a replacement for direct Markdown editing. Advanced users
+must remain able to create and edit artifacts by hand. Commands should make
+common starts and transitions easier, validate structure, preserve provenance,
+and connect artifacts without making the CLI the primary long-form editor.
+
+The likely product shape has three complementary paths:
+
+1. Markdown direct.
+   Users create or edit artifacts directly as Markdown. This is the base
+   capability and the review layer for every other path.
+2. Static generated authoring.
+   `chc` generates a questionnaire, draft, spec, plan, or slice skeleton in
+   Markdown. The user fills or edits it manually. This is simple, reproducible,
+   and useful without an adaptive session.
+3. Agent-assisted authoring.
+   `chc` starts a bounded authoring session backed by Codex or another model.
+   The agent acts as an analyst: asks adaptive follow-up questions, captures
+   answers, curates them, and produces Markdown artifacts. This is the product
+   equivalent of the current manual quiz/dump/spec workflow.
+
+A later TUI can sit on the same authoring-session model. It should not define a
+separate workflow. Its job would be ergonomic interaction: ask, answer, pause,
+resume, inspect transcript, edit generated Markdown, and finalize artifacts.
+
+Shared model candidates:
+
+- authoring session identity and status;
+- mode: static, assisted, or TUI-backed;
+- target: dump, quiz, draft, spec, plan, slice set, slice, or ticket;
+- topic and initial prompt;
+- context inputs;
+- question and answer transcript;
+- curated answers and decisions;
+- generated artifact paths;
+- provenance links between inputs and outputs.
+
+Candidate transitions:
+
+- dump to draft;
+- quiz to draft;
+- dump plus quiz to spec;
+- draft to spec;
+- spec to plan;
+- plan to slice set;
+- slice to ticket;
+- execution result to report or tracker update.
+
+Command design constraints:
+
+- Markdown remains the canonical durable format.
+- Commands must tolerate hand-authored documents.
+- Commands should support dry-run when they create or transform artifacts.
+- Commands should preserve enough provenance to explain generated outputs.
+- Agent-assisted authoring is host-side coordination, not ticket execution.
+- The Docker worker remains responsible for resolving tickets, not for deciding
+  product planning structure.
 
 Candidate slices:
 
-- document asset templates;
-- draft creation;
-- spec creation;
-- dump start and curation;
-- quiz start and curation;
+- authoring artifact inventory and storage contract;
+- Markdown templates for dumps, quizzes, drafts, specs, plans, and slice sets;
+- static questionnaire generation;
+- authoring session model and repository;
+- agent-assisted quiz session runner;
+- agent-assisted dump curation and synthesis;
 - draft-to-spec promotion;
-- slicing draft generation;
-- plan and tracker generation;
-- document listing and lookup.
+- spec-to-plan promotion;
+- plan-to-slice-set generation;
+- slice-to-ticket generation;
+- document listing, lookup, validation, and relationship graph;
+- TUI authoring surface over the same session backend.
 
-This slicing supports the broader workflow but is not the shortest path to the operational MVP.
+This slicing supports the broader workflow but is not the shortest path to the
+ticket-execution MVP. After Docker execution and context composition exist, it
+becomes important because otherwise dumps, quizzes, specs, and plans remain
+dependent on external conversations rather than product-owned workflows.
 
 ## Slicing: Agent Runtime Boundary
 
@@ -305,7 +373,9 @@ Use case:
 > fixes code, validates, retries through Ralph Loop, and leaves the project
 > working.
 
-Current state: planned as a temporary post-cutoff MVP hardening window.
+Current state: completed for the temporary post-cutoff MVP hardening window.
+The proving-ground fixture, objective contract, sandbox Codex runner,
+validation runner, Ralph Loop, and end-to-end proof are delivered.
 
 Candidate slices:
 
@@ -389,10 +459,10 @@ direction and should not be dropped from planning:
 1. Daemon Coordination.
 2. MVP Agent Proving Ground.
 3. Ticket Execution Context Hardening.
-4. Notification and Remote Commands.
-5. Reporting and Evidence.
-6. Maintenance and Recovery.
-7. Operational Documents.
+4. Operational Documents and Authoring.
+5. Notification and Remote Commands.
+6. Reporting and Evidence.
+7. Maintenance and Recovery.
 
 Post-cutoff work can be pulled earlier only when it directly blocks local loop
 operation, debugging, or evidence quality.
@@ -412,11 +482,31 @@ given a controlled fixture project, `chc` should run Codex in the agent sandbox,
 validate compile, lint, and tests, retry with Ralph Loop, and leave a
 non-trivial bugfix or feature working.
 
+Operational Documents and Authoring should be revisited after the Docker worker
+and context-composition path because the same primitives now make assisted
+authoring plausible. The recommended sequence is:
+
+1. document Markdown-first authoring and hand-edited artifact tolerance;
+2. add static generated questionnaires and templates;
+3. add host-side agent-assisted authoring sessions;
+4. add a TUI over the same session backend.
+
+The first two steps are ergonomic and structural. The third step is the core
+capability: `chc` should be able to command Codex or another model from outside
+the ticket worker to conduct a bounded quiz/dump/spec session, persist the
+transcript, curate answers, and produce Markdown. The TUI should come after the
+session model is stable enough to avoid designing a separate workflow.
+
 ## Open Questions
 
-- Should document workflows remain a separate slicing or be split by artifact family?
+- Should document workflows remain one authoring slicing or split into static
+  authoring, assisted sessions, and TUI surfaces?
 - Which proving-ground behavior should be generalized before Notification and Remote Commands?
 - Which execution-context specs should be implemented before or during the proving ground?
 - Which reporting artifacts are required before remote execution feedback is acceptable?
 - Does the next daemon phase need file watching, or is automatic reconciliation on command boundaries enough?
 - Which notification events are required for the first remote-feedback loop?
+- What minimum authoring session state is required for pause, resume, and
+  artifact regeneration?
+- Should assisted authoring run in the host process, the same Docker runtime
+  family as ticket execution, or a separate authoring runtime?
