@@ -43,7 +43,7 @@ func TestDaemonStatusPrintsStoppedWhenStateIsMissing(t *testing.T) {
 
 func TestDaemonStatusPrintsStoredRunningState(t *testing.T) {
 	devRoot := t.TempDir()
-	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
+	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt.Add(time.Minute)
 
 	upsertDaemonState(t, devRoot, chc.DaemonState{
@@ -71,9 +71,9 @@ func TestDaemonStatusPrintsStoredRunningState(t *testing.T) {
 		"daemon: running",
 		"state: stored",
 		"pid: 1234",
-		"started_at: 2026-05-20T12:00:00Z",
-		"heartbeat_at: 2026-05-20T12:01:00Z",
-		"updated_at: 2026-05-20T12:01:00Z",
+		"started_at:",
+		"heartbeat_at:",
+		"updated_at:",
 		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
 		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
 	} {
@@ -85,7 +85,7 @@ func TestDaemonStatusPrintsStoredRunningState(t *testing.T) {
 
 func TestDaemonStatusPrintsStoredStoppingState(t *testing.T) {
 	devRoot := t.TempDir()
-	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
+	startedAt := time.Now().UTC()
 	stopRequestedAt := startedAt.Add(time.Minute)
 
 	upsertDaemonState(t, devRoot, chc.DaemonState{
@@ -112,7 +112,7 @@ func TestDaemonStatusPrintsStoredStoppingState(t *testing.T) {
 		"daemon: stopping",
 		"state: stored",
 		"pid: 1234",
-		"stop_requested_at: 2026-05-20T12:01:00Z",
+		"stop_requested_at:",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -152,6 +152,48 @@ func TestDaemonStatusPrintsStoredStaleState(t *testing.T) {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
+	}
+}
+
+func TestDaemonStatusRecoversStaleRunningState(t *testing.T) {
+	devRoot := t.TempDir()
+	startedAt := time.Now().UTC().Add(-10 * time.Minute)
+	heartbeatAt := startedAt
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:      chc.DaemonStatusRunning,
+		PID:         1234,
+		StartedAt:   &startedAt,
+		HeartbeatAt: &heartbeatAt,
+		UpdatedAt:   heartbeatAt,
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: stale",
+		"state: stored",
+		"pid: 1234",
+		"failure_reason: daemon state is stale",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	state := getDaemonState(t, devRoot)
+	if state.Status != chc.DaemonStatusStale {
+		t.Fatalf("daemon state = %#v, want stale", state)
 	}
 }
 
@@ -325,6 +367,7 @@ func TestDaemonStartRunsForegroundLoop(t *testing.T) {
 	for _, want := range []string{
 		"daemon: stopped",
 		"iterations: 1",
+		"stop_requested: false",
 		"projects_loaded: 1",
 		"projects_ready: 1",
 		"projects_skipped: 0",
@@ -387,16 +430,85 @@ func TestDaemonStartRejectsFreshRunningState(t *testing.T) {
 	}
 }
 
-func TestDaemonStopRequiresDryRun(t *testing.T) {
+func TestDaemonStopRequestsRunningDaemonStop(t *testing.T) {
 	devRoot := t.TempDir()
+	startedAt := time.Now().UTC()
+	heartbeatAt := startedAt
 
-	err := run(t.Context(), []string{"daemon", "stop", "--dev-root", devRoot}, &bytes.Buffer{}, &bytes.Buffer{})
-	if err == nil {
-		t.Fatal("daemon stop returned nil error")
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:      chc.DaemonStatusRunning,
+		PID:         1234,
+		StartedAt:   &startedAt,
+		HeartbeatAt: &heartbeatAt,
+		UpdatedAt:   heartbeatAt,
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{"daemon", "stop", "--dev-root", devRoot}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon stop returned error: %v", err)
 	}
 
-	if !strings.Contains(err.Error(), "requires --dry-run") {
-		t.Fatalf("daemon stop error = %v, want dry-run requirement", err)
+	for _, want := range []string{
+		"daemon: stopping",
+		"action: stop",
+		"stop_requested_at:",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	state := getDaemonState(t, devRoot)
+	if state.Status != chc.DaemonStatusStopping || state.StopRequestedAt == nil {
+		t.Fatalf("daemon state = %#v, want stopping with stop request", state)
+	}
+}
+
+func TestDaemonStopReportsStoppedWhenStateIsMissing(t *testing.T) {
+	devRoot := t.TempDir()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{"daemon", "stop", "--dev-root", devRoot}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon stop returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: stopped",
+		"action: stop",
+		"state: missing",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStopRequestedHelperReadsStopRequest(t *testing.T) {
+	devRoot := t.TempDir()
+	startedAt := time.Now().UTC()
+	stopRequestedAt := startedAt.Add(time.Minute)
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:          chc.DaemonStatusStopping,
+		PID:             1234,
+		StartedAt:       &startedAt,
+		StopRequestedAt: &stopRequestedAt,
+		UpdatedAt:       stopRequestedAt,
+	})
+
+	repository := newDaemonStateRepositoryForTest(t, devRoot)
+
+	stopRequested, err := daemonStopRequested(t.Context(), repository)
+	if err != nil {
+		t.Fatalf("daemonStopRequested returned error: %v", err)
+	}
+
+	if !stopRequested {
+		t.Fatal("daemonStopRequested = false, want true")
 	}
 }
 

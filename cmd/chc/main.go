@@ -179,6 +179,11 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
+	state, err = recoverStaleDaemonState(ctx, repository, state)
+	if err != nil {
+		return err
+	}
+
 	return printDaemonStateStatus(stdout, env, state)
 }
 
@@ -218,7 +223,7 @@ func formatDaemonStatusTime(value *time.Time) string {
 	return value.Format(time.RFC3339)
 }
 
-func runDaemonStop(_ context.Context, cmd *cli.Command, stdout io.Writer) error {
+func runDaemonStop(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("daemon stop does not accept positional arguments")
 	}
@@ -229,7 +234,7 @@ func runDaemonStop(_ context.Context, cmd *cli.Command, stdout io.Writer) error 
 	}
 
 	if !cmd.Bool("dry-run") {
-		return fmt.Errorf("daemon stop requires --dry-run until lifecycle state is delivered")
+		return requestDaemonStop(ctx, stdout, env)
 	}
 
 	return printDaemonPlan(stdout, "stop", env)
@@ -253,6 +258,7 @@ type daemonForegroundLoopResult struct {
 	ProjectsReady     int
 	ProjectsSkipped   int
 	ProjectsRefreshed int
+	StopRequested     bool
 }
 
 func runDaemonForegroundLoop(
@@ -338,6 +344,17 @@ func runDaemonForegroundIterations(
 			return daemonForegroundLoopResult{}, err
 		}
 
+		stopRequested, err := daemonStopRequested(ctx, stateRepository)
+		if err != nil {
+			return daemonForegroundLoopResult{}, err
+		}
+
+		if stopRequested {
+			result.StopRequested = true
+
+			break
+		}
+
 		projects, err := chc.LoadDaemonProjects(ctx, registry)
 		if err != nil {
 			return daemonForegroundLoopResult{}, err
@@ -402,6 +419,7 @@ func printDaemonForegroundLoopResult(stdout io.Writer, result daemonForegroundLo
 	lines := []string{
 		"daemon: stopped",
 		fmt.Sprintf("iterations: %d", result.Iterations),
+		fmt.Sprintf("stop_requested: %t", result.StopRequested),
 		fmt.Sprintf("projects_loaded: %d", result.ProjectsLoaded),
 		fmt.Sprintf("projects_ready: %d", result.ProjectsReady),
 		fmt.Sprintf("projects_skipped: %d", result.ProjectsSkipped),
@@ -409,6 +427,76 @@ func printDaemonForegroundLoopResult(stdout io.Writer, result daemonForegroundLo
 	}
 
 	return printDaemonLines(stdout, lines)
+}
+
+func recoverStaleDaemonState(
+	ctx context.Context,
+	repository chc.DaemonStateRepository,
+	state chc.DaemonState,
+) (chc.DaemonState, error) {
+	decision, err := chc.EvaluateDaemonStartGuard(state, time.Now().UTC(), chc.DefaultDaemonStaleAfter)
+	if err != nil {
+		return chc.DaemonState{}, err
+	}
+
+	if !decision.Stale {
+		return state, nil
+	}
+
+	recoveredAt := time.Now().UTC()
+	recovered := state
+	recovered.Status = chc.DaemonStatusStale
+	recovered.StopRequestedAt = nil
+	recovered.FailureReason = "daemon state is stale"
+	recovered.UpdatedAt = recoveredAt
+
+	if err := repository.UpsertDaemonState(ctx, recovered); err != nil {
+		return chc.DaemonState{}, err
+	}
+
+	return recovered, nil
+}
+
+func requestDaemonStop(ctx context.Context, stdout io.Writer, env chc.UserEnvironment) error {
+	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	requestedAt := time.Now().UTC()
+
+	err = repository.RequestDaemonStop(ctx, requestedAt)
+	if errors.Is(err, chc.ErrDaemonStateNotFound) {
+		return printDaemonLines(stdout, []string{
+			"daemon: stopped",
+			"action: stop",
+			"state: missing",
+		})
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return printDaemonLines(stdout, []string{
+		"daemon: stopping",
+		"action: stop",
+		fmt.Sprintf("stop_requested_at: %s", requestedAt.Format(time.RFC3339)),
+	})
+}
+
+func daemonStopRequested(ctx context.Context, stateRepository chc.DaemonStateRepository) (bool, error) {
+	state, err := stateRepository.GetDaemonState(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return state.Status == chc.DaemonStatusStopping && state.StopRequestedAt != nil, nil
 }
 
 func daemonStartGuardDecision(ctx context.Context, env chc.UserEnvironment) (chc.DaemonStartGuardDecision, error) {

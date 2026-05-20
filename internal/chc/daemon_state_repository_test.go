@@ -63,6 +63,31 @@ func TestDaemonStateRepositoryUpsertsGetsUpdatesAndClearsState(t *testing.T) {
 	}
 }
 
+func TestDaemonStateRepositoryRequestsStop(t *testing.T) {
+	repository := newTestDaemonStateRepository(t)
+	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
+	stopRequestedAt := startedAt.Add(time.Minute)
+	state := testDaemonState(startedAt)
+
+	if err := repository.UpsertDaemonState(context.Background(), state); err != nil {
+		t.Fatalf("UpsertDaemonState returned error: %v", err)
+	}
+
+	if err := repository.RequestDaemonStop(context.Background(), stopRequestedAt); err != nil {
+		t.Fatalf("RequestDaemonStop returned error: %v", err)
+	}
+
+	got, err := repository.GetDaemonState(context.Background())
+	if err != nil {
+		t.Fatalf("GetDaemonState after stop request returned error: %v", err)
+	}
+
+	state.Status = DaemonStatusStopping
+	state.StopRequestedAt = &stopRequestedAt
+	state.UpdatedAt = stopRequestedAt
+	assertDaemonState(t, got, state)
+}
+
 func TestDaemonStateRepositoryReturnsNotFound(t *testing.T) {
 	repository := newTestDaemonStateRepository(t)
 
@@ -74,6 +99,11 @@ func TestDaemonStateRepositoryReturnsNotFound(t *testing.T) {
 	err = repository.UpdateDaemonHeartbeat(context.Background(), time.Now().UTC())
 	if !errors.Is(err, ErrDaemonStateNotFound) {
 		t.Fatalf("UpdateDaemonHeartbeat error = %v, want ErrDaemonStateNotFound", err)
+	}
+
+	err = repository.RequestDaemonStop(context.Background(), time.Now().UTC())
+	if !errors.Is(err, ErrDaemonStateNotFound) {
+		t.Fatalf("RequestDaemonStop error = %v, want ErrDaemonStateNotFound", err)
 	}
 }
 

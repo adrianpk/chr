@@ -21,6 +21,7 @@ type DaemonStateRepository interface {
 	GetDaemonState(ctx context.Context) (DaemonState, error)
 	UpsertDaemonState(ctx context.Context, state DaemonState) error
 	UpdateDaemonHeartbeat(ctx context.Context, heartbeatAt time.Time) error
+	RequestDaemonStop(ctx context.Context, requestedAt time.Time) error
 	ClearDaemonState(ctx context.Context) error
 	Close() error
 }
@@ -110,6 +111,36 @@ func (r *sqliteDaemonStateRepository) UpdateDaemonHeartbeat(ctx context.Context,
 	affected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("inspect updated daemon heartbeat rows: %w", err)
+	}
+
+	if affected == 0 {
+		return ErrDaemonStateNotFound
+	}
+
+	return nil
+}
+
+func (r *sqliteDaemonStateRepository) RequestDaemonStop(ctx context.Context, requestedAt time.Time) error {
+	result, err := r.db.ExecContext(
+		ctx,
+		`UPDATE daemon_state
+SET status = ?, stop_requested_at = ?, updated_at = ?
+WHERE id = ? AND status IN (?, ?, ?)`,
+		string(DaemonStatusStopping),
+		formatProjectTime(requestedAt),
+		formatProjectTime(requestedAt),
+		daemonStateID,
+		string(DaemonStatusStarting),
+		string(DaemonStatusRunning),
+		string(DaemonStatusStopping),
+	)
+	if err != nil {
+		return fmt.Errorf("request daemon stop: %w", err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("inspect daemon stop request rows: %w", err)
 	}
 
 	if affected == 0 {

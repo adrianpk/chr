@@ -147,9 +147,23 @@ The foreground run:
 
 `--max-iterations` is required to be greater than zero and defaults to `1`.
 
-The foreground loop does not run as an OS service and does not observe stop
-requests yet. Graceful stop handling is delivered by the stop and stale recovery
-slice.
+The foreground loop does not run as an OS service.
+
+## Stop and Recovery
+
+`chc daemon stop` persists a stop request when daemon state is active.
+
+The command changes `starting`, `running`, or `stopping` state to `stopping` and
+sets `stop_requested_at`. If state is missing, the command reports the daemon as
+already stopped.
+
+The foreground run loop checks for stop requests between iterations and exits
+cleanly when one is present. Normal exit writes stopped daemon state.
+
+`chc daemon status` also recovers stale active state. When stored `starting`,
+`running`, or `stopping` state has not heartbeated within the stale threshold,
+status rewrites it as `stale` with a stale failure reason and prints the
+recovered state.
 
 ## Status Reporting
 
