@@ -21,7 +21,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Worker Contract Model | Delivered | `feat/codex-worker-slice-1-contract-model` | `feat(codex-worker-slice-1): contract model` | `.prj/reports/slices/codex-runtime-worker/slice-1-contract-model.md` | Repository PR #49. Naming corrected for later slices. |
-| Slice 2: Worker Context Materialization | Reviewing | `feat/slice-2-worker-context-materialization` | `feat(slice-2): worker context materialization` | `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md` | Write Codex input artifact. |
+| Slice 2: Worker Context Materialization | Reviewing | `feat/slice-2-worker-context-materialization` | `feat(slice-2): worker context materialization` | `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md` | Repository PR #50. |
 | Slice 3: Harness Worker Invocation | Planned | `feat/slice-3-harness-worker-invocation` | `feat(slice-3): harness worker invocation` | `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md` | Invoke worker through Docker harness. |
 | Slice 4: Result Envelope Changed Files | Planned | `feat/slice-4-result-changed-files` | `feat(slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Carry changed files through result JSON. |
 | Slice 5: Changed File Discovery | Planned | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Discover actual workspace changes. |
