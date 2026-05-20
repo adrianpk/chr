@@ -25,7 +25,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Project and Use-Case Document Context | Delivered | `feat/slice-3-context-project-documents` | `feat(slice-3): context project documents` | `.prj/reports/slices/ticket-execution-context-hardening/slice-3-context-project-documents.md` | Repository PR #80 merged. |
 | Slice 4: Tree and Search Context | Delivered | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Repository PR #81 merged. |
 | Slice 5: Go Graph Context Provider | Delivered | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | Repository PR #82 merged. |
-| Slice 6: Ralph Attempt Context | Planned | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Retry evidence. |
+| Slice 6: Ralph Attempt Context | Reviewing | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Retry evidence. |
 | Slice 7: Docker-Compatible Context Materialization | Planned | `feat/slice-7-context-docker-materialization` | `feat(slice-7): context docker materialization` | `.prj/reports/slices/ticket-execution-context-hardening/slice-7-context-docker-materialization.md` | Runtime artifact layout. |
 | Slice 8: Execution Readiness and Handoff | Planned | `feat/slice-8-context-readiness-handoff` | `feat(slice-8): context readiness handoff` | `.prj/reports/slices/ticket-execution-context-hardening/slice-8-context-readiness-handoff.md` | Readiness and evidence links. |
 
@@ -213,25 +213,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Load previous validation artifact.
-- [ ] Summarize failed commands and repeated failure signatures.
-- [ ] Include previous changed files and result status.
-- [ ] Render `previous-attempt.md`.
-- [ ] Link previous attempt context from the next `context.md`.
-- [ ] Keep conversation history out unless materialized as an artifact.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Load previous validation artifact.
+- [x] Summarize failed commands and repeated failure signatures.
+- [x] Include previous changed files and result status.
+- [x] Render `previous-attempt.md`.
+- [x] Link previous attempt context from the next `context.md`.
+- [x] Keep conversation history out unless materialized as an artifact.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
-- T6.8: pending
+- T6.1: `8328d87`
+- T6.2: `8328d87`
+- T6.3: `8328d87`
+- T6.4: `8328d87`
+- T6.5: `8328d87`
+- T6.6: `8328d87`
+- T6.7: `docs(slice-6): record ralph attempt report`
+- T6.8: `8328d87`
 
 ## Slice 7: Docker-Compatible Context Materialization
 
