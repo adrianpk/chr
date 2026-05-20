@@ -1,6 +1,6 @@
 # Codex Runtime Worker Slicing Plan
 
-Status: active
+Status: complete
 
 ## Purpose
 
@@ -33,16 +33,13 @@ Prerequisite delivered work:
 
 ## Current State
 
-Already delivered:
+Delivered:
 
 - project runtime configuration and Docker runtime planning;
 - Docker build/run command rendering;
 - ticket execution records and artifact paths;
 - execution result loading and validation;
-- result application back into ticket state.
-
-Still missing:
-
+- result application back into ticket state;
 - explicit Codex command contract inside the runtime container;
 - ticket and workspace context passed to the worker;
 - worker-owned structured result production;
@@ -88,7 +85,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Worker Contract Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-worker-contract-model`
 Expected PR title: `feat(slice-1): worker contract model`
@@ -113,7 +110,7 @@ Expected outcome:
 
 ### Slice 2: Worker Context Materialization
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-worker-context-materialization`
 Expected PR title: `feat(slice-2): worker context materialization`
@@ -136,7 +133,7 @@ Expected outcome:
 
 ### Slice 3: Harness Worker Invocation
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-harness-worker-invocation`
 Expected PR title: `feat(slice-3): harness worker invocation`
@@ -160,7 +157,7 @@ Expected outcome:
 
 ### Slice 4: Result Envelope Changed Files
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-result-changed-files`
 Expected PR title: `feat(slice-4): result changed files`
@@ -184,7 +181,7 @@ Expected outcome:
 
 ### Slice 5: Changed File Discovery
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-changed-file-discovery`
 Expected PR title: `feat(slice-5): changed file discovery`
@@ -209,7 +206,7 @@ Expected outcome:
 
 ### Slice 6: Post-Worker Validation
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-post-worker-validation`
 Expected PR title: `feat(slice-6): post worker validation`
@@ -234,7 +231,7 @@ Expected outcome:
 
 ### Slice 7: Worker Failure Classification and Docs
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-worker-failure-docs`
 Expected PR title: `feat(slice-7): worker failure classification and docs`
@@ -260,9 +257,11 @@ Expected outcome:
 
 ## Validation
 
-Each implementation slice must run targeted tests and `make verify`.
+Each implementation slice ran targeted tests and `make verify`.
 
-The completed slicing must run `make verify` after the final slice is merged.
+Completed slicing validation after the final slice merge:
+
+- `make verify`: pass.
 
 ## Risks
 
