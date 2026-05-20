@@ -144,7 +144,7 @@ Candidate tasks:
 - [x] Map result changed files into result application.
 - [x] Add focused result-loading tests.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -154,7 +154,7 @@ Task commits:
 - T4.4: `2305bc2` `feat(codex-worker): carry result changed files`
 - T4.5: `16e8c5f` `test(codex-worker): cover result changed files`
 - T4.6: `docs(codex-worker): document result changed files`
-- T4.7: pending
+- T4.7: `docs(codex-worker): record result changed files validation`
 
 ## Slice 5: Changed File Discovery
 

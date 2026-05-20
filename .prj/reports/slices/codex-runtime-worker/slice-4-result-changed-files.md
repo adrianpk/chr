@@ -1,6 +1,6 @@
 # Slice 4: Result Envelope Changed Files
 
-Status: reviewing
+Status: delivered
 Slicing: Codex Runtime Worker
 Plan: `.prj/plans/slicing-codex-runtime-worker-plan.md`
 Tracker: `.prj/trackers/slicing-codex-runtime-worker-tracker.md`
@@ -57,7 +57,7 @@ Updated core types:
 ## Validation
 
 - `go test ./internal/chc ./cmd/chc`: pass
-- `make verify`: pending
+- `make verify`: pass
 
 ## Risks and Follow-ups
 
