@@ -22,6 +22,7 @@ type RuntimePlan struct {
 	Mounts            []RuntimeMount
 	ArtifactDir       string
 	RunArtifactDir    string
+	WorkerContextPath string
 	ResultPath        string
 	LogPath           string
 	ValidationCommand string
@@ -67,6 +68,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		Mounts:            runtimeMounts(projectDir, config.Workdir),
 		ArtifactDir:       artifactDir,
 		RunArtifactDir:    runArtifactDir,
+		WorkerContextPath: filepath.Join(runArtifactDir, "context.md"),
 		ResultPath:        filepath.Join(runArtifactDir, "result.json"),
 		LogPath:           filepath.Join(runArtifactDir, "runtime.log"),
 		ValidationCommand: config.ValidationCommand,
