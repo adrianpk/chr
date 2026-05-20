@@ -21,6 +21,7 @@ It contains:
 
 - a deliberate backend bug: task IDs are reused after deletion;
 - a missing feature: marking a task as completed is not implemented;
+- direct proving objectives under `.chc/proving/objectives/`;
 - validation commands for compile, lint, and tests;
 - a hand-authored `.chc/runtime/agent/Dockerfile` for sandboxed agent work.
 

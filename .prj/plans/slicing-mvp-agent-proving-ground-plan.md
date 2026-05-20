@@ -81,7 +81,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Todolist Fixture Project
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-proving-ground-fixture`
 Expected PR title: `feat(slice-1): proving ground fixture`
@@ -110,7 +110,7 @@ Expected outcome:
 
 ### Slice 2: Direct Proving Objective Contract
 
-Status: planned.
+Status: in review.
 
 Expected branch: `feat/slice-2-proving-objective-contract`
 Expected PR title: `feat(slice-2): proving objective contract`
