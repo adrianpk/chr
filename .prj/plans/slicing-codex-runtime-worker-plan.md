@@ -90,8 +90,8 @@ They do not define this slicing's numbers.
 
 Status: planned.
 
-Expected branch: `feat/codex-worker-slice-1-contract-model`
-Expected PR title: `feat(codex-worker-slice-1): contract model`
+Expected branch: `feat/slice-1-worker-contract-model`
+Expected PR title: `feat(slice-1): worker contract model`
 Expected report: `.prj/reports/slices/codex-runtime-worker/slice-1-contract-model.md`
 
 Goal:
@@ -115,8 +115,8 @@ Expected outcome:
 
 Status: planned.
 
-Expected branch: `feat/codex-worker-slice-2-context-materialization`
-Expected PR title: `feat(codex-worker-slice-2): context materialization`
+Expected branch: `feat/slice-2-worker-context-materialization`
+Expected PR title: `feat(slice-2): worker context materialization`
 Expected report: `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md`
 
 Goal:
@@ -138,8 +138,8 @@ Expected outcome:
 
 Status: planned.
 
-Expected branch: `feat/codex-worker-slice-3-harness-invocation`
-Expected PR title: `feat(codex-worker-slice-3): harness invocation`
+Expected branch: `feat/slice-3-harness-worker-invocation`
+Expected PR title: `feat(slice-3): harness worker invocation`
 Expected report: `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md`
 
 Goal:
@@ -162,8 +162,8 @@ Expected outcome:
 
 Status: planned.
 
-Expected branch: `feat/codex-worker-slice-4-result-changed-files`
-Expected PR title: `feat(codex-worker-slice-4): result changed files`
+Expected branch: `feat/slice-4-result-changed-files`
+Expected PR title: `feat(slice-4): result changed files`
 Expected report: `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md`
 
 Goal:
@@ -186,8 +186,8 @@ Expected outcome:
 
 Status: planned.
 
-Expected branch: `feat/codex-worker-slice-5-changed-file-discovery`
-Expected PR title: `feat(codex-worker-slice-5): changed file discovery`
+Expected branch: `feat/slice-5-changed-file-discovery`
+Expected PR title: `feat(slice-5): changed file discovery`
 Expected report: `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md`
 
 Goal:
@@ -211,8 +211,8 @@ Expected outcome:
 
 Status: planned.
 
-Expected branch: `feat/codex-worker-slice-6-post-worker-validation`
-Expected PR title: `feat(codex-worker-slice-6): post worker validation`
+Expected branch: `feat/slice-6-post-worker-validation`
+Expected PR title: `feat(slice-6): post worker validation`
 Expected report: `.prj/reports/slices/codex-runtime-worker/slice-6-post-worker-validation.md`
 
 Goal:
@@ -236,8 +236,8 @@ Expected outcome:
 
 Status: planned.
 
-Expected branch: `feat/codex-worker-slice-7-failure-docs`
-Expected PR title: `feat(codex-worker-slice-7): failure classification and docs`
+Expected branch: `feat/slice-7-worker-failure-docs`
+Expected PR title: `feat(slice-7): worker failure classification and docs`
 Expected report: `.prj/reports/slices/codex-runtime-worker/slice-7-failure-docs.md`
 
 Goal:
