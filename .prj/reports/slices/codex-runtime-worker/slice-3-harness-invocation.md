@@ -1,6 +1,6 @@
 # Slice 3: Harness Worker Invocation
 
-Status: reviewing
+Status: delivered
 Slicing: Codex Runtime Worker
 Plan: `.prj/plans/slicing-codex-runtime-worker-plan.md`
 Tracker: `.prj/trackers/slicing-codex-runtime-worker-tracker.md`
@@ -60,7 +60,7 @@ Updated behavior:
 ## Validation
 
 - `go test ./internal/chc ./cmd/chc`: pass
-- `make verify`: pending
+- `make verify`: pass
 
 ## Risks and Follow-ups
 

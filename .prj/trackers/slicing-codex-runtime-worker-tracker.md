@@ -112,7 +112,7 @@ Candidate tasks:
 - [x] Keep command construction side-effect free.
 - [x] Add focused invocation tests.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -122,7 +122,7 @@ Task commits:
 - T3.4: `2803e96` `feat(codex-worker): invoke worker through harness`
 - T3.5: `42f8037` `test(codex-worker): cover harness worker invocation`
 - T3.6: `docs(codex-worker): document harness worker invocation`
-- T3.7: pending
+- T3.7: `docs(codex-worker): record harness worker invocation validation`
 
 ## Slice 4: Result Envelope Changed Files
 
