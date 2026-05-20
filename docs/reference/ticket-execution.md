@@ -125,6 +125,7 @@ The run environment includes:
 - `CHC_RESULT_PATH`;
 - `CHC_LOG_PATH`.
 - `CHC_VALIDATION_PATH`.
+- `OPENAI_API_KEY`, inherited by name when present.
 
 Runtime artifact paths are scoped by ticket key and execution ID when both are
 available:
@@ -153,7 +154,7 @@ The worker command requires:
 The command invokes:
 
 ```sh
-codex exec --skip-git-repo-check --full-auto < "$CHC_WORKER_CONTEXT_PATH"
+codex exec --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox < "$CHC_WORKER_CONTEXT_PATH"
 ```
 
 The runtime image must provide:
@@ -162,6 +163,10 @@ The runtime image must provide:
 - the `codex` executable on `PATH`;
 - access to any credentials or configuration required by `codex exec`;
 - the project workspace mounted at the configured container workdir.
+
+The Docker runtime is the sandbox boundary. The Codex worker disables Codex's
+inner sandbox because nested namespace creation is not available in all runtime
+containers.
 
 The rendered command exports these environment variables for the worker process:
 
@@ -172,6 +177,7 @@ The rendered command exports these environment variables for the worker process:
 - `CHC_RESULT_PATH`;
 - `CHC_LOG_PATH`;
 - `CHC_VALIDATION_PATH`.
+- `OPENAI_API_KEY`, inherited by name when present.
 
 The worker command renderer does not execute Codex, run Docker, create context
 files, or write result artifacts. Later slices are responsible for context

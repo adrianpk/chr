@@ -71,8 +71,11 @@ Candidate implementation themes:
 - richer worker context materialization;
 - ticket readiness checks;
 - document reference loading;
-- code context selection and summarization;
-- `gograph` or Go AST integration;
+- code context selection and summarization through `gograph` CLI first;
+- optional `gograph --precise` mode for compiling repositories and risky
+  changes;
+- later `gopls`/LSP support only if graph-based context is not enough;
+- Tree-sitter support only when multi-language parsing becomes necessary;
 - Ralph Loop attempt records and stop rules;
 - evidence aggregation for ticket and PR handoff.
 

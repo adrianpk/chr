@@ -22,6 +22,128 @@ reproducible execution context.
 
 Ticket execution context is built from stable layers to specific layers.
 
+## Context Source Inventory
+
+The context composer should treat these sources as the initial full inventory
+before pruning:
+
+- agent identity and role definition;
+- root `AGENTS.md` and nested `AGENTS.md` files that apply to the execution
+  path;
+- project-local `.chc/` configuration, tickets, runtime assets, and workflow
+  documents;
+- project-local documentation and conventions;
+- ticket use-case documents, including related specs, drafts, plans, trackers,
+  dumps, and quizzes;
+- filesystem tree output for orientation;
+- text search over source, tests, docs, and `.chc/`;
+- selected `gograph` query output for Go code context;
+- validation commands and expected completion signals;
+- current execution attempt metadata;
+- previous Ralph Loop attempt artifacts when retrying;
+- output contract and evidence paths.
+
+The inventory is intentionally broader than the prompt budget. The composer
+should collect enough source material to decide what matters, then prune,
+summarize, and materialize only the context required for the current ticket.
+
+Conversation history is not an implicit Ralph Loop input. If prior discussion
+is relevant, it must first be captured into a durable dump, draft, spec, ticket
+comment, or execution artifact and then included through the normal source
+inventory.
+
+## Docker Runtime Compatibility
+
+The context composer must remain compatible with the existing Docker runtime
+boundary.
+
+`chc` should compose context on the host side before Docker execution. The
+runtime container should receive the result through the existing mounted
+workspace and artifact paths:
+
+- `CHC_WORKER_CONTEXT_PATH` points to the materialized `context.md`;
+- `CHC_TICKET_PATH` points to the ticket or direct objective;
+- `CHC_RESULT_PATH` points to the result envelope;
+- `CHC_LOG_PATH` points to the agent log;
+- `CHC_VALIDATION_PATH` points to validation evidence.
+
+Additional composer outputs should live under the execution artifact directory,
+for example:
+
+```text
+<run_artifact_dir>/context.md
+<run_artifact_dir>/context/
+  agent.md
+  project.md
+  protocols.md
+  documents.md
+  code-context.md
+  previous-attempt.md
+  source-inventory.md
+```
+
+The worker should be able to solve the ticket by reading `context.md` first and
+following references to sibling context artifacts when needed.
+
+The first implementation should not require the container to run `chc` or build
+context internally. Running context composition outside the container keeps
+workflow policy, pruning, source selection, and secret handling under `chc`
+control.
+
+## Per-Execution Context Package
+
+The default model is to generate a fresh context package for each execution or
+Ralph Loop attempt.
+
+Each Docker run should receive context tailored to the ticket, project state,
+attempt number, validation history, and selected code context it is about to
+work on. This may repeat some work across executions, but it keeps the behavior
+simple, auditable, and easy to reason about.
+
+Invariant context may later be cached or precomputed as appendable partials,
+for example:
+
+- stable agent identity;
+- stable project conventions;
+- applicable `AGENTS.md` hierarchy;
+- stable `.chc/` workflow descriptions;
+- stable project identity and ownership metadata.
+
+Those partials are an optimization, not the initial contract. The first
+implementation should materialize the full execution context package explicitly
+for each run and record enough provenance to show which sources were included.
+
+### Invariant and Fresh Context
+
+The composer should distinguish between context that is expected to be stable
+across many executions and context that should be regenerated for each
+execution.
+
+Invariant or cacheable context includes:
+
+- agent identity and operating stance;
+- project identity;
+- project conventions;
+- applicable `AGENTS.md` hierarchy;
+- stable `.chc/` workflow descriptions;
+- default validation policy;
+- repository-level documentation that changes rarely.
+
+Fresh per-execution context includes:
+
+- selected ticket or objective;
+- ticket use-case documents and references;
+- current filesystem tree;
+- current text-search results;
+- current `gograph` build and selected query output;
+- current git status and dirty-worktree state;
+- current validation commands and recent validation failures;
+- current Ralph Loop attempt number and previous attempt evidence.
+
+The initial implementation may recompute everything for clarity. Later
+implementations can cache invariant partials and append them to fresh execution
+context when their source fingerprints still match.
+
 ### Agent Runtime Layer
 
 This layer defines how the agent runs.
@@ -40,6 +162,26 @@ It includes:
 
 This layer answers: how does the agent execute?
 
+### Agent Identity Layer
+
+This layer defines who the agent is expected to be during execution.
+
+It includes:
+
+- role and operating stance;
+- domain expectations;
+- engineering quality bar;
+- language and documentation rules;
+- allowed autonomy;
+- reporting expectations;
+- forbidden behaviors.
+
+For Go project execution, the default agent identity should present the worker
+as a senior software engineer with strong Go, testing, infrastructure, and
+repository hygiene skills. The identity should be specific enough to guide
+behavior but should not replace ticket acceptance criteria or project-local
+instructions.
+
 ### Project Layer
 
 This layer defines where the agent works.
@@ -54,6 +196,9 @@ It includes:
 - user-level project registry;
 - ticket index;
 - workspace mounting rules.
+- applicable `AGENTS.md` instructions;
+- project-local `.chc/` workflow and runtime assets;
+- project conventions, docs, and validation commands.
 
 This layer answers: which managed project and workspace are being operated on?
 
@@ -80,6 +225,11 @@ It includes:
 - document references.
 
 This layer answers: what concrete work should be attempted?
+
+Ticket references may point to specs, drafts, plans, trackers, dumps, quizzes,
+or other project documents. The composer should include these references when
+they define the use case, acceptance criteria, constraints, or domain language
+needed to resolve the ticket.
 
 ### Execution Layer
 
@@ -112,6 +262,9 @@ This layer describes relevant repository code.
 
 It may include:
 
+- selected filesystem tree output;
+- selected text search results;
+- selected `gograph` query output;
 - files and directories likely related to the ticket;
 - packages and symbols;
 - APIs and command surfaces;
@@ -151,6 +304,8 @@ A materialized context artifact may contain:
 - Ralph Loop policy;
 - sandbox constraints;
 - output contract.
+- previous attempt summary when retrying;
+- validation failure details when retrying.
 
 The context builder may support verbosity modes:
 

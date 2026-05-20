@@ -6,6 +6,7 @@ Sources:
 
 - `/home/adrian/Downloads/context_composition_and_document_transitions.md`
 - `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `https://www.bytesizego.com/blog/gograph-a-go-cli-that-parses-your-codebase-for-ai-agents`
 
 ## Purpose
 
@@ -46,7 +47,7 @@ Text search is useful for:
 
 Text search is fast and should remain a first-pass tool.
 
-### AST and Syntax Trees
+### Go AST and Syntax Trees
 
 AST-based extraction can identify:
 
@@ -62,7 +63,12 @@ For Go code, the standard `go/ast`, `go/parser`, and `go/types` packages can
 support this layer. For package-level loading with types and module context,
 `golang.org/x/tools/go/packages` is the likely integration point.
 
-Tree-sitter remains useful if multi-language parsing becomes necessary.
+For Go repositories, this should be the primary syntax layer. Tree-sitter is
+not required for the initial Go implementation.
+
+Tree-sitter remains useful if multi-language parsing becomes necessary. It
+should be treated as a later multi-language capability, not as a dependency for
+the first Go context composer.
 
 ### LSP and `gopls`
 
@@ -77,9 +83,13 @@ Tree-sitter remains useful if multi-language parsing becomes necessary.
 This is useful when the repository shape is complex or when type-aware answers
 are required quickly.
 
+`gopls` should not be part of the first context composer implementation. It
+adds lifecycle, cache, workspace, and versioning concerns that are not needed
+until the simpler graph-based path has been proven.
+
 ### `gograph`
 
-`gograph` is a candidate code graph context provider.
+`gograph` is the preferred first code graph context provider for Go projects.
 
 It can help answer:
 
@@ -89,9 +99,47 @@ It can help answer:
 - what tests touch a package or function;
 - what changes may be impacted by a target edit.
 
-`gograph` may be used through a CLI or MCP integration. The CLI path is simpler
-as an initial integration; MCP may be useful when agent tooling needs direct
-interactive graph queries.
+`gograph` should be integrated through the CLI first. The initial integration
+should run `gograph build .` before execution, then query focused context rather
+than embedding the full graph in the prompt.
+
+Useful initial commands include:
+
+- `gograph context <symbol>`;
+- `gograph source <symbol>`;
+- `gograph callers <symbol>`;
+- `gograph callees <symbol>`;
+- `gograph tests <symbol-or-package>`;
+- `gograph deps <package>`;
+- `gograph changes`;
+- `gograph hotspot --top 20`.
+
+The default build mode should be the fast AST path because it can tolerate an
+incomplete or actively edited repository. `gograph build . --precise` should be
+reserved for cases where the repository compiles and the ticket needs stronger
+type, interface, or callgraph answers.
+
+The generated graph and reports are context infrastructure. They help the
+agent know where to look; they do not replace source files, tests, or
+validation commands.
+
+MCP integration may be useful later when agent tooling needs direct interactive
+graph queries. It is not required for the first implementation.
+
+## Initial Integration Decision
+
+The first Go semantic context implementation should use:
+
+- `gograph` CLI as the primary context provider;
+- fast `gograph build .` by default;
+- optional `gograph build . --precise` for compiling repositories and risky
+  changes;
+- selected query output materialized into execution artifacts;
+- no Tree-sitter dependency;
+- no LSP or `gopls` daemon dependency.
+
+This keeps the context composer simple while reducing repeated repository
+rediscovery across independent Codex executions and Ralph Loop attempts.
 
 ## When to Query Semantic Context
 
@@ -151,6 +199,13 @@ The context builder should prefer:
 - tests that assert the relevant behavior;
 - links or paths when full content is not needed.
 
+The builder should not pass the entire `.gograph/graph.json` to Codex by
+default. It should pass targeted query output plus paths and provenance.
+
+Across Ralph Loop attempts, the builder should reuse or refresh the graph and
+materialize attempt-specific code context artifacts instead of forcing each
+agent invocation to rediscover the repository from scratch.
+
 ## Source of Truth
 
 Semantic tools are not the source of truth.
@@ -161,7 +216,7 @@ incomplete, or misleading.
 
 ## Open Questions
 
-- Should `gograph` be integrated as a CLI first or as MCP first?
 - Which AST extraction output format should become durable artifact data?
 - How should code context be cached between Ralph Loop iterations?
 - What maximum context budget should apply before pruning begins?
+- Which tickets should trigger `gograph build . --precise` automatically?
