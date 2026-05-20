@@ -220,6 +220,15 @@ Envelope fields:
 - `ticket_key`: selected ticket key.
 - `status`: `succeeded` or `failed`.
 - `summary`: human-readable result summary.
+- `changed_files`: optional list of changed file objects.
+
+Changed file objects contain:
+
+- `path`: workspace-relative changed file path.
+- `summary`: optional concise change summary.
+
+Changed file paths must be relative to the workspace. Absolute paths and paths
+that escape the workspace are rejected.
 
 The runner reads the result artifact after the harness commands complete. A
 missing result file, malformed JSON, invalid status, mismatched execution ID, or

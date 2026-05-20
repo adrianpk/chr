@@ -23,7 +23,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 1: Worker Contract Model | Delivered | `feat/codex-worker-slice-1-contract-model` | `feat(codex-worker-slice-1): contract model` | `.prj/reports/slices/codex-runtime-worker/slice-1-contract-model.md` | Repository PR #49. Naming corrected for later slices. |
 | Slice 2: Worker Context Materialization | Delivered | `feat/slice-2-worker-context-materialization` | `feat(slice-2): worker context materialization` | `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md` | Repository PR #50. |
 | Slice 3: Harness Worker Invocation | Delivered | `feat/slice-3-harness-worker-invocation` | `feat(slice-3): harness worker invocation` | `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md` | Repository PR #51. |
-| Slice 4: Result Envelope Changed Files | Planned | `feat/slice-4-result-changed-files` | `feat(slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Carry changed files through result JSON. |
+| Slice 4: Result Envelope Changed Files | Reviewing | `feat/slice-4-result-changed-files` | `feat(slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Carry changed files through result JSON. |
 | Slice 5: Changed File Discovery | Planned | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Discover actual workspace changes. |
 | Slice 6: Post-Worker Validation | Planned | `feat/slice-6-post-worker-validation` | `feat(slice-6): post worker validation` | `.prj/reports/slices/codex-runtime-worker/slice-6-post-worker-validation.md` | Validate after Codex edits. |
 | Slice 7: Worker Failure Classification and Docs | Planned | `feat/slice-7-worker-failure-docs` | `feat(slice-7): worker failure classification and docs` | `.prj/reports/slices/codex-runtime-worker/slice-7-failure-docs.md` | Document and classify worker failures. |
@@ -138,22 +138,22 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Extend execution result types with changed files.
-- [ ] Preserve strict JSON decoding.
-- [ ] Validate changed-file paths and summaries.
-- [ ] Map result changed files into result application.
-- [ ] Add focused result-loading tests.
-- [ ] Add slice implementation report.
+- [x] Extend execution result types with changed files.
+- [x] Preserve strict JSON decoding.
+- [x] Validate changed-file paths and summaries.
+- [x] Map result changed files into result application.
+- [x] Add focused result-loading tests.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
+- T4.1: `2305bc2` `feat(codex-worker): carry result changed files`
+- T4.2: `2305bc2` `feat(codex-worker): carry result changed files`
+- T4.3: `2305bc2` `feat(codex-worker): carry result changed files`
+- T4.4: `2305bc2` `feat(codex-worker): carry result changed files`
+- T4.5: `16e8c5f` `test(codex-worker): cover result changed files`
+- T4.6: `docs(codex-worker): document result changed files`
 - T4.7: pending
 
 ## Slice 5: Changed File Discovery

@@ -103,6 +103,10 @@ written.
 
 Blocked reason section content is handled by another writer.
 
+Changed files can come from the structured execution result envelope or from
+explicit result application options. Execution-result changed files are mapped
+into the same result application changed-file contract used by the writer.
+
 ## Blocked Reason Writer
 
 The blocked reason writer prepends one entry to the ticket `# Blocker` section

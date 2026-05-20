@@ -31,6 +31,7 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 		"- log_path: /workspace/.chc/runtime/runs/CHC-1/exec-1/runtime.log",
 		"- validation_path: /workspace/.chc/runtime/runs/CHC-1/exec-1/validation.log",
 		"- `status`: `succeeded` or `failed`.",
+		"- `changed_files`: optional list of workspace-relative changed file summaries.",
 	} {
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("content does not contain %q:\n%s", want, string(content))
