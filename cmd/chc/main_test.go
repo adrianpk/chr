@@ -521,6 +521,148 @@ func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 	}
 }
 
+func TestTicketLoopHonorsMaxIterations(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", testLoopTicket(
+		"CHC-2", "Ready backend", "ready", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"loop",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--max-iterations",
+		"1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket loop returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"status: succeeded",
+		"eligible: 1",
+		"processed: 1",
+		"execution: exec-",
+		"CHC-1",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	if strings.Contains(stdout.String(), "CHC-2") {
+		t.Fatalf("stdout contains execution beyond max iterations:\n%s", stdout.String())
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
+	if len(records) != 0 {
+		t.Fatalf("CHC-2 execution records = %d, want 0", len(records))
+	}
+}
+
+func TestTicketLoopCompletesWithNoEligibleTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	executor := installFakeTicketStartHarnessExecutor(t, nil)
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Open.md", testLoopTicket(
+		"CHC-1", "Open frontend", "open", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"loop",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket loop returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"status: succeeded",
+		"eligible: 0",
+		"processed: 0",
+		"blocked: 0",
+		"failed: 0",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	if len(executor.commands) != 0 {
+		t.Fatalf("commands = %#v, want no ticket execution", executor.commands)
+	}
+}
+
+func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	executor := installFakeTicketStartHarnessExecutor(t, nil)
+	executor.failWorker = true
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", testLoopTicket(
+		"CHC-2", "Ready backend", "ready", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"loop",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket loop returned nil error")
+	}
+
+	if strings.Contains(stdout.String(), "CHC-2") {
+		t.Fatalf("stdout contains execution after failure:\n%s", stdout.String())
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
+	if len(records) != 0 {
+		t.Fatalf("CHC-2 execution records = %d, want 0", len(records))
+	}
+
+	loopRuns := listProjectLoopRuns(t, devRoot, projectID(projectDir))
+	if len(loopRuns) != 1 {
+		t.Fatalf("loop runs = %d, want 1", len(loopRuns))
+	}
+
+	if loopRuns[0].Status != chc.LoopRunStatusFailed || loopRuns[0].FailedCount != 1 {
+		t.Fatalf("loop run = %#v, want failed with one failed ticket", loopRuns[0])
+	}
+}
+
 func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -1923,9 +2065,10 @@ func testTicket() chc.Ticket {
 }
 
 type fakeTicketStartHarnessExecutor struct {
-	commands   []string
-	err        error
-	failWorker bool
+	commands       []string
+	err            error
+	failWorker     bool
+	resultStatuses map[string]chc.ExecutionResultStatus
 }
 
 func (e *fakeTicketStartHarnessExecutor) Run(
@@ -1949,7 +2092,7 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 		return chc.NewExecutionFailure(chc.ExecutionFailureHarness, fmt.Errorf("codex failed"))
 	}
 
-	if err := writeFakeTicketStartResult(command); err != nil {
+	if err := e.writeFakeTicketStartResult(command); err != nil {
 		return err
 	}
 
@@ -1960,7 +2103,7 @@ func isFakeTicketStartWorkerCommand(command chc.HarnessCommand) bool {
 	return command.Args[0] == "run" && harnessEnvValue(command, "CHC_RESULT_PATH") != ""
 }
 
-func writeFakeTicketStartResult(command chc.HarnessCommand) error {
+func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command chc.HarnessCommand) error {
 	if command.Args[0] != "run" {
 		return nil
 	}
@@ -1970,9 +2113,16 @@ func writeFakeTicketStartResult(command chc.HarnessCommand) error {
 		return nil
 	}
 
+	status := chc.ExecutionResultStatusSucceeded
+	ticketKey := harnessEnvValue(command, "CHC_TICKET_KEY")
+
+	if configured, ok := e.resultStatuses[ticketKey]; ok {
+		status = configured
+	}
+
 	content := `{"execution_id":"` + harnessEnvValue(command, "CHC_EXECUTION_ID") +
-		`","ticket_key":"` + harnessEnvValue(command, "CHC_TICKET_KEY") +
-		`","status":"succeeded","summary":"done"}`
+		`","ticket_key":"` + ticketKey +
+		`","status":"` + string(status) + `","summary":"done"}`
 
 	return os.WriteFile(containerPathToProjectPath(command, resultPath), []byte(content), 0o644)
 }

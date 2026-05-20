@@ -99,6 +99,7 @@ Supported preview flags:
 - `--type`;
 - `--use-case`;
 - `--order`.
+- `--max-iterations`.
 
 The preview command does not create loop records, create execution records,
 invoke the runtime worker, apply results, or mutate ticket files.
@@ -115,7 +116,16 @@ The foreground loop reuses:
 - execution result capture;
 - ticket result application.
 
-The loop does not yet expose configurable stop conditions or thresholds.
+Loop stop conditions:
+
+- no eligible tickets completes the run with zero processed tickets;
+- `--max-iterations` caps how many eligible tickets are attempted;
+- the first blocked ticket result stops the run and marks the loop blocked;
+- the first execution failure stops the run and marks the loop failed;
+- duplicate ticket keys in one selected run are attempted only once.
+
+When `--max-iterations` is zero or omitted, the loop uses every selected
+eligible ticket until another stop condition is reached.
 
 ## Loop Run Records
 

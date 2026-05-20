@@ -651,6 +651,10 @@ func ticketLoopFlags() []cli.Flag {
 			Name:  "order",
 			Usage: "ticket order: key, created_at, priority, severity, priority_severity",
 		},
+		&cli.IntFlag{
+			Name:  "max-iterations",
+			Usage: "maximum tickets to execute in one loop run",
+		},
 	)
 }
 
@@ -768,6 +772,10 @@ type ticketLoopExecutionResult struct {
 	Record       chc.LoopRunRecord
 	Executions   []chc.ExecutionRecord
 	Applications []chc.ResultApplication
+}
+
+type ticketLoopRunOptions struct {
+	MaxIterations int
 }
 
 var newTicketStartHarnessExecutor = func() chc.HarnessExecutor {
@@ -899,10 +907,17 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 
 	queryOptions := ticketLoopQueryOptionsFromCommand(cmd, projectContext.ProjectID)
 
+	runOptions, err := ticketLoopRunOptionsFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
 	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
 	if err != nil {
 		return err
 	}
+
+	tickets = ticketsForTicketLoopRun(tickets, runOptions)
 
 	if !cmd.Bool("dry-run") {
 		result, err := runTicketLoopExecution(ctx, env, projectContext, tickets)
@@ -930,6 +945,37 @@ func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) chc.T
 		},
 		Order: chc.TicketLoopOrder(cmd.String("order")),
 	}
+}
+
+func ticketLoopRunOptionsFromCommand(cmd *cli.Command) (ticketLoopRunOptions, error) {
+	opts := ticketLoopRunOptions{
+		MaxIterations: cmd.Int("max-iterations"),
+	}
+	if opts.MaxIterations < 0 {
+		return ticketLoopRunOptions{}, fmt.Errorf("max-iterations must be greater than or equal to zero")
+	}
+
+	return opts, nil
+}
+
+func ticketsForTicketLoopRun(tickets []chc.IndexedTicket, opts ticketLoopRunOptions) []chc.IndexedTicket {
+	selected := make([]chc.IndexedTicket, 0, len(tickets))
+	seen := map[string]struct{}{}
+
+	for _, ticket := range tickets {
+		if _, ok := seen[ticket.Key]; ok {
+			continue
+		}
+
+		seen[ticket.Key] = struct{}{}
+		selected = append(selected, ticket)
+
+		if opts.MaxIterations > 0 && len(selected) >= opts.MaxIterations {
+			break
+		}
+	}
+
+	return selected
 }
 
 func printTicketLoopPlan(
@@ -1004,6 +1050,8 @@ func runTicketLoopExecution(
 	for _, ticket := range tickets {
 		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket)
 		if err != nil {
+			record.FailedCount++
+
 			record = failLoopRunRecord(record, err)
 			if updateErr := repository.UpdateLoopRun(ctx, record); updateErr != nil {
 				return ticketLoopExecutionResult{}, updateErr
@@ -1018,6 +1066,8 @@ func runTicketLoopExecution(
 		record.ProcessedCount++
 		if application.TicketStatus == chc.TicketResultStatusBlocked {
 			record.BlockedCount++
+
+			break
 		}
 	}
 
@@ -1075,7 +1125,12 @@ func newRunningLoopRunRecord(projectID string, eligibleCount int) chc.LoopRunRec
 
 func finishLoopRunRecord(record chc.LoopRunRecord) chc.LoopRunRecord {
 	finishedAt := time.Now().UTC()
+
 	record.Status = chc.LoopRunStatusSucceeded
+	if record.BlockedCount > 0 {
+		record.Status = chc.LoopRunStatusBlocked
+	}
+
 	record.FinishedAt = &finishedAt
 	record.UpdatedAt = finishedAt
 

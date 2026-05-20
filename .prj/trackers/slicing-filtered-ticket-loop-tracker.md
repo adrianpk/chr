@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 4: Loop Command Skeleton | Delivered | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Repository PR #59. |
 | Slice 5: Loop Run Records | Delivered | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Repository PR #60. |
 | Slice 6: Repeated Ticket Execution | Delivered | `feat/slice-6-repeated-ticket-execution` | `feat(slice-6): repeated ticket execution` | `.prj/reports/slices/filtered-ticket-loop/slice-6-repeated-ticket-execution.md` | Repository PR #61. |
-| Slice 7: Stop Conditions and Thresholds | Planned | `feat/slice-7-stop-conditions` | `feat(slice-7): stop conditions` | `.prj/reports/slices/filtered-ticket-loop/slice-7-stop-conditions.md` | Terminate safely. |
+| Slice 7: Stop Conditions and Thresholds | In Review | `feat/slice-7-stop-conditions` | `feat(slice-7): stop conditions` | `.prj/reports/slices/filtered-ticket-loop/slice-7-stop-conditions.md` | Terminate safely. |
 | Slice 8: Loop Status Reporting | Planned | `feat/slice-8-loop-status-reporting` | `feat(slice-8): loop status reporting` | `.prj/reports/slices/filtered-ticket-loop/slice-8-loop-status-reporting.md` | Summarize loop outcome. |
 
 ## Slice 1: Eligible Ticket Query
@@ -233,13 +233,13 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add max-iteration threshold.
-- [ ] Add no-eligible-ticket completion.
-- [ ] Stop on blocker or execution failure.
-- [ ] Avoid repeated attempts on the same ticket in one run.
-- [ ] Add focused stop-condition tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add max-iteration threshold.
+- [x] Add no-eligible-ticket completion.
+- [x] Stop on blocker or execution failure.
+- [x] Avoid repeated attempts on the same ticket in one run.
+- [x] Add focused stop-condition tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
