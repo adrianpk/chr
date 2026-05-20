@@ -47,6 +47,7 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	}
 
 	assertTableExists(t, db, "projects")
+	assertTableExists(t, db, "loop_runs")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -103,6 +104,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260519000003-create_execution_records.sql": {
 			Data: []byte(testCreateExecutionRecordsMigration()),
+		},
+		"assets/migration/sqlite/20260520000004-create_loop_runs.sql": {
+			Data: []byte(testCreateLoopRunsMigration()),
 		},
 	}
 }
@@ -207,6 +211,35 @@ ON execution_records (project_id, status);
 
 -- +migrate Down
 DROP TABLE IF EXISTS execution_records;
+`
+}
+
+func testCreateLoopRunsMigration() string {
+	return `-- +migrate Up
+CREATE TABLE loop_runs (
+    id text PRIMARY KEY,
+    project_id text NOT NULL,
+    status text NOT NULL,
+    eligible_count integer NOT NULL,
+    processed_count integer NOT NULL,
+    blocked_count integer NOT NULL,
+    failed_count integer NOT NULL,
+    failure_reason text NOT NULL,
+    created_at text NOT NULL,
+    started_at text,
+    finished_at text,
+    updated_at text NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX loop_runs_project_status_idx
+ON loop_runs (project_id, status);
+
+CREATE INDEX loop_runs_project_created_idx
+ON loop_runs (project_id, created_at);
+
+-- +migrate Down
+DROP TABLE IF EXISTS loop_runs;
 `
 }
 

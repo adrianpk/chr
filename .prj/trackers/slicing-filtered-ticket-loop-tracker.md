@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 2: Loop Filters | Delivered | `feat/slice-2-loop-filters` | `feat(slice-2): loop filters` | `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md` | Repository PR #57. |
 | Slice 3: Loop Ordering | Delivered | `feat/slice-3-loop-ordering` | `feat(slice-3): loop ordering` | `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md` | Repository PR #58. |
 | Slice 4: Loop Command Skeleton | Delivered | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Repository PR #59. |
-| Slice 5: Loop Run Records | Planned | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Persist loop metadata. |
+| Slice 5: Loop Run Records | In Review | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Persist loop metadata. |
 | Slice 6: Repeated Ticket Execution | Planned | `feat/slice-6-repeated-ticket-execution` | `feat(slice-6): repeated ticket execution` | `.prj/reports/slices/filtered-ticket-loop/slice-6-repeated-ticket-execution.md` | Reuse single-ticket execution. |
 | Slice 7: Stop Conditions and Thresholds | Planned | `feat/slice-7-stop-conditions` | `feat(slice-7): stop conditions` | `.prj/reports/slices/filtered-ticket-loop/slice-7-stop-conditions.md` | Terminate safely. |
 | Slice 8: Loop Status Reporting | Planned | `feat/slice-8-loop-status-reporting` | `feat(slice-8): loop status reporting` | `.prj/reports/slices/filtered-ticket-loop/slice-8-loop-status-reporting.md` | Summarize loop outcome. |
@@ -169,23 +169,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add loop run model.
-- [ ] Add SQLite migration and repository.
-- [ ] Track lifecycle status and timestamps.
-- [ ] Link loop runs to project IDs.
-- [ ] Add repository tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add loop run model.
+- [x] Add SQLite migration and repository.
+- [x] Track lifecycle status and timestamps.
+- [x] Link loop runs to project IDs.
+- [x] Add repository tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
+- T5.1: `feat(slice-5): loop run records`
+- T5.2: `feat(slice-5): loop run records`
+- T5.3: `feat(slice-5): loop run records`
+- T5.4: `feat(slice-5): loop run records`
+- T5.5: `feat(slice-5): loop run records`
+- T5.6: `feat(slice-5): loop run records`
+- T5.7: `feat(slice-5): loop run records`
 
 ## Slice 6: Repeated Ticket Execution
 

@@ -1,0 +1,275 @@
+package chc
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"time"
+
+	_ "modernc.org/sqlite"
+)
+
+var ErrLoopRunNotFound = errors.New("loop run not found")
+
+type LoopRunRepository interface {
+	CreateLoopRun(ctx context.Context, record LoopRunRecord) error
+	UpdateLoopRun(ctx context.Context, record LoopRunRecord) error
+	GetLoopRun(ctx context.Context, id string) (LoopRunRecord, error)
+	ListProjectLoopRuns(ctx context.Context, projectID string) ([]LoopRunRecord, error)
+	Close() error
+}
+
+type sqliteLoopRunRepository struct {
+	db *sql.DB
+}
+
+func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (LoopRunRepository, error) {
+	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+		return nil, fmt.Errorf("create user data directory: %w", err)
+	}
+
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	if err != nil {
+		return nil, fmt.Errorf("open loop run database: %w", err)
+	}
+
+	db.SetMaxOpenConns(1)
+
+	repository, err := NewLoopRunRepositoryFromDB(ctx, db, assetsFS)
+	if err != nil {
+		return nil, closeDBWithError(db, err)
+	}
+
+	return repository, nil
+}
+
+func NewLoopRunRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (LoopRunRepository, error) {
+	migrator := NewMigrator(assetsFS)
+	if err := migrator.Migrate(ctx, db); err != nil {
+		return nil, fmt.Errorf("migrate loop run database: %w", err)
+	}
+
+	return &sqliteLoopRunRepository{db: db}, nil
+}
+
+func (r *sqliteLoopRunRepository) CreateLoopRun(ctx context.Context, record LoopRunRecord) error {
+	if err := ValidateLoopRunRecord(record); err != nil {
+		return err
+	}
+
+	_, err := r.db.ExecContext(ctx, insertLoopRunSQL(),
+		record.ID,
+		record.ProjectID,
+		string(record.Status),
+		record.EligibleCount,
+		record.ProcessedCount,
+		record.BlockedCount,
+		record.FailedCount,
+		record.FailureReason,
+		formatProjectTime(record.CreatedAt),
+		formatOptionalLoopRunTime(record.StartedAt),
+		formatOptionalLoopRunTime(record.FinishedAt),
+		formatProjectTime(record.UpdatedAt),
+	)
+	if err != nil {
+		return fmt.Errorf("create loop run: %w", err)
+	}
+
+	return nil
+}
+
+func (r *sqliteLoopRunRepository) UpdateLoopRun(ctx context.Context, record LoopRunRecord) error {
+	if err := ValidateLoopRunRecord(record); err != nil {
+		return err
+	}
+
+	result, err := r.db.ExecContext(ctx, updateLoopRunSQL(),
+		record.ProjectID,
+		string(record.Status),
+		record.EligibleCount,
+		record.ProcessedCount,
+		record.BlockedCount,
+		record.FailedCount,
+		record.FailureReason,
+		formatProjectTime(record.CreatedAt),
+		formatOptionalLoopRunTime(record.StartedAt),
+		formatOptionalLoopRunTime(record.FinishedAt),
+		formatProjectTime(record.UpdatedAt),
+		record.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("update loop run: %w", err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("inspect updated loop run rows: %w", err)
+	}
+
+	if affected == 0 {
+		return fmt.Errorf("%w: %s", ErrLoopRunNotFound, record.ID)
+	}
+
+	return nil
+}
+
+func (r *sqliteLoopRunRepository) GetLoopRun(ctx context.Context, id string) (LoopRunRecord, error) {
+	row := r.db.QueryRowContext(ctx, selectLoopRunSQL()+" WHERE id = ?", id)
+
+	record, err := scanLoopRun(row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return LoopRunRecord{}, fmt.Errorf("%w: %s", ErrLoopRunNotFound, id)
+	}
+
+	if err != nil {
+		return LoopRunRecord{}, err
+	}
+
+	return record, nil
+}
+
+func (r *sqliteLoopRunRepository) ListProjectLoopRuns(ctx context.Context, projectID string) ([]LoopRunRecord, error) {
+	rows, err := r.db.QueryContext(
+		ctx,
+		selectLoopRunSQL()+" WHERE project_id = ? ORDER BY created_at",
+		projectID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("list project loop runs: %w", err)
+	}
+
+	defer func() {
+		//nolint:errcheck // Row iteration errors are checked through rows.Err below.
+		_ = rows.Close()
+	}()
+
+	records := []LoopRunRecord{}
+
+	for rows.Next() {
+		record, err := scanLoopRun(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		records = append(records, record)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list loop run rows: %w", err)
+	}
+
+	return records, nil
+}
+
+func (r *sqliteLoopRunRepository) Close() error {
+	if err := r.db.Close(); err != nil {
+		return fmt.Errorf("close loop run repository database: %w", err)
+	}
+
+	return nil
+}
+
+type loopRunScanner interface {
+	Scan(dest ...any) error
+}
+
+func scanLoopRun(scanner loopRunScanner) (LoopRunRecord, error) {
+	var record LoopRunRecord
+
+	var status string
+
+	var createdAt, updatedAt string
+
+	var startedAt, finishedAt sql.NullString
+
+	err := scanner.Scan(
+		&record.ID,
+		&record.ProjectID,
+		&status,
+		&record.EligibleCount,
+		&record.ProcessedCount,
+		&record.BlockedCount,
+		&record.FailedCount,
+		&record.FailureReason,
+		&createdAt,
+		&startedAt,
+		&finishedAt,
+		&updatedAt,
+	)
+	if err != nil {
+		return LoopRunRecord{}, fmt.Errorf("scan loop run: %w", err)
+	}
+
+	parsedCreatedAt, err := parseProjectTime(createdAt)
+	if err != nil {
+		return LoopRunRecord{}, err
+	}
+
+	parsedUpdatedAt, err := parseProjectTime(updatedAt)
+	if err != nil {
+		return LoopRunRecord{}, err
+	}
+
+	record.Status = LoopRunStatus(status)
+	record.CreatedAt = parsedCreatedAt
+	record.UpdatedAt = parsedUpdatedAt
+
+	record.StartedAt, err = parseOptionalLoopRunTime(startedAt)
+	if err != nil {
+		return LoopRunRecord{}, err
+	}
+
+	record.FinishedAt, err = parseOptionalLoopRunTime(finishedAt)
+	if err != nil {
+		return LoopRunRecord{}, err
+	}
+
+	return record, nil
+}
+
+func insertLoopRunSQL() string {
+	return `INSERT INTO loop_runs (
+    id, project_id, status, eligible_count, processed_count, blocked_count,
+    failed_count, failure_reason, created_at, started_at, finished_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+}
+
+func updateLoopRunSQL() string {
+	return `UPDATE loop_runs
+SET project_id = ?, status = ?, eligible_count = ?, processed_count = ?,
+    blocked_count = ?, failed_count = ?, failure_reason = ?, created_at = ?,
+    started_at = ?, finished_at = ?, updated_at = ?
+WHERE id = ?`
+}
+
+func selectLoopRunSQL() string {
+	return `SELECT id, project_id, status, eligible_count, processed_count,
+    blocked_count, failed_count, failure_reason, created_at, started_at,
+    finished_at, updated_at
+FROM loop_runs`
+}
+
+func formatOptionalLoopRunTime(value *time.Time) any {
+	if value == nil {
+		return nil
+	}
+
+	return formatProjectTime(*value)
+}
+
+func parseOptionalLoopRunTime(value sql.NullString) (*time.Time, error) {
+	if !value.Valid {
+		return nil, nil
+	}
+
+	parsed, err := parseProjectTime(value.String)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsed, nil
+}

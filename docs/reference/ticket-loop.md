@@ -104,3 +104,42 @@ The preview command does not create loop records, create execution records,
 invoke the runtime worker, apply results, or mutate ticket files.
 
 Until execution slices are delivered, `ticket loop` requires `--dry-run`.
+
+## Loop Run Records
+
+A loop run record represents one foreground loop attempt for one project.
+
+Loop run records are stored in the user-level SQLite database and are separate
+from individual ticket execution records.
+
+Required identity and lifecycle fields:
+
+- `id`;
+- `project_id`;
+- `status`;
+- `created_at`;
+- `updated_at`.
+
+Supported statuses:
+
+- `pending`;
+- `running`;
+- `succeeded`;
+- `failed`;
+- `blocked`.
+
+Counters tracked on the loop run:
+
+- eligible tickets;
+- processed tickets;
+- blocked tickets;
+- failed tickets.
+
+Optional lifecycle fields:
+
+- `started_at`;
+- `finished_at`;
+- failure reason.
+
+Loop run records do not replace execution records. Later execution slices link
+loop iterations to existing per-ticket execution records.

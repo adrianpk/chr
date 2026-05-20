@@ -1,0 +1,98 @@
+package chc
+
+import (
+	"fmt"
+	"time"
+)
+
+type LoopRunStatus string
+
+const (
+	LoopRunStatusPending   LoopRunStatus = "pending"
+	LoopRunStatusRunning   LoopRunStatus = "running"
+	LoopRunStatusSucceeded LoopRunStatus = "succeeded"
+	LoopRunStatusFailed    LoopRunStatus = "failed"
+	LoopRunStatusBlocked   LoopRunStatus = "blocked"
+)
+
+type LoopRunRecord struct {
+	ID             string
+	ProjectID      string
+	Status         LoopRunStatus
+	EligibleCount  int
+	ProcessedCount int
+	BlockedCount   int
+	FailedCount    int
+	FailureReason  string
+	CreatedAt      time.Time
+	StartedAt      *time.Time
+	FinishedAt     *time.Time
+	UpdatedAt      time.Time
+}
+
+func ValidateLoopRunRecord(record LoopRunRecord) error {
+	if record.ID == "" {
+		return fmt.Errorf("loop run id is required")
+	}
+
+	if record.ProjectID == "" {
+		return fmt.Errorf("loop run project id is required")
+	}
+
+	if !record.Status.Valid() {
+		return fmt.Errorf("loop run status is invalid: %s", record.Status)
+	}
+
+	if err := validateLoopRunCounts(record); err != nil {
+		return err
+	}
+
+	return validateLoopRunTimes(record)
+}
+
+func (s LoopRunStatus) Valid() bool {
+	switch s {
+	case LoopRunStatusPending,
+		LoopRunStatusRunning,
+		LoopRunStatusSucceeded,
+		LoopRunStatusFailed,
+		LoopRunStatusBlocked:
+		return true
+	default:
+		return false
+	}
+}
+
+func validateLoopRunCounts(record LoopRunRecord) error {
+	for _, count := range []struct {
+		name  string
+		value int
+	}{
+		{name: "eligible", value: record.EligibleCount},
+		{name: "processed", value: record.ProcessedCount},
+		{name: "blocked", value: record.BlockedCount},
+		{name: "failed", value: record.FailedCount},
+	} {
+		if count.value < 0 {
+			return fmt.Errorf("loop run %s count cannot be negative", count.name)
+		}
+	}
+
+	return nil
+}
+
+func validateLoopRunTimes(record LoopRunRecord) error {
+	if record.CreatedAt.IsZero() {
+		return fmt.Errorf("loop run created time is required")
+	}
+
+	if record.UpdatedAt.IsZero() {
+		return fmt.Errorf("loop run updated time is required")
+	}
+
+	if record.StartedAt != nil && record.FinishedAt != nil && record.FinishedAt.Before(*record.StartedAt) {
+		return fmt.Errorf("loop run finished before it started")
+	}
+
+	return nil
+}
