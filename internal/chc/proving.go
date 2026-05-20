@@ -1,10 +1,13 @@
 package chc
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -39,6 +42,20 @@ type ProvingSandboxRunResult struct {
 	Run        HarnessCommand
 	TicketPath string
 	DryRun     bool
+}
+
+type ProvingValidationCommandResult struct {
+	Command  string
+	ExitCode int
+	Stdout   string
+	Stderr   string
+}
+
+type ProvingValidationResult struct {
+	Objective ProvingObjective
+	Commands  []ProvingValidationCommandResult
+	Passed    bool
+	LogPath   string
 }
 
 func LoadProvingObjective(path string) (ProvingObjective, error) {
@@ -123,6 +140,48 @@ func RunProvingSandbox(ctx context.Context, opts ProvingSandboxRunOptions) (Prov
 	return result, nil
 }
 
+func RunProvingValidation(ctx context.Context, projectDir, objectivePath string) (ProvingValidationResult, error) {
+	planned, err := PlanProvingSandboxRun(projectDir, objectivePath)
+	if err != nil {
+		return ProvingValidationResult{}, err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(planned.Plan.ValidationPath), 0o755); err != nil {
+		return ProvingValidationResult{}, fmt.Errorf("create proving validation directory: %w", err)
+	}
+
+	commands := ProvingValidationCommands()
+	result := ProvingValidationResult{
+		Objective: planned.Objective,
+		Passed:    true,
+		LogPath:   planned.Plan.ValidationPath,
+	}
+
+	for _, command := range commands {
+		commandResult := runProvingValidationCommand(ctx, planned.Plan.ProjectDir, command)
+		result.Commands = append(result.Commands, commandResult)
+
+		if commandResult.ExitCode != 0 {
+			result.Passed = false
+		}
+	}
+
+	if err := os.WriteFile(result.LogPath, []byte(RenderProvingValidationResult(result)), 0o644); err != nil {
+		return ProvingValidationResult{}, fmt.Errorf("write proving validation log: %w", err)
+	}
+
+	return result, nil
+}
+
+func ProvingValidationCommands() []string {
+	return []string{
+		"make compile",
+		"make lint",
+		"make test",
+		"make verify",
+	}
+}
+
 func prepareProvingArtifacts(result ProvingSandboxRunResult) (*os.File, error) {
 	if err := os.MkdirAll(filepath.Dir(result.Plan.WorkerContextPath), 0o755); err != nil {
 		return nil, fmt.Errorf("create proving artifact directory: %w", err)
@@ -167,6 +226,80 @@ func provingOutput(configured, fallback io.Writer) io.Writer {
 	}
 
 	return fallback
+}
+
+func runProvingValidationCommand(ctx context.Context, projectDir, command string) ProvingValidationCommandResult {
+	var stdout bytes.Buffer
+
+	var stderr bytes.Buffer
+
+	cmd := exec.CommandContext(ctx, "/bin/sh", "-lc", command)
+	cmd.Dir = projectDir
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+
+	return ProvingValidationCommandResult{
+		Command:  command,
+		ExitCode: commandExitCode(err),
+		Stdout:   stdout.String(),
+		Stderr:   stderr.String(),
+	}
+}
+
+func commandExitCode(err error) int {
+	if err == nil {
+		return 0
+	}
+
+	var exitError *exec.ExitError
+	if errors.As(err, &exitError) {
+		return exitError.ExitCode()
+	}
+
+	return -1
+}
+
+func RenderProvingValidationResult(result ProvingValidationResult) string {
+	var output strings.Builder
+
+	output.WriteString("# Proving Validation Result\n\n")
+	output.WriteString("objective_id: ")
+	output.WriteString(result.Objective.ID)
+	output.WriteString("\n")
+	output.WriteString("ticket_key: ")
+	output.WriteString(result.Objective.TicketKey)
+	output.WriteString("\n")
+	output.WriteString("passed: ")
+	output.WriteString(strconv.FormatBool(result.Passed))
+	output.WriteString("\n\n")
+
+	for _, command := range result.Commands {
+		output.WriteString("## Command: ")
+		output.WriteString(command.Command)
+		output.WriteString("\n\n")
+		output.WriteString("exit_code: ")
+		output.WriteString(strconv.Itoa(command.ExitCode))
+		output.WriteString("\n\n")
+		output.WriteString("### Stdout\n\n")
+		output.WriteString(command.Stdout)
+
+		if !strings.HasSuffix(command.Stdout, "\n") {
+			output.WriteString("\n")
+		}
+
+		output.WriteString("\n### Stderr\n\n")
+		output.WriteString(command.Stderr)
+
+		if !strings.HasSuffix(command.Stderr, "\n") {
+			output.WriteString("\n")
+		}
+
+		output.WriteString("\n")
+	}
+
+	return output.String()
 }
 
 func PlanProvingSandboxRun(projectDir, objectivePath string) (ProvingSandboxRunResult, error) {

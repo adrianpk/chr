@@ -163,7 +163,7 @@ Expected outcome:
 
 ### Slice 4: Validation Runner
 
-Status: planned.
+Status: in review.
 
 Expected branch: `feat/slice-4-proving-validation-runner`
 Expected PR title: `feat(slice-4): proving validation runner`

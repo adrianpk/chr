@@ -111,6 +111,48 @@ func TestRenderProvingWorkerContextIncludesObjective(t *testing.T) {
 	}
 }
 
+func TestRunProvingValidationCapturesFailure(t *testing.T) {
+	projectDir := newTestProvingProject(t)
+	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	writeTestFile(t, filepath.Join(projectDir, "Makefile"), `.PHONY: compile lint test verify
+compile:
+	@true
+lint:
+	@true
+test:
+	@echo failing test
+	@exit 2
+verify:
+	@$(MAKE) compile lint test
+`)
+
+	result, err := RunProvingValidation(context.Background(), projectDir, objectivePath)
+	if err != nil {
+		t.Fatalf("RunProvingValidation returned error: %v", err)
+	}
+
+	if result.Passed {
+		t.Fatal("Passed = true, want false")
+	}
+
+	if len(result.Commands) != 4 {
+		t.Fatalf("len(Commands) = %d, want 4", len(result.Commands))
+	}
+
+	if result.Commands[2].ExitCode == 0 {
+		t.Fatalf("test command exit code = %d, want non-zero", result.Commands[2].ExitCode)
+	}
+
+	content, err := os.ReadFile(result.LogPath)
+	if err != nil {
+		t.Fatalf("read validation log: %v", err)
+	}
+
+	if !strings.Contains(string(content), "failing test") {
+		t.Fatalf("validation log does not contain failure output:\n%s", string(content))
+	}
+}
+
 func newTestProvingProject(t *testing.T) string {
 	t.Helper()
 

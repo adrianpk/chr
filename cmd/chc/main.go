@@ -646,6 +646,7 @@ func newProvingCommand(stdout io.Writer) *cli.Command {
 		Usage: "Run temporary MVP proving-ground workflows",
 		Commands: []*cli.Command{
 			newProvingRunCommand(stdout),
+			newProvingValidateCommand(stdout),
 		},
 	}
 }
@@ -670,6 +671,25 @@ func newProvingRunCommand(stdout io.Writer) *cli.Command {
 			},
 		},
 		Action: provingRunAction(stdout),
+	}
+}
+
+func newProvingValidateCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "validate",
+		Usage: "Run validation commands for one proving objective",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "dir",
+				Usage: "project directory override",
+				Value: ".",
+			},
+			&cli.StringFlag{
+				Name:  "objective",
+				Usage: "project-relative proving objective path",
+			},
+		},
+		Action: provingValidateAction(stdout),
 	}
 }
 
@@ -718,6 +738,12 @@ func runtimeInitAction(stdout io.Writer) cli.ActionFunc {
 func provingRunAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runProvingRun(ctx, cmd, stdout)
+	}
+}
+
+func provingValidateAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runProvingValidate(ctx, cmd, stdout)
 	}
 }
 
@@ -2717,6 +2743,32 @@ func runProvingRun(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return printProvingRunResult(stdout, result)
 }
 
+func runProvingValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("proving validate does not accept positional arguments")
+	}
+
+	objectivePath := cmd.String("objective")
+	if objectivePath == "" {
+		return fmt.Errorf("proving validate requires --objective")
+	}
+
+	result, err := chc.RunProvingValidation(ctx, cmd.String("dir"), objectivePath)
+	if err != nil {
+		return err
+	}
+
+	if err := printProvingValidationResult(stdout, result); err != nil {
+		return err
+	}
+
+	if !result.Passed {
+		return fmt.Errorf("proving validation failed")
+	}
+
+	return nil
+}
+
 func printProvingRunResult(stdout io.Writer, result chc.ProvingSandboxRunResult) error {
 	status := "completed"
 	if result.DryRun {
@@ -2741,6 +2793,29 @@ func printProvingRunResult(stdout io.Writer, result chc.ProvingSandboxRunResult)
 	for _, line := range lines {
 		if _, err := fmt.Fprintln(stdout, line); err != nil {
 			return fmt.Errorf("write proving result: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func printProvingValidationResult(stdout io.Writer, result chc.ProvingValidationResult) error {
+	lines := []string{
+		fmt.Sprintf("proving_validation: %t", result.Passed),
+		fmt.Sprintf("objective_id: %s", result.Objective.ID),
+		fmt.Sprintf("ticket_key: %s", result.Objective.TicketKey),
+		fmt.Sprintf("validation_path: %s", result.LogPath),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write proving validation result: %w", err)
+		}
+	}
+
+	for _, command := range result.Commands {
+		if _, err := fmt.Fprintf(stdout, "command: %s exit_code=%d\n", command.Command, command.ExitCode); err != nil {
+			return fmt.Errorf("write proving validation command result: %w", err)
 		}
 	}
 

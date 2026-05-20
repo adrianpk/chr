@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 1: Todolist Fixture Project | Delivered | `feat/slice-1-proving-ground-fixture` | `feat(slice-1): proving ground fixture` | `.prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md` | Repository PR #72. |
 | Slice 2: Direct Proving Objective Contract | Delivered | `feat/slice-2-proving-objective-contract` | `feat(slice-2): proving objective contract` | `.prj/reports/slices/mvp-agent-proving-ground/slice-2-proving-objective-contract.md` | Repository PR #73. |
 | Slice 3: Sandbox Codex Runner | Delivered | `feat/slice-3-proving-sandbox-runner` | `feat(slice-3): proving sandbox runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-3-proving-sandbox-runner.md` | Repository PR #74. |
-| Slice 4: Validation Runner | Planned | `feat/slice-4-proving-validation-runner` | `feat(slice-4): proving validation runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-4-proving-validation-runner.md` | Compile, lint, tests. |
+| Slice 4: Validation Runner | In Review | `feat/slice-4-proving-validation-runner` | `feat(slice-4): proving validation runner` | `.prj/reports/slices/mvp-agent-proving-ground/slice-4-proving-validation-runner.md` | Compile, lint, tests. |
 | Slice 5: Minimal Ralph Loop | Planned | `feat/slice-5-proving-ralph-loop` | `feat(slice-5): proving ralph loop` | `.prj/reports/slices/mvp-agent-proving-ground/slice-5-proving-ralph-loop.md` | Bounded retries. |
 | Slice 6: End-to-End Agent Proof | Planned | `feat/slice-6-proving-e2e-agent-proof` | `feat(slice-6): proving e2e agent proof` | `.prj/reports/slices/mvp-agent-proving-ground/slice-6-proving-e2e-agent-proof.md` | Final proof. |
 
@@ -142,23 +142,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Run fixture validation commands.
-- [ ] Capture stdout, stderr, and exit codes.
-- [ ] Write validation artifacts.
-- [ ] Classify validation failure for Ralph Loop input.
-- [ ] Add success and failure tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run fixture validation commands.
+- [x] Capture stdout, stderr, and exit codes.
+- [x] Write validation artifacts.
+- [x] Classify validation failure for Ralph Loop input.
+- [x] Add success and failure tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
+- T4.1: pending commit
+- T4.2: pending commit
+- T4.3: pending commit
+- T4.4: pending commit
+- T4.5: pending commit
+- T4.6: pending commit
+- T4.7: pending commit
 
 ## Slice 5: Minimal Ralph Loop
 

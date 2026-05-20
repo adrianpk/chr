@@ -74,6 +74,26 @@ Without `--dry-run`, `chc proving run`:
 
 Validation and Ralph Loop retries are delivered by later proving-ground slices.
 
+## Validation Runner
+
+Run validation for one objective:
+
+```sh
+chc proving validate \
+  --dir _workspace/testing/projects/todolist \
+  --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md
+```
+
+The validation runner executes:
+
+- `make compile`;
+- `make lint`;
+- `make test`;
+- `make verify`.
+
+It writes a Markdown validation artifact to the objective's `validation_path`.
+The command exits non-zero when any validation command fails.
+
 ## Boundaries
 
 This command intentionally allows fixture-specific behavior. It does not clone
