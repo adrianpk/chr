@@ -40,6 +40,15 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 	if plan.ResultPath != filepath.Join(dir, ".chc", "runtime", "runs", "result.json") {
 		t.Fatalf("ResultPath = %q, want default result path", plan.ResultPath)
 	}
+}
+
+func TestPlanRuntimeUsesDefaultArtifactPaths(t *testing.T) {
+	dir := t.TempDir()
+
+	plan, err := PlanRuntime(RuntimePlanOptions{ProjectDir: dir})
+	if err != nil {
+		t.Fatalf("PlanRuntime returned error: %v", err)
+	}
 
 	if plan.WorkerContextPath != filepath.Join(dir, ".chc", "runtime", "runs", "context.md") {
 		t.Fatalf("WorkerContextPath = %q, want default context path", plan.WorkerContextPath)
