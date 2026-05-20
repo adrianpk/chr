@@ -40,7 +40,7 @@ func NewCodexWorkerCommand(opts CodexWorkerCommandOptions) (CodexWorkerCommand, 
 		Args: []string{
 			"exec",
 			"--skip-git-repo-check",
-			"--full-auto",
+			"--dangerously-bypass-approvals-and-sandbox",
 		},
 		Env: []CodexWorkerEnv{
 			{Name: "CHC_EXECUTION_ID", Value: opts.ExecutionID},

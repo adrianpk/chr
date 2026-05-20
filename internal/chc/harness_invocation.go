@@ -101,6 +101,7 @@ func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePl
 		"--env", "CHC_RESULT_PATH="+containerProjectPath(plan, plan.ResultPath),
 		"--env", "CHC_LOG_PATH="+containerProjectPath(plan, plan.LogPath),
 		"--env", "CHC_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
+		"--env", "OPENAI_API_KEY",
 		plan.Image,
 		"/bin/sh",
 		"-lc",

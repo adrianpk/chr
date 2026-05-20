@@ -75,10 +75,12 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 		"CHC_LOG_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/runtime.log",
 		"--env",
 		"CHC_VALIDATION_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log",
+		"--env",
+		"OPENAI_API_KEY",
 		"chc-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
-		"CHC_EXECUTION_ID='exec-123' CHC_TICKET_KEY='CHC-1' CHC_TICKET_PATH='/workspace/.chc/tickets/CHC-1.md' CHC_WORKER_CONTEXT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/context.md' CHC_RESULT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/result.json' CHC_LOG_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/runtime.log' CHC_VALIDATION_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--full-auto' < \"$CHC_WORKER_CONTEXT_PATH\"",
+		"CHC_EXECUTION_ID='exec-123' CHC_TICKET_KEY='CHC-1' CHC_TICKET_PATH='/workspace/.chc/tickets/CHC-1.md' CHC_WORKER_CONTEXT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/context.md' CHC_RESULT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/result.json' CHC_LOG_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/runtime.log' CHC_VALIDATION_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHC_WORKER_CONTEXT_PATH\"",
 	}
 
 	if invocation.Run.Program != "docker" {
@@ -147,11 +149,18 @@ func testHarnessRuntimePlan(projectDir string) RuntimePlan {
 	runDir := filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", "exec-123")
 
 	return RuntimePlan{
-		ProjectDir:        projectDir,
-		DockerfilePath:    filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
-		Image:             "chc-agent-runtime:local",
-		ContainerWorkdir:  "/workspace",
-		Mounts:            runtimeMounts(projectDir, "/workspace"),
+		ProjectDir:       projectDir,
+		DockerfilePath:   filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
+		Image:            "chc-agent-runtime:local",
+		ContainerWorkdir: "/workspace",
+		Mounts: []RuntimeMount{
+			{
+				Source:      projectDir,
+				Target:      "/workspace",
+				ReadOnly:    false,
+				Description: "project workspace",
+			},
+		},
 		RunArtifactDir:    runDir,
 		WorkerContextPath: filepath.Join(runDir, "context.md"),
 		ResultPath:        filepath.Join(runDir, "result.json"),

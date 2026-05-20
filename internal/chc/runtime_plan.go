@@ -2,6 +2,7 @@ package chc
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -113,7 +114,7 @@ func resolveProjectPath(projectDir, configuredPath string) string {
 }
 
 func runtimeMounts(projectDir, workdir string) []RuntimeMount {
-	return []RuntimeMount{
+	mounts := []RuntimeMount{
 		{
 			Source:      projectDir,
 			Target:      cleanContainerPath(workdir),
@@ -121,6 +122,45 @@ func runtimeMounts(projectDir, workdir string) []RuntimeMount {
 			Description: "project workspace",
 		},
 	}
+
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		mounts = append(mounts, codexCredentialMounts(homeDir)...)
+	}
+
+	return mounts
+}
+
+func codexCredentialMounts(homeDir string) []RuntimeMount {
+	candidates := []struct {
+		source string
+		target string
+	}{
+		{
+			source: filepath.Join(homeDir, ".codex", "auth.json"),
+			target: "/root/.codex/auth.json",
+		},
+		{
+			source: filepath.Join(homeDir, ".codex", "config.toml"),
+			target: "/root/.codex/config.toml",
+		},
+	}
+
+	mounts := make([]RuntimeMount, 0, len(candidates))
+	for _, candidate := range candidates {
+		if _, err := os.Stat(candidate.source); err != nil {
+			continue
+		}
+
+		mounts = append(mounts, RuntimeMount{
+			Source:      candidate.source,
+			Target:      candidate.target,
+			ReadOnly:    true,
+			Description: "codex credential",
+		})
+	}
+
+	return mounts
 }
 
 func cleanContainerPath(path string) string {

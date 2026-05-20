@@ -19,7 +19,7 @@ func TestNewCodexWorkerCommandDefinesCodexInvocation(t *testing.T) {
 	wantArgs := []string{
 		"exec",
 		"--skip-git-repo-check",
-		"--full-auto",
+		"--dangerously-bypass-approvals-and-sandbox",
 	}
 	if !slices.Equal(command.Args, wantArgs) {
 		t.Fatalf("Args = %#v, want %#v", command.Args, wantArgs)
@@ -47,7 +47,7 @@ func TestRenderCodexWorkerShellScriptQuotesInputs(t *testing.T) {
 	for _, want := range []string{
 		"CHC_EXECUTION_ID='exec-1'",
 		"CHC_TICKET_PATH='/workspace/.chc/tickets/CHC-1 Bob'\"'\"'s fix.md'",
-		"'codex' 'exec' '--skip-git-repo-check' '--full-auto'",
+		"'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox'",
 		`< "$CHC_WORKER_CONTEXT_PATH"`,
 	} {
 		if !strings.Contains(script, want) {
