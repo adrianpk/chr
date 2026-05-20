@@ -1,6 +1,6 @@
 # Ticket Execution Context Hardening Slicing Tracker
 
-Status: planned
+Status: in progress
 
 Plan: `.prj/plans/slicing-ticket-execution-context-hardening-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -12,7 +12,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing tracker.
 - [x] Read `AGENTS.md` and `.agents/` delivery rules before planning.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Context Composer Contract | Planned | `feat/slice-1-context-composer-contract` | `feat(slice-1): context composer contract` | `.prj/reports/slices/ticket-execution-context-hardening/slice-1-context-composer-contract.md` | Core model. |
+| Slice 1: Context Composer Contract | Reviewing | `feat/slice-1-context-composer-contract` | `feat(slice-1): context composer contract` | `.prj/reports/slices/ticket-execution-context-hardening/slice-1-context-composer-contract.md` | Core model. |
 | Slice 2: Agent Identity and Protocol Context | Planned | `feat/slice-2-context-agent-protocols` | `feat(slice-2): context agent protocols` | `.prj/reports/slices/ticket-execution-context-hardening/slice-2-context-agent-protocols.md` | AGENTS and `.chc`. |
 | Slice 3: Project and Use-Case Document Context | Planned | `feat/slice-3-context-project-documents` | `feat(slice-3): context project documents` | `.prj/reports/slices/ticket-execution-context-hardening/slice-3-context-project-documents.md` | Specs, drafts, plans, trackers, dumps, quizzes. |
 | Slice 4: Tree and Search Context | Planned | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Cheap orientation. |
@@ -43,25 +43,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add composer input and output models.
-- [ ] Define source inventory entries.
-- [ ] Define materialized artifact paths.
-- [ ] Define readiness status and warnings.
-- [ ] Define invariant versus fresh source classification.
-- [ ] Add focused tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add composer input and output models.
+- [x] Define source inventory entries.
+- [x] Define materialized artifact paths.
+- [x] Define readiness status and warnings.
+- [x] Define invariant versus fresh source classification.
+- [x] Add focused tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
-- T1.8: pending
+- T1.1: `95b1186`
+- T1.2: `95b1186`
+- T1.3: `95b1186`
+- T1.4: `95b1186`
+- T1.5: `95b1186`
+- T1.6: `95b1186`
+- T1.7: `docs(slice-1): record context composer report`
+- T1.8: `95b1186`
 
 ## Slice 2: Agent Identity and Protocol Context
 
