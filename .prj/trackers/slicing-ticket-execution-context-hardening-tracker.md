@@ -1,6 +1,6 @@
 # Ticket Execution Context Hardening Slicing Tracker
 
-Status: in progress
+Status: delivered
 
 Plan: `.prj/plans/slicing-ticket-execution-context-hardening-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -13,8 +13,8 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Read `AGENTS.md` and `.agents/` delivery rules before planning.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 5: Go Graph Context Provider | Delivered | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | Repository PR #82 merged. |
 | Slice 6: Ralph Attempt Context | Delivered | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Repository PR #83 merged. |
 | Slice 7: Docker-Compatible Context Materialization | Delivered | `feat/slice-7-context-docker-materialization` | `feat(slice-7): context docker materialization` | `.prj/reports/slices/ticket-execution-context-hardening/slice-7-context-docker-materialization.md` | Repository PR #84 merged. |
-| Slice 8: Execution Readiness and Handoff | Reviewing | `feat/slice-8-context-readiness-handoff` | `feat(slice-8): context readiness handoff` | `.prj/reports/slices/ticket-execution-context-hardening/slice-8-context-readiness-handoff.md` | Repository PR #85. |
+| Slice 8: Execution Readiness and Handoff | Delivered | `feat/slice-8-context-readiness-handoff` | `feat(slice-8): context readiness handoff` | `.prj/reports/slices/ticket-execution-context-hardening/slice-8-context-readiness-handoff.md` | Repository PR #85 merged. |
 
 ## Slice 1: Context Composer Contract
 
