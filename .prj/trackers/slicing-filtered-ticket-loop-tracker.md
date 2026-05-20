@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Eligible Ticket Query | Planned | `feat/slice-1-eligible-ticket-query` | `feat(slice-1): eligible ticket query` | `.prj/reports/slices/filtered-ticket-loop/slice-1-eligible-ticket-query.md` | Query loop candidates. |
+| Slice 1: Eligible Ticket Query | In Review | `feat/slice-1-eligible-ticket-query` | `feat(slice-1): eligible ticket query` | `.prj/reports/slices/filtered-ticket-loop/slice-1-eligible-ticket-query.md` | Query loop candidates. |
 | Slice 2: Loop Filters | Planned | `feat/slice-2-loop-filters` | `feat(slice-2): loop filters` | `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md` | Filter by ticket metadata. |
 | Slice 3: Loop Ordering | Planned | `feat/slice-3-loop-ordering` | `feat(slice-3): loop ordering` | `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md` | Deterministic loop order. |
 | Slice 4: Loop Command Skeleton | Planned | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Foreground command preview. |
@@ -43,25 +43,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add loop eligibility option types.
-- [ ] Select tickets by project and eligible statuses.
-- [ ] Keep selection read-only.
-- [ ] Return deterministic results.
-- [ ] Add focused query tests.
-- [ ] Document the eligibility contract.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add loop eligibility option types.
+- [x] Select tickets by project and eligible statuses.
+- [x] Keep selection read-only.
+- [x] Return deterministic results.
+- [x] Add focused query tests.
+- [x] Document the eligibility contract.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
-- T1.8: pending
+- T1.1: `feat(slice-1): eligible ticket query`
+- T1.2: `feat(slice-1): eligible ticket query`
+- T1.3: `feat(slice-1): eligible ticket query`
+- T1.4: `feat(slice-1): eligible ticket query`
+- T1.5: `feat(slice-1): eligible ticket query`
+- T1.6: `feat(slice-1): eligible ticket query`
+- T1.7: `feat(slice-1): eligible ticket query`
+- T1.8: `feat(slice-1): eligible ticket query`
 
 ## Slice 2: Loop Filters
 
