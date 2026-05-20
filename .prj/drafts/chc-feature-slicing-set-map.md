@@ -35,6 +35,7 @@ Known and inferred feature areas:
 - operational document workflows;
 - agent runtime boundary;
 - ticket execution;
+- ticket execution context hardening;
 - filtered ticket loop;
 - daemon and asynchronous coordination;
 - notification and remote command surfaces;
@@ -207,9 +208,9 @@ Use case:
 
 > A user starts a loop and `chc` keeps working through eligible tickets until completion, threshold, or blocker.
 
-Current state: planned next in the operational cutoff path. The single-ticket
-execution, Codex worker, and result application paths are delivered; the
-foreground loop that repeatedly selects and executes eligible tickets is not yet
+Current state: completed for the current operational cutoff scope. Eligible
+ticket selection, loop filters, ordering, foreground command behavior, loop run
+records, repeated execution, stop conditions, and loop status reporting are
 delivered.
 
 Candidate slices:
@@ -254,7 +255,10 @@ Use case:
 
 > A single user-level `chc` process coordinates multiple registered projects and long-running work.
 
-Current state: not delivered.
+Current state: completed for the planned post-cutoff daemon coordination scope.
+Daemon command surface, lifecycle state, state persistence, status reporting,
+single-instance guard, registered project loading, foreground run loop, graceful
+stop, and stale recovery are delivered.
 
 Candidate slices:
 
@@ -359,10 +363,11 @@ required for the operational cutoff, but they remain part of the product
 direction and should not be dropped from planning:
 
 1. Daemon Coordination.
-2. Notification and Remote Commands.
-3. Reporting and Evidence.
-4. Maintenance and Recovery.
-5. Operational Documents.
+2. Ticket Execution Context Hardening.
+3. Notification and Remote Commands.
+4. Reporting and Evidence.
+5. Maintenance and Recovery.
+6. Operational Documents.
 
 Post-cutoff work can be pulled earlier only when it directly blocks local loop
 operation, debugging, or evidence quality.
@@ -371,10 +376,16 @@ Daemon Coordination turns the foreground runner into a persistent background
 coordinator with multi-project ownership, status reporting, remote-control
 surfaces, and stale-process recovery.
 
+Ticket Execution Context Hardening formalizes how ticket, project, runtime,
+document, protocol, and code-derived context are materialized before Codex
+execution. It also captures Ralph Loop retry policy and execution handoff
+evidence. This work strengthens the post-cutoff MVP before remote notification
+surfaces.
+
 ## Open Questions
 
-- Which slicings are already complete enough to mark as delivered rather than active?
 - Should document workflows remain a separate slicing or be split by artifact family?
-- Which reporting artifacts are required before the first ticket loop is acceptable?
-- Does the first daemon need file watching, or is automatic reconciliation on command boundaries enough?
+- Which execution-context specs should be implemented before Notification and Remote Commands?
+- Which reporting artifacts are required before remote execution feedback is acceptable?
+- Does the next daemon phase need file watching, or is automatic reconciliation on command boundaries enough?
 - Which notification events are required for the first remote-feedback loop?

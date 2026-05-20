@@ -41,7 +41,7 @@ Already delivered:
 - ticket model and global ticket index;
 - ticket reconciliation before execution selection.
 
-Still missing:
+Delivered by this slicing:
 
 - a runtime config contract under `.chc/config.yml`;
 - an agent-runtime Dockerfile template;
@@ -87,7 +87,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Runtime Config Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-runtime-config-model`
 Expected PR title: `feat(slice-1): runtime config model`
@@ -111,7 +111,7 @@ Expected outcome:
 
 ### Slice 2: Runtime Asset Template
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-runtime-asset-template`
 Expected PR title: `feat(slice-2): runtime asset template`
@@ -135,7 +135,7 @@ Expected outcome:
 
 ### Slice 3: Runtime Init CLI
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-runtime-init-cli`
 Expected PR title: `feat(slice-3): runtime init cli`
@@ -161,7 +161,7 @@ Expected outcome:
 
 ### Slice 4: Runtime Plan Contract
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-runtime-plan-contract`
 Expected PR title: `feat(slice-4): runtime plan contract`
@@ -185,7 +185,7 @@ Expected outcome:
 
 ### Slice 5: Runtime Validate CLI
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-runtime-validate-cli`
 Expected PR title: `feat(slice-5): runtime validate cli`

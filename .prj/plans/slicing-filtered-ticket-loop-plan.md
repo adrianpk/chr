@@ -1,6 +1,6 @@
 # Filtered Ticket Loop Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -43,7 +43,7 @@ Delivered prerequisites:
 - execution result artifacts can be captured;
 - execution results can be applied back into ticket state.
 
-Still missing:
+Delivered by this slicing:
 
 - eligible ticket selection for loop execution;
 - user-facing filters for the loop;
@@ -92,7 +92,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Eligible Ticket Query
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-eligible-ticket-query`
 Expected PR title: `feat(slice-1): eligible ticket query`
@@ -119,7 +119,7 @@ Expected outcome:
 
 ### Slice 2: Loop Filters
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-loop-filters`
 Expected PR title: `feat(slice-2): loop filters`
@@ -142,7 +142,7 @@ Expected outcome:
 
 ### Slice 3: Loop Ordering
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-loop-ordering`
 Expected PR title: `feat(slice-3): loop ordering`
@@ -165,7 +165,7 @@ Expected outcome:
 
 ### Slice 4: Loop Command Skeleton
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-loop-command-skeleton`
 Expected PR title: `feat(slice-4): loop command skeleton`
@@ -190,7 +190,7 @@ Expected outcome:
 
 ### Slice 5: Loop Run Records
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-loop-run-records`
 Expected PR title: `feat(slice-5): loop run records`
@@ -214,7 +214,7 @@ Expected outcome:
 
 ### Slice 6: Repeated Ticket Execution
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-repeated-ticket-execution`
 Expected PR title: `feat(slice-6): repeated ticket execution`
@@ -240,7 +240,7 @@ Expected outcome:
 
 ### Slice 7: Stop Conditions and Thresholds
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-stop-conditions`
 Expected PR title: `feat(slice-7): stop conditions`
@@ -264,7 +264,7 @@ Expected outcome:
 
 ### Slice 8: Loop Status Reporting
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-8-loop-status-reporting`
 Expected PR title: `feat(slice-8): loop status reporting`
@@ -291,6 +291,8 @@ Expected outcome:
 Each implementation slice must run targeted tests and `make verify`.
 
 The completed slicing must run `make verify` after the final slice is merged.
+
+Completed slicing validation passed on `dev` after Repository PR #63 was merged.
 
 ## Risks
 

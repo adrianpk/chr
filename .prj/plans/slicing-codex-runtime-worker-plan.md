@@ -1,6 +1,6 @@
 # Codex Runtime Worker Slicing Plan
 
-Status: complete
+Status: completed
 
 ## Purpose
 

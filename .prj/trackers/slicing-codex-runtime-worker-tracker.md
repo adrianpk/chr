@@ -1,6 +1,6 @@
 # Codex Runtime Worker Slicing Tracker
 
-Status: complete
+Status: completed
 
 Plan: `.prj/plans/slicing-codex-runtime-worker-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
