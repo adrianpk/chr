@@ -77,3 +77,30 @@ ticket key.
 The eligible ticket query is a core package boundary. CLI parsing, ordering
 policies, loop run persistence, repeated execution, stop conditions, and
 reporting are implemented by later slices.
+
+## Loop Preview Command
+
+Preview the foreground loop selection:
+
+```sh
+chc ticket loop --dry-run
+```
+
+The command resolves the project, refreshes the ticket index, queries eligible
+tickets, and prints the planned selection.
+
+Supported preview flags:
+
+- `--status`;
+- `--priority`;
+- `--severity`;
+- `--project-area`;
+- `--tag`;
+- `--type`;
+- `--use-case`;
+- `--order`.
+
+The preview command does not create loop records, create execution records,
+invoke the runtime worker, apply results, or mutate ticket files.
+
+Until execution slices are delivered, `ticket loop` requires `--dry-run`.

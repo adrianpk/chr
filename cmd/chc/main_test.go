@@ -383,6 +383,97 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 	}
 }
 
+func TestTicketLoopDryRunPrintsEligibleTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeTicketLoopDryRunTickets(t, projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"loop",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+		"--priority",
+		"high",
+		"--project-area",
+		"frontend",
+		"--tag",
+		"uxui",
+		"--order",
+		"priority",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket loop returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"loop: planned",
+		"dry_run: true",
+		"order: priority",
+		"eligible: 1",
+		"ticket: CHC-1\tReady frontend\tready\thigh\tcritical\tfeature\tonboarding\tCHC-1-Ready.md",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	if strings.Contains(stdout.String(), "CHC-2") || strings.Contains(stdout.String(), "CHC-3") {
+		t.Fatalf("stdout contains ineligible tickets:\n%s", stdout.String())
+	}
+}
+
+func writeTicketLoopDryRunTickets(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", testLoopTicket(
+		"CHC-2", "Ready backend", "ready", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-3-Open.md", testLoopTicket(
+		"CHC-3", "Open frontend", "open", "critical", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+}
+
+func testLoopTicket(
+	key, title, status, priority, severity, ticketType, useCase, projectArea string,
+	tags []string,
+) chc.Ticket {
+	return chc.Ticket{
+		Key:         key,
+		Title:       title,
+		Status:      status,
+		Priority:    priority,
+		Severity:    severity,
+		Type:        ticketType,
+		UseCase:     useCase,
+		ProjectArea: projectArea,
+		Tags:        tags,
+		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	}
+}
+
+func TestTicketLoopRequiresDryRunUntilExecutionSlices(t *testing.T) {
+	err := run(t.Context(), []string{"ticket", "loop"}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket loop returned nil error")
+	}
+
+	if err.Error() != "ticket loop execution is not implemented; use --dry-run" {
+		t.Fatalf("err = %v, want dry-run requirement", err)
+	}
+}
+
 func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()

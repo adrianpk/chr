@@ -23,7 +23,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 1: Eligible Ticket Query | Delivered | `feat/slice-1-eligible-ticket-query` | `feat(slice-1): eligible ticket query` | `.prj/reports/slices/filtered-ticket-loop/slice-1-eligible-ticket-query.md` | Repository PR #56. |
 | Slice 2: Loop Filters | Delivered | `feat/slice-2-loop-filters` | `feat(slice-2): loop filters` | `.prj/reports/slices/filtered-ticket-loop/slice-2-loop-filters.md` | Repository PR #57. |
 | Slice 3: Loop Ordering | Delivered | `feat/slice-3-loop-ordering` | `feat(slice-3): loop ordering` | `.prj/reports/slices/filtered-ticket-loop/slice-3-loop-ordering.md` | Repository PR #58. |
-| Slice 4: Loop Command Skeleton | Planned | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Foreground command preview. |
+| Slice 4: Loop Command Skeleton | In Review | `feat/slice-4-loop-command-skeleton` | `feat(slice-4): loop command skeleton` | `.prj/reports/slices/filtered-ticket-loop/slice-4-loop-command-skeleton.md` | Foreground command preview. |
 | Slice 5: Loop Run Records | Planned | `feat/slice-5-loop-run-records` | `feat(slice-5): loop run records` | `.prj/reports/slices/filtered-ticket-loop/slice-5-loop-run-records.md` | Persist loop metadata. |
 | Slice 6: Repeated Ticket Execution | Planned | `feat/slice-6-repeated-ticket-execution` | `feat(slice-6): repeated ticket execution` | `.prj/reports/slices/filtered-ticket-loop/slice-6-repeated-ticket-execution.md` | Reuse single-ticket execution. |
 | Slice 7: Stop Conditions and Thresholds | Planned | `feat/slice-7-stop-conditions` | `feat(slice-7): stop conditions` | `.prj/reports/slices/filtered-ticket-loop/slice-7-stop-conditions.md` | Terminate safely. |
@@ -137,23 +137,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add CLI command and flags.
-- [ ] Resolve project and refresh index like ticket reads.
-- [ ] Call the eligible ticket query.
-- [ ] Support dry-run output.
-- [ ] Add focused CLI tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add CLI command and flags.
+- [x] Resolve project and refresh index like ticket reads.
+- [x] Call the eligible ticket query.
+- [x] Support dry-run output.
+- [x] Add focused CLI tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
+- T4.1: `feat(slice-4): loop command skeleton`
+- T4.2: `feat(slice-4): loop command skeleton`
+- T4.3: `feat(slice-4): loop command skeleton`
+- T4.4: `feat(slice-4): loop command skeleton`
+- T4.5: `feat(slice-4): loop command skeleton`
+- T4.6: `feat(slice-4): loop command skeleton`
+- T4.7: `feat(slice-4): loop command skeleton`
 
 ## Slice 5: Loop Run Records
 

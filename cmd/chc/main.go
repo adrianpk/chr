@@ -189,6 +189,7 @@ func newTicketCommand(stdout io.Writer) *cli.Command {
 			newTicketApplyResultCommand(stdout),
 			newTicketCommentCommand(stdout),
 			newTicketListCommand(stdout),
+			newTicketLoopCommand(stdout),
 			newTicketNewCommand(stdout),
 			newTicketShowCommand(stdout),
 			newTicketStartCommand(stdout),
@@ -539,6 +540,15 @@ func newTicketListCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newTicketLoopCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "loop",
+		Usage:  "Preview a foreground loop over eligible tickets",
+		Flags:  ticketLoopFlags(),
+		Action: ticketLoopAction(stdout),
+	}
+}
+
 func newTicketShowCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "show",
@@ -599,6 +609,47 @@ func ticketStartFlags() []cli.Flag {
 		&cli.BoolFlag{
 			Name:  "dry-run",
 			Usage: "print the execution preflight without creating an execution record",
+		},
+	)
+}
+
+func ticketLoopFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the planned loop selection without executing tickets",
+		},
+		&cli.StringSliceFlag{
+			Name:  "status",
+			Usage: "eligible ticket status",
+		},
+		&cli.StringSliceFlag{
+			Name:  "priority",
+			Usage: "ticket priority filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "severity",
+			Usage: "ticket severity filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "project-area",
+			Usage: "ticket project area filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "tag",
+			Usage: "ticket tag filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "type",
+			Usage: "ticket type filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "use-case",
+			Usage: "ticket use case filter",
+		},
+		&cli.StringFlag{
+			Name:  "order",
+			Usage: "ticket order: key, created_at, priority, severity, priority_severity",
 		},
 	)
 }
@@ -678,6 +729,12 @@ func ticketStatusAction(stdout io.Writer) cli.ActionFunc {
 func ticketStartAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketStart(ctx, cmd, stdout)
+	}
+}
+
+func ticketLoopAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketLoop(ctx, cmd, stdout)
 	}
 }
 
@@ -799,6 +856,115 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	return printTicketStartResult(stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
+}
+
+func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("ticket loop does not accept positional arguments")
+	}
+
+	if !cmd.Bool("dry-run") {
+		return fmt.Errorf("ticket loop execution is not implemented; use --dry-run")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+		return err
+	}
+
+	queryOptions := ticketLoopQueryOptionsFromCommand(cmd, projectContext.ProjectID)
+
+	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
+	if err != nil {
+		return err
+	}
+
+	return printTicketLoopPlan(stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
+}
+
+func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) chc.TicketLoopQueryOptions {
+	return chc.TicketLoopQueryOptions{
+		ProjectID: projectID,
+		Statuses:  cmd.StringSlice("status"),
+		Filters: chc.TicketLoopFilters{
+			Priorities:   cmd.StringSlice("priority"),
+			Severities:   cmd.StringSlice("severity"),
+			ProjectAreas: cmd.StringSlice("project-area"),
+			Tags:         cmd.StringSlice("tag"),
+			Types:        cmd.StringSlice("type"),
+			UseCases:     cmd.StringSlice("use-case"),
+		},
+		Order: chc.TicketLoopOrder(cmd.String("order")),
+	}
+}
+
+func printTicketLoopPlan(
+	stdout io.Writer,
+	projectContext commandProjectContext,
+	opts chc.TicketLoopQueryOptions,
+	tickets []chc.IndexedTicket,
+	dryRun bool,
+) error {
+	order := opts.Order
+	if order == "" {
+		order = chc.TicketLoopOrderKey
+	}
+
+	lines := []string{
+		"loop: planned",
+		fmt.Sprintf("project: %s", projectContext.ProjectID),
+		fmt.Sprintf("dry_run: %t", dryRun),
+		fmt.Sprintf("order: %s", order),
+		fmt.Sprintf("eligible: %d", len(tickets)),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write ticket loop result: %w", err)
+		}
+	}
+
+	for _, ticket := range tickets {
+		if _, err := fmt.Fprintf(
+			stdout,
+			"ticket: %s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+			ticket.Key,
+			ticket.Title,
+			ticket.Status,
+			ticket.Priority,
+			ticket.Severity,
+			ticket.Type,
+			ticket.UseCase,
+			ticket.RelativePath,
+		); err != nil {
+			return fmt.Errorf("write ticket loop result: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
