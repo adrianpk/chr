@@ -175,8 +175,93 @@ func TestDaemonStartDryRunPrintsPlan(t *testing.T) {
 		"daemon: planned",
 		"action: start",
 		"dry_run: true",
+		"allowed: true",
+		"stale: false",
+		"reason: daemon state is missing",
 		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
 		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStartDryRunRejectsFreshRunningState(t *testing.T) {
+	devRoot := t.TempDir()
+	startedAt := time.Now().UTC()
+	heartbeatAt := startedAt
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:      chc.DaemonStatusRunning,
+		PID:         1234,
+		StartedAt:   &startedAt,
+		HeartbeatAt: &heartbeatAt,
+		UpdatedAt:   heartbeatAt,
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon start returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: planned",
+		"action: start",
+		"allowed: false",
+		"stale: false",
+		"reason: daemon already running with pid 1234",
+		"current_status: running",
+		"current_pid: 1234",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestDaemonStartDryRunAllowsStaleRunningState(t *testing.T) {
+	devRoot := t.TempDir()
+	startedAt := time.Now().UTC().Add(-10 * time.Minute)
+	heartbeatAt := startedAt
+
+	upsertDaemonState(t, devRoot, chc.DaemonState{
+		Status:      chc.DaemonStatusRunning,
+		PID:         1234,
+		StartedAt:   &startedAt,
+		HeartbeatAt: &heartbeatAt,
+		UpdatedAt:   heartbeatAt,
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"daemon",
+		"start",
+		"--dev-root",
+		devRoot,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("daemon start returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"daemon: planned",
+		"action: start",
+		"allowed: true",
+		"stale: true",
+		"reason: daemon state is stale",
+		"current_status: running",
+		"current_pid: 1234",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())

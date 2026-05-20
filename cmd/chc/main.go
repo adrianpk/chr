@@ -116,7 +116,7 @@ func daemonStopAction(stdout io.Writer) cli.ActionFunc {
 	}
 }
 
-func runDaemonStart(_ context.Context, cmd *cli.Command, stdout io.Writer) error {
+func runDaemonStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("daemon start does not accept positional arguments")
 	}
@@ -130,7 +130,12 @@ func runDaemonStart(_ context.Context, cmd *cli.Command, stdout io.Writer) error
 		return fmt.Errorf("daemon start requires --dry-run until lifecycle state is delivered")
 	}
 
-	return printDaemonPlan(stdout, "start", env)
+	decision, err := daemonStartGuardDecision(ctx, env)
+	if err != nil {
+		return err
+	}
+
+	return printDaemonStartPlan(stdout, env, decision)
 }
 
 func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -225,6 +230,54 @@ func printDaemonPlan(stdout io.Writer, action string, env chc.UserEnvironment) e
 		"dry_run: true",
 		fmt.Sprintf("data_dir: %s", env.DataDir()),
 		fmt.Sprintf("state_dir: %s", env.StateDir()),
+	}
+
+	return printDaemonLines(stdout, lines)
+}
+
+func daemonStartGuardDecision(ctx context.Context, env chc.UserEnvironment) (chc.DaemonStartGuardDecision, error) {
+	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
+	if err != nil {
+		return chc.DaemonStartGuardDecision{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	state, err := repository.GetDaemonState(ctx)
+	if errors.Is(err, chc.ErrDaemonStateNotFound) {
+		return chc.DaemonStartGuardDecision{
+			Allowed: true,
+			Reason:  "daemon state is missing",
+		}, nil
+	}
+
+	if err != nil {
+		return chc.DaemonStartGuardDecision{}, err
+	}
+
+	return chc.EvaluateDaemonStartGuard(state, time.Now().UTC(), chc.DefaultDaemonStaleAfter)
+}
+
+func printDaemonStartPlan(stdout io.Writer, env chc.UserEnvironment, decision chc.DaemonStartGuardDecision) error {
+	lines := []string{
+		"daemon: planned",
+		"action: start",
+		"dry_run: true",
+		fmt.Sprintf("allowed: %t", decision.Allowed),
+		fmt.Sprintf("stale: %t", decision.Stale),
+		fmt.Sprintf("reason: %s", decision.Reason),
+		fmt.Sprintf("data_dir: %s", env.DataDir()),
+		fmt.Sprintf("state_dir: %s", env.StateDir()),
+	}
+
+	if decision.State.Status != "" {
+		lines = append(lines,
+			fmt.Sprintf("current_status: %s", decision.State.Status),
+			fmt.Sprintf("current_pid: %d", decision.State.PID),
+		)
 	}
 
 	return printDaemonLines(stdout, lines)

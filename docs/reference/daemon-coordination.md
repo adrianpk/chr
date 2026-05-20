@@ -33,6 +33,9 @@ reason, and user-level state paths.
 process ownership are delivered. Without `--dry-run`, they return an explicit
 error instead of writing partial daemon state.
 
+`daemon start --dry-run` evaluates the single-instance guard and reports whether
+a future start would be allowed.
+
 ## Out of Scope
 
 The command skeleton does not:
@@ -90,6 +93,25 @@ environment. It supports:
 The repository does not start, stop, or signal processes. It only persists the
 lifecycle state that later daemon slices use for process ownership and status
 reporting.
+
+## Single-Instance Guard
+
+The daemon start guard prevents duplicate local daemon ownership.
+
+The guard allows start when:
+
+- daemon state is missing;
+- daemon state is `stopped`;
+- daemon state is `failed`;
+- daemon state is already classified as `stale`;
+- active daemon state has not heartbeated within the stale threshold.
+
+The guard rejects start when daemon state is freshly `starting`, `running`, or
+`stopping`.
+
+The default stale threshold is five minutes. Stale classification in this slice
+is a decision result only; persisted stale-state mutation is handled by a later
+recovery slice.
 
 ## Status Reporting
 
