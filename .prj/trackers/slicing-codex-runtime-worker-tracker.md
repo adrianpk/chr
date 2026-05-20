@@ -49,7 +49,7 @@ Candidate tasks:
 - [x] Add focused command-rendering tests.
 - [x] Document the worker contract.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -60,7 +60,7 @@ Task commits:
 - T1.5: `67b32c9` `test(codex-worker): cover worker command contract`
 - T1.6: `docs(codex-worker): document worker contract`
 - T1.7: `docs(codex-worker): document worker contract`
-- T1.8: pending
+- T1.8: `docs(codex-worker): record worker contract validation`
 
 ## Slice 2: Worker Context Materialization
 
