@@ -646,6 +646,7 @@ func newProvingCommand(stdout io.Writer) *cli.Command {
 		Usage: "Run temporary MVP proving-ground workflows",
 		Commands: []*cli.Command{
 			newProvingRunCommand(stdout),
+			newProvingRalphCommand(stdout),
 			newProvingValidateCommand(stdout),
 		},
 	}
@@ -671,6 +672,29 @@ func newProvingRunCommand(stdout io.Writer) *cli.Command {
 			},
 		},
 		Action: provingRunAction(stdout),
+	}
+}
+
+func newProvingRalphCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "ralph",
+		Usage: "Run a bounded proving-ground Ralph Loop for one objective",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "dir",
+				Usage: "project directory override",
+				Value: ".",
+			},
+			&cli.StringFlag{
+				Name:  "objective",
+				Usage: "project-relative proving objective path",
+			},
+			&cli.IntFlag{
+				Name:  "max-attempts",
+				Usage: "maximum Ralph Loop attempts",
+			},
+		},
+		Action: provingRalphAction(stdout),
 	}
 }
 
@@ -738,6 +762,12 @@ func runtimeInitAction(stdout io.Writer) cli.ActionFunc {
 func provingRunAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runProvingRun(ctx, cmd, stdout)
+	}
+}
+
+func provingRalphAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runProvingRalph(ctx, cmd, stdout)
 	}
 }
 
@@ -2743,6 +2773,36 @@ func runProvingRun(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return printProvingRunResult(stdout, result)
 }
 
+func runProvingRalph(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("proving ralph does not accept positional arguments")
+	}
+
+	objectivePath := cmd.String("objective")
+	if objectivePath == "" {
+		return fmt.Errorf("proving ralph requires --objective")
+	}
+
+	result, err := chc.RunProvingRalphLoop(ctx, chc.ProvingRalphLoopOptions{
+		ProjectDir:    cmd.String("dir"),
+		ObjectivePath: objectivePath,
+		MaxAttempts:   cmd.Int("max-attempts"),
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := printProvingRalphResult(stdout, result); err != nil {
+		return err
+	}
+
+	if result.Status != chc.ProvingRalphLoopStatusPassed {
+		return fmt.Errorf("proving ralph loop failed")
+	}
+
+	return nil
+}
+
 func runProvingValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("proving validate does not accept positional arguments")
@@ -2764,6 +2824,38 @@ func runProvingValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 
 	if !result.Passed {
 		return fmt.Errorf("proving validation failed")
+	}
+
+	return nil
+}
+
+func printProvingRalphResult(stdout io.Writer, result chc.ProvingRalphLoopResult) error {
+	lines := []string{
+		fmt.Sprintf("proving_ralph: %s", result.Status),
+		fmt.Sprintf("objective_id: %s", result.Objective.ID),
+		fmt.Sprintf("ticket_key: %s", result.Objective.TicketKey),
+		fmt.Sprintf("attempts: %d", len(result.Attempts)),
+		fmt.Sprintf("stop_reason: %s", result.StopReason),
+		fmt.Sprintf("summary_path: %s", result.SummaryPath),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write proving ralph result: %w", err)
+		}
+	}
+
+	for _, attempt := range result.Attempts {
+		if _, err := fmt.Fprintf(
+			stdout,
+			"attempt: %d objective_id=%s validation_passed=%t validation_path=%s\n",
+			attempt.Number,
+			attempt.ObjectiveID,
+			attempt.ValidationPassed,
+			attempt.ValidationPath,
+		); err != nil {
+			return fmt.Errorf("write proving ralph attempt result: %w", err)
+		}
 	}
 
 	return nil

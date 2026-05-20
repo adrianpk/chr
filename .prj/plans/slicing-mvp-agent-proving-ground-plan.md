@@ -110,7 +110,7 @@ Expected outcome:
 
 ### Slice 2: Direct Proving Objective Contract
 
-Status: in review.
+Status: delivered.
 
 Expected branch: `feat/slice-2-proving-objective-contract`
 Expected PR title: `feat(slice-2): proving objective contract`
@@ -137,7 +137,7 @@ Expected outcome:
 
 ### Slice 3: Sandbox Codex Runner
 
-Status: in review.
+Status: delivered.
 
 Expected branch: `feat/slice-3-proving-sandbox-runner`
 Expected PR title: `feat(slice-3): proving sandbox runner`
@@ -163,7 +163,7 @@ Expected outcome:
 
 ### Slice 4: Validation Runner
 
-Status: in review.
+Status: delivered.
 
 Expected branch: `feat/slice-4-proving-validation-runner`
 Expected PR title: `feat(slice-4): proving validation runner`
@@ -187,7 +187,7 @@ Expected outcome:
 
 ### Slice 5: Minimal Ralph Loop
 
-Status: planned.
+Status: in review.
 
 Expected branch: `feat/slice-5-proving-ralph-loop`
 Expected PR title: `feat(slice-5): proving ralph loop`

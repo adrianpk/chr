@@ -153,6 +153,153 @@ verify:
 	}
 }
 
+func TestRunProvingRalphLoopStopsOnValidationPass(t *testing.T) {
+	projectDir := newTestProvingProject(t)
+	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	executor := &recordingHarnessExecutor{}
+	validations := 0
+
+	result, err := RunProvingRalphLoop(context.Background(), ProvingRalphLoopOptions{
+		ProjectDir:    projectDir,
+		ObjectivePath: objectivePath,
+		Executor:      executor,
+		ValidationRunner: func(_ context.Context, _ string, objective ProvingObjective) (ProvingValidationResult, error) {
+			validations++
+
+			return ProvingValidationResult{
+				Objective: objective,
+				Passed:    true,
+				LogPath:   resolveProjectPath(projectDir, objective.ValidationPath),
+				Commands: []ProvingValidationCommandResult{
+					{Command: "make verify", ExitCode: 0},
+				},
+			}, nil
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunProvingRalphLoop returned error: %v", err)
+	}
+
+	if result.Status != ProvingRalphLoopStatusPassed {
+		t.Fatalf("Status = %q, want %q", result.Status, ProvingRalphLoopStatusPassed)
+	}
+
+	if result.StopReason != ProvingRalphLoopStopValidationPassed {
+		t.Fatalf("StopReason = %q, want %q", result.StopReason, ProvingRalphLoopStopValidationPassed)
+	}
+
+	if len(result.Attempts) != 1 {
+		t.Fatalf("len(Attempts) = %d, want 1", len(result.Attempts))
+	}
+
+	if validations != 1 {
+		t.Fatalf("validations = %d, want 1", validations)
+	}
+
+	if len(executor.commands) != 2 {
+		t.Fatalf("commands = %d, want docker build and run", len(executor.commands))
+	}
+
+	if _, err := os.Stat(result.SummaryPath); err != nil {
+		t.Fatalf("ralph loop summary was not written: %v", err)
+	}
+}
+
+func TestRunProvingRalphLoopFeedsFailureIntoNextAttempt(t *testing.T) {
+	projectDir := newTestProvingProject(t)
+	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	executor := &recordingHarnessExecutor{}
+	validations := 0
+
+	result, err := RunProvingRalphLoop(context.Background(), ProvingRalphLoopOptions{
+		ProjectDir:    projectDir,
+		ObjectivePath: objectivePath,
+		Executor:      executor,
+		ValidationRunner: func(_ context.Context, _ string, objective ProvingObjective) (ProvingValidationResult, error) {
+			validations++
+			passed := validations == 2
+			exitCode := 0
+			stdout := "ok\n"
+
+			if !passed {
+				exitCode = 2
+				stdout = "expected ids not to be reused\n"
+			}
+
+			return ProvingValidationResult{
+				Objective: objective,
+				Passed:    passed,
+				LogPath:   resolveProjectPath(projectDir, objective.ValidationPath),
+				Commands: []ProvingValidationCommandResult{
+					{Command: "make test", ExitCode: exitCode, Stdout: stdout},
+				},
+			}, nil
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunProvingRalphLoop returned error: %v", err)
+	}
+
+	if result.Status != ProvingRalphLoopStatusPassed {
+		t.Fatalf("Status = %q, want %q", result.Status, ProvingRalphLoopStatusPassed)
+	}
+
+	if len(result.Attempts) != 2 {
+		t.Fatalf("len(Attempts) = %d, want 2", len(result.Attempts))
+	}
+
+	contextContent, err := os.ReadFile(result.Attempts[1].ContextPath)
+	if err != nil {
+		t.Fatalf("read second attempt context: %v", err)
+	}
+
+	for _, want := range []string{
+		"Previous Validation Failure",
+		"expected ids not to be reused",
+		"Do not weaken validation",
+	} {
+		if !strings.Contains(string(contextContent), want) {
+			t.Fatalf("second attempt context does not contain %q:\n%s", want, string(contextContent))
+		}
+	}
+}
+
+func TestRunProvingRalphLoopStopsOnRepeatedFailure(t *testing.T) {
+	projectDir := newTestProvingProject(t)
+	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+
+	result, err := RunProvingRalphLoop(context.Background(), ProvingRalphLoopOptions{
+		ProjectDir:    projectDir,
+		ObjectivePath: objectivePath,
+		Executor:      &recordingHarnessExecutor{},
+		ValidationRunner: func(_ context.Context, _ string, objective ProvingObjective) (ProvingValidationResult, error) {
+			return ProvingValidationResult{
+				Objective: objective,
+				Passed:    false,
+				LogPath:   resolveProjectPath(projectDir, objective.ValidationPath),
+				Commands: []ProvingValidationCommandResult{
+					{Command: "make test", ExitCode: 2, Stdout: "same failure\n"},
+				},
+			}, nil
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunProvingRalphLoop returned error: %v", err)
+	}
+
+	if result.Status != ProvingRalphLoopStatusFailed {
+		t.Fatalf("Status = %q, want %q", result.Status, ProvingRalphLoopStatusFailed)
+	}
+
+	if result.StopReason != ProvingRalphLoopStopRepeatedFailure {
+		t.Fatalf("StopReason = %q, want %q", result.StopReason, ProvingRalphLoopStopRepeatedFailure)
+	}
+
+	if len(result.Attempts) != 2 {
+		t.Fatalf("len(Attempts) = %d, want 2", len(result.Attempts))
+	}
+}
+
 func newTestProvingProject(t *testing.T) string {
 	t.Helper()
 

@@ -3,6 +3,8 @@ package chc
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -57,6 +59,51 @@ type ProvingValidationResult struct {
 	Passed    bool
 	LogPath   string
 }
+
+type ProvingValidationRunner func(context.Context, string, ProvingObjective) (ProvingValidationResult, error)
+
+type ProvingRalphLoopOptions struct {
+	ProjectDir       string
+	ObjectivePath    string
+	MaxAttempts      int
+	Executor         HarnessExecutor
+	ValidationRunner ProvingValidationRunner
+	Stdout           io.Writer
+	Stderr           io.Writer
+}
+
+type ProvingRalphLoopResult struct {
+	Objective   ProvingObjective
+	Attempts    []ProvingRalphLoopAttempt
+	Status      string
+	StopReason  string
+	SummaryPath string
+}
+
+type ProvingRalphLoopAttempt struct {
+	Number           int
+	ObjectiveID      string
+	ArtifactRoot     string
+	ContextPath      string
+	ResultPath       string
+	LogPath          string
+	ValidationPath   string
+	ValidationPassed bool
+	FailureSignature string
+	Error            string
+}
+
+const (
+	ProvingRalphLoopStatusPassed  = "passed"
+	ProvingRalphLoopStatusFailed  = "failed"
+	ProvingRalphLoopStatusBlocked = "blocked"
+
+	ProvingRalphLoopStopValidationPassed = "validation_passed"
+	ProvingRalphLoopStopRepeatedFailure  = "repeated_failure"
+	ProvingRalphLoopStopMaxAttempts      = "max_attempts"
+	ProvingRalphLoopStopAgentFailed      = "agent_failed"
+	ProvingRalphLoopStopValidationFailed = "validation_failed"
+)
 
 func LoadProvingObjective(path string) (ProvingObjective, error) {
 	content, err := os.ReadFile(path)
@@ -113,7 +160,21 @@ func ParseProvingObjective(content string) (ProvingObjective, error) {
 }
 
 func RunProvingSandbox(ctx context.Context, opts ProvingSandboxRunOptions) (ProvingSandboxRunResult, error) {
-	result, err := PlanProvingSandboxRun(opts.ProjectDir, opts.ObjectivePath)
+	projectDir, objective, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
+	if err != nil {
+		return ProvingSandboxRunResult{}, err
+	}
+
+	return RunProvingSandboxForObjective(ctx, opts, projectDir, objective)
+}
+
+func RunProvingSandboxForObjective(
+	ctx context.Context,
+	opts ProvingSandboxRunOptions,
+	projectDir string,
+	objective ProvingObjective,
+) (ProvingSandboxRunResult, error) {
+	result, err := PlanProvingSandboxRunForObjective(projectDir, objective)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
@@ -141,7 +202,20 @@ func RunProvingSandbox(ctx context.Context, opts ProvingSandboxRunOptions) (Prov
 }
 
 func RunProvingValidation(ctx context.Context, projectDir, objectivePath string) (ProvingValidationResult, error) {
-	planned, err := PlanProvingSandboxRun(projectDir, objectivePath)
+	projectDir, objective, err := loadProvingObjectiveForProject(projectDir, objectivePath)
+	if err != nil {
+		return ProvingValidationResult{}, err
+	}
+
+	return RunProvingValidationForObjective(ctx, projectDir, objective)
+}
+
+func RunProvingValidationForObjective(
+	ctx context.Context,
+	projectDir string,
+	objective ProvingObjective,
+) (ProvingValidationResult, error) {
+	planned, err := PlanProvingSandboxRunForObjective(projectDir, objective)
 	if err != nil {
 		return ProvingValidationResult{}, err
 	}
@@ -171,6 +245,136 @@ func RunProvingValidation(ctx context.Context, projectDir, objectivePath string)
 	}
 
 	return result, nil
+}
+
+func RunProvingRalphLoop(ctx context.Context, opts ProvingRalphLoopOptions) (ProvingRalphLoopResult, error) {
+	projectDir, objective, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
+	if err != nil {
+		return ProvingRalphLoopResult{}, err
+	}
+
+	maxAttempts, err := provingRalphLoopMaxAttempts(opts, objective)
+	if err != nil {
+		return ProvingRalphLoopResult{}, err
+	}
+
+	validationRunner := provingRalphLoopValidationRunner(opts)
+	result := newProvingRalphLoopResult(projectDir, objective)
+	seenFailures := map[string]bool{}
+
+	var previousValidation *ProvingValidationResult
+
+	for attemptNumber := 1; attemptNumber <= maxAttempts; attemptNumber++ {
+		attemptObjective := provingAttemptObjective(objective, attemptNumber, previousValidation)
+		attempt, validation, status, stopReason := runProvingRalphLoopAttempt(
+			ctx,
+			opts,
+			projectDir,
+			attemptNumber,
+			attemptObjective,
+			validationRunner,
+		)
+		result.Attempts = append(result.Attempts, attempt)
+
+		if stopReason != "" {
+			result.Status = status
+			result.StopReason = stopReason
+
+			break
+		}
+
+		if seenFailures[attempt.FailureSignature] {
+			result.Status = ProvingRalphLoopStatusFailed
+			result.StopReason = ProvingRalphLoopStopRepeatedFailure
+
+			break
+		}
+
+		seenFailures[attempt.FailureSignature] = true
+		previousValidation = validation
+	}
+
+	if err := writeProvingRalphLoopSummary(result); err != nil {
+		return ProvingRalphLoopResult{}, err
+	}
+
+	return result, nil
+}
+
+func provingRalphLoopMaxAttempts(opts ProvingRalphLoopOptions, objective ProvingObjective) (int, error) {
+	maxAttempts := opts.MaxAttempts
+	if maxAttempts <= 0 {
+		maxAttempts = objective.MaxAttempts
+	}
+
+	if maxAttempts <= 0 {
+		return 0, fmt.Errorf("max attempts must be greater than zero")
+	}
+
+	return maxAttempts, nil
+}
+
+func provingRalphLoopValidationRunner(opts ProvingRalphLoopOptions) ProvingValidationRunner {
+	if opts.ValidationRunner != nil {
+		return opts.ValidationRunner
+	}
+
+	return RunProvingValidationForObjective
+}
+
+func newProvingRalphLoopResult(projectDir string, objective ProvingObjective) ProvingRalphLoopResult {
+	summaryPath := filepath.ToSlash(filepath.Join(objective.ArtifactRoot, "ralph-loop.md"))
+
+	return ProvingRalphLoopResult{
+		Objective:   objective,
+		Status:      ProvingRalphLoopStatusFailed,
+		StopReason:  ProvingRalphLoopStopMaxAttempts,
+		SummaryPath: resolveProjectPath(projectDir, summaryPath),
+	}
+}
+
+func runProvingRalphLoopAttempt(
+	ctx context.Context,
+	opts ProvingRalphLoopOptions,
+	projectDir string,
+	attemptNumber int,
+	attemptObjective ProvingObjective,
+	validationRunner ProvingValidationRunner,
+) (ProvingRalphLoopAttempt, *ProvingValidationResult, string, string) {
+	attempt := provingRalphLoopAttempt(attemptNumber, attemptObjective)
+
+	sandbox, sandboxErr := RunProvingSandboxForObjective(ctx, ProvingSandboxRunOptions{
+		ProjectDir: projectDir,
+		DryRun:     false,
+		Executor:   opts.Executor,
+		Stdout:     opts.Stdout,
+		Stderr:     opts.Stderr,
+	}, projectDir, attemptObjective)
+	if sandboxErr != nil {
+		attempt.Error = sandboxErr.Error()
+
+		return attempt, nil, ProvingRalphLoopStatusBlocked, ProvingRalphLoopStopAgentFailed
+	}
+
+	validation, validationErr := validationRunner(ctx, projectDir, attemptObjective)
+	if validationErr != nil {
+		attempt.Error = validationErr.Error()
+
+		return attempt, nil, ProvingRalphLoopStatusBlocked, ProvingRalphLoopStopValidationFailed
+	}
+
+	attempt.ContextPath = sandbox.Plan.WorkerContextPath
+	attempt.ResultPath = sandbox.Plan.ResultPath
+	attempt.LogPath = sandbox.Plan.LogPath
+	attempt.ValidationPath = validation.LogPath
+	attempt.ValidationPassed = validation.Passed
+	attempt.FailureSignature = ProvingValidationFailureSignature(validation)
+
+	if validation.Passed {
+		return attempt, &validation, ProvingRalphLoopStatusPassed, ProvingRalphLoopStopValidationPassed
+	}
+
+	return attempt, &validation, "", ""
 }
 
 func ProvingValidationCommands() []string {
@@ -302,17 +506,144 @@ func RenderProvingValidationResult(result ProvingValidationResult) string {
 	return output.String()
 }
 
+func RenderProvingValidationFeedback(result ProvingValidationResult) string {
+	var output strings.Builder
+
+	output.WriteString("The previous attempt did not pass validation.\n\n")
+	output.WriteString("Validation artifact: ")
+	output.WriteString(result.LogPath)
+	output.WriteString("\n\n")
+
+	for _, command := range result.Commands {
+		if command.ExitCode == 0 {
+			continue
+		}
+
+		output.WriteString("## Failing Command: ")
+		output.WriteString(command.Command)
+		output.WriteString("\n\n")
+		output.WriteString("exit_code: ")
+		output.WriteString(strconv.Itoa(command.ExitCode))
+		output.WriteString("\n\n")
+
+		if strings.TrimSpace(command.Stdout) != "" {
+			output.WriteString("### Stdout\n\n")
+			output.WriteString(strings.TrimSpace(command.Stdout))
+			output.WriteString("\n\n")
+		}
+
+		if strings.TrimSpace(command.Stderr) != "" {
+			output.WriteString("### Stderr\n\n")
+			output.WriteString(strings.TrimSpace(command.Stderr))
+			output.WriteString("\n\n")
+		}
+	}
+
+	output.WriteString("Fix the implementation and any missing tests. Do not weaken validation.\n")
+
+	return output.String()
+}
+
+func RenderProvingRalphLoopResult(result ProvingRalphLoopResult) string {
+	var output strings.Builder
+
+	writeProvingRalphLoopHeader(&output, result)
+
+	for _, attempt := range result.Attempts {
+		writeProvingRalphLoopAttempt(&output, attempt)
+	}
+
+	return output.String()
+}
+
+func writeProvingRalphLoopHeader(output *strings.Builder, result ProvingRalphLoopResult) {
+	output.WriteString("# Proving Ralph Loop Result\n\n")
+	output.WriteString("objective_id: ")
+	output.WriteString(result.Objective.ID)
+	output.WriteString("\n")
+	output.WriteString("ticket_key: ")
+	output.WriteString(result.Objective.TicketKey)
+	output.WriteString("\n")
+	output.WriteString("status: ")
+	output.WriteString(result.Status)
+	output.WriteString("\n")
+	output.WriteString("stop_reason: ")
+	output.WriteString(result.StopReason)
+	output.WriteString("\n")
+	output.WriteString("attempts: ")
+	output.WriteString(strconv.Itoa(len(result.Attempts)))
+	output.WriteString("\n\n")
+}
+
+func writeProvingRalphLoopAttempt(output *strings.Builder, attempt ProvingRalphLoopAttempt) {
+	output.WriteString("## Attempt ")
+	output.WriteString(strconv.Itoa(attempt.Number))
+	output.WriteString("\n\n")
+	output.WriteString("- objective_id: ")
+	output.WriteString(attempt.ObjectiveID)
+	output.WriteString("\n")
+	output.WriteString("- artifact_root: ")
+	output.WriteString(attempt.ArtifactRoot)
+	output.WriteString("\n")
+	output.WriteString("- context_path: ")
+	output.WriteString(attempt.ContextPath)
+	output.WriteString("\n")
+	output.WriteString("- result_path: ")
+	output.WriteString(attempt.ResultPath)
+	output.WriteString("\n")
+	output.WriteString("- log_path: ")
+	output.WriteString(attempt.LogPath)
+	output.WriteString("\n")
+	output.WriteString("- validation_path: ")
+	output.WriteString(attempt.ValidationPath)
+	output.WriteString("\n")
+	output.WriteString("- validation_passed: ")
+	output.WriteString(strconv.FormatBool(attempt.ValidationPassed))
+	output.WriteString("\n")
+	output.WriteString("- failure_signature: ")
+	output.WriteString(attempt.FailureSignature)
+	output.WriteString("\n")
+
+	if attempt.Error != "" {
+		output.WriteString("- error: ")
+		output.WriteString(attempt.Error)
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n")
+}
+
+func ProvingValidationFailureSignature(result ProvingValidationResult) string {
+	hash := sha256.New()
+
+	for _, command := range result.Commands {
+		if command.ExitCode == 0 {
+			continue
+		}
+
+		hash.Write([]byte(command.Command))
+		hash.Write([]byte{0})
+		hash.Write([]byte(strconv.Itoa(command.ExitCode)))
+		hash.Write([]byte{0})
+		hash.Write([]byte(command.Stdout))
+		hash.Write([]byte{0})
+		hash.Write([]byte(command.Stderr))
+		hash.Write([]byte{0})
+	}
+
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
 func PlanProvingSandboxRun(projectDir, objectivePath string) (ProvingSandboxRunResult, error) {
-	projectDir, err := resolveProjectDir(projectDir)
+	projectDir, objective, err := loadProvingObjectiveForProject(projectDir, objectivePath)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
 
-	objective, err := LoadProvingObjective(resolveProjectPath(projectDir, objectivePath))
-	if err != nil {
-		return ProvingSandboxRunResult{}, err
-	}
+	return PlanProvingSandboxRunForObjective(projectDir, objective)
+}
 
+func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjective) (ProvingSandboxRunResult, error) {
 	config, err := LoadWorkspaceConfig(projectDir)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
@@ -356,6 +687,65 @@ func PlanProvingSandboxRun(projectDir, objectivePath string) (ProvingSandboxRunR
 		Run:        invocation.Run,
 		TicketPath: ticketPath,
 	}, nil
+}
+
+func loadProvingObjectiveForProject(projectDir, objectivePath string) (string, ProvingObjective, error) {
+	projectDir, err := resolveProjectDir(projectDir)
+	if err != nil {
+		return "", ProvingObjective{}, err
+	}
+
+	objective, err := LoadProvingObjective(resolveProjectPath(projectDir, objectivePath))
+	if err != nil {
+		return "", ProvingObjective{}, err
+	}
+
+	return projectDir, objective, nil
+}
+
+func provingAttemptObjective(
+	objective ProvingObjective,
+	attemptNumber int,
+	previousValidation *ProvingValidationResult,
+) ProvingObjective {
+	attempt := objective
+	attempt.ID = fmt.Sprintf("%s-attempt-%d", objective.ID, attemptNumber)
+	attempt.ArtifactRoot = filepath.ToSlash(filepath.Join(objective.ArtifactRoot, fmt.Sprintf("attempt-%d", attemptNumber)))
+	attempt.ContextPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "context.md"))
+	attempt.ResultPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "result.json"))
+	attempt.LogPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "agent.log"))
+	attempt.ValidationPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "validation.log"))
+
+	if previousValidation != nil {
+		attempt.Body = strings.TrimSpace(objective.Body) + "\n\n## Previous Validation Failure\n\n" +
+			RenderProvingValidationFeedback(*previousValidation)
+	}
+
+	return attempt
+}
+
+func provingRalphLoopAttempt(attemptNumber int, objective ProvingObjective) ProvingRalphLoopAttempt {
+	return ProvingRalphLoopAttempt{
+		Number:         attemptNumber,
+		ObjectiveID:    objective.ID,
+		ArtifactRoot:   objective.ArtifactRoot,
+		ContextPath:    objective.ContextPath,
+		ResultPath:     objective.ResultPath,
+		LogPath:        objective.LogPath,
+		ValidationPath: objective.ValidationPath,
+	}
+}
+
+func writeProvingRalphLoopSummary(result ProvingRalphLoopResult) error {
+	if err := os.MkdirAll(filepath.Dir(result.SummaryPath), 0o755); err != nil {
+		return fmt.Errorf("create proving ralph loop summary directory: %w", err)
+	}
+
+	if err := os.WriteFile(result.SummaryPath, []byte(RenderProvingRalphLoopResult(result)), 0o644); err != nil {
+		return fmt.Errorf("write proving ralph loop summary: %w", err)
+	}
+
+	return nil
 }
 
 func RenderProvingWorkerContext(result ProvingSandboxRunResult) string {

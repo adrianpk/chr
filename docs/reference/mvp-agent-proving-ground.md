@@ -72,7 +72,7 @@ Without `--dry-run`, `chc proving run`:
 - runs the Docker build command;
 - runs Codex inside the sandbox container.
 
-Validation and Ralph Loop retries are delivered by later proving-ground slices.
+Validation and Ralph Loop retries are provided by separate proving commands.
 
 ## Validation Runner
 
@@ -93,6 +93,30 @@ The validation runner executes:
 
 It writes a Markdown validation artifact to the objective's `validation_path`.
 The command exits non-zero when any validation command fails.
+
+## Minimal Ralph Loop
+
+Run a bounded Ralph Loop for one objective:
+
+```sh
+chc proving ralph \
+  --dir _workspace/testing/projects/todolist \
+  --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md
+```
+
+The loop:
+
+- runs one sandboxed Codex invocation per attempt;
+- validates after each attempt;
+- feeds failed validation output into the next attempt context;
+- stops on validation pass, repeated failure, blocked execution, or max
+  attempts;
+- writes per-attempt artifacts under the objective artifact root;
+- writes a loop summary to `ralph-loop.md`.
+
+Each Codex invocation is independent. The loop does not rely on implicit
+conversation memory. Context transfer between attempts is explicit through the
+generated worker context artifact.
 
 ## Boundaries
 
