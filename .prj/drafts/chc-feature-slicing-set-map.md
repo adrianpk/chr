@@ -36,6 +36,7 @@ Known and inferred feature areas:
 - agent runtime boundary;
 - ticket execution;
 - ticket execution context hardening;
+- MVP agent proving ground;
 - filtered ticket loop;
 - daemon and asynchronous coordination;
 - notification and remote command surfaces;
@@ -296,6 +297,29 @@ Candidate slices:
 
 Manual notification commands are setup checks. The main value is daemon, loop, and agent-triggered messaging.
 
+## Slicing: MVP Agent Proving Ground
+
+Use case:
+
+> A controlled project proves that `chc` can run a sandboxed Codex agent that
+> fixes code, validates, retries through Ralph Loop, and leaves the project
+> working.
+
+Current state: planned as a temporary post-cutoff MVP hardening window.
+
+Candidate slices:
+
+- todolist fixture project;
+- direct proving objective contract;
+- sandbox Codex runner;
+- validation runner;
+- minimal Ralph Loop;
+- end-to-end agent proof.
+
+This slicing explicitly allows hardcoded fixture paths, a hand-authored sandbox
+Dockerfile, and a direct execution path before the official workflow is fully
+generalized.
+
 ## Slicing: Reporting and Evidence
 
 Use case:
@@ -363,11 +387,12 @@ required for the operational cutoff, but they remain part of the product
 direction and should not be dropped from planning:
 
 1. Daemon Coordination.
-2. Ticket Execution Context Hardening.
-3. Notification and Remote Commands.
-4. Reporting and Evidence.
-5. Maintenance and Recovery.
-6. Operational Documents.
+2. MVP Agent Proving Ground.
+3. Ticket Execution Context Hardening.
+4. Notification and Remote Commands.
+5. Reporting and Evidence.
+6. Maintenance and Recovery.
+7. Operational Documents.
 
 Post-cutoff work can be pulled earlier only when it directly blocks local loop
 operation, debugging, or evidence quality.
@@ -382,10 +407,16 @@ execution. It also captures Ralph Loop retry policy and execution handoff
 evidence. This work strengthens the post-cutoff MVP before remote notification
 surfaces.
 
+MVP Agent Proving Ground temporarily prioritizes a direct proof over generality:
+given a controlled fixture project, `chc` should run Codex in the agent sandbox,
+validate compile, lint, and tests, retry with Ralph Loop, and leave a
+non-trivial bugfix or feature working.
+
 ## Open Questions
 
 - Should document workflows remain a separate slicing or be split by artifact family?
-- Which execution-context specs should be implemented before Notification and Remote Commands?
+- Which proving-ground behavior should be generalized before Notification and Remote Commands?
+- Which execution-context specs should be implemented before or during the proving ground?
 - Which reporting artifacts are required before remote execution feedback is acceptable?
 - Does the next daemon phase need file watching, or is automatic reconciliation on command boundaries enough?
 - Which notification events are required for the first remote-feedback loop?
