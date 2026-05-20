@@ -5,7 +5,7 @@ Slicing: MVP Agent Proving Ground
 Plan: `.prj/plans/slicing-mvp-agent-proving-ground-plan.md`
 Tracker: `.prj/trackers/slicing-mvp-agent-proving-ground-tracker.md`
 Branch: `feat/slice-1-proving-ground-fixture`
-PR: pending
+PR: #72
 
 ## Purpose
 
