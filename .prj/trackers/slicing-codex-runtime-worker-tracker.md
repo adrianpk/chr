@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 2: Worker Context Materialization | Delivered | `feat/slice-2-worker-context-materialization` | `feat(slice-2): worker context materialization` | `.prj/reports/slices/codex-runtime-worker/slice-2-context-materialization.md` | Repository PR #50. |
 | Slice 3: Harness Worker Invocation | Delivered | `feat/slice-3-harness-worker-invocation` | `feat(slice-3): harness worker invocation` | `.prj/reports/slices/codex-runtime-worker/slice-3-harness-invocation.md` | Repository PR #51. |
 | Slice 4: Result Envelope Changed Files | Delivered | `feat/slice-4-result-changed-files` | `feat(slice-4): result changed files` | `.prj/reports/slices/codex-runtime-worker/slice-4-result-changed-files.md` | Repository PR #52. |
-| Slice 5: Changed File Discovery | Reviewing | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Discover actual workspace changes. |
+| Slice 5: Changed File Discovery | Reviewing | `feat/slice-5-changed-file-discovery` | `feat(slice-5): changed file discovery` | `.prj/reports/slices/codex-runtime-worker/slice-5-changed-file-discovery.md` | Repository PR #53. |
 | Slice 6: Post-Worker Validation | Planned | `feat/slice-6-post-worker-validation` | `feat(slice-6): post worker validation` | `.prj/reports/slices/codex-runtime-worker/slice-6-post-worker-validation.md` | Validate after Codex edits. |
 | Slice 7: Worker Failure Classification and Docs | Planned | `feat/slice-7-worker-failure-docs` | `feat(slice-7): worker failure classification and docs` | `.prj/reports/slices/codex-runtime-worker/slice-7-failure-docs.md` | Document and classify worker failures. |
 
