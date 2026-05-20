@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 4: Tree and Search Context | Delivered | `feat/slice-4-context-tree-search` | `feat(slice-4): context tree search` | `.prj/reports/slices/ticket-execution-context-hardening/slice-4-context-tree-search.md` | Repository PR #81 merged. |
 | Slice 5: Go Graph Context Provider | Delivered | `feat/slice-5-context-gograph-provider` | `feat(slice-5): context gograph provider` | `.prj/reports/slices/ticket-execution-context-hardening/slice-5-context-gograph-provider.md` | Repository PR #82 merged. |
 | Slice 6: Ralph Attempt Context | Delivered | `feat/slice-6-context-ralph-attempts` | `feat(slice-6): context ralph attempts` | `.prj/reports/slices/ticket-execution-context-hardening/slice-6-context-ralph-attempts.md` | Repository PR #83 merged. |
-| Slice 7: Docker-Compatible Context Materialization | Planned | `feat/slice-7-context-docker-materialization` | `feat(slice-7): context docker materialization` | `.prj/reports/slices/ticket-execution-context-hardening/slice-7-context-docker-materialization.md` | Runtime artifact layout. |
+| Slice 7: Docker-Compatible Context Materialization | Reviewing | `feat/slice-7-context-docker-materialization` | `feat(slice-7): context docker materialization` | `.prj/reports/slices/ticket-execution-context-hardening/slice-7-context-docker-materialization.md` | Runtime artifact layout. |
 | Slice 8: Execution Readiness and Handoff | Planned | `feat/slice-8-context-readiness-handoff` | `feat(slice-8): context readiness handoff` | `.prj/reports/slices/ticket-execution-context-hardening/slice-8-context-readiness-handoff.md` | Readiness and evidence links. |
 
 ## Slice 1: Context Composer Contract
@@ -247,25 +247,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Write `context.md` under `run_artifact_dir`.
-- [ ] Write sibling context artifacts under `run_artifact_dir/context/`.
-- [ ] Ensure paths are visible through the runtime mount.
-- [ ] Keep `CHC_WORKER_CONTEXT_PATH` as the main Codex input.
-- [ ] Add dry-run visibility for included sources.
-- [ ] Test path rendering and artifact layout.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Write `context.md` under `run_artifact_dir`.
+- [x] Write sibling context artifacts under `run_artifact_dir/context/`.
+- [x] Ensure paths are visible through the runtime mount.
+- [x] Keep `CHC_WORKER_CONTEXT_PATH` as the main Codex input.
+- [x] Add dry-run visibility for included sources.
+- [x] Test path rendering and artifact layout.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
-- T7.6: pending
-- T7.7: pending
-- T7.8: pending
+- T7.1: `102ac21`
+- T7.2: `102ac21`
+- T7.3: `102ac21`
+- T7.4: `102ac21`
+- T7.5: `102ac21`
+- T7.6: `102ac21`
+- T7.7: `docs(slice-7): record context materialization report`
+- T7.8: `102ac21`
 
 ## Slice 8: Execution Readiness and Handoff
 
