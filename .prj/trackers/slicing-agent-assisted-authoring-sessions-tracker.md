@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 3: Authoring Context Package
+Slice 4: Model Invocation Adapter
 
 ## Slice Status
 
