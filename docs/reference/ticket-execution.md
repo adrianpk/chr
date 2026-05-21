@@ -338,5 +338,14 @@ The repository supports:
 - getting one execution record by ID;
 - listing execution records for one project ticket.
 
+## Reporting
+
+Execution reporting is documented in:
+
+- `docs/reference/execution-reports.md` for the execution report format;
+- `docs/reference/reports.md` for `chc report list` and `chc report show`;
+- `docs/how-to/find-execution-and-loop-evidence.md` for practical evidence
+  lookup.
+
 Execution records are linked to `projects(id)` and are deleted when their
 project is deleted.

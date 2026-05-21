@@ -13,6 +13,7 @@ Learning-oriented walkthroughs:
 Task-oriented guides:
 
 - [User guide](how-to/user-guide/index.md)
+- [Find execution and loop evidence](how-to/find-execution-and-loop-evidence.md)
 
 ## Reference
 
@@ -32,6 +33,10 @@ Exact contracts and command behavior:
 - [Ticket execution](reference/ticket-execution.md)
 - [Ticket loop](reference/ticket-loop.md)
 - [Ticket result application](reference/ticket-result-application.md)
+- [Reports](reference/reports.md)
+- [Execution reports](reference/execution-reports.md)
+- [Loop reports](reference/loop-reports.md)
+- [Review handoff summaries](reference/review-handoff-summaries.md)
 - [Daemon coordination](reference/daemon-coordination.md)
 - [MVP agent proving ground](reference/mvp-agent-proving-ground.md)
 

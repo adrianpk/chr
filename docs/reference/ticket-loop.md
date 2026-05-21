@@ -181,3 +181,12 @@ Optional lifecycle fields:
 
 Loop run records do not replace execution records. Later execution slices link
 loop iterations to existing per-ticket execution records.
+
+## Reporting
+
+Loop reporting is documented in:
+
+- `docs/reference/loop-reports.md` for the loop report format;
+- `docs/reference/reports.md` for `chc report list` and `chc report show`;
+- `docs/how-to/find-execution-and-loop-evidence.md` for practical evidence
+  lookup.

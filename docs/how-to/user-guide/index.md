@@ -201,6 +201,13 @@ Preview result application:
 chc ticket apply-result <execution-id> --dry-run
 ```
 
+Inspect execution evidence:
+
+```sh
+chc report list --ticket CHC-1
+chc report show --execution <execution-id>
+```
+
 ## Run a Foreground Ticket Loop
 
 Preview eligible tickets:
@@ -228,6 +235,13 @@ chc ticket loop --max-iterations 3
 
 The loop executes eligible tickets one at a time and stops on the first blocked
 or failed ticket.
+
+Inspect loop evidence:
+
+```sh
+chc report list --kind loop
+chc report show --loop <loop-id>
+```
 
 ## Capture Authoring Context
 
