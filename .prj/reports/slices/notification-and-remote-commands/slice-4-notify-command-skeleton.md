@@ -1,6 +1,6 @@
 # Slice 4: Notify Command Skeleton
 
-Status: reviewing
+Status: delivered
 Slicing: Notification and Remote Commands
 Plan: `.prj/plans/slicing-notification-and-remote-commands-plan.md`
 Tracker: `.prj/trackers/slicing-notification-and-remote-commands-tracker.md`
