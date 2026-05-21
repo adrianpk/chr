@@ -11,7 +11,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Read `AGENTS.md` and `.agents/` delivery rules before planning.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker to `dev`.
+- [x] Commit plan and tracker to `dev`.
 - [ ] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
