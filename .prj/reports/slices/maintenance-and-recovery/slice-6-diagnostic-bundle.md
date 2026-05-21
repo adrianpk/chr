@@ -1,6 +1,6 @@
 # Slice 6: Diagnostic Bundle
 
-Status: reviewing
+Status: delivered
 Slicing: Maintenance and Recovery
 Plan: `.prj/plans/slicing-maintenance-and-recovery-plan.md`
 Tracker: `.prj/trackers/slicing-maintenance-and-recovery-tracker.md`
