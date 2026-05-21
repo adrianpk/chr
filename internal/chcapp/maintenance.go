@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path/filepath"
 
 	"github.com/urfave/cli/v3"
 
@@ -45,8 +46,23 @@ func newMaintenanceRegistryCommand(stdout io.Writer) *cli.Command {
 		Name:  "registry",
 		Usage: "Inspect project registry state",
 		Commands: []*cli.Command{
+			newMaintenanceRegistryDisableCommand(stdout),
 			newMaintenanceRegistryStatusCommand(stdout),
+			newMaintenanceRegistrySetPathCommand(stdout),
 		},
+	}
+}
+
+func newMaintenanceRegistryDisableCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:      "disable",
+		Usage:     "Disable a registered project",
+		ArgsUsage: "<project-name>",
+		Flags: append(projectRegistryFlags(), &cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print planned repair without updating the registry",
+		}),
+		Action: maintenanceRegistryDisableAction(stdout),
 	}
 }
 
@@ -59,6 +75,19 @@ func newMaintenanceRegistryStatusCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newMaintenanceRegistrySetPathCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:      "set-path",
+		Usage:     "Update a registered project path",
+		ArgsUsage: "<project-name> <project-dir>",
+		Flags: append(projectRegistryFlags(), &cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print planned repair without updating the registry",
+		}),
+		Action: maintenanceRegistrySetPathAction(stdout),
+	}
+}
+
 func maintenanceDBStatusAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runMaintenanceDBStatus(ctx, cmd, stdout)
@@ -68,6 +97,18 @@ func maintenanceDBStatusAction(stdout io.Writer) cli.ActionFunc {
 func maintenanceRegistryStatusAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runMaintenanceRegistryStatus(ctx, cmd, stdout)
+	}
+}
+
+func maintenanceRegistryDisableAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runMaintenanceRegistryDisable(ctx, cmd, stdout)
+	}
+}
+
+func maintenanceRegistrySetPathAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runMaintenanceRegistrySetPath(ctx, cmd, stdout)
 	}
 }
 
@@ -118,6 +159,95 @@ func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout 
 	}
 
 	return printProjectRegistryDiagnostics(stdout, diagnostics)
+}
+
+func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("maintenance registry disable requires exactly one project name")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	projectName := cmd.Args().First()
+	project, err := registry.GetProjectByName(ctx, projectName)
+	if err != nil {
+		return err
+	}
+
+	if cmd.Bool("dry-run") {
+		return printProjectRegistryDisable(stdout, project, true)
+	}
+
+	project, err = registry.DisableProject(ctx, projectName)
+	if err != nil {
+		return err
+	}
+
+	return printProjectRegistryDisable(stdout, project, false)
+}
+
+func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 2 {
+		return fmt.Errorf("maintenance registry set-path requires project name and project directory")
+	}
+
+	projectDir, err := filepath.Abs(cmd.Args().Get(1))
+	if err != nil {
+		return fmt.Errorf("resolve project directory: %w", err)
+	}
+
+	err = requireWorkspace(projectDir)
+	if err != nil {
+		return err
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	projectName := cmd.Args().First()
+	project, err := registry.GetProjectByName(ctx, projectName)
+	if err != nil {
+		return err
+	}
+
+	previousPath := project.Path
+	project.Path = projectDir
+
+	if cmd.Bool("dry-run") {
+		return printProjectRegistrySetPath(stdout, project, previousPath, true)
+	}
+
+	project, err = registry.UpdateProjectPath(ctx, projectName, projectDir)
+	if err != nil {
+		return err
+	}
+
+	return printProjectRegistrySetPath(stdout, project, previousPath, false)
 }
 
 func printMigrationStatus(stdout io.Writer, status chc.MigrationStatus) error {
@@ -221,6 +351,47 @@ func printProjectRegistryDiagnostics(
 		if err != nil {
 			return fmt.Errorf("write project registry diagnostic: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func printProjectRegistryDisable(stdout io.Writer, project chc.Project, dryRun bool) error {
+	action := "disabled"
+	if dryRun {
+		action = "would_disable"
+	}
+
+	_, err := fmt.Fprintf(stdout, "%s: %s path: %s id: %s\n", action, project.Name, project.Path, project.ID)
+	if err != nil {
+		return fmt.Errorf("write project registry disable result: %w", err)
+	}
+
+	return nil
+}
+
+func printProjectRegistrySetPath(
+	stdout io.Writer,
+	project chc.Project,
+	previousPath string,
+	dryRun bool,
+) error {
+	action := "updated_path"
+	if dryRun {
+		action = "would_update_path"
+	}
+
+	_, err := fmt.Fprintf(
+		stdout,
+		"%s: %s from: %s to: %s id: %s\n",
+		action,
+		project.Name,
+		previousPath,
+		project.Path,
+		project.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("write project registry set-path result: %w", err)
 	}
 
 	return nil

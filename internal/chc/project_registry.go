@@ -23,6 +23,8 @@ type ProjectRegistry interface {
 	GetProjectByID(ctx context.Context, id string) (Project, error)
 	GetProjectByName(ctx context.Context, name string) (Project, error)
 	GetProjectByPath(ctx context.Context, path string) (Project, error)
+	DisableProject(ctx context.Context, name string) (Project, error)
+	UpdateProjectPath(ctx context.Context, name string, path string) (Project, error)
 	Close() error
 }
 
@@ -141,6 +143,42 @@ func (r *sqliteProjectRegistry) GetProjectByID(ctx context.Context, id string) (
 
 func (r *sqliteProjectRegistry) GetProjectByPath(ctx context.Context, path string) (Project, error) {
 	return r.getProject(ctx, "path", path)
+}
+
+func (r *sqliteProjectRegistry) DisableProject(ctx context.Context, name string) (Project, error) {
+	project, err := r.GetProjectByName(ctx, name)
+	if err != nil {
+		return Project{}, err
+	}
+
+	_, err = r.db.ExecContext(ctx, "UPDATE projects SET enabled = 0 WHERE id = ?", project.ID)
+	if err != nil {
+		return Project{}, fmt.Errorf("disable project: %w", err)
+	}
+
+	project.Enabled = false
+
+	return project, nil
+}
+
+func (r *sqliteProjectRegistry) UpdateProjectPath(ctx context.Context, name string, path string) (Project, error) {
+	if path == "" {
+		return Project{}, fmt.Errorf("project path is required")
+	}
+
+	project, err := r.GetProjectByName(ctx, name)
+	if err != nil {
+		return Project{}, err
+	}
+
+	_, err = r.db.ExecContext(ctx, "UPDATE projects SET path = ? WHERE id = ?", path, project.ID)
+	if err != nil {
+		return Project{}, fmt.Errorf("update project path: %w", err)
+	}
+
+	project.Path = path
+
+	return project, nil
 }
 
 func (r *sqliteProjectRegistry) getProject(ctx context.Context, field, value string) (Project, error) {

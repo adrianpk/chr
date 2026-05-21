@@ -3212,6 +3212,180 @@ func TestMaintenanceRegistryStatusReportsMissingProjectPath(t *testing.T) {
 	}
 }
 
+func TestMaintenanceRegistryDisableDisablesProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"disable",
+		"--dev-root",
+		devRoot,
+		"example",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry disable returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "disabled: example path: "+projectDir) {
+		t.Fatalf("stdout = %q, want disabled project", stdout.String())
+	}
+
+	var statusStdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &statusStdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry status returned error: %v", err)
+	}
+
+	if !strings.Contains(statusStdout.String(), "enabled: false active: false path_exists: true workspace_exists: true status: disabled") {
+		t.Fatalf("stdout = %q, want disabled status", statusStdout.String())
+	}
+}
+
+func TestMaintenanceRegistryDisableDryRunDoesNotMutateProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"disable",
+		"--dev-root",
+		devRoot,
+		"--dry-run",
+		"example",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry disable returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "would_disable: example path: "+projectDir) {
+		t.Fatalf("stdout = %q, want dry-run disable", stdout.String())
+	}
+
+	var statusStdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &statusStdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry status returned error: %v", err)
+	}
+
+	if !strings.Contains(statusStdout.String(), "enabled: true active: false path_exists: true workspace_exists: true status: ok") {
+		t.Fatalf("stdout = %q, want unchanged status", statusStdout.String())
+	}
+}
+
+func TestMaintenanceRegistrySetPathUpdatesProjectPath(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	movedDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"set-path",
+		"--dev-root",
+		devRoot,
+		"example",
+		movedDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry set-path returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "updated_path: example from: "+projectDir+" to: "+movedDir) {
+		t.Fatalf("stdout = %q, want updated path", stdout.String())
+	}
+
+	var statusStdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &statusStdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry status returned error: %v", err)
+	}
+
+	if !strings.Contains(statusStdout.String(), "project: example path: "+movedDir) {
+		t.Fatalf("stdout = %q, want moved path", statusStdout.String())
+	}
+}
+
+func TestMaintenanceRegistrySetPathDryRunDoesNotMutateProject(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	movedDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"set-path",
+		"--dev-root",
+		devRoot,
+		"--dry-run",
+		"example",
+		movedDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry set-path returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "would_update_path: example from: "+projectDir+" to: "+movedDir) {
+		t.Fatalf("stdout = %q, want dry-run path update", stdout.String())
+	}
+
+	var statusStdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &statusStdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry status returned error: %v", err)
+	}
+
+	if !strings.Contains(statusStdout.String(), "project: example path: "+projectDir) {
+		t.Fatalf("stdout = %q, want original path", statusStdout.String())
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()

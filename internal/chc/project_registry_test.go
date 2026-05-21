@@ -128,6 +128,56 @@ func TestProjectRegistryReturnsNotFoundError(t *testing.T) {
 	}
 }
 
+func TestProjectRegistryDisablesProject(t *testing.T) {
+	registry := newTestProjectRegistry(t)
+	project := testRegistryProject("project-1", "example", "/tmp/example")
+
+	addTestProject(t, registry, project)
+
+	updated, err := registry.DisableProject(context.Background(), "example")
+	if err != nil {
+		t.Fatalf("DisableProject returned error: %v", err)
+	}
+
+	if updated.Enabled {
+		t.Fatal("Enabled = true, want false")
+	}
+
+	stored, err := registry.GetProjectByName(context.Background(), "example")
+	if err != nil {
+		t.Fatalf("GetProjectByName returned error: %v", err)
+	}
+
+	if stored.Enabled {
+		t.Fatal("stored Enabled = true, want false")
+	}
+}
+
+func TestProjectRegistryUpdatesProjectPath(t *testing.T) {
+	registry := newTestProjectRegistry(t)
+	project := testRegistryProject("project-1", "example", "/tmp/example")
+
+	addTestProject(t, registry, project)
+
+	updated, err := registry.UpdateProjectPath(context.Background(), "example", "/tmp/moved")
+	if err != nil {
+		t.Fatalf("UpdateProjectPath returned error: %v", err)
+	}
+
+	if updated.Path != "/tmp/moved" {
+		t.Fatalf("Path = %q, want /tmp/moved", updated.Path)
+	}
+
+	stored, err := registry.GetProjectByName(context.Background(), "example")
+	if err != nil {
+		t.Fatalf("GetProjectByName returned error: %v", err)
+	}
+
+	if stored.Path != "/tmp/moved" {
+		t.Fatalf("stored Path = %q, want /tmp/moved", stored.Path)
+	}
+}
+
 func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 	root := t.TempDir()
 
@@ -190,6 +240,16 @@ func addTestProject(t *testing.T, registry ProjectRegistry, project Project) {
 	err := registry.AddProject(context.Background(), project)
 	if err != nil {
 		t.Fatalf("AddProject returned error: %v", err)
+	}
+}
+
+func testRegistryProject(id, name, path string) Project {
+	return Project{
+		ID:           id,
+		Name:         name,
+		Path:         path,
+		Enabled:      true,
+		RegisteredAt: time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC),
 	}
 }
 
