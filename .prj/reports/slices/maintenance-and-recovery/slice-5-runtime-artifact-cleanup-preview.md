@@ -5,7 +5,7 @@ Slicing: Maintenance and Recovery
 Plan: `.prj/plans/slicing-maintenance-and-recovery-plan.md`
 Tracker: `.prj/trackers/slicing-maintenance-and-recovery-tracker.md`
 Branch: `feat/slice-5-runtime-artifact-cleanup-preview`
-PR: pending
+PR: #130
 
 ## Purpose
 
