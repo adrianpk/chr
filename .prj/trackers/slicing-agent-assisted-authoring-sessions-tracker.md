@@ -25,7 +25,7 @@ Slice 2: Transcript Event Storage
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Assisted Session Contract | Delivered | `feat/slice-1-assisted-session-contract` | `feat(slice-1): assisted session contract` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-1-assisted-session-contract.md` | Repository PR #99. |
-| Slice 2: Transcript Event Storage | Planned | `feat/slice-2-assisted-transcript-storage` | `feat(slice-2): assisted transcript storage` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-2-assisted-transcript-storage.md` | Depends on Slice 1. |
+| Slice 2: Transcript Event Storage | Delivered | `feat/slice-2-assisted-transcript-storage` | `feat(slice-2): assisted transcript storage` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-2-assisted-transcript-storage.md` | Repository PR #100. |
 | Slice 3: Authoring Context Package | Planned | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Depends on Slice 2. |
 | Slice 4: Model Invocation Adapter | Planned | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Depends on Slice 3. |
 | Slice 5: Adaptive Quiz Loop | Planned | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Depends on Slice 4. |
@@ -80,23 +80,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define transcript event types.
-- [ ] Render transcript events to Markdown.
-- [ ] Parse stored transcript events.
-- [ ] Append events without rewriting unrelated session artifacts.
-- [ ] Add repository tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define transcript event types.
+- [x] Render transcript events to Markdown.
+- [x] Parse stored transcript events.
+- [x] Append events without rewriting unrelated session artifacts.
+- [x] Add repository tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1:
-- T2.2:
-- T2.3:
-- T2.4:
-- T2.5:
-- T2.6:
-- T2.7:
+- T2.1: feat(slice-2): assisted transcript storage
+- T2.2: feat(slice-2): assisted transcript storage
+- T2.3: feat(slice-2): assisted transcript storage
+- T2.4: feat(slice-2): assisted transcript storage
+- T2.5: feat(slice-2): assisted transcript storage
+- T2.6: feat(slice-2): assisted transcript storage
+- T2.7: feat(slice-2): assisted transcript storage
 
 ## Slice 3: Authoring Context Package
 

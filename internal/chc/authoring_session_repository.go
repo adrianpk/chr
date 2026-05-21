@@ -20,6 +20,8 @@ type AuthoringSessionRepository interface {
 	UpdateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error)
 	GetSession(ctx context.Context, id string) (AuthoringSession, error)
 	ListSessions(ctx context.Context) ([]AuthoringSession, error)
+	AppendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error
+	ListTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error)
 }
 
 type AuthoringSessionPaths struct {
@@ -196,6 +198,106 @@ func (r *fileAuthoringSessionRepository) ListSessions(ctx context.Context) ([]Au
 	}
 
 	return sessions, nil
+}
+
+func (r *fileAuthoringSessionRepository) AppendTranscriptEvents(
+	ctx context.Context,
+	sessionID string,
+	events []AssistedTranscriptEvent,
+) error {
+	err := ctx.Err()
+	if err != nil {
+		return err
+	}
+
+	if sessionID == "" {
+		return fmt.Errorf("authoring session id is required")
+	}
+
+	paths := AuthoringSessionLayout(r.projectDir, sessionID)
+
+	err = requireAuthoringSessionFile(paths.SessionPath, sessionID)
+	if err != nil {
+		return err
+	}
+
+	var output bytes.Buffer
+
+	for _, event := range events {
+		if event.SessionID != sessionID {
+			return fmt.Errorf("assisted transcript event session id does not match session")
+		}
+
+		rendered, err := RenderAssistedTranscriptEvent(event)
+		if err != nil {
+			return err
+		}
+
+		output.WriteString(rendered)
+		output.WriteString("\n")
+	}
+
+	file, err := os.OpenFile(paths.TranscriptPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		return fmt.Errorf("open authoring transcript: %w", err)
+	}
+
+	defer func() {
+		//nolint:errcheck // Write errors are returned by the main write call.
+		_ = file.Close()
+	}()
+
+	_, err = file.WriteString(output.String())
+	if err != nil {
+		return fmt.Errorf("append authoring transcript: %w", err)
+	}
+
+	return nil
+}
+
+func (r *fileAuthoringSessionRepository) ListTranscriptEvents(
+	ctx context.Context,
+	sessionID string,
+) ([]AssistedTranscriptEvent, error) {
+	err := ctx.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	if sessionID == "" {
+		return nil, fmt.Errorf("authoring session id is required")
+	}
+
+	paths := AuthoringSessionLayout(r.projectDir, sessionID)
+
+	err = requireAuthoringSessionFile(paths.SessionPath, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := os.ReadFile(paths.TranscriptPath)
+	if errors.Is(err, os.ErrNotExist) {
+		return []AssistedTranscriptEvent{}, nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("read authoring transcript: %w", err)
+	}
+
+	return ParseAssistedTranscriptEvents(string(content))
+}
+
+func requireAuthoringSessionFile(path, sessionID string) error {
+	_, err := os.Stat(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, sessionID)
+	}
+
+	if err != nil {
+		return fmt.Errorf("stat authoring session: %w", err)
+	}
+
+	return nil
 }
 
 func RenderAuthoringSession(session AuthoringSession, paths AuthoringSessionPaths) (string, error) {
