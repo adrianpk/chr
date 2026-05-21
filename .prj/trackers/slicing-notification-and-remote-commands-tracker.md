@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 2: Notification Configuration | Delivered | `feat/slice-2-notification-config` | `feat(slice-2): notification config` | `.prj/reports/slices/notification-and-remote-commands/slice-2-notification-config.md` | Repository PR #109 merged. |
 | Slice 3: Notification Audit Repository | Delivered | `feat/slice-3-notification-audit-repository` | `feat(slice-3): notification audit repository` | `.prj/reports/slices/notification-and-remote-commands/slice-3-notification-audit-repository.md` | Repository PR #110 merged. |
 | Slice 4: Notify Command Skeleton | Delivered | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Repository PR #111 merged. |
-| Slice 5: Telegram Dispatch Boundary | Planned | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Pending implementation. |
+| Slice 5: Telegram Dispatch Boundary | Reviewing | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Repository PR #112. |
 | Slice 6: Loop and Ticket Notifications | Planned | `feat/slice-6-loop-ticket-notifications` | `feat(slice-6): loop ticket notifications` | `.prj/reports/slices/notification-and-remote-commands/slice-6-loop-ticket-notifications.md` | Pending implementation. |
 | Slice 7: Remote Command Intake Model | Planned | `feat/slice-7-remote-command-intake-model` | `feat(slice-7): remote command intake model` | `.prj/reports/slices/notification-and-remote-commands/slice-7-remote-command-intake-model.md` | Pending implementation. |
 | Slice 8: Telegram Remote Command Handoff | Planned | `feat/slice-8-telegram-remote-command-handoff` | `feat(slice-8): telegram remote command handoff` | `.prj/reports/slices/notification-and-remote-commands/slice-8-telegram-remote-command-handoff.md` | Pending implementation. |
@@ -177,25 +177,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add Telegram message renderer.
-- [ ] Add transport interface for sending messages.
-- [ ] Add HTTP sender implementation with injectable client.
-- [ ] Wire non-dry-run `notify telegram test`.
-- [ ] Record audit success or failure.
-- [ ] Add transport and CLI tests without requiring real credentials.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add Telegram message renderer.
+- [x] Add transport interface for sending messages.
+- [x] Add HTTP sender implementation with injectable client.
+- [x] Wire non-dry-run `notify telegram test`.
+- [x] Record audit success or failure.
+- [x] Add transport and CLI tests without requiring real credentials.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
-- T5.8: pending
+- T5.1: `132d07f`
+- T5.2: `132d07f`
+- T5.3: `132d07f`
+- T5.4: `132d07f`
+- T5.5: `132d07f`
+- T5.6: `132d07f`
+- T5.7: `docs(slice-5): record telegram dispatch report`
+- T5.8: `make verify`
 
 ## Slice 6: Loop and Ticket Notifications
 
