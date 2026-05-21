@@ -13,6 +13,7 @@ Learning-oriented walkthroughs:
 Task-oriented guides:
 
 - [User guide](how-to/user-guide/index.md)
+- [Full-system lab runbook](how-to/full-system-lab-runbook.md)
 - [Find execution and loop evidence](how-to/find-execution-and-loop-evidence.md)
 - [Inspect and recover local state](how-to/inspect-and-recover-local-state.md)
 
