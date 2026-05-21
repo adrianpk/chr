@@ -3386,6 +3386,85 @@ func TestMaintenanceRegistrySetPathDryRunDoesNotMutateProject(t *testing.T) {
 	}
 }
 
+func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "runtime", "runs", "exec-1")
+	record := cliExecutionRecord(projectDir, runDir)
+
+	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
+	if err != nil {
+		t.Fatalf("create run dir: %v", err)
+	}
+
+	createCLIExecutionRecord(t, devRoot, record)
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"execution",
+		"artifacts",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance execution artifacts returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"executions: 1",
+		"drifted: 1",
+		"missing_artifacts: 4",
+		"execution: exec-1 ticket: CHC-1 status: succeeded artifact_status: missing_artifacts",
+		"artifact: exec-1 name: run_dir exists: true path: " + record.Artifacts.RunDir,
+		"artifact: exec-1 name: result exists: false path: " + record.Artifacts.ResultPath,
+		"artifact: exec-1 name: report exists: false path: " + chc.ExecutionReportPath(record),
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestMaintenanceExecutionArtifactsReportsCompleteArtifacts(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "runtime", "runs", "exec-1")
+	record := cliExecutionRecord(projectDir, runDir)
+	writeCLIExecutionArtifacts(t, record)
+	createCLIExecutionRecord(t, devRoot, record)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"execution",
+		"artifacts",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance execution artifacts returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"executions: 1",
+		"drifted: 0",
+		"missing_artifacts: 0",
+		"execution: exec-1 ticket: CHC-1 status: succeeded artifact_status: ok",
+		"artifact: exec-1 name: validation exists: true path: " + record.Artifacts.ValidationPath,
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
@@ -3693,6 +3772,85 @@ func selectProject(t *testing.T, devRoot, selector string) {
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("project select returned error: %v", err)
+	}
+}
+
+func createCLIExecutionRecord(t *testing.T, devRoot string, record chc.ExecutionRecord) {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	repository, err := chc.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	if err != nil {
+		t.Fatalf("NewExecutionRepository returned error: %v", err)
+	}
+
+	t.Cleanup(func() {
+		err := repository.Close()
+		if err != nil {
+			t.Fatalf("close execution repository: %v", err)
+		}
+	})
+
+	err = repository.CreateExecution(t.Context(), record)
+	if err != nil {
+		t.Fatalf("CreateExecution returned error: %v", err)
+	}
+}
+
+func cliExecutionRecord(projectDir, runDir string) chc.ExecutionRecord {
+	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
+	finishedAt := now.Add(time.Minute)
+
+	return chc.ExecutionRecord{
+		ID:         "exec-1",
+		ProjectID:  projectID(projectDir),
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(projectDir, ".chc", "tickets", "CHC-1.md"),
+		Status:     chc.ExecutionStatusSucceeded,
+		Runtime: chc.ExecutionRuntimeRef{
+			Image:             "chc-agent-runtime:local",
+			DockerfilePath:    filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
+			ContainerWorkdir:  "/workspace",
+			ValidationCommand: "make verify",
+		},
+		Artifacts: chc.ExecutionArtifacts{
+			RunDir:         runDir,
+			ResultPath:     filepath.Join(runDir, "result.json"),
+			LogPath:        filepath.Join(runDir, "runtime.log"),
+			ValidationPath: filepath.Join(runDir, "validation.log"),
+		},
+		CreatedAt:  now,
+		StartedAt:  &now,
+		FinishedAt: &finishedAt,
+		UpdatedAt:  now.Add(time.Minute),
+	}
+}
+
+func writeCLIExecutionArtifacts(t *testing.T, record chc.ExecutionRecord) {
+	t.Helper()
+
+	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
+	if err != nil {
+		t.Fatalf("create run dir: %v", err)
+	}
+
+	for _, path := range []string{
+		record.Artifacts.ResultPath,
+		record.Artifacts.LogPath,
+		record.Artifacts.ValidationPath,
+		chc.ExecutionReportPath(record),
+	} {
+		err = os.WriteFile(path, []byte("artifact\n"), 0o644)
+		if err != nil {
+			t.Fatalf("write artifact %q: %v", path, err)
+		}
 	}
 }
 

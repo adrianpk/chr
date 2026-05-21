@@ -19,6 +19,7 @@ type ExecutionRepository interface {
 	CreateExecution(ctx context.Context, record ExecutionRecord) error
 	UpdateExecution(ctx context.Context, record ExecutionRecord) error
 	GetExecution(ctx context.Context, id string) (ExecutionRecord, error)
+	ListProjectExecutions(ctx context.Context, projectID string) ([]ExecutionRecord, error)
 	ListTicketExecutions(ctx context.Context, projectID, ticketKey string) ([]ExecutionRecord, error)
 	Close() error
 }
@@ -149,6 +150,32 @@ func (r *sqliteExecutionRepository) GetExecution(ctx context.Context, id string)
 	return record, nil
 }
 
+func (r *sqliteExecutionRepository) ListProjectExecutions(
+	ctx context.Context,
+	projectID string,
+) ([]ExecutionRecord, error) {
+	rows, err := r.db.QueryContext(
+		ctx,
+		selectExecutionSQL()+" WHERE project_id = ? ORDER BY created_at",
+		projectID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("list project executions: %w", err)
+	}
+
+	defer func() {
+		//nolint:errcheck // Row iteration errors are checked through rows.Err below.
+		_ = rows.Close()
+	}()
+
+	records, err := scanExecutionRows(rows)
+	if err != nil {
+		return nil, fmt.Errorf("list project execution rows: %w", err)
+	}
+
+	return records, nil
+}
+
 func (r *sqliteExecutionRepository) ListTicketExecutions(
 	ctx context.Context,
 	projectID, ticketKey string,
@@ -168,6 +195,15 @@ func (r *sqliteExecutionRepository) ListTicketExecutions(
 		_ = rows.Close()
 	}()
 
+	records, err := scanExecutionRows(rows)
+	if err != nil {
+		return nil, fmt.Errorf("list ticket execution rows: %w", err)
+	}
+
+	return records, nil
+}
+
+func scanExecutionRows(rows *sql.Rows) ([]ExecutionRecord, error) {
 	records := []ExecutionRecord{}
 
 	for rows.Next() {
@@ -179,9 +215,9 @@ func (r *sqliteExecutionRepository) ListTicketExecutions(
 		records = append(records, record)
 	}
 
-	err = rows.Err()
+	err := rows.Err()
 	if err != nil {
-		return nil, fmt.Errorf("list execution rows: %w", err)
+		return nil, err
 	}
 
 	return records, nil

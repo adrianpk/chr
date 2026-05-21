@@ -58,6 +58,17 @@ func TestExecutionRepositoryCreatesGetsUpdatesAndListsExecutions(t *testing.T) {
 	}
 
 	assertExecutionRecord(t, records[0], record)
+
+	projectRecords, err := repository.ListProjectExecutions(context.Background(), record.ProjectID)
+	if err != nil {
+		t.Fatalf("ListProjectExecutions returned error: %v", err)
+	}
+
+	if len(projectRecords) != 1 {
+		t.Fatalf("len(projectRecords) = %d, want 1", len(projectRecords))
+	}
+
+	assertExecutionRecord(t, projectRecords[0], record)
 }
 
 func TestExecutionRepositoryReturnsNotFound(t *testing.T) {

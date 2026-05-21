@@ -17,6 +17,7 @@ func newMaintenanceCommand(stdout io.Writer) *cli.Command {
 		Usage: "Inspect and recover local chc state",
 		Commands: []*cli.Command{
 			newMaintenanceDBCommand(stdout),
+			newMaintenanceExecutionCommand(stdout),
 			newMaintenanceRegistryCommand(stdout),
 		},
 	}
@@ -38,6 +39,25 @@ func newMaintenanceDBStatusCommand(stdout io.Writer) *cli.Command {
 		Usage:  "Report local database migration status",
 		Flags:  projectRegistryFlags(),
 		Action: maintenanceDBStatusAction(stdout),
+	}
+}
+
+func newMaintenanceExecutionCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "execution",
+		Usage: "Inspect execution records and artifacts",
+		Commands: []*cli.Command{
+			newMaintenanceExecutionArtifactsCommand(stdout),
+		},
+	}
+}
+
+func newMaintenanceExecutionArtifactsCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "artifacts",
+		Usage:  "Report execution artifact drift for the resolved project",
+		Flags:  maintenanceProjectFlags(),
+		Action: maintenanceExecutionArtifactsAction(stdout),
 	}
 }
 
@@ -88,9 +108,25 @@ func newMaintenanceRegistrySetPathCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func maintenanceProjectFlags() []cli.Flag {
+	return append(projectRegistryFlags(),
+		&cli.StringFlag{
+			Name:  "dir",
+			Usage: "project directory override",
+			Value: ".",
+		},
+	)
+}
+
 func maintenanceDBStatusAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runMaintenanceDBStatus(ctx, cmd, stdout)
+	}
+}
+
+func maintenanceExecutionArtifactsAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runMaintenanceExecutionArtifacts(ctx, cmd, stdout)
 	}
 }
 
@@ -128,6 +164,45 @@ func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Wri
 	}
 
 	return printMigrationStatus(stdout, status)
+}
+
+func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("maintenance execution artifacts does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:    cmd.String("dir"),
+		UseExplicitDir: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	diagnostics, err := chc.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+		ctx,
+		projectContext.ProjectID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return printExecutionArtifactDriftDiagnostics(stdout, diagnostics)
 }
 
 func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -352,6 +427,81 @@ func printProjectRegistryDiagnostics(
 		)
 		if err != nil {
 			return fmt.Errorf("write project registry diagnostic: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func printExecutionArtifactDriftDiagnostics(
+	stdout io.Writer,
+	diagnostics []chc.ExecutionArtifactDriftDiagnostic,
+) error {
+	drifted := 0
+	missingArtifacts := 0
+
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Status != chc.ExecutionArtifactDriftStatusOK {
+			drifted++
+		}
+
+		for _, artifact := range diagnostic.Artifacts {
+			if !artifact.Exists {
+				missingArtifacts++
+			}
+		}
+	}
+
+	lines := []string{
+		fmt.Sprintf("executions: %d", len(diagnostics)),
+		fmt.Sprintf("drifted: %d", drifted),
+		fmt.Sprintf("missing_artifacts: %d", missingArtifacts),
+	}
+
+	for _, line := range lines {
+		_, err := fmt.Fprintln(stdout, line)
+		if err != nil {
+			return fmt.Errorf("write execution artifact drift summary: %w", err)
+		}
+	}
+
+	for _, diagnostic := range diagnostics {
+		err := printExecutionArtifactDriftDiagnostic(stdout, diagnostic)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func printExecutionArtifactDriftDiagnostic(
+	stdout io.Writer,
+	diagnostic chc.ExecutionArtifactDriftDiagnostic,
+) error {
+	_, err := fmt.Fprintf(
+		stdout,
+		"execution: %s ticket: %s status: %s artifact_status: %s\n",
+		diagnostic.Execution.ID,
+		diagnostic.Execution.TicketKey,
+		diagnostic.Execution.Status,
+		diagnostic.Status,
+	)
+	if err != nil {
+		return fmt.Errorf("write execution artifact drift diagnostic: %w", err)
+	}
+
+	for _, artifact := range diagnostic.Artifacts {
+		_, err = fmt.Fprintf(
+			stdout,
+			"artifact: %s name: %s exists: %t path: %s\n",
+			diagnostic.Execution.ID,
+			artifact.Name,
+			artifact.Exists,
+			artifact.Path,
+		)
+		if err != nil {
+			return fmt.Errorf("write execution artifact path diagnostic: %w", err)
 		}
 	}
 
