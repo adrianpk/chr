@@ -21,7 +21,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Execution Report Format | Delivered | `feat/slice-1-execution-report-format` | `feat(slice-1): execution report format` | `.prj/reports/slices/reporting-and-evidence/slice-1-execution-report-format.md` | Repository PR #118 merged. |
-| Slice 2: Execution Report Artifact Writer | Planned | `feat/slice-2-execution-report-writer` | `feat(slice-2): execution report writer` | `.prj/reports/slices/reporting-and-evidence/slice-2-execution-report-writer.md` | Pending. |
+| Slice 2: Execution Report Artifact Writer | Reviewing | `feat/slice-2-execution-report-writer` | `feat(slice-2): execution report writer` | `.prj/reports/slices/reporting-and-evidence/slice-2-execution-report-writer.md` | PR pending. |
 | Slice 3: Validation and Changed-File Summaries | Planned | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | Pending. |
 | Slice 4: Loop Report Format | Planned | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Pending. |
 | Slice 5: Report Listing | Planned | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Pending. |
@@ -75,23 +75,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define report artifact paths.
-- [ ] Write Markdown reports from existing execution evidence.
-- [ ] Avoid overwriting unrelated files.
-- [ ] Add writer tests.
-- [ ] Document artifact placement.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define report artifact paths.
+- [x] Write Markdown reports from existing execution evidence.
+- [x] Avoid overwriting unrelated files.
+- [x] Add writer tests.
+- [x] Document artifact placement.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
+- T2.1: `f82dc2f`
+- T2.2: `f82dc2f`
+- T2.3: `f82dc2f`
+- T2.4: `f82dc2f`
+- T2.5: `561d4e7`
+- T2.6: `docs(slice-2): record execution report writer`
+- T2.7: `make verify`
 
 ## Slice 3: Validation and Changed-File Summaries
 
@@ -281,6 +281,9 @@ Task commits:
 
 - Slice 1 focused tests: `go test ./internal/chc -run 'Test(NewExecutionReport|RenderExecutionReport)'` pass.
 - Slice 1 full validation: `make verify` pass.
+- Slice 2 focused tests: `go test ./internal/chc -run 'Test(ExecutionReportWriter|NewExecutionReport|RenderExecutionReport)'` pass.
+- Slice 2 focused CLI tests: `go test ./internal/chcapp -run 'TestTicketApplyResult'` pass.
+- Slice 2 full validation: `make verify` pass.
 
 ## Notes
 
