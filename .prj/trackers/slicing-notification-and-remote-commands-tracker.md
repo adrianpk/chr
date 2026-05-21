@@ -12,7 +12,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Notification Event Model | Planned | `feat/slice-1-notification-event-model` | `feat(slice-1): notification event model` | `.prj/reports/slices/notification-and-remote-commands/slice-1-notification-event-model.md` | Pending implementation. |
+| Slice 1: Notification Event Model | Reviewing | `feat/slice-1-notification-event-model` | `feat(slice-1): notification event model` | `.prj/reports/slices/notification-and-remote-commands/slice-1-notification-event-model.md` | Repository PR #108. |
 | Slice 2: Notification Configuration | Planned | `feat/slice-2-notification-config` | `feat(slice-2): notification config` | `.prj/reports/slices/notification-and-remote-commands/slice-2-notification-config.md` | Pending implementation. |
 | Slice 3: Notification Audit Repository | Planned | `feat/slice-3-notification-audit-repository` | `feat(slice-3): notification audit repository` | `.prj/reports/slices/notification-and-remote-commands/slice-3-notification-audit-repository.md` | Pending implementation. |
 | Slice 4: Notify Command Skeleton | Planned | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Pending implementation. |
@@ -43,25 +43,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add notification event type, severity, status, and source enums.
-- [ ] Add notification event identity and project/ticket/loop/execution references.
-- [ ] Validate required fields and lifecycle timestamps.
-- [ ] Add payload summary and detail fields without channel-specific formatting.
-- [ ] Add focused model tests.
-- [ ] Document the event contract.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add notification event type, severity, status, and source enums.
+- [x] Add notification event identity and project/ticket/loop/execution references.
+- [x] Validate required fields and lifecycle timestamps.
+- [x] Add payload summary and detail fields without channel-specific formatting.
+- [x] Add focused model tests.
+- [x] Document the event contract.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
-- T1.8: pending
+- T1.1: `be8fa65`
+- T1.2: `be8fa65`
+- T1.3: `be8fa65`
+- T1.4: `be8fa65`
+- T1.5: `8cc19fe`
+- T1.6: `bee1d8c`
+- T1.7: `docs(slice-1): record notification event report`
+- T1.8: `make verify`
 
 ## Slice 2: Notification Configuration
 
