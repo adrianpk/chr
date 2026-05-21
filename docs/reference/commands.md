@@ -104,6 +104,14 @@ chc index rebuild
 chc index status
 ```
 
+## Maintenance
+
+Inspect local maintenance state:
+
+```sh
+chc maintenance db status
+```
+
 ## Authoring
 
 Create an authoring session:
