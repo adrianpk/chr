@@ -5,7 +5,7 @@ Slicing: Reporting and Evidence
 Plan: `.prj/plans/slicing-reporting-and-evidence-plan.md`
 Tracker: `.prj/trackers/slicing-reporting-and-evidence-tracker.md`
 Branch: `feat/slice-7-review-handoff-summary`
-PR: pending
+PR: #124
 
 ## Purpose
 
