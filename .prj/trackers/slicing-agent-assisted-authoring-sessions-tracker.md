@@ -26,7 +26,7 @@ Slice 3: Authoring Context Package
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Assisted Session Contract | Delivered | `feat/slice-1-assisted-session-contract` | `feat(slice-1): assisted session contract` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-1-assisted-session-contract.md` | Repository PR #99. |
 | Slice 2: Transcript Event Storage | Delivered | `feat/slice-2-assisted-transcript-storage` | `feat(slice-2): assisted transcript storage` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-2-assisted-transcript-storage.md` | Repository PR #100. |
-| Slice 3: Authoring Context Package | Planned | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Depends on Slice 2. |
+| Slice 3: Authoring Context Package | Delivered | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Repository PR #101. |
 | Slice 4: Model Invocation Adapter | Planned | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Depends on Slice 3. |
 | Slice 5: Adaptive Quiz Loop | Planned | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Depends on Slice 4. |
 | Slice 6: Answer Curation | Planned | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Depends on Slice 5. |
@@ -112,23 +112,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Include agent identity for authoring analyst behavior.
-- [ ] Include project and authoring session metadata.
-- [ ] Include relevant `.chc/` artifacts and selected docs.
-- [ ] Include transcript summary and unanswered gaps.
-- [ ] Materialize deterministic Markdown context.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Include agent identity for authoring analyst behavior.
+- [x] Include project and authoring session metadata.
+- [x] Include relevant `.chc/` artifacts and selected docs.
+- [x] Include transcript summary and unanswered gaps.
+- [x] Materialize deterministic Markdown context.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1:
-- T3.2:
-- T3.3:
-- T3.4:
-- T3.5:
-- T3.6:
-- T3.7:
+- T3.1: feat(slice-3): assisted context package
+- T3.2: feat(slice-3): assisted context package
+- T3.3: feat(slice-3): assisted context package
+- T3.4: feat(slice-3): assisted context package
+- T3.5: feat(slice-3): assisted context package
+- T3.6: feat(slice-3): assisted context package
+- T3.7: feat(slice-3): assisted context package
 
 ## Slice 4: Model Invocation Adapter
 
