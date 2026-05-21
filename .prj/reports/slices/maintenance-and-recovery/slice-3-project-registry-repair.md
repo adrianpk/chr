@@ -5,7 +5,7 @@ Slicing: Maintenance and Recovery
 Plan: `.prj/plans/slicing-maintenance-and-recovery-plan.md`
 Tracker: `.prj/trackers/slicing-maintenance-and-recovery-tracker.md`
 Branch: `feat/slice-3-project-registry-repair`
-PR: pending
+PR: #128
 
 ## Purpose
 
