@@ -7,6 +7,12 @@ summarize existing records and artifacts; they do not replace tickets,
 execution records, loop records, runtime logs, validation artifacts, or result
 envelopes.
 
+Related report formats:
+
+- `docs/reference/execution-reports.md`;
+- `docs/reference/loop-reports.md`;
+- `docs/reference/review-handoff-summaries.md`.
+
 ## List Reports
 
 List reports for the resolved project:
