@@ -29,7 +29,7 @@ Slice 6: Answer Curation
 | Slice 3: Authoring Context Package | Delivered | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Repository PR #101. |
 | Slice 4: Model Invocation Adapter | Delivered | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Repository PR #102. |
 | Slice 5: Adaptive Quiz Loop | Delivered | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Repository PR #103. |
-| Slice 6: Answer Curation | Planned | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Depends on Slice 5. |
+| Slice 6: Answer Curation | Delivered | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Repository PR #104. |
 | Slice 7: Assisted Artifact Synthesis | Planned | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Depends on Slice 6. |
 | Slice 8: Assisted Authoring CLI | Planned | `feat/slice-8-assisted-authoring-cli` | `feat(slice-8): assisted authoring cli` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-8-assisted-authoring-cli.md` | Depends on Slices 1-7. |
 | Slice 9: Assisted Authoring Docs | Planned | `feat/slice-9-assisted-authoring-docs` | `feat(slice-9): assisted authoring docs` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-9-assisted-authoring-docs.md` | Final docs pass for the slicing. |
@@ -208,23 +208,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Generate curated answers from transcript events.
-- [ ] Preserve explicit decisions and open questions.
-- [ ] Write a curated summary artifact.
-- [ ] Update session provenance.
-- [ ] Add deterministic tests with fake model output.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Generate curated answers from transcript events.
+- [x] Preserve explicit decisions and open questions.
+- [x] Write a curated summary artifact.
+- [x] Update session provenance.
+- [x] Add deterministic tests with fake model output.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1:
-- T6.2:
-- T6.3:
-- T6.4:
-- T6.5:
-- T6.6:
-- T6.7:
+- T6.1: feat(slice-6): assisted answer curation
+- T6.2: feat(slice-6): assisted answer curation
+- T6.3: feat(slice-6): assisted answer curation
+- T6.4: feat(slice-6): assisted answer curation
+- T6.5: feat(slice-6): assisted answer curation
+- T6.6: feat(slice-6): assisted answer curation
+- T6.7: feat(slice-6): assisted answer curation
 
 ## Slice 7: Assisted Artifact Synthesis
 
