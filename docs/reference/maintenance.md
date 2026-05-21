@@ -84,3 +84,37 @@ Diagnostic statuses:
 - `missing_workspace`: the path exists but does not contain `.chc/`.
 
 Registry repair commands belong to a later maintenance slice.
+
+## Project Registry Repair
+
+Disable a registered project:
+
+```sh
+chc maintenance registry disable example
+```
+
+Preview the same operation:
+
+```sh
+chc maintenance registry disable --dry-run example
+```
+
+Update a registered project path:
+
+```sh
+chc maintenance registry set-path example /path/to/project
+```
+
+Preview the path update:
+
+```sh
+chc maintenance registry set-path --dry-run example /path/to/project
+```
+
+Repair commands require the project name, not the project path or id.
+
+`set-path` requires the target directory to contain `.chc/`. It does not create
+or initialize a workspace.
+
+Repair commands update only the project registry row. They do not mutate ticket
+files, runtime artifacts, execution records, or the active project selection.
