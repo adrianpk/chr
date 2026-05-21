@@ -19,6 +19,7 @@ Task-oriented guides:
 Exact contracts and command behavior:
 
 - [Project workspace](reference/project-workspace.md)
+- [Authoring sessions](reference/authoring-sessions.md)
 - [Project CLI](reference/project-cli.md)
 - [Project registry](reference/project-registry.md)
 - [Ticket parser](reference/ticket-parser.md)

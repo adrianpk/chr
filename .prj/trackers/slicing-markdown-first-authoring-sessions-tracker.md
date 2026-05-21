@@ -1,6 +1,6 @@
 # Markdown-First Authoring Sessions Slicing Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slicing-markdown-first-authoring-sessions-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -13,12 +13,12 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Active Slice
 
-Slice 7: Authoring Docs Reference
+None
 
 ## Slice Status
 
@@ -30,7 +30,7 @@ Slice 7: Authoring Docs Reference
 | Slice 4: Static Quiz Generation | Delivered | `feat/slice-4-static-quiz-generation` | `feat(slice-4): static quiz generation` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-4-static-quiz-generation.md` | Repository PR #94. |
 | Slice 5: Authoring Session CLI | Delivered | `feat/slice-5-authoring-session-cli` | `feat(slice-5): authoring session cli` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-5-authoring-session-cli.md` | Repository PR #95. |
 | Slice 6: Manual Promotion and Provenance | Delivered | `feat/slice-6-manual-promotion-provenance` | `feat(slice-6): manual promotion provenance` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-6-manual-promotion-provenance.md` | Repository PR #96. |
-| Slice 7: Authoring Docs Reference | Planned | `feat/slice-7-authoring-docs-reference` | `feat(slice-7): authoring docs reference` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-7-authoring-docs-reference.md` | Final docs pass for the slicing. |
+| Slice 7: Authoring Docs Reference | Delivered | `feat/slice-7-authoring-docs-reference` | `feat(slice-7): authoring docs reference` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-7-authoring-docs-reference.md` | Repository PR #97. |
 
 ## Slice 1: Authoring Session Model
 
@@ -240,21 +240,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add reference documentation for session fields and artifact layout.
-- [ ] Add user-guide coverage for static quiz generation and promotion.
-- [ ] Document hand-edited Markdown tolerance.
-- [ ] Document future assisted-session and TUI compatibility boundaries.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add reference documentation for session fields and artifact layout.
+- [x] Add user-guide coverage for static quiz generation and promotion.
+- [x] Document hand-edited Markdown tolerance.
+- [x] Document future assisted-session and TUI compatibility boundaries.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1:
-- T7.2:
-- T7.3:
-- T7.4:
-- T7.5:
-- T7.6:
+- T7.1: feat(slice-7): authoring docs reference
+- T7.2: feat(slice-7): authoring docs reference
+- T7.3: feat(slice-7): authoring docs reference
+- T7.4: feat(slice-7): authoring docs reference
+- T7.5: feat(slice-7): authoring docs reference
+- T7.6: feat(slice-7): authoring docs reference
 
 ## Validation
 

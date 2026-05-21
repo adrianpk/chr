@@ -229,6 +229,47 @@ chc ticket loop --max-iterations 3
 The loop executes eligible tickets one at a time and stops on the first blocked
 or failed ticket.
 
+## Capture Authoring Context
+
+Create an authoring session:
+
+```sh
+chc author session new --target spec --topic "Billing sync"
+```
+
+List authoring sessions:
+
+```sh
+chc author session list
+```
+
+Show one session:
+
+```sh
+chc author session show <session-id>
+```
+
+Create a static questionnaire:
+
+```sh
+chc author quiz new --target spec --topic "Billing sync"
+```
+
+Preview the questionnaire first:
+
+```sh
+chc author quiz new --target spec --topic "Billing sync" --dry-run
+```
+
+After editing the quiz answers, promote the quiz to a draft:
+
+```sh
+chc author promote quiz-to-draft --session <session-id> --quiz .chc/quizzes/<quiz>.md
+```
+
+Generated authoring artifacts remain Markdown under `.chc/`. The commands
+initialize and connect artifacts; they do not replace direct editing.
+
 ## Use the Local Daemon Coordinator
 
 Check daemon status:

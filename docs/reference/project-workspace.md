@@ -72,8 +72,11 @@ AGENTS.md
   tickets/
   comments/
   context/
+  authoring/
+    sessions/
   dumps/
   quizzes/
+  drafts/
   playbooks/
   reports/
   indexes/

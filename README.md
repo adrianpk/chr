@@ -24,6 +24,7 @@ loop records, and execution records.
 - Runs foreground ticket loops over eligible tickets.
 - Coordinates registered projects through a local foreground daemon.
 - Builds a bounded execution context package for agent work.
+- Creates and promotes Markdown-first authoring sessions.
 
 ## Install
 
@@ -85,6 +86,7 @@ and validation logs under `.chc/runtime/runs/`.
 Start with the user guide:
 
 - [User guide](docs/how-to/user-guide/index.md)
+- [Authoring sessions reference](docs/reference/authoring-sessions.md)
 
 Documentation is organized with Diataxis:
 
