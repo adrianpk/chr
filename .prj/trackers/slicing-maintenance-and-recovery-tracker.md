@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Project Registry Repair | Delivered | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Repository PR #128 merged. |
 | Slice 4: Execution Artifact Drift | Delivered | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Repository PR #129 merged. |
 | Slice 5: Runtime Artifact Cleanup Preview | Delivered | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Repository PR #130 merged. |
-| Slice 6: Diagnostic Bundle | Reviewing | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | PR pending. |
+| Slice 6: Diagnostic Bundle | Reviewing | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | Repository PR #131 open. |
 | Slice 7: Maintenance Documentation | Planned | `feat/slice-7-maintenance-docs` | `feat(slice-7): maintenance docs` | `.prj/reports/slices/maintenance-and-recovery/slice-7-maintenance-docs.md` | Pending. |
 
 ## Slice 1: Database Migration Status
