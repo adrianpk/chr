@@ -16,6 +16,7 @@ func newMaintenanceCommand(stdout io.Writer) *cli.Command {
 		Usage: "Inspect and recover local chc state",
 		Commands: []*cli.Command{
 			newMaintenanceDBCommand(stdout),
+			newMaintenanceRegistryCommand(stdout),
 		},
 	}
 }
@@ -39,9 +40,34 @@ func newMaintenanceDBStatusCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newMaintenanceRegistryCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "registry",
+		Usage: "Inspect project registry state",
+		Commands: []*cli.Command{
+			newMaintenanceRegistryStatusCommand(stdout),
+		},
+	}
+}
+
+func newMaintenanceRegistryStatusCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "status",
+		Usage:  "Report project registry diagnostics",
+		Flags:  projectRegistryFlags(),
+		Action: maintenanceRegistryStatusAction(stdout),
+	}
+}
+
 func maintenanceDBStatusAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runMaintenanceDBStatus(ctx, cmd, stdout)
+	}
+}
+
+func maintenanceRegistryStatusAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runMaintenanceRegistryStatus(ctx, cmd, stdout)
 	}
 }
 
@@ -61,6 +87,37 @@ func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Wri
 	}
 
 	return printMigrationStatus(stdout, status)
+}
+
+func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("maintenance registry status does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	diagnostics, err := chc.NewProjectRegistryDiagnosticsService(
+		registry,
+		chc.NewActiveProjectStore(env),
+	).ListDiagnostics(ctx)
+	if err != nil {
+		return err
+	}
+
+	return printProjectRegistryDiagnostics(stdout, diagnostics)
 }
 
 func printMigrationStatus(stdout io.Writer, status chc.MigrationStatus) error {
@@ -133,6 +190,36 @@ func printUnknownMigrations(stdout io.Writer, migrations []chc.AppliedMigration)
 		)
 		if err != nil {
 			return fmt.Errorf("write unknown migration: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func printProjectRegistryDiagnostics(
+	stdout io.Writer,
+	diagnostics []chc.ProjectRegistryDiagnostic,
+) error {
+	_, err := fmt.Fprintf(stdout, "projects: %d\n", len(diagnostics))
+	if err != nil {
+		return fmt.Errorf("write project registry diagnostics: %w", err)
+	}
+
+	for _, diagnostic := range diagnostics {
+		_, err = fmt.Fprintf(
+			stdout,
+			"project: %s path: %s enabled: %t active: %t path_exists: %t workspace_exists: %t status: %s id: %s\n",
+			diagnostic.Project.Name,
+			diagnostic.Project.Path,
+			diagnostic.Project.Enabled,
+			diagnostic.Active,
+			diagnostic.PathExists,
+			diagnostic.WorkspaceExists,
+			diagnostic.Status,
+			diagnostic.Project.ID,
+		)
+		if err != nil {
+			return fmt.Errorf("write project registry diagnostic: %w", err)
 		}
 	}
 

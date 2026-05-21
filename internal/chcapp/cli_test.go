@@ -3135,6 +3135,83 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 	}
 }
 
+func TestMaintenanceRegistryStatusReportsRegisteredProjectDiagnostics(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	noWorkspaceDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	addProject(t, devRoot, "no-workspace", noWorkspaceDir)
+
+	err := os.RemoveAll(filepath.Join(noWorkspaceDir, ".chc"))
+	if err != nil {
+		t.Fatalf("RemoveAll returned error: %v", err)
+	}
+
+	err = run(t.Context(), []string{
+		"project",
+		"select",
+		"--dev-root",
+		devRoot,
+		"example",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project select returned error: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"projects: 2",
+		"project: example path: " + projectDir + " enabled: true active: true path_exists: true workspace_exists: true status: ok",
+		"project: no-workspace path: " + noWorkspaceDir + " enabled: true active: false path_exists: true workspace_exists: false status: missing_workspace",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestMaintenanceRegistryStatusReportsMissingProjectPath(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "missing", projectDir)
+
+	err := os.RemoveAll(projectDir)
+	if err != nil {
+		t.Fatalf("RemoveAll returned error: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"registry",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance registry status returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "status: missing_path") {
+		t.Fatalf("stdout = %q, want missing path status", stdout.String())
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
