@@ -62,6 +62,10 @@ func TestNewExecutionReportIncludesResultEvidence(t *testing.T) {
 		t.Fatalf("Result.Summary = %q, want ready for review", report.Result.Summary)
 	}
 
+	if report.Validation.Status != ExecutionReportValidationSucceeded {
+		t.Fatalf("Validation.Status = %q, want succeeded", report.Validation.Status)
+	}
+
 	if len(report.ChangedFiles) != 1 {
 		t.Fatalf("ChangedFiles len = %d, want 1", len(report.ChangedFiles))
 	}
@@ -117,15 +121,67 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 		"## Artifacts",
 		"- result: " + record.Artifacts.ResultPath,
 		"- report: " + record.Artifacts.RunDir + "/execution-report.md",
+		"## Validation",
+		"- status: succeeded",
+		"- path: " + record.Artifacts.ValidationPath,
 		"## Result",
 		"- summary: ready for review",
 		"## Changed Files",
+		"- total: 1",
+		"- rendered: 1",
+		"- truncated: false",
 		"- internal/chc/execution_report.go: add report model",
 		"## Failure",
 		"No failure was recorded.",
 	} {
 		if !strings.Contains(markdown, want) {
 			t.Fatalf("markdown does not contain %q:\n%s", want, markdown)
+		}
+	}
+}
+
+func TestNewExecutionReportSortsAndBoundsChangedFiles(t *testing.T) {
+	record := testExecutionReportRecord(t.TempDir())
+	result := ExecutionResult{
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Status:      ExecutionResultStatusSucceeded,
+		Summary:     "ready for review",
+	}
+
+	for index := 29; index >= 0; index-- {
+		result.ChangedFiles = append(result.ChangedFiles, ExecutionResultChangedFile{
+			Path:    filepath.Join("file", string(rune('a'+index%26))+".go"),
+			Summary: "changed",
+		})
+	}
+
+	report, err := NewExecutionReport(ExecutionReportOptions{
+		Execution: record,
+		Result:    &result,
+	})
+	if err != nil {
+		t.Fatalf("NewExecutionReport returned error: %v", err)
+	}
+
+	if len(report.ChangedFiles) != executionReportChangedFileLimit {
+		t.Fatalf("ChangedFiles len = %d, want %d", len(report.ChangedFiles), executionReportChangedFileLimit)
+	}
+
+	if report.ChangedSummary.Total != 30 {
+		t.Fatalf("ChangedSummary.Total = %d, want 30", report.ChangedSummary.Total)
+	}
+
+	if !report.ChangedSummary.Truncated {
+		t.Fatal("ChangedSummary.Truncated = false, want true")
+	}
+
+	for index := 1; index < len(report.ChangedFiles); index++ {
+		previous := report.ChangedFiles[index-1].Path
+		current := report.ChangedFiles[index].Path
+
+		if previous > current {
+			t.Fatalf("changed files are not sorted: %q before %q", previous, current)
 		}
 	}
 }

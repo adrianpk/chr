@@ -5,25 +5,30 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
 
+const executionReportChangedFileLimit = 25
+
 type ExecutionReport struct {
-	ExecutionID   string
-	ProjectID     string
-	TicketKey     string
-	TicketPath    string
-	Execution     ExecutionReportExecution
-	Runtime       ExecutionReportRuntime
-	Artifacts     ExecutionReportArtifacts
-	Result        ExecutionReportResult
-	ChangedFiles  []ExecutionReportChangedFile
-	FailureReason string
-	CreatedAt     time.Time
-	StartedAt     *time.Time
-	FinishedAt    *time.Time
-	UpdatedAt     time.Time
+	ExecutionID    string
+	ProjectID      string
+	TicketKey      string
+	TicketPath     string
+	Execution      ExecutionReportExecution
+	Runtime        ExecutionReportRuntime
+	Artifacts      ExecutionReportArtifacts
+	Result         ExecutionReportResult
+	Validation     ExecutionReportValidation
+	ChangedFiles   []ExecutionReportChangedFile
+	ChangedSummary ExecutionReportChangedFilesSummary
+	FailureReason  string
+	CreatedAt      time.Time
+	StartedAt      *time.Time
+	FinishedAt     *time.Time
+	UpdatedAt      time.Time
 }
 
 type ExecutionReportExecution struct {
@@ -52,9 +57,30 @@ type ExecutionReportResult struct {
 	Summary   string
 }
 
+type ExecutionReportValidation struct {
+	Command string
+	Path    string
+	Status  ExecutionReportValidationStatus
+}
+
+type ExecutionReportValidationStatus string
+
+const (
+	ExecutionReportValidationNotRun    ExecutionReportValidationStatus = "not_run"
+	ExecutionReportValidationSucceeded ExecutionReportValidationStatus = "succeeded"
+	ExecutionReportValidationFailed    ExecutionReportValidationStatus = "failed"
+	ExecutionReportValidationUnknown   ExecutionReportValidationStatus = "unknown"
+)
+
 type ExecutionReportChangedFile struct {
 	Path    string
 	Summary string
+}
+
+type ExecutionReportChangedFilesSummary struct {
+	Total     int
+	Rendered  int
+	Truncated bool
 }
 
 type ExecutionReportOptions struct {
@@ -84,7 +110,7 @@ func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 		Status:    opts.Result.Status,
 		Summary:   opts.Result.Summary,
 	}
-	report.ChangedFiles = executionReportChangedFiles(*opts.Result)
+	report.ChangedFiles, report.ChangedSummary = executionReportChangedFiles(*opts.Result)
 
 	return report, nil
 }
@@ -112,6 +138,11 @@ func executionReportFromRecord(record ExecutionRecord) ExecutionReport {
 			ValidationPath: record.Artifacts.ValidationPath,
 			ReportPath:     ExecutionReportPath(record),
 		},
+		Validation: ExecutionReportValidation{
+			Command: record.Runtime.ValidationCommand,
+			Path:    record.Artifacts.ValidationPath,
+			Status:  executionReportValidationStatus(record),
+		},
 		FailureReason: record.FailureReason,
 		CreatedAt:     record.CreatedAt,
 		StartedAt:     record.StartedAt,
@@ -137,14 +168,29 @@ func validateExecutionReportResult(record ExecutionRecord, result ExecutionResul
 	return nil
 }
 
-func executionReportChangedFiles(result ExecutionResult) []ExecutionReportChangedFile {
+func executionReportChangedFiles(result ExecutionResult) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary) {
 	changedFiles := make([]ExecutionReportChangedFile, 0, len(result.ChangedFiles))
 
 	for _, changedFile := range result.ChangedFiles {
 		changedFiles = append(changedFiles, ExecutionReportChangedFile(changedFile))
 	}
 
-	return changedFiles
+	sort.SliceStable(changedFiles, func(i, j int) bool {
+		return changedFiles[i].Path < changedFiles[j].Path
+	})
+
+	summary := ExecutionReportChangedFilesSummary{
+		Total:    len(changedFiles),
+		Rendered: len(changedFiles),
+	}
+
+	if len(changedFiles) > executionReportChangedFileLimit {
+		changedFiles = changedFiles[:executionReportChangedFileLimit]
+		summary.Rendered = executionReportChangedFileLimit
+		summary.Truncated = true
+	}
+
+	return changedFiles, summary
 }
 
 func RenderExecutionReportMarkdown(report ExecutionReport) string {
@@ -155,8 +201,9 @@ func RenderExecutionReportMarkdown(report ExecutionReport) string {
 	writeExecutionReportTimes(&output, report)
 	writeExecutionReportRuntime(&output, report.Runtime)
 	writeExecutionReportArtifacts(&output, report.Artifacts)
+	writeExecutionReportValidation(&output, report.Validation)
 	writeExecutionReportResult(&output, report.Result)
-	writeExecutionReportChangedFiles(&output, report.ChangedFiles)
+	writeExecutionReportChangedFiles(&output, report.ChangedFiles, report.ChangedSummary)
 	writeExecutionReportFailure(&output, report)
 
 	return output.String()
@@ -279,6 +326,14 @@ func writeExecutionReportArtifacts(output *strings.Builder, artifacts ExecutionR
 	output.WriteString("\n")
 }
 
+func writeExecutionReportValidation(output *strings.Builder, validation ExecutionReportValidation) {
+	output.WriteString("## Validation\n\n")
+	writeExecutionReportField(output, "status", string(validation.Status))
+	writeExecutionReportField(output, "command", validation.Command)
+	writeExecutionReportField(output, "path", validation.Path)
+	output.WriteString("\n")
+}
+
 func writeExecutionReportResult(output *strings.Builder, result ExecutionReportResult) {
 	output.WriteString("## Result\n\n")
 
@@ -293,8 +348,16 @@ func writeExecutionReportResult(output *strings.Builder, result ExecutionReportR
 	output.WriteString("\n")
 }
 
-func writeExecutionReportChangedFiles(output *strings.Builder, changedFiles []ExecutionReportChangedFile) {
+func writeExecutionReportChangedFiles(
+	output *strings.Builder,
+	changedFiles []ExecutionReportChangedFile,
+	summary ExecutionReportChangedFilesSummary,
+) {
 	output.WriteString("## Changed Files\n\n")
+	writeExecutionReportField(output, "total", fmt.Sprintf("%d", summary.Total))
+	writeExecutionReportField(output, "rendered", fmt.Sprintf("%d", summary.Rendered))
+	writeExecutionReportField(output, "truncated", fmt.Sprintf("%t", summary.Truncated))
+	output.WriteString("\n")
 
 	if len(changedFiles) == 0 {
 		output.WriteString("No changed files were reported.\n\n")
@@ -316,6 +379,25 @@ func writeExecutionReportChangedFiles(output *strings.Builder, changedFiles []Ex
 	}
 
 	output.WriteString("\n")
+}
+
+func executionReportValidationStatus(record ExecutionRecord) ExecutionReportValidationStatus {
+	if strings.TrimSpace(record.Artifacts.ValidationPath) == "" {
+		return ExecutionReportValidationNotRun
+	}
+
+	switch record.Status {
+	case ExecutionStatusSucceeded:
+		return ExecutionReportValidationSucceeded
+	case ExecutionStatusFailed,
+		ExecutionStatusBlocked:
+		return ExecutionReportValidationFailed
+	case ExecutionStatusPending,
+		ExecutionStatusRunning:
+		return ExecutionReportValidationUnknown
+	default:
+		return ExecutionReportValidationUnknown
+	}
 }
 
 func writeExecutionReportFailure(output *strings.Builder, report ExecutionReport) {
