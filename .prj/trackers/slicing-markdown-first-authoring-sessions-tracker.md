@@ -27,7 +27,7 @@ Slice 4: Static Quiz Generation
 | Slice 1: Authoring Session Model | Delivered | `feat/slice-1-authoring-session-model` | `feat(slice-1): authoring session model` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-1-authoring-session-model.md` | Repository PR #91. |
 | Slice 2: Authoring Session Storage | Delivered | `feat/slice-2-authoring-session-storage` | `feat(slice-2): authoring session storage` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-2-authoring-session-storage.md` | Repository PR #92. |
 | Slice 3: Authoring Artifact Layout | Delivered | `feat/slice-3-authoring-artifact-layout` | `feat(slice-3): authoring artifact layout` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-3-authoring-artifact-layout.md` | Repository PR #93. |
-| Slice 4: Static Quiz Generation | Planned | `feat/slice-4-static-quiz-generation` | `feat(slice-4): static quiz generation` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-4-static-quiz-generation.md` | Depends on Slice 3. |
+| Slice 4: Static Quiz Generation | Delivered | `feat/slice-4-static-quiz-generation` | `feat(slice-4): static quiz generation` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-4-static-quiz-generation.md` | Repository PR #94. |
 | Slice 5: Authoring Session CLI | Planned | `feat/slice-5-authoring-session-cli` | `feat(slice-5): authoring session cli` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-5-authoring-session-cli.md` | Depends on Slices 1-4. |
 | Slice 6: Manual Promotion and Provenance | Planned | `feat/slice-6-manual-promotion-provenance` | `feat(slice-6): manual promotion provenance` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-6-manual-promotion-provenance.md` | Depends on Slice 5. |
 | Slice 7: Authoring Docs Reference | Planned | `feat/slice-7-authoring-docs-reference` | `feat(slice-7): authoring docs reference` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-7-authoring-docs-reference.md` | Final docs pass for the slicing. |
@@ -142,23 +142,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define target-specific question templates.
-- [ ] Generate editable Markdown quiz artifacts.
-- [ ] Link the generated quiz to its authoring session.
-- [ ] Support dry-run rendering.
-- [ ] Add deterministic rendering tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define target-specific question templates.
+- [x] Generate editable Markdown quiz artifacts.
+- [x] Link the generated quiz to its authoring session.
+- [x] Support dry-run rendering.
+- [x] Add deterministic rendering tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1:
-- T4.2:
-- T4.3:
-- T4.4:
-- T4.5:
-- T4.6:
-- T4.7:
+- T4.1: feat(slice-4): static quiz generation
+- T4.2: feat(slice-4): static quiz generation
+- T4.3: feat(slice-4): static quiz generation
+- T4.4: feat(slice-4): static quiz generation
+- T4.5: feat(slice-4): static quiz generation
+- T4.6: feat(slice-4): static quiz generation
+- T4.7: feat(slice-4): static quiz generation
 
 ## Slice 5: Authoring Session CLI
 
