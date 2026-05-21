@@ -25,7 +25,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 2: Project Registry Diagnostics | Delivered | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | Repository PR #127 merged. |
 | Slice 3: Project Registry Repair | Delivered | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Repository PR #128 merged. |
 | Slice 4: Execution Artifact Drift | Delivered | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Repository PR #129 merged. |
-| Slice 5: Runtime Artifact Cleanup Preview | Planned | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Pending. |
+| Slice 5: Runtime Artifact Cleanup Preview | Reviewing | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | PR pending. |
 | Slice 6: Diagnostic Bundle | Planned | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | Pending. |
 | Slice 7: Maintenance Documentation | Planned | `feat/slice-7-maintenance-docs` | `feat(slice-7): maintenance docs` | `.prj/reports/slices/maintenance-and-recovery/slice-7-maintenance-docs.md` | Pending. |
 
@@ -171,23 +171,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Identify unreferenced runtime artifact directories.
-- [ ] Print cleanup preview output.
-- [ ] Avoid deleting by default.
-- [ ] Add focused tests.
-- [ ] Document cleanup safety boundaries.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Identify unreferenced runtime artifact directories.
+- [x] Print cleanup preview output.
+- [x] Avoid deleting by default.
+- [x] Add focused tests.
+- [x] Document cleanup safety boundaries.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
+- T5.1: `5a3d4cd`
+- T5.2: `5a3d4cd`
+- T5.3: `5a3d4cd`
+- T5.4: `5a3d4cd`
+- T5.5: `7b27086`
+- T5.6: `docs(slice-5): record runtime artifact cleanup preview`
+- T5.7: `make verify`
 
 ## Slice 6: Diagnostic Bundle
 
