@@ -57,7 +57,8 @@ func parseGitStatusChangedFiles(output string) []ExecutionResultChangedFile {
 			continue
 		}
 
-		if _, exists := seen[path]; exists {
+		_, exists := seen[path]
+		if exists {
 			continue
 		}
 

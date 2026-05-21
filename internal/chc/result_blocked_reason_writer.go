@@ -31,7 +31,8 @@ func (w *ticketResultBlockedReasonWriter) WriteBlockedReason(
 		return nil
 	}
 
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return err
 	}
 
@@ -54,7 +55,8 @@ func (w *ticketResultBlockedReasonWriter) WriteBlockedReason(
 		return err
 	}
 
-	if err := os.WriteFile(opts.Application.TicketPath, []byte(updated), 0o644); err != nil {
+	err = os.WriteFile(opts.Application.TicketPath, []byte(updated), 0o644)
+	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}
 

@@ -1,18 +1,35 @@
-package main
+package chcapp
 
 import (
 	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
 )
+
+func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	return Run(ctx, args, stdout, stderr, testAssetsFS())
+}
+
+func testAssetsFS() fs.FS {
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("resolve test asset path")
+	}
+
+	root := filepath.Join(filepath.Dir(file), "..", "..", "cmd", "chc")
+
+	return os.DirFS(root)
+}
 
 func TestDaemonStatusPrintsStoppedWhenStateIsMissing(t *testing.T) {
 	devRoot := t.TempDir()
@@ -344,7 +361,8 @@ func TestDaemonStartRunsForegroundLoop(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "tickets"), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "tickets"), 0o755)
+	if err != nil {
 		t.Fatalf("create tickets directory: %v", err)
 	}
 
@@ -352,7 +370,7 @@ func TestDaemonStartRunsForegroundLoop(t *testing.T) {
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"daemon",
 		"start",
 		"--dev-root",
@@ -558,15 +576,18 @@ func TestTicketNewUsesConfigKeyPrefix(t *testing.T) {
 	dir := t.TempDir()
 
 	configPath := filepath.Join(dir, ".chc", "config.yml")
-	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
+	if err != nil {
 		t.Fatalf("create config dir: %v", err)
 	}
 
-	if err := os.WriteFile(configPath, []byte("tickets:\n  key_prefix: PRJ\n"), 0o644); err != nil {
+	err = os.WriteFile(configPath, []byte("tickets:\n  key_prefix: PRJ\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write config: %v", err)
 	}
 
-	err := run(t.Context(), []string{"ticket", "new", "--dir", dir, "Do something"}, &bytes.Buffer{}, &bytes.Buffer{})
+	err = run(t.Context(), []string{"ticket", "new", "--dir", dir, "Do something"}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("run returned error: %v", err)
 	}
@@ -654,17 +675,20 @@ func TestRuntimeInitSkipsExistingTemplate(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	dockerfilePath := filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile")
-	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime template directory: %v", err)
 	}
 
-	if err := os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644); err != nil {
+	err = os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write runtime template: %v", err)
 	}
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"runtime",
 		"init",
 		"--dir",
@@ -762,13 +786,15 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 
 func TestRuntimeValidateFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 	projectDir := newTestWorkspace(t)
-	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime runs dir: %v", err)
 	}
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"runtime",
 		"validate",
 		"--dir",
@@ -1426,7 +1452,8 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime runs dir: %v", err)
 	}
 
@@ -1435,7 +1462,7 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"ticket",
 		"start",
 		"--dev-root",
@@ -1641,11 +1668,13 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(ticketPath), 0o755)
+	if err != nil {
 		t.Fatalf("create ticket dir: %v", err)
 	}
 
-	if err := os.WriteFile(ticketPath, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(ticketPath, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write ticket: %v", err)
 	}
 
@@ -1823,17 +1852,20 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 	devRoot := t.TempDir()
 
 	badTicketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Bad.md")
-	if err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755)
+	if err != nil {
 		t.Fatalf("create ticket dir: %v", err)
 	}
 
-	if err := os.WriteFile(badTicketPath, []byte("# Bad\n"), 0o644); err != nil {
+	err = os.WriteFile(badTicketPath, []byte("# Bad\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write bad ticket: %v", err)
 	}
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"index",
 		"rebuild",
 		"--dev-root",
@@ -1867,20 +1899,21 @@ func TestIndexStatusReportsCleanIndex(t *testing.T) {
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 
-	if err := run(t.Context(), []string{
+	err := run(t.Context(), []string{
 		"index",
 		"rebuild",
 		"--dev-root",
 		devRoot,
 		"--dir",
 		projectDir,
-	}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
 		t.Fatalf("index rebuild returned error: %v", err)
 	}
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"index",
 		"status",
 		"--dev-root",
@@ -1950,14 +1983,15 @@ func TestIndexStatusReportsStaleTickets(t *testing.T) {
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 
-	if err := run(t.Context(), []string{
+	err := run(t.Context(), []string{
 		"index",
 		"rebuild",
 		"--dev-root",
 		devRoot,
 		"--dir",
 		projectDir,
-	}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
 		t.Fatalf("index rebuild returned error: %v", err)
 	}
 
@@ -1971,7 +2005,7 @@ func TestIndexStatusReportsStaleTickets(t *testing.T) {
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"index",
 		"status",
 		"--dev-root",
@@ -1998,17 +2032,20 @@ func TestIndexStatusReportsInvalidTickets(t *testing.T) {
 	devRoot := t.TempDir()
 
 	badTicketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Bad.md")
-	if err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755)
+	if err != nil {
 		t.Fatalf("create ticket dir: %v", err)
 	}
 
-	if err := os.WriteFile(badTicketPath, []byte("# Bad\n"), 0o644); err != nil {
+	err = os.WriteFile(badTicketPath, []byte("# Bad\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write bad ticket: %v", err)
 	}
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"index",
 		"status",
 		"--dev-root",
@@ -2034,13 +2071,14 @@ func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
 
-	if err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755); err != nil {
+	err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755)
+	if err != nil {
 		t.Fatalf("create project workspace: %v", err)
 	}
 
 	var stdout bytes.Buffer
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"project",
 		"add",
 		"--dev-root",
@@ -2077,11 +2115,12 @@ func TestProjectListPrintsRegisteredProjects(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
 
-	if err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755); err != nil {
+	err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755)
+	if err != nil {
 		t.Fatalf("create project workspace: %v", err)
 	}
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"project",
 		"add",
 		"--dev-root",
@@ -2218,11 +2257,12 @@ func TestProjectSelectRejectsMissingRegisteredPath(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	if err := os.RemoveAll(projectDir); err != nil {
+	err := os.RemoveAll(projectDir)
+	if err != nil {
 		t.Fatalf("remove project dir: %v", err)
 	}
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"project",
 		"select",
 		"--dev-root",
@@ -2240,11 +2280,12 @@ func TestProjectSelectRejectsRegisteredPathWithoutWorkspace(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	if err := os.RemoveAll(filepath.Join(projectDir, ".chc")); err != nil {
+	err := os.RemoveAll(filepath.Join(projectDir, ".chc"))
+	if err != nil {
 		t.Fatalf("remove project workspace: %v", err)
 	}
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"project",
 		"select",
 		"--dev-root",
@@ -2263,11 +2304,12 @@ func TestTicketNewRejectsMissingActiveProjectPath(t *testing.T) {
 	addProject(t, devRoot, "example", projectDir)
 	selectProject(t, devRoot, "example")
 
-	if err := os.RemoveAll(projectDir); err != nil {
+	err := os.RemoveAll(projectDir)
+	if err != nil {
 		t.Fatalf("remove project dir: %v", err)
 	}
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"ticket",
 		"new",
 		"--dev-root",
@@ -2286,11 +2328,12 @@ func TestTicketNewRejectsActiveProjectWithoutWorkspace(t *testing.T) {
 	addProject(t, devRoot, "example", projectDir)
 	selectProject(t, devRoot, "example")
 
-	if err := os.RemoveAll(filepath.Join(projectDir, ".chc")); err != nil {
+	err := os.RemoveAll(filepath.Join(projectDir, ".chc"))
+	if err != nil {
 		t.Fatalf("remove project workspace: %v", err)
 	}
 
-	err := run(t.Context(), []string{
+	err = run(t.Context(), []string{
 		"ticket",
 		"new",
 		"--dev-root",
@@ -2338,7 +2381,9 @@ func upsertDaemonState(t *testing.T, devRoot string, state chc.DaemonState) {
 	t.Helper()
 
 	repository := newDaemonStateRepositoryForTest(t, devRoot)
-	if err := repository.UpsertDaemonState(t.Context(), state); err != nil {
+
+	err := repository.UpsertDaemonState(t.Context(), state)
+	if err != nil {
 		t.Fatalf("UpsertDaemonState returned error: %v", err)
 	}
 }
@@ -2373,7 +2418,8 @@ func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) chc.DaemonSta
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close daemon state repository: %v", err)
 		}
 	})
@@ -2398,7 +2444,8 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket chc.IndexedTic
 	}
 
 	defer func() {
-		if err := index.Close(); err != nil {
+		err := index.Close()
+		if err != nil {
 			t.Fatalf("close ticket index: %v", err)
 		}
 	}()
@@ -2411,7 +2458,8 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket chc.IndexedTic
 	ticket.ContentHash = "hash"
 	ticket.IndexedAt = now
 
-	if err := index.UpsertTicket(t.Context(), ticket); err != nil {
+	err = index.UpsertTicket(t.Context(), ticket)
+	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 }
@@ -2433,7 +2481,8 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []chc.IndexedT
 	}
 
 	defer func() {
-		if err := index.Close(); err != nil {
+		err := index.Close()
+		if err != nil {
 			t.Fatalf("close ticket index: %v", err)
 		}
 	}()
@@ -2463,7 +2512,8 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 	}
 
 	defer func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close execution repository: %v", err)
 		}
 	}()
@@ -2493,7 +2543,8 @@ func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []chc.LoopRunR
 	}
 
 	defer func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close loop run repository: %v", err)
 		}
 	}()
@@ -2529,13 +2580,16 @@ func createApplyResultExecution(
 	}
 
 	defer func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close execution repository: %v", err)
 		}
 	}()
 
 	record := testApplyResultExecutionRecord(projectDir, status, failureReason)
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err = repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -2582,7 +2636,8 @@ func writeApplyResultFile(
 ) {
 	t.Helper()
 
-	if err := os.MkdirAll(record.Artifacts.RunDir, 0o755); err != nil {
+	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
+	if err != nil {
 		t.Fatalf("create execution run dir: %v", err)
 	}
 
@@ -2594,7 +2649,8 @@ func writeApplyResultFile(
 		summary,
 	)
 
-	if err := os.WriteFile(record.Artifacts.ResultPath, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(record.Artifacts.ResultPath, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write result file: %v", err)
 	}
 }
@@ -2641,11 +2697,13 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 	name := command.Program + " " + command.Args[0]
 	e.commands = append(e.commands, name)
 
-	if _, err := fmt.Fprintln(stdout, "stdout: "+name); err != nil {
+	_, err := fmt.Fprintln(stdout, "stdout: "+name)
+	if err != nil {
 		return err
 	}
 
-	if _, err := fmt.Fprintln(stderr, "stderr: "+name); err != nil {
+	_, err = fmt.Fprintln(stderr, "stderr: "+name)
+	if err != nil {
 		return err
 	}
 
@@ -2653,7 +2711,8 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 		return chc.NewExecutionFailure(chc.ExecutionFailureHarness, fmt.Errorf("codex failed"))
 	}
 
-	if err := e.writeFakeTicketStartResult(command); err != nil {
+	err = e.writeFakeTicketStartResult(command)
+	if err != nil {
 		return err
 	}
 
@@ -2677,7 +2736,8 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command chc.
 	status := chc.ExecutionResultStatusSucceeded
 	ticketKey := harnessEnvValue(command, "CHC_TICKET_KEY")
 
-	if configured, ok := e.resultStatuses[ticketKey]; ok {
+	configured, ok := e.resultStatuses[ticketKey]
+	if ok {
 		status = configured
 	}
 
@@ -2738,11 +2798,13 @@ func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, tick
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(ticketPath), 0o755)
+	if err != nil {
 		t.Fatalf("create ticket dir: %v", err)
 	}
 
-	if err := os.WriteFile(ticketPath, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(ticketPath, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write ticket: %v", err)
 	}
 
@@ -2754,7 +2816,8 @@ func newTestWorkspace(t *testing.T) string {
 
 	projectDir := t.TempDir()
 
-	if err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755); err != nil {
+	err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755)
+	if err != nil {
 		t.Fatalf("create project workspace: %v", err)
 	}
 
@@ -2765,15 +2828,19 @@ func writeRuntimeTemplate(t *testing.T, projectDir string) {
 	t.Helper()
 
 	dockerfilePath := filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile")
-	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime template directory: %v", err)
 	}
 
-	if err := os.WriteFile(dockerfilePath, []byte("FROM ubuntu:24.04\n"), 0o644); err != nil {
+	err = os.WriteFile(dockerfilePath, []byte("FROM ubuntu:24.04\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write runtime template: %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Join(projectDir, ".chc", "runtime", "runs"), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime runs directory: %v", err)
 	}
 }
@@ -2795,12 +2862,14 @@ func runInDirectory(t *testing.T, dir string, runFunc func()) {
 		t.Fatalf("get working directory: %v", err)
 	}
 
-	if err := os.Chdir(dir); err != nil {
+	err = os.Chdir(dir)
+	if err != nil {
 		t.Fatalf("change working directory: %v", err)
 	}
 
 	t.Cleanup(func() {
-		if err := os.Chdir(previousDir); err != nil {
+		err := os.Chdir(previousDir)
+		if err != nil {
 			t.Fatalf("restore working directory: %v", err)
 		}
 	})
@@ -2811,7 +2880,8 @@ func runInDirectory(t *testing.T, dir string, runFunc func()) {
 func assertPathExists(t *testing.T, path string) {
 	t.Helper()
 
-	if _, err := os.Stat(path); err != nil {
+	_, err := os.Stat(path)
+	if err != nil {
 		t.Fatalf("stat path %s: %v", path, err)
 	}
 }
@@ -2819,7 +2889,8 @@ func assertPathExists(t *testing.T, path string) {
 func assertPathNotExists(t *testing.T, path string) {
 	t.Helper()
 
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
+	_, err := os.Stat(path)
+	if !os.IsNotExist(err) {
 		t.Fatalf("path %s exists or returned unexpected stat error: %v", path, err)
 	}
 }

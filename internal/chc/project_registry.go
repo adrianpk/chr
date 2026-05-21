@@ -33,7 +33,8 @@ type sqliteProjectRegistry struct {
 }
 
 func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (ProjectRegistry, error) {
-	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+	err := os.MkdirAll(env.DataDir(), 0o755)
+	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
@@ -45,7 +46,9 @@ func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS
 	db.SetMaxOpenConns(1)
 
 	migrator := NewMigrator(assetsFS)
-	if err := migrator.Migrate(ctx, db); err != nil {
+
+	err = migrator.Migrate(ctx, db)
+	if err != nil {
 		return nil, closeDBWithError(db, fmt.Errorf("migrate project registry database: %w", err))
 	}
 
@@ -54,7 +57,9 @@ func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS
 
 func NewProjectRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ProjectRegistry, error) {
 	migrator := NewMigrator(assetsFS)
-	if err := migrator.Migrate(ctx, db); err != nil {
+
+	err := migrator.Migrate(ctx, db)
+	if err != nil {
 		return nil, fmt.Errorf("migrate project registry database: %w", err)
 	}
 
@@ -62,11 +67,12 @@ func NewProjectRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (
 }
 
 func (r *sqliteProjectRegistry) AddProject(ctx context.Context, project Project) error {
-	if err := validateProject(project); err != nil {
+	err := validateProject(project)
+	if err != nil {
 		return err
 	}
 
-	_, err := r.db.ExecContext(
+	_, err = r.db.ExecContext(
 		ctx,
 		`INSERT INTO projects (
     id,
@@ -117,7 +123,8 @@ ORDER BY name`,
 		projects = append(projects, project)
 	}
 
-	if err := rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		return nil, fmt.Errorf("list projects rows: %w", err)
 	}
 
@@ -172,7 +179,8 @@ func projectLookupColumn(field string) (string, error) {
 }
 
 func (r *sqliteProjectRegistry) Close() error {
-	if err := r.db.Close(); err != nil {
+	err := r.db.Close()
+	if err != nil {
 		return fmt.Errorf("close project registry database: %w", err)
 	}
 
@@ -274,7 +282,8 @@ func boolToInt(value bool) int {
 }
 
 func closeDBWithError(db *sql.DB, err error) error {
-	if closeErr := db.Close(); closeErr != nil {
+	closeErr := db.Close()
+	if closeErr != nil {
 		return fmt.Errorf("%w; close database failed: %w", err, closeErr)
 	}
 

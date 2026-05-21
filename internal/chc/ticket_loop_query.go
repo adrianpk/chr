@@ -87,15 +87,18 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 func normalizeTicketLoopFilters(filters TicketLoopFilters) (TicketLoopFilters, error) {
 	var err error
 
-	if filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", isValidTicketPriority); err != nil {
+	filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", isValidTicketPriority)
+	if err != nil {
 		return TicketLoopFilters{}, err
 	}
 
-	if filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", isValidTicketSeverity); err != nil {
+	filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", isValidTicketSeverity)
+	if err != nil {
 		return TicketLoopFilters{}, err
 	}
 
-	if filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", isValidTicketType); err != nil {
+	filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", isValidTicketType)
+	if err != nil {
 		return TicketLoopFilters{}, err
 	}
 

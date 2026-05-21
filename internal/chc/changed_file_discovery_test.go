@@ -67,7 +67,9 @@ func runChangedFileDiscoveryGit(t *testing.T, projectDir string, args ...string)
 	t.Helper()
 
 	cmd := exec.Command("git", append([]string{"-C", projectDir}, args...)...)
-	if output, err := cmd.CombinedOutput(); err != nil {
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
 		t.Fatalf("git %v failed: %v\n%s", args, err, string(output))
 	}
 }
@@ -76,11 +78,14 @@ func writeChangedFileDiscoveryFile(t *testing.T, projectDir, relativePath, conte
 	t.Helper()
 
 	path := filepath.Join(projectDir, filepath.FromSlash(relativePath))
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
 		t.Fatalf("create test file dir: %v", err)
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write test file: %v", err)
 	}
 }

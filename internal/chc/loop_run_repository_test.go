@@ -16,7 +16,8 @@ func TestLoopRunRepositoryCreatesGetsUpdatesAndListsLoopRuns(t *testing.T) {
 	now := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 	record := testLoopRunRecord(now)
 
-	if err := repository.CreateLoopRun(context.Background(), record); err != nil {
+	err := repository.CreateLoopRun(context.Background(), record)
+	if err != nil {
 		t.Fatalf("CreateLoopRun returned error: %v", err)
 	}
 
@@ -37,7 +38,8 @@ func TestLoopRunRepositoryCreatesGetsUpdatesAndListsLoopRuns(t *testing.T) {
 	record.BlockedCount = 1
 	record.UpdatedAt = finishedAt
 
-	if err := repository.UpdateLoopRun(context.Background(), record); err != nil {
+	err = repository.UpdateLoopRun(context.Background(), record)
+	if err != nil {
 		t.Fatalf("UpdateLoopRun returned error: %v", err)
 	}
 
@@ -102,7 +104,8 @@ func TestNewLoopRunRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close repository: %v", err)
 		}
 	})
@@ -139,7 +142,8 @@ func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close repository: %v", err)
 		}
 	})

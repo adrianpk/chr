@@ -69,7 +69,8 @@ func (c *ticketIndexStatusChecker) CheckProjectTicketIndex(
 	ctx context.Context,
 	opts CheckProjectTicketIndexOptions,
 ) (TicketIndexStatus, error) {
-	if err := validateCheckProjectTicketIndexOptions(opts); err != nil {
+	err := validateCheckProjectTicketIndexOptions(opts)
+	if err != nil {
 		return TicketIndexStatus{}, err
 	}
 
@@ -179,7 +180,8 @@ func orphanedIndexedTickets(tickets []IndexedTicket, seenRelativePaths map[strin
 	orphaned := []IndexedTicket{}
 
 	for _, ticket := range tickets {
-		if _, found := seenRelativePaths[ticket.RelativePath]; !found {
+		_, found := seenRelativePaths[ticket.RelativePath]
+		if !found {
 			orphaned = append(orphaned, ticket)
 		}
 	}

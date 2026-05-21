@@ -16,7 +16,8 @@ func TestExecutionRepositoryCreatesGetsUpdatesAndListsExecutions(t *testing.T) {
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 	record := testExecutionRecord(now)
 
-	if err := repository.CreateExecution(context.Background(), record); err != nil {
+	err := repository.CreateExecution(context.Background(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -35,7 +36,8 @@ func TestExecutionRepositoryCreatesGetsUpdatesAndListsExecutions(t *testing.T) {
 	record.UpdatedAt = finishedAt
 	record.Artifacts.ValidationPath = "/tmp/exec-1/validation.log"
 
-	if err := repository.UpdateExecution(context.Background(), record); err != nil {
+	err = repository.UpdateExecution(context.Background(), record)
+	if err != nil {
 		t.Fatalf("UpdateExecution returned error: %v", err)
 	}
 
@@ -89,7 +91,8 @@ func TestNewExecutionRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close repository: %v", err)
 		}
 	})
@@ -109,7 +112,8 @@ func newTestExecutionRepository(t *testing.T) ExecutionRepository {
 
 	repository, err := NewExecutionRepositoryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
-		if closeErr := db.Close(); closeErr != nil {
+		closeErr := db.Close()
+		if closeErr != nil {
 			t.Fatalf("close sqlite after repository error: %v", closeErr)
 		}
 
@@ -117,7 +121,8 @@ func newTestExecutionRepository(t *testing.T) ExecutionRepository {
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close repository: %v", err)
 		}
 	})

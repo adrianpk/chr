@@ -21,7 +21,8 @@ func (e OSHarnessExecutor) Run(ctx context.Context, command HarnessCommand, stdo
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
-	if err := cmd.Run(); err != nil {
+	err := cmd.Run()
+	if err != nil {
 		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("run harness command %s: %w", command.Program, err))
 	}
 
@@ -54,16 +55,14 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		return record, nil
 	}
 
-	if r.Repository == nil {
-		return ExecutionRecord{}, fmt.Errorf("execution repository is required")
+	err := r.validate()
+	if err != nil {
+		return ExecutionRecord{}, err
 	}
 
-	if r.Executor == nil {
-		return ExecutionRecord{}, fmt.Errorf("harness executor is required")
-	}
-
-	if err := os.MkdirAll(record.Artifacts.RunDir, 0o755); err != nil {
-		return ExecutionRecord{}, fmt.Errorf("create execution artifact directory: %w", err)
+	err = createExecutionArtifactDir(record)
+	if err != nil {
+		return ExecutionRecord{}, err
 	}
 
 	logFile, validationFile, err := openExecutionOutputArtifacts(record.Artifacts)
@@ -75,35 +74,78 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		//nolint:errcheck // Main command result is already determined by execution.
 		_ = logFile.Close()
 	}()
-
 	defer func() {
 		//nolint:errcheck // Main command result is already determined by execution.
 		_ = validationFile.Close()
 	}()
 
+	record, err = r.markExecutionRunning(ctx, record)
+	if err != nil {
+		return ExecutionRecord{}, err
+	}
+
+	err = r.runHarness(ctx, opts.Invocation, logFile, validationFile)
+	if err != nil {
+		return r.failExecution(ctx, record, err)
+	}
+
+	err = captureExecutionResult(record)
+	if err != nil {
+		return r.failExecution(ctx, record, err)
+	}
+
+	return r.markExecutionSucceeded(ctx, record)
+}
+
+func (r ExecutionRunner) validate() error {
+	if r.Repository == nil {
+		return fmt.Errorf("execution repository is required")
+	}
+
+	if r.Executor == nil {
+		return fmt.Errorf("harness executor is required")
+	}
+
+	return nil
+}
+
+func createExecutionArtifactDir(record ExecutionRecord) error {
+	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
+	if err != nil {
+		return fmt.Errorf("create execution artifact directory: %w", err)
+	}
+
+	return nil
+}
+
+func (r ExecutionRunner) markExecutionRunning(
+	ctx context.Context,
+	record ExecutionRecord,
+) (ExecutionRecord, error) {
 	startedAt := r.now()
 	record.Status = ExecutionStatusRunning
 	record.StartedAt = &startedAt
 	record.UpdatedAt = startedAt
 
-	if err := r.Repository.UpdateExecution(ctx, record); err != nil {
+	err := r.Repository.UpdateExecution(ctx, record)
+	if err != nil {
 		return ExecutionRecord{}, err
 	}
 
-	if err := r.runHarness(ctx, opts.Invocation, logFile, validationFile); err != nil {
-		return r.failExecution(ctx, record, err)
-	}
+	return record, nil
+}
 
-	if err := captureExecutionResult(record); err != nil {
-		return r.failExecution(ctx, record, err)
-	}
-
+func (r ExecutionRunner) markExecutionSucceeded(
+	ctx context.Context,
+	record ExecutionRecord,
+) (ExecutionRecord, error) {
 	finishedAt := r.now()
 	record.Status = ExecutionStatusSucceeded
 	record.FinishedAt = &finishedAt
 	record.UpdatedAt = finishedAt
 
-	if err := r.Repository.UpdateExecution(ctx, record); err != nil {
+	err := r.Repository.UpdateExecution(ctx, record)
+	if err != nil {
 		return ExecutionRecord{}, err
 	}
 
@@ -118,7 +160,8 @@ func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (*os.File, *os.F
 
 	validationFile, err := os.OpenFile(artifacts.ValidationPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
-		if closeErr := logFile.Close(); closeErr != nil {
+		closeErr := logFile.Close()
+		if closeErr != nil {
 			return nil, nil, fmt.Errorf("open validation artifact: %w; close execution log artifact: %w", err, closeErr)
 		}
 
@@ -129,15 +172,18 @@ func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (*os.File, *os.F
 }
 
 func (r ExecutionRunner) runHarness(ctx context.Context, invocation HarnessInvocation, log, validationLog io.Writer) error {
-	if err := r.Executor.Run(ctx, invocation.Build, log, log); err != nil {
+	err := r.Executor.Run(ctx, invocation.Build, log, log)
+	if err != nil {
 		return harnessFailure(err)
 	}
 
-	if err := r.Executor.Run(ctx, invocation.Run, log, log); err != nil {
+	err = r.Executor.Run(ctx, invocation.Run, log, log)
+	if err != nil {
 		return workerFailure(err)
 	}
 
-	if err := r.Executor.Run(ctx, invocation.Validation, validationLog, validationLog); err != nil {
+	err = r.Executor.Run(ctx, invocation.Validation, validationLog, validationLog)
+	if err != nil {
 		return validationFailure(err)
 	}
 
@@ -217,7 +263,8 @@ func (r ExecutionRunner) failExecution(ctx context.Context, record ExecutionReco
 	record.UpdatedAt = finishedAt
 	record.FailureReason = cause.Error()
 
-	if err := r.Repository.UpdateExecution(ctx, record); err != nil {
+	err := r.Repository.UpdateExecution(ctx, record)
+	if err != nil {
 		return ExecutionRecord{}, err
 	}
 

@@ -42,7 +42,8 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 		return time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
 	}))
 
-	if err := migrator.Migrate(context.Background(), db); err != nil {
+	err := migrator.Migrate(context.Background(), db)
+	if err != nil {
 		t.Fatalf("Migrate returned error: %v", err)
 	}
 
@@ -56,17 +57,19 @@ func TestMigratorSkipsAppliedMigrations(t *testing.T) {
 	db := openTestSQLite(t)
 	migrator := NewMigrator(testMigrationFS())
 
-	if err := migrator.Migrate(context.Background(), db); err != nil {
+	err := migrator.Migrate(context.Background(), db)
+	if err != nil {
 		t.Fatalf("first Migrate returned error: %v", err)
 	}
 
-	if err := migrator.Migrate(context.Background(), db); err != nil {
+	err = migrator.Migrate(context.Background(), db)
+	if err != nil {
 		t.Fatalf("second Migrate returned error: %v", err)
 	}
 
 	var count int
 
-	err := db.QueryRow("SELECT COUNT(*) FROM schema_migrations WHERE version = ?", "20260518000001").Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM schema_migrations WHERE version = ?", "20260518000001").Scan(&count)
 	if err != nil {
 		t.Fatalf("count migrations: %v", err)
 	}
@@ -87,7 +90,8 @@ func openTestSQLite(t *testing.T) *sql.DB {
 	db.SetMaxOpenConns(1)
 
 	t.Cleanup(func() {
-		if err := db.Close(); err != nil {
+		err := db.Close()
+		if err != nil {
 			t.Fatalf("close sqlite: %v", err)
 		}
 	})

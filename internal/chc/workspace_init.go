@@ -78,7 +78,8 @@ var directories = []string{
 }
 
 func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, error) {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return InitResult{}, err
 	}
 
@@ -89,7 +90,8 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 
 	result := InitResult{Root: filepath.Join(absProjectDir, DirectoryName)}
 
-	if err := initDirectories(ctx, absProjectDir, opts.DryRun, &result); err != nil {
+	err = initDirectories(ctx, absProjectDir, opts.DryRun, &result)
+	if err != nil {
 		return InitResult{}, err
 	}
 
@@ -98,11 +100,13 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 		profile = DefaultProfile
 	}
 
-	if err := w.initWorkspaceFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
+	err = w.initWorkspaceFiles(ctx, absProjectDir, profile, opts.DryRun, &result)
+	if err != nil {
 		return InitResult{}, err
 	}
 
-	if err := w.initRootFiles(ctx, absProjectDir, profile, opts.DryRun, &result); err != nil {
+	err = w.initRootFiles(ctx, absProjectDir, profile, opts.DryRun, &result)
+	if err != nil {
 		return InitResult{}, err
 	}
 
@@ -133,7 +137,8 @@ func resolveProjectDir(projectDir string) (string, error) {
 
 func initDirectories(ctx context.Context, projectDir string, dryRun bool, result *InitResult) error {
 	for _, dir := range directories {
-		if err := ctx.Err(); err != nil {
+		err := ctx.Err()
+		if err != nil {
 			return err
 		}
 
@@ -158,7 +163,8 @@ func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile 
 	}
 
 	for _, file := range files {
-		if err := ctx.Err(); err != nil {
+		err = ctx.Err()
+		if err != nil {
 			return err
 		}
 
@@ -183,7 +189,8 @@ func (w *workspace) initRootFiles(ctx context.Context, projectDir, profile strin
 	}
 
 	for _, file := range files {
-		if err := ctx.Err(); err != nil {
+		err = ctx.Err()
+		if err != nil {
 			return err
 		}
 
@@ -216,7 +223,8 @@ func (w *workspace) profileFiles(profile string, kind profileFileKind) ([]entry,
 	files := []entry{}
 	walk := w.profileFileWalker(profileDir, kind, &files)
 
-	if err := fs.WalkDir(w.assetsFS, profileDir, walk); err != nil {
+	err = fs.WalkDir(w.assetsFS, profileDir, walk)
+	if err != nil {
 		return nil, fmt.Errorf("read embedded workspace profile %q: %w", profile, err)
 	}
 
@@ -329,7 +337,8 @@ func ensureDir(path string, dryRun bool) (bool, error) {
 		return true, nil
 	}
 
-	if err := os.MkdirAll(path, 0o755); err != nil {
+	err = os.MkdirAll(path, 0o755)
+	if err != nil {
 		return false, fmt.Errorf("create directory: %w", err)
 	}
 
@@ -354,11 +363,13 @@ func createFile(path, content string, dryRun bool) (bool, error) {
 		return true, nil
 	}
 
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
 		return false, fmt.Errorf("create parent directory: %w", err)
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		return false, fmt.Errorf("create file: %w", err)
 	}
 

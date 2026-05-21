@@ -60,7 +60,8 @@ type ResultApplicationOptions struct {
 }
 
 func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, error) {
-	if err := validateResultApplicationInputs(opts); err != nil {
+	err := validateResultApplicationInputs(opts)
+	if err != nil {
 		return ResultApplication{}, err
 	}
 
@@ -102,11 +103,13 @@ func resultApplicationChangedFiles(opts ResultApplicationOptions) []ResultApplic
 }
 
 func validateResultApplicationInputs(opts ResultApplicationOptions) error {
-	if err := ValidateExecutionRecord(opts.Execution); err != nil {
+	err := ValidateExecutionRecord(opts.Execution)
+	if err != nil {
 		return err
 	}
 
-	if err := ValidateExecutionResult(opts.Result); err != nil {
+	err = ValidateExecutionResult(opts.Result)
+	if err != nil {
 		return err
 	}
 

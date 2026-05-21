@@ -25,7 +25,8 @@ func NewTicketStatusUpdater() TicketStatusUpdater {
 }
 
 func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicketStatusOptions) error {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return err
 	}
 
@@ -52,7 +53,8 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 		return err
 	}
 
-	if err := os.WriteFile(opts.Path, []byte(updated), 0o644); err != nil {
+	err = os.WriteFile(opts.Path, []byte(updated), 0o644)
+	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}
 

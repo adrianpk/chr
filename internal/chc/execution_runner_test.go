@@ -17,7 +17,9 @@ func TestExecutionRunnerRunsHarnessAndMarksSucceeded(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -87,7 +89,9 @@ func TestExecutionRunnerMarksFailedWhenBuildHarnessFails(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -129,7 +133,9 @@ func TestExecutionRunnerClassifiesWorkerCommandFailure(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -162,7 +168,9 @@ func TestExecutionRunnerMarksFailedWhenResultIsMissing(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -191,7 +199,9 @@ func TestExecutionRunnerMarksFailedWhenResultIsMalformed(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -223,7 +233,9 @@ func TestExecutionRunnerClassifiesFailedResultAsValidationFailure(t *testing.T) 
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -255,7 +267,9 @@ func TestExecutionRunnerClassifiesValidationCommandFailure(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -296,7 +310,9 @@ func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 	repository := newTestExecutionRunnerRepository(t)
 
 	record := testRunnerExecutionRecord(t.TempDir())
-	if err := repository.CreateExecution(t.Context(), record); err != nil {
+
+	err := repository.CreateExecution(t.Context(), record)
+	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
@@ -343,11 +359,13 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, std
 	name := command.Program + " " + command.Args[0]
 	e.commands = append(e.commands, name)
 
-	if _, err := fmt.Fprintln(stdout, "stdout: "+name); err != nil {
+	_, err := fmt.Fprintln(stdout, "stdout: "+name)
+	if err != nil {
 		return err
 	}
 
-	if _, err := fmt.Fprintln(stderr, "stderr: "+name); err != nil {
+	_, err = fmt.Fprintln(stderr, "stderr: "+name)
+	if err != nil {
 		return err
 	}
 
@@ -363,7 +381,8 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, std
 		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("failed %s", name))
 	}
 
-	if err := e.writeResultForWorkerRun(command); err != nil {
+	err = e.writeResultForWorkerRun(command)
+	if err != nil {
 		return err
 	}
 
@@ -405,7 +424,8 @@ func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close execution repository: %v", err)
 		}
 	})

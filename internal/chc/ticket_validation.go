@@ -6,11 +6,13 @@ import (
 )
 
 func ValidateIndexedTicket(ticket IndexedTicket) error {
-	if err := validateRequiredTicketMetadata(ticket); err != nil {
+	err := validateRequiredTicketMetadata(ticket)
+	if err != nil {
 		return err
 	}
 
-	if err := validateTicketClassification(ticket); err != nil {
+	err = validateTicketClassification(ticket)
+	if err != nil {
 		return err
 	}
 

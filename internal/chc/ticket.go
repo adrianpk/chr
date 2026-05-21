@@ -41,7 +41,8 @@ func (r *ticketRenderer) RenderTicket(ticket Ticket) (string, error) {
 
 	var output bytes.Buffer
 
-	if err := renderTicketFrontmatter(&output, ticket); err != nil {
+	err := renderTicketFrontmatter(&output, ticket)
+	if err != nil {
 		return "", err
 	}
 
@@ -63,37 +64,45 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		{key: "type", value: ticket.Type},
 	}
 
-	if _, err := output.WriteString("---\n"); err != nil {
+	_, err := output.WriteString("---\n")
+	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 
 	for _, field := range fields {
-		if _, err := fmt.Fprintf(output, "%s: %s\n", field.key, yamlString(field.value)); err != nil {
+		_, err = fmt.Fprintf(output, "%s: %s\n", field.key, yamlString(field.value))
+		if err != nil {
 			return fmt.Errorf("write ticket frontmatter: %w", err)
 		}
 	}
 
-	if _, err := fmt.Fprintf(output, "tags: %s\n", yamlStringList(ticket.Tags)); err != nil {
+	_, err = fmt.Fprintf(output, "tags: %s\n", yamlStringList(ticket.Tags))
+	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 
-	if _, err := fmt.Fprintf(output, "use_case: %s\n", yamlString(ticket.UseCase)); err != nil {
+	_, err = fmt.Fprintf(output, "use_case: %s\n", yamlString(ticket.UseCase))
+	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 
-	if _, err := fmt.Fprintf(output, "project_area: %s\n", yamlString(ticket.ProjectArea)); err != nil {
+	_, err = fmt.Fprintf(output, "project_area: %s\n", yamlString(ticket.ProjectArea))
+	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 
-	if _, err := fmt.Fprintf(output, "created_at: %s\n", yamlTimestamp(ticket.CreatedAt)); err != nil {
+	_, err = fmt.Fprintf(output, "created_at: %s\n", yamlTimestamp(ticket.CreatedAt))
+	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 
-	if _, err := fmt.Fprintf(output, "updated_at: %s\n", yamlTimestamp(ticket.UpdatedAt)); err != nil {
+	_, err = fmt.Fprintf(output, "updated_at: %s\n", yamlTimestamp(ticket.UpdatedAt))
+	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 
-	if _, err := output.WriteString("---\n\n"); err != nil {
+	_, err = output.WriteString("---\n\n")
+	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 

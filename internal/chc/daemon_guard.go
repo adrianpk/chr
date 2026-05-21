@@ -15,7 +15,8 @@ type DaemonStartGuardDecision struct {
 }
 
 func EvaluateDaemonStartGuard(state DaemonState, now time.Time, staleAfter time.Duration) (DaemonStartGuardDecision, error) {
-	if err := ValidateDaemonState(state); err != nil {
+	err := ValidateDaemonState(state)
+	if err != nil {
 		return DaemonStartGuardDecision{}, err
 	}
 

@@ -44,11 +44,14 @@ func writeDiscoveryTestFile(t *testing.T, projectDir, relativePath string) {
 	t.Helper()
 
 	path := filepath.Join(projectDir, filepath.FromSlash(relativePath))
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
 		t.Fatalf("create test file dir: %v", err)
 	}
 
-	if err := os.WriteFile(path, []byte("test"), 0o644); err != nil {
+	err = os.WriteFile(path, []byte("test"), 0o644)
+	if err != nil {
 		t.Fatalf("write test file: %v", err)
 	}
 }

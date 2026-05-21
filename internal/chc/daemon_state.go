@@ -42,7 +42,8 @@ func ValidateDaemonState(state DaemonState) error {
 		return fmt.Errorf("daemon updated time is required")
 	}
 
-	if err := validateDaemonStateProcess(state); err != nil {
+	err := validateDaemonStateProcess(state)
+	if err != nil {
 		return err
 	}
 
@@ -79,11 +80,13 @@ func validateDaemonStateProcess(state DaemonState) error {
 }
 
 func validateDaemonStateTimes(state DaemonState) error {
-	if err := validateDaemonStateStartedAt(state); err != nil {
+	err := validateDaemonStateStartedAt(state)
+	if err != nil {
 		return err
 	}
 
-	if err := validateDaemonStateHeartbeatAt(state); err != nil {
+	err = validateDaemonStateHeartbeatAt(state)
+	if err != nil {
 		return err
 	}
 

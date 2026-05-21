@@ -61,7 +61,8 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 		_ = file.Close()
 	}()
 
-	if err := readWorkspaceConfig(file, &config); err != nil {
+	err = readWorkspaceConfig(file, &config)
+	if err != nil {
 		return WorkspaceConfig{}, err
 	}
 
@@ -97,7 +98,8 @@ func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
+	err := scanner.Err()
+	if err != nil {
 		return fmt.Errorf("read workspace config: %w", err)
 	}
 

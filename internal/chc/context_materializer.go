@@ -34,25 +34,30 @@ func (m *contextPackageMaterializer) MaterializeContextPackage(
 	ctx context.Context,
 	opts MaterializeContextPackageOptions,
 ) error {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return err
 	}
 
-	if err := validateMaterializeContextPackageOptions(opts); err != nil {
+	err = validateMaterializeContextPackageOptions(opts)
+	if err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(opts.Composition.Paths.ContextDir, 0o755); err != nil {
+	err = os.MkdirAll(opts.Composition.Paths.ContextDir, 0o755)
+	if err != nil {
 		return fmt.Errorf("create context artifact directory: %w", err)
 	}
 
 	files := contextPackageFiles(opts)
 	for path, content := range files {
-		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		err = os.MkdirAll(filepath.Dir(path), 0o755)
+		if err != nil {
 			return fmt.Errorf("create context package parent directory: %w", err)
 		}
 
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		err = os.WriteFile(path, []byte(content), 0o644)
+		if err != nil {
 			return fmt.Errorf("write context package artifact: %w", err)
 		}
 	}

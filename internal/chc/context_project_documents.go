@@ -214,7 +214,8 @@ func referencedProjectDocumentPaths(content string) []string {
 			continue
 		}
 
-		if _, ok := seen[ref]; ok {
+		_, ok := seen[ref]
+		if ok {
 			continue
 		}
 

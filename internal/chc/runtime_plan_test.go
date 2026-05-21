@@ -216,11 +216,13 @@ func TestCodexCredentialMountsUseReadOnlyRootCodexPaths(t *testing.T) {
 func writeRuntimePlanTestFile(t *testing.T, path, content string) {
 	t.Helper()
 
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime plan test directory: %v", err)
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write runtime plan test file: %v", err)
 	}
 }

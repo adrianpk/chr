@@ -260,7 +260,8 @@ func goGraphSymbols(terms []string, maxSymbols int) []string {
 			continue
 		}
 
-		if _, ok := seen[symbol]; ok {
+		_, ok := seen[symbol]
+		if ok {
 			continue
 		}
 

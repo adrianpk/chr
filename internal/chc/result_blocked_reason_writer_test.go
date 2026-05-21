@@ -114,7 +114,8 @@ func writeResultBlockedReasonTicket(t *testing.T, blockerHistory string) string 
 		content = strings.Replace(content, "# Validation", blockerHistory+"\n# Validation", 1)
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write ticket: %v", err)
 	}
 

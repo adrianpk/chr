@@ -200,7 +200,8 @@ func TestRunProvingRalphLoopStopsOnValidationPass(t *testing.T) {
 		t.Fatalf("commands = %d, want docker build and run", len(executor.commands))
 	}
 
-	if _, err := os.Stat(result.SummaryPath); err != nil {
+	_, err = os.Stat(result.SummaryPath)
+	if err != nil {
 		t.Fatalf("ralph loop summary was not written: %v", err)
 	}
 }
@@ -339,11 +340,13 @@ max_attempts: 3
 func writeTestFile(t *testing.T, path, content string) {
 	t.Helper()
 
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
 		t.Fatalf("create test file directory: %v", err)
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write test file: %v", err)
 	}
 }

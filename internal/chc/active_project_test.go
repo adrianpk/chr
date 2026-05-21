@@ -24,7 +24,8 @@ func TestActiveProjectStoreSetsAndLoadsActiveProject(t *testing.T) {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
 
-	if err := store.SetActiveProject(activeProject); err != nil {
+	err = store.SetActiveProject(activeProject)
+	if err != nil {
 		t.Fatalf("SetActiveProject returned error: %v", err)
 	}
 
@@ -49,11 +50,13 @@ func TestActiveProjectStoreReplacesActiveProject(t *testing.T) {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
 
-	if err := store.SetActiveProject(first); err != nil {
+	err = store.SetActiveProject(first)
+	if err != nil {
 		t.Fatalf("SetActiveProject returned error: %v", err)
 	}
 
-	if err := store.SetActiveProject(second); err != nil {
+	err = store.SetActiveProject(second)
+	if err != nil {
 		t.Fatalf("SetActiveProject returned error: %v", err)
 	}
 
@@ -68,7 +71,8 @@ func TestActiveProjectStoreReplacesActiveProject(t *testing.T) {
 func TestActiveProjectStoreRejectsEmptyProjectID(t *testing.T) {
 	store := NewActiveProjectStore(newTestUserEnvironment(t))
 
-	if err := store.SetActiveProject(ActiveProject{}); err == nil {
+	err := store.SetActiveProject(ActiveProject{})
+	if err == nil {
 		t.Fatal("SetActiveProject returned nil error")
 	}
 }
@@ -81,11 +85,13 @@ func TestActiveProjectStoreClearsActiveProject(t *testing.T) {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
 
-	if err := store.SetActiveProject(activeProject); err != nil {
+	err = store.SetActiveProject(activeProject)
+	if err != nil {
 		t.Fatalf("SetActiveProject returned error: %v", err)
 	}
 
-	if err := store.ClearActiveProject(); err != nil {
+	err = store.ClearActiveProject()
+	if err != nil {
 		t.Fatalf("ClearActiveProject returned error: %v", err)
 	}
 
@@ -113,7 +119,8 @@ func TestActiveProjectStoreUsesDevelopmentConfigPath(t *testing.T) {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
 
-	if err := store.SetActiveProject(activeProject); err != nil {
+	err = store.SetActiveProject(activeProject)
+	if err != nil {
 		t.Fatalf("SetActiveProject returned error: %v", err)
 	}
 
@@ -148,7 +155,8 @@ func assertActiveProject(t *testing.T, got, want ActiveProject) {
 func assertPathNotExists(t *testing.T, path string) {
 	t.Helper()
 
-	if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+	_, err := os.Stat(path)
+	if !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("stat path %s error = %v, want not exist", path, err)
 	}
 }

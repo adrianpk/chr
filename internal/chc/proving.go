@@ -152,7 +152,8 @@ func ParseProvingObjective(content string) (ProvingObjective, error) {
 		Body:           strings.TrimSpace(parts[1]),
 	}
 
-	if err := validateProvingObjective(objective); err != nil {
+	err = validateProvingObjective(objective)
+	if err != nil {
 		return ProvingObjective{}, err
 	}
 
@@ -194,7 +195,8 @@ func RunProvingSandboxForObjective(
 		_ = logFile.Close()
 	}()
 
-	if err := runProvingSandboxCommands(ctx, result, opts, logFile); err != nil {
+	err = runProvingSandboxCommands(ctx, result, opts, logFile)
+	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}
 
@@ -220,7 +222,8 @@ func RunProvingValidationForObjective(
 		return ProvingValidationResult{}, err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(planned.Plan.ValidationPath), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(planned.Plan.ValidationPath), 0o755)
+	if err != nil {
 		return ProvingValidationResult{}, fmt.Errorf("create proving validation directory: %w", err)
 	}
 
@@ -240,7 +243,8 @@ func RunProvingValidationForObjective(
 		}
 	}
 
-	if err := os.WriteFile(result.LogPath, []byte(RenderProvingValidationResult(result)), 0o644); err != nil {
+	err = os.WriteFile(result.LogPath, []byte(RenderProvingValidationResult(result)), 0o644)
+	if err != nil {
 		return ProvingValidationResult{}, fmt.Errorf("write proving validation log: %w", err)
 	}
 
@@ -294,7 +298,8 @@ func RunProvingRalphLoop(ctx context.Context, opts ProvingRalphLoopOptions) (Pro
 		previousValidation = validation
 	}
 
-	if err := writeProvingRalphLoopSummary(result); err != nil {
+	err = writeProvingRalphLoopSummary(result)
+	if err != nil {
 		return ProvingRalphLoopResult{}, err
 	}
 
@@ -387,11 +392,13 @@ func ProvingValidationCommands() []string {
 }
 
 func prepareProvingArtifacts(result ProvingSandboxRunResult) (*os.File, error) {
-	if err := os.MkdirAll(filepath.Dir(result.Plan.WorkerContextPath), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Dir(result.Plan.WorkerContextPath), 0o755)
+	if err != nil {
 		return nil, fmt.Errorf("create proving artifact directory: %w", err)
 	}
 
-	if err := os.WriteFile(result.Plan.WorkerContextPath, []byte(RenderProvingWorkerContext(result)), 0o644); err != nil {
+	err = os.WriteFile(result.Plan.WorkerContextPath, []byte(RenderProvingWorkerContext(result)), 0o644)
+	if err != nil {
 		return nil, fmt.Errorf("write proving worker context: %w", err)
 	}
 
@@ -417,7 +424,8 @@ func runProvingSandboxCommands(
 	stdout := provingOutput(opts.Stdout, logFile)
 	stderr := provingOutput(opts.Stderr, logFile)
 
-	if err := executor.Run(ctx, result.Build, stdout, stderr); err != nil {
+	err := executor.Run(ctx, result.Build, stdout, stderr)
+	if err != nil {
 		return err
 	}
 
@@ -737,11 +745,13 @@ func provingRalphLoopAttempt(attemptNumber int, objective ProvingObjective) Prov
 }
 
 func writeProvingRalphLoopSummary(result ProvingRalphLoopResult) error {
-	if err := os.MkdirAll(filepath.Dir(result.SummaryPath), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Dir(result.SummaryPath), 0o755)
+	if err != nil {
 		return fmt.Errorf("create proving ralph loop summary directory: %w", err)
 	}
 
-	if err := os.WriteFile(result.SummaryPath, []byte(RenderProvingRalphLoopResult(result)), 0o644); err != nil {
+	err = os.WriteFile(result.SummaryPath, []byte(RenderProvingRalphLoopResult(result)), 0o644)
+	if err != nil {
 		return fmt.Errorf("write proving ralph loop summary: %w", err)
 	}
 

@@ -28,7 +28,8 @@ type sqliteLoopRunRepository struct {
 }
 
 func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (LoopRunRepository, error) {
-	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+	err := os.MkdirAll(env.DataDir(), 0o755)
+	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
@@ -49,7 +50,9 @@ func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.
 
 func NewLoopRunRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (LoopRunRepository, error) {
 	migrator := NewMigrator(assetsFS)
-	if err := migrator.Migrate(ctx, db); err != nil {
+
+	err := migrator.Migrate(ctx, db)
+	if err != nil {
 		return nil, fmt.Errorf("migrate loop run database: %w", err)
 	}
 
@@ -57,11 +60,12 @@ func NewLoopRunRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS)
 }
 
 func (r *sqliteLoopRunRepository) CreateLoopRun(ctx context.Context, record LoopRunRecord) error {
-	if err := ValidateLoopRunRecord(record); err != nil {
+	err := ValidateLoopRunRecord(record)
+	if err != nil {
 		return err
 	}
 
-	_, err := r.db.ExecContext(ctx, insertLoopRunSQL(),
+	_, err = r.db.ExecContext(ctx, insertLoopRunSQL(),
 		record.ID,
 		record.ProjectID,
 		string(record.Status),
@@ -83,7 +87,8 @@ func (r *sqliteLoopRunRepository) CreateLoopRun(ctx context.Context, record Loop
 }
 
 func (r *sqliteLoopRunRepository) UpdateLoopRun(ctx context.Context, record LoopRunRecord) error {
-	if err := ValidateLoopRunRecord(record); err != nil {
+	err := ValidateLoopRunRecord(record)
+	if err != nil {
 		return err
 	}
 
@@ -158,7 +163,8 @@ func (r *sqliteLoopRunRepository) ListProjectLoopRuns(ctx context.Context, proje
 		records = append(records, record)
 	}
 
-	if err := rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		return nil, fmt.Errorf("list loop run rows: %w", err)
 	}
 
@@ -166,7 +172,8 @@ func (r *sqliteLoopRunRepository) ListProjectLoopRuns(ctx context.Context, proje
 }
 
 func (r *sqliteLoopRunRepository) Close() error {
-	if err := r.db.Close(); err != nil {
+	err := r.db.Close()
+	if err != nil {
 		return fmt.Errorf("close loop run repository database: %w", err)
 	}
 

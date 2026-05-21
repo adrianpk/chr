@@ -31,7 +31,8 @@ type CodexWorkerEnv struct {
 }
 
 func NewCodexWorkerCommand(opts CodexWorkerCommandOptions) (CodexWorkerCommand, error) {
-	if err := validateCodexWorkerCommandOptions(opts); err != nil {
+	err := validateCodexWorkerCommandOptions(opts)
+	if err != nil {
 		return CodexWorkerCommand{}, err
 	}
 

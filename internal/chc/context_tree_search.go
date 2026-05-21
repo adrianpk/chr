@@ -266,7 +266,8 @@ func searchContextFile(projectDir, path string, terms []string, remaining int) (
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
+	err = scanner.Err()
+	if err != nil {
 		return nil, fmt.Errorf("scan searchable context file: %w", err)
 	}
 
@@ -280,7 +281,8 @@ func addSearchTokens(terms *[]string, seen map[string]struct{}, value string) {
 			continue
 		}
 
-		if _, ok := seen[normalized]; ok {
+		_, ok := seen[normalized]
+		if ok {
 			continue
 		}
 
@@ -307,7 +309,9 @@ func firstMatchingContextTerm(line string, terms []string) string {
 
 func shouldSkipContextPath(path string, isDir bool) bool {
 	firstPart := path
-	if before, _, ok := strings.Cut(path, "/"); ok {
+
+	before, _, ok := strings.Cut(path, "/")
+	if ok {
 		firstPart = before
 	}
 

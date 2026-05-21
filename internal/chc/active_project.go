@@ -57,22 +57,26 @@ func (s *activeProjectStore) LoadActiveProject() (ActiveProject, error) {
 }
 
 func (s *activeProjectStore) SetActiveProject(activeProject ActiveProject) error {
-	if _, err := NewActiveProject(activeProject.ProjectID); err != nil {
+	_, err := NewActiveProject(activeProject.ProjectID)
+	if err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(s.path), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(s.path), 0o755)
+	if err != nil {
 		return fmt.Errorf("create active project config directory: %w", err)
 	}
 
 	tmpPath := s.path + ".tmp"
 	content := []byte(activeProject.ProjectID + "\n")
 
-	if err := os.WriteFile(tmpPath, content, 0o644); err != nil {
+	err = os.WriteFile(tmpPath, content, 0o644)
+	if err != nil {
 		return fmt.Errorf("write active project: %w", err)
 	}
 
-	if err := os.Rename(tmpPath, s.path); err != nil {
+	err = os.Rename(tmpPath, s.path)
+	if err != nil {
 		return fmt.Errorf("replace active project: %w", err)
 	}
 
@@ -80,7 +84,8 @@ func (s *activeProjectStore) SetActiveProject(activeProject ActiveProject) error
 }
 
 func (s *activeProjectStore) ClearActiveProject() error {
-	if err := os.Remove(s.path); errors.Is(err, os.ErrNotExist) {
+	err := os.Remove(s.path)
+	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	} else if err != nil {
 		return fmt.Errorf("clear active project: %w", err)

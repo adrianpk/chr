@@ -56,11 +56,14 @@ func TestRuntimeInitSkipsExistingRuntimeTemplate(t *testing.T) {
 	createWorkspaceRoot(t, dir)
 
 	dockerfilePath := filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile")
-	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime template directory: %v", err)
 	}
 
-	if err := os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644); err != nil {
+	err = os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write runtime template: %v", err)
 	}
 
@@ -97,7 +100,8 @@ func newTestRuntimeAssets() RuntimeAssets {
 func createWorkspaceRoot(t *testing.T, dir string) {
 	t.Helper()
 
-	if err := os.Mkdir(filepath.Join(dir, DirectoryName), 0o755); err != nil {
+	err := os.Mkdir(filepath.Join(dir, DirectoryName), 0o755)
+	if err != nil {
 		t.Fatalf("create workspace root: %v", err)
 	}
 }

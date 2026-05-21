@@ -24,7 +24,8 @@ func TestValidateRuntimeFailsWhenDockerfileIsMissing(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
 
-	if err := os.MkdirAll(filepath.Join(dir, ".chc", "runtime", "runs"), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Join(dir, ".chc", "runtime", "runs"), 0o755)
+	if err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}
 
@@ -43,16 +44,21 @@ func TestValidateRuntimeUsesCustomConfig(t *testing.T) {
 	createWorkspaceRoot(t, dir)
 
 	dockerfilePath := filepath.Join(dir, "ops", "runtime.Dockerfile")
-	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
+	if err != nil {
 		t.Fatalf("create Dockerfile dir: %v", err)
 	}
 
-	if err := os.WriteFile(dockerfilePath, []byte("FROM ubuntu:24.04\n"), 0o644); err != nil {
+	err = os.WriteFile(dockerfilePath, []byte("FROM ubuntu:24.04\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write Dockerfile: %v", err)
 	}
 
 	artifactDir := filepath.Join(dir, "var", "chc", "runs")
-	if err := os.MkdirAll(artifactDir, 0o755); err != nil {
+
+	err = os.MkdirAll(artifactDir, 0o755)
+	if err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}
 
@@ -82,15 +88,19 @@ func createRuntimeValidationWorkspace(t *testing.T, dir string) {
 	createWorkspaceRoot(t, dir)
 
 	dockerfilePath := filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile")
-	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
+	if err != nil {
 		t.Fatalf("create Dockerfile dir: %v", err)
 	}
 
-	if err := os.WriteFile(dockerfilePath, []byte("FROM ubuntu:24.04\n"), 0o644); err != nil {
+	err = os.WriteFile(dockerfilePath, []byte("FROM ubuntu:24.04\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write Dockerfile: %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(dir, ".chc", "runtime", "runs"), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Join(dir, ".chc", "runtime", "runs"), 0o755)
+	if err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}
 }

@@ -79,7 +79,8 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(
 	ctx context.Context,
 	opts RebuildProjectTicketsOptions,
 ) (RebuildProjectTicketsResult, error) {
-	if err := validateRebuildProjectTicketsOptions(opts); err != nil {
+	err := validateRebuildProjectTicketsOptions(opts)
+	if err != nil {
 		return RebuildProjectTicketsResult{}, err
 	}
 
@@ -97,7 +98,8 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(
 		indexedAt = r.now().UTC()
 	}
 
-	if err := r.index.DeleteProjectTickets(ctx, opts.ProjectID); err != nil {
+	err = r.index.DeleteProjectTickets(ctx, opts.ProjectID)
+	if err != nil {
 		return RebuildProjectTicketsResult{}, err
 	}
 
@@ -119,7 +121,8 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(
 			continue
 		}
 
-		if err := r.index.UpsertTicket(ctx, ticket); err != nil {
+		err = r.index.UpsertTicket(ctx, ticket)
+		if err != nil {
 			return RebuildProjectTicketsResult{}, err
 		}
 

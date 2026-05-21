@@ -59,7 +59,8 @@ func NewUserEnvironment(opts UserEnvironmentOptions) (UserEnvironment, error) {
 		env.applyDefaults(opts)
 	}
 
-	if err := env.validate(); err != nil {
+	err := env.validate()
+	if err != nil {
 		return nil, err
 	}
 

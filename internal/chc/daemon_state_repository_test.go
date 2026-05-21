@@ -17,7 +17,8 @@ func TestDaemonStateRepositoryUpsertsGetsUpdatesAndClearsState(t *testing.T) {
 	heartbeatAt := startedAt.Add(time.Minute)
 	state := testDaemonState(startedAt)
 
-	if err := repository.UpsertDaemonState(context.Background(), state); err != nil {
+	err := repository.UpsertDaemonState(context.Background(), state)
+	if err != nil {
 		t.Fatalf("UpsertDaemonState returned error: %v", err)
 	}
 
@@ -28,7 +29,8 @@ func TestDaemonStateRepositoryUpsertsGetsUpdatesAndClearsState(t *testing.T) {
 
 	assertDaemonState(t, got, state)
 
-	if err := repository.UpdateDaemonHeartbeat(context.Background(), heartbeatAt); err != nil {
+	err = repository.UpdateDaemonHeartbeat(context.Background(), heartbeatAt)
+	if err != nil {
 		t.Fatalf("UpdateDaemonHeartbeat returned error: %v", err)
 	}
 
@@ -42,7 +44,9 @@ func TestDaemonStateRepositoryUpsertsGetsUpdatesAndClearsState(t *testing.T) {
 	assertDaemonState(t, got, state)
 
 	stopped := NewStoppedDaemonState(heartbeatAt.Add(time.Minute))
-	if err := repository.UpsertDaemonState(context.Background(), stopped); err != nil {
+
+	err = repository.UpsertDaemonState(context.Background(), stopped)
+	if err != nil {
 		t.Fatalf("second UpsertDaemonState returned error: %v", err)
 	}
 
@@ -53,7 +57,8 @@ func TestDaemonStateRepositoryUpsertsGetsUpdatesAndClearsState(t *testing.T) {
 
 	assertDaemonState(t, got, stopped)
 
-	if err := repository.ClearDaemonState(context.Background()); err != nil {
+	err = repository.ClearDaemonState(context.Background())
+	if err != nil {
 		t.Fatalf("ClearDaemonState returned error: %v", err)
 	}
 
@@ -69,11 +74,13 @@ func TestDaemonStateRepositoryRequestsStop(t *testing.T) {
 	stopRequestedAt := startedAt.Add(time.Minute)
 	state := testDaemonState(startedAt)
 
-	if err := repository.UpsertDaemonState(context.Background(), state); err != nil {
+	err := repository.UpsertDaemonState(context.Background(), state)
+	if err != nil {
 		t.Fatalf("UpsertDaemonState returned error: %v", err)
 	}
 
-	if err := repository.RequestDaemonStop(context.Background(), stopRequestedAt); err != nil {
+	err = repository.RequestDaemonStop(context.Background(), stopRequestedAt)
+	if err != nil {
 		t.Fatalf("RequestDaemonStop returned error: %v", err)
 	}
 
@@ -135,7 +142,8 @@ func TestNewDaemonStateRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close repository: %v", err)
 		}
 	})
@@ -159,7 +167,8 @@ func newTestDaemonStateRepository(t *testing.T) DaemonStateRepository {
 	}
 
 	t.Cleanup(func() {
-		if err := repository.Close(); err != nil {
+		err := repository.Close()
+		if err != nil {
 			t.Fatalf("close repository: %v", err)
 		}
 	})

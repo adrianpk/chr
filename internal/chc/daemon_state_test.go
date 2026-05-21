@@ -9,7 +9,8 @@ import (
 func TestValidateDaemonStateAcceptsStoppedState(t *testing.T) {
 	state := NewStoppedDaemonState(time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC))
 
-	if err := ValidateDaemonState(state); err != nil {
+	err := ValidateDaemonState(state)
+	if err != nil {
 		t.Fatalf("ValidateDaemonState returned error: %v", err)
 	}
 }
@@ -26,7 +27,8 @@ func TestValidateDaemonStateAcceptsRunningState(t *testing.T) {
 		UpdatedAt:   heartbeatAt,
 	}
 
-	if err := ValidateDaemonState(state); err != nil {
+	err := ValidateDaemonState(state)
+	if err != nil {
 		t.Fatalf("ValidateDaemonState returned error: %v", err)
 	}
 }
@@ -43,7 +45,8 @@ func TestValidateDaemonStateAcceptsStoppingState(t *testing.T) {
 		UpdatedAt:       stopRequestedAt,
 	}
 
-	if err := ValidateDaemonState(state); err != nil {
+	err := ValidateDaemonState(state)
+	if err != nil {
 		t.Fatalf("ValidateDaemonState returned error: %v", err)
 	}
 }

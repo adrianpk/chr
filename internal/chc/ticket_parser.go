@@ -32,7 +32,8 @@ func NewTicketParser() TicketParser {
 }
 
 func (p *ticketParser) ParseTicket(ctx context.Context, opts ParseTicketOptions) (IndexedTicket, error) {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return IndexedTicket{}, err
 	}
 
@@ -124,7 +125,8 @@ func indexedTicketFromMetadata(
 		IndexedAt:    opts.IndexedAt.UTC(),
 	}
 
-	if err := ValidateIndexedTicket(ticket); err != nil {
+	err = ValidateIndexedTicket(ticket)
+	if err != nil {
 		return IndexedTicket{}, err
 	}
 
@@ -176,7 +178,8 @@ func parseMetadataStringList(value string) []string {
 
 	values := make([]string, 0, len(parts))
 	for _, part := range parts {
-		if parsed := unquoteMetadataString(part); parsed != "" {
+		parsed := unquoteMetadataString(part)
+		if parsed != "" {
 			values = append(values, parsed)
 		}
 	}

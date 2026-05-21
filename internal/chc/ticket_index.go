@@ -28,7 +28,8 @@ type sqliteTicketIndex struct {
 }
 
 func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (TicketIndex, error) {
-	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+	err := os.MkdirAll(env.DataDir(), 0o755)
+	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
@@ -49,7 +50,9 @@ func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (T
 
 func NewTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (TicketIndex, error) {
 	migrator := NewMigrator(assetsFS)
-	if err := migrator.Migrate(ctx, db); err != nil {
+
+	err := migrator.Migrate(ctx, db)
+	if err != nil {
 		return nil, fmt.Errorf("migrate ticket index database: %w", err)
 	}
 
@@ -57,7 +60,8 @@ func NewTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (Tick
 }
 
 func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTicket) error {
-	if err := validateIndexedTicket(ticket); err != nil {
+	err := validateIndexedTicket(ticket)
+	if err != nil {
 		return err
 	}
 
@@ -66,15 +70,18 @@ func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTick
 		return fmt.Errorf("begin ticket index transaction: %w", err)
 	}
 
-	if err := upsertIndexedTicket(ctx, tx, ticket); err != nil {
+	err = upsertIndexedTicket(ctx, tx, ticket)
+	if err != nil {
 		return rollbackWithError(tx, err)
 	}
 
-	if err := replaceIndexedTicketTags(ctx, tx, ticket); err != nil {
+	err = replaceIndexedTicketTags(ctx, tx, ticket)
+	if err != nil {
 		return rollbackWithError(tx, err)
 	}
 
-	if err := tx.Commit(); err != nil {
+	err = tx.Commit()
+	if err != nil {
 		return fmt.Errorf("commit ticket index transaction: %w", err)
 	}
 
@@ -106,11 +113,13 @@ ORDER BY key`,
 		tickets = append(tickets, ticket)
 	}
 
-	if err := rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		return nil, fmt.Errorf("list indexed ticket rows: %w", err)
 	}
 
-	if err := rows.Close(); err != nil {
+	err = rows.Close()
+	if err != nil {
 		return nil, fmt.Errorf("close indexed ticket rows: %w", err)
 	}
 
@@ -166,7 +175,8 @@ func (i *sqliteTicketIndex) DeleteProjectTickets(ctx context.Context, projectID 
 }
 
 func (i *sqliteTicketIndex) Close() error {
-	if err := i.db.Close(); err != nil {
+	err := i.db.Close()
+	if err != nil {
 		return fmt.Errorf("close ticket index database: %w", err)
 	}
 
@@ -233,13 +243,14 @@ func replaceIndexedTicketTags(ctx context.Context, tx *sql.Tx, ticket IndexedTic
 	}
 
 	for _, tag := range ticket.Tags {
-		if _, err := tx.ExecContext(
+		_, err = tx.ExecContext(
 			ctx,
 			"INSERT INTO indexed_ticket_tags (project_id, ticket_path, tag) VALUES (?, ?, ?)",
 			ticket.ProjectID,
 			ticket.Path,
 			tag,
-		); err != nil {
+		)
+		if err != nil {
 			return fmt.Errorf("insert indexed ticket tag: %w", err)
 		}
 	}
@@ -271,14 +282,16 @@ ORDER BY tag`,
 	for rows.Next() {
 		var tag string
 
-		if err := rows.Scan(&tag); err != nil {
+		err = rows.Scan(&tag)
+		if err != nil {
 			return nil, fmt.Errorf("scan indexed ticket tag: %w", err)
 		}
 
 		tags = append(tags, tag)
 	}
 
-	if err := rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		return nil, fmt.Errorf("list indexed ticket tag rows: %w", err)
 	}
 
@@ -319,7 +332,8 @@ func scanIndexedTicket(scanner projectScanner) (IndexedTicket, error) {
 		return IndexedTicket{}, fmt.Errorf("scan indexed ticket: %w", err)
 	}
 
-	if err := assignIndexedTicketTimes(&ticket, createdAt, updatedAt, fileMTime, indexedAt); err != nil {
+	err = assignIndexedTicketTimes(&ticket, createdAt, updatedAt, fileMTime, indexedAt)
+	if err != nil {
 		return IndexedTicket{}, err
 	}
 

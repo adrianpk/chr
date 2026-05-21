@@ -32,7 +32,8 @@ func NewRuntimeAssets(assetsFS fs.FS) RuntimeAssets {
 }
 
 func (r *runtimeAssets) Init(ctx context.Context, opts RuntimeInitOptions) (RuntimeInitResult, error) {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return RuntimeInitResult{}, err
 	}
 
@@ -49,7 +50,8 @@ func (r *runtimeAssets) Init(ctx context.Context, opts RuntimeInitOptions) (Runt
 	}
 
 	for _, file := range files {
-		if err := ctx.Err(); err != nil {
+		err = ctx.Err()
+		if err != nil {
 			return RuntimeInitResult{}, err
 		}
 

@@ -27,7 +27,8 @@ func NewTicketCommenter() TicketCommenter {
 }
 
 func (c *ticketCommenter) AddComment(ctx context.Context, opts AddTicketCommentOptions) error {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return err
 	}
 
@@ -54,7 +55,8 @@ func (c *ticketCommenter) AddComment(ctx context.Context, opts AddTicketCommentO
 		return err
 	}
 
-	if err := os.WriteFile(opts.Path, []byte(updated), 0o644); err != nil {
+	err = os.WriteFile(opts.Path, []byte(updated), 0o644)
+	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}
 

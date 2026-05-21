@@ -113,7 +113,8 @@ func TestProjectRegistryRejectsDuplicateName(t *testing.T) {
 	project.ID = "project-2"
 	project.Path = "/tmp/other"
 
-	if err := registry.AddProject(context.Background(), project); err == nil {
+	err := registry.AddProject(context.Background(), project)
+	if err == nil {
 		t.Fatal("AddProject returned nil error for duplicate project name")
 	}
 }
@@ -144,7 +145,8 @@ func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		if err := registry.Close(); err != nil {
+		err := registry.Close()
+		if err != nil {
 			t.Fatalf("close registry: %v", err)
 		}
 	})
@@ -164,7 +166,8 @@ func newTestProjectRegistry(t *testing.T) ProjectRegistry {
 
 	registry, err := NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
-		if closeErr := db.Close(); closeErr != nil {
+		closeErr := db.Close()
+		if closeErr != nil {
 			t.Fatalf("close sqlite after registry error: %v", closeErr)
 		}
 
@@ -172,7 +175,8 @@ func newTestProjectRegistry(t *testing.T) ProjectRegistry {
 	}
 
 	t.Cleanup(func() {
-		if err := registry.Close(); err != nil {
+		err := registry.Close()
+		if err != nil {
 			t.Fatalf("close registry: %v", err)
 		}
 	})
@@ -183,7 +187,8 @@ func newTestProjectRegistry(t *testing.T) ProjectRegistry {
 func addTestProject(t *testing.T, registry ProjectRegistry, project Project) {
 	t.Helper()
 
-	if err := registry.AddProject(context.Background(), project); err != nil {
+	err := registry.AddProject(context.Background(), project)
+	if err != nil {
 		t.Fatalf("AddProject returned error: %v", err)
 	}
 }
@@ -191,7 +196,8 @@ func addTestProject(t *testing.T, registry ProjectRegistry, project Project) {
 func assertPathExists(t *testing.T, path string) {
 	t.Helper()
 
-	if _, err := os.Stat(path); err != nil {
+	_, err := os.Stat(path)
+	if err != nil {
 		t.Fatalf("stat path %s: %v", path, err)
 	}
 }

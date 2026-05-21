@@ -28,7 +28,8 @@ type sqliteExecutionRepository struct {
 }
 
 func NewExecutionRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (ExecutionRepository, error) {
-	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+	err := os.MkdirAll(env.DataDir(), 0o755)
+	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
@@ -49,7 +50,9 @@ func NewExecutionRepository(ctx context.Context, env UserEnvironment, assetsFS f
 
 func NewExecutionRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ExecutionRepository, error) {
 	migrator := NewMigrator(assetsFS)
-	if err := migrator.Migrate(ctx, db); err != nil {
+
+	err := migrator.Migrate(ctx, db)
+	if err != nil {
 		return nil, fmt.Errorf("migrate execution database: %w", err)
 	}
 
@@ -57,11 +60,12 @@ func NewExecutionRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.F
 }
 
 func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record ExecutionRecord) error {
-	if err := ValidateExecutionRecord(record); err != nil {
+	err := ValidateExecutionRecord(record)
+	if err != nil {
 		return err
 	}
 
-	_, err := r.db.ExecContext(ctx, insertExecutionSQL(),
+	_, err = r.db.ExecContext(ctx, insertExecutionSQL(),
 		record.ID,
 		record.ProjectID,
 		record.TicketKey,
@@ -89,7 +93,8 @@ func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record 
 }
 
 func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record ExecutionRecord) error {
-	if err := ValidateExecutionRecord(record); err != nil {
+	err := ValidateExecutionRecord(record)
+	if err != nil {
 		return err
 	}
 
@@ -174,7 +179,8 @@ func (r *sqliteExecutionRepository) ListTicketExecutions(
 		records = append(records, record)
 	}
 
-	if err := rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		return nil, fmt.Errorf("list execution rows: %w", err)
 	}
 
@@ -182,7 +188,8 @@ func (r *sqliteExecutionRepository) ListTicketExecutions(
 }
 
 func (r *sqliteExecutionRepository) Close() error {
-	if err := r.db.Close(); err != nil {
+	err := r.db.Close()
+	if err != nil {
 		return fmt.Errorf("close execution repository database: %w", err)
 	}
 

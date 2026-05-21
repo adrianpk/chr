@@ -38,15 +38,18 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 	initializer := newTestInitializer()
 
 	configPath := filepath.Join(dir, ".chc", "config.yml")
-	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
+	if err != nil {
 		t.Fatalf("create .chc: %v", err)
 	}
 
-	if err := os.WriteFile(configPath, []byte("custom: true\n"), 0o644); err != nil {
+	err = os.WriteFile(configPath, []byte("custom: true\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write config: %v", err)
 	}
 
-	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
+	_, err = initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
@@ -66,11 +69,13 @@ func TestInitDoesNotOverwriteExistingRootAgents(t *testing.T) {
 	initializer := newTestInitializer()
 
 	agentsPath := filepath.Join(dir, "AGENTS.md")
-	if err := os.WriteFile(agentsPath, []byte("custom agents\n"), 0o644); err != nil {
+
+	err := os.WriteFile(agentsPath, []byte("custom agents\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write AGENTS.md: %v", err)
 	}
 
-	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
+	_, err = initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
@@ -90,15 +95,18 @@ func TestInitDoesNotOverwriteExistingRuntimeTemplate(t *testing.T) {
 	initializer := newTestInitializer()
 
 	dockerfilePath := filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile")
-	if err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
+	if err != nil {
 		t.Fatalf("create runtime template directory: %v", err)
 	}
 
-	if err := os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644); err != nil {
+	err = os.WriteFile(dockerfilePath, []byte("FROM custom\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write runtime template: %v", err)
 	}
 
-	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
+	_, err = initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatalf("Init returned error: %v", err)
 	}
@@ -126,7 +134,8 @@ func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 		t.Fatal("dry run reported no planned creates")
 	}
 
-	if _, err := os.Stat(filepath.Join(dir, DirectoryName)); !os.IsNotExist(err) {
+	_, err = os.Stat(filepath.Join(dir, DirectoryName))
+	if !os.IsNotExist(err) {
 		t.Fatalf("dry run created workspace or returned unexpected stat error: %v", err)
 	}
 
@@ -139,7 +148,8 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	if err := os.MkdirAll(filepath.Join(dir, ".chc", "agents"), 0o755); err != nil {
+	err := os.MkdirAll(filepath.Join(dir, ".chc", "agents"), 0o755)
+	if err != nil {
 		t.Fatalf("create existing dir: %v", err)
 	}
 
@@ -158,11 +168,13 @@ func TestInitRejectsFileProjectDir(t *testing.T) {
 	initializer := newTestInitializer()
 
 	path := filepath.Join(dir, "not-a-dir")
-	if err := os.WriteFile(path, []byte("x"), 0o644); err != nil {
+
+	err := os.WriteFile(path, []byte("x"), 0o644)
+	if err != nil {
 		t.Fatalf("write file: %v", err)
 	}
 
-	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: path})
+	_, err = initializer.Init(context.Background(), InitOptions{ProjectDir: path})
 	if err == nil {
 		t.Fatal("Init returned nil error for file project dir")
 	}
@@ -283,7 +295,8 @@ func assertFile(t *testing.T, root, rel string) {
 func assertNotExists(t *testing.T, root, rel string) {
 	t.Helper()
 
-	if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); !os.IsNotExist(err) {
+	_, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel)))
+	if !os.IsNotExist(err) {
 		t.Fatalf("%s exists or returned unexpected stat error: %v", rel, err)
 	}
 }

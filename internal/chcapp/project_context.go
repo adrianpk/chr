@@ -1,4 +1,4 @@
-package main
+package chcapp
 
 import (
 	"context"
@@ -85,7 +85,8 @@ func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
 		return commandProjectContext{}, fmt.Errorf("resolve project directory: %w", err)
 	}
 
-	if err := requireWorkspace(absProjectDir); err != nil {
+	err = requireWorkspace(absProjectDir)
+	if err != nil {
 		return commandProjectContext{}, err
 	}
 

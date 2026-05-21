@@ -71,7 +71,8 @@ func (r *ticketReconciler) ReconcileProjectTickets(
 	ctx context.Context,
 	opts ReconcileProjectTicketsOptions,
 ) (TicketReconciliationResult, error) {
-	if err := validateReconcileProjectTicketsOptions(opts); err != nil {
+	err := validateReconcileProjectTicketsOptions(opts)
+	if err != nil {
 		return TicketReconciliationResult{}, err
 	}
 
@@ -94,7 +95,8 @@ func (r *ticketReconciler) ReconcileProjectTicket(
 	ctx context.Context,
 	opts ReconcileProjectTicketOptions,
 ) (TicketReconciliationResult, error) {
-	if err := validateReconcileProjectTicketOptions(opts); err != nil {
+	err := validateReconcileProjectTicketOptions(opts)
+	if err != nil {
 		return TicketReconciliationResult{}, err
 	}
 
@@ -110,7 +112,8 @@ func (r *ticketReconciler) ReconcileProjectTicket(
 		}, nil
 	}
 
-	if err := r.index.UpsertTicket(ctx, ticket); err != nil {
+	err = r.index.UpsertTicket(ctx, ticket)
+	if err != nil {
 		return TicketReconciliationResult{}, err
 	}
 

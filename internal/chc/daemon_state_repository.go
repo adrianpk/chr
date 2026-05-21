@@ -31,7 +31,8 @@ type sqliteDaemonStateRepository struct {
 }
 
 func NewDaemonStateRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (DaemonStateRepository, error) {
-	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+	err := os.MkdirAll(env.DataDir(), 0o755)
+	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
@@ -52,7 +53,9 @@ func NewDaemonStateRepository(ctx context.Context, env UserEnvironment, assetsFS
 
 func NewDaemonStateRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (DaemonStateRepository, error) {
 	migrator := NewMigrator(assetsFS)
-	if err := migrator.Migrate(ctx, db); err != nil {
+
+	err := migrator.Migrate(ctx, db)
+	if err != nil {
 		return nil, fmt.Errorf("migrate daemon state database: %w", err)
 	}
 
@@ -75,11 +78,12 @@ func (r *sqliteDaemonStateRepository) GetDaemonState(ctx context.Context) (Daemo
 }
 
 func (r *sqliteDaemonStateRepository) UpsertDaemonState(ctx context.Context, state DaemonState) error {
-	if err := ValidateDaemonState(state); err != nil {
+	err := ValidateDaemonState(state)
+	if err != nil {
 		return err
 	}
 
-	_, err := r.db.ExecContext(ctx, upsertDaemonStateSQL(),
+	_, err = r.db.ExecContext(ctx, upsertDaemonStateSQL(),
 		daemonStateID,
 		string(state.Status),
 		state.PID,
@@ -160,7 +164,8 @@ func (r *sqliteDaemonStateRepository) ClearDaemonState(ctx context.Context) erro
 }
 
 func (r *sqliteDaemonStateRepository) Close() error {
-	if err := r.db.Close(); err != nil {
+	err := r.db.Close()
+	if err != nil {
 		return fmt.Errorf("close daemon state repository database: %w", err)
 	}
 

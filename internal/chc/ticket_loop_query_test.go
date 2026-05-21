@@ -20,7 +20,8 @@ func TestTicketLoopQuerySelectsDefaultReadyTickets(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3"}) {
 		t.Fatalf("keys = %#v, want ready tickets sorted by key", gotKeys)
 	}
 }
@@ -40,7 +41,8 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-1", "CHC-2"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-1", "CHC-2"}) {
 		t.Fatalf("keys = %#v, want open and ready tickets", gotKeys)
 	}
 }
@@ -109,7 +111,8 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-1"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-1"}) {
 		t.Fatalf("keys = %#v, want filtered ticket", gotKeys)
 	}
 }
@@ -141,7 +144,8 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-2"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-2"}) {
 		t.Fatalf("keys = %#v, want priority-filtered ticket", gotKeys)
 	}
 }
@@ -172,7 +176,8 @@ func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
 		t.Fatalf("keys = %#v, want priority order", gotKeys)
 	}
 }
@@ -203,7 +208,8 @@ func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
 		t.Fatalf("keys = %#v, want severity order", gotKeys)
 	}
 }
@@ -237,7 +243,8 @@ func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-1", "CHC-2", "CHC-3"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-1", "CHC-2", "CHC-3"}) {
 		t.Fatalf("keys = %#v, want priority, severity, and key order", gotKeys)
 	}
 }
@@ -260,7 +267,8 @@ func TestTicketLoopQueryOrdersByCreatedAt(t *testing.T) {
 		t.Fatalf("EligibleTickets returned error: %v", err)
 	}
 
-	if gotKeys := indexedTicketKeys(got); !slices.Equal(gotKeys, []string{"CHC-1", "CHC-3", "CHC-2"}) {
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-1", "CHC-3", "CHC-2"}) {
 		t.Fatalf("keys = %#v, want created_at order", gotKeys)
 	}
 }
@@ -346,7 +354,8 @@ func upsertLoopQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata
 	ticket.ProjectArea = metadata.ProjectArea
 	ticket.CreatedAt = metadata.CreatedAt
 
-	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
+	err := index.UpsertTicket(context.Background(), ticket)
+	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 }

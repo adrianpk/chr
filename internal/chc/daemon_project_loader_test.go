@@ -65,7 +65,8 @@ func TestLoadDaemonProjectsClassifiesNonDirectoryPath(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 	path := filepath.Join(t.TempDir(), "project-file")
 
-	if err := os.WriteFile(path, []byte("not a directory\n"), 0o644); err != nil {
+	err := os.WriteFile(path, []byte("not a directory\n"), 0o644)
+	if err != nil {
 		t.Fatalf("write project file: %v", err)
 	}
 
@@ -108,7 +109,9 @@ func newDaemonLoaderWorkspace(t *testing.T) string {
 	t.Helper()
 
 	projectDir := t.TempDir()
-	if err := os.Mkdir(filepath.Join(projectDir, DirectoryName), 0o755); err != nil {
+
+	err := os.Mkdir(filepath.Join(projectDir, DirectoryName), 0o755)
+	if err != nil {
 		t.Fatalf("create workspace directory: %v", err)
 	}
 

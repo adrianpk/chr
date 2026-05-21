@@ -27,7 +27,8 @@ func (w *ticketResultValidationWriter) WriteResultValidation(
 	ctx context.Context,
 	opts WriteResultValidationOptions,
 ) error {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return err
 	}
 
@@ -50,7 +51,8 @@ func (w *ticketResultValidationWriter) WriteResultValidation(
 		return err
 	}
 
-	if err := os.WriteFile(opts.Application.TicketPath, []byte(updated), 0o644); err != nil {
+	err = os.WriteFile(opts.Application.TicketPath, []byte(updated), 0o644)
+	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}
 

@@ -75,7 +75,8 @@ func TestTicketIndexStatusCheckerReportsOrphanedTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
 
-	if err := index.UpsertTicket(context.Background(), testIndexedTicket("CHC-1", nil)); err != nil {
+	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHC-1", nil))
+	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 

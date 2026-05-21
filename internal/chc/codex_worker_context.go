@@ -32,20 +32,25 @@ func (m *codexWorkerContextMaterializer) MaterializeContext(
 	ctx context.Context,
 	opts MaterializeCodexWorkerContextOptions,
 ) error {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return err
 	}
 
-	if err := validateCodexWorkerContextOptions(opts); err != nil {
+	err = validateCodexWorkerContextOptions(opts)
+	if err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(opts.Path), 0o755); err != nil {
+	err = os.MkdirAll(filepath.Dir(opts.Path), 0o755)
+	if err != nil {
 		return fmt.Errorf("create codex worker context directory: %w", err)
 	}
 
 	content := RenderCodexWorkerContext(opts)
-	if err := os.WriteFile(opts.Path, []byte(content), 0o644); err != nil {
+
+	err = os.WriteFile(opts.Path, []byte(content), 0o644)
+	if err != nil {
 		return fmt.Errorf("write codex worker context: %w", err)
 	}
 

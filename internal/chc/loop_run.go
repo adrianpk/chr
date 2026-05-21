@@ -43,7 +43,8 @@ func ValidateLoopRunRecord(record LoopRunRecord) error {
 		return fmt.Errorf("loop run status is invalid: %s", record.Status)
 	}
 
-	if err := validateLoopRunCounts(record); err != nil {
+	err := validateLoopRunCounts(record)
+	if err != nil {
 		return err
 	}
 

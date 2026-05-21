@@ -92,7 +92,8 @@ func writeResultValidationTicket(t *testing.T, validationHistory string) string 
 		content += "\n" + validationHistory
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write ticket: %v", err)
 	}
 

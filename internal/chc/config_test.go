@@ -102,11 +102,14 @@ func writeWorkspaceConfig(t *testing.T, projectDir, content string) {
 	t.Helper()
 
 	path := filepath.Join(projectDir, DirectoryName, "config.yml")
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
 		t.Fatalf("create config directory: %v", err)
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write config: %v", err)
 	}
 }

@@ -33,7 +33,8 @@ type PreviousAttemptContext struct {
 }
 
 func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAttemptContext, error) {
-	if err := ValidateExecutionRecord(opts.Execution); err != nil {
+	err := ValidateExecutionRecord(opts.Execution)
+	if err != nil {
 		return PreviousAttemptContext{}, err
 	}
 
@@ -189,7 +190,9 @@ func validationFailureSignatures(content string) []string {
 		}
 
 		signature := normalizeFailureSignature(line)
-		if _, ok := seen[signature]; ok {
+
+		_, ok := seen[signature]
+		if ok {
 			continue
 		}
 

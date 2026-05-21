@@ -86,7 +86,9 @@ func writeResultChangedFilesTicket(t *testing.T) string {
 	}
 
 	content = strings.Replace(content, "# Blocker", "## 2026-05-19T12:30:00Z user\n\n\"Existing comment.\"\n\n# Blocker", 1)
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("write ticket: %v", err)
 	}
 

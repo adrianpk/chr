@@ -148,7 +148,8 @@ func codexCredentialMounts(homeDir string) []RuntimeMount {
 
 	mounts := make([]RuntimeMount, 0, len(candidates))
 	for _, candidate := range candidates {
-		if _, err := os.Stat(candidate.source); err != nil {
+		_, err := os.Stat(candidate.source)
+		if err != nil {
 			continue
 		}
 

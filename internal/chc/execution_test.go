@@ -18,7 +18,8 @@ func TestValidateExecutionRecordAcceptsValidRecord(t *testing.T) {
 		UpdatedAt: now,
 	}
 
-	if err := ValidateExecutionRecord(record); err != nil {
+	err := ValidateExecutionRecord(record)
+	if err != nil {
 		t.Fatalf("ValidateExecutionRecord returned error: %v", err)
 	}
 }
@@ -28,7 +29,8 @@ func TestValidateExecutionRecordRejectsMissingRequiredFields(t *testing.T) {
 
 	for _, test := range missingRequiredExecutionRecordTests(now) {
 		t.Run(test.name, func(t *testing.T) {
-			if err := ValidateExecutionRecord(test.record); err == nil {
+			err := ValidateExecutionRecord(test.record)
+			if err == nil {
 				t.Fatal("ValidateExecutionRecord returned nil error")
 			}
 		})
@@ -158,7 +160,8 @@ func TestValidateExecutionRecordRejectsInvalidStatus(t *testing.T) {
 		UpdatedAt: now,
 	}
 
-	if err := ValidateExecutionRecord(record); err == nil {
+	err := ValidateExecutionRecord(record)
+	if err == nil {
 		t.Fatal("ValidateExecutionRecord returned nil error")
 	}
 }
@@ -179,7 +182,8 @@ func TestValidateExecutionRecordRejectsFinishedBeforeStarted(t *testing.T) {
 		UpdatedAt:  now,
 	}
 
-	if err := ValidateExecutionRecord(record); err == nil {
+	err := ValidateExecutionRecord(record)
+	if err == nil {
 		t.Fatal("ValidateExecutionRecord returned nil error")
 	}
 }

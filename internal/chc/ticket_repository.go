@@ -83,7 +83,8 @@ func WithTicketRepositoryClock(now func() time.Time) TicketRepositoryOption {
 }
 
 func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTicketOptions) (CreateTicketResult, error) {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return CreateTicketResult{}, err
 	}
 
@@ -118,11 +119,14 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 	}
 
 	path := r.ticketPath(opts.UseCase, key, opts.Title)
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+
+	err = os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
 		return CreateTicketResult{}, fmt.Errorf("create ticket directory: %w", err)
 	}
 
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
 		return CreateTicketResult{}, fmt.Errorf("create ticket file: %w", err)
 	}
 
@@ -138,7 +142,8 @@ func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
 			return walkErr
 		}
 
-		if err := ctx.Err(); err != nil {
+		err := ctx.Err()
+		if err != nil {
 			return err
 		}
 
@@ -169,7 +174,8 @@ func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
 }
 
 func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
-	if number, ok := keyNumberFromText(r.keyPrefix, filepath.Base(path)); ok {
+	number, ok := keyNumberFromText(r.keyPrefix, filepath.Base(path))
+	if ok {
 		return number, true, nil
 	}
 
@@ -178,7 +184,8 @@ func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
 		return 0, false, fmt.Errorf("read ticket metadata: %w", err)
 	}
 
-	if number, ok := keyNumberFromText(r.keyPrefix, string(content)); ok {
+	number, ok = keyNumberFromText(r.keyPrefix, string(content))
+	if ok {
 		return number, true, nil
 	}
 
@@ -188,7 +195,8 @@ func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
 func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
 	parts := []string{r.projectDir, ".chc", "tickets"}
 
-	if slug := slugify(useCase); slug != "" {
+	slug := slugify(useCase)
+	if slug != "" {
 		parts = append(parts, slug)
 	}
 

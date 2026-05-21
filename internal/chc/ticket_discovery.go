@@ -32,19 +32,21 @@ func (d *ticketFileDiscoverer) DiscoverTicketFiles(
 	ctx context.Context,
 	opts DiscoverTicketFilesOptions,
 ) ([]DiscoveredTicketFile, error) {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return nil, err
 	}
 
 	ticketsDir := ticketsDirectory(opts.ProjectDir)
 	files := []DiscoveredTicketFile{}
 
-	err := filepath.WalkDir(ticketsDir, func(path string, entry os.DirEntry, walkErr error) error {
+	err = filepath.WalkDir(ticketsDir, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
 
-		if err := ctx.Err(); err != nil {
+		err := ctx.Err()
+		if err != nil {
 			return err
 		}
 

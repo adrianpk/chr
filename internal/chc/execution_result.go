@@ -43,11 +43,14 @@ func LoadExecutionResult(path string) (ExecutionResult, error) {
 	decoder.DisallowUnknownFields()
 
 	var result ExecutionResult
-	if err := decoder.Decode(&result); err != nil {
+
+	err = decoder.Decode(&result)
+	if err != nil {
 		return ExecutionResult{}, fmt.Errorf("decode execution result: %w", err)
 	}
 
-	if err := ValidateExecutionResult(result); err != nil {
+	err = ValidateExecutionResult(result)
+	if err != nil {
 		return ExecutionResult{}, err
 	}
 
@@ -67,7 +70,8 @@ func ValidateExecutionResult(result ExecutionResult) error {
 		return fmt.Errorf("execution result status is invalid: %s", result.Status)
 	}
 
-	if err := validateExecutionResultChangedFiles(result.ChangedFiles); err != nil {
+	err := validateExecutionResultChangedFiles(result.ChangedFiles)
+	if err != nil {
 		return err
 	}
 

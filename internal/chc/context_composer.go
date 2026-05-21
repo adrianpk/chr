@@ -111,7 +111,8 @@ type ContextReadiness struct {
 }
 
 func PlanContextComposition(opts ContextComposerOptions) (ContextCompositionPlan, error) {
-	if err := validateContextComposerOptions(opts); err != nil {
+	err := validateContextComposerOptions(opts)
+	if err != nil {
 		return ContextCompositionPlan{}, err
 	}
 

@@ -14,7 +14,8 @@ func TestTicketIndexUpsertsAndListsTickets(t *testing.T) {
 	index := newTestTicketIndex(t)
 	ticket := testIndexedTicket("CHC-1", []string{"uxui", "onboarding"})
 
-	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
+	err := index.UpsertTicket(context.Background(), ticket)
+	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
@@ -34,14 +35,16 @@ func TestTicketIndexReplacesTagsOnUpsert(t *testing.T) {
 	index := newTestTicketIndex(t)
 	ticket := testIndexedTicket("CHC-1", []string{"old"})
 
-	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
+	err := index.UpsertTicket(context.Background(), ticket)
+	if err != nil {
 		t.Fatalf("first UpsertTicket returned error: %v", err)
 	}
 
 	ticket.Tags = []string{"new"}
 	ticket.Title = "Updated"
 
-	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
+	err = index.UpsertTicket(context.Background(), ticket)
+	if err != nil {
 		t.Fatalf("second UpsertTicket returned error: %v", err)
 	}
 
@@ -63,7 +66,8 @@ func TestTicketIndexGetsTicketByKey(t *testing.T) {
 	index := newTestTicketIndex(t)
 	ticket := testIndexedTicket("CHC-1", []string{"uxui"})
 
-	if err := index.UpsertTicket(context.Background(), ticket); err != nil {
+	err := index.UpsertTicket(context.Background(), ticket)
+	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
@@ -87,11 +91,13 @@ func TestTicketIndexGetTicketByKeyRejectsMissingTicket(t *testing.T) {
 func TestTicketIndexDeletesProjectTickets(t *testing.T) {
 	index := newTestTicketIndex(t)
 
-	if err := index.UpsertTicket(context.Background(), testIndexedTicket("CHC-1", nil)); err != nil {
+	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHC-1", nil))
+	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
-	if err := index.DeleteProjectTickets(context.Background(), "project-1"); err != nil {
+	err = index.DeleteProjectTickets(context.Background(), "project-1")
+	if err != nil {
 		t.Fatalf("DeleteProjectTickets returned error: %v", err)
 	}
 
@@ -134,7 +140,8 @@ func newTestTicketIndex(t *testing.T) TicketIndex {
 	}
 
 	t.Cleanup(func() {
-		if err := index.Close(); err != nil {
+		err := index.Close()
+		if err != nil {
 			t.Fatalf("close ticket index: %v", err)
 		}
 	})

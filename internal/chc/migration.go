@@ -59,11 +59,13 @@ func WithMigratorClock(now func() time.Time) MigratorOption {
 }
 
 func (m *migrator) Migrate(ctx context.Context, db *sql.DB) error {
-	if err := ctx.Err(); err != nil {
+	err := ctx.Err()
+	if err != nil {
 		return err
 	}
 
-	if err := ensureSchemaMigrations(ctx, db); err != nil {
+	err = ensureSchemaMigrations(ctx, db)
+	if err != nil {
 		return err
 	}
 
@@ -73,7 +75,8 @@ func (m *migrator) Migrate(ctx context.Context, db *sql.DB) error {
 	}
 
 	for _, migration := range migrations {
-		if err := ctx.Err(); err != nil {
+		err = ctx.Err()
+		if err != nil {
 			return err
 		}
 
@@ -86,7 +89,8 @@ func (m *migrator) Migrate(ctx context.Context, db *sql.DB) error {
 			continue
 		}
 
-		if err := m.applyMigration(ctx, db, migration); err != nil {
+		err = m.applyMigration(ctx, db, migration)
+		if err != nil {
 			return err
 		}
 	}
@@ -113,7 +117,8 @@ func (m *migrator) applyMigration(ctx context.Context, db *sql.DB, migration Mig
 		return fmt.Errorf("begin migration transaction: %w", err)
 	}
 
-	if _, err := tx.ExecContext(ctx, migration.UpSQL); err != nil {
+	_, err = tx.ExecContext(ctx, migration.UpSQL)
+	if err != nil {
 		return rollbackWithError(tx, fmt.Errorf("apply migration %s: %w", migration.Version, err))
 	}
 
@@ -130,7 +135,8 @@ func (m *migrator) applyMigration(ctx context.Context, db *sql.DB, migration Mig
 		return rollbackWithError(tx, fmt.Errorf("record migration %s: %w", migration.Version, err))
 	}
 
-	if err := tx.Commit(); err != nil {
+	err = tx.Commit()
+	if err != nil {
 		return fmt.Errorf("commit migration %s: %w", migration.Version, err)
 	}
 
@@ -251,7 +257,8 @@ func migrationApplied(ctx context.Context, db *sql.DB, version string) (bool, er
 }
 
 func rollbackWithError(tx *sql.Tx, err error) error {
-	if rollbackErr := tx.Rollback(); rollbackErr != nil {
+	rollbackErr := tx.Rollback()
+	if rollbackErr != nil {
 		return fmt.Errorf("%w; rollback failed: %w", err, rollbackErr)
 	}
 
