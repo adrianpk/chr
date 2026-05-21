@@ -23,7 +23,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Database Migration Status | Delivered | `feat/slice-1-db-migration-status` | `feat(slice-1): db migration status` | `.prj/reports/slices/maintenance-and-recovery/slice-1-db-migration-status.md` | Repository PR #126 merged. |
 | Slice 2: Project Registry Diagnostics | Delivered | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | Repository PR #127 merged. |
-| Slice 3: Project Registry Repair | Planned | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Pending. |
+| Slice 3: Project Registry Repair | Reviewing | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | PR pending. |
 | Slice 4: Execution Artifact Drift | Planned | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Pending. |
 | Slice 5: Runtime Artifact Cleanup Preview | Planned | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Pending. |
 | Slice 6: Diagnostic Bundle | Planned | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | Pending. |
@@ -107,23 +107,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add explicit registry repair operations.
-- [ ] Support disabling stale project registrations.
-- [ ] Support updating registered project paths.
-- [ ] Add dry-run output.
-- [ ] Add focused tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add explicit registry repair operations.
+- [x] Support disabling stale project registrations.
+- [x] Support updating registered project paths.
+- [x] Add dry-run output.
+- [x] Add focused tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
-- T3.7: pending
+- T3.1: `7a26463`
+- T3.2: `7a26463`
+- T3.3: `7a26463`
+- T3.4: `7a26463`
+- T3.5: `7a26463`
+- T3.6: `docs(slice-3): record registry repair`
+- T3.7: `make verify`
 
 ## Slice 4: Execution Artifact Drift
 
