@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 6: Manual Promotion and Provenance
+Slice 7: Authoring Docs Reference
 
 ## Slice Status
 
