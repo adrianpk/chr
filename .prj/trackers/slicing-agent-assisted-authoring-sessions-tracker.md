@@ -27,7 +27,7 @@ Slice 4: Model Invocation Adapter
 | Slice 1: Assisted Session Contract | Delivered | `feat/slice-1-assisted-session-contract` | `feat(slice-1): assisted session contract` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-1-assisted-session-contract.md` | Repository PR #99. |
 | Slice 2: Transcript Event Storage | Delivered | `feat/slice-2-assisted-transcript-storage` | `feat(slice-2): assisted transcript storage` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-2-assisted-transcript-storage.md` | Repository PR #100. |
 | Slice 3: Authoring Context Package | Delivered | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Repository PR #101. |
-| Slice 4: Model Invocation Adapter | Planned | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Depends on Slice 3. |
+| Slice 4: Model Invocation Adapter | Delivered | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Repository PR #102. |
 | Slice 5: Adaptive Quiz Loop | Planned | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Depends on Slice 4. |
 | Slice 6: Answer Curation | Planned | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Depends on Slice 5. |
 | Slice 7: Assisted Artifact Synthesis | Planned | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Depends on Slice 6. |
@@ -144,23 +144,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define model request and response envelopes.
-- [ ] Add fake adapter for deterministic tests.
-- [ ] Record request and response artifacts.
-- [ ] Keep provider details behind an interface.
-- [ ] Classify adapter failures.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define model request and response envelopes.
+- [x] Add fake adapter for deterministic tests.
+- [x] Record request and response artifacts.
+- [x] Keep provider details behind an interface.
+- [x] Classify adapter failures.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1:
-- T4.2:
-- T4.3:
-- T4.4:
-- T4.5:
-- T4.6:
-- T4.7:
+- T4.1: feat(slice-4): assisted model adapter
+- T4.2: feat(slice-4): assisted model adapter
+- T4.3: feat(slice-4): assisted model adapter
+- T4.4: feat(slice-4): assisted model adapter
+- T4.5: feat(slice-4): assisted model adapter
+- T4.6: feat(slice-4): assisted model adapter
+- T4.7: feat(slice-4): assisted model adapter
 
 ## Slice 5: Adaptive Quiz Loop
 
