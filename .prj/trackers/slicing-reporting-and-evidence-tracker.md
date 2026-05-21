@@ -12,7 +12,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -20,7 +20,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Execution Report Format | Planned | `feat/slice-1-execution-report-format` | `feat(slice-1): execution report format` | `.prj/reports/slices/reporting-and-evidence/slice-1-execution-report-format.md` | Pending. |
+| Slice 1: Execution Report Format | Reviewing | `feat/slice-1-execution-report-format` | `feat(slice-1): execution report format` | `.prj/reports/slices/reporting-and-evidence/slice-1-execution-report-format.md` | PR pending. |
 | Slice 2: Execution Report Artifact Writer | Planned | `feat/slice-2-execution-report-writer` | `feat(slice-2): execution report writer` | `.prj/reports/slices/reporting-and-evidence/slice-2-execution-report-writer.md` | Pending. |
 | Slice 3: Validation and Changed-File Summaries | Planned | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | Pending. |
 | Slice 4: Loop Report Format | Planned | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Pending. |
@@ -43,23 +43,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add execution report summary model.
-- [ ] Add deterministic Markdown renderer.
-- [ ] Include execution, ticket, runtime, artifact, changed-file, validation, and failure fields.
-- [ ] Add focused model and renderer tests.
-- [ ] Document the execution report format.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add execution report summary model.
+- [x] Add deterministic Markdown renderer.
+- [x] Include execution, ticket, runtime, artifact, changed-file, validation, and failure fields.
+- [x] Add focused model and renderer tests.
+- [x] Document the execution report format.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
+- T1.1: `71ff968`
+- T1.2: `71ff968`
+- T1.3: `71ff968`
+- T1.4: `71ff968`
+- T1.5: `4d62ce9`
+- T1.6: `26fcc64`
+- T1.7: `make verify`
 
 ## Slice 2: Execution Report Artifact Writer
 
@@ -279,7 +279,8 @@ Task commits:
 
 ## Validation Record
 
-- Planning validation: pending.
+- Slice 1 focused tests: `go test ./internal/chc -run 'Test(NewExecutionReport|RenderExecutionReport)'` pass.
+- Slice 1 full validation: `make verify` pass.
 
 ## Notes
 
