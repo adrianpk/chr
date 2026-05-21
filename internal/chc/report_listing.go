@@ -175,25 +175,17 @@ func readReportListMetadata(path string) (map[string]string, error) {
 }
 
 func reportMatchesFilter(report ReportListEntry, filter ReportListFilter) bool {
-	if filter.Kind != "" && report.Kind != filter.Kind {
-		return false
-	}
+	return reportKindMatchesFilter(report, filter) &&
+		stringFieldMatchesFilter(report.TicketKey, filter.TicketKey) &&
+		stringFieldMatchesFilter(report.ExecutionID, filter.ExecutionID) &&
+		stringFieldMatchesFilter(report.LoopID, filter.LoopID) &&
+		stringFieldMatchesFilter(report.Status, filter.Status)
+}
 
-	if filter.TicketKey != "" && report.TicketKey != filter.TicketKey {
-		return false
-	}
+func reportKindMatchesFilter(report ReportListEntry, filter ReportListFilter) bool {
+	return filter.Kind == "" || report.Kind == filter.Kind
+}
 
-	if filter.ExecutionID != "" && report.ExecutionID != filter.ExecutionID {
-		return false
-	}
-
-	if filter.LoopID != "" && report.LoopID != filter.LoopID {
-		return false
-	}
-
-	if filter.Status != "" && report.Status != filter.Status {
-		return false
-	}
-
-	return true
+func stringFieldMatchesFilter(value, filter string) bool {
+	return filter == "" || value == filter
 }

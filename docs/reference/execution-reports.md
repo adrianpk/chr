@@ -132,3 +132,5 @@ does not look like an execution report, the writer refuses to overwrite it.
 
 Report listing, lookup, loop reports, and review handoff summaries belong to
 later `Reporting and Evidence` slices.
+
+Report listing is documented in `docs/reference/reports.md`.

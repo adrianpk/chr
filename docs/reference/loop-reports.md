@@ -78,3 +78,5 @@ This reference describes the loop report model and Markdown rendering contract.
 
 Loop report persistence, listing, and lookup belong to later `Reporting and
 Evidence` slices.
+
+Report listing is documented in `docs/reference/reports.md`.
