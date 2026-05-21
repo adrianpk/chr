@@ -24,7 +24,7 @@ Slice 1: Assisted Session Contract
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Assisted Session Contract | Planned | `feat/slice-1-assisted-session-contract` | `feat(slice-1): assisted session contract` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-1-assisted-session-contract.md` | First implementation slice. |
+| Slice 1: Assisted Session Contract | Delivered | `feat/slice-1-assisted-session-contract` | `feat(slice-1): assisted session contract` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-1-assisted-session-contract.md` | Repository PR #99. |
 | Slice 2: Transcript Event Storage | Planned | `feat/slice-2-assisted-transcript-storage` | `feat(slice-2): assisted transcript storage` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-2-assisted-transcript-storage.md` | Depends on Slice 1. |
 | Slice 3: Authoring Context Package | Planned | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Depends on Slice 2. |
 | Slice 4: Model Invocation Adapter | Planned | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Depends on Slice 3. |
@@ -48,23 +48,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add assisted session configuration.
-- [ ] Define turn state and turn result models.
-- [ ] Define user answer and assistant question models.
-- [ ] Define completion and blocked reasons.
-- [ ] Add focused model validation tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add assisted session configuration.
+- [x] Define turn state and turn result models.
+- [x] Define user answer and assistant question models.
+- [x] Define completion and blocked reasons.
+- [x] Add focused model validation tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1:
-- T1.2:
-- T1.3:
-- T1.4:
-- T1.5:
-- T1.6:
-- T1.7:
+- T1.1: feat(slice-1): assisted session contract
+- T1.2: feat(slice-1): assisted session contract
+- T1.3: feat(slice-1): assisted session contract
+- T1.4: feat(slice-1): assisted session contract
+- T1.5: feat(slice-1): assisted session contract
+- T1.6: feat(slice-1): assisted session contract
+- T1.7: feat(slice-1): assisted session contract
 
 ## Slice 2: Transcript Event Storage
 
