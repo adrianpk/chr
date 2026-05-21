@@ -18,7 +18,9 @@ Task-oriented guides:
 
 Exact contracts and command behavior:
 
+- [Commands](reference/commands.md)
 - [Project workspace](reference/project-workspace.md)
+- [Runtime configuration](reference/runtime-config.md)
 - [Authoring sessions](reference/authoring-sessions.md)
 - [Project CLI](reference/project-cli.md)
 - [Project registry](reference/project-registry.md)
@@ -35,3 +37,7 @@ Exact contracts and command behavior:
 Rationale and system shape:
 
 - [Architecture](explanation/architecture.md)
+- [Agent sandbox and runtime](explanation/agent-sandbox-and-runtime.md)
+- [Document generation model](explanation/document-generation-model.md)
+- [Slicing workflow](explanation/slicing-workflow.md)
+- [Ticket resolution lifecycle](explanation/ticket-resolution-lifecycle.md)
