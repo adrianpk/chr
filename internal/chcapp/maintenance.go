@@ -182,6 +182,7 @@ func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout
 	}()
 
 	projectName := cmd.Args().First()
+
 	project, err := registry.GetProjectByName(ctx, projectName)
 	if err != nil {
 		return err
@@ -230,6 +231,7 @@ func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout
 	}()
 
 	projectName := cmd.Args().First()
+
 	project, err := registry.GetProjectByName(ctx, projectName)
 	if err != nil {
 		return err

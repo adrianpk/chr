@@ -24,7 +24,7 @@ type ProjectRegistry interface {
 	GetProjectByName(ctx context.Context, name string) (Project, error)
 	GetProjectByPath(ctx context.Context, path string) (Project, error)
 	DisableProject(ctx context.Context, name string) (Project, error)
-	UpdateProjectPath(ctx context.Context, name string, path string) (Project, error)
+	UpdateProjectPath(ctx context.Context, name, path string) (Project, error)
 	Close() error
 }
 
@@ -161,7 +161,7 @@ func (r *sqliteProjectRegistry) DisableProject(ctx context.Context, name string)
 	return project, nil
 }
 
-func (r *sqliteProjectRegistry) UpdateProjectPath(ctx context.Context, name string, path string) (Project, error) {
+func (r *sqliteProjectRegistry) UpdateProjectPath(ctx context.Context, name, path string) (Project, error) {
 	if path == "" {
 		return Project{}, fmt.Errorf("project path is required")
 	}
