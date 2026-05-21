@@ -3062,6 +3062,79 @@ func TestIndexStatusReportsInvalidTickets(t *testing.T) {
 	}
 }
 
+func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *testing.T) {
+	devRoot := t.TempDir()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"db",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance db status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"database_exists: false",
+		"schema_migrations_exists: false",
+		"applied: 0",
+		"pending: 7",
+		"unknown: 0",
+		"pending_migration: 20260518000001 create_projects",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	err := run(t.Context(), []string{
+		"project",
+		"add",
+		"--dev-root",
+		devRoot,
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("project add returned error: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"db",
+		"status",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance db status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"database_exists: true",
+		"schema_migrations_exists: true",
+		"available: 7",
+		"applied: 7",
+		"pending: 0",
+		"unknown: 0",
+		"applied_migration: 20260518000001 create_projects",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
