@@ -120,3 +120,24 @@ The repository supports:
 
 Audit persistence does not send messages. Dispatch behavior belongs to the
 channel-specific slices that follow this contract.
+
+## Notify Commands
+
+The `notify` command group exposes setup and inspection surfaces.
+
+Report notification configuration readiness:
+
+```sh
+chc notify status
+```
+
+Preview a Telegram setup-check payload:
+
+```sh
+chc notify telegram test --dry-run
+```
+
+`notify telegram test --dry-run` renders the planned payload from project
+configuration and does not contact Telegram.
+
+Non-dry-run Telegram dispatch belongs to the Telegram dispatch boundary.

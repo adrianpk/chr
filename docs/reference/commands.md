@@ -143,3 +143,20 @@ chc daemon status
 chc daemon start --max-iterations 1
 chc daemon stop
 ```
+
+## Notify
+
+Inspect notification configuration:
+
+```sh
+chc notify status
+```
+
+Preview the Telegram setup-check payload:
+
+```sh
+chc notify telegram test --dry-run
+```
+
+The dry-run command does not contact Telegram. Non-dry-run Telegram dispatch is
+added by the Telegram dispatch boundary.
