@@ -26,7 +26,7 @@ Slice 3: Authoring Artifact Layout
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Authoring Session Model | Delivered | `feat/slice-1-authoring-session-model` | `feat(slice-1): authoring session model` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-1-authoring-session-model.md` | Repository PR #91. |
 | Slice 2: Authoring Session Storage | Delivered | `feat/slice-2-authoring-session-storage` | `feat(slice-2): authoring session storage` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-2-authoring-session-storage.md` | Repository PR #92. |
-| Slice 3: Authoring Artifact Layout | Planned | `feat/slice-3-authoring-artifact-layout` | `feat(slice-3): authoring artifact layout` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-3-authoring-artifact-layout.md` | Depends on Slice 2. |
+| Slice 3: Authoring Artifact Layout | Delivered | `feat/slice-3-authoring-artifact-layout` | `feat(slice-3): authoring artifact layout` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-3-authoring-artifact-layout.md` | Repository PR #93. |
 | Slice 4: Static Quiz Generation | Planned | `feat/slice-4-static-quiz-generation` | `feat(slice-4): static quiz generation` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-4-static-quiz-generation.md` | Depends on Slice 3. |
 | Slice 5: Authoring Session CLI | Planned | `feat/slice-5-authoring-session-cli` | `feat(slice-5): authoring session cli` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-5-authoring-session-cli.md` | Depends on Slices 1-4. |
 | Slice 6: Manual Promotion and Provenance | Planned | `feat/slice-6-manual-promotion-provenance` | `feat(slice-6): manual promotion provenance` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-6-manual-promotion-provenance.md` | Depends on Slice 5. |
@@ -110,23 +110,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Model artifact kinds for dumps, quizzes, drafts, specs, plans, slice sets, slices, trackers, and tickets.
-- [ ] Resolve project-local output paths.
-- [ ] Detect existing artifacts and collision behavior.
-- [ ] Render artifact inventory entries.
-- [ ] Add path and inventory tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Model artifact kinds for dumps, quizzes, drafts, specs, plans, slice sets, slices, trackers, and tickets.
+- [x] Resolve project-local output paths.
+- [x] Detect existing artifacts and collision behavior.
+- [x] Render artifact inventory entries.
+- [x] Add path and inventory tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1:
-- T3.2:
-- T3.3:
-- T3.4:
-- T3.5:
-- T3.6:
-- T3.7:
+- T3.1: feat(slice-3): authoring artifact layout
+- T3.2: feat(slice-3): authoring artifact layout
+- T3.3: feat(slice-3): authoring artifact layout
+- T3.4: feat(slice-3): authoring artifact layout
+- T3.5: feat(slice-3): authoring artifact layout
+- T3.6: feat(slice-3): authoring artifact layout
+- T3.7: feat(slice-3): authoring artifact layout
 
 ## Slice 4: Static Quiz Generation
 
