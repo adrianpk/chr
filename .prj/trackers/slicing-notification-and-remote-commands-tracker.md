@@ -1,6 +1,6 @@
 # Notification and Remote Commands Slicing Tracker
 
-Status: planned
+Status: in progress
 
 Plan: `.prj/plans/slicing-notification-and-remote-commands-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -25,7 +25,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Notification Audit Repository | Delivered | `feat/slice-3-notification-audit-repository` | `feat(slice-3): notification audit repository` | `.prj/reports/slices/notification-and-remote-commands/slice-3-notification-audit-repository.md` | Repository PR #110 merged. |
 | Slice 4: Notify Command Skeleton | Delivered | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Repository PR #111 merged. |
 | Slice 5: Telegram Dispatch Boundary | Delivered | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Repository PR #112 merged. |
-| Slice 6: Loop and Ticket Notifications | Planned | `feat/slice-6-loop-ticket-notifications` | `feat(slice-6): loop ticket notifications` | `.prj/reports/slices/notification-and-remote-commands/slice-6-loop-ticket-notifications.md` | Pending implementation. |
+| Slice 6: Loop and Ticket Notifications | In Review | `feat/slice-6-loop-ticket-notifications` | `feat(slice-6): loop ticket notifications` | `.prj/reports/slices/notification-and-remote-commands/slice-6-loop-ticket-notifications.md` | PR pending review. |
 | Slice 7: Remote Command Intake Model | Planned | `feat/slice-7-remote-command-intake-model` | `feat(slice-7): remote command intake model` | `.prj/reports/slices/notification-and-remote-commands/slice-7-remote-command-intake-model.md` | Pending implementation. |
 | Slice 8: Telegram Remote Command Handoff | Planned | `feat/slice-8-telegram-remote-command-handoff` | `feat(slice-8): telegram remote command handoff` | `.prj/reports/slices/notification-and-remote-commands/slice-8-telegram-remote-command-handoff.md` | Pending implementation. |
 
@@ -211,25 +211,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Emit events when a ticket execution is blocked.
-- [ ] Emit events when a loop stops on blocker or failure.
-- [ ] Emit events when a loop finishes with processed tickets.
-- [ ] Include ticket, loop, execution, and project references.
-- [ ] Keep dispatch optional and configuration-gated.
-- [ ] Add integration tests with fake notifier.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Emit events when a ticket execution is blocked.
+- [x] Emit events when a loop stops on blocker or failure.
+- [x] Emit events when a loop finishes with processed tickets.
+- [x] Include ticket, loop, execution, and project references.
+- [x] Keep dispatch optional and configuration-gated.
+- [x] Add integration tests with fake notifier.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
-- T6.8: pending
+- T6.1: this PR
+- T6.2: this PR
+- T6.3: this PR
+- T6.4: this PR
+- T6.5: this PR
+- T6.6: this PR
+- T6.7: this PR
+- T6.8: `make verify`
 
 ## Slice 7: Remote Command Intake Model
 

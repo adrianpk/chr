@@ -1664,6 +1664,45 @@ func TestTicketLoopCompletesWithNoEligibleTickets(t *testing.T) {
 	}
 }
 
+func TestTicketLoopDispatchesConfiguredFinishedNotification(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	t.Setenv("CHC_TELEGRAM_BOT_TOKEN", "token-1")
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	gotPayload := installTestTelegramSender(t)
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTelegramNotifyConfig(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"loop",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket loop returned error: %v", err)
+	}
+
+	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
+	assertNotificationEvent(t, records, 0, chc.NotificationEventLoopFinished, chc.NotificationStatusDelivered)
+
+	if gotPayload.ChatID != "123456" {
+		t.Fatalf("telegram chat id = %q, want configured chat id", gotPayload.ChatID)
+	}
+
+	if !strings.Contains(gotPayload.Text, "Ticket loop loop-") {
+		t.Fatalf("telegram text = %q, want loop notification", gotPayload.Text)
+	}
+}
+
 func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -1722,6 +1761,57 @@ func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 
 	if loopRuns[0].Status != chc.LoopRunStatusFailed || loopRuns[0].FailedCount != 1 {
 		t.Fatalf("loop run = %#v, want failed with one failed ticket", loopRuns[0])
+	}
+}
+
+func TestTicketLoopRecordsFailedNotification(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	executor := installFakeTicketStartHarnessExecutor(t, nil)
+	executor.failWorker = true
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"loop",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket loop returned nil error")
+	}
+
+	notificationRecords := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
+	assertNotificationEvent(t, notificationRecords, 0, chc.NotificationEventLoopFailed, chc.NotificationStatusSkipped)
+}
+
+func TestTicketLoopRecordsBlockedNotifications(t *testing.T) {
+	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
+	record := chc.LoopRunRecord{
+		ID:             "loop-1",
+		ProjectID:      "project-1",
+		Status:         chc.LoopRunStatusBlocked,
+		EligibleCount:  1,
+		ProcessedCount: 1,
+		BlockedCount:   1,
+		CreatedAt:      now,
+		UpdatedAt:      now,
+	}
+
+	event, ok := loopRunNotificationEvent(commandProjectContext{ProjectID: "project-1"}, record, now)
+	if !ok {
+		t.Fatal("loopRunNotificationEvent returned false")
+	}
+
+	if event.Type != chc.NotificationEventLoopBlocked {
+		t.Fatalf("event type = %q, want loop_blocked", event.Type)
 	}
 }
 
@@ -2066,6 +2156,37 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	tickets := listProjectTickets(t, devRoot, projectDir)
 	if len(tickets) != 1 || tickets[0].Status != "reviewing" {
 		t.Fatalf("indexed tickets = %#v, want reviewing CHC-1", tickets)
+	}
+}
+
+func TestTicketApplyResultRecordsBlockedNotification(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	addProject(t, devRoot, "example", projectDir)
+
+	record := createApplyResultExecution(t, devRoot, projectDir, chc.ExecutionStatusFailed, "codex failed")
+	writeApplyResultFile(t, record, chc.ExecutionResultStatusFailed, "blocked by compile error")
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"apply-result",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		record.ID,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket apply-result returned error: %v", err)
+	}
+
+	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
+	assertNotificationEvent(t, records, 0, chc.NotificationEventTicketBlocked, chc.NotificationStatusSkipped)
+
+	if records[0].Event.References.ExecutionID != record.ID {
+		t.Fatalf("execution reference = %q, want %q", records[0].Event.References.ExecutionID, record.ID)
 	}
 }
 
@@ -3617,6 +3738,33 @@ func listNotificationEventsForTest(
 	}
 
 	return records
+}
+
+func assertNotificationEvent(
+	t *testing.T,
+	records []chc.NotificationAuditRecord,
+	index int,
+	eventType chc.NotificationEventType,
+	status chc.NotificationStatus,
+) {
+	t.Helper()
+
+	if len(records) <= index {
+		t.Fatalf("notification records = %d, want index %d", len(records), index)
+	}
+
+	record := records[index]
+	if record.Event.Type != eventType {
+		t.Fatalf("notification type = %q, want %q", record.Event.Type, eventType)
+	}
+
+	if record.Event.Status != status {
+		t.Fatalf("notification status = %q, want %q", record.Event.Status, status)
+	}
+
+	if record.Event.ProjectID == "" {
+		t.Fatal("notification project id is empty")
+	}
 }
 
 func chcTestUserEnvironment(t *testing.T) (chc.UserEnvironment, error) {

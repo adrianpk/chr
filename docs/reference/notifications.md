@@ -121,6 +121,34 @@ The repository supports:
 Audit persistence does not send messages. Dispatch behavior belongs to the
 channel-specific slices that follow this contract.
 
+## Workflow Notifications
+
+Ticket and loop workflows create notification audit records for user-visible
+attention points.
+
+Current workflow-triggered events:
+
+- `ticket_blocked`: recorded when an applied execution result leaves a ticket
+  blocked.
+- `loop_finished`: recorded when a foreground ticket loop finishes after
+  processing at least one ticket.
+- `loop_blocked`: recorded when a foreground ticket loop stops after a blocked
+  ticket result.
+- `loop_failed`: recorded when a foreground ticket loop stops because ticket
+  execution failed.
+
+Workflow notifications are configuration-gated for delivery:
+
+- when Telegram notifications are disabled, events are recorded as `skipped`;
+- when Telegram is enabled and valid, events are recorded as `pending`, sent,
+  then updated to `delivered` or `failed`;
+- dispatch failures are recorded in the notification audit event and do not
+  replace the ticket or loop result.
+
+Ticket-blocked events include ticket and execution references. Loop events
+include the loop run reference. All workflow events include the managed project
+identifier.
+
 ## Notify Commands
 
 The `notify` command group exposes setup and inspection surfaces.

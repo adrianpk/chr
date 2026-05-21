@@ -593,7 +593,7 @@ func runTicketLoopExecution(
 	for _, ticket := range tickets {
 		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket)
 		if err != nil {
-			return failTicketLoopExecution(ctx, repository, result, record, err)
+			return failTicketLoopExecution(ctx, env, repository, projectContext, result, record, err)
 		}
 
 		result.Executions = append(result.Executions, execution)
@@ -607,12 +607,14 @@ func runTicketLoopExecution(
 		}
 	}
 
-	return finishTicketLoopExecution(ctx, repository, result, record)
+	return finishTicketLoopExecution(ctx, env, repository, projectContext, result, record)
 }
 
 func failTicketLoopExecution(
 	ctx context.Context,
+	env chc.UserEnvironment,
 	repository chc.LoopRunRepository,
+	projectContext commandProjectContext,
 	result ticketLoopExecutionResult,
 	record chc.LoopRunRecord,
 	cause error,
@@ -627,12 +629,19 @@ func failTicketLoopExecution(
 
 	result.Record = record
 
+	err = emitLoopRunNotification(ctx, env, projectContext, record)
+	if err != nil {
+		return ticketLoopExecutionResult{}, err
+	}
+
 	return result, cause
 }
 
 func finishTicketLoopExecution(
 	ctx context.Context,
+	env chc.UserEnvironment,
 	repository chc.LoopRunRepository,
+	projectContext commandProjectContext,
 	result ticketLoopExecutionResult,
 	record chc.LoopRunRecord,
 ) (ticketLoopExecutionResult, error) {
@@ -644,6 +653,11 @@ func finishTicketLoopExecution(
 	}
 
 	result.Record = record
+
+	err = emitLoopRunNotification(ctx, env, projectContext, record)
+	if err != nil {
+		return ticketLoopExecutionResult{}, err
+	}
 
 	return result, nil
 }
@@ -890,7 +904,12 @@ func applyTicketResult(ctx context.Context, env chc.UserEnvironment, plan ticket
 		return err
 	}
 
-	return writeTicketApplyResultReport(plan, appliedAt)
+	err = writeTicketApplyResultReport(plan, appliedAt)
+	if err != nil {
+		return err
+	}
+
+	return emitTicketBlockedNotification(ctx, env, plan)
 }
 
 func refreshAppliedTicketIndex(
