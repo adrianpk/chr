@@ -197,6 +197,7 @@ func writeExecutionReportArtifacts(output *strings.Builder, artifacts ExecutionR
 
 func writeExecutionReportResult(output *strings.Builder, result ExecutionReportResult) {
 	output.WriteString("## Result\n\n")
+
 	if !result.Available {
 		output.WriteString("No execution result was available.\n\n")
 
@@ -210,6 +211,7 @@ func writeExecutionReportResult(output *strings.Builder, result ExecutionReportR
 
 func writeExecutionReportChangedFiles(output *strings.Builder, changedFiles []ExecutionReportChangedFile) {
 	output.WriteString("## Changed Files\n\n")
+
 	if len(changedFiles) == 0 {
 		output.WriteString("No changed files were reported.\n\n")
 
@@ -234,6 +236,7 @@ func writeExecutionReportChangedFiles(output *strings.Builder, changedFiles []Ex
 
 func writeExecutionReportFailure(output *strings.Builder, report ExecutionReport) {
 	output.WriteString("## Failure\n\n")
+
 	if strings.TrimSpace(report.FailureReason) == "" {
 		output.WriteString("No failure was recorded.\n")
 
