@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 4: Static Quiz Generation
+Slice 5: Authoring Session CLI
 
 ## Slice Status
 
