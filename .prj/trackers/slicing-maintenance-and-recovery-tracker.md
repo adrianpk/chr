@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 1: Database Migration Status | Delivered | `feat/slice-1-db-migration-status` | `feat(slice-1): db migration status` | `.prj/reports/slices/maintenance-and-recovery/slice-1-db-migration-status.md` | Repository PR #126 merged. |
 | Slice 2: Project Registry Diagnostics | Delivered | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | Repository PR #127 merged. |
 | Slice 3: Project Registry Repair | Delivered | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Repository PR #128 merged. |
-| Slice 4: Execution Artifact Drift | Planned | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Pending. |
+| Slice 4: Execution Artifact Drift | Reviewing | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | PR pending. |
 | Slice 5: Runtime Artifact Cleanup Preview | Planned | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Pending. |
 | Slice 6: Diagnostic Bundle | Planned | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | Pending. |
 | Slice 7: Maintenance Documentation | Planned | `feat/slice-7-maintenance-docs` | `feat(slice-7): maintenance docs` | `.prj/reports/slices/maintenance-and-recovery/slice-7-maintenance-docs.md` | Pending. |
@@ -139,23 +139,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Inspect execution records for artifact references.
-- [ ] Report missing run directories and execution artifacts.
-- [ ] Keep the command read-only.
-- [ ] Add focused tests.
-- [ ] Document execution artifact drift.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Inspect execution records for artifact references.
+- [x] Report missing run directories and execution artifacts.
+- [x] Keep the command read-only.
+- [x] Add focused tests.
+- [x] Document execution artifact drift.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
+- T4.1: `804021c`
+- T4.2: `804021c`
+- T4.3: `804021c`
+- T4.4: `804021c`
+- T4.5: `4e1090c`
+- T4.6: `docs(slice-4): record execution artifact drift`
+- T4.7: `make verify`
 
 ## Slice 5: Runtime Artifact Cleanup Preview
 
