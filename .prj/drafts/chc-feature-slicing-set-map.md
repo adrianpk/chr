@@ -75,7 +75,10 @@ Use case:
 
 > A user initializes a Go project so it can be managed by `chc`.
 
-Current state: mostly delivered.
+Current state: completed for the current MVP scope. CLI bootstrap, project-local
+initialization, asset profiles, root `AGENTS.md`, default protocol assets,
+profile-specific defaults, dry-run behavior, and bootstrap safety checks are
+delivered.
 
 Candidate slices:
 
@@ -154,10 +157,12 @@ Use case:
 > A user captures and promotes working context through dumps, quizzes,
 > drafts, specs, plans, slice sets, slices, tickets, and trackers.
 
-Current state: manually practiced in this repository, not productized in `chc`.
-Markdown files already act as the durable editing surface. The missing product
-layer is ergonomic creation, validation, promotion, and optional agent-assisted
-authoring.
+Current state: completed for the current MVP scope. Markdown-first authoring
+sessions, artifact storage, static quiz generation, manual promotion,
+provenance, assisted authoring sessions, transcript storage, context packaging,
+model invocation, adaptive quiz loops, answer curation, artifact synthesis, CLI
+surface, and documentation are delivered. A later TUI remains an optional
+ergonomic layer over the same session model, not a separate workflow.
 
 This slicing is not a replacement for direct Markdown editing. Advanced users
 must remain able to create and edit artifacts by hand. Commands should make
@@ -377,7 +382,11 @@ Use case:
 
 > `chc` notifies the user and accepts remote input when asynchronous execution needs attention.
 
-Current state: not delivered.
+Current state: completed for the planned post-cutoff notification and remote
+command scope. Notification events, configuration, audit persistence, notify
+command setup checks, Telegram dispatch, loop and ticket notifications, remote
+command intake, and Telegram remote command handoff are delivered. Email remains
+future scope.
 
 Candidate slices:
 
@@ -424,7 +433,9 @@ Use case:
 
 > A user can understand what `chc` did, what changed, and why a ticket or loop is in its current state.
 
-Current state: not delivered.
+Current state: partially delivered through execution, loop, ticket result, and
+notification artifacts. A dedicated report listing and lookup UX is still not
+delivered.
 
 Candidate slices:
 
@@ -480,20 +491,20 @@ coordination model.
 
 ## Post-Cutoff Path
 
-These slicings are expected after the first useful local system. They are not
-required for the operational cutoff, but they remain part of the product
-direction and should not be dropped from planning:
+These slicings were expected after the first useful local system. Most of this
+post-cutoff path has now been delivered. The list is kept as historical planning
+context:
 
 1. Daemon Coordination.
 2. MVP Agent Proving Ground.
 3. Ticket Execution Context Hardening.
 4. Operational Documents and Authoring.
 5. Notification and Remote Commands.
-6. Reporting and Evidence.
-7. Maintenance and Recovery.
+6. Reporting and Evidence. Remaining dedicated UX.
+7. Maintenance and Recovery. Remaining dedicated UX.
 
-Post-cutoff work can be pulled earlier only when it directly blocks local loop
-operation, debugging, or evidence quality.
+Future post-cutoff work should be pulled forward only when it directly blocks
+local loop operation, debugging, or evidence quality.
 
 Daemon Coordination turns the foreground runner into a persistent background
 coordinator with multi-project ownership, status reporting, remote-control
@@ -510,31 +521,34 @@ given a controlled fixture project, `chc` should run Codex in the agent sandbox,
 validate compile, lint, and tests, retry with Ralph Loop, and leave a
 non-trivial bugfix or feature working.
 
-Operational Documents and Authoring should be revisited after the Docker worker
-and context-composition path because the same primitives now make assisted
-authoring plausible. The recommended sequence is:
+Operational Documents and Authoring was revisited after the Docker worker and
+context-composition path. The delivered sequence is:
 
 1. document Markdown-first authoring and hand-edited artifact tolerance;
 2. add static generated questionnaires and templates;
 3. add host-side agent-assisted authoring sessions;
-4. add a TUI over the same session backend.
+4. leave a TUI as a later ergonomic layer over the same session backend.
 
 The first two steps are ergonomic and structural. The third step is the core
-capability: `chc` should be able to command Codex or another model from outside
-the ticket worker to conduct a bounded quiz/dump/spec session, persist the
-transcript, curate answers, and produce Markdown. The TUI should come after the
-session model is stable enough to avoid designing a separate workflow.
+capability: `chc` can command Codex or another model from outside the ticket
+worker to conduct a bounded quiz/dump/spec session, persist the transcript,
+curate answers, and produce Markdown. The TUI should come after the session
+model is stable enough to avoid designing a separate workflow.
+
+After the completed post-cutoff work, the remaining planned slicing sets in
+this map are:
+
+1. Reporting and Evidence.
+2. Maintenance and Recovery.
+
+Additional future expansion can still be planned, but it is not currently part
+of this map.
 
 ## Open Questions
 
-- Should document workflows remain one authoring slicing or split into static
-  authoring, assisted sessions, and TUI surfaces?
-- Which proving-ground behavior should be generalized before Notification and Remote Commands?
-- Which execution-context specs should be implemented before or during the proving ground?
-- Which reporting artifacts are required before remote execution feedback is acceptable?
-- Does the next daemon phase need file watching, or is automatic reconciliation on command boundaries enough?
-- Which notification events are required for the first remote-feedback loop?
-- What minimum authoring session state is required for pause, resume, and
-  artifact regeneration?
-- Should assisted authoring run in the host process, the same Docker runtime
-  family as ticket execution, or a separate authoring runtime?
+- Which reporting artifacts are required before remote execution feedback is
+  acceptable?
+- Which maintenance and recovery commands are needed before broader unattended
+  operation?
+- Does a later daemon phase need file watching, or is automatic reconciliation
+  on command boundaries enough?
