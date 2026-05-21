@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 4: Loop Report Format | Delivered | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Repository PR #121 merged. |
 | Slice 5: Report Listing | Delivered | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Repository PR #122 merged. |
 | Slice 6: Report Lookup | Delivered | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Repository PR #123 merged. |
-| Slice 7: Review Handoff Summary | Planned | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | Pending. |
+| Slice 7: Review Handoff Summary | Reviewing | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | PR pending. |
 | Slice 8: Reporting Documentation | Planned | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | Pending. |
 
 ## Slice 1: Execution Report Format
@@ -233,21 +233,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Summarize status, changed files, validation, blocker or failure reason, and next action.
-- [ ] Keep summaries derived from existing records.
-- [ ] Add tests for succeeded, failed, and blocked executions.
-- [ ] Document handoff summary semantics.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Summarize status, changed files, validation, blocker or failure reason, and next action.
+- [x] Keep summaries derived from existing records.
+- [x] Add tests for succeeded, failed, and blocked executions.
+- [x] Document handoff summary semantics.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
-- T7.6: pending
+- T7.1: `a385fd5`
+- T7.2: `a385fd5`
+- T7.3: `a385fd5`
+- T7.4: `f0235b6`
+- T7.5: `docs(slice-7): record review handoff summary`
+- T7.6: `make verify`
 
 ## Slice 8: Reporting Documentation
 
