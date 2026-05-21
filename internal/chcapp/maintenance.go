@@ -48,6 +48,7 @@ func newMaintenanceExecutionCommand(stdout io.Writer) *cli.Command {
 		Usage: "Inspect execution records and artifacts",
 		Commands: []*cli.Command{
 			newMaintenanceExecutionArtifactsCommand(stdout),
+			newMaintenanceExecutionCleanupPreviewCommand(stdout),
 		},
 	}
 }
@@ -58,6 +59,15 @@ func newMaintenanceExecutionArtifactsCommand(stdout io.Writer) *cli.Command {
 		Usage:  "Report execution artifact drift for the resolved project",
 		Flags:  maintenanceProjectFlags(),
 		Action: maintenanceExecutionArtifactsAction(stdout),
+	}
+}
+
+func newMaintenanceExecutionCleanupPreviewCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "cleanup-preview",
+		Usage:  "Preview unreferenced runtime artifact directories",
+		Flags:  maintenanceProjectFlags(),
+		Action: maintenanceExecutionCleanupPreviewAction(stdout),
 	}
 }
 
@@ -127,6 +137,12 @@ func maintenanceDBStatusAction(stdout io.Writer) cli.ActionFunc {
 func maintenanceExecutionArtifactsAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runMaintenanceExecutionArtifacts(ctx, cmd, stdout)
+	}
+}
+
+func maintenanceExecutionCleanupPreviewAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runMaintenanceExecutionCleanupPreview(ctx, cmd, stdout)
 	}
 }
 
@@ -203,6 +219,46 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 	}
 
 	return printExecutionArtifactDriftDiagnostics(stdout, diagnostics)
+}
+
+func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("maintenance execution cleanup-preview does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:    cmd.String("dir"),
+		UseExplicitDir: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	preview, err := chc.NewRuntimeArtifactCleanupPreviewService(repository).Preview(
+		ctx,
+		projectContext.ProjectDir,
+		projectContext.ProjectID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return printRuntimeArtifactCleanupPreview(stdout, preview)
 }
 
 func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -469,6 +525,34 @@ func printExecutionArtifactDriftDiagnostics(
 		err := printExecutionArtifactDriftDiagnostic(stdout, diagnostic)
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func printRuntimeArtifactCleanupPreview(
+	stdout io.Writer,
+	preview chc.RuntimeArtifactCleanupPreview,
+) error {
+	lines := []string{
+		fmt.Sprintf("artifact_dir: %s", preview.ArtifactDir),
+		fmt.Sprintf("referenced_run_dirs: %d", len(preview.ReferencedRunDirs)),
+		fmt.Sprintf("cleanup_candidates: %d", len(preview.Candidates)),
+		fmt.Sprintf("mode: preview"),
+	}
+
+	for _, line := range lines {
+		_, err := fmt.Fprintln(stdout, line)
+		if err != nil {
+			return fmt.Errorf("write runtime artifact cleanup preview summary: %w", err)
+		}
+	}
+
+	for _, candidate := range preview.Candidates {
+		_, err := fmt.Fprintf(stdout, "candidate: %s\n", candidate.Path)
+		if err != nil {
+			return fmt.Errorf("write runtime artifact cleanup candidate: %w", err)
 		}
 	}
 

@@ -3465,6 +3465,77 @@ func TestMaintenanceExecutionArtifactsReportsCompleteArtifacts(t *testing.T) {
 	}
 }
 
+func TestMaintenanceExecutionCleanupPreviewReportsUnreferencedArtifactDirs(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	artifactDir := filepath.Join(projectDir, ".chc", "runtime", "runs")
+	referencedDir := filepath.Join(artifactDir, "CHC-1", "exec-1")
+	unreferencedDir := filepath.Join(artifactDir, "CHC-2", "exec-2")
+	record := cliExecutionRecord(projectDir, referencedDir)
+
+	for _, dir := range []string{referencedDir, unreferencedDir} {
+		err := os.MkdirAll(dir, 0o755)
+		if err != nil {
+			t.Fatalf("create runtime artifact dir %q: %v", dir, err)
+		}
+	}
+
+	createCLIExecutionRecord(t, devRoot, record)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"execution",
+		"cleanup-preview",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance execution cleanup-preview returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"artifact_dir: " + artifactDir,
+		"referenced_run_dirs: 1",
+		"cleanup_candidates: 1",
+		"mode: preview",
+		"candidate: " + unreferencedDir,
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func TestMaintenanceExecutionCleanupPreviewDoesNotDeleteCandidates(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	unreferencedDir := filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-2", "exec-2")
+
+	err := os.MkdirAll(unreferencedDir, 0o755)
+	if err != nil {
+		t.Fatalf("create runtime artifact dir: %v", err)
+	}
+
+	err = run(t.Context(), []string{
+		"maintenance",
+		"execution",
+		"cleanup-preview",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance execution cleanup-preview returned error: %v", err)
+	}
+
+	assertPathExists(t, unreferencedDir)
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
