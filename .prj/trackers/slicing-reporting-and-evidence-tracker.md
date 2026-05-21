@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Execution Report Format | Delivered | `feat/slice-1-execution-report-format` | `feat(slice-1): execution report format` | `.prj/reports/slices/reporting-and-evidence/slice-1-execution-report-format.md` | Repository PR #118 merged. |
 | Slice 2: Execution Report Artifact Writer | Delivered | `feat/slice-2-execution-report-writer` | `feat(slice-2): execution report writer` | `.prj/reports/slices/reporting-and-evidence/slice-2-execution-report-writer.md` | Repository PR #119 merged. |
-| Slice 3: Validation and Changed-File Summaries | Planned | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | Pending. |
+| Slice 3: Validation and Changed-File Summaries | Reviewing | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | PR pending. |
 | Slice 4: Loop Report Format | Planned | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Pending. |
 | Slice 5: Report Listing | Planned | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Pending. |
 | Slice 6: Report Lookup | Planned | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Pending. |
@@ -107,21 +107,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Summarize validation output paths and status.
-- [ ] Summarize changed files from existing evidence.
-- [ ] Keep summaries bounded and deterministic.
-- [ ] Add focused tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Summarize validation output paths and status.
+- [x] Summarize changed files from existing evidence.
+- [x] Keep summaries bounded and deterministic.
+- [x] Add focused tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
+- T3.1: `c2e483d`
+- T3.2: `c2e483d`
+- T3.3: `c2e483d`
+- T3.4: `c2e483d`
+- T3.5: `bc82aa8`
+- T3.6: `make verify`
 
 ## Slice 4: Loop Report Format
 
@@ -284,6 +284,8 @@ Task commits:
 - Slice 2 focused tests: `go test ./internal/chc -run 'Test(ExecutionReportWriter|NewExecutionReport|RenderExecutionReport)'` pass.
 - Slice 2 focused CLI tests: `go test ./internal/chcapp -run 'TestTicketApplyResult'` pass.
 - Slice 2 full validation: `make verify` pass.
+- Slice 3 focused tests: `go test ./internal/chc -run 'Test(NewExecutionReport|RenderExecutionReport|ExecutionReportWriter)'` pass.
+- Slice 3 full validation: `make verify` pass.
 
 ## Notes
 
