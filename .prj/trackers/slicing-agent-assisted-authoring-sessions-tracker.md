@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 1: Assisted Session Contract
+Slice 2: Transcript Event Storage
 
 ## Slice Status
 
