@@ -21,7 +21,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Notification Event Model | Delivered | `feat/slice-1-notification-event-model` | `feat(slice-1): notification event model` | `.prj/reports/slices/notification-and-remote-commands/slice-1-notification-event-model.md` | Repository PR #108 merged. |
-| Slice 2: Notification Configuration | Planned | `feat/slice-2-notification-config` | `feat(slice-2): notification config` | `.prj/reports/slices/notification-and-remote-commands/slice-2-notification-config.md` | Pending implementation. |
+| Slice 2: Notification Configuration | Reviewing | `feat/slice-2-notification-config` | `feat(slice-2): notification config` | `.prj/reports/slices/notification-and-remote-commands/slice-2-notification-config.md` | Repository PR #109. |
 | Slice 3: Notification Audit Repository | Planned | `feat/slice-3-notification-audit-repository` | `feat(slice-3): notification audit repository` | `.prj/reports/slices/notification-and-remote-commands/slice-3-notification-audit-repository.md` | Pending implementation. |
 | Slice 4: Notify Command Skeleton | Planned | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Pending implementation. |
 | Slice 5: Telegram Dispatch Boundary | Planned | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Pending implementation. |
@@ -77,25 +77,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Extend workspace config with notification settings.
-- [ ] Support Telegram channel fields with environment-variable based token lookup.
-- [ ] Support disabled channels by default.
-- [ ] Validate channel configuration without contacting external services.
-- [ ] Add config tests.
-- [ ] Document configuration fields.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Extend workspace config with notification settings.
+- [x] Support Telegram channel fields with environment-variable based token lookup.
+- [x] Support disabled channels by default.
+- [x] Validate channel configuration without contacting external services.
+- [x] Add config tests.
+- [x] Document configuration fields.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
-- T2.8: pending
+- T2.1: `75ba182`
+- T2.2: `75ba182`
+- T2.3: `75ba182`
+- T2.4: `75ba182`
+- T2.5: `75ba182`
+- T2.6: `ff93114`
+- T2.7: `docs(slice-2): record notification config report`
+- T2.8: `make verify`
 
 ## Slice 3: Notification Audit Repository
 
