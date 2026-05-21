@@ -539,7 +539,7 @@ func printRuntimeArtifactCleanupPreview(
 		fmt.Sprintf("artifact_dir: %s", preview.ArtifactDir),
 		fmt.Sprintf("referenced_run_dirs: %d", len(preview.ReferencedRunDirs)),
 		fmt.Sprintf("cleanup_candidates: %d", len(preview.Candidates)),
-		fmt.Sprintf("mode: preview"),
+		"mode: preview",
 	}
 
 	for _, line := range lines {
