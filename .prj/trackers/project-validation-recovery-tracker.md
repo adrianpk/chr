@@ -1,6 +1,6 @@
 # Project Validation and Recovery Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/project-validation-recovery-plan.md`
 Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
@@ -18,7 +18,7 @@ Expected PR title: `feat(slice-6): project validation recovery`
 - [x] Run validation.
 - [x] Push implementation branch.
 - [x] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Await user approval before merge.
 
 ## Task Commits
 
@@ -35,4 +35,8 @@ Expected PR title: `feat(slice-6): project validation recovery`
 
 - This slice closes the planned `User Project Context` slicing.
 - Project removal or repair commands are explicitly out of scope.
-- PR #16 is open against `dev` and should use title `feat(slice-6): project validation recovery`.
+- PR #16 was merged into `dev` with title `feat(slice-6): project validation recovery`.
+
+## Reconciliation
+
+Delivered as part of the `User Project Context` slicing. The consolidated tracker is `.prj/trackers/slicing-user-project-context-tracker.md`.

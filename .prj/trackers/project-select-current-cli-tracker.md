@@ -1,6 +1,6 @@
 # Project Select and Current CLI Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/project-select-current-cli-plan.md`
 Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
@@ -36,3 +36,7 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 - This slice depends on `ActiveProjectStore`.
 - Project context resolution for other commands belongs to a later slice in the same slicing.
 - PR #14 was merged into `dev`.
+
+## Reconciliation
+
+Delivered as part of the `User Project Context` slicing. The consolidated tracker is `.prj/trackers/slicing-user-project-context-tracker.md`.

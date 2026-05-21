@@ -1,6 +1,6 @@
 # Slice 10 Project Registry CLI Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slice-10-project-registry-cli-plan.md`
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
@@ -15,9 +15,9 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] T10.2 Project add command.
 - [x] T10.3 Project list command.
 - [x] Run validation.
-- [ ] Push slice branch.
-- [ ] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Push slice branch.
+- [x] Open PR against `dev`.
+- [x] Await user approval before merge.
 
 ## Task Commits
 
@@ -33,3 +33,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - This slice adds CLI access to the project registry only.
 - It must not add project reindex, ticket indexing, daemon behavior, watcher behavior, or Telegram behavior.
+
+## Reconciliation
+
+Delivered by earlier implementation work and superseded by the later consolidated slicing trackers. This file is kept as historical planning context, not active backlog.

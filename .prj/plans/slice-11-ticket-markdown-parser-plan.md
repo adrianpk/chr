@@ -1,6 +1,6 @@
 # Slice 11 Ticket Markdown Parser Plan
 
-Status: active
+Status: delivered
 
 Spec: `.prj/specs/specs/ticket-template.md`
 Index Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`

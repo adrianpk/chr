@@ -1,6 +1,6 @@
 # Slice 5 Ticket New Plan
 
-Status: active
+Status: delivered
 
 Spec: `.prj/specs/specs/ticket-template.md`
 Model: `.prj/specs/specs/ticket-template-model.md`

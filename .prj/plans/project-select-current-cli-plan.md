@@ -1,6 +1,6 @@
 # Project Select and Current CLI Plan
 
-Status: active
+Status: delivered
 
 Slicing: `.prj/plans/slicing-user-project-context-plan.md`
 Tracker: `.prj/trackers/project-select-current-cli-tracker.md`

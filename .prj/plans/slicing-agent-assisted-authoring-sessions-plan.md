@@ -1,6 +1,6 @@
 # Agent-Assisted Authoring Sessions Slicing Plan
 
-Status: planned
+Status: delivered
 
 ## Purpose
 
@@ -131,7 +131,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Assisted Session Contract
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-assisted-session-contract`
 Expected PR title: `feat(slice-1): assisted session contract`
@@ -156,7 +156,7 @@ Expected outcome:
 
 ### Slice 2: Transcript Event Storage
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-assisted-transcript-storage`
 Expected PR title: `feat(slice-2): assisted transcript storage`
@@ -180,7 +180,7 @@ Expected outcome:
 
 ### Slice 3: Authoring Context Package
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-assisted-context-package`
 Expected PR title: `feat(slice-3): assisted context package`
@@ -204,7 +204,7 @@ Expected outcome:
 
 ### Slice 4: Model Invocation Adapter
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-assisted-model-adapter`
 Expected PR title: `feat(slice-4): assisted model adapter`
@@ -229,7 +229,7 @@ Expected outcome:
 
 ### Slice 5: Adaptive Quiz Loop
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-assisted-quiz-loop`
 Expected PR title: `feat(slice-5): assisted quiz loop`
@@ -254,7 +254,7 @@ Expected outcome:
 
 ### Slice 6: Answer Curation
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-assisted-answer-curation`
 Expected PR title: `feat(slice-6): assisted answer curation`
@@ -279,7 +279,7 @@ Expected outcome:
 
 ### Slice 7: Assisted Artifact Synthesis
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-assisted-artifact-synthesis`
 Expected PR title: `feat(slice-7): assisted artifact synthesis`
@@ -305,7 +305,7 @@ Expected outcome:
 
 ### Slice 8: Assisted Authoring CLI
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-8-assisted-authoring-cli`
 Expected PR title: `feat(slice-8): assisted authoring cli`
@@ -330,7 +330,7 @@ Expected outcome:
 
 ### Slice 9: Assisted Authoring Docs
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-9-assisted-authoring-docs`
 Expected PR title: `feat(slice-9): assisted authoring docs`

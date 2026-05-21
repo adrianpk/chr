@@ -243,13 +243,13 @@ Candidate tasks:
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
-- T7.6: pending
-- T7.7: pending
+- T7.1: delivered in slice PR
+- T7.2: delivered in slice PR
+- T7.3: delivered in slice PR
+- T7.4: delivered in slice PR
+- T7.5: delivered in slice PR
+- T7.6: delivered in slice PR
+- T7.7: delivered in slice PR
 
 ## Slice 8: Loop Status Reporting
 
@@ -275,13 +275,13 @@ Candidate tasks:
 
 Task commits:
 
-- T8.1: pending
-- T8.2: pending
-- T8.3: pending
-- T8.4: pending
-- T8.5: pending
-- T8.6: pending
-- T8.7: pending
+- T8.1: delivered in slice PR
+- T8.2: delivered in slice PR
+- T8.3: delivered in slice PR
+- T8.4: delivered in slice PR
+- T8.5: delivered in slice PR
+- T8.6: delivered in slice PR
+- T8.7: delivered in slice PR
 
 ## Validation Record
 

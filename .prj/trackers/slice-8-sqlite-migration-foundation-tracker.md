@@ -1,6 +1,6 @@
 # Slice 8 SQLite Migration Foundation Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slice-8-sqlite-migration-foundation-plan.md`
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
@@ -15,9 +15,9 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] T8.2 Migrator core primitive.
 - [x] T8.3 Validation and documentation.
 - [x] Run validation.
-- [ ] Push slice branch.
-- [ ] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Push slice branch.
+- [x] Open PR against `dev`.
+- [x] Await user approval before merge.
 
 ## Task Commits
 
@@ -33,3 +33,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - This slice creates database schema infrastructure only.
 - It must not add project registration commands, daemon behavior, watcher behavior, or Telegram behavior.
+
+## Reconciliation
+
+Delivered by earlier implementation work and superseded by the later consolidated slicing trackers. This file is kept as historical planning context, not active backlog.

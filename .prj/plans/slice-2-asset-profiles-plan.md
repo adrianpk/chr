@@ -1,6 +1,6 @@
 # Slice 2 Asset Profiles Plan
 
-Status: active
+Status: delivered
 
 ## Purpose
 

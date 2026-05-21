@@ -1,6 +1,6 @@
 # Notification and Remote Commands Slicing Plan
 
-Status: planned
+Status: completed
 
 ## Purpose
 
@@ -46,11 +46,11 @@ Delivered prerequisites:
 - loop and execution records persist durable status;
 - context and evidence artifacts are materialized for agent execution.
 
-Not yet delivered:
+Delivered:
 
 - notification event model;
 - notification audit records;
-- channel configuration for Telegram or email;
+- channel configuration for Telegram;
 - notification dispatch from loop and ticket outcomes;
 - remote command intake;
 - remote command handoff into existing CLI-equivalent operations.
@@ -113,7 +113,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Notification Event Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-notification-event-model`
 Expected PR title: `feat(slice-1): notification event model`
@@ -140,7 +140,7 @@ Expected outcome:
 
 ### Slice 2: Notification Configuration
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-notification-config`
 Expected PR title: `feat(slice-2): notification config`
@@ -166,7 +166,7 @@ Expected outcome:
 
 ### Slice 3: Notification Audit Repository
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-notification-audit-repository`
 Expected PR title: `feat(slice-3): notification audit repository`
@@ -191,7 +191,7 @@ Expected outcome:
 
 ### Slice 4: Notify Command Skeleton
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-notify-command-skeleton`
 Expected PR title: `feat(slice-4): notify command skeleton`
@@ -217,7 +217,7 @@ Expected outcome:
 
 ### Slice 5: Telegram Dispatch Boundary
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-telegram-dispatch-boundary`
 Expected PR title: `feat(slice-5): telegram dispatch boundary`
@@ -243,7 +243,7 @@ Expected outcome:
 
 ### Slice 6: Loop and Ticket Notifications
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-loop-ticket-notifications`
 Expected PR title: `feat(slice-6): loop ticket notifications`
@@ -269,7 +269,7 @@ Expected outcome:
 
 ### Slice 7: Remote Command Intake Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-remote-command-intake-model`
 Expected PR title: `feat(slice-7): remote command intake model`
@@ -296,7 +296,7 @@ Expected outcome:
 
 ### Slice 8: Telegram Remote Command Handoff
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-8-telegram-remote-command-handoff`
 Expected PR title: `feat(slice-8): telegram remote command handoff`

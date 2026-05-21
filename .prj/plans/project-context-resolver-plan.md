@@ -1,6 +1,6 @@
 # Project Context Resolver Plan
 
-Status: active
+Status: delivered
 
 Slicing: `.prj/plans/slicing-user-project-context-plan.md`
 Tracker: `.prj/trackers/project-context-resolver-tracker.md`

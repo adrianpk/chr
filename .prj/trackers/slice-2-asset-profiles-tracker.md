@@ -1,6 +1,6 @@
 # Slice 2 Asset Profiles Tracker
 
-Status: active
+Status: delivered
 
 ## Checklist
 
@@ -12,9 +12,13 @@ Status: active
 - [x] Run validation.
 - [x] Push slice branch.
 - [x] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Await user approval before merge.
 
 ## Notes
 
 - The previous direct commits on `dev` were not compliant with the repository workflow.
 - Correction must avoid destructive history rewrites.
+
+## Reconciliation
+
+Delivered as part of the `Managed Project Bootstrap` slicing. The consolidated tracker is `.prj/trackers/slicing-managed-project-bootstrap-tracker.md`.

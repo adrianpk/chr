@@ -1,6 +1,6 @@
 # Slice 5 Ticket New Tracker
 
-Status: merged
+Status: delivered
 
 Plan: `.prj/plans/slice-5-ticket-new-plan.md`
 Spec: `.prj/specs/specs/ticket-template.md`

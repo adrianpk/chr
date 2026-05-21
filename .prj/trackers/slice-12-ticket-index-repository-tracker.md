@@ -1,6 +1,6 @@
 # Slice 12 Ticket Index Repository Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slice-12-ticket-index-repository-plan.md`
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
@@ -15,9 +15,9 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] T12.2 Ticket index repository.
 - [x] T12.3 Validation and documentation.
 - [x] Run validation.
-- [ ] Push slice branch.
-- [ ] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Push slice branch.
+- [x] Open PR against `dev`.
+- [x] Await user approval before merge.
 
 ## Task Commits
 
@@ -33,3 +33,7 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - This slice persists parsed ticket index rows only.
 - It must not add index rebuild commands, daemon watcher behavior, Telegram behavior, or ticket search CLI.
+
+## Reconciliation
+
+Delivered by earlier implementation work and superseded by the later consolidated slicing trackers. This file is kept as historical planning context, not active backlog.

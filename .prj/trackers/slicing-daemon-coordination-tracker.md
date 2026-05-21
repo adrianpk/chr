@@ -54,14 +54,14 @@ Candidate tasks:
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
-- T1.8: pending
+- T1.1: delivered in slice PR
+- T1.2: delivered in slice PR
+- T1.3: delivered in slice PR
+- T1.4: delivered in slice PR
+- T1.5: delivered in slice PR
+- T1.6: delivered in slice PR
+- T1.7: delivered in slice PR
+- T1.8: delivered in slice PR
 
 ## Slice 2: Daemon Lifecycle State Model
 
@@ -87,13 +87,13 @@ Candidate tasks:
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
+- T2.1: delivered in slice PR
+- T2.2: delivered in slice PR
+- T2.3: delivered in slice PR
+- T2.4: delivered in slice PR
+- T2.5: delivered in slice PR
+- T2.6: delivered in slice PR
+- T2.7: delivered in slice PR
 
 ## Slice 3: Daemon State Repository
 
@@ -118,12 +118,12 @@ Candidate tasks:
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
+- T3.1: delivered in slice PR
+- T3.2: delivered in slice PR
+- T3.3: delivered in slice PR
+- T3.4: delivered in slice PR
+- T3.5: delivered in slice PR
+- T3.6: delivered in slice PR
 
 ## Slice 4: Daemon Status Reporting
 
@@ -148,12 +148,12 @@ Candidate tasks:
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
+- T4.1: delivered in slice PR
+- T4.2: delivered in slice PR
+- T4.3: delivered in slice PR
+- T4.4: delivered in slice PR
+- T4.5: delivered in slice PR
+- T4.6: delivered in slice PR
 
 ## Slice 5: Single-Instance Guard
 
@@ -179,13 +179,13 @@ Candidate tasks:
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
+- T5.1: delivered in slice PR
+- T5.2: delivered in slice PR
+- T5.3: delivered in slice PR
+- T5.4: delivered in slice PR
+- T5.5: delivered in slice PR
+- T5.6: delivered in slice PR
+- T5.7: delivered in slice PR
 
 ## Slice 6: Registered Project Loading
 
@@ -210,12 +210,12 @@ Candidate tasks:
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
+- T6.1: delivered in slice PR
+- T6.2: delivered in slice PR
+- T6.3: delivered in slice PR
+- T6.4: delivered in slice PR
+- T6.5: delivered in slice PR
+- T6.6: delivered in slice PR
 
 ## Slice 7: Daemon Foreground Run Loop
 
@@ -242,14 +242,14 @@ Candidate tasks:
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
-- T7.6: pending
-- T7.7: pending
-- T7.8: pending
+- T7.1: delivered in slice PR
+- T7.2: delivered in slice PR
+- T7.3: delivered in slice PR
+- T7.4: delivered in slice PR
+- T7.5: delivered in slice PR
+- T7.6: delivered in slice PR
+- T7.7: delivered in slice PR
+- T7.8: delivered in slice PR
 
 ## Slice 8: Graceful Stop and Stale Recovery
 

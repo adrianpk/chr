@@ -1,6 +1,6 @@
 # Slice 11 Ticket Markdown Parser Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slice-11-ticket-markdown-parser-plan.md`
 Spec: `.prj/specs/specs/ticket-template.md`
@@ -15,9 +15,9 @@ Index Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - [x] T11.2 Ticket Markdown parser.
 - [x] T11.3 Validation and documentation.
 - [x] Run validation.
-- [ ] Push slice branch.
-- [ ] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Push slice branch.
+- [x] Open PR against `dev`.
+- [x] Await user approval before merge.
 
 ## Task Commits
 
@@ -33,3 +33,7 @@ Index Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 - This slice parses Markdown into an indexable model only.
 - It must not add SQLite ticket index persistence, index rebuild commands, daemon watcher behavior, or Telegram behavior.
+
+## Reconciliation
+
+Delivered by earlier implementation work and superseded by the later consolidated slicing trackers. This file is kept as historical planning context, not active backlog.

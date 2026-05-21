@@ -1,6 +1,6 @@
 # Slice 7 User Environment Paths Plan
 
-Status: active
+Status: delivered
 
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 Tracker: `.prj/trackers/slice-7-user-environment-paths-tracker.md`

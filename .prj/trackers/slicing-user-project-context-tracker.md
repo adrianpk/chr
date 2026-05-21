@@ -36,47 +36,47 @@ Specs:
 
 Candidate tasks:
 
-- [ ] Decide persistence location from the existing user environment model.
-- [ ] Add a core model for active project state.
-- [ ] Add a repository or config service for storing active project state.
-- [ ] Add tests for empty, set, replace, and missing-project cases.
-- [ ] Keep development-mode state under `_workspace`.
-- [ ] Run `make verify`.
+- [x] Decide persistence location from the existing user environment model.
+- [x] Add a core model for active project state.
+- [x] Add a repository or config service for storing active project state.
+- [x] Add tests for empty, set, replace, and missing-project cases.
+- [x] Keep development-mode state under `_workspace`.
+- [x] Run `make verify`.
 
 ## Slice 4: Project Select and Current CLI
 
 Candidate tasks:
 
-- [ ] Add `chc project select <name-or-path>`.
-- [ ] Add `chc project current`.
-- [ ] Resolve registered project by name.
-- [ ] Resolve registered project by path when unambiguous.
-- [ ] Print stable current-project output.
-- [ ] Add focused CLI tests.
-- [ ] Run `make verify`.
+- [x] Add `chc project select <name-or-path>`.
+- [x] Add `chc project current`.
+- [x] Resolve registered project by name.
+- [x] Resolve registered project by path when unambiguous.
+- [x] Print stable current-project output.
+- [x] Add focused CLI tests.
+- [x] Run `make verify`.
 
 ## Slice 5: Project Context Resolver
 
 Candidate tasks:
 
-- [ ] Add reusable core command context resolution.
-- [ ] Support explicit project input where command semantics require it.
-- [ ] Fall back to active project where appropriate.
-- [ ] Preserve current-directory behavior for project-local commands that should keep it.
-- [ ] Return clear errors when no project can be resolved.
-- [ ] Add tests for explicit, active, current-directory, and missing-context cases.
-- [ ] Run `make verify`.
+- [x] Add reusable core command context resolution.
+- [x] Support explicit project input where command semantics require it.
+- [x] Fall back to active project where appropriate.
+- [x] Preserve current-directory behavior for project-local commands that should keep it.
+- [x] Return clear errors when no project can be resolved.
+- [x] Add tests for explicit, active, current-directory, and missing-context cases.
+- [x] Run `make verify`.
 
 ## Slice 6: Project Validation and Recovery
 
 Candidate tasks:
 
-- [ ] Detect registered paths that no longer exist.
-- [ ] Detect registered paths without `.chc/`.
-- [ ] Distinguish disabled projects from missing projects.
-- [ ] Decide whether disable/remove commands belong here or in maintenance.
-- [ ] Add recovery-oriented error messages.
-- [ ] Run `make verify`.
+- [x] Detect registered paths that no longer exist.
+- [x] Detect registered paths without `.chc/`.
+- [x] Distinguish disabled projects from missing projects.
+- [x] Decide whether disable/remove commands belong here or in maintenance.
+- [x] Add recovery-oriented error messages.
+- [x] Run `make verify`.
 
 ## Validation Record
 

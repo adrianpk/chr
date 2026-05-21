@@ -1,6 +1,6 @@
 # Slice 12 Ticket Index Repository Plan
 
-Status: active
+Status: delivered
 
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`

@@ -1,6 +1,6 @@
 # Slice 8 SQLite Migration Foundation Plan
 
-Status: active
+Status: delivered
 
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`

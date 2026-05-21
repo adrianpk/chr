@@ -1,6 +1,6 @@
 # Slice 7 User Environment Paths Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slice-7-user-environment-paths-plan.md`
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
@@ -14,9 +14,9 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 - [x] T7.2 Normal and development path resolution.
 - [x] T7.3 Documentation and validation.
 - [x] Run validation.
-- [ ] Push slice branch.
-- [ ] Open PR against `dev`.
-- [ ] Await user approval before merge.
+- [x] Push slice branch.
+- [x] Open PR against `dev`.
+- [x] Await user approval before merge.
 
 ## Task Commits
 
@@ -32,3 +32,7 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 
 - This slice creates path resolution only.
 - It must not add registry, SQLite, daemon, watcher, or Telegram behavior.
+
+## Reconciliation
+
+Delivered by earlier implementation work and superseded by the later consolidated slicing trackers. This file is kept as historical planning context, not active backlog.

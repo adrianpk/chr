@@ -1,6 +1,6 @@
 # Managed Project Bootstrap Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -25,7 +25,7 @@ Related delivered plans:
 
 ## Current State
 
-The slicing is mostly delivered.
+The slicing is delivered.
 
 Already delivered:
 
@@ -42,7 +42,7 @@ Already delivered:
 - unknown profile rejection;
 - basic safety behavior for preserving existing root files.
 
-Remaining work should focus on closing bootstrap behavior gaps, not expanding into project registry, tickets, runtime, daemon, or execution.
+Bootstrap behavior gaps were closed by the safety pass. Further project registry, ticket, runtime, daemon, or execution work belongs to separate slicing sets.
 
 ## Slicing Scope
 
@@ -126,7 +126,7 @@ Delivery:
 
 ### Bootstrap Safety Pass
 
-Status: pending.
+Status: delivered.
 
 Goal:
 
@@ -140,7 +140,7 @@ Candidate scope:
 - expose clearer errors when the target directory is invalid or not writable;
 - keep behavior deterministic and small.
 
-This pending slice should be the only implementation slice expected from this slicing unless review finds a concrete bootstrap gap.
+The safety pass was the final implementation slice for this slicing.
 
 ## Acceptance Criteria
 
@@ -157,7 +157,7 @@ The slicing is complete when:
 
 ## Validation
 
-Required validation for any pending implementation slice in this slicing:
+Required validation for this slicing:
 
 ```sh
 make verify

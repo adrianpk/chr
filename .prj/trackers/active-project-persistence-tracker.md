@@ -1,6 +1,6 @@
 # Active Project Persistence Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/active-project-persistence-plan.md`
 Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
@@ -34,3 +34,7 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 - This slice intentionally does not add CLI commands.
 - CLI selection and inspection belong to a later slice in the same slicing.
 - PR #13 was merged into `dev`.
+
+## Reconciliation
+
+Delivered as part of the `User Project Context` slicing. The consolidated tracker is `.prj/trackers/slicing-user-project-context-tracker.md`.

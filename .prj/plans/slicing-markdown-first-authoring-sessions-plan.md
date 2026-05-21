@@ -1,6 +1,6 @@
 # Markdown-First Authoring Sessions Slicing Plan
 
-Status: planned
+Status: delivered
 
 ## Purpose
 
@@ -171,7 +171,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Authoring Session Model
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-authoring-session-model`
 Expected PR title: `feat(slice-1): authoring session model`
@@ -196,7 +196,7 @@ Expected outcome:
 
 ### Slice 2: Authoring Session Storage
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-authoring-session-storage`
 Expected PR title: `feat(slice-2): authoring session storage`
@@ -221,7 +221,7 @@ Expected outcome:
 
 ### Slice 3: Authoring Artifact Layout
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-authoring-artifact-layout`
 Expected PR title: `feat(slice-3): authoring artifact layout`
@@ -246,7 +246,7 @@ Expected outcome:
 
 ### Slice 4: Static Quiz Generation
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-static-quiz-generation`
 Expected PR title: `feat(slice-4): static quiz generation`
@@ -271,7 +271,7 @@ Expected outcome:
 
 ### Slice 5: Authoring Session CLI
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-authoring-session-cli`
 Expected PR title: `feat(slice-5): authoring session cli`
@@ -297,7 +297,7 @@ Expected outcome:
 
 ### Slice 6: Manual Promotion and Provenance
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-manual-promotion-provenance`
 Expected PR title: `feat(slice-6): manual promotion provenance`
@@ -324,7 +324,7 @@ Expected outcome:
 
 ### Slice 7: Authoring Docs Reference
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-authoring-docs-reference`
 Expected PR title: `feat(slice-7): authoring docs reference`

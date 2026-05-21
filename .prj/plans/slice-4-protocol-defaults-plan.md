@@ -1,6 +1,6 @@
 # Slice 4 Protocol Defaults Plan
 
-Status: active
+Status: delivered
 
 ## Purpose
 

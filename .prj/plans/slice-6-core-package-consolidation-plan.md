@@ -1,6 +1,6 @@
 # Slice 6 Core Package Consolidation Plan
 
-Status: active
+Status: delivered
 
 Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 Tracker: `.prj/trackers/slice-6-core-package-consolidation-tracker.md`
