@@ -2389,6 +2389,94 @@ func TestTicketApplyResultDryRunDoesNotMutateTicket(t *testing.T) {
 	assertPathNotExists(t, filepath.Join(record.Artifacts.RunDir, "execution-report.md"))
 }
 
+func TestReportListListsProjectReports(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"CHC-1",
+		"exec-1",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"loop-1",
+		"loop-report.md",
+	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"report",
+		"list",
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("report list returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"kind: execution path: .chc/runtime/runs/CHC-1/exec-1/execution-report.md ticket: CHC-1 execution: exec-1 loop: none status: succeeded",
+		"kind: loop path: .chc/runtime/runs/loop-1/loop-report.md ticket: none execution: none loop: loop-1 status: blocked",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestReportListFiltersReports(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"CHC-1",
+		"exec-1",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"CHC-2",
+		"exec-2",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHC-2\n- status: blocked\n")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"report",
+		"list",
+		"--dir",
+		projectDir,
+		"--kind",
+		"execution",
+		"--ticket",
+		"CHC-2",
+		"--status",
+		"blocked",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("report list returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "execution: exec-2") {
+		t.Fatalf("stdout does not contain exec-2:\n%s", stdout.String())
+	}
+
+	if strings.Contains(stdout.String(), "exec-1") {
+		t.Fatalf("stdout contains filtered report:\n%s", stdout.String())
+	}
+}
+
 func TestTicketShowRejectsMissingTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -3640,6 +3728,22 @@ func writeCLIWorkspaceConfig(t *testing.T, projectDir, content string) {
 	err := os.WriteFile(configPath, []byte(content), 0o644)
 	if err != nil {
 		t.Fatalf("write workspace config: %v", err)
+	}
+}
+
+func writeCLIReport(t *testing.T, projectDir, relativePath, content string) {
+	t.Helper()
+
+	path := filepath.Join(projectDir, relativePath)
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		t.Fatalf("create report directory: %v", err)
+	}
+
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("write report: %v", err)
 	}
 }
 

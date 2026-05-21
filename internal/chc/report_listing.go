@@ -1,0 +1,199 @@
+package chc
+
+import (
+	"bufio"
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+)
+
+type ReportKind string
+
+const (
+	ReportKindExecution ReportKind = "execution"
+	ReportKindLoop      ReportKind = "loop"
+)
+
+type ReportListFilter struct {
+	Kind        ReportKind
+	TicketKey   string
+	ExecutionID string
+	LoopID      string
+	Status      string
+}
+
+type ReportListEntry struct {
+	Kind         ReportKind
+	Path         string
+	RelativePath string
+	TicketKey    string
+	ExecutionID  string
+	LoopID       string
+	Status       string
+}
+
+type ReportLister struct{}
+
+func NewReportLister() ReportLister {
+	return ReportLister{}
+}
+
+func (l ReportLister) ListProjectReports(
+	ctx context.Context,
+	projectDir string,
+	filter ReportListFilter,
+) ([]ReportListEntry, error) {
+	err := ctx.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	root := filepath.Join(projectDir, DirectoryName, "runtime", "runs")
+	entries := []ReportListEntry{}
+
+	err = filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+
+		err = ctx.Err()
+		if err != nil {
+			return err
+		}
+
+		if entry.IsDir() {
+			return nil
+		}
+
+		report, ok, err := reportListEntryFromPath(projectDir, path)
+		if err != nil {
+			return err
+		}
+
+		if !ok || !reportMatchesFilter(report, filter) {
+			return nil
+		}
+
+		entries = append(entries, report)
+
+		return nil
+	})
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []ReportListEntry{}, nil
+		}
+
+		return nil, fmt.Errorf("list project reports: %w", err)
+	}
+
+	sort.SliceStable(entries, func(i, j int) bool {
+		return entries[i].RelativePath < entries[j].RelativePath
+	})
+
+	return entries, nil
+}
+
+func reportListEntryFromPath(projectDir, path string) (ReportListEntry, bool, error) {
+	filename := filepath.Base(path)
+
+	var kind ReportKind
+
+	switch filename {
+	case "execution-report.md":
+		kind = ReportKindExecution
+	case "loop-report.md":
+		kind = ReportKindLoop
+	default:
+		return ReportListEntry{}, false, nil
+	}
+
+	metadata, err := readReportListMetadata(path)
+	if err != nil {
+		return ReportListEntry{}, false, err
+	}
+
+	relativePath, err := filepath.Rel(projectDir, path)
+	if err != nil {
+		return ReportListEntry{}, false, fmt.Errorf("relativize report path: %w", err)
+	}
+
+	report := ReportListEntry{
+		Kind:         kind,
+		Path:         path,
+		RelativePath: filepath.ToSlash(relativePath),
+		TicketKey:    metadata["ticket"],
+		ExecutionID:  metadata["execution"],
+		LoopID:       metadata["loop"],
+		Status:       metadata["status"],
+	}
+
+	return report, true, nil
+}
+
+func readReportListMetadata(path string) (map[string]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("open report metadata: %w", err)
+	}
+
+	defer func() {
+		//nolint:errcheck // Scanner errors are checked below.
+		_ = file.Close()
+	}()
+
+	metadata := map[string]string{}
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if !strings.HasPrefix(line, "- ") {
+			continue
+		}
+
+		key, value, ok := strings.Cut(strings.TrimPrefix(line, "- "), ":")
+		if !ok {
+			continue
+		}
+
+		key = strings.TrimSpace(key)
+		if _, exists := metadata[key]; exists {
+			continue
+		}
+
+		metadata[key] = strings.TrimSpace(value)
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		return nil, fmt.Errorf("scan report metadata: %w", err)
+	}
+
+	return metadata, nil
+}
+
+func reportMatchesFilter(report ReportListEntry, filter ReportListFilter) bool {
+	if filter.Kind != "" && report.Kind != filter.Kind {
+		return false
+	}
+
+	if filter.TicketKey != "" && report.TicketKey != filter.TicketKey {
+		return false
+	}
+
+	if filter.ExecutionID != "" && report.ExecutionID != filter.ExecutionID {
+		return false
+	}
+
+	if filter.LoopID != "" && report.LoopID != filter.LoopID {
+		return false
+	}
+
+	if filter.Status != "" && report.Status != filter.Status {
+		return false
+	}
+
+	return true
+}
