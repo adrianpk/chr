@@ -1,6 +1,8 @@
 package chc
 
 import (
+	"context"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -21,6 +23,10 @@ func TestNewExecutionReportBuildsSummaryFromRecord(t *testing.T) {
 
 	if report.Runtime.ValidationCommand != "make verify" {
 		t.Fatalf("Runtime.ValidationCommand = %q, want make verify", report.Runtime.ValidationCommand)
+	}
+
+	if report.Artifacts.ReportPath != filepath.Join(record.Artifacts.RunDir, "execution-report.md") {
+		t.Fatalf("Artifacts.ReportPath = %q, want execution report path", report.Artifacts.ReportPath)
 	}
 
 	if report.Result.Available {
@@ -110,6 +116,7 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 		"- validation_command: make verify",
 		"## Artifacts",
 		"- result: " + record.Artifacts.ResultPath,
+		"- report: " + record.Artifacts.RunDir + "/execution-report.md",
 		"## Result",
 		"- summary: ready for review",
 		"## Changed Files",
@@ -120,6 +127,65 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 		if !strings.Contains(markdown, want) {
 			t.Fatalf("markdown does not contain %q:\n%s", want, markdown)
 		}
+	}
+}
+
+func TestExecutionReportWriterWritesMarkdownReport(t *testing.T) {
+	record := testExecutionReportRecord(t.TempDir())
+	result := ExecutionResult{
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Status:      ExecutionResultStatusSucceeded,
+		Summary:     "ready for review",
+	}
+
+	report, err := NewExecutionReport(ExecutionReportOptions{
+		Execution: record,
+		Result:    &result,
+	})
+	if err != nil {
+		t.Fatalf("NewExecutionReport returned error: %v", err)
+	}
+
+	path, err := NewExecutionReportWriter().WriteExecutionReport(context.Background(), report)
+	if err != nil {
+		t.Fatalf("WriteExecutionReport returned error: %v", err)
+	}
+
+	if path != filepath.Join(record.Artifacts.RunDir, "execution-report.md") {
+		t.Fatalf("path = %q, want execution report path", path)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile returned error: %v", err)
+	}
+
+	if !strings.Contains(string(content), "- execution: exec-1") {
+		t.Fatalf("report content missing execution id:\n%s", string(content))
+	}
+}
+
+func TestExecutionReportWriterRefusesNonReportOverwrite(t *testing.T) {
+	record := testExecutionReportRecord(t.TempDir())
+	report, err := NewExecutionReport(ExecutionReportOptions{Execution: record})
+	if err != nil {
+		t.Fatalf("NewExecutionReport returned error: %v", err)
+	}
+
+	err = os.MkdirAll(record.Artifacts.RunDir, 0o755)
+	if err != nil {
+		t.Fatalf("MkdirAll returned error: %v", err)
+	}
+
+	err = os.WriteFile(report.Artifacts.ReportPath, []byte("# Something Else\n"), 0o644)
+	if err != nil {
+		t.Fatalf("WriteFile returned error: %v", err)
+	}
+
+	_, err = NewExecutionReportWriter().WriteExecutionReport(context.Background(), report)
+	if err == nil {
+		t.Fatal("WriteExecutionReport returned nil error")
 	}
 }
 

@@ -909,6 +909,11 @@ func applyTicketResult(ctx context.Context, env chc.UserEnvironment, plan ticket
 		return err
 	}
 
+	err = writeTicketExecutionReport(ctx, plan)
+	if err != nil {
+		return err
+	}
+
 	return emitTicketBlockedNotification(ctx, env, plan)
 }
 
@@ -967,6 +972,23 @@ func writeTicketApplyResultReport(plan ticketApplyResultPlan, appliedAt time.Tim
 	return nil
 }
 
+func writeTicketExecutionReport(ctx context.Context, plan ticketApplyResultPlan) error {
+	report, err := chc.NewExecutionReport(chc.ExecutionReportOptions{
+		Execution: plan.Record,
+		Result:    &plan.Result,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = chc.NewExecutionReportWriter().WriteExecutionReport(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun bool) error {
 	lines := []string{
 		fmt.Sprintf("execution: %s", plan.Application.ExecutionID),
@@ -974,6 +996,7 @@ func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun
 		fmt.Sprintf("ticket_path: %s", plan.Application.TicketPath),
 		fmt.Sprintf("status: %s", plan.Application.TicketStatus),
 		fmt.Sprintf("result_status: %s", plan.Result.Status),
+		fmt.Sprintf("execution_report_path: %s", chc.ExecutionReportPath(plan.Record)),
 		fmt.Sprintf("report_path: %s", plan.ReportPath),
 		fmt.Sprintf("dry_run: %t", dryRun),
 	}

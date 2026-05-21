@@ -1,7 +1,10 @@
 package chc
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -40,6 +43,7 @@ type ExecutionReportArtifacts struct {
 	ResultPath     string
 	LogPath        string
 	ValidationPath string
+	ReportPath     string
 }
 
 type ExecutionReportResult struct {
@@ -106,6 +110,7 @@ func executionReportFromRecord(record ExecutionRecord) ExecutionReport {
 			ResultPath:     record.Artifacts.ResultPath,
 			LogPath:        record.Artifacts.LogPath,
 			ValidationPath: record.Artifacts.ValidationPath,
+			ReportPath:     ExecutionReportPath(record),
 		},
 		FailureReason: record.FailureReason,
 		CreatedAt:     record.CreatedAt,
@@ -157,6 +162,84 @@ func RenderExecutionReportMarkdown(report ExecutionReport) string {
 	return output.String()
 }
 
+type ExecutionReportWriter interface {
+	WriteExecutionReport(ctx context.Context, report ExecutionReport) (string, error)
+}
+
+type executionReportWriter struct{}
+
+func NewExecutionReportWriter() ExecutionReportWriter {
+	return &executionReportWriter{}
+}
+
+func ExecutionReportPath(record ExecutionRecord) string {
+	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
+		return ""
+	}
+
+	return filepath.Join(record.Artifacts.RunDir, "execution-report.md")
+}
+
+func (w *executionReportWriter) WriteExecutionReport(
+	ctx context.Context,
+	report ExecutionReport,
+) (string, error) {
+	err := ctx.Err()
+	if err != nil {
+		return "", err
+	}
+
+	path := strings.TrimSpace(report.Artifacts.ReportPath)
+	if path == "" {
+		return "", fmt.Errorf("execution report path is required")
+	}
+
+	err = ensureExecutionReportWriteTarget(path)
+	if err != nil {
+		return "", err
+	}
+
+	content := RenderExecutionReportMarkdown(report)
+
+	err = os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		return "", fmt.Errorf("create execution report directory: %w", err)
+	}
+
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
+		return "", fmt.Errorf("write execution report: %w", err)
+	}
+
+	return path, nil
+}
+
+func ensureExecutionReportWriteTarget(path string) error {
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+
+		return fmt.Errorf("stat execution report: %w", err)
+	}
+
+	if info.IsDir() {
+		return fmt.Errorf("execution report path is a directory: %s", path)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("read existing execution report: %w", err)
+	}
+
+	if !strings.HasPrefix(string(content), "# Execution Report\n") {
+		return fmt.Errorf("refuse to overwrite non-report file: %s", path)
+	}
+
+	return nil
+}
+
 func writeExecutionReportSummary(output *strings.Builder, report ExecutionReport) {
 	output.WriteString("## Summary\n\n")
 	writeExecutionReportField(output, "execution", report.ExecutionID)
@@ -192,6 +275,7 @@ func writeExecutionReportArtifacts(output *strings.Builder, artifacts ExecutionR
 	writeExecutionReportField(output, "result", artifacts.ResultPath)
 	writeExecutionReportField(output, "log", artifacts.LogPath)
 	writeExecutionReportField(output, "validation", artifacts.ValidationPath)
+	writeExecutionReportField(output, "report", artifacts.ReportPath)
 	output.WriteString("\n")
 }
 

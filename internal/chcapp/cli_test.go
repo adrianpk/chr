@@ -2293,6 +2293,7 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 		"ticket: CHC-1",
 		"status: reviewing",
 		"result_status: succeeded",
+		"execution_report_path: " + filepath.Join(record.Artifacts.RunDir, "execution-report.md"),
 		"dry_run: false",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -2314,6 +2315,7 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	}
 
 	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "result-application.md"))
+	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "execution-report.md"))
 
 	tickets := listProjectTickets(t, devRoot, projectDir)
 	if len(tickets) != 1 || tickets[0].Status != "reviewing" {
@@ -2384,6 +2386,7 @@ func TestTicketApplyResultDryRunDoesNotMutateTicket(t *testing.T) {
 	}
 
 	assertPathNotExists(t, filepath.Join(record.Artifacts.RunDir, "result-application.md"))
+	assertPathNotExists(t, filepath.Join(record.Artifacts.RunDir, "execution-report.md"))
 }
 
 func TestTicketShowRejectsMissingTicket(t *testing.T) {
