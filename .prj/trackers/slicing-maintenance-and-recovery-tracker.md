@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Database Migration Status | Delivered | `feat/slice-1-db-migration-status` | `feat(slice-1): db migration status` | `.prj/reports/slices/maintenance-and-recovery/slice-1-db-migration-status.md` | Repository PR #126 merged. |
-| Slice 2: Project Registry Diagnostics | Reviewing | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | Repository PR #127 open. |
+| Slice 2: Project Registry Diagnostics | Delivered | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | Repository PR #127 merged. |
 | Slice 3: Project Registry Repair | Planned | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Pending. |
 | Slice 4: Execution Artifact Drift | Planned | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Pending. |
 | Slice 5: Runtime Artifact Cleanup Preview | Planned | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Pending. |
