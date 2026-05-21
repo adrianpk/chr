@@ -30,7 +30,7 @@ Slice 7: Assisted Artifact Synthesis
 | Slice 4: Model Invocation Adapter | Delivered | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Repository PR #102. |
 | Slice 5: Adaptive Quiz Loop | Delivered | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Repository PR #103. |
 | Slice 6: Answer Curation | Delivered | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Repository PR #104. |
-| Slice 7: Assisted Artifact Synthesis | Planned | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Depends on Slice 6. |
+| Slice 7: Assisted Artifact Synthesis | Delivered | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Repository PR #105. |
 | Slice 8: Assisted Authoring CLI | Planned | `feat/slice-8-assisted-authoring-cli` | `feat(slice-8): assisted authoring cli` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-8-assisted-authoring-cli.md` | Depends on Slices 1-7. |
 | Slice 9: Assisted Authoring Docs | Planned | `feat/slice-9-assisted-authoring-docs` | `feat(slice-9): assisted authoring docs` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-9-assisted-authoring-docs.md` | Final docs pass for the slicing. |
 
@@ -240,23 +240,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Synthesize one conservative artifact path.
-- [ ] Preserve source session and summary provenance.
-- [ ] Write an editable target artifact.
-- [ ] Avoid overwriting without an explicit flag.
-- [ ] Add synthesis tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Synthesize one conservative artifact path.
+- [x] Preserve source session and summary provenance.
+- [x] Write an editable target artifact.
+- [x] Avoid overwriting without an explicit flag.
+- [x] Add synthesis tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1:
-- T7.2:
-- T7.3:
-- T7.4:
-- T7.5:
-- T7.6:
-- T7.7:
+- T7.1: feat(slice-7): assisted artifact synthesis
+- T7.2: feat(slice-7): assisted artifact synthesis
+- T7.3: feat(slice-7): assisted artifact synthesis
+- T7.4: feat(slice-7): assisted artifact synthesis
+- T7.5: feat(slice-7): assisted artifact synthesis
+- T7.6: feat(slice-7): assisted artifact synthesis
+- T7.7: feat(slice-7): assisted artifact synthesis
 
 ## Slice 8: Assisted Authoring CLI
 
