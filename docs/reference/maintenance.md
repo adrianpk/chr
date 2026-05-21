@@ -168,3 +168,41 @@ Inspected artifacts:
 - `log`: runtime log;
 - `validation`: validation log;
 - `report`: execution report Markdown derived from the run directory.
+
+## Runtime Artifact Cleanup Preview
+
+Preview runtime artifact directories that are not referenced by current
+execution records:
+
+```sh
+chc maintenance execution cleanup-preview
+```
+
+Preview a specific project directory:
+
+```sh
+chc maintenance execution cleanup-preview --dir /path/to/project
+```
+
+Use an isolated development environment:
+
+```sh
+chc maintenance execution cleanup-preview --dev-root /tmp/chc-dev --dir /path/to/project
+```
+
+The command is read-only. It does not delete files or directories.
+
+Output fields:
+
+- `artifact_dir`: resolved runtime artifact directory for the project;
+- `referenced_run_dirs`: number of run directories referenced by execution
+  records;
+- `cleanup_candidates`: number of unreferenced leaf directories found under the
+  runtime artifact directory;
+- `mode`: always `preview`;
+- `candidate`: one unreferenced directory that a later cleanup command could
+  remove.
+
+Only leaf directories under the runtime artifact directory are reported as
+cleanup candidates. Parent grouping directories are left out of the preview so
+the output focuses on concrete run directories.
