@@ -25,7 +25,7 @@ Slice 2: Authoring Session Storage
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Authoring Session Model | Delivered | `feat/slice-1-authoring-session-model` | `feat(slice-1): authoring session model` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-1-authoring-session-model.md` | Repository PR #91. |
-| Slice 2: Authoring Session Storage | Planned | `feat/slice-2-authoring-session-storage` | `feat(slice-2): authoring session storage` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-2-authoring-session-storage.md` | Depends on Slice 1. |
+| Slice 2: Authoring Session Storage | Delivered | `feat/slice-2-authoring-session-storage` | `feat(slice-2): authoring session storage` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-2-authoring-session-storage.md` | Repository PR #92. |
 | Slice 3: Authoring Artifact Layout | Planned | `feat/slice-3-authoring-artifact-layout` | `feat(slice-3): authoring artifact layout` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-3-authoring-artifact-layout.md` | Depends on Slice 2. |
 | Slice 4: Static Quiz Generation | Planned | `feat/slice-4-static-quiz-generation` | `feat(slice-4): static quiz generation` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-4-static-quiz-generation.md` | Depends on Slice 3. |
 | Slice 5: Authoring Session CLI | Planned | `feat/slice-5-authoring-session-cli` | `feat(slice-5): authoring session cli` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-5-authoring-session-cli.md` | Depends on Slices 1-4. |
@@ -78,23 +78,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Define the session directory layout.
-- [ ] Render and parse `session.md`.
-- [ ] Record transcript and artifact index paths.
-- [ ] Preserve hand-edited Markdown where possible.
-- [ ] Add repository tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define the session directory layout.
+- [x] Render and parse `session.md`.
+- [x] Record transcript and artifact index paths.
+- [x] Preserve hand-edited Markdown where possible.
+- [x] Add repository tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1:
-- T2.2:
-- T2.3:
-- T2.4:
-- T2.5:
-- T2.6:
-- T2.7:
+- T2.1: feat(slice-2): authoring session storage
+- T2.2: feat(slice-2): authoring session storage
+- T2.3: feat(slice-2): authoring session storage
+- T2.4: feat(slice-2): authoring session storage
+- T2.5: feat(slice-2): authoring session storage
+- T2.6: feat(slice-2): authoring session storage
+- T2.7: feat(slice-2): authoring session storage
 
 ## Slice 3: Authoring Artifact Layout
 
