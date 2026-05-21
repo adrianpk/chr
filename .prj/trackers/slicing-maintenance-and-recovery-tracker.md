@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Database Migration Status | Delivered | `feat/slice-1-db-migration-status` | `feat(slice-1): db migration status` | `.prj/reports/slices/maintenance-and-recovery/slice-1-db-migration-status.md` | Repository PR #126 merged. |
-| Slice 2: Project Registry Diagnostics | Planned | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | Pending. |
+| Slice 2: Project Registry Diagnostics | Reviewing | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | PR pending. |
 | Slice 3: Project Registry Repair | Planned | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Pending. |
 | Slice 4: Execution Artifact Drift | Planned | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Pending. |
 | Slice 5: Runtime Artifact Cleanup Preview | Planned | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Pending. |
@@ -75,23 +75,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] List registry diagnostics for registered projects.
-- [ ] Include path existence, `.chc/` presence, enabled state, and active marker.
-- [ ] Keep diagnostics read-only.
-- [ ] Add focused tests.
-- [ ] Document registry diagnostics.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] List registry diagnostics for registered projects.
+- [x] Include path existence, `.chc/` presence, enabled state, and active marker.
+- [x] Keep diagnostics read-only.
+- [x] Add focused tests.
+- [x] Document registry diagnostics.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
+- T2.1: `199de9b`
+- T2.2: `199de9b`
+- T2.3: `199de9b`
+- T2.4: `199de9b`
+- T2.5: `462e04b`
+- T2.6: `docs(slice-2): record registry diagnostics`
+- T2.7: `make verify`
 
 ## Slice 3: Project Registry Repair
 
