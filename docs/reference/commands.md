@@ -110,6 +110,7 @@ Inspect local maintenance state:
 
 ```sh
 chc maintenance db status
+chc maintenance execution artifacts
 chc maintenance registry status
 chc maintenance registry disable example
 chc maintenance registry set-path example /path/to/project

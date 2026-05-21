@@ -83,8 +83,6 @@ Diagnostic statuses:
 - `missing_path`: the registered project path is missing or is not a directory;
 - `missing_workspace`: the path exists but does not contain `.chc/`.
 
-Registry repair commands belong to a later maintenance slice.
-
 ## Project Registry Repair
 
 Disable a registered project:
@@ -118,3 +116,55 @@ or initialize a workspace.
 
 Repair commands update only the project registry row. They do not mutate ticket
 files, runtime artifacts, execution records, or the active project selection.
+
+## Execution Artifact Drift
+
+Inspect execution records for missing runtime evidence:
+
+```sh
+chc maintenance execution artifacts
+```
+
+Inspect a specific project directory:
+
+```sh
+chc maintenance execution artifacts --dir /path/to/project
+```
+
+Use an isolated development environment:
+
+```sh
+chc maintenance execution artifacts --dev-root /tmp/chc-dev --dir /path/to/project
+```
+
+The command is read-only. It does not create, rewrite, delete, or repair
+runtime artifacts.
+
+Output starts with:
+
+- `executions`: number of execution records for the resolved project;
+- `drifted`: number of execution records with missing artifacts;
+- `missing_artifacts`: total missing artifact paths across all inspected
+  execution records.
+
+Each execution row includes:
+
+- `execution`: execution id;
+- `ticket`: ticket key;
+- `status`: execution status;
+- `artifact_status`: `ok` or `missing_artifacts`.
+
+Each artifact row includes:
+
+- `artifact`: execution id;
+- `name`: artifact name;
+- `exists`: whether the expected path exists with the expected file type;
+- `path`: expected artifact path.
+
+Inspected artifacts:
+
+- `run_dir`: execution run directory;
+- `result`: result JSON artifact;
+- `log`: runtime log;
+- `validation`: validation log;
+- `report`: execution report Markdown derived from the run directory.
