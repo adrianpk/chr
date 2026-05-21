@@ -1,11 +1,11 @@
 # Slice 6: Loop and Ticket Notifications
 
-Status: in review
+Status: delivered
 Slicing: Notification and Remote Commands
 Plan: `.prj/plans/slicing-notification-and-remote-commands-plan.md`
 Tracker: `.prj/trackers/slicing-notification-and-remote-commands-tracker.md`
 Branch: `feat/slice-6-loop-ticket-notifications`
-PR: pending
+PR: `#113`
 
 ## Purpose
 
