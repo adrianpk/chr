@@ -31,7 +31,7 @@ Slice 8: Assisted Authoring CLI
 | Slice 5: Adaptive Quiz Loop | Delivered | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Repository PR #103. |
 | Slice 6: Answer Curation | Delivered | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Repository PR #104. |
 | Slice 7: Assisted Artifact Synthesis | Delivered | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Repository PR #105. |
-| Slice 8: Assisted Authoring CLI | Planned | `feat/slice-8-assisted-authoring-cli` | `feat(slice-8): assisted authoring cli` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-8-assisted-authoring-cli.md` | Depends on Slices 1-7. |
+| Slice 8: Assisted Authoring CLI | Delivered | `feat/slice-8-assisted-authoring-cli` | `feat(slice-8): assisted authoring cli` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-8-assisted-authoring-cli.md` | Repository PR #106. |
 | Slice 9: Assisted Authoring Docs | Planned | `feat/slice-9-assisted-authoring-docs` | `feat(slice-9): assisted authoring docs` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-9-assisted-authoring-docs.md` | Final docs pass for the slicing. |
 
 ## Slice 1: Assisted Session Contract
@@ -272,25 +272,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add assisted session start.
-- [ ] Add answer submission.
-- [ ] Add resume/status display.
-- [ ] Add finalize command.
-- [ ] Include dry-run and fake-adapter test paths.
-- [ ] Add CLI tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add assisted session start.
+- [x] Add answer submission.
+- [x] Add resume/status display.
+- [x] Add finalize command.
+- [x] Include dry-run and fake-adapter test paths.
+- [x] Add CLI tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T8.1:
-- T8.2:
-- T8.3:
-- T8.4:
-- T8.5:
-- T8.6:
-- T8.7:
-- T8.8:
+- T8.1: feat(slice-8): assisted authoring cli
+- T8.2: feat(slice-8): assisted authoring cli
+- T8.3: feat(slice-8): assisted authoring cli
+- T8.4: feat(slice-8): assisted authoring cli
+- T8.5: feat(slice-8): assisted authoring cli
+- T8.6: feat(slice-8): assisted authoring cli
+- T8.7: feat(slice-8): assisted authoring cli
+- T8.8: feat(slice-8): assisted authoring cli
 
 ## Slice 9: Assisted Authoring Docs
 

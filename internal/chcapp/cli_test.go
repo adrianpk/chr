@@ -522,6 +522,62 @@ func TestAuthorPromoteQuizToDraftDryRunPrintsDraft(t *testing.T) {
 	}
 }
 
+func TestAuthorAssistedStartResumeAnswerStatusAndFinalize(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	sessionID := createAuthorAssistedSessionForTest(t, projectDir)
+	question := askAuthorAssistedQuestionForTest(t, projectDir, sessionID)
+
+	answerAuthorAssistedQuestionForTest(t, projectDir, sessionID, question)
+
+	var statusOut bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"assisted",
+		"status",
+		"--dir",
+		projectDir,
+		"--session",
+		sessionID,
+	}, &statusOut, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author assisted status returned error: %v", err)
+	}
+
+	for _, want := range []string{"assisted: status", "questions: 1", "answers: 1"} {
+		if !strings.Contains(statusOut.String(), want) {
+			t.Fatalf("status output missing %q:\n%s", want, statusOut.String())
+		}
+	}
+
+	var finalizeOut bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"author",
+		"assisted",
+		"finalize",
+		"--dir",
+		projectDir,
+		"--session",
+		sessionID,
+		"--fake-summary",
+		"Billing sync needs a durable spec.",
+		"--target-kind",
+		"spec",
+		"--target-name",
+		"billing sync spec",
+	}, &finalizeOut, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author assisted finalize returned error: %v", err)
+	}
+
+	for _, want := range []string{"assisted: finalized", "curated-summary.md", ".chc/specs/"} {
+		if !strings.Contains(finalizeOut.String(), want) {
+			t.Fatalf("finalize output missing %q:\n%s", want, finalizeOut.String())
+		}
+	}
+}
+
 func TestDaemonStartDryRunAllowsStaleRunningState(t *testing.T) {
 	devRoot := t.TempDir()
 	startedAt := time.Now().UTC().Add(-10 * time.Minute)
@@ -3095,6 +3151,153 @@ func createAuthorQuizForTest(t *testing.T, projectDir string) (string, string) {
 	}
 
 	return authorSessionIDFromOutput(t, stdout.String()), authorQuizPathFromOutput(t, stdout.String())
+}
+
+type authorAssistedQuestionOutput struct {
+	TurnID     string
+	TurnIndex  int
+	QuestionID string
+	Question   string
+}
+
+func createAuthorAssistedSessionForTest(t *testing.T, projectDir string) string {
+	t.Helper()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"assisted",
+		"start",
+		"--dir",
+		projectDir,
+		"--target",
+		"spec",
+		"--topic",
+		"Billing sync",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author assisted start returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "assisted: started") {
+		t.Fatalf("start output missing assisted marker:\n%s", stdout.String())
+	}
+
+	return authorSessionIDFromOutput(t, stdout.String())
+}
+
+func askAuthorAssistedQuestionForTest(
+	t *testing.T,
+	projectDir string,
+	sessionID string,
+) authorAssistedQuestionOutput {
+	t.Helper()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"assisted",
+		"resume",
+		"--dir",
+		projectDir,
+		"--session",
+		sessionID,
+		"--fake-question",
+		"What should the billing sync spec include?",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author assisted resume returned error: %v", err)
+	}
+
+	return authorAssistedQuestionFromOutput(t, stdout.String())
+}
+
+func answerAuthorAssistedQuestionForTest(
+	t *testing.T,
+	projectDir string,
+	sessionID string,
+	question authorAssistedQuestionOutput,
+) {
+	t.Helper()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"assisted",
+		"answer",
+		"--dir",
+		projectDir,
+		"--session",
+		sessionID,
+		"--turn",
+		question.TurnID,
+		"--turn-index",
+		fmt.Sprintf("%d", question.TurnIndex),
+		"--question-id",
+		question.QuestionID,
+		"--question",
+		question.Question,
+		"--answer",
+		"It should include retry behavior.",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author assisted answer returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "assisted: answer") {
+		t.Fatalf("answer output missing assisted marker:\n%s", stdout.String())
+	}
+}
+
+func authorAssistedQuestionFromOutput(t *testing.T, output string) authorAssistedQuestionOutput {
+	t.Helper()
+
+	fields := authorOutputFields(output)
+
+	turnIndex, err := parseAuthorOutputInt(fields["turn_index"])
+	if err != nil {
+		t.Fatalf("parse turn_index %q: %v", fields["turn_index"], err)
+	}
+
+	parsed := authorAssistedQuestionOutput{
+		TurnID:     fields["turn"],
+		TurnIndex:  turnIndex,
+		QuestionID: fields["question_id"],
+		Question:   fields["question"],
+	}
+
+	if parsed.TurnID == "" || parsed.TurnIndex == 0 || parsed.QuestionID == "" || parsed.Question == "" {
+		t.Fatalf("invalid assisted question output:\n%s", output)
+	}
+
+	return parsed
+}
+
+func authorOutputFields(output string) map[string]string {
+	fields := map[string]string{}
+
+	for _, line := range strings.Split(output, "\n") {
+		key, value, ok := strings.Cut(line, ": ")
+		if ok {
+			fields[key] = value
+		}
+	}
+
+	return fields
+}
+
+func parseAuthorOutputInt(value string) (int, error) {
+	var parsed int
+
+	_, err := fmt.Sscanf(value, "%d", &parsed)
+	if err != nil {
+		return 0, err
+	}
+
+	return parsed, nil
 }
 
 func authorQuizPathFromOutput(t *testing.T, output string) string {
