@@ -56,6 +56,33 @@ chc report list --status succeeded
 
 Filters can be combined. All provided filters must match.
 
+## Show One Report
+
+Show a report body by report id or lookup filter:
+
+```sh
+chc report show .chc/runtime/runs/CHC-1/exec-1/execution-report.md
+chc report show --execution exec-1
+chc report show --loop loop-1
+chc report show --ticket CHC-1 --kind execution
+```
+
+The report id can be a project-relative report path, an absolute report path,
+a ticket key, an execution id, or a loop id.
+
+Lookup must resolve to exactly one report. If no report matches, the command
+fails. If multiple reports match, the command fails with an ambiguity error.
+Use narrower filters such as `--kind`, `--execution`, or `--loop` to select a
+single report.
+
+To print metadata instead of the Markdown body:
+
+```sh
+chc report show --execution exec-1 --metadata
+```
+
+Metadata output uses the same stable line format as `chc report list`.
+
 ## Discovery Boundary
 
 Report listing discovers Markdown report artifacts under:
@@ -72,4 +99,5 @@ Current discovered report filenames:
 The listing command reads only lightweight report metadata from Markdown list
 fields. It does not inspect runtime logs or validation output.
 
-Direct report lookup and body rendering belong to `chc report show`.
+Direct report lookup reads the selected Markdown report artifact and prints it
+without rewriting it.

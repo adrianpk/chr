@@ -130,7 +130,4 @@ The writer derives the report path from the execution record run directory. It
 creates the target directory when needed. If the target path already exists and
 does not look like an execution report, the writer refuses to overwrite it.
 
-Report listing, lookup, loop reports, and review handoff summaries belong to
-later `Reporting and Evidence` slices.
-
-Report listing is documented in `docs/reference/reports.md`.
+Report listing and lookup are documented in `docs/reference/reports.md`.
