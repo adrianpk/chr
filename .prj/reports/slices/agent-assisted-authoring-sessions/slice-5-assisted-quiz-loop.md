@@ -5,7 +5,7 @@ Slicing: Agent-Assisted Authoring Sessions
 Plan: `.prj/plans/slicing-agent-assisted-authoring-sessions-plan.md`
 Tracker: `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 Branch: `feat/slice-5-assisted-quiz-loop`
-PR: pending
+PR: #103
 
 ## Purpose
 

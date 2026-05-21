@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 5: Adaptive Quiz Loop
+Slice 6: Answer Curation
 
 ## Slice Status
 
@@ -28,7 +28,7 @@ Slice 5: Adaptive Quiz Loop
 | Slice 2: Transcript Event Storage | Delivered | `feat/slice-2-assisted-transcript-storage` | `feat(slice-2): assisted transcript storage` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-2-assisted-transcript-storage.md` | Repository PR #100. |
 | Slice 3: Authoring Context Package | Delivered | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Repository PR #101. |
 | Slice 4: Model Invocation Adapter | Delivered | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Repository PR #102. |
-| Slice 5: Adaptive Quiz Loop | Delivered | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Repository PR pending. |
+| Slice 5: Adaptive Quiz Loop | Delivered | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Repository PR #103. |
 | Slice 6: Answer Curation | Planned | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Depends on Slice 5. |
 | Slice 7: Assisted Artifact Synthesis | Planned | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Depends on Slice 6. |
 | Slice 8: Assisted Authoring CLI | Planned | `feat/slice-8-assisted-authoring-cli` | `feat(slice-8): assisted authoring cli` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-8-assisted-authoring-cli.md` | Depends on Slices 1-7. |
