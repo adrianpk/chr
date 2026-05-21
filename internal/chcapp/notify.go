@@ -4,11 +4,16 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chc/internal/chc"
 )
+
+var notifyTelegramSender = chc.NewTelegramSender(http.DefaultClient)
 
 func newNotifyCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
@@ -78,7 +83,7 @@ func runNotifyStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return fmt.Errorf("notify status does not accept positional arguments")
 	}
 
-	projectContext, config, err := loadNotifyProjectConfig(ctx, cmd)
+	_, projectContext, config, err := loadNotifyProjectConfig(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -91,11 +96,7 @@ func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return fmt.Errorf("notify telegram test does not accept positional arguments")
 	}
 
-	if !cmd.Bool("dry-run") {
-		return fmt.Errorf("notify telegram test requires --dry-run until Telegram dispatch is implemented")
-	}
-
-	projectContext, config, err := loadNotifyProjectConfig(ctx, cmd)
+	env, projectContext, config, err := loadNotifyProjectConfig(ctx, cmd)
 	if err != nil {
 		return err
 	}
@@ -105,16 +106,20 @@ func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return err
 	}
 
+	if !cmd.Bool("dry-run") {
+		return runNotifyTelegramTestDispatch(ctx, stdout, env, projectContext, config.Notifications.Telegram)
+	}
+
 	return printNotifyTelegramTestPlan(stdout, projectContext, config.Notifications.Telegram)
 }
 
 func loadNotifyProjectConfig(
 	ctx context.Context,
 	cmd *cli.Command,
-) (commandProjectContext, chc.WorkspaceConfig, error) {
+) (chc.UserEnvironment, commandProjectContext, chc.WorkspaceConfig, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
-		return commandProjectContext{}, chc.WorkspaceConfig{}, err
+		return nil, commandProjectContext{}, chc.WorkspaceConfig{}, err
 	}
 
 	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
@@ -123,15 +128,15 @@ func loadNotifyProjectConfig(
 		AllowCurrentDirectory: true,
 	})
 	if err != nil {
-		return commandProjectContext{}, chc.WorkspaceConfig{}, err
+		return nil, commandProjectContext{}, chc.WorkspaceConfig{}, err
 	}
 
 	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
-		return commandProjectContext{}, chc.WorkspaceConfig{}, err
+		return nil, commandProjectContext{}, chc.WorkspaceConfig{}, err
 	}
 
-	return projectContext, config, nil
+	return env, projectContext, config, nil
 }
 
 func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, config chc.WorkspaceConfig) error {
@@ -175,6 +180,100 @@ func printNotifyTelegramTestPlan(
 		"bot_token_env: " + telegram.BotTokenEnv,
 		"chat_id: " + telegram.ChatID,
 		"message: ChrysoCoord Telegram notification test for " + projectContext.ProjectID,
+	})
+}
+
+func runNotifyTelegramTestDispatch(
+	ctx context.Context,
+	stdout io.Writer,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+	telegram chc.TelegramNotificationConfig,
+) error {
+	now := time.Now().UTC()
+	event := notifyTelegramTestEvent(projectContext, now)
+	record := chc.NotificationAuditRecord{
+		Event:   event,
+		Channel: "telegram",
+	}
+
+	repository, err := chc.NewNotificationEventRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	err = repository.CreateNotificationEvent(ctx, record)
+	if err != nil {
+		return err
+	}
+
+	message := chc.RenderTelegramNotificationMessage(event)
+	message.ChatID = telegram.ChatID
+
+	token := os.Getenv(telegram.BotTokenEnv)
+	result, sendErr := notifyTelegramSender.SendMessage(ctx, token, message)
+	finishedAt := time.Now().UTC()
+
+	if sendErr != nil {
+		record.Event.Status = chc.NotificationStatusFailed
+		record.Event.FailureReason = sendErr.Error()
+		record.Event.UpdatedAt = finishedAt
+
+		updateErr := repository.UpdateNotificationEvent(ctx, record)
+		if updateErr != nil {
+			return updateErr
+		}
+
+		return sendErr
+	}
+
+	record.Event.Status = chc.NotificationStatusDelivered
+	record.Event.DeliveredAt = &finishedAt
+	record.Event.UpdatedAt = finishedAt
+
+	err = repository.UpdateNotificationEvent(ctx, record)
+	if err != nil {
+		return err
+	}
+
+	return printNotifyTelegramTestSent(stdout, projectContext, record, result)
+}
+
+func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time) chc.NotificationEvent {
+	return chc.NotificationEvent{
+		ID:        fmt.Sprintf("telegram-test-%d", now.UnixNano()),
+		ProjectID: projectContext.ProjectID,
+		Type:      chc.NotificationEventManualTest,
+		Severity:  chc.NotificationSeverityInfo,
+		Status:    chc.NotificationStatusPending,
+		Source:    chc.NotificationSourceManual,
+		Payload: chc.NotificationPayload{
+			Summary: "ChrysoCoord Telegram notification test for " + projectContext.ProjectID,
+			Detail:  "Project directory: " + projectContext.ProjectDir,
+		},
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+}
+
+func printNotifyTelegramTestSent(
+	stdout io.Writer,
+	projectContext commandProjectContext,
+	record chc.NotificationAuditRecord,
+	result chc.TelegramSendResult,
+) error {
+	return printNotifyLines(stdout, []string{
+		"telegram_test: sent",
+		"dry_run: false",
+		"project_id: " + projectContext.ProjectID,
+		"project_dir: " + projectContext.ProjectDir,
+		"notification_id: " + record.Event.ID,
+		fmt.Sprintf("status_code: %d", result.StatusCode),
 	})
 }
 

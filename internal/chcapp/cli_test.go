@@ -3,9 +3,12 @@ package chcapp
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -1236,8 +1239,117 @@ func TestNotifyTelegramTestRequiresDryRun(t *testing.T) {
 		t.Fatal("notify telegram test returned nil error")
 	}
 
-	if err.Error() != "notify telegram test requires --dry-run until Telegram dispatch is implemented" {
+	if err.Error() != "telegram bot token is required" {
 		t.Fatalf("notify telegram test error = %v", err)
+	}
+}
+
+func TestNotifyTelegramTestSendsAndRecordsAudit(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	t.Setenv("CHC_TELEGRAM_BOT_TOKEN", "token-1")
+
+	writeTelegramNotifyConfig(t, projectDir)
+
+	gotPayload := installTestTelegramSender(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"notify",
+		"telegram",
+		"test",
+		"--dir",
+		projectDir,
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("notify telegram test returned error: %v", err)
+	}
+
+	assertTelegramNotifyOutput(t, stdout.String())
+	assertTelegramPayload(t, gotPayload)
+
+	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
+	if len(records) != 1 {
+		t.Fatalf("len(records) = %d, want 1", len(records))
+	}
+
+	if records[0].Event.Status != chc.NotificationStatusDelivered {
+		t.Fatalf("notification status = %q, want delivered", records[0].Event.Status)
+	}
+}
+
+type testTelegramPayload struct {
+	ChatID string `json:"chat_id"`
+	Text   string `json:"text"`
+}
+
+func writeTelegramNotifyConfig(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeCLIWorkspaceConfig(t, projectDir, `notifications:
+  telegram_enabled: true
+  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_chat_id: "123456"
+`)
+}
+
+func installTestTelegramSender(t *testing.T) *testTelegramPayload {
+	t.Helper()
+
+	gotPayload := &testTelegramPayload{}
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		err := json.NewDecoder(request.Body).Decode(gotPayload)
+		if err != nil {
+			t.Fatalf("decode telegram payload: %v", err)
+		}
+
+		_, err = writer.Write([]byte(`{"ok":true}`))
+		if err != nil {
+			t.Fatalf("write telegram response: %v", err)
+		}
+	}))
+	t.Cleanup(server.Close)
+
+	previousSender := notifyTelegramSender
+	notifyTelegramSender = chc.TelegramSender{
+		Client:  server.Client(),
+		BaseURL: server.URL,
+	}
+
+	t.Cleanup(func() {
+		notifyTelegramSender = previousSender
+	})
+
+	return gotPayload
+}
+
+func assertTelegramNotifyOutput(t *testing.T, output string) {
+	t.Helper()
+
+	for _, want := range []string{
+		"telegram_test: sent",
+		"dry_run: false",
+		"notification_id: telegram-test-",
+		"status_code: 200",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, output)
+		}
+	}
+}
+
+func assertTelegramPayload(t *testing.T, gotPayload *testTelegramPayload) {
+	t.Helper()
+
+	if gotPayload.ChatID != "123456" {
+		t.Fatalf("telegram chat_id = %q, want 123456", gotPayload.ChatID)
+	}
+
+	if !strings.Contains(gotPayload.Text, "ChrysoCoord Telegram notification test") {
+		t.Fatalf("telegram text = %q, want test message", gotPayload.Text)
 	}
 }
 
@@ -3470,6 +3582,41 @@ func writeRuntimeTemplate(t *testing.T, projectDir string) {
 	if err != nil {
 		t.Fatalf("create runtime runs directory: %v", err)
 	}
+}
+
+func listNotificationEventsForTest(
+	t *testing.T,
+	devRoot string,
+	projectID string,
+) []chc.NotificationAuditRecord {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	repository, err := chc.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
+	if err != nil {
+		t.Fatalf("NewNotificationEventRepository returned error: %v", err)
+	}
+
+	t.Cleanup(func() {
+		err := repository.Close()
+		if err != nil {
+			t.Fatalf("close notification repository: %v", err)
+		}
+	})
+
+	records, err := repository.ListProjectNotificationEvents(t.Context(), projectID)
+	if err != nil {
+		t.Fatalf("ListProjectNotificationEvents returned error: %v", err)
+	}
+
+	return records
 }
 
 func chcTestUserEnvironment(t *testing.T) (chc.UserEnvironment, error) {
