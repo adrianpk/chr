@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 2: Authoring Session Storage
+Slice 3: Authoring Artifact Layout
 
 ## Slice Status
 
