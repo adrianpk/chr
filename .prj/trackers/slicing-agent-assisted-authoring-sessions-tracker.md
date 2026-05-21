@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 6: Answer Curation
+Slice 7: Assisted Artifact Synthesis
 
 ## Slice Status
 
