@@ -1,6 +1,6 @@
 # Reporting and Evidence Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-reporting-and-evidence-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -13,8 +13,8 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 5: Report Listing | Delivered | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Repository PR #122 merged. |
 | Slice 6: Report Lookup | Delivered | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Repository PR #123 merged. |
 | Slice 7: Review Handoff Summary | Delivered | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | Repository PR #124 merged. |
-| Slice 8: Reporting Documentation | Reviewing | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | Repository PR #125 open. |
+| Slice 8: Reporting Documentation | Delivered | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | Repository PR #125 merged. |
 
 ## Slice 1: Execution Report Format
 
@@ -291,6 +291,12 @@ Task commits:
 - Slice 5 focused core tests: `go test ./internal/chc -run 'TestReportLister'` pass.
 - Slice 5 focused CLI tests: `go test ./internal/chcapp -run 'TestReportList'` pass.
 - Slice 5 full validation: `make verify` pass.
+- Slice 6 focused tests: `go test ./internal/chc -run 'TestReportLookup|TestReportLister'` pass.
+- Slice 6 focused CLI tests: `go test ./internal/chcapp -run 'TestReportShow|TestReportList'` pass.
+- Slice 6 full validation: `make verify` pass.
+- Slice 7 focused tests: `go test ./internal/chc -run 'TestReviewHandoffSummary|TestNewExecutionReport|TestRenderExecutionReport'` pass.
+- Slice 7 full validation: `make verify` pass.
+- Slice 8 full validation: `make verify` pass.
 
 ## Notes
 

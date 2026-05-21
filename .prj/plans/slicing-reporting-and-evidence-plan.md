@@ -1,6 +1,6 @@
 # Reporting and Evidence Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -107,7 +107,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Execution Report Format
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-execution-report-format`
 Expected PR title: `feat(slice-1): execution report format`
@@ -135,7 +135,7 @@ Expected outcome:
 
 ### Slice 2: Execution Report Artifact Writer
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-execution-report-writer`
 Expected PR title: `feat(slice-2): execution report writer`
@@ -161,7 +161,7 @@ Expected outcome:
 
 ### Slice 3: Validation and Changed-File Summaries
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-evidence-summaries`
 Expected PR title: `feat(slice-3): evidence summaries`
@@ -184,7 +184,7 @@ Expected outcome:
 
 ### Slice 4: Loop Report Format
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-loop-report-format`
 Expected PR title: `feat(slice-4): loop report format`
@@ -209,7 +209,7 @@ Expected outcome:
 
 ### Slice 5: Report Listing
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-report-listing`
 Expected PR title: `feat(slice-5): report listing`
@@ -233,7 +233,7 @@ Expected outcome:
 
 ### Slice 6: Report Lookup
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-report-lookup`
 Expected PR title: `feat(slice-6): report lookup`
@@ -257,7 +257,7 @@ Expected outcome:
 
 ### Slice 7: Review Handoff Summary
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-review-handoff-summary`
 Expected PR title: `feat(slice-7): review handoff summary`
@@ -282,7 +282,7 @@ Expected outcome:
 
 ### Slice 8: Reporting Documentation
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-8-reporting-docs`
 Expected PR title: `feat(slice-8): reporting docs`
