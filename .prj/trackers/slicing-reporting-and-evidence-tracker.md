@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 5: Report Listing | Delivered | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Repository PR #122 merged. |
 | Slice 6: Report Lookup | Delivered | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Repository PR #123 merged. |
 | Slice 7: Review Handoff Summary | Delivered | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | Repository PR #124 merged. |
-| Slice 8: Reporting Documentation | Planned | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | Pending. |
+| Slice 8: Reporting Documentation | Reviewing | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | PR pending. |
 
 ## Slice 1: Execution Report Format
 
@@ -263,19 +263,19 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add reference docs for report formats and commands.
-- [ ] Add how-to documentation for finding execution and loop evidence.
-- [ ] Update related ticket execution and loop docs.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add reference docs for report formats and commands.
+- [x] Add how-to documentation for finding execution and loop evidence.
+- [x] Update related ticket execution and loop docs.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T8.1: pending
-- T8.2: pending
-- T8.3: pending
-- T8.4: pending
-- T8.5: pending
+- T8.1: `335370e`
+- T8.2: `335370e`
+- T8.3: `335370e`
+- T8.4: `docs(slice-8): record reporting docs`
+- T8.5: `make verify`
 
 ## Validation Record
 
