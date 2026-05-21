@@ -79,6 +79,7 @@ func inspectExecutionArtifacts(record ExecutionRecord) (ExecutionArtifactDriftDi
 	for _, artifact := range artifacts {
 		if !artifact.Exists {
 			status = ExecutionArtifactDriftStatusMissing
+
 			break
 		}
 	}
