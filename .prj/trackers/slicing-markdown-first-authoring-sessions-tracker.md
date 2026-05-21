@@ -29,7 +29,7 @@ Slice 6: Manual Promotion and Provenance
 | Slice 3: Authoring Artifact Layout | Delivered | `feat/slice-3-authoring-artifact-layout` | `feat(slice-3): authoring artifact layout` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-3-authoring-artifact-layout.md` | Repository PR #93. |
 | Slice 4: Static Quiz Generation | Delivered | `feat/slice-4-static-quiz-generation` | `feat(slice-4): static quiz generation` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-4-static-quiz-generation.md` | Repository PR #94. |
 | Slice 5: Authoring Session CLI | Delivered | `feat/slice-5-authoring-session-cli` | `feat(slice-5): authoring session cli` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-5-authoring-session-cli.md` | Repository PR #95. |
-| Slice 6: Manual Promotion and Provenance | Planned | `feat/slice-6-manual-promotion-provenance` | `feat(slice-6): manual promotion provenance` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-6-manual-promotion-provenance.md` | Depends on Slice 5. |
+| Slice 6: Manual Promotion and Provenance | Delivered | `feat/slice-6-manual-promotion-provenance` | `feat(slice-6): manual promotion provenance` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-6-manual-promotion-provenance.md` | Repository PR #96. |
 | Slice 7: Authoring Docs Reference | Planned | `feat/slice-7-authoring-docs-reference` | `feat(slice-7): authoring docs reference` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-7-authoring-docs-reference.md` | Final docs pass for the slicing. |
 
 ## Slice 1: Authoring Session Model
@@ -208,23 +208,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Support one conservative promotion path.
-- [ ] Record source session and input artifact paths.
-- [ ] Generate an editable target artifact.
-- [ ] Avoid overwriting existing artifacts without an explicit flag.
-- [ ] Add promotion tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Support one conservative promotion path.
+- [x] Record source session and input artifact paths.
+- [x] Generate an editable target artifact.
+- [x] Avoid overwriting existing artifacts without an explicit flag.
+- [x] Add promotion tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1:
-- T6.2:
-- T6.3:
-- T6.4:
-- T6.5:
-- T6.6:
-- T6.7:
+- T6.1: feat(slice-6): manual promotion provenance
+- T6.2: feat(slice-6): manual promotion provenance
+- T6.3: feat(slice-6): manual promotion provenance
+- T6.4: feat(slice-6): manual promotion provenance
+- T6.5: feat(slice-6): manual promotion provenance
+- T6.6: feat(slice-6): manual promotion provenance
+- T6.7: feat(slice-6): manual promotion provenance
 
 ## Slice 7: Authoring Docs Reference
 

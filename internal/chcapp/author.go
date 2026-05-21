@@ -17,8 +17,19 @@ func newAuthorCommand(stdout io.Writer) *cli.Command {
 		Name:  "author",
 		Usage: "Manage Markdown-first authoring sessions",
 		Commands: []*cli.Command{
+			newAuthorPromoteCommand(stdout),
 			newAuthorQuizCommand(stdout),
 			newAuthorSessionCommand(stdout),
+		},
+	}
+}
+
+func newAuthorPromoteCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "promote",
+		Usage: "Promote authoring artifacts",
+		Commands: []*cli.Command{
+			newAuthorPromoteQuizToDraftCommand(stdout),
 		},
 	}
 }
@@ -81,6 +92,15 @@ func newAuthorQuizNewCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+func newAuthorPromoteQuizToDraftCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "quiz-to-draft",
+		Usage:  "Promote a quiz artifact into an editable draft",
+		Flags:  authorPromoteQuizToDraftFlags(),
+		Action: authorPromoteQuizToDraftAction(stdout),
+	}
+}
+
 func authorProjectFlags() []cli.Flag {
 	return append(projectRegistryFlags(),
 		&cli.StringFlag{
@@ -140,6 +160,27 @@ func authorQuizNewFlags() []cli.Flag {
 	)
 }
 
+func authorPromoteQuizToDraftFlags() []cli.Flag {
+	return append(authorProjectFlags(),
+		&cli.StringFlag{
+			Name:  "session",
+			Usage: "authoring session id",
+		},
+		&cli.StringFlag{
+			Name:  "quiz",
+			Usage: "quiz artifact path",
+		},
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the planned draft without writing files",
+		},
+		&cli.BoolFlag{
+			Name:  "allow-replace",
+			Usage: "allow replacing an existing draft artifact",
+		},
+	)
+}
+
 func authorSessionNewAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runAuthorSessionNew(ctx, cmd, stdout)
@@ -161,6 +202,12 @@ func authorSessionShowAction(stdout io.Writer) cli.ActionFunc {
 func authorQuizNewAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runAuthorQuizNew(ctx, cmd, stdout)
+	}
+}
+
+func authorPromoteQuizToDraftAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runAuthorPromoteQuizToDraft(ctx, cmd, stdout)
 	}
 }
 
@@ -279,6 +326,62 @@ func runAuthorQuizNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 	}
 
 	return printAuthorQuizPlan(stdout, plan, false)
+}
+
+func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("author promote quiz-to-draft does not accept positional arguments")
+	}
+
+	projectContext, err := authorProjectContext(ctx, cmd)
+	if err != nil {
+		return err
+	}
+
+	sessionID := strings.TrimSpace(cmd.String("session"))
+	if sessionID == "" {
+		return fmt.Errorf("authoring session id is required")
+	}
+
+	quizPath := strings.TrimSpace(cmd.String("quiz"))
+	if quizPath == "" {
+		return fmt.Errorf("quiz path is required")
+	}
+
+	repository := chc.NewAuthoringSessionRepository(projectContext.ProjectDir)
+
+	session, err := repository.GetSession(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+
+	plan, err := chc.PlanQuizToDraftPromotion(chc.QuizToDraftPromotionOptions{
+		ProjectDir:   projectContext.ProjectDir,
+		Session:      session,
+		QuizPath:     quizPath,
+		Now:          time.Now().UTC(),
+		AllowReplace: cmd.Bool("allow-replace"),
+		DryRun:       cmd.Bool("dry-run"),
+	})
+	if err != nil {
+		return err
+	}
+
+	if cmd.Bool("dry-run") {
+		return printAuthorPromotionPlan(stdout, plan, true)
+	}
+
+	err = chc.WriteQuizToDraftPromotion(plan)
+	if err != nil {
+		return err
+	}
+
+	_, err = repository.UpdateSession(ctx, plan.Session)
+	if err != nil {
+		return err
+	}
+
+	return printAuthorPromotionPlan(stdout, plan, false)
 }
 
 func authorProjectContext(ctx context.Context, cmd *cli.Command) (commandProjectContext, error) {
@@ -408,6 +511,30 @@ func printAuthorQuizPlan(stdout io.Writer, plan chc.StaticQuizGenerationPlan, dr
 		_, err = fmt.Fprintln(stdout, plan.Content)
 		if err != nil {
 			return fmt.Errorf("write author quiz content: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func printAuthorPromotionPlan(stdout io.Writer, plan chc.QuizToDraftPromotionPlan, dryRun bool) error {
+	lines := []string{
+		"promotion: quiz-to-draft",
+		fmt.Sprintf("dry_run: %t", dryRun),
+		"session: " + plan.Session.ID,
+		"source: " + plan.Source.Path,
+		"path: " + plan.Layout.FullPath,
+	}
+
+	err := writeAuthorLines(stdout, lines)
+	if err != nil {
+		return err
+	}
+
+	if dryRun {
+		_, err = fmt.Fprintln(stdout, plan.Content)
+		if err != nil {
+			return fmt.Errorf("write author promotion content: %w", err)
 		}
 	}
 

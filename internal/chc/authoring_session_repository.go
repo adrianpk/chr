@@ -17,6 +17,7 @@ var ErrAuthoringSessionNotFound = errors.New("authoring session not found")
 
 type AuthoringSessionRepository interface {
 	CreateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error)
+	UpdateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error)
 	GetSession(ctx context.Context, id string) (AuthoringSession, error)
 	ListSessions(ctx context.Context) ([]AuthoringSession, error)
 }
@@ -86,6 +87,44 @@ func (r *fileAuthoringSessionRepository) CreateSession(
 	err = writeNewAuthoringFile(paths.ArtifactsPath, "# Artifacts\n\n")
 	if err != nil {
 		return AuthoringSessionPaths{}, err
+	}
+
+	return paths, nil
+}
+
+func (r *fileAuthoringSessionRepository) UpdateSession(
+	ctx context.Context,
+	session AuthoringSession,
+) (AuthoringSessionPaths, error) {
+	err := ctx.Err()
+	if err != nil {
+		return AuthoringSessionPaths{}, err
+	}
+
+	err = ValidateAuthoringSession(session)
+	if err != nil {
+		return AuthoringSessionPaths{}, err
+	}
+
+	paths := AuthoringSessionLayout(r.projectDir, session.ID)
+
+	_, err = os.Stat(paths.SessionPath)
+	if errors.Is(err, os.ErrNotExist) {
+		return AuthoringSessionPaths{}, fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, session.ID)
+	}
+
+	if err != nil {
+		return AuthoringSessionPaths{}, fmt.Errorf("stat authoring session: %w", err)
+	}
+
+	content, err := RenderAuthoringSession(session, paths)
+	if err != nil {
+		return AuthoringSessionPaths{}, err
+	}
+
+	err = os.WriteFile(paths.SessionPath, []byte(content), 0o644)
+	if err != nil {
+		return AuthoringSessionPaths{}, fmt.Errorf("update authoring session: %w", err)
 	}
 
 	return paths, nil

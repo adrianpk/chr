@@ -436,6 +436,92 @@ func TestAuthorQuizNewWritesSessionAndQuiz(t *testing.T) {
 	}
 }
 
+func TestAuthorPromoteQuizToDraftWritesDraftAndUpdatesSession(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	sessionID, quizPath := createAuthorQuizForTest(t, projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"promote",
+		"quiz-to-draft",
+		"--dir",
+		projectDir,
+		"--session",
+		sessionID,
+		"--quiz",
+		quizPath,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author promote quiz-to-draft returned error: %v", err)
+	}
+
+	draftPath := filepath.Join(projectDir, ".chc", "drafts", sessionID+"-billing-sync.md")
+
+	_, err = os.Stat(draftPath)
+	if err != nil {
+		t.Fatalf("expected draft path %s: %v", draftPath, err)
+	}
+
+	var showOut bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"author",
+		"session",
+		"show",
+		"--dir",
+		projectDir,
+		sessionID,
+	}, &showOut, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author session show returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"outputs: 2",
+		"provenance: 2",
+	} {
+		if !strings.Contains(showOut.String(), want) {
+			t.Fatalf("show output does not contain %q:\n%s", want, showOut.String())
+		}
+	}
+}
+
+func TestAuthorPromoteQuizToDraftDryRunPrintsDraft(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	sessionID, quizPath := createAuthorQuizForTest(t, projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"promote",
+		"quiz-to-draft",
+		"--dir",
+		projectDir,
+		"--session",
+		sessionID,
+		"--quiz",
+		quizPath,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author promote quiz-to-draft dry-run returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"promotion: quiz-to-draft",
+		"dry_run: true",
+		"# Draft",
+		"## Curated Answers",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func TestDaemonStartDryRunAllowsStaleRunningState(t *testing.T) {
 	devRoot := t.TempDir()
 	startedAt := time.Now().UTC().Add(-10 * time.Minute)
@@ -2984,6 +3070,50 @@ func authorSessionIDFromOutput(t *testing.T, output string) string {
 	}
 
 	t.Fatalf("output does not contain session id:\n%s", output)
+
+	return ""
+}
+
+func createAuthorQuizForTest(t *testing.T, projectDir string) (string, string) {
+	t.Helper()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"quiz",
+		"new",
+		"--dir",
+		projectDir,
+		"--target",
+		"spec",
+		"--topic",
+		"Billing sync",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author quiz new returned error: %v", err)
+	}
+
+	return authorSessionIDFromOutput(t, stdout.String()), authorQuizPathFromOutput(t, stdout.String())
+}
+
+func authorQuizPathFromOutput(t *testing.T, output string) string {
+	t.Helper()
+
+	var path string
+
+	for _, line := range strings.Split(output, "\n") {
+		value, ok := strings.CutPrefix(line, "path: ")
+		if ok && strings.Contains(value, ".chc/quizzes/") {
+			path = value
+		}
+	}
+
+	if path != "" {
+		return path
+	}
+
+	t.Fatalf("output does not contain quiz path:\n%s", output)
 
 	return ""
 }

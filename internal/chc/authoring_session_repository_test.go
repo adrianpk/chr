@@ -51,6 +51,34 @@ func TestAuthoringSessionRepositoryLoadsCreatedSession(t *testing.T) {
 	assertAuthoringSessionRoundTrip(t, loaded, session)
 }
 
+func TestAuthoringSessionRepositoryUpdatesSession(t *testing.T) {
+	ctx := context.Background()
+	projectDir := t.TempDir()
+	repository := NewAuthoringSessionRepository(projectDir)
+	session := validAuthoringSession()
+
+	_, err := repository.CreateSession(ctx, session)
+	if err != nil {
+		t.Fatalf("CreateSession returned error: %v", err)
+	}
+
+	session.Topic = "Updated authoring topic"
+
+	_, err = repository.UpdateSession(ctx, session)
+	if err != nil {
+		t.Fatalf("UpdateSession returned error: %v", err)
+	}
+
+	loaded, err := repository.GetSession(ctx, session.ID)
+	if err != nil {
+		t.Fatalf("GetSession returned error: %v", err)
+	}
+
+	if loaded.Topic != session.Topic {
+		t.Fatalf("Topic = %q, want %q", loaded.Topic, session.Topic)
+	}
+}
+
 func TestAuthoringSessionRepositoryListsSessions(t *testing.T) {
 	ctx := context.Background()
 	projectDir := t.TempDir()
@@ -105,6 +133,18 @@ func TestAuthoringSessionRepositoryReportsMissingSession(t *testing.T) {
 	_, err := repository.GetSession(ctx, "missing")
 	if !errors.Is(err, ErrAuthoringSessionNotFound) {
 		t.Fatalf("GetSession error = %v, want ErrAuthoringSessionNotFound", err)
+	}
+}
+
+func TestAuthoringSessionRepositoryReportsMissingSessionOnUpdate(t *testing.T) {
+	ctx := context.Background()
+	projectDir := t.TempDir()
+	repository := NewAuthoringSessionRepository(projectDir)
+	session := validAuthoringSession()
+
+	_, err := repository.UpdateSession(ctx, session)
+	if !errors.Is(err, ErrAuthoringSessionNotFound) {
+		t.Fatalf("UpdateSession error = %v, want ErrAuthoringSessionNotFound", err)
 	}
 }
 
