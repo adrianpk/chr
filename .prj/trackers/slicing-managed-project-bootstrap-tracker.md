@@ -8,8 +8,8 @@ Status: active
 - [x] Review existing delivered plans and implementation state.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Decide whether the pending bootstrap safety pass should become an implementation slice.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Decide whether the pending bootstrap safety pass should become an implementation slice.
 
 ## Slice Status
 
@@ -20,22 +20,23 @@ Status: active
 | Asset Profiles | Delivered | Embedded `standard`, `personal`, and `minimal` profiles exist. |
 | Root Agents File | Delivered | Root `AGENTS.md` is materialized and existing root file is preserved. |
 | Protocol Defaults | Delivered | Standard profile includes protocol files and playbooks. |
-| Bootstrap Safety Pass | Pending | Candidate final implementation slice for this slicing. |
+| Bootstrap Safety Pass | In Review | Branch `feat/bootstrap-safety-pass`; PR pending review. |
 
 ## Pending Slice Candidate: Bootstrap Safety Pass
 
 Candidate tasks:
 
-- [ ] Review current `chc init` CLI behavior against the acceptance criteria.
-- [ ] Add CLI-boundary tests for dry-run, existing files, and invalid targets if missing.
-- [ ] Improve invalid target or permission errors if current messages are unclear.
-- [ ] Verify real embedded profile assets, not only synthetic test assets.
-- [ ] Run `make verify`.
-- [ ] Open one branch and one PR for the pending slice if implementation is approved.
+- [x] Review current `chc init` CLI behavior against the acceptance criteria.
+- [x] Add CLI-boundary tests for dry-run, existing files, and invalid targets if missing.
+- [x] Improve invalid target or permission errors if current messages are unclear.
+- [x] Verify real embedded profile assets, not only synthetic test assets.
+- [x] Run `make verify`.
+- [x] Open one branch and one PR for the pending slice if implementation is approved.
 
 ## Validation Record
 
-No implementation validation has been run for this tracker yet.
+- `go test ./internal/chcapp -run 'TestInit'`: pass.
+- `make verify`: pass.
 
 ## Notes
 

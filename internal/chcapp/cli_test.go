@@ -34,6 +34,92 @@ func testAssetsFS() fs.FS {
 	return os.DirFS(root)
 }
 
+func TestInitDryRunDoesNotWriteWorkspace(t *testing.T) {
+	projectDir := t.TempDir()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"init",
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("init dry-run returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "create .chc/agents") {
+		t.Fatalf("stdout = %q, want planned .chc paths", stdout.String())
+	}
+
+	assertPathNotExists(t, filepath.Join(projectDir, ".chc"))
+}
+
+func TestInitPreservesExistingRootAgents(t *testing.T) {
+	projectDir := t.TempDir()
+	agentsPath := filepath.Join(projectDir, "AGENTS.md")
+
+	err := os.WriteFile(agentsPath, []byte("custom agents\n"), 0o644)
+	if err != nil {
+		t.Fatalf("write AGENTS.md: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{"init", "--dir", projectDir}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("init returned error: %v", err)
+	}
+
+	content := readFile(t, agentsPath)
+	if content != "custom agents\n" {
+		t.Fatalf("AGENTS.md = %q, want preserved custom content", content)
+	}
+
+	if !strings.Contains(stdout.String(), "skip existing AGENTS.md") {
+		t.Fatalf("stdout = %q, want skipped AGENTS.md", stdout.String())
+	}
+}
+
+func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
+	projectDir := t.TempDir()
+
+	err := run(t.Context(), []string{
+		"init",
+		"--dir",
+		projectDir,
+		"--profile",
+		"standard",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("init standard returned error: %v", err)
+	}
+
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "agents", "CONVENTIONS.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "agents", "playbooks", "ticket-workflow.md"))
+	assertPathExists(t, filepath.Join(projectDir, "AGENTS.md"))
+}
+
+func TestInitRejectsFileTarget(t *testing.T) {
+	projectDir := t.TempDir()
+	targetPath := filepath.Join(projectDir, "not-a-dir")
+
+	err := os.WriteFile(targetPath, []byte("content\n"), 0o644)
+	if err != nil {
+		t.Fatalf("write target file: %v", err)
+	}
+
+	err = run(t.Context(), []string{"init", "--dir", targetPath}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("init returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "project directory is not a directory") {
+		t.Fatalf("init error = %v, want not a directory", err)
+	}
+}
+
 func TestDaemonStatusPrintsStoppedWhenStateIsMissing(t *testing.T) {
 	devRoot := t.TempDir()
 
