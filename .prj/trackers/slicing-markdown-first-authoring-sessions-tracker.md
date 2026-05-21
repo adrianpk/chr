@@ -12,7 +12,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -24,7 +24,7 @@ Slice 1: Authoring Session Model
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Authoring Session Model | Planned | `feat/slice-1-authoring-session-model` | `feat(slice-1): authoring session model` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-1-authoring-session-model.md` | First implementation slice. |
+| Slice 1: Authoring Session Model | Delivered | `feat/slice-1-authoring-session-model` | `feat(slice-1): authoring session model` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-1-authoring-session-model.md` | Repository PR #91. |
 | Slice 2: Authoring Session Storage | Planned | `feat/slice-2-authoring-session-storage` | `feat(slice-2): authoring session storage` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-2-authoring-session-storage.md` | Depends on Slice 1. |
 | Slice 3: Authoring Artifact Layout | Planned | `feat/slice-3-authoring-artifact-layout` | `feat(slice-3): authoring artifact layout` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-3-authoring-artifact-layout.md` | Depends on Slice 2. |
 | Slice 4: Static Quiz Generation | Planned | `feat/slice-4-static-quiz-generation` | `feat(slice-4): static quiz generation` | `.prj/reports/slices/markdown-first-authoring-sessions/slice-4-static-quiz-generation.md` | Depends on Slice 3. |
@@ -46,23 +46,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add authoring session ID, status, mode, target, topic, and timestamps.
-- [ ] Define input and output artifact references.
-- [ ] Define provenance links.
-- [ ] Define validation errors for invalid session inputs.
-- [ ] Add focused model tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add authoring session ID, status, mode, target, topic, and timestamps.
+- [x] Define input and output artifact references.
+- [x] Define provenance links.
+- [x] Define validation errors for invalid session inputs.
+- [x] Add focused model tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1:
-- T1.2:
-- T1.3:
-- T1.4:
-- T1.5:
-- T1.6:
-- T1.7:
+- T1.1: feat(slice-1): authoring session model
+- T1.2: feat(slice-1): authoring session model
+- T1.3: feat(slice-1): authoring session model
+- T1.4: feat(slice-1): authoring session model
+- T1.5: feat(slice-1): authoring session model
+- T1.6: feat(slice-1): authoring session model
+- T1.7: feat(slice-1): authoring session model
 
 ## Slice 2: Authoring Session Storage
 
