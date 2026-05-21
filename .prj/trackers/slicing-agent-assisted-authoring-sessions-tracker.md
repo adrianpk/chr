@@ -28,7 +28,7 @@ Slice 5: Adaptive Quiz Loop
 | Slice 2: Transcript Event Storage | Delivered | `feat/slice-2-assisted-transcript-storage` | `feat(slice-2): assisted transcript storage` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-2-assisted-transcript-storage.md` | Repository PR #100. |
 | Slice 3: Authoring Context Package | Delivered | `feat/slice-3-assisted-context-package` | `feat(slice-3): assisted context package` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-3-assisted-context-package.md` | Repository PR #101. |
 | Slice 4: Model Invocation Adapter | Delivered | `feat/slice-4-assisted-model-adapter` | `feat(slice-4): assisted model adapter` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-4-assisted-model-adapter.md` | Repository PR #102. |
-| Slice 5: Adaptive Quiz Loop | Planned | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Depends on Slice 4. |
+| Slice 5: Adaptive Quiz Loop | Delivered | `feat/slice-5-assisted-quiz-loop` | `feat(slice-5): assisted quiz loop` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-5-assisted-quiz-loop.md` | Repository PR pending. |
 | Slice 6: Answer Curation | Planned | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Depends on Slice 5. |
 | Slice 7: Assisted Artifact Synthesis | Planned | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Depends on Slice 6. |
 | Slice 8: Assisted Authoring CLI | Planned | `feat/slice-8-assisted-authoring-cli` | `feat(slice-8): assisted authoring cli` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-8-assisted-authoring-cli.md` | Depends on Slices 1-7. |
@@ -176,23 +176,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Ask the next question.
-- [ ] Accept one user answer.
-- [ ] Allow limited follow-up depth.
-- [ ] Stop on completion, user stop, blocked state, or turn limit.
-- [ ] Persist each turn.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Ask the next question.
+- [x] Accept one user answer.
+- [x] Allow limited follow-up depth.
+- [x] Stop on completion, user stop, blocked state, or turn limit.
+- [x] Persist each turn.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1:
-- T5.2:
-- T5.3:
-- T5.4:
-- T5.5:
-- T5.6:
-- T5.7:
+- T5.1: feat(slice-5): assisted quiz loop
+- T5.2: feat(slice-5): assisted quiz loop
+- T5.3: feat(slice-5): assisted quiz loop
+- T5.4: feat(slice-5): assisted quiz loop
+- T5.5: feat(slice-5): assisted quiz loop
+- T5.6: feat(slice-5): assisted quiz loop
+- T5.7: feat(slice-5): assisted quiz loop
 
 ## Slice 6: Answer Curation
 
