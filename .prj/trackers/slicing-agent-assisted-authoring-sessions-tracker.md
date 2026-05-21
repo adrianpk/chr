@@ -1,6 +1,6 @@
 # Agent-Assisted Authoring Sessions Slicing Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slicing-agent-assisted-authoring-sessions-plan.md`
 Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
@@ -13,12 +13,12 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Active Slice
 
-Slice 9: Assisted Authoring Docs
+Complete
 
 ## Slice Status
 
@@ -32,7 +32,7 @@ Slice 9: Assisted Authoring Docs
 | Slice 6: Answer Curation | Delivered | `feat/slice-6-assisted-answer-curation` | `feat(slice-6): assisted answer curation` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-6-assisted-answer-curation.md` | Repository PR #104. |
 | Slice 7: Assisted Artifact Synthesis | Delivered | `feat/slice-7-assisted-artifact-synthesis` | `feat(slice-7): assisted artifact synthesis` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-7-assisted-artifact-synthesis.md` | Repository PR #105. |
 | Slice 8: Assisted Authoring CLI | Delivered | `feat/slice-8-assisted-authoring-cli` | `feat(slice-8): assisted authoring cli` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-8-assisted-authoring-cli.md` | Repository PR #106. |
-| Slice 9: Assisted Authoring Docs | Planned | `feat/slice-9-assisted-authoring-docs` | `feat(slice-9): assisted authoring docs` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-9-assisted-authoring-docs.md` | Final docs pass for the slicing. |
+| Slice 9: Assisted Authoring Docs | Delivered | `feat/slice-9-assisted-authoring-docs` | `feat(slice-9): assisted authoring docs` | `.prj/reports/slices/agent-assisted-authoring-sessions/slice-9-assisted-authoring-docs.md` | Repository PR #107. |
 
 ## Slice 1: Assisted Session Contract
 
@@ -306,21 +306,21 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Update authoring reference.
-- [ ] Update user guide.
-- [ ] Document transcript, context, and generated artifact paths.
-- [ ] Document model-boundary and persistence guarantees.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Update authoring reference.
+- [x] Update user guide.
+- [x] Document transcript, context, and generated artifact paths.
+- [x] Document model-boundary and persistence guarantees.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T9.1:
-- T9.2:
-- T9.3:
-- T9.4:
-- T9.5:
-- T9.6:
+- T9.1: feat(slice-9): assisted authoring docs
+- T9.2: feat(slice-9): assisted authoring docs
+- T9.3: feat(slice-9): assisted authoring docs
+- T9.4: feat(slice-9): assisted authoring docs
+- T9.5: feat(slice-9): assisted authoring docs
+- T9.6: feat(slice-9): assisted authoring docs
 
 ## Validation
 

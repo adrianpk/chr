@@ -25,6 +25,7 @@ loop records, and execution records.
 - Coordinates registered projects through a local foreground daemon.
 - Builds a bounded execution context package for agent work.
 - Creates and promotes Markdown-first authoring sessions.
+- Runs fake-adapter assisted authoring sessions from the CLI.
 
 ## Install
 

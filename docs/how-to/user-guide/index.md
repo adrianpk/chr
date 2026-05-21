@@ -270,6 +270,53 @@ chc author promote quiz-to-draft --session <session-id> --quiz .chc/quizzes/<qui
 Generated authoring artifacts remain Markdown under `.chc/`. The commands
 initialize and connect artifacts; they do not replace direct editing.
 
+Run an assisted authoring session when you want the CLI to drive one question at
+a time while preserving every step as Markdown:
+
+```sh
+chc author assisted start --target spec --topic "Billing sync"
+```
+
+Ask the next question:
+
+```sh
+chc author assisted resume \
+  --session <session-id> \
+  --fake-question "What should the spec include?"
+```
+
+Submit the answer:
+
+```sh
+chc author assisted answer \
+  --session <session-id> \
+  --turn turn-001 \
+  --turn-index 1 \
+  --question-id <question-id> \
+  --question "What should the spec include?" \
+  --answer "It should include retry behavior and idempotent writes."
+```
+
+Check progress:
+
+```sh
+chc author assisted status --session <session-id>
+```
+
+Finalize the session into a curated summary and target artifact:
+
+```sh
+chc author assisted finalize \
+  --session <session-id> \
+  --fake-summary "Billing sync needs retry behavior and idempotent writes." \
+  --target-kind spec \
+  --target-name "billing sync spec"
+```
+
+The current assisted commands use explicit fake-adapter inputs. They are useful
+for deterministic local authoring flows and for validating the persisted model
+boundary before a real provider adapter is added.
+
 ## Use the Local Daemon Coordinator
 
 Check daemon status:
@@ -340,10 +387,15 @@ Docker receives the same files through the project mount, usually under
 - Avoid editing a project while an agent run is active.
 - Clone/worktree execution and PAT-backed push from inside the container are
   future runtime-workspace concerns.
+- Assisted authoring prepares Markdown documents; it does not execute tickets or
+  run the Docker worker.
+- Assisted authoring does not include implicit conversation history. Relevant
+  prior discussion must be captured in Markdown artifacts or transcript events.
 
 ## Reference
 
 - [Project workspace](../../reference/project-workspace.md)
+- [Authoring sessions](../../reference/authoring-sessions.md)
 - [Project CLI](../../reference/project-cli.md)
 - [Ticket execution](../../reference/ticket-execution.md)
 - [Ticket loop](../../reference/ticket-loop.md)
