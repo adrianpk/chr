@@ -1,6 +1,6 @@
 # Maintenance and Recovery Slicing Plan
 
-Status: active
+Status: delivered
 
 ## Purpose
 
@@ -29,7 +29,7 @@ Related delivered work:
 
 ## Current State
 
-Delivered maintenance primitives:
+Delivered maintenance capabilities:
 
 - project resolution validates missing, disabled, and non-managed registered
   project paths;
@@ -37,15 +37,17 @@ Delivered maintenance primitives:
 - `chc index status` can report missing, stale, orphaned, and invalid ticket
   index entries;
 - runtime validation can inspect the configured Docker boundary;
-- execution records, loop runs, reports, and runtime artifacts preserve evidence.
-
-Missing dedicated recovery UX:
-
-- a database migration status command;
-- project registry drift inspection and repair guidance;
-- execution record to runtime artifact drift detection;
-- runtime artifact cleanup previews;
-- diagnostic bundle creation for local handoff.
+- execution records, loop runs, reports, and runtime artifacts preserve
+  evidence;
+- `chc maintenance db status` reports migration status;
+- `chc maintenance registry status`, `disable`, and `set-path` expose registry
+  diagnostics and explicit repair;
+- `chc maintenance execution artifacts` detects execution artifact drift;
+- `chc maintenance execution cleanup-preview` previews unreferenced runtime
+  artifact directories;
+- `chc maintenance bundle` writes a local diagnostic bundle;
+- maintenance workflows are documented under `docs/how-to/` and
+  `docs/reference/`.
 
 ## Slicing Scope
 
@@ -92,7 +94,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: Database Migration Status
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-1-db-migration-status`
 Expected PR title: `feat(slice-1): db migration status`
@@ -117,7 +119,7 @@ Expected outcome:
 
 ### Slice 2: Project Registry Diagnostics
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-2-project-registry-diagnostics`
 Expected PR title: `feat(slice-2): project registry diagnostics`
@@ -141,7 +143,7 @@ Expected outcome:
 
 ### Slice 3: Project Registry Repair
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-3-project-registry-repair`
 Expected PR title: `feat(slice-3): project registry repair`
@@ -165,7 +167,7 @@ Expected outcome:
 
 ### Slice 4: Execution Artifact Drift
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-4-execution-artifact-drift`
 Expected PR title: `feat(slice-4): execution artifact drift`
@@ -189,7 +191,7 @@ Expected outcome:
 
 ### Slice 5: Runtime Artifact Cleanup Preview
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-5-runtime-artifact-cleanup-preview`
 Expected PR title: `feat(slice-5): runtime artifact cleanup preview`
@@ -213,7 +215,7 @@ Expected outcome:
 
 ### Slice 6: Diagnostic Bundle
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-6-diagnostic-bundle`
 Expected PR title: `feat(slice-6): diagnostic bundle`
@@ -237,7 +239,7 @@ Expected outcome:
 
 ### Slice 7: Maintenance Documentation
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `feat/slice-7-maintenance-docs`
 Expected PR title: `feat(slice-7): maintenance docs`

@@ -60,8 +60,8 @@ that matches the intended scope.
 
 Tickets include checklists for subtasks and comment areas for progress,
 blockers, failed attempts, evidence, and handoff notes. The agent is not expected
-to spin forever when stuck: repeated failures can be recorded, and future
-notification channels can surface blockers outside the CLI.
+to spin forever when stuck: repeated failures can be recorded, and notification
+audit records can surface blockers through configured channels.
 
 See [Ticket loop](docs/reference/ticket-loop.md),
 [Ticket execution](docs/reference/ticket-execution.md), and
@@ -119,7 +119,8 @@ documentation input. It is structured knowledge extraction, not disposable chat
 history.
 
 The current CLI exposes quiz-based authoring and assisted authoring sessions.
-The dump command surface belongs to the same Markdown-first authoring direction.
+Dump-style context can still be captured directly as Markdown and used as input
+for drafts, specifications, plans, and tickets.
 
 See [Document generation model](docs/explanation/document-generation-model.md)
 and [User guide](docs/how-to/user-guide/index.md).
@@ -171,8 +172,22 @@ Coordination:
 - resolves active or explicit project directories;
 - coordinates foreground loops and local daemon-style operation.
 
-Planned integrations include Telegram command handling and status delivery
-through Telegram or email. Those messaging channels are future-facing and are
+Notifications and remote commands:
+
+- records notification audit events for ticket, loop, daemon, remote command,
+  and manual-test events;
+- can send Telegram setup-check messages when configured;
+- can parse Telegram update fixtures into accepted or rejected remote command
+  handoff records.
+
+Reporting and maintenance:
+
+- lists and shows execution and loop reports;
+- writes review handoff summaries;
+- inspects database, registry, execution artifact, and runtime artifact drift;
+- writes a local diagnostic bundle under `.chc/maintenance/`.
+
+Live Telegram polling and email delivery remain future transport work. They are
 not required for the local CLI workflow that exists today.
 
 ## Install
@@ -225,6 +240,8 @@ The README is the front door. Detailed technical material lives under
 - [Documentation index](docs/index.md)
 - [Getting started tutorial](docs/tutorials/getting-started.md)
 - [User guide](docs/how-to/user-guide/index.md)
+- [Inspect and recover local state](docs/how-to/inspect-and-recover-local-state.md)
+- [Find execution and loop evidence](docs/how-to/find-execution-and-loop-evidence.md)
 - [Reference](docs/reference/project-workspace.md)
 - [Explanation](docs/explanation/architecture.md)
 

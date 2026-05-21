@@ -208,6 +208,9 @@ chc report list --ticket CHC-1
 chc report show --execution <execution-id>
 ```
 
+Execution reports summarize the runtime plan, result status, validation status,
+changed files, and artifact paths for one execution.
+
 ## Run a Foreground Ticket Loop
 
 Preview eligible tickets:
@@ -242,6 +245,9 @@ Inspect loop evidence:
 chc report list --kind loop
 chc report show --loop <loop-id>
 ```
+
+Loop reports summarize loop status, ticket selection, execution outcomes, and
+stop reasons.
 
 ## Capture Authoring Context
 
@@ -353,6 +359,37 @@ chc daemon stop
 
 The daemon is a local foreground coordinator. It is not a hosted service.
 
+## Configure Notifications and Remote Command Intake
+
+Inspect notification configuration:
+
+```sh
+chc notify status
+```
+
+Preview a Telegram setup-check payload without contacting Telegram:
+
+```sh
+chc notify telegram test --dry-run
+```
+
+Send the setup-check message when Telegram is configured:
+
+```sh
+chc notify telegram test
+```
+
+Parse Telegram update fixtures into remote command handoff records:
+
+```sh
+chc notify telegram poll --fixture updates.json --dry-run
+chc notify telegram poll --fixture updates.json
+```
+
+Remote command intake is bounded. It stores accepted or rejected handoff records
+for supported intents such as status, loop start, ticket start, and ticket
+comment. It does not expose arbitrary shell command execution.
+
 ## Inspect and Recover Local State
 
 Write a local diagnostic bundle:
@@ -379,6 +416,9 @@ chc maintenance registry set-path example /path/to/project
 
 Maintenance previews and diagnostics are read-only unless the command name
 describes an explicit repair action.
+
+For a full recovery sequence, see
+[Inspect and recover local state](../inspect-and-recover-local-state.md).
 
 ## Proving-Ground Workflows
 
@@ -441,5 +481,8 @@ Docker receives the same files through the project mount, usually under
 - [Ticket execution](../../reference/ticket-execution.md)
 - [Ticket loop](../../reference/ticket-loop.md)
 - [Ticket result application](../../reference/ticket-result-application.md)
+- [Reports](../../reference/reports.md)
+- [Notifications](../../reference/notifications.md)
+- [Remote commands](../../reference/remote-commands.md)
 - [Daemon coordination](../../reference/daemon-coordination.md)
 - [Maintenance](../../reference/maintenance.md)

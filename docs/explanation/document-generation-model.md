@@ -29,9 +29,9 @@ Dump material can later feed a draft, specification, plan, ticket, or execution
 context. The dump is not expected to be polished; it preserves knowledge before
 the agent or user shapes it into a stricter document.
 
-The dump command surface is part of the Markdown-first authoring direction. The
-current CLI already exposes the related session, quiz, promotion, and assisted
-authoring boundaries.
+Dump-style material can be written directly as Markdown today. The current CLI
+already exposes the related session, quiz, promotion, and assisted authoring
+boundaries.
 
 ## Quizzes
 

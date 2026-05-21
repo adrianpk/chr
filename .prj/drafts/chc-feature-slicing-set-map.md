@@ -433,9 +433,9 @@ Use case:
 
 > A user can understand what `chc` did, what changed, and why a ticket or loop is in its current state.
 
-Current state: partially delivered through execution, loop, ticket result, and
-notification artifacts. A dedicated report listing and lookup UX is still not
-delivered.
+Current state: completed for the current MVP scope. Execution reports, loop
+reports, validation and changed-file summaries, review handoff summaries,
+report listing, report lookup, and reporting documentation are delivered.
 
 Candidate slices:
 
@@ -454,7 +454,10 @@ Use case:
 
 > A user can inspect and repair local `chc` state when files, database state, or runtime artifacts drift.
 
-Current state: partially supported through lower-level persistence primitives, not exposed as recovery UX.
+Current state: completed for the current MVP scope. Database migration status,
+project registry diagnostics and repair, execution artifact drift detection,
+runtime artifact cleanup preview, diagnostic bundle creation, and maintenance
+documentation are delivered.
 
 Candidate slices:
 
@@ -500,8 +503,8 @@ context:
 3. Ticket Execution Context Hardening.
 4. Operational Documents and Authoring.
 5. Notification and Remote Commands.
-6. Reporting and Evidence. Remaining dedicated UX.
-7. Maintenance and Recovery. Remaining dedicated UX.
+6. Reporting and Evidence.
+7. Maintenance and Recovery.
 
 Future post-cutoff work should be pulled forward only when it directly blocks
 local loop operation, debugging, or evidence quality.
@@ -535,20 +538,13 @@ worker to conduct a bounded quiz/dump/spec session, persist the transcript,
 curate answers, and produce Markdown. The TUI should come after the session
 model is stable enough to avoid designing a separate workflow.
 
-After the completed post-cutoff work, the remaining planned slicing sets in
-this map are:
-
-1. Reporting and Evidence.
-2. Maintenance and Recovery.
+After the completed post-cutoff work, there are no remaining planned slicing
+sets in this map.
 
 Additional future expansion can still be planned, but it is not currently part
 of this map.
 
 ## Open Questions
 
-- Which reporting artifacts are required before remote execution feedback is
-  acceptable?
-- Which maintenance and recovery commands are needed before broader unattended
-  operation?
 - Does a later daemon phase need file watching, or is automatic reconciliation
   on command boundaries enough?

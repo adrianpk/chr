@@ -39,6 +39,8 @@ Exact contracts and command behavior:
 - [Execution reports](reference/execution-reports.md)
 - [Loop reports](reference/loop-reports.md)
 - [Review handoff summaries](reference/review-handoff-summaries.md)
+- [Index rebuild CLI](reference/index-rebuild-cli.md)
+- [Index status CLI](reference/index-status-cli.md)
 - [Daemon coordination](reference/daemon-coordination.md)
 - [MVP agent proving ground](reference/mvp-agent-proving-ground.md)
 
