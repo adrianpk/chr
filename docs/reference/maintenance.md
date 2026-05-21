@@ -5,6 +5,43 @@ Maintenance commands inspect and recover local `chc` state.
 They are intended for local diagnostics. They should report exact state before
 any repair or cleanup command mutates files or database rows.
 
+## Diagnostic Bundle
+
+Write a project-local diagnostic bundle:
+
+```sh
+chc maintenance bundle
+```
+
+Write a bundle for a specific project directory:
+
+```sh
+chc maintenance bundle --dir /path/to/project
+```
+
+Use an isolated development environment:
+
+```sh
+chc maintenance bundle --dev-root /tmp/chc-dev --dir /path/to/project
+```
+
+The command writes:
+
+```text
+.chc/maintenance/diagnostic-bundle.md
+```
+
+The bundle includes command-readable local state summaries:
+
+- database migration status;
+- project registry diagnostics;
+- execution artifact drift diagnostics;
+- runtime artifact cleanup preview;
+- project report metadata.
+
+The bundle does not copy workspace config contents, environment values,
+credential files, or token values.
+
 ## Database Migration Status
 
 Inspect local SQLite migration state:

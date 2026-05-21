@@ -109,6 +109,7 @@ chc index status
 Inspect local maintenance state:
 
 ```sh
+chc maintenance bundle
 chc maintenance db status
 chc maintenance execution artifacts
 chc maintenance execution cleanup-preview
