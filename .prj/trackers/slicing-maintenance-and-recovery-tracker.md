@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 4: Execution Artifact Drift | Delivered | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Repository PR #129 merged. |
 | Slice 5: Runtime Artifact Cleanup Preview | Delivered | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Repository PR #130 merged. |
 | Slice 6: Diagnostic Bundle | Delivered | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | Repository PR #131 merged. |
-| Slice 7: Maintenance Documentation | Planned | `feat/slice-7-maintenance-docs` | `feat(slice-7): maintenance docs` | `.prj/reports/slices/maintenance-and-recovery/slice-7-maintenance-docs.md` | Pending. |
+| Slice 7: Maintenance Documentation | Reviewing | `feat/slice-7-maintenance-docs` | `feat(slice-7): maintenance docs` | `.prj/reports/slices/maintenance-and-recovery/slice-7-maintenance-docs.md` | PR pending. |
 
 ## Slice 1: Database Migration Status
 
@@ -235,19 +235,19 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add how-to documentation for inspecting and recovering local state.
-- [ ] Update command reference.
-- [ ] Link related index, runtime, report, and registry references.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add how-to documentation for inspecting and recovering local state.
+- [x] Update command reference.
+- [x] Link related index, runtime, report, and registry references.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
+- T7.1: `docs(maintenance): add recovery how-to`
+- T7.2: `docs(maintenance): add recovery how-to`
+- T7.3: `docs(maintenance): add recovery how-to`
+- T7.4: `docs(slice-7): record maintenance docs`
+- T7.5: `make verify`
 
 ## Validation Record
 
