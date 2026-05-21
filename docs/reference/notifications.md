@@ -91,3 +91,32 @@ Some event types require specific references:
 Channel-specific identifiers, such as Telegram chat IDs, do not belong in the
 core event model. They belong to later channel configuration, dispatch, or audit
 records.
+
+## Audit Records
+
+Notification audit records persist notification events in user-level state.
+
+Audit records store the channel separately from the core event. This keeps the
+event model channel-neutral while allowing later dispatch code to record where a
+notification was sent or attempted.
+
+The user-level SQLite table is `notification_events`.
+
+Stored fields include:
+
+- event identity, project, type, severity, status, and source;
+- optional channel name;
+- ticket, execution, loop, and daemon references;
+- summary and detail text;
+- failure reason;
+- creation, delivery, and update timestamps.
+
+The repository supports:
+
+- creating a notification audit record;
+- updating a notification audit record;
+- getting a record by ID;
+- listing records for one project ordered by creation time.
+
+Audit persistence does not send messages. Dispatch behavior belongs to the
+channel-specific slices that follow this contract.
