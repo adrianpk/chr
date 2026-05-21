@@ -1122,6 +1122,125 @@ func TestRuntimeValidateUsesActiveProject(t *testing.T) {
 	}
 }
 
+func TestNotifyStatusPrintsNotificationReadiness(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeCLIWorkspaceConfig(t, projectDir, `notifications:
+  telegram_enabled: true
+  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_chat_id: "123456"
+`)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"notify",
+		"status",
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("notify status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"notify: status",
+		"project_id:",
+		"project_dir: " + projectDir,
+		"telegram_enabled: true",
+		"telegram_status: ready",
+		"telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN",
+		"telegram_chat_id: 123456",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestNotifyStatusReportsInvalidTelegramConfig(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeCLIWorkspaceConfig(t, projectDir, `notifications:
+  telegram_enabled: true
+  telegram_chat_id: "123456"
+`)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"notify",
+		"status",
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("notify status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"telegram_enabled: true",
+		"telegram_status: invalid",
+		"telegram_error: telegram bot token environment variable is required",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestNotifyTelegramTestDryRunPrintsPlan(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeCLIWorkspaceConfig(t, projectDir, `notifications:
+  telegram_enabled: true
+  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_chat_id: "123456"
+`)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"notify",
+		"telegram",
+		"test",
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("notify telegram test dry-run returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"telegram_test: planned",
+		"dry_run: true",
+		"bot_token_env: CHC_TELEGRAM_BOT_TOKEN",
+		"chat_id: 123456",
+		"message: ChrysoCoord Telegram notification test",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestNotifyTelegramTestRequiresDryRun(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	err := run(t.Context(), []string{
+		"notify",
+		"telegram",
+		"test",
+		"--dir",
+		projectDir,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("notify telegram test returned nil error")
+	}
+
+	if err.Error() != "notify telegram test requires --dry-run until Telegram dispatch is implemented" {
+		t.Fatalf("notify telegram test error = %v", err)
+	}
+}
+
 func TestTicketNewFallsBackToCurrentDirectory(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
@@ -3113,6 +3232,17 @@ func newTestWorkspace(t *testing.T) string {
 	}
 
 	return projectDir
+}
+
+func writeCLIWorkspaceConfig(t *testing.T, projectDir, content string) {
+	t.Helper()
+
+	configPath := filepath.Join(projectDir, ".chc", "config.yml")
+
+	err := os.WriteFile(configPath, []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("write workspace config: %v", err)
+	}
 }
 
 func authorSessionIDFromOutput(t *testing.T, output string) string {

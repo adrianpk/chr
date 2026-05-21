@@ -31,6 +31,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 			newDaemonCommand(stdout),
 			newIndexCommand(stdout),
 			newInitCommand(stdout),
+			newNotifyCommand(stdout),
 			newProjectCommand(stdout),
 			newProvingCommand(stdout),
 			newRuntimeCommand(stdout),
