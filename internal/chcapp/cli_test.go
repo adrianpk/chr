@@ -3536,6 +3536,56 @@ func TestMaintenanceExecutionCleanupPreviewDoesNotDeleteCandidates(t *testing.T)
 	assertPathExists(t, unreferencedDir)
 }
 
+func TestMaintenanceBundleWritesDiagnosticBundle(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	bundlePath := filepath.Join(projectDir, ".chc", "maintenance", "diagnostic-bundle.md")
+
+	addProject(t, devRoot, "example", projectDir)
+	writeCLIWorkspaceConfig(t, projectDir, `version: 1
+notifications:
+  telegram:
+    bot_token_env: SUPER_SECRET_TOKEN_VALUE
+`)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"maintenance",
+		"bundle",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("maintenance bundle returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "bundle_path: "+bundlePath) {
+		t.Fatalf("stdout = %q, want bundle path", stdout.String())
+	}
+
+	content := readFile(t, bundlePath)
+
+	for _, want := range []string{
+		"# Diagnostic Bundle",
+		"project_dir: " + projectDir,
+		"database_exists: true",
+		"example path=" + projectDir,
+		"workspace config contents omitted",
+		"environment values omitted",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("bundle content does not contain %q:\n%s", want, content)
+		}
+	}
+
+	if strings.Contains(content, "SUPER_SECRET_TOKEN_VALUE") {
+		t.Fatalf("bundle content contains secret-like config value:\n%s", content)
+	}
+}
+
 func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()

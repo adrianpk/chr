@@ -16,10 +16,20 @@ func newMaintenanceCommand(stdout io.Writer) *cli.Command {
 		Name:  "maintenance",
 		Usage: "Inspect and recover local chc state",
 		Commands: []*cli.Command{
+			newMaintenanceBundleCommand(stdout),
 			newMaintenanceDBCommand(stdout),
 			newMaintenanceExecutionCommand(stdout),
 			newMaintenanceRegistryCommand(stdout),
 		},
+	}
+}
+
+func newMaintenanceBundleCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "bundle",
+		Usage:  "Write a local diagnostic bundle for the resolved project",
+		Flags:  maintenanceProjectFlags(),
+		Action: maintenanceBundleAction(stdout),
 	}
 }
 
@@ -128,6 +138,12 @@ func maintenanceProjectFlags() []cli.Flag {
 	)
 }
 
+func maintenanceBundleAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runMaintenanceBundle(ctx, cmd, stdout)
+	}
+}
+
 func maintenanceDBStatusAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runMaintenanceDBStatus(ctx, cmd, stdout)
@@ -164,6 +180,42 @@ func maintenanceRegistrySetPathAction(stdout io.Writer) cli.ActionFunc {
 	}
 }
 
+func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("maintenance bundle does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:    cmd.String("dir"),
+		UseExplicitDir: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	bundle, err := collectDiagnosticBundle(ctx, env, projectContext)
+	if err != nil {
+		return err
+	}
+
+	path, err := chc.WriteDiagnosticBundle(ctx, projectContext.ProjectDir, bundle)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "bundle_path: %s\n", path)
+	if err != nil {
+		return fmt.Errorf("write diagnostic bundle result: %w", err)
+	}
+
+	return nil
+}
+
 func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("maintenance db status does not accept positional arguments")
@@ -180,6 +232,89 @@ func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Wri
 	}
 
 	return printMigrationStatus(stdout, status)
+}
+
+func collectDiagnosticBundle(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+) (chc.DiagnosticBundle, error) {
+	migrationStatus, err := chc.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
+	if err != nil {
+		return chc.DiagnosticBundle{}, err
+	}
+
+	registryDiagnostics, err := collectDiagnosticBundleRegistry(ctx, env)
+	if err != nil {
+		return chc.DiagnosticBundle{}, err
+	}
+
+	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	if err != nil {
+		return chc.DiagnosticBundle{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Bundle result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	executionArtifacts, err := chc.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+		ctx,
+		projectContext.ProjectID,
+	)
+	if err != nil {
+		return chc.DiagnosticBundle{}, err
+	}
+
+	cleanupPreview, err := chc.NewRuntimeArtifactCleanupPreviewService(repository).Preview(
+		ctx,
+		projectContext.ProjectDir,
+		projectContext.ProjectID,
+	)
+	if err != nil {
+		return chc.DiagnosticBundle{}, err
+	}
+
+	reports, err := chc.NewReportLister().ListProjectReports(ctx, projectContext.ProjectDir, chc.ReportListFilter{})
+	if err != nil {
+		return chc.DiagnosticBundle{}, err
+	}
+
+	return chc.DiagnosticBundle{
+		ProjectDir:             projectContext.ProjectDir,
+		ProjectID:              projectContext.ProjectID,
+		MigrationStatus:        migrationStatus,
+		RegistryDiagnostics:    registryDiagnostics,
+		ExecutionArtifactDrift: executionArtifacts,
+		RuntimeCleanupPreview:  cleanupPreview,
+		Reports:                reports,
+	}, nil
+}
+
+func collectDiagnosticBundleRegistry(
+	ctx context.Context,
+	env chc.UserEnvironment,
+) ([]chc.ProjectRegistryDiagnostic, error) {
+	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Bundle result already comes from the main operation.
+		_ = registry.Close()
+	}()
+
+	diagnostics, err := chc.NewProjectRegistryDiagnosticsService(
+		registry,
+		chc.NewActiveProjectStore(env),
+	).ListDiagnostics(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return diagnostics, nil
 }
 
 func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
