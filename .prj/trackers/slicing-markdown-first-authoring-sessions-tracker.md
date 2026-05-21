@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 5: Authoring Session CLI
+Slice 6: Manual Promotion and Provenance
 
 ## Slice Status
 
