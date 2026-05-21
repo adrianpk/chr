@@ -16,6 +16,7 @@ func newReportCommand(stdout io.Writer) *cli.Command {
 		Usage: "Inspect project reports",
 		Commands: []*cli.Command{
 			newReportListCommand(stdout),
+			newReportShowCommand(stdout),
 		},
 	}
 }
@@ -54,9 +55,34 @@ func reportListFlags() []cli.Flag {
 	)
 }
 
+func newReportShowCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:      "show",
+		Usage:     "Show one project report",
+		ArgsUsage: "[report-id]",
+		Flags:     reportShowFlags(),
+		Action:    reportShowAction(stdout),
+	}
+}
+
+func reportShowFlags() []cli.Flag {
+	return append(reportListFlags(),
+		&cli.BoolFlag{
+			Name:  "metadata",
+			Usage: "print report metadata instead of body",
+		},
+	)
+}
+
 func reportListAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runReportList(ctx, cmd, stdout)
+	}
+}
+
+func reportShowAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runReportShow(ctx, cmd, stdout)
 	}
 }
 
@@ -92,6 +118,47 @@ func runReportList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return printReportList(stdout, reports)
 }
 
+func runReportShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() > 1 {
+		return fmt.Errorf("report show accepts at most one positional argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	request, err := reportLookupRequestFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	result, err := chc.NewReportLookupService().LookupReport(ctx, projectContext.ProjectDir, request)
+	if err != nil {
+		return err
+	}
+
+	if cmd.Bool("metadata") {
+		return printReportList(stdout, []chc.ReportListEntry{result.Entry})
+	}
+
+	_, err = fmt.Fprint(stdout, result.Body)
+	if err != nil {
+		return fmt.Errorf("write report body: %w", err)
+	}
+
+	return nil
+}
+
 func reportListFilterFromCommand(cmd *cli.Command) (chc.ReportListFilter, error) {
 	kind, err := reportKindFromString(cmd.String("kind"))
 	if err != nil {
@@ -105,6 +172,42 @@ func reportListFilterFromCommand(cmd *cli.Command) (chc.ReportListFilter, error)
 		LoopID:      cmd.String("loop"),
 		Status:      cmd.String("status"),
 	}, nil
+}
+
+func reportLookupRequestFromCommand(cmd *cli.Command) (chc.ReportLookupRequest, error) {
+	kind, err := reportKindFromString(cmd.String("kind"))
+	if err != nil {
+		return chc.ReportLookupRequest{}, err
+	}
+
+	reportID := ""
+	if cmd.NArg() == 1 {
+		reportID = cmd.Args().First()
+	}
+
+	request := chc.ReportLookupRequest{
+		ReportID:    reportID,
+		Kind:        kind,
+		TicketKey:   cmd.String("ticket"),
+		ExecutionID: cmd.String("execution"),
+		LoopID:      cmd.String("loop"),
+		Status:      cmd.String("status"),
+	}
+
+	if reportLookupRequestIsEmpty(request) {
+		return chc.ReportLookupRequest{}, fmt.Errorf("report show requires a report id or lookup filter")
+	}
+
+	return request, nil
+}
+
+func reportLookupRequestIsEmpty(request chc.ReportLookupRequest) bool {
+	return request.ReportID == "" &&
+		request.Kind == "" &&
+		request.TicketKey == "" &&
+		request.ExecutionID == "" &&
+		request.LoopID == "" &&
+		request.Status == ""
 }
 
 func reportKindFromString(value string) (chc.ReportKind, error) {

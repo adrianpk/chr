@@ -2477,6 +2477,105 @@ func TestReportListFiltersReports(t *testing.T) {
 	}
 }
 
+func TestReportShowPrintsReportBody(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"CHC-1",
+		"exec-1",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"report",
+		"show",
+		"--dir",
+		projectDir,
+		"--execution",
+		"exec-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("report show returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "# Execution Report") {
+		t.Fatalf("stdout does not contain report body:\n%s", stdout.String())
+	}
+}
+
+func TestReportShowPrintsReportMetadata(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"loop-1",
+		"loop-report.md",
+	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"report",
+		"show",
+		"--dir",
+		projectDir,
+		"--loop",
+		"loop-1",
+		"--metadata",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("report show returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "kind: loop path: .chc/runtime/runs/loop-1/loop-report.md") {
+		t.Fatalf("stdout does not contain report metadata:\n%s", stdout.String())
+	}
+}
+
+func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"CHC-1",
+		"exec-1",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n")
+	writeCLIReport(t, projectDir, filepath.Join(
+		".chc",
+		"runtime",
+		"runs",
+		"CHC-1",
+		"exec-2",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHC-1\n")
+
+	err := run(t.Context(), []string{
+		"report",
+		"show",
+		"--dir",
+		projectDir,
+		"--ticket",
+		"CHC-1",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("report show returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "ambiguous") {
+		t.Fatalf("error = %v, want ambiguous lookup", err)
+	}
+}
+
 func TestTicketShowRejectsMissingTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
