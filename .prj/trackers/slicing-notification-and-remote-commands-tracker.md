@@ -23,7 +23,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 1: Notification Event Model | Delivered | `feat/slice-1-notification-event-model` | `feat(slice-1): notification event model` | `.prj/reports/slices/notification-and-remote-commands/slice-1-notification-event-model.md` | Repository PR #108 merged. |
 | Slice 2: Notification Configuration | Delivered | `feat/slice-2-notification-config` | `feat(slice-2): notification config` | `.prj/reports/slices/notification-and-remote-commands/slice-2-notification-config.md` | Repository PR #109 merged. |
 | Slice 3: Notification Audit Repository | Delivered | `feat/slice-3-notification-audit-repository` | `feat(slice-3): notification audit repository` | `.prj/reports/slices/notification-and-remote-commands/slice-3-notification-audit-repository.md` | Repository PR #110 merged. |
-| Slice 4: Notify Command Skeleton | Planned | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Pending implementation. |
+| Slice 4: Notify Command Skeleton | Reviewing | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Repository PR #111. |
 | Slice 5: Telegram Dispatch Boundary | Planned | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Pending implementation. |
 | Slice 6: Loop and Ticket Notifications | Planned | `feat/slice-6-loop-ticket-notifications` | `feat(slice-6): loop ticket notifications` | `.prj/reports/slices/notification-and-remote-commands/slice-6-loop-ticket-notifications.md` | Pending implementation. |
 | Slice 7: Remote Command Intake Model | Planned | `feat/slice-7-remote-command-intake-model` | `feat(slice-7): remote command intake model` | `.prj/reports/slices/notification-and-remote-commands/slice-7-remote-command-intake-model.md` | Pending implementation. |
@@ -143,25 +143,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc notify` command group.
-- [ ] Add `chc notify status`.
-- [ ] Add `chc notify telegram test --dry-run`.
-- [ ] Render the planned Telegram test payload from config.
-- [ ] Avoid network calls in dry-run mode.
-- [ ] Add focused CLI tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add `chc notify` command group.
+- [x] Add `chc notify status`.
+- [x] Add `chc notify telegram test --dry-run`.
+- [x] Render the planned Telegram test payload from config.
+- [x] Avoid network calls in dry-run mode.
+- [x] Add focused CLI tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
-- T4.8: pending
+- T4.1: `8ad7bb7`
+- T4.2: `8ad7bb7`
+- T4.3: `8ad7bb7`
+- T4.4: `8ad7bb7`
+- T4.5: `8ad7bb7`
+- T4.6: `8ad7bb7`
+- T4.7: `docs(slice-4): record notify command report`
+- T4.8: `make verify`
 
 ## Slice 5: Telegram Dispatch Boundary
 
