@@ -25,7 +25,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Validation and Changed-File Summaries | Delivered | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | Repository PR #120 merged. |
 | Slice 4: Loop Report Format | Delivered | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Repository PR #121 merged. |
 | Slice 5: Report Listing | Delivered | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Repository PR #122 merged. |
-| Slice 6: Report Lookup | Planned | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Pending. |
+| Slice 6: Report Lookup | Reviewing | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | PR pending. |
 | Slice 7: Review Handoff Summary | Planned | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | Pending. |
 | Slice 8: Reporting Documentation | Planned | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | Pending. |
 
@@ -201,23 +201,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc report show`.
-- [ ] Resolve reports by report id, ticket key, execution id, or loop id.
-- [ ] Print report body or metadata predictably.
-- [ ] Add clear errors for ambiguous or missing lookups.
-- [ ] Add CLI tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add `chc report show`.
+- [x] Resolve reports by report id, ticket key, execution id, or loop id.
+- [x] Print report body or metadata predictably.
+- [x] Add clear errors for ambiguous or missing lookups.
+- [x] Add CLI tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
+- T6.1: `1fe77da`
+- T6.2: `1fe77da`
+- T6.3: `1fe77da`
+- T6.4: `1fe77da`
+- T6.5: `1fe77da`
+- T6.6: `docs(slice-6): record report lookup`
+- T6.7: `make verify`
 
 ## Slice 7: Review Handoff Summary
 
