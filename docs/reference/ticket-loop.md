@@ -119,6 +119,8 @@ Loop execution output includes:
 - failed ticket count;
 - execution IDs for attempted tickets.
 
+Loop report formatting is documented in `docs/reference/loop-reports.md`.
+
 The foreground loop reuses:
 
 - runtime validation;
