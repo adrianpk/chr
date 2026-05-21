@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 8: Assisted Authoring CLI
+Slice 9: Assisted Authoring Docs
 
 ## Slice Status
 
