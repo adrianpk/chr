@@ -1,11 +1,11 @@
 # Slice 7: Remote Command Intake Model
 
-Status: in review
+Status: delivered
 Slicing: Notification and Remote Commands
 Plan: `.prj/plans/slicing-notification-and-remote-commands-plan.md`
 Tracker: `.prj/trackers/slicing-notification-and-remote-commands-tracker.md`
 Branch: `feat/slice-7-remote-command-intake-model`
-PR: pending
+PR: `#114`
 
 ## Purpose
 
