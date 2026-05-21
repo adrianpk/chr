@@ -1,6 +1,6 @@
 # Slice 5: Runtime Artifact Cleanup Preview
 
-Status: reviewing
+Status: delivered
 Slicing: Maintenance and Recovery
 Plan: `.prj/plans/slicing-maintenance-and-recovery-plan.md`
 Tracker: `.prj/trackers/slicing-maintenance-and-recovery-tracker.md`
