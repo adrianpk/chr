@@ -27,7 +27,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 5: Telegram Dispatch Boundary | Delivered | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Repository PR #112 merged. |
 | Slice 6: Loop and Ticket Notifications | Delivered | `feat/slice-6-loop-ticket-notifications` | `feat(slice-6): loop ticket notifications` | `.prj/reports/slices/notification-and-remote-commands/slice-6-loop-ticket-notifications.md` | Repository PR #113 merged. |
 | Slice 7: Remote Command Intake Model | Delivered | `feat/slice-7-remote-command-intake-model` | `feat(slice-7): remote command intake model` | `.prj/reports/slices/notification-and-remote-commands/slice-7-remote-command-intake-model.md` | Repository PR #114 merged. |
-| Slice 8: Telegram Remote Command Handoff | Planned | `feat/slice-8-telegram-remote-command-handoff` | `feat(slice-8): telegram remote command handoff` | `.prj/reports/slices/notification-and-remote-commands/slice-8-telegram-remote-command-handoff.md` | Pending implementation. |
+| Slice 8: Telegram Remote Command Handoff | In Review | `feat/slice-8-telegram-remote-command-handoff` | `feat(slice-8): telegram remote command handoff` | `.prj/reports/slices/notification-and-remote-commands/slice-8-telegram-remote-command-handoff.md` | PR pending review. |
 
 ## Slice 1: Notification Event Model
 
@@ -279,22 +279,22 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Parse Telegram updates into remote command requests.
-- [ ] Persist accepted and rejected remote command records.
-- [ ] Map supported commands to existing CLI-equivalent handlers or explicit handoff records.
-- [ ] Add `notify telegram poll --dry-run` or equivalent bounded intake preview.
-- [ ] Document the remote command safety boundary.
-- [ ] Add tests with fixture Telegram updates.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Parse Telegram updates into remote command requests.
+- [x] Persist accepted and rejected remote command records.
+- [x] Map supported commands to existing CLI-equivalent handlers or explicit handoff records.
+- [x] Add `notify telegram poll --dry-run` or equivalent bounded intake preview.
+- [x] Document the remote command safety boundary.
+- [x] Add tests with fixture Telegram updates.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T8.1: pending
-- T8.2: pending
-- T8.3: pending
-- T8.4: pending
-- T8.5: pending
-- T8.6: pending
-- T8.7: pending
-- T8.8: pending
+- T8.1: this PR
+- T8.2: this PR
+- T8.3: this PR
+- T8.4: this PR
+- T8.5: this PR
+- T8.6: this PR
+- T8.7: this PR
+- T8.8: `make verify`

@@ -185,3 +185,12 @@ records a notification audit event with `channel` set to `telegram`.
 
 If dispatch fails after the audit event is created, the event is updated to
 `failed` with the failure reason.
+
+Parse Telegram update fixtures into remote command records:
+
+```sh
+chc notify telegram poll --fixture updates.json --dry-run
+```
+
+Without `--dry-run`, accepted and rejected remote command handoff records are
+persisted in user-level state.

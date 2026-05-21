@@ -167,3 +167,15 @@ chc notify telegram test
 The dry-run command does not contact Telegram. Non-dry-run dispatch reads the
 bot token from the configured environment variable and records a notification
 audit event.
+
+Preview Telegram update parsing from a fixture:
+
+```sh
+chc notify telegram poll --fixture updates.json --dry-run
+```
+
+Persist accepted and rejected remote command handoff records from a fixture:
+
+```sh
+chc notify telegram poll --fixture updates.json
+```

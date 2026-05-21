@@ -2,9 +2,9 @@
 
 Remote commands are bounded requests produced from external input channels.
 
-The model is channel-neutral. Telegram update intake, persistence, and command
-handoff are separate concerns. This contract only defines the request shape,
-validation rules, and the small text grammar accepted by the parser.
+The request model is channel-neutral. Telegram update intake converts Telegram
+messages into this model and stores explicit accepted or rejected handoff
+records.
 
 ## Request Model
 
@@ -79,6 +79,45 @@ unknown loop flags are rejected.
 Remote commands are intentionally narrower than the local CLI. They describe
 the user's requested intent, but they do not execute it directly.
 
-Later channel-specific intake can persist accepted or rejected requests and map
-accepted requests to existing local command behavior. The local CLI remains the
-source of truth for actual project operations.
+Accepted requests are mapped to CLI-equivalent handoff text, such as
+`chc daemon status`, `chc ticket loop`, `chc ticket start`, or
+`chc ticket comment`. Rejected requests store the rejection reason.
+
+The local CLI remains the source of truth for actual project operations.
+
+## Telegram Fixture Intake
+
+Telegram update fixtures use the `getUpdates` response shape:
+
+```json
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 1,
+      "message": {
+        "message_id": 10,
+        "from": {"id": 100, "username": "ops"},
+        "chat": {"id": 200},
+        "date": 1768000000,
+        "text": "@example status"
+      }
+    }
+  ]
+}
+```
+
+Preview parsing without persistence:
+
+```sh
+chc notify telegram poll --fixture updates.json --dry-run
+```
+
+Persist accepted and rejected handoff records from a fixture:
+
+```sh
+chc notify telegram poll --fixture updates.json
+```
+
+This slice does not perform live Telegram polling. The fixture command provides
+the bounded intake and persistence boundary used by later transport work.

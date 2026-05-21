@@ -120,6 +120,9 @@ func testMigrationFS() fstest.MapFS {
 		"assets/migration/sqlite/20260521000006-create_notification_events.sql": {
 			Data: []byte(testCreateNotificationEventsMigration()),
 		},
+		"assets/migration/sqlite/20260521000007-create_remote_command_records.sql": {
+			Data: []byte(testCreateRemoteCommandRecordsMigration()),
+		},
 	}
 }
 
@@ -303,6 +306,38 @@ ON notification_events (project_id, status);
 
 -- +migrate Down
 DROP TABLE IF EXISTS notification_events;
+`
+}
+
+func testCreateRemoteCommandRecordsMigration() string {
+	return `-- +migrate Up
+CREATE TABLE remote_command_records (
+    id text PRIMARY KEY,
+    status text NOT NULL,
+    channel text NOT NULL,
+    sender_external_id text NOT NULL,
+    sender_display_name text NOT NULL,
+    project_selector text NOT NULL,
+    intent text NOT NULL,
+    ticket_key text NOT NULL,
+    comment text NOT NULL,
+    loop_statuses text NOT NULL,
+    loop_priorities text NOT NULL,
+    loop_severities text NOT NULL,
+    loop_project_areas text NOT NULL,
+    loop_tags text NOT NULL,
+    loop_types text NOT NULL,
+    loop_use_cases text NOT NULL,
+    loop_max_iterations integer NOT NULL,
+    raw_text text NOT NULL,
+    handoff_command text NOT NULL,
+    rejection_reason text NOT NULL,
+    received_at text NOT NULL,
+    created_at text NOT NULL
+);
+
+-- +migrate Down
+DROP TABLE IF EXISTS remote_command_records;
 `
 }
 

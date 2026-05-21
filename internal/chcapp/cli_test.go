@@ -1281,6 +1281,65 @@ func TestNotifyTelegramTestSendsAndRecordsAudit(t *testing.T) {
 	}
 }
 
+func TestNotifyTelegramPollDryRunParsesFixture(t *testing.T) {
+	devRoot := t.TempDir()
+	fixturePath := writeTelegramUpdateFixture(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"notify",
+		"telegram",
+		"poll",
+		"--fixture",
+		fixturePath,
+		"--dry-run",
+		"--dev-root",
+		devRoot,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("notify telegram poll dry-run returned error: %v", err)
+	}
+
+	for _, want := range []string{"telegram_poll: parsed", "dry_run: true", "records: 2", "accepted", "rejected"} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	records := listRemoteCommandRecordsForTest(t, devRoot)
+	if len(records) != 0 {
+		t.Fatalf("remote command records = %d, want dry-run persistence skipped", len(records))
+	}
+}
+
+func TestNotifyTelegramPollPersistsFixtureRecords(t *testing.T) {
+	devRoot := t.TempDir()
+	fixturePath := writeTelegramUpdateFixture(t)
+
+	err := run(t.Context(), []string{
+		"notify",
+		"telegram",
+		"poll",
+		"--fixture",
+		fixturePath,
+		"--dev-root",
+		devRoot,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("notify telegram poll returned error: %v", err)
+	}
+
+	records := listRemoteCommandRecordsForTest(t, devRoot)
+	if len(records) != 2 {
+		t.Fatalf("remote command records = %d, want 2", len(records))
+	}
+
+	if records[0].Status != chc.RemoteCommandRecordAccepted || records[1].Status != chc.RemoteCommandRecordRejected {
+		t.Fatalf("records = %#v, want accepted then rejected", records)
+	}
+}
+
 type testTelegramPayload struct {
 	ChatID string `json:"chat_id"`
 	Text   string `json:"text"`
@@ -1294,6 +1353,23 @@ func writeTelegramNotifyConfig(t *testing.T, projectDir string) {
   telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
   telegram_chat_id: "123456"
 `)
+}
+
+func writeTelegramUpdateFixture(t *testing.T) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "updates.json")
+	content := `{"ok":true,"result":[
+{"update_id":1,"message":{"message_id":10,"from":{"id":100,"username":"ops"},"chat":{"id":200},"date":1768000000,"text":"@example status"}},
+{"update_id":2,"message":{"message_id":11,"from":{"id":101,"username":"ops"},"chat":{"id":201},"date":1768000001,"text":"merge dev"}}
+]}`
+
+	err := os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("write telegram update fixture: %v", err)
+	}
+
+	return path
 }
 
 func installTestTelegramSender(t *testing.T) *testTelegramPayload {
@@ -3735,6 +3811,37 @@ func listNotificationEventsForTest(
 	records, err := repository.ListProjectNotificationEvents(t.Context(), projectID)
 	if err != nil {
 		t.Fatalf("ListProjectNotificationEvents returned error: %v", err)
+	}
+
+	return records
+}
+
+func listRemoteCommandRecordsForTest(t *testing.T, devRoot string) []chc.RemoteCommandRecord {
+	t.Helper()
+
+	env, err := chc.NewUserEnvironment(chc.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	repository, err := chc.NewRemoteCommandRecordRepository(t.Context(), env, testAssetsFS())
+	if err != nil {
+		t.Fatalf("NewRemoteCommandRecordRepository returned error: %v", err)
+	}
+
+	t.Cleanup(func() {
+		err := repository.Close()
+		if err != nil {
+			t.Fatalf("close remote command repository: %v", err)
+		}
+	})
+
+	records, err := repository.ListRemoteCommandRecords(t.Context())
+	if err != nil {
+		t.Fatalf("ListRemoteCommandRecords returned error: %v", err)
 	}
 
 	return records

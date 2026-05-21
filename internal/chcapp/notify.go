@@ -43,8 +43,27 @@ func newNotifyTelegramCommand(stdout io.Writer) *cli.Command {
 		Name:  "telegram",
 		Usage: "Inspect and test Telegram notification setup",
 		Commands: []*cli.Command{
+			newNotifyTelegramPollCommand(stdout),
 			newNotifyTelegramTestCommand(stdout),
 		},
+	}
+}
+
+func newNotifyTelegramPollCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "poll",
+		Usage: "Parse Telegram updates into remote command handoff records",
+		Flags: append(projectRegistryFlags(),
+			&cli.StringFlag{
+				Name:  "fixture",
+				Usage: "Telegram getUpdates JSON fixture path",
+			},
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print parsed command records without persisting them",
+			},
+		),
+		Action: notifyTelegramPollAction(stdout),
 	}
 }
 
@@ -78,6 +97,41 @@ func notifyTelegramTestAction(stdout io.Writer) cli.ActionFunc {
 	}
 }
 
+func notifyTelegramPollAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runNotifyTelegramPoll(ctx, cmd, stdout)
+	}
+}
+
+func runNotifyTelegramPoll(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("notify telegram poll does not accept positional arguments")
+	}
+
+	if cmd.String("fixture") == "" {
+		return fmt.Errorf("notify telegram poll requires --fixture")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	records, err := loadNotifyTelegramPollFixture(cmd.String("fixture"))
+	if err != nil {
+		return err
+	}
+
+	if !cmd.Bool("dry-run") {
+		err = persistRemoteCommandRecords(ctx, env, records)
+		if err != nil {
+			return err
+		}
+	}
+
+	return printNotifyTelegramPollResult(stdout, records, cmd.Bool("dry-run"))
+}
+
 func runNotifyStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("notify status does not accept positional arguments")
@@ -89,6 +143,89 @@ func runNotifyStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	}
 
 	return printNotifyStatus(stdout, projectContext, config)
+}
+
+func loadNotifyTelegramPollFixture(path string) ([]chc.RemoteCommandRecord, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("open telegram update fixture: %w", err)
+	}
+
+	defer func() {
+		//nolint:errcheck // Decode errors are returned by DecodeTelegramUpdates.
+		_ = file.Close()
+	}()
+
+	updates, err := chc.DecodeTelegramUpdates(file)
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now().UTC()
+
+	records := make([]chc.RemoteCommandRecord, 0, len(updates))
+	for _, update := range updates {
+		record, err := chc.RemoteCommandRecordFromTelegramUpdate(update, now)
+		if err != nil {
+			return nil, err
+		}
+
+		records = append(records, record)
+	}
+
+	return records, nil
+}
+
+func persistRemoteCommandRecords(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	records []chc.RemoteCommandRecord,
+) error {
+	repository, err := chc.NewRemoteCommandRecordRepository(ctx, env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // The command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	for _, record := range records {
+		err = repository.CreateRemoteCommandRecord(ctx, record)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func printNotifyTelegramPollResult(
+	stdout io.Writer,
+	records []chc.RemoteCommandRecord,
+	dryRun bool,
+) error {
+	lines := []string{
+		"telegram_poll: parsed",
+		fmt.Sprintf("dry_run: %t", dryRun),
+		fmt.Sprintf("records: %d", len(records)),
+	}
+
+	for _, record := range records {
+		lines = append(lines, fmt.Sprintf(
+			"remote_command: %s\t%s\t%s\t%s",
+			record.Request.ID,
+			record.Status,
+			record.Request.Intent,
+			record.HandoffCommand,
+		))
+		if record.RejectionReason != "" {
+			lines = append(lines, "rejection: "+record.RejectionReason)
+		}
+	}
+
+	return printNotifyLines(stdout, lines)
 }
 
 func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
