@@ -168,6 +168,7 @@ func TestExecutionReportWriterWritesMarkdownReport(t *testing.T) {
 
 func TestExecutionReportWriterRefusesNonReportOverwrite(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
+
 	report, err := NewExecutionReport(ExecutionReportOptions{Execution: record})
 	if err != nil {
 		t.Fatalf("NewExecutionReport returned error: %v", err)

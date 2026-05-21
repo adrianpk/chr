@@ -151,9 +151,11 @@ The command:
 - reconciles the affected ticket into the derived SQLite index;
 - writes a `result-application.md` report artifact in the execution run
   directory.
+- writes an `execution-report.md` report artifact in the execution run
+  directory.
 
 Use `--dry-run` to print the planned application without mutating ticket
-Markdown, refreshing the index, or writing the report artifact.
+Markdown, refreshing the index, or writing report artifacts.
 
 ## Application Fields
 

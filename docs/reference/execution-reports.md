@@ -91,7 +91,19 @@ recorded.
 
 ## Current Boundary
 
-This reference describes the report model and Markdown rendering contract.
+Execution reports are written to the execution run artifact directory:
 
-Report persistence, listing, lookup, loop reports, and review handoff summaries
-belong to later `Reporting and Evidence` slices.
+```text
+<run_dir>/execution-report.md
+```
+
+For ticket result application, `chc ticket apply-result <execution-id>` writes
+this report after applying the result to ticket state. Dry-run result
+application prints the planned report path but does not write the report.
+
+The writer derives the report path from the execution record run directory. It
+creates the target directory when needed. If the target path already exists and
+does not look like an execution report, the writer refuses to overwrite it.
+
+Report listing, lookup, loop reports, and review handoff summaries belong to
+later `Reporting and Evidence` slices.
