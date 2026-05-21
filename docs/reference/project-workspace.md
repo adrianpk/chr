@@ -116,6 +116,23 @@ runtime:
   validation_command: make verify
 ```
 
+## Notification Config
+
+`.chc/config.yml` may also define notification settings under
+`notifications:`.
+
+Notifications are disabled by default. Telegram can be enabled with:
+
+```yml
+notifications:
+  telegram_enabled: true
+  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_chat_id: "123456"
+```
+
+The token value is read from the named environment variable by later dispatch
+code. It is not stored in project configuration.
+
 ## Runtime Template
 
 `chc init` creates `.chc/runtime/agent/Dockerfile` for new managed projects.
