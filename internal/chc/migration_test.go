@@ -50,6 +50,7 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	assertTableExists(t, db, "projects")
 	assertTableExists(t, db, "loop_runs")
 	assertTableExists(t, db, "daemon_state")
+	assertTableExists(t, db, "notification_events")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -115,6 +116,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260520000005-create_daemon_state.sql": {
 			Data: []byte(testCreateDaemonStateMigration()),
+		},
+		"assets/migration/sqlite/20260521000006-create_notification_events.sql": {
+			Data: []byte(testCreateNotificationEventsMigration()),
 		},
 	}
 }
@@ -266,6 +270,39 @@ CREATE TABLE daemon_state (
 
 -- +migrate Down
 DROP TABLE IF EXISTS daemon_state;
+`
+}
+
+func testCreateNotificationEventsMigration() string {
+	return `-- +migrate Up
+CREATE TABLE notification_events (
+    id text PRIMARY KEY,
+    project_id text NOT NULL,
+    type text NOT NULL,
+    severity text NOT NULL,
+    status text NOT NULL,
+    source text NOT NULL,
+    channel text NOT NULL,
+    ticket_key text NOT NULL,
+    execution_id text NOT NULL,
+    loop_run_id text NOT NULL,
+    daemon_pid integer NOT NULL,
+    summary text NOT NULL,
+    detail text NOT NULL,
+    failure_reason text NOT NULL,
+    created_at text NOT NULL,
+    delivered_at text,
+    updated_at text NOT NULL
+);
+
+CREATE INDEX notification_events_project_created_idx
+ON notification_events (project_id, created_at);
+
+CREATE INDEX notification_events_project_status_idx
+ON notification_events (project_id, status);
+
+-- +migrate Down
+DROP TABLE IF EXISTS notification_events;
 `
 }
 
