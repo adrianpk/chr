@@ -5,6 +5,9 @@ Maintenance commands inspect and recover local `chc` state.
 They are intended for local diagnostics. They should report exact state before
 any repair or cleanup command mutates files or database rows.
 
+For a task-oriented recovery sequence, see
+[Inspect and recover local state](../how-to/inspect-and-recover-local-state.md).
+
 ## Diagnostic Bundle
 
 Write a project-local diagnostic bundle:

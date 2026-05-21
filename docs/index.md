@@ -14,6 +14,7 @@ Task-oriented guides:
 
 - [User guide](how-to/user-guide/index.md)
 - [Find execution and loop evidence](how-to/find-execution-and-loop-evidence.md)
+- [Inspect and recover local state](how-to/inspect-and-recover-local-state.md)
 
 ## Reference
 
@@ -25,6 +26,7 @@ Exact contracts and command behavior:
 - [Notifications](reference/notifications.md)
 - [Notification configuration](reference/notification-config.md)
 - [Remote commands](reference/remote-commands.md)
+- [Maintenance](reference/maintenance.md)
 - [Authoring sessions](reference/authoring-sessions.md)
 - [Project CLI](reference/project-cli.md)
 - [Project registry](reference/project-registry.md)

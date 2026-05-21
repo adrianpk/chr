@@ -353,6 +353,33 @@ chc daemon stop
 
 The daemon is a local foreground coordinator. It is not a hosted service.
 
+## Inspect and Recover Local State
+
+Write a local diagnostic bundle:
+
+```sh
+chc maintenance bundle
+```
+
+Inspect database, registry, execution artifact, and cleanup-preview state:
+
+```sh
+chc maintenance db status
+chc maintenance registry status
+chc maintenance execution artifacts
+chc maintenance execution cleanup-preview
+```
+
+Repair moved or stale registry entries explicitly:
+
+```sh
+chc maintenance registry disable example
+chc maintenance registry set-path example /path/to/project
+```
+
+Maintenance previews and diagnostics are read-only unless the command name
+describes an explicit repair action.
+
 ## Proving-Ground Workflows
 
 The proving-ground commands exercise direct sandbox behavior against controlled
@@ -415,3 +442,4 @@ Docker receives the same files through the project mount, usually under
 - [Ticket loop](../../reference/ticket-loop.md)
 - [Ticket result application](../../reference/ticket-result-application.md)
 - [Daemon coordination](../../reference/daemon-coordination.md)
+- [Maintenance](../../reference/maintenance.md)
