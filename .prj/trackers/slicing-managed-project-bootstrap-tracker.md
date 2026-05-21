@@ -1,6 +1,6 @@
 # Managed Project Bootstrap Slicing Tracker
 
-Status: active
+Status: completed
 
 ## Slicing Checklist
 
@@ -20,7 +20,7 @@ Status: active
 | Asset Profiles | Delivered | Embedded `standard`, `personal`, and `minimal` profiles exist. |
 | Root Agents File | Delivered | Root `AGENTS.md` is materialized and existing root file is preserved. |
 | Protocol Defaults | Delivered | Standard profile includes protocol files and playbooks. |
-| Bootstrap Safety Pass | In Review | Branch `feat/bootstrap-safety-pass`; PR pending review. |
+| Bootstrap Safety Pass | Delivered | Repository PR #116 merged. |
 
 ## Pending Slice Candidate: Bootstrap Safety Pass
 
