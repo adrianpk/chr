@@ -1,0 +1,115 @@
+package chc
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestReviewHandoffSummaryRendersSucceededExecution(t *testing.T) {
+	record := testExecutionReportRecord(t.TempDir())
+	result := ExecutionResult{
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Status:      ExecutionResultStatusSucceeded,
+		Summary:     "ready for review",
+		ChangedFiles: []ExecutionResultChangedFile{
+			{Path: "internal/chc/review_handoff_summary.go", Summary: "add handoff summary"},
+		},
+	}
+
+	report, err := NewExecutionReport(ExecutionReportOptions{
+		Execution: record,
+		Result:    &result,
+	})
+	if err != nil {
+		t.Fatalf("NewExecutionReport returned error: %v", err)
+	}
+
+	summary := NewReviewHandoffSummary(report)
+	markdown := RenderReviewHandoffSummaryMarkdown(summary)
+
+	for _, want := range []string{
+		"# Review Handoff Summary",
+		"- execution: exec-1",
+		"- ticket: CHC-1",
+		"- status: succeeded",
+		"- result_status: succeeded",
+		"- summary: ready for review",
+		"- status: succeeded",
+		"- internal/chc/review_handoff_summary.go: add handoff summary",
+		"No blocker or failure was recorded.",
+		"Review changed files and validation evidence.",
+	} {
+		if !strings.Contains(markdown, want) {
+			t.Fatalf("markdown does not contain %q:\n%s", want, markdown)
+		}
+	}
+}
+
+func TestReviewHandoffSummaryRendersFailedExecution(t *testing.T) {
+	record := testExecutionReportRecord(t.TempDir())
+	record.Status = ExecutionStatusFailed
+	record.FailureReason = "validation: make verify failed"
+	result := ExecutionResult{
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Status:      ExecutionResultStatusFailed,
+		Summary:     "validation failed",
+	}
+
+	report, err := NewExecutionReport(ExecutionReportOptions{
+		Execution: record,
+		Result:    &result,
+	})
+	if err != nil {
+		t.Fatalf("NewExecutionReport returned error: %v", err)
+	}
+
+	markdown := RenderReviewHandoffSummaryMarkdown(NewReviewHandoffSummary(report))
+
+	for _, want := range []string{
+		"- status: failed",
+		"- result_status: failed",
+		"- status: failed",
+		"- kind: validation",
+		"- reason: validation: make verify failed",
+		"Inspect blocker details, runtime log, validation output, and result artifact.",
+	} {
+		if !strings.Contains(markdown, want) {
+			t.Fatalf("markdown does not contain %q:\n%s", want, markdown)
+		}
+	}
+}
+
+func TestReviewHandoffSummaryRendersBlockedExecution(t *testing.T) {
+	record := testExecutionReportRecord(t.TempDir())
+	record.Status = ExecutionStatusBlocked
+	record.FailureReason = "worker: codex could not resolve compile error"
+	result := ExecutionResult{
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Status:      ExecutionResultStatusFailed,
+		Summary:     "blocked by compile error",
+	}
+
+	report, err := NewExecutionReport(ExecutionReportOptions{
+		Execution: record,
+		Result:    &result,
+	})
+	if err != nil {
+		t.Fatalf("NewExecutionReport returned error: %v", err)
+	}
+
+	markdown := RenderReviewHandoffSummaryMarkdown(NewReviewHandoffSummary(report))
+
+	for _, want := range []string{
+		"- status: blocked",
+		"- kind: worker",
+		"- reason: worker: codex could not resolve compile error",
+		"Inspect blocker details, runtime log, validation output, and result artifact.",
+	} {
+		if !strings.Contains(markdown, want) {
+			t.Fatalf("markdown does not contain %q:\n%s", want, markdown)
+		}
+	}
+}
