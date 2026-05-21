@@ -75,6 +75,7 @@ func filterReportsByID(projectDir string, reports []ReportListEntry, reportID st
 	}
 
 	matches := []ReportListEntry{}
+
 	for _, report := range reports {
 		if reportMatchesID(projectDir, report, reportID) {
 			matches = append(matches, report)
