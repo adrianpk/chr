@@ -13,7 +13,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -21,7 +21,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Database Migration Status | Planned | `feat/slice-1-db-migration-status` | `feat(slice-1): db migration status` | `.prj/reports/slices/maintenance-and-recovery/slice-1-db-migration-status.md` | Pending. |
+| Slice 1: Database Migration Status | Reviewing | `feat/slice-1-db-migration-status` | `feat(slice-1): db migration status` | `.prj/reports/slices/maintenance-and-recovery/slice-1-db-migration-status.md` | PR pending. |
 | Slice 2: Project Registry Diagnostics | Planned | `feat/slice-2-project-registry-diagnostics` | `feat(slice-2): project registry diagnostics` | `.prj/reports/slices/maintenance-and-recovery/slice-2-project-registry-diagnostics.md` | Pending. |
 | Slice 3: Project Registry Repair | Planned | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Pending. |
 | Slice 4: Execution Artifact Drift | Planned | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Pending. |
@@ -43,23 +43,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add migration status model.
-- [ ] Compare migration assets with `schema_migrations`.
-- [ ] Add `chc maintenance db status`.
-- [ ] Add focused tests.
-- [ ] Document the command.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add migration status model.
+- [x] Compare migration assets with `schema_migrations`.
+- [x] Add `chc maintenance db status`.
+- [x] Add focused tests.
+- [x] Document the command.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
+- T1.1: `9637c96`
+- T1.2: `9637c96`
+- T1.3: `9637c96`
+- T1.4: `9637c96`
+- T1.5: `827bfc7`
+- T1.6: `docs(slice-1): record db migration status`
+- T1.7: `make verify`
 
 ## Slice 2: Project Registry Diagnostics
 
