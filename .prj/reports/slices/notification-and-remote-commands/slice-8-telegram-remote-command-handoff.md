@@ -1,11 +1,11 @@
 # Slice 8: Telegram Remote Command Handoff
 
-Status: in review
+Status: delivered
 Slicing: Notification and Remote Commands
 Plan: `.prj/plans/slicing-notification-and-remote-commands-plan.md`
 Tracker: `.prj/trackers/slicing-notification-and-remote-commands-tracker.md`
 Branch: `feat/slice-8-telegram-remote-command-handoff`
-PR: pending
+PR: `#115`
 
 ## Purpose
 
