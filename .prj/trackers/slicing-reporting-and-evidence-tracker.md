@@ -24,7 +24,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 2: Execution Report Artifact Writer | Delivered | `feat/slice-2-execution-report-writer` | `feat(slice-2): execution report writer` | `.prj/reports/slices/reporting-and-evidence/slice-2-execution-report-writer.md` | Repository PR #119 merged. |
 | Slice 3: Validation and Changed-File Summaries | Delivered | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | Repository PR #120 merged. |
 | Slice 4: Loop Report Format | Delivered | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Repository PR #121 merged. |
-| Slice 5: Report Listing | Planned | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Pending. |
+| Slice 5: Report Listing | Reviewing | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | PR pending. |
 | Slice 6: Report Lookup | Planned | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Pending. |
 | Slice 7: Review Handoff Summary | Planned | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | Pending. |
 | Slice 8: Reporting Documentation | Planned | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | Pending. |
@@ -169,23 +169,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add `chc report` command group.
-- [ ] Add `chc report list`.
-- [ ] Support report filters.
-- [ ] Print stable output.
-- [ ] Add CLI tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add `chc report` command group.
+- [x] Add `chc report list`.
+- [x] Support report filters.
+- [x] Print stable output.
+- [x] Add CLI tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending
-- T5.2: pending
-- T5.3: pending
-- T5.4: pending
-- T5.5: pending
-- T5.6: pending
-- T5.7: pending
+- T5.1: `baa4010`
+- T5.2: `baa4010`
+- T5.3: `baa4010`
+- T5.4: `baa4010`
+- T5.5: `baa4010`
+- T5.6: `b597a8e`
+- T5.7: `make verify`
 
 ## Slice 6: Report Lookup
 
@@ -288,6 +288,9 @@ Task commits:
 - Slice 3 full validation: `make verify` pass.
 - Slice 4 focused tests: `go test ./internal/chc -run 'Test(NewLoopReport|RenderLoopReport)'` pass.
 - Slice 4 full validation: `make verify` pass.
+- Slice 5 focused core tests: `go test ./internal/chc -run 'TestReportLister'` pass.
+- Slice 5 focused CLI tests: `go test ./internal/chcapp -run 'TestReportList'` pass.
+- Slice 5 full validation: `make verify` pass.
 
 ## Notes
 
