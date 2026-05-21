@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Project Registry Repair | Delivered | `feat/slice-3-project-registry-repair` | `feat(slice-3): project registry repair` | `.prj/reports/slices/maintenance-and-recovery/slice-3-project-registry-repair.md` | Repository PR #128 merged. |
 | Slice 4: Execution Artifact Drift | Delivered | `feat/slice-4-execution-artifact-drift` | `feat(slice-4): execution artifact drift` | `.prj/reports/slices/maintenance-and-recovery/slice-4-execution-artifact-drift.md` | Repository PR #129 merged. |
 | Slice 5: Runtime Artifact Cleanup Preview | Delivered | `feat/slice-5-runtime-artifact-cleanup-preview` | `feat(slice-5): runtime artifact cleanup preview` | `.prj/reports/slices/maintenance-and-recovery/slice-5-runtime-artifact-cleanup-preview.md` | Repository PR #130 merged. |
-| Slice 6: Diagnostic Bundle | Planned | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | Pending. |
+| Slice 6: Diagnostic Bundle | Reviewing | `feat/slice-6-diagnostic-bundle` | `feat(slice-6): diagnostic bundle` | `.prj/reports/slices/maintenance-and-recovery/slice-6-diagnostic-bundle.md` | PR pending. |
 | Slice 7: Maintenance Documentation | Planned | `feat/slice-7-maintenance-docs` | `feat(slice-7): maintenance docs` | `.prj/reports/slices/maintenance-and-recovery/slice-7-maintenance-docs.md` | Pending. |
 
 ## Slice 1: Database Migration Status
@@ -203,23 +203,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Gather command-readable local state summaries.
-- [ ] Include selected reports and maintenance diagnostics.
-- [ ] Avoid copying secrets or credentials.
-- [ ] Write deterministic Markdown bundle under `.chc/maintenance/`.
-- [ ] Add focused tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Gather command-readable local state summaries.
+- [x] Include selected reports and maintenance diagnostics.
+- [x] Avoid copying secrets or credentials.
+- [x] Write deterministic Markdown bundle under `.chc/maintenance/`.
+- [x] Add focused tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending
-- T6.2: pending
-- T6.3: pending
-- T6.4: pending
-- T6.5: pending
-- T6.6: pending
-- T6.7: pending
+- T6.1: `5d90e89`
+- T6.2: `5d90e89`
+- T6.3: `5d90e89`
+- T6.4: `5d90e89`
+- T6.5: `5d90e89`
+- T6.6: `docs(slice-6): record diagnostic bundle`
+- T6.7: `make verify`
 
 ## Slice 7: Maintenance Documentation
 
