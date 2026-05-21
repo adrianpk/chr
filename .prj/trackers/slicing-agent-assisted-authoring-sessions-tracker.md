@@ -18,7 +18,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 
 ## Active Slice
 
-Slice 4: Model Invocation Adapter
+Slice 5: Adaptive Quiz Loop
 
 ## Slice Status
 
