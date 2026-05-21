@@ -22,7 +22,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Notification Event Model | Delivered | `feat/slice-1-notification-event-model` | `feat(slice-1): notification event model` | `.prj/reports/slices/notification-and-remote-commands/slice-1-notification-event-model.md` | Repository PR #108 merged. |
 | Slice 2: Notification Configuration | Delivered | `feat/slice-2-notification-config` | `feat(slice-2): notification config` | `.prj/reports/slices/notification-and-remote-commands/slice-2-notification-config.md` | Repository PR #109 merged. |
-| Slice 3: Notification Audit Repository | Planned | `feat/slice-3-notification-audit-repository` | `feat(slice-3): notification audit repository` | `.prj/reports/slices/notification-and-remote-commands/slice-3-notification-audit-repository.md` | Pending implementation. |
+| Slice 3: Notification Audit Repository | Reviewing | `feat/slice-3-notification-audit-repository` | `feat(slice-3): notification audit repository` | `.prj/reports/slices/notification-and-remote-commands/slice-3-notification-audit-repository.md` | Repository PR #110. |
 | Slice 4: Notify Command Skeleton | Planned | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Pending implementation. |
 | Slice 5: Telegram Dispatch Boundary | Planned | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Pending implementation. |
 | Slice 6: Loop and Ticket Notifications | Planned | `feat/slice-6-loop-ticket-notifications` | `feat(slice-6): loop ticket notifications` | `.prj/reports/slices/notification-and-remote-commands/slice-6-loop-ticket-notifications.md` | Pending implementation. |
@@ -111,23 +111,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add SQLite migration for notification events.
-- [ ] Add repository create, update, get, and list operations.
-- [ ] Store channel, status, timestamps, references, summary, and failure reason.
-- [ ] Keep payload storage bounded and text-based.
-- [ ] Add repository tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add SQLite migration for notification events.
+- [x] Add repository create, update, get, and list operations.
+- [x] Store channel, status, timestamps, references, summary, and failure reason.
+- [x] Keep payload storage bounded and text-based.
+- [x] Add repository tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending
-- T3.2: pending
-- T3.3: pending
-- T3.4: pending
-- T3.5: pending
-- T3.6: pending
-- T3.7: pending
+- T3.1: `059e597`
+- T3.2: `059e597`
+- T3.3: `059e597`
+- T3.4: `059e597`
+- T3.5: `059e597`
+- T3.6: `docs(slice-3): record notification audit report`
+- T3.7: `make verify`
 
 ## Slice 4: Notify Command Skeleton
 
