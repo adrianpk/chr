@@ -26,7 +26,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 4: Notify Command Skeleton | Delivered | `feat/slice-4-notify-command-skeleton` | `feat(slice-4): notify command skeleton` | `.prj/reports/slices/notification-and-remote-commands/slice-4-notify-command-skeleton.md` | Repository PR #111 merged. |
 | Slice 5: Telegram Dispatch Boundary | Delivered | `feat/slice-5-telegram-dispatch-boundary` | `feat(slice-5): telegram dispatch boundary` | `.prj/reports/slices/notification-and-remote-commands/slice-5-telegram-dispatch-boundary.md` | Repository PR #112 merged. |
 | Slice 6: Loop and Ticket Notifications | Delivered | `feat/slice-6-loop-ticket-notifications` | `feat(slice-6): loop ticket notifications` | `.prj/reports/slices/notification-and-remote-commands/slice-6-loop-ticket-notifications.md` | Repository PR #113 merged. |
-| Slice 7: Remote Command Intake Model | Planned | `feat/slice-7-remote-command-intake-model` | `feat(slice-7): remote command intake model` | `.prj/reports/slices/notification-and-remote-commands/slice-7-remote-command-intake-model.md` | Pending implementation. |
+| Slice 7: Remote Command Intake Model | In Review | `feat/slice-7-remote-command-intake-model` | `feat(slice-7): remote command intake model` | `.prj/reports/slices/notification-and-remote-commands/slice-7-remote-command-intake-model.md` | PR pending review. |
 | Slice 8: Telegram Remote Command Handoff | Planned | `feat/slice-8-telegram-remote-command-handoff` | `feat(slice-8): telegram remote command handoff` | `.prj/reports/slices/notification-and-remote-commands/slice-8-telegram-remote-command-handoff.md` | Pending implementation. |
 
 ## Slice 1: Notification Event Model
@@ -245,25 +245,25 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add remote command request model.
-- [ ] Support status, loop start, ticket start, and ticket comment intents.
-- [ ] Validate sender, project selector, arguments, and timestamps.
-- [ ] Add parser for a small text command grammar.
-- [ ] Reject unknown or unsafe commands clearly.
-- [ ] Add focused parser and validation tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add remote command request model.
+- [x] Support status, loop start, ticket start, and ticket comment intents.
+- [x] Validate sender, project selector, arguments, and timestamps.
+- [x] Add parser for a small text command grammar.
+- [x] Reject unknown or unsafe commands clearly.
+- [x] Add focused parser and validation tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending
-- T7.2: pending
-- T7.3: pending
-- T7.4: pending
-- T7.5: pending
-- T7.6: pending
-- T7.7: pending
-- T7.8: pending
+- T7.1: this PR
+- T7.2: this PR
+- T7.3: this PR
+- T7.4: this PR
+- T7.5: this PR
+- T7.6: this PR
+- T7.7: this PR
+- T7.8: `make verify`
 
 ## Slice 8: Telegram Remote Command Handoff
 

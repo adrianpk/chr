@@ -7,6 +7,9 @@ The event model does not send Telegram or email messages by itself. Transport,
 configuration, audit persistence, and remote command intake are separate
 contracts built on top of this event shape.
 
+Remote command request parsing is described in
+[Remote commands](remote-commands.md).
+
 ## Event Fields
 
 Required fields:

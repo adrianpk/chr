@@ -23,6 +23,7 @@ Exact contracts and command behavior:
 - [Runtime configuration](reference/runtime-config.md)
 - [Notifications](reference/notifications.md)
 - [Notification configuration](reference/notification-config.md)
+- [Remote commands](reference/remote-commands.md)
 - [Authoring sessions](reference/authoring-sessions.md)
 - [Project CLI](reference/project-cli.md)
 - [Project registry](reference/project-registry.md)
