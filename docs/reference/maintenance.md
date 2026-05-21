@@ -43,3 +43,44 @@ Detailed rows:
 
 Unknown migrations usually mean the database was created or migrated by a newer
 binary than the one currently running.
+
+## Project Registry Status
+
+Inspect registered project state:
+
+```sh
+chc maintenance registry status
+```
+
+Use an isolated development environment:
+
+```sh
+chc maintenance registry status --dev-root /tmp/chc-dev
+```
+
+The command is read-only. It does not select, disable, remove, or repair
+projects.
+
+Output starts with:
+
+- `projects`: number of registered project rows.
+
+Each project row includes:
+
+- `project`: registered project name;
+- `path`: registered project path;
+- `enabled`: whether the registry row is enabled;
+- `active`: whether the project is currently selected;
+- `path_exists`: whether the registered path exists and is a directory;
+- `workspace_exists`: whether `<path>/.chc` exists and is a directory;
+- `status`: diagnostic status;
+- `id`: registered project id.
+
+Diagnostic statuses:
+
+- `ok`: the project is enabled, the path exists, and `.chc/` exists;
+- `disabled`: the project row is disabled;
+- `missing_path`: the registered project path is missing or is not a directory;
+- `missing_workspace`: the path exists but does not contain `.chc/`.
+
+Registry repair commands belong to a later maintenance slice.

@@ -110,6 +110,7 @@ Inspect local maintenance state:
 
 ```sh
 chc maintenance db status
+chc maintenance registry status
 ```
 
 ## Authoring
