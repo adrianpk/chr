@@ -23,7 +23,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 1: Execution Report Format | Delivered | `feat/slice-1-execution-report-format` | `feat(slice-1): execution report format` | `.prj/reports/slices/reporting-and-evidence/slice-1-execution-report-format.md` | Repository PR #118 merged. |
 | Slice 2: Execution Report Artifact Writer | Delivered | `feat/slice-2-execution-report-writer` | `feat(slice-2): execution report writer` | `.prj/reports/slices/reporting-and-evidence/slice-2-execution-report-writer.md` | Repository PR #119 merged. |
 | Slice 3: Validation and Changed-File Summaries | Delivered | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | Repository PR #120 merged. |
-| Slice 4: Loop Report Format | Planned | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Pending. |
+| Slice 4: Loop Report Format | Reviewing | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | PR pending. |
 | Slice 5: Report Listing | Planned | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Pending. |
 | Slice 6: Report Lookup | Planned | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Pending. |
 | Slice 7: Review Handoff Summary | Planned | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | Pending. |
@@ -137,23 +137,23 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add loop report summary model.
-- [ ] Render deterministic Markdown.
-- [ ] Include loop status, counts, failure reason, timings, and related executions when available.
-- [ ] Add focused tests.
-- [ ] Document the loop report format.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add loop report summary model.
+- [x] Render deterministic Markdown.
+- [x] Include loop status, counts, failure reason, timings, and related executions when available.
+- [x] Add focused tests.
+- [x] Document the loop report format.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending
-- T4.2: pending
-- T4.3: pending
-- T4.4: pending
-- T4.5: pending
-- T4.6: pending
-- T4.7: pending
+- T4.1: `9d38525`
+- T4.2: `9d38525`
+- T4.3: `9d38525`
+- T4.4: `9d38525`
+- T4.5: `b10ab17`
+- T4.6: `bdb7781`
+- T4.7: `make verify`
 
 ## Slice 5: Report Listing
 
@@ -286,6 +286,8 @@ Task commits:
 - Slice 2 full validation: `make verify` pass.
 - Slice 3 focused tests: `go test ./internal/chc -run 'Test(NewExecutionReport|RenderExecutionReport|ExecutionReportWriter)'` pass.
 - Slice 3 full validation: `make verify` pass.
+- Slice 4 focused tests: `go test ./internal/chc -run 'Test(NewLoopReport|RenderLoopReport)'` pass.
+- Slice 4 full validation: `make verify` pass.
 
 ## Notes
 
