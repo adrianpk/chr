@@ -287,6 +287,155 @@ func TestDaemonStartDryRunRejectsFreshRunningState(t *testing.T) {
 	}
 }
 
+func TestAuthorSessionNewListAndShow(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	sessionID := createAuthorSessionForTest(t, projectDir)
+
+	assertAuthorSessionListContains(t, projectDir, sessionID)
+	assertAuthorSessionShowContains(t, projectDir, sessionID)
+}
+
+func createAuthorSessionForTest(t *testing.T, projectDir string) string {
+	t.Helper()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"session",
+		"new",
+		"--dir",
+		projectDir,
+		"--target",
+		"spec",
+		"--topic",
+		"Billing sync",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author session new returned error: %v", err)
+	}
+
+	return authorSessionIDFromOutput(t, stdout.String())
+}
+
+func assertAuthorSessionListContains(t *testing.T, projectDir, sessionID string) {
+	t.Helper()
+
+	var listOut bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"session",
+		"list",
+		"--dir",
+		projectDir,
+	}, &listOut, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author session list returned error: %v", err)
+	}
+
+	if !strings.Contains(listOut.String(), sessionID) {
+		t.Fatalf("list output does not contain session id %q:\n%s", sessionID, listOut.String())
+	}
+}
+
+func assertAuthorSessionShowContains(t *testing.T, projectDir, sessionID string) {
+	t.Helper()
+
+	var showOut bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"session",
+		"show",
+		"--dir",
+		projectDir,
+		sessionID,
+	}, &showOut, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author session show returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"session: " + sessionID,
+		"mode: static",
+		"target: spec",
+		"topic: Billing sync",
+	} {
+		if !strings.Contains(showOut.String(), want) {
+			t.Fatalf("show output does not contain %q:\n%s", want, showOut.String())
+		}
+	}
+}
+
+func TestAuthorQuizNewDryRunPrintsEditableQuiz(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"quiz",
+		"new",
+		"--dir",
+		projectDir,
+		"--target",
+		"spec",
+		"--topic",
+		"Billing sync",
+		"--question-count",
+		"2",
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author quiz new dry-run returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"quiz: planned",
+		"dry_run: true",
+		"questions: 2",
+		"# Static Quiz",
+		"Answer:",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestAuthorQuizNewWritesSessionAndQuiz(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"author",
+		"quiz",
+		"new",
+		"--dir",
+		projectDir,
+		"--target",
+		"spec",
+		"--topic",
+		"Billing sync",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("author quiz new returned error: %v", err)
+	}
+
+	sessionID := authorSessionIDFromOutput(t, stdout.String())
+	sessionPath := filepath.Join(projectDir, ".chc", "authoring", "sessions", sessionID, "session.md")
+	quizPath := filepath.Join(projectDir, ".chc", "quizzes", sessionID+"-billing-sync.md")
+
+	for _, path := range []string{sessionPath, quizPath} {
+		_, err = os.Stat(path)
+		if err != nil {
+			t.Fatalf("expected path %s: %v", path, err)
+		}
+	}
+}
+
 func TestDaemonStartDryRunAllowsStaleRunningState(t *testing.T) {
 	devRoot := t.TempDir()
 	startedAt := time.Now().UTC().Add(-10 * time.Minute)
@@ -2822,6 +2971,21 @@ func newTestWorkspace(t *testing.T) string {
 	}
 
 	return projectDir
+}
+
+func authorSessionIDFromOutput(t *testing.T, output string) string {
+	t.Helper()
+
+	for _, line := range strings.Split(output, "\n") {
+		value, ok := strings.CutPrefix(line, "id: ")
+		if ok {
+			return value
+		}
+	}
+
+	t.Fatalf("output does not contain session id:\n%s", output)
+
+	return ""
 }
 
 func writeRuntimeTemplate(t *testing.T, projectDir string) {

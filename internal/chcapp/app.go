@@ -27,6 +27,7 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 		ErrWriter:             stderr,
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
+			newAuthorCommand(stdout),
 			newDaemonCommand(stdout),
 			newIndexCommand(stdout),
 			newInitCommand(stdout),
