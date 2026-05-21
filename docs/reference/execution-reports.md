@@ -70,6 +70,24 @@ When a structured execution result is available, the report includes:
 When no result is available, the report explicitly says that no execution result
 was available.
 
+### Validation
+
+Validation summary includes:
+
+- validation status;
+- validation command;
+- validation artifact path.
+
+Validation status is derived from the execution record:
+
+- `succeeded` when execution status is `succeeded` and a validation artifact path
+  exists;
+- `failed` when execution status is `failed` or `blocked` and a validation
+  artifact path exists;
+- `unknown` when execution is still pending or running and a validation artifact
+  path exists;
+- `not_run` when no validation artifact path is available.
+
 ### Changed Files
 
 Changed files come from the structured execution result envelope.
@@ -78,6 +96,13 @@ Each changed file entry includes:
 
 - workspace-relative path;
 - optional summary.
+
+Changed files are sorted by path before rendering. Reports render at most 25
+changed-file entries and include summary fields showing:
+
+- total changed files;
+- rendered changed files;
+- whether the list was truncated.
 
 When no changed files are available, the report explicitly says that no changed
 files were reported.
