@@ -25,7 +25,7 @@ Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
 | Slice 3: Validation and Changed-File Summaries | Delivered | `feat/slice-3-evidence-summaries` | `feat(slice-3): evidence summaries` | `.prj/reports/slices/reporting-and-evidence/slice-3-evidence-summaries.md` | Repository PR #120 merged. |
 | Slice 4: Loop Report Format | Delivered | `feat/slice-4-loop-report-format` | `feat(slice-4): loop report format` | `.prj/reports/slices/reporting-and-evidence/slice-4-loop-report-format.md` | Repository PR #121 merged. |
 | Slice 5: Report Listing | Delivered | `feat/slice-5-report-listing` | `feat(slice-5): report listing` | `.prj/reports/slices/reporting-and-evidence/slice-5-report-listing.md` | Repository PR #122 merged. |
-| Slice 6: Report Lookup | Reviewing | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Repository PR #123 open. |
+| Slice 6: Report Lookup | Delivered | `feat/slice-6-report-lookup` | `feat(slice-6): report lookup` | `.prj/reports/slices/reporting-and-evidence/slice-6-report-lookup.md` | Repository PR #123 merged. |
 | Slice 7: Review Handoff Summary | Planned | `feat/slice-7-review-handoff-summary` | `feat(slice-7): review handoff summary` | `.prj/reports/slices/reporting-and-evidence/slice-7-review-handoff-summary.md` | Pending. |
 | Slice 8: Reporting Documentation | Planned | `feat/slice-8-reporting-docs` | `feat(slice-8): reporting docs` | `.prj/reports/slices/reporting-and-evidence/slice-8-reporting-docs.md` | Pending. |
 
