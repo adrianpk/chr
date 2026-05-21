@@ -19,6 +19,10 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 	}
 
 	assertDefaultRuntimeConfig(t, config.Runtime)
+
+	if config.Notifications != DefaultNotificationConfig() {
+		t.Fatalf("Notifications = %#v, want %#v", config.Notifications, DefaultNotificationConfig())
+	}
 }
 
 func TestLoadWorkspaceConfigParsesTicketAndRuntimeConfig(t *testing.T) {
@@ -56,6 +60,48 @@ runtime:
 	}
 }
 
+func TestLoadWorkspaceConfigParsesNotificationConfig(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `notifications:
+  telegram_enabled: true
+  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_chat_id: "123456"
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := NotificationConfig{
+		Telegram: TelegramNotificationConfig{
+			Enabled:     true,
+			BotTokenEnv: "CHC_TELEGRAM_BOT_TOKEN",
+			ChatID:      "123456",
+		},
+	}
+	if config.Notifications != want {
+		t.Fatalf("Notifications = %#v, want %#v", config.Notifications, want)
+	}
+}
+
+func TestLoadWorkspaceConfigKeepsNotificationsDisabledByDefault(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `notifications:
+  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_chat_id: "123456"
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	if config.Notifications.Telegram.Enabled {
+		t.Fatal("Telegram notifications are enabled by default")
+	}
+}
+
 func TestLoadWorkspaceConfigKeepsRuntimeDefaultsForMissingKeys(t *testing.T) {
 	dir := t.TempDir()
 	writeWorkspaceConfig(t, dir, `runtime:
@@ -87,6 +133,68 @@ func TestLoadWorkspaceConfigSupportsLegacyTopLevelTicketKeyPrefix(t *testing.T) 
 
 	if config.TicketKeyPrefix != "LEGACY" {
 		t.Fatalf("TicketKeyPrefix = %q, want LEGACY", config.TicketKeyPrefix)
+	}
+}
+
+func TestValidateNotificationConfigAcceptsDisabledConfig(t *testing.T) {
+	err := ValidateNotificationConfig(NotificationConfig{})
+	if err != nil {
+		t.Fatalf("ValidateNotificationConfig returned error: %v", err)
+	}
+}
+
+func TestValidateNotificationConfigAcceptsEnabledTelegramConfig(t *testing.T) {
+	config := NotificationConfig{
+		Telegram: TelegramNotificationConfig{
+			Enabled:     true,
+			BotTokenEnv: "CHC_TELEGRAM_BOT_TOKEN",
+			ChatID:      "123456",
+		},
+	}
+
+	err := ValidateNotificationConfig(config)
+	if err != nil {
+		t.Fatalf("ValidateNotificationConfig returned error: %v", err)
+	}
+}
+
+func TestValidateNotificationConfigRejectsIncompleteTelegramConfig(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		config  NotificationConfig
+		wantErr string
+	}{
+		{
+			name: "token env",
+			config: NotificationConfig{
+				Telegram: TelegramNotificationConfig{
+					Enabled: true,
+					ChatID:  "123456",
+				},
+			},
+			wantErr: "telegram bot token environment variable is required",
+		},
+		{
+			name: "chat id",
+			config: NotificationConfig{
+				Telegram: TelegramNotificationConfig{
+					Enabled:     true,
+					BotTokenEnv: "CHC_TELEGRAM_BOT_TOKEN",
+				},
+			},
+			wantErr: "telegram chat id is required",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			err := ValidateNotificationConfig(test.config)
+			if err == nil {
+				t.Fatal("ValidateNotificationConfig returned nil error")
+			}
+
+			if err.Error() != test.wantErr+" when telegram notifications are enabled" {
+				t.Fatalf("ValidateNotificationConfig error = %q, want %q", err.Error(), test.wantErr)
+			}
+		})
 	}
 }
 

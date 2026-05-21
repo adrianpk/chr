@@ -12,6 +12,7 @@ import (
 type WorkspaceConfig struct {
 	TicketKeyPrefix string
 	Runtime         RuntimeConfig
+	Notifications   NotificationConfig
 }
 
 type RuntimeConfig struct {
@@ -20,6 +21,16 @@ type RuntimeConfig struct {
 	Workdir           string
 	ArtifactDir       string
 	ValidationCommand string
+}
+
+type NotificationConfig struct {
+	Telegram TelegramNotificationConfig
+}
+
+type TelegramNotificationConfig struct {
+	Enabled     bool
+	BotTokenEnv string
+	ChatID      string
 }
 
 const (
@@ -40,10 +51,15 @@ func DefaultRuntimeConfig() RuntimeConfig {
 	}
 }
 
+func DefaultNotificationConfig() NotificationConfig {
+	return NotificationConfig{}
+}
+
 func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 	config := WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,
 		Runtime:         DefaultRuntimeConfig(),
+		Notifications:   DefaultNotificationConfig(),
 	}
 	path := filepath.Join(projectDir, ".chc", "config.yml")
 
@@ -96,6 +112,10 @@ func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
 		if section == "runtime" {
 			setRuntimeConfigValue(&config.Runtime, key, value)
 		}
+
+		if section == "notifications" {
+			setNotificationConfigValue(&config.Notifications, key, value)
+		}
 	}
 
 	err := scanner.Err()
@@ -144,6 +164,17 @@ func setRuntimeConfigValue(config *RuntimeConfig, key, value string) {
 	}
 }
 
+func setNotificationConfigValue(config *NotificationConfig, key, value string) {
+	switch key {
+	case "telegram_enabled":
+		config.Telegram.Enabled = configBoolValue(value)
+	case "telegram_bot_token_env":
+		setString(&config.Telegram.BotTokenEnv, value)
+	case "telegram_chat_id":
+		setString(&config.Telegram.ChatID, value)
+	}
+}
+
 func setString(target *string, value string) {
 	if value != "" {
 		*target = value
@@ -152,4 +183,13 @@ func setString(target *string, value string) {
 
 func configStringValue(value string) string {
 	return strings.Trim(strings.TrimSpace(value), `"'`)
+}
+
+func configBoolValue(value string) bool {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "true", "yes", "1", "on":
+		return true
+	default:
+		return false
+	}
 }
