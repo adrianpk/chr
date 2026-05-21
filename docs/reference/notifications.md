@@ -141,3 +141,16 @@ chc notify telegram test --dry-run
 configuration and does not contact Telegram.
 
 Non-dry-run Telegram dispatch belongs to the Telegram dispatch boundary.
+
+Send a Telegram setup-check message:
+
+```sh
+chc notify telegram test
+```
+
+This command reads the bot token from the environment variable named by
+`telegram_bot_token_env`, sends the rendered test message through Telegram, and
+records a notification audit event with `channel` set to `telegram`.
+
+If dispatch fails after the audit event is created, the event is updated to
+`failed` with the failure reason.

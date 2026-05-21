@@ -158,5 +158,12 @@ Preview the Telegram setup-check payload:
 chc notify telegram test --dry-run
 ```
 
-The dry-run command does not contact Telegram. Non-dry-run Telegram dispatch is
-added by the Telegram dispatch boundary.
+Send the Telegram setup-check message:
+
+```sh
+chc notify telegram test
+```
+
+The dry-run command does not contact Telegram. Non-dry-run dispatch reads the
+bot token from the configured environment variable and records a notification
+audit event.
