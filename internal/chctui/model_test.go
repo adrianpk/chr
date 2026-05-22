@@ -438,6 +438,163 @@ func TestModelReportsTicketActionError(t *testing.T) {
 	}
 }
 
+func TestModelPlansWorkActionCommand(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "ready"},
+		},
+	})
+	model.commandPalette.Open = true
+	model.commandPalette.Filter = "work-start-ticket"
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	planned, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if planned.commandPalette.Open {
+		t.Fatal("command palette is open after work action planning")
+	}
+
+	if !planned.workAction.Pending {
+		t.Fatal("work action is not pending")
+	}
+
+	if planned.workAction.Request.TicketKey != "CHC-1" {
+		t.Fatalf("work action ticket key = %q, want CHC-1", planned.workAction.Request.TicketKey)
+	}
+
+	view := planned.View()
+	for _, want := range []string{
+		"Confirm Work Action",
+		"Start selected ticket",
+		"Ticket: CHC-1",
+		"enter confirms work action",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelCancelsWorkAction(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "ready"},
+		},
+	})
+
+	ticket, ok := model.selectedTicketView()
+	if !ok {
+		t.Fatal("selectedTicketView returned no ticket")
+	}
+
+	model.workAction = NewWorkActionState(WorkActionStartTicket, ticket)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
+
+	cancelled, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if cancelled.workAction.Pending {
+		t.Fatal("work action is pending after cancellation")
+	}
+
+	if cancelled.statusMessage != "Work action cancelled." {
+		t.Fatalf("statusMessage = %q, want work cancellation status", cancelled.statusMessage)
+	}
+}
+
+func TestModelConfirmsWorkAction(t *testing.T) {
+	executor := &fakeWorkActionExecutor{
+		result: WorkActionResult{
+			Message: "Execution exec-1 for ticket CHC-1 finished with status succeeded.",
+			Tickets: []chc.IndexedTicket{
+				{Key: "CHC-1", Title: "First", Status: "reviewing"},
+			},
+			Observability: ObservabilityView{
+				LatestExecution: ExecutionView{ID: "exec-1", Status: "succeeded"},
+			},
+		},
+	}
+	model := NewModel(Options{
+		WorkExecutor: executor,
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "ready"},
+		},
+	})
+
+	ticket, ok := model.selectedTicketView()
+	if !ok {
+		t.Fatal("selectedTicketView returned no ticket")
+	}
+
+	model.workAction = NewWorkActionState(WorkActionStartTicket, ticket)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	confirmed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.request.Action != WorkActionStartTicket || executor.request.TicketKey != "CHC-1" {
+		t.Fatalf("executor request = %#v, want start CHC-1", executor.request)
+	}
+
+	if confirmed.workAction.Pending {
+		t.Fatal("work action is pending after confirmation")
+	}
+
+	if confirmed.statusMessage != executor.result.Message {
+		t.Fatalf("statusMessage = %q, want %q", confirmed.statusMessage, executor.result.Message)
+	}
+
+	if len(confirmed.tickets) != 1 || confirmed.tickets[0].Status != "reviewing" {
+		t.Fatalf("tickets = %#v, want reloaded reviewing ticket", confirmed.tickets)
+	}
+
+	if confirmed.observability.LatestExecution.ID != "exec-1" {
+		t.Fatalf("LatestExecution.ID = %q, want exec-1", confirmed.observability.LatestExecution.ID)
+	}
+}
+
+func TestModelReportsWorkActionError(t *testing.T) {
+	executor := &fakeWorkActionExecutor{err: errors.New("runtime validation failed")}
+	model := NewModel(Options{
+		WorkExecutor: executor,
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "ready"},
+		},
+	})
+
+	ticket, ok := model.selectedTicketView()
+	if !ok {
+		t.Fatal("selectedTicketView returned no ticket")
+	}
+
+	model.workAction = NewWorkActionState(WorkActionStartTicket, ticket)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	failed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if failed.workAction.Pending {
+		t.Fatal("work action is pending after failure")
+	}
+
+	if failed.statusMessage != "Work action failed: runtime validation failed" {
+		t.Fatalf("statusMessage = %q, want work action failure", failed.statusMessage)
+	}
+}
+
 func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 	projectDir := t.TempDir()
 	firstPath := writeTicketViewFile(t, projectDir, "open.md", "- [x] Done\n- [ ] Pending\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n")
@@ -843,6 +1000,18 @@ type fakeTicketActionExecutor struct {
 }
 
 func (e *fakeTicketActionExecutor) ExecuteTicketAction(request TicketActionRequest) (TicketActionResult, error) {
+	e.request = request
+
+	return e.result, e.err
+}
+
+type fakeWorkActionExecutor struct {
+	request WorkActionRequest
+	result  WorkActionResult
+	err     error
+}
+
+func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (WorkActionResult, error) {
 	e.request = request
 
 	return e.result, e.err

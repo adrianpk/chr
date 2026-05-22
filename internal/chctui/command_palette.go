@@ -16,6 +16,7 @@ const (
 	CommandActionOpenSelectedSource CommandAction = "open_selected_source"
 	CommandActionPlanArtifact       CommandAction = "plan_artifact"
 	CommandActionPlanTicket         CommandAction = "plan_ticket"
+	CommandActionPlanWork           CommandAction = "plan_work"
 )
 
 type Command struct {
@@ -27,6 +28,7 @@ type Command struct {
 	Artifact    ArtifactActionID
 	Ticket      TicketActionID
 	Status      string
+	Work        WorkActionID
 }
 
 type CommandPaletteState struct {
@@ -57,6 +59,9 @@ func DefaultCommandRegistry() []Command {
 		{ID: "ticket-status-reviewing", Title: "Move ticket to reviewing", Description: "Move the selected ticket to reviewing after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionMoveStatus, Status: "reviewing"},
 		{ID: "ticket-checklist-toggle", Title: "Toggle ticket checklist item", Description: "Validate checklist toggle availability for the selected ticket.", Action: CommandActionPlanTicket, Ticket: TicketActionToggleChecklist},
 		{ID: "ticket-checklist-add", Title: "Add ticket checklist item", Description: "Validate checklist creation availability for the selected ticket.", Action: CommandActionPlanTicket, Ticket: TicketActionAddChecklistItem},
+		{ID: "work-start-ticket", Title: "Start selected ticket", Description: "Run the agent harness for the selected ticket after confirmation.", Action: CommandActionPlanWork, Work: WorkActionStartTicket},
+		{ID: "work-start-ready-loop", Title: "Start ready ticket loop", Description: "Run one ready ticket through the agent loop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionStartReadyLoop},
+		{ID: "work-request-stop", Title: "Request agent stop", Description: "Request daemon stop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRequestStop},
 	}
 
 	for _, view := range defaultViews {
@@ -211,6 +216,8 @@ func (m *Model) executeCommand(command Command) {
 		m.planArtifactAction(command.Artifact)
 	case CommandActionPlanTicket:
 		m.planTicketAction(command.Ticket, command.Status)
+	case CommandActionPlanWork:
+		m.planWorkAction(command.Work)
 	}
 }
 
