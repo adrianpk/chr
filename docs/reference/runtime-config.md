@@ -44,6 +44,9 @@ image tag, container workdir, and planned mount. The dry-run path prints the
 plan without building an image, starting a container, running the harness, or
 executing the validation command.
 
+Human output uses project-relative paths for files inside the managed project
+and groups path checks under `checks:`.
+
 ## Runtime Artifacts
 
 Ticket execution writes artifacts under the configured runtime artifact

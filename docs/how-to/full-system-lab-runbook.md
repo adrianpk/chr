@@ -173,6 +173,9 @@ Validate the runtime boundary without running Docker:
 chc runtime validate --dry-run
 ```
 
+Expected output uses project-relative paths for files inside the managed
+project and groups runtime checks under `checks:`.
+
 Register and select the project:
 
 ```sh
@@ -206,6 +209,10 @@ chc author session list
 chc author session show <session-id>
 ```
 
+`chc author session list` prints headers so `status`, `target`, and `topic`
+are distinguishable. Use the session id from the list when a later command
+requires `<session-id>`.
+
 Generate a static quiz:
 
 ```sh
@@ -214,6 +221,9 @@ chc author quiz new \
   --topic "CLI blog project validation" \
   --question-count 8
 ```
+
+The command prints the generated quiz path relative to the project, for example
+`.chc/quizzes/<quiz-file>.md`.
 
 Edit the generated quiz answers in Markdown, then promote the answered quiz to a
 draft:

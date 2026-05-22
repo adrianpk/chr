@@ -21,6 +21,13 @@ List sessions:
 chc author session list
 ```
 
+The list output includes headers:
+
+```text
+id                       status  target  topic
+auth-20260522-073505     draft   spec    Billing sync
+```
+
 Show a session:
 
 ```sh
@@ -31,6 +38,13 @@ Create a static quiz:
 
 ```sh
 chc author quiz new --target spec --topic "Billing sync"
+```
+
+Successful creation prints the quiz path relative to the managed project:
+
+```text
+quiz: created .chc/quizzes/auth-20260522-073505-billing-sync.md
+session: auth-20260522-073505
 ```
 
 Preview a static quiz without writing files:

@@ -216,11 +216,12 @@ the Docker build/run inputs, and checks required local paths:
 Validation output includes:
 
 - image tag;
-- Dockerfile path;
+- project-relative Dockerfile path when the file is inside the managed project;
 - container workdir;
-- artifact, result, and log paths;
-- project mount;
-- one `check:` line per required local path.
+- project-relative artifact, result, and log paths when they are inside the
+  managed project;
+- project mount summary;
+- a compact `checks:` section for required local paths.
 
 This command does not build Docker images, run containers, execute agents, or
 run `runtime.validation_command`.
