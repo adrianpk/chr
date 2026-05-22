@@ -1,11 +1,11 @@
 # Slice 3: Protocol Document Boundary Cleanup
 
-Status: reviewing
+Status: delivered
 Slicing: UX Operation Surface
 Plan: `.prj/plans/slicing-ux-operation-surface-plan.md`
 Tracker: `.prj/trackers/slicing-ux-operation-surface-tracker.md`
 Branch: `feat/slice-3-protocol-doc-boundaries`
-PR: pending
+PR: #136
 
 ## Purpose
 
