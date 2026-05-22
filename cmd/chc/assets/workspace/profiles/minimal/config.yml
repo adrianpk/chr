@@ -1,19 +1,5 @@
 version: 1
-workspace_root: .chc
-canonical_assets: markdown
 tickets:
   key_prefix: CHC
-runtime:
-  image: chc-agent-runtime:local
-  dockerfile: .chc/runtime/agent/Dockerfile
-  workdir: /workspace
-  artifact_dir: .chc/runtime/runs
-  validation_command: make verify
-indexes:
-  sqlite:
-    enabled: false
 notifications:
-  telegram:
-    enabled: false
-  email:
-    enabled: false
+  telegram_enabled: false

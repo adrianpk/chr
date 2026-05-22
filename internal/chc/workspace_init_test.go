@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"testing/fstest"
 )
@@ -31,6 +32,85 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 	assertFile(t, dir, ".chc/runtime/agent/Dockerfile")
 	assertFile(t, dir, "AGENTS.md")
 	assertNotExists(t, dir, ".chc/root/AGENTS.md")
+}
+
+func TestInitWritesUserOwnedWorkspaceConfig(t *testing.T) {
+	dir := t.TempDir()
+	initializer := newTestInitializer()
+
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
+	if err != nil {
+		t.Fatalf("Init returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(dir, ".chc", "config.yml"))
+	if err != nil {
+		t.Fatalf("read config: %v", err)
+	}
+
+	text := string(content)
+	for _, unwanted := range []string{
+		"workspace_root:",
+		"canonical_assets:",
+		"workdir:",
+		"artifact_dir:",
+		"validation_command:",
+		"sqlite:",
+		"email:",
+	} {
+		if strings.Contains(text, unwanted) {
+			t.Fatalf("config contains %q:\n%s", unwanted, text)
+		}
+	}
+
+	for _, want := range []string{
+		"version: 1",
+		"tickets:",
+		"  key_prefix: CHC",
+		"notifications:",
+		"  telegram_enabled: false",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("config does not contain %q:\n%s", want, text)
+		}
+	}
+}
+
+func TestInitWritesWorkspaceManifestAsOrientation(t *testing.T) {
+	dir := t.TempDir()
+	initializer := newTestInitializer()
+
+	_, err := initializer.Init(context.Background(), InitOptions{ProjectDir: dir})
+	if err != nil {
+		t.Fatalf("Init returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(dir, ".chc", "manifest.md"))
+	if err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+
+	text := string(content)
+	for _, unwanted := range []string{
+		"- system:",
+		"- command:",
+		"workspace root:",
+		"Markdown files are the canonical assets",
+	} {
+		if strings.Contains(text, unwanted) {
+			t.Fatalf("manifest contains config-like text %q:\n%s", unwanted, text)
+		}
+	}
+
+	for _, want := range []string{
+		"project-local working material",
+		"`tickets/` stores project-local work items",
+		"`runtime/` stores sandbox execution assets and evidence",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("manifest does not contain %q:\n%s", want, text)
+		}
+	}
 }
 
 func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
@@ -212,13 +292,13 @@ func TestInitRejectsUnknownProfile(t *testing.T) {
 func newTestInitializer() Workspace {
 	return NewWorkspace(fstest.MapFS{
 		"assets/workspace/profiles/standard/config.yml": {
-			Data: []byte("version: 1\nworkspace_root: .chc\nruntime:\n  dockerfile: .chc/runtime/agent/Dockerfile\n"),
+			Data: []byte("version: 1\ntickets:\n  key_prefix: CHC\nnotifications:\n  telegram_enabled: false\n"),
 		},
 		"assets/workspace/profiles/standard/runtime/agent/Dockerfile": {
 			Data: []byte("FROM ubuntu:24.04\n"),
 		},
 		"assets/workspace/profiles/standard/manifest.md": {
-			Data: []byte("# ChrysoCoord Workspace\n"),
+			Data: []byte("# ChrysoCoord Workspace\n\nThis directory stores ChrysoCoord's project-local working material.\n\n- `tickets/` stores project-local work items.\n- `runtime/` stores sandbox execution assets and evidence.\n"),
 		},
 		"assets/workspace/profiles/standard/agents/CONVENTIONS.md": {
 			Data: []byte("# Conventions\n"),
@@ -230,7 +310,7 @@ func newTestInitializer() Workspace {
 			Data: []byte("# Agent Operating Contract\n"),
 		},
 		"assets/workspace/profiles/minimal/config.yml": {
-			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: minimal\nruntime:\n  dockerfile: .chc/runtime/agent/Dockerfile\n"),
+			Data: []byte("version: 1\ntickets:\n  key_prefix: CHC\nnotifications:\n  telegram_enabled: false\n"),
 		},
 		"assets/workspace/profiles/minimal/runtime/agent/Dockerfile": {
 			Data: []byte("FROM ubuntu:24.04\n"),
@@ -242,7 +322,7 @@ func newTestInitializer() Workspace {
 			Data: []byte("# Minimal Agents\n"),
 		},
 		"assets/workspace/profiles/personal/config.yml": {
-			Data: []byte("version: 1\nworkspace_root: .chc\nprofile: personal\nruntime:\n  dockerfile: .chc/runtime/agent/Dockerfile\n"),
+			Data: []byte("version: 1\ntickets:\n  key_prefix: CHC\nnotifications:\n  telegram_enabled: false\n"),
 		},
 		"assets/workspace/profiles/personal/runtime/agent/Dockerfile": {
 			Data: []byte("FROM ubuntu:24.04\n"),
