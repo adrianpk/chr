@@ -42,7 +42,7 @@ Local artifact actions create or update Markdown/state files:
 - add ticket comment;
 - update ticket status;
 - create authoring session;
-- create static quiz;
+- create context-aware quiz;
 - save quiz answer;
 - promote artifact;
 - rebuild index.
@@ -167,4 +167,3 @@ flags such as `--dev-root` should appear only in a developer isolation context.
 - Dirty worktree state is surfaced before risky execution.
 - Failed actions provide inspectable evidence and next inspection targets.
 - The TUI never offers destructive git actions as a casual shortcut.
-

@@ -213,7 +213,7 @@ chc author session show <session-handle>
 and `topic` are distinguishable. Use the session id, exact topic, or a unique
 topic slug when a later command requires `<session-handle>`.
 
-Generate a static quiz:
+Generate a context-aware quiz:
 
 ```sh
 chc author quiz new \
@@ -222,7 +222,8 @@ chc author quiz new \
   --question-count 8
 ```
 
-The command prints the generated quiz path relative to the project, for example
+The command sends structured project context to the quiz provider and prints the
+generated quiz path relative to the project, for example
 `.chc/quizzes/<quiz-file>.md`.
 
 Edit the generated quiz answers in Markdown, then promote the answered quiz to a

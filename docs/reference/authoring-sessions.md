@@ -37,7 +37,7 @@ chc author session show <session-handle>
 The session handle may be the exact session id, the exact topic, or a unique
 topic slug such as `billing-sync`. Existing `auth-...` session ids remain valid.
 
-Create a static quiz:
+Create a context-aware quiz:
 
 ```sh
 chc author quiz new --target spec --topic "Billing sync"
@@ -50,7 +50,7 @@ quiz: created .chc/quizzes/author-20260522-073505-billing-sync.md
 session: author-20260522-073505
 ```
 
-Preview a static quiz without writing files:
+Preview a context-aware quiz without writing files:
 
 ```sh
 chc author quiz new --target spec --topic "Billing sync" --dry-run
@@ -173,14 +173,14 @@ The session model contains:
 - `id`: stable authoring session identifier.
 - `project_id`: resolved project identity.
 - `status`: `draft`, `active`, `finalized`, or `discarded`.
-- `mode`: `markdown_direct`, `static`, `assisted`, or `tui`.
+- `mode`: `markdown_direct`, `contextual`, `assisted`, or `tui`.
 - `target`: `dump`, `quiz`, `draft`, `spec`, `plan`, `slice_set`, `slice`,
   `tracker`, or `ticket`.
 - `topic`: human topic for the authoring work.
 - `created_at`, `started_at`, `finished_at`, `updated_at`: session times.
 - `description`: optional session description.
 
-Current CLI-created sessions use static mode.
+Quiz CLI sessions use contextual mode.
 Assisted CLI sessions use `active` status and `assisted` mode.
 New CLI-created sessions use the `author-<timestamp>` id prefix. Older
 `auth-<timestamp>` sessions remain readable and usable by exact id.
@@ -197,19 +197,42 @@ Each link records:
 - decision text;
 - recorded time.
 
-Static quiz generation records a `generated` link. Quiz-to-draft promotion
+Context-aware quiz generation records a `generated` link. Quiz-to-draft promotion
 records a `promoted` link.
 
 Assisted finalization records generated links from the transcript to the
 curated summary and from the curated summary to the synthesized artifact.
 
-## Static Quizzes
+## Context-Aware Quizzes
 
-Static quizzes are deterministic Markdown questionnaires. They include
-frontmatter, a topic, target-specific questions, and editable `Answer:` slots.
+Context-aware quizzes are generated from a structured request that includes the
+authoring session, project context sections, the target artifact, the topic,
+and an output contract.
 
-Static quizzes do not use a model. They are useful for starting structured
-context capture while keeping the result reviewable and hand-editable.
+The model response must be structured and validated before ChrysoCoord writes
+the Markdown quiz artifact. Generic template questions are not used as a
+fallback.
+
+The request sent to the quiz provider includes:
+
+- action: `authoring_quiz_generation`;
+- strategy: `deep`;
+- session id, target, topic, and requested question count;
+- context sections for the project, authoring session, agent protocol,
+  `.chc/` artifacts, docs, project tree, and Go inventory;
+- an output contract for question objects.
+
+The response must contain a `questions` array. Each question must include:
+
+- `id`;
+- `question`;
+- `tags`;
+- `follow_up_depth`;
+- `completion_recommended`.
+
+If the provider response is missing required structure, asks for sensitive
+material, or yields no valid questions, the command fails instead of writing a
+generic fallback quiz.
 
 ## Manual Promotion
 

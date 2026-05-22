@@ -272,7 +272,7 @@ chc author session show <session-handle>
 
 The session handle can be the exact id, exact topic, or a unique topic slug.
 
-Create a static questionnaire:
+Create a context-aware questionnaire:
 
 ```sh
 chc author quiz new --target spec --topic "Billing sync"

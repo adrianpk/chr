@@ -126,7 +126,7 @@ Create an authoring session:
 chc author session new --target spec --topic "Billing sync"
 ```
 
-Generate a static quiz:
+Generate a context-aware quiz:
 
 ```sh
 chc author quiz new --target spec --topic "Billing sync"

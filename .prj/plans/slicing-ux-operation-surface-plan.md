@@ -34,7 +34,7 @@ Reference context:
 Delivered foundations:
 
 - project-local `.chc/` workspace initialization;
-- Markdown-first authoring sessions, static quizzes, promotion, and assisted
+- Markdown-first authoring sessions, quiz promotion, and assisted
   authoring artifacts;
 - ticket creation, listing, status changes, execution, loop, result
   application, and reports;
@@ -47,7 +47,7 @@ Observed gaps:
 - CLI output is overly verbose for humans;
 - list output lacks headers;
 - authoring session IDs are opaque;
-- static quizzes are not context-aware enough for strong specs;
+- useful quizzes require model-generated questions from project context;
 - bootstrap config/manifest expose or repeat internal invariants;
 - protocol docs blur project documentation conventions and operational artifact
   contracts;
@@ -241,17 +241,16 @@ questions for a target artifact.
 
 Candidate scope:
 
-- keep deterministic static quiz generation as fallback/template mode;
 - define a quiz generation request model with project context, target artifact,
   topic, prior answers, and output contract;
-- define a provider interface that can later call an LLM;
-- add an initial fake/deterministic provider for tests;
+- define a provider interface and Codex-backed implementation;
+- add an initial fake provider for tests;
 - make `spec` target questions cover problem, actors, workflows, acceptance
   criteria, constraints, non-goals, validation evidence, impacted code/docs,
   and open risks;
 - do not claim requested `--question-count` was satisfied when fewer questions
   are generated;
-- add docs that distinguish static and context-aware modes.
+- add docs for the structured request/response contract.
 
 Expected outcome:
 

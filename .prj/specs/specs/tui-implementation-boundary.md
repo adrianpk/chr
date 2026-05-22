@@ -137,11 +137,11 @@ The next TUI implementation should wire selected low-risk actions:
 - update ticket status;
 - add ticket comment;
 - create authoring session;
-- create static quiz;
+- create context-aware quiz;
 - show equivalent command;
 - refresh/rebuild index where safe.
 
-Ticket execution, loops, and provider-backed quiz generation may follow once
+Ticket execution and loops may follow once
 the confirmation and operation record model is in place.
 
 ## Acceptance Criteria
@@ -153,4 +153,3 @@ the confirmation and operation record model is in place.
 - TUI code does not add logic to `main.go`.
 - Tests cover routing, selection, and action availability without brittle full
   terminal snapshots.
-

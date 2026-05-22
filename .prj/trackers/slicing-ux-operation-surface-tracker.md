@@ -143,8 +143,8 @@ Task commits:
 Candidate tasks:
 
 - [ ] Define quiz generation request/result models.
-- [ ] Define provider interface and deterministic fake provider.
-- [ ] Keep static template mode as explicit fallback.
+- [ ] Define provider interface, Codex provider, and deterministic fake provider.
+- [ ] Remove static quiz generation from the executable flow.
 - [ ] Add spec-target question coverage for useful spec generation.
 - [ ] Add context inputs from `.chc/`, docs, tree, tickets, and Go inventory.
 - [ ] Add output contract validation.

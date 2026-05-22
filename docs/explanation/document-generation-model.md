@@ -37,10 +37,11 @@ boundaries.
 
 A quiz captures missing knowledge through a bounded question session.
 
-Static quizzes generate the question set at once. Assisted authoring sessions
-can ask one question at a time while preserving transcript events and curated
-answers. In both cases, the useful output is persistent project material, not
-unstructured chat history.
+Context-aware quizzes generate questions from a structured request containing
+project context, authoring intent, target artifact, topic, and a response
+contract. Assisted authoring sessions can ask one question at a time while
+preserving transcript events and curated answers. In both cases, the useful
+output is persistent project material, not unstructured chat history.
 
 ## Promotion
 
