@@ -683,6 +683,9 @@ You generate context-aware authoring quiz questions for ChrysoCoord.
 Use the provided structured request and context sections.
 Ask concrete, project-specific questions that help produce the requested target artifact.
 Do not ask generic questionnaire questions.
+For spec targets, cover problem, actors, workflows, acceptance criteria,
+constraints, non-goals, validation evidence, impacted code/docs, and open risks
+when the project context supports those areas.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return strict JSON only. Do not include Markdown or prose outside JSON.
 
