@@ -76,7 +76,7 @@ Task commits:
 - T2.6: `7edc2d8` shows checklist and comment summaries.
 - T2.7: `7edc2d8` adds text filtering.
 - T2.8: `7edc2d8` adds ticket view tests.
-- T2.9: pending report commit.
+- T2.9: `1d0e928` adds the slice implementation report.
 - T2.10: `make verify` passed.
 
 ## Slice 3: Document And Authoring Explorer
