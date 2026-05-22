@@ -112,6 +112,7 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			Documents:         documents,
 			AuthoringSessions: authoringSessions,
 			Observability:     observability,
+			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
 		})
 	}
 }
@@ -161,8 +162,132 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			Documents:         documents,
 			AuthoringSessions: authoringSessions,
 			Observability:     observability,
+			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
 		})
 	}
+}
+
+type tuiArtifactActionExecutor struct {
+	ctx            context.Context
+	env            chc.UserEnvironment
+	projectContext commandProjectContext
+}
+
+func newTUIArtifactActionExecutor(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+) tuiArtifactActionExecutor {
+	return tuiArtifactActionExecutor{
+		ctx:            ctx,
+		env:            env,
+		projectContext: projectContext,
+	}
+}
+
+func (e tuiArtifactActionExecutor) ExecuteArtifactAction(
+	action chctui.ArtifactActionID,
+) (chctui.ArtifactActionResult, error) {
+	switch action {
+	case chctui.ArtifactActionCreateTicket:
+		return e.createTicket()
+	case chctui.ArtifactActionCreateAuthoringSession:
+		return e.createAuthoringSession()
+	case chctui.ArtifactActionCreateContextQuiz:
+		return chctui.ArtifactActionResult{}, errors.New(
+			"context-aware quiz creation requires provider-backed question generation and is not available from this TUI action yet",
+		)
+	case chctui.ArtifactActionCreateDraft:
+		return chctui.ArtifactActionResult{}, errors.New(
+			"draft file creation requires a source quiz promotion; create an authoring session first",
+		)
+	default:
+		return chctui.ArtifactActionResult{}, errors.New("unknown artifact action")
+	}
+}
+
+func (e tuiArtifactActionExecutor) createTicket() (chctui.ArtifactActionResult, error) {
+	config, err := chc.LoadWorkspaceConfig(e.projectContext.ProjectDir)
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	repository := chc.NewTicketRepository(
+		e.projectContext.ProjectDir,
+		chc.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
+	)
+
+	result, err := repository.CreateTicket(e.ctx, chc.CreateTicketOptions{
+		Title:       "TUI created ticket",
+		Priority:    "normal",
+		Severity:    "normal",
+		Type:        "task",
+		ProjectArea: "tui",
+	})
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	reloaded, err := e.reloadArtifactActionState()
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	reloaded.Message = "Created ticket " + result.Key + " at " + displayPath(e.projectContext.ProjectDir, result.Path)
+
+	return reloaded, nil
+}
+
+func (e tuiArtifactActionExecutor) createAuthoringSession() (chctui.ArtifactActionResult, error) {
+	now := time.Now().UTC()
+	session := chc.AuthoringSession{
+		ID:        authoringSessionID(now),
+		ProjectID: e.projectContext.ProjectID,
+		Status:    chc.AuthoringSessionStatusDraft,
+		Mode:      chc.AuthoringSessionModeTUI,
+		Target:    chc.AuthoringTargetDraft,
+		Topic:     "TUI artifact creation",
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	paths, err := chc.NewAuthoringSessionRepository(e.projectContext.ProjectDir).CreateSession(e.ctx, session)
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	reloaded, err := e.reloadArtifactActionState()
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	reloaded.Message = "Created authoring session " + session.ID + " at " +
+		displayPath(e.projectContext.ProjectDir, paths.SessionPath)
+
+	return reloaded, nil
+}
+
+func (e tuiArtifactActionExecutor) reloadArtifactActionState() (chctui.ArtifactActionResult, error) {
+	tickets, err := loadTUITickets(e.ctx, e.env, e.projectContext)
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	documents, err := chctui.LoadDocumentViews(e.ctx, e.projectContext.ProjectDir)
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	authoringSessions, err := loadTUIAuthoringSessions(e.ctx, e.projectContext)
+	if err != nil {
+		return chctui.ArtifactActionResult{}, err
+	}
+
+	return chctui.ArtifactActionResult{
+		Tickets:           tickets,
+		Documents:         documents,
+		AuthoringSessions: authoringSessions,
+	}, nil
 }
 
 func loadTUITickets(

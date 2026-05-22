@@ -60,6 +60,7 @@ type Options struct {
 	Documents         []DocumentView
 	AuthoringSessions []chc.AuthoringSession
 	Observability     ObservabilityView
+	ActionExecutor    ArtifactActionExecutor
 }
 
 type Model struct {
@@ -79,6 +80,8 @@ type Model struct {
 	selectedAuthoringSession int
 	observability            ObservabilityView
 	commandPalette           CommandPaletteState
+	artifactAction           ArtifactActionState
+	actionExecutor           ArtifactActionExecutor
 	statusMessage            string
 }
 
@@ -92,6 +95,7 @@ func NewModel(opts Options) Model {
 		authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:     opts.Observability,
 		commandPalette:    NewCommandPaletteState(DefaultCommandRegistry()),
+		actionExecutor:    opts.ActionExecutor,
 	}
 }
 
@@ -156,6 +160,7 @@ func (m Model) View() string {
 	output.WriteString("\n")
 	output.WriteString(m.renderSelectedView())
 	output.WriteString(m.renderStatusMessage())
+	output.WriteString(m.renderArtifactAction())
 	output.WriteString(m.renderCommandPalette())
 	output.WriteString("\n\n")
 	output.WriteString(m.renderKeys())
@@ -169,6 +174,10 @@ func (m Model) SelectedView() View {
 }
 
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.artifactAction.Pending {
+		return m.updateArtifactActionKey(msg)
+	}
+
 	if m.commandPalette.Open {
 		return m.updateCommandPaletteKey(msg)
 	}
@@ -177,6 +186,10 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateFilterKey(msg)
 	}
 
+	return m.updateNavigationKey(msg)
+}
+
+func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return m, tea.Quit
@@ -375,6 +388,10 @@ func (m Model) renderSelectedTicketDetail() string {
 }
 
 func (m Model) renderKeys() string {
+	if m.artifactAction.Pending {
+		return "Keys: enter confirms action, esc cancels action"
+	}
+
 	if m.commandPalette.Open {
 		return "Keys: up/down selects command, enter runs command, esc closes palette"
 	}

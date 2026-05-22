@@ -1,6 +1,7 @@
 package chctui
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -150,6 +151,131 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 
 	if navigated.statusMessage != "Selected source path: .prj/specs/specs/tui.md" {
 		t.Fatalf("statusMessage = %q, want selected source path", navigated.statusMessage)
+	}
+}
+
+func TestModelPlansArtifactActionCommand(t *testing.T) {
+	model := NewModel(Options{})
+	model.commandPalette.Open = true
+	model.commandPalette.Filter = "create-ticket"
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	planned, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if planned.commandPalette.Open {
+		t.Fatal("command palette is open after artifact action planning")
+	}
+
+	if !planned.artifactAction.Pending {
+		t.Fatal("artifact action is not pending")
+	}
+
+	if planned.artifactAction.Action != ArtifactActionCreateTicket {
+		t.Fatalf("artifact action = %q, want %q", planned.artifactAction.Action, ArtifactActionCreateTicket)
+	}
+
+	view := planned.View()
+	for _, want := range []string{
+		"Confirm Action",
+		"Create ticket",
+		"Title: TUI created ticket",
+		"enter confirms action",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelCancelsArtifactAction(t *testing.T) {
+	model := NewModel(Options{})
+	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
+
+	cancelled, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if cancelled.artifactAction.Pending {
+		t.Fatal("artifact action is pending after cancellation")
+	}
+
+	if cancelled.statusMessage != "Action cancelled." {
+		t.Fatalf("statusMessage = %q, want cancellation status", cancelled.statusMessage)
+	}
+}
+
+func TestModelConfirmsArtifactAction(t *testing.T) {
+	executor := &fakeArtifactActionExecutor{
+		result: ArtifactActionResult{
+			Message: "Created ticket CHC-1 at .chc/tickets/CHC-1-tui-created-ticket.md",
+			Tickets: []chc.IndexedTicket{
+				{Key: "CHC-1", Title: "TUI created ticket", Status: "open"},
+			},
+			Documents: []DocumentView{
+				{Index: 0, Title: "TUI Plan"},
+			},
+			AuthoringSessions: []chc.AuthoringSession{
+				{
+					ID:        "author-20260522-100000",
+					ProjectID: "project-1",
+					Status:    chc.AuthoringSessionStatusDraft,
+					Mode:      chc.AuthoringSessionModeTUI,
+					Target:    chc.AuthoringTargetDraft,
+					Topic:     "TUI artifact creation",
+				},
+			},
+		},
+	}
+	model := NewModel(Options{ActionExecutor: executor})
+	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	confirmed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.action != ArtifactActionCreateTicket {
+		t.Fatalf("executor action = %q, want %q", executor.action, ArtifactActionCreateTicket)
+	}
+
+	if confirmed.artifactAction.Pending {
+		t.Fatal("artifact action is pending after confirmation")
+	}
+
+	if confirmed.statusMessage != executor.result.Message {
+		t.Fatalf("statusMessage = %q, want %q", confirmed.statusMessage, executor.result.Message)
+	}
+
+	assertConfirmedArtifactState(t, confirmed)
+}
+
+func TestModelReportsArtifactActionError(t *testing.T) {
+	executor := &fakeArtifactActionExecutor{err: errors.New("write failed")}
+	model := NewModel(Options{ActionExecutor: executor})
+	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	failed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if failed.artifactAction.Pending {
+		t.Fatal("artifact action is pending after failure")
+	}
+
+	if failed.statusMessage != "Action failed: write failed" {
+		t.Fatalf("statusMessage = %q, want action failure", failed.statusMessage)
 	}
 }
 
@@ -537,4 +663,32 @@ func writeTicketViewFile(t *testing.T, projectDir, name, body string) string {
 	}
 
 	return path
+}
+
+type fakeArtifactActionExecutor struct {
+	action ArtifactActionID
+	result ArtifactActionResult
+	err    error
+}
+
+func (e *fakeArtifactActionExecutor) ExecuteArtifactAction(action ArtifactActionID) (ArtifactActionResult, error) {
+	e.action = action
+
+	return e.result, e.err
+}
+
+func assertConfirmedArtifactState(t *testing.T, model Model) {
+	t.Helper()
+
+	if len(model.tickets) != 1 || model.tickets[0].Key != "CHC-1" {
+		t.Fatalf("tickets = %#v, want reloaded CHC-1 ticket", model.tickets)
+	}
+
+	if len(model.documents) != 1 || model.documents[0].Title != "TUI Plan" {
+		t.Fatalf("documents = %#v, want reloaded TUI Plan document", model.documents)
+	}
+
+	if len(model.authoringSessions) != 1 || model.authoringSessions[0].ID != "author-20260522-100000" {
+		t.Fatalf("authoringSessions = %#v, want reloaded authoring session", model.authoringSessions)
+	}
 }

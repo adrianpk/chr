@@ -14,6 +14,7 @@ const (
 	CommandActionRefresh            CommandAction = "refresh"
 	CommandActionHelp               CommandAction = "help"
 	CommandActionOpenSelectedSource CommandAction = "open_selected_source"
+	CommandActionPlanArtifact       CommandAction = "plan_artifact"
 )
 
 type Command struct {
@@ -22,6 +23,7 @@ type Command struct {
 	Description string
 	Action      CommandAction
 	View        View
+	Artifact    ArtifactActionID
 }
 
 type CommandPaletteState struct {
@@ -42,6 +44,10 @@ func DefaultCommandRegistry() []Command {
 		{ID: "refresh", Title: "Refresh", Description: "Close the palette and keep the current read-only data visible.", Action: CommandActionRefresh},
 		{ID: "help", Title: "Help", Description: "Navigate to the Help view.", Action: CommandActionHelp, View: ViewHelp},
 		{ID: "open-source", Title: "Open selected source path", Description: "Show the selected source path for external opening.", Action: CommandActionOpenSelectedSource},
+		{ID: "create-ticket", Title: "Create ticket", Description: "Create a default task ticket after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateTicket},
+		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a draft authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
+		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
+		{ID: "create-draft", Title: "Create draft", Description: "Plan a safe draft creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateDraft},
 	}
 
 	for _, view := range defaultViews {
@@ -192,6 +198,8 @@ func (m *Model) executeCommand(command Command) {
 		m.statusMessage = "Refresh requested. Restart the TUI to reload read-only data."
 	case CommandActionOpenSelectedSource:
 		m.statusMessage = m.selectedSourcePathMessage()
+	case CommandActionPlanArtifact:
+		m.planArtifactAction(command.Artifact)
 	}
 }
 
