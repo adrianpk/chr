@@ -102,7 +102,7 @@ Task commits:
 - T3.5: `1be6d40` shows plans, slicing plans, and trackers as artifacts.
 - T3.6: `1be6d40` keeps tickets as the operational status source.
 - T3.7: `1be6d40` adds discovery and view model tests.
-- T3.8: pending report commit.
+- T3.8: `48a4ae8` adds the slice implementation report.
 - T3.9: `make verify` passed.
 
 ## Slice 4: Agent And Runtime Observability
