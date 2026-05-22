@@ -228,7 +228,7 @@ Expected outcome:
 
 ### Slice 5: Context-Aware Quiz Generation Foundation
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-5-context-aware-quiz-generation`
 Expected PR title: `feat(slice-5): context-aware quiz generation`

@@ -26,7 +26,7 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 | Slice 2: Workspace Bootstrap Contract Cleanup | Delivered | `feat/slice-2-workspace-bootstrap-contract` | `feat(slice-2): workspace bootstrap contract cleanup` | `.prj/reports/slices/ux-operation-surface/slice-2-workspace-bootstrap-contract.md` | PR #135 merged. |
 | Slice 3: Protocol Document Boundary Cleanup | Delivered | `feat/slice-3-protocol-doc-boundaries` | `feat(slice-3): protocol doc boundaries` | `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-boundaries.md` | PR #136 merged. |
 | Slice 4: Authoring Session Ergonomics | Delivered | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | Repository PR #137 merged. |
-| Slice 5: Context-Aware Quiz Generation Foundation | Planned | `feat/slice-5-context-aware-quiz-generation` | `feat(slice-5): context-aware quiz generation` | `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md` | Quiz engine boundary. |
+| Slice 5: Context-Aware Quiz Generation Foundation | Reviewing | `feat/slice-5-context-aware-quiz-generation` | `feat(slice-5): context-aware quiz generation` | `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md` | Quiz engine boundary. |
 | Slice 6: TUI Specification Set | Delivered | `docs/slice-6-tui-specification-set` | `docs(slice-6): tui specification set` | `.prj/reports/slices/ux-operation-surface/slice-6-tui-specification-set.md` | Spec-only slice delivered directly on `dev`. |
 | Slice 7: TUI Read-Only Shell | Planned | `feat/slice-7-tui-read-only-shell` | `feat(slice-7): tui read-only shell` | `.prj/reports/slices/ux-operation-surface/slice-7-tui-read-only-shell.md` | First Bubble Tea implementation. |
 | Slice 8: TUI Action Wiring | Planned | `feat/slice-8-tui-action-wiring` | `feat(slice-8): tui action wiring` | `.prj/reports/slices/ux-operation-surface/slice-8-tui-action-wiring.md` | Safe selected-record actions. |
@@ -142,27 +142,27 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Define quiz generation request/result models.
-- [ ] Define provider interface, Codex provider, and deterministic fake provider.
-- [ ] Remove static quiz generation from the executable flow.
-- [ ] Add spec-target question coverage for useful spec generation.
-- [ ] Add context inputs from `.chc/`, docs, tree, tickets, and Go inventory.
-- [ ] Add output contract validation.
-- [ ] Update docs and tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define quiz generation request/result models.
+- [x] Define provider interface, Codex provider, and deterministic fake provider.
+- [x] Remove static quiz generation from the executable flow.
+- [x] Add spec-target question coverage for useful spec generation.
+- [x] Add context inputs from `.chc/`, docs, tree, tickets, and Go inventory.
+- [x] Add output contract validation.
+- [x] Update docs and tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1:
-- T5.2:
-- T5.3:
-- T5.4:
-- T5.5:
-- T5.6:
-- T5.7:
-- T5.8:
-- T5.9:
+- T5.1: `13fe19f` added contextual quiz request/result models.
+- T5.2: `13fe19f` added provider interface, Codex provider, and fake provider.
+- T5.3: `13fe19f` removed static quiz generation from executable code.
+- T5.4: `3a4f88e` added spec-target coverage guidance to provider prompt.
+- T5.5: `13fe19f` added context sections from `.chc/`, docs, tree, and Go inventory.
+- T5.6: `13fe19f` added structured output validation.
+- T5.7: `1a0241a` updated docs and tests.
+- T5.8: report added in `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md`.
+- T5.9: `make verify` pass.
 
 ## Slice 6: TUI Specification Set
 
