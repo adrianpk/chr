@@ -208,7 +208,7 @@ Task commits:
 - T7.5: `8afafbe` registers checklist creation validation for unavailable safe writes.
 - T7.6: `8afafbe` reloads ticket state after mutation.
 - T7.7: `8afafbe` adds ticket action planning, cancellation, confirmation, and failure tests.
-- T7.8: pending report commit.
+- T7.8: `2e348c7` adds the slice implementation report.
 - T7.9: `make verify` passed.
 
 ## Slice 8: Agent Work Control
