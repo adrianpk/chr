@@ -14,7 +14,7 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -22,7 +22,7 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: CLI Output Readability | Planned | `feat/slice-1-cli-output-readability` | `feat(slice-1): cli output readability` | `.prj/reports/slices/ux-operation-surface/slice-1-cli-output-readability.md` | First implementation slice. |
+| Slice 1: CLI Output Readability | Reviewing | `feat/slice-1-cli-output-readability` | `feat(slice-1): cli output readability` | `.prj/reports/slices/ux-operation-surface/slice-1-cli-output-readability.md` | PR pending review. |
 | Slice 2: Workspace Bootstrap Contract Cleanup | Planned | `feat/slice-2-workspace-bootstrap-contract` | `feat(slice-2): workspace bootstrap contract cleanup` | `.prj/reports/slices/ux-operation-surface/slice-2-workspace-bootstrap-contract.md` | Config/manifest cleanup. |
 | Slice 3: Protocol Document Boundary Cleanup | Planned | `feat/slice-3-protocol-doc-boundaries` | `feat(slice-3): protocol doc boundaries` | `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-boundaries.md` | Generated protocol assets. |
 | Slice 4: Authoring Session Ergonomics | Planned | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | IDs, slugs, list/show UX. |
@@ -45,27 +45,27 @@ Pre-flight:
 
 Candidate tasks:
 
-- [ ] Add or consolidate human-output formatting helpers.
-- [ ] Render runtime validation checks without duplicated `ok`.
-- [ ] Render authoring session and quiz creation with compact defaults.
-- [ ] Add headers to list outputs that currently rely on positional fields.
-- [ ] Prefer project-relative paths for human output.
-- [ ] Add focused CLI tests.
-- [ ] Update affected docs/runbook.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add or consolidate human-output formatting helpers.
+- [x] Render runtime validation checks without duplicated `ok`.
+- [x] Render authoring session and quiz creation with compact defaults.
+- [x] Add headers to list outputs that currently rely on positional fields.
+- [x] Prefer project-relative paths for human output.
+- [x] Add focused CLI tests.
+- [x] Update affected docs/runbook.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1:
-- T1.2:
-- T1.3:
-- T1.4:
-- T1.5:
-- T1.6:
-- T1.7:
-- T1.8:
-- T1.9:
+- T1.1: `fa8bfc9` `feat(cli): add human output helpers`; `ded68ac` `refactor(cli): split runtime check output`
+- T1.2: `a07a94c` `feat(cli): compact runtime validation output`; `ded68ac` `refactor(cli): split runtime check output`
+- T1.3: `d71a917` `feat(cli): improve authoring command output`
+- T1.4: `d71a917` `feat(cli): improve authoring command output`
+- T1.5: `a07a94c` `feat(cli): compact runtime validation output`; `d71a917` `feat(cli): improve authoring command output`
+- T1.6: `a07a94c` `feat(cli): compact runtime validation output`; `d71a917` `feat(cli): improve authoring command output`
+- T1.7: `03eb554` `docs(cli): describe readable command output`
+- T1.8: pending report commit
+- T1.9: `make verify` pass
 
 ## Slice 2: Workspace Bootstrap Contract Cleanup
 
