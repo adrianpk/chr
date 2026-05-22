@@ -1,6 +1,6 @@
 # UX Operation Surface Slicing Tracker
 
-Status: planned
+Status: delivered-with-extraction
 
 Plan: `.prj/plans/slicing-ux-operation-surface-plan.md`
 Ticket: `.prj/tickets/open/20260522071859-align-cli-authoring-and-tui-operation-surface.md`
@@ -15,8 +15,9 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Extract TUI implementation into dedicated TUI Operational Console slicing.
+- [x] Complete all retained slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -28,8 +29,8 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 | Slice 4: Authoring Session Ergonomics | Delivered | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | Repository PR #137 merged. |
 | Slice 5: Context-Aware Quiz Generation Foundation | Delivered | `feat/slice-5-context-aware-quiz-generation` | `feat(slice-5): context-aware quiz generation` | `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md` | Repository PR #138 merged. |
 | Slice 6: TUI Specification Set | Delivered | `docs/slice-6-tui-specification-set` | `docs(slice-6): tui specification set` | `.prj/reports/slices/ux-operation-surface/slice-6-tui-specification-set.md` | Spec-only slice delivered directly on `dev`. |
-| Slice 7: TUI Read-Only Shell | Planned | `feat/slice-7-tui-read-only-shell` | `feat(slice-7): tui read-only shell` | `.prj/reports/slices/ux-operation-surface/slice-7-tui-read-only-shell.md` | First Bubble Tea implementation. |
-| Slice 8: TUI Action Wiring | Planned | `feat/slice-8-tui-action-wiring` | `feat(slice-8): tui action wiring` | `.prj/reports/slices/ux-operation-surface/slice-8-tui-action-wiring.md` | Safe selected-record actions. |
+| Slice 7: TUI Read-Only Shell | Extracted | `feat/slice-7-tui-read-only-shell` | `feat(slice-7): tui read-only shell` | `.prj/reports/slices/ux-operation-surface/slice-7-tui-read-only-shell.md` | Moved to `TUI Operational Console` slicing. |
+| Slice 8: TUI Action Wiring | Extracted | `feat/slice-8-tui-action-wiring` | `feat(slice-8): tui action wiring` | `.prj/reports/slices/ux-operation-surface/slice-8-tui-action-wiring.md` | Moved to `TUI Operational Console` slicing. |
 
 ## Slice 1: CLI Output Readability
 
@@ -188,49 +189,22 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add Bubble Tea dependency after confirming repo dependency policy.
-- [ ] Add `chc tui` command entrypoint.
-- [ ] Implement project resolution and navigation model.
-- [ ] Implement read-only lists for tickets, authoring sessions, reports, and
-  runtime status.
-- [ ] Implement detail panes for selected records.
-- [ ] Add tests for state/model functions where practical.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Extract implementation work into
+  `.prj/plans/slicing-tui-operational-console-plan.md`.
+- [x] Do not implement under this old slice number.
 
 Task commits:
 
-- T7.1:
-- T7.2:
-- T7.3:
-- T7.4:
-- T7.5:
-- T7.6:
-- T7.7:
-- T7.8:
+- T7.1: extracted into `TUI Operational Console`.
 
 ## Slice 8: TUI Action Wiring
 
 Candidate tasks:
 
-- [ ] Wire runtime validation action.
-- [ ] Wire ticket creation/status/comment actions.
-- [ ] Wire ticket start dry-run action.
-- [ ] Wire authoring session/quiz actions.
-- [ ] Wire report/evidence display actions.
-- [ ] Add confirmation model for mutating and long-running operations.
-- [ ] Add tests where practical.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Extract implementation work into
+  `.prj/plans/slicing-tui-operational-console-plan.md`.
+- [x] Do not implement under this old slice number.
 
 Task commits:
 
-- T8.1:
-- T8.2:
-- T8.3:
-- T8.4:
-- T8.5:
-- T8.6:
-- T8.7:
-- T8.8:
-- T8.9:
+- T8.1: extracted into `TUI Operational Console`.

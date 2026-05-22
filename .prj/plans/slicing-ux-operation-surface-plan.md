@@ -1,6 +1,6 @@
 # UX Operation Surface Slicing Plan
 
-Status: planned
+Status: delivered-with-extraction
 
 ## Purpose
 
@@ -42,7 +42,7 @@ Delivered foundations:
 - notification, remote command intake, reporting, and maintenance commands;
 - full-system lab fixture and runbook.
 
-Observed gaps:
+Observed gaps addressed by this slicing:
 
 - CLI output is overly verbose for humans;
 - list output lacks headers;
@@ -52,6 +52,13 @@ Observed gaps:
 - protocol docs blur project documentation conventions and operational artifact
   contracts;
 - no TUI specification exists for daily operation.
+
+Remaining TUI implementation work has been extracted into a dedicated slicing
+set:
+
+- `.prj/specs/specs/tui-operational-console.md`
+- `.prj/plans/slicing-tui-operational-console-plan.md`
+- `.prj/trackers/slicing-tui-operational-console-tracker.md`
 
 ## Slicing Scope
 
@@ -64,9 +71,11 @@ This slicing includes:
 - workspace config and manifest simplification;
 - protocol doc boundary cleanup;
 - context-aware quiz generation foundation;
-- detailed Bubble Tea TUI specifications;
-- a first read-only TUI shell and navigation model;
-- selected TUI actions wired through existing command/domain operations.
+- detailed Bubble Tea TUI specifications.
+
+The original implementation-oriented TUI slices in this plan were intentionally
+extracted into `TUI Operational Console` so the TUI can start at `Slice 1` with
+its own spec, plan, and tracker.
 
 ## Out of Scope
 
@@ -287,7 +296,7 @@ Expected outcome:
 
 ### Slice 7: TUI Read-Only Shell
 
-Status: planned.
+Status: extracted.
 
 Expected branch: `feat/slice-7-tui-read-only-shell`
 Expected PR title: `feat(slice-7): tui read-only shell`
@@ -295,8 +304,8 @@ Expected report: `.prj/reports/slices/ux-operation-surface/slice-7-tui-read-only
 
 Goal:
 
-Add the first Bubble Tea TUI surface with read-only navigation over existing
-state.
+Extract the first Bubble Tea TUI implementation work into the dedicated
+`TUI Operational Console` slicing set.
 
 Candidate scope:
 
@@ -311,12 +320,13 @@ Candidate scope:
 
 Expected outcome:
 
-- users can inspect core ChrysoCoord state without copying IDs between CLI
-  commands.
+- no implementation occurs under this old slice number;
+- equivalent and expanded work is tracked in
+  `.prj/plans/slicing-tui-operational-console-plan.md`.
 
 ### Slice 8: TUI Action Wiring
 
-Status: planned.
+Status: extracted.
 
 Expected branch: `feat/slice-8-tui-action-wiring`
 Expected PR title: `feat(slice-8): tui action wiring`
@@ -324,8 +334,8 @@ Expected report: `.prj/reports/slices/ux-operation-surface/slice-8-tui-action-wi
 
 Goal:
 
-Wire safe common actions into the TUI through existing command/domain
-operations.
+Extract safe common TUI actions into the dedicated `TUI Operational Console`
+slicing set.
 
 Candidate scope:
 
@@ -340,5 +350,6 @@ Candidate scope:
 
 Expected outcome:
 
-- the TUI becomes a usable local cockpit for common work while the CLI remains
-  the automation surface.
+- no implementation occurs under this old slice number;
+- equivalent and expanded work is tracked in
+  `.prj/plans/slicing-tui-operational-console-plan.md`.
