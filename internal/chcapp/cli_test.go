@@ -402,7 +402,8 @@ func TestAuthorSessionNewListAndShow(t *testing.T) {
 	sessionID := createAuthorSessionForTest(t, projectDir)
 
 	assertAuthorSessionListContains(t, projectDir, sessionID)
-	assertAuthorSessionShowContains(t, projectDir, sessionID)
+	assertAuthorSessionShowContains(t, projectDir, sessionID, sessionID)
+	assertAuthorSessionShowContains(t, projectDir, "billing-sync", sessionID)
 }
 
 func createAuthorSessionForTest(t *testing.T, projectDir string) string {
@@ -448,12 +449,16 @@ func assertAuthorSessionListContains(t *testing.T, projectDir, sessionID string)
 		t.Fatalf("list output does not contain session id %q:\n%s", sessionID, listOut.String())
 	}
 
-	if !strings.Contains(listOut.String(), "id\tstatus\ttarget\ttopic") {
+	if !strings.Contains(listOut.String(), "id\tstatus\ttarget\tupdated_at\ttopic") {
 		t.Fatalf("list output does not contain headers:\n%s", listOut.String())
+	}
+
+	if !strings.Contains(listOut.String(), "Z\tBilling sync") {
+		t.Fatalf("list output does not contain updated time before topic:\n%s", listOut.String())
 	}
 }
 
-func assertAuthorSessionShowContains(t *testing.T, projectDir, sessionID string) {
+func assertAuthorSessionShowContains(t *testing.T, projectDir, sessionHandle, expectedSessionID string) {
 	t.Helper()
 
 	var showOut bytes.Buffer
@@ -464,17 +469,18 @@ func assertAuthorSessionShowContains(t *testing.T, projectDir, sessionID string)
 		"show",
 		"--dir",
 		projectDir,
-		sessionID,
+		sessionHandle,
 	}, &showOut, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("author session show returned error: %v", err)
 	}
 
 	for _, want := range []string{
-		"session: " + sessionID,
+		"session: " + expectedSessionID,
 		"mode: static",
 		"target: spec",
 		"topic: Billing sync",
+		"updated_at:",
 	} {
 		if !strings.Contains(showOut.String(), want) {
 			t.Fatalf("show output does not contain %q:\n%s", want, showOut.String())
@@ -4490,7 +4496,7 @@ func authorSessionIDFromOutput(t *testing.T, output string) string {
 		}
 
 		value, ok = strings.CutPrefix(line, "session: ")
-		if ok && strings.HasPrefix(value, "auth-") {
+		if ok && (strings.HasPrefix(value, "auth-") || strings.HasPrefix(value, "author-")) {
 			return value
 		}
 	}

@@ -2,10 +2,12 @@ package chcapp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/urfave/cli/v3"
 
@@ -436,13 +438,21 @@ func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	_, err = fmt.Fprintln(stdout, "id\tstatus\ttarget\ttopic")
+	_, err = fmt.Fprintln(stdout, "id\tstatus\ttarget\tupdated_at\ttopic")
 	if err != nil {
 		return fmt.Errorf("write author session list header: %w", err)
 	}
 
 	for _, session := range sessions {
-		_, err = fmt.Fprintf(stdout, "%s\t%s\t%s\t%s\n", session.ID, session.Status, session.Target, session.Topic)
+		_, err = fmt.Fprintf(
+			stdout,
+			"%s\t%s\t%s\t%s\t%s\n",
+			session.ID,
+			session.Status,
+			session.Target,
+			session.UpdatedAt.UTC().Format(time.RFC3339),
+			session.Topic,
+		)
 		if err != nil {
 			return fmt.Errorf("write author session list: %w", err)
 		}
@@ -461,7 +471,9 @@ func runAuthorSessionShow(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	session, err := chc.NewAuthoringSessionRepository(projectContext.ProjectDir).GetSession(ctx, cmd.Args().First())
+	repository := chc.NewAuthoringSessionRepository(projectContext.ProjectDir)
+
+	session, err := resolveAuthoringSession(ctx, repository, cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -525,9 +537,9 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 		return err
 	}
 
-	sessionID := strings.TrimSpace(cmd.String("session"))
-	if sessionID == "" {
-		return fmt.Errorf("authoring session id is required")
+	sessionHandle := strings.TrimSpace(cmd.String("session"))
+	if sessionHandle == "" {
+		return fmt.Errorf("authoring session is required")
 	}
 
 	quizPath := strings.TrimSpace(cmd.String("quiz"))
@@ -537,7 +549,7 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 
 	repository := chc.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
-	session, err := repository.GetSession(ctx, sessionID)
+	session, err := resolveAuthoringSession(ctx, repository, sessionHandle)
 	if err != nil {
 		return err
 	}
@@ -748,14 +760,14 @@ func loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssis
 		return authorAssistedState{}, err
 	}
 
-	sessionID := strings.TrimSpace(cmd.String("session"))
-	if sessionID == "" {
-		return authorAssistedState{}, fmt.Errorf("authoring session id is required")
+	sessionHandle := strings.TrimSpace(cmd.String("session"))
+	if sessionHandle == "" {
+		return authorAssistedState{}, fmt.Errorf("authoring session is required")
 	}
 
 	repository := chc.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
-	session, err := repository.GetSession(ctx, sessionID)
+	session, err := resolveAuthoringSession(ctx, repository, sessionHandle)
 	if err != nil {
 		return authorAssistedState{}, err
 	}
@@ -924,7 +936,79 @@ func authorAssistedCurationResponse(
 }
 
 func authoringSessionID(now time.Time) string {
-	return "auth-" + now.UTC().Format("20060102-150405")
+	return "author-" + now.UTC().Format("20060102-150405")
+}
+
+func resolveAuthoringSession(
+	ctx context.Context,
+	repository chc.AuthoringSessionRepository,
+	handle string,
+) (chc.AuthoringSession, error) {
+	handle = strings.TrimSpace(handle)
+	if handle == "" {
+		return chc.AuthoringSession{}, fmt.Errorf("authoring session is required")
+	}
+
+	session, err := repository.GetSession(ctx, handle)
+	if err == nil {
+		return session, nil
+	}
+
+	if !errors.Is(err, chc.ErrAuthoringSessionNotFound) {
+		return chc.AuthoringSession{}, err
+	}
+
+	sessions, listErr := repository.ListSessions(ctx)
+	if listErr != nil {
+		return chc.AuthoringSession{}, listErr
+	}
+
+	matches := matchingAuthoringSessions(sessions, handle)
+	if len(matches) == 1 {
+		return matches[0], nil
+	}
+
+	if len(matches) > 1 {
+		return chc.AuthoringSession{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
+	}
+
+	return chc.AuthoringSession{}, fmt.Errorf("%w: %s", chc.ErrAuthoringSessionNotFound, handle)
+}
+
+func matchingAuthoringSessions(sessions []chc.AuthoringSession, handle string) []chc.AuthoringSession {
+	handleSlug := authoringHandleSlug(handle)
+	matches := []chc.AuthoringSession{}
+
+	for _, session := range sessions {
+		if strings.EqualFold(session.ID, handle) ||
+			strings.EqualFold(session.Topic, handle) ||
+			(handleSlug != "" && authoringHandleSlug(session.Topic) == handleSlug) {
+			matches = append(matches, session)
+		}
+	}
+
+	return matches
+}
+
+func authoringHandleSlug(value string) string {
+	var builder strings.Builder
+	var previousDash bool
+
+	for _, char := range strings.ToLower(strings.TrimSpace(value)) {
+		if unicode.IsLetter(char) || unicode.IsDigit(char) {
+			builder.WriteRune(char)
+			previousDash = false
+
+			continue
+		}
+
+		if builder.Len() > 0 && !previousDash {
+			builder.WriteByte('-')
+			previousDash = true
+		}
+	}
+
+	return strings.Trim(builder.String(), "-")
 }
 
 func printAuthorAssistedQuestion(stdout io.Writer, result chc.AssistedQuizAskResult) error {
@@ -1017,6 +1101,7 @@ func printAuthorSession(stdout io.Writer, session chc.AuthoringSession) error {
 		"mode: " + string(session.Mode),
 		"target: " + string(session.Target),
 		"topic: " + session.Topic,
+		"updated_at: " + session.UpdatedAt.UTC().Format(time.RFC3339),
 		fmt.Sprintf("inputs: %d", len(session.Inputs)),
 		fmt.Sprintf("outputs: %d", len(session.Outputs)),
 		fmt.Sprintf("provenance: %d", len(session.Provenance)),
