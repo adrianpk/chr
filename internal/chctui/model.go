@@ -59,6 +59,7 @@ type Options struct {
 	Tickets           []chc.IndexedTicket
 	Documents         []DocumentView
 	AuthoringSessions []chc.AuthoringSession
+	Observability     ObservabilityView
 }
 
 type Model struct {
@@ -76,6 +77,7 @@ type Model struct {
 	selectedDocument         int
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
+	observability            ObservabilityView
 }
 
 func NewModel(opts Options) Model {
@@ -86,6 +88,7 @@ func NewModel(opts Options) Model {
 		tickets:           NewTicketViews(opts.Tickets),
 		documents:         append([]DocumentView(nil), opts.Documents...),
 		authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
+		observability:     opts.Observability,
 	}
 }
 
@@ -239,6 +242,14 @@ func (m Model) renderSelectedView() string {
 
 	if selectedView == ViewAuthoring {
 		return m.renderAuthoring()
+	}
+
+	if selectedView == ViewAgent {
+		return m.renderAgent()
+	}
+
+	if selectedView == ViewRuntime {
+		return m.renderRuntime()
 	}
 
 	placeholder, ok := viewPlaceholders[selectedView]

@@ -2,8 +2,10 @@ package chcapp
 
 import (
 	"context"
+	"errors"
 	"io"
 	"io/fs"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -96,6 +98,11 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		observability, err := loadTUIObservability(ctx, env, projectContext)
+		if err != nil {
+			return err
+		}
+
 		return chctui.Run(ctx, chctui.Options{
 			ProjectDir:        projectContext.ProjectDir,
 			ProjectID:         projectContext.ProjectID,
@@ -104,6 +111,7 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			Tickets:           tickets,
 			Documents:         documents,
 			AuthoringSessions: authoringSessions,
+			Observability:     observability,
 		})
 	}
 }
@@ -139,6 +147,11 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		observability, err := loadTUIObservability(ctx, env, projectContext)
+		if err != nil {
+			return err
+		}
+
 		return chctui.Run(ctx, chctui.Options{
 			ProjectDir:        projectContext.ProjectDir,
 			ProjectID:         projectContext.ProjectID,
@@ -147,6 +160,7 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			Tickets:           tickets,
 			Documents:         documents,
 			AuthoringSessions: authoringSessions,
+			Observability:     observability,
 		})
 	}
 }
@@ -189,4 +203,109 @@ func loadTUIAuthoringSessions(
 	}
 
 	return sessions, nil
+}
+
+func loadTUIObservability(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+) (chctui.ObservabilityView, error) {
+	daemonState, err := loadTUIDaemonState(ctx, env)
+	if err != nil {
+		return chctui.ObservabilityView{}, err
+	}
+
+	executions, err := loadTUIExecutions(ctx, env, projectContext.ProjectID)
+	if err != nil {
+		return chctui.ObservabilityView{}, err
+	}
+
+	loops, err := loadTUILoopRuns(ctx, env, projectContext.ProjectID)
+	if err != nil {
+		return chctui.ObservabilityView{}, err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
+	if err != nil {
+		return chctui.ObservabilityView{}, err
+	}
+
+	runtime, err := chc.ValidateRuntime(chc.RuntimeValidationOptions{
+		ProjectDir: projectContext.ProjectDir,
+		Config:     config.Runtime,
+	})
+	if err != nil {
+		return chctui.ObservabilityView{}, err
+	}
+
+	return chctui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime), nil
+}
+
+func loadTUIDaemonState(ctx context.Context, env chc.UserEnvironment) (chc.DaemonState, error) {
+	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
+	if err != nil {
+		return chc.DaemonState{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Load result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	state, err := repository.GetDaemonState(ctx)
+	if errors.Is(err, chc.ErrDaemonStateNotFound) {
+		return chc.NewStoppedDaemonState(time.Now().UTC()), nil
+	}
+
+	if err != nil {
+		return chc.DaemonState{}, err
+	}
+
+	return state, nil
+}
+
+func loadTUIExecutions(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectID string,
+) ([]chc.ExecutionRecord, error) {
+	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Load result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	records, err := repository.ListProjectExecutions(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func loadTUILoopRuns(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectID string,
+) ([]chc.LoopRunRecord, error) {
+	repository, err := chc.NewLoopRunRepository(ctx, env, assetsFS)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Load result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	records, err := repository.ListProjectLoopRuns(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	return records, nil
 }

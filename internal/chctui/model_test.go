@@ -259,6 +259,133 @@ func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 	}
 }
 
+func TestModelRendersAgentObservability(t *testing.T) {
+	model := NewModel(Options{
+		Observability: ObservabilityView{
+			DaemonStatus:    "running",
+			DaemonPID:       1234,
+			DaemonUpdatedAt: "2026-05-22T10:00:00Z",
+			DaemonHeartbeat: "2026-05-22T10:00:00Z",
+			LatestLoop: LoopRunView{
+				ID:             "loop-1",
+				Status:         "blocked",
+				UpdatedAt:      "2026-05-22T10:01:00Z",
+				EligibleCount:  3,
+				ProcessedCount: 1,
+				BlockedCount:   1,
+				FailedCount:    0,
+				FailureReason:  "blocked ticket",
+			},
+			LatestExecution: ExecutionView{
+				ID:             "exec-1",
+				TicketKey:      "CHC-1",
+				Status:         "failed",
+				UpdatedAt:      "2026-05-22T10:02:00Z",
+				FailureReason:  "validation failed",
+				RunDir:         ".chc/runtime/runs/CHC-1/exec-1",
+				ResultPath:     ".chc/runtime/runs/CHC-1/exec-1/result.json",
+				LogPath:        ".chc/runtime/runs/CHC-1/exec-1/runtime.log",
+				ValidationPath: ".chc/runtime/runs/CHC-1/exec-1/validation.log",
+			},
+		},
+	})
+	model.selected = 5
+
+	view := model.View()
+
+	for _, want := range []string{
+		"Agent",
+		"Daemon: running",
+		"PID: 1234",
+		"Latest Loop",
+		"ID: loop-1",
+		"Counts: 3 eligible / 1 processed / 1 blocked / 0 failed",
+		"Latest Execution",
+		"Ticket: CHC-1",
+		"Validation: .chc/runtime/runs/CHC-1/exec-1/validation.log",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelRendersRuntimeObservability(t *testing.T) {
+	model := NewModel(Options{
+		Observability: ObservabilityView{
+			RuntimeImage:             "chc-agent-runtime:local",
+			RuntimeDockerfile:        ".chc/runtime/agent/Dockerfile",
+			RuntimeArtifactDir:       ".chc/runtime/runs",
+			RuntimeValidationCommand: "make verify",
+			RuntimeChecks: []RuntimeCheckView{
+				{Name: "workspace", Status: "ok", Path: ".chc", Message: "ok"},
+				{Name: "dockerfile", Status: "fail", Path: ".chc/runtime/agent/Dockerfile", Message: "missing"},
+			},
+		},
+	})
+	model.selected = 6
+
+	view := model.View()
+
+	for _, want := range []string{
+		"Runtime",
+		"Image: chc-agent-runtime:local",
+		"Dockerfile: .chc/runtime/agent/Dockerfile",
+		"Artifact Dir: .chc/runtime/runs",
+		"Validation: make verify",
+		"workspace",
+		"dockerfile",
+		"fail",
+		"missing",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
+	projectDir := t.TempDir()
+	older := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
+	newer := older.Add(time.Hour)
+
+	view := NewObservabilityView(
+		projectDir,
+		chc.NewStoppedDaemonState(newer),
+		[]chc.ExecutionRecord{
+			{ID: "exec-old", Status: chc.ExecutionStatusSucceeded, UpdatedAt: older},
+			{ID: "exec-new", Status: chc.ExecutionStatusFailed, UpdatedAt: newer},
+		},
+		[]chc.LoopRunRecord{
+			{ID: "loop-old", Status: chc.LoopRunStatusSucceeded, UpdatedAt: older},
+			{ID: "loop-new", Status: chc.LoopRunStatusFailed, UpdatedAt: newer},
+		},
+		chc.RuntimeValidationResult{
+			Plan: chc.RuntimePlan{
+				Image:             "image",
+				DockerfilePath:    filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
+				ArtifactDir:       filepath.Join(projectDir, ".chc", "runtime", "runs"),
+				ValidationCommand: "make verify",
+			},
+			Checks: []chc.RuntimeValidationCheck{
+				{Name: "dockerfile", Path: filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
+			},
+		},
+	)
+
+	if view.LatestExecution.ID != "exec-new" {
+		t.Fatalf("LatestExecution.ID = %q, want exec-new", view.LatestExecution.ID)
+	}
+
+	if view.LatestLoop.ID != "loop-new" {
+		t.Fatalf("LatestLoop.ID = %q, want loop-new", view.LatestLoop.ID)
+	}
+
+	if view.RuntimeDockerfile != ".chc/runtime/agent/Dockerfile" {
+		t.Fatalf("RuntimeDockerfile = %q, want relative runtime path", view.RuntimeDockerfile)
+	}
+}
+
 func TestModelSelectsDocuments(t *testing.T) {
 	model := NewModel(Options{
 		Documents: []DocumentView{
