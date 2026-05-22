@@ -5,7 +5,7 @@ Slicing: TUI Operational Console
 Plan: `.prj/plans/slicing-tui-operational-console-plan.md`
 Tracker: `.prj/trackers/slicing-tui-operational-console-tracker.md`
 Branch: `feat/slice-8-tui-agent-work-control`
-PR: pending
+PR: #146
 
 ## Purpose
 
