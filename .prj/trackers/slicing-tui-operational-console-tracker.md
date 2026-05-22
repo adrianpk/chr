@@ -25,7 +25,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice 3: Document And Authoring Explorer | Delivered | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | PR #141 merged. |
 | Slice 4: Agent And Runtime Observability | Delivered | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | PR #142 merged. |
 | Slice 5: Command Palette Foundation | Delivered | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | PR #143 merged. |
-| Slice 6: Safe Artifact Creation Actions | Planned | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | Low-risk creation flows. |
+| Slice 6: Safe Artifact Creation Actions | Reviewing | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | PR pending review. |
 | Slice 7: Ticket Mutation Actions | Planned | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | Explicit ticket operations. |
 | Slice 8: Agent Work Control | Planned | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | Start/stop selected work. |
 
@@ -161,29 +161,29 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add action confirmation model.
-- [ ] Wire create ticket.
-- [ ] Wire create authoring session.
-- [ ] Wire create context-aware quiz.
-- [ ] Wire create dump or draft where supported.
-- [ ] Reload state after writes.
-- [ ] Render validation errors.
-- [ ] Add tests for action planning.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add action confirmation model.
+- [x] Wire create ticket.
+- [x] Wire create authoring session.
+- [x] Wire create context-aware quiz.
+- [x] Wire create dump or draft where supported.
+- [x] Reload state after writes.
+- [x] Render validation errors.
+- [x] Add tests for action planning.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1:
-- T6.2:
-- T6.3:
-- T6.4:
-- T6.5:
-- T6.6:
-- T6.7:
-- T6.8:
-- T6.9:
-- T6.10:
+- T6.1: `c985c16` adds artifact action confirmation state.
+- T6.2: `c985c16` wires confirmed ticket creation through the ticket repository.
+- T6.3: `c985c16` wires confirmed authoring session creation through the authoring repository.
+- T6.4: `c985c16` registers context-aware quiz creation and reports provider-backed validation when unavailable from the TUI action.
+- T6.5: `c985c16` registers draft creation and reports the supported promotion requirement.
+- T6.6: `c985c16` reloads tickets, documents, and authoring sessions after writes.
+- T6.7: `c985c16` renders action validation errors as TUI status messages.
+- T6.8: `c985c16` adds action planning, cancellation, confirmation, and failure tests.
+- T6.9: pending report commit.
+- T6.10: `make verify` passed.
 
 ## Slice 7: Ticket Mutation Actions
 
