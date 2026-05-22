@@ -182,7 +182,7 @@ Task commits:
 - T6.6: `c985c16` reloads tickets, documents, and authoring sessions after writes.
 - T6.7: `c985c16` renders action validation errors as TUI status messages.
 - T6.8: `c985c16` adds action planning, cancellation, confirmation, and failure tests.
-- T6.9: pending report commit.
+- T6.9: `d74a52d` adds the slice implementation report.
 - T6.10: `make verify` passed.
 
 ## Slice 7: Ticket Mutation Actions
