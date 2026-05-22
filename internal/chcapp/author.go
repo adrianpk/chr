@@ -28,6 +28,10 @@ func newAuthorCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
+var newAuthoringQuizQuestionProvider = func() chc.AuthoringQuizQuestionProvider {
+	return chc.CodexAuthoringQuizQuestionProvider{}
+}
+
 func newAuthorAssistedCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "assisted",
@@ -67,7 +71,7 @@ func newAuthorSessionCommand(stdout io.Writer) *cli.Command {
 func newAuthorQuizCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "quiz",
-		Usage: "Generate static authoring quizzes",
+		Usage: "Generate authoring quizzes",
 		Commands: []*cli.Command{
 			newAuthorQuizNewCommand(stdout),
 		},
@@ -104,7 +108,7 @@ func newAuthorSessionShowCommand(stdout io.Writer) *cli.Command {
 func newAuthorQuizNewCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "new",
-		Usage:  "Create a static authoring quiz",
+		Usage:  "Create an authoring quiz",
 		Flags:  authorQuizNewFlags(),
 		Action: authorQuizNewAction(stdout),
 	}
@@ -276,7 +280,7 @@ func authorSessionFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "authoring mode",
-			Value: string(chc.AuthoringSessionModeStatic),
+			Value: string(chc.AuthoringSessionModeMarkdownDirect),
 		},
 		&cli.StringFlag{
 			Name:  "target",
@@ -494,28 +498,40 @@ func runAuthorQuizNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 
 	now := time.Now().UTC()
 
-	session, err := staticQuizSessionFromCommand(cmd, projectContext, now)
+	session, err := quizSessionFromCommand(cmd, projectContext, now)
 	if err != nil {
 		return err
 	}
 
-	plan, err := chc.PlanStaticQuizGeneration(chc.StaticQuizGenerationOptions{
+	return runAuthorContextualQuizNew(ctx, cmd, stdout, projectContext, session, now)
+}
+
+func runAuthorContextualQuizNew(
+	ctx context.Context,
+	cmd *cli.Command,
+	stdout io.Writer,
+	projectContext commandProjectContext,
+	session chc.AuthoringSession,
+	now time.Time,
+) error {
+	plan, err := chc.PlanContextualQuizGeneration(ctx, chc.ContextualQuizGenerationOptions{
 		ProjectDir:    projectContext.ProjectDir,
 		Session:       session,
 		Now:           now,
 		AllowReplace:  cmd.Bool("allow-replace"),
 		DryRun:        cmd.Bool("dry-run"),
 		QuestionCount: cmd.Int("question-count"),
+		Provider:      contextualQuizProviderFromCommand(),
 	})
 	if err != nil {
 		return err
 	}
 
 	if cmd.Bool("dry-run") {
-		return printAuthorQuizPlan(stdout, plan, true, projectContext.ProjectDir)
+		return printAuthorContextualQuizPlan(stdout, plan, true, projectContext.ProjectDir)
 	}
 
-	err = chc.WriteStaticQuiz(plan)
+	err = chc.WriteContextualQuiz(plan)
 	if err != nil {
 		return err
 	}
@@ -525,7 +541,7 @@ func runAuthorQuizNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	return printAuthorQuizPlan(stdout, plan, false, projectContext.ProjectDir)
+	return printAuthorContextualQuizPlan(stdout, plan, false, projectContext.ProjectDir)
 }
 
 func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -877,7 +893,7 @@ func authoringSessionFromCommand(
 	return session, nil
 }
 
-func staticQuizSessionFromCommand(
+func quizSessionFromCommand(
 	cmd *cli.Command,
 	projectContext commandProjectContext,
 	now time.Time,
@@ -891,7 +907,7 @@ func staticQuizSessionFromCommand(
 		ID:        authoringSessionID(now),
 		ProjectID: projectContext.ProjectID,
 		Status:    chc.AuthoringSessionStatusDraft,
-		Mode:      chc.AuthoringSessionModeStatic,
+		Mode:      chc.AuthoringSessionModeContextual,
 		Target:    chc.AuthoringTarget(cmd.String("target")),
 		Topic:     topic,
 		CreatedAt: now,
@@ -904,6 +920,10 @@ func staticQuizSessionFromCommand(
 	}
 
 	return session, nil
+}
+
+func contextualQuizProviderFromCommand() chc.AuthoringQuizQuestionProvider {
+	return newAuthoringQuizQuestionProvider()
 }
 
 func assistedConfigFromCommand(cmd *cli.Command, session chc.AuthoringSession) chc.AssistedAuthoringConfig {
@@ -1206,9 +1226,9 @@ func printAuthorSession(stdout io.Writer, session chc.AuthoringSession) error {
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorQuizPlan(
+func printAuthorContextualQuizPlan(
 	stdout io.Writer,
-	plan chc.StaticQuizGenerationPlan,
+	plan chc.ContextualQuizGenerationPlan,
 	dryRun bool,
 	projectDir string,
 ) error {
@@ -1220,9 +1240,13 @@ func printAuthorQuizPlan(
 	lines := []string{
 		"quiz: " + status + " " + displayPath(projectDir, plan.Layout.FullPath),
 		fmt.Sprintf("dry_run: %t", dryRun),
+		"mode: context",
+		"strategy: " + plan.Result.Strategy,
+		"provider: " + plan.Result.Provider,
 		"session: " + plan.Session.ID,
 		"path: " + displayPath(projectDir, plan.Layout.FullPath),
-		fmt.Sprintf("questions: %d", len(plan.Questions)),
+		fmt.Sprintf("requested_questions: %d", plan.RequestedQuestionCount),
+		fmt.Sprintf("generated_questions: %d", plan.GeneratedQuestionCount),
 	}
 
 	err := writeAuthorLines(stdout, lines)
@@ -1233,7 +1257,7 @@ func printAuthorQuizPlan(
 	if dryRun {
 		_, err = fmt.Fprintln(stdout, plan.Content)
 		if err != nil {
-			return fmt.Errorf("write author quiz content: %w", err)
+			return fmt.Errorf("write author contextual quiz content: %w", err)
 		}
 	}
 

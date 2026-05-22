@@ -477,7 +477,7 @@ func assertAuthorSessionShowContains(t *testing.T, projectDir, sessionHandle, ex
 
 	for _, want := range []string{
 		"session: " + expectedSessionID,
-		"mode: static",
+		"mode: markdown_direct",
 		"target: spec",
 		"topic: Billing sync",
 		"updated_at:",
@@ -490,6 +490,7 @@ func assertAuthorSessionShowContains(t *testing.T, projectDir, sessionHandle, ex
 
 func TestAuthorQuizNewDryRunPrintsEditableQuiz(t *testing.T) {
 	projectDir := newTestWorkspace(t)
+	installFakeAuthoringQuizProvider(t)
 
 	var stdout bytes.Buffer
 
@@ -514,8 +515,11 @@ func TestAuthorQuizNewDryRunPrintsEditableQuiz(t *testing.T) {
 	for _, want := range []string{
 		"quiz: planned",
 		"dry_run: true",
-		"questions: 2",
-		"# Static Quiz",
+		"mode: context",
+		"provider: fake",
+		"requested_questions: 2",
+		"generated_questions: 3",
+		"# Context-Aware Quiz",
 		"Answer:",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -526,6 +530,7 @@ func TestAuthorQuizNewDryRunPrintsEditableQuiz(t *testing.T) {
 
 func TestAuthorQuizNewWritesSessionAndQuiz(t *testing.T) {
 	projectDir := newTestWorkspace(t)
+	installFakeAuthoringQuizProvider(t)
 
 	var stdout bytes.Buffer
 
@@ -4507,6 +4512,8 @@ func authorSessionIDFromOutput(t *testing.T, output string) string {
 func createAuthorQuizForTest(t *testing.T, projectDir string) (string, string) {
 	t.Helper()
 
+	installFakeAuthoringQuizProvider(t)
+
 	var stdout bytes.Buffer
 
 	err := run(t.Context(), []string{
@@ -4530,6 +4537,47 @@ func createAuthorQuizForTest(t *testing.T, projectDir string) (string, string) {
 	}
 
 	return authorSessionIDFromOutput(t, stdout.String()), quizPath
+}
+
+func installFakeAuthoringQuizProvider(t *testing.T) {
+	t.Helper()
+
+	previous := newAuthoringQuizQuestionProvider
+	newAuthoringQuizQuestionProvider = func() chc.AuthoringQuizQuestionProvider {
+		return &chc.FakeAuthoringQuizQuestionProvider{
+			Result: chc.AuthoringQuizGenerationResult{
+				Provider: "fake",
+				Strategy: chc.AuthoringQuizGenerationStrategyDeep,
+				Questions: []chc.AuthoringQuizQuestion{
+					{
+						ID:                    "Q1",
+						Text:                  "Which user workflow should the specification pin down first?",
+						Tags:                  []string{"workflow", "specification"},
+						FollowUpDepth:         1,
+						CompletionRecommended: false,
+					},
+					{
+						ID:                    "Q2",
+						Text:                  "What project files or docs should be treated as authoritative context?",
+						Tags:                  []string{"context", "documents"},
+						FollowUpDepth:         1,
+						CompletionRecommended: false,
+					},
+					{
+						ID:                    "Q3",
+						Text:                  "What validation evidence should prove the generated spec is useful?",
+						Tags:                  []string{"validation", "evidence"},
+						FollowUpDepth:         0,
+						CompletionRecommended: true,
+					},
+				},
+			},
+		}
+	}
+
+	t.Cleanup(func() {
+		newAuthoringQuizQuestionProvider = previous
+	})
 }
 
 type authorAssistedQuestionOutput struct {

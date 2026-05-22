@@ -133,7 +133,7 @@ func quizToDraftLayoutOptions(opts QuizToDraftPromotionOptions) AuthoringArtifac
 		Kind:         AuthoringArtifactKindDraft,
 		Role:         AuthoringArtifactRoleOutput,
 		Topic:        opts.Session.Topic,
-		Description:  "Draft promoted from a static quiz.",
+		Description:  "Draft promoted from a quiz.",
 		AllowReplace: opts.AllowReplace,
 	}
 }

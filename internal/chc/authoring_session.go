@@ -18,7 +18,7 @@ type AuthoringSessionMode string
 
 const (
 	AuthoringSessionModeMarkdownDirect AuthoringSessionMode = "markdown_direct"
-	AuthoringSessionModeStatic         AuthoringSessionMode = "static"
+	AuthoringSessionModeContextual     AuthoringSessionMode = "contextual"
 	AuthoringSessionModeAssisted       AuthoringSessionMode = "assisted"
 	AuthoringSessionModeTUI            AuthoringSessionMode = "tui"
 )
@@ -160,7 +160,7 @@ func (s AuthoringSessionStatus) Valid() bool {
 func (m AuthoringSessionMode) Valid() bool {
 	switch m {
 	case AuthoringSessionModeMarkdownDirect,
-		AuthoringSessionModeStatic,
+		AuthoringSessionModeContextual,
 		AuthoringSessionModeAssisted,
 		AuthoringSessionModeTUI:
 		return true

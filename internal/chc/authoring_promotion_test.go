@@ -1,6 +1,7 @@
 package chc
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -92,7 +93,7 @@ func TestWriteQuizToDraftPromotionRejectsUnallowedCollision(t *testing.T) {
 
 func TestPlanQuizToDraftPromotionRejectsInvalidInput(t *testing.T) {
 	now := time.Date(2026, 5, 21, 16, 0, 0, 0, time.UTC)
-	session := validStaticQuizSession(now)
+	session := validContextualQuizSession(now)
 
 	for _, test := range []struct {
 		name string
@@ -115,12 +116,12 @@ func TestPlanQuizToDraftPromotionRejectsInvalidInput(t *testing.T) {
 func writePromotionQuizFixture(t *testing.T, projectDir string, now time.Time) (AuthoringSession, string) {
 	t.Helper()
 
-	session := validStaticQuizSession(now)
-	quizPlan := mustPlanStaticQuiz(t, projectDir, session, now, false)
+	session := validContextualQuizSession(now)
+	quizPlan := mustPlanContextualQuiz(t, projectDir, session, now, false)
 
-	err := WriteStaticQuiz(quizPlan)
+	err := WriteContextualQuiz(quizPlan)
 	if err != nil {
-		t.Fatalf("WriteStaticQuiz returned error: %v", err)
+		t.Fatalf("WriteContextualQuiz returned error: %v", err)
 	}
 
 	answerContent := strings.ReplaceAll(quizPlan.Content, "Answer:\n\n", "Answer:\n\nThe API must retry failed requests.\n\n")
@@ -131,6 +132,31 @@ func writePromotionQuizFixture(t *testing.T, projectDir string, now time.Time) (
 	}
 
 	return quizPlan.Session, quizPlan.Layout.FullPath
+}
+
+func mustPlanContextualQuiz(
+	t *testing.T,
+	projectDir string,
+	session AuthoringSession,
+	now time.Time,
+	allowReplace bool,
+) ContextualQuizGenerationPlan {
+	t.Helper()
+
+	plan, err := PlanContextualQuizGeneration(context.Background(), ContextualQuizGenerationOptions{
+		ProjectDir:   projectDir,
+		Session:      session,
+		Now:          now,
+		AllowReplace: allowReplace,
+		Provider: &FakeAuthoringQuizQuestionProvider{
+			Result: validContextualQuizGenerationResult(),
+		},
+	})
+	if err != nil {
+		t.Fatalf("PlanContextualQuizGeneration returned error: %v", err)
+	}
+
+	return plan
 }
 
 func mustPlanQuizToDraftPromotion(

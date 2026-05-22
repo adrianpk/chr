@@ -17,7 +17,7 @@ func TestValidateAuthoringSessionAcceptsValidSession(t *testing.T) {
 func TestValidateAuthoringSessionAcceptsFutureCompatibleModes(t *testing.T) {
 	for _, mode := range []AuthoringSessionMode{
 		AuthoringSessionModeMarkdownDirect,
-		AuthoringSessionModeStatic,
+		AuthoringSessionModeContextual,
 		AuthoringSessionModeAssisted,
 		AuthoringSessionModeTUI,
 	} {
@@ -398,14 +398,14 @@ func validAuthoringSession() AuthoringSession {
 		Kind:        AuthoringArtifactKindQuiz,
 		Role:        AuthoringArtifactRoleOutput,
 		Path:        ".chc/quizzes/auth-context-quiz.md",
-		Description: "Static questionnaire generated from the topic.",
+		Description: "Questionnaire generated from project context.",
 	}
 
 	return AuthoringSession{
 		ID:        "auth-20260521-120000",
 		ProjectID: "project-1",
 		Status:    AuthoringSessionStatusDraft,
-		Mode:      AuthoringSessionModeStatic,
+		Mode:      AuthoringSessionModeContextual,
 		Target:    AuthoringTargetQuiz,
 		Topic:     "Markdown-first authoring workflow",
 		Inputs:    []AuthoringArtifactRef{input},
@@ -415,7 +415,7 @@ func validAuthoringSession() AuthoringSession {
 				Relation:   AuthoringProvenanceRelationGenerated,
 				Source:     input,
 				Target:     output,
-				Decision:   "Generate a static quiz from the source dump.",
+				Decision:   "Generate a quiz from project context.",
 				RecordedAt: now,
 			},
 		},
