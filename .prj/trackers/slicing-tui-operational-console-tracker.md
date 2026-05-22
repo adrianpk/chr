@@ -128,7 +128,7 @@ Task commits:
 - T4.5: `af90147` renders the Runtime view.
 - T4.6: `af90147` shows blocked and failure summaries.
 - T4.7: `af90147` adds observability view model tests.
-- T4.8: pending report commit.
+- T4.8: `bf12912` adds the slice implementation report.
 - T4.9: `make verify` passed.
 
 ## Slice 5: Command Palette Foundation
