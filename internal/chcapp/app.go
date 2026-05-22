@@ -84,46 +84,12 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
-		tickets, err := loadTUITickets(ctx, env, projectContext)
+		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout)
 		if err != nil {
 			return err
 		}
 
-		documents, err := chctui.LoadDocumentViews(ctx, projectContext.ProjectDir)
-		if err != nil {
-			return err
-		}
-
-		projectMetadata, err := chc.NewProjectMetadataService(projectContext.ProjectDir).Load()
-		if err != nil {
-			return err
-		}
-
-		authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
-		if err != nil {
-			return err
-		}
-
-		observability, err := loadTUIObservability(ctx, env, projectContext)
-		if err != nil {
-			return err
-		}
-
-		return chctui.Run(ctx, chctui.Options{
-			ProjectDir:        projectContext.ProjectDir,
-			ProjectID:         projectContext.ProjectID,
-			ProjectMetadata:   projectMetadata,
-			Stdin:             stdin,
-			Stdout:            stdout,
-			Tickets:           tickets,
-			Documents:         documents,
-			AuthoringSessions: authoringSessions,
-			Observability:     observability,
-			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
-			TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
-			WorkExecutor:      newTUIWorkActionExecutor(ctx, env, projectContext),
-			ProjectExecutor:   newTUIProjectMetadataExecutor(ctx, env, projectContext),
-		})
+		return chctui.Run(ctx, options)
 	}
 }
 
@@ -143,47 +109,69 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
-		tickets, err := loadTUITickets(ctx, env, projectContext)
+		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout)
 		if err != nil {
 			return err
 		}
 
-		documents, err := chctui.LoadDocumentViews(ctx, projectContext.ProjectDir)
-		if err != nil {
-			return err
-		}
-
-		projectMetadata, err := chc.NewProjectMetadataService(projectContext.ProjectDir).Load()
-		if err != nil {
-			return err
-		}
-
-		authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
-		if err != nil {
-			return err
-		}
-
-		observability, err := loadTUIObservability(ctx, env, projectContext)
-		if err != nil {
-			return err
-		}
-
-		return chctui.Run(ctx, chctui.Options{
-			ProjectDir:        projectContext.ProjectDir,
-			ProjectID:         projectContext.ProjectID,
-			ProjectMetadata:   projectMetadata,
-			Stdin:             stdin,
-			Stdout:            stdout,
-			Tickets:           tickets,
-			Documents:         documents,
-			AuthoringSessions: authoringSessions,
-			Observability:     observability,
-			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
-			TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
-			WorkExecutor:      newTUIWorkActionExecutor(ctx, env, projectContext),
-			ProjectExecutor:   newTUIProjectMetadataExecutor(ctx, env, projectContext),
-		})
+		return chctui.Run(ctx, options)
 	}
+}
+
+func loadTUIOptions(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+	stdin io.Reader,
+	stdout io.Writer,
+) (chctui.Options, error) {
+	tickets, err := loadTUITickets(ctx, env, projectContext)
+	if err != nil {
+		return chctui.Options{}, err
+	}
+
+	documents, err := chctui.LoadDocumentViews(ctx, projectContext.ProjectDir)
+	if err != nil {
+		return chctui.Options{}, err
+	}
+
+	projectMetadata, err := chc.NewProjectMetadataService(projectContext.ProjectDir).Load()
+	if err != nil {
+		return chctui.Options{}, err
+	}
+
+	cases, err := chc.NewCaseMetadataService(projectContext.ProjectDir).LoadAll()
+	if err != nil {
+		return chctui.Options{}, err
+	}
+
+	authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
+	if err != nil {
+		return chctui.Options{}, err
+	}
+
+	observability, err := loadTUIObservability(ctx, env, projectContext)
+	if err != nil {
+		return chctui.Options{}, err
+	}
+
+	return chctui.Options{
+		ProjectDir:        projectContext.ProjectDir,
+		ProjectID:         projectContext.ProjectID,
+		ProjectMetadata:   projectMetadata,
+		Cases:             cases,
+		Stdin:             stdin,
+		Stdout:            stdout,
+		Tickets:           tickets,
+		Documents:         documents,
+		AuthoringSessions: authoringSessions,
+		Observability:     observability,
+		ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
+		TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
+		WorkExecutor:      newTUIWorkActionExecutor(ctx, env, projectContext),
+		ProjectExecutor:   newTUIProjectMetadataExecutor(ctx, env, projectContext),
+		CaseExecutor:      newTUICaseMetadataExecutor(ctx, env, projectContext),
+	}, nil
 }
 
 type tuiProjectMetadataExecutor struct {
@@ -256,6 +244,95 @@ func (e tuiProjectMetadataExecutor) indexProjectMetadata(metadata chc.ProjectMet
 	return repository.UpsertProjectMetadata(e.ctx, chc.IndexedProjectMetadata{
 		ProjectID: e.projectContext.ProjectID,
 		Metadata:  metadata,
+		IndexedAt: time.Now().UTC().Format(time.RFC3339),
+	})
+}
+
+type tuiCaseMetadataExecutor struct {
+	ctx            context.Context
+	env            chc.UserEnvironment
+	projectContext commandProjectContext
+}
+
+func newTUICaseMetadataExecutor(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+) tuiCaseMetadataExecutor {
+	return tuiCaseMetadataExecutor{
+		ctx:            ctx,
+		env:            env,
+		projectContext: projectContext,
+	}
+}
+
+func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
+	metadata chc.CaseMetadata,
+) (chctui.CaseMetadataResult, error) {
+	saved, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).Save(metadata)
+	if err != nil {
+		return chctui.CaseMetadataResult{}, err
+	}
+
+	err = e.indexCaseMetadata(saved)
+	if err != nil {
+		return chctui.CaseMetadataResult{}, err
+	}
+
+	cases, err := e.loadAndIndexCases()
+	if err != nil {
+		return chctui.CaseMetadataResult{}, err
+	}
+
+	return chctui.CaseMetadataResult{
+		Message: "Case metadata saved.",
+		Case:    saved,
+		Cases:   cases,
+	}, nil
+}
+
+func (e tuiCaseMetadataExecutor) ResyncCaseMetadata() (chctui.CaseMetadataResult, error) {
+	cases, err := e.loadAndIndexCases()
+	if err != nil {
+		return chctui.CaseMetadataResult{}, err
+	}
+
+	return chctui.CaseMetadataResult{
+		Message: "Case metadata resynced.",
+		Cases:   cases,
+	}, nil
+}
+
+func (e tuiCaseMetadataExecutor) loadAndIndexCases() ([]chc.CaseMetadata, error) {
+	cases, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).LoadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, metadata := range cases {
+		err = e.indexCaseMetadata(metadata)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return cases, nil
+}
+
+func (e tuiCaseMetadataExecutor) indexCaseMetadata(metadata chc.CaseMetadata) error {
+	repository, err := chc.NewCaseMetadataRepository(e.ctx, e.env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Save/resync already succeeded; close errors are not actionable here.
+		_ = repository.Close()
+	}()
+
+	return repository.UpsertCaseMetadata(e.ctx, chc.IndexedCaseMetadata{
+		ProjectID: e.projectContext.ProjectID,
+		Case:      metadata,
 		IndexedAt: time.Now().UTC().Format(time.RFC3339),
 	})
 }

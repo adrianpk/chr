@@ -25,6 +25,28 @@ spec, ticket, or implementation plan.
 - The TUI should feel closer to operator tools such as Lazygit, k9s, or
   Lazydocker: reactive, focused, dense, keyboard-first, and workflow-oriented.
 
+## Reusable Screen Geometry
+
+- Editable tabs should use the same spatial grammar unless a concrete workflow
+  requires a different layout.
+- The upper-right area is the natural detail-editing surface in master/detail
+  screens.
+- Derived metadata should not compete with editable content in the upper-right
+  area.
+- For `Project`, `Cases`, and similar editable screens:
+  - upper area: primary in-place editing when the screen represents a single
+    record;
+  - upper-left: primary selection when the screen has a real list;
+  - upper-right: editable detail fields only when the screen has real
+    master/detail behavior;
+  - lower-left: long-form body/context or supporting content;
+  - lower-right: derived, read-only metadata.
+- Derived metadata includes artifact counts, source/index facts, and actionable
+  diagnostics.
+- Inline editing is the default editing model. Editing should happen where the
+  field is displayed rather than moving the field into a separate temporary
+  editing region.
+
 ## Project Identity
 
 - User-facing project identity should be human-readable.
@@ -33,9 +55,9 @@ spec, ticket, or implementation plan.
 - Internal project IDs should remain hidden unless a diagnostic/debug view needs
   them.
 
-## F1 Project
+## Project
 
-- `F1 Project` is not a dashboard.
+- `Project` is not a dashboard.
 - It should describe the project semantically for human orientation and agent
   context.
 - The content should explain what the project does or intends to do.
@@ -101,9 +123,9 @@ spec, ticket, or implementation plan.
   because it is shorter.
 - The rest of the final button mapping is not yet fixed.
 
-## F2 Cases
+## Cases
 
-- `F2 Cases` is the space for listing and administering use cases.
+- `Cases` is the space for listing and administering use cases.
 - It should show the list of existing use cases.
 - It should support creating new use cases.
 - A use case is intentionally minimal:
@@ -123,6 +145,34 @@ spec, ticket, or implementation plan.
   create.
 - Ticket counts or related artifacts should be derived by queries, not manually
   maintained as use case fields.
+- Reuse the `Project` screen implementation lessons:
+  - use Bubble Tea/Bubbles components for text editing rather than custom
+    low-level input handling;
+  - keep a shared domain/application service between CLI and TUI;
+  - persist a human-editable Markdown file with YAML frontmatter;
+  - maintain SQLite as a query/index layer with source path, source hash,
+    schema version, and indexed timestamp.
+- A use case is conceptually a project-local container for related artifacts
+  such as dumps, quizzes, specs, plans, and board work.
+- A use case belongs to the current project by containment under `.chc/`; a
+  `project_id` frontmatter field is not currently necessary for normal
+  operation.
+- A `project_id` frontmatter field could help standalone file rehydration, but
+  it can also duplicate path context and create drift.
+- Current leaning: do not include project identity in use-case frontmatter unless
+  a concrete import/export workflow requires it.
+- The Cases screen likely needs:
+  - a navigable list;
+  - quick search/autocomplete;
+  - creation of new use cases;
+  - an editable detail panel for `name` and `description`;
+  - derived artifact counts by case.
+- The Cases screen should follow the reusable screen geometry:
+  - list/search in the left region;
+  - editable `name`, `description`, and long-form case context in one right-side
+    document panel;
+  - artifact counts, source/index facts, and diagnostics below that document
+    panel.
 
 ## F3 Dumps
 

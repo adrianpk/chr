@@ -230,6 +230,70 @@ func TestRenderProjectInputDoesNotShiftTextAtCursor(t *testing.T) {
 	}
 }
 
+func TestModelCreatesAndSavesCaseMetadata(t *testing.T) {
+	executor := &fakeCaseMetadataExecutor{}
+	model := NewModel(Options{
+		CaseExecutor: executor,
+	})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF2})
+	casesView := requireUpdatedModel(t, updated)
+
+	updated, _ = casesView.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("n")})
+	editing := requireUpdatedModel(t, updated)
+
+	if !editing.caseEdit.Active {
+		t.Fatal("caseEdit.Active = false, want active new case name edit")
+	}
+
+	editing.caseEdit.Input.SetValue("Blog Publishing")
+
+	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	changed := requireUpdatedModel(t, updated)
+
+	updated, _ = changed.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	saved := requireUpdatedModel(t, updated)
+
+	if executor.saved.Name != "Blog Publishing" {
+		t.Fatalf("saved.Name = %q, want Blog Publishing", executor.saved.Name)
+	}
+
+	if saved.caseDirty {
+		t.Fatal("caseDirty = true, want false after save")
+	}
+
+	if len(saved.cases) != 1 || saved.cases[0].Slug != "blog-publishing" {
+		t.Fatalf("cases = %#v, want saved blog-publishing case", saved.cases)
+	}
+}
+
+func TestModelFiltersCaseMetadata(t *testing.T) {
+	model := NewModel(Options{
+		Cases: []chc.CaseMetadata{
+			{SchemaVersion: chc.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
+			{SchemaVersion: chc.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
+		},
+	})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF2})
+	casesView := requireUpdatedModel(t, updated)
+
+	updated, _ = casesView.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("/")})
+	filtering := requireUpdatedModel(t, updated)
+
+	updated, _ = filtering.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("runtime")})
+	filtered := requireUpdatedModel(t, updated)
+
+	cases := filtered.filteredCases()
+	if len(cases) != 1 {
+		t.Fatalf("len(filteredCases) = %d, want 1", len(cases))
+	}
+
+	if cases[0].Slug != "runtime" {
+		t.Fatalf("filtered case = %q, want runtime", cases[0].Slug)
+	}
+}
+
 func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
 	model := NewModel(Options{})
 
@@ -1191,6 +1255,17 @@ func writeTicketViewFile(t *testing.T, projectDir, name, body string) string {
 	return path
 }
 
+func requireUpdatedModel(t *testing.T, updated tea.Model) Model {
+	t.Helper()
+
+	model, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	return model
+}
+
 type fakeArtifactActionExecutor struct {
 	action ArtifactActionID
 	result ArtifactActionResult
@@ -1222,6 +1297,36 @@ func (e *fakeProjectMetadataExecutor) ResyncProjectMetadata() (ProjectMetadataRe
 	return ProjectMetadataResult{
 		Message:  "Project metadata resynced.",
 		Metadata: e.saved,
+	}, nil
+}
+
+type fakeCaseMetadataExecutor struct {
+	saved chc.CaseMetadata
+}
+
+func (e *fakeCaseMetadataExecutor) SaveCaseMetadata(
+	metadata chc.CaseMetadata,
+) (CaseMetadataResult, error) {
+	e.saved = metadata
+
+	e.saved.SchemaVersion = chc.CaseMetadataSchemaVersion
+	if e.saved.Slug == "" {
+		e.saved.Slug = "blog-publishing"
+	}
+
+	e.saved.Exists = true
+
+	return CaseMetadataResult{
+		Message: "Case metadata saved.",
+		Case:    e.saved,
+		Cases:   []chc.CaseMetadata{e.saved},
+	}, nil
+}
+
+func (e *fakeCaseMetadataExecutor) ResyncCaseMetadata() (CaseMetadataResult, error) {
+	return CaseMetadataResult{
+		Message: "Case metadata resynced.",
+		Cases:   []chc.CaseMetadata{e.saved},
 	}, nil
 }
 

@@ -3136,7 +3136,7 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"database_exists: false",
 		"schema_migrations_exists: false",
 		"applied: 0",
-		"pending: 8",
+		"pending: 9",
 		"unknown: 0",
 		"pending_migration: 20260518000001 create_projects",
 	} {
@@ -3177,8 +3177,8 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 	for _, want := range []string{
 		"database_exists: true",
 		"schema_migrations_exists: true",
-		"available: 8",
-		"applied: 8",
+		"available: 9",
+		"applied: 9",
 		"pending: 0",
 		"unknown: 0",
 		"applied_migration: 20260518000001 create_projects",

@@ -263,30 +263,42 @@ overwrite them. It should require either:
 
 ## UI Layout
 
-The current spatial direction is acceptable:
+The `Project` screen represents one project record. It is not a master/detail
+screen because there is no project list inside the tab.
 
-- the primary project fields occupy the main left area;
-- secondary facts occupy compact right-side panels;
-- the bottom navigation/action bar remains the primary control surface.
+- upper area: editable project identity fields;
+- lower-left: editable long-form project context;
+- lower-right: derived read-only metadata and diagnostics.
 
-The main panel should not repeat `Project` as an extra heading when the active
-screen is already visible in navigation.
+The main editable panel may use `Project` as its panel title for consistency
+with other primary TUI screens.
 
 ```text
-┌──────────────────────────────────────────────┬──────────────────────────────┐
-│ Name                                         │ Artifacts                    │
-│ [ chc-blog-work                            ] │ tickets        12            │
-│                                              │ dumps           3            │
-│ Description                                  │ quizzes         1            │
-│ [ CLI/blog workspace used to validate...   ] │ specs           4            │
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Project                                                                     │
+│ Name                                                                        │
+│ [ chc-blog-work                                                           ] │
+│                                                                             │
+│ Description                                                                 │
+│ [ CLI/blog workspace used to validate CHC authoring flows.                ] │
+├──────────────────────────────────────────────┬──────────────────────────────┤
+│ Context                                      │ Artifacts                    │
+│ [ Long-form Markdown project context...    ] │ tickets        12            │
+│ [                                          ] │ dumps           3            │
+│                                              │ quizzes         1            │
+│                                              │ specs           4            │
 │                                              │ plans           2            │
-│ Context                                      ├──────────────────────────────┤
-│ [ Long-form Markdown project context...    ] │ Location                     │
-│ [                                          ] │ /home/.../chc-blog-work      │
+│                                              │                              │
+│                                              │ Source                       │
+│                                              │ .chc/project.md              │
 └──────────────────────────────────────────────┴──────────────────────────────┘
 
-Project  Cases  Dumps  Quizzes  Specs  Plans  Board  Dash  Help  Exit
+Project  Cases  Dumps  Quizzes  Specs  Plans  Board  Dash  Help  Quit
 ```
+
+Derived metadata must stay in the same visual region across `Project`, `Cases`,
+and later editable artifact screens unless a concrete workflow requires a
+different layout.
 
 ## Display Fields
 

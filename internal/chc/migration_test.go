@@ -51,6 +51,7 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	assertTableExists(t, db, "loop_runs")
 	assertTableExists(t, db, "daemon_state")
 	assertTableExists(t, db, "notification_events")
+	assertTableExists(t, db, "indexed_cases")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -125,6 +126,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260522000008-create_indexed_project_metadata.sql": {
 			Data: []byte(testCreateIndexedProjectMetadataMigration()),
+		},
+		"assets/migration/sqlite/20260522000009-create_indexed_cases.sql": {
+			Data: []byte(testCreateIndexedCasesMigration()),
 		},
 	}
 }
@@ -363,6 +367,30 @@ ON indexed_project_metadata (name);
 
 -- +migrate Down
 DROP TABLE IF EXISTS indexed_project_metadata;
+`
+}
+
+func testCreateIndexedCasesMigration() string {
+	return `-- +migrate Up
+CREATE TABLE indexed_cases (
+    project_id text NOT NULL,
+    slug text NOT NULL,
+    name text NOT NULL,
+    description text NOT NULL,
+    context text NOT NULL,
+    source_path text NOT NULL,
+    source_hash text NOT NULL,
+    schema_version integer NOT NULL,
+    indexed_at text NOT NULL,
+    PRIMARY KEY (project_id, slug),
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX indexed_cases_project_name_idx
+ON indexed_cases (project_id, name);
+
+-- +migrate Down
+DROP TABLE IF EXISTS indexed_cases;
 `
 }
 

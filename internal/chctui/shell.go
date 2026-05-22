@@ -6,9 +6,14 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+
+	"forge.adrianpk.com/chc/internal/chc"
 )
 
-const minShellHeight = 12
+const (
+	minShellHeight      = 12
+	primarySplitPercent = 55
+)
 
 var (
 	shellTopbarStyle = lipgloss.NewStyle().
@@ -127,8 +132,7 @@ func (m Model) renderLegacyWorkspace(width, height int) string {
 }
 
 func (m Model) renderProjectWorkspace(width, height int) string {
-	leftWidth := width * 62 / 100
-	rightWidth := width - leftWidth
+	leftWidth, rightWidth := splitWidths(width)
 	rightTopHeight := maxInt(height/2, 1)
 	rightBottomHeight := maxInt(height-rightTopHeight, 1)
 	project := m.renderProjectContextLines(maxInt(leftWidth-4, 1))
@@ -136,13 +140,13 @@ func (m Model) renderProjectWorkspace(width, height int) string {
 	location := m.renderProjectLocationLines()
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
-		renderPanel("Artifacts", artifacts, rightWidth, rightTopHeight, false),
-		renderPanel("Location", location, rightWidth, rightBottomHeight, false),
+		renderPanel("Location", location, rightWidth, rightTopHeight, false),
+		renderPanel("Artifacts", artifacts, rightWidth, rightBottomHeight, false),
 	)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("", project, leftWidth, height, true),
+		renderPanel("Project", project, leftWidth, height, true),
 		right,
 	), width, height)
 }
@@ -236,25 +240,236 @@ func (m Model) renderProjectLocationLines() []string {
 
 func (m Model) renderCasesWorkspace(width, height int) string {
 	leftWidth, rightWidth := splitWidths(width)
-	list := []string{
-		"No use cases found.",
-		"",
-		"Use cases are intentionally small:",
-		"name",
-		"description",
-	}
-	detail := []string{
-		"Scope",
-		"Single-user workspace.",
-		"No ownership fields.",
-		"Artifacts can later attach to a case or stay project-wide.",
-	}
+	rightEditableHeight := maxInt(height*70/100, 1)
+	rightArtifactsHeight := maxInt(height-rightEditableHeight, 1)
+	right := lipgloss.JoinVertical(
+		lipgloss.Left,
+		renderPanel("Case", m.renderCaseDocumentLines(maxInt(rightWidth-4, 1)), rightWidth, rightEditableHeight, true),
+		renderPanel("Artifacts", m.renderCaseArtifactLines(), rightWidth, rightArtifactsHeight, false),
+	)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Cases", list, leftWidth, height, true),
-		renderPanel("Case Detail", detail, rightWidth, height, false),
+		renderPanel("Cases", m.renderCaseListLines(maxInt(leftWidth-4, 1), height-2), leftWidth, height, true),
+		right,
 	), width, height)
+}
+
+func (m Model) renderCaseDocumentLines(width int) []string {
+	lines := m.renderCaseDetailLines(width)
+
+	lines = append(lines, "")
+	lines = append(lines, m.renderCaseContextLines(width)...)
+
+	return lines
+}
+
+func (m Model) renderCaseListLines(width, limit int) []string {
+	filter := strings.TrimSpace(m.caseFilter)
+
+	filterPrefix := "Filter"
+	if m.caseFilterEditing {
+		filterPrefix = "> Filter"
+	}
+
+	lines := []string{filterPrefix + ": " + filter}
+	if filter == "" {
+		lines[0] = filterPrefix
+	}
+
+	cases := m.filteredCases()
+	if len(cases) == 0 {
+		lines = append(lines, "", "No cases found.", "Press n to create one.")
+
+		return lines
+	}
+
+	lines = append(lines, "")
+
+	for _, metadata := range cases {
+		prefix := " "
+
+		selected, ok := m.selectedCaseMetadata()
+		if ok && metadata.Slug == selected.Slug {
+			prefix = ">"
+		}
+
+		name := strings.TrimSpace(metadata.Name)
+		if name == "" {
+			name = "Untitled case"
+		}
+
+		lines = append(lines, fitPlainLine(prefix+" "+name, width))
+		if len(lines) >= limit {
+			break
+		}
+	}
+
+	return lines
+}
+
+func (m Model) renderCaseDetailLines(width int) []string {
+	metadata, ok := m.selectedCaseMetadata()
+	if !ok {
+		return []string{"No case selected.", "", "Press n to create a case."}
+	}
+
+	lines := []string{
+		m.renderCaseFieldLine(caseFieldName, "Name", metadata.Name, width),
+		"",
+		m.renderCaseFieldLine(caseFieldDescription, "Description", metadata.Description, width),
+	}
+
+	for _, line := range m.renderCaseFieldBody(caseFieldDescription, metadata.Description, width) {
+		lines = append(lines, "  "+line)
+	}
+
+	if m.caseDirty {
+		lines = append(lines, "", shellMutedStyle.Render("Unsaved changes. Press s to save."))
+	}
+
+	return lines
+}
+
+func (m Model) renderCaseContextLines(width int) []string {
+	metadata, ok := m.selectedCaseMetadata()
+	if !ok {
+		return []string{"No case selected."}
+	}
+
+	lines := []string{m.renderCaseFieldLine(caseFieldContext, "Context", metadata.Context, width)}
+
+	for _, line := range m.renderCaseFieldBody(caseFieldContext, metadata.Context, width) {
+		lines = append(lines, "  "+line)
+	}
+
+	return lines
+}
+
+func (m Model) renderCaseFieldLine(field int, label, value string, width int) string {
+	prefix := "  "
+	if field == m.selectedCaseField {
+		prefix = "> "
+	}
+
+	if m.caseEdit.Active && field == m.caseEdit.Field && field == caseFieldName {
+		return prefix + label + ": " + m.renderCaseInput(maxInt(width-lipgloss.Width(prefix)-lipgloss.Width(label)-2, 1))
+	}
+
+	if field != caseFieldName {
+		return prefix + label
+	}
+
+	value = strings.TrimSpace(value)
+	if value == "" {
+		value = "Untitled case"
+	}
+
+	return prefix + label + ": " + value
+}
+
+func (m Model) renderCaseFieldBody(field int, value string, width int) []string {
+	if m.caseEdit.Active && field == m.caseEdit.Field {
+		if field == caseFieldName {
+			return nil
+		}
+
+		return []string{m.renderCaseInput(maxInt(width-2, 1))}
+	}
+
+	value = strings.TrimSpace(value)
+	if value == "" {
+		value = "Not set."
+	}
+
+	return wrapPlainText(value, maxInt(width-2, 1))
+}
+
+func (m Model) renderCaseInput(width int) string {
+	input := m.caseEdit.Input
+	input.Width = width
+
+	return input.View()
+}
+
+func (m Model) renderCaseArtifactLines() []string {
+	metadata, ok := m.selectedCaseMetadata()
+	if !ok {
+		return []string{"No case selected."}
+	}
+
+	return []string{
+		fmt.Sprintf("Dumps             %d", m.caseDocumentCount(metadata, "dump")),
+		fmt.Sprintf("Quizzes           %d", m.caseDocumentCount(metadata, "quiz")),
+		fmt.Sprintf("Specs             %d", m.caseDocumentCount(metadata, "spec")),
+		fmt.Sprintf("Plans             %d", m.caseDocumentCount(metadata, "plan")),
+		fmt.Sprintf("Board tickets     %d", m.caseTicketCount(metadata)),
+		"",
+		"Source",
+		"  " + emptyValue(projectMetadataRelativePath(m.projectDir, metadata.SourcePath)),
+	}
+}
+
+func (m Model) selectedCaseMetadata() (chc.CaseMetadata, bool) {
+	if len(m.cases) == 0 || m.selectedCase < 0 || m.selectedCase >= len(m.cases) {
+		return chc.CaseMetadata{}, false
+	}
+
+	return m.cases[m.selectedCase], true
+}
+
+func (m Model) filteredCases() []chc.CaseMetadata {
+	filter := strings.ToLower(strings.TrimSpace(m.caseFilter))
+	if filter == "" {
+		return append([]chc.CaseMetadata(nil), m.cases...)
+	}
+
+	cases := []chc.CaseMetadata{}
+	for _, metadata := range m.cases {
+		haystack := strings.ToLower(metadata.Name + " " + metadata.Description)
+		if strings.Contains(haystack, filter) {
+			cases = append(cases, metadata)
+		}
+	}
+
+	return cases
+}
+
+func (m Model) caseDocumentCount(metadata chc.CaseMetadata, family string) int {
+	slug := strings.ToLower(strings.TrimSpace(metadata.Slug))
+	name := strings.ToLower(strings.TrimSpace(metadata.Name))
+	count := 0
+
+	for _, document := range m.documents {
+		if document.Family != family {
+			continue
+		}
+
+		path := strings.ToLower(document.RelativePath)
+		if slug != "" && strings.Contains(path, "/"+slug+"/") {
+			count++
+
+			continue
+		}
+
+		if name != "" && strings.Contains(strings.ToLower(document.Title), name) {
+			count++
+		}
+	}
+
+	return count
+}
+
+func (m Model) caseTicketCount(metadata chc.CaseMetadata) int {
+	count := 0
+
+	for _, ticket := range m.tickets {
+		if strings.EqualFold(ticket.UseCase, metadata.Name) || strings.EqualFold(ticket.UseCase, metadata.Slug) {
+			count++
+		}
+	}
+
+	return count
 }
 
 func (m Model) renderTicketWorkspace(width, height int) string {
@@ -600,7 +815,7 @@ func fitPlainLine(line string, width int) string {
 }
 
 func splitWidths(width int) (int, int) {
-	left := width * 55 / 100
+	left := width * primarySplitPercent / 100
 	right := width - left
 
 	return left, right

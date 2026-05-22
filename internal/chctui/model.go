@@ -71,6 +71,7 @@ type Options struct {
 	ProjectDir        string
 	ProjectID         string
 	ProjectMetadata   chc.ProjectMetadata
+	Cases             []chc.CaseMetadata
 	Stdin             io.Reader
 	Stdout            io.Writer
 	Tickets           []chc.IndexedTicket
@@ -81,6 +82,7 @@ type Options struct {
 	TicketExecutor    TicketActionExecutor
 	WorkExecutor      WorkActionExecutor
 	ProjectExecutor   ProjectMetadataExecutor
+	CaseExecutor      CaseMetadataExecutor
 }
 
 type Model struct {
@@ -90,6 +92,13 @@ type Model struct {
 	selectedProjectField     int
 	projectEdit              ProjectEditState
 	projectDirty             bool
+	cases                    []chc.CaseMetadata
+	selectedCase             int
+	selectedCaseField        int
+	caseEdit                 ProjectEditState
+	caseDirty                bool
+	caseFilter               string
+	caseFilterEditing        bool
 	views                    []View
 	selected                 int
 	width                    int
@@ -111,6 +120,7 @@ type Model struct {
 	workAction               WorkActionState
 	workExecutor             WorkActionExecutor
 	projectExecutor          ProjectMetadataExecutor
+	caseExecutor             CaseMetadataExecutor
 	statusMessage            string
 }
 
@@ -132,6 +142,7 @@ func NewModel(opts Options) Model {
 		projectDir:        opts.ProjectDir,
 		projectID:         opts.ProjectID,
 		projectMetadata:   projectMetadata,
+		cases:             append([]chc.CaseMetadata(nil), opts.Cases...),
 		views:             append([]View(nil), defaultViews...),
 		tickets:           NewTicketViews(opts.Tickets),
 		documents:         append([]DocumentView(nil), opts.Documents...),
@@ -142,6 +153,7 @@ func NewModel(opts Options) Model {
 		ticketExecutor:    opts.TicketExecutor,
 		workExecutor:      opts.WorkExecutor,
 		projectExecutor:   opts.ProjectExecutor,
+		caseExecutor:      opts.CaseExecutor,
 	}
 }
 
@@ -248,6 +260,10 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	if m.SelectedView() == ViewProject {
 		return m.updateProjectKey(msg)
+	}
+
+	if m.SelectedView() == ViewCases {
+		return m.updateCasesKey(msg)
 	}
 
 	return m.updateNavigationKey(msg)
