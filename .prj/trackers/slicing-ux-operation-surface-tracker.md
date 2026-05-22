@@ -25,7 +25,7 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 | Slice 1: CLI Output Readability | Delivered | `feat/slice-1-cli-output-readability` | `feat(slice-1): cli output readability` | `.prj/reports/slices/ux-operation-surface/slice-1-cli-output-readability.md` | PR #134 merged. |
 | Slice 2: Workspace Bootstrap Contract Cleanup | Delivered | `feat/slice-2-workspace-bootstrap-contract` | `feat(slice-2): workspace bootstrap contract cleanup` | `.prj/reports/slices/ux-operation-surface/slice-2-workspace-bootstrap-contract.md` | PR #135 merged. |
 | Slice 3: Protocol Document Boundary Cleanup | Delivered | `feat/slice-3-protocol-doc-boundaries` | `feat(slice-3): protocol doc boundaries` | `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-boundaries.md` | PR #136 merged. |
-| Slice 4: Authoring Session Ergonomics | Planned | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | IDs, slugs, list/show UX. |
+| Slice 4: Authoring Session Ergonomics | Reviewing | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | IDs, slugs, list/show UX. |
 | Slice 5: Context-Aware Quiz Generation Foundation | Planned | `feat/slice-5-context-aware-quiz-generation` | `feat(slice-5): context-aware quiz generation` | `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md` | Quiz engine boundary. |
 | Slice 6: TUI Specification Set | Delivered | `docs/slice-6-tui-specification-set` | `docs(slice-6): tui specification set` | `.prj/reports/slices/ux-operation-surface/slice-6-tui-specification-set.md` | Spec-only slice delivered directly on `dev`. |
 | Slice 7: TUI Read-Only Shell | Planned | `feat/slice-7-tui-read-only-shell` | `feat(slice-7): tui read-only shell` | `.prj/reports/slices/ux-operation-surface/slice-7-tui-read-only-shell.md` | First Bubble Tea implementation. |
@@ -118,25 +118,25 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Evaluate authoring session ID prefix naming.
-- [ ] Add session list headers and updated-time display.
-- [ ] Add safe slug/topic lookup where appropriate.
-- [ ] Allow promote flows to resolve session from artifact metadata where safe.
-- [ ] Preserve old `auth-...` session compatibility.
-- [ ] Update docs and tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Evaluate authoring session ID prefix naming.
+- [x] Add session list headers and updated-time display.
+- [x] Add safe slug/topic lookup where appropriate.
+- [x] Allow promote flows to resolve session from artifact metadata where safe.
+- [x] Preserve old `auth-...` session compatibility.
+- [x] Update docs and tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1:
-- T4.2:
-- T4.3:
-- T4.4:
-- T4.5:
-- T4.6:
-- T4.7:
-- T4.8:
+- T4.1: `a103a89` changed new session ids to `author-...`.
+- T4.2: `a103a89` added list headers and updated timestamps.
+- T4.3: `a103a89` added exact topic and unique slug session lookup.
+- T4.4: `0b5a6ff` resolved promotion sessions from quiz artifacts.
+- T4.5: `a103a89` preserved exact `auth-...` id lookup compatibility.
+- T4.6: `a103a89`, `ccc59e1`, `0b5a6ff` updated tests and docs.
+- T4.7: report added in `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md`.
+- T4.8: `make verify` pass.
 
 ## Slice 5: Context-Aware Quiz Generation Foundation
 
