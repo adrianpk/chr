@@ -26,7 +26,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice 4: Agent And Runtime Observability | Delivered | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | PR #142 merged. |
 | Slice 5: Command Palette Foundation | Delivered | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | PR #143 merged. |
 | Slice 6: Safe Artifact Creation Actions | Delivered | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | PR #144 merged. |
-| Slice 7: Ticket Mutation Actions | Planned | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | Explicit ticket operations. |
+| Slice 7: Ticket Mutation Actions | Reviewing | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | PR pending review. |
 | Slice 8: Agent Work Control | Planned | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | Start/stop selected work. |
 
 ## Slice 1: TUI App Foundation
@@ -189,27 +189,27 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add ticket action confirmation model.
-- [ ] Wire add ticket comment.
-- [ ] Wire move ticket state.
-- [ ] Wire checklist toggle where safe.
-- [ ] Wire checklist creation only if supported by domain operations.
-- [ ] Validate and reload ticket after mutation.
-- [ ] Add tests for ticket action planning.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add ticket action confirmation model.
+- [x] Wire add ticket comment.
+- [x] Wire move ticket state.
+- [x] Wire checklist toggle where safe.
+- [x] Wire checklist creation only if supported by domain operations.
+- [x] Validate and reload ticket after mutation.
+- [x] Add tests for ticket action planning.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1:
-- T7.2:
-- T7.3:
-- T7.4:
-- T7.5:
-- T7.6:
-- T7.7:
-- T7.8:
-- T7.9:
+- T7.1: `8afafbe` adds ticket action confirmation state.
+- T7.2: `8afafbe` wires selected ticket comments through the ticket commenter.
+- T7.3: `8afafbe` wires selected ticket status moves through the status updater.
+- T7.4: `8afafbe` registers checklist toggle validation for unavailable safe writes.
+- T7.5: `8afafbe` registers checklist creation validation for unavailable safe writes.
+- T7.6: `8afafbe` reloads ticket state after mutation.
+- T7.7: `8afafbe` adds ticket action planning, cancellation, confirmation, and failure tests.
+- T7.8: pending report commit.
+- T7.9: `make verify` passed.
 
 ## Slice 8: Agent Work Control
 
