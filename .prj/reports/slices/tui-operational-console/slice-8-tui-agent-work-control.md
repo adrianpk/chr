@@ -1,6 +1,6 @@
 # Slice 8: Agent Work Control
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Operational Console
 Plan: `.prj/plans/slicing-tui-operational-console-plan.md`
 Tracker: `.prj/trackers/slicing-tui-operational-console-tracker.md`

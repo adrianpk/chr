@@ -1,6 +1,6 @@
 # TUI Operational Console Slicing Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `.prj/plans/slicing-tui-operational-console-plan.md`
 Spec: `.prj/specs/specs/tui-operational-console.md`
@@ -13,8 +13,8 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -27,7 +27,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice 5: Command Palette Foundation | Delivered | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | PR #143 merged. |
 | Slice 6: Safe Artifact Creation Actions | Delivered | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | PR #144 merged. |
 | Slice 7: Ticket Mutation Actions | Delivered | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | PR #145 merged. |
-| Slice 8: Agent Work Control | Reviewing | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | PR #146 pending review. |
+| Slice 8: Agent Work Control | Delivered | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | PR #146 merged. |
 
 ## Slice 1: TUI App Foundation
 
