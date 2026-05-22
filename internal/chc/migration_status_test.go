@@ -22,8 +22,8 @@ func TestMigrationStatusReportsPendingWhenDatabaseIsMissing(t *testing.T) {
 		t.Fatal("DatabaseExists = true, want false")
 	}
 
-	if len(status.Pending) != 7 {
-		t.Fatalf("Pending len = %d, want 7", len(status.Pending))
+	if len(status.Pending) != 8 {
+		t.Fatalf("Pending len = %d, want 8", len(status.Pending))
 	}
 }
 
@@ -45,8 +45,8 @@ func TestMigrationStatusReportsCleanDatabase(t *testing.T) {
 		t.Fatal("DatabaseExists = false, want true")
 	}
 
-	if len(status.Applied) != 7 {
-		t.Fatalf("Applied len = %d, want 7", len(status.Applied))
+	if len(status.Applied) != 8 {
+		t.Fatalf("Applied len = %d, want 8", len(status.Applied))
 	}
 
 	if len(status.Pending) != 0 {
