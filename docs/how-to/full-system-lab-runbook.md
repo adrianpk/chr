@@ -18,7 +18,6 @@ export CHC_LAB_ROOT="$HOME/Projects/labs/ghc"
 export CHC_PROJECTS="$CHC_LAB_ROOT/projects"
 export CHC_REF_PROJECT="$CHC_PROJECTS/chc-blog-ref"
 export CHC_WORK_PROJECT="$CHC_PROJECTS/chc-blog-work"
-export CHC_DEV_ROOT="$CHC_LAB_ROOT/dev-root"
 export CHC_LOG_DIR="$CHC_LAB_ROOT/logs"
 export CHC_ARTIFACT_DIR="$CHC_LAB_ROOT/artifacts"
 export CHC_SCRIPTS="$CHC_LAB_ROOT/scripts"
@@ -27,19 +26,23 @@ export CHC_SCRIPTS="$CHC_LAB_ROOT/scripts"
 Create the base directories:
 
 ```sh
-mkdir -p "$CHC_PROJECTS" "$CHC_DEV_ROOT" "$CHC_LOG_DIR" "$CHC_ARTIFACT_DIR" "$CHC_SCRIPTS"
+mkdir -p "$CHC_PROJECTS" "$CHC_LOG_DIR" "$CHC_ARTIFACT_DIR" "$CHC_SCRIPTS"
 ```
 
 The reference project is treated as immutable after it is created:
 
 - `chc-blog-ref` is the clean reset source.
 - `chc-blog-work` is the project ChrysoCoord operates on.
-- `dev-root` isolates ChrysoCoord user-level state from the real user account.
 - `logs` stores copied command output for later diagnosis.
 - `artifacts` stores snapshots, bundles, and exported evidence.
 - `scripts` may later contain reset helpers.
 
 Do not run destructive reset commands outside `$CHC_LAB_ROOT`.
+
+The command path below is written like a final user would run it from inside the
+managed project. It does not include developer-only flags such as `--dev-root`.
+Use a separate shell environment when you need to isolate user-level state while
+developing ChrysoCoord itself.
 
 ## Reference Project
 
@@ -126,17 +129,9 @@ rm -rf "$CHC_WORK_PROJECT"
 cp -a "$CHC_REF_PROJECT" "$CHC_WORK_PROJECT"
 ```
 
-Reset ChrysoCoord user-level lab state separately:
-
-```sh
-rm -rf "$CHC_DEV_ROOT"
-mkdir -p "$CHC_DEV_ROOT"
-```
-
-Useful future scripts under `$CHC_SCRIPTS`:
+Useful helper scripts under `$CHC_SCRIPTS`:
 
 - `reset-project.sh`: recreates `chc-blog-work` from `chc-blog-ref`.
-- `reset-dev-root.sh`: clears and recreates `$CHC_DEV_ROOT`.
 - `snapshot-project.sh`: copies the current work project to `$CHC_ARTIFACT_DIR`.
 - `run-step.sh`: runs one command, captures stdout, stderr, exit code, and time.
 
@@ -168,22 +163,23 @@ run `make build` immediately before testing a repository-local binary.
 Initialize ChrysoCoord inside the resettable work project:
 
 ```sh
-chc init --dir "$CHC_WORK_PROJECT"
+cd "$CHC_WORK_PROJECT"
+chc init
 ```
 
 Validate the runtime boundary without running Docker:
 
 ```sh
-chc runtime validate --dir "$CHC_WORK_PROJECT" --dry-run
+chc runtime validate --dry-run
 ```
 
-Register and select the project using isolated lab state:
+Register and select the project:
 
 ```sh
-chc project add --dev-root "$CHC_DEV_ROOT" --name chc-blog-lab "$CHC_WORK_PROJECT"
-chc project list --dev-root "$CHC_DEV_ROOT"
-chc project select --dev-root "$CHC_DEV_ROOT" chc-blog-lab
-chc project current --dev-root "$CHC_DEV_ROOT"
+chc project add --name chc-blog-lab .
+chc project list
+chc project select chc-blog-lab
+chc project current
 ```
 
 Expected result:
@@ -191,7 +187,7 @@ Expected result:
 - `.chc/` exists inside `chc-blog-work`.
 - `.chc/config.yml` exists.
 - `.chc/runtime/agent/Dockerfile` exists.
-- The lab project is registered under `$CHC_DEV_ROOT`.
+- The lab project is registered in the local user-level project registry.
 
 ## Authoring Workflow
 
@@ -199,8 +195,6 @@ Create an authoring session for the lab project:
 
 ```sh
 chc author session new \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --target spec \
   --topic "CLI blog project validation"
 ```
@@ -208,16 +202,14 @@ chc author session new \
 List and inspect sessions:
 
 ```sh
-chc author session list --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
-chc author session show --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" <session-id>
+chc author session list
+chc author session show <session-id>
 ```
 
 Generate a static quiz:
 
 ```sh
 chc author quiz new \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --target spec \
   --topic "CLI blog project validation" \
   --question-count 8
@@ -228,30 +220,22 @@ draft:
 
 ```sh
 chc author promote quiz-to-draft \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --session <session-id> \
-  --quiz "$CHC_WORK_PROJECT/.chc/quizzes/<quiz-file>.md"
+  --quiz ".chc/quizzes/<quiz-file>.md"
 ```
 
 Exercise assisted authoring with deterministic fake adapter inputs:
 
 ```sh
 chc author assisted start \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --target spec \
   --topic "CLI blog project validation"
 
 chc author assisted resume \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --session <session-id> \
   --fake-question "What behavior should the CLI blog prove first?"
 
 chc author assisted answer \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --session <session-id> \
   --turn turn-001 \
   --turn-index 1 \
@@ -260,13 +244,9 @@ chc author assisted answer \
   --answer "Publishing a draft should update the persistent index and tests should pass."
 
 chc author assisted status \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --session <session-id>
 
 chc author assisted finalize \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --session <session-id> \
   --fake-summary "The lab should prove initialization, authoring, ticket execution, validation, reporting, maintenance, and remote command intake against the CLI blog project." \
   --target-kind spec \
@@ -297,8 +277,6 @@ Create tickets from the seeded project issues:
 
 ```sh
 chc ticket new \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   "Fix publish index update" \
   --type bug \
   --priority high \
@@ -308,8 +286,6 @@ chc ticket new \
   --tag runtime
 
 chc ticket new \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   "Search posts by tags" \
   --type feature \
   --priority medium \
@@ -322,18 +298,18 @@ chc ticket new \
 Inspect and prepare tickets:
 
 ```sh
-chc ticket list --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
-chc ticket show --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" CHC-1
-chc ticket comment --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" CHC-1 "Lab ticket created from the seeded publish/index bug."
-chc ticket status --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" CHC-1 ready
-chc ticket status --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" CHC-2 ready
+chc ticket list
+chc ticket show CHC-1
+chc ticket comment CHC-1 "Lab ticket created from the seeded publish/index bug."
+chc ticket status CHC-1 ready
+chc ticket status CHC-2 ready
 ```
 
 Rebuild and inspect the ticket index:
 
 ```sh
-chc index rebuild --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
-chc index status --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
+chc index rebuild
+chc index status
 ```
 
 ## Runtime and Single-Ticket Execution
@@ -341,34 +317,34 @@ chc index status --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
 Preview one ticket execution:
 
 ```sh
-chc ticket start --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" CHC-1 --dry-run
+chc ticket start CHC-1 --dry-run
 ```
 
 Run it:
 
 ```sh
-chc ticket start --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" CHC-1
+chc ticket start CHC-1
 ```
 
 Capture the execution id from stdout or from reports:
 
 ```sh
-chc report list --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" --ticket CHC-1
+chc report list --ticket CHC-1
 ```
 
 Preview and apply the result:
 
 ```sh
-chc ticket apply-result --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" <execution-id> --dry-run
-chc ticket apply-result --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" <execution-id>
+chc ticket apply-result <execution-id> --dry-run
+chc ticket apply-result <execution-id>
 ```
 
 Inspect evidence:
 
 ```sh
-chc report show --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" --execution <execution-id>
-make -C "$CHC_WORK_PROJECT" verify
-git -C "$CHC_WORK_PROJECT" diff
+chc report show --execution <execution-id>
+make verify
+git diff
 ```
 
 Expected result:
@@ -384,8 +360,6 @@ Preview eligible work:
 
 ```sh
 chc ticket loop \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --status ready \
   --order priority_severity \
   --max-iterations 2 \
@@ -396,8 +370,6 @@ Run a bounded loop:
 
 ```sh
 chc ticket loop \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --status ready \
   --order priority_severity \
   --max-iterations 2
@@ -406,21 +378,21 @@ chc ticket loop \
 Inspect loop evidence:
 
 ```sh
-chc report list --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" --kind loop
-chc report show --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" --loop <loop-id>
+chc report list --kind loop
+chc report show --loop <loop-id>
 ```
 
 The loop should stop on a blocked or failed ticket instead of spinning forever.
 
 ## Daemon Coordinator
 
-Exercise daemon state with the isolated lab root:
+Exercise local daemon state:
 
 ```sh
-chc daemon status --dev-root "$CHC_DEV_ROOT"
-chc daemon start --dev-root "$CHC_DEV_ROOT" --max-iterations 1
-chc daemon status --dev-root "$CHC_DEV_ROOT"
-chc daemon stop --dev-root "$CHC_DEV_ROOT"
+chc daemon status
+chc daemon start --max-iterations 1
+chc daemon status
+chc daemon stop
 ```
 
 This validates local coordinator state. It does not create a hosted service.
@@ -430,13 +402,13 @@ This validates local coordinator state. It does not create a hosted service.
 Inspect notification configuration:
 
 ```sh
-chc notify status --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
+chc notify status
 ```
 
 Preview a Telegram payload without contacting Telegram:
 
 ```sh
-chc notify telegram test --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT" --dry-run
+chc notify telegram test --dry-run
 ```
 
 Create a fixture file under `$CHC_ARTIFACT_DIR/telegram-updates.json` with test
@@ -444,14 +416,10 @@ Telegram updates, then parse it:
 
 ```sh
 chc notify telegram poll \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --fixture "$CHC_ARTIFACT_DIR/telegram-updates.json" \
   --dry-run
 
 chc notify telegram poll \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --fixture "$CHC_ARTIFACT_DIR/telegram-updates.json"
 ```
 
@@ -463,23 +431,23 @@ record. This stage validates intake, not live Telegram operation.
 Write a diagnostic bundle:
 
 ```sh
-chc maintenance bundle --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
+chc maintenance bundle
 ```
 
 Inspect local state:
 
 ```sh
-chc maintenance db status --dev-root "$CHC_DEV_ROOT"
-chc maintenance registry status --dev-root "$CHC_DEV_ROOT"
-chc maintenance execution artifacts --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
-chc maintenance execution cleanup-preview --dev-root "$CHC_DEV_ROOT" --dir "$CHC_WORK_PROJECT"
+chc maintenance db status
+chc maintenance registry status
+chc maintenance execution artifacts
+chc maintenance execution cleanup-preview
 ```
 
 Preview registry repair commands before using the write variants:
 
 ```sh
-chc maintenance registry disable --dev-root "$CHC_DEV_ROOT" --dry-run chc-blog-lab
-chc maintenance registry set-path --dev-root "$CHC_DEV_ROOT" --dry-run chc-blog-lab "$CHC_WORK_PROJECT"
+chc maintenance registry disable --dry-run chc-blog-lab
+chc maintenance registry set-path --dry-run chc-blog-lab "$CHC_WORK_PROJECT"
 ```
 
 Copy the diagnostic bundle into `$CHC_ARTIFACT_DIR` after each run that exposes
@@ -492,19 +460,13 @@ against it:
 
 ```sh
 chc proving validate \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --objective .chc/proving/objectives/CLI-BLOG-1-fix-publish-index.md
 
 chc proving run \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --objective .chc/proving/objectives/CLI-BLOG-1-fix-publish-index.md \
   --dry-run
 
 chc proving ralph \
-  --dev-root "$CHC_DEV_ROOT" \
-  --dir "$CHC_WORK_PROJECT" \
   --objective .chc/proving/objectives/CLI-BLOG-1-fix-publish-index.md \
   --max-attempts 3
 ```
@@ -548,7 +510,6 @@ A useful full-system lab run produces:
 - a resettable `chc-blog-work` project;
 - a clean way to restore it from `chc-blog-ref`;
 - initialized `.chc/` project-local state;
-- isolated user-level state under `$CHC_DEV_ROOT`;
 - authoring session, quiz, promotion, and assisted authoring artifacts;
 - at least two Markdown tickets;
 - ticket index rebuild and status output;
