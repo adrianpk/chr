@@ -454,12 +454,20 @@ func printRuntimeValidateResult(
 		}
 	}
 
-	_, err = fmt.Fprintln(stdout, "checks:")
+	return printRuntimeValidationChecks(stdout, plan.ProjectDir, result.Checks)
+}
+
+func printRuntimeValidationChecks(
+	stdout io.Writer,
+	projectDir string,
+	checks []chc.RuntimeValidationCheck,
+) error {
+	_, err := fmt.Fprintln(stdout, "checks:")
 	if err != nil {
 		return fmt.Errorf("write runtime checks header: %w", err)
 	}
 
-	for _, check := range result.Checks {
+	for _, check := range checks {
 		status := "fail"
 		if check.OK {
 			status = "ok"
@@ -471,10 +479,11 @@ func printRuntimeValidateResult(
 		}
 
 		if message == "" {
-			_, err = fmt.Fprintf(stdout, "  %-4s  %-12s %s\n", status, check.Name, displayPath(plan.ProjectDir, check.Path))
+			_, err = fmt.Fprintf(stdout, "  %-4s  %-12s %s\n", status, check.Name, displayPath(projectDir, check.Path))
 		} else {
-			_, err = fmt.Fprintf(stdout, "  %-4s  %-12s %s  %s\n", status, check.Name, displayPath(plan.ProjectDir, check.Path), message)
+			_, err = fmt.Fprintf(stdout, "  %-4s  %-12s %s  %s\n", status, check.Name, displayPath(projectDir, check.Path), message)
 		}
+
 		if err != nil {
 			return fmt.Errorf("write runtime check: %w", err)
 		}
