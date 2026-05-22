@@ -88,9 +88,12 @@ AGENTS.md
 
 ## Source of Truth
 
-Markdown files are canonical assets.
+Markdown files are the human-readable project-local records.
 
 Indexes, databases, runtime traces, and notification state are supporting artifacts. They may be rebuilt or regenerated when their source assets allow it.
+
+The `.chc/` directory and Markdown-first artifact model are ChrysoCoord
+invariants. They are not configured by generated workspace files.
 
 ## Runtime Config
 
@@ -105,7 +108,8 @@ Supported runtime fields:
 - `artifact_dir`: project-relative directory for host-readable runtime results.
 - `validation_command`: command future runtime validation uses inside the configured boundary.
 
-When runtime fields are absent, `chc` uses safe local defaults:
+Generated config omits runtime defaults. When runtime fields are absent, `chc`
+uses safe local defaults:
 
 ```yml
 runtime:

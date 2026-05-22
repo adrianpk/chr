@@ -1,10 +1,13 @@
 # Runtime Configuration
 
-Runtime configuration lives in the managed project's `.chc/config.yml` file
+Runtime configuration may live in the managed project's `.chc/config.yml` file
 under the `runtime:` key.
 
 When fields are omitted, ChrysoCoord uses local defaults suitable for the
 project-owned runtime scaffold.
+
+New workspaces omit runtime defaults from generated config so users only edit
+runtime values when they are making a real project decision.
 
 ## Fields
 
@@ -14,14 +17,20 @@ project-owned runtime scaffold.
 - `artifact_dir`: project-relative directory for runtime results.
 - `validation_command`: command executed inside the runtime for validation.
 
-## Default Configuration
+## Default Values
+
+- `image`: `chc-agent-runtime:local`
+- `dockerfile`: `.chc/runtime/agent/Dockerfile`
+- `workdir`: `/workspace`
+- `artifact_dir`: `.chc/runtime/runs`
+- `validation_command`: `make verify`
+
+Example override:
 
 ```yml
 runtime:
   image: chc-agent-runtime:local
   dockerfile: .chc/runtime/agent/Dockerfile
-  workdir: /workspace
-  artifact_dir: .chc/runtime/runs
   validation_command: make verify
 ```
 

@@ -34,18 +34,19 @@ chc init --dir /path/to/project
 ```
 
 The initialized workspace includes ticket directories, project protocol files,
-runtime config, and `.chc/runtime/agent/Dockerfile`.
+minimal user-owned config, and `.chc/runtime/agent/Dockerfile`.
 
 ## Configure Runtime Execution
 
-Runtime settings live in `.chc/config.yml`:
+Runtime defaults are owned by `chc`. A new project does not need to repeat
+default runtime paths in `.chc/config.yml`.
+
+Override runtime settings only when the project has a real reason to do so:
 
 ```yml
 runtime:
   image: chc-agent-runtime:local
   dockerfile: .chc/runtime/agent/Dockerfile
-  workdir: /workspace
-  artifact_dir: .chc/runtime/runs
   validation_command: make verify
 ```
 

@@ -51,8 +51,9 @@ Preview the runtime plan:
 chc runtime validate --dry-run
 ```
 
-The command prints the configured Dockerfile, image, container workdir, mount,
-artifact paths, and local path checks.
+The command prints the effective Dockerfile, image, container workdir, mount,
+artifact paths, and local path checks. Runtime defaults come from `chc` unless
+the project overrides them in `.chc/config.yml`.
 
 ## Create a Ticket
 
