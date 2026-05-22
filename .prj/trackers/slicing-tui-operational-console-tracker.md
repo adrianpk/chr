@@ -21,7 +21,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: TUI App Foundation | Delivered | `feat/slice-1-tui-app-foundation` | `feat(slice-1): tui app foundation` | `.prj/reports/slices/tui-operational-console/slice-1-tui-app-foundation.md` | PR #139 merged. |
-| Slice 2: Read-Only Board And Ticket Detail | Planned | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | Ticket-centered read-only board. |
+| Slice 2: Read-Only Board And Ticket Detail | Reviewing | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | Ticket-centered read-only board. |
 | Slice 3: Document And Authoring Explorer | Planned | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | Documents and authoring artifacts. |
 | Slice 4: Agent And Runtime Observability | Planned | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | Read-only agent/runtime/evidence state. |
 | Slice 5: Command Palette Foundation | Planned | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | Discoverable commands. |
@@ -55,29 +55,29 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Load tickets through existing repositories/indexes.
-- [ ] Group tickets by status.
-- [ ] Render board/list rows with headers.
-- [ ] Implement ticket selection.
-- [ ] Render selected ticket detail.
-- [ ] Show checklist and comment summaries where available.
-- [ ] Add text filtering.
-- [ ] Add tests for ticket view model construction.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Load tickets through existing repositories/indexes.
+- [x] Group tickets by status.
+- [x] Render board/list rows with headers.
+- [x] Implement ticket selection.
+- [x] Render selected ticket detail.
+- [x] Show checklist and comment summaries where available.
+- [x] Add text filtering.
+- [x] Add tests for ticket view model construction.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1:
-- T2.2:
-- T2.3:
-- T2.4:
-- T2.5:
-- T2.6:
-- T2.7:
-- T2.8:
-- T2.9:
-- T2.10:
+- T2.1: `7edc2d8` loads project tickets for TUI startup.
+- T2.2: `7edc2d8` groups tickets by status for the Board view.
+- T2.3: `7edc2d8` renders board and list rows.
+- T2.4: `7edc2d8` implements ticket selection.
+- T2.5: `7edc2d8` renders selected ticket detail.
+- T2.6: `7edc2d8` shows checklist and comment summaries.
+- T2.7: `7edc2d8` adds text filtering.
+- T2.8: `7edc2d8` adds ticket view tests.
+- T2.9: pending report commit.
+- T2.10: `make verify` passed.
 
 ## Slice 3: Document And Authoring Explorer
 
