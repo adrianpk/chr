@@ -423,7 +423,7 @@ func printRuntimeValidateResult(
 ) error {
 	plan := result.Plan
 
-	_, err := fmt.Fprintf(stdout, "runtime: %s\n", filepath.Join(plan.ProjectDir, chc.DirectoryName, "runtime"))
+	_, err := fmt.Fprintf(stdout, "runtime: %s\n", displayPath(plan.ProjectDir, filepath.Join(plan.ProjectDir, chc.DirectoryName, "runtime")))
 	if err != nil {
 		return fmt.Errorf("write runtime result: %w", err)
 	}
@@ -431,12 +431,12 @@ func printRuntimeValidateResult(
 	lines := []string{
 		fmt.Sprintf("dry_run: %t", dryRun),
 		fmt.Sprintf("image: %s", plan.Image),
-		fmt.Sprintf("dockerfile: %s", plan.DockerfilePath),
+		fmt.Sprintf("dockerfile: %s", displayPath(plan.ProjectDir, plan.DockerfilePath)),
 		fmt.Sprintf("workdir: %s", plan.ContainerWorkdir),
-		fmt.Sprintf("artifact_dir: %s", plan.ArtifactDir),
-		fmt.Sprintf("run_artifact_dir: %s", plan.RunArtifactDir),
-		fmt.Sprintf("result_path: %s", plan.ResultPath),
-		fmt.Sprintf("log_path: %s", plan.LogPath),
+		fmt.Sprintf("artifact_dir: %s", displayPath(plan.ProjectDir, plan.ArtifactDir)),
+		fmt.Sprintf("run_artifact_dir: %s", displayPath(plan.ProjectDir, plan.RunArtifactDir)),
+		fmt.Sprintf("result_path: %s", displayPath(plan.ProjectDir, plan.ResultPath)),
+		fmt.Sprintf("log_path: %s", displayPath(plan.ProjectDir, plan.LogPath)),
 		fmt.Sprintf("validation_command: %s", plan.ValidationCommand),
 	}
 
@@ -448,10 +448,15 @@ func printRuntimeValidateResult(
 	}
 
 	for _, mount := range plan.Mounts {
-		_, err = fmt.Fprintf(stdout, "mount: %s -> %s read_only=%t\n", mount.Source, mount.Target, mount.ReadOnly)
+		_, err = fmt.Fprintf(stdout, "mount: %s -> %s read_only=%t\n", displayPath(plan.ProjectDir, mount.Source), mount.Target, mount.ReadOnly)
 		if err != nil {
 			return fmt.Errorf("write runtime mount: %w", err)
 		}
+	}
+
+	_, err = fmt.Fprintln(stdout, "checks:")
+	if err != nil {
+		return fmt.Errorf("write runtime checks header: %w", err)
 	}
 
 	for _, check := range result.Checks {
@@ -460,7 +465,16 @@ func printRuntimeValidateResult(
 			status = "ok"
 		}
 
-		_, err = fmt.Fprintf(stdout, "check: %s %s %s %s\n", status, check.Name, check.Path, check.Message)
+		message := check.Message
+		if check.OK && message == "ok" {
+			message = ""
+		}
+
+		if message == "" {
+			_, err = fmt.Fprintf(stdout, "  %-4s  %-12s %s\n", status, check.Name, displayPath(plan.ProjectDir, check.Path))
+		} else {
+			_, err = fmt.Fprintf(stdout, "  %-4s  %-12s %s  %s\n", status, check.Name, displayPath(plan.ProjectDir, check.Path), message)
+		}
 		if err != nil {
 			return fmt.Errorf("write runtime check: %w", err)
 		}

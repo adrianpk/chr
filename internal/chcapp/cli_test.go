@@ -1150,13 +1150,14 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 	for _, want := range []string{
 		"dry_run: true",
 		"image: chc-agent-runtime:local",
-		"dockerfile: " + filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
+		"dockerfile: .chc/runtime/agent/Dockerfile",
 		"workdir: /workspace",
-		"artifact_dir: " + filepath.Join(projectDir, ".chc", "runtime", "runs"),
-		"mount: " + projectDir + " -> /workspace read_only=false",
-		"check: ok workspace " + filepath.Join(projectDir, ".chc") + " ok",
-		"check: ok dockerfile " + filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile") + " ok",
-		"check: ok artifact_dir " + filepath.Join(projectDir, ".chc", "runtime", "runs") + " ok",
+		"artifact_dir: .chc/runtime/runs",
+		"mount: . -> /workspace read_only=false",
+		"checks:",
+		"ok    workspace    .chc",
+		"ok    dockerfile   .chc/runtime/agent/Dockerfile",
+		"ok    artifact_dir .chc/runtime/runs",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -1185,7 +1186,7 @@ func TestRuntimeValidateFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 		t.Fatal("runtime validate returned nil error")
 	}
 
-	if !strings.Contains(stdout.String(), "check: fail dockerfile") {
+	if !strings.Contains(stdout.String(), "fail  dockerfile") {
 		t.Fatalf("stdout = %q, want failed Dockerfile check", stdout.String())
 	}
 }
@@ -2057,9 +2058,9 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 		"ticket_path: " + filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Do-something.md"),
 		"status: pending",
 		"dry_run: true",
-		"run_artifact_dir: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", "exec-"),
-		"result_path: " + filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", "exec-"),
-		"check: ok dockerfile " + filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile") + " ok",
+		"run_artifact_dir: .chc/runtime/runs/CHC-1/exec-",
+		"result_path: .chc/runtime/runs/CHC-1/exec-",
+		"ok    dockerfile   .chc/runtime/agent/Dockerfile",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -2249,7 +2250,7 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 		t.Fatal("ticket start returned nil error")
 	}
 
-	if !strings.Contains(stdout.String(), "check: fail dockerfile") {
+	if !strings.Contains(stdout.String(), "fail  dockerfile") {
 		t.Fatalf("stdout = %q, want failed Dockerfile check", stdout.String())
 	}
 
