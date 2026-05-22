@@ -23,7 +23,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice 1: TUI App Foundation | Delivered | `feat/slice-1-tui-app-foundation` | `feat(slice-1): tui app foundation` | `.prj/reports/slices/tui-operational-console/slice-1-tui-app-foundation.md` | PR #139 merged. |
 | Slice 2: Read-Only Board And Ticket Detail | Delivered | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | PR #140 merged. |
 | Slice 3: Document And Authoring Explorer | Delivered | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | PR #141 merged. |
-| Slice 4: Agent And Runtime Observability | Planned | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | Read-only agent/runtime/evidence state. |
+| Slice 4: Agent And Runtime Observability | Reviewing | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | Read-only agent/runtime/evidence state. |
 | Slice 5: Command Palette Foundation | Planned | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | Discoverable commands. |
 | Slice 6: Safe Artifact Creation Actions | Planned | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | Low-risk creation flows. |
 | Slice 7: Ticket Mutation Actions | Planned | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | Explicit ticket operations. |
@@ -109,27 +109,27 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Load daemon status where available.
-- [ ] Load loop and execution summaries.
-- [ ] Load runtime readiness summary.
-- [ ] Render agent view.
-- [ ] Render runtime/evidence view.
-- [ ] Show blocked/failure summaries.
-- [ ] Add tests for observability view models.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Load daemon status where available.
+- [x] Load loop and execution summaries.
+- [x] Load runtime readiness summary.
+- [x] Render agent view.
+- [x] Render runtime/evidence view.
+- [x] Show blocked/failure summaries.
+- [x] Add tests for observability view models.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1:
-- T4.2:
-- T4.3:
-- T4.4:
-- T4.5:
-- T4.6:
-- T4.7:
-- T4.8:
-- T4.9:
+- T4.1: `af90147` loads daemon status where available.
+- T4.2: `af90147` loads loop and execution summaries.
+- T4.3: `af90147` loads runtime readiness summary.
+- T4.4: `af90147` renders the Agent view.
+- T4.5: `af90147` renders the Runtime view.
+- T4.6: `af90147` shows blocked and failure summaries.
+- T4.7: `af90147` adds observability view model tests.
+- T4.8: pending report commit.
+- T4.9: `make verify` passed.
 
 ## Slice 5: Command Palette Foundation
 
