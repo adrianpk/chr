@@ -111,6 +111,7 @@ func Run(ctx context.Context, opts Options) error {
 	programOptions := []tea.ProgramOption{
 		tea.WithContext(ctx),
 		tea.WithOutput(opts.Stdout),
+		tea.WithAltScreen(),
 	}
 
 	if opts.Stdin != nil {
@@ -146,6 +147,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
+	if m.width > 0 && m.height > 0 {
+		return m.renderShell()
+	}
+
 	var output strings.Builder
 
 	output.WriteString("ChrysoCoord\n\n")

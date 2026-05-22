@@ -9,6 +9,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"forge.adrianpk.com/chc/internal/chc"
 )
@@ -960,6 +961,48 @@ func TestModelRecordsWindowSize(t *testing.T) {
 
 	if resized.height != 40 {
 		t.Fatalf("height = %d, want 40", resized.height)
+	}
+}
+
+func TestModelViewUsesWindowRealEstate(t *testing.T) {
+	model := NewModel(Options{
+		ProjectDir: "/workspace/project",
+		ProjectID:  "project-1",
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "open"},
+		},
+	})
+
+	updated, _ := model.Update(tea.WindowSizeMsg{Width: 80, Height: 20})
+
+	resized, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	view := resized.View()
+
+	lines := strings.Split(strings.TrimSuffix(view, "\n"), "\n")
+	if len(lines) != 20 {
+		t.Fatalf("View() rendered %d lines, want 20:\n%s", len(lines), view)
+	}
+
+	for index, line := range lines {
+		if lipgloss.Width(line) != 80 {
+			t.Fatalf("line %d width = %d, want 80: %q", index, lipgloss.Width(line), line)
+		}
+	}
+
+	for _, want := range []string{
+		"ChrysoCoord",
+		"F1",
+		"Project",
+		"F10",
+		"Quit",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
 	}
 }
 
