@@ -1,11 +1,11 @@
 # Slice 1: TUI App Foundation
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Operational Console
 Plan: `.prj/plans/slicing-tui-operational-console-plan.md`
 Tracker: `.prj/trackers/slicing-tui-operational-console-tracker.md`
 Branch: `feat/slice-1-tui-app-foundation`
-PR: pending
+PR: #139
 
 ## Purpose
 
