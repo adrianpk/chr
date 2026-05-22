@@ -26,7 +26,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice 4: Agent And Runtime Observability | Delivered | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | PR #142 merged. |
 | Slice 5: Command Palette Foundation | Delivered | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | PR #143 merged. |
 | Slice 6: Safe Artifact Creation Actions | Delivered | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | PR #144 merged. |
-| Slice 7: Ticket Mutation Actions | Reviewing | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | PR #145 pending review. |
+| Slice 7: Ticket Mutation Actions | Delivered | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | PR #145 merged. |
 | Slice 8: Agent Work Control | Planned | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | Start/stop selected work. |
 
 ## Slice 1: TUI App Foundation
