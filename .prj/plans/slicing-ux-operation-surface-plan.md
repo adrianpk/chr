@@ -139,7 +139,7 @@ Expected outcome:
 
 ### Slice 2: Workspace Bootstrap Contract Cleanup
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-2-workspace-bootstrap-contract`
 Expected PR title: `feat(slice-2): workspace bootstrap contract cleanup`

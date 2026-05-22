@@ -23,7 +23,7 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: CLI Output Readability | Delivered | `feat/slice-1-cli-output-readability` | `feat(slice-1): cli output readability` | `.prj/reports/slices/ux-operation-surface/slice-1-cli-output-readability.md` | PR #134 merged. |
-| Slice 2: Workspace Bootstrap Contract Cleanup | Planned | `feat/slice-2-workspace-bootstrap-contract` | `feat(slice-2): workspace bootstrap contract cleanup` | `.prj/reports/slices/ux-operation-surface/slice-2-workspace-bootstrap-contract.md` | Config/manifest cleanup. |
+| Slice 2: Workspace Bootstrap Contract Cleanup | Reviewing | `feat/slice-2-workspace-bootstrap-contract` | `feat(slice-2): workspace bootstrap contract cleanup` | `.prj/reports/slices/ux-operation-surface/slice-2-workspace-bootstrap-contract.md` | PR pending review. |
 | Slice 3: Protocol Document Boundary Cleanup | Planned | `feat/slice-3-protocol-doc-boundaries` | `feat(slice-3): protocol doc boundaries` | `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-boundaries.md` | Generated protocol assets. |
 | Slice 4: Authoring Session Ergonomics | Planned | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | IDs, slugs, list/show UX. |
 | Slice 5: Context-Aware Quiz Generation Foundation | Planned | `feat/slice-5-context-aware-quiz-generation` | `feat(slice-5): context-aware quiz generation` | `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md` | Quiz engine boundary. |
@@ -71,25 +71,25 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Inventory generated `.chc/config.yml` fields.
-- [ ] Decide invariant versus real user decision for each field.
-- [ ] Simplify generated config output.
-- [ ] Rewrite or remove `manifest.md` as config-like surface.
-- [ ] Preserve compatibility with existing managed projects.
-- [ ] Update docs and tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Inventory generated `.chc/config.yml` fields.
+- [x] Decide invariant versus real user decision for each field.
+- [x] Simplify generated config output.
+- [x] Rewrite or remove `manifest.md` as config-like surface.
+- [x] Preserve compatibility with existing managed projects.
+- [x] Update docs and tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1:
-- T2.2:
-- T2.3:
-- T2.4:
-- T2.5:
-- T2.6:
-- T2.7:
-- T2.8:
+- T2.1: `cb694b1` `feat(init): simplify workspace bootstrap assets`
+- T2.2: `cb694b1` `feat(init): simplify workspace bootstrap assets`
+- T2.3: `cb694b1` `feat(init): simplify workspace bootstrap assets`
+- T2.4: `cb694b1` `feat(init): simplify workspace bootstrap assets`
+- T2.5: `cb694b1` `feat(init): simplify workspace bootstrap assets`
+- T2.6: `06d15c9` `docs(init): clarify generated config boundary`
+- T2.7: pending report commit
+- T2.8: `make verify` pass
 
 ## Slice 3: Protocol Document Boundary Cleanup
 
