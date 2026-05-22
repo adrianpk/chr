@@ -198,7 +198,7 @@ Expected outcome:
 
 ### Slice 4: Authoring Session Ergonomics
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-4-authoring-session-ergonomics`
 Expected PR title: `feat(slice-4): authoring session ergonomics`

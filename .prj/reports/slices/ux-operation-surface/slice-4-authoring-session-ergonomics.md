@@ -1,11 +1,11 @@
 # Slice 4: Authoring Session Ergonomics
 
-Status: reviewing
+Status: delivered
 Slicing: UX Operation Surface
 Plan: `.prj/plans/slicing-ux-operation-surface-plan.md`
 Tracker: `.prj/trackers/slicing-ux-operation-surface-tracker.md`
 Branch: `feat/slice-4-authoring-session-ergonomics`
-PR: pending
+PR: #137
 
 ## Purpose
 
