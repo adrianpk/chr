@@ -27,7 +27,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice 5: Command Palette Foundation | Delivered | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | PR #143 merged. |
 | Slice 6: Safe Artifact Creation Actions | Delivered | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | PR #144 merged. |
 | Slice 7: Ticket Mutation Actions | Delivered | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | PR #145 merged. |
-| Slice 8: Agent Work Control | Planned | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | Start/stop selected work. |
+| Slice 8: Agent Work Control | Reviewing | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | PR pending review. |
 
 ## Slice 1: TUI App Foundation
 
@@ -215,24 +215,24 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add selected-ticket execution action.
-- [ ] Add loop start action with explicit filters.
-- [ ] Add stop/request-stop action where supported.
-- [ ] Show confirmation for long-running operations.
-- [ ] Show completion/failure state after operation.
-- [ ] Surface evidence paths after execution.
-- [ ] Add tests for action planning and result handling.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add selected-ticket execution action.
+- [x] Add loop start action with explicit filters.
+- [x] Add stop/request-stop action where supported.
+- [x] Show confirmation for long-running operations.
+- [x] Show completion/failure state after operation.
+- [x] Surface evidence paths after execution.
+- [x] Add tests for action planning and result handling.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T8.1:
-- T8.2:
-- T8.3:
-- T8.4:
-- T8.5:
-- T8.6:
-- T8.7:
-- T8.8:
-- T8.9:
+- T8.1: `58c6f9d` adds selected-ticket execution action.
+- T8.2: `58c6f9d` adds a ready-ticket loop action with explicit `status=ready` and `max_iterations=1`.
+- T8.3: `58c6f9d` adds daemon stop request action.
+- T8.4: `58c6f9d` shows confirmation for work actions.
+- T8.5: `58c6f9d` renders completion or failure status after execution.
+- T8.6: `58c6f9d` surfaces execution result paths in completion messages.
+- T8.7: `58c6f9d` adds work action planning, cancellation, confirmation, and failure tests.
+- T8.8: pending report commit.
+- T8.9: `make verify` passed.
