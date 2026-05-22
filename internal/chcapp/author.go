@@ -418,7 +418,7 @@ func runAuthorSessionNew(ctx context.Context, cmd *cli.Command, stdout io.Writer
 		return err
 	}
 
-	return printAuthorSessionCreated(stdout, session, paths)
+	return printAuthorSessionCreated(stdout, session, paths, projectContext.ProjectDir)
 }
 
 func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -436,8 +436,13 @@ func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
+	_, err = fmt.Fprintln(stdout, "id\tstatus\ttarget\ttopic")
+	if err != nil {
+		return fmt.Errorf("write author session list header: %w", err)
+	}
+
 	for _, session := range sessions {
-		_, err = fmt.Fprintf(stdout, "session: %s\t%s\t%s\t%s\n", session.ID, session.Status, session.Target, session.Topic)
+		_, err = fmt.Fprintf(stdout, "%s\t%s\t%s\t%s\n", session.ID, session.Status, session.Target, session.Topic)
 		if err != nil {
 			return fmt.Errorf("write author session list: %w", err)
 		}
@@ -494,7 +499,7 @@ func runAuthorQuizNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 	}
 
 	if cmd.Bool("dry-run") {
-		return printAuthorQuizPlan(stdout, plan, true)
+		return printAuthorQuizPlan(stdout, plan, true, projectContext.ProjectDir)
 	}
 
 	err = chc.WriteStaticQuiz(plan)
@@ -502,17 +507,12 @@ func runAuthorQuizNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	paths, err := chc.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
+	_, err = chc.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
 	if err != nil {
 		return err
 	}
 
-	err = printAuthorSessionCreated(stdout, plan.Session, paths)
-	if err != nil {
-		return err
-	}
-
-	return printAuthorQuizPlan(stdout, plan, false)
+	return printAuthorQuizPlan(stdout, plan, false, projectContext.ProjectDir)
 }
 
 func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -593,7 +593,7 @@ func runAuthorAssistedStart(ctx context.Context, cmd *cli.Command, stdout io.Wri
 		return err
 	}
 
-	err = printAuthorSessionCreated(stdout, session, paths)
+	err = printAuthorSessionCreated(stdout, session, paths, projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
@@ -995,15 +995,16 @@ func printAuthorSessionCreated(
 	stdout io.Writer,
 	session chc.AuthoringSession,
 	paths chc.AuthoringSessionPaths,
+	projectDir string,
 ) error {
 	lines := []string{
-		"session: created",
-		"id: " + session.ID,
+		"session: created " + session.ID,
 		"target: " + string(session.Target),
 		"topic: " + session.Topic,
-		"path: " + paths.SessionPath,
-		"transcript: " + paths.TranscriptPath,
-		"artifacts: " + paths.ArtifactsPath,
+		"files:",
+		"  session: " + displayPath(projectDir, paths.SessionPath),
+		"  transcript: " + displayPath(projectDir, paths.TranscriptPath),
+		"  artifacts: " + displayPath(projectDir, paths.ArtifactsPath),
 	}
 
 	return writeAuthorLines(stdout, lines)
@@ -1024,12 +1025,22 @@ func printAuthorSession(stdout io.Writer, session chc.AuthoringSession) error {
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorQuizPlan(stdout io.Writer, plan chc.StaticQuizGenerationPlan, dryRun bool) error {
+func printAuthorQuizPlan(
+	stdout io.Writer,
+	plan chc.StaticQuizGenerationPlan,
+	dryRun bool,
+	projectDir string,
+) error {
+	status := "created"
+	if dryRun {
+		status = "planned"
+	}
+
 	lines := []string{
-		"quiz: planned",
+		"quiz: " + status + " " + displayPath(projectDir, plan.Layout.FullPath),
 		fmt.Sprintf("dry_run: %t", dryRun),
 		"session: " + plan.Session.ID,
-		"path: " + plan.Layout.FullPath,
+		"path: " + displayPath(projectDir, plan.Layout.FullPath),
 		fmt.Sprintf("questions: %d", len(plan.Questions)),
 	}
 

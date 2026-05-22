@@ -426,6 +426,10 @@ func assertAuthorSessionListContains(t *testing.T, projectDir, sessionID string)
 	if !strings.Contains(listOut.String(), sessionID) {
 		t.Fatalf("list output does not contain session id %q:\n%s", sessionID, listOut.String())
 	}
+
+	if !strings.Contains(listOut.String(), "id\tstatus\ttarget\ttopic") {
+		t.Fatalf("list output does not contain headers:\n%s", listOut.String())
+	}
 }
 
 func assertAuthorSessionShowContains(t *testing.T, projectDir, sessionID string) {
@@ -4454,8 +4458,18 @@ func authorSessionIDFromOutput(t *testing.T, output string) string {
 	t.Helper()
 
 	for _, line := range strings.Split(output, "\n") {
-		value, ok := strings.CutPrefix(line, "id: ")
+		value, ok := strings.CutPrefix(line, "session: created ")
 		if ok {
+			return value
+		}
+
+		value, ok = strings.CutPrefix(line, "id: ")
+		if ok {
+			return value
+		}
+
+		value, ok = strings.CutPrefix(line, "session: ")
+		if ok && strings.HasPrefix(value, "auth-") {
 			return value
 		}
 	}
@@ -4485,7 +4499,12 @@ func createAuthorQuizForTest(t *testing.T, projectDir string) (string, string) {
 		t.Fatalf("author quiz new returned error: %v", err)
 	}
 
-	return authorSessionIDFromOutput(t, stdout.String()), authorQuizPathFromOutput(t, stdout.String())
+	quizPath := authorQuizPathFromOutput(t, stdout.String())
+	if !filepath.IsAbs(quizPath) {
+		quizPath = filepath.Join(projectDir, quizPath)
+	}
+
+	return authorSessionIDFromOutput(t, stdout.String()), quizPath
 }
 
 type authorAssistedQuestionOutput struct {
