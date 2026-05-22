@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"sort"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+
+	"forge.adrianpk.com/chc/internal/chc"
 )
 
 type View string
@@ -52,15 +56,20 @@ type Options struct {
 	ProjectID  string
 	Stdin      io.Reader
 	Stdout     io.Writer
+	Tickets    []chc.IndexedTicket
 }
 
 type Model struct {
-	projectDir string
-	projectID  string
-	views      []View
-	selected   int
-	width      int
-	height     int
+	projectDir      string
+	projectID       string
+	views           []View
+	selected        int
+	width           int
+	height          int
+	tickets         []TicketView
+	selectedTicket  int
+	ticketFilter    string
+	filterEntryMode bool
 }
 
 func NewModel(opts Options) Model {
@@ -68,6 +77,7 @@ func NewModel(opts Options) Model {
 		projectDir: opts.ProjectDir,
 		projectID:  opts.ProjectID,
 		views:      append([]View(nil), defaultViews...),
+		tickets:    NewTicketViews(opts.Tickets),
 	}
 }
 
@@ -132,7 +142,8 @@ func (m Model) View() string {
 	output.WriteString("\n")
 	output.WriteString(m.renderSelectedView())
 	output.WriteString("\n\n")
-	output.WriteString("Keys: up/down or j/k navigate, tab cycles, q quits\n")
+	output.WriteString(m.renderKeys())
+	output.WriteString("\n")
 
 	return output.String()
 }
@@ -142,13 +153,23 @@ func (m Model) SelectedView() View {
 }
 
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.filterEntryMode {
+		return m.updateFilterKey(msg)
+	}
+
 	switch msg.String() {
 	case "ctrl+c", "q":
 		return m, tea.Quit
-	case "up", "k":
+	case "left", "shift+tab", "h":
 		m.selectPreviousView()
-	case "down", "j", "tab":
+	case "right", "tab", "l":
 		m.selectNextView()
+	case "up", "k":
+		m.selectPreviousTicket()
+	case "down", "j":
+		m.selectNextTicket()
+	case "/":
+		m.filterEntryMode = true
 	}
 
 	return m, nil
@@ -174,10 +195,384 @@ func (m *Model) selectNextView() {
 func (m Model) renderSelectedView() string {
 	selectedView := m.SelectedView()
 
+	if selectedView == ViewBoard {
+		return m.renderTicketBoard()
+	}
+
+	if selectedView == ViewTickets {
+		return m.renderTicketList()
+	}
+
 	placeholder, ok := viewPlaceholders[selectedView]
 	if !ok {
 		return "Unknown\n  No view is selected."
 	}
 
 	return fmt.Sprintf("%s\n  %s", selectedView, placeholder)
+}
+
+func (m Model) renderTicketBoard() string {
+	filteredTickets := m.filteredTickets()
+	if len(filteredTickets) == 0 {
+		return "Board\n  No tickets match the current view."
+	}
+
+	var output strings.Builder
+
+	output.WriteString("Board\n")
+	output.WriteString(fmt.Sprintf("  Tickets: %d", len(filteredTickets)))
+
+	if m.ticketFilter != "" {
+		output.WriteString(fmt.Sprintf("  Filter: %q", m.ticketFilter))
+	}
+
+	output.WriteString("\n\n")
+
+	for _, group := range groupTicketsByStatus(filteredTickets) {
+		output.WriteString(group.Status)
+		output.WriteString("\n")
+
+		for _, ticket := range group.Tickets {
+			prefix := "  "
+			if ticket.Index == m.selectedTicket {
+				prefix = "> "
+			}
+
+			output.WriteString(prefix)
+			output.WriteString(renderTicketRow(ticket))
+			output.WriteString("\n")
+		}
+
+		output.WriteString("\n")
+	}
+
+	output.WriteString(m.renderSelectedTicketDetail())
+
+	return strings.TrimRight(output.String(), "\n")
+}
+
+func (m Model) renderTicketList() string {
+	filteredTickets := m.filteredTickets()
+	if len(filteredTickets) == 0 {
+		return "Tickets\n  No tickets match the current view."
+	}
+
+	var output strings.Builder
+
+	output.WriteString("Tickets\n")
+	output.WriteString("  Key     Status      Priority  Type      Title\n")
+
+	for _, ticket := range filteredTickets {
+		prefix := "  "
+		if ticket.Index == m.selectedTicket {
+			prefix = "> "
+		}
+
+		output.WriteString(prefix)
+		output.WriteString(renderTicketRow(ticket))
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n")
+	output.WriteString(m.renderSelectedTicketDetail())
+
+	return strings.TrimRight(output.String(), "\n")
+}
+
+func renderTicketRow(ticket TicketView) string {
+	return fmt.Sprintf(
+		"%-7s %-11s %-9s %-9s %s",
+		ticket.Key,
+		ticket.Status,
+		ticket.Priority,
+		ticket.Type,
+		ticket.Title,
+	)
+}
+
+func (m Model) renderSelectedTicketDetail() string {
+	ticket, ok := m.selectedTicketView()
+	if !ok {
+		return "Selected Ticket\n  No ticket selected."
+	}
+
+	var output strings.Builder
+
+	output.WriteString("Selected Ticket\n")
+	output.WriteString(fmt.Sprintf("  Key: %s\n", ticket.Key))
+	output.WriteString(fmt.Sprintf("  Title: %s\n", ticket.Title))
+	output.WriteString(fmt.Sprintf("  Status: %s\n", ticket.Status))
+	output.WriteString(fmt.Sprintf("  Priority: %s\n", ticket.Priority))
+	output.WriteString(fmt.Sprintf("  Severity: %s\n", ticket.Severity))
+	output.WriteString(fmt.Sprintf("  Type: %s\n", ticket.Type))
+	output.WriteString(fmt.Sprintf("  Use Case: %s\n", ticket.UseCase))
+	output.WriteString(fmt.Sprintf("  Project Area: %s\n", ticket.ProjectArea))
+	output.WriteString(fmt.Sprintf("  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal))
+	output.WriteString(fmt.Sprintf("  Comments: %d\n", ticket.CommentCount))
+	output.WriteString(fmt.Sprintf("  Path: %s", ticket.RelativePath))
+
+	return output.String()
+}
+
+func (m Model) renderKeys() string {
+	if m.filterEntryMode {
+		return "Keys: enter applies filter, esc cancels filter, ctrl+c quits"
+	}
+
+	if m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets {
+		return "Keys: up/down selects ticket, left/right or tab changes view, / filters, q quits"
+	}
+
+	return "Keys: left/right or tab changes view, q quits"
+}
+
+func (m Model) selectedTicketView() (TicketView, bool) {
+	if len(m.tickets) == 0 {
+		return TicketView{}, false
+	}
+
+	for _, ticket := range m.filteredTickets() {
+		if ticket.Index == m.selectedTicket {
+			return ticket, true
+		}
+	}
+
+	return TicketView{}, false
+}
+
+func (m *Model) selectPreviousTicket() {
+	if !m.ticketSelectionActive() {
+		return
+	}
+
+	filteredTickets := m.filteredTickets()
+	if len(filteredTickets) == 0 {
+		return
+	}
+
+	position := m.selectedTicketPosition(filteredTickets)
+	if position == 0 {
+		m.selectedTicket = filteredTickets[len(filteredTickets)-1].Index
+
+		return
+	}
+
+	m.selectedTicket = filteredTickets[position-1].Index
+}
+
+func (m *Model) selectNextTicket() {
+	if !m.ticketSelectionActive() {
+		return
+	}
+
+	filteredTickets := m.filteredTickets()
+	if len(filteredTickets) == 0 {
+		return
+	}
+
+	position := m.selectedTicketPosition(filteredTickets)
+	if position >= len(filteredTickets)-1 {
+		m.selectedTicket = filteredTickets[0].Index
+
+		return
+	}
+
+	m.selectedTicket = filteredTickets[position+1].Index
+}
+
+func (m Model) ticketSelectionActive() bool {
+	return m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets
+}
+
+func (m Model) selectedTicketPosition(tickets []TicketView) int {
+	for index, ticket := range tickets {
+		if ticket.Index == m.selectedTicket {
+			return index
+		}
+	}
+
+	return 0
+}
+
+func (m Model) filteredTickets() []TicketView {
+	if m.ticketFilter == "" {
+		return append([]TicketView(nil), m.tickets...)
+	}
+
+	filter := strings.ToLower(m.ticketFilter)
+	tickets := []TicketView{}
+
+	for _, ticket := range m.tickets {
+		if ticket.Matches(filter) {
+			tickets = append(tickets, ticket)
+		}
+	}
+
+	return tickets
+}
+
+func (m Model) updateFilterKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.Type {
+	case tea.KeyEsc:
+		m.filterEntryMode = false
+	case tea.KeyEnter:
+		m.filterEntryMode = false
+		m.selectFirstFilteredTicket()
+	case tea.KeyBackspace:
+		m.ticketFilter = strings.TrimSuffix(m.ticketFilter, lastRune(m.ticketFilter))
+	default:
+		if msg.Type == tea.KeyRunes {
+			m.ticketFilter += msg.String()
+		}
+	}
+
+	return m, nil
+}
+
+func (m *Model) selectFirstFilteredTicket() {
+	tickets := m.filteredTickets()
+	if len(tickets) == 0 {
+		m.selectedTicket = 0
+
+		return
+	}
+
+	m.selectedTicket = tickets[0].Index
+}
+
+func lastRune(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	runes := []rune(value)
+
+	return string(runes[len(runes)-1])
+}
+
+type TicketView struct {
+	Index          int
+	Key            string
+	Title          string
+	Status         string
+	Priority       string
+	Severity       string
+	Type           string
+	UseCase        string
+	ProjectArea    string
+	RelativePath   string
+	ChecklistDone  int
+	ChecklistTotal int
+	CommentCount   int
+}
+
+type TicketStatusGroup struct {
+	Status  string
+	Tickets []TicketView
+}
+
+func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
+	views := make([]TicketView, 0, len(tickets))
+
+	for index, ticket := range tickets {
+		view := TicketView{
+			Index:        index,
+			Key:          ticket.Key,
+			Title:        ticket.Title,
+			Status:       ticket.Status,
+			Priority:     ticket.Priority,
+			Severity:     ticket.Severity,
+			Type:         ticket.Type,
+			UseCase:      ticket.UseCase,
+			ProjectArea:  ticket.ProjectArea,
+			RelativePath: ticket.RelativePath,
+		}
+
+		view.ChecklistDone, view.ChecklistTotal, view.CommentCount = ticketMarkdownSummary(ticket.Path)
+
+		views = append(views, view)
+	}
+
+	return views
+}
+
+func (t TicketView) Matches(filter string) bool {
+	values := []string{
+		t.Key,
+		t.Title,
+		t.Status,
+		t.Priority,
+		t.Severity,
+		t.Type,
+		t.UseCase,
+		t.ProjectArea,
+		t.RelativePath,
+	}
+
+	for _, value := range values {
+		if strings.Contains(strings.ToLower(value), filter) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func groupTicketsByStatus(tickets []TicketView) []TicketStatusGroup {
+	grouped := map[string][]TicketView{}
+
+	for _, ticket := range tickets {
+		grouped[ticket.Status] = append(grouped[ticket.Status], ticket)
+	}
+
+	statuses := make([]string, 0, len(grouped))
+	for status := range grouped {
+		statuses = append(statuses, status)
+	}
+
+	sort.Strings(statuses)
+
+	groups := make([]TicketStatusGroup, 0, len(statuses))
+	for _, status := range statuses {
+		groups = append(groups, TicketStatusGroup{
+			Status:  status,
+			Tickets: grouped[status],
+		})
+	}
+
+	return groups
+}
+
+func ticketMarkdownSummary(path string) (int, int, int) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return 0, 0, 0
+	}
+
+	checklistDone := 0
+	checklistTotal := 0
+	commentCount := 0
+	inComments := false
+
+	for _, line := range strings.Split(string(content), "\n") {
+		trimmed := strings.TrimSpace(line)
+
+		if strings.HasPrefix(trimmed, "# ") {
+			inComments = trimmed == "# Comments"
+		}
+
+		if strings.HasPrefix(trimmed, "- [") {
+			checklistTotal++
+
+			if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
+				checklistDone++
+			}
+		}
+
+		if inComments && strings.HasPrefix(trimmed, "## ") {
+			commentCount++
+		}
+	}
+
+	return checklistDone, checklistTotal, commentCount
 }

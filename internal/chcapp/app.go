@@ -7,6 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	"forge.adrianpk.com/chc/internal/chc"
 	"forge.adrianpk.com/chc/internal/chctui"
 )
 
@@ -80,11 +81,17 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		tickets, err := loadTUITickets(ctx, env, projectContext)
+		if err != nil {
+			return err
+		}
+
 		return chctui.Run(ctx, chctui.Options{
 			ProjectDir: projectContext.ProjectDir,
 			ProjectID:  projectContext.ProjectID,
 			Stdin:      stdin,
 			Stdout:     stdout,
+			Tickets:    tickets,
 		})
 	}
 }
@@ -105,11 +112,45 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		tickets, err := loadTUITickets(ctx, env, projectContext)
+		if err != nil {
+			return err
+		}
+
 		return chctui.Run(ctx, chctui.Options{
 			ProjectDir: projectContext.ProjectDir,
 			ProjectID:  projectContext.ProjectID,
 			Stdin:      stdin,
 			Stdout:     stdout,
+			Tickets:    tickets,
 		})
 	}
+}
+
+func loadTUITickets(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+) ([]chc.IndexedTicket, error) {
+	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Load result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	err = refreshProjectTicketIndex(ctx, index, projectContext)
+	if err != nil {
+		return nil, err
+	}
+
+	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+
+	return tickets, nil
 }
