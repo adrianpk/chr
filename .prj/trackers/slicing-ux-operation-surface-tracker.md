@@ -27,7 +27,7 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 | Slice 3: Protocol Document Boundary Cleanup | Planned | `feat/slice-3-protocol-doc-boundaries` | `feat(slice-3): protocol doc boundaries` | `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-boundaries.md` | Generated protocol assets. |
 | Slice 4: Authoring Session Ergonomics | Planned | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | IDs, slugs, list/show UX. |
 | Slice 5: Context-Aware Quiz Generation Foundation | Planned | `feat/slice-5-context-aware-quiz-generation` | `feat(slice-5): context-aware quiz generation` | `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md` | Quiz engine boundary. |
-| Slice 6: TUI Specification Set | Planned | `docs/slice-6-tui-specification-set` | `docs(slice-6): tui specification set` | `.prj/reports/slices/ux-operation-surface/slice-6-tui-specification-set.md` | Spec-only slice. |
+| Slice 6: TUI Specification Set | Delivered | `docs/slice-6-tui-specification-set` | `docs(slice-6): tui specification set` | `.prj/reports/slices/ux-operation-surface/slice-6-tui-specification-set.md` | Spec-only slice delivered directly on `dev`. |
 | Slice 7: TUI Read-Only Shell | Planned | `feat/slice-7-tui-read-only-shell` | `feat(slice-7): tui read-only shell` | `.prj/reports/slices/ux-operation-surface/slice-7-tui-read-only-shell.md` | First Bubble Tea implementation. |
 | Slice 8: TUI Action Wiring | Planned | `feat/slice-8-tui-action-wiring` | `feat(slice-8): tui action wiring` | `.prj/reports/slices/ux-operation-surface/slice-8-tui-action-wiring.md` | Safe selected-record actions. |
 
@@ -168,27 +168,21 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Create TUI product role and scope spec.
-- [ ] Create TUI navigation and layout spec.
-- [ ] Create TUI entity screens spec.
-- [ ] Create TUI authoring and quiz UX spec.
-- [ ] Create TUI ticket execution and evidence UX spec.
-- [ ] Create TUI action and safety model spec.
-- [ ] Cross-link specs from plan/tracker as needed.
-- [ ] Add slice implementation report.
-- [ ] Run documentation validation.
+- [x] Create TUI product role and scope spec.
+- [x] Create TUI navigation and layout spec.
+- [x] Create TUI entity screens spec.
+- [x] Create TUI authoring and quiz UX spec.
+- [x] Create TUI ticket execution and evidence UX spec.
+- [x] Create TUI action and safety model spec.
+- [x] Cross-link specs from plan/tracker as needed.
+- [x] Add slice implementation report.
+- [x] Run documentation validation.
 
 Task commits:
 
-- T6.1:
-- T6.2:
-- T6.3:
-- T6.4:
-- T6.5:
-- T6.6:
-- T6.7:
-- T6.8:
-- T6.9:
+- T6.1: specs for product surface, navigation, records, authoring, execution,
+  actions, and implementation boundary.
+- T6.2: slice report and tracker update.
 
 ## Slice 7: TUI Read-Only Shell
 

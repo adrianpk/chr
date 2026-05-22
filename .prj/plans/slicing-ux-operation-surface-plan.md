@@ -260,7 +260,7 @@ Expected outcome:
 
 ### Slice 6: TUI Specification Set
 
-Status: planned.
+Status: delivered.
 
 Expected branch: `docs/slice-6-tui-specification-set`
 Expected PR title: `docs(slice-6): tui specification set`
