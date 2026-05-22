@@ -1,11 +1,11 @@
 # Slice 2: Workspace Bootstrap Contract Cleanup
 
-Status: reviewing
+Status: delivered
 Slicing: UX Operation Surface
 Plan: `.prj/plans/slicing-ux-operation-surface-plan.md`
 Tracker: `.prj/trackers/slicing-ux-operation-surface-tracker.md`
 Branch: `feat/slice-2-workspace-bootstrap-contract`
-PR: pending
+PR: #135
 
 ## Purpose
 
