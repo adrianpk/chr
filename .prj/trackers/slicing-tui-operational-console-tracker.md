@@ -22,7 +22,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: TUI App Foundation | Delivered | `feat/slice-1-tui-app-foundation` | `feat(slice-1): tui app foundation` | `.prj/reports/slices/tui-operational-console/slice-1-tui-app-foundation.md` | PR #139 merged. |
 | Slice 2: Read-Only Board And Ticket Detail | Delivered | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | PR #140 merged. |
-| Slice 3: Document And Authoring Explorer | Planned | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | Documents and authoring artifacts. |
+| Slice 3: Document And Authoring Explorer | Reviewing | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | Documents and authoring artifacts. |
 | Slice 4: Agent And Runtime Observability | Planned | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | Read-only agent/runtime/evidence state. |
 | Slice 5: Command Palette Foundation | Planned | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | Discoverable commands. |
 | Slice 6: Safe Artifact Creation Actions | Planned | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | Low-risk creation flows. |
@@ -83,27 +83,27 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Discover project-local document artifacts.
-- [ ] Discover authoring sessions.
-- [ ] Render document list and detail views.
-- [ ] Render authoring session list and detail views.
-- [ ] Show plans/slicing/tracking as artifacts.
-- [ ] Preserve tickets as operational status source.
-- [ ] Add tests for discovery and view models.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Discover project-local document artifacts.
+- [x] Discover authoring sessions.
+- [x] Render document list and detail views.
+- [x] Render authoring session list and detail views.
+- [x] Show plans/slicing/tracking as artifacts.
+- [x] Preserve tickets as operational status source.
+- [x] Add tests for discovery and view models.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1:
-- T3.2:
-- T3.3:
-- T3.4:
-- T3.5:
-- T3.6:
-- T3.7:
-- T3.8:
-- T3.9:
+- T3.1: `1be6d40` discovers project-local document artifacts.
+- T3.2: `1be6d40` discovers authoring sessions.
+- T3.3: `1be6d40` renders document list and detail views.
+- T3.4: `1be6d40` renders authoring session list and detail views.
+- T3.5: `1be6d40` shows plans, slicing plans, and trackers as artifacts.
+- T3.6: `1be6d40` keeps tickets as the operational status source.
+- T3.7: `1be6d40` adds discovery and view model tests.
+- T3.8: pending report commit.
+- T3.9: `make verify` passed.
 
 ## Slice 4: Agent And Runtime Observability
 
