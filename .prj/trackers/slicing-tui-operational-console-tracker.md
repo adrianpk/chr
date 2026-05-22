@@ -24,7 +24,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice 2: Read-Only Board And Ticket Detail | Delivered | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | PR #140 merged. |
 | Slice 3: Document And Authoring Explorer | Delivered | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | PR #141 merged. |
 | Slice 4: Agent And Runtime Observability | Delivered | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | PR #142 merged. |
-| Slice 5: Command Palette Foundation | Planned | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | Discoverable commands. |
+| Slice 5: Command Palette Foundation | Reviewing | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | Discoverable commands. |
 | Slice 6: Safe Artifact Creation Actions | Planned | `feat/slice-6-tui-artifact-creation-actions` | `feat(slice-6): tui artifact creation actions` | `.prj/reports/slices/tui-operational-console/slice-6-tui-artifact-creation-actions.md` | Low-risk creation flows. |
 | Slice 7: Ticket Mutation Actions | Planned | `feat/slice-7-tui-ticket-mutation-actions` | `feat(slice-7): tui ticket mutation actions` | `.prj/reports/slices/tui-operational-console/slice-7-tui-ticket-mutation-actions.md` | Explicit ticket operations. |
 | Slice 8: Agent Work Control | Planned | `feat/slice-8-tui-agent-work-control` | `feat(slice-8): tui agent work control` | `.prj/reports/slices/tui-operational-console/slice-8-tui-agent-work-control.md` | Start/stop selected work. |
@@ -135,27 +135,27 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add command palette state.
-- [ ] Add command registry model.
-- [ ] Add text filtering.
-- [ ] Register navigation commands.
-- [ ] Register refresh/help commands.
-- [ ] Register safe open-source-path command where supported.
-- [ ] Add tests for palette filtering and command dispatch.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add command palette state.
+- [x] Add command registry model.
+- [x] Add text filtering.
+- [x] Register navigation commands.
+- [x] Register refresh/help commands.
+- [x] Register safe open-source-path command where supported.
+- [x] Add tests for palette filtering and command dispatch.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1:
-- T5.2:
-- T5.3:
-- T5.4:
-- T5.5:
-- T5.6:
-- T5.7:
-- T5.8:
-- T5.9:
+- T5.1: `6e6b228` adds command palette state.
+- T5.2: `6e6b228` adds the command registry model.
+- T5.3: `6e6b228` adds text filtering.
+- T5.4: `6e6b228` registers navigation commands.
+- T5.5: `6e6b228` registers refresh and help commands.
+- T5.6: `6e6b228` registers selected source path reporting.
+- T5.7: `6e6b228` adds palette filtering and dispatch tests.
+- T5.8: pending report commit.
+- T5.9: `make verify` passed.
 
 ## Slice 6: Safe Artifact Creation Actions
 
