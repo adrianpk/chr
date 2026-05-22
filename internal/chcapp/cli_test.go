@@ -568,8 +568,6 @@ func TestAuthorPromoteQuizToDraftWritesDraftAndUpdatesSession(t *testing.T) {
 		"quiz-to-draft",
 		"--dir",
 		projectDir,
-		"--session",
-		sessionID,
 		"--quiz",
 		quizPath,
 	}, &stdout, &bytes.Buffer{})

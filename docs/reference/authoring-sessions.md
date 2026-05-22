@@ -59,13 +59,17 @@ chc author quiz new --target spec --topic "Billing sync" --dry-run
 Promote a quiz to a draft:
 
 ```sh
-chc author promote quiz-to-draft --session <session-handle> --quiz .chc/quizzes/<quiz>.md
+chc author promote quiz-to-draft --quiz .chc/quizzes/<quiz>.md
 ```
+
+When the quiz path matches one recorded session output, ChrysoCoord resolves the
+session from the artifact metadata. Use `--session <session-handle>` to select a
+session explicitly.
 
 Preview promotion without writing the draft or updating the session:
 
 ```sh
-chc author promote quiz-to-draft --session <session-handle> --quiz .chc/quizzes/<quiz>.md --dry-run
+chc author promote quiz-to-draft --quiz .chc/quizzes/<quiz>.md --dry-run
 ```
 
 All commands accept `--dir` to target another managed project.

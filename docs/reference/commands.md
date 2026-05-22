@@ -135,8 +135,10 @@ chc author quiz new --target spec --topic "Billing sync"
 Promote quiz answers into a draft:
 
 ```sh
-chc author promote quiz-to-draft --session <session-handle> --quiz .chc/quizzes/<quiz>.md
+chc author promote quiz-to-draft --quiz .chc/quizzes/<quiz>.md
 ```
+
+Use `--session <session-handle>` to select a session explicitly when needed.
 
 Run the current assisted authoring flow:
 

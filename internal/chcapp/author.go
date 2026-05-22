@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strings"
 	"time"
 	"unicode"
@@ -195,7 +196,7 @@ func authorAssistedSessionFlags() []cli.Flag {
 	return append(authorProjectFlags(),
 		&cli.StringFlag{
 			Name:  "session",
-			Usage: "authoring session id",
+			Usage: "authoring session handle",
 		},
 	)
 }
@@ -538,9 +539,6 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 	}
 
 	sessionHandle := strings.TrimSpace(cmd.String("session"))
-	if sessionHandle == "" {
-		return fmt.Errorf("authoring session is required")
-	}
 
 	quizPath := strings.TrimSpace(cmd.String("quiz"))
 	if quizPath == "" {
@@ -549,7 +547,13 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 
 	repository := chc.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
-	session, err := resolveAuthoringSession(ctx, repository, sessionHandle)
+	session, err := resolveAuthoringSessionForPromotion(
+		ctx,
+		repository,
+		projectContext.ProjectDir,
+		sessionHandle,
+		quizPath,
+	)
 	if err != nil {
 		return err
 	}
@@ -975,14 +979,89 @@ func resolveAuthoringSession(
 	return chc.AuthoringSession{}, fmt.Errorf("%w: %s", chc.ErrAuthoringSessionNotFound, handle)
 }
 
+func resolveAuthoringSessionForPromotion(
+	ctx context.Context,
+	repository chc.AuthoringSessionRepository,
+	projectDir string,
+	handle string,
+	artifactPath string,
+) (chc.AuthoringSession, error) {
+	if strings.TrimSpace(handle) != "" {
+		return resolveAuthoringSession(ctx, repository, handle)
+	}
+
+	return resolveAuthoringSessionFromArtifact(ctx, repository, projectDir, artifactPath)
+}
+
+func resolveAuthoringSessionFromArtifact(
+	ctx context.Context,
+	repository chc.AuthoringSessionRepository,
+	projectDir string,
+	artifactPath string,
+) (chc.AuthoringSession, error) {
+	sessions, err := repository.ListSessions(ctx)
+	if err != nil {
+		return chc.AuthoringSession{}, err
+	}
+
+	matches := []chc.AuthoringSession{}
+	normalizedPath := normalizeAuthoringArtifactPath(projectDir, artifactPath)
+
+	for _, session := range sessions {
+		if authoringSessionHasArtifact(session, projectDir, normalizedPath) {
+			matches = append(matches, session)
+		}
+	}
+
+	if len(matches) == 1 {
+		return matches[0], nil
+	}
+
+	if len(matches) > 1 {
+		return chc.AuthoringSession{}, fmt.Errorf("authoring artifact path is ambiguous: %s", artifactPath)
+	}
+
+	return chc.AuthoringSession{}, fmt.Errorf("authoring session is required when artifact metadata cannot identify one session")
+}
+
+func authoringSessionHasArtifact(
+	session chc.AuthoringSession,
+	projectDir string,
+	artifactPath string,
+) bool {
+	for _, artifact := range session.Outputs {
+		if normalizeAuthoringArtifactPath(projectDir, artifact.Path) == artifactPath {
+			return true
+		}
+	}
+
+	for _, artifact := range session.Inputs {
+		if normalizeAuthoringArtifactPath(projectDir, artifact.Path) == artifactPath {
+			return true
+		}
+	}
+
+	return false
+}
+
+func normalizeAuthoringArtifactPath(projectDir, artifactPath string) string {
+	path := filepath.Clean(strings.TrimSpace(artifactPath))
+	if filepath.IsAbs(path) {
+		relativePath, err := filepath.Rel(projectDir, path)
+		if err == nil {
+			path = relativePath
+		}
+	}
+
+	return filepath.ToSlash(path)
+}
+
 func matchingAuthoringSessions(sessions []chc.AuthoringSession, handle string) []chc.AuthoringSession {
 	handleSlug := authoringHandleSlug(handle)
 	matches := []chc.AuthoringSession{}
 
 	for _, session := range sessions {
-		if strings.EqualFold(session.ID, handle) ||
-			strings.EqualFold(session.Topic, handle) ||
-			(handleSlug != "" && authoringHandleSlug(session.Topic) == handleSlug) {
+		if authoringSessionMatchesHandle(session, handle, handleSlug) {
 			matches = append(matches, session)
 		}
 	}
@@ -990,13 +1069,29 @@ func matchingAuthoringSessions(sessions []chc.AuthoringSession, handle string) [
 	return matches
 }
 
+func authoringSessionMatchesHandle(session chc.AuthoringSession, handle, handleSlug string) bool {
+	if strings.EqualFold(session.ID, handle) {
+		return true
+	}
+
+	if strings.EqualFold(session.Topic, handle) {
+		return true
+	}
+
+	return handleSlug != "" && authoringHandleSlug(session.Topic) == handleSlug
+}
+
 func authoringHandleSlug(value string) string {
 	var builder strings.Builder
+
 	var previousDash bool
 
-	for _, char := range strings.ToLower(strings.TrimSpace(value)) {
+	normalized := strings.ToLower(strings.TrimSpace(value))
+
+	for _, char := range normalized {
 		if unicode.IsLetter(char) || unicode.IsDigit(char) {
 			builder.WriteRune(char)
+
 			previousDash = false
 
 			continue
@@ -1004,6 +1099,7 @@ func authoringHandleSlug(value string) string {
 
 		if builder.Len() > 0 && !previousDash {
 			builder.WriteByte('-')
+
 			previousDash = true
 		}
 	}

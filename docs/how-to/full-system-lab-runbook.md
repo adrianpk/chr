@@ -230,9 +230,11 @@ draft:
 
 ```sh
 chc author promote quiz-to-draft \
-  --session <session-handle> \
   --quiz ".chc/quizzes/<quiz-file>.md"
 ```
+
+Pass `--session <session-handle>` only when the quiz artifact does not identify
+one recorded authoring session.
 
 Exercise assisted authoring with deterministic fake adapter inputs:
 
