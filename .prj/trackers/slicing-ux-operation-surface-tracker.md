@@ -24,7 +24,7 @@ Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: CLI Output Readability | Delivered | `feat/slice-1-cli-output-readability` | `feat(slice-1): cli output readability` | `.prj/reports/slices/ux-operation-surface/slice-1-cli-output-readability.md` | PR #134 merged. |
 | Slice 2: Workspace Bootstrap Contract Cleanup | Delivered | `feat/slice-2-workspace-bootstrap-contract` | `feat(slice-2): workspace bootstrap contract cleanup` | `.prj/reports/slices/ux-operation-surface/slice-2-workspace-bootstrap-contract.md` | PR #135 merged. |
-| Slice 3: Protocol Document Boundary Cleanup | Planned | `feat/slice-3-protocol-doc-boundaries` | `feat(slice-3): protocol doc boundaries` | `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-boundaries.md` | Generated protocol assets. |
+| Slice 3: Protocol Document Boundary Cleanup | Reviewing | `feat/slice-3-protocol-doc-boundaries` | `feat(slice-3): protocol doc boundaries` | `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-boundaries.md` | PR pending review. |
 | Slice 4: Authoring Session Ergonomics | Planned | `feat/slice-4-authoring-session-ergonomics` | `feat(slice-4): authoring session ergonomics` | `.prj/reports/slices/ux-operation-surface/slice-4-authoring-session-ergonomics.md` | IDs, slugs, list/show UX. |
 | Slice 5: Context-Aware Quiz Generation Foundation | Planned | `feat/slice-5-context-aware-quiz-generation` | `feat(slice-5): context-aware quiz generation` | `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md` | Quiz engine boundary. |
 | Slice 6: TUI Specification Set | Delivered | `docs/slice-6-tui-specification-set` | `docs(slice-6): tui specification set` | `.prj/reports/slices/ux-operation-surface/slice-6-tui-specification-set.md` | Spec-only slice delivered directly on `dev`. |
@@ -95,24 +95,24 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Review generated `.chc/agents/*.md` assets.
-- [ ] Keep project documentation guidance separate from `.chc/` operational
+- [x] Review generated `.chc/agents/*.md` assets.
+- [x] Keep project documentation guidance separate from `.chc/` operational
   contracts.
-- [ ] Move artifact layout explanation into proper reference/workspace docs.
-- [ ] Adjust context composition if protocol candidates change.
-- [ ] Update generated asset tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Move artifact layout explanation into proper reference/workspace docs.
+- [x] Adjust context composition if protocol candidates change.
+- [x] Update generated asset tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1:
-- T3.2:
-- T3.3:
-- T3.4:
-- T3.5:
-- T3.6:
-- T3.7:
+- T3.1: `e432a82` `feat(init): separate protocol docs from workspace contracts`
+- T3.2: `e432a82` `feat(init): separate protocol docs from workspace contracts`
+- T3.3: `e432a82` `feat(init): separate protocol docs from workspace contracts`
+- T3.4: no context candidate change required
+- T3.5: `e432a82` `feat(init): separate protocol docs from workspace contracts`
+- T3.6: pending report commit
+- T3.7: `make verify` pass
 
 ## Slice 4: Authoring Session Ergonomics
 

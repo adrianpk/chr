@@ -169,7 +169,7 @@ Expected outcome:
 
 ### Slice 3: Protocol Document Boundary Cleanup
 
-Status: planned.
+Status: reviewing.
 
 Expected branch: `feat/slice-3-protocol-doc-boundaries`
 Expected PR title: `feat(slice-3): protocol doc boundaries`
