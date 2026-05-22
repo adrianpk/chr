@@ -113,6 +113,7 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			AuthoringSessions: authoringSessions,
 			Observability:     observability,
 			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
+			TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
 		})
 	}
 }
@@ -163,6 +164,7 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			AuthoringSessions: authoringSessions,
 			Observability:     observability,
 			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
+			TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
 		})
 	}
 }
@@ -288,6 +290,115 @@ func (e tuiArtifactActionExecutor) reloadArtifactActionState() (chctui.ArtifactA
 		Documents:         documents,
 		AuthoringSessions: authoringSessions,
 	}, nil
+}
+
+type tuiTicketActionExecutor struct {
+	ctx            context.Context
+	env            chc.UserEnvironment
+	projectContext commandProjectContext
+}
+
+func newTUITicketActionExecutor(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+) tuiTicketActionExecutor {
+	return tuiTicketActionExecutor{
+		ctx:            ctx,
+		env:            env,
+		projectContext: projectContext,
+	}
+}
+
+func (e tuiTicketActionExecutor) ExecuteTicketAction(
+	request chctui.TicketActionRequest,
+) (chctui.TicketActionResult, error) {
+	ticket, err := e.ticketByKey(request.Key)
+	if err != nil {
+		return chctui.TicketActionResult{}, err
+	}
+
+	switch request.Action {
+	case chctui.TicketActionAddComment:
+		return e.addComment(ticket)
+	case chctui.TicketActionMoveStatus:
+		return e.moveStatus(ticket, request.Status)
+	case chctui.TicketActionToggleChecklist:
+		return chctui.TicketActionResult{}, errors.New(
+			"checklist toggle requires a safe checklist item writer and is not available from this TUI action yet",
+		)
+	case chctui.TicketActionAddChecklistItem:
+		return chctui.TicketActionResult{}, errors.New(
+			"checklist item creation requires a safe checklist item writer and is not available from this TUI action yet",
+		)
+	default:
+		return chctui.TicketActionResult{}, errors.New("unknown ticket action")
+	}
+}
+
+func (e tuiTicketActionExecutor) addComment(ticket chc.IndexedTicket) (chctui.TicketActionResult, error) {
+	err := chc.NewTicketCommenter().AddComment(e.ctx, chc.AddTicketCommentOptions{
+		Path:      ticket.Path,
+		Author:    "tui",
+		Body:      "TUI action recorded.",
+		CreatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return chctui.TicketActionResult{}, err
+	}
+
+	tickets, err := loadTUITickets(e.ctx, e.env, e.projectContext)
+	if err != nil {
+		return chctui.TicketActionResult{}, err
+	}
+
+	return chctui.TicketActionResult{
+		Message: "Added comment to ticket " + ticket.Key + ".",
+		Tickets: tickets,
+	}, nil
+}
+
+func (e tuiTicketActionExecutor) moveStatus(
+	ticket chc.IndexedTicket,
+	status string,
+) (chctui.TicketActionResult, error) {
+	err := chc.NewTicketStatusUpdater().UpdateStatus(e.ctx, chc.UpdateTicketStatusOptions{
+		Path:      ticket.Path,
+		Status:    status,
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return chctui.TicketActionResult{}, err
+	}
+
+	tickets, err := loadTUITickets(e.ctx, e.env, e.projectContext)
+	if err != nil {
+		return chctui.TicketActionResult{}, err
+	}
+
+	return chctui.TicketActionResult{
+		Message: "Moved ticket " + ticket.Key + " to " + status + ".",
+		Tickets: tickets,
+	}, nil
+}
+
+func (e tuiTicketActionExecutor) ticketByKey(key string) (chc.IndexedTicket, error) {
+	index, err := chc.NewTicketIndex(e.ctx, e.env, assetsFS)
+	if err != nil {
+		return chc.IndexedTicket{}, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Lookup result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	err = refreshProjectTicketIndex(e.ctx, index, e.projectContext)
+	if err != nil {
+		return chc.IndexedTicket{}, err
+	}
+
+	return index.GetProjectTicketByKey(e.ctx, e.projectContext.ProjectID, key)
 }
 
 func loadTUITickets(

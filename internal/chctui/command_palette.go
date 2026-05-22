@@ -15,6 +15,7 @@ const (
 	CommandActionHelp               CommandAction = "help"
 	CommandActionOpenSelectedSource CommandAction = "open_selected_source"
 	CommandActionPlanArtifact       CommandAction = "plan_artifact"
+	CommandActionPlanTicket         CommandAction = "plan_ticket"
 )
 
 type Command struct {
@@ -24,6 +25,8 @@ type Command struct {
 	Action      CommandAction
 	View        View
 	Artifact    ArtifactActionID
+	Ticket      TicketActionID
+	Status      string
 }
 
 type CommandPaletteState struct {
@@ -48,6 +51,12 @@ func DefaultCommandRegistry() []Command {
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a draft authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
 		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
 		{ID: "create-draft", Title: "Create draft", Description: "Plan a safe draft creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateDraft},
+		{ID: "ticket-add-comment", Title: "Add ticket comment", Description: "Add a standard comment to the selected ticket after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionAddComment},
+		{ID: "ticket-status-ready", Title: "Move ticket to ready", Description: "Move the selected ticket to ready after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionMoveStatus, Status: "ready"},
+		{ID: "ticket-status-in-progress", Title: "Move ticket to in_progress", Description: "Move the selected ticket to in_progress after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionMoveStatus, Status: "in_progress"},
+		{ID: "ticket-status-reviewing", Title: "Move ticket to reviewing", Description: "Move the selected ticket to reviewing after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionMoveStatus, Status: "reviewing"},
+		{ID: "ticket-checklist-toggle", Title: "Toggle ticket checklist item", Description: "Validate checklist toggle availability for the selected ticket.", Action: CommandActionPlanTicket, Ticket: TicketActionToggleChecklist},
+		{ID: "ticket-checklist-add", Title: "Add ticket checklist item", Description: "Validate checklist creation availability for the selected ticket.", Action: CommandActionPlanTicket, Ticket: TicketActionAddChecklistItem},
 	}
 
 	for _, view := range defaultViews {
@@ -200,6 +209,8 @@ func (m *Model) executeCommand(command Command) {
 		m.statusMessage = m.selectedSourcePathMessage()
 	case CommandActionPlanArtifact:
 		m.planArtifactAction(command.Artifact)
+	case CommandActionPlanTicket:
+		m.planTicketAction(command.Ticket, command.Status)
 	}
 }
 

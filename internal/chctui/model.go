@@ -61,6 +61,7 @@ type Options struct {
 	AuthoringSessions []chc.AuthoringSession
 	Observability     ObservabilityView
 	ActionExecutor    ArtifactActionExecutor
+	TicketExecutor    TicketActionExecutor
 }
 
 type Model struct {
@@ -82,6 +83,8 @@ type Model struct {
 	commandPalette           CommandPaletteState
 	artifactAction           ArtifactActionState
 	actionExecutor           ArtifactActionExecutor
+	ticketAction             TicketActionState
+	ticketExecutor           TicketActionExecutor
 	statusMessage            string
 }
 
@@ -96,6 +99,7 @@ func NewModel(opts Options) Model {
 		observability:     opts.Observability,
 		commandPalette:    NewCommandPaletteState(DefaultCommandRegistry()),
 		actionExecutor:    opts.ActionExecutor,
+		ticketExecutor:    opts.TicketExecutor,
 	}
 }
 
@@ -161,6 +165,7 @@ func (m Model) View() string {
 	output.WriteString(m.renderSelectedView())
 	output.WriteString(m.renderStatusMessage())
 	output.WriteString(m.renderArtifactAction())
+	output.WriteString(m.renderTicketAction())
 	output.WriteString(m.renderCommandPalette())
 	output.WriteString("\n\n")
 	output.WriteString(m.renderKeys())
@@ -176,6 +181,10 @@ func (m Model) SelectedView() View {
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.artifactAction.Pending {
 		return m.updateArtifactActionKey(msg)
+	}
+
+	if m.ticketAction.Pending {
+		return m.updateTicketActionKey(msg)
 	}
 
 	if m.commandPalette.Open {
@@ -390,6 +399,10 @@ func (m Model) renderSelectedTicketDetail() string {
 func (m Model) renderKeys() string {
 	if m.artifactAction.Pending {
 		return "Keys: enter confirms action, esc cancels action"
+	}
+
+	if m.ticketAction.Pending {
+		return "Keys: enter confirms ticket action, esc cancels ticket action"
 	}
 
 	if m.commandPalette.Open {
