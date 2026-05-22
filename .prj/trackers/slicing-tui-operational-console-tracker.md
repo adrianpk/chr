@@ -234,5 +234,5 @@ Task commits:
 - T8.5: `58c6f9d` renders completion or failure status after execution.
 - T8.6: `58c6f9d` surfaces execution result paths in completion messages.
 - T8.7: `58c6f9d` adds work action planning, cancellation, confirmation, and failure tests.
-- T8.8: pending report commit.
+- T8.8: `df2a39c` adds the slice implementation report.
 - T8.9: `make verify` passed.
