@@ -21,7 +21,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: TUI App Foundation | Delivered | `feat/slice-1-tui-app-foundation` | `feat(slice-1): tui app foundation` | `.prj/reports/slices/tui-operational-console/slice-1-tui-app-foundation.md` | PR #139 merged. |
-| Slice 2: Read-Only Board And Ticket Detail | Reviewing | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | Ticket-centered read-only board. |
+| Slice 2: Read-Only Board And Ticket Detail | Delivered | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | PR #140 merged. |
 | Slice 3: Document And Authoring Explorer | Planned | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | Documents and authoring artifacts. |
 | Slice 4: Agent And Runtime Observability | Planned | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | Read-only agent/runtime/evidence state. |
 | Slice 5: Command Palette Foundation | Planned | `feat/slice-5-tui-command-palette` | `feat(slice-5): tui command palette` | `.prj/reports/slices/tui-operational-console/slice-5-tui-command-palette.md` | Discoverable commands. |
