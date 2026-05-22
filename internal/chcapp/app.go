@@ -86,12 +86,24 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		documents, err := chctui.LoadDocumentViews(ctx, projectContext.ProjectDir)
+		if err != nil {
+			return err
+		}
+
+		authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
+		if err != nil {
+			return err
+		}
+
 		return chctui.Run(ctx, chctui.Options{
-			ProjectDir: projectContext.ProjectDir,
-			ProjectID:  projectContext.ProjectID,
-			Stdin:      stdin,
-			Stdout:     stdout,
-			Tickets:    tickets,
+			ProjectDir:        projectContext.ProjectDir,
+			ProjectID:         projectContext.ProjectID,
+			Stdin:             stdin,
+			Stdout:            stdout,
+			Tickets:           tickets,
+			Documents:         documents,
+			AuthoringSessions: authoringSessions,
 		})
 	}
 }
@@ -117,12 +129,24 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		documents, err := chctui.LoadDocumentViews(ctx, projectContext.ProjectDir)
+		if err != nil {
+			return err
+		}
+
+		authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
+		if err != nil {
+			return err
+		}
+
 		return chctui.Run(ctx, chctui.Options{
-			ProjectDir: projectContext.ProjectDir,
-			ProjectID:  projectContext.ProjectID,
-			Stdin:      stdin,
-			Stdout:     stdout,
-			Tickets:    tickets,
+			ProjectDir:        projectContext.ProjectDir,
+			ProjectID:         projectContext.ProjectID,
+			Stdin:             stdin,
+			Stdout:            stdout,
+			Tickets:           tickets,
+			Documents:         documents,
+			AuthoringSessions: authoringSessions,
 		})
 	}
 }
@@ -153,4 +177,16 @@ func loadTUITickets(
 	}
 
 	return tickets, nil
+}
+
+func loadTUIAuthoringSessions(
+	ctx context.Context,
+	projectContext commandProjectContext,
+) ([]chc.AuthoringSession, error) {
+	sessions, err := chc.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return sessions, nil
 }

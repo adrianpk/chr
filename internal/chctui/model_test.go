@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -161,6 +162,129 @@ func TestTicketFilterMatchesMetadata(t *testing.T) {
 	}
 }
 
+func TestModelRendersDocumentsAndDetail(t *testing.T) {
+	model := NewModel(Options{
+		Documents: []DocumentView{
+			{
+				Index:        0,
+				Family:       "spec",
+				Status:       "accepted",
+				Title:        "TUI Navigation",
+				RelativePath: ".prj/specs/specs/tui-navigation.md",
+				Preview:      "Navigation details.",
+			},
+		},
+	})
+	model.selected = 3
+
+	view := model.View()
+
+	for _, want := range []string{
+		"Documents",
+		"spec",
+		"accepted",
+		"TUI Navigation",
+		"Selected Document",
+		"Path: .prj/specs/specs/tui-navigation.md",
+		"Navigation details.",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
+	projectDir := t.TempDir()
+	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "specs", "specs"), "feature.md", "# Feature Spec\n\nStatus: accepted\n\nDetails.")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "trackers"), "feature-tracker.md", "# Feature Tracker\n\nStatus: planned\n")
+
+	documents, err := LoadDocumentViews(t.Context(), projectDir)
+	if err != nil {
+		t.Fatalf("LoadDocumentViews returned error: %v", err)
+	}
+
+	if len(documents) != 2 {
+		t.Fatalf("len(documents) = %d, want 2", len(documents))
+	}
+
+	if documents[0].Title != "Feature Spec" {
+		t.Fatalf("first document title = %q, want Feature Spec", documents[0].Title)
+	}
+
+	if documents[0].Status != "accepted" {
+		t.Fatalf("first document status = %q, want accepted", documents[0].Status)
+	}
+}
+
+func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
+	updated := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
+	model := NewModel(Options{
+		AuthoringSessions: []chc.AuthoringSession{
+			{
+				ID:        "auth-1",
+				ProjectID: "project-1",
+				Status:    chc.AuthoringSessionStatusActive,
+				Mode:      chc.AuthoringSessionModeAssisted,
+				Target:    chc.AuthoringTargetSpec,
+				Topic:     "Billing sync",
+				UpdatedAt: updated,
+				Inputs: []chc.AuthoringArtifactRef{
+					{Path: ".prj/dumps/billing.md"},
+				},
+				Outputs: []chc.AuthoringArtifactRef{
+					{Path: ".chc/specs/auth-1-billing-sync.md"},
+				},
+			},
+		},
+	})
+	model.selected = 4
+
+	view := model.View()
+
+	for _, want := range []string{
+		"Authoring",
+		"active",
+		"spec",
+		"Billing sync",
+		"Selected Authoring Session",
+		"ID: auth-1",
+		"Transcript: .chc/authoring/sessions/auth-1/transcript.md",
+		"Inputs: .prj/dumps/billing.md",
+		"Outputs: .chc/specs/auth-1-billing-sync.md",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelSelectsDocuments(t *testing.T) {
+	model := NewModel(Options{
+		Documents: []DocumentView{
+			{Index: 0, Title: "First"},
+			{Index: 1, Title: "Second"},
+		},
+	})
+	model.selected = 3
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
+	navigated, ok := updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	document, ok := navigated.selectedDocumentView()
+	if !ok {
+		t.Fatal("selectedDocumentView returned no document")
+	}
+
+	if document.Title != "Second" {
+		t.Fatalf("selected document = %q, want Second", document.Title)
+	}
+}
+
 func TestModelRecordsWindowSize(t *testing.T) {
 	model := NewModel(Options{})
 
@@ -183,9 +307,14 @@ func TestModelRecordsWindowSize(t *testing.T) {
 func writeTicketViewFile(t *testing.T, projectDir, name, body string) string {
 	t.Helper()
 
+	err := os.MkdirAll(projectDir, 0o755)
+	if err != nil {
+		t.Fatalf("create ticket view directory: %v", err)
+	}
+
 	path := filepath.Join(projectDir, name)
 
-	err := os.WriteFile(path, []byte(body), 0o644)
+	err = os.WriteFile(path, []byte(body), 0o644)
 	if err != nil {
 		t.Fatalf("write ticket view file: %v", err)
 	}

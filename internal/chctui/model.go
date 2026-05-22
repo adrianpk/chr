@@ -52,32 +52,40 @@ var viewPlaceholders = map[View]string{
 }
 
 type Options struct {
-	ProjectDir string
-	ProjectID  string
-	Stdin      io.Reader
-	Stdout     io.Writer
-	Tickets    []chc.IndexedTicket
+	ProjectDir        string
+	ProjectID         string
+	Stdin             io.Reader
+	Stdout            io.Writer
+	Tickets           []chc.IndexedTicket
+	Documents         []DocumentView
+	AuthoringSessions []chc.AuthoringSession
 }
 
 type Model struct {
-	projectDir      string
-	projectID       string
-	views           []View
-	selected        int
-	width           int
-	height          int
-	tickets         []TicketView
-	selectedTicket  int
-	ticketFilter    string
-	filterEntryMode bool
+	projectDir               string
+	projectID                string
+	views                    []View
+	selected                 int
+	width                    int
+	height                   int
+	tickets                  []TicketView
+	selectedTicket           int
+	ticketFilter             string
+	filterEntryMode          bool
+	documents                []DocumentView
+	selectedDocument         int
+	authoringSessions        []AuthoringSessionView
+	selectedAuthoringSession int
 }
 
 func NewModel(opts Options) Model {
 	return Model{
-		projectDir: opts.ProjectDir,
-		projectID:  opts.ProjectID,
-		views:      append([]View(nil), defaultViews...),
-		tickets:    NewTicketViews(opts.Tickets),
+		projectDir:        opts.ProjectDir,
+		projectID:         opts.ProjectID,
+		views:             append([]View(nil), defaultViews...),
+		tickets:           NewTicketViews(opts.Tickets),
+		documents:         append([]DocumentView(nil), opts.Documents...),
+		authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
 	}
 }
 
@@ -165,14 +173,36 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "right", "tab", "l":
 		m.selectNextView()
 	case "up", "k":
-		m.selectPreviousTicket()
+		m.selectPreviousRecord()
 	case "down", "j":
-		m.selectNextTicket()
+		m.selectNextRecord()
 	case "/":
 		m.filterEntryMode = true
 	}
 
 	return m, nil
+}
+
+func (m *Model) selectPreviousRecord() {
+	switch m.SelectedView() {
+	case ViewBoard, ViewTickets:
+		m.selectPreviousTicket()
+	case ViewDocuments:
+		m.selectPreviousDocument()
+	case ViewAuthoring:
+		m.selectPreviousAuthoringSession()
+	}
+}
+
+func (m *Model) selectNextRecord() {
+	switch m.SelectedView() {
+	case ViewBoard, ViewTickets:
+		m.selectNextTicket()
+	case ViewDocuments:
+		m.selectNextDocument()
+	case ViewAuthoring:
+		m.selectNextAuthoringSession()
+	}
 }
 
 func (m *Model) selectPreviousView() {
@@ -201,6 +231,14 @@ func (m Model) renderSelectedView() string {
 
 	if selectedView == ViewTickets {
 		return m.renderTicketList()
+	}
+
+	if selectedView == ViewDocuments {
+		return m.renderDocuments()
+	}
+
+	if selectedView == ViewAuthoring {
+		return m.renderAuthoring()
 	}
 
 	placeholder, ok := viewPlaceholders[selectedView]
@@ -321,6 +359,14 @@ func (m Model) renderKeys() string {
 
 	if m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets {
 		return "Keys: up/down selects ticket, left/right or tab changes view, / filters, q quits"
+	}
+
+	if m.SelectedView() == ViewDocuments {
+		return "Keys: up/down selects document, left/right or tab changes view, q quits"
+	}
+
+	if m.SelectedView() == ViewAuthoring {
+		return "Keys: up/down selects session, left/right or tab changes view, q quits"
 	}
 
 	return "Keys: left/right or tab changes view, q quits"
