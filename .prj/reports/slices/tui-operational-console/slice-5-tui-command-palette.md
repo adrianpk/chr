@@ -1,11 +1,11 @@
 # Slice 5: Command Palette Foundation
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Operational Console
 Plan: `.prj/plans/slicing-tui-operational-console-plan.md`
 Tracker: `.prj/trackers/slicing-tui-operational-console-tracker.md`
 Branch: `feat/slice-5-tui-command-palette`
-PR: pending
+PR: #143
 
 ## Purpose
 
