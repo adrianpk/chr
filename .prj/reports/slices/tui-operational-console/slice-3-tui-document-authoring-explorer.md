@@ -1,11 +1,11 @@
 # Slice 3: Document And Authoring Explorer
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Operational Console
 Plan: `.prj/plans/slicing-tui-operational-console-plan.md`
 Tracker: `.prj/trackers/slicing-tui-operational-console-tracker.md`
 Branch: `feat/slice-3-tui-document-authoring-explorer`
-PR: pending
+PR: #141
 
 ## Purpose
 
