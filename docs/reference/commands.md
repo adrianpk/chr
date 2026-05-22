@@ -135,14 +135,14 @@ chc author quiz new --target spec --topic "Billing sync"
 Promote quiz answers into a draft:
 
 ```sh
-chc author promote quiz-to-draft --session <session-id> --quiz .chc/quizzes/<quiz>.md
+chc author promote quiz-to-draft --session <session-handle> --quiz .chc/quizzes/<quiz>.md
 ```
 
 Run the current assisted authoring flow:
 
 ```sh
 chc author assisted start --target spec --topic "Billing sync"
-chc author assisted status --session <session-id>
+chc author assisted status --session <session-handle>
 ```
 
 The current assisted commands use explicit adapter inputs for deterministic

@@ -206,12 +206,12 @@ List and inspect sessions:
 
 ```sh
 chc author session list
-chc author session show <session-id>
+chc author session show <session-handle>
 ```
 
-`chc author session list` prints headers so `status`, `target`, and `topic`
-are distinguishable. Use the session id from the list when a later command
-requires `<session-id>`.
+`chc author session list` prints headers so `status`, `target`, `updated_at`,
+and `topic` are distinguishable. Use the session id, exact topic, or a unique
+topic slug when a later command requires `<session-handle>`.
 
 Generate a static quiz:
 
@@ -230,7 +230,7 @@ draft:
 
 ```sh
 chc author promote quiz-to-draft \
-  --session <session-id> \
+  --session <session-handle> \
   --quiz ".chc/quizzes/<quiz-file>.md"
 ```
 
@@ -242,11 +242,11 @@ chc author assisted start \
   --topic "CLI blog project validation"
 
 chc author assisted resume \
-  --session <session-id> \
+  --session <session-handle> \
   --fake-question "What behavior should the CLI blog prove first?"
 
 chc author assisted answer \
-  --session <session-id> \
+  --session <session-handle> \
   --turn turn-001 \
   --turn-index 1 \
   --question-id <question-id> \
@@ -254,10 +254,10 @@ chc author assisted answer \
   --answer "Publishing a draft should update the persistent index and tests should pass."
 
 chc author assisted status \
-  --session <session-id>
+  --session <session-handle>
 
 chc author assisted finalize \
-  --session <session-id> \
+  --session <session-handle> \
   --fake-summary "The lab should prove initialization, authoring, ticket execution, validation, reporting, maintenance, and remote command intake against the CLI blog project." \
   --target-kind spec \
   --target-name "cli blog validation spec"

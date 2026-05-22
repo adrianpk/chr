@@ -24,15 +24,18 @@ chc author session list
 The list output includes headers:
 
 ```text
-id                       status  target  topic
-auth-20260522-073505     draft   spec    Billing sync
+id                       status  target  updated_at            topic
+author-20260522-073505   draft   spec    2026-05-22T07:35:05Z  Billing sync
 ```
 
 Show a session:
 
 ```sh
-chc author session show <session-id>
+chc author session show <session-handle>
 ```
+
+The session handle may be the exact session id, the exact topic, or a unique
+topic slug such as `billing-sync`. Existing `auth-...` session ids remain valid.
 
 Create a static quiz:
 
@@ -43,8 +46,8 @@ chc author quiz new --target spec --topic "Billing sync"
 Successful creation prints the quiz path relative to the managed project:
 
 ```text
-quiz: created .chc/quizzes/auth-20260522-073505-billing-sync.md
-session: auth-20260522-073505
+quiz: created .chc/quizzes/author-20260522-073505-billing-sync.md
+session: author-20260522-073505
 ```
 
 Preview a static quiz without writing files:
@@ -56,13 +59,13 @@ chc author quiz new --target spec --topic "Billing sync" --dry-run
 Promote a quiz to a draft:
 
 ```sh
-chc author promote quiz-to-draft --session <session-id> --quiz .chc/quizzes/<quiz>.md
+chc author promote quiz-to-draft --session <session-handle> --quiz .chc/quizzes/<quiz>.md
 ```
 
 Preview promotion without writing the draft or updating the session:
 
 ```sh
-chc author promote quiz-to-draft --session <session-id> --quiz .chc/quizzes/<quiz>.md --dry-run
+chc author promote quiz-to-draft --session <session-handle> --quiz .chc/quizzes/<quiz>.md --dry-run
 ```
 
 All commands accept `--dir` to target another managed project.
@@ -77,7 +80,7 @@ Ask the next assisted question with the current fake adapter path:
 
 ```sh
 chc author assisted resume \
-  --session <session-id> \
+  --session <session-handle> \
   --fake-question "What should the spec include?"
 ```
 
@@ -85,7 +88,7 @@ Submit one answer:
 
 ```sh
 chc author assisted answer \
-  --session <session-id> \
+  --session <session-handle> \
   --turn turn-001 \
   --turn-index 1 \
   --question-id question-20260521-120000 \
@@ -96,14 +99,14 @@ chc author assisted answer \
 Show assisted transcript status:
 
 ```sh
-chc author assisted status --session <session-id>
+chc author assisted status --session <session-handle>
 ```
 
 Finalize into a curated summary and synthesized artifact:
 
 ```sh
 chc author assisted finalize \
-  --session <session-id> \
+  --session <session-handle> \
   --fake-summary "Billing sync needs retry behavior and idempotent writes." \
   --target-kind spec \
   --target-name "billing sync spec"
@@ -175,6 +178,8 @@ The session model contains:
 
 Current CLI-created sessions use static mode.
 Assisted CLI sessions use `active` status and `assisted` mode.
+New CLI-created sessions use the `author-<timestamp>` id prefix. Older
+`auth-<timestamp>` sessions remain readable and usable by exact id.
 
 ## Provenance
 

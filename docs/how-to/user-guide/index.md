@@ -267,8 +267,10 @@ chc author session list
 Show one session:
 
 ```sh
-chc author session show <session-id>
+chc author session show <session-handle>
 ```
+
+The session handle can be the exact id, exact topic, or a unique topic slug.
 
 Create a static questionnaire:
 
@@ -285,7 +287,7 @@ chc author quiz new --target spec --topic "Billing sync" --dry-run
 After editing the quiz answers, promote the quiz to a draft:
 
 ```sh
-chc author promote quiz-to-draft --session <session-id> --quiz .chc/quizzes/<quiz>.md
+chc author promote quiz-to-draft --session <session-handle> --quiz .chc/quizzes/<quiz>.md
 ```
 
 Generated authoring artifacts remain Markdown under `.chc/`. The commands
@@ -302,7 +304,7 @@ Ask the next question:
 
 ```sh
 chc author assisted resume \
-  --session <session-id> \
+  --session <session-handle> \
   --fake-question "What should the spec include?"
 ```
 
@@ -310,7 +312,7 @@ Submit the answer:
 
 ```sh
 chc author assisted answer \
-  --session <session-id> \
+  --session <session-handle> \
   --turn turn-001 \
   --turn-index 1 \
   --question-id <question-id> \
@@ -321,14 +323,14 @@ chc author assisted answer \
 Check progress:
 
 ```sh
-chc author assisted status --session <session-id>
+chc author assisted status --session <session-handle>
 ```
 
 Finalize the session into a curated summary and target artifact:
 
 ```sh
 chc author assisted finalize \
-  --session <session-id> \
+  --session <session-handle> \
   --fake-summary "Billing sync needs retry behavior and idempotent writes." \
   --target-kind spec \
   --target-name "billing sync spec"
