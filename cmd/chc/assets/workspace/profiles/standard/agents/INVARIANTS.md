@@ -10,7 +10,8 @@
 
 - Do not overwrite user files unless explicitly requested.
 - Do not run destructive git operations without explicit approval.
-- Treat `.chc/` as project-local operational state.
+- Treat tool-managed workspace files as durable project records unless the task
+  explicitly asks to change them.
 
 ## Validation
 

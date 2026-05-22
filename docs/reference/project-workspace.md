@@ -95,6 +95,11 @@ Indexes, databases, runtime traces, and notification state are supporting artifa
 The `.chc/` directory and Markdown-first artifact model are ChrysoCoord
 invariants. They are not configured by generated workspace files.
 
+The generated files under `.chc/agents/` guide how an agent should work inside
+the managed project. They do not define or override ChrysoCoord's operational
+artifact layout. Directory placement for tickets, runtime evidence, reports,
+indexes, and authoring artifacts is a product contract owned by `chc`.
+
 ## Runtime Config
 
 `.chc/config.yml` may define the project-local agent runtime contract under

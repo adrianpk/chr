@@ -99,6 +99,27 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 	assertPathExists(t, filepath.Join(projectDir, ".chc", "agents", "CONVENTIONS.md"))
 	assertPathExists(t, filepath.Join(projectDir, ".chc", "agents", "playbooks", "ticket-workflow.md"))
 	assertPathExists(t, filepath.Join(projectDir, "AGENTS.md"))
+
+	documenting := readTestFile(t, filepath.Join(projectDir, ".chc", "agents", "DOCUMENTING.md"))
+	for _, unwanted := range []string{
+		"ChrysoCoord Artifacts",
+		"Use `.chc/` for project-local operational artifacts",
+		"generated operational records",
+	} {
+		if strings.Contains(documenting, unwanted) {
+			t.Fatalf("DOCUMENTING.md contains operational artifact rule %q:\n%s", unwanted, documenting)
+		}
+	}
+
+	architecture := readTestFile(t, filepath.Join(projectDir, ".chc", "agents", "ARCHITECTURE.md"))
+	if strings.Contains(architecture, ".chc/         ChrysoCoord project-local state") {
+		t.Fatalf("ARCHITECTURE.md exposes .chc as application layout:\n%s", architecture)
+	}
+
+	invariants := readTestFile(t, filepath.Join(projectDir, ".chc", "agents", "INVARIANTS.md"))
+	if strings.Contains(invariants, "Treat `.chc/` as project-local operational state") {
+		t.Fatalf("INVARIANTS.md contains old .chc operational rule:\n%s", invariants)
+	}
 }
 
 func TestInitRejectsFileTarget(t *testing.T) {
@@ -4837,4 +4858,15 @@ func assertPathNotExists(t *testing.T, path string) {
 	if !os.IsNotExist(err) {
 		t.Fatalf("path %s exists or returned unexpected stat error: %v", path, err)
 	}
+}
+
+func readTestFile(t *testing.T, path string) string {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read file %s: %v", path, err)
+	}
+
+	return string(content)
 }
