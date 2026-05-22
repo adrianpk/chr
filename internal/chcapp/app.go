@@ -6,26 +6,30 @@ import (
 	"io/fs"
 
 	"github.com/urfave/cli/v3"
+
+	"forge.adrianpk.com/chc/internal/chctui"
 )
 
 var assetsFS fs.FS
 
-func Run(ctx context.Context, args []string, stdout, stderr io.Writer, commandAssetsFS fs.FS) error {
+func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.Writer, commandAssetsFS fs.FS) error {
 	assetsFS = commandAssetsFS
-	cmd := newRootCommand(stdout, stderr)
+	cmd := newRootCommand(stdin, stdout, stderr)
 
 	osArgs := append([]string{"chc"}, args...)
 
 	return cmd.Run(ctx, osArgs)
 }
 
-func newRootCommand(stdout, stderr io.Writer) *cli.Command {
+func newRootCommand(stdin io.Reader, stdout, stderr io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:                  "chc",
 		Usage:                 "Coordinate agent development workflows from the current project",
+		Reader:                stdin,
 		Writer:                stdout,
 		ErrWriter:             stderr,
 		EnableShellCompletion: true,
+		Action:                runDefaultTUIAction(stdin, stdout),
 		Commands: []*cli.Command{
 			newAuthorCommand(stdout),
 			newDaemonCommand(stdout),
@@ -38,6 +42,74 @@ func newRootCommand(stdout, stderr io.Writer) *cli.Command {
 			newReportCommand(stdout),
 			newRuntimeCommand(stdout),
 			newTicketCommand(stdout),
+			newTUICommand(stdin, stdout),
 		},
+	}
+}
+
+func newTUICommand(stdin io.Reader, stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "tui",
+		Usage:  "Open the local ChrysoCoord operational console",
+		Flags:  tuiFlags(),
+		Action: runTUICommandAction(stdin, stdout),
+	}
+}
+
+func tuiFlags() []cli.Flag {
+	return append(projectRegistryFlags(),
+		&cli.StringFlag{
+			Name:  "dir",
+			Usage: "project directory override",
+			Value: ".",
+		},
+	)
+}
+
+func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		env, err := newUserEnvironment("")
+		if err != nil {
+			return err
+		}
+
+		projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+			AllowCurrentDirectory: true,
+		})
+		if err != nil {
+			return err
+		}
+
+		return chctui.Run(ctx, chctui.Options{
+			ProjectDir: projectContext.ProjectDir,
+			ProjectID:  projectContext.ProjectID,
+			Stdin:      stdin,
+			Stdout:     stdout,
+		})
+	}
+}
+
+func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		env, err := newUserEnvironmentFromCommand(cmd)
+		if err != nil {
+			return err
+		}
+
+		projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+			ExplicitDir:           cmd.String("dir"),
+			UseExplicitDir:        cmd.IsSet("dir"),
+			AllowCurrentDirectory: true,
+		})
+		if err != nil {
+			return err
+		}
+
+		return chctui.Run(ctx, chctui.Options{
+			ProjectDir: projectContext.ProjectDir,
+			ProjectID:  projectContext.ProjectID,
+			Stdin:      stdin,
+			Stdout:     stdout,
+		})
 	}
 }

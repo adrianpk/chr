@@ -12,7 +12,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -20,7 +20,7 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: TUI App Foundation | Planned | `feat/slice-1-tui-app-foundation` | `feat(slice-1): tui app foundation` | `.prj/reports/slices/tui-operational-console/slice-1-tui-app-foundation.md` | TUI package and entry behavior. |
+| Slice 1: TUI App Foundation | Reviewing | `feat/slice-1-tui-app-foundation` | `feat(slice-1): tui app foundation` | `.prj/reports/slices/tui-operational-console/slice-1-tui-app-foundation.md` | PR ready for review. |
 | Slice 2: Read-Only Board And Ticket Detail | Planned | `feat/slice-2-tui-board-ticket-detail` | `feat(slice-2): tui board ticket detail` | `.prj/reports/slices/tui-operational-console/slice-2-tui-board-ticket-detail.md` | Ticket-centered read-only board. |
 | Slice 3: Document And Authoring Explorer | Planned | `feat/slice-3-tui-document-authoring-explorer` | `feat(slice-3): tui document authoring explorer` | `.prj/reports/slices/tui-operational-console/slice-3-tui-document-authoring-explorer.md` | Documents and authoring artifacts. |
 | Slice 4: Agent And Runtime Observability | Planned | `feat/slice-4-tui-agent-runtime-observability` | `feat(slice-4): tui agent runtime observability` | `.prj/reports/slices/tui-operational-console/slice-4-tui-agent-runtime-observability.md` | Read-only agent/runtime/evidence state. |
@@ -33,29 +33,23 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 
 Candidate tasks:
 
-- [ ] Add Bubble Tea dependencies.
-- [ ] Add `internal/chctui` package boundary.
-- [ ] Add `chc tui` command.
-- [ ] Dispatch `chc` without subcommands to the TUI.
-- [ ] Preserve `chc --help`.
-- [ ] Implement base model/update/view.
-- [ ] Render project-aware navigation shell.
-- [ ] Add tests for model/update behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add Bubble Tea dependencies.
+- [x] Add `internal/chctui` package boundary.
+- [x] Add `chc tui` command.
+- [x] Dispatch `chc` without subcommands to the TUI.
+- [x] Preserve `chc --help`.
+- [x] Implement base model/update/view.
+- [x] Render project-aware navigation shell.
+- [x] Add tests for model/update behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1:
-- T1.2:
-- T1.3:
-- T1.4:
-- T1.5:
-- T1.6:
-- T1.7:
-- T1.8:
-- T1.9:
-- T1.10:
+- T1.1: Bubble Tea dependency and TUI package boundary.
+- T1.2: `chc tui` and default `chc` routing.
+- T1.3: base TUI model, navigation, and project shell.
+- T1.4: tests, validation, and slice report.
 
 ## Slice 2: Read-Only Board And Ticket Detail
 

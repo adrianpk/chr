@@ -20,7 +20,7 @@ import (
 )
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
-	return Run(ctx, args, stdout, stderr, testAssetsFS())
+	return Run(ctx, args, strings.NewReader(""), stdout, stderr, testAssetsFS())
 }
 
 func testAssetsFS() fs.FS {
@@ -32,6 +32,25 @@ func testAssetsFS() fs.FS {
 	root := filepath.Join(filepath.Dir(file), "..", "..", "cmd", "chc")
 
 	return os.DirFS(root)
+}
+
+func TestRootCommandDefaultsToTUIAction(t *testing.T) {
+	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{})
+	if cmd.Action == nil {
+		t.Fatal("root command Action is nil")
+	}
+}
+
+func TestRootCommandIncludesTUICommand(t *testing.T) {
+	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{})
+
+	for _, child := range cmd.Commands {
+		if child.Name == "tui" {
+			return
+		}
+	}
+
+	t.Fatal("root command does not include tui command")
 }
 
 func TestInitDryRunDoesNotWriteWorkspace(t *testing.T) {

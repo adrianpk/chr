@@ -22,7 +22,10 @@ func projectRegistryFlags() []cli.Flag {
 }
 
 func newUserEnvironmentFromCommand(cmd *cli.Command) (chc.UserEnvironment, error) {
-	devRoot := cmd.String("dev-root")
+	return newUserEnvironment(cmd.String("dev-root"))
+}
+
+func newUserEnvironment(devRoot string) (chc.UserEnvironment, error) {
 	if devRoot != "" {
 		return chc.NewUserEnvironment(chc.UserEnvironmentOptions{
 			DevMode: true,
