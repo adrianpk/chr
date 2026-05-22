@@ -48,18 +48,17 @@ func (m Model) renderShell() string {
 	width := maxInt(m.width, 60)
 	height := maxInt(m.height, minShellHeight)
 	topbar := m.renderShellTopbar(width)
-	tabs := m.renderShellTabs(width)
 	footer := m.renderShellFooter(width)
 	status := m.renderShellStatus(width)
 
-	bodyHeight := height - lineCount(topbar) - lineCount(tabs) - lineCount(status) - lineCount(footer)
+	bodyHeight := height - lineCount(topbar) - lineCount(status) - lineCount(footer)
 	if bodyHeight < 1 {
 		bodyHeight = 1
 	}
 
 	body := m.renderWorkspace(width, bodyHeight)
 
-	sections := []string{topbar, tabs, body}
+	sections := []string{topbar, body}
 	if status != "" {
 		sections = append(sections, status)
 	}
@@ -70,45 +69,12 @@ func (m Model) renderShell() string {
 }
 
 func (m Model) renderShellTopbar(width int) string {
-	project := m.projectID
-	if project == "" {
-		project = "no project"
-	}
-
-	dir := m.projectDir
-	if dir == "" {
-		dir = "."
-	}
-
-	dir = filepath.Base(dir)
-	if dir == "." || dir == string(filepath.Separator) {
-		dir = m.projectDir
-	}
-
-	left := fmt.Sprintf(" ChrysoCoord  %s ", project)
-	right := fmt.Sprintf(" %s  %s ", string(m.SelectedView()), dir)
+	project := m.projectDisplayName()
+	left := fmt.Sprintf(" %s ", project)
+	right := fmt.Sprintf(" %s ", string(m.SelectedView()))
 	spacer := strings.Repeat(" ", maxInt(width-lipgloss.Width(left)-lipgloss.Width(right), 1))
 
 	return shellTopbarStyle.Render(fitPlainLine(left+spacer+right, width))
-}
-
-func (m Model) renderShellTabs(width int) string {
-	var output strings.Builder
-
-	for index, view := range m.views {
-		label := fmt.Sprintf("%d %s", index+1, view)
-		if view == m.SelectedView() {
-			label = "[" + label + "]"
-		}
-
-		if output.Len() > 0 {
-			output.WriteString("  ")
-		}
-
-		output.WriteString(label)
-	}
-
-	return fitPlainLine(output.String(), width)
 }
 
 func (m Model) renderWorkspace(width, height int) string {
@@ -117,13 +83,40 @@ func (m Model) renderWorkspace(width, height int) string {
 		return m.renderOverlayWorkspace(width, height, overlay)
 	}
 
+	if workspace, ok := m.renderProductWorkspace(width, height); ok {
+		return workspace
+	}
+
+	return m.renderLegacyWorkspace(width, height)
+}
+
+func (m Model) renderProductWorkspace(width, height int) (string, bool) {
 	switch m.SelectedView() {
-	case ViewDashboard:
-		return m.renderDashboardWorkspace(width, height)
+	case ViewProject, ViewDashboard:
+		return m.renderProjectWorkspace(width, height), true
+	case ViewCases:
+		return m.renderCasesWorkspace(width, height), true
 	case ViewBoard, ViewTickets:
-		return m.renderTicketWorkspace(width, height)
+		return m.renderTicketWorkspace(width, height), true
+	case ViewDumps:
+		return m.renderDocumentFamilyWorkspace(width, height, "Dumps", map[string]bool{"dump": true}), true
+	case ViewQuizzes:
+		return m.renderQuizWorkspace(width, height), true
+	case ViewSpecs:
+		return m.renderDocumentFamilyWorkspace(width, height, "Specs", map[string]bool{"spec": true}), true
+	case ViewPlans:
+		return m.renderDocumentFamilyWorkspace(width, height, "Plans", map[string]bool{"plan": true, "tracker": true}), true
+	case ViewDash:
+		return m.renderOperationsWorkspace(width, height), true
+	default:
+		return "", false
+	}
+}
+
+func (m Model) renderLegacyWorkspace(width, height int) string {
+	switch m.SelectedView() {
 	case ViewDocuments:
-		return m.renderDocumentWorkspace(width, height)
+		return m.renderDocumentWorkspace(width, height, "Documents", m.documents)
 	case ViewAuthoring:
 		return m.renderAuthoringWorkspace(width, height)
 	case ViewAgent, ViewRuntime:
@@ -133,42 +126,135 @@ func (m Model) renderWorkspace(width, height int) string {
 	}
 }
 
-func (m Model) renderDashboardWorkspace(width, height int) string {
-	leftWidth, rightWidth := splitWidths(width)
-	topHeight := maxInt(height/2, 1)
-	bottomHeight := maxInt(height-topHeight, 1)
-	project := []string{
-		"Project",
-		"ID: " + emptyValue(m.projectID),
-		"Dir: " + emptyValue(m.projectDir),
-	}
-	tickets := []string{
-		"Tickets",
-		fmt.Sprintf("Total: %d", len(m.tickets)),
-		fmt.Sprintf("Filtered: %d", len(m.filteredTickets())),
-	}
-	agent := []string{
-		"Agent",
-		"Daemon: " + emptyValue(m.observability.DaemonStatus),
-		"Latest loop: " + emptyValue(m.observability.LatestLoop.ID),
-	}
-	runtime := []string{
-		"Runtime",
-		"Image: " + emptyValue(m.observability.RuntimeImage),
-		"Validation: " + emptyValue(m.observability.RuntimeValidationCommand),
-	}
-	top := lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		renderPanel("Project", project[1:], leftWidth, topHeight, true),
-		renderPanel("Tickets", tickets[1:], rightWidth, topHeight, false),
-	)
-	bottom := lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		renderPanel("Agent", agent[1:], leftWidth, bottomHeight, false),
-		renderPanel("Runtime", runtime[1:], rightWidth, bottomHeight, false),
+func (m Model) renderProjectWorkspace(width, height int) string {
+	leftWidth := width * 62 / 100
+	rightWidth := width - leftWidth
+	rightTopHeight := maxInt(height/2, 1)
+	rightBottomHeight := maxInt(height-rightTopHeight, 1)
+	project := m.renderProjectContextLines(maxInt(leftWidth-4, 1))
+	artifacts := m.renderProjectArtifactLines()
+	location := m.renderProjectLocationLines()
+	right := lipgloss.JoinVertical(
+		lipgloss.Left,
+		renderPanel("Artifacts", artifacts, rightWidth, rightTopHeight, false),
+		renderPanel("Location", location, rightWidth, rightBottomHeight, false),
 	)
 
-	return fitBlock(top+"\n"+bottom, width, height)
+	return fitBlock(lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		renderPanel("", project, leftWidth, height, true),
+		right,
+	), width, height)
+}
+
+func (m Model) renderProjectContextLines(width int) []string {
+	name := m.projectDisplayName()
+
+	lines := []string{
+		m.renderProjectFieldLine(projectFieldName, "Name", name, width),
+		"",
+		m.renderProjectFieldLine(projectFieldDescription, "Description", m.projectMetadata.Description, width),
+	}
+
+	for _, line := range m.renderProjectFieldBody(projectFieldDescription, m.projectMetadata.Description, width) {
+		lines = append(lines, "  "+line)
+	}
+
+	lines = append(lines, "", m.renderProjectFieldLine(projectFieldContext, "Context", m.projectMetadata.Context, width))
+
+	for _, line := range m.renderProjectFieldBody(projectFieldContext, m.projectMetadata.Context, width) {
+		lines = append(lines, "  "+line)
+	}
+
+	if m.projectDirty {
+		lines = append(lines, "", shellMutedStyle.Render("Unsaved changes. Press s to save."))
+	}
+
+	return lines
+}
+
+func (m Model) renderProjectFieldLine(field int, label, value string, width int) string {
+	prefix := "  "
+	if field == m.selectedProjectField {
+		prefix = "> "
+	}
+
+	if m.projectEdit.Active && field == m.projectEdit.Field && field == projectFieldName {
+		return prefix + label + ": " + m.renderProjectInput(maxInt(width-lipgloss.Width(prefix)-lipgloss.Width(label)-2, 1))
+	}
+
+	if field != projectFieldName {
+		return prefix + label
+	}
+
+	return prefix + label + ": " + strings.TrimSpace(value)
+}
+
+func (m Model) renderProjectFieldBody(field int, value string, width int) []string {
+	if m.projectEdit.Active && field == m.projectEdit.Field {
+		if field == projectFieldName {
+			return nil
+		}
+
+		return []string{m.renderProjectInput(maxInt(width-2, 1))}
+	}
+
+	value = strings.TrimSpace(value)
+	if value == "" {
+		value = "Not set."
+	}
+
+	return wrapPlainText(value, maxInt(width-2, 1))
+}
+
+func (m Model) renderProjectInput(width int) string {
+	input := m.projectEdit.Input
+	input.Width = width
+
+	return input.View()
+}
+
+func (m Model) renderProjectArtifactLines() []string {
+	return []string{
+		fmt.Sprintf("Board tickets     %d", len(m.tickets)),
+		fmt.Sprintf("Dumps             %d", len(m.documentsByFamily(map[string]bool{"dump": true}))),
+		fmt.Sprintf("Quizzes           %d", len(m.documentsByFamily(map[string]bool{"quiz": true}))),
+		fmt.Sprintf("Specs             %d", len(m.documentsByFamily(map[string]bool{"spec": true}))),
+		fmt.Sprintf("Plans             %d", len(m.documentsByFamily(map[string]bool{"plan": true}))),
+	}
+}
+
+func (m Model) renderProjectLocationLines() []string {
+	return []string{
+		"Path",
+		"  " + emptyValue(m.projectDir),
+		"",
+		"File",
+		"  " + emptyValue(projectMetadataRelativePath(m.projectDir, m.projectMetadata.SourcePath)),
+	}
+}
+
+func (m Model) renderCasesWorkspace(width, height int) string {
+	leftWidth, rightWidth := splitWidths(width)
+	list := []string{
+		"No use cases found.",
+		"",
+		"Use cases are intentionally small:",
+		"name",
+		"description",
+	}
+	detail := []string{
+		"Scope",
+		"Single-user workspace.",
+		"No ownership fields.",
+		"Artifacts can later attach to a case or stay project-wide.",
+	}
+
+	return fitBlock(lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		renderPanel("Cases", list, leftWidth, height, true),
+		renderPanel("Case Detail", detail, rightWidth, height, false),
+	), width, height)
 }
 
 func (m Model) renderTicketWorkspace(width, height int) string {
@@ -183,15 +269,38 @@ func (m Model) renderTicketWorkspace(width, height int) string {
 	), width, height)
 }
 
-func (m Model) renderDocumentWorkspace(width, height int) string {
+func (m Model) renderDocumentWorkspace(width, height int, title string, documents []DocumentView) string {
 	leftWidth, rightWidth := splitWidths(width)
-	list := m.renderDocumentFocusList(height - 2)
-	detail := m.renderSelectedDocumentDetail()
+	list := m.renderDocumentFocusList(documents, height-2)
+	detail := m.renderSelectedDocumentDetailFor(documents)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Documents", list, leftWidth, height, true),
+		renderPanel(title, list, leftWidth, height, true),
 		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, false),
+	), width, height)
+}
+
+func (m Model) renderDocumentFamilyWorkspace(width, height int, title string, families map[string]bool) string {
+	return m.renderDocumentWorkspace(width, height, title, m.documentsByFamily(families))
+}
+
+func (m Model) renderQuizWorkspace(width, height int) string {
+	leftWidth, rightWidth := splitWidths(width)
+	quizzes := m.documentsByFamily(map[string]bool{"quiz": true})
+	list := m.renderDocumentFocusList(quizzes, height-2)
+	interaction := []string{
+		"Question/answer workspace",
+		"Agent prompt: not active.",
+		"User answer: not active.",
+		"",
+		"Quizzes can be project-wide or case-scoped.",
+	}
+
+	return fitBlock(lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		renderPanel("Quizzes", list, leftWidth, height, true),
+		renderPanel("Interaction", interaction, rightWidth, height, false),
 	), width, height)
 }
 
@@ -214,7 +323,7 @@ func (m Model) renderOperationsWorkspace(width, height int) string {
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Agent", agent[1:], leftWidth, height, m.SelectedView() == ViewAgent),
+		renderPanel("Agent", agent[1:], leftWidth, height, m.SelectedView() == ViewDash || m.SelectedView() == ViewAgent),
 		renderPanel("Runtime", runtime[1:], rightWidth, height, m.SelectedView() == ViewRuntime),
 	), width, height)
 }
@@ -252,14 +361,14 @@ func (m Model) renderTicketFocusList(limit int) []string {
 	return lines
 }
 
-func (m Model) renderDocumentFocusList(limit int) []string {
-	if len(m.documents) == 0 {
+func (m Model) renderDocumentFocusList(documents []DocumentView, limit int) []string {
+	if len(documents) == 0 {
 		return []string{"No documents found."}
 	}
 
 	lines := []string{shellMutedStyle.Render("Type       Status      Title")}
 
-	for _, document := range m.documents {
+	for _, document := range documents {
 		prefix := " "
 		if document.Index == m.selectedDocument {
 			prefix = ">"
@@ -323,16 +432,16 @@ func (m Model) renderShellStatus(width int) string {
 
 func (m Model) renderShellFooter(width int) string {
 	buttons := []shellButton{
-		{Key: "F1", Label: "Project", View: ViewDashboard},
-		{Key: "F2", Label: "Dumps"},
-		{Key: "F3", Label: "Quizzes"},
-		{Key: "F4", Label: "Drafts"},
-		{Key: "F5", Label: "Specs", View: ViewDocuments},
-		{Key: "F6", Label: "Plans", View: ViewReports},
+		{Key: "F1", Label: "Project", View: ViewProject},
+		{Key: "F2", Label: "Cases", View: ViewCases},
+		{Key: "F3", Label: "Dumps", View: ViewDumps},
+		{Key: "F4", Label: "Quizzes", View: ViewQuizzes},
+		{Key: "F5", Label: "Specs", View: ViewSpecs},
+		{Key: "F6", Label: "Plans", View: ViewPlans},
 		{Key: "F7", Label: "Board", View: ViewBoard},
-		{Key: "F8", Label: "Dash", View: ViewAgent},
+		{Key: "F8", Label: "Dash", View: ViewDash},
 		{Key: "F9", Label: "Help", View: ViewHelp},
-		{Key: "F10", Label: "Quit"},
+		{Key: "F10", Label: "Exit"},
 	}
 
 	return m.renderShellButtons(buttons, width)
@@ -356,6 +465,78 @@ func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 	}
 
 	return strings.Join(keyLine, "") + "\n" + strings.Join(labelLine, "")
+}
+
+func projectDisplayName(projectDir string) string {
+	if strings.TrimSpace(projectDir) == "" {
+		return "."
+	}
+
+	name := filepath.Base(projectDir)
+	if name == "." || name == string(filepath.Separator) {
+		return projectDir
+	}
+
+	return name
+}
+
+func (m Model) projectDisplayName() string {
+	if strings.TrimSpace(m.projectMetadata.Name) != "" {
+		return m.projectMetadata.Name
+	}
+
+	return projectDisplayName(m.projectDir)
+}
+
+func projectMetadataRelativePath(projectDir, sourcePath string) string {
+	if strings.TrimSpace(sourcePath) == "" {
+		return ""
+	}
+
+	relativePath, err := filepath.Rel(projectDir, sourcePath)
+	if err != nil {
+		return sourcePath
+	}
+
+	return filepath.ToSlash(relativePath)
+}
+
+func wrapPlainText(text string, width int) []string {
+	if width <= 0 {
+		return []string{text}
+	}
+
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return []string{""}
+	}
+
+	lines := []string{}
+	line := ""
+
+	for _, word := range words {
+		if line == "" {
+			line = word
+
+			continue
+		}
+
+		next := line + " " + word
+		if lipgloss.Width(next) <= width {
+			line = next
+
+			continue
+		}
+
+		lines = append(lines, line)
+		line = word
+	}
+
+	if line != "" {
+		lines = append(lines, line)
+	}
+
+	return lines
 }
 
 func renderPanel(title string, lines []string, width, height int, focused bool) string {

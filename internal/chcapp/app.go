@@ -94,6 +94,11 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		projectMetadata, err := chc.NewProjectMetadataService(projectContext.ProjectDir).Load()
+		if err != nil {
+			return err
+		}
+
 		authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
 		if err != nil {
 			return err
@@ -107,6 +112,7 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 		return chctui.Run(ctx, chctui.Options{
 			ProjectDir:        projectContext.ProjectDir,
 			ProjectID:         projectContext.ProjectID,
+			ProjectMetadata:   projectMetadata,
 			Stdin:             stdin,
 			Stdout:            stdout,
 			Tickets:           tickets,
@@ -116,6 +122,7 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
 			TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
 			WorkExecutor:      newTUIWorkActionExecutor(ctx, env, projectContext),
+			ProjectExecutor:   newTUIProjectMetadataExecutor(ctx, env, projectContext),
 		})
 	}
 }
@@ -146,6 +153,11 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
+		projectMetadata, err := chc.NewProjectMetadataService(projectContext.ProjectDir).Load()
+		if err != nil {
+			return err
+		}
+
 		authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
 		if err != nil {
 			return err
@@ -159,6 +171,7 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 		return chctui.Run(ctx, chctui.Options{
 			ProjectDir:        projectContext.ProjectDir,
 			ProjectID:         projectContext.ProjectID,
+			ProjectMetadata:   projectMetadata,
 			Stdin:             stdin,
 			Stdout:            stdout,
 			Tickets:           tickets,
@@ -168,8 +181,83 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
 			TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
 			WorkExecutor:      newTUIWorkActionExecutor(ctx, env, projectContext),
+			ProjectExecutor:   newTUIProjectMetadataExecutor(ctx, env, projectContext),
 		})
 	}
+}
+
+type tuiProjectMetadataExecutor struct {
+	ctx            context.Context
+	env            chc.UserEnvironment
+	projectContext commandProjectContext
+}
+
+func newTUIProjectMetadataExecutor(
+	ctx context.Context,
+	env chc.UserEnvironment,
+	projectContext commandProjectContext,
+) tuiProjectMetadataExecutor {
+	return tuiProjectMetadataExecutor{
+		ctx:            ctx,
+		env:            env,
+		projectContext: projectContext,
+	}
+}
+
+func (e tuiProjectMetadataExecutor) SaveProjectMetadata(
+	metadata chc.ProjectMetadata,
+) (chctui.ProjectMetadataResult, error) {
+	saved, err := chc.NewProjectMetadataService(e.projectContext.ProjectDir).Save(metadata)
+	if err != nil {
+		return chctui.ProjectMetadataResult{}, err
+	}
+
+	err = e.indexProjectMetadata(saved)
+	if err != nil {
+		return chctui.ProjectMetadataResult{}, err
+	}
+
+	return chctui.ProjectMetadataResult{
+		Message:  "Project metadata saved.",
+		Metadata: saved,
+	}, nil
+}
+
+func (e tuiProjectMetadataExecutor) ResyncProjectMetadata() (chctui.ProjectMetadataResult, error) {
+	metadata, err := chc.NewProjectMetadataService(e.projectContext.ProjectDir).Load()
+	if err != nil {
+		return chctui.ProjectMetadataResult{}, err
+	}
+
+	if metadata.Exists {
+		err = e.indexProjectMetadata(metadata)
+		if err != nil {
+			return chctui.ProjectMetadataResult{}, err
+		}
+	}
+
+	return chctui.ProjectMetadataResult{
+		Message:  "Project metadata resynced.",
+		Metadata: metadata,
+	}, nil
+}
+
+func (e tuiProjectMetadataExecutor) indexProjectMetadata(metadata chc.ProjectMetadata) error {
+	repository, err := chc.NewProjectMetadataRepository(e.ctx, e.env, assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Save/resync already succeeded; close errors are not actionable here.
+		_ = repository.Close()
+	}()
+
+	return repository.UpsertProjectMetadata(e.ctx, chc.IndexedProjectMetadata{
+		ProjectID: e.projectContext.ProjectID,
+		Metadata:  metadata,
+		IndexedAt: time.Now().UTC().Format(time.RFC3339),
+	})
 }
 
 type tuiArtifactActionExecutor struct {

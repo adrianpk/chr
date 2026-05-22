@@ -16,6 +16,16 @@ import (
 type View string
 
 const (
+	ViewProject View = "Project"
+	ViewCases   View = "Cases"
+	ViewDumps   View = "Dumps"
+	ViewQuizzes View = "Quizzes"
+	ViewSpecs   View = "Specs"
+	ViewPlans   View = "Plans"
+	ViewDash    View = "Dash"
+	ViewHelp    View = "Help"
+
+	// Legacy internal views kept for existing commands and non-shell rendering paths.
 	ViewDashboard View = "Dashboard"
 	ViewBoard     View = "Board"
 	ViewTickets   View = "Tickets"
@@ -24,22 +34,28 @@ const (
 	ViewAgent     View = "Agent"
 	ViewRuntime   View = "Runtime"
 	ViewReports   View = "Reports"
-	ViewHelp      View = "Help"
 )
 
 var defaultViews = []View{
-	ViewDashboard,
+	ViewProject,
+	ViewCases,
+	ViewDumps,
+	ViewQuizzes,
+	ViewSpecs,
+	ViewPlans,
 	ViewBoard,
-	ViewTickets,
-	ViewDocuments,
-	ViewAuthoring,
-	ViewAgent,
-	ViewRuntime,
-	ViewReports,
+	ViewDash,
 	ViewHelp,
 }
 
 var viewPlaceholders = map[View]string{
+	ViewProject:   "Project context will appear here.",
+	ViewCases:     "Use cases will appear here.",
+	ViewDumps:     "Project and use-case dumps will appear here.",
+	ViewQuizzes:   "Quiz administration will appear here.",
+	ViewSpecs:     "Specs will appear here.",
+	ViewPlans:     "Plans will appear here.",
+	ViewDash:      "Agent activity will appear here.",
 	ViewDashboard: "Project overview will appear here.",
 	ViewBoard:     "Ticket board will appear here.",
 	ViewTickets:   "Ticket list and detail will appear here.",
@@ -54,6 +70,7 @@ var viewPlaceholders = map[View]string{
 type Options struct {
 	ProjectDir        string
 	ProjectID         string
+	ProjectMetadata   chc.ProjectMetadata
 	Stdin             io.Reader
 	Stdout            io.Writer
 	Tickets           []chc.IndexedTicket
@@ -63,11 +80,16 @@ type Options struct {
 	ActionExecutor    ArtifactActionExecutor
 	TicketExecutor    TicketActionExecutor
 	WorkExecutor      WorkActionExecutor
+	ProjectExecutor   ProjectMetadataExecutor
 }
 
 type Model struct {
 	projectDir               string
 	projectID                string
+	projectMetadata          chc.ProjectMetadata
+	selectedProjectField     int
+	projectEdit              ProjectEditState
+	projectDirty             bool
 	views                    []View
 	selected                 int
 	width                    int
@@ -88,13 +110,28 @@ type Model struct {
 	ticketExecutor           TicketActionExecutor
 	workAction               WorkActionState
 	workExecutor             WorkActionExecutor
+	projectExecutor          ProjectMetadataExecutor
 	statusMessage            string
 }
 
 func NewModel(opts Options) Model {
+	projectMetadata := opts.ProjectMetadata
+	if strings.TrimSpace(projectMetadata.Name) == "" {
+		projectMetadata.Name = projectDisplayName(opts.ProjectDir)
+	}
+
+	if strings.TrimSpace(projectMetadata.Description) == "" {
+		projectMetadata.Description = "Not set."
+	}
+
+	if strings.TrimSpace(projectMetadata.SourcePath) == "" && strings.TrimSpace(opts.ProjectDir) != "" {
+		projectMetadata.SourcePath = chc.ProjectMetadataPath(opts.ProjectDir)
+	}
+
 	return Model{
 		projectDir:        opts.ProjectDir,
 		projectID:         opts.ProjectID,
+		projectMetadata:   projectMetadata,
 		views:             append([]View(nil), defaultViews...),
 		tickets:           NewTicketViews(opts.Tickets),
 		documents:         append([]DocumentView(nil), opts.Documents...),
@@ -104,6 +141,7 @@ func NewModel(opts Options) Model {
 		actionExecutor:    opts.ActionExecutor,
 		ticketExecutor:    opts.TicketExecutor,
 		workExecutor:      opts.WorkExecutor,
+		projectExecutor:   opts.ProjectExecutor,
 	}
 }
 
@@ -153,10 +191,9 @@ func (m Model) View() string {
 
 	var output strings.Builder
 
-	output.WriteString("ChrysoCoord\n\n")
 	output.WriteString("Project\n")
-	output.WriteString(fmt.Sprintf("  ID:  %s\n", m.projectID))
-	output.WriteString(fmt.Sprintf("  Dir: %s\n\n", m.projectDir))
+	output.WriteString(fmt.Sprintf("  Name: %s\n", projectDisplayName(m.projectDir)))
+	output.WriteString(fmt.Sprintf("  Dir:  %s\n\n", m.projectDir))
 	output.WriteString("Navigation\n")
 
 	for index, view := range m.views {
@@ -209,12 +246,26 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateFilterKey(msg)
 	}
 
+	if m.SelectedView() == ViewProject {
+		return m.updateProjectKey(msg)
+	}
+
 	return m.updateNavigationKey(msg)
 }
 
 func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
+	key := msg.String()
+
+	if view, ok := functionKeyView(msg); ok {
+		m.selectView(view)
+
+		return m, nil
+	}
+
+	switch key {
 	case "ctrl+c", "q":
+		return m, tea.Quit
+	case "f10":
 		return m, tea.Quit
 	case "left", "shift+tab", "h":
 		m.selectPreviousView()
@@ -233,11 +284,45 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func functionKeyView(msg tea.KeyMsg) (View, bool) {
+	viewsByType := map[tea.KeyType]View{
+		tea.KeyF1: ViewProject,
+		tea.KeyF2: ViewCases,
+		tea.KeyF3: ViewDumps,
+		tea.KeyF4: ViewQuizzes,
+		tea.KeyF5: ViewSpecs,
+		tea.KeyF6: ViewPlans,
+		tea.KeyF7: ViewBoard,
+		tea.KeyF8: ViewDash,
+		tea.KeyF9: ViewHelp,
+	}
+
+	if view, ok := viewsByType[msg.Type]; ok {
+		return view, true
+	}
+
+	viewsByString := map[string]View{
+		"f1": ViewProject,
+		"f2": ViewCases,
+		"f3": ViewDumps,
+		"f4": ViewQuizzes,
+		"f5": ViewSpecs,
+		"f6": ViewPlans,
+		"f7": ViewBoard,
+		"f8": ViewDash,
+		"f9": ViewHelp,
+	}
+
+	view, ok := viewsByString[msg.String()]
+
+	return view, ok
+}
+
 func (m *Model) selectPreviousRecord() {
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectPreviousTicket()
-	case ViewDocuments:
+	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
 		m.selectPreviousDocument()
 	case ViewAuthoring:
 		m.selectPreviousAuthoringSession()
@@ -248,7 +333,7 @@ func (m *Model) selectNextRecord() {
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectNextTicket()
-	case ViewDocuments:
+	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
 		m.selectNextDocument()
 	case ViewAuthoring:
 		m.selectNextAuthoringSession()
@@ -275,6 +360,56 @@ func (m *Model) selectNextView() {
 func (m Model) renderSelectedView() string {
 	selectedView := m.SelectedView()
 
+	if view, ok := m.renderProductSelectedView(selectedView); ok {
+		return view
+	}
+
+	return m.renderLegacySelectedView(selectedView)
+}
+
+func (m Model) renderProductSelectedView(selectedView View) (string, bool) {
+	if selectedView == ViewProject {
+		description := strings.TrimSpace(m.projectMetadata.Description)
+		if description == "" {
+			description = "Not set."
+		}
+
+		name := strings.TrimSpace(m.projectMetadata.Name)
+		if name == "" {
+			name = projectDisplayName(m.projectDir)
+		}
+
+		return fmt.Sprintf("Project\n  Name: %s\n  Description: %s", name, description), true
+	}
+
+	if selectedView == ViewCases {
+		return "Cases\n  No use cases found.", true
+	}
+
+	if selectedView == ViewDumps {
+		return m.renderDocumentsByFamily("Dumps", map[string]bool{"dump": true}), true
+	}
+
+	if selectedView == ViewQuizzes {
+		return m.renderDocumentsByFamily("Quizzes", map[string]bool{"quiz": true}), true
+	}
+
+	if selectedView == ViewSpecs {
+		return m.renderDocumentsByFamily("Specs", map[string]bool{"spec": true}), true
+	}
+
+	if selectedView == ViewPlans {
+		return m.renderDocumentsByFamily("Plans", map[string]bool{"plan": true, "tracker": true}), true
+	}
+
+	if selectedView == ViewDash {
+		return m.renderAgent() + "\n\n" + m.renderRuntime(), true
+	}
+
+	return "", false
+}
+
+func (m Model) renderLegacySelectedView(selectedView View) string {
 	if selectedView == ViewBoard {
 		return m.renderTicketBoard()
 	}
@@ -411,39 +546,52 @@ func (m Model) renderSelectedTicketDetail() string {
 }
 
 func (m Model) renderKeys() string {
-	if m.artifactAction.Pending {
-		return "Keys: enter confirms action, esc cancels action"
+	if keys, ok := m.activeInteractionKeys(); ok {
+		return keys
 	}
 
-	if m.ticketAction.Pending {
-		return "Keys: enter confirms ticket action, esc cancels ticket action"
-	}
-
-	if m.workAction.Pending {
-		return "Keys: enter confirms work action, esc cancels work action"
-	}
-
-	if m.commandPalette.Open {
-		return "Keys: up/down selects command, enter runs command, esc closes palette"
-	}
-
-	if m.filterEntryMode {
-		return "Keys: enter applies filter, esc cancels filter, ctrl+c quits"
-	}
-
-	if m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets {
+	switch {
+	case m.ticketKeysActive():
 		return "Keys: up/down selects ticket, left/right or tab changes view, / filters, q quits"
-	}
-
-	if m.SelectedView() == ViewDocuments {
+	case m.documentKeysActive():
 		return "Keys: up/down selects document, left/right or tab changes view, q quits"
-	}
-
-	if m.SelectedView() == ViewAuthoring {
+	case m.SelectedView() == ViewProject:
+		return "Keys: up/down selects field, enter edits, s saves, r resyncs, left/right changes view, q quits"
+	case m.SelectedView() == ViewAuthoring:
 		return "Keys: up/down selects session, left/right or tab changes view, q quits"
+	default:
+		return "Keys: left/right or tab changes view, q quits"
 	}
+}
 
-	return "Keys: left/right or tab changes view, q quits"
+func (m Model) ticketKeysActive() bool {
+	return m.SelectedView() == ViewBoard || m.SelectedView() == ViewTickets
+}
+
+func (m Model) documentKeysActive() bool {
+	switch m.SelectedView() {
+	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
+		return true
+	default:
+		return false
+	}
+}
+
+func (m Model) activeInteractionKeys() (string, bool) {
+	switch {
+	case m.artifactAction.Pending:
+		return "Keys: enter confirms action, esc cancels action", true
+	case m.ticketAction.Pending:
+		return "Keys: enter confirms ticket action, esc cancels ticket action", true
+	case m.workAction.Pending:
+		return "Keys: enter confirms work action, esc cancels work action", true
+	case m.commandPalette.Open:
+		return "Keys: up/down selects command, enter runs command, esc closes palette", true
+	case m.filterEntryMode:
+		return "Keys: enter applies filter, esc cancels filter, ctrl+c quits", true
+	default:
+		return "", false
+	}
 }
 
 func (m Model) renderStatusMessage() string {

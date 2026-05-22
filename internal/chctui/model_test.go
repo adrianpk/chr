@@ -23,14 +23,12 @@ func TestModelViewRendersProjectAndNavigation(t *testing.T) {
 	view := model.View()
 
 	for _, want := range []string{
-		"ChrysoCoord",
 		"Project",
-		"project-1",
+		"Name: project",
 		"/workspace/project",
-		"> Dashboard",
-		"Board",
-		"Tickets",
-		"Runtime",
+		"> Project",
+		"Cases",
+		"Dash",
 		"Keys:",
 	} {
 		if !strings.Contains(view, want) {
@@ -49,8 +47,8 @@ func TestModelNavigatesViews(t *testing.T) {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	if navigated.SelectedView() != ViewBoard {
-		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewBoard)
+	if navigated.SelectedView() != ViewCases {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewCases)
 	}
 
 	updated, _ = navigated.Update(tea.KeyMsg{Type: tea.KeyLeft})
@@ -60,8 +58,175 @@ func TestModelNavigatesViews(t *testing.T) {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	if navigated.SelectedView() != ViewDashboard {
-		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewDashboard)
+	if navigated.SelectedView() != ViewProject {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewProject)
+	}
+}
+
+func TestModelNavigatesWithFunctionKeys(t *testing.T) {
+	model := NewModel(Options{})
+
+	cases := []struct {
+		key  tea.KeyType
+		want View
+	}{
+		{key: tea.KeyF1, want: ViewProject},
+		{key: tea.KeyF2, want: ViewCases},
+		{key: tea.KeyF3, want: ViewDumps},
+		{key: tea.KeyF4, want: ViewQuizzes},
+		{key: tea.KeyF5, want: ViewSpecs},
+		{key: tea.KeyF6, want: ViewPlans},
+		{key: tea.KeyF7, want: ViewBoard},
+		{key: tea.KeyF8, want: ViewDash},
+		{key: tea.KeyF9, want: ViewHelp},
+	}
+
+	for _, testCase := range cases {
+		updated, _ := model.Update(tea.KeyMsg{Type: testCase.key})
+		navigated, ok := updated.(Model)
+
+		if !ok {
+			t.Fatalf("Update returned %T, want Model", updated)
+		}
+
+		if navigated.SelectedView() != testCase.want {
+			t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), testCase.want)
+		}
+
+		model = navigated
+	}
+}
+
+func TestModelEditsAndSavesProjectMetadata(t *testing.T) {
+	executor := &fakeProjectMetadataExecutor{}
+	model := NewModel(Options{
+		ProjectMetadata: chc.ProjectMetadata{
+			SchemaVersion: chc.ProjectMetadataSchemaVersion,
+			Name:          "Old",
+			Description:   "Old description.",
+		},
+		ProjectExecutor: executor,
+	})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("e")})
+	editing, ok := updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	editing.projectEdit.Input.SetValue("New")
+
+	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	changed, ok := updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if !changed.projectDirty {
+		t.Fatal("projectDirty = false, want true after project edit")
+	}
+
+	updated, _ = changed.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	saved, ok := updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.saved.Name != "New" {
+		t.Fatalf("saved.Name = %q, want New", executor.saved.Name)
+	}
+
+	if saved.projectDirty {
+		t.Fatal("projectDirty = true, want false after save")
+	}
+
+	if saved.statusMessage != "" {
+		t.Fatalf("statusMessage = %q, want empty status after normal project save", saved.statusMessage)
+	}
+}
+
+func TestModelProjectEditAcceptsSpaces(t *testing.T) {
+	model := NewModel(Options{
+		ProjectMetadata: chc.ProjectMetadata{
+			SchemaVersion: chc.ProjectMetadataSchemaVersion,
+			Name:          "Old",
+			Description:   "Old description.",
+		},
+	})
+
+	model.projectEdit = newProjectEditState(projectFieldDescription, "New")
+	model.projectEdit.Input.CursorEnd()
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeySpace})
+	editing, ok := updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("description")})
+	editing, ok = updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if editing.projectEdit.Input.Value() != "New description" {
+		t.Fatalf("projectEdit value = %q, want space-preserving edit", editing.projectEdit.Input.Value())
+	}
+}
+
+func TestModelProjectEditInsertsAtCursor(t *testing.T) {
+	model := NewModel(Options{
+		ProjectMetadata: chc.ProjectMetadata{
+			SchemaVersion: chc.ProjectMetadataSchemaVersion,
+			Name:          "Old",
+			Description:   "Old description.",
+		},
+	})
+
+	model.projectEdit = newProjectEditState(projectFieldDescription, "New description")
+	model.projectEdit.Input.SetCursor(3)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeySpace})
+	editing, ok := updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	updated, _ = editing.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("technical")})
+	editing, ok = updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if editing.projectEdit.Input.Value() != "New technical description" {
+		t.Fatalf("projectEdit value = %q, want insertion at cursor", editing.projectEdit.Input.Value())
+	}
+}
+
+func TestProjectEditStartsAtBeginning(t *testing.T) {
+	edit := newProjectEditState(projectFieldDescription, "abc")
+
+	if edit.Input.Position() != 0 {
+		t.Fatalf("cursor position = %d, want 0", edit.Input.Position())
+	}
+}
+
+func TestRenderProjectInputDoesNotShiftTextAtCursor(t *testing.T) {
+	model := NewModel(Options{})
+	model.projectEdit = newProjectEditState(projectFieldDescription, "abc")
+	model.projectEdit.Input.SetCursor(1)
+
+	value := model.renderProjectInput(20)
+
+	if strings.Contains(value, "_") {
+		t.Fatalf("rendered edit value contains manual underscore cursor: %q", value)
 	}
 }
 
@@ -79,7 +244,7 @@ func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
 		t.Fatal("command palette is closed, want open")
 	}
 
-	updated, _ = palette.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("runtime")})
+	updated, _ = palette.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("dash")})
 
 	palette, ok = updated.(Model)
 	if !ok {
@@ -91,15 +256,15 @@ func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
 		t.Fatal("filteredCommands returned no commands")
 	}
 
-	if commands[0].View != ViewRuntime {
-		t.Fatalf("first filtered command view = %q, want %q", commands[0].View, ViewRuntime)
+	if commands[0].View != ViewDash {
+		t.Fatalf("first filtered command view = %q, want %q", commands[0].View, ViewDash)
 	}
 
 	view := palette.View()
 	for _, want := range []string{
 		"Command Palette",
-		"Filter: runtime",
-		"Go to Runtime",
+		"Filter: dash",
+		"Go to Dash",
 		"enter runs command",
 	} {
 		if !strings.Contains(view, want) {
@@ -111,7 +276,7 @@ func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
 func TestModelExecutesNavigationCommand(t *testing.T) {
 	model := NewModel(Options{})
 	model.commandPalette.Open = true
-	model.commandPalette.Filter = "runtime"
+	model.commandPalette.Filter = "dash"
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -124,11 +289,11 @@ func TestModelExecutesNavigationCommand(t *testing.T) {
 		t.Fatal("command palette is open after command execution")
 	}
 
-	if navigated.SelectedView() != ViewRuntime {
-		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewRuntime)
+	if navigated.SelectedView() != ViewDash {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewDash)
 	}
 
-	if navigated.statusMessage != "Navigated to Runtime." {
+	if navigated.statusMessage != "Navigated to Dash." {
 		t.Fatalf("statusMessage = %q, want navigation status", navigated.statusMessage)
 	}
 }
@@ -136,10 +301,10 @@ func TestModelExecutesNavigationCommand(t *testing.T) {
 func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 	model := NewModel(Options{
 		Documents: []DocumentView{
-			{Index: 0, Title: "Spec", RelativePath: ".prj/specs/specs/tui.md"},
+			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".prj/specs/specs/tui.md"},
 		},
 	})
-	model.selected = 3
+	model.selected = 4
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "source"
 
@@ -629,7 +794,7 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 1
+	model.selected = 6
 
 	view := model.View()
 
@@ -657,7 +822,7 @@ func TestModelSelectsTickets(t *testing.T) {
 			{Key: "CHC-2", Title: "Second", Status: "ready"},
 		},
 	})
-	model.selected = 1
+	model.selected = 6
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 	navigated, ok := updated.(Model)
@@ -708,12 +873,12 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 3
+	model.selected = 4
 
 	view := model.View()
 
 	for _, want := range []string{
-		"Documents",
+		"Specs",
 		"spec",
 		"accepted",
 		"TUI Navigation",
@@ -771,7 +936,8 @@ func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 4
+	model.views = []View{ViewAuthoring}
+	model.selected = 0
 
 	view := model.View()
 
@@ -822,7 +988,7 @@ func TestModelRendersAgentObservability(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 5
+	model.selected = 7
 
 	view := model.View()
 
@@ -856,7 +1022,8 @@ func TestModelRendersRuntimeObservability(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 6
+	model.views = []View{ViewRuntime}
+	model.selected = 0
 
 	view := model.View()
 
@@ -922,11 +1089,11 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 func TestModelSelectsDocuments(t *testing.T) {
 	model := NewModel(Options{
 		Documents: []DocumentView{
-			{Index: 0, Title: "First"},
-			{Index: 1, Title: "Second"},
+			{Index: 0, Family: "spec", Title: "First"},
+			{Index: 1, Family: "spec", Title: "Second"},
 		},
 	})
-	model.selected = 3
+	model.selected = 4
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
 	navigated, ok := updated.(Model)
@@ -994,11 +1161,11 @@ func TestModelViewUsesWindowRealEstate(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		"ChrysoCoord",
+		"project",
 		"F1",
 		"Project",
 		"F10",
-		"Quit",
+		"Exit",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -1034,6 +1201,28 @@ func (e *fakeArtifactActionExecutor) ExecuteArtifactAction(action ArtifactAction
 	e.action = action
 
 	return e.result, e.err
+}
+
+type fakeProjectMetadataExecutor struct {
+	saved chc.ProjectMetadata
+}
+
+func (e *fakeProjectMetadataExecutor) SaveProjectMetadata(
+	metadata chc.ProjectMetadata,
+) (ProjectMetadataResult, error) {
+	e.saved = metadata
+
+	return ProjectMetadataResult{
+		Message:  "Project metadata saved.",
+		Metadata: metadata,
+	}, nil
+}
+
+func (e *fakeProjectMetadataExecutor) ResyncProjectMetadata() (ProjectMetadataResult, error) {
+	return ProjectMetadataResult{
+		Message:  "Project metadata resynced.",
+		Metadata: e.saved,
+	}, nil
 }
 
 type fakeTicketActionExecutor struct {
