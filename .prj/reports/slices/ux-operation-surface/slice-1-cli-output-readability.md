@@ -1,11 +1,11 @@
 # Slice 1: CLI Output Readability
 
-Status: reviewing
+Status: delivered
 Slicing: UX Operation Surface
 Plan: `.prj/plans/slicing-ux-operation-surface-plan.md`
 Tracker: `.prj/trackers/slicing-ux-operation-surface-tracker.md`
 Branch: `feat/slice-1-cli-output-readability`
-PR: pending
+PR: #134
 
 ## Purpose
 

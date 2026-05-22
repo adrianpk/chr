@@ -111,7 +111,7 @@ They do not define this slicing's numbers.
 
 ### Slice 1: CLI Output Readability
 
-Status: reviewing.
+Status: delivered.
 
 Expected branch: `feat/slice-1-cli-output-readability`
 Expected PR title: `feat(slice-1): cli output readability`
