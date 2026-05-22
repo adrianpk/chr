@@ -154,7 +154,7 @@ Task commits:
 - T5.5: `6e6b228` registers refresh and help commands.
 - T5.6: `6e6b228` registers selected source path reporting.
 - T5.7: `6e6b228` adds palette filtering and dispatch tests.
-- T5.8: pending report commit.
+- T5.8: `7e16e9d` adds the slice implementation report.
 - T5.9: `make verify` passed.
 
 ## Slice 6: Safe Artifact Creation Actions
