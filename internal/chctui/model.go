@@ -78,6 +78,8 @@ type Model struct {
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
+	commandPalette           CommandPaletteState
+	statusMessage            string
 }
 
 func NewModel(opts Options) Model {
@@ -89,6 +91,7 @@ func NewModel(opts Options) Model {
 		documents:         append([]DocumentView(nil), opts.Documents...),
 		authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:     opts.Observability,
+		commandPalette:    NewCommandPaletteState(DefaultCommandRegistry()),
 	}
 }
 
@@ -152,6 +155,8 @@ func (m Model) View() string {
 
 	output.WriteString("\n")
 	output.WriteString(m.renderSelectedView())
+	output.WriteString(m.renderStatusMessage())
+	output.WriteString(m.renderCommandPalette())
 	output.WriteString("\n\n")
 	output.WriteString(m.renderKeys())
 	output.WriteString("\n")
@@ -164,6 +169,10 @@ func (m Model) SelectedView() View {
 }
 
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if m.commandPalette.Open {
+		return m.updateCommandPaletteKey(msg)
+	}
+
 	if m.filterEntryMode {
 		return m.updateFilterKey(msg)
 	}
@@ -179,6 +188,8 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.selectPreviousRecord()
 	case "down", "j":
 		m.selectNextRecord()
+	case ":":
+		m.openCommandPalette()
 	case "/":
 		m.filterEntryMode = true
 	}
@@ -364,6 +375,10 @@ func (m Model) renderSelectedTicketDetail() string {
 }
 
 func (m Model) renderKeys() string {
+	if m.commandPalette.Open {
+		return "Keys: up/down selects command, enter runs command, esc closes palette"
+	}
+
 	if m.filterEntryMode {
 		return "Keys: enter applies filter, esc cancels filter, ctrl+c quits"
 	}
@@ -381,6 +396,14 @@ func (m Model) renderKeys() string {
 	}
 
 	return "Keys: left/right or tab changes view, q quits"
+}
+
+func (m Model) renderStatusMessage() string {
+	if m.statusMessage == "" {
+		return ""
+	}
+
+	return "\n\nStatus\n  " + m.statusMessage
 }
 
 func (m Model) selectedTicketView() (TicketView, bool) {

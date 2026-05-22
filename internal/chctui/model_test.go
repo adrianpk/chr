@@ -63,6 +63,96 @@ func TestModelNavigatesViews(t *testing.T) {
 	}
 }
 
+func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
+	model := NewModel(Options{})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{':'}})
+
+	palette, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if !palette.commandPalette.Open {
+		t.Fatal("command palette is closed, want open")
+	}
+
+	updated, _ = palette.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("runtime")})
+
+	palette, ok = updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	commands := palette.filteredCommands()
+	if len(commands) == 0 {
+		t.Fatal("filteredCommands returned no commands")
+	}
+
+	if commands[0].View != ViewRuntime {
+		t.Fatalf("first filtered command view = %q, want %q", commands[0].View, ViewRuntime)
+	}
+
+	view := palette.View()
+	for _, want := range []string{
+		"Command Palette",
+		"Filter: runtime",
+		"Go to Runtime",
+		"enter runs command",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelExecutesNavigationCommand(t *testing.T) {
+	model := NewModel(Options{})
+	model.commandPalette.Open = true
+	model.commandPalette.Filter = "runtime"
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	navigated, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if navigated.commandPalette.Open {
+		t.Fatal("command palette is open after command execution")
+	}
+
+	if navigated.SelectedView() != ViewRuntime {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewRuntime)
+	}
+
+	if navigated.statusMessage != "Navigated to Runtime." {
+		t.Fatalf("statusMessage = %q, want navigation status", navigated.statusMessage)
+	}
+}
+
+func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
+	model := NewModel(Options{
+		Documents: []DocumentView{
+			{Index: 0, Title: "Spec", RelativePath: ".prj/specs/specs/tui.md"},
+		},
+	})
+	model.selected = 3
+	model.commandPalette.Open = true
+	model.commandPalette.Filter = "source"
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	navigated, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if navigated.statusMessage != "Selected source path: .prj/specs/specs/tui.md" {
+		t.Fatalf("statusMessage = %q, want selected source path", navigated.statusMessage)
+	}
+}
+
 func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 	projectDir := t.TempDir()
 	firstPath := writeTicketViewFile(t, projectDir, "open.md", "- [x] Done\n- [ ] Pending\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n")
