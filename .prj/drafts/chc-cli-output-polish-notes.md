@@ -117,6 +117,51 @@ path: .chc/authoring/sessions/auth-20260522-063839/session.md
 
 Then `chc author session show auth-20260522-063839` can expose full detail.
 
+Second observed output:
+
+```text
+session: created
+id: auth-20260522-065402
+target: spec
+topic: CLI blog project validation
+path: /home/adrian/Projects/labs/ghc/projects/chc-blog-work/.chc/authoring/sessions/auth-20260522-065402/session.md
+transcript: /home/adrian/Projects/labs/ghc/projects/chc-blog-work/.chc/authoring/sessions/auth-20260522-065402/transcript.md
+artifacts: /home/adrian/Projects/labs/ghc/projects/chc-blog-work/.chc/authoring/sessions/auth-20260522-065402/artifacts.md
+quiz: planned
+dry_run: false
+session: auth-20260522-065402
+path: /home/adrian/Projects/labs/ghc/projects/chc-blog-work/.chc/quizzes/auth-20260522-065402-cli-blog-project-validation.md
+questions: 6
+```
+
+This likely applies beyond authoring commands. The output is technically rich,
+but the default path is not readable:
+
+- absolute paths dominate the command result;
+- the command prints two related blocks with repeated `session` information;
+- `quiz: planned` appears even when `dry_run: false`, which may read oddly;
+- the useful result is buried: a quiz file was created for a session.
+
+Potential compact default:
+
+```text
+quiz: created .chc/quizzes/auth-20260522-065402-cli-blog-project-validation.md
+session: auth-20260522-065402
+target: spec
+questions: 6
+```
+
+or:
+
+```text
+created quiz: .chc/quizzes/auth-20260522-065402-cli-blog-project-validation.md
+session: auth-20260522-065402
+questions: 6
+```
+
+Full session file paths should be available through `author session show`,
+`--verbose`, or structured output, not forced into every successful command.
+
 ## List Output Without Headers
 
 Observed output:
@@ -156,6 +201,30 @@ does not remove the need for readable CLI output, but it supports the same
 direction: expose sessions as identifiable records with clear status, target,
 topic, and updated time.
 
+## CLI and TUI Surface Principle
+
+Every system capability that needs to be exposed should have a command-line
+surface. The CLI is valuable for automation, scripting, testing, runbooks,
+documentation, power users, and exact reproducibility.
+
+However, the CLI should not be the only ergonomic human operation surface.
+Copying IDs from one command output into the next command is acceptable for
+automation and debugging, but it is not an efficient everyday interaction model.
+
+The TUI is therefore not cosmetic. It should become the natural human-facing
+control surface over the same underlying operations:
+
+- list sessions, tickets, reports, drafts, specs, plans, and runs;
+- move with arrow keys;
+- inspect records without copying opaque IDs;
+- launch actions against the selected record;
+- preserve the CLI as the executable foundation underneath.
+
+Principle:
+
+The CLI should make every operation possible and automatable. The TUI should
+make common operations fast, discoverable, and hard to misuse.
+
 ## Demo Runbook Should Use User-Facing Commands
 
 The full-system lab runbook currently includes `--dev-root` in many commands.
@@ -180,6 +249,75 @@ Principle:
 The main runbook path should test the product UX, not the developer harness
 mechanics. `--dev-root` should appear only where the runbook explicitly explains
 developer isolation.
+
+## Static Quiz Quality Gap
+
+Observed command:
+
+```sh
+chc author quiz new \
+  --target spec \
+  --topic "CLI blog project validation" \
+  --question-count 8
+```
+
+Observed generated questions:
+
+```text
+What problem or context should this artifact capture?
+What outcome should be true when this work is complete?
+Which existing files, commands, or documents are relevant?
+What constraints, risks, or boundaries must be preserved?
+What evidence should prove that the result is correct?
+What target-specific details should shape the spec artifact?
+```
+
+These questions are too generic to reliably cook a high-quality spec from a
+real project. They are usable as a minimal editable checklist, but they are not
+equivalent to the questionnaire behavior ChrysoCoord needs for useful
+knowledge extraction.
+
+Useful questionnaire behavior requires a context-aware question engine and a
+stronger prompt contract:
+
+- deep mode asks one context-aware question at a time;
+- fast mode can ask for a batch of upcoming questions;
+- both modes receive project, quiz/session state, recent answers, current
+  question, routing state, and output contract context;
+- generated questions are validated through a structured output contract;
+- repeated or malformed questions have fallback behavior;
+- candidate questions are kept separate from final answered quiz entries.
+
+Current ChrysoCoord static quiz generation is deterministic and hardcoded. It
+does not inspect the project, the topic beyond naming the file, the target
+artifact shape, existing docs, code, tickets, or prior answers. Therefore, it
+cannot currently generate inquisitive project-specific questions.
+
+This is a product gap, not just output polish.
+
+Potential direction:
+
+- keep the static quiz as a fallback or offline template mode;
+- add an LLM-backed quiz generation path for useful first-pass question sets;
+- for spec target, generate questions specifically aimed at producing a spec:
+  problem, actors, workflows, acceptance criteria, constraints, non-goals,
+  validation evidence, impacted code/docs, and open risks;
+- include project context from `.chc/`, docs, file tree, tickets, and optional
+  code context;
+- avoid pretending `--question-count 8` guarantees eight questions when the
+  template has fewer available questions;
+- name modes clearly so users understand whether they are getting a static
+  template or context-aware quiz generation.
+
+The model should remain ChrysoCoord-native:
+
+- state lives inside the managed project under `.chc/`;
+- generated questions, answers, curated notes, and promotions are Markdown-first
+  artifacts with provenance;
+- the same engine should support CLI-first operation now and future TUI
+  selection later;
+- Go project context should be first-class, including file tree, docs, tests,
+  package layout, and optional semantic code summaries.
 
 ## Runtime Config Smell
 
