@@ -121,6 +121,93 @@ func TestServiceSaveCaseMetadataReloadsCases(t *testing.T) {
 	}
 }
 
+func TestServiceWorkspaceIndexQueries(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	operations := newTestService(t, projectDir)
+
+	assertServiceSuggestsWorkspaceCases(t, operations)
+	assertServiceResolvesWorkspaceRelatedDocuments(t, operations)
+}
+
+func assertServiceSuggestsWorkspaceCases(t *testing.T, operations service) {
+	t.Helper()
+
+	suggestions, err := operations.SuggestWorkspaceCases("blog")
+	if err != nil {
+		t.Fatalf("SuggestWorkspaceCases returned error: %v", err)
+	}
+
+	if len(suggestions) != 1 || suggestions[0].Slug != "blog" {
+		t.Fatalf("suggestions = %#v, want blog", suggestions)
+	}
+}
+
+func assertServiceResolvesWorkspaceRelatedDocuments(t *testing.T, operations service) {
+	t.Helper()
+
+	resolved, err := operations.ResolveWorkspacePath(filepath.ToSlash(filepath.Join(chc.DirectoryName, "specs", "blog-spec.md")))
+	if err != nil {
+		t.Fatalf("ResolveWorkspacePath returned error: %v", err)
+	}
+
+	if !resolved.Found || resolved.Node.Title != "Blog Spec" {
+		t.Fatalf("resolved = %#v, want Blog Spec", resolved)
+	}
+
+	related, err := operations.RelatedWorkspaceDocuments(chc.WorkspaceNodeID(resolved.Node))
+	if err != nil {
+		t.Fatalf("RelatedWorkspaceDocuments returned error: %v", err)
+	}
+
+	if !related.Resolved || len(related.Related) != 1 || related.Related[0].Kind != chc.WorkspaceNodeTicket {
+		t.Fatalf("related = %#v, want related ticket", related)
+	}
+}
+
+func TestServiceSearchWorkspaceIndexUsesSemanticDigestCache(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	graph, err := chc.NewWorkspaceGraphBuilder(projectDir).Build(t.Context())
+	if err != nil {
+		t.Fatalf("Build returned error: %v", err)
+	}
+
+	index := chc.NewWorkspaceIndexFromGraph(graph)
+	cache := chc.NewWorkspaceSemanticDigestCache()
+
+	for nodeID, node := range index.NodesByID {
+		if node.Kind == chc.WorkspaceNodePlan {
+			cache.Entries[nodeID] = chc.WorkspaceSemanticDigest{
+				NodeID: nodeID,
+				Digest: "editorial roadmap publishing workflow",
+			}
+		}
+	}
+
+	err = chc.WriteWorkspaceSemanticDigestCache(chc.WorkspaceSemanticDigestCachePath(projectDir), cache)
+	if err != nil {
+		t.Fatalf("WriteWorkspaceSemanticDigestCache returned error: %v", err)
+	}
+
+	operations := newTestService(t, projectDir)
+
+	result, err := operations.SearchWorkspaceIndex("editorial")
+	if err != nil {
+		t.Fatalf("SearchWorkspaceIndex returned error: %v", err)
+	}
+
+	if len(result.Results) == 0 {
+		t.Fatal("SearchWorkspaceIndex returned no results, want semantic match")
+	}
+
+	if !result.Results[0].MatchedSemanticDigest {
+		t.Fatalf("first result = %#v, want semantic digest match", result.Results[0])
+	}
+}
+
 func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	operations := newTestService(t, projectDir)
@@ -262,6 +349,60 @@ func assertWorkspaceIndexCacheMiss(t *testing.T, cache chc.WorkspaceIndexCacheSt
 
 	if cache.Status != chc.WorkspaceIndexCacheMiss {
 		t.Fatalf("IndexCache.Status = %q, want %q", cache.Status, chc.WorkspaceIndexCacheMiss)
+	}
+}
+
+func writeServiceWorkspaceQueryFixture(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeServiceWorkspaceFile(t, chc.ProjectMetadataPath(projectDir), chc.RenderProjectMetadata(chc.ProjectMetadata{
+		Name:        "Example",
+		Description: "Example project.",
+	}))
+	writeServiceWorkspaceFile(t, chc.CaseMetadataPath(projectDir, "blog"), chc.RenderCaseMetadata(chc.CaseMetadata{
+		Name:        "Blog Publishing",
+		Description: "Publish articles.",
+	}))
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, "specs", "blog-spec.md"), `---
+title: "Blog Spec"
+status: "accepted"
+case: "blog"
+---
+
+# Blog Spec
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, "plans", "project-plan.md"), `---
+title: "Project Plan"
+status: "ready"
+---
+
+# Project Plan
+`)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Write.md", chc.Ticket{
+		Key:         "CHC-1",
+		Title:       "Write article",
+		Status:      "ready",
+		Priority:    "normal",
+		Severity:    "normal",
+		Type:        "task",
+		UseCase:     "blog",
+		ProjectArea: "content",
+		CreatedAt:   testTime(),
+		UpdatedAt:   testTime(),
+	})
+}
+
+func writeServiceWorkspaceFile(t *testing.T, path, content string) {
+	t.Helper()
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		t.Fatalf("MkdirAll returned error: %v", err)
+	}
+
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("WriteFile returned error: %v", err)
 	}
 }
 

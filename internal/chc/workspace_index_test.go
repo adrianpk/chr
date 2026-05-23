@@ -212,6 +212,152 @@ func TestWorkspaceIndexHealthReportsDiagnosticsAndUnresolvedReferences(t *testin
 	}
 }
 
+func TestWorkspaceIndexSuggestsCases(t *testing.T) {
+	index := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"case:blog": {
+				Kind:        WorkspaceNodeCase,
+				Slug:        "blog",
+				Name:        "Blog Publishing",
+				Description: "Publish articles.",
+			},
+			"case:runtime": {
+				Kind:        WorkspaceNodeCase,
+				Slug:        "runtime",
+				Name:        "Runtime Operations",
+				Description: "Observe runtime work.",
+			},
+		},
+		CasesBySlug: map[string]string{
+			"blog":    "case:blog",
+			"runtime": "case:runtime",
+		},
+	}
+
+	suggestions := index.SuggestCases("blog")
+
+	if len(suggestions) != 1 {
+		t.Fatalf("suggestions = %#v, want one match", suggestions)
+	}
+
+	if suggestions[0].Slug != "blog" {
+		t.Fatalf("Slug = %q, want blog", suggestions[0].Slug)
+	}
+}
+
+func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
+	index := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"case:blog": {
+				Kind: WorkspaceNodeCase,
+				Slug: "blog",
+			},
+			"spec:.chc/specs/blog.md": {
+				Kind:         WorkspaceNodeSpec,
+				RelativePath: ".chc/specs/blog.md",
+				Title:        "Blog Spec",
+				CaseSlug:     "blog",
+			},
+			"ticket:.chc/tickets/CHC-1.md": {
+				Kind:         WorkspaceNodeTicket,
+				RelativePath: ".chc/tickets/CHC-1.md",
+				Title:        "Blog Ticket",
+				CaseSlug:     "blog",
+			},
+		},
+		NodesByPath: map[string]string{
+			".chc/specs/blog.md": "spec:.chc/specs/blog.md",
+		},
+		ByCaseSlug: map[string][]string{
+			"blog": {
+				"spec:.chc/specs/blog.md",
+				"ticket:.chc/tickets/CHC-1.md",
+			},
+		},
+	}
+
+	node, ok := index.ResolvePath(".chc/specs/blog.md")
+	if !ok {
+		t.Fatal("ResolvePath returned ok=false, want true")
+	}
+
+	if node.Title != "Blog Spec" {
+		t.Fatalf("node.Title = %q, want Blog Spec", node.Title)
+	}
+
+	related := index.RelatedDocuments("spec:.chc/specs/blog.md")
+	if !related.Resolved {
+		t.Fatal("RelatedDocuments returned Resolved=false, want true")
+	}
+
+	if len(related.Related) != 1 || related.Related[0].Title != "Blog Ticket" {
+		t.Fatalf("Related = %#v, want Blog Ticket", related.Related)
+	}
+}
+
+func TestWorkspaceIndexSearchUsesStructuralMetadataAndSemanticDigests(t *testing.T) {
+	index := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"spec:blog": {
+				Kind:       WorkspaceNodeSpec,
+				Title:      "Blog Spec",
+				SourceHash: "source-blog",
+			},
+			"plan:ops": {
+				Kind:       WorkspaceNodePlan,
+				Title:      "Operations",
+				SourceHash: "source-ops",
+			},
+		},
+	}
+	cache := NewWorkspaceSemanticDigestCache()
+	cache.Entries["plan:ops"] = WorkspaceSemanticDigest{
+		NodeID: "plan:ops",
+		Digest: "publishing workflow and editorial operations",
+	}
+
+	results := index.Search("publishing", cache)
+
+	if len(results) == 0 {
+		t.Fatal("Search returned no results, want semantic digest match")
+	}
+
+	if results[0].NodeID != "plan:ops" || !results[0].MatchedSemanticDigest {
+		t.Fatalf("first result = %#v, want semantic plan match", results[0])
+	}
+}
+
+func TestWorkspaceIndexSearchReportsStaleSemanticDigestStatus(t *testing.T) {
+	index := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"plan:ops": {
+				Kind:       WorkspaceNodePlan,
+				Title:      "Operations",
+				SourceHash: "source-new",
+			},
+		},
+	}
+	cache := NewWorkspaceSemanticDigestCache()
+	cache.Entries["plan:ops"] = WorkspaceSemanticDigest{
+		NodeID:     "plan:ops",
+		Digest:     "release coordination",
+		SourceHash: "source-old",
+	}
+	states := []WorkspaceSemanticDigestState{
+		{NodeID: "plan:ops", Status: WorkspaceSemanticDigestStale},
+	}
+
+	results := index.SearchWithSemanticDigestStates("release", cache, states)
+
+	if len(results) != 1 {
+		t.Fatalf("results = %#v, want one result", results)
+	}
+
+	if results[0].SemanticDigestStatus != WorkspaceSemanticDigestStale {
+		t.Fatalf("SemanticDigestStatus = %q, want stale", results[0].SemanticDigestStatus)
+	}
+}
+
 func workspaceIndexHasEdge(index WorkspaceIndex, from, to string, kind WorkspaceEdgeKind) bool {
 	for _, edge := range index.Edges {
 		if edge.From == from && edge.To == to && edge.Kind == kind {
