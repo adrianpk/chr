@@ -78,9 +78,11 @@ type Options struct {
 	Documents         []DocumentView
 	AuthoringSessions []chc.AuthoringSession
 	Observability     ObservabilityView
+	WorkspaceGraph    chc.WorkspaceGraph
 	ActionExecutor    ArtifactActionExecutor
 	TicketExecutor    TicketActionExecutor
 	WorkExecutor      WorkActionExecutor
+	WorkspaceExecutor WorkspaceRefreshExecutor
 	ProjectExecutor   ProjectMetadataExecutor
 	CaseExecutor      CaseMetadataExecutor
 }
@@ -112,6 +114,7 @@ type Model struct {
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
+	workspaceGraph           chc.WorkspaceGraph
 	commandPalette           CommandPaletteState
 	artifactAction           ArtifactActionState
 	actionExecutor           ArtifactActionExecutor
@@ -119,6 +122,7 @@ type Model struct {
 	ticketExecutor           TicketActionExecutor
 	workAction               WorkActionState
 	workExecutor             WorkActionExecutor
+	workspaceExecutor        WorkspaceRefreshExecutor
 	projectExecutor          ProjectMetadataExecutor
 	caseExecutor             CaseMetadataExecutor
 	statusMessage            string
@@ -148,10 +152,12 @@ func NewModel(opts Options) Model {
 		documents:         append([]DocumentView(nil), opts.Documents...),
 		authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:     opts.Observability,
+		workspaceGraph:    opts.WorkspaceGraph,
 		commandPalette:    NewCommandPaletteState(DefaultCommandRegistry()),
 		actionExecutor:    opts.ActionExecutor,
 		ticketExecutor:    opts.TicketExecutor,
 		workExecutor:      opts.WorkExecutor,
+		workspaceExecutor: opts.WorkspaceExecutor,
 		projectExecutor:   opts.ProjectExecutor,
 		caseExecutor:      opts.CaseExecutor,
 	}

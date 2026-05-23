@@ -46,7 +46,7 @@ func NewCommandPaletteState(commands []Command) CommandPaletteState {
 
 func DefaultCommandRegistry() []Command {
 	commands := []Command{
-		{ID: "refresh", Title: "Refresh", Description: "Close the palette and keep the current read-only data visible.", Action: CommandActionRefresh},
+		{ID: "refresh", Title: "Refresh", Description: "Reload workspace files into the runtime graph.", Action: CommandActionRefresh},
 		{ID: "help", Title: "Help", Description: "Navigate to the Help view.", Action: CommandActionHelp, View: ViewHelp},
 		{ID: "open-source", Title: "Open selected source path", Description: "Show the selected source path for external opening.", Action: CommandActionOpenSelectedSource},
 		{ID: "create-ticket", Title: "Create ticket", Description: "Create a default task ticket after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateTicket},
@@ -209,7 +209,7 @@ func (m *Model) executeCommand(command Command) {
 
 		m.statusMessage = "Navigated to " + string(command.View) + "."
 	case CommandActionRefresh:
-		m.statusMessage = "Refresh requested. Restart the TUI to reload read-only data."
+		m.refreshWorkspace()
 	case CommandActionOpenSelectedSource:
 		m.statusMessage = m.selectedSourcePathMessage()
 	case CommandActionPlanArtifact:

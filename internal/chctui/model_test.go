@@ -294,6 +294,69 @@ func TestModelFiltersCaseMetadata(t *testing.T) {
 	}
 }
 
+func TestModelRefreshesWorkspaceGraphFromCommandPalette(t *testing.T) {
+	executor := &fakeWorkspaceRefreshExecutor{
+		result: WorkspaceRefreshResult{
+			Message: "Workspace refreshed.",
+			Graph: chc.WorkspaceGraph{
+				Project: &chc.WorkspaceNode{Name: "External"},
+			},
+		},
+	}
+	model := NewModel(Options{
+		WorkspaceExecutor: executor,
+	})
+
+	model.executeCommand(Command{Action: CommandActionRefresh})
+
+	if model.workspaceGraph.Project == nil || model.workspaceGraph.Project.Name != "External" {
+		t.Fatalf("workspaceGraph.Project = %#v, want refreshed graph", model.workspaceGraph.Project)
+	}
+
+	if model.statusMessage != "Workspace refreshed." {
+		t.Fatalf("statusMessage = %q, want refresh status", model.statusMessage)
+	}
+}
+
+func TestModelRefreshReportsWorkspaceDiagnostics(t *testing.T) {
+	executor := &fakeWorkspaceRefreshExecutor{
+		result: WorkspaceRefreshResult{
+			Graph: chc.WorkspaceGraph{
+				Diagnostics: []chc.WorkspaceGraphDiagnostic{
+					{Path: ".chc/cases/broken.md", Kind: chc.WorkspaceNodeCase, Message: "invalid"},
+				},
+			},
+		},
+	}
+	model := NewModel(Options{
+		WorkspaceExecutor: executor,
+	})
+
+	model.executeCommand(Command{Action: CommandActionRefresh})
+
+	if model.statusMessage != "Workspace refreshed with 1 diagnostics." {
+		t.Fatalf("statusMessage = %q, want diagnostic refresh status", model.statusMessage)
+	}
+}
+
+func TestModelRefreshBlocksActiveEdits(t *testing.T) {
+	executor := &fakeWorkspaceRefreshExecutor{}
+	model := NewModel(Options{
+		WorkspaceExecutor: executor,
+	})
+	model.projectEdit = newProjectEditState(projectFieldName, "Draft")
+
+	model.executeCommand(Command{Action: CommandActionRefresh})
+
+	if executor.called {
+		t.Fatal("RefreshWorkspace called with active edit, want blocked refresh")
+	}
+
+	if model.statusMessage != "Finish or cancel the active project edit before refreshing." {
+		t.Fatalf("statusMessage = %q, want active edit block", model.statusMessage)
+	}
+}
+
 func TestModelOpensAndFiltersCommandPalette(t *testing.T) {
 	model := NewModel(Options{})
 
@@ -1346,6 +1409,18 @@ type fakeWorkActionExecutor struct {
 	request WorkActionRequest
 	result  WorkActionResult
 	err     error
+}
+
+type fakeWorkspaceRefreshExecutor struct {
+	called bool
+	result WorkspaceRefreshResult
+	err    error
+}
+
+func (e *fakeWorkspaceRefreshExecutor) RefreshWorkspace() (WorkspaceRefreshResult, error) {
+	e.called = true
+
+	return e.result, e.err
 }
 
 func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (WorkActionResult, error) {

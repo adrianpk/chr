@@ -155,6 +155,11 @@ func loadTUIOptions(
 		return chctui.Options{}, err
 	}
 
+	workspaceGraph, err := chc.NewWorkspaceGraphBuilder(projectContext.ProjectDir).Build(ctx)
+	if err != nil {
+		return chctui.Options{}, err
+	}
+
 	return chctui.Options{
 		ProjectDir:        projectContext.ProjectDir,
 		ProjectID:         projectContext.ProjectID,
@@ -166,11 +171,40 @@ func loadTUIOptions(
 		Documents:         documents,
 		AuthoringSessions: authoringSessions,
 		Observability:     observability,
+		WorkspaceGraph:    workspaceGraph,
 		ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
 		TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
 		WorkExecutor:      newTUIWorkActionExecutor(ctx, env, projectContext),
+		WorkspaceExecutor: newTUIWorkspaceRefreshExecutor(ctx, projectContext),
 		ProjectExecutor:   newTUIProjectMetadataExecutor(ctx, env, projectContext),
 		CaseExecutor:      newTUICaseMetadataExecutor(ctx, env, projectContext),
+	}, nil
+}
+
+type tuiWorkspaceRefreshExecutor struct {
+	ctx            context.Context
+	projectContext commandProjectContext
+}
+
+func newTUIWorkspaceRefreshExecutor(
+	ctx context.Context,
+	projectContext commandProjectContext,
+) tuiWorkspaceRefreshExecutor {
+	return tuiWorkspaceRefreshExecutor{
+		ctx:            ctx,
+		projectContext: projectContext,
+	}
+}
+
+func (e tuiWorkspaceRefreshExecutor) RefreshWorkspace() (chctui.WorkspaceRefreshResult, error) {
+	graph, err := chc.NewWorkspaceGraphBuilder(e.projectContext.ProjectDir).Build(e.ctx)
+	if err != nil {
+		return chctui.WorkspaceRefreshResult{}, err
+	}
+
+	return chctui.WorkspaceRefreshResult{
+		Message: "Workspace refreshed.",
+		Graph:   graph,
 	}, nil
 }
 
