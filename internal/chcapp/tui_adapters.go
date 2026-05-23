@@ -26,8 +26,11 @@ func (e tuiWorkspaceRefreshExecutor) RefreshWorkspace() (chctui.WorkspaceRefresh
 	}
 
 	return chctui.WorkspaceRefreshResult{
-		Message: result.Message,
-		Graph:   result.Graph,
+		Message:      result.Message,
+		Graph:        result.Graph,
+		Index:        result.Index,
+		IndexHealth:  result.IndexHealth,
+		IndexChanges: result.IndexChanges,
 	}, nil
 }
 

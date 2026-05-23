@@ -613,6 +613,51 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 	if model.cases[0].Context != "Preserved context." {
 		t.Fatalf("case context = %q, want preserved service-loaded body", model.cases[0].Context)
 	}
+
+	if len(model.workspaceIndex.NodesByID) == 0 {
+		t.Fatal("workspaceIndex.NodesByID is empty, want index derived from graph")
+	}
+}
+
+func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
+	initialGraph := chc.WorkspaceGraph{
+		ProjectWide: []chc.WorkspaceNode{
+			{
+				Kind:         chc.WorkspaceNodeSpec,
+				RelativePath: ".chc/specs/old.md",
+				Title:        "Old",
+				SourceHash:   "old",
+			},
+		},
+		CaseDocuments: map[string][]chc.WorkspaceNode{},
+	}
+	refreshedGraph := chc.WorkspaceGraph{
+		ProjectWide: []chc.WorkspaceNode{
+			{
+				Kind:         chc.WorkspaceNodeSpec,
+				RelativePath: ".chc/specs/new.md",
+				Title:        "New",
+				SourceHash:   "new",
+			},
+		},
+		CaseDocuments: map[string][]chc.WorkspaceNode{},
+	}
+	executor := &fakeWorkspaceRefreshExecutor{
+		result: WorkspaceRefreshResult{
+			Graph: refreshedGraph,
+			Index: chc.NewWorkspaceIndexFromGraph(refreshedGraph),
+		},
+	}
+	model := NewModel(Options{
+		WorkspaceGraph:    initialGraph,
+		WorkspaceExecutor: executor,
+	})
+
+	model.refreshWorkspace()
+
+	if _, ok := model.workspaceIndex.NodesByID["spec:.chc/specs/new.md"]; !ok {
+		t.Fatalf("workspaceIndex.NodesByID = %#v, want refreshed spec", model.workspaceIndex.NodesByID)
+	}
 }
 
 func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {

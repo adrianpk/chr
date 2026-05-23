@@ -154,7 +154,7 @@ func loadTUIOptions(
 		return chctui.Options{}, err
 	}
 
-	workspaceGraph, err := chc.NewWorkspaceGraphBuilder(projectContext.ProjectDir).Build(ctx)
+	workspaceGraph, workspaceIndex, err := loadTUIWorkspaceState(ctx, projectContext)
 	if err != nil {
 		return chctui.Options{}, err
 	}
@@ -174,8 +174,21 @@ func loadTUIOptions(
 		authoringSessions: authoringSessions,
 		observability:     observability,
 		workspaceGraph:    workspaceGraph,
+		workspaceIndex:    workspaceIndex,
 		operations:        operations,
 	}), nil
+}
+
+func loadTUIWorkspaceState(
+	ctx context.Context,
+	projectContext commandProjectContext,
+) (chc.WorkspaceGraph, chc.WorkspaceIndex, error) {
+	workspaceGraph, err := chc.NewWorkspaceGraphBuilder(projectContext.ProjectDir).Build(ctx)
+	if err != nil {
+		return chc.WorkspaceGraph{}, chc.WorkspaceIndex{}, err
+	}
+
+	return workspaceGraph, chc.NewWorkspaceIndexFromGraph(workspaceGraph), nil
 }
 
 type tuiOptionsData struct {
@@ -191,6 +204,7 @@ type tuiOptionsData struct {
 	authoringSessions []chc.AuthoringSession
 	observability     chctui.ObservabilityView
 	workspaceGraph    chc.WorkspaceGraph
+	workspaceIndex    chc.WorkspaceIndex
 	operations        service
 }
 
@@ -207,6 +221,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		AuthoringSessions: data.authoringSessions,
 		Observability:     data.observability,
 		WorkspaceGraph:    data.workspaceGraph,
+		WorkspaceIndex:    data.workspaceIndex,
 		ActionExecutor:    newTUIArtifactActionExecutor(data.operations),
 		TicketExecutor:    newTUITicketActionExecutor(data.operations),
 		WorkExecutor:      newTUIWorkActionExecutor(data.operations),

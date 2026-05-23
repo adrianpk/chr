@@ -22,7 +22,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Workspace Index Contract | Delivered | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | PR #164. |
 | Slice 2: Structural Workspace Index Model | Delivered | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | PR #165. |
-| Slice 3: Index Load And Refresh Semantics | Planned | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | Handles direct file changes. |
+| Slice 3: Index Load And Refresh Semantics | Reviewing | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | Handles direct file changes. |
 | Slice 4: Discardable Structural Cache | Planned | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
 | Slice 5: Semantic Digest Cache Contract | Planned | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | Adds digest schema and invalidation. |
 | Slice 6: Semantic Index Worker Boundary | Planned | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | Adds optional LLM boundary. |
@@ -72,21 +72,21 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Load or build the structural index at app startup.
-- [ ] Compute modified time and source hash for indexed files.
-- [ ] Detect changed, added, and removed files.
-- [ ] Rebuild or target-update the structural index after refresh.
-- [ ] Preserve direct-file-edit workflows.
-- [ ] Expose index health and diagnostics through service results.
-- [ ] Add tests for changed files and stale cache inputs.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Load or build the structural index at app startup.
+- [x] Compute modified time and source hash for indexed files.
+- [x] Detect changed, added, and removed files.
+- [x] Rebuild or target-update the structural index after refresh.
+- [x] Preserve direct-file-edit workflows.
+- [x] Expose index health and diagnostics through service results.
+- [x] Add tests for changed files and stale cache inputs.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending.
-- T3.2: pending.
-- T3.3: pending.
+- T3.1: pending local commit loads and refreshes the structural index.
+- T3.2: pending local commit adds index health and change detection.
+- T3.3: pending local commit adds tests, report, and validation.
 
 ## Slice 4: Discardable Structural Cache
 
@@ -226,3 +226,4 @@ Task commits:
 - 2026-05-23: `make verify` passed for Slice 1.
 - 2026-05-23: `go test ./internal/chc` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 2.
+- 2026-05-23: `make verify` passed for Slice 3.

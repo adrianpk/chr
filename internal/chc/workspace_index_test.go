@@ -4,6 +4,7 @@ import (
 	"context"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestWorkspaceIndexBuildsLookupsAndEdgesFromGraph(t *testing.T) {
@@ -128,6 +129,89 @@ func TestWorkspaceGraphBuilderBuildIndex(t *testing.T) {
 	}
 }
 
+func TestWorkspaceIndexChangesSinceDetectsAddedChangedAndRemovedFiles(t *testing.T) {
+	previousTime := time.Date(2026, 5, 23, 10, 0, 0, 0, time.UTC)
+	currentTime := previousTime.Add(time.Minute)
+	previous := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"spec:changed.md": {
+				Kind:       WorkspaceNodeSpec,
+				SourceHash: "old",
+				ModifiedAt: previousTime,
+				Size:       10,
+			},
+			"spec:removed.md": {
+				Kind:       WorkspaceNodeSpec,
+				SourceHash: "removed",
+				ModifiedAt: previousTime,
+				Size:       12,
+			},
+		},
+	}
+	current := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"spec:added.md": {
+				Kind:       WorkspaceNodeSpec,
+				SourceHash: "added",
+				ModifiedAt: currentTime,
+				Size:       8,
+			},
+			"spec:changed.md": {
+				Kind:       WorkspaceNodeSpec,
+				SourceHash: "new",
+				ModifiedAt: currentTime,
+				Size:       11,
+			},
+		},
+	}
+
+	changes := current.ChangesSince(previous)
+
+	assertStringSlice(t, changes.Added, []string{"spec:added.md"})
+	assertStringSlice(t, changes.Changed, []string{"spec:changed.md"})
+	assertStringSlice(t, changes.Removed, []string{"spec:removed.md"})
+}
+
+func TestWorkspaceIndexHealthReportsDiagnosticsAndUnresolvedReferences(t *testing.T) {
+	index := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"case:known":   {},
+			"dump:missing": {},
+		},
+		Edges: []WorkspaceEdge{
+			{From: "case:known", To: "dump:missing", Kind: WorkspaceEdgeContains},
+		},
+		ByCaseSlug: map[string][]string{
+			"missing": {"dump:missing"},
+		},
+		CasesBySlug: map[string]string{
+			"known": "case:known",
+		},
+		Diagnostics: []WorkspaceGraphDiagnostic{
+			{Path: ".chc/cases/broken.md", Kind: WorkspaceNodeCase, Message: "invalid"},
+		},
+		BuiltAt: time.Date(2026, 5, 23, 11, 0, 0, 0, time.UTC),
+	}
+
+	health := index.Health()
+
+	if health.NodeCount != 2 {
+		t.Fatalf("NodeCount = %d, want 2", health.NodeCount)
+	}
+
+	if health.EdgeCount != 1 {
+		t.Fatalf("EdgeCount = %d, want 1", health.EdgeCount)
+	}
+
+	if health.DiagnosticCount != 1 {
+		t.Fatalf("DiagnosticCount = %d, want 1", health.DiagnosticCount)
+	}
+
+	if health.UnresolvedReferenceCount != 1 {
+		t.Fatalf("UnresolvedReferenceCount = %d, want 1", health.UnresolvedReferenceCount)
+	}
+}
+
 func workspaceIndexHasEdge(index WorkspaceIndex, from, to string, kind WorkspaceEdgeKind) bool {
 	for _, edge := range index.Edges {
 		if edge.From == from && edge.To == to && edge.Kind == kind {
@@ -136,4 +220,18 @@ func workspaceIndexHasEdge(index WorkspaceIndex, from, to string, kind Workspace
 	}
 
 	return false
+}
+
+func assertStringSlice(t *testing.T, got, want []string) {
+	t.Helper()
+
+	if len(got) != len(want) {
+		t.Fatalf("slice = %#v, want %#v", got, want)
+	}
+
+	for index := range got {
+		if got[index] != want[index] {
+			t.Fatalf("slice = %#v, want %#v", got, want)
+		}
+	}
 }

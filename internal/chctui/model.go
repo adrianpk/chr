@@ -79,6 +79,7 @@ type Options struct {
 	AuthoringSessions []chc.AuthoringSession
 	Observability     ObservabilityView
 	WorkspaceGraph    chc.WorkspaceGraph
+	WorkspaceIndex    chc.WorkspaceIndex
 	ActionExecutor    ArtifactActionExecutor
 	TicketExecutor    TicketActionExecutor
 	WorkExecutor      WorkActionExecutor
@@ -116,6 +117,7 @@ type Model struct {
 	selectedAuthoringSession int
 	observability            ObservabilityView
 	workspaceGraph           chc.WorkspaceGraph
+	workspaceIndex           chc.WorkspaceIndex
 	commandPalette           CommandPaletteState
 	artifactAction           ArtifactActionState
 	actionExecutor           ArtifactActionExecutor
@@ -130,6 +132,11 @@ type Model struct {
 }
 
 func NewModel(opts Options) Model {
+	workspaceIndex := opts.WorkspaceIndex
+	if len(workspaceIndex.NodesByID) == 0 {
+		workspaceIndex = chc.NewWorkspaceIndexFromGraph(opts.WorkspaceGraph)
+	}
+
 	projectMetadata := opts.ProjectMetadata
 	if opts.WorkspaceGraph.Project != nil {
 		projectMetadata.Name = opts.WorkspaceGraph.Project.Name
@@ -162,6 +169,7 @@ func NewModel(opts Options) Model {
 		authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:     opts.Observability,
 		workspaceGraph:    opts.WorkspaceGraph,
+		workspaceIndex:    workspaceIndex,
 		commandPalette:    NewCommandPaletteState(DefaultCommandRegistry()),
 		actionExecutor:    opts.ActionExecutor,
 		ticketExecutor:    opts.TicketExecutor,

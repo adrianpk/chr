@@ -33,6 +33,20 @@ type WorkspaceIndex struct {
 	BuiltAt      time.Time
 }
 
+type WorkspaceIndexHealth struct {
+	NodeCount                int
+	EdgeCount                int
+	DiagnosticCount          int
+	UnresolvedReferenceCount int
+	BuiltAt                  time.Time
+}
+
+type WorkspaceIndexChanges struct {
+	Added   []string
+	Changed []string
+	Removed []string
+}
+
 func NewWorkspaceIndexFromGraph(graph WorkspaceGraph) WorkspaceIndex {
 	index := WorkspaceIndex{
 		NodesByID:    map[string]WorkspaceNode{},
@@ -111,6 +125,43 @@ func (b WorkspaceGraphBuilder) BuildIndex(ctx context.Context) (WorkspaceIndex, 
 	}
 
 	return NewWorkspaceIndexFromGraph(graph), nil
+}
+
+func (i WorkspaceIndex) Health() WorkspaceIndexHealth {
+	return WorkspaceIndexHealth{
+		NodeCount:                len(i.NodesByID),
+		EdgeCount:                len(i.Edges),
+		DiagnosticCount:          len(i.Diagnostics),
+		UnresolvedReferenceCount: len(i.unresolvedCaseSlugs()),
+		BuiltAt:                  i.BuiltAt,
+	}
+}
+
+func (i WorkspaceIndex) ChangesSince(previous WorkspaceIndex) WorkspaceIndexChanges {
+	changes := WorkspaceIndexChanges{}
+
+	for id, node := range i.NodesByID {
+		previousNode, ok := previous.NodesByID[id]
+		if !ok {
+			changes.Added = append(changes.Added, id)
+
+			continue
+		}
+
+		if workspaceNodeSourceChanged(previousNode, node) {
+			changes.Changed = append(changes.Changed, id)
+		}
+	}
+
+	for id := range previous.NodesByID {
+		if _, ok := i.NodesByID[id]; !ok {
+			changes.Removed = append(changes.Removed, id)
+		}
+	}
+
+	changes.sort()
+
+	return changes
 }
 
 func (i *WorkspaceIndex) addNode(node WorkspaceNode) string {
@@ -216,4 +267,36 @@ func appendWorkspaceStringIfMissing(values []string, value string) []string {
 	}
 
 	return append(values, value)
+}
+
+func (i WorkspaceIndex) unresolvedCaseSlugs() []string {
+	slugs := []string{}
+
+	for slug := range i.ByCaseSlug {
+		if _, ok := i.CasesBySlug[slug]; !ok {
+			slugs = append(slugs, slug)
+		}
+	}
+
+	sort.Strings(slugs)
+
+	return slugs
+}
+
+func workspaceNodeSourceChanged(previous, current WorkspaceNode) bool {
+	if previous.SourceHash != current.SourceHash {
+		return true
+	}
+
+	if !previous.ModifiedAt.Equal(current.ModifiedAt) {
+		return true
+	}
+
+	return previous.Size != current.Size
+}
+
+func (c *WorkspaceIndexChanges) sort() {
+	sort.Strings(c.Added)
+	sort.Strings(c.Changed)
+	sort.Strings(c.Removed)
 }

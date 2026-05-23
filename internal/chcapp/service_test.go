@@ -52,6 +52,14 @@ func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
 	if result.Graph.Project == nil || result.Graph.Project.Name != "Service Project" {
 		t.Fatalf("Project = %#v, want Service Project", result.Graph.Project)
 	}
+
+	if result.IndexHealth.NodeCount != 1 {
+		t.Fatalf("IndexHealth.NodeCount = %d, want 1", result.IndexHealth.NodeCount)
+	}
+
+	if len(result.Index.NodesByID) != 1 {
+		t.Fatalf("Index.NodesByID = %#v, want one project node", result.Index.NodesByID)
+	}
 }
 
 func TestServiceSaveProjectMetadata(t *testing.T) {

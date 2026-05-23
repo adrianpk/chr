@@ -11,8 +11,11 @@ type WorkspaceRefreshExecutor interface {
 }
 
 type WorkspaceRefreshResult struct {
-	Message string
-	Graph   chc.WorkspaceGraph
+	Message      string
+	Graph        chc.WorkspaceGraph
+	Index        chc.WorkspaceIndex
+	IndexHealth  chc.WorkspaceIndexHealth
+	IndexChanges chc.WorkspaceIndexChanges
 }
 
 func (m *Model) refreshWorkspace() {
@@ -33,7 +36,10 @@ func (m *Model) refreshWorkspace() {
 		return
 	}
 
+	result.Index = workspaceIndexFromRefreshResult(result)
+	result.IndexChanges = result.Index.ChangesSince(m.workspaceIndex)
 	m.workspaceGraph = result.Graph
+	m.workspaceIndex = result.Index
 	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
 	m.cases = casesFromWorkspaceGraph(result.Graph, m.cases)
 	m.clampSelectedCase()
@@ -53,12 +59,23 @@ func (m *Model) refreshWorkspaceGraphAfterWrite() bool {
 		return false
 	}
 
+	result.Index = workspaceIndexFromRefreshResult(result)
+	result.IndexChanges = result.Index.ChangesSince(m.workspaceIndex)
 	m.workspaceGraph = result.Graph
+	m.workspaceIndex = result.Index
 	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
 	m.cases = casesFromWorkspaceGraph(result.Graph, m.cases)
 	m.clampSelectedCase()
 
 	return true
+}
+
+func workspaceIndexFromRefreshResult(result WorkspaceRefreshResult) chc.WorkspaceIndex {
+	if len(result.Index.NodesByID) > 0 {
+		return result.Index
+	}
+
+	return chc.NewWorkspaceIndexFromGraph(result.Graph)
 }
 
 func projectMetadataFromWorkspaceGraph(
