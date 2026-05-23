@@ -24,7 +24,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 3: Artifact And Ticket Operations | Delivered | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | PR #158. |
 | Slice 4: Work Control Operations | Delivered | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | PR #159. |
 | Slice 5: Adapter Interface Cleanup | Delivered | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | PR #160. |
-| Slice 6: CLI Convergence Pass | Reviewing | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | Ticket CLI commands routed through service. |
+| Slice 6: CLI Convergence Pass | Delivered | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | PR #161. |
 | Slice 7: Architecture Documentation | Planned | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Document operation boundary. |
 
 ## Slice 1: Operation Service Boundary
@@ -141,10 +141,10 @@ Candidate tasks:
 
 Task commits:
 
-- T6.1: pending local commit for generic ticket service operations.
-- T6.2: pending local commit for ticket CLI convergence.
-- T6.3: pending local commit for focused CLI validation.
-- T6.4: pending local commit for report and validation.
+- T6.1: `d00e592` adds generic ticket service operations.
+- T6.2: `d00e592` routes ticket CLI commands through the service.
+- T6.3: `d00e592` records focused CLI validation.
+- T6.4: `d00e592` adds report and validation.
 
 ## Slice 7: Architecture Documentation
 

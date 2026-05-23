@@ -1,11 +1,11 @@
 # Slice 6: CLI Convergence Pass
 
-Status: reviewing
+Status: delivered
 Slicing: Application Operation Service Consolidation
 Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 Tracker: `.prj/trackers/slicing-application-operation-service-consolidation-tracker.md`
 Branch: `feat/slice-6-cli-convergence-pass`
-PR: pending
+PR: #161
 
 ## Purpose
 
