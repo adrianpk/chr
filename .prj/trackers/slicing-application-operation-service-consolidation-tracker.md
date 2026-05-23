@@ -1,6 +1,6 @@
 # Application Operation Service Consolidation Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 
@@ -11,9 +11,9 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -25,7 +25,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 4: Work Control Operations | Delivered | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | PR #159. |
 | Slice 5: Adapter Interface Cleanup | Delivered | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | PR #160. |
 | Slice 6: CLI Convergence Pass | Delivered | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | PR #161. |
-| Slice 7: Architecture Documentation | Reviewing | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Documents operation boundary. |
+| Slice 7: Architecture Documentation | Delivered | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | PR #162. |
 
 ## Slice 1: Operation Service Boundary
 
@@ -169,8 +169,8 @@ Task commits:
   unexported `service` until another package needs it directly.
 - Whether service request/result types should live in one file or next to their
   capability methods.
-- How much CLI convergence belongs in this slicing versus a follow-up tuning
-  slice.
+- No post-slice tuning is required for this slicing before continuing with the
+  next architecture normalization effort.
 
 ## Validation Log
 
@@ -188,3 +188,4 @@ Task commits:
 - 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 6.
 - 2026-05-23: `make verify` passed for Slice 6.
 - 2026-05-23: `make verify` passed for Slice 7.
+- 2026-05-23: `make verify` passed after completing all planned slices.
