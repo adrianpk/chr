@@ -1,11 +1,11 @@
 # Slice 3: Artifact And Ticket Operations
 
-Status: reviewing
+Status: delivered
 Slicing: Application Operation Service Consolidation
 Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 Tracker: `.prj/trackers/slicing-application-operation-service-consolidation-tracker.md`
 Branch: `feat/slice-3-artifact-ticket-operations`
-PR: pending
+PR: #158
 
 ## Purpose
 
