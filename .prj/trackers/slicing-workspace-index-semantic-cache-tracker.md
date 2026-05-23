@@ -11,7 +11,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -21,7 +21,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Workspace Index Contract | Delivered | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | PR #164. |
-| Slice 2: Structural Workspace Index Model | Planned | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | Adds index model shape. |
+| Slice 2: Structural Workspace Index Model | Reviewing | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | Adds index model shape. |
 | Slice 3: Index Load And Refresh Semantics | Planned | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | Handles direct file changes. |
 | Slice 4: Discardable Structural Cache | Planned | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
 | Slice 5: Semantic Digest Cache Contract | Planned | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | Adds digest schema and invalidation. |
@@ -53,20 +53,20 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add workspace index model types.
-- [ ] Map existing workspace graph nodes into index nodes.
-- [ ] Add explicit edge types.
-- [ ] Add lookup maps for kind, path, case slug, ticket key, and case slug.
-- [ ] Preserve existing graph API where needed during transition.
-- [ ] Add focused model and builder tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add workspace index model types.
+- [x] Map existing workspace graph nodes into index nodes.
+- [x] Add explicit edge types.
+- [x] Add lookup maps for kind, path, case slug, ticket key, and case slug.
+- [x] Preserve existing graph API where needed during transition.
+- [x] Add focused model and builder tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending.
-- T2.2: pending.
-- T2.3: pending.
+- T2.1: pending local commit adds structural workspace index model.
+- T2.2: pending local commit maps workspace graph nodes to index lookups and edges.
+- T2.3: pending local commit adds focused index tests and report.
 
 ## Slice 3: Index Load And Refresh Semantics
 
@@ -224,3 +224,5 @@ Task commits:
 
 - 2026-05-23: `make verify` passed for plan and tracker creation.
 - 2026-05-23: `make verify` passed for Slice 1.
+- 2026-05-23: `go test ./internal/chc` passed for Slice 2.
+- 2026-05-23: `make verify` passed for Slice 2.
