@@ -881,18 +881,35 @@ func centerPlainLineWithOffset(line string, width, leftOffset int) string {
 
 	padding := width - len(runes)
 	left := padding / 2
-	left = maxInt(left-leftOffset, 0)
+	left = clampInt(left-leftOffset, 0, padding)
 	right := padding - left
 
 	return strings.Repeat(" ", left) + line + strings.Repeat(" ", right)
 }
 
 func shellButtonKeyLeftOffset(key string) int {
-	if key == "F10" {
-		return 2
+	switch key {
+	case "F6":
+		return 0
+	case "F8", "F9":
+		return -1
+	case "F10":
+		return 0
+	default:
+		return 1
+	}
+}
+
+func clampInt(value, minimum, maximum int) int {
+	if value < minimum {
+		return minimum
 	}
 
-	return 1
+	if value > maximum {
+		return maximum
+	}
+
+	return value
 }
 
 func splitWidths(width int) (int, int) {
