@@ -155,7 +155,7 @@ Expected outcome:
 
 ### Slice 2: Remove Project And Case Indexes
 
-Status: active.
+Status: delivered.
 
 Expected branch: `feat/slice-2-remove-project-case-indexes`
 Expected PR title: `feat(slice-2): remove project case indexes`
@@ -183,7 +183,7 @@ Expected outcome:
 
 ### Slice 3: Workspace Graph Builder
 
-Status: planned.
+Status: active.
 
 Expected branch: `feat/slice-3-workspace-graph-builder`
 Expected PR title: `feat(slice-3): workspace graph builder`

@@ -20,8 +20,8 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Markdown-Only Contract | Delivered | `feat/slice-1-markdown-only-contract` | `feat(slice-1): markdown-only contract` | `.prj/reports/slices/markdown-only-workspace-model/slice-1-markdown-only-contract.md` | PR #149. |
-| Slice 2: Remove Project And Case Indexes | Active | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | Remove relational persistence for Project/Cases only. |
-| Slice 3: Workspace Graph Builder | Planned | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | Runtime in-memory graph. |
+| Slice 2: Remove Project And Case Indexes | Delivered | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | PR #150. |
+| Slice 3: Workspace Graph Builder | Active | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | Runtime in-memory graph. |
 | Slice 4: Filesystem Refresh Semantics | Planned | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | Manual editor/file changes. |
 | Slice 5: TUI Project And Cases Rewire | Planned | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | Project/Cases screens use Markdown and graph. |
 | Slice 6: Context Assembly From Graph | Planned | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
@@ -68,7 +68,7 @@ Task commits:
 - T2.1: `5dd9c40` removes project/case SQLite repositories and migrations.
 - T2.2: `5dd9c40` rewires TUI executors to Markdown-only refresh/save paths.
 - T2.3: `5dd9c40` updates tests for seven remaining SQLite migrations.
-- T2.4: pending commit adds slice implementation report and validation.
+- T2.4: `4d307d6` adds slice implementation report and validation.
 
 ## Slice 3: Workspace Graph Builder
 

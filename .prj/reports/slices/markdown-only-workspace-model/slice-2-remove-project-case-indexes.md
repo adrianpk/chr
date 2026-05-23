@@ -1,11 +1,11 @@
 # Slice 2: Remove Project And Case Indexes
 
-Status: reviewing
+Status: delivered
 Slicing: Markdown-Only Workspace Model
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 Tracker: `.prj/trackers/slicing-markdown-only-workspace-model-tracker.md`
 Branch: `feat/slice-2-remove-project-case-indexes`
-PR: pending
+PR: #150
 
 ## Purpose
 
