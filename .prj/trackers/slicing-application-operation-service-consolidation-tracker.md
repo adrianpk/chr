@@ -22,7 +22,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 1: Operation Service Boundary | Delivered | `feat/slice-1-operation-service-boundary` | `feat(slice-1): operation service boundary` | `.prj/reports/slices/application-operation-service-consolidation/slice-1-operation-service-boundary.md` | PR #156. |
 | Slice 2: Workspace And Metadata Operations | Delivered | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | PR #157. |
 | Slice 3: Artifact And Ticket Operations | Delivered | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | PR #158. |
-| Slice 4: Work Control Operations | Planned | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | Move execution and daemon controls. |
+| Slice 4: Work Control Operations | Reviewing | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | Execution and daemon controls moved. |
 | Slice 5: Adapter Interface Cleanup | Planned | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | Reduce adapter-specific operation wrappers. |
 | Slice 6: CLI Convergence Pass | Planned | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | Reuse service from overlapping CLI commands. |
 | Slice 7: Architecture Documentation | Planned | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Document operation boundary. |
@@ -91,21 +91,21 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Move selected-ticket execution into service methods.
-- [ ] Move one-ticket ready-loop execution into service methods.
-- [ ] Move daemon stop requests into service methods.
-- [ ] Centralize observability reload after work actions.
-- [ ] Preserve execution failure handling.
-- [ ] Add focused tests for work-control operation outcomes where practical.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Move selected-ticket execution into service methods.
+- [x] Move one-ticket ready-loop execution into service methods.
+- [x] Move daemon stop requests into service methods.
+- [x] Centralize observability reload after work actions.
+- [x] Preserve execution failure handling.
+- [x] Add focused tests for work-control operation outcomes where practical.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending.
-- T4.2: pending.
-- T4.3: pending.
-- T4.4: pending.
+- T4.1: pending local commit for selected-ticket execution service operation.
+- T4.2: pending local commit for ready-loop and daemon stop service operations.
+- T4.3: pending local commit for TUI wrapper delegation and focused tests.
+- T4.4: pending local commit for report and validation.
 
 ## Slice 5: Adapter Interface Cleanup
 
@@ -180,3 +180,5 @@ Task commits:
 - 2026-05-23: `make verify` passed for Slice 2.
 - 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 3.
 - 2026-05-23: `make verify` passed for Slice 3.
+- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 4.
+- 2026-05-23: `make verify` passed for Slice 4.

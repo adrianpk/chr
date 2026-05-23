@@ -207,6 +207,30 @@ func TestServiceMutatesSelectedTicket(t *testing.T) {
 	}
 }
 
+func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "tickets"), 0o755)
+	if err != nil {
+		t.Fatalf("create ticket dir: %v", err)
+	}
+
+	operations := newTestService(t, projectDir)
+
+	result, err := operations.RequestDaemonStop()
+	if err != nil {
+		t.Fatalf("RequestDaemonStop returned error: %v", err)
+	}
+
+	if result.Message != "Daemon is already stopped." {
+		t.Fatalf("Message = %q, want daemon stopped message", result.Message)
+	}
+
+	if result.Tickets == nil {
+		t.Fatal("Tickets = nil, want reloaded empty slice")
+	}
+}
+
 func newTestService(t *testing.T, projectDir string) service {
 	t.Helper()
 

@@ -3,7 +3,6 @@ package chcapp
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"time"
@@ -210,7 +209,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		WorkspaceGraph:    data.workspaceGraph,
 		ActionExecutor:    newTUIArtifactActionExecutor(data.operations),
 		TicketExecutor:    newTUITicketActionExecutor(data.operations),
-		WorkExecutor:      newTUIWorkActionExecutor(data.ctx, data.env, data.projectContext),
+		WorkExecutor:      newTUIWorkActionExecutor(data.operations),
 		WorkspaceExecutor: newTUIWorkspaceRefreshExecutor(data.operations),
 		ProjectExecutor:   newTUIProjectMetadataExecutor(data.operations),
 		CaseExecutor:      newTUICaseMetadataExecutor(data.operations),
@@ -404,20 +403,14 @@ func ticketActionResult(result TicketOperationResult) chctui.TicketActionResult 
 }
 
 type tuiWorkActionExecutor struct {
-	ctx            context.Context
-	env            chc.UserEnvironment
-	projectContext commandProjectContext
+	operations service
 }
 
 func newTUIWorkActionExecutor(
-	ctx context.Context,
-	env chc.UserEnvironment,
-	projectContext commandProjectContext,
+	operations service,
 ) tuiWorkActionExecutor {
 	return tuiWorkActionExecutor{
-		ctx:            ctx,
-		env:            env,
-		projectContext: projectContext,
+		operations: operations,
 	}
 }
 
@@ -426,182 +419,42 @@ func (e tuiWorkActionExecutor) ExecuteWorkAction(
 ) (chctui.WorkActionResult, error) {
 	switch request.Action {
 	case chctui.WorkActionStartTicket:
-		return e.startTicket(request.TicketKey)
+		result, err := e.operations.StartSelectedTicket(request.TicketKey)
+		if err != nil {
+			return chctui.WorkActionResult{}, err
+		}
+
+		return e.workActionResult(result)
 	case chctui.WorkActionStartReadyLoop:
-		return e.startReadyLoop()
+		result, err := e.operations.StartReadyTicketLoop()
+		if err != nil {
+			return chctui.WorkActionResult{}, err
+		}
+
+		return e.workActionResult(result)
 	case chctui.WorkActionRequestStop:
-		return e.requestStop()
+		result, err := e.operations.RequestDaemonStop()
+		if err != nil {
+			return chctui.WorkActionResult{}, err
+		}
+
+		return e.workActionResult(result)
 	default:
 		return chctui.WorkActionResult{}, errors.New("unknown work action")
 	}
 }
 
-func (e tuiWorkActionExecutor) startTicket(ticketKey string) (chctui.WorkActionResult, error) {
-	ticket, err := e.ticketByKey(ticketKey)
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	preflight, err := buildTicketStartPreflightForTicket(e.ctx, e.env, e.projectContext, ticket)
-	if err != nil {
-		return chctui.WorkActionResult{}, chc.NewExecutionFailure(chc.ExecutionFailurePreflight, err)
-	}
-
-	if !chc.RuntimeValidationPassed(preflight.Runtime.Checks) {
-		return chctui.WorkActionResult{}, chc.NewExecutionFailure(
-			chc.ExecutionFailureRuntime,
-			errors.New("runtime validation failed"),
-		)
-	}
-
-	record, err := runTicketStartExecution(e.ctx, e.env, preflight.Record, preflight.Runtime)
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	result, err := e.reloadWorkActionState()
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	result.Message = "Execution " + record.ID + " for ticket " + ticket.Key + " finished with status " +
-		string(record.Status) + ". Result: " + displayPath(e.projectContext.ProjectDir, record.Artifacts.ResultPath)
-
-	if record.FailureReason != "" {
-		result.Message += " Failure: " + record.FailureReason
-	}
-
-	return result, nil
-}
-
-func (e tuiWorkActionExecutor) startReadyLoop() (chctui.WorkActionResult, error) {
-	tickets, eligibleCount, err := e.readyLoopTickets()
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	result, err := runTicketLoopExecution(e.ctx, e.env, e.projectContext, tickets, eligibleCount)
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	reloaded, err := e.reloadWorkActionState()
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	reloaded.Message = "Loop " + result.Record.ID + " finished with status " + string(result.Record.Status) +
-		fmt.Sprintf(": %d processed, %d blocked, %d failed.", result.Record.ProcessedCount, result.Record.BlockedCount, result.Record.FailedCount)
-
-	if result.Record.FailureReason != "" {
-		reloaded.Message += " Failure: " + result.Record.FailureReason
-	}
-
-	return reloaded, nil
-}
-
-func (e tuiWorkActionExecutor) requestStop() (chctui.WorkActionResult, error) {
-	repository, err := chc.NewDaemonStateRepository(e.ctx, e.env, assetsFS)
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	defer func() {
-		//nolint:errcheck // Stop result already comes from the main operation.
-		_ = repository.Close()
-	}()
-
-	requestedAt := time.Now().UTC()
-
-	err = repository.RequestDaemonStop(e.ctx, requestedAt)
-	if errors.Is(err, chc.ErrDaemonStateNotFound) {
-		result, reloadErr := e.reloadWorkActionState()
-		if reloadErr != nil {
-			return chctui.WorkActionResult{}, reloadErr
-		}
-
-		result.Message = "Daemon is already stopped."
-
-		return result, nil
-	}
-
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	result, err := e.reloadWorkActionState()
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	result.Message = "Daemon stop requested at " + requestedAt.Format(time.RFC3339) + "."
-
-	return result, nil
-}
-
-func (e tuiWorkActionExecutor) readyLoopTickets() ([]chc.IndexedTicket, int, error) {
-	index, err := chc.NewTicketIndex(e.ctx, e.env, assetsFS)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	defer func() {
-		//nolint:errcheck // Query result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(e.ctx, index, e.projectContext)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(e.ctx, chc.TicketLoopQueryOptions{
-		ProjectID: e.projectContext.ProjectID,
-		Statuses:  []string{"ready"},
-		Order:     chc.TicketLoopOrderKey,
-	})
-	if err != nil {
-		return nil, 0, err
-	}
-
-	eligibleTickets := deduplicateTicketLoopTickets(tickets)
-	tickets = ticketsForTicketLoopRun(eligibleTickets, ticketLoopRunOptions{MaxIterations: 1})
-
-	return tickets, len(eligibleTickets), nil
-}
-
-func (e tuiWorkActionExecutor) ticketByKey(key string) (chc.IndexedTicket, error) {
-	index, err := chc.NewTicketIndex(e.ctx, e.env, assetsFS)
-	if err != nil {
-		return chc.IndexedTicket{}, err
-	}
-
-	defer func() {
-		//nolint:errcheck // Lookup result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(e.ctx, index, e.projectContext)
-	if err != nil {
-		return chc.IndexedTicket{}, err
-	}
-
-	return index.GetProjectTicketByKey(e.ctx, e.projectContext.ProjectID, key)
-}
-
-func (e tuiWorkActionExecutor) reloadWorkActionState() (chctui.WorkActionResult, error) {
-	tickets, err := loadTUITickets(e.ctx, e.env, e.projectContext)
-	if err != nil {
-		return chctui.WorkActionResult{}, err
-	}
-
-	observability, err := loadTUIObservability(e.ctx, e.env, e.projectContext)
+func (e tuiWorkActionExecutor) workActionResult(
+	result WorkOperationResult,
+) (chctui.WorkActionResult, error) {
+	observability, err := loadTUIObservability(e.operations.ctx, e.operations.env, e.operations.projectContext)
 	if err != nil {
 		return chctui.WorkActionResult{}, err
 	}
 
 	return chctui.WorkActionResult{
-		Tickets:       tickets,
+		Message:       result.Message,
+		Tickets:       result.Tickets,
 		Observability: observability,
 	}, nil
 }
