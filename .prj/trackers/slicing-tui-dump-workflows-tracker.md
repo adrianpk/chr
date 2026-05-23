@@ -65,7 +65,7 @@ Task commits:
 
 - T1.1: `311402f` adds dump service contracts and canonical dump directory.
 - T1.2: `45b897a` aligns active dump document loading with `.chc/dumps`.
-- T1.3: pending.
+- T1.3: `66cdb9e` adds service scope tests, report, and validation.
 
 ## Slice 2: Scoped Dump Read Model
 
