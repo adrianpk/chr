@@ -23,7 +23,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 2: Workspace And Metadata Operations | Delivered | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | PR #157. |
 | Slice 3: Artifact And Ticket Operations | Delivered | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | PR #158. |
 | Slice 4: Work Control Operations | Delivered | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | PR #159. |
-| Slice 5: Adapter Interface Cleanup | Planned | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | Reduce adapter-specific operation wrappers. |
+| Slice 5: Adapter Interface Cleanup | Reviewing | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | TUI adapter wrappers isolated. |
 | Slice 6: CLI Convergence Pass | Planned | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | Reuse service from overlapping CLI commands. |
 | Slice 7: Architecture Documentation | Planned | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Document operation boundary. |
 
@@ -111,21 +111,21 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Reduce TUI executor wrappers to thin adapter mappings.
-- [ ] Remove obsolete TUI-named operation structs from `internal/chcapp`.
-- [ ] Keep adapter-neutral operation types in `internal/chcapp`.
-- [ ] Ensure operation service files do not import `internal/chctui`.
-- [ ] Organize service methods across capability files without separate entity services.
-- [ ] Add boundary tests or checks where practical.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Reduce TUI executor wrappers to thin adapter mappings.
+- [x] Remove obsolete TUI-named operation structs from `internal/chcapp`.
+- [x] Keep adapter-neutral operation types in `internal/chcapp`.
+- [x] Ensure operation service files do not import `internal/chctui`.
+- [x] Organize service methods across capability files without separate entity services.
+- [x] Add boundary tests or checks where practical.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending.
-- T5.2: pending.
-- T5.3: pending.
-- T5.4: pending.
+- T5.1: pending local commit for TUI adapter wrapper isolation.
+- T5.2: pending local commit for service import boundary test.
+- T5.3: pending local commit for report and validation.
+- T5.4: pending local commit for final adapter cleanup verification.
 
 ## Slice 6: CLI Convergence Pass
 
@@ -182,3 +182,5 @@ Task commits:
 - 2026-05-23: `make verify` passed for Slice 3.
 - 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 4.
 - 2026-05-23: `make verify` passed for Slice 4.
+- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 5.
+- 2026-05-23: `make verify` passed for Slice 5.
