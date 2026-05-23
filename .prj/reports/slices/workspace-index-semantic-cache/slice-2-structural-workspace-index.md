@@ -1,11 +1,11 @@
 # Slice 2: Structural Workspace Index Model
 
-Status: reviewing
+Status: delivered
 Slicing: Workspace Index And Semantic Cache
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 Tracker: `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 Branch: `feat/slice-2-structural-workspace-index`
-PR: pending
+PR: #165
 
 ## Purpose
 

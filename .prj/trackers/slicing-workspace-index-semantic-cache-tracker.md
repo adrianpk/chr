@@ -21,7 +21,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Workspace Index Contract | Delivered | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | PR #164. |
-| Slice 2: Structural Workspace Index Model | Reviewing | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | Adds index model shape. |
+| Slice 2: Structural Workspace Index Model | Delivered | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | PR #165. |
 | Slice 3: Index Load And Refresh Semantics | Planned | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | Handles direct file changes. |
 | Slice 4: Discardable Structural Cache | Planned | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
 | Slice 5: Semantic Digest Cache Contract | Planned | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | Adds digest schema and invalidation. |
@@ -64,9 +64,9 @@ Candidate tasks:
 
 Task commits:
 
-- T2.1: pending local commit adds structural workspace index model.
-- T2.2: pending local commit maps workspace graph nodes to index lookups and edges.
-- T2.3: pending local commit adds focused index tests and report.
+- T2.1: `0d563b4` adds structural workspace index model.
+- T2.2: `0d563b4` maps workspace graph nodes to index lookups and edges.
+- T2.3: `0d563b4` adds focused index tests and report.
 
 ## Slice 3: Index Load And Refresh Semantics
 
