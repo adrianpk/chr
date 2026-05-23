@@ -22,7 +22,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 1: Operation Service Boundary | Delivered | `feat/slice-1-operation-service-boundary` | `feat(slice-1): operation service boundary` | `.prj/reports/slices/application-operation-service-consolidation/slice-1-operation-service-boundary.md` | PR #156. |
 | Slice 2: Workspace And Metadata Operations | Delivered | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | PR #157. |
 | Slice 3: Artifact And Ticket Operations | Delivered | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | PR #158. |
-| Slice 4: Work Control Operations | Reviewing | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | Execution and daemon controls moved. |
+| Slice 4: Work Control Operations | Delivered | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | PR #159. |
 | Slice 5: Adapter Interface Cleanup | Planned | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | Reduce adapter-specific operation wrappers. |
 | Slice 6: CLI Convergence Pass | Planned | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | Reuse service from overlapping CLI commands. |
 | Slice 7: Architecture Documentation | Planned | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Document operation boundary. |
@@ -102,10 +102,10 @@ Candidate tasks:
 
 Task commits:
 
-- T4.1: pending local commit for selected-ticket execution service operation.
-- T4.2: pending local commit for ready-loop and daemon stop service operations.
-- T4.3: pending local commit for TUI wrapper delegation and focused tests.
-- T4.4: pending local commit for report and validation.
+- T4.1: `adc2a05` adds selected-ticket execution service operation.
+- T4.2: `adc2a05` adds ready-loop and daemon stop service operations.
+- T4.3: `adc2a05` delegates TUI wrapper to the service and adds focused tests.
+- T4.4: `adc2a05` adds report and validation.
 
 ## Slice 5: Adapter Interface Cleanup
 
