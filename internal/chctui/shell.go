@@ -702,7 +702,7 @@ func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 		}
 
 		cellWidth := widths[index]
-		keyCells = append(keyCells, style.Render(centerPlainLine(button.Key, cellWidth)))
+		keyCells = append(keyCells, style.Render(centerPlainLineWithOffset(button.Key, cellWidth, shellButtonKeyLeftOffset(button.Key))))
 		labelCells = append(labelCells, style.Render(centerPlainLine(button.Label, cellWidth)))
 	}
 
@@ -866,6 +866,10 @@ func fitPlainLine(line string, width int) string {
 }
 
 func centerPlainLine(line string, width int) string {
+	return centerPlainLineWithOffset(line, width, 0)
+}
+
+func centerPlainLineWithOffset(line string, width, leftOffset int) string {
 	if width <= 0 {
 		return ""
 	}
@@ -877,9 +881,18 @@ func centerPlainLine(line string, width int) string {
 
 	padding := width - len(runes)
 	left := padding / 2
+	left = maxInt(left-leftOffset, 0)
 	right := padding - left
 
 	return strings.Repeat(" ", left) + line + strings.Repeat(" ", right)
+}
+
+func shellButtonKeyLeftOffset(key string) int {
+	if key == "F10" {
+		return 2
+	}
+
+	return 1
 }
 
 func splitWidths(width int) (int, int) {
