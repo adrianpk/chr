@@ -12,9 +12,9 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -27,8 +27,8 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice 5: Semantic Digest Cache Contract | Delivered | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | PR #168. |
 | Slice 6: Semantic Index Worker Boundary | Delivered | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | PR #169. |
 | Slice 7: Service Queries And Suggestions | Delivered | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | PR #170. |
-| Slice 8: TUI Index Consumers | Reviewing | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | Uses queries in TUI selectors/status. |
-| Slice 9: Draft Artifact Removal | Reviewing | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | PR #172. |
+| Slice 8: TUI Index Consumers | Delivered | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | PR #171. |
+| Slice 9: Draft Artifact Removal | Delivered | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | PR #172. |
 
 ## Slice 1: Workspace Index Contract
 
@@ -181,9 +181,9 @@ Candidate tasks:
 
 Task commits:
 
-- T8.1: pending local commit wires TUI case surfaces to the workspace index.
-- T8.2: pending local commit carries semantic digest state into TUI health.
-- T8.3: pending local commit adds tests, report, and validation.
+- T8.1: `dec1921` wires TUI case surfaces to the workspace index.
+- T8.2: `dec1921` carries semantic digest state into TUI health.
+- T8.3: `dec1921` adds tests, report, and validation.
 
 ## Slice 9: Draft Artifact Removal
 
@@ -227,4 +227,7 @@ Task commits:
 - 2026-05-23: `go test ./internal/chc` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 3.
+- 2026-05-23: `make verify` passed for Slice 8.
 - 2026-05-23: `make verify` passed for Slice 9.
+- 2026-05-23: `make verify` passed after completing all planned workspace
+  index and semantic cache slices.
