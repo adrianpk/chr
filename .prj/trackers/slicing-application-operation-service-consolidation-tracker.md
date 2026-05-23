@@ -23,7 +23,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 2: Workspace And Metadata Operations | Delivered | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | PR #157. |
 | Slice 3: Artifact And Ticket Operations | Delivered | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | PR #158. |
 | Slice 4: Work Control Operations | Delivered | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | PR #159. |
-| Slice 5: Adapter Interface Cleanup | Reviewing | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | TUI adapter wrappers isolated. |
+| Slice 5: Adapter Interface Cleanup | Delivered | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | PR #160. |
 | Slice 6: CLI Convergence Pass | Planned | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | Reuse service from overlapping CLI commands. |
 | Slice 7: Architecture Documentation | Planned | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Document operation boundary. |
 
@@ -122,10 +122,10 @@ Candidate tasks:
 
 Task commits:
 
-- T5.1: pending local commit for TUI adapter wrapper isolation.
-- T5.2: pending local commit for service import boundary test.
-- T5.3: pending local commit for report and validation.
-- T5.4: pending local commit for final adapter cleanup verification.
+- T5.1: `aaa261a` isolates TUI adapter wrappers.
+- T5.2: `aaa261a` adds service import boundary test.
+- T5.3: `aaa261a` adds report and validation.
+- T5.4: `aaa261a` verifies final adapter cleanup.
 
 ## Slice 6: CLI Convergence Pass
 

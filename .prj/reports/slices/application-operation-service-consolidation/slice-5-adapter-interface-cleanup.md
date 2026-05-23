@@ -1,11 +1,11 @@
 # Slice 5: Adapter Interface Cleanup
 
-Status: reviewing
+Status: delivered
 Slicing: Application Operation Service Consolidation
 Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 Tracker: `.prj/trackers/slicing-application-operation-service-consolidation-tracker.md`
 Branch: `feat/slice-5-adapter-interface-cleanup`
-PR: pending
+PR: #160
 
 ## Purpose
 
