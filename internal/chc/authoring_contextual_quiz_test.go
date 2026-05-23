@@ -84,8 +84,21 @@ func assertContextualQuizRequest(t *testing.T, request AuthoringQuizGenerationRe
 		t.Fatalf("QuestionCount = %d, want 8", request.QuestionCount)
 	}
 
-	for _, name := range []string{"project", "session", "agent_protocol", "docs", "tree", "go_inventory"} {
+	for _, name := range []string{
+		"project",
+		"session",
+		"agent_protocol",
+		"workspace_graph_context",
+		"docs",
+		"tree",
+		"go_inventory",
+	} {
 		assertAuthoringQuizContextSection(t, request.ContextSections, name)
+	}
+
+	workspaceContext := authoringQuizContextSection(t, request.ContextSections, "workspace_graph_context")
+	if !strings.Contains(workspaceContext.Content, "Project Context Plan") {
+		t.Fatalf("workspace graph context missing project-wide plan:\n%s", workspaceContext.Content)
 	}
 }
 
@@ -106,6 +119,19 @@ func writeContextualQuizProjectFixture(t *testing.T, projectDir string) {
 	if err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
+
+	writeTestFile(t, ProjectMetadataPath(projectDir), RenderProjectMetadata(ProjectMetadata{
+		SchemaVersion: ProjectMetadataSchemaVersion,
+		Name:          "Contextual Quiz Project",
+		Description:   "Project description.",
+		Context:       "Project body.",
+	}))
+	writeTestFile(t, filepath.Join(projectDir, ".chc", "plans", "project-context-plan.md"), `---
+title: Project Context Plan
+---
+
+# Project Context Plan
+`)
 }
 
 func TestPlanContextualQuizGenerationRejectsMissingProvider(t *testing.T) {
@@ -172,13 +198,25 @@ func assertAuthoringQuizContextSection(
 ) {
 	t.Helper()
 
+	_ = authoringQuizContextSection(t, sections, name)
+}
+
+func authoringQuizContextSection(
+	t *testing.T,
+	sections []AuthoringQuizContextSection,
+	name string,
+) AuthoringQuizContextSection {
+	t.Helper()
+
 	for _, section := range sections {
 		if section.Name == name {
-			return
+			return section
 		}
 	}
 
 	t.Fatalf("context sections do not contain %q: %#v", name, sections)
+
+	return AuthoringQuizContextSection{}
 }
 
 func validContextualQuizGenerationResult() AuthoringQuizGenerationResult {

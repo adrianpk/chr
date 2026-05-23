@@ -111,7 +111,7 @@ func PlanContextualQuizGeneration(
 		return ContextualQuizGenerationPlan{}, err
 	}
 
-	request, err := NewAuthoringQuizGenerationRequest(opts.ProjectDir, opts.Session, opts.QuestionCount, opts.Now)
+	request, err := NewAuthoringQuizGenerationRequest(ctx, opts.ProjectDir, opts.Session, opts.QuestionCount, opts.Now)
 	if err != nil {
 		return ContextualQuizGenerationPlan{}, err
 	}
@@ -160,12 +160,13 @@ func WriteContextualQuiz(plan ContextualQuizGenerationPlan) error {
 }
 
 func NewAuthoringQuizGenerationRequest(
+	ctx context.Context,
 	projectDir string,
 	session AuthoringSession,
 	questionCount int,
 	now time.Time,
 ) (AuthoringQuizGenerationRequest, error) {
-	sections, err := LoadAuthoringQuizContextSections(projectDir, session)
+	sections, err := LoadAuthoringQuizContextSections(ctx, projectDir, session)
 	if err != nil {
 		return AuthoringQuizGenerationRequest{}, err
 	}
@@ -194,6 +195,7 @@ func NewAuthoringQuizGenerationRequest(
 }
 
 func LoadAuthoringQuizContextSections(
+	ctx context.Context,
 	projectDir string,
 	session AuthoringSession,
 ) ([]AuthoringQuizContextSection, error) {
@@ -218,6 +220,7 @@ func LoadAuthoringQuizContextSections(
 	}
 
 	sections = append(sections, authoringQuizOptionalFileSection(projectDir, "agent_protocol", "protocols", "AGENTS.md"))
+	sections = append(sections, authoringQuizWorkspaceGraphSection(ctx, projectDir))
 	sections = append(sections, authoringQuizPathInventorySection(projectDir, "workspace_artifacts", "workspace", DirectoryName))
 	sections = append(sections, authoringQuizPathInventorySection(projectDir, "docs", "docs", "docs"))
 	sections = append(sections, authoringQuizTreeSection(projectDir))
@@ -544,6 +547,35 @@ func authoringQuizOptionalFileSection(projectDir, name, layer, relPath string) A
 		Layer:     layer,
 		Authority: relPath,
 		Content:   string(content),
+	}
+}
+
+func authoringQuizWorkspaceGraphSection(ctx context.Context, projectDir string) AuthoringQuizContextSection {
+	graph, err := NewWorkspaceGraphBuilder(projectDir).Build(ctx)
+	if err != nil {
+		return AuthoringQuizContextSection{
+			Name:      "workspace_graph_context",
+			Layer:     "workspace",
+			Authority: "WorkspaceGraph",
+			Content:   "workspace graph context unavailable: " + err.Error(),
+		}
+	}
+
+	assembly, err := AssembleWorkspaceContext(NewProjectWideWorkspaceContextRequest(projectDir, graph))
+	if err != nil {
+		return AuthoringQuizContextSection{
+			Name:      "workspace_graph_context",
+			Layer:     "workspace",
+			Authority: "WorkspaceGraph",
+			Content:   "workspace graph context unavailable: " + err.Error(),
+		}
+	}
+
+	return AuthoringQuizContextSection{
+		Name:      "workspace_graph_context",
+		Layer:     "workspace",
+		Authority: "WorkspaceGraph",
+		Content:   RenderWorkspaceContextAssembly(assembly),
 	}
 }
 

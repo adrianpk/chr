@@ -11,8 +11,8 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
 
 ## Slice Status
@@ -24,7 +24,7 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 | Slice 3: Workspace Graph Builder | Delivered | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | PR #151. |
 | Slice 4: Filesystem Refresh Semantics | Delivered | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | PR #152. |
 | Slice 5: TUI Project And Cases Rewire | Delivered | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | PR #153. |
-| Slice 6: Context Assembly From Graph | Active | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
+| Slice 6: Context Assembly From Graph | Reviewing | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
 
 ## Slice 1: Markdown-Only Contract
 
@@ -140,23 +140,23 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add case-rooted context request model.
-- [ ] Add project-wide context request model.
-- [ ] Collect selected case document.
-- [ ] Collect case-scoped dumps, quizzes, specs, and plans.
-- [ ] Collect project-wide material when no case applies.
-- [ ] Read document bodies lazily during context assembly.
-- [ ] Report missing or unresolved references.
-- [ ] Add context assembly tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add case-rooted context request model.
+- [x] Add project-wide context request model.
+- [x] Collect selected case document.
+- [x] Collect case-scoped dumps, quizzes, specs, and plans.
+- [x] Collect project-wide material when no case applies.
+- [x] Read document bodies lazily during context assembly.
+- [x] Report missing or unresolved references.
+- [x] Add context assembly tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending.
-- T6.2: pending.
-- T6.3: pending.
-- T6.4: pending.
+- T6.1: pending local commit for workspace context request and assembly model.
+- T6.2: pending local commit for case-rooted and project-wide document selection.
+- T6.3: pending local commit for lazy body reads and source reporting.
+- T6.4: pending local commit for authoring quiz integration, tests, report, and validation.
 
 ## Open Decisions
 
@@ -178,3 +178,5 @@ Task commits:
 - 2026-05-23: `make verify` passed for Slice 4.
 - 2026-05-23: `go test ./internal/chctui ./internal/chcapp ./internal/chc ./cmd/chc` passed for Slice 5.
 - 2026-05-23: `make verify` passed for Slice 5.
+- 2026-05-23: `go test ./internal/chc ./internal/chcapp ./internal/chctui ./cmd/chc` passed for Slice 6.
+- 2026-05-23: `make verify` passed for Slice 6.
