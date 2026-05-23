@@ -311,43 +311,34 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		//nolint:errcheck // Command result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(ctx, index, projectContext)
-	if err != nil {
-		return err
-	}
-
-	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().Get(0))
-	if err != nil {
-		return err
-	}
-
 	status := cmd.Args().Get(1)
 
-	err = chc.NewTicketStatusUpdater().UpdateStatus(ctx, chc.UpdateTicketStatusOptions{
-		Path:      ticket.Path,
-		Status:    status,
-		UpdatedAt: time.Now().UTC(),
-	})
+	result, err := newService(ctx, env, projectContext).MoveTicketStatus(cmd.Args().Get(0), status)
 	if err != nil {
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "ticket: %s %s\n", ticket.Key, status)
+	updated, err := ticketOperationResultTicket(result, cmd.Args().Get(0))
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "ticket: %s %s\n", updated.Key, status)
 	if err != nil {
 		return fmt.Errorf("write ticket status result: %w", err)
 	}
 
 	return nil
+}
+
+func ticketOperationResultTicket(result TicketOperationResult, key string) (chc.IndexedTicket, error) {
+	for _, ticket := range result.Tickets {
+		if ticket.Key == key {
+			return ticket, nil
+		}
+	}
+
+	return chc.IndexedTicket{}, fmt.Errorf("ticket not found after operation: %s", key)
 }
 
 func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -1265,37 +1256,21 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		//nolint:errcheck // Command result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(ctx, index, projectContext)
-	if err != nil {
-		return err
-	}
-
-	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().Get(0))
-	if err != nil {
-		return err
-	}
-
-	err = chc.NewTicketCommenter().AddComment(ctx, chc.AddTicketCommentOptions{
-		Path:      ticket.Path,
-		Author:    cmd.String("author"),
-		Body:      cmd.Args().Get(1),
-		CreatedAt: time.Now().UTC(),
+	result, err := newService(ctx, env, projectContext).AddTicketComment(TicketCommentRequest{
+		Key:    cmd.Args().Get(0),
+		Author: cmd.String("author"),
+		Body:   cmd.Args().Get(1),
 	})
 	if err != nil {
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "ticket: %s\n", ticket.Path)
+	updated, err := ticketOperationResultTicket(result, cmd.Args().Get(0))
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "ticket: %s\n", updated.Path)
 	if err != nil {
 		return fmt.Errorf("write ticket comment result: %w", err)
 	}
@@ -1472,17 +1447,7 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
-	if err != nil {
-		return err
-	}
-
-	repository := chc.NewTicketRepository(
-		projectContext.ProjectDir,
-		chc.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
-	)
-
-	result, err := repository.CreateTicket(ctx, chc.CreateTicketOptions{
+	result, err := newService(ctx, env, projectContext).CreateTicket(CreateTicketRequest{
 		Title:       cmd.Args().First(),
 		Priority:    cmd.String("priority"),
 		Severity:    cmd.String("severity"),

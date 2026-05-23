@@ -13,10 +13,25 @@ type ArtifactOperationResult struct {
 	AuthoringSessions []chc.AuthoringSession
 }
 
-func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
+type CreateTicketRequest struct {
+	Title       string
+	Priority    string
+	Severity    string
+	Type        string
+	Tags        []string
+	UseCase     string
+	ProjectArea string
+}
+
+type CreateTicketResult struct {
+	Key  string
+	Path string
+}
+
+func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, error) {
 	config, err := chc.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
-		return ArtifactOperationResult{}, err
+		return CreateTicketResult{}, err
 	}
 
 	repository := chc.NewTicketRepository(
@@ -25,6 +40,26 @@ func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
 	)
 
 	result, err := repository.CreateTicket(s.ctx, chc.CreateTicketOptions{
+		Title:       request.Title,
+		Priority:    request.Priority,
+		Severity:    request.Severity,
+		Type:        request.Type,
+		Tags:        request.Tags,
+		UseCase:     request.UseCase,
+		ProjectArea: request.ProjectArea,
+	})
+	if err != nil {
+		return CreateTicketResult{}, err
+	}
+
+	return CreateTicketResult{
+		Key:  result.Key,
+		Path: result.Path,
+	}, nil
+}
+
+func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
+	result, err := s.CreateTicket(CreateTicketRequest{
 		Title:       "TUI created ticket",
 		Priority:    "normal",
 		Severity:    "normal",
@@ -97,16 +132,30 @@ type TicketOperationResult struct {
 	Tickets []chc.IndexedTicket
 }
 
+type TicketCommentRequest struct {
+	Key    string
+	Author string
+	Body   string
+}
+
 func (s service) AddSelectedTicketComment(ticketKey string) (TicketOperationResult, error) {
-	ticket, err := s.ticketByKey(ticketKey)
+	return s.AddTicketComment(TicketCommentRequest{
+		Key:    ticketKey,
+		Author: "tui",
+		Body:   "TUI action recorded.",
+	})
+}
+
+func (s service) AddTicketComment(request TicketCommentRequest) (TicketOperationResult, error) {
+	ticket, err := s.ticketByKey(request.Key)
 	if err != nil {
 		return TicketOperationResult{}, err
 	}
 
 	err = chc.NewTicketCommenter().AddComment(s.ctx, chc.AddTicketCommentOptions{
 		Path:      ticket.Path,
-		Author:    "tui",
-		Body:      "TUI action recorded.",
+		Author:    request.Author,
+		Body:      request.Body,
 		CreatedAt: time.Now().UTC(),
 	})
 	if err != nil {
@@ -125,6 +174,10 @@ func (s service) AddSelectedTicketComment(ticketKey string) (TicketOperationResu
 }
 
 func (s service) MoveSelectedTicketStatus(ticketKey, status string) (TicketOperationResult, error) {
+	return s.MoveTicketStatus(ticketKey, status)
+}
+
+func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResult, error) {
 	if status == "" {
 		return TicketOperationResult{}, errors.New("ticket status is required")
 	}

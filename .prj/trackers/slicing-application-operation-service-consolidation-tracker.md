@@ -24,7 +24,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 3: Artifact And Ticket Operations | Delivered | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | PR #158. |
 | Slice 4: Work Control Operations | Delivered | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | PR #159. |
 | Slice 5: Adapter Interface Cleanup | Delivered | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | PR #160. |
-| Slice 6: CLI Convergence Pass | Planned | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | Reuse service from overlapping CLI commands. |
+| Slice 6: CLI Convergence Pass | Reviewing | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | Ticket CLI commands routed through service. |
 | Slice 7: Architecture Documentation | Planned | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Document operation boundary. |
 
 ## Slice 1: Operation Service Boundary
@@ -131,20 +131,20 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Identify overlapping CLI operations.
-- [ ] Migrate lowest-risk overlapping CLI commands to service calls.
-- [ ] Preserve current CLI output contracts.
-- [ ] Avoid broad CLI rewrites.
-- [ ] Add focused CLI tests for migrated commands.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Identify overlapping CLI operations.
+- [x] Migrate lowest-risk overlapping CLI commands to service calls.
+- [x] Preserve current CLI output contracts.
+- [x] Avoid broad CLI rewrites.
+- [x] Add focused CLI tests for migrated commands.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending.
-- T6.2: pending.
-- T6.3: pending.
-- T6.4: pending.
+- T6.1: pending local commit for generic ticket service operations.
+- T6.2: pending local commit for ticket CLI convergence.
+- T6.3: pending local commit for focused CLI validation.
+- T6.4: pending local commit for report and validation.
 
 ## Slice 7: Architecture Documentation
 
@@ -184,3 +184,6 @@ Task commits:
 - 2026-05-23: `make verify` passed for Slice 4.
 - 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 5.
 - 2026-05-23: `make verify` passed for Slice 5.
+- 2026-05-23: `go test ./internal/chcapp -run 'TestTicket(New|Comment|Status)'` passed for Slice 6.
+- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 6.
+- 2026-05-23: `make verify` passed for Slice 6.
