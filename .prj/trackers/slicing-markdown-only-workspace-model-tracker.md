@@ -74,24 +74,24 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add workspace graph model and builder.
-- [ ] Scan `.chc/` Markdown files.
-- [ ] Parse frontmatter into lightweight nodes.
-- [ ] Classify supported document kinds.
-- [ ] Build case-rooted views.
-- [ ] Build project-wide views.
-- [ ] Track unresolved case references.
-- [ ] Track invalid frontmatter diagnostics.
-- [ ] Add graph fixture tests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add workspace graph model and builder.
+- [x] Scan `.chc/` Markdown files.
+- [x] Parse frontmatter into lightweight nodes.
+- [x] Classify supported document kinds.
+- [x] Build case-rooted views.
+- [x] Build project-wide views.
+- [x] Track unresolved case references.
+- [x] Track invalid frontmatter diagnostics.
+- [x] Add graph fixture tests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T3.1: pending.
-- T3.2: pending.
-- T3.3: pending.
-- T3.4: pending.
+- T3.1: `0fa2ef0` adds workspace graph model and builder.
+- T3.2: `0fa2ef0` adds `.chc/` Markdown scanning and document classification.
+- T3.3: `0fa2ef0` adds case-rooted/project-wide views and diagnostics.
+- T3.4: pending commit adds slice implementation report and validation.
 
 ## Slice 4: Filesystem Refresh Semantics
 
@@ -172,3 +172,5 @@ Task commits:
 
 - 2026-05-23: `make verify` passed.
 - 2026-05-23: `make verify` passed for Slice 2.
+- 2026-05-23: `go test ./internal/chc ./internal/chcapp ./internal/chctui ./cmd/chc` passed for Slice 3.
+- 2026-05-23: `make verify` passed for Slice 3.
