@@ -103,6 +103,7 @@ type Model struct {
 	caseFilterEditing        bool
 	views                    []View
 	selected                 int
+	selectedPane             int
 	width                    int
 	height                   int
 	tickets                  []TicketView
@@ -176,6 +177,7 @@ func Run(ctx context.Context, opts Options) error {
 		tea.WithContext(ctx),
 		tea.WithOutput(opts.Stdout),
 		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
 	}
 
 	if opts.Stdin != nil {
@@ -203,6 +205,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = typedMsg.Height
 
 		return m, nil
+	case tea.MouseMsg:
+		return m.updateMouse(typedMsg)
 	case tea.KeyMsg:
 		return m.updateKey(typedMsg)
 	default:
@@ -283,6 +287,32 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m.updateNavigationKey(msg)
 }
 
+func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
+	event := tea.MouseEvent(msg)
+	if event.Action != tea.MouseActionPress || event.Button != tea.MouseButtonLeft {
+		return m, nil
+	}
+
+	width := maxInt(m.width, 60)
+
+	button, ok := shellFooterButtonAt(event.X, event.Y, width, maxInt(m.height, minShellHeight))
+	if !ok {
+		return m, nil
+	}
+
+	if button.View != "" {
+		m.selectView(button.View)
+
+		return m, nil
+	}
+
+	if button.Key == "F10" {
+		return m, tea.Quit
+	}
+
+	return m, nil
+}
+
 func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 
@@ -292,19 +322,21 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	if isQuitKey(key) {
+		return m, tea.Quit
+	}
+
+	if m.handlePaneNavigationKey(key) {
+		return m, nil
+	}
+
 	switch key {
-	case "ctrl+c", "q":
-		return m, tea.Quit
-	case "f10":
-		return m, tea.Quit
-	case "left", "shift+tab", "h":
-		m.selectPreviousView()
-	case "right", "tab", "l":
-		m.selectNextView()
 	case "up", "k":
 		m.selectPreviousRecord()
 	case "down", "j":
 		m.selectNextRecord()
+	case "esc":
+		m.selectPrimaryPane()
 	case ":":
 		m.openCommandPalette()
 	case "/":
@@ -312,6 +344,23 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func isQuitKey(key string) bool {
+	return key == "ctrl+c" || key == "q" || key == "f10"
+}
+
+func (m *Model) handlePaneNavigationKey(key string) bool {
+	switch key {
+	case "shift+tab":
+		m.selectPreviousPane()
+	case "tab":
+		m.selectNextPane()
+	default:
+		return false
+	}
+
+	return true
 }
 
 func functionKeyView(msg tea.KeyMsg) (View, bool) {
@@ -349,6 +398,10 @@ func functionKeyView(msg tea.KeyMsg) (View, bool) {
 }
 
 func (m *Model) selectPreviousRecord() {
+	if m.selectedPane != 0 {
+		return
+	}
+
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectPreviousTicket()
@@ -360,6 +413,10 @@ func (m *Model) selectPreviousRecord() {
 }
 
 func (m *Model) selectNextRecord() {
+	if m.selectedPane != 0 {
+		return
+	}
+
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectNextTicket()
@@ -370,20 +427,55 @@ func (m *Model) selectNextRecord() {
 	}
 }
 
-func (m *Model) selectPreviousView() {
-	if m.selected == 0 {
-		m.selected = len(m.views) - 1
+func (m *Model) selectNextPane() {
+	count := m.paneCount()
+	if count <= 1 {
+		m.selectedPane = 0
 
 		return
 	}
 
-	m.selected--
+	m.selectedPane++
+	if m.selectedPane >= count {
+		m.selectedPane = 0
+	}
 }
 
-func (m *Model) selectNextView() {
-	m.selected++
-	if m.selected >= len(m.views) {
-		m.selected = 0
+func (m *Model) selectPreviousPane() {
+	count := m.paneCount()
+	if count <= 1 {
+		m.selectedPane = 0
+
+		return
+	}
+
+	if m.selectedPane == 0 {
+		m.selectedPane = count - 1
+
+		return
+	}
+
+	m.selectedPane--
+}
+
+func (m *Model) selectPrimaryPane() {
+	m.selectedPane = 0
+}
+
+func (m Model) paneCount() int {
+	switch m.SelectedView() {
+	case ViewProject, ViewCases:
+		return 3
+	case ViewBoard, ViewTickets:
+		return 2
+	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
+		return 2
+	case ViewAuthoring:
+		return 2
+	case ViewDash, ViewAgent, ViewRuntime:
+		return 2
+	default:
+		return 1
 	}
 }
 
@@ -582,15 +674,17 @@ func (m Model) renderKeys() string {
 
 	switch {
 	case m.ticketKeysActive():
-		return "Keys: up/down selects ticket, left/right or tab changes view, / filters, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects ticket, / filters, q quits"
 	case m.documentKeysActive():
-		return "Keys: up/down selects document, left/right or tab changes view, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects document, q quits"
 	case m.SelectedView() == ViewProject:
-		return "Keys: up/down selects field, enter edits, s saves, r refreshes, left/right changes view, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects field, enter edits, s saves, r refreshes, q quits"
+	case m.SelectedView() == ViewCases:
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects focused pane, enter opens or edits, s saves, r refreshes, q quits"
 	case m.SelectedView() == ViewAuthoring:
-		return "Keys: up/down selects session, left/right or tab changes view, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects session, q quits"
 	default:
-		return "Keys: left/right or tab changes view, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, q quits"
 	}
 }
 

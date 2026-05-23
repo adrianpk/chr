@@ -37,21 +37,25 @@ func TestModelViewRendersProjectAndNavigation(t *testing.T) {
 	}
 }
 
-func TestModelNavigatesViews(t *testing.T) {
+func TestTabMovesPaneFocusWithoutChangingView(t *testing.T) {
 	model := NewModel(Options{})
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRight})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyTab})
 	navigated, ok := updated.(Model)
 
 	if !ok {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	if navigated.SelectedView() != ViewCases {
-		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewCases)
+	if navigated.SelectedView() != ViewProject {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewProject)
 	}
 
-	updated, _ = navigated.Update(tea.KeyMsg{Type: tea.KeyLeft})
+	if navigated.selectedPane != 1 {
+		t.Fatalf("selectedPane = %d, want 1", navigated.selectedPane)
+	}
+
+	updated, _ = navigated.Update(tea.KeyMsg{Type: tea.KeyShiftTab})
 	navigated, ok = updated.(Model)
 
 	if !ok {
@@ -60,6 +64,62 @@ func TestModelNavigatesViews(t *testing.T) {
 
 	if navigated.SelectedView() != ViewProject {
 		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewProject)
+	}
+
+	if navigated.selectedPane != 0 {
+		t.Fatalf("selectedPane = %d, want 0", navigated.selectedPane)
+	}
+}
+
+func TestLeftAndRightDoNotChangeGlobalTabs(t *testing.T) {
+	model := NewModel(Options{})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRight})
+	navigated := requireUpdatedModel(t, updated)
+
+	if navigated.SelectedView() != ViewProject {
+		t.Fatalf("right selected view = %q, want %q", navigated.SelectedView(), ViewProject)
+	}
+
+	updated, _ = navigated.Update(tea.KeyMsg{Type: tea.KeyLeft})
+	navigated = requireUpdatedModel(t, updated)
+
+	if navigated.SelectedView() != ViewProject {
+		t.Fatalf("left selected view = %q, want %q", navigated.SelectedView(), ViewProject)
+	}
+}
+
+func TestMouseClickSelectsShellTab(t *testing.T) {
+	model := NewModel(Options{})
+	model.width = 100
+	model.height = 30
+
+	updated, _ := model.Update(tea.MouseMsg{
+		X:      12,
+		Y:      29,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	})
+	navigated := requireUpdatedModel(t, updated)
+
+	if navigated.SelectedView() != ViewCases {
+		t.Fatalf("SelectedView() = %q, want %q", navigated.SelectedView(), ViewCases)
+	}
+}
+
+func TestShellFooterAlignsKeysAndLabels(t *testing.T) {
+	model := NewModel(Options{})
+	footer := model.renderShellFooter(100)
+	lines := strings.Split(footer, "\n")
+
+	if len(lines) != 2 {
+		t.Fatalf("footer lines = %d, want 2:\n%s", len(lines), footer)
+	}
+
+	for index, line := range lines {
+		if lipgloss.Width(line) != 100 {
+			t.Fatalf("footer line %d width = %d, want 100:\n%s", index, lipgloss.Width(line), footer)
+		}
 	}
 }
 
@@ -386,6 +446,47 @@ func TestModelFiltersCaseMetadata(t *testing.T) {
 
 	if cases[0].Slug != "runtime" {
 		t.Fatalf("filtered case = %q, want runtime", cases[0].Slug)
+	}
+}
+
+func TestCasesUseTabForPanesAndArrowsWithinFocusedPane(t *testing.T) {
+	model := NewModel(Options{
+		Cases: []chc.CaseMetadata{
+			{SchemaVersion: chc.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
+			{SchemaVersion: chc.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
+		},
+	})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyF2})
+	casesView := requireUpdatedModel(t, updated)
+
+	updated, _ = casesView.Update(tea.KeyMsg{Type: tea.KeyDown})
+	selectedSecond := requireUpdatedModel(t, updated)
+
+	if selectedSecond.selectedCase != 1 {
+		t.Fatalf("selectedCase = %d, want 1", selectedSecond.selectedCase)
+	}
+
+	updated, _ = selectedSecond.Update(tea.KeyMsg{Type: tea.KeyTab})
+	detailPane := requireUpdatedModel(t, updated)
+
+	if detailPane.SelectedView() != ViewCases {
+		t.Fatalf("SelectedView() = %q, want %q", detailPane.SelectedView(), ViewCases)
+	}
+
+	if detailPane.selectedPane != 1 {
+		t.Fatalf("selectedPane = %d, want 1", detailPane.selectedPane)
+	}
+
+	updated, _ = detailPane.Update(tea.KeyMsg{Type: tea.KeyDown})
+	nextField := requireUpdatedModel(t, updated)
+
+	if nextField.selectedCase != 1 {
+		t.Fatalf("selectedCase = %d, want 1", nextField.selectedCase)
+	}
+
+	if nextField.selectedCaseField != caseFieldDescription {
+		t.Fatalf("selectedCaseField = %d, want %d", nextField.selectedCaseField, caseFieldDescription)
 	}
 }
 

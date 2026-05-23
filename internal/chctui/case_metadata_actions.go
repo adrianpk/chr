@@ -52,13 +52,23 @@ func (m Model) updateCasesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 func (m *Model) handleCaseSelectionKey(msg tea.KeyMsg) bool {
 	switch msg.String() {
 	case "up", "k":
-		m.selectPreviousCase()
+		switch m.selectedPane {
+		case 0:
+			m.selectPreviousCase()
+		case 1:
+			m.selectPreviousCaseField()
+		default:
+			return false
+		}
 	case "down", "j":
-		m.selectNextCase()
-	case "shift+tab":
-		m.selectPreviousCaseField()
-	case "tab":
-		m.selectNextCaseField()
+		switch m.selectedPane {
+		case 0:
+			m.selectNextCase()
+		case 1:
+			m.selectNextCaseField()
+		default:
+			return false
+		}
 	default:
 		return false
 	}
@@ -69,7 +79,7 @@ func (m *Model) handleCaseSelectionKey(msg tea.KeyMsg) bool {
 func (m *Model) handleCaseActionKey(msg tea.KeyMsg) bool {
 	switch msg.String() {
 	case "enter", "e":
-		m.startCaseFieldEdit()
+		return m.handleCaseEnterKey()
 	case "n":
 		m.newCase()
 	case "ctrl+s", "s":
@@ -77,15 +87,42 @@ func (m *Model) handleCaseActionKey(msg tea.KeyMsg) bool {
 	case "r":
 		m.refreshWorkspace()
 	case "/":
+		if m.selectedPane != 0 {
+			return false
+		}
+
 		m.caseFilterEditing = true
 		m.statusMessage = ""
 	case "esc":
-		m.caseFilter = ""
+		m.handleCaseEscapeKey()
 	default:
 		return false
 	}
 
 	return true
+}
+
+func (m *Model) handleCaseEnterKey() bool {
+	switch m.selectedPane {
+	case 0:
+		m.selectedPane = 1
+	case 1:
+		m.startCaseFieldEdit()
+	default:
+		return false
+	}
+
+	return true
+}
+
+func (m *Model) handleCaseEscapeKey() {
+	if m.selectedPane == 0 {
+		m.caseFilter = ""
+
+		return
+	}
+
+	m.selectPrimaryPane()
 }
 
 func (m *Model) updateCaseEditKey(msg tea.KeyMsg) tea.Cmd {

@@ -225,6 +225,7 @@ func (m *Model) selectView(view View) {
 	for index, candidate := range m.views {
 		if candidate == view {
 			m.selected = index
+			m.selectPrimaryPane()
 
 			return
 		}

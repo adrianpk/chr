@@ -140,13 +140,13 @@ func (m Model) renderProjectWorkspace(width, height int) string {
 	location := m.renderProjectLocationLines()
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
-		renderPanel("Location", location, rightWidth, rightTopHeight, false),
-		renderPanel("Artifacts", artifacts, rightWidth, rightBottomHeight, false),
+		renderPanel("Location", location, rightWidth, rightTopHeight, m.selectedPane == 1),
+		renderPanel("Artifacts", artifacts, rightWidth, rightBottomHeight, m.selectedPane == 2),
 	)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Project", project, leftWidth, height, true),
+		renderPanel("Project", project, leftWidth, height, m.selectedPane == 0),
 		right,
 	), width, height)
 }
@@ -179,7 +179,7 @@ func (m Model) renderProjectContextLines(width int) []string {
 
 func (m Model) renderProjectFieldLine(field int, label, value string, width int) string {
 	prefix := "  "
-	if field == m.selectedProjectField {
+	if m.selectedPane == 0 && field == m.selectedProjectField {
 		prefix = "> "
 	}
 
@@ -245,13 +245,13 @@ func (m Model) renderCasesWorkspace(width, height int) string {
 	rightArtifactsHeight := maxInt(height-rightEditableHeight, 1)
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
-		renderPanel("Case", m.renderCaseDocumentLines(maxInt(rightWidth-4, 1)), rightWidth, rightEditableHeight, true),
-		renderPanel("Artifacts", m.renderCaseArtifactLines(), rightWidth, rightArtifactsHeight, false),
+		renderPanel("Case", m.renderCaseDocumentLines(maxInt(rightWidth-4, 1)), rightWidth, rightEditableHeight, m.selectedPane == 1),
+		renderPanel("Artifacts", m.renderCaseArtifactLines(), rightWidth, rightArtifactsHeight, m.selectedPane == 2),
 	)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Cases", m.renderCaseListLines(maxInt(leftWidth-4, 1), height-2), leftWidth, height, true),
+		renderPanel("Cases", m.renderCaseListLines(maxInt(leftWidth-4, 1), height-2), leftWidth, height, m.selectedPane == 0),
 		right,
 	), width, height)
 }
@@ -383,7 +383,7 @@ func (m Model) renderCaseContextLines(width int) []string {
 
 func (m Model) renderCaseFieldLine(field int, label, value string, width int) string {
 	prefix := "  "
-	if field == m.selectedCaseField {
+	if m.selectedPane == 1 && field == m.selectedCaseField {
 		prefix = "> "
 	}
 
@@ -478,8 +478,8 @@ func (m Model) renderTicketWorkspace(width, height int) string {
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Tickets", list, leftWidth, height, true),
-		renderPanel("Detail", strings.Split(detail, "\n")[1:], rightWidth, height, false),
+		renderPanel("Tickets", list, leftWidth, height, m.selectedPane == 0),
+		renderPanel("Detail", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -490,8 +490,8 @@ func (m Model) renderDocumentWorkspace(width, height int, title string, document
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel(title, list, leftWidth, height, true),
-		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, false),
+		renderPanel(title, list, leftWidth, height, m.selectedPane == 0),
+		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -513,8 +513,8 @@ func (m Model) renderQuizWorkspace(width, height int) string {
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Quizzes", list, leftWidth, height, true),
-		renderPanel("Interaction", interaction, rightWidth, height, false),
+		renderPanel("Quizzes", list, leftWidth, height, m.selectedPane == 0),
+		renderPanel("Interaction", interaction, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -525,8 +525,8 @@ func (m Model) renderAuthoringWorkspace(width, height int) string {
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Authoring", list, leftWidth, height, true),
-		renderPanel("Session", strings.Split(detail, "\n")[1:], rightWidth, height, false),
+		renderPanel("Authoring", list, leftWidth, height, m.selectedPane == 0),
+		renderPanel("Session", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -537,8 +537,8 @@ func (m Model) renderOperationsWorkspace(width, height int) string {
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		renderPanel("Agent", agent[1:], leftWidth, height, m.SelectedView() == ViewDash || m.SelectedView() == ViewAgent),
-		renderPanel("Runtime", runtime[1:], rightWidth, height, m.SelectedView() == ViewRuntime),
+		renderPanel("Agent", agent[1:], leftWidth, height, m.selectedPane == 0),
+		renderPanel("Runtime", runtime[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -645,7 +645,11 @@ func (m Model) renderShellStatus(width int) string {
 }
 
 func (m Model) renderShellFooter(width int) string {
-	buttons := []shellButton{
+	return m.renderShellButtons(shellFooterButtons(), width)
+}
+
+func shellFooterButtons() []shellButton {
+	return []shellButton{
 		{Key: "F1", Label: "Project", View: ViewProject},
 		{Key: "F2", Label: "Cases", View: ViewCases},
 		{Key: "F3", Label: "Dumps", View: ViewDumps},
@@ -657,14 +661,11 @@ func (m Model) renderShellFooter(width int) string {
 		{Key: "F9", Label: "Help", View: ViewHelp},
 		{Key: "F10", Label: "Exit"},
 	}
-
-	return m.renderShellButtons(buttons, width)
 }
 
 func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 	widths := distributedWidths(width, len(buttons))
-	keyLine := make([]string, 0, len(buttons))
-	labelLine := make([]string, 0, len(buttons))
+	cells := make([]string, 0, len(buttons))
 
 	for index, button := range buttons {
 		style := shellButtonInactiveStyle
@@ -674,11 +675,29 @@ func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 
 		cellWidth := widths[index]
 		style = style.Width(cellWidth).Align(lipgloss.Center)
-		keyLine = append(keyLine, style.Render(button.Key))
-		labelLine = append(labelLine, style.Render(button.Label))
+		cells = append(cells, style.Render(button.Key+"\n"+button.Label))
 	}
 
-	return strings.Join(keyLine, "") + "\n" + strings.Join(labelLine, "")
+	return lipgloss.JoinHorizontal(lipgloss.Top, cells...)
+}
+
+func shellFooterButtonAt(x, y, width, height int) (shellButton, bool) {
+	if y < height-2 || y >= height || x < 0 || x >= width {
+		return shellButton{}, false
+	}
+
+	buttons := shellFooterButtons()
+	offset := 0
+
+	for index, cellWidth := range distributedWidths(width, len(buttons)) {
+		if x >= offset && x < offset+cellWidth {
+			return buttons[index], true
+		}
+
+		offset += cellWidth
+	}
+
+	return shellButton{}, false
 }
 
 func projectDisplayName(projectDir string) string {

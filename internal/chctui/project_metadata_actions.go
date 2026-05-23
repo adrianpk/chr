@@ -38,13 +38,11 @@ func (m Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 
+	if m.handleProjectFieldKey(msg.String()) {
+		return m, nil
+	}
+
 	switch msg.String() {
-	case "up", "k":
-		m.selectPreviousProjectField()
-	case "down", "j":
-		m.selectNextProjectField()
-	case "enter", "e":
-		m.startProjectFieldEdit()
 	case "ctrl+s", "s":
 		m.saveProjectMetadata()
 	case "r":
@@ -54,6 +52,25 @@ func (m Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m *Model) handleProjectFieldKey(key string) bool {
+	if m.selectedPane != 0 {
+		return false
+	}
+
+	switch key {
+	case "up", "k":
+		m.selectPreviousProjectField()
+	case "down", "j":
+		m.selectNextProjectField()
+	case "enter", "e":
+		m.startProjectFieldEdit()
+	default:
+		return false
+	}
+
+	return true
 }
 
 func (m *Model) updateProjectEditKey(msg tea.KeyMsg) tea.Cmd {
