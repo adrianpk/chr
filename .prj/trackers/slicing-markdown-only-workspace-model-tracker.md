@@ -22,8 +22,8 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 | Slice 1: Markdown-Only Contract | Delivered | `feat/slice-1-markdown-only-contract` | `feat(slice-1): markdown-only contract` | `.prj/reports/slices/markdown-only-workspace-model/slice-1-markdown-only-contract.md` | PR #149. |
 | Slice 2: Remove Project And Case Indexes | Delivered | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | PR #150. |
 | Slice 3: Workspace Graph Builder | Delivered | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | PR #151. |
-| Slice 4: Filesystem Refresh Semantics | Active | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | Manual editor/file changes. |
-| Slice 5: TUI Project And Cases Rewire | Planned | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | Project/Cases screens use Markdown and graph. |
+| Slice 4: Filesystem Refresh Semantics | Delivered | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | PR #152. |
+| Slice 5: TUI Project And Cases Rewire | Active | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | Project/Cases screens use Markdown and graph. |
 | Slice 6: Context Assembly From Graph | Planned | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
 
 ## Slice 1: Markdown-Only Contract
@@ -112,7 +112,7 @@ Task commits:
 - T4.1: `2bb78b2` adds workspace refresh executor contract.
 - T4.2: `2bb78b2` rebuilds the runtime graph from filesystem refresh.
 - T4.3: `2bb78b2` adds diagnostics/status reporting and edit guardrails.
-- T4.4: pending commit adds slice implementation report and validation.
+- T4.4: `095e308` adds slice implementation report and validation.
 
 ## Slice 5: TUI Project And Cases Rewire
 

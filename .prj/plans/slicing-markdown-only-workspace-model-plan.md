@@ -211,7 +211,7 @@ Expected outcome:
 
 ### Slice 4: Filesystem Refresh Semantics
 
-Status: active.
+Status: delivered.
 
 Expected branch: `feat/slice-4-filesystem-refresh-semantics`
 Expected PR title: `feat(slice-4): filesystem refresh semantics`
@@ -239,7 +239,7 @@ Expected outcome:
 
 ### Slice 5: TUI Project And Cases Rewire
 
-Status: planned.
+Status: active.
 
 Expected branch: `feat/slice-5-tui-project-cases-rewire`
 Expected PR title: `feat(slice-5): tui project cases rewire`

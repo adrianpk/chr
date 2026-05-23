@@ -1,11 +1,11 @@
 # Slice 4: Filesystem Refresh Semantics
 
-Status: reviewing
+Status: delivered
 Slicing: Markdown-Only Workspace Model
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 Tracker: `.prj/trackers/slicing-markdown-only-workspace-model-tracker.md`
 Branch: `feat/slice-4-filesystem-refresh-semantics`
-PR: pending
+PR: #152
 
 ## Purpose
 
