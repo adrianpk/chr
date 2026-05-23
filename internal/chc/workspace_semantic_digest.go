@@ -46,13 +46,40 @@ type WorkspaceSemanticDigestCache struct {
 type WorkspaceSemanticDigestGenerator interface {
 	GenerateWorkspaceSemanticDigest(
 		ctx context.Context,
-		node WorkspaceNode,
-		modelID string,
-		promptHash string,
+		request WorkspaceSemanticDigestRequest,
 	) (string, error)
 }
 
 type DeterministicWorkspaceSemanticDigestGenerator struct{}
+
+type WorkspaceSemanticDigestRequest struct {
+	NodeID     string
+	Node       WorkspaceNode
+	ModelID    string
+	PromptHash string
+}
+
+type WorkspaceSemanticDigestGeneration struct {
+	NodeID string
+	Status WorkspaceSemanticDigestStatus
+	Digest WorkspaceSemanticDigest
+}
+
+type WorkspaceSemanticIndexWorker struct {
+	Generator  WorkspaceSemanticDigestGenerator
+	ModelID    string
+	PromptHash string
+	Now        func() time.Time
+}
+
+type WorkspaceSemanticIndexWorkerResult struct {
+	Cache          WorkspaceSemanticDigestCache
+	Generated      []WorkspaceSemanticDigestGeneration
+	ReadyCount     int
+	PendingCount   int
+	StaleCount     int
+	GeneratedCount int
+}
 
 type workspaceSemanticDigestCacheFile struct {
 	SchemaVersion int                       `json:"schema_version"`
@@ -195,23 +222,96 @@ func NewWorkspaceSemanticDigest(
 
 func (DeterministicWorkspaceSemanticDigestGenerator) GenerateWorkspaceSemanticDigest(
 	_ context.Context,
-	node WorkspaceNode,
-	modelID string,
-	promptHash string,
+	request WorkspaceSemanticDigestRequest,
 ) (string, error) {
+	node := request.Node
 	parts := []string{
-		WorkspaceNodeID(node),
+		request.NodeID,
 		string(node.Kind),
 		node.RelativePath,
 		node.Title,
 		node.Status,
 		node.CaseSlug,
 		node.SourceHash,
-		modelID,
-		promptHash,
+		request.ModelID,
+		request.PromptHash,
 	}
 
 	return contentHash([]byte(strings.Join(parts, "\x00"))), nil
+}
+
+func (w WorkspaceSemanticIndexWorker) Generate(
+	ctx context.Context,
+	index WorkspaceIndex,
+	cache WorkspaceSemanticDigestCache,
+) (WorkspaceSemanticIndexWorkerResult, error) {
+	if w.Generator == nil {
+		return WorkspaceSemanticIndexWorkerResult{}, errors.New("workspace semantic digest generator is required")
+	}
+
+	result := WorkspaceSemanticIndexWorkerResult{
+		Cache: NewWorkspaceSemanticDigestCache(),
+	}
+
+	for nodeID, entry := range cache.Entries {
+		result.Cache.Entries[nodeID] = entry
+	}
+
+	states := WorkspaceSemanticDigestStates(index, result.Cache, w.ModelID, w.PromptHash)
+	for _, state := range states {
+		err := ctx.Err()
+		if err != nil {
+			return WorkspaceSemanticIndexWorkerResult{}, err
+		}
+
+		result.countState(state.Status)
+
+		if state.Status == WorkspaceSemanticDigestReady {
+			continue
+		}
+
+		node := index.NodesByID[state.NodeID]
+
+		digest, err := w.Generator.GenerateWorkspaceSemanticDigest(ctx, WorkspaceSemanticDigestRequest{
+			NodeID:     state.NodeID,
+			Node:       node,
+			ModelID:    w.ModelID,
+			PromptHash: w.PromptHash,
+		})
+		if err != nil {
+			return WorkspaceSemanticIndexWorkerResult{}, fmt.Errorf("generate workspace semantic digest for %s: %w", state.NodeID, err)
+		}
+
+		entry := NewWorkspaceSemanticDigest(node, w.ModelID, w.PromptHash, digest, w.now())
+		result.Cache.Entries[state.NodeID] = entry
+		result.Generated = append(result.Generated, WorkspaceSemanticDigestGeneration{
+			NodeID: state.NodeID,
+			Status: state.Status,
+			Digest: entry,
+		})
+		result.GeneratedCount++
+	}
+
+	return result, nil
+}
+
+func (w WorkspaceSemanticIndexWorker) now() time.Time {
+	if w.Now != nil {
+		return w.Now().UTC()
+	}
+
+	return time.Now().UTC()
+}
+
+func (r *WorkspaceSemanticIndexWorkerResult) countState(status WorkspaceSemanticDigestStatus) {
+	switch status {
+	case WorkspaceSemanticDigestReady:
+		r.ReadyCount++
+	case WorkspaceSemanticDigestPending:
+		r.PendingCount++
+	case WorkspaceSemanticDigestStale:
+		r.StaleCount++
+	}
 }
 
 func workspaceSemanticDigestStale(

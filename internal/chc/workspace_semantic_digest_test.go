@@ -123,12 +123,19 @@ func TestDeterministicWorkspaceSemanticDigestGenerator(t *testing.T) {
 		SourceHash:   "source-1",
 	}
 
-	first, err := generator.GenerateWorkspaceSemanticDigest(context.Background(), node, "model-a", "prompt-a")
+	request := WorkspaceSemanticDigestRequest{
+		NodeID:     WorkspaceNodeID(node),
+		Node:       node,
+		ModelID:    "model-a",
+		PromptHash: "prompt-a",
+	}
+
+	first, err := generator.GenerateWorkspaceSemanticDigest(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateWorkspaceSemanticDigest returned error: %v", err)
 	}
 
-	second, err := generator.GenerateWorkspaceSemanticDigest(context.Background(), node, "model-a", "prompt-a")
+	second, err := generator.GenerateWorkspaceSemanticDigest(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateWorkspaceSemanticDigest returned error: %v", err)
 	}
@@ -139,6 +146,93 @@ func TestDeterministicWorkspaceSemanticDigestGenerator(t *testing.T) {
 
 	if first != second {
 		t.Fatalf("digest = %q then %q, want deterministic result", first, second)
+	}
+}
+
+func TestWorkspaceSemanticIndexWorkerGeneratesPendingAndStaleDigests(t *testing.T) {
+	now := time.Date(2026, 5, 23, 13, 0, 0, 0, time.UTC)
+	index := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"spec:ready.md": {
+				Kind:         WorkspaceNodeSpec,
+				RelativePath: "specs/ready.md",
+				SourceHash:   "source-ready",
+			},
+			"spec:stale.md": {
+				Kind:         WorkspaceNodeSpec,
+				RelativePath: "specs/stale.md",
+				SourceHash:   "source-new",
+			},
+			"spec:pending.md": {
+				Kind:         WorkspaceNodeSpec,
+				RelativePath: "specs/pending.md",
+				SourceHash:   "source-pending",
+			},
+		},
+	}
+	cache := NewWorkspaceSemanticDigestCache()
+	cache.Entries["spec:ready.md"] = WorkspaceSemanticDigest{
+		NodeID:     "spec:ready.md",
+		ModelID:    "model-a",
+		PromptHash: "prompt-a",
+		SourceHash: "source-ready",
+		Digest:     "ready",
+	}
+	cache.Entries["spec:stale.md"] = WorkspaceSemanticDigest{
+		NodeID:     "spec:stale.md",
+		ModelID:    "model-a",
+		PromptHash: "prompt-a",
+		SourceHash: "source-old",
+		Digest:     "stale",
+	}
+	worker := WorkspaceSemanticIndexWorker{
+		Generator:  DeterministicWorkspaceSemanticDigestGenerator{},
+		ModelID:    "model-a",
+		PromptHash: "prompt-a",
+		Now: func() time.Time {
+			return now
+		},
+	}
+
+	result, err := worker.Generate(context.Background(), index, cache)
+	if err != nil {
+		t.Fatalf("Generate returned error: %v", err)
+	}
+
+	if result.ReadyCount != 1 || result.PendingCount != 1 || result.StaleCount != 1 {
+		t.Fatalf("result counts = %#v, want one ready, pending, and stale", result)
+	}
+
+	if result.GeneratedCount != 2 || len(result.Generated) != 2 {
+		t.Fatalf("generated = %#v, want two generated digests", result.Generated)
+	}
+
+	assertGeneratedSemanticDigest(t, result.Cache, "spec:pending.md", "source-pending", now)
+	assertGeneratedSemanticDigest(t, result.Cache, "spec:stale.md", "source-new", now)
+}
+
+func TestWorkspaceIndexHealthWithSemanticDigestStates(t *testing.T) {
+	index := WorkspaceIndex{
+		NodesByID: map[string]WorkspaceNode{
+			"spec:one.md":   {},
+			"spec:two.md":   {},
+			"spec:three.md": {},
+		},
+	}
+	states := []WorkspaceSemanticDigestState{
+		{NodeID: "spec:one.md", Status: WorkspaceSemanticDigestReady},
+		{NodeID: "spec:two.md", Status: WorkspaceSemanticDigestPending},
+		{NodeID: "spec:three.md", Status: WorkspaceSemanticDigestStale},
+	}
+
+	health := index.HealthWithSemanticDigestStates(states)
+
+	if health.SemanticDigestPendingCount != 1 {
+		t.Fatalf("SemanticDigestPendingCount = %d, want 1", health.SemanticDigestPendingCount)
+	}
+
+	if health.SemanticDigestStaleCount != 1 {
+		t.Fatalf("SemanticDigestStaleCount = %d, want 1", health.SemanticDigestStaleCount)
 	}
 }
 
@@ -153,6 +247,29 @@ func TestWorkspaceSemanticDigestCachePath(t *testing.T) {
 	err := os.MkdirAll(filepath.Dir(want), 0o755)
 	if err != nil {
 		t.Fatalf("MkdirAll returned error: %v", err)
+	}
+}
+
+func assertGeneratedSemanticDigest(
+	t *testing.T,
+	cache WorkspaceSemanticDigestCache,
+	nodeID string,
+	sourceHash string,
+	generatedAt time.Time,
+) {
+	t.Helper()
+
+	entry := cache.Entries[nodeID]
+	if entry.Digest == "" {
+		t.Fatalf("digest for %s is empty", nodeID)
+	}
+
+	if entry.SourceHash != sourceHash {
+		t.Fatalf("SourceHash for %s = %q, want %q", nodeID, entry.SourceHash, sourceHash)
+	}
+
+	if !entry.GeneratedAt.Equal(generatedAt) {
+		t.Fatalf("GeneratedAt for %s = %s, want %s", nodeID, entry.GeneratedAt, generatedAt)
 	}
 }
 

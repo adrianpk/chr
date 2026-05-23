@@ -34,11 +34,13 @@ type WorkspaceIndex struct {
 }
 
 type WorkspaceIndexHealth struct {
-	NodeCount                int
-	EdgeCount                int
-	DiagnosticCount          int
-	UnresolvedReferenceCount int
-	BuiltAt                  time.Time
+	NodeCount                  int
+	EdgeCount                  int
+	DiagnosticCount            int
+	UnresolvedReferenceCount   int
+	SemanticDigestPendingCount int
+	SemanticDigestStaleCount   int
+	BuiltAt                    time.Time
 }
 
 type WorkspaceIndexChanges struct {
@@ -135,6 +137,23 @@ func (i WorkspaceIndex) Health() WorkspaceIndexHealth {
 		UnresolvedReferenceCount: len(i.unresolvedCaseSlugs()),
 		BuiltAt:                  i.BuiltAt,
 	}
+}
+
+func (i WorkspaceIndex) HealthWithSemanticDigestStates(
+	states []WorkspaceSemanticDigestState,
+) WorkspaceIndexHealth {
+	health := i.Health()
+
+	for _, state := range states {
+		switch state.Status {
+		case WorkspaceSemanticDigestPending:
+			health.SemanticDigestPendingCount++
+		case WorkspaceSemanticDigestStale:
+			health.SemanticDigestStaleCount++
+		}
+	}
+
+	return health
 }
 
 func (i WorkspaceIndex) ChangesSince(previous WorkspaceIndex) WorkspaceIndexChanges {

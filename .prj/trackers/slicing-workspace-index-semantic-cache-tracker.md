@@ -25,7 +25,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice 3: Index Load And Refresh Semantics | Delivered | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | PR #166. |
 | Slice 4: Discardable Structural Cache | Delivered | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | PR #167. |
 | Slice 5: Semantic Digest Cache Contract | Delivered | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | PR #168. |
-| Slice 6: Semantic Index Worker Boundary | Planned | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | Adds optional LLM boundary. |
+| Slice 6: Semantic Index Worker Boundary | Reviewing | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | Adds optional LLM boundary. |
 | Slice 7: Service Queries And Suggestions | Planned | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | Exposes adapter-facing queries. |
 | Slice 8: TUI Index Consumers | Planned | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | Uses queries in TUI selectors/status. |
 | Slice 9: Draft Artifact Removal | Planned | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | Removes first-class Draft semantics. |
@@ -131,20 +131,20 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Define semantic digest generator interface.
-- [ ] Define request and response contracts for per-node digest generation.
-- [ ] Wire a disabled-by-default background worker or service method.
-- [ ] Ensure tests use fake generators only.
-- [ ] Surface pending/stale digest counts in index health.
-- [ ] Prevent UI startup from blocking on semantic indexing.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define semantic digest generator interface.
+- [x] Define request and response contracts for per-node digest generation.
+- [x] Wire a disabled-by-default background worker or service method.
+- [x] Ensure tests use fake generators only.
+- [x] Surface pending/stale digest counts in index health.
+- [x] Prevent UI startup from blocking on semantic indexing.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T6.1: pending.
-- T6.2: pending.
-- T6.3: pending.
+- T6.1: pending local commit adds semantic worker contracts.
+- T6.2: pending local commit adds explicit worker generation and health counts.
+- T6.3: pending local commit adds tests, report, and validation.
 
 ## Slice 7: Service Queries And Suggestions
 
