@@ -32,10 +32,41 @@ func casesFromWorkspaceGraph(graph chc.WorkspaceGraph, fallback []chc.CaseMetada
 	return cases
 }
 
-func workspaceGraphProjectDocumentCount(graph chc.WorkspaceGraph, kind chc.WorkspaceNodeKind) int {
+func casesFromWorkspaceIndex(
+	index chc.WorkspaceIndex,
+	graph chc.WorkspaceGraph,
+	fallback []chc.CaseMetadata,
+) []chc.CaseMetadata {
+	suggestions := index.ListCases()
+	if len(suggestions) == 0 {
+		return casesFromWorkspaceGraph(graph, fallback)
+	}
+
+	fallbackBySlug := make(map[string]chc.CaseMetadata, len(fallback))
+	for _, metadata := range fallback {
+		fallbackBySlug[metadata.Slug] = metadata
+	}
+
+	cases := make([]chc.CaseMetadata, 0, len(suggestions))
+	for _, suggestion := range suggestions {
+		metadata := fallbackBySlug[suggestion.Slug]
+		metadata.SchemaVersion = chc.CaseMetadataSchemaVersion
+		metadata.Slug = suggestion.Slug
+		metadata.Name = suggestion.Name
+		metadata.Description = suggestion.Description
+		metadata.SourcePath = suggestion.Path
+		metadata.Exists = true
+		cases = append(cases, metadata)
+	}
+
+	return cases
+}
+
+func workspaceIndexCaseDocumentCount(index chc.WorkspaceIndex, slug string, kind chc.WorkspaceNodeKind) int {
 	count := 0
 
-	for _, node := range graph.ProjectWide {
+	for _, nodeID := range index.ByCaseSlug[slug] {
+		node := index.NodesByID[nodeID]
 		if node.Kind == kind {
 			count++
 		}
@@ -44,10 +75,10 @@ func workspaceGraphProjectDocumentCount(graph chc.WorkspaceGraph, kind chc.Works
 	return count
 }
 
-func workspaceGraphCaseDocumentCount(graph chc.WorkspaceGraph, slug string, kind chc.WorkspaceNodeKind) int {
+func workspaceGraphProjectDocumentCount(graph chc.WorkspaceGraph, kind chc.WorkspaceNodeKind) int {
 	count := 0
 
-	for _, node := range graph.CaseDocuments[slug] {
+	for _, node := range graph.ProjectWide {
 		if node.Kind == kind {
 			count++
 		}

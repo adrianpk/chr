@@ -646,6 +646,9 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 		result: WorkspaceRefreshResult{
 			Graph: refreshedGraph,
 			Index: chc.NewWorkspaceIndexFromGraph(refreshedGraph),
+			SemanticDigestStates: []chc.WorkspaceSemanticDigestState{
+				{NodeID: "spec:.chc/specs/new.md", Status: chc.WorkspaceSemanticDigestPending},
+			},
 		},
 	}
 	model := NewModel(Options{
@@ -658,6 +661,10 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 	if _, ok := model.workspaceIndex.NodesByID["spec:.chc/specs/new.md"]; !ok {
 		t.Fatalf("workspaceIndex.NodesByID = %#v, want refreshed spec", model.workspaceIndex.NodesByID)
 	}
+
+	if len(model.semanticDigestStates) != 1 {
+		t.Fatalf("semanticDigestStates = %#v, want one state", model.semanticDigestStates)
+	}
 }
 
 func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {
@@ -668,9 +675,9 @@ func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {
 			},
 			CaseDocuments: map[string][]chc.WorkspaceNode{
 				"blog": {
-					{Kind: chc.WorkspaceNodeDump, CaseSlug: "blog"},
-					{Kind: chc.WorkspaceNodeSpec, CaseSlug: "blog"},
-					{Kind: chc.WorkspaceNodeTicket, CaseSlug: "blog"},
+					{Kind: chc.WorkspaceNodeDump, RelativePath: ".chc/dumps/blog.md", CaseSlug: "blog"},
+					{Kind: chc.WorkspaceNodeSpec, RelativePath: ".chc/specs/blog.md", CaseSlug: "blog"},
+					{Kind: chc.WorkspaceNodeTicket, RelativePath: ".chc/tickets/CHC-1.md", CaseSlug: "blog"},
 				},
 			},
 			UnresolvedCaseReferences: []chc.WorkspaceCaseReference{
@@ -722,6 +729,63 @@ func TestModelShowsUnresolvedCaseReferencesInCaseList(t *testing.T) {
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("case list missing %q:\n%s", want, rendered)
+		}
+	}
+}
+
+func TestModelFiltersCasesWithWorkspaceIndexSuggestions(t *testing.T) {
+	index := chc.WorkspaceIndex{
+		NodesByID: map[string]chc.WorkspaceNode{
+			"case:blog": {
+				Kind:        chc.WorkspaceNodeCase,
+				Slug:        "blog",
+				Name:        "Blog Publishing",
+				Description: "Publish articles.",
+			},
+			"case:runtime": {
+				Kind:        chc.WorkspaceNodeCase,
+				Slug:        "runtime",
+				Name:        "Runtime Operations",
+				Description: "Observe runtime work.",
+			},
+		},
+		CasesBySlug: map[string]string{
+			"blog":    "case:blog",
+			"runtime": "case:runtime",
+		},
+	}
+	model := NewModel(Options{WorkspaceIndex: index})
+	model.caseFilter = "publishing"
+
+	cases := model.filteredCases()
+
+	if len(cases) != 1 || cases[0].Slug != "blog" {
+		t.Fatalf("filtered cases = %#v, want blog", cases)
+	}
+}
+
+func TestModelShowsWorkspaceIndexHealthInDash(t *testing.T) {
+	model := NewModel(Options{
+		WorkspaceGraph: chc.WorkspaceGraph{
+			ProjectWide: []chc.WorkspaceNode{
+				{Kind: chc.WorkspaceNodeSpec, RelativePath: ".chc/specs/one.md"},
+			},
+			CaseDocuments: map[string][]chc.WorkspaceNode{},
+		},
+		SemanticDigestStates: []chc.WorkspaceSemanticDigestState{
+			{NodeID: "spec:.chc/specs/one.md", Status: chc.WorkspaceSemanticDigestPending},
+		},
+	})
+
+	rendered := model.renderWorkspaceIndexHealth()
+
+	for _, want := range []string{
+		"Workspace Index",
+		"Nodes: 1",
+		"Semantic pending: 1",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("workspace index health missing %q:\n%s", want, rendered)
 		}
 	}
 }
@@ -856,7 +920,18 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 }
 
 func TestModelPlansArtifactActionCommand(t *testing.T) {
-	model := NewModel(Options{})
+	model := NewModel(Options{
+		WorkspaceIndex: chc.WorkspaceIndex{
+			NodesByID: map[string]chc.WorkspaceNode{
+				"case:blog": {
+					Kind: chc.WorkspaceNodeCase,
+					Slug: "blog",
+					Name: "Blog Publishing",
+				},
+			},
+			CasesBySlug: map[string]string{"blog": "case:blog"},
+		},
+	})
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "create-ticket"
 
@@ -884,6 +959,8 @@ func TestModelPlansArtifactActionCommand(t *testing.T) {
 		"Confirm Action",
 		"Create ticket",
 		"Title: TUI created ticket",
+		"Use case suggestions:",
+		"blog - Blog Publishing",
 		"enter confirms action",
 	} {
 		if !strings.Contains(view, want) {

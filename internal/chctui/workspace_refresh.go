@@ -11,12 +11,13 @@ type WorkspaceRefreshExecutor interface {
 }
 
 type WorkspaceRefreshResult struct {
-	Message      string
-	Graph        chc.WorkspaceGraph
-	Index        chc.WorkspaceIndex
-	IndexHealth  chc.WorkspaceIndexHealth
-	IndexChanges chc.WorkspaceIndexChanges
-	IndexCache   chc.WorkspaceIndexCacheState
+	Message              string
+	Graph                chc.WorkspaceGraph
+	Index                chc.WorkspaceIndex
+	IndexHealth          chc.WorkspaceIndexHealth
+	IndexChanges         chc.WorkspaceIndexChanges
+	IndexCache           chc.WorkspaceIndexCacheState
+	SemanticDigestStates []chc.WorkspaceSemanticDigestState
 }
 
 func (m *Model) refreshWorkspace() {
@@ -41,8 +42,9 @@ func (m *Model) refreshWorkspace() {
 	result.IndexChanges = result.Index.ChangesSince(m.workspaceIndex)
 	m.workspaceGraph = result.Graph
 	m.workspaceIndex = result.Index
+	m.semanticDigestStates = append([]chc.WorkspaceSemanticDigestState(nil), result.SemanticDigestStates...)
 	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
-	m.cases = casesFromWorkspaceGraph(result.Graph, m.cases)
+	m.cases = casesFromWorkspaceIndex(result.Index, result.Graph, m.cases)
 	m.clampSelectedCase()
 
 	m.statusMessage = workspaceRefreshMessage(result)
@@ -64,8 +66,9 @@ func (m *Model) refreshWorkspaceGraphAfterWrite() bool {
 	result.IndexChanges = result.Index.ChangesSince(m.workspaceIndex)
 	m.workspaceGraph = result.Graph
 	m.workspaceIndex = result.Index
+	m.semanticDigestStates = append([]chc.WorkspaceSemanticDigestState(nil), result.SemanticDigestStates...)
 	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
-	m.cases = casesFromWorkspaceGraph(result.Graph, m.cases)
+	m.cases = casesFromWorkspaceIndex(result.Index, result.Graph, m.cases)
 	m.clampSelectedCase()
 
 	return true

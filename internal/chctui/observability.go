@@ -124,6 +124,22 @@ func (m Model) renderRuntime() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
+func (m Model) renderWorkspaceIndexHealth() string {
+	health := m.workspaceIndex.HealthWithSemanticDigestStates(m.semanticDigestStates)
+
+	var output strings.Builder
+
+	output.WriteString("Workspace Index\n")
+	output.WriteString(fmt.Sprintf("  Nodes: %d\n", health.NodeCount))
+	output.WriteString(fmt.Sprintf("  Edges: %d\n", health.EdgeCount))
+	output.WriteString(fmt.Sprintf("  Diagnostics: %d\n", health.DiagnosticCount))
+	output.WriteString(fmt.Sprintf("  Unresolved refs: %d\n", health.UnresolvedReferenceCount))
+	output.WriteString(fmt.Sprintf("  Semantic pending: %d\n", health.SemanticDigestPendingCount))
+	output.WriteString(fmt.Sprintf("  Semantic stale: %d", health.SemanticDigestStaleCount))
+
+	return output.String()
+}
+
 func renderLoopRunDetail(loop LoopRunView) string {
 	if loop.ID == "" {
 		return "  No loop runs recorded."

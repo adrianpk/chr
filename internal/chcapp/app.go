@@ -154,7 +154,7 @@ func loadTUIOptions(
 		return chctui.Options{}, err
 	}
 
-	workspaceGraph, workspaceIndex, err := loadTUIWorkspaceState(ctx, projectContext)
+	workspaceGraph, workspaceIndex, semanticDigestStates, err := loadTUIWorkspaceState(ctx, projectContext)
 	if err != nil {
 		return chctui.Options{}, err
 	}
@@ -162,72 +162,84 @@ func loadTUIOptions(
 	operations := newService(ctx, env, projectContext)
 
 	return newTUIOptions(tuiOptionsData{
-		ctx:               ctx,
-		env:               env,
-		projectContext:    projectContext,
-		stdin:             stdin,
-		stdout:            stdout,
-		tickets:           tickets,
-		documents:         documents,
-		projectMetadata:   projectMetadata,
-		cases:             cases,
-		authoringSessions: authoringSessions,
-		observability:     observability,
-		workspaceGraph:    workspaceGraph,
-		workspaceIndex:    workspaceIndex,
-		operations:        operations,
+		ctx:                  ctx,
+		env:                  env,
+		projectContext:       projectContext,
+		stdin:                stdin,
+		stdout:               stdout,
+		tickets:              tickets,
+		documents:            documents,
+		projectMetadata:      projectMetadata,
+		cases:                cases,
+		authoringSessions:    authoringSessions,
+		observability:        observability,
+		workspaceGraph:       workspaceGraph,
+		workspaceIndex:       workspaceIndex,
+		semanticDigestStates: semanticDigestStates,
+		operations:           operations,
 	}), nil
 }
 
 func loadTUIWorkspaceState(
 	ctx context.Context,
 	projectContext commandProjectContext,
-) (chc.WorkspaceGraph, chc.WorkspaceIndex, error) {
+) (chc.WorkspaceGraph, chc.WorkspaceIndex, []chc.WorkspaceSemanticDigestState, error) {
 	result, err := chc.NewWorkspaceGraphBuilder(projectContext.ProjectDir).BuildCachedIndex(ctx)
 	if err != nil {
-		return chc.WorkspaceGraph{}, chc.WorkspaceIndex{}, err
+		return chc.WorkspaceGraph{}, chc.WorkspaceIndex{}, nil, err
 	}
 
-	return result.Graph, result.Index, nil
+	cache, err := chc.ReadWorkspaceSemanticDigestCache(
+		chc.WorkspaceSemanticDigestCachePath(projectContext.ProjectDir),
+	)
+	if err != nil {
+		return chc.WorkspaceGraph{}, chc.WorkspaceIndex{}, nil, err
+	}
+
+	states := chc.WorkspaceSemanticDigestStates(result.Index, cache, "", "")
+
+	return result.Graph, result.Index, states, nil
 }
 
 type tuiOptionsData struct {
-	ctx               context.Context
-	env               chc.UserEnvironment
-	projectContext    commandProjectContext
-	stdin             io.Reader
-	stdout            io.Writer
-	tickets           []chc.IndexedTicket
-	documents         []chctui.DocumentView
-	projectMetadata   chc.ProjectMetadata
-	cases             []chc.CaseMetadata
-	authoringSessions []chc.AuthoringSession
-	observability     chctui.ObservabilityView
-	workspaceGraph    chc.WorkspaceGraph
-	workspaceIndex    chc.WorkspaceIndex
-	operations        service
+	ctx                  context.Context
+	env                  chc.UserEnvironment
+	projectContext       commandProjectContext
+	stdin                io.Reader
+	stdout               io.Writer
+	tickets              []chc.IndexedTicket
+	documents            []chctui.DocumentView
+	projectMetadata      chc.ProjectMetadata
+	cases                []chc.CaseMetadata
+	authoringSessions    []chc.AuthoringSession
+	observability        chctui.ObservabilityView
+	workspaceGraph       chc.WorkspaceGraph
+	workspaceIndex       chc.WorkspaceIndex
+	semanticDigestStates []chc.WorkspaceSemanticDigestState
+	operations           service
 }
 
 func newTUIOptions(data tuiOptionsData) chctui.Options {
 	return chctui.Options{
-		ProjectDir:        data.projectContext.ProjectDir,
-		ProjectID:         data.projectContext.ProjectID,
-		ProjectMetadata:   data.projectMetadata,
-		Cases:             data.cases,
-		Stdin:             data.stdin,
-		Stdout:            data.stdout,
-		Tickets:           data.tickets,
-		Documents:         data.documents,
-		AuthoringSessions: data.authoringSessions,
-		Observability:     data.observability,
-		WorkspaceGraph:    data.workspaceGraph,
-		WorkspaceIndex:    data.workspaceIndex,
-		ActionExecutor:    newTUIArtifactActionExecutor(data.operations),
-		TicketExecutor:    newTUITicketActionExecutor(data.operations),
-		WorkExecutor:      newTUIWorkActionExecutor(data.operations),
-		WorkspaceExecutor: newTUIWorkspaceRefreshExecutor(data.operations),
-		ProjectExecutor:   newTUIProjectMetadataExecutor(data.operations),
-		CaseExecutor:      newTUICaseMetadataExecutor(data.operations),
+		ProjectDir:           data.projectContext.ProjectDir,
+		ProjectID:            data.projectContext.ProjectID,
+		ProjectMetadata:      data.projectMetadata,
+		Cases:                data.cases,
+		Stdin:                data.stdin,
+		Stdout:               data.stdout,
+		Tickets:              data.tickets,
+		Documents:            data.documents,
+		AuthoringSessions:    data.authoringSessions,
+		Observability:        data.observability,
+		WorkspaceGraph:       data.workspaceGraph,
+		WorkspaceIndex:       data.workspaceIndex,
+		SemanticDigestStates: data.semanticDigestStates,
+		ActionExecutor:       newTUIArtifactActionExecutor(data.operations),
+		TicketExecutor:       newTUITicketActionExecutor(data.operations),
+		WorkExecutor:         newTUIWorkActionExecutor(data.operations),
+		WorkspaceExecutor:    newTUIWorkspaceRefreshExecutor(data.operations),
+		ProjectExecutor:      newTUIProjectMetadataExecutor(data.operations),
+		CaseExecutor:         newTUICaseMetadataExecutor(data.operations),
 	}
 }
 

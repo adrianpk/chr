@@ -68,24 +68,25 @@ var viewPlaceholders = map[View]string{
 }
 
 type Options struct {
-	ProjectDir        string
-	ProjectID         string
-	ProjectMetadata   chc.ProjectMetadata
-	Cases             []chc.CaseMetadata
-	Stdin             io.Reader
-	Stdout            io.Writer
-	Tickets           []chc.IndexedTicket
-	Documents         []DocumentView
-	AuthoringSessions []chc.AuthoringSession
-	Observability     ObservabilityView
-	WorkspaceGraph    chc.WorkspaceGraph
-	WorkspaceIndex    chc.WorkspaceIndex
-	ActionExecutor    ArtifactActionExecutor
-	TicketExecutor    TicketActionExecutor
-	WorkExecutor      WorkActionExecutor
-	WorkspaceExecutor WorkspaceRefreshExecutor
-	ProjectExecutor   ProjectMetadataExecutor
-	CaseExecutor      CaseMetadataExecutor
+	ProjectDir           string
+	ProjectID            string
+	ProjectMetadata      chc.ProjectMetadata
+	Cases                []chc.CaseMetadata
+	Stdin                io.Reader
+	Stdout               io.Writer
+	Tickets              []chc.IndexedTicket
+	Documents            []DocumentView
+	AuthoringSessions    []chc.AuthoringSession
+	Observability        ObservabilityView
+	WorkspaceGraph       chc.WorkspaceGraph
+	WorkspaceIndex       chc.WorkspaceIndex
+	SemanticDigestStates []chc.WorkspaceSemanticDigestState
+	ActionExecutor       ArtifactActionExecutor
+	TicketExecutor       TicketActionExecutor
+	WorkExecutor         WorkActionExecutor
+	WorkspaceExecutor    WorkspaceRefreshExecutor
+	ProjectExecutor      ProjectMetadataExecutor
+	CaseExecutor         CaseMetadataExecutor
 }
 
 type Model struct {
@@ -118,6 +119,7 @@ type Model struct {
 	observability            ObservabilityView
 	workspaceGraph           chc.WorkspaceGraph
 	workspaceIndex           chc.WorkspaceIndex
+	semanticDigestStates     []chc.WorkspaceSemanticDigestState
 	commandPalette           CommandPaletteState
 	artifactAction           ArtifactActionState
 	actionExecutor           ArtifactActionExecutor
@@ -159,24 +161,25 @@ func NewModel(opts Options) Model {
 	}
 
 	return Model{
-		projectDir:        opts.ProjectDir,
-		projectID:         opts.ProjectID,
-		projectMetadata:   projectMetadata,
-		cases:             casesFromWorkspaceGraph(opts.WorkspaceGraph, opts.Cases),
-		views:             append([]View(nil), defaultViews...),
-		tickets:           NewTicketViews(opts.Tickets),
-		documents:         append([]DocumentView(nil), opts.Documents...),
-		authoringSessions: NewAuthoringSessionViews(opts.AuthoringSessions),
-		observability:     opts.Observability,
-		workspaceGraph:    opts.WorkspaceGraph,
-		workspaceIndex:    workspaceIndex,
-		commandPalette:    NewCommandPaletteState(DefaultCommandRegistry()),
-		actionExecutor:    opts.ActionExecutor,
-		ticketExecutor:    opts.TicketExecutor,
-		workExecutor:      opts.WorkExecutor,
-		workspaceExecutor: opts.WorkspaceExecutor,
-		projectExecutor:   opts.ProjectExecutor,
-		caseExecutor:      opts.CaseExecutor,
+		projectDir:           opts.ProjectDir,
+		projectID:            opts.ProjectID,
+		projectMetadata:      projectMetadata,
+		cases:                casesFromWorkspaceIndex(workspaceIndex, opts.WorkspaceGraph, opts.Cases),
+		views:                append([]View(nil), defaultViews...),
+		tickets:              NewTicketViews(opts.Tickets),
+		documents:            append([]DocumentView(nil), opts.Documents...),
+		authoringSessions:    NewAuthoringSessionViews(opts.AuthoringSessions),
+		observability:        opts.Observability,
+		workspaceGraph:       opts.WorkspaceGraph,
+		workspaceIndex:       workspaceIndex,
+		semanticDigestStates: append([]chc.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
+		commandPalette:       NewCommandPaletteState(DefaultCommandRegistry()),
+		actionExecutor:       opts.ActionExecutor,
+		ticketExecutor:       opts.TicketExecutor,
+		workExecutor:         opts.WorkExecutor,
+		workspaceExecutor:    opts.WorkspaceExecutor,
+		projectExecutor:      opts.ProjectExecutor,
+		caseExecutor:         opts.CaseExecutor,
 	}
 }
 
