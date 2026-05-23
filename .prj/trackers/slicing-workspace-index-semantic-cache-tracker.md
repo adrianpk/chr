@@ -20,7 +20,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Workspace Index Contract | Planned | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | Defines contracts before runtime changes. |
+| Slice 1: Workspace Index Contract | Reviewing | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | Defines contracts before runtime changes. |
 | Slice 2: Structural Workspace Index Model | Planned | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | Adds index model shape. |
 | Slice 3: Index Load And Refresh Semantics | Planned | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | Handles direct file changes. |
 | Slice 4: Discardable Structural Cache | Planned | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
@@ -34,20 +34,20 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 
 Candidate tasks:
 
-- [ ] Update architecture/product documentation with the workspace index model.
-- [ ] Define structural vs semantic index responsibilities.
-- [ ] Define cache discardability and invalidation rules.
-- [ ] Define refresh behavior for direct filesystem edits.
-- [ ] Define optional/background semantic digest generation behavior.
-- [ ] Document that `Draft` is not a first-class document kind.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Update architecture/product documentation with the workspace index model.
+- [x] Define structural vs semantic index responsibilities.
+- [x] Define cache discardability and invalidation rules.
+- [x] Define refresh behavior for direct filesystem edits.
+- [x] Define optional/background semantic digest generation behavior.
+- [x] Document that `Draft` is not a first-class document kind.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending.
-- T1.2: pending.
-- T1.3: pending.
+- T1.1: pending local commit documents workspace index architecture.
+- T1.2: pending local commit documents semantic cache and refresh contracts.
+- T1.3: pending local commit documents draft artifact removal direction.
 
 ## Slice 2: Structural Workspace Index Model
 
@@ -223,3 +223,4 @@ Task commits:
 ## Validation Log
 
 - 2026-05-23: `make verify` passed for plan and tracker creation.
+- 2026-05-23: `make verify` passed for Slice 1.

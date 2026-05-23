@@ -65,6 +65,80 @@ Narrow interfaces are acceptable when an adapter needs a small contract, but
 they should usually be implemented by the central operation service or a thin
 adapter wrapper over it.
 
+## Workspace Index
+
+`internal/chc` owns the workspace index model.
+
+The workspace index is a local graph/read-model over project Markdown files. It
+is not a database and it must not become the durable source of truth. The
+filesystem remains authoritative, and the index must be rebuildable from
+workspace files.
+
+The structural index should be deterministic and local. It stores lightweight
+facts needed for navigation, relationship traversal, suggestions, diagnostics,
+and context selection:
+
+- node kind, slug, key, title, description, status, and case association;
+- source path, source hash, and modified time;
+- explicit edges such as ownership, reference, and case association;
+- lookup maps by kind, path, case slug, and ticket key;
+- diagnostics for invalid files or unresolved references.
+
+Document bodies should not be loaded into the structural index by default.
+Bodies are read lazily when a detail view, context assembler, writer, validator,
+or semantic indexing worker needs them.
+
+Documents such as dumps, quizzes, specs, and plans may be associated with a use
+case by canonical case slug. When no use case is declared, the document is
+project-wide. Missing case slugs are unresolved references; they do not create
+implicit cases.
+
+## Workspace Cache And Semantic Digests
+
+Workspace cache files are discardable local acceleration artifacts. They may
+live under a project-local cache path such as:
+
+```text
+.chc/tmp/cache/workspace-index/
+```
+
+Cache files must never be treated as authoritative. Missing, stale, corrupt, or
+schema-incompatible cache files should trigger a rebuild from Markdown files.
+
+The semantic index is separate from the structural index. It may use an LLM to
+generate compact agent-oriented retrieval hints such as search terms, aliases,
+concepts, decisions, constraints, and related slugs. These hints are not
+human-facing labels and should not replace source documents.
+
+Semantic digest cache entries must be invalidated by at least:
+
+- digest schema version;
+- semantic prompt hash;
+- model identifier;
+- source hash.
+
+Semantic digest generation must be optional and background-capable. TUI startup
+and normal structural refresh must not require network access or block on LLM
+calls. Missing or stale semantic digests should appear as index health status,
+not as hard failures.
+
+## Document Artifact Model
+
+`Draft` is not a first-class document kind in the active architecture.
+
+Rough or exploratory material belongs in dumps and quizzes. Formalized behavior
+belongs in specs. A spec may use `status: draft` when it needs review before
+acceptance, but that status does not imply a separate draft artifact family.
+
+The preferred authoring flow is:
+
+```text
+dump
+quiz
+dump + quiz -> spec(status=draft)
+spec(status=accepted/final) -> plan
+```
+
 ## Runtime assembly
 
 - Runtime startup should follow a deterministic assembly order.
