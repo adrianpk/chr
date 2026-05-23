@@ -26,7 +26,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice 4: Discardable Structural Cache | Delivered | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | PR #167. |
 | Slice 5: Semantic Digest Cache Contract | Delivered | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | PR #168. |
 | Slice 6: Semantic Index Worker Boundary | Delivered | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | PR #169. |
-| Slice 7: Service Queries And Suggestions | Reviewing | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | Exposes adapter-facing queries. |
+| Slice 7: Service Queries And Suggestions | Delivered | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | PR #170. |
 | Slice 8: TUI Index Consumers | Planned | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | Uses queries in TUI selectors/status. |
 | Slice 9: Draft Artifact Removal | Planned | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | Removes first-class Draft semantics. |
 
@@ -161,9 +161,9 @@ Candidate tasks:
 
 Task commits:
 
-- T7.1: pending local commit adds workspace index query methods.
-- T7.2: pending local commit adds service query wrappers.
-- T7.3: pending local commit adds tests, report, and validation.
+- T7.1: `4c3a713` adds workspace index query methods.
+- T7.2: `4c3a713` adds service query wrappers.
+- T7.3: `4c3a713` adds tests, report, and validation.
 
 ## Slice 8: TUI Index Consumers
 
