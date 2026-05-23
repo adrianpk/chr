@@ -1,6 +1,6 @@
 # Markdown-Only Workspace Model Slicing Plan
 
-Status: planned
+Status: active
 
 ## Purpose
 
@@ -127,7 +127,7 @@ numbers.
 
 ### Slice 1: Markdown-Only Contract
 
-Status: planned.
+Status: active.
 
 Expected branch: `feat/slice-1-markdown-only-contract`
 Expected PR title: `feat(slice-1): markdown-only contract`

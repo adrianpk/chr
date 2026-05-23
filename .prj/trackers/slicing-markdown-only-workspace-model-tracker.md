@@ -1,6 +1,6 @@
 # Markdown-Only Workspace Model Slicing Tracker
 
-Status: planned
+Status: active
 
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 
@@ -9,8 +9,8 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 - [x] Capture Markdown-only persistence direction.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -19,7 +19,7 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Markdown-Only Contract | Planned | `feat/slice-1-markdown-only-contract` | `feat(slice-1): markdown-only contract` | `.prj/reports/slices/markdown-only-workspace-model/slice-1-markdown-only-contract.md` | Documentation and contract only. |
+| Slice 1: Markdown-Only Contract | Active | `feat/slice-1-markdown-only-contract` | `feat(slice-1): markdown-only contract` | `.prj/reports/slices/markdown-only-workspace-model/slice-1-markdown-only-contract.md` | Documentation and contract only. |
 | Slice 2: Remove Project And Case Indexes | Planned | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | Remove relational persistence for Project/Cases only. |
 | Slice 3: Workspace Graph Builder | Planned | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | Runtime in-memory graph. |
 | Slice 4: Filesystem Refresh Semantics | Planned | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | Manual editor/file changes. |
@@ -30,23 +30,24 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 
 Candidate tasks:
 
-- [ ] Update Project spec to declare Markdown as source of truth.
-- [ ] Update Cases spec to declare Markdown as source of truth.
-- [ ] Define ephemeral workspace graph terminology.
-- [ ] Define case definition vs case association.
-- [ ] Define unresolved case reference behavior.
-- [ ] Define manual filesystem edit behavior.
-- [ ] Define case-rooted and project-wide context assembly direction.
-- [ ] Update interactive design notes.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Update Project spec to declare Markdown as source of truth.
+- [x] Update Cases spec to declare Markdown as source of truth.
+- [x] Define ephemeral workspace graph terminology.
+- [x] Define case definition vs case association.
+- [x] Define unresolved case reference behavior.
+- [x] Define manual filesystem edit behavior.
+- [x] Define case-rooted and project-wide context assembly direction.
+- [x] Update interactive design notes.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending.
-- T1.2: pending.
-- T1.3: pending.
-- T1.4: pending.
+- T1.0: `bb47052` created and published slicing plan and tracker.
+- T1.1: `b844ab7` updates Project and Cases specs.
+- T1.2: `b844ab7` updates interactive design notes.
+- T1.3: pending commit adds slice implementation report and tracker status.
+- T1.4: `make verify` passed on 2026-05-23.
 
 ## Slice 2: Remove Project And Case Indexes
 
@@ -169,4 +170,4 @@ Task commits:
 
 ## Validation Log
 
-- Pending.
+- 2026-05-23: `make verify` passed.
