@@ -212,8 +212,8 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		TicketExecutor:    newTUITicketActionExecutor(data.ctx, data.env, data.projectContext),
 		WorkExecutor:      newTUIWorkActionExecutor(data.ctx, data.env, data.projectContext),
 		WorkspaceExecutor: newTUIWorkspaceRefreshExecutor(data.operations),
-		ProjectExecutor:   newTUIProjectMetadataExecutor(data.ctx, data.env, data.projectContext),
-		CaseExecutor:      newTUICaseMetadataExecutor(data.ctx, data.env, data.projectContext),
+		ProjectExecutor:   newTUIProjectMetadataExecutor(data.operations),
+		CaseExecutor:      newTUICaseMetadataExecutor(data.operations),
 	}
 }
 
@@ -242,64 +242,55 @@ func (e tuiWorkspaceRefreshExecutor) RefreshWorkspace() (chctui.WorkspaceRefresh
 }
 
 type tuiProjectMetadataExecutor struct {
-	projectContext commandProjectContext
+	operations service
 }
 
 func newTUIProjectMetadataExecutor(
-	ctx context.Context,
-	env chc.UserEnvironment,
-	projectContext commandProjectContext,
+	operations service,
 ) tuiProjectMetadataExecutor {
 	return tuiProjectMetadataExecutor{
-		projectContext: projectContext,
+		operations: operations,
 	}
 }
 
 func (e tuiProjectMetadataExecutor) SaveProjectMetadata(
 	metadata chc.ProjectMetadata,
 ) (chctui.ProjectMetadataResult, error) {
-	saved, err := chc.NewProjectMetadataService(e.projectContext.ProjectDir).Save(metadata)
+	result, err := e.operations.SaveProjectMetadata(metadata)
 	if err != nil {
 		return chctui.ProjectMetadataResult{}, err
 	}
 
 	return chctui.ProjectMetadataResult{
-		Message:  "Project metadata saved.",
-		Metadata: saved,
+		Message:  result.Message,
+		Metadata: result.Metadata,
 	}, nil
 }
 
 type tuiCaseMetadataExecutor struct {
-	projectContext commandProjectContext
+	operations service
 }
 
 func newTUICaseMetadataExecutor(
-	ctx context.Context,
-	env chc.UserEnvironment,
-	projectContext commandProjectContext,
+	operations service,
 ) tuiCaseMetadataExecutor {
 	return tuiCaseMetadataExecutor{
-		projectContext: projectContext,
+		operations: operations,
 	}
 }
 
 func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
 	metadata chc.CaseMetadata,
 ) (chctui.CaseMetadataResult, error) {
-	saved, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).Save(metadata)
-	if err != nil {
-		return chctui.CaseMetadataResult{}, err
-	}
-
-	cases, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).LoadAll()
+	result, err := e.operations.SaveCaseMetadata(metadata)
 	if err != nil {
 		return chctui.CaseMetadataResult{}, err
 	}
 
 	return chctui.CaseMetadataResult{
-		Message: "Case metadata saved.",
-		Case:    saved,
-		Cases:   cases,
+		Message: result.Message,
+		Case:    result.Case,
+		Cases:   result.Cases,
 	}, nil
 }
 

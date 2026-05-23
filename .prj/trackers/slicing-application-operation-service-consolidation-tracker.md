@@ -20,7 +20,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Operation Service Boundary | Delivered | `feat/slice-1-operation-service-boundary` | `feat(slice-1): operation service boundary` | `.prj/reports/slices/application-operation-service-consolidation/slice-1-operation-service-boundary.md` | PR #156. |
-| Slice 2: Workspace And Metadata Operations | Planned | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | Move refresh, Project, and Case operations. |
+| Slice 2: Workspace And Metadata Operations | Reviewing | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | Refresh, Project, and Case operations moved. |
 | Slice 3: Artifact And Ticket Operations | Planned | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | Move artifact creation and ticket mutations. |
 | Slice 4: Work Control Operations | Planned | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | Move execution and daemon controls. |
 | Slice 5: Adapter Interface Cleanup | Planned | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | Reduce adapter-specific operation wrappers. |
@@ -51,20 +51,20 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Move workspace graph refresh into service methods.
-- [ ] Move Project metadata save into service methods.
-- [ ] Move Case metadata save into service methods.
-- [ ] Map service results to TUI results outside the service.
-- [ ] Add focused tests for refresh and metadata save operations.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Move workspace graph refresh into service methods.
+- [x] Move Project metadata save into service methods.
+- [x] Move Case metadata save into service methods.
+- [x] Map service results to TUI results outside the service.
+- [x] Add focused tests for refresh and metadata save operations.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending.
-- T2.2: pending.
-- T2.3: pending.
-- T2.4: pending.
+- T2.1: pending local commit for metadata service operations.
+- T2.2: pending local commit for TUI metadata wrapper delegation.
+- T2.3: pending local commit for service metadata tests.
+- T2.4: pending local commit for report and validation.
 
 ## Slice 3: Artifact And Ticket Operations
 
@@ -176,3 +176,5 @@ Task commits:
 
 - 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 1.
 - 2026-05-23: `make verify` passed for Slice 1.
+- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 2.
+- 2026-05-23: `make verify` passed for Slice 2.
