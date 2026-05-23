@@ -692,7 +692,8 @@ func shellFooterButtons() []shellButton {
 
 func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 	widths := distributedWidths(width, len(buttons))
-	cells := make([]string, 0, len(buttons))
+	keyCells := make([]string, 0, len(buttons))
+	labelCells := make([]string, 0, len(buttons))
 
 	for index, button := range buttons {
 		style := shellButtonInactiveStyle
@@ -701,11 +702,12 @@ func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 		}
 
 		cellWidth := widths[index]
-		style = style.Width(cellWidth).Align(lipgloss.Center)
-		cells = append(cells, style.Render(button.Key+"\n"+button.Label))
+		keyCells = append(keyCells, style.Render(centerPlainLine(button.Key, cellWidth)))
+		labelCells = append(labelCells, style.Render(centerPlainLine(button.Label, cellWidth)))
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Top, cells...)
+	return lipgloss.JoinHorizontal(lipgloss.Top, keyCells...) + "\n" +
+		lipgloss.JoinHorizontal(lipgloss.Top, labelCells...)
 }
 
 func shellFooterButtonAt(x, y, width, height int) (shellButton, bool) {
@@ -861,6 +863,23 @@ func fitPlainLine(line string, width int) string {
 	}
 
 	return line + strings.Repeat(" ", width-len(runes))
+}
+
+func centerPlainLine(line string, width int) string {
+	if width <= 0 {
+		return ""
+	}
+
+	runes := []rune(line)
+	if len(runes) >= width {
+		return fitPlainLine(line, width)
+	}
+
+	padding := width - len(runes)
+	left := padding / 2
+	right := padding - left
+
+	return strings.Repeat(" ", left) + line + strings.Repeat(" ", right)
 }
 
 func splitWidths(width int) (int, int) {
