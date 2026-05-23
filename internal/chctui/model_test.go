@@ -148,6 +148,50 @@ func TestModelEditsAndSavesProjectMetadata(t *testing.T) {
 	}
 }
 
+func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
+	projectExecutor := &fakeProjectMetadataExecutor{}
+	workspaceExecutor := &fakeWorkspaceRefreshExecutor{
+		result: WorkspaceRefreshResult{
+			Graph: chc.WorkspaceGraph{
+				Project: &chc.WorkspaceNode{
+					Name:        "Graph Project",
+					Description: "Graph description.",
+					Path:        ".chc/project.md",
+					SourceHash:  "hash-project",
+				},
+			},
+		},
+	}
+	model := NewModel(Options{
+		ProjectMetadata: chc.ProjectMetadata{
+			SchemaVersion: chc.ProjectMetadataSchemaVersion,
+			Name:          "Edited Project",
+			Context:       "Preserved context.",
+		},
+		ProjectExecutor:   projectExecutor,
+		WorkspaceExecutor: workspaceExecutor,
+	})
+	model.projectDirty = true
+
+	model.saveProjectMetadata()
+
+	if !workspaceExecutor.called {
+		t.Fatal("RefreshWorkspace was not called after project save")
+	}
+
+	if model.projectDirty {
+		t.Fatal("projectDirty = true, want false after save")
+	}
+
+	if model.projectMetadata.Name != "Graph Project" {
+		t.Fatalf("project name = %q, want refreshed graph project", model.projectMetadata.Name)
+	}
+
+	if model.projectMetadata.Context != "Preserved context." {
+		t.Fatalf("project context = %q, want body preserved from saved metadata", model.projectMetadata.Context)
+	}
+}
+
 func TestModelProjectEditAcceptsSpaces(t *testing.T) {
 	model := NewModel(Options{
 		ProjectMetadata: chc.ProjectMetadata{
@@ -267,6 +311,57 @@ func TestModelCreatesAndSavesCaseMetadata(t *testing.T) {
 	}
 }
 
+func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
+	caseExecutor := &fakeCaseMetadataExecutor{}
+	workspaceExecutor := &fakeWorkspaceRefreshExecutor{
+		result: WorkspaceRefreshResult{
+			Graph: chc.WorkspaceGraph{
+				Cases: []chc.WorkspaceNode{
+					{
+						Slug:        "blog-publishing",
+						Name:        "Graph Case",
+						Description: "Graph case description.",
+						Path:        ".chc/cases/blog-publishing.md",
+						SourceHash:  "hash-case",
+					},
+				},
+				CaseDocuments: map[string][]chc.WorkspaceNode{},
+			},
+		},
+	}
+	model := NewModel(Options{
+		Cases: []chc.CaseMetadata{
+			{
+				SchemaVersion: chc.CaseMetadataSchemaVersion,
+				Slug:          "blog-publishing",
+				Name:          "Edited Case",
+				Context:       "Preserved context.",
+			},
+		},
+		CaseExecutor:      caseExecutor,
+		WorkspaceExecutor: workspaceExecutor,
+	})
+	model.caseDirty = true
+
+	model.saveSelectedCase()
+
+	if !workspaceExecutor.called {
+		t.Fatal("RefreshWorkspace was not called after case save")
+	}
+
+	if model.caseDirty {
+		t.Fatal("caseDirty = true, want false after save")
+	}
+
+	if len(model.cases) != 1 || model.cases[0].Name != "Graph Case" {
+		t.Fatalf("cases = %#v, want graph case after save", model.cases)
+	}
+
+	if model.cases[0].Context != "Preserved context." {
+		t.Fatalf("case context = %q, want body preserved from saved metadata", model.cases[0].Context)
+	}
+}
+
 func TestModelFiltersCaseMetadata(t *testing.T) {
 	model := NewModel(Options{
 		Cases: []chc.CaseMetadata{
@@ -315,6 +410,173 @@ func TestModelRefreshesWorkspaceGraphFromCommandPalette(t *testing.T) {
 
 	if model.statusMessage != "Workspace refreshed." {
 		t.Fatalf("statusMessage = %q, want refresh status", model.statusMessage)
+	}
+}
+
+func TestProjectRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
+	executor := &fakeWorkspaceRefreshExecutor{
+		result: WorkspaceRefreshResult{
+			Message: "Workspace refreshed.",
+			Graph: chc.WorkspaceGraph{
+				Project: &chc.WorkspaceNode{Name: "External"},
+			},
+		},
+	}
+	model := NewModel(Options{
+		WorkspaceExecutor: executor,
+	})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
+	refreshed := requireUpdatedModel(t, updated)
+
+	if !executor.called {
+		t.Fatal("RefreshWorkspace was not called from Project refresh key")
+	}
+
+	if refreshed.projectMetadata.Name != "External" {
+		t.Fatalf("project name = %q, want refreshed graph project", refreshed.projectMetadata.Name)
+	}
+}
+
+func TestCasesRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
+	executor := &fakeWorkspaceRefreshExecutor{
+		result: WorkspaceRefreshResult{
+			Message: "Workspace refreshed.",
+			Graph: chc.WorkspaceGraph{
+				Cases: []chc.WorkspaceNode{
+					{Slug: "external", Name: "External Case"},
+				},
+				CaseDocuments: map[string][]chc.WorkspaceNode{},
+			},
+		},
+	}
+	model := NewModel(Options{
+		WorkspaceExecutor: executor,
+	})
+	model.selected = 1
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
+	refreshed := requireUpdatedModel(t, updated)
+
+	if !executor.called {
+		t.Fatal("RefreshWorkspace was not called from Cases refresh key")
+	}
+
+	if len(refreshed.cases) != 1 || refreshed.cases[0].Slug != "external" {
+		t.Fatalf("cases = %#v, want refreshed graph case", refreshed.cases)
+	}
+}
+
+func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
+	model := NewModel(Options{
+		ProjectMetadata: chc.ProjectMetadata{
+			Name:        "Fallback",
+			Description: "Fallback description.",
+		},
+		Cases: []chc.CaseMetadata{
+			{
+				Slug:        "fallback",
+				Name:        "Fallback Case",
+				Description: "Fallback case description.",
+				Context:     "Preserved context.",
+			},
+		},
+		WorkspaceGraph: chc.WorkspaceGraph{
+			Project: &chc.WorkspaceNode{
+				Name:        "Graph Project",
+				Description: "Graph description.",
+				Path:        ".chc/project.md",
+				SourceHash:  "hash-project",
+			},
+			Cases: []chc.WorkspaceNode{
+				{
+					Slug:        "fallback",
+					Name:        "Graph Case",
+					Description: "Graph case description.",
+					Path:        ".chc/cases/fallback.md",
+					SourceHash:  "hash-case",
+				},
+			},
+			CaseDocuments: map[string][]chc.WorkspaceNode{},
+		},
+	})
+
+	if model.projectMetadata.Name != "Graph Project" {
+		t.Fatalf("project name = %q, want graph project", model.projectMetadata.Name)
+	}
+
+	if len(model.cases) != 1 || model.cases[0].Name != "Graph Case" {
+		t.Fatalf("cases = %#v, want graph case", model.cases)
+	}
+
+	if model.cases[0].Context != "Preserved context." {
+		t.Fatalf("case context = %q, want preserved service-loaded body", model.cases[0].Context)
+	}
+}
+
+func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {
+	model := NewModel(Options{
+		WorkspaceGraph: chc.WorkspaceGraph{
+			Cases: []chc.WorkspaceNode{
+				{Slug: "blog", Name: "Blog"},
+			},
+			CaseDocuments: map[string][]chc.WorkspaceNode{
+				"blog": {
+					{Kind: chc.WorkspaceNodeDump, CaseSlug: "blog"},
+					{Kind: chc.WorkspaceNodeSpec, CaseSlug: "blog"},
+					{Kind: chc.WorkspaceNodeTicket, CaseSlug: "blog"},
+				},
+			},
+			UnresolvedCaseReferences: []chc.WorkspaceCaseReference{
+				{
+					CaseSlug: "blog",
+					References: []chc.WorkspaceNode{
+						{Kind: chc.WorkspaceNodePlan, CaseSlug: "blog"},
+					},
+				},
+			},
+		},
+	})
+
+	lines := model.renderCaseArtifactLines()
+	rendered := strings.Join(lines, "\n")
+
+	for _, want := range []string{
+		"Dumps             1",
+		"Specs             1",
+		"Board tickets     1",
+		"Unresolved refs   1",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("artifact lines missing %q:\n%s", want, rendered)
+		}
+	}
+}
+
+func TestModelShowsUnresolvedCaseReferencesInCaseList(t *testing.T) {
+	model := NewModel(Options{
+		WorkspaceGraph: chc.WorkspaceGraph{
+			UnresolvedCaseReferences: []chc.WorkspaceCaseReference{
+				{
+					CaseSlug: "missing",
+					References: []chc.WorkspaceNode{
+						{Kind: chc.WorkspaceNodePlan, CaseSlug: "missing"},
+						{Kind: chc.WorkspaceNodeSpec, CaseSlug: "missing"},
+					},
+				},
+			},
+		},
+	})
+
+	rendered := strings.Join(model.renderCaseListLines(80, 10), "\n")
+
+	for _, want := range []string{
+		"Unresolved references",
+		"missing (2)",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("case list missing %q:\n%s", want, rendered)
+		}
 	}
 }
 
@@ -1356,13 +1618,6 @@ func (e *fakeProjectMetadataExecutor) SaveProjectMetadata(
 	}, nil
 }
 
-func (e *fakeProjectMetadataExecutor) RefreshProjectMetadata() (ProjectMetadataResult, error) {
-	return ProjectMetadataResult{
-		Message:  "Project metadata refreshed.",
-		Metadata: e.saved,
-	}, nil
-}
-
 type fakeCaseMetadataExecutor struct {
 	saved chc.CaseMetadata
 }
@@ -1382,13 +1637,6 @@ func (e *fakeCaseMetadataExecutor) SaveCaseMetadata(
 	return CaseMetadataResult{
 		Message: "Case metadata saved.",
 		Case:    e.saved,
-		Cases:   []chc.CaseMetadata{e.saved},
-	}, nil
-}
-
-func (e *fakeCaseMetadataExecutor) RefreshCaseMetadata() (CaseMetadataResult, error) {
-	return CaseMetadataResult{
-		Message: "Case metadata refreshed.",
 		Cases:   []chc.CaseMetadata{e.saved},
 	}, nil
 }

@@ -236,18 +236,6 @@ func (e tuiProjectMetadataExecutor) SaveProjectMetadata(
 	}, nil
 }
 
-func (e tuiProjectMetadataExecutor) RefreshProjectMetadata() (chctui.ProjectMetadataResult, error) {
-	metadata, err := chc.NewProjectMetadataService(e.projectContext.ProjectDir).Load()
-	if err != nil {
-		return chctui.ProjectMetadataResult{}, err
-	}
-
-	return chctui.ProjectMetadataResult{
-		Message:  "Project metadata refreshed.",
-		Metadata: metadata,
-	}, nil
-}
-
 type tuiCaseMetadataExecutor struct {
 	projectContext commandProjectContext
 }
@@ -278,18 +266,6 @@ func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
 	return chctui.CaseMetadataResult{
 		Message: "Case metadata saved.",
 		Case:    saved,
-		Cases:   cases,
-	}, nil
-}
-
-func (e tuiCaseMetadataExecutor) RefreshCaseMetadata() (chctui.CaseMetadataResult, error) {
-	cases, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).LoadAll()
-	if err != nil {
-		return chctui.CaseMetadataResult{}, err
-	}
-
-	return chctui.CaseMetadataResult{
-		Message: "Case metadata refreshed.",
 		Cases:   cases,
 	}, nil
 }

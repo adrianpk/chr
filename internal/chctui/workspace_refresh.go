@@ -34,7 +34,48 @@ func (m *Model) refreshWorkspace() {
 	}
 
 	m.workspaceGraph = result.Graph
+	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
+	m.cases = casesFromWorkspaceGraph(result.Graph, m.cases)
+	m.clampSelectedCase()
+
 	m.statusMessage = workspaceRefreshMessage(result)
+}
+
+func (m *Model) refreshWorkspaceGraphAfterWrite() bool {
+	if m.workspaceExecutor == nil {
+		return true
+	}
+
+	result, err := m.workspaceExecutor.RefreshWorkspace()
+	if err != nil {
+		m.statusMessage = "Workspace refresh failed: " + err.Error()
+
+		return false
+	}
+
+	m.workspaceGraph = result.Graph
+	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
+	m.cases = casesFromWorkspaceGraph(result.Graph, m.cases)
+	m.clampSelectedCase()
+
+	return true
+}
+
+func projectMetadataFromWorkspaceGraph(
+	current chc.ProjectMetadata,
+	graph chc.WorkspaceGraph,
+) chc.ProjectMetadata {
+	if graph.Project == nil {
+		return current
+	}
+
+	current.Name = graph.Project.Name
+	current.Description = graph.Project.Description
+	current.SourcePath = graph.Project.Path
+	current.SourceHash = graph.Project.SourceHash
+	current.Exists = true
+
+	return current
 }
 
 func (m *Model) workspaceRefreshBlocked() bool {

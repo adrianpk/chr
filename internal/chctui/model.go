@@ -130,6 +130,14 @@ type Model struct {
 
 func NewModel(opts Options) Model {
 	projectMetadata := opts.ProjectMetadata
+	if opts.WorkspaceGraph.Project != nil {
+		projectMetadata.Name = opts.WorkspaceGraph.Project.Name
+		projectMetadata.Description = opts.WorkspaceGraph.Project.Description
+		projectMetadata.SourcePath = opts.WorkspaceGraph.Project.Path
+		projectMetadata.SourceHash = opts.WorkspaceGraph.Project.SourceHash
+		projectMetadata.Exists = true
+	}
+
 	if strings.TrimSpace(projectMetadata.Name) == "" {
 		projectMetadata.Name = projectDisplayName(opts.ProjectDir)
 	}
@@ -146,7 +154,7 @@ func NewModel(opts Options) Model {
 		projectDir:        opts.ProjectDir,
 		projectID:         opts.ProjectID,
 		projectMetadata:   projectMetadata,
-		cases:             append([]chc.CaseMetadata(nil), opts.Cases...),
+		cases:             casesFromWorkspaceGraph(opts.WorkspaceGraph, opts.Cases),
 		views:             append([]View(nil), defaultViews...),
 		tickets:           NewTicketViews(opts.Tickets),
 		documents:         append([]DocumentView(nil), opts.Documents...),

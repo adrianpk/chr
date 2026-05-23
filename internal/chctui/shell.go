@@ -220,11 +220,12 @@ func (m Model) renderProjectInput(width int) string {
 
 func (m Model) renderProjectArtifactLines() []string {
 	return []string{
-		fmt.Sprintf("Board tickets     %d", len(m.tickets)),
-		fmt.Sprintf("Dumps             %d", len(m.documentsByFamily(map[string]bool{"dump": true}))),
-		fmt.Sprintf("Quizzes           %d", len(m.documentsByFamily(map[string]bool{"quiz": true}))),
-		fmt.Sprintf("Specs             %d", len(m.documentsByFamily(map[string]bool{"spec": true}))),
-		fmt.Sprintf("Plans             %d", len(m.documentsByFamily(map[string]bool{"plan": true}))),
+		fmt.Sprintf("Board tickets     %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, chc.WorkspaceNodeTicket)),
+		fmt.Sprintf("Dumps             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, chc.WorkspaceNodeDump)),
+		fmt.Sprintf("Quizzes           %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, chc.WorkspaceNodeQuiz)),
+		fmt.Sprintf("Specs             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, chc.WorkspaceNodeSpec)),
+		fmt.Sprintf("Plans             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, chc.WorkspaceNodePlan)),
+		fmt.Sprintf("Diagnostics       %d", len(m.workspaceGraph.Diagnostics)),
 	}
 }
 
@@ -280,6 +281,7 @@ func (m Model) renderCaseListLines(width, limit int) []string {
 	cases := m.filteredCases()
 	if len(cases) == 0 {
 		lines = append(lines, "", "No cases found.", "Press n to create one.")
+		lines = append(lines, m.renderUnresolvedCaseReferenceLines(width, limit-len(lines))...)
 
 		return lines
 	}
@@ -303,6 +305,39 @@ func (m Model) renderCaseListLines(width, limit int) []string {
 		if len(lines) >= limit {
 			break
 		}
+	}
+
+	lines = append(lines, m.renderUnresolvedCaseReferenceLines(width, limit-len(lines))...)
+
+	return lines
+}
+
+func (m Model) renderUnresolvedCaseReferenceLines(width, limit int) []string {
+	if limit <= 0 {
+		return nil
+	}
+
+	references := workspaceGraphUnresolvedCaseReferences(m.workspaceGraph)
+	if len(references) == 0 {
+		return nil
+	}
+
+	lines := []string{}
+	for _, line := range []string{"", "Unresolved references"} {
+		if len(lines) >= limit {
+			return lines
+		}
+
+		lines = append(lines, line)
+	}
+
+	for _, reference := range references {
+		if len(lines) >= limit {
+			break
+		}
+
+		line := fmt.Sprintf("  %s (%d)", reference.CaseSlug, len(reference.References))
+		lines = append(lines, fitPlainLine(line, width))
 	}
 
 	return lines
@@ -399,11 +434,12 @@ func (m Model) renderCaseArtifactLines() []string {
 	}
 
 	return []string{
-		fmt.Sprintf("Dumps             %d", m.caseDocumentCount(metadata, "dump")),
-		fmt.Sprintf("Quizzes           %d", m.caseDocumentCount(metadata, "quiz")),
-		fmt.Sprintf("Specs             %d", m.caseDocumentCount(metadata, "spec")),
-		fmt.Sprintf("Plans             %d", m.caseDocumentCount(metadata, "plan")),
-		fmt.Sprintf("Board tickets     %d", m.caseTicketCount(metadata)),
+		fmt.Sprintf("Dumps             %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeDump)),
+		fmt.Sprintf("Quizzes           %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeQuiz)),
+		fmt.Sprintf("Specs             %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeSpec)),
+		fmt.Sprintf("Plans             %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodePlan)),
+		fmt.Sprintf("Board tickets     %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeTicket)),
+		fmt.Sprintf("Unresolved refs   %d", workspaceGraphCaseReferenceCount(m.workspaceGraph, metadata.Slug)),
 		"",
 		"Source",
 		"  " + emptyValue(projectMetadataRelativePath(m.projectDir, metadata.SourcePath)),
@@ -433,43 +469,6 @@ func (m Model) filteredCases() []chc.CaseMetadata {
 	}
 
 	return cases
-}
-
-func (m Model) caseDocumentCount(metadata chc.CaseMetadata, family string) int {
-	slug := strings.ToLower(strings.TrimSpace(metadata.Slug))
-	name := strings.ToLower(strings.TrimSpace(metadata.Name))
-	count := 0
-
-	for _, document := range m.documents {
-		if document.Family != family {
-			continue
-		}
-
-		path := strings.ToLower(document.RelativePath)
-		if slug != "" && strings.Contains(path, "/"+slug+"/") {
-			count++
-
-			continue
-		}
-
-		if name != "" && strings.Contains(strings.ToLower(document.Title), name) {
-			count++
-		}
-	}
-
-	return count
-}
-
-func (m Model) caseTicketCount(metadata chc.CaseMetadata) int {
-	count := 0
-
-	for _, ticket := range m.tickets {
-		if strings.EqualFold(ticket.UseCase, metadata.Name) || strings.EqualFold(ticket.UseCase, metadata.Slug) {
-			count++
-		}
-	}
-
-	return count
 }
 
 func (m Model) renderTicketWorkspace(width, height int) string {

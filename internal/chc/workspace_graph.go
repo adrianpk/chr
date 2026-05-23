@@ -41,6 +41,7 @@ type WorkspaceNode struct {
 	Slug         string
 	Title        string
 	Name         string
+	Description  string
 	Status       string
 	CaseSlug     string
 	SourceHash   string
@@ -128,6 +129,7 @@ func (b WorkspaceGraphBuilder) loadProject(ctx context.Context, graph *Workspace
 		Slug:         "project",
 		Title:        metadata.Name,
 		Name:         metadata.Name,
+		Description:  metadata.Description,
 		SourceHash:   contentHash(content),
 		ModifiedAt:   info.ModTime().UTC(),
 		Size:         info.Size(),
@@ -165,6 +167,7 @@ func (b WorkspaceGraphBuilder) loadCases(ctx context.Context, graph *WorkspaceGr
 			Slug:         slug,
 			Title:        metadata.Name,
 			Name:         metadata.Name,
+			Description:  metadata.Description,
 			SourceHash:   contentHash(content),
 			ModifiedAt:   info.ModTime().UTC(),
 			Size:         info.Size(),

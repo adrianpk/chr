@@ -17,7 +17,6 @@ const (
 
 type CaseMetadataExecutor interface {
 	SaveCaseMetadata(metadata chc.CaseMetadata) (CaseMetadataResult, error)
-	RefreshCaseMetadata() (CaseMetadataResult, error)
 }
 
 type CaseMetadataResult struct {
@@ -76,7 +75,7 @@ func (m *Model) handleCaseActionKey(msg tea.KeyMsg) bool {
 	case "ctrl+s", "s":
 		m.saveSelectedCase()
 	case "r":
-		m.refreshCases()
+		m.refreshWorkspace()
 	case "/":
 		m.caseFilterEditing = true
 		m.statusMessage = ""
@@ -316,26 +315,11 @@ func (m *Model) saveSelectedCase() {
 	m.applyCaseMetadataResult(result)
 
 	m.caseDirty = false
-	m.statusMessage = ""
-}
 
-func (m *Model) refreshCases() {
-	if m.caseExecutor == nil {
-		m.statusMessage = "Case metadata executor is unavailable."
-
+	if !m.refreshWorkspaceGraphAfterWrite() {
 		return
 	}
 
-	result, err := m.caseExecutor.RefreshCaseMetadata()
-	if err != nil {
-		m.statusMessage = "Case metadata refresh failed: " + err.Error()
-
-		return
-	}
-
-	m.applyCaseMetadataResult(result)
-
-	m.caseDirty = false
 	m.statusMessage = ""
 }
 
