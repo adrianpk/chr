@@ -131,6 +131,73 @@ func TestServiceWorkspaceIndexQueries(t *testing.T) {
 	assertServiceResolvesWorkspaceRelatedDocuments(t, operations)
 }
 
+func TestServiceListDumpsReturnsProjectAndCaseScopedDumps(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-context.md"), `---
+title: "Project Context"
+status: "raw"
+---
+
+# Project Context
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context.md"), `---
+title: "Blog Context"
+status: "curated"
+case: "blog"
+---
+
+# Blog Context
+`)
+
+	operations := newTestService(t, projectDir)
+
+	result, err := operations.ListDumps()
+	if err != nil {
+		t.Fatalf("ListDumps returned error: %v", err)
+	}
+
+	if result.Message != "Dumps loaded." {
+		t.Fatalf("Message = %q, want Dumps loaded.", result.Message)
+	}
+
+	if len(result.Dumps) != 2 {
+		t.Fatalf("Dumps = %#v, want two dumps", result.Dumps)
+	}
+
+	projectDump := findDumpViewByTitle(t, result.Dumps, "Project Context")
+	if projectDump.Scope.CaseSlug != "" {
+		t.Fatalf("project dump scope = %#v, want project-wide", projectDump.Scope)
+	}
+
+	caseDump := findDumpViewByTitle(t, result.Dumps, "Blog Context")
+	if caseDump.Scope.CaseSlug != "blog" {
+		t.Fatalf("case dump scope = %#v, want blog", caseDump.Scope)
+	}
+
+	if caseDump.RelativePath != ".chc/dumps/blog-context.md" {
+		t.Fatalf("case dump path = %q, want .chc/dumps/blog-context.md", caseDump.RelativePath)
+	}
+
+	if operations.dumpDirectory() != filepath.Join(projectDir, ".chc", "dumps") {
+		t.Fatalf("dumpDirectory = %q, want .chc/dumps", operations.dumpDirectory())
+	}
+}
+
+func findDumpViewByTitle(t *testing.T, dumps []DumpView, title string) DumpView {
+	t.Helper()
+
+	for _, dump := range dumps {
+		if dump.Title == title {
+			return dump
+		}
+	}
+
+	t.Fatalf("dump %q not found in %#v", title, dumps)
+
+	return DumpView{}
+}
+
 func assertServiceSuggestsWorkspaceCases(t *testing.T, operations service) {
 	t.Helper()
 

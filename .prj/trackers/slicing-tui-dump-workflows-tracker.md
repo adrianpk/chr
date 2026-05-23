@@ -33,7 +33,7 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -42,7 +42,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Dump Service Contract | Pending | `feat/slice-1-dump-service-contract` | `feat(slice-1): dump service contract` | `.prj/reports/slices/tui-dump-workflows/slice-1-dump-service-contract.md` | Service owns dump operational logic. |
+| Slice 1: Dump Service Contract | Reviewing | `feat/slice-1-dump-service-contract` | `feat(slice-1): dump service contract` | `.prj/reports/slices/tui-dump-workflows/slice-1-dump-service-contract.md` | Service owns dump operational logic. |
 | Slice 2: Scoped Dump Read Model | Pending | `feat/slice-2-scoped-dump-read-model` | `feat(slice-2): scoped dump read model` | `.prj/reports/slices/tui-dump-workflows/slice-2-scoped-dump-read-model.md` | TUI consumes dump-specific state. |
 | Slice 3: Create Dumps From TUI | Pending | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | Empty case slug means project-wide dump. |
 | Slice 4: Append And Edit TUI Dumps | Pending | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | Dumps can grow and remain editable. |
@@ -52,18 +52,20 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] Add service-owned dump operation contracts.
-- [ ] Add dump scope model where empty case slug means project-wide.
-- [ ] Move canonical dump path/layout decisions out of the TUI boundary.
-- [ ] Align active dump loading with the `.chc/dumps` product layout or record
+- [x] Add service-owned dump operation contracts.
+- [x] Add dump scope model where empty case slug means project-wide.
+- [x] Move canonical dump path/layout decisions out of the TUI boundary.
+- [x] Align active dump loading with the `.chc/dumps` product layout or record
       explicit compatibility handling.
-- [ ] Add focused tests for service-level dump scope and path behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add focused tests for service-level dump scope and path behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- Pending.
+- T1.1: `311402f` adds dump service contracts and canonical dump directory.
+- T1.2: `45b897a` aligns active dump document loading with `.chc/dumps`.
+- T1.3: pending.
 
 ## Slice 2: Scoped Dump Read Model
 

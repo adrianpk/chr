@@ -264,5 +264,5 @@ This slicing does not include:
 - adding a full TUI text editor;
 - adding Telegram or Email adapters;
 - changing unrelated quiz/spec/plan workflows;
-- introducing a database;
+- changing the Markdown-first durable source-of-truth model;
 - making `.chc/tmp/` cache files authoritative.
