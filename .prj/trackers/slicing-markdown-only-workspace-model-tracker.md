@@ -53,22 +53,22 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Remove project metadata repository/index code.
-- [ ] Remove case metadata repository/index code.
-- [ ] Stop TUI executors from updating SQLite for Project/Cases.
-- [ ] Remove or neutralize project/case index migrations according to migration
+- [x] Remove project metadata repository/index code.
+- [x] Remove case metadata repository/index code.
+- [x] Stop TUI executors from updating SQLite for Project/Cases.
+- [x] Remove or neutralize project/case index migrations according to migration
       compatibility constraints.
-- [ ] Keep Markdown parse/render/write services.
-- [ ] Update tests for file-only Project/Cases persistence.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Keep Markdown parse/render/write services.
+- [x] Update tests for file-only Project/Cases persistence.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T2.1: pending.
-- T2.2: pending.
-- T2.3: pending.
-- T2.4: pending.
+- T2.1: `5dd9c40` removes project/case SQLite repositories and migrations.
+- T2.2: `5dd9c40` rewires TUI executors to Markdown-only refresh/save paths.
+- T2.3: `5dd9c40` updates tests for seven remaining SQLite migrations.
+- T2.4: pending commit adds slice implementation report and validation.
 
 ## Slice 3: Workspace Graph Builder
 
@@ -171,3 +171,4 @@ Task commits:
 ## Validation Log
 
 - 2026-05-23: `make verify` passed.
+- 2026-05-23: `make verify` passed for Slice 2.
