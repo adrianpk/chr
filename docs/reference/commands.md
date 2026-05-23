@@ -132,13 +132,9 @@ Generate a context-aware quiz:
 chc author quiz new --target spec --topic "Billing sync"
 ```
 
-Promote quiz answers into a draft:
-
-```sh
-chc author promote quiz-to-draft --quiz .chc/quizzes/<quiz>.md
-```
-
-Use `--session <session-handle>` to select a session explicitly when needed.
+Generate or edit a spec with `status: draft` when quiz answers still need
+review. Legacy `quiz-to-draft` promotion exists only for compatibility with
+older authoring sessions.
 
 Run the current assisted authoring flow:
 

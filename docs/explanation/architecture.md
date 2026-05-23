@@ -32,6 +32,11 @@ User-level state stores derived and coordinating data:
 This state exists outside the managed project because it represents the local
 user's coordination view, not the project's portable source of truth.
 
+Project and case metadata are not duplicated into SQLite as authoritative
+records. They remain Markdown in the managed project. Runtime code may build a
+structural workspace index in memory, and may cache discardable index files
+under `.chc/tmp/`, but those caches are derived from project files.
+
 ## Runtime Boundary
 
 Ticket execution uses Docker as the sandbox boundary.
@@ -91,7 +96,9 @@ not a notification transport.
 The design keeps the project workflow auditable while avoiding hidden state:
 
 - Markdown remains readable and portable.
-- SQLite holds derived indexes and local coordination state.
+- SQLite holds user-level coordination state and derived indexes where those
+  domains still need persistence.
+- The workspace structural index is derived from Markdown and can be rebuilt.
 - Docker contains agent execution effects.
 - Context artifacts make each agent attempt inspectable.
 - Runtime plans and execution records preserve the boundary used for an attempt.

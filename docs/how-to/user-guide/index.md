@@ -284,14 +284,8 @@ Preview the questionnaire first:
 chc author quiz new --target spec --topic "Billing sync" --dry-run
 ```
 
-After editing the quiz answers, promote the quiz to a draft:
-
-```sh
-chc author promote quiz-to-draft --quiz .chc/quizzes/<quiz>.md
-```
-
-Pass `--session <session-handle>` when the quiz path cannot identify a unique
-authoring session.
+After editing quiz answers, use them to create or refine a spec. Keep the spec
+in `status: draft` while it still needs review.
 
 Generated authoring artifacts remain Markdown under `.chc/`. The commands
 initialize and connect artifacts; they do not replace direct editing.

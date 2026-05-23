@@ -77,8 +77,8 @@ exists.
 
 ## Authoring Screen
 
-The authoring screen groups sessions, drafts, specs, plans, trackers, dumps,
-and quizzes.
+The authoring screen groups sessions, specs, plans, trackers, dumps, and
+quizzes.
 
 The first implementation may focus on sessions and quizzes, but the information
 architecture should allow all authoring artifacts to be surfaced.

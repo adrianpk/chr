@@ -76,7 +76,6 @@ AGENTS.md
     sessions/
   dumps/
   quizzes/
-  drafts/
   playbooks/
   reports/
   indexes/
@@ -90,7 +89,17 @@ AGENTS.md
 
 Markdown files are the human-readable project-local records.
 
-Indexes, databases, runtime traces, and notification state are supporting artifacts. They may be rebuilt or regenerated when their source assets allow it.
+Workspace metadata, project descriptions, cases, tickets, dumps, quizzes, specs,
+plans, trackers, reports, and runtime evidence are durable as files in the
+managed project.
+
+Runtime indexes, caches, user-level databases, runtime traces, and notification
+state are supporting artifacts. They may be rebuilt or regenerated when their
+source assets allow it.
+
+The workspace index is an in-memory structural model that may be cached under
+`.chc/tmp/`. That cache is discardable and must not become the durable source of
+truth.
 
 The `.chc/` directory and Markdown-first artifact model are ChrysoCoord
 invariants. They are not configured by generated workspace files.

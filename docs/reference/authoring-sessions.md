@@ -1,8 +1,8 @@
 # Authoring Sessions
 
 Authoring sessions are project-local Markdown workflows for turning rough
-knowledge into durable artifacts such as quizzes, drafts, specs, plans, slice
-sets, and tickets.
+knowledge into durable artifacts such as quizzes, specs, plans, slice sets, and
+tickets.
 
 Markdown remains the canonical editing surface. The CLI creates, lists, shows,
 and promotes files, but users may edit generated Markdown directly.
@@ -54,22 +54,6 @@ Preview a context-aware quiz without writing files:
 
 ```sh
 chc author quiz new --target spec --topic "Billing sync" --dry-run
-```
-
-Promote a quiz to a draft:
-
-```sh
-chc author promote quiz-to-draft --quiz .chc/quizzes/<quiz>.md
-```
-
-When the quiz path matches one recorded session output, ChrysoCoord resolves the
-session from the artifact metadata. Use `--session <session-handle>` to select a
-session explicitly.
-
-Preview promotion without writing the draft or updating the session:
-
-```sh
-chc author promote quiz-to-draft --quiz .chc/quizzes/<quiz>.md --dry-run
 ```
 
 All commands accept `--dir` to target another managed project.
@@ -148,7 +132,6 @@ Generated authoring artifacts use project-local `.chc/` paths:
 ```text
 .chc/dumps/
 .chc/quizzes/
-.chc/drafts/
 .chc/specs/
 .chc/plans/
 .chc/slice-sets/
@@ -174,7 +157,7 @@ The session model contains:
 - `project_id`: resolved project identity.
 - `status`: `draft`, `active`, `finalized`, or `discarded`.
 - `mode`: `markdown_direct`, `contextual`, `assisted`, or `tui`.
-- `target`: `dump`, `quiz`, `draft`, `spec`, `plan`, `slice_set`, `slice`,
+- `target`: `dump`, `quiz`, `spec`, `plan`, `slice_set`, `slice`,
   `tracker`, or `ticket`.
 - `topic`: human topic for the authoring work.
 - `created_at`, `started_at`, `finished_at`, `updated_at`: session times.
@@ -197,8 +180,9 @@ Each link records:
 - decision text;
 - recorded time.
 
-Context-aware quiz generation records a `generated` link. Quiz-to-draft promotion
-records a `promoted` link.
+Context-aware quiz generation records a `generated` link. Later promotion or
+synthesis steps record `promoted` or `generated` links according to the
+operation that created the target artifact.
 
 Assisted finalization records generated links from the transcript to the
 curated summary and from the curated summary to the synthesized artifact.
@@ -236,18 +220,21 @@ generic fallback quiz.
 
 ## Manual Promotion
 
-The current promotion path is:
+The current product model does not use `draft` as a first-class artifact
+family. Roughness is represented by a spec with `status: draft`.
+
+The intended manual document flow is:
 
 ```text
-quiz -> draft
+dump
+quiz
+dump + quiz -> spec(status=draft)
+spec(status=draft) -> spec(status=accepted/final)
 ```
 
-Promotion reads the selected quiz file, creates an editable draft, and updates
-the session with the new output artifact and provenance link.
-
-Promotion does not synthesize or summarize answers with an LLM. It preserves the
-quiz content inside the draft so the user can continue editing from a durable
-Markdown artifact.
+Legacy `quiz-to-draft` promotion remains a compatibility path for older
+sessions. New flows should generate or edit specs instead of creating draft
+artifacts.
 
 ## Assisted Authoring
 
