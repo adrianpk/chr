@@ -24,7 +24,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice 2: Structural Workspace Index Model | Delivered | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | PR #165. |
 | Slice 3: Index Load And Refresh Semantics | Delivered | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | PR #166. |
 | Slice 4: Discardable Structural Cache | Delivered | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | PR #167. |
-| Slice 5: Semantic Digest Cache Contract | Planned | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | Adds digest schema and invalidation. |
+| Slice 5: Semantic Digest Cache Contract | Reviewing | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | Adds digest schema and invalidation. |
 | Slice 6: Semantic Index Worker Boundary | Planned | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | Adds optional LLM boundary. |
 | Slice 7: Service Queries And Suggestions | Planned | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | Exposes adapter-facing queries. |
 | Slice 8: TUI Index Consumers | Planned | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | Uses queries in TUI selectors/status. |
@@ -111,21 +111,21 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add semantic digest types.
-- [ ] Add cache entry schema with version, model id, prompt hash, source hash,
+- [x] Add semantic digest types.
+- [x] Add cache entry schema with version, model id, prompt hash, source hash,
       path, and digest.
-- [ ] Add deterministic fake digest generator for tests.
-- [ ] Mark missing or stale semantic digests as pending.
-- [ ] Keep digest generation optional and non-blocking.
-- [ ] Add tests for digest cache invalidation paths.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add deterministic fake digest generator for tests.
+- [x] Mark missing or stale semantic digests as pending.
+- [x] Keep digest generation optional and non-blocking.
+- [x] Add tests for digest cache invalidation paths.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T5.1: pending.
-- T5.2: pending.
-- T5.3: pending.
+- T5.1: pending local commit adds semantic digest cache schema.
+- T5.2: pending local commit adds digest state invalidation and fake generator.
+- T5.3: pending local commit adds tests, report, and validation.
 
 ## Slice 6: Semantic Index Worker Boundary
 
