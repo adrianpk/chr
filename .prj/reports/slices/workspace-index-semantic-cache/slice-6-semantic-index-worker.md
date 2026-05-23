@@ -1,11 +1,11 @@
 # Slice 6: Semantic Index Worker Boundary
 
-Status: reviewing
+Status: delivered
 Slicing: Workspace Index And Semantic Cache
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 Tracker: `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 Branch: `feat/slice-6-semantic-index-worker`
-PR: pending
+PR: #169
 
 ## Purpose
 
