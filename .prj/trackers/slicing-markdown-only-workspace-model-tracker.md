@@ -1,6 +1,6 @@
 # Markdown-Only Workspace Model Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 
@@ -13,7 +13,9 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 - [x] Select the first pending slice for implementation.
 - [x] Complete all planned slices.
 - [x] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Decide whether post-slice tuning is needed.
+
+Post-slice tuning decision: no tuning slice needed after completed validation.
 
 ## Slice Status
 
