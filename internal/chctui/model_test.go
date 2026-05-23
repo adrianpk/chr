@@ -1597,6 +1597,7 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 
 func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 	projectDir := t.TempDir()
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "dumps"), "context.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "specs", "specs"), "feature.md", "# Feature Spec\n\nStatus: accepted\n\nDetails.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "trackers"), "feature-tracker.md", "# Feature Tracker\n\nStatus: planned\n")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "drafts"), "legacy-draft.md", "# Legacy Draft\n\nStatus: draft\n")
@@ -1607,16 +1608,16 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 		t.Fatalf("LoadDocumentViews returned error: %v", err)
 	}
 
-	if len(documents) != 2 {
-		t.Fatalf("len(documents) = %d, want 2", len(documents))
+	if len(documents) != 3 {
+		t.Fatalf("len(documents) = %d, want 3", len(documents))
 	}
 
-	if documents[0].Title != "Feature Spec" {
-		t.Fatalf("first document title = %q, want Feature Spec", documents[0].Title)
+	if documents[0].Title != "Project Context Dump" {
+		t.Fatalf("first document title = %q, want Project Context Dump", documents[0].Title)
 	}
 
-	if documents[0].Status != "accepted" {
-		t.Fatalf("first document status = %q, want accepted", documents[0].Status)
+	if documents[0].Status != "raw" {
+		t.Fatalf("first document status = %q, want raw", documents[0].Status)
 	}
 
 	for _, document := range documents {

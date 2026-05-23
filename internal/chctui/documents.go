@@ -282,6 +282,7 @@ func documentRoots(projectDir string) []struct {
 		family string
 		path   string
 	}{
+		{family: "dump", path: filepath.Join(projectDir, ".chc", "dumps")},
 		{family: "dump", path: filepath.Join(projectDir, ".prj", "dumps")},
 		{family: "quiz", path: filepath.Join(projectDir, ".prj", "quizzes")},
 		{family: "spec", path: filepath.Join(projectDir, ".prj", "specs")},
