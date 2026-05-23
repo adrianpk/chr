@@ -88,7 +88,7 @@ func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 		ProjectID: s.projectContext.ProjectID,
 		Status:    chc.AuthoringSessionStatusDraft,
 		Mode:      chc.AuthoringSessionModeTUI,
-		Target:    chc.AuthoringTargetDraft,
+		Target:    chc.AuthoringTargetSpec,
 		Topic:     "TUI artifact creation",
 		CreatedAt: now,
 		UpdatedAt: now,

@@ -115,7 +115,6 @@ Record families:
 
 - dumps;
 - quizzes;
-- drafts;
 - specs;
 - plans;
 - trackers;
@@ -194,4 +193,3 @@ Do not show `.chc/` root or Markdown canonical assets as editable settings.
 - Records can be discovered from semantic fields such as title, topic, status,
   and target.
 - The screens do not expose internal invariants as if they were user choices.
-

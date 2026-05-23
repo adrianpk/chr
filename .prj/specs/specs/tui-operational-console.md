@@ -121,7 +121,6 @@ This includes:
 
 - dumps;
 - quizzes;
-- drafts;
 - specs;
 - plans;
 - slicing plans;
@@ -310,7 +309,6 @@ It should eventually support:
 - create ticket;
 - create dump;
 - start quiz;
-- create draft;
 - generate spec;
 - create plan;
 - open board;
@@ -463,7 +461,6 @@ Documents view should index:
 
 - dumps;
 - quizzes;
-- drafts;
 - specs;
 - plans;
 - slicing plans;
@@ -490,7 +487,6 @@ Authoring view should expose:
 
 - authoring sessions;
 - quizzes;
-- drafts;
 - specs;
 - plans;
 - trackers.
@@ -511,7 +507,7 @@ Session detail should show:
 - provenance count or links;
 - transcript path;
 - artifacts path;
-- generated quiz/draft/spec paths.
+- generated quiz/spec paths.
 
 The TUI should not force users to treat session IDs as the main mental model
 when topic or slug is available.
@@ -581,7 +577,6 @@ Long text should be edited through the user's configured editor.
 Candidate editor actions:
 
 - edit dump;
-- edit draft;
 - edit spec;
 - edit plan;
 - edit ticket;

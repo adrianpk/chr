@@ -122,10 +122,6 @@ func (e tuiArtifactActionExecutor) ExecuteArtifactAction(
 		return chctui.ArtifactActionResult{}, errors.New(
 			"context-aware quiz creation requires provider-backed question generation and is not available from this TUI action yet",
 		)
-	case chctui.ArtifactActionCreateDraft:
-		return chctui.ArtifactActionResult{}, errors.New(
-			"draft file creation requires a source quiz promotion; create an authoring session first",
-		)
 	default:
 		return chctui.ArtifactActionResult{}, errors.New("unknown artifact action")
 	}

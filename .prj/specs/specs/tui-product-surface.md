@@ -68,7 +68,7 @@ Required first-class areas:
 - project overview;
 - ticket board and ticket details;
 - authoring sessions;
-- drafts, specs, plans, trackers, quizzes, and dumps;
+- specs, plans, trackers, quizzes, and dumps;
 - runtime validation;
 - ticket execution and loop evidence;
 - reports and handoff summaries;
@@ -166,4 +166,3 @@ and preserves the scriptable foundation.
 - A user can leave the TUI and continue through CLI commands without state loss.
 - The TUI does not require or imply a web server, account, tenant, or
   multi-user model.
-

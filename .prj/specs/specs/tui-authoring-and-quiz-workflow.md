@@ -92,7 +92,7 @@ Inputs:
 - active project identity;
 - target artifact type;
 - topic;
-- source dump, draft, spec, plan, tracker, ticket, or selected document;
+- source dump, spec, plan, tracker, ticket, or selected document;
 - current session transcript;
 - previous answers;
 - relevant `.chc/` artifacts;
@@ -143,11 +143,10 @@ Promotion turns authoring material into another artifact.
 
 Supported conceptual transitions:
 
-- dump to draft;
 - dump to quiz;
-- quiz to draft;
 - quiz to spec;
-- draft to spec;
+- dump plus quiz to spec;
+- spec with `status: draft` to accepted or final spec;
 - spec to plan;
 - plan to tracker;
 - plan/tracker to tickets.

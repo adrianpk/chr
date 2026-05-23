@@ -15,7 +15,6 @@ const (
 	ArtifactActionCreateTicket           ArtifactActionID = "create_ticket"
 	ArtifactActionCreateAuthoringSession ArtifactActionID = "create_authoring_session"
 	ArtifactActionCreateContextQuiz      ArtifactActionID = "create_context_quiz"
-	ArtifactActionCreateDraft            ArtifactActionID = "create_draft"
 )
 
 type ArtifactActionExecutor interface {
@@ -57,7 +56,7 @@ func NewArtifactActionState(action ArtifactActionID) ArtifactActionState {
 			Title:   "Create authoring session",
 			Details: []string{
 				"Topic: TUI artifact creation",
-				"Target: draft",
+				"Target: spec",
 				"Mode: tui",
 			},
 		}
@@ -69,16 +68,6 @@ func NewArtifactActionState(action ArtifactActionID) ArtifactActionState {
 			Details: []string{
 				"Creates a contextual quiz through the existing authoring quiz path.",
 				"Requires model/provider configuration from the authoring stack.",
-			},
-		}
-	case ArtifactActionCreateDraft:
-		return ArtifactActionState{
-			Pending: true,
-			Action:  action,
-			Title:   "Create draft",
-			Details: []string{
-				"Creates a draft authoring session.",
-				"Draft file creation remains available through supported promotions.",
 			},
 		}
 	default:

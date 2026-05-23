@@ -253,6 +253,10 @@ func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 		t.Fatalf("session mode = %q, want tui", result.AuthoringSessions[0].Mode)
 	}
 
+	if result.AuthoringSessions[0].Target != chc.AuthoringTargetSpec {
+		t.Fatalf("session target = %q, want spec", result.AuthoringSessions[0].Target)
+	}
+
 	if result.Tickets == nil {
 		t.Fatal("Tickets = nil, want reloaded empty slice")
 	}

@@ -20,7 +20,7 @@ recording evidence, and updating durable project state.
 
 The ticket is the minimum functional work unit.
 
-Use cases, dumps, drafts, quizzes, specs, plans, and trackers may inform work,
+Use cases, dumps, quizzes, specs, plans, and trackers may inform work,
 but implementation execution should eventually reduce to a ticket that the agent
 can attempt.
 

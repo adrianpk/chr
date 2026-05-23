@@ -892,6 +892,14 @@ func TestModelPlansArtifactActionCommand(t *testing.T) {
 	}
 }
 
+func TestDefaultCommandRegistryDoesNotExposeDraftCreation(t *testing.T) {
+	for _, command := range DefaultCommandRegistry() {
+		if command.ID == "create-draft" || strings.Contains(strings.ToLower(command.Title), "draft") {
+			t.Fatalf("command registry exposes draft creation command: %#v", command)
+		}
+	}
+}
+
 func TestModelCancelsArtifactAction(t *testing.T) {
 	model := NewModel(Options{})
 	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)
@@ -928,7 +936,7 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 					ProjectID: "project-1",
 					Status:    chc.AuthoringSessionStatusDraft,
 					Mode:      chc.AuthoringSessionModeTUI,
-					Target:    chc.AuthoringTargetDraft,
+					Target:    chc.AuthoringTargetSpec,
 					Topic:     "TUI artifact creation",
 				},
 			},
@@ -1431,6 +1439,8 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 	projectDir := t.TempDir()
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "specs", "specs"), "feature.md", "# Feature Spec\n\nStatus: accepted\n\nDetails.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "trackers"), "feature-tracker.md", "# Feature Tracker\n\nStatus: planned\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "drafts"), "legacy-draft.md", "# Legacy Draft\n\nStatus: draft\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "drafts"), "runtime-draft.md", "# Runtime Draft\n\nStatus: draft\n")
 
 	documents, err := LoadDocumentViews(t.Context(), projectDir)
 	if err != nil {
@@ -1447,6 +1457,12 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 
 	if documents[0].Status != "accepted" {
 		t.Fatalf("first document status = %q, want accepted", documents[0].Status)
+	}
+
+	for _, document := range documents {
+		if document.Family == "draft" {
+			t.Fatalf("document family = draft for %#v, want no active draft documents", document)
+		}
 	}
 }
 

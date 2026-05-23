@@ -28,7 +28,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice 6: Semantic Index Worker Boundary | Delivered | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | PR #169. |
 | Slice 7: Service Queries And Suggestions | Delivered | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | PR #170. |
 | Slice 8: TUI Index Consumers | Planned | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | Uses queries in TUI selectors/status. |
-| Slice 9: Draft Artifact Removal | Planned | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | Removes first-class Draft semantics. |
+| Slice 9: Draft Artifact Removal | Reviewing | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | Removes first-class Draft semantics. |
 
 ## Slice 1: Workspace Index Contract
 
@@ -177,7 +177,7 @@ Candidate tasks:
 - [ ] Keep TUI interaction non-blocking when semantic digests are pending.
 - [ ] Add TUI tests for suggestions and index health display.
 - [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
@@ -189,24 +189,24 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Remove draft-specific TUI command palette actions or mark them unavailable
+- [x] Remove draft-specific TUI command palette actions or mark them unavailable
       according to current command behavior.
-- [ ] Migrate active docs from draft workflow language to dump/quiz/spec
+- [x] Migrate active docs from draft workflow language to dump/quiz/spec
       language.
-- [ ] Update authoring references so quiz/dump material can produce specs with
+- [x] Update authoring references so quiz/dump material can produce specs with
       `status: draft`.
-- [ ] Remove draft document family from active index classification if present.
-- [ ] Preserve historical notes only when marked historical or superseded.
-- [ ] Add tests that active document classification and TUI surfaces do not
+- [x] Remove draft document family from active index classification if present.
+- [x] Preserve historical notes only when marked historical or superseded.
+- [x] Add tests that active document classification and TUI surfaces do not
       expose `Draft` as a first-class document kind.
-- [ ] Add slice implementation report.
+- [x] Add slice implementation report.
 - [ ] Run `make verify`.
 
 Task commits:
 
-- T9.1: pending.
-- T9.2: pending.
-- T9.3: pending.
+- T9.1: pending local commit removes draft TUI action and document family.
+- T9.2: pending local commit retargets authoring session creation to specs.
+- T9.3: pending local commit updates active specs, tests, and report.
 
 ## Open Decisions
 
@@ -227,3 +227,4 @@ Task commits:
 - 2026-05-23: `go test ./internal/chc` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 3.
+- 2026-05-23: `make verify` passed for Slice 9.
