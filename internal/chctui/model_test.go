@@ -1293,9 +1293,9 @@ func (e *fakeProjectMetadataExecutor) SaveProjectMetadata(
 	}, nil
 }
 
-func (e *fakeProjectMetadataExecutor) ResyncProjectMetadata() (ProjectMetadataResult, error) {
+func (e *fakeProjectMetadataExecutor) RefreshProjectMetadata() (ProjectMetadataResult, error) {
 	return ProjectMetadataResult{
-		Message:  "Project metadata resynced.",
+		Message:  "Project metadata refreshed.",
 		Metadata: e.saved,
 	}, nil
 }
@@ -1323,9 +1323,9 @@ func (e *fakeCaseMetadataExecutor) SaveCaseMetadata(
 	}, nil
 }
 
-func (e *fakeCaseMetadataExecutor) ResyncCaseMetadata() (CaseMetadataResult, error) {
+func (e *fakeCaseMetadataExecutor) RefreshCaseMetadata() (CaseMetadataResult, error) {
 	return CaseMetadataResult{
-		Message: "Case metadata resynced.",
+		Message: "Case metadata refreshed.",
 		Cases:   []chc.CaseMetadata{e.saved},
 	}, nil
 }

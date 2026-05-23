@@ -1,15 +1,10 @@
 package chc
 
 import (
-	"context"
-	"database/sql"
-	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-
-	_ "modernc.org/sqlite"
 )
 
 func TestCaseMetadataServiceSavesAndLoadsCases(t *testing.T) {
@@ -107,71 +102,8 @@ description: "External edit."
 		t.Fatal("Save returned nil error, want stale write failure")
 	}
 
-	if !strings.Contains(err.Error(), "resync before saving") {
+	if !strings.Contains(err.Error(), "refresh before saving") {
 		t.Fatalf("Save error = %q, want resync guidance", err.Error())
-	}
-}
-
-func TestCaseMetadataRepositoryUpsertsAndListsCases(t *testing.T) {
-	repository := newTestCaseMetadataRepository(t)
-
-	record := IndexedCaseMetadata{
-		ProjectID: "project-1",
-		Case: CaseMetadata{
-			SchemaVersion: CaseMetadataSchemaVersion,
-			Slug:          "example",
-			Name:          "Example",
-			Description:   "Example description.",
-			Context:       "Context.",
-			SourcePath:    ".chc/cases/example.md",
-			SourceHash:    "hash-1",
-		},
-		IndexedAt: "2026-05-22T10:00:00Z",
-	}
-
-	err := repository.UpsertCaseMetadata(context.Background(), record)
-	if err != nil {
-		t.Fatalf("UpsertCaseMetadata returned error: %v", err)
-	}
-
-	record.Case.Description = "Updated description."
-	record.Case.SourceHash = "hash-2"
-	record.IndexedAt = "2026-05-22T11:00:00Z"
-
-	err = repository.UpsertCaseMetadata(context.Background(), record)
-	if err != nil {
-		t.Fatalf("second UpsertCaseMetadata returned error: %v", err)
-	}
-
-	records, err := repository.ListProjectCaseMetadata(context.Background(), "project-1")
-	if err != nil {
-		t.Fatalf("ListProjectCaseMetadata returned error: %v", err)
-	}
-
-	if len(records) != 1 {
-		t.Fatalf("len(records) = %d, want 1", len(records))
-	}
-
-	if records[0].Case.Description != "Updated description." {
-		t.Fatalf("Description = %q, want updated description", records[0].Case.Description)
-	}
-}
-
-func TestCaseMetadataRepositoryRejectsInvalidCase(t *testing.T) {
-	repository := newTestCaseMetadataRepository(t)
-
-	err := repository.UpsertCaseMetadata(context.Background(), IndexedCaseMetadata{
-		ProjectID: "project-1",
-		Case: CaseMetadata{
-			SchemaVersion: CaseMetadataSchemaVersion,
-			Slug:          "missing-name",
-			SourcePath:    ".chc/cases/missing-name.md",
-			SourceHash:    "hash",
-		},
-		IndexedAt: "2026-05-22T10:00:00Z",
-	})
-	if err == nil {
-		t.Fatal("UpsertCaseMetadata returned nil error, want validation failure")
 	}
 }
 
@@ -191,29 +123,6 @@ func TestParseCaseMetadataRejectsInvalidFrontmatter(t *testing.T) {
 	if err == nil {
 		t.Fatal("ParseCaseMetadata returned nil error, want failure")
 	}
-}
-
-func newTestCaseMetadataRepository(t *testing.T) CaseMetadataRepository {
-	t.Helper()
-
-	db, err := sql.Open("sqlite", ":memory:")
-	if err != nil {
-		t.Fatalf("open sqlite: %v", err)
-	}
-
-	t.Cleanup(func() {
-		err := db.Close()
-		if err != nil && !errors.Is(err, sql.ErrConnDone) {
-			t.Fatalf("close sqlite: %v", err)
-		}
-	})
-
-	repository, err := NewCaseMetadataRepositoryFromDB(context.Background(), db, testMigrationFS())
-	if err != nil {
-		t.Fatalf("NewCaseMetadataRepositoryFromDB returned error: %v", err)
-	}
-
-	return repository
 }
 
 func TestCaseMetadataServiceCreatesUniqueSlug(t *testing.T) {

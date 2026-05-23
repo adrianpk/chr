@@ -17,7 +17,7 @@ const (
 
 type CaseMetadataExecutor interface {
 	SaveCaseMetadata(metadata chc.CaseMetadata) (CaseMetadataResult, error)
-	ResyncCaseMetadata() (CaseMetadataResult, error)
+	RefreshCaseMetadata() (CaseMetadataResult, error)
 }
 
 type CaseMetadataResult struct {
@@ -76,7 +76,7 @@ func (m *Model) handleCaseActionKey(msg tea.KeyMsg) bool {
 	case "ctrl+s", "s":
 		m.saveSelectedCase()
 	case "r":
-		m.resyncCases()
+		m.refreshCases()
 	case "/":
 		m.caseFilterEditing = true
 		m.statusMessage = ""
@@ -319,16 +319,16 @@ func (m *Model) saveSelectedCase() {
 	m.statusMessage = ""
 }
 
-func (m *Model) resyncCases() {
+func (m *Model) refreshCases() {
 	if m.caseExecutor == nil {
 		m.statusMessage = "Case metadata executor is unavailable."
 
 		return
 	}
 
-	result, err := m.caseExecutor.ResyncCaseMetadata()
+	result, err := m.caseExecutor.RefreshCaseMetadata()
 	if err != nil {
-		m.statusMessage = "Case metadata resync failed: " + err.Error()
+		m.statusMessage = "Case metadata refresh failed: " + err.Error()
 
 		return
 	}

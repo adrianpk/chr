@@ -18,7 +18,7 @@ const (
 
 type ProjectMetadataExecutor interface {
 	SaveProjectMetadata(metadata chc.ProjectMetadata) (ProjectMetadataResult, error)
-	ResyncProjectMetadata() (ProjectMetadataResult, error)
+	RefreshProjectMetadata() (ProjectMetadataResult, error)
 }
 
 type ProjectMetadataResult struct {
@@ -49,7 +49,7 @@ func (m Model) updateProjectKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "ctrl+s", "s":
 		m.saveProjectMetadata()
 	case "r":
-		m.resyncProjectMetadata()
+		m.refreshProjectMetadata()
 	default:
 		return m.updateNavigationKey(msg)
 	}
@@ -160,16 +160,16 @@ func (m *Model) saveProjectMetadata() {
 	m.statusMessage = ""
 }
 
-func (m *Model) resyncProjectMetadata() {
+func (m *Model) refreshProjectMetadata() {
 	if m.projectExecutor == nil {
 		m.statusMessage = "Project metadata executor is unavailable."
 
 		return
 	}
 
-	result, err := m.projectExecutor.ResyncProjectMetadata()
+	result, err := m.projectExecutor.RefreshProjectMetadata()
 	if err != nil {
-		m.statusMessage = "Project metadata resync failed: " + err.Error()
+		m.statusMessage = "Project metadata refresh failed: " + err.Error()
 
 		return
 	}

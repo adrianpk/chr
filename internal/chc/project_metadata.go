@@ -1,11 +1,8 @@
 package chc
 
 import (
-	"context"
-	"database/sql"
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -24,199 +21,6 @@ type ProjectMetadata struct {
 	SourcePath    string
 	SourceHash    string
 	Exists        bool
-}
-
-type IndexedProjectMetadata struct {
-	ProjectID string
-	Metadata  ProjectMetadata
-	IndexedAt string
-}
-
-type ProjectMetadataRepository interface {
-	UpsertProjectMetadata(ctx context.Context, record IndexedProjectMetadata) error
-	GetProjectMetadata(ctx context.Context, projectID string) (IndexedProjectMetadata, error)
-	Close() error
-}
-
-type sqliteProjectMetadataRepository struct {
-	db *sql.DB
-}
-
-type projectMetadataScanner interface {
-	Scan(dest ...any) error
-}
-
-func NewProjectMetadataRepository(
-	ctx context.Context,
-	env UserEnvironment,
-	assetsFS fs.FS,
-) (ProjectMetadataRepository, error) {
-	err := os.MkdirAll(env.DataDir(), 0o755)
-	if err != nil {
-		return nil, fmt.Errorf("create user data directory: %w", err)
-	}
-
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
-	if err != nil {
-		return nil, fmt.Errorf("open project metadata database: %w", err)
-	}
-
-	db.SetMaxOpenConns(1)
-
-	repository, err := NewProjectMetadataRepositoryFromDB(ctx, db, assetsFS)
-	if err != nil {
-		return nil, closeDBWithError(db, err)
-	}
-
-	return repository, nil
-}
-
-func NewProjectMetadataRepositoryFromDB(
-	ctx context.Context,
-	db *sql.DB,
-	assetsFS fs.FS,
-) (ProjectMetadataRepository, error) {
-	migrator := NewMigrator(assetsFS)
-
-	err := migrator.Migrate(ctx, db)
-	if err != nil {
-		return nil, fmt.Errorf("migrate project metadata database: %w", err)
-	}
-
-	return &sqliteProjectMetadataRepository{db: db}, nil
-}
-
-func (r *sqliteProjectMetadataRepository) UpsertProjectMetadata(
-	ctx context.Context,
-	record IndexedProjectMetadata,
-) error {
-	err := validateIndexedProjectMetadata(record)
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(
-		ctx,
-		`INSERT INTO indexed_project_metadata (
-    project_id,
-    name,
-    description,
-    context,
-    source_path,
-    source_hash,
-    schema_version,
-    indexed_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-ON CONFLICT(project_id) DO UPDATE SET
-    name = excluded.name,
-    description = excluded.description,
-    context = excluded.context,
-    source_path = excluded.source_path,
-    source_hash = excluded.source_hash,
-    schema_version = excluded.schema_version,
-    indexed_at = excluded.indexed_at`,
-		record.ProjectID,
-		record.Metadata.Name,
-		record.Metadata.Description,
-		record.Metadata.Context,
-		record.Metadata.SourcePath,
-		record.Metadata.SourceHash,
-		record.Metadata.SchemaVersion,
-		record.IndexedAt,
-	)
-	if err != nil {
-		return fmt.Errorf("upsert project metadata: %w", err)
-	}
-
-	return nil
-}
-
-func (r *sqliteProjectMetadataRepository) GetProjectMetadata(
-	ctx context.Context,
-	projectID string,
-) (IndexedProjectMetadata, error) {
-	row := r.db.QueryRowContext(
-		ctx,
-		`SELECT
-    project_id,
-    name,
-    description,
-    context,
-    source_path,
-    source_hash,
-    schema_version,
-    indexed_at
-FROM indexed_project_metadata
-WHERE project_id = ?`,
-		projectID,
-	)
-
-	record, err := scanIndexedProjectMetadata(row)
-	if errors.Is(err, sql.ErrNoRows) {
-		return IndexedProjectMetadata{}, fmt.Errorf("%w: %s", ErrProjectMetadataNotFound, projectID)
-	}
-
-	if err != nil {
-		return IndexedProjectMetadata{}, err
-	}
-
-	return record, nil
-}
-
-func (r *sqliteProjectMetadataRepository) Close() error {
-	err := r.db.Close()
-	if err != nil {
-		return fmt.Errorf("close project metadata repository: %w", err)
-	}
-
-	return nil
-}
-
-func scanIndexedProjectMetadata(scanner projectMetadataScanner) (IndexedProjectMetadata, error) {
-	var record IndexedProjectMetadata
-
-	err := scanner.Scan(
-		&record.ProjectID,
-		&record.Metadata.Name,
-		&record.Metadata.Description,
-		&record.Metadata.Context,
-		&record.Metadata.SourcePath,
-		&record.Metadata.SourceHash,
-		&record.Metadata.SchemaVersion,
-		&record.IndexedAt,
-	)
-	if err != nil {
-		return IndexedProjectMetadata{}, err
-	}
-
-	record.Metadata.Exists = true
-
-	return record, nil
-}
-
-func validateIndexedProjectMetadata(record IndexedProjectMetadata) error {
-	if strings.TrimSpace(record.ProjectID) == "" {
-		return fmt.Errorf("project metadata project id is required")
-	}
-
-	if strings.TrimSpace(record.IndexedAt) == "" {
-		return fmt.Errorf("project metadata indexed_at is required")
-	}
-
-	err := ValidateProjectMetadata(record.Metadata)
-	if err != nil {
-		return err
-	}
-
-	if strings.TrimSpace(record.Metadata.SourcePath) == "" {
-		return fmt.Errorf("project metadata source path is required")
-	}
-
-	if strings.TrimSpace(record.Metadata.SourceHash) == "" {
-		return fmt.Errorf("project metadata source hash is required")
-	}
-
-	return nil
 }
 
 type ProjectMetadataService struct {
@@ -296,7 +100,7 @@ func validateProjectMetadataWriteHash(path string, metadata ProjectMetadata) err
 
 	currentHash := contentHash(current)
 	if currentHash != metadata.SourceHash {
-		return fmt.Errorf("project metadata file changed outside CHC: resync before saving")
+		return fmt.Errorf("project metadata file changed outside CHC: refresh before saving")
 	}
 
 	return nil

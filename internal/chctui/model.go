@@ -572,7 +572,7 @@ func (m Model) renderKeys() string {
 	case m.documentKeysActive():
 		return "Keys: up/down selects document, left/right or tab changes view, q quits"
 	case m.SelectedView() == ViewProject:
-		return "Keys: up/down selects field, enter edits, s saves, r resyncs, left/right changes view, q quits"
+		return "Keys: up/down selects field, enter edits, s saves, r refreshes, left/right changes view, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: up/down selects session, left/right or tab changes view, q quits"
 	default:

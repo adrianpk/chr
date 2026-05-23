@@ -175,8 +175,6 @@ func loadTUIOptions(
 }
 
 type tuiProjectMetadataExecutor struct {
-	ctx            context.Context
-	env            chc.UserEnvironment
 	projectContext commandProjectContext
 }
 
@@ -186,8 +184,6 @@ func newTUIProjectMetadataExecutor(
 	projectContext commandProjectContext,
 ) tuiProjectMetadataExecutor {
 	return tuiProjectMetadataExecutor{
-		ctx:            ctx,
-		env:            env,
 		projectContext: projectContext,
 	}
 }
@@ -200,57 +196,25 @@ func (e tuiProjectMetadataExecutor) SaveProjectMetadata(
 		return chctui.ProjectMetadataResult{}, err
 	}
 
-	err = e.indexProjectMetadata(saved)
-	if err != nil {
-		return chctui.ProjectMetadataResult{}, err
-	}
-
 	return chctui.ProjectMetadataResult{
 		Message:  "Project metadata saved.",
 		Metadata: saved,
 	}, nil
 }
 
-func (e tuiProjectMetadataExecutor) ResyncProjectMetadata() (chctui.ProjectMetadataResult, error) {
+func (e tuiProjectMetadataExecutor) RefreshProjectMetadata() (chctui.ProjectMetadataResult, error) {
 	metadata, err := chc.NewProjectMetadataService(e.projectContext.ProjectDir).Load()
 	if err != nil {
 		return chctui.ProjectMetadataResult{}, err
 	}
 
-	if metadata.Exists {
-		err = e.indexProjectMetadata(metadata)
-		if err != nil {
-			return chctui.ProjectMetadataResult{}, err
-		}
-	}
-
 	return chctui.ProjectMetadataResult{
-		Message:  "Project metadata resynced.",
+		Message:  "Project metadata refreshed.",
 		Metadata: metadata,
 	}, nil
 }
 
-func (e tuiProjectMetadataExecutor) indexProjectMetadata(metadata chc.ProjectMetadata) error {
-	repository, err := chc.NewProjectMetadataRepository(e.ctx, e.env, assetsFS)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		//nolint:errcheck // Save/resync already succeeded; close errors are not actionable here.
-		_ = repository.Close()
-	}()
-
-	return repository.UpsertProjectMetadata(e.ctx, chc.IndexedProjectMetadata{
-		ProjectID: e.projectContext.ProjectID,
-		Metadata:  metadata,
-		IndexedAt: time.Now().UTC().Format(time.RFC3339),
-	})
-}
-
 type tuiCaseMetadataExecutor struct {
-	ctx            context.Context
-	env            chc.UserEnvironment
 	projectContext commandProjectContext
 }
 
@@ -260,8 +224,6 @@ func newTUICaseMetadataExecutor(
 	projectContext commandProjectContext,
 ) tuiCaseMetadataExecutor {
 	return tuiCaseMetadataExecutor{
-		ctx:            ctx,
-		env:            env,
 		projectContext: projectContext,
 	}
 }
@@ -274,12 +236,7 @@ func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
 		return chctui.CaseMetadataResult{}, err
 	}
 
-	err = e.indexCaseMetadata(saved)
-	if err != nil {
-		return chctui.CaseMetadataResult{}, err
-	}
-
-	cases, err := e.loadAndIndexCases()
+	cases, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return chctui.CaseMetadataResult{}, err
 	}
@@ -291,50 +248,16 @@ func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
 	}, nil
 }
 
-func (e tuiCaseMetadataExecutor) ResyncCaseMetadata() (chctui.CaseMetadataResult, error) {
-	cases, err := e.loadAndIndexCases()
+func (e tuiCaseMetadataExecutor) RefreshCaseMetadata() (chctui.CaseMetadataResult, error) {
+	cases, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return chctui.CaseMetadataResult{}, err
 	}
 
 	return chctui.CaseMetadataResult{
-		Message: "Case metadata resynced.",
+		Message: "Case metadata refreshed.",
 		Cases:   cases,
 	}, nil
-}
-
-func (e tuiCaseMetadataExecutor) loadAndIndexCases() ([]chc.CaseMetadata, error) {
-	cases, err := chc.NewCaseMetadataService(e.projectContext.ProjectDir).LoadAll()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, metadata := range cases {
-		err = e.indexCaseMetadata(metadata)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return cases, nil
-}
-
-func (e tuiCaseMetadataExecutor) indexCaseMetadata(metadata chc.CaseMetadata) error {
-	repository, err := chc.NewCaseMetadataRepository(e.ctx, e.env, assetsFS)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		//nolint:errcheck // Save/resync already succeeded; close errors are not actionable here.
-		_ = repository.Close()
-	}()
-
-	return repository.UpsertCaseMetadata(e.ctx, chc.IndexedCaseMetadata{
-		ProjectID: e.projectContext.ProjectID,
-		Case:      metadata,
-		IndexedAt: time.Now().UTC().Format(time.RFC3339),
-	})
 }
 
 type tuiArtifactActionExecutor struct {
