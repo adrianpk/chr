@@ -1,11 +1,11 @@
 # Slice 2: Workspace And Metadata Operations
 
-Status: reviewing
+Status: delivered
 Slicing: Application Operation Service Consolidation
 Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 Tracker: `.prj/trackers/slicing-application-operation-service-consolidation-tracker.md`
 Branch: `feat/slice-2-workspace-metadata-operations`
-PR: pending
+PR: #157
 
 ## Purpose
 
