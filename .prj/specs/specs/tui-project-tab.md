@@ -88,13 +88,13 @@ domain assumptions, and anything useful as extended project context.
 
 `name`
 
-: Required string. Human-readable project name shown in the TUI and indexed in
-SQLite.
+: Required string. Human-readable project name shown in the TUI and exposed in
+the runtime workspace graph.
 
 `description`
 
 : Required string. Compact technical project description shown in the TUI and
-indexed in SQLite.
+exposed in the runtime workspace graph.
 
 ### Markdown Body
 
@@ -106,31 +106,32 @@ it, but must not depend on arbitrary body prose to populate structured columns.
 
 ## Persistence Model
 
-ChrysoCoord has two representations of project data:
+ChrysoCoord has one durable representation of project data:
 
-- `.chc/project.md` as the human-editable project file;
-- SQLite as the fast query/index layer used by the UI, CLI, and context
-  assembly.
+- `.chc/project.md` as the human-editable project file.
 
-The file is the authoring surface. SQLite is the indexed operational view of
-the last valid synchronized content.
+The file is the source of truth. Runtime code may build an ephemeral
+`WorkspaceGraph` from Markdown files for navigation, diagnostics, and context
+selection, but that graph is not persisted and is always reconstructible from
+the filesystem.
 
 ```plantuml
 @startuml
-title Project metadata persistence model
+title Project metadata source model
 
 rectangle ".chc/project.md\nMarkdown + YAML frontmatter" as File
 component "Project metadata parser\nschema validation" as Parser
-database "SQLite project metadata index" as DB
+component "Ephemeral WorkspaceGraph\nnavigation metadata" as Graph
 rectangle "Project screen" as UI
 rectangle "CLI project commands" as CLI
 rectangle "Context assembly" as Context
 
 File --> Parser
-Parser --> DB
-DB --> UI
-DB --> CLI
-DB --> Context
+Parser --> Graph
+Graph --> UI
+Graph --> CLI
+Graph --> Context
+Context --> File : read body lazily
 
 @enduml
 ```
@@ -139,14 +140,14 @@ DB --> Context
 
 TUI and CLI writes must go through a shared domain/application operation.
 
-The TUI should not manually edit Markdown or write SQLite directly. The CLI
-should not carry separate persistence logic for the same behavior.
+The TUI should not carry separate Markdown persistence logic. The CLI should
+not carry separate persistence logic for the same behavior.
 
 ### Save Interaction
 
 This diagram describes the logical interaction between UI state, application
-model, domain persistence, the relational index, and the project metadata file.
-It intentionally avoids key-level interaction details.
+model, domain persistence, the runtime graph, and the project metadata file. It
+intentionally avoids key-level interaction details.
 
 ```plantuml
 @startuml
@@ -157,7 +158,7 @@ participant "Project screen" as UI
 participant "TUI model" as Model
 participant "ProjectMetadataExecutor" as Executor
 participant "ProjectMetadataService" as Service
-database "SQLite index" as DB
+participant "WorkspaceGraph" as Graph
 collections ".chc/project.md" as File
 
 User -> UI: edit project metadata fields
@@ -173,12 +174,12 @@ Service -> File: read current file hash
 
 alt source hash changed outside CHC
     Service --> Executor: conflict error
-    Executor --> UI: report resync required
+    Executor --> UI: report refresh required
 else source hash matches or file is new
     Service -> File: write Markdown atomically
-    Service --> Executor: saved metadata with new source_hash
-    Executor -> DB: upsert indexed metadata
-    DB --> Executor: indexed
+    Service --> Executor: saved metadata with new runtime source hash
+    Executor -> Graph: update project node from saved file metadata
+    Graph --> Executor: updated
     Executor --> UI: saved metadata
     UI -> Model: replace metadata and clear dirty state
 end
@@ -191,74 +192,71 @@ The service owns:
 - validation;
 - conflict detection;
 - atomic file writes;
-- database update;
-- source hash tracking;
+- runtime source hash tracking when an edit is active;
 - diagnostics returned to the UI/CLI.
 
-## Manual Edit And Resync Model
+## Manual Edit And Refresh Model
 
-Manual file edits are supported, but they do not silently mutate the database.
+Manual file edits are supported because Markdown is the source of truth.
 
-The user can run an explicit resync action. The first implementation may expose
-this through the command palette or a contextual screen action. A daemon or file
-watcher may be added later, but is not required for the first complete model.
+The user can run an explicit refresh action. The first implementation may
+expose this through the command palette or a contextual screen action. A daemon
+or file watcher may be added later, but is not required for the first complete
+model.
 
 ```plantuml
 @startuml
-title Manual project metadata resync
+title Manual project metadata refresh
 
 actor User
 participant Editor
 collections ".chc/project.md" as File
 participant "Project screen" as UI
-participant "Project metadata indexer" as Indexer
-database "SQLite index" as DB
+participant "WorkspaceGraph builder" as Graph
 
 User -> Editor: edit project.md manually
 Editor -> File: save
-User -> UI: request resync
-UI -> Indexer: reindex project metadata
-Indexer -> File: read file
-Indexer -> Indexer: parse frontmatter and validate schema
+User -> UI: request refresh
+UI -> Graph: rebuild project node from Markdown
+Graph -> File: read frontmatter
 
 alt valid
-    Indexer -> DB: update indexed metadata and source hash
-    Indexer --> UI: resync complete
+    Graph -> Graph: update in-memory project node
+    Graph --> UI: refresh complete
 else invalid
-    Indexer -> DB: keep last valid indexed metadata
-    Indexer -> DB: record diagnostics
-    Indexer --> UI: show parse/schema error
+    Graph -> Graph: record diagnostic in memory
+    Graph --> UI: show parse/schema error
 end
 
 @enduml
 ```
 
-## Staleness And Conflict Rules
+## Runtime Staleness And Conflict Rules
 
-Every indexed project metadata record should store enough source information to
-detect external changes:
+No durable database staleness exists for project metadata because the Markdown
+file is the durable source.
+
+The runtime model may still track enough source information to detect external
+changes while the TUI is open:
 
 - `source_path`;
-- `source_hash`;
-- `indexed_at`;
+- runtime source hash;
+- `mtime`;
 - `schema_version`;
 - parse or validation diagnostics when invalid.
 
-Expected sync states:
+Expected runtime states:
 
-- `synced`: the file and database index match.
-- `stale`: the file changed since the last valid index.
+- `current`: the in-memory node reflects the last parsed file state.
+- `changed`: the file changed since the active edit began.
 - `invalid`: the file was read but frontmatter/schema validation failed.
 - `conflict`: the app attempted to write while the file had changed outside the
-  indexed version.
-
-When invalid content is found, SQLite must not be overwritten from invalid file
-data.
+  active edit.
 
 When a CLI/TUI write detects external file changes, it must not blindly
 overwrite them. It should require either:
 
-- resync first; or
+- refresh first; or
 - an explicit overwrite action.
 
 ## UI Layout
@@ -335,13 +333,12 @@ Initial complete interaction:
 - `Enter` or an explicit edit action enters field editing.
 - `Esc` cancels the current field edit.
 - A save action persists through `ProjectMetadataService`.
-- A resync action reindexes `.chc/project.md` into SQLite.
+- A refresh action reloads `.chc/project.md` into the runtime graph.
 - If the file changed outside the app, save shows a conflict instead of
   overwriting.
-- If the file is invalid, the tab shows the last valid indexed values plus an
-  actionable diagnostic.
+- If the file is invalid, the tab shows an actionable diagnostic.
 
-The exact save/resync bindings are not finalized. They should be visible in the
+The exact save/refresh bindings are not finalized. They should be visible in the
 bottom action area or contextual help before implementation.
 
 ## Context Assembly Rules
@@ -390,8 +387,7 @@ When `.chc/project.md` does not exist:
 - The tab does not show internal generated project IDs.
 - The tab does not show irrelevant workspace implementation diagnostics.
 - The canonical project file is Markdown with YAML frontmatter.
-- SQLite indexes validated structured metadata and supports fast queries.
-- Manual file edits are supported through explicit resync.
-- Invalid manual edits do not corrupt the SQLite index.
+- Manual file edits are supported through explicit refresh.
+- Invalid manual edits surface diagnostics without corrupting durable state.
 - CLI and TUI writes share one domain/application operation.
 - External file changes are detected before CLI/TUI writes overwrite files.

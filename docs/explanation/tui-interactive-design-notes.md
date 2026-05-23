@@ -41,7 +41,7 @@ spec, ticket, or implementation plan.
     master/detail behavior;
   - lower-left: long-form body/context or supporting content;
   - lower-right: derived, read-only metadata.
-- Derived metadata includes artifact counts, source/index facts, and actionable
+- Derived metadata includes artifact counts, source file facts, and actionable
   diagnostics.
 - Inline editing is the default editing model. Editing should happen where the
   field is displayed rather than moving the field into a separate temporary
@@ -74,26 +74,16 @@ spec, ticket, or implementation plan.
   cost.
 - The normal screen should make it clear how the user changes `name` and
   `description`; showing inferred values without an edit path is incomplete.
-- The editing model is unresolved:
-  - direct Markdown editing may be too file-centric for a TUI field;
-  - invoking the same application command path as the CLI would keep behavior
-    consistent;
-  - persistence may need both SQLite and a Markdown representation, consistent
-    with the rest of project-local data.
-- Open persistence question: for editable project metadata, should the command
-  layer write SQLite first and then render/update Markdown, or should Markdown be
-  the canonical source and SQLite be an index/cache?
-- Current persistence direction:
+- Markdown-only persistence direction:
   - project-local files under `.chc/` should remain human-editable and cannot be
     treated as a sealed vault;
-  - SQLite should support fast querying/indexing for UI and command responses;
-  - user edits to project-local files imply an indexing/reconciliation process
-    that notices file changes and refreshes the database when the file remains
-    parseable;
-  - if a user breaks the file schema, the database should not blindly update from
-    invalid content;
-  - broken file parseability should surface as an actionable diagnostics state,
-    not silently corrupt indexed state.
+  - Markdown is the source of truth for project and case documents;
+  - the TUI/CLI may keep a lightweight in-memory workspace graph for navigation;
+  - the graph stores metadata, relationships, parse status, and paths, not full
+    body context;
+  - user edits through Vim or another editor are valid and become visible after
+    refresh;
+  - broken file parseability should surface as an actionable diagnostics state.
 - Project metadata file-format direction:
   - project metadata should not use a dedicated YAML file;
   - it should use Markdown with YAML frontmatter;
@@ -101,18 +91,17 @@ spec, ticket, or implementation plan.
   - the Markdown body is a separate long-form project context field;
   - the body lets the project carry richer context without making
     `description` too long for frontmatter or UI summaries.
-- Synchronization direction under discussion:
+- Refresh direction:
   - manual file edits are a first-class workflow for terminal/editor-oriented
     users;
-  - file-to-database synchronization can be delegated to an explicit manual
-    resync action at first, possibly exposed as a function-key command;
+  - filesystem-to-memory refresh can be delegated to an explicit manual refresh
+    action at first, possibly exposed as a function-key command;
   - a daemon or watcher may come later, but should not be required for the first
     usable model;
-  - CLI/TUI writes are easier to keep consistent because they can use the
-    application/domain layer and persist database-to-file in one controlled
-    operation;
-  - database-to-file writes must account for user edits made outside the app, so
-    blind overwrites need conflict detection or an explicit overwrite policy.
+  - CLI/TUI writes should use the application/domain layer and write Markdown
+    files atomically;
+  - app writes must account for user edits made outside the app, so blind
+    overwrites need runtime conflict detection or an explicit overwrite policy.
 
 ## Button Bar
 
@@ -132,13 +121,9 @@ spec, ticket, or implementation plan.
   - `name`
   - `description`
 - No additional fields are assumed for now.
-- Use cases should have SQLite persistence support, consistent with the rest of
-  the app.
-- Use cases should also have a Markdown representation under `.chc/`.
+- Use cases are Markdown documents under `.chc/cases/`.
 - Useful persistence metadata can exist below the UI surface:
   - stable `slug` or ID derived from the name;
-  - `status`, likely only `active` or `archived`;
-  - `created_at` and `updated_at`;
   - `doc_path` for the Markdown representation.
 - Do not add ownership fields.
 - The app is single-user: each user has their own workspace and owns what they
@@ -149,9 +134,7 @@ spec, ticket, or implementation plan.
   - use Bubble Tea/Bubbles components for text editing rather than custom
     low-level input handling;
   - keep a shared domain/application service between CLI and TUI;
-  - persist a human-editable Markdown file with YAML frontmatter;
-  - maintain SQLite as a query/index layer with source path, source hash,
-    schema version, and indexed timestamp.
+  - persist a human-editable Markdown file with YAML frontmatter.
 - A use case is conceptually a project-local container for related artifacts
   such as dumps, quizzes, specs, plans, and board work.
 - A use case belongs to the current project by containment under `.chc/`; a
@@ -171,8 +154,13 @@ spec, ticket, or implementation plan.
   - list/search in the left region;
   - editable `name`, `description`, and long-form case context in one right-side
     document panel;
-  - artifact counts, source/index facts, and diagnostics below that document
+  - artifact counts, source file facts, and diagnostics below that document
     panel.
+- A case reference from another artifact should point to a canonical case slug.
+- A missing case slug should appear as an unresolved reference, not silently
+  create a new case.
+- The normal context assembly path starts from a selected case when available,
+  and falls back to project-wide material when no case applies.
 
 ## F3 Dumps
 
