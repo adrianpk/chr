@@ -106,6 +106,10 @@ type Model struct {
 	views                    []View
 	selected                 int
 	selectedPane             int
+	maximizedPane            int
+	verticalSplitPercent     int
+	horizontalSplitPercent   int
+	layoutDrag               layoutDrag
 	width                    int
 	height                   int
 	tickets                  []TicketView
@@ -132,6 +136,20 @@ type Model struct {
 	caseExecutor             CaseMetadataExecutor
 	statusMessage            string
 }
+
+type layoutDrag int
+
+const (
+	layoutDragNone layoutDrag = iota
+	layoutDragVertical
+	layoutDragHorizontal
+)
+
+const (
+	defaultPanelSplitPercent = 50
+	minPanelSplitPercent     = 25
+	maxPanelSplitPercent     = 75
+)
 
 func NewModel(opts Options) Model {
 	workspaceIndex := opts.WorkspaceIndex
@@ -161,25 +179,28 @@ func NewModel(opts Options) Model {
 	}
 
 	return Model{
-		projectDir:           opts.ProjectDir,
-		projectID:            opts.ProjectID,
-		projectMetadata:      projectMetadata,
-		cases:                casesFromWorkspaceIndex(workspaceIndex, opts.WorkspaceGraph, opts.Cases),
-		views:                append([]View(nil), defaultViews...),
-		tickets:              NewTicketViews(opts.Tickets),
-		documents:            append([]DocumentView(nil), opts.Documents...),
-		authoringSessions:    NewAuthoringSessionViews(opts.AuthoringSessions),
-		observability:        opts.Observability,
-		workspaceGraph:       opts.WorkspaceGraph,
-		workspaceIndex:       workspaceIndex,
-		semanticDigestStates: append([]chc.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
-		commandPalette:       NewCommandPaletteState(DefaultCommandRegistry()),
-		actionExecutor:       opts.ActionExecutor,
-		ticketExecutor:       opts.TicketExecutor,
-		workExecutor:         opts.WorkExecutor,
-		workspaceExecutor:    opts.WorkspaceExecutor,
-		projectExecutor:      opts.ProjectExecutor,
-		caseExecutor:         opts.CaseExecutor,
+		projectDir:             opts.ProjectDir,
+		projectID:              opts.ProjectID,
+		projectMetadata:        projectMetadata,
+		cases:                  casesFromWorkspaceIndex(workspaceIndex, opts.WorkspaceGraph, opts.Cases),
+		views:                  append([]View(nil), defaultViews...),
+		maximizedPane:          -1,
+		verticalSplitPercent:   defaultPanelSplitPercent,
+		horizontalSplitPercent: defaultPanelSplitPercent,
+		tickets:                NewTicketViews(opts.Tickets),
+		documents:              append([]DocumentView(nil), opts.Documents...),
+		authoringSessions:      NewAuthoringSessionViews(opts.AuthoringSessions),
+		observability:          opts.Observability,
+		workspaceGraph:         opts.WorkspaceGraph,
+		workspaceIndex:         workspaceIndex,
+		semanticDigestStates:   append([]chc.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
+		commandPalette:         NewCommandPaletteState(DefaultCommandRegistry()),
+		actionExecutor:         opts.ActionExecutor,
+		ticketExecutor:         opts.TicketExecutor,
+		workExecutor:           opts.WorkExecutor,
+		workspaceExecutor:      opts.WorkspaceExecutor,
+		projectExecutor:        opts.ProjectExecutor,
+		caseExecutor:           opts.CaseExecutor,
 	}
 }
 
@@ -287,6 +308,12 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateFilterKey(msg)
 	}
 
+	if msg.String() == "alt+m" {
+		m.toggleMaximizedPane()
+
+		return m, nil
+	}
+
 	if m.SelectedView() == ViewProject {
 		return m.updateProjectKey(msg)
 	}
@@ -300,13 +327,32 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	event := tea.MouseEvent(msg)
+
+	if event.Action == tea.MouseActionRelease {
+		m.layoutDrag = layoutDragNone
+
+		return m, nil
+	}
+
+	if event.Action == tea.MouseActionMotion {
+		return m.updateMouseMotion(event)
+	}
+
 	if event.Action != tea.MouseActionPress || event.Button != tea.MouseButtonLeft {
 		return m, nil
 	}
 
 	width := maxInt(m.width, 60)
+	height := maxInt(m.height, minShellHeight)
 
-	button, ok := shellFooterButtonAt(event.X, event.Y, width, maxInt(m.height, minShellHeight))
+	if drag, ok := m.layoutDragAt(event.X, event.Y, width, height); ok {
+		m.layoutDrag = drag
+		m.applyLayoutDrag(event)
+
+		return m, nil
+	}
+
+	button, ok := shellFooterButtonAt(event.X, event.Y, width, height)
 	if !ok {
 		return m, nil
 	}
@@ -324,6 +370,28 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m Model) updateMouseMotion(event tea.MouseEvent) (tea.Model, tea.Cmd) {
+	if m.layoutDrag != layoutDragNone {
+		m.applyLayoutDrag(event)
+
+		return m, nil
+	}
+
+	if event.Button != tea.MouseButtonLeft {
+		return m, nil
+	}
+
+	width := maxInt(m.width, 60)
+	height := maxInt(m.height, minShellHeight)
+
+	if drag, ok := m.layoutDragAt(event.X, event.Y, width, height); ok {
+		m.layoutDrag = drag
+		m.applyLayoutDrag(event)
+	}
+
+	return m, nil
+}
+
 func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 
@@ -335,6 +403,12 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 	if isQuitKey(key) {
 		return m, tea.Quit
+	}
+
+	if key == "alt+m" {
+		m.toggleMaximizedPane()
+
+		return m, nil
 	}
 
 	if m.handlePaneNavigationKey(key) {
@@ -355,6 +429,80 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m *Model) toggleMaximizedPane() {
+	if m.maximizedPane == m.selectedPane {
+		m.maximizedPane = -1
+
+		return
+	}
+
+	m.maximizedPane = m.selectedPane
+}
+
+func (m Model) layoutDragAt(x, y, width, height int) (layoutDrag, bool) {
+	if m.maximizedPane >= 0 {
+		return layoutDragNone, false
+	}
+
+	bodyTop, bodyHeight := m.shellBodyGeometry(width, height)
+	if y < bodyTop || y >= bodyTop+bodyHeight {
+		return layoutDragNone, false
+	}
+
+	leftWidth, _ := m.splitWidths(width)
+	if nearInt(x, leftWidth, 4) {
+		return layoutDragVertical, true
+	}
+
+	if !m.hasStackedRightPanels() || x < leftWidth {
+		return layoutDragNone, false
+	}
+
+	topHeight, _ := m.splitHeights(bodyHeight)
+	if nearInt(y-bodyTop, topHeight, 1) {
+		return layoutDragHorizontal, true
+	}
+
+	return layoutDragNone, false
+}
+
+func (m *Model) applyLayoutDrag(event tea.MouseEvent) {
+	width := maxInt(m.width, 60)
+	height := maxInt(m.height, minShellHeight)
+	bodyTop, bodyHeight := m.shellBodyGeometry(width, height)
+
+	switch m.layoutDrag {
+	case layoutDragVertical:
+		m.verticalSplitPercent = percentFromPosition(event.X, width)
+	case layoutDragHorizontal:
+		m.horizontalSplitPercent = percentFromPosition(event.Y-bodyTop, bodyHeight)
+	}
+}
+
+func (m Model) shellBodyGeometry(width, height int) (int, int) {
+	topbar := m.renderShellTopbar(width)
+	footer := m.renderShellFooter(width)
+	status := m.renderShellStatus(width)
+
+	bodyTop := lineCount(topbar)
+	bodyHeight := height - lineCount(topbar) - lineCount(status) - lineCount(footer)
+
+	if bodyHeight < 1 {
+		bodyHeight = 1
+	}
+
+	return bodyTop, bodyHeight
+}
+
+func (m Model) hasStackedRightPanels() bool {
+	switch m.SelectedView() {
+	case ViewProject, ViewDashboard, ViewCases:
+		return true
+	default:
+		return false
+	}
 }
 
 func isQuitKey(key string) bool {

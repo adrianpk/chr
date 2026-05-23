@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	minShellHeight      = 12
-	primarySplitPercent = 55
+	minShellHeight       = 12
+	panelVerticalGapSize = 1
 )
 
 var (
@@ -132,12 +132,21 @@ func (m Model) renderLegacyWorkspace(width, height int) string {
 }
 
 func (m Model) renderProjectWorkspace(width, height int) string {
-	leftWidth, rightWidth := splitWidths(width)
-	rightTopHeight := maxInt(height/2, 1)
-	rightBottomHeight := maxInt(height-rightTopHeight, 1)
+	leftWidth, rightWidth := m.splitWidths(width)
 	project := m.renderProjectContextLines(maxInt(leftWidth-4, 1))
 	artifacts := m.renderProjectArtifactLines()
 	location := m.renderProjectLocationLines()
+
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Project", m.renderProjectContextLines(maxInt(width-4, 1)), width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Location", location, width, height, true), width, height)
+	case 2:
+		return fitBlock(renderPanel("Artifacts", artifacts, width, height, true), width, height)
+	}
+
+	rightTopHeight, rightBottomHeight := m.splitHeights(height)
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
 		renderPanel("Location", location, rightWidth, rightTopHeight, m.selectedPane == 1),
@@ -147,6 +156,7 @@ func (m Model) renderProjectWorkspace(width, height int) string {
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Project", project, leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
 		right,
 	), width, height)
 }
@@ -240,9 +250,17 @@ func (m Model) renderProjectLocationLines() []string {
 }
 
 func (m Model) renderCasesWorkspace(width, height int) string {
-	leftWidth, rightWidth := splitWidths(width)
-	rightEditableHeight := maxInt(height*70/100, 1)
-	rightArtifactsHeight := maxInt(height-rightEditableHeight, 1)
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Cases", m.renderCaseListLines(maxInt(width-4, 1), height-2), width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Case", m.renderCaseDocumentLines(maxInt(width-4, 1)), width, height, true), width, height)
+	case 2:
+		return fitBlock(renderPanel("Artifacts", m.renderCaseArtifactLines(), width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
+	rightEditableHeight, rightArtifactsHeight := m.splitHeights(height)
 	right := lipgloss.JoinVertical(
 		lipgloss.Left,
 		renderPanel("Case", m.renderCaseDocumentLines(maxInt(rightWidth-4, 1)), rightWidth, rightEditableHeight, m.selectedPane == 1),
@@ -252,6 +270,7 @@ func (m Model) renderCasesWorkspace(width, height int) string {
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Cases", m.renderCaseListLines(maxInt(leftWidth-4, 1), height-2), leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
 		right,
 	), width, height)
 }
@@ -499,25 +518,43 @@ func (m Model) caseMetadataFromSuggestions(
 }
 
 func (m Model) renderTicketWorkspace(width, height int) string {
-	leftWidth, rightWidth := splitWidths(width)
 	list := m.renderTicketFocusList(height - 2)
 	detail := m.renderSelectedTicketDetail()
+
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Tickets", list, width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Detail", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Tickets", list, leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
 		renderPanel("Detail", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
 func (m Model) renderDocumentWorkspace(width, height int, title string, documents []DocumentView) string {
-	leftWidth, rightWidth := splitWidths(width)
 	list := m.renderDocumentFocusList(documents, height-2)
 	detail := m.renderSelectedDocumentDetailFor(documents)
+
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel(title, list, width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Preview", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel(title, list, leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
 		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
@@ -527,7 +564,6 @@ func (m Model) renderDocumentFamilyWorkspace(width, height int, title string, fa
 }
 
 func (m Model) renderQuizWorkspace(width, height int) string {
-	leftWidth, rightWidth := splitWidths(width)
 	quizzes := m.documentsByFamily(map[string]bool{"quiz": true})
 	list := m.renderDocumentFocusList(quizzes, height-2)
 	interaction := []string{
@@ -538,33 +574,61 @@ func (m Model) renderQuizWorkspace(width, height int) string {
 		"Quizzes can be project-wide or case-scoped.",
 	}
 
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Quizzes", list, width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Interaction", interaction, width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
+
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Quizzes", list, leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
 		renderPanel("Interaction", interaction, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
 func (m Model) renderAuthoringWorkspace(width, height int) string {
-	leftWidth, rightWidth := splitWidths(width)
 	list := m.renderAuthoringFocusList(height - 2)
 	detail := m.renderSelectedAuthoringSessionDetail()
+
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Authoring", list, width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Session", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Authoring", list, leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
 		renderPanel("Session", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
 func (m Model) renderOperationsWorkspace(width, height int) string {
-	leftWidth, rightWidth := splitWidths(width)
 	agent := strings.Split(m.renderAgent(), "\n")
 	runtime := strings.Split(m.renderRuntime()+"\n\n"+m.renderWorkspaceIndexHealth(), "\n")
+
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Agent", agent[1:], width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Runtime", runtime[1:], width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Agent", agent[1:], leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
 		renderPanel("Runtime", runtime[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
@@ -816,6 +880,15 @@ func renderPanel(title string, lines []string, width, height int, focused bool) 
 	return style.Width(maxInt(width-2, 1)).Height(contentHeight).Render(fitBlock(strings.Join(content, "\n"), maxInt(width-4, 1), contentHeight))
 }
 
+func panelVerticalGap(height int) string {
+	lines := make([]string, maxInt(height, 1))
+	for index := range lines {
+		lines[index] = strings.Repeat(" ", panelVerticalGapSize)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
 func normalizeBlock(content string, width, height int) string {
 	lines := strings.Split(strings.ReplaceAll(content, "\r\n", "\n"), "\n")
 	if len(lines) > height {
@@ -917,11 +990,20 @@ func truncatePlainLine(line string, width int) string {
 	return string(runes[:width-1]) + "…"
 }
 
-func splitWidths(width int) (int, int) {
-	left := width * primarySplitPercent / 100
-	right := width - left
+func (m Model) splitWidths(width int) (int, int) {
+	available := maxInt(width-panelVerticalGapSize, 1)
+	left := available * m.verticalSplitPercent / 100
+	right := available - left
 
 	return left, right
+}
+
+func (m Model) splitHeights(height int) (int, int) {
+	available := maxInt(height, 1)
+	top := maxInt(available*m.horizontalSplitPercent/100, 1)
+	bottom := maxInt(available-top, 1)
+
+	return top, bottom
 }
 
 func distributedWidths(width, count int) []int {
@@ -965,6 +1047,25 @@ func maxInt(left, right int) int {
 	}
 
 	return right
+}
+
+func percentFromPosition(position, total int) int {
+	if total <= 0 {
+		return defaultPanelSplitPercent
+	}
+
+	percent := position * 100 / total
+
+	return minInt(maxInt(percent, minPanelSplitPercent), maxPanelSplitPercent)
+}
+
+func nearInt(left, right, distance int) bool {
+	delta := left - right
+	if delta < 0 {
+		delta = -delta
+	}
+
+	return delta <= distance
 }
 
 func minInt(left, right int) int {

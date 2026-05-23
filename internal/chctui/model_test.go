@@ -71,6 +71,89 @@ func TestTabMovesPaneFocusWithoutChangingView(t *testing.T) {
 	}
 }
 
+func TestPanelSplitsDefaultToEqualAspectRatio(t *testing.T) {
+	model := NewModel(Options{})
+
+	leftWidth, rightWidth := model.splitWidths(101)
+	if leftWidth != 50 || rightWidth != 50 {
+		t.Fatalf("splitWidths(101) = %d, %d, want 50, 50", leftWidth, rightWidth)
+	}
+
+	topHeight, bottomHeight := model.splitHeights(41)
+	if topHeight != 20 || bottomHeight != 21 {
+		t.Fatalf("splitHeights(41) = %d, %d, want 20, 21", topHeight, bottomHeight)
+	}
+}
+
+func TestMouseDragUpdatesPanelSplits(t *testing.T) {
+	model := NewModel(Options{})
+	model.width = 100
+	model.height = 30
+
+	updated, _ := model.Update(tea.MouseMsg{
+		X:      49,
+		Y:      10,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	})
+	dragging := requireUpdatedModel(t, updated)
+
+	updated, _ = dragging.Update(tea.MouseMsg{
+		X:      70,
+		Y:      10,
+		Action: tea.MouseActionMotion,
+		Button: tea.MouseButtonLeft,
+	})
+	dragged := requireUpdatedModel(t, updated)
+
+	if dragged.verticalSplitPercent != 70 {
+		t.Fatalf("verticalSplitPercent = %d, want 70", dragged.verticalSplitPercent)
+	}
+
+	updated, _ = dragged.Update(tea.MouseMsg{
+		X:      80,
+		Y:      14,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	})
+	dragging = requireUpdatedModel(t, updated)
+
+	updated, _ = dragging.Update(tea.MouseMsg{
+		X:      80,
+		Y:      20,
+		Action: tea.MouseActionMotion,
+		Button: tea.MouseButtonLeft,
+	})
+	dragged = requireUpdatedModel(t, updated)
+
+	if dragged.horizontalSplitPercent != 70 {
+		t.Fatalf("horizontalSplitPercent = %d, want 70", dragged.horizontalSplitPercent)
+	}
+}
+
+func TestAltMTogglesFocusedPaneMaximize(t *testing.T) {
+	model := NewModel(Options{})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'m'}, Alt: true})
+	maximized := requireUpdatedModel(t, updated)
+
+	if maximized.maximizedPane != 0 {
+		t.Fatalf("maximizedPane = %d, want 0", maximized.maximizedPane)
+	}
+
+	view := maximized.renderProjectWorkspace(100, 20)
+	if strings.Contains(view, "Location") || strings.Contains(view, "Artifacts") {
+		t.Fatalf("maximized project workspace contains secondary panels:\n%s", view)
+	}
+
+	updated, _ = maximized.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'m'}, Alt: true})
+	restored := requireUpdatedModel(t, updated)
+
+	if restored.maximizedPane != -1 {
+		t.Fatalf("maximizedPane = %d, want -1", restored.maximizedPane)
+	}
+}
+
 func TestLeftAndRightDoNotChangeGlobalTabs(t *testing.T) {
 	model := NewModel(Options{})
 

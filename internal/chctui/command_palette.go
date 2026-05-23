@@ -226,6 +226,8 @@ func (m *Model) selectView(view View) {
 			m.selected = index
 			m.selectPrimaryPane()
 
+			m.maximizedPane = -1
+
 			return
 		}
 	}
