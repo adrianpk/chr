@@ -127,7 +127,7 @@ numbers.
 
 ### Slice 1: Markdown-Only Contract
 
-Status: active.
+Status: delivered.
 
 Expected branch: `feat/slice-1-markdown-only-contract`
 Expected PR title: `feat(slice-1): markdown-only contract`
@@ -155,7 +155,7 @@ Expected outcome:
 
 ### Slice 2: Remove Project And Case Indexes
 
-Status: planned.
+Status: active.
 
 Expected branch: `feat/slice-2-remove-project-case-indexes`
 Expected PR title: `feat(slice-2): remove project case indexes`

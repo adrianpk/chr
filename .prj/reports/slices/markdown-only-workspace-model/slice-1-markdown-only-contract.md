@@ -1,11 +1,11 @@
 # Slice 1: Markdown-Only Contract
 
-Status: reviewing
+Status: delivered
 Slicing: Markdown-Only Workspace Model
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 Tracker: `.prj/trackers/slicing-markdown-only-workspace-model-tracker.md`
 Branch: `feat/slice-1-markdown-only-contract`
-PR: pending
+PR: #149
 
 ## Purpose
 

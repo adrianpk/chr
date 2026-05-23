@@ -19,8 +19,8 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Markdown-Only Contract | Active | `feat/slice-1-markdown-only-contract` | `feat(slice-1): markdown-only contract` | `.prj/reports/slices/markdown-only-workspace-model/slice-1-markdown-only-contract.md` | Documentation and contract only. |
-| Slice 2: Remove Project And Case Indexes | Planned | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | Remove relational persistence for Project/Cases only. |
+| Slice 1: Markdown-Only Contract | Delivered | `feat/slice-1-markdown-only-contract` | `feat(slice-1): markdown-only contract` | `.prj/reports/slices/markdown-only-workspace-model/slice-1-markdown-only-contract.md` | PR #149. |
+| Slice 2: Remove Project And Case Indexes | Active | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | Remove relational persistence for Project/Cases only. |
 | Slice 3: Workspace Graph Builder | Planned | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | Runtime in-memory graph. |
 | Slice 4: Filesystem Refresh Semantics | Planned | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | Manual editor/file changes. |
 | Slice 5: TUI Project And Cases Rewire | Planned | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | Project/Cases screens use Markdown and graph. |
@@ -46,7 +46,7 @@ Task commits:
 - T1.0: `bb47052` created and published slicing plan and tracker.
 - T1.1: `b844ab7` updates Project and Cases specs.
 - T1.2: `b844ab7` updates interactive design notes.
-- T1.3: pending commit adds slice implementation report and tracker status.
+- T1.3: `2a47d8f` adds slice implementation report and tracker status.
 - T1.4: `make verify` passed on 2026-05-23.
 
 ## Slice 2: Remove Project And Case Indexes
