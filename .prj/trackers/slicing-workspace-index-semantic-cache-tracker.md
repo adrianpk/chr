@@ -20,7 +20,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Workspace Index Contract | Reviewing | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | Defines contracts before runtime changes. |
+| Slice 1: Workspace Index Contract | Delivered | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | PR #164. |
 | Slice 2: Structural Workspace Index Model | Planned | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | Adds index model shape. |
 | Slice 3: Index Load And Refresh Semantics | Planned | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | Handles direct file changes. |
 | Slice 4: Discardable Structural Cache | Planned | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
@@ -45,9 +45,9 @@ Candidate tasks:
 
 Task commits:
 
-- T1.1: pending local commit documents workspace index architecture.
-- T1.2: pending local commit documents semantic cache and refresh contracts.
-- T1.3: pending local commit documents draft artifact removal direction.
+- T1.1: `18a4351` documents workspace index architecture.
+- T1.2: `18a4351` documents semantic cache and refresh contracts.
+- T1.3: `18a4351` documents draft artifact removal direction.
 
 ## Slice 2: Structural Workspace Index Model
 

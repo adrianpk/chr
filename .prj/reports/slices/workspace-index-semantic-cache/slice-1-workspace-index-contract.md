@@ -1,11 +1,11 @@
 # Slice 1: Workspace Index Contract
 
-Status: reviewing
+Status: delivered
 Slicing: Workspace Index And Semantic Cache
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 Tracker: `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 Branch: `feat/slice-1-workspace-index-contract`
-PR: pending
+PR: #164
 
 ## Purpose
 
