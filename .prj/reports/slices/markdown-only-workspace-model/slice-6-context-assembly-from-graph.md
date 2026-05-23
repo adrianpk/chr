@@ -1,11 +1,11 @@
 # Slice 6: Context Assembly From Graph
 
-Status: reviewing
+Status: delivered
 Slicing: Markdown-Only Workspace Model
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 Tracker: `.prj/trackers/slicing-markdown-only-workspace-model-tracker.md`
 Branch: `feat/slice-6-context-assembly-from-graph`
-PR: pending
+PR: #154
 
 ## Purpose
 

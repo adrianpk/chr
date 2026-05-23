@@ -24,7 +24,7 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 | Slice 3: Workspace Graph Builder | Delivered | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | PR #151. |
 | Slice 4: Filesystem Refresh Semantics | Delivered | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | PR #152. |
 | Slice 5: TUI Project And Cases Rewire | Delivered | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | PR #153. |
-| Slice 6: Context Assembly From Graph | Reviewing | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
+| Slice 6: Context Assembly From Graph | Delivered | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | PR #154. |
 
 ## Slice 1: Markdown-Only Contract
 
@@ -153,10 +153,10 @@ Candidate tasks:
 
 Task commits:
 
-- T6.1: pending local commit for workspace context request and assembly model.
-- T6.2: pending local commit for case-rooted and project-wide document selection.
-- T6.3: pending local commit for lazy body reads and source reporting.
-- T6.4: pending local commit for authoring quiz integration, tests, report, and validation.
+- T6.1: `9cd64b8` adds workspace context request and assembly model.
+- T6.2: `9cd64b8` adds case-rooted and project-wide document selection.
+- T6.3: `9cd64b8` adds lazy body reads and source reporting.
+- T6.4: `9cd64b8` adds authoring quiz integration, tests, report, and validation.
 
 ## Open Decisions
 
