@@ -23,8 +23,8 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 | Slice 2: Remove Project And Case Indexes | Delivered | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | PR #150. |
 | Slice 3: Workspace Graph Builder | Delivered | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | PR #151. |
 | Slice 4: Filesystem Refresh Semantics | Delivered | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | PR #152. |
-| Slice 5: TUI Project And Cases Rewire | Reviewing | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | Project/Cases screens use Markdown and graph. |
-| Slice 6: Context Assembly From Graph | Planned | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
+| Slice 5: TUI Project And Cases Rewire | Delivered | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | PR #153. |
+| Slice 6: Context Assembly From Graph | Active | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
 
 ## Slice 1: Markdown-Only Contract
 
@@ -131,10 +131,10 @@ Candidate tasks:
 
 Task commits:
 
-- T5.1: pending local commit for graph-backed Project/Cases projection.
-- T5.2: pending local commit for Project/Cases refresh rebind and post-save graph refresh.
-- T5.3: pending local commit for graph-backed TUI tests.
-- T5.4: pending local commit for slice implementation report and validation.
+- T5.1: `46e995b` adds graph-backed Project/Cases projection.
+- T5.2: `46e995b` rebinds Project/Cases refresh and post-save graph refresh.
+- T5.3: `46e995b` adds graph-backed TUI tests.
+- T5.4: `46e995b` adds slice implementation report and validation.
 
 ## Slice 6: Context Assembly From Graph
 

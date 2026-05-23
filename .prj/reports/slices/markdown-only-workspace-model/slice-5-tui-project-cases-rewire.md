@@ -1,11 +1,11 @@
 # Slice 5: TUI Project And Cases Rewire
 
-Status: reviewing
+Status: delivered
 Slicing: Markdown-Only Workspace Model
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 Tracker: `.prj/trackers/slicing-markdown-only-workspace-model-tracker.md`
 Branch: `feat/slice-5-tui-project-cases-rewire`
-PR: pending
+PR: #153
 
 ## Purpose
 
