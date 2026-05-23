@@ -25,7 +25,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 | Slice 4: Work Control Operations | Delivered | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | PR #159. |
 | Slice 5: Adapter Interface Cleanup | Delivered | `feat/slice-5-adapter-interface-cleanup` | `feat(slice-5): adapter interface cleanup` | `.prj/reports/slices/application-operation-service-consolidation/slice-5-adapter-interface-cleanup.md` | PR #160. |
 | Slice 6: CLI Convergence Pass | Delivered | `feat/slice-6-cli-convergence-pass` | `feat(slice-6): cli convergence pass` | `.prj/reports/slices/application-operation-service-consolidation/slice-6-cli-convergence-pass.md` | PR #161. |
-| Slice 7: Architecture Documentation | Planned | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Document operation boundary. |
+| Slice 7: Architecture Documentation | Reviewing | `docs/slice-7-architecture-documentation` | `feat(slice-7): architecture documentation` | `.prj/reports/slices/application-operation-service-consolidation/slice-7-architecture-documentation.md` | Documents operation boundary. |
 
 ## Slice 1: Operation Service Boundary
 
@@ -150,18 +150,18 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Update workspace architecture documentation with the service boundary.
-- [ ] Document that adapters do not implement use cases.
-- [ ] Document that one central service may be split across files.
-- [ ] Document when narrow interfaces are appropriate.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Update workspace architecture documentation with the service boundary.
+- [x] Document that adapters do not implement use cases.
+- [x] Document that one central service may be split across files.
+- [x] Document when narrow interfaces are appropriate.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T7.1: pending.
-- T7.2: pending.
-- T7.3: pending.
+- T7.1: pending local commit documents the operation service boundary.
+- T7.2: pending local commit documents adapter responsibilities and service split rules.
+- T7.3: pending local commit adds report context and validation.
 
 ## Open Decisions
 
@@ -187,3 +187,4 @@ Task commits:
 - 2026-05-23: `go test ./internal/chcapp -run 'TestTicket(New|Comment|Status)'` passed for Slice 6.
 - 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 6.
 - 2026-05-23: `make verify` passed for Slice 6.
+- 2026-05-23: `make verify` passed for Slice 7.

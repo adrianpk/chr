@@ -15,6 +15,14 @@ This document defines coding rules for Go application code.
 - Use `pkg/` only for stable contracts that are intentionally shared outside the module.
 - Keep command packages under `cmd/` as assembly entrypoints.
 - Keep transport adapters thin and delegate execution to package-owned services or workflows.
+- Keep reusable CLI, TUI, and future transport operations centered in the
+  `internal/chcapp` operation service.
+- Do not duplicate an operation workflow inside an adapter when the behavior can
+  be invoked from another adapter.
+- Split operation service methods across files when it improves readability,
+  but do not create one service implementation per entity by default.
+- Keep `service*.go` files adapter-neutral. TUI-specific mappings belong in
+  TUI adapter files, not in the service implementation.
 - Use package-local unexported types unless a public contract is required.
 
 ## Code style
@@ -46,6 +54,9 @@ This document defines coding rules for Go application code.
 
 Avoid:
 - command packages that contain domain logic
+- TUI, CLI, Telegram, or email adapters that own reusable workflow logic
+- separate service implementations per entity when one operation service with
+  file-level method grouping is sufficient
 - generic `util` packages without clear ownership
 - public packages created for internal convenience
 - stringly typed contracts where structs or explicit types are available
