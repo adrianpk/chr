@@ -97,22 +97,22 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Define refresh/reload behavior in code contracts.
-- [ ] Implement graph rebuild on refresh.
-- [ ] Update graph after app writes.
-- [ ] Surface invalid Markdown/frontmatter diagnostics.
-- [ ] Remove database resync terminology from runtime paths.
-- [ ] Add runtime guardrails for active edits when source files changed.
-- [ ] Add tests for external edits and refresh.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define refresh/reload behavior in code contracts.
+- [x] Implement graph rebuild on refresh.
+- [x] Update graph after app writes.
+- [x] Surface invalid Markdown/frontmatter diagnostics.
+- [x] Remove database resync terminology from runtime paths.
+- [x] Add runtime guardrails for active edits when source files changed.
+- [x] Add tests for external edits and refresh.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending.
-- T4.2: pending.
-- T4.3: pending.
-- T4.4: pending.
+- T4.1: `2bb78b2` adds workspace refresh executor contract.
+- T4.2: `2bb78b2` rebuilds the runtime graph from filesystem refresh.
+- T4.3: `2bb78b2` adds diagnostics/status reporting and edit guardrails.
+- T4.4: pending commit adds slice implementation report and validation.
 
 ## Slice 5: TUI Project And Cases Rewire
 
@@ -174,3 +174,5 @@ Task commits:
 - 2026-05-23: `make verify` passed for Slice 2.
 - 2026-05-23: `go test ./internal/chc ./internal/chcapp ./internal/chctui ./cmd/chc` passed for Slice 3.
 - 2026-05-23: `make verify` passed for Slice 3.
+- 2026-05-23: `go test ./internal/chctui ./internal/chcapp ./internal/chc ./cmd/chc` passed for Slice 4.
+- 2026-05-23: `make verify` passed for Slice 4.
