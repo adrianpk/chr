@@ -160,51 +160,84 @@ func loadTUIOptions(
 		return chctui.Options{}, err
 	}
 
+	operations := newService(ctx, env, projectContext)
+
+	return newTUIOptions(tuiOptionsData{
+		ctx:               ctx,
+		env:               env,
+		projectContext:    projectContext,
+		stdin:             stdin,
+		stdout:            stdout,
+		tickets:           tickets,
+		documents:         documents,
+		projectMetadata:   projectMetadata,
+		cases:             cases,
+		authoringSessions: authoringSessions,
+		observability:     observability,
+		workspaceGraph:    workspaceGraph,
+		operations:        operations,
+	}), nil
+}
+
+type tuiOptionsData struct {
+	ctx               context.Context
+	env               chc.UserEnvironment
+	projectContext    commandProjectContext
+	stdin             io.Reader
+	stdout            io.Writer
+	tickets           []chc.IndexedTicket
+	documents         []chctui.DocumentView
+	projectMetadata   chc.ProjectMetadata
+	cases             []chc.CaseMetadata
+	authoringSessions []chc.AuthoringSession
+	observability     chctui.ObservabilityView
+	workspaceGraph    chc.WorkspaceGraph
+	operations        service
+}
+
+func newTUIOptions(data tuiOptionsData) chctui.Options {
 	return chctui.Options{
-		ProjectDir:        projectContext.ProjectDir,
-		ProjectID:         projectContext.ProjectID,
-		ProjectMetadata:   projectMetadata,
-		Cases:             cases,
-		Stdin:             stdin,
-		Stdout:            stdout,
-		Tickets:           tickets,
-		Documents:         documents,
-		AuthoringSessions: authoringSessions,
-		Observability:     observability,
-		WorkspaceGraph:    workspaceGraph,
-		ActionExecutor:    newTUIArtifactActionExecutor(ctx, env, projectContext),
-		TicketExecutor:    newTUITicketActionExecutor(ctx, env, projectContext),
-		WorkExecutor:      newTUIWorkActionExecutor(ctx, env, projectContext),
-		WorkspaceExecutor: newTUIWorkspaceRefreshExecutor(ctx, projectContext),
-		ProjectExecutor:   newTUIProjectMetadataExecutor(ctx, env, projectContext),
-		CaseExecutor:      newTUICaseMetadataExecutor(ctx, env, projectContext),
-	}, nil
+		ProjectDir:        data.projectContext.ProjectDir,
+		ProjectID:         data.projectContext.ProjectID,
+		ProjectMetadata:   data.projectMetadata,
+		Cases:             data.cases,
+		Stdin:             data.stdin,
+		Stdout:            data.stdout,
+		Tickets:           data.tickets,
+		Documents:         data.documents,
+		AuthoringSessions: data.authoringSessions,
+		Observability:     data.observability,
+		WorkspaceGraph:    data.workspaceGraph,
+		ActionExecutor:    newTUIArtifactActionExecutor(data.ctx, data.env, data.projectContext),
+		TicketExecutor:    newTUITicketActionExecutor(data.ctx, data.env, data.projectContext),
+		WorkExecutor:      newTUIWorkActionExecutor(data.ctx, data.env, data.projectContext),
+		WorkspaceExecutor: newTUIWorkspaceRefreshExecutor(data.operations),
+		ProjectExecutor:   newTUIProjectMetadataExecutor(data.ctx, data.env, data.projectContext),
+		CaseExecutor:      newTUICaseMetadataExecutor(data.ctx, data.env, data.projectContext),
+	}
 }
 
 type tuiWorkspaceRefreshExecutor struct {
-	ctx            context.Context
-	projectContext commandProjectContext
+	operations service
 }
 
 func newTUIWorkspaceRefreshExecutor(
-	ctx context.Context,
-	projectContext commandProjectContext,
+	operations service,
 ) tuiWorkspaceRefreshExecutor {
 	return tuiWorkspaceRefreshExecutor{
-		ctx:            ctx,
-		projectContext: projectContext,
+		operations: operations,
 	}
 }
 
 func (e tuiWorkspaceRefreshExecutor) RefreshWorkspace() (chctui.WorkspaceRefreshResult, error) {
-	graph, err := chc.NewWorkspaceGraphBuilder(e.projectContext.ProjectDir).Build(e.ctx)
+	result, err := e.operations.RefreshWorkspace()
 	if err != nil {
 		return chctui.WorkspaceRefreshResult{}, err
 	}
 
 	return chctui.WorkspaceRefreshResult{
-		Message: "Workspace refreshed.",
-		Graph:   graph,
+		Message: result.Message,
+		Graph:   result.Graph,
 	}, nil
 }
 

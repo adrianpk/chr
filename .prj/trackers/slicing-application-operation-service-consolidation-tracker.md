@@ -9,8 +9,8 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 - [x] Capture operation service consolidation direction.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -19,7 +19,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Operation Service Boundary | Planned | `feat/slice-1-operation-service-boundary` | `feat(slice-1): operation service boundary` | `.prj/reports/slices/application-operation-service-consolidation/slice-1-operation-service-boundary.md` | Establish shared service boundary. |
+| Slice 1: Operation Service Boundary | Reviewing | `feat/slice-1-operation-service-boundary` | `feat(slice-1): operation service boundary` | `.prj/reports/slices/application-operation-service-consolidation/slice-1-operation-service-boundary.md` | Shared service boundary established. |
 | Slice 2: Workspace And Metadata Operations | Planned | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | Move refresh, Project, and Case operations. |
 | Slice 3: Artifact And Ticket Operations | Planned | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | Move artifact creation and ticket mutations. |
 | Slice 4: Work Control Operations | Planned | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | Move execution and daemon controls. |
@@ -31,21 +31,21 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 
 Candidate tasks:
 
-- [ ] Add central operation service type.
-- [ ] Centralize shared service dependencies.
-- [ ] Add adapter-neutral request/result types for the first migrated boundary.
-- [ ] Delegate at least one low-risk TUI executor path through the service.
-- [ ] Keep TUI options and behavior stable.
-- [ ] Add focused tests where practical.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add central operation service type.
+- [x] Centralize shared service dependencies.
+- [x] Add adapter-neutral request/result types for the first migrated boundary.
+- [x] Delegate at least one low-risk TUI executor path through the service.
+- [x] Keep TUI options and behavior stable.
+- [x] Add focused tests where practical.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T1.1: pending.
-- T1.2: pending.
-- T1.3: pending.
-- T1.4: pending.
+- T1.1: pending local commit for service type and dependency boundary.
+- T1.2: pending local commit for workspace refresh service method.
+- T1.3: pending local commit for TUI wrapper delegation.
+- T1.4: pending local commit for tests, report, and validation.
 
 ## Slice 2: Workspace And Metadata Operations
 
@@ -174,4 +174,5 @@ Task commits:
 
 ## Validation Log
 
-- Pending.
+- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 1.
+- 2026-05-23: `make verify` passed for Slice 1.
