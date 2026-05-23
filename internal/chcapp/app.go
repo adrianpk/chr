@@ -208,8 +208,8 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		AuthoringSessions: data.authoringSessions,
 		Observability:     data.observability,
 		WorkspaceGraph:    data.workspaceGraph,
-		ActionExecutor:    newTUIArtifactActionExecutor(data.ctx, data.env, data.projectContext),
-		TicketExecutor:    newTUITicketActionExecutor(data.ctx, data.env, data.projectContext),
+		ActionExecutor:    newTUIArtifactActionExecutor(data.operations),
+		TicketExecutor:    newTUITicketActionExecutor(data.operations),
 		WorkExecutor:      newTUIWorkActionExecutor(data.ctx, data.env, data.projectContext),
 		WorkspaceExecutor: newTUIWorkspaceRefreshExecutor(data.operations),
 		ProjectExecutor:   newTUIProjectMetadataExecutor(data.operations),
@@ -295,20 +295,14 @@ func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
 }
 
 type tuiArtifactActionExecutor struct {
-	ctx            context.Context
-	env            chc.UserEnvironment
-	projectContext commandProjectContext
+	operations service
 }
 
 func newTUIArtifactActionExecutor(
-	ctx context.Context,
-	env chc.UserEnvironment,
-	projectContext commandProjectContext,
+	operations service,
 ) tuiArtifactActionExecutor {
 	return tuiArtifactActionExecutor{
-		ctx:            ctx,
-		env:            env,
-		projectContext: projectContext,
+		operations: operations,
 	}
 }
 
@@ -317,9 +311,19 @@ func (e tuiArtifactActionExecutor) ExecuteArtifactAction(
 ) (chctui.ArtifactActionResult, error) {
 	switch action {
 	case chctui.ArtifactActionCreateTicket:
-		return e.createTicket()
+		result, err := e.operations.CreateDefaultTicket()
+		if err != nil {
+			return chctui.ArtifactActionResult{}, err
+		}
+
+		return e.artifactActionResult(result)
 	case chctui.ArtifactActionCreateAuthoringSession:
-		return e.createAuthoringSession()
+		result, err := e.operations.CreateTUIAuthoringSession()
+		if err != nil {
+			return chctui.ArtifactActionResult{}, err
+		}
+
+		return e.artifactActionResult(result)
 	case chctui.ArtifactActionCreateContextQuiz:
 		return chctui.ArtifactActionResult{}, errors.New(
 			"context-aware quiz creation requires provider-backed question generation and is not available from this TUI action yet",
@@ -333,121 +337,52 @@ func (e tuiArtifactActionExecutor) ExecuteArtifactAction(
 	}
 }
 
-func (e tuiArtifactActionExecutor) createTicket() (chctui.ArtifactActionResult, error) {
-	config, err := chc.LoadWorkspaceConfig(e.projectContext.ProjectDir)
-	if err != nil {
-		return chctui.ArtifactActionResult{}, err
-	}
-
-	repository := chc.NewTicketRepository(
-		e.projectContext.ProjectDir,
-		chc.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
-	)
-
-	result, err := repository.CreateTicket(e.ctx, chc.CreateTicketOptions{
-		Title:       "TUI created ticket",
-		Priority:    "normal",
-		Severity:    "normal",
-		Type:        "task",
-		ProjectArea: "tui",
-	})
-	if err != nil {
-		return chctui.ArtifactActionResult{}, err
-	}
-
-	reloaded, err := e.reloadArtifactActionState()
-	if err != nil {
-		return chctui.ArtifactActionResult{}, err
-	}
-
-	reloaded.Message = "Created ticket " + result.Key + " at " + displayPath(e.projectContext.ProjectDir, result.Path)
-
-	return reloaded, nil
-}
-
-func (e tuiArtifactActionExecutor) createAuthoringSession() (chctui.ArtifactActionResult, error) {
-	now := time.Now().UTC()
-	session := chc.AuthoringSession{
-		ID:        authoringSessionID(now),
-		ProjectID: e.projectContext.ProjectID,
-		Status:    chc.AuthoringSessionStatusDraft,
-		Mode:      chc.AuthoringSessionModeTUI,
-		Target:    chc.AuthoringTargetDraft,
-		Topic:     "TUI artifact creation",
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-
-	paths, err := chc.NewAuthoringSessionRepository(e.projectContext.ProjectDir).CreateSession(e.ctx, session)
-	if err != nil {
-		return chctui.ArtifactActionResult{}, err
-	}
-
-	reloaded, err := e.reloadArtifactActionState()
-	if err != nil {
-		return chctui.ArtifactActionResult{}, err
-	}
-
-	reloaded.Message = "Created authoring session " + session.ID + " at " +
-		displayPath(e.projectContext.ProjectDir, paths.SessionPath)
-
-	return reloaded, nil
-}
-
-func (e tuiArtifactActionExecutor) reloadArtifactActionState() (chctui.ArtifactActionResult, error) {
-	tickets, err := loadTUITickets(e.ctx, e.env, e.projectContext)
-	if err != nil {
-		return chctui.ArtifactActionResult{}, err
-	}
-
-	documents, err := chctui.LoadDocumentViews(e.ctx, e.projectContext.ProjectDir)
-	if err != nil {
-		return chctui.ArtifactActionResult{}, err
-	}
-
-	authoringSessions, err := loadTUIAuthoringSessions(e.ctx, e.projectContext)
+func (e tuiArtifactActionExecutor) artifactActionResult(
+	result ArtifactOperationResult,
+) (chctui.ArtifactActionResult, error) {
+	documents, err := chctui.LoadDocumentViews(e.operations.ctx, e.operations.projectContext.ProjectDir)
 	if err != nil {
 		return chctui.ArtifactActionResult{}, err
 	}
 
 	return chctui.ArtifactActionResult{
-		Tickets:           tickets,
+		Message:           result.Message,
+		Tickets:           result.Tickets,
 		Documents:         documents,
-		AuthoringSessions: authoringSessions,
+		AuthoringSessions: result.AuthoringSessions,
 	}, nil
 }
 
 type tuiTicketActionExecutor struct {
-	ctx            context.Context
-	env            chc.UserEnvironment
-	projectContext commandProjectContext
+	operations service
 }
 
 func newTUITicketActionExecutor(
-	ctx context.Context,
-	env chc.UserEnvironment,
-	projectContext commandProjectContext,
+	operations service,
 ) tuiTicketActionExecutor {
 	return tuiTicketActionExecutor{
-		ctx:            ctx,
-		env:            env,
-		projectContext: projectContext,
+		operations: operations,
 	}
 }
 
 func (e tuiTicketActionExecutor) ExecuteTicketAction(
 	request chctui.TicketActionRequest,
 ) (chctui.TicketActionResult, error) {
-	ticket, err := e.ticketByKey(request.Key)
-	if err != nil {
-		return chctui.TicketActionResult{}, err
-	}
-
 	switch request.Action {
 	case chctui.TicketActionAddComment:
-		return e.addComment(ticket)
+		result, err := e.operations.AddSelectedTicketComment(request.Key)
+		if err != nil {
+			return chctui.TicketActionResult{}, err
+		}
+
+		return ticketActionResult(result), nil
 	case chctui.TicketActionMoveStatus:
-		return e.moveStatus(ticket, request.Status)
+		result, err := e.operations.MoveSelectedTicketStatus(request.Key, request.Status)
+		if err != nil {
+			return chctui.TicketActionResult{}, err
+		}
+
+		return ticketActionResult(result), nil
 	case chctui.TicketActionToggleChecklist:
 		return chctui.TicketActionResult{}, errors.New(
 			"checklist toggle requires a safe checklist item writer and is not available from this TUI action yet",
@@ -461,69 +396,11 @@ func (e tuiTicketActionExecutor) ExecuteTicketAction(
 	}
 }
 
-func (e tuiTicketActionExecutor) addComment(ticket chc.IndexedTicket) (chctui.TicketActionResult, error) {
-	err := chc.NewTicketCommenter().AddComment(e.ctx, chc.AddTicketCommentOptions{
-		Path:      ticket.Path,
-		Author:    "tui",
-		Body:      "TUI action recorded.",
-		CreatedAt: time.Now().UTC(),
-	})
-	if err != nil {
-		return chctui.TicketActionResult{}, err
-	}
-
-	tickets, err := loadTUITickets(e.ctx, e.env, e.projectContext)
-	if err != nil {
-		return chctui.TicketActionResult{}, err
-	}
-
+func ticketActionResult(result TicketOperationResult) chctui.TicketActionResult {
 	return chctui.TicketActionResult{
-		Message: "Added comment to ticket " + ticket.Key + ".",
-		Tickets: tickets,
-	}, nil
-}
-
-func (e tuiTicketActionExecutor) moveStatus(
-	ticket chc.IndexedTicket,
-	status string,
-) (chctui.TicketActionResult, error) {
-	err := chc.NewTicketStatusUpdater().UpdateStatus(e.ctx, chc.UpdateTicketStatusOptions{
-		Path:      ticket.Path,
-		Status:    status,
-		UpdatedAt: time.Now().UTC(),
-	})
-	if err != nil {
-		return chctui.TicketActionResult{}, err
+		Message: result.Message,
+		Tickets: result.Tickets,
 	}
-
-	tickets, err := loadTUITickets(e.ctx, e.env, e.projectContext)
-	if err != nil {
-		return chctui.TicketActionResult{}, err
-	}
-
-	return chctui.TicketActionResult{
-		Message: "Moved ticket " + ticket.Key + " to " + status + ".",
-		Tickets: tickets,
-	}, nil
-}
-
-func (e tuiTicketActionExecutor) ticketByKey(key string) (chc.IndexedTicket, error) {
-	index, err := chc.NewTicketIndex(e.ctx, e.env, assetsFS)
-	if err != nil {
-		return chc.IndexedTicket{}, err
-	}
-
-	defer func() {
-		//nolint:errcheck // Lookup result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(e.ctx, index, e.projectContext)
-	if err != nil {
-		return chc.IndexedTicket{}, err
-	}
-
-	return index.GetProjectTicketByKey(e.ctx, e.projectContext.ProjectID, key)
 }
 
 type tuiWorkActionExecutor struct {
