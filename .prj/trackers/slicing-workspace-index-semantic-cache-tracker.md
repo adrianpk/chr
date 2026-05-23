@@ -27,8 +27,8 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice 5: Semantic Digest Cache Contract | Delivered | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | PR #168. |
 | Slice 6: Semantic Index Worker Boundary | Delivered | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | PR #169. |
 | Slice 7: Service Queries And Suggestions | Delivered | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | PR #170. |
-| Slice 8: TUI Index Consumers | Planned | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | Uses queries in TUI selectors/status. |
-| Slice 9: Draft Artifact Removal | Reviewing | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | Removes first-class Draft semantics. |
+| Slice 8: TUI Index Consumers | Reviewing | `feat/slice-8-tui-index-consumers` | `feat(slice-8): tui index consumers` | `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md` | Uses queries in TUI selectors/status. |
+| Slice 9: Draft Artifact Removal | Reviewing | `feat/slice-9-remove-draft-artifact` | `feat(slice-9): remove draft artifact` | `.prj/reports/slices/workspace-index-semantic-cache/slice-9-remove-draft-artifact.md` | PR #172. |
 
 ## Slice 1: Workspace Index Contract
 
@@ -169,21 +169,21 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Replace direct graph projection call sites with service/index query
+- [x] Replace direct graph projection call sites with service/index query
       results where appropriate.
-- [ ] Add a use-case selector or suggestion surface for artifact creation flows
+- [x] Add a use-case selector or suggestion surface for artifact creation flows
       that need case association.
-- [ ] Show index health and stale semantic digest status in an appropriate view.
-- [ ] Keep TUI interaction non-blocking when semantic digests are pending.
-- [ ] Add TUI tests for suggestions and index health display.
-- [ ] Add slice implementation report.
+- [x] Show index health and stale semantic digest status in an appropriate view.
+- [x] Keep TUI interaction non-blocking when semantic digests are pending.
+- [x] Add TUI tests for suggestions and index health display.
+- [x] Add slice implementation report.
 - [x] Run `make verify`.
 
 Task commits:
 
-- T8.1: pending.
-- T8.2: pending.
-- T8.3: pending.
+- T8.1: pending local commit wires TUI case surfaces to the workspace index.
+- T8.2: pending local commit carries semantic digest state into TUI health.
+- T8.3: pending local commit adds tests, report, and validation.
 
 ## Slice 9: Draft Artifact Removal
 
@@ -200,13 +200,13 @@ Candidate tasks:
 - [x] Add tests that active document classification and TUI surfaces do not
       expose `Draft` as a first-class document kind.
 - [x] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T9.1: pending local commit removes draft TUI action and document family.
-- T9.2: pending local commit retargets authoring session creation to specs.
-- T9.3: pending local commit updates active specs, tests, and report.
+- T9.1: `9d5add2` removes draft TUI action and document family.
+- T9.2: `9d5add2` retargets authoring session creation to specs.
+- T9.3: `9d5add2` updates active specs, tests, and report.
 
 ## Open Decisions
 

@@ -3,12 +3,13 @@ package chcapp
 import "forge.adrianpk.com/chc/internal/chc"
 
 type WorkspaceRefreshResult struct {
-	Message      string
-	Graph        chc.WorkspaceGraph
-	Index        chc.WorkspaceIndex
-	IndexHealth  chc.WorkspaceIndexHealth
-	IndexChanges chc.WorkspaceIndexChanges
-	IndexCache   chc.WorkspaceIndexCacheState
+	Message              string
+	Graph                chc.WorkspaceGraph
+	Index                chc.WorkspaceIndex
+	IndexHealth          chc.WorkspaceIndexHealth
+	IndexChanges         chc.WorkspaceIndexChanges
+	IndexCache           chc.WorkspaceIndexCacheState
+	SemanticDigestStates []chc.WorkspaceSemanticDigestState
 }
 
 func (s service) RefreshWorkspace() (WorkspaceRefreshResult, error) {
@@ -17,11 +18,30 @@ func (s service) RefreshWorkspace() (WorkspaceRefreshResult, error) {
 		return WorkspaceRefreshResult{}, err
 	}
 
+	digestStates, err := s.workspaceSemanticDigestStates(result.Index)
+	if err != nil {
+		return WorkspaceRefreshResult{}, err
+	}
+
 	return WorkspaceRefreshResult{
-		Message:     "Workspace refreshed.",
-		Graph:       result.Graph,
-		Index:       result.Index,
-		IndexHealth: result.Index.Health(),
-		IndexCache:  result.Cache,
+		Message:              "Workspace refreshed.",
+		Graph:                result.Graph,
+		Index:                result.Index,
+		IndexHealth:          result.Index.HealthWithSemanticDigestStates(digestStates),
+		IndexCache:           result.Cache,
+		SemanticDigestStates: digestStates,
 	}, nil
+}
+
+func (s service) workspaceSemanticDigestStates(
+	index chc.WorkspaceIndex,
+) ([]chc.WorkspaceSemanticDigestState, error) {
+	cache, err := chc.ReadWorkspaceSemanticDigestCache(
+		chc.WorkspaceSemanticDigestCachePath(s.projectContext.ProjectDir),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return chc.WorkspaceSemanticDigestStates(index, cache, "", ""), nil
 }

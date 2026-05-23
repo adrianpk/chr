@@ -434,11 +434,11 @@ func (m Model) renderCaseArtifactLines() []string {
 	}
 
 	return []string{
-		fmt.Sprintf("Dumps             %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeDump)),
-		fmt.Sprintf("Quizzes           %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeQuiz)),
-		fmt.Sprintf("Specs             %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeSpec)),
-		fmt.Sprintf("Plans             %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodePlan)),
-		fmt.Sprintf("Board tickets     %d", workspaceGraphCaseDocumentCount(m.workspaceGraph, metadata.Slug, chc.WorkspaceNodeTicket)),
+		fmt.Sprintf("Dumps             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, chc.WorkspaceNodeDump)),
+		fmt.Sprintf("Quizzes           %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, chc.WorkspaceNodeQuiz)),
+		fmt.Sprintf("Specs             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, chc.WorkspaceNodeSpec)),
+		fmt.Sprintf("Plans             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, chc.WorkspaceNodePlan)),
+		fmt.Sprintf("Board tickets     %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, chc.WorkspaceNodeTicket)),
 		fmt.Sprintf("Unresolved refs   %d", workspaceGraphCaseReferenceCount(m.workspaceGraph, metadata.Slug)),
 		"",
 		"Source",
@@ -460,12 +460,39 @@ func (m Model) filteredCases() []chc.CaseMetadata {
 		return append([]chc.CaseMetadata(nil), m.cases...)
 	}
 
+	if len(m.workspaceIndex.CasesBySlug) > 0 {
+		return m.caseMetadataFromSuggestions(m.workspaceIndex.SuggestCases(filter))
+	}
+
 	cases := []chc.CaseMetadata{}
 	for _, metadata := range m.cases {
 		haystack := strings.ToLower(metadata.Name + " " + metadata.Description)
 		if strings.Contains(haystack, filter) {
 			cases = append(cases, metadata)
 		}
+	}
+
+	return cases
+}
+
+func (m Model) caseMetadataFromSuggestions(
+	suggestions []chc.WorkspaceCaseSuggestion,
+) []chc.CaseMetadata {
+	bySlug := make(map[string]chc.CaseMetadata, len(m.cases))
+	for _, metadata := range m.cases {
+		bySlug[metadata.Slug] = metadata
+	}
+
+	cases := make([]chc.CaseMetadata, 0, len(suggestions))
+	for _, suggestion := range suggestions {
+		metadata := bySlug[suggestion.Slug]
+		metadata.SchemaVersion = chc.CaseMetadataSchemaVersion
+		metadata.Slug = suggestion.Slug
+		metadata.Name = suggestion.Name
+		metadata.Description = suggestion.Description
+		metadata.SourcePath = suggestion.Path
+		metadata.Exists = true
+		cases = append(cases, metadata)
 	}
 
 	return cases
@@ -533,7 +560,7 @@ func (m Model) renderAuthoringWorkspace(width, height int) string {
 func (m Model) renderOperationsWorkspace(width, height int) string {
 	leftWidth, rightWidth := splitWidths(width)
 	agent := strings.Split(m.renderAgent(), "\n")
-	runtime := strings.Split(m.renderRuntime(), "\n")
+	runtime := strings.Split(m.renderRuntime()+"\n\n"+m.renderWorkspaceIndexHealth(), "\n")
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
@@ -724,6 +751,10 @@ func (m Model) projectDisplayName() string {
 func projectMetadataRelativePath(projectDir, sourcePath string) string {
 	if strings.TrimSpace(sourcePath) == "" {
 		return ""
+	}
+
+	if !filepath.IsAbs(sourcePath) {
+		return filepath.ToSlash(sourcePath)
 	}
 
 	relativePath, err := filepath.Rel(projectDir, sourcePath)

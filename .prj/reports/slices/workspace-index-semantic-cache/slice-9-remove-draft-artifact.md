@@ -5,7 +5,7 @@ Slicing: Workspace Index And Semantic Cache
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 Tracker: `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 Branch: `feat/slice-9-remove-draft-artifact`
-PR: pending
+PR: #172
 
 ## Purpose
 
