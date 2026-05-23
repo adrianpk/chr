@@ -22,7 +22,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Workspace Index Contract | Delivered | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | PR #164. |
 | Slice 2: Structural Workspace Index Model | Delivered | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | PR #165. |
-| Slice 3: Index Load And Refresh Semantics | Reviewing | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | Handles direct file changes. |
+| Slice 3: Index Load And Refresh Semantics | Delivered | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | PR #166. |
 | Slice 4: Discardable Structural Cache | Planned | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
 | Slice 5: Semantic Digest Cache Contract | Planned | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | Adds digest schema and invalidation. |
 | Slice 6: Semantic Index Worker Boundary | Planned | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | Adds optional LLM boundary. |
@@ -84,9 +84,9 @@ Candidate tasks:
 
 Task commits:
 
-- T3.1: pending local commit loads and refreshes the structural index.
-- T3.2: pending local commit adds index health and change detection.
-- T3.3: pending local commit adds tests, report, and validation.
+- T3.1: `5c519c2` loads and refreshes the structural index.
+- T3.2: `5c519c2` adds index health and change detection.
+- T3.3: `5c519c2` adds tests, report, and validation.
 
 ## Slice 4: Discardable Structural Cache
 

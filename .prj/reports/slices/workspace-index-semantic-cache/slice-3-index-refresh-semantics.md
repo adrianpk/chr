@@ -1,11 +1,11 @@
 # Slice 3: Index Load And Refresh Semantics
 
-Status: reviewing
+Status: delivered
 Slicing: Workspace Index And Semantic Cache
 Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 Tracker: `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 Branch: `feat/slice-3-index-refresh-semantics`
-PR: pending
+PR: #166
 
 ## Purpose
 
