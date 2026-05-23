@@ -692,8 +692,7 @@ func shellFooterButtons() []shellButton {
 
 func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 	widths := distributedWidths(width, len(buttons))
-	keyCells := make([]string, 0, len(buttons))
-	labelCells := make([]string, 0, len(buttons))
+	cells := make([]string, 0, len(buttons))
 
 	for index, button := range buttons {
 		style := shellButtonInactiveStyle
@@ -702,12 +701,10 @@ func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 		}
 
 		cellWidth := widths[index]
-		keyCells = append(keyCells, style.Render(centerPlainLineWithOffset(button.Key, cellWidth, shellButtonKeyLeftOffset(button.Key))))
-		labelCells = append(labelCells, style.Render(centerPlainLine(button.Label, cellWidth)))
+		cells = append(cells, style.Render(centerShellButtonLines(button.Key, button.Label, cellWidth)))
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Top, keyCells...) + "\n" +
-		lipgloss.JoinHorizontal(lipgloss.Top, labelCells...)
+	return lipgloss.JoinHorizontal(lipgloss.Top, cells...)
 }
 
 func shellFooterButtonAt(x, y, width, height int) (shellButton, bool) {
@@ -865,51 +862,41 @@ func fitPlainLine(line string, width int) string {
 	return line + strings.Repeat(" ", width-len(runes))
 }
 
-func centerPlainLine(line string, width int) string {
-	return centerPlainLineWithOffset(line, width, 0)
-}
-
-func centerPlainLineWithOffset(line string, width, leftOffset int) string {
+func centerShellButtonLines(key, label string, width int) string {
 	if width <= 0 {
 		return ""
 	}
 
-	runes := []rune(line)
-	if len(runes) >= width {
-		return fitPlainLine(line, width)
-	}
+	keyRunes := []rune(key)
+	labelRunes := []rune(label)
+	keyWidth := minInt(len(keyRunes), width)
+	labelWidth := minInt(len(labelRunes), width)
 
-	padding := width - len(runes)
-	left := padding / 2
-	left = clampInt(left-leftOffset, 0, padding)
-	right := padding - left
+	anchorWidth := maxInt(keyWidth, labelWidth)
+	anchorLeft := maxInt((width-anchorWidth)/2, 0)
+	keyLeft := anchorLeft + maxInt((anchorWidth-keyWidth)/2, 0)
+	labelLeft := anchorLeft + maxInt((anchorWidth-labelWidth)/2, 0)
 
-	return strings.Repeat(" ", left) + line + strings.Repeat(" ", right)
+	return placePlainLine(key, width, keyLeft) + "\n" +
+		placePlainLine(label, width, labelLeft)
 }
 
-func shellButtonKeyLeftOffset(key string) int {
-	switch key {
-	case "F6":
-		return 0
-	case "F8", "F9":
-		return -1
-	case "F10":
-		return 0
-	default:
-		return 1
-	}
-}
-
-func clampInt(value, minimum, maximum int) int {
-	if value < minimum {
-		return minimum
+func placePlainLine(line string, width, left int) string {
+	if width <= 0 {
+		return ""
 	}
 
-	if value > maximum {
-		return maximum
+	fitted := fitPlainLine(line, width)
+	lineWidth := lipgloss.Width(fitted)
+
+	if lineWidth >= width {
+		return fitted
 	}
 
-	return value
+	left = minInt(maxInt(left, 0), width-lineWidth)
+	right := width - lineWidth - left
+
+	return strings.Repeat(" ", left) + fitted + strings.Repeat(" ", right)
 }
 
 func splitWidths(width int) (int, int) {
@@ -956,6 +943,14 @@ func emptyValue(value string) string {
 
 func maxInt(left, right int) int {
 	if left > right {
+		return left
+	}
+
+	return right
+}
+
+func minInt(left, right int) int {
+	if left < right {
 		return left
 	}
 
