@@ -701,6 +701,7 @@ func (m Model) renderShellButtons(buttons []shellButton, width int) string {
 		}
 
 		cellWidth := widths[index]
+		style = style.Width(cellWidth)
 		cells = append(cells, style.Render(centerShellButtonLines(button.Key, button.Label, cellWidth)))
 	}
 
@@ -886,7 +887,7 @@ func placePlainLine(line string, width, left int) string {
 		return ""
 	}
 
-	fitted := fitPlainLine(line, width)
+	fitted := truncatePlainLine(line, width)
 	lineWidth := lipgloss.Width(fitted)
 
 	if lineWidth >= width {
@@ -897,6 +898,23 @@ func placePlainLine(line string, width, left int) string {
 	right := width - lineWidth - left
 
 	return strings.Repeat(" ", left) + fitted + strings.Repeat(" ", right)
+}
+
+func truncatePlainLine(line string, width int) string {
+	if width <= 0 {
+		return ""
+	}
+
+	runes := []rune(line)
+	if len(runes) <= width {
+		return line
+	}
+
+	if width == 1 {
+		return "…"
+	}
+
+	return string(runes[:width-1]) + "…"
 }
 
 func splitWidths(width int) (int, int) {
