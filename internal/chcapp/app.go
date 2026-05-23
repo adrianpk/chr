@@ -183,12 +183,12 @@ func loadTUIWorkspaceState(
 	ctx context.Context,
 	projectContext commandProjectContext,
 ) (chc.WorkspaceGraph, chc.WorkspaceIndex, error) {
-	workspaceGraph, err := chc.NewWorkspaceGraphBuilder(projectContext.ProjectDir).Build(ctx)
+	result, err := chc.NewWorkspaceGraphBuilder(projectContext.ProjectDir).BuildCachedIndex(ctx)
 	if err != nil {
 		return chc.WorkspaceGraph{}, chc.WorkspaceIndex{}, err
 	}
 
-	return workspaceGraph, chc.NewWorkspaceIndexFromGraph(workspaceGraph), nil
+	return result.Graph, result.Index, nil
 }
 
 type tuiOptionsData struct {

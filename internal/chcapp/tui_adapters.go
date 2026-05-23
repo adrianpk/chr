@@ -31,6 +31,7 @@ func (e tuiWorkspaceRefreshExecutor) RefreshWorkspace() (chctui.WorkspaceRefresh
 		Index:        result.Index,
 		IndexHealth:  result.IndexHealth,
 		IndexChanges: result.IndexChanges,
+		IndexCache:   result.IndexCache,
 	}, nil
 }
 

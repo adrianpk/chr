@@ -60,6 +60,8 @@ func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
 	if len(result.Index.NodesByID) != 1 {
 		t.Fatalf("Index.NodesByID = %#v, want one project node", result.Index.NodesByID)
 	}
+
+	assertWorkspaceIndexCacheMiss(t, result.IndexCache)
 }
 
 func TestServiceSaveProjectMetadata(t *testing.T) {
@@ -253,6 +255,14 @@ func newTestService(t *testing.T, projectDir string) service {
 		ProjectDir: projectDir,
 		ProjectID:  "service-project",
 	})
+}
+
+func assertWorkspaceIndexCacheMiss(t *testing.T, cache chc.WorkspaceIndexCacheState) {
+	t.Helper()
+
+	if cache.Status != chc.WorkspaceIndexCacheMiss {
+		t.Fatalf("IndexCache.Status = %q, want %q", cache.Status, chc.WorkspaceIndexCacheMiss)
+	}
 }
 
 func testTime() time.Time {

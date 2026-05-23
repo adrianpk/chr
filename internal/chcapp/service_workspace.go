@@ -8,20 +8,20 @@ type WorkspaceRefreshResult struct {
 	Index        chc.WorkspaceIndex
 	IndexHealth  chc.WorkspaceIndexHealth
 	IndexChanges chc.WorkspaceIndexChanges
+	IndexCache   chc.WorkspaceIndexCacheState
 }
 
 func (s service) RefreshWorkspace() (WorkspaceRefreshResult, error) {
-	graph, err := chc.NewWorkspaceGraphBuilder(s.projectContext.ProjectDir).Build(s.ctx)
+	result, err := chc.NewWorkspaceGraphBuilder(s.projectContext.ProjectDir).BuildCachedIndex(s.ctx)
 	if err != nil {
 		return WorkspaceRefreshResult{}, err
 	}
 
-	index := chc.NewWorkspaceIndexFromGraph(graph)
-
 	return WorkspaceRefreshResult{
 		Message:     "Workspace refreshed.",
-		Graph:       graph,
-		Index:       index,
-		IndexHealth: index.Health(),
+		Graph:       result.Graph,
+		Index:       result.Index,
+		IndexHealth: result.Index.Health(),
+		IndexCache:  result.Cache,
 	}, nil
 }

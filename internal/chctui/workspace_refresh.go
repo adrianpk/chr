@@ -16,6 +16,7 @@ type WorkspaceRefreshResult struct {
 	Index        chc.WorkspaceIndex
 	IndexHealth  chc.WorkspaceIndexHealth
 	IndexChanges chc.WorkspaceIndexChanges
+	IndexCache   chc.WorkspaceIndexCacheState
 }
 
 func (m *Model) refreshWorkspace() {

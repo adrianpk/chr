@@ -23,7 +23,7 @@ Plan: `.prj/plans/slicing-workspace-index-semantic-cache-plan.md`
 | Slice 1: Workspace Index Contract | Delivered | `feat/slice-1-workspace-index-contract` | `feat(slice-1): workspace index contract` | `.prj/reports/slices/workspace-index-semantic-cache/slice-1-workspace-index-contract.md` | PR #164. |
 | Slice 2: Structural Workspace Index Model | Delivered | `feat/slice-2-structural-workspace-index` | `feat(slice-2): structural workspace index` | `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md` | PR #165. |
 | Slice 3: Index Load And Refresh Semantics | Delivered | `feat/slice-3-index-refresh-semantics` | `feat(slice-3): index refresh semantics` | `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md` | PR #166. |
-| Slice 4: Discardable Structural Cache | Planned | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
+| Slice 4: Discardable Structural Cache | Reviewing | `feat/slice-4-structural-index-cache` | `feat(slice-4): structural index cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md` | Adds local structural cache. |
 | Slice 5: Semantic Digest Cache Contract | Planned | `feat/slice-5-semantic-digest-cache` | `feat(slice-5): semantic digest cache` | `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md` | Adds digest schema and invalidation. |
 | Slice 6: Semantic Index Worker Boundary | Planned | `feat/slice-6-semantic-index-worker` | `feat(slice-6): semantic index worker` | `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md` | Adds optional LLM boundary. |
 | Slice 7: Service Queries And Suggestions | Planned | `feat/slice-7-index-service-queries` | `feat(slice-7): index service queries` | `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md` | Exposes adapter-facing queries. |
@@ -92,20 +92,20 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Define cache manifest schema.
-- [ ] Write `structural-index.json` under `.chc/tmp/cache/workspace-index/`.
-- [ ] Load cache when schema and source hashes remain valid.
-- [ ] Fall back to filesystem rebuild when cache is missing or stale.
-- [ ] Add maintenance or debug visibility for cache state where practical.
-- [ ] Add tests for cache hit, cache miss, stale cache, and cache deletion.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Define cache manifest schema.
+- [x] Write `structural-index.json` under `.chc/tmp/cache/workspace-index/`.
+- [x] Load cache when schema and source hashes remain valid.
+- [x] Fall back to filesystem rebuild when cache is missing or stale.
+- [x] Add maintenance or debug visibility for cache state where practical.
+- [x] Add tests for cache hit, cache miss, stale cache, and cache deletion.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- T4.1: pending.
-- T4.2: pending.
-- T4.3: pending.
+- T4.1: pending local commit adds structural index cache read/write.
+- T4.2: pending local commit wires cached index into startup and refresh.
+- T4.3: pending local commit adds cache tests, report, and validation.
 
 ## Slice 5: Semantic Digest Cache Contract
 
