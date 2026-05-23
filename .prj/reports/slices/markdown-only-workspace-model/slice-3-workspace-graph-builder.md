@@ -1,11 +1,11 @@
 # Slice 3: Workspace Graph Builder
 
-Status: reviewing
+Status: delivered
 Slicing: Markdown-Only Workspace Model
 Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 Tracker: `.prj/trackers/slicing-markdown-only-workspace-model-tracker.md`
 Branch: `feat/slice-3-workspace-graph-builder`
-PR: pending
+PR: #151
 
 ## Purpose
 

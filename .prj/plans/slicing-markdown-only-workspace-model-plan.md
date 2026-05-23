@@ -183,7 +183,7 @@ Expected outcome:
 
 ### Slice 3: Workspace Graph Builder
 
-Status: active.
+Status: delivered.
 
 Expected branch: `feat/slice-3-workspace-graph-builder`
 Expected PR title: `feat(slice-3): workspace graph builder`
@@ -211,7 +211,7 @@ Expected outcome:
 
 ### Slice 4: Filesystem Refresh Semantics
 
-Status: planned.
+Status: active.
 
 Expected branch: `feat/slice-4-filesystem-refresh-semantics`
 Expected PR title: `feat(slice-4): filesystem refresh semantics`

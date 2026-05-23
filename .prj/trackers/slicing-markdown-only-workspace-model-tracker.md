@@ -21,8 +21,8 @@ Plan: `.prj/plans/slicing-markdown-only-workspace-model-plan.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Markdown-Only Contract | Delivered | `feat/slice-1-markdown-only-contract` | `feat(slice-1): markdown-only contract` | `.prj/reports/slices/markdown-only-workspace-model/slice-1-markdown-only-contract.md` | PR #149. |
 | Slice 2: Remove Project And Case Indexes | Delivered | `feat/slice-2-remove-project-case-indexes` | `feat(slice-2): remove project case indexes` | `.prj/reports/slices/markdown-only-workspace-model/slice-2-remove-project-case-indexes.md` | PR #150. |
-| Slice 3: Workspace Graph Builder | Active | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | Runtime in-memory graph. |
-| Slice 4: Filesystem Refresh Semantics | Planned | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | Manual editor/file changes. |
+| Slice 3: Workspace Graph Builder | Delivered | `feat/slice-3-workspace-graph-builder` | `feat(slice-3): workspace graph builder` | `.prj/reports/slices/markdown-only-workspace-model/slice-3-workspace-graph-builder.md` | PR #151. |
+| Slice 4: Filesystem Refresh Semantics | Active | `feat/slice-4-filesystem-refresh-semantics` | `feat(slice-4): filesystem refresh semantics` | `.prj/reports/slices/markdown-only-workspace-model/slice-4-filesystem-refresh-semantics.md` | Manual editor/file changes. |
 | Slice 5: TUI Project And Cases Rewire | Planned | `feat/slice-5-tui-project-cases-rewire` | `feat(slice-5): tui project cases rewire` | `.prj/reports/slices/markdown-only-workspace-model/slice-5-tui-project-cases-rewire.md` | Project/Cases screens use Markdown and graph. |
 | Slice 6: Context Assembly From Graph | Planned | `feat/slice-6-context-assembly-from-graph` | `feat(slice-6): context assembly from graph` | `.prj/reports/slices/markdown-only-workspace-model/slice-6-context-assembly-from-graph.md` | LLM context selection. |
 
@@ -91,7 +91,7 @@ Task commits:
 - T3.1: `0fa2ef0` adds workspace graph model and builder.
 - T3.2: `0fa2ef0` adds `.chc/` Markdown scanning and document classification.
 - T3.3: `0fa2ef0` adds case-rooted/project-wide views and diagnostics.
-- T3.4: pending commit adds slice implementation report and validation.
+- T3.4: `86e47e8` adds slice implementation report and validation.
 
 ## Slice 4: Filesystem Refresh Semantics
 
