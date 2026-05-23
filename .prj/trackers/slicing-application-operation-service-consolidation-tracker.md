@@ -19,7 +19,7 @@ Plan: `.prj/plans/slicing-application-operation-service-consolidation-plan.md`
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Operation Service Boundary | Reviewing | `feat/slice-1-operation-service-boundary` | `feat(slice-1): operation service boundary` | `.prj/reports/slices/application-operation-service-consolidation/slice-1-operation-service-boundary.md` | Shared service boundary established. |
+| Slice 1: Operation Service Boundary | Delivered | `feat/slice-1-operation-service-boundary` | `feat(slice-1): operation service boundary` | `.prj/reports/slices/application-operation-service-consolidation/slice-1-operation-service-boundary.md` | PR #156. |
 | Slice 2: Workspace And Metadata Operations | Planned | `feat/slice-2-workspace-metadata-operations` | `feat(slice-2): workspace metadata operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-2-workspace-metadata-operations.md` | Move refresh, Project, and Case operations. |
 | Slice 3: Artifact And Ticket Operations | Planned | `feat/slice-3-artifact-ticket-operations` | `feat(slice-3): artifact ticket operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-3-artifact-ticket-operations.md` | Move artifact creation and ticket mutations. |
 | Slice 4: Work Control Operations | Planned | `feat/slice-4-work-control-operations` | `feat(slice-4): work control operations` | `.prj/reports/slices/application-operation-service-consolidation/slice-4-work-control-operations.md` | Move execution and daemon controls. |
@@ -42,10 +42,10 @@ Candidate tasks:
 
 Task commits:
 
-- T1.1: pending local commit for service type and dependency boundary.
-- T1.2: pending local commit for workspace refresh service method.
-- T1.3: pending local commit for TUI wrapper delegation.
-- T1.4: pending local commit for tests, report, and validation.
+- T1.1: `aa65793` adds service type and dependency boundary.
+- T1.2: `aa65793` adds workspace refresh service method.
+- T1.3: `aa65793` delegates the TUI workspace refresh wrapper to the service.
+- T1.4: `aa65793` adds tests, report, and validation.
 
 ## Slice 2: Workspace And Metadata Operations
 
