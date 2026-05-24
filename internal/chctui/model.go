@@ -327,6 +327,10 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateCasesKey(msg)
 	}
 
+	if m.SelectedView() == ViewQuizzes {
+		return m.updateQuizzesKey(msg)
+	}
+
 	return m.updateNavigationKey(msg)
 }
 
@@ -922,6 +926,8 @@ func (m Model) renderKeys() string {
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects field, enter edits, s saves, r refreshes, q quits"
 	case m.SelectedView() == ViewCases:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects focused pane, enter opens or edits, s saves, r refreshes, q quits"
+	case m.SelectedView() == ViewQuizzes:
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects quiz, s starts, enter answers, r refreshes, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects session, q quits"
 	default:

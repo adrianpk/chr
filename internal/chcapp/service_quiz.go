@@ -292,10 +292,22 @@ func (s service) generateNextQuizQuestion(state chc.QuizRuntimeState) (chc.QuizR
 }
 
 func (s service) newQuizModelRequest(state chc.QuizRuntimeState) (chc.QuizModelRequest, error) {
-	sections, err := s.quizContextSections(chc.QuizScope{
+	scope := chc.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
-	})
+	}
+
+	payload, err := s.newQuizModelPayload(scope, state, chc.QuizModelActionNextQuestion)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err := chc.QuizModelContextSectionsForPayload(payload)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err = s.appendQuizSupplementalContextSections(sections, scope)
 	if err != nil {
 		return chc.QuizModelRequest{}, err
 	}
@@ -303,13 +315,14 @@ func (s service) newQuizModelRequest(state chc.QuizRuntimeState) (chc.QuizModelR
 	return chc.QuizModelRequest{
 		ID:              fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1),
 		Action:          chc.QuizModelActionNextQuestion,
-		Strategy:        string(state.Mode),
-		Scope:           chc.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug},
+		Strategy:        quizModelStrategy(state.Mode),
+		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
+		Payload:         payload,
 		ContextSections: sections,
 		OutputContract: chc.QuizModelOutputContract{
-			RequiredFields: []string{"id", "prompt", "topic", "depth", "trunk_id"},
+			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
 	}, nil
@@ -347,10 +360,22 @@ func (s service) newQuizDraftSpecModelRequest(
 	state chc.QuizRuntimeState,
 	paths chc.QuizArtifactPaths,
 ) (chc.QuizModelRequest, error) {
-	sections, err := s.quizContextSections(chc.QuizScope{
+	scope := chc.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
-	})
+	}
+
+	payload, err := s.newQuizModelPayload(scope, state, chc.QuizModelActionDraftSpec)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err := chc.QuizModelContextSectionsForPayload(payload)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err = s.appendQuizSupplementalContextSections(sections, scope)
 	if err != nil {
 		return chc.QuizModelRequest{}, err
 	}
@@ -367,14 +392,34 @@ func (s service) newQuizDraftSpecModelRequest(
 		ID:              fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID),
 		Action:          chc.QuizModelActionDraftSpec,
 		Strategy:        "draft_spec",
-		Scope:           chc.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug},
+		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
+		Payload:         payload,
 		ContextSections: sections,
 		OutputContract: chc.QuizModelOutputContract{
-			RequiredFields: []string{"title", "body", "status"},
+			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
+	}, nil
+}
+
+func (s service) newQuizModelPayload(
+	scope chc.QuizScope,
+	state chc.QuizRuntimeState,
+	action chc.QuizModelAction,
+) (chc.QuizModelPayload, error) {
+	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, scope)
+	if err != nil {
+		return chc.QuizModelPayload{}, err
+	}
+
+	return chc.QuizModelPayload{
+		Project:         s.quizModelProjectPayload(),
+		Quiz:            quizModelQuizPayload(state),
+		RecentEntries:   quizModelRecentEntryPayloads(entries, 5),
+		CurrentQuestion: quizModelCurrentQuestionPayload(state, entries),
+		OutputContract:  chc.NewQuizModelOutputContract(action, state.Mode),
 	}, nil
 }
 
@@ -399,46 +444,41 @@ func (s service) newQuizRuntimeState(scope chc.QuizScope, mode chc.QuizMode) (ch
 	}, nil
 }
 
-func (s service) quizContextSections(scope chc.QuizScope) ([]chc.QuizModelContextSection, error) {
-	sections := []chc.QuizModelContextSection{}
+func (s service) quizModelProjectPayload() chc.QuizModelProjectPayload {
+	payload := chc.QuizModelProjectPayload{ID: s.projectContext.ProjectID}
+
+	metadata, err := chc.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
+	if err != nil {
+		return payload
+	}
+
+	payload.Name = metadata.Name
+	payload.Description = metadata.Description
+
+	return payload
+}
+
+func (s service) appendQuizSupplementalContextSections(
+	sections []chc.QuizModelContextSection,
+	scope chc.QuizScope,
+) ([]chc.QuizModelContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
-	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project", "project", chc.ProjectMetadataPath(""))
+	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", chc.ProjectMetadataPath(""))
 
 	if scope.CaseSlug != "" {
 		sections = appendQuizFileContextSection(
 			sections,
 			s.projectContext.ProjectDir,
-			"use_case",
+			"use_case_document",
 			"use_case",
 			chc.CaseMetadataPath("", scope.CaseSlug),
 		)
 	}
 
-	dumpSections, err := s.quizDumpContextSections(scope)
-	if err != nil {
-		return nil, err
-	}
-
-	sections = append(sections, dumpSections...)
-	if len(sections) == 0 {
-		sections = append(sections, chc.QuizModelContextSection{
-			Name:      "project",
-			Layer:     "project",
-			Authority: "project_directory",
-			Content:   "project_id: " + scope.ProjectID,
-		})
-	}
-
-	return sections, nil
-}
-
-func (s service) quizDumpContextSections(scope chc.QuizScope) ([]chc.QuizModelContextSection, error) {
 	index, err := s.workspaceIndex()
 	if err != nil {
 		return nil, err
 	}
-
-	sections := []chc.QuizModelContextSection{}
 
 	for _, nodeID := range index.ByKind[chc.WorkspaceNodeDump] {
 		node := index.NodesByID[nodeID]
@@ -446,12 +486,109 @@ func (s service) quizDumpContextSections(scope chc.QuizScope) ([]chc.QuizModelCo
 			continue
 		}
 
-		if node.CaseSlug == "" || scope.CaseSlug == "" || node.CaseSlug == scope.CaseSlug {
-			sections = appendQuizNodeContextSection(sections, s.projectContext.ProjectDir, node)
-		}
+		sections = appendQuizNodeContextSection(sections, s.projectContext.ProjectDir, node)
 	}
 
 	return sections, nil
+}
+
+func quizModelQuizPayload(state chc.QuizRuntimeState) chc.QuizModelQuizPayload {
+	return chc.QuizModelQuizPayload{
+		ID:         state.ID,
+		UseCaseID:  state.CaseSlug,
+		EntryCount: state.AnswersRecorded + state.SkipsRecorded,
+		Mode:       string(state.Mode),
+	}
+}
+
+func quizModelRecentEntryPayloads(entries []chc.QuizEntry, limit int) []chc.QuizModelEntryPayload {
+	if limit <= 0 {
+		return []chc.QuizModelEntryPayload{}
+	}
+
+	start := len(entries) - limit
+	if start < 0 {
+		start = 0
+	}
+
+	payloads := make([]chc.QuizModelEntryPayload, 0, len(entries[start:]))
+	for _, entry := range entries[start:] {
+		payloads = append(payloads, chc.QuizModelEntryPayload{
+			Question: entry.Question,
+			Answer:   entry.Answer,
+			Status:   string(entry.Status),
+			Tags:     entry.Tags,
+		})
+	}
+
+	return payloads
+}
+
+func quizModelCurrentQuestionPayload(
+	state chc.QuizRuntimeState,
+	entries []chc.QuizEntry,
+) chc.QuizModelCurrentQuestionPayload {
+	if state.ActiveQuestion != nil {
+		return quizModelQuestionPayloadFromQuestion(*state.ActiveQuestion)
+	}
+
+	if len(entries) == 0 {
+		return chc.QuizModelCurrentQuestionPayload{PromptIntent: map[string]any{}}
+	}
+
+	entry := entries[len(entries)-1]
+
+	return chc.QuizModelCurrentQuestionPayload{
+		Question: entry.Question,
+		Tags:     quizModelEntryTags(entry),
+		PromptIntent: map[string]any{
+			"metadata": map[string]any{
+				"follow_up_depth": entry.Depth - 1,
+				"status":          string(entry.Status),
+			},
+		},
+	}
+}
+
+func quizModelQuestionPayloadFromQuestion(question chc.QuizQuestion) chc.QuizModelCurrentQuestionPayload {
+	return chc.QuizModelCurrentQuestionPayload{
+		Question: question.Prompt,
+		Tags:     quizModelQuestionTags(question),
+		PromptIntent: map[string]any{
+			"metadata": map[string]any{
+				"follow_up_depth":        question.Depth - 1,
+				"completion_recommended": !question.Required,
+			},
+		},
+	}
+}
+
+func quizModelQuestionTags(question chc.QuizQuestion) []string {
+	if strings.TrimSpace(question.Topic) == "" {
+		return []string{}
+	}
+
+	return []string{question.Topic}
+}
+
+func quizModelEntryTags(entry chc.QuizEntry) []string {
+	if len(entry.Tags) > 0 {
+		return entry.Tags
+	}
+
+	if strings.TrimSpace(entry.Topic) == "" {
+		return []string{}
+	}
+
+	return []string{entry.Topic}
+}
+
+func quizModelStrategy(mode chc.QuizMode) string {
+	if mode == chc.QuizModeFast {
+		return chc.QuizModelFastStrategy
+	}
+
+	return chc.QuizModelDeepStrategy
 }
 
 func (s service) listQuizRuntimeStates() ([]chc.QuizRuntimeState, error) {

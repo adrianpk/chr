@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type QuizScope struct {
@@ -212,6 +214,27 @@ func (m Model) selectedQuizScope() QuizScope {
 	}
 
 	return quiz.Scope
+}
+
+func (m Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "s":
+		m.executeQuizAction(QuizActionRequest{Action: QuizActionStart, Scope: m.selectedQuizScope()})
+	case "enter":
+		m.planQuizAction(QuizActionAnswer)
+	case "r":
+		m.executeQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: m.selectedQuizScope()})
+	case "x":
+		m.planQuizAction(QuizActionSkip)
+	case "c":
+		m.planQuizAction(QuizActionComplete)
+	case "esc":
+		m.selectPrimaryPane()
+	default:
+		return m.updateNavigationKey(msg)
+	}
+
+	return m, nil
 }
 
 func (m Model) newQuizActionState(action QuizActionID) QuizActionState {

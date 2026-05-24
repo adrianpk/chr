@@ -61,12 +61,13 @@ func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) 
 	}
 
 	assertQuizModelRequestSections(t, model.requests[0], []string{
-		"agent_protocol",
 		"project",
-		"use_case",
-		"project_dump",
-		"use_case_dump",
+		"quiz",
+		"recent_entries",
+		"current_question",
 	})
+
+	assertServiceQuizRedWrightPayload(t, model.requests[0])
 }
 
 func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
@@ -223,7 +224,7 @@ func TestServiceCompleteQuizWritesCuratedNotesAndDraftSpec(t *testing.T) {
 		t.Fatalf("draft action = %q", draftRequest.Action)
 	}
 
-	assertQuizModelRequestSections(t, draftRequest, []string{"project_dump", "use_case_dump", "curated_quiz"})
+	assertQuizModelRequestSections(t, draftRequest, []string{"project", "quiz", "recent_entries", "current_question", "curated_quiz"})
 }
 
 func completeServiceQuizWithAnswer(
@@ -272,6 +273,22 @@ func assertServiceQuizContentContains(t *testing.T, content string, values []str
 		if !strings.Contains(content, want) {
 			t.Fatalf("content missing %q:\n%s", want, content)
 		}
+	}
+}
+
+func assertServiceQuizRedWrightPayload(t *testing.T, request chc.QuizModelRequest) {
+	t.Helper()
+
+	if request.Payload.Project.Name != "Quiz Project" {
+		t.Fatalf("payload project name = %q, want Quiz Project", request.Payload.Project.Name)
+	}
+
+	if request.Payload.Quiz.UseCaseID != "blog" {
+		t.Fatalf("payload use case id = %q, want blog", request.Payload.Quiz.UseCaseID)
+	}
+
+	if request.Payload.OutputContract.RenderedTextField != "question" {
+		t.Fatalf("payload rendered text field = %q, want question", request.Payload.OutputContract.RenderedTextField)
 	}
 }
 

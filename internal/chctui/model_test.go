@@ -2501,6 +2501,41 @@ func TestModelConfirmsQuizStartThroughExecutor(t *testing.T) {
 	}
 }
 
+func TestModelStartsQuizFromQuizzesKey(t *testing.T) {
+	executor := &fakeQuizActionExecutor{
+		result: QuizActionResult{
+			Message: "Quiz started.",
+			Quizzes: []QuizView{
+				{Title: "Project", Scope: QuizScope{}, Status: "active", ActiveQuestionSummary: "What should be clarified?"},
+			},
+			SelectedScope: QuizScope{},
+		},
+	}
+	model := NewModel(Options{
+		QuizExecutor: executor,
+		Quizzes: []QuizView{
+			{Title: "Project", Scope: QuizScope{}, Status: "not_started"},
+		},
+	})
+	model.selected = 3
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != QuizActionStart {
+		t.Fatalf("action = %q, want start", executor.request.Action)
+	}
+
+	if confirmed.statusMessage != "Quiz started." {
+		t.Fatalf("statusMessage = %q, want Quiz started.", confirmed.statusMessage)
+	}
+
+	quiz, ok := confirmed.selectedQuizView()
+	if !ok || quiz.ActiveQuestionSummary != "What should be clarified?" {
+		t.Fatalf("selected quiz = %#v, want generated question", quiz)
+	}
+}
+
 func TestModelSubmitsQuizAnswerThroughExecutor(t *testing.T) {
 	executor := &fakeQuizActionExecutor{
 		result: QuizActionResult{

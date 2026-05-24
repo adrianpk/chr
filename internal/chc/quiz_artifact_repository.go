@@ -287,7 +287,17 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 	output.WriteString("- status: " + string(entry.Status) + "\n")
 	output.WriteString("- mode: " + string(entry.Mode) + "\n")
 	output.WriteString("- topic: " + entry.Topic + "\n")
-	output.WriteString("- depth: " + fmt.Sprintf("%d", entry.Depth) + "\n\n")
+	output.WriteString("- depth: " + fmt.Sprintf("%d", entry.Depth) + "\n")
+
+	if strings.TrimSpace(entry.ParentID) != "" {
+		output.WriteString("- parent_id: " + entry.ParentID + "\n")
+	}
+
+	if len(entry.Tags) > 0 {
+		output.WriteString("- tags: " + strings.Join(entry.Tags, ", ") + "\n")
+	}
+
+	output.WriteString("\n")
 	output.WriteString("Question:\n\n")
 	output.WriteString(strings.TrimSpace(entry.Question) + "\n\n")
 

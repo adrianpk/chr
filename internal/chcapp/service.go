@@ -29,6 +29,7 @@ func newService(
 		assetsFS:       assetsFS,
 		projectContext: projectContext,
 		dumpEditor:     defaultDumpEditorLauncher{},
+		quizModel:      chc.OpenAIQuizModelAdapter{},
 		now:            time.Now,
 	}
 }

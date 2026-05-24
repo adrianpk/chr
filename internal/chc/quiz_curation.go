@@ -51,6 +51,8 @@ func parseQuizRawTurn(index int, block string) (QuizEntry, error) {
 	entry.Mode = QuizMode(metadata["mode"])
 	entry.Topic = metadata["topic"]
 	entry.Depth = parseQuizTurnDepth(metadata["depth"])
+	entry.ParentID = metadata["parent_id"]
+	entry.Tags = parseQuizTurnTags(metadata["tags"])
 	entry.Question = sectionAfterLabel(body, "Question:")
 	entry.Answer = sectionAfterLabel(body, "Answer:")
 	entry.CreatedAt = quizRawTurnTime(block)
@@ -103,6 +105,19 @@ func parseQuizTurnDepth(value string) int {
 	}
 
 	return depth
+}
+
+func parseQuizTurnTags(value string) []string {
+	tags := []string{}
+
+	for _, tag := range strings.Split(value, ",") {
+		tag = strings.TrimSpace(tag)
+		if tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	return tags
 }
 
 func quizRawTurnTime(block string) time.Time {

@@ -68,6 +68,7 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 	request.Action = QuizModelActionDraftSpec
 	request.Strategy = "draft_spec"
 	request.OutputContract.RequiredFields = []string{"title", "body", "status"}
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
 
 	adapter := &fakeQuizModelAdapter{
 		response: QuizModelResponse{
@@ -97,8 +98,266 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 	}
 }
 
+func TestQuizModelContextSectionsForPayloadMatchesRedWrightShape(t *testing.T) {
+	request := validQuizModelRequest()
+
+	sections, err := QuizModelContextSectionsForPayload(request.Payload)
+	if err != nil {
+		t.Fatalf("QuizModelContextSectionsForPayload returned error: %v", err)
+	}
+
+	names := []string{}
+	for _, section := range sections {
+		names = append(names, section.Name)
+	}
+
+	want := []string{"project", "quiz", "recent_entries", "current_question"}
+	for index, name := range want {
+		if names[index] != name {
+			t.Fatalf("section names = %#v, want %#v", names, want)
+		}
+	}
+
+	if sections[0].Authority != "project_context" {
+		t.Fatalf("project authority = %q, want project_context", sections[0].Authority)
+	}
+
+	if sections[2].Authority != "quiz_context" {
+		t.Fatalf("recent entries authority = %q, want quiz_context", sections[2].Authority)
+	}
+}
+
+func TestDecodeQuizModelQuestionPayloadEnforcesRedWrightContract(t *testing.T) {
+	payload, err := DecodeQuizModelQuestionPayload([]byte(`{
+		"question": "What should editorial review clarify before publishing?",
+		"tags": ["Editorial Review", "review"],
+		"follow_up_depth": 12,
+		"completion_recommended": false
+	}`))
+	if err != nil {
+		t.Fatalf("DecodeQuizModelQuestionPayload returned error: %v", err)
+	}
+
+	if payload.Tags[0] != "editorial-review" {
+		t.Fatalf("normalized tag = %q, want editorial-review", payload.Tags[0])
+	}
+
+	if payload.FollowUpDepth != MaxQuizFollowUpDepth {
+		t.Fatalf("follow up depth = %d, want clamp to %d", payload.FollowUpDepth, MaxQuizFollowUpDepth)
+	}
+}
+
+func TestDecodeQuizModelQuestionPayloadRejectsMalformedOutput(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+	}{
+		{
+			name: "extra field",
+			content: `{
+				"question": "What should editorial review clarify?",
+				"tags": ["review"],
+				"follow_up_depth": 0,
+				"completion_recommended": false,
+				"extra": "not allowed"
+			}`,
+		},
+		{
+			name: "secret prompt",
+			content: `{
+				"question": "What API key should the workflow collect?",
+				"tags": ["review"],
+				"follow_up_depth": 0,
+				"completion_recommended": false
+			}`,
+		},
+		{
+			name: "wrong tags type",
+			content: `{
+				"question": "What should editorial review clarify?",
+				"tags": "review",
+				"follow_up_depth": 0,
+				"completion_recommended": false
+			}`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			_, err := DecodeQuizModelQuestionPayload([]byte(test.content))
+			if err == nil {
+				t.Fatal("DecodeQuizModelQuestionPayload returned nil error")
+			}
+		})
+	}
+}
+
+func TestDecodeQuizModelFastQuestionPayloadValidatesCandidates(t *testing.T) {
+	payload, err := DecodeQuizModelFastQuestionPayload([]byte(`{
+		"questions": [
+			{
+				"question": "What should editorial review clarify first?",
+				"tags": ["review"],
+				"follow_up_depth": 0,
+				"completion_recommended": false
+			},
+			{
+				"question": "Which publishing gate depends on that review?",
+				"tags": ["publishing"],
+				"follow_up_depth": 1,
+				"completion_recommended": false
+			}
+		]
+	}`))
+	if err != nil {
+		t.Fatalf("DecodeQuizModelFastQuestionPayload returned error: %v", err)
+	}
+
+	if len(payload.Questions) != 2 {
+		t.Fatalf("questions = %#v, want two", payload.Questions)
+	}
+}
+
+func TestNewQuizModelPromptIntentMatchesRedWrightShape(t *testing.T) {
+	intent := NewQuizModelPromptIntent(QuizModelQuestionPayload{
+		Question:              "What should editorial review clarify?",
+		Tags:                  []string{"review"},
+		FollowUpDepth:         1,
+		CompletionRecommended: false,
+	}, map[string]any{"entry_count": 2})
+
+	if intent.Kind != "quiz_question" {
+		t.Fatalf("kind = %q, want quiz_question", intent.Kind)
+	}
+
+	if intent.ExpectedInputShape != "free_text_or_control" {
+		t.Fatalf("input shape = %q, want free_text_or_control", intent.ExpectedInputShape)
+	}
+
+	if intent.Metadata["follow_up_depth"] != 1 {
+		t.Fatalf("metadata = %#v, want follow_up_depth 1", intent.Metadata)
+	}
+}
+
+func TestQuizModelResponseFromDeepOutput(t *testing.T) {
+	request := validQuizModelRequest()
+	request.RuntimeState.ActiveQuestion = nil
+	request.RuntimeState.Trail = nil
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"question": "What should editorial review clarify before publishing?",
+		"tags": ["Editorial Review"],
+		"follow_up_depth": 2,
+		"completion_recommended": false
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.Question.Prompt != "What should editorial review clarify before publishing?" {
+		t.Fatalf("question = %q", response.Question.Prompt)
+	}
+
+	if response.Question.Depth != 1 {
+		t.Fatalf("depth = %d, want 1", response.Question.Depth)
+	}
+
+	if response.Question.Topic != "editorial-review" {
+		t.Fatalf("topic = %q, want editorial-review", response.Question.Topic)
+	}
+}
+
+func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Mode = QuizModeFast
+	request.Strategy = QuizModelFastStrategy
+	request.Payload.Quiz.Mode = string(QuizModeFast)
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionNextQuestion, QuizModeFast)
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"questions": [
+			{
+				"question": "What should editorial review clarify first?",
+				"tags": ["review"],
+				"follow_up_depth": 0,
+				"completion_recommended": false
+			},
+			{
+				"question": "Which publishing gate depends on that review?",
+				"tags": ["publishing"],
+				"follow_up_depth": 1,
+				"completion_recommended": false
+			}
+		]
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.Question.Prompt != "What should editorial review clarify first?" {
+		t.Fatalf("question = %q", response.Question.Prompt)
+	}
+
+	if len(response.Candidates) != 1 {
+		t.Fatalf("candidates = %#v, want one", response.Candidates)
+	}
+
+	if response.Candidates[0].Depth != 1 {
+		t.Fatalf("candidate depth = %d, want 1", response.Candidates[0].Depth)
+	}
+}
+
+func TestQuizModelResponseFromDraftSpecOutput(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionDraftSpec
+	request.Strategy = "draft_spec"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"title": "Editorial Review Spec",
+		"body": "The workflow must preserve editorial review.",
+		"status": "draft"
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.DraftSpec.Title != "Editorial Review Spec" {
+		t.Fatalf("title = %q", response.DraftSpec.Title)
+	}
+}
+
 func validQuizModelRequest() QuizModelRequest {
 	state := validQuizRuntimeState()
+	payload := QuizModelPayload{
+		Project: QuizModelProjectPayload{
+			ID:          "project-1",
+			Name:        "Project",
+			Description: "Project context.",
+		},
+		Quiz: QuizModelQuizPayload{
+			ID:         state.ID,
+			EntryCount: 1,
+			Mode:       string(QuizModeDeep),
+		},
+		RecentEntries: []QuizModelEntryPayload{
+			{
+				Question: "What should this workflow preserve?",
+				Answer:   "The workflow should preserve review.",
+				Status:   string(QuizEntryStatusAnswered),
+				Tags:     []string{"workflow"},
+			},
+		},
+		CurrentQuestion: QuizModelCurrentQuestionPayload{
+			Question: "What should this workflow preserve?",
+			Tags:     []string{"workflow"},
+			PromptIntent: map[string]any{
+				"metadata": map[string]any{"follow_up_depth": 0},
+			},
+		},
+		OutputContract: NewQuizModelOutputContract(QuizModelActionNextQuestion, QuizModeDeep),
+	}
 
 	return QuizModelRequest{
 		ID:           "quiz-model-request-1",
@@ -107,6 +366,7 @@ func validQuizModelRequest() QuizModelRequest {
 		Scope:        QuizScope{ProjectID: "project-1"},
 		Mode:         QuizModeDeep,
 		RuntimeState: state,
+		Payload:      payload,
 		ContextSections: []QuizModelContextSection{
 			{Name: "project", Layer: "project", Authority: "project_metadata", Content: "Project context."},
 		},

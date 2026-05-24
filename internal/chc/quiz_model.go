@@ -28,6 +28,7 @@ type QuizModelRequest struct {
 	Scope           QuizScope
 	Mode            QuizMode
 	RuntimeState    QuizRuntimeState
+	Payload         QuizModelPayload
 	ContextSections []QuizModelContextSection
 	OutputContract  QuizModelOutputContract
 	CreatedAt       time.Time
@@ -38,6 +39,7 @@ type QuizModelContextSection struct {
 	Layer     string
 	Authority string
 	Content   string
+	Metadata  map[string]string
 }
 
 type QuizModelOutputContract struct {
@@ -110,6 +112,15 @@ func ValidateQuizModelRequest(request QuizModelRequest) error {
 	}
 
 	err = ValidateQuizRuntimeState(request.RuntimeState)
+	if err != nil {
+		return err
+	}
+
+	return validateQuizModelRequestPayload(request)
+}
+
+func validateQuizModelRequestPayload(request QuizModelRequest) error {
+	err := ValidateQuizModelPayload(request.Payload)
 	if err != nil {
 		return err
 	}
