@@ -1,6 +1,6 @@
 # Slice 4: Append And Edit TUI Dumps
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Dump Workflows
 Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 Tracker: `.prj/trackers/slicing-tui-dump-workflows-tracker.md`
@@ -59,8 +59,9 @@ add a service boundary for resolving the selected dump path.
 
 ## Risks and Follow-ups
 
-- Open does not launch `$EDITOR` or another external tool yet. A later UX or
-  integration slice should introduce a service-owned launcher abstraction before
-  wiring external edit behavior.
-- Append currently uses deterministic default content. Rich input belongs to a
-  later TUI input refinement.
+- Edit/open does not launch `$EDITOR` or another external tool yet. A later UX
+  or integration slice should introduce a service-owned launcher abstraction
+  before wiring external edit behavior.
+- Append currently uses deterministic default content and should be treated as a
+  narrow growth helper. The primary user-facing operation should become editing
+  the full Markdown dump.
