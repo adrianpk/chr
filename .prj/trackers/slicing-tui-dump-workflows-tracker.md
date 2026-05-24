@@ -54,7 +54,7 @@ Prerequisite PRs or delivered work:
 | Slice 4: Append And Edit TUI Dumps | Delivered | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | PR #178. |
 | Slice 5: Polish Dump Workflows | Delivered | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | PR #179. |
 | Slice 6: Full Dump Markdown Editing | Delivered | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` | PR #180. |
-| Slice 7: Dump Editing UX Polish | Reviewing | `feat/slice-7-dump-editing-ux-polish` | `feat(slice-7): dump editing ux polish` | `.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md` | Tuning slice. |
+| Slice 7: Dump Editing UX Polish | Delivered | `feat/slice-7-dump-editing-ux-polish` | `feat(slice-7): dump editing ux polish` | `.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md` | PR #181. |
 
 ## Slice 1: Dump Service Contract
 
@@ -206,5 +206,5 @@ Validation:
 - Slice 6 covers conversion of the current path-resolution edit command into
   real full-Markdown editing through a service-owned editor or launcher
   abstraction.
-- A second tuning pass should use captured screenshots to refine Dumps layout,
-  grouping, labels, and selected/focused state after full editing is available.
+- Slice 7 covers the second tuning pass for Dumps layout, edit-mode labeling,
+  panel sizing, and selected/focused state after full editing became available.

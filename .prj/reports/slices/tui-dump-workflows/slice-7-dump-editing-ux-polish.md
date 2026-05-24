@@ -1,11 +1,11 @@
 # Slice 7: Dump Editing UX Polish
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Dump Workflows
 Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 Tracker: `.prj/trackers/slicing-tui-dump-workflows-tracker.md`
 Branch: `feat/slice-7-dump-editing-ux-polish`
-PR: pending
+PR: #181
 
 ## Purpose
 
