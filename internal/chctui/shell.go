@@ -734,6 +734,7 @@ func (m Model) renderShellOverlay() string {
 		m.renderDumpAction(),
 		m.renderTicketAction(),
 		m.renderWorkAction(),
+		m.renderQuizAction(),
 		m.renderCommandPalette(),
 	} {
 		if strings.TrimSpace(overlay) != "" {

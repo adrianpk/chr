@@ -260,6 +260,133 @@ func newTUIDumpActionExecutor(
 	}
 }
 
+type tuiQuizActionExecutor struct {
+	operations service
+}
+
+func newTUIQuizActionExecutor(
+	operations service,
+) tuiQuizActionExecutor {
+	return tuiQuizActionExecutor{
+		operations: operations,
+	}
+}
+
+func (e tuiQuizActionExecutor) ExecuteQuizAction(
+	request chctui.QuizActionRequest,
+) (chctui.QuizActionResult, error) {
+	operation, ok := e.quizOperation(request.Action)
+	if !ok {
+		return chctui.QuizActionResult{}, errors.New("unknown quiz action")
+	}
+
+	message, err := operation(request)
+	if err != nil {
+		return chctui.QuizActionResult{}, err
+	}
+
+	quizzes, err := loadTUIQuizzes(e.operations)
+	if err != nil {
+		return chctui.QuizActionResult{}, err
+	}
+
+	return chctui.QuizActionResult{
+		Message:       message,
+		Quizzes:       quizzes,
+		SelectedScope: request.Scope,
+	}, nil
+}
+
+func (e tuiQuizActionExecutor) quizOperation(
+	action chctui.QuizActionID,
+) (func(chctui.QuizActionRequest) (string, error), bool) {
+	operations := map[chctui.QuizActionID]func(chctui.QuizActionRequest) (string, error){
+		chctui.QuizActionStart:    e.executeQuizOperationStart,
+		chctui.QuizActionResume:   e.executeQuizOperationResume,
+		chctui.QuizActionAnswer:   e.executeQuizOperationAnswer,
+		chctui.QuizActionSkip:     e.executeQuizOperationSkip,
+		chctui.QuizActionComplete: e.executeQuizOperationComplete,
+		chctui.QuizActionCancel:   e.executeQuizOperationCancel,
+		chctui.QuizActionRefresh:  executeQuizOperationRefresh,
+	}
+
+	operation, ok := operations[action]
+
+	return operation, ok
+}
+
+func executeQuizOperationRefresh(_ chctui.QuizActionRequest) (string, error) {
+	return "Quizzes refreshed.", nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationStart(request chctui.QuizActionRequest) (string, error) {
+	result, err := e.operations.StartQuiz(QuizStartRequest{
+		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Mode:  chc.QuizModeDeep,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationResume(request chctui.QuizActionRequest) (string, error) {
+	result, err := e.operations.ResumeQuiz(QuizResumeRequest{
+		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationAnswer(request chctui.QuizActionRequest) (string, error) {
+	result, err := e.operations.AnswerQuiz(QuizAnswerRequest{
+		Scope:  chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Answer: request.Answer,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationSkip(request chctui.QuizActionRequest) (string, error) {
+	result, err := e.operations.SkipQuiz(QuizSkipRequest{
+		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationComplete(request chctui.QuizActionRequest) (string, error) {
+	result, err := e.operations.CompleteQuiz(QuizCompleteRequest{
+		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationCancel(request chctui.QuizActionRequest) (string, error) {
+	result, err := e.operations.CancelQuiz(QuizCancelRequest{
+		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
 func (e tuiDumpActionExecutor) ExecuteDumpAction(
 	request chctui.DumpActionRequest,
 ) (chctui.DumpActionResult, error) {

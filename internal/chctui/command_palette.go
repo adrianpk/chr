@@ -16,6 +16,7 @@ const (
 	CommandActionOpenSelectedSource CommandAction = "open_selected_source"
 	CommandActionPlanArtifact       CommandAction = "plan_artifact"
 	CommandActionPlanDump           CommandAction = "plan_dump"
+	CommandActionPlanQuiz           CommandAction = "plan_quiz"
 	CommandActionPlanTicket         CommandAction = "plan_ticket"
 	CommandActionPlanWork           CommandAction = "plan_work"
 )
@@ -28,6 +29,7 @@ type Command struct {
 	View        View
 	Artifact    ArtifactActionID
 	Dump        DumpActionID
+	Quiz        QuizActionID
 	Ticket      TicketActionID
 	Status      string
 	Work        WorkActionID
@@ -54,6 +56,13 @@ func DefaultCommandRegistry() []Command {
 		{ID: "create-ticket", Title: "Create ticket", Description: "Create a default task ticket after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateTicket},
 		{ID: "create-dump", Title: "Create dump", Description: "Create a scoped dump after confirmation.", Action: CommandActionPlanDump, Dump: DumpActionCreate},
 		{ID: "edit-dump", Title: "Edit dump", Description: "Open the selected dump Markdown file in the editor.", Action: CommandActionPlanDump, Dump: DumpActionEdit},
+		{ID: "quiz-start", Title: "Start selected quiz", Description: "Start the selected scoped quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionStart},
+		{ID: "quiz-resume", Title: "Resume selected quiz", Description: "Reload the selected scoped quiz runtime.", Action: CommandActionPlanQuiz, Quiz: QuizActionResume},
+		{ID: "quiz-answer", Title: "Answer selected quiz", Description: "Enter an answer for the active quiz question.", Action: CommandActionPlanQuiz, Quiz: QuizActionAnswer},
+		{ID: "quiz-skip", Title: "Skip quiz question", Description: "Skip the active selected quiz question.", Action: CommandActionPlanQuiz, Quiz: QuizActionSkip},
+		{ID: "quiz-complete", Title: "Complete selected quiz", Description: "Mark the selected quiz as complete.", Action: CommandActionPlanQuiz, Quiz: QuizActionComplete},
+		{ID: "quiz-cancel", Title: "Cancel selected quiz", Description: "Cancel the selected quiz loop.", Action: CommandActionPlanQuiz, Quiz: QuizActionCancel},
+		{ID: "quiz-refresh", Title: "Refresh quizzes", Description: "Reload scoped quiz state.", Action: CommandActionPlanQuiz, Quiz: QuizActionRefresh},
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a spec-oriented authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
 		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
 		{ID: "ticket-add-comment", Title: "Add ticket comment", Description: "Add a standard comment to the selected ticket after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionAddComment},
@@ -219,6 +228,8 @@ func (m *Model) executeCommand(command Command) {
 		m.planArtifactAction(command.Artifact)
 	case CommandActionPlanDump:
 		m.planDumpAction(command.Dump)
+	case CommandActionPlanQuiz:
+		m.planQuizAction(command.Quiz)
 	case CommandActionPlanTicket:
 		m.planTicketAction(command.Ticket, command.Status)
 	case CommandActionPlanWork:
@@ -283,11 +294,10 @@ func (m Model) selectedSourcePath() string {
 		if ok {
 			return dump.RelativePath
 		}
-	case ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
-		document, ok := m.selectedDocumentViewFor(m.currentDocumentViews())
-		if ok {
-			return document.RelativePath
-		}
+	case ViewQuizzes:
+		return m.selectedQuizSourcePath()
+	case ViewSpecs, ViewPlans, ViewDocuments:
+		return m.selectedDocumentSourcePath()
 	case ViewAuthoring:
 		session, ok := m.selectedAuthoringSessionView()
 		if ok {
@@ -296,4 +306,22 @@ func (m Model) selectedSourcePath() string {
 	}
 
 	return ""
+}
+
+func (m Model) selectedQuizSourcePath() string {
+	quiz, ok := m.selectedQuizView()
+	if !ok {
+		return ""
+	}
+
+	return quiz.CuratedPath
+}
+
+func (m Model) selectedDocumentSourcePath() string {
+	document, ok := m.selectedDocumentViewFor(m.currentDocumentViews())
+	if !ok {
+		return ""
+	}
+
+	return document.RelativePath
 }

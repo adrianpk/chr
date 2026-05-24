@@ -84,6 +84,11 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		lines = append(lines, indentLines(wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width-2, 1)), "  ")...)
 	}
 
+	if m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
+		lines = append(lines, "", shellMutedStyle.Render("Answer:"), "")
+		lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width-2, 1), 6), "\n")...)
+	}
+
 	if strings.TrimSpace(quiz.TrailSummary) != "" {
 		lines = append(lines, "", "Trail:")
 		lines = append(lines, indentLines(wrapPlainText(quiz.TrailSummary, maxInt(width-2, 1)), "  ")...)
@@ -173,6 +178,50 @@ func (m *Model) selectNextQuiz() {
 	m.selectedQuiz = m.quizzes[position+1].Index
 }
 
+func (m *Model) selectQuizByScope(scope QuizScope) {
+	for _, quiz := range m.quizzes {
+		if quiz.Scope.CaseSlug == scope.CaseSlug {
+			m.selectedQuiz = quiz.Index
+
+			return
+		}
+	}
+
+	if len(m.quizzes) > 0 {
+		m.selectedQuiz = m.quizzes[0].Index
+
+		return
+	}
+
+	m.selectedQuiz = 0
+}
+
+func (m Model) selectedQuizScope() QuizScope {
+	quiz, ok := m.selectedQuizView()
+	if !ok {
+		return QuizScope{}
+	}
+
+	return quiz.Scope
+}
+
+func (m Model) newQuizActionState(action QuizActionID) QuizActionState {
+	scope := m.selectedQuizScope()
+	title := quizActionTitle(action)
+
+	return QuizActionState{
+		Pending: true,
+		Request: QuizActionRequest{
+			Action: action,
+			Scope:  scope,
+		},
+		Title: title,
+		Details: []string{
+			"Scope: " + quizScopeLabel(scope),
+		},
+	}
+}
+
 func (m Model) selectedQuizPosition() int {
 	for index, quiz := range m.quizzes {
 		if quiz.Index == m.selectedQuiz {
@@ -205,4 +254,23 @@ func quizScopeLabel(scope QuizScope) string {
 	}
 
 	return scope.CaseSlug
+}
+
+func quizActionTitle(action QuizActionID) string {
+	switch action {
+	case QuizActionStart:
+		return "Start quiz"
+	case QuizActionResume:
+		return "Resume quiz"
+	case QuizActionSkip:
+		return "Skip active question"
+	case QuizActionComplete:
+		return "Complete quiz"
+	case QuizActionCancel:
+		return "Cancel quiz"
+	case QuizActionRefresh:
+		return "Refresh quizzes"
+	default:
+		return "Quiz action"
+	}
 }

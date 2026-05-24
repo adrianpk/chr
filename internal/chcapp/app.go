@@ -279,6 +279,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		SemanticDigestStates: data.semanticDigestStates,
 		ActionExecutor:       newTUIArtifactActionExecutor(data.operations),
 		DumpExecutor:         newTUIDumpActionExecutor(data.operations),
+		QuizExecutor:         newTUIQuizActionExecutor(data.operations),
 		TicketExecutor:       newTUITicketActionExecutor(data.operations),
 		WorkExecutor:         newTUIWorkActionExecutor(data.operations),
 		WorkspaceExecutor:    newTUIWorkspaceRefreshExecutor(data.operations),

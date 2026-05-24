@@ -85,6 +85,7 @@ type Options struct {
 	SemanticDigestStates []chc.WorkspaceSemanticDigestState
 	ActionExecutor       ArtifactActionExecutor
 	DumpExecutor         DumpActionExecutor
+	QuizExecutor         QuizActionExecutor
 	TicketExecutor       TicketActionExecutor
 	WorkExecutor         WorkActionExecutor
 	WorkspaceExecutor    WorkspaceRefreshExecutor
@@ -126,6 +127,8 @@ type Model struct {
 	dumpEdit                 DumpEditState
 	quizzes                  []QuizView
 	selectedQuiz             int
+	quizAction               QuizActionState
+	quizAnswer               QuizAnswerState
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
@@ -137,6 +140,7 @@ type Model struct {
 	actionExecutor           ArtifactActionExecutor
 	dumpAction               DumpActionState
 	dumpExecutor             DumpActionExecutor
+	quizExecutor             QuizActionExecutor
 	ticketAction             TicketActionState
 	ticketExecutor           TicketActionExecutor
 	workAction               WorkActionState
@@ -209,6 +213,7 @@ func NewModel(opts Options) Model {
 		commandPalette:         NewCommandPaletteState(DefaultCommandRegistry()),
 		actionExecutor:         opts.ActionExecutor,
 		dumpExecutor:           opts.DumpExecutor,
+		quizExecutor:           opts.QuizExecutor,
 		ticketExecutor:         opts.TicketExecutor,
 		workExecutor:           opts.WorkExecutor,
 		workspaceExecutor:      opts.WorkspaceExecutor,
@@ -292,6 +297,7 @@ func (m Model) View() string {
 	output.WriteString(m.renderArtifactAction())
 	output.WriteString(m.renderTicketAction())
 	output.WriteString(m.renderWorkAction())
+	output.WriteString(m.renderQuizAction())
 	output.WriteString(m.renderCommandPalette())
 	output.WriteString("\n\n")
 	output.WriteString(m.renderKeys())
@@ -352,6 +358,21 @@ func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 		return updated, cmd, true
 	case m.filterEntryMode:
 		updated, cmd := m.updateFilterKey(msg)
+
+		return updated, cmd, true
+	default:
+		return m.updateActiveQuizModeKey(msg)
+	}
+}
+
+func (m Model) updateActiveQuizModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+	switch {
+	case m.quizAction.Pending:
+		updated, cmd := m.updateQuizActionKey(msg)
+
+		return updated, cmd, true
+	case m.quizAnswer.Active:
+		updated, cmd := m.updateQuizAnswerKey(msg)
 
 		return updated, cmd, true
 	default:

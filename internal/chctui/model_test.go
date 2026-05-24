@@ -2425,6 +2425,94 @@ func TestModelSelectsQuizzesIndependentlyFromDocuments(t *testing.T) {
 	}
 }
 
+func TestModelConfirmsQuizStartThroughExecutor(t *testing.T) {
+	executor := &fakeQuizActionExecutor{
+		result: QuizActionResult{
+			Message: "Quiz started.",
+			Quizzes: []QuizView{
+				{Title: "Project", Scope: QuizScope{}, Status: "not_started"},
+				{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "active"},
+			},
+			SelectedScope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		QuizExecutor: executor,
+		Quizzes: []QuizView{
+			{Title: "Project", Scope: QuizScope{}, Status: "not_started"},
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "not_started"},
+		},
+	})
+	model.selected = 3
+	model.selectedQuiz = 1
+	model.planQuizAction(QuizActionStart)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != QuizActionStart {
+		t.Fatalf("action = %q, want start", executor.request.Action)
+	}
+
+	if executor.request.Scope.CaseSlug != "blog" {
+		t.Fatalf("scope = %#v, want blog", executor.request.Scope)
+	}
+
+	if confirmed.statusMessage != "Quiz started." {
+		t.Fatalf("statusMessage = %q, want Quiz started.", confirmed.statusMessage)
+	}
+
+	quiz, ok := confirmed.selectedQuizView()
+	if !ok || quiz.Status != "active" || quiz.Scope.CaseSlug != "blog" {
+		t.Fatalf("selected quiz = %#v, want active blog", quiz)
+	}
+}
+
+func TestModelSubmitsQuizAnswerThroughExecutor(t *testing.T) {
+	executor := &fakeQuizActionExecutor{
+		result: QuizActionResult{
+			Message: "Quiz answer recorded.",
+			Quizzes: []QuizView{
+				{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "active", QuestionsAsked: 2},
+			},
+			SelectedScope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		QuizExecutor: executor,
+		Quizzes: []QuizView{
+			{
+				Title:                 "Blog",
+				Scope:                 QuizScope{CaseSlug: "blog"},
+				Status:                "active",
+				ActiveQuestionSummary: "What should be clarified?",
+			},
+		},
+	})
+	model.selected = 3
+	model.startQuizAnswer()
+	model.quizAnswer.Input.SetValue("Clarify editorial ownership.")
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != QuizActionAnswer {
+		t.Fatalf("action = %q, want answer", executor.request.Action)
+	}
+
+	if executor.request.Answer != "Clarify editorial ownership." {
+		t.Fatalf("answer = %q", executor.request.Answer)
+	}
+
+	if confirmed.quizAnswer.Active {
+		t.Fatal("quiz answer editor is still active")
+	}
+
+	if confirmed.statusMessage != "Quiz answer recorded." {
+		t.Fatalf("statusMessage = %q, want Quiz answer recorded.", confirmed.statusMessage)
+	}
+}
+
 func TestModelRecordsWindowSize(t *testing.T) {
 	model := NewModel(Options{})
 
@@ -2534,6 +2622,18 @@ type fakeDumpActionExecutor struct {
 }
 
 func (e *fakeDumpActionExecutor) ExecuteDumpAction(request DumpActionRequest) (DumpActionResult, error) {
+	e.request = request
+
+	return e.result, e.err
+}
+
+type fakeQuizActionExecutor struct {
+	request QuizActionRequest
+	result  QuizActionResult
+	err     error
+}
+
+func (e *fakeQuizActionExecutor) ExecuteQuizAction(request QuizActionRequest) (QuizActionResult, error) {
 	e.request = request
 
 	return e.result, e.err
