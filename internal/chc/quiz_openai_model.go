@@ -154,7 +154,7 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 		"output_contract":  request.Payload.OutputContract,
 	}
 
-	if len(request.ContextSections) > 0 {
+	if request.Action == QuizModelActionDraftSpec && len(request.ContextSections) > 0 {
 		payload["context_sections"] = quizModelProviderContextSections(request.ContextSections)
 	}
 
@@ -561,7 +561,7 @@ func quizModelInstructions(request QuizModelRequest) string {
 func quizModelDeepQuestionInstructions() string {
 	return strings.TrimSpace(`
 You generate exactly one next question for a project quiz.
-Use the provided project, quiz, recent answer, routing state, and selected context sections.
+Use the provided project, quiz, recent answer, and routing state context.
 Ask one concise question that helps capture useful project or use-case knowledge.
 Prefer useful progression over repeating prior questions.
 If follow-up depth is high, return to broader coverage.
@@ -573,7 +573,7 @@ Return only the JSON object required by the response schema.
 func quizModelFastQuestionInstructions() string {
 	return strings.TrimSpace(fmt.Sprintf(`
 You generate the next %d questions for a project quiz fast mode.
-Use the provided project, quiz, recent answer, routing state, and selected context sections.
+Use the provided project, quiz, recent answer, and routing state context.
 Prefer low-latency questions that can safely advance the quiz without exposing strategy internals.
 Do not mention batch, round, tree, candidate, or strategy choices to the user.
 If the next step needs semantic interpretation that is not explicit in the provided context, return a normal broad question.

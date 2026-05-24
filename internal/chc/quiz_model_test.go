@@ -2,6 +2,7 @@ package chc
 
 import (
 	"context"
+	"strings"
 	"testing"
 )
 
@@ -124,6 +125,59 @@ func TestQuizModelContextSectionsForPayloadMatchesRedWrightShape(t *testing.T) {
 
 	if sections[2].Authority != "quiz_context" {
 		t.Fatalf("recent entries authority = %q, want quiz_context", sections[2].Authority)
+	}
+}
+
+func TestQuizModelProviderPayloadKeepsNextQuestionContextOutOfProviderText(t *testing.T) {
+	request := validQuizModelRequest()
+	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+		Name:      "project_dump",
+		Layer:     "dump",
+		Authority: ".chc/dumps/project-context.md",
+		Content:   "Detailed project dump that should not be sent to next-question generation.",
+	})
+
+	payload := quizModelProviderPayload(request)
+
+	if _, ok := payload["context_sections"]; ok {
+		t.Fatalf("next-question provider payload includes context_sections: %#v", payload)
+	}
+}
+
+func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionDraftSpec
+	request.Strategy = "draft_spec"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+		Name:      "project_dump",
+		Layer:     "dump",
+		Authority: ".chc/dumps/project-context.md",
+		Content:   "Detailed project dump for draft spec synthesis.",
+	})
+
+	payload := quizModelProviderPayload(request)
+
+	if _, ok := payload["context_sections"]; !ok {
+		t.Fatalf("draft-spec provider payload omitted context_sections: %#v", payload)
+	}
+}
+
+func TestQuizModelQuestionInstructionsMatchRedWrightContextBoundary(t *testing.T) {
+	instructions := []string{
+		quizModelDeepQuestionInstructions(),
+		quizModelFastQuestionInstructions(),
+	}
+
+	for _, instruction := range instructions {
+		if strings.Contains(instruction, "selected context sections") {
+			t.Fatalf("question instructions mention selected context sections: %q", instruction)
+		}
+
+		if !strings.Contains(instruction, "Use the provided project, quiz, recent answer, and routing state context.") {
+			t.Fatalf("question instructions do not match RedWright context wording: %q", instruction)
+		}
 	}
 }
 
