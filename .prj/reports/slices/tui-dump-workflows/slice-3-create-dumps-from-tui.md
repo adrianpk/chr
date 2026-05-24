@@ -1,6 +1,6 @@
 # Slice 3: Create Dumps From TUI
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Dump Workflows
 Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 Tracker: `.prj/trackers/slicing-tui-dump-workflows-tracker.md`
