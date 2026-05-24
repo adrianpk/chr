@@ -249,10 +249,8 @@ func (s service) generateNextQuizQuestion(state chc.QuizRuntimeState) (chc.QuizR
 	}
 
 	state.Status = chc.QuizRuntimeStatusActive
-	state.ActiveQuestion = &response.Question
+	state = activateQuizQuestion(state, response.Question, response.CreatedAt.UTC())
 	state.Candidates = response.Candidates
-	state.QuestionsAsked++
-	state.UpdatedAt = response.CreatedAt.UTC()
 
 	return state, nil
 }
@@ -495,10 +493,34 @@ func updateQuizStateAfterEntry(state chc.QuizRuntimeState, entry chc.QuizEntry) 
 
 	state.Status = chc.QuizRuntimeStatusIdle
 	state.ActiveQuestion = nil
+	state.ActiveTopic = ""
+
+	if entry.Depth >= chc.MaxQuizFollowUpDepth {
+		state.Trail = nil
+		state.BranchReturnReason = chc.QuizBranchReturnReasonMaxDepth
+	} else {
+		state.BranchReturnReason = ""
+	}
 
 	if state.Mode == chc.QuizModeDeep {
 		state.Candidates = nil
 	}
+
+	return state
+}
+
+func activateQuizQuestion(
+	state chc.QuizRuntimeState,
+	question chc.QuizQuestion,
+	now time.Time,
+) chc.QuizRuntimeState {
+	state.Status = chc.QuizRuntimeStatusActive
+	state.ActiveQuestion = &question
+	state.ActiveTopic = question.Topic
+	state.Trail = quizTrailForQuestion(state.Trail, question)
+	state.BranchReturnReason = ""
+	state.QuestionsAsked++
+	state.UpdatedAt = now
 
 	return state
 }
@@ -530,10 +552,39 @@ func activateQuizCandidate(
 		}
 	}
 
-	state.Status = chc.QuizRuntimeStatusActive
-	state.ActiveQuestion = &question
-	state.QuestionsAsked++
-	state.UpdatedAt = now
+	state = activateQuizQuestion(state, question, now)
 
 	return state
+}
+
+func quizTrailForQuestion(trail []chc.QuizTrailNode, question chc.QuizQuestion) []chc.QuizTrailNode {
+	node := chc.QuizTrailNode{
+		QuestionID: question.ID,
+		Prompt:     question.Prompt,
+		Topic:      question.Topic,
+		Depth:      question.Depth,
+	}
+
+	if question.Depth <= 1 {
+		return []chc.QuizTrailNode{node}
+	}
+
+	parentIndex := -1
+
+	for index, current := range trail {
+		if current.QuestionID == question.ParentID {
+			parentIndex = index
+
+			break
+		}
+	}
+
+	if parentIndex < 0 {
+		return []chc.QuizTrailNode{node}
+	}
+
+	next := append([]chc.QuizTrailNode(nil), trail[:parentIndex+1]...)
+	next = append(next, node)
+
+	return next
 }

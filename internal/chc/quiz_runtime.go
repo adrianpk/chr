@@ -9,6 +9,8 @@ import (
 const (
 	DefaultQuizQuestionBudget = 50
 	MaxQuizFollowUpDepth      = 3
+
+	QuizBranchReturnReasonMaxDepth = "max_depth_reached"
 )
 
 type QuizScope struct {
@@ -50,23 +52,24 @@ const (
 )
 
 type QuizRuntimeState struct {
-	ID              string
-	ProjectID       string
-	CaseSlug        string
-	Status          QuizRuntimeStatus
-	Mode            QuizMode
-	QuestionBudget  int
-	QuestionsAsked  int
-	AnswersRecorded int
-	SkipsRecorded   int
-	ActiveTopic     string
-	Coverage        []QuizCoverageTopic
-	ActiveQuestion  *QuizQuestion
-	Trail           []QuizTrailNode
-	Candidates      []QuizCandidate
-	RawPath         string
-	CuratedPath     string
-	UpdatedAt       time.Time
+	ID                 string
+	ProjectID          string
+	CaseSlug           string
+	Status             QuizRuntimeStatus
+	Mode               QuizMode
+	QuestionBudget     int
+	QuestionsAsked     int
+	AnswersRecorded    int
+	SkipsRecorded      int
+	ActiveTopic        string
+	Coverage           []QuizCoverageTopic
+	ActiveQuestion     *QuizQuestion
+	Trail              []QuizTrailNode
+	BranchReturnReason string
+	Candidates         []QuizCandidate
+	RawPath            string
+	CuratedPath        string
+	UpdatedAt          time.Time
 }
 
 type QuizQuestion struct {

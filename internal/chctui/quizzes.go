@@ -24,6 +24,7 @@ type QuizView struct {
 	AnswersRecorded       int
 	SkipsRecorded         int
 	CandidateCount        int
+	BranchReturnReason    string
 	UpdatedAt             time.Time
 	ActiveQuestionSummary string
 	TrailSummary          string
@@ -75,6 +76,7 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		fmt.Sprintf("Answers: %d", quiz.AnswersRecorded),
 		fmt.Sprintf("Skips: %d", quiz.SkipsRecorded),
 		fmt.Sprintf("Candidates: %d", quiz.CandidateCount),
+		fmt.Sprintf("Return: %s", emptyValue(quiz.BranchReturnReason)),
 		fmt.Sprintf("Updated: %s", renderTime(quiz.UpdatedAt)),
 		fmt.Sprintf("Raw: %s", quiz.RawPath),
 		fmt.Sprintf("Curated: %s", quiz.CuratedPath),

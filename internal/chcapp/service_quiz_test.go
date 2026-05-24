@@ -188,6 +188,94 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 	}
 }
 
+func TestServiceQuizTrailRecoversAfterMaxDepthBranch(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizModelResponse("response-1", "question-1", clock()),
+			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(chc.QuizQuestion{
+				ID:        "question-2",
+				Prompt:    "What follow-up matters?",
+				Topic:     "workflow",
+				Depth:     2,
+				ParentID:  "question-1",
+				TrunkID:   "question-1",
+				CreatedAt: clock(),
+			})),
+			serviceQuizModelResponseWithQuestion("response-3", serviceQuizQuestion(chc.QuizQuestion{
+				ID:        "question-3",
+				Prompt:    "What final detail matters?",
+				Topic:     "workflow",
+				Depth:     3,
+				ParentID:  "question-2",
+				TrunkID:   "question-1",
+				CreatedAt: clock(),
+			})),
+			serviceQuizModelResponse("response-4", "question-4", clock()),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	result, err := operations.StartQuiz(QuizStartRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
+	if err != nil {
+		t.Fatalf("StartQuiz returned error: %v", err)
+	}
+
+	if len(result.State.Trail) != 1 || result.State.Trail[0].QuestionID != "question-1" {
+		t.Fatalf("trail = %#v, want question-1", result.State.Trail)
+	}
+
+	result = answerServiceQuizForTrail(t, operations, "First answer.")
+	assertServiceQuizTrailIDs(t, result.State.Trail, []string{"question-1", "question-2"})
+
+	result = answerServiceQuizForTrail(t, operations, "Second answer.")
+	assertServiceQuizTrailIDs(t, result.State.Trail, []string{"question-1", "question-2", "question-3"})
+
+	result = answerServiceQuizForTrail(t, operations, "Third answer.")
+	if result.State.BranchReturnReason != "" {
+		t.Fatalf("BranchReturnReason = %q, want cleared after next trunk activation", result.State.BranchReturnReason)
+	}
+
+	assertServiceQuizTrailIDs(t, result.State.Trail, []string{"question-4"})
+}
+
+func answerServiceQuizForTrail(
+	t *testing.T,
+	operations service,
+	answer string,
+) QuizOperationResult {
+	t.Helper()
+
+	result, err := operations.AnswerQuiz(QuizAnswerRequest{
+		Scope:  chc.QuizScope{CaseSlug: "blog"},
+		Answer: answer,
+	})
+	if err != nil {
+		t.Fatalf("AnswerQuiz returned error: %v", err)
+	}
+
+	return result
+}
+
+func assertServiceQuizTrailIDs(t *testing.T, trail []chc.QuizTrailNode, ids []string) {
+	t.Helper()
+
+	if len(trail) != len(ids) {
+		t.Fatalf("trail = %#v, want ids %#v", trail, ids)
+	}
+
+	for index, id := range ids {
+		if trail[index].QuestionID != id {
+			t.Fatalf("trail = %#v, want ids %#v", trail, ids)
+		}
+	}
+}
+
 func TestServiceQuizLifecycleOperations(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -471,6 +559,24 @@ func serviceQuizModelResponse(
 		RawText:   "raw model text",
 		CreatedAt: createdAt,
 	}
+}
+
+func serviceQuizModelResponseWithQuestion(responseID string, question chc.QuizQuestion) chc.QuizModelResponse {
+	return chc.QuizModelResponse{
+		ID:        responseID,
+		RequestID: "filled-by-fake",
+		Provider:  "fake",
+		Status:    chc.QuizModelResponseReady,
+		Question:  question,
+		RawText:   "raw model text",
+		CreatedAt: question.CreatedAt,
+	}
+}
+
+func serviceQuizQuestion(question chc.QuizQuestion) chc.QuizQuestion {
+	question.Required = true
+
+	return question
 }
 
 func serviceQuizModelResponseWithCandidates(

@@ -239,6 +239,7 @@ func loadTUIQuizzes(operations service) ([]chctui.QuizView, error) {
 			AnswersRecorded:       quiz.AnswersRecorded,
 			SkipsRecorded:         quiz.SkipsRecorded,
 			CandidateCount:        quiz.CandidateCount,
+			BranchReturnReason:    quiz.BranchReturnReason,
 			UpdatedAt:             quiz.UpdatedAt,
 			ActiveQuestionSummary: quiz.ActiveQuestionSummary,
 			TrailSummary:          quiz.TrailSummary,
