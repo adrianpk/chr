@@ -52,7 +52,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Quiz Runtime Model | Delivered | `feat/slice-1-quiz-runtime-model` | `feat(slice-1): quiz runtime model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-1-quiz-runtime-model.md` | PR #183. |
 | Slice 2: Quiz Artifact Repository | Delivered | `feat/slice-2-quiz-artifact-repository` | `feat(slice-2): quiz artifact repository` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md` | PR #184. |
-| Slice 3: Quiz Service Operations | Planned | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | Service start/resume/answer/skip/done/cancel/mode operations. |
+| Slice 3: Quiz Service Operations | Reviewing | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | Service start/resume/answer/skip/done/cancel/mode operations. |
 | Slice 4: Scoped Quiz Read Model | Planned | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | TUI read model and scoped quiz listing. |
 | Slice 5: TUI Deep Quiz Loop | Planned | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | Interactive one-question-at-a-time deep mode. |
 | Slice 6: Fast Quiz Candidates | Planned | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | Internal candidate buffering and mode switch. |
@@ -115,23 +115,29 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Add service quiz operation interface and request/result shapes.
-- [ ] Implement list, start, resume, answer, skip, complete, cancel, switch
+- [x] Add service quiz operation interface and request/result shapes.
+- [x] Implement list, start, resume, answer, skip, complete, cancel, switch
       mode, and refresh over the application service.
-- [ ] Ensure answer and skip use service-owned active question state.
-- [ ] Wire deep mode generation through the existing model/provider boundary.
-- [ ] Add formal semantic request and response payload contracts for
+- [x] Ensure answer and skip use service-owned active question state.
+- [x] Wire deep mode generation through the existing model/provider boundary.
+- [x] Add formal semantic request and response payload contracts for
       model-backed quiz operations.
-- [ ] Include agent protocol, project, use-case, and relevant dump context in
+- [x] Include agent protocol, project, use-case, and relevant dump context in
       model-backed question generation.
-- [ ] Persist raw capture and runtime state after each operation.
-- [ ] Add service tests for control semantics and scoped artifacts.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and `make verify`.
+- [x] Persist raw capture and runtime state after each operation.
+- [x] Add service tests for control semantics and scoped artifacts.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T3.1: `f03cfa0` adds the formal quiz model request and response boundary.
+- T3.2: `341ffbc` adds service-owned quiz operations and tests.
+
+Validation:
+
+- `go test ./internal/chc ./internal/chcapp`
+- `make verify`
 
 ## Slice 4: Scoped Quiz Read Model
 
