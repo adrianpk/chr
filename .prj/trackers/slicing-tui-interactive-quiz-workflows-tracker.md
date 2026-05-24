@@ -54,7 +54,7 @@ Prerequisite PRs or delivered work:
 | Slice 1: Quiz Runtime Model | Delivered | `feat/slice-1-quiz-runtime-model` | `feat(slice-1): quiz runtime model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-1-quiz-runtime-model.md` | PR #183. |
 | Slice 2: Quiz Artifact Repository | Delivered | `feat/slice-2-quiz-artifact-repository` | `feat(slice-2): quiz artifact repository` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md` | PR #184. |
 | Slice 3: Quiz Service Operations | Delivered | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | PR #185. |
-| Slice 4: Scoped Quiz Read Model | Planned | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | TUI read model and scoped quiz listing. |
+| Slice 4: Scoped Quiz Read Model | Reviewing | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | TUI read model and scoped quiz listing. |
 | Slice 5: TUI Deep Quiz Loop | Planned | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | Interactive one-question-at-a-time deep mode. |
 | Slice 6: Fast Quiz Candidates | Planned | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | Internal candidate buffering and mode switch. |
 | Slice 7: Ariadne Trail Recovery | Planned | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | Trail display, depth cap, branch return, resume recovery. |
@@ -144,18 +144,24 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Add TUI quiz view model carrying scope, status, mode, paths, counts,
+- [x] Add TUI quiz view model carrying scope, status, mode, paths, counts,
       updated time, active question summary, trail summary, and curated preview.
-- [ ] Add adapter mapping from service quiz results to TUI quiz views.
-- [ ] Render project-wide and use-case-scoped quizzes in `F4 Quizzes`.
-- [ ] Add empty, idle, active, done, cancelled, and blocked detail states.
-- [ ] Add focused TUI tests for scoped listing and detail rendering.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and `make verify`.
+- [x] Add adapter mapping from service quiz results to TUI quiz views.
+- [x] Render project-wide and use-case-scoped quizzes in `F4 Quizzes`.
+- [x] Add empty, idle, active, done, cancelled, and blocked detail states.
+- [x] Add focused TUI tests for scoped listing and detail rendering.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T4.1: `ce57db4` adds service and TUI scoped quiz read models.
+
+Validation:
+
+- `go test ./internal/chcapp ./internal/chctui`
+- `make verify`
+
 
 ## Slice 5: TUI Deep Quiz Loop
 
