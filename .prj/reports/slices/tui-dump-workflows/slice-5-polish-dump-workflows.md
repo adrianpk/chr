@@ -5,7 +5,7 @@ Slicing: TUI Dump Workflows
 Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 Tracker: `.prj/trackers/slicing-tui-dump-workflows-tracker.md`
 Branch: `feat/slice-5-polish-dump-workflows`
-PR: pending
+PR: `#179`
 
 ## Purpose
 

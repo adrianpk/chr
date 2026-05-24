@@ -50,7 +50,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Scoped Dump Read Model | Delivered | `feat/slice-2-scoped-dump-read-model` | `feat(slice-2): scoped dump read model` | `.prj/reports/slices/tui-dump-workflows/slice-2-scoped-dump-read-model.md` | PR #176. |
 | Slice 3: Create Dumps From TUI | Delivered | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | PR #177. |
 | Slice 4: Append And Edit TUI Dumps | Delivered | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | PR #178. |
-| Slice 5: Polish Dump Workflows | Reviewing | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | Commands, empty states, messages, and coverage. |
+| Slice 5: Polish Dump Workflows | Reviewing | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | PR #179. |
 
 ## Slice 1: Dump Service Contract
 
