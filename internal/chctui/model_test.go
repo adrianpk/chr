@@ -2377,21 +2377,30 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 	view := model.View()
 	for _, want := range []string{
 		"Quizzes",
-		"Scope        Status       Mode   Asked  Title",
-		"blog",
 		"Blog Publishing",
-		"Status: active",
-		"Mode: fast",
-		"Questions: 2/50",
-		"Candidates: 2",
-		"Return: max_depth_reached",
-		"Active question:",
+		"Question 2",
+		"Question:",
 		"What should the workflow preserve?",
-		"Curated preview:",
-		"Preserve editorial review.",
+		"Enter answer",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	for _, unwanted := range []string{
+		"Mode:",
+		"Questions:",
+		"Candidates:",
+		"Return:",
+		"Raw:",
+		"Curated:",
+		"Runtime:",
+		"Trail:",
+		"Curated preview:",
+	} {
+		if strings.Contains(view, unwanted) {
+			t.Fatalf("View() includes technical detail %q:\n%s", unwanted, view)
 		}
 	}
 }
@@ -2414,8 +2423,8 @@ func TestModelRendersCuratedQuizBodyWithoutActiveQuestion(t *testing.T) {
 
 	view := model.View()
 	for _, want := range []string{
-		"Status: done",
-		"Curated notes:",
+		"Done",
+		"Notes:",
 		"Preserve editorial review.",
 		"Open Questions",
 	} {

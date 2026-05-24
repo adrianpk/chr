@@ -38,7 +38,7 @@ func (m Model) renderQuizFocusList(limit int) []string {
 		return []string{"No quiz scopes found."}
 	}
 
-	lines := []string{shellMutedStyle.Render("Scope        Status       Mode   Asked  Title")}
+	lines := []string{shellMutedStyle.Render("Scope")}
 
 	for _, quiz := range m.quizzes {
 		prefix := " "
@@ -46,15 +46,7 @@ func (m Model) renderQuizFocusList(limit int) []string {
 			prefix = ">"
 		}
 
-		lines = append(lines, fmt.Sprintf(
-			"%s %-12s %-12s %-6s %-6d %s",
-			prefix,
-			quizScopeLabel(quiz.Scope),
-			quiz.Status,
-			quiz.Mode,
-			quiz.QuestionsAsked,
-			quiz.Title,
-		))
+		lines = append(lines, fmt.Sprintf("%s %s", prefix, quiz.Title))
 		if len(lines) >= limit {
 			break
 		}
@@ -70,23 +62,12 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 	}
 
 	lines := []string{
-		fmt.Sprintf("Scope: %s", quizScopeLabel(quiz.Scope)),
-		fmt.Sprintf("Status: %s", quiz.Status),
-		fmt.Sprintf("Mode: %s", quiz.Mode),
-		fmt.Sprintf("Title: %s", quiz.Title),
-		fmt.Sprintf("Questions: %d/%d", quiz.QuestionsAsked, quiz.QuestionBudget),
-		fmt.Sprintf("Answers: %d", quiz.AnswersRecorded),
-		fmt.Sprintf("Skips: %d", quiz.SkipsRecorded),
-		fmt.Sprintf("Candidates: %d", quiz.CandidateCount),
-		fmt.Sprintf("Return: %s", emptyValue(quiz.BranchReturnReason)),
-		fmt.Sprintf("Updated: %s", renderTime(quiz.UpdatedAt)),
-		fmt.Sprintf("Raw: %s", quiz.RawPath),
-		fmt.Sprintf("Curated: %s", quiz.CuratedPath),
-		fmt.Sprintf("Runtime: %s", quiz.RuntimePath),
+		quiz.Title,
+		quizHumanStatus(quiz),
 	}
 
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
-		lines = append(lines, "", "Active question:")
+		lines = append(lines, "", "Question:")
 		lines = append(lines, indentLines(wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width-2, 1)), "  ")...)
 	}
 
@@ -95,18 +76,12 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width-2, 1), 6), "\n")...)
 	}
 
-	if strings.TrimSpace(quiz.TrailSummary) != "" {
-		lines = append(lines, "", "Trail:")
-		lines = append(lines, indentLines(wrapPlainText(quiz.TrailSummary, maxInt(width-2, 1)), "  ")...)
+	if strings.TrimSpace(quiz.ActiveQuestionSummary) == "" && strings.TrimSpace(quiz.CuratedPreview) != "" {
+		lines = append(lines, "", "Notes:")
+		lines = append(lines, indentLines(wrapPlainText(quiz.CuratedPreview, maxInt(width-2, 1)), "  ")...)
 	}
 
-	if strings.TrimSpace(quiz.ActiveQuestionSummary) == "" {
-		lines = append(lines, "", "Curated notes:")
-	} else {
-		lines = append(lines, "", "Curated preview:")
-	}
-
-	lines = append(lines, indentLines(wrapPlainText(emptyValue(quiz.CuratedPreview), maxInt(width-2, 1)), "  ")...)
+	lines = append(lines, "", shellMutedStyle.Render(quizActionHint(quiz)))
 
 	return lines
 }
@@ -119,7 +94,6 @@ func (m Model) renderQuizzes() string {
 	var output strings.Builder
 
 	output.WriteString("Quizzes\n")
-	output.WriteString("  Scope        Status       Mode   Asked  Title\n")
 
 	for _, quiz := range m.quizzes {
 		prefix := "  "
@@ -128,21 +102,45 @@ func (m Model) renderQuizzes() string {
 		}
 
 		output.WriteString(prefix)
-		output.WriteString(fmt.Sprintf(
-			"%-12s %-12s %-6s %-6d %s",
-			quizScopeLabel(quiz.Scope),
-			quiz.Status,
-			quiz.Mode,
-			quiz.QuestionsAsked,
-			quiz.Title,
-		))
+		output.WriteString(quiz.Title)
+		output.WriteString("  ")
+		output.WriteString(shellMutedStyle.Render(quizHumanStatus(quiz)))
 		output.WriteString("\n")
 	}
 
-	output.WriteString("\nSelected Quiz\n")
+	output.WriteString("\n")
 	output.WriteString(strings.Join(m.renderSelectedQuizDetailLines(72), "\n"))
 
 	return strings.TrimRight(output.String(), "\n")
+}
+
+func quizHumanStatus(quiz QuizView) string {
+	switch quiz.Status {
+	case "not_started":
+		return "Not started"
+	case "active":
+		return fmt.Sprintf("Question %d", maxInt(quiz.QuestionsAsked, 1))
+	case "done":
+		return "Done"
+	case "cancelled":
+		return "Cancelled"
+	case "blocked":
+		return "Blocked"
+	default:
+		if strings.TrimSpace(quiz.Status) == "" {
+			return "Not started"
+		}
+
+		return quiz.Status
+	}
+}
+
+func quizActionHint(quiz QuizView) string {
+	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
+		return "Enter answer  x skip  c done"
+	}
+
+	return "s start"
 }
 
 func (m Model) selectedQuizView() (QuizView, bool) {
