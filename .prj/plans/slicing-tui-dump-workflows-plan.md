@@ -132,16 +132,16 @@ needed.
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 6
+Active slice number: Slice 7
 
-Active slice short name: full dump markdown editing
+Active slice short name: dump editing ux polish
 
-Expected branch name: `feat/slice-6-full-dump-markdown-editing`
+Expected branch name: `feat/slice-7-dump-editing-ux-polish`
 
-Expected PR title: `feat(slice-6): full dump markdown editing`
+Expected PR title: `feat(slice-7): dump editing ux polish`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md`
+`.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md`
 
 Prerequisite PRs or delivered work:
 
@@ -154,6 +154,7 @@ Prerequisite PRs or delivered work:
 - Slice 3 create dumps from TUI through PR #177.
 - Slice 4 append/edit dump workflow through PR #178.
 - Slice 5 polish dump workflow through PR #179.
+- Slice 6 full dump Markdown editing through PR #180.
 
 | Slice | Short Name | Expected Branch | Expected PR Title | Expected Report |
 | --- | --- | --- | --- | --- |
@@ -163,6 +164,7 @@ Prerequisite PRs or delivered work:
 | Slice 4 | append and edit tui dumps | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` |
 | Slice 5 | polish dump workflows | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` |
 | Slice 6 | full dump markdown editing | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` |
+| Slice 7 | dump editing ux polish | `feat/slice-7-dump-editing-ux-polish` | `feat(slice-7): dump editing ux polish` | `.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md` |
 
 ## Slice 1: Dump Service Contract
 
@@ -274,6 +276,27 @@ Out of scope:
 - Spec promotion workflows.
 - Removing service-level append compatibility if existing tests or callers
   still rely on it.
+
+## Slice 7: Dump Editing UX Polish
+
+Polish the dump editing surface now that full-document editing exists.
+
+Expected behavior:
+
+- The dump detail panel clearly distinguishes read mode from edit mode.
+- Internal edit mode uses the available panel width and height instead of fixed
+  editor sizing.
+- Edit status, save hint, cancel hint, and external-editor hint are visible in
+  the detail panel.
+- The selected and focused dump remains visually consistent after edit, save,
+  cancel, external edit, and refresh.
+- Tests cover the edited detail rendering and keyboard behavior.
+
+Out of scope:
+
+- Rich Markdown syntax highlighting.
+- Multi-file dump editing.
+- LLM-assisted dump rewriting.
 
 ## Validation Strategy
 

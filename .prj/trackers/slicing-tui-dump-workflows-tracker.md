@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 6
+Active slice number: Slice 7
 
-Active slice short name: full dump markdown editing
+Active slice short name: dump editing ux polish
 
-Expected branch name: `feat/slice-6-full-dump-markdown-editing`
+Expected branch name: `feat/slice-7-dump-editing-ux-polish`
 
-Expected PR title: `feat(slice-6): full dump markdown editing`
+Expected PR title: `feat(slice-7): dump editing ux polish`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md`
+`.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md`
 
 Prerequisite PRs or delivered work:
 
@@ -30,6 +30,7 @@ Prerequisite PRs or delivered work:
 - Slice 3 create dumps from TUI through PR #177.
 - Slice 4 append/edit dump workflow through PR #178.
 - Slice 5 polish dump workflow through PR #179.
+- Slice 6 full dump Markdown editing through PR #180.
 
 ## Slicing Checklist
 
@@ -52,7 +53,8 @@ Prerequisite PRs or delivered work:
 | Slice 3: Create Dumps From TUI | Delivered | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | PR #177. |
 | Slice 4: Append And Edit TUI Dumps | Delivered | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | PR #178. |
 | Slice 5: Polish Dump Workflows | Delivered | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | PR #179. |
-| Slice 6: Full Dump Markdown Editing | Reviewing | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` | Tuning slice. |
+| Slice 6: Full Dump Markdown Editing | Delivered | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` | PR #180. |
+| Slice 7: Dump Editing UX Polish | Planned | `feat/slice-7-dump-editing-ux-polish` | `feat(slice-7): dump editing ux polish` | `.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md` | Tuning slice. |
 
 ## Slice 1: Dump Service Contract
 
@@ -167,11 +169,28 @@ Validation:
 - `go test ./internal/chc ./internal/chcapp ./internal/chctui`
 - `make verify`
 
+## Slice 7: Dump Editing UX Polish
+
+Candidate tasks:
+
+- [ ] Distinguish dump read mode from edit mode in the detail panel.
+- [ ] Size the internal Markdown editor from available panel dimensions.
+- [ ] Render edit status, save, cancel, and external-editor hints in the
+      detail panel.
+- [ ] Preserve selected and focused dump state across edit, save, cancel,
+      external edit, and refresh.
+- [ ] Add focused TUI tests for edited detail rendering and keyboard behavior.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- Pending.
+
 ## Open Decisions
 
 - Whether `.prj/dumps` should remain as a legacy read source or be removed from
   active dump loading.
-- None for this slice.
 - Whether dump preview should come from the structural index, lazy file body
   reads, or service-provided summaries.
 
