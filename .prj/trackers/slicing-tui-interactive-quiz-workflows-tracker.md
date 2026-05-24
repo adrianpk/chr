@@ -56,7 +56,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Quiz Artifact Repository | Delivered | `feat/slice-2-quiz-artifact-repository` | `feat(slice-2): quiz artifact repository` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md` | PR #184. |
 | Slice 3: Quiz Service Operations | Delivered | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | PR #185. |
 | Slice 4: Scoped Quiz Read Model | Delivered | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | PR #186. |
-| Slice 5: TUI Deep Quiz Loop | Planned | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | Interactive one-question-at-a-time deep mode. |
+| Slice 5: TUI Deep Quiz Loop | Reviewing | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | Interactive one-question-at-a-time deep mode. |
 | Slice 6: Fast Quiz Candidates | Planned | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | Internal candidate buffering and mode switch. |
 | Slice 7: Ariadne Trail Recovery | Planned | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | Trail display, depth cap, branch return, resume recovery. |
 | Slice 8: Quiz Curation Polish | Planned | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | Curated notes and documentation alignment. |
@@ -168,19 +168,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Add TUI action state for start, resume, answer, skip, done, cancel, and
+- [x] Add TUI action state for start, resume, answer, skip, done, cancel, and
       refresh.
-- [ ] Add TUI-native answer input for the active question.
-- [ ] Dispatch all quiz actions through the service executor.
-- [ ] Preserve selected quiz and focus state across operations.
-- [ ] Render budget, counts, status messages, and active question state.
-- [ ] Add TUI tests for keyboard behavior and service intent dispatch.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and `make verify`.
+- [x] Add TUI-native answer input for the active question.
+- [x] Dispatch all quiz actions through the service executor.
+- [x] Preserve selected quiz and focus state across operations.
+- [x] Render budget, counts, status messages, and active question state.
+- [x] Add TUI tests for keyboard behavior and service intent dispatch.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T5.1: `4892e20` wires TUI quiz loop actions through the service executor.
+
+Validation:
+
+- `go test ./internal/chctui ./internal/chcapp`
+- `make verify`
+
 
 ## Slice 6: Fast Quiz Candidates
 
