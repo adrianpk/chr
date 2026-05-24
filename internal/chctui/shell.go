@@ -586,30 +586,24 @@ func (m Model) renderDocumentFamilyWorkspace(width, height int, title string, fa
 }
 
 func (m Model) renderQuizWorkspace(width, height int) string {
-	quizzes := m.documentsByFamily(map[string]bool{"quiz": true})
-	list := m.renderDocumentFocusList(quizzes, height-2)
-	interaction := []string{
-		"Question/answer workspace",
-		"Agent prompt: not active.",
-		"User answer: not active.",
-		"",
-		"Quizzes can be project-wide or case-scoped.",
-	}
+	list := m.renderQuizFocusList(height - 2)
+	detail := m.renderSelectedQuizDetailLines(maxInt(width-4, 1))
 
 	switch m.maximizedPane {
 	case 0:
 		return fitBlock(renderPanel("Quizzes", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Interaction", interaction, width, height, true), width, height)
+		return fitBlock(renderPanel("Quiz", detail, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
+	detail = m.renderSelectedQuizDetailLines(maxInt(rightWidth-4, 1))
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Quizzes", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Interaction", interaction, rightWidth, height, m.selectedPane == 1),
+		renderPanel("Quiz", detail, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 

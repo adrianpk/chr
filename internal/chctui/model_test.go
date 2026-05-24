@@ -2337,6 +2337,94 @@ func TestModelSelectsDumpsIndependentlyFromDocuments(t *testing.T) {
 	}
 }
 
+func TestModelRendersScopedQuizzes(t *testing.T) {
+	updated := time.Date(2026, 5, 24, 10, 0, 0, 0, time.UTC)
+	model := NewModel(Options{
+		Quizzes: []QuizView{
+			{
+				Title:          "Project",
+				Status:         "not_started",
+				Mode:           "deep",
+				Scope:          QuizScope{},
+				RawPath:        ".chc/quizzes/project-quiz-raw.md",
+				CuratedPath:    ".chc/quizzes/project-quiz.md",
+				RuntimePath:    ".chc/tmp/quiz-runtime/project.json",
+				QuestionBudget: 50,
+			},
+			{
+				Title:                 "Blog Publishing",
+				Status:                "active",
+				Mode:                  "fast",
+				Scope:                 QuizScope{CaseSlug: "blog"},
+				RawPath:               ".chc/quizzes/blog-quiz-raw.md",
+				CuratedPath:           ".chc/quizzes/blog-quiz.md",
+				RuntimePath:           ".chc/tmp/quiz-runtime/blog.json",
+				QuestionBudget:        50,
+				QuestionsAsked:        2,
+				AnswersRecorded:       1,
+				UpdatedAt:             updated,
+				ActiveQuestionSummary: "What should the workflow preserve?",
+				TrailSummary:          "workflow",
+				CuratedPreview:        "Preserve editorial review.",
+			},
+		},
+	})
+	model.selected = 3
+	model.selectedQuiz = 1
+
+	view := model.View()
+	for _, want := range []string{
+		"Quizzes",
+		"Scope        Status       Mode   Asked  Title",
+		"blog",
+		"Blog Publishing",
+		"Status: active",
+		"Mode: fast",
+		"Questions: 2/50",
+		"Active question:",
+		"What should the workflow preserve?",
+		"Curated preview:",
+		"Preserve editorial review.",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelSelectsQuizzesIndependentlyFromDocuments(t *testing.T) {
+	model := NewModel(Options{
+		Quizzes: []QuizView{
+			{Title: "Project", Scope: QuizScope{}},
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}},
+		},
+		Documents: []DocumentView{
+			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chc/specs/spec.md"},
+		},
+	})
+	model.selected = 3
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
+
+	navigated, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	quiz, ok := navigated.selectedQuizView()
+	if !ok {
+		t.Fatal("selectedQuizView returned no quiz")
+	}
+
+	if quiz.Title != "Blog" {
+		t.Fatalf("selected quiz = %q, want Blog", quiz.Title)
+	}
+
+	if navigated.selectedDocument != 0 {
+		t.Fatalf("selectedDocument = %d, want unchanged 0", navigated.selectedDocument)
+	}
+}
+
 func TestModelRecordsWindowSize(t *testing.T) {
 	model := NewModel(Options{})
 

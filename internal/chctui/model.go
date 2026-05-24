@@ -77,6 +77,7 @@ type Options struct {
 	Tickets              []chc.IndexedTicket
 	Documents            []DocumentView
 	Dumps                []DumpView
+	Quizzes              []QuizView
 	AuthoringSessions    []chc.AuthoringSession
 	Observability        ObservabilityView
 	WorkspaceGraph       chc.WorkspaceGraph
@@ -123,6 +124,8 @@ type Model struct {
 	dumps                    []DumpView
 	selectedDump             int
 	dumpEdit                 DumpEditState
+	quizzes                  []QuizView
+	selectedQuiz             int
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
@@ -197,6 +200,7 @@ func NewModel(opts Options) Model {
 		tickets:                NewTicketViews(opts.Tickets),
 		documents:              append([]DocumentView(nil), opts.Documents...),
 		dumps:                  normalizeDumpViews(opts.Dumps),
+		quizzes:                normalizeQuizViews(opts.Quizzes),
 		authoringSessions:      NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:          opts.Observability,
 		workspaceGraph:         opts.WorkspaceGraph,
@@ -615,7 +619,9 @@ func (m *Model) selectPreviousRecord() {
 		m.selectPreviousTicket()
 	case ViewDumps:
 		m.selectPreviousDump()
-	case ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
+	case ViewQuizzes:
+		m.selectPreviousQuiz()
+	case ViewSpecs, ViewPlans, ViewDocuments:
 		m.selectPreviousDocument()
 	case ViewAuthoring:
 		m.selectPreviousAuthoringSession()
@@ -632,7 +638,9 @@ func (m *Model) selectNextRecord() {
 		m.selectNextTicket()
 	case ViewDumps:
 		m.selectNextDump()
-	case ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
+	case ViewQuizzes:
+		m.selectNextQuiz()
+	case ViewSpecs, ViewPlans, ViewDocuments:
 		m.selectNextDocument()
 	case ViewAuthoring:
 		m.selectNextAuthoringSession()
@@ -725,7 +733,7 @@ func (m Model) renderProductSelectedView(selectedView View) (string, bool) {
 	}
 
 	if selectedView == ViewQuizzes {
-		return m.renderDocumentsByFamily("Quizzes", map[string]bool{"quiz": true}), true
+		return m.renderQuizzes(), true
 	}
 
 	if selectedView == ViewSpecs {

@@ -217,6 +217,37 @@ func loadTUIDumps(operations service) ([]chctui.DumpView, error) {
 	return dumps, nil
 }
 
+func loadTUIQuizzes(operations service) ([]chctui.QuizView, error) {
+	result, err := operations.ListQuizzes()
+	if err != nil {
+		return nil, err
+	}
+
+	quizzes := make([]chctui.QuizView, 0, len(result.Views))
+	for index, quiz := range result.Views {
+		quizzes = append(quizzes, chctui.QuizView{
+			Index:                 index,
+			Title:                 quiz.Title,
+			Scope:                 chctui.QuizScope{CaseSlug: quiz.Scope.CaseSlug},
+			Status:                quiz.Status,
+			Mode:                  string(quiz.Mode),
+			RawPath:               quiz.RawPath,
+			CuratedPath:           quiz.CuratedPath,
+			RuntimePath:           quiz.RuntimePath,
+			QuestionBudget:        quiz.QuestionBudget,
+			QuestionsAsked:        quiz.QuestionsAsked,
+			AnswersRecorded:       quiz.AnswersRecorded,
+			SkipsRecorded:         quiz.SkipsRecorded,
+			UpdatedAt:             quiz.UpdatedAt,
+			ActiveQuestionSummary: quiz.ActiveQuestionSummary,
+			TrailSummary:          quiz.TrailSummary,
+			CuratedPreview:        quiz.CuratedPreview,
+		})
+	}
+
+	return quizzes, nil
+}
+
 type tuiDumpActionExecutor struct {
 	operations service
 }

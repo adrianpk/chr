@@ -14,6 +14,7 @@ import (
 type QuizListResult struct {
 	Message string
 	States  []chc.QuizRuntimeState
+	Views   []QuizView
 }
 
 type QuizOperationResult struct {
@@ -58,7 +59,12 @@ func (s service) ListQuizzes() (QuizListResult, error) {
 		return QuizListResult{}, err
 	}
 
-	return QuizListResult{Message: "Quizzes loaded.", States: states}, nil
+	views, err := s.quizViewsFromStates(states)
+	if err != nil {
+		return QuizListResult{}, err
+	}
+
+	return QuizListResult{Message: "Quizzes loaded.", States: states, Views: views}, nil
 }
 
 func (s service) StartQuiz(request QuizStartRequest) (QuizOperationResult, error) {

@@ -146,6 +146,46 @@ func TestServiceQuizLifecycleOperations(t *testing.T) {
 	assertServiceQuizCancel(t, operations)
 }
 
+func TestServiceListQuizzesReturnsScopedReadModels(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	operations := newTestService(t, projectDir)
+	updated := serviceQuizClock()()
+	writeServiceQuizReadModelState(t, projectDir, updated)
+
+	result, err := operations.ListQuizzes()
+	if err != nil {
+		t.Fatalf("ListQuizzes returned error: %v", err)
+	}
+
+	if len(result.Views) != 2 {
+		t.Fatalf("Views = %#v, want project and blog quiz scopes", result.Views)
+	}
+
+	projectView := findQuizViewByScope(t, result.Views, "")
+	if projectView.Status != QuizViewStatusNotStarted {
+		t.Fatalf("project status = %q, want not_started", projectView.Status)
+	}
+
+	blogView := findQuizViewByScope(t, result.Views, "blog")
+	if blogView.Status != string(chc.QuizRuntimeStatusActive) {
+		t.Fatalf("blog status = %q, want active", blogView.Status)
+	}
+
+	if blogView.Mode != chc.QuizModeFast {
+		t.Fatalf("blog mode = %q, want fast", blogView.Mode)
+	}
+
+	if blogView.ActiveQuestionSummary != "What should be clarified before writing?" {
+		t.Fatalf("active question summary = %q", blogView.ActiveQuestionSummary)
+	}
+
+	if !strings.Contains(blogView.CuratedPreview, "Preserve editorial review.") {
+		t.Fatalf("curated preview = %q, want curated decision", blogView.CuratedPreview)
+	}
+}
+
 func assertServiceQuizSwitchAndSkip(t *testing.T, operations service) {
 	t.Helper()
 
@@ -225,6 +265,70 @@ func assertServiceQuizCancel(t *testing.T, operations service) {
 
 	if cancelResult.State.Status != chc.QuizRuntimeStatusCancelled {
 		t.Fatalf("cancel status = %q, want cancelled", cancelResult.State.Status)
+	}
+}
+
+func findQuizViewByScope(t *testing.T, views []QuizView, caseSlug string) QuizView {
+	t.Helper()
+
+	for _, view := range views {
+		if view.Scope.CaseSlug == caseSlug {
+			return view
+		}
+	}
+
+	t.Fatalf("quiz view for case %q not found in %#v", caseSlug, views)
+
+	return QuizView{}
+}
+
+func writeServiceQuizReadModelState(t *testing.T, projectDir string, updated time.Time) {
+	t.Helper()
+
+	repository := chc.NewQuizArtifactRepository(projectDir)
+	state := serviceQuizReadModelRuntimeState(updated)
+
+	_, err := repository.SaveRuntimeState(t.Context(), state)
+	if err != nil {
+		t.Fatalf("SaveRuntimeState returned error: %v", err)
+	}
+
+	_, err = repository.WriteCuratedNotes(t.Context(), chc.QuizCuratedNotes{
+		Scope:     chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"},
+		Status:    "curated",
+		Decisions: []string{"Preserve editorial review."},
+		UpdatedAt: updated.Format(time.RFC3339),
+	})
+	if err != nil {
+		t.Fatalf("WriteCuratedNotes returned error: %v", err)
+	}
+}
+
+func serviceQuizReadModelRuntimeState(updated time.Time) chc.QuizRuntimeState {
+	return chc.QuizRuntimeState{
+		ID:              "quiz-blog",
+		ProjectID:       "service-project",
+		CaseSlug:        "blog",
+		Status:          chc.QuizRuntimeStatusActive,
+		Mode:            chc.QuizModeFast,
+		QuestionBudget:  50,
+		QuestionsAsked:  1,
+		AnswersRecorded: 0,
+		SkipsRecorded:   0,
+		ActiveQuestion: &chc.QuizQuestion{
+			ID:        "question-1",
+			Prompt:    "What should be clarified before writing?",
+			Topic:     "clarity",
+			Depth:     1,
+			TrunkID:   "question-1",
+			CreatedAt: updated,
+		},
+		Trail: []chc.QuizTrailNode{
+			{QuestionID: "question-1", Prompt: "What should be clarified?", Topic: "clarity", Depth: 1},
+		},
+		RawPath:     ".chc/quizzes/blog-quiz-raw.md",
+		CuratedPath: ".chc/quizzes/blog-quiz.md",
+		UpdatedAt:   updated,
 	}
 }
 
