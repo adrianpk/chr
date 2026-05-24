@@ -130,16 +130,16 @@ needed.
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: dump service contract
+Active slice short name: scoped dump read model
 
-Expected branch name: `feat/slice-1-dump-service-contract`
+Expected branch name: `feat/slice-2-scoped-dump-read-model`
 
-Expected PR title: `feat(slice-1): dump service contract`
+Expected PR title: `feat(slice-2): scoped dump read model`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-1-dump-service-contract.md`
+`.prj/reports/slices/tui-dump-workflows/slice-2-scoped-dump-read-model.md`
 
 Prerequisite PRs or delivered work:
 
@@ -147,6 +147,7 @@ Prerequisite PRs or delivered work:
 - Application operation service consolidation slicing through its delivered
   slices.
 - TUI pane navigation and split behavior commit `d10056c`.
+- Slice 1 dump service contract through PR #175.
 
 | Slice | Short Name | Expected Branch | Expected PR Title | Expected Report |
 | --- | --- | --- | --- | --- |
