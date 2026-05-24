@@ -1334,6 +1334,66 @@ func TestModelSavesInternalDumpEdit(t *testing.T) {
 	}
 }
 
+func TestModelRendersDumpEditPanelWithHints(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{
+				Title:        "Project dump",
+				Status:       "raw",
+				RelativePath: ".chc/dumps/project-dump.md",
+			},
+		},
+	})
+	model.selected = 2
+	model.selectedPane = 1
+	model.width = 100
+	model.height = 24
+	model.startDumpEdit(".chc/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+
+	view := model.View()
+
+	for _, want := range []string{
+		"Edit Dump",
+		"Editing Markdown. ctrl+s save | esc cancel |",
+		"alt+e external editor",
+		"# Project dump",
+		"Changed Markdown.",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelCancelsInternalDumpEdit(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+		},
+	})
+	model.startDumpEdit(".chc/dumps/project-dump.md", "# Project dump")
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
+
+	cancelled, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if cancelled.dumpEdit.Active {
+		t.Fatal("dumpEdit.Active = true after cancel")
+	}
+
+	dump, ok := cancelled.selectedDumpView()
+	if !ok {
+		t.Fatal("selectedDumpView returned no dump")
+	}
+
+	if dump.RelativePath != ".chc/dumps/project-dump.md" {
+		t.Fatalf("selected dump path = %q", dump.RelativePath)
+	}
+}
+
 func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{

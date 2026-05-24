@@ -561,22 +561,23 @@ func (m Model) renderDocumentWorkspace(width, height int, title string, document
 
 func (m Model) renderDumpWorkspace(width, height int) string {
 	list := m.renderDumpFocusList(height - 2)
-	detail := m.renderSelectedDumpDetail()
+	detailTitle, detailLines := m.renderDumpDetailPanel(maxInt(width-4, 1), height-2)
 
 	switch m.maximizedPane {
 	case 0:
 		return fitBlock(renderPanel("Dumps", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Preview", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+		return fitBlock(renderPanel(detailTitle, detailLines, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
+	detailTitle, detailLines = m.renderDumpDetailPanel(maxInt(rightWidth-4, 1), height-2)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel("Dumps", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
+		renderPanel(detailTitle, detailLines, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 

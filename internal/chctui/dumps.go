@@ -43,38 +43,71 @@ func (m Model) renderDumpFocusList(limit int) []string {
 	return lines
 }
 
-func (m Model) renderSelectedDumpDetail() string {
-	dump, ok := m.selectedDumpView()
-	if !ok {
-		return "Selected Dump\n  No dump selected."
+func (m Model) renderDumpDetailPanel(width, height int) (string, []string) {
+	if m.dumpEdit.Active {
+		return "Edit Dump", m.renderSelectedDumpDetailLines(width, height)
 	}
 
-	var output strings.Builder
-
-	output.WriteString("Selected Dump\n")
-	output.WriteString(fmt.Sprintf("  Scope: %s\n", dumpScopeLabel(dump.Scope)))
-	output.WriteString(fmt.Sprintf("  Status: %s\n", dump.Status))
-	output.WriteString(fmt.Sprintf("  Title: %s\n", dump.Title))
-	output.WriteString(fmt.Sprintf("  Updated: %s\n", renderTime(dump.UpdatedAt)))
-	output.WriteString(fmt.Sprintf("  Path: %s\n", dump.RelativePath))
-
-	if m.dumpEdit.Active && m.dumpEdit.Path == dump.RelativePath {
-		output.WriteString("  Editing:\n")
-		output.WriteString(indentText(m.renderDumpEditInput(72), "    "))
-
-		return strings.TrimRight(output.String(), "\n")
-	}
-
-	output.WriteString("  Preview:\n")
-	output.WriteString(indentText(dump.Preview, "    "))
-
-	return strings.TrimRight(output.String(), "\n")
+	return "Preview", m.renderSelectedDumpDetailLines(width, height)
 }
 
-func (m Model) renderDumpEditInput(width int) string {
+func (m Model) renderSelectedDumpDetail() string {
+	lines := append([]string{"Selected Dump"}, m.renderSelectedDumpDetailLines(72, 16)...)
+
+	return strings.Join(lines, "\n")
+}
+
+func (m Model) renderSelectedDumpDetailLines(width, height int) []string {
+	dump, ok := m.selectedDumpView()
+	if !ok {
+		return []string{"No dump selected."}
+	}
+
+	lines := []string{
+		fmt.Sprintf("Scope: %s", dumpScopeLabel(dump.Scope)),
+		fmt.Sprintf("Status: %s", dump.Status),
+		fmt.Sprintf("Title: %s", dump.Title),
+		fmt.Sprintf("Updated: %s", renderTime(dump.UpdatedAt)),
+		fmt.Sprintf("Path: %s", dump.RelativePath),
+	}
+
+	if m.dumpEdit.Active && m.dumpEdit.Path == dump.RelativePath {
+		return m.renderSelectedDumpEditLines(lines, width, height)
+	}
+
+	lines = append(lines, "", "Preview:")
+	lines = append(lines, indentLines(wrapPlainText(emptyValue(dump.Preview), maxInt(width-2, 1)), "  ")...)
+
+	return lines
+}
+
+func (m Model) renderSelectedDumpEditLines(header []string, width, height int) []string {
+	lines := append([]string(nil), header...)
+	lines = append(lines,
+		"",
+		shellMutedStyle.Render("Editing Markdown. ctrl+s save | esc cancel | alt+e external editor"),
+		"",
+	)
+
+	editorHeight := maxInt(height-len(lines), 3)
+	lines = append(lines, strings.Split(m.renderDumpEditInput(maxInt(width-2, 1), editorHeight), "\n")...)
+
+	return lines
+}
+
+func indentLines(lines []string, prefix string) []string {
+	indented := make([]string, 0, len(lines))
+	for _, line := range lines {
+		indented = append(indented, prefix+line)
+	}
+
+	return indented
+}
+
+func (m Model) renderDumpEditInput(width, height int) string {
 	input := m.dumpEdit.Input
 	input.SetWidth(maxInt(width, 1))
-	input.SetHeight(12)
+	input.SetHeight(maxInt(height, 3))
 
 	return input.View()
 }
