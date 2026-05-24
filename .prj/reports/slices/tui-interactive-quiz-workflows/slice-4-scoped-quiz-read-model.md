@@ -1,11 +1,11 @@
 # Slice 4: Scoped Quiz Read Model
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Interactive Quiz Workflows
 Plan: `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 Tracker: `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 Branch: `feat/slice-4-scoped-quiz-read-model`
-PR: TBD
+PR: #186
 
 ## Purpose
 
