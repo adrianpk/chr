@@ -2387,7 +2387,32 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
 		}
 	}
+}
 
+func TestModelHidesTechnicalQuizDetails(t *testing.T) {
+	model := NewModel(Options{
+		Quizzes: []QuizView{
+			{
+				Title:                 "Blog Publishing",
+				Status:                "active",
+				Mode:                  "fast",
+				Scope:                 QuizScope{CaseSlug: "blog"},
+				RawPath:               ".chc/quizzes/blog-quiz-raw.md",
+				CuratedPath:           ".chc/quizzes/blog-quiz.md",
+				RuntimePath:           ".chc/tmp/quiz-runtime/blog.json",
+				QuestionBudget:        50,
+				QuestionsAsked:        2,
+				CandidateCount:        2,
+				BranchReturnReason:    "max_depth_reached",
+				ActiveQuestionSummary: "What should the workflow preserve?",
+				TrailSummary:          "workflow",
+				CuratedPreview:        "Preserve editorial review.",
+			},
+		},
+	})
+	model.selected = 3
+
+	view := model.View()
 	for _, unwanted := range []string{
 		"Mode:",
 		"Questions:",
