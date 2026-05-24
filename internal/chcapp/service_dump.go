@@ -50,6 +50,10 @@ type DumpOpenRequest struct {
 	RelativePath string
 }
 
+type DumpReadRequest struct {
+	RelativePath string
+}
+
 type DumpEditorCommand struct {
 	Program string
 	Args    []string
@@ -63,6 +67,7 @@ type DumpEditorLauncher interface {
 type DumpOperationResult struct {
 	Message       string
 	Dumps         []DumpView
+	Content       string
 	EditorCommand *DumpEditorCommand
 }
 
@@ -169,6 +174,23 @@ func (s service) SaveDump(request DumpSaveRequest) (DumpOperationResult, error) 
 	return DumpOperationResult{
 		Message: "Saved dump " + filepath.ToSlash(request.RelativePath) + ".",
 		Dumps:   result.Dumps,
+	}, nil
+}
+
+func (s service) ReadDump(request DumpReadRequest) (DumpOperationResult, error) {
+	path, err := s.resolveDumpPath(request.RelativePath)
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return DumpOperationResult{}, fmt.Errorf("read dump: %w", err)
+	}
+
+	return DumpOperationResult{
+		Message: "Editing dump " + filepath.ToSlash(request.RelativePath) + ".",
+		Content: string(content),
 	}, nil
 }
 

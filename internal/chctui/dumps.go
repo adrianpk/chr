@@ -57,10 +57,26 @@ func (m Model) renderSelectedDumpDetail() string {
 	output.WriteString(fmt.Sprintf("  Title: %s\n", dump.Title))
 	output.WriteString(fmt.Sprintf("  Updated: %s\n", renderTime(dump.UpdatedAt)))
 	output.WriteString(fmt.Sprintf("  Path: %s\n", dump.RelativePath))
+
+	if m.dumpEdit.Active && m.dumpEdit.Path == dump.RelativePath {
+		output.WriteString("  Editing:\n")
+		output.WriteString(indentText(m.renderDumpEditInput(72), "    "))
+
+		return strings.TrimRight(output.String(), "\n")
+	}
+
 	output.WriteString("  Preview:\n")
 	output.WriteString(indentText(dump.Preview, "    "))
 
 	return strings.TrimRight(output.String(), "\n")
+}
+
+func (m Model) renderDumpEditInput(width int) string {
+	input := m.dumpEdit.Input
+	input.SetWidth(maxInt(width, 1))
+	input.SetHeight(12)
+
+	return input.View()
 }
 
 func (m Model) renderDumps() string {

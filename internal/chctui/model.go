@@ -122,6 +122,7 @@ type Model struct {
 	selectedDocument         int
 	dumps                    []DumpView
 	selectedDump             int
+	dumpEdit                 DumpEditState
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
@@ -300,34 +301,12 @@ func (m Model) SelectedView() View {
 }
 
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	if m.artifactAction.Pending {
-		return m.updateArtifactActionKey(msg)
+	if updated, cmd, handled := m.updateActiveModeKey(msg); handled {
+		return updated, cmd
 	}
 
-	if m.dumpAction.Pending {
-		return m.updateDumpActionKey(msg)
-	}
-
-	if m.ticketAction.Pending {
-		return m.updateTicketActionKey(msg)
-	}
-
-	if m.workAction.Pending {
-		return m.updateWorkActionKey(msg)
-	}
-
-	if m.commandPalette.Open {
-		return m.updateCommandPaletteKey(msg)
-	}
-
-	if m.filterEntryMode {
-		return m.updateFilterKey(msg)
-	}
-
-	if msg.String() == "alt+m" {
-		m.toggleMaximizedPane()
-
-		return m, nil
+	if cmd, handled := m.handleGlobalKey(msg); handled {
+		return m, cmd
 	}
 
 	if m.SelectedView() == ViewProject {
@@ -339,6 +318,60 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m.updateNavigationKey(msg)
+}
+
+func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
+	switch {
+	case m.artifactAction.Pending:
+		updated, cmd := m.updateArtifactActionKey(msg)
+
+		return updated, cmd, true
+	case m.dumpAction.Pending:
+		updated, cmd := m.updateDumpActionKey(msg)
+
+		return updated, cmd, true
+	case m.dumpEdit.Active:
+		updated, cmd := m.updateDumpEditKey(msg)
+
+		return updated, cmd, true
+	case m.ticketAction.Pending:
+		updated, cmd := m.updateTicketActionKey(msg)
+
+		return updated, cmd, true
+	case m.workAction.Pending:
+		updated, cmd := m.updateWorkActionKey(msg)
+
+		return updated, cmd, true
+	case m.commandPalette.Open:
+		updated, cmd := m.updateCommandPaletteKey(msg)
+
+		return updated, cmd, true
+	case m.filterEntryMode:
+		updated, cmd := m.updateFilterKey(msg)
+
+		return updated, cmd, true
+	default:
+		return m, nil, false
+	}
+}
+
+func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {
+	switch msg.String() {
+	case "alt+m":
+		m.toggleMaximizedPane()
+
+		return nil, true
+	case "alt+e":
+		if m.SelectedView() != ViewDumps {
+			return nil, false
+		}
+
+		m.planDumpAction(DumpActionExternalEdit)
+
+		return m.confirmDumpAction(), true
+	default:
+		return nil, false
+	}
 }
 
 func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {

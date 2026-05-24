@@ -158,6 +158,8 @@ Task commits:
 
 - T6.1: `d6e2b96` adds service-owned dump editor launch, TUI editor
   execution, refresh behavior, append demotion, and tests.
+- T6.2: `7312fd6` review correction aligns `Edit dump` with internal Markdown
+  editing and moves the external editor to `alt+e`.
 
 Validation:
 
@@ -169,8 +171,7 @@ Validation:
 
 - Whether `.prj/dumps` should remain as a legacy read source or be removed from
   active dump loading.
-- Whether append remains exposed as a TUI command after full Markdown editing
-  becomes the primary dump update workflow.
+- None for this slice.
 - Whether dump preview should come from the structural index, lazy file body
   reads, or service-provided summaries.
 

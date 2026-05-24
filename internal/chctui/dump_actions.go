@@ -5,16 +5,19 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type DumpActionID string
 
 const (
-	DumpActionCreate  DumpActionID = "create_dump"
-	DumpActionAppend  DumpActionID = "append_dump"
-	DumpActionEdit    DumpActionID = "edit_dump"
-	DumpActionRefresh DumpActionID = "refresh_dumps"
+	DumpActionCreate       DumpActionID = "create_dump"
+	DumpActionAppend       DumpActionID = "append_dump"
+	DumpActionEdit         DumpActionID = "edit_dump"
+	DumpActionSave         DumpActionID = "save_dump"
+	DumpActionExternalEdit DumpActionID = "external_edit_dump"
+	DumpActionRefresh      DumpActionID = "refresh_dumps"
 )
 
 type DumpActionExecutor interface {
@@ -32,6 +35,7 @@ type DumpActionRequest struct {
 type DumpActionResult struct {
 	Message       string
 	Dumps         []DumpView
+	Content       string
 	SelectedPath  string
 	EditorCommand *exec.Cmd
 }
@@ -41,6 +45,12 @@ type DumpActionState struct {
 	Request DumpActionRequest
 	Title   string
 	Details []string
+}
+
+type DumpEditState struct {
+	Active bool
+	Path   string
+	Input  textarea.Model
 }
 
 func (m Model) renderDumpAction() string {
@@ -71,6 +81,25 @@ func (m Model) updateDumpActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m Model) updateDumpEditKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.Type {
+	case tea.KeyEsc:
+		m.dumpEdit = DumpEditState{}
+		m.statusMessage = ""
+
+		return m, nil
+	case tea.KeyCtrlS:
+		m.saveDumpEdit()
+
+		return m, nil
+	}
+
+	input, cmd := m.dumpEdit.Input.Update(msg)
+	m.dumpEdit.Input = input
+
+	return m, cmd
 }
 
 func (m *Model) planDumpAction(action DumpActionID) {
@@ -111,9 +140,54 @@ func (m *Model) confirmDumpAction() tea.Cmd {
 		})
 	}
 
+	if strings.TrimSpace(result.SelectedPath) != "" && result.Dumps == nil {
+		m.startDumpEdit(result.SelectedPath, result.Content)
+
+		return nil
+	}
+
 	m.applyDumpActionResult(result)
 
 	return nil
+}
+
+func (m *Model) startDumpEdit(path, content string) {
+	input := textarea.New()
+	input.SetValue(content)
+	input.Focus()
+
+	input.ShowLineNumbers = false
+	input.Prompt = ""
+	input.CharLimit = 0
+
+	m.dumpEdit = DumpEditState{
+		Active: true,
+		Path:   path,
+		Input:  input,
+	}
+	m.statusMessage = "Editing dump. Press ctrl+s to save or esc to cancel."
+}
+
+func (m *Model) saveDumpEdit() {
+	if m.dumpExecutor == nil {
+		m.statusMessage = "Dump action executor is unavailable."
+
+		return
+	}
+
+	result, err := m.dumpExecutor.ExecuteDumpAction(DumpActionRequest{
+		Action:  DumpActionSave,
+		Path:    m.dumpEdit.Path,
+		Content: m.dumpEdit.Input.Value(),
+	})
+	if err != nil {
+		m.statusMessage = "Save failed: " + err.Error()
+
+		return
+	}
+
+	m.dumpEdit = DumpEditState{}
+	m.applyDumpActionResult(result)
 }
 
 func (m *Model) applyDumpActionResult(result DumpActionResult) {
@@ -195,62 +269,58 @@ func (m Model) defaultDumpTitle() string {
 func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
 	switch action {
 	case DumpActionCreate:
-		request := DumpActionRequest{
-			Action:  action,
-			Title:   m.defaultDumpTitle(),
-			Content: "Initial dump created from the TUI.",
-			Scope:   m.defaultDumpScope(),
-		}
-
-		return DumpActionState{
-			Pending: true,
-			Request: request,
-			Title:   "Create dump",
-			Details: []string{
-				"Title: " + request.Title,
-				"Scope: " + dumpScopeLabel(request.Scope),
-			},
-		}
+		return m.newCreateDumpActionState(action)
 	case DumpActionAppend:
-		dump, ok := m.selectedDumpView()
-		if !ok {
-			return DumpActionState{}
-		}
-
-		request := DumpActionRequest{
-			Action:  action,
-			Path:    dump.RelativePath,
-			Content: "Appended dump note from the TUI.",
-		}
-
-		return DumpActionState{
-			Pending: true,
-			Request: request,
-			Title:   "Append dump",
-			Details: []string{
-				"Path: " + request.Path,
-			},
-		}
+		return m.newSelectedDumpActionState(action, "Append dump")
 	case DumpActionEdit:
-		dump, ok := m.selectedDumpView()
-		if !ok {
-			return DumpActionState{}
-		}
-
-		request := DumpActionRequest{
-			Action: action,
-			Path:   dump.RelativePath,
-		}
-
-		return DumpActionState{
-			Pending: true,
-			Request: request,
-			Title:   "Edit dump",
-			Details: []string{
-				"Path: " + request.Path,
-			},
-		}
+		return m.newSelectedDumpActionState(action, "Edit dump")
+	case DumpActionExternalEdit:
+		return m.newSelectedDumpActionState(action, "Open dump in external editor")
 	default:
 		return DumpActionState{}
+	}
+}
+
+func (m Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
+	request := DumpActionRequest{
+		Action:  action,
+		Title:   m.defaultDumpTitle(),
+		Content: "Initial dump created from the TUI.",
+		Scope:   m.defaultDumpScope(),
+	}
+
+	return DumpActionState{
+		Pending: true,
+		Request: request,
+		Title:   "Create dump",
+		Details: []string{
+			"Title: " + request.Title,
+			"Scope: " + dumpScopeLabel(request.Scope),
+		},
+	}
+}
+
+func (m Model) newSelectedDumpActionState(action DumpActionID, title string) DumpActionState {
+	dump, ok := m.selectedDumpView()
+	if !ok {
+		return DumpActionState{}
+	}
+
+	request := DumpActionRequest{
+		Action: action,
+		Path:   dump.RelativePath,
+	}
+
+	if action == DumpActionAppend {
+		request.Content = "Appended dump note from the TUI."
+	}
+
+	return DumpActionState{
+		Pending: true,
+		Request: request,
+		Title:   title,
+		Details: []string{
+			"Path: " + request.Path,
+		},
 	}
 }

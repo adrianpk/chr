@@ -271,6 +271,17 @@ Original body.
 		t.Fatalf("append result dumps = %#v, want one dump", appendResult.Dumps)
 	}
 
+	readResult, err := operations.ReadDump(DumpReadRequest{
+		RelativePath: ".chc/dumps/project-notes.md",
+	})
+	if err != nil {
+		t.Fatalf("ReadDump returned error: %v", err)
+	}
+
+	if !strings.Contains(readResult.Content, "Appended body.") {
+		t.Fatalf("read content missing appended body:\n%s", readResult.Content)
+	}
+
 	assertServiceOpenDumpEditorCommand(t, operations, editor, projectDir)
 }
 

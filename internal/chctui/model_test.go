@@ -1256,11 +1256,12 @@ func TestModelConfirmsAppendDumpAction(t *testing.T) {
 	}
 }
 
-func TestModelConfirmsEditDumpActionReturnsEditorCommand(t *testing.T) {
+func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:       "Editing dump .chc/dumps/project-dump.md.",
-			EditorCommand: exec.Command("true"),
+			Message:      "Editing dump .chc/dumps/project-dump.md.",
+			Content:      "# Project dump\n\nExisting Markdown.",
+			SelectedPath: ".chc/dumps/project-dump.md",
 		},
 	}
 	model := NewModel(Options{DumpExecutor: executor})
@@ -1272,7 +1273,83 @@ func TestModelConfirmsEditDumpActionReturnsEditorCommand(t *testing.T) {
 		},
 	}
 
-	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	confirmed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.request.Action != DumpActionEdit {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionEdit)
+	}
+
+	if !confirmed.dumpEdit.Active {
+		t.Fatal("dumpEdit.Active = false, want active edit")
+	}
+
+	if confirmed.dumpEdit.Path != ".chc/dumps/project-dump.md" {
+		t.Fatalf("dumpEdit.Path = %q", confirmed.dumpEdit.Path)
+	}
+
+	if confirmed.dumpEdit.Input.Value() != "# Project dump\n\nExisting Markdown." {
+		t.Fatalf("dumpEdit value = %q", confirmed.dumpEdit.Input.Value())
+	}
+
+	if confirmed.statusMessage != "Editing dump. Press ctrl+s to save or esc to cancel." {
+		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
+	}
+}
+
+func TestModelSavesInternalDumpEdit(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message: "Saved dump .chc/dumps/project-dump.md.",
+			Dumps: []DumpView{
+				{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+			},
+			SelectedPath: ".chc/dumps/project-dump.md",
+		},
+	}
+	model := NewModel(Options{DumpExecutor: executor})
+	model.startDumpEdit(".chc/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
+
+	saved, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.request.Action != DumpActionSave {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionSave)
+	}
+
+	if executor.request.Content != "# Project dump\n\nChanged Markdown." {
+		t.Fatalf("saved content = %q", executor.request.Content)
+	}
+
+	if saved.dumpEdit.Active {
+		t.Fatal("dumpEdit.Active = true after save")
+	}
+}
+
+func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message:       "Editing dump .chc/dumps/project-dump.md.",
+			EditorCommand: exec.Command("true"),
+		},
+	}
+	model := NewModel(Options{
+		DumpExecutor: executor,
+		Dumps: []DumpView{
+			{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+		},
+	})
+	model.selected = 2
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}, Alt: true})
 
 	confirmed, ok := updated.(Model)
 	if !ok {
@@ -1280,15 +1357,15 @@ func TestModelConfirmsEditDumpActionReturnsEditorCommand(t *testing.T) {
 	}
 
 	if cmd == nil {
-		t.Fatal("cmd = nil, want editor command")
+		t.Fatal("cmd = nil, want external editor command")
 	}
 
-	if executor.request.Action != DumpActionEdit {
-		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionEdit)
+	if executor.request.Action != DumpActionExternalEdit {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionExternalEdit)
 	}
 
 	if confirmed.statusMessage != executor.result.Message {
-		t.Fatalf("statusMessage = %q, want %q", confirmed.statusMessage, executor.result.Message)
+		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
 	}
 }
 

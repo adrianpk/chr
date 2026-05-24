@@ -234,49 +234,111 @@ func (e tuiDumpActionExecutor) ExecuteDumpAction(
 ) (chctui.DumpActionResult, error) {
 	switch request.Action {
 	case chctui.DumpActionCreate:
-		result, err := e.operations.CreateDump(DumpCreateRequest{
-			Title:   request.Title,
-			Content: request.Content,
-			Scope:   DumpScope{CaseSlug: request.Scope.CaseSlug},
-		})
-		if err != nil {
-			return chctui.DumpActionResult{}, err
-		}
-
-		return dumpActionResult(result, e.operations)
+		return e.executeCreateDump(request)
 	case chctui.DumpActionAppend:
-		result, err := e.operations.AppendDump(DumpAppendRequest{
-			RelativePath: request.Path,
-			Content:      request.Content,
-		})
-		if err != nil {
-			return chctui.DumpActionResult{}, err
-		}
-
-		return dumpActionResult(result, e.operations)
+		return e.executeAppendDump(request)
 	case chctui.DumpActionEdit:
-		result, err := e.operations.OpenDump(DumpOpenRequest{
-			RelativePath: request.Path,
-		})
-		if err != nil {
-			return chctui.DumpActionResult{}, err
-		}
-
-		return dumpActionResult(result, e.operations)
+		return e.executeEditDump(request)
+	case chctui.DumpActionSave:
+		return e.executeSaveDump(request)
+	case chctui.DumpActionExternalEdit:
+		return e.executeExternalEditDump(request)
 	case chctui.DumpActionRefresh:
-		dumps, err := loadTUIDumps(e.operations)
-		if err != nil {
-			return chctui.DumpActionResult{}, err
-		}
-
-		return chctui.DumpActionResult{
-			Message:      "Edited dump " + request.Path + ".",
-			Dumps:        dumps,
-			SelectedPath: request.Path,
-		}, nil
+		return e.executeRefreshDumps(request)
 	default:
 		return chctui.DumpActionResult{}, errors.New("unknown dump action")
 	}
+}
+
+func (e tuiDumpActionExecutor) executeCreateDump(
+	request chctui.DumpActionRequest,
+) (chctui.DumpActionResult, error) {
+	result, err := e.operations.CreateDump(DumpCreateRequest{
+		Title:   request.Title,
+		Content: request.Content,
+		Scope:   DumpScope{CaseSlug: request.Scope.CaseSlug},
+	})
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	return dumpActionResult(result, e.operations)
+}
+
+func (e tuiDumpActionExecutor) executeAppendDump(
+	request chctui.DumpActionRequest,
+) (chctui.DumpActionResult, error) {
+	result, err := e.operations.AppendDump(DumpAppendRequest{
+		RelativePath: request.Path,
+		Content:      request.Content,
+	})
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	return dumpActionResult(result, e.operations)
+}
+
+func (e tuiDumpActionExecutor) executeEditDump(
+	request chctui.DumpActionRequest,
+) (chctui.DumpActionResult, error) {
+	result, err := e.operations.ReadDump(DumpReadRequest{RelativePath: request.Path})
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	return chctui.DumpActionResult{
+		Message:      result.Message,
+		Content:      result.Content,
+		SelectedPath: request.Path,
+	}, nil
+}
+
+func (e tuiDumpActionExecutor) executeSaveDump(
+	request chctui.DumpActionRequest,
+) (chctui.DumpActionResult, error) {
+	result, err := e.operations.SaveDump(DumpSaveRequest{
+		RelativePath: request.Path,
+		Content:      request.Content,
+	})
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	actionResult, err := dumpActionResult(result, e.operations)
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	actionResult.SelectedPath = request.Path
+
+	return actionResult, nil
+}
+
+func (e tuiDumpActionExecutor) executeExternalEditDump(
+	request chctui.DumpActionRequest,
+) (chctui.DumpActionResult, error) {
+	result, err := e.operations.OpenDump(DumpOpenRequest{RelativePath: request.Path})
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	return dumpActionResult(result, e.operations)
+}
+
+func (e tuiDumpActionExecutor) executeRefreshDumps(
+	request chctui.DumpActionRequest,
+) (chctui.DumpActionResult, error) {
+	dumps, err := loadTUIDumps(e.operations)
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	return chctui.DumpActionResult{
+		Message:      "Edited dump " + request.Path + ".",
+		Dumps:        dumps,
+		SelectedPath: request.Path,
+	}, nil
 }
 
 func dumpActionResult(result DumpOperationResult, operations service) (chctui.DumpActionResult, error) {
