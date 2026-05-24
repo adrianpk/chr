@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 
 Slicing name: TUI Interactive Quiz Workflows
 
-Active slice number: Slice 5
+Active slice number: Slice 6
 
-Active slice short name: tui deep quiz loop
+Active slice short name: fast quiz candidates
 
-Expected branch name: `feat/slice-5-tui-deep-quiz-loop`
+Expected branch name: `feat/slice-6-fast-quiz-candidates`
 
-Expected PR title: `feat(slice-5): tui deep quiz loop`
+Expected PR title: `feat(slice-6): fast quiz candidates`
 
 Expected report path:
-`.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md`
+`.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md`
 
 Prerequisite PRs or delivered work:
 
@@ -29,6 +29,7 @@ Prerequisite PRs or delivered work:
 - Slice 2 quiz artifact repository through PR #184.
 - Slice 3 quiz service operations through PR #185.
 - Slice 4 scoped quiz read model through PR #186.
+- Slice 5 TUI deep quiz loop through PR #187.
 
 ## Slicing Checklist
 
@@ -56,7 +57,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Quiz Artifact Repository | Delivered | `feat/slice-2-quiz-artifact-repository` | `feat(slice-2): quiz artifact repository` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md` | PR #184. |
 | Slice 3: Quiz Service Operations | Delivered | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | PR #185. |
 | Slice 4: Scoped Quiz Read Model | Delivered | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | PR #186. |
-| Slice 5: TUI Deep Quiz Loop | Reviewing | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | Interactive one-question-at-a-time deep mode. |
+| Slice 5: TUI Deep Quiz Loop | Delivered | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | PR #187. |
 | Slice 6: Fast Quiz Candidates | Planned | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | Internal candidate buffering and mode switch. |
 | Slice 7: Ariadne Trail Recovery | Planned | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | Trail display, depth cap, branch return, resume recovery. |
 | Slice 8: Quiz Curation Polish | Planned | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | Curated notes and documentation alignment. |
