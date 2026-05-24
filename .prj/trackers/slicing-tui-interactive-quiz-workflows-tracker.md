@@ -1,6 +1,6 @@
 # TUI Interactive Quiz Workflows Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 
@@ -32,6 +32,7 @@ Prerequisite PRs or delivered work:
 - Slice 5 TUI deep quiz loop through PR #187.
 - Slice 6 fast quiz candidates through PR #188.
 - Slice 7 Ariadne trail recovery through PR #189.
+- Slice 8 quiz curation polish through PR #190.
 
 ## Slicing Checklist
 
@@ -47,9 +48,9 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -62,7 +63,7 @@ Prerequisite PRs or delivered work:
 | Slice 5: TUI Deep Quiz Loop | Delivered | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | PR #187. |
 | Slice 6: Fast Quiz Candidates | Delivered | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | PR #188. |
 | Slice 7: Ariadne Trail Recovery | Delivered | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | PR #189. |
-| Slice 8: Quiz Curation Polish | Reviewing | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | PR pending. |
+| Slice 8: Quiz Curation Polish | Delivered | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | PR #190. |
 
 ## Slice 1: Quiz Runtime Model
 
@@ -280,4 +281,7 @@ Validation:
 
 ## Completion Notes
 
-- Pending.
+- Slice 8 delivered through PR #190.
+- Completed slicing validation: `make verify`.
+- Tuning needed: yes. TUI quiz editing and generated spec review UX remain
+  candidates for a separate slicing or tuning pass.
