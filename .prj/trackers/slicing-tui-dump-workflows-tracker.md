@@ -52,7 +52,7 @@ Prerequisite PRs or delivered work:
 | Slice 3: Create Dumps From TUI | Delivered | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | PR #177. |
 | Slice 4: Append And Edit TUI Dumps | Delivered | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | PR #178. |
 | Slice 5: Polish Dump Workflows | Delivered | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | PR #179. |
-| Slice 6: Full Dump Markdown Editing | Planned | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` | Tuning slice. |
+| Slice 6: Full Dump Markdown Editing | Reviewing | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` | Tuning slice. |
 
 ## Slice 1: Dump Service Contract
 
@@ -143,20 +143,27 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add service-owned editor launcher contract for dump Markdown editing.
-- [ ] Execute `Edit dump` through that service boundary and refresh dump state
+- [x] Add service-owned editor launcher contract for dump Markdown editing.
+- [x] Execute `Edit dump` through that service boundary and refresh dump state
       when the editor exits.
-- [ ] Preserve selected dump state after edit when the same dump still exists.
-- [ ] Remove or demote append as a user-facing TUI workflow where it conflicts
+- [x] Preserve selected dump state after edit when the same dump still exists.
+- [x] Remove or demote append as a user-facing TUI workflow where it conflicts
       with full-document editing.
-- [ ] Add tests for editor launch requests, refresh behavior, and selection
+- [x] Add tests for editor launch requests, refresh behavior, and selection
       preservation.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- Pending.
+- T6.1: `d6e2b96` adds service-owned dump editor launch, TUI editor
+  execution, refresh behavior, append demotion, and tests.
+
+Validation:
+
+- `go test ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `make verify`
 
 ## Open Decisions
 
