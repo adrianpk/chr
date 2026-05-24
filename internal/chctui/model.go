@@ -76,6 +76,7 @@ type Options struct {
 	Stdout               io.Writer
 	Tickets              []chc.IndexedTicket
 	Documents            []DocumentView
+	Dumps                []DumpView
 	AuthoringSessions    []chc.AuthoringSession
 	Observability        ObservabilityView
 	WorkspaceGraph       chc.WorkspaceGraph
@@ -118,6 +119,8 @@ type Model struct {
 	filterEntryMode          bool
 	documents                []DocumentView
 	selectedDocument         int
+	dumps                    []DumpView
+	selectedDump             int
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
@@ -189,6 +192,7 @@ func NewModel(opts Options) Model {
 		horizontalSplitPercent: defaultPanelSplitPercent,
 		tickets:                NewTicketViews(opts.Tickets),
 		documents:              append([]DocumentView(nil), opts.Documents...),
+		dumps:                  normalizeDumpViews(opts.Dumps),
 		authoringSessions:      NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:          opts.Observability,
 		workspaceGraph:         opts.WorkspaceGraph,
@@ -564,7 +568,9 @@ func (m *Model) selectPreviousRecord() {
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectPreviousTicket()
-	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
+	case ViewDumps:
+		m.selectPreviousDump()
+	case ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
 		m.selectPreviousDocument()
 	case ViewAuthoring:
 		m.selectPreviousAuthoringSession()
@@ -579,7 +585,9 @@ func (m *Model) selectNextRecord() {
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectNextTicket()
-	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
+	case ViewDumps:
+		m.selectNextDump()
+	case ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
 		m.selectNextDocument()
 	case ViewAuthoring:
 		m.selectNextAuthoringSession()
@@ -668,7 +676,7 @@ func (m Model) renderProductSelectedView(selectedView View) (string, bool) {
 	}
 
 	if selectedView == ViewDumps {
-		return m.renderDocumentsByFamily("Dumps", map[string]bool{"dump": true}), true
+		return m.renderDumps(), true
 	}
 
 	if selectedView == ViewQuizzes {

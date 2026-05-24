@@ -124,60 +124,93 @@ func loadTUIOptions(
 	stdin io.Reader,
 	stdout io.Writer,
 ) (chctui.Options, error) {
-	tickets, err := loadTUITickets(ctx, env, projectContext)
-	if err != nil {
+	data := tuiOptionsData{
+		ctx:            ctx,
+		env:            env,
+		projectContext: projectContext,
+		stdin:          stdin,
+		stdout:         stdout,
+		operations:     newService(ctx, env, projectContext),
+	}
+
+	if err := loadTUIContentData(&data); err != nil {
 		return chctui.Options{}, err
 	}
 
-	documents, err := chctui.LoadDocumentViews(ctx, projectContext.ProjectDir)
-	if err != nil {
+	if err := loadTUIMetadataData(&data); err != nil {
 		return chctui.Options{}, err
 	}
 
-	projectMetadata, err := chc.NewProjectMetadataService(projectContext.ProjectDir).Load()
-	if err != nil {
+	if err := loadTUIIndexData(&data); err != nil {
 		return chctui.Options{}, err
 	}
 
-	cases, err := chc.NewCaseMetadataService(projectContext.ProjectDir).LoadAll()
+	return newTUIOptions(data), nil
+}
+
+func loadTUIContentData(data *tuiOptionsData) error {
+	tickets, err := loadTUITickets(data.ctx, data.env, data.projectContext)
 	if err != nil {
-		return chctui.Options{}, err
+		return err
 	}
 
-	authoringSessions, err := loadTUIAuthoringSessions(ctx, projectContext)
+	documents, err := chctui.LoadDocumentViews(data.ctx, data.projectContext.ProjectDir)
 	if err != nil {
-		return chctui.Options{}, err
+		return err
 	}
 
-	observability, err := loadTUIObservability(ctx, env, projectContext)
+	dumps, err := loadTUIDumps(data.operations)
 	if err != nil {
-		return chctui.Options{}, err
+		return err
 	}
 
-	workspaceGraph, workspaceIndex, semanticDigestStates, err := loadTUIWorkspaceState(ctx, projectContext)
+	data.tickets = tickets
+	data.documents = documents
+	data.dumps = dumps
+
+	return nil
+}
+
+func loadTUIMetadataData(data *tuiOptionsData) error {
+	projectMetadata, err := chc.NewProjectMetadataService(data.projectContext.ProjectDir).Load()
 	if err != nil {
-		return chctui.Options{}, err
+		return err
 	}
 
-	operations := newService(ctx, env, projectContext)
+	cases, err := chc.NewCaseMetadataService(data.projectContext.ProjectDir).LoadAll()
+	if err != nil {
+		return err
+	}
 
-	return newTUIOptions(tuiOptionsData{
-		ctx:                  ctx,
-		env:                  env,
-		projectContext:       projectContext,
-		stdin:                stdin,
-		stdout:               stdout,
-		tickets:              tickets,
-		documents:            documents,
-		projectMetadata:      projectMetadata,
-		cases:                cases,
-		authoringSessions:    authoringSessions,
-		observability:        observability,
-		workspaceGraph:       workspaceGraph,
-		workspaceIndex:       workspaceIndex,
-		semanticDigestStates: semanticDigestStates,
-		operations:           operations,
-	}), nil
+	authoringSessions, err := loadTUIAuthoringSessions(data.ctx, data.projectContext)
+	if err != nil {
+		return err
+	}
+
+	observability, err := loadTUIObservability(data.ctx, data.env, data.projectContext)
+	if err != nil {
+		return err
+	}
+
+	data.projectMetadata = projectMetadata
+	data.cases = cases
+	data.authoringSessions = authoringSessions
+	data.observability = observability
+
+	return nil
+}
+
+func loadTUIIndexData(data *tuiOptionsData) error {
+	workspaceGraph, workspaceIndex, semanticDigestStates, err := loadTUIWorkspaceState(data.ctx, data.projectContext)
+	if err != nil {
+		return err
+	}
+
+	data.workspaceGraph = workspaceGraph
+	data.workspaceIndex = workspaceIndex
+	data.semanticDigestStates = semanticDigestStates
+
+	return nil
 }
 
 func loadTUIWorkspaceState(
@@ -209,6 +242,7 @@ type tuiOptionsData struct {
 	stdout               io.Writer
 	tickets              []chc.IndexedTicket
 	documents            []chctui.DocumentView
+	dumps                []chctui.DumpView
 	projectMetadata      chc.ProjectMetadata
 	cases                []chc.CaseMetadata
 	authoringSessions    []chc.AuthoringSession
@@ -229,6 +263,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		Stdout:               data.stdout,
 		Tickets:              data.tickets,
 		Documents:            data.documents,
+		Dumps:                data.dumps,
 		AuthoringSessions:    data.authoringSessions,
 		Observability:        data.observability,
 		WorkspaceGraph:       data.workspaceGraph,

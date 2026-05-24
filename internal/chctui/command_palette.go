@@ -272,7 +272,12 @@ func (m Model) selectedSourcePath() string {
 		if ok {
 			return ticket.RelativePath
 		}
-	case ViewDumps, ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
+	case ViewDumps:
+		dump, ok := m.selectedDumpView()
+		if ok {
+			return dump.RelativePath
+		}
+	case ViewQuizzes, ViewSpecs, ViewPlans, ViewDocuments:
 		document, ok := m.selectedDocumentViewFor(m.currentDocumentViews())
 		if ok {
 			return document.RelativePath

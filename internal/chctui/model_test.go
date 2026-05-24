@@ -1824,6 +1824,82 @@ func TestModelSelectsDocuments(t *testing.T) {
 	}
 }
 
+func TestModelRendersScopedDumps(t *testing.T) {
+	updated := time.Date(2026, 5, 24, 10, 0, 0, 0, time.UTC)
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{
+				Title:        "Project Context",
+				Status:       "raw",
+				Scope:        DumpScope{},
+				RelativePath: ".chc/dumps/project-context.md",
+				UpdatedAt:    updated,
+				Preview:      "Project-wide notes.",
+			},
+			{
+				Title:        "Blog Context",
+				Status:       "curated",
+				Scope:        DumpScope{CaseSlug: "blog"},
+				RelativePath: ".chc/dumps/blog-context.md",
+				UpdatedAt:    updated,
+				Preview:      "Use-case notes.",
+			},
+		},
+	})
+	model.selected = 2
+
+	view := model.View()
+	for _, want := range []string{
+		"Dumps",
+		"Scope        Status      Title",
+		"project",
+		"Project Context",
+		"blog",
+		"Blog Context",
+		"Selected Dump",
+		"Scope: project",
+		"Path: .chc/dumps/project-context.md",
+		"Project-wide notes.",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelSelectsDumpsIndependentlyFromDocuments(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{Title: "Project Context", RelativePath: ".chc/dumps/project-context.md"},
+			{Title: "Blog Context", Scope: DumpScope{CaseSlug: "blog"}, RelativePath: ".chc/dumps/blog-context.md"},
+		},
+		Documents: []DocumentView{
+			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chc/specs/spec.md"},
+		},
+	})
+	model.selected = 2
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
+
+	navigated, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	dump, ok := navigated.selectedDumpView()
+	if !ok {
+		t.Fatal("selectedDumpView returned no dump")
+	}
+
+	if dump.Title != "Blog Context" {
+		t.Fatalf("selected dump = %q, want Blog Context", dump.Title)
+	}
+
+	if navigated.selectedDocument != 0 {
+		t.Fatalf("selectedDocument = %d, want unchanged 0", navigated.selectedDocument)
+	}
+}
+
 func TestModelRecordsWindowSize(t *testing.T) {
 	model := NewModel(Options{})
 

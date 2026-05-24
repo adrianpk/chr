@@ -101,10 +101,10 @@ func (m Model) renderProductWorkspace(width, height int) (string, bool) {
 		return m.renderProjectWorkspace(width, height), true
 	case ViewCases:
 		return m.renderCasesWorkspace(width, height), true
+	case ViewDumps:
+		return m.renderDumpWorkspace(width, height), true
 	case ViewBoard, ViewTickets:
 		return m.renderTicketWorkspace(width, height), true
-	case ViewDumps:
-		return m.renderDocumentFamilyWorkspace(width, height, "Dumps", map[string]bool{"dump": true}), true
 	case ViewQuizzes:
 		return m.renderQuizWorkspace(width, height), true
 	case ViewSpecs:
@@ -554,6 +554,27 @@ func (m Model) renderDocumentWorkspace(width, height int, title string, document
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
 		renderPanel(title, list, leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
+		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
+	), width, height)
+}
+
+func (m Model) renderDumpWorkspace(width, height int) string {
+	list := m.renderDumpFocusList(height - 2)
+	detail := m.renderSelectedDumpDetail()
+
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Dumps", list, width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Preview", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
+
+	return fitBlock(lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		renderPanel("Dumps", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
 		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)

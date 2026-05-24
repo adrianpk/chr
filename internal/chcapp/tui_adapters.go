@@ -194,6 +194,28 @@ func ticketActionResult(result TicketOperationResult) chctui.TicketActionResult 
 	}
 }
 
+func loadTUIDumps(operations service) ([]chctui.DumpView, error) {
+	result, err := operations.ListDumps()
+	if err != nil {
+		return nil, err
+	}
+
+	dumps := make([]chctui.DumpView, 0, len(result.Dumps))
+	for index, dump := range result.Dumps {
+		dumps = append(dumps, chctui.DumpView{
+			Index:        index,
+			NodeID:       dump.NodeID,
+			Title:        dump.Title,
+			Status:       dump.Status,
+			Scope:        chctui.DumpScope{CaseSlug: dump.Scope.CaseSlug},
+			RelativePath: dump.RelativePath,
+			UpdatedAt:    dump.UpdatedAt,
+		})
+	}
+
+	return dumps, nil
+}
+
 type tuiWorkActionExecutor struct {
 	operations service
 }
