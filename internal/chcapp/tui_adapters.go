@@ -238,6 +238,7 @@ func loadTUIQuizzes(operations service) ([]chctui.QuizView, error) {
 			QuestionsAsked:        quiz.QuestionsAsked,
 			AnswersRecorded:       quiz.AnswersRecorded,
 			SkipsRecorded:         quiz.SkipsRecorded,
+			CandidateCount:        quiz.CandidateCount,
 			UpdatedAt:             quiz.UpdatedAt,
 			ActiveQuestionSummary: quiz.ActiveQuestionSummary,
 			TrailSummary:          quiz.TrailSummary,
@@ -308,6 +309,8 @@ func (e tuiQuizActionExecutor) quizOperation(
 		chctui.QuizActionComplete: e.executeQuizOperationComplete,
 		chctui.QuizActionCancel:   e.executeQuizOperationCancel,
 		chctui.QuizActionRefresh:  executeQuizOperationRefresh,
+		chctui.QuizActionDeepMode: e.executeQuizOperationMode,
+		chctui.QuizActionFastMode: e.executeQuizOperationMode,
 	}
 
 	operation, ok := operations[action]
@@ -379,6 +382,20 @@ func (e tuiQuizActionExecutor) executeQuizOperationComplete(request chctui.QuizA
 func (e tuiQuizActionExecutor) executeQuizOperationCancel(request chctui.QuizActionRequest) (string, error) {
 	result, err := e.operations.CancelQuiz(QuizCancelRequest{
 		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationMode(request chctui.QuizActionRequest) (string, error) {
+	mode := chc.QuizMode(request.Mode)
+
+	result, err := e.operations.SwitchQuizMode(QuizModeRequest{
+		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Mode:  mode,
 	})
 	if err != nil {
 		return "", err

@@ -126,6 +126,68 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 	}
 }
 
+func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizModelResponseWithCandidates(
+				"response-1",
+				"question-1",
+				clock(),
+				[]chc.QuizCandidate{
+					serviceQuizCandidate("candidate-2", "What constraint matters next?", clock()),
+					serviceQuizCandidate("candidate-3", "What preference matters next?", clock()),
+				},
+			),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	startResult, err := operations.StartQuiz(QuizStartRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+		Mode:  chc.QuizModeFast,
+	})
+	if err != nil {
+		t.Fatalf("StartQuiz returned error: %v", err)
+	}
+
+	if len(startResult.State.Candidates) != 2 {
+		t.Fatalf("Candidates = %#v, want two buffered candidates", startResult.State.Candidates)
+	}
+
+	firstAnswer, err := operations.AnswerQuiz(QuizAnswerRequest{
+		Scope:  chc.QuizScope{CaseSlug: "blog"},
+		Answer: "The workflow must preserve ownership.",
+	})
+	if err != nil {
+		t.Fatalf("AnswerQuiz returned error: %v", err)
+	}
+
+	if len(model.requests) != 1 {
+		t.Fatalf("model requests = %d, want one request", len(model.requests))
+	}
+
+	if firstAnswer.State.ActiveQuestion == nil || firstAnswer.State.ActiveQuestion.ID != "candidate-2" {
+		t.Fatalf("ActiveQuestion = %#v, want candidate-2", firstAnswer.State.ActiveQuestion)
+	}
+
+	if len(firstAnswer.State.Candidates) != 1 {
+		t.Fatalf("Candidates = %#v, want one remaining candidate", firstAnswer.State.Candidates)
+	}
+
+	rawPath := filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md")
+	rawContent := readServiceWorkspaceFile(t, rawPath)
+
+	if strings.Contains(rawContent, "candidate-2") {
+		t.Fatalf("raw capture contains unactivated candidate:\n%s", rawContent)
+	}
+}
+
 func TestServiceQuizLifecycleOperations(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -407,6 +469,32 @@ func serviceQuizModelResponse(
 			CreatedAt: createdAt,
 		},
 		RawText:   "raw model text",
+		CreatedAt: createdAt,
+	}
+}
+
+func serviceQuizModelResponseWithCandidates(
+	responseID string,
+	questionID string,
+	createdAt time.Time,
+	candidates []chc.QuizCandidate,
+) chc.QuizModelResponse {
+	response := serviceQuizModelResponse(responseID, questionID, createdAt)
+	response.Candidates = candidates
+
+	return response
+}
+
+func serviceQuizCandidate(
+	id string,
+	prompt string,
+	createdAt time.Time,
+) chc.QuizCandidate {
+	return chc.QuizCandidate{
+		ID:        id,
+		Prompt:    prompt,
+		Topic:     "workflow",
+		Depth:     1,
 		CreatedAt: createdAt,
 	}
 }

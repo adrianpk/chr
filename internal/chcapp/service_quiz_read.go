@@ -26,6 +26,7 @@ type QuizView struct {
 	QuestionsAsked        int
 	AnswersRecorded       int
 	SkipsRecorded         int
+	CandidateCount        int
 	UpdatedAt             time.Time
 	ActiveQuestionSummary string
 	TrailSummary          string
@@ -173,6 +174,7 @@ func (s service) quizViewFromState(title string, state chc.QuizRuntimeState) (Qu
 		QuestionsAsked:        state.QuestionsAsked,
 		AnswersRecorded:       state.AnswersRecorded,
 		SkipsRecorded:         state.SkipsRecorded,
+		CandidateCount:        len(state.Candidates),
 		UpdatedAt:             state.UpdatedAt,
 		ActiveQuestionSummary: quizActiveQuestionSummary(state),
 		TrailSummary:          quizTrailSummary(state),

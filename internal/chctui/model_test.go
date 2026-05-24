@@ -2513,6 +2513,42 @@ func TestModelSubmitsQuizAnswerThroughExecutor(t *testing.T) {
 	}
 }
 
+func TestModelConfirmsQuizFastModeThroughExecutor(t *testing.T) {
+	executor := &fakeQuizActionExecutor{
+		result: QuizActionResult{
+			Message: "Quiz mode switched.",
+			Quizzes: []QuizView{
+				{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "active", Mode: "fast"},
+			},
+			SelectedScope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		QuizExecutor: executor,
+		Quizzes: []QuizView{
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "active", Mode: "deep"},
+		},
+	})
+	model.selected = 3
+	model.planQuizAction(QuizActionFastMode)
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != QuizActionFastMode {
+		t.Fatalf("action = %q, want fast mode", executor.request.Action)
+	}
+
+	if executor.request.Mode != "fast" {
+		t.Fatalf("mode = %q, want fast", executor.request.Mode)
+	}
+
+	quiz, ok := confirmed.selectedQuizView()
+	if !ok || quiz.Mode != "fast" {
+		t.Fatalf("selected quiz = %#v, want fast mode", quiz)
+	}
+}
+
 func TestModelRecordsWindowSize(t *testing.T) {
 	model := NewModel(Options{})
 

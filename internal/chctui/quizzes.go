@@ -23,6 +23,7 @@ type QuizView struct {
 	QuestionsAsked        int
 	AnswersRecorded       int
 	SkipsRecorded         int
+	CandidateCount        int
 	UpdatedAt             time.Time
 	ActiveQuestionSummary string
 	TrailSummary          string
@@ -73,6 +74,7 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		fmt.Sprintf("Questions: %d/%d", quiz.QuestionsAsked, quiz.QuestionBudget),
 		fmt.Sprintf("Answers: %d", quiz.AnswersRecorded),
 		fmt.Sprintf("Skips: %d", quiz.SkipsRecorded),
+		fmt.Sprintf("Candidates: %d", quiz.CandidateCount),
 		fmt.Sprintf("Updated: %s", renderTime(quiz.UpdatedAt)),
 		fmt.Sprintf("Raw: %s", quiz.RawPath),
 		fmt.Sprintf("Curated: %s", quiz.CuratedPath),
@@ -214,6 +216,7 @@ func (m Model) newQuizActionState(action QuizActionID) QuizActionState {
 		Request: QuizActionRequest{
 			Action: action,
 			Scope:  scope,
+			Mode:   quizActionMode(action),
 		},
 		Title: title,
 		Details: []string{
@@ -270,7 +273,22 @@ func quizActionTitle(action QuizActionID) string {
 		return "Cancel quiz"
 	case QuizActionRefresh:
 		return "Refresh quizzes"
+	case QuizActionDeepMode:
+		return "Switch quiz to deep mode"
+	case QuizActionFastMode:
+		return "Switch quiz to fast mode"
 	default:
 		return "Quiz action"
+	}
+}
+
+func quizActionMode(action QuizActionID) string {
+	switch action {
+	case QuizActionDeepMode:
+		return "deep"
+	case QuizActionFastMode:
+		return "fast"
+	default:
+		return ""
 	}
 }

@@ -139,6 +139,13 @@ func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, e
 	state.Candidates = nil
 	state.UpdatedAt = s.utcNow()
 
+	if state.Status == chc.QuizRuntimeStatusIdle && state.Mode == chc.QuizModeFast {
+		state, err = s.generateNextQuizQuestion(state)
+		if err != nil {
+			return QuizOperationResult{}, err
+		}
+	}
+
 	_, err = repository.SaveRuntimeState(s.ctx, state)
 	if err != nil {
 		return QuizOperationResult{}, err
@@ -216,6 +223,13 @@ func (s service) stopQuiz(
 }
 
 func (s service) generateNextQuizQuestion(state chc.QuizRuntimeState) (chc.QuizRuntimeState, error) {
+	if len(state.Candidates) > 0 {
+		state = activateQuizCandidate(state, state.Candidates[0], s.utcNow())
+		state.Candidates = state.Candidates[1:]
+
+		return state, nil
+	}
+
 	request, err := s.newQuizModelRequest(state)
 	if err != nil {
 		return chc.QuizRuntimeState{}, err
@@ -236,6 +250,7 @@ func (s service) generateNextQuizQuestion(state chc.QuizRuntimeState) (chc.QuizR
 
 	state.Status = chc.QuizRuntimeStatusActive
 	state.ActiveQuestion = &response.Question
+	state.Candidates = response.Candidates
 	state.QuestionsAsked++
 	state.UpdatedAt = response.CreatedAt.UTC()
 
@@ -480,6 +495,45 @@ func updateQuizStateAfterEntry(state chc.QuizRuntimeState, entry chc.QuizEntry) 
 
 	state.Status = chc.QuizRuntimeStatusIdle
 	state.ActiveQuestion = nil
+
+	if state.Mode == chc.QuizModeDeep {
+		state.Candidates = nil
+	}
+
+	return state
+}
+
+func activateQuizCandidate(
+	state chc.QuizRuntimeState,
+	candidate chc.QuizCandidate,
+	now time.Time,
+) chc.QuizRuntimeState {
+	question := chc.QuizQuestion{
+		ID:        candidate.ID,
+		Prompt:    candidate.Prompt,
+		Required:  true,
+		Topic:     candidate.Topic,
+		Depth:     candidate.Depth,
+		ParentID:  candidate.ParentID,
+		TrunkID:   candidate.ID,
+		RouteID:   candidate.RouteID,
+		CreatedAt: candidate.CreatedAt,
+	}
+	if question.CreatedAt.IsZero() {
+		question.CreatedAt = now
+	}
+
+	if question.Depth > 1 {
+		question.TrunkID = candidate.RouteID
+		if strings.TrimSpace(question.TrunkID) == "" {
+			question.TrunkID = candidate.ParentID
+		}
+	}
+
+	state.Status = chc.QuizRuntimeStatusActive
+	state.ActiveQuestion = &question
+	state.QuestionsAsked++
+	state.UpdatedAt = now
 
 	return state
 }

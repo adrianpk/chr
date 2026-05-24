@@ -44,13 +44,14 @@ type QuizModelOutputContract struct {
 }
 
 type QuizModelResponse struct {
-	ID        string
-	RequestID string
-	Provider  string
-	Status    QuizModelResponseStatus
-	Question  QuizQuestion
-	RawText   string
-	CreatedAt time.Time
+	ID         string
+	RequestID  string
+	Provider   string
+	Status     QuizModelResponseStatus
+	Question   QuizQuestion
+	Candidates []QuizCandidate
+	RawText    string
+	CreatedAt  time.Time
 }
 
 type QuizModelAdapter interface {
@@ -147,6 +148,13 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 		err := ValidateQuizQuestion(response.Question)
 		if err != nil {
 			return err
+		}
+	}
+
+	for index, candidate := range response.Candidates {
+		err := ValidateQuizCandidate(candidate)
+		if err != nil {
+			return fmt.Errorf("quiz model response candidate %d: %w", index+1, err)
 		}
 	}
 

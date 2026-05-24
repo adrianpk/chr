@@ -18,6 +18,8 @@ const (
 	QuizActionComplete QuizActionID = "complete_quiz"
 	QuizActionCancel   QuizActionID = "cancel_quiz"
 	QuizActionRefresh  QuizActionID = "refresh_quizzes"
+	QuizActionDeepMode QuizActionID = "quiz_deep_mode"
+	QuizActionFastMode QuizActionID = "quiz_fast_mode"
 )
 
 type QuizActionExecutor interface {
@@ -27,6 +29,7 @@ type QuizActionExecutor interface {
 type QuizActionRequest struct {
 	Action QuizActionID
 	Scope  QuizScope
+	Mode   string
 	Answer string
 }
 

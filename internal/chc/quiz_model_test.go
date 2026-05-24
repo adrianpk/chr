@@ -14,6 +14,9 @@ func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
 			Provider:  "fake",
 			Status:    QuizModelResponseReady,
 			Question:  validQuizQuestion(),
+			Candidates: []QuizCandidate{
+				validQuizCandidate(),
+			},
 			RawText:   "question",
 			CreatedAt: quizRuntimeTestTime(),
 		},
@@ -26,6 +29,10 @@ func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
 
 	if response.Question.ID != "question-1" {
 		t.Fatalf("question id = %q", response.Question.ID)
+	}
+
+	if len(response.Candidates) != 1 {
+		t.Fatalf("candidates = %#v, want one candidate", response.Candidates)
 	}
 }
 
