@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: create dumps from tui
+Active slice short name: append and edit tui dumps
 
-Expected branch name: `feat/slice-3-create-dumps-from-tui`
+Expected branch name: `feat/slice-4-append-edit-tui-dumps`
 
-Expected PR title: `feat(slice-3): create dumps from tui`
+Expected PR title: `feat(slice-4): append and edit tui dumps`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md`
+`.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md`
 
 Prerequisite PRs or delivered work:
 
@@ -27,6 +27,7 @@ Prerequisite PRs or delivered work:
 - TUI pane navigation and split behavior commit `d10056c`.
 - Slice 1 dump service contract through PR #175.
 - Slice 2 scoped dump read model through PR #176.
+- Slice 3 create dumps from TUI through PR #177.
 
 ## Slicing Checklist
 
@@ -47,7 +48,7 @@ Prerequisite PRs or delivered work:
 | Slice 1: Dump Service Contract | Delivered | `feat/slice-1-dump-service-contract` | `feat(slice-1): dump service contract` | `.prj/reports/slices/tui-dump-workflows/slice-1-dump-service-contract.md` | PR #175. |
 | Slice 2: Scoped Dump Read Model | Delivered | `feat/slice-2-scoped-dump-read-model` | `feat(slice-2): scoped dump read model` | `.prj/reports/slices/tui-dump-workflows/slice-2-scoped-dump-read-model.md` | PR #176. |
 | Slice 3: Create Dumps From TUI | Delivered | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | PR #177. |
-| Slice 4: Append And Edit TUI Dumps | Pending | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | Dumps can grow and remain editable. |
+| Slice 4: Append And Edit TUI Dumps | Reviewing | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | Dumps can grow and remain editable. |
 | Slice 5: Polish Dump Workflows | Pending | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | Commands, empty states, messages, and coverage. |
 
 ## Slice 1: Dump Service Contract
@@ -106,18 +107,18 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add append request state for the selected dump.
-- [ ] Execute append through the dump service boundary.
-- [ ] Add open/edit operation for the selected dump.
-- [ ] Refresh dump state after append/edit.
-- [ ] Preserve existing scope and frontmatter during service writes.
-- [ ] Add tests for append/edit requests and refresh behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add append request state for the selected dump.
+- [x] Execute append through the dump service boundary.
+- [x] Add open/edit operation for the selected dump.
+- [x] Refresh dump state after append/edit.
+- [x] Preserve existing scope and frontmatter during service writes.
+- [x] Add tests for append/edit requests and refresh behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- Pending.
+- T4.1: `de4988e` adds append/open dump service behavior, TUI actions, adapter wiring, and tests.
 
 ## Slice 5: Polish Dump Workflows
 
