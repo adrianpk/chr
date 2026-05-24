@@ -54,7 +54,7 @@ Prerequisite PRs or delivered work:
 | Slice 4: Append And Edit TUI Dumps | Delivered | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | PR #178. |
 | Slice 5: Polish Dump Workflows | Delivered | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | PR #179. |
 | Slice 6: Full Dump Markdown Editing | Delivered | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` | PR #180. |
-| Slice 7: Dump Editing UX Polish | Planned | `feat/slice-7-dump-editing-ux-polish` | `feat(slice-7): dump editing ux polish` | `.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md` | Tuning slice. |
+| Slice 7: Dump Editing UX Polish | Reviewing | `feat/slice-7-dump-editing-ux-polish` | `feat(slice-7): dump editing ux polish` | `.prj/reports/slices/tui-dump-workflows/slice-7-dump-editing-ux-polish.md` | Tuning slice. |
 
 ## Slice 1: Dump Service Contract
 
@@ -173,19 +173,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Distinguish dump read mode from edit mode in the detail panel.
-- [ ] Size the internal Markdown editor from available panel dimensions.
-- [ ] Render edit status, save, cancel, and external-editor hints in the
+- [x] Distinguish dump read mode from edit mode in the detail panel.
+- [x] Size the internal Markdown editor from available panel dimensions.
+- [x] Render edit status, save, cancel, and external-editor hints in the
       detail panel.
-- [ ] Preserve selected and focused dump state across edit, save, cancel,
+- [x] Preserve selected and focused dump state across edit, save, cancel,
       external edit, and refresh.
-- [ ] Add focused TUI tests for edited detail rendering and keyboard behavior.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add focused TUI tests for edited detail rendering and keyboard behavior.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- Pending.
+- T7.1: `67a6472` polishes the dump edit panel, panel sizing, hints, and tests.
+
+Validation:
+
+- `go test ./internal/chctui`
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `make verify`
 
 ## Open Decisions
 
