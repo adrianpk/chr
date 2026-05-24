@@ -83,16 +83,23 @@ func (m Model) updateQuizActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.Type {
-	case tea.KeyEsc:
+	switch msg.String() {
+	case "esc":
 		m.quizAnswer = QuizAnswerState{}
 		m.statusMessage = ""
+		m.maximizedPane = -1
+		m.selectPrimaryPane()
 
 		return m, nil
-	case tea.KeyCtrlS:
+	case "enter":
 		m.saveQuizAnswer()
 
 		return m, nil
+	case "shift+enter", "ctrl+j":
+		input, cmd := m.quizAnswer.Input.Update(tea.KeyMsg{Type: tea.KeyEnter})
+		m.quizAnswer.Input = input
+
+		return m, cmd
 	}
 
 	input, cmd := m.quizAnswer.Input.Update(msg)
@@ -159,12 +166,19 @@ func (m *Model) applyQuizActionResult(result QuizActionResult) {
 	}
 
 	m.statusMessage = result.Message
+	m.startQuizAnswerIfActive()
 }
 
 func (m *Model) startQuizAnswer() {
 	quiz, ok := m.selectedQuizView()
 	if !ok {
 		m.statusMessage = "No quiz selected."
+
+		return
+	}
+
+	if strings.TrimSpace(quiz.ActiveQuestionSummary) == "" {
+		m.statusMessage = "No active question."
 
 		return
 	}
@@ -181,7 +195,25 @@ func (m *Model) startQuizAnswer() {
 		Scope:  quiz.Scope,
 		Input:  input,
 	}
-	m.statusMessage = "Editing quiz answer. Press ctrl+s to submit or esc to cancel."
+	m.selectedPane = 1
+	m.maximizedPane = 1
+	m.statusMessage = "Answer the question. Enter submits; shift+enter inserts a new line."
+}
+
+func (m *Model) startQuizAnswerIfActive() {
+	quiz, ok := m.selectedQuizView()
+	if !ok || strings.TrimSpace(quiz.ActiveQuestionSummary) == "" {
+		return
+	}
+
+	if m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
+		m.selectedPane = 1
+		m.maximizedPane = 1
+
+		return
+	}
+
+	m.startQuizAnswer()
 }
 
 func (m Model) renderQuizAnswerInput(width, height int) string {

@@ -2535,17 +2535,29 @@ func TestModelStartsQuizFromQuizzesKey(t *testing.T) {
 		t.Fatalf("action = %q, want start", executor.request.Action)
 	}
 
-	if confirmed.statusMessage != "Quiz started." {
-		t.Fatalf("statusMessage = %q, want Quiz started.", confirmed.statusMessage)
+	if confirmed.statusMessage != "Answer the question. Enter submits; shift+enter inserts a new line." {
+		t.Fatalf("statusMessage = %q, want answer hint", confirmed.statusMessage)
 	}
 
 	quiz, ok := confirmed.selectedQuizView()
 	if !ok || quiz.ActiveQuestionSummary != "What should be clarified?" {
 		t.Fatalf("selected quiz = %#v, want generated question", quiz)
 	}
+
+	if !confirmed.quizAnswer.Active {
+		t.Fatal("quiz answer editor is not active")
+	}
+
+	if confirmed.selectedPane != 1 {
+		t.Fatalf("selectedPane = %d, want 1", confirmed.selectedPane)
+	}
+
+	if confirmed.maximizedPane != 1 {
+		t.Fatalf("maximizedPane = %d, want 1", confirmed.maximizedPane)
+	}
 }
 
-func TestModelSubmitsQuizAnswerThroughExecutor(t *testing.T) {
+func TestModelSubmitsQuizAnswerWithEnterThroughExecutor(t *testing.T) {
 	executor := &fakeQuizActionExecutor{
 		result: QuizActionResult{
 			Message: "Quiz answer recorded.",
@@ -2570,7 +2582,7 @@ func TestModelSubmitsQuizAnswerThroughExecutor(t *testing.T) {
 	model.startQuizAnswer()
 	model.quizAnswer.Input.SetValue("Clarify editorial ownership.")
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	confirmed := requireUpdatedModel(t, updated)
 
 	if executor.request.Action != QuizActionAnswer {
@@ -2587,6 +2599,29 @@ func TestModelSubmitsQuizAnswerThroughExecutor(t *testing.T) {
 
 	if confirmed.statusMessage != "Quiz answer recorded." {
 		t.Fatalf("statusMessage = %q, want Quiz answer recorded.", confirmed.statusMessage)
+	}
+}
+
+func TestModelInsertsQuizAnswerLineWithShiftEnter(t *testing.T) {
+	model := NewModel(Options{
+		Quizzes: []QuizView{
+			{
+				Title:                 "Blog",
+				Scope:                 QuizScope{CaseSlug: "blog"},
+				Status:                "active",
+				ActiveQuestionSummary: "What should be clarified?",
+			},
+		},
+	})
+	model.selected = 3
+	model.startQuizAnswer()
+	model.quizAnswer.Input.SetValue("First line")
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlJ})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if !strings.Contains(confirmed.quizAnswer.Input.Value(), "\n") {
+		t.Fatalf("answer value = %q, want inserted newline", confirmed.quizAnswer.Input.Value())
 	}
 }
 

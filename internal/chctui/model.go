@@ -960,6 +960,8 @@ func (m Model) activeInteractionKeys() (string, bool) {
 		return "Keys: enter confirms work action, esc cancels work action", true
 	case m.commandPalette.Open:
 		return "Keys: up/down selects command, enter runs command, esc closes palette", true
+	case m.quizAnswer.Active:
+		return "Keys: enter submits answer, shift+enter inserts line, esc cancels answer", true
 	case m.filterEntryMode:
 		return "Keys: enter applies filter, esc cancels filter, ctrl+c quits", true
 	default:
