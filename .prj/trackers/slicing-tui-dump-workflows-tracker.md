@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 4
+Active slice number: Slice 5
 
-Active slice short name: append and edit tui dumps
+Active slice short name: polish dump workflows
 
-Expected branch name: `feat/slice-4-append-edit-tui-dumps`
+Expected branch name: `feat/slice-5-polish-dump-workflows`
 
-Expected PR title: `feat(slice-4): append and edit tui dumps`
+Expected PR title: `feat(slice-5): polish dump workflows`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md`
+`.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md`
 
 Prerequisite PRs or delivered work:
 
@@ -28,6 +28,7 @@ Prerequisite PRs or delivered work:
 - Slice 1 dump service contract through PR #175.
 - Slice 2 scoped dump read model through PR #176.
 - Slice 3 create dumps from TUI through PR #177.
+- Slice 4 append/edit dump workflow through PR #178.
 
 ## Slicing Checklist
 
@@ -49,7 +50,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Scoped Dump Read Model | Delivered | `feat/slice-2-scoped-dump-read-model` | `feat(slice-2): scoped dump read model` | `.prj/reports/slices/tui-dump-workflows/slice-2-scoped-dump-read-model.md` | PR #176. |
 | Slice 3: Create Dumps From TUI | Delivered | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | PR #177. |
 | Slice 4: Append And Edit TUI Dumps | Delivered | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | PR #178. |
-| Slice 5: Polish Dump Workflows | Pending | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | Commands, empty states, messages, and coverage. |
+| Slice 5: Polish Dump Workflows | Reviewing | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | Commands, empty states, messages, and coverage. |
 
 ## Slice 1: Dump Service Contract
 
@@ -124,17 +125,17 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add command palette entries for dump workflows.
-- [ ] Add clear empty states for project-wide and case-scoped dumps.
-- [ ] Add clear status messages for dump operations.
-- [ ] Verify pane navigation and shortcuts remain consistent.
-- [ ] Add integration-style TUI tests for the full dump workflow surface.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add command palette entries for dump workflows.
+- [x] Add clear empty states for project-wide and case-scoped dumps.
+- [x] Add clear status messages for dump operations.
+- [x] Verify pane navigation and shortcuts remain consistent.
+- [x] Add integration-style TUI tests for the full dump workflow surface.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- Pending.
+- T5.1: `138dbc5` polishes dump commands, empty state copy, edit naming, and workflow tests.
 
 ## Open Decisions
 
@@ -148,4 +149,9 @@ Task commits:
 
 ## Completion Notes
 
-- Pending.
+- Post-slice tuning needed: yes.
+- Follow-up tuning should convert the current path-resolution edit command into
+  real full-Markdown editing through a service-owned editor or launcher
+  abstraction.
+- A second tuning pass should use captured screenshots to refine Dumps layout,
+  grouping, labels, and selected/focused state after full editing is available.

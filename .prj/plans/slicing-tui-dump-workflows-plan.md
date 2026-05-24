@@ -130,16 +130,16 @@ needed.
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 4
+Active slice number: Slice 5
 
-Active slice short name: append and edit tui dumps
+Active slice short name: polish dump workflows
 
-Expected branch name: `feat/slice-4-append-edit-tui-dumps`
+Expected branch name: `feat/slice-5-polish-dump-workflows`
 
-Expected PR title: `feat(slice-4): append and edit tui dumps`
+Expected PR title: `feat(slice-5): polish dump workflows`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md`
+`.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md`
 
 Prerequisite PRs or delivered work:
 
@@ -150,6 +150,7 @@ Prerequisite PRs or delivered work:
 - Slice 1 dump service contract through PR #175.
 - Slice 2 scoped dump read model through PR #176.
 - Slice 3 create dumps from TUI through PR #177.
+- Slice 4 append/edit dump workflow through PR #178.
 
 | Slice | Short Name | Expected Branch | Expected PR Title | Expected Report |
 | --- | --- | --- | --- | --- |
