@@ -5,8 +5,8 @@ Status: active
 ## Purpose
 
 Plan the TUI dump workflow so project-wide and use-case-scoped dumps can be
-created, viewed, appended, edited, and refreshed from the TUI without moving
-runtime logic into the TUI layer.
+created, viewed, edited, and refreshed from the TUI without moving runtime
+logic into the TUI layer.
 
 Dumps are rough Markdown knowledge captures. A dump with no associated use case
 belongs directly to the project. A dump with a case slug belongs to that use
@@ -35,7 +35,9 @@ Conversation decisions:
   implementation.
 - Empty use-case association means project-wide dump.
 - Non-empty use-case association means use-case-scoped dump.
-- Dumps can grow by append operations and can be edited as Markdown.
+- Dumps are Markdown documents and the primary update model is full-document
+  editing. Append behavior may remain as service compatibility, but it is not
+  the main user-facing editing model.
 - Direct user edits to dump files remain valid and must be visible after
   refresh.
 
@@ -77,8 +79,8 @@ The target TUI behavior is:
 - When a case is selected, dump creation can default to that case.
 - When no case is selected or the user chooses project scope, creation produces
   a project-wide dump.
-- Appending preserves existing dump metadata and adds new body content.
-- Editing opens or saves through the service boundary.
+- Editing opens the selected dump as a complete Markdown document through the
+  service boundary and refreshes visible state when control returns.
 - Refresh reflects direct filesystem edits.
 
 ## Service Boundary
@@ -130,16 +132,16 @@ needed.
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 5
+Active slice number: Slice 6
 
-Active slice short name: polish dump workflows
+Active slice short name: full dump markdown editing
 
-Expected branch name: `feat/slice-5-polish-dump-workflows`
+Expected branch name: `feat/slice-6-full-dump-markdown-editing`
 
-Expected PR title: `feat(slice-5): polish dump workflows`
+Expected PR title: `feat(slice-6): full dump markdown editing`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md`
+`.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md`
 
 Prerequisite PRs or delivered work:
 
@@ -151,6 +153,7 @@ Prerequisite PRs or delivered work:
 - Slice 2 scoped dump read model through PR #176.
 - Slice 3 create dumps from TUI through PR #177.
 - Slice 4 append/edit dump workflow through PR #178.
+- Slice 5 polish dump workflow through PR #179.
 
 | Slice | Short Name | Expected Branch | Expected PR Title | Expected Report |
 | --- | --- | --- | --- | --- |
@@ -159,6 +162,7 @@ Prerequisite PRs or delivered work:
 | Slice 3 | create dumps from tui | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` |
 | Slice 4 | append and edit tui dumps | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` |
 | Slice 5 | polish dump workflows | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` |
+| Slice 6 | full dump markdown editing | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` |
 
 ## Slice 1: Dump Service Contract
 
@@ -247,6 +251,30 @@ Out of scope:
 - Spec promotion workflows.
 - Semantic digest generation changes.
 
+## Slice 6: Full Dump Markdown Editing
+
+Convert the visible dump update flow from append-oriented behavior to
+full-document Markdown editing.
+
+Expected behavior:
+
+- `Edit dump` is the primary update action for the selected dump.
+- The TUI resolves the selected dump and scope through the service boundary.
+- The service opens the complete dump Markdown file through an editor launcher
+  abstraction owned outside the TUI presentation layer.
+- Returning from the editor refreshes dump state and preserves the selected
+  dump when possible.
+- User-facing commands and status messages describe editing, not appending, as
+  the main flow.
+
+Out of scope:
+
+- Adding an embedded TUI text editor.
+- LLM-assisted dump rewriting.
+- Spec promotion workflows.
+- Removing service-level append compatibility if existing tests or callers
+  still rely on it.
+
 ## Validation Strategy
 
 Each slice must run focused tests for touched packages and `make verify` before
@@ -265,7 +293,7 @@ This slicing does not include:
 
 - implementing LLM-assisted dump curation;
 - promoting dumps to specs;
-- adding a full TUI text editor;
+- adding an embedded TUI text editor;
 - adding Telegram or Email adapters;
 - changing unrelated quiz/spec/plan workflows;
 - changing the Markdown-first durable source-of-truth model;

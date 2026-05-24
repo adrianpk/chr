@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 5
+Active slice number: Slice 6
 
-Active slice short name: polish dump workflows
+Active slice short name: full dump markdown editing
 
-Expected branch name: `feat/slice-5-polish-dump-workflows`
+Expected branch name: `feat/slice-6-full-dump-markdown-editing`
 
-Expected PR title: `feat(slice-5): polish dump workflows`
+Expected PR title: `feat(slice-6): full dump markdown editing`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md`
+`.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md`
 
 Prerequisite PRs or delivered work:
 
@@ -29,6 +29,7 @@ Prerequisite PRs or delivered work:
 - Slice 2 scoped dump read model through PR #176.
 - Slice 3 create dumps from TUI through PR #177.
 - Slice 4 append/edit dump workflow through PR #178.
+- Slice 5 polish dump workflow through PR #179.
 
 ## Slicing Checklist
 
@@ -51,6 +52,7 @@ Prerequisite PRs or delivered work:
 | Slice 3: Create Dumps From TUI | Delivered | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | PR #177. |
 | Slice 4: Append And Edit TUI Dumps | Delivered | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | PR #178. |
 | Slice 5: Polish Dump Workflows | Delivered | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | PR #179. |
+| Slice 6: Full Dump Markdown Editing | Planned | `feat/slice-6-full-dump-markdown-editing` | `feat(slice-6): full dump markdown editing` | `.prj/reports/slices/tui-dump-workflows/slice-6-full-dump-markdown-editing.md` | Tuning slice. |
 
 ## Slice 1: Dump Service Contract
 
@@ -137,20 +139,38 @@ Task commits:
 
 - T5.1: `138dbc5` polishes dump commands, empty state copy, edit naming, and workflow tests.
 
+## Slice 6: Full Dump Markdown Editing
+
+Candidate tasks:
+
+- [ ] Add service-owned editor launcher contract for dump Markdown editing.
+- [ ] Execute `Edit dump` through that service boundary and refresh dump state
+      when the editor exits.
+- [ ] Preserve selected dump state after edit when the same dump still exists.
+- [ ] Remove or demote append as a user-facing TUI workflow where it conflicts
+      with full-document editing.
+- [ ] Add tests for editor launch requests, refresh behavior, and selection
+      preservation.
+- [ ] Add slice implementation report.
+- [ ] Run `make verify`.
+
+Task commits:
+
+- Pending.
+
 ## Open Decisions
 
 - Whether `.prj/dumps` should remain as a legacy read source or be removed from
   active dump loading.
-- Exact shape of append input in the TUI before a full text editor exists.
-- Whether edit/open should use `$EDITOR`, an existing command runner, or a
-  service-owned abstraction that later supports non-terminal adapters.
+- Whether append remains exposed as a TUI command after full Markdown editing
+  becomes the primary dump update workflow.
 - Whether dump preview should come from the structural index, lazy file body
   reads, or service-provided summaries.
 
 ## Completion Notes
 
 - Post-slice tuning needed: yes.
-- Follow-up tuning should convert the current path-resolution edit command into
+- Slice 6 covers conversion of the current path-resolution edit command into
   real full-Markdown editing through a service-owned editor or launcher
   abstraction.
 - A second tuning pass should use captured screenshots to refine Dumps layout,
