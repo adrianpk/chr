@@ -55,9 +55,10 @@ type DumpReadRequest struct {
 }
 
 type DumpEditorCommand struct {
-	Program string
-	Args    []string
-	Dir     string
+	Program     string
+	Args        []string
+	Dir         string
+	Description string
 }
 
 type DumpEditorLauncher interface {
@@ -391,14 +392,23 @@ func (defaultDumpEditorLauncher) EditorCommand(_ context.Context, path string) (
 		editor = "vi"
 	}
 
-	parts := strings.Fields(editor)
-	if len(parts) == 0 {
-		return DumpEditorCommand{}, fmt.Errorf("editor command is required")
+	shell := strings.TrimSpace(os.Getenv("SHELL"))
+	if shell == "" {
+		shell = "/bin/sh"
 	}
 
+	dir := filepath.Dir(path)
+	file := filepath.Base(path)
+	script := "cd " + shellQuote(dir) + " && exec " + editor + " " + shellQuote(file)
+
 	return DumpEditorCommand{
-		Program: parts[0],
-		Args:    append(parts[1:], path),
-		Dir:     filepath.Dir(path),
+		Program:     shell,
+		Args:        []string{"-lc", script},
+		Dir:         dir,
+		Description: editor + " " + file,
 	}, nil
+}
+
+func shellQuote(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", `'\''`) + "'"
 }

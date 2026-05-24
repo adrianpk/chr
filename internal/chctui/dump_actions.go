@@ -33,11 +33,12 @@ type DumpActionRequest struct {
 }
 
 type DumpActionResult struct {
-	Message       string
-	Dumps         []DumpView
-	Content       string
-	SelectedPath  string
-	EditorCommand *exec.Cmd
+	Message                  string
+	Dumps                    []DumpView
+	Content                  string
+	SelectedPath             string
+	EditorCommand            *exec.Cmd
+	EditorCommandDescription string
 }
 
 type DumpActionState struct {
@@ -130,12 +131,14 @@ func (m *Model) confirmDumpAction() tea.Cmd {
 	}
 
 	if result.EditorCommand != nil {
-		m.statusMessage = result.Message
+		m.statusMessage = "External editor opened. chc will resume when the editor process exits."
 
 		return tea.ExecProcess(result.EditorCommand, func(err error) tea.Msg {
 			return dumpEditorFinishedMsg{
-				err:  err,
-				path: request.Path,
+				err:        err,
+				path:       request.Path,
+				command:    result.EditorCommandDescription,
+				workingDir: result.EditorCommand.Dir,
 			}
 		})
 	}
@@ -214,13 +217,15 @@ func (m Model) dumpSelectionPath(path string) string {
 }
 
 type dumpEditorFinishedMsg struct {
-	err  error
-	path string
+	err        error
+	path       string
+	command    string
+	workingDir string
 }
 
 func (m *Model) completeDumpEdit(msg dumpEditorFinishedMsg) {
 	if msg.err != nil {
-		m.statusMessage = "Edit failed: " + msg.err.Error()
+		m.statusMessage = "Edit failed: " + externalEditorErrorMessage(msg)
 
 		return
 	}
@@ -242,6 +247,21 @@ func (m *Model) completeDumpEdit(msg dumpEditorFinishedMsg) {
 	}
 
 	m.applyDumpActionResult(result)
+}
+
+func externalEditorErrorMessage(msg dumpEditorFinishedMsg) string {
+	parts := []string{}
+	if strings.TrimSpace(msg.command) != "" {
+		parts = append(parts, "command="+msg.command)
+	}
+
+	if strings.TrimSpace(msg.workingDir) != "" {
+		parts = append(parts, "dir="+msg.workingDir)
+	}
+
+	parts = append(parts, msg.err.Error())
+
+	return strings.Join(parts, " ")
 }
 
 func (m Model) defaultDumpScope() DumpScope {

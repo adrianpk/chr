@@ -359,6 +359,7 @@ func dumpActionResult(result DumpOperationResult, operations service) (chctui.Du
 			result.EditorCommand.Args...,
 		)
 		actionResult.EditorCommand.Dir = result.EditorCommand.Dir
+		actionResult.EditorCommandDescription = result.EditorCommand.Description
 	}
 
 	return actionResult, nil

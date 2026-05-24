@@ -1397,8 +1397,9 @@ func TestModelCancelsInternalDumpEdit(t *testing.T) {
 func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:       "Editing dump .chc/dumps/project-dump.md.",
-			EditorCommand: exec.Command("true"),
+			Message:                  "Editing dump .chc/dumps/project-dump.md.",
+			EditorCommand:            exec.Command("true"),
+			EditorCommandDescription: "nvim project-dump.md",
 		},
 	}
 	model := NewModel(Options{
@@ -1424,8 +1425,36 @@ func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionExternalEdit)
 	}
 
-	if confirmed.statusMessage != executor.result.Message {
+	wantStatus := "External editor opened. chc will resume when the editor process exits."
+	if confirmed.statusMessage != wantStatus {
 		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
+	}
+}
+
+func TestModelReportsExternalEditorFailureContext(t *testing.T) {
+	model := NewModel(Options{})
+
+	updated, _ := model.Update(dumpEditorFinishedMsg{
+		err:        errors.New("exit status 135"),
+		path:       ".chc/dumps/project-dump.md",
+		command:    "nvim project-dump.md",
+		workingDir: "/workspace/.chc/dumps",
+	})
+
+	failed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	for _, want := range []string{
+		"Edit failed:",
+		"command=nvim project-dump.md",
+		"dir=/workspace/.chc/dumps",
+		"exit status 135",
+	} {
+		if !strings.Contains(failed.statusMessage, want) {
+			t.Fatalf("statusMessage missing %q: %q", want, failed.statusMessage)
+		}
 	}
 }
 

@@ -317,6 +317,37 @@ func assertServiceOpenDumpEditorCommand(
 	}
 }
 
+func TestDefaultDumpEditorLauncherUsesShellCommand(t *testing.T) {
+	t.Setenv("SHELL", "/bin/zsh")
+	t.Setenv("VISUAL", "code --wait")
+	t.Setenv("EDITOR", "nvim")
+
+	path := filepath.Join(t.TempDir(), "project context.md")
+
+	command, err := defaultDumpEditorLauncher{}.EditorCommand(t.Context(), path)
+	if err != nil {
+		t.Fatalf("EditorCommand returned error: %v", err)
+	}
+
+	if command.Program != "/bin/zsh" {
+		t.Fatalf("Program = %q, want /bin/zsh", command.Program)
+	}
+
+	if len(command.Args) != 2 || command.Args[0] != "-lc" {
+		t.Fatalf("Args = %#v, want shell -lc script", command.Args)
+	}
+
+	for _, want := range []string{"cd ", "exec code --wait", "'project context.md'"} {
+		if !strings.Contains(command.Args[1], want) {
+			t.Fatalf("shell script missing %q: %q", want, command.Args[1])
+		}
+	}
+
+	if command.Description != "code --wait project context.md" {
+		t.Fatalf("Description = %q", command.Description)
+	}
+}
+
 func TestServiceRejectsDumpPathsOutsideDumpDirectory(t *testing.T) {
 	operations := newTestService(t, t.TempDir())
 
