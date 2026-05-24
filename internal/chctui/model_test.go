@@ -1061,6 +1061,24 @@ func TestDefaultCommandRegistryDoesNotExposeDraftCreation(t *testing.T) {
 	}
 }
 
+func TestDefaultCommandRegistryExposesDumpWorkflows(t *testing.T) {
+	commandsByID := map[string]Command{}
+	for _, command := range DefaultCommandRegistry() {
+		commandsByID[command.ID] = command
+	}
+
+	for _, id := range []string{"create-dump", "append-dump", "edit-dump"} {
+		command, ok := commandsByID[id]
+		if !ok {
+			t.Fatalf("command %q not found", id)
+		}
+
+		if command.Action != CommandActionPlanDump {
+			t.Fatalf("command %q action = %q, want %q", id, command.Action, CommandActionPlanDump)
+		}
+	}
+}
+
 func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 	model := NewModel(Options{
 		Cases: []chc.CaseMetadata{
@@ -1157,6 +1175,21 @@ func TestModelConfirmsDumpAction(t *testing.T) {
 	}
 }
 
+func TestModelRendersEmptyDumpState(t *testing.T) {
+	model := NewModel(Options{})
+	model.selected = 2
+
+	view := model.View()
+	for _, want := range []string{
+		"No dumps found.",
+		"Use the command palette to create one.",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
 func TestModelPlansAppendDumpCommand(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
@@ -1180,6 +1213,36 @@ func TestModelPlansAppendDumpCommand(t *testing.T) {
 
 	if planned.dumpAction.Request.Action != DumpActionAppend {
 		t.Fatalf("dump action = %q, want %q", planned.dumpAction.Request.Action, DumpActionAppend)
+	}
+
+	if planned.dumpAction.Request.Path != ".chc/dumps/project-dump.md" {
+		t.Fatalf("dump path = %q", planned.dumpAction.Request.Path)
+	}
+}
+
+func TestModelPlansEditDumpCommand(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+		},
+	})
+	model.selected = 2
+	model.commandPalette.Open = true
+	model.commandPalette.Filter = "edit-dump"
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	planned, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if !planned.dumpAction.Pending {
+		t.Fatal("dump action is not pending")
+	}
+
+	if planned.dumpAction.Request.Action != DumpActionEdit {
+		t.Fatalf("dump action = %q, want %q", planned.dumpAction.Request.Action, DumpActionEdit)
 	}
 
 	if planned.dumpAction.Request.Path != ".chc/dumps/project-dump.md" {

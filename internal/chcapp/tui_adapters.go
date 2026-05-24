@@ -253,7 +253,7 @@ func (e tuiDumpActionExecutor) ExecuteDumpAction(
 		}
 
 		return dumpActionResult(result, e.operations)
-	case chctui.DumpActionOpen:
+	case chctui.DumpActionEdit:
 		result, err := e.operations.OpenDump(DumpOpenRequest{
 			RelativePath: request.Path,
 		})

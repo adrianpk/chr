@@ -23,7 +23,7 @@ type DumpView struct {
 
 func (m Model) renderDumpFocusList(limit int) []string {
 	if len(m.dumps) == 0 {
-		return []string{"No dumps found."}
+		return []string{"No dumps found.", "Use the command palette to create one."}
 	}
 
 	lines := []string{shellMutedStyle.Render("Scope        Status      Title")}
@@ -65,7 +65,7 @@ func (m Model) renderSelectedDumpDetail() string {
 
 func (m Model) renderDumps() string {
 	if len(m.dumps) == 0 {
-		return "Dumps\n  No dumps found."
+		return "Dumps\n  No dumps found.\n  Use the command palette to create one."
 	}
 
 	var output strings.Builder

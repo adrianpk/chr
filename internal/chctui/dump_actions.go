@@ -12,7 +12,7 @@ type DumpActionID string
 const (
 	DumpActionCreate DumpActionID = "create_dump"
 	DumpActionAppend DumpActionID = "append_dump"
-	DumpActionOpen   DumpActionID = "open_dump"
+	DumpActionEdit   DumpActionID = "edit_dump"
 )
 
 type DumpActionExecutor interface {
@@ -169,7 +169,7 @@ func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
 				"Path: " + request.Path,
 			},
 		}
-	case DumpActionOpen:
+	case DumpActionEdit:
 		dump, ok := m.selectedDumpView()
 		if !ok {
 			return DumpActionState{}
@@ -183,7 +183,7 @@ func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
 		return DumpActionState{
 			Pending: true,
 			Request: request,
-			Title:   "Open dump",
+			Title:   "Edit dump",
 			Details: []string{
 				"Path: " + request.Path,
 			},
