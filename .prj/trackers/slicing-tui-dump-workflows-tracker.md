@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 
 Slicing name: TUI Dump Workflows
 
-Active slice number: Slice 2
+Active slice number: Slice 3
 
-Active slice short name: scoped dump read model
+Active slice short name: create dumps from tui
 
-Expected branch name: `feat/slice-2-scoped-dump-read-model`
+Expected branch name: `feat/slice-3-create-dumps-from-tui`
 
-Expected PR title: `feat(slice-2): scoped dump read model`
+Expected PR title: `feat(slice-3): create dumps from tui`
 
 Expected report path:
-`.prj/reports/slices/tui-dump-workflows/slice-2-scoped-dump-read-model.md`
+`.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md`
 
 Prerequisite PRs or delivered work:
 
@@ -26,6 +26,7 @@ Prerequisite PRs or delivered work:
   slices.
 - TUI pane navigation and split behavior commit `d10056c`.
 - Slice 1 dump service contract through PR #175.
+- Slice 2 scoped dump read model through PR #176.
 
 ## Slicing Checklist
 
@@ -45,7 +46,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Dump Service Contract | Delivered | `feat/slice-1-dump-service-contract` | `feat(slice-1): dump service contract` | `.prj/reports/slices/tui-dump-workflows/slice-1-dump-service-contract.md` | PR #175. |
 | Slice 2: Scoped Dump Read Model | Delivered | `feat/slice-2-scoped-dump-read-model` | `feat(slice-2): scoped dump read model` | `.prj/reports/slices/tui-dump-workflows/slice-2-scoped-dump-read-model.md` | PR #176. |
-| Slice 3: Create Dumps From TUI | Pending | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | Empty case slug means project-wide dump. |
+| Slice 3: Create Dumps From TUI | Reviewing | `feat/slice-3-create-dumps-from-tui` | `feat(slice-3): create dumps from tui` | `.prj/reports/slices/tui-dump-workflows/slice-3-create-dumps-from-tui.md` | Empty case slug means project-wide dump. |
 | Slice 4: Append And Edit TUI Dumps | Pending | `feat/slice-4-append-edit-tui-dumps` | `feat(slice-4): append and edit tui dumps` | `.prj/reports/slices/tui-dump-workflows/slice-4-append-edit-tui-dumps.md` | Dumps can grow and remain editable. |
 | Slice 5: Polish Dump Workflows | Pending | `feat/slice-5-polish-dump-workflows` | `feat(slice-5): polish dump workflows` | `.prj/reports/slices/tui-dump-workflows/slice-5-polish-dump-workflows.md` | Commands, empty states, messages, and coverage. |
 
@@ -89,17 +90,17 @@ Task commits:
 
 Candidate tasks:
 
-- [ ] Add a create-dump TUI action and confirmation state.
-- [ ] Default creation scope from selected project/case context.
-- [ ] Execute creation through the dump service boundary.
-- [ ] Refresh dump state after creation.
-- [ ] Add tests for project-wide and use-case-scoped creation requests.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add a create-dump TUI action and confirmation state.
+- [x] Default creation scope from selected project/case context.
+- [x] Execute creation through the dump service boundary.
+- [x] Refresh dump state after creation.
+- [x] Add tests for project-wide and use-case-scoped creation requests.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- Pending.
+- T3.1: `12095bf` adds dump creation service behavior, TUI action flow, adapter wiring, and tests.
 
 ## Slice 4: Append And Edit TUI Dumps
 
