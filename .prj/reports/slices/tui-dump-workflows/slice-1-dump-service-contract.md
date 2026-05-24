@@ -1,6 +1,6 @@
 # Slice 1: Dump Service Contract
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Dump Workflows
 Plan: `.prj/plans/slicing-tui-dump-workflows-plan.md`
 Tracker: `.prj/trackers/slicing-tui-dump-workflows-tracker.md`
@@ -58,8 +58,8 @@ projection outside the TUI layer.
 
 ## Validation
 
-- pass: `go test ./internal/chcapp ./internal/chctui ./internal/chc`
-- pass: `make verify`
+- `go test ./internal/chcapp ./internal/chctui ./internal/chc`
+- `make verify`
 
 ## Risks and Follow-ups
 
