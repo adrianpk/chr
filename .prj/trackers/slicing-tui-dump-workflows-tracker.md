@@ -158,7 +158,7 @@ Task commits:
 
 - T6.1: `d6e2b96` adds service-owned dump editor launch, TUI editor
   execution, refresh behavior, append demotion, and tests.
-- T6.2: `7312fd6` review correction aligns `Edit dump` with internal Markdown
+- T6.2: `1995395` review correction aligns `Edit dump` with internal Markdown
   editing and moves the external editor to `alt+e`.
 
 Validation:
