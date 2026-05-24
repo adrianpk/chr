@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 
 Slicing name: TUI Interactive Quiz Workflows
 
-Active slice number: Slice 7
+Active slice number: Slice 8
 
-Active slice short name: ariadne trail recovery
+Active slice short name: quiz curation polish
 
-Expected branch name: `feat/slice-7-ariadne-trail-recovery`
+Expected branch name: `feat/slice-8-quiz-curation-polish`
 
-Expected PR title: `feat(slice-7): ariadne trail recovery`
+Expected PR title: `feat(slice-8): quiz curation polish`
 
 Expected report path:
-`.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md`
+`.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md`
 
 Prerequisite PRs or delivered work:
 
@@ -31,6 +31,7 @@ Prerequisite PRs or delivered work:
 - Slice 4 scoped quiz read model through PR #186.
 - Slice 5 TUI deep quiz loop through PR #187.
 - Slice 6 fast quiz candidates through PR #188.
+- Slice 7 Ariadne trail recovery through PR #189.
 
 ## Slicing Checklist
 
@@ -60,7 +61,7 @@ Prerequisite PRs or delivered work:
 | Slice 4: Scoped Quiz Read Model | Delivered | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | PR #186. |
 | Slice 5: TUI Deep Quiz Loop | Delivered | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | PR #187. |
 | Slice 6: Fast Quiz Candidates | Delivered | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | PR #188. |
-| Slice 7: Ariadne Trail Recovery | Reviewing | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | Trail display, depth cap, branch return, resume recovery. |
+| Slice 7: Ariadne Trail Recovery | Delivered | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | PR #189. |
 | Slice 8: Quiz Curation Polish | Planned | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | Curated notes and documentation alignment. |
 
 ## Slice 1: Quiz Runtime Model
