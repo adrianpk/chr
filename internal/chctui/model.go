@@ -129,6 +129,7 @@ type Model struct {
 	selectedQuiz             int
 	quizAction               QuizActionState
 	quizAnswer               QuizAnswerState
+	quizBusy                 bool
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
@@ -261,6 +262,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.completeDumpEdit(typedMsg)
 
 		return m, nil
+	case quizActionFinishedMsg:
+		m.completeQuizAction(typedMsg)
+
+		return m, nil
 	case tea.KeyMsg:
 		return m.updateKey(typedMsg)
 	default:
@@ -375,6 +380,8 @@ func (m Model) updateActiveQuizModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool
 		updated, cmd := m.updateQuizActionKey(msg)
 
 		return updated, cmd, true
+	case m.quizBusy:
+		return m, nil, true
 	case m.quizAnswer.Active:
 		updated, cmd := m.updateQuizAnswerKey(msg)
 
@@ -960,8 +967,10 @@ func (m Model) activeInteractionKeys() (string, bool) {
 		return "Keys: enter confirms work action, esc cancels work action", true
 	case m.commandPalette.Open:
 		return "Keys: up/down selects command, enter runs command, esc closes palette", true
+	case m.quizBusy:
+		return "Keys: waiting for quiz action to finish", true
 	case m.quizAnswer.Active:
-		return "Keys: enter submits answer, shift+enter inserts line, esc cancels answer", true
+		return "Keys: enter submits answer, shift+enter inserts line, alt+s skips, alt+d done, esc cancels answer", true
 	case m.filterEntryMode:
 		return "Keys: enter applies filter, esc cancels filter, ctrl+c quits", true
 	default:

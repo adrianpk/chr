@@ -2381,7 +2381,7 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 		"Question 2",
 		"Question:",
 		"What should the workflow preserve?",
-		"Enter answer",
+		"Enter answers",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -2489,7 +2489,18 @@ func TestModelConfirmsQuizStartThroughExecutor(t *testing.T) {
 	model.selectedQuiz = 1
 	model.planQuizAction(QuizActionStart)
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.quizBusy {
+		t.Fatal("quiz action is not marked busy")
+	}
+
+	if busy.statusMessage != "Loading question..." {
+		t.Fatalf("statusMessage = %q, want Loading question...", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
 	if executor.request.Action != QuizActionStart {
@@ -2528,7 +2539,18 @@ func TestModelStartsQuizFromQuizzesKey(t *testing.T) {
 	})
 	model.selected = 3
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.quizBusy {
+		t.Fatal("quiz action is not marked busy")
+	}
+
+	if busy.statusMessage != "Loading question..." {
+		t.Fatalf("statusMessage = %q, want Loading question...", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
 	if executor.request.Action != QuizActionStart {
@@ -2582,7 +2604,18 @@ func TestModelSubmitsQuizAnswerWithEnterThroughExecutor(t *testing.T) {
 	model.startQuizAnswer()
 	model.quizAnswer.Input.SetValue("Clarify editorial ownership.")
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.quizBusy {
+		t.Fatal("quiz action is not marked busy")
+	}
+
+	if busy.statusMessage != "Generating next question..." {
+		t.Fatalf("statusMessage = %q, want Generating next question...", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
 	if executor.request.Action != QuizActionAnswer {
@@ -2625,6 +2658,92 @@ func TestModelInsertsQuizAnswerLineWithShiftEnter(t *testing.T) {
 	}
 }
 
+func TestModelSkipsQuizAnswerWithAltS(t *testing.T) {
+	executor := &fakeQuizActionExecutor{
+		result: QuizActionResult{
+			Message: "Quiz question skipped.",
+			Quizzes: []QuizView{
+				{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "active", QuestionsAsked: 2},
+			},
+			SelectedScope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		QuizExecutor: executor,
+		Quizzes: []QuizView{
+			{
+				Title:                 "Blog",
+				Scope:                 QuizScope{CaseSlug: "blog"},
+				Status:                "active",
+				ActiveQuestionSummary: "What should be clarified?",
+			},
+		},
+	})
+	model.selected = 3
+	model.startQuizAnswer()
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s"), Alt: true})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.quizBusy {
+		t.Fatal("quiz action is not marked busy")
+	}
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != QuizActionSkip {
+		t.Fatalf("action = %q, want skip", executor.request.Action)
+	}
+
+	if confirmed.quizAnswer.Active {
+		t.Fatal("quiz answer editor is still active")
+	}
+}
+
+func TestModelCompletesQuizAnswerWithAltD(t *testing.T) {
+	executor := &fakeQuizActionExecutor{
+		result: QuizActionResult{
+			Message: "Quiz completed.",
+			Quizzes: []QuizView{
+				{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "done", QuestionsAsked: 2},
+			},
+			SelectedScope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		QuizExecutor: executor,
+		Quizzes: []QuizView{
+			{
+				Title:                 "Blog",
+				Scope:                 QuizScope{CaseSlug: "blog"},
+				Status:                "active",
+				ActiveQuestionSummary: "What should be clarified?",
+			},
+		},
+	})
+	model.selected = 3
+	model.startQuizAnswer()
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("d"), Alt: true})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.quizBusy {
+		t.Fatal("quiz action is not marked busy")
+	}
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != QuizActionComplete {
+		t.Fatalf("action = %q, want complete", executor.request.Action)
+	}
+
+	if confirmed.quizAnswer.Active {
+		t.Fatal("quiz answer editor is still active")
+	}
+}
+
 func TestModelConfirmsQuizFastModeThroughExecutor(t *testing.T) {
 	executor := &fakeQuizActionExecutor{
 		result: QuizActionResult{
@@ -2644,7 +2763,14 @@ func TestModelConfirmsQuizFastModeThroughExecutor(t *testing.T) {
 	model.selected = 3
 	model.planQuizAction(QuizActionFastMode)
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.quizBusy {
+		t.Fatal("quiz action is not marked busy")
+	}
+
+	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
 	if executor.request.Action != QuizActionFastMode {

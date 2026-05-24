@@ -71,6 +71,11 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		lines = append(lines, indentLines(wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width-2, 1)), "  ")...)
 	}
 
+	if m.quizBusy {
+		lines = append(lines, "", "Working...")
+		lines = append(lines, "  "+m.statusMessage)
+	}
+
 	if m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
 		lines = append(lines, "", shellMutedStyle.Render("Answer:"), "")
 		lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width-2, 1), 6), "\n")...)
@@ -81,7 +86,7 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		lines = append(lines, indentLines(wrapPlainText(quiz.CuratedPreview, maxInt(width-2, 1)), "  ")...)
 	}
 
-	lines = append(lines, "", shellMutedStyle.Render(quizActionHint(quiz)))
+	lines = append(lines, "", shellMutedStyle.Render(m.quizActionHint(quiz)))
 
 	return lines
 }
@@ -135,9 +140,17 @@ func quizHumanStatus(quiz QuizView) string {
 	}
 }
 
-func quizActionHint(quiz QuizView) string {
+func (m Model) quizActionHint(quiz QuizView) string {
+	if m.quizBusy {
+		return "Working"
+	}
+
+	if m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
+		return "Enter submits  shift+enter inserts line  alt+s skips  alt+d done  esc cancels"
+	}
+
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
-		return "Enter answer  x skip  c done"
+		return "Enter answers"
 	}
 
 	return "s start"
@@ -217,15 +230,15 @@ func (m Model) selectedQuizScope() QuizScope {
 func (m Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "s":
-		m.executeQuizAction(QuizActionRequest{Action: QuizActionStart, Scope: m.selectedQuizScope()})
+		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionStart, Scope: m.selectedQuizScope()})
+
+		return m, cmd
 	case "enter":
 		m.planQuizAction(QuizActionAnswer)
 	case "r":
-		m.executeQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: m.selectedQuizScope()})
-	case "x":
-		m.planQuizAction(QuizActionSkip)
-	case "c":
-		m.planQuizAction(QuizActionComplete)
+		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: m.selectedQuizScope()})
+
+		return m, cmd
 	case "esc":
 		m.selectPrimaryPane()
 	default:

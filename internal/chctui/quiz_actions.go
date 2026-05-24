@@ -52,6 +52,12 @@ type QuizAnswerState struct {
 	Input  textarea.Model
 }
 
+type quizActionFinishedMsg struct {
+	Request QuizActionRequest
+	Result  QuizActionResult
+	Err     error
+}
+
 func (m Model) renderQuizAction() string {
 	if !m.quizAction.Pending {
 		return ""
@@ -76,7 +82,7 @@ func (m Model) updateQuizActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case tea.KeyEsc:
 		m.cancelQuizAction()
 	case tea.KeyEnter:
-		m.confirmQuizAction()
+		return m.confirmQuizAction()
 	}
 
 	return m, nil
@@ -92,12 +98,30 @@ func (m Model) updateQuizAnswerKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 	case "enter":
-		m.saveQuizAnswer()
-
-		return m, nil
+		return m.saveQuizAnswer()
 	case "shift+enter", "ctrl+j":
 		input, cmd := m.quizAnswer.Input.Update(tea.KeyMsg{Type: tea.KeyEnter})
 		m.quizAnswer.Input = input
+
+		return m, cmd
+	case "alt+s":
+		scope := m.quizAnswer.Scope
+		m.quizAnswer = QuizAnswerState{}
+
+		cmd := m.startQuizAction(QuizActionRequest{
+			Action: QuizActionSkip,
+			Scope:  scope,
+		})
+
+		return m, cmd
+	case "alt+d":
+		scope := m.quizAnswer.Scope
+		m.quizAnswer = QuizAnswerState{}
+
+		cmd := m.startQuizAction(QuizActionRequest{
+			Action: QuizActionComplete,
+			Scope:  scope,
+		})
 
 		return m, cmd
 	}
@@ -124,39 +148,69 @@ func (m *Model) cancelQuizAction() {
 	m.statusMessage = "Action cancelled."
 }
 
-func (m *Model) confirmQuizAction() {
+func (m *Model) confirmQuizAction() (tea.Model, tea.Cmd) {
 	request := m.quizAction.Request
 	m.quizAction = QuizActionState{}
-	m.executeQuizAction(request)
+
+	cmd := m.startQuizAction(request)
+
+	return *m, cmd
 }
 
-func (m *Model) saveQuizAnswer() {
+func (m *Model) saveQuizAnswer() (tea.Model, tea.Cmd) {
 	answer := m.quizAnswer.Input.Value()
 	scope := m.quizAnswer.Scope
 	m.quizAnswer = QuizAnswerState{}
 
-	m.executeQuizAction(QuizActionRequest{
+	cmd := m.startQuizAction(QuizActionRequest{
 		Action: QuizActionAnswer,
 		Scope:  scope,
 		Answer: answer,
 	})
+
+	return *m, cmd
 }
 
-func (m *Model) executeQuizAction(request QuizActionRequest) {
+func (m Model) executeQuizActionCommand(request QuizActionRequest) tea.Cmd {
+	executor := m.quizExecutor
+
+	return func() tea.Msg {
+		if executor == nil {
+			return quizActionFinishedMsg{
+				Request: request,
+				Err:     fmt.Errorf("quiz action executor is unavailable"),
+			}
+		}
+
+		result, err := executor.ExecuteQuizAction(request)
+
+		return quizActionFinishedMsg{Request: request, Result: result, Err: err}
+	}
+}
+
+func (m *Model) startQuizAction(request QuizActionRequest) tea.Cmd {
 	if m.quizExecutor == nil {
 		m.statusMessage = "Quiz action executor is unavailable."
 
+		return nil
+	}
+
+	m.quizBusy = true
+	m.statusMessage = quizBusyMessage(request)
+
+	return m.executeQuizActionCommand(request)
+}
+
+func (m *Model) completeQuizAction(message quizActionFinishedMsg) {
+	m.quizBusy = false
+
+	if message.Err != nil {
+		m.statusMessage = "Action failed: " + message.Err.Error()
+
 		return
 	}
 
-	result, err := m.quizExecutor.ExecuteQuizAction(request)
-	if err != nil {
-		m.statusMessage = "Action failed: " + err.Error()
-
-		return
-	}
-
-	m.applyQuizActionResult(result)
+	m.applyQuizActionResult(message.Result)
 }
 
 func (m *Model) applyQuizActionResult(result QuizActionResult) {
@@ -222,4 +276,21 @@ func (m Model) renderQuizAnswerInput(width, height int) string {
 	input.SetHeight(maxInt(height, 3))
 
 	return input.View()
+}
+
+func quizBusyMessage(request QuizActionRequest) string {
+	switch request.Action {
+	case QuizActionAnswer:
+		return "Generating next question..."
+	case QuizActionStart, QuizActionResume:
+		return "Loading question..."
+	case QuizActionSkip:
+		return "Skipping question..."
+	case QuizActionComplete:
+		return "Completing quiz..."
+	case QuizActionRefresh:
+		return "Refreshing quizzes..."
+	default:
+		return "Working..."
+	}
 }
