@@ -98,7 +98,12 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		lines = append(lines, indentLines(wrapPlainText(quiz.TrailSummary, maxInt(width-2, 1)), "  ")...)
 	}
 
-	lines = append(lines, "", "Curated preview:")
+	if strings.TrimSpace(quiz.ActiveQuestionSummary) == "" {
+		lines = append(lines, "", "Curated notes:")
+	} else {
+		lines = append(lines, "", "Curated preview:")
+	}
+
 	lines = append(lines, indentLines(wrapPlainText(emptyValue(quiz.CuratedPreview), maxInt(width-2, 1)), "  ")...)
 
 	return lines

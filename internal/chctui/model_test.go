@@ -2396,6 +2396,35 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 	}
 }
 
+func TestModelRendersCuratedQuizBodyWithoutActiveQuestion(t *testing.T) {
+	model := NewModel(Options{
+		Quizzes: []QuizView{
+			{
+				Title:          "Blog Publishing",
+				Status:         "done",
+				Mode:           "deep",
+				Scope:          QuizScope{CaseSlug: "blog"},
+				QuestionBudget: 50,
+				QuestionsAsked: 2,
+				CuratedPreview: "## Decisions\n- Preserve editorial review.\n## Open Questions\n- None recorded.",
+			},
+		},
+	})
+	model.selected = 3
+
+	view := model.View()
+	for _, want := range []string{
+		"Status: done",
+		"Curated notes:",
+		"Preserve editorial review.",
+		"Open Questions",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
 func TestModelSelectsQuizzesIndependentlyFromDocuments(t *testing.T) {
 	model := NewModel(Options{
 		Quizzes: []QuizView{

@@ -173,6 +173,89 @@ func TestQuizArtifactRepositoryKeepsCandidatesOutOfRawAndCuratedArtifacts(t *tes
 	}
 }
 
+func TestQuizArtifactRepositoryLoadsRawCaptureEntries(t *testing.T) {
+	dir := t.TempDir()
+	repository := NewQuizArtifactRepository(dir)
+	state := validQuizRuntimeState()
+
+	_, err := repository.AppendRawCapture(context.Background(), state, validQuizEntry())
+	if err != nil {
+		t.Fatalf("AppendRawCapture returned error: %v", err)
+	}
+
+	entries, err := repository.LoadRawCaptureEntries(context.Background(), QuizScope{ProjectID: "project-1"})
+	if err != nil {
+		t.Fatalf("LoadRawCaptureEntries returned error: %v", err)
+	}
+
+	if len(entries) != 1 {
+		t.Fatalf("entries = %#v, want one entry", entries)
+	}
+
+	if entries[0].QuestionID != "question-1" {
+		t.Fatalf("QuestionID = %q, want question-1", entries[0].QuestionID)
+	}
+}
+
+func TestCurateQuizEntriesDistillsAnsweredTurns(t *testing.T) {
+	entry := validQuizEntry()
+	entry.Answer = "The TUI must preserve one visible question at a time. Extra raw detail."
+
+	notes := CurateQuizEntries(
+		QuizScope{ProjectID: "project-1"},
+		[]QuizEntry{entry},
+		quizRuntimeTestTime(),
+	)
+
+	if len(notes.Decisions) != 1 {
+		t.Fatalf("Decisions = %#v, want one distilled decision", notes.Decisions)
+	}
+
+	if strings.Contains(notes.Decisions[0], entry.Question) {
+		t.Fatalf("decision mirrors raw question:\n%s", notes.Decisions[0])
+	}
+
+	if !strings.Contains(notes.Decisions[0], "workflow") {
+		t.Fatalf("decision missing topic:\n%s", notes.Decisions[0])
+	}
+}
+
+func TestWriteQuizDraftSpecWritesSpecArtifactWithDraftStatus(t *testing.T) {
+	dir := t.TempDir()
+	spec := QuizDraftSpec{
+		Scope:           QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
+		Title:           "Article Authoring Spec",
+		Body:            "Generated behavior.",
+		SourceQuizPath:  ".chc/quizzes/article-authoring-quiz.md",
+		SourceRawPath:   ".chc/quizzes/article-authoring-quiz-raw.md",
+		SourceDumpPaths: []string{".chc/dumps/article-authoring-context.md"},
+		CreatedAt:       quizRuntimeTestTime(),
+	}
+
+	paths, err := WriteQuizDraftSpec(context.Background(), dir, spec)
+	if err != nil {
+		t.Fatalf("WriteQuizDraftSpec returned error: %v", err)
+	}
+
+	if paths.RelativePath != ".chc/specs/drafts/article-authoring-quiz-spec.md" {
+		t.Fatalf("relative path = %q", paths.RelativePath)
+	}
+
+	content := readQuizArtifactTestFile(t, paths.Path)
+	for _, want := range []string{
+		`status: "draft"`,
+		`case_slug: "article-authoring"`,
+		"# Article Authoring Spec",
+		"Generated behavior.",
+		"- curated quiz: .chc/quizzes/article-authoring-quiz.md",
+		"- dump: .chc/dumps/article-authoring-context.md",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("draft spec missing %q in:\n%s", want, content)
+		}
+	}
+}
+
 func readQuizArtifactTestFile(t *testing.T, path string) string {
 	t.Helper()
 

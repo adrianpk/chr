@@ -11,6 +11,7 @@ type QuizModelAction string
 
 const (
 	QuizModelActionNextQuestion QuizModelAction = "quiz_next_question"
+	QuizModelActionDraftSpec    QuizModelAction = "quiz_to_draft_spec"
 )
 
 type QuizModelResponseStatus string
@@ -50,6 +51,7 @@ type QuizModelResponse struct {
 	Status     QuizModelResponseStatus
 	Question   QuizQuestion
 	Candidates []QuizCandidate
+	DraftSpec  QuizDraftSpec
 	RawText    string
 	CreatedAt  time.Time
 }
@@ -145,7 +147,7 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 	}
 
 	if response.Status == QuizModelResponseReady {
-		err := ValidateQuizQuestion(response.Question)
+		err := validateQuizModelReadyResponse(response)
 		if err != nil {
 			return err
 		}
@@ -167,11 +169,19 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 
 func (a QuizModelAction) Valid() bool {
 	switch a {
-	case QuizModelActionNextQuestion:
+	case QuizModelActionNextQuestion, QuizModelActionDraftSpec:
 		return true
 	default:
 		return false
 	}
+}
+
+func validateQuizModelReadyResponse(response QuizModelResponse) error {
+	if response.DraftSpec.HasContent() {
+		return ValidateQuizDraftSpec(response.DraftSpec)
+	}
+
+	return ValidateQuizQuestion(response.Question)
 }
 
 func (s QuizModelResponseStatus) Valid() bool {

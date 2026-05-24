@@ -28,6 +28,7 @@ type QuizArtifactPaths struct {
 type QuizArtifactRepository interface {
 	Paths(scope QuizScope) (QuizArtifactPaths, error)
 	AppendRawCapture(ctx context.Context, state QuizRuntimeState, entry QuizEntry) (QuizArtifactPaths, error)
+	LoadRawCaptureEntries(ctx context.Context, scope QuizScope) ([]QuizEntry, error)
 	WriteCuratedNotes(ctx context.Context, notes QuizCuratedNotes) (QuizArtifactPaths, error)
 	SaveRuntimeState(ctx context.Context, state QuizRuntimeState) (QuizArtifactPaths, error)
 	LoadRuntimeState(ctx context.Context, scope QuizScope) (QuizRuntimeState, error)
@@ -173,6 +174,32 @@ func (r *fileQuizArtifactRepository) WriteCuratedNotes(
 	}
 
 	return paths, nil
+}
+
+func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
+	ctx context.Context,
+	scope QuizScope,
+) ([]QuizEntry, error) {
+	err := ctx.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	paths, err := r.Paths(scope)
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := os.ReadFile(paths.RawPath)
+	if os.IsNotExist(err) {
+		return []QuizEntry{}, nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("read quiz raw capture: %w", err)
+	}
+
+	return ParseQuizRawCaptureEntries(string(content))
 }
 
 func (r *fileQuizArtifactRepository) SaveRuntimeState(

@@ -188,6 +188,93 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 	}
 }
 
+func TestServiceCompleteQuizWritesCuratedNotesAndDraftSpec(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	model, result := completeServiceQuizWithAnswer(t, projectDir)
+	if result.State.Status != chc.QuizRuntimeStatusDone {
+		t.Fatalf("status = %q, want done", result.State.Status)
+	}
+
+	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz.md"))
+	assertServiceQuizContentContains(t, curated, []string{
+		`status: "curated"`,
+		"## Decisions",
+		"workflow: The workflow must preserve editorial review before publication.",
+		"## Implementation Implications",
+	})
+
+	if strings.Contains(curated, "What should the workflow preserve?") {
+		t.Fatalf("curated notes mirrored raw question:\n%s", curated)
+	}
+
+	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "drafts", "blog-quiz-spec.md"))
+	assertServiceQuizContentContains(t, spec, []string{
+		`status: "draft"`,
+		`case_slug: "blog"`,
+		"# Quiz Generated Spec",
+		"Generated behavior from dump and quiz context.",
+		"- curated quiz: .chc/quizzes/blog-quiz.md",
+	})
+
+	draftRequest := model.requests[len(model.requests)-1]
+	if draftRequest.Action != chc.QuizModelActionDraftSpec {
+		t.Fatalf("draft action = %q", draftRequest.Action)
+	}
+
+	assertQuizModelRequestSections(t, draftRequest, []string{"project_dump", "use_case_dump", "curated_quiz"})
+}
+
+func completeServiceQuizWithAnswer(
+	t *testing.T,
+	projectDir string,
+) (*fakeServiceQuizModel, QuizOperationResult) {
+	t.Helper()
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizModelResponse("response-1", "question-1", clock()),
+			serviceQuizModelResponse("response-2", "question-2", clock()),
+			serviceQuizDraftSpecResponse("response-3", clock()),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	_, err := operations.StartQuiz(QuizStartRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
+	if err != nil {
+		t.Fatalf("StartQuiz returned error: %v", err)
+	}
+
+	_, err = operations.AnswerQuiz(QuizAnswerRequest{
+		Scope:  chc.QuizScope{CaseSlug: "blog"},
+		Answer: "The workflow must preserve editorial review before publication.",
+	})
+	if err != nil {
+		t.Fatalf("AnswerQuiz returned error: %v", err)
+	}
+
+	result, err := operations.CompleteQuiz(QuizCompleteRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
+	if err != nil {
+		t.Fatalf("CompleteQuiz returned error: %v", err)
+	}
+
+	return model, result
+}
+
+func assertServiceQuizContentContains(t *testing.T, content string, values []string) {
+	t.Helper()
+
+	for _, want := range values {
+		if !strings.Contains(content, want) {
+			t.Fatalf("content missing %q:\n%s", want, content)
+		}
+	}
+}
+
 func TestServiceQuizTrailRecoversAfterMaxDepthBranch(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -494,6 +581,10 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 	m.requests = append(m.requests, request)
 
 	if len(m.responses) == 0 {
+		if request.Action == chc.QuizModelActionDraftSpec {
+			return serviceQuizDraftSpecResponse("response-fallback", request.CreatedAt), nil
+		}
+
 		return serviceQuizModelResponse("response-fallback", "question-fallback", request.CreatedAt), nil
 	}
 
@@ -557,6 +648,25 @@ func serviceQuizModelResponse(
 			CreatedAt: createdAt,
 		},
 		RawText:   "raw model text",
+		CreatedAt: createdAt,
+	}
+}
+
+func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) chc.QuizModelResponse {
+	return chc.QuizModelResponse{
+		ID:        responseID,
+		RequestID: "filled-by-fake",
+		Provider:  "fake",
+		Status:    chc.QuizModelResponseReady,
+		DraftSpec: chc.QuizDraftSpec{
+			Scope:          chc.QuizScope{ProjectID: "service-project"},
+			Title:          "Quiz Generated Spec",
+			Body:           "Generated behavior from dump and quiz context.",
+			SourceQuizPath: ".chc/quizzes/project-quiz.md",
+			SourceRawPath:  ".chc/quizzes/project-quiz-raw.md",
+			CreatedAt:      createdAt,
+		},
+		RawText:   "raw draft spec",
 		CreatedAt: createdAt,
 	}
 }

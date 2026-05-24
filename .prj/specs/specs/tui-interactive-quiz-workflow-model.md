@@ -335,6 +335,10 @@ Candidate request families:
 - `quiz_curated_notes`;
 - `quiz_to_draft_spec`.
 
+The implemented draft-spec promotion path uses `quiz_to_draft_spec`. Its
+request carries the fresh curated quiz body as a `curated_quiz` context section
+after the service refreshes curation on done.
+
 Each request must carry:
 
 - request id;
@@ -357,10 +361,14 @@ Each response must carry:
 - request id;
 - provider;
 - status;
-- action;
 - structured payload;
 - raw text when available;
 - created time.
+
+For `quiz_next_question`, the structured payload is a question and optional
+candidate list. For `quiz_to_draft_spec`, the structured payload is a draft
+spec title and body that the service writes into `.chc/specs/drafts/` with
+`status: draft`.
 
 Responses must be validated before they update runtime state or write durable
 artifacts.

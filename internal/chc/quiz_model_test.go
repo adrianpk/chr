@@ -63,6 +63,40 @@ func TestInvokeQuizModelRejectsInvalidResponse(t *testing.T) {
 	}
 }
 
+func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionDraftSpec
+	request.Strategy = "draft_spec"
+	request.OutputContract.RequiredFields = []string{"title", "body", "status"}
+
+	adapter := &fakeQuizModelAdapter{
+		response: QuizModelResponse{
+			ID:        "response-1",
+			RequestID: request.ID,
+			Provider:  "fake",
+			Status:    QuizModelResponseReady,
+			DraftSpec: QuizDraftSpec{
+				Scope:          QuizScope{ProjectID: "project-1"},
+				Title:          "Generated Spec",
+				Body:           "Generated behavior.",
+				SourceQuizPath: ".chc/quizzes/project-quiz.md",
+				SourceRawPath:  ".chc/quizzes/project-quiz-raw.md",
+				CreatedAt:      quizRuntimeTestTime(),
+			},
+			CreatedAt: quizRuntimeTestTime(),
+		},
+	}
+
+	response, err := InvokeQuizModel(context.Background(), adapter, request)
+	if err != nil {
+		t.Fatalf("InvokeQuizModel returned error: %v", err)
+	}
+
+	if response.DraftSpec.Title != "Generated Spec" {
+		t.Fatalf("draft spec title = %q", response.DraftSpec.Title)
+	}
+}
+
 func validQuizModelRequest() QuizModelRequest {
 	state := validQuizRuntimeState()
 

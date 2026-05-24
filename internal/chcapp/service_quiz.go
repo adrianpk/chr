@@ -116,7 +116,7 @@ func (s service) SkipQuiz(request QuizSkipRequest) (QuizOperationResult, error) 
 }
 
 func (s service) CompleteQuiz(request QuizCompleteRequest) (QuizOperationResult, error) {
-	return s.stopQuiz(s.quizScope(request.Scope), chc.QuizRuntimeStatusDone, "Quiz completed.")
+	return s.completeQuiz(s.quizScope(request.Scope))
 }
 
 func (s service) CancelQuiz(request QuizCancelRequest) (QuizOperationResult, error) {
@@ -222,6 +222,42 @@ func (s service) stopQuiz(
 	return QuizOperationResult{Message: message, State: state}, nil
 }
 
+func (s service) completeQuiz(scope chc.QuizScope) (QuizOperationResult, error) {
+	repository := s.quizRepository()
+
+	state, err := repository.LoadRuntimeState(s.ctx, scope)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	state.Status = chc.QuizRuntimeStatusDone
+	state.ActiveQuestion = nil
+	state.Candidates = nil
+	state.UpdatedAt = s.utcNow()
+
+	entries, err := repository.LoadRawCaptureEntries(s.ctx, scope)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	paths, err := repository.WriteCuratedNotes(s.ctx, chc.CurateQuizEntries(scope, entries, state.UpdatedAt))
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	err = s.writeQuizDraftSpec(state, paths)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	_, err = repository.SaveRuntimeState(s.ctx, state)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	return QuizOperationResult{Message: "Quiz completed.", State: state}, nil
+}
+
 func (s service) generateNextQuizQuestion(state chc.QuizRuntimeState) (chc.QuizRuntimeState, error) {
 	if len(state.Candidates) > 0 {
 		state = activateQuizCandidate(state, state.Candidates[0], s.utcNow())
@@ -274,6 +310,69 @@ func (s service) newQuizModelRequest(state chc.QuizRuntimeState) (chc.QuizModelR
 		ContextSections: sections,
 		OutputContract: chc.QuizModelOutputContract{
 			RequiredFields: []string{"id", "prompt", "topic", "depth", "trunk_id"},
+		},
+		CreatedAt: s.utcNow(),
+	}, nil
+}
+
+func (s service) writeQuizDraftSpec(
+	state chc.QuizRuntimeState,
+	paths chc.QuizArtifactPaths,
+) error {
+	request, err := s.newQuizDraftSpecModelRequest(state, paths)
+	if err != nil {
+		return err
+	}
+
+	response, err := chc.InvokeQuizModel(s.ctx, s.quizModel, request)
+	if err != nil {
+		return err
+	}
+
+	spec := response.DraftSpec
+	spec.Scope = chc.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
+	spec.SourceQuizPath = paths.CuratedRelativePath
+	spec.SourceRawPath = paths.RawRelativePath
+	spec.SourceDumpPaths = quizDumpSourcePaths(request.ContextSections)
+	spec.SourceRequestID = request.ID
+	spec.SourceResponseID = response.ID
+	spec.CreatedAt = response.CreatedAt.UTC()
+
+	_, err = chc.WriteQuizDraftSpec(s.ctx, s.projectContext.ProjectDir, spec)
+
+	return err
+}
+
+func (s service) newQuizDraftSpecModelRequest(
+	state chc.QuizRuntimeState,
+	paths chc.QuizArtifactPaths,
+) (chc.QuizModelRequest, error) {
+	sections, err := s.quizContextSections(chc.QuizScope{
+		ProjectID: state.ProjectID,
+		CaseSlug:  state.CaseSlug,
+	})
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections = appendQuizFileContextSection(
+		sections,
+		s.projectContext.ProjectDir,
+		"curated_quiz",
+		"quiz",
+		paths.CuratedRelativePath,
+	)
+
+	return chc.QuizModelRequest{
+		ID:              fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID),
+		Action:          chc.QuizModelActionDraftSpec,
+		Strategy:        "draft_spec",
+		Scope:           chc.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug},
+		Mode:            state.Mode,
+		RuntimeState:    state,
+		ContextSections: sections,
+		OutputContract: chc.QuizModelOutputContract{
+			RequiredFields: []string{"title", "body", "status"},
 		},
 		CreatedAt: s.utcNow(),
 	}, nil
@@ -457,6 +556,18 @@ func appendQuizNodeContextSection(
 		Authority: node.RelativePath,
 		Content:   string(content),
 	})
+}
+
+func quizDumpSourcePaths(sections []chc.QuizModelContextSection) []string {
+	paths := []string{}
+
+	for _, section := range sections {
+		if section.Layer == "dump" {
+			paths = append(paths, section.Authority)
+		}
+	}
+
+	return paths
 }
 
 func quizEntryFromState(

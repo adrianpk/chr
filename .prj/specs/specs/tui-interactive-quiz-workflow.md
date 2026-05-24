@@ -258,6 +258,14 @@ The runtime state cache lives outside the curated artifact:
 .chc/tmp/quiz-runtime/<case-slug>.json
 ```
 
+Completed quizzes can also produce draft specification artifacts in the spec
+artifact family:
+
+```text
+.chc/specs/drafts/project-quiz-spec.md
+.chc/specs/drafts/<case-slug>-quiz-spec.md
+```
+
 Model request/response evidence should reuse the existing authoring model
 evidence layout when a model call is made:
 
@@ -296,6 +304,9 @@ The curated artifact must contain distilled, decision-relevant quiz notes.
 
 It must not map raw questions one-to-one into the final file.
 
+When the user marks a quiz done, the service refreshes curated notes from the
+raw capture before any downstream spec generation.
+
 It should preserve:
 
 - scope;
@@ -330,6 +341,11 @@ The generated specification must:
 
 The promotion flow is downstream from the interactive quiz loop. It must not
 change the one-question-at-a-time quiz interaction.
+
+When promotion runs, the service sends a `quiz_to_draft_spec` model request
+with the same scoped context family used for question generation, plus the
+fresh curated quiz artifact. The model response supplies the draft spec title
+and body, and the service owns writing the spec artifact and provenance.
 
 ## Service Boundary
 
