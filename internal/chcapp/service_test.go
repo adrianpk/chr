@@ -184,6 +184,82 @@ case: "blog"
 	}
 }
 
+func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	operations := newTestService(t, projectDir)
+
+	projectResult, err := operations.CreateDump(DumpCreateRequest{
+		Title:   "Project Notes",
+		Content: "Project-wide dump body.",
+	})
+	if err != nil {
+		t.Fatalf("CreateDump project returned error: %v", err)
+	}
+
+	caseResult, err := operations.CreateDump(DumpCreateRequest{
+		Title:   "Blog Notes",
+		Content: "Case-scoped dump body.",
+		Scope:   DumpScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("CreateDump case returned error: %v", err)
+	}
+
+	assertProjectDumpContent(t, projectDir)
+	assertCaseDumpContent(t, projectDir)
+
+	if len(projectResult.Dumps) != 1 {
+		t.Fatalf("project result dumps = %#v, want one dump", projectResult.Dumps)
+	}
+
+	if len(caseResult.Dumps) != 2 {
+		t.Fatalf("case result dumps = %#v, want two dumps", caseResult.Dumps)
+	}
+
+	caseDump := findDumpViewByTitle(t, caseResult.Dumps, "Blog Notes")
+	if caseDump.Scope.CaseSlug != "blog" {
+		t.Fatalf("case dump scope = %#v, want blog", caseDump.Scope)
+	}
+}
+
+func assertProjectDumpContent(t *testing.T, projectDir string) {
+	t.Helper()
+
+	projectContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes.md"))
+	for _, want := range []string{
+		`title: "Project Notes"`,
+		`status: "raw"`,
+		"# Project Notes",
+		"Project-wide dump body.",
+	} {
+		if !strings.Contains(projectContent, want) {
+			t.Fatalf("project dump missing %q:\n%s", want, projectContent)
+		}
+	}
+
+	if strings.Contains(projectContent, "case:") {
+		t.Fatalf("project dump has case field:\n%s", projectContent)
+	}
+}
+
+func assertCaseDumpContent(t *testing.T, projectDir string) {
+	t.Helper()
+
+	caseContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-notes.md"))
+	for _, want := range []string{
+		`title: "Blog Notes"`,
+		`case: "blog"`,
+		"# Blog Notes",
+		"Case-scoped dump body.",
+	} {
+		if !strings.Contains(caseContent, want) {
+			t.Fatalf("case dump missing %q:\n%s", want, caseContent)
+		}
+	}
+}
+
 func findDumpViewByTitle(t *testing.T, dumps []DumpView, title string) DumpView {
 	t.Helper()
 
@@ -196,6 +272,17 @@ func findDumpViewByTitle(t *testing.T, dumps []DumpView, title string) DumpView 
 	t.Fatalf("dump %q not found in %#v", title, dumps)
 
 	return DumpView{}
+}
+
+func readServiceWorkspaceFile(t *testing.T, path string) string {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile returned error: %v", err)
+	}
+
+	return string(content)
 }
 
 func assertServiceSuggestsWorkspaceCases(t *testing.T, operations service) {

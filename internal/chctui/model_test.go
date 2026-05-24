@@ -637,6 +637,7 @@ func TestCasesRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 	model := NewModel(Options{
 		WorkspaceExecutor: executor,
 	})
+	model.cases = []chc.CaseMetadata{{Slug: "blog", Name: "Blog"}}
 	model.selected = 1
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
@@ -1057,6 +1058,102 @@ func TestDefaultCommandRegistryDoesNotExposeDraftCreation(t *testing.T) {
 		if command.ID == "create-draft" || strings.Contains(strings.ToLower(command.Title), "draft") {
 			t.Fatalf("command registry exposes draft creation command: %#v", command)
 		}
+	}
+}
+
+func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
+	model := NewModel(Options{
+		Cases: []chc.CaseMetadata{
+			{Slug: "blog", Name: "Blog"},
+		},
+		WorkspaceIndex: chc.WorkspaceIndex{
+			NodesByID: map[string]chc.WorkspaceNode{
+				"case:blog": {
+					Kind: chc.WorkspaceNodeCase,
+					Slug: "blog",
+					Name: "Blog",
+				},
+			},
+			CasesBySlug: map[string]string{"blog": "case:blog"},
+		},
+	})
+	model.cases = []chc.CaseMetadata{{Slug: "blog", Name: "Blog"}}
+	model.selected = 1
+	model.commandPalette.Open = true
+	model.commandPalette.Filter = "create-dump"
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	planned, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if !planned.dumpAction.Pending {
+		t.Fatal("dump action is not pending")
+	}
+
+	if planned.dumpAction.Request.Scope.CaseSlug != "blog" {
+		t.Fatalf("dump scope = %#v, want blog", planned.dumpAction.Request.Scope)
+	}
+
+	view := planned.renderDumpAction()
+	for _, want := range []string{
+		"Confirm Action",
+		"Create dump",
+		"Title: blog dump",
+		"Scope: blog",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelConfirmsDumpAction(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message: "Created dump .chc/dumps/project-dump.md.",
+			Dumps: []DumpView{
+				{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+			},
+		},
+	}
+	model := NewModel(Options{DumpExecutor: executor})
+	model.dumpAction = DumpActionState{
+		Pending: true,
+		Request: DumpActionRequest{
+			Action: DumpActionCreate,
+			Title:  "Project dump",
+		},
+	}
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	confirmed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.request.Action != DumpActionCreate {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionCreate)
+	}
+
+	if confirmed.dumpAction.Pending {
+		t.Fatal("dump action is pending after confirmation")
+	}
+
+	if confirmed.statusMessage != executor.result.Message {
+		t.Fatalf("statusMessage = %q, want %q", confirmed.statusMessage, executor.result.Message)
+	}
+
+	dump, ok := confirmed.selectedDumpView()
+	if !ok {
+		t.Fatal("selectedDumpView returned no dump")
+	}
+
+	if dump.Title != "Project dump" {
+		t.Fatalf("selected dump = %q, want Project dump", dump.Title)
 	}
 }
 
@@ -1998,6 +2095,18 @@ type fakeArtifactActionExecutor struct {
 
 func (e *fakeArtifactActionExecutor) ExecuteArtifactAction(action ArtifactActionID) (ArtifactActionResult, error) {
 	e.action = action
+
+	return e.result, e.err
+}
+
+type fakeDumpActionExecutor struct {
+	request DumpActionRequest
+	result  DumpActionResult
+	err     error
+}
+
+func (e *fakeDumpActionExecutor) ExecuteDumpAction(request DumpActionRequest) (DumpActionResult, error) {
+	e.request = request
 
 	return e.result, e.err
 }

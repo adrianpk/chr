@@ -83,6 +83,7 @@ type Options struct {
 	WorkspaceIndex       chc.WorkspaceIndex
 	SemanticDigestStates []chc.WorkspaceSemanticDigestState
 	ActionExecutor       ArtifactActionExecutor
+	DumpExecutor         DumpActionExecutor
 	TicketExecutor       TicketActionExecutor
 	WorkExecutor         WorkActionExecutor
 	WorkspaceExecutor    WorkspaceRefreshExecutor
@@ -130,6 +131,8 @@ type Model struct {
 	commandPalette           CommandPaletteState
 	artifactAction           ArtifactActionState
 	actionExecutor           ArtifactActionExecutor
+	dumpAction               DumpActionState
+	dumpExecutor             DumpActionExecutor
 	ticketAction             TicketActionState
 	ticketExecutor           TicketActionExecutor
 	workAction               WorkActionState
@@ -200,6 +203,7 @@ func NewModel(opts Options) Model {
 		semanticDigestStates:   append([]chc.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
 		commandPalette:         NewCommandPaletteState(DefaultCommandRegistry()),
 		actionExecutor:         opts.ActionExecutor,
+		dumpExecutor:           opts.DumpExecutor,
 		ticketExecutor:         opts.TicketExecutor,
 		workExecutor:           opts.WorkExecutor,
 		workspaceExecutor:      opts.WorkspaceExecutor,
@@ -294,6 +298,10 @@ func (m Model) SelectedView() View {
 func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if m.artifactAction.Pending {
 		return m.updateArtifactActionKey(msg)
+	}
+
+	if m.dumpAction.Pending {
+		return m.updateDumpActionKey(msg)
 	}
 
 	if m.ticketAction.Pending {
@@ -872,6 +880,8 @@ func (m Model) activeInteractionKeys() (string, bool) {
 	switch {
 	case m.artifactAction.Pending:
 		return "Keys: enter confirms action, esc cancels action", true
+	case m.dumpAction.Pending:
+		return "Keys: enter confirms dump action, esc cancels dump action", true
 	case m.ticketAction.Pending:
 		return "Keys: enter confirms ticket action, esc cancels ticket action", true
 	case m.workAction.Pending:

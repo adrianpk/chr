@@ -1,7 +1,11 @@
 package chcapp
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
@@ -62,8 +66,70 @@ func (s service) ListDumps() (DumpListResult, error) {
 	}, nil
 }
 
+func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, error) {
+	title := strings.TrimSpace(request.Title)
+	if title == "" {
+		return DumpOperationResult{}, fmt.Errorf("dump title is required")
+	}
+
+	content := renderDumpMarkdown(title, request.Scope, request.Content)
+
+	path, err := s.createDumpFile(title, content)
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	result, err := s.ListDumps()
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	relativePath, err := filepath.Rel(s.projectContext.ProjectDir, path)
+	if err != nil {
+		relativePath = path
+	}
+
+	return DumpOperationResult{
+		Message: "Created dump " + filepath.ToSlash(relativePath) + ".",
+		Dumps:   result.Dumps,
+	}, nil
+}
+
 func (s service) dumpDirectory() string {
 	return chc.DumpDirectory(s.projectContext.ProjectDir)
+}
+
+func (s service) createDumpFile(title, content string) (string, error) {
+	err := os.MkdirAll(s.dumpDirectory(), 0o755)
+	if err != nil {
+		return "", fmt.Errorf("create dump directory: %w", err)
+	}
+
+	for _, path := range candidateDumpPaths(s.dumpDirectory(), title) {
+		file, openErr := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		if os.IsExist(openErr) {
+			continue
+		}
+
+		if openErr != nil {
+			return "", fmt.Errorf("create dump file: %w", openErr)
+		}
+
+		_, writeErr := file.WriteString(content)
+		closeErr := file.Close()
+
+		if writeErr != nil {
+			return "", fmt.Errorf("write dump file: %w", writeErr)
+		}
+
+		if closeErr != nil {
+			return "", fmt.Errorf("close dump file: %w", closeErr)
+		}
+
+		return path, nil
+	}
+
+	return "", fmt.Errorf("create dump file: exhausted unique names for %q", title)
 }
 
 func dumpViewsFromIndex(index chc.WorkspaceIndex) []DumpView {
@@ -92,4 +158,78 @@ func dumpViewFromNode(nodeID string, node chc.WorkspaceNode) DumpView {
 		RelativePath: node.RelativePath,
 		UpdatedAt:    node.ModifiedAt,
 	}
+}
+
+func candidateDumpPaths(directory, title string) []string {
+	slug := dumpSlug(title)
+	if slug == "" {
+		slug = "dump"
+	}
+
+	paths := []string{filepath.Join(directory, slug+".md")}
+	for index := 2; index <= 100; index++ {
+		paths = append(paths, filepath.Join(directory, fmt.Sprintf("%s-%d.md", slug, index)))
+	}
+
+	return paths
+}
+
+func dumpSlug(value string) string {
+	var output strings.Builder
+
+	lastDash := false
+
+	for _, char := range strings.ToLower(value) {
+		switch {
+		case char >= 'a' && char <= 'z':
+			output.WriteRune(char)
+
+			lastDash = false
+		case char >= '0' && char <= '9':
+			output.WriteRune(char)
+
+			lastDash = false
+		case !lastDash:
+			output.WriteRune('-')
+
+			lastDash = true
+		}
+	}
+
+	return strings.Trim(output.String(), "-")
+}
+
+func renderDumpMarkdown(title string, scope DumpScope, content string) string {
+	var output strings.Builder
+
+	output.WriteString("---\n")
+	output.WriteString("title: ")
+	output.WriteString(quoteDumpFrontmatter(title))
+	output.WriteString("\n")
+	output.WriteString("status: \"raw\"\n")
+
+	if strings.TrimSpace(scope.CaseSlug) != "" {
+		output.WriteString("case: ")
+		output.WriteString(quoteDumpFrontmatter(scope.CaseSlug))
+		output.WriteString("\n")
+	}
+
+	output.WriteString("---\n\n")
+	output.WriteString("# ")
+	output.WriteString(title)
+	output.WriteString("\n\n")
+
+	body := strings.TrimSpace(content)
+	if body == "" {
+		body = "Initial dump created from the TUI."
+	}
+
+	output.WriteString(body)
+	output.WriteString("\n")
+
+	return output.String()
+}
+
+func quoteDumpFrontmatter(value string) string {
+	return fmt.Sprintf("%q", strings.TrimSpace(value))
 }

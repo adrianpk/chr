@@ -216,6 +216,46 @@ func loadTUIDumps(operations service) ([]chctui.DumpView, error) {
 	return dumps, nil
 }
 
+type tuiDumpActionExecutor struct {
+	operations service
+}
+
+func newTUIDumpActionExecutor(
+	operations service,
+) tuiDumpActionExecutor {
+	return tuiDumpActionExecutor{
+		operations: operations,
+	}
+}
+
+func (e tuiDumpActionExecutor) ExecuteDumpAction(
+	request chctui.DumpActionRequest,
+) (chctui.DumpActionResult, error) {
+	switch request.Action {
+	case chctui.DumpActionCreate:
+		result, err := e.operations.CreateDump(DumpCreateRequest{
+			Title:   request.Title,
+			Content: request.Content,
+			Scope:   DumpScope{CaseSlug: request.Scope.CaseSlug},
+		})
+		if err != nil {
+			return chctui.DumpActionResult{}, err
+		}
+
+		dumps, err := loadTUIDumps(e.operations)
+		if err != nil {
+			return chctui.DumpActionResult{}, err
+		}
+
+		return chctui.DumpActionResult{
+			Message: result.Message,
+			Dumps:   dumps,
+		}, nil
+	default:
+		return chctui.DumpActionResult{}, errors.New("unknown dump action")
+	}
+}
+
 type tuiWorkActionExecutor struct {
 	operations service
 }

@@ -736,6 +736,7 @@ func (m Model) renderShellOverlay() string {
 
 	for _, overlay := range []string{
 		m.renderArtifactAction(),
+		m.renderDumpAction(),
 		m.renderTicketAction(),
 		m.renderWorkAction(),
 		m.renderCommandPalette(),

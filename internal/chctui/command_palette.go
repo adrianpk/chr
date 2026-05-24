@@ -15,6 +15,7 @@ const (
 	CommandActionHelp               CommandAction = "help"
 	CommandActionOpenSelectedSource CommandAction = "open_selected_source"
 	CommandActionPlanArtifact       CommandAction = "plan_artifact"
+	CommandActionPlanDump           CommandAction = "plan_dump"
 	CommandActionPlanTicket         CommandAction = "plan_ticket"
 	CommandActionPlanWork           CommandAction = "plan_work"
 )
@@ -26,6 +27,7 @@ type Command struct {
 	Action      CommandAction
 	View        View
 	Artifact    ArtifactActionID
+	Dump        DumpActionID
 	Ticket      TicketActionID
 	Status      string
 	Work        WorkActionID
@@ -50,6 +52,7 @@ func DefaultCommandRegistry() []Command {
 		{ID: "help", Title: "Help", Description: "Navigate to the Help view.", Action: CommandActionHelp, View: ViewHelp},
 		{ID: "open-source", Title: "Open selected source path", Description: "Show the selected source path for external opening.", Action: CommandActionOpenSelectedSource},
 		{ID: "create-ticket", Title: "Create ticket", Description: "Create a default task ticket after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateTicket},
+		{ID: "create-dump", Title: "Create dump", Description: "Create a scoped dump after confirmation.", Action: CommandActionPlanDump, Dump: DumpActionCreate},
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a spec-oriented authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
 		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
 		{ID: "ticket-add-comment", Title: "Add ticket comment", Description: "Add a standard comment to the selected ticket after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionAddComment},
@@ -213,6 +216,8 @@ func (m *Model) executeCommand(command Command) {
 		m.statusMessage = m.selectedSourcePathMessage()
 	case CommandActionPlanArtifact:
 		m.planArtifactAction(command.Artifact)
+	case CommandActionPlanDump:
+		m.planDumpAction(command.Dump)
 	case CommandActionPlanTicket:
 		m.planTicketAction(command.Ticket, command.Status)
 	case CommandActionPlanWork:
