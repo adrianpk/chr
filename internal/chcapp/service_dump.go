@@ -95,8 +95,119 @@ func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, err
 	}, nil
 }
 
+func (s service) AppendDump(request DumpAppendRequest) (DumpOperationResult, error) {
+	path, err := s.resolveDumpPath(request.RelativePath)
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	content := strings.TrimSpace(request.Content)
+	if content == "" {
+		content = "Appended dump note from the TUI."
+	}
+
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		return DumpOperationResult{}, fmt.Errorf("open dump for append: %w", err)
+	}
+
+	_, writeErr := file.WriteString("\n\n" + content + "\n")
+	closeErr := file.Close()
+
+	if writeErr != nil {
+		return DumpOperationResult{}, fmt.Errorf("append dump: %w", writeErr)
+	}
+
+	if closeErr != nil {
+		return DumpOperationResult{}, fmt.Errorf("close dump: %w", closeErr)
+	}
+
+	result, err := s.ListDumps()
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	return DumpOperationResult{
+		Message: "Appended dump " + filepath.ToSlash(request.RelativePath) + ".",
+		Dumps:   result.Dumps,
+	}, nil
+}
+
+func (s service) SaveDump(request DumpSaveRequest) (DumpOperationResult, error) {
+	path, err := s.resolveDumpPath(request.RelativePath)
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	content := strings.TrimSpace(request.Content)
+	if content == "" {
+		return DumpOperationResult{}, fmt.Errorf("dump content is required")
+	}
+
+	err = os.WriteFile(path, []byte(content+"\n"), 0o644)
+	if err != nil {
+		return DumpOperationResult{}, fmt.Errorf("save dump: %w", err)
+	}
+
+	result, err := s.ListDumps()
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	return DumpOperationResult{
+		Message: "Saved dump " + filepath.ToSlash(request.RelativePath) + ".",
+		Dumps:   result.Dumps,
+	}, nil
+}
+
+func (s service) OpenDump(request DumpOpenRequest) (DumpOperationResult, error) {
+	_, err := s.resolveDumpPath(request.RelativePath)
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	result, err := s.ListDumps()
+	if err != nil {
+		return DumpOperationResult{}, err
+	}
+
+	return DumpOperationResult{
+		Message: "Selected dump path: " + filepath.ToSlash(request.RelativePath),
+		Dumps:   result.Dumps,
+	}, nil
+}
+
 func (s service) dumpDirectory() string {
 	return chc.DumpDirectory(s.projectContext.ProjectDir)
+}
+
+func (s service) resolveDumpPath(relativePath string) (string, error) {
+	relativePath = filepath.ToSlash(strings.TrimSpace(relativePath))
+	if relativePath == "" {
+		return "", fmt.Errorf("dump path is required")
+	}
+
+	cleanPath := filepath.Clean(filepath.FromSlash(relativePath))
+	if filepath.IsAbs(cleanPath) || strings.HasPrefix(cleanPath, ".."+string(filepath.Separator)) || cleanPath == ".." {
+		return "", fmt.Errorf("dump path must be project-relative")
+	}
+
+	if filepath.ToSlash(filepath.Dir(cleanPath)) != ".chc/dumps" {
+		return "", fmt.Errorf("dump path must be under .chc/dumps")
+	}
+
+	path := filepath.Join(s.projectContext.ProjectDir, cleanPath)
+
+	info, err := os.Stat(path)
+	if err != nil {
+		return "", fmt.Errorf("stat dump: %w", err)
+	}
+
+	if info.IsDir() {
+		return "", fmt.Errorf("dump path is a directory")
+	}
+
+	return path, nil
 }
 
 func (s service) createDumpFile(title, content string) (string, error) {

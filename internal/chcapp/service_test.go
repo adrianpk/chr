@@ -224,6 +224,68 @@ func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {
 	}
 }
 
+func TestServiceAppendAndOpenDump(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes.md"), `---
+title: "Project Notes"
+status: "raw"
+---
+
+# Project Notes
+
+Original body.
+`)
+
+	operations := newTestService(t, projectDir)
+
+	appendResult, err := operations.AppendDump(DumpAppendRequest{
+		RelativePath: ".chc/dumps/project-notes.md",
+		Content:      "Appended body.",
+	})
+	if err != nil {
+		t.Fatalf("AppendDump returned error: %v", err)
+	}
+
+	content := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes.md"))
+	for _, want := range []string{
+		`title: "Project Notes"`,
+		"Original body.",
+		"Appended body.",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("dump content missing %q:\n%s", want, content)
+		}
+	}
+
+	if len(appendResult.Dumps) != 1 {
+		t.Fatalf("append result dumps = %#v, want one dump", appendResult.Dumps)
+	}
+
+	openResult, err := operations.OpenDump(DumpOpenRequest{
+		RelativePath: ".chc/dumps/project-notes.md",
+	})
+	if err != nil {
+		t.Fatalf("OpenDump returned error: %v", err)
+	}
+
+	if openResult.Message != "Selected dump path: .chc/dumps/project-notes.md" {
+		t.Fatalf("open message = %q", openResult.Message)
+	}
+}
+
+func TestServiceRejectsDumpPathsOutsideDumpDirectory(t *testing.T) {
+	operations := newTestService(t, t.TempDir())
+
+	_, err := operations.AppendDump(DumpAppendRequest{
+		RelativePath: ".chc/project.md",
+		Content:      "bad",
+	})
+	if err == nil {
+		t.Fatal("AppendDump returned nil error, want invalid path error")
+	}
+}
+
 func assertProjectDumpContent(t *testing.T, projectDir string) {
 	t.Helper()
 

@@ -53,6 +53,8 @@ func DefaultCommandRegistry() []Command {
 		{ID: "open-source", Title: "Open selected source path", Description: "Show the selected source path for external opening.", Action: CommandActionOpenSelectedSource},
 		{ID: "create-ticket", Title: "Create ticket", Description: "Create a default task ticket after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateTicket},
 		{ID: "create-dump", Title: "Create dump", Description: "Create a scoped dump after confirmation.", Action: CommandActionPlanDump, Dump: DumpActionCreate},
+		{ID: "append-dump", Title: "Append dump", Description: "Append a default note to the selected dump after confirmation.", Action: CommandActionPlanDump, Dump: DumpActionAppend},
+		{ID: "open-dump", Title: "Open dump", Description: "Resolve the selected dump path through the service.", Action: CommandActionPlanDump, Dump: DumpActionOpen},
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a spec-oriented authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
 		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
 		{ID: "ticket-add-comment", Title: "Add ticket comment", Description: "Add a standard comment to the selected ticket after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionAddComment},

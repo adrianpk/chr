@@ -11,6 +11,8 @@ type DumpActionID string
 
 const (
 	DumpActionCreate DumpActionID = "create_dump"
+	DumpActionAppend DumpActionID = "append_dump"
+	DumpActionOpen   DumpActionID = "open_dump"
 )
 
 type DumpActionExecutor interface {
@@ -22,6 +24,7 @@ type DumpActionRequest struct {
 	Title   string
 	Content string
 	Scope   DumpScope
+	Path    string
 }
 
 type DumpActionResult struct {
@@ -67,22 +70,7 @@ func (m Model) updateDumpActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) planDumpAction(action DumpActionID) {
-	request := DumpActionRequest{
-		Action:  action,
-		Title:   m.defaultDumpTitle(),
-		Content: "Initial dump created from the TUI.",
-		Scope:   m.defaultDumpScope(),
-	}
-
-	m.dumpAction = DumpActionState{
-		Pending: true,
-		Request: request,
-		Title:   "Create dump",
-		Details: []string{
-			"Title: " + request.Title,
-			"Scope: " + dumpScopeLabel(request.Scope),
-		},
-	}
+	m.dumpAction = m.newDumpActionState(action)
 	m.statusMessage = ""
 }
 
@@ -140,4 +128,67 @@ func (m Model) defaultDumpTitle() string {
 	}
 
 	return scope.CaseSlug + " dump"
+}
+
+func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
+	switch action {
+	case DumpActionCreate:
+		request := DumpActionRequest{
+			Action:  action,
+			Title:   m.defaultDumpTitle(),
+			Content: "Initial dump created from the TUI.",
+			Scope:   m.defaultDumpScope(),
+		}
+
+		return DumpActionState{
+			Pending: true,
+			Request: request,
+			Title:   "Create dump",
+			Details: []string{
+				"Title: " + request.Title,
+				"Scope: " + dumpScopeLabel(request.Scope),
+			},
+		}
+	case DumpActionAppend:
+		dump, ok := m.selectedDumpView()
+		if !ok {
+			return DumpActionState{}
+		}
+
+		request := DumpActionRequest{
+			Action:  action,
+			Path:    dump.RelativePath,
+			Content: "Appended dump note from the TUI.",
+		}
+
+		return DumpActionState{
+			Pending: true,
+			Request: request,
+			Title:   "Append dump",
+			Details: []string{
+				"Path: " + request.Path,
+			},
+		}
+	case DumpActionOpen:
+		dump, ok := m.selectedDumpView()
+		if !ok {
+			return DumpActionState{}
+		}
+
+		request := DumpActionRequest{
+			Action: action,
+			Path:   dump.RelativePath,
+		}
+
+		return DumpActionState{
+			Pending: true,
+			Request: request,
+			Title:   "Open dump",
+			Details: []string{
+				"Path: " + request.Path,
+			},
+		}
+	default:
+		return DumpActionState{}
+	}
 }

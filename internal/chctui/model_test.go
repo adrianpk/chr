@@ -1157,6 +1157,71 @@ func TestModelConfirmsDumpAction(t *testing.T) {
 	}
 }
 
+func TestModelPlansAppendDumpCommand(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+		},
+	})
+	model.selected = 2
+	model.commandPalette.Open = true
+	model.commandPalette.Filter = "append-dump"
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	planned, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if !planned.dumpAction.Pending {
+		t.Fatal("dump action is not pending")
+	}
+
+	if planned.dumpAction.Request.Action != DumpActionAppend {
+		t.Fatalf("dump action = %q, want %q", planned.dumpAction.Request.Action, DumpActionAppend)
+	}
+
+	if planned.dumpAction.Request.Path != ".chc/dumps/project-dump.md" {
+		t.Fatalf("dump path = %q", planned.dumpAction.Request.Path)
+	}
+}
+
+func TestModelConfirmsAppendDumpAction(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message: "Appended dump .chc/dumps/project-dump.md.",
+			Dumps: []DumpView{
+				{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+			},
+		},
+	}
+	model := NewModel(Options{DumpExecutor: executor})
+	model.dumpAction = DumpActionState{
+		Pending: true,
+		Request: DumpActionRequest{
+			Action:  DumpActionAppend,
+			Path:    ".chc/dumps/project-dump.md",
+			Content: "Appended dump note from the TUI.",
+		},
+	}
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	confirmed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.request.Action != DumpActionAppend {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionAppend)
+	}
+
+	if confirmed.statusMessage != executor.result.Message {
+		t.Fatalf("statusMessage = %q, want %q", confirmed.statusMessage, executor.result.Message)
+	}
+}
+
 func TestModelCancelsArtifactAction(t *testing.T) {
 	model := NewModel(Options{})
 	model.artifactAction = NewArtifactActionState(ArtifactActionCreateTicket)

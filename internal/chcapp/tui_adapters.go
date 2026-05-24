@@ -242,18 +242,41 @@ func (e tuiDumpActionExecutor) ExecuteDumpAction(
 			return chctui.DumpActionResult{}, err
 		}
 
-		dumps, err := loadTUIDumps(e.operations)
+		return dumpActionResult(result, e.operations)
+	case chctui.DumpActionAppend:
+		result, err := e.operations.AppendDump(DumpAppendRequest{
+			RelativePath: request.Path,
+			Content:      request.Content,
+		})
 		if err != nil {
 			return chctui.DumpActionResult{}, err
 		}
 
-		return chctui.DumpActionResult{
-			Message: result.Message,
-			Dumps:   dumps,
-		}, nil
+		return dumpActionResult(result, e.operations)
+	case chctui.DumpActionOpen:
+		result, err := e.operations.OpenDump(DumpOpenRequest{
+			RelativePath: request.Path,
+		})
+		if err != nil {
+			return chctui.DumpActionResult{}, err
+		}
+
+		return dumpActionResult(result, e.operations)
 	default:
 		return chctui.DumpActionResult{}, errors.New("unknown dump action")
 	}
+}
+
+func dumpActionResult(result DumpOperationResult, operations service) (chctui.DumpActionResult, error) {
+	dumps, err := loadTUIDumps(operations)
+	if err != nil {
+		return chctui.DumpActionResult{}, err
+	}
+
+	return chctui.DumpActionResult{
+		Message: result.Message,
+		Dumps:   dumps,
+	}, nil
 }
 
 type tuiWorkActionExecutor struct {
