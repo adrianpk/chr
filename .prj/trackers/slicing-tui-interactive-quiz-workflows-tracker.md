@@ -62,7 +62,7 @@ Prerequisite PRs or delivered work:
 | Slice 5: TUI Deep Quiz Loop | Delivered | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | PR #187. |
 | Slice 6: Fast Quiz Candidates | Delivered | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | PR #188. |
 | Slice 7: Ariadne Trail Recovery | Delivered | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | PR #189. |
-| Slice 8: Quiz Curation Polish | Planned | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | Curated notes and documentation alignment. |
+| Slice 8: Quiz Curation Polish | Reviewing | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | PR pending. |
 
 ## Slice 1: Quiz Runtime Model
 
@@ -246,23 +246,28 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Generate or refresh curated quiz notes when the user marks a quiz done.
-- [ ] Render curated body in the Quizzes detail panel when no active question
+- [x] Generate or refresh curated quiz notes when the user marks a quiz done.
+- [x] Render curated body in the Quizzes detail panel when no active question
       is running.
-- [ ] Ensure curated notes distill raw turns instead of mirroring them
+- [x] Ensure curated notes distill raw turns instead of mirroring them
       one-to-one.
-- [ ] Add promotion support from complete quiz plus relevant dump context to a
+- [x] Add promotion support from complete quiz plus relevant dump context to a
       spec artifact with `status: draft`.
-- [ ] Route draft spec synthesis through the formal model request/response
+- [x] Route draft spec synthesis through the formal model request/response
       boundary.
-- [ ] Align docs with the implemented interactive quiz contract.
-- [ ] Add tests for curated artifact shape and TUI curated-body rendering.
-- [ ] Add final slicing report or completion notes.
-- [ ] Run targeted tests and `make verify`.
+- [x] Align docs with the implemented interactive quiz contract.
+- [x] Add tests for curated artifact shape and TUI curated-body rendering.
+- [x] Add final slicing report or completion notes.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T8.1: `d434519` polishes quiz curation, draft spec generation, model boundary, docs, and tests.
+
+Validation:
+
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `make verify`
 
 ## Open Decisions
 
