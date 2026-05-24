@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 
 Slicing name: TUI Interactive Quiz Workflows
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: quiz runtime model
+Active slice short name: quiz artifact repository
 
-Expected branch name: `feat/slice-1-quiz-runtime-model`
+Expected branch name: `feat/slice-2-quiz-artifact-repository`
 
-Expected PR title: `feat(slice-1): quiz runtime model`
+Expected PR title: `feat(slice-2): quiz artifact repository`
 
 Expected report path:
-`.prj/reports/slices/tui-interactive-quiz-workflows/slice-1-quiz-runtime-model.md`
+`.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md`
 
 Prerequisite PRs or delivered work:
 
@@ -25,6 +25,7 @@ Prerequisite PRs or delivered work:
 - TUI Dump Workflows through PR #181.
 - External dump editor shell-launch fix through PR #182.
 - Workspace index and semantic cache slicing through PR #172.
+- Slice 1 quiz runtime model through PR #183.
 
 ## Slicing Checklist
 
