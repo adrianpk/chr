@@ -95,16 +95,16 @@ The target TUI behavior is:
 
 Slicing name: TUI Interactive Quiz Workflows
 
-Active slice number: Slice 6
+Active slice number: Slice 7
 
-Active slice short name: fast quiz candidates
+Active slice short name: ariadne trail recovery
 
-Expected branch name: `feat/slice-6-fast-quiz-candidates`
+Expected branch name: `feat/slice-7-ariadne-trail-recovery`
 
-Expected PR title: `feat(slice-6): fast quiz candidates`
+Expected PR title: `feat(slice-7): ariadne trail recovery`
 
 Expected report path:
-`.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md`
+`.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md`
 
 Prerequisite PRs or delivered work:
 
@@ -117,6 +117,7 @@ Prerequisite PRs or delivered work:
 - Slice 3 quiz service operations through PR #185.
 - Slice 4 scoped quiz read model through PR #186.
 - Slice 5 TUI deep quiz loop through PR #187.
+- Slice 6 fast quiz candidates through PR #188.
 
 | Slice | Short Name | Expected Branch | Expected PR Title | Expected Report |
 | --- | --- | --- | --- | --- |

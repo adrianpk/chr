@@ -1,11 +1,11 @@
 # Slice 6: Fast Quiz Candidates
 
-Status: reviewing
+Status: delivered
 Slicing: TUI Interactive Quiz Workflows
 Plan: `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 Tracker: `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 Branch: `feat/slice-6-fast-quiz-candidates`
-PR: TBD
+PR: #188
 
 ## Purpose
 
