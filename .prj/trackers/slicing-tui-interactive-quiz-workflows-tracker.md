@@ -60,7 +60,7 @@ Prerequisite PRs or delivered work:
 | Slice 4: Scoped Quiz Read Model | Delivered | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | PR #186. |
 | Slice 5: TUI Deep Quiz Loop | Delivered | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | PR #187. |
 | Slice 6: Fast Quiz Candidates | Delivered | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | PR #188. |
-| Slice 7: Ariadne Trail Recovery | Planned | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | Trail display, depth cap, branch return, resume recovery. |
+| Slice 7: Ariadne Trail Recovery | Reviewing | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | Trail display, depth cap, branch return, resume recovery. |
 | Slice 8: Quiz Curation Polish | Planned | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | Curated notes and documentation alignment. |
 
 ## Slice 1: Quiz Runtime Model
@@ -220,20 +220,26 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Persist trunk id, parent id, topic, depth, trail, and branch return
+- [x] Persist trunk id, parent id, topic, depth, trail, and branch return
       reason in runtime state.
-- [ ] Render compact trail information in the Quizzes detail panel.
-- [ ] Enforce maximum follow-up depth of 3.
-- [ ] Return to broader coverage after branch closure.
-- [ ] Reconstruct active question and trail from runtime state on resume.
-- [ ] Add tests for depth cap, trunk return, trail rendering, and missing-state
+- [x] Render compact trail information in the Quizzes detail panel.
+- [x] Enforce maximum follow-up depth of 3.
+- [x] Return to broader coverage after branch closure.
+- [x] Reconstruct active question and trail from runtime state on resume.
+- [x] Add tests for depth cap, trunk return, trail rendering, and missing-state
       recovery.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and `make verify`.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T7.1: `1abf09b` adds quiz trail recovery and branch return rendering.
+
+Validation:
+
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `make verify`
+
 
 ## Slice 8: Quiz Curation Polish
 
