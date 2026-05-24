@@ -58,7 +58,7 @@ Prerequisite PRs or delivered work:
 | Slice 3: Quiz Service Operations | Delivered | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | PR #185. |
 | Slice 4: Scoped Quiz Read Model | Delivered | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | PR #186. |
 | Slice 5: TUI Deep Quiz Loop | Delivered | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | PR #187. |
-| Slice 6: Fast Quiz Candidates | Planned | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | Internal candidate buffering and mode switch. |
+| Slice 6: Fast Quiz Candidates | Reviewing | `feat/slice-6-fast-quiz-candidates` | `feat(slice-6): fast quiz candidates` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-6-fast-quiz-candidates.md` | Internal candidate buffering and mode switch. |
 | Slice 7: Ariadne Trail Recovery | Planned | `feat/slice-7-ariadne-trail-recovery` | `feat(slice-7): ariadne trail recovery` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-7-ariadne-trail-recovery.md` | Trail display, depth cap, branch return, resume recovery. |
 | Slice 8: Quiz Curation Polish | Planned | `feat/slice-8-quiz-curation-polish` | `feat(slice-8): quiz curation polish` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-8-quiz-curation-polish.md` | Curated notes and documentation alignment. |
 
@@ -193,21 +193,27 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Add mode switch operation to the TUI and service result flow.
-- [ ] Add internal fast candidate generation and activation behavior.
-- [ ] Route fast candidate generation through the formal model request/response
+- [x] Add mode switch operation to the TUI and service result flow.
+- [x] Add internal fast candidate generation and activation behavior.
+- [x] Route fast candidate generation through the formal model request/response
       boundary.
-- [ ] Ensure ambiguous answers fall back to deep generation.
-- [ ] Ensure discarded candidates stay out of raw capture and curated notes.
-- [ ] Add candidate cleanup during branch selection, mode switch, completion,
+- [x] Ensure ambiguous answers fall back to deep generation.
+- [x] Ensure discarded candidates stay out of raw capture and curated notes.
+- [x] Add candidate cleanup during branch selection, mode switch, completion,
       replacement, and stale resume.
-- [ ] Add tests for candidate activation, discard, cleanup, and mode switching.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and `make verify`.
+- [x] Add tests for candidate activation, discard, cleanup, and mode switching.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T6.1: `95b062d` adds fast quiz candidate buffering, activation, and mode controls.
+
+Validation:
+
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `make verify`
+
 
 ## Slice 7: Ariadne Trail Recovery
 
