@@ -1,6 +1,7 @@
 package chcapp
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -49,9 +50,20 @@ type DumpOpenRequest struct {
 	RelativePath string
 }
 
+type DumpEditorCommand struct {
+	Program string
+	Args    []string
+	Dir     string
+}
+
+type DumpEditorLauncher interface {
+	EditorCommand(ctx context.Context, path string) (DumpEditorCommand, error)
+}
+
 type DumpOperationResult struct {
-	Message string
-	Dumps   []DumpView
+	Message       string
+	Dumps         []DumpView
+	EditorCommand *DumpEditorCommand
 }
 
 func (s service) ListDumps() (DumpListResult, error) {
@@ -161,19 +173,19 @@ func (s service) SaveDump(request DumpSaveRequest) (DumpOperationResult, error) 
 }
 
 func (s service) OpenDump(request DumpOpenRequest) (DumpOperationResult, error) {
-	_, err := s.resolveDumpPath(request.RelativePath)
+	path, err := s.resolveDumpPath(request.RelativePath)
 	if err != nil {
 		return DumpOperationResult{}, err
 	}
 
-	result, err := s.ListDumps()
+	command, err := s.dumpEditor.EditorCommand(s.ctx, path)
 	if err != nil {
 		return DumpOperationResult{}, err
 	}
 
 	return DumpOperationResult{
-		Message: "Selected dump path: " + filepath.ToSlash(request.RelativePath),
-		Dumps:   result.Dumps,
+		Message:       "Editing dump " + filepath.ToSlash(request.RelativePath) + ".",
+		EditorCommand: &command,
 	}, nil
 }
 
@@ -343,4 +355,28 @@ func renderDumpMarkdown(title string, scope DumpScope, content string) string {
 
 func quoteDumpFrontmatter(value string) string {
 	return fmt.Sprintf("%q", strings.TrimSpace(value))
+}
+
+type defaultDumpEditorLauncher struct{}
+
+func (defaultDumpEditorLauncher) EditorCommand(_ context.Context, path string) (DumpEditorCommand, error) {
+	editor := strings.TrimSpace(os.Getenv("VISUAL"))
+	if editor == "" {
+		editor = strings.TrimSpace(os.Getenv("EDITOR"))
+	}
+
+	if editor == "" {
+		editor = "vi"
+	}
+
+	parts := strings.Fields(editor)
+	if len(parts) == 0 {
+		return DumpEditorCommand{}, fmt.Errorf("editor command is required")
+	}
+
+	return DumpEditorCommand{
+		Program: parts[0],
+		Args:    append(parts[1:], path),
+		Dir:     filepath.Dir(path),
+	}, nil
 }

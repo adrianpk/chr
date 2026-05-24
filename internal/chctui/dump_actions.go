@@ -2,6 +2,7 @@ package chctui
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -10,9 +11,10 @@ import (
 type DumpActionID string
 
 const (
-	DumpActionCreate DumpActionID = "create_dump"
-	DumpActionAppend DumpActionID = "append_dump"
-	DumpActionEdit   DumpActionID = "edit_dump"
+	DumpActionCreate  DumpActionID = "create_dump"
+	DumpActionAppend  DumpActionID = "append_dump"
+	DumpActionEdit    DumpActionID = "edit_dump"
+	DumpActionRefresh DumpActionID = "refresh_dumps"
 )
 
 type DumpActionExecutor interface {
@@ -28,8 +30,10 @@ type DumpActionRequest struct {
 }
 
 type DumpActionResult struct {
-	Message string
-	Dumps   []DumpView
+	Message       string
+	Dumps         []DumpView
+	SelectedPath  string
+	EditorCommand *exec.Cmd
 }
 
 type DumpActionState struct {
@@ -63,7 +67,7 @@ func (m Model) updateDumpActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case tea.KeyEsc:
 		m.cancelDumpAction()
 	case tea.KeyEnter:
-		m.confirmDumpAction()
+		return m, m.confirmDumpAction()
 	}
 
 	return m, nil
@@ -79,9 +83,73 @@ func (m *Model) cancelDumpAction() {
 	m.statusMessage = "Action cancelled."
 }
 
-func (m *Model) confirmDumpAction() {
+func (m *Model) confirmDumpAction() tea.Cmd {
 	request := m.dumpAction.Request
 	m.dumpAction = DumpActionState{}
+
+	if m.dumpExecutor == nil {
+		m.statusMessage = "Dump action executor is unavailable."
+
+		return nil
+	}
+
+	result, err := m.dumpExecutor.ExecuteDumpAction(request)
+	if err != nil {
+		m.statusMessage = "Action failed: " + err.Error()
+
+		return nil
+	}
+
+	if result.EditorCommand != nil {
+		m.statusMessage = result.Message
+
+		return tea.ExecProcess(result.EditorCommand, func(err error) tea.Msg {
+			return dumpEditorFinishedMsg{
+				err:  err,
+				path: request.Path,
+			}
+		})
+	}
+
+	m.applyDumpActionResult(result)
+
+	return nil
+}
+
+func (m *Model) applyDumpActionResult(result DumpActionResult) {
+	if result.Dumps != nil {
+		m.dumps = normalizeDumpViews(result.Dumps)
+		m.selectDumpByPath(m.dumpSelectionPath(result.SelectedPath))
+	}
+
+	m.statusMessage = result.Message
+}
+
+func (m Model) dumpSelectionPath(path string) string {
+	path = strings.TrimSpace(path)
+	if path != "" {
+		return path
+	}
+
+	dump, ok := m.selectedDumpView()
+	if !ok {
+		return ""
+	}
+
+	return dump.RelativePath
+}
+
+type dumpEditorFinishedMsg struct {
+	err  error
+	path string
+}
+
+func (m *Model) completeDumpEdit(msg dumpEditorFinishedMsg) {
+	if msg.err != nil {
+		m.statusMessage = "Edit failed: " + msg.err.Error()
+
+		return
+	}
 
 	if m.dumpExecutor == nil {
 		m.statusMessage = "Dump action executor is unavailable."
@@ -89,23 +157,17 @@ func (m *Model) confirmDumpAction() {
 		return
 	}
 
-	result, err := m.dumpExecutor.ExecuteDumpAction(request)
+	result, err := m.dumpExecutor.ExecuteDumpAction(DumpActionRequest{
+		Action: DumpActionRefresh,
+		Path:   msg.path,
+	})
 	if err != nil {
-		m.statusMessage = "Action failed: " + err.Error()
+		m.statusMessage = "Refresh failed: " + err.Error()
 
 		return
 	}
 
 	m.applyDumpActionResult(result)
-}
-
-func (m *Model) applyDumpActionResult(result DumpActionResult) {
-	if result.Dumps != nil {
-		m.dumps = normalizeDumpViews(result.Dumps)
-		m.selectedDump = 0
-	}
-
-	m.statusMessage = result.Message
 }
 
 func (m Model) defaultDumpScope() DumpScope {

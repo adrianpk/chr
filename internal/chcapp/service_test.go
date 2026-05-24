@@ -1,6 +1,7 @@
 package chcapp
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -238,6 +239,14 @@ Original body.
 `)
 
 	operations := newTestService(t, projectDir)
+	editor := &fakeDumpEditorLauncher{
+		command: DumpEditorCommand{
+			Program: "test-editor",
+			Args:    []string{"--wait"},
+			Dir:     projectDir,
+		},
+	}
+	operations.dumpEditor = editor
 
 	appendResult, err := operations.AppendDump(DumpAppendRequest{
 		RelativePath: ".chc/dumps/project-notes.md",
@@ -262,6 +271,17 @@ Original body.
 		t.Fatalf("append result dumps = %#v, want one dump", appendResult.Dumps)
 	}
 
+	assertServiceOpenDumpEditorCommand(t, operations, editor, projectDir)
+}
+
+func assertServiceOpenDumpEditorCommand(
+	t *testing.T,
+	operations service,
+	editor *fakeDumpEditorLauncher,
+	projectDir string,
+) {
+	t.Helper()
+
 	openResult, err := operations.OpenDump(DumpOpenRequest{
 		RelativePath: ".chc/dumps/project-notes.md",
 	})
@@ -269,8 +289,20 @@ Original body.
 		t.Fatalf("OpenDump returned error: %v", err)
 	}
 
-	if openResult.Message != "Selected dump path: .chc/dumps/project-notes.md" {
+	if editor.path != filepath.Join(projectDir, ".chc", "dumps", "project-notes.md") {
+		t.Fatalf("editor path = %q", editor.path)
+	}
+
+	if openResult.Message != "Editing dump .chc/dumps/project-notes.md." {
 		t.Fatalf("open message = %q", openResult.Message)
+	}
+
+	if openResult.EditorCommand == nil {
+		t.Fatal("EditorCommand = nil, want editor command")
+	}
+
+	if openResult.EditorCommand.Program != "test-editor" {
+		t.Fatalf("editor program = %q", openResult.EditorCommand.Program)
 	}
 }
 
@@ -562,6 +594,18 @@ func newTestService(t *testing.T, projectDir string) service {
 		ProjectDir: projectDir,
 		ProjectID:  "service-project",
 	})
+}
+
+type fakeDumpEditorLauncher struct {
+	path    string
+	command DumpEditorCommand
+	err     error
+}
+
+func (l *fakeDumpEditorLauncher) EditorCommand(_ context.Context, path string) (DumpEditorCommand, error) {
+	l.path = path
+
+	return l.command, l.err
 }
 
 func assertWorkspaceIndexCacheMiss(t *testing.T, cache chc.WorkspaceIndexCacheState) {

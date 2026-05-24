@@ -144,6 +144,27 @@ func (m Model) selectedDumpPosition() int {
 	return 0
 }
 
+func (m *Model) selectDumpByPath(path string) {
+	path = strings.TrimSpace(path)
+	if path != "" {
+		for _, dump := range m.dumps {
+			if dump.RelativePath == path {
+				m.selectedDump = dump.Index
+
+				return
+			}
+		}
+	}
+
+	if len(m.dumps) > 0 {
+		m.selectedDump = m.dumps[0].Index
+
+		return
+	}
+
+	m.selectedDump = 0
+}
+
 func normalizeDumpViews(dumps []DumpView) []DumpView {
 	normalized := append([]DumpView(nil), dumps...)
 	for index := range normalized {

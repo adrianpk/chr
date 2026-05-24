@@ -247,6 +247,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case tea.MouseMsg:
 		return m.updateMouse(typedMsg)
+	case dumpEditorFinishedMsg:
+		m.completeDumpEdit(typedMsg)
+
+		return m, nil
 	case tea.KeyMsg:
 		return m.updateKey(typedMsg)
 	default:

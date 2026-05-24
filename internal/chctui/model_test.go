@@ -3,6 +3,7 @@ package chctui
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -1067,7 +1068,7 @@ func TestDefaultCommandRegistryExposesDumpWorkflows(t *testing.T) {
 		commandsByID[command.ID] = command
 	}
 
-	for _, id := range []string{"create-dump", "append-dump", "edit-dump"} {
+	for _, id := range []string{"create-dump", "edit-dump"} {
 		command, ok := commandsByID[id]
 		if !ok {
 			t.Fatalf("command %q not found", id)
@@ -1190,36 +1191,6 @@ func TestModelRendersEmptyDumpState(t *testing.T) {
 	}
 }
 
-func TestModelPlansAppendDumpCommand(t *testing.T) {
-	model := NewModel(Options{
-		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
-		},
-	})
-	model.selected = 2
-	model.commandPalette.Open = true
-	model.commandPalette.Filter = "append-dump"
-
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
-
-	planned, ok := updated.(Model)
-	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
-	}
-
-	if !planned.dumpAction.Pending {
-		t.Fatal("dump action is not pending")
-	}
-
-	if planned.dumpAction.Request.Action != DumpActionAppend {
-		t.Fatalf("dump action = %q, want %q", planned.dumpAction.Request.Action, DumpActionAppend)
-	}
-
-	if planned.dumpAction.Request.Path != ".chc/dumps/project-dump.md" {
-		t.Fatalf("dump path = %q", planned.dumpAction.Request.Path)
-	}
-}
-
 func TestModelPlansEditDumpCommand(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
@@ -1282,6 +1253,81 @@ func TestModelConfirmsAppendDumpAction(t *testing.T) {
 
 	if confirmed.statusMessage != executor.result.Message {
 		t.Fatalf("statusMessage = %q, want %q", confirmed.statusMessage, executor.result.Message)
+	}
+}
+
+func TestModelConfirmsEditDumpActionReturnsEditorCommand(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message:       "Editing dump .chc/dumps/project-dump.md.",
+			EditorCommand: exec.Command("true"),
+		},
+	}
+	model := NewModel(Options{DumpExecutor: executor})
+	model.dumpAction = DumpActionState{
+		Pending: true,
+		Request: DumpActionRequest{
+			Action: DumpActionEdit,
+			Path:   ".chc/dumps/project-dump.md",
+		},
+	}
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	confirmed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if cmd == nil {
+		t.Fatal("cmd = nil, want editor command")
+	}
+
+	if executor.request.Action != DumpActionEdit {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionEdit)
+	}
+
+	if confirmed.statusMessage != executor.result.Message {
+		t.Fatalf("statusMessage = %q, want %q", confirmed.statusMessage, executor.result.Message)
+	}
+}
+
+func TestModelRefreshesDumpsAfterEditorFinishes(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message: "Edited dump .chc/dumps/second.md.",
+			Dumps: []DumpView{
+				{Title: "First", RelativePath: ".chc/dumps/first.md"},
+				{Title: "Second", RelativePath: ".chc/dumps/second.md"},
+			},
+			SelectedPath: ".chc/dumps/second.md",
+		},
+	}
+	model := NewModel(Options{
+		DumpExecutor: executor,
+		Dumps: []DumpView{
+			{Title: "Second", RelativePath: ".chc/dumps/second.md"},
+		},
+	})
+
+	updated, _ := model.Update(dumpEditorFinishedMsg{path: ".chc/dumps/second.md"})
+
+	refreshed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if executor.request.Action != DumpActionRefresh {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionRefresh)
+	}
+
+	dump, ok := refreshed.selectedDumpView()
+	if !ok {
+		t.Fatal("selectedDumpView returned no dump")
+	}
+
+	if dump.RelativePath != ".chc/dumps/second.md" {
+		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
 

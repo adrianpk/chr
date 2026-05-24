@@ -12,6 +12,7 @@ type service struct {
 	env            chc.UserEnvironment
 	assetsFS       fs.FS
 	projectContext commandProjectContext
+	dumpEditor     DumpEditorLauncher
 }
 
 func newService(
@@ -24,5 +25,6 @@ func newService(
 		env:            env,
 		assetsFS:       assetsFS,
 		projectContext: projectContext,
+		dumpEditor:     defaultDumpEditorLauncher{},
 	}
 }

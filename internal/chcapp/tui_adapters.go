@@ -2,6 +2,7 @@ package chcapp
 
 import (
 	"errors"
+	"os/exec"
 
 	"forge.adrianpk.com/chc/internal/chc"
 	"forge.adrianpk.com/chc/internal/chctui"
@@ -262,6 +263,17 @@ func (e tuiDumpActionExecutor) ExecuteDumpAction(
 		}
 
 		return dumpActionResult(result, e.operations)
+	case chctui.DumpActionRefresh:
+		dumps, err := loadTUIDumps(e.operations)
+		if err != nil {
+			return chctui.DumpActionResult{}, err
+		}
+
+		return chctui.DumpActionResult{
+			Message:      "Edited dump " + request.Path + ".",
+			Dumps:        dumps,
+			SelectedPath: request.Path,
+		}, nil
 	default:
 		return chctui.DumpActionResult{}, errors.New("unknown dump action")
 	}
@@ -273,10 +285,21 @@ func dumpActionResult(result DumpOperationResult, operations service) (chctui.Du
 		return chctui.DumpActionResult{}, err
 	}
 
-	return chctui.DumpActionResult{
+	actionResult := chctui.DumpActionResult{
 		Message: result.Message,
 		Dumps:   dumps,
-	}, nil
+	}
+
+	if result.EditorCommand != nil {
+		actionResult.EditorCommand = exec.CommandContext(
+			operations.ctx,
+			result.EditorCommand.Program,
+			result.EditorCommand.Args...,
+		)
+		actionResult.EditorCommand.Dir = result.EditorCommand.Dir
+	}
+
+	return actionResult, nil
 }
 
 type tuiWorkActionExecutor struct {
