@@ -3,6 +3,7 @@ package chcapp
 import (
 	"context"
 	"io/fs"
+	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
 )
@@ -13,6 +14,8 @@ type service struct {
 	assetsFS       fs.FS
 	projectContext commandProjectContext
 	dumpEditor     DumpEditorLauncher
+	quizModel      chc.QuizModelAdapter
+	now            func() time.Time
 }
 
 func newService(
@@ -26,5 +29,6 @@ func newService(
 		assetsFS:       assetsFS,
 		projectContext: projectContext,
 		dumpEditor:     defaultDumpEditorLauncher{},
+		now:            time.Now,
 	}
 }
