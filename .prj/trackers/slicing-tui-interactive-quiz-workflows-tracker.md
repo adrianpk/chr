@@ -50,7 +50,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Quiz Runtime Model | Delivered | `feat/slice-1-quiz-runtime-model` | `feat(slice-1): quiz runtime model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-1-quiz-runtime-model.md` | PR #183. |
-| Slice 2: Quiz Artifact Repository | Planned | `feat/slice-2-quiz-artifact-repository` | `feat(slice-2): quiz artifact repository` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md` | File-backed raw, curated, and runtime-state artifacts. |
+| Slice 2: Quiz Artifact Repository | Reviewing | `feat/slice-2-quiz-artifact-repository` | `feat(slice-2): quiz artifact repository` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md` | File-backed raw, curated, and runtime-state artifacts. |
 | Slice 3: Quiz Service Operations | Planned | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | Service start/resume/answer/skip/done/cancel/mode operations. |
 | Slice 4: Scoped Quiz Read Model | Planned | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | TUI read model and scoped quiz listing. |
 | Slice 5: TUI Deep Quiz Loop | Planned | `feat/slice-5-tui-deep-quiz-loop` | `feat(slice-5): tui deep quiz loop` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-5-tui-deep-quiz-loop.md` | Interactive one-question-at-a-time deep mode. |
@@ -89,20 +89,26 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Add canonical quiz artifact path resolution for project and use-case
+- [x] Add canonical quiz artifact path resolution for project and use-case
       scopes.
-- [ ] Add raw capture rendering and append behavior.
-- [ ] Add curated quiz rendering from distilled entries.
-- [ ] Add runtime JSON state save/load behavior.
-- [ ] Add candidate persistence only inside runtime state.
-- [ ] Add repository tests for paths, rendering, resume, and candidate
+- [x] Add raw capture rendering and append behavior.
+- [x] Add curated quiz rendering from distilled entries.
+- [x] Add runtime JSON state save/load behavior.
+- [x] Add candidate persistence only inside runtime state.
+- [x] Add repository tests for paths, rendering, resume, and candidate
       isolation.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and `make verify`.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T2.1: `4181472` adds canonical quiz artifact paths, raw capture append,
+  curated note writes, runtime state JSON save/load, and tests.
+
+Validation:
+
+- `go test ./internal/chc`
+- `make verify`
 
 ## Slice 3: Quiz Service Operations
 
