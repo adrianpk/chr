@@ -1,6 +1,6 @@
 # TUI Interactive Quiz Workflows Slicing Tracker
 
-Status: planned
+Status: active
 
 Plan: `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 
@@ -39,7 +39,7 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -48,7 +48,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Quiz Runtime Model | Planned | `feat/slice-1-quiz-runtime-model` | `feat(slice-1): quiz runtime model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-1-quiz-runtime-model.md` | Core runtime model and validation only. |
+| Slice 1: Quiz Runtime Model | Reviewing | `feat/slice-1-quiz-runtime-model` | `feat(slice-1): quiz runtime model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-1-quiz-runtime-model.md` | Core runtime model and validation only. |
 | Slice 2: Quiz Artifact Repository | Planned | `feat/slice-2-quiz-artifact-repository` | `feat(slice-2): quiz artifact repository` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-2-quiz-artifact-repository.md` | File-backed raw, curated, and runtime-state artifacts. |
 | Slice 3: Quiz Service Operations | Planned | `feat/slice-3-quiz-service-operations` | `feat(slice-3): quiz service operations` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md` | Service start/resume/answer/skip/done/cancel/mode operations. |
 | Slice 4: Scoped Quiz Read Model | Planned | `feat/slice-4-scoped-quiz-read-model` | `feat(slice-4): scoped quiz read model` | `.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md` | TUI read model and scoped quiz listing. |
@@ -61,19 +61,28 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] Add quiz scope, status, mode, question, answer, coverage, trail, and
+- [x] Add quiz scope, status, mode, question, answer, coverage, trail, and
       candidate model types.
-- [ ] Add validation for runtime state, question depth, answers, skips,
+- [x] Add validation for runtime state, question depth, answers, skips,
       modes, statuses, and budget limits.
-- [ ] Add tests for valid project-wide and use-case-scoped runtime state.
-- [ ] Add tests for invalid depth, invalid answer/skip state, invalid mode,
+- [x] Add tests for valid project-wide and use-case-scoped runtime state.
+- [x] Add tests for invalid depth, invalid answer/skip state, invalid mode,
       invalid status, and budget overflow.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and `make verify`.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- T1.1: `549161e` adds quiz runtime model types.
+- T1.2: `55e7896` adds runtime validation.
+- T1.3: `2bb3a0d` covers valid project-wide and use-case runtime scopes.
+- T1.4: `cb06763` covers invalid runtime and entry states.
+- T1.5: `863ca6d` refines quiz context, promotion, and model boundary docs.
+
+Validation:
+
+- `go test ./internal/chc`
+- `make verify`
 
 ## Slice 2: Quiz Artifact Repository
 

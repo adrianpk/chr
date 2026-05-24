@@ -125,23 +125,12 @@ type QuizCandidate struct {
 }
 
 func ValidateQuizRuntimeState(state QuizRuntimeState) error {
-	if strings.TrimSpace(state.ID) == "" {
-		return fmt.Errorf("quiz runtime id is required")
+	err := validateQuizRuntimeIdentity(state)
+	if err != nil {
+		return err
 	}
 
-	if strings.TrimSpace(state.ProjectID) == "" {
-		return fmt.Errorf("quiz runtime project id is required")
-	}
-
-	if !state.Status.Valid() {
-		return fmt.Errorf("quiz runtime status is invalid: %s", state.Status)
-	}
-
-	if !state.Mode.Valid() {
-		return fmt.Errorf("quiz runtime mode is invalid: %s", state.Mode)
-	}
-
-	err := validateQuizRuntimeCounts(state)
+	err = validateQuizRuntimeCounts(state)
 	if err != nil {
 		return err
 	}
@@ -151,40 +140,12 @@ func ValidateQuizRuntimeState(state QuizRuntimeState) error {
 		return err
 	}
 
-	for index, topic := range state.Coverage {
-		err = ValidateQuizCoverageTopic(topic)
-		if err != nil {
-			return fmt.Errorf("quiz runtime coverage topic %d: %w", index+1, err)
-		}
+	err = validateQuizRuntimeCollections(state)
+	if err != nil {
+		return err
 	}
 
-	for index, node := range state.Trail {
-		err = ValidateQuizTrailNode(node)
-		if err != nil {
-			return fmt.Errorf("quiz runtime trail node %d: %w", index+1, err)
-		}
-	}
-
-	for index, candidate := range state.Candidates {
-		err = ValidateQuizCandidate(candidate)
-		if err != nil {
-			return fmt.Errorf("quiz runtime candidate %d: %w", index+1, err)
-		}
-	}
-
-	if strings.TrimSpace(state.RawPath) == "" {
-		return fmt.Errorf("quiz runtime raw path is required")
-	}
-
-	if strings.TrimSpace(state.CuratedPath) == "" {
-		return fmt.Errorf("quiz runtime curated path is required")
-	}
-
-	if state.UpdatedAt.IsZero() {
-		return fmt.Errorf("quiz runtime updated time is required")
-	}
-
-	return nil
+	return validateQuizRuntimeArtifacts(state)
 }
 
 func ValidateQuizScope(scope QuizScope) error {
@@ -196,105 +157,26 @@ func ValidateQuizScope(scope QuizScope) error {
 }
 
 func ValidateQuizQuestion(question QuizQuestion) error {
-	if strings.TrimSpace(question.ID) == "" {
-		return fmt.Errorf("quiz question id is required")
-	}
-
-	if strings.TrimSpace(question.Prompt) == "" {
-		return fmt.Errorf("quiz question prompt is required")
-	}
-
-	if strings.TrimSpace(question.Topic) == "" {
-		return fmt.Errorf("quiz question topic is required")
-	}
-
-	err := validateQuizDepth(question.Depth)
+	err := validateQuizQuestionCore(question)
 	if err != nil {
 		return err
 	}
 
-	if question.Depth == 1 {
-		if strings.TrimSpace(question.ParentID) != "" {
-			return fmt.Errorf("quiz trunk question parent id must be empty")
-		}
-
-		if question.TrunkID != question.ID {
-			return fmt.Errorf("quiz trunk question trunk id must match question id")
-		}
-	}
-
-	if question.Depth > 1 {
-		if strings.TrimSpace(question.ParentID) == "" {
-			return fmt.Errorf("quiz follow-up question parent id is required")
-		}
-
-		if strings.TrimSpace(question.TrunkID) == "" {
-			return fmt.Errorf("quiz follow-up question trunk id is required")
-		}
-	}
-
-	if question.CreatedAt.IsZero() {
-		return fmt.Errorf("quiz question created time is required")
-	}
-
-	return nil
+	return validateQuizQuestionRoute(question)
 }
 
 func ValidateQuizEntry(entry QuizEntry) error {
-	if strings.TrimSpace(entry.ID) == "" {
-		return fmt.Errorf("quiz entry id is required")
-	}
-
-	if strings.TrimSpace(entry.QuestionID) == "" {
-		return fmt.Errorf("quiz entry question id is required")
-	}
-
-	if strings.TrimSpace(entry.Question) == "" {
-		return fmt.Errorf("quiz entry question is required")
-	}
-
-	if !entry.Status.Valid() {
-		return fmt.Errorf("quiz entry status is invalid: %s", entry.Status)
-	}
-
-	if !entry.Mode.Valid() {
-		return fmt.Errorf("quiz entry mode is invalid: %s", entry.Mode)
-	}
-
-	if strings.TrimSpace(entry.Topic) == "" {
-		return fmt.Errorf("quiz entry topic is required")
-	}
-
-	err := validateQuizDepth(entry.Depth)
+	err := validateQuizEntryCore(entry)
 	if err != nil {
 		return err
 	}
 
-	if entry.Status == QuizEntryStatusAnswered && strings.TrimSpace(entry.Answer) == "" {
-		return fmt.Errorf("quiz answered entry answer is required")
+	err = validateQuizEntryAnswer(entry)
+	if err != nil {
+		return err
 	}
 
-	if entry.Status == QuizEntryStatusSkipped && strings.TrimSpace(entry.Answer) != "" {
-		return fmt.Errorf("quiz skipped entry answer must be empty")
-	}
-
-	if entry.Depth > 1 && strings.TrimSpace(entry.ParentID) == "" {
-		return fmt.Errorf("quiz follow-up entry parent id is required")
-	}
-
-	if entry.CreatedAt.IsZero() {
-		return fmt.Errorf("quiz entry created time is required")
-	}
-
-	if entry.AnsweredAt.IsZero() {
-		return fmt.Errorf("quiz entry answered time is required")
-	}
-
-	if entry.AnsweredAt.Before(entry.CreatedAt) {
-		return fmt.Errorf("quiz entry answered time is before created time")
-	}
-
-	return nil
+	return validateQuizEntryTimes(entry)
 }
 
 func ValidateQuizCoverageTopic(topic QuizCoverageTopic) error {
@@ -389,8 +271,7 @@ func (s QuizRuntimeStatus) Valid() bool {
 
 func (m QuizMode) Valid() bool {
 	switch m {
-	case QuizModeDeep,
-		QuizModeFast:
+	case QuizModeDeep, QuizModeFast:
 		return true
 	default:
 		return false
@@ -399,8 +280,7 @@ func (m QuizMode) Valid() bool {
 
 func (s QuizEntryStatus) Valid() bool {
 	switch s {
-	case QuizEntryStatusAnswered,
-		QuizEntryStatusSkipped:
+	case QuizEntryStatusAnswered, QuizEntryStatusSkipped:
 		return true
 	default:
 		return false
@@ -447,14 +327,32 @@ func validateQuizRuntimeCounts(state QuizRuntimeState) error {
 	return nil
 }
 
+func validateQuizRuntimeIdentity(state QuizRuntimeState) error {
+	if strings.TrimSpace(state.ID) == "" {
+		return fmt.Errorf("quiz runtime id is required")
+	}
+
+	if strings.TrimSpace(state.ProjectID) == "" {
+		return fmt.Errorf("quiz runtime project id is required")
+	}
+
+	if !state.Status.Valid() {
+		return fmt.Errorf("quiz runtime status is invalid: %s", state.Status)
+	}
+
+	if !state.Mode.Valid() {
+		return fmt.Errorf("quiz runtime mode is invalid: %s", state.Mode)
+	}
+
+	return nil
+}
+
 func validateQuizRuntimeActiveQuestion(state QuizRuntimeState) error {
 	if state.Status == QuizRuntimeStatusActive && state.ActiveQuestion == nil {
 		return fmt.Errorf("quiz runtime active question is required when active")
 	}
 
-	if state.Status != QuizRuntimeStatusActive &&
-		state.Status != QuizRuntimeStatusBlocked &&
-		state.ActiveQuestion != nil {
+	if quizRuntimeHasInvalidInactiveQuestion(state) {
 		return fmt.Errorf("quiz runtime active question must be empty unless active or blocked")
 	}
 
@@ -463,6 +361,197 @@ func validateQuizRuntimeActiveQuestion(state QuizRuntimeState) error {
 	}
 
 	return ValidateQuizQuestion(*state.ActiveQuestion)
+}
+
+func quizRuntimeHasInvalidInactiveQuestion(state QuizRuntimeState) bool {
+	return state.Status != QuizRuntimeStatusActive &&
+		state.Status != QuizRuntimeStatusBlocked &&
+		state.ActiveQuestion != nil
+}
+
+func validateQuizRuntimeCollections(state QuizRuntimeState) error {
+	err := validateQuizRuntimeCoverage(state.Coverage)
+	if err != nil {
+		return err
+	}
+
+	err = validateQuizRuntimeTrail(state.Trail)
+	if err != nil {
+		return err
+	}
+
+	return validateQuizRuntimeCandidates(state.Candidates)
+}
+
+func validateQuizRuntimeCoverage(topics []QuizCoverageTopic) error {
+	for index, topic := range topics {
+		err := ValidateQuizCoverageTopic(topic)
+		if err != nil {
+			return fmt.Errorf("quiz runtime coverage topic %d: %w", index+1, err)
+		}
+	}
+
+	return nil
+}
+
+func validateQuizRuntimeTrail(nodes []QuizTrailNode) error {
+	for index, node := range nodes {
+		err := ValidateQuizTrailNode(node)
+		if err != nil {
+			return fmt.Errorf("quiz runtime trail node %d: %w", index+1, err)
+		}
+	}
+
+	return nil
+}
+
+func validateQuizRuntimeCandidates(candidates []QuizCandidate) error {
+	for index, candidate := range candidates {
+		err := ValidateQuizCandidate(candidate)
+		if err != nil {
+			return fmt.Errorf("quiz runtime candidate %d: %w", index+1, err)
+		}
+	}
+
+	return nil
+}
+
+func validateQuizRuntimeArtifacts(state QuizRuntimeState) error {
+	if strings.TrimSpace(state.RawPath) == "" {
+		return fmt.Errorf("quiz runtime raw path is required")
+	}
+
+	if strings.TrimSpace(state.CuratedPath) == "" {
+		return fmt.Errorf("quiz runtime curated path is required")
+	}
+
+	if state.UpdatedAt.IsZero() {
+		return fmt.Errorf("quiz runtime updated time is required")
+	}
+
+	return nil
+}
+
+func validateQuizQuestionCore(question QuizQuestion) error {
+	if strings.TrimSpace(question.ID) == "" {
+		return fmt.Errorf("quiz question id is required")
+	}
+
+	if strings.TrimSpace(question.Prompt) == "" {
+		return fmt.Errorf("quiz question prompt is required")
+	}
+
+	if strings.TrimSpace(question.Topic) == "" {
+		return fmt.Errorf("quiz question topic is required")
+	}
+
+	err := validateQuizDepth(question.Depth)
+	if err != nil {
+		return err
+	}
+
+	if question.CreatedAt.IsZero() {
+		return fmt.Errorf("quiz question created time is required")
+	}
+
+	return nil
+}
+
+func validateQuizQuestionRoute(question QuizQuestion) error {
+	if question.Depth == 1 {
+		return validateQuizTrunkQuestion(question)
+	}
+
+	return validateQuizFollowUpQuestion(question)
+}
+
+func validateQuizTrunkQuestion(question QuizQuestion) error {
+	if strings.TrimSpace(question.ParentID) != "" {
+		return fmt.Errorf("quiz trunk question parent id must be empty")
+	}
+
+	if question.TrunkID != question.ID {
+		return fmt.Errorf("quiz trunk question trunk id must match question id")
+	}
+
+	return nil
+}
+
+func validateQuizFollowUpQuestion(question QuizQuestion) error {
+	if strings.TrimSpace(question.ParentID) == "" {
+		return fmt.Errorf("quiz follow-up question parent id is required")
+	}
+
+	if strings.TrimSpace(question.TrunkID) == "" {
+		return fmt.Errorf("quiz follow-up question trunk id is required")
+	}
+
+	return nil
+}
+
+func validateQuizEntryCore(entry QuizEntry) error {
+	if strings.TrimSpace(entry.ID) == "" {
+		return fmt.Errorf("quiz entry id is required")
+	}
+
+	if strings.TrimSpace(entry.QuestionID) == "" {
+		return fmt.Errorf("quiz entry question id is required")
+	}
+
+	if strings.TrimSpace(entry.Question) == "" {
+		return fmt.Errorf("quiz entry question is required")
+	}
+
+	if !entry.Status.Valid() {
+		return fmt.Errorf("quiz entry status is invalid: %s", entry.Status)
+	}
+
+	if !entry.Mode.Valid() {
+		return fmt.Errorf("quiz entry mode is invalid: %s", entry.Mode)
+	}
+
+	if strings.TrimSpace(entry.Topic) == "" {
+		return fmt.Errorf("quiz entry topic is required")
+	}
+
+	err := validateQuizDepth(entry.Depth)
+	if err != nil {
+		return err
+	}
+
+	if entry.Depth > 1 && strings.TrimSpace(entry.ParentID) == "" {
+		return fmt.Errorf("quiz follow-up entry parent id is required")
+	}
+
+	return nil
+}
+
+func validateQuizEntryAnswer(entry QuizEntry) error {
+	if entry.Status == QuizEntryStatusAnswered && strings.TrimSpace(entry.Answer) == "" {
+		return fmt.Errorf("quiz answered entry answer is required")
+	}
+
+	if entry.Status == QuizEntryStatusSkipped && strings.TrimSpace(entry.Answer) != "" {
+		return fmt.Errorf("quiz skipped entry answer must be empty")
+	}
+
+	return nil
+}
+
+func validateQuizEntryTimes(entry QuizEntry) error {
+	if entry.CreatedAt.IsZero() {
+		return fmt.Errorf("quiz entry created time is required")
+	}
+
+	if entry.AnsweredAt.IsZero() {
+		return fmt.Errorf("quiz entry answered time is required")
+	}
+
+	if entry.AnsweredAt.Before(entry.CreatedAt) {
+		return fmt.Errorf("quiz entry answered time is before created time")
+	}
+
+	return nil
 }
 
 func validateQuizDepth(depth int) error {
