@@ -95,16 +95,16 @@ The target TUI behavior is:
 
 Slicing name: TUI Interactive Quiz Workflows
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: quiz service operations
+Active slice short name: scoped quiz read model
 
-Expected branch name: `feat/slice-3-quiz-service-operations`
+Expected branch name: `feat/slice-4-scoped-quiz-read-model`
 
-Expected PR title: `feat(slice-3): quiz service operations`
+Expected PR title: `feat(slice-4): scoped quiz read model`
 
 Expected report path:
-`.prj/reports/slices/tui-interactive-quiz-workflows/slice-3-quiz-service-operations.md`
+`.prj/reports/slices/tui-interactive-quiz-workflows/slice-4-scoped-quiz-read-model.md`
 
 Prerequisite PRs or delivered work:
 
@@ -114,6 +114,7 @@ Prerequisite PRs or delivered work:
 - Workspace index and semantic cache slicing through PR #172.
 - Slice 1 quiz runtime model through PR #183.
 - Slice 2 quiz artifact repository through PR #184.
+- Slice 3 quiz service operations through PR #185.
 
 | Slice | Short Name | Expected Branch | Expected PR Title | Expected Report |
 | --- | --- | --- | --- | --- |
