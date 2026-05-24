@@ -315,6 +315,22 @@ It must exclude:
 - repeated low-signal Q/A pairs;
 - internal routing mechanics unless they explain a real decision.
 
+## Draft Spec Promotion
+
+A complete quiz plus the relevant dump context must be sufficient to generate
+at least a draft specification.
+
+The generated specification must:
+
+- use the spec artifact family, not a separate draft document type;
+- carry `status: draft` when it still needs review;
+- preserve provenance to the source dump and curated quiz;
+- include enough behavior, constraints, open questions, and acceptance criteria
+  to support later slicing.
+
+The promotion flow is downstream from the interactive quiz loop. It must not
+change the one-question-at-a-time quiz interaction.
+
 ## Service Boundary
 
 The application service owns all quiz behavior.
@@ -404,8 +420,13 @@ Unused candidates must be cleaned opportunistically:
 
 ## Model Boundary
 
-All model-backed quiz question generation must use the existing model/provider
-boundary.
+All model-backed quiz question generation and quiz-derived synthesis must use a
+single formal model boundary.
+
+The project must not accumulate separate ad hoc ways for agents to call an LLM
+per feature. Each model-backed operation must use semantically formalized
+request and response payloads that can be validated, recorded, and reused
+across adapters.
 
 Generation requests must include:
 
@@ -419,6 +440,12 @@ Generation requests must include:
 - coverage state;
 - follow-up depth;
 - prior answered/skipped material;
+- agent protocol context;
+- project context;
+- use-case context when the quiz is use-case-scoped;
+- project-wide dump context when present;
+- use-case dump context when the quiz is use-case-scoped and the use case has
+  an associated dump;
 - relevant project context;
 - output contract.
 
@@ -428,6 +455,14 @@ runtime state.
 Invalid model responses must block or fail the operation with a clear service
 error. The service must not silently replace invalid model output with generic
 template questions.
+
+The same boundary must be usable for:
+
+- deep next-question generation;
+- fast candidate generation;
+- answer interpretation when needed;
+- curated quiz synthesis;
+- draft spec generation from dump plus complete quiz context.
 
 ## Acceptance Criteria
 

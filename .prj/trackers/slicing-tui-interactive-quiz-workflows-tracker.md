@@ -31,6 +31,9 @@ Prerequisite PRs or delivered work:
 - [x] Capture interactive quiz workflow direction.
 - [x] Capture service-boundary requirement.
 - [x] Capture canonical raw, curated, and runtime-state artifact contract.
+- [x] Capture augmented question-generation context contract.
+- [x] Capture dump plus complete quiz to draft spec promotion contract.
+- [x] Capture formal model request/response boundary requirement.
 - [x] Create stable spec.
 - [x] Create model contract.
 - [x] Create slicing plan.
@@ -100,6 +103,10 @@ Candidate tasks:
       mode, and refresh over the application service.
 - [ ] Ensure answer and skip use service-owned active question state.
 - [ ] Wire deep mode generation through the existing model/provider boundary.
+- [ ] Add formal semantic request and response payload contracts for
+      model-backed quiz operations.
+- [ ] Include agent protocol, project, use-case, and relevant dump context in
+      model-backed question generation.
 - [ ] Persist raw capture and runtime state after each operation.
 - [ ] Add service tests for control semantics and scoped artifacts.
 - [ ] Add slice implementation report.
@@ -150,6 +157,8 @@ Candidate tasks:
 
 - [ ] Add mode switch operation to the TUI and service result flow.
 - [ ] Add internal fast candidate generation and activation behavior.
+- [ ] Route fast candidate generation through the formal model request/response
+      boundary.
 - [ ] Ensure ambiguous answers fall back to deep generation.
 - [ ] Ensure discarded candidates stay out of raw capture and curated notes.
 - [ ] Add candidate cleanup during branch selection, mode switch, completion,
@@ -190,6 +199,10 @@ Candidate tasks:
       is running.
 - [ ] Ensure curated notes distill raw turns instead of mirroring them
       one-to-one.
+- [ ] Add promotion support from complete quiz plus relevant dump context to a
+      spec artifact with `status: draft`.
+- [ ] Route draft spec synthesis through the formal model request/response
+      boundary.
 - [ ] Align docs with the implemented interactive quiz contract.
 - [ ] Add tests for curated artifact shape and TUI curated-body rendering.
 - [ ] Add final slicing report or completion notes.

@@ -320,6 +320,51 @@ The concrete implementation remains the existing application service.
 The exact Go type names may change during implementation, but the ownership
 boundary must not change.
 
+## Model Boundary Payloads
+
+Quiz model calls must use formal request and response payloads.
+
+The runtime must not introduce feature-local shellouts or untyped prompt
+strings as the integration contract.
+
+Candidate request families:
+
+- `quiz_next_question`;
+- `quiz_fast_candidates`;
+- `quiz_answer_interpretation`;
+- `quiz_curated_notes`;
+- `quiz_to_draft_spec`.
+
+Each request must carry:
+
+- request id;
+- action;
+- strategy;
+- scope;
+- mode;
+- project context;
+- agent protocol context;
+- use-case context when scoped;
+- relevant dump context;
+- prior quiz entries;
+- active runtime state;
+- output contract;
+- created time.
+
+Each response must carry:
+
+- response id;
+- request id;
+- provider;
+- status;
+- action;
+- structured payload;
+- raw text when available;
+- created time.
+
+Responses must be validated before they update runtime state or write durable
+artifacts.
+
 ## Validation Expectations
 
 - Model validation rejects invalid status, mode, depth, and answer state.

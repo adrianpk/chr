@@ -40,6 +40,13 @@ Conversation decisions:
 - Deep mode is the default and remains authoritative for ambiguous free text.
 - Runtime state must survive accidental TUI closure through project-local files.
 - Quiz persistence must remain file-backed.
+- LLM-backed question generation must receive agent protocol context, project
+  context, use-case context when scoped, and relevant dump context, including a
+  use-case dump when one exists.
+- A complete quiz plus relevant dump context must be promotable into a spec
+  artifact with `status: draft`.
+- Model-backed quiz and synthesis operations must use one formal request and
+  response boundary instead of ad hoc feature-specific LLM call paths.
 
 ## Current State
 
@@ -168,6 +175,10 @@ Expected behavior:
 - Deep mode is the default.
 - The service writes raw capture and runtime state after each operation.
 - The service refreshes quiz read state after writes.
+- Model-backed question generation receives augmented context from agent
+  protocol files, project context, scoped use-case context, and relevant dumps.
+- Model-backed question generation uses formal semantic request and response
+  payloads.
 
 Out of scope:
 
@@ -221,6 +232,8 @@ Add fast mode as a service-owned future-generation preference.
 Expected behavior:
 
 - The user can switch future generation mode between deep and fast.
+- Fast candidate generation uses the same formal model request/response
+  boundary as deep generation.
 - Fast mode can prepare internal candidates.
 - Activated candidates become normal active questions.
 - Discarded candidates do not appear in raw capture, curated notes, or tags.
@@ -265,11 +278,15 @@ Expected behavior:
 - The Quizzes screen can show the curated body when no active question is
   running.
 - The generated artifacts are ready for spec creation and context assembly.
+- A complete quiz plus relevant dump context can generate a spec artifact with
+  `status: draft`.
+- Draft spec generation uses the same formal model request/response boundary as
+  quiz question generation.
 - Documentation is aligned with the implemented quiz contract.
 
 Out of scope:
 
-- Automatic spec generation.
+- Automatic accepted/final spec generation.
 - Historical quiz archive UX.
 - Telegram or Email adapters.
 
