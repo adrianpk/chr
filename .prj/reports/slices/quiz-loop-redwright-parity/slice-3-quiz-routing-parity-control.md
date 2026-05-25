@@ -1,11 +1,11 @@
 # Slice 3: Quiz Routing Parity Control
 
-Status: reviewing
+Status: delivered
 Slicing: Quiz Loop RedWright Parity
 Plan: `.prj/plans/slicing-quiz-loop-redwright-parity-plan.md`
 Tracker: `.prj/trackers/slicing-quiz-loop-redwright-parity-tracker.md`
 Branch: `feat/slice-3-quiz-routing-parity-control`
-PR: pending
+PR: #195
 
 ## Purpose
 
