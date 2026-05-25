@@ -1183,7 +1183,7 @@ func TestModelRendersEmptyDumpState(t *testing.T) {
 	view := model.View()
 	for _, want := range []string{
 		"No dumps found.",
-		"Use the command palette to create one.",
+		"c create",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -1296,7 +1296,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		t.Fatalf("dumpEdit value = %q", confirmed.dumpEdit.Input.Value())
 	}
 
-	if confirmed.statusMessage != "Editing dump. Press ctrl+s to save or esc to cancel." {
+	if confirmed.statusMessage != "Editing dump." {
 		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
 	}
 }
@@ -1334,7 +1334,7 @@ func TestModelSavesInternalDumpEdit(t *testing.T) {
 	}
 }
 
-func TestModelRendersDumpEditPanelWithHints(t *testing.T) {
+func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
 			{
@@ -1353,9 +1353,8 @@ func TestModelRendersDumpEditPanelWithHints(t *testing.T) {
 	view := model.View()
 
 	for _, want := range []string{
-		"Edit Dump",
-		"Editing Markdown. ctrl+s save | esc cancel |",
-		"alt+e external editor",
+		"Edit",
+		"ctrl+s save  esc cancel",
 		"# Project dump",
 		"Changed Markdown.",
 	} {
@@ -2288,18 +2287,26 @@ func TestModelRendersScopedDumps(t *testing.T) {
 	view := model.View()
 	for _, want := range []string{
 		"Dumps",
-		"Scope        Status      Title",
 		"project",
 		"Project Context",
-		"blog",
 		"Blog Context",
-		"Selected Dump",
-		"Scope: project",
-		"Path: .chc/dumps/project-context.md",
 		"Project-wide notes.",
+		"enter edit  c create  alt+e external  r refresh",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	for _, unwanted := range []string{
+		"Scope        Status      Title",
+		"Selected Dump",
+		"Path: .chc/dumps/project-context.md",
+		"Updated:",
+		"Status:",
+	} {
+		if strings.Contains(view, unwanted) {
+			t.Fatalf("View() contains unwanted %q:\n%s", unwanted, view)
 		}
 	}
 }

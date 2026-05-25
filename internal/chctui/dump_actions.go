@@ -168,7 +168,7 @@ func (m *Model) startDumpEdit(path, content string) {
 		Path:   path,
 		Input:  input,
 	}
-	m.statusMessage = "Editing dump. Press ctrl+s to save or esc to cancel."
+	m.statusMessage = "Editing dump."
 }
 
 func (m *Model) saveDumpEdit() {
@@ -296,6 +296,8 @@ func (m Model) newDumpActionState(action DumpActionID) DumpActionState {
 		return m.newSelectedDumpActionState(action, "Edit dump")
 	case DumpActionExternalEdit:
 		return m.newSelectedDumpActionState(action, "Open dump in external editor")
+	case DumpActionRefresh:
+		return m.newSelectedDumpActionState(action, "Refresh dumps")
 	default:
 		return DumpActionState{}
 	}
