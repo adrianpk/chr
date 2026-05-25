@@ -35,8 +35,8 @@ Prerequisite PRs or delivered work:
 - [x] Capture long-running generation timeout and concurrency risks.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -45,7 +45,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Plan Action Semantics | Planned | `feat/slice-1-plan-action-semantics` | `feat(slice-1): plan action semantics` | `.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md` | Not started. |
+| Slice 1: Plan Action Semantics | Delivered | `feat/slice-1-plan-action-semantics` | `feat(slice-1): plan action semantics` | `.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 2: Archive Before Replace | Planned | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Depends on Slice 1. |
 | Slice 3: Archive Context Exclusion | Planned | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Depends on Slice 2. |
 | Slice 4: Generation Runtime Safety | Planned | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Depends on Slices 1-3. |
@@ -54,25 +54,28 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Add plan action IDs for generate-missing, regenerate, and refresh.
-- [ ] T1.2 Make `g` no-op with an explanatory status when a canonical plan
+- [x] T1.1 Add plan action IDs for generate-missing, regenerate, and refresh.
+- [x] T1.2 Make `g` no-op with an explanatory status when a canonical plan
       already exists.
-- [ ] T1.3 Add explicit regenerate command/key path that can be confirmed
+- [x] T1.3 Add explicit regenerate command/key path that can be confirmed
       separately from create-missing.
-- [ ] T1.4 Ensure plan busy state blocks repeated keypresses and command
+- [x] T1.4 Ensure plan busy state blocks repeated keypresses and command
       palette dispatch for plan actions.
-- [ ] T1.5 Add TUI and adapter tests for missing-plan generation, existing-plan
+- [x] T1.5 Add TUI and adapter tests for missing-plan generation, existing-plan
       generate refusal, refresh, and regenerate intent dispatch.
-- [ ] T1.6 Add slice implementation report.
-- [ ] T1.7 Run targeted tests and `make verify`.
+- [x] T1.6 Add slice implementation report.
+- [x] T1.7 Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- `9d9db1f feat(tui): separate plan generate and regenerate actions`
+- `09f21f7 test(tui): cover plan action semantics`
 
 Validation:
 
-- Pending.
+- `go test ./...`: pass.
+- `make verify`: fail in `lint-strict` because of existing lint debt across
+  plan, spec, and TUI code.
 
 ## Slice 2: Archive Before Replace
 
