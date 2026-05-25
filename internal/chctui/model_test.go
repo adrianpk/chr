@@ -2153,6 +2153,8 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "dumps"), "context.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "specs", "specs"), "feature.md", "# Feature Spec\n\nStatus: accepted\n\nDetails.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "trackers"), "feature-tracker.md", "# Feature Tracker\n\nStatus: planned\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "plans", "archive"), "blog-plan-20260525.md", "# Archived Blog Plan\n\nStatus: planned\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "specs", "archive"), "blog-spec-20260525.md", "# Archived Blog Spec\n\nStatus: draft\n")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "drafts"), "legacy-draft.md", "# Legacy Draft\n\nStatus: draft\n")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "drafts"), "runtime-draft.md", "# Runtime Draft\n\nStatus: draft\n")
 
@@ -2176,6 +2178,10 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 	for _, document := range documents {
 		if document.Family == "draft" {
 			t.Fatalf("document family = draft for %#v, want no active draft documents", document)
+		}
+
+		if strings.Contains(document.RelativePath, "/archive/") {
+			t.Fatalf("archived generated document loaded: %#v", document)
 		}
 	}
 }

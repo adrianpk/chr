@@ -88,6 +88,10 @@ func appendDocumentView(
 		return nil
 	}
 
+	if isArchivedGeneratedDocumentPath(projectDir, path) {
+		return nil
+	}
+
 	document, err := documentViewFromPath(projectDir, family, path)
 	if err != nil {
 		return err
@@ -293,6 +297,19 @@ func documentRoots(projectDir string) []struct {
 		{family: "plan", path: filepath.Join(projectDir, ".chc", "plans")},
 		{family: "tracker", path: filepath.Join(projectDir, ".chc", "trackers")},
 	}
+}
+
+func isArchivedGeneratedDocumentPath(projectDir string, path string) bool {
+	relativePath, err := filepath.Rel(filepath.Join(projectDir, ".chc"), path)
+	if err != nil {
+		return false
+	}
+
+	parts := strings.Split(filepath.ToSlash(relativePath), "/")
+
+	return len(parts) >= 3 &&
+		(parts[0] == "plans" || parts[0] == "specs") &&
+		parts[1] == "archive"
 }
 
 func documentViewFromPath(projectDir, family, path string) (DocumentView, error) {
