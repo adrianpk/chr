@@ -1145,7 +1145,7 @@ func TestDefaultCommandRegistryExposesDumpWorkflows(t *testing.T) {
 		commandsByID[command.ID] = command
 	}
 
-	for _, id := range []string{"create-dump", "edit-dump"} {
+	for _, id := range []string{"create-dump", "edit-dump", "refresh-dumps"} {
 		command, ok := commandsByID[id]
 		if !ok {
 			t.Fatalf("command %q not found", id)
@@ -1154,6 +1154,50 @@ func TestDefaultCommandRegistryExposesDumpWorkflows(t *testing.T) {
 		if command.Action != CommandActionPlanDump {
 			t.Fatalf("command %q action = %q, want %q", id, command.Action, CommandActionPlanDump)
 		}
+	}
+}
+
+func TestModelRefreshesDumpsFromDumpsKey(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message: "Dumps refreshed.",
+			Dumps: []DumpView{
+				{Title: "First", RelativePath: ".chc/dumps/first.md"},
+				{Title: "Second", RelativePath: ".chc/dumps/second.md"},
+			},
+			SelectedPath: ".chc/dumps/second.md",
+		},
+	}
+	model := NewModel(Options{
+		DumpExecutor: executor,
+		Dumps: []DumpView{
+			{Title: "Second", RelativePath: ".chc/dumps/second.md"},
+		},
+	})
+	model.selected = 2
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
+	refreshed := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil, want synchronous dump refresh")
+	}
+
+	if executor.request.Action != DumpActionRefresh {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionRefresh)
+	}
+
+	if refreshed.statusMessage != "Dumps refreshed." {
+		t.Fatalf("statusMessage = %q, want Dumps refreshed.", refreshed.statusMessage)
+	}
+
+	dump, ok := refreshed.selectedDumpView()
+	if !ok {
+		t.Fatal("selectedDumpView returned no dump")
+	}
+
+	if dump.RelativePath != ".chc/dumps/second.md" {
+		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
 

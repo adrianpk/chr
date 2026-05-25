@@ -715,7 +715,7 @@ func (e tuiDumpActionExecutor) executeRefreshDumps(
 	}
 
 	return chctui.DumpActionResult{
-		Message:      "Edited dump " + request.Path + ".",
+		Message:      "Dumps refreshed.",
 		Dumps:        dumps,
 		SelectedPath: request.Path,
 	}, nil

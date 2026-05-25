@@ -60,6 +60,7 @@ func DefaultCommandRegistry() []Command {
 		{ID: "create-ticket", Title: "Create ticket", Description: "Create a default task ticket after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateTicket},
 		{ID: "create-dump", Title: "Create dump", Description: "Create a scoped dump after confirmation.", Action: CommandActionPlanDump, Dump: DumpActionCreate},
 		{ID: "edit-dump", Title: "Edit dump", Description: "Open the selected dump Markdown file in the editor.", Action: CommandActionPlanDump, Dump: DumpActionEdit},
+		{ID: "refresh-dumps", Title: "Refresh dumps", Description: "Reload scoped dumps.", Action: CommandActionPlanDump, Dump: DumpActionRefresh},
 		{ID: "quiz-start", Title: "Start selected quiz", Description: "Start the selected scoped quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionStart},
 		{ID: "quiz-resume", Title: "Resume selected quiz", Description: "Reload the selected scoped quiz runtime.", Action: CommandActionPlanQuiz, Quiz: QuizActionResume},
 		{ID: "quiz-answer", Title: "Answer selected quiz", Description: "Enter an answer for the active quiz question.", Action: CommandActionPlanQuiz, Quiz: QuizActionAnswer},
