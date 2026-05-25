@@ -2836,6 +2836,27 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 	}
 }
 
+func TestModelReportsSpecGenerationFailureShowsLastSavedSpec(t *testing.T) {
+	executor := &fakeSpecActionExecutor{err: errors.New("provider timeout")}
+	model := NewModel(Options{
+		SpecExecutor: executor,
+		Specs: []SpecView{
+			{Title: "Blog Spec", Scope: QuizScope{CaseSlug: "blog"}, Status: "draft", Content: "# Blog Spec"},
+		},
+	})
+	model.selected = 4
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	busy := requireUpdatedModel(t, updated)
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if confirmed.statusMessage != "Spec action failed; showing last saved spec if available: provider timeout" {
+		t.Fatalf("statusMessage = %q, want last saved spec failure", confirmed.statusMessage)
+	}
+}
+
 func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 	executor := &fakePlanActionExecutor{
 		result: PlanActionResult{
@@ -2897,6 +2918,36 @@ func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 	plan, ok := confirmed.selectedPlanView()
 	if !ok || plan.Title != "Generated Plan" {
 		t.Fatalf("selected plan = %#v, want generated plan", plan)
+	}
+}
+
+func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
+	executor := &fakePlanActionExecutor{err: errors.New("provider timeout")}
+	model := NewModel(Options{
+		PlanExecutor: executor,
+		Plans: []PlanView{
+			{
+				Title:        "Blog Plan",
+				Scope:        QuizScope{CaseSlug: "blog"},
+				Status:       "planned",
+				RelativePath: ".chc/plans/blog-plan.md",
+				Content:      "# Blog Plan",
+			},
+		},
+	})
+	model.selected = 5
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
+	pending := requireUpdatedModel(t, updated)
+
+	updated, cmd = pending.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if confirmed.statusMessage != "Plan action failed; showing last saved plan if available: provider timeout" {
+		t.Fatalf("statusMessage = %q, want last saved plan failure", confirmed.statusMessage)
 	}
 }
 

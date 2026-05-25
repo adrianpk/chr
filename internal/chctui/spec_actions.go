@@ -166,7 +166,7 @@ func (m *Model) completeSpecAction(message specActionFinishedMsg) {
 	m.specBusy = false
 
 	if message.Err != nil {
-		m.statusMessage = "Spec action failed: " + message.Err.Error()
+		m.statusMessage = "Spec action failed; showing last saved spec if available: " + message.Err.Error()
 
 		return
 	}
