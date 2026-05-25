@@ -77,20 +77,54 @@ func (s service) GenerateSpec(request SpecGenerateRequest) (SpecOperationResult,
 }
 
 func (s service) generateSpec(ctx context.Context, scope chc.QuizScope) (SpecOperationResult, error) {
+	s.appendPlanGenerationLog("generate_spec_started", map[string]string{
+		"case_slug": scope.CaseSlug,
+		"timeout":   longGenerationTimeout.String(),
+	})
+
 	state, err := s.specGenerationRuntimeState(scope)
 	if err != nil {
+		s.appendPlanGenerationLog("generate_spec_runtime_state_failed", map[string]string{
+			"case_slug": scope.CaseSlug,
+			"error":     err.Error(),
+		})
+
 		return SpecOperationResult{}, err
 	}
 
 	modelRequest, err := s.newSpecGenerationModelRequest(state)
 	if err != nil {
+		s.appendPlanGenerationLog("generate_spec_request_failed", map[string]string{
+			"case_slug": scope.CaseSlug,
+			"error":     err.Error(),
+		})
+
 		return SpecOperationResult{}, err
 	}
 
+	s.appendPlanGenerationLog("generate_spec_model_invocation_started", map[string]string{
+		"case_slug":        scope.CaseSlug,
+		"request_id":       modelRequest.ID,
+		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
+	})
+
 	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
+		s.appendPlanGenerationLog("generate_spec_model_invocation_failed", map[string]string{
+			"case_slug":  scope.CaseSlug,
+			"request_id": modelRequest.ID,
+			"error":      err.Error(),
+		})
+
 		return SpecOperationResult{}, err
 	}
+
+	s.appendPlanGenerationLog("generate_spec_model_invocation_finished", map[string]string{
+		"case_slug":   scope.CaseSlug,
+		"request_id":  modelRequest.ID,
+		"response_id": response.ID,
+		"title":       response.DraftSpec.Title,
+	})
 
 	spec := chc.GeneratedSpec{
 		Scope:            scope,
@@ -104,8 +138,23 @@ func (s service) generateSpec(ctx context.Context, scope chc.QuizScope) (SpecOpe
 
 	paths, err := chc.WriteGeneratedSpec(ctx, s.projectContext.ProjectDir, spec)
 	if err != nil {
+		s.appendPlanGenerationLog("generate_spec_write_failed", map[string]string{
+			"case_slug":   scope.CaseSlug,
+			"request_id":  modelRequest.ID,
+			"response_id": response.ID,
+			"error":       err.Error(),
+		})
+
 		return SpecOperationResult{}, err
 	}
+
+	s.appendPlanGenerationLog("generate_spec_written", map[string]string{
+		"case_slug":     scope.CaseSlug,
+		"request_id":    modelRequest.ID,
+		"response_id":   response.ID,
+		"relative_path": paths.RelativePath,
+		"path":          paths.Path,
+	})
 
 	view := s.specViewFromPath(scope, paths.RelativePath, paths.Path)
 
