@@ -48,7 +48,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Quiz Provider Parity Fixtures | Delivered | `feat/slice-1-quiz-provider-parity-fixtures` | `feat(slice-1): quiz provider parity fixtures` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md` | PR #193. |
-| Slice 2: Quiz Prompt Intent Persistence | Planned | `feat/slice-2-quiz-prompt-intent-persistence` | `feat(slice-2): quiz prompt intent persistence` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md` | Active next slice. |
+| Slice 2: Quiz Prompt Intent Persistence | Reviewing | `feat/slice-2-quiz-prompt-intent-persistence` | `feat(slice-2): quiz prompt intent persistence` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md` | PR pending. |
 | Slice 3: Quiz Routing Parity Control | Planned | `feat/slice-3-quiz-routing-parity-control` | `feat(slice-3): quiz routing parity control` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-3-quiz-routing-parity-control.md` | Starts after Slice 2 merge. |
 | Slice 4: Quiz Parity Lab Validation | Planned | `feat/slice-4-quiz-parity-lab-validation` | `feat(slice-4): quiz parity lab validation` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-4-quiz-parity-lab-validation.md` | Starts after Slice 3 merge. |
 
@@ -77,23 +77,28 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Add runtime storage for formal prompt intent metadata returned by the
+- [x] Add runtime storage for formal prompt intent metadata returned by the
       model.
-- [ ] Preserve follow-up depth, tags, completion hints, parent linkage, and
+- [x] Preserve follow-up depth, tags, completion hints, parent linkage, and
       topic intent across save/load.
-- [ ] Rehydrate next-question payloads from persisted intent metadata instead
+- [x] Rehydrate next-question payloads from persisted intent metadata instead
       of display-oriented approximations.
-- [ ] Add tests for resume and entry-based reconstruction.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and broader validation as needed.
+- [x] Add tests for resume and entry-based reconstruction.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and broader validation as needed.
 
 Task commits:
 
-- Pending.
+- T2.1: `81664c8` persists quiz prompt intent.
+- T2.2: `45dbc0d` covers prompt intent rehydration.
+- T2.3: `23f45c9` satisfies strict lint whitespace.
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chcapp`
+- `git diff --check`
+- `make verify`
 
 ## Slice 3: Quiz Routing Parity Control
 
