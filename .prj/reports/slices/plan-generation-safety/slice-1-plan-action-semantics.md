@@ -5,7 +5,7 @@ Slicing: Plan Generation Safety
 Plan: `.prj/plans/slicing-plan-generation-safety-plan.md`
 Tracker: `.prj/trackers/slicing-plan-generation-safety-tracker.md`
 Branch: `feat/slice-1-plan-action-semantics`
-PR: pending
+PR: `#198`
 
 ## Purpose
 
