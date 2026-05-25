@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+//nolint:funlen // Integration-style service assertion keeps fixture and checks together.
 func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)

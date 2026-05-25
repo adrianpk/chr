@@ -160,7 +160,7 @@ func ArchiveGeneratedPlan(
 	return archivePaths, true, nil
 }
 
-func RenderArchivedPlan(content string, sourceRelativePath string, archivedAt time.Time) string {
+func RenderArchivedPlan(content, sourceRelativePath string, archivedAt time.Time) string {
 	archiveMetadata := []string{
 		"archived_from: " + yamlString(filepath.ToSlash(sourceRelativePath)),
 		"archived_at: " + yamlString(archivedAt.UTC().Format(time.RFC3339Nano)),

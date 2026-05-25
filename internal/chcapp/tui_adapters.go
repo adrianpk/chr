@@ -213,6 +213,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 	}, nil
 }
 
+//nolint:cyclop,funlen,wsl_v5 // Adapter dispatch keeps action-specific service calls in one place.
 func (e tuiPlanActionExecutor) ExecutePlanAction(
 	request chctui.PlanActionRequest,
 ) (chctui.PlanActionResult, error) {

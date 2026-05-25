@@ -227,6 +227,7 @@ func (m *Model) executeSelectedCommand() {
 	m.executeCommand(command)
 }
 
+//nolint:cyclop // Central command dispatch keeps palette behavior easy to audit.
 func (m *Model) executeCommand(command Command) {
 	switch command.Action {
 	case CommandActionNavigate, CommandActionHelp:
@@ -267,6 +268,7 @@ func (m *Model) selectView(view View) {
 	}
 }
 
+//nolint:wsl_v5 // Filtering keeps predicate and append adjacent.
 func (m Model) filteredCommands() []Command {
 	filter := strings.ToLower(strings.TrimSpace(m.commandPalette.Filter))
 	if filter == "" {
@@ -326,6 +328,7 @@ func (m Model) selectedSourcePathMessage() string {
 	return "Selected source path: " + path
 }
 
+//nolint:cyclop // Source resolution is intentionally centralized by view.
 func (m Model) selectedSourcePath() string {
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:

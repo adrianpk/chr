@@ -39,8 +39,14 @@ func (s service) appendPlanGenerationLog(event string, fields map[string]string)
 	}
 
 	defer func() {
-		_ = file.Close()
+		closeErr := file.Close()
+		if closeErr != nil {
+			return
+		}
 	}()
 
-	_, _ = fmt.Fprintln(file, string(content))
+	_, err = fmt.Fprintln(file, string(content))
+	if err != nil {
+		return
+	}
 }

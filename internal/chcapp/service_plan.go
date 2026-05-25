@@ -76,6 +76,7 @@ func (s service) ListPlans() (PlanListResult, error) {
 	return PlanListResult{Message: "Plans loaded.", Plans: plans}, nil
 }
 
+//nolint:wsl_v5 // Guard clauses read clearer in this service flow.
 func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	existing, exists, err := s.existingGeneratedPlan(scope)
@@ -121,6 +122,7 @@ func (s service) existingGeneratedPlan(scope chc.QuizScope) (PlanView, bool, err
 	return s.planViewFromPath(scope, paths.RelativePath, paths.Path), true, nil
 }
 
+//nolint:funlen // Generation flow is intentionally linear for logging and failure attribution.
 func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOperationResult, error) {
 	s.appendPlanGenerationLog("generate_plan_started", map[string]string{
 		"case_slug": scope.CaseSlug,
@@ -209,6 +211,7 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 	}, nil
 }
 
+//nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
 func (s service) RegeneratePlan(request PlanRegenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	var result PlanOperationResult
@@ -392,7 +395,8 @@ func (s service) createPlanTrackingTickets(
 	return created, nil
 }
 
-func renderPlanTrackingTicketBody(planPath string, trackingPath string, ticket chc.GeneratedPlanTrackingTicket) string {
+//nolint:wsl_v5 // Markdown body construction benefits from local grouping.
+func renderPlanTrackingTicketBody(planPath, trackingPath string, ticket chc.GeneratedPlanTrackingTicket) string {
 	var output strings.Builder
 
 	output.WriteString("# Description\n\n")
@@ -427,7 +431,7 @@ func renderPlanTrackingTicketBody(planPath string, trackingPath string, ticket c
 	return output.String()
 }
 
-func relativeProjectPath(projectDir string, path string) string {
+func relativeProjectPath(projectDir, path string) string {
 	relativePath, err := filepath.Rel(projectDir, path)
 	if err != nil {
 		return filepath.ToSlash(path)
@@ -450,6 +454,7 @@ func (s service) planViewFromScope(scope quizReadScope, index chc.WorkspaceIndex
 	return s.planViewFromNode(scope.scope, scope.title, node)
 }
 
+//nolint:wsl_v5 // Tight loop keeps filtering and candidate assignment together.
 func (s service) latestPlanNodeForScope(scope chc.QuizScope, index chc.WorkspaceIndex) (chc.WorkspaceNode, bool) {
 	nodes := []chc.WorkspaceNode{}
 	for _, nodeID := range index.ByKind[chc.WorkspaceNodePlan] {
@@ -490,7 +495,7 @@ func (s service) planViewFromNode(scope chc.QuizScope, fallbackTitle string, nod
 	)
 }
 
-func (s service) planViewFromPath(scope chc.QuizScope, relativePath string, path string) PlanView {
+func (s service) planViewFromPath(scope chc.QuizScope, relativePath, path string) PlanView {
 	content, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		content = nil
@@ -531,6 +536,7 @@ func (v PlanView) withMetadata(useCaseTitle, title, status string, updatedAt tim
 	return v
 }
 
+//nolint:wsl_v5 // Request assembly keeps optional project-wide sections adjacent.
 func (s service) newPlanGenerationModelRequest(state chc.QuizRuntimeState) (chc.QuizModelRequest, error) {
 	scope := chc.QuizScope{
 		ProjectID: state.ProjectID,

@@ -438,7 +438,7 @@ func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
 	}
 }
 
-func isArchivedGenerationPath(projectDir string, path string) bool {
+func isArchivedGenerationPath(projectDir, path string) bool {
 	relativePath, err := filepath.Rel(filepath.Join(projectDir, DirectoryName), path)
 	if err != nil {
 		return false

@@ -61,6 +61,7 @@ func (s service) ListSpecs() (SpecListResult, error) {
 	return SpecListResult{Message: "Specs loaded.", Specs: specs}, nil
 }
 
+//nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
 func (s service) GenerateSpec(request SpecGenerateRequest) (SpecOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	var result SpecOperationResult
@@ -76,6 +77,7 @@ func (s service) GenerateSpec(request SpecGenerateRequest) (SpecOperationResult,
 	return result, err
 }
 
+//nolint:funlen,wsl_v5 // Generation flow is intentionally linear for logging and failure attribution.
 func (s service) generateSpec(ctx context.Context, scope chc.QuizScope) (SpecOperationResult, error) {
 	s.appendPlanGenerationLog("generate_spec_started", map[string]string{
 		"case_slug": scope.CaseSlug,
@@ -178,6 +180,7 @@ func (s service) specViewFromScope(scope quizReadScope, index chc.WorkspaceIndex
 	return s.specViewFromNode(scope.scope, scope.title, node)
 }
 
+//nolint:wsl_v5 // Tight loop keeps filtering and candidate assignment together.
 func (s service) latestSpecNodeForScope(scope chc.QuizScope, index chc.WorkspaceIndex) (chc.WorkspaceNode, bool) {
 	nodes := []chc.WorkspaceNode{}
 	for _, nodeID := range index.ByKind[chc.WorkspaceNodeSpec] {
@@ -218,7 +221,7 @@ func (s service) specViewFromNode(scope chc.QuizScope, fallbackTitle string, nod
 	)
 }
 
-func (s service) specViewFromPath(scope chc.QuizScope, relativePath string, path string) SpecView {
+func (s service) specViewFromPath(scope chc.QuizScope, relativePath, path string) SpecView {
 	content, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		content = nil
@@ -388,6 +391,7 @@ func appendSpecNodeContextSection(
 	})
 }
 
+//nolint:wsl_v5 // Straight extraction loop is easier to read without extra helpers.
 func specSourcePaths(sections []chc.QuizModelContextSection) []string {
 	paths := []string{}
 	for _, section := range sections {
@@ -430,12 +434,14 @@ func summarizeWorkspaceMarkdownDocument(content, fallbackName string) (string, s
 
 		if strings.HasPrefix(line, "# ") && title == strings.TrimSuffix(fallbackName, filepath.Ext(fallbackName)) {
 			title = strings.TrimSpace(strings.TrimPrefix(line, "# "))
+
 			continue
 		}
 
 		key, value, ok := strings.Cut(line, ":")
 		if ok && strings.EqualFold(strings.TrimSpace(key), "status") {
 			status = strings.Trim(strings.TrimSpace(value), `"`)
+
 			continue
 		}
 

@@ -776,6 +776,7 @@ type fakeServiceQuizModel struct {
 	responses []chc.QuizModelResponse
 }
 
+//nolint:nestif // Test fake keeps action fallback behavior in one place.
 func (m *fakeServiceQuizModel) InvokeQuizModel(
 	_ context.Context,
 	request chc.QuizModelRequest,

@@ -1,3 +1,4 @@
+//nolint:wsl_v5 // Service tests keep setup and assertions close to the behavior under test.
 package chcapp
 
 import (
@@ -13,6 +14,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chctui"
 )
 
+//nolint:funlen // Integration-style service assertion keeps fixture and checks together.
 func TestServiceGeneratePlanUsesUseCaseContext(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -180,6 +182,7 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 	}
 }
 
+//nolint:cyclop,funlen,wsl_v5 // End-to-end materialization assertions are intentionally grouped.
 func TestServiceMaterializePlanTrackingCreatesTrackingAndTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeServiceQuizFixture(t, projectDir)
@@ -507,6 +510,7 @@ func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
 	for _, plan := range result.Plans {
 		if plan.Scope.CaseSlug == "blog" {
 			generated = plan
+
 			break
 		}
 	}

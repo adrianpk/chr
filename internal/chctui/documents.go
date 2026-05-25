@@ -129,6 +129,7 @@ func (m Model) renderDocuments() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
+//nolint:unused // Kept for legacy/non-shell document family renderers.
 func (m Model) renderDocumentsByFamily(title string, families map[string]bool) string {
 	documents := m.documentsByFamily(families)
 	if len(documents) == 0 {
@@ -203,6 +204,7 @@ func (m Model) renderSelectedDocumentDetailFor(documents []DocumentView) string 
 	return strings.TrimRight(output.String(), "\n")
 }
 
+//nolint:unused // Kept for legacy/non-shell document view paths.
 func (m Model) selectedDocumentView() (DocumentView, bool) {
 	return m.selectedDocumentViewFor(m.documents)
 }
@@ -299,7 +301,7 @@ func documentRoots(projectDir string) []struct {
 	}
 }
 
-func isArchivedGeneratedDocumentPath(projectDir string, path string) bool {
+func isArchivedGeneratedDocumentPath(projectDir, path string) bool {
 	relativePath, err := filepath.Rel(filepath.Join(projectDir, ".chc"), path)
 	if err != nil {
 		return false

@@ -581,6 +581,7 @@ func (m Model) renderDumpWorkspace(width, height int) string {
 	), width, height)
 }
 
+//nolint:unused // Kept for document-family workspaces planned after shell consolidation.
 func (m Model) renderDocumentFamilyWorkspace(width, height int, title string, families map[string]bool) string {
 	return m.renderDocumentWorkspace(width, height, title, m.documentsByFamily(families))
 }

@@ -428,6 +428,7 @@ func normalizePlanTrackingType(ticketType string) string {
 	}
 }
 
+//nolint:wsl_v5 // Small normalization loop is clearer inline.
 func normalizePlanTrackingDependencies(dependencies []string) []string {
 	normalized := []string{}
 	for _, dependency := range dependencies {

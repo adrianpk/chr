@@ -1,3 +1,4 @@
+//nolint:wsl_v5 // Baseline extraction keeps small parsing steps intentionally adjacent.
 package chcapp
 
 import (

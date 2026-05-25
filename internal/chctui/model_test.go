@@ -2962,6 +2962,7 @@ func TestModelReportsSpecGenerationFailureShowsLastSavedSpec(t *testing.T) {
 	}
 }
 
+//nolint:cyclop,funlen // End-to-end TUI action test validates several state updates together.
 func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 	executor := &fakePlanActionExecutor{
 		result: PlanActionResult{
@@ -3100,6 +3101,7 @@ func TestModelRefusesGeneratePlanWhenPlanExists(t *testing.T) {
 	}
 }
 
+//nolint:cyclop,funlen,gocognit // Confirmation flow test keeps pending, busy, and complete states together.
 func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 	executor := &fakePlanActionExecutor{
 		result: PlanActionResult{
@@ -3171,9 +3173,12 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 		t.Fatalf("statusMessage = %q, want Regenerating plan...", busy.statusMessage)
 	}
 
-	if action := busy.renderPlanAction(); !strings.Contains(action, "Plan Action Running") ||
-		!strings.Contains(action, "Regenerating plan...") ||
-		!strings.Contains(action, "Please wait") {
+	action := busy.renderPlanAction()
+
+	hasRunningOverlay := strings.Contains(action, "Plan Action Running") &&
+		strings.Contains(action, "Regenerating plan...") &&
+		strings.Contains(action, "Please wait")
+	if !hasRunningOverlay {
 		t.Fatalf("renderPlanAction() = %q, want running overlay", action)
 	}
 
@@ -3274,8 +3279,11 @@ func TestModelPlansPlanTrackingWithAltT(t *testing.T) {
 		t.Fatalf("statusMessage = %q, want Creating plan tracking...", busy.statusMessage)
 	}
 
-	if action := busy.renderPlanAction(); !strings.Contains(action, "Plan Action Running") ||
-		!strings.Contains(action, "Creating plan tracking...") {
+	action := busy.renderPlanAction()
+
+	hasTrackingOverlay := strings.Contains(action, "Plan Action Running") &&
+		strings.Contains(action, "Creating plan tracking...")
+	if !hasTrackingOverlay {
 		t.Fatalf("renderPlanAction() = %q, want tracking running overlay", action)
 	}
 }

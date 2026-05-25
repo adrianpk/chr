@@ -156,10 +156,11 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 		"output_contract":  request.Payload.OutputContract,
 	}
 
-	if (request.Action == QuizModelActionDraftSpec ||
+	hasContextAction := request.Action == QuizModelActionDraftSpec ||
 		request.Action == QuizModelActionGenerateSpec ||
-		request.Action == QuizModelActionGeneratePlan) &&
-		len(request.ContextSections) > 0 {
+		request.Action == QuizModelActionGeneratePlan ||
+		request.Action == QuizModelActionMaterializePlanTracking
+	if hasContextAction && len(request.ContextSections) > 0 {
 		payload["context_sections"] = quizModelProviderContextSections(request.ContextSections)
 	}
 
@@ -882,6 +883,7 @@ func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 	}
 }
 
+//nolint:funlen // JSON schema literals are clearer kept together.
 func quizModelPlanTrackingJSONSchema() map[string]any {
 	ticketSchema := map[string]any{
 		"type":                 "object",

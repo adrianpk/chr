@@ -379,6 +379,7 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m.updateNavigationKey(msg)
 }
 
+//nolint:cyclop // Active mode dispatch is centralized to preserve modal ordering.
 func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 	switch {
 	case m.artifactAction.Pending:
@@ -1006,6 +1007,7 @@ func (m Model) renderSelectedTicketDetail() string {
 	return output.String()
 }
 
+//nolint:cyclop // Key helper text is centralized by selected view.
 func (m Model) renderKeys() string {
 	if keys, ok := m.activeInteractionKeys(); ok {
 		return keys
@@ -1048,6 +1050,7 @@ func (m Model) documentKeysActive() bool {
 	}
 }
 
+//nolint:cyclop // Active interaction key hints mirror modal precedence.
 func (m Model) activeInteractionKeys() (string, bool) {
 	switch {
 	case m.artifactAction.Pending:
