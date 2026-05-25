@@ -67,8 +67,8 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 	}
 
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
-		lines = append(lines, "", "Question:")
-		lines = append(lines, indentLines(wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width-2, 1)), "  ")...)
+		lines = append(lines, "")
+		lines = append(lines, wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width, 1))...)
 	}
 
 	if m.quizBusy {

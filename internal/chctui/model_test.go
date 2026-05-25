@@ -2379,7 +2379,6 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 		"Quizzes",
 		"Blog Publishing",
 		"Question 2",
-		"Question:",
 		"What should the workflow preserve?",
 		"Enter answers",
 	} {
