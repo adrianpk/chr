@@ -211,6 +211,7 @@ func loadTUIDumps(operations service) ([]chctui.DumpView, error) {
 			Scope:        chctui.DumpScope{CaseSlug: dump.Scope.CaseSlug},
 			RelativePath: dump.RelativePath,
 			UpdatedAt:    dump.UpdatedAt,
+			Preview:      dump.Content,
 		})
 	}
 

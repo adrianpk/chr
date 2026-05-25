@@ -23,6 +23,7 @@ type DumpView struct {
 	Scope        DumpScope
 	RelativePath string
 	UpdatedAt    time.Time
+	Content      string
 }
 
 type DumpListResult struct {
@@ -80,7 +81,7 @@ func (s service) ListDumps() (DumpListResult, error) {
 
 	return DumpListResult{
 		Message: "Dumps loaded.",
-		Dumps:   dumpViewsFromIndex(index),
+		Dumps:   s.dumpViewsFromIndex(index),
 	}, nil
 }
 
@@ -278,7 +279,7 @@ func (s service) createDumpFile(title, content string) (string, error) {
 	return "", fmt.Errorf("create dump file: exhausted unique names for %q", title)
 }
 
-func dumpViewsFromIndex(index chc.WorkspaceIndex) []DumpView {
+func (s service) dumpViewsFromIndex(index chc.WorkspaceIndex) []DumpView {
 	nodeIDs := append([]string(nil), index.ByKind[chc.WorkspaceNodeDump]...)
 	sort.Strings(nodeIDs)
 
@@ -289,13 +290,13 @@ func dumpViewsFromIndex(index chc.WorkspaceIndex) []DumpView {
 			continue
 		}
 
-		dumps = append(dumps, dumpViewFromNode(nodeID, node))
+		dumps = append(dumps, s.dumpViewFromNode(nodeID, node))
 	}
 
 	return dumps
 }
 
-func dumpViewFromNode(nodeID string, node chc.WorkspaceNode) DumpView {
+func (s service) dumpViewFromNode(nodeID string, node chc.WorkspaceNode) DumpView {
 	return DumpView{
 		NodeID:       nodeID,
 		Title:        node.Title,
@@ -303,7 +304,19 @@ func dumpViewFromNode(nodeID string, node chc.WorkspaceNode) DumpView {
 		Scope:        DumpScope{CaseSlug: node.CaseSlug},
 		RelativePath: node.RelativePath,
 		UpdatedAt:    node.ModifiedAt,
+		Content:      s.dumpContent(node.RelativePath),
 	}
+}
+
+func (s service) dumpContent(relativePath string) string {
+	path := filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(relativePath))
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+
+	return string(content)
 }
 
 func candidateDumpPaths(directory, title string) []string {

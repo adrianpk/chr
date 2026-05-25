@@ -443,6 +443,10 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 
 	button, ok := shellFooterButtonAt(event.X, event.Y, width, height)
 	if !ok {
+		if m.SelectedView() == ViewDumps {
+			m.selectDumpPaneAt(event.X, width)
+		}
+
 		return m, nil
 	}
 
@@ -457,6 +461,23 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m *Model) selectDumpPaneAt(x, width int) {
+	if m.maximizedPane >= 0 {
+		m.selectedPane = m.maximizedPane
+
+		return
+	}
+
+	leftWidth, _ := m.splitWidths(width)
+	if x <= leftWidth {
+		m.selectedPane = 0
+
+		return
+	}
+
+	m.selectedPane = 1
 }
 
 func (m Model) updateMouseMotion(event tea.MouseEvent) (tea.Model, tea.Cmd) {

@@ -168,7 +168,9 @@ func (m *Model) startDumpEdit(path, content string) {
 		Path:   path,
 		Input:  input,
 	}
-	m.statusMessage = "Editing dump."
+	m.selectedPane = 1
+	m.maximizedPane = 1
+	m.statusMessage = "Editing " + path
 }
 
 func (m *Model) saveDumpEdit() {

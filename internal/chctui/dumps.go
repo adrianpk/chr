@@ -74,16 +74,32 @@ func (m Model) renderSelectedDumpDetailLines(width, height int) []string {
 	}
 
 	lines = append(lines, "")
-	lines = append(lines, wrapPlainText(emptyValue(dump.Preview), maxInt(width, 1))...)
+	lines = append(lines, renderContentReadLines(emptyValue(dump.Preview), maxInt(width, 1))...)
 	lines = append(lines, "", shellMutedStyle.Render(m.dumpActionHint()))
 
 	return lines
 }
 
-func (m Model) renderSelectedDumpEditLines(_ []string, width, height int) []string {
-	lines := []string{shellMutedStyle.Render(m.dumpActionHint()), ""}
+func renderContentReadLines(content string, width int) []string {
+	lines := []string{}
 
-	editorHeight := maxInt(height-len(lines), 3)
+	for _, line := range strings.Split(content, "\n") {
+		if strings.TrimSpace(line) == "" {
+			lines = append(lines, "")
+
+			continue
+		}
+
+		lines = append(lines, wrapPlainText(line, width)...)
+	}
+
+	return lines
+}
+
+func (m Model) renderSelectedDumpEditLines(_ []string, width, height int) []string {
+	lines := []string{shellMutedStyle.Render(m.dumpActionHint())}
+
+	editorHeight := maxInt(height-len(lines)-1, 3)
 	lines = append(lines, strings.Split(m.renderDumpEditInput(maxInt(width, 1), editorHeight), "\n")...)
 
 	return lines
@@ -134,14 +150,14 @@ func (m Model) renderDumps() string {
 
 func (m Model) dumpActionHint() string {
 	if m.dumpEdit.Active {
-		return "ctrl+s save  esc cancel"
+		return "ctrl+s save  esc cancel  alt+e external"
 	}
 
 	if len(m.dumps) == 0 {
 		return "c create"
 	}
 
-	return "enter edit  c create  alt+e external  r refresh"
+	return "enter edit  alt+e external  c create  r refresh"
 }
 
 func (m Model) updateDumpsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -150,6 +166,8 @@ func (m Model) updateDumpsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.planDumpAction(DumpActionCreate)
 	case "enter":
 		m.planDumpAction(DumpActionEdit)
+
+		return m, m.confirmDumpAction()
 	case "r":
 		m.planDumpAction(DumpActionRefresh)
 

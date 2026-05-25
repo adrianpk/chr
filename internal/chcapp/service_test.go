@@ -171,6 +171,10 @@ case: "blog"
 		t.Fatalf("project dump scope = %#v, want project-wide", projectDump.Scope)
 	}
 
+	if !strings.Contains(projectDump.Content, "# Project Context") {
+		t.Fatalf("project dump content = %q, want full dump content", projectDump.Content)
+	}
+
 	caseDump := findDumpViewByTitle(t, result.Dumps, "Blog Context")
 	if caseDump.Scope.CaseSlug != "blog" {
 		t.Fatalf("case dump scope = %#v, want blog", caseDump.Scope)

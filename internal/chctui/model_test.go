@@ -191,6 +191,29 @@ func TestMouseClickSelectsShellTab(t *testing.T) {
 	}
 }
 
+func TestMouseClickSelectsDumpTextPane(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{Title: "Project Context", RelativePath: ".chc/dumps/project-context.md", Preview: "# Project Context"},
+		},
+	})
+	model.selected = 2
+	model.width = 100
+	model.height = 30
+
+	updated, _ := model.Update(tea.MouseMsg{
+		X:      70,
+		Y:      10,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	})
+	clicked := requireUpdatedModel(t, updated)
+
+	if clicked.selectedPane != 1 {
+		t.Fatalf("selectedPane = %d, want text pane", clicked.selectedPane)
+	}
+}
+
 func TestShellFooterAlignsKeysAndLabels(t *testing.T) {
 	model := NewModel(Options{})
 	footer := model.renderShellFooter(100)
@@ -1221,6 +1244,47 @@ func TestModelPlansEditDumpCommand(t *testing.T) {
 	}
 }
 
+func TestModelEditsSelectedDumpDirectlyWithEnter(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message:      "Editing dump .chc/dumps/project-dump.md.",
+			Content:      "# Project dump\n\nExisting Markdown.",
+			SelectedPath: ".chc/dumps/project-dump.md",
+		},
+	}
+	model := NewModel(Options{
+		DumpExecutor: executor,
+		Dumps: []DumpView{
+			{Title: "Project dump", RelativePath: ".chc/dumps/project-dump.md"},
+		},
+	})
+	model.selected = 2
+	model.selectedPane = 1
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != DumpActionEdit {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionEdit)
+	}
+
+	if !confirmed.dumpEdit.Active {
+		t.Fatal("dumpEdit.Active = false, want active edit")
+	}
+
+	if confirmed.dumpAction.Pending {
+		t.Fatal("dump action is pending after direct edit")
+	}
+
+	if confirmed.selectedPane != 1 {
+		t.Fatalf("selectedPane = %d, want 1", confirmed.selectedPane)
+	}
+
+	if confirmed.maximizedPane != 1 {
+		t.Fatalf("maximizedPane = %d, want 1", confirmed.maximizedPane)
+	}
+}
+
 func TestModelConfirmsAppendDumpAction(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
@@ -1296,7 +1360,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		t.Fatalf("dumpEdit value = %q", confirmed.dumpEdit.Input.Value())
 	}
 
-	if confirmed.statusMessage != "Editing dump." {
+	if confirmed.statusMessage != "Editing .chc/dumps/project-dump.md" {
 		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
 	}
 }
@@ -1354,7 +1418,7 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 
 	for _, want := range []string{
 		"Edit",
-		"ctrl+s save  esc cancel",
+		"ctrl+s save  esc cancel  alt+e external",
 		"# Project dump",
 		"Changed Markdown.",
 	} {
@@ -2291,7 +2355,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 		"Project Context",
 		"Blog Context",
 		"Project-wide notes.",
-		"enter edit  c create  alt+e external  r refresh",
+		"enter edit  alt+e external  c create  r refresh",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
