@@ -35,10 +35,10 @@ type QuizView struct {
 
 func (m Model) renderQuizFocusList(limit int) []string {
 	if len(m.quizzes) == 0 {
-		return []string{"No quiz scopes found."}
+		return []string{"No quiz use cases found."}
 	}
 
-	lines := []string{shellMutedStyle.Render("Scope")}
+	lines := []string{shellMutedStyle.Render("Use Case")}
 
 	for _, quiz := range m.quizzes {
 		prefix := " "
@@ -100,7 +100,7 @@ func (m Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string 
 
 func (m Model) renderQuizzes() string {
 	if len(m.quizzes) == 0 {
-		return "Quizzes\n  No quiz scopes found."
+		return "Quizzes\n  No quiz use cases found."
 	}
 
 	var output strings.Builder
@@ -272,7 +272,7 @@ func (m Model) newQuizActionState(action QuizActionID) QuizActionState {
 		},
 		Title: title,
 		Details: []string{
-			"Scope: " + quizScopeLabel(scope),
+			"Use Case: " + quizUseCaseLabel(scope),
 		},
 	}
 }
@@ -304,8 +304,12 @@ func normalizeQuizViews(quizzes []QuizView) []QuizView {
 }
 
 func quizScopeLabel(scope QuizScope) string {
+	return quizUseCaseLabel(scope)
+}
+
+func quizUseCaseLabel(scope QuizScope) string {
 	if strings.TrimSpace(scope.CaseSlug) == "" {
-		return "project"
+		return "Project-wide"
 	}
 
 	return scope.CaseSlug

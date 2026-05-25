@@ -78,6 +78,7 @@ type Options struct {
 	Documents            []DocumentView
 	Dumps                []DumpView
 	Quizzes              []QuizView
+	Specs                []SpecView
 	AuthoringSessions    []chc.AuthoringSession
 	Observability        ObservabilityView
 	WorkspaceGraph       chc.WorkspaceGraph
@@ -86,6 +87,7 @@ type Options struct {
 	ActionExecutor       ArtifactActionExecutor
 	DumpExecutor         DumpActionExecutor
 	QuizExecutor         QuizActionExecutor
+	SpecExecutor         SpecActionExecutor
 	TicketExecutor       TicketActionExecutor
 	WorkExecutor         WorkActionExecutor
 	WorkspaceExecutor    WorkspaceRefreshExecutor
@@ -130,6 +132,8 @@ type Model struct {
 	quizAction               QuizActionState
 	quizAnswer               QuizAnswerState
 	quizBusy                 bool
+	specs                    []SpecView
+	selectedSpec             int
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
@@ -142,6 +146,8 @@ type Model struct {
 	dumpAction               DumpActionState
 	dumpExecutor             DumpActionExecutor
 	quizExecutor             QuizActionExecutor
+	specAction               SpecActionState
+	specExecutor             SpecActionExecutor
 	ticketAction             TicketActionState
 	ticketExecutor           TicketActionExecutor
 	workAction               WorkActionState
@@ -206,6 +212,7 @@ func NewModel(opts Options) Model {
 		documents:              append([]DocumentView(nil), opts.Documents...),
 		dumps:                  normalizeDumpViews(opts.Dumps),
 		quizzes:                normalizeQuizViews(opts.Quizzes),
+		specs:                  normalizeSpecViews(opts.Specs),
 		authoringSessions:      NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:          opts.Observability,
 		workspaceGraph:         opts.WorkspaceGraph,
@@ -215,6 +222,7 @@ func NewModel(opts Options) Model {
 		actionExecutor:         opts.ActionExecutor,
 		dumpExecutor:           opts.DumpExecutor,
 		quizExecutor:           opts.QuizExecutor,
+		specExecutor:           opts.SpecExecutor,
 		ticketExecutor:         opts.TicketExecutor,
 		workExecutor:           opts.WorkExecutor,
 		workspaceExecutor:      opts.WorkspaceExecutor,
@@ -303,6 +311,7 @@ func (m Model) View() string {
 	output.WriteString(m.renderTicketAction())
 	output.WriteString(m.renderWorkAction())
 	output.WriteString(m.renderQuizAction())
+	output.WriteString(m.renderSpecAction())
 	output.WriteString(m.renderCommandPalette())
 	output.WriteString("\n\n")
 	output.WriteString(m.renderKeys())
@@ -340,6 +349,10 @@ func (m Model) updateKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateQuizzesKey(msg)
 	}
 
+	if m.SelectedView() == ViewSpecs {
+		return m.updateSpecsKey(msg)
+	}
+
 	return m.updateNavigationKey(msg)
 }
 
@@ -359,6 +372,10 @@ func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 		return updated, cmd, true
 	case m.ticketAction.Pending:
 		updated, cmd := m.updateTicketActionKey(msg)
+
+		return updated, cmd, true
+	case m.specAction.Pending:
+		updated, cmd := m.updateSpecActionKey(msg)
 
 		return updated, cmd, true
 	case m.workAction.Pending:
@@ -679,7 +696,11 @@ func (m *Model) selectPreviousRecord() {
 	case ViewQuizzes:
 		m.selectPreviousQuiz()
 	case ViewSpecs, ViewPlans, ViewDocuments:
-		m.selectPreviousDocument()
+		if m.SelectedView() == ViewSpecs {
+			m.selectPreviousSpec()
+		} else {
+			m.selectPreviousDocument()
+		}
 	case ViewAuthoring:
 		m.selectPreviousAuthoringSession()
 	}
@@ -698,7 +719,11 @@ func (m *Model) selectNextRecord() {
 	case ViewQuizzes:
 		m.selectNextQuiz()
 	case ViewSpecs, ViewPlans, ViewDocuments:
-		m.selectNextDocument()
+		if m.SelectedView() == ViewSpecs {
+			m.selectNextSpec()
+		} else {
+			m.selectNextDocument()
+		}
 	case ViewAuthoring:
 		m.selectNextAuthoringSession()
 	}
@@ -794,7 +819,7 @@ func (m Model) renderProductSelectedView(selectedView View) (string, bool) {
 	}
 
 	if selectedView == ViewSpecs {
-		return m.renderDocumentsByFamily("Specs", map[string]bool{"spec": true}), true
+		return m.renderSpecs(), true
 	}
 
 	if selectedView == ViewPlans {
@@ -962,6 +987,8 @@ func (m Model) renderKeys() string {
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects dump, enter edits, c creates, r refreshes, q quits"
 	case m.SelectedView() == ViewQuizzes:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects quiz, s starts, enter answers, r refreshes, q quits"
+	case m.SelectedView() == ViewSpecs:
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects spec, g generates spec, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects session, q quits"
 	default:
@@ -975,7 +1002,7 @@ func (m Model) ticketKeysActive() bool {
 
 func (m Model) documentKeysActive() bool {
 	switch m.SelectedView() {
-	case ViewSpecs, ViewPlans, ViewDocuments:
+	case ViewPlans, ViewDocuments:
 		return true
 	default:
 		return false
@@ -990,6 +1017,8 @@ func (m Model) activeInteractionKeys() (string, bool) {
 		return "Keys: enter confirms dump action, esc cancels dump action", true
 	case m.ticketAction.Pending:
 		return "Keys: enter confirms ticket action, esc cancels ticket action", true
+	case m.specAction.Pending:
+		return "Keys: enter confirms spec action, esc cancels spec action", true
 	case m.workAction.Pending:
 		return "Keys: enter confirms work action, esc cancels work action", true
 	case m.commandPalette.Open:

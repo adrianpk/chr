@@ -149,6 +149,57 @@ type tuiTicketActionExecutor struct {
 	operations service
 }
 
+type tuiSpecActionExecutor struct {
+	operations service
+}
+
+func newTUISpecActionExecutor(
+	operations service,
+) tuiSpecActionExecutor {
+	return tuiSpecActionExecutor{
+		operations: operations,
+	}
+}
+
+func (e tuiSpecActionExecutor) ExecuteSpecAction(
+	request chctui.SpecActionRequest,
+) (chctui.SpecActionResult, error) {
+	switch request.Action {
+	case chctui.SpecActionGenerate:
+		_, err := e.operations.GenerateSpec(SpecGenerateRequest{
+			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		})
+		if err != nil {
+			return chctui.SpecActionResult{}, err
+		}
+	case chctui.SpecActionRefresh:
+	default:
+		return chctui.SpecActionResult{}, errors.New("unknown spec action")
+	}
+
+	documents, err := chctui.LoadDocumentViews(e.operations.ctx, e.operations.projectContext.ProjectDir)
+	if err != nil {
+		return chctui.SpecActionResult{}, err
+	}
+
+	specs, err := loadTUISpecs(e.operations)
+	if err != nil {
+		return chctui.SpecActionResult{}, err
+	}
+
+	message := "Specs refreshed."
+	if request.Action == chctui.SpecActionGenerate {
+		message = "Spec generated."
+	}
+
+	return chctui.SpecActionResult{
+		Message:   message,
+		Documents: documents,
+		Specs:     specs,
+		Scope:     request.Scope,
+	}, nil
+}
+
 func newTUITicketActionExecutor(
 	operations service,
 ) tuiTicketActionExecutor {
@@ -206,6 +257,7 @@ func loadTUIDumps(operations service) ([]chctui.DumpView, error) {
 		dumps = append(dumps, chctui.DumpView{
 			Index:        index,
 			NodeID:       dump.NodeID,
+			UseCaseTitle: dump.UseCaseTitle,
 			Title:        dump.Title,
 			Status:       dump.Status,
 			Scope:        chctui.DumpScope{CaseSlug: dump.Scope.CaseSlug},
@@ -249,6 +301,29 @@ func loadTUIQuizzes(operations service) ([]chctui.QuizView, error) {
 	}
 
 	return quizzes, nil
+}
+
+func loadTUISpecs(operations service) ([]chctui.SpecView, error) {
+	result, err := operations.ListSpecs()
+	if err != nil {
+		return nil, err
+	}
+
+	specs := make([]chctui.SpecView, 0, len(result.Specs))
+	for index, spec := range result.Specs {
+		specs = append(specs, chctui.SpecView{
+			Index:        index,
+			UseCaseTitle: spec.UseCaseTitle,
+			Title:        spec.Title,
+			Status:       spec.Status,
+			Scope:        chctui.QuizScope{CaseSlug: spec.Scope.CaseSlug},
+			RelativePath: spec.RelativePath,
+			UpdatedAt:    spec.UpdatedAt,
+			Content:      spec.Content,
+		})
+	}
+
+	return specs, nil
 }
 
 type tuiDumpActionExecutor struct {

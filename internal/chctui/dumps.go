@@ -14,6 +14,7 @@ type DumpScope struct {
 type DumpView struct {
 	Index        int
 	NodeID       string
+	UseCaseTitle string
 	Title        string
 	Status       string
 	Scope        DumpScope
@@ -27,7 +28,7 @@ func (m Model) renderDumpFocusList(limit int) []string {
 		return []string{"No dumps found."}
 	}
 
-	lines := []string{shellMutedStyle.Render("Scope")}
+	lines := []string{shellMutedStyle.Render("Use Case")}
 
 	for _, dump := range m.dumps {
 		prefix := " "
@@ -35,7 +36,7 @@ func (m Model) renderDumpFocusList(limit int) []string {
 			prefix = ">"
 		}
 
-		lines = append(lines, prefix+" "+dump.Title)
+		lines = append(lines, prefix+" "+dumpUseCaseTitle(dump))
 		if len(lines) >= limit {
 			break
 		}
@@ -138,7 +139,7 @@ func (m Model) renderDumps() string {
 		}
 
 		output.WriteString(prefix)
-		output.WriteString(dump.Title)
+		output.WriteString(dumpUseCaseTitle(dump))
 		output.WriteString("\n")
 	}
 
@@ -274,8 +275,17 @@ func normalizeDumpViews(dumps []DumpView) []DumpView {
 
 func dumpScopeLabel(scope DumpScope) string {
 	if strings.TrimSpace(scope.CaseSlug) == "" {
-		return "project"
+		return "Project-wide"
 	}
 
 	return scope.CaseSlug
+}
+
+func dumpUseCaseTitle(dump DumpView) string {
+	title := strings.TrimSpace(dump.UseCaseTitle)
+	if title != "" {
+		return title
+	}
+
+	return dumpScopeLabel(dump.Scope)
 }

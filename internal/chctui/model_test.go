@@ -1007,8 +1007,8 @@ func TestModelExecutesNavigationCommand(t *testing.T) {
 
 func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 	model := NewModel(Options{
-		Documents: []DocumentView{
-			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".prj/specs/specs/tui.md"},
+		Specs: []SpecView{
+			{Index: 0, Title: "Spec", RelativePath: ".chc/specs/tui.md"},
 		},
 	})
 	model.selected = 4
@@ -1022,7 +1022,7 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	if navigated.statusMessage != "Selected source path: .prj/specs/specs/tui.md" {
+	if navigated.statusMessage != "Selected source path: .chc/specs/tui.md" {
 		t.Fatalf("statusMessage = %q, want selected source path", navigated.statusMessage)
 	}
 }
@@ -1085,6 +1085,23 @@ func TestDefaultCommandRegistryDoesNotExposeDraftCreation(t *testing.T) {
 	}
 }
 
+func TestGenerateSpecCommandOnlyAppearsInSpecs(t *testing.T) {
+	model := NewModel(Options{})
+	model.selected = 3
+	model.commandPalette.Filter = "generate"
+
+	if commands := model.filteredCommands(); len(commands) != 0 {
+		t.Fatalf("quiz commands include generate spec: %#v", commands)
+	}
+
+	model.selected = 4
+
+	commands := model.filteredCommands()
+	if len(commands) != 1 || commands[0].ID != "generate-spec" {
+		t.Fatalf("spec commands = %#v, want generate-spec", commands)
+	}
+}
+
 func TestDefaultCommandRegistryExposesDumpWorkflows(t *testing.T) {
 	commandsByID := map[string]Command{}
 	for _, command := range DefaultCommandRegistry() {
@@ -1144,7 +1161,7 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 		"Confirm Action",
 		"Create dump",
 		"Title: blog dump",
-		"Scope: blog",
+		"Use Case: blog",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -2065,14 +2082,14 @@ func TestTicketFilterMatchesMetadata(t *testing.T) {
 
 func TestModelRendersDocumentsAndDetail(t *testing.T) {
 	model := NewModel(Options{
-		Documents: []DocumentView{
+		Specs: []SpecView{
 			{
 				Index:        0,
-				Family:       "spec",
+				UseCaseTitle: "Blog Publishing",
 				Status:       "accepted",
 				Title:        "TUI Navigation",
-				RelativePath: ".prj/specs/specs/tui-navigation.md",
-				Preview:      "Navigation details.",
+				RelativePath: ".chc/specs/tui-navigation.md",
+				Content:      "# TUI Navigation\n\nStatus: accepted\n\nNavigation details.",
 			},
 		},
 	})
@@ -2082,11 +2099,10 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 
 	for _, want := range []string{
 		"Specs",
-		"spec",
 		"accepted",
+		"Blog Publishing",
 		"TUI Navigation",
-		"Selected Document",
-		"Path: .prj/specs/specs/tui-navigation.md",
+		".chc/specs/tui-navigation.md",
 		"Navigation details.",
 	} {
 		if !strings.Contains(view, want) {
@@ -2300,9 +2316,9 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 
 func TestModelSelectsDocuments(t *testing.T) {
 	model := NewModel(Options{
-		Documents: []DocumentView{
-			{Index: 0, Family: "spec", Title: "First"},
-			{Index: 1, Family: "spec", Title: "Second"},
+		Specs: []SpecView{
+			{Index: 0, UseCaseTitle: "First", Title: "First Spec"},
+			{Index: 1, UseCaseTitle: "Second", Title: "Second Spec"},
 		},
 	})
 	model.selected = 4
@@ -2314,13 +2330,13 @@ func TestModelSelectsDocuments(t *testing.T) {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	document, ok := navigated.selectedDocumentView()
+	document, ok := navigated.selectedSpecView()
 	if !ok {
-		t.Fatal("selectedDocumentView returned no document")
+		t.Fatal("selectedSpecView returned no spec")
 	}
 
-	if document.Title != "Second" {
-		t.Fatalf("selected document = %q, want Second", document.Title)
+	if document.UseCaseTitle != "Second" {
+		t.Fatalf("selected use case = %q, want Second", document.UseCaseTitle)
 	}
 }
 
@@ -2330,6 +2346,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 		Dumps: []DumpView{
 			{
 				Title:        "Project Context",
+				UseCaseTitle: "Project-wide",
 				Status:       "raw",
 				Scope:        DumpScope{},
 				RelativePath: ".chc/dumps/project-context.md",
@@ -2338,6 +2355,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 			},
 			{
 				Title:        "Blog Context",
+				UseCaseTitle: "Blog Publishing",
 				Status:       "curated",
 				Scope:        DumpScope{CaseSlug: "blog"},
 				RelativePath: ".chc/dumps/blog-context.md",
@@ -2351,9 +2369,8 @@ func TestModelRendersScopedDumps(t *testing.T) {
 	view := model.View()
 	for _, want := range []string{
 		"Dumps",
-		"project",
-		"Project Context",
-		"Blog Context",
+		"Project-wide",
+		"Blog Publishing",
 		"Project-wide notes.",
 		"enter edit  alt+e external  c create  r refresh",
 	} {
@@ -2363,7 +2380,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 	}
 
 	for _, unwanted := range []string{
-		"Scope        Status      Title",
+		"Use Case     Status      Title",
 		"Selected Dump",
 		"Path: .chc/dumps/project-context.md",
 		"Updated:",
@@ -2372,6 +2389,29 @@ func TestModelRendersScopedDumps(t *testing.T) {
 		if strings.Contains(view, unwanted) {
 			t.Fatalf("View() contains unwanted %q:\n%s", unwanted, view)
 		}
+	}
+}
+
+func TestModelDumpListUsesUseCaseTitle(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{
+				UseCaseTitle: "Blog Publishing",
+				Title:        "Blog Context",
+				Scope:        DumpScope{CaseSlug: "blog"},
+				Preview:      "# Blog Context\n\nNotes.",
+			},
+		},
+	})
+	model.selected = 2
+
+	view := model.View()
+	if !strings.Contains(view, "> Blog Publishing") {
+		t.Fatalf("View() missing use case title in dump list:\n%s", view)
+	}
+
+	if !strings.Contains(view, "Blog Context") {
+		t.Fatalf("View() missing dump title in detail:\n%s", view)
 	}
 }
 
@@ -2697,6 +2737,73 @@ func TestModelStartsQuizFromQuizzesKey(t *testing.T) {
 	}
 
 	assertQuizAnswerHelperVisible(t, confirmed)
+}
+
+func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
+	executor := &fakeSpecActionExecutor{
+		result: SpecActionResult{
+			Message: "Spec generated.",
+			Documents: []DocumentView{
+				{Family: "spec", Status: "draft", Title: "Generated Spec", RelativePath: ".chc/specs/drafts/blog-quiz-spec.md"},
+			},
+		},
+	}
+	model := NewModel(Options{
+		SpecExecutor: executor,
+		Specs: []SpecView{
+			{Title: "Project", Scope: QuizScope{}, Status: "done"},
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "done"},
+		},
+	})
+	model.selected = 4
+	model.selectedSpec = 1
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if confirmed.specAction.Pending {
+		t.Fatal("spec action is pending, want direct execution")
+	}
+
+	if executor.request.Action != SpecActionGenerate {
+		t.Fatalf("executor action = %q, want %q", executor.request.Action, SpecActionGenerate)
+	}
+
+	if executor.request.Scope.CaseSlug != "blog" {
+		t.Fatalf("scope = %q, want blog", executor.request.Scope.CaseSlug)
+	}
+
+	if confirmed.statusMessage != "Spec generated." {
+		t.Fatalf("statusMessage = %q, want Spec generated.", confirmed.statusMessage)
+	}
+
+	if len(confirmed.documents) != 1 || confirmed.documents[0].Title != "Generated Spec" {
+		t.Fatalf("documents = %#v, want generated spec", confirmed.documents)
+	}
+}
+
+func TestModelSpecListUsesUseCaseTitleWhenSpecExists(t *testing.T) {
+	model := NewModel(Options{
+		Specs: []SpecView{
+			{
+				UseCaseTitle: "Blog Publishing",
+				Title:        "Generated Blog Workflow Spec",
+				Status:       "draft",
+				Scope:        QuizScope{CaseSlug: "blog"},
+				Content:      "# Generated Blog Workflow Spec\n\nDetails.",
+			},
+		},
+	})
+	model.selected = 4
+
+	view := model.View()
+	if !strings.Contains(view, "> Blog Publishing") {
+		t.Fatalf("View() missing use case title in list:\n%s", view)
+	}
+
+	if !strings.Contains(view, "Generated Blog Workflow Spec") {
+		t.Fatalf("View() missing spec title in detail:\n%s", view)
+	}
 }
 
 func assertQuizAnswerHelperVisible(t *testing.T, model Model) {
@@ -3041,6 +3148,18 @@ type fakeQuizActionExecutor struct {
 }
 
 func (e *fakeQuizActionExecutor) ExecuteQuizAction(request QuizActionRequest) (QuizActionResult, error) {
+	e.request = request
+
+	return e.result, e.err
+}
+
+type fakeSpecActionExecutor struct {
+	request SpecActionRequest
+	result  SpecActionResult
+	err     error
+}
+
+func (e *fakeSpecActionExecutor) ExecuteSpecAction(request SpecActionRequest) (SpecActionResult, error) {
 	e.request = request
 
 	return e.result, e.err

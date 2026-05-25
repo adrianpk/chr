@@ -17,6 +17,7 @@ const (
 	CommandActionPlanArtifact       CommandAction = "plan_artifact"
 	CommandActionPlanDump           CommandAction = "plan_dump"
 	CommandActionPlanQuiz           CommandAction = "plan_quiz"
+	CommandActionPlanSpec           CommandAction = "plan_spec"
 	CommandActionPlanTicket         CommandAction = "plan_ticket"
 	CommandActionPlanWork           CommandAction = "plan_work"
 )
@@ -30,6 +31,7 @@ type Command struct {
 	Artifact    ArtifactActionID
 	Dump        DumpActionID
 	Quiz        QuizActionID
+	Spec        SpecActionID
 	Ticket      TicketActionID
 	Status      string
 	Work        WorkActionID
@@ -65,6 +67,8 @@ func DefaultCommandRegistry() []Command {
 		{ID: "quiz-refresh", Title: "Refresh quizzes", Description: "Reload scoped quiz state.", Action: CommandActionPlanQuiz, Quiz: QuizActionRefresh},
 		{ID: "quiz-mode-deep", Title: "Switch quiz to deep mode", Description: "Use deep generation for the selected quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionDeepMode},
 		{ID: "quiz-mode-fast", Title: "Switch quiz to fast mode", Description: "Use fast candidate generation for the selected quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionFastMode},
+		{ID: "generate-spec", Title: "Generate spec", Description: "Generate a draft spec from available project and use-case context.", Action: CommandActionPlanSpec, Spec: SpecActionGenerate},
+		{ID: "refresh-specs", Title: "Refresh specs", Description: "Reload scoped specs.", Action: CommandActionPlanSpec, Spec: SpecActionRefresh},
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a spec-oriented authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
 		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
 		{ID: "ticket-add-comment", Title: "Add ticket comment", Description: "Add a standard comment to the selected ticket after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionAddComment},
@@ -232,6 +236,8 @@ func (m *Model) executeCommand(command Command) {
 		m.planDumpAction(command.Dump)
 	case CommandActionPlanQuiz:
 		m.planQuizAction(command.Quiz)
+	case CommandActionPlanSpec:
+		m.planSpecAction(command.Spec)
 	case CommandActionPlanTicket:
 		m.planTicketAction(command.Ticket, command.Status)
 	case CommandActionPlanWork:
@@ -255,18 +261,37 @@ func (m *Model) selectView(view View) {
 func (m Model) filteredCommands() []Command {
 	filter := strings.ToLower(strings.TrimSpace(m.commandPalette.Filter))
 	if filter == "" {
-		return append([]Command(nil), m.commandPalette.Commands...)
+		commands := []Command{}
+		for _, command := range m.commandPalette.Commands {
+			if m.commandAvailableInCurrentView(command) {
+				commands = append(commands, command)
+			}
+		}
+
+		return commands
 	}
 
 	commands := []Command{}
 
 	for _, command := range m.commandPalette.Commands {
+		if !m.commandAvailableInCurrentView(command) {
+			continue
+		}
+
 		if command.Matches(filter) {
 			commands = append(commands, command)
 		}
 	}
 
 	return commands
+}
+
+func (m Model) commandAvailableInCurrentView(command Command) bool {
+	if command.Action == CommandActionPlanSpec {
+		return m.SelectedView() == ViewSpecs
+	}
+
+	return true
 }
 
 func (c Command) Matches(filter string) bool {
@@ -298,7 +323,12 @@ func (m Model) selectedSourcePath() string {
 		}
 	case ViewQuizzes:
 		return m.selectedQuizSourcePath()
-	case ViewSpecs, ViewPlans, ViewDocuments:
+	case ViewSpecs:
+		spec, ok := m.selectedSpecView()
+		if ok {
+			return spec.RelativePath
+		}
+	case ViewPlans, ViewDocuments:
 		return m.selectedDocumentSourcePath()
 	case ViewAuthoring:
 		session, ok := m.selectedAuthoringSessionView()

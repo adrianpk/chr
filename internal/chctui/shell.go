@@ -108,7 +108,7 @@ func (m Model) renderProductWorkspace(width, height int) (string, bool) {
 	case ViewQuizzes:
 		return m.renderQuizWorkspace(width, height), true
 	case ViewSpecs:
-		return m.renderDocumentFamilyWorkspace(width, height, "Specs", map[string]bool{"spec": true}), true
+		return m.renderSpecWorkspace(width, height), true
 	case ViewPlans:
 		return m.renderDocumentFamilyWorkspace(width, height, "Plans", map[string]bool{"plan": true, "tracker": true}), true
 	case ViewDash:
@@ -608,6 +608,28 @@ func (m Model) renderQuizWorkspace(width, height int) string {
 	), width, height)
 }
 
+func (m Model) renderSpecWorkspace(width, height int) string {
+	list := m.renderSpecFocusList(height - 2)
+	detail := m.renderSelectedSpecDetailLines(maxInt(width-4, 1))
+
+	switch m.maximizedPane {
+	case 0:
+		return fitBlock(renderPanel("Specs", list, width, height, true), width, height)
+	case 1:
+		return fitBlock(renderPanel("Spec", detail, width, height, true), width, height)
+	}
+
+	leftWidth, rightWidth := m.splitWidths(width)
+	detail = m.renderSelectedSpecDetailLines(maxInt(rightWidth-4, 1))
+
+	return fitBlock(lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		renderPanel("Specs", list, leftWidth, height, m.selectedPane == 0),
+		panelVerticalGap(height),
+		renderPanel("Spec", detail, rightWidth, height, m.selectedPane == 1),
+	), width, height)
+}
+
 func (m Model) quizDetailPanelTitle() string {
 	quiz, ok := m.selectedQuizView()
 	if ok && m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
@@ -745,6 +767,7 @@ func (m Model) renderShellOverlay() string {
 		m.renderTicketAction(),
 		m.renderWorkAction(),
 		m.renderQuizAction(),
+		m.renderSpecAction(),
 		m.renderCommandPalette(),
 	} {
 		if strings.TrimSpace(overlay) != "" {

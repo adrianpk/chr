@@ -18,6 +18,7 @@ type DumpScope struct {
 
 type DumpView struct {
 	NodeID       string
+	UseCaseTitle string
 	Title        string
 	Status       string
 	Scope        DumpScope
@@ -299,6 +300,7 @@ func (s service) dumpViewsFromIndex(index chc.WorkspaceIndex) []DumpView {
 func (s service) dumpViewFromNode(nodeID string, node chc.WorkspaceNode) DumpView {
 	return DumpView{
 		NodeID:       nodeID,
+		UseCaseTitle: s.dumpUseCaseTitle(node.CaseSlug),
 		Title:        node.Title,
 		Status:       node.Status,
 		Scope:        DumpScope{CaseSlug: node.CaseSlug},
@@ -306,6 +308,23 @@ func (s service) dumpViewFromNode(nodeID string, node chc.WorkspaceNode) DumpVie
 		UpdatedAt:    node.ModifiedAt,
 		Content:      s.dumpContent(node.RelativePath),
 	}
+}
+
+func (s service) dumpUseCaseTitle(caseSlug string) string {
+	if strings.TrimSpace(caseSlug) == "" {
+		return "Project-wide"
+	}
+
+	cases, err := chc.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
+	if err == nil {
+		for _, metadata := range cases {
+			if metadata.Slug == caseSlug && strings.TrimSpace(metadata.Name) != "" {
+				return metadata.Name
+			}
+		}
+	}
+
+	return caseSlug
 }
 
 func (s service) dumpContent(relativePath string) string {

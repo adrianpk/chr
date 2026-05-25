@@ -319,7 +319,7 @@ func (m Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
 		Title:   "Create dump",
 		Details: []string{
 			"Title: " + request.Title,
-			"Scope: " + dumpScopeLabel(request.Scope),
+			"Use Case: " + dumpScopeLabel(request.Scope),
 		},
 	}
 }
