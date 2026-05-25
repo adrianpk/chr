@@ -595,6 +595,27 @@ func TestQuizModelResponseFromDraftSpecOutput(t *testing.T) {
 	}
 }
 
+func TestValidateQuizModelResponseAcceptsDraftSpecBeforeServiceProvenance(t *testing.T) {
+	response := QuizModelResponse{
+		ID:        "response-1",
+		RequestID: "request-1",
+		Provider:  "fake",
+		Status:    QuizModelResponseReady,
+		DraftSpec: QuizDraftSpec{
+			Scope:     QuizScope{ProjectID: "project-1"},
+			Title:     "Draft Spec",
+			Body:      "Draft body.",
+			CreatedAt: quizRuntimeTestTime(),
+		},
+		CreatedAt: quizRuntimeTestTime(),
+	}
+
+	err := ValidateQuizModelResponse(response)
+	if err != nil {
+		t.Fatalf("ValidateQuizModelResponse returned error: %v", err)
+	}
+}
+
 func validQuizModelRequest() QuizModelRequest {
 	state := validQuizRuntimeState()
 	payload := QuizModelPayload{

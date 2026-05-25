@@ -189,7 +189,7 @@ func (a QuizModelAction) Valid() bool {
 
 func validateQuizModelReadyResponse(response QuizModelResponse) error {
 	if response.DraftSpec.HasContent() {
-		return ValidateQuizDraftSpec(response.DraftSpec)
+		return ValidateQuizDraftSpecModelContent(response.DraftSpec)
 	}
 
 	return ValidateQuizQuestion(response.Question)

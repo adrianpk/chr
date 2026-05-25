@@ -109,11 +109,7 @@ func RenderQuizDraftSpec(spec QuizDraftSpec) string {
 }
 
 func ValidateQuizDraftSpec(spec QuizDraftSpec) error {
-	if !spec.HasContent() {
-		return fmt.Errorf("quiz draft spec content is required")
-	}
-
-	err := ValidateQuizScope(spec.Scope)
+	err := ValidateQuizDraftSpecModelContent(spec)
 	if err != nil {
 		return err
 	}
@@ -124,6 +120,23 @@ func ValidateQuizDraftSpec(spec QuizDraftSpec) error {
 
 	if strings.TrimSpace(spec.SourceRawPath) == "" {
 		return fmt.Errorf("quiz draft spec source raw path is required")
+	}
+
+	if spec.CreatedAt.IsZero() {
+		return fmt.Errorf("quiz draft spec created time is required")
+	}
+
+	return nil
+}
+
+func ValidateQuizDraftSpecModelContent(spec QuizDraftSpec) error {
+	if !spec.HasContent() {
+		return fmt.Errorf("quiz draft spec content is required")
+	}
+
+	err := ValidateQuizScope(spec.Scope)
+	if err != nil {
+		return err
 	}
 
 	if spec.CreatedAt.IsZero() {
