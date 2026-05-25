@@ -53,6 +53,7 @@ func parseQuizRawTurn(index int, block string) (QuizEntry, error) {
 	entry.Depth = parseQuizTurnDepth(metadata["depth"])
 	entry.ParentID = metadata["parent_id"]
 	entry.Tags = parseQuizTurnTags(metadata["tags"])
+	entry.PromptIntent = sectionAfterLabel(body, "Prompt intent:")
 	entry.Question = sectionAfterLabel(body, "Question:")
 	entry.Answer = sectionAfterLabel(body, "Answer:")
 	entry.CreatedAt = quizRawTurnTime(block)

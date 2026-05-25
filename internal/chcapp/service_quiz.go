@@ -1,6 +1,7 @@
 package chcapp
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -537,30 +538,55 @@ func quizModelCurrentQuestionPayload(
 	}
 
 	entry := entries[len(entries)-1]
-
-	return chc.QuizModelCurrentQuestionPayload{
-		Question: entry.Question,
-		Tags:     quizModelEntryTags(entry),
-		PromptIntent: map[string]any{
+	promptIntent := quizModelPromptIntentFromJSON(entry.PromptIntent)
+	if len(promptIntent) == 0 {
+		promptIntent = map[string]any{
 			"metadata": map[string]any{
 				"follow_up_depth": entry.Depth - 1,
 				"status":          string(entry.Status),
 			},
-		},
+		}
+	}
+
+	return chc.QuizModelCurrentQuestionPayload{
+		Question:     entry.Question,
+		Tags:         quizModelEntryTags(entry),
+		PromptIntent: promptIntent,
 	}
 }
 
 func quizModelQuestionPayloadFromQuestion(question chc.QuizQuestion) chc.QuizModelCurrentQuestionPayload {
-	return chc.QuizModelCurrentQuestionPayload{
-		Question: question.Prompt,
-		Tags:     quizModelQuestionTags(question),
-		PromptIntent: map[string]any{
+	promptIntent := quizModelPromptIntentFromJSON(question.Rationale)
+	if len(promptIntent) == 0 {
+		promptIntent = map[string]any{
 			"metadata": map[string]any{
 				"follow_up_depth":        question.Depth - 1,
 				"completion_recommended": !question.Required,
 			},
-		},
+		}
 	}
+
+	return chc.QuizModelCurrentQuestionPayload{
+		Question:     question.Prompt,
+		Tags:         quizModelQuestionTags(question),
+		PromptIntent: promptIntent,
+	}
+}
+
+func quizModelPromptIntentFromJSON(value string) map[string]any {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return map[string]any{}
+	}
+
+	var promptIntent map[string]any
+
+	err := json.Unmarshal([]byte(value), &promptIntent)
+	if err != nil {
+		return map[string]any{}
+	}
+
+	return promptIntent
 }
 
 func quizModelQuestionTags(question chc.QuizQuestion) []string {
@@ -716,17 +742,19 @@ func quizEntryFromState(
 	question := *state.ActiveQuestion
 
 	return chc.QuizEntry{
-		ID:         fmt.Sprintf("entry-%03d", state.QuestionsAsked),
-		QuestionID: question.ID,
-		Question:   question.Prompt,
-		Answer:     strings.TrimSpace(answer),
-		Status:     status,
-		Topic:      question.Topic,
-		Depth:      question.Depth,
-		ParentID:   question.ParentID,
-		Mode:       state.Mode,
-		CreatedAt:  question.CreatedAt,
-		AnsweredAt: now,
+		ID:           fmt.Sprintf("entry-%03d", state.QuestionsAsked),
+		QuestionID:   question.ID,
+		Question:     question.Prompt,
+		Answer:       strings.TrimSpace(answer),
+		Status:       status,
+		Topic:        question.Topic,
+		Depth:        question.Depth,
+		ParentID:     question.ParentID,
+		Mode:         state.Mode,
+		Tags:         quizModelQuestionTags(question),
+		PromptIntent: question.Rationale,
+		CreatedAt:    question.CreatedAt,
+		AnsweredAt:   now,
 	}
 }
 

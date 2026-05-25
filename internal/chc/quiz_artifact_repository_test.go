@@ -70,6 +70,8 @@ func TestQuizArtifactRepositoryAppendsRawCapture(t *testing.T) {
 		`status: "raw"`,
 		`runtime_id: "quiz-project"`,
 		"question_id: question-1",
+		"Prompt intent:",
+		`"follow_up_depth":0`,
 		"Question:",
 		"What should this workflow preserve?",
 		"Answer:",
@@ -194,6 +196,10 @@ func TestQuizArtifactRepositoryLoadsRawCaptureEntries(t *testing.T) {
 
 	if entries[0].QuestionID != "question-1" {
 		t.Fatalf("QuestionID = %q, want question-1", entries[0].QuestionID)
+	}
+
+	if !strings.Contains(entries[0].PromptIntent, `"follow_up_depth":0`) {
+		t.Fatalf("PromptIntent = %q, want persisted follow-up depth", entries[0].PromptIntent)
 	}
 }
 

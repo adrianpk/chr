@@ -127,6 +127,62 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 	}
 }
 
+func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizModelResponseWithQuestion("response-1", serviceQuizQuestion(chc.QuizQuestion{
+				ID:        "question-1",
+				Prompt:    "What should the workflow preserve?",
+				Topic:     "workflow",
+				Depth:     1,
+				TrunkID:   "question-1",
+				Rationale: `{"kind":"quiz_question","metadata":{"follow_up_depth":2,"completion_recommended":false,"routing_state":{"phase":"follow_up"}}}`,
+				CreatedAt: clock(),
+			})),
+			serviceQuizModelResponse("response-2", "question-2", clock()),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	_, err := operations.StartQuiz(QuizStartRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
+	if err != nil {
+		t.Fatalf("StartQuiz returned error: %v", err)
+	}
+
+	_, err = operations.AnswerQuiz(QuizAnswerRequest{
+		Scope:  chc.QuizScope{CaseSlug: "blog"},
+		Answer: "The workflow must preserve editorial review.",
+	})
+	if err != nil {
+		t.Fatalf("AnswerQuiz returned error: %v", err)
+	}
+
+	if len(model.requests) != 2 {
+		t.Fatalf("model requests = %d, want two", len(model.requests))
+	}
+
+	metadata, ok := model.requests[1].Payload.CurrentQuestion.PromptIntent["metadata"].(map[string]any)
+	if !ok {
+		t.Fatalf("prompt intent = %#v, want metadata map", model.requests[1].Payload.CurrentQuestion.PromptIntent)
+	}
+
+	if metadata["follow_up_depth"] != float64(2) {
+		t.Fatalf("follow_up_depth = %#v, want persisted value 2", metadata["follow_up_depth"])
+	}
+
+	rawPath := filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md")
+	rawContent := readServiceWorkspaceFile(t, rawPath)
+	if !strings.Contains(rawContent, `"routing_state":{"phase":"follow_up"}`) {
+		t.Fatalf("raw capture missing prompt intent:\n%s", rawContent)
+	}
+}
+
 func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)

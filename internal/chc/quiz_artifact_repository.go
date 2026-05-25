@@ -297,6 +297,12 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 		output.WriteString("- tags: " + strings.Join(entry.Tags, ", ") + "\n")
 	}
 
+	if strings.TrimSpace(entry.PromptIntent) != "" {
+		output.WriteString("\n")
+		output.WriteString("Prompt intent:\n\n")
+		output.WriteString(strings.TrimSpace(entry.PromptIntent) + "\n")
+	}
+
 	output.WriteString("\n")
 	output.WriteString("Question:\n\n")
 	output.WriteString(strings.TrimSpace(entry.Question) + "\n\n")

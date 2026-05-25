@@ -192,17 +192,18 @@ func validQuizEntry() QuizEntry {
 	now := quizRuntimeTestTime()
 
 	return QuizEntry{
-		ID:         "entry-1",
-		QuestionID: "question-1",
-		Question:   "What should this workflow preserve?",
-		Answer:     "It should preserve one visible question at a time.",
-		Status:     QuizEntryStatusAnswered,
-		Topic:      "workflow",
-		Depth:      1,
-		Mode:       QuizModeDeep,
-		Tags:       []string{"workflow"},
-		CreatedAt:  now,
-		AnsweredAt: now.Add(time.Minute),
+		ID:           "entry-1",
+		QuestionID:   "question-1",
+		Question:     "What should this workflow preserve?",
+		Answer:       "It should preserve one visible question at a time.",
+		Status:       QuizEntryStatusAnswered,
+		Topic:        "workflow",
+		Depth:        1,
+		Mode:         QuizModeDeep,
+		Tags:         []string{"workflow"},
+		PromptIntent: `{"kind":"quiz_question","metadata":{"follow_up_depth":0}}`,
+		CreatedAt:    now,
+		AnsweredAt:   now.Add(time.Minute),
 	}
 }
 

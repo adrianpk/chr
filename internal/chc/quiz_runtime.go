@@ -86,18 +86,19 @@ type QuizQuestion struct {
 }
 
 type QuizEntry struct {
-	ID         string
-	QuestionID string
-	Question   string
-	Answer     string
-	Status     QuizEntryStatus
-	Topic      string
-	Depth      int
-	ParentID   string
-	Mode       QuizMode
-	Tags       []string
-	CreatedAt  time.Time
-	AnsweredAt time.Time
+	ID           string
+	QuestionID   string
+	Question     string
+	Answer       string
+	Status       QuizEntryStatus
+	Topic        string
+	Depth        int
+	ParentID     string
+	Mode         QuizMode
+	Tags         []string
+	PromptIntent string
+	CreatedAt    time.Time
+	AnsweredAt   time.Time
 }
 
 type QuizCoverageTopic struct {
