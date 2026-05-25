@@ -1,6 +1,7 @@
 package chcapp
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -62,7 +63,20 @@ func (s service) ListSpecs() (SpecListResult, error) {
 
 func (s service) GenerateSpec(request SpecGenerateRequest) (SpecOperationResult, error) {
 	scope := s.quizScope(request.Scope)
+	var result SpecOperationResult
 
+	err := s.withGenerationRuntime("spec", scope, func(ctx context.Context) error {
+		var err error
+
+		result, err = s.generateSpec(ctx, scope)
+
+		return err
+	})
+
+	return result, err
+}
+
+func (s service) generateSpec(ctx context.Context, scope chc.QuizScope) (SpecOperationResult, error) {
 	state, err := s.specGenerationRuntimeState(scope)
 	if err != nil {
 		return SpecOperationResult{}, err
@@ -73,7 +87,7 @@ func (s service) GenerateSpec(request SpecGenerateRequest) (SpecOperationResult,
 		return SpecOperationResult{}, err
 	}
 
-	response, err := chc.InvokeQuizModel(s.ctx, s.quizModel, modelRequest)
+	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		return SpecOperationResult{}, err
 	}
@@ -88,7 +102,7 @@ func (s service) GenerateSpec(request SpecGenerateRequest) (SpecOperationResult,
 		CreatedAt:        response.CreatedAt.UTC(),
 	}
 
-	paths, err := chc.WriteGeneratedSpec(s.ctx, s.projectContext.ProjectDir, spec)
+	paths, err := chc.WriteGeneratedSpec(ctx, s.projectContext.ProjectDir, spec)
 	if err != nil {
 		return SpecOperationResult{}, err
 	}

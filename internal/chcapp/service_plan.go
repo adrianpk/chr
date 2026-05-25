@@ -1,6 +1,7 @@
 package chcapp
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -66,8 +67,23 @@ func (s service) ListPlans() (PlanListResult, error) {
 
 func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
+	var result PlanOperationResult
+
+	err := s.withGenerationRuntime("plan", scope, func(ctx context.Context) error {
+		var err error
+
+		result, err = s.generatePlan(ctx, scope)
+
+		return err
+	})
+
+	return result, err
+}
+
+func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOperationResult, error) {
 	s.appendPlanGenerationLog("generate_plan_started", map[string]string{
 		"case_slug": scope.CaseSlug,
+		"timeout":   longGenerationTimeout.String(),
 	})
 
 	state, err := s.specGenerationRuntimeState(scope)
@@ -96,7 +112,7 @@ func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult,
 		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
 	})
 
-	response, err := chc.InvokeQuizModel(s.ctx, s.quizModel, modelRequest)
+	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_plan_model_invocation_failed", map[string]string{
 			"case_slug":  scope.CaseSlug,
@@ -124,7 +140,7 @@ func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult,
 		CreatedAt:        response.CreatedAt.UTC(),
 	}
 
-	paths, err := chc.WriteGeneratedPlan(s.ctx, s.projectContext.ProjectDir, plan)
+	paths, err := chc.WriteGeneratedPlan(ctx, s.projectContext.ProjectDir, plan)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_plan_write_failed", map[string]string{
 			"case_slug":   scope.CaseSlug,
@@ -154,14 +170,29 @@ func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult,
 
 func (s service) RegeneratePlan(request PlanRegenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
+	var result PlanOperationResult
+
+	err := s.withGenerationRuntime("plan", scope, func(ctx context.Context) error {
+		var err error
+
+		result, err = s.regeneratePlan(ctx, scope)
+
+		return err
+	})
+
+	return result, err
+}
+
+func (s service) regeneratePlan(ctx context.Context, scope chc.QuizScope) (PlanOperationResult, error) {
 	archivedAt := s.utcNow()
 
 	s.appendPlanGenerationLog("regenerate_plan_started", map[string]string{
 		"case_slug": scope.CaseSlug,
+		"timeout":   longGenerationTimeout.String(),
 	})
 
 	archivePaths, archived, err := chc.ArchiveGeneratedPlan(
-		s.ctx,
+		ctx,
 		s.projectContext.ProjectDir,
 		scope,
 		archivedAt,
@@ -183,7 +214,7 @@ func (s service) RegeneratePlan(request PlanRegenerateRequest) (PlanOperationRes
 		})
 	}
 
-	result, err := s.GeneratePlan(PlanGenerateRequest{Scope: scope})
+	result, err := s.generatePlan(ctx, scope)
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
