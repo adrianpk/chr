@@ -183,6 +183,27 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 	}
 }
 
+func TestQuizModelCurrentQuestionPayloadUsesActiveQuestionPromptIntent(t *testing.T) {
+	payload := quizModelQuestionPayloadFromQuestion(chc.QuizQuestion{
+		ID:        "question-1",
+		Prompt:    "What should the workflow preserve?",
+		Required:  true,
+		Topic:     "workflow",
+		Depth:     1,
+		Rationale: `{"kind":"quiz_question","metadata":{"follow_up_depth":3,"completion_recommended":false,"routing_state":{"phase":"follow_up"}}}`,
+		CreatedAt: serviceQuizClock()(),
+	})
+
+	metadata, ok := payload.PromptIntent["metadata"].(map[string]any)
+	if !ok {
+		t.Fatalf("prompt intent = %#v, want metadata map", payload.PromptIntent)
+	}
+
+	if metadata["follow_up_depth"] != float64(3) {
+		t.Fatalf("follow_up_depth = %#v, want persisted value 3", metadata["follow_up_depth"])
+	}
+}
+
 func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
