@@ -157,14 +157,14 @@ func (m Model) quizActionHint(quiz QuizView) string {
 	}
 
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
-		return "enter answers"
+		return "enter answers  r refresh"
 	}
 
 	if quiz.Status == "done" && strings.TrimSpace(quiz.CuratedPath) != "" {
-		return "s restart"
+		return "s restart  r refresh"
 	}
 
-	return "s start"
+	return "s start  r refresh"
 }
 
 func (m Model) selectedQuizView() (QuizView, bool) {

@@ -327,6 +327,19 @@ func (m Model) newCreateDumpActionState(action DumpActionID) DumpActionState {
 func (m Model) newSelectedDumpActionState(action DumpActionID, title string) DumpActionState {
 	dump, ok := m.selectedDumpView()
 	if !ok {
+		if action == DumpActionRefresh {
+			return DumpActionState{
+				Pending: true,
+				Request: DumpActionRequest{
+					Action: action,
+				},
+				Title: title,
+				Details: []string{
+					"Target: Dumps",
+				},
+			}
+		}
+
 		return DumpActionState{}
 	}
 

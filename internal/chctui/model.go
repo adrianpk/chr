@@ -1025,9 +1025,9 @@ func (m Model) renderKeys() string {
 	case m.SelectedView() == ViewQuizzes:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects quiz, s starts, enter answers, r refreshes, q quits"
 	case m.SelectedView() == ViewSpecs:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects spec, g generates spec, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects spec, g generates spec, r refreshes, q quits"
 	case m.SelectedView() == ViewPlans:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects plan, g generates missing plan, G regenerates, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects plan, g generates missing plan, G regenerates, r refreshes, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects session, q quits"
 	default:

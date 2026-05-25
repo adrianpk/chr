@@ -1201,6 +1201,66 @@ func TestModelRefreshesDumpsFromDumpsKey(t *testing.T) {
 	}
 }
 
+func TestModelRefreshesEmptyDumpsFromDumpsKey(t *testing.T) {
+	executor := &fakeDumpActionExecutor{
+		result: DumpActionResult{
+			Message: "Dumps refreshed.",
+			Dumps:   []DumpView{},
+		},
+	}
+	model := NewModel(Options{DumpExecutor: executor})
+	model.selected = 2
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
+	refreshed := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil, want synchronous dump refresh")
+	}
+
+	if executor.request.Action != DumpActionRefresh {
+		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionRefresh)
+	}
+
+	if executor.request.Path != "" {
+		t.Fatalf("dump refresh path = %q, want empty path", executor.request.Path)
+	}
+
+	if refreshed.statusMessage != "Dumps refreshed." {
+		t.Fatalf("statusMessage = %q, want Dumps refreshed.", refreshed.statusMessage)
+	}
+}
+
+func TestModelRendersDocumentRefreshHints(t *testing.T) {
+	model := NewModel(Options{})
+
+	if hint := model.dumpActionHint(); !strings.Contains(hint, "r refresh") {
+		t.Fatalf("dumpActionHint() = %q, want refresh hint", hint)
+	}
+
+	if hint := model.quizActionHint(QuizView{}); !strings.Contains(hint, "r refresh") {
+		t.Fatalf("quizActionHint() = %q, want refresh hint", hint)
+	}
+
+	if hint := model.specActionHint(); !strings.Contains(hint, "r refresh") {
+		t.Fatalf("specActionHint() = %q, want refresh hint", hint)
+	}
+
+	if hint := model.planActionHint(); !strings.Contains(hint, "r refresh") {
+		t.Fatalf("planActionHint() = %q, want refresh hint", hint)
+	}
+
+	model.selected = 4
+	if keys := model.renderKeys(); !strings.Contains(keys, "r refreshes") {
+		t.Fatalf("spec renderKeys() = %q, want refresh key", keys)
+	}
+
+	model.selected = 5
+	if keys := model.renderKeys(); !strings.Contains(keys, "r refreshes") {
+		t.Fatalf("plan renderKeys() = %q, want refresh key", keys)
+	}
+}
+
 func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 	model := NewModel(Options{
 		Cases: []chc.CaseMetadata{
@@ -1305,6 +1365,7 @@ func TestModelRendersEmptyDumpState(t *testing.T) {
 	for _, want := range []string{
 		"No dumps found.",
 		"c create",
+		"r refresh",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)

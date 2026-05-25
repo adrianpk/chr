@@ -155,7 +155,7 @@ func (m Model) dumpActionHint() string {
 	}
 
 	if len(m.dumps) == 0 {
-		return "c create"
+		return "c create  r refresh"
 	}
 
 	return "enter edit  alt+e external  c create  r refresh"
