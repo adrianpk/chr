@@ -94,7 +94,7 @@ type QuizModelPromptIntentPayload struct {
 }
 
 func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModelOutputContractPayload {
-	if action == QuizModelActionDraftSpec {
+	if action == QuizModelActionDraftSpec || action == QuizModelActionGenerateSpec {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    []string{"title", "body", "status"},
 			RenderedTextField: "body",

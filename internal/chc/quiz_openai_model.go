@@ -154,7 +154,8 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 		"output_contract":  request.Payload.OutputContract,
 	}
 
-	if request.Action == QuizModelActionDraftSpec && len(request.ContextSections) > 0 {
+	if (request.Action == QuizModelActionDraftSpec || request.Action == QuizModelActionGenerateSpec) &&
+		len(request.ContextSections) > 0 {
 		payload["context_sections"] = quizModelProviderContextSections(request.ContextSections)
 	}
 
@@ -290,7 +291,7 @@ func quizModelResponseFromOutput(request QuizModelRequest, output []byte) (QuizM
 	switch request.Action {
 	case QuizModelActionNextQuestion:
 		return quizModelQuestionResponseFromOutput(request, output)
-	case QuizModelActionDraftSpec:
+	case QuizModelActionDraftSpec, QuizModelActionGenerateSpec:
 		return quizModelDraftSpecResponseFromOutput(request, output)
 	default:
 		return QuizModelResponse{}, fmt.Errorf("quiz model action is unsupported: %s", request.Action)
@@ -593,6 +594,8 @@ func quizModelRecentTopicStreak(entries []QuizModelEntryPayload) map[string]any 
 
 func quizModelInstructions(request QuizModelRequest) string {
 	switch {
+	case request.Action == QuizModelActionGenerateSpec:
+		return quizModelSpecGenerationInstructions()
 	case request.Action == QuizModelActionDraftSpec:
 		return quizModelDraftSpecInstructions()
 	case request.Mode == QuizModeFast:
@@ -636,6 +639,19 @@ Return only the JSON object required by the response schema.
 `, QuizModelFastBatchSize))
 }
 
+func quizModelSpecGenerationInstructions() string {
+	return strings.TrimSpace(`
+You generate a formal specification for the selected project or use case.
+Use the structured request payload and all context sections as the sole source of truth.
+Ground the spec in the available project metadata, use-case metadata, dumps, quiz notes, existing docs, and related artifacts.
+Prefer concrete behavior, constraints, decisions, open questions, and implementation implications.
+Keep uncertain behavior explicit instead of inventing facts.
+Set status to draft because generated specs require user review.
+Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
+Return only the JSON object required by the response schema.
+`)
+}
+
 func quizModelDraftSpecInstructions() string {
 	return strings.TrimSpace(`
 You generate a draft specification from a completed project dump and quiz.
@@ -649,6 +665,14 @@ Return only the JSON object required by the response schema.
 
 func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 	switch {
+	case request.Action == QuizModelActionGenerateSpec:
+		return openAIResponsesTextFormat{
+			Type:        "json_schema",
+			Name:        "generated_spec",
+			Description: "Draft specification generated from project and use-case context.",
+			Strict:      true,
+			Schema:      quizModelDraftSpecJSONSchema(),
+		}
 	case request.Action == QuizModelActionDraftSpec:
 		return openAIResponsesTextFormat{
 			Type:        "json_schema",

@@ -12,6 +12,7 @@ type QuizModelAction string
 const (
 	QuizModelActionNextQuestion QuizModelAction = "quiz_next_question"
 	QuizModelActionDraftSpec    QuizModelAction = "quiz_to_draft_spec"
+	QuizModelActionGenerateSpec QuizModelAction = "spec_generation"
 )
 
 type QuizModelResponseStatus string
@@ -180,7 +181,7 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 
 func (a QuizModelAction) Valid() bool {
 	switch a {
-	case QuizModelActionNextQuestion, QuizModelActionDraftSpec:
+	case QuizModelActionNextQuestion, QuizModelActionDraftSpec, QuizModelActionGenerateSpec:
 		return true
 	default:
 		return false

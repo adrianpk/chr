@@ -783,7 +783,7 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 	m.requests = append(m.requests, request)
 
 	if len(m.responses) == 0 {
-		if request.Action == chc.QuizModelActionDraftSpec {
+		if request.Action == chc.QuizModelActionDraftSpec || request.Action == chc.QuizModelActionGenerateSpec {
 			return serviceQuizDraftSpecResponse("response-fallback", request.CreatedAt), nil
 		}
 
