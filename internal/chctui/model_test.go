@@ -2474,7 +2474,7 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 		"Blog Publishing",
 		"Question 2",
 		"What should the workflow preserve?",
-		"Enter answers",
+		"enter answers",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -2675,8 +2675,8 @@ func TestModelStartsQuizFromQuizzesKey(t *testing.T) {
 		t.Fatalf("action = %q, want start", executor.request.Action)
 	}
 
-	if confirmed.statusMessage != "Answer the question. Enter submits; shift+enter inserts a new line." {
-		t.Fatalf("statusMessage = %q, want answer hint", confirmed.statusMessage)
+	if confirmed.statusMessage != "Answering quiz." {
+		t.Fatalf("statusMessage = %q, want answer status", confirmed.statusMessage)
 	}
 
 	quiz, ok := confirmed.selectedQuizView()

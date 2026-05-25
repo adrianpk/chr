@@ -587,13 +587,14 @@ func (m Model) renderDocumentFamilyWorkspace(width, height int, title string, fa
 
 func (m Model) renderQuizWorkspace(width, height int) string {
 	list := m.renderQuizFocusList(height - 2)
+	detailTitle := m.quizDetailPanelTitle()
 	detail := m.renderSelectedQuizDetailLines(maxInt(width-4, 1))
 
 	switch m.maximizedPane {
 	case 0:
 		return fitBlock(renderPanel("Quizzes", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Quiz", detail, width, height, true), width, height)
+		return fitBlock(renderPanel(detailTitle, detail, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -603,8 +604,17 @@ func (m Model) renderQuizWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Quizzes", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Quiz", detail, rightWidth, height, m.selectedPane == 1),
+		renderPanel(detailTitle, detail, rightWidth, height, m.selectedPane == 1),
 	), width, height)
+}
+
+func (m Model) quizDetailPanelTitle() string {
+	quiz, ok := m.selectedQuizView()
+	if ok && m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
+		return "Answer"
+	}
+
+	return "Quiz"
 }
 
 func (m Model) renderAuthoringWorkspace(width, height int) string {

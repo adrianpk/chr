@@ -252,7 +252,7 @@ func (m *Model) startQuizAnswer() {
 	}
 	m.selectedPane = 1
 	m.maximizedPane = 1
-	m.statusMessage = "Answer the question. Enter submits; shift+enter inserts a new line."
+	m.statusMessage = "Answering quiz."
 }
 
 func (m *Model) startQuizAnswerIfActive() {

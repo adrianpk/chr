@@ -61,7 +61,13 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		return []string{"No quiz selected."}
 	}
 
+	if m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
+		return m.renderSelectedQuizAnswerLines(quiz, width)
+	}
+
 	lines := []string{
+		shellMutedStyle.Render(m.quizActionHint(quiz)),
+		"",
 		quiz.Title,
 		quizHumanStatus(quiz),
 	}
@@ -76,17 +82,18 @@ func (m Model) renderSelectedQuizDetailLines(width int) []string {
 		lines = append(lines, "  "+m.statusMessage)
 	}
 
-	if m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
-		lines = append(lines, "", shellMutedStyle.Render("Answer:"), "")
-		lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width-2, 1), 6), "\n")...)
-	}
-
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) == "" && strings.TrimSpace(quiz.CuratedPreview) != "" {
 		lines = append(lines, "", "Notes:")
-		lines = append(lines, indentLines(wrapPlainText(quiz.CuratedPreview, maxInt(width-2, 1)), "  ")...)
+		lines = append(lines, indentLines(renderContentReadLines(quiz.CuratedPreview, maxInt(width-2, 1)), "  ")...)
 	}
 
-	lines = append(lines, "", shellMutedStyle.Render(m.quizActionHint(quiz)))
+	return lines
+}
+
+func (m Model) renderSelectedQuizAnswerLines(quiz QuizView, width int) []string {
+	lines := []string{shellMutedStyle.Render(m.quizActionHint(quiz)), ""}
+	lines = append(lines, wrapPlainText(quiz.ActiveQuestionSummary, maxInt(width, 1))...)
+	lines = append(lines, strings.Split(m.renderQuizAnswerInput(maxInt(width, 1), 6), "\n")...)
 
 	return lines
 }
