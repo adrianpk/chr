@@ -79,16 +79,16 @@ The target model distinguishes cheap reads from expensive writes:
 
 Slicing name: Plan Generation Safety
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: archive context exclusion
+Active slice short name: generation runtime safety
 
-Expected branch name: `feat/slice-3-archive-context-exclusion`
+Expected branch name: `feat/slice-4-generation-runtime-safety`
 
-Expected PR title: `feat(slice-3): archive context exclusion`
+Expected PR title: `feat(slice-4): generation runtime safety`
 
 Expected report path:
-`.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md`
+`.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md`
 
 Prerequisite PRs or delivered work:
 

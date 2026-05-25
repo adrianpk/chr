@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-plan-generation-safety-plan.md`
 
 Slicing name: Plan Generation Safety
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: archive context exclusion
+Active slice short name: generation runtime safety
 
-Expected branch name: `feat/slice-3-archive-context-exclusion`
+Expected branch name: `feat/slice-4-generation-runtime-safety`
 
-Expected PR title: `feat(slice-3): archive context exclusion`
+Expected PR title: `feat(slice-4): generation runtime safety`
 
 Expected report path:
-`.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md`
+`.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md`
 
 Prerequisite PRs or delivered work:
 
@@ -46,8 +46,8 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Plan Action Semantics | Delivered | `feat/slice-1-plan-action-semantics` | `feat(slice-1): plan action semantics` | `.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
-| Slice 2: Archive Before Replace | Reviewing | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
-| Slice 3: Archive Context Exclusion | Reviewing | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
+| Slice 2: Archive Before Replace | Delivered | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
+| Slice 3: Archive Context Exclusion | Delivered | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 4: Generation Runtime Safety | Planned | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Depends on Slices 1-3. |
 
 ## Slice 1: Plan Action Semantics
