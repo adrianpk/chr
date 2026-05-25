@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-plan-generation-safety-plan.md`
 
 Slicing name: Plan Generation Safety
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: plan action semantics
+Active slice short name: archive before replace
 
-Expected branch name: `feat/slice-1-plan-action-semantics`
+Expected branch name: `feat/slice-2-archive-before-replace`
 
-Expected PR title: `feat(slice-1): plan action semantics`
+Expected PR title: `feat(slice-2): archive before replace`
 
 Expected report path:
-`.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md`
+`.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md`
 
 Prerequisite PRs or delivered work:
 
