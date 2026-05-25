@@ -45,6 +45,10 @@ type QuizCompleteRequest struct {
 	Scope chc.QuizScope
 }
 
+type QuizDraftSpecRequest struct {
+	Scope chc.QuizScope
+}
+
 type QuizCancelRequest struct {
 	Scope chc.QuizScope
 }
@@ -120,6 +124,10 @@ func (s service) CompleteQuiz(request QuizCompleteRequest) (QuizOperationResult,
 	return s.completeQuiz(s.quizScope(request.Scope))
 }
 
+func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperationResult, error) {
+	return s.generateQuizDraftSpec(s.quizScope(request.Scope))
+}
+
 func (s service) CancelQuiz(request QuizCancelRequest) (QuizOperationResult, error) {
 	return s.stopQuiz(s.quizScope(request.Scope), chc.QuizRuntimeStatusCancelled, "Quiz cancelled.")
 }
@@ -174,6 +182,11 @@ func (s service) recordQuizOutcome(
 	entry := quizEntryFromState(state, status, answer, s.utcNow())
 
 	_, err = repository.AppendRawCapture(s.ctx, state, entry)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	_, err = s.writeQuizCuratedNotes(scope)
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
@@ -236,17 +249,7 @@ func (s service) completeQuiz(scope chc.QuizScope) (QuizOperationResult, error) 
 	state.Candidates = nil
 	state.UpdatedAt = s.utcNow()
 
-	entries, err := repository.LoadRawCaptureEntries(s.ctx, scope)
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	paths, err := repository.WriteCuratedNotes(s.ctx, chc.CurateQuizEntries(scope, entries, state.UpdatedAt))
-	if err != nil {
-		return QuizOperationResult{}, err
-	}
-
-	err = s.writeQuizDraftSpec(state, paths)
+	_, err = s.writeQuizCuratedNotes(scope)
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
@@ -257,6 +260,38 @@ func (s service) completeQuiz(scope chc.QuizScope) (QuizOperationResult, error) 
 	}
 
 	return QuizOperationResult{Message: "Quiz completed.", State: state}, nil
+}
+
+func (s service) generateQuizDraftSpec(scope chc.QuizScope) (QuizOperationResult, error) {
+	repository := s.quizRepository()
+
+	state, err := repository.LoadRuntimeState(s.ctx, scope)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	paths, err := s.writeQuizCuratedNotes(scope)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	err = s.writeQuizDraftSpec(state, paths)
+	if err != nil {
+		return QuizOperationResult{}, err
+	}
+
+	return QuizOperationResult{Message: "Spec generated.", State: state}, nil
+}
+
+func (s service) writeQuizCuratedNotes(scope chc.QuizScope) (chc.QuizArtifactPaths, error) {
+	repository := s.quizRepository()
+
+	entries, err := repository.LoadRawCaptureEntries(s.ctx, scope)
+	if err != nil {
+		return chc.QuizArtifactPaths{}, err
+	}
+
+	return repository.WriteCuratedNotes(s.ctx, chc.CurateQuizEntries(scope, entries, s.utcNow()))
 }
 
 func (s service) generateNextQuizQuestion(state chc.QuizRuntimeState) (chc.QuizRuntimeState, error) {

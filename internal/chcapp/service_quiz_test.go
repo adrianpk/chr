@@ -2,6 +2,7 @@ package chcapp
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -267,14 +268,11 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 	}
 }
 
-func TestServiceCompleteQuizWritesCuratedNotesAndDraftSpec(t *testing.T) {
+func TestServiceQuizUpdatesCuratedNotesIteratively(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 
-	model, result := completeServiceQuizWithAnswer(t, projectDir)
-	if result.State.Status != chc.QuizRuntimeStatusDone {
-		t.Fatalf("status = %q, want done", result.State.Status)
-	}
+	_, result := answerServiceQuiz(t, projectDir)
 
 	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz.md"))
 	assertServiceQuizContentContains(t, curated, []string{
@@ -288,6 +286,47 @@ func TestServiceCompleteQuizWritesCuratedNotesAndDraftSpec(t *testing.T) {
 		t.Fatalf("curated notes mirrored raw question:\n%s", curated)
 	}
 
+	if result.State.Status != chc.QuizRuntimeStatusActive {
+		t.Fatalf("status = %q, want active", result.State.Status)
+	}
+}
+
+func TestServiceCompleteQuizDoesNotGenerateDraftSpec(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	model, result := completeServiceQuizWithAnswer(t, projectDir)
+	if result.State.Status != chc.QuizRuntimeStatusDone {
+		t.Fatalf("status = %q, want done", result.State.Status)
+	}
+
+	if len(model.model.requests) != 2 {
+		t.Fatalf("model requests = %d, want start and next question only", len(model.model.requests))
+	}
+
+	specPath := filepath.Join(projectDir, ".chc", "specs", "drafts", "blog-quiz-spec.md")
+	if _, err := os.Stat(specPath); !os.IsNotExist(err) {
+		t.Fatalf("draft spec path stat err = %v, want not exist", err)
+	}
+}
+
+func TestServiceGenerateQuizDraftSpecUsesCuratedNotes(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	model, _ := completeServiceQuizWithAnswer(t, projectDir)
+
+	result, err := model.operations.GenerateQuizDraftSpec(QuizDraftSpecRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("GenerateQuizDraftSpec returned error: %v", err)
+	}
+
+	if result.State.Status != chc.QuizRuntimeStatusDone {
+		t.Fatalf("status = %q, want done", result.State.Status)
+	}
+
 	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "drafts", "blog-quiz-spec.md"))
 	assertServiceQuizContentContains(t, spec, []string{
 		`status: "draft"`,
@@ -297,7 +336,7 @@ func TestServiceCompleteQuizWritesCuratedNotesAndDraftSpec(t *testing.T) {
 		"- curated quiz: .chc/quizzes/blog-quiz.md",
 	})
 
-	draftRequest := model.requests[len(model.requests)-1]
+	draftRequest := model.model.requests[len(model.model.requests)-1]
 	if draftRequest.Action != chc.QuizModelActionDraftSpec {
 		t.Fatalf("draft action = %q", draftRequest.Action)
 	}
@@ -305,10 +344,12 @@ func TestServiceCompleteQuizWritesCuratedNotesAndDraftSpec(t *testing.T) {
 	assertQuizModelRequestSections(t, draftRequest, []string{"project", "quiz", "recent_entries", "current_question", "curated_quiz"})
 }
 
-func completeServiceQuizWithAnswer(
-	t *testing.T,
-	projectDir string,
-) (*fakeServiceQuizModel, QuizOperationResult) {
+type serviceQuizFixture struct {
+	model      *fakeServiceQuizModel
+	operations service
+}
+
+func answerServiceQuiz(t *testing.T, projectDir string) (serviceQuizFixture, QuizOperationResult) {
 	t.Helper()
 
 	clock := serviceQuizClock()
@@ -328,7 +369,7 @@ func completeServiceQuizWithAnswer(
 		t.Fatalf("StartQuiz returned error: %v", err)
 	}
 
-	_, err = operations.AnswerQuiz(QuizAnswerRequest{
+	result, err := operations.AnswerQuiz(QuizAnswerRequest{
 		Scope:  chc.QuizScope{CaseSlug: "blog"},
 		Answer: "The workflow must preserve editorial review before publication.",
 	})
@@ -336,12 +377,23 @@ func completeServiceQuizWithAnswer(
 		t.Fatalf("AnswerQuiz returned error: %v", err)
 	}
 
-	result, err := operations.CompleteQuiz(QuizCompleteRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
+	return serviceQuizFixture{model: model, operations: operations}, result
+}
+
+func completeServiceQuizWithAnswer(
+	t *testing.T,
+	projectDir string,
+) (serviceQuizFixture, QuizOperationResult) {
+	t.Helper()
+
+	fixture, _ := answerServiceQuiz(t, projectDir)
+
+	result, err := fixture.operations.CompleteQuiz(QuizCompleteRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatalf("CompleteQuiz returned error: %v", err)
 	}
 
-	return model, result
+	return fixture, result
 }
 
 func assertServiceQuizContentContains(t *testing.T, content string, values []string) {
