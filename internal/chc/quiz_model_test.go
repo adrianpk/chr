@@ -2,6 +2,7 @@ package chc
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -144,6 +145,49 @@ func TestQuizModelProviderPayloadKeepsNextQuestionContextOutOfProviderText(t *te
 	}
 }
 
+func TestOpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload(t *testing.T) {
+	request := validQuizModelRequest()
+	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+		Name:      "project_dump",
+		Layer:     "dump",
+		Authority: ".chc/dumps/project-context.md",
+		Content:   "Detailed project dump that should not be sent to next-question generation.",
+	})
+
+	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	if err != nil {
+		t.Fatalf("openAIRequestBody returned error: %v", err)
+	}
+
+	envelope, input := decodeOpenAIQuizRequestBody(t, body)
+
+	if envelope.Model != "test-model" {
+		t.Fatalf("model = %q, want test-model", envelope.Model)
+	}
+
+	if envelope.Store {
+		t.Fatal("store = true, want false")
+	}
+
+	if envelope.Metadata["chc_action"] != string(QuizModelActionNextQuestion) {
+		t.Fatalf("metadata = %#v, want next-question action", envelope.Metadata)
+	}
+
+	if _, ok := input["context_sections"]; ok {
+		t.Fatalf("next-question input includes context_sections: %#v", input)
+	}
+
+	for _, key := range []string{"project", "quiz", "recent_entries", "current_question", "output_contract"} {
+		if _, ok := input[key]; !ok {
+			t.Fatalf("next-question input missing key %q: %#v", key, input)
+		}
+	}
+
+	if envelope.Text.Format.Name != "quiz_next_question" {
+		t.Fatalf("format name = %q, want quiz_next_question", envelope.Text.Format.Name)
+	}
+}
+
 func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Action = QuizModelActionDraftSpec
@@ -161,6 +205,45 @@ func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.
 
 	if _, ok := payload["context_sections"]; !ok {
 		t.Fatalf("draft-spec provider payload omitted context_sections: %#v", payload)
+	}
+}
+
+func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionDraftSpec
+	request.Strategy = "draft_spec"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionDraftSpec, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+		Name:      "project_dump",
+		Layer:     "dump",
+		Authority: ".chc/dumps/project-context.md",
+		Content:   "Detailed project dump for draft spec synthesis.",
+		Metadata:  map[string]string{"source": "dump"},
+	})
+
+	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	if err != nil {
+		t.Fatalf("openAIRequestBody returned error: %v", err)
+	}
+
+	envelope, input := decodeOpenAIQuizRequestBody(t, body)
+
+	if envelope.Metadata["chc_action"] != string(QuizModelActionDraftSpec) {
+		t.Fatalf("metadata = %#v, want draft-spec action", envelope.Metadata)
+	}
+
+	sections, ok := input["context_sections"].([]any)
+	if !ok {
+		t.Fatalf("context_sections = %#v, want array", input["context_sections"])
+	}
+
+	if len(sections) != len(request.ContextSections) {
+		t.Fatalf("context_sections length = %d, want %d", len(sections), len(request.ContextSections))
+	}
+
+	if envelope.Text.Format.Name != "quiz_draft_spec" {
+		t.Fatalf("format name = %q, want quiz_draft_spec", envelope.Text.Format.Name)
 	}
 }
 
@@ -321,6 +404,60 @@ func TestQuizModelResponseFromDeepOutput(t *testing.T) {
 	}
 }
 
+func TestQuizModelResponseFromDeepOutputAfterSkippedEntry(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Payload.RecentEntries = append(request.Payload.RecentEntries, QuizModelEntryPayload{
+		Question: "Which publishing branch should we avoid?",
+		Status:   string(QuizEntryStatusSkipped),
+		Tags:     []string{"publishing"},
+	})
+	request.Payload.Quiz.EntryCount = len(request.Payload.RecentEntries)
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"question": "What should the next useful publishing checkpoint clarify?",
+		"tags": ["publishing"],
+		"follow_up_depth": 0,
+		"completion_recommended": false
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.Question.Prompt != "What should the next useful publishing checkpoint clarify?" {
+		t.Fatalf("question = %q", response.Question.Prompt)
+	}
+
+	if response.Question.Topic != "publishing" {
+		t.Fatalf("topic = %q, want publishing", response.Question.Topic)
+	}
+
+	if response.Question.Required != true {
+		t.Fatalf("required = %v, want true", response.Question.Required)
+	}
+}
+
+func TestQuizModelResponseFromDeepOutputCarriesCompletionRecommendation(t *testing.T) {
+	request := validQuizModelRequest()
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"question": "Is there anything else this quiz must capture before drafting?",
+		"tags": ["completion"],
+		"follow_up_depth": 1,
+		"completion_recommended": true
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.Question.Required {
+		t.Fatal("question required = true, want false for completion recommendation")
+	}
+
+	if !strings.Contains(response.Question.Rationale, `"completion_recommended":true`) {
+		t.Fatalf("rationale = %q, want completion recommendation metadata", response.Question.Rationale)
+	}
+}
+
 func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Mode = QuizModeFast
@@ -429,6 +566,26 @@ func validQuizModelRequest() QuizModelRequest {
 		},
 		CreatedAt: quizRuntimeTestTime(),
 	}
+}
+
+func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (openAIResponsesRequest, map[string]any) {
+	t.Helper()
+
+	var envelope openAIResponsesRequest
+
+	err := json.Unmarshal(body, &envelope)
+	if err != nil {
+		t.Fatalf("decode OpenAI request body: %v", err)
+	}
+
+	input := map[string]any{}
+
+	err = json.Unmarshal([]byte(envelope.Input), &input)
+	if err != nil {
+		t.Fatalf("decode OpenAI request input: %v", err)
+	}
+
+	return envelope, input
 }
 
 type fakeQuizModelAdapter struct {
