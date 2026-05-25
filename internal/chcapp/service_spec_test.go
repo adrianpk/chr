@@ -1,9 +1,11 @@
 package chcapp
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
 )
@@ -141,6 +143,30 @@ case: "blog"
 	}
 }
 
+func TestServiceGenerateSpecUsesLongGenerationDeadline(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	model := &deadlineCapturingSpecModel{}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	_, err := operations.GenerateSpec(SpecGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("GenerateSpec returned error: %v", err)
+	}
+
+	if !model.hasDeadline {
+		t.Fatal("model context has no deadline, want long generation deadline")
+	}
+
+	if model.remaining < 4*time.Minute {
+		t.Fatalf("generation deadline remaining = %s, want long generation timeout", model.remaining)
+	}
+}
+
 func TestServiceListSpecsReturnsScopes(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -173,4 +199,20 @@ Generated behavior.
 	if result.Specs[1].UseCaseTitle != "Blog Publishing" || result.Specs[1].Title != "Blog Spec" {
 		t.Fatalf("blog spec titles = %#v, want use case and spec titles split", result.Specs[1])
 	}
+}
+
+type deadlineCapturingSpecModel struct {
+	hasDeadline bool
+	remaining   time.Duration
+}
+
+func (m *deadlineCapturingSpecModel) InvokeQuizModel(
+	ctx context.Context,
+	request chc.QuizModelRequest,
+) (chc.QuizModelResponse, error) {
+	deadline, ok := ctx.Deadline()
+	m.hasDeadline = ok
+	m.remaining = time.Until(deadline)
+
+	return serviceQuizDraftSpecResponse("response-spec", request.CreatedAt), nil
 }

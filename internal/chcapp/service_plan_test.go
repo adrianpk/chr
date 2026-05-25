@@ -1,9 +1,11 @@
 package chcapp
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -277,6 +279,66 @@ case: "blog"
 	}
 }
 
+func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	model := &deadlineCapturingPlanModel{}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	_, err := operations.GeneratePlan(PlanGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("GeneratePlan returned error: %v", err)
+	}
+
+	if !model.hasDeadline {
+		t.Fatal("model context has no deadline, want long generation deadline")
+	}
+
+	if model.remaining < 4*time.Minute {
+		t.Fatalf("generation deadline remaining = %s, want long generation timeout", model.remaining)
+	}
+}
+
+func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	model := newBlockingPlanModel()
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	done := make(chan error, 1)
+	go func() {
+		_, err := operations.GeneratePlan(PlanGenerateRequest{
+			Scope: chc.QuizScope{CaseSlug: "blog"},
+		})
+		done <- err
+	}()
+
+	<-model.started
+
+	_, err := operations.GeneratePlan(PlanGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err == nil || !strings.Contains(err.Error(), "plan generation already running for scope blog") {
+		t.Fatalf("GeneratePlan error = %v, want guard error", err)
+	}
+
+	close(model.release)
+
+	if err := <-done; err != nil {
+		t.Fatalf("first GeneratePlan returned error: %v", err)
+	}
+
+	if model.requestCount() != 1 {
+		t.Fatalf("model requests = %d, want one guarded invocation", model.requestCount())
+	}
+}
+
 func TestServiceListPlansReturnsScopes(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -315,4 +377,56 @@ func fixedServiceClock(now time.Time) func() time.Time {
 	return func() time.Time {
 		return now
 	}
+}
+
+type deadlineCapturingPlanModel struct {
+	hasDeadline bool
+	remaining   time.Duration
+}
+
+func (m *deadlineCapturingPlanModel) InvokeQuizModel(
+	ctx context.Context,
+	request chc.QuizModelRequest,
+) (chc.QuizModelResponse, error) {
+	deadline, ok := ctx.Deadline()
+	m.hasDeadline = ok
+	m.remaining = time.Until(deadline)
+
+	return serviceQuizPlanResponse("response-plan", request.CreatedAt), nil
+}
+
+type blockingPlanModel struct {
+	started chan struct{}
+	release chan struct{}
+	once    sync.Once
+	mu      sync.Mutex
+	count   int
+}
+
+func newBlockingPlanModel() *blockingPlanModel {
+	return &blockingPlanModel{
+		started: make(chan struct{}),
+		release: make(chan struct{}),
+	}
+}
+
+func (m *blockingPlanModel) InvokeQuizModel(
+	_ context.Context,
+	request chc.QuizModelRequest,
+) (chc.QuizModelResponse, error) {
+	m.mu.Lock()
+	m.count++
+	m.mu.Unlock()
+
+	m.once.Do(func() { close(m.started) })
+	<-m.release
+
+	return serviceQuizPlanResponse("response-plan", request.CreatedAt), nil
+}
+
+func (m *blockingPlanModel) requestCount() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	return m.count
 }
