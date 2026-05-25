@@ -222,8 +222,21 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 	})
 
 	switch request.Action {
-	case chctui.PlanActionGenerate, chctui.PlanActionRegenerate:
+	case chctui.PlanActionGenerate:
 		_, err := e.operations.GeneratePlan(PlanGenerateRequest{
+			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		})
+		if err != nil {
+			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
+				"action":    string(request.Action),
+				"case_slug": request.Scope.CaseSlug,
+				"error":     err.Error(),
+			})
+
+			return chctui.PlanActionResult{}, err
+		}
+	case chctui.PlanActionRegenerate:
+		_, err := e.operations.RegeneratePlan(PlanRegenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {

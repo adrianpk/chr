@@ -32,6 +32,10 @@ type PlanGenerateRequest struct {
 	Scope chc.QuizScope
 }
 
+type PlanRegenerateRequest struct {
+	Scope chc.QuizScope
+}
+
 type PlanOperationResult struct {
 	Message string
 	Plan    PlanView
@@ -146,6 +150,47 @@ func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult,
 		Message: "Plan generated.",
 		Plan:    view,
 	}, nil
+}
+
+func (s service) RegeneratePlan(request PlanRegenerateRequest) (PlanOperationResult, error) {
+	scope := s.quizScope(request.Scope)
+	archivedAt := s.utcNow()
+
+	s.appendPlanGenerationLog("regenerate_plan_started", map[string]string{
+		"case_slug": scope.CaseSlug,
+	})
+
+	archivePaths, archived, err := chc.ArchiveGeneratedPlan(
+		s.ctx,
+		s.projectContext.ProjectDir,
+		scope,
+		archivedAt,
+	)
+	if err != nil {
+		s.appendPlanGenerationLog("regenerate_plan_archive_failed", map[string]string{
+			"case_slug": scope.CaseSlug,
+			"error":     err.Error(),
+		})
+
+		return PlanOperationResult{}, err
+	}
+
+	if archived {
+		s.appendPlanGenerationLog("regenerate_plan_archived", map[string]string{
+			"case_slug":     scope.CaseSlug,
+			"relative_path": archivePaths.RelativePath,
+			"path":          archivePaths.Path,
+		})
+	}
+
+	result, err := s.GeneratePlan(PlanGenerateRequest{Scope: scope})
+	if err != nil {
+		return PlanOperationResult{}, err
+	}
+
+	result.Message = "Plan regenerated."
+
+	return result, nil
 }
 
 func (s service) planViewFromScope(scope quizReadScope, index chc.WorkspaceIndex) PlanView {
