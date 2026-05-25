@@ -11,15 +11,16 @@ import (
 type QuizActionID string
 
 const (
-	QuizActionStart    QuizActionID = "start_quiz"
-	QuizActionResume   QuizActionID = "resume_quiz"
-	QuizActionAnswer   QuizActionID = "answer_quiz"
-	QuizActionSkip     QuizActionID = "skip_quiz"
-	QuizActionComplete QuizActionID = "complete_quiz"
-	QuizActionCancel   QuizActionID = "cancel_quiz"
-	QuizActionRefresh  QuizActionID = "refresh_quizzes"
-	QuizActionDeepMode QuizActionID = "quiz_deep_mode"
-	QuizActionFastMode QuizActionID = "quiz_fast_mode"
+	QuizActionStart     QuizActionID = "start_quiz"
+	QuizActionResume    QuizActionID = "resume_quiz"
+	QuizActionAnswer    QuizActionID = "answer_quiz"
+	QuizActionSkip      QuizActionID = "skip_quiz"
+	QuizActionComplete  QuizActionID = "complete_quiz"
+	QuizActionDraftSpec QuizActionID = "generate_quiz_draft_spec"
+	QuizActionCancel    QuizActionID = "cancel_quiz"
+	QuizActionRefresh   QuizActionID = "refresh_quizzes"
+	QuizActionDeepMode  QuizActionID = "quiz_deep_mode"
+	QuizActionFastMode  QuizActionID = "quiz_fast_mode"
 )
 
 type QuizActionExecutor interface {
@@ -288,6 +289,8 @@ func quizBusyMessage(request QuizActionRequest) string {
 		return "Skipping question..."
 	case QuizActionComplete:
 		return "Completing quiz..."
+	case QuizActionDraftSpec:
+		return "Generating spec..."
 	case QuizActionRefresh:
 		return "Refreshing quizzes..."
 	default:

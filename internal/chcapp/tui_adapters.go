@@ -303,15 +303,16 @@ func (e tuiQuizActionExecutor) quizOperation(
 	action chctui.QuizActionID,
 ) (func(chctui.QuizActionRequest) (string, error), bool) {
 	operations := map[chctui.QuizActionID]func(chctui.QuizActionRequest) (string, error){
-		chctui.QuizActionStart:    e.executeQuizOperationStart,
-		chctui.QuizActionResume:   e.executeQuizOperationResume,
-		chctui.QuizActionAnswer:   e.executeQuizOperationAnswer,
-		chctui.QuizActionSkip:     e.executeQuizOperationSkip,
-		chctui.QuizActionComplete: e.executeQuizOperationComplete,
-		chctui.QuizActionCancel:   e.executeQuizOperationCancel,
-		chctui.QuizActionRefresh:  executeQuizOperationRefresh,
-		chctui.QuizActionDeepMode: e.executeQuizOperationMode,
-		chctui.QuizActionFastMode: e.executeQuizOperationMode,
+		chctui.QuizActionStart:     e.executeQuizOperationStart,
+		chctui.QuizActionResume:    e.executeQuizOperationResume,
+		chctui.QuizActionAnswer:    e.executeQuizOperationAnswer,
+		chctui.QuizActionSkip:      e.executeQuizOperationSkip,
+		chctui.QuizActionComplete:  e.executeQuizOperationComplete,
+		chctui.QuizActionDraftSpec: e.executeQuizOperationDraftSpec,
+		chctui.QuizActionCancel:    e.executeQuizOperationCancel,
+		chctui.QuizActionRefresh:   executeQuizOperationRefresh,
+		chctui.QuizActionDeepMode:  e.executeQuizOperationMode,
+		chctui.QuizActionFastMode:  e.executeQuizOperationMode,
 	}
 
 	operation, ok := operations[action]
@@ -371,6 +372,17 @@ func (e tuiQuizActionExecutor) executeQuizOperationSkip(request chctui.QuizActio
 
 func (e tuiQuizActionExecutor) executeQuizOperationComplete(request chctui.QuizActionRequest) (string, error) {
 	result, err := e.operations.CompleteQuiz(QuizCompleteRequest{
+		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.Message, nil
+}
+
+func (e tuiQuizActionExecutor) executeQuizOperationDraftSpec(request chctui.QuizActionRequest) (string, error) {
+	result, err := e.operations.GenerateQuizDraftSpec(QuizDraftSpecRequest{
 		Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 	})
 	if err != nil {

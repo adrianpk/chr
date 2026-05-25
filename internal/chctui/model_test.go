@@ -2768,6 +2768,54 @@ func TestModelCompletesQuizAnswerWithAltD(t *testing.T) {
 	}
 }
 
+func TestModelGeneratesQuizDraftSpecFromQuizzesKey(t *testing.T) {
+	executor := &fakeQuizActionExecutor{
+		result: QuizActionResult{
+			Message: "Spec generated.",
+			Quizzes: []QuizView{
+				{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "done"},
+			},
+			SelectedScope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		QuizExecutor: executor,
+		Quizzes: []QuizView{
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "done", CuratedPath: ".chc/quizzes/blog-quiz.md"},
+		},
+	})
+	model.selected = 3
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	planned := requireUpdatedModel(t, updated)
+
+	if !planned.quizAction.Pending || planned.quizAction.Request.Action != QuizActionDraftSpec {
+		t.Fatalf("quiz action = %#v, want draft spec action", planned.quizAction)
+	}
+
+	updated, cmd := planned.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.quizBusy {
+		t.Fatal("quiz action is not marked busy")
+	}
+
+	if busy.statusMessage != "Generating spec..." {
+		t.Fatalf("statusMessage = %q, want Generating spec...", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != QuizActionDraftSpec {
+		t.Fatalf("action = %q, want draft spec", executor.request.Action)
+	}
+
+	if confirmed.statusMessage != "Spec generated." {
+		t.Fatalf("statusMessage = %q, want Spec generated.", confirmed.statusMessage)
+	}
+}
+
 func TestModelConfirmsQuizFastModeThroughExecutor(t *testing.T) {
 	executor := &fakeQuizActionExecutor{
 		result: QuizActionResult{

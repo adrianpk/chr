@@ -153,6 +153,10 @@ func (m Model) quizActionHint(quiz QuizView) string {
 		return "Enter answers"
 	}
 
+	if quiz.Status == "done" && strings.TrimSpace(quiz.CuratedPath) != "" {
+		return "g generate spec  s restart"
+	}
+
 	return "s start"
 }
 
@@ -239,6 +243,8 @@ func (m Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: m.selectedQuizScope()})
 
 		return m, cmd
+	case "g":
+		m.planQuizAction(QuizActionDraftSpec)
 	case "esc":
 		m.selectPrimaryPane()
 	default:
@@ -301,26 +307,24 @@ func quizScopeLabel(scope QuizScope) string {
 }
 
 func quizActionTitle(action QuizActionID) string {
-	switch action {
-	case QuizActionStart:
-		return "Start quiz"
-	case QuizActionResume:
-		return "Resume quiz"
-	case QuizActionSkip:
-		return "Skip active question"
-	case QuizActionComplete:
-		return "Complete quiz"
-	case QuizActionCancel:
-		return "Cancel quiz"
-	case QuizActionRefresh:
-		return "Refresh quizzes"
-	case QuizActionDeepMode:
-		return "Switch quiz to deep mode"
-	case QuizActionFastMode:
-		return "Switch quiz to fast mode"
-	default:
+	titles := map[QuizActionID]string{
+		QuizActionStart:     "Start quiz",
+		QuizActionResume:    "Resume quiz",
+		QuizActionSkip:      "Skip active question",
+		QuizActionComplete:  "Complete quiz",
+		QuizActionDraftSpec: "Generate spec",
+		QuizActionCancel:    "Cancel quiz",
+		QuizActionRefresh:   "Refresh quizzes",
+		QuizActionDeepMode:  "Switch quiz to deep mode",
+		QuizActionFastMode:  "Switch quiz to fast mode",
+	}
+
+	title, ok := titles[action]
+	if !ok {
 		return "Quiz action"
 	}
+
+	return title
 }
 
 func quizActionMode(action QuizActionID) string {
