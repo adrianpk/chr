@@ -139,7 +139,7 @@ Candidate tasks:
 
 Task commits:
 
-- T4.1: pending.
+- T4.1: `af0eec6` adds quiz parity lab validation.
 
 Validation:
 
