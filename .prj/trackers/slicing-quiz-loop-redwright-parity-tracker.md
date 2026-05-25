@@ -50,7 +50,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Quiz Provider Parity Fixtures | Delivered | `feat/slice-1-quiz-provider-parity-fixtures` | `feat(slice-1): quiz provider parity fixtures` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md` | PR #193. |
 | Slice 2: Quiz Prompt Intent Persistence | Delivered | `feat/slice-2-quiz-prompt-intent-persistence` | `feat(slice-2): quiz prompt intent persistence` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md` | PR #194. |
-| Slice 3: Quiz Routing Parity Control | Planned | `feat/slice-3-quiz-routing-parity-control` | `feat(slice-3): quiz routing parity control` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-3-quiz-routing-parity-control.md` | Active next slice. |
+| Slice 3: Quiz Routing Parity Control | Reviewing | `feat/slice-3-quiz-routing-parity-control` | `feat(slice-3): quiz routing parity control` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-3-quiz-routing-parity-control.md` | PR pending. |
 | Slice 4: Quiz Parity Lab Validation | Planned | `feat/slice-4-quiz-parity-lab-validation` | `feat(slice-4): quiz parity lab validation` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-4-quiz-parity-lab-validation.md` | Starts after Slice 3 merge. |
 
 ## Slice 1: Quiz Provider Parity Fixtures
@@ -105,21 +105,23 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Align branch follow-up decisions with persisted prompt intent metadata.
-- [ ] Enforce maximum follow-up depth from the persisted model intent.
-- [ ] Return skipped and exhausted branches to broader coverage.
-- [ ] Add tests for vague answer, specific answer, skip, completion, and trunk
+- [x] Align branch follow-up decisions with persisted prompt intent metadata.
+- [x] Enforce maximum follow-up depth from the persisted model intent.
+- [x] Return skipped and exhausted branches to broader coverage.
+- [x] Add tests for vague answer, specific answer, skip, completion, and trunk
       return flows.
-- [ ] Add slice implementation report.
-- [ ] Run targeted tests and broader validation as needed.
+- [x] Add slice implementation report.
+- [x] Run targeted tests and broader validation as needed.
 
 Task commits:
 
-- Pending.
+- T3.1: `3ca138a` returns skipped quiz branches to trunk.
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc ./internal/chcapp`
+- `git diff --check`
+- `make verify`
 
 ## Slice 4: Quiz Parity Lab Validation
 
