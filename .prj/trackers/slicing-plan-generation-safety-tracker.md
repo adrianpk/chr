@@ -48,7 +48,7 @@ Prerequisite PRs or delivered work:
 | Slice 1: Plan Action Semantics | Delivered | `feat/slice-1-plan-action-semantics` | `feat(slice-1): plan action semantics` | `.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 2: Archive Before Replace | Delivered | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 3: Archive Context Exclusion | Delivered | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
-| Slice 4: Generation Runtime Safety | Planned | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Depends on Slices 1-3. |
+| Slice 4: Generation Runtime Safety | Reviewing | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 
 ## Slice 1: Plan Action Semantics
 
@@ -138,21 +138,32 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T4.1 Add longer timeout behavior for plan/spec generation than quiz
+- [x] T4.1 Add longer timeout behavior for plan/spec generation than quiz
       next-question generation.
-- [ ] T4.2 Add service-level same-scope generation guard.
-- [ ] T4.3 Improve failure status when generation fails while an older plan is
+- [x] T4.2 Add service-level same-scope generation guard.
+- [x] T4.3 Improve failure status when generation fails while an older plan is
       still visible.
-- [ ] T4.4 Extend diagnostic logging for guard, archive, success, and failure
+- [x] T4.4 Extend diagnostic logging for guard, archive, success, and failure
       events.
-- [ ] T4.5 Add tests for guard behavior and failure messaging.
-- [ ] T4.6 Add slice implementation report.
-- [ ] T4.7 Run targeted tests and `make verify`.
+- [x] T4.5 Add tests for guard behavior and failure messaging.
+- [x] T4.6 Add slice implementation report.
+- [x] T4.7 Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- `1189b57 docs(plan): select slice 4 generation runtime safety`
+- `6a58219 feat(generation): guard long-running spec and plan requests`
+- `27dc933 fix(tui): clarify generation failure state`
+- `505f092 test(generation): cover timeout and guard behavior`
+- `07ca43b feat(generation): log spec generation lifecycle`
+- `ba67767 fix(openai): extend spec and plan generation timeout`
+- `6634da0 test(tui): fix generation failure assertion flow`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc`: pass.
+- `go test ./internal/chcapp`: pass.
+- `go test ./internal/chctui`: pass.
+- `go test ./...`: pass.
+- `make verify`: fail in `lint-strict` because of existing lint debt across
+  plan, spec, and TUI code.
