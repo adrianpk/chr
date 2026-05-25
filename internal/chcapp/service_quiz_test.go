@@ -178,6 +178,7 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 
 	rawPath := filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md")
 	rawContent := readServiceWorkspaceFile(t, rawPath)
+
 	if !strings.Contains(rawContent, `"routing_state":{"phase":"follow_up"}`) {
 		t.Fatalf("raw capture missing prompt intent:\n%s", rawContent)
 	}

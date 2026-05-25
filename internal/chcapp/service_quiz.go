@@ -539,6 +539,7 @@ func quizModelCurrentQuestionPayload(
 
 	entry := entries[len(entries)-1]
 	promptIntent := quizModelPromptIntentFromJSON(entry.PromptIntent)
+
 	if len(promptIntent) == 0 {
 		promptIntent = map[string]any{
 			"metadata": map[string]any{
