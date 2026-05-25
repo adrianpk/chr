@@ -97,16 +97,16 @@ The target user behavior is:
 
 Slicing name: Quiz Loop RedWright Parity
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: quiz provider parity fixtures
+Active slice short name: quiz prompt intent persistence
 
-Expected branch name: `feat/slice-1-quiz-provider-parity-fixtures`
+Expected branch name: `feat/slice-2-quiz-prompt-intent-persistence`
 
-Expected PR title: `feat(slice-1): quiz provider parity fixtures`
+Expected PR title: `feat(slice-2): quiz prompt intent persistence`
 
 Expected report path:
-`.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md`
+`.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md`
 
 Prerequisite PRs or delivered work:
 
@@ -114,6 +114,7 @@ Prerequisite PRs or delivered work:
 - Post-slice TUI quiz UX fixes through the latest `dev -> main` alignment.
 - Service-owned quiz operations, file-backed runtime state, scoped read models,
   direct LLM question generation, and TUI answer flow already delivered.
+- Slice 1 quiz provider parity fixtures through PR #193.
 
 | Slice | Short Name | Expected Branch | Expected PR Title | Expected Report |
 | --- | --- | --- | --- | --- |

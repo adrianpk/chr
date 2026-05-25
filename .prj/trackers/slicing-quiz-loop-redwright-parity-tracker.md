@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-quiz-loop-redwright-parity-plan.md`
 
 Slicing name: Quiz Loop RedWright Parity
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: quiz provider parity fixtures
+Active slice short name: quiz prompt intent persistence
 
-Expected branch name: `feat/slice-1-quiz-provider-parity-fixtures`
+Expected branch name: `feat/slice-2-quiz-prompt-intent-persistence`
 
-Expected PR title: `feat(slice-1): quiz provider parity fixtures`
+Expected PR title: `feat(slice-2): quiz prompt intent persistence`
 
 Expected report path:
-`.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md`
+`.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md`
 
 Prerequisite PRs or delivered work:
 
@@ -25,6 +25,7 @@ Prerequisite PRs or delivered work:
 - Post-slice TUI quiz UX fixes through the latest `dev -> main` alignment.
 - Service-owned quiz operations, file-backed runtime state, scoped read models,
   direct LLM question generation, and TUI answer flow already delivered.
+- Slice 1 quiz provider parity fixtures through PR #193.
 
 ## Slicing Checklist
 
@@ -46,8 +47,8 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Quiz Provider Parity Fixtures | Reviewing | `feat/slice-1-quiz-provider-parity-fixtures` | `feat(slice-1): quiz provider parity fixtures` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md` | PR pending. |
-| Slice 2: Quiz Prompt Intent Persistence | Planned | `feat/slice-2-quiz-prompt-intent-persistence` | `feat(slice-2): quiz prompt intent persistence` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md` | Starts after Slice 1 merge. |
+| Slice 1: Quiz Provider Parity Fixtures | Delivered | `feat/slice-1-quiz-provider-parity-fixtures` | `feat(slice-1): quiz provider parity fixtures` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md` | PR #193. |
+| Slice 2: Quiz Prompt Intent Persistence | Planned | `feat/slice-2-quiz-prompt-intent-persistence` | `feat(slice-2): quiz prompt intent persistence` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md` | Active next slice. |
 | Slice 3: Quiz Routing Parity Control | Planned | `feat/slice-3-quiz-routing-parity-control` | `feat(slice-3): quiz routing parity control` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-3-quiz-routing-parity-control.md` | Starts after Slice 2 merge. |
 | Slice 4: Quiz Parity Lab Validation | Planned | `feat/slice-4-quiz-parity-lab-validation` | `feat(slice-4): quiz parity lab validation` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-4-quiz-parity-lab-validation.md` | Starts after Slice 3 merge. |
 

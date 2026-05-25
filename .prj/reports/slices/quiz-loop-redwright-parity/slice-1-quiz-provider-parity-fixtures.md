@@ -1,11 +1,11 @@
 # Slice 1: Quiz Provider Parity Fixtures
 
-Status: reviewing
+Status: delivered
 Slicing: Quiz Loop RedWright Parity
 Plan: `.prj/plans/slicing-quiz-loop-redwright-parity-plan.md`
 Tracker: `.prj/trackers/slicing-quiz-loop-redwright-parity-tracker.md`
 Branch: `feat/slice-1-quiz-provider-parity-fixtures`
-PR: pending
+PR: #193
 
 ## Purpose
 
