@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
+	"forge.adrianpk.com/chc/internal/chctui"
 )
 
 func TestServiceGeneratePlanUsesUseCaseContext(t *testing.T) {
@@ -300,6 +301,120 @@ func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
 
 	if model.remaining < 4*time.Minute {
 		t.Fatalf("generation deadline remaining = %s, want long generation timeout", model.remaining)
+	}
+}
+
+func TestServiceGeneratePlanRefusesExistingCanonicalPlan(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
+title: "Existing Blog Plan"
+status: "planned"
+case_slug: "blog"
+---
+
+# Existing Blog Plan
+
+Manual plan content.
+`)
+
+	model := &fakeServiceQuizModel{}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	result, err := operations.GeneratePlan(PlanGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("GeneratePlan returned error: %v", err)
+	}
+
+	if result.Message != "Plan already exists. Use regenerate plan to replace it." {
+		t.Fatalf("Message = %q, want existing plan refusal", result.Message)
+	}
+
+	if result.Plan.RelativePath != ".chc/plans/blog-plan.md" {
+		t.Fatalf("Plan.RelativePath = %q, want existing canonical path", result.Plan.RelativePath)
+	}
+
+	if len(model.requests) != 0 {
+		t.Fatalf("model requests = %d, want no model invocation", len(model.requests))
+	}
+}
+
+func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizPlanResponse("response-plan", clock()),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	executor := newTUIPlanActionExecutor(operations)
+	result, err := executor.ExecutePlanAction(chctui.PlanActionRequest{
+		Action: chctui.PlanActionGenerate,
+		Scope:  chctui.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("ExecutePlanAction returned error: %v", err)
+	}
+
+	var generated chctui.PlanView
+	for _, plan := range result.Plans {
+		if plan.Scope.CaseSlug == "blog" {
+			generated = plan
+			break
+		}
+	}
+
+	if generated.RelativePath != ".chc/plans/blog-plan.md" {
+		t.Fatalf("generated RelativePath = %q, want canonical plan path in TUI result: %#v", generated.RelativePath, result.Plans)
+	}
+
+	if generated.Status == "missing" {
+		t.Fatalf("generated Status = missing, want existing plan: %#v", generated)
+	}
+}
+
+func TestTUIPlanGenerateReturnsRefusalMessageForExistingPlan(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
+title: "Existing Blog Plan"
+status: "planned"
+case_slug: "blog"
+---
+
+# Existing Blog Plan
+
+Manual plan content.
+`)
+
+	model := &fakeServiceQuizModel{}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	executor := newTUIPlanActionExecutor(operations)
+	result, err := executor.ExecutePlanAction(chctui.PlanActionRequest{
+		Action: chctui.PlanActionGenerate,
+		Scope:  chctui.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("ExecutePlanAction returned error: %v", err)
+	}
+
+	if result.Message != "Plan already exists. Use regenerate plan to replace it." {
+		t.Fatalf("Message = %q, want existing plan refusal", result.Message)
+	}
+
+	if len(model.requests) != 0 {
+		t.Fatalf("model requests = %d, want no model invocation", len(model.requests))
 	}
 }
 

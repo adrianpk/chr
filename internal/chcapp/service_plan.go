@@ -67,17 +67,47 @@ func (s service) ListPlans() (PlanListResult, error) {
 
 func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
+	existing, exists, err := s.existingGeneratedPlan(scope)
+	if err != nil {
+		return PlanOperationResult{}, err
+	}
+
+	if exists {
+		return PlanOperationResult{
+			Message: "Plan already exists. Use regenerate plan to replace it.",
+			Plan:    existing,
+		}, nil
+	}
+
 	var result PlanOperationResult
 
-	err := s.withGenerationRuntime("plan", scope, func(ctx context.Context) error {
-		var err error
+	err = s.withGenerationRuntime("plan", scope, func(ctx context.Context) error {
+		var generateErr error
 
-		result, err = s.generatePlan(ctx, scope)
+		result, generateErr = s.generatePlan(ctx, scope)
 
-		return err
+		return generateErr
 	})
 
 	return result, err
+}
+
+func (s service) existingGeneratedPlan(scope chc.QuizScope) (PlanView, bool, error) {
+	paths, err := chc.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return PlanView{}, false, err
+	}
+
+	_, err = os.Stat(paths.Path)
+	if errors.Is(err, os.ErrNotExist) {
+		return PlanView{}, false, nil
+	}
+
+	if err != nil {
+		return PlanView{}, false, fmt.Errorf("stat generated plan: %w", err)
+	}
+
+	return s.planViewFromPath(scope, paths.RelativePath, paths.Path), true, nil
 }
 
 func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOperationResult, error) {

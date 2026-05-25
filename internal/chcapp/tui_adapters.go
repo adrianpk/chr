@@ -221,9 +221,11 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 		"case_slug": request.Scope.CaseSlug,
 	})
 
+	message := ""
+
 	switch request.Action {
 	case chctui.PlanActionGenerate:
-		_, err := e.operations.GeneratePlan(PlanGenerateRequest{
+		result, err := e.operations.GeneratePlan(PlanGenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
@@ -235,8 +237,10 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 
 			return chctui.PlanActionResult{}, err
 		}
+
+		message = result.Message
 	case chctui.PlanActionRegenerate:
-		_, err := e.operations.RegeneratePlan(PlanRegenerateRequest{
+		result, err := e.operations.RegeneratePlan(PlanRegenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
@@ -248,6 +252,8 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 
 			return chctui.PlanActionResult{}, err
 		}
+
+		message = result.Message
 	case chctui.PlanActionRefresh:
 	default:
 		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
@@ -281,12 +287,8 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 		return chctui.PlanActionResult{}, err
 	}
 
-	message := "Plans refreshed."
-	if request.Action == chctui.PlanActionGenerate {
-		message = "Plan generated."
-	}
-	if request.Action == chctui.PlanActionRegenerate {
-		message = "Plan regenerated."
+	if message == "" {
+		message = "Plans refreshed."
 	}
 
 	e.operations.appendPlanGenerationLog("tui_plan_action_finished", map[string]string{
