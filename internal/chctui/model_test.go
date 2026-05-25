@@ -2896,6 +2896,14 @@ func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 		t.Fatalf("statusMessage = %q, want Generating plan...", busy.statusMessage)
 	}
 
+	if busy.selectedPane != 1 {
+		t.Fatalf("selectedPane = %d, want 1", busy.selectedPane)
+	}
+
+	if busy.maximizedPane != 1 {
+		t.Fatalf("maximizedPane = %d, want 1", busy.maximizedPane)
+	}
+
 	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
@@ -3058,8 +3066,8 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 		t.Fatalf("statusMessage = %q, want Regenerating plan...", busy.statusMessage)
 	}
 
-	if busy.maximizedPane != -1 {
-		t.Fatalf("maximizedPane = %d, want -1 after confirmation", busy.maximizedPane)
+	if busy.maximizedPane != 1 {
+		t.Fatalf("maximizedPane = %d, want 1 after confirmation", busy.maximizedPane)
 	}
 
 	updated, _ = busy.Update(cmd())
@@ -3071,6 +3079,10 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 
 	if confirmed.statusMessage != "Plan regenerated." {
 		t.Fatalf("statusMessage = %q, want Plan regenerated.", confirmed.statusMessage)
+	}
+
+	if confirmed.maximizedPane != 1 {
+		t.Fatalf("maximizedPane = %d, want 1 after regeneration", confirmed.maximizedPane)
 	}
 }
 

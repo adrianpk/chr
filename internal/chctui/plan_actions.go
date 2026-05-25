@@ -139,7 +139,6 @@ func (m *Model) cancelPlanAction() {
 func (m *Model) confirmPlanAction() tea.Cmd {
 	request := m.planAction.Request
 	m.planAction = PlanActionState{}
-	m.maximizedPane = -1
 
 	return m.startPlanAction(request)
 }
@@ -178,6 +177,11 @@ func (m *Model) startPlanAction(request PlanActionRequest) tea.Cmd {
 		m.statusMessage = "Plan already exists. Use regenerate plan to replace it."
 
 		return nil
+	}
+
+	if planActionChangesContent(request.Action) {
+		m.selectedPane = 1
+		m.maximizedPane = 1
 	}
 
 	m.planBusy = true
@@ -222,6 +226,15 @@ func planActionTitle(action PlanActionID) string {
 		return "Refresh plans"
 	default:
 		return "Plan action"
+	}
+}
+
+func planActionChangesContent(action PlanActionID) bool {
+	switch action {
+	case PlanActionGenerate, PlanActionRegenerate:
+		return true
+	default:
+		return false
 	}
 }
 
