@@ -1,11 +1,11 @@
 # Slice 2: Archive Before Replace
 
-Status: reviewing
+Status: delivered
 Slicing: Plan Generation Safety
 Plan: `.prj/plans/slicing-plan-generation-safety-plan.md`
 Tracker: `.prj/trackers/slicing-plan-generation-safety-tracker.md`
 Branch: `feat/slice-2-archive-before-replace`
-PR: pending
+PR: `#199`
 
 ## Purpose
 
