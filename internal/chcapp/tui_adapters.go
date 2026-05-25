@@ -222,7 +222,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 	})
 
 	switch request.Action {
-	case chctui.PlanActionGenerate:
+	case chctui.PlanActionGenerate, chctui.PlanActionRegenerate:
 		_, err := e.operations.GeneratePlan(PlanGenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
@@ -271,6 +271,9 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 	message := "Plans refreshed."
 	if request.Action == chctui.PlanActionGenerate {
 		message = "Plan generated."
+	}
+	if request.Action == chctui.PlanActionRegenerate {
+		message = "Plan regenerated."
 	}
 
 	e.operations.appendPlanGenerationLog("tui_plan_action_finished", map[string]string{

@@ -408,6 +408,8 @@ func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 
 		return updated, cmd, true
 	case m.planBusy:
+		m.statusMessage = "Plan action already running."
+
 		return m, nil, true
 	case m.workAction.Pending:
 		updated, cmd := m.updateWorkActionKey(msg)
@@ -1025,7 +1027,7 @@ func (m Model) renderKeys() string {
 	case m.SelectedView() == ViewSpecs:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects spec, g generates spec, q quits"
 	case m.SelectedView() == ViewPlans:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects plan, g generates plan, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects plan, g generates missing plan, G regenerates, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects session, q quits"
 	default:

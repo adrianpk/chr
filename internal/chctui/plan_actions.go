@@ -10,8 +10,9 @@ import (
 type PlanActionID string
 
 const (
-	PlanActionGenerate PlanActionID = "generate_plan"
-	PlanActionRefresh  PlanActionID = "refresh_plans"
+	PlanActionGenerate   PlanActionID = "generate_missing_plan"
+	PlanActionRegenerate PlanActionID = "regenerate_plan"
+	PlanActionRefresh    PlanActionID = "refresh_plans"
 )
 
 type PlanActionExecutor interface {
@@ -71,6 +72,10 @@ func (m Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		})
 
 		return m, cmd
+	case "G":
+		m.planPlanAction(PlanActionRegenerate)
+
+		return m, nil
 	case "r":
 		cmd := m.startPlanAction(PlanActionRequest{
 			Action: PlanActionRefresh,
@@ -150,8 +155,20 @@ func (m Model) executePlanActionCommand(request PlanActionRequest) tea.Cmd {
 }
 
 func (m *Model) startPlanAction(request PlanActionRequest) tea.Cmd {
+	if m.planBusy {
+		m.statusMessage = "Plan action already running."
+
+		return nil
+	}
+
 	if m.planExecutor == nil {
 		m.statusMessage = "Plan action executor is unavailable."
+
+		return nil
+	}
+
+	if request.Action == PlanActionGenerate && m.planExistsForScope(request.Scope) {
+		m.statusMessage = "Plan already exists. Use regenerate plan to replace it."
 
 		return nil
 	}
@@ -192,6 +209,8 @@ func planActionTitle(action PlanActionID) string {
 	switch action {
 	case PlanActionGenerate:
 		return "Generate plan"
+	case PlanActionRegenerate:
+		return "Regenerate plan"
 	case PlanActionRefresh:
 		return "Refresh plans"
 	default:
@@ -203,6 +222,8 @@ func planBusyMessage(request PlanActionRequest) string {
 	switch request.Action {
 	case PlanActionGenerate:
 		return "Generating plan..."
+	case PlanActionRegenerate:
+		return "Regenerating plan..."
 	case PlanActionRefresh:
 		return "Refreshing plans..."
 	default:
