@@ -37,9 +37,9 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -48,7 +48,7 @@ Prerequisite PRs or delivered work:
 | Slice 1: Plan Action Semantics | Delivered | `feat/slice-1-plan-action-semantics` | `feat(slice-1): plan action semantics` | `.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 2: Archive Before Replace | Delivered | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 3: Archive Context Exclusion | Delivered | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
-| Slice 4: Generation Runtime Safety | Reviewing | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
+| Slice 4: Generation Runtime Safety | Delivered | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 
 ## Slice 1: Plan Action Semantics
 
@@ -133,6 +133,25 @@ Validation:
 - `go test ./...`: pass.
 - `make verify`: fail in `lint-strict` because of existing lint debt across
   plan, spec, and TUI code.
+
+## Slicing Closure
+
+All planned slices are delivered:
+
+- Slice 1: PR `#198`
+- Slice 2: PR `#199`
+- Slice 3: PR `#200`
+- Slice 4: PR `#201`
+
+Slicing validation:
+
+- `go test ./...`: pass.
+- `make verify`: fail in `lint-strict` because of existing lint debt across
+  plan, spec, and TUI code.
+
+Tuning decision: no additional tuning slice is planned for this slicing. The
+remaining blocker is repository-wide lint debt, not unfinished plan generation
+safety behavior.
 
 ## Slice 4: Generation Runtime Safety
 
