@@ -3191,6 +3191,121 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 	}
 }
 
+func TestModelShowsPlanTrackingOnlyWhenPlanExists(t *testing.T) {
+	model := NewModel(Options{
+		Plans: []PlanView{
+			{
+				Title:  "Missing Plan",
+				Scope:  QuizScope{CaseSlug: "blog"},
+				Status: "missing",
+			},
+		},
+	})
+	model.selected = 5
+
+	if strings.Contains(model.planActionHint(), "alt+t tracking") {
+		t.Fatalf("planActionHint() = %q, want no tracking hint for missing plan", model.planActionHint())
+	}
+
+	model.plans = normalizePlanViews([]PlanView{
+		{
+			Title:        "Generated Plan",
+			Scope:        QuizScope{CaseSlug: "blog"},
+			Status:       "planned",
+			RelativePath: ".chc/plans/blog-plan.md",
+			Content:      "# Generated Plan\n",
+		},
+	})
+
+	if !strings.Contains(model.planActionHint(), "alt+t tracking") {
+		t.Fatalf("planActionHint() = %q, want tracking hint for existing plan", model.planActionHint())
+	}
+}
+
+func TestModelPlansPlanTrackingWithAltT(t *testing.T) {
+	model := NewModel(Options{
+		Plans: []PlanView{
+			{
+				Title:        "Generated Plan",
+				Scope:        QuizScope{CaseSlug: "blog"},
+				Status:       "planned",
+				RelativePath: ".chc/plans/blog-plan.md",
+				Content:      "# Generated Plan\n",
+			},
+		},
+	})
+	model.selected = 5
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("t"), Alt: true})
+	pending := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil before confirmation")
+	}
+
+	if !pending.planAction.Pending {
+		t.Fatal("plan action is not pending")
+	}
+
+	if pending.planAction.Request.Action != PlanActionMaterializeTracking {
+		t.Fatalf("pending action = %q, want %q", pending.planAction.Request.Action, PlanActionMaterializeTracking)
+	}
+}
+
+func TestModelBlocksPlanTrackingWhenPlanIsMissing(t *testing.T) {
+	model := NewModel(Options{
+		Plans: []PlanView{
+			{
+				Title:  "Missing Plan",
+				Scope:  QuizScope{CaseSlug: "blog"},
+				Status: "missing",
+			},
+		},
+	})
+	model.selected = 5
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("t"), Alt: true})
+	blocked := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil, want no command")
+	}
+
+	if blocked.planAction.Pending {
+		t.Fatal("plan action is pending")
+	}
+
+	if blocked.statusMessage != "Plan tracking requires an existing plan." {
+		t.Fatalf("statusMessage = %q, want missing plan guidance", blocked.statusMessage)
+	}
+}
+
+func TestPlanTrackingCommandOnlyAppearsWhenPlanExists(t *testing.T) {
+	model := NewModel(Options{
+		Plans: []PlanView{{Title: "Missing Plan", Status: "missing"}},
+	})
+	model.selected = 5
+	model.commandPalette.Filter = "materialize-plan-tracking"
+
+	if commands := model.filteredCommands(); len(commands) != 0 {
+		t.Fatalf("commands = %#v, want no tracking command for missing plan", commands)
+	}
+
+	model.plans = normalizePlanViews([]PlanView{
+		{
+			Title:        "Generated Plan",
+			Status:       "planned",
+			RelativePath: ".chc/plans/project-plan.md",
+			Content:      "# Generated Plan\n",
+		},
+	})
+
+	commands := model.filteredCommands()
+	if len(commands) != 1 || commands[0].Plan != PlanActionMaterializeTracking {
+		t.Fatalf("commands = %#v, want tracking command", commands)
+	}
+}
+
 func TestModelBlocksDuplicatePlanActionWhileBusy(t *testing.T) {
 	executor := &fakePlanActionExecutor{}
 	model := NewModel(Options{

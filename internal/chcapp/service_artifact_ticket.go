@@ -15,12 +15,14 @@ type ArtifactOperationResult struct {
 
 type CreateTicketRequest struct {
 	Title       string
+	Status      string
 	Priority    string
 	Severity    string
 	Type        string
 	Tags        []string
 	UseCase     string
 	ProjectArea string
+	Body        string
 }
 
 type CreateTicketResult struct {
@@ -41,12 +43,14 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 
 	result, err := repository.CreateTicket(s.ctx, chc.CreateTicketOptions{
 		Title:       request.Title,
+		Status:      request.Status,
 		Priority:    request.Priority,
 		Severity:    request.Severity,
 		Type:        request.Type,
 		Tags:        request.Tags,
 		UseCase:     request.UseCase,
 		ProjectArea: request.ProjectArea,
+		Body:        request.Body,
 	})
 	if err != nil {
 		return CreateTicketResult{}, err

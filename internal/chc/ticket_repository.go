@@ -21,12 +21,14 @@ type TicketRepository interface {
 
 type CreateTicketOptions struct {
 	Title       string
+	Status      string
 	Priority    string
 	Severity    string
 	Type        string
 	Tags        []string
 	UseCase     string
 	ProjectArea string
+	Body        string
 }
 
 type CreateTicketResult struct {
@@ -102,13 +104,14 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 	ticket := Ticket{
 		Key:         key,
 		Title:       opts.Title,
-		Status:      DefaultTicketStatus,
+		Status:      ticketStatusOrDefault(opts.Status),
 		Priority:    opts.Priority,
 		Severity:    opts.Severity,
 		Type:        opts.Type,
 		Tags:        opts.Tags,
 		UseCase:     opts.UseCase,
 		ProjectArea: opts.ProjectArea,
+		Body:        opts.Body,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -131,6 +134,15 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 	}
 
 	return CreateTicketResult{Key: key, Path: path}, nil
+}
+
+func ticketStatusOrDefault(status string) string {
+	status = strings.TrimSpace(status)
+	if status == "" {
+		return DefaultTicketStatus
+	}
+
+	return status
 }
 
 func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {

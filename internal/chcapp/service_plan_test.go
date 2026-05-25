@@ -180,6 +180,144 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 	}
 }
 
+func TestServiceMaterializePlanTrackingCreatesTrackingAndTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
+title: "Blog Plan"
+status: "planned"
+case_slug: "blog"
+---
+
+# Blog Plan
+
+## Slice 1
+
+Implement planning foundation.
+`)
+
+	now := time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC)
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizPlanTrackingResponse("response-tracking", now),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = fixedServiceClock(now)
+
+	result, err := operations.MaterializePlanTracking(PlanTrackingRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("MaterializePlanTracking returned error: %v", err)
+	}
+
+	if result.Message != "Created plan tracking and 1 tickets." {
+		t.Fatalf("Message = %q, want created tracking message", result.Message)
+	}
+
+	if result.TrackingPath != ".chc/plans/blog-tracking.md" {
+		t.Fatalf("TrackingPath = %q, want blog tracking path", result.TrackingPath)
+	}
+
+	tracking := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-tracking.md"))
+	for _, want := range []string{
+		`plan_path: ".chc/plans/blog-plan.md"`,
+		"Track the generated plan slices through tickets.",
+		"Slice 1: CHC-1 - Implement planning foundation",
+	} {
+		if !strings.Contains(tracking, want) {
+			t.Fatalf("tracking missing %q in:\n%s", want, tracking)
+		}
+	}
+
+	if len(result.Tickets) != 1 {
+		t.Fatalf("Tickets = %#v, want one ticket", result.Tickets)
+	}
+
+	if result.Tickets[0].Status != "ready" {
+		t.Fatalf("ticket status = %q, want ready", result.Tickets[0].Status)
+	}
+
+	ticket := readServiceWorkspaceFile(
+		t,
+		filepath.Join(projectDir, ".chc", "tickets", "blog", "CHC-1-Implement-planning-foundation.md"),
+	)
+	for _, want := range []string{
+		`status: "ready"`,
+		"Source plan: `.chc/plans/blog-plan.md`",
+		"Tracking: `.chc/plans/blog-tracking.md`",
+		"Slice: Slice 1",
+	} {
+		if !strings.Contains(ticket, want) {
+			t.Fatalf("ticket missing %q in:\n%s", want, ticket)
+		}
+	}
+
+	if len(model.requests) != 1 || model.requests[0].Action != chc.QuizModelActionMaterializePlanTracking {
+		t.Fatalf("model requests = %#v, want plan tracking materialization", model.requests)
+	}
+}
+
+func TestServiceMaterializePlanTrackingRequiresExistingPlan(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeServiceQuizFixture(t, projectDir)
+	model := &fakeServiceQuizModel{}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	_, err := operations.MaterializePlanTracking(PlanTrackingRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err == nil || !strings.Contains(err.Error(), "plan is required before tracking can be created") {
+		t.Fatalf("MaterializePlanTracking error = %v, want missing plan error", err)
+	}
+
+	if len(model.requests) != 0 {
+		t.Fatalf("model requests = %#v, want no model request", model.requests)
+	}
+}
+
+func TestServiceMaterializePlanTrackingRefusesExistingTracking(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
+title: "Blog Plan"
+status: "planned"
+case_slug: "blog"
+---
+
+# Blog Plan
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-tracking.md"), `---
+title: "Blog Tracking"
+status: "tracking"
+case_slug: "blog"
+---
+
+# Blog Tracking
+`)
+	model := &fakeServiceQuizModel{}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	result, err := operations.MaterializePlanTracking(PlanTrackingRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("MaterializePlanTracking returned error: %v", err)
+	}
+
+	if result.Message != "Plan tracking already exists." {
+		t.Fatalf("Message = %q, want existing tracking message", result.Message)
+	}
+
+	if len(model.requests) != 0 {
+		t.Fatalf("model requests = %#v, want no model request", model.requests)
+	}
+}
+
 func TestServiceRegeneratePlanPreservesCanonicalPlanWhenArchiveFails(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)

@@ -222,6 +222,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 	})
 
 	message := ""
+	var tickets []chc.IndexedTicket
 
 	switch request.Action {
 	case chctui.PlanActionGenerate:
@@ -254,6 +255,22 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 		}
 
 		message = result.Message
+	case chctui.PlanActionMaterializeTracking:
+		result, err := e.operations.MaterializePlanTracking(PlanTrackingRequest{
+			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		})
+		if err != nil {
+			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
+				"action":    string(request.Action),
+				"case_slug": request.Scope.CaseSlug,
+				"error":     err.Error(),
+			})
+
+			return chctui.PlanActionResult{}, err
+		}
+
+		message = result.Message
+		tickets = result.Tickets
 	case chctui.PlanActionRefresh:
 	default:
 		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
@@ -301,6 +318,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 		Message:   message,
 		Documents: documents,
 		Plans:     plans,
+		Tickets:   tickets,
 		Scope:     request.Scope,
 	}, nil
 }

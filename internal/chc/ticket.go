@@ -20,6 +20,7 @@ type Ticket struct {
 	Tags        []string
 	UseCase     string
 	ProjectArea string
+	Body        string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -46,7 +47,7 @@ func (r *ticketRenderer) RenderTicket(ticket Ticket) (string, error) {
 		return "", err
 	}
 
-	renderTicketBody(&output)
+	renderTicketBody(&output, ticket.Body)
 
 	return output.String(), nil
 }
@@ -109,7 +110,14 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 	return nil
 }
 
-func renderTicketBody(output *bytes.Buffer) {
+func renderTicketBody(output *bytes.Buffer, body string) {
+	if strings.TrimSpace(body) != "" {
+		output.WriteString(strings.TrimSpace(body))
+		output.WriteString("\n")
+
+		return
+	}
+
 	output.WriteString("# Description\n\n")
 	output.WriteString("# Checklist\n\n")
 	output.WriteString("# Acceptance\n\n")

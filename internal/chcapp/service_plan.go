@@ -37,9 +37,20 @@ type PlanRegenerateRequest struct {
 	Scope chc.QuizScope
 }
 
+type PlanTrackingRequest struct {
+	Scope chc.QuizScope
+}
+
 type PlanOperationResult struct {
 	Message string
 	Plan    PlanView
+}
+
+type PlanTrackingResult struct {
+	Message      string
+	Plan         PlanView
+	TrackingPath string
+	Tickets      []chc.IndexedTicket
 }
 
 func (s service) ListPlans() (PlanListResult, error) {
@@ -254,6 +265,177 @@ func (s service) regeneratePlan(ctx context.Context, scope chc.QuizScope) (PlanO
 	return result, nil
 }
 
+func (s service) MaterializePlanTracking(request PlanTrackingRequest) (PlanTrackingResult, error) {
+	scope := s.quizScope(request.Scope)
+
+	plan, exists, err := s.existingGeneratedPlan(scope)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	if !exists {
+		return PlanTrackingResult{}, fmt.Errorf("plan is required before tracking can be created")
+	}
+
+	trackingPaths, err := chc.GeneratedPlanTrackingLayout(s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	_, err = os.Stat(trackingPaths.Path)
+	if err == nil {
+		return PlanTrackingResult{
+			Message:      "Plan tracking already exists.",
+			Plan:         plan,
+			TrackingPath: trackingPaths.RelativePath,
+		}, nil
+	}
+
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return PlanTrackingResult{}, fmt.Errorf("stat plan tracking: %w", err)
+	}
+
+	var result PlanTrackingResult
+
+	err = s.withGenerationRuntime("plan_tracking", scope, func(ctx context.Context) error {
+		var materializeErr error
+
+		result, materializeErr = s.materializePlanTracking(ctx, scope, plan, trackingPaths.RelativePath)
+
+		return materializeErr
+	})
+
+	return result, err
+}
+
+func (s service) materializePlanTracking(
+	ctx context.Context,
+	scope chc.QuizScope,
+	plan PlanView,
+	trackingRelativePath string,
+) (PlanTrackingResult, error) {
+	state, err := s.specGenerationRuntimeState(scope)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	modelRequest, err := s.newPlanTrackingModelRequest(state, plan)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	tracking := response.PlanTracking
+	tracking.Scope = scope
+	tracking.PlanPath = plan.RelativePath
+	tracking.SourcePaths = specSourcePaths(modelRequest.ContextSections)
+	tracking.CreatedAt = modelRequest.CreatedAt
+
+	createdTickets, err := s.createPlanTrackingTickets(scope, plan.RelativePath, trackingRelativePath, tracking.Tickets)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	tracking.Tickets = createdTickets
+
+	paths, err := chc.WriteGeneratedPlanTracking(ctx, s.projectContext.ProjectDir, tracking)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	tickets, err := s.listProjectTickets()
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	return PlanTrackingResult{
+		Message:      fmt.Sprintf("Created plan tracking and %d tickets.", len(createdTickets)),
+		Plan:         s.planViewFromPath(scope, plan.RelativePath, filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(plan.RelativePath))),
+		TrackingPath: paths.RelativePath,
+		Tickets:      tickets,
+	}, nil
+}
+
+func (s service) createPlanTrackingTickets(
+	scope chc.QuizScope,
+	planPath string,
+	trackingPath string,
+	ticketPayloads []chc.GeneratedPlanTrackingTicket,
+) ([]chc.GeneratedPlanTrackingTicket, error) {
+	created := make([]chc.GeneratedPlanTrackingTicket, 0, len(ticketPayloads))
+
+	for _, payload := range ticketPayloads {
+		result, err := s.CreateTicket(CreateTicketRequest{
+			Title:       payload.Title,
+			Status:      "ready",
+			Priority:    payload.Priority,
+			Severity:    payload.Severity,
+			Type:        payload.Type,
+			Tags:        payload.Tags,
+			UseCase:     scope.CaseSlug,
+			ProjectArea: "plan",
+			Body:        renderPlanTrackingTicketBody(planPath, trackingPath, payload),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		payload.Key = result.Key
+		payload.Path = relativeProjectPath(s.projectContext.ProjectDir, result.Path)
+		created = append(created, payload)
+	}
+
+	return created, nil
+}
+
+func renderPlanTrackingTicketBody(planPath string, trackingPath string, ticket chc.GeneratedPlanTrackingTicket) string {
+	var output strings.Builder
+
+	output.WriteString("# Description\n\n")
+	output.WriteString(strings.TrimSpace(ticket.Summary))
+	output.WriteString("\n\n")
+	output.WriteString("Source plan: `")
+	output.WriteString(filepath.ToSlash(planPath))
+	output.WriteString("`\n")
+	output.WriteString("Tracking: `")
+	output.WriteString(filepath.ToSlash(trackingPath))
+	output.WriteString("`\n")
+	output.WriteString("Slice: ")
+	output.WriteString(ticket.SliceID)
+	output.WriteString("\n\n")
+	output.WriteString(strings.TrimSpace(ticket.Body))
+	output.WriteString("\n\n")
+	output.WriteString("# Dependencies\n\n")
+	if len(ticket.Dependencies) == 0 {
+		output.WriteString("None.\n\n")
+	} else {
+		for _, dependency := range ticket.Dependencies {
+			output.WriteString("- ")
+			output.WriteString(dependency)
+			output.WriteString("\n")
+		}
+		output.WriteString("\n")
+	}
+	output.WriteString("# Comments\n\n")
+	output.WriteString("# Blocker\n\n")
+	output.WriteString("# Validation\n")
+
+	return output.String()
+}
+
+func relativeProjectPath(projectDir string, path string) string {
+	relativePath, err := filepath.Rel(projectDir, path)
+	if err != nil {
+		return filepath.ToSlash(path)
+	}
+
+	return filepath.ToSlash(relativePath)
+}
+
 func (s service) planViewFromScope(scope quizReadScope, index chc.WorkspaceIndex) PlanView {
 	node, ok := s.latestPlanNodeForScope(scope.scope, index)
 	if !ok {
@@ -382,6 +564,53 @@ func (s service) newPlanGenerationModelRequest(state chc.QuizRuntimeState) (chc.
 		ID:              fmt.Sprintf("plan-generation-%s", specScopeID(scope)),
 		Action:          chc.QuizModelActionGeneratePlan,
 		Strategy:        "plan_generation",
+		Scope:           scope,
+		Mode:            state.Mode,
+		RuntimeState:    state,
+		Payload:         payload,
+		ContextSections: sections,
+		OutputContract: chc.QuizModelOutputContract{
+			RequiredFields: payload.OutputContract.RequiredFields,
+		},
+		CreatedAt: s.utcNow(),
+	}, nil
+}
+
+func (s service) newPlanTrackingModelRequest(
+	state chc.QuizRuntimeState,
+	plan PlanView,
+) (chc.QuizModelRequest, error) {
+	scope := chc.QuizScope{
+		ProjectID: state.ProjectID,
+		CaseSlug:  state.CaseSlug,
+	}
+
+	payload, err := s.newQuizModelPayload(scope, state, chc.QuizModelActionMaterializePlanTracking)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err := chc.QuizModelContextSectionsForPayload(payload)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections = append(sections, chc.QuizModelContextSection{
+		Name:      "implementation_plan",
+		Layer:     "plan",
+		Authority: plan.RelativePath,
+		Content:   plan.Content,
+		Metadata: map[string]string{
+			"case_slug": scope.CaseSlug,
+			"title":     plan.Title,
+			"status":    plan.Status,
+		},
+	})
+
+	return chc.QuizModelRequest{
+		ID:              fmt.Sprintf("plan-tracking-%s", specScopeID(scope)),
+		Action:          chc.QuizModelActionMaterializePlanTracking,
+		Strategy:        "plan_tracking_materialization",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,

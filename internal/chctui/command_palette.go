@@ -74,6 +74,7 @@ func DefaultCommandRegistry() []Command {
 		{ID: "refresh-specs", Title: "Refresh specs", Description: "Reload scoped specs.", Action: CommandActionPlanSpec, Spec: SpecActionRefresh},
 		{ID: "generate-plan", Title: "Generate plan", Description: "Generate an implementation plan from available project and use-case context.", Action: CommandActionPlanPlan, Plan: PlanActionGenerate},
 		{ID: "regenerate-plan", Title: "Regenerate plan", Description: "Explicitly replace the selected implementation plan.", Action: CommandActionPlanPlan, Plan: PlanActionRegenerate},
+		{ID: "materialize-plan-tracking", Title: "Create plan tracking", Description: "Create tracking and tickets from the selected plan.", Action: CommandActionPlanPlan, Plan: PlanActionMaterializeTracking},
 		{ID: "refresh-plans", Title: "Refresh plans", Description: "Reload scoped plans.", Action: CommandActionPlanPlan, Plan: PlanActionRefresh},
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a spec-oriented authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
 		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
@@ -300,6 +301,10 @@ func (m Model) commandAvailableInCurrentView(command Command) bool {
 	}
 
 	if command.Action == CommandActionPlanPlan {
+		if command.Plan == PlanActionMaterializeTracking {
+			return m.SelectedView() == ViewPlans && m.selectedPlanCanMaterializeTracking()
+		}
+
 		return m.SelectedView() == ViewPlans
 	}
 

@@ -791,6 +791,10 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 			return serviceQuizPlanResponse("response-fallback", request.CreatedAt), nil
 		}
 
+		if request.Action == chc.QuizModelActionMaterializePlanTracking {
+			return serviceQuizPlanTrackingResponse("response-fallback", request.CreatedAt), nil
+		}
+
 		return serviceQuizModelResponse("response-fallback", "question-fallback", request.CreatedAt), nil
 	}
 
@@ -890,6 +894,35 @@ func serviceQuizPlanResponse(responseID string, createdAt time.Time) chc.QuizMod
 			CreatedAt: createdAt,
 		},
 		RawText:   "raw generated plan",
+		CreatedAt: createdAt,
+	}
+}
+
+func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) chc.QuizModelResponse {
+	return chc.QuizModelResponse{
+		ID:        responseID,
+		RequestID: "filled-by-fake",
+		Provider:  "fake",
+		Status:    chc.QuizModelResponseReady,
+		PlanTracking: chc.GeneratedPlanTracking{
+			Scope:     chc.QuizScope{ProjectID: "service-project"},
+			Title:     "Generated Plan Tracking",
+			Body:      "Track the generated plan slices through tickets.",
+			CreatedAt: createdAt,
+			Tickets: []chc.GeneratedPlanTrackingTicket{
+				{
+					SliceID:  "Slice 1",
+					Title:    "Implement planning foundation",
+					Summary:  "Implement the foundational planning work.",
+					Body:     "## Tasks\n\n- Implement the planning foundation.\n\n## Acceptance Criteria\n\n- Foundation behavior is covered by tests.",
+					Priority: "normal",
+					Severity: "normal",
+					Type:     "task",
+					Tags:     []string{"plan-tracking"},
+				},
+			},
+		},
+		RawText:   "raw plan tracking",
 		CreatedAt: createdAt,
 	}
 }

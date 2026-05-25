@@ -10,10 +10,11 @@ import (
 type QuizModelAction string
 
 const (
-	QuizModelActionNextQuestion QuizModelAction = "quiz_next_question"
-	QuizModelActionDraftSpec    QuizModelAction = "quiz_to_draft_spec"
-	QuizModelActionGenerateSpec QuizModelAction = "spec_generation"
-	QuizModelActionGeneratePlan QuizModelAction = "plan_generation"
+	QuizModelActionNextQuestion            QuizModelAction = "quiz_next_question"
+	QuizModelActionDraftSpec               QuizModelAction = "quiz_to_draft_spec"
+	QuizModelActionGenerateSpec            QuizModelAction = "spec_generation"
+	QuizModelActionGeneratePlan            QuizModelAction = "plan_generation"
+	QuizModelActionMaterializePlanTracking QuizModelAction = "plan_tracking_materialization"
 )
 
 type QuizModelResponseStatus string
@@ -49,16 +50,17 @@ type QuizModelOutputContract struct {
 }
 
 type QuizModelResponse struct {
-	ID         string
-	RequestID  string
-	Provider   string
-	Status     QuizModelResponseStatus
-	Question   QuizQuestion
-	Candidates []QuizCandidate
-	DraftSpec  QuizDraftSpec
-	Plan       GeneratedPlan
-	RawText    string
-	CreatedAt  time.Time
+	ID           string
+	RequestID    string
+	Provider     string
+	Status       QuizModelResponseStatus
+	Question     QuizQuestion
+	Candidates   []QuizCandidate
+	DraftSpec    QuizDraftSpec
+	Plan         GeneratedPlan
+	PlanTracking GeneratedPlanTracking
+	RawText      string
+	CreatedAt    time.Time
 }
 
 type QuizModelAdapter interface {
@@ -183,7 +185,11 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 
 func (a QuizModelAction) Valid() bool {
 	switch a {
-	case QuizModelActionNextQuestion, QuizModelActionDraftSpec, QuizModelActionGenerateSpec, QuizModelActionGeneratePlan:
+	case QuizModelActionNextQuestion,
+		QuizModelActionDraftSpec,
+		QuizModelActionGenerateSpec,
+		QuizModelActionGeneratePlan,
+		QuizModelActionMaterializePlanTracking:
 		return true
 	default:
 		return false
@@ -197,6 +203,10 @@ func validateQuizModelReadyResponse(response QuizModelResponse) error {
 
 	if response.Plan.HasContent() {
 		return ValidateGeneratedPlanModelContent(response.Plan)
+	}
+
+	if response.PlanTracking.HasContent() {
+		return ValidateGeneratedPlanTrackingModelContent(response.PlanTracking)
 	}
 
 	return ValidateQuizQuestion(response.Question)

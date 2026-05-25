@@ -258,7 +258,7 @@ func (a OpenAIQuizModelAdapter) httpClient(request QuizModelRequest) *http.Clien
 
 func openAIQuizModelTimeout(action QuizModelAction) time.Duration {
 	switch action {
-	case QuizModelActionGenerateSpec, QuizModelActionGeneratePlan:
+	case QuizModelActionGenerateSpec, QuizModelActionGeneratePlan, QuizModelActionMaterializePlanTracking:
 		return defaultOpenAIGenerationTimeout
 	default:
 		return defaultOpenAIQuizTimeout
@@ -311,6 +311,8 @@ func quizModelResponseFromOutput(request QuizModelRequest, output []byte) (QuizM
 		return quizModelDraftSpecResponseFromOutput(request, output)
 	case QuizModelActionGeneratePlan:
 		return quizModelPlanResponseFromOutput(request, output)
+	case QuizModelActionMaterializePlanTracking:
+		return quizModelPlanTrackingResponseFromOutput(request, output)
 	default:
 		return QuizModelResponse{}, fmt.Errorf("quiz model action is unsupported: %s", request.Action)
 	}
@@ -409,6 +411,47 @@ func quizModelPlanResponseFromOutput(
 			Scope:     request.Scope,
 			Title:     payload.Title,
 			Body:      payload.Body,
+			CreatedAt: request.CreatedAt.UTC(),
+		},
+		RawText:   string(output),
+		CreatedAt: request.CreatedAt.UTC(),
+	}, nil
+}
+
+func quizModelPlanTrackingResponseFromOutput(
+	request QuizModelRequest,
+	output []byte,
+) (QuizModelResponse, error) {
+	payload, err := DecodeQuizModelPlanTrackingPayload(extractJSONObject(output))
+	if err != nil {
+		return QuizModelResponse{}, err
+	}
+
+	tickets := make([]GeneratedPlanTrackingTicket, 0, len(payload.Tickets))
+	for _, ticket := range payload.Tickets {
+		tickets = append(tickets, GeneratedPlanTrackingTicket{
+			SliceID:      ticket.SliceID,
+			Title:        ticket.Title,
+			Summary:      ticket.Summary,
+			Body:         ticket.Body,
+			Priority:     ticket.Priority,
+			Severity:     ticket.Severity,
+			Type:         ticket.Type,
+			Tags:         ticket.Tags,
+			Dependencies: ticket.Dependencies,
+		})
+	}
+
+	return QuizModelResponse{
+		ID:        quizModelResponseID(request),
+		RequestID: request.ID,
+		Provider:  QuizModelProviderOpenAI,
+		Status:    QuizModelResponseReady,
+		PlanTracking: GeneratedPlanTracking{
+			Scope:     request.Scope,
+			Title:     payload.Title,
+			Body:      payload.Body,
+			Tickets:   tickets,
 			CreatedAt: request.CreatedAt.UTC(),
 		},
 		RawText:   string(output),
@@ -637,6 +680,8 @@ func quizModelRecentTopicStreak(entries []QuizModelEntryPayload) map[string]any 
 
 func quizModelInstructions(request QuizModelRequest) string {
 	switch {
+	case request.Action == QuizModelActionMaterializePlanTracking:
+		return quizModelPlanTrackingInstructions()
 	case request.Action == QuizModelActionGeneratePlan:
 		return quizModelPlanGenerationInstructions()
 	case request.Action == QuizModelActionGenerateSpec:
@@ -682,6 +727,23 @@ If the next step needs semantic interpretation that is not explicit in the provi
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
 `, QuizModelFastBatchSize))
+}
+
+func quizModelPlanTrackingInstructions() string {
+	return strings.TrimSpace(`
+You materialize execution tracking artifacts from an existing implementation plan.
+Use the structured request payload and context sections as the sole source of truth.
+Do not execute work, do not create branches, do not open pull requests, and do not claim implementation progress.
+Transform the plan into a tracking Markdown body and one ticket payload per implementation slice.
+The tracking body is an execution index: ordered slice list, dependencies, recommended ticket order, expected branch/PR references, and initial status.
+Tickets are the detailed execution units and must be ready for later implementation work.
+Each ticket must correspond to exactly one slice from the plan.
+Each ticket body must include: objective, tasks, dependencies, acceptance criteria, validation expectations, and references to the source plan/tracking.
+Keep the content deterministic, concise, implementation-oriented, and review-friendly.
+Do not duplicate implementation progress or invent completed work.
+Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
+Return only the JSON object required by the response schema.
+`)
 }
 
 func quizModelPlanGenerationInstructions() string {
@@ -769,6 +831,14 @@ Return only the JSON object required by the response schema.
 
 func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 	switch {
+	case request.Action == QuizModelActionMaterializePlanTracking:
+		return openAIResponsesTextFormat{
+			Type:        "json_schema",
+			Name:        "plan_tracking_artifacts",
+			Description: "Plan tracking and ticket payloads derived from an existing implementation plan.",
+			Strict:      true,
+			Schema:      quizModelPlanTrackingJSONSchema(),
+		}
 	case request.Action == QuizModelActionGeneratePlan:
 		return openAIResponsesTextFormat{
 			Type:        "json_schema",
@@ -809,6 +879,80 @@ func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 			Strict:      true,
 			Schema:      quizModelQuestionJSONSchema(),
 		}
+	}
+}
+
+func quizModelPlanTrackingJSONSchema() map[string]any {
+	ticketSchema := map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required": []string{
+			"slice_id",
+			"title",
+			"summary",
+			"body",
+			"priority",
+			"severity",
+			"type",
+			"tags",
+			"dependencies",
+		},
+		"properties": map[string]any{
+			"slice_id": map[string]any{"type": "string"},
+			"title":    map[string]any{"type": "string"},
+			"summary":  map[string]any{"type": "string"},
+			"body": map[string]any{
+				"type":        "string",
+				"description": "Markdown ticket body without front matter.",
+			},
+			"priority": map[string]any{
+				"type": "string",
+				"enum": []string{"low", "normal", "high", "critical"},
+			},
+			"severity": map[string]any{
+				"type": "string",
+				"enum": []string{"low", "normal", "high", "critical"},
+			},
+			"type": map[string]any{
+				"type": "string",
+				"enum": []string{"task", "bug", "feature", "cleanup", "research", "docs"},
+			},
+			"tags": map[string]any{
+				"type": "array",
+				"items": map[string]any{
+					"type": "string",
+				},
+			},
+			"dependencies": map[string]any{
+				"type": "array",
+				"items": map[string]any{
+					"type": "string",
+				},
+			},
+		},
+	}
+
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"title", "body", "status", "tickets"},
+		"properties": map[string]any{
+			"title": map[string]any{"type": "string"},
+			"body": map[string]any{
+				"type":        "string",
+				"description": "Markdown tracking body without front matter.",
+			},
+			"status": map[string]any{
+				"type": "string",
+				"enum": []string{"tracking"},
+			},
+			"tickets": map[string]any{
+				"type":     "array",
+				"minItems": 1,
+				"maxItems": 12,
+				"items":    ticketSchema,
+			},
+		},
 	}
 }
 

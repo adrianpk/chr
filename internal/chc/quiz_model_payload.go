@@ -90,6 +90,25 @@ type QuizModelPlanPayload struct {
 	Status string `json:"status"`
 }
 
+type QuizModelPlanTrackingPayload struct {
+	Title   string                               `json:"title"`
+	Body    string                               `json:"body"`
+	Status  string                               `json:"status"`
+	Tickets []QuizModelPlanTrackingTicketPayload `json:"tickets"`
+}
+
+type QuizModelPlanTrackingTicketPayload struct {
+	SliceID      string   `json:"slice_id"`
+	Title        string   `json:"title"`
+	Summary      string   `json:"summary"`
+	Body         string   `json:"body"`
+	Priority     string   `json:"priority"`
+	Severity     string   `json:"severity"`
+	Type         string   `json:"type"`
+	Tags         []string `json:"tags"`
+	Dependencies []string `json:"dependencies"`
+}
+
 type QuizModelPromptIntentPayload struct {
 	Kind               string         `json:"kind"`
 	Controls           []string       `json:"controls"`
@@ -103,6 +122,13 @@ func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModel
 	if action == QuizModelActionDraftSpec || action == QuizModelActionGenerateSpec || action == QuizModelActionGeneratePlan {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    []string{"title", "body", "status"},
+			RenderedTextField: "body",
+		}
+	}
+
+	if action == QuizModelActionMaterializePlanTracking {
+		return QuizModelOutputContractPayload{
+			RequiredFields:    []string{"title", "body", "status", "tickets"},
 			RenderedTextField: "body",
 		}
 	}
@@ -220,6 +246,27 @@ func DecodeQuizModelPlanPayload(content []byte) (QuizModelPlanPayload, error) {
 	return ValidateQuizModelPlanPayload(payload)
 }
 
+func DecodeQuizModelPlanTrackingPayload(content []byte) (QuizModelPlanTrackingPayload, error) {
+	fields, err := quizModelRawJSONFields(content)
+	if err != nil {
+		return QuizModelPlanTrackingPayload{}, err
+	}
+
+	err = validateQuizModelExactFields(fields, []string{"title", "body", "status", "tickets"})
+	if err != nil {
+		return QuizModelPlanTrackingPayload{}, err
+	}
+
+	var payload QuizModelPlanTrackingPayload
+
+	err = decodeStrictQuizModelJSON(content, &payload)
+	if err != nil {
+		return QuizModelPlanTrackingPayload{}, err
+	}
+
+	return ValidateQuizModelPlanTrackingPayload(payload)
+}
+
 func ValidateQuizModelFastQuestionPayload(payload QuizModelFastQuestionPayload) (QuizModelFastQuestionPayload, error) {
 	if len(payload.Questions) == 0 {
 		return QuizModelFastQuestionPayload{}, fmt.Errorf("quiz model fast response questions must be an array with at least one question")
@@ -280,6 +327,117 @@ func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPa
 	}
 
 	return normalized, nil
+}
+
+func ValidateQuizModelPlanTrackingPayload(
+	payload QuizModelPlanTrackingPayload,
+) (QuizModelPlanTrackingPayload, error) {
+	normalized := QuizModelPlanTrackingPayload{
+		Title:  strings.TrimSpace(payload.Title),
+		Body:   strings.TrimSpace(payload.Body),
+		Status: strings.TrimSpace(payload.Status),
+	}
+
+	if normalized.Title == "" {
+		return QuizModelPlanTrackingPayload{}, fmt.Errorf("plan tracking title is required")
+	}
+
+	if normalized.Body == "" {
+		return QuizModelPlanTrackingPayload{}, fmt.Errorf("plan tracking body is required")
+	}
+
+	if normalized.Status != "tracking" {
+		return QuizModelPlanTrackingPayload{}, fmt.Errorf("plan tracking status must be tracking")
+	}
+
+	if len(payload.Tickets) == 0 {
+		return QuizModelPlanTrackingPayload{}, fmt.Errorf("plan tracking tickets are required")
+	}
+
+	normalized.Tickets = make([]QuizModelPlanTrackingTicketPayload, 0, len(payload.Tickets))
+	for index, ticket := range payload.Tickets {
+		normalizedTicket, err := ValidateQuizModelPlanTrackingTicketPayload(ticket)
+		if err != nil {
+			return QuizModelPlanTrackingPayload{}, fmt.Errorf("plan tracking ticket %d: %w", index+1, err)
+		}
+
+		normalized.Tickets = append(normalized.Tickets, normalizedTicket)
+	}
+
+	return normalized, nil
+}
+
+func ValidateQuizModelPlanTrackingTicketPayload(
+	payload QuizModelPlanTrackingTicketPayload,
+) (QuizModelPlanTrackingTicketPayload, error) {
+	normalized := QuizModelPlanTrackingTicketPayload{
+		SliceID:      strings.TrimSpace(payload.SliceID),
+		Title:        strings.TrimSpace(payload.Title),
+		Summary:      strings.TrimSpace(payload.Summary),
+		Body:         strings.TrimSpace(payload.Body),
+		Priority:     normalizePlanTrackingPriority(payload.Priority),
+		Severity:     normalizePlanTrackingSeverity(payload.Severity),
+		Type:         normalizePlanTrackingType(payload.Type),
+		Tags:         normalizeQuizModelTags(payload.Tags),
+		Dependencies: normalizePlanTrackingDependencies(payload.Dependencies),
+	}
+
+	if normalized.SliceID == "" {
+		return QuizModelPlanTrackingTicketPayload{}, fmt.Errorf("slice id is required")
+	}
+
+	if normalized.Title == "" {
+		return QuizModelPlanTrackingTicketPayload{}, fmt.Errorf("ticket title is required")
+	}
+
+	if normalized.Summary == "" {
+		return QuizModelPlanTrackingTicketPayload{}, fmt.Errorf("ticket summary is required")
+	}
+
+	if normalized.Body == "" {
+		return QuizModelPlanTrackingTicketPayload{}, fmt.Errorf("ticket body is required")
+	}
+
+	return normalized, nil
+}
+
+func normalizePlanTrackingPriority(priority string) string {
+	switch strings.TrimSpace(priority) {
+	case "low", "normal", "high", "critical":
+		return strings.TrimSpace(priority)
+	default:
+		return "normal"
+	}
+}
+
+func normalizePlanTrackingSeverity(severity string) string {
+	switch strings.TrimSpace(severity) {
+	case "low", "normal", "high", "critical":
+		return strings.TrimSpace(severity)
+	default:
+		return "normal"
+	}
+}
+
+func normalizePlanTrackingType(ticketType string) string {
+	switch strings.TrimSpace(ticketType) {
+	case "task", "bug", "feature", "cleanup", "research", "docs":
+		return strings.TrimSpace(ticketType)
+	default:
+		return "task"
+	}
+}
+
+func normalizePlanTrackingDependencies(dependencies []string) []string {
+	normalized := []string{}
+	for _, dependency := range dependencies {
+		dependency = strings.TrimSpace(dependency)
+		if dependency != "" {
+			normalized = append(normalized, dependency)
+		}
+	}
+
+	return normalized
 }
 
 func NewQuizModelPromptIntent(payload QuizModelQuestionPayload, routingState map[string]any) QuizModelPromptIntentPayload {

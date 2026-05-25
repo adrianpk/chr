@@ -5,14 +5,17 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+
+	"forge.adrianpk.com/chc/internal/chc"
 )
 
 type PlanActionID string
 
 const (
-	PlanActionGenerate   PlanActionID = "generate_missing_plan"
-	PlanActionRegenerate PlanActionID = "regenerate_plan"
-	PlanActionRefresh    PlanActionID = "refresh_plans"
+	PlanActionGenerate            PlanActionID = "generate_missing_plan"
+	PlanActionRegenerate          PlanActionID = "regenerate_plan"
+	PlanActionRefresh             PlanActionID = "refresh_plans"
+	PlanActionMaterializeTracking PlanActionID = "materialize_plan_tracking"
 )
 
 type PlanActionExecutor interface {
@@ -28,6 +31,7 @@ type PlanActionResult struct {
 	Message   string
 	Documents []DocumentView
 	Plans     []PlanView
+	Tickets   []chc.IndexedTicket
 	Scope     QuizScope
 }
 
@@ -77,6 +81,16 @@ func (m Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case "G":
 		m.planPlanAction(PlanActionRegenerate)
+
+		return m, nil
+	case "alt+t":
+		if !m.selectedPlanCanMaterializeTracking() {
+			m.statusMessage = "Plan tracking requires an existing plan."
+
+			return m, nil
+		}
+
+		m.planPlanAction(PlanActionMaterializeTracking)
 
 		return m, nil
 	case "r":
@@ -213,6 +227,11 @@ func (m *Model) applyPlanActionResult(result PlanActionResult) {
 		m.selectPlanByScope(result.Scope)
 	}
 
+	if result.Tickets != nil {
+		m.tickets = NewTicketViews(result.Tickets)
+		m.selectFirstFilteredTicket()
+	}
+
 	m.statusMessage = result.Message
 }
 
@@ -224,6 +243,8 @@ func planActionTitle(action PlanActionID) string {
 		return "Regenerate plan"
 	case PlanActionRefresh:
 		return "Refresh plans"
+	case PlanActionMaterializeTracking:
+		return "Create plan tracking"
 	default:
 		return "Plan action"
 	}
@@ -231,7 +252,7 @@ func planActionTitle(action PlanActionID) string {
 
 func planActionChangesContent(action PlanActionID) bool {
 	switch action {
-	case PlanActionGenerate, PlanActionRegenerate:
+	case PlanActionGenerate, PlanActionRegenerate, PlanActionMaterializeTracking:
 		return true
 	default:
 		return false
@@ -246,6 +267,8 @@ func planBusyMessage(request PlanActionRequest) string {
 		return "Regenerating plan..."
 	case PlanActionRefresh:
 		return "Refreshing plans..."
+	case PlanActionMaterializeTracking:
+		return "Creating plan tracking..."
 	default:
 		return "Running plan action..."
 	}

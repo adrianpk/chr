@@ -101,7 +101,22 @@ func (m Model) renderPlans() string {
 }
 
 func (m Model) planActionHint() string {
+	if m.selectedPlanCanMaterializeTracking() {
+		return "g generate missing  G regenerate  alt+t tracking  r refresh"
+	}
+
 	return "g generate missing  G regenerate  r refresh"
+}
+
+func (m Model) selectedPlanCanMaterializeTracking() bool {
+	plan, ok := m.selectedPlanView()
+	if !ok {
+		return false
+	}
+
+	return strings.TrimSpace(plan.RelativePath) != "" &&
+		strings.TrimSpace(plan.Content) != "" &&
+		plan.Status != "missing"
 }
 
 func (m Model) selectedPlanView() (PlanView, bool) {
