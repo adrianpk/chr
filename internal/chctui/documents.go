@@ -257,8 +257,6 @@ func (m Model) currentDocumentViews() []DocumentView {
 		return m.documentsByFamily(map[string]bool{"quiz": true})
 	case ViewSpecs:
 		return m.documentsByFamily(map[string]bool{"spec": true})
-	case ViewPlans:
-		return m.documentsByFamily(map[string]bool{"plan": true, "tracker": true})
 	default:
 		return append([]DocumentView(nil), m.documents...)
 	}

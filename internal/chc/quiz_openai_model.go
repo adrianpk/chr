@@ -154,7 +154,9 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 		"output_contract":  request.Payload.OutputContract,
 	}
 
-	if (request.Action == QuizModelActionDraftSpec || request.Action == QuizModelActionGenerateSpec) &&
+	if (request.Action == QuizModelActionDraftSpec ||
+		request.Action == QuizModelActionGenerateSpec ||
+		request.Action == QuizModelActionGeneratePlan) &&
 		len(request.ContextSections) > 0 {
 		payload["context_sections"] = quizModelProviderContextSections(request.ContextSections)
 	}
@@ -293,6 +295,8 @@ func quizModelResponseFromOutput(request QuizModelRequest, output []byte) (QuizM
 		return quizModelQuestionResponseFromOutput(request, output)
 	case QuizModelActionDraftSpec, QuizModelActionGenerateSpec:
 		return quizModelDraftSpecResponseFromOutput(request, output)
+	case QuizModelActionGeneratePlan:
+		return quizModelPlanResponseFromOutput(request, output)
 	default:
 		return QuizModelResponse{}, fmt.Errorf("quiz model action is unsupported: %s", request.Action)
 	}
@@ -363,6 +367,31 @@ func quizModelDraftSpecResponseFromOutput(
 		Provider:  QuizModelProviderOpenAI,
 		Status:    QuizModelResponseReady,
 		DraftSpec: QuizDraftSpec{
+			Scope:     request.Scope,
+			Title:     payload.Title,
+			Body:      payload.Body,
+			CreatedAt: request.CreatedAt.UTC(),
+		},
+		RawText:   string(output),
+		CreatedAt: request.CreatedAt.UTC(),
+	}, nil
+}
+
+func quizModelPlanResponseFromOutput(
+	request QuizModelRequest,
+	output []byte,
+) (QuizModelResponse, error) {
+	payload, err := DecodeQuizModelPlanPayload(extractJSONObject(output))
+	if err != nil {
+		return QuizModelResponse{}, err
+	}
+
+	return QuizModelResponse{
+		ID:        quizModelResponseID(request),
+		RequestID: request.ID,
+		Provider:  QuizModelProviderOpenAI,
+		Status:    QuizModelResponseReady,
+		Plan: GeneratedPlan{
 			Scope:     request.Scope,
 			Title:     payload.Title,
 			Body:      payload.Body,
@@ -594,6 +623,8 @@ func quizModelRecentTopicStreak(entries []QuizModelEntryPayload) map[string]any 
 
 func quizModelInstructions(request QuizModelRequest) string {
 	switch {
+	case request.Action == QuizModelActionGeneratePlan:
+		return quizModelPlanGenerationInstructions()
 	case request.Action == QuizModelActionGenerateSpec:
 		return quizModelSpecGenerationInstructions()
 	case request.Action == QuizModelActionDraftSpec:
@@ -639,6 +670,65 @@ Return only the JSON object required by the response schema.
 `, QuizModelFastBatchSize))
 }
 
+func quizModelPlanGenerationInstructions() string {
+	return strings.TrimSpace(`
+You generate an implementation plan for the selected project or use case.
+Use the structured request payload and all context sections as the sole source of truth.
+Synthesize project metadata, project-wide context, use-case metadata, use-case context, dumps, quizzes, existing specs, and related plans before planning.
+Do not simply summarize specs. Derive executable implementation work from the available material.
+When project_wide_planning_baseline is present, treat it as binding deterministic evidence about the repository state.
+When project_wide_planning_readiness is present, obey its plan_kind, status, blocking_slots, and generation_guidance.
+If plan_kind is project_gap_plan, generate gap-closure slices for the existing codebase; do not propose greenfield scaffolding, go.mod creation, Makefile creation, command creation, storage creation, export creation, or tests that the baseline shows already exist unless the slice explicitly changes or hardens the existing implementation.
+If plan_kind is project_setup_plan, generate setup slices suitable for an empty or near-empty Go workspace.
+If status is partial, still generate a plan, but mark it as provisional, include a Current Implementation Baseline section, and list assumptions and unresolved slots before the slice decomposition.
+For project-wide plans, always include a Current Implementation Baseline section before the implementation strategy.
+For project-wide plans, always include an Assumptions and Low-Confidence Items section when any slot is unresolved or inferred.
+
+The plan is not a roadmap, milestone list, brainstorm, or architecture essay.
+The plan is an executable implementation decomposition, sequencing mechanism, reviewable execution strategy, and bridge from specs to tickets.
+
+Generate a deterministic Markdown body with these sections:
+- High-level implementation strategy
+- Slice decomposition
+- Slice ordering
+- Slice dependency analysis
+- Tasks inside slices
+- Ticket generation data
+- Branch strategy
+- Pull request strategy
+- Merge sequencing
+- Review requirements
+- Completion validation criteria
+
+Each slice must include:
+- slice identifier
+- title
+- objective
+- implementation rationale
+- dependencies
+- implementation notes
+- acceptance criteria
+- estimated execution complexity
+- associated tasks
+- ticket metadata
+- branch metadata
+- PR expectations
+
+Tasks must be implementation-oriented and should generally map to one Conventional Commit.
+Each slice must map to one ticket, one branch, one pull request, one review cycle, and one merge cycle.
+Default to sequential slices unless isolated slices are truly parallelizable.
+Assume the integration branch is dev unless context says otherwise.
+Use deterministic branch names shaped like feature/<use-case>/<slice-id>-<short-name>.
+Aim for 4 to 8 slices for normal work and up to 12 for large manageable work.
+If more than 12 slices are needed, explicitly flag the use case as unusually large, explain why, and suggest smaller use cases or phases.
+Optimize for incremental delivery, low review complexity, isolated change sets, predictable merge flow, agent execution compatibility, traceability, and resumability.
+Avoid motivational language, filler, vague abstractions, generic agile terminology, fake precision, unnecessary infrastructure, and unrelated work.
+Set status to planned.
+Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
+Return only the JSON object required by the response schema.
+`)
+}
+
 func quizModelSpecGenerationInstructions() string {
 	return strings.TrimSpace(`
 You generate a formal specification for the selected project or use case.
@@ -665,6 +755,14 @@ Return only the JSON object required by the response schema.
 
 func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 	switch {
+	case request.Action == QuizModelActionGeneratePlan:
+		return openAIResponsesTextFormat{
+			Type:        "json_schema",
+			Name:        "generated_plan",
+			Description: "Implementation plan generated from project and use-case context.",
+			Strict:      true,
+			Schema:      quizModelPlanJSONSchema(),
+		}
 	case request.Action == QuizModelActionGenerateSpec:
 		return openAIResponsesTextFormat{
 			Type:        "json_schema",
@@ -760,6 +858,27 @@ func quizModelDraftSpecJSONSchema() map[string]any {
 			"status": map[string]any{
 				"type": "string",
 				"enum": []string{"draft"},
+			},
+		},
+	}
+}
+
+func quizModelPlanJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"title", "body", "status"},
+		"properties": map[string]any{
+			"title": map[string]any{
+				"type": "string",
+			},
+			"body": map[string]any{
+				"type":        "string",
+				"description": "Markdown implementation plan body without front matter.",
+			},
+			"status": map[string]any{
+				"type": "string",
+				"enum": []string{"planned"},
 			},
 		},
 	}

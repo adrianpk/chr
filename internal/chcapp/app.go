@@ -174,11 +174,17 @@ func loadTUIContentData(data *tuiOptionsData) error {
 		return err
 	}
 
+	plans, err := loadTUIPlans(data.operations)
+	if err != nil {
+		return err
+	}
+
 	data.tickets = tickets
 	data.documents = documents
 	data.dumps = dumps
 	data.quizzes = quizzes
 	data.specs = specs
+	data.plans = plans
 
 	return nil
 }
@@ -257,6 +263,7 @@ type tuiOptionsData struct {
 	dumps                []chctui.DumpView
 	quizzes              []chctui.QuizView
 	specs                []chctui.SpecView
+	plans                []chctui.PlanView
 	projectMetadata      chc.ProjectMetadata
 	cases                []chc.CaseMetadata
 	authoringSessions    []chc.AuthoringSession
@@ -280,6 +287,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		Dumps:                data.dumps,
 		Quizzes:              data.quizzes,
 		Specs:                data.specs,
+		Plans:                data.plans,
 		AuthoringSessions:    data.authoringSessions,
 		Observability:        data.observability,
 		WorkspaceGraph:       data.workspaceGraph,
@@ -289,6 +297,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		DumpExecutor:         newTUIDumpActionExecutor(data.operations),
 		QuizExecutor:         newTUIQuizActionExecutor(data.operations),
 		SpecExecutor:         newTUISpecActionExecutor(data.operations),
+		PlanExecutor:         newTUIPlanActionExecutor(data.operations),
 		TicketExecutor:       newTUITicketActionExecutor(data.operations),
 		WorkExecutor:         newTUIWorkActionExecutor(data.operations),
 		WorkspaceExecutor:    newTUIWorkspaceRefreshExecutor(data.operations),

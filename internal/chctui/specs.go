@@ -53,8 +53,17 @@ func (m Model) renderSelectedSpecDetailLines(width int) []string {
 
 	if strings.TrimSpace(spec.Content) == "" {
 		lines = append(lines, "", "No generated spec found for this use case.")
+		if m.specBusy {
+			lines = append(lines, "", "Working...")
+			lines = append(lines, "  "+m.statusMessage)
+		}
 
 		return lines
+	}
+
+	if m.specBusy {
+		lines = append(lines, "", "Working...")
+		lines = append(lines, "  "+m.statusMessage)
 	}
 
 	lines = append(lines, "")

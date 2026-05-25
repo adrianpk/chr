@@ -37,6 +37,12 @@ type SpecActionState struct {
 	Details []string
 }
 
+type specActionFinishedMsg struct {
+	Request SpecActionRequest
+	Result  SpecActionResult
+	Err     error
+}
+
 func (m Model) renderSpecAction() string {
 	if !m.specAction.Pending {
 		return ""
@@ -59,13 +65,19 @@ func (m Model) renderSpecAction() string {
 func (m Model) updateSpecsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "g":
-		m.planSpecAction(SpecActionGenerate)
+		cmd := m.startSpecAction(SpecActionRequest{
+			Action: SpecActionGenerate,
+			Scope:  m.selectedSpecScope(),
+		})
 
-		return m, m.confirmSpecAction()
+		return m, cmd
 	case "r":
-		m.planSpecAction(SpecActionRefresh)
+		cmd := m.startSpecAction(SpecActionRequest{
+			Action: SpecActionRefresh,
+			Scope:  m.selectedSpecScope(),
+		})
 
-		return m, m.confirmSpecAction()
+		return m, cmd
 	case "esc":
 		m.selectPrimaryPane()
 	default:
@@ -117,19 +129,52 @@ func (m *Model) confirmSpecAction() tea.Cmd {
 	request := m.specAction.Request
 	m.specAction = SpecActionState{}
 
+	return m.startSpecAction(request)
+}
+
+func (m Model) executeSpecActionCommand(request SpecActionRequest) tea.Cmd {
+	executor := m.specExecutor
+
+	return func() tea.Msg {
+		if executor == nil {
+			return specActionFinishedMsg{
+				Request: request,
+				Err:     fmt.Errorf("spec action executor is unavailable"),
+			}
+		}
+
+		result, err := executor.ExecuteSpecAction(request)
+
+		return specActionFinishedMsg{Request: request, Result: result, Err: err}
+	}
+}
+
+func (m *Model) startSpecAction(request SpecActionRequest) tea.Cmd {
 	if m.specExecutor == nil {
 		m.statusMessage = "Spec action executor is unavailable."
 
 		return nil
 	}
 
-	result, err := m.specExecutor.ExecuteSpecAction(request)
-	if err != nil {
-		m.statusMessage = "Spec action failed: " + err.Error()
+	m.specBusy = true
+	m.statusMessage = specBusyMessage(request)
 
-		return nil
+	return m.executeSpecActionCommand(request)
+}
+
+func (m *Model) completeSpecAction(message specActionFinishedMsg) {
+	m.specBusy = false
+
+	if message.Err != nil {
+		m.statusMessage = "Spec action failed: " + message.Err.Error()
+
+		return
 	}
 
+	m.applySpecActionResult(message.Result)
+}
+
+func (m *Model) applySpecActionResult(result SpecActionResult) {
 	if result.Documents != nil {
 		m.documents = append([]DocumentView(nil), result.Documents...)
 		m.selectedDocument = 0
@@ -141,8 +186,6 @@ func (m *Model) confirmSpecAction() tea.Cmd {
 	}
 
 	m.statusMessage = result.Message
-
-	return nil
 }
 
 func specActionTitle(action SpecActionID) string {
@@ -153,5 +196,16 @@ func specActionTitle(action SpecActionID) string {
 		return "Refresh specs"
 	default:
 		return "Spec action"
+	}
+}
+
+func specBusyMessage(request SpecActionRequest) string {
+	switch request.Action {
+	case SpecActionGenerate:
+		return "Generating spec..."
+	case SpecActionRefresh:
+		return "Refreshing specs..."
+	default:
+		return "Running spec action..."
 	}
 }

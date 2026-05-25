@@ -84,6 +84,12 @@ type QuizModelDraftSpecPayload struct {
 	Status string `json:"status"`
 }
 
+type QuizModelPlanPayload struct {
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+	Status string `json:"status"`
+}
+
 type QuizModelPromptIntentPayload struct {
 	Kind               string         `json:"kind"`
 	Controls           []string       `json:"controls"`
@@ -94,7 +100,7 @@ type QuizModelPromptIntentPayload struct {
 }
 
 func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModelOutputContractPayload {
-	if action == QuizModelActionDraftSpec || action == QuizModelActionGenerateSpec {
+	if action == QuizModelActionDraftSpec || action == QuizModelActionGenerateSpec || action == QuizModelActionGeneratePlan {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    []string{"title", "body", "status"},
 			RenderedTextField: "body",
@@ -193,6 +199,27 @@ func DecodeQuizModelDraftSpecPayload(content []byte) (QuizModelDraftSpecPayload,
 	return ValidateQuizModelDraftSpecPayload(payload)
 }
 
+func DecodeQuizModelPlanPayload(content []byte) (QuizModelPlanPayload, error) {
+	fields, err := quizModelRawJSONFields(content)
+	if err != nil {
+		return QuizModelPlanPayload{}, err
+	}
+
+	err = validateQuizModelExactFields(fields, []string{"title", "body", "status"})
+	if err != nil {
+		return QuizModelPlanPayload{}, err
+	}
+
+	var payload QuizModelPlanPayload
+
+	err = decodeStrictQuizModelJSON(content, &payload)
+	if err != nil {
+		return QuizModelPlanPayload{}, err
+	}
+
+	return ValidateQuizModelPlanPayload(payload)
+}
+
 func ValidateQuizModelFastQuestionPayload(payload QuizModelFastQuestionPayload) (QuizModelFastQuestionPayload, error) {
 	if len(payload.Questions) == 0 {
 		return QuizModelFastQuestionPayload{}, fmt.Errorf("quiz model fast response questions must be an array with at least one question")
@@ -228,6 +255,28 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 
 	if normalized.Status != "draft" {
 		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec status must be draft")
+	}
+
+	return normalized, nil
+}
+
+func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPayload, error) {
+	normalized := QuizModelPlanPayload{
+		Title:  strings.TrimSpace(payload.Title),
+		Body:   strings.TrimSpace(payload.Body),
+		Status: strings.TrimSpace(payload.Status),
+	}
+
+	if normalized.Title == "" {
+		return QuizModelPlanPayload{}, fmt.Errorf("generated plan title is required")
+	}
+
+	if normalized.Body == "" {
+		return QuizModelPlanPayload{}, fmt.Errorf("generated plan body is required")
+	}
+
+	if normalized.Status != "planned" {
+		return QuizModelPlanPayload{}, fmt.Errorf("generated plan status must be planned")
 	}
 
 	return normalized, nil

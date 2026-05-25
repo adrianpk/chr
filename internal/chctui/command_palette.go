@@ -18,6 +18,7 @@ const (
 	CommandActionPlanDump           CommandAction = "plan_dump"
 	CommandActionPlanQuiz           CommandAction = "plan_quiz"
 	CommandActionPlanSpec           CommandAction = "plan_spec"
+	CommandActionPlanPlan           CommandAction = "plan_plan"
 	CommandActionPlanTicket         CommandAction = "plan_ticket"
 	CommandActionPlanWork           CommandAction = "plan_work"
 )
@@ -32,6 +33,7 @@ type Command struct {
 	Dump        DumpActionID
 	Quiz        QuizActionID
 	Spec        SpecActionID
+	Plan        PlanActionID
 	Ticket      TicketActionID
 	Status      string
 	Work        WorkActionID
@@ -69,6 +71,8 @@ func DefaultCommandRegistry() []Command {
 		{ID: "quiz-mode-fast", Title: "Switch quiz to fast mode", Description: "Use fast candidate generation for the selected quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionFastMode},
 		{ID: "generate-spec", Title: "Generate spec", Description: "Generate a draft spec from available project and use-case context.", Action: CommandActionPlanSpec, Spec: SpecActionGenerate},
 		{ID: "refresh-specs", Title: "Refresh specs", Description: "Reload scoped specs.", Action: CommandActionPlanSpec, Spec: SpecActionRefresh},
+		{ID: "generate-plan", Title: "Generate plan", Description: "Generate an implementation plan from available project and use-case context.", Action: CommandActionPlanPlan, Plan: PlanActionGenerate},
+		{ID: "refresh-plans", Title: "Refresh plans", Description: "Reload scoped plans.", Action: CommandActionPlanPlan, Plan: PlanActionRefresh},
 		{ID: "create-authoring-session", Title: "Create authoring session", Description: "Create a spec-oriented authoring session after confirmation.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateAuthoringSession},
 		{ID: "create-context-quiz", Title: "Create context-aware quiz", Description: "Plan a context-aware quiz creation action.", Action: CommandActionPlanArtifact, Artifact: ArtifactActionCreateContextQuiz},
 		{ID: "ticket-add-comment", Title: "Add ticket comment", Description: "Add a standard comment to the selected ticket after confirmation.", Action: CommandActionPlanTicket, Ticket: TicketActionAddComment},
@@ -238,6 +242,8 @@ func (m *Model) executeCommand(command Command) {
 		m.planQuizAction(command.Quiz)
 	case CommandActionPlanSpec:
 		m.planSpecAction(command.Spec)
+	case CommandActionPlanPlan:
+		m.planPlanAction(command.Plan)
 	case CommandActionPlanTicket:
 		m.planTicketAction(command.Ticket, command.Status)
 	case CommandActionPlanWork:
@@ -291,6 +297,10 @@ func (m Model) commandAvailableInCurrentView(command Command) bool {
 		return m.SelectedView() == ViewSpecs
 	}
 
+	if command.Action == CommandActionPlanPlan {
+		return m.SelectedView() == ViewPlans
+	}
+
 	return true
 }
 
@@ -328,7 +338,12 @@ func (m Model) selectedSourcePath() string {
 		if ok {
 			return spec.RelativePath
 		}
-	case ViewPlans, ViewDocuments:
+	case ViewPlans:
+		plan, ok := m.selectedPlanView()
+		if ok {
+			return plan.RelativePath
+		}
+	case ViewDocuments:
 		return m.selectedDocumentSourcePath()
 	case ViewAuthoring:
 		session, ok := m.selectedAuthoringSessionView()

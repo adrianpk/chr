@@ -787,6 +787,10 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 			return serviceQuizDraftSpecResponse("response-fallback", request.CreatedAt), nil
 		}
 
+		if request.Action == chc.QuizModelActionGeneratePlan {
+			return serviceQuizPlanResponse("response-fallback", request.CreatedAt), nil
+		}
+
 		return serviceQuizModelResponse("response-fallback", "question-fallback", request.CreatedAt), nil
 	}
 
@@ -869,6 +873,23 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) chc.Qu
 			CreatedAt:      createdAt,
 		},
 		RawText:   "raw draft spec",
+		CreatedAt: createdAt,
+	}
+}
+
+func serviceQuizPlanResponse(responseID string, createdAt time.Time) chc.QuizModelResponse {
+	return chc.QuizModelResponse{
+		ID:        responseID,
+		RequestID: "filled-by-fake",
+		Provider:  "fake",
+		Status:    chc.QuizModelResponseReady,
+		Plan: chc.GeneratedPlan{
+			Scope:     chc.QuizScope{ProjectID: "service-project"},
+			Title:     "Generated Implementation Plan",
+			Body:      "## Slice 01 - Foundation\n\n- Task: implement the planning foundation.\n",
+			CreatedAt: createdAt,
+		},
+		RawText:   "raw generated plan",
 		CreatedAt: createdAt,
 	}
 }

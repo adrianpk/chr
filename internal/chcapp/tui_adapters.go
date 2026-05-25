@@ -2,6 +2,7 @@ package chcapp
 
 import (
 	"errors"
+	"fmt"
 	"os/exec"
 
 	"forge.adrianpk.com/chc/internal/chc"
@@ -153,10 +154,22 @@ type tuiSpecActionExecutor struct {
 	operations service
 }
 
+type tuiPlanActionExecutor struct {
+	operations service
+}
+
 func newTUISpecActionExecutor(
 	operations service,
 ) tuiSpecActionExecutor {
 	return tuiSpecActionExecutor{
+		operations: operations,
+	}
+}
+
+func newTUIPlanActionExecutor(
+	operations service,
+) tuiPlanActionExecutor {
+	return tuiPlanActionExecutor{
 		operations: operations,
 	}
 }
@@ -196,6 +209,80 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 		Message:   message,
 		Documents: documents,
 		Specs:     specs,
+		Scope:     request.Scope,
+	}, nil
+}
+
+func (e tuiPlanActionExecutor) ExecutePlanAction(
+	request chctui.PlanActionRequest,
+) (chctui.PlanActionResult, error) {
+	e.operations.appendPlanGenerationLog("tui_plan_action_started", map[string]string{
+		"action":    string(request.Action),
+		"case_slug": request.Scope.CaseSlug,
+	})
+
+	switch request.Action {
+	case chctui.PlanActionGenerate:
+		_, err := e.operations.GeneratePlan(PlanGenerateRequest{
+			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		})
+		if err != nil {
+			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
+				"action":    string(request.Action),
+				"case_slug": request.Scope.CaseSlug,
+				"error":     err.Error(),
+			})
+
+			return chctui.PlanActionResult{}, err
+		}
+	case chctui.PlanActionRefresh:
+	default:
+		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
+			"action":    string(request.Action),
+			"case_slug": request.Scope.CaseSlug,
+			"error":     "unknown plan action",
+		})
+
+		return chctui.PlanActionResult{}, errors.New("unknown plan action")
+	}
+
+	documents, err := chctui.LoadDocumentViews(e.operations.ctx, e.operations.projectContext.ProjectDir)
+	if err != nil {
+		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
+			"action":    string(request.Action),
+			"case_slug": request.Scope.CaseSlug,
+			"error":     err.Error(),
+		})
+
+		return chctui.PlanActionResult{}, err
+	}
+
+	plans, err := loadTUIPlans(e.operations)
+	if err != nil {
+		e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
+			"action":    string(request.Action),
+			"case_slug": request.Scope.CaseSlug,
+			"error":     err.Error(),
+		})
+
+		return chctui.PlanActionResult{}, err
+	}
+
+	message := "Plans refreshed."
+	if request.Action == chctui.PlanActionGenerate {
+		message = "Plan generated."
+	}
+
+	e.operations.appendPlanGenerationLog("tui_plan_action_finished", map[string]string{
+		"action":     string(request.Action),
+		"case_slug":  request.Scope.CaseSlug,
+		"plan_count": fmt.Sprintf("%d", len(plans)),
+	})
+
+	return chctui.PlanActionResult{
+		Message:   message,
+		Documents: documents,
+		Plans:     plans,
 		Scope:     request.Scope,
 	}, nil
 }
@@ -324,6 +411,29 @@ func loadTUISpecs(operations service) ([]chctui.SpecView, error) {
 	}
 
 	return specs, nil
+}
+
+func loadTUIPlans(operations service) ([]chctui.PlanView, error) {
+	result, err := operations.ListPlans()
+	if err != nil {
+		return nil, err
+	}
+
+	plans := make([]chctui.PlanView, 0, len(result.Plans))
+	for index, plan := range result.Plans {
+		plans = append(plans, chctui.PlanView{
+			Index:        index,
+			UseCaseTitle: plan.UseCaseTitle,
+			Title:        plan.Title,
+			Status:       plan.Status,
+			Scope:        chctui.QuizScope{CaseSlug: plan.Scope.CaseSlug},
+			RelativePath: plan.RelativePath,
+			UpdatedAt:    plan.UpdatedAt,
+			Content:      plan.Content,
+		})
+	}
+
+	return plans, nil
 }
 
 type tuiDumpActionExecutor struct {

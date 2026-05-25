@@ -2758,12 +2758,23 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 	model.selected = 4
 	model.selectedSpec = 1
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
-	confirmed := requireUpdatedModel(t, updated)
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	busy := requireUpdatedModel(t, updated)
 
-	if confirmed.specAction.Pending {
+	if busy.specAction.Pending {
 		t.Fatal("spec action is pending, want direct execution")
 	}
+
+	if !busy.specBusy {
+		t.Fatal("spec action is not marked busy")
+	}
+
+	if busy.statusMessage != "Generating spec..." {
+		t.Fatalf("statusMessage = %q, want Generating spec...", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
 
 	if executor.request.Action != SpecActionGenerate {
 		t.Fatalf("executor action = %q, want %q", executor.request.Action, SpecActionGenerate)
@@ -2779,6 +2790,70 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 
 	if len(confirmed.documents) != 1 || confirmed.documents[0].Title != "Generated Spec" {
 		t.Fatalf("documents = %#v, want generated spec", confirmed.documents)
+	}
+}
+
+func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
+	executor := &fakePlanActionExecutor{
+		result: PlanActionResult{
+			Message: "Plan generated.",
+			Documents: []DocumentView{
+				{Family: "plan", Status: "planned", Title: "Generated Plan", RelativePath: ".chc/plans/blog-plan.md"},
+			},
+			Plans: []PlanView{
+				{UseCaseTitle: "Project", Title: "Project", Scope: QuizScope{}, Status: "missing"},
+				{UseCaseTitle: "Blog", Title: "Generated Plan", Scope: QuizScope{CaseSlug: "blog"}, Status: "planned"},
+			},
+			Scope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		PlanExecutor: executor,
+		Plans: []PlanView{
+			{Title: "Project", Scope: QuizScope{}, Status: "missing"},
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "missing"},
+		},
+	})
+	model.selected = 5
+	model.selectedPlan = 1
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	busy := requireUpdatedModel(t, updated)
+
+	if busy.planAction.Pending {
+		t.Fatal("plan action is pending, want direct execution")
+	}
+
+	if !busy.planBusy {
+		t.Fatal("plan action is not marked busy")
+	}
+
+	if busy.statusMessage != "Generating plan..." {
+		t.Fatalf("statusMessage = %q, want Generating plan...", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != PlanActionGenerate {
+		t.Fatalf("executor action = %q, want %q", executor.request.Action, PlanActionGenerate)
+	}
+
+	if executor.request.Scope.CaseSlug != "blog" {
+		t.Fatalf("scope = %q, want blog", executor.request.Scope.CaseSlug)
+	}
+
+	if confirmed.statusMessage != "Plan generated." {
+		t.Fatalf("statusMessage = %q, want Plan generated.", confirmed.statusMessage)
+	}
+
+	if len(confirmed.documents) != 1 || confirmed.documents[0].Title != "Generated Plan" {
+		t.Fatalf("documents = %#v, want generated plan", confirmed.documents)
+	}
+
+	plan, ok := confirmed.selectedPlanView()
+	if !ok || plan.Title != "Generated Plan" {
+		t.Fatalf("selected plan = %#v, want generated plan", plan)
 	}
 }
 
@@ -3160,6 +3235,18 @@ type fakeSpecActionExecutor struct {
 }
 
 func (e *fakeSpecActionExecutor) ExecuteSpecAction(request SpecActionRequest) (SpecActionResult, error) {
+	e.request = request
+
+	return e.result, e.err
+}
+
+type fakePlanActionExecutor struct {
+	request PlanActionRequest
+	result  PlanActionResult
+	err     error
+}
+
+func (e *fakePlanActionExecutor) ExecutePlanAction(request PlanActionRequest) (PlanActionResult, error) {
 	e.request = request
 
 	return e.result, e.err
