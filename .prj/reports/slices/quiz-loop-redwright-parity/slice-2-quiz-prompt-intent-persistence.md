@@ -1,11 +1,11 @@
 # Slice 2: Quiz Prompt Intent Persistence
 
-Status: reviewing
+Status: delivered
 Slicing: Quiz Loop RedWright Parity
 Plan: `.prj/plans/slicing-quiz-loop-redwright-parity-plan.md`
 Tracker: `.prj/trackers/slicing-quiz-loop-redwright-parity-tracker.md`
 Branch: `feat/slice-2-quiz-prompt-intent-persistence`
-PR: pending
+PR: #194
 
 ## Purpose
 
