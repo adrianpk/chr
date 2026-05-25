@@ -209,6 +209,7 @@ spec, ticket, or implementation plan.
   user answers.
 - This should feel like a focused question/answer workspace, not a static list
   only.
+- Quiz actions should not generate specs; spec generation belongs in `F5 Specs`.
 
 ## F5 Specs
 
@@ -217,6 +218,7 @@ spec, ticket, or implementation plan.
 - Formal behavior belongs in specs.
 - A spec can have `status: draft` when it needs review, but that is a spec
   state, not a separate document family.
+- The Specs surface owns generation of specs from completed quiz material.
 - Accepted workflow direction:
   - dump or quiz;
   - spec with `status: draft`;

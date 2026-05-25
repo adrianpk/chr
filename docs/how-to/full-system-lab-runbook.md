@@ -312,16 +312,10 @@ The command sends structured project context to the quiz provider and prints the
 generated quiz path relative to the project, for example
 `.chc/quizzes/<quiz-file>.md`.
 
-Edit the generated quiz answers in Markdown, then promote the answered quiz to a
-draft:
-
-```sh
-chc author promote quiz-to-draft \
-  --quiz ".chc/quizzes/<quiz-file>.md"
-```
-
-Pass `--session <session-handle>` only when the quiz artifact does not identify
-one recorded authoring session.
+Edit the generated quiz answers in Markdown, then generate or edit the
+corresponding spec from the Specs surface. Specs that still need review should
+use `status: draft`; legacy `quiz-to-draft` promotion remains only for older
+authoring sessions.
 
 Exercise assisted authoring with deterministic fake adapter inputs:
 
