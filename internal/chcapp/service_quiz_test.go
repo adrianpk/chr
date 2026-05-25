@@ -426,6 +426,61 @@ func TestServiceQuizTrailRecoversAfterMaxDepthBranch(t *testing.T) {
 	assertServiceQuizTrailIDs(t, result.State.Trail, []string{"question-4"})
 }
 
+func TestServiceQuizSkipReturnsToTrunkCoverage(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizModelResponse("response-1", "question-1", clock()),
+			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(chc.QuizQuestion{
+				ID:        "question-2",
+				Prompt:    "What follow-up matters?",
+				Topic:     "workflow",
+				Depth:     2,
+				ParentID:  "question-1",
+				TrunkID:   "question-1",
+				CreatedAt: clock(),
+			})),
+			serviceQuizModelResponseWithQuestion("response-3", serviceQuizQuestion(chc.QuizQuestion{
+				ID:        "question-3",
+				Prompt:    "What broader area should be covered next?",
+				Topic:     "coverage",
+				Depth:     1,
+				TrunkID:   "question-3",
+				CreatedAt: clock(),
+			})),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	_, err := operations.StartQuiz(QuizStartRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
+	if err != nil {
+		t.Fatalf("StartQuiz returned error: %v", err)
+	}
+
+	result := answerServiceQuizForTrail(t, operations, "This needs a follow-up.")
+	assertServiceQuizTrailIDs(t, result.State.Trail, []string{"question-1", "question-2"})
+
+	result, err = operations.SkipQuiz(QuizSkipRequest{Scope: chc.QuizScope{CaseSlug: "blog"}})
+	if err != nil {
+		t.Fatalf("SkipQuiz returned error: %v", err)
+	}
+
+	if result.State.BranchReturnReason != "" {
+		t.Fatalf("BranchReturnReason = %q, want cleared after trunk activation", result.State.BranchReturnReason)
+	}
+
+	assertServiceQuizTrailIDs(t, result.State.Trail, []string{"question-3"})
+
+	if result.State.ActiveQuestion == nil || result.State.ActiveQuestion.Depth != 1 {
+		t.Fatalf("ActiveQuestion = %#v, want trunk question", result.State.ActiveQuestion)
+	}
+}
+
 func answerServiceQuizForTrail(
 	t *testing.T,
 	operations service,

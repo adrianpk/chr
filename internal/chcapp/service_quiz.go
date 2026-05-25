@@ -772,7 +772,10 @@ func updateQuizStateAfterEntry(state chc.QuizRuntimeState, entry chc.QuizEntry) 
 	state.ActiveQuestion = nil
 	state.ActiveTopic = ""
 
-	if entry.Depth >= chc.MaxQuizFollowUpDepth {
+	if entry.Status == chc.QuizEntryStatusSkipped {
+		state.Trail = nil
+		state.BranchReturnReason = chc.QuizBranchReturnReasonSkipped
+	} else if entry.Depth >= chc.MaxQuizFollowUpDepth {
 		state.Trail = nil
 		state.BranchReturnReason = chc.QuizBranchReturnReasonMaxDepth
 	} else {

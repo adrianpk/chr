@@ -11,6 +11,7 @@ const (
 	MaxQuizFollowUpDepth      = 3
 
 	QuizBranchReturnReasonMaxDepth = "max_depth_reached"
+	QuizBranchReturnReasonSkipped  = "skipped"
 )
 
 type QuizScope struct {

@@ -458,6 +458,18 @@ func TestQuizModelResponseFromDeepOutputCarriesCompletionRecommendation(t *testi
 	}
 }
 
+func TestQuizModelRuntimeDepthForcesTrunkAfterBranchReturn(t *testing.T) {
+	state := validQuizRuntimeState()
+	state.ActiveQuestion = nil
+	state.Trail = nil
+	state.BranchReturnReason = QuizBranchReturnReasonSkipped
+
+	depth := quizModelRuntimeDepth(state, MaxQuizFollowUpDepth)
+	if depth != 1 {
+		t.Fatalf("depth = %d, want trunk depth after branch return", depth)
+	}
+}
+
 func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Mode = QuizModeFast
