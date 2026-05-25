@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
@@ -244,6 +245,20 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 
 	if envelope.Text.Format.Name != "quiz_draft_spec" {
 		t.Fatalf("format name = %q, want quiz_draft_spec", envelope.Text.Format.Name)
+	}
+}
+
+func TestOpenAIQuizModelTimeoutUsesLongerTimeoutForGeneration(t *testing.T) {
+	if got := openAIQuizModelTimeout(QuizModelActionNextQuestion); got != 60*time.Second {
+		t.Fatalf("next question timeout = %s, want 60s", got)
+	}
+
+	if got := openAIQuizModelTimeout(QuizModelActionGenerateSpec); got != 5*time.Minute {
+		t.Fatalf("spec generation timeout = %s, want 5m", got)
+	}
+
+	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlan); got != 5*time.Minute {
+		t.Fatalf("plan generation timeout = %s, want 5m", got)
 	}
 }
 

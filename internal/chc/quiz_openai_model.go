@@ -17,8 +17,10 @@ const (
 
 	QuizModelFastBatchSize = 10
 
-	defaultOpenAIResponsesBaseURL = "https://api.openai.com/v1"
-	defaultOpenAIQuizModel        = "gpt-5-mini"
+	defaultOpenAIResponsesBaseURL  = "https://api.openai.com/v1"
+	defaultOpenAIQuizModel         = "gpt-5-mini"
+	defaultOpenAIQuizTimeout       = 60 * time.Second
+	defaultOpenAIGenerationTimeout = 5 * time.Minute
 )
 
 type OpenAIQuizModelAdapter struct {
@@ -114,7 +116,7 @@ func (a OpenAIQuizModelAdapter) invokeOpenAI(
 	httpRequest.Header.Set("Authorization", "Bearer "+a.openAIAPIKey())
 	httpRequest.Header.Set("Content-Type", "application/json")
 
-	return a.executeOpenAIRequest(httpRequest)
+	return a.executeOpenAIRequest(request, httpRequest)
 }
 
 func (a OpenAIQuizModelAdapter) openAIRequestBody(request QuizModelRequest) ([]byte, error) {
@@ -180,8 +182,11 @@ func quizModelProviderContextSections(sections []QuizModelContextSection) []map[
 	return payloads
 }
 
-func (a OpenAIQuizModelAdapter) executeOpenAIRequest(httpRequest *http.Request) ([]byte, error) {
-	response, err := a.httpClient().Do(httpRequest)
+func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
+	request QuizModelRequest,
+	httpRequest *http.Request,
+) ([]byte, error) {
+	response, err := a.httpClient(request).Do(httpRequest)
 	if err != nil {
 		return nil, fmt.Errorf("invoke OpenAI quiz model: %w", err)
 	}
@@ -243,12 +248,21 @@ func (a OpenAIQuizModelAdapter) openAIBaseURL() string {
 	return baseURL
 }
 
-func (a OpenAIQuizModelAdapter) httpClient() *http.Client {
+func (a OpenAIQuizModelAdapter) httpClient(request QuizModelRequest) *http.Client {
 	if a.Client != nil {
 		return a.Client
 	}
 
-	return &http.Client{Timeout: 60 * time.Second}
+	return &http.Client{Timeout: openAIQuizModelTimeout(request.Action)}
+}
+
+func openAIQuizModelTimeout(action QuizModelAction) time.Duration {
+	switch action {
+	case QuizModelActionGenerateSpec, QuizModelActionGeneratePlan:
+		return defaultOpenAIGenerationTimeout
+	default:
+		return defaultOpenAIQuizTimeout
+	}
 }
 
 func openAIResponseText(content []byte) (string, error) {
