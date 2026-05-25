@@ -108,7 +108,9 @@ func (m Model) updatePlanActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func (m *Model) planPlanAction(action PlanActionID) {
 	m.planAction = m.newPlanActionState(action)
-	m.statusMessage = ""
+	m.selectedPane = 1
+	m.maximizedPane = 1
+	m.statusMessage = "Confirm plan action with Enter, or cancel with Esc."
 }
 
 func (m Model) newPlanActionState(action PlanActionID) PlanActionState {
@@ -130,12 +132,14 @@ func (m Model) newPlanActionState(action PlanActionID) PlanActionState {
 
 func (m *Model) cancelPlanAction() {
 	m.planAction = PlanActionState{}
+	m.maximizedPane = -1
 	m.statusMessage = "Plan action cancelled."
 }
 
 func (m *Model) confirmPlanAction() tea.Cmd {
 	request := m.planAction.Request
 	m.planAction = PlanActionState{}
+	m.maximizedPane = -1
 
 	return m.startPlanAction(request)
 }

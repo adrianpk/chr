@@ -3031,6 +3031,18 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 		t.Fatalf("pending action = %q, want %q", pending.planAction.Request.Action, PlanActionRegenerate)
 	}
 
+	if pending.selectedPane != 1 {
+		t.Fatalf("selectedPane = %d, want 1", pending.selectedPane)
+	}
+
+	if pending.maximizedPane != 1 {
+		t.Fatalf("maximizedPane = %d, want 1", pending.maximizedPane)
+	}
+
+	if pending.statusMessage != "Confirm plan action with Enter, or cancel with Esc." {
+		t.Fatalf("statusMessage = %q, want confirmation guidance", pending.statusMessage)
+	}
+
 	if action := pending.renderPlanAction(); !strings.Contains(action, "Enter: confirm") || !strings.Contains(action, "Esc: cancel") {
 		t.Fatalf("renderPlanAction() = %q, want confirmation keys", action)
 	}
@@ -3044,6 +3056,10 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 
 	if busy.statusMessage != "Regenerating plan..." {
 		t.Fatalf("statusMessage = %q, want Regenerating plan...", busy.statusMessage)
+	}
+
+	if busy.maximizedPane != -1 {
+		t.Fatalf("maximizedPane = %d, want -1 after confirmation", busy.maximizedPane)
 	}
 
 	updated, _ = busy.Update(cmd())
