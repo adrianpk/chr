@@ -60,6 +60,9 @@ func (m Model) renderPlanAction() string {
 		output.WriteString("\n")
 	}
 
+	output.WriteString("\n  Enter: confirm\n")
+	output.WriteString("  Esc: cancel\n")
+
 	return strings.TrimRight(output.String(), "\n")
 }
 

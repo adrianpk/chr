@@ -3031,6 +3031,10 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 		t.Fatalf("pending action = %q, want %q", pending.planAction.Request.Action, PlanActionRegenerate)
 	}
 
+	if action := pending.renderPlanAction(); !strings.Contains(action, "Enter: confirm") || !strings.Contains(action, "Esc: cancel") {
+		t.Fatalf("renderPlanAction() = %q, want confirmation keys", action)
+	}
+
 	updated, cmd = pending.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	busy := requireUpdatedModel(t, updated)
 
