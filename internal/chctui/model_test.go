@@ -1102,6 +1102,43 @@ func TestGenerateSpecCommandOnlyAppearsInSpecs(t *testing.T) {
 	}
 }
 
+func TestPlanCommandsOnlyAppearInPlans(t *testing.T) {
+	model := NewModel(Options{})
+	model.selected = 4
+	model.commandPalette.Filter = "regenerate-plan"
+
+	if commands := model.filteredCommands(); len(commands) != 0 {
+		t.Fatalf("spec commands include plan actions: %#v", commands)
+	}
+
+	model.selected = 5
+
+	commands := model.filteredCommands()
+	if len(commands) != 1 || commands[0].ID != "regenerate-plan" || commands[0].Plan != PlanActionRegenerate {
+		t.Fatalf("plan commands = %#v, want regenerate-plan", commands)
+	}
+
+	commandsByID := map[string]Command{}
+	for _, command := range DefaultCommandRegistry() {
+		commandsByID[command.ID] = command
+	}
+
+	for id, action := range map[string]PlanActionID{
+		"generate-plan":   PlanActionGenerate,
+		"regenerate-plan": PlanActionRegenerate,
+		"refresh-plans":   PlanActionRefresh,
+	} {
+		command, ok := commandsByID[id]
+		if !ok {
+			t.Fatalf("command %q not found", id)
+		}
+
+		if command.Action != CommandActionPlanPlan || command.Plan != action {
+			t.Fatalf("command %q = %#v, want plan action %q", id, command, action)
+		}
+	}
+}
+
 func TestDefaultCommandRegistryExposesDumpWorkflows(t *testing.T) {
 	commandsByID := map[string]Command{}
 	for _, command := range DefaultCommandRegistry() {
@@ -2854,6 +2891,132 @@ func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 	plan, ok := confirmed.selectedPlanView()
 	if !ok || plan.Title != "Generated Plan" {
 		t.Fatalf("selected plan = %#v, want generated plan", plan)
+	}
+}
+
+func TestModelRefusesGeneratePlanWhenPlanExists(t *testing.T) {
+	executor := &fakePlanActionExecutor{}
+	model := NewModel(Options{
+		PlanExecutor: executor,
+		Plans: []PlanView{
+			{
+				Title:        "Generated Plan",
+				Scope:        QuizScope{CaseSlug: "blog"},
+				Status:       "planned",
+				RelativePath: ".chc/plans/blog-plan.md",
+				Content:      "# Generated Plan\n\nExisting.",
+			},
+		},
+	})
+	model.selected = 5
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil, want no generation command")
+	}
+
+	if confirmed.planBusy {
+		t.Fatal("planBusy = true, want false")
+	}
+
+	if executor.request.Action != "" {
+		t.Fatalf("executor action = %q, want no action", executor.request.Action)
+	}
+
+	if confirmed.statusMessage != "Plan already exists. Use regenerate plan to replace it." {
+		t.Fatalf("statusMessage = %q, want existing plan refusal", confirmed.statusMessage)
+	}
+}
+
+func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
+	executor := &fakePlanActionExecutor{
+		result: PlanActionResult{
+			Message: "Plan regenerated.",
+			Plans: []PlanView{
+				{
+					Title:        "Regenerated Plan",
+					Scope:        QuizScope{CaseSlug: "blog"},
+					Status:       "planned",
+					RelativePath: ".chc/plans/blog-plan.md",
+				},
+			},
+			Scope: QuizScope{CaseSlug: "blog"},
+		},
+	}
+	model := NewModel(Options{
+		PlanExecutor: executor,
+		Plans: []PlanView{
+			{
+				Title:        "Generated Plan",
+				Scope:        QuizScope{CaseSlug: "blog"},
+				Status:       "planned",
+				RelativePath: ".chc/plans/blog-plan.md",
+				Content:      "# Generated Plan\n\nExisting.",
+			},
+		},
+	})
+	model.selected = 5
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
+	pending := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil before confirmation")
+	}
+
+	if !pending.planAction.Pending {
+		t.Fatal("plan action is not pending")
+	}
+
+	if pending.planAction.Request.Action != PlanActionRegenerate {
+		t.Fatalf("pending action = %q, want %q", pending.planAction.Request.Action, PlanActionRegenerate)
+	}
+
+	updated, cmd = pending.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.planBusy {
+		t.Fatal("planBusy = false, want true")
+	}
+
+	if busy.statusMessage != "Regenerating plan..." {
+		t.Fatalf("statusMessage = %q, want Regenerating plan...", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != PlanActionRegenerate {
+		t.Fatalf("executor action = %q, want %q", executor.request.Action, PlanActionRegenerate)
+	}
+
+	if confirmed.statusMessage != "Plan regenerated." {
+		t.Fatalf("statusMessage = %q, want Plan regenerated.", confirmed.statusMessage)
+	}
+}
+
+func TestModelBlocksDuplicatePlanActionWhileBusy(t *testing.T) {
+	executor := &fakePlanActionExecutor{}
+	model := NewModel(Options{
+		PlanExecutor: executor,
+		Plans: []PlanView{
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "missing"},
+		},
+	})
+	model.selected = 5
+	model.planBusy = true
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
+	confirmed := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil, want duplicate action blocked")
+	}
+
+	if confirmed.statusMessage != "Plan action already running." {
+		t.Fatalf("statusMessage = %q, want busy guard", confirmed.statusMessage)
 	}
 }
 
