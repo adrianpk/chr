@@ -2375,6 +2375,29 @@ func TestModelRendersScopedDumps(t *testing.T) {
 	}
 }
 
+func TestModelRendersDumpContentWithMarkdownLineBreaks(t *testing.T) {
+	model := NewModel(Options{
+		Dumps: []DumpView{
+			{
+				Title:        "Project Context",
+				RelativePath: ".chc/dumps/project-context.md",
+				Preview:      "---\ntitle: \"Project Context\"\n---\n\n# Project Context\n\nNotes.",
+			},
+		},
+	})
+	model.selected = 2
+
+	view := model.View()
+
+	if !strings.Contains(view, "---\n") {
+		t.Fatalf("View() does not preserve frontmatter line break:\n%s", view)
+	}
+
+	if !strings.Contains(view, "\n# Project Context\n") {
+		t.Fatalf("View() does not preserve heading line break:\n%s", view)
+	}
+}
+
 func TestModelSelectsDumpsIndependentlyFromDocuments(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
