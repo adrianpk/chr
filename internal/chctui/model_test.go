@@ -3171,6 +3171,12 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 		t.Fatalf("statusMessage = %q, want Regenerating plan...", busy.statusMessage)
 	}
 
+	if action := busy.renderPlanAction(); !strings.Contains(action, "Plan Action Running") ||
+		!strings.Contains(action, "Regenerating plan...") ||
+		!strings.Contains(action, "Please wait") {
+		t.Fatalf("renderPlanAction() = %q, want running overlay", action)
+	}
+
 	if busy.maximizedPane != 1 {
 		t.Fatalf("maximizedPane = %d, want 1 after confirmation", busy.maximizedPane)
 	}
@@ -3223,7 +3229,9 @@ func TestModelShowsPlanTrackingOnlyWhenPlanExists(t *testing.T) {
 }
 
 func TestModelPlansPlanTrackingWithAltT(t *testing.T) {
+	executor := &fakePlanActionExecutor{}
 	model := NewModel(Options{
+		PlanExecutor: executor,
 		Plans: []PlanView{
 			{
 				Title:        "Generated Plan",
@@ -3249,6 +3257,88 @@ func TestModelPlansPlanTrackingWithAltT(t *testing.T) {
 
 	if pending.planAction.Request.Action != PlanActionMaterializeTracking {
 		t.Fatalf("pending action = %q, want %q", pending.planAction.Request.Action, PlanActionMaterializeTracking)
+	}
+
+	updated, cmd = pending.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	if cmd == nil {
+		t.Fatal("cmd is nil, want tracking command")
+	}
+
+	if !busy.planBusy {
+		t.Fatal("planBusy = false, want true")
+	}
+
+	if busy.statusMessage != "Creating plan tracking..." {
+		t.Fatalf("statusMessage = %q, want Creating plan tracking...", busy.statusMessage)
+	}
+
+	if action := busy.renderPlanAction(); !strings.Contains(action, "Plan Action Running") ||
+		!strings.Contains(action, "Creating plan tracking...") {
+		t.Fatalf("renderPlanAction() = %q, want tracking running overlay", action)
+	}
+}
+
+func TestModelBlocksPlanTrackingWhileBusy(t *testing.T) {
+	model := NewModel(Options{
+		Plans: []PlanView{
+			{
+				Title:        "Generated Plan",
+				Scope:        QuizScope{CaseSlug: "blog"},
+				Status:       "planned",
+				RelativePath: ".chc/plans/blog-plan.md",
+				Content:      "# Generated Plan\n",
+			},
+		},
+	})
+	model.selected = 5
+	model.planBusy = true
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("t"), Alt: true})
+	blocked := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil, want busy guard")
+	}
+
+	if blocked.planAction.Pending {
+		t.Fatal("plan action is pending")
+	}
+
+	if blocked.statusMessage != "Plan action already running." {
+		t.Fatalf("statusMessage = %q, want busy guard", blocked.statusMessage)
+	}
+}
+
+func TestModelBlocksRegenerateWhileBusy(t *testing.T) {
+	model := NewModel(Options{
+		Plans: []PlanView{
+			{
+				Title:        "Generated Plan",
+				Scope:        QuizScope{CaseSlug: "blog"},
+				Status:       "planned",
+				RelativePath: ".chc/plans/blog-plan.md",
+				Content:      "# Generated Plan\n",
+			},
+		},
+	})
+	model.selected = 5
+	model.planBusy = true
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
+	blocked := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("cmd is non-nil, want busy guard")
+	}
+
+	if blocked.planAction.Pending {
+		t.Fatal("plan action is pending")
+	}
+
+	if blocked.statusMessage != "Plan action already running." {
+		t.Fatalf("statusMessage = %q, want busy guard", blocked.statusMessage)
 	}
 }
 

@@ -49,6 +49,10 @@ type planActionFinishedMsg struct {
 }
 
 func (m Model) renderPlanAction() string {
+	if m.planBusy {
+		return strings.TrimRight("\n\nPlan Action Running\n  "+m.statusMessage+"\n\n  Please wait for this action to finish.", "\n")
+	}
+
 	if !m.planAction.Pending {
 		return ""
 	}
@@ -80,10 +84,22 @@ func (m Model) updatePlansKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 		return m, cmd
 	case "G":
+		if m.planBusy {
+			m.statusMessage = "Plan action already running."
+
+			return m, nil
+		}
+
 		m.planPlanAction(PlanActionRegenerate)
 
 		return m, nil
 	case "alt+t":
+		if m.planBusy {
+			m.statusMessage = "Plan action already running."
+
+			return m, nil
+		}
+
 		if !m.selectedPlanCanMaterializeTracking() {
 			m.statusMessage = "Plan tracking requires an existing plan."
 
