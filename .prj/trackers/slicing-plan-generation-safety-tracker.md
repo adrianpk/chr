@@ -46,7 +46,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Plan Action Semantics | Delivered | `feat/slice-1-plan-action-semantics` | `feat(slice-1): plan action semantics` | `.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
-| Slice 2: Archive Before Replace | Planned | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Depends on Slice 1. |
+| Slice 2: Archive Before Replace | Reviewing | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 3: Archive Context Exclusion | Planned | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Depends on Slice 2. |
 | Slice 4: Generation Runtime Safety | Planned | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Depends on Slices 1-3. |
 
@@ -81,22 +81,29 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T2.1 Add canonical plan archive path layout with timestamped filenames.
-- [ ] T2.2 Archive existing canonical plans before regenerate writes.
-- [ ] T2.3 Preserve canonical plans when archive fails.
-- [ ] T2.4 Add archive metadata for source path and archive time.
-- [ ] T2.5 Add service tests for regenerate with existing plan, regenerate with
+- [x] T2.1 Add canonical plan archive path layout with timestamped filenames.
+- [x] T2.2 Archive existing canonical plans before regenerate writes.
+- [x] T2.3 Preserve canonical plans when archive fails.
+- [x] T2.4 Add archive metadata for source path and archive time.
+- [x] T2.5 Add service tests for regenerate with existing plan, regenerate with
       missing plan, and archive failure.
-- [ ] T2.6 Add slice implementation report.
-- [ ] T2.7 Run targeted tests and `make verify`.
+- [x] T2.6 Add slice implementation report.
+- [x] T2.7 Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- `183a730 docs(plan): select slice 2 archive before replace`
+- `e38f1e6 feat(plan): add generated plan archive layout`
+- `3da3dc0 feat(plan): archive before regenerating plans`
+- `27a4f61 test(plan): cover regenerate archive behavior`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc`: pass.
+- `go test ./internal/chcapp`: pass.
+- `go test ./...`: pass.
+- `make verify`: fail in `lint-strict` because of existing lint debt across
+  plan, spec, and TUI code.
 
 ## Slice 3: Archive Context Exclusion
 
