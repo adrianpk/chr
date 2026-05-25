@@ -52,7 +52,7 @@ Prerequisite PRs or delivered work:
 | Slice 1: Quiz Provider Parity Fixtures | Delivered | `feat/slice-1-quiz-provider-parity-fixtures` | `feat(slice-1): quiz provider parity fixtures` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md` | PR #193. |
 | Slice 2: Quiz Prompt Intent Persistence | Delivered | `feat/slice-2-quiz-prompt-intent-persistence` | `feat(slice-2): quiz prompt intent persistence` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md` | PR #194. |
 | Slice 3: Quiz Routing Parity Control | Delivered | `feat/slice-3-quiz-routing-parity-control` | `feat(slice-3): quiz routing parity control` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-3-quiz-routing-parity-control.md` | PR #195. |
-| Slice 4: Quiz Parity Lab Validation | Planned | `feat/slice-4-quiz-parity-lab-validation` | `feat(slice-4): quiz parity lab validation` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-4-quiz-parity-lab-validation.md` | Active next slice. |
+| Slice 4: Quiz Parity Lab Validation | Reviewing | `feat/slice-4-quiz-parity-lab-validation` | `feat(slice-4): quiz parity lab validation` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-4-quiz-parity-lab-validation.md` | PR pending. |
 
 ## Slice 1: Quiz Provider Parity Fixtures
 
@@ -128,22 +128,24 @@ Validation:
 
 Candidate tasks:
 
-- [ ] Add or update reset guidance for representative quiz runtime state.
-- [ ] Run project-level and use-case-level quiz validation against the test
+- [x] Add or update reset guidance for representative quiz runtime state.
+- [x] Run project-level and use-case-level quiz validation against the test
       project.
-- [ ] Record payload examples and generated-question samples.
-- [ ] Confirm the default flow asks one question at a time without preloading a
+- [x] Record payload examples and generated-question samples.
+- [x] Confirm the default flow asks one question at a time without preloading a
       large batch.
-- [ ] Add slice implementation report.
-- [ ] Run `make verify`.
+- [x] Add slice implementation report.
+- [x] Run `make verify`.
 
 Task commits:
 
-- Pending.
+- T4.1: pending.
 
 Validation:
 
-- Pending.
+- `go run ./cmd/chc --help`
+- `git diff --check`
+- `make verify`
 
 ## Open Risks
 
