@@ -153,15 +153,15 @@ func (m Model) quizActionHint(quiz QuizView) string {
 	}
 
 	if m.quizAnswer.Active && quizScopeLabel(m.quizAnswer.Scope) == quizScopeLabel(quiz.Scope) {
-		return "Enter submits  shift+enter inserts line  alt+s skips  alt+d done  esc cancels"
+		return "enter submits  shift+enter inserts line  alt+s skip  alt+d done  esc cancel"
 	}
 
 	if strings.TrimSpace(quiz.ActiveQuestionSummary) != "" {
-		return "Enter answers"
+		return "enter answers"
 	}
 
 	if quiz.Status == "done" && strings.TrimSpace(quiz.CuratedPath) != "" {
-		return "g generate spec  s restart"
+		return "s restart"
 	}
 
 	return "s start"
@@ -250,8 +250,6 @@ func (m Model) updateQuizzesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		cmd := m.startQuizAction(QuizActionRequest{Action: QuizActionRefresh, Scope: m.selectedQuizScope()})
 
 		return m, cmd
-	case "g":
-		m.planQuizAction(QuizActionDraftSpec)
 	case "esc":
 		m.selectPrimaryPane()
 	default:
@@ -315,15 +313,14 @@ func quizScopeLabel(scope QuizScope) string {
 
 func quizActionTitle(action QuizActionID) string {
 	titles := map[QuizActionID]string{
-		QuizActionStart:     "Start quiz",
-		QuizActionResume:    "Resume quiz",
-		QuizActionSkip:      "Skip active question",
-		QuizActionComplete:  "Complete quiz",
-		QuizActionDraftSpec: "Generate spec",
-		QuizActionCancel:    "Cancel quiz",
-		QuizActionRefresh:   "Refresh quizzes",
-		QuizActionDeepMode:  "Switch quiz to deep mode",
-		QuizActionFastMode:  "Switch quiz to fast mode",
+		QuizActionStart:    "Start quiz",
+		QuizActionResume:   "Resume quiz",
+		QuizActionSkip:     "Skip active question",
+		QuizActionComplete: "Complete quiz",
+		QuizActionCancel:   "Cancel quiz",
+		QuizActionRefresh:  "Refresh quizzes",
+		QuizActionDeepMode: "Switch quiz to deep mode",
+		QuizActionFastMode: "Switch quiz to fast mode",
 	}
 
 	title, ok := titles[action]

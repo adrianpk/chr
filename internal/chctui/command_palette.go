@@ -61,7 +61,6 @@ func DefaultCommandRegistry() []Command {
 		{ID: "quiz-answer", Title: "Answer selected quiz", Description: "Enter an answer for the active quiz question.", Action: CommandActionPlanQuiz, Quiz: QuizActionAnswer},
 		{ID: "quiz-skip", Title: "Skip quiz question", Description: "Skip the active selected quiz question.", Action: CommandActionPlanQuiz, Quiz: QuizActionSkip},
 		{ID: "quiz-complete", Title: "Complete selected quiz", Description: "Mark the selected quiz as complete.", Action: CommandActionPlanQuiz, Quiz: QuizActionComplete},
-		{ID: "quiz-spec", Title: "Generate quiz spec", Description: "Generate a spec from the selected curated quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionDraftSpec},
 		{ID: "quiz-cancel", Title: "Cancel selected quiz", Description: "Cancel the selected quiz loop.", Action: CommandActionPlanQuiz, Quiz: QuizActionCancel},
 		{ID: "quiz-refresh", Title: "Refresh quizzes", Description: "Reload scoped quiz state.", Action: CommandActionPlanQuiz, Quiz: QuizActionRefresh},
 		{ID: "quiz-mode-deep", Title: "Switch quiz to deep mode", Description: "Use deep generation for the selected quiz.", Action: CommandActionPlanQuiz, Quiz: QuizActionDeepMode},

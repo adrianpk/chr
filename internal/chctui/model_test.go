@@ -2695,6 +2695,21 @@ func TestModelStartsQuizFromQuizzesKey(t *testing.T) {
 	if confirmed.maximizedPane != 1 {
 		t.Fatalf("maximizedPane = %d, want 1", confirmed.maximizedPane)
 	}
+
+	assertQuizAnswerHelperVisible(t, confirmed)
+}
+
+func assertQuizAnswerHelperVisible(t *testing.T, model Model) {
+	t.Helper()
+
+	view := model.View()
+	if !strings.Contains(view, "Answer") {
+		t.Fatalf("View() missing answer panel title:\n%s", view)
+	}
+
+	if !strings.Contains(view, "enter submits  shift+enter inserts line  alt+s skip  alt+d done  esc cancel") {
+		t.Fatalf("View() missing quiz edit helper:\n%s", view)
+	}
 }
 
 func TestModelSubmitsQuizAnswerWithEnterThroughExecutor(t *testing.T) {
@@ -2859,54 +2874,6 @@ func TestModelCompletesQuizAnswerWithAltD(t *testing.T) {
 
 	if confirmed.quizAnswer.Active {
 		t.Fatal("quiz answer editor is still active")
-	}
-}
-
-func TestModelGeneratesQuizDraftSpecFromQuizzesKey(t *testing.T) {
-	executor := &fakeQuizActionExecutor{
-		result: QuizActionResult{
-			Message: "Spec generated.",
-			Quizzes: []QuizView{
-				{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "done"},
-			},
-			SelectedScope: QuizScope{CaseSlug: "blog"},
-		},
-	}
-	model := NewModel(Options{
-		QuizExecutor: executor,
-		Quizzes: []QuizView{
-			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "done", CuratedPath: ".chc/quizzes/blog-quiz.md"},
-		},
-	})
-	model.selected = 3
-
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("g")})
-	planned := requireUpdatedModel(t, updated)
-
-	if !planned.quizAction.Pending || planned.quizAction.Request.Action != QuizActionDraftSpec {
-		t.Fatalf("quiz action = %#v, want draft spec action", planned.quizAction)
-	}
-
-	updated, cmd := planned.Update(tea.KeyMsg{Type: tea.KeyEnter})
-	busy := requireUpdatedModel(t, updated)
-
-	if !busy.quizBusy {
-		t.Fatal("quiz action is not marked busy")
-	}
-
-	if busy.statusMessage != "Generating spec..." {
-		t.Fatalf("statusMessage = %q, want Generating spec...", busy.statusMessage)
-	}
-
-	updated, _ = busy.Update(cmd())
-	confirmed := requireUpdatedModel(t, updated)
-
-	if executor.request.Action != QuizActionDraftSpec {
-		t.Fatalf("action = %q, want draft spec", executor.request.Action)
-	}
-
-	if confirmed.statusMessage != "Spec generated." {
-		t.Fatalf("statusMessage = %q, want Spec generated.", confirmed.statusMessage)
 	}
 }
 
