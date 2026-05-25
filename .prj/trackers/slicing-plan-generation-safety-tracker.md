@@ -47,7 +47,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Plan Action Semantics | Delivered | `feat/slice-1-plan-action-semantics` | `feat(slice-1): plan action semantics` | `.prj/reports/slices/plan-generation-safety/slice-1-plan-action-semantics.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 2: Archive Before Replace | Reviewing | `feat/slice-2-archive-before-replace` | `feat(slice-2): archive before replace` | `.prj/reports/slices/plan-generation-safety/slice-2-archive-before-replace.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
-| Slice 3: Archive Context Exclusion | Planned | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Depends on Slice 2. |
+| Slice 3: Archive Context Exclusion | Reviewing | `feat/slice-3-archive-context-exclusion` | `feat(slice-3): archive context exclusion` | `.prj/reports/slices/plan-generation-safety/slice-3-archive-context-exclusion.md` | Implemented; `go test ./...` passes; `make verify` blocked by lint debt. |
 | Slice 4: Generation Runtime Safety | Planned | `feat/slice-4-generation-runtime-safety` | `feat(slice-4): generation runtime safety` | `.prj/reports/slices/plan-generation-safety/slice-4-generation-runtime-safety.md` | Depends on Slices 1-3. |
 
 ## Slice 1: Plan Action Semantics
@@ -109,22 +109,30 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T3.1 Exclude `.chc/plans/archive/**` from active plan context.
-- [ ] T3.2 Exclude `.chc/specs/archive/**` from active generation context when
+- [x] T3.1 Exclude `.chc/plans/archive/**` from active plan context.
+- [x] T3.2 Exclude `.chc/specs/archive/**` from active generation context when
       present.
-- [ ] T3.3 Ensure TUI plan lists ignore archived plans.
-- [ ] T3.4 Ensure generated plan provenance does not include archived paths.
-- [ ] T3.5 Add tests for workspace/context exclusion and TUI listing behavior.
-- [ ] T3.6 Add slice implementation report.
-- [ ] T3.7 Run targeted tests and `make verify`.
+- [x] T3.3 Ensure TUI plan lists ignore archived plans.
+- [x] T3.4 Ensure generated plan provenance does not include archived paths.
+- [x] T3.5 Add tests for workspace/context exclusion and TUI listing behavior.
+- [x] T3.6 Add slice implementation report.
+- [x] T3.7 Run targeted tests and `make verify`.
 
 Task commits:
 
-- Pending.
+- `0f97588 docs(plan): select slice 3 archive context exclusion`
+- `c8605aa fix(index): exclude archived generated documents`
+- `f554174 test(plan): verify archived documents stay out of generation`
+- `8d658e9 fix(tui): hide archived generated documents`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc`: pass.
+- `go test ./internal/chcapp`: pass.
+- `go test ./internal/chctui`: pass.
+- `go test ./...`: pass.
+- `make verify`: fail in `lint-strict` because of existing lint debt across
+  plan, spec, and TUI code.
 
 ## Slice 4: Generation Runtime Safety
 
