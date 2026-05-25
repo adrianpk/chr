@@ -46,7 +46,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Quiz Provider Parity Fixtures | Planned | `feat/slice-1-quiz-provider-parity-fixtures` | `feat(slice-1): quiz provider parity fixtures` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md` | Active first slice. |
+| Slice 1: Quiz Provider Parity Fixtures | Reviewing | `feat/slice-1-quiz-provider-parity-fixtures` | `feat(slice-1): quiz provider parity fixtures` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-1-quiz-provider-parity-fixtures.md` | PR pending. |
 | Slice 2: Quiz Prompt Intent Persistence | Planned | `feat/slice-2-quiz-prompt-intent-persistence` | `feat(slice-2): quiz prompt intent persistence` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-2-quiz-prompt-intent-persistence.md` | Starts after Slice 1 merge. |
 | Slice 3: Quiz Routing Parity Control | Planned | `feat/slice-3-quiz-routing-parity-control` | `feat(slice-3): quiz routing parity control` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-3-quiz-routing-parity-control.md` | Starts after Slice 2 merge. |
 | Slice 4: Quiz Parity Lab Validation | Planned | `feat/slice-4-quiz-parity-lab-validation` | `feat(slice-4): quiz parity lab validation` | `.prj/reports/slices/quiz-loop-redwright-parity/slice-4-quiz-parity-lab-validation.md` | Starts after Slice 3 merge. |
@@ -55,20 +55,22 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] Add fixture coverage for next-question provider payload shape.
-- [ ] Add fixture coverage for draft-spec payload shape.
-- [ ] Add response decoding tests for question, skip, and completion-shaped
+- [x] Add fixture coverage for next-question provider payload shape.
+- [x] Add fixture coverage for draft-spec payload shape.
+- [x] Add response decoding tests for question, skip, and completion-shaped
       provider responses.
-- [ ] Record the provider payload contract in the slice report.
-- [ ] Run targeted tests and broader validation as needed.
+- [x] Record the provider payload contract in the slice report.
+- [x] Run targeted tests and broader validation as needed.
 
 Task commits:
 
-- Pending.
+- T1.1: `5bb651a` locks provider payload and response parity fixtures.
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc`
+- `git diff --check`
+- `make verify`
 
 ## Slice 2: Quiz Prompt Intent Persistence
 
