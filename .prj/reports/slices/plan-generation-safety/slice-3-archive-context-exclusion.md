@@ -1,11 +1,11 @@
 # Slice 3: Archive Context Exclusion
 
-Status: reviewing
+Status: delivered
 Slicing: Plan Generation Safety
 Plan: `.prj/plans/slicing-plan-generation-safety-plan.md`
 Tracker: `.prj/trackers/slicing-plan-generation-safety-tracker.md`
 Branch: `feat/slice-3-archive-context-exclusion`
-PR: pending
+PR: `#200`
 
 ## Purpose
 
