@@ -219,6 +219,64 @@ Manual edits that must remain recoverable.
 	}
 }
 
+func TestServiceGeneratePlanExcludesArchivedDocumentsFromContextAndProvenance(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-spec.md"), `---
+title: "Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Blog Spec
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "archive", "blog-spec-20260525.md"), `---
+title: "Archived Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Archived Blog Spec
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "archive", "blog-plan-20260525.md"), `---
+title: "Archived Blog Plan"
+status: "planned"
+case: "blog"
+---
+
+# Archived Blog Plan
+`)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizPlanResponse("response-plan", clock()),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	_, err := operations.GeneratePlan(PlanGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("GeneratePlan returned error: %v", err)
+	}
+
+	request := model.requests[len(model.requests)-1]
+	for _, section := range request.ContextSections {
+		if strings.Contains(section.Authority, "/archive/") {
+			t.Fatalf("context section includes archived authority: %#v", section)
+		}
+	}
+
+	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"))
+	if strings.Contains(plan, "/archive/") {
+		t.Fatalf("generated provenance includes archived path:\n%s", plan)
+	}
+}
+
 func TestServiceListPlansReturnsScopes(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
