@@ -2937,10 +2937,10 @@ func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
 	})
 	model.selected = 5
 
-	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("G")})
 	pending := requireUpdatedModel(t, updated)
 
-	updated, cmd = pending.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, cmd := pending.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	busy := requireUpdatedModel(t, updated)
 
 	updated, _ = busy.Update(cmd())
