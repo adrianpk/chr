@@ -3,6 +3,7 @@ package chc
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -112,6 +113,66 @@ case: "missing"
 	unresolvedID := index.ByCaseSlug["missing"][0]
 	if index.NodesByID[unresolvedID].Title != "Missing Case Dump" {
 		t.Fatalf("unresolved node = %#v, want Missing Case Dump", index.NodesByID[unresolvedID])
+	}
+}
+
+func TestWorkspaceIndexExcludesArchivedGeneratedDocuments(t *testing.T) {
+	projectDir := t.TempDir()
+	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+		Name: "Blog Publishing",
+	}))
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "plans", "blog-plan.md"), `---
+title: "Blog Plan"
+status: "planned"
+case: "blog"
+---
+
+# Blog Plan
+`)
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "plans", "archive", "blog-plan-20260525.md"), `---
+title: "Archived Blog Plan"
+status: "planned"
+case: "blog"
+---
+
+# Archived Blog Plan
+`)
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "specs", "blog-spec.md"), `---
+title: "Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Blog Spec
+`)
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "specs", "archive", "blog-spec-20260525.md"), `---
+title: "Archived Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Archived Blog Spec
+`)
+
+	graph, err := NewWorkspaceGraphBuilder(projectDir).Build(context.Background())
+	if err != nil {
+		t.Fatalf("Build returned error: %v", err)
+	}
+
+	index := NewWorkspaceIndexFromGraph(graph)
+
+	if len(index.ByKind[WorkspaceNodePlan]) != 1 {
+		t.Fatalf("ByKind[plan] = %#v, want only canonical plan", index.ByKind[WorkspaceNodePlan])
+	}
+
+	if len(index.ByKind[WorkspaceNodeSpec]) != 1 {
+		t.Fatalf("ByKind[spec] = %#v, want only canonical spec", index.ByKind[WorkspaceNodeSpec])
+	}
+
+	for path := range index.NodesByPath {
+		if strings.Contains(path, "/archive/") {
+			t.Fatalf("archived path indexed: %s", path)
+		}
 	}
 }
 

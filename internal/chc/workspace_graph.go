@@ -190,6 +190,10 @@ func (b WorkspaceGraphBuilder) loadDocuments(ctx context.Context, graph *Workspa
 			return nil
 		}
 
+		if isArchivedGenerationPath(b.projectDir, path) {
+			return nil
+		}
+
 		node, err := b.documentNode(path)
 		if err != nil {
 			graph.addDiagnostic(path, WorkspaceNodeUnknown, err)
@@ -432,6 +436,19 @@ func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
 	default:
 		return WorkspaceNodeUnknown
 	}
+}
+
+func isArchivedGenerationPath(projectDir string, path string) bool {
+	relativePath, err := filepath.Rel(filepath.Join(projectDir, DirectoryName), path)
+	if err != nil {
+		return false
+	}
+
+	parts := strings.Split(filepath.ToSlash(relativePath), "/")
+
+	return len(parts) >= 3 &&
+		(parts[0] == "plans" || parts[0] == "specs") &&
+		parts[1] == "archive"
 }
 
 func isWorkspaceMarkdownPath(path string) bool {
