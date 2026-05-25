@@ -505,6 +505,8 @@ func quizModelRoutingState(
 		"max_follow_up_depth":      MaxQuizFollowUpDepth,
 		"trunk_return_recommended": payload.FollowUpDepth >= MaxQuizFollowUpDepth,
 		"covered_tags":             quizModelCoveredTags(request.Payload.RecentEntries),
+		"topic_coverage":           quizModelTopicCoverage(request.Payload.RecentEntries),
+		"recent_topic_streak":      quizModelRecentTopicStreak(request.Payload.RecentEntries),
 		"mode":                     request.Payload.Quiz.Mode,
 		"generation_strategy":      request.Strategy,
 		"fallback_reason":          "",
@@ -547,6 +549,48 @@ func quizModelCoveredTags(entries []QuizModelEntryPayload) []string {
 	return tags
 }
 
+func quizModelTopicCoverage(entries []QuizModelEntryPayload) map[string]int {
+	coverage := map[string]int{}
+
+	for _, entry := range entries {
+		for _, tag := range entry.Tags {
+			tag = strings.TrimSpace(tag)
+			if tag == "" {
+				continue
+			}
+
+			coverage[tag]++
+		}
+	}
+
+	return coverage
+}
+
+func quizModelRecentTopicStreak(entries []QuizModelEntryPayload) map[string]any {
+	if len(entries) == 0 {
+		return map[string]any{
+			"topic": "",
+			"count": 0,
+		}
+	}
+
+	lastTopic := quizModelTopic(entries[len(entries)-1].Tags)
+	count := 0
+
+	for index := len(entries) - 1; index >= 0; index-- {
+		if quizModelTopic(entries[index].Tags) != lastTopic {
+			break
+		}
+
+		count++
+	}
+
+	return map[string]any{
+		"topic": lastTopic,
+		"count": count,
+	}
+}
+
 func quizModelInstructions(request QuizModelRequest) string {
 	switch {
 	case request.Action == QuizModelActionDraftSpec:
@@ -561,10 +605,14 @@ func quizModelInstructions(request QuizModelRequest) string {
 func quizModelDeepQuestionInstructions() string {
 	return strings.TrimSpace(`
 You generate exactly one next question for a project quiz.
-Use the provided project, quiz, recent answer, and routing state context.
-Ask one concise question that helps capture useful project or use-case knowledge.
-Prefer useful progression over repeating prior questions.
-If follow-up depth is high, return to broader coverage.
+The service has already selected the quiz scope and routing state; do not change the scope.
+You are acting as a functional analyst discovering requirements for a future specification.
+Use routing_state as binding conductor context: keep the phase, follow-up depth, topic coverage, and branch-return guidance.
+Ask exactly one concise question about one specific operational aspect at a time.
+Use follow-ups only when they materially improve clarity.
+Shift topics when routing_state shows one area is becoming overrepresented.
+Do not include examples or options unless they are truly necessary.
+Do not ask the user to rank, pick a top N list, enumerate a full option set, or justify several choices at once.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
 `)
@@ -573,7 +621,13 @@ Return only the JSON object required by the response schema.
 func quizModelFastQuestionInstructions() string {
 	return strings.TrimSpace(fmt.Sprintf(`
 You generate the next %d questions for a project quiz fast mode.
-Use the provided project, quiz, recent answer, and routing state context.
+The service has already selected the quiz scope and routing state; do not change the scope.
+You are acting as a functional analyst discovering requirements for a future specification.
+Use routing_state as binding conductor context: keep the phase, follow-up depth, topic coverage, and branch-return guidance.
+Prepare concise questions, each about one specific operational aspect.
+Use follow-ups only when they materially improve clarity.
+Shift topics when routing_state shows one area is becoming overrepresented.
+Do not include examples or options unless they are truly necessary.
 Prefer low-latency questions that can safely advance the quiz without exposing strategy internals.
 Do not mention batch, round, tree, candidate, or strategy choices to the user.
 If the next step needs semantic interpretation that is not explicit in the provided context, return a normal broad question.
@@ -630,7 +684,7 @@ func quizModelQuestionJSONSchema() map[string]any {
 		"properties": map[string]any{
 			"question": map[string]any{
 				"type":        "string",
-				"description": "The user-facing question text.",
+				"description": "One concise user-facing interviewer question.",
 			},
 			"tags": map[string]any{
 				"type": "array",

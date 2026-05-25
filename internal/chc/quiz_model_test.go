@@ -258,9 +258,73 @@ func TestQuizModelQuestionInstructionsMatchRedWrightContextBoundary(t *testing.T
 			t.Fatalf("question instructions mention selected context sections: %q", instruction)
 		}
 
-		if !strings.Contains(instruction, "Use the provided project, quiz, recent answer, and routing state context.") {
-			t.Fatalf("question instructions do not match RedWright context wording: %q", instruction)
+		if !strings.Contains(instruction, "service has already selected the quiz scope and routing state") {
+			t.Fatalf("question instructions do not keep service-selected scope: %q", instruction)
 		}
+
+		if !strings.Contains(instruction, "functional analyst discovering requirements") {
+			t.Fatalf("question instructions do not define analyst role: %q", instruction)
+		}
+
+		if !strings.Contains(instruction, "routing_state as binding conductor context") {
+			t.Fatalf("question instructions do not bind routing state: %q", instruction)
+		}
+
+		if !strings.Contains(instruction, "one specific operational aspect") {
+			t.Fatalf("question instructions do not define single-aspect focus: %q", instruction)
+		}
+
+		if !strings.Contains(instruction, "one area is becoming overrepresented") {
+			t.Fatalf("question instructions do not define topic shift signal: %q", instruction)
+		}
+	}
+}
+
+func TestQuizModelRoutingStateCarriesTopicConductorSignals(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Payload.RecentEntries = []QuizModelEntryPayload{
+		quizModelEntryPayloadWithTags("identity"),
+		quizModelEntryPayloadWithTags("identity"),
+		quizModelEntryPayloadWithTags("storage"),
+		quizModelEntryPayloadWithTags("identity"),
+		quizModelEntryPayloadWithTags("identity"),
+	}
+
+	state := quizModelRoutingState(request, QuizModelQuestionPayload{
+		Question:      "What identifier should appear in public paths?",
+		Tags:          []string{"identity"},
+		FollowUpDepth: 1,
+	})
+
+	coverage, ok := state["topic_coverage"].(map[string]int)
+	if !ok {
+		t.Fatalf("topic_coverage = %#v, want map[string]int", state["topic_coverage"])
+	}
+
+	if coverage["identity"] != 4 {
+		t.Fatalf("identity coverage = %d, want 4", coverage["identity"])
+	}
+
+	streak, ok := state["recent_topic_streak"].(map[string]any)
+	if !ok {
+		t.Fatalf("recent_topic_streak = %#v, want map[string]any", state["recent_topic_streak"])
+	}
+
+	if streak["topic"] != "identity" {
+		t.Fatalf("recent topic = %#v, want identity", streak["topic"])
+	}
+
+	if streak["count"] != 2 {
+		t.Fatalf("recent topic count = %#v, want 2", streak["count"])
+	}
+}
+
+func quizModelEntryPayloadWithTags(tags ...string) QuizModelEntryPayload {
+	return QuizModelEntryPayload{
+		Question: "Question?",
+		Answer:   "Answer.",
+		Status:   string(QuizEntryStatusAnswered),
+		Tags:     tags,
 	}
 }
 
