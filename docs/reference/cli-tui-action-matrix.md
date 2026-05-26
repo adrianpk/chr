@@ -216,6 +216,14 @@ High-priority `missing_cli` gaps:
 - Workspace graph refresh remains only partially covered by `chc index rebuild`
   and `chc index status`.
 
+Final Slice 5 documentation status:
+
+- Metadata, dump, runtime quiz, spec, plan, plan tracking, ticket, and work
+  operations have documented CLI/TUI parity where both surfaces exist.
+- Remaining gaps are explicit below and are either intentionally interactive,
+  CLI-only administration, TUI-only navigation, or not-yet-implemented checklist
+  capabilities.
+
 High-priority `service_divergence` gaps:
 
 - None currently identified in the audited Slice 2 surface.
