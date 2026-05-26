@@ -187,20 +187,28 @@ func assertIndexedTicket(t *testing.T, got, want IndexedTicket) {
 		t.Fatalf("ticket = %#v, want %#v", got, want)
 	}
 
-	if got.Synopsis != want.Synopsis ||
-		got.Status != want.Status ||
-		got.BoardColumn != want.BoardColumn ||
-		got.SourceKind != want.SourceKind ||
-		got.SourceRef != want.SourceRef ||
-		got.Slice != want.Slice {
-		t.Fatalf("enriched metadata = %#v, want %#v", got, want)
-	}
-
 	if got.ContentHash != want.ContentHash || got.FileSize != want.FileSize {
 		t.Fatalf("file state = %#v, want %#v", got, want)
 	}
 
 	if len(got.Tags) != len(want.Tags) {
 		t.Fatalf("len(Tags) = %d, want %d", len(got.Tags), len(want.Tags))
+	}
+
+	assertIndexedTicketEnrichedMetadata(t, got, want)
+}
+
+func assertIndexedTicketEnrichedMetadata(t *testing.T, got, want IndexedTicket) {
+	t.Helper()
+
+	enrichedMetadataMatches := got.Synopsis == want.Synopsis &&
+		got.Status == want.Status &&
+		got.BoardColumn == want.BoardColumn &&
+		got.SourceKind == want.SourceKind &&
+		got.SourceRef == want.SourceRef &&
+		got.Slice == want.Slice
+
+	if !enrichedMetadataMatches {
+		t.Fatalf("enriched metadata = %#v, want %#v", got, want)
 	}
 }
