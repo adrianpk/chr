@@ -22,6 +22,7 @@ func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Usage: "Manage workspace tickets",
 		Commands: []*cli.Command{
 			newTicketApplyResultCommand(stdout),
+			newTicketBoardCommand(stdout),
 			newTicketCommentCommand(stdout),
 			newTicketListCommand(stdout),
 			newTicketLoopCommand(stdout),
@@ -30,6 +31,15 @@ func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newTicketStartCommand(stdout),
 			newTicketStatusCommand(stdout),
 		},
+	}
+}
+
+func newTicketBoardCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "board",
+		Usage:  "Inspect Board columns for the resolved project",
+		Flags:  ticketProjectFlags(),
+		Action: ticketBoardAction(stdout),
 	}
 }
 
@@ -224,6 +234,12 @@ func ticketNewFlags() []cli.Flag {
 func ticketListAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketList(ctx, cmd, stdout)
+	}
+}
+
+func ticketBoardAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketBoard(ctx, cmd, stdout)
 	}
 }
 
@@ -1415,6 +1431,84 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	}
 
 	return printTicketList(stdout, tickets)
+}
+
+func runTicketBoard(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("ticket board does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	board, err := newService(ctx, env, projectContext, deps.assetsFS).Board()
+	if err != nil {
+		return err
+	}
+
+	return printTicketBoard(stdout, board)
+}
+
+func printTicketBoard(stdout io.Writer, board chc.Board) error {
+	lines := []string{
+		fmt.Sprintf("total: %d", board.TotalCount),
+		fmt.Sprintf("normal: %d", board.NormalCount),
+		fmt.Sprintf("attention: %d", board.AttentionCount),
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write ticket board result: %w", err)
+		}
+	}
+
+	for _, column := range board.Columns {
+		if err := printTicketBoardColumn(stdout, column); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func printTicketBoardColumn(stdout io.Writer, column chc.BoardColumn) error {
+	_, err := fmt.Fprintf(stdout, "column: %s\t%s\t%d\n", column.ID, column.Title, column.Count)
+	if err != nil {
+		return fmt.Errorf("write ticket board column: %w", err)
+	}
+
+	for _, ticket := range column.Tickets {
+		_, err = fmt.Fprintf(
+			stdout,
+			"%s\t%s\t%s\t%s\t%s\n",
+			ticket.Key,
+			ticket.Status,
+			ticket.Priority,
+			ticket.Type,
+			ticket.Title,
+		)
+		if err != nil {
+			return fmt.Errorf("write ticket board row: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func printTicketList(stdout io.Writer, tickets []chc.IndexedTicket) error {

@@ -95,6 +95,7 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		{"plan", "generate"},
 		{"plan", "regenerate"},
 		{"plan", "tracking", "create"},
+		{"ticket", "board"},
 	} {
 		if rootCommandIncludesPath(cmd, path...) {
 			continue
@@ -1894,6 +1895,63 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 	want := "CHC-1\tDo something\topen\thigh\tnormal\ttask\tonboarding\tCHC-1-Do-something.md"
 	if !strings.Contains(stdout.String(), want) {
 		t.Fatalf("stdout = %q, want ticket row %q", stdout.String(), want)
+	}
+}
+
+func TestTicketBoardPrintsBoardColumns(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Backlog.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Backlog work",
+		Synopsis:  "Prepare backlog work.",
+		Status:    chc.TicketStatusBacklog,
+		Priority:  "normal",
+		Severity:  "normal",
+		Type:      "task",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Review.md", chc.Ticket{
+		Key:       "CHC-2",
+		Title:     "Review work",
+		Synopsis:  "Review implemented work.",
+		Status:    chc.TicketStatusReadyForReview,
+		Priority:  "high",
+		Severity:  "normal",
+		Type:      "feature",
+		CreatedAt: time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
+	})
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"board",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket board returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"total: 2",
+		"normal: 2",
+		"attention: 0",
+		"column: backlog\tBacklog\t1",
+		"CHC-1\tbacklog\tnormal\ttask\tBacklog work",
+		"column: ready_for_review\tReady For Review\t1",
+		"CHC-2\tready_for_review\thigh\tfeature\tReview work",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
 	}
 }
 

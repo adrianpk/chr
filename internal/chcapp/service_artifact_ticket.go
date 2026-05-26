@@ -312,9 +312,18 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 }
 
 func (s service) listProjectTickets() ([]chc.IndexedTicket, error) {
-	index, err := chc.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	board, err := s.Board()
 	if err != nil {
 		return nil, err
+	}
+
+	return board.Tickets, nil
+}
+
+func (s service) Board() (chc.Board, error) {
+	index, err := chc.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	if err != nil {
+		return chc.Board{}, err
 	}
 
 	defer func() {
@@ -324,10 +333,12 @@ func (s service) listProjectTickets() ([]chc.IndexedTicket, error) {
 
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
-		return nil, err
+		return chc.Board{}, err
 	}
 
-	return index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
+	return chc.NewBoardQuery(index).ProjectBoard(s.ctx, chc.BoardQueryOptions{
+		ProjectID: s.projectContext.ProjectID,
+	})
 }
 
 func (s service) ticketByKey(key string) (chc.IndexedTicket, error) {

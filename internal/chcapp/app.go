@@ -341,27 +341,12 @@ func loadTUITickets(
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
 ) ([]chc.IndexedTicket, error) {
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	board, err := newService(ctx, env, projectContext, assetsFS).Board()
 	if err != nil {
 		return nil, err
 	}
 
-	defer func() {
-		//nolint:errcheck // Load result already comes from the main operation.
-		_ = index.Close()
-	}()
-
-	err = refreshProjectTicketIndex(ctx, index, projectContext)
-	if err != nil {
-		return nil, err
-	}
-
-	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
-	if err != nil {
-		return nil, err
-	}
-
-	return tickets, nil
+	return board.Tickets, nil
 }
 
 func loadTUIAuthoringSessions(

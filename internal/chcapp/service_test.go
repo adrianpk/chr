@@ -532,6 +532,36 @@ func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 	}
 }
 
+func TestServiceBoardReturnsSharedBoardReadModel(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Backlog.md", chc.Ticket{
+		Key:       "CHC-1",
+		Title:     "Backlog work",
+		Synopsis:  "Prepare backlog work.",
+		Status:    chc.TicketStatusBacklog,
+		Priority:  "normal",
+		Severity:  "normal",
+		Type:      "task",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+
+	operations := newTestService(t, projectDir)
+
+	board, err := operations.Board()
+	if err != nil {
+		t.Fatalf("Board returned error: %v", err)
+	}
+
+	if board.TotalCount != 1 || board.NormalCount != 1 {
+		t.Fatalf("board counts = %#v, want one normal ticket", board)
+	}
+
+	if len(board.Tickets) != 1 || board.Tickets[0].Key != "CHC-1" {
+		t.Fatalf("board tickets = %#v, want CHC-1", board.Tickets)
+	}
+}
+
 func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
