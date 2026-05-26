@@ -198,6 +198,17 @@ Command availability gates:
 | Project registry | no TUI path | `runProject*` | `missing_tui` | User-level registry management is CLI-only. |
 | Maintenance/notify/proving | no TUI path | command-specific paths | `missing_tui` | Operational/admin command families are CLI-only. |
 
+## Test Evidence
+
+| Surface | Evidence | Coverage |
+| --- | --- | --- |
+| CLI command registration | `TestRootCommandRegistersParitySubcommands` | Verifies metadata, dump, quiz, spec, plan, and plan tracking command paths are registered. |
+| CLI metadata and document commands | `TestMetadataProjectSetSavesProjectMetadata`, `TestMetadataCaseSetCreatesUseCaseMetadata`, `TestDumpNewAndShowUseServiceCommands`, `TestSpecAndPlanListCommandsUseServiceViews` | Verifies representative CLI commands write or read through project services. |
+| TUI dump adapter | `TestTUIDumpAdapterUsesDumpServices` | Verifies TUI dump create/edit/save dispatch reaches dump services and preserves selected paths. |
+| TUI runtime quiz adapter | `TestTUIQuizAdapterDispatchesRuntimeQuizActions` | Verifies TUI quiz start/answer/mode dispatch reaches runtime quiz services. |
+| TUI plan adapter | `TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope`, `TestTUIPlanGenerateReturnsRefusalMessageForExistingPlan` | Verifies TUI plan generation dispatch and existing-plan guard. |
+| Service generation paths | `TestServiceGenerateSpecUsesUseCaseContext`, `TestServiceMaterializePlanTrackingCreatesTrackingAndTickets` | Verifies spec generation and plan tracking services used by both surfaces. |
+
 ## Gap Summary
 
 High-priority `missing_cli` gaps:
