@@ -128,12 +128,13 @@ Candidate tasks:
 - [x] T3.4 Add transaction-safe ticket key allocation persistence.
 - [x] T3.5 Add migration tests.
 - [x] T3.6 Update SQLite migration reference.
-- [ ] T3.7 Create slice implementation report.
+- [x] T3.7 Create slice implementation report.
 - [ ] T3.8 Run validation.
 
 Task commits:
 
 - `d5b0bc5 feat(db): add board ticket metadata schema`
+- `f8a6fcf docs(db): record board ticket schema decision`
 - `pending commit`
 
 Validation:
