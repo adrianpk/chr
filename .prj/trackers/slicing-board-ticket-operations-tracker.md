@@ -49,7 +49,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Userspace Resolver | Delivered | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | PR `#214`; active `.chc/user/` resolver and env contract; `make verify` passed. |
 | Slice 3: Board SQLite Schema | Delivered | `feat/slice-3-board-sqlite-schema` | `feat(slice-3): board sqlite schema` | `.prj/reports/slices/board-ticket-operations/slice-3-board-sqlite-schema.md` | PR `#215`; migration/index shape for Board metadata and key allocation foundation; `make verify` passed. |
 | Slice 4: Indexed Ticket Enrichment | Delivered | `feat/slice-4-indexed-ticket-enrichment` | `feat(slice-4): indexed ticket enrichment` | `.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md` | PR `#216`; parser/reconciler/repository through enriched metadata; `make verify` passed. |
-| Slice 5: Ticket Creation Service | In progress | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | Manual creation with synopsis, backlog default, index refresh. |
+| Slice 5: Ticket Creation Service | In review | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | Manual creation with synopsis, backlog default, SQLite key allocation, index refresh. |
 | Slice 6: Generated Ticket Synopsis | Pending | `feat/slice-6-generated-ticket-synopsis` | `feat(slice-6): generated ticket synopsis` | `.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md` | Plan tracking materialization ticket synopsis/source metadata. |
 | Slice 7: Board Query Service | Pending | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | Shared CLI/TUI Board read model. |
 | Slice 8: Compact Board Columns | Pending | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | One-column compact Board navigation. |
@@ -177,22 +177,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T5.1 Add synopsis to `CreateTicketRequest` and CLI flags.
-- [ ] T5.2 Default Board/TUI-created tickets to `backlog`.
-- [ ] T5.3 Validate required metadata for ChrysoCoord-created tickets.
-- [ ] T5.4 Use SQLite-backed key allocation or the Slice 3 allocation boundary.
-- [ ] T5.5 Refresh affected ticket index after creation.
-- [ ] T5.6 Add CLI/service tests.
-- [ ] T5.7 Create slice implementation report.
-- [ ] T5.8 Run validation.
+- [x] T5.1 Add synopsis to `CreateTicketRequest` and CLI flags.
+- [x] T5.2 Default Board/TUI-created tickets to `backlog`.
+- [x] T5.3 Validate required metadata for ChrysoCoord-created tickets.
+- [x] T5.4 Use SQLite-backed key allocation or the Slice 3 allocation boundary.
+- [x] T5.5 Refresh affected ticket index after creation.
+- [x] T5.6 Add CLI/service tests.
+- [x] T5.7 Create slice implementation report.
+- [x] T5.8 Run validation.
 
 Task commits:
 
-- Pending.
+- `b2f49de feat(ticket): harden board ticket creation`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 6: Generated Ticket Synopsis
 
