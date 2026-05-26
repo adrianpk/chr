@@ -156,18 +156,22 @@ Candidate tasks:
 - [x] T4.4 Surface unknown statuses as attention-ready metadata.
 - [x] T4.5 Update index rebuild/status tests.
 - [x] T4.6 Create slice implementation report.
-- [ ] T4.7 Run validation.
+- [x] T4.7 Run validation.
 
 Task commits:
 
 - `32c4afa feat(ticket): persist enriched ticket metadata`
 - `2225d3b test(ticket): assert enriched index metadata`
-- `pending commit`
+- `fcec642 docs(board): report indexed ticket enrichment slice`
+- `832bafa test(ticket): simplify enriched metadata assertion`
 
 Validation:
 
 - `go test ./internal/chc -run 'TestTicketIndex|TestTicketParser|TestTicketIndexRebuild|TestTicketReconciliation'`: pass.
 - `go test ./internal/chc -run 'TestTicketIndex'`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 5: Ticket Creation Service
 

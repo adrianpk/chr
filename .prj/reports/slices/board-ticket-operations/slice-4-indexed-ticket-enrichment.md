@@ -51,6 +51,9 @@ SQLite ticket index repository.
 
 - `go test ./internal/chc -run 'TestTicketIndex|TestTicketParser|TestTicketIndexRebuild|TestTicketReconciliation'`
 - `go test ./internal/chc -run 'TestTicketIndex'`
+- `git diff --check`
+- `go test ./...`
+- `make verify`
 
 ## Risks and Follow-ups
 
