@@ -78,6 +78,9 @@ before changing SQLite schema, ticket creation services, or TUI rendering.
 - `go test ./internal/chc -run 'TestTicketRenderer'`
 - `go test ./internal/chc -run 'TestTicketParser'`
 - `go test ./internal/chc -run 'TestValidateIndexedTicket|TestTicketStatus'`
+- `git diff --check`
+- `go test ./...`
+- `make verify`
 
 ## Risks and Follow-ups
 

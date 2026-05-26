@@ -69,7 +69,7 @@ Candidate tasks:
 - [x] T1.5 Add metadata validation tests for Board-created tickets and legacy
   tickets.
 - [x] T1.6 Create slice implementation report.
-- [ ] T1.7 Run validation.
+- [x] T1.7 Run validation.
 
 Task commits:
 
@@ -78,7 +78,8 @@ Task commits:
 - `6a67fba feat(ticket): render board metadata`
 - `b7adc7b feat(ticket): parse board metadata`
 - `14e4b6d test(ticket): cover board metadata validation`
-- `pending commit`
+- `2af922b docs(board): report ticket metadata slice`
+- `b87e8dd refactor(ticket): simplify metadata rendering`
 
 Validation:
 
@@ -86,6 +87,9 @@ Validation:
 - `go test ./internal/chc -run 'TestTicketRenderer'`: pass.
 - `go test ./internal/chc -run 'TestTicketParser'`: pass.
 - `go test ./internal/chc -run 'TestValidateIndexedTicket|TestTicketStatus'`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 2: Userspace Resolver
 
