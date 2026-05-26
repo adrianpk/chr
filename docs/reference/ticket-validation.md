@@ -25,15 +25,24 @@ Empty values for those fields are rejected.
 Allowed status values are:
 
 ```text
+backlog
+ready_for_dev
+in_progress
+ready_for_review
+ready_for_merge
+done
 open
 ready
-in_progress
 reviewing
 blocked
 solved
 merged
 closed
 ```
+
+The first six values are normal Board statuses. The remaining values are legacy
+statuses that still validate for existing tickets. `blocked` validates but is
+rendered in the Board attention view rather than a normal column.
 
 ## Classification Values
 

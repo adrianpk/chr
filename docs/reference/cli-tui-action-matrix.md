@@ -28,7 +28,7 @@ Status values:
 | Navigation | Open Dash view | `F8` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
 | Navigation | Open Help view | `F9` | `chc --help`, command-specific `--help` | `internal/chctui.Model.selectView`, `urfave/cli` help | `matched` | Different surfaces, same help intent. |
 | Layout | Move pane focus | `tab`, `shift+tab`, `esc` | none | `internal/chctui.Model.selectNextPane`, `selectPreviousPane`, `selectPrimaryPane` | `intentionally_interactive` | TUI-only layout state. |
-| Layout | Maximize focused pane | `alt+m` | none | `internal/chctui.Model.toggleMaximizedPane` | `intentionally_interactive` | TUI-only layout state. |
+| Layout | Maximize focused pane | `alt+m` | none | `internal/chctui.Model.toggleMaximizedPane` | `intentionally_interactive` | TUI-only layout state. Board ticket-pane maximization renders all normal Board columns. |
 | Layout | Resize panes | mouse drag | none | `internal/chctui.Model.applyLayoutDrag` | `intentionally_interactive` | TUI-only layout state. |
 | Shell | Quit TUI | `q`, `ctrl+c`, `F10` | process exit | Bubble Tea quit | `intentionally_interactive` | Terminal lifecycle. |
 | Palette | Open command palette | `:` | none | `internal/chctui.CommandPaletteState` | `intentionally_interactive` | TUI-only command launcher. |
@@ -55,6 +55,10 @@ Status values:
 | Plans | Create plan tracking and tickets | `F6`, `alt+t`, confirm | `chc plan tracking create [--use-case ...]` | `service.MaterializePlanTracking` | `matched` | Same plan tracking materialization service. |
 | Plans | Refresh plans | `F6`, `r` | `chc plan list` | `service.ListPlans` | `matched` | Same plan list service. |
 | Board | Select/filter tickets | `F7`, arrows, `/` | `chc ticket list` filters | `internal/chctui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
+| Board | Move between normal Board columns | `F7`, `left` / `right` or `h` / `l` | `chc ticket board` | `internal/chctui.Model.selectBoardColumn`, `service.Board` | `matched` | CLI prints all Board columns; TUI navigates one compact column at a time. |
+| Board | Toggle attention view | `F7`, `alt+a` | `chc ticket board` attention summary | `internal/chctui.Model.toggleBoardAttention`, `chc.BoardAttentionReasons` | `matched` | TUI shows attention tickets separately; CLI prints attention count through the same Board service. |
+| Board | Maximize Board ticket pane | `F7`, ticket pane, `alt+m` | `chc ticket board` | `internal/chctui.renderMaximizedBoardWorkspace`, `service.Board` | `matched` | TUI renders a multi-column Board; CLI prints equivalent column data. |
+| Board | Selected ticket detail | `F7`, selected ticket detail pane | `chc ticket show <key>` | `internal/chctui.Model.renderSelectedTicketDetail`, `runTicketShow` | `matched` | TUI detail includes indexed metadata and bounded Markdown context; CLI shows the selected ticket file. |
 
 ## Command Palette Commands
 
@@ -63,7 +67,7 @@ Status values:
 | Workspace | `refresh` | Reload workspace files into runtime graph. | `chc index rebuild`, `chc index status` partially | `service.RefreshWorkspace` | `missing_cli` | CLI index commands target ticket index, not the full TUI workspace graph refresh. |
 | Help | `help` | Navigate to Help view. | `chc --help` | `internal/chctui.Model.selectView`, CLI help | `matched` | Equivalent intent, different presentation. |
 | Selection | `open-source` | Show selected source path. | none | `internal/chctui.Model.selectedSourcePath` | `missing_cli` | CLI has path outputs in list/show commands, but no selected-source concept. |
-| Ticket | `create-ticket` | Create default task ticket. | `chc ticket new <title>` | `service.CreateTicket`; TUI also wraps defaults with `service.CreateDefaultTicket` | `matched` | CLI supports full metadata; TUI uses default metadata through the same ticket creation service. |
+| Ticket | `create-ticket` | Create default task ticket. | `chc ticket new <title> --synopsis ...` | `service.CreateTicket`; TUI also wraps defaults with `service.CreateDefaultTicket` | `matched` | CLI supports full metadata; TUI uses default metadata through the same ticket creation service. |
 | Dump | `create-dump` | Create selected project/use-case dump. | `chc dump new ...` | `service.CreateDump` | `matched` | Same service path. |
 | Dump | `edit-dump` | Open selected dump in TUI editor. | `chc dump show`, `chc dump save`, `chc dump append` | `service.ReadDump`, `service.SaveDump`, `service.AppendDump` | `matched` | CLI is non-interactive and path-based. |
 | Dump | `refresh-dumps` | Reload dump views. | `chc dump list` | `service.ListDumps` | `matched` | Same service path. |
@@ -118,6 +122,7 @@ Command availability gates:
 | Project Registry | `chc project select` | none | `runProjectSelect`, user registry | `missing_tui` | Registry selection is CLI-only. |
 | Tickets | `chc ticket new` | Palette `create-ticket` partially | `service.CreateTicket`; TUI also wraps defaults with `service.CreateDefaultTicket` | `matched` | CLI supports metadata; TUI creates a default task ticket through the same service. |
 | Tickets | `chc ticket list` | Board view | `runTicketList`, ticket index | `matched` | TUI board and CLI list inspect indexed tickets. |
+| Tickets | `chc ticket board` | Board view and maximized Board | `service.Board` | `matched` | CLI prints Board totals and columns; TUI renders compact and maximized Board views. |
 | Tickets | `chc ticket show` | Board selected ticket detail | `runTicketShow`, ticket index | `matched` | Equivalent inspection surface. |
 | Tickets | `chc ticket comment` | Palette `ticket-add-comment` partially | `service.AddTicketComment`; TUI wraps default body with `service.AddSelectedTicketComment` | `matched` | CLI body is user-supplied; TUI body is fixed. |
 | Tickets | `chc ticket status` | Palette ticket status commands | `service.MoveTicketStatus`; TUI wraps selected ticket with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
@@ -187,6 +192,7 @@ Command availability gates:
 | Spec operations | `tuiSpecActionExecutor` -> `service.ListSpecs`, `GenerateSpec` | `chc spec list`, `chc spec generate` -> same service methods | `matched` | Same service path. |
 | Plan operations | `tuiPlanActionExecutor` -> `service.ListPlans`, `GeneratePlan`, `RegeneratePlan`, `MaterializePlanTracking` | `chc plan *` -> same service methods | `matched` | Same service path. |
 | Ticket creation | `tuiArtifactActionExecutor` -> `service.CreateDefaultTicket` -> `service.CreateTicket` | `runTicketNew` -> `service.CreateTicket` | `matched` | CLI behavior is richer; both use the same ticket creation service. |
+| Board query | TUI Board views -> indexed ticket views | `runTicketBoard` -> `service.Board` | `matched` | CLI and TUI read the same Board columns and attention classification. |
 | Ticket comment | `tuiTicketActionExecutor` -> `service.AddSelectedTicketComment` -> `service.AddTicketComment` | `runTicketComment` -> `service.AddTicketComment` | `matched` | CLI body is user-supplied; TUI supplies a default body. |
 | Ticket status | `tuiTicketActionExecutor` -> `service.MoveSelectedTicketStatus` -> `service.MoveTicketStatus` | `runTicketStatus` -> `service.MoveTicketStatus` | `matched` | Same status service. |
 | Work start ticket | `tuiWorkActionExecutor` -> `service.StartSelectedTicket` -> shared execution helpers | `runTicketStart` -> shared execution helpers | `matched` | TUI wraps selection and message reload; CLI owns dry-run and output. |
@@ -207,6 +213,7 @@ Command availability gates:
 | TUI dump adapter | `TestTUIDumpAdapterUsesDumpServices` | Verifies TUI dump create/edit/save dispatch reaches dump services and preserves selected paths. |
 | TUI runtime quiz adapter | `TestTUIQuizAdapterDispatchesRuntimeQuizActions` | Verifies TUI quiz start/answer/mode dispatch reaches runtime quiz services. |
 | TUI plan adapter | `TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope`, `TestTUIPlanGenerateReturnsRefusalMessageForExistingPlan` | Verifies TUI plan generation dispatch and existing-plan guard. |
+| Board CLI and TUI | `TestTicketBoardPrintsBoardColumns`, `TestModelRendersMaximizedBoardColumns`, `TestModelRendersMaximizedBoardAttentionSeparately` | Verifies CLI Board output, maximized TUI Board columns, and separate attention rendering. |
 | Service generation paths | `TestServiceGenerateSpecUsesUseCaseContext`, `TestServiceMaterializePlanTrackingCreatesTrackingAndTickets` | Verifies spec generation and plan tracking services used by both surfaces. |
 
 ## Gap Summary
@@ -216,17 +223,17 @@ High-priority `missing_cli` gaps:
 - Workspace graph refresh remains only partially covered by `chc index rebuild`
   and `chc index status`.
 
-Final Slice 5 documentation status:
+Current documentation status:
 
-- Metadata, dump, runtime quiz, spec, plan, plan tracking, ticket, and work
-  operations have documented CLI/TUI parity where both surfaces exist.
+- Metadata, dump, runtime quiz, spec, plan, plan tracking, Board, ticket, and
+  work operations have documented CLI/TUI parity where both surfaces exist.
 - Remaining gaps are explicit below and are either intentionally interactive,
   CLI-only administration, TUI-only navigation, or not-yet-implemented checklist
   capabilities.
 
 High-priority `service_divergence` gaps:
 
-- None currently identified in the audited Slice 2 surface.
+- None currently identified in the audited surfaces.
 
 Current `not_implemented` actions:
 

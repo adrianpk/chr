@@ -358,7 +358,8 @@ interactive use, when the shell is already inside the managed project, the
 ticket can be created with much less input:
 
 ```sh
-chc ticket new "Fix publish index update"
+chc ticket new "Fix publish index update" \
+  --synopsis "Fix the publish index update path."
 ```
 
 Metadata such as type, priority, severity, use case, project area, and tags can
@@ -371,6 +372,7 @@ Create tickets from the seeded project issues:
 ```sh
 chc ticket new \
   "Fix publish index update" \
+  --synopsis "Fix the publish index update path." \
   --type bug \
   --priority high \
   --severity critical \
@@ -380,9 +382,10 @@ chc ticket new \
 
 chc ticket new \
   "Search posts by tags" \
+  --synopsis "Add tag-aware post search." \
   --type feature \
-  --priority medium \
-  --severity major \
+  --priority normal \
+  --severity normal \
   --use-case cli-blog \
   --project-area search \
   --tag authoring

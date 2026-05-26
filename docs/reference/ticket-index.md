@@ -37,6 +37,21 @@ Initial operations:
 
 Upserting a ticket replaces its tag rows transactionally.
 
+Indexed ticket rows include Board-facing metadata:
+
+- `synopsis`;
+- `board_column`;
+- `source_kind`;
+- `source_ref`;
+- `slice`;
+- `use_case`;
+- `project_area`;
+- classification fields such as status, priority, severity, and type.
+
+The Board uses this derived metadata for column selection, attention detection,
+filtering, and selected-ticket detail. Markdown ticket files remain the durable
+ticket body.
+
 ## Scope
 
 The repository does not parse Markdown files.

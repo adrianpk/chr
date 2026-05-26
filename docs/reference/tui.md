@@ -224,12 +224,40 @@ chc plan tracking create --use-case billing
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a ticket. |
+| `left` / `right` or `h` / `l` | Move between normal Board columns. |
+| `alt+a` | Toggle the virtual attention view. |
+| `alt+m` | Maximize the focused pane. In the ticket pane, maximized Board shows all normal columns; in attention mode it shows only attention tickets. |
 | `/` | Filter tickets. |
 | `enter` while filtering | Apply the filter and select the first match. |
 | `esc` while filtering | Cancel filter editing. |
 
+Normal Board columns are `backlog`, `ready_for_dev`, `in_progress`,
+`ready_for_review`, `ready_for_merge`, and `done`. Legacy statuses still parse:
+`open` maps to Backlog, `ready` maps to Ready For Dev, `reviewing` maps to
+Ready For Review, `solved` maps to Ready For Merge, and `merged` or `closed`
+map to Done. `blocked` and statuses outside normal Board columns appear in the
+attention view.
+
+The selected ticket detail includes synopsis, source metadata, slice metadata,
+checklist counts, comment counts, bounded Markdown body context, checklist
+preview, recent comment headings, attention reasons, and the source path when
+available.
+
 Ticket and work actions are available from the command palette and use
 confirmation prompts.
+
+CLI equivalents:
+
+```sh
+chc ticket board
+chc ticket list
+chc ticket show CHC-1
+chc ticket status CHC-1 ready
+chc ticket status CHC-1 in_progress
+chc ticket status CHC-1 reviewing
+chc ticket start CHC-1
+chc ticket loop --status ready --max-iterations 1
+```
 
 ## Confirmation Modes
 

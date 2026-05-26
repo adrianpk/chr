@@ -382,14 +382,35 @@ chc plan tracking create --use-case billing
 Open the Board view with `F7`.
 
 The Board view groups tickets by status and shows details for the selected
-ticket.
+ticket. Normal Board columns are:
+
+- Backlog: `backlog`
+- Ready For Dev: `ready_for_dev`
+- In Progress: `in_progress`
+- Ready For Review: `ready_for_review`
+- Ready For Merge: `ready_for_merge`
+- Done: `done`
+
+Legacy ticket statuses are still accepted. `open`, `ready`, `reviewing`,
+`solved`, `merged`, and `closed` map into normal Board columns. `blocked` and
+unknown statuses appear in the virtual attention view instead of the normal
+column cycle.
 
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a ticket. |
+| `left` / `right` or `h` / `l` | Move between normal Board columns. |
+| `alt+a` | Toggle the virtual attention view. |
+| `alt+m` | Maximize the focused pane. In the ticket pane, Board maximization shows all normal columns; in attention mode it shows only attention tickets. |
 | `/` | Filter tickets. |
 | `enter` while filtering | Apply the filter and select the first match. |
 | `esc` while filtering | Cancel filter editing. |
+
+The compact Board shows one normal column at a time and a detail pane for the
+selected ticket. The detail pane includes status metadata, synopsis, source
+metadata, slice metadata, checklist counts, comment counts, bounded Markdown
+body preview, checklist preview, recent comment headings, attention reasons,
+and the ticket path when those fields are available.
 
 Ticket and work operations are available from the command palette:
 
@@ -397,7 +418,7 @@ Ticket and work operations are available from the command palette:
 | --- | --- |
 | Create ticket | Create a default task ticket after confirmation. |
 | Add ticket comment | Add the standard `TUI action recorded.` comment to the selected ticket. |
-| Move ticket to ready | Move the selected ticket to `ready`. |
+| Move ticket to ready | Move the selected ticket to `ready`. This legacy status maps to the Ready For Dev Board column. |
 | Move ticket to in_progress | Move the selected ticket to `in_progress`. |
 | Move ticket to reviewing | Move the selected ticket to `reviewing`. |
 | Start selected ticket | Run the configured runtime harness for the selected ticket. |
@@ -407,6 +428,22 @@ Ticket and work operations are available from the command palette:
 Checklist toggle and checklist item creation commands are visible as capability
 checks, but they currently return an unavailable-operation message because the
 safe checklist writer has not been implemented.
+
+Equivalent CLI commands:
+
+```sh
+chc ticket board
+chc ticket list
+chc ticket show CHC-1
+chc ticket new "Add completed task support" --synopsis "Add task completion support."
+chc ticket comment CHC-1 "TUI action recorded."
+chc ticket status CHC-1 ready
+chc ticket status CHC-1 in_progress
+chc ticket status CHC-1 reviewing
+chc ticket start CHC-1
+chc ticket loop --status ready --max-iterations 1
+chc daemon stop
+```
 
 ## Inspect Operations
 
@@ -427,13 +464,17 @@ modal state.
 Create a ticket:
 
 ```sh
-chc ticket new "Add completed task support" --type feature --priority high
+chc ticket new "Add completed task support" \
+  --synopsis "Add task completion support." \
+  --type feature \
+  --priority high
 ```
 
 Useful metadata:
 
 ```sh
 chc ticket new "Fix task ID reuse" \
+  --synopsis "Fix task id reuse in the runtime path." \
   --type bug \
   --priority high \
   --severity critical \

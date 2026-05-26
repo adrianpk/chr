@@ -25,15 +25,42 @@ The command accepts the standard ticket project flags:
 Allowed status values are:
 
 ```text
+backlog
+ready_for_dev
+in_progress
+ready_for_review
+ready_for_merge
+done
+```
+
+Legacy status values are still accepted for compatibility:
+
+```text
 open
 ready
-in_progress
 reviewing
 blocked
 solved
 merged
 closed
 ```
+
+Board column mapping:
+
+| Status | Board behavior |
+| --- | --- |
+| `backlog` | Backlog column. |
+| `ready_for_dev` | Ready For Dev column. |
+| `in_progress` | In Progress column. |
+| `ready_for_review` | Ready For Review column. |
+| `ready_for_merge` | Ready For Merge column. |
+| `done` | Done column. |
+| `open` | Legacy alias for Backlog. |
+| `ready` | Legacy alias for Ready For Dev. |
+| `reviewing` | Legacy alias for Ready For Review. |
+| `solved` | Legacy alias for Ready For Merge. |
+| `merged`, `closed` | Legacy aliases for Done. |
+| `blocked` | Attention view; not part of the normal Board column cycle. |
 
 ## Behavior
 

@@ -72,3 +72,13 @@ The Board migration adds:
 
 Markdown ticket files remain the durable ticket body. SQLite stores searchable
 and selectable metadata for operational views.
+
+The migration file is:
+
+```text
+20260526000008-add_board_ticket_metadata.sql
+```
+
+The Board uses the existing `indexed_tickets` read model instead of a dedicated
+Board table. `ticket_key_sequences` stores monotonic ticket key allocation state
+for generated `CHC-<number>` keys.

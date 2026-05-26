@@ -10,6 +10,14 @@ Project ticket files and project protocol assets are local to `.chc/` inside eac
 
 ChrysoCoord may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chc/` source files.
 
+Board and ticket operations use both layers:
+
+- Markdown tickets under `.chc/tickets/` are the durable ticket records.
+- The user-level SQLite index stores derived ticket metadata for fast listing,
+  Board columns, attention detection, and ticket key allocation.
+- `.chc/user/` is the project-local active userspace boundary for workflows
+  that need an operator-owned location.
+
 Managed projects also receive a root-level `AGENTS.md` for compatibility with agent tooling that looks for this file at the repository root.
 
 ## Initialization

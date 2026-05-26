@@ -60,7 +60,10 @@ the project overrides them in `.chc/config.yml`.
 Create a Markdown ticket:
 
 ```sh
-chc ticket new "Fix the failing task workflow" --type bug --priority high
+chc ticket new "Fix the failing task workflow" \
+  --synopsis "Fix the failing task workflow." \
+  --type bug \
+  --priority high
 ```
 
 List indexed tickets:

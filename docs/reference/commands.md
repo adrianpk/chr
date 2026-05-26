@@ -156,17 +156,29 @@ Markdown document plus one ticket per generated slice.
 Create and inspect tickets:
 
 ```sh
-chc ticket new "Add completed task support" --type feature --priority high
+chc ticket new "Add completed task support" \
+  --synopsis "Add task completion support." \
+  --type feature \
+  --priority high
 chc ticket list
 chc ticket show CHC-1
+chc ticket board
 ```
+
+`chc ticket board` prints Board totals, normal Board columns, and tickets in
+each column for the resolved project.
 
 Update ticket state:
 
 ```sh
 chc ticket comment CHC-1 "Validation fails in the completion path."
 chc ticket status CHC-1 ready
+chc ticket status CHC-1 in_progress
+chc ticket status CHC-1 reviewing
 ```
+
+Ticket creation requires a synopsis. The synopsis is short searchable metadata
+used by Board and detail views.
 
 Start one ticket:
 

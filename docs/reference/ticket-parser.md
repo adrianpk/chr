@@ -14,7 +14,8 @@ The parser expects a Markdown file with YAML frontmatter delimiters:
 ---
 key: "CHC-1"
 title: "Do something"
-status: "open"
+synopsis: "Implement one focused change."
+status: "backlog"
 tags: ["uxui"]
 ---
 
@@ -37,6 +38,7 @@ The model includes:
 - relative ticket path;
 - ticket metadata;
 - tags;
+- synopsis, Board column, source metadata, and slice metadata when present;
 - created and updated timestamps when present;
 - file modification time;
 - file size;
