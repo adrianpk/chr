@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sort"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -122,6 +121,7 @@ type Model struct {
 	height                   int
 	tickets                  []TicketView
 	selectedTicket           int
+	boardColumn              string
 	ticketFilter             string
 	filterEntryMode          bool
 	documents                []DocumentView
@@ -180,6 +180,7 @@ const (
 	maxPanelSplitPercent     = 75
 )
 
+//nolint:funlen // Model construction keeps option mapping in one place.
 func NewModel(opts Options) Model {
 	workspaceIndex := opts.WorkspaceIndex
 	if len(workspaceIndex.NodesByID) == 0 {
@@ -207,6 +208,8 @@ func NewModel(opts Options) Model {
 		projectMetadata.SourcePath = chc.ProjectMetadataPath(opts.ProjectDir)
 	}
 
+	tickets := NewTicketViews(opts.Tickets)
+
 	return Model{
 		projectDir:             opts.ProjectDir,
 		projectID:              opts.ProjectID,
@@ -216,7 +219,8 @@ func NewModel(opts Options) Model {
 		maximizedPane:          -1,
 		verticalSplitPercent:   defaultPanelSplitPercent,
 		horizontalSplitPercent: defaultPanelSplitPercent,
-		tickets:                NewTicketViews(opts.Tickets),
+		tickets:                tickets,
+		boardColumn:            defaultBoardColumn(tickets),
 		documents:              append([]DocumentView(nil), opts.Documents...),
 		dumps:                  normalizeDumpViews(opts.Dumps),
 		quizzes:                normalizeQuizViews(opts.Quizzes),
@@ -562,18 +566,8 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	if isQuitKey(key) {
-		return m, tea.Quit
-	}
-
-	if key == "alt+m" {
-		m.toggleMaximizedPane()
-
-		return m, nil
-	}
-
-	if m.handlePaneNavigationKey(key) {
-		return m, nil
+	if cmd, ok := m.handleNavigationCommandKey(key); ok {
+		return m, cmd
 	}
 
 	switch key {
@@ -590,6 +584,36 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m *Model) handleNavigationCommandKey(key string) (tea.Cmd, bool) {
+	switch {
+	case isQuitKey(key):
+		return tea.Quit, true
+	case key == "alt+m":
+		m.toggleMaximizedPane()
+
+		return nil, true
+	case m.handlePaneNavigationKey(key):
+		return nil, true
+	case m.handleBoardColumnNavigationKey(key):
+		return nil, true
+	default:
+		return nil, false
+	}
+}
+
+func (m *Model) handleBoardColumnNavigationKey(key string) bool {
+	switch key {
+	case "left", "h":
+		m.selectPreviousBoardColumn()
+	case "right", "l":
+		m.selectNextBoardColumn()
+	default:
+		return false
+	}
+
+	return true
 }
 
 func (m *Model) toggleMaximizedPane() {
@@ -906,13 +930,16 @@ func (m Model) renderLegacySelectedView(selectedView View) string {
 
 func (m Model) renderTicketBoard() string {
 	filteredTickets := m.filteredTickets()
-	if len(filteredTickets) == 0 {
-		return "Board\n  No tickets match the current view."
-	}
 
 	var output strings.Builder
 
 	output.WriteString("Board\n")
+	output.WriteString(fmt.Sprintf(
+		"  Column: %s (%d/%d)\n",
+		chc.BoardColumnTitle(m.activeBoardColumn()),
+		m.activeBoardColumnPosition()+1,
+		len(chc.NormalBoardColumns),
+	))
 	output.WriteString(fmt.Sprintf("  Tickets: %d", len(filteredTickets)))
 
 	if m.ticketFilter != "" {
@@ -921,24 +948,25 @@ func (m Model) renderTicketBoard() string {
 
 	output.WriteString("\n\n")
 
-	for _, group := range groupTicketsByStatus(filteredTickets) {
-		output.WriteString(group.Status)
-		output.WriteString("\n")
+	if len(filteredTickets) == 0 {
+		output.WriteString("No tickets in this column.\n\n")
+		output.WriteString(m.renderSelectedTicketDetail())
 
-		for _, ticket := range group.Tickets {
-			prefix := "  "
-			if ticket.Index == m.selectedTicket {
-				prefix = "> "
-			}
+		return strings.TrimRight(output.String(), "\n")
+	}
 
-			output.WriteString(prefix)
-			output.WriteString(renderTicketRow(ticket))
-			output.WriteString("\n")
+	for _, ticket := range filteredTickets {
+		prefix := "  "
+		if ticket.Index == m.selectedTicket {
+			prefix = "> "
 		}
 
+		output.WriteString(prefix)
+		output.WriteString(renderTicketRow(ticket))
 		output.WriteString("\n")
 	}
 
+	output.WriteString("\n")
 	output.WriteString(m.renderSelectedTicketDetail())
 
 	return strings.TrimRight(output.String(), "\n")
@@ -1014,6 +1042,8 @@ func (m Model) renderKeys() string {
 	}
 
 	switch {
+	case m.SelectedView() == ViewBoard:
+		return "Keys: F1-F9 or click changes tab, tab changes pane, left/right changes Board column, up/down selects ticket, / filters, q quits"
 	case m.ticketKeysActive():
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects ticket, / filters, q quits"
 	case m.documentKeysActive():
@@ -1159,20 +1189,25 @@ func (m Model) selectedTicketPosition(tickets []TicketView) int {
 }
 
 func (m Model) filteredTickets() []TicketView {
+	tickets := m.tickets
+	if m.SelectedView() == ViewBoard {
+		tickets = m.activeBoardColumnTickets()
+	}
+
 	if m.ticketFilter == "" {
-		return append([]TicketView(nil), m.tickets...)
+		return append([]TicketView(nil), tickets...)
 	}
 
 	filter := strings.ToLower(m.ticketFilter)
-	tickets := []TicketView{}
+	filtered := []TicketView{}
 
-	for _, ticket := range m.tickets {
+	for _, ticket := range tickets {
 		if ticket.Matches(filter) {
-			tickets = append(tickets, ticket)
+			filtered = append(filtered, ticket)
 		}
 	}
 
-	return tickets
+	return filtered
 }
 
 func (m Model) updateFilterKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -1204,6 +1239,90 @@ func (m *Model) selectFirstFilteredTicket() {
 	m.selectedTicket = tickets[0].Index
 }
 
+func (m Model) activeBoardColumn() string {
+	if chc.IsNormalBoardTicketStatus(m.boardColumn) {
+		return m.boardColumn
+	}
+
+	return chc.TicketStatusBacklog
+}
+
+func (m Model) activeBoardColumnPosition() int {
+	for index, column := range chc.NormalBoardColumns {
+		if column == m.activeBoardColumn() {
+			return index
+		}
+	}
+
+	return 0
+}
+
+func (m Model) activeBoardColumnTickets() []TicketView {
+	column := m.activeBoardColumn()
+	tickets := []TicketView{}
+
+	for _, ticket := range m.tickets {
+		if ticket.BoardColumn == column {
+			tickets = append(tickets, ticket)
+		}
+	}
+
+	return tickets
+}
+
+func (m *Model) selectPreviousBoardColumn() {
+	if !m.boardColumnNavigationActive() {
+		return
+	}
+
+	position := m.activeBoardColumnPosition()
+	if position == 0 {
+		position = len(chc.NormalBoardColumns) - 1
+	} else {
+		position--
+	}
+
+	m.selectBoardColumn(chc.NormalBoardColumns[position])
+}
+
+func (m *Model) selectNextBoardColumn() {
+	if !m.boardColumnNavigationActive() {
+		return
+	}
+
+	position := m.activeBoardColumnPosition() + 1
+	if position >= len(chc.NormalBoardColumns) {
+		position = 0
+	}
+
+	m.selectBoardColumn(chc.NormalBoardColumns[position])
+}
+
+func (m Model) boardColumnNavigationActive() bool {
+	return m.SelectedView() == ViewBoard && m.selectedPane == 0
+}
+
+func (m *Model) selectBoardColumn(column string) {
+	if !chc.IsNormalBoardTicketStatus(column) {
+		return
+	}
+
+	m.boardColumn = column
+	m.selectFirstFilteredTicket()
+}
+
+func defaultBoardColumn(tickets []TicketView) string {
+	for _, column := range chc.NormalBoardColumns {
+		for _, ticket := range tickets {
+			if ticket.BoardColumn == column {
+				return column
+			}
+		}
+	}
+
+	return chc.TicketStatusBacklog
+}
+
 func lastRune(value string) string {
 	if value == "" {
 		return ""
@@ -1224,21 +1343,22 @@ type TicketView struct {
 	Type           string
 	UseCase        string
 	ProjectArea    string
+	BoardColumn    string
 	RelativePath   string
 	ChecklistDone  int
 	ChecklistTotal int
 	CommentCount   int
 }
 
-type TicketStatusGroup struct {
-	Status  string
-	Tickets []TicketView
-}
-
 func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 	views := make([]TicketView, 0, len(tickets))
 
 	for index, ticket := range tickets {
+		boardColumn, ok := chc.BoardTicketStatusFor(ticket.Status)
+		if ok && chc.IsNormalBoardTicketStatus(ticket.BoardColumn) {
+			boardColumn = ticket.BoardColumn
+		}
+
 		view := TicketView{
 			Index:        index,
 			Key:          ticket.Key,
@@ -1249,6 +1369,7 @@ func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 			Type:         ticket.Type,
 			UseCase:      ticket.UseCase,
 			ProjectArea:  ticket.ProjectArea,
+			BoardColumn:  boardColumn,
 			RelativePath: ticket.RelativePath,
 		}
 
@@ -1280,31 +1401,6 @@ func (t TicketView) Matches(filter string) bool {
 	}
 
 	return false
-}
-
-func groupTicketsByStatus(tickets []TicketView) []TicketStatusGroup {
-	grouped := map[string][]TicketView{}
-
-	for _, ticket := range tickets {
-		grouped[ticket.Status] = append(grouped[ticket.Status], ticket)
-	}
-
-	statuses := make([]string, 0, len(grouped))
-	for status := range grouped {
-		statuses = append(statuses, status)
-	}
-
-	sort.Strings(statuses)
-
-	groups := make([]TicketStatusGroup, 0, len(statuses))
-	for _, status := range statuses {
-		groups = append(groups, TicketStatusGroup{
-			Status:  status,
-			Tickets: grouped[status],
-		})
-	}
-
-	return groups
 }
 
 func ticketMarkdownSummary(path string) (int, int, int) {

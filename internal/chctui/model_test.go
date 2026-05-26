@@ -2162,8 +2162,7 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 
 	for _, want := range []string{
 		"Board",
-		"open",
-		"ready",
+		"Column: Backlog (1/6)",
 		"CHC-1",
 		"Fix publishing",
 		"Selected Ticket",
@@ -2181,7 +2180,7 @@ func TestModelSelectsTickets(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []chc.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "open"},
-			{Key: "CHC-2", Title: "Second", Status: "ready"},
+			{Key: "CHC-2", Title: "Second", Status: "open"},
 		},
 	})
 	model.selected = 6
@@ -2191,6 +2190,36 @@ func TestModelSelectsTickets(t *testing.T) {
 
 	if !ok {
 		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	ticket, ok := navigated.selectedTicketView()
+	if !ok {
+		t.Fatal("selectedTicketView returned no ticket")
+	}
+
+	if ticket.Key != "CHC-2" {
+		t.Fatalf("selected ticket = %q, want CHC-2", ticket.Key)
+	}
+}
+
+func TestModelNavigatesBoardColumns(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: chc.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Second", Status: chc.TicketStatusReadyForDev},
+		},
+	})
+	model.selected = 6
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRight})
+	navigated, ok := updated.(Model)
+
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if navigated.activeBoardColumn() != chc.TicketStatusReadyForDev {
+		t.Fatalf("board column = %q, want ready_for_dev", navigated.activeBoardColumn())
 	}
 
 	ticket, ok := navigated.selectedTicketView()
