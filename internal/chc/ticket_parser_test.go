@@ -20,6 +20,7 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 	content, err := NewTicketRenderer().RenderTicket(Ticket{
 		Key:         "CHC-1",
 		Title:       "Do something",
+		Synopsis:    "Implement the onboarding flow.",
 		Status:      "open",
 		Priority:    "high",
 		Severity:    "critical",
@@ -27,6 +28,9 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 		Tags:        []string{"uxui", "onboarding"},
 		UseCase:     "onboarding",
 		ProjectArea: "frontend",
+		SourceKind:  "plan_tracking",
+		SourceRef:   ".chc/plans/onboarding-plan.md",
+		Slice:       "Slice 1",
 		CreatedAt:   createdAt,
 		UpdatedAt:   updatedAt,
 	})
@@ -229,8 +233,18 @@ func assertParsedTicketMetadata(t *testing.T, ticket IndexedTicket) {
 		t.Fatalf("parsed metadata = %#v", ticket)
 	}
 
+	if ticket.Synopsis != "Implement the onboarding flow." {
+		t.Fatalf("Synopsis = %q, want onboarding synopsis", ticket.Synopsis)
+	}
+
 	if len(ticket.Tags) != 2 || ticket.Tags[0] != "uxui" || ticket.Tags[1] != "onboarding" {
 		t.Fatalf("Tags = %#v, want uxui and onboarding", ticket.Tags)
+	}
+
+	if ticket.SourceKind != "plan_tracking" ||
+		ticket.SourceRef != ".chc/plans/onboarding-plan.md" ||
+		ticket.Slice != "Slice 1" {
+		t.Fatalf("source metadata = %#v", ticket)
 	}
 }
 
