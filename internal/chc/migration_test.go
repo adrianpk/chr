@@ -431,12 +431,14 @@ func assertColumnExists(t *testing.T, db *sql.DB, tableName, columnName string) 
 	}()
 
 	for rows.Next() {
-		var cid int
-		var name string
-		var columnType string
-		var notNull int
-		var defaultValue sql.NullString
-		var primaryKey int
+		var (
+			cid          int
+			name         string
+			columnType   string
+			notNull      int
+			defaultValue sql.NullString
+			primaryKey   int
+		)
 
 		err = rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey)
 		if err != nil {
