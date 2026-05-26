@@ -406,11 +406,11 @@ column cycle.
 | `enter` while filtering | Apply the filter and select the first match. |
 | `esc` while filtering | Cancel filter editing. |
 
-The compact Board shows one normal column at a time and a detail pane for the
-selected ticket. The detail pane includes status metadata, synopsis, source
-metadata, slice metadata, checklist counts, comment counts, bounded Markdown
-body preview, checklist preview, recent comment headings, attention reasons,
-and the ticket path when those fields are available.
+The compact Board shows one normal column at a time and marks the active column
+in the header and column strip. The detail pane includes status metadata,
+synopsis, source metadata, slice metadata, checklist counts, comment counts,
+bounded Markdown body preview, checklist preview, recent comment headings,
+attention reasons, and the ticket path when those fields are available.
 
 Ticket and work operations are available from the command palette:
 

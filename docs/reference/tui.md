@@ -243,6 +243,9 @@ checklist counts, comment counts, bounded Markdown body context, checklist
 preview, recent comment headings, attention reasons, and the source path when
 available.
 
+The compact Board header marks the active column explicitly and also shows a
+column strip with the active normal column or attention view in brackets.
+
 Ticket and work actions are available from the command palette and use
 confirmation prompts.
 

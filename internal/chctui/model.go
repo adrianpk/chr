@@ -975,15 +975,40 @@ func (m Model) renderTicketBoard() string {
 
 func (m Model) renderBoardHeaderColumnLine() string {
 	if m.boardAttentionActive() {
-		return fmt.Sprintf("  Column: Attention (%d)\n", len(m.attentionTickets()))
+		return fmt.Sprintf(
+			"  Active view: [Attention] (%d)\n  Columns: %s\n",
+			len(m.attentionTickets()),
+			m.renderBoardColumnStrip(),
+		)
 	}
 
 	return fmt.Sprintf(
-		"  Column: %s (%d/%d)\n",
+		"  Active column: [%s] (%d/%d)\n  Columns: %s\n",
 		chc.BoardColumnTitle(m.activeBoardColumn()),
 		m.activeBoardColumnPosition()+1,
 		len(chc.NormalBoardColumns),
+		m.renderBoardColumnStrip(),
 	)
+}
+
+func (m Model) renderBoardColumnStrip() string {
+	columns := make([]string, 0, len(chc.NormalBoardColumns))
+	activeColumn := m.activeBoardColumn()
+
+	for _, column := range chc.NormalBoardColumns {
+		title := chc.BoardColumnTitle(column)
+		if column == activeColumn && !m.boardAttentionActive() {
+			title = "[" + title + "]"
+		}
+
+		columns = append(columns, title)
+	}
+
+	if m.boardAttentionActive() {
+		columns = append(columns, "[Attention]")
+	}
+
+	return strings.Join(columns, " | ")
 }
 
 func (m Model) renderTicketList() string {

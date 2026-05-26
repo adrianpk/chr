@@ -2134,7 +2134,8 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 
 	for _, want := range []string{
 		"Board",
-		"Column: Backlog (1/6)",
+		"Active column: [Backlog] (1/6)",
+		"Columns: [Backlog] | Ready For Dev | In Progress",
 		"CHC-1",
 		"Fix publishing",
 		"Selected Ticket",
@@ -2247,6 +2248,15 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 		t.Fatalf("board column = %q, want ready_for_dev", navigated.activeBoardColumn())
 	}
 
+	view := navigated.View()
+	if !strings.Contains(view, "Active column: [Ready For Dev] (2/6)") {
+		t.Fatalf("View() does not mark active Board column:\n%s", view)
+	}
+
+	if !strings.Contains(view, "Columns: Backlog | [Ready For Dev] | In Progress") {
+		t.Fatalf("View() does not mark active Board column in strip:\n%s", view)
+	}
+
 	ticket, ok := navigated.selectedTicketView()
 	if !ok {
 		t.Fatal("selectedTicketView returned no ticket")
@@ -2275,7 +2285,9 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 
 	view := attention.View()
 	for _, want := range []string{
-		"Column: Attention (1)",
+		"Active view: [Attention] (1)",
+		"Columns: Backlog | Ready For Dev | In Progress",
+		"[Attention]",
 		"! CHC-2",
 		"Attention:",
 		"status is blocked",
