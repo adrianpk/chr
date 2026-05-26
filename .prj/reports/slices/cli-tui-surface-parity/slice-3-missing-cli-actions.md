@@ -5,7 +5,7 @@ Slicing: CLI TUI Surface Parity
 Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 Tracker: `.prj/trackers/slicing-cli-tui-surface-parity-tracker.md`
 Branch: `feat/slice-3-missing-cli-actions`
-PR: pending
+PR: #206
 
 ## Purpose
 
