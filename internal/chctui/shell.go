@@ -719,12 +719,14 @@ func (m Model) renderOverlayWorkspace(width, height int, overlay string) string 
 }
 
 func (m Model) renderTicketFocusList(limit int) []string {
+	lines := m.renderBoardFocusHeaderLines(limit)
+
 	tickets := m.filteredTickets()
 	if len(tickets) == 0 {
-		return []string{"No tickets match."}
+		return appendLimitedLines(lines, []string{"No tickets match."}, limit)
 	}
 
-	lines := []string{shellMutedStyle.Render("Key     Status       Priority  Title")}
+	lines = appendLimitedLines(lines, []string{shellMutedStyle.Render("Key     Status       Priority  Title")}, limit)
 
 	for _, ticket := range tickets {
 		prefix := " "
@@ -851,6 +853,40 @@ func (m Model) renderBoardAttentionFocusList(limit int) []string {
 		if len(lines) >= limit {
 			break
 		}
+	}
+
+	return lines
+}
+
+func (m Model) renderBoardFocusHeaderLines(limit int) []string {
+	if m.SelectedView() != ViewBoard {
+		return []string{}
+	}
+
+	if m.boardAttentionActive() {
+		return appendLimitedLines([]string{}, []string{
+			"Attention",
+			"",
+		}, limit)
+	}
+
+	return appendLimitedLines([]string{}, []string{
+		fmt.Sprintf("%s (%d/%d)",
+			chc.BoardColumnTitle(m.activeBoardColumn()),
+			m.activeBoardColumnPosition()+1,
+			len(chc.NormalBoardColumns),
+		),
+		"",
+	}, limit)
+}
+
+func appendLimitedLines(lines, additions []string, limit int) []string {
+	for _, line := range additions {
+		if len(lines) >= limit {
+			return lines
+		}
+
+		lines = append(lines, line)
 	}
 
 	return lines

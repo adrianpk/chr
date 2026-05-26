@@ -2134,8 +2134,7 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 
 	for _, want := range []string{
 		"Board",
-		"Active column: [Backlog] (1/6)",
-		"Columns: [Backlog] | Ready For Dev | In Progress",
+		"Backlog (1/6)",
 		"CHC-1",
 		"Fix publishing",
 		"Selected Ticket",
@@ -2249,12 +2248,8 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 	}
 
 	view := navigated.View()
-	if !strings.Contains(view, "Active column: [Ready For Dev] (2/6)") {
+	if !strings.Contains(view, "Ready For Dev (2/6)") {
 		t.Fatalf("View() does not mark active Board column:\n%s", view)
-	}
-
-	if !strings.Contains(view, "Columns: Backlog | [Ready For Dev] | In Progress") {
-		t.Fatalf("View() does not mark active Board column in strip:\n%s", view)
 	}
 
 	ticket, ok := navigated.selectedTicketView()
@@ -2264,6 +2259,32 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 
 	if ticket.Key != "CHC-2" {
 		t.Fatalf("selected ticket = %q, want CHC-2", ticket.Key)
+	}
+}
+
+func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: chc.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Second", Status: chc.TicketStatusReadyForDev},
+		},
+	})
+	model.selected = 6
+
+	updated, _ := model.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	resized := requireUpdatedModel(t, updated)
+
+	updated, _ = resized.Update(tea.KeyMsg{Type: tea.KeyRight})
+	navigated := requireUpdatedModel(t, updated)
+	view := navigated.View()
+
+	for _, want := range []string{
+		"Ready For Dev (2/6)",
+		"> CHC-2",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
 	}
 }
 
@@ -2285,9 +2306,7 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 
 	view := attention.View()
 	for _, want := range []string{
-		"Active view: [Attention] (1)",
-		"Columns: Backlog | Ready For Dev | In Progress",
-		"[Attention]",
+		"Attention (1)",
 		"! CHC-2",
 		"Attention:",
 		"status is blocked",
