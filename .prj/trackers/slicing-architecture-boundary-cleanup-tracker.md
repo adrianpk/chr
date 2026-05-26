@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-architecture-boundary-cleanup-plan.md`
 
 Slicing name: Architecture Boundary Cleanup
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: dependency context cleanup
+Active slice short name: operation context boundary
 
-Expected branch name: `feat/slice-1-dependency-context-cleanup`
+Expected branch name: `feat/slice-2-operation-context-boundary`
 
-Expected PR title: `feat(slice-1): dependency context cleanup`
+Expected PR title: `feat(slice-2): operation context boundary`
 
 Expected report path:
-`.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md`
+`.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md`
 
 Prerequisite PRs or delivered work:
 
@@ -41,8 +41,8 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Dependency Context Cleanup | Reviewing | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | PR `#209`; hidden startup asset dependency removed; `make verify` passed. |
-| Slice 2: Operation Context Boundary | Planned | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | Move cancellable service work to operation-scoped context. |
+| Slice 1: Dependency Context Cleanup | Delivered | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | PR `#209`; hidden startup asset dependency removed; `make verify` passed. |
+| Slice 2: Operation Context Boundary | Active | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | Move cancellable service work to operation-scoped context. |
 | Slice 3: Adapter Service Shape Cleanup | Planned | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | Move metadata workflow logic into service methods, split TUI adapters, and rename neutral scope helpers. |
 
 ## Slice 1: Dependency Context Cleanup
@@ -64,6 +64,7 @@ Task commits:
 - `bd7843f refactor(ticket): share ticket index setup`
 - `5958ca5 docs(architecture): report dependency context cleanup`
 - `2019d0a docs(architecture): record dependency cleanup validation`
+- `4bd7889 docs(architecture): link dependency cleanup pr`
 
 Validation:
 
