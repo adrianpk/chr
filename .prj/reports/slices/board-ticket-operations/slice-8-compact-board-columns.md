@@ -1,11 +1,11 @@
 # Slice 8: Compact Board Columns
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-8-compact-board-columns`
-PR: pending
+PR: #220
 
 ## Purpose
 

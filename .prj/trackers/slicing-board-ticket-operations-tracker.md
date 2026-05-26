@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 8
+Active slice number: Slice 9
 
-Active slice short name: compact board columns
+Active slice short name: attention view
 
-Expected branch name: `feat/slice-8-compact-board-columns`
+Expected branch name: `feat/slice-9-attention-view`
 
-Expected PR title: `feat(slice-8): compact board columns`
+Expected PR title: `feat(slice-9): attention view`
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md`
+`.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md`
 
 Prerequisite PRs or delivered work:
 
@@ -52,8 +52,8 @@ Prerequisite PRs or delivered work:
 | Slice 5: Ticket Creation Service | Delivered | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | PR `#217`; manual creation with synopsis, backlog default, SQLite key allocation, index refresh; `make verify` passed. |
 | Slice 6: Generated Ticket Synopsis | Delivered | `feat/slice-6-generated-ticket-synopsis` | `feat(slice-6): generated ticket synopsis` | `.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md` | PR `#218`; plan tracking materialization ticket synopsis/source metadata; `make verify` passed. |
 | Slice 7: Board Query Service | Delivered | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | PR `#219`; shared CLI/TUI Board read model; `make verify` passed. |
-| Slice 8: Compact Board Columns | In review | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | One-column compact Board navigation. |
-| Slice 9: Attention View | Pending | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | Virtual attention view and plain-text reasons. |
+| Slice 8: Compact Board Columns | Delivered | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | PR `#220`; one-column compact Board navigation; `make verify` passed. |
+| Slice 9: Attention View | In progress | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | Virtual attention view and plain-text reasons. |
 | Slice 10: Ticket Detail Surface | Pending | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | Synopsis, source refs, attention, body/comment context. |
 | Slice 11: Maximized Board | Pending | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | Multi-column maximized Board. |
 | Slice 12: Board Docs Validation | Pending | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | Documentation, parity matrix, migration reference, final validation. |
