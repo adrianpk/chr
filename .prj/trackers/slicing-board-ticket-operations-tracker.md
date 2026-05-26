@@ -66,7 +66,7 @@ Candidate tasks:
 - [x] T1.2 Extend `Ticket` with synopsis, source metadata, and slice metadata.
 - [x] T1.3 Render new metadata fields in ticket frontmatter.
 - [x] T1.4 Parse new metadata fields into `IndexedTicket`.
-- [ ] T1.5 Add metadata validation tests for Board-created tickets and legacy
+- [x] T1.5 Add metadata validation tests for Board-created tickets and legacy
   tickets.
 - [ ] T1.6 Create slice implementation report.
 - [ ] T1.7 Run validation.
@@ -77,12 +77,14 @@ Task commits:
 - `7bd604a feat(ticket): add board metadata fields`
 - `6a67fba feat(ticket): render board metadata`
 - `b7adc7b feat(ticket): parse board metadata`
+- `14e4b6d test(ticket): cover board metadata validation`
 
 Validation:
 
 - `go test ./internal/chc -run 'TestTicketStatus|TestTicketRenderer|TestTicketParser'`: pass.
 - `go test ./internal/chc -run 'TestTicketRenderer'`: pass.
 - `go test ./internal/chc -run 'TestTicketParser'`: pass.
+- `go test ./internal/chc -run 'TestValidateIndexedTicket|TestTicketStatus'`: pass.
 
 ## Slice 2: Userspace Resolver
 
