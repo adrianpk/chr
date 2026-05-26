@@ -120,24 +120,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T3.1 Decide direct `indexed_tickets` migration vs dedicated Board read
+- [x] T3.1 Decide direct `indexed_tickets` migration vs dedicated Board read
   model and record the decision in the report.
-- [ ] T3.2 Add migration for synopsis, normalized Board column, source metadata,
+- [x] T3.2 Add migration for synopsis, normalized Board column, source metadata,
   and slice metadata.
-- [ ] T3.3 Add indexes for Board queries.
-- [ ] T3.4 Add transaction-safe ticket key allocation persistence.
-- [ ] T3.5 Add migration tests.
-- [ ] T3.6 Update SQLite migration reference.
+- [x] T3.3 Add indexes for Board queries.
+- [x] T3.4 Add transaction-safe ticket key allocation persistence.
+- [x] T3.5 Add migration tests.
+- [x] T3.6 Update SQLite migration reference.
 - [ ] T3.7 Create slice implementation report.
 - [ ] T3.8 Run validation.
 
 Task commits:
 
-- Pending.
+- `d5b0bc5 feat(db): add board ticket metadata schema`
+- `pending commit`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc -run 'TestMigratorAppliesPendingMigrations|TestReadSQLiteMigrations'`: pass.
 
 ## Slice 4: Indexed Ticket Enrichment
 

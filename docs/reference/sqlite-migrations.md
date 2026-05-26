@@ -53,3 +53,22 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 ```
 
 Applied versions are skipped on later runs.
+
+## Board Ticket Metadata
+
+Board ticket metadata extends the existing `indexed_tickets` table. It does not
+introduce a separate Board read model.
+
+The Board migration adds:
+
+- `synopsis`;
+- `board_column`;
+- `source_kind`;
+- `source_ref`;
+- `slice`;
+- Board query indexes for column, use case, project area, updated timestamp,
+  and source kind;
+- `ticket_key_sequences` for transaction-safe ticket key allocation foundation.
+
+Markdown ticket files remain the durable ticket body. SQLite stores searchable
+and selectable metadata for operational views.
