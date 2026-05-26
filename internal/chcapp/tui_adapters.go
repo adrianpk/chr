@@ -179,7 +179,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 ) (chctui.SpecActionResult, error) {
 	switch request.Action {
 	case chctui.SpecActionGenerate:
-		_, err := e.operations.GenerateSpec(SpecGenerateRequest{
+		_, err := e.operations.GenerateSpec(e.operations.ctx, SpecGenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
@@ -227,7 +227,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 
 	switch request.Action {
 	case chctui.PlanActionGenerate:
-		result, err := e.operations.GeneratePlan(PlanGenerateRequest{
+		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
@@ -242,7 +242,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 
 		message = result.Message
 	case chctui.PlanActionRegenerate:
-		result, err := e.operations.RegeneratePlan(PlanRegenerateRequest{
+		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
@@ -257,7 +257,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 
 		message = result.Message
 	case chctui.PlanActionMaterializeTracking:
-		result, err := e.operations.MaterializePlanTracking(PlanTrackingRequest{
+		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {

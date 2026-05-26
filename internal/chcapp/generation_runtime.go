@@ -39,6 +39,7 @@ func (g *generationGuard) release(key string) {
 }
 
 func (s service) withGenerationRuntime(
+	parent context.Context,
 	kind string,
 	scope chc.QuizScope,
 	run func(context.Context) error,
@@ -54,7 +55,7 @@ func (s service) withGenerationRuntime(
 	}
 	defer activeGenerations.release(key)
 
-	ctx, cancel := context.WithTimeout(s.ctx, longGenerationTimeout)
+	ctx, cancel := context.WithTimeout(parent, longGenerationTimeout)
 	defer cancel()
 
 	return run(ctx)

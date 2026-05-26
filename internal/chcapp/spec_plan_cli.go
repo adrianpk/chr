@@ -157,7 +157,6 @@ func runSpecList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return nil
 }
 
-//nolint:contextcheck // The service owns generation timeout wrapping for model-backed operations.
 func runSpecGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("spec generate does not accept positional arguments")
@@ -168,7 +167,7 @@ func runSpecGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	result, err := operations.GenerateSpec(SpecGenerateRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.GenerateSpec(ctx, SpecGenerateRequest{Scope: quizScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -206,7 +205,6 @@ func runPlanList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return nil
 }
 
-//nolint:contextcheck // The service owns generation timeout wrapping for model-backed operations.
 func runPlanGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("plan generate does not accept positional arguments")
@@ -217,7 +215,7 @@ func runPlanGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	result, err := operations.GeneratePlan(PlanGenerateRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: quizScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -230,7 +228,6 @@ func runPlanGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	return nil
 }
 
-//nolint:contextcheck // The service owns generation timeout wrapping for model-backed operations.
 func runPlanRegenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("plan regenerate does not accept positional arguments")
@@ -241,7 +238,7 @@ func runPlanRegenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) 
 		return err
 	}
 
-	result, err := operations.RegeneratePlan(PlanRegenerateRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: quizScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -254,7 +251,6 @@ func runPlanRegenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) 
 	return nil
 }
 
-//nolint:contextcheck // The service owns generation timeout wrapping for model-backed operations.
 func runPlanTrackingCreate(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
 	if cmd.NArg() != 0 {
 		return fmt.Errorf("plan tracking create does not accept positional arguments")
@@ -265,7 +261,7 @@ func runPlanTrackingCreate(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return err
 	}
 
-	result, err := operations.MaterializePlanTracking(PlanTrackingRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.MaterializePlanTracking(ctx, PlanTrackingRequest{Scope: quizScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}

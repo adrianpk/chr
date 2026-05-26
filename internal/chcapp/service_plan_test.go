@@ -50,7 +50,7 @@ The implementation must preserve editorial review.
 	operations.quizModel = model
 	operations.now = clock
 
-	result, err := operations.GeneratePlan(PlanGenerateRequest{
+	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -116,7 +116,7 @@ Manual edits that must remain recoverable.
 	operations.quizModel = model
 	operations.now = clock
 
-	result, err := operations.RegeneratePlan(PlanRegenerateRequest{
+	result, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -164,7 +164,7 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 	operations.quizModel = model
 	operations.now = clock
 
-	_, err := operations.RegeneratePlan(PlanRegenerateRequest{
+	_, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -209,7 +209,7 @@ Implement planning foundation.
 	operations.quizModel = model
 	operations.now = fixedServiceClock(now)
 
-	result, err := operations.MaterializePlanTracking(PlanTrackingRequest{
+	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -270,7 +270,7 @@ func TestServiceMaterializePlanTrackingRequiresExistingPlan(t *testing.T) {
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
 
-	_, err := operations.MaterializePlanTracking(PlanTrackingRequest{
+	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil || !strings.Contains(err.Error(), "plan is required before tracking can be created") {
@@ -305,7 +305,7 @@ case_slug: "blog"
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
 
-	result, err := operations.MaterializePlanTracking(PlanTrackingRequest{
+	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -346,7 +346,7 @@ Manual edits that must remain recoverable.
 	operations.quizModel = model
 	operations.now = clock
 
-	_, err := operations.RegeneratePlan(PlanRegenerateRequest{
+	_, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil {
@@ -401,7 +401,7 @@ case: "blog"
 	operations.quizModel = model
 	operations.now = clock
 
-	_, err := operations.GeneratePlan(PlanGenerateRequest{
+	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -429,7 +429,7 @@ func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
 
-	_, err := operations.GeneratePlan(PlanGenerateRequest{
+	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -463,7 +463,7 @@ Manual plan content.
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
 
-	result, err := operations.GeneratePlan(PlanGenerateRequest{
+	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -570,7 +570,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 
 	done := make(chan error, 1)
 	go func() {
-		_, err := operations.GeneratePlan(PlanGenerateRequest{
+		_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: "blog"},
 		})
 		done <- err
@@ -578,7 +578,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 
 	<-model.started
 
-	_, err := operations.GeneratePlan(PlanGenerateRequest{
+	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil || !strings.Contains(err.Error(), "plan generation already running for scope blog") {

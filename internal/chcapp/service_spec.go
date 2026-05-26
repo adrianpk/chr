@@ -62,11 +62,11 @@ func (s service) ListSpecs() (SpecListResult, error) {
 }
 
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
-func (s service) GenerateSpec(request SpecGenerateRequest) (SpecOperationResult, error) {
+func (s service) GenerateSpec(ctx context.Context, request SpecGenerateRequest) (SpecOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	var result SpecOperationResult
 
-	err := s.withGenerationRuntime("spec", scope, func(ctx context.Context) error {
+	err := s.withGenerationRuntime(ctx, "spec", scope, func(ctx context.Context) error {
 		var err error
 
 		result, err = s.generateSpec(ctx, scope)

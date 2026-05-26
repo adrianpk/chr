@@ -44,7 +44,7 @@ case: "blog"
 	operations.quizModel = model
 	operations.now = clock
 
-	result, err := operations.GenerateSpec(SpecGenerateRequest{
+	result, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -124,7 +124,7 @@ case: "blog"
 	operations.quizModel = model
 	operations.now = clock
 
-	_, err := operations.GenerateSpec(SpecGenerateRequest{
+	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
@@ -152,7 +152,7 @@ func TestServiceGenerateSpecUsesLongGenerationDeadline(t *testing.T) {
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
 
-	_, err := operations.GenerateSpec(SpecGenerateRequest{
+	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {

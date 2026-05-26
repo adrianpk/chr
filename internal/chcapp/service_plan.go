@@ -77,7 +77,7 @@ func (s service) ListPlans() (PlanListResult, error) {
 }
 
 //nolint:wsl_v5 // Guard clauses read clearer in this service flow.
-func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult, error) {
+func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	existing, exists, err := s.existingGeneratedPlan(scope)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s service) GeneratePlan(request PlanGenerateRequest) (PlanOperationResult,
 
 	var result PlanOperationResult
 
-	err = s.withGenerationRuntime("plan", scope, func(ctx context.Context) error {
+	err = s.withGenerationRuntime(ctx, "plan", scope, func(ctx context.Context) error {
 		var generateErr error
 
 		result, generateErr = s.generatePlan(ctx, scope)
@@ -212,11 +212,11 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 }
 
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
-func (s service) RegeneratePlan(request PlanRegenerateRequest) (PlanOperationResult, error) {
+func (s service) RegeneratePlan(ctx context.Context, request PlanRegenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	var result PlanOperationResult
 
-	err := s.withGenerationRuntime("plan", scope, func(ctx context.Context) error {
+	err := s.withGenerationRuntime(ctx, "plan", scope, func(ctx context.Context) error {
 		var err error
 
 		result, err = s.regeneratePlan(ctx, scope)
@@ -268,7 +268,7 @@ func (s service) regeneratePlan(ctx context.Context, scope chc.QuizScope) (PlanO
 	return result, nil
 }
 
-func (s service) MaterializePlanTracking(request PlanTrackingRequest) (PlanTrackingResult, error) {
+func (s service) MaterializePlanTracking(ctx context.Context, request PlanTrackingRequest) (PlanTrackingResult, error) {
 	scope := s.quizScope(request.Scope)
 
 	plan, exists, err := s.existingGeneratedPlan(scope)
@@ -300,7 +300,7 @@ func (s service) MaterializePlanTracking(request PlanTrackingRequest) (PlanTrack
 
 	var result PlanTrackingResult
 
-	err = s.withGenerationRuntime("plan_tracking", scope, func(ctx context.Context) error {
+	err = s.withGenerationRuntime(ctx, "plan_tracking", scope, func(ctx context.Context) error {
 		var materializeErr error
 
 		result, materializeErr = s.materializePlanTracking(ctx, scope, plan, trackingPaths.RelativePath)
