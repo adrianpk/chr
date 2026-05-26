@@ -2,16 +2,11 @@ package chcapp
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v3"
-
-	"forge.adrianpk.com/chc/internal/chc"
 )
 
 func newMetadataCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -98,19 +93,12 @@ func runMetadataProjectSet(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return fmt.Errorf("metadata project set does not accept positional arguments")
 	}
 
-	operations, projectContext, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	metadata, err := chc.NewProjectMetadataService(projectContext.ProjectDir).Load()
-	if err != nil {
-		return err
-	}
-
-	metadata = metadataFromCommand(cmd, metadata)
-
-	result, err := operations.SaveProjectMetadata(metadata)
+	result, err := operations.PatchProjectMetadata(projectMetadataPatchFromCommand(cmd))
 	if err != nil {
 		return err
 	}
@@ -129,27 +117,16 @@ func runMetadataCaseSet(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	}
 
 	slug := strings.TrimSpace(cmd.Args().First())
-	if err := validateCaseSlugForCLI(slug); err != nil {
+	if err := validateCaseSlug(slug); err != nil {
 		return err
 	}
 
-	operations, projectContext, err := serviceFromCommand(ctx, cmd)
+	operations, _, err := serviceFromCommand(ctx, cmd)
 	if err != nil {
 		return err
 	}
 
-	metadata, err := loadCaseMetadataForCLI(projectContext.ProjectDir, slug)
-	if err != nil {
-		return err
-	}
-
-	metadata = metadataFromCommand(cmd, metadata)
-
-	if strings.TrimSpace(metadata.Name) == "" {
-		metadata.Name = caseNameFromSlug(slug)
-	}
-
-	result, err := operations.SaveCaseMetadata(metadata)
+	result, err := operations.PatchCaseMetadata(caseMetadataPatchFromCommand(cmd, slug))
 	if err != nil {
 		return err
 	}
@@ -162,91 +139,31 @@ func runMetadataCaseSet(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	return nil
 }
 
-type cliMetadata interface {
-	chc.ProjectMetadata | chc.CaseMetadata
+func projectMetadataPatchFromCommand(cmd *cli.Command) ProjectMetadataPatchRequest {
+	return ProjectMetadataPatchRequest{
+		Name:        optionalStringFlag(cmd, "name"),
+		Description: optionalStringFlag(cmd, "description"),
+		Context:     optionalStringFlag(cmd, "context"),
+	}
 }
 
-func metadataFromCommand[T cliMetadata](cmd *cli.Command, metadata T) T {
-	switch value := any(&metadata).(type) {
-	case *chc.ProjectMetadata:
-		if cmd.IsSet("name") {
-			value.Name = cmd.String("name")
-		}
-
-		if cmd.IsSet("description") {
-			value.Description = cmd.String("description")
-		}
-
-		if cmd.IsSet("context") {
-			value.Context = cmd.String("context")
-		}
-	case *chc.CaseMetadata:
-		if cmd.IsSet("name") {
-			value.Name = cmd.String("name")
-		}
-
-		if cmd.IsSet("description") {
-			value.Description = cmd.String("description")
-		}
-
-		if cmd.IsSet("context") {
-			value.Context = cmd.String("context")
-		}
+func caseMetadataPatchFromCommand(cmd *cli.Command, slug string) CaseMetadataPatchRequest {
+	return CaseMetadataPatchRequest{
+		Slug:        slug,
+		Name:        optionalStringFlag(cmd, "name"),
+		Description: optionalStringFlag(cmd, "description"),
+		Context:     optionalStringFlag(cmd, "context"),
 	}
-
-	return metadata
 }
 
-func loadCaseMetadataForCLI(projectDir, slug string) (chc.CaseMetadata, error) {
-	path := chc.CaseMetadataPath(projectDir, slug)
-
-	metadata, err := chc.NewCaseMetadataService(projectDir).LoadPath(path)
-	if errors.Is(err, os.ErrNotExist) {
-		return chc.CaseMetadata{
-			SchemaVersion: chc.CaseMetadataSchemaVersion,
-			Slug:          slug,
-			SourcePath:    path,
-		}, nil
+func optionalStringFlag(cmd *cli.Command, name string) *string {
+	if !cmd.IsSet(name) {
+		return nil
 	}
 
-	return metadata, err
-}
+	value := cmd.String(name)
 
-func validateCaseSlugForCLI(slug string) error {
-	if slug == "" {
-		return fmt.Errorf("metadata case slug is required")
-	}
-
-	for _, current := range slug {
-		if current >= 'a' && current <= 'z' {
-			continue
-		}
-
-		if current >= '0' && current <= '9' {
-			continue
-		}
-
-		if current == '-' {
-			continue
-		}
-
-		return fmt.Errorf("metadata case slug must contain only lowercase letters, numbers, and dashes")
-	}
-
-	return nil
-}
-
-func caseNameFromSlug(slug string) string {
-	parts := strings.Split(filepath.Base(slug), "-")
-	for index, part := range parts {
-		if part == "" {
-			continue
-		}
-
-		parts[index] = strings.ToUpper(part[:1]) + part[1:]
-	}
-
-	return strings.Join(parts, " ")
+	return &value
 }
 
 func serviceFromCommand(ctx context.Context, cmd *cli.Command) (service, commandProjectContext, error) {
