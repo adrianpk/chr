@@ -150,21 +150,23 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T4.1 Update `IndexedTicket` and scan/upsert logic for enriched fields.
-- [ ] T4.2 Normalize Board columns during parse/reconcile.
-- [ ] T4.3 Preserve indexability for legacy tickets without synopsis.
-- [ ] T4.4 Surface unknown statuses as attention-ready metadata.
-- [ ] T4.5 Update index rebuild/status tests.
+- [x] T4.1 Update `IndexedTicket` and scan/upsert logic for enriched fields.
+- [x] T4.2 Normalize Board columns during parse/reconcile.
+- [x] T4.3 Preserve indexability for legacy tickets without synopsis.
+- [x] T4.4 Surface unknown statuses as attention-ready metadata.
+- [x] T4.5 Update index rebuild/status tests.
 - [ ] T4.6 Create slice implementation report.
 - [ ] T4.7 Run validation.
 
 Task commits:
 
-- Pending.
+- `32c4afa feat(ticket): persist enriched ticket metadata`
+- `2225d3b test(ticket): assert enriched index metadata`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc -run 'TestTicketIndex|TestTicketParser|TestTicketIndexRebuild|TestTicketReconciliation'`: pass.
+- `go test ./internal/chc -run 'TestTicketIndex'`: pass.
 
 ## Slice 5: Ticket Creation Service
 
