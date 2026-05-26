@@ -45,7 +45,7 @@ func newSpecGenerateCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "generate",
 		Usage:  "Generate a spec",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: specGenerateAction(stdout),
 	}
 }
@@ -63,7 +63,7 @@ func newPlanGenerateCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "generate",
 		Usage:  "Generate a plan",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: planGenerateAction(stdout),
 	}
 }
@@ -72,7 +72,7 @@ func newPlanRegenerateCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "regenerate",
 		Usage:  "Regenerate a plan",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: planRegenerateAction(stdout),
 	}
 }
@@ -91,7 +91,7 @@ func newPlanTrackingCreateCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "create",
 		Usage:  "Create tracking and tickets for an existing generated plan",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: planTrackingCreateAction(stdout),
 	}
 }
@@ -167,7 +167,7 @@ func runSpecGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	result, err := operations.GenerateSpec(ctx, SpecGenerateRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.GenerateSpec(ctx, SpecGenerateRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func runPlanGenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.GeneratePlan(ctx, PlanGenerateRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -238,7 +238,7 @@ func runPlanRegenerate(ctx context.Context, cmd *cli.Command, stdout io.Writer) 
 		return err
 	}
 
-	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.RegeneratePlan(ctx, PlanRegenerateRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func runPlanTrackingCreate(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return err
 	}
 
-	result, err := operations.MaterializePlanTracking(ctx, PlanTrackingRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.MaterializePlanTracking(ctx, PlanTrackingRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}

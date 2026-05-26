@@ -31,7 +31,7 @@ Review findings:
   service operations.
 - `internal/chcapp/tui_adapters.go` mixes adapter functions for several
   unrelated domains in one file.
-- `quizScopeFlags` and `quizScopeFromCommand` are used outside quiz-specific
+- `workspaceScopeFlags` and `workspaceScopeFromCommand` provide shared
   flows and should use neutral naming.
 
 ## Current State

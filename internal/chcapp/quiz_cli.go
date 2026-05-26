@@ -49,7 +49,7 @@ func newQuizResumeCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "resume",
 		Usage:  "Resume a runtime quiz",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: quizResumeAction(stdout),
 	}
 }
@@ -67,7 +67,7 @@ func newQuizSkipCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "skip",
 		Usage:  "Skip the active runtime quiz question",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: quizSkipAction(stdout),
 	}
 }
@@ -76,7 +76,7 @@ func newQuizCompleteCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "complete",
 		Usage:  "Complete a runtime quiz",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: quizCompleteAction(stdout),
 	}
 }
@@ -85,7 +85,7 @@ func newQuizCancelCommand(stdout io.Writer) *cli.Command {
 	return &cli.Command{
 		Name:   "cancel",
 		Usage:  "Cancel a runtime quiz",
-		Flags:  quizScopeFlags(),
+		Flags:  workspaceScopeFlags(),
 		Action: quizCancelAction(stdout),
 	}
 }
@@ -95,12 +95,12 @@ func newQuizModeCommand(stdout io.Writer) *cli.Command {
 		Name:      "mode",
 		Usage:     "Switch runtime quiz mode",
 		ArgsUsage: "<deep|fast>",
-		Flags:     quizScopeFlags(),
+		Flags:     workspaceScopeFlags(),
 		Action:    quizModeAction(stdout),
 	}
 }
 
-func quizScopeFlags() []cli.Flag {
+func workspaceScopeFlags() []cli.Flag {
 	return append(ticketProjectFlags(),
 		&cli.StringFlag{
 			Name:  "use-case",
@@ -110,7 +110,7 @@ func quizScopeFlags() []cli.Flag {
 }
 
 func quizStartFlags() []cli.Flag {
-	return append(quizScopeFlags(),
+	return append(workspaceScopeFlags(),
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "quiz mode: deep or fast",
@@ -120,7 +120,7 @@ func quizStartFlags() []cli.Flag {
 }
 
 func quizAnswerFlags() []cli.Flag {
-	return append(quizScopeFlags(),
+	return append(workspaceScopeFlags(),
 		&cli.StringFlag{
 			Name:  "answer",
 			Usage: "quiz answer",
@@ -225,7 +225,7 @@ func runQuizStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	result, err := operations.StartQuiz(QuizStartRequest{Scope: quizScopeFromCommand(cmd), Mode: mode})
+	result, err := operations.StartQuiz(QuizStartRequest{Scope: workspaceScopeFromCommand(cmd), Mode: mode})
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func runQuizResume(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	result, err := operations.ResumeQuiz(QuizResumeRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.ResumeQuiz(QuizResumeRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func runQuizAnswer(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	result, err := operations.AnswerQuiz(QuizAnswerRequest{Scope: quizScopeFromCommand(cmd), Answer: cmd.String("answer")})
+	result, err := operations.AnswerQuiz(QuizAnswerRequest{Scope: workspaceScopeFromCommand(cmd), Answer: cmd.String("answer")})
 	if err != nil {
 		return err
 	}
@@ -279,7 +279,7 @@ func runQuizSkip(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return err
 	}
 
-	result, err := operations.SkipQuiz(QuizSkipRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.SkipQuiz(QuizSkipRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -297,7 +297,7 @@ func runQuizComplete(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	result, err := operations.CompleteQuiz(QuizCompleteRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.CompleteQuiz(QuizCompleteRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -315,7 +315,7 @@ func runQuizCancel(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	result, err := operations.CancelQuiz(QuizCancelRequest{Scope: quizScopeFromCommand(cmd)})
+	result, err := operations.CancelQuiz(QuizCancelRequest{Scope: workspaceScopeFromCommand(cmd)})
 	if err != nil {
 		return err
 	}
@@ -338,7 +338,7 @@ func runQuizMode(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return err
 	}
 
-	result, err := operations.SwitchQuizMode(QuizModeRequest{Scope: quizScopeFromCommand(cmd), Mode: mode})
+	result, err := operations.SwitchQuizMode(QuizModeRequest{Scope: workspaceScopeFromCommand(cmd), Mode: mode})
 	if err != nil {
 		return err
 	}
@@ -346,7 +346,7 @@ func runQuizMode(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return printQuizOperationResult(stdout, result)
 }
 
-func quizScopeFromCommand(cmd *cli.Command) chc.QuizScope {
+func workspaceScopeFromCommand(cmd *cli.Command) chc.QuizScope {
 	return chc.QuizScope{CaseSlug: cmd.String("use-case")}
 }
 
