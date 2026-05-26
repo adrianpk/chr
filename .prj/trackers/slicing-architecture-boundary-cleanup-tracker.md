@@ -41,7 +41,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Dependency Context Cleanup | Reviewing | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | Hidden startup asset dependency removed; `make verify` passed; PR pending. |
+| Slice 1: Dependency Context Cleanup | Reviewing | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | PR `#209`; hidden startup asset dependency removed; `make verify` passed. |
 | Slice 2: Operation Context Boundary | Planned | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | Move cancellable service work to operation-scoped context. |
 | Slice 3: Adapter Service Shape Cleanup | Planned | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | Move metadata workflow logic into service methods, split TUI adapters, and rename neutral scope helpers. |
 
@@ -63,6 +63,7 @@ Task commits:
 - `32922ed refactor(app): pass embedded assets explicitly`
 - `bd7843f refactor(ticket): share ticket index setup`
 - `5958ca5 docs(architecture): report dependency context cleanup`
+- `2019d0a docs(architecture): record dependency cleanup validation`
 
 Validation:
 
