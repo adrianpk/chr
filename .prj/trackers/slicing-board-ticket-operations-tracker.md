@@ -54,7 +54,7 @@ Prerequisite PRs or delivered work:
 | Slice 7: Board Query Service | Delivered | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | PR `#219`; shared CLI/TUI Board read model; `make verify` passed. |
 | Slice 8: Compact Board Columns | Delivered | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | PR `#220`; one-column compact Board navigation; `make verify` passed. |
 | Slice 9: Attention View | Delivered | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | PR `#221`; virtual attention view and plain-text reasons; `make verify` passed. |
-| Slice 10: Ticket Detail Surface | In progress | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | Synopsis, source refs, attention, body/comment context. |
+| Slice 10: Ticket Detail Surface | In review | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | Synopsis, source refs, Markdown previews, and detail tests; `make verify` passed. |
 | Slice 11: Maximized Board | Pending | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | Multi-column maximized Board. |
 | Slice 12: Board Docs Validation | Pending | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | Documentation, parity matrix, migration reference, final validation. |
 
@@ -296,21 +296,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T10.1 Add synopsis to Board detail.
-- [ ] T10.2 Add source metadata and slice metadata to Board detail.
-- [ ] T10.3 Load selected Markdown body/comment/checklist context safely.
-- [ ] T10.4 Fit detail rendering in normal right-pane constraints.
-- [ ] T10.5 Add TUI detail rendering tests.
-- [ ] T10.6 Create slice implementation report.
-- [ ] T10.7 Run validation.
+- [x] T10.1 Add synopsis to Board detail.
+- [x] T10.2 Add source metadata and slice metadata to Board detail.
+- [x] T10.3 Load selected Markdown body/comment/checklist context safely.
+- [x] T10.4 Fit detail rendering in normal right-pane constraints.
+- [x] T10.5 Add TUI detail rendering tests.
+- [x] T10.6 Create slice implementation report.
+- [x] T10.7 Run validation.
 
 Task commits:
 
-- Pending.
+- `fb5c6e3 feat(board): enrich ticket detail surface`
+- Documentation/report commit recorded in this changeset.
 
 Validation:
 
-- Pending.
+- `go test ./internal/chctui`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 11: Maximized Board
 
