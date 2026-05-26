@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 
 Slicing name: CLI TUI Surface Parity
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: missing cli actions
+Active slice short name: parity tests
 
-Expected branch name: `feat/slice-3-missing-cli-actions`
+Expected branch name: `feat/slice-4-parity-tests`
 
-Expected PR title: `feat(slice-3): missing cli actions`
+Expected PR title: `feat(slice-4): parity tests`
 
 Expected report path:
-`.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md`
+`.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md`
 
 Prerequisite PRs or delivered work:
 
@@ -44,7 +44,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Inventory | Delivered | `feat/slice-1-cli-tui-inventory` | `feat(slice-1): inventory` | `.prj/reports/slices/cli-tui-surface-parity/slice-1-inventory.md` | PR `#204`; matrix created; `make verify` passed. |
 | Slice 2: Service Boundaries | Delivered | `feat/slice-2-service-boundaries` | `feat(slice-2): service boundaries` | `.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md` | PR `#205`; shared daemon stop and authoring session boundaries; `make verify` passed. |
-| Slice 3: Missing CLI Actions | Reviewing | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | Added CLI entrypoints for service-backed operational TUI actions; `make verify` passed. |
+| Slice 3: Missing CLI Actions | Delivered | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | PR `#206`; added CLI entrypoints for service-backed operational TUI actions; `make verify` passed. |
 | Slice 4: Parity Tests | Planned | `feat/slice-4-parity-tests` | `feat(slice-4): parity tests` | `.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md` | Add tests for CLI/TUI/service parity. |
 | Slice 5: Parity Docs | Planned | `feat/slice-5-parity-docs` | `feat(slice-5): parity docs` | `.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md` | Publish final parity contract. |
 

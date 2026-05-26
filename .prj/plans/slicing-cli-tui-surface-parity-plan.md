@@ -66,16 +66,16 @@ The target model treats CLI and TUI as equivalent operation surfaces:
 
 Slicing name: CLI TUI Surface Parity
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: missing cli actions
+Active slice short name: parity tests
 
-Expected branch name: `feat/slice-3-missing-cli-actions`
+Expected branch name: `feat/slice-4-parity-tests`
 
-Expected PR title: `feat(slice-3): missing cli actions`
+Expected PR title: `feat(slice-4): parity tests`
 
 Expected report path:
-`.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md`
+`.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md`
 
 Prerequisite PRs or delivered work:
 
