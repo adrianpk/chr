@@ -16,6 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/urfave/cli/v3"
+
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
@@ -44,13 +46,23 @@ func TestRootCommandDefaultsToTUIAction(t *testing.T) {
 func TestRootCommandIncludesTUICommand(t *testing.T) {
 	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{})
 
+	for _, name := range []string{"dump", "metadata", "plan", "quiz", "spec", "tui"} {
+		if rootCommandIncludesCommand(cmd, name) {
+			continue
+		}
+
+		t.Fatalf("root command does not include %s command", name)
+	}
+}
+
+func rootCommandIncludesCommand(cmd *cli.Command, name string) bool {
 	for _, child := range cmd.Commands {
-		if child.Name == "tui" {
-			return
+		if child.Name == name {
+			return true
 		}
 	}
 
-	t.Fatal("root command does not include tui command")
+	return false
 }
 
 func TestInitDryRunDoesNotWriteWorkspace(t *testing.T) {
@@ -157,6 +169,83 @@ func TestInitRejectsFileTarget(t *testing.T) {
 
 	if !strings.Contains(err.Error(), "project directory is not a directory") {
 		t.Fatalf("init error = %v, want not a directory", err)
+	}
+}
+
+func TestMetadataProjectSetSavesProjectMetadata(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, ".keep"), "")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"metadata",
+		"project",
+		"set",
+		"--dir",
+		projectDir,
+		"--name",
+		"CLI Project",
+		"--description",
+		"Saved through CLI.",
+		"--context",
+		"CLI context.",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("metadata project set returned error: %v", err)
+	}
+
+	metadata, err := chc.NewProjectMetadataService(projectDir).Load()
+	if err != nil {
+		t.Fatalf("Load returned error: %v", err)
+	}
+
+	if metadata.Name != "CLI Project" || metadata.Context != "CLI context." {
+		t.Fatalf("metadata = %#v, want CLI project metadata", metadata)
+	}
+
+	if !strings.Contains(stdout.String(), "project_metadata:") {
+		t.Fatalf("stdout = %q, want project_metadata path", stdout.String())
+	}
+}
+
+func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"dump",
+		"new",
+		"--dir",
+		projectDir,
+		"--title",
+		"CLI Dump",
+		"--content",
+		"Dump body from CLI.",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("dump new returned error: %v", err)
+	}
+
+	dumpPath := filepath.ToSlash(filepath.Join(chc.DirectoryName, "dumps", "cli-dump.md"))
+
+	stdout.Reset()
+
+	err = run(t.Context(), []string{
+		"dump",
+		"show",
+		"--dir",
+		projectDir,
+		dumpPath,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("dump show returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "Dump body from CLI.") {
+		t.Fatalf("stdout = %q, want dump body", stdout.String())
 	}
 }
 
