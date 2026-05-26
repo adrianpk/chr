@@ -48,7 +48,9 @@ operationally equivalent to TUI actions but bypass the same service facade.
 
 ## Validation
 
-Pending final validation for this slice.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Risks and Follow-ups
 

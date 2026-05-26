@@ -58,7 +58,7 @@ Candidate tasks:
 - [x] T1.4 Map each action to service or adapter paths.
 - [x] T1.5 Create `docs/reference/cli-tui-action-matrix.md`.
 - [x] T1.6 Create slice implementation report.
-- [ ] T1.7 Run validation.
+- [x] T1.7 Run validation.
 
 Task commits:
 
@@ -86,11 +86,19 @@ Candidate tasks:
 
 Task commits:
 
-- Pending.
+- `f8e1c9c docs(cli-tui): inventory direct tui bindings`
+- `4f1a90e docs(cli-tui): inventory command palette actions`
+- `0a40856 docs(cli-tui): inventory cli commands`
+- `5c5ce0b docs(cli-tui): map service parity gaps`
+- `6c9e769 docs(cli-tui): link parity matrix`
+- `36dc004 docs(cli-tui): report inventory slice`
+- `pending commit`
 
 Validation:
 
-- Pending.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 3: Missing CLI Actions
 
