@@ -46,7 +46,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Service Boundaries | Delivered | `feat/slice-2-service-boundaries` | `feat(slice-2): service boundaries` | `.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md` | PR `#205`; shared daemon stop and authoring session boundaries; `make verify` passed. |
 | Slice 3: Missing CLI Actions | Delivered | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | PR `#206`; added CLI entrypoints for service-backed operational TUI actions; `make verify` passed. |
 | Slice 4: Parity Tests | Delivered | `feat/slice-4-parity-tests` | `feat(slice-4): parity tests` | `.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md` | PR `#207`; added CLI command and TUI adapter parity tests; `make verify` passed. |
-| Slice 5: Parity Docs | Planned | `feat/slice-5-parity-docs` | `feat(slice-5): parity docs` | `.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md` | Publish final parity contract. |
+| Slice 5: Parity Docs | Reviewing | `feat/slice-5-parity-docs` | `feat(slice-5): parity docs` | `.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md` | Published final CLI/TUI parity documentation; `make verify` passed. |
 
 ## Slice 1: Inventory
 
@@ -153,18 +153,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T5.1 Update the user guide.
-- [ ] T5.2 Update command reference.
-- [ ] T5.3 Update TUI reference.
-- [ ] T5.4 Update architecture explanation.
-- [ ] T5.5 Finalize matrix statuses and remaining gap notes.
-- [ ] T5.6 Add slice implementation report.
-- [ ] T5.7 Run validation.
+- [x] T5.1 Update the user guide.
+- [x] T5.2 Update command reference.
+- [x] T5.3 Update TUI reference.
+- [x] T5.4 Update architecture explanation.
+- [x] T5.5 Finalize matrix statuses and remaining gap notes.
+- [x] T5.6 Add slice implementation report.
+- [x] T5.7 Run validation.
 
 Task commits:
 
-- Pending.
+- `48af80a docs(user-guide): document parity commands`
+- `a3ebb34 docs(commands): document parity command groups`
+- `32179a7 docs(tui): link cli equivalents`
+- `a573347 docs(architecture): explain operation surfaces`
+- `e038eeb docs(parity): finalize gap notes`
+- `pending commit`
 
 Validation:
 
-- Pending.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
