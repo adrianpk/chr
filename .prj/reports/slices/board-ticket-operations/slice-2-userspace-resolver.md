@@ -55,6 +55,9 @@ work without relocating existing ChrysoCoord artifacts.
 ## Validation
 
 - `go test ./internal/chc -run 'TestResolveProjectUserspace|TestEnsureProjectUserspace|TestIsValidOperatorID|TestInitCreatesProjectWorkspace'`
+- `git diff --check`
+- `go test ./...`
+- `make verify`
 
 ## Risks and Follow-ups
 

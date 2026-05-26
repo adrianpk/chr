@@ -101,17 +101,20 @@ Candidate tasks:
 - [x] T2.4 Document `.envrc` usage and non-direnv setup.
 - [x] T2.5 Add resolver tests.
 - [x] T2.6 Create slice implementation report.
-- [ ] T2.7 Run validation.
+- [x] T2.7 Run validation.
 
 Task commits:
 
 - `f9ae8de feat(workspace): add project userspace resolver`
 - `eda9241 docs(workspace): document active userspace`
-- `pending commit`
+- `705d229 docs(board): report userspace resolver slice`
 
 Validation:
 
 - `go test ./internal/chc -run 'TestResolveProjectUserspace|TestEnsureProjectUserspace|TestIsValidOperatorID|TestInitCreatesProjectWorkspace'`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 3: Board SQLite Schema
 
