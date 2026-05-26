@@ -1,6 +1,6 @@
 # Architecture Boundary Cleanup Slicing Plan
 
-Status: planned
+Status: in_progress
 
 ## Purpose
 

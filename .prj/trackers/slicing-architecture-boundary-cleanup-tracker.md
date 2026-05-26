@@ -1,6 +1,6 @@
 # Architecture Boundary Cleanup Slicing Tracker
 
-Status: planned
+Status: in_progress
 
 Plan: `.prj/plans/slicing-architecture-boundary-cleanup-plan.md`
 
@@ -32,7 +32,7 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -41,7 +41,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Dependency Context Cleanup | Planned | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | Remove hidden startup asset dependency and keep behavior stable. |
+| Slice 1: Dependency Context Cleanup | Reviewing | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | Hidden startup asset dependency removed; `make verify` passed; PR pending. |
 | Slice 2: Operation Context Boundary | Planned | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | Move cancellable service work to operation-scoped context. |
 | Slice 3: Adapter Service Shape Cleanup | Planned | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | Move metadata workflow logic into service methods, split TUI adapters, and rename neutral scope helpers. |
 
@@ -49,22 +49,26 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Replace package-level asset filesystem state with explicit app
+- [x] T1.1 Replace package-level asset filesystem state with explicit app
   dependencies.
-- [ ] T1.2 Pass asset dependencies into project context resolution without
+- [x] T1.2 Pass asset dependencies into project context resolution without
   mutable global state.
-- [ ] T1.3 Preserve CLI and TUI startup behavior with focused tests or existing
+- [x] T1.3 Preserve CLI and TUI startup behavior with focused tests or existing
   coverage.
-- [ ] T1.4 Create slice implementation report.
-- [ ] T1.5 Run validation.
+- [x] T1.4 Create slice implementation report.
+- [x] T1.5 Run validation.
 
 Task commits:
 
-- Pending.
+- `32922ed refactor(app): pass embedded assets explicitly`
+- `bd7843f refactor(ticket): share ticket index setup`
+- `5958ca5 docs(architecture): report dependency context cleanup`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chcapp`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 2: Operation Context Boundary
 
