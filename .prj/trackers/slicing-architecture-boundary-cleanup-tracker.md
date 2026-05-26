@@ -43,7 +43,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Dependency Context Cleanup | Delivered | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | PR `#209`; hidden startup asset dependency removed; `make verify` passed. |
 | Slice 2: Operation Context Boundary | Delivered | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | PR `#210`; generation operations now receive operation-scoped context; `make verify` passed. |
-| Slice 3: Adapter Service Shape Cleanup | Active | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | Move metadata workflow logic into service methods, split TUI adapters, and rename neutral scope helpers. |
+| Slice 3: Adapter Service Shape Cleanup | Reviewing | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | PR `#211`; metadata patching moved to service methods, TUI adapters split, and shared scope helpers renamed; `make verify` passed. |
 
 ## Slice 1: Dependency Context Cleanup
 
@@ -118,6 +118,7 @@ Task commits:
 - `4efdbd5 refactor(cli): rename shared scope helpers`
 - `916c5bd refactor(tui): split adapter domains`
 - `f9069be docs(architecture): update adapter cleanup finding`
+- `7b9d0ae docs(architecture): report adapter service cleanup`
 
 Validation:
 
