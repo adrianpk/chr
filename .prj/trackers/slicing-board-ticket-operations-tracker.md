@@ -100,13 +100,14 @@ Candidate tasks:
 - [x] T2.3 Ensure workspace initialization or repair can create `.chc/user/`.
 - [x] T2.4 Document `.envrc` usage and non-direnv setup.
 - [x] T2.5 Add resolver tests.
-- [ ] T2.6 Create slice implementation report.
+- [x] T2.6 Create slice implementation report.
 - [ ] T2.7 Run validation.
 
 Task commits:
 
 - `f9ae8de feat(workspace): add project userspace resolver`
 - `eda9241 docs(workspace): document active userspace`
+- `pending commit`
 
 Validation:
 
