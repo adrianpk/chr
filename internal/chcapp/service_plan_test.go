@@ -239,8 +239,8 @@ Implement planning foundation.
 		t.Fatalf("Tickets = %#v, want one ticket", result.Tickets)
 	}
 
-	if result.Tickets[0].Status != "ready" {
-		t.Fatalf("ticket status = %q, want ready", result.Tickets[0].Status)
+	if result.Tickets[0].Status != chc.TicketStatusReadyForDev {
+		t.Fatalf("ticket status = %q, want ready_for_dev", result.Tickets[0].Status)
 	}
 
 	ticket := readServiceWorkspaceFile(
@@ -248,7 +248,8 @@ Implement planning foundation.
 		filepath.Join(projectDir, ".chc", "tickets", "blog", "CHC-1-Implement-planning-foundation.md"),
 	)
 	for _, want := range []string{
-		`status: "ready"`,
+		`status: "ready_for_dev"`,
+		`synopsis: "Implement the foundational planning work."`,
 		"Source plan: `.chc/plans/blog-plan.md`",
 		"Tracking: `.chc/plans/blog-tracking.md`",
 		"Slice: Slice 1",

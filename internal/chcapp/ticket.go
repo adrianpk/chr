@@ -195,6 +195,10 @@ func ticketNewFlags() []cli.Flag {
 			Usage: "ticket priority",
 		},
 		&cli.StringFlag{
+			Name:  "synopsis",
+			Usage: "ticket synopsis",
+		},
+		&cli.StringFlag{
 			Name:  "severity",
 			Usage: "ticket severity",
 		},
@@ -1513,6 +1517,7 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 
 	result, err := newService(ctx, env, projectContext, deps.assetsFS).CreateTicket(CreateTicketRequest{
 		Title:       cmd.Args().First(),
+		Synopsis:    cmd.String("synopsis"),
 		Priority:    cmd.String("priority"),
 		Severity:    cmd.String("severity"),
 		Type:        cmd.String("type"),

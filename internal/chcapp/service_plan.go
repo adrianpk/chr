@@ -374,7 +374,8 @@ func (s service) createPlanTrackingTickets(
 	for _, payload := range ticketPayloads {
 		result, err := s.CreateTicket(CreateTicketRequest{
 			Title:       payload.Title,
-			Status:      "ready",
+			Synopsis:    payload.Summary,
+			Status:      chc.TicketStatusReadyForDev,
 			Priority:    payload.Priority,
 			Severity:    payload.Severity,
 			Type:        payload.Type,

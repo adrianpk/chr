@@ -18,6 +18,7 @@ func TestTicketRepositoryCreatesProjectWiseTicket(t *testing.T) {
 
 	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{
 		Title:    "Do something",
+		Synopsis: "Do the implementation work.",
 		Priority: "high",
 		Tags:     []string{"uxui"},
 	})
@@ -34,6 +35,8 @@ func TestTicketRepositoryCreatesProjectWiseTicket(t *testing.T) {
 	for _, want := range []string{
 		`key: "CHC-1"`,
 		`title: "Do something"`,
+		`synopsis: "Do the implementation work."`,
+		`status: "backlog"`,
 		`priority: "high"`,
 		`tags: ["uxui"]`,
 		`created_at: "2026-05-18T12:30:00Z"`,
@@ -49,8 +52,9 @@ func TestTicketRepositoryCreatesUseCaseTicket(t *testing.T) {
 	repository := NewTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
 
 	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{
-		Title:   "Add setup flow",
-		UseCase: "User Onboarding",
+		Title:    "Add setup flow",
+		Synopsis: "Add the onboarding setup flow.",
+		UseCase:  "User Onboarding",
 	})
 	if err != nil {
 		t.Fatalf("CreateTicket returned error: %v", err)
@@ -69,7 +73,10 @@ func TestTicketRepositoryDerivesNextKeyFromExistingTickets(t *testing.T) {
 
 	repository := NewTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
 
-	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{Title: "Next"})
+	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{
+		Title:    "Next",
+		Synopsis: "Create the next ticket.",
+	})
 	if err != nil {
 		t.Fatalf("CreateTicket returned error: %v", err)
 	}
@@ -89,13 +96,26 @@ func TestTicketRepositoryUsesCustomKeyPrefix(t *testing.T) {
 		WithTicketRepositoryClock(fixedTicketTime),
 	)
 
-	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{Title: "Next"})
+	result, err := repository.CreateTicket(context.Background(), CreateTicketOptions{
+		Title:    "Next",
+		Synopsis: "Create the next ticket.",
+	})
 	if err != nil {
 		t.Fatalf("CreateTicket returned error: %v", err)
 	}
 
 	if result.Key != "PRJ-5" {
 		t.Fatalf("Key = %q, want PRJ-5", result.Key)
+	}
+}
+
+func TestTicketRepositoryRejectsMissingSynopsis(t *testing.T) {
+	dir := t.TempDir()
+	repository := NewTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
+
+	_, err := repository.CreateTicket(context.Background(), CreateTicketOptions{Title: "Next"})
+	if err == nil {
+		t.Fatal("CreateTicket returned nil error")
 	}
 }
 

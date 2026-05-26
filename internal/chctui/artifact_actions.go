@@ -44,6 +44,7 @@ func NewArtifactActionState(action ArtifactActionID) ArtifactActionState {
 			Title:   "Create ticket",
 			Details: []string{
 				"Title: TUI created ticket",
+				"Synopsis: Ticket created from the TUI Board action.",
 				"Type: task",
 				"Priority: normal",
 				"Severity: normal",

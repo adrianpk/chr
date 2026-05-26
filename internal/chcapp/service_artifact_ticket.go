@@ -2,6 +2,7 @@ package chcapp
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
@@ -20,6 +21,7 @@ type CreateAuthoringSessionResult struct {
 
 type CreateTicketRequest struct {
 	Title       string
+	Synopsis    string
 	Status      string
 	Priority    string
 	Severity    string
@@ -36,7 +38,20 @@ type CreateTicketResult struct {
 }
 
 func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, error) {
+	if strings.TrimSpace(request.Title) == "" {
+		return CreateTicketResult{}, errors.New("ticket title is required")
+	}
+
+	if strings.TrimSpace(request.Synopsis) == "" {
+		return CreateTicketResult{}, errors.New("ticket synopsis is required")
+	}
+
 	config, err := chc.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		return CreateTicketResult{}, err
+	}
+
+	nextNumber, err := s.reserveNextTicketKeyNumber(config.TicketKeyPrefix)
 	if err != nil {
 		return CreateTicketResult{}, err
 	}
@@ -44,10 +59,12 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 	repository := chc.NewTicketRepository(
 		s.projectContext.ProjectDir,
 		chc.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
+		chc.WithTicketRepositoryNextKeyNumber(nextNumber),
 	)
 
 	result, err := repository.CreateTicket(s.ctx, chc.CreateTicketOptions{
 		Title:       request.Title,
+		Synopsis:    request.Synopsis,
 		Status:      request.Status,
 		Priority:    request.Priority,
 		Severity:    request.Severity,
@@ -61,15 +78,45 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 		return CreateTicketResult{}, err
 	}
 
+	err = s.refreshCreatedTicketIndex(result.Path)
+	if err != nil {
+		return CreateTicketResult{}, err
+	}
+
 	return CreateTicketResult{
 		Key:  result.Key,
 		Path: result.Path,
 	}, nil
 }
 
+func (s service) reserveNextTicketKeyNumber(keyPrefix string) (int, error) {
+	seed, err := chc.NextTicketKeyNumber(s.ctx, s.projectContext.ProjectDir, keyPrefix)
+	if err != nil {
+		return 0, err
+	}
+
+	repository, err := chc.NewTicketKeySequenceRepository(s.ctx, s.env, s.assetsFS)
+	if err != nil {
+		return 0, err
+	}
+
+	defer func() {
+		//nolint:errcheck // The caller only needs the reserved key number.
+		_ = repository.Close()
+	}()
+
+	return repository.ReserveNextTicketKey(s.ctx, chc.ReserveNextTicketKeyOptions{
+		ProjectID: s.projectContext.ProjectID,
+		Prefix:    keyPrefix,
+		Seed:      seed,
+		UpdatedAt: time.Now().UTC(),
+	})
+}
+
 func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
 	result, err := s.CreateTicket(CreateTicketRequest{
 		Title:       "TUI created ticket",
+		Synopsis:    "Ticket created from the TUI Board action.",
 		Priority:    "normal",
 		Severity:    "normal",
 		Type:        "task",
@@ -88,6 +135,36 @@ func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
 		displayPath(s.projectContext.ProjectDir, result.Path)
 
 	return reloaded, nil
+}
+
+func (s service) refreshCreatedTicketIndex(ticketPath string) error {
+	index, err := chc.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // The caller only needs the reconciliation result.
+		_ = index.Close()
+	}()
+
+	result, err := chc.NewTicketReconciler(index).ReconcileProjectTicket(s.ctx, chc.ReconcileProjectTicketOptions{
+		ProjectID:    s.projectContext.ProjectID,
+		ProjectDir:   s.projectContext.ProjectDir,
+		TicketPath:   ticketPath,
+		ReconciledAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+
+	if result.HasBlockers() {
+		firstBlocker, _ := result.FirstBlocker()
+
+		return errors.New("refresh created ticket index: " + firstBlocker.Err.Error())
+	}
+
+	return nil
 }
 
 func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {

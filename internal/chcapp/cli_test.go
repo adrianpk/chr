@@ -1204,6 +1204,8 @@ func TestTicketNewCreatesTicket(t *testing.T) {
 		"high",
 		"--tag",
 		"uxui",
+		"--synopsis",
+		"Do the implementation work.",
 		"Do something",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
@@ -1223,6 +1225,8 @@ func TestTicketNewCreatesTicket(t *testing.T) {
 	for _, want := range []string{
 		`key: "CHC-1"`,
 		`title: "Do something"`,
+		`synopsis: "Do the implementation work."`,
+		`status: "backlog"`,
 		`priority: "high"`,
 		`tags: ["uxui"]`,
 	} {
@@ -1247,7 +1251,15 @@ func TestTicketNewUsesConfigKeyPrefix(t *testing.T) {
 		t.Fatalf("write config: %v", err)
 	}
 
-	err = run(t.Context(), []string{"ticket", "new", "--dir", dir, "Do something"}, &bytes.Buffer{}, &bytes.Buffer{})
+	err = run(t.Context(), []string{
+		"ticket",
+		"new",
+		"--dir",
+		dir,
+		"--synopsis",
+		"Do the implementation work.",
+		"Do something",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("run returned error: %v", err)
 	}
@@ -1277,6 +1289,8 @@ func TestTicketNewUsesActiveProject(t *testing.T) {
 		"new",
 		"--dev-root",
 		devRoot,
+		"--synopsis",
+		"Create the active project ticket.",
 		"Active project ticket",
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
@@ -1805,6 +1819,8 @@ func TestTicketNewFallsBackToCurrentDirectory(t *testing.T) {
 			"new",
 			"--dev-root",
 			t.TempDir(),
+			"--synopsis",
+			"Create the current project ticket.",
 			"Current project ticket",
 		}, &bytes.Buffer{}, &bytes.Buffer{})
 		if err != nil {
@@ -1829,6 +1845,15 @@ func TestProjectContextResolverRejectsMissingContext(t *testing.T) {
 
 func TestTicketNewRejectsMissingTitle(t *testing.T) {
 	err := run(t.Context(), []string{"ticket", "new"}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("run returned nil error")
+	}
+}
+
+func TestTicketNewRejectsMissingSynopsis(t *testing.T) {
+	dir := newTestWorkspace(t)
+
+	err := run(t.Context(), []string{"ticket", "new", "--dir", dir, "Do something"}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("run returned nil error")
 	}

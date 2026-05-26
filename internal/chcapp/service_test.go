@@ -519,6 +519,14 @@ func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 		t.Fatalf("ticket title = %q, want TUI created ticket", result.Tickets[0].Title)
 	}
 
+	if result.Tickets[0].Status != chc.TicketStatusBacklog {
+		t.Fatalf("ticket status = %q, want backlog", result.Tickets[0].Status)
+	}
+
+	if result.Tickets[0].Synopsis != "Ticket created from the TUI Board action." {
+		t.Fatalf("ticket synopsis = %q, want TUI default synopsis", result.Tickets[0].Synopsis)
+	}
+
 	if result.AuthoringSessions == nil {
 		t.Fatal("AuthoringSessions = nil, want reloaded empty slice")
 	}

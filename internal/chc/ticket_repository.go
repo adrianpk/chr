@@ -21,6 +21,7 @@ type TicketRepository interface {
 
 type CreateTicketOptions struct {
 	Title       string
+	Synopsis    string
 	Status      string
 	Priority    string
 	Severity    string
@@ -39,10 +40,11 @@ type CreateTicketResult struct {
 type TicketRepositoryOption func(*fileTicketRepository)
 
 type fileTicketRepository struct {
-	projectDir string
-	keyPrefix  string
-	renderer   TicketRenderer
-	now        func() time.Time
+	projectDir           string
+	keyPrefix            string
+	renderer             TicketRenderer
+	now                  func() time.Time
+	nextKeyNumberFactory func(context.Context) (int, error)
 }
 
 func NewTicketRepository(projectDir string, opts ...TicketRepositoryOption) TicketRepository {
@@ -84,6 +86,16 @@ func WithTicketRepositoryClock(now func() time.Time) TicketRepositoryOption {
 	}
 }
 
+func WithTicketRepositoryNextKeyNumber(nextNumber int) TicketRepositoryOption {
+	return func(repository *fileTicketRepository) {
+		if nextNumber > 0 {
+			repository.nextKeyNumberFactory = func(context.Context) (int, error) {
+				return nextNumber, nil
+			}
+		}
+	}
+}
+
 func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTicketOptions) (CreateTicketResult, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -94,7 +106,11 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 		return CreateTicketResult{}, fmt.Errorf("ticket title is required")
 	}
 
-	nextNumber, err := r.nextKeyNumber(ctx)
+	if strings.TrimSpace(opts.Synopsis) == "" {
+		return CreateTicketResult{}, fmt.Errorf("ticket synopsis is required")
+	}
+
+	nextNumber, err := r.allocateKeyNumber(ctx)
 	if err != nil {
 		return CreateTicketResult{}, err
 	}
@@ -104,6 +120,7 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 	ticket := Ticket{
 		Key:         key,
 		Title:       opts.Title,
+		Synopsis:    opts.Synopsis,
 		Status:      ticketStatusOrDefault(opts.Status),
 		Priority:    opts.Priority,
 		Severity:    opts.Severity,
@@ -136,10 +153,29 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 	return CreateTicketResult{Key: key, Path: path}, nil
 }
 
+func NextTicketKeyNumber(ctx context.Context, projectDir, keyPrefix string) (int, error) {
+	repository := &fileTicketRepository{
+		projectDir: projectDir,
+		keyPrefix:  DefaultTicketKeyPrefix,
+	}
+
+	WithTicketRepositoryKeyPrefix(keyPrefix)(repository)
+
+	return repository.nextKeyNumber(ctx)
+}
+
+func (r *fileTicketRepository) allocateKeyNumber(ctx context.Context) (int, error) {
+	if r.nextKeyNumberFactory != nil {
+		return r.nextKeyNumberFactory(ctx)
+	}
+
+	return r.nextKeyNumber(ctx)
+}
+
 func ticketStatusOrDefault(status string) string {
 	status = strings.TrimSpace(status)
 	if status == "" {
-		return DefaultTicketStatus
+		return TicketStatusBacklog
 	}
 
 	return status
