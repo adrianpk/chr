@@ -79,11 +79,37 @@ AGENTS.md
   playbooks/
   reports/
   indexes/
+  user/
   runtime/
     agent/
       Dockerfile
   notifications/
 ```
+
+## Active Userspace
+
+`.chc/user/` is the current project-local active userspace.
+
+The MVP layout is intentionally single-active-operator. Workflows that need to
+bind a write to an operator resolve the operator id from:
+
+```sh
+CHC_OPERATOR_ID
+```
+
+For direnv users, a project may set it in `.envrc`:
+
+```sh
+export CHC_OPERATOR_ID=adrian
+```
+
+Users who do not use direnv should export the same variable in their shell or
+automation environment before running workflows that require operator
+ownership.
+
+The future multi-operator shape is expected to use an operator namespace such
+as `.chc/operators/<operator-id>/...`. The current `.chc/user/` path prepares
+the boundary without relocating existing artifacts.
 
 ## Source of Truth
 

@@ -34,7 +34,17 @@ chc init --dir /path/to/project
 ```
 
 The initialized workspace includes ticket directories, project protocol files,
-minimal user-owned config, and `.chc/runtime/agent/Dockerfile`.
+minimal user-owned config, `.chc/user/`, and
+`.chc/runtime/agent/Dockerfile`.
+
+Set an active operator id for workflows that need project-local userspace
+ownership:
+
+```sh
+export CHC_OPERATOR_ID=adrian
+```
+
+With direnv, the same export may live in `.envrc`.
 
 ## Configure Runtime Execution
 
