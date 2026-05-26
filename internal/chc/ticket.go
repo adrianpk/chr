@@ -13,6 +13,7 @@ const DefaultTicketStatus = TicketStatusOpenLegacy
 type Ticket struct {
 	Key         string
 	Title       string
+	Synopsis    string
 	Status      string
 	Priority    string
 	Severity    string
@@ -20,6 +21,9 @@ type Ticket struct {
 	Tags        []string
 	UseCase     string
 	ProjectArea string
+	SourceKind  string
+	SourceRef   string
+	Slice       string
 	Body        string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
