@@ -1,6 +1,6 @@
 # Slice 3: Adapter Service Shape Cleanup
 
-Status: reviewing
+Status: delivered
 Slicing: Architecture Boundary Cleanup
 Plan: `.prj/plans/slicing-architecture-boundary-cleanup-plan.md`
 Tracker: `.prj/trackers/slicing-architecture-boundary-cleanup-tracker.md`

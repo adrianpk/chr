@@ -1,6 +1,6 @@
 # Architecture Boundary Cleanup Slicing Tracker
 
-Status: in_progress
+Status: completed
 
 Plan: `.prj/plans/slicing-architecture-boundary-cleanup-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-architecture-boundary-cleanup-plan.md`
 
 Slicing name: Architecture Boundary Cleanup
 
-Active slice number: Slice 3
+Active slice number: none
 
-Active slice short name: adapter service shape cleanup
+Active slice short name: none
 
-Expected branch name: `feat/slice-3-adapter-service-shape-cleanup`
+Expected branch name: none
 
-Expected PR title: `feat(slice-3): adapter service shape cleanup`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -33,9 +33,9 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -43,7 +43,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Dependency Context Cleanup | Delivered | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | PR `#209`; hidden startup asset dependency removed; `make verify` passed. |
 | Slice 2: Operation Context Boundary | Delivered | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | PR `#210`; generation operations now receive operation-scoped context; `make verify` passed. |
-| Slice 3: Adapter Service Shape Cleanup | Reviewing | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | PR `#211`; metadata patching moved to service methods, TUI adapters split, and shared scope helpers renamed; `make verify` passed. |
+| Slice 3: Adapter Service Shape Cleanup | Delivered | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | PR `#211`; metadata patching moved to service methods, TUI adapters split, and shared scope helpers renamed; `make verify` passed. |
 
 ## Slice 1: Dependency Context Cleanup
 
@@ -119,9 +119,26 @@ Task commits:
 - `916c5bd refactor(tui): split adapter domains`
 - `f9069be docs(architecture): update adapter cleanup finding`
 - `7b9d0ae docs(architecture): report adapter service cleanup`
+- `eb5223e docs(architecture): link adapter cleanup pr`
 
 Validation:
 
 - `go test ./internal/chcapp`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
+
+## Completion
+
+All planned slices are delivered.
+
+Final validation:
+
+- `make verify`: pass.
+
+Post-slice tuning needed: no.
+
+Known remaining gaps:
+
+- Stored service context still exists for remaining non-generation operation
+  paths and can be revisited in a future cleanup if it becomes an active
+  source of coupling.

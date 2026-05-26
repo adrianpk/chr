@@ -1,6 +1,6 @@
 # Architecture Boundary Cleanup Slicing Plan
 
-Status: in_progress
+Status: completed
 
 ## Purpose
 
@@ -31,8 +31,7 @@ Review findings:
   service operations.
 - TUI adapter functions were concentrated in one file across several unrelated
   domains.
-- `workspaceScopeFlags` and `workspaceScopeFromCommand` provide shared
-  flows and should use neutral naming.
+- shared CLI scope helpers now use neutral workspace naming.
 
 ## Current State
 
@@ -66,16 +65,16 @@ The target model is:
 
 Slicing name: Architecture Boundary Cleanup
 
-Active slice number: Slice 3
+Active slice number: none
 
-Active slice short name: adapter service shape cleanup
+Active slice short name: none
 
-Expected branch name: `feat/slice-3-adapter-service-shape-cleanup`
+Expected branch name: none
 
-Expected PR title: `feat(slice-3): adapter service shape cleanup`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md`
+none
 
 Prerequisite PRs or delivered work:
 
