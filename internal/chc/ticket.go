@@ -63,6 +63,7 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 	}{
 		{key: "key", value: ticket.Key},
 		{key: "title", value: ticket.Title},
+		{key: "synopsis", value: ticket.Synopsis},
 		{key: "status", value: ticket.Status},
 		{key: "priority", value: ticket.Priority},
 		{key: "severity", value: ticket.Severity},
@@ -92,6 +93,21 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 	}
 
 	_, err = fmt.Fprintf(output, "project_area: %s\n", yamlString(ticket.ProjectArea))
+	if err != nil {
+		return fmt.Errorf("write ticket frontmatter: %w", err)
+	}
+
+	_, err = fmt.Fprintf(output, "source_kind: %s\n", yamlString(ticket.SourceKind))
+	if err != nil {
+		return fmt.Errorf("write ticket frontmatter: %w", err)
+	}
+
+	_, err = fmt.Fprintf(output, "source_ref: %s\n", yamlString(ticket.SourceRef))
+	if err != nil {
+		return fmt.Errorf("write ticket frontmatter: %w", err)
+	}
+
+	_, err = fmt.Fprintf(output, "slice: %s\n", yamlString(ticket.Slice))
 	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}

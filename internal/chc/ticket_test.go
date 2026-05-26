@@ -14,12 +14,16 @@ func TestTicketRendererRendersFrontmatterAndBody(t *testing.T) {
 	content, err := renderer.RenderTicket(Ticket{
 		Key:         "CHC-1",
 		Title:       "Do something",
+		Synopsis:    "Implement the onboarding flow.",
 		Priority:    "high",
 		Severity:    "critical",
 		Type:        "feature",
 		Tags:        []string{"uxui", "onboarding"},
 		UseCase:     "onboarding",
 		ProjectArea: "frontend",
+		SourceKind:  "plan_tracking",
+		SourceRef:   ".chc/plans/onboarding-plan.md",
+		Slice:       "Slice 1",
 		CreatedAt:   createdAt,
 		UpdatedAt:   updatedAt,
 	})
@@ -30,6 +34,7 @@ func TestTicketRendererRendersFrontmatterAndBody(t *testing.T) {
 	want := `---
 key: "CHC-1"
 title: "Do something"
+synopsis: "Implement the onboarding flow."
 status: "open"
 priority: "high"
 severity: "critical"
@@ -37,6 +42,9 @@ type: "feature"
 tags: ["uxui", "onboarding"]
 use_case: "onboarding"
 project_area: "frontend"
+source_kind: "plan_tracking"
+source_ref: ".chc/plans/onboarding-plan.md"
+slice: "Slice 1"
 created_at: "2026-05-18T12:30:00Z"
 updated_at: "2026-05-18T13:45:00Z"
 ---
@@ -68,12 +76,16 @@ func TestTicketRendererKeepsOptionalFieldsEmpty(t *testing.T) {
 	}
 
 	for _, want := range []string{
+		`synopsis: ""`,
 		`priority: ""`,
 		`severity: ""`,
 		`type: ""`,
 		`tags: []`,
 		`use_case: ""`,
 		`project_area: ""`,
+		`source_kind: ""`,
+		`source_ref: ""`,
+		`slice: ""`,
 		`created_at: ""`,
 		`updated_at: ""`,
 	} {
