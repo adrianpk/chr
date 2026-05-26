@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 1
+Active slice number: none
 
-Active slice short name: ticket metadata contract
+Active slice short name: none
 
-Expected branch name: `feat/slice-1-ticket-metadata-contract`
+Expected branch name: none
 
-Expected PR title: `feat(slice-1): ticket metadata contract`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -45,7 +45,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Ticket Metadata Contract | Reviewing | `feat/slice-1-ticket-metadata-contract` | `feat(slice-1): ticket metadata contract` | `.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md` | PR `#213`; metadata, synopsis, source fields, Board statuses, legacy aliases; `make verify` passed. |
+| Slice 1: Ticket Metadata Contract | Delivered | `feat/slice-1-ticket-metadata-contract` | `feat(slice-1): ticket metadata contract` | `.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md` | PR `#213`; metadata, synopsis, source fields, Board statuses, legacy aliases; `make verify` passed. |
 | Slice 2: Userspace Resolver | Pending | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | Active `.chc/user/` resolver and env contract. |
 | Slice 3: Board SQLite Schema | Pending | `feat/slice-3-board-sqlite-schema` | `feat(slice-3): board sqlite schema` | `.prj/reports/slices/board-ticket-operations/slice-3-board-sqlite-schema.md` | Migration/index shape for Board metadata and key allocation foundation. |
 | Slice 4: Indexed Ticket Enrichment | Pending | `feat/slice-4-indexed-ticket-enrichment` | `feat(slice-4): indexed ticket enrichment` | `.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md` | Parser/reconciler/repository through enriched metadata. |
