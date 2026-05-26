@@ -29,6 +29,9 @@ type CreateTicketRequest struct {
 	Tags        []string
 	UseCase     string
 	ProjectArea string
+	SourceKind  string
+	SourceRef   string
+	Slice       string
 	Body        string
 }
 
@@ -72,6 +75,9 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 		Tags:        request.Tags,
 		UseCase:     request.UseCase,
 		ProjectArea: request.ProjectArea,
+		SourceKind:  request.SourceKind,
+		SourceRef:   request.SourceRef,
+		Slice:       request.Slice,
 		Body:        request.Body,
 	})
 	if err != nil {

@@ -25,6 +25,7 @@ type GeneratedPlanTrackingTicket struct {
 	Path         string
 	SliceID      string
 	Title        string
+	Synopsis     string
 	Summary      string
 	Body         string
 	Priority     string
@@ -182,6 +183,10 @@ func ValidateGeneratedPlanTrackingTicket(ticket GeneratedPlanTrackingTicket) err
 		return fmt.Errorf("ticket title is required")
 	}
 
+	if strings.TrimSpace(ticket.Synopsis) == "" {
+		return fmt.Errorf("ticket synopsis is required")
+	}
+
 	return nil
 }
 
@@ -205,6 +210,10 @@ func ValidateGeneratedPlanTrackingModelContent(tracking GeneratedPlanTracking) e
 
 		if strings.TrimSpace(ticket.Title) == "" {
 			return fmt.Errorf("plan tracking ticket %d title is required", index+1)
+		}
+
+		if strings.TrimSpace(ticket.Synopsis) == "" {
+			return fmt.Errorf("plan tracking ticket %d synopsis is required", index+1)
 		}
 
 		if strings.TrimSpace(ticket.Body) == "" {

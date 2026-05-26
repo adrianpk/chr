@@ -29,6 +29,9 @@ type CreateTicketOptions struct {
 	Tags        []string
 	UseCase     string
 	ProjectArea string
+	SourceKind  string
+	SourceRef   string
+	Slice       string
 	Body        string
 }
 
@@ -128,6 +131,9 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 		Tags:        opts.Tags,
 		UseCase:     opts.UseCase,
 		ProjectArea: opts.ProjectArea,
+		SourceKind:  opts.SourceKind,
+		SourceRef:   opts.SourceRef,
+		Slice:       opts.Slice,
 		Body:        opts.Body,
 		CreatedAt:   now,
 		UpdatedAt:   now,

@@ -239,17 +239,28 @@ Implement planning foundation.
 		t.Fatalf("Tickets = %#v, want one ticket", result.Tickets)
 	}
 
-	if result.Tickets[0].Status != chc.TicketStatusReadyForDev {
-		t.Fatalf("ticket status = %q, want ready_for_dev", result.Tickets[0].Status)
-	}
+	assertMaterializedPlanTrackingTicketMetadata(t, result.Tickets[0])
 
 	ticket := readServiceWorkspaceFile(
 		t,
 		filepath.Join(projectDir, ".chc", "tickets", "blog", "CHC-1-Implement-planning-foundation.md"),
 	)
+	assertMaterializedPlanTrackingTicketContent(t, ticket)
+
+	if len(model.requests) != 1 || model.requests[0].Action != chc.QuizModelActionMaterializePlanTracking {
+		t.Fatalf("model requests = %#v, want plan tracking materialization", model.requests)
+	}
+}
+
+func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
+	t.Helper()
+
 	for _, want := range []string{
 		`status: "ready_for_dev"`,
-		`synopsis: "Implement the foundational planning work."`,
+		`synopsis: "Build the planning foundation slice."`,
+		`source_kind: "plan_tracking"`,
+		`source_ref: ".chc/plans/blog-plan.md"`,
+		`slice: "Slice 1"`,
 		"Source plan: `.chc/plans/blog-plan.md`",
 		"Tracking: `.chc/plans/blog-tracking.md`",
 		"Slice: Slice 1",
@@ -258,9 +269,25 @@ Implement planning foundation.
 			t.Fatalf("ticket missing %q in:\n%s", want, ticket)
 		}
 	}
+}
 
-	if len(model.requests) != 1 || model.requests[0].Action != chc.QuizModelActionMaterializePlanTracking {
-		t.Fatalf("model requests = %#v, want plan tracking materialization", model.requests)
+func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket chc.IndexedTicket) {
+	t.Helper()
+
+	if ticket.Status != chc.TicketStatusReadyForDev {
+		t.Fatalf("ticket status = %q, want ready_for_dev", ticket.Status)
+	}
+
+	if ticket.Synopsis != "Build the planning foundation slice." {
+		t.Fatalf("ticket synopsis = %q, want generated synopsis", ticket.Synopsis)
+	}
+
+	sourceMetadataMatches := ticket.SourceKind == "plan_tracking" &&
+		ticket.SourceRef == ".chc/plans/blog-plan.md" &&
+		ticket.Slice == "Slice 1"
+
+	if !sourceMetadataMatches {
+		t.Fatalf("ticket source metadata = %#v", ticket)
 	}
 }
 

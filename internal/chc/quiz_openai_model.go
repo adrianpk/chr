@@ -433,6 +433,7 @@ func quizModelPlanTrackingResponseFromOutput(
 		tickets = append(tickets, GeneratedPlanTrackingTicket{
 			SliceID:      ticket.SliceID,
 			Title:        ticket.Title,
+			Synopsis:     ticket.Synopsis,
 			Summary:      ticket.Summary,
 			Body:         ticket.Body,
 			Priority:     ticket.Priority,
@@ -739,6 +740,7 @@ Transform the plan into a tracking Markdown body and one ticket payload per impl
 The tracking body is an execution index: ordered slice list, dependencies, recommended ticket order, expected branch/PR references, and initial status.
 Tickets are the detailed execution units and must be ready for later implementation work.
 Each ticket must correspond to exactly one slice from the plan.
+Each ticket synopsis must be one short sentence that lets the Board identify the ticket without opening the full body.
 Each ticket body must include: objective, tasks, dependencies, acceptance criteria, validation expectations, and references to the source plan/tracking.
 Keep the content deterministic, concise, implementation-oriented, and review-friendly.
 Do not duplicate implementation progress or invent completed work.
@@ -891,6 +893,7 @@ func quizModelPlanTrackingJSONSchema() map[string]any {
 		"required": []string{
 			"slice_id",
 			"title",
+			"synopsis",
 			"summary",
 			"body",
 			"priority",
@@ -902,7 +905,11 @@ func quizModelPlanTrackingJSONSchema() map[string]any {
 		"properties": map[string]any{
 			"slice_id": map[string]any{"type": "string"},
 			"title":    map[string]any{"type": "string"},
-			"summary":  map[string]any{"type": "string"},
+			"synopsis": map[string]any{
+				"type":        "string",
+				"description": "One short Board-facing sentence describing the ticket.",
+			},
+			"summary": map[string]any{"type": "string"},
 			"body": map[string]any{
 				"type":        "string",
 				"description": "Markdown ticket body without front matter.",

@@ -408,6 +408,59 @@ func TestDecodeQuizModelQuestionPayloadRejectsMalformedOutput(t *testing.T) {
 	}
 }
 
+func TestDecodeQuizModelPlanTrackingPayloadRequiresTicketSynopsis(t *testing.T) {
+	payload, err := DecodeQuizModelPlanTrackingPayload([]byte(`{
+		"title": "Tracking",
+		"body": "Track implementation slices.",
+		"status": "tracking",
+		"tickets": [
+			{
+				"slice_id": "Slice 1",
+				"title": "Implement foundation",
+				"synopsis": "Build the implementation foundation.",
+				"summary": "Implement the foundational work.",
+				"body": "## Tasks\n\n- Implement the foundation.",
+				"priority": "normal",
+				"severity": "normal",
+				"type": "task",
+				"tags": ["foundation"],
+				"dependencies": []
+			}
+		]
+	}`))
+	if err != nil {
+		t.Fatalf("DecodeQuizModelPlanTrackingPayload returned error: %v", err)
+	}
+
+	if payload.Tickets[0].Synopsis != "Build the implementation foundation." {
+		t.Fatalf("ticket synopsis = %q, want generated synopsis", payload.Tickets[0].Synopsis)
+	}
+}
+
+func TestDecodeQuizModelPlanTrackingPayloadRejectsMissingTicketSynopsis(t *testing.T) {
+	_, err := DecodeQuizModelPlanTrackingPayload([]byte(`{
+		"title": "Tracking",
+		"body": "Track implementation slices.",
+		"status": "tracking",
+		"tickets": [
+			{
+				"slice_id": "Slice 1",
+				"title": "Implement foundation",
+				"summary": "Implement the foundational work.",
+				"body": "## Tasks\n\n- Implement the foundation.",
+				"priority": "normal",
+				"severity": "normal",
+				"type": "task",
+				"tags": ["foundation"],
+				"dependencies": []
+			}
+		]
+	}`))
+	if err == nil {
+		t.Fatal("DecodeQuizModelPlanTrackingPayload returned nil error")
+	}
+}
+
 func TestDecodeQuizModelFastQuestionPayloadValidatesCandidates(t *testing.T) {
 	payload, err := DecodeQuizModelFastQuestionPayload([]byte(`{
 		"questions": [

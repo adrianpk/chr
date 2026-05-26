@@ -100,6 +100,7 @@ type QuizModelPlanTrackingPayload struct {
 type QuizModelPlanTrackingTicketPayload struct {
 	SliceID      string   `json:"slice_id"`
 	Title        string   `json:"title"`
+	Synopsis     string   `json:"synopsis"`
 	Summary      string   `json:"summary"`
 	Body         string   `json:"body"`
 	Priority     string   `json:"priority"`
@@ -373,6 +374,7 @@ func ValidateQuizModelPlanTrackingTicketPayload(
 	normalized := QuizModelPlanTrackingTicketPayload{
 		SliceID:      strings.TrimSpace(payload.SliceID),
 		Title:        strings.TrimSpace(payload.Title),
+		Synopsis:     strings.TrimSpace(payload.Synopsis),
 		Summary:      strings.TrimSpace(payload.Summary),
 		Body:         strings.TrimSpace(payload.Body),
 		Priority:     normalizePlanTrackingPriority(payload.Priority),
@@ -392,6 +394,10 @@ func ValidateQuizModelPlanTrackingTicketPayload(
 
 	if normalized.Summary == "" {
 		return QuizModelPlanTrackingTicketPayload{}, fmt.Errorf("ticket summary is required")
+	}
+
+	if normalized.Synopsis == "" {
+		return QuizModelPlanTrackingTicketPayload{}, fmt.Errorf("ticket synopsis is required")
 	}
 
 	if normalized.Body == "" {

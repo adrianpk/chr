@@ -914,6 +914,7 @@ func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) chc
 				{
 					SliceID:  "Slice 1",
 					Title:    "Implement planning foundation",
+					Synopsis: "Build the planning foundation slice.",
 					Summary:  "Implement the foundational planning work.",
 					Body:     "## Tasks\n\n- Implement the planning foundation.\n\n## Acceptance Criteria\n\n- Foundation behavior is covered by tests.",
 					Priority: "normal",

@@ -374,7 +374,7 @@ func (s service) createPlanTrackingTickets(
 	for _, payload := range ticketPayloads {
 		result, err := s.CreateTicket(CreateTicketRequest{
 			Title:       payload.Title,
-			Synopsis:    payload.Summary,
+			Synopsis:    payload.Synopsis,
 			Status:      chc.TicketStatusReadyForDev,
 			Priority:    payload.Priority,
 			Severity:    payload.Severity,
@@ -382,6 +382,9 @@ func (s service) createPlanTrackingTickets(
 			Tags:        payload.Tags,
 			UseCase:     scope.CaseSlug,
 			ProjectArea: "plan",
+			SourceKind:  "plan_tracking",
+			SourceRef:   planPath,
+			Slice:       payload.SliceID,
 			Body:        renderPlanTrackingTicketBody(planPath, trackingPath, payload),
 		})
 		if err != nil {
