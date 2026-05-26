@@ -66,16 +66,16 @@ The target model is:
 
 Slicing name: Architecture Boundary Cleanup
 
-Active slice number: Slice 2
+Active slice number: Slice 3
 
-Active slice short name: operation context boundary
+Active slice short name: adapter service shape cleanup
 
-Expected branch name: `feat/slice-2-operation-context-boundary`
+Expected branch name: `feat/slice-3-adapter-service-shape-cleanup`
 
-Expected PR title: `feat(slice-2): operation context boundary`
+Expected PR title: `feat(slice-3): adapter service shape cleanup`
 
 Expected report path:
-`.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md`
+`.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md`
 
 Prerequisite PRs or delivered work:
 

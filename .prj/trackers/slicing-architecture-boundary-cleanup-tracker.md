@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-architecture-boundary-cleanup-plan.md`
 
 Slicing name: Architecture Boundary Cleanup
 
-Active slice number: Slice 2
+Active slice number: Slice 3
 
-Active slice short name: operation context boundary
+Active slice short name: adapter service shape cleanup
 
-Expected branch name: `feat/slice-2-operation-context-boundary`
+Expected branch name: `feat/slice-3-adapter-service-shape-cleanup`
 
-Expected PR title: `feat(slice-2): operation context boundary`
+Expected PR title: `feat(slice-3): adapter service shape cleanup`
 
 Expected report path:
-`.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md`
+`.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md`
 
 Prerequisite PRs or delivered work:
 
@@ -42,8 +42,8 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Dependency Context Cleanup | Delivered | `feat/slice-1-dependency-context-cleanup` | `feat(slice-1): dependency context cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-1-dependency-context-cleanup.md` | PR `#209`; hidden startup asset dependency removed; `make verify` passed. |
-| Slice 2: Operation Context Boundary | Reviewing | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | PR `#210`; generation operations now receive operation-scoped context; `make verify` passed. |
-| Slice 3: Adapter Service Shape Cleanup | Planned | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | Move metadata workflow logic into service methods, split TUI adapters, and rename neutral scope helpers. |
+| Slice 2: Operation Context Boundary | Delivered | `feat/slice-2-operation-context-boundary` | `feat(slice-2): operation context boundary` | `.prj/reports/slices/architecture-boundary-cleanup/slice-2-operation-context-boundary.md` | PR `#210`; generation operations now receive operation-scoped context; `make verify` passed. |
+| Slice 3: Adapter Service Shape Cleanup | Active | `feat/slice-3-adapter-service-shape-cleanup` | `feat(slice-3): adapter service shape cleanup` | `.prj/reports/slices/architecture-boundary-cleanup/slice-3-adapter-service-shape-cleanup.md` | Move metadata workflow logic into service methods, split TUI adapters, and rename neutral scope helpers. |
 
 ## Slice 1: Dependency Context Cleanup
 
@@ -90,6 +90,7 @@ Task commits:
 
 - `138c8c4 refactor(generation): pass operation contexts explicitly`
 - `db6d4e8 docs(architecture): report operation context boundary`
+- `be2916b docs(architecture): link operation context pr`
 
 Validation:
 
