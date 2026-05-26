@@ -100,3 +100,55 @@ Command availability gates:
 - Plan commands are available only in the Plans view.
 - `materialize-plan-tracking` is additionally available only when the selected
   plan exists and contains content.
+
+## CLI Command Inventory
+
+| Domain | CLI command | TUI equivalent | Service path | Status | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Shell | `chc` | Opens TUI | `runDefaultTUIAction`, `chctui.Run` | `matched` | Root command launches the operational console. |
+| Shell | `chc tui --dir <path>` | Opens TUI | `runTUICommandAction`, `chctui.Run` | `matched` | Explicit TUI command. |
+| Workspace | `chc init` | none | `chc.Workspace.Init` | `missing_tui` | Workspace bootstrap is CLI-only. |
+| Runtime | `chc runtime init` | none | `chc.Workspace.InitRuntime` through runtime command | `missing_tui` | Runtime asset installation is CLI-only. |
+| Runtime | `chc runtime validate` | Dash displays runtime evidence only | `runRuntimeValidate` | `missing_tui` | TUI does not run runtime validation directly. |
+| Project Registry | `chc project add` | none | `runProjectAdd`, user registry | `missing_tui` | Registry management is CLI-only. |
+| Project Registry | `chc project list` | none | `runProjectList`, user registry | `missing_tui` | Registry management is CLI-only. |
+| Project Registry | `chc project current` | current project topbar | `runProjectCurrent`, user registry | `matched` | TUI shows resolved project, CLI prints active project. |
+| Project Registry | `chc project select` | none | `runProjectSelect`, user registry | `missing_tui` | Registry selection is CLI-only. |
+| Tickets | `chc ticket new` | Palette `create-ticket` partially | CLI: `runTicketNew`; TUI: `service.CreateDefaultTicket` | `service_divergence` | CLI supports metadata; TUI creates a default task ticket. |
+| Tickets | `chc ticket list` | Board view | `runTicketList`, ticket index | `matched` | TUI board and CLI list inspect indexed tickets. |
+| Tickets | `chc ticket show` | Board selected ticket detail | `runTicketShow`, ticket index | `matched` | Equivalent inspection surface. |
+| Tickets | `chc ticket comment` | Palette `ticket-add-comment` partially | CLI: `runTicketComment`; TUI: `service.AddSelectedTicketComment` | `service_divergence` | CLI body is user-supplied; TUI body is fixed. |
+| Tickets | `chc ticket status` | Palette ticket status commands | CLI: `runTicketStatus`; TUI: `service.MoveSelectedTicketStatus` | `service_divergence` | Equivalent state change, different path. |
+| Work | `chc ticket start` | Palette `work-start-ticket` | CLI: `runTicketStart`; TUI: `service.StartSelectedTicket` | `service_divergence` | Equivalent execution intent, different path. |
+| Work | `chc ticket loop` | Palette `work-start-ready-loop` partially | CLI: `runTicketLoop`; TUI: `service.StartReadyTicketLoop` | `service_divergence` | CLI is configurable; TUI runs one ready-ticket iteration. |
+| Work | `chc ticket apply-result` | none | `runTicketApplyResult` | `missing_tui` | Result application is CLI-only. |
+| Index | `chc index rebuild` | Workspace refresh partially | `runIndexRebuild`, ticket reconciler | `missing_tui` | CLI rebuilds ticket index; TUI refresh rebuilds workspace graph/read model. |
+| Index | `chc index status` | Project/Dash diagnostics partially | `runIndexStatus` | `missing_tui` | CLI-specific index diagnostics. |
+| Authoring | `chc author session new` | Palette `create-authoring-session` partially | CLI: `runAuthorSessionNew`; TUI: `service.CreateTUIAuthoringSession` | `service_divergence` | CLI is configurable; TUI creates a default session. |
+| Authoring | `chc author session list` | legacy Authoring view only | `runAuthorSessionList` | `missing_tui` | Authoring is not part of default TUI tabs. |
+| Authoring | `chc author session show` | legacy Authoring view only | `runAuthorSessionShow` | `missing_tui` | Authoring is not part of default TUI tabs. |
+| Authoring | `chc author quiz new` | Palette `create-context-quiz` not implemented | `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware authoring quiz generation. |
+| Authoring | `chc author promote quiz-to-draft` | none | `runAuthorPromoteQuizToDraft`, `chc.PlanQuizToDraftPromotion` | `missing_tui` | Active CLI compatibility command; no TUI equivalent. |
+| Assisted Authoring | `chc author assisted start` | none | `runAuthorAssistedStart` | `missing_tui` | CLI-only assisted workflow. |
+| Assisted Authoring | `chc author assisted resume` | none | `runAuthorAssistedResume` | `missing_tui` | CLI-only assisted workflow. |
+| Assisted Authoring | `chc author assisted answer` | none | `runAuthorAssistedAnswer` | `missing_tui` | CLI-only assisted workflow. |
+| Assisted Authoring | `chc author assisted status` | none | `runAuthorAssistedStatus` | `missing_tui` | CLI-only assisted workflow. |
+| Assisted Authoring | `chc author assisted finalize` | none | `runAuthorAssistedFinalize` | `missing_tui` | CLI-only assisted workflow. |
+| Daemon | `chc daemon status` | Dash displays observability partially | `runDaemonStatus` | `missing_tui` | TUI displays state but does not expose full daemon status command. |
+| Daemon | `chc daemon start` | Palette `work-start-ready-loop` partially | `runDaemonStart` | `missing_tui` | Daemon foreground loop is CLI-only. |
+| Daemon | `chc daemon stop` | Palette `work-request-stop` | CLI: `runDaemonStop`; TUI: `service.RequestDaemonStop` | `service_divergence` | Equivalent stop intent, different path. |
+| Reports | `chc report list` | Dash displays recent evidence partially | `runReportList` | `missing_tui` | Report browsing is CLI-only. |
+| Reports | `chc report show` | Dash displays recent evidence partially | `runReportShow` | `missing_tui` | Report browsing is CLI-only. |
+| Maintenance | `chc maintenance bundle` | none | `runMaintenanceBundle` | `missing_tui` | Maintenance is CLI-only. |
+| Maintenance | `chc maintenance db status` | none | maintenance command path | `missing_tui` | Maintenance is CLI-only. |
+| Maintenance | `chc maintenance execution artifacts` | Dash evidence partially | maintenance command path | `missing_tui` | Detailed artifact drift reporting is CLI-only. |
+| Maintenance | `chc maintenance execution cleanup-preview` | none | maintenance command path | `missing_tui` | Maintenance is CLI-only. |
+| Maintenance | `chc maintenance registry status` | none | maintenance command path | `missing_tui` | Maintenance is CLI-only. |
+| Maintenance | `chc maintenance registry disable` | none | maintenance command path | `missing_tui` | Maintenance is CLI-only. |
+| Maintenance | `chc maintenance registry set-path` | none | maintenance command path | `missing_tui` | Maintenance is CLI-only. |
+| Notify | `chc notify status` | none | `runNotifyStatus` | `missing_tui` | Notification inspection is CLI-only. |
+| Notify | `chc notify telegram test` | none | `runNotifyTelegramTest` | `missing_tui` | Notification setup test is CLI-only. |
+| Notify | `chc notify telegram poll` | none | `runNotifyTelegramPoll` | `missing_tui` | Remote command intake is CLI-only. |
+| Proving | `chc proving validate` | none | `runProvingValidate` | `missing_tui` | Proving-ground workflows are CLI-only. |
+| Proving | `chc proving run` | none | `runProvingRun` | `missing_tui` | Proving-ground workflows are CLI-only. |
+| Proving | `chc proving ralph` | none | `runProvingRalph` | `missing_tui` | Proving-ground workflows are CLI-only. |
