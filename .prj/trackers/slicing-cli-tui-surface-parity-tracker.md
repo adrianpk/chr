@@ -44,7 +44,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Inventory | Delivered | `feat/slice-1-cli-tui-inventory` | `feat(slice-1): inventory` | `.prj/reports/slices/cli-tui-surface-parity/slice-1-inventory.md` | PR `#204`; matrix created; `make verify` passed. |
 | Slice 2: Service Boundaries | Delivered | `feat/slice-2-service-boundaries` | `feat(slice-2): service boundaries` | `.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md` | PR `#205`; shared daemon stop and authoring session boundaries; `make verify` passed. |
-| Slice 3: Missing CLI Actions | Planned | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | Add CLI entrypoints for operational TUI actions. |
+| Slice 3: Missing CLI Actions | Reviewing | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | Added CLI entrypoints for service-backed operational TUI actions; `make verify` passed. |
 | Slice 4: Parity Tests | Planned | `feat/slice-4-parity-tests` | `feat(slice-4): parity tests` | `.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md` | Add tests for CLI/TUI/service parity. |
 | Slice 5: Parity Docs | Planned | `feat/slice-5-parity-docs` | `feat(slice-5): parity docs` | `.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md` | Publish final parity contract. |
 
@@ -103,22 +103,27 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T3.1 Add missing project and use-case metadata commands.
-- [ ] T3.2 Add missing dump commands.
-- [ ] T3.3 Add missing quiz commands.
-- [ ] T3.4 Add missing spec, plan, and tracking commands.
-- [ ] T3.5 Add missing ticket and work commands where applicable.
-- [ ] T3.6 Update matrix statuses for implemented CLI commands.
-- [ ] T3.7 Add slice implementation report.
-- [ ] T3.8 Run validation.
+- [x] T3.1 Add missing project and use-case metadata commands.
+- [x] T3.2 Add missing dump commands.
+- [x] T3.3 Add missing quiz commands.
+- [x] T3.4 Add missing spec, plan, and tracking commands.
+- [x] T3.5 Add missing ticket and work commands where applicable.
+- [x] T3.6 Update matrix statuses for implemented CLI commands.
+- [x] T3.7 Add slice implementation report.
+- [x] T3.8 Run validation.
 
 Task commits:
 
+- `a67df45 feat(cli): add tui parity commands`
+- `9e2f4ac test(cli): cover parity command entrypoints`
+- `ca1c70b docs(parity): mark implemented cli actions`
 - `pending commit`
 
 Validation:
 
-- Pending.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 4: Parity Tests
 
