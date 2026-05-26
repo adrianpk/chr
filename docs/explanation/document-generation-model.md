@@ -17,7 +17,9 @@ The intended progression is:
 4. Mark or treat the specification as accepted/final when behavior is clear
    enough.
 5. Turn the specification into a plan when implementation work is ready.
-6. Track the plan through slices, tasks, commits, branches, and pull requests.
+6. Materialize plan tracking and tickets when the plan is ready to execute.
+7. Track execution through tickets, slices, tasks, commits, branches, and pull
+   requests.
 
 Not every project needs every step. The value is that each step has a durable
 artifact when the project needs it.
@@ -38,8 +40,8 @@ Dumps may declare a use-case slug. Dumps without a use-case slug are
 project-wide.
 
 Dump-style material can be written directly as Markdown today. The current CLI
-already exposes the related session, quiz, promotion, and assisted authoring
-boundaries.
+already exposes the related session, quiz, legacy quiz-to-draft, and assisted
+authoring boundaries.
 
 ## Quizzes
 
@@ -54,15 +56,35 @@ output is persistent project material, not unstructured chat history.
 Quizzes may declare a use-case slug. Quizzes without a use-case slug are
 project-wide.
 
-## Promotion
+## Legacy Quiz-To-Draft
 
-Promotion records how one artifact became another. Answered quiz material and
-dumps can be promoted into a specification with `status: draft` when the result
-needs review.
+The active document flow does not have a general promotion operation. Current
+spec and plan generation read accumulated workspace material directly and write
+the target artifact for the selected project or use case.
 
-Promotion should keep enough source context for later review without making the
-generated document feel locked. Users can edit promoted Markdown directly after
-it is created.
+The CLI still exposes `author promote quiz-to-draft` as a compatibility path
+for older authoring sessions. That command turns one quiz artifact into an
+editable draft artifact and records provenance. New flows should generate or
+edit specs instead of creating draft artifacts.
+
+## Specs, Plans, and Tracking
+
+Specs are generated from accumulated project and use-case material. They are the
+place where expected behavior is made explicit before implementation planning.
+
+Plans are generated from the same workspace material plus existing specs. A plan
+is an implementation decomposition: slices, ordering, dependencies, tasks,
+branch expectations, pull request expectations, and validation criteria.
+
+Plan tracking is a separate materialization step. It creates a tracking
+Markdown document and one ticket per generated slice. The tracking document is
+the ordered execution map; tickets are the execution surface for agents and
+operators.
+
+Generated plan regeneration archives the previous generated plan before writing
+the replacement. Archived generated plans remain on disk for recovery, but
+normal document loading excludes archived generated documents so discarded
+material does not influence later generation.
 
 ## Workspace Index
 

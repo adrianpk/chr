@@ -13,10 +13,10 @@ The normal flow is:
 
 1. Describe a use case or feature.
 2. Produce or refine a specification.
-3. Promote the specification into a plan.
-4. Create a tracker for execution.
-5. Divide the work into slices.
-6. Define tasks inside each slice.
+3. Generate an implementation plan.
+4. Materialize plan tracking and tickets.
+5. Use the tracking document as the ordered execution map.
+6. Execute the generated tickets in slice order.
 7. Associate tasks with commits where useful.
 8. Associate slices with branches and pull requests.
 9. Review and merge each pull request manually.
@@ -46,6 +46,6 @@ assumption.
 
 ## Relationship to Tickets
 
-Tickets are the agent's task surface during execution. Slicing is the planning
-and delivery structure around larger work. A ticket can represent a slice, a
-task, or another bounded unit depending on the project workflow.
+Tickets are the agent's task surface during execution. For generated plan
+tracking, each slice becomes one ticket. The tracking document preserves the
+intended execution order and references the generated tickets.

@@ -4,8 +4,9 @@ Authoring sessions are project-local Markdown workflows for turning rough
 knowledge into durable artifacts such as quizzes, specs, plans, slice sets, and
 tickets.
 
-Markdown remains the canonical editing surface. The CLI creates, lists, shows,
-and promotes files, but users may edit generated Markdown directly.
+Markdown remains the canonical editing surface. The CLI creates, lists, and
+shows sessions and artifacts. It also keeps a legacy quiz-to-draft command for
+older sessions, but users may edit generated Markdown directly.
 
 ## Command Surface
 
@@ -180,9 +181,9 @@ Each link records:
 - decision text;
 - recorded time.
 
-Context-aware quiz generation records a `generated` link. Later promotion or
-synthesis steps record `promoted` or `generated` links according to the
-operation that created the target artifact.
+Context-aware quiz generation records a `generated` link. Assisted synthesis
+records `generated` links. The legacy quiz-to-draft command records a
+`promoted` link for compatibility with older sessions.
 
 Assisted finalization records generated links from the transcript to the
 curated summary and from the curated summary to the synthesized artifact.
@@ -218,7 +219,7 @@ If the provider response is missing required structure, asks for sensitive
 material, or yields no valid questions, the command fails instead of writing a
 generic fallback quiz.
 
-## Manual Promotion
+## Legacy Quiz-To-Draft
 
 The current product model does not use `draft` as a first-class artifact
 family. Roughness is represented by a spec with `status: draft`.
@@ -232,9 +233,8 @@ dump + quiz -> spec(status=draft)
 spec(status=draft) -> spec(status=accepted/final)
 ```
 
-Legacy `quiz-to-draft` promotion remains a compatibility path for older
-sessions. New flows should generate or edit specs instead of creating draft
-artifacts.
+Legacy `quiz-to-draft` remains a compatibility path for older sessions. New
+flows should generate or edit specs instead of creating draft artifacts.
 
 ## Assisted Authoring
 

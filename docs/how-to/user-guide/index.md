@@ -109,6 +109,268 @@ chc project current
 All project registry commands support `--dev-root` for isolated development
 state.
 
+## Open the TUI Console
+
+Open the local operational console from the resolved project:
+
+```sh
+chc
+```
+
+The explicit form is:
+
+```sh
+chc tui
+```
+
+Open a specific project directory:
+
+```sh
+chc tui --dir /path/to/project
+```
+
+The TUI is the main interactive surface for project context, use cases, dumps,
+quizzes, specs, plans, tickets, and execution activity. It loads durable
+workspace files from disk and writes normal Markdown artifacts back to the
+workspace.
+
+## Navigate the TUI
+
+Use the function-key tabs:
+
+| Key | View |
+| --- | --- |
+| `F1` | Project |
+| `F2` | Cases |
+| `F3` | Dumps |
+| `F4` | Quizzes |
+| `F5` | Specs |
+| `F6` | Plans |
+| `F7` | Board |
+| `F8` | Dash |
+| `F9` | Help |
+
+Common navigation:
+
+| Key | Behavior |
+| --- | --- |
+| `tab` | Move to the next pane. |
+| `shift+tab` | Move to the previous pane. |
+| `up` / `k` | Move to the previous selected row or field when the focused pane supports selection. |
+| `down` / `j` | Move to the next selected row or field when the focused pane supports selection. |
+| `alt+m` | Toggle maximized mode for the focused pane. |
+| `esc` | Return focus to the primary pane, cancel an active prompt, or close an active mode. |
+| `q`, `ctrl+c`, `F10` | Quit the TUI. |
+| `:` | Open the command palette. |
+| `/` | Open filtering where the current view supports filtering. |
+
+The footer tabs are clickable. The TUI also supports mouse resizing between
+panes: drag near the vertical divider, or near the horizontal divider in stacked
+right panes.
+
+## Use the Command Palette
+
+Press `:` to open the command palette.
+
+Inside the palette:
+
+| Key | Behavior |
+| --- | --- |
+| type text | Filter commands by id, title, or description. |
+| `up` / `down` | Select a command. |
+| `enter` | Run the selected command. |
+| `backspace` | Remove one filter character. |
+| `esc` | Close the palette. |
+
+The palette includes navigation, refresh, selected-source inspection, artifact
+creation, dump, quiz, spec, plan, ticket, and work commands. Some commands are
+view-gated. Spec commands appear only in Specs. Plan commands appear only in
+Plans, and plan tracking appears only when the selected plan exists.
+
+Palette commands that change files open the same confirmation prompt used by
+direct keybindings. Confirm with `enter` or cancel with `esc`.
+
+## Edit Project Context
+
+Open the Project view with `F1`.
+
+The Project view contains project name, description, long-form context,
+location, and artifact counts. The context here is project-wide material that
+feeds later spec and plan generation.
+
+| Key | Behavior |
+| --- | --- |
+| `up` / `down` or `k` / `j` | Select the project field in the primary pane. |
+| `enter` or `e` | Edit the selected field. |
+| `enter` while editing | Apply the field edit locally. |
+| `esc` while editing | Cancel the field edit. |
+| `s` or `ctrl+s` | Save project metadata to disk. |
+| `r` | Refresh the workspace graph from disk. |
+
+Refresh is blocked while project edits are active or unsaved.
+
+## Manage Use Cases
+
+Open the Cases view with `F2`.
+
+The system is use-case based. The list represents use cases. Use-case metadata
+and context become part of the material used by dumps, quizzes, specs, plans,
+and tickets.
+
+| Key | Behavior |
+| --- | --- |
+| `up` / `down` or `k` / `j` in the list pane | Select a use case. |
+| `enter` in the list pane | Move focus into the use-case detail pane. |
+| `up` / `down` or `k` / `j` in the detail pane | Select a use-case field. |
+| `enter` or `e` in the detail pane | Edit the selected use-case field. |
+| `n` | Create a new use case entry. |
+| `/` in the list pane | Filter use cases. |
+| `enter` while filtering | Apply the filter. |
+| `esc` while filtering | Cancel filter editing. |
+| `esc` in the list pane | Clear the case filter. |
+| `s` or `ctrl+s` | Save the selected use case. |
+| `r` | Refresh the workspace graph from disk. |
+
+Refresh is blocked while use-case edits are active or unsaved.
+
+## Capture Dumps in the TUI
+
+Open the Dumps view with `F3`.
+
+Dumps are free-form Markdown context. They can be project-wide or tied to a use
+case. The TUI lists dumps by use case and shows the selected dump content in the
+detail pane.
+
+| Key | Behavior |
+| --- | --- |
+| `up` / `down` or `k` / `j` | Select a dump. |
+| `c` | Create a dump for the selected project or use case after confirmation. |
+| `enter` | Edit the selected dump in the TUI editor. |
+| `alt+e` | Open the selected dump in the external editor. |
+| `r` | Refresh dumps from disk. |
+| `ctrl+s` while editing | Save the TUI editor content. |
+| `esc` while editing | Cancel the TUI editor. |
+
+Direct edit maximizes the detail pane. External edit starts the configured
+editor process and refreshes the dump list when the editor exits.
+
+## Run Quizzes in the TUI
+
+Open the Quizzes view with `F4`.
+
+Quizzes collect missing project or use-case knowledge through bounded questions.
+The TUI shows quiz state, active question, recorded answers, and curated notes.
+
+| Key | Behavior |
+| --- | --- |
+| `up` / `down` or `k` / `j` | Select a quiz. |
+| `s` | Start or restart the selected quiz. |
+| `enter` | Answer the active question. |
+| `r` | Refresh quiz state from disk. |
+
+When answering a quiz:
+
+| Key | Behavior |
+| --- | --- |
+| `enter` | Submit the answer. |
+| `shift+enter` or `ctrl+j` | Insert a newline. |
+| `alt+s` | Skip the active question. |
+| `alt+d` | Mark the quiz done. |
+| `esc` | Cancel answer entry. |
+
+The command palette also exposes resume, skip, complete, cancel, deep mode, and
+fast mode actions for the selected quiz.
+
+## Generate Specs in the TUI
+
+Open the Specs view with `F5`.
+
+Specs are generated from accumulated project and use-case material: project
+metadata, project context, use-case metadata, use-case context, dumps, quizzes,
+and related workspace documents. Specs are generated from the Specs tab.
+
+| Key | Behavior |
+| --- | --- |
+| `up` / `down` or `k` / `j` | Select a use case. |
+| `g` | Generate a spec for the selected use case. |
+| `r` | Refresh specs from disk. |
+
+Spec generation is asynchronous. While it is running, the TUI shows a working
+state and ignores other spec actions until the request finishes.
+
+## Generate Plans and Tracking in the TUI
+
+Open the Plans view with `F6`.
+
+Plans are generated from accumulated project and use-case material, including
+existing specs. A plan decomposes implementation into reviewable slices and is
+the input for later tracking and ticket creation.
+
+| Key | Behavior |
+| --- | --- |
+| `up` / `down` or `k` / `j` | Select a use case. |
+| `g` | Generate the selected plan only when it is missing. |
+| `G` | Regenerate the selected plan after confirmation. |
+| `alt+t` | Create plan tracking and tickets from the selected plan after confirmation. |
+| `r` | Refresh plans from disk. |
+
+`g` does not overwrite an existing plan. Use `G` when the existing plan should
+be replaced. Regeneration archives the existing generated plan before writing
+the replacement, so archived generated plans remain available on disk but are
+excluded from normal document loading.
+
+`alt+t` is available only when the selected plan exists. It creates a tracking
+Markdown file and one ticket per generated slice. If tracking already exists,
+the operation reports that state instead of creating duplicate tracking.
+
+Plan generation, regeneration, and tracking creation are guarded so the same
+TUI cannot start overlapping plan operations.
+
+## Use the Board
+
+Open the Board view with `F7`.
+
+The Board view groups tickets by status and shows details for the selected
+ticket.
+
+| Key | Behavior |
+| --- | --- |
+| `up` / `down` or `k` / `j` | Select a ticket. |
+| `/` | Filter tickets. |
+| `enter` while filtering | Apply the filter and select the first match. |
+| `esc` while filtering | Cancel filter editing. |
+
+Ticket and work operations are available from the command palette:
+
+| Command | Behavior |
+| --- | --- |
+| Create ticket | Create a default task ticket after confirmation. |
+| Add ticket comment | Add the standard `TUI action recorded.` comment to the selected ticket. |
+| Move ticket to ready | Move the selected ticket to `ready`. |
+| Move ticket to in_progress | Move the selected ticket to `in_progress`. |
+| Move ticket to reviewing | Move the selected ticket to `reviewing`. |
+| Start selected ticket | Run the configured runtime harness for the selected ticket. |
+| Start ready ticket loop | Run one ready ticket through the agent loop. |
+| Request agent stop | Request daemon stop through local daemon state. |
+
+Checklist toggle and checklist item creation commands are visible as capability
+checks, but they currently return an unavailable-operation message because the
+safe checklist writer has not been implemented.
+
+## Inspect Operations
+
+Open the Dash view with `F8`.
+
+Dash shows agent activity and runtime evidence loaded from local state. Use it
+after ticket execution, ready-loop execution, or daemon activity to inspect the
+latest operational state.
+
+## Get Help in the TUI
+
+Open Help with `F9`, or use `:` and run the Help command. The footer at the
+bottom of the TUI always shows the active key helper for the current view or
+modal state.
+
 ## Create and Manage Tickets
 
 Create a ticket:
@@ -476,6 +738,7 @@ Docker receives the same files through the project mount, usually under
 ## Reference
 
 - [Project workspace](../../reference/project-workspace.md)
+- [TUI](../../reference/tui.md)
 - [Authoring sessions](../../reference/authoring-sessions.md)
 - [Project CLI](../../reference/project-cli.md)
 - [Ticket execution](../../reference/ticket-execution.md)

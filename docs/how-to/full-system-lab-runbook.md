@@ -314,8 +314,8 @@ generated quiz path relative to the project, for example
 
 Edit the generated quiz answers in Markdown, then generate or edit the
 corresponding spec from the Specs surface. Specs that still need review should
-use `status: draft`; legacy `quiz-to-draft` promotion remains only for older
-authoring sessions.
+use `status: draft`; legacy `quiz-to-draft` remains only for older authoring
+sessions.
 
 Exercise assisted authoring with deterministic fake adapter inputs:
 
@@ -603,7 +603,7 @@ A useful full-system lab run produces:
 - a resettable `chc-blog-work` project;
 - a clean way to restore it from `chc-blog-ref`;
 - initialized `.chc/` project-local state;
-- authoring session, quiz, promotion, and assisted authoring artifacts;
+- authoring session, quiz, legacy quiz-to-draft, and assisted authoring artifacts;
 - at least two Markdown tickets;
 - ticket index rebuild and status output;
 - one single-ticket execution attempt;

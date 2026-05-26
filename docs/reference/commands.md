@@ -3,6 +3,8 @@
 This page lists the main command surfaces. Use `chc --help` and command-specific
 help for exact flags.
 
+Running `chc` without a subcommand opens the TUI for the resolved project.
+
 ## Workspace
 
 Initialize a managed project:
@@ -16,6 +18,19 @@ Preview initialization:
 ```sh
 chc init --dry-run
 ```
+
+## TUI
+
+Open the local operational console:
+
+```sh
+chc
+chc tui
+chc tui --dir /path/to/project
+```
+
+See [TUI reference](tui.md) for views, keybindings, command palette behavior,
+and confirmation modes.
 
 ## Runtime
 
@@ -133,18 +148,27 @@ chc author quiz new --target spec --topic "Billing sync"
 ```
 
 Generate or edit a spec with `status: draft` when quiz answers still need
-review. Legacy `quiz-to-draft` promotion exists only for compatibility with
-older authoring sessions.
+review. Legacy `quiz-to-draft` exists only for compatibility with older
+authoring sessions.
 
 Run the current assisted authoring flow:
 
 ```sh
 chc author assisted start --target spec --topic "Billing sync"
+chc author assisted resume --session <session-handle>
+chc author assisted answer --session <session-handle> --turn <turn-id> --answer "Retry writes must be idempotent."
 chc author assisted status --session <session-handle>
+chc author assisted finalize --session <session-handle> --target-kind spec --target-name "billing sync spec"
 ```
 
 The current assisted commands use explicit adapter inputs for deterministic
 local behavior.
+
+The legacy quiz-to-draft command remains available for older authoring sessions:
+
+```sh
+chc author promote quiz-to-draft --session <session-id> --quiz <quiz-path>
+```
 
 ## Daemon
 
@@ -191,3 +215,16 @@ Persist accepted and rejected remote command handoff records from a fixture:
 ```sh
 chc notify telegram poll --fixture updates.json
 ```
+
+## Proving
+
+Run direct proving-ground workflows against controlled objectives:
+
+```sh
+chc proving validate --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md
+chc proving run --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md --dry-run
+chc proving ralph --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md --max-attempts 3
+```
+
+Proving commands are for sandbox proofing and validation, not the normal ticket
+execution path.

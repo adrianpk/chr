@@ -22,6 +22,7 @@ Task-oriented guides:
 Exact contracts and command behavior:
 
 - [Commands](reference/commands.md)
+- [TUI](reference/tui.md)
 - [Project workspace](reference/project-workspace.md)
 - [Runtime configuration](reference/runtime-config.md)
 - [Notifications](reference/notifications.md)
