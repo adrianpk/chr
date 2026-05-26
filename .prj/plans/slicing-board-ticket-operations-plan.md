@@ -104,16 +104,16 @@ The planned count is twelve slices.
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 4
+Active slice number: none
 
-Active slice short name: indexed ticket enrichment
+Active slice short name: none
 
-Expected branch name: `feat/slice-4-indexed-ticket-enrichment`
+Expected branch name: none
 
-Expected PR title: `feat(slice-4): indexed ticket enrichment`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md`
+none
 
 Prerequisite PRs or delivered work:
 
