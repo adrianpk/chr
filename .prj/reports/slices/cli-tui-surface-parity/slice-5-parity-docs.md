@@ -1,6 +1,6 @@
 # Slice 5: Parity Docs
 
-Status: reviewing
+Status: delivered
 Slicing: CLI TUI Surface Parity
 Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 Tracker: `.prj/trackers/slicing-cli-tui-surface-parity-tracker.md`

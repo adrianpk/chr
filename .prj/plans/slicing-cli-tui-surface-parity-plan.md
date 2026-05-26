@@ -1,6 +1,6 @@
 # CLI TUI Surface Parity Slicing Plan
 
-Status: active
+Status: completed
 
 ## Purpose
 
@@ -66,16 +66,16 @@ The target model treats CLI and TUI as equivalent operation surfaces:
 
 Slicing name: CLI TUI Surface Parity
 
-Active slice number: Slice 5
+Active slice number: none
 
-Active slice short name: parity docs
+Active slice short name: none
 
-Expected branch name: `feat/slice-5-parity-docs`
+Expected branch name: none
 
-Expected PR title: `feat(slice-5): parity docs`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md`
+none
 
 Prerequisite PRs or delivered work:
 

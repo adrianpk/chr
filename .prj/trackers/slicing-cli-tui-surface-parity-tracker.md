@@ -1,6 +1,6 @@
 # CLI TUI Surface Parity Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 
 Slicing name: CLI TUI Surface Parity
 
-Active slice number: Slice 5
+Active slice number: none
 
-Active slice short name: parity docs
+Active slice short name: none
 
-Expected branch name: `feat/slice-5-parity-docs`
+Expected branch name: none
 
-Expected PR title: `feat(slice-5): parity docs`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -34,9 +34,9 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -46,7 +46,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Service Boundaries | Delivered | `feat/slice-2-service-boundaries` | `feat(slice-2): service boundaries` | `.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md` | PR `#205`; shared daemon stop and authoring session boundaries; `make verify` passed. |
 | Slice 3: Missing CLI Actions | Delivered | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | PR `#206`; added CLI entrypoints for service-backed operational TUI actions; `make verify` passed. |
 | Slice 4: Parity Tests | Delivered | `feat/slice-4-parity-tests` | `feat(slice-4): parity tests` | `.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md` | PR `#207`; added CLI command and TUI adapter parity tests; `make verify` passed. |
-| Slice 5: Parity Docs | Reviewing | `feat/slice-5-parity-docs` | `feat(slice-5): parity docs` | `.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md` | Published final CLI/TUI parity documentation; `make verify` passed. |
+| Slice 5: Parity Docs | Delivered | `feat/slice-5-parity-docs` | `feat(slice-5): parity docs` | `.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md` | PR `#208`; published final CLI/TUI parity documentation; `make verify` passed. |
 
 ## Slice 1: Inventory
 
@@ -175,3 +175,19 @@ Validation:
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
+
+## Completion
+
+All planned slices are delivered.
+
+Final validation:
+
+- `make verify`: pass.
+
+Post-slice tuning needed: no.
+
+Known remaining gaps:
+
+- Workspace graph refresh remains only partially covered by CLI index commands.
+- TUI checklist item operations remain unavailable until a safe checklist writer
+  exists.
