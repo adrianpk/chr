@@ -5,7 +5,7 @@ Slicing: Architecture Boundary Cleanup
 Plan: `.prj/plans/slicing-architecture-boundary-cleanup-plan.md`
 Tracker: `.prj/trackers/slicing-architecture-boundary-cleanup-tracker.md`
 Branch: `feat/slice-2-operation-context-boundary`
-PR: pending
+PR: #210
 
 ## Purpose
 
