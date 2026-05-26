@@ -155,13 +155,14 @@ Candidate tasks:
 - [x] T4.3 Preserve indexability for legacy tickets without synopsis.
 - [x] T4.4 Surface unknown statuses as attention-ready metadata.
 - [x] T4.5 Update index rebuild/status tests.
-- [ ] T4.6 Create slice implementation report.
+- [x] T4.6 Create slice implementation report.
 - [ ] T4.7 Run validation.
 
 Task commits:
 
 - `32c4afa feat(ticket): persist enriched ticket metadata`
 - `2225d3b test(ticket): assert enriched index metadata`
+- `pending commit`
 
 Validation:
 
