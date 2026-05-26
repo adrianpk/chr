@@ -53,7 +53,7 @@ Prerequisite PRs or delivered work:
 | Slice 6: Generated Ticket Synopsis | Delivered | `feat/slice-6-generated-ticket-synopsis` | `feat(slice-6): generated ticket synopsis` | `.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md` | PR `#218`; plan tracking materialization ticket synopsis/source metadata; `make verify` passed. |
 | Slice 7: Board Query Service | Delivered | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | PR `#219`; shared CLI/TUI Board read model; `make verify` passed. |
 | Slice 8: Compact Board Columns | Delivered | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | PR `#220`; one-column compact Board navigation; `make verify` passed. |
-| Slice 9: Attention View | In progress | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | Virtual attention view and plain-text reasons. |
+| Slice 9: Attention View | In review | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | Virtual attention view and plain-text reasons. |
 | Slice 10: Ticket Detail Surface | Pending | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | Synopsis, source refs, attention, body/comment context. |
 | Slice 11: Maximized Board | Pending | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | Multi-column maximized Board. |
 | Slice 12: Board Docs Validation | Pending | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | Documentation, parity matrix, migration reference, final validation. |
@@ -273,21 +273,24 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T9.1 Add attention reason model and conservative detectors.
-- [ ] T9.2 Add TUI attention mode toggle that preserves previous normal column.
-- [ ] T9.3 Render attention row hints.
-- [ ] T9.4 Show plain-text attention reasons in detail.
-- [ ] T9.5 Add tests for invalid statuses and toggle behavior.
-- [ ] T9.6 Create slice implementation report.
-- [ ] T9.7 Run validation.
+- [x] T9.1 Add attention reason model and conservative detectors.
+- [x] T9.2 Add TUI attention mode toggle that preserves previous normal column.
+- [x] T9.3 Render attention row hints.
+- [x] T9.4 Show plain-text attention reasons in detail.
+- [x] T9.5 Add tests for invalid statuses and toggle behavior.
+- [x] T9.6 Create slice implementation report.
+- [x] T9.7 Run validation.
 
 Task commits:
 
-- Pending.
+- `6dc1f62 feat(board): add attention view`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc ./internal/chctui`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 10: Ticket Detail Surface
 
