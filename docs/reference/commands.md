@@ -66,6 +66,91 @@ chc project current
 chc project list
 ```
 
+## Project and Use-Case Metadata
+
+Save project metadata:
+
+```sh
+chc metadata project set \
+  --name "Billing Service" \
+  --description "Coordinates billing workflows." \
+  --context "Project-wide context."
+```
+
+Create or update use-case metadata:
+
+```sh
+chc metadata case set billing \
+  --name "Billing Sync" \
+  --description "Synchronize billing records." \
+  --context "Use-case context."
+```
+
+The metadata commands write the same Markdown files edited by the TUI Project
+and Cases views.
+
+## Dumps
+
+List, create, inspect, and edit dumps:
+
+```sh
+chc dump list
+chc dump new --title "Billing notes" --content "Initial context."
+chc dump new --title "Billing notes" --content "Use-case context." --use-case billing
+chc dump show .chc/dumps/billing-notes.md
+chc dump save .chc/dumps/billing-notes.md --content "# Billing notes"
+chc dump append .chc/dumps/billing-notes.md --content "Additional context."
+chc dump open .chc/dumps/billing-notes.md
+```
+
+Dump paths are project-relative and must stay under `.chc/dumps/`.
+
+## Runtime Quizzes
+
+Run bounded quiz sessions against project or use-case context:
+
+```sh
+chc quiz list
+chc quiz start --use-case billing --mode deep
+chc quiz resume --use-case billing
+chc quiz answer --use-case billing --answer "Retries must be idempotent."
+chc quiz skip --use-case billing
+chc quiz complete --use-case billing
+chc quiz cancel --use-case billing
+chc quiz mode fast --use-case billing
+```
+
+These commands operate on the same runtime quiz state shown in the TUI Quizzes
+view. They are separate from `chc author quiz new`.
+
+## Specs
+
+List and generate specs:
+
+```sh
+chc spec list
+chc spec generate --use-case billing
+```
+
+Spec generation reads accumulated project and use-case material, including
+metadata, context, dumps, quizzes, and related workspace documents.
+
+## Plans
+
+List, generate, regenerate, and materialize plan tracking:
+
+```sh
+chc plan list
+chc plan generate --use-case billing
+chc plan regenerate --use-case billing
+chc plan tracking create --use-case billing
+```
+
+`plan generate` does not overwrite an existing generated plan. Use
+`plan regenerate` when the generated plan should be archived and replaced.
+`plan tracking create` requires an existing plan and creates the tracking
+Markdown document plus one ticket per generated slice.
+
 ## Tickets
 
 Create and inspect tickets:
