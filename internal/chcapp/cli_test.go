@@ -65,6 +65,65 @@ func rootCommandIncludesCommand(cmd *cli.Command, name string) bool {
 	return false
 }
 
+func TestRootCommandRegistersParitySubcommands(t *testing.T) {
+	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{})
+
+	for _, path := range [][]string{
+		{"metadata", "project", "set"},
+		{"metadata", "case", "set"},
+		{"dump", "list"},
+		{"dump", "new"},
+		{"dump", "show"},
+		{"dump", "save"},
+		{"dump", "append"},
+		{"dump", "open"},
+		{"quiz", "list"},
+		{"quiz", "start"},
+		{"quiz", "resume"},
+		{"quiz", "answer"},
+		{"quiz", "skip"},
+		{"quiz", "complete"},
+		{"quiz", "cancel"},
+		{"quiz", "mode"},
+		{"spec", "list"},
+		{"spec", "generate"},
+		{"plan", "list"},
+		{"plan", "generate"},
+		{"plan", "regenerate"},
+		{"plan", "tracking", "create"},
+	} {
+		if rootCommandIncludesPath(cmd, path...) {
+			continue
+		}
+
+		t.Fatalf("root command does not include %s", strings.Join(path, " "))
+	}
+}
+
+func rootCommandIncludesPath(cmd *cli.Command, path ...string) bool {
+	current := cmd
+
+	for _, name := range path {
+		var next *cli.Command
+
+		for _, child := range current.Commands {
+			if child.Name == name {
+				next = child
+
+				break
+			}
+		}
+
+		if next == nil {
+			return false
+		}
+
+		current = next
+	}
+
+	return true
+}
+
 func TestInitDryRunDoesNotWriteWorkspace(t *testing.T) {
 	projectDir := t.TempDir()
 
@@ -246,6 +305,81 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 
 	if !strings.Contains(stdout.String(), "Dump body from CLI.") {
 		t.Fatalf("stdout = %q, want dump body", stdout.String())
+	}
+}
+
+func TestMetadataCaseSetCreatesUseCaseMetadata(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, ".keep"), "")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"metadata",
+		"case",
+		"set",
+		"--dir",
+		projectDir,
+		"--name",
+		"Blog Publishing",
+		"--description",
+		"Publish articles.",
+		"--context",
+		"Use-case context.",
+		"blog",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("metadata case set returned error: %v", err)
+	}
+
+	metadata, err := chc.NewCaseMetadataService(projectDir).LoadPath(chc.CaseMetadataPath(projectDir, "blog"))
+	if err != nil {
+		t.Fatalf("LoadPath returned error: %v", err)
+	}
+
+	if metadata.Name != "Blog Publishing" || metadata.Context != "Use-case context." {
+		t.Fatalf("metadata = %#v, want CLI case metadata", metadata)
+	}
+
+	if !strings.Contains(stdout.String(), "case_metadata:") {
+		t.Fatalf("stdout = %q, want case_metadata path", stdout.String())
+	}
+}
+
+func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"spec",
+		"list",
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("spec list returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), ".chc/specs/blog-spec.md") {
+		t.Fatalf("spec list stdout = %q, want blog spec path", stdout.String())
+	}
+
+	stdout.Reset()
+
+	err = run(t.Context(), []string{
+		"plan",
+		"list",
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("plan list returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), ".chc/plans/project-plan.md") {
+		t.Fatalf("plan list stdout = %q, want project plan path", stdout.String())
 	}
 }
 
