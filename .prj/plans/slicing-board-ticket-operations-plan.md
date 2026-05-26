@@ -104,16 +104,16 @@ The planned count is twelve slices.
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 10
+Active slice number: Slice 11
 
-Active slice short name: ticket detail surface
+Active slice short name: maximized board
 
-Expected branch name: `feat/slice-10-ticket-detail-surface`
+Expected branch name: `feat/slice-11-maximized-board`
 
-Expected PR title: `feat(slice-10): ticket detail surface`
+Expected PR title: `feat(slice-11): maximized board`
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md`
+`.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md`
 
 Prerequisite PRs or delivered work:
 
