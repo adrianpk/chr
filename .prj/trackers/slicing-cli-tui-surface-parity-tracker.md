@@ -81,7 +81,7 @@ Candidate tasks:
 - [x] T2.2 Move duplicated logic into shared service methods where needed.
 - [x] T2.3 Preserve current CLI and TUI behavior.
 - [x] T2.4 Update matrix statuses for resolved divergences.
-- [ ] T2.5 Add slice implementation report.
+- [x] T2.5 Add slice implementation report.
 - [ ] T2.6 Run validation.
 
 Task commits:
@@ -95,6 +95,7 @@ Task commits:
 - `5ef3814 docs(cli-tui): correct matched service paths`
 - `17fedd1 refactor(daemon): share stop request boundary`
 - `93efc94 refactor(authoring): share session creation service`
+- `89535d6 docs(cli-tui): record resolved service boundaries`
 - `pending commit`
 
 Validation:
