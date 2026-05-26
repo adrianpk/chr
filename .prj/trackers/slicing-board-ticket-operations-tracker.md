@@ -51,7 +51,7 @@ Prerequisite PRs or delivered work:
 | Slice 4: Indexed Ticket Enrichment | Delivered | `feat/slice-4-indexed-ticket-enrichment` | `feat(slice-4): indexed ticket enrichment` | `.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md` | PR `#216`; parser/reconciler/repository through enriched metadata; `make verify` passed. |
 | Slice 5: Ticket Creation Service | Delivered | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | PR `#217`; manual creation with synopsis, backlog default, SQLite key allocation, index refresh; `make verify` passed. |
 | Slice 6: Generated Ticket Synopsis | Delivered | `feat/slice-6-generated-ticket-synopsis` | `feat(slice-6): generated ticket synopsis` | `.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md` | PR `#218`; plan tracking materialization ticket synopsis/source metadata; `make verify` passed. |
-| Slice 7: Board Query Service | In progress | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | Shared CLI/TUI Board read model. |
+| Slice 7: Board Query Service | In review | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | Shared CLI/TUI Board read model. |
 | Slice 8: Compact Board Columns | Pending | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | One-column compact Board navigation. |
 | Slice 9: Attention View | Pending | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | Virtual attention view and plain-text reasons. |
 | Slice 10: Ticket Detail Surface | Pending | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | Synopsis, source refs, attention, body/comment context. |
@@ -225,22 +225,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T7.1 Add Board query structs for columns, counts, rows, and detail
+- [x] T7.1 Add Board query structs for columns, counts, rows, and detail
   metadata.
-- [ ] T7.2 Implement shared Board query service over the ticket index.
-- [ ] T7.3 Add CLI inspection command for Board state where meaningful.
-- [ ] T7.4 Route TUI Board loading through the shared query service.
-- [ ] T7.5 Add service and CLI tests.
-- [ ] T7.6 Create slice implementation report.
-- [ ] T7.7 Run validation.
+- [x] T7.2 Implement shared Board query service over the ticket index.
+- [x] T7.3 Add CLI inspection command for Board state where meaningful.
+- [x] T7.4 Route TUI Board loading through the shared query service.
+- [x] T7.5 Add service and CLI tests.
+- [x] T7.6 Create slice implementation report.
+- [x] T7.7 Run validation.
 
 Task commits:
 
-- Pending.
+- `de2237c feat(board): add shared board query service`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 8: Compact Board Columns
 
