@@ -92,7 +92,7 @@ Status values:
 | Ticket | `ticket-checklist-add` | Validate checklist item creation availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
 | Work | `work-start-ticket` | Start selected ticket execution. | `chc ticket start <key>` | shared `buildTicketStartPreflightForTicket` and `runTicketStartExecution` | `matched` | CLI owns preflight/output; TUI service wraps selected-ticket execution. |
 | Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chc ticket loop --status ready --max-iterations 1` | shared `runTicketLoopExecution` | `matched` | CLI supports configurable query/run options; TUI wraps one ready-ticket iteration. |
-| Work | `work-request-stop` | Request daemon stop. | `chc daemon stop` | TUI: `service.RequestDaemonStop`; CLI: `runDaemonStop` | `service_divergence` | Equivalent behavior, paths differ. |
+| Work | `work-request-stop` | Request daemon stop. | `chc daemon stop` | shared `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 
 Command availability gates:
 
@@ -136,7 +136,7 @@ Command availability gates:
 | Assisted Authoring | `chc author assisted finalize` | none | `runAuthorAssistedFinalize` | `missing_tui` | CLI-only assisted workflow. |
 | Daemon | `chc daemon status` | Dash displays observability partially | `runDaemonStatus` | `missing_tui` | TUI displays state but does not expose full daemon status command. |
 | Daemon | `chc daemon start` | Palette `work-start-ready-loop` partially | `runDaemonStart` | `missing_tui` | Daemon foreground loop is CLI-only. |
-| Daemon | `chc daemon stop` | Palette `work-request-stop` | CLI: `runDaemonStop`; TUI: `service.RequestDaemonStop` | `service_divergence` | Equivalent stop intent, different path. |
+| Daemon | `chc daemon stop` | Palette `work-request-stop` | shared `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 | Reports | `chc report list` | Dash displays recent evidence partially | `runReportList` | `missing_tui` | Report browsing is CLI-only. |
 | Reports | `chc report show` | Dash displays recent evidence partially | `runReportShow` | `missing_tui` | Report browsing is CLI-only. |
 | Maintenance | `chc maintenance bundle` | none | `runMaintenanceBundle` | `missing_tui` | Maintenance is CLI-only. |
@@ -169,7 +169,7 @@ Command availability gates:
 | Ticket status | `tuiTicketActionExecutor` -> `service.MoveSelectedTicketStatus` -> `service.MoveTicketStatus` | `runTicketStatus` -> `service.MoveTicketStatus` | `matched` | Same status service. |
 | Work start ticket | `tuiWorkActionExecutor` -> `service.StartSelectedTicket` -> shared execution helpers | `runTicketStart` -> shared execution helpers | `matched` | TUI wraps selection and message reload; CLI owns dry-run and output. |
 | Work ready loop | `tuiWorkActionExecutor` -> `service.StartReadyTicketLoop` -> `runTicketLoopExecution` | `runTicketLoop` -> `runTicketLoopExecution` | `matched` | TUI uses fixed ready/max-one selection; CLI is configurable. |
-| Work request stop | `tuiWorkActionExecutor` -> `service.RequestDaemonStop` | `runDaemonStop` | `service_divergence` | Equivalent intent, different command path. |
+| Work request stop | `tuiWorkActionExecutor` -> `service.RequestDaemonStop` -> `requestDaemonStopState` | `runDaemonStop` -> `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 | Authoring session creation | `tuiArtifactActionExecutor` -> `service.CreateTUIAuthoringSession` | `runAuthorSessionNew` | `service_divergence` | CLI is configurable; TUI creates a default spec-oriented session. |
 | Context-aware authoring quiz | TUI returns unavailable | `runAuthorContextualQuizNew` | `missing_tui` | CLI path exists and should inform future TUI implementation. |
 | Assisted authoring | no default TUI path | `runAuthorAssisted*` | `missing_tui` | CLI-only workflow. |
@@ -189,7 +189,6 @@ High-priority `missing_cli` gaps:
 
 High-priority `service_divergence` gaps:
 
-- Daemon stop.
 - Authoring session creation.
 
 Current `not_implemented` actions:

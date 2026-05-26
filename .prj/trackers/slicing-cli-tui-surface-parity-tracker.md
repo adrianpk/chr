@@ -78,7 +78,7 @@ Validation:
 Candidate tasks:
 
 - [x] T2.1 Identify matched actions with divergent implementation paths.
-- [ ] T2.2 Move duplicated logic into shared service methods where needed.
+- [x] T2.2 Move duplicated logic into shared service methods where needed.
 - [ ] T2.3 Preserve current CLI and TUI behavior.
 - [ ] T2.4 Update matrix statuses for resolved divergences.
 - [ ] T2.5 Add slice implementation report.
@@ -92,6 +92,7 @@ Task commits:
 - `5c5ce0b docs(cli-tui): map service parity gaps`
 - `6c9e769 docs(cli-tui): link parity matrix`
 - `36dc004 docs(cli-tui): report inventory slice`
+- `5ef3814 docs(cli-tui): correct matched service paths`
 - `pending commit`
 
 Validation:

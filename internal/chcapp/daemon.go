@@ -428,20 +428,14 @@ func recoverStaleDaemonState(
 }
 
 func requestDaemonStop(ctx context.Context, stdout io.Writer, env chc.UserEnvironment) error {
-	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
+	requestedAt := time.Now().UTC()
+
+	result, err := requestDaemonStopState(ctx, env, assetsFS, requestedAt)
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		//nolint:errcheck // Command result already comes from the main operation.
-		_ = repository.Close()
-	}()
-
-	requestedAt := time.Now().UTC()
-
-	err = repository.RequestDaemonStop(ctx, requestedAt)
-	if errors.Is(err, chc.ErrDaemonStateNotFound) {
+	if result.AlreadyStopped {
 		return printDaemonLines(stdout, []string{
 			"daemon: stopped",
 			"action: stop",
@@ -449,14 +443,10 @@ func requestDaemonStop(ctx context.Context, stdout io.Writer, env chc.UserEnviro
 		})
 	}
 
-	if err != nil {
-		return err
-	}
-
 	return printDaemonLines(stdout, []string{
 		"daemon: stopping",
 		"action: stop",
-		fmt.Sprintf("stop_requested_at: %s", requestedAt.Format(time.RFC3339)),
+		fmt.Sprintf("stop_requested_at: %s", result.RequestedAt.Format(time.RFC3339)),
 	})
 }
 

@@ -78,20 +78,13 @@ func (s service) StartReadyTicketLoop() (WorkOperationResult, error) {
 }
 
 func (s service) RequestDaemonStop() (WorkOperationResult, error) {
-	repository, err := chc.NewDaemonStateRepository(s.ctx, s.env, s.assetsFS)
+	requestedAt := s.now().UTC()
+	stopResult, err := requestDaemonStopState(s.ctx, s.env, s.assetsFS, requestedAt)
 	if err != nil {
 		return WorkOperationResult{}, err
 	}
 
-	defer func() {
-		//nolint:errcheck // Stop result already comes from the main operation.
-		_ = repository.Close()
-	}()
-
-	requestedAt := time.Now().UTC()
-
-	err = repository.RequestDaemonStop(s.ctx, requestedAt)
-	if errors.Is(err, chc.ErrDaemonStateNotFound) {
+	if stopResult.AlreadyStopped {
 		result, reloadErr := s.reloadWorkOperationState()
 		if reloadErr != nil {
 			return WorkOperationResult{}, reloadErr
@@ -102,16 +95,12 @@ func (s service) RequestDaemonStop() (WorkOperationResult, error) {
 		return result, nil
 	}
 
-	if err != nil {
-		return WorkOperationResult{}, err
-	}
-
 	result, err := s.reloadWorkOperationState()
 	if err != nil {
 		return WorkOperationResult{}, err
 	}
 
-	result.Message = "Daemon stop requested at " + requestedAt.Format(time.RFC3339) + "."
+	result.Message = "Daemon stop requested at " + stopResult.RequestedAt.Format(time.RFC3339) + "."
 
 	return result, nil
 }
