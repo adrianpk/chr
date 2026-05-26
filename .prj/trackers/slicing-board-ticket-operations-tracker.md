@@ -63,7 +63,7 @@ Prerequisite PRs or delivered work:
 Candidate tasks:
 
 - [x] T1.1 Add core constants/types for Board statuses and legacy status aliases.
-- [ ] T1.2 Extend `Ticket` with synopsis, source metadata, and slice metadata.
+- [x] T1.2 Extend `Ticket` with synopsis, source metadata, and slice metadata.
 - [ ] T1.3 Render new metadata fields in ticket frontmatter.
 - [ ] T1.4 Parse new metadata fields into `IndexedTicket`.
 - [ ] T1.5 Add metadata validation tests for Board-created tickets and legacy
@@ -74,6 +74,7 @@ Candidate tasks:
 Task commits:
 
 - `5cf1805 feat(ticket): define board status aliases`
+- `7bd604a feat(ticket): add board metadata fields`
 
 Validation:
 
