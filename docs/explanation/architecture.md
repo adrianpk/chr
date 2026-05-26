@@ -67,6 +67,22 @@ context/
 This package makes agent execution reviewable. The worker should not depend on
 implicit conversation history.
 
+## Operation Surfaces
+
+The CLI and TUI are two operation surfaces over the same project files and
+service boundaries.
+
+- The TUI is optimized for interactive navigation, inspection, editing,
+  confirmations, and focused work modes.
+- The CLI is optimized for scripted operations and agent workflows.
+- Shared actions route through application services instead of separate
+  implementations.
+
+Project metadata, use-case metadata, dumps, runtime quizzes, specs, plans, plan
+tracking, tickets, and work actions are expected to preserve this shape. The
+[CLI TUI action matrix](../reference/cli-tui-action-matrix.md) records the
+current parity status and remaining intentional gaps.
+
 ## Ticket Execution Boundary
 
 A ticket execution record represents one attempt to work on one ticket. It is
