@@ -102,20 +102,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T3.1 Move metadata project patch/upsert workflow into service methods.
-- [ ] T3.2 Move metadata case patch/upsert workflow into service methods.
-- [ ] T3.3 Split TUI adapter wrappers into domain-focused files.
-- [ ] T3.4 Rename shared scope helpers from quiz-specific naming to neutral
+- [x] T3.1 Move metadata project patch/upsert workflow into service methods.
+- [x] T3.2 Move metadata case patch/upsert workflow into service methods.
+- [x] T3.3 Split TUI adapter wrappers into domain-focused files.
+- [x] T3.4 Rename shared scope helpers from quiz-specific naming to neutral
   naming.
-- [ ] T3.5 Update documentation or parity matrix paths if implementation paths
+- [x] T3.5 Update documentation or parity matrix paths if implementation paths
   changed.
-- [ ] T3.6 Create slice implementation report.
-- [ ] T3.7 Run validation.
+- [x] T3.6 Create slice implementation report.
+- [x] T3.7 Run validation.
 
 Task commits:
 
-- Pending.
+- `ed7138b refactor(metadata): move cli patching into service`
+- `4efdbd5 refactor(cli): rename shared scope helpers`
+- `916c5bd refactor(tui): split adapter domains`
+- `f9069be docs(architecture): update adapter cleanup finding`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chcapp`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
