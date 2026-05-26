@@ -55,7 +55,7 @@ Candidate tasks:
 - [x] T1.1 Audit TUI direct keybindings by view.
 - [x] T1.2 Audit command palette commands and availability gates.
 - [x] T1.3 Audit current CLI commands by domain.
-- [ ] T1.4 Map each action to service or adapter paths.
+- [x] T1.4 Map each action to service or adapter paths.
 - [ ] T1.5 Create `docs/reference/cli-tui-action-matrix.md`.
 - [ ] T1.6 Create slice implementation report.
 - [ ] T1.7 Run validation.
@@ -64,6 +64,7 @@ Task commits:
 
 - `f8e1c9c docs(cli-tui): inventory direct tui bindings`
 - `4f1a90e docs(cli-tui): inventory command palette actions`
+- `0a40856 docs(cli-tui): inventory cli commands`
 - `pending commit`
 
 Validation:

@@ -152,3 +152,59 @@ Command availability gates:
 | Proving | `chc proving validate` | none | `runProvingValidate` | `missing_tui` | Proving-ground workflows are CLI-only. |
 | Proving | `chc proving run` | none | `runProvingRun` | `missing_tui` | Proving-ground workflows are CLI-only. |
 | Proving | `chc proving ralph` | none | `runProvingRalph` | `missing_tui` | Proving-ground workflows are CLI-only. |
+
+## Service Path Summary
+
+| Service area | TUI path | CLI path | Status | Notes |
+| --- | --- | --- | --- | --- |
+| Workspace graph refresh | `tuiWorkspaceRefreshExecutor.RefreshWorkspace` -> `service.RefreshWorkspace` | no equivalent | `missing_cli` | CLI index commands do not refresh the complete workspace graph/read model. |
+| Project metadata | `tuiProjectMetadataExecutor.SaveProjectMetadata` -> `service.SaveProjectMetadata` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
+| Use-case metadata | `tuiCaseMetadataExecutor.SaveCaseMetadata` -> `service.SaveCaseMetadata` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
+| Dump operations | `tuiDumpActionExecutor` -> `service.ListDumps`, `CreateDump`, `AppendDump`, `ReadDump`, `SaveDump`, `OpenDump` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
+| Runtime quiz operations | `tuiQuizActionExecutor` -> `service.ListQuizzes`, `StartQuiz`, `ResumeQuiz`, `AnswerQuiz`, `SkipQuiz`, `CompleteQuiz`, `CancelQuiz`, `SwitchQuizMode` | no equivalent | `missing_cli` | Different from `chc author quiz new`; this is the TUI runtime quiz loop. |
+| Spec operations | `tuiSpecActionExecutor` -> `service.ListSpecs`, `GenerateSpec` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
+| Plan operations | `tuiPlanActionExecutor` -> `service.ListPlans`, `GeneratePlan`, `RegeneratePlan`, `MaterializePlanTracking` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
+| Ticket creation | `tuiArtifactActionExecutor` -> `service.CreateDefaultTicket` | `runTicketNew` -> lower-level ticket renderer/repository path | `service_divergence` | CLI behavior is richer; TUI default helper should be reconciled with shared service command shape. |
+| Ticket comment | `tuiTicketActionExecutor` -> `service.AddSelectedTicketComment` -> `service.AddTicketComment` | `runTicketComment` -> lower-level commenter/reconcile path | `service_divergence` | Both write comments; CLI does not use the service method. |
+| Ticket status | `tuiTicketActionExecutor` -> `service.MoveSelectedTicketStatus` -> `service.MoveTicketStatus` | `runTicketStatus` -> lower-level status updater/reconcile path | `service_divergence` | Both update status; CLI does not use the service method. |
+| Work start ticket | `tuiWorkActionExecutor` -> `service.StartSelectedTicket` | `runTicketStart` | `service_divergence` | Both run one ticket; service boundary should be consolidated or explicitly separated. |
+| Work ready loop | `tuiWorkActionExecutor` -> `service.StartReadyTicketLoop` | `runTicketLoop` | `service_divergence` | TUI wraps one ready iteration; CLI exposes configurable loop options. |
+| Work request stop | `tuiWorkActionExecutor` -> `service.RequestDaemonStop` | `runDaemonStop` | `service_divergence` | Equivalent intent, different command path. |
+| Authoring session creation | `tuiArtifactActionExecutor` -> `service.CreateTUIAuthoringSession` | `runAuthorSessionNew` | `service_divergence` | CLI is configurable; TUI creates a default spec-oriented session. |
+| Context-aware authoring quiz | TUI returns unavailable | `runAuthorContextualQuizNew` | `missing_tui` | CLI path exists and should inform future TUI implementation. |
+| Assisted authoring | no default TUI path | `runAuthorAssisted*` | `missing_tui` | CLI-only workflow. |
+| Project registry | no TUI path | `runProject*` | `missing_tui` | User-level registry management is CLI-only. |
+| Maintenance/notify/proving | no TUI path | command-specific paths | `missing_tui` | Operational/admin command families are CLI-only. |
+
+## Gap Summary
+
+High-priority `missing_cli` gaps:
+
+- Project metadata save.
+- Use-case metadata create/save.
+- Dump list/create/read/save/open.
+- Runtime quiz list/start/resume/answer/skip/complete/cancel/mode.
+- Spec list/generate.
+- Plan list/generate/regenerate/tracking.
+
+High-priority `service_divergence` gaps:
+
+- Ticket creation.
+- Ticket comment.
+- Ticket status.
+- Ticket start.
+- Ready-ticket loop.
+- Daemon stop.
+- Authoring session creation.
+
+Current `not_implemented` actions:
+
+- TUI checklist toggle.
+- TUI checklist item creation.
+
+Important `missing_tui` command families:
+
+- Workspace initialization and runtime setup.
+- Project registry management.
+- CLI authoring workflows.
+- Reports, maintenance, notifications, and proving-ground workflows.
