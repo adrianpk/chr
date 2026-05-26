@@ -55,7 +55,7 @@ Prerequisite PRs or delivered work:
 | Slice 8: Compact Board Columns | Delivered | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | PR `#220`; one-column compact Board navigation; `make verify` passed. |
 | Slice 9: Attention View | Delivered | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | PR `#221`; virtual attention view and plain-text reasons; `make verify` passed. |
 | Slice 10: Ticket Detail Surface | Delivered | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | PR `#222`; synopsis, source refs, Markdown previews, and detail tests; `make verify` passed. |
-| Slice 11: Maximized Board | In progress | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | Multi-column maximized Board. |
+| Slice 11: Maximized Board | In review | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | Responsive maximized normal columns and separate attention rendering; `make verify` passed. |
 | Slice 12: Board Docs Validation | Pending | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | Documentation, parity matrix, migration reference, final validation. |
 
 ## Slice 1: Ticket Metadata Contract
@@ -320,20 +320,24 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T11.1 Add maximized Board renderer for multiple normal columns.
-- [ ] T11.2 Preserve selected ticket and active column across maximize toggles.
-- [ ] T11.3 Keep attention separate from normal maximized columns.
-- [ ] T11.4 Add terminal-size-aware rendering tests.
-- [ ] T11.5 Create slice implementation report.
-- [ ] T11.6 Run validation.
+- [x] T11.1 Add maximized Board renderer for multiple normal columns.
+- [x] T11.2 Preserve selected ticket and active column across maximize toggles.
+- [x] T11.3 Keep attention separate from normal maximized columns.
+- [x] T11.4 Add terminal-size-aware rendering tests.
+- [x] T11.5 Create slice implementation report.
+- [x] T11.6 Run validation.
 
 Task commits:
 
-- Pending.
+- `fa7b9a8 feat(board): render maximized board columns`
+- Documentation/report commit recorded in this changeset.
 
 Validation:
 
-- Pending.
+- `go test ./internal/chctui`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 12: Board Docs Validation
 
