@@ -5,7 +5,7 @@ Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-1-ticket-metadata-contract`
-PR: pending
+PR: #213
 
 ## Purpose
 
