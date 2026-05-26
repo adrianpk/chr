@@ -51,6 +51,12 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	assertTableExists(t, db, "loop_runs")
 	assertTableExists(t, db, "daemon_state")
 	assertTableExists(t, db, "notification_events")
+	assertTableExists(t, db, "ticket_key_sequences")
+	assertColumnExists(t, db, "indexed_tickets", "synopsis")
+	assertColumnExists(t, db, "indexed_tickets", "board_column")
+	assertColumnExists(t, db, "indexed_tickets", "source_kind")
+	assertColumnExists(t, db, "indexed_tickets", "source_ref")
+	assertColumnExists(t, db, "indexed_tickets", "slice")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -122,6 +128,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260521000007-create_remote_command_records.sql": {
 			Data: []byte(testCreateRemoteCommandRecordsMigration()),
+		},
+		"assets/migration/sqlite/20260526000008-add_board_ticket_metadata.sql": {
+			Data: []byte(testAddBoardTicketMetadataMigration()),
 		},
 	}
 }
@@ -341,6 +350,57 @@ DROP TABLE IF EXISTS remote_command_records;
 `
 }
 
+func testAddBoardTicketMetadataMigration() string {
+	return `-- +migrate Up
+ALTER TABLE indexed_tickets
+ADD COLUMN synopsis text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN board_column text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN source_kind text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN source_ref text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN slice text NOT NULL DEFAULT '';
+
+CREATE INDEX indexed_tickets_project_board_column_idx
+ON indexed_tickets (project_id, board_column, priority, severity);
+
+CREATE INDEX indexed_tickets_project_use_case_idx
+ON indexed_tickets (project_id, use_case);
+
+CREATE INDEX indexed_tickets_project_area_idx
+ON indexed_tickets (project_id, project_area);
+
+CREATE INDEX indexed_tickets_project_updated_idx
+ON indexed_tickets (project_id, updated_at);
+
+CREATE INDEX indexed_tickets_project_source_kind_idx
+ON indexed_tickets (project_id, source_kind);
+
+CREATE TABLE ticket_key_sequences (
+    project_id text NOT NULL,
+    prefix text NOT NULL,
+    next_number integer NOT NULL,
+    updated_at text NOT NULL,
+    PRIMARY KEY (project_id, prefix),
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+-- +migrate Down
+DROP TABLE IF EXISTS ticket_key_sequences;
+DROP INDEX IF EXISTS indexed_tickets_project_source_kind_idx;
+DROP INDEX IF EXISTS indexed_tickets_project_updated_idx;
+DROP INDEX IF EXISTS indexed_tickets_project_area_idx;
+DROP INDEX IF EXISTS indexed_tickets_project_use_case_idx;
+DROP INDEX IF EXISTS indexed_tickets_project_board_column_idx;
+`
+}
+
 func assertTableExists(t *testing.T, db *sql.DB, name string) {
 	t.Helper()
 
@@ -353,6 +413,46 @@ func assertTableExists(t *testing.T, db *sql.DB, name string) {
 	if err != nil {
 		t.Fatalf("table %s does not exist: %v", name, err)
 	}
+}
+
+func assertColumnExists(t *testing.T, db *sql.DB, tableName, columnName string) {
+	t.Helper()
+
+	rows, err := db.Query("PRAGMA table_info(" + tableName + ")")
+	if err != nil {
+		t.Fatalf("inspect columns for %s: %v", tableName, err)
+	}
+
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			t.Fatalf("close column rows: %v", err)
+		}
+	}()
+
+	for rows.Next() {
+		var cid int
+		var name string
+		var columnType string
+		var notNull int
+		var defaultValue sql.NullString
+		var primaryKey int
+
+		err = rows.Scan(&cid, &name, &columnType, &notNull, &defaultValue, &primaryKey)
+		if err != nil {
+			t.Fatalf("scan column: %v", err)
+		}
+
+		if name == columnName {
+			return
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		t.Fatalf("iterate columns for %s: %v", tableName, err)
+	}
+
+	t.Fatalf("column %s.%s does not exist", tableName, columnName)
 }
 
 func assertMigrationApplied(t *testing.T, db *sql.DB, version, name, appliedAt string) {
