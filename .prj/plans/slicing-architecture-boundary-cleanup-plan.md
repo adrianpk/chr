@@ -29,8 +29,8 @@ Review findings:
 - `internal/chcapp/service.go` stores `context.Context` in the service object.
 - `internal/chcapp/metadata_cli.go` contains workflow logic that belongs behind
   service operations.
-- `internal/chcapp/tui_adapters.go` mixes adapter functions for several
-  unrelated domains in one file.
+- TUI adapter functions were concentrated in one file across several unrelated
+  domains.
 - `workspaceScopeFlags` and `workspaceScopeFromCommand` provide shared
   flows and should use neutral naming.
 
