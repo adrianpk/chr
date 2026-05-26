@@ -1,6 +1,6 @@
 # Board Ticket Operations Slicing Plan
 
-Status: planned
+Status: in progress
 
 ## Purpose
 
@@ -104,16 +104,16 @@ The planned count is twelve slices.
 
 Slicing name: Board Ticket Operations
 
-Active slice number: none
+Active slice number: Slice 1
 
-Active slice short name: none
+Active slice short name: ticket metadata contract
 
-Expected branch name: none
+Expected branch name: `feat/slice-1-ticket-metadata-contract`
 
-Expected PR title: none
+Expected PR title: `feat(slice-1): ticket metadata contract`
 
 Expected report path:
-none
+`.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md`
 
 Prerequisite PRs or delivered work:
 

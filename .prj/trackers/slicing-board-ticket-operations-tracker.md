@@ -1,6 +1,6 @@
 # Board Ticket Operations Slicing Tracker
 
-Status: planned
+Status: in progress
 
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
 Slicing name: Board Ticket Operations
 
-Active slice number: none
+Active slice number: Slice 1
 
-Active slice short name: none
+Active slice short name: ticket metadata contract
 
-Expected branch name: none
+Expected branch name: `feat/slice-1-ticket-metadata-contract`
 
-Expected PR title: none
+Expected PR title: `feat(slice-1): ticket metadata contract`
 
 Expected report path:
-none
+`.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md`
 
 Prerequisite PRs or delivered work:
 
@@ -36,7 +36,7 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
@@ -45,7 +45,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Ticket Metadata Contract | Pending | `feat/slice-1-ticket-metadata-contract` | `feat(slice-1): ticket metadata contract` | `.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md` | Metadata, synopsis, source fields, Board statuses, legacy aliases. |
+| Slice 1: Ticket Metadata Contract | In progress | `feat/slice-1-ticket-metadata-contract` | `feat(slice-1): ticket metadata contract` | `.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md` | Metadata, synopsis, source fields, Board statuses, legacy aliases. |
 | Slice 2: Userspace Resolver | Pending | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | Active `.chc/user/` resolver and env contract. |
 | Slice 3: Board SQLite Schema | Pending | `feat/slice-3-board-sqlite-schema` | `feat(slice-3): board sqlite schema` | `.prj/reports/slices/board-ticket-operations/slice-3-board-sqlite-schema.md` | Migration/index shape for Board metadata and key allocation foundation. |
 | Slice 4: Indexed Ticket Enrichment | Pending | `feat/slice-4-indexed-ticket-enrichment` | `feat(slice-4): indexed ticket enrichment` | `.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md` | Parser/reconciler/repository through enriched metadata. |
