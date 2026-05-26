@@ -66,16 +66,16 @@ The target model treats CLI and TUI as equivalent operation surfaces:
 
 Slicing name: CLI TUI Surface Parity
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: inventory
+Active slice short name: service boundaries
 
-Expected branch name: `feat/slice-1-cli-tui-inventory`
+Expected branch name: `feat/slice-2-service-boundaries`
 
-Expected PR title: `feat(slice-1): inventory`
+Expected PR title: `feat(slice-2): service boundaries`
 
 Expected report path:
-`.prj/reports/slices/cli-tui-surface-parity/slice-1-inventory.md`
+`.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md`
 
 Prerequisite PRs or delivered work:
 

@@ -1,11 +1,11 @@
 # Slice 1: Inventory
 
-Status: reviewing
+Status: delivered
 Slicing: CLI TUI Surface Parity
 Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 Tracker: `.prj/trackers/slicing-cli-tui-surface-parity-tracker.md`
 Branch: `feat/slice-1-cli-tui-inventory`
-PR: pending
+PR: #204
 
 ## Purpose
 

@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 
 Slicing name: CLI TUI Surface Parity
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: inventory
+Active slice short name: service boundaries
 
-Expected branch name: `feat/slice-1-cli-tui-inventory`
+Expected branch name: `feat/slice-2-service-boundaries`
 
-Expected PR title: `feat(slice-1): inventory`
+Expected PR title: `feat(slice-2): service boundaries`
 
 Expected report path:
-`.prj/reports/slices/cli-tui-surface-parity/slice-1-inventory.md`
+`.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md`
 
 Prerequisite PRs or delivered work:
 
@@ -42,7 +42,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Inventory | Planned | `feat/slice-1-cli-tui-inventory` | `feat(slice-1): inventory` | `.prj/reports/slices/cli-tui-surface-parity/slice-1-inventory.md` | Build matrix only; no behavior changes. |
+| Slice 1: Inventory | Delivered | `feat/slice-1-cli-tui-inventory` | `feat(slice-1): inventory` | `.prj/reports/slices/cli-tui-surface-parity/slice-1-inventory.md` | PR `#204`; matrix created; `make verify` passed. |
 | Slice 2: Service Boundaries | Planned | `feat/slice-2-service-boundaries` | `feat(slice-2): service boundaries` | `.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md` | Align shared service paths for existing operations. |
 | Slice 3: Missing CLI Actions | Planned | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | Add CLI entrypoints for operational TUI actions. |
 | Slice 4: Parity Tests | Planned | `feat/slice-4-parity-tests` | `feat(slice-4): parity tests` | `.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md` | Add tests for CLI/TUI/service parity. |
