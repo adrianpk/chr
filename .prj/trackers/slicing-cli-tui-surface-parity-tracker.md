@@ -53,7 +53,7 @@ Prerequisite PRs or delivered work:
 Candidate tasks:
 
 - [x] T1.1 Audit TUI direct keybindings by view.
-- [ ] T1.2 Audit command palette commands and availability gates.
+- [x] T1.2 Audit command palette commands and availability gates.
 - [ ] T1.3 Audit current CLI commands by domain.
 - [ ] T1.4 Map each action to service or adapter paths.
 - [ ] T1.5 Create `docs/reference/cli-tui-action-matrix.md`.
@@ -62,6 +62,7 @@ Candidate tasks:
 
 Task commits:
 
+- `f8e1c9c docs(cli-tui): inventory direct tui bindings`
 - `pending commit`
 
 Validation:

@@ -55,3 +55,48 @@ Status values:
 | Plans | Create plan tracking and tickets | `F6`, `alt+t`, confirm | none | `service.MaterializePlanTracking` | `missing_cli` | Service exists; CLI entrypoint missing. |
 | Plans | Refresh plans | `F6`, `r` | none | `service.ListPlans` | `missing_cli` | CLI lacks plan list/show command. |
 | Board | Select/filter tickets | `F7`, arrows, `/` | `chc ticket list` filters | `internal/chctui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
+
+## Command Palette Commands
+
+| Domain | Command palette id | TUI action | CLI command | Service path | Status | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Workspace | `refresh` | Reload workspace files into runtime graph. | `chc index rebuild`, `chc index status` partially | `service.RefreshWorkspace` | `missing_cli` | CLI index commands target ticket index, not the full TUI workspace graph refresh. |
+| Help | `help` | Navigate to Help view. | `chc --help` | `internal/chctui.Model.selectView`, CLI help | `matched` | Equivalent intent, different presentation. |
+| Selection | `open-source` | Show selected source path. | none | `internal/chctui.Model.selectedSourcePath` | `missing_cli` | CLI has path outputs in list/show commands, but no selected-source concept. |
+| Ticket | `create-ticket` | Create default task ticket. | `chc ticket new <title>` | TUI: `service.CreateDefaultTicket`; CLI: `runTicketNew` and ticket renderer | `service_divergence` | CLI can create tickets, but TUI default creation uses a dedicated service method. |
+| Dump | `create-dump` | Create selected project/use-case dump. | none | `service.CreateDump` | `missing_cli` | Service exists; CLI entrypoint missing. |
+| Dump | `edit-dump` | Open selected dump in TUI editor. | none | `service.ReadDump`, `service.SaveDump` | `missing_cli` | Service exists; CLI entrypoint missing. |
+| Dump | `refresh-dumps` | Reload dump views. | none | `service.ListDumps` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-start` | Start selected runtime quiz. | none | `service.StartQuiz` | `missing_cli` | Different from authoring quiz generation. |
+| Quiz | `quiz-resume` | Resume selected runtime quiz. | none | `service.ResumeQuiz` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-answer` | Answer active runtime quiz question. | none | `service.AnswerQuiz` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-skip` | Skip active runtime quiz question. | none | `service.SkipQuiz` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-complete` | Complete selected runtime quiz. | none | `service.CompleteQuiz` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-cancel` | Cancel selected runtime quiz. | none | `service.CancelQuiz` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-refresh` | Reload runtime quiz state. | none | `service.ListQuizzes` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-mode-deep` | Switch selected runtime quiz to deep mode. | none | `service.SwitchQuizMode` | `missing_cli` | CLI entrypoint missing. |
+| Quiz | `quiz-mode-fast` | Switch selected runtime quiz to fast mode. | none | `service.SwitchQuizMode` | `missing_cli` | CLI entrypoint missing. |
+| Spec | `generate-spec` | Generate selected spec. | none | `service.GenerateSpec` | `missing_cli` | Command is gated to Specs view. |
+| Spec | `refresh-specs` | Reload spec views. | none | `service.ListSpecs` | `missing_cli` | Command is gated to Specs view. |
+| Plan | `generate-plan` | Generate missing selected plan. | none | `service.GeneratePlan` | `missing_cli` | Command is gated to Plans view. |
+| Plan | `regenerate-plan` | Regenerate selected plan. | none | `service.RegeneratePlan` | `missing_cli` | Command is gated to Plans view. |
+| Plan | `materialize-plan-tracking` | Create plan tracking and tickets. | none | `service.MaterializePlanTracking` | `missing_cli` | Command is gated to Plans and only available for existing plans. |
+| Plan | `refresh-plans` | Reload plan views. | none | `service.ListPlans` | `missing_cli` | Command is gated to Plans view. |
+| Authoring | `create-authoring-session` | Create TUI default authoring session. | `chc author session new ...` | TUI: `service.CreateTUIAuthoringSession`; CLI: `runAuthorSessionNew` | `service_divergence` | Equivalent artifact family, but TUI default helper and CLI command paths differ. |
+| Authoring | `create-context-quiz` | Validate context-aware quiz creation availability. | `chc author quiz new ...` | TUI returns unavailable; CLI `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware quiz generation; TUI action is not implemented. |
+| Ticket | `ticket-add-comment` | Add default selected-ticket comment. | `chc ticket comment <key> <body>` | TUI: `service.AddSelectedTicketComment`; CLI: `runTicketComment` | `service_divergence` | CLI supports arbitrary body; TUI uses default body through service. |
+| Ticket | `ticket-status-ready` | Move selected ticket to `ready`. | `chc ticket status <key> ready` | TUI: `service.MoveSelectedTicketStatus`; CLI: `runTicketStatus` | `service_divergence` | Equivalent behavior, paths differ. |
+| Ticket | `ticket-status-in-progress` | Move selected ticket to `in_progress`. | `chc ticket status <key> in_progress` | TUI: `service.MoveSelectedTicketStatus`; CLI: `runTicketStatus` | `service_divergence` | Equivalent behavior, paths differ. |
+| Ticket | `ticket-status-reviewing` | Move selected ticket to `reviewing`. | `chc ticket status <key> reviewing` | TUI: `service.MoveSelectedTicketStatus`; CLI: `runTicketStatus` | `service_divergence` | Equivalent behavior, paths differ. |
+| Ticket | `ticket-checklist-toggle` | Validate checklist toggle availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
+| Ticket | `ticket-checklist-add` | Validate checklist item creation availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
+| Work | `work-start-ticket` | Start selected ticket execution. | `chc ticket start <key>` | TUI: `service.StartSelectedTicket`; CLI: `runTicketStart` | `service_divergence` | Equivalent behavior, paths differ. |
+| Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chc ticket loop --status ready --max-iterations 1` | TUI: `service.StartReadyTicketLoop`; CLI: `runTicketLoop` | `service_divergence` | Equivalent behavior, paths differ. |
+| Work | `work-request-stop` | Request daemon stop. | `chc daemon stop` | TUI: `service.RequestDaemonStop`; CLI: `runDaemonStop` | `service_divergence` | Equivalent behavior, paths differ. |
+
+Command availability gates:
+
+- Spec commands are available only in the Specs view.
+- Plan commands are available only in the Plans view.
+- `materialize-plan-tracking` is additionally available only when the selected
+  plan exists and contains content.
