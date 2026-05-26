@@ -1,11 +1,11 @@
 # Slice 2: Service Boundaries
 
-Status: reviewing
+Status: delivered
 Slicing: CLI TUI Surface Parity
 Plan: `.prj/plans/slicing-cli-tui-surface-parity-plan.md`
 Tracker: `.prj/trackers/slicing-cli-tui-surface-parity-tracker.md`
 Branch: `feat/slice-2-service-boundaries`
-PR: pending
+PR: #205
 
 ## Purpose
 
