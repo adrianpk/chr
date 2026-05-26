@@ -45,7 +45,7 @@ Prerequisite PRs or delivered work:
 | Slice 1: Inventory | Delivered | `feat/slice-1-cli-tui-inventory` | `feat(slice-1): inventory` | `.prj/reports/slices/cli-tui-surface-parity/slice-1-inventory.md` | PR `#204`; matrix created; `make verify` passed. |
 | Slice 2: Service Boundaries | Delivered | `feat/slice-2-service-boundaries` | `feat(slice-2): service boundaries` | `.prj/reports/slices/cli-tui-surface-parity/slice-2-service-boundaries.md` | PR `#205`; shared daemon stop and authoring session boundaries; `make verify` passed. |
 | Slice 3: Missing CLI Actions | Delivered | `feat/slice-3-missing-cli-actions` | `feat(slice-3): missing cli actions` | `.prj/reports/slices/cli-tui-surface-parity/slice-3-missing-cli-actions.md` | PR `#206`; added CLI entrypoints for service-backed operational TUI actions; `make verify` passed. |
-| Slice 4: Parity Tests | Planned | `feat/slice-4-parity-tests` | `feat(slice-4): parity tests` | `.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md` | Add tests for CLI/TUI/service parity. |
+| Slice 4: Parity Tests | Reviewing | `feat/slice-4-parity-tests` | `feat(slice-4): parity tests` | `.prj/reports/slices/cli-tui-surface-parity/slice-4-parity-tests.md` | Added CLI command and TUI adapter parity tests; `make verify` passed. |
 | Slice 5: Parity Docs | Planned | `feat/slice-5-parity-docs` | `feat(slice-5): parity docs` | `.prj/reports/slices/cli-tui-surface-parity/slice-5-parity-docs.md` | Publish final parity contract. |
 
 ## Slice 1: Inventory
@@ -129,20 +129,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T4.1 Add CLI tests for new commands.
-- [ ] T4.2 Add service tests for shared logic.
-- [ ] T4.3 Add TUI adapter dispatch tests for critical actions.
-- [ ] T4.4 Update matrix with test evidence.
-- [ ] T4.5 Add slice implementation report.
-- [ ] T4.6 Run validation.
+- [x] T4.1 Add CLI tests for new commands.
+- [x] T4.2 Add service tests for shared logic.
+- [x] T4.3 Add TUI adapter dispatch tests for critical actions.
+- [x] T4.4 Update matrix with test evidence.
+- [x] T4.5 Add slice implementation report.
+- [x] T4.6 Run validation.
 
 Task commits:
 
-- Pending.
+- `41f45c6 test(cli): cover parity command paths`
+- `71e9d90 test(tui): cover service adapter parity`
+- `fa9f2dc docs(parity): record test evidence`
+- `pending commit`
 
 Validation:
 
-- Pending.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 5: Parity Docs
 
