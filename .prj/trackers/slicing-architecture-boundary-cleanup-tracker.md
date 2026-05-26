@@ -76,23 +76,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T2.1 Identify service operations that should receive operation-scoped
+- [x] T2.1 Identify service operations that should receive operation-scoped
   context.
-- [ ] T2.2 Update service method signatures and call sites for selected
+- [x] T2.2 Update service method signatures and call sites for selected
   operations.
-- [ ] T2.3 Remove obsolete `contextcheck` suppressions from CLI flow code.
-- [ ] T2.4 Preserve CLI and TUI behavior with focused tests or existing
+- [x] T2.3 Remove obsolete `contextcheck` suppressions from CLI flow code.
+- [x] T2.4 Preserve CLI and TUI behavior with focused tests or existing
   coverage.
-- [ ] T2.5 Create slice implementation report.
-- [ ] T2.6 Run validation.
+- [x] T2.5 Create slice implementation report.
+- [x] T2.6 Run validation.
 
 Task commits:
 
-- Pending.
+- `138c8c4 refactor(generation): pass operation contexts explicitly`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chcapp`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 3: Adapter Service Shape Cleanup
 
