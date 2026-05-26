@@ -395,21 +395,7 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
-		ExplicitDir:           cmd.String("dir"),
-		UseExplicitDir:        cmd.IsSet("dir"),
-		AllowCurrentDirectory: true,
-	})
-	if err != nil {
-		return err
-	}
-
-	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
+	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
 	if err != nil {
 		return err
 	}
@@ -440,6 +426,11 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
 
 	if !cmd.Bool("dry-run") {
+		deps, err := appDependenciesFromCommand(cmd)
+		if err != nil {
+			return err
+		}
+
 		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, len(eligibleTickets), deps.assetsFS)
 	}
 
@@ -1329,21 +1320,7 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	deps, err := appDependenciesFromCommand(cmd)
-	if err != nil {
-		return err
-	}
-
-	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
-		ExplicitDir:           cmd.String("dir"),
-		UseExplicitDir:        cmd.IsSet("dir"),
-		AllowCurrentDirectory: true,
-	})
-	if err != nil {
-		return err
-	}
-
-	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
+	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
 	if err != nil {
 		return err
 	}
@@ -1433,8 +1410,12 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
+	return printTicketList(stdout, tickets)
+}
+
+func printTicketList(stdout io.Writer, tickets []chc.IndexedTicket) error {
 	for _, ticket := range tickets {
-		_, err = fmt.Fprintf(
+		_, err := fmt.Fprintf(
 			stdout,
 			"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 			ticket.Key,
@@ -1452,6 +1433,33 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	}
 
 	return nil
+}
+
+func openTicketIndexForCommand(
+	ctx context.Context,
+	cmd *cli.Command,
+	env chc.UserEnvironment,
+) (commandProjectContext, chc.TicketIndex, error) {
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return commandProjectContext{}, nil, err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return commandProjectContext{}, nil, err
+	}
+
+	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
+	if err != nil {
+		return commandProjectContext{}, nil, err
+	}
+
+	return projectContext, index, nil
 }
 
 func refreshProjectTicketIndex(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext) error {
