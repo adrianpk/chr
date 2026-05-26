@@ -37,8 +37,8 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
 
 ## Slice Status
@@ -56,7 +56,7 @@ Prerequisite PRs or delivered work:
 | Slice 9: Attention View | Delivered | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | PR `#221`; virtual attention view and plain-text reasons; `make verify` passed. |
 | Slice 10: Ticket Detail Surface | Delivered | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | PR `#222`; synopsis, source refs, Markdown previews, and detail tests; `make verify` passed. |
 | Slice 11: Maximized Board | Delivered | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | PR `#223`; responsive maximized normal columns and separate attention rendering; `make verify` passed. |
-| Slice 12: Board Docs Validation | In progress | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | Documentation, parity matrix, migration reference, final validation. |
+| Slice 12: Board Docs Validation | In review | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | User guide, TUI reference, command reference, parity matrix, SQLite/ticket references; `make verify` passed. |
 
 ## Slice 1: Ticket Metadata Contract
 
@@ -343,30 +343,38 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T12.1 Update TUI reference.
-- [ ] T12.2 Update command reference.
-- [ ] T12.3 Update project workspace and runtime/config docs for userspace.
-- [ ] T12.4 Update SQLite migration reference.
-- [ ] T12.5 Update CLI/TUI parity matrix.
-- [ ] T12.6 Run `gofmt` and targeted tests.
-- [ ] T12.7 Run `make verify`.
-- [ ] T12.8 Create slice implementation report.
+- [x] T12.1 Update TUI reference.
+- [x] T12.2 Update command reference.
+- [x] T12.3 Update project workspace and runtime/config docs for userspace.
+- [x] T12.4 Update SQLite migration reference.
+- [x] T12.5 Update CLI/TUI parity matrix.
+- [x] T12.6 Run `gofmt` and targeted tests.
+- [x] T12.7 Run `make verify`.
+- [x] T12.8 Create slice implementation report.
 
 Task commits:
 
-- Pending.
+- `92c025b docs(board): update ticket board references`
+- Documentation/report commit recorded in this changeset.
 
 Validation:
 
-- Pending.
+- `git diff --check`: pass.
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Completion
 
-Planned slices are pending.
+Planned slices are implemented through Slice 12 and awaiting final Slice 12
+review/merge.
 
 Final validation:
 
-- Pending.
+- `git diff --check`: pass.
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 Post-slice tuning needed:
 
