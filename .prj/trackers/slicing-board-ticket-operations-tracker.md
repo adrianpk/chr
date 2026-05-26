@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 5
+Active slice number: Slice 6
 
-Active slice short name: ticket creation service
+Active slice short name: generated ticket synopsis
 
-Expected branch name: `feat/slice-5-ticket-creation-service`
+Expected branch name: `feat/slice-6-generated-ticket-synopsis`
 
-Expected PR title: `feat(slice-5): ticket creation service`
+Expected PR title: `feat(slice-6): generated ticket synopsis`
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md`
+`.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md`
 
 Prerequisite PRs or delivered work:
 
@@ -49,8 +49,8 @@ Prerequisite PRs or delivered work:
 | Slice 2: Userspace Resolver | Delivered | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | PR `#214`; active `.chc/user/` resolver and env contract; `make verify` passed. |
 | Slice 3: Board SQLite Schema | Delivered | `feat/slice-3-board-sqlite-schema` | `feat(slice-3): board sqlite schema` | `.prj/reports/slices/board-ticket-operations/slice-3-board-sqlite-schema.md` | PR `#215`; migration/index shape for Board metadata and key allocation foundation; `make verify` passed. |
 | Slice 4: Indexed Ticket Enrichment | Delivered | `feat/slice-4-indexed-ticket-enrichment` | `feat(slice-4): indexed ticket enrichment` | `.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md` | PR `#216`; parser/reconciler/repository through enriched metadata; `make verify` passed. |
-| Slice 5: Ticket Creation Service | In review | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | Manual creation with synopsis, backlog default, SQLite key allocation, index refresh. |
-| Slice 6: Generated Ticket Synopsis | Pending | `feat/slice-6-generated-ticket-synopsis` | `feat(slice-6): generated ticket synopsis` | `.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md` | Plan tracking materialization ticket synopsis/source metadata. |
+| Slice 5: Ticket Creation Service | Delivered | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | PR `#217`; manual creation with synopsis, backlog default, SQLite key allocation, index refresh; `make verify` passed. |
+| Slice 6: Generated Ticket Synopsis | In progress | `feat/slice-6-generated-ticket-synopsis` | `feat(slice-6): generated ticket synopsis` | `.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md` | Plan tracking materialization ticket synopsis/source metadata. |
 | Slice 7: Board Query Service | Pending | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | Shared CLI/TUI Board read model. |
 | Slice 8: Compact Board Columns | Pending | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | One-column compact Board navigation. |
 | Slice 9: Attention View | Pending | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | Virtual attention view and plain-text reasons. |

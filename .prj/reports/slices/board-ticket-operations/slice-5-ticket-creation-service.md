@@ -1,11 +1,11 @@
 # Slice 5: Ticket Creation Service
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-5-ticket-creation-service`
-PR: pending
+PR: #217
 
 ## Purpose
 
