@@ -77,7 +77,7 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T2.1 Identify matched actions with divergent implementation paths.
+- [x] T2.1 Identify matched actions with divergent implementation paths.
 - [ ] T2.2 Move duplicated logic into shared service methods where needed.
 - [ ] T2.3 Preserve current CLI and TUI behavior.
 - [ ] T2.4 Update matrix statuses for resolved divergences.
@@ -115,7 +115,7 @@ Candidate tasks:
 
 Task commits:
 
-- Pending.
+- `pending commit`
 
 Validation:
 

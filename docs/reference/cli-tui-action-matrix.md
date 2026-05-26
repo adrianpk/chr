@@ -63,7 +63,7 @@ Status values:
 | Workspace | `refresh` | Reload workspace files into runtime graph. | `chc index rebuild`, `chc index status` partially | `service.RefreshWorkspace` | `missing_cli` | CLI index commands target ticket index, not the full TUI workspace graph refresh. |
 | Help | `help` | Navigate to Help view. | `chc --help` | `internal/chctui.Model.selectView`, CLI help | `matched` | Equivalent intent, different presentation. |
 | Selection | `open-source` | Show selected source path. | none | `internal/chctui.Model.selectedSourcePath` | `missing_cli` | CLI has path outputs in list/show commands, but no selected-source concept. |
-| Ticket | `create-ticket` | Create default task ticket. | `chc ticket new <title>` | TUI: `service.CreateDefaultTicket`; CLI: `runTicketNew` and ticket renderer | `service_divergence` | CLI can create tickets, but TUI default creation uses a dedicated service method. |
+| Ticket | `create-ticket` | Create default task ticket. | `chc ticket new <title>` | `service.CreateTicket`; TUI also wraps defaults with `service.CreateDefaultTicket` | `matched` | CLI supports full metadata; TUI uses default metadata through the same ticket creation service. |
 | Dump | `create-dump` | Create selected project/use-case dump. | none | `service.CreateDump` | `missing_cli` | Service exists; CLI entrypoint missing. |
 | Dump | `edit-dump` | Open selected dump in TUI editor. | none | `service.ReadDump`, `service.SaveDump` | `missing_cli` | Service exists; CLI entrypoint missing. |
 | Dump | `refresh-dumps` | Reload dump views. | none | `service.ListDumps` | `missing_cli` | CLI entrypoint missing. |
@@ -84,14 +84,14 @@ Status values:
 | Plan | `refresh-plans` | Reload plan views. | none | `service.ListPlans` | `missing_cli` | Command is gated to Plans view. |
 | Authoring | `create-authoring-session` | Create TUI default authoring session. | `chc author session new ...` | TUI: `service.CreateTUIAuthoringSession`; CLI: `runAuthorSessionNew` | `service_divergence` | Equivalent artifact family, but TUI default helper and CLI command paths differ. |
 | Authoring | `create-context-quiz` | Validate context-aware quiz creation availability. | `chc author quiz new ...` | TUI returns unavailable; CLI `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware quiz generation; TUI action is not implemented. |
-| Ticket | `ticket-add-comment` | Add default selected-ticket comment. | `chc ticket comment <key> <body>` | TUI: `service.AddSelectedTicketComment`; CLI: `runTicketComment` | `service_divergence` | CLI supports arbitrary body; TUI uses default body through service. |
-| Ticket | `ticket-status-ready` | Move selected ticket to `ready`. | `chc ticket status <key> ready` | TUI: `service.MoveSelectedTicketStatus`; CLI: `runTicketStatus` | `service_divergence` | Equivalent behavior, paths differ. |
-| Ticket | `ticket-status-in-progress` | Move selected ticket to `in_progress`. | `chc ticket status <key> in_progress` | TUI: `service.MoveSelectedTicketStatus`; CLI: `runTicketStatus` | `service_divergence` | Equivalent behavior, paths differ. |
-| Ticket | `ticket-status-reviewing` | Move selected ticket to `reviewing`. | `chc ticket status <key> reviewing` | TUI: `service.MoveSelectedTicketStatus`; CLI: `runTicketStatus` | `service_divergence` | Equivalent behavior, paths differ. |
+| Ticket | `ticket-add-comment` | Add default selected-ticket comment. | `chc ticket comment <key> <body>` | `service.AddTicketComment`; TUI wraps default body with `service.AddSelectedTicketComment` | `matched` | CLI supports arbitrary body; TUI supplies the standard body through the same service. |
+| Ticket | `ticket-status-ready` | Move selected ticket to `ready`. | `chc ticket status <key> ready` | `service.MoveTicketStatus`; TUI wraps selection with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
+| Ticket | `ticket-status-in-progress` | Move selected ticket to `in_progress`. | `chc ticket status <key> in_progress` | `service.MoveTicketStatus`; TUI wraps selection with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
+| Ticket | `ticket-status-reviewing` | Move selected ticket to `reviewing`. | `chc ticket status <key> reviewing` | `service.MoveTicketStatus`; TUI wraps selection with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
 | Ticket | `ticket-checklist-toggle` | Validate checklist toggle availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
 | Ticket | `ticket-checklist-add` | Validate checklist item creation availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
-| Work | `work-start-ticket` | Start selected ticket execution. | `chc ticket start <key>` | TUI: `service.StartSelectedTicket`; CLI: `runTicketStart` | `service_divergence` | Equivalent behavior, paths differ. |
-| Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chc ticket loop --status ready --max-iterations 1` | TUI: `service.StartReadyTicketLoop`; CLI: `runTicketLoop` | `service_divergence` | Equivalent behavior, paths differ. |
+| Work | `work-start-ticket` | Start selected ticket execution. | `chc ticket start <key>` | shared `buildTicketStartPreflightForTicket` and `runTicketStartExecution` | `matched` | CLI owns preflight/output; TUI service wraps selected-ticket execution. |
+| Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chc ticket loop --status ready --max-iterations 1` | shared `runTicketLoopExecution` | `matched` | CLI supports configurable query/run options; TUI wraps one ready-ticket iteration. |
 | Work | `work-request-stop` | Request daemon stop. | `chc daemon stop` | TUI: `service.RequestDaemonStop`; CLI: `runDaemonStop` | `service_divergence` | Equivalent behavior, paths differ. |
 
 Command availability gates:
@@ -114,13 +114,13 @@ Command availability gates:
 | Project Registry | `chc project list` | none | `runProjectList`, user registry | `missing_tui` | Registry management is CLI-only. |
 | Project Registry | `chc project current` | current project topbar | `runProjectCurrent`, user registry | `matched` | TUI shows resolved project, CLI prints active project. |
 | Project Registry | `chc project select` | none | `runProjectSelect`, user registry | `missing_tui` | Registry selection is CLI-only. |
-| Tickets | `chc ticket new` | Palette `create-ticket` partially | CLI: `runTicketNew`; TUI: `service.CreateDefaultTicket` | `service_divergence` | CLI supports metadata; TUI creates a default task ticket. |
+| Tickets | `chc ticket new` | Palette `create-ticket` partially | `service.CreateTicket`; TUI also wraps defaults with `service.CreateDefaultTicket` | `matched` | CLI supports metadata; TUI creates a default task ticket through the same service. |
 | Tickets | `chc ticket list` | Board view | `runTicketList`, ticket index | `matched` | TUI board and CLI list inspect indexed tickets. |
 | Tickets | `chc ticket show` | Board selected ticket detail | `runTicketShow`, ticket index | `matched` | Equivalent inspection surface. |
-| Tickets | `chc ticket comment` | Palette `ticket-add-comment` partially | CLI: `runTicketComment`; TUI: `service.AddSelectedTicketComment` | `service_divergence` | CLI body is user-supplied; TUI body is fixed. |
-| Tickets | `chc ticket status` | Palette ticket status commands | CLI: `runTicketStatus`; TUI: `service.MoveSelectedTicketStatus` | `service_divergence` | Equivalent state change, different path. |
-| Work | `chc ticket start` | Palette `work-start-ticket` | CLI: `runTicketStart`; TUI: `service.StartSelectedTicket` | `service_divergence` | Equivalent execution intent, different path. |
-| Work | `chc ticket loop` | Palette `work-start-ready-loop` partially | CLI: `runTicketLoop`; TUI: `service.StartReadyTicketLoop` | `service_divergence` | CLI is configurable; TUI runs one ready-ticket iteration. |
+| Tickets | `chc ticket comment` | Palette `ticket-add-comment` partially | `service.AddTicketComment`; TUI wraps default body with `service.AddSelectedTicketComment` | `matched` | CLI body is user-supplied; TUI body is fixed. |
+| Tickets | `chc ticket status` | Palette ticket status commands | `service.MoveTicketStatus`; TUI wraps selected ticket with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
+| Work | `chc ticket start` | Palette `work-start-ticket` | shared `buildTicketStartPreflightForTicket` and `runTicketStartExecution` | `matched` | Shared core execution path. |
+| Work | `chc ticket loop` | Palette `work-start-ready-loop` partially | shared `runTicketLoopExecution` | `matched` | CLI is configurable; TUI runs one ready-ticket iteration. |
 | Work | `chc ticket apply-result` | none | `runTicketApplyResult` | `missing_tui` | Result application is CLI-only. |
 | Index | `chc index rebuild` | Workspace refresh partially | `runIndexRebuild`, ticket reconciler | `missing_tui` | CLI rebuilds ticket index; TUI refresh rebuilds workspace graph/read model. |
 | Index | `chc index status` | Project/Dash diagnostics partially | `runIndexStatus` | `missing_tui` | CLI-specific index diagnostics. |
@@ -164,11 +164,11 @@ Command availability gates:
 | Runtime quiz operations | `tuiQuizActionExecutor` -> `service.ListQuizzes`, `StartQuiz`, `ResumeQuiz`, `AnswerQuiz`, `SkipQuiz`, `CompleteQuiz`, `CancelQuiz`, `SwitchQuizMode` | no equivalent | `missing_cli` | Different from `chc author quiz new`; this is the TUI runtime quiz loop. |
 | Spec operations | `tuiSpecActionExecutor` -> `service.ListSpecs`, `GenerateSpec` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
 | Plan operations | `tuiPlanActionExecutor` -> `service.ListPlans`, `GeneratePlan`, `RegeneratePlan`, `MaterializePlanTracking` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
-| Ticket creation | `tuiArtifactActionExecutor` -> `service.CreateDefaultTicket` | `runTicketNew` -> lower-level ticket renderer/repository path | `service_divergence` | CLI behavior is richer; TUI default helper should be reconciled with shared service command shape. |
-| Ticket comment | `tuiTicketActionExecutor` -> `service.AddSelectedTicketComment` -> `service.AddTicketComment` | `runTicketComment` -> lower-level commenter/reconcile path | `service_divergence` | Both write comments; CLI does not use the service method. |
-| Ticket status | `tuiTicketActionExecutor` -> `service.MoveSelectedTicketStatus` -> `service.MoveTicketStatus` | `runTicketStatus` -> lower-level status updater/reconcile path | `service_divergence` | Both update status; CLI does not use the service method. |
-| Work start ticket | `tuiWorkActionExecutor` -> `service.StartSelectedTicket` | `runTicketStart` | `service_divergence` | Both run one ticket; service boundary should be consolidated or explicitly separated. |
-| Work ready loop | `tuiWorkActionExecutor` -> `service.StartReadyTicketLoop` | `runTicketLoop` | `service_divergence` | TUI wraps one ready iteration; CLI exposes configurable loop options. |
+| Ticket creation | `tuiArtifactActionExecutor` -> `service.CreateDefaultTicket` -> `service.CreateTicket` | `runTicketNew` -> `service.CreateTicket` | `matched` | CLI behavior is richer; both use the same ticket creation service. |
+| Ticket comment | `tuiTicketActionExecutor` -> `service.AddSelectedTicketComment` -> `service.AddTicketComment` | `runTicketComment` -> `service.AddTicketComment` | `matched` | CLI body is user-supplied; TUI supplies a default body. |
+| Ticket status | `tuiTicketActionExecutor` -> `service.MoveSelectedTicketStatus` -> `service.MoveTicketStatus` | `runTicketStatus` -> `service.MoveTicketStatus` | `matched` | Same status service. |
+| Work start ticket | `tuiWorkActionExecutor` -> `service.StartSelectedTicket` -> shared execution helpers | `runTicketStart` -> shared execution helpers | `matched` | TUI wraps selection and message reload; CLI owns dry-run and output. |
+| Work ready loop | `tuiWorkActionExecutor` -> `service.StartReadyTicketLoop` -> `runTicketLoopExecution` | `runTicketLoop` -> `runTicketLoopExecution` | `matched` | TUI uses fixed ready/max-one selection; CLI is configurable. |
 | Work request stop | `tuiWorkActionExecutor` -> `service.RequestDaemonStop` | `runDaemonStop` | `service_divergence` | Equivalent intent, different command path. |
 | Authoring session creation | `tuiArtifactActionExecutor` -> `service.CreateTUIAuthoringSession` | `runAuthorSessionNew` | `service_divergence` | CLI is configurable; TUI creates a default spec-oriented session. |
 | Context-aware authoring quiz | TUI returns unavailable | `runAuthorContextualQuizNew` | `missing_tui` | CLI path exists and should inform future TUI implementation. |
@@ -189,11 +189,6 @@ High-priority `missing_cli` gaps:
 
 High-priority `service_divergence` gaps:
 
-- Ticket creation.
-- Ticket comment.
-- Ticket status.
-- Ticket start.
-- Ready-ticket loop.
 - Daemon stop.
 - Authoring session creation.
 
