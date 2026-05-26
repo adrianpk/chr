@@ -1047,14 +1047,23 @@ func (m Model) renderSelectedTicketDetail() string {
 	output.WriteString("Selected Ticket\n")
 	output.WriteString(fmt.Sprintf("  Key: %s\n", ticket.Key))
 	output.WriteString(fmt.Sprintf("  Title: %s\n", ticket.Title))
+
+	if ticket.Synopsis != "" {
+		output.WriteString(fmt.Sprintf("  Synopsis: %s\n", ticket.Synopsis))
+	}
+
 	output.WriteString(fmt.Sprintf("  Status: %s\n", ticket.Status))
 	output.WriteString(fmt.Sprintf("  Priority: %s\n", ticket.Priority))
 	output.WriteString(fmt.Sprintf("  Severity: %s\n", ticket.Severity))
 	output.WriteString(fmt.Sprintf("  Type: %s\n", ticket.Type))
 	output.WriteString(fmt.Sprintf("  Use Case: %s\n", ticket.UseCase))
 	output.WriteString(fmt.Sprintf("  Project Area: %s\n", ticket.ProjectArea))
+	renderTicketSourceDetail(&output, ticket)
 	output.WriteString(fmt.Sprintf("  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal))
 	output.WriteString(fmt.Sprintf("  Comments: %d\n", ticket.CommentCount))
+	renderTicketPreviewSection(&output, "Body", ticket.BodyPreview)
+	renderTicketPreviewSection(&output, "Checklist Items", ticket.ChecklistPreview)
+	renderTicketPreviewSection(&output, "Recent Comments", ticket.CommentPreview)
 
 	if len(ticket.AttentionReasons) > 0 {
 		output.WriteString("  Attention:\n")
@@ -1067,6 +1076,36 @@ func (m Model) renderSelectedTicketDetail() string {
 	output.WriteString(fmt.Sprintf("  Path: %s", ticket.RelativePath))
 
 	return output.String()
+}
+
+func renderTicketSourceDetail(output *strings.Builder, ticket TicketView) {
+	if ticket.SourceKind == "" && ticket.SourceRef == "" && ticket.Slice == "" {
+		return
+	}
+
+	if ticket.SourceKind != "" {
+		fmt.Fprintf(output, "  Source: %s\n", ticket.SourceKind)
+	}
+
+	if ticket.SourceRef != "" {
+		fmt.Fprintf(output, "  Source Ref: %s\n", ticket.SourceRef)
+	}
+
+	if ticket.Slice != "" {
+		fmt.Fprintf(output, "  Slice: %s\n", ticket.Slice)
+	}
+}
+
+func renderTicketPreviewSection(output *strings.Builder, title string, lines []string) {
+	if len(lines) == 0 {
+		return
+	}
+
+	fmt.Fprintf(output, "  %s:\n", title)
+
+	for _, line := range lines {
+		fmt.Fprintf(output, "    %s\n", line)
+	}
 }
 
 //nolint:cyclop // Key helper text is centralized by selected view.
@@ -1427,18 +1466,25 @@ type TicketView struct {
 	Index            int
 	Key              string
 	Title            string
+	Synopsis         string
 	Status           string
 	Priority         string
 	Severity         string
 	Type             string
 	UseCase          string
 	ProjectArea      string
+	SourceKind       string
+	SourceRef        string
+	Slice            string
 	BoardColumn      string
 	AttentionReasons []string
 	RelativePath     string
 	ChecklistDone    int
 	ChecklistTotal   int
 	CommentCount     int
+	BodyPreview      []string
+	ChecklistPreview []string
+	CommentPreview   []string
 }
 
 func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
@@ -1454,18 +1500,28 @@ func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 			Index:            index,
 			Key:              ticket.Key,
 			Title:            ticket.Title,
+			Synopsis:         ticket.Synopsis,
 			Status:           ticket.Status,
 			Priority:         ticket.Priority,
 			Severity:         ticket.Severity,
 			Type:             ticket.Type,
 			UseCase:          ticket.UseCase,
 			ProjectArea:      ticket.ProjectArea,
+			SourceKind:       ticket.SourceKind,
+			SourceRef:        ticket.SourceRef,
+			Slice:            ticket.Slice,
 			BoardColumn:      boardColumn,
 			AttentionReasons: chc.BoardAttentionReasons(ticket),
 			RelativePath:     ticket.RelativePath,
 		}
 
-		view.ChecklistDone, view.ChecklistTotal, view.CommentCount = ticketMarkdownSummary(ticket.Path)
+		detail := ticketMarkdownDetail(ticket.Path)
+		view.ChecklistDone = detail.ChecklistDone
+		view.ChecklistTotal = detail.ChecklistTotal
+		view.CommentCount = detail.CommentCount
+		view.BodyPreview = detail.BodyPreview
+		view.ChecklistPreview = detail.ChecklistPreview
+		view.CommentPreview = detail.CommentPreview
 
 		views = append(views, view)
 	}
@@ -1483,6 +1539,10 @@ func (t TicketView) Matches(filter string) bool {
 		t.Type,
 		t.UseCase,
 		t.ProjectArea,
+		t.Synopsis,
+		t.SourceKind,
+		t.SourceRef,
+		t.Slice,
 		t.RelativePath,
 	}
 
@@ -1495,36 +1555,95 @@ func (t TicketView) Matches(filter string) bool {
 	return false
 }
 
-func ticketMarkdownSummary(path string) (int, int, int) {
+type ticketMarkdownDetailView struct {
+	ChecklistDone    int
+	ChecklistTotal   int
+	CommentCount     int
+	BodyPreview      []string
+	ChecklistPreview []string
+	CommentPreview   []string
+}
+
+type ticketMarkdownParser struct {
+	detail            ticketMarkdownDetailView
+	inFrontMatter     bool
+	frontMatterClosed bool
+	inComments        bool
+}
+
+func ticketMarkdownDetail(path string) ticketMarkdownDetailView {
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return 0, 0, 0
+		return ticketMarkdownDetailView{}
 	}
 
-	checklistDone := 0
-	checklistTotal := 0
-	commentCount := 0
-	inComments := false
+	parser := ticketMarkdownParser{}
 
 	for _, line := range strings.Split(string(content), "\n") {
-		trimmed := strings.TrimSpace(line)
-
-		if strings.HasPrefix(trimmed, "# ") {
-			inComments = trimmed == "# Comments"
-		}
-
-		if strings.HasPrefix(trimmed, "- [") {
-			checklistTotal++
-
-			if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
-				checklistDone++
-			}
-		}
-
-		if inComments && strings.HasPrefix(trimmed, "## ") {
-			commentCount++
-		}
+		parser.readLine(strings.TrimSpace(line))
 	}
 
-	return checklistDone, checklistTotal, commentCount
+	return parser.detail
+}
+
+func (p *ticketMarkdownParser) readLine(trimmed string) {
+	if trimmed == "" {
+		return
+	}
+
+	if p.handleFrontMatter(trimmed) || p.inFrontMatter {
+		return
+	}
+
+	switch {
+	case strings.HasPrefix(trimmed, "# "):
+		p.readHeading(trimmed)
+	case strings.HasPrefix(trimmed, "- ["):
+		p.readChecklistItem(trimmed)
+	case p.inComments && strings.HasPrefix(trimmed, "## "):
+		p.detail.CommentCount++
+		appendPreviewLine(&p.detail.CommentPreview, strings.TrimPrefix(trimmed, "## "), 3)
+	case !p.inComments && !strings.HasPrefix(trimmed, "#"):
+		appendPreviewLine(&p.detail.BodyPreview, trimmed, 4)
+	}
+}
+
+func (p *ticketMarkdownParser) handleFrontMatter(trimmed string) bool {
+	if trimmed != "---" || p.frontMatterClosed {
+		return false
+	}
+
+	p.inFrontMatter = !p.inFrontMatter
+	if !p.inFrontMatter {
+		p.frontMatterClosed = true
+	}
+
+	return true
+}
+
+func (p *ticketMarkdownParser) readHeading(trimmed string) {
+	p.inComments = trimmed == "# Comments"
+	if p.inComments {
+		return
+	}
+
+	appendPreviewLine(&p.detail.BodyPreview, trimmed, 4)
+}
+
+func (p *ticketMarkdownParser) readChecklistItem(trimmed string) {
+	p.detail.ChecklistTotal++
+
+	if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
+		p.detail.ChecklistDone++
+	}
+
+	appendPreviewLine(&p.detail.ChecklistPreview, trimmed, 4)
+}
+
+func appendPreviewLine(lines *[]string, line string, limit int) {
+	if len(*lines) >= limit {
+		return
+	}
+
+	*lines = append(*lines, line)
 }

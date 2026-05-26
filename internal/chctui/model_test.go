@@ -2125,36 +2125,8 @@ func TestModelReportsWorkActionError(t *testing.T) {
 
 func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 	projectDir := t.TempDir()
-	firstPath := writeTicketViewFile(t, projectDir, "open.md", "- [x] Done\n- [ ] Pending\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n")
-	secondPath := writeTicketViewFile(t, projectDir, "ready.md", "- [ ] Ready\n")
-
 	model := NewModel(Options{
-		Tickets: []chc.IndexedTicket{
-			{
-				Path:         firstPath,
-				RelativePath: "open.md",
-				Key:          "CHC-1",
-				Title:        "Fix publishing",
-				Status:       "open",
-				Priority:     "high",
-				Severity:     "critical",
-				Type:         "bug",
-				UseCase:      "cli-blog",
-				ProjectArea:  "indexing",
-			},
-			{
-				Path:         secondPath,
-				RelativePath: "ready.md",
-				Key:          "CHC-2",
-				Title:        "Add completion",
-				Status:       "ready",
-				Priority:     "normal",
-				Severity:     "normal",
-				Type:         "feature",
-				UseCase:      "cli-blog",
-				ProjectArea:  "tasks",
-			},
-		},
+		Tickets: ticketBoardTestTickets(t, projectDir),
 	})
 	model.selected = 6
 
@@ -2166,13 +2138,66 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 		"CHC-1",
 		"Fix publishing",
 		"Selected Ticket",
+		"Synopsis: Fix the publishing workflow.",
+		"Source: plan_tracking",
+		"Source Ref: .chc/plans/blog-plan.md",
+		"Slice: Slice 1",
 		"Checklist: 1 done / 2 total",
 		"Comments: 1",
+		"Body:",
+		"Investigate publishing failure.",
+		"Checklist Items:",
+		"- [x] Done",
+		"Recent Comments:",
+		"2026-05-22T10:00:00Z chc",
 		"Path: open.md",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
 		}
+	}
+}
+
+func ticketBoardTestTickets(t *testing.T, projectDir string) []chc.IndexedTicket {
+	t.Helper()
+
+	firstPath := writeTicketViewFile(
+		t,
+		projectDir,
+		"open.md",
+		"Investigate publishing failure.\n\n- [x] Done\n- [ ] Pending\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n",
+	)
+	secondPath := writeTicketViewFile(t, projectDir, "ready.md", "- [ ] Ready\n")
+
+	return []chc.IndexedTicket{
+		{
+			Path:         firstPath,
+			RelativePath: "open.md",
+			Key:          "CHC-1",
+			Title:        "Fix publishing",
+			Synopsis:     "Fix the publishing workflow.",
+			Status:       "open",
+			Priority:     "high",
+			Severity:     "critical",
+			Type:         "bug",
+			UseCase:      "cli-blog",
+			ProjectArea:  "indexing",
+			SourceKind:   "plan_tracking",
+			SourceRef:    ".chc/plans/blog-plan.md",
+			Slice:        "Slice 1",
+		},
+		{
+			Path:         secondPath,
+			RelativePath: "ready.md",
+			Key:          "CHC-2",
+			Title:        "Add completion",
+			Status:       "ready",
+			Priority:     "normal",
+			Severity:     "normal",
+			Type:         "feature",
+			UseCase:      "cli-blog",
+			ProjectArea:  "tasks",
+		},
 	}
 }
 
@@ -2276,10 +2301,16 @@ func TestTicketFilterMatchesMetadata(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []chc.IndexedTicket{
 			{Key: "CHC-1", Title: "Fix publishing", Status: "open"},
-			{Key: "CHC-2", Title: "Add completion", Status: "ready"},
+			{
+				Key:        "CHC-2",
+				Title:      "Add completion",
+				Synopsis:   "Finish generated tickets from a plan.",
+				Status:     "ready",
+				SourceKind: "plan_tracking",
+			},
 		},
 	})
-	model.ticketFilter = "completion"
+	model.ticketFilter = "generated tickets"
 
 	tickets := model.filteredTickets()
 	if len(tickets) != 1 {
