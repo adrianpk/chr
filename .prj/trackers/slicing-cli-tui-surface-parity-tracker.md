@@ -52,7 +52,7 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Audit TUI direct keybindings by view.
+- [x] T1.1 Audit TUI direct keybindings by view.
 - [ ] T1.2 Audit command palette commands and availability gates.
 - [ ] T1.3 Audit current CLI commands by domain.
 - [ ] T1.4 Map each action to service or adapter paths.
@@ -62,7 +62,7 @@ Candidate tasks:
 
 Task commits:
 
-- Pending.
+- `pending commit`
 
 Validation:
 
