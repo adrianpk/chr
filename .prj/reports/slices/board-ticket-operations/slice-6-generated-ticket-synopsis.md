@@ -1,11 +1,11 @@
 # Slice 6: Generated Ticket Synopsis
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-6-generated-ticket-synopsis`
-PR: pending
+PR: #218
 
 ## Purpose
 
