@@ -65,7 +65,7 @@ Candidate tasks:
 - [x] T1.1 Add core constants/types for Board statuses and legacy status aliases.
 - [x] T1.2 Extend `Ticket` with synopsis, source metadata, and slice metadata.
 - [x] T1.3 Render new metadata fields in ticket frontmatter.
-- [ ] T1.4 Parse new metadata fields into `IndexedTicket`.
+- [x] T1.4 Parse new metadata fields into `IndexedTicket`.
 - [ ] T1.5 Add metadata validation tests for Board-created tickets and legacy
   tickets.
 - [ ] T1.6 Create slice implementation report.
@@ -76,11 +76,13 @@ Task commits:
 - `5cf1805 feat(ticket): define board status aliases`
 - `7bd604a feat(ticket): add board metadata fields`
 - `6a67fba feat(ticket): render board metadata`
+- `b7adc7b feat(ticket): parse board metadata`
 
 Validation:
 
 - `go test ./internal/chc -run 'TestTicketStatus|TestTicketRenderer|TestTicketParser'`: pass.
 - `go test ./internal/chc -run 'TestTicketRenderer'`: pass.
+- `go test ./internal/chc -run 'TestTicketParser'`: pass.
 
 ## Slice 2: Userspace Resolver
 
