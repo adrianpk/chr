@@ -79,6 +79,7 @@ func (s service) StartReadyTicketLoop() (WorkOperationResult, error) {
 
 func (s service) RequestDaemonStop() (WorkOperationResult, error) {
 	requestedAt := s.now().UTC()
+
 	stopResult, err := requestDaemonStopState(s.ctx, s.env, s.assetsFS, requestedAt)
 	if err != nil {
 		return WorkOperationResult{}, err
