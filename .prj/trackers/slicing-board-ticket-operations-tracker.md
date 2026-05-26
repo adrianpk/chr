@@ -95,21 +95,22 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T2.1 Add project-local userspace resolver for `.chc/user/`.
-- [ ] T2.2 Add active-operator environment resolution and validation.
-- [ ] T2.3 Ensure workspace initialization or repair can create `.chc/user/`.
-- [ ] T2.4 Document `.envrc` usage and non-direnv setup.
-- [ ] T2.5 Add resolver tests.
+- [x] T2.1 Add project-local userspace resolver for `.chc/user/`.
+- [x] T2.2 Add active-operator environment resolution and validation.
+- [x] T2.3 Ensure workspace initialization or repair can create `.chc/user/`.
+- [x] T2.4 Document `.envrc` usage and non-direnv setup.
+- [x] T2.5 Add resolver tests.
 - [ ] T2.6 Create slice implementation report.
 - [ ] T2.7 Run validation.
 
 Task commits:
 
-- Pending.
+- `f9ae8de feat(workspace): add project userspace resolver`
+- `eda9241 docs(workspace): document active userspace`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc -run 'TestResolveProjectUserspace|TestEnsureProjectUserspace|TestIsValidOperatorID|TestInitCreatesProjectWorkspace'`: pass.
 
 ## Slice 3: Board SQLite Schema
 
