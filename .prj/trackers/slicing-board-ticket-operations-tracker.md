@@ -129,17 +129,22 @@ Candidate tasks:
 - [x] T3.5 Add migration tests.
 - [x] T3.6 Update SQLite migration reference.
 - [x] T3.7 Create slice implementation report.
-- [ ] T3.8 Run validation.
+- [x] T3.8 Run validation.
 
 Task commits:
 
 - `d5b0bc5 feat(db): add board ticket metadata schema`
 - `f8a6fcf docs(db): record board ticket schema decision`
-- `pending commit`
+- `857e801 docs(board): report sqlite schema slice`
+- `9ba087c test(db): update migration status counts`
+- `a2a494b test(db): fix migration schema lint`
 
 Validation:
 
 - `go test ./internal/chc -run 'TestMigratorAppliesPendingMigrations|TestReadSQLiteMigrations'`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 4: Indexed Ticket Enrichment
 

@@ -50,6 +50,9 @@ transaction-safe ticket key allocation.
 ## Validation
 
 - `go test ./internal/chc -run 'TestMigratorAppliesPendingMigrations|TestReadSQLiteMigrations'`
+- `git diff --check`
+- `go test ./...`
+- `make verify`
 
 ## Risks and Follow-ups
 
