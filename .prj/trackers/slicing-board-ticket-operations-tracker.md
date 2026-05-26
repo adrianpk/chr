@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 11
+Active slice number: Slice 12
 
-Active slice short name: maximized board
+Active slice short name: board docs validation
 
-Expected branch name: `feat/slice-11-maximized-board`
+Expected branch name: `feat/slice-12-board-docs-validation`
 
-Expected PR title: `feat(slice-11): maximized board`
+Expected PR title: `feat(slice-12): board docs validation`
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md`
+`.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md`
 
 Prerequisite PRs or delivered work:
 
@@ -55,8 +55,8 @@ Prerequisite PRs or delivered work:
 | Slice 8: Compact Board Columns | Delivered | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | PR `#220`; one-column compact Board navigation; `make verify` passed. |
 | Slice 9: Attention View | Delivered | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | PR `#221`; virtual attention view and plain-text reasons; `make verify` passed. |
 | Slice 10: Ticket Detail Surface | Delivered | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | PR `#222`; synopsis, source refs, Markdown previews, and detail tests; `make verify` passed. |
-| Slice 11: Maximized Board | In review | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | Responsive maximized normal columns and separate attention rendering; `make verify` passed. |
-| Slice 12: Board Docs Validation | Pending | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | Documentation, parity matrix, migration reference, final validation. |
+| Slice 11: Maximized Board | Delivered | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | PR `#223`; responsive maximized normal columns and separate attention rendering; `make verify` passed. |
+| Slice 12: Board Docs Validation | In progress | `feat/slice-12-board-docs-validation` | `feat(slice-12): board docs validation` | `.prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md` | Documentation, parity matrix, migration reference, final validation. |
 
 ## Slice 1: Ticket Metadata Contract
 
