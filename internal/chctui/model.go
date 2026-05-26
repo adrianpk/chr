@@ -122,6 +122,7 @@ type Model struct {
 	tickets                  []TicketView
 	selectedTicket           int
 	boardColumn              string
+	previousBoardColumn      string
 	ticketFilter             string
 	filterEntryMode          bool
 	documents                []DocumentView
@@ -178,6 +179,7 @@ const (
 	defaultPanelSplitPercent = 50
 	minPanelSplitPercent     = 25
 	maxPanelSplitPercent     = 75
+	boardAttentionColumn     = "attention"
 )
 
 //nolint:funlen // Model construction keeps option mapping in one place.
@@ -209,6 +211,7 @@ func NewModel(opts Options) Model {
 	}
 
 	tickets := NewTicketViews(opts.Tickets)
+	boardColumn := defaultBoardColumn(tickets)
 
 	return Model{
 		projectDir:             opts.ProjectDir,
@@ -220,7 +223,8 @@ func NewModel(opts Options) Model {
 		verticalSplitPercent:   defaultPanelSplitPercent,
 		horizontalSplitPercent: defaultPanelSplitPercent,
 		tickets:                tickets,
-		boardColumn:            defaultBoardColumn(tickets),
+		boardColumn:            boardColumn,
+		previousBoardColumn:    boardColumn,
 		documents:              append([]DocumentView(nil), opts.Documents...),
 		dumps:                  normalizeDumpViews(opts.Dumps),
 		quizzes:                normalizeQuizViews(opts.Quizzes),
@@ -605,6 +609,8 @@ func (m *Model) handleNavigationCommandKey(key string) (tea.Cmd, bool) {
 
 func (m *Model) handleBoardColumnNavigationKey(key string) bool {
 	switch key {
+	case "alt+a":
+		m.toggleBoardAttention()
 	case "left", "h":
 		m.selectPreviousBoardColumn()
 	case "right", "l":
@@ -934,12 +940,7 @@ func (m Model) renderTicketBoard() string {
 	var output strings.Builder
 
 	output.WriteString("Board\n")
-	output.WriteString(fmt.Sprintf(
-		"  Column: %s (%d/%d)\n",
-		chc.BoardColumnTitle(m.activeBoardColumn()),
-		m.activeBoardColumnPosition()+1,
-		len(chc.NormalBoardColumns),
-	))
+	output.WriteString(m.renderBoardHeaderColumnLine())
 	output.WriteString(fmt.Sprintf("  Tickets: %d", len(filteredTickets)))
 
 	if m.ticketFilter != "" {
@@ -972,6 +973,19 @@ func (m Model) renderTicketBoard() string {
 	return strings.TrimRight(output.String(), "\n")
 }
 
+func (m Model) renderBoardHeaderColumnLine() string {
+	if m.boardAttentionActive() {
+		return fmt.Sprintf("  Column: Attention (%d)\n", len(m.attentionTickets()))
+	}
+
+	return fmt.Sprintf(
+		"  Column: %s (%d/%d)\n",
+		chc.BoardColumnTitle(m.activeBoardColumn()),
+		m.activeBoardColumnPosition()+1,
+		len(chc.NormalBoardColumns),
+	)
+}
+
 func (m Model) renderTicketList() string {
 	filteredTickets := m.filteredTickets()
 	if len(filteredTickets) == 0 {
@@ -1001,6 +1015,17 @@ func (m Model) renderTicketList() string {
 }
 
 func renderTicketRow(ticket TicketView) string {
+	if len(ticket.AttentionReasons) > 0 {
+		return fmt.Sprintf(
+			"! %-7s %-11s %-9s %-9s %s",
+			ticket.Key,
+			ticket.Status,
+			ticket.Priority,
+			ticket.Type,
+			ticket.Title,
+		)
+	}
+
 	return fmt.Sprintf(
 		"%-7s %-11s %-9s %-9s %s",
 		ticket.Key,
@@ -1030,6 +1055,15 @@ func (m Model) renderSelectedTicketDetail() string {
 	output.WriteString(fmt.Sprintf("  Project Area: %s\n", ticket.ProjectArea))
 	output.WriteString(fmt.Sprintf("  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal))
 	output.WriteString(fmt.Sprintf("  Comments: %d\n", ticket.CommentCount))
+
+	if len(ticket.AttentionReasons) > 0 {
+		output.WriteString("  Attention:\n")
+
+		for _, reason := range ticket.AttentionReasons {
+			output.WriteString(fmt.Sprintf("    - %s\n", reason))
+		}
+	}
+
 	output.WriteString(fmt.Sprintf("  Path: %s", ticket.RelativePath))
 
 	return output.String()
@@ -1043,7 +1077,7 @@ func (m Model) renderKeys() string {
 
 	switch {
 	case m.SelectedView() == ViewBoard:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, left/right changes Board column, up/down selects ticket, / filters, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, left/right changes Board column, alt+a toggles attention, up/down selects ticket, / filters, q quits"
 	case m.ticketKeysActive():
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects ticket, / filters, q quits"
 	case m.documentKeysActive():
@@ -1191,7 +1225,11 @@ func (m Model) selectedTicketPosition(tickets []TicketView) int {
 func (m Model) filteredTickets() []TicketView {
 	tickets := m.tickets
 	if m.SelectedView() == ViewBoard {
-		tickets = m.activeBoardColumnTickets()
+		if m.boardAttentionActive() {
+			tickets = m.attentionTickets()
+		} else {
+			tickets = m.activeBoardColumnTickets()
+		}
 	}
 
 	if m.ticketFilter == "" {
@@ -1240,6 +1278,10 @@ func (m *Model) selectFirstFilteredTicket() {
 }
 
 func (m Model) activeBoardColumn() string {
+	if m.boardAttentionActive() {
+		return m.previousNormalBoardColumn()
+	}
+
 	if chc.IsNormalBoardTicketStatus(m.boardColumn) {
 		return m.boardColumn
 	}
@@ -1270,8 +1312,51 @@ func (m Model) activeBoardColumnTickets() []TicketView {
 	return tickets
 }
 
+func (m Model) attentionTickets() []TicketView {
+	tickets := []TicketView{}
+
+	for _, ticket := range m.tickets {
+		if len(ticket.AttentionReasons) > 0 {
+			tickets = append(tickets, ticket)
+		}
+	}
+
+	return tickets
+}
+
+func (m Model) boardAttentionActive() bool {
+	return m.SelectedView() == ViewBoard && m.boardColumn == boardAttentionColumn
+}
+
+func (m *Model) toggleBoardAttention() {
+	if !m.boardColumnNavigationActive() {
+		return
+	}
+
+	if m.boardAttentionActive() {
+		m.boardColumn = m.previousNormalBoardColumn()
+	} else {
+		m.previousBoardColumn = m.activeBoardColumn()
+		m.boardColumn = boardAttentionColumn
+	}
+
+	m.selectFirstFilteredTicket()
+}
+
+func (m Model) previousNormalBoardColumn() string {
+	if chc.IsNormalBoardTicketStatus(m.previousBoardColumn) {
+		return m.previousBoardColumn
+	}
+
+	return chc.TicketStatusBacklog
+}
+
 func (m *Model) selectPreviousBoardColumn() {
 	if !m.boardColumnNavigationActive() {
+		return
+	}
+
+	if m.boardAttentionActive() {
 		return
 	}
 
@@ -1287,6 +1372,10 @@ func (m *Model) selectPreviousBoardColumn() {
 
 func (m *Model) selectNextBoardColumn() {
 	if !m.boardColumnNavigationActive() {
+		return
+	}
+
+	if m.boardAttentionActive() {
 		return
 	}
 
@@ -1308,6 +1397,7 @@ func (m *Model) selectBoardColumn(column string) {
 	}
 
 	m.boardColumn = column
+	m.previousBoardColumn = column
 	m.selectFirstFilteredTicket()
 }
 
@@ -1334,20 +1424,21 @@ func lastRune(value string) string {
 }
 
 type TicketView struct {
-	Index          int
-	Key            string
-	Title          string
-	Status         string
-	Priority       string
-	Severity       string
-	Type           string
-	UseCase        string
-	ProjectArea    string
-	BoardColumn    string
-	RelativePath   string
-	ChecklistDone  int
-	ChecklistTotal int
-	CommentCount   int
+	Index            int
+	Key              string
+	Title            string
+	Status           string
+	Priority         string
+	Severity         string
+	Type             string
+	UseCase          string
+	ProjectArea      string
+	BoardColumn      string
+	AttentionReasons []string
+	RelativePath     string
+	ChecklistDone    int
+	ChecklistTotal   int
+	CommentCount     int
 }
 
 func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
@@ -1360,17 +1451,18 @@ func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 		}
 
 		view := TicketView{
-			Index:        index,
-			Key:          ticket.Key,
-			Title:        ticket.Title,
-			Status:       ticket.Status,
-			Priority:     ticket.Priority,
-			Severity:     ticket.Severity,
-			Type:         ticket.Type,
-			UseCase:      ticket.UseCase,
-			ProjectArea:  ticket.ProjectArea,
-			BoardColumn:  boardColumn,
-			RelativePath: ticket.RelativePath,
+			Index:            index,
+			Key:              ticket.Key,
+			Title:            ticket.Title,
+			Status:           ticket.Status,
+			Priority:         ticket.Priority,
+			Severity:         ticket.Severity,
+			Type:             ticket.Type,
+			UseCase:          ticket.UseCase,
+			ProjectArea:      ticket.ProjectArea,
+			BoardColumn:      boardColumn,
+			AttentionReasons: chc.BoardAttentionReasons(ticket),
+			RelativePath:     ticket.RelativePath,
 		}
 
 		view.ChecklistDone, view.ChecklistTotal, view.CommentCount = ticketMarkdownSummary(ticket.Path)

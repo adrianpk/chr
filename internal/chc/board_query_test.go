@@ -65,6 +65,19 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 		t.Fatalf("board counts = %#v, want one normal and one attention ticket", board)
 	}
 
+	if len(board.Attention) != 1 || board.Attention[0].Ticket.Key != "CHC-2" {
+		t.Fatalf("attention tickets = %#v, want CHC-2", board.Attention)
+	}
+
+	wantReasons := []string{
+		"status is blocked",
+		"status is outside normal Board columns: blocked",
+	}
+
+	if !slices.Equal(board.Attention[0].Reasons, wantReasons) {
+		t.Fatalf("attention reasons = %#v, want blocked status reasons", board.Attention[0].Reasons)
+	}
+
 	if got := indexedTicketKeys(board.Tickets); !slices.Equal(got, []string{"CHC-1", "CHC-2"}) {
 		t.Fatalf("board tickets = %#v, want normal tickets followed by attention tickets", got)
 	}

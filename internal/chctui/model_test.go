@@ -2232,6 +2232,46 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 	}
 }
 
+func TestModelTogglesBoardAttentionView(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: chc.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Blocked", Status: chc.TicketStatusBlockedLegacy},
+		},
+	})
+	model.selected = 6
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a"), Alt: true})
+	attention := requireUpdatedModel(t, updated)
+
+	if !attention.boardAttentionActive() {
+		t.Fatal("board attention view is not active")
+	}
+
+	view := attention.View()
+	for _, want := range []string{
+		"Column: Attention (1)",
+		"! CHC-2",
+		"Attention:",
+		"status is blocked",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	updated, _ = attention.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a"), Alt: true})
+	normal := requireUpdatedModel(t, updated)
+
+	if normal.boardAttentionActive() {
+		t.Fatal("board attention view is still active")
+	}
+
+	if normal.activeBoardColumn() != chc.TicketStatusBacklog {
+		t.Fatalf("board column = %q, want backlog", normal.activeBoardColumn())
+	}
+}
+
 func TestTicketFilterMatchesMetadata(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []chc.IndexedTicket{

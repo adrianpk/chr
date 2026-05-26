@@ -27,6 +27,7 @@ type BoardQueryOptions struct {
 type Board struct {
 	ProjectID       string
 	Columns         []BoardColumn
+	Attention       []BoardAttentionTicket
 	Tickets         []IndexedTicket
 	TotalCount      int
 	NormalCount     int
@@ -39,6 +40,11 @@ type BoardColumn struct {
 	Title   string
 	Count   int
 	Tickets []IndexedTicket
+}
+
+type BoardAttentionTicket struct {
+	Ticket  IndexedTicket
+	Reasons []string
 }
 
 func NewBoardQuery(index TicketIndex) BoardQuery {
@@ -64,16 +70,20 @@ func (q BoardQuery) ProjectBoard(ctx context.Context, opts BoardQueryOptions) (B
 
 func buildBoard(projectID string, tickets []IndexedTicket) Board {
 	columns := newBoardColumns()
-	attention := make([]IndexedTicket, 0)
+	attention := make([]BoardAttentionTicket, 0)
 
 	for _, ticket := range tickets {
-		columnID, ok := boardColumnForTicket(ticket)
-		if !ok {
-			attention = append(attention, ticket)
+		reasons := BoardAttentionReasons(ticket)
+		if len(reasons) > 0 {
+			attention = append(attention, BoardAttentionTicket{
+				Ticket:  ticket,
+				Reasons: reasons,
+			})
 
 			continue
 		}
 
+		columnID, _ := boardColumnForTicket(ticket)
 		columns[columnID] = append(columns[columnID], ticket)
 	}
 
@@ -100,11 +110,12 @@ func boardColumnForTicket(ticket IndexedTicket) (string, bool) {
 func boardFromColumns(
 	projectID string,
 	columns map[string][]IndexedTicket,
-	attention []IndexedTicket,
+	attention []BoardAttentionTicket,
 ) Board {
 	board := Board{
 		ProjectID:       projectID,
 		Columns:         make([]BoardColumn, 0, len(NormalBoardColumns)),
+		Attention:       sortedBoardAttentionTickets(attention),
 		Tickets:         make([]IndexedTicket, 0),
 		TotalCount:      len(attention),
 		AttentionCount:  len(attention),
@@ -124,14 +135,39 @@ func boardFromColumns(
 		board.NormalCount += len(tickets)
 	}
 
-	board.Tickets = append(board.Tickets, sortedBoardTickets(attention)...)
+	for _, attentionTicket := range board.Attention {
+		board.Tickets = append(board.Tickets, attentionTicket.Ticket)
+	}
 
 	return board
+}
+
+func BoardAttentionReasons(ticket IndexedTicket) []string {
+	reasons := []string{}
+
+	if ticket.Status == TicketStatusBlockedLegacy {
+		reasons = append(reasons, "status is blocked")
+	}
+
+	if _, ok := boardColumnForTicket(ticket); !ok {
+		reasons = append(reasons, "status is outside normal Board columns: "+ticket.Status)
+	}
+
+	return reasons
 }
 
 func sortedBoardTickets(tickets []IndexedTicket) []IndexedTicket {
 	sorted := append([]IndexedTicket(nil), tickets...)
 	slices.SortFunc(sorted, compareIndexedTicketsByKey)
+
+	return sorted
+}
+
+func sortedBoardAttentionTickets(tickets []BoardAttentionTicket) []BoardAttentionTicket {
+	sorted := append([]BoardAttentionTicket(nil), tickets...)
+	slices.SortFunc(sorted, func(left, right BoardAttentionTicket) int {
+		return compareIndexedTicketsByKey(left.Ticket, right.Ticket)
+	})
 
 	return sorted
 }
