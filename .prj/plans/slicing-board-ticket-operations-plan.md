@@ -104,16 +104,16 @@ The planned count is twelve slices.
 
 Slicing name: Board Ticket Operations
 
-Active slice number: Slice 3
+Active slice number: none
 
-Active slice short name: board sqlite schema
+Active slice short name: none
 
-Expected branch name: `feat/slice-3-board-sqlite-schema`
+Expected branch name: none
 
-Expected PR title: `feat(slice-3): board sqlite schema`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/board-ticket-operations/slice-3-board-sqlite-schema.md`
+none
 
 Prerequisite PRs or delivered work:
 

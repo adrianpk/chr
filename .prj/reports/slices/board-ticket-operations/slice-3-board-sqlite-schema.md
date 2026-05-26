@@ -1,6 +1,6 @@
 # Slice 3: Board SQLite Schema
 
-Status: reviewing
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
