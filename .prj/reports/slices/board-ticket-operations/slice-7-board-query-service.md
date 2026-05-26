@@ -1,11 +1,11 @@
 # Slice 7: Board Query Service
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-7-board-query-service`
-PR: pending
+PR: #219
 
 ## Purpose
 
