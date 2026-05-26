@@ -32,28 +32,28 @@ Status values:
 | Layout | Resize panes | mouse drag | none | `internal/chctui.Model.applyLayoutDrag` | `intentionally_interactive` | TUI-only layout state. |
 | Shell | Quit TUI | `q`, `ctrl+c`, `F10` | process exit | Bubble Tea quit | `intentionally_interactive` | Terminal lifecycle. |
 | Palette | Open command palette | `:` | none | `internal/chctui.CommandPaletteState` | `intentionally_interactive` | TUI-only command launcher. |
-| Project | Edit project metadata field | `F1`, field selection, `enter` or `e` | none | `internal/chctui.ProjectEditState` | `missing_cli` | CLI lacks direct project metadata set command. |
-| Project | Save project metadata | `F1`, `s` or `ctrl+s` | none | `service.SaveProjectMetadata` through `tuiProjectMetadataExecutor` | `missing_cli` | Service exists; CLI entrypoint missing. |
+| Project | Edit project metadata field | `F1`, field selection, `enter` or `e` | `chc metadata project set --name ... --description ... --context ...` | `internal/chctui.ProjectEditState`, `service.SaveProjectMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
+| Project | Save project metadata | `F1`, `s` or `ctrl+s` | `chc metadata project set ...` | `service.SaveProjectMetadata` through `tuiProjectMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
 | Project | Refresh workspace state | `F1`, `r` | `chc index rebuild`, `chc index status` partially | `service.RefreshWorkspace` through `tuiWorkspaceRefreshExecutor` | `missing_cli` | CLI index commands cover ticket index, not full workspace graph refresh. |
 | Cases | Select/filter use cases | `F2`, arrows, `/` | none | `internal/chctui` filter state | `intentionally_interactive` | List navigation/filtering is TUI-only. |
-| Cases | Create use case entry | `F2`, `n` | none | `internal/chctui.Model.newCase`, saved by `service.SaveCaseMetadata` | `missing_cli` | CLI lacks case metadata create command. |
-| Cases | Edit use-case metadata field | `F2`, `enter` or `e` | none | `internal/chctui.ProjectEditState` | `missing_cli` | CLI lacks case metadata set command. |
-| Cases | Save selected use case | `F2`, `s` or `ctrl+s` | none | `service.SaveCaseMetadata` through `tuiCaseMetadataExecutor` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Dumps | Create dump | `F3`, `c`, confirm | none | `service.CreateDump` through `tuiDumpActionExecutor` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Dumps | Edit dump in TUI editor | `F3`, `enter`, `ctrl+s` | none | `service.ReadDump`, `service.SaveDump` | `missing_cli` | CLI lacks read/save dump operations. |
-| Dumps | Open dump in external editor | `F3`, `alt+e` | none | `service.OpenDump` | `missing_cli` | CLI lacks external edit command. |
-| Dumps | Refresh dump list | `F3`, `r` | none | `service.ListDumps` | `missing_cli` | CLI lacks dump list/refresh command. |
-| Quizzes | Start selected quiz | `F4`, `s` | none | `service.StartQuiz` through `tuiQuizActionExecutor` | `missing_cli` | Runtime quiz lifecycle service exists; CLI lacks command. |
-| Quizzes | Answer active question | `F4`, `enter`, answer editor, `enter` | none | `service.AnswerQuiz` | `missing_cli` | CLI lacks runtime quiz answer command. |
-| Quizzes | Skip active question | answer editor `alt+s` | none | `service.SkipQuiz` | `missing_cli` | CLI lacks runtime quiz skip command. |
-| Quizzes | Complete selected quiz | answer editor `alt+d` | none | `service.CompleteQuiz` | `missing_cli` | CLI lacks runtime quiz complete command. |
-| Quizzes | Refresh quizzes | `F4`, `r` | none | `service.ListQuizzes` | `missing_cli` | CLI lacks runtime quiz list/status command. |
-| Specs | Generate spec | `F5`, `g` | none | `service.GenerateSpec` through `tuiSpecActionExecutor` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Specs | Refresh specs | `F5`, `r` | none | `service.ListSpecs` | `missing_cli` | CLI lacks spec list/show command. |
-| Plans | Generate missing plan | `F6`, `g` | none | `service.GeneratePlan` through `tuiPlanActionExecutor` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Plans | Regenerate plan | `F6`, `G`, confirm | none | `service.RegeneratePlan` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Plans | Create plan tracking and tickets | `F6`, `alt+t`, confirm | none | `service.MaterializePlanTracking` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Plans | Refresh plans | `F6`, `r` | none | `service.ListPlans` | `missing_cli` | CLI lacks plan list/show command. |
+| Cases | Create use case entry | `F2`, `n` | `chc metadata case set <slug> --name ... --description ... --context ...` | `internal/chctui.Model.newCase`, saved by `service.SaveCaseMetadata` | `matched` | CLI creates by slug and metadata flags. |
+| Cases | Edit use-case metadata field | `F2`, `enter` or `e` | `chc metadata case set <slug> ...` | `internal/chctui.ProjectEditState`, `service.SaveCaseMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
+| Cases | Save selected use case | `F2`, `s` or `ctrl+s` | `chc metadata case set <slug> ...` | `service.SaveCaseMetadata` through `tuiCaseMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
+| Dumps | Create dump | `F3`, `c`, confirm | `chc dump new --title ... --content ... [--use-case ...]` | `service.CreateDump` through `tuiDumpActionExecutor` and CLI command | `matched` | Same dump creation service. |
+| Dumps | Edit dump in TUI editor | `F3`, `enter`, `ctrl+s` | `chc dump show <path>`, `chc dump save <path> --content ...`, `chc dump append <path> --content ...` | `service.ReadDump`, `service.SaveDump`, `service.AppendDump` | `matched` | CLI is non-interactive and path-based. |
+| Dumps | Open dump in external editor | `F3`, `alt+e` | `chc dump open <path>` | `service.OpenDump` | `matched` | CLI prints the resolved editor command. |
+| Dumps | Refresh dump list | `F3`, `r` | `chc dump list` | `service.ListDumps` | `matched` | Same dump list service. |
+| Quizzes | Start selected quiz | `F4`, `s` | `chc quiz start [--use-case ...] [--mode deep|fast]` | `service.StartQuiz` through `tuiQuizActionExecutor` and CLI command | `matched` | Same runtime quiz service. |
+| Quizzes | Answer active question | `F4`, `enter`, answer editor, `enter` | `chc quiz answer --answer ... [--use-case ...]` | `service.AnswerQuiz` | `matched` | Same runtime quiz service. |
+| Quizzes | Skip active question | answer editor `alt+s` | `chc quiz skip [--use-case ...]` | `service.SkipQuiz` | `matched` | Same runtime quiz service. |
+| Quizzes | Complete selected quiz | answer editor `alt+d` | `chc quiz complete [--use-case ...]` | `service.CompleteQuiz` | `matched` | Same runtime quiz service. |
+| Quizzes | Refresh quizzes | `F4`, `r` | `chc quiz list` | `service.ListQuizzes` | `matched` | Same runtime quiz list service. |
+| Specs | Generate spec | `F5`, `g` | `chc spec generate [--use-case ...]` | `service.GenerateSpec` through `tuiSpecActionExecutor` and CLI command | `matched` | Same spec generation service. |
+| Specs | Refresh specs | `F5`, `r` | `chc spec list` | `service.ListSpecs` | `matched` | Same spec list service. |
+| Plans | Generate missing plan | `F6`, `g` | `chc plan generate [--use-case ...]` | `service.GeneratePlan` through `tuiPlanActionExecutor` and CLI command | `matched` | Same plan generation service. |
+| Plans | Regenerate plan | `F6`, `G`, confirm | `chc plan regenerate [--use-case ...]` | `service.RegeneratePlan` | `matched` | Same plan regeneration service. |
+| Plans | Create plan tracking and tickets | `F6`, `alt+t`, confirm | `chc plan tracking create [--use-case ...]` | `service.MaterializePlanTracking` | `matched` | Same plan tracking materialization service. |
+| Plans | Refresh plans | `F6`, `r` | `chc plan list` | `service.ListPlans` | `matched` | Same plan list service. |
 | Board | Select/filter tickets | `F7`, arrows, `/` | `chc ticket list` filters | `internal/chctui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
 
 ## Command Palette Commands
@@ -64,24 +64,24 @@ Status values:
 | Help | `help` | Navigate to Help view. | `chc --help` | `internal/chctui.Model.selectView`, CLI help | `matched` | Equivalent intent, different presentation. |
 | Selection | `open-source` | Show selected source path. | none | `internal/chctui.Model.selectedSourcePath` | `missing_cli` | CLI has path outputs in list/show commands, but no selected-source concept. |
 | Ticket | `create-ticket` | Create default task ticket. | `chc ticket new <title>` | `service.CreateTicket`; TUI also wraps defaults with `service.CreateDefaultTicket` | `matched` | CLI supports full metadata; TUI uses default metadata through the same ticket creation service. |
-| Dump | `create-dump` | Create selected project/use-case dump. | none | `service.CreateDump` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Dump | `edit-dump` | Open selected dump in TUI editor. | none | `service.ReadDump`, `service.SaveDump` | `missing_cli` | Service exists; CLI entrypoint missing. |
-| Dump | `refresh-dumps` | Reload dump views. | none | `service.ListDumps` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-start` | Start selected runtime quiz. | none | `service.StartQuiz` | `missing_cli` | Different from authoring quiz generation. |
-| Quiz | `quiz-resume` | Resume selected runtime quiz. | none | `service.ResumeQuiz` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-answer` | Answer active runtime quiz question. | none | `service.AnswerQuiz` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-skip` | Skip active runtime quiz question. | none | `service.SkipQuiz` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-complete` | Complete selected runtime quiz. | none | `service.CompleteQuiz` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-cancel` | Cancel selected runtime quiz. | none | `service.CancelQuiz` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-refresh` | Reload runtime quiz state. | none | `service.ListQuizzes` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-mode-deep` | Switch selected runtime quiz to deep mode. | none | `service.SwitchQuizMode` | `missing_cli` | CLI entrypoint missing. |
-| Quiz | `quiz-mode-fast` | Switch selected runtime quiz to fast mode. | none | `service.SwitchQuizMode` | `missing_cli` | CLI entrypoint missing. |
-| Spec | `generate-spec` | Generate selected spec. | none | `service.GenerateSpec` | `missing_cli` | Command is gated to Specs view. |
-| Spec | `refresh-specs` | Reload spec views. | none | `service.ListSpecs` | `missing_cli` | Command is gated to Specs view. |
-| Plan | `generate-plan` | Generate missing selected plan. | none | `service.GeneratePlan` | `missing_cli` | Command is gated to Plans view. |
-| Plan | `regenerate-plan` | Regenerate selected plan. | none | `service.RegeneratePlan` | `missing_cli` | Command is gated to Plans view. |
-| Plan | `materialize-plan-tracking` | Create plan tracking and tickets. | none | `service.MaterializePlanTracking` | `missing_cli` | Command is gated to Plans and only available for existing plans. |
-| Plan | `refresh-plans` | Reload plan views. | none | `service.ListPlans` | `missing_cli` | Command is gated to Plans view. |
+| Dump | `create-dump` | Create selected project/use-case dump. | `chc dump new ...` | `service.CreateDump` | `matched` | Same service path. |
+| Dump | `edit-dump` | Open selected dump in TUI editor. | `chc dump show`, `chc dump save`, `chc dump append` | `service.ReadDump`, `service.SaveDump`, `service.AppendDump` | `matched` | CLI is non-interactive and path-based. |
+| Dump | `refresh-dumps` | Reload dump views. | `chc dump list` | `service.ListDumps` | `matched` | Same service path. |
+| Quiz | `quiz-start` | Start selected runtime quiz. | `chc quiz start ...` | `service.StartQuiz` | `matched` | Different from authoring quiz generation. |
+| Quiz | `quiz-resume` | Resume selected runtime quiz. | `chc quiz resume ...` | `service.ResumeQuiz` | `matched` | Same service path. |
+| Quiz | `quiz-answer` | Answer active runtime quiz question. | `chc quiz answer ...` | `service.AnswerQuiz` | `matched` | Same service path. |
+| Quiz | `quiz-skip` | Skip active runtime quiz question. | `chc quiz skip ...` | `service.SkipQuiz` | `matched` | Same service path. |
+| Quiz | `quiz-complete` | Complete selected runtime quiz. | `chc quiz complete ...` | `service.CompleteQuiz` | `matched` | Same service path. |
+| Quiz | `quiz-cancel` | Cancel selected runtime quiz. | `chc quiz cancel ...` | `service.CancelQuiz` | `matched` | Same service path. |
+| Quiz | `quiz-refresh` | Reload runtime quiz state. | `chc quiz list` | `service.ListQuizzes` | `matched` | Same service path. |
+| Quiz | `quiz-mode-deep` | Switch selected runtime quiz to deep mode. | `chc quiz mode deep ...` | `service.SwitchQuizMode` | `matched` | Same service path. |
+| Quiz | `quiz-mode-fast` | Switch selected runtime quiz to fast mode. | `chc quiz mode fast ...` | `service.SwitchQuizMode` | `matched` | Same service path. |
+| Spec | `generate-spec` | Generate selected spec. | `chc spec generate ...` | `service.GenerateSpec` | `matched` | Command is gated to Specs view. |
+| Spec | `refresh-specs` | Reload spec views. | `chc spec list` | `service.ListSpecs` | `matched` | Command is gated to Specs view. |
+| Plan | `generate-plan` | Generate missing selected plan. | `chc plan generate ...` | `service.GeneratePlan` | `matched` | Command is gated to Plans view. |
+| Plan | `regenerate-plan` | Regenerate selected plan. | `chc plan regenerate ...` | `service.RegeneratePlan` | `matched` | Command is gated to Plans view. |
+| Plan | `materialize-plan-tracking` | Create plan tracking and tickets. | `chc plan tracking create ...` | `service.MaterializePlanTracking` | `matched` | Command is gated to Plans and only available for existing plans. |
+| Plan | `refresh-plans` | Reload plan views. | `chc plan list` | `service.ListPlans` | `matched` | Command is gated to Plans view. |
 | Authoring | `create-authoring-session` | Create TUI default authoring session. | `chc author session new ...` | `service.CreateAuthoringSession`; TUI wraps default session metadata with `service.CreateTUIAuthoringSession` | `matched` | CLI is configurable; TUI creates a default spec-oriented session through the same service. |
 | Authoring | `create-context-quiz` | Validate context-aware quiz creation availability. | `chc author quiz new ...` | TUI returns unavailable; CLI `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware quiz generation; TUI action is not implemented. |
 | Ticket | `ticket-add-comment` | Add default selected-ticket comment. | `chc ticket comment <key> <body>` | `service.AddTicketComment`; TUI wraps default body with `service.AddSelectedTicketComment` | `matched` | CLI supports arbitrary body; TUI supplies the standard body through the same service. |
@@ -110,6 +110,8 @@ Command availability gates:
 | Workspace | `chc init` | none | `chc.Workspace.Init` | `missing_tui` | Workspace bootstrap is CLI-only. |
 | Runtime | `chc runtime init` | none | `chc.Workspace.InitRuntime` through runtime command | `missing_tui` | Runtime asset installation is CLI-only. |
 | Runtime | `chc runtime validate` | Dash displays runtime evidence only | `runRuntimeValidate` | `missing_tui` | TUI does not run runtime validation directly. |
+| Project Metadata | `chc metadata project set` | Project metadata save | `service.SaveProjectMetadata` | `matched` | CLI edits by flag; TUI edits interactively. |
+| Use-Case Metadata | `chc metadata case set` | Cases metadata save | `service.SaveCaseMetadata` | `matched` | CLI creates or updates by slug. |
 | Project Registry | `chc project add` | none | `runProjectAdd`, user registry | `missing_tui` | Registry management is CLI-only. |
 | Project Registry | `chc project list` | none | `runProjectList`, user registry | `missing_tui` | Registry management is CLI-only. |
 | Project Registry | `chc project current` | current project topbar | `runProjectCurrent`, user registry | `matched` | TUI shows resolved project, CLI prints active project. |
@@ -119,6 +121,26 @@ Command availability gates:
 | Tickets | `chc ticket show` | Board selected ticket detail | `runTicketShow`, ticket index | `matched` | Equivalent inspection surface. |
 | Tickets | `chc ticket comment` | Palette `ticket-add-comment` partially | `service.AddTicketComment`; TUI wraps default body with `service.AddSelectedTicketComment` | `matched` | CLI body is user-supplied; TUI body is fixed. |
 | Tickets | `chc ticket status` | Palette ticket status commands | `service.MoveTicketStatus`; TUI wraps selected ticket with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
+| Dumps | `chc dump list` | Dumps refresh | `service.ListDumps` | `matched` | Same service path. |
+| Dumps | `chc dump new` | Dumps create | `service.CreateDump` | `matched` | CLI creates project-wide or use-case scoped dumps. |
+| Dumps | `chc dump show` | Dumps editor load | `service.ReadDump` | `matched` | CLI prints content for a path. |
+| Dumps | `chc dump save` | Dumps editor save | `service.SaveDump` | `matched` | CLI replaces content for a path. |
+| Dumps | `chc dump append` | Dump append action | `service.AppendDump` | `matched` | CLI appends content for a path. |
+| Dumps | `chc dump open` | Dumps external editor | `service.OpenDump` | `matched` | CLI prints the resolved editor command. |
+| Runtime Quizzes | `chc quiz list` | Quizzes refresh | `service.ListQuizzes` | `matched` | Same service path. |
+| Runtime Quizzes | `chc quiz start` | Quizzes start | `service.StartQuiz` | `matched` | Same service path. |
+| Runtime Quizzes | `chc quiz resume` | Quizzes resume | `service.ResumeQuiz` | `matched` | Same service path. |
+| Runtime Quizzes | `chc quiz answer` | Quizzes answer | `service.AnswerQuiz` | `matched` | Same service path. |
+| Runtime Quizzes | `chc quiz skip` | Quizzes skip | `service.SkipQuiz` | `matched` | Same service path. |
+| Runtime Quizzes | `chc quiz complete` | Quizzes complete | `service.CompleteQuiz` | `matched` | Same service path. |
+| Runtime Quizzes | `chc quiz cancel` | Quizzes cancel | `service.CancelQuiz` | `matched` | Same service path. |
+| Runtime Quizzes | `chc quiz mode` | Quizzes mode switch | `service.SwitchQuizMode` | `matched` | Same service path. |
+| Specs | `chc spec list` | Specs refresh | `service.ListSpecs` | `matched` | Same service path. |
+| Specs | `chc spec generate` | Specs generate | `service.GenerateSpec` | `matched` | Same service path. |
+| Plans | `chc plan list` | Plans refresh | `service.ListPlans` | `matched` | Same service path. |
+| Plans | `chc plan generate` | Plans generate | `service.GeneratePlan` | `matched` | Same service path. |
+| Plans | `chc plan regenerate` | Plans regenerate | `service.RegeneratePlan` | `matched` | Same service path. |
+| Plans | `chc plan tracking create` | Plan tracking materialization | `service.MaterializePlanTracking` | `matched` | Same service path. |
 | Work | `chc ticket start` | Palette `work-start-ticket` | shared `buildTicketStartPreflightForTicket` and `runTicketStartExecution` | `matched` | Shared core execution path. |
 | Work | `chc ticket loop` | Palette `work-start-ready-loop` partially | shared `runTicketLoopExecution` | `matched` | CLI is configurable; TUI runs one ready-ticket iteration. |
 | Work | `chc ticket apply-result` | none | `runTicketApplyResult` | `missing_tui` | Result application is CLI-only. |
@@ -158,12 +180,12 @@ Command availability gates:
 | Service area | TUI path | CLI path | Status | Notes |
 | --- | --- | --- | --- | --- |
 | Workspace graph refresh | `tuiWorkspaceRefreshExecutor.RefreshWorkspace` -> `service.RefreshWorkspace` | no equivalent | `missing_cli` | CLI index commands do not refresh the complete workspace graph/read model. |
-| Project metadata | `tuiProjectMetadataExecutor.SaveProjectMetadata` -> `service.SaveProjectMetadata` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
-| Use-case metadata | `tuiCaseMetadataExecutor.SaveCaseMetadata` -> `service.SaveCaseMetadata` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
-| Dump operations | `tuiDumpActionExecutor` -> `service.ListDumps`, `CreateDump`, `AppendDump`, `ReadDump`, `SaveDump`, `OpenDump` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
-| Runtime quiz operations | `tuiQuizActionExecutor` -> `service.ListQuizzes`, `StartQuiz`, `ResumeQuiz`, `AnswerQuiz`, `SkipQuiz`, `CompleteQuiz`, `CancelQuiz`, `SwitchQuizMode` | no equivalent | `missing_cli` | Different from `chc author quiz new`; this is the TUI runtime quiz loop. |
-| Spec operations | `tuiSpecActionExecutor` -> `service.ListSpecs`, `GenerateSpec` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
-| Plan operations | `tuiPlanActionExecutor` -> `service.ListPlans`, `GeneratePlan`, `RegeneratePlan`, `MaterializePlanTracking` | no equivalent | `missing_cli` | Service is ready for CLI exposure. |
+| Project metadata | `tuiProjectMetadataExecutor.SaveProjectMetadata` -> `service.SaveProjectMetadata` | `chc metadata project set` -> `service.SaveProjectMetadata` | `matched` | CLI edits by flag; TUI edits interactively. |
+| Use-case metadata | `tuiCaseMetadataExecutor.SaveCaseMetadata` -> `service.SaveCaseMetadata` | `chc metadata case set` -> `service.SaveCaseMetadata` | `matched` | CLI creates or updates by slug. |
+| Dump operations | `tuiDumpActionExecutor` -> `service.ListDumps`, `CreateDump`, `AppendDump`, `ReadDump`, `SaveDump`, `OpenDump` | `chc dump *` -> same service methods | `matched` | CLI is path-based and non-interactive. |
+| Runtime quiz operations | `tuiQuizActionExecutor` -> `service.ListQuizzes`, `StartQuiz`, `ResumeQuiz`, `AnswerQuiz`, `SkipQuiz`, `CompleteQuiz`, `CancelQuiz`, `SwitchQuizMode` | `chc quiz *` -> same service methods | `matched` | Different from `chc author quiz new`; this is the runtime quiz loop. |
+| Spec operations | `tuiSpecActionExecutor` -> `service.ListSpecs`, `GenerateSpec` | `chc spec list`, `chc spec generate` -> same service methods | `matched` | Same service path. |
+| Plan operations | `tuiPlanActionExecutor` -> `service.ListPlans`, `GeneratePlan`, `RegeneratePlan`, `MaterializePlanTracking` | `chc plan *` -> same service methods | `matched` | Same service path. |
 | Ticket creation | `tuiArtifactActionExecutor` -> `service.CreateDefaultTicket` -> `service.CreateTicket` | `runTicketNew` -> `service.CreateTicket` | `matched` | CLI behavior is richer; both use the same ticket creation service. |
 | Ticket comment | `tuiTicketActionExecutor` -> `service.AddSelectedTicketComment` -> `service.AddTicketComment` | `runTicketComment` -> `service.AddTicketComment` | `matched` | CLI body is user-supplied; TUI supplies a default body. |
 | Ticket status | `tuiTicketActionExecutor` -> `service.MoveSelectedTicketStatus` -> `service.MoveTicketStatus` | `runTicketStatus` -> `service.MoveTicketStatus` | `matched` | Same status service. |
@@ -180,12 +202,8 @@ Command availability gates:
 
 High-priority `missing_cli` gaps:
 
-- Project metadata save.
-- Use-case metadata create/save.
-- Dump list/create/read/save/open.
-- Runtime quiz list/start/resume/answer/skip/complete/cancel/mode.
-- Spec list/generate.
-- Plan list/generate/regenerate/tracking.
+- Workspace graph refresh remains only partially covered by `chc index rebuild`
+  and `chc index status`.
 
 High-priority `service_divergence` gaps:
 
