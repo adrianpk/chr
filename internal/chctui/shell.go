@@ -523,6 +523,10 @@ func (m Model) renderTicketWorkspace(width, height int) string {
 
 	switch m.maximizedPane {
 	case 0:
+		if m.SelectedView() == ViewBoard {
+			return m.renderMaximizedBoardWorkspace(width, height)
+		}
+
 		return fitBlock(renderPanel("Tickets", list, width, height, true), width, height)
 	case 1:
 		return fitBlock(renderPanel("Detail", strings.Split(detail, "\n")[1:], width, height, true), width, height)
@@ -718,6 +722,121 @@ func (m Model) renderTicketFocusList(limit int) []string {
 	tickets := m.filteredTickets()
 	if len(tickets) == 0 {
 		return []string{"No tickets match."}
+	}
+
+	lines := []string{shellMutedStyle.Render("Key     Status       Priority  Title")}
+
+	for _, ticket := range tickets {
+		prefix := " "
+		if ticket.Index == m.selectedTicket {
+			prefix = ">"
+		}
+
+		lines = append(lines, fmt.Sprintf("%s %-7s %-12s %-9s %s", prefix, ticket.Key, ticket.Status, ticket.Priority, ticket.Title))
+		if len(lines) >= limit {
+			break
+		}
+	}
+
+	return lines
+}
+
+func (m Model) renderMaximizedBoardWorkspace(width, height int) string {
+	if m.boardAttentionActive() {
+		return fitBlock(renderPanel("Attention", m.renderBoardAttentionFocusList(height-2), width, height, true), width, height)
+	}
+
+	columnsPerRow := boardMaximizedColumnsPerRow(width)
+	rows := boardMaximizedRows(len(chc.NormalBoardColumns), columnsPerRow)
+	rowHeight := maxInt(height/rows, 1)
+	renderedRows := make([]string, 0, rows)
+
+	for row := range rows {
+		start := row * columnsPerRow
+
+		end := minInt(start+columnsPerRow, len(chc.NormalBoardColumns))
+		if start >= end {
+			break
+		}
+
+		renderedRows = append(renderedRows, m.renderMaximizedBoardRow(
+			chc.NormalBoardColumns[start:end],
+			width,
+			rowHeight,
+		))
+	}
+
+	return fitBlock(lipgloss.JoinVertical(lipgloss.Left, renderedRows...), width, height)
+}
+
+func (m Model) renderMaximizedBoardRow(columns []string, width, height int) string {
+	gapWidth := panelVerticalGapSize * maxInt(len(columns)-1, 0)
+	columnWidth := maxInt((width-gapWidth)/maxInt(len(columns), 1), 1)
+	panels := make([]string, 0, len(columns)*2-1)
+
+	for index, column := range columns {
+		if index > 0 {
+			panels = append(panels, panelVerticalGap(height))
+		}
+
+		tickets := m.ticketsForBoardColumn(column)
+		lines := m.renderMaximizedBoardColumnLines(tickets, maxInt(columnWidth-4, 1), height-2)
+		title := fmt.Sprintf("%s (%d)", chc.BoardColumnTitle(column), len(tickets))
+
+		panels = append(panels, renderPanel(title, lines, columnWidth, height, m.activeBoardColumn() == column))
+	}
+
+	return lipgloss.JoinHorizontal(lipgloss.Top, panels...)
+}
+
+func (m Model) renderMaximizedBoardColumnLines(tickets []TicketView, width, limit int) []string {
+	if len(tickets) == 0 {
+		return []string{"No tickets."}
+	}
+
+	lines := make([]string, 0, minInt(len(tickets), maxInt(limit, 1)))
+
+	for _, ticket := range tickets {
+		prefix := " "
+		if ticket.Index == m.selectedTicket {
+			prefix = ">"
+		}
+
+		line := fmt.Sprintf("%s%s %s", prefix, ticket.Key, ticket.Title)
+		if len(ticket.AttentionReasons) > 0 {
+			line = fmt.Sprintf("!%s %s", ticket.Key, ticket.Title)
+		}
+
+		lines = append(lines, fitPlainLine(line, width))
+		if len(lines) >= limit {
+			break
+		}
+	}
+
+	return lines
+}
+
+func boardMaximizedColumnsPerRow(width int) int {
+	switch {
+	case width >= 132:
+		return 6
+	case width >= 90:
+		return 3
+	case width >= 64:
+		return 2
+	default:
+		return 1
+	}
+}
+
+func boardMaximizedRows(columnCount, columnsPerRow int) int {
+	return maxInt((columnCount+columnsPerRow-1)/columnsPerRow, 1)
+}
+
+func (m Model) renderBoardAttentionFocusList(limit int) []string {
+	tickets := m.attentionTickets()
+	if len(tickets) == 0 {
+		return []string{"No attention tickets."}
 	}
 
 	lines := []string{shellMutedStyle.Render("Key     Status       Priority  Title")}

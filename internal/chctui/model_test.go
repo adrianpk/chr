@@ -2297,6 +2297,90 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 	}
 }
 
+func TestModelRendersMaximizedBoardColumns(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "Backlog ticket", Status: chc.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Ready ticket", Status: chc.TicketStatusReadyForDev},
+			{Key: "CHC-3", Title: "Progress ticket", Status: chc.TicketStatusInProgress},
+			{Key: "CHC-4", Title: "Review ticket", Status: chc.TicketStatusReadyForReview},
+			{Key: "CHC-5", Title: "Merge ticket", Status: chc.TicketStatusReadyForMerge},
+			{Key: "CHC-6", Title: "Done ticket", Status: chc.TicketStatusDone},
+		},
+	})
+	model.selected = 6
+
+	updated, _ := model.Update(tea.WindowSizeMsg{Width: 120, Height: 24})
+	resized := requireUpdatedModel(t, updated)
+
+	updated, _ = resized.Update(tea.KeyMsg{Type: tea.KeyRight})
+	readyColumn := requireUpdatedModel(t, updated)
+
+	updated, _ = readyColumn.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("m"), Alt: true})
+	maximized := requireUpdatedModel(t, updated)
+	view := maximized.View()
+
+	for _, want := range []string{
+		"Backlog (1)",
+		"Ready For Dev (1)",
+		"In Progress (1)",
+		"Ready For Review (1)",
+		"Ready For Merge (1)",
+		"Done (1)",
+		">CHC-2 Ready ticket",
+		" CHC-6 Done ticket",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	updated, _ = maximized.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("m"), Alt: true})
+	restored := requireUpdatedModel(t, updated)
+
+	if restored.selectedTicket != 1 {
+		t.Fatalf("selectedTicket = %d, want 1", restored.selectedTicket)
+	}
+
+	if restored.activeBoardColumn() != chc.TicketStatusReadyForDev {
+		t.Fatalf("activeBoardColumn = %q, want ready_for_dev", restored.activeBoardColumn())
+	}
+}
+
+func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "Normal ticket", Status: chc.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Blocked ticket", Status: chc.TicketStatusBlockedLegacy},
+		},
+	})
+	model.selected = 6
+
+	updated, _ := model.Update(tea.WindowSizeMsg{Width: 100, Height: 20})
+	resized := requireUpdatedModel(t, updated)
+
+	updated, _ = resized.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a"), Alt: true})
+	attention := requireUpdatedModel(t, updated)
+
+	updated, _ = attention.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("m"), Alt: true})
+	maximized := requireUpdatedModel(t, updated)
+	view := maximized.View()
+
+	for _, want := range []string{
+		"Attention",
+		"CHC-2",
+		"Blocked ticket",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	if strings.Contains(view, "Backlog (") {
+		t.Fatalf("maximized attention view rendered normal Board columns:\n%s", view)
+	}
+}
+
 func TestTicketFilterMatchesMetadata(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []chc.IndexedTicket{

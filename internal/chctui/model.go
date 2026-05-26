@@ -1339,7 +1339,10 @@ func (m Model) activeBoardColumnPosition() int {
 }
 
 func (m Model) activeBoardColumnTickets() []TicketView {
-	column := m.activeBoardColumn()
+	return m.ticketsForBoardColumn(m.activeBoardColumn())
+}
+
+func (m Model) ticketsForBoardColumn(column string) []TicketView {
 	tickets := []TicketView{}
 
 	for _, ticket := range m.tickets {
