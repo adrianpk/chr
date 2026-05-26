@@ -32,8 +32,8 @@ Prerequisite PRs or delivered work:
 - [x] Define complete ordered slice map.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 - [ ] Decide whether post-slice tuning is needed.
