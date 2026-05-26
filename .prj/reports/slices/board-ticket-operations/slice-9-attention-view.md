@@ -1,11 +1,11 @@
 # Slice 9: Attention View
 
-Status: in review
+Status: delivered
 Slicing: Board Ticket Operations
 Plan: `.prj/plans/slicing-board-ticket-operations-plan.md`
 Tracker: `.prj/trackers/slicing-board-ticket-operations-tracker.md`
 Branch: `feat/slice-9-attention-view`
-PR: pending
+PR: #221
 
 ## Purpose
 
