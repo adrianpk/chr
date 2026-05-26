@@ -12,6 +12,9 @@ to the workspace.
 See [CLI TUI action matrix](cli-tui-action-matrix.md) for current parity
 between TUI actions and command-line operations.
 
+Most TUI write actions have equivalent CLI commands. Use the CLI for scripted
+operation and the TUI for interactive inspection, editing, and confirmation.
+
 ## Views
 
 | Key | View | Purpose |
@@ -89,6 +92,12 @@ are implemented.
 
 Refresh is blocked while project edits are active or unsaved.
 
+CLI equivalent:
+
+```sh
+chc metadata project set --name "Project" --description "Description" --context "Context"
+```
+
 ## Cases View
 
 | Key | Behavior |
@@ -107,6 +116,12 @@ Refresh is blocked while project edits are active or unsaved.
 
 Refresh is blocked while use-case edits are active or unsaved.
 
+CLI equivalent:
+
+```sh
+chc metadata case set billing --name "Billing" --description "Description" --context "Context"
+```
+
 ## Dumps View
 
 | Key | Behavior |
@@ -118,6 +133,17 @@ Refresh is blocked while use-case edits are active or unsaved.
 | `r` | Refresh dumps from disk. |
 | `ctrl+s` while editing | Save the TUI editor content. |
 | `esc` while editing | Cancel TUI editing. |
+
+CLI equivalents:
+
+```sh
+chc dump list
+chc dump new --title "Notes" --content "Context." --use-case billing
+chc dump show .chc/dumps/notes.md
+chc dump save .chc/dumps/notes.md --content "# Notes"
+chc dump append .chc/dumps/notes.md --content "More context."
+chc dump open .chc/dumps/notes.md
+```
 
 ## Quizzes View
 
@@ -138,6 +164,19 @@ Answer entry:
 | `alt+d` | Mark the quiz done. |
 | `esc` | Cancel answer entry. |
 
+CLI equivalents:
+
+```sh
+chc quiz list
+chc quiz start --use-case billing --mode deep
+chc quiz resume --use-case billing
+chc quiz answer --use-case billing --answer "Answer text."
+chc quiz skip --use-case billing
+chc quiz complete --use-case billing
+chc quiz cancel --use-case billing
+chc quiz mode fast --use-case billing
+```
+
 ## Specs View
 
 | Key | Behavior |
@@ -148,6 +187,13 @@ Answer entry:
 
 Spec generation uses project context, use-case context, dumps, quizzes, and
 related workspace documents.
+
+CLI equivalents:
+
+```sh
+chc spec list
+chc spec generate --use-case billing
+```
 
 ## Plans View
 
@@ -163,6 +209,15 @@ Plan generation is guarded against overlapping requests. `g` does not overwrite
 an existing plan. `G` archives the existing generated plan before writing a new
 one. `alt+t` is available only when the selected plan exists and contains
 content.
+
+CLI equivalents:
+
+```sh
+chc plan list
+chc plan generate --use-case billing
+chc plan regenerate --use-case billing
+chc plan tracking create --use-case billing
+```
 
 ## Board View
 
