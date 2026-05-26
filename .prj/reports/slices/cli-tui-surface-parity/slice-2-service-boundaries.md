@@ -51,7 +51,9 @@ and TUI defaults while sharing the session repository write.
 
 ## Validation
 
-Pending final validation for this slice.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass after lint whitespace fix in `service_work.go`.
 
 ## Risks and Follow-ups
 

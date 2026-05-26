@@ -82,20 +82,15 @@ Candidate tasks:
 - [x] T2.3 Preserve current CLI and TUI behavior.
 - [x] T2.4 Update matrix statuses for resolved divergences.
 - [x] T2.5 Add slice implementation report.
-- [ ] T2.6 Run validation.
+- [x] T2.6 Run validation.
 
 Task commits:
 
-- `f8e1c9c docs(cli-tui): inventory direct tui bindings`
-- `4f1a90e docs(cli-tui): inventory command palette actions`
-- `0a40856 docs(cli-tui): inventory cli commands`
-- `5c5ce0b docs(cli-tui): map service parity gaps`
-- `6c9e769 docs(cli-tui): link parity matrix`
-- `36dc004 docs(cli-tui): report inventory slice`
 - `5ef3814 docs(cli-tui): correct matched service paths`
 - `17fedd1 refactor(daemon): share stop request boundary`
 - `93efc94 refactor(authoring): share session creation service`
 - `89535d6 docs(cli-tui): record resolved service boundaries`
+- `bcb1a72 chore(cli-tui): fix service boundary lint`
 - `pending commit`
 
 Validation:
