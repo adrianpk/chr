@@ -159,13 +159,18 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 		RelativePath: key + ".md",
 		Key:          key,
 		Title:        "Do something",
-		Status:       "open",
+		Synopsis:     "Implement indexed ticket enrichment.",
+		Status:       TicketStatusReadyForDev,
+		BoardColumn:  TicketStatusReadyForDev,
 		Priority:     "high",
 		Severity:     "critical",
 		Type:         "feature",
 		Tags:         tags,
 		UseCase:      "onboarding",
 		ProjectArea:  "frontend",
+		SourceKind:   "plan_tracking",
+		SourceRef:    ".chc/plans/onboarding-plan.md",
+		Slice:        "Slice 4",
 		CreatedAt:    timePtr(createdAt),
 		UpdatedAt:    timePtr(updatedAt),
 		FileMTime:    time.Date(2026, 5, 18, 14, 0, 0, 0, time.UTC),
@@ -180,6 +185,15 @@ func assertIndexedTicket(t *testing.T, got, want IndexedTicket) {
 
 	if got.ProjectID != want.ProjectID || got.Key != want.Key || got.Title != want.Title {
 		t.Fatalf("ticket = %#v, want %#v", got, want)
+	}
+
+	if got.Synopsis != want.Synopsis ||
+		got.Status != want.Status ||
+		got.BoardColumn != want.BoardColumn ||
+		got.SourceKind != want.SourceKind ||
+		got.SourceRef != want.SourceRef ||
+		got.Slice != want.Slice {
+		t.Fatalf("enriched metadata = %#v, want %#v", got, want)
 	}
 
 	if got.ContentHash != want.ContentHash || got.FileSize != want.FileSize {
