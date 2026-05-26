@@ -104,16 +104,16 @@ The planned count is twelve slices.
 
 Slicing name: Board Ticket Operations
 
-Active slice number: none
+Active slice number: Slice 2
 
-Active slice short name: none
+Active slice short name: userspace resolver
 
-Expected branch name: none
+Expected branch name: `feat/slice-2-userspace-resolver`
 
-Expected PR title: none
+Expected PR title: `feat(slice-2): userspace resolver`
 
 Expected report path:
-none
+`.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md`
 
 Prerequisite PRs or delivered work:
 
