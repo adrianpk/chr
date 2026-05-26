@@ -13,6 +13,11 @@ type ArtifactOperationResult struct {
 	AuthoringSessions []chc.AuthoringSession
 }
 
+type CreateAuthoringSessionResult struct {
+	Session chc.AuthoringSession
+	Paths   chc.AuthoringSessionPaths
+}
+
 type CreateTicketRequest struct {
 	Title       string
 	Status      string
@@ -98,7 +103,7 @@ func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 		UpdatedAt: now,
 	}
 
-	paths, err := chc.NewAuthoringSessionRepository(s.projectContext.ProjectDir).CreateSession(s.ctx, session)
+	result, err := s.CreateAuthoringSession(session)
 	if err != nil {
 		return ArtifactOperationResult{}, err
 	}
@@ -109,9 +114,21 @@ func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 	}
 
 	reloaded.Message = "Created authoring session " + session.ID + " at " +
-		displayPath(s.projectContext.ProjectDir, paths.SessionPath)
+		displayPath(s.projectContext.ProjectDir, result.Paths.SessionPath)
 
 	return reloaded, nil
+}
+
+func (s service) CreateAuthoringSession(session chc.AuthoringSession) (CreateAuthoringSessionResult, error) {
+	paths, err := chc.NewAuthoringSessionRepository(s.projectContext.ProjectDir).CreateSession(s.ctx, session)
+	if err != nil {
+		return CreateAuthoringSessionResult{}, err
+	}
+
+	return CreateAuthoringSessionResult{
+		Session: session,
+		Paths:   paths,
+	}, nil
 }
 
 func (s service) reloadArtifactOperationState() (ArtifactOperationResult, error) {

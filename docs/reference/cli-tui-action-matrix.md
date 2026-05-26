@@ -82,7 +82,7 @@ Status values:
 | Plan | `regenerate-plan` | Regenerate selected plan. | none | `service.RegeneratePlan` | `missing_cli` | Command is gated to Plans view. |
 | Plan | `materialize-plan-tracking` | Create plan tracking and tickets. | none | `service.MaterializePlanTracking` | `missing_cli` | Command is gated to Plans and only available for existing plans. |
 | Plan | `refresh-plans` | Reload plan views. | none | `service.ListPlans` | `missing_cli` | Command is gated to Plans view. |
-| Authoring | `create-authoring-session` | Create TUI default authoring session. | `chc author session new ...` | TUI: `service.CreateTUIAuthoringSession`; CLI: `runAuthorSessionNew` | `service_divergence` | Equivalent artifact family, but TUI default helper and CLI command paths differ. |
+| Authoring | `create-authoring-session` | Create TUI default authoring session. | `chc author session new ...` | `service.CreateAuthoringSession`; TUI wraps default session metadata with `service.CreateTUIAuthoringSession` | `matched` | CLI is configurable; TUI creates a default spec-oriented session through the same service. |
 | Authoring | `create-context-quiz` | Validate context-aware quiz creation availability. | `chc author quiz new ...` | TUI returns unavailable; CLI `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware quiz generation; TUI action is not implemented. |
 | Ticket | `ticket-add-comment` | Add default selected-ticket comment. | `chc ticket comment <key> <body>` | `service.AddTicketComment`; TUI wraps default body with `service.AddSelectedTicketComment` | `matched` | CLI supports arbitrary body; TUI supplies the standard body through the same service. |
 | Ticket | `ticket-status-ready` | Move selected ticket to `ready`. | `chc ticket status <key> ready` | `service.MoveTicketStatus`; TUI wraps selection with `service.MoveSelectedTicketStatus` | `matched` | Same service path. |
@@ -124,7 +124,7 @@ Command availability gates:
 | Work | `chc ticket apply-result` | none | `runTicketApplyResult` | `missing_tui` | Result application is CLI-only. |
 | Index | `chc index rebuild` | Workspace refresh partially | `runIndexRebuild`, ticket reconciler | `missing_tui` | CLI rebuilds ticket index; TUI refresh rebuilds workspace graph/read model. |
 | Index | `chc index status` | Project/Dash diagnostics partially | `runIndexStatus` | `missing_tui` | CLI-specific index diagnostics. |
-| Authoring | `chc author session new` | Palette `create-authoring-session` partially | CLI: `runAuthorSessionNew`; TUI: `service.CreateTUIAuthoringSession` | `service_divergence` | CLI is configurable; TUI creates a default session. |
+| Authoring | `chc author session new` | Palette `create-authoring-session` partially | `service.CreateAuthoringSession`; TUI wraps default session metadata with `service.CreateTUIAuthoringSession` | `matched` | CLI is configurable; TUI creates a default session through the same service. |
 | Authoring | `chc author session list` | legacy Authoring view only | `runAuthorSessionList` | `missing_tui` | Authoring is not part of default TUI tabs. |
 | Authoring | `chc author session show` | legacy Authoring view only | `runAuthorSessionShow` | `missing_tui` | Authoring is not part of default TUI tabs. |
 | Authoring | `chc author quiz new` | Palette `create-context-quiz` not implemented | `runAuthorContextualQuizNew` | `missing_tui` | CLI supports context-aware authoring quiz generation. |
@@ -170,7 +170,7 @@ Command availability gates:
 | Work start ticket | `tuiWorkActionExecutor` -> `service.StartSelectedTicket` -> shared execution helpers | `runTicketStart` -> shared execution helpers | `matched` | TUI wraps selection and message reload; CLI owns dry-run and output. |
 | Work ready loop | `tuiWorkActionExecutor` -> `service.StartReadyTicketLoop` -> `runTicketLoopExecution` | `runTicketLoop` -> `runTicketLoopExecution` | `matched` | TUI uses fixed ready/max-one selection; CLI is configurable. |
 | Work request stop | `tuiWorkActionExecutor` -> `service.RequestDaemonStop` -> `requestDaemonStopState` | `runDaemonStop` -> `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
-| Authoring session creation | `tuiArtifactActionExecutor` -> `service.CreateTUIAuthoringSession` | `runAuthorSessionNew` | `service_divergence` | CLI is configurable; TUI creates a default spec-oriented session. |
+| Authoring session creation | `tuiArtifactActionExecutor` -> `service.CreateTUIAuthoringSession` -> `service.CreateAuthoringSession` | `runAuthorSessionNew` -> `service.CreateAuthoringSession` | `matched` | CLI is configurable; TUI creates a default spec-oriented session. |
 | Context-aware authoring quiz | TUI returns unavailable | `runAuthorContextualQuizNew` | `missing_tui` | CLI path exists and should inform future TUI implementation. |
 | Assisted authoring | no default TUI path | `runAuthorAssisted*` | `missing_tui` | CLI-only workflow. |
 | Project registry | no TUI path | `runProject*` | `missing_tui` | User-level registry management is CLI-only. |
@@ -189,7 +189,7 @@ High-priority `missing_cli` gaps:
 
 High-priority `service_divergence` gaps:
 
-- Authoring session creation.
+- None currently identified in the audited Slice 2 surface.
 
 Current `not_implemented` actions:
 

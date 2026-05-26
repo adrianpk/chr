@@ -410,7 +410,16 @@ func runAuthorSessionNew(ctx context.Context, cmd *cli.Command, stdout io.Writer
 		return fmt.Errorf("author session new does not accept positional arguments")
 	}
 
-	projectContext, err := authorProjectContext(ctx, cmd)
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
 	if err != nil {
 		return err
 	}
@@ -420,12 +429,12 @@ func runAuthorSessionNew(ctx context.Context, cmd *cli.Command, stdout io.Writer
 		return err
 	}
 
-	paths, err := chc.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, session)
+	result, err := newService(ctx, env, projectContext).CreateAuthoringSession(session)
 	if err != nil {
 		return err
 	}
 
-	return printAuthorSessionCreated(stdout, session, paths, projectContext.ProjectDir)
+	return printAuthorSessionCreated(stdout, result.Session, result.Paths, projectContext.ProjectDir)
 }
 
 func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
