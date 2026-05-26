@@ -241,9 +241,17 @@ func assertParsedTicketMetadata(t *testing.T, ticket IndexedTicket) {
 		t.Fatalf("Tags = %#v, want uxui and onboarding", ticket.Tags)
 	}
 
-	if ticket.SourceKind != "plan_tracking" ||
-		ticket.SourceRef != ".chc/plans/onboarding-plan.md" ||
-		ticket.Slice != "Slice 1" {
+	assertParsedTicketSourceMetadata(t, ticket)
+}
+
+func assertParsedTicketSourceMetadata(t *testing.T, ticket IndexedTicket) {
+	t.Helper()
+
+	sourceMetadataMatches := ticket.SourceKind == "plan_tracking" &&
+		ticket.SourceRef == ".chc/plans/onboarding-plan.md" &&
+		ticket.Slice == "Slice 1"
+
+	if !sourceMetadataMatches {
 		t.Fatalf("source metadata = %#v", ticket)
 	}
 }

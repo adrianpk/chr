@@ -57,7 +57,12 @@ func (r *ticketRenderer) RenderTicket(ticket Ticket) (string, error) {
 }
 
 func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
-	fields := []struct {
+	_, err := output.WriteString("---\n")
+	if err != nil {
+		return fmt.Errorf("write ticket frontmatter: %w", err)
+	}
+
+	for _, field := range []struct {
 		key   string
 		value string
 	}{
@@ -68,61 +73,62 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		{key: "priority", value: ticket.Priority},
 		{key: "severity", value: ticket.Severity},
 		{key: "type", value: ticket.Type},
-	}
-
-	_, err := output.WriteString("---\n")
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
-	}
-
-	for _, field := range fields {
-		_, err = fmt.Fprintf(output, "%s: %s\n", field.key, yamlString(field.value))
-		if err != nil {
-			return fmt.Errorf("write ticket frontmatter: %w", err)
+	} {
+		if err := writeTicketStringField(output, field.key, field.value); err != nil {
+			return err
 		}
 	}
 
-	_, err = fmt.Fprintf(output, "tags: %s\n", yamlStringList(ticket.Tags))
+	err = writeTicketListField(output, "tags", ticket.Tags)
 	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
+		return err
 	}
 
-	_, err = fmt.Fprintf(output, "use_case: %s\n", yamlString(ticket.UseCase))
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
+	for _, field := range []struct {
+		key   string
+		value string
+	}{
+		{key: "use_case", value: ticket.UseCase},
+		{key: "project_area", value: ticket.ProjectArea},
+		{key: "source_kind", value: ticket.SourceKind},
+		{key: "source_ref", value: ticket.SourceRef},
+		{key: "slice", value: ticket.Slice},
+	} {
+		if err := writeTicketStringField(output, field.key, field.value); err != nil {
+			return err
+		}
 	}
 
-	_, err = fmt.Fprintf(output, "project_area: %s\n", yamlString(ticket.ProjectArea))
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
-	}
-
-	_, err = fmt.Fprintf(output, "source_kind: %s\n", yamlString(ticket.SourceKind))
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
-	}
-
-	_, err = fmt.Fprintf(output, "source_ref: %s\n", yamlString(ticket.SourceRef))
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
-	}
-
-	_, err = fmt.Fprintf(output, "slice: %s\n", yamlString(ticket.Slice))
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
-	}
-
-	_, err = fmt.Fprintf(output, "created_at: %s\n", yamlTimestamp(ticket.CreatedAt))
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
-	}
-
-	_, err = fmt.Fprintf(output, "updated_at: %s\n", yamlTimestamp(ticket.UpdatedAt))
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
+	for _, field := range []struct {
+		key   string
+		value time.Time
+	}{
+		{key: "created_at", value: ticket.CreatedAt},
+		{key: "updated_at", value: ticket.UpdatedAt},
+	} {
+		if err := writeTicketEncodedField(output, field.key, yamlTimestamp(field.value)); err != nil {
+			return err
+		}
 	}
 
 	_, err = output.WriteString("---\n\n")
+	if err != nil {
+		return fmt.Errorf("write ticket frontmatter: %w", err)
+	}
+
+	return nil
+}
+
+func writeTicketStringField(output *bytes.Buffer, key, value string) error {
+	return writeTicketEncodedField(output, key, yamlString(value))
+}
+
+func writeTicketListField(output *bytes.Buffer, key string, values []string) error {
+	return writeTicketEncodedField(output, key, yamlStringList(values))
+}
+
+func writeTicketEncodedField(output *bytes.Buffer, key, value string) error {
+	_, err := fmt.Fprintf(output, "%s: %s\n", key, value)
 	if err != nil {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
