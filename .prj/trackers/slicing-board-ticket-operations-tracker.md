@@ -62,7 +62,7 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Add core constants/types for Board statuses and legacy status aliases.
+- [x] T1.1 Add core constants/types for Board statuses and legacy status aliases.
 - [ ] T1.2 Extend `Ticket` with synopsis, source metadata, and slice metadata.
 - [ ] T1.3 Render new metadata fields in ticket frontmatter.
 - [ ] T1.4 Parse new metadata fields into `IndexedTicket`.
@@ -73,11 +73,11 @@ Candidate tasks:
 
 Task commits:
 
-- Pending.
+- `5cf1805 feat(ticket): define board status aliases`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc -run 'TestTicketStatus|TestTicketRenderer|TestTicketParser'`: pass.
 
 ## Slice 2: Userspace Resolver
 
