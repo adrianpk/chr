@@ -254,6 +254,18 @@ detail pane.
 Direct edit maximizes the detail pane. External edit starts the configured
 editor process and refreshes the dump list when the editor exits.
 
+Equivalent CLI commands:
+
+```sh
+chc dump list
+chc dump new --title "Billing notes" --content "Initial context."
+chc dump new --title "Billing notes" --content "Use-case context." --use-case billing
+chc dump show .chc/dumps/billing-notes.md
+chc dump save .chc/dumps/billing-notes.md --content "# Billing notes"
+chc dump append .chc/dumps/billing-notes.md --content "Additional context."
+chc dump open .chc/dumps/billing-notes.md
+```
+
 ## Run Quizzes in the TUI
 
 Open the Quizzes view with `F4`.
@@ -281,6 +293,19 @@ When answering a quiz:
 The command palette also exposes resume, skip, complete, cancel, deep mode, and
 fast mode actions for the selected quiz.
 
+Equivalent CLI commands:
+
+```sh
+chc quiz list
+chc quiz start --use-case billing --mode deep
+chc quiz resume --use-case billing
+chc quiz answer --use-case billing --answer "Retries must be idempotent."
+chc quiz skip --use-case billing
+chc quiz complete --use-case billing
+chc quiz cancel --use-case billing
+chc quiz mode fast --use-case billing
+```
+
 ## Generate Specs in the TUI
 
 Open the Specs view with `F5`.
@@ -297,6 +322,13 @@ and related workspace documents. Specs are generated from the Specs tab.
 
 Spec generation is asynchronous. While it is running, the TUI shows a working
 state and ignores other spec actions until the request finishes.
+
+Equivalent CLI commands:
+
+```sh
+chc spec list
+chc spec generate --use-case billing
+```
 
 ## Generate Plans and Tracking in the TUI
 
@@ -325,6 +357,15 @@ the operation reports that state instead of creating duplicate tracking.
 
 Plan generation, regeneration, and tracking creation are guarded so the same
 TUI cannot start overlapping plan operations.
+
+Equivalent CLI commands:
+
+```sh
+chc plan list
+chc plan generate --use-case billing
+chc plan regenerate --use-case billing
+chc plan tracking create --use-case billing
+```
 
 ## Use the Board
 
