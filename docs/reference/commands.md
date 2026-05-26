@@ -32,6 +32,9 @@ chc tui --dir /path/to/project
 See [TUI reference](tui.md) for views, keybindings, command palette behavior,
 and confirmation modes.
 
+See [CLI TUI action matrix](cli-tui-action-matrix.md) for current parity
+between command-line and interactive operations.
+
 ## Runtime
 
 Install missing runtime defaults:

@@ -23,6 +23,7 @@ Exact contracts and command behavior:
 
 - [Commands](reference/commands.md)
 - [TUI](reference/tui.md)
+- [CLI TUI action matrix](reference/cli-tui-action-matrix.md)
 - [Project workspace](reference/project-workspace.md)
 - [Runtime configuration](reference/runtime-config.md)
 - [Notifications](reference/notifications.md)
