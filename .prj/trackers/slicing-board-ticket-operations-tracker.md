@@ -52,7 +52,7 @@ Prerequisite PRs or delivered work:
 | Slice 5: Ticket Creation Service | Delivered | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | PR `#217`; manual creation with synopsis, backlog default, SQLite key allocation, index refresh; `make verify` passed. |
 | Slice 6: Generated Ticket Synopsis | Delivered | `feat/slice-6-generated-ticket-synopsis` | `feat(slice-6): generated ticket synopsis` | `.prj/reports/slices/board-ticket-operations/slice-6-generated-ticket-synopsis.md` | PR `#218`; plan tracking materialization ticket synopsis/source metadata; `make verify` passed. |
 | Slice 7: Board Query Service | Delivered | `feat/slice-7-board-query-service` | `feat(slice-7): board query service` | `.prj/reports/slices/board-ticket-operations/slice-7-board-query-service.md` | PR `#219`; shared CLI/TUI Board read model; `make verify` passed. |
-| Slice 8: Compact Board Columns | In progress | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | One-column compact Board navigation. |
+| Slice 8: Compact Board Columns | In review | `feat/slice-8-compact-board-columns` | `feat(slice-8): compact board columns` | `.prj/reports/slices/board-ticket-operations/slice-8-compact-board-columns.md` | One-column compact Board navigation. |
 | Slice 9: Attention View | Pending | `feat/slice-9-attention-view` | `feat(slice-9): attention view` | `.prj/reports/slices/board-ticket-operations/slice-9-attention-view.md` | Virtual attention view and plain-text reasons. |
 | Slice 10: Ticket Detail Surface | Pending | `feat/slice-10-ticket-detail-surface` | `feat(slice-10): ticket detail surface` | `.prj/reports/slices/board-ticket-operations/slice-10-ticket-detail-surface.md` | Synopsis, source refs, attention, body/comment context. |
 | Slice 11: Maximized Board | Pending | `feat/slice-11-maximized-board` | `feat(slice-11): maximized board` | `.prj/reports/slices/board-ticket-operations/slice-11-maximized-board.md` | Multi-column maximized Board. |
@@ -249,22 +249,25 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T8.1 Add TUI state for active normal Board column.
-- [ ] T8.2 Implement normal column navigation.
-- [ ] T8.3 Filter the compact left pane to the active column.
-- [ ] T8.4 Render human-readable column labels and counts.
-- [ ] T8.5 Preserve selection when changing columns where possible.
-- [ ] T8.6 Add TUI model tests.
-- [ ] T8.7 Create slice implementation report.
-- [ ] T8.8 Run validation.
+- [x] T8.1 Add TUI state for active normal Board column.
+- [x] T8.2 Implement normal column navigation.
+- [x] T8.3 Filter the compact left pane to the active column.
+- [x] T8.4 Render human-readable column labels and counts.
+- [x] T8.5 Preserve selection when changing columns where possible.
+- [x] T8.6 Add TUI model tests.
+- [x] T8.7 Create slice implementation report.
+- [x] T8.8 Run validation.
 
 Task commits:
 
-- Pending.
+- `7b1a2c5 feat(board): add compact column navigation`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chctui`: pass.
+- `git diff --check`: pass.
+- `go test ./...`: pass.
+- `make verify`: pass.
 
 ## Slice 9: Attention View
 
