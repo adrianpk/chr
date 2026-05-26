@@ -10,6 +10,7 @@ type IndexedTicket struct {
 	Title        string
 	Synopsis     string
 	Status       string
+	BoardColumn  string
 	Priority     string
 	Severity     string
 	Type         string

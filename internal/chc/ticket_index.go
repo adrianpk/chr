@@ -91,8 +91,9 @@ func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTick
 func (i *sqliteTicketIndex) ListProjectTickets(ctx context.Context, projectID string) ([]IndexedTicket, error) {
 	rows, err := i.db.QueryContext(
 		ctx,
-		`SELECT project_id, path, relative_path, key, title, status, priority, severity, type,
-    use_case, project_area, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
+    priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
+    created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
 FROM indexed_tickets
 WHERE project_id = ?
 ORDER BY key`,
@@ -138,8 +139,9 @@ ORDER BY key`,
 func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID, key string) (IndexedTicket, error) {
 	row := i.db.QueryRowContext(
 		ctx,
-		`SELECT project_id, path, relative_path, key, title, status, priority, severity, type,
-    use_case, project_area, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
+    priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
+    created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
 FROM indexed_tickets
 WHERE project_id = ? AND key = ?`,
 		projectID,
@@ -187,19 +189,25 @@ func upsertIndexedTicket(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) 
 	_, err := tx.ExecContext(
 		ctx,
 		`INSERT INTO indexed_tickets (
-    project_id, path, relative_path, key, title, status, priority, severity, type,
-    use_case, project_area, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    project_id, path, relative_path, key, title, synopsis, status, board_column,
+    priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
+    created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(project_id, path) DO UPDATE SET
     relative_path = excluded.relative_path,
     key = excluded.key,
     title = excluded.title,
+    synopsis = excluded.synopsis,
     status = excluded.status,
+    board_column = excluded.board_column,
     priority = excluded.priority,
     severity = excluded.severity,
     type = excluded.type,
     use_case = excluded.use_case,
     project_area = excluded.project_area,
+    source_kind = excluded.source_kind,
+    source_ref = excluded.source_ref,
+    slice = excluded.slice,
     created_at = excluded.created_at,
     updated_at = excluded.updated_at,
     file_mtime = excluded.file_mtime,
@@ -211,12 +219,17 @@ ON CONFLICT(project_id, path) DO UPDATE SET
 		ticket.RelativePath,
 		ticket.Key,
 		ticket.Title,
+		ticket.Synopsis,
 		ticket.Status,
+		ticket.BoardColumn,
 		ticket.Priority,
 		ticket.Severity,
 		ticket.Type,
 		ticket.UseCase,
 		ticket.ProjectArea,
+		ticket.SourceKind,
+		ticket.SourceRef,
+		ticket.Slice,
 		formatOptionalProjectTime(ticket.CreatedAt),
 		formatOptionalProjectTime(ticket.UpdatedAt),
 		formatProjectTime(ticket.FileMTime),
@@ -315,12 +328,17 @@ func scanIndexedTicket(scanner projectScanner) (IndexedTicket, error) {
 		&ticket.RelativePath,
 		&ticket.Key,
 		&ticket.Title,
+		&ticket.Synopsis,
 		&ticket.Status,
+		&ticket.BoardColumn,
 		&ticket.Priority,
 		&ticket.Severity,
 		&ticket.Type,
 		&ticket.UseCase,
 		&ticket.ProjectArea,
+		&ticket.SourceKind,
+		&ticket.SourceRef,
+		&ticket.Slice,
 		&createdAt,
 		&updatedAt,
 		&fileMTime,

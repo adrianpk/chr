@@ -129,6 +129,8 @@ func indexedTicketFromMetadata(
 		IndexedAt:    opts.IndexedAt.UTC(),
 	}
 
+	ticket.BoardColumn, _ = BoardTicketStatusFor(ticket.Status)
+
 	err = ValidateIndexedTicket(ticket)
 	if err != nil {
 		return IndexedTicket{}, err
