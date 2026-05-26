@@ -10,7 +10,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newReportCommand(stdout io.Writer) *cli.Command {
+func newReportCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "report",
 		Usage: "Inspect project reports",
@@ -96,7 +96,12 @@ func runReportList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -128,7 +133,12 @@ func runReportShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,

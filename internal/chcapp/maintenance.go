@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/urfave/cli/v3"
@@ -11,7 +12,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newMaintenanceCommand(stdout io.Writer) *cli.Command {
+func newMaintenanceCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "maintenance",
 		Usage: "Inspect and recover local chc state",
@@ -190,7 +191,12 @@ func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:    cmd.String("dir"),
 		UseExplicitDir: true,
 	})
@@ -198,7 +204,7 @@ func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	bundle, err := collectDiagnosticBundle(ctx, env, projectContext)
+	bundle, err := collectDiagnosticBundle(ctx, env, projectContext, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -226,7 +232,12 @@ func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Wri
 		return err
 	}
 
-	status, err := chc.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	status, err := chc.NewMigrationStatusChecker(deps.assetsFS).Check(ctx, env)
 	if err != nil {
 		return err
 	}
@@ -238,13 +249,14 @@ func collectDiagnosticBundle(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
+	assetsFS fs.FS,
 ) (chc.DiagnosticBundle, error) {
 	migrationStatus, err := chc.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
 	if err != nil {
 		return chc.DiagnosticBundle{}, err
 	}
 
-	registryDiagnostics, err := collectDiagnosticBundleRegistry(ctx, env)
+	registryDiagnostics, err := collectDiagnosticBundleRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return chc.DiagnosticBundle{}, err
 	}
@@ -295,6 +307,7 @@ func collectDiagnosticBundle(
 func collectDiagnosticBundleRegistry(
 	ctx context.Context,
 	env chc.UserEnvironment,
+	assetsFS fs.FS,
 ) ([]chc.ProjectRegistryDiagnostic, error) {
 	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
@@ -327,7 +340,12 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:    cmd.String("dir"),
 		UseExplicitDir: true,
 	})
@@ -335,7 +353,7 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 		return err
 	}
 
-	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	repository, err := chc.NewExecutionRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -366,7 +384,12 @@ func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:    cmd.String("dir"),
 		UseExplicitDir: true,
 	})
@@ -374,7 +397,7 @@ func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command
 		return err
 	}
 
-	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	repository, err := chc.NewExecutionRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -406,7 +429,12 @@ func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout 
 		return err
 	}
 
-	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -437,7 +465,12 @@ func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -486,7 +519,12 @@ func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	registry, err := chc.NewProjectRegistry(ctx, env, assetsFS)
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	registry, err := chc.NewProjectRegistry(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}

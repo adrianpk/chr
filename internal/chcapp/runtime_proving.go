@@ -12,7 +12,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newRuntimeCommand(stdout io.Writer) *cli.Command {
+func newRuntimeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "runtime",
 		Usage: "Manage project runtime assets",
@@ -23,7 +23,7 @@ func newRuntimeCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
-func newProvingCommand(stdout io.Writer) *cli.Command {
+func newProvingCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "proving",
 		Usage: "Run temporary MVP proving-ground workflows",
@@ -176,7 +176,12 @@ func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -185,7 +190,7 @@ func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	result, err := chc.NewRuntimeAssets(assetsFS).Init(ctx, chc.RuntimeInitOptions{
+	result, err := chc.NewRuntimeAssets(deps.assetsFS).Init(ctx, chc.RuntimeInitOptions{
 		ProjectDir: projectContext.ProjectDir,
 		DryRun:     cmd.Bool("dry-run"),
 	})
@@ -206,7 +211,12 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,

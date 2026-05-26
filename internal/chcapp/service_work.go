@@ -19,7 +19,7 @@ func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, err
 		return WorkOperationResult{}, err
 	}
 
-	preflight, err := buildTicketStartPreflightForTicket(s.ctx, s.env, s.projectContext, ticket)
+	preflight, err := buildTicketStartPreflightForTicket(s.ctx, s.env, s.projectContext, ticket, s.assetsFS)
 	if err != nil {
 		return WorkOperationResult{}, chc.NewExecutionFailure(chc.ExecutionFailurePreflight, err)
 	}
@@ -31,7 +31,7 @@ func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, err
 		)
 	}
 
-	record, err := runTicketStartExecution(s.ctx, s.env, preflight.Record, preflight.Runtime)
+	record, err := runTicketStartExecution(s.ctx, s.env, preflight.Record, preflight.Runtime, s.assetsFS)
 	if err != nil {
 		return WorkOperationResult{}, err
 	}
@@ -57,7 +57,7 @@ func (s service) StartReadyTicketLoop() (WorkOperationResult, error) {
 		return WorkOperationResult{}, err
 	}
 
-	result, err := runTicketLoopExecution(s.ctx, s.env, s.projectContext, tickets, eligibleCount)
+	result, err := runTicketLoopExecution(s.ctx, s.env, s.projectContext, tickets, eligibleCount, s.assetsFS)
 	if err != nil {
 		return WorkOperationResult{}, err
 	}

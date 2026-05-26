@@ -22,6 +22,7 @@ func newService(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
+	assetsFS fs.FS,
 ) service {
 	return service{
 		ctx:            ctx,

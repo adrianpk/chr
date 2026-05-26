@@ -11,7 +11,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newIndexCommand(stdout io.Writer) *cli.Command {
+func newIndexCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "index",
 		Usage: "Manage derived project indexes",
@@ -62,7 +62,12 @@ func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -71,7 +76,7 @@ func runIndexRebuild(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -124,7 +129,12 @@ func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -133,7 +143,7 @@ func runIndexStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}

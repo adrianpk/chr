@@ -10,8 +10,8 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newInitCommand(stdout io.Writer) *cli.Command {
-	workspace := chc.NewWorkspace(assetsFS)
+func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+	workspace := chc.NewWorkspace(deps.assetsFS)
 
 	return &cli.Command{
 		Name:  "init",

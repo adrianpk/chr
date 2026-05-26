@@ -36,15 +36,19 @@ func testAssetsFS() fs.FS {
 	return os.DirFS(root)
 }
 
+func testAppDependencies() appDependencies {
+	return appDependencies{assetsFS: testAssetsFS()}
+}
+
 func TestRootCommandDefaultsToTUIAction(t *testing.T) {
-	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{})
+	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
 	if cmd.Action == nil {
 		t.Fatal("root command Action is nil")
 	}
 }
 
 func TestRootCommandIncludesTUICommand(t *testing.T) {
-	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{})
+	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
 
 	for _, name := range []string{"dump", "metadata", "plan", "quiz", "spec", "tui"} {
 		if rootCommandIncludesCommand(cmd, name) {
@@ -66,7 +70,7 @@ func rootCommandIncludesCommand(cmd *cli.Command, name string) bool {
 }
 
 func TestRootCommandRegistersParitySubcommands(t *testing.T) {
-	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{})
+	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
 
 	for _, path := range [][]string{
 		{"metadata", "project", "set"},
@@ -1817,7 +1821,7 @@ func TestProjectContextResolverRejectsMissingContext(t *testing.T) {
 		t.Fatalf("chcTestUserEnvironment returned error: %v", err)
 	}
 
-	_, err = newCommandProjectContextResolver(env).Resolve(t.Context(), commandProjectContextOptions{})
+	_, err = newCommandProjectContextResolver(env, testAssetsFS()).Resolve(t.Context(), commandProjectContextOptions{})
 	if err == nil {
 		t.Fatal("Resolve returned nil error")
 	}
@@ -4287,7 +4291,7 @@ func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) chc.DaemonSta
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := chc.NewDaemonStateRepository(t.Context(), env, assetsFS)
+	repository, err := chc.NewDaemonStateRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewDaemonStateRepository returned error: %v", err)
 	}
@@ -4313,7 +4317,7 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket chc.IndexedTic
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := chc.NewTicketIndex(t.Context(), env, assetsFS)
+	index, err := chc.NewTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}
@@ -4350,7 +4354,7 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []chc.IndexedT
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := chc.NewTicketIndex(t.Context(), env, assetsFS)
+	index, err := chc.NewTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}
@@ -4381,7 +4385,7 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := chc.NewExecutionRepository(t.Context(), env, assetsFS)
+	repository, err := chc.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -4412,7 +4416,7 @@ func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []chc.LoopRunR
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := chc.NewLoopRunRepository(t.Context(), env, assetsFS)
+	repository, err := chc.NewLoopRunRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewLoopRunRepository returned error: %v", err)
 	}
@@ -4449,7 +4453,7 @@ func createApplyResultExecution(
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := chc.NewExecutionRepository(t.Context(), env, assetsFS)
+	repository, err := chc.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}

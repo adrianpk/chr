@@ -10,7 +10,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newQuizCommand(stdout io.Writer) *cli.Command {
+func newQuizCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "quiz",
 		Usage: "Manage runtime quizzes",

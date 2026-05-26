@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newDaemonCommand(stdout io.Writer) *cli.Command {
+func newDaemonCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "daemon",
 		Usage: "Coordinate long-running local work",
@@ -93,12 +94,17 @@ func runDaemonStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
 	maxIterations := cmd.Int("max-iterations")
 	if maxIterations <= 0 {
 		return fmt.Errorf("max-iterations must be greater than zero")
 	}
 
-	decision, err := daemonStartGuardDecision(ctx, env)
+	decision, err := daemonStartGuardDecision(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -107,7 +113,7 @@ func runDaemonStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return printDaemonStartPlan(stdout, env, decision)
 	}
 
-	return runDaemonForegroundLoop(ctx, stdout, env, decision, maxIterations)
+	return runDaemonForegroundLoop(ctx, stdout, env, deps.assetsFS, decision, maxIterations)
 }
 
 func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -120,7 +126,12 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	repository, err := chc.NewDaemonStateRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -193,8 +204,13 @@ func runDaemonStop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
 	if !cmd.Bool("dry-run") {
-		return requestDaemonStop(ctx, stdout, env)
+		return requestDaemonStop(ctx, stdout, env, deps.assetsFS)
 	}
 
 	return printDaemonPlan(stdout, "stop", env)
@@ -225,6 +241,7 @@ func runDaemonForegroundLoop(
 	ctx context.Context,
 	stdout io.Writer,
 	env chc.UserEnvironment,
+	assetsFS fs.FS,
 	decision chc.DaemonStartGuardDecision,
 	maxIterations int,
 ) error {
@@ -257,7 +274,7 @@ func runDaemonForegroundLoop(
 		return err
 	}
 
-	result, err := runDaemonForegroundIterations(ctx, env, stateRepository, maxIterations)
+	result, err := runDaemonForegroundIterations(ctx, env, assetsFS, stateRepository, maxIterations)
 	if err != nil {
 		failDaemonForegroundState(ctx, stateRepository, err)
 
@@ -277,6 +294,7 @@ func runDaemonForegroundLoop(
 func runDaemonForegroundIterations(
 	ctx context.Context,
 	env chc.UserEnvironment,
+	assetsFS fs.FS,
 	stateRepository chc.DaemonStateRepository,
 	maxIterations int,
 ) (daemonForegroundLoopResult, error) {
@@ -427,7 +445,7 @@ func recoverStaleDaemonState(
 	return recovered, nil
 }
 
-func requestDaemonStop(ctx context.Context, stdout io.Writer, env chc.UserEnvironment) error {
+func requestDaemonStop(ctx context.Context, stdout io.Writer, env chc.UserEnvironment, assetsFS fs.FS) error {
 	requestedAt := time.Now().UTC()
 
 	result, err := requestDaemonStopState(ctx, env, assetsFS, requestedAt)
@@ -459,7 +477,7 @@ func daemonStopRequested(ctx context.Context, stateRepository chc.DaemonStateRep
 	return state.Status == chc.DaemonStatusStopping && state.StopRequestedAt != nil, nil
 }
 
-func daemonStartGuardDecision(ctx context.Context, env chc.UserEnvironment) (chc.DaemonStartGuardDecision, error) {
+func daemonStartGuardDecision(ctx context.Context, env chc.UserEnvironment, assetsFS fs.FS) (chc.DaemonStartGuardDecision, error) {
 	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
 	if err != nil {
 		return chc.DaemonStartGuardDecision{}, err

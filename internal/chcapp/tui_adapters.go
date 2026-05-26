@@ -809,7 +809,7 @@ func (e tuiWorkActionExecutor) ExecuteWorkAction(
 func (e tuiWorkActionExecutor) workActionResult(
 	result WorkOperationResult,
 ) (chctui.WorkActionResult, error) {
-	observability, err := loadTUIObservability(e.operations.ctx, e.operations.env, e.operations.projectContext)
+	observability, err := loadTUIObservability(e.operations.ctx, e.operations.env, e.operations.projectContext, e.operations.assetsFS)
 	if err != nil {
 		return chctui.WorkActionResult{}, err
 	}

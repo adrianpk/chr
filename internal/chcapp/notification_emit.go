@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"io/fs"
 	"os"
 	"time"
 
@@ -15,6 +16,7 @@ func emitTicketBlockedNotification(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	plan ticketApplyResultPlan,
+	assetsFS fs.FS,
 ) error {
 	if plan.Application.TicketStatus != chc.TicketResultStatusBlocked {
 		return nil
@@ -40,7 +42,7 @@ func emitTicketBlockedNotification(
 		UpdatedAt: now,
 	}
 
-	return emitWorkflowNotification(ctx, env, plan.ProjectContext, event)
+	return emitWorkflowNotification(ctx, env, plan.ProjectContext, event, assetsFS)
 }
 
 func emitLoopRunNotification(
@@ -48,13 +50,14 @@ func emitLoopRunNotification(
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
 	record chc.LoopRunRecord,
+	assetsFS fs.FS,
 ) error {
 	event, ok := loopRunNotificationEvent(projectContext, record, time.Now().UTC())
 	if !ok {
 		return nil
 	}
 
-	return emitWorkflowNotification(ctx, env, projectContext, event)
+	return emitWorkflowNotification(ctx, env, projectContext, event, assetsFS)
 }
 
 func loopRunNotificationEvent(
@@ -108,6 +111,7 @@ func emitWorkflowNotification(
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
 	event chc.NotificationEvent,
+	assetsFS fs.FS,
 ) error {
 	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
@@ -15,7 +16,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newTicketCommand(stdout io.Writer) *cli.Command {
+func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "ticket",
 		Usage: "Manage workspace tickets",
@@ -259,10 +260,11 @@ func ticketApplyResultAction(stdout io.Writer) cli.ActionFunc {
 }
 
 type ticketStartPreflight struct {
-	Env     chc.UserEnvironment
-	Ticket  chc.IndexedTicket
-	Record  chc.ExecutionRecord
-	Runtime chc.RuntimeValidationResult
+	AssetsFS fs.FS
+	Env      chc.UserEnvironment
+	Ticket   chc.IndexedTicket
+	Record   chc.ExecutionRecord
+	Runtime  chc.RuntimeValidationResult
 }
 
 type ticketStartSelection struct {
@@ -302,7 +304,12 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -313,7 +320,7 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 
 	status := cmd.Args().Get(1)
 
-	result, err := newService(ctx, env, projectContext).MoveTicketStatus(cmd.Args().Get(0), status)
+	result, err := newService(ctx, env, projectContext, deps.assetsFS).MoveTicketStatus(cmd.Args().Get(0), status)
 	if err != nil {
 		return err
 	}
@@ -388,7 +395,12 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -397,7 +409,7 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -428,7 +440,7 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
 
 	if !cmd.Bool("dry-run") {
-		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, len(eligibleTickets))
+		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, len(eligibleTickets), deps.assetsFS)
 	}
 
 	return printTicketLoopPlan(stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
@@ -493,8 +505,9 @@ func runAndPrintTicketLoopExecution(
 	projectContext commandProjectContext,
 	tickets []chc.IndexedTicket,
 	eligibleCount int,
+	assetsFS fs.FS,
 ) error {
-	result, err := runTicketLoopExecution(ctx, env, projectContext, tickets, eligibleCount)
+	result, err := runTicketLoopExecution(ctx, env, projectContext, tickets, eligibleCount, assetsFS)
 	if result.Record.ID == "" {
 		return err
 	}
@@ -561,6 +574,7 @@ func runTicketLoopExecution(
 	projectContext commandProjectContext,
 	tickets []chc.IndexedTicket,
 	eligibleCount int,
+	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
 	repository, err := chc.NewLoopRunRepository(ctx, env, assetsFS)
 	if err != nil {
@@ -582,9 +596,9 @@ func runTicketLoopExecution(
 	result := ticketLoopExecutionResult{Record: record}
 
 	for _, ticket := range tickets {
-		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket)
+		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket, assetsFS)
 		if err != nil {
-			return failTicketLoopExecution(ctx, env, repository, projectContext, result, record, err)
+			return failTicketLoopExecution(ctx, env, repository, projectContext, result, record, err, assetsFS)
 		}
 
 		result.Executions = append(result.Executions, execution)
@@ -598,7 +612,7 @@ func runTicketLoopExecution(
 		}
 	}
 
-	return finishTicketLoopExecution(ctx, env, repository, projectContext, result, record)
+	return finishTicketLoopExecution(ctx, env, repository, projectContext, result, record, assetsFS)
 }
 
 func failTicketLoopExecution(
@@ -609,6 +623,7 @@ func failTicketLoopExecution(
 	result ticketLoopExecutionResult,
 	record chc.LoopRunRecord,
 	cause error,
+	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
 	record.FailedCount++
 	record = failLoopRunRecord(record, cause)
@@ -620,7 +635,7 @@ func failTicketLoopExecution(
 
 	result.Record = record
 
-	err = emitLoopRunNotification(ctx, env, projectContext, record)
+	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
 	if err != nil {
 		return ticketLoopExecutionResult{}, err
 	}
@@ -635,6 +650,7 @@ func finishTicketLoopExecution(
 	projectContext commandProjectContext,
 	result ticketLoopExecutionResult,
 	record chc.LoopRunRecord,
+	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
 	record = finishLoopRunRecord(record)
 
@@ -645,7 +661,7 @@ func finishTicketLoopExecution(
 
 	result.Record = record
 
-	err = emitLoopRunNotification(ctx, env, projectContext, record)
+	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
 	if err != nil {
 		return ticketLoopExecutionResult{}, err
 	}
@@ -658,13 +674,14 @@ func executeLoopTicket(
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
 	ticket chc.IndexedTicket,
+	assetsFS fs.FS,
 ) (chc.ExecutionRecord, chc.ResultApplication, error) {
-	preflight, err := buildTicketStartPreflightForTicket(ctx, env, projectContext, ticket)
+	preflight, err := buildTicketStartPreflightForTicket(ctx, env, projectContext, ticket, assetsFS)
 	if err != nil {
 		return chc.ExecutionRecord{}, chc.ResultApplication{}, err
 	}
 
-	record, err := runTicketStartExecution(ctx, env, preflight.Record, preflight.Runtime)
+	record, err := runTicketStartExecution(ctx, env, preflight.Record, preflight.Runtime, assetsFS)
 	if err != nil {
 		return record, chc.ResultApplication{}, err
 	}
@@ -674,7 +691,7 @@ func executeLoopTicket(
 		return record, chc.ResultApplication{}, err
 	}
 
-	err = applyTicketResult(ctx, env, plan)
+	err = applyTicketResult(ctx, env, plan, assetsFS)
 	if err != nil {
 		return record, chc.ResultApplication{}, err
 	}
@@ -775,7 +792,12 @@ func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Write
 	}
 
 	if !cmd.Bool("dry-run") {
-		err = applyTicketResult(ctx, env, plan)
+		deps, err := appDependenciesFromCommand(cmd)
+		if err != nil {
+			return err
+		}
+
+		err = applyTicketResult(ctx, env, plan, deps.assetsFS)
 		if err != nil {
 			return err
 		}
@@ -789,7 +811,12 @@ func buildTicketApplyResultPlan(
 	cmd *cli.Command,
 	env chc.UserEnvironment,
 ) (ticketApplyResultPlan, error) {
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -798,7 +825,7 @@ func buildTicketApplyResultPlan(
 		return ticketApplyResultPlan{}, err
 	}
 
-	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
+	repository, err := chc.NewExecutionRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return ticketApplyResultPlan{}, err
 	}
@@ -847,7 +874,7 @@ func buildTicketApplyResultPlanForRecord(
 	}, nil
 }
 
-func applyTicketResult(ctx context.Context, env chc.UserEnvironment, plan ticketApplyResultPlan) error {
+func applyTicketResult(ctx context.Context, env chc.UserEnvironment, plan ticketApplyResultPlan, assetsFS fs.FS) error {
 	appliedAt := time.Now().UTC()
 
 	err := chc.NewTicketResultStateWriter().WriteResultState(ctx, chc.WriteResultStateOptions{
@@ -890,7 +917,7 @@ func applyTicketResult(ctx context.Context, env chc.UserEnvironment, plan ticket
 		return err
 	}
 
-	err = refreshAppliedTicketIndex(ctx, env, plan, appliedAt)
+	err = refreshAppliedTicketIndex(ctx, env, plan, appliedAt, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -905,7 +932,7 @@ func applyTicketResult(ctx context.Context, env chc.UserEnvironment, plan ticket
 		return err
 	}
 
-	return emitTicketBlockedNotification(ctx, env, plan)
+	return emitTicketBlockedNotification(ctx, env, plan, assetsFS)
 }
 
 func refreshAppliedTicketIndex(
@@ -913,6 +940,7 @@ func refreshAppliedTicketIndex(
 	env chc.UserEnvironment,
 	plan ticketApplyResultPlan,
 	appliedAt time.Time,
+	assetsFS fs.FS,
 ) error {
 	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
 	if err != nil {
@@ -1007,7 +1035,7 @@ func runAndPrintTicketStartExecution(
 	stdout io.Writer,
 	preflight ticketStartPreflight,
 ) (chc.ExecutionRecord, error) {
-	record, err := runTicketStartExecution(ctx, preflight.Env, preflight.Record, preflight.Runtime)
+	record, err := runTicketStartExecution(ctx, preflight.Env, preflight.Record, preflight.Runtime, preflight.AssetsFS)
 	if err == nil {
 		return record, nil
 	}
@@ -1026,12 +1054,17 @@ func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketSta
 		return ticketStartPreflight{}, err
 	}
 
-	selection, err := selectTicketStartTicket(ctx, cmd, env)
+	deps, err := appDependenciesFromCommand(cmd)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
-	return buildTicketStartPreflightForTicket(ctx, env, selection.ProjectContext, selection.Ticket)
+	selection, err := selectTicketStartTicket(ctx, cmd, env, deps.assetsFS)
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+
+	return buildTicketStartPreflightForTicket(ctx, env, selection.ProjectContext, selection.Ticket, deps.assetsFS)
 }
 
 func buildTicketStartPreflightForTicket(
@@ -1039,6 +1072,7 @@ func buildTicketStartPreflightForTicket(
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
 	ticket chc.IndexedTicket,
+	assetsFS fs.FS,
 ) (ticketStartPreflight, error) {
 	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
@@ -1060,15 +1094,16 @@ func buildTicketStartPreflightForTicket(
 	record = chc.ExecutionRecordFromRuntimePlan(record, result.Plan)
 
 	return ticketStartPreflight{
-		Env:     env,
-		Ticket:  ticket,
-		Record:  record,
-		Runtime: result,
+		AssetsFS: assetsFS,
+		Env:      env,
+		Ticket:   ticket,
+		Record:   record,
+		Runtime:  result,
 	}, nil
 }
 
-func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env chc.UserEnvironment) (ticketStartSelection, error) {
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env chc.UserEnvironment, assetsFS fs.FS) (ticketStartSelection, error) {
+	projectContext, err := newCommandProjectContextResolver(env, assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -1122,6 +1157,7 @@ func runTicketStartExecution(
 	env chc.UserEnvironment,
 	record chc.ExecutionRecord,
 	result chc.RuntimeValidationResult,
+	assetsFS fs.FS,
 ) (chc.ExecutionRecord, error) {
 	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
@@ -1247,7 +1283,12 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -1256,7 +1297,7 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 		return err
 	}
 
-	result, err := newService(ctx, env, projectContext).AddTicketComment(TicketCommentRequest{
+	result, err := newService(ctx, env, projectContext, deps.assetsFS).AddTicketComment(TicketCommentRequest{
 		Key:    cmd.Args().Get(0),
 		Author: cmd.String("author"),
 		Body:   cmd.Args().Get(1),
@@ -1288,7 +1329,12 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -1297,7 +1343,7 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -1353,7 +1399,12 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -1362,7 +1413,7 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
+	index, err := chc.NewTicketIndex(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -1438,7 +1489,12 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -1447,7 +1503,7 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return err
 	}
 
-	result, err := newService(ctx, env, projectContext).CreateTicket(CreateTicketRequest{
+	result, err := newService(ctx, env, projectContext, deps.assetsFS).CreateTicket(CreateTicketRequest{
 		Title:       cmd.Args().First(),
 		Priority:    cmd.String("priority"),
 		Severity:    cmd.String("severity"),

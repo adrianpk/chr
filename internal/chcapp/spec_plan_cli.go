@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func newSpecCommand(stdout io.Writer) *cli.Command {
+func newSpecCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "spec",
 		Usage: "Manage generated specs",
@@ -19,7 +19,7 @@ func newSpecCommand(stdout io.Writer) *cli.Command {
 	}
 }
 
-func newPlanCommand(stdout io.Writer) *cli.Command {
+func newPlanCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "plan",
 		Usage: "Manage generated plans",

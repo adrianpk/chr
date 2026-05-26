@@ -39,7 +39,7 @@ func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
 	operations := newService(t.Context(), env, commandProjectContext{
 		ProjectDir: projectDir,
 		ProjectID:  "service-project",
-	})
+	}, testAssetsFS())
 
 	result, err := operations.RefreshWorkspace()
 	if err != nil {
@@ -629,8 +629,6 @@ func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
 func newTestService(t *testing.T, projectDir string) service {
 	t.Helper()
 
-	assetsFS = testAssetsFS()
-
 	env, err := chcTestUserEnvironment(t)
 	if err != nil {
 		t.Fatalf("chcTestUserEnvironment returned error: %v", err)
@@ -639,7 +637,7 @@ func newTestService(t *testing.T, projectDir string) service {
 	return newService(t.Context(), env, commandProjectContext{
 		ProjectDir: projectDir,
 		ProjectID:  "service-project",
-	})
+	}, testAssetsFS())
 }
 
 type fakeDumpEditorLauncher struct {

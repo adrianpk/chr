@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -22,11 +23,12 @@ type commandProjectContextOptions struct {
 }
 
 type commandProjectContextResolver struct {
-	env chc.UserEnvironment
+	env      chc.UserEnvironment
+	assetsFS fs.FS
 }
 
-func newCommandProjectContextResolver(env chc.UserEnvironment) commandProjectContextResolver {
-	return commandProjectContextResolver{env: env}
+func newCommandProjectContextResolver(env chc.UserEnvironment, assetsFS fs.FS) commandProjectContextResolver {
+	return commandProjectContextResolver{env: env, assetsFS: assetsFS}
 }
 
 func (r commandProjectContextResolver) Resolve(
@@ -57,7 +59,7 @@ func (r commandProjectContextResolver) resolveActiveProject(
 	ctx context.Context,
 	activeProject chc.ActiveProject,
 ) (commandProjectContext, error) {
-	registry, err := chc.NewProjectRegistry(ctx, r.env, assetsFS)
+	registry, err := chc.NewProjectRegistry(ctx, r.env, r.assetsFS)
 	if err != nil {
 		return commandProjectContext{}, err
 	}

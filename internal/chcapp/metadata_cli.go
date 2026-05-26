@@ -14,7 +14,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-func newMetadataCommand(stdout io.Writer) *cli.Command {
+func newMetadataCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "metadata",
 		Usage: "Manage project and use-case metadata",
@@ -255,7 +255,12 @@ func serviceFromCommand(ctx context.Context, cmd *cli.Command) (service, command
 		return service{}, commandProjectContext{}, err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return service{}, commandProjectContext{}, err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -264,5 +269,5 @@ func serviceFromCommand(ctx context.Context, cmd *cli.Command) (service, command
 		return service{}, commandProjectContext{}, err
 	}
 
-	return newService(ctx, env, projectContext), projectContext, nil
+	return newService(ctx, env, projectContext, deps.assetsFS), projectContext, nil
 }

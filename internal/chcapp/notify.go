@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"time"
@@ -15,7 +16,7 @@ import (
 
 var notifyTelegramSender = chc.NewTelegramSender(http.DefaultClient)
 
-func newNotifyCommand(stdout io.Writer) *cli.Command {
+func newNotifyCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "notify",
 		Usage: "Inspect and test notification setup",
@@ -123,7 +124,12 @@ func runNotifyTelegramPoll(ctx context.Context, cmd *cli.Command, stdout io.Writ
 	}
 
 	if !cmd.Bool("dry-run") {
-		err = persistRemoteCommandRecords(ctx, env, records)
+		deps, err := appDependenciesFromCommand(cmd)
+		if err != nil {
+			return err
+		}
+
+		err = persistRemoteCommandRecords(ctx, env, records, deps.assetsFS)
 		if err != nil {
 			return err
 		}
@@ -180,6 +186,7 @@ func persistRemoteCommandRecords(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	records []chc.RemoteCommandRecord,
+	assetsFS fs.FS,
 ) error {
 	repository, err := chc.NewRemoteCommandRecordRepository(ctx, env, assetsFS)
 	if err != nil {
@@ -244,7 +251,12 @@ func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writ
 	}
 
 	if !cmd.Bool("dry-run") {
-		return runNotifyTelegramTestDispatch(ctx, stdout, env, projectContext, config.Notifications.Telegram)
+		deps, err := appDependenciesFromCommand(cmd)
+		if err != nil {
+			return err
+		}
+
+		return runNotifyTelegramTestDispatch(ctx, stdout, env, projectContext, config.Notifications.Telegram, deps.assetsFS)
 	}
 
 	return printNotifyTelegramTestPlan(stdout, projectContext, config.Notifications.Telegram)
@@ -259,7 +271,12 @@ func loadNotifyProjectConfig(
 		return nil, commandProjectContext{}, chc.WorkspaceConfig{}, err
 	}
 
-	projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return nil, commandProjectContext{}, chc.WorkspaceConfig{}, err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
 		AllowCurrentDirectory: true,
@@ -326,6 +343,7 @@ func runNotifyTelegramTestDispatch(
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
 	telegram chc.TelegramNotificationConfig,
+	assetsFS fs.FS,
 ) error {
 	now := time.Now().UTC()
 	event := notifyTelegramTestEvent(projectContext, now)

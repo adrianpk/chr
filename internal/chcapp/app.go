@@ -13,54 +13,75 @@ import (
 	"forge.adrianpk.com/chc/internal/chctui"
 )
 
-var assetsFS fs.FS
+type appDependencies struct {
+	assetsFS fs.FS
+}
+
+const appDependenciesMetadataKey = "chcapp.dependencies"
+
+func appDependenciesFromCommand(cmd *cli.Command) (appDependencies, error) {
+	value, ok := cmd.Root().Metadata[appDependenciesMetadataKey]
+	if !ok {
+		return appDependencies{}, errors.New("application dependencies are not configured")
+	}
+
+	deps, ok := value.(appDependencies)
+	if !ok {
+		return appDependencies{}, errors.New("application dependencies have an invalid type")
+	}
+
+	return deps, nil
+}
 
 func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.Writer, commandAssetsFS fs.FS) error {
-	assetsFS = commandAssetsFS
-	cmd := newRootCommand(stdin, stdout, stderr)
+	deps := appDependencies{assetsFS: commandAssetsFS}
+	cmd := newRootCommand(stdin, stdout, stderr, deps)
 
 	osArgs := append([]string{"chc"}, args...)
 
 	return cmd.Run(ctx, osArgs)
 }
 
-func newRootCommand(stdin io.Reader, stdout, stderr io.Writer) *cli.Command {
+func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
-		Name:                  "chc",
-		Usage:                 "Coordinate agent development workflows from the current project",
-		Reader:                stdin,
-		Writer:                stdout,
-		ErrWriter:             stderr,
+		Name:      "chc",
+		Usage:     "Coordinate agent development workflows from the current project",
+		Reader:    stdin,
+		Writer:    stdout,
+		ErrWriter: stderr,
+		Metadata: map[string]any{
+			appDependenciesMetadataKey: deps,
+		},
 		EnableShellCompletion: true,
-		Action:                runDefaultTUIAction(stdin, stdout),
+		Action:                runDefaultTUIAction(stdin, stdout, deps),
 		Commands: []*cli.Command{
-			newAuthorCommand(stdout),
-			newDaemonCommand(stdout),
-			newDumpCommand(stdout),
-			newIndexCommand(stdout),
-			newInitCommand(stdout),
-			newMaintenanceCommand(stdout),
-			newMetadataCommand(stdout),
-			newNotifyCommand(stdout),
-			newPlanCommand(stdout),
-			newProjectCommand(stdout),
-			newProvingCommand(stdout),
-			newQuizCommand(stdout),
-			newReportCommand(stdout),
-			newSpecCommand(stdout),
-			newRuntimeCommand(stdout),
-			newTicketCommand(stdout),
-			newTUICommand(stdin, stdout),
+			newAuthorCommand(stdout, deps),
+			newDaemonCommand(stdout, deps),
+			newDumpCommand(stdout, deps),
+			newIndexCommand(stdout, deps),
+			newInitCommand(stdout, deps),
+			newMaintenanceCommand(stdout, deps),
+			newMetadataCommand(stdout, deps),
+			newNotifyCommand(stdout, deps),
+			newPlanCommand(stdout, deps),
+			newProjectCommand(stdout, deps),
+			newProvingCommand(stdout, deps),
+			newQuizCommand(stdout, deps),
+			newReportCommand(stdout, deps),
+			newSpecCommand(stdout, deps),
+			newRuntimeCommand(stdout, deps),
+			newTicketCommand(stdout, deps),
+			newTUICommand(stdin, stdout, deps),
 		},
 	}
 }
 
-func newTUICommand(stdin io.Reader, stdout io.Writer) *cli.Command {
+func newTUICommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:   "tui",
 		Usage:  "Open the local ChrysoCoord operational console",
 		Flags:  tuiFlags(),
-		Action: runTUICommandAction(stdin, stdout),
+		Action: runTUICommandAction(stdin, stdout, deps),
 	}
 }
 
@@ -74,21 +95,21 @@ func tuiFlags() []cli.Flag {
 	)
 }
 
-func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
+func runDefaultTUIAction(stdin io.Reader, stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		env, err := newUserEnvironment("")
 		if err != nil {
 			return err
 		}
 
-		projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 			AllowCurrentDirectory: true,
 		})
 		if err != nil {
 			return err
 		}
 
-		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout)
+		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout, deps)
 		if err != nil {
 			return err
 		}
@@ -97,14 +118,14 @@ func runDefaultTUIAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 	}
 }
 
-func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
+func runTUICommandAction(stdin io.Reader, stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		env, err := newUserEnvironmentFromCommand(cmd)
 		if err != nil {
 			return err
 		}
 
-		projectContext, err := newCommandProjectContextResolver(env).Resolve(ctx, commandProjectContextOptions{
+		projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
 			ExplicitDir:           cmd.String("dir"),
 			UseExplicitDir:        cmd.IsSet("dir"),
 			AllowCurrentDirectory: true,
@@ -113,7 +134,7 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer) cli.ActionFunc {
 			return err
 		}
 
-		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout)
+		options, err := loadTUIOptions(ctx, env, projectContext, stdin, stdout, deps)
 		if err != nil {
 			return err
 		}
@@ -128,6 +149,7 @@ func loadTUIOptions(
 	projectContext commandProjectContext,
 	stdin io.Reader,
 	stdout io.Writer,
+	deps appDependencies,
 ) (chctui.Options, error) {
 	data := tuiOptionsData{
 		ctx:            ctx,
@@ -135,7 +157,8 @@ func loadTUIOptions(
 		projectContext: projectContext,
 		stdin:          stdin,
 		stdout:         stdout,
-		operations:     newService(ctx, env, projectContext),
+		assetsFS:       deps.assetsFS,
+		operations:     newService(ctx, env, projectContext, deps.assetsFS),
 	}
 
 	if err := loadTUIContentData(&data); err != nil {
@@ -154,7 +177,7 @@ func loadTUIOptions(
 }
 
 func loadTUIContentData(data *tuiOptionsData) error {
-	tickets, err := loadTUITickets(data.ctx, data.env, data.projectContext)
+	tickets, err := loadTUITickets(data.ctx, data.env, data.projectContext, data.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -210,7 +233,7 @@ func loadTUIMetadataData(data *tuiOptionsData) error {
 		return err
 	}
 
-	observability, err := loadTUIObservability(data.ctx, data.env, data.projectContext)
+	observability, err := loadTUIObservability(data.ctx, data.env, data.projectContext, data.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -263,6 +286,7 @@ type tuiOptionsData struct {
 	projectContext       commandProjectContext
 	stdin                io.Reader
 	stdout               io.Writer
+	assetsFS             fs.FS
 	tickets              []chc.IndexedTicket
 	documents            []chctui.DocumentView
 	dumps                []chctui.DumpView
@@ -315,6 +339,7 @@ func loadTUITickets(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
+	assetsFS fs.FS,
 ) ([]chc.IndexedTicket, error) {
 	index, err := chc.NewTicketIndex(ctx, env, assetsFS)
 	if err != nil {
@@ -355,18 +380,19 @@ func loadTUIObservability(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	projectContext commandProjectContext,
+	assetsFS fs.FS,
 ) (chctui.ObservabilityView, error) {
-	daemonState, err := loadTUIDaemonState(ctx, env)
+	daemonState, err := loadTUIDaemonState(ctx, env, assetsFS)
 	if err != nil {
 		return chctui.ObservabilityView{}, err
 	}
 
-	executions, err := loadTUIExecutions(ctx, env, projectContext.ProjectID)
+	executions, err := loadTUIExecutions(ctx, env, projectContext.ProjectID, assetsFS)
 	if err != nil {
 		return chctui.ObservabilityView{}, err
 	}
 
-	loops, err := loadTUILoopRuns(ctx, env, projectContext.ProjectID)
+	loops, err := loadTUILoopRuns(ctx, env, projectContext.ProjectID, assetsFS)
 	if err != nil {
 		return chctui.ObservabilityView{}, err
 	}
@@ -387,7 +413,7 @@ func loadTUIObservability(
 	return chctui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime), nil
 }
 
-func loadTUIDaemonState(ctx context.Context, env chc.UserEnvironment) (chc.DaemonState, error) {
+func loadTUIDaemonState(ctx context.Context, env chc.UserEnvironment, assetsFS fs.FS) (chc.DaemonState, error) {
 	repository, err := chc.NewDaemonStateRepository(ctx, env, assetsFS)
 	if err != nil {
 		return chc.DaemonState{}, err
@@ -414,6 +440,7 @@ func loadTUIExecutions(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	projectID string,
+	assetsFS fs.FS,
 ) ([]chc.ExecutionRecord, error) {
 	repository, err := chc.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
@@ -437,6 +464,7 @@ func loadTUILoopRuns(
 	ctx context.Context,
 	env chc.UserEnvironment,
 	projectID string,
+	assetsFS fs.FS,
 ) ([]chc.LoopRunRecord, error) {
 	repository, err := chc.NewLoopRunRepository(ctx, env, assetsFS)
 	if err != nil {

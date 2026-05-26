@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func newDumpCommand(stdout io.Writer) *cli.Command {
+func newDumpCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "dump",
 		Usage: "Manage workspace dumps",
