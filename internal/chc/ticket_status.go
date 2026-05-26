@@ -18,6 +18,41 @@ type UpdateTicketStatusOptions struct {
 	UpdatedAt time.Time
 }
 
+const (
+	TicketStatusBacklog        = "backlog"
+	TicketStatusReadyForDev    = "ready_for_dev"
+	TicketStatusInProgress     = "in_progress"
+	TicketStatusReadyForReview = "ready_for_review"
+	TicketStatusReadyForMerge  = "ready_for_merge"
+	TicketStatusDone           = "done"
+
+	TicketStatusOpenLegacy      = "open"
+	TicketStatusReadyLegacy     = "ready"
+	TicketStatusReviewingLegacy = "reviewing"
+	TicketStatusBlockedLegacy   = "blocked"
+	TicketStatusSolvedLegacy    = "solved"
+	TicketStatusMergedLegacy    = "merged"
+	TicketStatusClosedLegacy    = "closed"
+)
+
+var normalBoardTicketStatuses = map[string]struct{}{
+	TicketStatusBacklog:        {},
+	TicketStatusReadyForDev:    {},
+	TicketStatusInProgress:     {},
+	TicketStatusReadyForReview: {},
+	TicketStatusReadyForMerge:  {},
+	TicketStatusDone:           {},
+}
+
+var legacyTicketStatusAliases = map[string]string{
+	TicketStatusOpenLegacy:      TicketStatusBacklog,
+	TicketStatusReadyLegacy:     TicketStatusReadyForDev,
+	TicketStatusReviewingLegacy: TicketStatusReadyForReview,
+	TicketStatusSolvedLegacy:    TicketStatusReadyForMerge,
+	TicketStatusMergedLegacy:    TicketStatusDone,
+	TicketStatusClosedLegacy:    TicketStatusDone,
+}
+
 type ticketStatusUpdater struct{}
 
 func NewTicketStatusUpdater() TicketStatusUpdater {
@@ -62,10 +97,31 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 }
 
 func IsValidTicketStatus(status string) bool {
-	switch status {
-	case "open", "ready", "in_progress", "reviewing", "blocked", "solved", "merged", "closed":
+	status = strings.TrimSpace(status)
+	if _, ok := normalBoardTicketStatuses[status]; ok {
 		return true
-	default:
-		return false
 	}
+
+	if _, ok := legacyTicketStatusAliases[status]; ok {
+		return true
+	}
+
+	return status == TicketStatusBlockedLegacy
+}
+
+func IsNormalBoardTicketStatus(status string) bool {
+	_, ok := normalBoardTicketStatuses[strings.TrimSpace(status)]
+
+	return ok
+}
+
+func BoardTicketStatusFor(status string) (string, bool) {
+	status = strings.TrimSpace(status)
+	if IsNormalBoardTicketStatus(status) {
+		return status, true
+	}
+
+	alias, ok := legacyTicketStatusAliases[status]
+
+	return alias, ok
 }

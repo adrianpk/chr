@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const DefaultTicketStatus = "open"
+const DefaultTicketStatus = TicketStatusOpenLegacy
 
 type Ticket struct {
 	Key         string

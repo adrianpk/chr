@@ -63,3 +63,59 @@ func TestTicketStatusUpdaterRejectsInvalidStatus(t *testing.T) {
 		t.Fatal("UpdateStatus returned nil error")
 	}
 }
+
+func TestTicketStatusValidationAcceptsBoardAndLegacyStatuses(t *testing.T) {
+	for _, status := range []string{
+		TicketStatusBacklog,
+		TicketStatusReadyForDev,
+		TicketStatusInProgress,
+		TicketStatusReadyForReview,
+		TicketStatusReadyForMerge,
+		TicketStatusDone,
+		TicketStatusOpenLegacy,
+		TicketStatusReadyLegacy,
+		TicketStatusReviewingLegacy,
+		TicketStatusBlockedLegacy,
+		TicketStatusSolvedLegacy,
+		TicketStatusMergedLegacy,
+		TicketStatusClosedLegacy,
+	} {
+		t.Run(status, func(t *testing.T) {
+			if !IsValidTicketStatus(status) {
+				t.Fatalf("IsValidTicketStatus(%q) = false, want true", status)
+			}
+		})
+	}
+}
+
+func TestBoardTicketStatusForMapsNormalAndLegacyStatuses(t *testing.T) {
+	tests := []struct {
+		name   string
+		status string
+		want   string
+		wantOK bool
+	}{
+		{name: "normal", status: TicketStatusReadyForDev, want: TicketStatusReadyForDev, wantOK: true},
+		{name: "open legacy", status: TicketStatusOpenLegacy, want: TicketStatusBacklog, wantOK: true},
+		{name: "ready legacy", status: TicketStatusReadyLegacy, want: TicketStatusReadyForDev, wantOK: true},
+		{name: "reviewing legacy", status: TicketStatusReviewingLegacy, want: TicketStatusReadyForReview, wantOK: true},
+		{name: "solved legacy", status: TicketStatusSolvedLegacy, want: TicketStatusReadyForMerge, wantOK: true},
+		{name: "merged legacy", status: TicketStatusMergedLegacy, want: TicketStatusDone, wantOK: true},
+		{name: "closed legacy", status: TicketStatusClosedLegacy, want: TicketStatusDone, wantOK: true},
+		{name: "blocked legacy", status: TicketStatusBlockedLegacy, wantOK: false},
+		{name: "unknown", status: "unknown", wantOK: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := BoardTicketStatusFor(tt.status)
+			if ok != tt.wantOK {
+				t.Fatalf("ok = %v, want %v", ok, tt.wantOK)
+			}
+
+			if got != tt.want {
+				t.Fatalf("status = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
