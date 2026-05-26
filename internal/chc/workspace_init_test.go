@@ -25,6 +25,7 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 	assertDir(t, dir, ".chc/tickets/open")
 	assertDir(t, dir, ".chc/context")
 	assertDir(t, dir, ".chc/runtime/traces")
+	assertDir(t, dir, ".chc/user")
 	assertFile(t, dir, ".chc/manifest.md")
 	assertFile(t, dir, ".chc/config.yml")
 	assertFile(t, dir, ".chc/agents/CONVENTIONS.md")

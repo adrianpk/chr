@@ -71,6 +71,7 @@ var directories = []string{
 	"reports/runs",
 	"reports/audits",
 	"indexes",
+	"user",
 	"runtime/runs",
 	"runtime/locks",
 	"runtime/traces",
