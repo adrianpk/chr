@@ -275,12 +275,18 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 		Title:        title,
 		Status:       unquoteMetadataString(fields["status"]),
 		DocumentType: unquoteMetadataString(fields["type"]),
-		SourcePath:   unquoteMetadataString(fields["source"]),
-		CuratedPath:  unquoteMetadataString(fields["curated"]),
-		CaseSlug:     documentCaseSlug(fields),
-		SourceHash:   contentHash(content),
-		ModifiedAt:   info.ModTime().UTC(),
-		Size:         info.Size(),
+		SourcePath: firstNonEmpty(
+			unquoteMetadataString(fields["source"]),
+			unquoteMetadataString(fields["raw_path"]),
+		),
+		CuratedPath: firstNonEmpty(
+			unquoteMetadataString(fields["curated"]),
+			unquoteMetadataString(fields["curated_path"]),
+		),
+		CaseSlug:   documentCaseSlug(fields),
+		SourceHash: contentHash(content),
+		ModifiedAt: info.ModTime().UTC(),
+		Size:       info.Size(),
 	}, nil
 }
 
@@ -460,6 +466,20 @@ func IsRawDumpNode(node WorkspaceNode) bool {
 // IsCuratedDumpNode reports whether a dump node is a primary curated dump.
 func IsCuratedDumpNode(node WorkspaceNode) bool {
 	return node.Kind == WorkspaceNodeDump && !IsRawDumpNode(node)
+}
+
+// IsRawQuizNode reports whether a quiz node is the raw capture sibling.
+func IsRawQuizNode(node WorkspaceNode) bool {
+	if node.Kind != WorkspaceNodeQuiz {
+		return false
+	}
+
+	return node.Status == "raw" && strings.TrimSpace(node.CuratedPath) != ""
+}
+
+// IsCuratedQuizNode reports whether a quiz node is a primary curated quiz.
+func IsCuratedQuizNode(node WorkspaceNode) bool {
+	return node.Kind == WorkspaceNodeQuiz && !IsRawQuizNode(node)
 }
 
 func isArchivedGenerationPath(projectDir, path string) bool {

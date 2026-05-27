@@ -932,6 +932,7 @@ Ground the spec in the available project metadata, use-case metadata, dumps, qui
 Prefer concrete behavior, constraints, decisions, open questions, and implementation implications.
 Keep uncertain behavior explicit instead of inventing facts.
 Set status to draft because generated specs require user review.
+Return body without a top-level title heading; the renderer adds the H1 from title.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
 `)

@@ -437,6 +437,8 @@ case: "blog"
 	}
 
 	request := model.requests[len(model.requests)-1]
+	assertQuizModelRequestSections(t, request, []string{"spec"})
+
 	for _, section := range request.ContextSections {
 		if strings.Contains(section.Authority, "/archive/") {
 			t.Fatalf("context section includes archived authority: %#v", section)

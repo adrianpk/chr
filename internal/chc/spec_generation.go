@@ -90,7 +90,7 @@ func RenderGeneratedSpec(spec GeneratedSpec) string {
 	output.WriteString("created_at: " + yamlTimestamp(spec.CreatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# " + spec.Title + "\n\n")
-	output.WriteString(strings.TrimSpace(spec.Body) + "\n\n")
+	output.WriteString(generatedSpecBodyWithoutDuplicateTitle(spec.Title, spec.Body) + "\n\n")
 	output.WriteString("## Provenance\n\n")
 
 	for _, path := range spec.SourcePaths {
@@ -98,6 +98,20 @@ func RenderGeneratedSpec(spec GeneratedSpec) string {
 	}
 
 	return output.String()
+}
+
+func generatedSpecBodyWithoutDuplicateTitle(title, body string) string {
+	body = strings.TrimSpace(body)
+	heading := "# " + strings.TrimSpace(title)
+
+	if strings.HasPrefix(body, heading) {
+		remaining := strings.TrimPrefix(body, heading)
+		if remaining == "" || strings.HasPrefix(remaining, "\n") || strings.HasPrefix(remaining, "\r\n") {
+			return strings.TrimSpace(remaining)
+		}
+	}
+
+	return body
 }
 
 func ValidateGeneratedSpec(spec GeneratedSpec) error {

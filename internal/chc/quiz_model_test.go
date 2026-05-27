@@ -443,6 +443,14 @@ func TestOpenAIQuizModelTimeoutUsesLongerTimeoutForGeneration(t *testing.T) {
 	}
 }
 
+func TestQuizModelSpecGenerationInstructionsAvoidTopLevelBodyHeading(t *testing.T) {
+	instructions := quizModelSpecGenerationInstructions()
+
+	if !strings.Contains(instructions, "body without a top-level title heading") {
+		t.Fatalf("spec generation instructions do not prevent duplicate title headings: %q", instructions)
+	}
+}
+
 func TestQuizModelQuestionInstructionsMatchRedWrightContextBoundary(t *testing.T) {
 	instructions := []string{
 		quizModelDeepQuestionInstructions(),

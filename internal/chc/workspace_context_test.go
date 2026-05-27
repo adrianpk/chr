@@ -38,6 +38,7 @@ func TestAssembleWorkspaceContextLoadsCaseRootedDocuments(t *testing.T) {
 	for _, want := range []string{
 		"# Workspace Context",
 		"Case Dump",
+		"Case Quiz",
 		"Case Spec",
 		"Case Plan",
 		"Unresolved Case References",
@@ -47,7 +48,7 @@ func TestAssembleWorkspaceContextLoadsCaseRootedDocuments(t *testing.T) {
 		}
 	}
 
-	for _, forbidden := range []string{"Project Plan", "Board Ticket", "Case Dump Raw Capture"} {
+	for _, forbidden := range []string{"Project Plan", "Board Ticket", "Case Dump Raw Capture", "Case Quiz Raw Capture"} {
 		if strings.Contains(rendered, forbidden) {
 			t.Fatalf("rendered case context contains non-case document %q:\n%s", forbidden, rendered)
 		}
@@ -198,6 +199,28 @@ case: blog
 # Case Dump Raw Capture
 
 Raw case dump body.
+`)
+	writeTestFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz.md"), `---
+title: Case Quiz
+status: curated
+raw_path: .chc/quizzes/blog-quiz-raw.md
+case: blog
+---
+
+# Case Quiz
+
+Curated case quiz body.
+`)
+	writeTestFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md"), `---
+title: Case Quiz Raw Capture
+status: raw
+curated_path: .chc/quizzes/blog-quiz.md
+case: blog
+---
+
+# Case Quiz Raw Capture
+
+Raw case quiz body.
 `)
 	writeTestFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
 title: Case Plan
