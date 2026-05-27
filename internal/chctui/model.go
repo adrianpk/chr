@@ -94,6 +94,7 @@ type Options struct {
 	WorkspaceExecutor    WorkspaceRefreshExecutor
 	ProjectExecutor      ProjectMetadataExecutor
 	CaseExecutor         CaseMetadataExecutor
+	SourceExecutor       SourceOpenExecutor
 }
 
 type Model struct {
@@ -164,6 +165,8 @@ type Model struct {
 	workspaceExecutor        WorkspaceRefreshExecutor
 	projectExecutor          ProjectMetadataExecutor
 	caseExecutor             CaseMetadataExecutor
+	sourceExecutor           SourceOpenExecutor
+	detailScroll             int
 	statusMessage            string
 }
 
@@ -246,6 +249,7 @@ func NewModel(opts Options) Model {
 		workspaceExecutor:      opts.WorkspaceExecutor,
 		projectExecutor:        opts.ProjectExecutor,
 		caseExecutor:           opts.CaseExecutor,
+		sourceExecutor:         opts.SourceExecutor,
 	}
 }
 
@@ -286,6 +290,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateMouse(typedMsg)
 	case dumpEditorFinishedMsg:
 		m.completeDumpEdit(typedMsg)
+
+		return m, nil
+	case sourceEditorFinishedMsg:
+		m.completeSourceEdit(typedMsg)
 
 		return m, nil
 	case quizActionFinishedMsg:
@@ -462,7 +470,7 @@ func (m *Model) handleGlobalKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 		return nil, true
 	case "alt+e":
 		if m.SelectedView() != ViewDumps {
-			return nil, false
+			return m.openSelectedSource(), true
 		}
 
 		m.planDumpAction(DumpActionExternalEdit)
@@ -574,7 +582,26 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 
+	switch msg.Type {
+	case tea.KeyPgUp:
+		m.scrollDetailPage(-1)
+
+		return m, nil
+	case tea.KeyPgDown:
+		m.scrollDetailPage(1)
+
+		return m, nil
+	}
+
 	switch key {
+	case "pgup", "pageup", "ctrl+u":
+		m.scrollDetailPage(-1)
+	case "pgdown", "pagedown", "ctrl+d":
+		m.scrollDetailPage(1)
+	case "e":
+		if m.selectedPane == 1 {
+			return m, m.openSelectedSource()
+		}
 	case "up", "k":
 		m.selectPreviousRecord()
 	case "down", "j":
@@ -598,6 +625,8 @@ func (m *Model) handleNavigationCommandKey(key string) (tea.Cmd, bool) {
 		m.toggleMaximizedPane()
 
 		return nil, true
+	case key == "ctrl+e":
+		return m.openSelectedSource(), true
 	case m.handlePaneNavigationKey(key):
 		return nil, true
 	case m.handleBoardColumnNavigationKey(key):
@@ -749,9 +778,12 @@ func functionKeyView(msg tea.KeyMsg) (View, bool) {
 
 func (m *Model) selectPreviousRecord() {
 	if m.selectedPane != 0 {
+		m.scrollDetail(-1)
+
 		return
 	}
 
+	selectedPath := m.selectedSourcePath()
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectPreviousTicket()
@@ -770,13 +802,17 @@ func (m *Model) selectPreviousRecord() {
 	case ViewAuthoring:
 		m.selectPreviousAuthoringSession()
 	}
+	m.resetDetailScrollIfSourceChanged(selectedPath)
 }
 
 func (m *Model) selectNextRecord() {
 	if m.selectedPane != 0 {
+		m.scrollDetail(1)
+
 		return
 	}
 
+	selectedPath := m.selectedSourcePath()
 	switch m.SelectedView() {
 	case ViewBoard, ViewTickets:
 		m.selectNextTicket()
@@ -795,6 +831,7 @@ func (m *Model) selectNextRecord() {
 	case ViewAuthoring:
 		m.selectNextAuthoringSession()
 	}
+	m.resetDetailScrollIfSourceChanged(selectedPath)
 }
 
 func (m *Model) selectNextPane() {
@@ -830,6 +867,7 @@ func (m *Model) selectPreviousPane() {
 
 func (m *Model) selectPrimaryPane() {
 	m.selectedPane = 0
+	m.detailScroll = 0
 }
 
 func (m Model) paneCount() int {
@@ -1064,9 +1102,8 @@ func (m Model) renderSelectedTicketDetail() string {
 	renderTicketSourceDetail(&output, ticket)
 	output.WriteString(fmt.Sprintf("  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal))
 	output.WriteString(fmt.Sprintf("  Comments: %d\n", ticket.CommentCount))
-	renderTicketPreviewSection(&output, "Body", ticket.BodyPreview)
-	renderTicketPreviewSection(&output, "Checklist Items", ticket.ChecklistPreview)
-	renderTicketPreviewSection(&output, "Recent Comments", ticket.CommentPreview)
+	output.WriteString(fmt.Sprintf("  Path: %s\n", ticketDisplayPath(ticket.RelativePath)))
+	renderTicketBodySection(&output, ticket.BodyLines)
 
 	if len(ticket.AttentionReasons) > 0 {
 		output.WriteString("  Attention:\n")
@@ -1075,8 +1112,6 @@ func (m Model) renderSelectedTicketDetail() string {
 			output.WriteString(fmt.Sprintf("    - %s\n", reason))
 		}
 	}
-
-	output.WriteString(fmt.Sprintf("  Path: %s", ticket.RelativePath))
 
 	return output.String()
 }
@@ -1111,6 +1146,18 @@ func renderTicketPreviewSection(output *strings.Builder, title string, lines []s
 	}
 }
 
+func renderTicketBodySection(output *strings.Builder, lines []string) {
+	if len(lines) == 0 {
+		return
+	}
+
+	output.WriteString("  Body:\n")
+
+	for _, line := range lines {
+		fmt.Fprintf(output, "    %s\n", line)
+	}
+}
+
 //nolint:cyclop // Key helper text is centralized by selected view.
 func (m Model) renderKeys() string {
 	if keys, ok := m.activeInteractionKeys(); ok {
@@ -1119,25 +1166,25 @@ func (m Model) renderKeys() string {
 
 	switch {
 	case m.SelectedView() == ViewBoard:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, left/right changes Board column, alt+a toggles attention, up/down selects ticket, / filters, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, left/right changes Board column, alt+a toggles attention, alt+e edits source, up/down selects or scrolls, / filters, q quits"
 	case m.ticketKeysActive():
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects ticket, / filters, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, / filters, q quits"
 	case m.documentKeysActive():
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects document, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, q quits"
 	case m.SelectedView() == ViewProject:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects field, enter edits, s saves, r refreshes, q quits"
 	case m.SelectedView() == ViewCases:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects focused pane, enter opens or edits, s saves, r refreshes, q quits"
 	case m.SelectedView() == ViewDumps:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects dump, enter edits, c creates, r refreshes, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects or scrolls, enter edits, alt+e external, c creates, r refreshes, q quits"
 	case m.SelectedView() == ViewQuizzes:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects quiz, s starts, enter answers, r refreshes, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, s starts, enter answers, r refreshes, q quits"
 	case m.SelectedView() == ViewSpecs:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects spec, g generates spec, r refreshes, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates spec, r refreshes, q quits"
 	case m.SelectedView() == ViewPlans:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects plan, g generates missing plan, G regenerates, r refreshes, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates missing plan, G regenerates, r refreshes, q quits"
 	case m.SelectedView() == ViewAuthoring:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, up/down selects session, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, q quits"
 	default:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, q quits"
 	}
@@ -1488,9 +1535,7 @@ type TicketView struct {
 	ChecklistDone    int
 	ChecklistTotal   int
 	CommentCount     int
-	BodyPreview      []string
-	ChecklistPreview []string
-	CommentPreview   []string
+	BodyLines        []string
 }
 
 func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
@@ -1525,9 +1570,7 @@ func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 		view.ChecklistDone = detail.ChecklistDone
 		view.ChecklistTotal = detail.ChecklistTotal
 		view.CommentCount = detail.CommentCount
-		view.BodyPreview = detail.BodyPreview
-		view.ChecklistPreview = detail.ChecklistPreview
-		view.CommentPreview = detail.CommentPreview
+		view.BodyLines = detail.BodyLines
 
 		views = append(views, view)
 	}
@@ -1562,12 +1605,10 @@ func (t TicketView) Matches(filter string) bool {
 }
 
 type ticketMarkdownDetailView struct {
-	ChecklistDone    int
-	ChecklistTotal   int
-	CommentCount     int
-	BodyPreview      []string
-	ChecklistPreview []string
-	CommentPreview   []string
+	ChecklistDone  int
+	ChecklistTotal int
+	CommentCount   int
+	BodyLines      []string
 }
 
 type ticketMarkdownParser struct {
@@ -1586,18 +1627,21 @@ func ticketMarkdownDetail(path string) ticketMarkdownDetailView {
 	parser := ticketMarkdownParser{}
 
 	for _, line := range strings.Split(string(content), "\n") {
-		parser.readLine(strings.TrimSpace(line))
+		parser.readLine(line)
 	}
 
 	return parser.detail
 }
 
-func (p *ticketMarkdownParser) readLine(trimmed string) {
-	if trimmed == "" {
+func (p *ticketMarkdownParser) readLine(line string) {
+	trimmed := strings.TrimSpace(line)
+	if p.handleFrontMatter(trimmed) || p.inFrontMatter {
 		return
 	}
 
-	if p.handleFrontMatter(trimmed) || p.inFrontMatter {
+	p.detail.BodyLines = append(p.detail.BodyLines, line)
+
+	if trimmed == "" {
 		return
 	}
 
@@ -1608,9 +1652,6 @@ func (p *ticketMarkdownParser) readLine(trimmed string) {
 		p.readChecklistItem(trimmed)
 	case p.inComments && strings.HasPrefix(trimmed, "## "):
 		p.detail.CommentCount++
-		appendPreviewLine(&p.detail.CommentPreview, strings.TrimPrefix(trimmed, "## "), 3)
-	case !p.inComments && !strings.HasPrefix(trimmed, "#"):
-		appendPreviewLine(&p.detail.BodyPreview, trimmed, 4)
 	}
 }
 
@@ -1629,11 +1670,6 @@ func (p *ticketMarkdownParser) handleFrontMatter(trimmed string) bool {
 
 func (p *ticketMarkdownParser) readHeading(trimmed string) {
 	p.inComments = trimmed == "# Comments"
-	if p.inComments {
-		return
-	}
-
-	appendPreviewLine(&p.detail.BodyPreview, trimmed, 4)
 }
 
 func (p *ticketMarkdownParser) readChecklistItem(trimmed string) {
@@ -1642,14 +1678,4 @@ func (p *ticketMarkdownParser) readChecklistItem(trimmed string) {
 	if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
 		p.detail.ChecklistDone++
 	}
-
-	appendPreviewLine(&p.detail.ChecklistPreview, trimmed, 4)
-}
-
-func appendPreviewLine(lines *[]string, line string, limit int) {
-	if len(*lines) >= limit {
-		return
-	}
-
-	*lines = append(*lines, line)
 }

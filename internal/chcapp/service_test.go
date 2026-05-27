@@ -664,6 +664,34 @@ func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
 	}
 }
 
+func TestServiceOpenSourceUsesProjectRelativeFile(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "tickets", "CHC-1-example.md"), "# Ticket\n")
+
+	operations := newTestService(t, projectDir)
+	editor := &fakeDumpEditorLauncher{
+		command: DumpEditorCommand{
+			Program: "test-editor",
+			Args:    []string{"--wait"},
+			Dir:     projectDir,
+		},
+	}
+	operations.dumpEditor = editor
+
+	result, err := operations.OpenSource(".chc/tickets/CHC-1-example.md")
+	if err != nil {
+		t.Fatalf("OpenSource returned error: %v", err)
+	}
+
+	if editor.path != filepath.Join(projectDir, ".chc", "tickets", "CHC-1-example.md") {
+		t.Fatalf("editor path = %q", editor.path)
+	}
+
+	if result.EditorCommand == nil {
+		t.Fatal("EditorCommand = nil, want editor command")
+	}
+}
+
 func newTestService(t *testing.T, projectDir string) service {
 	t.Helper()
 

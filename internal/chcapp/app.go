@@ -332,6 +332,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		WorkspaceExecutor:    newTUIWorkspaceRefreshExecutor(data.operations),
 		ProjectExecutor:      newTUIProjectMetadataExecutor(data.operations),
 		CaseExecutor:         newTUICaseMetadataExecutor(data.operations),
+		SourceExecutor:       newTUISourceOpenExecutor(data.operations),
 	}
 }
 

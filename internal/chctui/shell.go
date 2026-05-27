@@ -520,6 +520,7 @@ func (m Model) caseMetadataFromSuggestions(
 func (m Model) renderTicketWorkspace(width, height int) string {
 	list := m.renderTicketFocusList(height - 2)
 	detail := m.renderSelectedTicketDetail()
+	detailLines := strings.Split(detail, "\n")[1:]
 
 	switch m.maximizedPane {
 	case 0:
@@ -529,7 +530,7 @@ func (m Model) renderTicketWorkspace(width, height int) string {
 
 		return fitBlock(renderPanel("Tickets", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Detail", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel("Detail", detailLines, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -538,7 +539,7 @@ func (m Model) renderTicketWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Tickets", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Detail", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel("Detail", detailLines, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -550,7 +551,7 @@ func (m Model) renderDocumentWorkspace(width, height int, title string, document
 	case 0:
 		return fitBlock(renderPanel(title, list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Preview", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel("Preview", strings.Split(detail, "\n")[1:], width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -559,7 +560,7 @@ func (m Model) renderDocumentWorkspace(width, height int, title string, document
 		lipgloss.Top,
 		renderPanel(title, list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel("Preview", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -571,7 +572,7 @@ func (m Model) renderDumpWorkspace(width, height int) string {
 	case 0:
 		return fitBlock(renderPanel("Dumps", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel(detailTitle, detailLines, width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel(detailTitle, detailLines, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -581,7 +582,7 @@ func (m Model) renderDumpWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Dumps", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel(detailTitle, detailLines, rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel(detailTitle, detailLines, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -599,7 +600,7 @@ func (m Model) renderQuizWorkspace(width, height int) string {
 	case 0:
 		return fitBlock(renderPanel("Quizzes", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel(detailTitle, detail, width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel(detailTitle, detail, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -609,7 +610,7 @@ func (m Model) renderQuizWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Quizzes", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel(detailTitle, detail, rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel(detailTitle, detail, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -621,7 +622,7 @@ func (m Model) renderSpecWorkspace(width, height int) string {
 	case 0:
 		return fitBlock(renderPanel("Specs", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Spec", detail, width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel("Spec", detail, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -631,7 +632,7 @@ func (m Model) renderSpecWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Specs", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Spec", detail, rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel("Spec", detail, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -643,7 +644,7 @@ func (m Model) renderPlanWorkspace(width, height int) string {
 	case 0:
 		return fitBlock(renderPanel("Plans", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Plan", detail, width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel("Plan", detail, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -653,7 +654,7 @@ func (m Model) renderPlanWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Plans", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Plan", detail, rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel("Plan", detail, rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -674,7 +675,7 @@ func (m Model) renderAuthoringWorkspace(width, height int) string {
 	case 0:
 		return fitBlock(renderPanel("Authoring", list, width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Session", strings.Split(detail, "\n")[1:], width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel("Session", strings.Split(detail, "\n")[1:], width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -683,7 +684,7 @@ func (m Model) renderAuthoringWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Authoring", list, leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Session", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel("Session", strings.Split(detail, "\n")[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -695,7 +696,7 @@ func (m Model) renderOperationsWorkspace(width, height int) string {
 	case 0:
 		return fitBlock(renderPanel("Agent", agent[1:], width, height, true), width, height)
 	case 1:
-		return fitBlock(renderPanel("Runtime", runtime[1:], width, height, true), width, height)
+		return fitBlock(m.renderDetailPanel("Runtime", runtime[1:], width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
@@ -704,7 +705,7 @@ func (m Model) renderOperationsWorkspace(width, height int) string {
 		lipgloss.Top,
 		renderPanel("Agent", agent[1:], leftWidth, height, m.selectedPane == 0),
 		panelVerticalGap(height),
-		renderPanel("Runtime", runtime[1:], rightWidth, height, m.selectedPane == 1),
+		m.renderDetailPanel("Runtime", runtime[1:], rightWidth, height, m.selectedPane == 1),
 	), width, height)
 }
 
@@ -1108,6 +1109,12 @@ func renderPanel(title string, lines []string, width, height int, focused bool) 
 	content := append([]string{shellTitleStyle.Render(title)}, lines...)
 
 	return style.Width(maxInt(width-2, 1)).Height(contentHeight).Render(fitBlock(strings.Join(content, "\n"), maxInt(width-4, 1), contentHeight))
+}
+
+func (m Model) renderDetailPanel(title string, lines []string, width, height int, focused bool) string {
+	lines = scrollLines(lines, m.detailScroll, maxInt(height-3, 1))
+
+	return renderPanel(title, lines, width, height, focused)
 }
 
 func panelVerticalGap(height int) string {

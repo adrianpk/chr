@@ -1653,6 +1653,218 @@ func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 	}
 }
 
+func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
+	executor := &fakeSourceOpenExecutor{
+		result: SourceOpenResult{
+			EditorCommand:            exec.Command("true"),
+			EditorCommandDescription: "nvim ticket.md",
+		},
+	}
+	model := NewModel(Options{
+		SourceExecutor: executor,
+		Tickets: []chc.IndexedTicket{
+			{
+				Key:          "CHC-1",
+				Title:        "Preview command",
+				Status:       chc.TicketStatusBacklog,
+				RelativePath: "local-preview/CHC-1-preview-command.md",
+			},
+		},
+	})
+	model.selected = 6
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}, Alt: true})
+
+	confirmed, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if cmd == nil {
+		t.Fatal("cmd = nil, want external editor command")
+	}
+
+	if executor.path != ".chc/tickets/local-preview/CHC-1-preview-command.md" {
+		t.Fatalf("source path = %q", executor.path)
+	}
+
+	wantStatus := "External editor opened. chc will resume when the editor process exits."
+	if confirmed.statusMessage != wantStatus {
+		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
+	}
+}
+
+func TestModelCtrlEOpensSelectedTicketSource(t *testing.T) {
+	executor := &fakeSourceOpenExecutor{
+		result: SourceOpenResult{
+			EditorCommand:            exec.Command("true"),
+			EditorCommandDescription: "nvim ticket.md",
+		},
+	}
+	model := NewModel(Options{
+		SourceExecutor: executor,
+		Tickets: []chc.IndexedTicket{
+			{
+				Key:          "CHC-1",
+				Title:        "Preview command",
+				Status:       chc.TicketStatusBacklog,
+				RelativePath: "local-preview/CHC-1-preview-command.md",
+			},
+		},
+	})
+	model.selected = 6
+
+	_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyCtrlE})
+
+	if cmd == nil {
+		t.Fatal("cmd = nil, want external editor command")
+	}
+
+	if executor.path != ".chc/tickets/local-preview/CHC-1-preview-command.md" {
+		t.Fatalf("source path = %q", executor.path)
+	}
+}
+
+func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
+	executor := &fakeSourceOpenExecutor{
+		result: SourceOpenResult{
+			EditorCommand:            exec.Command("true"),
+			EditorCommandDescription: "nvim ticket.md",
+		},
+	}
+	model := NewModel(Options{
+		SourceExecutor: executor,
+		Tickets: []chc.IndexedTicket{
+			{
+				Key:          "CHC-1",
+				Title:        "Preview command",
+				Status:       chc.TicketStatusBacklog,
+				RelativePath: "CHC-1-preview-command.md",
+			},
+		},
+	})
+	model.selected = 6
+	model.selectedPane = 1
+
+	_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}})
+
+	if cmd == nil {
+		t.Fatal("cmd = nil, want external editor command")
+	}
+
+	if executor.path != ".chc/tickets/CHC-1-preview-command.md" {
+		t.Fatalf("source path = %q", executor.path)
+	}
+}
+
+func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{
+				Key:          "CHC-1",
+				Title:        "Long detail",
+				Status:       chc.TicketStatusBacklog,
+				RelativePath: "CHC-1-long-detail.md",
+			},
+		},
+	})
+	model.selected = 6
+	model.height = 20
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyPgDown})
+
+	scrolled, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if scrolled.detailScroll != 15 {
+		t.Fatalf("detailScroll = %d, want 15", scrolled.detailScroll)
+	}
+}
+
+func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{
+				Key:          "CHC-1",
+				Title:        "Long detail",
+				Status:       chc.TicketStatusBacklog,
+				RelativePath: "CHC-1-long-detail.md",
+			},
+		},
+	})
+	model.selected = 6
+	model.width = 100
+	model.height = 18
+	model.tickets[0].BodyLines = []string{
+		"Line 1",
+		"Line 2",
+		"Line 3",
+		"Line 4",
+		"Line 5",
+		"Line 6",
+		"Line 7",
+		"Line 8",
+		"Line 9",
+		"Line 10",
+		"Line 11",
+		"Line 12",
+		"Line 13",
+		"Line 14",
+		"Line 15",
+	}
+
+	before := model.View()
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyPgDown})
+	scrolled := updated.(Model)
+	after := scrolled.View()
+
+	if before == after {
+		t.Fatal("View() did not change after PgDown")
+	}
+
+	if strings.Contains(after, "Line 1 ") {
+		t.Fatalf("View() still contains first body line after PgDown:\n%s", after)
+	}
+}
+
+func TestModelScrollsFocusedTicketDetail(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{
+				Key:          "CHC-1",
+				Title:        "Long detail",
+				Status:       chc.TicketStatusBacklog,
+				RelativePath: "CHC-1-long-detail.md",
+			},
+		},
+	})
+	model.selected = 6
+	model.selectedPane = 1
+	model.tickets[0].BodyLines = []string{
+		"Line 1",
+		"Line 2",
+		"Line 3",
+		"Line 4",
+		"Line 5",
+		"Line 6",
+		"Line 7",
+		"Line 8",
+	}
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyDown})
+
+	scrolled, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if scrolled.detailScroll != 1 {
+		t.Fatalf("detailScroll = %d, want 1", scrolled.detailScroll)
+	}
+}
+
 func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 	model := NewModel(Options{})
 
@@ -2144,16 +2356,60 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 		"Slice: Slice 1",
 		"Checklist: 1 done / 2 total",
 		"Comments: 1",
+		"Path: .chc/tickets/open.md",
 		"Body:",
 		"Investigate publishing failure.",
-		"Checklist Items:",
 		"- [x] Done",
-		"Recent Comments:",
+		"- [ ] Pending",
+		"# Comments",
 		"2026-05-22T10:00:00Z chc",
-		"Path: open.md",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
+	projectDir := t.TempDir()
+	ticketPath := writeTicketViewFile(
+		t,
+		projectDir,
+		"long.md",
+		"# Description\n\nFirst paragraph.\n\n    indented code\n\n- [ ] Task\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n\nComment body.\n",
+	)
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{
+				Path:         ticketPath,
+				RelativePath: "long.md",
+				Key:          "CHC-1",
+				Title:        "Long body",
+				Status:       chc.TicketStatusBacklog,
+			},
+		},
+	})
+	model.selected = 6
+
+	view := model.View()
+
+	for _, want := range []string{
+		"Body:",
+		"# Description",
+		"First paragraph.",
+		"indented code",
+		"- [ ] Task",
+		"# Comments",
+		"Comment body.",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	for _, unwanted := range []string{"Checklist Items:", "Recent Comments:"} {
+		if strings.Contains(view, unwanted) {
+			t.Fatalf("View() contains preview section %q:\n%s", unwanted, view)
 		}
 	}
 }
@@ -4101,6 +4357,18 @@ type fakeWorkspaceRefreshExecutor struct {
 
 func (e *fakeWorkspaceRefreshExecutor) RefreshWorkspace() (WorkspaceRefreshResult, error) {
 	e.called = true
+
+	return e.result, e.err
+}
+
+type fakeSourceOpenExecutor struct {
+	path   string
+	result SourceOpenResult
+	err    error
+}
+
+func (e *fakeSourceOpenExecutor) OpenSource(path string) (SourceOpenResult, error) {
+	e.path = path
 
 	return e.result, e.err
 }

@@ -334,7 +334,7 @@ func (m Model) selectedSourcePath() string {
 	case ViewBoard, ViewTickets:
 		ticket, ok := m.selectedTicketView()
 		if ok {
-			return ticket.RelativePath
+			return ticketDisplayPath(ticket.RelativePath)
 		}
 	case ViewDumps:
 		dump, ok := m.selectedDumpView()
@@ -371,7 +371,11 @@ func (m Model) selectedQuizSourcePath() string {
 		return ""
 	}
 
-	return quiz.CuratedPath
+	if strings.TrimSpace(quiz.CuratedPath) != "" {
+		return quiz.CuratedPath
+	}
+
+	return quiz.RawPath
 }
 
 func (m Model) selectedDocumentSourcePath() string {
