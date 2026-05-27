@@ -1,4 +1,4 @@
-# Slice 2: Quiz Model Trace Integration
+# Slice 2: LLM Call Trace Integration
 
 Status: reviewing
 Slicing: LLM File Tracing

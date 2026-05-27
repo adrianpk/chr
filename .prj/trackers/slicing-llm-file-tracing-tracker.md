@@ -10,11 +10,11 @@ Slicing name: LLM File Tracing
 
 Active slice number: Slice 2
 
-Active slice short name: quiz model trace integration
+Active slice short name: llm call trace integration
 
 Expected branch name: `feat/slice-2-quiz-model-trace-integration`
 
-Expected PR title: `feat(slice-2): quiz model trace integration`
+Expected PR title: `feat(slice-2): llm call trace integration`
 
 Expected report path:
 `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md`
@@ -47,7 +47,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: LLM Trace Sink | Delivered | `feat/slice-1-llm-trace-sink` | `feat(slice-1): llm trace sink` | `.prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md` | Delivered in PR #229. |
-| Slice 2: Quiz Model Trace Integration | Reviewing | `feat/slice-2-quiz-model-trace-integration` | `feat(slice-2): quiz model trace integration` | `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md` | Wires tracing into real model calls. |
+| Slice 2: LLM Call Trace Integration | Reviewing | `feat/slice-2-quiz-model-trace-integration` | `feat(slice-2): llm call trace integration` | `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md` | Wires tracing into real model calls. |
 
 ## Slice 1: LLM Trace Sink
 
@@ -74,7 +74,7 @@ Validation:
 - `go test ./internal/chc -run 'Test(LoadLLMTraceConfig|WriteLLMTraceEvent|RecordLLMTraceEvent)'` - pass.
 - `go test ./...` - pass.
 
-## Slice 2: Quiz Model Trace Integration
+## Slice 2: LLM Call Trace Integration
 
 Candidate tasks:
 
