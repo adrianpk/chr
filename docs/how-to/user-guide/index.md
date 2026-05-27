@@ -248,8 +248,9 @@ Refresh is blocked while use-case edits are active or unsaved.
 Open the Dumps view with `F3`.
 
 Dumps are free-form Markdown context. They can be project-wide or tied to a use
-case. The TUI lists dumps by use case and shows the selected dump content in the
-detail pane.
+case. Creating a dump writes a curated primary document plus a raw capture
+sibling. The TUI lists curated dumps by use case, shows the selected curated
+content in the detail pane, and shows the raw sibling path when one exists.
 
 | Key | Behavior |
 | --- | --- |

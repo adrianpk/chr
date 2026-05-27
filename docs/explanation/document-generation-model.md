@@ -32,9 +32,10 @@ status of a spec, not a separate artifact family.
 A dump captures broad project or use-case context. It is useful when the user
 has a lot of information that is not yet structured.
 
-Dump material can later feed a specification, plan, ticket, or execution
-context. The dump is not expected to be polished; it preserves knowledge before
-the agent or user shapes it into a stricter document.
+Dump creation produces a curated primary document plus a raw capture sibling.
+The curated document feeds specifications, plans, tickets, and execution
+context by default. The raw sibling preserves the original capture and
+highlights, but it is not selected as regular dump context.
 
 Dumps may declare a use-case slug. Dumps without a use-case slug are
 project-wide.

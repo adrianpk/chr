@@ -124,6 +124,9 @@ chc metadata case set billing --name "Billing" --description "Description" --con
 
 ## Dumps View
 
+The Dumps view shows curated primary dumps. Raw capture siblings are retained on
+disk and shown as metadata for the selected curated dump when available.
+
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a dump. |

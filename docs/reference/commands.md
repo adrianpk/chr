@@ -104,6 +104,9 @@ chc dump open .chc/dumps/billing-notes.md
 ```
 
 Dump paths are project-relative and must stay under `.chc/dumps/`.
+`chc dump new` writes a curated primary dump and a `-raw.md` sibling. Listing
+dumps returns the curated primary documents; raw siblings are retained as source
+captures and are not selected as regular dump context.
 
 ## Runtime Quizzes
 
