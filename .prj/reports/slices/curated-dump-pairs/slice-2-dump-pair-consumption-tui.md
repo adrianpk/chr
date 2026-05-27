@@ -4,6 +4,8 @@ Status: reviewing
 
 Branch: `feat/slice-2-dump-pair-consumption-tui`
 
+Pull request: #232
+
 ## Objective
 
 Make curated dumps the primary consumption artifact while retaining raw dump siblings as source metadata.
