@@ -9,9 +9,9 @@ PR: pending
 
 ## Purpose
 
-Wire the reusable LLM trace sink into the shared OpenAI quiz model adapter so
-quiz, spec, plan, and plan-tracking generation calls can be inspected from the
-active project userspace when tracing is enabled.
+Wire the reusable LLM trace sink into ChrysoCoord-owned LLM calls so quiz,
+spec, plan, plan-tracking, and local authoring quiz generation calls can be
+inspected from the active project userspace when tracing is enabled.
 
 ## Delivered Behavior
 
@@ -25,6 +25,8 @@ active project userspace when tracing is enabled.
   `CHC_LLM_TRACE_PAYLOADS=1`.
 - Routes the default application OpenAI adapter with the active project
   directory so trace files resolve under `.chc/user/log/llm/`.
+- Records local Codex authoring quiz generation calls outside the ticket
+  execution container.
 
 ## Implementation Notes
 
@@ -36,6 +38,8 @@ active project userspace when tracing is enabled.
   with distinct `status` values.
 - The service constructor passes `projectContext.ProjectDir` into the default
   OpenAI adapter.
+- Ticket execution worker invocations are intentionally outside this trace
+  surface because they run as the execution container workflow.
 
 ## Contracts Added or Changed
 
@@ -46,11 +50,14 @@ active project userspace when tracing is enabled.
   - `error`
   - `parse_error`
 - Added `output_payload` to the payload-gated trace fields.
+- Added trace recording for `CodexAuthoringQuizQuestionProvider`.
 
 ## Files of Interest
 
 - `internal/chc/quiz_openai_model.go`
 - `internal/chc/quiz_model_test.go`
+- `internal/chc/authoring_contextual_quiz.go`
+- `internal/chc/authoring_contextual_quiz_test.go`
 - `internal/chc/llm_trace.go`
 - `internal/chcapp/service.go`
 - `.prj/trackers/slicing-llm-file-tracing-tracker.md`
@@ -59,6 +66,7 @@ active project userspace when tracing is enabled.
 ## Validation
 
 - `go test ./internal/chc -run 'TestOpenAIQuizModel(AdapterRecords|RequestBody|Timeout)|TestWriteLLMTraceEvent'` - pass.
+- `go test ./internal/chc -run 'Test(CodexAuthoringQuizQuestionProviderRecords|OpenAIQuizModelAdapterRecords|WriteLLMTraceEvent)'` - pass.
 - `go test ./internal/chcapp` - pass.
 - `go test ./...` - pass.
 

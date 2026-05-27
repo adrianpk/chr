@@ -94,10 +94,12 @@ Candidate tasks:
 Task commits:
 
 - `38bffc7 feat(trace): record quiz model llm calls`
+- `a8106f6 feat(trace): record authoring quiz llm calls`
 
 Validation:
 
 - `go test ./internal/chc -run 'TestOpenAIQuizModel(AdapterRecords|RequestBody|Timeout)|TestWriteLLMTraceEvent'` - pass.
+- `go test ./internal/chc -run 'Test(CodexAuthoringQuizQuestionProviderRecords|OpenAIQuizModelAdapterRecords|WriteLLMTraceEvent)'` - pass.
 - `go test ./internal/chcapp` - pass.
 - `go test ./...` - pass.
 
