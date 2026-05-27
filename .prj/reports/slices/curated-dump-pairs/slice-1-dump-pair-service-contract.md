@@ -1,11 +1,11 @@
 # Slice 1: Dump Pair Service Contract
 
-Status: reviewing
+Status: delivered
 Slicing: Curated Dump Pairs
 Plan: `.prj/plans/slicing-curated-dump-pairs-plan.md`
 Tracker: `.prj/trackers/slicing-curated-dump-pairs-tracker.md`
 Branch: `feat/slice-1-dump-pair-service-contract`
-PR: pending
+PR: #231
 
 ## Purpose
 

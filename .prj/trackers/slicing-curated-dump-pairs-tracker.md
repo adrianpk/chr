@@ -26,8 +26,8 @@ Expected report path:
 - [x] Capture LLM curation and deterministic fallback behavior.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -35,7 +35,7 @@ Expected report path:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Dump Pair Service Contract | Reviewing | `feat/slice-1-dump-pair-service-contract` | `feat(slice-1): dump pair service contract` | `.prj/reports/slices/curated-dump-pairs/slice-1-dump-pair-service-contract.md` | Service, LLM curation, fallback, CLI behavior. |
+| Slice 1: Dump Pair Service Contract | Delivered | `feat/slice-1-dump-pair-service-contract` | `feat(slice-1): dump pair service contract` | `.prj/reports/slices/curated-dump-pairs/slice-1-dump-pair-service-contract.md` | PR #231. |
 | Slice 2: Dump Pair Consumption And TUI | Pending | `feat/slice-2-dump-pair-consumption-tui` | `feat(slice-2): dump pair consumption and tui` | `.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md` | Workspace index, context assembly, TUI presentation. |
 
 ## Slice 1: Dump Pair Service Contract
