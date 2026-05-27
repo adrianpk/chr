@@ -294,6 +294,15 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 	}
 
 	dumpPath := filepath.ToSlash(filepath.Join(chc.DirectoryName, "dumps", "cli-dump.md"))
+	rawDumpPath := filepath.ToSlash(filepath.Join(chc.DirectoryName, "dumps", "cli-dump-raw.md"))
+
+	if !strings.Contains(stdout.String(), "Created dump "+dumpPath+".") {
+		t.Fatalf("dump new stdout = %q, want curated dump path", stdout.String())
+	}
+
+	if _, err := os.Stat(filepath.Join(projectDir, filepath.FromSlash(rawDumpPath))); err != nil {
+		t.Fatalf("stat raw dump: %v", err)
+	}
 
 	stdout.Reset()
 
@@ -310,6 +319,16 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 
 	if !strings.Contains(stdout.String(), "Dump body from CLI.") {
 		t.Fatalf("stdout = %q, want dump body", stdout.String())
+	}
+
+	rawContent, err := os.ReadFile(filepath.Join(projectDir, filepath.FromSlash(rawDumpPath)))
+	if err != nil {
+		t.Fatalf("read raw dump: %v", err)
+	}
+
+	if !strings.Contains(string(rawContent), "## Highlights") ||
+		!strings.Contains(string(rawContent), "Dump body from CLI.") {
+		t.Fatalf("raw dump content = %q, want highlights and raw body", string(rawContent))
 	}
 }
 
