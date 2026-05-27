@@ -139,6 +139,62 @@ case: "missing"
 	}
 }
 
+func TestWorkspaceGraphBuilderClassifiesDumpPairMetadata(t *testing.T) {
+	projectDir := t.TempDir()
+
+	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+		Name: "Blog Publishing",
+	}))
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes.md"), `---
+title: "Blog Notes"
+status: "curated"
+type: "dump"
+source: ".chc/dumps/blog-notes-raw.md"
+case: "blog"
+---
+
+# Blog Notes
+`)
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes-raw.md"), `---
+title: "Blog Notes Raw Capture"
+status: "raw"
+type: "dump_raw"
+curated: ".chc/dumps/blog-notes.md"
+case: "blog"
+---
+
+# Blog Notes Raw Capture
+`)
+
+	graph, err := NewWorkspaceGraphBuilder(projectDir).Build(context.Background())
+	if err != nil {
+		t.Fatalf("Build returned error: %v", err)
+	}
+
+	caseNodes, ok := graph.CaseView("blog")
+	if !ok {
+		t.Fatal("CaseView returned ok=false, want true")
+	}
+
+	curated := findWorkspaceGraphNodeByTitle(t, caseNodes, "Blog Notes")
+	if curated.DocumentType != "dump" || curated.SourcePath != ".chc/dumps/blog-notes-raw.md" {
+		t.Fatalf("curated dump metadata = %#v", curated)
+	}
+
+	raw := findWorkspaceGraphNodeByTitle(t, caseNodes, "Blog Notes Raw Capture")
+	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chc/dumps/blog-notes.md" {
+		t.Fatalf("raw dump metadata = %#v", raw)
+	}
+
+	if !IsRawDumpNode(raw) {
+		t.Fatalf("IsRawDumpNode returned false for %#v", raw)
+	}
+
+	if !IsCuratedDumpNode(curated) {
+		t.Fatalf("IsCuratedDumpNode returned false for %#v", curated)
+	}
+}
+
 func TestWorkspaceGraphBuilderToleratesMissingChcDirectory(t *testing.T) {
 	graph, err := NewWorkspaceGraphBuilder(t.TempDir()).Build(context.Background())
 	if err != nil {
@@ -152,6 +208,20 @@ func TestWorkspaceGraphBuilderToleratesMissingChcDirectory(t *testing.T) {
 	if len(graph.Cases) != 0 || len(graph.ProjectWide) != 0 || len(graph.Diagnostics) != 0 {
 		t.Fatalf("graph = %#v, want empty graph", graph)
 	}
+}
+
+func findWorkspaceGraphNodeByTitle(t *testing.T, nodes []WorkspaceNode, title string) WorkspaceNode {
+	t.Helper()
+
+	for _, node := range nodes {
+		if node.Title == title {
+			return node
+		}
+	}
+
+	t.Fatalf("node %q not found in %#v", title, nodes)
+
+	return WorkspaceNode{}
 }
 
 func assertWorkspaceGraphNode(

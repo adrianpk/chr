@@ -43,6 +43,9 @@ type WorkspaceNode struct {
 	Name         string
 	Description  string
 	Status       string
+	DocumentType string
+	SourcePath   string
+	CuratedPath  string
 	CaseSlug     string
 	SourceHash   string
 	ModifiedAt   time.Time
@@ -271,6 +274,9 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 		Slug:         strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
 		Title:        title,
 		Status:       unquoteMetadataString(fields["status"]),
+		DocumentType: unquoteMetadataString(fields["type"]),
+		SourcePath:   unquoteMetadataString(fields["source"]),
+		CuratedPath:  unquoteMetadataString(fields["curated"]),
 		CaseSlug:     documentCaseSlug(fields),
 		SourceHash:   contentHash(content),
 		ModifiedAt:   info.ModTime().UTC(),
@@ -436,6 +442,24 @@ func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
 	default:
 		return WorkspaceNodeUnknown
 	}
+}
+
+// IsRawDumpNode reports whether a dump node is the raw capture sibling.
+func IsRawDumpNode(node WorkspaceNode) bool {
+	if node.Kind != WorkspaceNodeDump {
+		return false
+	}
+
+	if node.DocumentType == "dump_raw" {
+		return true
+	}
+
+	return node.Status == "raw" && strings.TrimSpace(node.CuratedPath) != ""
+}
+
+// IsCuratedDumpNode reports whether a dump node is a primary curated dump.
+func IsCuratedDumpNode(node WorkspaceNode) bool {
+	return node.Kind == WorkspaceNodeDump && !IsRawDumpNode(node)
 }
 
 func isArchivedGenerationPath(projectDir, path string) bool {
