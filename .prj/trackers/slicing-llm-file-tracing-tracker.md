@@ -35,9 +35,9 @@ Prerequisite PRs or delivered work:
 - [x] Capture future per-user configuration need.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker.
-- [ ] Merge plan and tracker into `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker.
+- [x] Merge plan and tracker into `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing.
 - [ ] Decide whether post-slice tuning is needed.
@@ -46,31 +46,32 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: LLM Trace Sink | Planned | `feat/slice-1-llm-trace-sink` | `feat(slice-1): llm trace sink` | `.prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md` | Adds reusable opt-in writer and tests. |
+| Slice 1: LLM Trace Sink | Reviewing | `feat/slice-1-llm-trace-sink` | `feat(slice-1): llm trace sink` | `.prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md` | Adds reusable opt-in writer and tests. |
 | Slice 2: Quiz Model Trace Integration | Planned | `feat/slice-2-quiz-model-trace-integration` | `feat(slice-2): quiz model trace integration` | `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md` | Wires tracing into real model calls. |
 
 ## Slice 1: LLM Trace Sink
 
 Candidate tasks:
 
-- [ ] T1.1 Add trace configuration resolved from environment variables.
-- [ ] T1.2 Add active-userspace LLM log path resolution.
-- [ ] T1.3 Add JSONL trace writer with non-fatal write behavior.
-- [ ] T1.4 Add rolling file rotation with bounded retained files.
-- [ ] T1.5 Add redaction for secret-like fields and known secret environment
+- [x] T1.1 Add trace configuration resolved from environment variables.
+- [x] T1.2 Add active-userspace LLM log path resolution.
+- [x] T1.3 Add JSONL trace writer with non-fatal write behavior.
+- [x] T1.4 Add rolling file rotation with bounded retained files.
+- [x] T1.5 Add redaction for secret-like fields and known secret environment
       values.
-- [ ] T1.6 Add unit tests for disabled tracing, enabled tracing, payload gating,
+- [x] T1.6 Add unit tests for disabled tracing, enabled tracing, payload gating,
       redaction, and rotation.
-- [ ] T1.7 Add slice implementation report.
-- [ ] T1.8 Run targeted tests and `go test ./...`.
+- [x] T1.7 Add slice implementation report.
+- [x] T1.8 Run targeted tests and `go test ./...`.
 
 Task commits:
 
-- Pending.
+- `0a77788 feat(trace): add llm trace sink`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc -run 'Test(LoadLLMTraceConfig|WriteLLMTraceEvent|RecordLLMTraceEvent)'` - pass.
+- `go test ./...` - pass.
 
 ## Slice 2: Quiz Model Trace Integration
 
