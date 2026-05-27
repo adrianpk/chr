@@ -1,11 +1,11 @@
 # Slice 1: LLM Trace Sink
 
-Status: reviewing
+Status: delivered
 Slicing: LLM File Tracing
 Plan: `.prj/plans/slicing-llm-file-tracing-plan.md`
 Tracker: `.prj/trackers/slicing-llm-file-tracing-tracker.md`
 Branch: `feat/slice-1-llm-trace-sink`
-PR: pending
+PR: #229
 
 ## Purpose
 
