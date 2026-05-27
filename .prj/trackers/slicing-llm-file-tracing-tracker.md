@@ -47,7 +47,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: LLM Trace Sink | Delivered | `feat/slice-1-llm-trace-sink` | `feat(slice-1): llm trace sink` | `.prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md` | Delivered in PR #229. |
-| Slice 2: Quiz Model Trace Integration | Planned | `feat/slice-2-quiz-model-trace-integration` | `feat(slice-2): quiz model trace integration` | `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md` | Wires tracing into real model calls. |
+| Slice 2: Quiz Model Trace Integration | Reviewing | `feat/slice-2-quiz-model-trace-integration` | `feat(slice-2): quiz model trace integration` | `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md` | Wires tracing into real model calls. |
 
 ## Slice 1: LLM Trace Sink
 
@@ -78,26 +78,28 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T2.1 Generate one `llm_call_id` per provider invocation.
-- [ ] T2.2 Record `llm_request` events before provider dispatch.
-- [ ] T2.3 Record `llm_response` events for success, provider failure, and
+- [x] T2.1 Generate one `llm_call_id` per provider invocation.
+- [x] T2.2 Record `llm_request` events before provider dispatch.
+- [x] T2.3 Record `llm_response` events for success, provider failure, and
       parse failure.
-- [ ] T2.4 Include action, request id, provider, model, status, latency,
+- [x] T2.4 Include action, request id, provider, model, status, latency,
       payload byte counts, and error details.
-- [ ] T2.5 Include request and response payloads only when payload capture is
+- [x] T2.5 Include request and response payloads only when payload capture is
       enabled.
-- [ ] T2.6 Add integration tests covering quiz/spec/plan shared model paths or
+- [x] T2.6 Add integration tests covering quiz/spec/plan shared model paths or
       the common OpenAI adapter boundary.
-- [ ] T2.7 Add slice implementation report.
-- [ ] T2.8 Run targeted tests and `go test ./...`.
+- [x] T2.7 Add slice implementation report.
+- [x] T2.8 Run targeted tests and `go test ./...`.
 
 Task commits:
 
-- Pending.
+- `38bffc7 feat(trace): record quiz model llm calls`
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc -run 'TestOpenAIQuizModel(AdapterRecords|RequestBody|Timeout)|TestWriteLLMTraceEvent'` - pass.
+- `go test ./internal/chcapp` - pass.
+- `go test ./...` - pass.
 
 ## Slicing Closure
 
