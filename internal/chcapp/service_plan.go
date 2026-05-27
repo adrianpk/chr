@@ -557,7 +557,7 @@ func (s service) newPlanGenerationModelRequest(state chc.QuizRuntimeState) (chc.
 		return chc.QuizModelRequest{}, err
 	}
 
-	sections, err = s.appendSpecGenerationContextSections(sections, scope)
+	sections, err = s.appendPlanGenerationContextSections(sections, scope)
 	if err != nil {
 		return chc.QuizModelRequest{}, err
 	}

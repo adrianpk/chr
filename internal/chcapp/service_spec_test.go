@@ -17,6 +17,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz.md"), `---
 status: "curated"
 case_slug: "blog"
+raw_path: ".chc/quizzes/blog-quiz-raw.md"
 ---
 
 # Quiz Notes
@@ -25,6 +26,16 @@ case_slug: "blog"
 
 - Preserve editorial review.
 `)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md"), `---
+status: "raw"
+case_slug: "blog"
+curated_path: ".chc/quizzes/blog-quiz.md"
+---
+
+# Raw Quiz Notes
+
+Raw quiz turn that must not feed spec context.
+`)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
@@ -32,6 +43,16 @@ case: "blog"
 ---
 
 # Blog Plan
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-prior-spec.md"), `---
+title: "Prior Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Prior Blog Spec
+
+Prior spec content that must not feed initial spec generation.
 `)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context-raw.md"), `---
 title: "Blog Context Raw Capture"
@@ -94,12 +115,23 @@ Raw sibling body that must not feed spec context.
 		"use_case_document",
 		"dump",
 		"quiz",
-		"plan",
 	})
 
 	for _, section := range request.ContextSections {
 		if strings.Contains(section.Content, "Raw sibling body that must not feed spec context.") {
 			t.Fatalf("spec context included raw dump sibling in section %#v", section)
+		}
+
+		if strings.Contains(section.Content, "Raw quiz turn that must not feed spec context.") {
+			t.Fatalf("spec context included raw quiz sibling in section %#v", section)
+		}
+
+		if strings.Contains(section.Authority, ".chc/plans/blog-plan.md") {
+			t.Fatalf("spec context included plan section: %#v", section)
+		}
+
+		if strings.Contains(section.Content, "Prior spec content that must not feed initial spec generation.") {
+			t.Fatalf("spec context included prior spec section: %#v", section)
 		}
 	}
 }

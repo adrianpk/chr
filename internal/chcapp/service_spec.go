@@ -321,6 +321,14 @@ func (s service) appendSpecGenerationContextSections(
 	sections []chc.QuizModelContextSection,
 	scope chc.QuizScope,
 ) ([]chc.QuizModelContextSection, error) {
+	return s.appendGenerationContextSections(sections, scope, sortedSpecContextNodeIDs)
+}
+
+func (s service) appendGenerationContextSections(
+	sections []chc.QuizModelContextSection,
+	scope chc.QuizScope,
+	nodeIDs func(chc.WorkspaceIndex) []string,
+) ([]chc.QuizModelContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", chc.ProjectMetadataPath(""))
 
@@ -339,9 +347,9 @@ func (s service) appendSpecGenerationContextSections(
 		return nil, err
 	}
 
-	for _, nodeID := range sortedSpecContextNodeIDs(index) {
+	for _, nodeID := range nodeIDs(index) {
 		node := index.NodesByID[nodeID]
-		if chc.IsRawDumpNode(node) {
+		if chc.IsRawDumpNode(node) || chc.IsRawQuizNode(node) {
 			continue
 		}
 
@@ -356,14 +364,32 @@ func (s service) appendSpecGenerationContextSections(
 }
 
 func sortedSpecContextNodeIDs(index chc.WorkspaceIndex) []string {
-	ids := []string{}
+	return sortedGenerationContextNodeIDs(index, []chc.WorkspaceNodeKind{
+		chc.WorkspaceNodeDump,
+		chc.WorkspaceNodeQuiz,
+	})
+}
 
-	for _, kind := range []chc.WorkspaceNodeKind{
+func (s service) appendPlanGenerationContextSections(
+	sections []chc.QuizModelContextSection,
+	scope chc.QuizScope,
+) ([]chc.QuizModelContextSection, error) {
+	return s.appendGenerationContextSections(sections, scope, sortedPlanContextNodeIDs)
+}
+
+func sortedPlanContextNodeIDs(index chc.WorkspaceIndex) []string {
+	return sortedGenerationContextNodeIDs(index, []chc.WorkspaceNodeKind{
 		chc.WorkspaceNodeDump,
 		chc.WorkspaceNodeQuiz,
 		chc.WorkspaceNodeSpec,
 		chc.WorkspaceNodePlan,
-	} {
+	})
+}
+
+func sortedGenerationContextNodeIDs(index chc.WorkspaceIndex, kinds []chc.WorkspaceNodeKind) []string {
+	ids := []string{}
+
+	for _, kind := range kinds {
 		ids = append(ids, index.ByKind[kind]...)
 	}
 
