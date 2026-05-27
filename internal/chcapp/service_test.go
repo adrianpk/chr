@@ -215,12 +215,12 @@ func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {
 	assertProjectDumpContent(t, projectDir)
 	assertCaseDumpContent(t, projectDir)
 
-	if len(projectResult.Dumps) != 1 {
-		t.Fatalf("project result dumps = %#v, want one dump", projectResult.Dumps)
+	if len(projectResult.Dumps) != 2 {
+		t.Fatalf("project result dumps = %#v, want curated and raw dumps", projectResult.Dumps)
 	}
 
-	if len(caseResult.Dumps) != 2 {
-		t.Fatalf("case result dumps = %#v, want two dumps", caseResult.Dumps)
+	if len(caseResult.Dumps) != 4 {
+		t.Fatalf("case result dumps = %#v, want curated and raw dumps for both captures", caseResult.Dumps)
 	}
 
 	caseDump := findDumpViewByTitle(t, caseResult.Dumps, "Blog Notes")
@@ -370,7 +370,9 @@ func assertProjectDumpContent(t *testing.T, projectDir string) {
 	projectContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes.md"))
 	for _, want := range []string{
 		`title: "Project Notes"`,
-		`status: "raw"`,
+		`status: "curated"`,
+		`type: "dump"`,
+		`source: ".chc/dumps/project-notes-raw.md"`,
 		"# Project Notes",
 		"Project-wide dump body.",
 	} {
@@ -382,6 +384,20 @@ func assertProjectDumpContent(t *testing.T, projectDir string) {
 	if strings.Contains(projectContent, "case:") {
 		t.Fatalf("project dump has case field:\n%s", projectContent)
 	}
+
+	rawContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes-raw.md"))
+	for _, want := range []string{
+		`status: "raw"`,
+		`type: "dump_raw"`,
+		`curated: ".chc/dumps/project-notes.md"`,
+		"## Highlights",
+		"## Raw Capture",
+		"Project-wide dump body.",
+	} {
+		if !strings.Contains(rawContent, want) {
+			t.Fatalf("project raw dump missing %q:\n%s", want, rawContent)
+		}
+	}
 }
 
 func assertCaseDumpContent(t *testing.T, projectDir string) {
@@ -390,12 +406,28 @@ func assertCaseDumpContent(t *testing.T, projectDir string) {
 	caseContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-notes.md"))
 	for _, want := range []string{
 		`title: "Blog Notes"`,
+		`status: "curated"`,
+		`type: "dump"`,
+		`source: ".chc/dumps/blog-notes-raw.md"`,
 		`case: "blog"`,
 		"# Blog Notes",
 		"Case-scoped dump body.",
 	} {
 		if !strings.Contains(caseContent, want) {
 			t.Fatalf("case dump missing %q:\n%s", want, caseContent)
+		}
+	}
+
+	rawContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-notes-raw.md"))
+	for _, want := range []string{
+		`status: "raw"`,
+		`type: "dump_raw"`,
+		`curated: ".chc/dumps/blog-notes.md"`,
+		`case: "blog"`,
+		"Case-scoped dump body.",
+	} {
+		if !strings.Contains(rawContent, want) {
+			t.Fatalf("case raw dump missing %q:\n%s", want, rawContent)
 		}
 	}
 }
@@ -700,10 +732,13 @@ func newTestService(t *testing.T, projectDir string) service {
 		t.Fatalf("chcTestUserEnvironment returned error: %v", err)
 	}
 
-	return newService(t.Context(), env, commandProjectContext{
+	operations := newService(t.Context(), env, commandProjectContext{
 		ProjectDir: projectDir,
 		ProjectID:  "service-project",
 	}, testAssetsFS())
+	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "test fallback"}
+
+	return operations
 }
 
 type fakeDumpEditorLauncher struct {

@@ -14,6 +14,7 @@ type service struct {
 	assetsFS       fs.FS
 	projectContext commandProjectContext
 	dumpEditor     DumpEditorLauncher
+	dumpCurator    DumpCurationProvider
 	quizModel      chc.QuizModelAdapter
 	now            func() time.Time
 }
@@ -30,6 +31,7 @@ func newService(
 		assetsFS:       assetsFS,
 		projectContext: projectContext,
 		dumpEditor:     defaultDumpEditorLauncher{},
+		dumpCurator:    openAIDumpCurationProvider{ProjectDir: projectContext.ProjectDir},
 		quizModel:      chc.OpenAIQuizModelAdapter{ProjectDir: projectContext.ProjectDir},
 		now:            time.Now,
 	}

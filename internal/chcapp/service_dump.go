@@ -92,9 +92,9 @@ func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, err
 		return DumpOperationResult{}, fmt.Errorf("dump title is required")
 	}
 
-	content := renderDumpMarkdown(title, request.Scope, request.Content)
+	curation := s.curateDump(request)
 
-	path, err := s.createDumpFile(title, content)
+	path, err := s.createDumpPairFiles(title, request.Scope, request.Content, curation)
 	if err != nil {
 		return DumpOperationResult{}, err
 	}
@@ -280,6 +280,147 @@ func (s service) createDumpFile(title, content string) (string, error) {
 	return "", fmt.Errorf("create dump file: exhausted unique names for %q", title)
 }
 
+type dumpPathPair struct {
+	CuratedPath string
+	RawPath     string
+}
+
+func (s service) curateDump(request DumpCreateRequest) DumpCurationResult {
+	provider := s.dumpCurator
+	if provider == nil {
+		provider = fallbackDumpCurationProvider{Reason: "dump curation provider is not configured"}
+	}
+
+	result, err := provider.CurateDump(s.ctx, DumpCurationRequest{
+		ProjectDir: s.projectContext.ProjectDir,
+		ProjectID:  s.projectContext.ProjectID,
+		Title:      request.Title,
+		Content:    request.Content,
+		Scope:      request.Scope,
+	})
+	if err == nil {
+		return normalizeDumpCurationResult(result, request.Content)
+	}
+
+	fallback, fallbackErr := (fallbackDumpCurationProvider{
+		Reason: "llm_unavailable: " + err.Error(),
+	}).CurateDump(s.ctx, DumpCurationRequest{
+		ProjectDir: s.projectContext.ProjectDir,
+		ProjectID:  s.projectContext.ProjectID,
+		Title:      request.Title,
+		Content:    request.Content,
+		Scope:      request.Scope,
+	})
+	if fallbackErr != nil {
+		return normalizeDumpCurationResult(DumpCurationResult{}, request.Content)
+	}
+
+	return fallback
+}
+
+func (s service) relativeDumpPath(path string) string {
+	relativePath, err := filepath.Rel(s.projectContext.ProjectDir, path)
+	if err != nil {
+		return filepath.ToSlash(path)
+	}
+
+	return filepath.ToSlash(relativePath)
+}
+
+func candidateDumpPathPairs(directory, title string) []dumpPathPair {
+	slug := dumpSlug(title)
+	if slug == "" {
+		slug = "dump"
+	}
+
+	pairs := []dumpPathPair{{
+		CuratedPath: filepath.Join(directory, slug+".md"),
+		RawPath:     filepath.Join(directory, slug+"-raw.md"),
+	}}
+	for index := 2; index <= 100; index++ {
+		pairs = append(pairs, dumpPathPair{
+			CuratedPath: filepath.Join(directory, fmt.Sprintf("%s-%d.md", slug, index)),
+			RawPath:     filepath.Join(directory, fmt.Sprintf("%s-%d-raw.md", slug, index)),
+		})
+	}
+
+	return pairs
+}
+
+func dumpPairPathExists(path string) bool {
+	_, err := os.Stat(path)
+
+	return err == nil
+}
+
+func writeDumpPair(pair dumpPathPair, curatedContent, rawContent string) error {
+	err := writeNewDumpFile(pair.CuratedPath, curatedContent)
+	if err != nil {
+		return err
+	}
+
+	err = writeNewDumpFile(pair.RawPath, rawContent)
+	if err != nil {
+		_ = os.Remove(pair.CuratedPath)
+
+		return err
+	}
+
+	return nil
+}
+
+func writeNewDumpFile(path, content string) error {
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return fmt.Errorf("create dump file: %w", err)
+	}
+
+	_, writeErr := file.WriteString(content)
+	closeErr := file.Close()
+
+	if writeErr != nil {
+		return fmt.Errorf("write dump file: %w", writeErr)
+	}
+
+	if closeErr != nil {
+		return fmt.Errorf("close dump file: %w", closeErr)
+	}
+
+	return nil
+}
+
+func (s service) createDumpPairFiles(
+	title string,
+	scope DumpScope,
+	rawContent string,
+	curation DumpCurationResult,
+) (string, error) {
+	err := os.MkdirAll(s.dumpDirectory(), 0o755)
+	if err != nil {
+		return "", fmt.Errorf("create dump directory: %w", err)
+	}
+
+	for _, pair := range candidateDumpPathPairs(s.dumpDirectory(), title) {
+		if dumpPairPathExists(pair.CuratedPath) || dumpPairPathExists(pair.RawPath) {
+			continue
+		}
+
+		curatedRelativePath := s.relativeDumpPath(pair.CuratedPath)
+		rawRelativePath := s.relativeDumpPath(pair.RawPath)
+		curatedContent := renderCuratedDumpMarkdown(title, scope, rawRelativePath, curation)
+		rawCaptureContent := renderRawDumpMarkdown(title, scope, curatedRelativePath, rawContent, curation)
+
+		err = writeDumpPair(pair, curatedContent, rawCaptureContent)
+		if err != nil {
+			return "", err
+		}
+
+		return pair.CuratedPath, nil
+	}
+
+	return "", fmt.Errorf("create dump file: exhausted unique names for %q", title)
+}
+
 func (s service) dumpViewsFromIndex(index chc.WorkspaceIndex) []DumpView {
 	nodeIDs := append([]string(nil), index.ByKind[chc.WorkspaceNodeDump]...)
 	sort.Strings(nodeIDs)
@@ -404,6 +545,97 @@ func renderDumpMarkdown(title string, scope DumpScope, content string) string {
 
 	output.WriteString(body)
 	output.WriteString("\n")
+
+	return output.String()
+}
+
+func renderCuratedDumpMarkdown(
+	title string,
+	scope DumpScope,
+	rawRelativePath string,
+	curation DumpCurationResult,
+) string {
+	var output strings.Builder
+
+	output.WriteString("---\n")
+	output.WriteString("title: ")
+	output.WriteString(quoteDumpFrontmatter(title))
+	output.WriteString("\n")
+	output.WriteString("status: \"curated\"\n")
+	output.WriteString("type: \"dump\"\n")
+	output.WriteString("source: ")
+	output.WriteString(quoteDumpFrontmatter(rawRelativePath))
+	output.WriteString("\n")
+
+	if strings.TrimSpace(scope.CaseSlug) != "" {
+		output.WriteString("case: ")
+		output.WriteString(quoteDumpFrontmatter(scope.CaseSlug))
+		output.WriteString("\n")
+	}
+
+	output.WriteString("---\n\n")
+	output.WriteString("# ")
+	output.WriteString(title)
+	output.WriteString("\n\n")
+	output.WriteString(strings.TrimSpace(curation.PolishedBody))
+	output.WriteString("\n")
+
+	return output.String()
+}
+
+func renderRawDumpMarkdown(
+	title string,
+	scope DumpScope,
+	curatedRelativePath string,
+	rawContent string,
+	curation DumpCurationResult,
+) string {
+	var output strings.Builder
+
+	output.WriteString("---\n")
+	output.WriteString("title: ")
+	output.WriteString(quoteDumpFrontmatter(title + " Raw Capture"))
+	output.WriteString("\n")
+	output.WriteString("status: \"raw\"\n")
+	output.WriteString("type: \"dump_raw\"\n")
+	output.WriteString("curated: ")
+	output.WriteString(quoteDumpFrontmatter(curatedRelativePath))
+	output.WriteString("\n")
+
+	if strings.TrimSpace(scope.CaseSlug) != "" {
+		output.WriteString("case: ")
+		output.WriteString(quoteDumpFrontmatter(scope.CaseSlug))
+		output.WriteString("\n")
+	}
+
+	output.WriteString("---\n\n")
+	output.WriteString("# ")
+	output.WriteString(title)
+	output.WriteString(" Raw Capture\n\n")
+	output.WriteString("## Highlights\n\n")
+	for _, highlight := range curation.Highlights {
+		output.WriteString("- ")
+		output.WriteString(highlight)
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n## Raw Capture\n\n")
+	body := strings.TrimSpace(rawContent)
+	if body == "" {
+		body = "No dump content provided."
+	}
+
+	output.WriteString(body)
+	output.WriteString("\n")
+
+	if len(curation.Warnings) > 0 {
+		output.WriteString("\n## Curation Warnings\n\n")
+		for _, warning := range curation.Warnings {
+			output.WriteString("- ")
+			output.WriteString(warning)
+			output.WriteString("\n")
+		}
+	}
 
 	return output.String()
 }
