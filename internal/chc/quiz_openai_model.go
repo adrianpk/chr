@@ -931,6 +931,10 @@ Use the structured request payload and all context sections as the sole source o
 Ground the spec in the available project metadata, use-case metadata, dumps, quiz notes, existing docs, and related artifacts.
 Prefer concrete behavior, constraints, decisions, open questions, and implementation implications.
 Keep uncertain behavior explicit instead of inventing facts.
+Treat .chc/ as ChrysoCoord's reserved coordination namespace.
+Do not propose arbitrary domain directories directly under .chc/.
+Only mention .chc/ paths when they belong to existing ChrysoCoord primitive directories such as cases, dumps, quizzes, specs, plans, tickets, reports, runtime, tmp, or user.
+When the product domain needs generated application artifacts, describe them as application-owned paths outside .chc/ unless the context explicitly says otherwise.
 Set status to draft because generated specs require user review.
 Return body without a top-level title heading; the renderer adds the H1 from title.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.

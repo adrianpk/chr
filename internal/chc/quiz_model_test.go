@@ -451,6 +451,20 @@ func TestQuizModelSpecGenerationInstructionsAvoidTopLevelBodyHeading(t *testing.
 	}
 }
 
+func TestQuizModelSpecGenerationInstructionsReserveChrysoCoordNamespace(t *testing.T) {
+	instructions := quizModelSpecGenerationInstructions()
+
+	for _, want := range []string{
+		"Treat .chc/ as ChrysoCoord's reserved coordination namespace.",
+		"Do not propose arbitrary domain directories directly under .chc/.",
+		"application-owned paths outside .chc/",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
+		}
+	}
+}
+
 func TestQuizModelQuestionInstructionsMatchRedWrightContextBoundary(t *testing.T) {
 	instructions := []string{
 		quizModelDeepQuestionInstructions(),
