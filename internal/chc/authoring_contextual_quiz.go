@@ -327,17 +327,31 @@ func (p CodexAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 		return AuthoringQuizGenerationResult{}, fmt.Errorf("marshal authoring quiz request: %w", err)
 	}
 
+	prompt := authoringQuizCodexPrompt(string(payload))
+	trace := authoringQuizLLMTrace{
+		CallID:    newLLMCallID(),
+		Provider:  "codex",
+		Model:     program,
+		Prompt:    prompt,
+		StartedAt: time.Now().UTC(),
+	}
+	recordAuthoringQuizLLMRequest(ctx, request, trace)
+
 	cmd := exec.CommandContext(ctx, program, "exec", "--skip-git-repo-check")
 	cmd.Dir = request.ProjectDir
-	cmd.Stdin = strings.NewReader(authoringQuizCodexPrompt(string(payload)))
+	cmd.Stdin = strings.NewReader(prompt)
 
 	output, err := cmd.Output()
 	if err != nil {
+		recordAuthoringQuizLLMResponse(ctx, request, trace, output, "error", err)
+
 		return AuthoringQuizGenerationResult{}, fmt.Errorf("invoke authoring quiz provider: %w", err)
 	}
 
 	result, err := ParseAuthoringQuizGenerationResult(output)
 	if err != nil {
+		recordAuthoringQuizLLMResponse(ctx, request, trace, output, "parse_error", err)
+
 		return AuthoringQuizGenerationResult{}, err
 	}
 
@@ -345,7 +359,61 @@ func (p CodexAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 	result.Strategy = AuthoringQuizGenerationStrategyDeep
 	result.RawText = string(output)
 
+	recordAuthoringQuizLLMResponse(ctx, request, trace, output, "ready", nil)
+
 	return result, nil
+}
+
+type authoringQuizLLMTrace struct {
+	CallID    string
+	Provider  string
+	Model     string
+	Prompt    string
+	StartedAt time.Time
+}
+
+func recordAuthoringQuizLLMRequest(
+	ctx context.Context,
+	request AuthoringQuizGenerationRequest,
+	trace authoringQuizLLMTrace,
+) {
+	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: request.ProjectDir}, map[string]any{
+		"event":                 "llm_request",
+		"llm_call_id":           trace.CallID,
+		"request_id":            request.ID,
+		"action":                request.Action,
+		"provider":              trace.Provider,
+		"model":                 trace.Model,
+		"request_payload_bytes": len(trace.Prompt),
+		"request_payload":       trace.Prompt,
+	})
+}
+
+func recordAuthoringQuizLLMResponse(
+	ctx context.Context,
+	request AuthoringQuizGenerationRequest,
+	trace authoringQuizLLMTrace,
+	output []byte,
+	status string,
+	responseErr error,
+) {
+	event := map[string]any{
+		"event":                  "llm_response",
+		"llm_call_id":            trace.CallID,
+		"request_id":             request.ID,
+		"action":                 request.Action,
+		"provider":               trace.Provider,
+		"model":                  trace.Model,
+		"status":                 status,
+		"latency_ms":             time.Since(trace.StartedAt).Milliseconds(),
+		"response_payload_bytes": len(output),
+		"response_payload":       string(output),
+	}
+	if responseErr != nil {
+		event["error"] = responseErr.Error()
+	}
+
+	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: request.ProjectDir}, event)
 }
 
 func ValidateAuthoringQuizGenerationRequest(request AuthoringQuizGenerationRequest) error {

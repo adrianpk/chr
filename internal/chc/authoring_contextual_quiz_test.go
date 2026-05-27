@@ -158,6 +158,107 @@ func TestValidateAuthoringQuizGenerationResultRejectsGenericUnsafeOutput(t *test
 	}
 }
 
+func TestCodexAuthoringQuizQuestionProviderRecordsTraceEvents(t *testing.T) {
+	projectDir := t.TempDir()
+	t.Setenv(ActiveOperatorIDEnv, "adrian")
+	t.Setenv(LLMTraceEnabledEnv, "1")
+
+	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
+cat >/dev/null
+printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this spec cover?","tags":["workflow"],"follow_up_depth":1,"completion_recommended":false}]}'
+`)
+	request := validAuthoringQuizGenerationRequest(projectDir)
+
+	result, err := (CodexAuthoringQuizQuestionProvider{Program: program}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	if err != nil {
+		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
+	}
+
+	if len(result.Questions) != 1 {
+		t.Fatalf("question count = %d, want 1", len(result.Questions))
+	}
+
+	events := readLLMTraceEvents(t, projectDir)
+	if len(events) != 2 {
+		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
+	}
+	if events[0]["event"] != "llm_request" {
+		t.Fatalf("request event = %#v", events[0]["event"])
+	}
+	if events[1]["event"] != "llm_response" {
+		t.Fatalf("response event = %#v", events[1]["event"])
+	}
+	if events[0]["provider"] != "codex" || events[1]["provider"] != "codex" {
+		t.Fatalf("provider events = %#v / %#v, want codex", events[0]["provider"], events[1]["provider"])
+	}
+	if events[0]["llm_call_id"] != events[1]["llm_call_id"] {
+		t.Fatalf("trace call ids differ: %#v / %#v", events[0]["llm_call_id"], events[1]["llm_call_id"])
+	}
+	if events[1]["status"] != "ready" {
+		t.Fatalf("response status = %#v, want ready", events[1]["status"])
+	}
+	if _, ok := events[0]["request_payload"]; ok {
+		t.Fatalf("request payload captured without payload opt-in: %#v", events[0])
+	}
+	if _, ok := events[1]["response_payload"]; ok {
+		t.Fatalf("response payload captured without payload opt-in: %#v", events[1])
+	}
+}
+
+func TestCodexAuthoringQuizQuestionProviderRecordsTracePayloadsWhenEnabled(t *testing.T) {
+	projectDir := t.TempDir()
+	t.Setenv(ActiveOperatorIDEnv, "adrian")
+	t.Setenv(LLMTraceEnabledEnv, "1")
+	t.Setenv(LLMTracePayloadsEnv, "1")
+
+	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
+cat >/dev/null
+printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this spec cover?","tags":["workflow"],"follow_up_depth":1,"completion_recommended":false}]}'
+`)
+	request := validAuthoringQuizGenerationRequest(projectDir)
+
+	_, err := (CodexAuthoringQuizQuestionProvider{Program: program}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	if err != nil {
+		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
+	}
+
+	events := readLLMTraceEvents(t, projectDir)
+	if _, ok := events[0]["request_payload"]; !ok {
+		t.Fatalf("request payload missing with payload opt-in: %#v", events[0])
+	}
+	if _, ok := events[1]["response_payload"]; !ok {
+		t.Fatalf("response payload missing with payload opt-in: %#v", events[1])
+	}
+}
+
+func TestCodexAuthoringQuizQuestionProviderRecordsParseFailureTrace(t *testing.T) {
+	projectDir := t.TempDir()
+	t.Setenv(ActiveOperatorIDEnv, "adrian")
+	t.Setenv(LLMTraceEnabledEnv, "1")
+
+	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
+cat >/dev/null
+printf '%s\n' 'not-json'
+`)
+	request := validAuthoringQuizGenerationRequest(projectDir)
+
+	_, err := (CodexAuthoringQuizQuestionProvider{Program: program}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	if err == nil {
+		t.Fatal("GenerateAuthoringQuizQuestions returned nil error")
+	}
+
+	events := readLLMTraceEvents(t, projectDir)
+	if len(events) != 2 {
+		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
+	}
+	if events[1]["status"] != "parse_error" {
+		t.Fatalf("response status = %#v, want parse_error", events[1]["status"])
+	}
+	if events[1]["error"] == "" {
+		t.Fatalf("missing parse error in response event: %#v", events[1])
+	}
+}
+
 func TestWriteContextualQuizWritesArtifact(t *testing.T) {
 	projectDir := t.TempDir()
 	now := time.Date(2026, 5, 22, 9, 0, 0, 0, time.UTC)
@@ -248,6 +349,40 @@ func validContextualQuizGenerationResult() AuthoringQuizGenerationResult {
 		},
 		RawText: "{}",
 	}
+}
+
+func validAuthoringQuizGenerationRequest(projectDir string) AuthoringQuizGenerationRequest {
+	now := time.Date(2026, 5, 22, 9, 0, 0, 0, time.UTC)
+
+	return AuthoringQuizGenerationRequest{
+		ID:            "authoring-quiz-request-1",
+		Action:        AuthoringQuizActionGeneration,
+		Strategy:      AuthoringQuizGenerationStrategyDeep,
+		ProjectDir:    projectDir,
+		SessionID:     "author-20260522-090000",
+		Target:        AuthoringTargetSpec,
+		Topic:         "Billing sync behavior",
+		QuestionCount: 1,
+		ContextSections: []AuthoringQuizContextSection{
+			{Name: "project", Layer: "project", Authority: "project_metadata", Content: "Project context."},
+		},
+		OutputContract: AuthoringQuizOutputContract{
+			RequiredFields: []string{"id", "question", "tags", "follow_up_depth", "completion_recommended"},
+		},
+		CreatedAt: now,
+	}
+}
+
+func writeAuthoringQuizProviderScript(t *testing.T, projectDir string, content string) string {
+	t.Helper()
+
+	path := filepath.Join(projectDir, "provider.sh")
+	err := os.WriteFile(path, []byte(content), 0o755)
+	if err != nil {
+		t.Fatalf("WriteFile returned error: %v", err)
+	}
+
+	return path
 }
 
 func validContextualQuizSession(now time.Time) AuthoringSession {
