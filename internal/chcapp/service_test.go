@@ -229,6 +229,48 @@ func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {
 	}
 }
 
+func TestServiceCreateDumpPreservesUniqueSlugBehaviorForPairs(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	operations := newTestService(t, projectDir)
+
+	first, err := operations.CreateDump(DumpCreateRequest{
+		Title:   "Collision Notes",
+		Content: "First body.",
+	})
+	if err != nil {
+		t.Fatalf("CreateDump first returned error: %v", err)
+	}
+
+	second, err := operations.CreateDump(DumpCreateRequest{
+		Title:   "Collision Notes",
+		Content: "Second body.",
+	})
+	if err != nil {
+		t.Fatalf("CreateDump second returned error: %v", err)
+	}
+
+	if first.Message != "Created dump .chc/dumps/collision-notes.md." {
+		t.Fatalf("first message = %q", first.Message)
+	}
+
+	if second.Message != "Created dump .chc/dumps/collision-notes-2.md." {
+		t.Fatalf("second message = %q", second.Message)
+	}
+
+	for _, path := range []string{
+		".chc/dumps/collision-notes.md",
+		".chc/dumps/collision-notes-raw.md",
+		".chc/dumps/collision-notes-2.md",
+		".chc/dumps/collision-notes-2-raw.md",
+	} {
+		if _, err := os.Stat(filepath.Join(projectDir, filepath.FromSlash(path))); err != nil {
+			t.Fatalf("stat %s: %v", path, err)
+		}
+	}
+}
+
 func TestServiceAppendAndOpenDump(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)

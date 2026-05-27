@@ -247,39 +247,6 @@ func (s service) resolveDumpPath(relativePath string) (string, error) {
 	return path, nil
 }
 
-func (s service) createDumpFile(title, content string) (string, error) {
-	err := os.MkdirAll(s.dumpDirectory(), 0o755)
-	if err != nil {
-		return "", fmt.Errorf("create dump directory: %w", err)
-	}
-
-	for _, path := range candidateDumpPaths(s.dumpDirectory(), title) {
-		file, openErr := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
-		if os.IsExist(openErr) {
-			continue
-		}
-
-		if openErr != nil {
-			return "", fmt.Errorf("create dump file: %w", openErr)
-		}
-
-		_, writeErr := file.WriteString(content)
-		closeErr := file.Close()
-
-		if writeErr != nil {
-			return "", fmt.Errorf("write dump file: %w", writeErr)
-		}
-
-		if closeErr != nil {
-			return "", fmt.Errorf("close dump file: %w", closeErr)
-		}
-
-		return path, nil
-	}
-
-	return "", fmt.Errorf("create dump file: exhausted unique names for %q", title)
-}
-
 type dumpPathPair struct {
 	CuratedPath string
 	RawPath     string
@@ -479,20 +446,6 @@ func (s service) dumpContent(relativePath string) string {
 	return string(content)
 }
 
-func candidateDumpPaths(directory, title string) []string {
-	slug := dumpSlug(title)
-	if slug == "" {
-		slug = "dump"
-	}
-
-	paths := []string{filepath.Join(directory, slug+".md")}
-	for index := 2; index <= 100; index++ {
-		paths = append(paths, filepath.Join(directory, fmt.Sprintf("%s-%d.md", slug, index)))
-	}
-
-	return paths
-}
-
 func dumpSlug(value string) string {
 	var output strings.Builder
 
@@ -516,37 +469,6 @@ func dumpSlug(value string) string {
 	}
 
 	return strings.Trim(output.String(), "-")
-}
-
-func renderDumpMarkdown(title string, scope DumpScope, content string) string {
-	var output strings.Builder
-
-	output.WriteString("---\n")
-	output.WriteString("title: ")
-	output.WriteString(quoteDumpFrontmatter(title))
-	output.WriteString("\n")
-	output.WriteString("status: \"raw\"\n")
-
-	if strings.TrimSpace(scope.CaseSlug) != "" {
-		output.WriteString("case: ")
-		output.WriteString(quoteDumpFrontmatter(scope.CaseSlug))
-		output.WriteString("\n")
-	}
-
-	output.WriteString("---\n\n")
-	output.WriteString("# ")
-	output.WriteString(title)
-	output.WriteString("\n\n")
-
-	body := strings.TrimSpace(content)
-	if body == "" {
-		body = "Initial dump created from the TUI."
-	}
-
-	output.WriteString(body)
-	output.WriteString("\n")
-
-	return output.String()
 }
 
 func renderCuratedDumpMarkdown(
