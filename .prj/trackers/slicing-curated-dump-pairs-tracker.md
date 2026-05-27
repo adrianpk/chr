@@ -35,43 +35,46 @@ Expected report path:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Dump Pair Service Contract | Pending | `feat/slice-1-dump-pair-service-contract` | `feat(slice-1): dump pair service contract` | `.prj/reports/slices/curated-dump-pairs/slice-1-dump-pair-service-contract.md` | Service, LLM curation, fallback, CLI behavior. |
+| Slice 1: Dump Pair Service Contract | Reviewing | `feat/slice-1-dump-pair-service-contract` | `feat(slice-1): dump pair service contract` | `.prj/reports/slices/curated-dump-pairs/slice-1-dump-pair-service-contract.md` | Service, LLM curation, fallback, CLI behavior. |
 | Slice 2: Dump Pair Consumption And TUI | Pending | `feat/slice-2-dump-pair-consumption-tui` | `feat(slice-2): dump pair consumption and tui` | `.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md` | Workspace index, context assembly, TUI presentation. |
 
 ## Slice 1: Dump Pair Service Contract
 
 Tasks:
 
-- [ ] T1.1 Add a dump curation provider contract for polished body, highlights,
+- [x] T1.1 Add a dump curation provider contract for polished body, highlights,
       and warnings.
-- [ ] T1.2 Add an LLM-backed provider implementation using the existing LLM
-      adapter and trace sink.
-- [ ] T1.3 Add deterministic fallback curation when LLM curation fails or is
+- [x] T1.2 Add an LLM-backed provider implementation using the existing LLM
+      trace sink.
+- [x] T1.3 Add deterministic fallback curation when LLM curation fails or is
       disabled.
-- [ ] T1.4 Change `CreateDump` to write curated and raw sibling files in one
+- [x] T1.4 Change `CreateDump` to write curated and raw sibling files in one
       operation.
-- [ ] T1.5 Preserve title, use-case scope, slug collision handling, and service
+- [x] T1.5 Preserve title, use-case scope, slug collision handling, and service
       error behavior.
-- [ ] T1.6 Update CLI coverage for `chc dump new`.
-- [ ] T1.7 Add service tests for successful curation, fallback curation, raw
+- [x] T1.6 Update CLI coverage for `chc dump new`.
+- [x] T1.7 Add service tests for successful curation, fallback curation, raw
       sibling creation, frontmatter relationship fields, and filename collision
       handling.
-- [ ] T1.8 Add slice implementation report and validation evidence.
+- [x] T1.8 Add slice implementation report and validation evidence.
 
 Task commits:
 
-- T1.1: pending
-- T1.2: pending
-- T1.3: pending
-- T1.4: pending
-- T1.5: pending
-- T1.6: pending
-- T1.7: pending
-- T1.8: pending
+- T1.1: `02173b1` adds the dump curation provider contract.
+- T1.2: `caeffc6` adds the OpenAI dump curation provider.
+- T1.3: `0f6ef72` adds deterministic fallback curation.
+- T1.4: `385a86a` creates curated/raw dump pairs from `CreateDump`.
+- T1.5: `e74b919` preserves pair slug collision behavior.
+- T1.6: `c9fa68f` covers CLI dump pair creation.
+- T1.7: `62d5120` and `69438fc` cover curation provider and service paths.
+- T1.8: this slice report commit.
 
 Validation:
 
-- Pending.
+- `go test ./internal/chcapp` pass.
+- `go test ./internal/chc ./internal/chcapp` pass.
+- `make verify` fail on pre-existing strict lint issues outside this slice's
+  files.
 
 ## Slice 2: Dump Pair Consumption And TUI
 
