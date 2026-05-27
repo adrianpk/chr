@@ -1,9 +1,110 @@
 package chcapp
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chc/internal/chc"
 )
+
+func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	operations := newTestService(t, projectDir)
+	operations.dumpCurator = fakeDumpCurationProvider{
+		result: DumpCurationResult{
+			PolishedBody: "Polished dump body.",
+			Highlights:   []string{"Important source point."},
+		},
+	}
+
+	_, err := operations.CreateDump(DumpCreateRequest{
+		Title:   "Curated Notes",
+		Content: "rough dump body",
+	})
+	if err != nil {
+		t.Fatalf("CreateDump returned error: %v", err)
+	}
+
+	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "curated-notes.md"))
+	if !strings.Contains(curated, "Polished dump body.") {
+		t.Fatalf("curated dump = %q, want polished body", curated)
+	}
+
+	raw := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "curated-notes-raw.md"))
+	if !strings.Contains(raw, "Important source point.") ||
+		!strings.Contains(raw, "rough dump body") {
+		t.Fatalf("raw dump = %q, want highlight and original body", raw)
+	}
+}
+
+func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	t.Setenv(chc.LLMTraceEnabledEnv, "1")
+	t.Setenv(chc.LLMTracePayloadsEnv, "1")
+	t.Setenv(chc.ActiveOperatorIDEnv, "test-user")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/responses" {
+			t.Fatalf("path = %q, want /responses", request.URL.Path)
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{
+			"id": "response-dump",
+			"output_text": "{\"polished_body\":\"Polished body.\",\"highlights\":[\"Source point.\"],\"warnings\":[]}"
+		}`))
+	}))
+	defer server.Close()
+
+	provider := openAIDumpCurationProvider{
+		ProjectDir: projectDir,
+		APIKey:     "test-key",
+		BaseURL:    server.URL,
+		Model:      "test-model",
+	}
+
+	result, err := provider.CurateDump(t.Context(), DumpCurationRequest{
+		ProjectDir: projectDir,
+		ProjectID:  "service-project",
+		Title:      "Trace Dump",
+		Content:    "rough body",
+	})
+	if err != nil {
+		t.Fatalf("CurateDump returned error: %v", err)
+	}
+
+	if result.PolishedBody != "Polished body." {
+		t.Fatalf("PolishedBody = %q", result.PolishedBody)
+	}
+
+	tracePath := filepath.Join(projectDir, chc.DirectoryName, "user", "log", "llm", "llm.ndjson")
+	trace, err := os.ReadFile(tracePath)
+	if err != nil {
+		t.Fatalf("read trace: %v", err)
+	}
+
+	for _, want := range []string{
+		`"event":"llm_request"`,
+		`"event":"llm_response"`,
+		`"action":"dump_curation"`,
+		`"request_payload"`,
+		`"response_payload"`,
+		`"output_payload"`,
+	} {
+		if !strings.Contains(string(trace), want) {
+			t.Fatalf("trace missing %q:\n%s", want, string(trace))
+		}
+	}
+}
 
 func TestFallbackDumpCurationProviderPreservesBodyAndHighlights(t *testing.T) {
 	provider := fallbackDumpCurationProvider{Reason: "llm_unavailable"}
@@ -48,4 +149,16 @@ func TestFallbackDumpCurationProviderHandlesEmptyContent(t *testing.T) {
 	if len(result.Highlights) != 1 {
 		t.Fatalf("Highlights = %#v, want one fallback highlight", result.Highlights)
 	}
+}
+
+type fakeDumpCurationProvider struct {
+	result DumpCurationResult
+	err    error
+}
+
+func (p fakeDumpCurationProvider) CurateDump(
+	_ context.Context,
+	_ DumpCurationRequest,
+) (DumpCurationResult, error) {
+	return p.result, p.err
 }
