@@ -39,6 +39,7 @@ func (p fallbackDumpCurationProvider) CurateDump(
 
 	highlights := deterministicDumpHighlights(body)
 	warnings := []string{}
+
 	if strings.TrimSpace(p.Reason) != "" {
 		warnings = append(warnings, strings.TrimSpace(p.Reason))
 	}
@@ -86,6 +87,7 @@ func deterministicDumpHighlights(body string) []string {
 	for _, line := range lines {
 		line = strings.TrimSpace(strings.TrimPrefix(line, "-"))
 		line = strings.TrimSpace(strings.TrimPrefix(line, "*"))
+
 		if line == "" {
 			continue
 		}

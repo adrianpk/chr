@@ -326,8 +326,10 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 		t.Fatalf("read raw dump: %v", err)
 	}
 
-	if !strings.Contains(string(rawContent), "## Highlights") ||
-		!strings.Contains(string(rawContent), "Dump body from CLI.") {
+	hasHighlights := strings.Contains(string(rawContent), "## Highlights")
+	hasRawBody := strings.Contains(string(rawContent), "Dump body from CLI.")
+
+	if !hasHighlights || !hasRawBody {
 		t.Fatalf("raw dump content = %q, want highlights and raw body", string(rawContent))
 	}
 }

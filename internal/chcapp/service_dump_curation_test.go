@@ -38,8 +38,10 @@ func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
 	}
 
 	raw := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "curated-notes-raw.md"))
-	if !strings.Contains(raw, "Important source point.") ||
-		!strings.Contains(raw, "rough dump body") {
+	hasHighlight := strings.Contains(raw, "Important source point.")
+	hasRawBody := strings.Contains(raw, "rough dump body")
+
+	if !hasHighlight || !hasRawBody {
 		t.Fatalf("raw dump = %q, want highlight and original body", raw)
 	}
 }
@@ -52,17 +54,7 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 	t.Setenv(chc.LLMTracePayloadsEnv, "1")
 	t.Setenv(chc.ActiveOperatorIDEnv, "test-user")
 
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		if request.URL.Path != "/responses" {
-			t.Fatalf("path = %q, want /responses", request.URL.Path)
-		}
-
-		writer.Header().Set("Content-Type", "application/json")
-		_, _ = writer.Write([]byte(`{
-			"id": "response-dump",
-			"output_text": "{\"polished_body\":\"Polished body.\",\"highlights\":[\"Source point.\"],\"warnings\":[]}"
-		}`))
-	}))
+	server := newDumpCurationTraceTestServer(t)
 	defer server.Close()
 
 	provider := openAIDumpCurationProvider{
@@ -87,10 +79,37 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 	}
 
 	tracePath := filepath.Join(projectDir, chc.DirectoryName, "user", "log", "llm", "llm.ndjson")
+
 	trace, err := os.ReadFile(tracePath)
 	if err != nil {
 		t.Fatalf("read trace: %v", err)
 	}
+
+	assertDumpCurationTracePayloads(t, string(trace))
+}
+
+func newDumpCurationTraceTestServer(t *testing.T) *httptest.Server {
+	t.Helper()
+
+	return httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/responses" {
+			t.Fatalf("path = %q, want /responses", request.URL.Path)
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+
+		_, err := writer.Write([]byte(`{
+			"id": "response-dump",
+			"output_text": "{\"polished_body\":\"Polished body.\",\"highlights\":[\"Source point.\"],\"warnings\":[]}"
+		}`))
+		if err != nil {
+			t.Fatalf("write response: %v", err)
+		}
+	}))
+}
+
+func assertDumpCurationTracePayloads(t *testing.T, trace string) {
+	t.Helper()
 
 	for _, want := range []string{
 		`"event":"llm_request"`,
@@ -100,8 +119,8 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 		`"response_payload"`,
 		`"output_payload"`,
 	} {
-		if !strings.Contains(string(trace), want) {
-			t.Fatalf("trace missing %q:\n%s", want, string(trace))
+		if !strings.Contains(trace, want) {
+			t.Fatalf("trace missing %q:\n%s", want, trace)
 		}
 	}
 }

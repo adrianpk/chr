@@ -185,6 +185,7 @@ func (p openAIDumpCurationProvider) newTrace(
 ) (dumpCurationOpenAITrace, error) {
 	now := p.now()
 	requestID := "dump-curation-" + dumpSlug(firstNonEmptyDumpCurationString(request.Title, "dump"))
+
 	body, err := p.openAIRequestBody(request, requestID)
 	if err != nil {
 		return dumpCurationOpenAITrace{}, err
@@ -326,7 +327,12 @@ func (p openAIDumpCurationProvider) executeOpenAIRequest(
 		return dumpCurationOpenAIExecutionResult{Latency: time.Since(startedAt)}, fmt.Errorf("invoke OpenAI dump curation: %w", err)
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		closeErr := response.Body.Close()
+		if closeErr != nil {
+			return
+		}
+	}()
 
 	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -349,6 +355,7 @@ func (p openAIDumpCurationProvider) executeOpenAIRequest(
 	output, responseID, err := dumpCurationOpenAIResponseText(responseBody)
 	result.Output = []byte(output)
 	result.ResponseID = responseID
+
 	if err != nil {
 		return result, err
 	}
@@ -373,6 +380,7 @@ func dumpCurationOpenAIResponseText(content []byte) (string, string, error) {
 	}
 
 	var output strings.Builder
+
 	for _, item := range envelope.Output {
 		if item.Type != "message" {
 			continue
@@ -401,11 +409,7 @@ func decodeDumpCurationPayload(content []byte) (DumpCurationResult, error) {
 		return DumpCurationResult{}, fmt.Errorf("decode dump curation payload: %w", err)
 	}
 
-	result := normalizeDumpCurationResult(DumpCurationResult{
-		PolishedBody: payload.PolishedBody,
-		Highlights:   payload.Highlights,
-		Warnings:     payload.Warnings,
-	}, "")
+	result := normalizeDumpCurationResult(DumpCurationResult(payload), "")
 	if result.PolishedBody == "" {
 		return DumpCurationResult{}, fmt.Errorf("dump curation polished body is required")
 	}
@@ -421,6 +425,7 @@ func extractDumpCurationJSONObject(content []byte) []byte {
 	text := strings.TrimSpace(string(content))
 	start := strings.Index(text, "{")
 	end := strings.LastIndex(text, "}")
+
 	if start >= 0 && end >= start {
 		return []byte(text[start : end+1])
 	}
@@ -572,6 +577,7 @@ func (p openAIDumpCurationProvider) now() time.Time {
 
 func newDumpCurationCallID() string {
 	var value [8]byte
+
 	_, err := rand.Read(value[:])
 	if err != nil {
 		return "llm-" + strconv.FormatInt(time.Now().UnixNano(), 36)

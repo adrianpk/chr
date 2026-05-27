@@ -328,7 +328,10 @@ func writeDumpPair(pair dumpPathPair, curatedContent, rawContent string) error {
 
 	err = writeNewDumpFile(pair.RawPath, rawContent)
 	if err != nil {
-		_ = os.Remove(pair.CuratedPath)
+		removeErr := os.Remove(pair.CuratedPath)
+		if removeErr != nil {
+			return fmt.Errorf("create raw dump: %w; remove partial curated dump: %w", err, removeErr)
+		}
 
 		return err
 	}
@@ -535,6 +538,7 @@ func renderRawDumpMarkdown(
 	output.WriteString(title)
 	output.WriteString(" Raw Capture\n\n")
 	output.WriteString("## Highlights\n\n")
+
 	for _, highlight := range curation.Highlights {
 		output.WriteString("- ")
 		output.WriteString(highlight)
@@ -542,6 +546,7 @@ func renderRawDumpMarkdown(
 	}
 
 	output.WriteString("\n## Raw Capture\n\n")
+
 	body := strings.TrimSpace(rawContent)
 	if body == "" {
 		body = "No dump content provided."
@@ -552,6 +557,7 @@ func renderRawDumpMarkdown(
 
 	if len(curation.Warnings) > 0 {
 		output.WriteString("\n## Curation Warnings\n\n")
+
 		for _, warning := range curation.Warnings {
 			output.WriteString("- ")
 			output.WriteString(warning)
