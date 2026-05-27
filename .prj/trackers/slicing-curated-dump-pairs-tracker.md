@@ -1,6 +1,6 @@
 # Curated Dump Pairs Slicing Tracker
 
-Status: in progress
+Status: delivered
 
 Plan: `.prj/plans/slicing-curated-dump-pairs-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-curated-dump-pairs-plan.md`
 
 Slicing name: Curated Dump Pairs
 
-Active slice number: Slice 2
+Active slice number: none
 
-Active slice short name: dump pair consumption and tui
+Active slice short name: none
 
-Expected branch name: `feat/slice-2-dump-pair-consumption-tui`
+Expected branch name: none
 
-Expected PR title: `feat(slice-2): dump pair consumption and tui`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md`
+none
 
 ## Slicing Checklist
 
@@ -28,7 +28,7 @@ Expected report path:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
+- [x] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
 ## Slice Status
@@ -36,7 +36,7 @@ Expected report path:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Dump Pair Service Contract | Delivered | `feat/slice-1-dump-pair-service-contract` | `feat(slice-1): dump pair service contract` | `.prj/reports/slices/curated-dump-pairs/slice-1-dump-pair-service-contract.md` | PR #231. |
-| Slice 2: Dump Pair Consumption And TUI | Reviewing | `feat/slice-2-dump-pair-consumption-tui` | `feat(slice-2): dump pair consumption and tui` | `.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md` | PR #232. |
+| Slice 2: Dump Pair Consumption And TUI | Delivered | `feat/slice-2-dump-pair-consumption-tui` | `feat(slice-2): dump pair consumption and tui` | `.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md` | PR #232. |
 
 ## Slice 1: Dump Pair Service Contract
 

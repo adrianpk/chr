@@ -1,10 +1,12 @@
 # Slice 2: Dump Pair Consumption And TUI
 
-Status: reviewing
+Status: delivered
 
 Branch: `feat/slice-2-dump-pair-consumption-tui`
 
 Pull request: #232
+
+Merged into: `dev`
 
 ## Objective
 
