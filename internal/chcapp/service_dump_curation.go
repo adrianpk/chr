@@ -2,6 +2,7 @@ package chcapp
 
 import (
 	"context"
+	"regexp"
 	"strings"
 )
 
@@ -21,6 +22,32 @@ type DumpCurationResult struct {
 
 type DumpCurationProvider interface {
 	CurateDump(ctx context.Context, request DumpCurationRequest) (DumpCurationResult, error)
+}
+
+type fallbackDumpCurationProvider struct {
+	Reason string
+}
+
+func (p fallbackDumpCurationProvider) CurateDump(
+	_ context.Context,
+	request DumpCurationRequest,
+) (DumpCurationResult, error) {
+	body := redactDumpCurationSecrets(strings.TrimSpace(request.Content))
+	if body == "" {
+		body = "No dump content provided."
+	}
+
+	highlights := deterministicDumpHighlights(body)
+	warnings := []string{}
+	if strings.TrimSpace(p.Reason) != "" {
+		warnings = append(warnings, strings.TrimSpace(p.Reason))
+	}
+
+	return normalizeDumpCurationResult(DumpCurationResult{
+		PolishedBody: body,
+		Highlights:   highlights,
+		Warnings:     warnings,
+	}, body), nil
 }
 
 func normalizeDumpCurationResult(result DumpCurationResult, fallbackBody string) DumpCurationResult {
@@ -50,4 +77,34 @@ func normalizeDumpCurationStrings(values []string) []string {
 	}
 
 	return normalized
+}
+
+func deterministicDumpHighlights(body string) []string {
+	lines := strings.Split(strings.TrimSpace(body), "\n")
+	highlights := []string{}
+
+	for _, line := range lines {
+		line = strings.TrimSpace(strings.TrimPrefix(line, "-"))
+		line = strings.TrimSpace(strings.TrimPrefix(line, "*"))
+		if line == "" {
+			continue
+		}
+
+		highlights = append(highlights, line)
+		if len(highlights) == 5 {
+			break
+		}
+	}
+
+	if len(highlights) == 0 {
+		return []string{"No recoverable source points were available."}
+	}
+
+	return highlights
+}
+
+var dumpCurationSecretAssignmentPattern = regexp.MustCompile(`(?i)\b(api[_-]?(?:key|token)|token|password|secret|credential)=([^\s,"}]+)`)
+
+func redactDumpCurationSecrets(value string) string {
+	return dumpCurationSecretAssignmentPattern.ReplaceAllString(value, "$1=[REDACTED]")
 }
