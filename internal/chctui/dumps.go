@@ -17,6 +17,7 @@ type DumpView struct {
 	UseCaseTitle string
 	Title        string
 	Status       string
+	SourcePath   string
 	Scope        DumpScope
 	RelativePath string
 	UpdatedAt    time.Time
@@ -75,6 +76,10 @@ func (m Model) renderSelectedDumpDetailLines(width, height int) []string {
 	}
 
 	lines = append(lines, "")
+	if strings.TrimSpace(dump.SourcePath) != "" {
+		lines = append(lines, shellMutedStyle.Render("Raw: "+dump.SourcePath), "")
+	}
+
 	lines = append(lines, renderContentReadLines(emptyValue(dump.Preview), maxInt(width, 1))...)
 	lines = append(lines, "", shellMutedStyle.Render(m.dumpActionHint()))
 

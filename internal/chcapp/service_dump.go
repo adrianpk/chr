@@ -21,6 +21,8 @@ type DumpView struct {
 	UseCaseTitle string
 	Title        string
 	Status       string
+	DocumentType string
+	SourcePath   string
 	Scope        DumpScope
 	RelativePath string
 	UpdatedAt    time.Time
@@ -402,6 +404,10 @@ func (s service) dumpViewsFromIndex(index chc.WorkspaceIndex) []DumpView {
 			continue
 		}
 
+		if chc.IsRawDumpNode(node) {
+			continue
+		}
+
 		dumps = append(dumps, s.dumpViewFromNode(nodeID, node))
 	}
 
@@ -414,6 +420,8 @@ func (s service) dumpViewFromNode(nodeID string, node chc.WorkspaceNode) DumpVie
 		UseCaseTitle: s.dumpUseCaseTitle(node.CaseSlug),
 		Title:        node.Title,
 		Status:       node.Status,
+		DocumentType: node.DocumentType,
+		SourcePath:   node.SourcePath,
 		Scope:        DumpScope{CaseSlug: node.CaseSlug},
 		RelativePath: node.RelativePath,
 		UpdatedAt:    node.ModifiedAt,

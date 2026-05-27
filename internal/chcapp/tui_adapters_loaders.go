@@ -16,6 +16,7 @@ func loadTUIDumps(operations service) ([]chctui.DumpView, error) {
 			UseCaseTitle: dump.UseCaseTitle,
 			Title:        dump.Title,
 			Status:       dump.Status,
+			SourcePath:   dump.SourcePath,
 			Scope:        chctui.DumpScope{CaseSlug: dump.Scope.CaseSlug},
 			RelativePath: dump.RelativePath,
 			UpdatedAt:    dump.UpdatedAt,

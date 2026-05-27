@@ -145,10 +145,22 @@ status: "raw"
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context.md"), `---
 title: "Blog Context"
 status: "curated"
+type: "dump"
+source: ".chc/dumps/blog-context-raw.md"
 case: "blog"
 ---
 
 # Blog Context
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context-raw.md"), `---
+title: "Blog Context Raw Capture"
+status: "raw"
+type: "dump_raw"
+curated: ".chc/dumps/blog-context.md"
+case: "blog"
+---
+
+# Blog Context Raw Capture
 `)
 
 	operations := newTestService(t, projectDir)
@@ -184,6 +196,10 @@ case: "blog"
 		t.Fatalf("case dump path = %q, want .chc/dumps/blog-context.md", caseDump.RelativePath)
 	}
 
+	if caseDump.SourcePath != ".chc/dumps/blog-context-raw.md" {
+		t.Fatalf("case dump source path = %q, want raw sibling path", caseDump.SourcePath)
+	}
+
 	if operations.dumpDirectory() != filepath.Join(projectDir, ".chc", "dumps") {
 		t.Fatalf("dumpDirectory = %q, want .chc/dumps", operations.dumpDirectory())
 	}
@@ -215,12 +231,12 @@ func TestServiceCreateDumpWritesProjectAndCaseScopedDumps(t *testing.T) {
 	assertProjectDumpContent(t, projectDir)
 	assertCaseDumpContent(t, projectDir)
 
-	if len(projectResult.Dumps) != 2 {
-		t.Fatalf("project result dumps = %#v, want curated and raw dumps", projectResult.Dumps)
+	if len(projectResult.Dumps) != 1 {
+		t.Fatalf("project result dumps = %#v, want curated dump only", projectResult.Dumps)
 	}
 
-	if len(caseResult.Dumps) != 4 {
-		t.Fatalf("case result dumps = %#v, want curated and raw dumps for both captures", caseResult.Dumps)
+	if len(caseResult.Dumps) != 2 {
+		t.Fatalf("case result dumps = %#v, want curated dumps only for both captures", caseResult.Dumps)
 	}
 
 	caseDump := findDumpViewByTitle(t, caseResult.Dumps, "Blog Notes")

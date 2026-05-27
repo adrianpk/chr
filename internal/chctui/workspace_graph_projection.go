@@ -67,6 +67,10 @@ func workspaceIndexCaseDocumentCount(index chc.WorkspaceIndex, slug string, kind
 
 	for _, nodeID := range index.ByCaseSlug[slug] {
 		node := index.NodesByID[nodeID]
+		if kind == chc.WorkspaceNodeDump && chc.IsRawDumpNode(node) {
+			continue
+		}
+
 		if node.Kind == kind {
 			count++
 		}
@@ -79,6 +83,10 @@ func workspaceGraphProjectDocumentCount(graph chc.WorkspaceGraph, kind chc.Works
 	count := 0
 
 	for _, node := range graph.ProjectWide {
+		if kind == chc.WorkspaceNodeDump && chc.IsRawDumpNode(node) {
+			continue
+		}
+
 		if node.Kind == kind {
 			count++
 		}

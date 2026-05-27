@@ -2969,6 +2969,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 				Status:       "raw",
 				Scope:        DumpScope{},
 				RelativePath: ".chc/dumps/project-context.md",
+				SourcePath:   ".chc/dumps/project-context-raw.md",
 				UpdatedAt:    updated,
 				Preview:      "Project-wide notes.",
 			},
@@ -2990,6 +2991,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 		"Dumps",
 		"Project-wide",
 		"Blog Publishing",
+		"Raw: .chc/dumps/project-context-raw.md",
 		"Project-wide notes.",
 		"enter edit  alt+e external  c create  r refresh",
 	} {
