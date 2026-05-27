@@ -51,6 +51,54 @@ func TestWorkspaceGraphBuilderBuildCachedIndexHitsValidCache(t *testing.T) {
 	}
 }
 
+func TestWorkspaceGraphBuilderBuildCachedIndexPreservesDumpPairMetadata(t *testing.T) {
+	projectDir := t.TempDir()
+
+	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
+		Name: "Blog Publishing",
+	}))
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes.md"), `---
+title: "Blog Notes"
+status: "curated"
+type: "dump"
+source: ".chc/dumps/blog-notes-raw.md"
+case: "blog"
+---
+
+# Blog Notes
+`)
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes-raw.md"), `---
+title: "Blog Notes Raw Capture"
+status: "raw"
+type: "dump_raw"
+curated: ".chc/dumps/blog-notes.md"
+case: "blog"
+---
+
+# Blog Notes Raw Capture
+`)
+
+	_, err := NewWorkspaceGraphBuilder(projectDir).BuildCachedIndex(context.Background())
+	if err != nil {
+		t.Fatalf("first BuildCachedIndex returned error: %v", err)
+	}
+
+	second, err := NewWorkspaceGraphBuilder(projectDir).BuildCachedIndex(context.Background())
+	if err != nil {
+		t.Fatalf("second BuildCachedIndex returned error: %v", err)
+	}
+
+	if second.Cache.Status != WorkspaceIndexCacheHit {
+		t.Fatalf("Cache.Status = %q, want %q", second.Cache.Status, WorkspaceIndexCacheHit)
+	}
+
+	rawID := second.Index.NodesByPath[".chc/dumps/blog-notes-raw.md"]
+	raw := second.Index.NodesByID[rawID]
+	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chc/dumps/blog-notes.md" {
+		t.Fatalf("cached raw dump metadata = %#v", raw)
+	}
+}
+
 func TestWorkspaceGraphBuilderBuildCachedIndexRewritesStaleCache(t *testing.T) {
 	projectDir := t.TempDir()
 	writeCaseRootedWorkspaceGraphFixture(t, projectDir)

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const workspaceIndexCacheSchemaVersion = 1
+const workspaceIndexCacheSchemaVersion = 2
 
 var errInvalidWorkspaceIndexCache = errors.New("invalid workspace index cache")
 
