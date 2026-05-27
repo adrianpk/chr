@@ -77,3 +77,27 @@ func TestValidateGeneratedSpecAllowsKnownChrysoCoordPathReferences(t *testing.T)
 		t.Fatalf("ValidateGeneratedSpec returned error: %v", err)
 	}
 }
+
+func TestNormalizeGeneratedSpecChrysoCoordPathReferencesKeepsKnownPaths(t *testing.T) {
+	body := "See .chc/project.md and .chc/dumps/newsletter.md."
+
+	got := NormalizeGeneratedSpecChrysoCoordPathReferences(body)
+
+	if got != body {
+		t.Fatalf("normalized body = %q, want %q", got, body)
+	}
+}
+
+func TestNormalizeGeneratedSpecChrysoCoordPathReferencesMovesUnknownPathsOutOfChrysoCoord(t *testing.T) {
+	body := "Store drafts in .chc/newsletters/drafts/<post-slug>.md, then export them."
+
+	got := NormalizeGeneratedSpecChrysoCoordPathReferences(body)
+
+	if strings.Contains(got, ".chc/newsletters") {
+		t.Fatalf("normalized body still contains unsupported .chc path: %q", got)
+	}
+
+	if !strings.Contains(got, "newsletters/drafts/<post-slug>.md") {
+		t.Fatalf("normalized body = %q, want application-owned path", got)
+	}
+}

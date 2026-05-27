@@ -57,6 +57,8 @@ func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSp
 		return GeneratedSpecPaths{}, err
 	}
 
+	spec.Body = NormalizeGeneratedSpecChrysoCoordPathReferences(spec.Body)
+
 	err = ValidateGeneratedSpec(spec)
 	if err != nil {
 		return GeneratedSpecPaths{}, err
@@ -154,6 +156,19 @@ func validateGeneratedSpecChrysoCoordPathReferences(body string) error {
 	}
 
 	return nil
+}
+
+func NormalizeGeneratedSpecChrysoCoordPathReferences(body string) string {
+	return generatedSpecChrysoCoordPathPattern.ReplaceAllStringFunc(body, func(match string) string {
+		path := strings.TrimRight(match, ".,;:")
+		suffix := strings.TrimPrefix(match, path)
+
+		if generatedSpecChrysoCoordPathReferenceAllowed(path) {
+			return match
+		}
+
+		return strings.TrimPrefix(path, ".chc/") + suffix
+	})
 }
 
 func generatedSpecChrysoCoordPathReferenceAllowed(path string) bool {
