@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-llm-file-tracing-plan.md`
 
 Slicing name: LLM File Tracing
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: llm trace sink
+Active slice short name: quiz model trace integration
 
-Expected branch name: `feat/slice-1-llm-trace-sink`
+Expected branch name: `feat/slice-2-quiz-model-trace-integration`
 
-Expected PR title: `feat(slice-1): llm trace sink`
+Expected PR title: `feat(slice-2): quiz model trace integration`
 
 Expected report path:
-`.prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md`
+`.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md`
 
 Prerequisite PRs or delivered work:
 
