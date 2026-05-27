@@ -1,6 +1,6 @@
 # LLM File Tracing Slicing Tracker
 
-Status: active
+Status: complete
 
 Plan: `.prj/plans/slicing-llm-file-tracing-plan.md`
 
@@ -38,16 +38,16 @@ Prerequisite PRs or delivered work:
 - [x] Commit plan and tracker.
 - [x] Merge plan and tracker into `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: LLM Trace Sink | Delivered | `feat/slice-1-llm-trace-sink` | `feat(slice-1): llm trace sink` | `.prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md` | Delivered in PR #229. |
-| Slice 2: LLM Call Trace Integration | Reviewing | `feat/slice-2-quiz-model-trace-integration` | `feat(slice-2): llm call trace integration` | `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md` | Wires tracing into real model calls. |
+| Slice 2: LLM Call Trace Integration | Delivered | `feat/slice-2-quiz-model-trace-integration` | `feat(slice-2): llm call trace integration` | `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md` | Delivered in PR #230. |
 
 ## Slice 1: LLM Trace Sink
 
@@ -105,4 +105,13 @@ Validation:
 
 ## Slicing Closure
 
-Pending.
+Completed in PR #230.
+
+Tuning needed: no.
+
+Evidence:
+
+- Slice 1 delivered the reusable trace sink.
+- Slice 2 connected tracing to ChrysoCoord-owned LLM calls outside ticket
+  execution containers.
+- `go test ./...` passed after Slice 2 delivery.
