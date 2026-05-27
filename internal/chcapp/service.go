@@ -30,7 +30,7 @@ func newService(
 		assetsFS:       assetsFS,
 		projectContext: projectContext,
 		dumpEditor:     defaultDumpEditorLauncher{},
-		quizModel:      chc.OpenAIQuizModelAdapter{},
+		quizModel:      chc.OpenAIQuizModelAdapter{ProjectDir: projectContext.ProjectDir},
 		now:            time.Now,
 	}
 }

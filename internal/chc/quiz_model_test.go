@@ -3,6 +3,10 @@ package chc
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -245,6 +249,183 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 
 	if envelope.Text.Format.Name != "quiz_draft_spec" {
 		t.Fatalf("format name = %q, want quiz_draft_spec", envelope.Text.Format.Name)
+	}
+}
+
+func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv(ActiveOperatorIDEnv, "adrian")
+	t.Setenv(LLMTraceEnabledEnv, "1")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/responses" {
+			t.Fatalf("path = %q, want /responses", request.URL.Path)
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"output_text":"{\"question\":\"What should happen next?\",\"tags\":[\"workflow\"],\"follow_up_depth\":1,\"completion_recommended\":false}"}`))
+	}))
+	defer server.Close()
+
+	model := OpenAIQuizModelAdapter{
+		APIKey:     "test-key",
+		BaseURL:    server.URL,
+		Model:      "test-model",
+		ProjectDir: dir,
+		Client:     server.Client(),
+	}
+
+	request := validQuizModelRequest()
+	response, err := model.InvokeQuizModel(context.Background(), request)
+	if err != nil {
+		t.Fatalf("InvokeQuizModel returned error: %v", err)
+	}
+
+	if response.Question.Prompt != "What should happen next?" {
+		t.Fatalf("question = %q, want traced test response", response.Question.Prompt)
+	}
+
+	events := readLLMTraceEvents(t, dir)
+	if len(events) != 2 {
+		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
+	}
+
+	requestEvent := events[0]
+	responseEvent := events[1]
+	if requestEvent["event"] != "llm_request" {
+		t.Fatalf("request event = %#v", requestEvent["event"])
+	}
+	if responseEvent["event"] != "llm_response" {
+		t.Fatalf("response event = %#v", responseEvent["event"])
+	}
+	if requestEvent["llm_call_id"] == "" {
+		t.Fatalf("missing llm_call_id in request event: %#v", requestEvent)
+	}
+	if requestEvent["llm_call_id"] != responseEvent["llm_call_id"] {
+		t.Fatalf("trace call ids differ: request=%#v response=%#v", requestEvent["llm_call_id"], responseEvent["llm_call_id"])
+	}
+	if responseEvent["status"] != "ready" {
+		t.Fatalf("response status = %#v, want ready", responseEvent["status"])
+	}
+	if responseEvent["response_id"] == "" {
+		t.Fatalf("missing response_id in response event: %#v", responseEvent)
+	}
+	if _, ok := requestEvent["request_payload"]; ok {
+		t.Fatalf("request payload captured without payload opt-in: %#v", requestEvent)
+	}
+	if _, ok := responseEvent["response_payload"]; ok {
+		t.Fatalf("response payload captured without payload opt-in: %#v", responseEvent)
+	}
+}
+
+func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv(ActiveOperatorIDEnv, "adrian")
+	t.Setenv(LLMTraceEnabledEnv, "1")
+	t.Setenv(LLMTracePayloadsEnv, "1")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"output_text":"{\"question\":\"What should happen next?\",\"tags\":[\"workflow\"],\"follow_up_depth\":1,\"completion_recommended\":false}"}`))
+	}))
+	defer server.Close()
+
+	model := OpenAIQuizModelAdapter{
+		APIKey:     "test-key",
+		BaseURL:    server.URL,
+		Model:      "test-model",
+		ProjectDir: dir,
+		Client:     server.Client(),
+	}
+
+	_, err := model.InvokeQuizModel(context.Background(), validQuizModelRequest())
+	if err != nil {
+		t.Fatalf("InvokeQuizModel returned error: %v", err)
+	}
+
+	events := readLLMTraceEvents(t, dir)
+	if _, ok := events[0]["request_payload"]; !ok {
+		t.Fatalf("request payload missing with payload opt-in: %#v", events[0])
+	}
+	if _, ok := events[1]["response_payload"]; !ok {
+		t.Fatalf("response payload missing with payload opt-in: %#v", events[1])
+	}
+	if _, ok := events[1]["output_payload"]; !ok {
+		t.Fatalf("output payload missing with payload opt-in: %#v", events[1])
+	}
+}
+
+func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv(ActiveOperatorIDEnv, "adrian")
+	t.Setenv(LLMTraceEnabledEnv, "1")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"output_text":"not-json"}`))
+	}))
+	defer server.Close()
+
+	model := OpenAIQuizModelAdapter{
+		APIKey:     "test-key",
+		BaseURL:    server.URL,
+		Model:      "test-model",
+		ProjectDir: dir,
+		Client:     server.Client(),
+	}
+
+	_, err := model.InvokeQuizModel(context.Background(), validQuizModelRequest())
+	if err == nil {
+		t.Fatal("InvokeQuizModel returned nil error")
+	}
+
+	events := readLLMTraceEvents(t, dir)
+	if len(events) != 2 {
+		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
+	}
+	if events[1]["status"] != "parse_error" {
+		t.Fatalf("response status = %#v, want parse_error", events[1]["status"])
+	}
+	if events[1]["error"] == "" {
+		t.Fatalf("missing parse error in response event: %#v", events[1])
+	}
+}
+
+func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv(ActiveOperatorIDEnv, "adrian")
+	t.Setenv(LLMTraceEnabledEnv, "1")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		http.Error(writer, "provider failed", http.StatusBadGateway)
+	}))
+	defer server.Close()
+
+	model := OpenAIQuizModelAdapter{
+		APIKey:     "test-key",
+		BaseURL:    server.URL,
+		Model:      "test-model",
+		ProjectDir: dir,
+		Client:     server.Client(),
+	}
+
+	_, err := model.InvokeQuizModel(context.Background(), validQuizModelRequest())
+	if err == nil {
+		t.Fatal("InvokeQuizModel returned nil error")
+	}
+
+	events := readLLMTraceEvents(t, dir)
+	if len(events) != 2 {
+		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
+	}
+	if events[1]["status"] != "error" {
+		t.Fatalf("response status = %#v, want error", events[1]["status"])
+	}
+	if events[1]["http_status"] != float64(http.StatusBadGateway) {
+		t.Fatalf("http_status = %#v, want 502", events[1]["http_status"])
+	}
+	if events[1]["error"] == "" {
+		t.Fatalf("missing provider error in response event: %#v", events[1])
 	}
 }
 
@@ -751,6 +932,30 @@ func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (openAIResponsesRequ
 	}
 
 	return envelope, input
+}
+
+func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {
+	t.Helper()
+
+	path := filepath.Join(projectDir, DirectoryName, "user", "log", "llm", defaultLLMTraceFileName)
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read LLM trace file: %v", err)
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(content)), "\n")
+	events := make([]map[string]any, 0, len(lines))
+	for _, line := range lines {
+		var event map[string]any
+		err = json.Unmarshal([]byte(line), &event)
+		if err != nil {
+			t.Fatalf("decode LLM trace event: %v", err)
+		}
+
+		events = append(events, event)
+	}
+
+	return events
 }
 
 type fakeQuizModelAdapter struct {

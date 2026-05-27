@@ -212,6 +212,7 @@ func llmTracePayloadField(key string) bool {
 	return normalized == "payload" ||
 		normalized == "request_payload" ||
 		normalized == "response_payload" ||
+		normalized == "output_payload" ||
 		normalized == "raw_request" ||
 		normalized == "raw_response"
 }

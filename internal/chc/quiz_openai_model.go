@@ -3,11 +3,14 @@ package chc
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -24,10 +27,25 @@ const (
 )
 
 type OpenAIQuizModelAdapter struct {
-	APIKey  string
-	BaseURL string
-	Model   string
-	Client  *http.Client
+	APIKey     string
+	BaseURL    string
+	Model      string
+	ProjectDir string
+	Client     *http.Client
+}
+
+type openAIQuizTrace struct {
+	CallID      string
+	Model       string
+	RequestBody []byte
+	StartedAt   time.Time
+}
+
+type openAIQuizExecutionResult struct {
+	Output       []byte
+	ResponseBody []byte
+	StatusCode   int
+	Latency      time.Duration
 }
 
 type openAIResponsesRequest struct {
@@ -82,41 +100,61 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 		return QuizModelResponse{}, err
 	}
 
-	output, err := a.invokeOpenAI(ctx, request)
+	trace := a.newOpenAIQuizTrace(request)
+	output, result, err := a.invokeOpenAI(ctx, request, trace)
 	if err != nil {
+		a.recordOpenAIQuizResponse(ctx, request, trace, result, "error", err, QuizModelResponse{})
+
 		return QuizModelResponse{}, err
 	}
 
-	return quizModelResponseFromOutput(request, output)
+	response, err := quizModelResponseFromOutput(request, output)
+	if err != nil {
+		a.recordOpenAIQuizResponse(ctx, request, trace, result, "parse_error", err, QuizModelResponse{})
+
+		return QuizModelResponse{}, err
+	}
+
+	a.recordOpenAIQuizResponse(ctx, request, trace, result, "ready", nil, response)
+
+	return response, nil
 }
 
 func (a OpenAIQuizModelAdapter) invokeOpenAI(
 	ctx context.Context,
 	request QuizModelRequest,
-) ([]byte, error) {
+	trace openAIQuizTrace,
+) ([]byte, openAIQuizExecutionResult, error) {
 	if a.openAIAPIKey() == "" {
-		return nil, fmt.Errorf("OPENAI_API_KEY is required for quiz model generation")
+		return nil, openAIQuizExecutionResult{}, fmt.Errorf("OPENAI_API_KEY is required for quiz model generation")
 	}
 
-	body, err := a.openAIRequestBody(request)
-	if err != nil {
-		return nil, err
+	if len(trace.RequestBody) == 0 {
+		body, err := a.openAIRequestBody(request)
+		if err != nil {
+			return nil, openAIQuizExecutionResult{}, err
+		}
+
+		trace.RequestBody = body
 	}
 
 	httpRequest, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
 		strings.TrimRight(a.openAIBaseURL(), "/")+"/responses",
-		bytes.NewReader(body),
+		bytes.NewReader(trace.RequestBody),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("build OpenAI quiz request: %w", err)
+		return nil, openAIQuizExecutionResult{}, fmt.Errorf("build OpenAI quiz request: %w", err)
 	}
 
 	httpRequest.Header.Set("Authorization", "Bearer "+a.openAIAPIKey())
 	httpRequest.Header.Set("Content-Type", "application/json")
 
-	return a.executeOpenAIRequest(request, httpRequest)
+	a.recordOpenAIQuizRequest(ctx, request, trace)
+
+	result, err := a.executeOpenAIRequest(request, httpRequest, trace.StartedAt)
+	return result.Output, result, err
 }
 
 func (a OpenAIQuizModelAdapter) openAIRequestBody(request QuizModelRequest) ([]byte, error) {
@@ -186,10 +224,11 @@ func quizModelProviderContextSections(sections []QuizModelContextSection) []map[
 func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
 	request QuizModelRequest,
 	httpRequest *http.Request,
-) ([]byte, error) {
+	startedAt time.Time,
+) (openAIQuizExecutionResult, error) {
 	response, err := a.httpClient(request).Do(httpRequest)
 	if err != nil {
-		return nil, fmt.Errorf("invoke OpenAI quiz model: %w", err)
+		return openAIQuizExecutionResult{Latency: time.Since(startedAt)}, fmt.Errorf("invoke OpenAI quiz model: %w", err)
 	}
 
 	defer func() {
@@ -198,20 +237,97 @@ func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
 	}()
 
 	responseBody, err := io.ReadAll(io.LimitReader(response.Body, 4*1024*1024))
+	result := openAIQuizExecutionResult{
+		ResponseBody: responseBody,
+		StatusCode:   response.StatusCode,
+		Latency:      time.Since(startedAt),
+	}
 	if err != nil {
-		return nil, fmt.Errorf("read OpenAI quiz response: %w", err)
+		return result, fmt.Errorf("read OpenAI quiz response: %w", err)
 	}
 
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		return nil, fmt.Errorf("OpenAI quiz model returned HTTP %d: %s", response.StatusCode, strings.TrimSpace(string(responseBody)))
+		return result, fmt.Errorf("OpenAI quiz model returned HTTP %d: %s", response.StatusCode, strings.TrimSpace(string(responseBody)))
 	}
 
 	output, err := openAIResponseText(responseBody)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
-	return []byte(output), nil
+	result.Output = []byte(output)
+
+	return result, nil
+}
+
+func (a OpenAIQuizModelAdapter) newOpenAIQuizTrace(request QuizModelRequest) openAIQuizTrace {
+	body, _ := a.openAIRequestBody(request)
+
+	return openAIQuizTrace{
+		CallID:      newLLMCallID(),
+		Model:       a.openAIModel(),
+		RequestBody: body,
+		StartedAt:   time.Now().UTC(),
+	}
+}
+
+func (a OpenAIQuizModelAdapter) recordOpenAIQuizRequest(
+	ctx context.Context,
+	request QuizModelRequest,
+	trace openAIQuizTrace,
+) {
+	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: a.ProjectDir}, map[string]any{
+		"event":                 "llm_request",
+		"llm_call_id":           trace.CallID,
+		"request_id":            request.ID,
+		"action":                string(request.Action),
+		"provider":              QuizModelProviderOpenAI,
+		"model":                 trace.Model,
+		"request_payload_bytes": len(trace.RequestBody),
+		"request_payload":       string(trace.RequestBody),
+	})
+}
+
+func (a OpenAIQuizModelAdapter) recordOpenAIQuizResponse(
+	ctx context.Context,
+	request QuizModelRequest,
+	trace openAIQuizTrace,
+	result openAIQuizExecutionResult,
+	status string,
+	responseErr error,
+	response QuizModelResponse,
+) {
+	event := map[string]any{
+		"event":                  "llm_response",
+		"llm_call_id":            trace.CallID,
+		"request_id":             request.ID,
+		"response_id":            response.ID,
+		"action":                 string(request.Action),
+		"provider":               QuizModelProviderOpenAI,
+		"model":                  trace.Model,
+		"status":                 status,
+		"http_status":            result.StatusCode,
+		"latency_ms":             result.Latency.Milliseconds(),
+		"response_payload_bytes": len(result.ResponseBody),
+		"output_payload_bytes":   len(result.Output),
+		"response_payload":       string(result.ResponseBody),
+		"output_payload":         string(result.Output),
+	}
+	if responseErr != nil {
+		event["error"] = responseErr.Error()
+	}
+
+	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: a.ProjectDir}, event)
+}
+
+func newLLMCallID() string {
+	var value [8]byte
+	_, err := rand.Read(value[:])
+	if err != nil {
+		return "llm-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	}
+
+	return "llm-" + hex.EncodeToString(value[:])
 }
 
 func (a OpenAIQuizModelAdapter) openAIAPIKey() string {
