@@ -249,6 +249,17 @@ case: "blog"
 	}
 }
 
+func TestIsRawQuizNodeClassifiesLegacyRawSuffix(t *testing.T) {
+	node := WorkspaceNode{
+		Kind: WorkspaceNodeQuiz,
+		Slug: "project-quiz-raw",
+	}
+
+	if !IsRawQuizNode(node) {
+		t.Fatalf("IsRawQuizNode returned false for legacy raw quiz %#v", node)
+	}
+}
+
 func TestWorkspaceGraphBuilderToleratesMissingChcDirectory(t *testing.T) {
 	graph, err := NewWorkspaceGraphBuilder(t.TempDir()).Build(context.Background())
 	if err != nil {

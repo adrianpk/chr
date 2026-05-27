@@ -474,6 +474,10 @@ func IsRawQuizNode(node WorkspaceNode) bool {
 		return false
 	}
 
+	if strings.HasSuffix(node.Slug, "-raw") {
+		return true
+	}
+
 	return node.Status == "raw" && strings.TrimSpace(node.CuratedPath) != ""
 }
 
