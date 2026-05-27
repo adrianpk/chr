@@ -37,6 +37,7 @@ func TestAssembleWorkspaceContextLoadsCaseRootedDocuments(t *testing.T) {
 	rendered := RenderWorkspaceContextAssembly(assembly)
 	for _, want := range []string{
 		"# Workspace Context",
+		"Case Dump",
 		"Case Spec",
 		"Case Plan",
 		"Unresolved Case References",
@@ -46,7 +47,7 @@ func TestAssembleWorkspaceContextLoadsCaseRootedDocuments(t *testing.T) {
 		}
 	}
 
-	for _, forbidden := range []string{"Project Plan", "Board Ticket"} {
+	for _, forbidden := range []string{"Project Plan", "Board Ticket", "Case Dump Raw Capture"} {
 		if strings.Contains(rendered, forbidden) {
 			t.Fatalf("rendered case context contains non-case document %q:\n%s", forbidden, rendered)
 		}
@@ -173,6 +174,30 @@ case: blog
 # Case Spec
 
 Case specification body.
+`)
+	writeTestFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-dump.md"), `---
+title: Case Dump
+status: curated
+type: dump
+source: .chc/dumps/blog-dump-raw.md
+case: blog
+---
+
+# Case Dump
+
+Curated case dump body.
+`)
+	writeTestFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-dump-raw.md"), `---
+title: Case Dump Raw Capture
+status: raw
+type: dump_raw
+curated: .chc/dumps/blog-dump.md
+case: blog
+---
+
+# Case Dump Raw Capture
+
+Raw case dump body.
 `)
 	writeTestFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
 title: Case Plan

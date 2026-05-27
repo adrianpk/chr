@@ -229,6 +229,10 @@ func workspaceContextDocumentNodes(request WorkspaceContextRequest) []WorkspaceN
 func workspaceContextSupportedNodes(nodes []WorkspaceNode) []WorkspaceNode {
 	selected := make([]WorkspaceNode, 0, len(nodes))
 	for _, node := range nodes {
+		if IsRawDumpNode(node) {
+			continue
+		}
+
 		if workspaceContextSupportsNodeKind(node.Kind) {
 			selected = append(selected, node)
 		}

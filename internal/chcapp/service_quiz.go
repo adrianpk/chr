@@ -518,6 +518,10 @@ func (s service) appendQuizSupplementalContextSections(
 
 	for _, nodeID := range index.ByKind[chc.WorkspaceNodeDump] {
 		node := index.NodesByID[nodeID]
+		if chc.IsRawDumpNode(node) {
+			continue
+		}
+
 		if node.CaseSlug != "" && node.CaseSlug != scope.CaseSlug {
 			continue
 		}

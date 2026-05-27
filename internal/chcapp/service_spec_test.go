@@ -33,6 +33,18 @@ case: "blog"
 
 # Blog Plan
 `)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context-raw.md"), `---
+title: "Blog Context Raw Capture"
+status: "raw"
+type: "dump_raw"
+curated: ".chc/dumps/blog-context.md"
+case: "blog"
+---
+
+# Blog Context Raw Capture
+
+Raw sibling body that must not feed spec context.
+`)
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
@@ -84,6 +96,12 @@ case: "blog"
 		"quiz",
 		"plan",
 	})
+
+	for _, section := range request.ContextSections {
+		if strings.Contains(section.Content, "Raw sibling body that must not feed spec context.") {
+			t.Fatalf("spec context included raw dump sibling in section %#v", section)
+		}
+	}
 }
 
 func TestServiceGenerateSpecExcludesArchivedDocumentsFromContextAndProvenance(t *testing.T) {

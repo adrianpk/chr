@@ -341,6 +341,10 @@ func (s service) appendSpecGenerationContextSections(
 
 	for _, nodeID := range sortedSpecContextNodeIDs(index) {
 		node := index.NodesByID[nodeID]
+		if chc.IsRawDumpNode(node) {
+			continue
+		}
+
 		if node.CaseSlug != "" && node.CaseSlug != scope.CaseSlug {
 			continue
 		}
