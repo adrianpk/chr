@@ -1,6 +1,6 @@
 # Curated Dump Pairs Slicing Tracker
 
-Status: planned
+Status: in progress
 
 Plan: `.prj/plans/slicing-curated-dump-pairs-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-curated-dump-pairs-plan.md`
 
 Slicing name: Curated Dump Pairs
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: dump pair service contract
+Active slice short name: dump pair consumption and tui
 
-Expected branch name: `feat/slice-1-dump-pair-service-contract`
+Expected branch name: `feat/slice-2-dump-pair-consumption-tui`
 
-Expected PR title: `feat(slice-1): dump pair service contract`
+Expected PR title: `feat(slice-2): dump pair consumption and tui`
 
 Expected report path:
-`.prj/reports/slices/curated-dump-pairs/slice-1-dump-pair-service-contract.md`
+`.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md`
 
 ## Slicing Checklist
 
@@ -36,7 +36,7 @@ Expected report path:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Dump Pair Service Contract | Delivered | `feat/slice-1-dump-pair-service-contract` | `feat(slice-1): dump pair service contract` | `.prj/reports/slices/curated-dump-pairs/slice-1-dump-pair-service-contract.md` | PR #231. |
-| Slice 2: Dump Pair Consumption And TUI | Pending | `feat/slice-2-dump-pair-consumption-tui` | `feat(slice-2): dump pair consumption and tui` | `.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md` | Workspace index, context assembly, TUI presentation. |
+| Slice 2: Dump Pair Consumption And TUI | Reviewing | `feat/slice-2-dump-pair-consumption-tui` | `feat(slice-2): dump pair consumption and tui` | `.prj/reports/slices/curated-dump-pairs/slice-2-dump-pair-consumption-tui.md` | Workspace index, context assembly, TUI presentation. |
 
 ## Slice 1: Dump Pair Service Contract
 
@@ -80,31 +80,31 @@ Validation:
 
 Tasks:
 
-- [ ] T2.1 Update workspace indexing or dump read-model mapping so raw dump
+- [x] T2.1 Update workspace indexing or dump read-model mapping so raw dump
       siblings are distinguishable from curated dumps.
-- [ ] T2.2 Ensure context assembly uses curated dump content by default.
-- [ ] T2.3 Ensure raw dump siblings do not double-count as regular dumps in
+- [x] T2.2 Ensure context assembly uses curated dump content by default.
+- [x] T2.3 Ensure raw dump siblings do not double-count as regular dumps in
       spec, plan, tracking, or ticket generation context.
-- [ ] T2.4 Update F3 Dumps to present curated dumps as primary items.
-- [ ] T2.5 Expose raw sibling metadata in the detail panel when available.
-- [ ] T2.6 Keep `alt+e` editing behavior focused on the selected curated dump.
-- [ ] T2.7 Add tests for index classification, context selection, and TUI
+- [x] T2.4 Update F3 Dumps to present curated dumps as primary items.
+- [x] T2.5 Expose raw sibling metadata in the detail panel when available.
+- [x] T2.6 Keep `alt+e` editing behavior focused on the selected curated dump.
+- [x] T2.7 Add tests for index classification, context selection, and TUI
       rendering.
-- [ ] T2.8 Update user-facing documentation for dump pair behavior.
-- [ ] T2.9 Add slice implementation report and validation evidence.
+- [x] T2.8 Update user-facing documentation for dump pair behavior.
+- [x] T2.9 Add slice implementation report and validation evidence.
 
 Task commits:
 
-- T2.1: pending
-- T2.2: pending
-- T2.3: pending
-- T2.4: pending
-- T2.5: pending
-- T2.6: pending
-- T2.7: pending
-- T2.8: pending
-- T2.9: pending
+- T2.1: workspace graph node metadata and dump classification helpers.
+- T2.2: workspace context selection skips raw dump siblings.
+- T2.3: spec and quiz supplemental context skip raw dump siblings.
+- T2.4: dump list service filters raw siblings from primary views.
+- T2.5: TUI dump detail renders raw sibling metadata.
+- T2.6: external edit remains bound to selected curated dump paths.
+- T2.7: graph, context, service, spec, and TUI tests cover dump pair consumption.
+- T2.8: user guide and reference docs describe dump pair behavior.
+- T2.9: slice report added.
 
 Validation:
 
-- Pending.
+- `go test ./internal/chc ./internal/chcapp ./internal/chctui` pass.
