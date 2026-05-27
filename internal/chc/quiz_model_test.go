@@ -451,16 +451,15 @@ func TestQuizModelSpecGenerationInstructionsAvoidTopLevelBodyHeading(t *testing.
 	}
 }
 
-func TestQuizModelSpecGenerationInstructionsReserveChrysoCoordNamespace(t *testing.T) {
+func TestQuizModelSpecGenerationInstructionsDoNotOverfitPathPolicy(t *testing.T) {
 	instructions := quizModelSpecGenerationInstructions()
 
-	for _, want := range []string{
-		"Treat .chc/ as ChrysoCoord's reserved coordination namespace.",
-		"Do not propose arbitrary domain directories directly under .chc/.",
-		"application-owned paths outside .chc/",
+	for _, forbidden := range []string{
+		"Do not propose arbitrary domain directories",
+		"Do not invent new ChrysoCoord persistence locations",
 	} {
-		if !strings.Contains(instructions, want) {
-			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
+		if strings.Contains(instructions, forbidden) {
+			t.Fatalf("spec generation instructions contain overfitted path policy %q in: %q", forbidden, instructions)
 		}
 	}
 }

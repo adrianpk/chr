@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
 
 const SpecDirectory = "specs"
+
+var generatedSpecChrysoCoordPathPattern = regexp.MustCompile(`\.chc(?:/[^\s\])"'` + "`" + `]+)?`)
 
 type GeneratedSpec struct {
 	Scope            QuizScope
@@ -123,7 +126,12 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 		return fmt.Errorf("generated spec body is required")
 	}
 
-	err := ValidateQuizScope(spec.Scope)
+	err := validateGeneratedSpecChrysoCoordPathReferences(spec.Body)
+	if err != nil {
+		return err
+	}
+
+	err = ValidateQuizScope(spec.Scope)
 	if err != nil {
 		return err
 	}
@@ -133,4 +141,48 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 	}
 
 	return nil
+}
+
+func validateGeneratedSpecChrysoCoordPathReferences(body string) error {
+	for _, match := range generatedSpecChrysoCoordPathPattern.FindAllString(body, -1) {
+		path := strings.TrimRight(match, ".,;:")
+		if generatedSpecChrysoCoordPathReferenceAllowed(path) {
+			continue
+		}
+
+		return fmt.Errorf("generated spec body references unsupported ChrysoCoord path %q", path)
+	}
+
+	return nil
+}
+
+func generatedSpecChrysoCoordPathReferenceAllowed(path string) bool {
+	if path == ".chc" || path == ".chc/" {
+		return true
+	}
+
+	switch path {
+	case ".chc/config.yml", ".chc/manifest.md", ".chc/project.md":
+		return true
+	}
+
+	for _, directory := range []string{
+		"cases",
+		"dumps",
+		"quizzes",
+		"specs",
+		"plans",
+		"tickets",
+		"reports",
+		"runtime",
+		"tmp",
+		"user",
+	} {
+		prefix := ".chc/" + directory
+		if path == prefix || strings.HasPrefix(path, prefix+"/") {
+			return true
+		}
+	}
+
+	return false
 }

@@ -43,3 +43,37 @@ func TestRenderGeneratedSpecKeepsDifferentBodyHeading(t *testing.T) {
 		t.Fatalf("rendered spec removed a distinct body heading:\n%s", rendered)
 	}
 }
+
+func TestValidateGeneratedSpecRejectsUnsupportedChrysoCoordPathReference(t *testing.T) {
+	spec := GeneratedSpec{
+		Scope:     QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Title:     "Newsletter Distribution",
+		Body:      "Store newsletter drafts in .chc/newsletters/drafts.",
+		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
+	}
+
+	err := ValidateGeneratedSpec(spec)
+	if err == nil {
+		t.Fatal("ValidateGeneratedSpec returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), `.chc/newsletters/drafts`) {
+		t.Fatalf("error = %q, want unsupported path reference", err)
+	}
+}
+
+func TestValidateGeneratedSpecAllowsKnownChrysoCoordPathReferences(t *testing.T) {
+	spec := GeneratedSpec{
+		Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Title: "Newsletter Distribution",
+		Body: strings.Join([]string{
+			"See .chc/project.md.",
+			"See .chc/cases/newsletter.md, .chc/dumps/newsletter.md, and .chc/quizzes/newsletter.md.",
+		}, "\n"),
+		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
+	}
+
+	if err := ValidateGeneratedSpec(spec); err != nil {
+		t.Fatalf("ValidateGeneratedSpec returned error: %v", err)
+	}
+}
