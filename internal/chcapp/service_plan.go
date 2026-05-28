@@ -2,6 +2,7 @@ package chcapp
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -554,6 +555,61 @@ func (s service) newPlanOutlineGenerationModelRequest(state chc.QuizRuntimeState
 	)
 }
 
+func (s service) newPlanSliceDetailGenerationModelRequest(
+	state chc.QuizRuntimeState,
+	outline chc.GeneratedPlanOutline,
+	targetSliceID string,
+) (chc.QuizModelRequest, error) {
+	scope := chc.QuizScope{
+		ProjectID: state.ProjectID,
+		CaseSlug:  state.CaseSlug,
+	}
+
+	if err := chc.ValidateGeneratedPlanOutline(outline); err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	targetSlice, ok := outline.Slice(targetSliceID)
+	if !ok {
+		return chc.QuizModelRequest{}, fmt.Errorf("plan outline slice is unknown: %s", targetSliceID)
+	}
+
+	payload, err := s.newQuizModelPayload(scope, state, chc.QuizModelActionGeneratePlanSliceDetail)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err := chc.QuizModelContextSectionsForPayload(payload)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err = s.appendPlanGenerationContextSections(sections, scope)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	sections, err = appendPlanSliceDetailContextSections(sections, outline, targetSlice)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	return chc.QuizModelRequest{
+		ID:              fmt.Sprintf("plan-slice-detail-generation-%s-%s", specScopeID(scope), planSliceIDSlug(targetSliceID)),
+		Action:          chc.QuizModelActionGeneratePlanSliceDetail,
+		Strategy:        "plan_slice_detail_generation",
+		Scope:           scope,
+		Mode:            state.Mode,
+		RuntimeState:    state,
+		Payload:         payload,
+		ContextSections: sections,
+		OutputContract: chc.QuizModelOutputContract{
+			RequiredFields: payload.OutputContract.RequiredFields,
+		},
+		CreatedAt: s.utcNow(),
+	}, nil
+}
+
 func (s service) newPlanningModelRequest(
 	state chc.QuizRuntimeState,
 	action chc.QuizModelAction,
@@ -603,6 +659,53 @@ func (s service) newPlanningModelRequest(
 		},
 		CreatedAt: s.utcNow(),
 	}, nil
+}
+
+func appendPlanSliceDetailContextSections(
+	sections []chc.QuizModelContextSection,
+	outline chc.GeneratedPlanOutline,
+	targetSlice chc.GeneratedPlanOutlineSlice,
+) ([]chc.QuizModelContextSection, error) {
+	outlineContent, err := json.MarshalIndent(outline, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+
+	targetContent, err := json.MarshalIndent(targetSlice, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+
+	sections = append(sections, chc.QuizModelContextSection{
+		Name:      "plan_outline",
+		Layer:     "plan",
+		Authority: "generated_plan_outline",
+		Content:   string(outlineContent),
+		Metadata: map[string]string{
+			"title":  outline.Title,
+			"status": outline.Status,
+		},
+	})
+	sections = append(sections, chc.QuizModelContextSection{
+		Name:      "target_slice",
+		Layer:     "plan",
+		Authority: targetSlice.ID,
+		Content:   string(targetContent),
+		Metadata: map[string]string{
+			"slice_id":    targetSlice.ID,
+			"short_name":  targetSlice.ShortName,
+			"branch_name": targetSlice.BranchName,
+		},
+	})
+
+	return sections, nil
+}
+
+func planSliceIDSlug(sliceID string) string {
+	slug := strings.ToLower(strings.TrimSpace(sliceID))
+	slug = strings.ReplaceAll(slug, " ", "-")
+
+	return slug
 }
 
 func (s service) newPlanTrackingModelRequest(
