@@ -105,6 +105,37 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 	}
 }
 
+func TestInvokeQuizModelAcceptsPlanOutlineResponse(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGeneratePlanOutline
+	request.Strategy = "plan_outline_generation"
+	request.OutputContract.RequiredFields = NewQuizModelOutputContract(
+		QuizModelActionGeneratePlanOutline,
+		request.Mode,
+	).RequiredFields
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+
+	adapter := &fakeQuizModelAdapter{
+		response: QuizModelResponse{
+			ID:          "response-1",
+			RequestID:   request.ID,
+			Provider:    "fake",
+			Status:      QuizModelResponseReady,
+			PlanOutline: validGeneratedPlanOutline(request.CreatedAt),
+			CreatedAt:   quizRuntimeTestTime(),
+		},
+	}
+
+	response, err := InvokeQuizModel(context.Background(), adapter, request)
+	if err != nil {
+		t.Fatalf("InvokeQuizModel returned error: %v", err)
+	}
+
+	if response.PlanOutline.Slices[0].ID != "Slice 1" {
+		t.Fatalf("outline slice id = %q, want Slice 1", response.PlanOutline.Slices[0].ID)
+	}
+}
+
 func TestQuizModelContextSectionsForPayloadMatchesRedWrightShape(t *testing.T) {
 	request := validQuizModelRequest()
 
@@ -249,6 +280,57 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 
 	if envelope.Text.Format.Name != "quiz_draft_spec" {
 		t.Fatalf("format name = %q, want quiz_draft_spec", envelope.Text.Format.Name)
+	}
+}
+
+func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGeneratePlanOutline
+	request.Strategy = "plan_outline_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+		Name:      "spec",
+		Layer:     "spec",
+		Authority: ".chc/specs/blog.md",
+		Content:   "Spec context for outline generation.",
+	})
+
+	payload := quizModelProviderPayload(request)
+
+	if _, ok := payload["context_sections"]; !ok {
+		t.Fatalf("plan-outline provider payload omitted context_sections: %#v", payload)
+	}
+}
+
+func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGeneratePlanOutline
+	request.Strategy = "plan_outline_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+
+	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	if err != nil {
+		t.Fatalf("openAIRequestBody returned error: %v", err)
+	}
+
+	envelope, input := decodeOpenAIQuizRequestBody(t, body)
+
+	if envelope.Metadata["chc_action"] != string(QuizModelActionGeneratePlanOutline) {
+		t.Fatalf("metadata = %#v, want plan-outline action", envelope.Metadata)
+	}
+
+	if envelope.Text.Format.Name != "generated_plan_outline" {
+		t.Fatalf("format name = %q, want generated_plan_outline", envelope.Text.Format.Name)
+	}
+
+	if envelope.Text.Format.Schema["required"] == nil {
+		t.Fatalf("plan outline schema missing required fields: %#v", envelope.Text.Format.Schema)
+	}
+
+	if _, ok := input["context_sections"]; !ok {
+		t.Fatalf("plan-outline input omitted context_sections: %#v", input)
 	}
 }
 
@@ -440,6 +522,76 @@ func TestOpenAIQuizModelTimeoutUsesLongerTimeoutForGeneration(t *testing.T) {
 
 	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlan); got != 5*time.Minute {
 		t.Fatalf("plan generation timeout = %s, want 5m", got)
+	}
+
+	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlanOutline); got != 5*time.Minute {
+		t.Fatalf("plan outline generation timeout = %s, want 5m", got)
+	}
+}
+
+func TestQuizModelPlanOutlineResponseFromOutput(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGeneratePlanOutline
+	request.Strategy = "plan_outline_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanOutline, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"title":"Staged Plan Generation",
+		"status":"planned",
+		"summary":"Generate an outline first.",
+		"assumptions":["Existing plans remain valid."],
+		"open_questions":["Should staged generation be default?"],
+		"risks":["More model calls."],
+		"validation_strategy":"Validate schema and request construction.",
+		"slices":[{
+			"id":"Slice 1",
+			"short_name":"outline generation contract",
+			"objective":"Add outline contracts.",
+			"rationale":"Keep the slice map coherent.",
+			"dependencies":[],
+			"branch_name":"feat/slice-1-outline-generation-contract",
+			"pr_title":"feat(slice-1): outline generation contract",
+			"report_path":".prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md",
+			"complexity":"medium",
+			"implementation_boundary":"Contracts only."
+		}],
+		"dependencies":[]
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.PlanOutline.Title != "Staged Plan Generation" {
+		t.Fatalf("plan outline title = %q", response.PlanOutline.Title)
+	}
+}
+
+func TestValidateQuizModelPlanOutlinePayloadRejectsNonSequentialSlices(t *testing.T) {
+	_, err := DecodeQuizModelPlanOutlinePayload([]byte(`{
+		"title":"Staged Plan Generation",
+		"status":"planned",
+		"summary":"Generate an outline first.",
+		"assumptions":[],
+		"open_questions":[],
+		"risks":[],
+		"validation_strategy":"Validate schema and request construction.",
+		"slices":[{
+			"id":"Slice 2",
+			"short_name":"outline generation contract",
+			"objective":"Add outline contracts.",
+			"rationale":"Keep the slice map coherent.",
+			"dependencies":[],
+			"branch_name":"feat/slice-1-outline-generation-contract",
+			"pr_title":"feat(slice-1): outline generation contract",
+			"report_path":".prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md",
+			"complexity":"medium",
+			"implementation_boundary":"Contracts only."
+		}],
+		"dependencies":[]
+	}`))
+	if err == nil {
+		t.Fatal("DecodeQuizModelPlanOutlinePayload returned nil error")
 	}
 }
 
@@ -932,6 +1084,33 @@ func validQuizModelRequest() QuizModelRequest {
 			RequiredFields: []string{"id", "prompt", "topic", "depth"},
 		},
 		CreatedAt: quizRuntimeTestTime(),
+	}
+}
+
+func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
+	return GeneratedPlanOutline{
+		Scope:              QuizScope{ProjectID: "project-1"},
+		Title:              "Staged Plan Generation",
+		Status:             "planned",
+		Summary:            "Generate an outline first.",
+		Assumptions:        []string{"Existing plans remain valid."},
+		OpenQuestions:      []string{"Should staged generation be default?"},
+		Risks:              []string{"More model calls."},
+		ValidationStrategy: "Validate schema and request construction.",
+		Slices: []GeneratedPlanOutlineSlice{
+			{
+				ID:                     "Slice 1",
+				ShortName:              "outline generation contract",
+				Objective:              "Add outline contracts.",
+				Rationale:              "Keep the slice map coherent.",
+				BranchName:             "feat/slice-1-outline-generation-contract",
+				PRTitle:                "feat(slice-1): outline generation contract",
+				ReportPath:             ".prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md",
+				Complexity:             "medium",
+				ImplementationBoundary: "Contracts only.",
+			},
+		},
+		CreatedAt: createdAt,
 	}
 }
 

@@ -92,6 +92,61 @@ The implementation must preserve editorial review.
 	})
 }
 
+func TestServiceBuildsPlanOutlineGenerationRequest(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-spec.md"), `---
+title: "Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Blog Spec
+
+The implementation must preserve editorial review.
+`)
+
+	operations := newTestService(t, projectDir)
+	scope := chc.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	state, err := operations.specGenerationRuntimeState(scope)
+	if err != nil {
+		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
+	}
+
+	request, err := operations.newPlanOutlineGenerationModelRequest(state)
+	if err != nil {
+		t.Fatalf("newPlanOutlineGenerationModelRequest returned error: %v", err)
+	}
+
+	if request.Action != chc.QuizModelActionGeneratePlanOutline {
+		t.Fatalf("Action = %q, want plan outline generation", request.Action)
+	}
+
+	if request.Strategy != "plan_outline_generation" {
+		t.Fatalf("Strategy = %q, want plan_outline_generation", request.Strategy)
+	}
+
+	if request.ID != "plan-outline-generation-blog" {
+		t.Fatalf("ID = %q, want plan-outline-generation-blog", request.ID)
+	}
+
+	if request.Payload.OutputContract.RenderedTextField != "summary" {
+		t.Fatalf("RenderedTextField = %q, want summary", request.Payload.OutputContract.RenderedTextField)
+	}
+
+	assertQuizModelRequestSections(t, request, []string{
+		"project",
+		"quiz",
+		"recent_entries",
+		"current_question",
+		"agent_protocol",
+		"project_document",
+		"use_case_document",
+		"dump",
+		"spec",
+	})
+}
+
 func TestServiceRegeneratePlanArchivesExistingPlanBeforeReplace(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
