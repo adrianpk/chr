@@ -42,7 +42,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Outline Generation Contract | Delivered | `feat/slice-1-outline-generation-contract` | `feat(slice-1): outline generation contract` | `.prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md` | Delivered in PR #237. |
 | Slice 2: Slice Detail Expansion | Delivered | `feat/slice-2-slice-detail-expansion` | `feat(slice-2): slice detail expansion` | `.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md` | Delivered in PR #238. |
-| Slice 3: Deterministic Plan Assembly | Planned | `feat/slice-3-deterministic-plan-assembly` | `feat(slice-3): deterministic plan assembly` | `.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md` | Connects staged generation into final plan assembly and write behavior. |
+| Slice 3: Deterministic Plan Assembly | Reviewing | `feat/slice-3-deterministic-plan-assembly` | `feat(slice-3): deterministic plan assembly` | `.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md` | Connects staged generation into final plan assembly and write behavior. |
 
 ## Slice 1: Outline Generation Contract
 
@@ -108,22 +108,28 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T3.1 Add deterministic Markdown assembly from outline plus slice details.
-- [ ] T3.2 Connect staged generation orchestration into `GeneratePlan`.
-- [ ] T3.3 Preserve existing generate/regenerate/archive/failure safety
+- [x] T3.1 Add deterministic Markdown assembly from outline plus slice details.
+- [x] T3.2 Connect staged generation orchestration into `GeneratePlan`.
+- [x] T3.3 Preserve existing generate/regenerate/archive/failure safety
       semantics.
-- [ ] T3.4 Record staged request/response provenance in the generated plan.
-- [ ] T3.5 Ensure no final plan is written when outline or slice detail
+- [x] T3.4 Record staged request/response provenance in the generated plan.
+- [x] T3.5 Ensure no final plan is written when outline or slice detail
       generation fails.
-- [ ] T3.6 Add integration tests for staged plan generation success and
+- [x] T3.6 Add integration tests for staged plan generation success and
       failure paths.
-- [ ] T3.7 Add slice implementation report.
-- [ ] T3.8 Run targeted tests and repository quality gates.
+- [x] T3.7 Add slice implementation report.
+- [x] T3.8 Run targeted tests and repository quality gates.
 
 Task commits:
 
-- Pending.
+- `6213b78` feat(chc): assemble staged generated plans
+- `9853ae2` feat(chcapp): orchestrate staged plan generation
+- `6037cba` test(chcapp): cover staged plan generation
 
 Validation:
 
-- Pending.
+- `gofmt -w internal/chc/plan_assembly.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go internal/chcapp/service_quiz_test.go` - pass.
+- `go test ./internal/chc ./internal/chcapp` - pass.
+- `go test ./...` - pass.
+- `git diff --check` - pass.
+- `make verify` - fail: `lint-strict` reports pre-existing lint debt.
