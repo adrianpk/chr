@@ -136,6 +136,37 @@ func TestInvokeQuizModelAcceptsPlanOutlineResponse(t *testing.T) {
 	}
 }
 
+func TestInvokeQuizModelAcceptsPlanSliceDetailResponse(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGeneratePlanSliceDetail
+	request.Strategy = "plan_slice_detail_generation"
+	request.OutputContract.RequiredFields = NewQuizModelOutputContract(
+		QuizModelActionGeneratePlanSliceDetail,
+		request.Mode,
+	).RequiredFields
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanSliceDetail, request.Mode)
+
+	adapter := &fakeQuizModelAdapter{
+		response: QuizModelResponse{
+			ID:          "response-1",
+			RequestID:   request.ID,
+			Provider:    "fake",
+			Status:      QuizModelResponseReady,
+			SliceDetail: validGeneratedPlanSliceDetail(request.CreatedAt),
+			CreatedAt:   quizRuntimeTestTime(),
+		},
+	}
+
+	response, err := InvokeQuizModel(context.Background(), adapter, request)
+	if err != nil {
+		t.Fatalf("InvokeQuizModel returned error: %v", err)
+	}
+
+	if response.SliceDetail.SliceID != "Slice 1" {
+		t.Fatalf("slice detail id = %q, want Slice 1", response.SliceDetail.SliceID)
+	}
+}
+
 func TestQuizModelContextSectionsForPayloadMatchesRedWrightShape(t *testing.T) {
 	request := validQuizModelRequest()
 
@@ -334,6 +365,48 @@ func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
 	}
 }
 
+func TestOpenAIQuizModelRequestBodySerializesPlanSliceDetailContract(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGeneratePlanSliceDetail
+	request.Strategy = "plan_slice_detail_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanSliceDetail, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
+		Name:      "plan_outline",
+		Layer:     "plan",
+		Authority: "generated_plan_outline",
+		Content:   "Outline context.",
+	})
+
+	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	if err != nil {
+		t.Fatalf("openAIRequestBody returned error: %v", err)
+	}
+
+	envelope, input := decodeOpenAIQuizRequestBody(t, body)
+
+	if envelope.Metadata["chc_action"] != string(QuizModelActionGeneratePlanSliceDetail) {
+		t.Fatalf("metadata = %#v, want plan-slice-detail action", envelope.Metadata)
+	}
+
+	if envelope.Text.Format.Name != "generated_plan_slice_detail" {
+		t.Fatalf("format name = %q, want generated_plan_slice_detail", envelope.Text.Format.Name)
+	}
+
+	required, ok := envelope.Text.Format.Schema["required"].([]any)
+	if !ok {
+		t.Fatalf("schema required = %#v, want []any", envelope.Text.Format.Schema["required"])
+	}
+
+	if !containsAnyString(required, "ticket_metadata") {
+		t.Fatalf("slice detail schema required fields = %#v, want ticket_metadata", required)
+	}
+
+	if _, ok := input["context_sections"]; !ok {
+		t.Fatalf("plan-slice-detail input omitted context_sections: %#v", input)
+	}
+}
+
 func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv(ActiveOperatorIDEnv, "adrian")
@@ -527,6 +600,10 @@ func TestOpenAIQuizModelTimeoutUsesLongerTimeoutForGeneration(t *testing.T) {
 	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlanOutline); got != 5*time.Minute {
 		t.Fatalf("plan outline generation timeout = %s, want 5m", got)
 	}
+
+	if got := openAIQuizModelTimeout(QuizModelActionGeneratePlanSliceDetail); got != 5*time.Minute {
+		t.Fatalf("plan slice detail generation timeout = %s, want 5m", got)
+	}
 }
 
 func TestQuizModelPlanOutlineResponseFromOutput(t *testing.T) {
@@ -592,6 +669,58 @@ func TestValidateQuizModelPlanOutlinePayloadRejectsNonSequentialSlices(t *testin
 	}`))
 	if err == nil {
 		t.Fatal("DecodeQuizModelPlanOutlinePayload returned nil error")
+	}
+}
+
+func TestQuizModelPlanSliceDetailResponseFromOutput(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGeneratePlanSliceDetail
+	request.Strategy = "plan_slice_detail_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGeneratePlanSliceDetail, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"slice_id":"Slice 1",
+		"short_name":"outline generation contract",
+		"objective":"Add outline contracts.",
+		"implementation_notes":["Keep this scoped to contracts."],
+		"tasks":[{
+			"id":"T1.1",
+			"summary":"Add the model action.",
+			"commit_hint":"feat(chc): add plan outline action"
+		}],
+		"acceptance_criteria":["The action validates."],
+		"ticket_metadata":{
+			"title":"Add outline contract",
+			"synopsis":"Adds outline generation contracts.",
+			"priority":"medium",
+			"severity":"normal",
+			"type":"feature",
+			"tags":["planning"]
+		},
+		"branch_metadata":{"branch_name":"feat/slice-1-outline-generation-contract"},
+		"pr_expectations":["Open one PR against dev."],
+		"validation_expectations":["Run focused tests."],
+		"dependencies":[],
+		"non_goals":["Do not connect runtime orchestration."]
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.SliceDetail.Tasks[0].ID != "T1.1" {
+		t.Fatalf("slice detail task id = %q, want T1.1", response.SliceDetail.Tasks[0].ID)
+	}
+}
+
+func TestValidateGeneratedPlanSliceDetailRejectsRenamedSlice(t *testing.T) {
+	outline := validGeneratedPlanOutline(quizRuntimeTestTime())
+	detail := validGeneratedPlanSliceDetail(quizRuntimeTestTime())
+	detail.ShortName = "renamed slice"
+
+	err := ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, "Slice 1")
+	if err == nil {
+		t.Fatal("ValidateGeneratedPlanSliceDetailAgainstOutline returned nil error")
 	}
 }
 
@@ -1112,6 +1241,49 @@ func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
 		},
 		CreatedAt: createdAt,
 	}
+}
+
+func validGeneratedPlanSliceDetail(createdAt time.Time) GeneratedPlanSliceDetail {
+	return GeneratedPlanSliceDetail{
+		Scope:               QuizScope{ProjectID: "project-1"},
+		SliceID:             "Slice 1",
+		ShortName:           "outline generation contract",
+		Objective:           "Add outline contracts.",
+		ImplementationNotes: []string{"Keep this scoped to contracts."},
+		Tasks: []GeneratedPlanSliceTask{
+			{
+				ID:         "T1.1",
+				Summary:    "Add the model action.",
+				CommitHint: "feat(chc): add plan outline action",
+			},
+		},
+		AcceptanceCriteria: []string{"The action validates."},
+		TicketMetadata: GeneratedPlanSliceTicketMetadata{
+			Title:    "Add outline contract",
+			Synopsis: "Adds outline generation contracts.",
+			Priority: "medium",
+			Severity: "normal",
+			Type:     "feature",
+			Tags:     []string{"planning"},
+		},
+		BranchMetadata: GeneratedPlanSliceBranchMetadata{
+			BranchName: "feat/slice-1-outline-generation-contract",
+		},
+		PRExpectations:         []string{"Open one PR against dev."},
+		ValidationExpectations: []string{"Run focused tests."},
+		NonGoals:               []string{"Do not connect runtime orchestration."},
+		CreatedAt:              createdAt,
+	}
+}
+
+func containsAnyString(values []any, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+
+	return false
 }
 
 func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (openAIResponsesRequest, map[string]any) {

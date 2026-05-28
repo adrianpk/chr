@@ -147,6 +147,64 @@ The implementation must preserve editorial review.
 	})
 }
 
+func TestServiceBuildsPlanSliceDetailGenerationRequest(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-spec.md"), `---
+title: "Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Blog Spec
+
+The implementation must preserve editorial review.
+`)
+
+	operations := newTestService(t, projectDir)
+	scope := chc.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	state, err := operations.specGenerationRuntimeState(scope)
+	if err != nil {
+		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
+	}
+
+	outline := validServiceGeneratedPlanOutline(scope, operations.now())
+	request, err := operations.newPlanSliceDetailGenerationModelRequest(state, outline, "Slice 1")
+	if err != nil {
+		t.Fatalf("newPlanSliceDetailGenerationModelRequest returned error: %v", err)
+	}
+
+	if request.Action != chc.QuizModelActionGeneratePlanSliceDetail {
+		t.Fatalf("Action = %q, want plan slice detail generation", request.Action)
+	}
+
+	if request.Strategy != "plan_slice_detail_generation" {
+		t.Fatalf("Strategy = %q, want plan_slice_detail_generation", request.Strategy)
+	}
+
+	if request.ID != "plan-slice-detail-generation-blog-slice-1" {
+		t.Fatalf("ID = %q, want plan-slice-detail-generation-blog-slice-1", request.ID)
+	}
+
+	if request.Payload.OutputContract.RenderedTextField != "objective" {
+		t.Fatalf("RenderedTextField = %q, want objective", request.Payload.OutputContract.RenderedTextField)
+	}
+
+	assertQuizModelRequestSections(t, request, []string{
+		"project",
+		"quiz",
+		"recent_entries",
+		"current_question",
+		"agent_protocol",
+		"project_document",
+		"use_case_document",
+		"dump",
+		"spec",
+		"plan_outline",
+		"target_slice",
+	})
+}
+
 func TestServiceRegeneratePlanArchivesExistingPlanBeforeReplace(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -718,6 +776,33 @@ Slice decomposition.
 func fixedServiceClock(now time.Time) func() time.Time {
 	return func() time.Time {
 		return now
+	}
+}
+
+func validServiceGeneratedPlanOutline(scope chc.QuizScope, createdAt time.Time) chc.GeneratedPlanOutline {
+	return chc.GeneratedPlanOutline{
+		Scope:              scope,
+		Title:              "Staged Plan Generation",
+		Status:             "planned",
+		Summary:            "Generate an outline first.",
+		Assumptions:        []string{"Existing plans remain valid."},
+		OpenQuestions:      []string{"Should staged generation be default?"},
+		Risks:              []string{"More model calls."},
+		ValidationStrategy: "Validate schema and request construction.",
+		Slices: []chc.GeneratedPlanOutlineSlice{
+			{
+				ID:                     "Slice 1",
+				ShortName:              "outline generation contract",
+				Objective:              "Add outline contracts.",
+				Rationale:              "Keep the slice map coherent.",
+				BranchName:             "feat/slice-1-outline-generation-contract",
+				PRTitle:                "feat(slice-1): outline generation contract",
+				ReportPath:             ".prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md",
+				Complexity:             "medium",
+				ImplementationBoundary: "Contracts only.",
+			},
+		},
+		CreatedAt: createdAt,
 	}
 }
 
