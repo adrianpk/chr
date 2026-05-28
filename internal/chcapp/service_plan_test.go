@@ -42,9 +42,7 @@ The implementation must preserve editorial review.
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizPlanResponse("response-plan", clock()),
-		},
+		responses: serviceQuizStagedPlanResponses(clock()),
 	}
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
@@ -66,19 +64,27 @@ The implementation must preserve editorial review.
 		`status: "planned"`,
 		`case_slug: "blog"`,
 		"# Generated Implementation Plan",
-		"Slice 01 - Foundation",
+		"### Slice 1: Foundation",
+		"## Model call provenance",
 	} {
 		if !strings.Contains(plan, want) {
 			t.Fatalf("generated plan missing %q in:\n%s", want, plan)
 		}
 	}
 
-	request := model.requests[len(model.requests)-1]
-	if request.Action != chc.QuizModelActionGeneratePlan {
-		t.Fatalf("Action = %q, want plan generation", request.Action)
+	if len(model.requests) != 2 {
+		t.Fatalf("model requests = %d, want outline and slice detail requests", len(model.requests))
 	}
 
-	assertQuizModelRequestSections(t, request, []string{
+	if model.requests[0].Action != chc.QuizModelActionGeneratePlanOutline {
+		t.Fatalf("first action = %q, want plan outline generation", model.requests[0].Action)
+	}
+
+	if model.requests[1].Action != chc.QuizModelActionGeneratePlanSliceDetail {
+		t.Fatalf("second action = %q, want plan slice detail generation", model.requests[1].Action)
+	}
+
+	assertQuizModelRequestSections(t, model.requests[0], []string{
 		"project",
 		"quiz",
 		"recent_entries",
@@ -221,9 +227,7 @@ Manual edits that must remain recoverable.
 
 	clock := fixedServiceClock(time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC))
 	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizPlanResponse("response-plan", clock()),
-		},
+		responses: serviceQuizStagedPlanResponses(clock()),
 	}
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
@@ -269,9 +273,7 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 
 	clock := fixedServiceClock(time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC))
 	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizPlanResponse("response-plan", clock()),
-		},
+		responses: serviceQuizStagedPlanResponses(clock()),
 	}
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
@@ -292,6 +294,37 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 	archiveRoot := filepath.Join(projectDir, ".chc", "plans", "archive")
 	if _, err := os.Stat(archiveRoot); !os.IsNotExist(err) {
 		t.Fatalf("archive root exists after missing-plan regenerate: %v", err)
+	}
+}
+
+func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	badDetail := serviceQuizPlanSliceDetailResponse("response-plan-slice-detail", clock())
+	badDetail.SliceDetail.ShortName = "renamed slice"
+
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizPlanOutlineResponse("response-plan-outline", clock()),
+			badDetail,
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err == nil {
+		t.Fatal("GeneratePlan returned nil error, want slice detail validation failure")
+	}
+
+	planPath := filepath.Join(projectDir, ".chc", "plans", "blog-plan.md")
+	if _, statErr := os.Stat(planPath); !os.IsNotExist(statErr) {
+		t.Fatalf("plan path stat error = %v, want not exist", statErr)
 	}
 }
 
@@ -479,9 +512,7 @@ Manual edits that must remain recoverable.
 
 	clock := fixedServiceClock(time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC))
 	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizPlanResponse("response-plan", clock()),
-		},
+		responses: serviceQuizStagedPlanResponses(clock()),
 	}
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
@@ -534,9 +565,7 @@ case: "blog"
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizPlanResponse("response-plan", clock()),
-		},
+		responses: serviceQuizStagedPlanResponses(clock()),
 	}
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
@@ -632,9 +661,7 @@ func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizPlanResponse("response-plan", clock()),
-		},
+		responses: serviceQuizStagedPlanResponses(clock()),
 	}
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
@@ -734,8 +761,8 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 		t.Fatalf("first GeneratePlan returned error: %v", err)
 	}
 
-	if model.requestCount() != 1 {
-		t.Fatalf("model requests = %d, want one guarded invocation", model.requestCount())
+	if model.requestCount() != 2 {
+		t.Fatalf("model requests = %d, want one guarded staged invocation", model.requestCount())
 	}
 }
 
@@ -819,7 +846,11 @@ func (m *deadlineCapturingPlanModel) InvokeQuizModel(
 	m.hasDeadline = ok
 	m.remaining = time.Until(deadline)
 
-	return serviceQuizPlanResponse("response-plan", request.CreatedAt), nil
+	if request.Action == chc.QuizModelActionGeneratePlanOutline {
+		return serviceQuizPlanOutlineResponse("response-plan-outline", request.CreatedAt), nil
+	}
+
+	return serviceQuizPlanSliceDetailResponse("response-plan-slice-detail", request.CreatedAt), nil
 }
 
 type blockingPlanModel struct {
@@ -848,7 +879,11 @@ func (m *blockingPlanModel) InvokeQuizModel(
 	m.once.Do(func() { close(m.started) })
 	<-m.release
 
-	return serviceQuizPlanResponse("response-plan", request.CreatedAt), nil
+	if request.Action == chc.QuizModelActionGeneratePlanOutline {
+		return serviceQuizPlanOutlineResponse("response-plan-outline", request.CreatedAt), nil
+	}
+
+	return serviceQuizPlanSliceDetailResponse("response-plan-slice-detail", request.CreatedAt), nil
 }
 
 func (m *blockingPlanModel) requestCount() int {

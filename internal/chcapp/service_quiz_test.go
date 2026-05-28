@@ -788,8 +788,12 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 			return serviceQuizDraftSpecResponse("response-fallback", request.CreatedAt), nil
 		}
 
-		if request.Action == chc.QuizModelActionGeneratePlan {
-			return serviceQuizPlanResponse("response-fallback", request.CreatedAt), nil
+		if request.Action == chc.QuizModelActionGeneratePlanOutline {
+			return serviceQuizPlanOutlineResponse("response-fallback-outline", request.CreatedAt), nil
+		}
+
+		if request.Action == chc.QuizModelActionGeneratePlanSliceDetail {
+			return serviceQuizPlanSliceDetailResponse("response-fallback-slice-detail", request.CreatedAt), nil
 		}
 
 		if request.Action == chc.QuizModelActionMaterializePlanTracking {
@@ -882,19 +886,88 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) chc.Qu
 	}
 }
 
-func serviceQuizPlanResponse(responseID string, createdAt time.Time) chc.QuizModelResponse {
+func serviceQuizStagedPlanResponses(createdAt time.Time) []chc.QuizModelResponse {
+	return []chc.QuizModelResponse{
+		serviceQuizPlanOutlineResponse("response-plan-outline", createdAt),
+		serviceQuizPlanSliceDetailResponse("response-plan-slice-detail", createdAt),
+	}
+}
+
+func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) chc.QuizModelResponse {
 	return chc.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
 		Status:    chc.QuizModelResponseReady,
-		Plan: chc.GeneratedPlan{
-			Scope:     chc.QuizScope{ProjectID: "service-project"},
-			Title:     "Generated Implementation Plan",
-			Body:      "## Slice 01 - Foundation\n\n- Task: implement the planning foundation.\n",
-			CreatedAt: createdAt,
+		PlanOutline: chc.GeneratedPlanOutline{
+			Scope:              chc.QuizScope{ProjectID: "service-project"},
+			Title:              "Generated Implementation Plan",
+			Status:             "planned",
+			Summary:            "Implement the planning foundation.",
+			Assumptions:        []string{"Existing planning context is authoritative."},
+			OpenQuestions:      []string{},
+			Risks:              []string{"Generated output needs review."},
+			ValidationStrategy: "Run focused and repository tests.",
+			Slices: []chc.GeneratedPlanOutlineSlice{
+				{
+					ID:                     "Slice 1",
+					ShortName:              "Foundation",
+					Objective:              "Implement the planning foundation.",
+					Rationale:              "The generated plan needs a first executable slice.",
+					Dependencies:           []string{},
+					BranchName:             "feat/slice-1-foundation",
+					PRTitle:                "feat(slice-1): foundation",
+					ReportPath:             ".prj/reports/slices/generated-plan/slice-1-foundation.md",
+					Complexity:             "medium",
+					ImplementationBoundary: "Foundation behavior only.",
+				},
+			},
+			Dependencies: []chc.GeneratedPlanOutlineDependency{},
+			CreatedAt:    createdAt,
 		},
-		RawText:   "raw generated plan",
+		RawText:   "raw generated plan outline",
+		CreatedAt: createdAt,
+	}
+}
+
+func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) chc.QuizModelResponse {
+	return chc.QuizModelResponse{
+		ID:        responseID,
+		RequestID: "filled-by-fake",
+		Provider:  "fake",
+		Status:    chc.QuizModelResponseReady,
+		SliceDetail: chc.GeneratedPlanSliceDetail{
+			Scope:               chc.QuizScope{ProjectID: "service-project"},
+			SliceID:             "Slice 1",
+			ShortName:           "Foundation",
+			Objective:           "Implement the planning foundation.",
+			ImplementationNotes: []string{"Keep the first slice focused on the planning foundation."},
+			Tasks: []chc.GeneratedPlanSliceTask{
+				{
+					ID:         "T1.1",
+					Summary:    "Implement the planning foundation.",
+					CommitHint: "feat(plan): implement planning foundation",
+				},
+			},
+			AcceptanceCriteria: []string{"Foundation behavior is covered by tests."},
+			TicketMetadata: chc.GeneratedPlanSliceTicketMetadata{
+				Title:    "Implement planning foundation",
+				Synopsis: "Build the planning foundation slice.",
+				Priority: "normal",
+				Severity: "normal",
+				Type:     "task",
+				Tags:     []string{"plan"},
+			},
+			BranchMetadata: chc.GeneratedPlanSliceBranchMetadata{
+				BranchName: "feat/slice-1-foundation",
+			},
+			PRExpectations:         []string{"Open one PR against dev."},
+			ValidationExpectations: []string{"Run focused and repository tests."},
+			Dependencies:           []string{},
+			NonGoals:               []string{"Do not add unrelated work."},
+			CreatedAt:              createdAt,
+		},
+		RawText:   "raw generated plan slice detail",
 		CreatedAt: createdAt,
 	}
 }
