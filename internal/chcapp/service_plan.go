@@ -542,12 +542,30 @@ func (v PlanView) withMetadata(useCaseTitle, title, status string, updatedAt tim
 
 //nolint:wsl_v5 // Request assembly keeps optional project-wide sections adjacent.
 func (s service) newPlanGenerationModelRequest(state chc.QuizRuntimeState) (chc.QuizModelRequest, error) {
+	return s.newPlanningModelRequest(state, chc.QuizModelActionGeneratePlan, "plan_generation", "plan-generation")
+}
+
+func (s service) newPlanOutlineGenerationModelRequest(state chc.QuizRuntimeState) (chc.QuizModelRequest, error) {
+	return s.newPlanningModelRequest(
+		state,
+		chc.QuizModelActionGeneratePlanOutline,
+		"plan_outline_generation",
+		"plan-outline-generation",
+	)
+}
+
+func (s service) newPlanningModelRequest(
+	state chc.QuizRuntimeState,
+	action chc.QuizModelAction,
+	strategy string,
+	idPrefix string,
+) (chc.QuizModelRequest, error) {
 	scope := chc.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, chc.QuizModelActionGeneratePlan)
+	payload, err := s.newQuizModelPayload(scope, state, action)
 	if err != nil {
 		return chc.QuizModelRequest{}, err
 	}
@@ -567,13 +585,14 @@ func (s service) newPlanGenerationModelRequest(state chc.QuizRuntimeState) (chc.
 		if err != nil {
 			return chc.QuizModelRequest{}, err
 		}
+
 		sections = append(sections, planningSections...)
 	}
 
 	return chc.QuizModelRequest{
-		ID:              fmt.Sprintf("plan-generation-%s", specScopeID(scope)),
-		Action:          chc.QuizModelActionGeneratePlan,
-		Strategy:        "plan_generation",
+		ID:              fmt.Sprintf("%s-%s", idPrefix, specScopeID(scope)),
+		Action:          action,
+		Strategy:        strategy,
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
