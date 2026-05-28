@@ -2535,11 +2535,63 @@ func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 	view := navigated.View()
 
 	for _, want := range []string{
-		"Ready For Dev (2/6)",
+		"RFD (2/6)",
 		"> CHC-2",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{
+				Key:      "CHC-1",
+				Title:    "Legacy ready ticket",
+				Status:   chc.TicketStatusReadyLegacy,
+				Priority: "high",
+			},
+			{
+				Key:      "CHC-15",
+				Title:    "Implement filesystem-backed Post store and slug normalization",
+				Status:   chc.TicketStatusReadyForDev,
+				Priority: "normal",
+			},
+		},
+	})
+	model.selected = 6
+
+	lines := model.renderTicketFocusList(48, 8)
+	rendered := strings.Join(lines, "\n")
+
+	for _, want := range []string{
+		"    Key     Sts   Pri   Title",
+		"RFD",
+		"RDY",
+		"Norm",
+		"Implement filesystem-ba",
+		"…",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("compact ticket list missing %q:\n%s", want, rendered)
+		}
+	}
+
+	for _, unwanted := range []string{
+		"ready_for_dev",
+		"Ready",
+		"slug normalization",
+	} {
+		if strings.Contains(rendered, unwanted) {
+			t.Fatalf("compact ticket list contains %q:\n%s", unwanted, rendered)
+		}
+	}
+
+	for index, line := range lines {
+		if lipgloss.Width(line) > 48 {
+			t.Fatalf("line %d width = %d, want <= 48: %q", index, lipgloss.Width(line), line)
 		}
 	}
 }

@@ -518,7 +518,6 @@ func (m Model) caseMetadataFromSuggestions(
 }
 
 func (m Model) renderTicketWorkspace(width, height int) string {
-	list := m.renderTicketFocusList(height - 2)
 	detail := m.renderSelectedTicketDetail()
 	detailLines := strings.Split(detail, "\n")[1:]
 
@@ -528,12 +527,15 @@ func (m Model) renderTicketWorkspace(width, height int) string {
 			return m.renderMaximizedBoardWorkspace(width, height)
 		}
 
+		list := m.renderTicketFocusList(maxInt(width-4, 1), height-2)
+
 		return fitBlock(renderPanel("Tickets", list, width, height, true), width, height)
 	case 1:
 		return fitBlock(m.renderDetailPanel("Detail", detailLines, width, height, true), width, height)
 	}
 
 	leftWidth, rightWidth := m.splitWidths(width)
+	list := m.renderTicketFocusList(maxInt(leftWidth-4, 1), height-2)
 
 	return fitBlock(lipgloss.JoinHorizontal(
 		lipgloss.Top,
@@ -719,7 +721,7 @@ func (m Model) renderOverlayWorkspace(width, height int, overlay string) string 
 	return renderPanel("Action", content, width, height, true)
 }
 
-func (m Model) renderTicketFocusList(limit int) []string {
+func (m Model) renderTicketFocusList(width, limit int) []string {
 	lines := m.renderBoardFocusHeaderLines(limit)
 
 	tickets := m.filteredTickets()
@@ -727,7 +729,7 @@ func (m Model) renderTicketFocusList(limit int) []string {
 		return appendLimitedLines(lines, []string{"No tickets match."}, limit)
 	}
 
-	lines = appendLimitedLines(lines, []string{shellMutedStyle.Render("Key     Status       Priority  Title")}, limit)
+	lines = appendLimitedLines(lines, []string{shellMutedStyle.Render(renderCompactTicketHeaderLine(width))}, limit)
 
 	for _, ticket := range tickets {
 		prefix := " "
@@ -735,7 +737,7 @@ func (m Model) renderTicketFocusList(limit int) []string {
 			prefix = ">"
 		}
 
-		lines = append(lines, fmt.Sprintf("%s %-7s %-12s %-9s %s", prefix, ticket.Key, ticket.Status, ticket.Priority, ticket.Title))
+		lines = append(lines, renderCompactTicketFocusLine(prefix, ticket, width))
 		if len(lines) >= limit {
 			break
 		}
@@ -859,6 +861,139 @@ func (m Model) renderBoardAttentionFocusList(limit int) []string {
 	return lines
 }
 
+func renderCompactTicketHeaderLine(width int) string {
+	return renderCompactTicketColumns(" ", "Key", "Sts", "Pri", "Title", width, true)
+}
+
+func renderCompactTicketFocusLine(prefix string, ticket TicketView, width int) string {
+	return renderCompactTicketColumns(
+		prefix,
+		ticket.Key,
+		compactTicketStatusLabel(ticket.Status),
+		compactTicketPriorityLabel(ticket.Priority),
+		ticket.Title,
+		width,
+		false,
+	)
+}
+
+func renderCompactTicketColumns(prefix, key, status, priority, title string, width int, header bool) string {
+	line := strings.Builder{}
+	line.WriteString(compactTicketCell(prefix, 1, false))
+	line.WriteString(" ")
+	line.WriteString(compactTicketCell(key, 7, header))
+	line.WriteString("  ")
+	line.WriteString(compactTicketCell(status, 5, header))
+	line.WriteString("  ")
+	line.WriteString(compactTicketCell(priority, 4, header))
+	line.WriteString("  ")
+
+	titleWidth := maxInt(width-lipgloss.Width(line.String()), 1)
+	line.WriteString(truncatePlainLine(title, titleWidth))
+
+	return fitPlainLine(line.String(), width)
+}
+
+func compactTicketCell(value string, width int, center bool) string {
+	if width <= 0 {
+		return ""
+	}
+
+	value = truncatePlainLine(value, width)
+	if !center {
+		return fitPlainLine(value, width)
+	}
+
+	valueWidth := lipgloss.Width(value)
+	left := maxInt((width-valueWidth)/2, 0)
+	right := maxInt(width-valueWidth-left, 0)
+
+	return strings.Repeat(" ", left) + value + strings.Repeat(" ", right)
+}
+
+func compactTicketStatusLabel(status string) string {
+	switch strings.TrimSpace(status) {
+	case chc.TicketStatusBacklog:
+		return "BL"
+	case chc.TicketStatusReadyForDev:
+		return "RFD"
+	case chc.TicketStatusInProgress:
+		return "IP"
+	case chc.TicketStatusReadyForReview:
+		return "RFR"
+	case chc.TicketStatusReadyForMerge:
+		return "RFM"
+	case chc.TicketStatusDone:
+		return "DONE"
+	case chc.TicketStatusOpenLegacy:
+		return "OPN"
+	case chc.TicketStatusReadyLegacy:
+		return "RDY"
+	case chc.TicketStatusReviewingLegacy:
+		return "REV"
+	case chc.TicketStatusBlockedLegacy:
+		return "BLK"
+	case chc.TicketStatusSolvedLegacy:
+		return "SLV"
+	case chc.TicketStatusMergedLegacy:
+		return "DONE"
+	case chc.TicketStatusClosedLegacy:
+		return "CLS"
+	default:
+		return truncatePlainLine(humanizeCompactToken(status), 5)
+	}
+}
+
+func compactTicketPriorityLabel(priority string) string {
+	switch strings.TrimSpace(priority) {
+	case "urgent":
+		return "Urg"
+	case "high":
+		return "High"
+	case "normal":
+		return "Norm"
+	case "low":
+		return "Low"
+	default:
+		return truncatePlainLine(humanizeCompactToken(priority), 4)
+	}
+}
+
+func compactBoardColumnLabel(column string) string {
+	switch strings.TrimSpace(column) {
+	case boardAttentionColumn:
+		return "ATT"
+	case chc.TicketStatusBacklog:
+		return "BL"
+	case chc.TicketStatusReadyForDev:
+		return "RFD"
+	case chc.TicketStatusInProgress:
+		return "IP"
+	case chc.TicketStatusReadyForReview:
+		return "RFR"
+	case chc.TicketStatusReadyForMerge:
+		return "RFM"
+	case chc.TicketStatusDone:
+		return "Done"
+	default:
+		return truncatePlainLine(humanizeCompactToken(column), 5)
+	}
+}
+
+func humanizeCompactToken(value string) string {
+	value = strings.TrimSpace(strings.ReplaceAll(value, "_", " "))
+	if value == "" {
+		return "-"
+	}
+
+	words := strings.Fields(value)
+	for index, word := range words {
+		words[index] = strings.ToUpper(word[:1]) + word[1:]
+	}
+
+	return strings.Join(words, " ")
+}
+
 func (m Model) renderBoardFocusHeaderLines(limit int) []string {
 	if m.SelectedView() != ViewBoard {
 		return []string{}
@@ -873,7 +1008,7 @@ func (m Model) renderBoardFocusHeaderLines(limit int) []string {
 
 	return appendLimitedLines([]string{}, []string{
 		fmt.Sprintf("%s (%d/%d)",
-			chc.BoardColumnTitle(m.activeBoardColumn()),
+			compactBoardColumnLabel(m.activeBoardColumn()),
 			m.activeBoardColumnPosition()+1,
 			len(chc.NormalBoardColumns),
 		),
