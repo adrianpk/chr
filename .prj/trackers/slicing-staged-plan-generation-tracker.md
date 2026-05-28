@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-staged-plan-generation-plan.md`
 
 Slicing name: Staged Plan Generation
 
-Active slice number: Slice 2
+Active slice number: Slice 3
 
-Active slice short name: slice detail expansion
+Active slice short name: deterministic plan assembly
 
-Expected branch name: `feat/slice-2-slice-detail-expansion`
+Expected branch name: `feat/slice-3-deterministic-plan-assembly`
 
-Expected PR title: `feat(slice-2): slice detail expansion`
+Expected PR title: `feat(slice-3): deterministic plan assembly`
 
 Expected report path:
-`.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md`
+`.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md`
 
 Prerequisite PRs or delivered work:
 
@@ -41,7 +41,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Outline Generation Contract | Delivered | `feat/slice-1-outline-generation-contract` | `feat(slice-1): outline generation contract` | `.prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md` | Delivered in PR #237. |
-| Slice 2: Slice Detail Expansion | Reviewing | `feat/slice-2-slice-detail-expansion` | `feat(slice-2): slice detail expansion` | `.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md` | Adds one-slice expansion action/schema/request construction and validation. |
+| Slice 2: Slice Detail Expansion | Delivered | `feat/slice-2-slice-detail-expansion` | `feat(slice-2): slice detail expansion` | `.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md` | Delivered in PR #238. |
 | Slice 3: Deterministic Plan Assembly | Planned | `feat/slice-3-deterministic-plan-assembly` | `feat(slice-3): deterministic plan assembly` | `.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md` | Connects staged generation into final plan assembly and write behavior. |
 
 ## Slice 1: Outline Generation Contract

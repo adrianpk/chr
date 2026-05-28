@@ -1,11 +1,11 @@
 # Slice 2: Slice Detail Expansion
 
-Status: reviewing
+Status: delivered
 Slicing: Staged Plan Generation
 Plan: `.prj/plans/slicing-staged-plan-generation-plan.md`
 Tracker: `.prj/trackers/slicing-staged-plan-generation-tracker.md`
 Branch: `feat/slice-2-slice-detail-expansion`
-PR: pending
+PR: #238
 
 ## Purpose
 
