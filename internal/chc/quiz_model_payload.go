@@ -90,6 +90,37 @@ type QuizModelPlanPayload struct {
 	Status string `json:"status"`
 }
 
+type QuizModelPlanOutlinePayload struct {
+	Title              string                                  `json:"title"`
+	Status             string                                  `json:"status"`
+	Summary            string                                  `json:"summary"`
+	Assumptions        []string                                `json:"assumptions"`
+	OpenQuestions      []string                                `json:"open_questions"`
+	Risks              []string                                `json:"risks"`
+	ValidationStrategy string                                  `json:"validation_strategy"`
+	Slices             []QuizModelPlanOutlineSlicePayload      `json:"slices"`
+	Dependencies       []QuizModelPlanOutlineDependencyPayload `json:"dependencies"`
+}
+
+type QuizModelPlanOutlineSlicePayload struct {
+	ID                     string   `json:"id"`
+	ShortName              string   `json:"short_name"`
+	Objective              string   `json:"objective"`
+	Rationale              string   `json:"rationale"`
+	Dependencies           []string `json:"dependencies"`
+	BranchName             string   `json:"branch_name"`
+	PRTitle                string   `json:"pr_title"`
+	ReportPath             string   `json:"report_path"`
+	Complexity             string   `json:"complexity"`
+	ImplementationBoundary string   `json:"implementation_boundary"`
+}
+
+type QuizModelPlanOutlineDependencyPayload struct {
+	FromSliceID string `json:"from_slice_id"`
+	ToSliceID   string `json:"to_slice_id"`
+	Reason      string `json:"reason"`
+}
+
 type QuizModelPlanTrackingPayload struct {
 	Title   string                               `json:"title"`
 	Body    string                               `json:"body"`
@@ -120,6 +151,23 @@ type QuizModelPromptIntentPayload struct {
 }
 
 func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModelOutputContractPayload {
+	if action == QuizModelActionGeneratePlanOutline {
+		return QuizModelOutputContractPayload{
+			RequiredFields: []string{
+				"title",
+				"status",
+				"summary",
+				"assumptions",
+				"open_questions",
+				"risks",
+				"validation_strategy",
+				"slices",
+				"dependencies",
+			},
+			RenderedTextField: "summary",
+		}
+	}
+
 	if action == QuizModelActionDraftSpec || action == QuizModelActionGenerateSpec || action == QuizModelActionGeneratePlan {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    []string{"title", "body", "status"},
@@ -247,6 +295,38 @@ func DecodeQuizModelPlanPayload(content []byte) (QuizModelPlanPayload, error) {
 	return ValidateQuizModelPlanPayload(payload)
 }
 
+func DecodeQuizModelPlanOutlinePayload(content []byte) (QuizModelPlanOutlinePayload, error) {
+	fields, err := quizModelRawJSONFields(content)
+	if err != nil {
+		return QuizModelPlanOutlinePayload{}, err
+	}
+
+	required := []string{
+		"title",
+		"status",
+		"summary",
+		"assumptions",
+		"open_questions",
+		"risks",
+		"validation_strategy",
+		"slices",
+		"dependencies",
+	}
+	err = validateQuizModelExactFields(fields, required)
+	if err != nil {
+		return QuizModelPlanOutlinePayload{}, err
+	}
+
+	var payload QuizModelPlanOutlinePayload
+
+	err = decodeStrictQuizModelJSON(content, &payload)
+	if err != nil {
+		return QuizModelPlanOutlinePayload{}, err
+	}
+
+	return ValidateQuizModelPlanOutlinePayload(payload)
+}
+
 func DecodeQuizModelPlanTrackingPayload(content []byte) (QuizModelPlanTrackingPayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -328,6 +408,99 @@ func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPa
 	}
 
 	return normalized, nil
+}
+
+func ValidateQuizModelPlanOutlinePayload(payload QuizModelPlanOutlinePayload) (QuizModelPlanOutlinePayload, error) {
+	normalized := normalizeQuizModelPlanOutlinePayload(payload)
+	outline := generatedPlanOutlineFromPayload(QuizScope{ProjectID: "payload-validation"}, normalized)
+
+	if err := ValidateGeneratedPlanOutline(outline); err != nil {
+		return QuizModelPlanOutlinePayload{}, err
+	}
+
+	return normalized, nil
+}
+
+func normalizeQuizModelPlanOutlinePayload(payload QuizModelPlanOutlinePayload) QuizModelPlanOutlinePayload {
+	normalized := QuizModelPlanOutlinePayload{
+		Title:              strings.TrimSpace(payload.Title),
+		Status:             strings.TrimSpace(payload.Status),
+		Summary:            strings.TrimSpace(payload.Summary),
+		Assumptions:        normalizePlanTrackingDependencies(payload.Assumptions),
+		OpenQuestions:      normalizePlanTrackingDependencies(payload.OpenQuestions),
+		Risks:              normalizePlanTrackingDependencies(payload.Risks),
+		ValidationStrategy: strings.TrimSpace(payload.ValidationStrategy),
+		Slices:             make([]QuizModelPlanOutlineSlicePayload, 0, len(payload.Slices)),
+		Dependencies:       make([]QuizModelPlanOutlineDependencyPayload, 0, len(payload.Dependencies)),
+	}
+
+	for _, slice := range payload.Slices {
+		normalized.Slices = append(normalized.Slices, normalizeQuizModelPlanOutlineSlicePayload(slice))
+	}
+
+	for _, dependency := range payload.Dependencies {
+		normalized.Dependencies = append(
+			normalized.Dependencies,
+			normalizeQuizModelPlanOutlineDependencyPayload(dependency),
+		)
+	}
+
+	return normalized
+}
+
+func normalizeQuizModelPlanOutlineSlicePayload(
+	slice QuizModelPlanOutlineSlicePayload,
+) QuizModelPlanOutlineSlicePayload {
+	return QuizModelPlanOutlineSlicePayload{
+		ID:                     strings.TrimSpace(slice.ID),
+		ShortName:              strings.TrimSpace(slice.ShortName),
+		Objective:              strings.TrimSpace(slice.Objective),
+		Rationale:              strings.TrimSpace(slice.Rationale),
+		Dependencies:           normalizePlanTrackingDependencies(slice.Dependencies),
+		BranchName:             strings.TrimSpace(slice.BranchName),
+		PRTitle:                strings.TrimSpace(slice.PRTitle),
+		ReportPath:             strings.TrimSpace(slice.ReportPath),
+		Complexity:             strings.TrimSpace(slice.Complexity),
+		ImplementationBoundary: strings.TrimSpace(slice.ImplementationBoundary),
+	}
+}
+
+func normalizeQuizModelPlanOutlineDependencyPayload(
+	dependency QuizModelPlanOutlineDependencyPayload,
+) QuizModelPlanOutlineDependencyPayload {
+	return QuizModelPlanOutlineDependencyPayload{
+		FromSliceID: strings.TrimSpace(dependency.FromSliceID),
+		ToSliceID:   strings.TrimSpace(dependency.ToSliceID),
+		Reason:      strings.TrimSpace(dependency.Reason),
+	}
+}
+
+func generatedPlanOutlineFromPayload(
+	scope QuizScope,
+	payload QuizModelPlanOutlinePayload,
+) GeneratedPlanOutline {
+	outline := GeneratedPlanOutline{
+		Scope:              scope,
+		Title:              payload.Title,
+		Status:             payload.Status,
+		Summary:            payload.Summary,
+		Assumptions:        payload.Assumptions,
+		OpenQuestions:      payload.OpenQuestions,
+		Risks:              payload.Risks,
+		ValidationStrategy: payload.ValidationStrategy,
+		Slices:             make([]GeneratedPlanOutlineSlice, 0, len(payload.Slices)),
+		Dependencies:       make([]GeneratedPlanOutlineDependency, 0, len(payload.Dependencies)),
+	}
+
+	for _, slice := range payload.Slices {
+		outline.Slices = append(outline.Slices, GeneratedPlanOutlineSlice(slice))
+	}
+
+	for _, dependency := range payload.Dependencies {
+		outline.Dependencies = append(outline.Dependencies, GeneratedPlanOutlineDependency(dependency))
+	}
+
+	return outline
 }
 
 func ValidateQuizModelPlanTrackingPayload(
