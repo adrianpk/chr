@@ -197,6 +197,7 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 	hasContextAction := request.Action == QuizModelActionDraftSpec ||
 		request.Action == QuizModelActionGenerateSpec ||
 		request.Action == QuizModelActionGeneratePlan ||
+		request.Action == QuizModelActionGeneratePlanOutline ||
 		request.Action == QuizModelActionMaterializePlanTracking
 	if hasContextAction && len(request.ContextSections) > 0 {
 		payload["context_sections"] = quizModelProviderContextSections(request.ContextSections)
@@ -375,7 +376,10 @@ func (a OpenAIQuizModelAdapter) httpClient(request QuizModelRequest) *http.Clien
 
 func openAIQuizModelTimeout(action QuizModelAction) time.Duration {
 	switch action {
-	case QuizModelActionGenerateSpec, QuizModelActionGeneratePlan, QuizModelActionMaterializePlanTracking:
+	case QuizModelActionGenerateSpec,
+		QuizModelActionGeneratePlan,
+		QuizModelActionGeneratePlanOutline,
+		QuizModelActionMaterializePlanTracking:
 		return defaultOpenAIGenerationTimeout
 	default:
 		return defaultOpenAIQuizTimeout
@@ -428,6 +432,8 @@ func quizModelResponseFromOutput(request QuizModelRequest, output []byte) (QuizM
 		return quizModelDraftSpecResponseFromOutput(request, output)
 	case QuizModelActionGeneratePlan:
 		return quizModelPlanResponseFromOutput(request, output)
+	case QuizModelActionGeneratePlanOutline:
+		return quizModelPlanOutlineResponseFromOutput(request, output)
 	case QuizModelActionMaterializePlanTracking:
 		return quizModelPlanTrackingResponseFromOutput(request, output)
 	default:
@@ -532,6 +538,29 @@ func quizModelPlanResponseFromOutput(
 		},
 		RawText:   string(output),
 		CreatedAt: request.CreatedAt.UTC(),
+	}, nil
+}
+
+func quizModelPlanOutlineResponseFromOutput(
+	request QuizModelRequest,
+	output []byte,
+) (QuizModelResponse, error) {
+	payload, err := DecodeQuizModelPlanOutlinePayload(extractJSONObject(output))
+	if err != nil {
+		return QuizModelResponse{}, err
+	}
+
+	outline := generatedPlanOutlineFromPayload(request.Scope, payload)
+	outline.CreatedAt = request.CreatedAt.UTC()
+
+	return QuizModelResponse{
+		ID:          quizModelResponseID(request),
+		RequestID:   request.ID,
+		Provider:    QuizModelProviderOpenAI,
+		Status:      QuizModelResponseReady,
+		PlanOutline: outline,
+		RawText:     string(output),
+		CreatedAt:   request.CreatedAt.UTC(),
 	}, nil
 }
 
@@ -802,6 +831,8 @@ func quizModelInstructions(request QuizModelRequest) string {
 		return quizModelPlanTrackingInstructions()
 	case request.Action == QuizModelActionGeneratePlan:
 		return quizModelPlanGenerationInstructions()
+	case request.Action == QuizModelActionGeneratePlanOutline:
+		return quizModelPlanOutlineGenerationInstructions()
 	case request.Action == QuizModelActionGenerateSpec:
 		return quizModelSpecGenerationInstructions()
 	case request.Action == QuizModelActionDraftSpec:
@@ -924,6 +955,24 @@ Return only the JSON object required by the response schema.
 `)
 }
 
+func quizModelPlanOutlineGenerationInstructions() string {
+	return strings.TrimSpace(`
+You generate a structured implementation plan outline for the selected project or use case.
+Use the structured request payload and all context sections as the sole source of truth.
+Synthesize project metadata, project-wide context, use-case metadata, use-case context, dumps, quizzes, existing specs, related plans, and project-wide planning baseline/readiness sections before outlining.
+Do not write the full implementation plan body.
+Produce only the global slice map and planning constraints needed for later slice detail expansion.
+The outline is authoritative for slice count, slice order, slice identifiers, branch names, PR titles, report paths, dependencies, assumptions, risks, and validation strategy.
+Use sequential slice identifiers starting at Slice 1.
+Keep each slice concise and implementation-oriented.
+Do not generate tickets, code, or final Markdown plan prose.
+Keep uncertain behavior explicit instead of inventing facts.
+Set status to planned.
+Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
+Return only the JSON object required by the response schema.
+`)
+}
+
 func quizModelSpecGenerationInstructions() string {
 	return strings.TrimSpace(`
 You generate a formal specification for the selected project or use case.
@@ -966,6 +1015,14 @@ func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 			Description: "Implementation plan generated from project and use-case context.",
 			Strict:      true,
 			Schema:      quizModelPlanJSONSchema(),
+		}
+	case request.Action == QuizModelActionGeneratePlanOutline:
+		return openAIResponsesTextFormat{
+			Type:        "json_schema",
+			Name:        "generated_plan_outline",
+			Description: "Plan outline generated from project and use-case context.",
+			Strict:      true,
+			Schema:      quizModelPlanOutlineJSONSchema(),
 		}
 	case request.Action == QuizModelActionGenerateSpec:
 		return openAIResponsesTextFormat{
@@ -1165,5 +1222,85 @@ func quizModelPlanJSONSchema() map[string]any {
 				"enum": []string{"planned"},
 			},
 		},
+	}
+}
+
+func quizModelPlanOutlineJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required": []string{
+			"title",
+			"status",
+			"summary",
+			"assumptions",
+			"open_questions",
+			"risks",
+			"validation_strategy",
+			"slices",
+			"dependencies",
+		},
+		"properties": map[string]any{
+			"title":               map[string]any{"type": "string"},
+			"status":              map[string]any{"type": "string", "enum": []string{"planned"}},
+			"summary":             map[string]any{"type": "string"},
+			"assumptions":         stringArrayJSONSchema(),
+			"open_questions":      stringArrayJSONSchema(),
+			"risks":               stringArrayJSONSchema(),
+			"validation_strategy": map[string]any{"type": "string"},
+			"slices":              map[string]any{"type": "array", "items": quizModelPlanOutlineSliceJSONSchema()},
+			"dependencies":        map[string]any{"type": "array", "items": quizModelPlanOutlineDependencyJSONSchema()},
+		},
+	}
+}
+
+func quizModelPlanOutlineSliceJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required": []string{
+			"id",
+			"short_name",
+			"objective",
+			"rationale",
+			"dependencies",
+			"branch_name",
+			"pr_title",
+			"report_path",
+			"complexity",
+			"implementation_boundary",
+		},
+		"properties": map[string]any{
+			"id":                      map[string]any{"type": "string"},
+			"short_name":              map[string]any{"type": "string"},
+			"objective":               map[string]any{"type": "string"},
+			"rationale":               map[string]any{"type": "string"},
+			"dependencies":            stringArrayJSONSchema(),
+			"branch_name":             map[string]any{"type": "string"},
+			"pr_title":                map[string]any{"type": "string"},
+			"report_path":             map[string]any{"type": "string"},
+			"complexity":              map[string]any{"type": "string"},
+			"implementation_boundary": map[string]any{"type": "string"},
+		},
+	}
+}
+
+func quizModelPlanOutlineDependencyJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"from_slice_id", "to_slice_id", "reason"},
+		"properties": map[string]any{
+			"from_slice_id": map[string]any{"type": "string"},
+			"to_slice_id":   map[string]any{"type": "string"},
+			"reason":        map[string]any{"type": "string"},
+		},
+	}
+}
+
+func stringArrayJSONSchema() map[string]any {
+	return map[string]any{
+		"type":  "array",
+		"items": map[string]any{"type": "string"},
 	}
 }
