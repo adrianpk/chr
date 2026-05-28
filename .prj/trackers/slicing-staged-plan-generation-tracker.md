@@ -41,7 +41,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Outline Generation Contract | Delivered | `feat/slice-1-outline-generation-contract` | `feat(slice-1): outline generation contract` | `.prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md` | Delivered in PR #237. |
-| Slice 2: Slice Detail Expansion | Planned | `feat/slice-2-slice-detail-expansion` | `feat(slice-2): slice detail expansion` | `.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md` | Adds one-slice expansion action/schema/request construction and validation. |
+| Slice 2: Slice Detail Expansion | Reviewing | `feat/slice-2-slice-detail-expansion` | `feat(slice-2): slice detail expansion` | `.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md` | Adds one-slice expansion action/schema/request construction and validation. |
 | Slice 3: Deterministic Plan Assembly | Planned | `feat/slice-3-deterministic-plan-assembly` | `feat(slice-3): deterministic plan assembly` | `.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md` | Connects staged generation into final plan assembly and write behavior. |
 
 ## Slice 1: Outline Generation Contract
@@ -78,24 +78,31 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T2.1 Add a slice detail model action and output contract.
-- [ ] T2.2 Add slice detail payload structs and validation.
-- [ ] T2.3 Add strict JSON schema for slice detail responses.
-- [ ] T2.4 Add provider instruction text for one-slice expansion.
-- [ ] T2.5 Add service request construction with full outline and target slice.
-- [ ] T2.6 Add validation that rejects renamed, unknown, reordered, or
+- [x] T2.1 Add a slice detail model action and output contract.
+- [x] T2.2 Add slice detail payload structs and validation.
+- [x] T2.3 Add strict JSON schema for slice detail responses.
+- [x] T2.4 Add provider instruction text for one-slice expansion.
+- [x] T2.5 Add service request construction with full outline and target slice.
+- [x] T2.6 Add validation that rejects renamed, unknown, reordered, or
       out-of-scope slice details.
-- [ ] T2.7 Add tests for valid detail expansion and rejection cases.
-- [ ] T2.8 Add slice implementation report.
-- [ ] T2.9 Run targeted tests and repository quality gates.
+- [x] T2.7 Add tests for valid detail expansion and rejection cases.
+- [x] T2.8 Add slice implementation report.
+- [x] T2.9 Run targeted tests and repository quality gates.
 
 Task commits:
 
-- Pending.
+- `0c62bb4` feat(chc): add plan slice detail contract
+- `8166f11` feat(chc): add plan slice detail OpenAI contract
+- `e7ada61` feat(chcapp): build plan slice detail requests
+- `b505eb0` test(chc): cover plan slice detail contract
 
 Validation:
 
-- Pending.
+- `gofmt -w internal/chc/quiz_model.go internal/chc/plan_outline.go internal/chc/plan_slice_detail.go internal/chc/quiz_model_payload.go internal/chc/quiz_openai_model.go internal/chc/quiz_model_test.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go` - pass.
+- `go test ./internal/chc ./internal/chcapp` - pass.
+- `go test ./...` - pass.
+- `git diff --check` - pass.
+- `make verify` - fail: `lint-strict` reports pre-existing lint debt.
 
 ## Slice 3: Deterministic Plan Assembly
 
