@@ -140,9 +140,9 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 		return PlanOperationResult{}, err
 	}
 
-	modelRequest, err := s.newPlanGenerationModelRequest(state)
+	plan, requestIDs, responseIDs, err := s.generateStagedPlan(ctx, scope, state)
 	if err != nil {
-		s.appendPlanGenerationLog("generate_plan_request_failed", map[string]string{
+		s.appendPlanGenerationLog("generate_plan_staged_generation_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
 			"error":     err.Error(),
 		})
@@ -150,47 +150,14 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 		return PlanOperationResult{}, err
 	}
 
-	s.appendPlanGenerationLog("generate_plan_model_invocation_started", map[string]string{
-		"case_slug":        scope.CaseSlug,
-		"request_id":       modelRequest.ID,
-		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
-	})
-
-	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
-	if err != nil {
-		s.appendPlanGenerationLog("generate_plan_model_invocation_failed", map[string]string{
-			"case_slug":  scope.CaseSlug,
-			"request_id": modelRequest.ID,
-			"error":      err.Error(),
-		})
-
-		return PlanOperationResult{}, err
-	}
-
-	s.appendPlanGenerationLog("generate_plan_model_invocation_finished", map[string]string{
-		"case_slug":   scope.CaseSlug,
-		"request_id":  modelRequest.ID,
-		"response_id": response.ID,
-		"title":       response.Plan.Title,
-	})
-
-	plan := chc.GeneratedPlan{
-		Scope:            scope,
-		Title:            response.Plan.Title,
-		Body:             response.Plan.Body,
-		SourcePaths:      specSourcePaths(modelRequest.ContextSections),
-		SourceRequestID:  modelRequest.ID,
-		SourceResponseID: response.ID,
-		CreatedAt:        response.CreatedAt.UTC(),
-	}
+	plan.SourceRequestID = strings.Join(requestIDs, ",")
+	plan.SourceResponseID = strings.Join(responseIDs, ",")
 
 	paths, err := chc.WriteGeneratedPlan(ctx, s.projectContext.ProjectDir, plan)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_plan_write_failed", map[string]string{
-			"case_slug":   scope.CaseSlug,
-			"request_id":  modelRequest.ID,
-			"response_id": response.ID,
-			"error":       err.Error(),
+			"case_slug": scope.CaseSlug,
+			"error":     err.Error(),
 		})
 
 		return PlanOperationResult{}, err
@@ -198,8 +165,8 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 
 	s.appendPlanGenerationLog("generate_plan_written", map[string]string{
 		"case_slug":     scope.CaseSlug,
-		"request_id":    modelRequest.ID,
-		"response_id":   response.ID,
+		"request_ids":   strings.Join(requestIDs, ","),
+		"response_ids":  strings.Join(responseIDs, ","),
 		"relative_path": paths.RelativePath,
 		"path":          paths.Path,
 	})
@@ -210,6 +177,124 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 		Message: "Plan generated.",
 		Plan:    view,
 	}, nil
+}
+
+func (s service) generateStagedPlan(
+	ctx context.Context,
+	scope chc.QuizScope,
+	state chc.QuizRuntimeState,
+) (chc.GeneratedPlan, []string, []string, error) {
+	outline, sourcePaths, requestIDs, responseIDs, err := s.generatePlanOutline(ctx, scope, state)
+	if err != nil {
+		return chc.GeneratedPlan{}, nil, nil, err
+	}
+
+	details := make([]chc.GeneratedPlanSliceDetail, 0, len(outline.Slices))
+	for _, slice := range outline.Slices {
+		detail, requestID, responseID, err := s.generatePlanSliceDetail(ctx, state, outline, slice.ID)
+		if err != nil {
+			return chc.GeneratedPlan{}, nil, nil, err
+		}
+
+		details = append(details, detail)
+		requestIDs = append(requestIDs, requestID)
+		responseIDs = append(responseIDs, responseID)
+	}
+
+	body, err := chc.AssembleGeneratedPlanBody(outline, details, requestIDs, responseIDs)
+	if err != nil {
+		return chc.GeneratedPlan{}, nil, nil, err
+	}
+
+	plan := chc.GeneratedPlan{
+		Scope:       scope,
+		Title:       outline.Title,
+		Body:        body,
+		SourcePaths: sourcePaths,
+		CreatedAt:   outline.CreatedAt.UTC(),
+	}
+
+	return plan, requestIDs, responseIDs, nil
+}
+
+func (s service) generatePlanOutline(
+	ctx context.Context,
+	scope chc.QuizScope,
+	state chc.QuizRuntimeState,
+) (chc.GeneratedPlanOutline, []string, []string, []string, error) {
+	modelRequest, err := s.newPlanOutlineGenerationModelRequest(state)
+	if err != nil {
+		return chc.GeneratedPlanOutline{}, nil, nil, nil, err
+	}
+
+	s.appendPlanGenerationLog("generate_plan_outline_started", map[string]string{
+		"case_slug":        scope.CaseSlug,
+		"request_id":       modelRequest.ID,
+		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
+	})
+
+	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	if err != nil {
+		return chc.GeneratedPlanOutline{}, nil, nil, nil, err
+	}
+
+	outline := response.PlanOutline
+	outline.Scope = scope
+	outline.CreatedAt = response.CreatedAt.UTC()
+
+	s.appendPlanGenerationLog("generate_plan_outline_finished", map[string]string{
+		"case_slug":   scope.CaseSlug,
+		"request_id":  modelRequest.ID,
+		"response_id": response.ID,
+		"title":       outline.Title,
+		"slices":      fmt.Sprintf("%d", len(outline.Slices)),
+	})
+
+	return outline,
+		specSourcePaths(modelRequest.ContextSections),
+		[]string{modelRequest.ID},
+		[]string{response.ID},
+		nil
+}
+
+func (s service) generatePlanSliceDetail(
+	ctx context.Context,
+	state chc.QuizRuntimeState,
+	outline chc.GeneratedPlanOutline,
+	targetSliceID string,
+) (chc.GeneratedPlanSliceDetail, string, string, error) {
+	modelRequest, err := s.newPlanSliceDetailGenerationModelRequest(state, outline, targetSliceID)
+	if err != nil {
+		return chc.GeneratedPlanSliceDetail{}, "", "", err
+	}
+
+	s.appendPlanGenerationLog("generate_plan_slice_detail_started", map[string]string{
+		"case_slug":  state.CaseSlug,
+		"request_id": modelRequest.ID,
+		"slice_id":   targetSliceID,
+	})
+
+	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	if err != nil {
+		return chc.GeneratedPlanSliceDetail{}, "", "", err
+	}
+
+	detail := response.SliceDetail
+	detail.Scope = outline.Scope
+	detail.CreatedAt = response.CreatedAt.UTC()
+
+	if err := chc.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, targetSliceID); err != nil {
+		return chc.GeneratedPlanSliceDetail{}, "", "", err
+	}
+
+	s.appendPlanGenerationLog("generate_plan_slice_detail_finished", map[string]string{
+		"case_slug":   state.CaseSlug,
+		"request_id":  modelRequest.ID,
+		"response_id": response.ID,
+		"slice_id":    targetSliceID,
+	})
+
+	return detail, modelRequest.ID, response.ID, nil
 }
 
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
@@ -539,11 +624,6 @@ func (v PlanView) withMetadata(useCaseTitle, title, status string, updatedAt tim
 	}
 
 	return v
-}
-
-//nolint:wsl_v5 // Request assembly keeps optional project-wide sections adjacent.
-func (s service) newPlanGenerationModelRequest(state chc.QuizRuntimeState) (chc.QuizModelRequest, error) {
-	return s.newPlanningModelRequest(state, chc.QuizModelActionGeneratePlan, "plan_generation", "plan-generation")
 }
 
 func (s service) newPlanOutlineGenerationModelRequest(state chc.QuizRuntimeState) (chc.QuizModelRequest, error) {
