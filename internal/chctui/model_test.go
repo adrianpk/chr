@@ -2666,8 +2666,9 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 		"Ready For Review (1)",
 		"Ready For Merge (1)",
 		"Done (1)",
-		">CHC-2 Ready ticket",
-		" CHC-6 Done ticket",
+		"│> CHC-2  RFD",
+		"├",
+		"│Ready ticket",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -2683,6 +2684,35 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 
 	if restored.activeBoardColumn() != chc.TicketStatusReadyForDev {
 		t.Fatalf("activeBoardColumn = %q, want ready_for_dev", restored.activeBoardColumn())
+	}
+}
+
+func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First ticket", Status: chc.TicketStatusReadyForDev},
+			{Key: "CHC-2", Title: "Second ticket", Status: chc.TicketStatusReadyForDev},
+			{Key: "CHC-3", Title: "Third ticket with enough words to wrap across several card body lines", Status: chc.TicketStatusReadyForDev},
+		},
+	})
+	model.selectedTicket = 2
+
+	lines := model.renderMaximizedBoardColumnLines(model.tickets, 30, 7)
+	rendered := strings.Join(lines, "\n")
+
+	for _, want := range []string{
+		"│> CHC-3  RFD",
+		"│Third ticket with enough",
+		"│words to wrap across several",
+		"│card body lines",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("maximized card missing %q:\n%s", want, rendered)
+		}
+	}
+
+	if strings.Contains(rendered, "CHC-1") {
+		t.Fatalf("maximized column did not scroll to selected ticket:\n%s", rendered)
 	}
 }
 

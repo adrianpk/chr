@@ -799,26 +799,114 @@ func (m Model) renderMaximizedBoardColumnLines(tickets []TicketView, width, limi
 		return []string{"No tickets."}
 	}
 
-	lines := make([]string, 0, minInt(len(tickets), maxInt(limit, 1)))
+	lines := make([]string, 0, maxInt(limit, 1))
+	start := m.maximizedBoardColumnStart(tickets, width, limit)
 
-	for _, ticket := range tickets {
+	for _, ticket := range tickets[start:] {
 		prefix := " "
 		if ticket.Index == m.selectedTicket {
 			prefix = ">"
 		}
 
-		line := fmt.Sprintf("%s%s %s", prefix, ticket.Key, ticket.Title)
 		if len(ticket.AttentionReasons) > 0 {
-			line = fmt.Sprintf("!%s %s", ticket.Key, ticket.Title)
+			prefix = "!"
 		}
 
-		lines = append(lines, fitPlainLine(line, width))
+		card := renderMaximizedBoardTicketCard(prefix, ticket, width)
+		if len(lines) > 0 && len(lines)+len(card) > limit {
+			break
+		}
+
+		for _, line := range card {
+			if len(lines) >= limit {
+				break
+			}
+
+			lines = append(lines, line)
+		}
+
 		if len(lines) >= limit {
 			break
 		}
 	}
 
 	return lines
+}
+
+func (m Model) maximizedBoardColumnStart(tickets []TicketView, width, limit int) int {
+	selectedPosition := m.selectedTicketPosition(tickets)
+	if selectedPosition <= 0 {
+		return 0
+	}
+
+	cardHeight := len(renderMaximizedBoardTicketCard(" ", tickets[selectedPosition], width))
+	if cardHeight <= 0 {
+		return 0
+	}
+
+	visibleCards := maxInt(limit/cardHeight, 1)
+	if selectedPosition < visibleCards {
+		return 0
+	}
+
+	return selectedPosition - visibleCards + 1
+}
+
+func renderMaximizedBoardTicketCard(prefix string, ticket TicketView, width int) []string {
+	if width < 8 {
+		metadata := fmt.Sprintf(
+			"%s %s  %s  %s",
+			prefix,
+			ticket.Key,
+			compactTicketStatusLabel(ticket.Status),
+			compactTicketPriorityLabel(ticket.Priority),
+		)
+
+		return []string{
+			fitPlainLine(metadata, width),
+			fitPlainLine("  "+truncatePlainLine(ticket.Title, maxInt(width-2, 1)), width),
+		}
+	}
+
+	innerWidth := maxInt(width-2, 1)
+	metadata := fmt.Sprintf(
+		"%s %s  %s  %s",
+		prefix,
+		ticket.Key,
+		compactTicketStatusLabel(ticket.Status),
+		compactTicketPriorityLabel(ticket.Priority),
+	)
+	metadata = truncatePlainLine(metadata, innerWidth)
+	titleLines := maximizedBoardTicketTitleLines(ticket.Title, innerWidth, 3)
+
+	return []string{
+		"┌" + strings.Repeat("─", innerWidth) + "┐",
+		"│" + fitPlainLine(metadata, innerWidth) + "│",
+		"├" + strings.Repeat("─", innerWidth) + "┤",
+		"│" + fitPlainLine(titleLines[0], innerWidth) + "│",
+		"│" + fitPlainLine(titleLines[1], innerWidth) + "│",
+		"│" + fitPlainLine(titleLines[2], innerWidth) + "│",
+		"└" + strings.Repeat("─", innerWidth) + "┘",
+	}
+}
+
+func maximizedBoardTicketTitleLines(title string, width, lineCount int) []string {
+	lines := wrapPlainText(title, width)
+	fitted := make([]string, 0, lineCount)
+
+	for _, line := range lines {
+		if len(fitted) >= lineCount {
+			break
+		}
+
+		fitted = append(fitted, truncatePlainLine(line, width))
+	}
+
+	for len(fitted) < lineCount {
+		fitted = append(fitted, "")
+	}
+
+	return fitted
 }
 
 func boardMaximizedColumnsPerRow(width int) int {
