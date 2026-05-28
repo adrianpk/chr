@@ -1,6 +1,6 @@
 # Staged Plan Generation Slicing Tracker
 
-Status: active
+Status: delivered
 
 Plan: `.prj/plans/slicing-staged-plan-generation-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-staged-plan-generation-plan.md`
 
 Slicing name: Staged Plan Generation
 
-Active slice number: Slice 3
+Active slice number: none
 
-Active slice short name: deterministic plan assembly
+Active slice short name: none
 
-Expected branch name: `feat/slice-3-deterministic-plan-assembly`
+Expected branch name: none
 
-Expected PR title: `feat(slice-3): deterministic plan assembly`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -32,9 +32,9 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with repository quality gates.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with repository quality gates.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -42,7 +42,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Outline Generation Contract | Delivered | `feat/slice-1-outline-generation-contract` | `feat(slice-1): outline generation contract` | `.prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md` | Delivered in PR #237. |
 | Slice 2: Slice Detail Expansion | Delivered | `feat/slice-2-slice-detail-expansion` | `feat(slice-2): slice detail expansion` | `.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md` | Delivered in PR #238. |
-| Slice 3: Deterministic Plan Assembly | Reviewing | `feat/slice-3-deterministic-plan-assembly` | `feat(slice-3): deterministic plan assembly` | `.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md` | Connects staged generation into final plan assembly and write behavior. |
+| Slice 3: Deterministic Plan Assembly | Delivered | `feat/slice-3-deterministic-plan-assembly` | `feat(slice-3): deterministic plan assembly` | `.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md` | Delivered in PR #239. |
 
 ## Slice 1: Outline Generation Contract
 
@@ -73,6 +73,27 @@ Validation:
 - `go test ./...` - pass.
 - `git diff --check` - pass.
 - `make verify` - fail: `lint-strict` reports pre-existing lint debt.
+
+## Completion
+
+All planned slices are delivered:
+
+- Slice 1 delivered in PR #237.
+- Slice 2 delivered in PR #238.
+- Slice 3 delivered in PR #239.
+
+Completed slicing validation:
+
+- `go test ./internal/chc ./internal/chcapp`
+- `go test ./...`
+- `git diff --check`
+- `make verify` remains blocked by pre-existing `lint-strict` debt.
+
+Tuning needed: no.
+
+Evidence: all planned staged generation contracts and orchestration slices were
+delivered, targeted and repository tests passed, and no post-slice tuning issue
+was identified during automated validation.
 
 ## Slice 2: Slice Detail Expansion
 
