@@ -224,7 +224,7 @@ func (m *Model) completePlanAction(message planActionFinishedMsg) {
 	m.planBusy = false
 
 	if message.Err != nil {
-		m.statusMessage = "Plan action failed; showing last saved plan if available: " + message.Err.Error()
+		m.statusMessage = savedArtifactFailureStatus("Plan", "plan", message.Err)
 
 		return
 	}

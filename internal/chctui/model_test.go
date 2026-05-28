@@ -3502,7 +3502,7 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 }
 
 func TestModelReportsSpecGenerationFailureShowsLastSavedSpec(t *testing.T) {
-	executor := &fakeSpecActionExecutor{err: errors.New("provider timeout")}
+	executor := &fakeSpecActionExecutor{err: errors.New(`invoke OpenAI quiz model: Post "https://api.openai.com/v1/responses": context deadline exceeded`)}
 	model := NewModel(Options{
 		SpecExecutor: executor,
 		Specs: []SpecView{
@@ -3517,7 +3517,7 @@ func TestModelReportsSpecGenerationFailureShowsLastSavedSpec(t *testing.T) {
 	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
-	if confirmed.statusMessage != "Spec action failed; showing last saved spec if available: provider timeout" {
+	if confirmed.statusMessage != "Spec failed; showing last saved spec: provider timeout" {
 		t.Fatalf("statusMessage = %q, want last saved spec failure", confirmed.statusMessage)
 	}
 }
@@ -3596,7 +3596,7 @@ func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 }
 
 func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
-	executor := &fakePlanActionExecutor{err: errors.New("provider timeout")}
+	executor := &fakePlanActionExecutor{err: errors.New(`invoke OpenAI quiz model: Post "https://api.openai.com/v1/responses": context deadline exceeded`)}
 	model := NewModel(Options{
 		PlanExecutor: executor,
 		Plans: []PlanView{
@@ -3620,7 +3620,7 @@ func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
 	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
-	if confirmed.statusMessage != "Plan action failed; showing last saved plan if available: provider timeout" {
+	if confirmed.statusMessage != "Plan failed; showing last saved plan: provider timeout" {
 		t.Fatalf("statusMessage = %q, want last saved plan failure", confirmed.statusMessage)
 	}
 }
