@@ -47,6 +47,24 @@ If git hooks are configured, pre-commit should run fast checks only:
 
 Full lint and test gates should run before merge.
 
+## Commit gate
+
+Before each code commit, run formatting and the relevant focused tests for the
+changed packages.
+
+When the change touches shared contracts, generation flows, service boundaries,
+or cross-package behavior, run the repository-level gate before committing:
+
+```text
+make verify
+```
+
+If `make verify` is blocked by known unrelated lint debt, run and report the
+closest passing targeted checks, plus the exact failing gate and reason.
+
+For docs-only commits, validate the diff and whitespace instead of running
+unrelated application tests.
+
 ## Rules
 
 - Do not skip tests for behavior changes.
