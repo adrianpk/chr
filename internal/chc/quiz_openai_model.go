@@ -198,6 +198,7 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 		request.Action == QuizModelActionGenerateSpec ||
 		request.Action == QuizModelActionGeneratePlan ||
 		request.Action == QuizModelActionGeneratePlanOutline ||
+		request.Action == QuizModelActionGeneratePlanSliceDetail ||
 		request.Action == QuizModelActionMaterializePlanTracking
 	if hasContextAction && len(request.ContextSections) > 0 {
 		payload["context_sections"] = quizModelProviderContextSections(request.ContextSections)
@@ -379,6 +380,7 @@ func openAIQuizModelTimeout(action QuizModelAction) time.Duration {
 	case QuizModelActionGenerateSpec,
 		QuizModelActionGeneratePlan,
 		QuizModelActionGeneratePlanOutline,
+		QuizModelActionGeneratePlanSliceDetail,
 		QuizModelActionMaterializePlanTracking:
 		return defaultOpenAIGenerationTimeout
 	default:
@@ -434,6 +436,8 @@ func quizModelResponseFromOutput(request QuizModelRequest, output []byte) (QuizM
 		return quizModelPlanResponseFromOutput(request, output)
 	case QuizModelActionGeneratePlanOutline:
 		return quizModelPlanOutlineResponseFromOutput(request, output)
+	case QuizModelActionGeneratePlanSliceDetail:
+		return quizModelPlanSliceDetailResponseFromOutput(request, output)
 	case QuizModelActionMaterializePlanTracking:
 		return quizModelPlanTrackingResponseFromOutput(request, output)
 	default:
@@ -559,6 +563,29 @@ func quizModelPlanOutlineResponseFromOutput(
 		Provider:    QuizModelProviderOpenAI,
 		Status:      QuizModelResponseReady,
 		PlanOutline: outline,
+		RawText:     string(output),
+		CreatedAt:   request.CreatedAt.UTC(),
+	}, nil
+}
+
+func quizModelPlanSliceDetailResponseFromOutput(
+	request QuizModelRequest,
+	output []byte,
+) (QuizModelResponse, error) {
+	payload, err := DecodeQuizModelPlanSliceDetailPayload(extractJSONObject(output))
+	if err != nil {
+		return QuizModelResponse{}, err
+	}
+
+	detail := generatedPlanSliceDetailFromPayload(request.Scope, payload)
+	detail.CreatedAt = request.CreatedAt.UTC()
+
+	return QuizModelResponse{
+		ID:          quizModelResponseID(request),
+		RequestID:   request.ID,
+		Provider:    QuizModelProviderOpenAI,
+		Status:      QuizModelResponseReady,
+		SliceDetail: detail,
 		RawText:     string(output),
 		CreatedAt:   request.CreatedAt.UTC(),
 	}, nil
@@ -833,6 +860,8 @@ func quizModelInstructions(request QuizModelRequest) string {
 		return quizModelPlanGenerationInstructions()
 	case request.Action == QuizModelActionGeneratePlanOutline:
 		return quizModelPlanOutlineGenerationInstructions()
+	case request.Action == QuizModelActionGeneratePlanSliceDetail:
+		return quizModelPlanSliceDetailGenerationInstructions()
 	case request.Action == QuizModelActionGenerateSpec:
 		return quizModelSpecGenerationInstructions()
 	case request.Action == QuizModelActionDraftSpec:
@@ -973,6 +1002,22 @@ Return only the JSON object required by the response schema.
 `)
 }
 
+func quizModelPlanSliceDetailGenerationInstructions() string {
+	return strings.TrimSpace(`
+You expand exactly one implementation slice from an authoritative staged plan outline.
+Use the structured request payload, the full plan_outline context section, and the target_slice context section as the sole source of truth.
+Return details only for the target slice.
+Do not rename the slice, change its slice identifier, reorder slices, add new slices, remove dependencies, or change branch metadata from the outline.
+Expand the target slice into implementation notes, tasks, acceptance criteria, ticket metadata, PR expectations, validation expectations, dependencies, and non-goals.
+Tasks must be implementation-oriented and should generally map to one Conventional Commit.
+Keep uncertain behavior explicit instead of inventing facts.
+Do not generate the final Markdown plan body.
+Do not generate tickets, code, branches, commits, or pull requests.
+Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
+Return only the JSON object required by the response schema.
+`)
+}
+
 func quizModelSpecGenerationInstructions() string {
 	return strings.TrimSpace(`
 You generate a formal specification for the selected project or use case.
@@ -1001,61 +1046,63 @@ Return only the JSON object required by the response schema.
 func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 	switch {
 	case request.Action == QuizModelActionMaterializePlanTracking:
-		return openAIResponsesTextFormat{
-			Type:        "json_schema",
-			Name:        "plan_tracking_artifacts",
-			Description: "Plan tracking and ticket payloads derived from an existing implementation plan.",
-			Strict:      true,
-			Schema:      quizModelPlanTrackingJSONSchema(),
-		}
+		return quizModelJSONSchemaTextFormat(
+			"plan_tracking_artifacts",
+			"Plan tracking and ticket payloads derived from an existing implementation plan.",
+			quizModelPlanTrackingJSONSchema(),
+		)
 	case request.Action == QuizModelActionGeneratePlan:
-		return openAIResponsesTextFormat{
-			Type:        "json_schema",
-			Name:        "generated_plan",
-			Description: "Implementation plan generated from project and use-case context.",
-			Strict:      true,
-			Schema:      quizModelPlanJSONSchema(),
-		}
+		return quizModelJSONSchemaTextFormat(
+			"generated_plan",
+			"Implementation plan generated from project and use-case context.",
+			quizModelPlanJSONSchema(),
+		)
 	case request.Action == QuizModelActionGeneratePlanOutline:
-		return openAIResponsesTextFormat{
-			Type:        "json_schema",
-			Name:        "generated_plan_outline",
-			Description: "Plan outline generated from project and use-case context.",
-			Strict:      true,
-			Schema:      quizModelPlanOutlineJSONSchema(),
-		}
+		return quizModelJSONSchemaTextFormat(
+			"generated_plan_outline",
+			"Plan outline generated from project and use-case context.",
+			quizModelPlanOutlineJSONSchema(),
+		)
+	case request.Action == QuizModelActionGeneratePlanSliceDetail:
+		return quizModelJSONSchemaTextFormat(
+			"generated_plan_slice_detail",
+			"Implementation details generated for one outline slice.",
+			quizModelPlanSliceDetailJSONSchema(),
+		)
 	case request.Action == QuizModelActionGenerateSpec:
-		return openAIResponsesTextFormat{
-			Type:        "json_schema",
-			Name:        "generated_spec",
-			Description: "Draft specification generated from project and use-case context.",
-			Strict:      true,
-			Schema:      quizModelDraftSpecJSONSchema(),
-		}
+		return quizModelJSONSchemaTextFormat(
+			"generated_spec",
+			"Draft specification generated from project and use-case context.",
+			quizModelDraftSpecJSONSchema(),
+		)
 	case request.Action == QuizModelActionDraftSpec:
-		return openAIResponsesTextFormat{
-			Type:        "json_schema",
-			Name:        "quiz_draft_spec",
-			Description: "Draft specification generated from project quiz context.",
-			Strict:      true,
-			Schema:      quizModelDraftSpecJSONSchema(),
-		}
+		return quizModelJSONSchemaTextFormat(
+			"quiz_draft_spec",
+			"Draft specification generated from project quiz context.",
+			quizModelDraftSpecJSONSchema(),
+		)
 	case request.Mode == QuizModeFast:
-		return openAIResponsesTextFormat{
-			Type:        "json_schema",
-			Name:        "quiz_fast_questions",
-			Description: "A batch of project quiz questions.",
-			Strict:      true,
-			Schema:      quizModelFastQuestionJSONSchema(),
-		}
+		return quizModelJSONSchemaTextFormat(
+			"quiz_fast_questions",
+			"A batch of project quiz questions.",
+			quizModelFastQuestionJSONSchema(),
+		)
 	default:
-		return openAIResponsesTextFormat{
-			Type:        "json_schema",
-			Name:        "quiz_next_question",
-			Description: "The next project quiz question.",
-			Strict:      true,
-			Schema:      quizModelQuestionJSONSchema(),
-		}
+		return quizModelJSONSchemaTextFormat(
+			"quiz_next_question",
+			"The next project quiz question.",
+			quizModelQuestionJSONSchema(),
+		)
+	}
+}
+
+func quizModelJSONSchemaTextFormat(name, description string, schema map[string]any) openAIResponsesTextFormat {
+	return openAIResponsesTextFormat{
+		Type:        "json_schema",
+		Name:        name,
+		Description: description,
+		Strict:      true,
+		Schema:      schema,
 	}
 }
 
@@ -1294,6 +1341,81 @@ func quizModelPlanOutlineDependencyJSONSchema() map[string]any {
 			"from_slice_id": map[string]any{"type": "string"},
 			"to_slice_id":   map[string]any{"type": "string"},
 			"reason":        map[string]any{"type": "string"},
+		},
+	}
+}
+
+func quizModelPlanSliceDetailJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required": []string{
+			"slice_id",
+			"short_name",
+			"objective",
+			"implementation_notes",
+			"tasks",
+			"acceptance_criteria",
+			"ticket_metadata",
+			"branch_metadata",
+			"pr_expectations",
+			"validation_expectations",
+			"dependencies",
+			"non_goals",
+		},
+		"properties": map[string]any{
+			"slice_id":                map[string]any{"type": "string"},
+			"short_name":              map[string]any{"type": "string"},
+			"objective":               map[string]any{"type": "string"},
+			"implementation_notes":    stringArrayJSONSchema(),
+			"tasks":                   map[string]any{"type": "array", "items": quizModelPlanSliceTaskJSONSchema()},
+			"acceptance_criteria":     stringArrayJSONSchema(),
+			"ticket_metadata":         quizModelPlanSliceTicketMetadataJSONSchema(),
+			"branch_metadata":         quizModelPlanSliceBranchMetadataJSONSchema(),
+			"pr_expectations":         stringArrayJSONSchema(),
+			"validation_expectations": stringArrayJSONSchema(),
+			"dependencies":            stringArrayJSONSchema(),
+			"non_goals":               stringArrayJSONSchema(),
+		},
+	}
+}
+
+func quizModelPlanSliceTaskJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"id", "summary", "commit_hint"},
+		"properties": map[string]any{
+			"id":          map[string]any{"type": "string"},
+			"summary":     map[string]any{"type": "string"},
+			"commit_hint": map[string]any{"type": "string"},
+		},
+	}
+}
+
+func quizModelPlanSliceTicketMetadataJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"title", "synopsis", "priority", "severity", "type", "tags"},
+		"properties": map[string]any{
+			"title":    map[string]any{"type": "string"},
+			"synopsis": map[string]any{"type": "string"},
+			"priority": map[string]any{"type": "string"},
+			"severity": map[string]any{"type": "string"},
+			"type":     map[string]any{"type": "string"},
+			"tags":     stringArrayJSONSchema(),
+		},
+	}
+}
+
+func quizModelPlanSliceBranchMetadataJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"branch_name"},
+		"properties": map[string]any{
+			"branch_name": map[string]any{"type": "string"},
 		},
 	}
 }
