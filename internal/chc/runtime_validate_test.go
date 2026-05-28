@@ -24,7 +24,7 @@ func TestValidateRuntimeFailsWhenDockerfileIsMissing(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
 
-	err := os.MkdirAll(filepath.Join(dir, ".chc", "runtime", "runs"), 0o755)
+	err := os.MkdirAll(filepath.Join(dir, ".chc", "user", "runtime", "runs"), 0o755)
 	if err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}
@@ -87,7 +87,7 @@ func createRuntimeValidationWorkspace(t *testing.T, dir string) {
 
 	createWorkspaceRoot(t, dir)
 
-	dockerfilePath := filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -99,7 +99,7 @@ func createRuntimeValidationWorkspace(t *testing.T, dir string) {
 		t.Fatalf("write Dockerfile: %v", err)
 	}
 
-	err = os.MkdirAll(filepath.Join(dir, ".chc", "runtime", "runs"), 0o755)
+	err = os.MkdirAll(filepath.Join(dir, ".chc", "user", "runtime", "runs"), 0o755)
 	if err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}

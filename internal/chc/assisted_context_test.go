@@ -10,8 +10,8 @@ import (
 func TestLoadAssistedAuthoringContextPackageIncludesProtocolsDocumentsAndTranscriptSummary(t *testing.T) {
 	dir := t.TempDir()
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Workspace Protocol\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "manifest.md"), "# Workspace Manifest\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "config.yml"), "version: 1\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "manifest.md"), "# Workspace Manifest\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "config.yml"), "version: 1\n")
 	writeTestFile(t, filepath.Join(dir, "docs", "reference", "authoring.md"), "# Authoring Reference\n")
 
 	session := testAssistedContextSession(dir)

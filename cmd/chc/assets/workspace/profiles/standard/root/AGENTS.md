@@ -10,8 +10,8 @@ ChrysoCoord project state lives under `.chc/`.
 
 Start with:
 
-- `.chc/manifest.md`
-- `.chc/config.yml`
+- `.chc/user/manifest.md`
+- `.chc/user/config.yml`
 
 ## Rules
 

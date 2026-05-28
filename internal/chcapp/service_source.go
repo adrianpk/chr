@@ -37,6 +37,7 @@ func (s service) resolveProjectSourcePath(relativePath string) (string, error) {
 	}
 
 	path := filepath.Join(s.projectContext.ProjectDir, cleanPath)
+
 	info, err := os.Stat(path)
 	if err != nil {
 		return "", fmt.Errorf("stat source: %w", err)

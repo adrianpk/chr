@@ -10,9 +10,9 @@ import (
 func TestTicketFileDiscovererDiscoversMarkdownTickets(t *testing.T) {
 	projectDir := t.TempDir()
 
-	writeDiscoveryTestFile(t, projectDir, ".chc/tickets/use-case/CHC-2-Second.md")
-	writeDiscoveryTestFile(t, projectDir, ".chc/tickets/CHC-1-First.md")
-	writeDiscoveryTestFile(t, projectDir, ".chc/tickets/notes.txt")
+	writeDiscoveryTestFile(t, projectDir, ".chc/user/tickets/use-case/CHC-2-Second.md")
+	writeDiscoveryTestFile(t, projectDir, ".chc/user/tickets/CHC-1-First.md")
+	writeDiscoveryTestFile(t, projectDir, ".chc/user/tickets/notes.txt")
 
 	files, err := NewTicketFileDiscoverer().DiscoverTicketFiles(
 		context.Background(),
@@ -68,7 +68,7 @@ func assertDiscoveredTicketFile(
 		t.Fatalf("RelativePath = %q, want %q", file.RelativePath, relativePath)
 	}
 
-	wantPath := filepath.Join(projectDir, ".chc", "tickets", filepath.FromSlash(relativePath))
+	wantPath := filepath.Join(projectDir, ".chc", "user", "tickets", filepath.FromSlash(relativePath))
 	if file.Path != wantPath {
 		t.Fatalf("Path = %q, want %q", file.Path, wantPath)
 	}

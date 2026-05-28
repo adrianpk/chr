@@ -65,9 +65,9 @@ func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, 
 		return QuizArtifactPaths{}, err
 	}
 
-	rawRelativePath := filepath.ToSlash(filepath.Join(DirectoryName, QuizArtifactsDirectory, scopeID+"-quiz-raw.md"))
-	curatedRelativePath := filepath.ToSlash(filepath.Join(DirectoryName, QuizArtifactsDirectory, scopeID+"-quiz.md"))
-	runtimeRelativePath := filepath.ToSlash(filepath.Join(DirectoryName, filepath.FromSlash(QuizRuntimeDirectory), scopeID+".json"))
+	rawRelativePath := UserRelativePath(QuizArtifactsDirectory, scopeID+"-quiz-raw.md")
+	curatedRelativePath := UserRelativePath(QuizArtifactsDirectory, scopeID+"-quiz.md")
+	runtimeRelativePath := UserRelativePath(filepath.FromSlash(QuizRuntimeDirectory), scopeID+".json")
 
 	return QuizArtifactPaths{
 		ScopeID:             scopeID,

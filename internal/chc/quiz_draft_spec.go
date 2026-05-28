@@ -41,7 +41,7 @@ func QuizDraftSpecLayout(projectDir string, scope QuizScope) (QuizDraftSpecPaths
 		return QuizDraftSpecPaths{}, err
 	}
 
-	relativePath := filepath.ToSlash(filepath.Join(DirectoryName, filepath.FromSlash(QuizSpecDirectory), scopeID+"-quiz-spec.md"))
+	relativePath := UserRelativePath(filepath.FromSlash(QuizSpecDirectory), scopeID+"-quiz-spec.md")
 
 	return QuizDraftSpecPaths{
 		ScopeID:      scopeID,

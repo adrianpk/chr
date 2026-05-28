@@ -80,14 +80,14 @@ func TestWorkspaceIndexTracksProjectWideAndUnresolvedCaseDocuments(t *testing.T)
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "valid"), RenderCaseMetadata(CaseMetadata{
 		Name: "Valid",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "plans", "project-plan.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---
 
 # Project Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "missing-case.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "missing-case.md"), `---
 title: "Missing Case Dump"
 case: "missing"
 ---
@@ -121,7 +121,7 @@ func TestWorkspaceIndexExcludesArchivedGeneratedDocuments(t *testing.T) {
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "plans", "blog-plan.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case: "blog"
@@ -129,7 +129,7 @@ case: "blog"
 
 # Blog Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "plans", "archive", "blog-plan-20260525.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "plans", "archive", "blog-plan-20260525.md"), `---
 title: "Archived Blog Plan"
 status: "planned"
 case: "blog"
@@ -137,7 +137,7 @@ case: "blog"
 
 # Archived Blog Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "specs", "blog-spec.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -145,7 +145,7 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "specs", "archive", "blog-spec-20260525.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "specs", "archive", "blog-spec-20260525.md"), `---
 title: "Archived Blog Spec"
 status: "draft"
 case: "blog"
@@ -249,7 +249,7 @@ func TestWorkspaceIndexHealthReportsDiagnosticsAndUnresolvedReferences(t *testin
 			"known": "case:known",
 		},
 		Diagnostics: []WorkspaceGraphDiagnostic{
-			{Path: ".chc/cases/broken.md", Kind: WorkspaceNodeCase, Message: "invalid"},
+			{Path: ".chc/user/cases/broken.md", Kind: WorkspaceNodeCase, Message: "invalid"},
 		},
 		BuiltAt: time.Date(2026, 5, 23, 11, 0, 0, 0, time.UTC),
 	}
@@ -313,31 +313,31 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 				Kind: WorkspaceNodeCase,
 				Slug: "blog",
 			},
-			"spec:.chc/specs/blog.md": {
+			"spec:.chc/user/specs/blog.md": {
 				Kind:         WorkspaceNodeSpec,
-				RelativePath: ".chc/specs/blog.md",
+				RelativePath: ".chc/user/specs/blog.md",
 				Title:        "Blog Spec",
 				CaseSlug:     "blog",
 			},
-			"ticket:.chc/tickets/CHC-1.md": {
+			"ticket:.chc/user/tickets/CHC-1.md": {
 				Kind:         WorkspaceNodeTicket,
-				RelativePath: ".chc/tickets/CHC-1.md",
+				RelativePath: ".chc/user/tickets/CHC-1.md",
 				Title:        "Blog Ticket",
 				CaseSlug:     "blog",
 			},
 		},
 		NodesByPath: map[string]string{
-			".chc/specs/blog.md": "spec:.chc/specs/blog.md",
+			".chc/user/specs/blog.md": "spec:.chc/user/specs/blog.md",
 		},
 		ByCaseSlug: map[string][]string{
 			"blog": {
-				"spec:.chc/specs/blog.md",
-				"ticket:.chc/tickets/CHC-1.md",
+				"spec:.chc/user/specs/blog.md",
+				"ticket:.chc/user/tickets/CHC-1.md",
 			},
 		},
 	}
 
-	node, ok := index.ResolvePath(".chc/specs/blog.md")
+	node, ok := index.ResolvePath(".chc/user/specs/blog.md")
 	if !ok {
 		t.Fatal("ResolvePath returned ok=false, want true")
 	}
@@ -346,7 +346,7 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 		t.Fatalf("node.Title = %q, want Blog Spec", node.Title)
 	}
 
-	related := index.RelatedDocuments("spec:.chc/specs/blog.md")
+	related := index.RelatedDocuments("spec:.chc/user/specs/blog.md")
 	if !related.Resolved {
 		t.Fatal("RelatedDocuments returned Resolved=false, want true")
 	}

@@ -142,10 +142,10 @@ CLI equivalents:
 ```sh
 chc dump list
 chc dump new --title "Notes" --content "Context." --use-case billing
-chc dump show .chc/dumps/notes.md
-chc dump save .chc/dumps/notes.md --content "# Notes"
-chc dump append .chc/dumps/notes.md --content "More context."
-chc dump open .chc/dumps/notes.md
+chc dump show .chc/user/dumps/notes.md
+chc dump save .chc/user/dumps/notes.md --content "# Notes"
+chc dump append .chc/user/dumps/notes.md --content "More context."
+chc dump open .chc/user/dumps/notes.md
 ```
 
 ## Quizzes View

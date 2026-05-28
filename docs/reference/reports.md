@@ -33,7 +33,7 @@ chc report list --dir /path/to/project
 Each report is printed as one line:
 
 ```text
-kind: execution path: .chc/runtime/runs/CHC-1/exec-1/execution-report.md ticket: CHC-1 execution: exec-1 loop: none status: succeeded
+kind: execution path: .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md ticket: CHC-1 execution: exec-1 loop: none status: succeeded
 ```
 
 Fields:
@@ -67,7 +67,7 @@ Filters can be combined. All provided filters must match.
 Show a report body by report id or lookup filter:
 
 ```sh
-chc report show .chc/runtime/runs/CHC-1/exec-1/execution-report.md
+chc report show .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md
 chc report show --execution exec-1
 chc report show --loop loop-1
 chc report show --ticket CHC-1 --kind execution
@@ -94,7 +94,7 @@ Metadata output uses the same stable line format as `chc report list`.
 Report listing discovers Markdown report artifacts under:
 
 ```text
-.chc/runtime/runs/
+.chc/user/runtime/runs/
 ```
 
 Current discovered report filenames:

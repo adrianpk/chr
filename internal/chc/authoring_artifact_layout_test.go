@@ -47,39 +47,39 @@ func authoringArtifactKindPathTests(projectDir string) []struct {
 	}{
 		{
 			kind:             AuthoringArtifactKindDump,
-			wantRelativePath: ".chc/dumps/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/dumps/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindQuiz,
-			wantRelativePath: ".chc/quizzes/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/quizzes/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindDraft,
-			wantRelativePath: ".chc/drafts/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/drafts/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSpec,
-			wantRelativePath: ".chc/specs/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/specs/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindPlan,
-			wantRelativePath: ".chc/plans/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/plans/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSliceSet,
-			wantRelativePath: ".chc/slice-sets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/slice-sets/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSlice,
-			wantRelativePath: ".chc/slices/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/slices/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTracker,
-			wantRelativePath: ".chc/trackers/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/trackers/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTicket,
-			wantRelativePath: ".chc/tickets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chc/user/tickets/auth-20260521-120000-billing-sync.md",
 		},
 	}
 }

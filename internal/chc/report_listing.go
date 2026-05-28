@@ -51,7 +51,7 @@ func (l ReportLister) ListProjectReports(
 		return nil, err
 	}
 
-	root := filepath.Join(projectDir, DirectoryName, "runtime", "runs")
+	root := UserPath(projectDir, "runtime", "runs")
 	entries := []ReportListEntry{}
 
 	err = filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {

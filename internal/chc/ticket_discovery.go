@@ -94,5 +94,5 @@ func sortDiscoveredTicketFiles(files []DiscoveredTicketFile) []DiscoveredTicketF
 }
 
 func ticketsDirectory(projectDir string) string {
-	return filepath.Join(projectDir, DirectoryName, "tickets")
+	return UserPath(projectDir, "tickets")
 }

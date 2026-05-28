@@ -320,11 +320,12 @@ func shouldSkipContextPath(path string, isDir bool) bool {
 		return true
 	}
 
-	if isDir && path == DirectoryName+"/runtime/runs" {
+	runtimeRunsPath := UserRelativePath("runtime", "runs")
+	if isDir && path == runtimeRunsPath {
 		return true
 	}
 
-	return strings.HasPrefix(path, DirectoryName+"/runtime/runs/")
+	return strings.HasPrefix(path, runtimeRunsPath+"/")
 }
 
 func isSearchableContextFile(path string) bool {

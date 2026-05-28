@@ -96,7 +96,7 @@ func TestTicketIndexStatusCheckerReportsOrphanedTicket(t *testing.T) {
 func TestTicketIndexStatusCheckerReportsInvalidTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chc", "tickets", "CHC-1-Bad.md"))
+	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chc", "user", "tickets", "CHC-1-Bad.md"))
 
 	status := checkProjectTicketIndexForStatusTest(t, index, projectDir)
 

@@ -186,7 +186,7 @@ func (b WorkspaceGraphBuilder) loadCases(ctx context.Context, graph *WorkspaceGr
 }
 
 func (b WorkspaceGraphBuilder) loadDocuments(ctx context.Context, graph *WorkspaceGraph) error {
-	root := filepath.Join(b.projectDir, DirectoryName)
+	root := UserPath(b.projectDir)
 
 	err := walkMarkdownFiles(ctx, root, func(path string) error {
 		if path == ProjectMetadataPath(b.projectDir) || isCaseMetadataPath(b.projectDir, path) {
@@ -422,7 +422,7 @@ func isCaseMetadataPath(projectDir, path string) bool {
 }
 
 func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
-	relativePath, err := filepath.Rel(filepath.Join(projectDir, DirectoryName), path)
+	relativePath, err := filepath.Rel(UserPath(projectDir), path)
 	if err != nil {
 		return WorkspaceNodeUnknown
 	}
@@ -487,7 +487,7 @@ func IsCuratedQuizNode(node WorkspaceNode) bool {
 }
 
 func isArchivedGenerationPath(projectDir, path string) bool {
-	relativePath, err := filepath.Rel(filepath.Join(projectDir, DirectoryName), path)
+	relativePath, err := filepath.Rel(UserPath(projectDir), path)
 	if err != nil {
 		return false
 	}

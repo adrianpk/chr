@@ -145,9 +145,9 @@ It does not remove project metadata, use-case metadata, dumps, tickets, specs,
 or authoring-session quizzes.
 
 ```sh
-rm -rf "$CHC_WORK_PROJECT/.chc/tmp/quiz-runtime"
+rm -rf "$CHC_WORK_PROJECT/.chc/user/tmp/quiz-runtime"
 
-find "$CHC_WORK_PROJECT/.chc/quizzes" -maxdepth 1 -type f \
+find "$CHC_WORK_PROJECT/.chc/user/quizzes" -maxdepth 1 -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -158,8 +158,8 @@ find "$CHC_WORK_PROJECT/.chc/quizzes" -maxdepth 1 -type f \
 Confirm the reset:
 
 ```sh
-find "$CHC_WORK_PROJECT/.chc/tmp/quiz-runtime" -maxdepth 1 -type f 2>/dev/null
-find "$CHC_WORK_PROJECT/.chc/quizzes" -maxdepth 1 -type f \
+find "$CHC_WORK_PROJECT/.chc/user/tmp/quiz-runtime" -maxdepth 1 -type f 2>/dev/null
+find "$CHC_WORK_PROJECT/.chc/user/quizzes" -maxdepth 1 -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -210,8 +210,8 @@ Use-case-level validation:
 After validation, inspect the artifacts:
 
 ```sh
-find "$CHC_WORK_PROJECT/.chc/tmp/quiz-runtime" -maxdepth 1 -type f -print
-find "$CHC_WORK_PROJECT/.chc/quizzes" -maxdepth 1 -type f -print
+find "$CHC_WORK_PROJECT/.chc/user/tmp/quiz-runtime" -maxdepth 1 -type f -print
+find "$CHC_WORK_PROJECT/.chc/user/quizzes" -maxdepth 1 -type f -print
 ```
 
 Expected evidence:
@@ -274,8 +274,8 @@ chc project current
 Expected result:
 
 - `.chc/` exists inside `chc-blog-work`.
-- `.chc/config.yml` exists.
-- `.chc/runtime/agent/Dockerfile` exists.
+- `.chc/user/config.yml` exists.
+- `.chc/user/runtime/agent/Dockerfile` exists.
 - The lab project is registered in the local user-level project registry.
 
 ## Authoring Workflow
@@ -310,7 +310,7 @@ chc author quiz new \
 
 The command sends structured project context to the quiz provider and prints the
 generated quiz path relative to the project, for example
-`.chc/quizzes/<quiz-file>.md`.
+`.chc/user/quizzes/<quiz-file>.md`.
 
 Edit the generated quiz answers in Markdown, then generate or edit the
 corresponding spec from the Specs surface. Specs that still need review should
@@ -445,7 +445,7 @@ git diff
 
 Expected result:
 
-- the runtime writes execution artifacts under `.chc/runtime/runs/`;
+- the runtime writes execution artifacts under `.chc/user/runtime/runs/`;
 - the ticket records progress, blockers, or completion evidence;
 - validation output is inspectable;
 - changed files can be reviewed with `git diff`.

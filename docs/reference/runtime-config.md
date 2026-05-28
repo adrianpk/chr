@@ -1,6 +1,6 @@
 # Runtime Configuration
 
-Runtime configuration may live in the managed project's `.chc/config.yml` file
+Runtime configuration may live in the managed project's `.chc/user/config.yml` file
 under the `runtime:` key.
 
 When fields are omitted, ChrysoCoord uses local defaults suitable for the
@@ -20,9 +20,9 @@ runtime values when they are making a real project decision.
 ## Default Values
 
 - `image`: `chc-agent-runtime:local`
-- `dockerfile`: `.chc/runtime/agent/Dockerfile`
+- `dockerfile`: `.chc/user/runtime/agent/Dockerfile`
 - `workdir`: `/workspace`
-- `artifact_dir`: `.chc/runtime/runs`
+- `artifact_dir`: `.chc/user/runtime/runs`
 - `validation_command`: `make verify`
 
 Example override:
@@ -30,7 +30,7 @@ Example override:
 ```yml
 runtime:
   image: chc-agent-runtime:local
-  dockerfile: .chc/runtime/agent/Dockerfile
+  dockerfile: .chc/user/runtime/agent/Dockerfile
   validation_command: make verify
 ```
 

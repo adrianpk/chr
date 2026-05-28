@@ -10,62 +10,10 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-//nolint:funlen // Integration-style service assertion keeps fixture and checks together.
 func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz.md"), `---
-status: "curated"
-case_slug: "blog"
-raw_path: ".chc/quizzes/blog-quiz-raw.md"
----
-
-# Quiz Notes
-
-## Decisions
-
-- Preserve editorial review.
-`)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md"), `---
-status: "raw"
-case_slug: "blog"
-curated_path: ".chc/quizzes/blog-quiz.md"
----
-
-# Raw Quiz Notes
-
-Raw quiz turn that must not feed spec context.
-`)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
-title: "Blog Plan"
-status: "planned"
-case: "blog"
----
-
-# Blog Plan
-`)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-prior-spec.md"), `---
-title: "Prior Blog Spec"
-status: "draft"
-case: "blog"
----
-
-# Prior Blog Spec
-
-Prior spec content that must not feed initial spec generation.
-`)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context-raw.md"), `---
-title: "Blog Context Raw Capture"
-status: "raw"
-type: "dump_raw"
-curated: ".chc/dumps/blog-context.md"
-case: "blog"
----
-
-# Blog Context Raw Capture
-
-Raw sibling body that must not feed spec context.
-`)
+	writeSpecGenerationUseCaseFixture(t, projectDir)
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
@@ -84,21 +32,7 @@ Raw sibling body that must not feed spec context.
 		t.Fatalf("GenerateSpec returned error: %v", err)
 	}
 
-	if result.Message != "Spec generated." {
-		t.Fatalf("Message = %q, want Spec generated.", result.Message)
-	}
-
-	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-spec.md"))
-	for _, want := range []string{
-		`status: "draft"`,
-		`case_slug: "blog"`,
-		"# Quiz Generated Spec",
-		"Generated behavior from dump and quiz context.",
-	} {
-		if !strings.Contains(spec, want) {
-			t.Fatalf("generated spec missing %q in:\n%s", want, spec)
-		}
-	}
+	assertGeneratedSpecResult(t, projectDir, result)
 
 	request := model.requests[len(model.requests)-1]
 	if request.Action != chc.QuizModelActionGenerateSpec {
@@ -116,6 +50,109 @@ Raw sibling body that must not feed spec context.
 		"dump",
 		"quiz",
 	})
+	assertSpecGenerationContext(t, request)
+}
+
+func writeSpecGenerationUseCaseFixture(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeSpecGenerationQuizFixture(t, projectDir)
+	writeSpecGenerationExcludedDocumentFixture(t, projectDir)
+}
+
+func writeSpecGenerationQuizFixture(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz.md"), `---
+status: "curated"
+case_slug: "blog"
+raw_path: ".chc/user/quizzes/blog-quiz-raw.md"
+---
+
+# Quiz Notes
+
+## Decisions
+
+- Preserve editorial review.
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "project-wide-quiz.md"), `---
+status: "curated"
+raw_path: ".chc/user/quizzes/project-wide-quiz-raw.md"
+---
+
+# Project-wide Quiz Notes
+
+Project-wide quiz context that must not feed scoped spec generation.
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz-raw.md"), `---
+status: "raw"
+case_slug: "blog"
+curated_path: ".chc/user/quizzes/blog-quiz.md"
+---
+
+# Raw Quiz Notes
+
+Raw quiz turn that must not feed spec context.
+`)
+}
+
+func writeSpecGenerationExcludedDocumentFixture(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+title: "Blog Plan"
+status: "planned"
+case: "blog"
+---
+
+# Blog Plan
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-prior-spec.md"), `---
+title: "Prior Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Prior Blog Spec
+
+Prior spec content that must not feed initial spec generation.
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context-raw.md"), `---
+title: "Blog Context Raw Capture"
+status: "raw"
+type: "dump_raw"
+curated: ".chc/user/dumps/blog-context.md"
+case: "blog"
+---
+
+# Blog Context Raw Capture
+
+Raw sibling body that must not feed spec context.
+`)
+}
+
+func assertGeneratedSpecResult(t *testing.T, projectDir string, result SpecOperationResult) {
+	t.Helper()
+
+	if result.Message != "Spec generated." {
+		t.Fatalf("Message = %q, want Spec generated.", result.Message)
+	}
+
+	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"))
+	for _, want := range []string{
+		`status: "draft"`,
+		`case_slug: "blog"`,
+		"# Quiz Generated Spec",
+		"Generated behavior from dump and quiz context.",
+	} {
+		if !strings.Contains(spec, want) {
+			t.Fatalf("generated spec missing %q in:\n%s", want, spec)
+		}
+	}
+}
+
+func assertSpecGenerationContext(t *testing.T, request chc.QuizModelRequest) {
+	t.Helper()
 
 	for _, section := range request.ContextSections {
 		if strings.Contains(section.Content, "Raw sibling body that must not feed spec context.") {
@@ -126,7 +163,11 @@ Raw sibling body that must not feed spec context.
 			t.Fatalf("spec context included raw quiz sibling in section %#v", section)
 		}
 
-		if strings.Contains(section.Authority, ".chc/plans/blog-plan.md") {
+		if strings.Contains(section.Content, "Project-wide quiz context that must not feed scoped spec generation.") {
+			t.Fatalf("spec context included project-wide quiz in scoped generation section %#v", section)
+		}
+
+		if strings.Contains(section.Authority, ".chc/user/plans/blog-plan.md") {
 			t.Fatalf("spec context included plan section: %#v", section)
 		}
 
@@ -139,7 +180,7 @@ Raw sibling body that must not feed spec context.
 func TestServiceGenerateSpecExcludesArchivedDocumentsFromContextAndProvenance(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "archive", "blog-spec-20260525.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "archive", "blog-spec-20260525.md"), `---
 title: "Archived Blog Spec"
 status: "draft"
 case: "blog"
@@ -147,7 +188,7 @@ case: "blog"
 
 # Archived Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case: "blog"
@@ -155,7 +196,7 @@ case: "blog"
 
 # Blog Plan
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "plans", "archive", "blog-plan-20260525.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "archive", "blog-plan-20260525.md"), `---
 title: "Archived Blog Plan"
 status: "planned"
 case: "blog"
@@ -188,7 +229,7 @@ case: "blog"
 		}
 	}
 
-	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-spec.md"))
+	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"))
 	if strings.Contains(spec, "/archive/") {
 		t.Fatalf("generated provenance includes archived path:\n%s", spec)
 	}
@@ -221,7 +262,7 @@ func TestServiceGenerateSpecUsesLongGenerationDeadline(t *testing.T) {
 func TestServiceListSpecsReturnsScopes(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"

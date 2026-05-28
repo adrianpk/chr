@@ -87,8 +87,8 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 				Scope:          QuizScope{ProjectID: "project-1"},
 				Title:          "Generated Spec",
 				Body:           "Generated behavior.",
-				SourceQuizPath: ".chc/quizzes/project-quiz.md",
-				SourceRawPath:  ".chc/quizzes/project-quiz-raw.md",
+				SourceQuizPath: ".chc/user/quizzes/project-quiz.md",
+				SourceRawPath:  ".chc/user/quizzes/project-quiz-raw.md",
 				CreatedAt:      quizRuntimeTestTime(),
 			},
 			CreatedAt: quizRuntimeTestTime(),
@@ -201,7 +201,7 @@ func TestQuizModelProviderPayloadKeepsNextQuestionContextOutOfProviderText(t *te
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/dumps/project-context.md",
+		Authority: ".chc/user/dumps/project-context.md",
 		Content:   "Detailed project dump that should not be sent to next-question generation.",
 	})
 
@@ -217,7 +217,7 @@ func TestOpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload(t *testi
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/dumps/project-context.md",
+		Authority: ".chc/user/dumps/project-context.md",
 		Content:   "Detailed project dump that should not be sent to next-question generation.",
 	})
 
@@ -264,7 +264,7 @@ func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/dumps/project-context.md",
+		Authority: ".chc/user/dumps/project-context.md",
 		Content:   "Detailed project dump for draft spec synthesis.",
 	})
 
@@ -284,7 +284,7 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/dumps/project-context.md",
+		Authority: ".chc/user/dumps/project-context.md",
 		Content:   "Detailed project dump for draft spec synthesis.",
 		Metadata:  map[string]string{"source": "dump"},
 	})
@@ -323,7 +323,7 @@ func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testin
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "spec",
 		Layer:     "spec",
-		Authority: ".chc/specs/blog.md",
+		Authority: ".chc/user/specs/blog.md",
 		Content:   "Spec context for outline generation.",
 	})
 
@@ -418,7 +418,7 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 		}
 
 		writer.Header().Set("Content-Type", "application/json")
-		_, _ = writer.Write([]byte(`{"output_text":"{\"question\":\"What should happen next?\",\"tags\":[\"workflow\"],\"follow_up_depth\":1,\"completion_recommended\":false}"}`))
+		writeQuizModelHTTPResponse(t, writer, `{"output_text":"{\"question\":\"What should happen next?\",\"tags\":[\"workflow\"],\"follow_up_depth\":1,\"completion_recommended\":false}"}`)
 	}))
 	defer server.Close()
 
@@ -431,6 +431,7 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	}
 
 	request := validQuizModelRequest()
+
 	response, err := model.InvokeQuizModel(context.Background(), request)
 	if err != nil {
 		t.Fatalf("InvokeQuizModel returned error: %v", err)
@@ -441,36 +442,8 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	}
 
 	events := readLLMTraceEvents(t, dir)
-	if len(events) != 2 {
-		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
-	}
 
-	requestEvent := events[0]
-	responseEvent := events[1]
-	if requestEvent["event"] != "llm_request" {
-		t.Fatalf("request event = %#v", requestEvent["event"])
-	}
-	if responseEvent["event"] != "llm_response" {
-		t.Fatalf("response event = %#v", responseEvent["event"])
-	}
-	if requestEvent["llm_call_id"] == "" {
-		t.Fatalf("missing llm_call_id in request event: %#v", requestEvent)
-	}
-	if requestEvent["llm_call_id"] != responseEvent["llm_call_id"] {
-		t.Fatalf("trace call ids differ: request=%#v response=%#v", requestEvent["llm_call_id"], responseEvent["llm_call_id"])
-	}
-	if responseEvent["status"] != "ready" {
-		t.Fatalf("response status = %#v, want ready", responseEvent["status"])
-	}
-	if responseEvent["response_id"] == "" {
-		t.Fatalf("missing response_id in response event: %#v", responseEvent)
-	}
-	if _, ok := requestEvent["request_payload"]; ok {
-		t.Fatalf("request payload captured without payload opt-in: %#v", requestEvent)
-	}
-	if _, ok := responseEvent["response_payload"]; ok {
-		t.Fatalf("response payload captured without payload opt-in: %#v", responseEvent)
-	}
+	assertOpenAITraceEventsWithoutPayloads(t, events)
 }
 
 func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
@@ -481,7 +454,7 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
-		_, _ = writer.Write([]byte(`{"output_text":"{\"question\":\"What should happen next?\",\"tags\":[\"workflow\"],\"follow_up_depth\":1,\"completion_recommended\":false}"}`))
+		writeQuizModelHTTPResponse(t, writer, `{"output_text":"{\"question\":\"What should happen next?\",\"tags\":[\"workflow\"],\"follow_up_depth\":1,\"completion_recommended\":false}"}`)
 	}))
 	defer server.Close()
 
@@ -502,9 +475,11 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	if _, ok := events[0]["request_payload"]; !ok {
 		t.Fatalf("request payload missing with payload opt-in: %#v", events[0])
 	}
+
 	if _, ok := events[1]["response_payload"]; !ok {
 		t.Fatalf("response payload missing with payload opt-in: %#v", events[1])
 	}
+
 	if _, ok := events[1]["output_payload"]; !ok {
 		t.Fatalf("output payload missing with payload opt-in: %#v", events[1])
 	}
@@ -517,7 +492,7 @@ func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
-		_, _ = writer.Write([]byte(`{"output_text":"not-json"}`))
+		writeQuizModelHTTPResponse(t, writer, `{"output_text":"not-json"}`)
 	}))
 	defer server.Close()
 
@@ -538,9 +513,11 @@ func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 	if len(events) != 2 {
 		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
 	}
+
 	if events[1]["status"] != "parse_error" {
 		t.Fatalf("response status = %#v, want parse_error", events[1]["status"])
 	}
+
 	if events[1]["error"] == "" {
 		t.Fatalf("missing parse error in response event: %#v", events[1])
 	}
@@ -573,12 +550,15 @@ func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 	if len(events) != 2 {
 		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
 	}
+
 	if events[1]["status"] != "error" {
 		t.Fatalf("response status = %#v, want error", events[1]["status"])
 	}
+
 	if events[1]["http_status"] != float64(http.StatusBadGateway) {
 		t.Fatalf("http_status = %#v, want 502", events[1]["http_status"])
 	}
+
 	if events[1]["error"] == "" {
 		t.Fatalf("missing provider error in response event: %#v", events[1])
 	}
@@ -729,6 +709,34 @@ func TestQuizModelSpecGenerationInstructionsAvoidTopLevelBodyHeading(t *testing.
 
 	if !strings.Contains(instructions, "body without a top-level title heading") {
 		t.Fatalf("spec generation instructions do not prevent duplicate title headings: %q", instructions)
+	}
+}
+
+func TestQuizModelSpecGenerationInstructionsSeparateGroundedRequirementsFromProposals(t *testing.T) {
+	instructions := quizModelSpecGenerationInstructions()
+
+	for _, want := range []string{
+		"Do not convert unresolved open questions into canonical requirements",
+		"label any chosen default as proposed",
+		"Do not introduce new commands, flags, APIs, exit codes, or persistence fields as requirements",
+		"label useful ungrounded additions as proposed optional extensions",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
+		}
+	}
+}
+
+func TestQuizModelSpecGenerationInstructionsFenceMultilineExamples(t *testing.T) {
+	instructions := quizModelSpecGenerationInstructions()
+
+	for _, want := range []string{
+		"Fence every multi-line example in a Markdown code block",
+		"Never emit raw front matter, YAML, JSON, command output, or code snippets as plain paragraphs or headings",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
+		}
 	}
 }
 
@@ -1310,15 +1318,18 @@ func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {
 	t.Helper()
 
 	path := filepath.Join(projectDir, DirectoryName, "user", "log", "llm", defaultLLMTraceFileName)
+
 	content, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read LLM trace file: %v", err)
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(content)), "\n")
+
 	events := make([]map[string]any, 0, len(lines))
 	for _, line := range lines {
 		var event map[string]any
+
 		err = json.Unmarshal([]byte(line), &event)
 		if err != nil {
 			t.Fatalf("decode LLM trace event: %v", err)
@@ -1328,6 +1339,67 @@ func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {
 	}
 
 	return events
+}
+
+func writeQuizModelHTTPResponse(t *testing.T, writer http.ResponseWriter, content string) {
+	t.Helper()
+
+	_, err := writer.Write([]byte(content))
+	if err != nil {
+		t.Fatalf("write HTTP response: %v", err)
+	}
+}
+
+func assertOpenAITraceEventsWithoutPayloads(t *testing.T, events []map[string]any) {
+	t.Helper()
+
+	if len(events) != 2 {
+		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
+	}
+
+	requestEvent := events[0]
+	responseEvent := events[1]
+
+	assertQuizModelTraceField(t, requestEvent, "event", "llm_request")
+	assertQuizModelTraceField(t, responseEvent, "event", "llm_response")
+	assertQuizModelTraceField(t, responseEvent, "status", "ready")
+	assertQuizModelTraceHasField(t, requestEvent, "llm_call_id")
+	assertQuizModelTraceHasField(t, responseEvent, "response_id")
+	assertQuizModelTraceMatchingCallID(t, requestEvent, responseEvent)
+	assertQuizModelTraceOmitsField(t, requestEvent, "request_payload")
+	assertQuizModelTraceOmitsField(t, responseEvent, "response_payload")
+}
+
+func assertQuizModelTraceField(t *testing.T, event map[string]any, key string, want any) {
+	t.Helper()
+
+	if event[key] != want {
+		t.Fatalf("trace %s = %#v, want %#v in %#v", key, event[key], want, event)
+	}
+}
+
+func assertQuizModelTraceHasField(t *testing.T, event map[string]any, key string) {
+	t.Helper()
+
+	if event[key] == "" {
+		t.Fatalf("missing %s in trace event: %#v", key, event)
+	}
+}
+
+func assertQuizModelTraceMatchingCallID(t *testing.T, requestEvent, responseEvent map[string]any) {
+	t.Helper()
+
+	if requestEvent["llm_call_id"] != responseEvent["llm_call_id"] {
+		t.Fatalf("trace call ids differ: request=%#v response=%#v", requestEvent["llm_call_id"], responseEvent["llm_call_id"])
+	}
+}
+
+func assertQuizModelTraceOmitsField(t *testing.T, event map[string]any, key string) {
+	t.Helper()
+
+	if _, ok := event[key]; ok {
+		t.Fatalf("trace event captured %s: %#v", key, event)
+	}
 }
 
 type fakeQuizModelAdapter struct {

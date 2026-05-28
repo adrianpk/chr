@@ -36,7 +36,7 @@ func TestArchiveGeneratedPlanCopiesCanonicalPlanWithArchiveMetadata(t *testing.T
 		t.Fatal("archived = false, want true")
 	}
 
-	if paths.RelativePath != ".chc/plans/archive/blog-plan-20260525-111213000000014.md" {
+	if paths.RelativePath != ".chc/user/plans/archive/blog-plan-20260525-111213000000014.md" {
 		t.Fatalf("RelativePath = %q, want deterministic archive path", paths.RelativePath)
 	}
 
@@ -47,7 +47,7 @@ func TestArchiveGeneratedPlanCopiesCanonicalPlanWithArchiveMetadata(t *testing.T
 
 	for _, want := range []string{
 		`title: "Blog Plan"`,
-		`archived_from: ".chc/plans/blog-plan.md"`,
+		`archived_from: ".chc/user/plans/blog-plan.md"`,
 		`archived_at: "2026-05-25T11:12:13.000000014Z"`,
 		"# Blog Plan",
 		"Implementation slices.",

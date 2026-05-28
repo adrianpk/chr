@@ -43,12 +43,12 @@ func TestLoadAgentProtocolContextLoadsApplicableAgentsFiles(t *testing.T) {
 func TestLoadAgentProtocolContextLoadsSelectedChcProtocolFiles(t *testing.T) {
 	dir := t.TempDir()
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Root Protocol\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "manifest.md"), "# Manifest\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "config.yml"), "version: 1\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "agents", "CONVENTIONS.md"), "# Conventions\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile"), "FROM golang:1.22\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "tickets", "CHC-1.md"), "# Ticket\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "manifest.md"), "# Manifest\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "config.yml"), "version: 1\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "agents", "CONVENTIONS.md"), "# Conventions\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"), "FROM golang:1.22\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
+	writeTestFile(t, filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"), "# Ticket\n")
 
 	ctx, err := LoadAgentProtocolContext(AgentProtocolContextOptions{ProjectDir: dir})
 	if err != nil {
@@ -57,10 +57,10 @@ func TestLoadAgentProtocolContextLoadsSelectedChcProtocolFiles(t *testing.T) {
 
 	rendered := RenderProtocolsContext(ctx)
 	for _, want := range []string{
-		".chc/agents/CONVENTIONS.md",
-		".chc/config.yml",
-		".chc/manifest.md",
-		".chc/runtime/agent/Dockerfile",
+		".chc/user/agents/CONVENTIONS.md",
+		".chc/user/config.yml",
+		".chc/user/manifest.md",
+		".chc/user/runtime/agent/Dockerfile",
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("rendered protocols missing %q:\n%s", want, rendered)

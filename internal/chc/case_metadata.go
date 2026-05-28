@@ -165,7 +165,7 @@ func validateCaseMetadataWriteHash(path string, metadata CaseMetadata) error {
 }
 
 func CaseMetadataDirectory(projectDir string) string {
-	return filepath.Join(projectDir, DirectoryName, "cases")
+	return UserPath(projectDir, "cases")
 }
 
 func CaseMetadataPath(projectDir, slug string) string {

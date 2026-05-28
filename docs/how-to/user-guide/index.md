@@ -35,7 +35,7 @@ chc init --dir /path/to/project
 
 The initialized workspace includes ticket directories, project protocol files,
 minimal user-owned config, `.chc/user/`, and
-`.chc/runtime/agent/Dockerfile`.
+`.chc/user/runtime/agent/Dockerfile`.
 
 Set an active operator id for workflows that need project-local userspace
 ownership:
@@ -49,14 +49,14 @@ With direnv, the same export may live in `.envrc`.
 ## Configure Runtime Execution
 
 Runtime defaults are owned by `chc`. A new project does not need to repeat
-default runtime paths in `.chc/config.yml`.
+default runtime paths in `.chc/user/config.yml`.
 
 Override runtime settings only when the project has a real reason to do so:
 
 ```yml
 runtime:
   image: chc-agent-runtime:local
-  dockerfile: .chc/runtime/agent/Dockerfile
+  dockerfile: .chc/user/runtime/agent/Dockerfile
   validation_command: make verify
 ```
 
@@ -271,10 +271,10 @@ Equivalent CLI commands:
 chc dump list
 chc dump new --title "Billing notes" --content "Initial context."
 chc dump new --title "Billing notes" --content "Use-case context." --use-case billing
-chc dump show .chc/dumps/billing-notes.md
-chc dump save .chc/dumps/billing-notes.md --content "# Billing notes"
-chc dump append .chc/dumps/billing-notes.md --content "Additional context."
-chc dump open .chc/dumps/billing-notes.md
+chc dump show .chc/user/dumps/billing-notes.md
+chc dump save .chc/user/dumps/billing-notes.md --content "# Billing notes"
+chc dump append .chc/user/dumps/billing-notes.md --content "Additional context."
+chc dump open .chc/user/dumps/billing-notes.md
 ```
 
 ## Run Quizzes in the TUI
@@ -508,7 +508,7 @@ Update status:
 chc ticket status CHC-1 ready
 ```
 
-Ticket files remain Markdown under `.chc/tickets/`.
+Ticket files remain Markdown under `.chc/user/tickets/`.
 
 ## Keep the Ticket Index Current
 
@@ -813,7 +813,7 @@ Sibling context files live under:
 ```
 
 Docker receives the same files through the project mount, usually under
-`/workspace/.chc/runtime/runs/...`.
+`/workspace/.chc/user/runtime/runs/...`.
 
 ## Current Boundaries
 

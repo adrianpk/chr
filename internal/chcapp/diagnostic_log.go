@@ -26,7 +26,7 @@ func (s service) appendPlanGenerationLog(event string, fields map[string]string)
 		return
 	}
 
-	path := filepath.Join(s.projectContext.ProjectDir, chc.DirectoryName, "runtime", "plan-generation.log")
+	path := chc.UserPath(s.projectContext.ProjectDir, "runtime", "plan-generation.log")
 
 	err = os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {

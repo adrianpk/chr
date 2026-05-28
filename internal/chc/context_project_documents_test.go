@@ -9,7 +9,7 @@ import (
 
 func TestLoadProjectDocumentContextLoadsTicketReferences(t *testing.T) {
 	dir := t.TempDir()
-	ticketPath := filepath.Join(dir, ".chc", "tickets", "CHC-1-example.md")
+	ticketPath := filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-example.md")
 	specPath := filepath.Join(dir, ".prj", "specs", "specs", "feature.md")
 	docsPath := filepath.Join(dir, "docs", "reference", "feature.md")
 
@@ -62,7 +62,7 @@ Use .prj/specs/specs/feature.md and docs/reference/feature.md.
 
 func TestLoadProjectDocumentContextRecordsMissingReferences(t *testing.T) {
 	dir := t.TempDir()
-	ticketPath := filepath.Join(dir, ".chc", "tickets", "CHC-1-example.md")
+	ticketPath := filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-example.md")
 
 	writeTestFile(t, ticketPath, renderProjectDocumentTestTicket(t, Ticket{
 		Key:       "CHC-1",

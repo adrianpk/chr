@@ -8,7 +8,7 @@ import (
 
 func TestProjectWidePlanningBaselineDetectsExistingGoProject(t *testing.T) {
 	projectDir := t.TempDir()
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "project.md"), "# Project\n")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "project.md"), "# Project\n")
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, "go.mod"), "module example.com/blog\n\ngo 1.24\n")
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, "Makefile"), "test:\n\tgo test ./...\n")
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, "cmd", "blog", "main.go"), "package main\n")
@@ -50,7 +50,7 @@ func TestProjectWidePlanningBaselineDetectsExistingGoProject(t *testing.T) {
 
 func TestProjectWidePlanningBaselineDetectsEmptySetupProject(t *testing.T) {
 	projectDir := t.TempDir()
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "project.md"), "# Project\n")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "project.md"), "# Project\n")
 
 	operations := newTestService(t, projectDir)
 

@@ -14,7 +14,7 @@ import (
 func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
 	projectDir := t.TempDir()
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chc"), 0o755)
+	err := os.MkdirAll(filepath.Dir(chc.ProjectMetadataPath(projectDir)), 0o755)
 	if err != nil {
 		t.Fatalf("create .chc: %v", err)
 	}
@@ -135,33 +135,7 @@ func TestServiceWorkspaceIndexQueries(t *testing.T) {
 func TestServiceListDumpsReturnsProjectAndCaseScopedDumps(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-context.md"), `---
-title: "Project Context"
-status: "raw"
----
-
-# Project Context
-`)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context.md"), `---
-title: "Blog Context"
-status: "curated"
-type: "dump"
-source: ".chc/dumps/blog-context-raw.md"
-case: "blog"
----
-
-# Blog Context
-`)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context-raw.md"), `---
-title: "Blog Context Raw Capture"
-status: "raw"
-type: "dump_raw"
-curated: ".chc/dumps/blog-context.md"
-case: "blog"
----
-
-# Blog Context Raw Capture
-`)
+	writeServiceDumpListFixture(t, projectDir)
 
 	operations := newTestService(t, projectDir)
 
@@ -169,6 +143,44 @@ case: "blog"
 	if err != nil {
 		t.Fatalf("ListDumps returned error: %v", err)
 	}
+
+	assertServiceDumpListResult(t, operations, result)
+}
+
+func writeServiceDumpListFixture(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "project-context.md"), `---
+title: "Project Context"
+status: "raw"
+---
+
+# Project Context
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context.md"), `---
+title: "Blog Context"
+status: "curated"
+type: "dump"
+source: ".chc/user/dumps/blog-context-raw.md"
+case: "blog"
+---
+
+# Blog Context
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context-raw.md"), `---
+title: "Blog Context Raw Capture"
+status: "raw"
+type: "dump_raw"
+curated: ".chc/user/dumps/blog-context.md"
+case: "blog"
+---
+
+# Blog Context Raw Capture
+`)
+}
+
+func assertServiceDumpListResult(t *testing.T, operations service, result DumpListResult) {
+	t.Helper()
 
 	if result.Message != "Dumps loaded." {
 		t.Fatalf("Message = %q, want Dumps loaded.", result.Message)
@@ -192,16 +204,16 @@ case: "blog"
 		t.Fatalf("case dump scope = %#v, want blog", caseDump.Scope)
 	}
 
-	if caseDump.RelativePath != ".chc/dumps/blog-context.md" {
-		t.Fatalf("case dump path = %q, want .chc/dumps/blog-context.md", caseDump.RelativePath)
+	if caseDump.RelativePath != ".chc/user/dumps/blog-context.md" {
+		t.Fatalf("case dump path = %q, want .chc/user/dumps/blog-context.md", caseDump.RelativePath)
 	}
 
-	if caseDump.SourcePath != ".chc/dumps/blog-context-raw.md" {
+	if caseDump.SourcePath != ".chc/user/dumps/blog-context-raw.md" {
 		t.Fatalf("case dump source path = %q, want raw sibling path", caseDump.SourcePath)
 	}
 
-	if operations.dumpDirectory() != filepath.Join(projectDir, ".chc", "dumps") {
-		t.Fatalf("dumpDirectory = %q, want .chc/dumps", operations.dumpDirectory())
+	if operations.dumpDirectory() != filepath.Join(operations.projectContext.ProjectDir, ".chc", "user", "dumps") {
+		t.Fatalf("dumpDirectory = %q, want .chc/user/dumps", operations.dumpDirectory())
 	}
 }
 
@@ -267,19 +279,19 @@ func TestServiceCreateDumpPreservesUniqueSlugBehaviorForPairs(t *testing.T) {
 		t.Fatalf("CreateDump second returned error: %v", err)
 	}
 
-	if first.Message != "Created dump .chc/dumps/collision-notes.md." {
+	if first.Message != "Created dump .chc/user/dumps/collision-notes.md." {
 		t.Fatalf("first message = %q", first.Message)
 	}
 
-	if second.Message != "Created dump .chc/dumps/collision-notes-2.md." {
+	if second.Message != "Created dump .chc/user/dumps/collision-notes-2.md." {
 		t.Fatalf("second message = %q", second.Message)
 	}
 
 	for _, path := range []string{
-		".chc/dumps/collision-notes.md",
-		".chc/dumps/collision-notes-raw.md",
-		".chc/dumps/collision-notes-2.md",
-		".chc/dumps/collision-notes-2-raw.md",
+		".chc/user/dumps/collision-notes.md",
+		".chc/user/dumps/collision-notes-raw.md",
+		".chc/user/dumps/collision-notes-2.md",
+		".chc/user/dumps/collision-notes-2-raw.md",
 	} {
 		if _, err := os.Stat(filepath.Join(projectDir, filepath.FromSlash(path))); err != nil {
 			t.Fatalf("stat %s: %v", path, err)
@@ -290,7 +302,7 @@ func TestServiceCreateDumpPreservesUniqueSlugBehaviorForPairs(t *testing.T) {
 func TestServiceAppendAndOpenDump(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "project-notes.md"), `---
 title: "Project Notes"
 status: "raw"
 ---
@@ -311,14 +323,14 @@ Original body.
 	operations.dumpEditor = editor
 
 	appendResult, err := operations.AppendDump(DumpAppendRequest{
-		RelativePath: ".chc/dumps/project-notes.md",
+		RelativePath: ".chc/user/dumps/project-notes.md",
 		Content:      "Appended body.",
 	})
 	if err != nil {
 		t.Fatalf("AppendDump returned error: %v", err)
 	}
 
-	content := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes.md"))
+	content := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "project-notes.md"))
 	for _, want := range []string{
 		`title: "Project Notes"`,
 		"Original body.",
@@ -334,7 +346,7 @@ Original body.
 	}
 
 	readResult, err := operations.ReadDump(DumpReadRequest{
-		RelativePath: ".chc/dumps/project-notes.md",
+		RelativePath: ".chc/user/dumps/project-notes.md",
 	})
 	if err != nil {
 		t.Fatalf("ReadDump returned error: %v", err)
@@ -356,17 +368,17 @@ func assertServiceOpenDumpEditorCommand(
 	t.Helper()
 
 	openResult, err := operations.OpenDump(DumpOpenRequest{
-		RelativePath: ".chc/dumps/project-notes.md",
+		RelativePath: ".chc/user/dumps/project-notes.md",
 	})
 	if err != nil {
 		t.Fatalf("OpenDump returned error: %v", err)
 	}
 
-	if editor.path != filepath.Join(projectDir, ".chc", "dumps", "project-notes.md") {
+	if editor.path != filepath.Join(projectDir, ".chc", "user", "dumps", "project-notes.md") {
 		t.Fatalf("editor path = %q", editor.path)
 	}
 
-	if openResult.Message != "Editing dump .chc/dumps/project-notes.md." {
+	if openResult.Message != "Editing dump .chc/user/dumps/project-notes.md." {
 		t.Fatalf("open message = %q", openResult.Message)
 	}
 
@@ -414,7 +426,7 @@ func TestServiceRejectsDumpPathsOutsideDumpDirectory(t *testing.T) {
 	operations := newTestService(t, t.TempDir())
 
 	_, err := operations.AppendDump(DumpAppendRequest{
-		RelativePath: ".chc/project.md",
+		RelativePath: ".chc/user/project.md",
 		Content:      "bad",
 	})
 	if err == nil {
@@ -425,12 +437,12 @@ func TestServiceRejectsDumpPathsOutsideDumpDirectory(t *testing.T) {
 func assertProjectDumpContent(t *testing.T, projectDir string) {
 	t.Helper()
 
-	projectContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes.md"))
+	projectContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "project-notes.md"))
 	for _, want := range []string{
 		`title: "Project Notes"`,
 		`status: "curated"`,
 		`type: "dump"`,
-		`source: ".chc/dumps/project-notes-raw.md"`,
+		`source: ".chc/user/dumps/project-notes-raw.md"`,
 		"# Project Notes",
 		"Project-wide dump body.",
 	} {
@@ -443,11 +455,11 @@ func assertProjectDumpContent(t *testing.T, projectDir string) {
 		t.Fatalf("project dump has case field:\n%s", projectContent)
 	}
 
-	rawContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-notes-raw.md"))
+	rawContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "project-notes-raw.md"))
 	for _, want := range []string{
 		`status: "raw"`,
 		`type: "dump_raw"`,
-		`curated: ".chc/dumps/project-notes.md"`,
+		`curated: ".chc/user/dumps/project-notes.md"`,
 		"## Highlights",
 		"## Raw Capture",
 		"Project-wide dump body.",
@@ -461,12 +473,12 @@ func assertProjectDumpContent(t *testing.T, projectDir string) {
 func assertCaseDumpContent(t *testing.T, projectDir string) {
 	t.Helper()
 
-	caseContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-notes.md"))
+	caseContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-notes.md"))
 	for _, want := range []string{
 		`title: "Blog Notes"`,
 		`status: "curated"`,
 		`type: "dump"`,
-		`source: ".chc/dumps/blog-notes-raw.md"`,
+		`source: ".chc/user/dumps/blog-notes-raw.md"`,
 		`case: "blog"`,
 		"# Blog Notes",
 		"Case-scoped dump body.",
@@ -476,11 +488,11 @@ func assertCaseDumpContent(t *testing.T, projectDir string) {
 		}
 	}
 
-	rawContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-notes-raw.md"))
+	rawContent := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-notes-raw.md"))
 	for _, want := range []string{
 		`status: "raw"`,
 		`type: "dump_raw"`,
-		`curated: ".chc/dumps/blog-notes.md"`,
+		`curated: ".chc/user/dumps/blog-notes.md"`,
 		`case: "blog"`,
 		"Case-scoped dump body.",
 	} {
@@ -531,7 +543,7 @@ func assertServiceSuggestsWorkspaceCases(t *testing.T, operations service) {
 func assertServiceResolvesWorkspaceRelatedDocuments(t *testing.T, operations service) {
 	t.Helper()
 
-	resolved, err := operations.ResolveWorkspacePath(filepath.ToSlash(filepath.Join(chc.DirectoryName, "specs", "blog-spec.md")))
+	resolved, err := operations.ResolveWorkspacePath(filepath.ToSlash(filepath.Join(chc.DirectoryName, chc.UserDirectoryName, "specs", "blog-spec.md")))
 	if err != nil {
 		t.Fatalf("ResolveWorkspacePath returned error: %v", err)
 	}
@@ -655,7 +667,7 @@ func TestServiceBoardReturnsSharedBoardReadModel(t *testing.T) {
 func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "tickets"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "user", "tickets"), 0o755)
 	if err != nil {
 		t.Fatalf("create ticket dir: %v", err)
 	}
@@ -733,7 +745,7 @@ func TestServiceMutatesSelectedTicket(t *testing.T) {
 func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "tickets"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "user", "tickets"), 0o755)
 	if err != nil {
 		t.Fatalf("create ticket dir: %v", err)
 	}
@@ -756,7 +768,7 @@ func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
 
 func TestServiceOpenSourceUsesProjectRelativeFile(t *testing.T) {
 	projectDir := t.TempDir()
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "tickets", "CHC-1-example.md"), "# Ticket\n")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-example.md"), "# Ticket\n")
 
 	operations := newTestService(t, projectDir)
 	editor := &fakeDumpEditorLauncher{
@@ -768,12 +780,12 @@ func TestServiceOpenSourceUsesProjectRelativeFile(t *testing.T) {
 	}
 	operations.dumpEditor = editor
 
-	result, err := operations.OpenSource(".chc/tickets/CHC-1-example.md")
+	result, err := operations.OpenSource(".chc/user/tickets/CHC-1-example.md")
 	if err != nil {
 		t.Fatalf("OpenSource returned error: %v", err)
 	}
 
-	if editor.path != filepath.Join(projectDir, ".chc", "tickets", "CHC-1-example.md") {
+	if editor.path != filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-example.md") {
 		t.Fatalf("editor path = %q", editor.path)
 	}
 
@@ -830,7 +842,7 @@ func writeServiceWorkspaceQueryFixture(t *testing.T, projectDir string) {
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, chc.UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "accepted"
 case: "blog"
@@ -838,7 +850,7 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, "plans", "project-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, chc.DirectoryName, chc.UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---

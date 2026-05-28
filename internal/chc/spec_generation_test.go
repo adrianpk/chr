@@ -67,8 +67,8 @@ func TestValidateGeneratedSpecAllowsKnownChrysoCoordPathReferences(t *testing.T)
 		Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title: "Newsletter Distribution",
 		Body: strings.Join([]string{
-			"See .chc/project.md.",
-			"See .chc/cases/newsletter.md, .chc/dumps/newsletter.md, and .chc/quizzes/newsletter.md.",
+			"See .chc/user/project.md.",
+			"See .chc/user/cases/newsletter.md, .chc/user/dumps/newsletter.md, and .chc/user/quizzes/newsletter.md.",
 		}, "\n"),
 		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
 	}
@@ -79,7 +79,7 @@ func TestValidateGeneratedSpecAllowsKnownChrysoCoordPathReferences(t *testing.T)
 }
 
 func TestNormalizeGeneratedSpecChrysoCoordPathReferencesKeepsKnownPaths(t *testing.T) {
-	body := "See .chc/project.md and .chc/dumps/newsletter.md."
+	body := "See .chc/user/project.md and .chc/user/dumps/newsletter.md."
 
 	got := NormalizeGeneratedSpecChrysoCoordPathReferences(body)
 

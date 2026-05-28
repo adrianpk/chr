@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v3"
@@ -433,7 +432,7 @@ func printRuntimeValidateResult(
 ) error {
 	plan := result.Plan
 
-	_, err := fmt.Fprintf(stdout, "runtime: %s\n", displayPath(plan.ProjectDir, filepath.Join(plan.ProjectDir, chc.DirectoryName, "runtime")))
+	_, err := fmt.Fprintf(stdout, "runtime: %s\n", displayPath(plan.ProjectDir, chc.UserPath(plan.ProjectDir, "runtime")))
 	if err != nil {
 		return fmt.Errorf("write runtime result: %w", err)
 	}

@@ -101,6 +101,7 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 	}
 
 	trace := a.newOpenAIQuizTrace(request)
+
 	output, result, err := a.invokeOpenAI(ctx, request, trace)
 	if err != nil {
 		a.recordOpenAIQuizResponse(ctx, request, trace, result, "error", err, QuizModelResponse{})
@@ -154,6 +155,7 @@ func (a OpenAIQuizModelAdapter) invokeOpenAI(
 	a.recordOpenAIQuizRequest(ctx, request, trace)
 
 	result, err := a.executeOpenAIRequest(request, httpRequest, trace.StartedAt)
+
 	return result.Output, result, err
 }
 
@@ -239,6 +241,7 @@ func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
 	}()
 
 	responseBody, err := io.ReadAll(io.LimitReader(response.Body, 4*1024*1024))
+
 	result := openAIQuizExecutionResult{
 		ResponseBody: responseBody,
 		StatusCode:   response.StatusCode,
@@ -263,7 +266,10 @@ func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
 }
 
 func (a OpenAIQuizModelAdapter) newOpenAIQuizTrace(request QuizModelRequest) openAIQuizTrace {
-	body, _ := a.openAIRequestBody(request)
+	body, err := a.openAIRequestBody(request)
+	if err != nil {
+		body = nil
+	}
 
 	return openAIQuizTrace{
 		CallID:      newLLMCallID(),
@@ -324,6 +330,7 @@ func (a OpenAIQuizModelAdapter) recordOpenAIQuizResponse(
 
 func newLLMCallID() string {
 	var value [8]byte
+
 	_, err := rand.Read(value[:])
 	if err != nil {
 		return "llm-" + strconv.FormatInt(time.Now().UnixNano(), 36)
@@ -1025,6 +1032,11 @@ Use the structured request payload and all context sections as the sole source o
 Ground the spec in the available project metadata, use-case metadata, dumps, quiz notes, existing docs, and related artifacts.
 Prefer concrete behavior, constraints, decisions, open questions, and implementation implications.
 Keep uncertain behavior explicit instead of inventing facts.
+Do not convert unresolved open questions into canonical requirements; keep them explicit or label any chosen default as proposed.
+Do not introduce new commands, flags, APIs, exit codes, or persistence fields as requirements unless they are grounded in context; label useful ungrounded additions as proposed optional extensions.
+Keep implementation checklists secondary to behavioral requirements and avoid making them more authoritative than the spec decisions.
+Fence every multi-line example in a Markdown code block with a language tag, such as yaml, json, shell, or text.
+Never emit raw front matter, YAML, JSON, command output, or code snippets as plain paragraphs or headings.
 Set status to draft because generated specs require user review.
 Return body without a top-level title heading; the renderer adds the H1 from title.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.

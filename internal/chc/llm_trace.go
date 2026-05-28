@@ -60,6 +60,7 @@ func LoadLLMTraceConfig(opts LoadLLMTraceConfigOptions) (LLMTraceConfig, error) 
 	if config.Environ == nil {
 		config.Environ = os.Environ
 	}
+
 	if config.Now == nil {
 		config.Now = time.Now
 	}
@@ -78,6 +79,7 @@ func LoadLLMTraceConfig(opts LoadLLMTraceConfigOptions) (LLMTraceConfig, error) 
 
 	config.Dir = filepath.Join(userspace.Path, "log", "llm")
 	config.FilePath = filepath.Join(config.Dir, defaultLLMTraceFileName)
+
 	return config, nil
 }
 
@@ -87,7 +89,9 @@ func RecordLLMTraceEvent(ctx context.Context, opts LoadLLMTraceConfigOptions, ev
 		return
 	}
 
-	_ = WriteLLMTraceEvent(ctx, config, event)
+	if err := WriteLLMTraceEvent(ctx, config, event); err != nil {
+		return
+	}
 }
 
 func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[string]any) error {
@@ -119,15 +123,33 @@ func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[st
 		return fmt.Errorf("rotate LLM trace file: %w", err)
 	}
 
-	file, err := os.OpenFile(config.FilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	err = appendLLMTraceLine(config.FilePath, line)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func appendLLMTraceLine(filePath string, line []byte) error {
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return fmt.Errorf("open LLM trace file: %w", err)
 	}
-	defer file.Close()
 
 	_, err = file.Write(line)
 	if err != nil {
+		closeErr := file.Close()
+		if closeErr != nil {
+			return fmt.Errorf("write LLM trace event: %w; close LLM trace file: %w", err, closeErr)
+		}
+
 		return fmt.Errorf("write LLM trace event: %w", err)
+	}
+
+	err = file.Close()
+	if err != nil {
+		return fmt.Errorf("close LLM trace file: %w", err)
 	}
 
 	return nil
@@ -136,10 +158,12 @@ func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[st
 func encodeLLMTraceEvent(config LLMTraceConfig, event map[string]any) ([]byte, error) {
 	normalized := make(map[string]any, len(event)+1)
 	secretValues := llmTraceSecretValues(config.Environ)
+
 	for key, value := range event {
 		if value == nil {
 			continue
 		}
+
 		if !config.IncludePayloads && llmTracePayloadField(key) {
 			continue
 		}
@@ -152,6 +176,7 @@ func encodeLLMTraceEvent(config LLMTraceConfig, event map[string]any) ([]byte, e
 		if config.Now != nil {
 			now = config.Now
 		}
+
 		normalized["timestamp"] = now().UTC().Format(time.RFC3339Nano)
 	}
 
@@ -164,42 +189,59 @@ func encodeLLMTraceEvent(config LLMTraceConfig, event map[string]any) ([]byte, e
 }
 
 func rotateLLMTraceFile(filePath string, maxBytes int64, keepFiles int, incomingBytes int64) error {
-	if maxBytes <= 0 {
-		maxBytes = defaultLLMTraceMaxBytes
-	}
-	if keepFiles <= 0 {
-		keepFiles = defaultLLMTraceKeepFiles
-	}
+	maxBytes = normalizedLLMTraceMaxBytes(maxBytes)
+	keepFiles = normalizedLLMTraceKeepFiles(keepFiles)
 
 	info, err := os.Stat(filePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-
+	if err != nil && !os.IsNotExist(err) {
 		return err
+	}
+
+	if os.IsNotExist(err) {
+		return nil
 	}
 
 	if info.Size()+incomingBytes <= maxBytes {
 		return nil
 	}
 
-	err = os.Remove(filePath + "." + strconv.Itoa(keepFiles))
-	if err != nil && !os.IsNotExist(err) {
+	return rotateExistingLLMTraceFile(filePath, keepFiles)
+}
+
+func normalizedLLMTraceMaxBytes(maxBytes int64) int64 {
+	if maxBytes > 0 {
+		return maxBytes
+	}
+
+	return defaultLLMTraceMaxBytes
+}
+
+func normalizedLLMTraceKeepFiles(keepFiles int) int {
+	if keepFiles > 0 {
+		return keepFiles
+	}
+
+	return defaultLLMTraceKeepFiles
+}
+
+func rotateExistingLLMTraceFile(filePath string, keepFiles int) error {
+	err := removeLLMTraceRotation(filePath, keepFiles)
+	if err != nil {
 		return err
 	}
 
 	for index := keepFiles - 1; index >= 1; index-- {
-		source := filePath + "." + strconv.Itoa(index)
-		target := filePath + "." + strconv.Itoa(index+1)
-
-		err = os.Rename(source, target)
-		if err != nil && !os.IsNotExist(err) {
+		err = renameLLMTraceRotation(filePath, index, index+1)
+		if err != nil {
 			return err
 		}
 	}
 
-	err = os.Rename(filePath, filePath+".1")
+	return renameLLMTraceRotation(filePath, 0, 1)
+}
+
+func removeLLMTraceRotation(filePath string, index int) error {
+	err := os.Remove(llmTraceRotationPath(filePath, index))
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -207,8 +249,26 @@ func rotateLLMTraceFile(filePath string, maxBytes int64, keepFiles int, incoming
 	return nil
 }
 
+func renameLLMTraceRotation(filePath string, sourceIndex, targetIndex int) error {
+	err := os.Rename(llmTraceRotationPath(filePath, sourceIndex), llmTraceRotationPath(filePath, targetIndex))
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	return nil
+}
+
+func llmTraceRotationPath(filePath string, index int) string {
+	if index == 0 {
+		return filePath
+	}
+
+	return filePath + "." + strconv.Itoa(index)
+}
+
 func llmTracePayloadField(key string) bool {
 	normalized := strings.ToLower(strings.TrimSpace(key))
+
 	return normalized == "payload" ||
 		normalized == "request_payload" ||
 		normalized == "response_payload" ||
@@ -228,12 +288,14 @@ func redactLLMTraceValue(key string, value any, secretValues []string) any {
 		for childKey, childValue := range typed {
 			redacted[childKey] = redactLLMTraceValue(childKey, childValue, secretValues)
 		}
+
 		return redacted
 	case []any:
 		redacted := make([]any, 0, len(typed))
 		for _, childValue := range typed {
 			redacted = append(redacted, redactLLMTraceValue("", childValue, secretValues))
 		}
+
 		return redacted
 	case string:
 		return redactLLMTraceString(typed, secretValues)
@@ -244,6 +306,7 @@ func redactLLMTraceValue(key string, value any, secretValues []string) any {
 
 func redactLLMTraceString(value string, secretValues []string) string {
 	redacted := redactBearerToken(value)
+
 	for _, secret := range secretValues {
 		if secret == "" {
 			continue
@@ -270,11 +333,13 @@ func llmTraceSecretValues(environ func() []string) []string {
 	}
 
 	values := make([]string, 0)
+
 	for _, entry := range environ() {
 		name, value, ok := strings.Cut(entry, "=")
 		if !ok {
 			continue
 		}
+
 		if !secretLikeFieldPattern.MatchString(name) || value == "" {
 			continue
 		}

@@ -22,7 +22,7 @@ func TestTicketRendererRendersFrontmatterAndBody(t *testing.T) {
 		UseCase:     "onboarding",
 		ProjectArea: "frontend",
 		SourceKind:  "plan_tracking",
-		SourceRef:   ".chc/plans/onboarding-plan.md",
+		SourceRef:   ".chc/user/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
 		CreatedAt:   createdAt,
 		UpdatedAt:   updatedAt,
@@ -43,7 +43,7 @@ tags: ["uxui", "onboarding"]
 use_case: "onboarding"
 project_area: "frontend"
 source_kind: "plan_tracking"
-source_ref: ".chc/plans/onboarding-plan.md"
+source_ref: ".chc/user/plans/onboarding-plan.md"
 slice: "Slice 1"
 created_at: "2026-05-18T12:30:00Z"
 updated_at: "2026-05-18T13:45:00Z"

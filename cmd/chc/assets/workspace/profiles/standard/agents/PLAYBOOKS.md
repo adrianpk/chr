@@ -1,6 +1,6 @@
 # Playbooks
 
-Playbooks live under `.chc/agents/playbooks/`.
+Playbooks live under `.chc/user/agents/playbooks/`.
 
 Use the smallest playbook that matches the active work.
 

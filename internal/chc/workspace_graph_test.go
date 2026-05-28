@@ -32,7 +32,7 @@ func writeCaseRootedWorkspaceGraphFixture(t *testing.T, projectDir string) {
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "specs", "blog-spec.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "accepted"
 case: "blog"
@@ -40,14 +40,14 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "plans", "project-plan.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---
 
 # Project Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "tickets", "CHC-1-Write.md"), ticketFixture(t, Ticket{
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "tickets", "CHC-1-Write.md"), ticketFixture(t, Ticket{
 		Key:         "CHC-1",
 		Title:       "Write article",
 		Status:      "ready",
@@ -101,7 +101,7 @@ func TestWorkspaceGraphBuilderTracksInvalidFilesAndUnresolvedCases(t *testing.T)
 		Name: "Valid",
 	}))
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "broken"), "# Missing frontmatter\n")
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "missing-case.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "missing-case.md"), `---
 title: "Missing Case Dump"
 case: "missing"
 ---
@@ -145,21 +145,21 @@ func TestWorkspaceGraphBuilderClassifiesDumpPairMetadata(t *testing.T) {
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "blog-notes.md"), `---
 title: "Blog Notes"
 status: "curated"
 type: "dump"
-source: ".chc/dumps/blog-notes-raw.md"
+source: ".chc/user/dumps/blog-notes-raw.md"
 case: "blog"
 ---
 
 # Blog Notes
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "blog-notes-raw.md"), `---
 title: "Blog Notes Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chc/dumps/blog-notes.md"
+curated: ".chc/user/dumps/blog-notes.md"
 case: "blog"
 ---
 
@@ -177,12 +177,12 @@ case: "blog"
 	}
 
 	curated := findWorkspaceGraphNodeByTitle(t, caseNodes, "Blog Notes")
-	if curated.DocumentType != "dump" || curated.SourcePath != ".chc/dumps/blog-notes-raw.md" {
+	if curated.DocumentType != "dump" || curated.SourcePath != ".chc/user/dumps/blog-notes-raw.md" {
 		t.Fatalf("curated dump metadata = %#v", curated)
 	}
 
 	raw := findWorkspaceGraphNodeByTitle(t, caseNodes, "Blog Notes Raw Capture")
-	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chc/dumps/blog-notes.md" {
+	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chc/user/dumps/blog-notes.md" {
 		t.Fatalf("raw dump metadata = %#v", raw)
 	}
 
@@ -201,19 +201,19 @@ func TestWorkspaceGraphBuilderClassifiesQuizPairMetadata(t *testing.T) {
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "quizzes", "blog-quiz.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz.md"), `---
 title: "Blog Quiz"
 status: "curated"
-raw_path: ".chc/quizzes/blog-quiz-raw.md"
+raw_path: ".chc/user/quizzes/blog-quiz-raw.md"
 case: "blog"
 ---
 
 # Blog Quiz
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "quizzes", "blog-quiz-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz-raw.md"), `---
 title: "Blog Quiz Raw Capture"
 status: "raw"
-curated_path: ".chc/quizzes/blog-quiz.md"
+curated_path: ".chc/user/quizzes/blog-quiz.md"
 case: "blog"
 ---
 
@@ -231,12 +231,12 @@ case: "blog"
 	}
 
 	curated := findWorkspaceGraphNodeByTitle(t, caseNodes, "Blog Quiz")
-	if curated.SourcePath != ".chc/quizzes/blog-quiz-raw.md" {
+	if curated.SourcePath != ".chc/user/quizzes/blog-quiz-raw.md" {
 		t.Fatalf("curated quiz metadata = %#v", curated)
 	}
 
 	raw := findWorkspaceGraphNodeByTitle(t, caseNodes, "Blog Quiz Raw Capture")
-	if raw.CuratedPath != ".chc/quizzes/blog-quiz.md" {
+	if raw.CuratedPath != ".chc/user/quizzes/blog-quiz.md" {
 		t.Fatalf("raw quiz metadata = %#v", raw)
 	}
 

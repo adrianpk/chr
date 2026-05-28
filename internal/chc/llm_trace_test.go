@@ -24,6 +24,7 @@ func TestLoadLLMTraceConfigDisabledDoesNotRequireUserspace(t *testing.T) {
 	if config.Enabled {
 		t.Fatal("Enabled = true, want false")
 	}
+
 	if config.FilePath != "" {
 		t.Fatalf("FilePath = %q, want empty", config.FilePath)
 	}
@@ -51,6 +52,7 @@ func TestLoadLLMTraceConfigEnabledResolvesUserspaceLogPath(t *testing.T) {
 	if config.Dir != wantDir {
 		t.Fatalf("Dir = %q, want %q", config.Dir, wantDir)
 	}
+
 	if config.FilePath != filepath.Join(wantDir, defaultLLMTraceFileName) {
 		t.Fatalf("FilePath = %q, want llm trace file under userspace", config.FilePath)
 	}
@@ -77,12 +79,15 @@ func TestLoadLLMTraceConfigReadsEnvironmentOverrides(t *testing.T) {
 	if !config.Enabled {
 		t.Fatal("Enabled = false, want true")
 	}
+
 	if !config.IncludePayloads {
 		t.Fatal("IncludePayloads = false, want true")
 	}
+
 	if config.MaxBytes != 2048 {
 		t.Fatalf("MaxBytes = %d, want 2048", config.MaxBytes)
 	}
+
 	if config.KeepFiles != 3 {
 		t.Fatalf("KeepFiles = %d, want 3", config.KeepFiles)
 	}
@@ -110,12 +115,15 @@ func TestWriteLLMTraceEventWritesJSONL(t *testing.T) {
 	if decoded["event"] != "llm_request" {
 		t.Fatalf("event = %#v, want llm_request", decoded["event"])
 	}
+
 	if decoded["llm_call_id"] != "llm-001" {
 		t.Fatalf("llm_call_id = %#v, want llm-001", decoded["llm_call_id"])
 	}
+
 	if _, ok := decoded["payload"]; ok {
 		t.Fatalf("payload was written while payload capture is disabled: %#v", decoded)
 	}
+
 	if decoded["timestamp"] != "2026-05-27T10:00:00Z" {
 		t.Fatalf("timestamp = %#v, want fixed test timestamp", decoded["timestamp"])
 	}
@@ -135,10 +143,12 @@ func TestWriteLLMTraceEventIncludesPayloadsWhenEnabled(t *testing.T) {
 	}
 
 	decoded := decodeTraceLine(t, readTraceFile(t, config.FilePath))
+
 	payload, ok := decoded["payload"].(map[string]any)
 	if !ok {
 		t.Fatalf("payload = %#v, want object", decoded["payload"])
 	}
+
 	if payload["output"] != "visible" {
 		t.Fatalf("payload output = %#v, want visible", payload["output"])
 	}
@@ -173,12 +183,15 @@ func TestWriteLLMTraceEventRedactsSecretFieldsAndEnvironmentValues(t *testing.T)
 	if strings.Contains(content, "env-secret") {
 		t.Fatalf("trace file leaked environment secret: %s", content)
 	}
+
 	if strings.Contains(content, "direct-secret") {
 		t.Fatalf("trace file leaked bearer secret: %s", content)
 	}
+
 	if strings.Contains(content, "direct-key") {
 		t.Fatalf("trace file leaked secret field: %s", content)
 	}
+
 	if !strings.Contains(content, "[REDACTED]") {
 		t.Fatalf("trace file does not contain redaction marker: %s", content)
 	}
@@ -205,6 +218,7 @@ func TestWriteLLMTraceEventRotatesTraceFile(t *testing.T) {
 	assertFileExists(t, config.FilePath)
 	assertFileExists(t, config.FilePath+".1")
 	assertFileExists(t, config.FilePath+".2")
+
 	if _, err := os.Stat(config.FilePath + ".3"); !os.IsNotExist(err) {
 		t.Fatalf("unexpected third rotated file: %v", err)
 	}
@@ -268,6 +282,7 @@ func decodeTraceLine(t *testing.T, content string) map[string]any {
 	t.Helper()
 
 	var decoded map[string]any
+
 	err := json.Unmarshal([]byte(strings.TrimSpace(content)), &decoded)
 	if err != nil {
 		t.Fatalf("decode trace line: %v", err)

@@ -107,7 +107,7 @@ func validateProjectMetadataWriteHash(path string, metadata ProjectMetadata) err
 }
 
 func ProjectMetadataPath(projectDir string) string {
-	return filepath.Join(projectDir, DirectoryName, "project.md")
+	return UserPath(projectDir, "project.md")
 }
 
 func ParseProjectMetadata(content string) (ProjectMetadata, error) {

@@ -57,21 +57,21 @@ func TestWorkspaceGraphBuilderBuildCachedIndexPreservesDumpPairMetadata(t *testi
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "blog-notes.md"), `---
 title: "Blog Notes"
 status: "curated"
 type: "dump"
-source: ".chc/dumps/blog-notes-raw.md"
+source: ".chc/user/dumps/blog-notes-raw.md"
 case: "blog"
 ---
 
 # Blog Notes
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "dumps", "blog-notes-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "blog-notes-raw.md"), `---
 title: "Blog Notes Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chc/dumps/blog-notes.md"
+curated: ".chc/user/dumps/blog-notes.md"
 case: "blog"
 ---
 
@@ -92,9 +92,10 @@ case: "blog"
 		t.Fatalf("Cache.Status = %q, want %q", second.Cache.Status, WorkspaceIndexCacheHit)
 	}
 
-	rawID := second.Index.NodesByPath[".chc/dumps/blog-notes-raw.md"]
+	rawID := second.Index.NodesByPath[".chc/user/dumps/blog-notes-raw.md"]
+
 	raw := second.Index.NodesByID[rawID]
-	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chc/dumps/blog-notes.md" {
+	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chc/user/dumps/blog-notes.md" {
 		t.Fatalf("cached raw dump metadata = %#v", raw)
 	}
 }
@@ -105,19 +106,19 @@ func TestWorkspaceGraphBuilderBuildCachedIndexPreservesQuizPairMetadata(t *testi
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "quizzes", "blog-quiz.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz.md"), `---
 title: "Blog Quiz"
 status: "curated"
-raw_path: ".chc/quizzes/blog-quiz-raw.md"
+raw_path: ".chc/user/quizzes/blog-quiz-raw.md"
 case: "blog"
 ---
 
 # Blog Quiz
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "quizzes", "blog-quiz-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz-raw.md"), `---
 title: "Blog Quiz Raw Capture"
 status: "raw"
-curated_path: ".chc/quizzes/blog-quiz.md"
+curated_path: ".chc/user/quizzes/blog-quiz.md"
 case: "blog"
 ---
 
@@ -138,9 +139,10 @@ case: "blog"
 		t.Fatalf("Cache.Status = %q, want %q", second.Cache.Status, WorkspaceIndexCacheHit)
 	}
 
-	rawID := second.Index.NodesByPath[".chc/quizzes/blog-quiz-raw.md"]
+	rawID := second.Index.NodesByPath[".chc/user/quizzes/blog-quiz-raw.md"]
+
 	raw := second.Index.NodesByID[rawID]
-	if raw.CuratedPath != ".chc/quizzes/blog-quiz.md" {
+	if raw.CuratedPath != ".chc/user/quizzes/blog-quiz.md" {
 		t.Fatalf("cached raw quiz metadata = %#v", raw)
 	}
 }
@@ -154,7 +156,7 @@ func TestWorkspaceGraphBuilderBuildCachedIndexRewritesStaleCache(t *testing.T) {
 		t.Fatalf("first BuildCachedIndex returned error: %v", err)
 	}
 
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, "specs", "blog-spec.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Updated Blog Spec"
 status: "accepted"
 case: "blog"
@@ -176,7 +178,7 @@ case: "blog"
 		t.Fatalf("Index.BuiltAt = %s, want rewritten index after stale cache", second.Index.BuiltAt)
 	}
 
-	specID := second.Index.NodesByPath[filepath.ToSlash(filepath.Join(DirectoryName, "specs", "blog-spec.md"))]
+	specID := second.Index.NodesByPath[filepath.ToSlash(filepath.Join(DirectoryName, UserDirectoryName, "specs", "blog-spec.md"))]
 	if second.Index.NodesByID[specID].Title != "Updated Blog Spec" {
 		t.Fatalf("spec title = %q, want Updated Blog Spec", second.Index.NodesByID[specID].Title)
 	}

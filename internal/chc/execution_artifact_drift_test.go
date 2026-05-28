@@ -79,7 +79,7 @@ func TestExecutionArtifactDriftServiceReportsMissingArtifacts(t *testing.T) {
 func testExecutionArtifactRecord(t *testing.T, now time.Time) ExecutionRecord {
 	t.Helper()
 
-	runDir := filepath.Join(t.TempDir(), ".chc", "runtime", "runs", "exec-1")
+	runDir := filepath.Join(t.TempDir(), ".chc", "user", "runtime", "runs", "exec-1")
 
 	record := testExecutionRecord(now)
 	record.Artifacts = ExecutionArtifacts{

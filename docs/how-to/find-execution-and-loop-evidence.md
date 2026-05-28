@@ -79,7 +79,7 @@ chc report show --loop loop-1
 Show a report by project-relative path:
 
 ```sh
-chc report show .chc/runtime/runs/CHC-1/exec-1/execution-report.md
+chc report show .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md
 ```
 
 If a lookup matches more than one report, the command fails with an ambiguity

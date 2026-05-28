@@ -19,7 +19,7 @@ The rebuild service receives:
 The service discovers Markdown tickets under:
 
 ```text
-<project>/.chc/tickets
+<project>/.chc/user/tickets
 ```
 
 ## Behavior
@@ -46,7 +46,7 @@ The rebuild result includes:
 Each parse error includes:
 
 - absolute path;
-- relative path under `.chc/tickets`;
+- relative path under `.chc/user/tickets`;
 - underlying error.
 
 ## Scope

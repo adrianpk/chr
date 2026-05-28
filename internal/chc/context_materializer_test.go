@@ -10,7 +10,7 @@ import (
 
 func TestContextPackageMaterializerWritesArtifactLayout(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 	plan := testContextPackageRuntimePlan(dir, runDir)
 	composition := testContextPackageComposition(t, plan)
 
@@ -40,7 +40,7 @@ func TestContextPackageMaterializerWritesArtifactLayout(t *testing.T) {
 
 func TestRenderMainContextPackageUsesDockerVisiblePaths(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 	plan := testContextPackageRuntimePlan(dir, runDir)
 	composition := testContextPackageComposition(t, plan)
 
@@ -50,9 +50,9 @@ func TestRenderMainContextPackageUsesDockerVisiblePaths(t *testing.T) {
 	})
 
 	for _, want := range []string{
-		"/workspace/.chc/runtime/runs/CHC-1/exec-1/context/agent.md",
-		"/workspace/.chc/runtime/runs/CHC-1/exec-1/context/code-context.md",
-		"/workspace/.chc/runtime/runs/CHC-1/exec-1/result.json",
+		"/workspace/.chc/user/runtime/runs/CHC-1/exec-1/context/agent.md",
+		"/workspace/.chc/user/runtime/runs/CHC-1/exec-1/context/code-context.md",
+		"/workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
 		"agent-default",
 	} {
 		if !strings.Contains(rendered, want) {
@@ -63,7 +63,7 @@ func TestRenderMainContextPackageUsesDockerVisiblePaths(t *testing.T) {
 
 func TestRenderContextPackageDryRunShowsIncludedAndSkippedSources(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 	plan := testContextPackageRuntimePlan(dir, runDir)
 	composition := testContextPackageComposition(t, plan)
 
@@ -106,7 +106,7 @@ func testContextPackageComposition(t *testing.T, plan RuntimePlan) ContextCompos
 
 	composition, err := PlanContextComposition(ContextComposerOptions{
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(plan.ProjectDir, ".chc", "tickets", "CHC-1.md"),
+		TicketPath:  filepath.Join(plan.ProjectDir, ".chc", "user", "tickets", "CHC-1.md"),
 		ExecutionID: "exec-1",
 		Plan:        plan,
 		Sources: []ContextSourceInventoryEntry{

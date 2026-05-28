@@ -52,7 +52,7 @@ func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) 
 		t.Fatalf("ActiveQuestion = %#v, want question-1", result.State.ActiveQuestion)
 	}
 
-	runtimePath := filepath.Join(projectDir, ".chc", "tmp", "quiz-runtime", "blog.json")
+	runtimePath := filepath.Join(projectDir, ".chc", "user", "tmp", "quiz-runtime", "blog.json")
 	if content := readServiceWorkspaceFile(t, runtimePath); !strings.Contains(content, `"CaseSlug": "blog"`) {
 		t.Fatalf("runtime content missing blog case:\n%s", content)
 	}
@@ -114,7 +114,7 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 		t.Fatalf("ActiveQuestion = %#v, want question-2", result.State.ActiveQuestion)
 	}
 
-	rawPath := filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md")
+	rawPath := filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz-raw.md")
 	rawContent := readServiceWorkspaceFile(t, rawPath)
 
 	for _, want := range []string{
@@ -177,7 +177,7 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 		t.Fatalf("follow_up_depth = %#v, want persisted value 2", metadata["follow_up_depth"])
 	}
 
-	rawPath := filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md")
+	rawPath := filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz-raw.md")
 	rawContent := readServiceWorkspaceFile(t, rawPath)
 
 	if !strings.Contains(rawContent, `"routing_state":{"phase":"follow_up"}`) {
@@ -260,7 +260,7 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 		t.Fatalf("Candidates = %#v, want one remaining candidate", firstAnswer.State.Candidates)
 	}
 
-	rawPath := filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz-raw.md")
+	rawPath := filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz-raw.md")
 	rawContent := readServiceWorkspaceFile(t, rawPath)
 
 	if strings.Contains(rawContent, "candidate-2") {
@@ -274,7 +274,7 @@ func TestServiceQuizUpdatesCuratedNotesIteratively(t *testing.T) {
 
 	_, result := answerServiceQuiz(t, projectDir)
 
-	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "quizzes", "blog-quiz.md"))
+	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz.md"))
 	assertServiceQuizContentContains(t, curated, []string{
 		`status: "curated"`,
 		"## Decisions",
@@ -304,7 +304,7 @@ func TestServiceCompleteQuizDoesNotGenerateDraftSpec(t *testing.T) {
 		t.Fatalf("model requests = %d, want start and next question only", len(model.model.requests))
 	}
 
-	specPath := filepath.Join(projectDir, ".chc", "specs", "drafts", "blog-quiz-spec.md")
+	specPath := filepath.Join(projectDir, ".chc", "user", "specs", "drafts", "blog-quiz-spec.md")
 	if _, err := os.Stat(specPath); !os.IsNotExist(err) {
 		t.Fatalf("draft spec path stat err = %v, want not exist", err)
 	}
@@ -327,13 +327,13 @@ func TestServiceGenerateQuizDraftSpecUsesCuratedNotes(t *testing.T) {
 		t.Fatalf("status = %q, want done", result.State.Status)
 	}
 
-	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "specs", "drafts", "blog-quiz-spec.md"))
+	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "drafts", "blog-quiz-spec.md"))
 	assertServiceQuizContentContains(t, spec, []string{
 		`status: "draft"`,
 		`case_slug: "blog"`,
 		"# Quiz Generated Spec",
 		"Generated behavior from dump and quiz context.",
-		"- curated quiz: .chc/quizzes/blog-quiz.md",
+		"- curated quiz: .chc/user/quizzes/blog-quiz.md",
 	})
 
 	draftRequest := model.model.requests[len(model.model.requests)-1]
@@ -765,8 +765,8 @@ func serviceQuizReadModelRuntimeState(updated time.Time) chc.QuizRuntimeState {
 		Trail: []chc.QuizTrailNode{
 			{QuestionID: "question-1", Prompt: "What should be clarified?", Topic: "clarity", Depth: 1},
 		},
-		RawPath:     ".chc/quizzes/blog-quiz-raw.md",
-		CuratedPath: ".chc/quizzes/blog-quiz.md",
+		RawPath:     ".chc/user/quizzes/blog-quiz-raw.md",
+		CuratedPath: ".chc/user/quizzes/blog-quiz.md",
 		UpdatedAt:   updated,
 	}
 }
@@ -822,7 +822,7 @@ func writeServiceQuizFixture(t *testing.T, projectDir string) {
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "project-context.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "project-context.md"), `---
 title: "Project Context"
 status: "raw"
 ---
@@ -831,7 +831,7 @@ status: "raw"
 
 Project-wide dump body.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "blog-context.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context.md"), `---
 title: "Blog Context"
 status: "raw"
 case: "blog"
@@ -877,8 +877,8 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) chc.Qu
 			Scope:          chc.QuizScope{ProjectID: "service-project"},
 			Title:          "Quiz Generated Spec",
 			Body:           "Generated behavior from dump and quiz context.",
-			SourceQuizPath: ".chc/quizzes/project-quiz.md",
-			SourceRawPath:  ".chc/quizzes/project-quiz-raw.md",
+			SourceQuizPath: ".chc/user/quizzes/project-quiz.md",
+			SourceRawPath:  ".chc/user/quizzes/project-quiz-raw.md",
 			CreatedAt:      createdAt,
 		},
 		RawText:   "raw draft spec",

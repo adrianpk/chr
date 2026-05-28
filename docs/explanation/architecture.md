@@ -35,7 +35,7 @@ user's coordination view, not the project's portable source of truth.
 Project and case metadata are not duplicated into SQLite as authoritative
 records. They remain Markdown in the managed project. Runtime code may build a
 structural workspace index in memory, and may cache discardable index files
-under `.chc/tmp/`, but those caches are derived from project files.
+under `.chc/user/tmp/`, but those caches are derived from project files.
 
 ## Runtime Boundary
 

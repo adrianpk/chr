@@ -146,7 +146,7 @@ func relativeTicketPath(opts ParseTicketOptions) (string, error) {
 	}
 
 	if base == "" {
-		base = filepath.Join(opts.ProjectDir, DirectoryName, "tickets")
+		base = UserPath(opts.ProjectDir, "tickets")
 	}
 
 	relativePath, err := filepath.Rel(base, opts.Path)

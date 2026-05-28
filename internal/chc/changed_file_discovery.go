@@ -95,5 +95,7 @@ func changedFilePathFromGitStatusLine(line string) string {
 }
 
 func operationalChangedFile(path string) bool {
-	return path == DirectoryName+"/runtime" || strings.HasPrefix(path, DirectoryName+"/runtime/")
+	runtimePath := UserRelativePath("runtime")
+
+	return path == runtimePath || strings.HasPrefix(path, runtimePath+"/")
 }

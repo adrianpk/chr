@@ -46,7 +46,7 @@ func GeneratedPlanLayout(projectDir string, scope QuizScope) (GeneratedPlanPaths
 		return GeneratedPlanPaths{}, err
 	}
 
-	relativePath := filepath.ToSlash(filepath.Join(DirectoryName, PlanDirectory, scopeID+"-plan.md"))
+	relativePath := UserRelativePath(PlanDirectory, scopeID+"-plan.md")
 
 	return GeneratedPlanPaths{
 		ScopeID:      scopeID,
@@ -74,6 +74,7 @@ func ArchivedPlanLayout(projectDir string, scope QuizScope, archivedAt time.Time
 	timestamp := archivedAt.Format("20060102-150405") + fmt.Sprintf("%09d", archivedAt.Nanosecond())
 	relativePath := filepath.ToSlash(filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		PlanDirectory,
 		"archive",
 		scopeID+"-plan-"+timestamp+".md",

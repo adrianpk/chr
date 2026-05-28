@@ -47,7 +47,7 @@ chc author quiz new --target spec --topic "Billing sync"
 Successful creation prints the quiz path relative to the managed project:
 
 ```text
-quiz: created .chc/quizzes/author-20260522-073505-billing-sync.md
+quiz: created .chc/user/quizzes/author-20260522-073505-billing-sync.md
 session: author-20260522-073505
 ```
 
@@ -131,14 +131,14 @@ authoring step.
 Generated authoring artifacts use project-local `.chc/` paths:
 
 ```text
-.chc/dumps/
-.chc/quizzes/
-.chc/specs/
-.chc/plans/
-.chc/slice-sets/
-.chc/slices/
-.chc/trackers/
-.chc/tickets/
+.chc/user/dumps/
+.chc/user/quizzes/
+.chc/user/specs/
+.chc/user/plans/
+.chc/user/slice-sets/
+.chc/user/slices/
+.chc/user/trackers/
+.chc/user/tickets/
 ```
 
 The current generated filename shape is:

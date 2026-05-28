@@ -192,13 +192,13 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 	dir := t.TempDir()
 	plan := RuntimePlan{
 		Image:             "chc-agent-runtime:local",
-		DockerfilePath:    filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile"),
+		DockerfilePath:    filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
 		ContainerWorkdir:  "/workspace",
-		RunArtifactDir:    filepath.Join(dir, ".chc", "runtime", "runs", "exec-1"),
-		WorkerContextPath: filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "context.md"),
-		ResultPath:        filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "result.json"),
-		LogPath:           filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "runtime.log"),
-		ValidationPath:    filepath.Join(dir, ".chc", "runtime", "runs", "exec-1", "validation.log"),
+		RunArtifactDir:    filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1"),
+		WorkerContextPath: filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "context.md"),
+		ResultPath:        filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "result.json"),
+		LogPath:           filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "runtime.log"),
+		ValidationPath:    filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "validation.log"),
 		ValidationCommand: "make verify",
 	}
 

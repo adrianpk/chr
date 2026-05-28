@@ -49,7 +49,7 @@ func TestValidateIndexedTicketRejectsUnknownStatus(t *testing.T) {
 func validIndexedTicket(now time.Time) IndexedTicket {
 	return IndexedTicket{
 		ProjectID:    "project-1",
-		Path:         "/tmp/project/.chc/tickets/CHC-1-Test.md",
+		Path:         "/tmp/project/.chc/user/tickets/CHC-1-Test.md",
 		RelativePath: "CHC-1-Test.md",
 		Key:          "CHC-1",
 		Title:        "Test ticket",

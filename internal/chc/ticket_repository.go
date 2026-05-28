@@ -188,7 +188,7 @@ func ticketStatusOrDefault(status string) string {
 }
 
 func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
-	ticketsDir := filepath.Join(r.projectDir, ".chc", "tickets")
+	ticketsDir := UserPath(r.projectDir, "tickets")
 	highest := 0
 
 	err := filepath.WalkDir(ticketsDir, func(path string, entry os.DirEntry, walkErr error) error {
@@ -247,7 +247,7 @@ func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
 }
 
 func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
-	parts := []string{r.projectDir, ".chc", "tickets"}
+	parts := []string{UserPath(r.projectDir, "tickets")}
 
 	slug := slugify(useCase)
 	if slug != "" {

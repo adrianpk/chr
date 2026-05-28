@@ -144,18 +144,18 @@ func TestNewResultApplicationRejectsMismatchedExecutionID(t *testing.T) {
 }
 
 func testResultApplicationExecutionRecord(dir string) ExecutionRecord {
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
 	return ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(dir, ".chc", "tickets", "CHC-1.md"),
+		TicketPath: filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
 		Status:     ExecutionStatusSucceeded,
 		Runtime: ExecutionRuntimeRef{
 			Image:             "chc-agent-runtime:local",
-			DockerfilePath:    filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile"),
+			DockerfilePath:    filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},

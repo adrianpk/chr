@@ -88,7 +88,7 @@ type workspaceSemanticDigestCacheFile struct {
 }
 
 func WorkspaceSemanticDigestCachePath(projectDir string) string {
-	return filepath.Join(projectDir, DirectoryName, "tmp", "cache", "workspace-index", "semantic-digests.json")
+	return UserPath(projectDir, "tmp", "cache", "workspace-index", "semantic-digests.json")
 }
 
 func NewWorkspaceSemanticDigestCache() WorkspaceSemanticDigestCache {

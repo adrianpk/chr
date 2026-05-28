@@ -13,7 +13,7 @@ func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1.md"),
+		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -23,7 +23,7 @@ func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
 	wantArgs := []string{
 		"build",
 		"--file",
-		filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile"),
+		filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
 		"--tag",
 		"chc-agent-runtime:local",
 		dir,
@@ -45,7 +45,7 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1.md"),
+		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -66,21 +66,21 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 		"--env",
 		"CHC_TICKET_KEY=CHC-1",
 		"--env",
-		"CHC_TICKET_PATH=/workspace/.chc/tickets/CHC-1.md",
+		"CHC_TICKET_PATH=/workspace/.chc/user/tickets/CHC-1.md",
 		"--env",
-		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/context.md",
+		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/context.md",
 		"--env",
-		"CHC_RESULT_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/result.json",
+		"CHC_RESULT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/result.json",
 		"--env",
-		"CHC_LOG_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/runtime.log",
+		"CHC_LOG_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/runtime.log",
 		"--env",
-		"CHC_VALIDATION_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log",
+		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
 		"--env",
 		"OPENAI_API_KEY",
 		"chc-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
-		"CHC_EXECUTION_ID='exec-123' CHC_TICKET_KEY='CHC-1' CHC_TICKET_PATH='/workspace/.chc/tickets/CHC-1.md' CHC_WORKER_CONTEXT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/context.md' CHC_RESULT_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/result.json' CHC_LOG_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/runtime.log' CHC_VALIDATION_PATH='/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHC_WORKER_CONTEXT_PATH\"",
+		"CHC_EXECUTION_ID='exec-123' CHC_TICKET_KEY='CHC-1' CHC_TICKET_PATH='/workspace/.chc/user/tickets/CHC-1.md' CHC_WORKER_CONTEXT_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/context.md' CHC_RESULT_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/result.json' CHC_LOG_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/runtime.log' CHC_VALIDATION_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHC_WORKER_CONTEXT_PATH\"",
 	}
 
 	if invocation.Run.Program != "docker" {
@@ -99,7 +99,7 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1.md"),
+		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -118,7 +118,7 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 		"--env",
 		"CHC_EXECUTION_ID=exec-123",
 		"--env",
-		"CHC_VALIDATION_PATH=/workspace/.chc/runtime/runs/CHC-1/exec-123/validation.log",
+		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
 		"chc-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
@@ -137,7 +137,7 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	_, err := NewHarnessInvocation(HarnessInvocationOptions{
 		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(t.TempDir(), ".chc", "tickets", "CHC-1.md"),
+		TicketPath: filepath.Join(t.TempDir(), ".chc", "user", "tickets", "CHC-1.md"),
 		Plan:       testHarnessRuntimePlan(t.TempDir()),
 	})
 	if err == nil {
@@ -146,11 +146,11 @@ func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 }
 
 func testHarnessRuntimePlan(projectDir string) RuntimePlan {
-	runDir := filepath.Join(projectDir, ".chc", "runtime", "runs", "CHC-1", "exec-123")
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-123")
 
 	return RuntimePlan{
 		ProjectDir:       projectDir,
-		DockerfilePath:   filepath.Join(projectDir, ".chc", "runtime", "agent", "Dockerfile"),
+		DockerfilePath:   filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
 		Image:            "chc-agent-runtime:local",
 		ContainerWorkdir: "/workspace",
 		Mounts: []RuntimeMount{

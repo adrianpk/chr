@@ -10,7 +10,10 @@ import (
 	"strings"
 )
 
-const DirectoryName = ".chc"
+const (
+	DirectoryName     = ".chc"
+	UserDirectoryName = "user"
+)
 
 const DefaultProfile = "standard"
 
@@ -49,33 +52,42 @@ type entry struct {
 }
 
 var directories = []string{
-	"agents",
-	"docs",
-	"specs/drafts",
-	"specs/accepted",
-	"specs/archived",
-	"tickets/open",
-	"tickets/ready",
-	"tickets/in_progress",
-	"tickets/reviewing",
-	"tickets/blocked",
-	"tickets/solved",
-	"tickets/closed",
-	"comments/tickets",
-	"context",
-	"dumps/raw",
-	"dumps/curated",
-	"quizzes/raw",
-	"quizzes/curated",
-	"playbooks",
-	"reports/runs",
-	"reports/audits",
-	"indexes",
-	"user",
-	"runtime/runs",
-	"runtime/locks",
-	"runtime/traces",
-	"notifications",
+	"user/agents",
+	"user/docs",
+	"user/specs/drafts",
+	"user/specs/accepted",
+	"user/specs/archived",
+	"user/tickets/open",
+	"user/tickets/ready",
+	"user/tickets/in_progress",
+	"user/tickets/reviewing",
+	"user/tickets/blocked",
+	"user/tickets/solved",
+	"user/tickets/closed",
+	"user/comments/tickets",
+	"user/context",
+	"user/dumps/raw",
+	"user/dumps/curated",
+	"user/quizzes/raw",
+	"user/quizzes/curated",
+	"user/playbooks",
+	"user/reports/runs",
+	"user/reports/audits",
+	"user/indexes",
+	"user/runtime/runs",
+	"user/runtime/locks",
+	"user/runtime/traces",
+	"user/notifications",
+}
+
+func UserRelativePath(elements ...string) string {
+	parts := append([]string{DirectoryName, UserDirectoryName}, elements...)
+
+	return filepath.ToSlash(filepath.Join(parts...))
+}
+
+func UserPath(projectDir string, elements ...string) string {
+	return filepath.Join(projectDir, filepath.FromSlash(UserRelativePath(elements...)))
 }
 
 func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, error) {
@@ -169,7 +181,7 @@ func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile 
 			return err
 		}
 
-		rel := filepath.Join(DirectoryName, filepath.FromSlash(file.path))
+		rel := filepath.Join(DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
 		target := filepath.Join(projectDir, rel)
 
 		created, err := createFile(target, file.content, dryRun)

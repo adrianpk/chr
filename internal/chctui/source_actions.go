@@ -162,5 +162,5 @@ func ticketDisplayPath(relativePath string) string {
 		return relativePath
 	}
 
-	return fmt.Sprintf(".chc/tickets/%s", relativePath)
+	return fmt.Sprintf(".chc/user/tickets/%s", relativePath)
 }

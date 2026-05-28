@@ -9,7 +9,7 @@ import (
 )
 
 func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
-	path := filepath.Join(t.TempDir(), ".chc", "runtime", "runs", "CHC-1", "exec-1", "context.md")
+	path := filepath.Join(t.TempDir(), ".chc", "user", "runtime", "runs", "CHC-1", "exec-1", "context.md")
 	opts := testCodexWorkerContextOptions(path)
 
 	err := NewCodexWorkerContextMaterializer().MaterializeContext(context.Background(), opts)
@@ -26,10 +26,10 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 		"# Codex Worker Context",
 		"- execution_id: exec-1",
 		"- ticket_key: CHC-1",
-		"- ticket_path: /workspace/.chc/tickets/CHC-1.md",
-		"- result_path: /workspace/.chc/runtime/runs/CHC-1/exec-1/result.json",
-		"- log_path: /workspace/.chc/runtime/runs/CHC-1/exec-1/runtime.log",
-		"- validation_path: /workspace/.chc/runtime/runs/CHC-1/exec-1/validation.log",
+		"- ticket_path: /workspace/.chc/user/tickets/CHC-1.md",
+		"- result_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
+		"- log_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
+		"- validation_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
 		"- `status`: `succeeded` or `failed`.",
 		"- `changed_files`: optional list of workspace-relative changed file summaries.",
 	} {
@@ -65,9 +65,9 @@ func testCodexWorkerContextOptions(path string) MaterializeCodexWorkerContextOpt
 		Path:           path,
 		ExecutionID:    "exec-1",
 		TicketKey:      "CHC-1",
-		TicketPath:     "/workspace/.chc/tickets/CHC-1.md",
-		ResultPath:     "/workspace/.chc/runtime/runs/CHC-1/exec-1/result.json",
-		LogPath:        "/workspace/.chc/runtime/runs/CHC-1/exec-1/runtime.log",
-		ValidationPath: "/workspace/.chc/runtime/runs/CHC-1/exec-1/validation.log",
+		TicketPath:     "/workspace/.chc/user/tickets/CHC-1.md",
+		ResultPath:     "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
+		LogPath:        "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
+		ValidationPath: "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
 	}
 }

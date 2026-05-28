@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"unicode"
 )
@@ -47,12 +46,12 @@ func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUsersp
 		return ProjectUserspace{}, fmt.Errorf("invalid operator id: %s", operatorID)
 	}
 
-	relativeDir := filepath.ToSlash(filepath.Join(DirectoryName, "user"))
+	relativeDir := UserRelativePath()
 
 	return ProjectUserspace{
 		ProjectDir:  projectDir,
 		OperatorID:  operatorID,
-		Path:        filepath.Join(projectDir, DirectoryName, "user"),
+		Path:        UserPath(projectDir),
 		RelativeDir: relativeDir,
 	}, nil
 }

@@ -658,7 +658,7 @@ func quizModelStrategy(mode chc.QuizMode) string {
 }
 
 func (s service) listQuizRuntimeStates() ([]chc.QuizRuntimeState, error) {
-	root := filepath.Join(s.projectContext.ProjectDir, chc.DirectoryName, filepath.FromSlash(chc.QuizRuntimeDirectory))
+	root := chc.UserPath(s.projectContext.ProjectDir, filepath.FromSlash(chc.QuizRuntimeDirectory))
 
 	entries, err := os.ReadDir(root)
 	if errors.Is(err, os.ErrNotExist) {

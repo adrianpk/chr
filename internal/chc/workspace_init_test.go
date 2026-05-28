@@ -22,15 +22,15 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 		t.Fatalf("Root = %q, want %q", result.Root, filepath.Join(dir, DirectoryName))
 	}
 
-	assertDir(t, dir, ".chc/tickets/open")
-	assertDir(t, dir, ".chc/context")
-	assertDir(t, dir, ".chc/runtime/traces")
+	assertDir(t, dir, ".chc/user/tickets/open")
+	assertDir(t, dir, ".chc/user/context")
+	assertDir(t, dir, ".chc/user/runtime/traces")
 	assertDir(t, dir, ".chc/user")
-	assertFile(t, dir, ".chc/manifest.md")
-	assertFile(t, dir, ".chc/config.yml")
-	assertFile(t, dir, ".chc/agents/CONVENTIONS.md")
-	assertFile(t, dir, ".chc/agents/playbooks/ticket-workflow.md")
-	assertFile(t, dir, ".chc/runtime/agent/Dockerfile")
+	assertFile(t, dir, ".chc/user/manifest.md")
+	assertFile(t, dir, ".chc/user/config.yml")
+	assertFile(t, dir, ".chc/user/agents/CONVENTIONS.md")
+	assertFile(t, dir, ".chc/user/agents/playbooks/ticket-workflow.md")
+	assertFile(t, dir, ".chc/user/runtime/agent/Dockerfile")
 	assertFile(t, dir, "AGENTS.md")
 	assertNotExists(t, dir, ".chc/root/AGENTS.md")
 }
@@ -44,7 +44,7 @@ func TestInitWritesUserOwnedWorkspaceConfig(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chc", "config.yml"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chc", "user", "config.yml"))
 	if err != nil {
 		t.Fatalf("read config: %v", err)
 	}
@@ -86,7 +86,7 @@ func TestInitWritesWorkspaceManifestAsOrientation(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chc", "manifest.md"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chc", "user", "manifest.md"))
 	if err != nil {
 		t.Fatalf("read manifest: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	configPath := filepath.Join(dir, ".chc", "config.yml")
+	configPath := filepath.Join(dir, ".chc", "user", "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
 	if err != nil {
@@ -175,7 +175,7 @@ func TestInitDoesNotOverwriteExistingRuntimeTemplate(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	dockerfilePath := filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -220,7 +220,7 @@ func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 		t.Fatalf("dry run created workspace or returned unexpected stat error: %v", err)
 	}
 
-	if !contains(result.Created, ".chc/runtime/agent/Dockerfile") {
+	if !contains(result.Created, ".chc/user/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 }
@@ -229,7 +229,7 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	err := os.MkdirAll(filepath.Join(dir, ".chc", "agents"), 0o755)
+	err := os.MkdirAll(filepath.Join(dir, ".chc", "user", "agents"), 0o755)
 	if err != nil {
 		t.Fatalf("create existing dir: %v", err)
 	}
@@ -239,8 +239,8 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	if !contains(result.Skipped, ".chc/agents") {
-		t.Fatalf("Skipped = %#v, want .chc/agents", result.Skipped)
+	if !contains(result.Skipped, ".chc/user/agents") {
+		t.Fatalf("Skipped = %#v, want .chc/user/agents", result.Skipped)
 	}
 }
 
@@ -270,7 +270,7 @@ func TestInitUsesRequestedProfile(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chc", "manifest.md"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chc", "user", "manifest.md"))
 	if err != nil {
 		t.Fatalf("read manifest: %v", err)
 	}

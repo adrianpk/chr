@@ -353,7 +353,7 @@ func (s service) appendGenerationContextSections(
 			continue
 		}
 
-		if node.CaseSlug != "" && node.CaseSlug != scope.CaseSlug {
+		if !generationContextNodeAllowed(scope, node) {
 			continue
 		}
 
@@ -361,6 +361,22 @@ func (s service) appendGenerationContextSections(
 	}
 
 	return sections, nil
+}
+
+func generationContextNodeAllowed(scope chc.QuizScope, node chc.WorkspaceNode) bool {
+	if strings.TrimSpace(scope.CaseSlug) == "" {
+		return true
+	}
+
+	if node.CaseSlug == scope.CaseSlug {
+		return true
+	}
+
+	if strings.TrimSpace(node.CaseSlug) != "" {
+		return false
+	}
+
+	return node.Kind == chc.WorkspaceNodeDump
 }
 
 func sortedSpecContextNodeIDs(index chc.WorkspaceIndex) []string {

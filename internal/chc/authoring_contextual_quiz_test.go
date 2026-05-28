@@ -126,7 +126,7 @@ func writeContextualQuizProjectFixture(t *testing.T, projectDir string) {
 		Description:   "Project description.",
 		Context:       "Project body.",
 	}))
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "plans", "project-context-plan.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "project-context-plan.md"), `---
 title: Project Context Plan
 ---
 
@@ -179,30 +179,8 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 	}
 
 	events := readLLMTraceEvents(t, projectDir)
-	if len(events) != 2 {
-		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
-	}
-	if events[0]["event"] != "llm_request" {
-		t.Fatalf("request event = %#v", events[0]["event"])
-	}
-	if events[1]["event"] != "llm_response" {
-		t.Fatalf("response event = %#v", events[1]["event"])
-	}
-	if events[0]["provider"] != "codex" || events[1]["provider"] != "codex" {
-		t.Fatalf("provider events = %#v / %#v, want codex", events[0]["provider"], events[1]["provider"])
-	}
-	if events[0]["llm_call_id"] != events[1]["llm_call_id"] {
-		t.Fatalf("trace call ids differ: %#v / %#v", events[0]["llm_call_id"], events[1]["llm_call_id"])
-	}
-	if events[1]["status"] != "ready" {
-		t.Fatalf("response status = %#v, want ready", events[1]["status"])
-	}
-	if _, ok := events[0]["request_payload"]; ok {
-		t.Fatalf("request payload captured without payload opt-in: %#v", events[0])
-	}
-	if _, ok := events[1]["response_payload"]; ok {
-		t.Fatalf("response payload captured without payload opt-in: %#v", events[1])
-	}
+
+	assertCodexTraceEventsWithoutPayloads(t, events)
 }
 
 func TestCodexAuthoringQuizQuestionProviderRecordsTracePayloadsWhenEnabled(t *testing.T) {
@@ -226,6 +204,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 	if _, ok := events[0]["request_payload"]; !ok {
 		t.Fatalf("request payload missing with payload opt-in: %#v", events[0])
 	}
+
 	if _, ok := events[1]["response_payload"]; !ok {
 		t.Fatalf("response payload missing with payload opt-in: %#v", events[1])
 	}
@@ -251,9 +230,11 @@ printf '%s\n' 'not-json'
 	if len(events) != 2 {
 		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
 	}
+
 	if events[1]["status"] != "parse_error" {
 		t.Fatalf("response status = %#v, want parse_error", events[1]["status"])
 	}
+
 	if events[1]["error"] == "" {
 		t.Fatalf("missing parse error in response event: %#v", events[1])
 	}
@@ -373,16 +354,58 @@ func validAuthoringQuizGenerationRequest(projectDir string) AuthoringQuizGenerat
 	}
 }
 
-func writeAuthoringQuizProviderScript(t *testing.T, projectDir string, content string) string {
+func writeAuthoringQuizProviderScript(t *testing.T, projectDir, content string) string {
 	t.Helper()
 
 	path := filepath.Join(projectDir, "provider.sh")
+
 	err := os.WriteFile(path, []byte(content), 0o755)
 	if err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
 
 	return path
+}
+
+func assertCodexTraceEventsWithoutPayloads(t *testing.T, events []map[string]any) {
+	t.Helper()
+
+	if len(events) != 2 {
+		t.Fatalf("trace event count = %d, want 2: %#v", len(events), events)
+	}
+
+	assertTraceField(t, events[0], "event", "llm_request")
+	assertTraceField(t, events[1], "event", "llm_response")
+	assertTraceField(t, events[0], "provider", "codex")
+	assertTraceField(t, events[1], "provider", "codex")
+	assertTraceField(t, events[1], "status", "ready")
+	assertMatchingTraceCallID(t, events)
+	assertTraceOmitsField(t, events[0], "request_payload")
+	assertTraceOmitsField(t, events[1], "response_payload")
+}
+
+func assertTraceField(t *testing.T, event map[string]any, key string, want any) {
+	t.Helper()
+
+	if event[key] != want {
+		t.Fatalf("trace %s = %#v, want %#v in %#v", key, event[key], want, event)
+	}
+}
+
+func assertTraceOmitsField(t *testing.T, event map[string]any, key string) {
+	t.Helper()
+
+	if _, ok := event[key]; ok {
+		t.Fatalf("trace event captured %s: %#v", key, event)
+	}
+}
+
+func assertMatchingTraceCallID(t *testing.T, events []map[string]any) {
+	t.Helper()
+
+	if events[0]["llm_call_id"] != events[1]["llm_call_id"] {
+		t.Fatalf("trace call ids differ: %#v / %#v", events[0]["llm_call_id"], events[1]["llm_call_id"])
+	}
 }
 
 func validContextualQuizSession(now time.Time) AuthoringSession {

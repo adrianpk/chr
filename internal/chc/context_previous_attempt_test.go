@@ -9,7 +9,7 @@ import (
 
 func TestLoadPreviousAttemptContextLoadsValidationAndResult(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 	validationPath := filepath.Join(runDir, "validation.log")
 	resultPath := filepath.Join(runDir, "result.json")
 
@@ -86,7 +86,7 @@ func TestLoadPreviousAttemptContextDegradesWhenArtifactsAreMissing(t *testing.T)
 }
 
 func TestRenderPreviousAttemptContextLink(t *testing.T) {
-	rendered := RenderPreviousAttemptContextLink(".chc/runtime/runs/CHC-1/exec-2/context/previous-attempt.md")
+	rendered := RenderPreviousAttemptContextLink(".chc/user/runtime/runs/CHC-1/exec-2/context/previous-attempt.md")
 
 	if !strings.Contains(rendered, "Previous Attempt") {
 		t.Fatalf("link missing heading:\n%s", rendered)
@@ -104,7 +104,7 @@ func testPreviousAttemptExecutionRecord(validationPath, resultPath string) Execu
 		ID:            "exec-1",
 		ProjectID:     "project-1",
 		TicketKey:     "CHC-1",
-		TicketPath:    "/tmp/project/.chc/tickets/CHC-1.md",
+		TicketPath:    "/tmp/project/.chc/user/tickets/CHC-1.md",
 		Status:        ExecutionStatusFailed,
 		FailureReason: string(ExecutionFailureValidation) + ": make verify failed",
 		Runtime: ExecutionRuntimeRef{

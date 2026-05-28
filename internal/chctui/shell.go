@@ -803,31 +803,39 @@ func (m Model) renderMaximizedBoardColumnLines(tickets []TicketView, width, limi
 	start := m.maximizedBoardColumnStart(tickets, width, limit)
 
 	for _, ticket := range tickets[start:] {
-		prefix := " "
-		if ticket.Index == m.selectedTicket {
-			prefix = ">"
-		}
-
-		if len(ticket.AttentionReasons) > 0 {
-			prefix = "!"
-		}
-
-		card := renderMaximizedBoardTicketCard(prefix, ticket, width)
+		card := renderMaximizedBoardTicketCard(m.maximizedBoardTicketPrefix(ticket), ticket, width)
 		if len(lines) > 0 && len(lines)+len(card) > limit {
 			break
 		}
 
-		for _, line := range card {
-			if len(lines) >= limit {
-				break
-			}
-
-			lines = append(lines, line)
-		}
+		lines = appendBoardCardLines(lines, card, limit)
 
 		if len(lines) >= limit {
 			break
 		}
+	}
+
+	return lines
+}
+
+func (m Model) maximizedBoardTicketPrefix(ticket TicketView) string {
+	switch {
+	case len(ticket.AttentionReasons) > 0:
+		return "!"
+	case ticket.Index == m.selectedTicket:
+		return ">"
+	default:
+		return " "
+	}
+}
+
+func appendBoardCardLines(lines, card []string, limit int) []string {
+	for _, line := range card {
+		if len(lines) >= limit {
+			break
+		}
+
+		lines = append(lines, line)
 	}
 
 	return lines
@@ -1000,36 +1008,28 @@ func compactTicketCell(value string, width int, center bool) string {
 }
 
 func compactTicketStatusLabel(status string) string {
-	switch strings.TrimSpace(status) {
-	case chc.TicketStatusBacklog:
-		return "BL"
-	case chc.TicketStatusReadyForDev:
-		return "RFD"
-	case chc.TicketStatusInProgress:
-		return "IP"
-	case chc.TicketStatusReadyForReview:
-		return "RFR"
-	case chc.TicketStatusReadyForMerge:
-		return "RFM"
-	case chc.TicketStatusDone:
-		return "DONE"
-	case chc.TicketStatusOpenLegacy:
-		return "OPN"
-	case chc.TicketStatusReadyLegacy:
-		return "RDY"
-	case chc.TicketStatusReviewingLegacy:
-		return "REV"
-	case chc.TicketStatusBlockedLegacy:
-		return "BLK"
-	case chc.TicketStatusSolvedLegacy:
-		return "SLV"
-	case chc.TicketStatusMergedLegacy:
-		return "DONE"
-	case chc.TicketStatusClosedLegacy:
-		return "CLS"
-	default:
-		return truncatePlainLine(humanizeCompactToken(status), 5)
+	labels := map[string]string{
+		chc.TicketStatusBacklog:         "BL",
+		chc.TicketStatusReadyForDev:     "RFD",
+		chc.TicketStatusInProgress:      "IP",
+		chc.TicketStatusReadyForReview:  "RFR",
+		chc.TicketStatusReadyForMerge:   "RFM",
+		chc.TicketStatusDone:            "DONE",
+		chc.TicketStatusOpenLegacy:      "OPN",
+		chc.TicketStatusReadyLegacy:     "RDY",
+		chc.TicketStatusReviewingLegacy: "REV",
+		chc.TicketStatusBlockedLegacy:   "BLK",
+		chc.TicketStatusSolvedLegacy:    "SLV",
+		chc.TicketStatusMergedLegacy:    "DONE",
+		chc.TicketStatusClosedLegacy:    "CLS",
 	}
+
+	label, ok := labels[strings.TrimSpace(status)]
+	if ok {
+		return label
+	}
+
+	return truncatePlainLine(humanizeCompactToken(status), 5)
 }
 
 func compactTicketPriorityLabel(priority string) string {

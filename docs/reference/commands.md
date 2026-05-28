@@ -97,13 +97,13 @@ List, create, inspect, and edit dumps:
 chc dump list
 chc dump new --title "Billing notes" --content "Initial context."
 chc dump new --title "Billing notes" --content "Use-case context." --use-case billing
-chc dump show .chc/dumps/billing-notes.md
-chc dump save .chc/dumps/billing-notes.md --content "# Billing notes"
-chc dump append .chc/dumps/billing-notes.md --content "Additional context."
-chc dump open .chc/dumps/billing-notes.md
+chc dump show .chc/user/dumps/billing-notes.md
+chc dump save .chc/user/dumps/billing-notes.md --content "# Billing notes"
+chc dump append .chc/user/dumps/billing-notes.md --content "Additional context."
+chc dump open .chc/user/dumps/billing-notes.md
 ```
 
-Dump paths are project-relative and must stay under `.chc/dumps/`.
+Dump paths are project-relative and must stay under `.chc/user/dumps/`.
 `chc dump new` writes a curated primary dump and a `-raw.md` sibling. Listing
 dumps returns the curated primary documents; raw siblings are retained as source
 captures and are not selected as regular dump context.

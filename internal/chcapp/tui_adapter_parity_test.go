@@ -43,11 +43,11 @@ func createDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor) s
 		t.Fatalf("ExecuteDumpAction create returned error: %v", err)
 	}
 
-	if createResult.Message != "Created dump .chc/dumps/adapter-notes.md." {
+	if createResult.Message != "Created dump .chc/user/dumps/adapter-notes.md." {
 		t.Fatalf("create message = %q, want created dump message", createResult.Message)
 	}
 
-	return filepath.ToSlash(filepath.Join(chc.DirectoryName, "dumps", "adapter-notes.md"))
+	return filepath.ToSlash(filepath.Join(chc.DirectoryName, chc.UserDirectoryName, "dumps", "adapter-notes.md"))
 }
 
 func editDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor, dumpPath string) {

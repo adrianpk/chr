@@ -122,7 +122,7 @@ func authoringArtifactRelativePath(opts AuthoringArtifactLayoutOptions) string {
 	}
 
 	fileName := authoringArtifactFileName(opts.SessionID, name)
-	parts := []string{DirectoryName}
+	parts := []string{DirectoryName, UserDirectoryName}
 	parts = append(parts, authoringArtifactDirectory(opts.Kind))
 	parts = append(parts, fileName)
 

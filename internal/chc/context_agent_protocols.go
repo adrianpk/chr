@@ -309,9 +309,9 @@ func loadChcProtocolFiles(projectDir string) ([]ContextDocument, []ContextSource
 }
 
 func chcProtocolCandidates(projectDir string) ([]string, error) {
-	chcDir := filepath.Join(projectDir, DirectoryName)
-	candidates := stableChcProtocolCandidates(chcDir)
-	agentsDir := filepath.Join(chcDir, "agents")
+	userDir := UserPath(projectDir)
+	candidates := stableChcProtocolCandidates(userDir)
+	agentsDir := filepath.Join(userDir, "agents")
 
 	if !directoryExists(agentsDir) {
 		sort.Strings(candidates)
@@ -335,7 +335,7 @@ func chcProtocolCandidates(projectDir string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("walk .chc agents: %w", err)
+		return nil, fmt.Errorf("walk .chc user agents: %w", err)
 	}
 
 	sort.Strings(candidates)
@@ -343,11 +343,11 @@ func chcProtocolCandidates(projectDir string) ([]string, error) {
 	return candidates, nil
 }
 
-func stableChcProtocolCandidates(chcDir string) []string {
+func stableChcProtocolCandidates(userDir string) []string {
 	return []string{
-		filepath.Join(chcDir, "manifest.md"),
-		filepath.Join(chcDir, "config.yml"),
-		filepath.Join(chcDir, "runtime", "agent", "Dockerfile"),
+		filepath.Join(userDir, "manifest.md"),
+		filepath.Join(userDir, "config.yml"),
+		filepath.Join(userDir, "runtime", "agent", "Dockerfile"),
 	}
 }
 

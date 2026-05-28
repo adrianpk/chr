@@ -25,7 +25,7 @@ func TestEvaluateContextReadinessHandoffReady(t *testing.T) {
 	}
 
 	rendered := RenderContextReadinessHandoff(handoff)
-	for _, want := range []string{"Context Readiness Handoff", "/workspace/.chc/runtime/runs/CHC-1/exec-1/context.md", "PAT-backed"} {
+	for _, want := range []string{"Context Readiness Handoff", "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/context.md", "PAT-backed"} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("handoff missing %q:\n%s", want, rendered)
 		}
@@ -84,7 +84,7 @@ func TestEvaluateContextReadinessHandoffSupportsCustomRequiredKinds(t *testing.T
 }
 
 func testReadinessRuntimePlan(dir string) RuntimePlan {
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 
 	return RuntimePlan{
 		ProjectDir:        dir,
@@ -107,7 +107,7 @@ func testReadinessComposition(
 
 	composition, err := PlanContextComposition(ContextComposerOptions{
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(plan.ProjectDir, ".chc", "tickets", "CHC-1.md"),
+		TicketPath:  filepath.Join(plan.ProjectDir, ".chc", "user", "tickets", "CHC-1.md"),
 		ExecutionID: "exec-1",
 		Plan:        plan,
 		Sources:     sources,

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -35,9 +34,9 @@ type TelegramNotificationConfig struct {
 
 const (
 	DefaultRuntimeImage             = "chc-agent-runtime:local"
-	DefaultRuntimeDockerfilePath    = ".chc/runtime/agent/Dockerfile"
+	DefaultRuntimeDockerfilePath    = ".chc/user/runtime/agent/Dockerfile"
 	DefaultRuntimeWorkdir           = "/workspace"
-	DefaultRuntimeArtifactDir       = ".chc/runtime/runs"
+	DefaultRuntimeArtifactDir       = ".chc/user/runtime/runs"
 	DefaultRuntimeValidationCommand = "make verify"
 )
 
@@ -61,7 +60,7 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 		Runtime:         DefaultRuntimeConfig(),
 		Notifications:   DefaultNotificationConfig(),
 	}
-	path := filepath.Join(projectDir, ".chc", "config.yml")
+	path := UserPath(projectDir, "config.yml")
 
 	file, err := os.Open(path)
 	if errors.Is(err, os.ErrNotExist) {

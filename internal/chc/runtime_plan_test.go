@@ -22,7 +22,7 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 		t.Fatalf("WorkspaceDir = %q, want .chc path", plan.WorkspaceDir)
 	}
 
-	if plan.DockerfilePath != filepath.Join(dir, ".chc", "runtime", "agent", "Dockerfile") {
+	if plan.DockerfilePath != filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile") {
 		t.Fatalf("DockerfilePath = %q, want default Dockerfile path", plan.DockerfilePath)
 	}
 
@@ -34,11 +34,11 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 		t.Fatalf("ContainerWorkdir = %q, want %q", plan.ContainerWorkdir, DefaultRuntimeWorkdir)
 	}
 
-	if plan.ArtifactDir != filepath.Join(dir, ".chc", "runtime", "runs") {
+	if plan.ArtifactDir != filepath.Join(dir, ".chc", "user", "runtime", "runs") {
 		t.Fatalf("ArtifactDir = %q, want default artifact dir", plan.ArtifactDir)
 	}
 
-	if plan.ResultPath != filepath.Join(dir, ".chc", "runtime", "runs", "result.json") {
+	if plan.ResultPath != filepath.Join(dir, ".chc", "user", "runtime", "runs", "result.json") {
 		t.Fatalf("ResultPath = %q, want default result path", plan.ResultPath)
 	}
 }
@@ -51,11 +51,11 @@ func TestPlanRuntimeUsesDefaultArtifactPaths(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	if plan.WorkerContextPath != filepath.Join(dir, ".chc", "runtime", "runs", "context.md") {
+	if plan.WorkerContextPath != filepath.Join(dir, ".chc", "user", "runtime", "runs", "context.md") {
 		t.Fatalf("WorkerContextPath = %q, want default context path", plan.WorkerContextPath)
 	}
 
-	if plan.ValidationPath != filepath.Join(dir, ".chc", "runtime", "runs", "validation.log") {
+	if plan.ValidationPath != filepath.Join(dir, ".chc", "user", "runtime", "runs", "validation.log") {
 		t.Fatalf("ValidationPath = %q, want default validation path", plan.ValidationPath)
 	}
 }
@@ -113,7 +113,7 @@ func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	wantRunDir := filepath.Join(dir, ".chc", "runtime", "runs", "run-123")
+	wantRunDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "run-123")
 	if plan.RunArtifactDir != wantRunDir {
 		t.Fatalf("RunArtifactDir = %q, want %q", plan.RunArtifactDir, wantRunDir)
 	}
@@ -147,7 +147,7 @@ func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	wantRunDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-123")
+	wantRunDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-123")
 	if plan.RunArtifactDir != wantRunDir {
 		t.Fatalf("RunArtifactDir = %q, want %q", plan.RunArtifactDir, wantRunDir)
 	}

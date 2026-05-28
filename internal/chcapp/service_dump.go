@@ -231,8 +231,8 @@ func (s service) resolveDumpPath(relativePath string) (string, error) {
 		return "", fmt.Errorf("dump path must be project-relative")
 	}
 
-	if filepath.ToSlash(filepath.Dir(cleanPath)) != ".chc/dumps" {
-		return "", fmt.Errorf("dump path must be under .chc/dumps")
+	if filepath.ToSlash(filepath.Dir(cleanPath)) != chc.UserRelativePath("dumps") {
+		return "", fmt.Errorf("dump path must be under %s", chc.UserRelativePath("dumps"))
 	}
 
 	path := filepath.Join(s.projectContext.ProjectDir, cleanPath)

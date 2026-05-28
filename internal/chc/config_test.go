@@ -33,9 +33,9 @@ tickets:
   key_prefix: PRJ
 runtime:
   image: custom-agent:latest
-  dockerfile: .chc/runtime/custom.Dockerfile
+  dockerfile: .chc/user/runtime/custom.Dockerfile
   workdir: /repo
-  artifact_dir: .chc/runtime/custom-runs
+  artifact_dir: .chc/user/runtime/custom-runs
   validation_command: go test ./...
 `)
 
@@ -50,9 +50,9 @@ runtime:
 
 	want := RuntimeConfig{
 		Image:             "custom-agent:latest",
-		DockerfilePath:    ".chc/runtime/custom.Dockerfile",
+		DockerfilePath:    ".chc/user/runtime/custom.Dockerfile",
 		Workdir:           "/repo",
-		ArtifactDir:       ".chc/runtime/custom-runs",
+		ArtifactDir:       ".chc/user/runtime/custom-runs",
 		ValidationCommand: "go test ./...",
 	}
 	if config.Runtime != want {
@@ -209,7 +209,7 @@ func assertDefaultRuntimeConfig(t *testing.T, config RuntimeConfig) {
 func writeWorkspaceConfig(t *testing.T, projectDir, content string) {
 	t.Helper()
 
-	path := filepath.Join(projectDir, DirectoryName, "config.yml")
+	path := UserPath(projectDir, "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {

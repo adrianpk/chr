@@ -88,7 +88,7 @@ func (b WorkspaceGraphBuilder) BuildCachedIndex(ctx context.Context) (CachedWork
 }
 
 func WorkspaceIndexCachePath(projectDir string) string {
-	return filepath.Join(projectDir, DirectoryName, "tmp", "cache", "workspace-index", "structural-index.json")
+	return UserPath(projectDir, "tmp", "cache", "workspace-index", "structural-index.json")
 }
 
 func readWorkspaceIndexCache(path string) (WorkspaceIndex, bool, error) {

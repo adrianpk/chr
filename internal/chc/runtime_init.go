@@ -42,7 +42,7 @@ func (r *runtimeAssets) Init(ctx context.Context, opts RuntimeInitOptions) (Runt
 		return RuntimeInitResult{}, err
 	}
 
-	result := RuntimeInitResult{Root: filepath.Join(absProjectDir, DirectoryName, "runtime")}
+	result := RuntimeInitResult{Root: UserPath(absProjectDir, "runtime")}
 
 	files, err := r.workspace.profileFiles(DefaultProfile, workspaceFile)
 	if err != nil {
@@ -59,7 +59,7 @@ func (r *runtimeAssets) Init(ctx context.Context, opts RuntimeInitOptions) (Runt
 			continue
 		}
 
-		rel := filepath.Join(DirectoryName, filepath.FromSlash(file.path))
+		rel := filepath.Join(DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
 		target := filepath.Join(absProjectDir, rel)
 
 		created, err := createFile(target, file.content, opts.DryRun)

@@ -42,7 +42,7 @@ func GeneratedSpecLayout(projectDir string, scope QuizScope) (GeneratedSpecPaths
 		return GeneratedSpecPaths{}, err
 	}
 
-	relativePath := filepath.ToSlash(filepath.Join(DirectoryName, SpecDirectory, scopeID+"-spec.md"))
+	relativePath := UserRelativePath(SpecDirectory, scopeID+"-spec.md")
 
 	return GeneratedSpecPaths{
 		ScopeID:      scopeID,
@@ -167,17 +167,21 @@ func NormalizeGeneratedSpecChrysoCoordPathReferences(body string) string {
 			return match
 		}
 
-		return strings.TrimPrefix(path, ".chc/") + suffix
+		if strings.HasPrefix(path, ".chc/") {
+			return ".chc/user/" + strings.TrimPrefix(path, ".chc/") + suffix
+		}
+
+		return path + suffix
 	})
 }
 
 func generatedSpecChrysoCoordPathReferenceAllowed(path string) bool {
-	if path == ".chc" || path == ".chc/" {
+	if path == ".chc" || path == ".chc/" || path == ".chc/user" || path == ".chc/user/" {
 		return true
 	}
 
 	switch path {
-	case ".chc/config.yml", ".chc/manifest.md", ".chc/project.md":
+	case ".chc/user/config.yml", ".chc/user/manifest.md", ".chc/user/project.md":
 		return true
 	}
 
@@ -191,9 +195,8 @@ func generatedSpecChrysoCoordPathReferenceAllowed(path string) bool {
 		"reports",
 		"runtime",
 		"tmp",
-		"user",
 	} {
-		prefix := ".chc/" + directory
+		prefix := ".chc/user/" + directory
 		if path == prefix || strings.HasPrefix(path, prefix+"/") {
 			return true
 		}

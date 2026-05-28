@@ -14,11 +14,11 @@ func TestParseProvingObjective(t *testing.T) {
 objective_id: proving-TODO-1
 ticket_key: TODO-1
 kind: bugfix
-artifact_root: .chc/runtime/runs/proving/TODO-1
-context_path: .chc/runtime/runs/proving/TODO-1/context.md
-result_path: .chc/runtime/runs/proving/TODO-1/result.json
-log_path: .chc/runtime/runs/proving/TODO-1/agent.log
-validation_path: .chc/runtime/runs/proving/TODO-1/validation.log
+artifact_root: .chc/user/runtime/runs/proving/TODO-1
+context_path: .chc/user/runtime/runs/proving/TODO-1/context.md
+result_path: .chc/user/runtime/runs/proving/TODO-1/result.json
+log_path: .chc/user/runtime/runs/proving/TODO-1/agent.log
+validation_path: .chc/user/runtime/runs/proving/TODO-1/validation.log
 max_attempts: 3
 ---
 
@@ -57,7 +57,7 @@ func TestPlanProvingSandboxRunRendersDockerCommands(t *testing.T) {
 	for _, want := range []string{
 		"CHC_EXECUTION_ID=proving-TODO-1",
 		"CHC_TICKET_KEY=TODO-1",
-		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/runtime/runs/proving/TODO-1/context.md",
+		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/user/runtime/runs/proving/TODO-1/context.md",
 	} {
 		if !harnessArgsContain(result.Run.Args, want) {
 			t.Fatalf("run args do not contain %q:\n%#v", want, result.Run.Args)
@@ -312,22 +312,22 @@ tickets:
   key_prefix: TODO
 runtime:
   image: chc-todolist-agent:local
-  dockerfile: .chc/runtime/agent/Dockerfile
+  dockerfile: .chc/user/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chc/runtime/runs
+  artifact_dir: .chc/user/runtime/runs
   validation_command: make verify
 `)
-	writeTestFile(t, filepath.Join(dir, DirectoryName, "runtime", "agent", "Dockerfile"), "FROM golang:1.22-bookworm\n")
-	writeTestFile(t, filepath.Join(dir, DirectoryName, "tickets", "TODO-1-fix-task-id-reuse.md"), "# Ticket\n")
+	writeTestFile(t, filepath.Join(dir, DirectoryName, UserDirectoryName, "runtime", "agent", "Dockerfile"), "FROM golang:1.22-bookworm\n")
+	writeTestFile(t, filepath.Join(dir, DirectoryName, UserDirectoryName, "tickets", "TODO-1-fix-task-id-reuse.md"), "# Ticket\n")
 	writeTestFile(t, filepath.Join(dir, DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md"), `---
 objective_id: proving-TODO-1
 ticket_key: TODO-1
 kind: bugfix
-artifact_root: .chc/runtime/runs/proving/TODO-1
-context_path: .chc/runtime/runs/proving/TODO-1/context.md
-result_path: .chc/runtime/runs/proving/TODO-1/result.json
-log_path: .chc/runtime/runs/proving/TODO-1/agent.log
-validation_path: .chc/runtime/runs/proving/TODO-1/validation.log
+artifact_root: .chc/user/runtime/runs/proving/TODO-1
+context_path: .chc/user/runtime/runs/proving/TODO-1/context.md
+result_path: .chc/user/runtime/runs/proving/TODO-1/result.json
+log_path: .chc/user/runtime/runs/proving/TODO-1/agent.log
+validation_path: .chc/user/runtime/runs/proving/TODO-1/validation.log
 max_attempts: 3
 ---
 

@@ -11,6 +11,7 @@ func TestReportLookupFindsReportByExecutionID(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"CHC-1",
@@ -38,6 +39,7 @@ func TestReportLookupFindsReportByRelativePath(t *testing.T) {
 	projectDir := t.TempDir()
 	relativePath := filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"loop-1",
@@ -76,6 +78,7 @@ func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"CHC-1",
@@ -84,6 +87,7 @@ func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"CHC-1",

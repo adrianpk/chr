@@ -32,12 +32,12 @@ func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
 		t.Fatalf("CreateDump returned error: %v", err)
 	}
 
-	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "curated-notes.md"))
+	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "curated-notes.md"))
 	if !strings.Contains(curated, "Polished dump body.") {
 		t.Fatalf("curated dump = %q, want polished body", curated)
 	}
 
-	raw := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "dumps", "curated-notes-raw.md"))
+	raw := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "curated-notes-raw.md"))
 	hasHighlight := strings.Contains(raw, "Important source point.")
 	hasRawBody := strings.Contains(raw, "rough dump body")
 

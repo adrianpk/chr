@@ -51,7 +51,7 @@ func TestTicketReconcilerRefreshesCleanProject(t *testing.T) {
 func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chc", "tickets", "CHC-1-Bad.md"))
+	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chc", "user", "tickets", "CHC-1-Bad.md"))
 
 	result, err := NewTicketReconciler(index).ReconcileProjectTickets(
 		context.Background(),
@@ -104,7 +104,7 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 
 	reconcileAllProjectTickets(t, index, projectDir)
 
-	ticketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Good.md")
+	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Good.md")
 
 	err := NewTicketResultStateWriter().WriteResultState(context.Background(), WriteResultStateOptions{
 		Application: ResultApplication{
@@ -155,7 +155,7 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	ticketPath := filepath.Join(projectDir, ".chc", "tickets", "CHC-1-Bad.md")
+	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Bad.md")
 	writeFile(t, ticketPath, "missing frontmatter")
 
 	result, err := NewTicketReconciler(index).ReconcileProjectTicket(

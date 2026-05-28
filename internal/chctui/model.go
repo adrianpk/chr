@@ -582,17 +582,27 @@ func (m Model) updateNavigationKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 
-	switch msg.Type {
-	case tea.KeyPgUp:
-		m.scrollDetailPage(-1)
-
-		return m, nil
-	case tea.KeyPgDown:
-		m.scrollDetailPage(1)
-
+	if m.handleNavigationPageKey(msg.Type) {
 		return m, nil
 	}
 
+	return m.handleNavigationActionKey(key)
+}
+
+func (m *Model) handleNavigationPageKey(keyType tea.KeyType) bool {
+	switch keyType {
+	case tea.KeyPgUp:
+		m.scrollDetailPage(-1)
+	case tea.KeyPgDown:
+		m.scrollDetailPage(1)
+	default:
+		return false
+	}
+
+	return true
+}
+
+func (m Model) handleNavigationActionKey(key string) (tea.Model, tea.Cmd) {
 	switch key {
 	case "pgup", "pageup", "ctrl+u":
 		m.scrollDetailPage(-1)
@@ -802,6 +812,7 @@ func (m *Model) selectPreviousRecord() {
 	case ViewAuthoring:
 		m.selectPreviousAuthoringSession()
 	}
+
 	m.resetDetailScrollIfSourceChanged(selectedPath)
 }
 
@@ -831,6 +842,7 @@ func (m *Model) selectNextRecord() {
 	case ViewAuthoring:
 		m.selectNextAuthoringSession()
 	}
+
 	m.resetDetailScrollIfSourceChanged(selectedPath)
 }
 
@@ -1131,18 +1143,6 @@ func renderTicketSourceDetail(output *strings.Builder, ticket TicketView) {
 
 	if ticket.Slice != "" {
 		fmt.Fprintf(output, "  Slice: %s\n", ticket.Slice)
-	}
-}
-
-func renderTicketPreviewSection(output *strings.Builder, title string, lines []string) {
-	if len(lines) == 0 {
-		return
-	}
-
-	fmt.Fprintf(output, "  %s:\n", title)
-
-	for _, line := range lines {
-		fmt.Fprintf(output, "    %s\n", line)
 	}
 }
 

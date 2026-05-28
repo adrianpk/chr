@@ -12,7 +12,7 @@ ChrysoCoord may also keep user-level state outside the project for daemon operat
 
 Board and ticket operations use both layers:
 
-- Markdown tickets under `.chc/tickets/` are the durable ticket records.
+- Markdown tickets under `.chc/user/tickets/` are the durable ticket records.
 - The user-level SQLite index stores derived ticket metadata for fast listing,
   Board columns, attention detection, and ticket key allocation.
 - `.chc/user/` is the project-local active userspace boundary for workflows
@@ -132,20 +132,20 @@ state are supporting artifacts. They may be rebuilt or regenerated when their
 source assets allow it.
 
 The workspace index is an in-memory structural model that may be cached under
-`.chc/tmp/`. That cache is discardable and must not become the durable source of
+`.chc/user/tmp/`. That cache is discardable and must not become the durable source of
 truth.
 
 The `.chc/` directory and Markdown-first artifact model are ChrysoCoord
 invariants. They are not configured by generated workspace files.
 
-The generated files under `.chc/agents/` guide how an agent should work inside
+The generated files under `.chc/user/agents/` guide how an agent should work inside
 the managed project. They do not define or override ChrysoCoord's operational
 artifact layout. Directory placement for tickets, runtime evidence, reports,
 indexes, and authoring artifacts is a product contract owned by `chc`.
 
 ## Runtime Config
 
-`.chc/config.yml` may define the project-local agent runtime contract under
+`.chc/user/config.yml` may define the project-local agent runtime contract under
 `runtime:`.
 
 Supported runtime fields:
@@ -162,15 +162,15 @@ uses safe local defaults:
 ```yml
 runtime:
   image: chc-agent-runtime:local
-  dockerfile: .chc/runtime/agent/Dockerfile
+  dockerfile: .chc/user/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chc/runtime/runs
+  artifact_dir: .chc/user/runtime/runs
   validation_command: make verify
 ```
 
 ## Notification Config
 
-`.chc/config.yml` may also define notification settings under
+`.chc/user/config.yml` may also define notification settings under
 `notifications:`.
 
 Notifications are disabled by default. Telegram can be enabled with:
@@ -187,7 +187,7 @@ code. It is not stored in project configuration.
 
 ## Runtime Template
 
-`chc init` creates `.chc/runtime/agent/Dockerfile` for new managed projects.
+`chc init` creates `.chc/user/runtime/agent/Dockerfile` for new managed projects.
 This file is the project-local agent runtime template. It is owned by the
 managed project after initialization and may be edited to install project
 dependencies, agent tooling, or validation prerequisites.
@@ -216,7 +216,7 @@ chc runtime init --dir /path/to/project
 ## Runtime Plan
 
 The runtime planner computes a side-effect-free Docker boundary plan from the
-project directory and `.chc/config.yml` runtime fields.
+project directory and `.chc/user/config.yml` runtime fields.
 
 Path semantics:
 
@@ -258,7 +258,7 @@ Validate another managed project:
 chc runtime validate --dir /path/to/project --dry-run
 ```
 
-Runtime validation loads `.chc/config.yml`, computes the runtime plan, prints
+Runtime validation loads `.chc/user/config.yml`, computes the runtime plan, prints
 the Docker build/run inputs, and checks required local paths:
 
 - `.chc/` workspace directory;

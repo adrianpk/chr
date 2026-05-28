@@ -14,7 +14,7 @@ func TestWorkspaceSemanticDigestCacheRoundTrip(t *testing.T) {
 	cache := NewWorkspaceSemanticDigestCache()
 	node := WorkspaceNode{
 		Kind:         WorkspaceNodeSpec,
-		RelativePath: filepath.ToSlash(filepath.Join(DirectoryName, "specs", "blog.md")),
+		RelativePath: filepath.ToSlash(filepath.Join(DirectoryName, UserDirectoryName, "specs", "blog.md")),
 		Title:        "Blog Spec",
 		SourceHash:   "source-1",
 	}
@@ -116,7 +116,7 @@ func TestDeterministicWorkspaceSemanticDigestGenerator(t *testing.T) {
 	generator := DeterministicWorkspaceSemanticDigestGenerator{}
 	node := WorkspaceNode{
 		Kind:         WorkspaceNodeSpec,
-		RelativePath: filepath.ToSlash(filepath.Join(DirectoryName, "specs", "blog.md")),
+		RelativePath: filepath.ToSlash(filepath.Join(DirectoryName, UserDirectoryName, "specs", "blog.md")),
 		Title:        "Blog Spec",
 		Status:       "accepted",
 		CaseSlug:     "blog",
@@ -238,7 +238,7 @@ func TestWorkspaceIndexHealthWithSemanticDigestStates(t *testing.T) {
 
 func TestWorkspaceSemanticDigestCachePath(t *testing.T) {
 	projectDir := t.TempDir()
-	want := filepath.Join(projectDir, DirectoryName, "tmp", "cache", "workspace-index", "semantic-digests.json")
+	want := filepath.Join(projectDir, DirectoryName, UserDirectoryName, "tmp", "cache", "workspace-index", "semantic-digests.json")
 
 	if WorkspaceSemanticDigestCachePath(projectDir) != want {
 		t.Fatalf("WorkspaceSemanticDigestCachePath = %q, want %q", WorkspaceSemanticDigestCachePath(projectDir), want)

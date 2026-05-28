@@ -11,6 +11,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"CHC-1",
@@ -19,6 +20,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"loop-1",
@@ -26,6 +28,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"CHC-1",
@@ -55,6 +58,7 @@ func TestReportListerFiltersReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"CHC-1",
@@ -63,6 +67,7 @@ func TestReportListerFiltersReports(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
+		UserDirectoryName,
 		"runtime",
 		"runs",
 		"CHC-2",

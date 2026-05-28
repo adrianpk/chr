@@ -52,7 +52,7 @@ func GeneratedPlanTrackingLayout(projectDir string, scope QuizScope) (GeneratedP
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	relativePath := filepath.ToSlash(filepath.Join(DirectoryName, PlanDirectory, scopeID+"-tracking.md"))
+	relativePath := UserRelativePath(PlanDirectory, scopeID+"-tracking.md")
 
 	return GeneratedPlanTrackingPaths{
 		ScopeID:      scopeID,

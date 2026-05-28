@@ -844,7 +844,7 @@ func validateProvingObjective(objective ProvingObjective) error {
 }
 
 func findProvingTicketPath(projectDir, ticketKey string) (string, error) {
-	ticketsDir := filepath.Join(projectDir, DirectoryName, "tickets")
+	ticketsDir := UserPath(projectDir, "tickets")
 
 	entries, err := os.ReadDir(ticketsDir)
 	if err != nil {

@@ -7,11 +7,11 @@ import (
 
 func TestPlanContextCompositionDerivesDockerVisibleArtifactPaths(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 
 	plan, err := PlanContextComposition(ContextComposerOptions{
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1-example.md"),
+		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-example.md"),
 		ExecutionID: "exec-1",
 		Plan: RuntimePlan{
 			ProjectDir:        dir,
@@ -51,11 +51,11 @@ func TestPlanContextCompositionDerivesDockerVisibleArtifactPaths(t *testing.T) {
 
 func TestPlanContextCompositionBlocksWhenRequiredSourcesAreMissing(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 
 	plan, err := PlanContextComposition(ContextComposerOptions{
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1-example.md"),
+		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-example.md"),
 		ExecutionID: "exec-1",
 		Plan: RuntimePlan{
 			ProjectDir:        dir,
@@ -92,11 +92,11 @@ func TestPlanContextCompositionBlocksWhenRequiredSourcesAreMissing(t *testing.T)
 
 func TestPlanContextCompositionPreservesInvariantAndFreshSources(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 
 	plan, err := PlanContextComposition(ContextComposerOptions{
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1-example.md"),
+		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-example.md"),
 		ExecutionID: "exec-1",
 		Plan: RuntimePlan{
 			ProjectDir:        dir,
@@ -133,11 +133,11 @@ func TestPlanContextCompositionPreservesInvariantAndFreshSources(t *testing.T) {
 
 func TestPlanContextCompositionRejectsInvalidSourceKind(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 
 	_, err := PlanContextComposition(ContextComposerOptions{
 		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "tickets", "CHC-1-example.md"),
+		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-example.md"),
 		ExecutionID: "exec-1",
 		Plan: RuntimePlan{
 			ProjectDir:        dir,
