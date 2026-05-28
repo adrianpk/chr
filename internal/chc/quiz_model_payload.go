@@ -121,6 +121,40 @@ type QuizModelPlanOutlineDependencyPayload struct {
 	Reason      string `json:"reason"`
 }
 
+type QuizModelPlanSliceDetailPayload struct {
+	SliceID                string                                  `json:"slice_id"`
+	ShortName              string                                  `json:"short_name"`
+	Objective              string                                  `json:"objective"`
+	ImplementationNotes    []string                                `json:"implementation_notes"`
+	Tasks                  []QuizModelPlanSliceTaskPayload         `json:"tasks"`
+	AcceptanceCriteria     []string                                `json:"acceptance_criteria"`
+	TicketMetadata         QuizModelPlanSliceTicketMetadataPayload `json:"ticket_metadata"`
+	BranchMetadata         QuizModelPlanSliceBranchMetadataPayload `json:"branch_metadata"`
+	PRExpectations         []string                                `json:"pr_expectations"`
+	ValidationExpectations []string                                `json:"validation_expectations"`
+	Dependencies           []string                                `json:"dependencies"`
+	NonGoals               []string                                `json:"non_goals"`
+}
+
+type QuizModelPlanSliceTaskPayload struct {
+	ID         string `json:"id"`
+	Summary    string `json:"summary"`
+	CommitHint string `json:"commit_hint"`
+}
+
+type QuizModelPlanSliceTicketMetadataPayload struct {
+	Title    string   `json:"title"`
+	Synopsis string   `json:"synopsis"`
+	Priority string   `json:"priority"`
+	Severity string   `json:"severity"`
+	Type     string   `json:"type"`
+	Tags     []string `json:"tags"`
+}
+
+type QuizModelPlanSliceBranchMetadataPayload struct {
+	BranchName string `json:"branch_name"`
+}
+
 type QuizModelPlanTrackingPayload struct {
 	Title   string                               `json:"title"`
 	Body    string                               `json:"body"`
@@ -151,19 +185,16 @@ type QuizModelPromptIntentPayload struct {
 }
 
 func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModelOutputContractPayload {
+	if action == QuizModelActionGeneratePlanSliceDetail {
+		return QuizModelOutputContractPayload{
+			RequiredFields:    quizModelPlanSliceDetailRequiredFields(),
+			RenderedTextField: "objective",
+		}
+	}
+
 	if action == QuizModelActionGeneratePlanOutline {
 		return QuizModelOutputContractPayload{
-			RequiredFields: []string{
-				"title",
-				"status",
-				"summary",
-				"assumptions",
-				"open_questions",
-				"risks",
-				"validation_strategy",
-				"slices",
-				"dependencies",
-			},
+			RequiredFields:    quizModelPlanOutlineRequiredFields(),
 			RenderedTextField: "summary",
 		}
 	}
@@ -192,6 +223,37 @@ func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModel
 	return QuizModelOutputContractPayload{
 		RequiredFields:    append([]string(nil), QuizModelQuestionRequiredFields...),
 		RenderedTextField: "question",
+	}
+}
+
+func quizModelPlanOutlineRequiredFields() []string {
+	return []string{
+		"title",
+		"status",
+		"summary",
+		"assumptions",
+		"open_questions",
+		"risks",
+		"validation_strategy",
+		"slices",
+		"dependencies",
+	}
+}
+
+func quizModelPlanSliceDetailRequiredFields() []string {
+	return []string{
+		"slice_id",
+		"short_name",
+		"objective",
+		"implementation_notes",
+		"tasks",
+		"acceptance_criteria",
+		"ticket_metadata",
+		"branch_metadata",
+		"pr_expectations",
+		"validation_expectations",
+		"dependencies",
+		"non_goals",
 	}
 }
 
@@ -301,17 +363,8 @@ func DecodeQuizModelPlanOutlinePayload(content []byte) (QuizModelPlanOutlinePayl
 		return QuizModelPlanOutlinePayload{}, err
 	}
 
-	required := []string{
-		"title",
-		"status",
-		"summary",
-		"assumptions",
-		"open_questions",
-		"risks",
-		"validation_strategy",
-		"slices",
-		"dependencies",
-	}
+	required := quizModelPlanOutlineRequiredFields()
+
 	err = validateQuizModelExactFields(fields, required)
 	if err != nil {
 		return QuizModelPlanOutlinePayload{}, err
@@ -325,6 +378,29 @@ func DecodeQuizModelPlanOutlinePayload(content []byte) (QuizModelPlanOutlinePayl
 	}
 
 	return ValidateQuizModelPlanOutlinePayload(payload)
+}
+
+func DecodeQuizModelPlanSliceDetailPayload(content []byte) (QuizModelPlanSliceDetailPayload, error) {
+	fields, err := quizModelRawJSONFields(content)
+	if err != nil {
+		return QuizModelPlanSliceDetailPayload{}, err
+	}
+
+	required := quizModelPlanSliceDetailRequiredFields()
+
+	err = validateQuizModelExactFields(fields, required)
+	if err != nil {
+		return QuizModelPlanSliceDetailPayload{}, err
+	}
+
+	var payload QuizModelPlanSliceDetailPayload
+
+	err = decodeStrictQuizModelJSON(content, &payload)
+	if err != nil {
+		return QuizModelPlanSliceDetailPayload{}, err
+	}
+
+	return ValidateQuizModelPlanSliceDetailPayload(payload)
 }
 
 func DecodeQuizModelPlanTrackingPayload(content []byte) (QuizModelPlanTrackingPayload, error) {
@@ -501,6 +577,102 @@ func generatedPlanOutlineFromPayload(
 	}
 
 	return outline
+}
+
+func ValidateQuizModelPlanSliceDetailPayload(
+	payload QuizModelPlanSliceDetailPayload,
+) (QuizModelPlanSliceDetailPayload, error) {
+	normalized := normalizeQuizModelPlanSliceDetailPayload(payload)
+	detail := generatedPlanSliceDetailFromPayload(QuizScope{ProjectID: "payload-validation"}, normalized)
+
+	if err := ValidateGeneratedPlanSliceDetailContent(detail); err != nil {
+		return QuizModelPlanSliceDetailPayload{}, err
+	}
+
+	return normalized, nil
+}
+
+func normalizeQuizModelPlanSliceDetailPayload(
+	payload QuizModelPlanSliceDetailPayload,
+) QuizModelPlanSliceDetailPayload {
+	normalized := QuizModelPlanSliceDetailPayload{
+		SliceID:                strings.TrimSpace(payload.SliceID),
+		ShortName:              strings.TrimSpace(payload.ShortName),
+		Objective:              strings.TrimSpace(payload.Objective),
+		ImplementationNotes:    normalizePlanTrackingDependencies(payload.ImplementationNotes),
+		Tasks:                  make([]QuizModelPlanSliceTaskPayload, 0, len(payload.Tasks)),
+		AcceptanceCriteria:     normalizePlanTrackingDependencies(payload.AcceptanceCriteria),
+		TicketMetadata:         normalizeQuizModelPlanSliceTicketMetadataPayload(payload.TicketMetadata),
+		BranchMetadata:         normalizeQuizModelPlanSliceBranchMetadataPayload(payload.BranchMetadata),
+		PRExpectations:         normalizePlanTrackingDependencies(payload.PRExpectations),
+		ValidationExpectations: normalizePlanTrackingDependencies(payload.ValidationExpectations),
+		Dependencies:           normalizePlanTrackingDependencies(payload.Dependencies),
+		NonGoals:               normalizePlanTrackingDependencies(payload.NonGoals),
+	}
+
+	for _, task := range payload.Tasks {
+		normalized.Tasks = append(normalized.Tasks, normalizeQuizModelPlanSliceTaskPayload(task))
+	}
+
+	return normalized
+}
+
+func normalizeQuizModelPlanSliceTaskPayload(
+	task QuizModelPlanSliceTaskPayload,
+) QuizModelPlanSliceTaskPayload {
+	return QuizModelPlanSliceTaskPayload{
+		ID:         strings.TrimSpace(task.ID),
+		Summary:    strings.TrimSpace(task.Summary),
+		CommitHint: strings.TrimSpace(task.CommitHint),
+	}
+}
+
+func normalizeQuizModelPlanSliceTicketMetadataPayload(
+	metadata QuizModelPlanSliceTicketMetadataPayload,
+) QuizModelPlanSliceTicketMetadataPayload {
+	return QuizModelPlanSliceTicketMetadataPayload{
+		Title:    strings.TrimSpace(metadata.Title),
+		Synopsis: strings.TrimSpace(metadata.Synopsis),
+		Priority: strings.TrimSpace(metadata.Priority),
+		Severity: strings.TrimSpace(metadata.Severity),
+		Type:     strings.TrimSpace(metadata.Type),
+		Tags:     normalizePlanTrackingDependencies(metadata.Tags),
+	}
+}
+
+func normalizeQuizModelPlanSliceBranchMetadataPayload(
+	metadata QuizModelPlanSliceBranchMetadataPayload,
+) QuizModelPlanSliceBranchMetadataPayload {
+	return QuizModelPlanSliceBranchMetadataPayload{
+		BranchName: strings.TrimSpace(metadata.BranchName),
+	}
+}
+
+func generatedPlanSliceDetailFromPayload(
+	scope QuizScope,
+	payload QuizModelPlanSliceDetailPayload,
+) GeneratedPlanSliceDetail {
+	detail := GeneratedPlanSliceDetail{
+		Scope:                  scope,
+		SliceID:                payload.SliceID,
+		ShortName:              payload.ShortName,
+		Objective:              payload.Objective,
+		ImplementationNotes:    payload.ImplementationNotes,
+		Tasks:                  make([]GeneratedPlanSliceTask, 0, len(payload.Tasks)),
+		AcceptanceCriteria:     payload.AcceptanceCriteria,
+		TicketMetadata:         GeneratedPlanSliceTicketMetadata(payload.TicketMetadata),
+		BranchMetadata:         GeneratedPlanSliceBranchMetadata(payload.BranchMetadata),
+		PRExpectations:         payload.PRExpectations,
+		ValidationExpectations: payload.ValidationExpectations,
+		Dependencies:           payload.Dependencies,
+		NonGoals:               payload.NonGoals,
+	}
+
+	for _, task := range payload.Tasks {
+		detail.Tasks = append(detail.Tasks, GeneratedPlanSliceTask(task))
+	}
+
+	return detail
 }
 
 func ValidateQuizModelPlanTrackingPayload(

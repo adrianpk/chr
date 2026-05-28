@@ -15,6 +15,7 @@ const (
 	QuizModelActionGenerateSpec            QuizModelAction = "spec_generation"
 	QuizModelActionGeneratePlan            QuizModelAction = "plan_generation"
 	QuizModelActionGeneratePlanOutline     QuizModelAction = "plan_outline_generation"
+	QuizModelActionGeneratePlanSliceDetail QuizModelAction = "plan_slice_detail_generation"
 	QuizModelActionMaterializePlanTracking QuizModelAction = "plan_tracking_materialization"
 )
 
@@ -60,6 +61,7 @@ type QuizModelResponse struct {
 	DraftSpec    QuizDraftSpec
 	Plan         GeneratedPlan
 	PlanOutline  GeneratedPlanOutline
+	SliceDetail  GeneratedPlanSliceDetail
 	PlanTracking GeneratedPlanTracking
 	RawText      string
 	CreatedAt    time.Time
@@ -192,6 +194,7 @@ func (a QuizModelAction) Valid() bool {
 		QuizModelActionGenerateSpec,
 		QuizModelActionGeneratePlan,
 		QuizModelActionGeneratePlanOutline,
+		QuizModelActionGeneratePlanSliceDetail,
 		QuizModelActionMaterializePlanTracking:
 		return true
 	default:
@@ -210,6 +213,10 @@ func validateQuizModelReadyResponse(response QuizModelResponse) error {
 
 	if response.PlanOutline.HasContent() {
 		return ValidateGeneratedPlanOutline(response.PlanOutline)
+	}
+
+	if response.SliceDetail.HasContent() {
+		return ValidateGeneratedPlanSliceDetailContent(response.SliceDetail)
 	}
 
 	if response.PlanTracking.HasContent() {

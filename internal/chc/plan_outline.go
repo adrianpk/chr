@@ -45,6 +45,16 @@ func (o GeneratedPlanOutline) HasContent() bool {
 		len(o.Slices) > 0
 }
 
+func (o GeneratedPlanOutline) Slice(sliceID string) (GeneratedPlanOutlineSlice, bool) {
+	for _, slice := range o.Slices {
+		if slice.ID == sliceID {
+			return slice, true
+		}
+	}
+
+	return GeneratedPlanOutlineSlice{}, false
+}
+
 func ValidateGeneratedPlanOutline(outline GeneratedPlanOutline) error {
 	if err := ValidateQuizScope(outline.Scope); err != nil {
 		return err
