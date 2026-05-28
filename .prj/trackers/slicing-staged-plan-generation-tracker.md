@@ -31,7 +31,7 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with repository quality gates.
 - [ ] Decide whether post-slice tuning is needed.
@@ -40,7 +40,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Outline Generation Contract | Planned | `feat/slice-1-outline-generation-contract` | `feat(slice-1): outline generation contract` | `.prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md` | Adds model action/schema/request construction without runtime integration. |
+| Slice 1: Outline Generation Contract | Reviewing | `feat/slice-1-outline-generation-contract` | `feat(slice-1): outline generation contract` | `.prj/reports/slices/staged-plan-generation/slice-1-outline-generation-contract.md` | Adds model action/schema/request construction without runtime integration. |
 | Slice 2: Slice Detail Expansion | Planned | `feat/slice-2-slice-detail-expansion` | `feat(slice-2): slice detail expansion` | `.prj/reports/slices/staged-plan-generation/slice-2-slice-detail-expansion.md` | Adds one-slice expansion action/schema/request construction and validation. |
 | Slice 3: Deterministic Plan Assembly | Planned | `feat/slice-3-deterministic-plan-assembly` | `feat(slice-3): deterministic plan assembly` | `.prj/reports/slices/staged-plan-generation/slice-3-deterministic-plan-assembly.md` | Connects staged generation into final plan assembly and write behavior. |
 
@@ -48,23 +48,31 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Add a plan outline model action and output contract.
-- [ ] T1.2 Add outline payload structs and validation.
-- [ ] T1.3 Add strict JSON schema for outline responses.
-- [ ] T1.4 Add provider instruction text for outline generation.
-- [ ] T1.5 Add service request construction that reuses plan generation context.
-- [ ] T1.6 Add tests for action selection, schema shape, payload validation,
+- [x] T1.1 Add a plan outline model action and output contract.
+- [x] T1.2 Add outline payload structs and validation.
+- [x] T1.3 Add strict JSON schema for outline responses.
+- [x] T1.4 Add provider instruction text for outline generation.
+- [x] T1.5 Add service request construction that reuses plan generation context.
+- [x] T1.6 Add tests for action selection, schema shape, payload validation,
       and request context sections.
-- [ ] T1.7 Add slice implementation report.
-- [ ] T1.8 Run targeted tests and repository quality gates.
+- [x] T1.7 Add slice implementation report.
+- [x] T1.8 Run targeted tests and repository quality gates.
 
 Task commits:
 
-- Pending.
+- `4d80405` docs(lint): require pre-commit quality gates
+- `4cc1b1f` feat(chc): add plan outline model contract
+- `c32aaea` feat(chc): add plan outline OpenAI contract
+- `9c343fb` feat(chcapp): build plan outline requests
+- `f1e5dd8` test(chc): cover plan outline generation contract
 
 Validation:
 
-- Pending.
+- `gofmt -w internal/chc/quiz_model.go internal/chc/quiz_model_payload.go internal/chc/quiz_openai_model.go internal/chc/plan_outline.go internal/chc/quiz_model_test.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go` - pass.
+- `go test ./internal/chc ./internal/chcapp` - pass.
+- `go test ./...` - pass.
+- `git diff --check` - pass.
+- `make verify` - fail: `lint-strict` reports pre-existing lint debt.
 
 ## Slice 2: Slice Detail Expansion
 
