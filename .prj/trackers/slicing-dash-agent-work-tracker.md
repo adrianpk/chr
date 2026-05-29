@@ -1,6 +1,6 @@
 # Dash Agent Work Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-dash-agent-work-plan.md`
 
@@ -31,9 +31,9 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with repository quality gates.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with repository quality gates.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -44,7 +44,7 @@ Prerequisite PRs or delivered work:
 | Slice 3: CLI Agent Work Commands | Completed | `feat/slice-3-cli-agent-work-commands` | `feat(slice-3): cli agent work commands` | `.prj/reports/slices/dash-agent-work/slice-3-cli-agent-work-commands.md` | Merged into `dev`. |
 | Slice 4: Dash Agent Work Panel | Completed | `feat/slice-4-dash-agent-work-panel` | `feat(slice-4): dash agent work panel` | `.prj/reports/slices/dash-agent-work/slice-4-dash-agent-work-panel.md` | Merged into `dev`. |
 | Slice 5: Dash Realtime Progress | Completed | `feat/slice-5-dash-realtime-progress` | `feat(slice-5): dash realtime progress` | `.prj/reports/slices/dash-agent-work/slice-5-dash-realtime-progress.md` | Merged into `dev`. |
-| Slice 6: Agent Work Filters And Ordering | Reviewing | `feat/slice-6-agent-work-filters-ordering` | `feat(slice-6): agent work filters ordering` | `.prj/reports/slices/dash-agent-work/slice-6-agent-work-filters-ordering.md` | PR pending. |
+| Slice 6: Agent Work Filters And Ordering | Completed | `feat/slice-6-agent-work-filters-ordering` | `feat(slice-6): agent work filters ordering` | `.prj/reports/slices/dash-agent-work/slice-6-agent-work-filters-ordering.md` | Merged into `dev`. |
 
 ## Slice 1: Agent Work Selection Contract
 
@@ -168,7 +168,7 @@ Candidate tasks:
 
 Task commits:
 
-- Pending review.
+- `641e6d0 feat(slice-6): agent work filters ordering`
 
 Validation:
 
@@ -178,6 +178,6 @@ Validation:
 
 ## Completion
 
-The slicing is not complete.
+The slicing is complete.
 
-Tuning needed: undecided.
+Tuning needed: none recorded.
