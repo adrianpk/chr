@@ -97,9 +97,7 @@ func TestServiceSaveProjectMetadata(t *testing.T) {
 	}
 }
 
-func TestNewQuizModelAdapterCanRouteSpecGenerationToCodex(t *testing.T) {
-	t.Setenv("CHC_SPEC_GENERATION_BACKEND", "codex")
-
+func TestNewQuizModelAdapterRoutesArtifactGenerationToCodexByDefault(t *testing.T) {
 	adapter := newQuizModelAdapter(t.TempDir())
 
 	routing, ok := adapter.(chc.ActionRoutingQuizModelAdapter)
@@ -107,38 +105,44 @@ func TestNewQuizModelAdapterCanRouteSpecGenerationToCodex(t *testing.T) {
 		t.Fatalf("adapter = %T, want action routing adapter", adapter)
 	}
 
-	if _, ok := routing.ActionAdapters[chc.QuizModelActionGenerateSpec]; !ok {
-		t.Fatalf("spec generation action is not routed: %#v", routing.ActionAdapters)
+	for _, action := range []chc.QuizModelAction{
+		chc.QuizModelActionGenerateSpec,
+		chc.QuizModelActionGeneratePlan,
+		chc.QuizModelActionMaterializePlanTracking,
+	} {
+		if _, ok := routing.ActionAdapters[action]; !ok {
+			t.Fatalf("%s action is not routed: %#v", action, routing.ActionAdapters)
+		}
 	}
 }
 
-func TestNewQuizModelAdapterCanRoutePlanGenerationToCodex(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "codex")
+func TestNewQuizModelAdapterCanRouteArtifactGenerationToOpenAI(t *testing.T) {
+	t.Setenv("CHC_SPEC_GENERATION_BACKEND", "openai")
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHC_PLAN_TRACKING_GENERATION_BACKEND", "openai")
 
 	adapter := newQuizModelAdapter(t.TempDir())
 
-	routing, ok := adapter.(chc.ActionRoutingQuizModelAdapter)
-	if !ok {
-		t.Fatalf("adapter = %T, want action routing adapter", adapter)
-	}
-
-	if _, ok := routing.ActionAdapters[chc.QuizModelActionGeneratePlan]; !ok {
-		t.Fatalf("plan generation action is not routed: %#v", routing.ActionAdapters)
+	if _, ok := adapter.(chc.OpenAIQuizModelAdapter); !ok {
+		t.Fatalf("adapter = %T, want OpenAI adapter", adapter)
 	}
 }
 
-func TestNewQuizModelAdapterCanRoutePlanTrackingToCodex(t *testing.T) {
-	t.Setenv("CHC_PLAN_TRACKING_GENERATION_BACKEND", "codex")
+func TestNewDumpCurationProviderUsesCodexByDefault(t *testing.T) {
+	provider := newDumpCurationProvider(t.TempDir())
 
-	adapter := newQuizModelAdapter(t.TempDir())
-
-	routing, ok := adapter.(chc.ActionRoutingQuizModelAdapter)
-	if !ok {
-		t.Fatalf("adapter = %T, want action routing adapter", adapter)
+	if _, ok := provider.(codexDumpCurationProvider); !ok {
+		t.Fatalf("dump curation provider = %T, want codex provider", provider)
 	}
+}
 
-	if _, ok := routing.ActionAdapters[chc.QuizModelActionMaterializePlanTracking]; !ok {
-		t.Fatalf("plan tracking action is not routed: %#v", routing.ActionAdapters)
+func TestNewDumpCurationProviderCanUseOpenAI(t *testing.T) {
+	t.Setenv("CHC_DUMP_GENERATION_BACKEND", "openai")
+
+	provider := newDumpCurationProvider(t.TempDir())
+
+	if _, ok := provider.(openAIDumpCurationProvider); !ok {
+		t.Fatalf("dump curation provider = %T, want OpenAI provider", provider)
 	}
 }
 

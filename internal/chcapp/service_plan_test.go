@@ -16,6 +16,8 @@ import (
 
 //nolint:funlen // Integration-style service assertion keeps fixture and checks together.
 func TestServiceGeneratePlanUsesUseCaseContext(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz.md"), `---
@@ -310,6 +312,8 @@ The implementation must preserve editorial review.
 }
 
 func TestServiceRegeneratePlanArchivesExistingPlanBeforeReplace(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
@@ -366,6 +370,8 @@ Manual edits that must remain recoverable.
 }
 
 func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 
@@ -396,6 +402,8 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 }
 
 func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 
@@ -743,6 +751,8 @@ Manual edits that must remain recoverable.
 }
 
 func TestServiceGeneratePlanExcludesArchivedDocumentsFromContextAndProvenance(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
@@ -801,6 +811,8 @@ case: "blog"
 }
 
 func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 
@@ -863,6 +875,8 @@ Manual plan content.
 }
 
 func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 
@@ -938,6 +952,8 @@ Manual plan content.
 }
 
 func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 

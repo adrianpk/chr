@@ -88,6 +88,48 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 	assertDumpCurationTracePayloads(t, string(trace))
 }
 
+func TestCodexDumpCurationProviderUsesAgentRunner(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceWorkspaceQueryFixture(t, projectDir)
+
+	runner := &fakeDumpCurationAgentRunner{
+		result: chc.AgentRunResult{
+			ID:     "dump-curation-trace-dump",
+			Output: []byte(`{"polished_body":"Polished body.","highlights":["Source point."],"warnings":[]}`),
+		},
+	}
+	provider := codexDumpCurationProvider{
+		ProjectDir: projectDir,
+		Runner:     runner,
+	}
+
+	result, err := provider.CurateDump(t.Context(), DumpCurationRequest{
+		ProjectDir: projectDir,
+		ProjectID:  "service-project",
+		Title:      "Trace Dump",
+		Content:    "rough body",
+	})
+	if err != nil {
+		t.Fatalf("CurateDump returned error: %v", err)
+	}
+
+	if result.PolishedBody != "Polished body." {
+		t.Fatalf("PolishedBody = %q", result.PolishedBody)
+	}
+
+	if runner.request.ID != "dump-curation-trace-dump" {
+		t.Fatalf("agent request id = %q, want dump-curation-trace-dump", runner.request.ID)
+	}
+
+	if !strings.Contains(runner.request.Prompt, "dump curation backend") {
+		t.Fatalf("prompt does not identify dump curation backend:\n%s", runner.request.Prompt)
+	}
+
+	if len(runner.request.OutputSchema) == 0 {
+		t.Fatal("agent output schema is empty")
+	}
+}
+
 func newDumpCurationTraceTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 
@@ -173,6 +215,21 @@ func TestFallbackDumpCurationProviderHandlesEmptyContent(t *testing.T) {
 type fakeDumpCurationProvider struct {
 	result DumpCurationResult
 	err    error
+}
+
+type fakeDumpCurationAgentRunner struct {
+	request chc.AgentRunRequest
+	result  chc.AgentRunResult
+	err     error
+}
+
+func (r *fakeDumpCurationAgentRunner) RunAgent(
+	_ context.Context,
+	request chc.AgentRunRequest,
+) (chc.AgentRunResult, error) {
+	r.request = request
+
+	return r.result, r.err
 }
 
 func (p fakeDumpCurationProvider) CurateDump(

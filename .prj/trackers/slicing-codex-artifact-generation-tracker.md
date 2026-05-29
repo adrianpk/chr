@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-codex-artifact-generation-plan.md`
 
 Slicing name: Codex Artifact Generation
 
-Active slice number: Slice 2
+Active slice number: Slice 3
 
-Active slice short name: ticket payload boundary
+Active slice short name: artifact backend defaults
 
-Expected branch name: `feat/slice-2-ticket-payload-boundary`
+Expected branch name: `feat/slice-3-artifact-backend-defaults`
 
-Expected PR title: `feat(slice-2): ticket payload boundary`
+Expected PR title: `feat(slice-3): artifact backend defaults`
 
 Expected report path:
-`.prj/reports/slices/codex-artifact-generation/slice-2-ticket-payload-boundary.md`
+`.prj/reports/slices/codex-artifact-generation/slice-3-artifact-backend-defaults.md`
 
 Prerequisite PRs or delivered work:
 
@@ -41,8 +41,8 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Plan Tracking Codex Backend | Completed | `feat/slice-1-plan-tracking-codex-backend` | `feat(slice-1): plan tracking codex backend` | `.prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md` | Merged into `dev`. |
-| Slice 2: Ticket Payload Boundary | Reviewing | `feat/slice-2-ticket-payload-boundary` | `feat(slice-2): ticket payload boundary` | `.prj/reports/slices/codex-artifact-generation/slice-2-ticket-payload-boundary.md` | Implemented on `feat/slice-2-ticket-payload-boundary`; PR pending. |
-| Slice 3: Artifact Backend Defaults | Planned | `feat/slice-3-artifact-backend-defaults` | `feat(slice-3): artifact backend defaults` | `.prj/reports/slices/codex-artifact-generation/slice-3-artifact-backend-defaults.md` | Depends on Slices 1 and 2; reconciles dump curation branch/default policy. |
+| Slice 2: Ticket Payload Boundary | Completed | `feat/slice-2-ticket-payload-boundary` | `feat(slice-2): ticket payload boundary` | `.prj/reports/slices/codex-artifact-generation/slice-2-ticket-payload-boundary.md` | Merged into `dev`. |
+| Slice 3: Artifact Backend Defaults | Reviewing | `feat/slice-3-artifact-backend-defaults` | `feat(slice-3): artifact backend defaults` | `.prj/reports/slices/codex-artifact-generation/slice-3-artifact-backend-defaults.md` | Implemented on `feat/slice-3-artifact-backend-defaults`; PR pending. |
 | Slice 4: Artifact Run Bundle Audit | Planned | `feat/slice-4-artifact-run-bundle-audit` | `feat(slice-4): artifact run bundle audit` | `.prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md` | Depends on Slices 1 through 3. |
 
 ## Slice 1: Plan Tracking Codex Backend
@@ -79,7 +79,7 @@ Candidate tasks:
 
 Task commits:
 
-- Pending commit on `feat/slice-2-ticket-payload-boundary`.
+- `d8675ab` feat(slice-2): ticket payload boundary
 
 Validation:
 
@@ -90,22 +90,23 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T3.1 Decide and implement default routing for dump/spec/plan/tracking.
-- [ ] T3.2 Preserve or simplify env var override behavior.
-- [ ] T3.3 Reconcile the `feat/codex-dump-generation` implementation with the
+- [x] T3.1 Decide and implement default routing for dump/spec/plan/tracking.
+- [x] T3.2 Preserve or simplify env var override behavior.
+- [x] T3.3 Reconcile the `feat/codex-dump-generation` implementation with the
       committed slice map.
-- [ ] T3.4 Update docs/config reference for artifact generation backends.
-- [ ] T3.5 Add routing tests for default and override cases.
-- [ ] T3.6 Add slice implementation report.
-- [ ] T3.7 Run targeted tests and repository quality gates.
+- [x] T3.4 Update docs/config reference for artifact generation backends.
+- [x] T3.5 Add routing tests for default and override cases.
+- [x] T3.6 Add slice implementation report.
+- [x] T3.7 Run targeted tests and repository quality gates.
 
 Task commits:
 
-- None yet.
+- Pending commit on `feat/slice-3-artifact-backend-defaults`.
 
 Validation:
 
-- Not run yet.
+- `go test ./internal/chc ./internal/chcapp` - pass.
+- `make verify` - pass.
 
 ## Slice 4: Artifact Run Bundle Audit
 

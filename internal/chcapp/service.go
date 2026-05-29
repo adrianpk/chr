@@ -33,10 +33,18 @@ func newService(
 		assetsFS:       assetsFS,
 		projectContext: projectContext,
 		dumpEditor:     defaultDumpEditorLauncher{},
-		dumpCurator:    openAIDumpCurationProvider{ProjectDir: projectContext.ProjectDir},
+		dumpCurator:    newDumpCurationProvider(projectContext.ProjectDir),
 		quizModel:      newQuizModelAdapter(projectContext.ProjectDir),
 		now:            time.Now,
 	}
+}
+
+func newDumpCurationProvider(projectDir string) DumpCurationProvider {
+	if openAIGenerationBackend("CHC_DUMP_GENERATION_BACKEND") {
+		return openAIDumpCurationProvider{ProjectDir: projectDir}
+	}
+
+	return codexDumpCurationProvider{ProjectDir: projectDir}
 }
 
 func newQuizModelAdapter(projectDir string) chc.QuizModelAdapter {
@@ -66,5 +74,9 @@ func newQuizModelAdapter(projectDir string) chc.QuizModelAdapter {
 }
 
 func codexGenerationBackend(name string) bool {
-	return strings.EqualFold(strings.TrimSpace(os.Getenv(name)), "codex")
+	return !openAIGenerationBackend(name)
+}
+
+func openAIGenerationBackend(name string) bool {
+	return strings.EqualFold(strings.TrimSpace(os.Getenv(name)), "openai")
 }

@@ -413,6 +413,17 @@ func recordAgentRunResponseEvent(
 	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: request.ProjectDir}, event)
 }
 
+// RecordAgentRunResponseEvent records a deferred agent response trace event.
+func RecordAgentRunResponseEvent(
+	ctx context.Context,
+	request AgentRunRequest,
+	result AgentRunResult,
+	status string,
+	runErr error,
+) {
+	recordAgentRunResponseEvent(ctx, request, result, status, runErr)
+}
+
 func runCodexAgent(ctx context.Context, runner AgentRunner, request AgentRunRequest) (AgentRunResult, error) {
 	timeout := codexAgentTimeout(request)
 	if deadline, ok := ctx.Deadline(); ok {
@@ -430,4 +441,9 @@ func runCodexAgent(ctx context.Context, runner AgentRunner, request AgentRunRequ
 	}
 
 	return result, err
+}
+
+// RunCodexAgent runs a Codex-backed agent request with the configured timeout.
+func RunCodexAgent(ctx context.Context, runner AgentRunner, request AgentRunRequest) (AgentRunResult, error) {
+	return runCodexAgent(ctx, runner, request)
 }
