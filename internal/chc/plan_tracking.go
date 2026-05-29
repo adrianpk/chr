@@ -204,21 +204,41 @@ func ValidateGeneratedPlanTrackingModelContent(tracking GeneratedPlanTracking) e
 	}
 
 	for index, ticket := range tracking.Tickets {
-		if strings.TrimSpace(ticket.SliceID) == "" {
-			return fmt.Errorf("plan tracking ticket %d slice id is required", index+1)
+		if err := ValidateGeneratedPlanTrackingTicketModelContent(ticket); err != nil {
+			return fmt.Errorf("plan tracking ticket %d: %w", index+1, err)
 		}
+	}
 
-		if strings.TrimSpace(ticket.Title) == "" {
-			return fmt.Errorf("plan tracking ticket %d title is required", index+1)
-		}
+	return nil
+}
 
-		if strings.TrimSpace(ticket.Synopsis) == "" {
-			return fmt.Errorf("plan tracking ticket %d synopsis is required", index+1)
-		}
+func ValidateGeneratedPlanTrackingTicketModelContent(ticket GeneratedPlanTrackingTicket) error {
+	if strings.TrimSpace(ticket.Key) != "" {
+		return fmt.Errorf("key must be empty before materialization")
+	}
 
-		if strings.TrimSpace(ticket.Body) == "" {
-			return fmt.Errorf("plan tracking ticket %d body is required", index+1)
-		}
+	if strings.TrimSpace(ticket.Path) != "" {
+		return fmt.Errorf("path must be empty before materialization")
+	}
+
+	if strings.TrimSpace(ticket.SliceID) == "" {
+		return fmt.Errorf("slice id is required")
+	}
+
+	if strings.TrimSpace(ticket.Title) == "" {
+		return fmt.Errorf("title is required")
+	}
+
+	if strings.TrimSpace(ticket.Synopsis) == "" {
+		return fmt.Errorf("synopsis is required")
+	}
+
+	if strings.TrimSpace(ticket.Summary) == "" {
+		return fmt.Errorf("summary is required")
+	}
+
+	if strings.TrimSpace(ticket.Body) == "" {
+		return fmt.Errorf("body is required")
 	}
 
 	return nil

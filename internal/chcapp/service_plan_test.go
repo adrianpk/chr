@@ -538,6 +538,73 @@ case_slug: "blog"
 	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
 }
 
+func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeServiceQuizFixture(t, projectDir)
+
+	operations := newTestService(t, projectDir)
+	payloads := []chc.GeneratedPlanTrackingTicket{
+		validPlanTrackingTicketPayload(),
+		{
+			SliceID:  "Slice 2",
+			Title:    "Implement second slice",
+			Synopsis: "Build the second slice.",
+			Body:     "## Tasks\n\n- Implement the second slice.",
+			Priority: "normal",
+			Severity: "normal",
+			Type:     "task",
+		},
+	}
+
+	_, err := operations.createPlanTrackingTickets(
+		chc.QuizScope{CaseSlug: "blog"},
+		".chc/user/plans/blog-plan.md",
+		".chc/user/plans/blog-tracking.md",
+		payloads,
+	)
+	if err == nil || !strings.Contains(err.Error(), "ticket summary is required") {
+		t.Fatalf("createPlanTrackingTickets error = %v, want missing summary error", err)
+	}
+
+	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
+}
+
+func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeServiceQuizFixture(t, projectDir)
+
+	operations := newTestService(t, projectDir)
+	payload := validPlanTrackingTicketPayload()
+	payload.Key = "LLM-99"
+	payload.Path = ".chc/user/tickets/blog/LLM-99-owned-by-model.md"
+
+	_, err := operations.createPlanTrackingTickets(
+		chc.QuizScope{CaseSlug: "blog"},
+		".chc/user/plans/blog-plan.md",
+		".chc/user/plans/blog-tracking.md",
+		[]chc.GeneratedPlanTrackingTicket{payload},
+	)
+	if err == nil || !strings.Contains(err.Error(), "generated ticket key must be empty") {
+		t.Fatalf("createPlanTrackingTickets error = %v, want generated key error", err)
+	}
+
+	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
+}
+
+func validPlanTrackingTicketPayload() chc.GeneratedPlanTrackingTicket {
+	return chc.GeneratedPlanTrackingTicket{
+		SliceID:  "Slice 1",
+		Title:    "Implement planning foundation",
+		Synopsis: "Build the planning foundation slice.",
+		Summary:  "Implement the foundational planning work.",
+		Body:     "## Tasks\n\n- Implement the planning foundation.",
+		Priority: "normal",
+		Severity: "normal",
+		Type:     "task",
+		Tags:     []string{"plan-tracking"},
+	}
+}
+
 func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
 	t.Helper()
 

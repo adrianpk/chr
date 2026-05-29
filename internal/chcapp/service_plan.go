@@ -503,6 +503,10 @@ func (s service) createPlanTrackingTickets(
 	trackingPath string,
 	ticketPayloads []chc.GeneratedPlanTrackingTicket,
 ) ([]chc.GeneratedPlanTrackingTicket, error) {
+	if err := validatePlanTrackingTicketPayloads(ticketPayloads); err != nil {
+		return nil, err
+	}
+
 	created := make([]chc.GeneratedPlanTrackingTicket, 0, len(ticketPayloads))
 
 	for _, payload := range ticketPayloads {
@@ -531,6 +535,41 @@ func (s service) createPlanTrackingTickets(
 	}
 
 	return created, nil
+}
+
+func validatePlanTrackingTicketPayloads(ticketPayloads []chc.GeneratedPlanTrackingTicket) error {
+	if len(ticketPayloads) == 0 {
+		return fmt.Errorf("plan tracking ticket payloads are required")
+	}
+
+	for index, payload := range ticketPayloads {
+		if err := validatePlanTrackingTicketPayload(payload); err != nil {
+			return fmt.Errorf("plan tracking ticket payload %d: %w", index+1, err)
+		}
+	}
+
+	return nil
+}
+
+func validatePlanTrackingTicketPayload(payload chc.GeneratedPlanTrackingTicket) error {
+	switch {
+	case strings.TrimSpace(payload.Key) != "":
+		return fmt.Errorf("generated ticket key must be empty")
+	case strings.TrimSpace(payload.Path) != "":
+		return fmt.Errorf("generated ticket path must be empty")
+	case strings.TrimSpace(payload.SliceID) == "":
+		return fmt.Errorf("slice id is required")
+	case strings.TrimSpace(payload.Title) == "":
+		return fmt.Errorf("ticket title is required")
+	case strings.TrimSpace(payload.Synopsis) == "":
+		return fmt.Errorf("ticket synopsis is required")
+	case strings.TrimSpace(payload.Summary) == "":
+		return fmt.Errorf("ticket summary is required")
+	case strings.TrimSpace(payload.Body) == "":
+		return fmt.Errorf("ticket body is required")
+	}
+
+	return nil
 }
 
 //nolint:wsl_v5 // Markdown body construction benefits from local grouping.
