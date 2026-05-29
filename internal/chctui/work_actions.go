@@ -14,6 +14,7 @@ type WorkActionID string
 const (
 	WorkActionStartTicket    WorkActionID = "start_ticket"
 	WorkActionStartReadyLoop WorkActionID = "start_ready_loop"
+	WorkActionRunAllReady    WorkActionID = "run_all_ready"
 	WorkActionRequestStop    WorkActionID = "request_stop"
 )
 
@@ -63,8 +64,21 @@ func NewWorkActionState(action WorkActionID, ticket TicketView) WorkActionState 
 			},
 			Title: "Start ready ticket loop",
 			Details: []string{
-				"Status filter: ready",
+				"Status filter: ready_for_dev",
 				"Max iterations: 1",
+				"Stops on blocked or failed work.",
+			},
+		}
+	case WorkActionRunAllReady:
+		return WorkActionState{
+			Pending: true,
+			Request: WorkActionRequest{
+				Action: action,
+			},
+			Title: "Run all ready tickets",
+			Details: []string{
+				"Status filter: ready_for_dev",
+				"Order: oldest first",
 				"Stops on blocked or failed work.",
 			},
 		}

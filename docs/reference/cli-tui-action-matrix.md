@@ -96,6 +96,7 @@ Status values:
 | Ticket | `ticket-checklist-add` | Validate checklist item creation availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
 | Work | `work-start-ticket` | Start selected ticket execution. | `chc ticket start <key>` | shared `buildTicketStartPreflightForTicket` and `runTicketStartExecution` | `matched` | CLI owns preflight/output; TUI service wraps selected-ticket execution. |
 | Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chc ticket loop --status ready_for_dev --max-iterations 1` | shared `runTicketLoopExecution` | `matched` | CLI supports configurable query/run options; TUI wraps one ready-ticket iteration. |
+| Work | `work-run-all-ready` | Run all ready tickets. | `chc work run-all` | `service.StartAllReadyAgentWork` -> `runTicketLoopExecution` | `matched` | CLI and TUI use the agent-work facade. |
 | Work | `work-request-stop` | Request daemon stop. | `chc daemon stop` | shared `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 
 Command availability gates:
@@ -197,6 +198,7 @@ Command availability gates:
 | Ticket status | `tuiTicketActionExecutor` -> `service.MoveSelectedTicketStatus` -> `service.MoveTicketStatus` | `runTicketStatus` -> `service.MoveTicketStatus` | `matched` | Same status service. |
 | Work start ticket | `tuiWorkActionExecutor` -> `service.StartSelectedTicket` -> shared execution helpers | `runTicketStart` -> shared execution helpers | `matched` | TUI wraps selection and message reload; CLI owns dry-run and output. |
 | Work ready loop | `tuiWorkActionExecutor` -> `service.StartReadyTicketLoop` -> `runTicketLoopExecution` | `runTicketLoop` -> `runTicketLoopExecution` | `matched` | TUI uses fixed ready/max-one selection; CLI is configurable. |
+| Work run all ready | `tuiWorkActionExecutor` -> `service.StartAllReadyAgentWork` -> `runTicketLoopExecution` | `chc work run-all` -> `service.StartAllReadyAgentWork` | `matched` | Both paths use the agent-work facade and shared default selection contract. |
 | Work request stop | `tuiWorkActionExecutor` -> `service.RequestDaemonStop` -> `requestDaemonStopState` | `runDaemonStop` -> `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 | Authoring session creation | `tuiArtifactActionExecutor` -> `service.CreateTUIAuthoringSession` -> `service.CreateAuthoringSession` | `runAuthorSessionNew` -> `service.CreateAuthoringSession` | `matched` | CLI is configurable; TUI creates a default spec-oriented session. |
 | Context-aware authoring quiz | TUI returns unavailable | `runAuthorContextualQuizNew` | `missing_tui` | CLI path exists and should inform future TUI implementation. |

@@ -86,6 +86,7 @@ func DefaultCommandRegistry() []Command {
 		{ID: "ticket-checklist-add", Title: "Add ticket checklist item", Description: "Validate checklist creation availability for the selected ticket.", Action: CommandActionPlanTicket, Ticket: TicketActionAddChecklistItem},
 		{ID: "work-start-ticket", Title: "Start selected ticket", Description: "Run the agent harness for the selected ticket after confirmation.", Action: CommandActionPlanWork, Work: WorkActionStartTicket},
 		{ID: "work-start-ready-loop", Title: "Start ready ticket loop", Description: "Run one ready ticket through the agent loop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionStartReadyLoop},
+		{ID: "work-run-all-ready", Title: "Run all ready tickets", Description: "Run all ready_for_dev tickets through the agent loop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRunAllReady},
 		{ID: "work-request-stop", Title: "Request agent stop", Description: "Request daemon stop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRequestStop},
 	}
 

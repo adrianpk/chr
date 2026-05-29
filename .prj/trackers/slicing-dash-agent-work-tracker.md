@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-dash-agent-work-plan.md`
 
 Slicing name: Dash Agent Work
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: cli agent work commands
+Active slice short name: dash agent work panel
 
-Expected branch name: `feat/slice-3-cli-agent-work-commands`
+Expected branch name: `feat/slice-4-dash-agent-work-panel`
 
-Expected PR title: `feat(slice-3): cli agent work commands`
+Expected PR title: `feat(slice-4): dash agent work panel`
 
 Expected report path:
-`.prj/reports/slices/dash-agent-work/slice-3-cli-agent-work-commands.md`
+`.prj/reports/slices/dash-agent-work/slice-4-dash-agent-work-panel.md`
 
 Prerequisite PRs or delivered work:
 
@@ -41,8 +41,8 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Agent Work Selection Contract | Completed | `feat/slice-1-agent-work-selection-contract` | `feat(slice-1): agent work selection contract` | `.prj/reports/slices/dash-agent-work/slice-1-agent-work-selection-contract.md` | Merged into `dev`. |
 | Slice 2: Agent Work Service Facade | Completed | `feat/slice-2-agent-work-service-facade` | `feat(slice-2): agent work service facade` | `.prj/reports/slices/dash-agent-work/slice-2-agent-work-service-facade.md` | Merged into `dev`. |
-| Slice 3: CLI Agent Work Commands | Reviewing | `feat/slice-3-cli-agent-work-commands` | `feat(slice-3): cli agent work commands` | `.prj/reports/slices/dash-agent-work/slice-3-cli-agent-work-commands.md` | PR pending. |
-| Slice 4: Dash Agent Work Panel | Planned | `feat/slice-4-dash-agent-work-panel` | `feat(slice-4): dash agent work panel` | `.prj/reports/slices/dash-agent-work/slice-4-dash-agent-work-panel.md` | Depends on Slice 2. |
+| Slice 3: CLI Agent Work Commands | Completed | `feat/slice-3-cli-agent-work-commands` | `feat(slice-3): cli agent work commands` | `.prj/reports/slices/dash-agent-work/slice-3-cli-agent-work-commands.md` | Merged into `dev`. |
+| Slice 4: Dash Agent Work Panel | Reviewing | `feat/slice-4-dash-agent-work-panel` | `feat(slice-4): dash agent work panel` | `.prj/reports/slices/dash-agent-work/slice-4-dash-agent-work-panel.md` | PR pending. |
 | Slice 5: Dash Realtime Progress | Planned | `feat/slice-5-dash-realtime-progress` | `feat(slice-5): dash realtime progress` | `.prj/reports/slices/dash-agent-work/slice-5-dash-realtime-progress.md` | Depends on Slice 4. |
 | Slice 6: Agent Work Filters And Ordering | Planned | `feat/slice-6-agent-work-filters-ordering` | `feat(slice-6): agent work filters ordering` | `.prj/reports/slices/dash-agent-work/slice-6-agent-work-filters-ordering.md` | Depends on Slices 2, 3, and 4. |
 
@@ -104,7 +104,7 @@ Candidate tasks:
 
 Task commits:
 
-- Pending review.
+- `5ed20c3 feat(slice-3): cli agent work commands`
 
 Validation:
 
@@ -114,21 +114,23 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T4.1 Identify the existing Dash/Work layout and action wiring.
-- [ ] T4.2 Add queue/current/recent sections with stable dimensions.
-- [ ] T4.3 Add selected-ticket and run-all controls.
-- [ ] T4.4 Wire controls to the agent-work service facade.
-- [ ] T4.5 Add TUI tests for rendering and action dispatch.
-- [ ] T4.6 Update TUI docs and action matrix.
-- [ ] T4.7 Add slice implementation report and run quality gates.
+- [x] T4.1 Identify the existing Dash/Work layout and action wiring.
+- [x] T4.2 Add queue/current/recent sections with stable dimensions.
+- [x] T4.3 Add selected-ticket and run-all controls.
+- [x] T4.4 Wire controls to the agent-work service facade.
+- [x] T4.5 Add TUI tests for rendering and action dispatch.
+- [x] T4.6 Update TUI docs and action matrix.
+- [x] T4.7 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- Pending review.
 
 Validation:
 
-- Not run yet.
+- `go test ./internal/chctui ./internal/chcapp`
+- `make verify`
+- `git diff --check`
 
 ## Slice 5: Dash Realtime Progress
 

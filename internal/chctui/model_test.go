@@ -2224,6 +2224,78 @@ func TestModelPlansWorkActionCommand(t *testing.T) {
 	}
 }
 
+func TestModelRendersDashAgentWorkPanel(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "Ready frontend", Status: "ready_for_dev", Priority: "high"},
+			{Key: "CHC-2", Title: "Backlog backend", Status: "backlog", Priority: "normal"},
+		},
+		Observability: ObservabilityView{
+			LatestExecution: ExecutionView{ID: "exec-1", TicketKey: "CHC-1", Status: "succeeded"},
+			LatestLoop: LoopRunView{
+				ID:             "loop-1",
+				Status:         "succeeded",
+				EligibleCount:  1,
+				ProcessedCount: 1,
+			},
+		},
+	})
+	model.selected = 7
+
+	view := model.View()
+	for _, want := range []string{
+		"Agent Work",
+		"Queue",
+		"CHC-1",
+		"Ready frontend",
+		"Current",
+		"Loop: loop-1",
+		"Execution: exec-1",
+		"Recent",
+		"Run all ready tickets",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	if strings.Contains(view, "Backlog backend") {
+		t.Fatalf("View() includes backlog ticket in ready queue:\n%s", view)
+	}
+}
+
+func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
+	model := NewModel(Options{})
+	model.selected = 7
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("R")})
+
+	planned, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	if !planned.workAction.Pending {
+		t.Fatal("work action is not pending")
+	}
+
+	if planned.workAction.Request.Action != WorkActionRunAllReady {
+		t.Fatalf("work action = %q, want %q", planned.workAction.Request.Action, WorkActionRunAllReady)
+	}
+
+	view := planned.View()
+	for _, want := range []string{
+		"Confirm Work Action",
+		"Run all ready tickets",
+		"Status filter: ready_for_dev",
+		"Order: oldest first",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
 func TestModelCancelsWorkAction(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []chc.IndexedTicket{
@@ -2922,7 +2994,8 @@ func TestModelRendersAgentObservability(t *testing.T) {
 			},
 		},
 	})
-	model.selected = 7
+	model.views = []View{ViewAgent}
+	model.selected = 0
 
 	view := model.View()
 

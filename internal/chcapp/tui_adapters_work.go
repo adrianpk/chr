@@ -36,6 +36,13 @@ func (e tuiWorkActionExecutor) ExecuteWorkAction(
 		}
 
 		return e.workActionResult(result)
+	case chctui.WorkActionRunAllReady:
+		result, err := e.operations.StartAllReadyAgentWork()
+		if err != nil {
+			return chctui.WorkActionResult{}, err
+		}
+
+		return e.workActionResult(workOperationResultFromAgentWork(result))
 	case chctui.WorkActionRequestStop:
 		result, err := e.operations.RequestDaemonStop()
 		if err != nil {

@@ -112,7 +112,7 @@ func (m Model) renderProductWorkspace(width, height int) (string, bool) {
 	case ViewPlans:
 		return m.renderPlanWorkspace(width, height), true
 	case ViewDash:
-		return m.renderOperationsWorkspace(width, height), true
+		return m.renderDashWorkspace(width, height), true
 	default:
 		return "", false
 	}

@@ -72,7 +72,7 @@ Available command families:
 - Plan generation, regeneration, tracking creation, and refresh, only in the
   Plans view.
 - Ticket comment and selected ticket status transitions.
-- Work start, ready-loop start, and agent stop request.
+- Work start, ready-loop start, run-all-ready, and agent stop request.
 
 `Create context-aware quiz`, `Toggle ticket checklist item`, and `Add ticket
 checklist item` are capability checks in the current TUI. They report an
@@ -263,7 +263,23 @@ chc ticket status CHC-1 in_progress
 chc ticket status CHC-1 reviewing
 chc ticket start CHC-1
 chc ticket loop --status ready_for_dev --max-iterations 1
+chc work ticket CHC-1
+chc work run-all
 ```
+
+## Dash View
+
+Dash shows agent-work operations:
+
+- ready queue;
+- current loop or execution state;
+- recent execution and loop outcomes.
+
+Dash work actions use confirmation prompts:
+
+- `enter` starts the selected ticket;
+- `R` runs all `ready_for_dev` tickets oldest first;
+- `s` requests agent stop.
 
 ## Confirmation Modes
 

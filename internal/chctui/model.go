@@ -603,11 +603,15 @@ func (m *Model) handleNavigationPageKey(keyType tea.KeyType) bool {
 }
 
 func (m Model) handleNavigationActionKey(key string) (tea.Model, tea.Cmd) {
+	if m.handleDashActionKey(key) {
+		return m, nil
+	}
+
+	if m.handleDetailScrollKey(key) {
+		return m, nil
+	}
+
 	switch key {
-	case "pgup", "pageup", "ctrl+u":
-		m.scrollDetailPage(-1)
-	case "pgdown", "pagedown", "ctrl+d":
-		m.scrollDetailPage(1)
 	case "e":
 		if m.selectedPane == 1 {
 			return m, m.openSelectedSource()
@@ -625,6 +629,38 @@ func (m Model) handleNavigationActionKey(key string) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m *Model) handleDetailScrollKey(key string) bool {
+	switch key {
+	case "ctrl+u":
+		m.scrollDetailPage(-1)
+	case "ctrl+d":
+		m.scrollDetailPage(1)
+	default:
+		return false
+	}
+
+	return true
+}
+
+func (m *Model) handleDashActionKey(key string) bool {
+	if m.SelectedView() != ViewDash {
+		return false
+	}
+
+	switch key {
+	case "enter":
+		m.planWorkAction(WorkActionStartTicket)
+	case "R":
+		m.planWorkAction(WorkActionRunAllReady)
+	case "s":
+		m.planWorkAction(WorkActionRequestStop)
+	default:
+		return false
+	}
+
+	return true
 }
 
 func (m *Model) handleNavigationCommandKey(key string) (tea.Cmd, bool) {
@@ -884,7 +920,7 @@ func (m *Model) selectPrimaryPane() {
 
 func (m Model) paneCount() int {
 	switch m.SelectedView() {
-	case ViewProject, ViewCases:
+	case ViewProject, ViewCases, ViewDash:
 		return 3
 	case ViewBoard, ViewTickets:
 		return 2
@@ -892,7 +928,7 @@ func (m Model) paneCount() int {
 		return 2
 	case ViewAuthoring:
 		return 2
-	case ViewDash, ViewAgent, ViewRuntime:
+	case ViewAgent, ViewRuntime:
 		return 2
 	default:
 		return 1
@@ -945,7 +981,7 @@ func (m Model) renderProductSelectedView(selectedView View) (string, bool) {
 	}
 
 	if selectedView == ViewDash {
-		return m.renderAgent() + "\n\n" + m.renderRuntime(), true
+		return m.renderDash(), true
 	}
 
 	return "", false
@@ -1183,6 +1219,8 @@ func (m Model) renderKeys() string {
 		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates spec, r refreshes, q quits"
 	case m.SelectedView() == ViewPlans:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates missing plan, G regenerates, r refreshes, q quits"
+	case m.SelectedView() == ViewDash:
+		return "Keys: F1-F9 or click changes tab, tab changes pane, enter starts selected ticket, R runs all ready, s requests stop, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, q quits"
 	default:
