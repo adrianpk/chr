@@ -1,0 +1,169 @@
+# Dash Agent Work Slicing Tracker
+
+Status: active
+
+Plan: `.prj/plans/slicing-dash-agent-work-plan.md`
+
+## Active Slice
+
+Slicing name: Dash Agent Work
+
+Active slice number: Slice 1
+
+Active slice short name: agent work selection contract
+
+Expected branch name: `feat/slice-1-agent-work-selection-contract`
+
+Expected PR title: `feat(slice-1): agent work selection contract`
+
+Expected report path:
+`.prj/reports/slices/dash-agent-work/slice-1-agent-work-selection-contract.md`
+
+Prerequisite PRs or delivered work:
+
+- `dev` includes ticket execution and ticket loop support.
+- `dev` includes TUI Work actions for selected-ticket and ready-loop execution.
+- `dev` includes execution, loop, and report persistence.
+
+## Slicing Checklist
+
+- [x] Create slicing plan.
+- [x] Create slicing tracker.
+- [ ] Commit plan and tracker directly to `dev`.
+- [ ] Select the first pending slice for implementation.
+- [ ] Complete all planned slices.
+- [ ] Validate completed slicing with repository quality gates.
+- [ ] Decide whether post-slice tuning is needed.
+
+## Slice Status
+
+| Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Slice 1: Agent Work Selection Contract | Planned | `feat/slice-1-agent-work-selection-contract` | `feat(slice-1): agent work selection contract` | `.prj/reports/slices/dash-agent-work/slice-1-agent-work-selection-contract.md` | Defines default selection semantics. |
+| Slice 2: Agent Work Service Facade | Planned | `feat/slice-2-agent-work-service-facade` | `feat(slice-2): agent work service facade` | `.prj/reports/slices/dash-agent-work/slice-2-agent-work-service-facade.md` | Depends on Slice 1. |
+| Slice 3: CLI Agent Work Commands | Planned | `feat/slice-3-cli-agent-work-commands` | `feat(slice-3): cli agent work commands` | `.prj/reports/slices/dash-agent-work/slice-3-cli-agent-work-commands.md` | Depends on Slice 2. |
+| Slice 4: Dash Agent Work Panel | Planned | `feat/slice-4-dash-agent-work-panel` | `feat(slice-4): dash agent work panel` | `.prj/reports/slices/dash-agent-work/slice-4-dash-agent-work-panel.md` | Depends on Slice 2. |
+| Slice 5: Dash Realtime Progress | Planned | `feat/slice-5-dash-realtime-progress` | `feat(slice-5): dash realtime progress` | `.prj/reports/slices/dash-agent-work/slice-5-dash-realtime-progress.md` | Depends on Slice 4. |
+| Slice 6: Agent Work Filters And Ordering | Planned | `feat/slice-6-agent-work-filters-ordering` | `feat(slice-6): agent work filters ordering` | `.prj/reports/slices/dash-agent-work/slice-6-agent-work-filters-ordering.md` | Depends on Slices 2, 3, and 4. |
+
+## Slice 1: Agent Work Selection Contract
+
+Candidate tasks:
+
+- [ ] T1.1 Audit current ticket loop status and order defaults.
+- [ ] T1.2 Add or update tests for `ready_for_dev` default selection.
+- [ ] T1.3 Add or update tests for oldest-first default ordering.
+- [ ] T1.4 Update ticket loop reference docs for agent-work default semantics.
+- [ ] T1.5 Add slice implementation report and run quality gates.
+
+Task commits:
+
+- None yet.
+
+Validation:
+
+- Not run yet.
+
+## Slice 2: Agent Work Service Facade
+
+Candidate tasks:
+
+- [ ] T2.1 Define agent-work request/result structs.
+- [ ] T2.2 Implement selected-ticket facade over existing selected-ticket
+      execution.
+- [ ] T2.3 Implement run-all facade over existing loop execution.
+- [ ] T2.4 Add tests proving the facade reuses existing execution and loop
+      records.
+- [ ] T2.5 Add slice implementation report and run quality gates.
+
+Task commits:
+
+- None yet.
+
+Validation:
+
+- Not run yet.
+
+## Slice 3: CLI Agent Work Commands
+
+Candidate tasks:
+
+- [ ] T3.1 Add `chc work ticket <ticket-key>` or equivalent command.
+- [ ] T3.2 Add `chc work run-all` or equivalent command.
+- [ ] T3.3 Add dry-run preview for run-all.
+- [ ] T3.4 Add CLI tests for selected ticket, run-all, dry-run, and no eligible
+      tickets.
+- [ ] T3.5 Update command/reference docs.
+- [ ] T3.6 Add slice implementation report and run quality gates.
+
+Task commits:
+
+- None yet.
+
+Validation:
+
+- Not run yet.
+
+## Slice 4: Dash Agent Work Panel
+
+Candidate tasks:
+
+- [ ] T4.1 Identify the existing Dash/Work layout and action wiring.
+- [ ] T4.2 Add queue/current/recent sections with stable dimensions.
+- [ ] T4.3 Add selected-ticket and run-all controls.
+- [ ] T4.4 Wire controls to the agent-work service facade.
+- [ ] T4.5 Add TUI tests for rendering and action dispatch.
+- [ ] T4.6 Update TUI docs and action matrix.
+- [ ] T4.7 Add slice implementation report and run quality gates.
+
+Task commits:
+
+- None yet.
+
+Validation:
+
+- Not run yet.
+
+## Slice 5: Dash Realtime Progress
+
+Candidate tasks:
+
+- [ ] T5.1 Define the polling or refresh cadence for active work.
+- [ ] T5.2 Add a service read model for agent-work observability state.
+- [ ] T5.3 Wire Dash refresh to persisted execution and loop state.
+- [ ] T5.4 Add tests for running, succeeded, failed, and blocked states.
+- [ ] T5.5 Update docs for realtime Dash behavior.
+- [ ] T5.6 Add slice implementation report and run quality gates.
+
+Task commits:
+
+- None yet.
+
+Validation:
+
+- Not run yet.
+
+## Slice 6: Agent Work Filters And Ordering
+
+Candidate tasks:
+
+- [ ] T6.1 Add filter/order request model to the agent-work facade.
+- [ ] T6.2 Wire CLI filters and order options to the facade.
+- [ ] T6.3 Add Dash filter controls.
+- [ ] T6.4 Add tests for filter combinations and order modes.
+- [ ] T6.5 Update references and action matrix.
+- [ ] T6.6 Add slice implementation report and run quality gates.
+
+Task commits:
+
+- None yet.
+
+Validation:
+
+- Not run yet.
+
+## Completion
+
+The slicing is not complete.
+
+Tuning needed: undecided.
