@@ -23,8 +23,10 @@ type WorkActionExecutor interface {
 }
 
 type WorkActionRequest struct {
-	Action    WorkActionID
-	TicketKey string
+	Action         WorkActionID
+	TicketKey      string
+	PriorityFilter string
+	Order          chc.TicketLoopOrder
 }
 
 type WorkActionResult struct {
@@ -145,7 +147,22 @@ func (m *Model) planWorkAction(action WorkActionID) {
 	}
 
 	m.workAction = NewWorkActionState(action, TicketView{})
+	if action == WorkActionRunAllReady {
+		m.applyDashAgentWorkSelectionToAction()
+	}
+
 	m.statusMessage = ""
+}
+
+func (m *Model) applyDashAgentWorkSelectionToAction() {
+	m.workAction.Request.PriorityFilter = m.agentWorkPriorityFilter
+	m.workAction.Request.Order = m.agentWorkOrder
+	m.workAction.Details = []string{
+		"Status filter: ready_for_dev",
+		"Priority filter: " + displayDashPriorityFilter(m.agentWorkPriorityFilter),
+		"Order: " + displayDashAgentWorkOrder(m.agentWorkOrder),
+		"Stops on blocked or failed work.",
+	}
 }
 
 func (m *Model) cancelWorkAction() {

@@ -2354,6 +2354,55 @@ func TestWorkRunAllDryRunPrintsQueue(t *testing.T) {
 	}
 }
 
+func TestWorkRunAllDryRunAppliesFiltersAndOrder(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-1", "Ready normal", "ready_for_dev", "normal", "normal", "feature", "onboarding", "frontend", []string{"uxui"},
+	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready high", "ready_for_dev", "high", "critical", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"run-all",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+		"--priority",
+		"high",
+		"--order",
+		"priority",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work run-all --dry-run returned error: %v", err)
+	}
+
+	output := stdout.String()
+	for _, want := range []string{
+		"work: run-all",
+		"dry_run: true",
+		"order: priority",
+		"eligible: 1",
+		"ticket: CHC-2\tReady high\tready_for_dev",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, output)
+		}
+	}
+
+	if strings.Contains(output, "CHC-1") {
+		t.Fatalf("stdout contains filtered ticket CHC-1:\n%s", output)
+	}
+}
+
 func TestWorkRunAllCompletesWithNoEligibleTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()

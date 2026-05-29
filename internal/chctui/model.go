@@ -123,6 +123,8 @@ type Model struct {
 	height                   int
 	tickets                  []TicketView
 	selectedTicket           int
+	agentWorkPriorityFilter  string
+	agentWorkOrder           chc.TicketLoopOrder
 	boardColumn              string
 	previousBoardColumn      string
 	ticketFilter             string
@@ -228,6 +230,7 @@ func NewModel(opts Options) Model {
 		verticalSplitPercent:     defaultPanelSplitPercent,
 		horizontalSplitPercent:   defaultPanelSplitPercent,
 		tickets:                  tickets,
+		agentWorkOrder:           chc.TicketLoopOrderCreatedAt,
 		boardColumn:              boardColumn,
 		previousBoardColumn:      boardColumn,
 		documents:                append([]DocumentView(nil), opts.Documents...),
@@ -673,6 +676,10 @@ func (m *Model) handleDashActionKey(key string) bool {
 		m.planWorkAction(WorkActionStartTicket)
 	case "R":
 		m.planWorkAction(WorkActionRunAllReady)
+	case "p":
+		m.cycleAgentWorkPriorityFilter()
+	case "o":
+		m.cycleAgentWorkOrder()
 	case "s":
 		m.planWorkAction(WorkActionRequestStop)
 	default:

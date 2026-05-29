@@ -122,6 +122,34 @@ func TestServicePreviewAllReadyAgentWorkDoesNotExecute(t *testing.T) {
 	}
 }
 
+func TestServicePreviewAgentWorkLoopAppliesSelection(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-1", "Ready normal", "ready_for_dev", "normal", "normal", "feature", "onboarding", "frontend", []string{"uxui"},
+	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready high", "ready_for_dev", "high", "critical", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.PreviewAgentWorkLoop(AgentWorkSelectionOptions{
+		Filters: chc.TicketLoopFilters{
+			Priorities: []string{"high"},
+		},
+		Order: chc.TicketLoopOrderPriority,
+	})
+	if err != nil {
+		t.Fatalf("PreviewAgentWorkLoop returned error: %v", err)
+	}
+
+	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHC-2" {
+		t.Fatalf("preview result = %#v, want one high-priority CHC-2 queued ticket", result)
+	}
+}
+
 func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 	t.Helper()
 

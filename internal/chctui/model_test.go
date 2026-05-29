@@ -2288,7 +2288,73 @@ func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 		"Confirm Work Action",
 		"Run all ready tickets",
 		"Status filter: ready_for_dev",
+		"Priority filter: all",
 		"Order: oldest first",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
+	model := NewModel(Options{
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "Ready normal", Status: "ready_for_dev", Priority: "normal", Severity: "normal"},
+			{Key: "CHC-2", Title: "Ready critical", Status: "ready_for_dev", Priority: "critical", Severity: "critical"},
+		},
+	})
+	model.selected = 7
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
+
+	filtered, ok := updated.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", updated)
+	}
+
+	view := filtered.View()
+	for _, want := range []string{
+		"Priority: critical",
+		"CHC-2",
+		"Ready critical",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+
+	if strings.Contains(view, "Ready normal") {
+		t.Fatalf("View() includes filtered ticket:\n%s", view)
+	}
+}
+
+func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
+	model := NewModel(Options{})
+	model.selected = 7
+
+	priorityChanged, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
+	orderChanged, _ := priorityChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("o")})
+	planned, _ := orderChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("R")})
+
+	modelWithAction, ok := planned.(Model)
+	if !ok {
+		t.Fatalf("Update returned %T, want Model", planned)
+	}
+
+	request := modelWithAction.workAction.Request
+	if request.PriorityFilter != "critical" {
+		t.Fatalf("PriorityFilter = %q, want critical", request.PriorityFilter)
+	}
+
+	if request.Order != chc.TicketLoopOrderPriority {
+		t.Fatalf("Order = %q, want priority", request.Order)
+	}
+
+	view := modelWithAction.View()
+	for _, want := range []string{
+		"Priority filter: critical",
+		"Order: priority",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)

@@ -56,6 +56,38 @@ func workRunAllFlags() []cli.Flag {
 			Name:  "dry-run",
 			Usage: "print the ready-ticket queue without executing agent work",
 		},
+		&cli.StringSliceFlag{
+			Name:  "status",
+			Usage: "eligible ticket status",
+		},
+		&cli.StringSliceFlag{
+			Name:  "priority",
+			Usage: "ticket priority filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "severity",
+			Usage: "ticket severity filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "project-area",
+			Usage: "ticket project area filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "tag",
+			Usage: "ticket tag filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "type",
+			Usage: "ticket type filter",
+		},
+		&cli.StringSliceFlag{
+			Name:  "use-case",
+			Usage: "ticket use case filter",
+		},
+		&cli.StringFlag{
+			Name:  "order",
+			Usage: "ticket order: key, created_at, priority, severity, priority_severity",
+		},
 	)
 }
 
@@ -86,16 +118,17 @@ func workRunAllAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 			return err
 		}
 
+		selection := agentWorkSelectionOptionsFromCommand(cmd)
 		if cmd.Bool("dry-run") {
-			result, err := operations.PreviewAllReadyAgentWork()
+			result, err := operations.PreviewAgentWorkLoop(selection)
 			if err != nil {
 				return err
 			}
 
-			return printAgentWorkRunAllPreview(stdout, projectContext, result)
+			return printAgentWorkRunAllPreview(stdout, projectContext, selection, result)
 		}
 
-		result, err := operations.StartAllReadyAgentWork()
+		result, err := operations.StartAgentWorkLoop(selection)
 		if err != nil {
 			return err
 		}
@@ -126,6 +159,21 @@ func workServiceFromCommand(
 	return newService(ctx, env, projectContext, deps.assetsFS), projectContext, nil
 }
 
+func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOptions {
+	return AgentWorkSelectionOptions{
+		Statuses: cmd.StringSlice("status"),
+		Filters: chc.TicketLoopFilters{
+			Priorities:   cmd.StringSlice("priority"),
+			Severities:   cmd.StringSlice("severity"),
+			ProjectAreas: cmd.StringSlice("project-area"),
+			Tags:         cmd.StringSlice("tag"),
+			Types:        cmd.StringSlice("type"),
+			UseCases:     cmd.StringSlice("use-case"),
+		},
+		Order: chc.TicketLoopOrder(cmd.String("order")),
+	}
+}
+
 func printAgentWorkTicket(stdout io.Writer, result AgentWorkResult) error {
 	lines := []string{
 		"work: ticket",
@@ -146,13 +194,14 @@ func printAgentWorkTicket(stdout io.Writer, result AgentWorkResult) error {
 func printAgentWorkRunAllPreview(
 	stdout io.Writer,
 	projectContext commandProjectContext,
+	selection AgentWorkSelectionOptions,
 	result AgentWorkResult,
 ) error {
 	lines := []string{
 		"work: run-all",
 		fmt.Sprintf("project: %s", projectContext.ProjectID),
 		"dry_run: true",
-		"order: created_at",
+		fmt.Sprintf("order: %s", agentWorkOrder(selection.Order)),
 		fmt.Sprintf("eligible: %d", result.EligibleCount),
 	}
 

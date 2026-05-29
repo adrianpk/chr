@@ -23,6 +23,13 @@ type AgentWorkResult struct {
 	EligibleCount int
 }
 
+type AgentWorkSelectionOptions struct {
+	Statuses      []string
+	Filters       chc.TicketLoopFilters
+	Order         chc.TicketLoopOrder
+	MaxIterations int
+}
+
 func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, error) {
 	result, err := s.StartAgentWorkTicket(ticketKey)
 	if err != nil {
@@ -84,7 +91,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 }
 
 func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
-	tickets, eligibleCount, err := s.readyLoopTickets(1)
+	tickets, eligibleCount, err := s.agentWorkLoopTickets(defaultAgentWorkSelectionOptions(1))
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -93,7 +100,11 @@ func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
 }
 
 func (s service) StartAllReadyAgentWork() (AgentWorkResult, error) {
-	tickets, eligibleCount, err := s.readyLoopTickets(0)
+	return s.StartAgentWorkLoop(defaultAgentWorkSelectionOptions(0))
+}
+
+func (s service) StartAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
+	tickets, eligibleCount, err := s.agentWorkLoopTickets(opts)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -102,7 +113,11 @@ func (s service) StartAllReadyAgentWork() (AgentWorkResult, error) {
 }
 
 func (s service) PreviewAllReadyAgentWork() (AgentWorkResult, error) {
-	tickets, eligibleCount, err := s.readyLoopTickets(0)
+	return s.PreviewAgentWorkLoop(defaultAgentWorkSelectionOptions(0))
+}
+
+func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
+	tickets, eligibleCount, err := s.agentWorkLoopTickets(opts)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -177,35 +192,70 @@ func (s service) RequestDaemonStop() (WorkOperationResult, error) {
 	return result, nil
 }
 
-func (s service) readyLoopTickets(maxIterations int) ([]chc.IndexedTicket, int, error) {
+func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]chc.IndexedTicket, int, error) {
 	index, err := chc.NewTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	defer func() {
-		//nolint:errcheck // Query result already comes from the main operation.
-		_ = index.Close()
-	}()
-
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
+		closeErr := index.Close()
+		if closeErr != nil {
+			return nil, 0, closeErr
+		}
+
 		return nil, 0, err
 	}
 
 	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(s.ctx, chc.TicketLoopQueryOptions{
 		ProjectID: s.projectContext.ProjectID,
-		Statuses:  []string{chc.TicketStatusReadyForDev},
-		Order:     chc.TicketLoopOrderCreatedAt,
+		Statuses:  agentWorkStatuses(opts.Statuses),
+		Filters:   opts.Filters,
+		Order:     agentWorkOrder(opts.Order),
 	})
+	if err != nil {
+		closeErr := index.Close()
+		if closeErr != nil {
+			return nil, 0, closeErr
+		}
+
+		return nil, 0, err
+	}
+
+	err = index.Close()
 	if err != nil {
 		return nil, 0, err
 	}
 
 	eligibleTickets := deduplicateTicketLoopTickets(tickets)
-	tickets = ticketsForTicketLoopRun(eligibleTickets, ticketLoopRunOptions{MaxIterations: maxIterations})
+	tickets = ticketsForTicketLoopRun(eligibleTickets, ticketLoopRunOptions{MaxIterations: opts.MaxIterations})
 
 	return tickets, len(eligibleTickets), nil
+}
+
+func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {
+	return AgentWorkSelectionOptions{
+		Statuses:      []string{chc.TicketStatusReadyForDev},
+		Order:         chc.TicketLoopOrderCreatedAt,
+		MaxIterations: maxIterations,
+	}
+}
+
+func agentWorkStatuses(statuses []string) []string {
+	if len(statuses) == 0 {
+		return []string{chc.TicketStatusReadyForDev}
+	}
+
+	return statuses
+}
+
+func agentWorkOrder(order chc.TicketLoopOrder) chc.TicketLoopOrder {
+	if order == "" {
+		return chc.TicketLoopOrderCreatedAt
+	}
+
+	return order
 }
 
 func workOperationResultFromAgentWork(result AgentWorkResult) WorkOperationResult {

@@ -233,8 +233,17 @@ Preview the ready-ticket queue without execution:
 chc work run-all --dry-run
 ```
 
-`work run-all` uses the shared agent-work selection contract: `ready_for_dev`
-tickets, oldest first by `created_at`.
+Run or preview a filtered ready-ticket queue:
+
+```sh
+chc work run-all --priority high --order priority
+chc work run-all --dry-run --tag backend --order priority_severity
+```
+
+`work run-all` uses the shared agent-work selection contract. Defaults are
+`ready_for_dev` tickets, oldest first by `created_at`. Supported filters mirror
+`chc ticket loop`: `--status`, `--priority`, `--severity`, `--project-area`,
+`--tag`, `--type`, `--use-case`, and `--order`.
 
 ## Index
 

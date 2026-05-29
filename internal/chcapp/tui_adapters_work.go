@@ -3,6 +3,7 @@ package chcapp
 import (
 	"errors"
 
+	"forge.adrianpk.com/chc/internal/chc"
 	"forge.adrianpk.com/chc/internal/chctui"
 )
 
@@ -37,7 +38,7 @@ func (e tuiWorkActionExecutor) ExecuteWorkAction(
 
 		return e.workActionResult(result)
 	case chctui.WorkActionRunAllReady:
-		result, err := e.operations.StartAllReadyAgentWork()
+		result, err := e.operations.StartAgentWorkLoop(agentWorkSelectionOptionsFromTUIRequest(request))
 		if err != nil {
 			return chctui.WorkActionResult{}, err
 		}
@@ -53,6 +54,18 @@ func (e tuiWorkActionExecutor) ExecuteWorkAction(
 	default:
 		return chctui.WorkActionResult{}, errors.New("unknown work action")
 	}
+}
+
+func agentWorkSelectionOptionsFromTUIRequest(request chctui.WorkActionRequest) AgentWorkSelectionOptions {
+	opts := AgentWorkSelectionOptions{
+		Statuses: []string{chc.TicketStatusReadyForDev},
+		Order:    request.Order,
+	}
+	if request.PriorityFilter != "" {
+		opts.Filters.Priorities = []string{request.PriorityFilter}
+	}
+
+	return opts
 }
 
 func (e tuiWorkActionExecutor) workActionResult(

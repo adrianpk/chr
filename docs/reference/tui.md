@@ -282,7 +282,10 @@ not start work or mutate ticket files.
 Dash work actions use confirmation prompts:
 
 - `enter` starts the selected ticket;
-- `R` runs all `ready_for_dev` tickets oldest first;
+- `p` cycles the ready-queue priority filter;
+- `o` cycles the ready-queue order;
+- `R` runs all visible `ready_for_dev` tickets with the selected priority and
+  order;
 - `s` requests agent stop.
 
 ## Confirmation Modes

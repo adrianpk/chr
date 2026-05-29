@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-dash-agent-work-plan.md`
 
 Slicing name: Dash Agent Work
 
-Active slice number: Slice 5
+Active slice number: Slice 6
 
-Active slice short name: dash realtime progress
+Active slice short name: agent work filters ordering
 
-Expected branch name: `feat/slice-5-dash-realtime-progress`
+Expected branch name: `feat/slice-6-agent-work-filters-ordering`
 
-Expected PR title: `feat(slice-5): dash realtime progress`
+Expected PR title: `feat(slice-6): agent work filters ordering`
 
 Expected report path:
-`.prj/reports/slices/dash-agent-work/slice-5-dash-realtime-progress.md`
+`.prj/reports/slices/dash-agent-work/slice-6-agent-work-filters-ordering.md`
 
 Prerequisite PRs or delivered work:
 
@@ -43,8 +43,8 @@ Prerequisite PRs or delivered work:
 | Slice 2: Agent Work Service Facade | Completed | `feat/slice-2-agent-work-service-facade` | `feat(slice-2): agent work service facade` | `.prj/reports/slices/dash-agent-work/slice-2-agent-work-service-facade.md` | Merged into `dev`. |
 | Slice 3: CLI Agent Work Commands | Completed | `feat/slice-3-cli-agent-work-commands` | `feat(slice-3): cli agent work commands` | `.prj/reports/slices/dash-agent-work/slice-3-cli-agent-work-commands.md` | Merged into `dev`. |
 | Slice 4: Dash Agent Work Panel | Completed | `feat/slice-4-dash-agent-work-panel` | `feat(slice-4): dash agent work panel` | `.prj/reports/slices/dash-agent-work/slice-4-dash-agent-work-panel.md` | Merged into `dev`. |
-| Slice 5: Dash Realtime Progress | Reviewing | `feat/slice-5-dash-realtime-progress` | `feat(slice-5): dash realtime progress` | `.prj/reports/slices/dash-agent-work/slice-5-dash-realtime-progress.md` | PR pending. |
-| Slice 6: Agent Work Filters And Ordering | Planned | `feat/slice-6-agent-work-filters-ordering` | `feat(slice-6): agent work filters ordering` | `.prj/reports/slices/dash-agent-work/slice-6-agent-work-filters-ordering.md` | Depends on Slices 2, 3, and 4. |
+| Slice 5: Dash Realtime Progress | Completed | `feat/slice-5-dash-realtime-progress` | `feat(slice-5): dash realtime progress` | `.prj/reports/slices/dash-agent-work/slice-5-dash-realtime-progress.md` | Merged into `dev`. |
+| Slice 6: Agent Work Filters And Ordering | Reviewing | `feat/slice-6-agent-work-filters-ordering` | `feat(slice-6): agent work filters ordering` | `.prj/reports/slices/dash-agent-work/slice-6-agent-work-filters-ordering.md` | PR pending. |
 
 ## Slice 1: Agent Work Selection Contract
 
@@ -147,30 +147,34 @@ Candidate tasks:
 
 Task commits:
 
-- Pending review.
+- `ea7c138 feat(slice-5): dash realtime progress`
 
 Validation:
 
 - `go test ./internal/chctui ./internal/chcapp`
+- `make verify`
+- `git diff --check`
 
 ## Slice 6: Agent Work Filters And Ordering
 
 Candidate tasks:
 
-- [ ] T6.1 Add filter/order request model to the agent-work facade.
-- [ ] T6.2 Wire CLI filters and order options to the facade.
-- [ ] T6.3 Add Dash filter controls.
-- [ ] T6.4 Add tests for filter combinations and order modes.
-- [ ] T6.5 Update references and action matrix.
-- [ ] T6.6 Add slice implementation report and run quality gates.
+- [x] T6.1 Add filter/order request model to the agent-work facade.
+- [x] T6.2 Wire CLI filters and order options to the facade.
+- [x] T6.3 Add Dash filter controls.
+- [x] T6.4 Add tests for filter combinations and order modes.
+- [x] T6.5 Update references and action matrix.
+- [x] T6.6 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- Pending review.
 
 Validation:
 
-- Not run yet.
+- `go test ./internal/chcapp ./internal/chctui`
+- `make verify`
+- `git diff --check`
 
 ## Completion
 
