@@ -275,6 +275,10 @@ Dash shows agent-work operations:
 - current loop or execution state;
 - recent execution and loop outcomes.
 
+When Dash is selected, the TUI periodically reloads ticket and observability
+state from persisted execution, loop, daemon, and runtime records. Refresh does
+not start work or mutate ticket files.
+
 Dash work actions use confirmation prompts:
 
 - `enter` starts the selected ticket;

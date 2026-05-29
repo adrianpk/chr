@@ -330,6 +330,7 @@ func newTUIOptions(data tuiOptionsData) chctui.Options {
 		PlanExecutor:         newTUIPlanActionExecutor(data.operations),
 		TicketExecutor:       newTUITicketActionExecutor(data.operations),
 		WorkExecutor:         newTUIWorkActionExecutor(data.operations),
+		AgentWorkExecutor:    newTUIAgentWorkRefreshExecutor(data.operations),
 		WorkspaceExecutor:    newTUIWorkspaceRefreshExecutor(data.operations),
 		ProjectExecutor:      newTUIProjectMetadataExecutor(data.operations),
 		CaseExecutor:         newTUICaseMetadataExecutor(data.operations),

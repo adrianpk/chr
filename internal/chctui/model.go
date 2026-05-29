@@ -91,6 +91,7 @@ type Options struct {
 	PlanExecutor         PlanActionExecutor
 	TicketExecutor       TicketActionExecutor
 	WorkExecutor         WorkActionExecutor
+	AgentWorkExecutor    AgentWorkRefreshExecutor
 	WorkspaceExecutor    WorkspaceRefreshExecutor
 	ProjectExecutor      ProjectMetadataExecutor
 	CaseExecutor         CaseMetadataExecutor
@@ -162,6 +163,7 @@ type Model struct {
 	ticketExecutor           TicketActionExecutor
 	workAction               WorkActionState
 	workExecutor             WorkActionExecutor
+	agentWorkRefreshExecutor AgentWorkRefreshExecutor
 	workspaceExecutor        WorkspaceRefreshExecutor
 	projectExecutor          ProjectMetadataExecutor
 	caseExecutor             CaseMetadataExecutor
@@ -217,39 +219,40 @@ func NewModel(opts Options) Model {
 	boardColumn := defaultBoardColumn(tickets)
 
 	return Model{
-		projectDir:             opts.ProjectDir,
-		projectID:              opts.ProjectID,
-		projectMetadata:        projectMetadata,
-		cases:                  casesFromWorkspaceIndex(workspaceIndex, opts.WorkspaceGraph, opts.Cases),
-		views:                  append([]View(nil), defaultViews...),
-		maximizedPane:          -1,
-		verticalSplitPercent:   defaultPanelSplitPercent,
-		horizontalSplitPercent: defaultPanelSplitPercent,
-		tickets:                tickets,
-		boardColumn:            boardColumn,
-		previousBoardColumn:    boardColumn,
-		documents:              append([]DocumentView(nil), opts.Documents...),
-		dumps:                  normalizeDumpViews(opts.Dumps),
-		quizzes:                normalizeQuizViews(opts.Quizzes),
-		specs:                  normalizeSpecViews(opts.Specs),
-		plans:                  normalizePlanViews(opts.Plans),
-		authoringSessions:      NewAuthoringSessionViews(opts.AuthoringSessions),
-		observability:          opts.Observability,
-		workspaceGraph:         opts.WorkspaceGraph,
-		workspaceIndex:         workspaceIndex,
-		semanticDigestStates:   append([]chc.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
-		commandPalette:         NewCommandPaletteState(DefaultCommandRegistry()),
-		actionExecutor:         opts.ActionExecutor,
-		dumpExecutor:           opts.DumpExecutor,
-		quizExecutor:           opts.QuizExecutor,
-		specExecutor:           opts.SpecExecutor,
-		planExecutor:           opts.PlanExecutor,
-		ticketExecutor:         opts.TicketExecutor,
-		workExecutor:           opts.WorkExecutor,
-		workspaceExecutor:      opts.WorkspaceExecutor,
-		projectExecutor:        opts.ProjectExecutor,
-		caseExecutor:           opts.CaseExecutor,
-		sourceExecutor:         opts.SourceExecutor,
+		projectDir:               opts.ProjectDir,
+		projectID:                opts.ProjectID,
+		projectMetadata:          projectMetadata,
+		cases:                    casesFromWorkspaceIndex(workspaceIndex, opts.WorkspaceGraph, opts.Cases),
+		views:                    append([]View(nil), defaultViews...),
+		maximizedPane:            -1,
+		verticalSplitPercent:     defaultPanelSplitPercent,
+		horizontalSplitPercent:   defaultPanelSplitPercent,
+		tickets:                  tickets,
+		boardColumn:              boardColumn,
+		previousBoardColumn:      boardColumn,
+		documents:                append([]DocumentView(nil), opts.Documents...),
+		dumps:                    normalizeDumpViews(opts.Dumps),
+		quizzes:                  normalizeQuizViews(opts.Quizzes),
+		specs:                    normalizeSpecViews(opts.Specs),
+		plans:                    normalizePlanViews(opts.Plans),
+		authoringSessions:        NewAuthoringSessionViews(opts.AuthoringSessions),
+		observability:            opts.Observability,
+		workspaceGraph:           opts.WorkspaceGraph,
+		workspaceIndex:           workspaceIndex,
+		semanticDigestStates:     append([]chc.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
+		commandPalette:           NewCommandPaletteState(DefaultCommandRegistry()),
+		actionExecutor:           opts.ActionExecutor,
+		dumpExecutor:             opts.DumpExecutor,
+		quizExecutor:             opts.QuizExecutor,
+		specExecutor:             opts.SpecExecutor,
+		planExecutor:             opts.PlanExecutor,
+		ticketExecutor:           opts.TicketExecutor,
+		workExecutor:             opts.WorkExecutor,
+		agentWorkRefreshExecutor: opts.AgentWorkExecutor,
+		workspaceExecutor:        opts.WorkspaceExecutor,
+		projectExecutor:          opts.ProjectExecutor,
+		caseExecutor:             opts.CaseExecutor,
+		sourceExecutor:           opts.SourceExecutor,
 	}
 }
 
@@ -276,42 +279,58 @@ func Run(ctx context.Context, opts Options) error {
 }
 
 func (m Model) Init() tea.Cmd {
-	return nil
+	return agentWorkRefreshTickCmd()
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if updated, cmd, ok := m.updateSystemMessage(msg); ok {
+		return updated, cmd
+	}
+
+	if typedMsg, ok := msg.(tea.KeyMsg); ok {
+		return m.updateKey(typedMsg)
+	}
+
+	return m, nil
+}
+
+func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+	if updated, cmd, ok := m.updateAgentWorkRefreshMessage(msg); ok {
+		return updated, cmd, true
+	}
+
 	switch typedMsg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = typedMsg.Width
 		m.height = typedMsg.Height
 
-		return m, nil
+		return m, nil, true
 	case tea.MouseMsg:
-		return m.updateMouse(typedMsg)
+		updated, cmd := m.updateMouse(typedMsg)
+
+		return updated, cmd, true
 	case dumpEditorFinishedMsg:
 		m.completeDumpEdit(typedMsg)
 
-		return m, nil
+		return m, nil, true
 	case sourceEditorFinishedMsg:
 		m.completeSourceEdit(typedMsg)
 
-		return m, nil
+		return m, nil, true
 	case quizActionFinishedMsg:
 		m.completeQuizAction(typedMsg)
 
-		return m, nil
+		return m, nil, true
 	case specActionFinishedMsg:
 		m.completeSpecAction(typedMsg)
 
-		return m, nil
+		return m, nil, true
 	case planActionFinishedMsg:
 		m.completePlanAction(typedMsg)
 
-		return m, nil
-	case tea.KeyMsg:
-		return m.updateKey(typedMsg)
+		return m, nil, true
 	default:
-		return m, nil
+		return m, nil, false
 	}
 }
 

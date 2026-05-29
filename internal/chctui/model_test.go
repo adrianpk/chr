@@ -2296,6 +2296,108 @@ func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 	}
 }
 
+func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
+	executor := &fakeAgentWorkRefreshExecutor{
+		result: AgentWorkRefreshResult{
+			Tickets: []chc.IndexedTicket{
+				{Key: "CHC-2", Title: "Fresh ready", Status: "ready_for_dev"},
+			},
+			Observability: ObservabilityView{
+				LatestExecution: ExecutionView{ID: "exec-2", TicketKey: "CHC-2", Status: "running"},
+				LatestLoop:      LoopRunView{ID: "loop-2", Status: "running", EligibleCount: 1},
+			},
+		},
+	}
+	model := NewModel(Options{
+		AgentWorkExecutor: executor,
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "Old ready", Status: "ready_for_dev"},
+		},
+	})
+	model.selected = 7
+
+	updated, cmd := model.Update(agentWorkRefreshTickMsg{})
+	refreshing := requireUpdatedModel(t, updated)
+
+	if cmd == nil {
+		t.Fatal("refresh command is nil")
+	}
+
+	if !executor.called {
+		cmd()
+	}
+
+	updated, _ = refreshing.Update(agentWorkRefreshFinishedMsg{result: executor.result})
+	refreshed := requireUpdatedModel(t, updated)
+
+	if len(refreshed.tickets) != 1 || refreshed.tickets[0].Key != "CHC-2" {
+		t.Fatalf("tickets = %#v, want refreshed CHC-2", refreshed.tickets)
+	}
+
+	if refreshed.observability.LatestExecution.ID != "exec-2" {
+		t.Fatalf("LatestExecution.ID = %q, want exec-2", refreshed.observability.LatestExecution.ID)
+	}
+}
+
+func TestModelDoesNotRefreshAgentWorkOutsideDash(t *testing.T) {
+	executor := &fakeAgentWorkRefreshExecutor{}
+	model := NewModel(Options{AgentWorkExecutor: executor})
+
+	_, cmd := model.Update(agentWorkRefreshTickMsg{})
+	if cmd == nil {
+		t.Fatal("tick command is nil")
+	}
+
+	if executor.called {
+		t.Fatal("RefreshAgentWork called outside Dash")
+	}
+}
+
+func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
+	for _, testCase := range []struct {
+		name          string
+		observability ObservabilityView
+		want          []string
+	}{
+		{
+			name: "running",
+			observability: ObservabilityView{
+				LatestExecution: ExecutionView{ID: "exec-running", TicketKey: "CHC-1", Status: "running"},
+				LatestLoop:      LoopRunView{ID: "loop-running", Status: "running", EligibleCount: 2, ProcessedCount: 1},
+			},
+			want: []string{"Status: running", "Execution status: running", "Loop loop-running  running"},
+		},
+		{
+			name: "failed",
+			observability: ObservabilityView{
+				LatestExecution: ExecutionView{ID: "exec-failed", TicketKey: "CHC-2", Status: "failed"},
+				LatestLoop:      LoopRunView{ID: "loop-failed", Status: "failed", EligibleCount: 2, FailedCount: 1},
+			},
+			want: []string{"Status: failed", "Execution status: failed", "Loop loop-failed  failed"},
+		},
+		{
+			name: "blocked",
+			observability: ObservabilityView{
+				LatestExecution: ExecutionView{ID: "exec-blocked", TicketKey: "CHC-3", Status: "succeeded"},
+				LatestLoop:      LoopRunView{ID: "loop-blocked", Status: "blocked", EligibleCount: 2, BlockedCount: 1},
+			},
+			want: []string{"Status: blocked", "Execution status: succeeded", "Loop loop-blocked  blocked"},
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			model := NewModel(Options{Observability: testCase.observability})
+			model.selected = 7
+
+			view := model.View()
+			for _, want := range testCase.want {
+				if !strings.Contains(view, want) {
+					t.Fatalf("View() missing %q:\n%s", want, view)
+				}
+			}
+		})
+	}
+}
+
 func TestModelCancelsWorkAction(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []chc.IndexedTicket{
@@ -4511,6 +4613,12 @@ type fakeWorkActionExecutor struct {
 	err     error
 }
 
+type fakeAgentWorkRefreshExecutor struct {
+	called bool
+	result AgentWorkRefreshResult
+	err    error
+}
+
 type fakeWorkspaceRefreshExecutor struct {
 	called bool
 	result WorkspaceRefreshResult
@@ -4537,6 +4645,12 @@ func (e *fakeSourceOpenExecutor) OpenSource(path string) (SourceOpenResult, erro
 
 func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (WorkActionResult, error) {
 	e.request = request
+
+	return e.result, e.err
+}
+
+func (e *fakeAgentWorkRefreshExecutor) RefreshAgentWork() (AgentWorkRefreshResult, error) {
+	e.called = true
 
 	return e.result, e.err
 }

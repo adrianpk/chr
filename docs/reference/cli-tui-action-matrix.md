@@ -103,6 +103,8 @@ Command availability gates:
 
 - Spec commands are available only in the Specs view.
 - Plan commands are available only in the Plans view.
+- Dash refreshes agent-work observability from persisted execution and loop
+  records while selected.
 - `materialize-plan-tracking` is additionally available only when the selected
   plan exists and contains content.
 
