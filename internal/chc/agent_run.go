@@ -244,7 +244,6 @@ func codexAgentCommand(run preparedAgentRun) AgentCommand {
 		"exec",
 		"--cd", request.ProjectDir,
 		"--sandbox", "read-only",
-		"--ask-for-approval", "never",
 		"--skip-git-repo-check",
 		"--ephemeral",
 		"--output-last-message", run.Result.OutputPath,
