@@ -27,11 +27,13 @@ Optional input:
 When no statuses are provided, the default eligible status is:
 
 ```text
-ready
+ready_for_dev
 ```
 
 Callers may provide explicit statuses to widen or narrow selection. Status
-values must be valid ticket lifecycle statuses.
+values must be valid ticket lifecycle statuses. The legacy `ready` status
+remains supported when passed explicitly, but default loop selection uses
+`ready_for_dev`.
 
 Metadata filters can narrow the eligible tickets by:
 
@@ -49,7 +51,8 @@ Empty filter dimensions are ignored. Multiple values inside one filter
 dimension are treated as alternatives, except tags: every requested tag must be
 present on the ticket.
 
-When no ordering is provided, returned tickets are sorted by ticket key.
+When no ordering is provided, returned tickets are sorted by `created_at`
+oldest-first, with ticket key as the final tie-breaker.
 
 Supported order values:
 

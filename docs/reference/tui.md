@@ -262,7 +262,7 @@ chc ticket status CHC-1 ready
 chc ticket status CHC-1 in_progress
 chc ticket status CHC-1 reviewing
 chc ticket start CHC-1
-chc ticket loop --status ready --max-iterations 1
+chc ticket loop --status ready_for_dev --max-iterations 1
 ```
 
 ## Confirmation Modes

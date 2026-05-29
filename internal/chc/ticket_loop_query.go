@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var defaultLoopEligibleStatuses = []string{"ready"}
+var defaultLoopEligibleStatuses = []string{TicketStatusReadyForDev}
 
 type TicketLoopQueryOptions struct {
 	ProjectID string
@@ -163,7 +163,7 @@ func matchesTicketLoopTags(filters, ticketTags []string) bool {
 
 func normalizeTicketLoopOrder(order TicketLoopOrder) (TicketLoopOrder, error) {
 	if order == "" {
-		return TicketLoopOrderKey, nil
+		return TicketLoopOrderCreatedAt, nil
 	}
 
 	switch order {

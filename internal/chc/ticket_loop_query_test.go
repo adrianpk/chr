@@ -4,14 +4,31 @@ import (
 	"context"
 	"slices"
 	"testing"
+	"time"
 )
 
-func TestTicketLoopQuerySelectsDefaultReadyTickets(t *testing.T) {
+func TestTicketLoopQuerySelectsDefaultReadyForDevTicketsOldestFirst(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicket(t, index, "CHC-3", "ready")
-	upsertLoopQueryTicket(t, index, "CHC-1", "open")
-	upsertLoopQueryTicket(t, index, "CHC-2", "ready")
-	upsertLoopQueryTicket(t, index, "CHC-4", "blocked")
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:       "CHC-3",
+		Status:    TicketStatusReadyForDev,
+		CreatedAt: testLoopQueryTime("2026-05-18T13:00:00Z"),
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:       "CHC-1",
+		Status:    TicketStatusBacklog,
+		CreatedAt: testLoopQueryTime("2026-05-18T10:00:00Z"),
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:       "CHC-2",
+		Status:    TicketStatusReadyForDev,
+		CreatedAt: testLoopQueryTime("2026-05-18T12:00:00Z"),
+	})
+	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:       "CHC-4",
+		Status:    TicketStatusReadyForReview,
+		CreatedAt: testLoopQueryTime("2026-05-18T09:00:00Z"),
+	})
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
@@ -22,7 +39,7 @@ func TestTicketLoopQuerySelectsDefaultReadyTickets(t *testing.T) {
 
 	gotKeys := indexedTicketKeys(got)
 	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3"}) {
-		t.Fatalf("keys = %#v, want ready tickets sorted by key", gotKeys)
+		t.Fatalf("keys = %#v, want ready_for_dev tickets sorted by created_at", gotKeys)
 	}
 }
 
@@ -36,6 +53,7 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
 		Statuses:  []string{"open", "ready"},
+		Order:     TicketLoopOrderKey,
 	})
 	if err != nil {
 		t.Fatalf("EligibleTickets returned error: %v", err)
@@ -49,7 +67,7 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 
 func TestTicketLoopQueryScopesToProject(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicket(t, index, "CHC-1", "ready")
+	upsertLoopQueryTicket(t, index, "CHC-1", TicketStatusReadyForDev)
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "other-project",
@@ -67,7 +85,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:         "CHC-1",
-		Status:      "ready",
+		Status:      TicketStatusReadyForDev,
 		Priority:    "high",
 		Severity:    "critical",
 		Type:        "feature",
@@ -77,7 +95,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:         "CHC-2",
-		Status:      "ready",
+		Status:      TicketStatusReadyForDev,
 		Priority:    "normal",
 		Severity:    "normal",
 		Type:        "bug",
@@ -87,7 +105,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:         "CHC-3",
-		Status:      "ready",
+		Status:      TicketStatusReadyForDev,
 		Priority:    "high",
 		Severity:    "critical",
 		Type:        "feature",
@@ -121,14 +139,14 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-1",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "critical",
 		Type:     "feature",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-2",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "normal",
 		Severity: "normal",
 		Type:     "bug",
@@ -154,17 +172,17 @@ func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-1",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "low",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-2",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "critical",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-3",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 	})
 
@@ -186,17 +204,17 @@ func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-1",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Severity: "normal",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-2",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Severity: "critical",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-3",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Severity: "high",
 	})
 
@@ -218,19 +236,19 @@ func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-3",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "normal",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-1",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "critical",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
 		Key:      "CHC-2",
-		Status:   "ready",
+		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "critical",
 	})
@@ -361,19 +379,23 @@ func upsertLoopQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata
 }
 
 func testLoopQueryTicketWithCreatedAt(key, createdAt string) IndexedTicket {
-	parsed, err := parseProjectTime(createdAt)
+	return IndexedTicket{
+		Key:       key,
+		Status:    TicketStatusReadyForDev,
+		Priority:  "normal",
+		Severity:  "normal",
+		Type:      "task",
+		CreatedAt: testLoopQueryTime(createdAt),
+	}
+}
+
+func testLoopQueryTime(value string) *time.Time {
+	parsed, err := parseProjectTime(value)
 	if err != nil {
 		panic(err)
 	}
 
-	return IndexedTicket{
-		Key:       key,
-		Status:    "ready",
-		Priority:  "normal",
-		Severity:  "normal",
-		Type:      "task",
-		CreatedAt: &parsed,
-	}
+	return &parsed
 }
 
 func indexedTicketKeys(tickets []IndexedTicket) []string {

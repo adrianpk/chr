@@ -29,8 +29,8 @@ Prerequisite PRs or delivered work:
 
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [ ] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Commit plan and tracker directly to `dev`.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with repository quality gates.
 - [ ] Decide whether post-slice tuning is needed.
@@ -39,7 +39,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Agent Work Selection Contract | Planned | `feat/slice-1-agent-work-selection-contract` | `feat(slice-1): agent work selection contract` | `.prj/reports/slices/dash-agent-work/slice-1-agent-work-selection-contract.md` | Defines default selection semantics. |
+| Slice 1: Agent Work Selection Contract | Reviewing | `feat/slice-1-agent-work-selection-contract` | `feat(slice-1): agent work selection contract` | `.prj/reports/slices/dash-agent-work/slice-1-agent-work-selection-contract.md` | PR pending. |
 | Slice 2: Agent Work Service Facade | Planned | `feat/slice-2-agent-work-service-facade` | `feat(slice-2): agent work service facade` | `.prj/reports/slices/dash-agent-work/slice-2-agent-work-service-facade.md` | Depends on Slice 1. |
 | Slice 3: CLI Agent Work Commands | Planned | `feat/slice-3-cli-agent-work-commands` | `feat(slice-3): cli agent work commands` | `.prj/reports/slices/dash-agent-work/slice-3-cli-agent-work-commands.md` | Depends on Slice 2. |
 | Slice 4: Dash Agent Work Panel | Planned | `feat/slice-4-dash-agent-work-panel` | `feat(slice-4): dash agent work panel` | `.prj/reports/slices/dash-agent-work/slice-4-dash-agent-work-panel.md` | Depends on Slice 2. |
@@ -50,19 +50,21 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Audit current ticket loop status and order defaults.
-- [ ] T1.2 Add or update tests for `ready_for_dev` default selection.
-- [ ] T1.3 Add or update tests for oldest-first default ordering.
-- [ ] T1.4 Update ticket loop reference docs for agent-work default semantics.
-- [ ] T1.5 Add slice implementation report and run quality gates.
+- [x] T1.1 Audit current ticket loop status and order defaults.
+- [x] T1.2 Add or update tests for `ready_for_dev` default selection.
+- [x] T1.3 Add or update tests for oldest-first default ordering.
+- [x] T1.4 Update ticket loop reference docs for agent-work default semantics.
+- [x] T1.5 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- Pending review.
 
 Validation:
 
-- Not run yet.
+- `go test ./internal/chc ./internal/chcapp`
+- `make verify`
+- `git diff --check`
 
 ## Slice 2: Agent Work Service Facade
 

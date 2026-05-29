@@ -95,7 +95,7 @@ Status values:
 | Ticket | `ticket-checklist-toggle` | Validate checklist toggle availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
 | Ticket | `ticket-checklist-add` | Validate checklist item creation availability. | none | TUI returns unavailable | `not_implemented` | Safe checklist writer is not implemented. |
 | Work | `work-start-ticket` | Start selected ticket execution. | `chc ticket start <key>` | shared `buildTicketStartPreflightForTicket` and `runTicketStartExecution` | `matched` | CLI owns preflight/output; TUI service wraps selected-ticket execution. |
-| Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chc ticket loop --status ready --max-iterations 1` | shared `runTicketLoopExecution` | `matched` | CLI supports configurable query/run options; TUI wraps one ready-ticket iteration. |
+| Work | `work-start-ready-loop` | Start one ready-ticket loop. | `chc ticket loop --status ready_for_dev --max-iterations 1` | shared `runTicketLoopExecution` | `matched` | CLI supports configurable query/run options; TUI wraps one ready-ticket iteration. |
 | Work | `work-request-stop` | Request daemon stop. | `chc daemon stop` | shared `requestDaemonStopState` | `matched` | CLI owns output and dry-run; TUI reloads work state after the shared stop request. |
 
 Command availability gates:

@@ -204,7 +204,7 @@ chc ticket apply-result <execution-id>
 Run a filtered foreground loop:
 
 ```sh
-chc ticket loop --status ready --priority high --max-iterations 3
+chc ticket loop --status ready_for_dev --priority high --max-iterations 3
 ```
 
 Preview loop selection:

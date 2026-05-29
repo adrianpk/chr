@@ -540,7 +540,7 @@ func printTicketLoopPlan(
 ) error {
 	order := opts.Order
 	if order == "" {
-		order = chc.TicketLoopOrderKey
+		order = chc.TicketLoopOrderCreatedAt
 	}
 
 	lines := []string{

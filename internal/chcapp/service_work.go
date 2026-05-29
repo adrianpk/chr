@@ -124,8 +124,8 @@ func (s service) readyLoopTickets() ([]chc.IndexedTicket, int, error) {
 
 	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(s.ctx, chc.TicketLoopQueryOptions{
 		ProjectID: s.projectContext.ProjectID,
-		Statuses:  []string{"ready"},
-		Order:     chc.TicketLoopOrderKey,
+		Statuses:  []string{chc.TicketStatusReadyForDev},
+		Order:     chc.TicketLoopOrderCreatedAt,
 	})
 	if err != nil {
 		return nil, 0, err

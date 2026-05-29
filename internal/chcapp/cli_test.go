@@ -2011,7 +2011,7 @@ func TestTicketLoopDryRunPrintsEligibleTickets(t *testing.T) {
 		"dry_run: true",
 		"order: priority",
 		"eligible: 1",
-		"ticket: CHC-1\tReady frontend\tready\thigh\tcritical\tfeature\tonboarding\tCHC-1-Ready.md",
+		"ticket: CHC-1\tReady frontend\tready_for_dev\thigh\tcritical\tfeature\tonboarding\tCHC-1-Ready.md",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -2027,10 +2027,10 @@ func writeTicketLoopDryRunTickets(t *testing.T, projectDir string) {
 	t.Helper()
 
 	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", testLoopTicket(
-		"CHC-2", "Ready backend", "ready", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
 	))
 	writeTicketMarkdownOnly(t, projectDir, "CHC-3-Open.md", testLoopTicket(
 		"CHC-3", "Open frontend", "open", "critical", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
@@ -2056,6 +2056,13 @@ func testLoopTicket(
 	}
 }
 
+func withLoopTicketCreatedAt(ticket chc.Ticket, createdAt time.Time) chc.Ticket {
+	ticket.CreatedAt = createdAt
+	ticket.UpdatedAt = createdAt
+
+	return ticket
+}
+
 func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -2064,7 +2071,7 @@ func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
 	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	var stdout bytes.Buffer
@@ -2122,12 +2129,12 @@ func TestTicketLoopHonorsMaxIterations(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
-	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", testLoopTicket(
-		"CHC-2", "Ready backend", "ready", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
-	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	var stdout bytes.Buffer
 
@@ -2223,7 +2230,7 @@ func TestTicketLoopDispatchesConfiguredFinishedNotification(t *testing.T) {
 	writeRuntimeTemplate(t, projectDir)
 	writeTelegramNotifyConfig(t, projectDir)
 	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	err := run(t.Context(), []string{
@@ -2258,12 +2265,12 @@ func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
-	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", testLoopTicket(
-		"CHC-2", "Ready backend", "ready", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
-	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	var stdout bytes.Buffer
 
@@ -2320,7 +2327,7 @@ func TestTicketLoopRecordsFailedNotification(t *testing.T) {
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
 	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	err := run(t.Context(), []string{

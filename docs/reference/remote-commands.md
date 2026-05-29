@@ -49,7 +49,7 @@ Supported commands:
 ```text
 status
 @project-name status
-loop start --status ready --priority high --max-iterations 1
+loop start --status ready_for_dev --priority high --max-iterations 1
 ticket start CHC-12
 ticket comment CHC-12 blocked on CI logs
 ```
@@ -57,7 +57,7 @@ ticket comment CHC-12 blocked on CI logs
 Loop flags may use either separate values or `--name=value` form:
 
 ```text
-loop start --status=ready --tag backend
+loop start --status=ready_for_dev --tag backend
 ```
 
 Supported loop flags:
