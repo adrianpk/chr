@@ -96,6 +96,36 @@ func TestServiceSaveProjectMetadata(t *testing.T) {
 	}
 }
 
+func TestNewQuizModelAdapterCanRouteSpecGenerationToCodex(t *testing.T) {
+	t.Setenv("CHC_SPEC_GENERATION_BACKEND", "codex")
+
+	adapter := newQuizModelAdapter(t.TempDir())
+
+	routing, ok := adapter.(chc.ActionRoutingQuizModelAdapter)
+	if !ok {
+		t.Fatalf("adapter = %T, want action routing adapter", adapter)
+	}
+
+	if _, ok := routing.ActionAdapters[chc.QuizModelActionGenerateSpec]; !ok {
+		t.Fatalf("spec generation action is not routed: %#v", routing.ActionAdapters)
+	}
+}
+
+func TestNewQuizModelAdapterCanRoutePlanGenerationToCodex(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "codex")
+
+	adapter := newQuizModelAdapter(t.TempDir())
+
+	routing, ok := adapter.(chc.ActionRoutingQuizModelAdapter)
+	if !ok {
+		t.Fatalf("adapter = %T, want action routing adapter", adapter)
+	}
+
+	if _, ok := routing.ActionAdapters[chc.QuizModelActionGeneratePlan]; !ok {
+		t.Fatalf("plan generation action is not routed: %#v", routing.ActionAdapters)
+	}
+}
+
 func TestServiceSaveCaseMetadataReloadsCases(t *testing.T) {
 	projectDir := t.TempDir()
 	operations := newTestService(t, projectDir)

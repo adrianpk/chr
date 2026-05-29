@@ -140,9 +140,9 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 		return PlanOperationResult{}, err
 	}
 
-	plan, requestIDs, responseIDs, err := s.generateStagedPlan(ctx, scope, state)
+	plan, requestIDs, responseIDs, err := s.generatePlanWithConfiguredBackend(ctx, scope, state)
 	if err != nil {
-		s.appendPlanGenerationLog("generate_plan_staged_generation_failed", map[string]string{
+		s.appendPlanGenerationLog("generate_plan_model_generation_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
 			"error":     err.Error(),
 		})
@@ -177,6 +177,54 @@ func (s service) generatePlan(ctx context.Context, scope chc.QuizScope) (PlanOpe
 		Message: "Plan generated.",
 		Plan:    view,
 	}, nil
+}
+
+func (s service) generatePlanWithConfiguredBackend(
+	ctx context.Context,
+	scope chc.QuizScope,
+	state chc.QuizRuntimeState,
+) (chc.GeneratedPlan, []string, []string, error) {
+	if codexGenerationBackend("CHC_PLAN_GENERATION_BACKEND") {
+		return s.generateSinglePassPlan(ctx, scope, state)
+	}
+
+	return s.generateStagedPlan(ctx, scope, state)
+}
+
+func (s service) generateSinglePassPlan(
+	ctx context.Context,
+	scope chc.QuizScope,
+	state chc.QuizRuntimeState,
+) (chc.GeneratedPlan, []string, []string, error) {
+	modelRequest, err := s.newPlanGenerationModelRequest(state)
+	if err != nil {
+		return chc.GeneratedPlan{}, nil, nil, err
+	}
+
+	s.appendPlanGenerationLog("generate_plan_single_pass_started", map[string]string{
+		"case_slug":        scope.CaseSlug,
+		"request_id":       modelRequest.ID,
+		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
+	})
+
+	response, err := chc.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	if err != nil {
+		return chc.GeneratedPlan{}, nil, nil, err
+	}
+
+	plan := response.Plan
+	plan.Scope = scope
+	plan.SourcePaths = specSourcePaths(modelRequest.ContextSections)
+	plan.CreatedAt = response.CreatedAt.UTC()
+
+	s.appendPlanGenerationLog("generate_plan_single_pass_finished", map[string]string{
+		"case_slug":   scope.CaseSlug,
+		"request_id":  modelRequest.ID,
+		"response_id": response.ID,
+		"title":       plan.Title,
+	})
+
+	return plan, []string{modelRequest.ID}, []string{response.ID}, nil
 }
 
 func (s service) generateStagedPlan(
@@ -632,6 +680,15 @@ func (s service) newPlanOutlineGenerationModelRequest(state chc.QuizRuntimeState
 		chc.QuizModelActionGeneratePlanOutline,
 		"plan_outline_generation",
 		"plan-outline-generation",
+	)
+}
+
+func (s service) newPlanGenerationModelRequest(state chc.QuizRuntimeState) (chc.QuizModelRequest, error) {
+	return s.newPlanningModelRequest(
+		state,
+		chc.QuizModelActionGeneratePlan,
+		"plan_generation",
+		"plan-generation",
 	)
 }
 

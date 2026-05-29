@@ -98,6 +98,57 @@ The implementation must preserve editorial review.
 	})
 }
 
+func TestServiceGeneratePlanCanUseSinglePassCodexBackend(t *testing.T) {
+	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "codex")
+
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+title: "Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Blog Spec
+
+The implementation must preserve editorial review.
+`)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizPlanResponse("response-plan", clock()),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("GeneratePlan returned error: %v", err)
+	}
+
+	if result.Message != "Plan generated." {
+		t.Fatalf("Message = %q, want Plan generated.", result.Message)
+	}
+
+	if len(model.requests) != 1 {
+		t.Fatalf("model requests = %d, want single plan generation request", len(model.requests))
+	}
+
+	if model.requests[0].Action != chc.QuizModelActionGeneratePlan {
+		t.Fatalf("action = %q, want plan generation", model.requests[0].Action)
+	}
+
+	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"))
+	if !strings.Contains(plan, "Implement the generated plan in one pass.") {
+		t.Fatalf("generated plan missing single-pass body in:\n%s", plan)
+	}
+}
+
 func TestServiceBuildsPlanOutlineGenerationRequest(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -138,6 +189,53 @@ The implementation must preserve editorial review.
 
 	if request.Payload.OutputContract.RenderedTextField != "summary" {
 		t.Fatalf("RenderedTextField = %q, want summary", request.Payload.OutputContract.RenderedTextField)
+	}
+
+	assertQuizModelRequestSections(t, request, []string{
+		"project",
+		"quiz",
+		"recent_entries",
+		"current_question",
+		"agent_protocol",
+		"project_document",
+		"use_case_document",
+		"dump",
+		"spec",
+	})
+}
+
+func TestServiceBuildsPlanGenerationModelRequest(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+title: "Blog Spec"
+status: "draft"
+case: "blog"
+---
+
+# Blog Spec
+
+The implementation must preserve editorial review.
+`)
+
+	operations := newTestService(t, projectDir)
+	scope := chc.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	state, err := operations.specGenerationRuntimeState(scope)
+	if err != nil {
+		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
+	}
+
+	request, err := operations.newPlanGenerationModelRequest(state)
+	if err != nil {
+		t.Fatalf("newPlanGenerationModelRequest returned error: %v", err)
+	}
+
+	if request.Action != chc.QuizModelActionGeneratePlan {
+		t.Fatalf("Action = %q, want plan generation", request.Action)
+	}
+
+	if request.ID != "plan-generation-blog" {
+		t.Fatalf("ID = %q, want plan-generation-blog", request.ID)
 	}
 
 	assertQuizModelRequestSections(t, request, []string{

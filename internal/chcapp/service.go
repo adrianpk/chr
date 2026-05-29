@@ -3,6 +3,8 @@ package chcapp
 import (
 	"context"
 	"io/fs"
+	"os"
+	"strings"
 	"time"
 
 	"forge.adrianpk.com/chc/internal/chc"
@@ -32,7 +34,33 @@ func newService(
 		projectContext: projectContext,
 		dumpEditor:     defaultDumpEditorLauncher{},
 		dumpCurator:    openAIDumpCurationProvider{ProjectDir: projectContext.ProjectDir},
-		quizModel:      chc.OpenAIQuizModelAdapter{ProjectDir: projectContext.ProjectDir},
+		quizModel:      newQuizModelAdapter(projectContext.ProjectDir),
 		now:            time.Now,
 	}
+}
+
+func newQuizModelAdapter(projectDir string) chc.QuizModelAdapter {
+	defaultAdapter := chc.OpenAIQuizModelAdapter{ProjectDir: projectDir}
+	actionAdapters := map[chc.QuizModelAction]chc.QuizModelAdapter{}
+
+	if codexGenerationBackend("CHC_SPEC_GENERATION_BACKEND") {
+		actionAdapters[chc.QuizModelActionGenerateSpec] = chc.CodexQuizModelAdapter{ProjectDir: projectDir}
+	}
+
+	if codexGenerationBackend("CHC_PLAN_GENERATION_BACKEND") {
+		actionAdapters[chc.QuizModelActionGeneratePlan] = chc.CodexQuizModelAdapter{ProjectDir: projectDir}
+	}
+
+	if len(actionAdapters) == 0 {
+		return defaultAdapter
+	}
+
+	return chc.ActionRoutingQuizModelAdapter{
+		ActionAdapters: actionAdapters,
+		DefaultAdapter: defaultAdapter,
+	}
+}
+
+func codexGenerationBackend(name string) bool {
+	return strings.EqualFold(strings.TrimSpace(os.Getenv(name)), "codex")
 }

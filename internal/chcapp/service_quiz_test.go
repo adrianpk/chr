@@ -796,6 +796,10 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 			return serviceQuizPlanSliceDetailResponse("response-fallback-slice-detail", request.CreatedAt), nil
 		}
 
+		if request.Action == chc.QuizModelActionGeneratePlan {
+			return serviceQuizPlanResponse("response-fallback-plan", request.CreatedAt), nil
+		}
+
 		if request.Action == chc.QuizModelActionMaterializePlanTracking {
 			return serviceQuizPlanTrackingResponse("response-fallback", request.CreatedAt), nil
 		}
@@ -890,6 +894,23 @@ func serviceQuizStagedPlanResponses(createdAt time.Time) []chc.QuizModelResponse
 	return []chc.QuizModelResponse{
 		serviceQuizPlanOutlineResponse("response-plan-outline", createdAt),
 		serviceQuizPlanSliceDetailResponse("response-plan-slice-detail", createdAt),
+	}
+}
+
+func serviceQuizPlanResponse(responseID string, createdAt time.Time) chc.QuizModelResponse {
+	return chc.QuizModelResponse{
+		ID:        responseID,
+		RequestID: "filled-by-fake",
+		Provider:  "fake",
+		Status:    chc.QuizModelResponseReady,
+		Plan: chc.GeneratedPlan{
+			Scope:     chc.QuizScope{ProjectID: "service-project"},
+			Title:     "Generated Implementation Plan",
+			Body:      "## High-level implementation strategy\n\nImplement the generated plan in one pass.\n",
+			CreatedAt: createdAt,
+		},
+		RawText:   "raw generated plan",
+		CreatedAt: createdAt,
 	}
 }
 
