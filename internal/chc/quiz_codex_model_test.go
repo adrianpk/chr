@@ -108,6 +108,52 @@ func TestCodexQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
 	}
 }
 
+func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing.T) {
+	runner := &fakeAgentRunner{
+		Result: AgentRunResult{
+			ID: "plan-tracking-blog",
+			Output: []byte(`{
+				"title":"Blog Tracking",
+				"body":"Track generated tickets.",
+				"status":"tracking",
+				"tickets":[{
+					"slice_id":"Slice 1",
+					"title":"Implement planning foundation",
+					"synopsis":"Build the planning foundation slice.",
+					"summary":"Implement the planning foundation.",
+					"body":"Ticket body.",
+					"priority":"normal",
+					"severity":"normal",
+					"type":"task",
+					"tags":["plan"],
+					"dependencies":[]
+				}]
+			}`),
+		},
+	}
+	request := validCodexQuizModelRequest(QuizModelActionMaterializePlanTracking)
+
+	response, err := (CodexQuizModelAdapter{
+		ProjectDir: t.TempDir(),
+		Runner:     runner,
+	}).InvokeQuizModel(context.Background(), request)
+	if err != nil {
+		t.Fatalf("InvokeQuizModel returned error: %v", err)
+	}
+
+	if response.Provider != QuizModelProviderCodex {
+		t.Fatalf("Provider = %q, want codex", response.Provider)
+	}
+
+	if response.PlanTracking.Title != "Blog Tracking" {
+		t.Fatalf("PlanTracking.Title = %q, want Blog Tracking", response.PlanTracking.Title)
+	}
+
+	if !strings.Contains(runner.Request.Prompt, "plan_tracking_materialization backend") {
+		t.Fatalf("prompt does not identify plan tracking backend:\n%s", runner.Request.Prompt)
+	}
+}
+
 func TestActionRoutingQuizModelAdapterRoutesConfiguredActions(t *testing.T) {
 	specAdapter := &fakeRoutingQuizModelAdapter{}
 	defaultAdapter := &fakeRoutingQuizModelAdapter{}

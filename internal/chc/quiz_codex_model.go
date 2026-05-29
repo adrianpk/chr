@@ -114,6 +114,8 @@ func codexQuizModelOutputSchema(action QuizModelAction) ([]byte, error) {
 		schema = quizModelDraftSpecJSONSchema()
 	case QuizModelActionGeneratePlan:
 		schema = quizModelPlanJSONSchema()
+	case QuizModelActionMaterializePlanTracking:
+		schema = quizModelPlanTrackingJSONSchema()
 	default:
 		return nil, fmt.Errorf("codex quiz model adapter does not support action %s", action)
 	}

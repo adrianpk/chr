@@ -496,6 +496,48 @@ Implement planning foundation.
 	}
 }
 
+func TestServiceMaterializePlanTrackingDoesNotWriteOnInvalidGeneratedTracking(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+title: "Blog Plan"
+status: "planned"
+case_slug: "blog"
+---
+
+# Blog Plan
+`)
+
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			{
+				ID:        "response-invalid-tracking",
+				RequestID: "filled-by-fake",
+				Provider:  "fake",
+				Status:    chc.QuizModelResponseReady,
+				PlanTracking: chc.GeneratedPlanTracking{
+					Title:     "Invalid Tracking",
+					Body:      "Missing generated tickets.",
+					CreatedAt: time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC),
+				},
+				CreatedAt: time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC),
+			},
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+
+	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err == nil {
+		t.Fatal("MaterializePlanTracking returned nil error")
+	}
+
+	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/plans/blog-tracking.md")
+	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
+}
+
 func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
 	t.Helper()
 

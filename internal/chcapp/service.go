@@ -51,6 +51,10 @@ func newQuizModelAdapter(projectDir string) chc.QuizModelAdapter {
 		actionAdapters[chc.QuizModelActionGeneratePlan] = chc.CodexQuizModelAdapter{ProjectDir: projectDir}
 	}
 
+	if codexGenerationBackend("CHC_PLAN_TRACKING_GENERATION_BACKEND") {
+		actionAdapters[chc.QuizModelActionMaterializePlanTracking] = chc.CodexQuizModelAdapter{ProjectDir: projectDir}
+	}
+
 	if len(actionAdapters) == 0 {
 		return defaultAdapter
 	}

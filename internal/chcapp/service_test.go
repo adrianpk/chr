@@ -2,6 +2,7 @@ package chcapp
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -123,6 +124,21 @@ func TestNewQuizModelAdapterCanRoutePlanGenerationToCodex(t *testing.T) {
 
 	if _, ok := routing.ActionAdapters[chc.QuizModelActionGeneratePlan]; !ok {
 		t.Fatalf("plan generation action is not routed: %#v", routing.ActionAdapters)
+	}
+}
+
+func TestNewQuizModelAdapterCanRoutePlanTrackingToCodex(t *testing.T) {
+	t.Setenv("CHC_PLAN_TRACKING_GENERATION_BACKEND", "codex")
+
+	adapter := newQuizModelAdapter(t.TempDir())
+
+	routing, ok := adapter.(chc.ActionRoutingQuizModelAdapter)
+	if !ok {
+		t.Fatalf("adapter = %T, want action routing adapter", adapter)
+	}
+
+	if _, ok := routing.ActionAdapters[chc.QuizModelActionMaterializePlanTracking]; !ok {
+		t.Fatalf("plan tracking action is not routed: %#v", routing.ActionAdapters)
 	}
 }
 
@@ -555,6 +571,21 @@ func readServiceWorkspaceFile(t *testing.T, path string) string {
 	}
 
 	return string(content)
+}
+
+func assertServiceWorkspacePathMissing(t *testing.T, projectDir, relativePath string) {
+	t.Helper()
+
+	path := filepath.Join(projectDir, filepath.FromSlash(relativePath))
+
+	_, err := os.Stat(path)
+	if err == nil {
+		t.Fatalf("path exists, want missing: %s", path)
+	}
+
+	if !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("Stat returned error %v, want not exists", err)
+	}
 }
 
 func assertServiceSuggestsWorkspaceCases(t *testing.T, operations service) {

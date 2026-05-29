@@ -31,7 +31,7 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with repository quality gates.
 - [ ] Decide whether post-slice tuning is needed.
@@ -40,7 +40,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: Plan Tracking Codex Backend | Planned | `feat/slice-1-plan-tracking-codex-backend` | `feat(slice-1): plan tracking codex backend` | `.prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md` | First executable slice after this plan/tracker are committed to `dev`. |
+| Slice 1: Plan Tracking Codex Backend | Reviewing | `feat/slice-1-plan-tracking-codex-backend` | `feat(slice-1): plan tracking codex backend` | `.prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md` | Implemented on `feat/slice-1-plan-tracking-codex-backend`; PR pending. |
 | Slice 2: Ticket Payload Boundary | Planned | `feat/slice-2-ticket-payload-boundary` | `feat(slice-2): ticket payload boundary` | `.prj/reports/slices/codex-artifact-generation/slice-2-ticket-payload-boundary.md` | Depends on Slice 1. |
 | Slice 3: Artifact Backend Defaults | Planned | `feat/slice-3-artifact-backend-defaults` | `feat(slice-3): artifact backend defaults` | `.prj/reports/slices/codex-artifact-generation/slice-3-artifact-backend-defaults.md` | Depends on Slices 1 and 2; reconciles dump curation branch/default policy. |
 | Slice 4: Artifact Run Bundle Audit | Planned | `feat/slice-4-artifact-run-bundle-audit` | `feat(slice-4): artifact run bundle audit` | `.prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md` | Depends on Slices 1 through 3. |
@@ -49,20 +49,21 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Add plan tracking schema support to the Codex quiz model adapter.
-- [ ] T1.2 Add plan tracking routing/configuration in the service.
-- [ ] T1.3 Add tests that plan tracking can use the Codex route.
-- [ ] T1.4 Add failure-path tests for parse/validation failure without writes.
-- [ ] T1.5 Add slice implementation report.
-- [ ] T1.6 Run targeted tests and repository quality gates.
+- [x] T1.1 Add plan tracking schema support to the Codex quiz model adapter.
+- [x] T1.2 Add plan tracking routing/configuration in the service.
+- [x] T1.3 Add tests that plan tracking can use the Codex route.
+- [x] T1.4 Add failure-path tests for parse/validation failure without writes.
+- [x] T1.5 Add slice implementation report.
+- [x] T1.6 Run targeted tests and repository quality gates.
 
 Task commits:
 
-- None yet.
+- Pending commit on `feat/slice-1-plan-tracking-codex-backend`.
 
 Validation:
 
-- Not run yet.
+- `go test ./internal/chc ./internal/chcapp` - pass.
+- `make verify` - pass.
 
 ## Slice 2: Ticket Payload Boundary
 
