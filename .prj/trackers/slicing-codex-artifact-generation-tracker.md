@@ -1,6 +1,6 @@
 # Codex Artifact Generation Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-codex-artifact-generation-plan.md`
 
@@ -34,7 +34,7 @@ Prerequisite PRs or delivered work:
 - [x] Select the first pending slice for implementation.
 - [x] Complete all planned slices.
 - [x] Validate completed slicing with repository quality gates.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -43,7 +43,7 @@ Prerequisite PRs or delivered work:
 | Slice 1: Plan Tracking Codex Backend | Completed | `feat/slice-1-plan-tracking-codex-backend` | `feat(slice-1): plan tracking codex backend` | `.prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md` | Merged into `dev`. |
 | Slice 2: Ticket Payload Boundary | Completed | `feat/slice-2-ticket-payload-boundary` | `feat(slice-2): ticket payload boundary` | `.prj/reports/slices/codex-artifact-generation/slice-2-ticket-payload-boundary.md` | Merged into `dev`. |
 | Slice 3: Artifact Backend Defaults | Completed | `feat/slice-3-artifact-backend-defaults` | `feat(slice-3): artifact backend defaults` | `.prj/reports/slices/codex-artifact-generation/slice-3-artifact-backend-defaults.md` | Merged into `dev`. |
-| Slice 4: Artifact Run Bundle Audit | Reviewing | `feat/slice-4-artifact-run-bundle-audit` | `feat(slice-4): artifact run bundle audit` | `.prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md` | Implemented on `feat/slice-4-artifact-run-bundle-audit`; PR pending. |
+| Slice 4: Artifact Run Bundle Audit | Completed | `feat/slice-4-artifact-run-bundle-audit` | `feat(slice-4): artifact run bundle audit` | `.prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md` | Merged into `dev`. |
 
 ## Slice 1: Plan Tracking Codex Backend
 
@@ -122,7 +122,7 @@ Candidate tasks:
 
 Task commits:
 
-- Pending commit on `feat/slice-4-artifact-run-bundle-audit`.
+- `ef65802` test(slice-4): audit codex artifact bundles
 
 Validation:
 
@@ -131,6 +131,6 @@ Validation:
 
 ## Completion
 
-The slicing implementation is complete and awaiting Slice 4 review.
+The slicing is complete.
 
-Tuning needed: undecided.
+Tuning needed: none required.
