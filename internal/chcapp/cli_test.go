@@ -50,7 +50,7 @@ func TestRootCommandDefaultsToTUIAction(t *testing.T) {
 func TestRootCommandIncludesTUICommand(t *testing.T) {
 	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
 
-	for _, name := range []string{"dump", "metadata", "plan", "quiz", "spec", "tui"} {
+	for _, name := range []string{"dump", "metadata", "plan", "quiz", "spec", "tui", "work"} {
 		if rootCommandIncludesCommand(cmd, name) {
 			continue
 		}
@@ -2215,6 +2215,179 @@ func TestTicketLoopCompletesWithNoEligibleTickets(t *testing.T) {
 
 	if len(executor.commands) != 0 {
 		t.Fatalf("commands = %#v, want no ticket execution", executor.commands)
+	}
+}
+
+func TestWorkTicketRunsSelectedTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"ticket",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work ticket returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: ticket",
+		"ticket: CHC-1",
+		"execution: exec-",
+		"status: succeeded",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(records) != 1 {
+		t.Fatalf("execution records = %d, want 1", len(records))
+	}
+}
+
+func TestWorkRunAllExecutesReadyTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"run-all",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work run-all returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: run-all",
+		"loop: loop-",
+		"status: succeeded",
+		"eligible: 2",
+		"processed: 2",
+		"execution: exec-",
+		"CHC-1",
+		"CHC-2",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	for _, ticketKey := range []string{"CHC-1", "CHC-2"} {
+		records := listTicketExecutions(t, devRoot, projectID(projectDir), ticketKey)
+		if len(records) != 1 {
+			t.Fatalf("%s execution records = %d, want 1", ticketKey, len(records))
+		}
+	}
+}
+
+func TestWorkRunAllDryRunPrintsQueue(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"run-all",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work run-all --dry-run returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: run-all",
+		"dry_run: true",
+		"order: created_at",
+		"eligible: 1",
+		"ticket: CHC-1\tReady frontend\tready_for_dev",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(records) != 0 {
+		t.Fatalf("execution records = %d, want 0", len(records))
+	}
+}
+
+func TestWorkRunAllCompletesWithNoEligibleTickets(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	addProject(t, devRoot, "example", projectDir)
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Open.md", testLoopTicket(
+		"CHC-1", "Open frontend", "open", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"run-all",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work run-all returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: run-all",
+		"status: succeeded",
+		"eligible: 0",
+		"processed: 0",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
 	}
 }
 

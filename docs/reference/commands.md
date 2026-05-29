@@ -213,6 +213,29 @@ Preview loop selection:
 chc ticket loop --dry-run
 ```
 
+## Agent Work
+
+Run agent work for one ticket:
+
+```sh
+chc work ticket CHC-1
+```
+
+Run agent work for all ready tickets:
+
+```sh
+chc work run-all
+```
+
+Preview the ready-ticket queue without execution:
+
+```sh
+chc work run-all --dry-run
+```
+
+`work run-all` uses the shared agent-work selection contract: `ready_for_dev`
+tickets, oldest first by `created_at`.
+
 ## Index
 
 Rebuild and inspect the ticket index:
