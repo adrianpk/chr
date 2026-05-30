@@ -47,6 +47,13 @@ The project contains seeded metadata, dumps, quiz notes, ADRs, and one manual
 bug ticket. It intentionally does not contain generated specs, plans, tracking,
 or generated comments tickets.
 
+Initialize runtime assets before executing agent work:
+
+```sh
+chc runtime init
+chc runtime validate --dry-run
+```
+
 ## Resolve The Seeded Bug Ticket
 
 Use the TUI or CLI to run the manual ticket:
@@ -76,13 +83,13 @@ metadata, and ADRs under `docs/explanation/adr/`.
 Preview generated ready work:
 
 ```sh
-chc work run-all --dry-run
+chc work run-all --dry-run --use-case comments --order key
 ```
 
 Run the generated ticket loop:
 
 ```sh
-chc work run-all
+chc work run-all --use-case comments --order key
 ```
 
 Use this scenario to observe whether CHC can preserve context from seeded

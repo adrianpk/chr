@@ -22,3 +22,9 @@ notifications, or admin tooling.
 
 Unknown post slugs should use the same JSON error response style as the rest of
 the API.
+
+The existing `GET /posts/{slug}` unknown-post bug is intentionally seeded as
+manual ticket `CHC-1` and should be resolved before the generated comments
+ticket loop. Comments spec, plan, tracking, and generated tickets should not
+duplicate that base post bug ticket; they should focus on the comments feature
+itself.

@@ -14,7 +14,7 @@ updated_at: "2026-05-30T00:00:00Z"
 - status: answered
 - mode: deep
 - topic: comments-api
-- depth: 0
+- depth: 1
 - tags: comments, api
 
 Question:
@@ -32,7 +32,7 @@ API should allow creating a comment and listing comments for that post.
 - status: answered
 - mode: deep
 - topic: comments-boundaries
-- depth: 0
+- depth: 1
 - tags: comments, constraints
 
 Question:

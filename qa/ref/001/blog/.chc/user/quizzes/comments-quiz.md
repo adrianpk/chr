@@ -39,6 +39,8 @@ updated_at: "2026-05-30T00:00:00Z"
 - Unknown post slugs should return JSON `404` responses.
 - Comments should be associated with post slugs rather than a global thread
   model.
+- The seeded base post `404` bug is covered by manual ticket `CHC-1`; generated
+  comments tickets should not duplicate that preexisting bug ticket.
 
 ## Provenance
 
