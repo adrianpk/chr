@@ -80,7 +80,8 @@ func addTicketComment(content string, comment ticketComment) (string, error) {
 
 	commentsIndex := strings.Index(updatedContent, commentsHeading)
 	if commentsIndex < 0 {
-		return "", fmt.Errorf("ticket comments section is required")
+		updatedContent = addMissingTicketCommentsSection(updatedContent)
+		commentsIndex = strings.Index(updatedContent, commentsHeading)
 	}
 
 	insertAt := commentsIndex + len(commentsHeading)
@@ -93,6 +94,24 @@ func addTicketComment(content string, comment ticketComment) (string, error) {
 	insertAt += nextHeadingIndex + 1
 
 	return updatedContent[:insertAt] + renderedComment + "\n" + updatedContent[insertAt:], nil
+}
+
+func addMissingTicketCommentsSection(content string) string {
+	blockerHeading := "# Blocker\n"
+	blockerIndex := strings.Index(content, blockerHeading)
+
+	if blockerIndex >= 0 {
+		return content[:blockerIndex] + "# Comments\n\n" + content[blockerIndex:]
+	}
+
+	validationHeading := "# Validation\n"
+	validationIndex := strings.Index(content, validationHeading)
+
+	if validationIndex >= 0 {
+		return content[:validationIndex] + "# Comments\n\n" + content[validationIndex:]
+	}
+
+	return strings.TrimRight(content, "\n") + "\n\n# Comments\n"
 }
 
 func renderTicketComment(comment ticketComment) string {
