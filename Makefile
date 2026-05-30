@@ -6,8 +6,10 @@ BIN_DIR := bin
 BIN := $(BIN_DIR)/chc
 COVERAGE_OUT ?= /tmp/chc-coverage.out
 RUN_ARGS ?= --help
+QA_CASE ?= blog
+QA_REF ?= 001
 
-.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev
+.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev qa-reset qa-test qa-reset-blog qa-test-blog
 
 fmt:
 	@$(GO) fmt ./...
@@ -48,3 +50,15 @@ install:
 
 clean-dev:
 	@rm -rf $(DEV_ROOT)
+
+qa-reset:
+	@scripts/qa/reset.sh $(QA_CASE) $(QA_REF)
+
+qa-test:
+	@scripts/qa/test.sh $(QA_CASE)
+
+qa-reset-blog:
+	@$(MAKE) qa-reset QA_CASE=blog QA_REF=001
+
+qa-test-blog:
+	@$(MAKE) qa-test QA_CASE=blog
