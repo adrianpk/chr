@@ -1,0 +1,7 @@
+version: 1
+tickets:
+  key_prefix: CHC
+runtime:
+  validation_command: "go test ./..."
+notifications:
+  telegram_enabled: false
