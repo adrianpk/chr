@@ -164,6 +164,7 @@ type Model struct {
 	ticketAction             TicketActionState
 	ticketExecutor           TicketActionExecutor
 	workAction               WorkActionState
+	workBusy                 bool
 	workExecutor             WorkActionExecutor
 	agentWorkRefreshExecutor AgentWorkRefreshExecutor
 	agentWorkRefreshInFlight bool
@@ -303,6 +304,10 @@ func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		return updated, cmd, true
 	}
 
+	if updated, cmd, ok := m.updateActionFinishedMessage(msg); ok {
+		return updated, cmd, true
+	}
+
 	switch typedMsg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = typedMsg.Width
@@ -321,6 +326,13 @@ func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		m.completeSourceEdit(typedMsg)
 
 		return m, nil, true
+	default:
+		return m, nil, false
+	}
+}
+
+func (m Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
+	switch typedMsg := msg.(type) {
 	case quizActionFinishedMsg:
 		m.completeQuizAction(typedMsg)
 
@@ -331,6 +343,10 @@ func (m Model) updateSystemMessage(msg tea.Msg) (tea.Model, tea.Cmd, bool) {
 		return m, nil, true
 	case planActionFinishedMsg:
 		m.completePlanAction(typedMsg)
+
+		return m, nil, true
+	case workActionFinishedMsg:
+		m.completeWorkAction(typedMsg)
 
 		return m, nil, true
 	default:
@@ -449,6 +465,10 @@ func (m Model) updateActiveModeKey(msg tea.KeyMsg) (tea.Model, tea.Cmd, bool) {
 		return updated, cmd, true
 	case m.planBusy:
 		m.statusMessage = "Plan action already running."
+
+		return m, nil, true
+	case m.workBusy:
+		m.statusMessage = "Work action already running."
 
 		return m, nil, true
 	case m.workAction.Pending:

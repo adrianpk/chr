@@ -42,6 +42,12 @@ type WorkActionState struct {
 	Details []string
 }
 
+type workActionFinishedMsg struct {
+	Request WorkActionRequest
+	Result  WorkActionResult
+	Err     error
+}
+
 func NewWorkActionState(action WorkActionID, ticket TicketView) WorkActionState {
 	switch action {
 	case WorkActionStartTicket:
@@ -102,6 +108,10 @@ func NewWorkActionState(action WorkActionID, ticket TicketView) WorkActionState 
 }
 
 func (m Model) renderWorkAction() string {
+	if m.workBusy {
+		return strings.TrimRight("\n\nWork Action Running\n  "+m.statusMessage+"\n\n  Please wait for this action to finish.", "\n")
+	}
+
 	if !m.workAction.Pending {
 		return ""
 	}
@@ -117,6 +127,9 @@ func (m Model) renderWorkAction() string {
 		output.WriteString("\n")
 	}
 
+	output.WriteString("\n  Enter: confirm\n")
+	output.WriteString("  Esc: cancel\n")
+
 	return strings.TrimRight(output.String(), "\n")
 }
 
@@ -125,7 +138,7 @@ func (m Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case tea.KeyEsc:
 		m.cancelWorkAction()
 	case tea.KeyEnter:
-		m.confirmWorkAction()
+		return m, m.confirmWorkAction()
 	}
 
 	return m, nil
@@ -170,23 +183,62 @@ func (m *Model) cancelWorkAction() {
 	m.statusMessage = "Work action cancelled."
 }
 
-func (m *Model) confirmWorkAction() {
+func (m *Model) confirmWorkAction() tea.Cmd {
 	request := m.workAction.Request
 	m.workAction = WorkActionState{}
+
+	return m.startWorkAction(request)
+}
+
+func (m Model) executeWorkActionCommand(request WorkActionRequest) tea.Cmd {
+	executor := m.workExecutor
+
+	return func() tea.Msg {
+		if executor == nil {
+			return workActionFinishedMsg{
+				Request: request,
+				Err:     fmt.Errorf("work action executor is unavailable"),
+			}
+		}
+
+		result, err := executor.ExecuteWorkAction(request)
+
+		return workActionFinishedMsg{Request: request, Result: result, Err: err}
+	}
+}
+
+func (m *Model) startWorkAction(request WorkActionRequest) tea.Cmd {
+	if m.workBusy {
+		m.statusMessage = "Work action already running."
+
+		return nil
+	}
 
 	if m.workExecutor == nil {
 		m.statusMessage = "Work action executor is unavailable."
 
+		return nil
+	}
+
+	m.workBusy = true
+	m.statusMessage = workBusyMessage(request)
+
+	return m.executeWorkActionCommand(request)
+}
+
+func (m *Model) completeWorkAction(message workActionFinishedMsg) {
+	m.workBusy = false
+
+	if message.Err != nil {
+		m.statusMessage = "Work action failed: " + message.Err.Error()
+
 		return
 	}
 
-	result, err := m.workExecutor.ExecuteWorkAction(request)
-	if err != nil {
-		m.statusMessage = "Work action failed: " + err.Error()
+	m.applyWorkActionResult(message.Result)
+}
 
-		return
-	}
-
+func (m *Model) applyWorkActionResult(result WorkActionResult) {
 	if result.Tickets != nil {
 		m.tickets = NewTicketViews(result.Tickets)
 		m.selectFirstFilteredTicket()
@@ -194,4 +246,23 @@ func (m *Model) confirmWorkAction() {
 
 	m.observability = result.Observability
 	m.statusMessage = result.Message
+}
+
+func workBusyMessage(request WorkActionRequest) string {
+	switch request.Action {
+	case WorkActionStartTicket:
+		if strings.TrimSpace(request.TicketKey) != "" {
+			return "Starting agent work for " + request.TicketKey + "..."
+		}
+
+		return "Starting selected ticket..."
+	case WorkActionStartReadyLoop:
+		return "Starting ready ticket loop..."
+	case WorkActionRunAllReady:
+		return "Running all ready tickets..."
+	case WorkActionRequestStop:
+		return "Requesting agent stop..."
+	default:
+		return "Running work action..."
+	}
 }

@@ -2216,6 +2216,8 @@ func TestModelPlansWorkActionCommand(t *testing.T) {
 		"Confirm Work Action",
 		"Start selected ticket",
 		"Ticket: CHC-1",
+		"Enter: confirm",
+		"Esc: cancel",
 		"enter confirms work action",
 	} {
 		if !strings.Contains(view, want) {
@@ -2518,17 +2520,9 @@ func TestModelCancelsWorkAction(t *testing.T) {
 	}
 }
 
-func TestModelConfirmsWorkAction(t *testing.T) {
+func TestModelStartsWorkActionOnConfirm(t *testing.T) {
 	executor := &fakeWorkActionExecutor{
-		result: WorkActionResult{
-			Message: "Execution exec-1 for ticket CHC-1 finished with status succeeded.",
-			Tickets: []chc.IndexedTicket{
-				{Key: "CHC-1", Title: "First", Status: "reviewing"},
-			},
-			Observability: ObservabilityView{
-				LatestExecution: ExecutionView{ID: "exec-1", Status: "succeeded"},
-			},
-		},
+		result: testSuccessfulWorkActionResult(),
 	}
 	model := NewModel(Options{
 		WorkExecutor: executor,
@@ -2544,12 +2538,49 @@ func TestModelConfirmsWorkAction(t *testing.T) {
 
 	model.workAction = NewWorkActionState(WorkActionStartTicket, ticket)
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
 
-	confirmed, ok := updated.(Model)
-	if !ok {
-		t.Fatalf("Update returned %T, want Model", updated)
+	if cmd == nil {
+		t.Fatal("work action command is nil")
 	}
+
+	if !busy.workBusy {
+		t.Fatal("workBusy = false, want true")
+	}
+
+	if busy.statusMessage != "Starting agent work for CHC-1..." {
+		t.Fatalf("statusMessage = %q, want starting work status", busy.statusMessage)
+	}
+
+	action := busy.renderWorkAction()
+	if !strings.Contains(action, "Work Action Running") || !strings.Contains(action, "Please wait") {
+		t.Fatalf("renderWorkAction() = %q, want running overlay", action)
+	}
+}
+
+func TestModelCompletesWorkAction(t *testing.T) {
+	executor := &fakeWorkActionExecutor{
+		result: testSuccessfulWorkActionResult(),
+	}
+	model := NewModel(Options{
+		WorkExecutor: executor,
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "ready"},
+		},
+	})
+
+	ticket, ok := model.selectedTicketView()
+	if !ok {
+		t.Fatal("selectedTicketView returned no ticket")
+	}
+
+	model.workAction = NewWorkActionState(WorkActionStartTicket, ticket)
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
 
 	if executor.request.Action != WorkActionStartTicket || executor.request.TicketKey != "CHC-1" {
 		t.Fatalf("executor request = %#v, want start CHC-1", executor.request)
@@ -2588,12 +2619,15 @@ func TestModelReportsWorkActionError(t *testing.T) {
 
 	model.workAction = NewWorkActionState(WorkActionStartTicket, ticket)
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-	failed, ok := updated.(Model)
+	busy, ok := updated.(Model)
 	if !ok {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
+
+	updated, _ = busy.Update(cmd())
+	failed := requireUpdatedModel(t, updated)
 
 	if failed.workAction.Pending {
 		t.Fatal("work action is pending after failure")
@@ -4737,6 +4771,18 @@ func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (W
 	e.request = request
 
 	return e.result, e.err
+}
+
+func testSuccessfulWorkActionResult() WorkActionResult {
+	return WorkActionResult{
+		Message: "Execution exec-1 for ticket CHC-1 finished with status succeeded.",
+		Tickets: []chc.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "reviewing"},
+		},
+		Observability: ObservabilityView{
+			LatestExecution: ExecutionView{ID: "exec-1", Status: "succeeded"},
+		},
+	}
 }
 
 func (e *fakeAgentWorkRefreshExecutor) RefreshAgentWork() (AgentWorkRefreshResult, error) {
