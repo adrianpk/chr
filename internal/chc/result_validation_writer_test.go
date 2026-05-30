@@ -26,9 +26,7 @@ func TestTicketResultValidationWriterWritesEvidence(t *testing.T) {
 		`updated_at: "2026-05-19T15:00:00Z"`,
 		"# Validation\n\n## 2026-05-19T15:00:00Z exec-1",
 		"- command: make verify",
-		"- result: /tmp/result.json",
-		"- log: /tmp/runtime.log",
-		"- validation: /tmp/validation.log",
+		"- status: succeeded",
 	} {
 		if !strings.Contains(content, want) {
 			t.Fatalf("content does not contain %q:\n%s", want, content)
@@ -115,6 +113,9 @@ func testResultValidationApplication(path string) ResultApplication {
 	return ResultApplication{
 		ExecutionID: "exec-1",
 		TicketPath:  path,
+		Execution: ResultApplicationExecution{
+			Status: ExecutionStatusSucceeded,
+		},
 		Evidence: ResultApplicationEvidence{
 			ValidationCommand: "make verify",
 			ResultPath:        "/tmp/result.json",

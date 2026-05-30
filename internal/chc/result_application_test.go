@@ -31,11 +31,8 @@ func TestNewResultApplicationMapsSucceededExecutionToReviewing(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		"Execution exec-1 finished with status succeeded.",
+		"Execution `exec-1` finished with status `succeeded`.",
 		"Summary: ready for review",
-		"Result: " + record.Artifacts.ResultPath,
-		"Log: " + record.Artifacts.LogPath,
-		"Validation: " + record.Artifacts.ValidationPath,
 	} {
 		if !strings.Contains(application.Comment.Body, want) {
 			t.Fatalf("Comment.Body does not contain %q:\n%s", want, application.Comment.Body)

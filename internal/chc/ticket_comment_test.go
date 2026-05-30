@@ -47,7 +47,7 @@ func TestTicketCommenterAddsComment(t *testing.T) {
 
 	for _, want := range []string{
 		`updated_at: "2026-05-18T13:00:00Z"`,
-		"# Comments\n\n## 2026-05-18T13:00:00Z adrian\n\n\"Looks ready.\"",
+		"# Comments\n\n## 2026-05-18T13:00:00Z adrian\n\nLooks ready.",
 		"# Blocker",
 	} {
 		if !strings.Contains(string(updatedContent), want) {
@@ -97,7 +97,7 @@ go test ./...
 
 	for _, want := range []string{
 		`updated_at: "2026-05-18T12:00:00Z"`,
-		"# Comments\n\n## 2026-05-18T12:00:00Z chc\n\n\"Execution finished.\"",
+		"# Comments\n\n## 2026-05-18T12:00:00Z chc\n\nExecution finished.",
 		"# Validation",
 	} {
 		if !strings.Contains(string(updatedContent), want) {

@@ -27,9 +27,7 @@ func TestTicketResultBlockedReasonWriterWritesBlocker(t *testing.T) {
 		"# Blocker\n\n## 2026-05-19T17:00:00Z exec-1",
 		"- kind: harness",
 		"- reason: harness: docker unavailable",
-		"- result: /tmp/result.json",
-		"- log: /tmp/runtime.log",
-		"- validation: /tmp/validation.log",
+		"- details: see runtime artifacts",
 		"# Validation",
 	} {
 		if !strings.Contains(content, want) {

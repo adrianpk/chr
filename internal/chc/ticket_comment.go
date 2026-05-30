@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -128,7 +127,7 @@ func renderTicketComment(comment ticketComment) string {
 	output.WriteString(" ")
 	output.WriteString(author)
 	output.WriteString("\n\n")
-	output.WriteString(strconv.Quote(body))
+	output.WriteString(body)
 	output.WriteString("\n")
 
 	return output.String()

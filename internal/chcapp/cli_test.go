@@ -2929,10 +2929,11 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	content := readFile(t, ticketPath)
 	for _, want := range []string{
 		`status: "reviewing"`,
-		"Execution exec-apply finished with status succeeded.",
+		"Execution `exec-apply` finished with status `succeeded`.",
 		"Summary: ready for review",
 		"## ",
 		"- command: make verify",
+		"- status: succeeded",
 	} {
 		if !strings.Contains(content, want) {
 			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
@@ -3272,7 +3273,7 @@ func TestTicketCommentAppendsComment(t *testing.T) {
 	for _, want := range []string{
 		"# Comments",
 		"adrian",
-		"\"Looks ready.\"",
+		"Looks ready.",
 	} {
 		if !strings.Contains(string(updatedContent), want) {
 			t.Fatalf("updated content does not contain %q:\n%s", want, string(updatedContent))

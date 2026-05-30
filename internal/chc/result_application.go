@@ -1,6 +1,9 @@
 package chc
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	TicketResultStatusReviewing = "reviewing"
@@ -144,21 +147,24 @@ func resultApplicationComment(author string, application ResultApplication) Resu
 }
 
 func RenderResultApplicationCommentBody(application ResultApplication) string {
-	body := fmt.Sprintf(
-		"Execution %s finished with status %s.\n\nSummary: %s\n\nResult: %s\nLog: %s\nValidation: %s",
-		application.ExecutionID,
-		application.Execution.Status,
-		application.Summary,
-		application.Evidence.ResultPath,
-		application.Evidence.LogPath,
-		application.Evidence.ValidationPath,
-	)
+	var body strings.Builder
+	body.WriteString("Execution `")
+	body.WriteString(application.ExecutionID)
+	body.WriteString("` finished with status `")
+	body.WriteString(string(application.Execution.Status))
+	body.WriteString("`.")
 
-	if application.Execution.FailureReason != "" {
-		body += fmt.Sprintf("\n\nFailure: %s", application.Execution.FailureReason)
+	summary := strings.TrimSpace(application.Summary)
+	if summary != "" {
+		body.WriteString("\n\nSummary: ")
+		body.WriteString(summary)
 	}
 
-	return body
+	if strings.TrimSpace(application.Execution.FailureReason) != "" {
+		body.WriteString("\n\nExecution details are available in the runtime artifacts.")
+	}
+
+	return body.String()
 }
 
 func resultApplicationBlockedReason(application ResultApplication) ResultApplicationBlockedReason {

@@ -97,15 +97,7 @@ func renderResultBlockedReason(application ResultApplication, createdAt time.Tim
 	output.WriteString("- reason: ")
 	output.WriteString(blockedReason.Reason)
 	output.WriteString("\n")
-	output.WriteString("- result: ")
-	output.WriteString(blockedReason.ResultPath)
-	output.WriteString("\n")
-	output.WriteString("- log: ")
-	output.WriteString(blockedReason.LogPath)
-	output.WriteString("\n")
-	output.WriteString("- validation: ")
-	output.WriteString(blockedReason.ValidationPath)
-	output.WriteString("\n\n")
+	output.WriteString("- details: see runtime artifacts\n\n")
 
 	return output.String()
 }

@@ -25,11 +25,8 @@ func TestTicketResultCommentWriterWritesExecutionComment(t *testing.T) {
 	for _, want := range []string{
 		`updated_at: "2026-05-19T14:00:00Z"`,
 		"## 2026-05-19T14:00:00Z chc",
-		"Execution exec-1 finished with status succeeded.",
+		"Execution `exec-1` finished with status `succeeded`.",
 		"Summary: ready for review",
-		"Result: /tmp/result.json",
-		"Log: /tmp/runtime.log",
-		"Validation: /tmp/validation.log",
 		"Existing comment.",
 		"# Blocker",
 	} {
@@ -55,8 +52,12 @@ func TestTicketResultCommentWriterWritesFailureReason(t *testing.T) {
 	}
 
 	content := readResultCommentTicket(t, path)
-	if !strings.Contains(content, "Failure: harness: docker unavailable") {
-		t.Fatalf("content does not contain failure reason:\n%s", content)
+	if strings.Contains(content, "harness: docker unavailable") {
+		t.Fatalf("content exposes runtime failure reason:\n%s", content)
+	}
+
+	if !strings.Contains(content, "Execution details are available in the runtime artifacts.") {
+		t.Fatalf("content does not contain runtime artifact pointer:\n%s", content)
 	}
 }
 
