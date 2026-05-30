@@ -1,13 +1,15 @@
-# Blog QA Reference
+# Blog
 
-This is the minimal reference seed for the ChrysoCoord QA blog scenario.
+Small headless blog service used as a ChrysoCoord QA reference project.
 
-Use the repository-level targets:
+From the parent `chc` repository:
 
 ```sh
 make qa-reset-blog
 make qa-test-blog
 ```
 
-Later slices replace this placeholder with the initial Go blog service and
-seeded ChrysoCoord context.
+The initial baseline intentionally has one failing test:
+`GET /posts/{slug}` returns `500` for an unknown slug instead of `404`.
+
+That failure seeds the first manual agent-work ticket in a later slice.
