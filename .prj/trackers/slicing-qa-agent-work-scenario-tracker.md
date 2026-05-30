@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-qa-agent-work-scenario-plan.md`
 
 Slicing name: QA Agent Work Scenario
 
-Active slice number: Slice 1
+Active slice number: Slice 2
 
-Active slice short name: qa workspace reset scaffold
+Active slice short name: blog reference project
 
-Expected branch name: `feat/slice-1-qa-workspace-reset-scaffold`
+Expected branch name: `feat/slice-2-blog-reference-project`
 
-Expected PR title: `feat(slice-1): qa workspace reset scaffold`
+Expected PR title: `feat(slice-2): blog reference project`
 
 Expected report path:
-`.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md`
+`.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md`
 
 Prerequisite PRs or delivered work:
 
@@ -39,8 +39,8 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: QA Workspace Reset Scaffold | Reviewing | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | PR pending. |
-| Slice 2: Blog Reference Project | Planned | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | Depends on Slice 1. |
+| Slice 1: QA Workspace Reset Scaffold | Completed | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | Merged into `dev`. |
+| Slice 2: Blog Reference Project | Reviewing | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | PR pending. |
 | Slice 3: Seeded CHC Context And ADR Docs | Planned | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | Depends on Slice 2. |
 | Slice 4: Test Based Agent Guidance | Planned | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | Can run after Slice 3. |
 | Slice 5: QA Runbook And Smoke Validation | Planned | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | Final documentation and smoke validation. |
@@ -76,21 +76,28 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T2.1 Add the blog Go module and package structure.
-- [ ] T2.2 Add post listing and single-post HTTP behavior.
-- [ ] T2.3 Add the intentional unknown-slug bug.
-- [ ] T2.4 Add a failing test that documents the expected `404` behavior.
-- [ ] T2.5 Add a concise blog project README.
-- [ ] T2.6 Validate reset and expected failing test behavior.
-- [ ] T2.7 Add slice implementation report and run quality gates.
+- [x] T2.1 Add the blog Go module and package structure.
+- [x] T2.2 Add post listing and single-post HTTP behavior.
+- [x] T2.3 Add the intentional unknown-slug bug.
+- [x] T2.4 Add a failing test that documents the expected `404` behavior.
+- [x] T2.5 Add a concise blog project README.
+- [x] T2.6 Validate reset and expected failing test behavior.
+- [x] T2.7 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- `11e4605 feat(qa): add blog go module structure`
+- `2025c4b feat(qa): add blog post endpoints`
+- `cbc4837 test(qa): seed unknown post status bug`
+- `e390c97 test(qa): cover blog post endpoints`
+- `506badf docs(qa): document blog baseline`
 
 Validation:
 
-- Not run yet.
+- `make qa-reset-blog`
+- `make qa-test-blog` expected failure: unknown post returns `500`, test expects `404`
+- `make verify`
+- `git diff --check`
 
 ## Slice 3: Seeded CHC Context And ADR Docs
 
