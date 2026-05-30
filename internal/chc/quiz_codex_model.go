@@ -139,12 +139,45 @@ func codexQuizModelPrompt(request QuizModelRequest) (string, error) {
 	prompt.WriteString(string(request.Action))
 	prompt.WriteString(" backend.\n")
 	prompt.WriteString("Generate the requested artifact and return only the final JSON object matching the provided output schema.\n")
-	prompt.WriteString("Do not edit files, run commands, create commits, open pull requests, or ask follow-up questions.\n\n")
+	prompt.WriteString("You may inspect workspace files with read-only operations when the instructions require additional project context.\n")
+	prompt.WriteString("Do not edit files, create commits, open pull requests, or ask follow-up questions.\n\n")
 	prompt.WriteString("Instructions:\n")
 	prompt.WriteString(quizModelInstructions(request))
+
+	if discovery := codexWorkspaceDiscoveryInstructions(request.Action); discovery != "" {
+		prompt.WriteString("\n\nWorkspace discovery:\n")
+		prompt.WriteString(discovery)
+	}
+
 	prompt.WriteString("\n\nRequest payload:\n```json\n")
 	prompt.Write(payload)
 	prompt.WriteString("\n```\n")
 
 	return prompt.String(), nil
+}
+
+func codexWorkspaceDiscoveryInstructions(action QuizModelAction) string {
+	switch action {
+	case QuizModelActionGenerateSpec:
+		return codexDecisionDocumentDiscoveryInstructions("the generated spec")
+	case QuizModelActionGeneratePlan,
+		QuizModelActionGeneratePlanOutline,
+		QuizModelActionGeneratePlanSliceDetail:
+		return codexDecisionDocumentDiscoveryInstructions("the generated plan")
+	case QuizModelActionMaterializePlanTracking:
+		return codexDecisionDocumentDiscoveryInstructions("the generated tracking and tickets")
+	default:
+		return ""
+	}
+}
+
+func codexDecisionDocumentDiscoveryInstructions(target string) string {
+	return strings.TrimSpace(`
+Before generating the artifact, search the workspace for architecture decision records or equivalent decision documents.
+Look for ADRs, decision records, architecture decisions, RFCs, engineering principles, decision logs, or similarly named files and directories.
+Use accepted or active decisions as high-authority constraints for ` + target + `.
+Incorporate relevant decisions into requirements, constraints, non-goals, acceptance criteria, slice definitions, ticket metadata, and validation expectations when applicable.
+If a decision conflicts with dumps, quizzes, existing docs, or inferred requirements, prefer the decision and explicitly call out the conflict.
+Do not require configured decision-document paths; discover them from the workspace structure.
+`)
 }

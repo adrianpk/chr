@@ -76,6 +76,8 @@ func TestCodexQuizModelAdapterGeneratesSpecThroughAgentRunner(t *testing.T) {
 	if !strings.Contains(runner.Request.Prompt, "spec_generation backend") {
 		t.Fatalf("prompt does not identify spec generation backend:\n%s", runner.Request.Prompt)
 	}
+
+	assertCodexDecisionDiscoveryPrompt(t, runner.Request.Prompt, "the generated spec")
 }
 
 func TestCodexQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
@@ -106,6 +108,8 @@ func TestCodexQuizModelAdapterGeneratesPlanThroughAgentRunner(t *testing.T) {
 	if !strings.Contains(runner.Request.Prompt, "plan_generation backend") {
 		t.Fatalf("prompt does not identify plan generation backend:\n%s", runner.Request.Prompt)
 	}
+
+	assertCodexDecisionDiscoveryPrompt(t, runner.Request.Prompt, "the generated plan")
 }
 
 func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing.T) {
@@ -151,6 +155,14 @@ func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing
 
 	if !strings.Contains(runner.Request.Prompt, "plan_tracking_materialization backend") {
 		t.Fatalf("prompt does not identify plan tracking backend:\n%s", runner.Request.Prompt)
+	}
+
+	assertCodexDecisionDiscoveryPrompt(t, runner.Request.Prompt, "the generated tracking and tickets")
+}
+
+func TestCodexWorkspaceDiscoveryOmitsQuestionActions(t *testing.T) {
+	if got := codexWorkspaceDiscoveryInstructions(QuizModelActionNextQuestion); got != "" {
+		t.Fatalf("discovery instructions = %q, want empty", got)
 	}
 }
 
@@ -199,4 +211,21 @@ func validCodexQuizModelRequest(action QuizModelAction) QuizModelRequest {
 	}
 
 	return request
+}
+
+func assertCodexDecisionDiscoveryPrompt(t *testing.T, prompt, target string) {
+	t.Helper()
+
+	for _, want := range []string{
+		"read-only operations",
+		"Workspace discovery:",
+		"search the workspace for architecture decision records",
+		"ADRs, decision records, architecture decisions, RFCs",
+		"Use accepted or active decisions as high-authority constraints for " + target,
+		"Do not require configured decision-document paths",
+	} {
+		if !strings.Contains(prompt, want) {
+			t.Fatalf("prompt missing %q:\n%s", want, prompt)
+		}
+	}
 }
