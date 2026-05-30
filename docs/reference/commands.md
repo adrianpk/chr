@@ -245,6 +245,33 @@ chc work run-all --dry-run --tag backend --order priority_severity
 `chc ticket loop`: `--status`, `--priority`, `--severity`, `--project-area`,
 `--tag`, `--type`, `--use-case`, and `--order`.
 
+## QA Scenarios
+
+Reset a QA scenario from its versioned reference copy:
+
+```sh
+make qa-reset QA_CASE=blog QA_REF=001
+make qa-reset-blog
+```
+
+Run the active scenario tests:
+
+```sh
+make qa-test QA_CASE=blog
+make qa-test-blog
+```
+
+Run scenario smoke validation:
+
+```sh
+make qa-smoke QA_CASE=blog QA_REF=001
+make qa-smoke-blog
+```
+
+QA references live under `qa/ref/<ref>/<case>`. Active project copies live
+under ignored `qa/project/<case>` directories, and previous active copies are
+moved to ignored `qa/tmp/<case>` directories during reset.
+
 ## Index
 
 Rebuild and inspect the ticket index:
