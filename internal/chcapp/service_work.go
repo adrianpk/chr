@@ -76,13 +76,24 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 		return AgentWorkResult{}, err
 	}
 
+	plan, err := buildTicketApplyResultPlanForRecord(s.projectContext, record)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	err = applyTicketResult(s.ctx, s.env, plan, s.assetsFS)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
 	result, err := s.reloadWorkOperationState()
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
 
 	result.Message = "Execution " + record.ID + " for ticket " + ticket.Key + " finished with status " +
-		string(record.Status) + ". Result: " + displayPath(s.projectContext.ProjectDir, record.Artifacts.ResultPath)
+		string(record.Status) + ". Result applied to ticket. Result: " +
+		displayPath(s.projectContext.ProjectDir, record.Artifacts.ResultPath)
 
 	if record.FailureReason != "" {
 		result.Message += " Failure: " + record.FailureReason

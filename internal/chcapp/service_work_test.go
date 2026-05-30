@@ -34,6 +34,14 @@ func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
 		t.Fatalf("Message = %q, want execution summary", result.Message)
 	}
 
+	if !strings.Contains(result.Message, "Result applied to ticket") {
+		t.Fatalf("Message = %q, want result application summary", result.Message)
+	}
+
+	if len(result.Tickets) != 1 || result.Tickets[0].Status != "reviewing" {
+		t.Fatalf("Tickets = %#v, want reviewing ticket after result application", result.Tickets)
+	}
+
 	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
 	if len(records) != 1 {
 		t.Fatalf("execution records = %d, want 1", len(records))
