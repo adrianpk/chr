@@ -158,6 +158,7 @@ func TestCodexQuizModelAdapterGeneratesPlanTrackingThroughAgentRunner(t *testing
 	}
 
 	assertCodexDecisionDiscoveryPrompt(t, runner.Request.Prompt, "the generated tracking and tickets")
+	assertCodexTestBasedTrackingPrompt(t, runner.Request.Prompt)
 }
 
 func TestCodexWorkspaceDiscoveryOmitsQuestionActions(t *testing.T) {
@@ -223,6 +224,20 @@ func assertCodexDecisionDiscoveryPrompt(t *testing.T, prompt, target string) {
 		"ADRs, decision records, architecture decisions, RFCs",
 		"Use accepted or active decisions as high-authority constraints for " + target,
 		"Do not require configured decision-document paths",
+	} {
+		if !strings.Contains(prompt, want) {
+			t.Fatalf("prompt missing %q:\n%s", want, prompt)
+		}
+	}
+}
+
+func assertCodexTestBasedTrackingPrompt(t *testing.T, prompt string) {
+	t.Helper()
+
+	for _, want := range []string{
+		"reproduce or observe the defect with a failing test",
+		"Prefer table-driven tests for input/output behavior",
+		"property-based, fuzz, race, or benchmark tests only when",
 	} {
 		if !strings.Contains(prompt, want) {
 			t.Fatalf("prompt missing %q:\n%s", want, prompt)

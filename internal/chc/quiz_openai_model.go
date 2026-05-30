@@ -925,6 +925,9 @@ Tickets are the detailed execution units and must be ready for later implementat
 Each ticket must correspond to exactly one slice from the plan.
 Each ticket synopsis must be one short sentence that lets the Board identify the ticket without opening the full body.
 Each ticket body must include: objective, tasks, dependencies, acceptance criteria, validation expectations, and references to the source plan/tracking.
+When a ticket fixes a bug, include a task to reproduce or observe the defect with a failing test before changing code when feasible.
+Prefer table-driven tests for input/output behavior in validation expectations.
+Mention property-based, fuzz, race, or benchmark tests only when the slice's use case justifies them.
 Keep the content deterministic, concise, implementation-oriented, and review-friendly.
 Do not duplicate implementation progress or invent completed work.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
