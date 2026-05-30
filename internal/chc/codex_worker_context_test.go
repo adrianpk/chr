@@ -39,6 +39,50 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 	}
 }
 
+func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
+	projectDir := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	plan := RuntimePlan{
+		ProjectDir:        projectDir,
+		ContainerWorkdir:  "/workspace",
+		WorkerContextPath: filepath.Join(runDir, "context.md"),
+		ResultPath:        filepath.Join(runDir, "result.json"),
+		LogPath:           filepath.Join(runDir, "runtime.log"),
+		ValidationPath:    filepath.Join(runDir, "validation.log"),
+		ValidationCommand: "go test ./...",
+		DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		RunArtifactDir:    runDir,
+		ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
+		Image:             "chc-agent-runtime:local",
+	}
+	record := ExecutionRecord{
+		ID:         "exec-1",
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
+	}
+
+	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	if err != nil {
+		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(plan.WorkerContextPath)
+	if err != nil {
+		t.Fatalf("read context: %v", err)
+	}
+
+	for _, want := range []string{
+		"- ticket_path: /workspace/.chc/user/tickets/CHC-1.md",
+		"- result_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
+		"- log_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
+		"- validation_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+	} {
+		if !strings.Contains(string(content), want) {
+			t.Fatalf("content does not contain %q:\n%s", want, string(content))
+		}
+	}
+}
+
 func TestRenderCodexWorkerContextIsDeterministic(t *testing.T) {
 	opts := testCodexWorkerContextOptions("/tmp/context.md")
 

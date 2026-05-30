@@ -1185,6 +1185,11 @@ func runTicketStartExecution(
 		return chc.ExecutionRecord{}, err
 	}
 
+	err = chc.MaterializeCodexWorkerContextForExecution(ctx, record, result.Plan)
+	if err != nil {
+		return chc.ExecutionRecord{}, chc.NewExecutionFailure(chc.ExecutionFailurePreflight, err)
+	}
+
 	invocation, err := chc.NewHarnessInvocation(chc.HarnessInvocationOptions{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,

@@ -2834,6 +2834,17 @@ func assertTicketStartSucceededExecution(t *testing.T, record chc.ExecutionRecor
 	if record.Artifacts.ValidationPath != filepath.Join(record.Artifacts.RunDir, "validation.log") {
 		t.Fatalf("Artifacts.ValidationPath = %q, want validation log path", record.Artifacts.ValidationPath)
 	}
+
+	contextPath := filepath.Join(record.Artifacts.RunDir, "context.md")
+
+	contextContent, err := os.ReadFile(contextPath)
+	if err != nil {
+		t.Fatalf("read worker context: %v", err)
+	}
+
+	if !strings.Contains(string(contextContent), "- ticket_path: /workspace/.chc/user/tickets/CHC-1-Do-something.md") {
+		t.Fatalf("worker context = %q, want container ticket path", string(contextContent))
+	}
 }
 
 func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {

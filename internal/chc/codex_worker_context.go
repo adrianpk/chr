@@ -28,6 +28,22 @@ func NewCodexWorkerContextMaterializer() CodexWorkerContextMaterializer {
 	return &codexWorkerContextMaterializer{}
 }
 
+func MaterializeCodexWorkerContextForExecution(
+	ctx context.Context,
+	record ExecutionRecord,
+	plan RuntimePlan,
+) error {
+	return NewCodexWorkerContextMaterializer().MaterializeContext(ctx, MaterializeCodexWorkerContextOptions{
+		Path:           plan.WorkerContextPath,
+		ExecutionID:    record.ID,
+		TicketKey:      record.TicketKey,
+		TicketPath:     containerProjectPath(plan, record.TicketPath),
+		ResultPath:     containerProjectPath(plan, plan.ResultPath),
+		LogPath:        containerProjectPath(plan, plan.LogPath),
+		ValidationPath: containerProjectPath(plan, plan.ValidationPath),
+	})
+}
+
 func (m *codexWorkerContextMaterializer) MaterializeContext(
 	ctx context.Context,
 	opts MaterializeCodexWorkerContextOptions,
