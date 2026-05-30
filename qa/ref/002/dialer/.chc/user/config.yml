@@ -1,0 +1,4 @@
+schema_version: 1
+project_id: "project-dialer-gallery"
+runtime:
+  validation_command: go test ./...
