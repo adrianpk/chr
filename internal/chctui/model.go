@@ -166,6 +166,7 @@ type Model struct {
 	workAction               WorkActionState
 	workExecutor             WorkActionExecutor
 	agentWorkRefreshExecutor AgentWorkRefreshExecutor
+	agentWorkRefreshInFlight bool
 	workspaceExecutor        WorkspaceRefreshExecutor
 	projectExecutor          ProjectMetadataExecutor
 	caseExecutor             CaseMetadataExecutor

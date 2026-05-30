@@ -45,6 +45,8 @@ func (m Model) startAgentWorkRefresh() tea.Cmd {
 }
 
 func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cmd {
+	m.agentWorkRefreshInFlight = false
+
 	if msg.err != nil {
 		m.statusMessage = "Agent work refresh failed: " + msg.err.Error()
 
@@ -69,6 +71,12 @@ func (m Model) handleAgentWorkRefreshTick() (tea.Model, tea.Cmd) {
 	if m.workAction.Pending {
 		return m, agentWorkRefreshTickCmd()
 	}
+
+	if m.agentWorkRefreshInFlight {
+		return m, agentWorkRefreshTickCmd()
+	}
+
+	m.agentWorkRefreshInFlight = true
 
 	return m, m.startAgentWorkRefresh()
 }

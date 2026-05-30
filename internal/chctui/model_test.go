@@ -2405,6 +2405,30 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	}
 }
 
+func TestModelSkipsDashAgentWorkRefreshWhenOneIsInFlight(t *testing.T) {
+	executor := &fakeAgentWorkRefreshExecutor{}
+	model := NewModel(Options{AgentWorkExecutor: executor})
+	model.selected = 7
+
+	updated, cmd := model.Update(agentWorkRefreshTickMsg{})
+	refreshing := requireUpdatedModel(t, updated)
+
+	if cmd == nil {
+		t.Fatal("refresh command is nil")
+	}
+
+	updated, _ = refreshing.Update(agentWorkRefreshTickMsg{})
+	stillRefreshing := requireUpdatedModel(t, updated)
+
+	if !stillRefreshing.agentWorkRefreshInFlight {
+		t.Fatal("agentWorkRefreshInFlight is false, want in-flight refresh retained")
+	}
+
+	if executor.called {
+		t.Fatal("RefreshAgentWork called before refresh command runs")
+	}
+}
+
 func TestModelDoesNotRefreshAgentWorkOutsideDash(t *testing.T) {
 	executor := &fakeAgentWorkRefreshExecutor{}
 	model := NewModel(Options{AgentWorkExecutor: executor})

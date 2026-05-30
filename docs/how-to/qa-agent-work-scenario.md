@@ -47,13 +47,6 @@ The project contains seeded metadata, dumps, quiz notes, ADRs, and one manual
 bug ticket. It intentionally does not contain generated specs, plans, tracking,
 or generated comments tickets.
 
-Initialize runtime assets before executing agent work:
-
-```sh
-chc runtime init
-chc runtime validate --dry-run
-```
-
 ## Resolve The Seeded Bug Ticket
 
 Use the TUI or CLI to run the manual ticket:
@@ -64,6 +57,8 @@ chc work ticket CHC-1
 
 The agent should reproduce the failing unknown-post test, fix the status code,
 and leave validation evidence in the ticket workflow.
+
+Agent work initializes missing runtime assets automatically before execution.
 
 ## Generate Comments Work
 

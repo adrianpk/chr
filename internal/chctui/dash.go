@@ -51,9 +51,9 @@ func (m Model) renderDash() string {
 	}
 
 	output.WriteString("\nActions\n")
-	output.WriteString("  Start selected ticket\n")
-	output.WriteString("  Run all ready tickets\n")
-	output.WriteString("  Request agent stop")
+	output.WriteString("  enter Start selected ticket\n")
+	output.WriteString("  R Run all ready tickets\n")
+	output.WriteString("  s Request agent stop")
 
 	return output.String()
 }
@@ -69,11 +69,11 @@ func (m Model) renderDashWorkspace(width, height int) string {
 	currentLines := m.renderAgentWorkCurrentLines()
 	recentLines := append([]string{
 		"Actions",
-		"  Start selected ticket",
-		"  Run all ready tickets",
+		"  enter Start selected ticket",
+		"  R Run all ready tickets",
 		"  p Cycle priority filter",
 		"  o Cycle queue order",
-		"  Request agent stop",
+		"  s Request agent stop",
 		"",
 		"Recent",
 	}, m.renderAgentWorkRecentLines()...)
