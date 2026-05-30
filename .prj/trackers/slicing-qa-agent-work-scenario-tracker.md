@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-qa-agent-work-scenario-plan.md`
 
 Slicing name: QA Agent Work Scenario
 
-Active slice number: Slice 4
+Active slice number: Slice 5
 
-Active slice short name: test based agent guidance
+Active slice short name: qa runbook and smoke validation
 
-Expected branch name: `feat/slice-4-test-based-agent-guidance`
+Expected branch name: `feat/slice-5-qa-runbook-smoke-validation`
 
-Expected PR title: `feat(slice-4): test based agent guidance`
+Expected PR title: `feat(slice-5): qa runbook smoke validation`
 
 Expected report path:
-`.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md`
+`.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md`
 
 Prerequisite PRs or delivered work:
 
@@ -42,8 +42,8 @@ Prerequisite PRs or delivered work:
 | Slice 1: QA Workspace Reset Scaffold | Completed | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | Merged into `dev`. |
 | Slice 2: Blog Reference Project | Completed | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | Merged into `dev`. |
 | Slice 3: Seeded CHC Context And ADR Docs | Completed | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | Merged into `dev`. |
-| Slice 4: Test Based Agent Guidance | Reviewing | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | PR pending. |
-| Slice 5: QA Runbook And Smoke Validation | Planned | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | Final documentation and smoke validation. |
+| Slice 4: Test Based Agent Guidance | Completed | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | Merged into `dev`. |
+| Slice 5: QA Runbook And Smoke Validation | Reviewing | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | PR pending. |
 
 ## Slice 1: QA Workspace Reset Scaffold
 
@@ -157,20 +157,23 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T5.1 Add a concise QA runbook in repository docs.
-- [ ] T5.2 Update reference docs for QA Make targets.
-- [ ] T5.3 Add smoke validation for reset, Git initialization, and expected
+- [x] T5.1 Add a concise QA runbook in repository docs.
+- [x] T5.2 Update reference docs for QA Make targets.
+- [x] T5.3 Add smoke validation for reset, Git initialization, and expected
       failing blog tests.
-- [ ] T5.4 Verify active project directories remain ignored.
-- [ ] T5.5 Add slice implementation report and run quality gates.
+- [x] T5.4 Verify active project directories remain ignored.
+- [x] T5.5 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- Pending.
 
 Validation:
 
-- Not run yet.
+- `make qa-smoke-blog`
+- `make qa-test-blog` expected failure: unknown post returns `500`, test expects `404`
+- `make verify`
+- `git diff --check`
 
 ## Completion
 
