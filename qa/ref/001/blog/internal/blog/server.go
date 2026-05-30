@@ -32,7 +32,7 @@ func (s Server) getPost(w http.ResponseWriter, r *http.Request) {
 	post, err := s.posts.PublishedPost(r.PathValue("slug"))
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
-			writeJSON(w, http.StatusNotFound, map[string]string{
+			writeJSON(w, http.StatusInternalServerError, map[string]string{
 				"error": "post not found",
 			})
 
