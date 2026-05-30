@@ -291,6 +291,28 @@ func TestTicketLoopQueryOrdersByCreatedAt(t *testing.T) {
 	}
 }
 
+func TestTicketLoopQueryOrdersByCreatedAtThenKey(t *testing.T) {
+	index := newTestTicketIndex(t)
+	createdAt := "2026-05-18T12:00:00Z"
+
+	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHC-6", createdAt))
+	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHC-2", createdAt))
+	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHC-10", createdAt))
+
+	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
+		ProjectID: "project-1",
+		Order:     TicketLoopOrderCreatedAt,
+	})
+	if err != nil {
+		t.Fatalf("EligibleTickets returned error: %v", err)
+	}
+
+	gotKeys := indexedTicketKeys(got)
+	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-6", "CHC-10"}) {
+		t.Fatalf("keys = %#v, want created_at ties ordered by key", gotKeys)
+	}
+}
+
 func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 	index := newTestTicketIndex(t)
 

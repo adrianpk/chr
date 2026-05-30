@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -218,6 +219,8 @@ func compareIndexedTicketsByCreatedAt(left, right IndexedTicket) int {
 			return -1
 		case left.CreatedAt.After(*right.CreatedAt):
 			return 1
+		default:
+			return compareIndexedTicketsByKey(left, right)
 		}
 	}
 
@@ -303,6 +306,13 @@ func firstNonZero(values ...int) int {
 }
 
 func compareIndexedTicketsByKey(left, right IndexedTicket) int {
+	leftPrefix, leftNumber, leftOK := splitTicketKey(left.Key)
+	rightPrefix, rightNumber, rightOK := splitTicketKey(right.Key)
+
+	if leftOK && rightOK && leftPrefix == rightPrefix {
+		return compareRank(leftNumber, rightNumber)
+	}
+
 	if left.Key < right.Key {
 		return -1
 	}
@@ -312,4 +322,18 @@ func compareIndexedTicketsByKey(left, right IndexedTicket) int {
 	}
 
 	return 0
+}
+
+func splitTicketKey(key string) (string, int, bool) {
+	prefix, numberText, ok := strings.Cut(key, "-")
+	if !ok || prefix == "" || numberText == "" {
+		return "", 0, false
+	}
+
+	number, err := strconv.Atoi(numberText)
+	if err != nil {
+		return "", 0, false
+	}
+
+	return prefix, number, true
 }
