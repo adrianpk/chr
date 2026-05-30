@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-qa-agent-work-scenario-plan.md`
 
 Slicing name: QA Agent Work Scenario
 
-Active slice number: Slice 3
+Active slice number: Slice 4
 
-Active slice short name: seeded chc context and adr docs
+Active slice short name: test based agent guidance
 
-Expected branch name: `feat/slice-3-seeded-chc-context-adr-docs`
+Expected branch name: `feat/slice-4-test-based-agent-guidance`
 
-Expected PR title: `feat(slice-3): seeded chc context adr docs`
+Expected PR title: `feat(slice-4): test based agent guidance`
 
 Expected report path:
-`.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md`
+`.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md`
 
 Prerequisite PRs or delivered work:
 
@@ -41,8 +41,8 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: QA Workspace Reset Scaffold | Completed | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | Merged into `dev`. |
 | Slice 2: Blog Reference Project | Completed | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | Merged into `dev`. |
-| Slice 3: Seeded CHC Context And ADR Docs | Reviewing | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | PR pending. |
-| Slice 4: Test Based Agent Guidance | Planned | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | Can run after Slice 3. |
+| Slice 3: Seeded CHC Context And ADR Docs | Completed | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | Merged into `dev`. |
+| Slice 4: Test Based Agent Guidance | Reviewing | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | PR pending. |
 | Slice 5: QA Runbook And Smoke Validation | Planned | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | Final documentation and smoke validation. |
 
 ## Slice 1: QA Workspace Reset Scaffold
@@ -132,20 +132,26 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T4.1 Update CHC agent conventions with test-based guidance.
-- [ ] T4.2 Update generated tracking/ticket prompt instructions with the same
+- [x] T4.1 Update CHC agent conventions with test-based guidance.
+- [x] T4.2 Update generated tracking/ticket prompt instructions with the same
       preference.
-- [ ] T4.3 Add tests that assert prompt guidance is present where relevant.
-- [ ] T4.4 Seed equivalent guidance in the blog reference project.
-- [ ] T4.5 Add slice implementation report and run quality gates.
+- [x] T4.3 Add tests that assert prompt guidance is present where relevant.
+- [x] T4.4 Seed equivalent guidance in the blog reference project.
+- [x] T4.5 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- `b57a362 docs(agents): prefer test based bug fixes`
+- `540bf43 feat(generation): add test based ticket guidance`
+- `5757357 docs(qa): seed blog agent conventions`
 
 Validation:
 
-- Not run yet.
+- `go test ./internal/chc`
+- `make qa-reset-blog`
+- `make qa-test-blog` expected failure: unknown post returns `500`, test expects `404`
+- `make verify`
+- `git diff --check`
 
 ## Slice 5: QA Runbook And Smoke Validation
 
