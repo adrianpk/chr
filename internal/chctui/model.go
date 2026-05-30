@@ -695,6 +695,8 @@ func (m *Model) handleDashActionKey(key string) bool {
 	switch key {
 	case "enter":
 		m.planWorkAction(WorkActionStartTicket)
+	case "a":
+		m.planWorkAction(WorkActionRunAllReady)
 	case "R":
 		m.planWorkAction(WorkActionRunAllReady)
 	case "p":
@@ -1267,7 +1269,7 @@ func (m Model) renderKeys() string {
 	case m.SelectedView() == ViewPlans:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates missing plan, G regenerates, r refreshes, q quits"
 	case m.SelectedView() == ViewDash:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, enter starts selected ticket, R runs all ready, s requests stop, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, a runs all ready tickets, enter starts selected ticket, s requests stop, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, q quits"
 	default:

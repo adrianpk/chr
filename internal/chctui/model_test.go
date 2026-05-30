@@ -2254,6 +2254,7 @@ func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 		"Loop: loop-1",
 		"Execution: exec-1",
 		"Recent",
+		"a Run all ready tickets",
 		"Run all ready tickets",
 	} {
 		if !strings.Contains(view, want) {
@@ -2270,7 +2271,7 @@ func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 	model := NewModel(Options{})
 	model.selected = 7
 
-	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("R")})
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
 
 	planned, ok := updated.(Model)
 	if !ok {
@@ -2337,7 +2338,7 @@ func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 
 	priorityChanged, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("p")})
 	orderChanged, _ := priorityChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("o")})
-	planned, _ := orderChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("R")})
+	planned, _ := orderChanged.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
 
 	modelWithAction, ok := planned.(Model)
 	if !ok {
