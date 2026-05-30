@@ -44,11 +44,14 @@ This document defines coding rules for Go application code.
 ## Testing
 
 - Use Go's standard `testing` package by default.
+- For bug fixes, first reproduce the defect with a failing test when feasible.
 - Prefer table-driven tests for input/output behavior.
 - Place tests beside the package they validate.
 - Use fakes over broad mocks when dependency substitution is needed.
 - Cover expected failures, edge cases, and package boundary contracts.
 - Do not skip tests for behavior changes.
+- Use property-based, fuzz, race, or benchmark tests when the use case justifies
+  them; do not add them as ceremony.
 
 ## Anti-patterns
 
