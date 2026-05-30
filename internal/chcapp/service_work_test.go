@@ -1,6 +1,7 @@
 package chcapp
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -42,6 +43,26 @@ func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
 	if len(loopRuns) != 0 {
 		t.Fatalf("loop runs = %d, want 0", len(loopRuns))
 	}
+}
+
+func TestServiceStartAgentWorkTicketInitializesRuntime(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	_, err := operations.StartAgentWorkTicket("CHC-1")
+	if err != nil {
+		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
+	}
+
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "runs"))
 }
 
 func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {

@@ -49,6 +49,11 @@ func (s service) StartReadyTicketLoop() (WorkOperationResult, error) {
 }
 
 func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error) {
+	err := s.ensureAgentWorkRuntime()
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
 	ticket, err := s.ticketByKey(ticketKey)
 	if err != nil {
 		return AgentWorkResult{}, err
@@ -91,6 +96,11 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 }
 
 func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
+	err := s.ensureAgentWorkRuntime()
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
 	tickets, eligibleCount, err := s.agentWorkLoopTickets(defaultAgentWorkSelectionOptions(1))
 	if err != nil {
 		return AgentWorkResult{}, err
@@ -104,6 +114,11 @@ func (s service) StartAllReadyAgentWork() (AgentWorkResult, error) {
 }
 
 func (s service) StartAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
+	err := s.ensureAgentWorkRuntime()
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
 	tickets, eligibleCount, err := s.agentWorkLoopTickets(opts)
 	if err != nil {
 		return AgentWorkResult{}, err
@@ -274,4 +289,15 @@ func (s service) reloadWorkOperationState() (WorkOperationResult, error) {
 	return WorkOperationResult{
 		Tickets: tickets,
 	}, nil
+}
+
+func (s service) ensureAgentWorkRuntime() error {
+	_, err := chc.NewRuntimeAssets(s.assetsFS).Init(s.ctx, chc.RuntimeInitOptions{
+		ProjectDir: s.projectContext.ProjectDir,
+	})
+	if err != nil {
+		return fmt.Errorf("initialize agent runtime: %w", err)
+	}
+
+	return nil
 }
