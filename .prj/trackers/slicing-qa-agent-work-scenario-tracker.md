@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-qa-agent-work-scenario-plan.md`
 
 Slicing name: QA Agent Work Scenario
 
-Active slice number: Slice 2
+Active slice number: Slice 3
 
-Active slice short name: blog reference project
+Active slice short name: seeded chc context and adr docs
 
-Expected branch name: `feat/slice-2-blog-reference-project`
+Expected branch name: `feat/slice-3-seeded-chc-context-adr-docs`
 
-Expected PR title: `feat(slice-2): blog reference project`
+Expected PR title: `feat(slice-3): seeded chc context adr docs`
 
 Expected report path:
-`.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md`
+`.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md`
 
 Prerequisite PRs or delivered work:
 
@@ -40,8 +40,8 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: QA Workspace Reset Scaffold | Completed | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | Merged into `dev`. |
-| Slice 2: Blog Reference Project | Reviewing | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | PR pending. |
-| Slice 3: Seeded CHC Context And ADR Docs | Planned | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | Depends on Slice 2. |
+| Slice 2: Blog Reference Project | Completed | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | Merged into `dev`. |
+| Slice 3: Seeded CHC Context And ADR Docs | Reviewing | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | PR pending. |
 | Slice 4: Test Based Agent Guidance | Planned | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | Can run after Slice 3. |
 | Slice 5: QA Runbook And Smoke Validation | Planned | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | Final documentation and smoke validation. |
 
@@ -103,21 +103,30 @@ Validation:
 
 Candidate tasks:
 
-- [ ] T3.1 Add project and use-case metadata for `comments`.
-- [ ] T3.2 Add comments dumps and curated quiz notes under `.chc/user/...`.
-- [ ] T3.3 Add a ready bug ticket for the unknown-slug behavior.
-- [ ] T3.4 Add ADR documentation under `docs/explanation/adr/`.
-- [ ] T3.5 Ensure no generated comments spec/plan/tracking/tickets are seeded.
-- [ ] T3.6 Validate CHC can open the active project after reset.
-- [ ] T3.7 Add slice implementation report and run quality gates.
+- [x] T3.1 Add project and use-case metadata for `comments`.
+- [x] T3.2 Add comments dumps and curated quiz notes under `.chc/user/...`.
+- [x] T3.3 Add a ready bug ticket for the unknown-slug behavior.
+- [x] T3.4 Add ADR documentation under `docs/explanation/adr/`.
+- [x] T3.5 Ensure no generated comments spec/plan/tracking/tickets are seeded.
+- [x] T3.6 Validate CHC can open the active project after reset.
+- [x] T3.7 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- `629ac44 docs(qa): seed blog project metadata`
+- `e0858ec docs(qa): seed comments discovery context`
+- `fcc1262 docs(qa): seed unknown post bug ticket`
+- `501c908 docs(qa): seed blog api adr`
 
 Validation:
 
-- Not run yet.
+- `make qa-reset-blog`
+- `go run ./cmd/chc ticket list --dir qa/project/blog`
+- `go run ./cmd/chc spec list --dir qa/project/blog`
+- `find qa/project/blog/.chc/user/specs qa/project/blog/.chc/user/plans -maxdepth 2 -type f 2>/dev/null | sort`
+- `make qa-test-blog` expected failure: unknown post returns `500`, test expects `404`
+- `make verify`
+- `git diff --check`
 
 ## Slice 4: Test Based Agent Guidance
 
