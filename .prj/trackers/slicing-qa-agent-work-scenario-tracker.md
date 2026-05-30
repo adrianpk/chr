@@ -39,7 +39,7 @@ Prerequisite PRs or delivered work:
 
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1: QA Workspace Reset Scaffold | Planned | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | First implementation slice. |
+| Slice 1: QA Workspace Reset Scaffold | Reviewing | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` | PR pending. |
 | Slice 2: Blog Reference Project | Planned | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | Depends on Slice 1. |
 | Slice 3: Seeded CHC Context And ADR Docs | Planned | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | Depends on Slice 2. |
 | Slice 4: Test Based Agent Guidance | Planned | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | Can run after Slice 3. |
@@ -49,21 +49,28 @@ Prerequisite PRs or delivered work:
 
 Candidate tasks:
 
-- [ ] T1.1 Add `qa/` ignore rules for generated project and temporary copies.
-- [ ] T1.2 Add generic and blog-specific Make targets.
-- [ ] T1.3 Add reset script under `scripts/qa/`.
-- [ ] T1.4 Add test script under `scripts/qa/`.
-- [ ] T1.5 Add minimal placeholder reference content required to prove reset.
-- [ ] T1.6 Add tests or shell validation for reset behavior.
-- [ ] T1.7 Add slice implementation report and run quality gates.
+- [x] T1.1 Add `qa/` ignore rules for generated project and temporary copies.
+- [x] T1.2 Add generic and blog-specific Make targets.
+- [x] T1.3 Add reset script under `scripts/qa/`.
+- [x] T1.4 Add test script under `scripts/qa/`.
+- [x] T1.5 Add minimal placeholder reference content required to prove reset.
+- [x] T1.6 Add tests or shell validation for reset behavior.
+- [x] T1.7 Add slice implementation report and run quality gates.
 
 Task commits:
 
-- None yet.
+- `1e9fe77 chore(qa): ignore generated qa workspaces`
+- `8f13091 build(qa): add scenario make targets`
+- `71d1cd6 feat(qa): add scenario reset script`
+- `6a04d33 feat(qa): add scenario test script`
+- `a8c8147 docs(qa): seed blog reference placeholder`
 
 Validation:
 
-- Not run yet.
+- `make qa-reset-blog`
+- `make qa-test-blog`
+- `make verify`
+- `git diff --check`
 
 ## Slice 2: Blog Reference Project
 
