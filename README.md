@@ -4,6 +4,10 @@
   <img src="docs/assets/img/home/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
 </p>
 
+<p align="center">
+  <a href="docs/gallery/index.md">Gallery</a>
+</p>
+
 ChrysoCoord is a local software-development orchestrator for agentic work.
 
 Think of it as a controlled, Go-oriented software factory that turns rough
@@ -30,46 +34,21 @@ ready queue, then records what happened.
 Ticket work runs through a Docker-based sandboxed runtime boundary. Execution
 is explicit, inspectable, and separated from the host workflow.
 
-## Capabilities
+## Control Surface
 
-ChrysoCoord puts a controlled workflow around that process. Dumps preserve rough
-project knowledge. Quizzes put the agent in a requirements-analysis role.
-Specifications turn the captured knowledge into expected behavior. Plans and
-trackers turn the spec into visible implementation work. Tickets become the
-unit the agent can actually execute.
+ChrysoCoord is operated through a TUI and mirrored CLI commands. The TUI gives
+the user a project-manager view: specs, plans, tickets, board state, runtime
+activity, and review evidence. The CLI exposes the same workflow as commands
+that users can script and agents can invoke when they need to interact with the
+project workflow directly.
 
-The result becomes project material. Specs, plans, tickets, comments, reports,
-changed-file summaries, plus validation evidence live with the project as
-editable Markdown and local artifacts.
+Dumps and quizzes capture context. Specs and plans organize the work. Tickets
+are the executable unit. The board shows what is ready, running, blocked, or
+waiting for review.
 
-Remote operation is part of the direction of travel. Telegram-driven
-orchestration is still transport work, with the current plumbing shaped around
-that model.
-
-## Control Model
-
-ChrysoCoord makes the work inspectable before code changes start. You can review
-the spec, inspect the plan, see the tickets, run a single ticket, run the whole
-queue, stop the loop, then review the board after execution.
-
-That gives the agent room to work while keeping control points in the hands of
-the user. The sandboxed runtime adds a practical safety boundary around the code
-execution phase.
-
-ChrysoCoord treats the user more like a project manager than a harness operator.
-Shape the work, inspect the generated tickets, choose what runs, watch progress
-on the board, then review the result. Once the queue is shaped, the agent can
-work autonomously through ready tickets while ChrysoCoord keeps execution
-bounded and observable.
-
-## System Shape
-
-ChrysoCoord currently focuses on local Go projects. It provides a CLI, a TUI, a
-Docker-based runtime boundary for ticket execution, plus Markdown-first project
-artifacts under `.chc/user/`.
-
-Detailed technical material lives under `docs/`; the README is only the front
-door.
+Once the queue is shaped, the agent can work autonomously through ready tickets.
+The user can still run one ticket, run the full queue, stop the loop, inspect
+the output, and review the result before promoting the work.
 
 ## Install
 
@@ -115,8 +94,7 @@ chc project current
 
 ## Documentation
 
-The README is the front door. Detailed technical material lives under
-`docs/`, organized with Diataxis:
+More documentation:
 
 - [Documentation index](docs/index.md)
 - [Getting started tutorial](docs/tutorials/getting-started.md)
@@ -125,23 +103,3 @@ The README is the front door. Detailed technical material lives under
 - [Find execution and loop evidence](docs/how-to/find-execution-and-loop-evidence.md)
 - [Reference](docs/reference/project-workspace.md)
 - [Explanation](docs/explanation/architecture.md)
-
-Use reference pages for exact command behavior, workspace layout, configuration,
-ticket schema, and runtime contracts. Use explanation pages for architecture,
-runtime design, slicing, ticket lifecycle, and document-generation rationale.
-
-## Development
-
-Common local checks:
-
-```sh
-make fmt
-make test
-make verify
-```
-
-Run the CLI without installing:
-
-```sh
-make run RUN_ARGS="--help"
-```

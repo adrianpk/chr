@@ -3,10 +3,11 @@ skinparam monochrome true
 skinparam shadowing false
 
 :Your idea and answers;
-:Context dump or requirements quiz;
+:User dump and quiz answers;
 :Agent-generated spec;
 :Agent-generated plan;
-:Tracker and tickets;
-:Agent execution loop;
+:Agent-generated tracker and tickets;
+:User starts loop;
+:Agent completes queue;
 :Board updates and review evidence;
 @enduml

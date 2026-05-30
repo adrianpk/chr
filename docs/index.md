@@ -57,3 +57,9 @@ Rationale and system shape:
 - [Document generation model](explanation/document-generation-model.md)
 - [Slicing workflow](explanation/slicing-workflow.md)
 - [Ticket resolution lifecycle](explanation/ticket-resolution-lifecycle.md)
+
+## Gallery
+
+Visual examples:
+
+- [Gallery](gallery/index.md)
