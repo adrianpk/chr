@@ -22,7 +22,7 @@ tickets, runtime artifacts, and execution state.
 
 <div align="center">
 
-<img src="docs/assets/img/home/chrysocoord-workflow.svg" alt="ChrysoCoord workflow">
+<img src="docs/assets/img/home/chrysocoord-workflow.png" alt="ChrysoCoord workflow">
 
 </div>
 
