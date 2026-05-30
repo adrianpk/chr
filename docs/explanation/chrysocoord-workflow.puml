@@ -1,0 +1,12 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+
+:Your idea and answers;
+:Context dump or requirements quiz;
+:Agent-generated spec;
+:Agent-generated plan;
+:Tracker and tickets;
+:Agent execution loop;
+:Board updates and review evidence;
+@enduml

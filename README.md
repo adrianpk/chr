@@ -1,38 +1,24 @@
 # ChrysoCoord
 
 <p align="center">
-  <img src="docs/assets/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
+  <img src="docs/assets/img/home/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
 </p>
 
 ChrysoCoord is a local software-development orchestrator for agentic work.
 
 Think of it as a controlled, Go-oriented software factory that turns rough
-intent into organized implementation work, then lets an agent execute that work
-ticket by ticket while leaving a reviewable trail behind.
+intent into organized implementation work, then allows agents to execute that
+work ticket by ticket while leaving a reviewable trail behind.
 
-Once the `chc` binary is on your `PATH`, the workflow can be injected into an
-existing Go project. Initialize it in the project root and ChrysoCoord creates a
-reserved `.chc/` workspace where the agent manages project context, generated
-documents, tickets, runtime artifacts, plus execution state.
+Running `chc init` in the root of an existing Go project creates a reserved
+`.chc/` workspace where ChrysoCoord stores project context, generated documents,
+tickets, runtime artifacts, and execution state.
 
 ## Workflow
 
 <div align="center">
 
-```plantuml
-@startuml
-skinparam monochrome true
-skinparam shadowing false
-
-:Your idea and answers;
-:Context dump or requirements quiz;
-:Agent-generated spec;
-:Agent-generated plan;
-:Tracker and tickets;
-:Agent execution loop;
-:Board updates and review evidence;
-@enduml
-```
+<img src="docs/assets/img/home/chrysocoord-workflow.svg" alt="ChrysoCoord workflow">
 
 </div>
 
