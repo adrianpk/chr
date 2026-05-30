@@ -1,194 +1,89 @@
 # ChrysoCoord
 
-ChrysoCoord organizes agent work inside a software project.
+<p align="center">
+  <img src="docs/assets/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
+</p>
 
-It gives the project a local workspace where tickets, specifications, plans,
-execution evidence, and handoff material can live together. The agent can use
-that workspace to receive work, reason from project documents, execute tickets,
-track progress, and leave behind a traceable record of what happened.
+ChrysoCoord is a local software-development orchestrator for agentic work.
 
-ChrysoCoord is implemented in Go and is currently optimized for Go projects.
+Think of it as a controlled, Go-oriented software factory that turns rough
+intent into organized implementation work, then lets an agent execute that work
+ticket by ticket while leaving a reviewable trail behind.
 
-## What ChrysoCoord Does
+Once the `chc` binary is on your `PATH`, the workflow can be injected into an
+existing Go project. Initialize it in the project root and ChrysoCoord creates a
+reserved `.chc/` workspace where the agent manages project context, generated
+documents, tickets, runtime artifacts, plus execution state.
 
-Working with an agent on a real project becomes difficult when the agent has no
-durable project-local memory, no structured task workflow, no clear execution
-boundary, and no stable record of attempts or blockers.
+## Workflow
 
-ChrysoCoord gives that work a shape. It keeps project-specific agent state close
-to the code, uses Markdown documents as editable workflow artifacts, and lets the
-agent work from tickets instead of from loose chat context.
+<div align="center">
 
-## How It Works
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
 
-At a high level, the workflow is:
+:Your idea and answers;
+:Context dump or requirements quiz;
+:Agent-generated spec;
+:Agent-generated plan;
+:Tracker and tickets;
+:Agent execution loop;
+:Board updates and review evidence;
+@enduml
+```
 
-1. A project gets a hidden local workspace.
-2. The user creates or imports project knowledge such as drafts,
-   specifications, plans, trackers, quizzes, dumps, and tickets.
-3. The agent receives work through Markdown tickets.
-4. Ticket execution runs inside a sandboxed Docker runtime.
-5. The harness runs the agent workflow, including Ralph-loop based ticket
-   resolution where applicable.
-6. Results are written back as ticket updates, comments, checklists, logs,
-   validation evidence, and changed-file summaries.
-7. The user inspects, reviews, continues, or promotes the work.
+</div>
 
-## Project Workspace
+You provide the initial intent, project context, and answers to focused
+questions. The agent does the heavy work after that. It formalizes the feature,
+plans the implementation, creates tickets, executes them one by one or as a
+ready queue, then records what happened.
 
-ChrysoCoord maintains project-specific state in a hidden workspace inside the
-project. That workspace can contain drafts, specs, plans, trackers, tickets,
-reports, quizzes, fixtures, execution artifacts, and validation evidence.
+Ticket work runs through a Docker-based sandboxed runtime boundary. Execution
+is explicit, inspectable, and separated from the host workflow.
 
-These files are intentionally project-local. They are inspectable, editable, and
-connected to the code they describe. Generated documents are not locked away in a
-closed database; a technical user can edit the Markdown directly when that is
-the clearest path.
+## Capabilities
 
-See [Project workspace](docs/reference/project-workspace.md) for the exact
-layout and contracts.
+ChrysoCoord puts a controlled workflow around that process. Dumps preserve rough
+project knowledge. Quizzes put the agent in a requirements-analysis role.
+Specifications turn the captured knowledge into expected behavior. Plans and
+trackers turn the spec into visible implementation work. Tickets become the
+unit the agent can actually execute.
 
-## Tickets and Agent Work
+The result becomes project material. Specs, plans, tickets, comments, reports,
+changed-file summaries, plus validation evidence live with the project as
+editable Markdown and local artifacts.
 
-Tickets are the project-local task surface used by the agent. A ticket describes
-work the agent can execute and can carry metadata such as priority, severity,
-type, labels, use case, or project area.
+Remote operation is part of the direction of travel. Telegram-driven
+orchestration is still transport work, with the current plumbing shaped around
+that model.
 
-The agent can work on one explicit ticket, or ChrysoCoord can run a loop over
-eligible tickets. Loops can be filtered and ordered so the agent only picks work
-that matches the intended scope.
+## Control Model
 
-Tickets include checklists for subtasks and comment areas for progress,
-blockers, failed attempts, evidence, and handoff notes. The agent is not expected
-to spin forever when stuck: repeated failures can be recorded, and notification
-audit records can surface blockers through configured channels.
+ChrysoCoord makes the work inspectable before code changes start. You can review
+the spec, inspect the plan, see the tickets, run a single ticket, run the whole
+queue, stop the loop, then review the board after execution.
 
-See [Ticket loop](docs/reference/ticket-loop.md),
-[Ticket execution](docs/reference/ticket-execution.md), and
-[Ticket comments](docs/reference/ticket-comments.md) for detailed behavior.
+That gives the agent room to work while keeping control points in the hands of
+the user. The sandboxed runtime adds a practical safety boundary around the code
+execution phase.
 
-## Documents, Specs, Plans, and Trackers
+ChrysoCoord treats the user more like a project manager than a harness operator.
+Shape the work, inspect the generated tickets, choose what runs, watch progress
+on the board, then review the result. Once the queue is shaped, the agent can
+work autonomously through ready tickets while ChrysoCoord keeps execution
+bounded and observable.
 
-ChrysoCoord is Markdown-first. Commands can create base project documents, but
-the documents remain normal files that can be reviewed and edited directly.
+## System Shape
 
-The intended document progression is simple:
+ChrysoCoord currently focuses on local Go projects. It provides a CLI, a TUI, a
+Docker-based runtime boundary for ticket execution, plus Markdown-first project
+artifacts under `.chc/user/`.
 
-- a dump or quiz captures rough project knowledge;
-- a draft turns that material into a first structured document;
-- a specification defines expected behavior;
-- a plan defines implementation work;
-- a tracker records progress through that work.
-
-The current CLI supports authoring sessions, static quiz generation, quiz to
-draft promotion, and assisted authoring flows that persist their state as
-Markdown.
-
-See [Authoring sessions](docs/reference/authoring-sessions.md) and
-[Document generation model](docs/explanation/document-generation-model.md).
-
-## Slicing
-
-ChrysoCoord is built around slicing larger work into smaller implementation
-units.
-
-A feature or use case can be described, turned into specifications and plans,
-and then split into slices. A slice can contain tasks, and tasks can correspond
-to commits. Slices can be associated with branches and pull requests, so the
-user can review the work manually. In trusted workflows, auto-merge may be
-configured later.
-
-This matters because a plan should make implementation visible before the agent
-starts writing code. The user should be able to inspect how many slices and
-tasks are expected, how the commits are distributed, and where review will
-happen.
-
-See [Slicing workflow](docs/explanation/slicing-workflow.md).
-
-## Knowledge Capture
-
-ChrysoCoord's document model is designed around two knowledge-capture paths.
-
-A dump captures broad project or use-case context. It is useful when the user
-needs to preserve rough knowledge before turning it into a draft, specification,
-plan, or ticket.
-
-A quiz is a bounded question session. The agent asks focused questions to
-extract missing knowledge, then stores the raw and curated material as reusable
-documentation input. It is structured knowledge extraction, not disposable chat
-history.
-
-The current CLI exposes quiz-based authoring and assisted authoring sessions.
-Dump-style context can still be captured directly as Markdown and used as input
-for drafts, specifications, plans, and tickets.
-
-See [Document generation model](docs/explanation/document-generation-model.md)
-and [User guide](docs/how-to/user-guide/index.md).
-
-## Runtime
-
-When the agent works on a ticket, ChrysoCoord can start a Docker container and
-run the configured harness inside it. The harness receives the execution
-context, works on the ticket, runs validation, and leaves behind result data,
-logs, validation evidence, and changed-file information.
-
-The Docker container is the sandboxed runtime boundary. ChrysoCoord prepares the
-context on the host side and passes explicit artifacts into the runtime instead
-of relying on hidden conversation state.
-
-See [Agent sandbox and runtime](docs/explanation/agent-sandbox-and-runtime.md)
-and [Runtime configuration](docs/reference/runtime-config.md).
-
-## Current Capabilities
-
-Project workspace:
-
-- initializes a project-local workspace;
-- stores project-specific agent material;
-- keeps durable state close to the project.
-
-Documents:
-
-- creates drafts, quizzes, reports, and related Markdown artifacts;
-- supports manual editing;
-- supports promotion from quiz material into drafts;
-- supports assisted authoring sessions with durable transcripts.
-
-Tickets:
-
-- creates and indexes Markdown tickets;
-- lets the agent execute explicit tickets or filtered ticket loops;
-- records progress, comments, checklists, and execution outcomes.
-
-Runtime:
-
-- validates the project runtime boundary;
-- runs ticket execution inside Docker;
-- captures logs, results, validation evidence, and changed-file summaries.
-
-Coordination:
-
-- registers local projects;
-- resolves active or explicit project directories;
-- coordinates foreground loops and local daemon-style operation.
-
-Notifications and remote commands:
-
-- records notification audit events for ticket, loop, daemon, remote command,
-  and manual-test events;
-- can send Telegram setup-check messages when configured;
-- can parse Telegram update fixtures into accepted or rejected remote command
-  handoff records.
-
-Reporting and maintenance:
-
-- lists and shows execution and loop reports;
-- writes review handoff summaries;
-- inspects database, registry, execution artifact, and runtime artifact drift;
-- writes a local diagnostic bundle under `.chc/maintenance/`.
-
-Live Telegram polling and email delivery remain future transport work. They are
-not required for the local CLI workflow that exists today.
+Detailed technical material lives under `docs/`; the README is only the front
+door.
 
 ## Install
 
