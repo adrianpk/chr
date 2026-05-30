@@ -12,6 +12,8 @@ RUN apt-get update \
         make \
         nodejs \
         npm \
+    && ln -sf /usr/local/go/bin/go /usr/local/bin/go \
+    && ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt \
     && npm install -g @openai/codex \
     && rm -rf /var/lib/apt/lists/*
 
