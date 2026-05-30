@@ -1,6 +1,6 @@
 # QA Agent Work Scenario Slicing Tracker
 
-Status: active
+Status: completed
 
 Plan: `.prj/plans/slicing-qa-agent-work-scenario-plan.md`
 
@@ -8,16 +8,16 @@ Plan: `.prj/plans/slicing-qa-agent-work-scenario-plan.md`
 
 Slicing name: QA Agent Work Scenario
 
-Active slice number: Slice 5
+Active slice number: None
 
-Active slice short name: qa runbook and smoke validation
+Active slice short name: none
 
-Expected branch name: `feat/slice-5-qa-runbook-smoke-validation`
+Expected branch name: none
 
-Expected PR title: `feat(slice-5): qa runbook smoke validation`
+Expected PR title: none
 
 Expected report path:
-`.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md`
+none
 
 Prerequisite PRs or delivered work:
 
@@ -31,9 +31,9 @@ Prerequisite PRs or delivered work:
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with repository quality gates.
-- [ ] Decide whether post-slice tuning is needed.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with repository quality gates.
+- [x] Decide whether post-slice tuning is needed.
 
 ## Slice Status
 
@@ -43,7 +43,7 @@ Prerequisite PRs or delivered work:
 | Slice 2: Blog Reference Project | Completed | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` | Merged into `dev`. |
 | Slice 3: Seeded CHC Context And ADR Docs | Completed | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` | Merged into `dev`. |
 | Slice 4: Test Based Agent Guidance | Completed | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` | Merged into `dev`. |
-| Slice 5: QA Runbook And Smoke Validation | Reviewing | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | PR pending. |
+| Slice 5: QA Runbook And Smoke Validation | Completed | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` | Merged into `dev`. |
 
 ## Slice 1: QA Workspace Reset Scaffold
 
@@ -166,7 +166,9 @@ Candidate tasks:
 
 Task commits:
 
-- Pending.
+- `ce0c8bb build(qa): add scenario smoke target`
+- `cf31238 docs(qa): add agent work runbook`
+- `20dc005 docs(qa): report smoke validation slice`
 
 Validation:
 
@@ -177,6 +179,6 @@ Validation:
 
 ## Completion
 
-The slicing is not complete.
+The slicing is complete.
 
-Tuning needed: undecided.
+Tuning needed: none identified during slice completion.
