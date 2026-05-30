@@ -44,7 +44,10 @@ func NewTicketKeySequenceRepository(
 		return nil, fmt.Errorf("open ticket key sequence database: %w", err)
 	}
 
-	db.SetMaxOpenConns(1)
+	err = configureSQLiteDatabase(ctx, db)
+	if err != nil {
+		return nil, closeDBWithError(db, err)
+	}
 
 	repository, err := NewTicketKeySequenceRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {

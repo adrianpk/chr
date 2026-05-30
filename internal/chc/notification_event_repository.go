@@ -47,7 +47,10 @@ func NewNotificationEventRepository(
 		return nil, fmt.Errorf("open notification event database: %w", err)
 	}
 
-	db.SetMaxOpenConns(1)
+	err = configureSQLiteDatabase(ctx, db)
+	if err != nil {
+		return nil, closeDBWithError(db, err)
+	}
 
 	repository, err := NewNotificationEventRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {

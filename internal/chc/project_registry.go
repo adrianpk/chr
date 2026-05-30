@@ -45,7 +45,10 @@ func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS
 		return nil, fmt.Errorf("open project registry database: %w", err)
 	}
 
-	db.SetMaxOpenConns(1)
+	err = configureSQLiteDatabase(ctx, db)
+	if err != nil {
+		return nil, closeDBWithError(db, err)
+	}
 
 	migrator := NewMigrator(assetsFS)
 

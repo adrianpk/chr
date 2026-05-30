@@ -42,7 +42,10 @@ func NewRemoteCommandRecordRepository(
 		return nil, fmt.Errorf("open remote command database: %w", err)
 	}
 
-	db.SetMaxOpenConns(1)
+	err = configureSQLiteDatabase(ctx, db)
+	if err != nil {
+		return nil, closeDBWithError(db, err)
+	}
 
 	repository, err := NewRemoteCommandRecordRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
