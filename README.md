@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="docs/gallery/index.md">Gallery</a>
+  <a href="https://forge.adrianpk.com/adrianpk/chc/src/branch/main/docs/gallery/index.md">Gallery</a>
 </p>
 
 ChrysoCoord is a local software-development orchestrator for agentic work.
