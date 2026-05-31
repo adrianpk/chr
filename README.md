@@ -103,3 +103,11 @@ More documentation:
 - [Find execution and loop evidence](docs/how-to/find-execution-and-loop-evidence.md)
 - [Reference](docs/reference/project-workspace.md)
 - [Explanation](docs/explanation/architecture.md)
+
+## Repositories
+
+Official repository: https://forge.adrianpk.com/adrianpk/chc
+
+Public mirrors:
+
+- https://codeberg.org/adrianpk/chc
