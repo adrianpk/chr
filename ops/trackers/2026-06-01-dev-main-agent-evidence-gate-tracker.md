@@ -10,7 +10,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | gate command and git evidence | delivered | `feat/slice-1-gate-command-git-evidence` | #264 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
-| Slice 2 | validation and report output | reviewing | `feat/slice-2-validation-report-output` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
+| Slice 2 | validation and report output | delivered | `feat/slice-2-validation-report-output` | #265 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
 | Slice 3 | agent evidence classification | pending | `feat/slice-3-agent-evidence-classification` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
 | Slice 4 | gate policy configuration | pending | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
 | Slice 5 | forgejo woodpecker integration | pending | `feat/slice-5-forgejo-woodpecker-integration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md` |
