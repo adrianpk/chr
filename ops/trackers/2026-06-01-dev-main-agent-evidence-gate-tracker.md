@@ -12,7 +12,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | Slice 1 | gate command and git evidence | delivered | `feat/slice-1-gate-command-git-evidence` | #264 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
 | Slice 2 | validation and report output | delivered | `feat/slice-2-validation-report-output` | #265 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
 | Slice 3 | agent evidence classification | delivered | `feat/slice-3-agent-evidence-classification` | #266 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
-| Slice 4 | gate policy configuration | reviewing | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
+| Slice 4 | gate policy configuration | delivered | `feat/slice-4-gate-policy-configuration` | #267 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
 | Slice 5 | forgejo woodpecker integration | pending | `feat/slice-5-forgejo-woodpecker-integration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md` |
 | Slice 6 | docs qa and end to end validation | pending | `feat/slice-6-docs-qa-e2e-validation` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-6-docs-qa-e2e-validation.md` |
 
