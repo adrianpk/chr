@@ -33,6 +33,7 @@ type ReportListEntry struct {
 	ExecutionID  string
 	LoopID       string
 	Status       string
+	ResultPath   string
 }
 
 type ReportLister struct{}
@@ -128,9 +129,23 @@ func reportListEntryFromPath(projectDir, path string) (ReportListEntry, bool, er
 		ExecutionID:  metadata["execution"],
 		LoopID:       metadata["loop"],
 		Status:       metadata["status"],
+		ResultPath:   reportListAbsoluteMetadataPath(projectDir, metadata["result"]),
 	}
 
 	return report, true, nil
+}
+
+func reportListAbsoluteMetadataPath(projectDir, path string) string {
+	path = strings.TrimSpace(path)
+	if path == "" || path == "none" {
+		return ""
+	}
+
+	if filepath.IsAbs(path) {
+		return path
+	}
+
+	return filepath.Join(projectDir, filepath.FromSlash(path))
 }
 
 func readReportListMetadata(path string) (map[string]string, error) {
