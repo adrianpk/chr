@@ -17,6 +17,7 @@ func newGateCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Usage: "Run project promotion gates",
 		Commands: []*cli.Command{
 			newGateDevMainCommand(stdout, deps),
+			newGateWoodpeckerCommand(stdout, deps),
 		},
 	}
 }
@@ -28,6 +29,27 @@ func newGateDevMainCommand(stdout io.Writer, deps appDependencies) *cli.Command 
 		Flags: gateDevMainFlags(),
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			return runGateDevMain(ctx, cmd, stdout)
+		},
+	}
+}
+
+func newGateWoodpeckerCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+	return &cli.Command{
+		Name:  "woodpecker",
+		Usage: "Configure Woodpecker gate integration",
+		Commands: []*cli.Command{
+			newGateWoodpeckerInitCommand(stdout, deps),
+		},
+	}
+}
+
+func newGateWoodpeckerInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+	return &cli.Command{
+		Name:  "init",
+		Usage: "Create or print a Woodpecker dev-main gate config",
+		Flags: gateWoodpeckerInitFlags(),
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			return runGateWoodpeckerInit(ctx, cmd, stdout)
 		},
 	}
 }
@@ -48,6 +70,24 @@ func gateDevMainFlags() []cli.Flag {
 			Name:     "head",
 			Usage:    "head ref for promotion evidence",
 			Required: true,
+		},
+	)
+}
+
+func gateWoodpeckerInitFlags() []cli.Flag {
+	return append(projectRegistryFlags(),
+		&cli.StringFlag{
+			Name:  "dir",
+			Usage: "project directory override",
+			Value: ".",
+		},
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the Woodpecker gate config without writing it",
+		},
+		&cli.BoolFlag{
+			Name:  "write",
+			Usage: "update an existing generated Woodpecker gate config",
 		},
 	)
 }
@@ -77,6 +117,54 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	return runGateDevMainForProject(ctx, stdout, projectContext.ProjectDir, cmd.String("base"), cmd.String("head"))
+}
+
+func runGateWoodpeckerInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("gate woodpecker init does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	result, err := chc.InitGateWoodpecker(chc.GateWoodpeckerInitRequest{
+		ProjectDir: projectContext.ProjectDir,
+		DryRun:     cmd.Bool("dry-run"),
+		Write:      cmd.Bool("write"),
+	})
+	if err != nil {
+		return err
+	}
+
+	return printGateWoodpeckerInitResult(stdout, result)
+}
+
+func printGateWoodpeckerInitResult(stdout io.Writer, result chc.GateWoodpeckerInitResult) error {
+	_, err := fmt.Fprintf(stdout, "woodpecker: init\nconfig: %s\naction: %s\nfeedback: %s\nwrote: %t\n\n%s",
+		result.ConfigPath,
+		result.Action,
+		result.FeedbackMechanism,
+		result.Wrote,
+		result.Snippet,
+	)
+
+	return err
 }
 
 func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir, baseRef, headRef string) error {

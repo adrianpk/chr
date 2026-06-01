@@ -83,6 +83,7 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		{"dump", "append"},
 		{"dump", "open"},
 		{"gate", "dev-main"},
+		{"gate", "woodpecker", "init"},
 		{"quiz", "list"},
 		{"quiz", "start"},
 		{"quiz", "resume"},
@@ -104,6 +105,44 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		}
 
 		t.Fatalf("root command does not include %s", strings.Join(path, " "))
+	}
+}
+
+func TestGateWoodpeckerInitDryRunPrintsConfigWithoutWriting(t *testing.T) {
+	projectDir := newGateCLIGitProject(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"gate",
+		"woodpecker",
+		"init",
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, io.Discard)
+	if err != nil {
+		t.Fatalf("gate woodpecker init returned error: %v", err)
+	}
+
+	output := stdout.String()
+	for _, expected := range []string{
+		"woodpecker: init",
+		"action: dry-run",
+		"feedback: woodpecker-status",
+		"wrote: false",
+		"chc-dev-main-gate",
+	} {
+		if strings.Contains(output, expected) {
+			continue
+		}
+
+		t.Fatalf("output does not contain %q:\n%s", expected, output)
+	}
+
+	_, statErr := os.Stat(filepath.Join(projectDir, ".woodpecker.yml"))
+	if !os.IsNotExist(statErr) {
+		t.Fatalf("Woodpecker config stat error = %v, want not exist", statErr)
 	}
 }
 
