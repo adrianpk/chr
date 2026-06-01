@@ -26,7 +26,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 | Slice 2 | pr reference workflow | delivered | `feat/slice-2-pr-reference-workflow` | `#274` | `.prj/reports/slices/ticket-review-integration/slice-2-pr-reference-workflow.md` |
 | Slice 3 | review mode configuration | delivered | `feat/slice-3-review-mode-configuration` | `#275` | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | delivered | `feat/slice-4-forge-provider-diagnostics` | `#276` | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
-| Slice 5 | remote review adapter | pending | `feat/slice-5-remote-review-adapter` | pending | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
+| Slice 5 | remote review adapter | reviewing | `feat/slice-5-remote-review-adapter` | pending | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
 | Slice 6 | ticket review command | pending | `feat/slice-6-ticket-review-command` | pending | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
 | Slice 7 | serialized work preflight | pending | `feat/slice-7-serialized-work-preflight` | pending | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
 | Slice 8 | repair handoff and docs | pending | `feat/slice-8-repair-handoff-docs` | pending | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
@@ -129,12 +129,12 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T5.1 Define remote review adapter contracts and result types.
-- [ ] T5.2 Implement Forgejo/Codeberg read paths for PR metadata, diff, comments, and checks.
-- [ ] T5.3 Implement Forgejo/Codeberg comment writing with inline-first behavior.
-- [ ] T5.4 Implement GitHub read and comment paths.
-- [ ] T5.5 Add tests with provider fixtures or fakes for read, inline comment, general comment, and unavailable capability cases.
-- [ ] T5.6 Add slice report and tracker updates.
+- [x] T5.1 Define remote review adapter contracts and result types. Commit: `774fe88`
+- [x] T5.2 Implement Forgejo/Codeberg read paths for PR metadata, diff, comments, and checks. Commit: `774fe88`
+- [x] T5.3 Implement Forgejo/Codeberg comment writing with inline-first behavior. Commit: `774fe88`
+- [x] T5.4 Implement GitHub read and comment paths. Commit: `774fe88`
+- [x] T5.5 Add tests with provider fixtures or fakes for read, inline comment, general comment, and unavailable capability cases. Commit: `774fe88`
+- [x] T5.6 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 6: Ticket Review Command
 
@@ -224,6 +224,11 @@ Tasks:
   - `go test ./internal/chc -run 'Config|ReviewProvider'` - pass
   - `go test ./internal/chcapp -run 'TicketReviewMode|Workspace|Init'` - pass
   - `go test ./internal/chc ./internal/chcapp` - pass
+- Slice 5:
+  - `git diff --check` - pass
+  - `go test ./internal/chc -run 'Review(Remote|Provider)|Config'` - pass
+  - `go test ./internal/chc` - pass
+  - `golangci-lint run ./internal/chc` - pass
 
 ## Notes
 
