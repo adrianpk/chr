@@ -2,14 +2,18 @@ GO := go
 DEV_ROOT ?= _workspace
 CHC_DEV_HOME := $(DEV_ROOT)/chc
 CHC_DEV_CONFIG := $(DEV_ROOT)/config/chc
+GO_BUILD_CACHE := $(CURDIR)/$(DEV_ROOT)/go-build-cache
+GOLANGCI_LINT_CACHE := $(CURDIR)/$(DEV_ROOT)/golangci-lint-cache
 BIN_DIR := bin
 BIN := $(BIN_DIR)/chc
 COVERAGE_OUT ?= /tmp/chc-coverage.out
 RUN_ARGS ?= --help
 QA_CASE ?= blog
 QA_REF ?= 001
+GATE_BASE ?= origin/main
+GATE_HEAD ?= origin/dev
 
-.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
+.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
 
 fmt:
 	@$(GO) fmt ./...
@@ -50,6 +54,10 @@ install:
 
 clean-dev:
 	@rm -rf $(DEV_ROOT)
+
+gate-dev-main:
+	@mkdir -p $(GO_BUILD_CACHE) $(GOLANGCI_LINT_CACHE)
+	@GOCACHE=$(GO_BUILD_CACHE) GOLANGCI_LINT_CACHE=$(GOLANGCI_LINT_CACHE) $(GO) run ./cmd/chc gate dev-main --base $(GATE_BASE) --head $(GATE_HEAD)
 
 qa-reset:
 	@scripts/qa/reset.sh $(QA_CASE) $(QA_REF)
