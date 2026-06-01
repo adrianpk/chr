@@ -14,7 +14,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | Slice 3 | agent evidence classification | delivered | `feat/slice-3-agent-evidence-classification` | #266 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
 | Slice 4 | gate policy configuration | delivered | `feat/slice-4-gate-policy-configuration` | #267 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
 | Slice 5 | forgejo woodpecker integration | delivered | `feat/slice-5-forgejo-woodpecker-integration` | #268 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md` |
-| Slice 6 | docs qa and end to end validation | pending | `feat/slice-6-docs-qa-e2e-validation` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-6-docs-qa-e2e-validation.md` |
+| Slice 6 | docs qa and end to end validation | reviewing | `feat/slice-6-docs-qa-e2e-validation` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-6-docs-qa-e2e-validation.md` |
 
 ## Slice 1 Tasks
 
@@ -74,12 +74,12 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T6.1 | Add command reference docs. | pending | pending |  |
-| T6.2 | Add gate config and report schema docs. | pending | pending |  |
-| T6.3 | Add Woodpecker how-to docs. | pending | pending |  |
-| T6.4 | Add QA fixture or scripted scenario. | pending | pending |  |
-| T6.5 | Run `make verify` and the new gate against this repository. | pending | pending |  |
-| T6.6 | Add final cycle report and tracker closure. | pending | pending |  |
+| T6.1 | Add command reference docs. | done | `ce681ad` | Added `gate dev-main` and `gate woodpecker init` command coverage. |
+| T6.2 | Add gate config and report schema docs. | done | `ce681ad` | Added `docs/reference/dev-main-gate.md`. |
+| T6.3 | Add Woodpecker how-to docs. | done | `a548b02` | Added the task-oriented Woodpecker setup guide. |
+| T6.4 | Add QA fixture or scripted scenario. | done | `0c02534` | Added `make qa-gate` and `scripts/qa/gate.sh`. |
+| T6.5 | Run `make verify` and the new gate against this repository. | done | this commit | Validation recorded in the Slice 6 report and log below. |
+| T6.6 | Add final cycle report and tracker closure. | done | this commit | Added the Slice 6 report and moved the slice to review. |
 
 ## Validation Log
 
@@ -98,6 +98,9 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 - Slice 4: `make verify` (pass)
 - Slice 5: `go test ./internal/chc ./internal/chcapp` (pass)
 - Slice 5: `make verify` (pass)
+- Slice 6: `make verify` (pass)
+- Slice 6: `make qa-gate` (pass)
+- Slice 6: `GOCACHE=/tmp/chc-gate-self.aRZ3ao/.go-build-cache go run /home/adrian/Projects/chrysocoord/cmd/chc gate dev-main --dir /tmp/chc-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
 
 ## Notes
 
