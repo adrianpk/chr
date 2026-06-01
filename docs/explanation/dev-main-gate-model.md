@@ -7,9 +7,9 @@ It does not replace tests, PR review, or project judgement. It records what can
 be observed about the promotion range and turns that evidence into a local
 Markdown and JSON report.
 
-## What The Six Slices Delivered
+## What The Gate Provides
 
-The completed slice set added:
+The gate provides:
 
 - `chc gate dev-main`;
 - Git range evidence collection;
@@ -41,9 +41,8 @@ The current paths are:
 - `.chc/user/reports/gates/`;
 - execution and loop evidence under `.chc/user/` when agent work runs.
 
-Repository-specific planning directories such as `.prj/` are not treated as a
-ChrysoCoord workspace. They can contain useful planning material, but gate
-commands do not read them as runtime state.
+Project notes, issue trackers, or planning directories outside `.chc/user/` can
+remain useful to the team, but gate commands do not read them as runtime state.
 
 ## Evidence Model
 
@@ -107,9 +106,8 @@ The current implementation does not create an adoption baseline object with a
 dedicated command. Baseline adoption is a documented workflow using the gate
 report and permissive policy.
 
-The current implementation does not migrate `.prj/` material into `.chc/user/`.
 Projects that want ChrysoCoord-managed execution evidence need a real
-`.chc/user/` workspace.
+`.chc/user/` workspace created by `chc init`.
 
 The current Woodpecker integration does not write Forgejo comments or call
 Forgejo APIs. It relies on Woodpecker status and local reports.

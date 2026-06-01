@@ -22,7 +22,7 @@ This creates the project-local ChrysoCoord workspace under:
 ```
 
 The dev-to-main gate reads and writes under that workspace. It does not read
-`.prj/` or any repository-specific planning directory.
+unrelated project planning directories.
 
 ## Start With Informational Traceability
 

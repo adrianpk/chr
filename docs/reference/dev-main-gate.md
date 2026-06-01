@@ -21,9 +21,8 @@ Optional flags:
 The command exits non-zero when validation fails or when configured
 traceability policy requires agent evidence that is missing.
 
-The command requires a managed project workspace under `.chc/user/`.
-Repository-local planning directories such as `.prj/` are not a substitute for
-that workspace.
+The command requires a managed project workspace. Create one with `chc init`
+before running the gate in a project for the first time.
 
 ## Evidence
 
