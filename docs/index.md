@@ -16,6 +16,7 @@ Task-oriented guides:
 - [Full-system lab runbook](how-to/full-system-lab-runbook.md)
 - [Find execution and loop evidence](how-to/find-execution-and-loop-evidence.md)
 - [Inspect and recover local state](how-to/inspect-and-recover-local-state.md)
+- [Adopt the dev to main gate in an existing project](how-to/adopt-dev-main-gate-in-existing-project.md)
 - [Use the dev to main gate with Woodpecker](how-to/use-dev-main-gate-with-woodpecker.md)
 
 ## Reference
@@ -59,6 +60,7 @@ Rationale and system shape:
 - [Document generation model](explanation/document-generation-model.md)
 - [Agent review model](explanation/agent-review-model.md)
 - [Testing and engineering doctrine](explanation/testing-and-engineering-doctrine.md)
+- [Dev to main gate model](explanation/dev-main-gate-model.md)
 - [Dev to main gate direction](explanation/dev-main-gate-direction.md)
 - [Dev to main tooling gate spec draft](explanation/dev-main-tooling-gate-spec-draft.md)
 - [Slicing workflow](explanation/slicing-workflow.md)

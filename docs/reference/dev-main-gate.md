@@ -21,6 +21,10 @@ Optional flags:
 The command exits non-zero when validation fails or when configured
 traceability policy requires agent evidence that is missing.
 
+The command requires a managed project workspace under `.chc/user/`.
+Repository-local planning directories such as `.prj/` are not a substitute for
+that workspace.
+
 ## Evidence
 
 The gate records:
@@ -109,6 +113,41 @@ Defaults:
 
 Manual or external changes are informational by default. They become warnings
 only when policy enables warning behavior.
+
+## Adoption Policy
+
+For existing projects, start with:
+
+```yml
+gates:
+  dev_main:
+    validation_command: make verify
+    traceability:
+      mode: agent_only
+      fail_on_missing_agent_evidence: false
+      warn_on_manual_changes: true
+    manual_changes:
+      list: true
+```
+
+This records evidence and warns about manual or external changes without
+blocking adoption because old work has no ChrysoCoord execution history.
+
+After new work is consistently executed through ChrysoCoord tickets, projects
+can tighten policy:
+
+```yml
+gates:
+  dev_main:
+    validation_command: make verify
+    traceability:
+      mode: agent_only
+      fail_on_missing_agent_evidence: true
+      warn_on_manual_changes: true
+    manual_changes:
+      list: true
+      warn_on_high_risk_paths: true
+```
 
 ## Woodpecker Setup
 
