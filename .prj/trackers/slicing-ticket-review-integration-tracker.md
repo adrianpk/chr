@@ -24,7 +24,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | ticket review metadata contract | delivered | `feat/slice-1-ticket-review-metadata-contract` | `#273` | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
 | Slice 2 | pr reference workflow | delivered | `feat/slice-2-pr-reference-workflow` | `#274` | `.prj/reports/slices/ticket-review-integration/slice-2-pr-reference-workflow.md` |
-| Slice 3 | review mode configuration | pending | `feat/slice-3-review-mode-configuration` | pending | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
+| Slice 3 | review mode configuration | reviewing | `feat/slice-3-review-mode-configuration` | pending | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | pending | `feat/slice-4-forge-provider-diagnostics` | pending | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
 | Slice 5 | remote review adapter | pending | `feat/slice-5-remote-review-adapter` | pending | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
 | Slice 6 | ticket review command | pending | `feat/slice-6-ticket-review-command` | pending | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
@@ -87,12 +87,12 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T3.1 Add review workflow config schema and defaults.
-- [ ] T3.2 Add config loader and validation for review modes.
-- [ ] T3.3 Add dry-run/status output that explains the active review mode.
-- [ ] T3.4 Add tests for default, human, agentic, and trusted modes.
-- [ ] T3.5 Document review mode configuration.
-- [ ] T3.6 Add slice report and tracker updates.
+- [x] T3.1 Add review workflow config schema and defaults. Commit: `7540d31`
+- [x] T3.2 Add config loader and validation for review modes. Commit: `7540d31`
+- [x] T3.3 Add dry-run/status output that explains the active review mode. Commit: `7540d31`
+- [x] T3.4 Add tests for default, human, agentic, and trusted modes. Commit: `7540d31`
+- [x] T3.5 Document review mode configuration. Commit: `7540d31`
+- [x] T3.6 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 4: Forge Provider Diagnostics
 
@@ -213,6 +213,11 @@ Tasks:
   - `go test ./internal/chc -run 'Ticket(Review|Status)|ReviewMetadata'` - pass
   - `go test ./internal/chcapp -run 'Ticket(ReviewRef|Status|ApplyResult)'` - pass
   - `go test ./internal/chc ./internal/chcapp ./internal/chctui` - pass
+  - `make verify` - pass
+- Slice 3:
+  - `go test ./internal/chc -run 'Config|ReviewWorkflow'` - pass
+  - `go test ./internal/chcapp -run 'TicketReviewMode|Workspace|Init'` - pass
+  - `go test ./internal/chc ./internal/chcapp` - pass
   - `make verify` - pass
 
 ## Notes
