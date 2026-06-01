@@ -153,6 +153,52 @@ func (w GateReportWriter) WriteJSON(ctx context.Context, report GateReport) (str
 	return path, nil
 }
 
+func (w GateReportWriter) WriteMarkdown(ctx context.Context, report GateReport) (string, error) {
+	err := ctx.Err()
+	if err != nil {
+		return "", err
+	}
+
+	path := strings.TrimSpace(report.Artifacts.MarkdownPath)
+	if path == "" {
+		return "", fmt.Errorf("gate Markdown report path is required")
+	}
+
+	err = ensureGateReportWriteTarget(path)
+	if err != nil {
+		return "", err
+	}
+
+	content := RenderGateReportMarkdown(report)
+
+	err = os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		return "", fmt.Errorf("create gate report directory: %w", err)
+	}
+
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
+		return "", fmt.Errorf("write gate Markdown report: %w", err)
+	}
+
+	return path, nil
+}
+
+func RenderGateReportMarkdown(report GateReport) string {
+	var output strings.Builder
+
+	output.WriteString("# Dev to Main Gate Report\n\n")
+	writeGateReportSummary(&output, report)
+	writeGateReportGitEvidence(&output, report)
+	writeGateReportValidation(&output, report.Validation)
+	writeGateReportMessages(&output, "Failures", report.Failures)
+	writeGateReportMessages(&output, "Warnings", report.Warnings)
+	writeGateReportMessages(&output, "Info", report.Info)
+	writeGateReportArtifacts(&output, report.Artifacts)
+
+	return output.String()
+}
+
 func ensureGateReportWriteTarget(path string) error {
 	info, err := os.Stat(path)
 	if err != nil {
@@ -168,6 +214,104 @@ func ensureGateReportWriteTarget(path string) error {
 	}
 
 	return nil
+}
+
+func writeGateReportSummary(output *strings.Builder, report GateReport) {
+	output.WriteString("## Summary\n\n")
+	writeGateReportField(output, "status", string(report.Status))
+	writeGateReportField(output, "created_at", report.CreatedAt.UTC().Format(time.RFC3339))
+	output.WriteString("\n")
+}
+
+func writeGateReportGitEvidence(output *strings.Builder, report GateReport) {
+	output.WriteString("## Git Evidence\n\n")
+	writeGateReportField(output, "base", report.Base.Ref+" "+report.Base.SHA)
+	writeGateReportField(output, "head", report.Head.Ref+" "+report.Head.SHA)
+	writeGateReportField(output, "merge_base", report.MergeBase)
+	writeGateReportField(output, "diff_stat", report.DiffStat)
+	writeGateReportField(output, "commits", fmt.Sprintf("%d", len(report.Commits)))
+	writeGateReportField(output, "changed_files", fmt.Sprintf("%d", len(report.ChangedFiles)))
+	output.WriteString("\n")
+
+	if len(report.Commits) > 0 {
+		output.WriteString("### Commits\n\n")
+
+		for _, commit := range report.Commits {
+			output.WriteString("- `" + emptyGateReportValue(commit.SHA) + "` " + emptyGateReportValue(commit.Subject) + "\n")
+		}
+
+		output.WriteString("\n")
+	}
+
+	if len(report.ChangedFiles) > 0 {
+		output.WriteString("### Changed Files\n\n")
+
+		for _, file := range report.ChangedFiles {
+			if file.Old != "" {
+				output.WriteString("- " + file.Status + " " + file.Old + " -> " + file.Path + "\n")
+
+				continue
+			}
+
+			output.WriteString("- " + file.Status + " " + file.Path + "\n")
+		}
+
+		output.WriteString("\n")
+	}
+}
+
+func writeGateReportValidation(output *strings.Builder, validation GateReportValidation) {
+	output.WriteString("## Validation\n\n")
+	writeGateReportField(output, "command", validation.Command)
+	writeGateReportField(output, "passed", fmt.Sprintf("%t", validation.Passed))
+	writeGateReportField(output, "exit_code", fmt.Sprintf("%d", validation.ExitCode))
+
+	if validation.Output != "" {
+		output.WriteString("\n```text\n")
+		output.WriteString(validation.Output)
+		output.WriteString("\n```\n")
+	}
+
+	output.WriteString("\n")
+}
+
+func writeGateReportMessages(output *strings.Builder, title string, messages []string) {
+	output.WriteString("## " + title + "\n\n")
+	if len(messages) == 0 {
+		output.WriteString("- none\n\n")
+
+		return
+	}
+
+	for _, message := range messages {
+		output.WriteString("- " + message + "\n")
+	}
+
+	output.WriteString("\n")
+}
+
+func writeGateReportArtifacts(output *strings.Builder, artifacts GateReportArtifacts) {
+	output.WriteString("## Artifacts\n\n")
+	writeGateReportField(output, "json", artifacts.JSONPath)
+	writeGateReportField(output, "markdown", artifacts.MarkdownPath)
+	output.WriteString("\n")
+}
+
+func writeGateReportField(output *strings.Builder, name, value string) {
+	output.WriteString("- ")
+	output.WriteString(name)
+	output.WriteString(": ")
+	output.WriteString(emptyGateReportValue(value))
+	output.WriteString("\n")
+}
+
+func emptyGateReportValue(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "none"
+	}
+
+	return value
 }
 
 func gateReportCommits(commits []GateGitCommit) []GateReportCommit {

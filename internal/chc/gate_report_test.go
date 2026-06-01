@@ -59,6 +59,54 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 	}
 }
 
+func TestGateReportWriterWritesMarkdown(t *testing.T) {
+	projectDir := t.TempDir()
+	createdAt := time.Date(2026, 6, 1, 12, 30, 45, 0, time.UTC)
+	artifacts := NewGateReportArtifacts(projectDir, createdAt)
+	report := NewGateReport(createdAt, GateGitEvidence{
+		Base:      GateGitRef{Ref: "main", SHA: "base-sha"},
+		Head:      GateGitRef{Ref: "dev", SHA: "head-sha"},
+		MergeBase: "base-sha",
+		Commits: []GateGitCommit{
+			{SHA: "head-sha", Subject: "add gate"},
+		},
+		Files: []GateGitChangedFile{
+			{Status: "M", Path: "internal/chc/gate.go"},
+		},
+	}, GateValidationResult{
+		Command:  DefaultGateValidationCommand,
+		ExitCode: 1,
+		Output:   "validation failed",
+	}, artifacts)
+	report.Failures = []string{"validation failed"}
+
+	path, err := NewGateReportWriter().WriteMarkdown(context.Background(), report)
+	if err != nil {
+		t.Fatalf("WriteMarkdown returned error: %v", err)
+	}
+
+	if path != filepath.Join(projectDir, ".chc", "user", "reports", "gates", "dev-main-20260601T123045Z.md") {
+		t.Fatalf("path = %q, want timestamped Markdown report path", path)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read report: %v", err)
+	}
+
+	for _, want := range []string{
+		"# Dev to Main Gate Report",
+		"- status: failed",
+		"- base: main base-sha",
+		"- command: go test ./...",
+		"validation failed",
+	} {
+		if !strings.Contains(string(content), want) {
+			t.Fatalf("content missing %q:\n%s", want, string(content))
+		}
+	}
+}
+
 func TestGateReportWriterRejectsDirectoryTarget(t *testing.T) {
 	projectDir := t.TempDir()
 	path := filepath.Join(projectDir, ".chc", "user", "reports", "gates", "dev-main.json")
