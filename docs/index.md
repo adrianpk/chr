@@ -16,6 +16,7 @@ Task-oriented guides:
 - [Full-system lab runbook](how-to/full-system-lab-runbook.md)
 - [Find execution and loop evidence](how-to/find-execution-and-loop-evidence.md)
 - [Inspect and recover local state](how-to/inspect-and-recover-local-state.md)
+- [Use the dev to main gate with Woodpecker](how-to/use-dev-main-gate-with-woodpecker.md)
 
 ## Reference
 
