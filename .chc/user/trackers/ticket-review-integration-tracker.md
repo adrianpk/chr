@@ -45,4 +45,4 @@ source for task completion, commit mapping, validation logs, and slice closure.
 - Slice 6 Report: `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md`
 - Slice 6 Validation: `go test ./internal/chc ./internal/chcapp` - pass
 - Slice 7 Report: `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md`
-- Slice 7 Validation: `go test ./internal/chcapp -run 'AgentWork|TicketLoop|TicketReview'` - pass
+- Slice 7 Validation: `golangci-lint run ./internal/chc ./internal/chcapp` - pass

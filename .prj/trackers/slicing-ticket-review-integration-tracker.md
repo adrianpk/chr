@@ -171,12 +171,12 @@ Pre-flight:
 
 Tasks:
 
-- [x] T7.1 Add workspace-level agent operation lock for review/development paths. Commit: `4e173a0`
-- [x] T7.2 Add series/dependency metadata to work selection inputs. Commit: `4e173a0`
-- [x] T7.3 Add preflight checks for unresolved review repairs. Commit: `4e173a0`
-- [x] T7.4 Add preflight checks for prerequisite PR merged and contained in updated `dev`. Commit: `4e173a0`
-- [x] T7.5 Add scheduler behavior to select repair work before later series work. Commit: `4e173a0`
-- [x] T7.6 Add tests for blocked next slice, repair priority, stale dev, and lock conflicts. Commit: `4e173a0`
+- [x] T7.1 Add workspace-level agent operation lock for review/development paths. Commits: `4e173a0`, `e026f6e`
+- [x] T7.2 Add series/dependency metadata to work selection inputs. Commits: `4e173a0`, `e026f6e`
+- [x] T7.3 Add preflight checks for unresolved review repairs. Commits: `4e173a0`, `e026f6e`
+- [x] T7.4 Add preflight checks for prerequisite PR merged and contained in updated `dev`. Commits: `4e173a0`, `e026f6e`
+- [x] T7.5 Add scheduler behavior to select repair work before later series work. Commits: `4e173a0`, `e026f6e`
+- [x] T7.6 Add tests for blocked next slice, repair priority, stale dev, and lock conflicts. Commits: `4e173a0`, `e026f6e`
 - [x] T7.7 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 8: Repair Handoff and Docs
@@ -239,6 +239,8 @@ Tasks:
   - `scripts/check-go-func-signatures.sh` - pass
   - `go test ./internal/chc -run 'WorkSelection|AgentOperationLock'` - pass
   - `go test ./internal/chcapp -run 'AgentWork|TicketLoop|TicketReview'` - pass
+  - `go test ./internal/chc ./internal/chcapp` - pass
+  - `golangci-lint run ./internal/chc ./internal/chcapp` - pass
 
 ## Notes
 

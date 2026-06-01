@@ -56,6 +56,8 @@ concurrent development and review operations in the same workspace.
 - `scripts/check-go-func-signatures.sh`
 - `go test ./internal/chc -run 'WorkSelection|AgentOperationLock'`
 - `go test ./internal/chcapp -run 'AgentWork|TicketLoop|TicketReview'`
+- `go test ./internal/chc ./internal/chcapp`
+- `golangci-lint run ./internal/chc ./internal/chcapp`
 
 ## Risks and Follow-ups
 
