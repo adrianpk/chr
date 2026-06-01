@@ -231,6 +231,55 @@ func TestGateDevMainWritesReportsWhenRefResolutionFails(t *testing.T) {
 	}
 }
 
+func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
+	projectDir := newGateCLIGitProject(t)
+	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
+	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+
+	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
+
+	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
+	writeGateCLIFile(t, projectDir, filepath.Join(chc.DirectoryName, chc.UserDirectoryName, "runtime", "runs", "CHC-1", "exec-1", "execution-report.md"), `# Execution Report
+
+## Summary
+
+- execution: exec-1
+- ticket: CHC-1
+- status: succeeded
+
+## Artifacts
+
+- result: .chc/user/runtime/runs/CHC-1/exec-1/result.json
+`)
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "change")
+
+	err := run(t.Context(), []string{
+		"gate",
+		"dev-main",
+		"--dir",
+		projectDir,
+		"--base",
+		baseSHA,
+		"--head",
+		"HEAD",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("gate dev-main returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "missing agent evidence") {
+		t.Fatalf("error = %q, want missing evidence", err.Error())
+	}
+
+	report := readOnlyGateCLIJSONReport(t, projectDir)
+	if len(report.MissingAgentEvidence) != 1 {
+		t.Fatalf("MissingAgentEvidence = %#v, want one entry", report.MissingAgentEvidence)
+	}
+}
+
 func rootCommandIncludesPath(cmd *cli.Command, path ...string) bool {
 	current := cmd
 

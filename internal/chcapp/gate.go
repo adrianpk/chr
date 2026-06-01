@@ -112,6 +112,11 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		report.Failures = []string{"validation failed"}
 	}
 
+	if len(classification.MissingAgentEvidence) > 0 {
+		report.Status = chc.GateReportStatusFailed
+		report.Failures = append(report.Failures, "missing agent evidence")
+	}
+
 	err = writeGateReports(ctx, report)
 	if err != nil {
 		return err
@@ -124,6 +129,10 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 
 	if !validation.Passed {
 		return fmt.Errorf("gate validation failed")
+	}
+
+	if len(classification.MissingAgentEvidence) > 0 {
+		return fmt.Errorf("missing agent evidence")
 	}
 
 	return nil
