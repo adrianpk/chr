@@ -17,7 +17,10 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
-var reviewProviderDiagnosticRunner chc.ReviewProviderDiagnosticRunner = chc.OSReviewProviderDiagnosticRunner{}
+var (
+	reviewProviderDiagnosticRunner chc.ReviewProviderDiagnosticRunner = chc.OSReviewProviderDiagnosticRunner{}
+	reviewRemoteCommandRunner      chc.ReviewRemoteCommandRunner      = chc.OSReviewRemoteCommandRunner{}
+)
 
 func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
@@ -30,6 +33,7 @@ func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newTicketListCommand(stdout),
 			newTicketLoopCommand(stdout),
 			newTicketNewCommand(stdout),
+			newTicketReviewCommand(stdout),
 			newTicketReviewModeCommand(stdout),
 			newTicketReviewRefCommand(stdout),
 			newTicketShowCommand(stdout),
@@ -63,6 +67,15 @@ func newTicketReviewRefCommand(stdout io.Writer) *cli.Command {
 		Usage:  "Attach branch and pull request review metadata to one ticket",
 		Flags:  ticketReviewRefFlags(),
 		Action: ticketReviewRefAction(stdout),
+	}
+}
+
+func newTicketReviewCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "review",
+		Usage:  "Apply an inspection-only ticket review result",
+		Flags:  ticketReviewFlags(),
+		Action: ticketReviewAction(stdout),
 	}
 }
 
@@ -272,6 +285,24 @@ func ticketReviewRefFlags() []cli.Flag {
 	)
 }
 
+func ticketReviewFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.StringFlag{
+			Name:  "result",
+			Usage: "review result: pass, needs_changes, insufficient_evidence, needs_human_decision",
+			Value: chc.TicketReviewCommandResultPass,
+		},
+		&cli.StringSliceFlag{
+			Name:  "finding",
+			Usage: "blocking review finding to write remotely",
+		},
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print review plan without writing ticket or remote comments",
+		},
+	)
+}
+
 func ticketReviewModeStatusFlags() []cli.Flag {
 	return append(ticketProjectFlags(),
 		&cli.BoolFlag{
@@ -354,6 +385,12 @@ func ticketCommentAction(stdout io.Writer) cli.ActionFunc {
 func ticketReviewRefAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketReviewRef(ctx, cmd, stdout)
+	}
+}
+
+func ticketReviewAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketReview(ctx, cmd, stdout)
 	}
 }
 
@@ -1491,6 +1528,104 @@ func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	_, err = fmt.Fprintf(stdout, "ticket: %s review_ref\n", updated.Key)
 	if err != nil {
 		return fmt.Errorf("write ticket review-ref result: %w", err)
+	}
+
+	return nil
+}
+
+func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("ticket review requires exactly one ticket key argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	err = refreshProjectTicketIndex(ctx, index, projectContext)
+	if err != nil {
+		return err
+	}
+
+	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
+
+	adapter := chc.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
+
+	result, err := chc.RunTicketReviewCommand(ctx, chc.TicketReviewCommandOptions{
+		Ticket:     ticket,
+		Config:     config,
+		Result:     cmd.String("result"),
+		Findings:   cmd.StringSlice("finding"),
+		Adapter:    adapter,
+		DryRun:     cmd.Bool("dry-run"),
+		ReviewedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+
+	if !cmd.Bool("dry-run") {
+		err = refreshProjectTicketIndex(ctx, index, projectContext)
+		if err != nil {
+			return err
+		}
+	}
+
+	return printTicketReviewResult(stdout, projectContext, result)
+}
+
+func printTicketReviewResult(
+	stdout io.Writer,
+	projectContext commandProjectContext,
+	result chc.TicketReviewCommandResult,
+) error {
+	lines := []string{
+		"ticket_review: result",
+		"project_id: " + projectContext.ProjectID,
+		"ticket: " + result.TicketKey,
+		"result: " + result.ReviewResult,
+		"review_state: " + result.ReviewState,
+		fmt.Sprintf("review_round: %d", result.ReviewRound),
+		"status: " + result.Status,
+		"review_ref: " + result.ReviewRef.URL,
+		"provider: " + string(result.RemoteSnapshot.Reference.Provider),
+		fmt.Sprintf("remote_comments: %d", len(result.RemoteComments)),
+		fmt.Sprintf("dry_run: %t", result.DryRun),
+		"policy: " + chc.TicketReviewCommandInspectionOnlyPolicySummary,
+	}
+
+	for _, finding := range result.BlockingFindings {
+		lines = append(lines, "finding: "+finding)
+	}
+
+	for _, comment := range result.RemoteComments {
+		lines = append(lines, "remote_comment: "+comment.Placement+" "+comment.Kind)
+	}
+
+	for _, line := range lines {
+		_, err := fmt.Fprintln(stdout, line)
+		if err != nil {
+			return fmt.Errorf("write ticket review result: %w", err)
+		}
 	}
 
 	return nil

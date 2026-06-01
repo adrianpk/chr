@@ -3353,6 +3353,31 @@ func testTicketWithReviewRef() chc.Ticket {
 	return ticket
 }
 
+func testTicketReadyForReview() chc.Ticket {
+	ticket := testTicketWithReviewRef()
+	ticket.Status = chc.TicketStatusReadyForReview
+
+	return ticket
+}
+
+func setupCLIReviewRemoteEvidence(
+	t *testing.T,
+	devRoot string,
+	projectDir string,
+) (*fakeCLIReviewRemoteRunner, func()) {
+	t.Helper()
+
+	runner := newFakeCLIReviewRemoteRunner()
+	runner.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"head":{"sha":"abc123"}}`)
+	runner.outputs["tea api /repos/adrianpk/chc/pulls/274.diff"] = []byte("diff --git a/file.go b/file.go")
+	runner.outputs["tea api /repos/adrianpk/chc/issues/274/comments"] = []byte(`[]`)
+	runner.outputs["tea api /repos/adrianpk/chc/commits/abc123/statuses"] = []byte(`[]`)
+
+	addProject(t, devRoot, "example", projectDir)
+
+	return runner, replaceReviewRemoteCommandRunner(runner)
+}
+
 func assertTicketApplyResultOutput(t *testing.T, stdout string, record chc.ExecutionRecord) {
 	t.Helper()
 
@@ -4003,6 +4028,161 @@ func TestTicketReviewModeStatusPrintsInvalidMode(t *testing.T) {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
+	}
+}
+
+func TestTicketReviewPassUpdatesTicketWithoutRemoteComment(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForReview())
+	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+
+	defer restoreRunner()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--result",
+		"pass",
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"ticket_review: result",
+		"ticket: CHC-1",
+		"result: pass",
+		"review_state: pass",
+		"status: ready_for_merge",
+		"remote_comments: 0",
+		"dry_run: false",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	content := readFile(t, ticketPath)
+	for _, want := range []string{
+		`status: "ready_for_merge"`,
+		`review_state: "pass"`,
+		`review_result: "pass"`,
+		`review_comments_url: "https://forge.example.com/adrianpk/chc/pulls/274"`,
+		`review_round: 1`,
+		`blocking_findings: []`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
+		}
+	}
+
+	if len(runner.inputs) != 0 {
+		t.Fatalf("remote inputs = %#v, want none", runner.inputs)
+	}
+}
+
+func TestTicketReviewNeedsChangesWritesRemoteFinding(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForReview())
+	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+
+	defer restoreRunner()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--result",
+		"needs_changes",
+		"--finding",
+		"Handle nil input.",
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"result: needs_changes",
+		"review_state: changes_requested",
+		"status: ready_for_dev",
+		"remote_comments: 1",
+		"finding: Handle nil input.",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	content := readFile(t, ticketPath)
+	for _, want := range []string{
+		`status: "ready_for_dev"`,
+		`review_state: "changes_requested"`,
+		`review_result: "needs_changes"`,
+		`blocking_findings: ["Handle nil input."]`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
+		}
+	}
+
+	command := "tea api -X POST /repos/adrianpk/chc/issues/274/comments -d @-"
+	input := string(runner.inputs[command])
+
+	if !strings.Contains(input, "Handle nil input.") {
+		t.Fatalf("remote comment payload = %q", input)
+	}
+}
+
+func TestTicketReviewDryRunDoesNotMutateTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForReview())
+	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+
+	defer restoreRunner()
+
+	before := readFile(t, ticketPath)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+		"--result",
+		"needs_changes",
+		"--finding",
+		"Handle nil input.",
+		"CHC-1",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review dry-run returned error: %v", err)
+	}
+
+	after := readFile(t, ticketPath)
+	if after != before {
+		t.Fatalf("dry-run mutated ticket:\n%s", after)
+	}
+
+	if len(runner.inputs) != 0 {
+		t.Fatalf("remote inputs = %#v, want none", runner.inputs)
 	}
 }
 
@@ -6371,4 +6551,63 @@ func replaceReviewProviderDiagnosticRunner(runner chc.ReviewProviderDiagnosticRu
 	return func() {
 		reviewProviderDiagnosticRunner = previous
 	}
+}
+
+type fakeCLIReviewRemoteRunner struct {
+	outputs    map[string][]byte
+	outputErrs map[string]error
+	inputs     map[string][]byte
+	inputErrs  map[string]error
+}
+
+func newFakeCLIReviewRemoteRunner() *fakeCLIReviewRemoteRunner {
+	return &fakeCLIReviewRemoteRunner{
+		outputs:    map[string][]byte{},
+		outputErrs: map[string]error{},
+		inputs:     map[string][]byte{},
+		inputErrs:  map[string]error{},
+	}
+}
+
+func (runner *fakeCLIReviewRemoteRunner) Output(_ context.Context, command string, args ...string) ([]byte, error) {
+	key := cliReviewRemoteCommandKey(command, args...)
+	if err := runner.outputErrs[key]; err != nil {
+		return nil, err
+	}
+
+	output, ok := runner.outputs[key]
+	if !ok {
+		return nil, errors.New("missing output for " + key)
+	}
+
+	return output, nil
+}
+
+func (runner *fakeCLIReviewRemoteRunner) Input(
+	_ context.Context,
+	command string,
+	input []byte,
+	args ...string,
+) ([]byte, error) {
+	key := cliReviewRemoteCommandKey(command, args...)
+	if err := runner.inputErrs[key]; err != nil {
+		return nil, err
+	}
+
+	runner.inputs[key] = input
+
+	return []byte(`{}`), nil
+}
+
+func replaceReviewRemoteCommandRunner(runner chc.ReviewRemoteCommandRunner) func() {
+	previous := reviewRemoteCommandRunner
+	reviewRemoteCommandRunner = runner
+
+	return func() {
+		reviewRemoteCommandRunner = previous
+	}
+}
+
+func cliReviewRemoteCommandKey(command string, args ...string) string {
+	return strings.Join(append([]string{command}, args...), " ")
 }
