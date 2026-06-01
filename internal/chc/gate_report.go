@@ -18,20 +18,23 @@ const (
 )
 
 type GateReport struct {
-	CreatedAt    time.Time               `json:"created_at"`
-	Status       GateReportStatus        `json:"status"`
-	Base         GateReportRef           `json:"base"`
-	Head         GateReportRef           `json:"head"`
-	MergeBase    string                  `json:"merge_base"`
-	Commits      []GateReportCommit      `json:"commits"`
-	ChangedFiles []GateReportChangedFile `json:"changed_files"`
-	DiffStat     string                  `json:"diff_stat"`
-	Validation   GateReportValidation    `json:"validation"`
-	Artifacts    GateReportArtifacts     `json:"artifacts"`
-	Failures     []string                `json:"failures"`
-	Warnings     []string                `json:"warnings"`
-	Info         []string                `json:"info"`
-	Metadata     map[string]string       `json:"metadata,omitempty"`
+	CreatedAt               time.Time                          `json:"created_at"`
+	Status                  GateReportStatus                   `json:"status"`
+	Base                    GateReportRef                      `json:"base"`
+	Head                    GateReportRef                      `json:"head"`
+	MergeBase               string                             `json:"merge_base"`
+	Commits                 []GateReportCommit                 `json:"commits"`
+	ChangedFiles            []GateReportChangedFile            `json:"changed_files"`
+	DiffStat                string                             `json:"diff_stat"`
+	AgentManagedWork        []GateReportAgentManagedWork       `json:"agent_managed_work"`
+	ManualOrExternalChanges []GateReportManualOrExternalChange `json:"manual_or_external_changes"`
+	MissingAgentEvidence    []GateReportMissingAgentEvidence   `json:"missing_agent_evidence"`
+	Validation              GateReportValidation               `json:"validation"`
+	Artifacts               GateReportArtifacts                `json:"artifacts"`
+	Failures                []string                           `json:"failures"`
+	Warnings                []string                           `json:"warnings"`
+	Info                    []string                           `json:"info"`
+	Metadata                map[string]string                  `json:"metadata,omitempty"`
 }
 
 type GateReportRef struct {
@@ -48,6 +51,26 @@ type GateReportChangedFile struct {
 	Status string `json:"status"`
 	Path   string `json:"path"`
 	Old    string `json:"old,omitempty"`
+}
+
+type GateReportAgentManagedWork struct {
+	Path        string `json:"path"`
+	Status      string `json:"status"`
+	TicketKey   string `json:"ticket_key"`
+	ExecutionID string `json:"execution_id"`
+	ReportPath  string `json:"report_path"`
+}
+
+type GateReportManualOrExternalChange struct {
+	Path   string `json:"path"`
+	Status string `json:"status"`
+}
+
+type GateReportMissingAgentEvidence struct {
+	TicketKey   string `json:"ticket_key"`
+	ExecutionID string `json:"execution_id"`
+	ReportPath  string `json:"report_path"`
+	Reason      string `json:"reason"`
 }
 
 type GateReportValidation struct {
@@ -72,6 +95,7 @@ func NewGateReport(
 	createdAt time.Time,
 	evidence GateGitEvidence,
 	validation GateValidationResult,
+	classification GateEvidenceClassification,
 	artifacts GateReportArtifacts,
 ) GateReport {
 	status := GateReportStatusFailed
@@ -80,16 +104,19 @@ func NewGateReport(
 	}
 
 	return GateReport{
-		CreatedAt:    createdAt.UTC(),
-		Status:       status,
-		Base:         GateReportRef(evidence.Base),
-		Head:         GateReportRef(evidence.Head),
-		MergeBase:    evidence.MergeBase,
-		Commits:      gateReportCommits(evidence.Commits),
-		ChangedFiles: gateReportChangedFiles(evidence.Files),
-		DiffStat:     evidence.DiffStat,
-		Validation:   GateReportValidation(validation),
-		Artifacts:    artifacts,
+		CreatedAt:               createdAt.UTC(),
+		Status:                  status,
+		Base:                    GateReportRef(evidence.Base),
+		Head:                    GateReportRef(evidence.Head),
+		MergeBase:               evidence.MergeBase,
+		Commits:                 gateReportCommits(evidence.Commits),
+		ChangedFiles:            gateReportChangedFiles(evidence.Files),
+		DiffStat:                evidence.DiffStat,
+		AgentManagedWork:        gateReportAgentManagedWork(classification.AgentManagedWork),
+		ManualOrExternalChanges: gateReportManualOrExternalChanges(classification.ManualOrExternalChanges),
+		MissingAgentEvidence:    gateReportMissingAgentEvidence(classification.MissingAgentEvidence),
+		Validation:              GateReportValidation(validation),
+		Artifacts:               artifacts,
 	}
 }
 
@@ -190,6 +217,9 @@ func RenderGateReportMarkdown(report GateReport) string {
 	output.WriteString("# Dev to Main Gate Report\n\n")
 	writeGateReportSummary(&output, report)
 	writeGateReportGitEvidence(&output, report)
+	writeGateReportAgentManagedWork(&output, report.AgentManagedWork)
+	writeGateReportManualOrExternalChanges(&output, report.ManualOrExternalChanges)
+	writeGateReportMissingAgentEvidence(&output, report.MissingAgentEvidence)
 	writeGateReportValidation(&output, report.Validation)
 	writeGateReportMessages(&output, "Failures", report.Failures)
 	writeGateReportMessages(&output, "Warnings", report.Warnings)
@@ -275,6 +305,73 @@ func writeGateReportValidation(output *strings.Builder, validation GateReportVal
 	output.WriteString("\n")
 }
 
+func writeGateReportAgentManagedWork(output *strings.Builder, work []GateReportAgentManagedWork) {
+	output.WriteString("## Agent-Managed Work\n\n")
+	if len(work) == 0 {
+		output.WriteString("- none\n\n")
+
+		return
+	}
+
+	for _, item := range work {
+		output.WriteString("- ")
+		output.WriteString(item.Status)
+		output.WriteString(" ")
+		output.WriteString(item.Path)
+		output.WriteString(" ticket=")
+		output.WriteString(emptyGateReportValue(item.TicketKey))
+		output.WriteString(" execution=")
+		output.WriteString(emptyGateReportValue(item.ExecutionID))
+		output.WriteString(" report=")
+		output.WriteString(emptyGateReportValue(item.ReportPath))
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n")
+}
+
+func writeGateReportManualOrExternalChanges(output *strings.Builder, changes []GateReportManualOrExternalChange) {
+	output.WriteString("## Manual or External Changes\n\n")
+	if len(changes) == 0 {
+		output.WriteString("- none\n\n")
+
+		return
+	}
+
+	for _, item := range changes {
+		output.WriteString("- ")
+		output.WriteString(item.Status)
+		output.WriteString(" ")
+		output.WriteString(item.Path)
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n")
+}
+
+func writeGateReportMissingAgentEvidence(output *strings.Builder, missing []GateReportMissingAgentEvidence) {
+	output.WriteString("## Missing Agent Evidence\n\n")
+	if len(missing) == 0 {
+		output.WriteString("- none\n\n")
+
+		return
+	}
+
+	for _, item := range missing {
+		output.WriteString("- ticket=")
+		output.WriteString(emptyGateReportValue(item.TicketKey))
+		output.WriteString(" execution=")
+		output.WriteString(emptyGateReportValue(item.ExecutionID))
+		output.WriteString(" report=")
+		output.WriteString(emptyGateReportValue(item.ReportPath))
+		output.WriteString(" reason=")
+		output.WriteString(emptyGateReportValue(item.Reason))
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n")
+}
+
 func writeGateReportMessages(output *strings.Builder, title string, messages []string) {
 	output.WriteString("## " + title + "\n\n")
 
@@ -333,4 +430,34 @@ func gateReportChangedFiles(files []GateGitChangedFile) []GateReportChangedFile 
 	}
 
 	return reportFiles
+}
+
+func gateReportAgentManagedWork(work []GateAgentManagedWork) []GateReportAgentManagedWork {
+	reportWork := make([]GateReportAgentManagedWork, 0, len(work))
+
+	for _, item := range work {
+		reportWork = append(reportWork, GateReportAgentManagedWork(item))
+	}
+
+	return reportWork
+}
+
+func gateReportManualOrExternalChanges(changes []GateManualOrExternalChange) []GateReportManualOrExternalChange {
+	reportChanges := make([]GateReportManualOrExternalChange, 0, len(changes))
+
+	for _, item := range changes {
+		reportChanges = append(reportChanges, GateReportManualOrExternalChange(item))
+	}
+
+	return reportChanges
+}
+
+func gateReportMissingAgentEvidence(missing []GateMissingAgentEvidence) []GateReportMissingAgentEvidence {
+	reportMissing := make([]GateReportMissingAgentEvidence, 0, len(missing))
+
+	for _, item := range missing {
+		reportMissing = append(reportMissing, GateReportMissingAgentEvidence(item))
+	}
+
+	return reportMissing
 }

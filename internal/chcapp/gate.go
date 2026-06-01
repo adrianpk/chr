@@ -99,7 +99,15 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return writeGateFailedValidationRunReport(ctx, createdAt, evidence, validation, artifacts, err)
 	}
 
-	report := chc.NewGateReport(createdAt, evidence, validation, artifacts)
+	classification, err := chc.NewGateEvidenceClassifier().Classify(ctx, chc.GateEvidenceClassificationRequest{
+		ProjectDir: projectDir,
+		Files:      evidence.Files,
+	})
+	if err != nil {
+		return err
+	}
+
+	report := chc.NewGateReport(createdAt, evidence, validation, classification, artifacts)
 	if !validation.Passed {
 		report.Failures = []string{"validation failed"}
 	}
@@ -147,7 +155,7 @@ func writeGateFailedValidationRunReport(
 	artifacts chc.GateReportArtifacts,
 	cause error,
 ) error {
-	report := chc.NewGateReport(createdAt, evidence, validation, artifacts)
+	report := chc.NewGateReport(createdAt, evidence, validation, chc.GateEvidenceClassification{}, artifacts)
 	report.Failures = []string{cause.Error()}
 
 	err := writeGateReports(ctx, report)

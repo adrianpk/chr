@@ -28,7 +28,7 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 	}, GateValidationResult{
 		Command: DefaultGateValidationCommand,
 		Passed:  true,
-	}, artifacts)
+	}, GateEvidenceClassification{}, artifacts)
 
 	path, err := NewGateReportWriter().WriteJSON(context.Background(), report)
 	if err != nil {
@@ -78,6 +78,19 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 		Command:  DefaultGateValidationCommand,
 		ExitCode: 1,
 		Output:   "validation failed",
+	}, GateEvidenceClassification{
+		AgentManagedWork: []GateAgentManagedWork{
+			{
+				Path:        "internal/chc/gate.go",
+				Status:      "M",
+				TicketKey:   "CHC-1",
+				ExecutionID: "exec-1",
+				ReportPath:  ".chc/user/runtime/runs/CHC-1/exec-1/execution-report.md",
+			},
+		},
+		ManualOrExternalChanges: []GateManualOrExternalChange{
+			{Path: "README.md", Status: "M"},
+		},
 	}, artifacts)
 	report.Failures = []string{"validation failed"}
 
@@ -99,6 +112,10 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 		"# Dev to Main Gate Report",
 		"- status: failed",
 		"- base: main base-sha",
+		"## Agent-Managed Work",
+		"ticket=CHC-1 execution=exec-1",
+		"## Manual or External Changes",
+		"- M README.md",
 		"- command: go test ./...",
 		"validation failed",
 	} {
