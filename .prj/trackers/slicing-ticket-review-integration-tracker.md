@@ -1,6 +1,6 @@
 # Ticket Review Integration Slicing Tracker
 
-Status: reviewing
+Status: delivered
 
 Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 Spec Draft: `.prj/specs/drafts/ticket-review-integration-draft.md`
@@ -15,8 +15,8 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with `make verify`.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with `make verify`.
 
 ## Slice Status
 
@@ -29,7 +29,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 | Slice 5 | remote review adapter | delivered | `feat/slice-5-remote-review-adapter` | `#277` | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
 | Slice 6 | ticket review command | delivered | `feat/slice-6-ticket-review-command` | #278 | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
 | Slice 7 | serialized work preflight | delivered | `feat/slice-7-serialized-work-preflight` | #279 | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
-| Slice 8 | repair handoff and docs | reviewing | `feat/slice-8-repair-handoff-docs` | #280 | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
+| Slice 8 | repair handoff and docs | delivered | `feat/slice-8-repair-handoff-docs` | #280 | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
 
 ## Slice 1: Ticket Review Metadata Contract
 

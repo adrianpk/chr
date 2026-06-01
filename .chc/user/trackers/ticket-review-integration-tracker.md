@@ -2,7 +2,7 @@
 title: "Ticket Review Integration Tracker"
 project_id: "chrysocoord"
 case_slug: "ticket-execution-loop"
-status: "reviewing"
+status: "delivered"
 source_request_id: "chat-2026-06-01-ticket-review-integration"
 source_response_id: "codex-plan"
 created_at: "2026-06-01T00:00:00Z"
@@ -26,7 +26,7 @@ source for task completion, commit mapping, validation logs, and slice closure.
 | Slice 5 | remote review adapter | delivered | `feat/slice-5-remote-review-adapter` | `#277` | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
 | Slice 6 | ticket review command | delivered | `feat/slice-6-ticket-review-command` | #278 | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
 | Slice 7 | serialized work preflight | delivered | `feat/slice-7-serialized-work-preflight` | #279 | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
-| Slice 8 | repair handoff and docs | reviewing | `feat/slice-8-repair-handoff-docs` | #280 | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
+| Slice 8 | repair handoff and docs | delivered | `feat/slice-8-repair-handoff-docs` | #280 | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
 
 ## Operational Sources
 

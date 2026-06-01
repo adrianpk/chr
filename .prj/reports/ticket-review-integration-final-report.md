@@ -1,6 +1,6 @@
 # Ticket Review Integration Final Report
 
-Status: reviewing
+Status: delivered
 Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-review-integration-tracker.md`
 
@@ -31,4 +31,3 @@ and repair handoff context.
 
 Live provider behavior still depends on the configured Forgejo or GitHub API
 credentials and provider support for inline comments.
-
