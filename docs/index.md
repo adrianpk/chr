@@ -55,6 +55,7 @@ Rationale and system shape:
 - [Architecture](explanation/architecture.md)
 - [Agent sandbox and runtime](explanation/agent-sandbox-and-runtime.md)
 - [Document generation model](explanation/document-generation-model.md)
+- [Agent review model](explanation/agent-review-model.md)
 - [Slicing workflow](explanation/slicing-workflow.md)
 - [Ticket resolution lifecycle](explanation/ticket-resolution-lifecycle.md)
 

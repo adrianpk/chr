@@ -50,6 +50,11 @@ Once the queue is shaped, the agent can work autonomously through ready tickets.
 The user can still run one ticket, run the full queue, stop the loop, inspect
 the output, and review the result before promoting the work.
 
+Review is treated as an integration checkpoint, not as a replica of human PR
+review after every small slice. The review model focuses on accumulated
+coherence, scope, contracts, and evidence before work is promoted. See
+[Agent review model](docs/explanation/agent-review-model.md).
+
 ## Install
 
 Build the CLI locally:
