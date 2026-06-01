@@ -10,7 +10,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | gate command and git evidence | delivered | `feat/slice-1-gate-command-git-evidence` | #264 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
-| Slice 2 | validation and report output | pending | `feat/slice-2-validation-report-output` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
+| Slice 2 | validation and report output | reviewing | `feat/slice-2-validation-report-output` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
 | Slice 3 | agent evidence classification | pending | `feat/slice-3-agent-evidence-classification` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
 | Slice 4 | gate policy configuration | pending | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
 | Slice 5 | forgejo woodpecker integration | pending | `feat/slice-5-forgejo-woodpecker-integration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md` |
@@ -29,12 +29,12 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Add validation command runner with default `go test ./...`. | pending | pending |  |
-| T2.2 | Add gate JSON report model and writer. | pending | pending |  |
-| T2.3 | Add gate Markdown report renderer. | pending | pending |  |
-| T2.4 | Add exit code handling. | pending | pending |  |
-| T2.5 | Add tests for pass, validation fail, report write behavior, and stale or invalid ref failures. | pending | pending |  |
-| T2.6 | Add slice report and tracker updates. | pending | pending |  |
+| T2.1 | Add validation command runner with default `go test ./...`. | done | `cd63af7` | Added default gate validation execution. |
+| T2.2 | Add gate JSON report model and writer. | done | `590d75e` | Added JSON report model, timestamped paths, and writer coverage. |
+| T2.3 | Add gate Markdown report renderer. | done | `b5ce589` | Added Markdown renderer and writer coverage. |
+| T2.4 | Add exit code handling. | done | `6af64c3` | Connected validation and report writing to `chc gate dev-main`. |
+| T2.5 | Add tests for pass, validation fail, report write behavior, and stale or invalid ref failures. | done | `51a7165` | Added CLI coverage for pass, validation fail, and invalid ref report flows. |
+| T2.6 | Add slice report and tracker updates. | done | this commit | Added the Slice 2 report and validation log. |
 
 ## Slice 3 Tasks
 
@@ -85,6 +85,9 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 - Slice 1: `go test ./internal/chc ./internal/chcapp` (pass)
 - Slice 1: `make verify` (pass)
+- Slice 2: `go test ./internal/chcapp -run GateDevMain` (pass)
+- Slice 2: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 2: `make verify` (pass)
 
 ## Notes
 

@@ -2,6 +2,8 @@
 
 Status: active
 
+Active Slice: Slice 2
+
 Spec: `ops/specs/2026-06-01-dev-main-agent-evidence-gate.md`
 Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`
 
