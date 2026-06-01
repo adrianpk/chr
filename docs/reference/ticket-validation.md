@@ -72,6 +72,34 @@ Tags are optional free-form grouping values.
 
 Empty tag values are rejected.
 
+## Review Metadata
+
+Review metadata is optional.
+
+Allowed `review_state` values are:
+
+```text
+pass
+changes_requested
+insufficient_evidence
+needs_human_decision
+```
+
+Allowed `review_result` values are:
+
+```text
+pass
+needs_changes
+insufficient_evidence
+needs_human_decision
+```
+
+`review_round` must be empty, zero, or a positive integer.
+
+Each `review_refs` entry requires `type`, `provider`, and `url`.
+
+`blocking_findings` cannot contain empty values.
+
 ## Time Consistency
 
 `created_at` and `updated_at` must parse as RFC3339 timestamps.

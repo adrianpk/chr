@@ -82,3 +82,28 @@ The migration file is:
 The Board uses the existing `indexed_tickets` read model instead of a dedicated
 Board table. `ticket_key_sequences` stores monotonic ticket key allocation state
 for generated `CHC-<number>` keys.
+
+## Ticket Review Metadata
+
+Ticket review metadata extends the existing `indexed_tickets` table. It does
+not introduce provider-specific review tables in the first schema.
+
+The review metadata migration adds:
+
+- `branch`;
+- `review_refs`;
+- `review_state`;
+- `review_round`;
+- `review_result`;
+- `review_comments_url`;
+- `blocking_findings`;
+- indexes for review state and branch lookups.
+
+`review_refs` and `blocking_findings` are stored as JSON arrays in SQLite. The
+canonical representation remains Markdown ticket frontmatter.
+
+The migration file is:
+
+```text
+20260601000009-add_ticket_review_metadata.sql
+```
