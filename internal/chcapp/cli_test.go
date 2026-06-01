@@ -113,6 +113,7 @@ func TestGateDevMainWritesReportsWhenValidationPasses(t *testing.T) {
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
 	runGateCLIGit(t, projectDir, "add", ".")
 	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
@@ -153,6 +154,7 @@ func TestGateDevMainWritesReportsWhenValidationFails(t *testing.T) {
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
 	runGateCLIGit(t, projectDir, "add", ".")
 	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "failing_test.go", `package gatecli
@@ -5694,6 +5696,7 @@ func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) chc.GateReport {
 	content := readFile(t, matches[0])
 
 	var report chc.GateReport
+
 	err = json.Unmarshal([]byte(content), &report)
 	if err != nil {
 		t.Fatalf("decode gate JSON report: %v", err)

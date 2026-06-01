@@ -277,6 +277,7 @@ func writeGateReportValidation(output *strings.Builder, validation GateReportVal
 
 func writeGateReportMessages(output *strings.Builder, title string, messages []string) {
 	output.WriteString("## " + title + "\n\n")
+
 	if len(messages) == 0 {
 		output.WriteString("- none\n\n")
 

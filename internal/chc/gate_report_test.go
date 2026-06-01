@@ -45,6 +45,7 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 	}
 
 	var decoded GateReport
+
 	err = json.Unmarshal(content, &decoded)
 	if err != nil {
 		t.Fatalf("decode report: %v", err)
@@ -119,6 +120,7 @@ func TestGateReportWriterRejectsDirectoryTarget(t *testing.T) {
 	report := GateReport{
 		Artifacts: GateReportArtifacts{JSONPath: path},
 	}
+
 	_, err = NewGateReportWriter().WriteJSON(context.Background(), report)
 	if err == nil {
 		t.Fatal("WriteJSON returned nil error")

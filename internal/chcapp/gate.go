@@ -76,37 +76,27 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
+	return runGateDevMainForProject(ctx, stdout, projectContext.ProjectDir, cmd.String("base"), cmd.String("head"))
+}
+
+func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir, baseRef, headRef string) error {
 	createdAt := time.Now().UTC()
-	artifacts := chc.NewGateReportArtifacts(projectContext.ProjectDir, createdAt)
+	artifacts := chc.NewGateReportArtifacts(projectDir, createdAt)
 
 	evidence, err := chc.NewGateGitEvidenceService().Collect(ctx, chc.GateGitEvidenceRequest{
-		ProjectDir: projectContext.ProjectDir,
-		BaseRef:    cmd.String("base"),
-		HeadRef:    cmd.String("head"),
+		ProjectDir: projectDir,
+		BaseRef:    baseRef,
+		HeadRef:    headRef,
 	})
 	if err != nil {
-		report := chc.NewFailedGateReport(createdAt, cmd.String("base"), cmd.String("head"), artifacts, []string{err.Error()})
-		writeErr := writeGateReports(ctx, report)
-		if writeErr != nil {
-			return writeErr
-		}
-
-		return err
+		return writeGateFailedEvidenceReport(ctx, createdAt, baseRef, headRef, artifacts, err)
 	}
 
 	validation, err := chc.NewGateValidationRunner().Run(ctx, chc.GateValidationRequest{
-		ProjectDir: projectContext.ProjectDir,
+		ProjectDir: projectDir,
 	})
 	if err != nil {
-		report := chc.NewGateReport(createdAt, evidence, validation, artifacts)
-		report.Failures = []string{err.Error()}
-
-		writeErr := writeGateReports(ctx, report)
-		if writeErr != nil {
-			return writeErr
-		}
-
-		return err
+		return writeGateFailedValidationRunReport(ctx, createdAt, evidence, validation, artifacts, err)
 	}
 
 	report := chc.NewGateReport(createdAt, evidence, validation, artifacts)
@@ -129,6 +119,43 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	return nil
+}
+
+func writeGateFailedEvidenceReport(
+	ctx context.Context,
+	createdAt time.Time,
+	baseRef string,
+	headRef string,
+	artifacts chc.GateReportArtifacts,
+	cause error,
+) error {
+	report := chc.NewFailedGateReport(createdAt, baseRef, headRef, artifacts, []string{cause.Error()})
+
+	err := writeGateReports(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	return cause
+}
+
+func writeGateFailedValidationRunReport(
+	ctx context.Context,
+	createdAt time.Time,
+	evidence chc.GateGitEvidence,
+	validation chc.GateValidationResult,
+	artifacts chc.GateReportArtifacts,
+	cause error,
+) error {
+	report := chc.NewGateReport(createdAt, evidence, validation, artifacts)
+	report.Failures = []string{cause.Error()}
+
+	err := writeGateReports(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	return cause
 }
 
 func writeGateReports(ctx context.Context, report chc.GateReport) error {

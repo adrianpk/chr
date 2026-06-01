@@ -48,10 +48,12 @@ func (r GateValidationRunner) Run(ctx context.Context, request GateValidationReq
 	cmd.Dir = projectDir
 
 	var output bytes.Buffer
+
 	cmd.Stdout = &output
 	cmd.Stderr = &output
 
 	err := cmd.Run()
+
 	result := GateValidationResult{
 		Command: strings.Join(command, " "),
 		Output:  strings.TrimSpace(output.String()),
