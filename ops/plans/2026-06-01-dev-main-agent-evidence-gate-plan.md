@@ -1,6 +1,6 @@
 # Dev to Main Agent Evidence Gate Plan
 
-Status: proposed
+Status: active
 
 Spec: `ops/specs/2026-06-01-dev-main-agent-evidence-gate.md`
 Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`

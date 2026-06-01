@@ -1,6 +1,6 @@
 # Dev to Main Agent Evidence Gate Tracker
 
-Status: proposed
+Status: active
 
 Spec: `ops/specs/2026-06-01-dev-main-agent-evidence-gate.md`
 Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
@@ -9,7 +9,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | gate command and git evidence | pending | `feat/slice-1-gate-command-git-evidence` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
+| Slice 1 | gate command and git evidence | reviewing | `feat/slice-1-gate-command-git-evidence` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
 | Slice 2 | validation and report output | pending | `feat/slice-2-validation-report-output` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
 | Slice 3 | agent evidence classification | pending | `feat/slice-3-agent-evidence-classification` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
 | Slice 4 | gate policy configuration | pending | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
@@ -20,10 +20,10 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add command routing for `gate dev-main`. | pending | pending |  |
-| T1.2 | Add git evidence collection service. | pending | pending |  |
-| T1.3 | Add tests for ref resolution, invalid refs, changed files, and diff collection. | pending | pending |  |
-| T1.4 | Add slice report and tracker updates. | pending | pending |  |
+| T1.1 | Add command routing for `gate dev-main`. | done | `347fc7f` | Registered the root `gate` command and `dev-main` subcommand. |
+| T1.2 | Add git evidence collection service. | done | `33b87ae` | Added Git evidence collection and CLI output. |
+| T1.3 | Add tests for ref resolution, invalid refs, changed files, and diff collection. | done | `080b71e` | Added package and CLI command coverage. |
+| T1.4 | Add slice report and tracker updates. | done | this commit | This tracker update and slice report. |
 
 ## Slice 2 Tasks
 
@@ -83,7 +83,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 ## Validation Log
 
-- pending
+- Slice 1: `go test ./internal/chc ./internal/chcapp` (pass)
 
 ## Notes
 
