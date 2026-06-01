@@ -145,6 +145,14 @@ func TestGateDevMainWritesReportsWhenValidationPasses(t *testing.T) {
 		t.Fatalf("Status = %q, want passed", report.Status)
 	}
 
+	if len(report.ManualOrExternalChanges) == 0 {
+		t.Fatalf("ManualOrExternalChanges = %#v, want manual change context", report.ManualOrExternalChanges)
+	}
+
+	if len(report.Failures) != 0 {
+		t.Fatalf("Failures = %#v, want no failures for manual changes", report.Failures)
+	}
+
 	assertPathExists(t, report.Artifacts.MarkdownPath)
 }
 
@@ -275,8 +283,16 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
+	if report.Status != chc.GateReportStatusFailed {
+		t.Fatalf("Status = %q, want failed", report.Status)
+	}
+
 	if len(report.MissingAgentEvidence) != 1 {
 		t.Fatalf("MissingAgentEvidence = %#v, want one entry", report.MissingAgentEvidence)
+	}
+
+	if len(report.Failures) != 1 || report.Failures[0] != "missing agent evidence" {
+		t.Fatalf("Failures = %#v, want missing agent evidence failure", report.Failures)
 	}
 }
 
