@@ -82,6 +82,10 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir, baseRef, headRef string) error {
 	createdAt := time.Now().UTC()
 	artifacts := chc.NewGateReportArtifacts(projectDir, createdAt)
+	config, err := chc.LoadGateConfig(projectDir)
+	if err != nil {
+		return err
+	}
 
 	evidence, err := chc.NewGateGitEvidenceService().Collect(ctx, chc.GateGitEvidenceRequest{
 		ProjectDir: projectDir,
@@ -94,6 +98,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 
 	validation, err := chc.NewGateValidationRunner().Run(ctx, chc.GateValidationRequest{
 		ProjectDir: projectDir,
+		Command:    config.DevMain.ValidationCommand,
 	})
 	if err != nil {
 		return writeGateFailedValidationRunReport(ctx, createdAt, evidence, validation, artifacts, err)

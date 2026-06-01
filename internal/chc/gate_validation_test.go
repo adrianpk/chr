@@ -56,6 +56,22 @@ func TestFailure(t *testing.T) {
 	}
 }
 
+func TestGateValidationRunnerUsesConfiguredCommand(t *testing.T) {
+	projectDir := newGateValidationGoProject(t, "package gatevalidation\n")
+
+	result, err := NewGateValidationRunner().Run(t.Context(), GateValidationRequest{
+		ProjectDir: projectDir,
+		Command:    "go test ./...",
+	})
+	if err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+
+	if !result.Passed {
+		t.Fatalf("Passed = false, want true: %#v", result)
+	}
+}
+
 func TestGateValidationRunnerRejectsMissingProjectDir(t *testing.T) {
 	_, err := NewGateValidationRunner().Run(t.Context(), GateValidationRequest{})
 	if err == nil {
