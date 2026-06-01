@@ -84,6 +84,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 ## Validation Log
 
 - Slice 1: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 1: `make verify` (pass)
 
 ## Notes
 

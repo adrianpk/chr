@@ -62,6 +62,7 @@ Markdown report writing under `.chc/user/reports/gates/`.
 ## Validation
 
 - `go test ./internal/chc ./internal/chcapp` (pass)
+- `make verify` (pass)
 
 ## Risks and Follow-ups
 
@@ -69,3 +70,6 @@ Markdown report writing under `.chc/user/reports/gates/`.
 - Validation command execution is intentionally deferred to Slice 2.
 - Agent-managed evidence classification is intentionally deferred to Slice 3.
 - Forgejo/Woodpecker behavior is intentionally deferred to Slice 5.
+- End-to-end gate execution against this repository is intentionally deferred
+  until the later QA slice because the repository is not initialized as a
+  ChrysoCoord-managed project at `.chc/`.
