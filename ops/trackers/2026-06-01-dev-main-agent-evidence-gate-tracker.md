@@ -11,7 +11,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | gate command and git evidence | delivered | `feat/slice-1-gate-command-git-evidence` | #264 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
 | Slice 2 | validation and report output | delivered | `feat/slice-2-validation-report-output` | #265 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
-| Slice 3 | agent evidence classification | pending | `feat/slice-3-agent-evidence-classification` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
+| Slice 3 | agent evidence classification | reviewing | `feat/slice-3-agent-evidence-classification` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
 | Slice 4 | gate policy configuration | pending | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
 | Slice 5 | forgejo woodpecker integration | pending | `feat/slice-5-forgejo-woodpecker-integration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md` |
 | Slice 6 | docs qa and end to end validation | pending | `feat/slice-6-docs-qa-e2e-validation` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-6-docs-qa-e2e-validation.md` |
@@ -40,12 +40,12 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Discover gate-relevant reports under `.chc/user/reports`. | pending | pending |  |
-| T3.2 | Classify agent-managed evidence from available run reports. | pending | pending |  |
-| T3.3 | Classify unmatched changed files as manual or external info. | pending | pending |  |
-| T3.4 | Add failure checks for missing ChrysoCoord-owned run evidence. | pending | pending |  |
-| T3.5 | Add tests for agent-managed, manual/external, and missing-evidence cases. | pending | pending |  |
-| T3.6 | Add slice report and tracker updates. | pending | pending |  |
+| T3.1 | Discover gate-relevant reports under `.chc/user/reports`. | done | `9fccea6` | Reused project report discovery and resolved execution result paths from report metadata. |
+| T3.2 | Classify agent-managed evidence from available run reports. | done | `ba4342f` | Added report fields and command integration for agent-managed work. |
+| T3.3 | Classify unmatched changed files as manual or external info. | done | `ba4342f` | Unmatched Git changes are reported as manual or external context. |
+| T3.4 | Add failure checks for missing ChrysoCoord-owned run evidence. | done | `e2a9299` | Missing execution evidence now fails the gate. |
+| T3.5 | Add tests for agent-managed, manual/external, and missing-evidence cases. | done | `9bf60d3` | Added CLI assertions for manual context and missing evidence failures. |
+| T3.6 | Add slice report and tracker updates. | done | this commit | Added the Slice 3 report and validation log. |
 
 ## Slice 4 Tasks
 
@@ -88,6 +88,10 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 - Slice 2: `go test ./internal/chcapp -run GateDevMain` (pass)
 - Slice 2: `go test ./internal/chc ./internal/chcapp` (pass)
 - Slice 2: `make verify` (pass)
+- Slice 3: `go test ./internal/chc -run 'GateEvidence|ReportLister'` (pass)
+- Slice 3: `go test ./internal/chc ./internal/chcapp -run 'GateReport|GateEvidence|GateDevMain'` (pass)
+- Slice 3: `go test ./internal/chcapp -run 'GateDevMain'` (pass)
+- Slice 3: `make verify` (pass)
 
 ## Notes
 
