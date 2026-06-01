@@ -1,8 +1,8 @@
 # Dev to Main Agent Evidence Gate Plan
 
-Status: active
+Status: completed
 
-Active Slice: Slice 6
+Active Slice: none
 
 Spec: `ops/specs/2026-06-01-dev-main-agent-evidence-gate.md`
 Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`

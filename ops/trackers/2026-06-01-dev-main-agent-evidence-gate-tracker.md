@@ -1,6 +1,6 @@
 # Dev to Main Agent Evidence Gate Tracker
 
-Status: active
+Status: completed
 
 Spec: `ops/specs/2026-06-01-dev-main-agent-evidence-gate.md`
 Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
@@ -14,7 +14,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | Slice 3 | agent evidence classification | delivered | `feat/slice-3-agent-evidence-classification` | #266 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
 | Slice 4 | gate policy configuration | delivered | `feat/slice-4-gate-policy-configuration` | #267 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
 | Slice 5 | forgejo woodpecker integration | delivered | `feat/slice-5-forgejo-woodpecker-integration` | #268 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md` |
-| Slice 6 | docs qa and end to end validation | reviewing | `feat/slice-6-docs-qa-e2e-validation` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-6-docs-qa-e2e-validation.md` |
+| Slice 6 | docs qa and end to end validation | delivered | `feat/slice-6-docs-qa-e2e-validation` | #269 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-6-docs-qa-e2e-validation.md` |
 
 ## Slice 1 Tasks
 

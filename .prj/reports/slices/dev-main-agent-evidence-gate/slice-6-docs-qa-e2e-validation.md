@@ -1,11 +1,11 @@
 # Slice 6: Docs QA and End To End Validation
 
-Status: reviewing
+Status: delivered
 Slicing: Dev to Main Agent Evidence Gate
 Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`
 Branch: `feat/slice-6-docs-qa-e2e-validation`
-PR: pending
+PR: #269
 
 ## Purpose
 
