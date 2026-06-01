@@ -431,11 +431,12 @@ func ticketApplyResultAction(stdout io.Writer) cli.ActionFunc {
 }
 
 type ticketStartPreflight struct {
-	AssetsFS fs.FS
-	Env      chc.UserEnvironment
-	Ticket   chc.IndexedTicket
-	Record   chc.ExecutionRecord
-	Runtime  chc.RuntimeValidationResult
+	AssetsFS       fs.FS
+	Env            chc.UserEnvironment
+	ProjectContext commandProjectContext
+	Ticket         chc.IndexedTicket
+	Record         chc.ExecutionRecord
+	Runtime        chc.RuntimeValidationResult
 }
 
 type ticketStartSelection struct {
@@ -545,6 +546,15 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	if !cmd.Bool("dry-run") {
+		lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, chc.AgentOperationDevelopment)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			//nolint:errcheck // Command result already comes from the main operation.
+			_ = lock.Release()
+		}()
+
 		record, err := runAndPrintTicketStartExecution(ctx, stdout, preflight)
 		if err != nil {
 			return err
@@ -593,6 +603,26 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
+	allTickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
+	if err != nil {
+		return err
+	}
+
+	preflight, err := chc.RunWorkSelectionPreflight(ctx, chc.WorkSelectionPreflightOptions{
+		ProjectDir:        projectContext.ProjectDir,
+		Tickets:           allTickets,
+		RequireUpdatedDev: true,
+	})
+	if err != nil {
+		return err
+	}
+	if !preflight.Allowed {
+		return formatWorkSelectionPreflightError(preflight)
+	}
+	if len(preflight.SelectedTickets) > 0 && hasReviewRepairTicket(preflight.SelectedTickets) {
+		tickets = preflight.SelectedTickets
+	}
+
 	eligibleTickets := deduplicateTicketLoopTickets(tickets)
 	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
 
@@ -601,6 +631,15 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		if err != nil {
 			return err
 		}
+
+		lock, err := acquireAgentOperationLock(ctx, projectContext, chc.AgentOperationDevelopment)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			//nolint:errcheck // Command result already comes from the main operation.
+			_ = lock.Release()
+		}()
 
 		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, len(eligibleTickets), deps.assetsFS)
 	}
@@ -658,6 +697,55 @@ func deduplicateTicketLoopTickets(tickets []chc.IndexedTicket) []chc.IndexedTick
 	}
 
 	return selected
+}
+
+func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandProjectContext, tickets []chc.IndexedTicket, selectedTicketKey string) error {
+	preflight, err := chc.RunWorkSelectionPreflight(ctx, chc.WorkSelectionPreflightOptions{
+		ProjectDir:        projectContext.ProjectDir,
+		Tickets:           tickets,
+		SelectedTicketKey: selectedTicketKey,
+		RequireUpdatedDev: true,
+	})
+	if err != nil {
+		return err
+	}
+	if !preflight.Allowed {
+		return formatWorkSelectionPreflightError(preflight)
+	}
+
+	return nil
+}
+
+func formatWorkSelectionPreflightError(preflight chc.WorkSelectionPreflightResult) error {
+	if len(preflight.BlockReasons) == 0 {
+		return fmt.Errorf("work selection preflight blocked")
+	}
+
+	reason := preflight.BlockReasons[0]
+	if reason.TicketKey != "" {
+		return fmt.Errorf("work selection preflight blocked: %s ticket=%s detail=%s", reason.Code, reason.TicketKey, reason.Detail)
+	}
+
+	return fmt.Errorf("work selection preflight blocked: %s detail=%s", reason.Code, reason.Detail)
+}
+
+func hasReviewRepairTicket(tickets []chc.IndexedTicket) bool {
+	for _, ticket := range tickets {
+		if ticket.Status == chc.TicketStatusReadyForDev &&
+			(ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes") {
+			return true
+		}
+	}
+
+	return false
+}
+
+func acquireAgentOperationLock(ctx context.Context, projectContext commandProjectContext, operation string) (*chc.AgentOperationLock, error) {
+	return chc.AcquireAgentOperationLock(ctx, chc.AgentOperationLockOptions{
+		ProjectDir: projectContext.ProjectDir,
+		Operation:  operation,
+		Owner:      "chc",
+	})
 }
 
 func runAndPrintTicketLoopExecution(
@@ -1256,11 +1344,12 @@ func buildTicketStartPreflightForTicket(
 	record = chc.ExecutionRecordFromRuntimePlan(record, result.Plan)
 
 	return ticketStartPreflight{
-		AssetsFS: assetsFS,
-		Env:      env,
-		Ticket:   ticket,
-		Record:   record,
-		Runtime:  result,
+		AssetsFS:       assetsFS,
+		Env:            env,
+		ProjectContext: projectContext,
+		Ticket:         ticket,
+		Record:         record,
+		Runtime:        result,
 	}, nil
 }
 
@@ -1290,6 +1379,16 @@ func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env chc.User
 	}
 
 	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().First())
+	if err != nil {
+		return ticketStartSelection{}, err
+	}
+
+	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
+	if err != nil {
+		return ticketStartSelection{}, err
+	}
+
+	err = enforceWorkSelectionPreflight(ctx, projectContext, tickets, ticket.Key)
 	if err != nil {
 		return ticketStartSelection{}, err
 	}
@@ -1569,6 +1668,17 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	}
 
 	adapter := chc.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
+
+	if !cmd.Bool("dry-run") {
+		lock, err := acquireAgentOperationLock(ctx, projectContext, chc.AgentOperationReview)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			//nolint:errcheck // Command result already comes from the main operation.
+			_ = lock.Release()
+		}()
+	}
 
 	result, err := chc.RunTicketReviewCommand(ctx, chc.TicketReviewCommandOptions{
 		Ticket:     ticket,

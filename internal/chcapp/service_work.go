@@ -59,6 +59,25 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 		return AgentWorkResult{}, err
 	}
 
+	tickets, err := s.listProjectTickets()
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, chc.AgentOperationDevelopment)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+	defer func() {
+		//nolint:errcheck // Operation result already comes from the main workflow.
+		_ = lock.Release()
+	}()
+
 	preflight, err := buildTicketStartPreflightForTicket(s.ctx, s.env, s.projectContext, ticket, s.assetsFS)
 	if err != nil {
 		return AgentWorkResult{}, chc.NewExecutionFailure(chc.ExecutionFailurePreflight, err)
@@ -162,6 +181,15 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 }
 
 func (s service) startAgentWorkLoop(tickets []chc.IndexedTicket, eligibleCount int) (AgentWorkResult, error) {
+	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, chc.AgentOperationDevelopment)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+	defer func() {
+		//nolint:errcheck // Operation result already comes from the main workflow.
+		_ = lock.Release()
+	}()
+
 	result, err := runTicketLoopExecution(s.ctx, s.env, s.projectContext, tickets, eligibleCount, s.assetsFS)
 	if err != nil {
 		return AgentWorkResult{}, err
@@ -247,6 +275,41 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]chc.Ind
 		}
 
 		return nil, 0, err
+	}
+
+	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
+	if err != nil {
+		closeErr := index.Close()
+		if closeErr != nil {
+			return nil, 0, closeErr
+		}
+
+		return nil, 0, err
+	}
+
+	preflight, err := chc.RunWorkSelectionPreflight(s.ctx, chc.WorkSelectionPreflightOptions{
+		ProjectDir:        s.projectContext.ProjectDir,
+		Tickets:           allTickets,
+		RequireUpdatedDev: true,
+	})
+	if err != nil {
+		closeErr := index.Close()
+		if closeErr != nil {
+			return nil, 0, closeErr
+		}
+
+		return nil, 0, err
+	}
+	if !preflight.Allowed {
+		closeErr := index.Close()
+		if closeErr != nil {
+			return nil, 0, closeErr
+		}
+
+		return nil, 0, formatWorkSelectionPreflightError(preflight)
+	}
+	if len(preflight.SelectedTickets) > 0 && hasReviewRepairTicket(preflight.SelectedTickets) {
+		tickets = preflight.SelectedTickets
 	}
 
 	err = index.Close()
