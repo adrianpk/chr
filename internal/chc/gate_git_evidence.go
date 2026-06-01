@@ -41,6 +41,13 @@ type GateGitChangedFile struct {
 	Old    string
 }
 
+type gateGitEvidenceRequest struct {
+	projectDir string
+	baseRef    string
+	headRef    string
+	rangeRef   string
+}
+
 func NewGateGitEvidenceService() GateGitEvidenceService {
 	return GateGitEvidenceService{}
 }
@@ -49,69 +56,102 @@ func (s GateGitEvidenceService) Collect(
 	ctx context.Context,
 	request GateGitEvidenceRequest,
 ) (GateGitEvidence, error) {
-	projectDir := strings.TrimSpace(request.ProjectDir)
-	if projectDir == "" {
-		return GateGitEvidence{}, fmt.Errorf("project directory is required")
-	}
-
-	baseRef := strings.TrimSpace(request.BaseRef)
-	if baseRef == "" {
-		return GateGitEvidence{}, fmt.Errorf("base ref is required")
-	}
-
-	headRef := strings.TrimSpace(request.HeadRef)
-	if headRef == "" {
-		return GateGitEvidence{}, fmt.Errorf("head ref is required")
-	}
-
-	baseSHA, err := gitOutput(ctx, projectDir, "rev-parse", "--verify", baseRef)
+	normalized, err := normalizeGateGitEvidenceRequest(request)
 	if err != nil {
-		return GateGitEvidence{}, fmt.Errorf("resolve base ref %q: %w", baseRef, err)
+		return GateGitEvidence{}, err
 	}
 
-	headSHA, err := gitOutput(ctx, projectDir, "rev-parse", "--verify", headRef)
+	base, head, err := collectGateGitRefs(ctx, normalized)
 	if err != nil {
-		return GateGitEvidence{}, fmt.Errorf("resolve head ref %q: %w", headRef, err)
+		return GateGitEvidence{}, err
 	}
 
-	mergeBase, err := gitOutput(ctx, projectDir, "merge-base", baseRef, headRef)
+	mergeBase, commits, files, diffStat, err := collectGateGitRange(ctx, normalized)
 	if err != nil {
-		return GateGitEvidence{}, fmt.Errorf("resolve merge base for %q and %q: %w", baseRef, headRef, err)
-	}
-
-	commitsOutput, err := gitOutput(ctx, projectDir, "log", "--format=%H%x09%s", baseRef+".."+headRef)
-	if err != nil {
-		return GateGitEvidence{}, fmt.Errorf("collect commits for %q..%q: %w", baseRef, headRef, err)
-	}
-
-	filesOutput, err := gitOutput(ctx, projectDir, "diff", "--name-status", baseRef+".."+headRef)
-	if err != nil {
-		return GateGitEvidence{}, fmt.Errorf("collect changed files for %q..%q: %w", baseRef, headRef, err)
-	}
-
-	diffStat, err := gitOutput(ctx, projectDir, "diff", "--shortstat", baseRef+".."+headRef)
-	if err != nil {
-		return GateGitEvidence{}, fmt.Errorf("collect diff stat for %q..%q: %w", baseRef, headRef, err)
+		return GateGitEvidence{}, err
 	}
 
 	return GateGitEvidence{
-		Base: GateGitRef{
-			Ref: baseRef,
-			SHA: baseSHA,
-		},
-		Head: GateGitRef{
-			Ref: headRef,
-			SHA: headSHA,
-		},
+		Base:      base,
+		Head:      head,
 		MergeBase: mergeBase,
-		Commits:   parseGateGitCommits(commitsOutput),
-		Files:     parseGateGitChangedFiles(filesOutput),
+		Commits:   commits,
+		Files:     files,
 		DiffStat:  diffStat,
 	}, nil
 }
 
+func normalizeGateGitEvidenceRequest(request GateGitEvidenceRequest) (gateGitEvidenceRequest, error) {
+	normalized := gateGitEvidenceRequest{
+		projectDir: strings.TrimSpace(request.ProjectDir),
+		baseRef:    strings.TrimSpace(request.BaseRef),
+		headRef:    strings.TrimSpace(request.HeadRef),
+	}
+
+	if normalized.projectDir == "" {
+		return gateGitEvidenceRequest{}, fmt.Errorf("project directory is required")
+	}
+
+	if normalized.baseRef == "" {
+		return gateGitEvidenceRequest{}, fmt.Errorf("base ref is required")
+	}
+
+	if normalized.headRef == "" {
+		return gateGitEvidenceRequest{}, fmt.Errorf("head ref is required")
+	}
+
+	normalized.rangeRef = normalized.baseRef + ".." + normalized.headRef
+
+	return normalized, nil
+}
+
+func collectGateGitRefs(
+	ctx context.Context,
+	request gateGitEvidenceRequest,
+) (GateGitRef, GateGitRef, error) {
+	baseSHA, err := gitOutput(ctx, request.projectDir, "rev-parse", "--verify", request.baseRef)
+	if err != nil {
+		return GateGitRef{}, GateGitRef{}, fmt.Errorf("resolve base ref %q: %w", request.baseRef, err)
+	}
+
+	headSHA, err := gitOutput(ctx, request.projectDir, "rev-parse", "--verify", request.headRef)
+	if err != nil {
+		return GateGitRef{}, GateGitRef{}, fmt.Errorf("resolve head ref %q: %w", request.headRef, err)
+	}
+
+	return GateGitRef{Ref: request.baseRef, SHA: baseSHA}, GateGitRef{Ref: request.headRef, SHA: headSHA}, nil
+}
+
+func collectGateGitRange(
+	ctx context.Context,
+	request gateGitEvidenceRequest,
+) (string, []GateGitCommit, []GateGitChangedFile, string, error) {
+	mergeBase, err := gitOutput(ctx, request.projectDir, "merge-base", request.baseRef, request.headRef)
+	if err != nil {
+		return "", nil, nil, "", fmt.Errorf("resolve merge base for %q and %q: %w", request.baseRef, request.headRef, err)
+	}
+
+	commitsOutput, err := gitOutput(ctx, request.projectDir, "log", "--format=%H%x09%s", request.rangeRef)
+	if err != nil {
+		return "", nil, nil, "", fmt.Errorf("collect commits for %q: %w", request.rangeRef, err)
+	}
+
+	filesOutput, err := gitOutput(ctx, request.projectDir, "diff", "--name-status", request.rangeRef)
+	if err != nil {
+		return "", nil, nil, "", fmt.Errorf("collect changed files for %q: %w", request.rangeRef, err)
+	}
+
+	diffStat, err := gitOutput(ctx, request.projectDir, "diff", "--shortstat", request.rangeRef)
+	if err != nil {
+		return "", nil, nil, "", fmt.Errorf("collect diff stat for %q: %w", request.rangeRef, err)
+	}
+
+	return mergeBase, parseGateGitCommits(commitsOutput), parseGateGitChangedFiles(filesOutput), diffStat, nil
+}
+
 func gitOutput(ctx context.Context, projectDir string, args ...string) (string, error) {
 	cmd := exec.CommandContext(ctx, "git", append([]string{"-C", projectDir}, args...)...)
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("%s: %s", strings.Join(cmd.Args, " "), strings.TrimSpace(string(output)))
@@ -122,6 +162,7 @@ func gitOutput(ctx context.Context, projectDir string, args ...string) (string, 
 
 func parseGateGitCommits(output string) []GateGitCommit {
 	commits := []GateGitCommit{}
+
 	for _, line := range gateNonEmptyLines(output) {
 		sha, subject, ok := strings.Cut(line, "\t")
 		if !ok {
@@ -138,6 +179,7 @@ func parseGateGitCommits(output string) []GateGitCommit {
 
 func parseGateGitChangedFiles(output string) []GateGitChangedFile {
 	files := []GateGitChangedFile{}
+
 	for _, line := range gateNonEmptyLines(output) {
 		parts := strings.Split(line, "\t")
 		if len(parts) < 2 {
@@ -166,6 +208,7 @@ func parseGateGitChangedFiles(output string) []GateGitChangedFile {
 
 func gateNonEmptyLines(output string) []string {
 	lines := []string{}
+
 	for _, line := range strings.Split(output, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {

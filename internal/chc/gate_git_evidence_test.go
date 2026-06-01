@@ -14,12 +14,14 @@ func TestGateGitEvidenceServiceCollectsRangeEvidence(t *testing.T) {
 	writeGateGitEvidenceFile(t, projectDir, "README.md", "base\n")
 	runGateGitEvidenceGit(t, projectDir, "add", ".")
 	runGateGitEvidenceGit(t, projectDir, "commit", "-m", "base commit")
+
 	baseSHA := gateGitEvidenceOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateGitEvidenceFile(t, projectDir, "README.md", "changed\n")
 	writeGateGitEvidenceFile(t, projectDir, "internal/chc/gate.go", "package chc\n")
 	runGateGitEvidenceGit(t, projectDir, "add", ".")
 	runGateGitEvidenceGit(t, projectDir, "commit", "-m", "gate evidence")
+
 	headSHA := gateGitEvidenceOutput(t, projectDir, "rev-parse", "HEAD")
 
 	evidence, err := NewGateGitEvidenceService().Collect(t.Context(), GateGitEvidenceRequest{
@@ -34,9 +36,11 @@ func TestGateGitEvidenceServiceCollectsRangeEvidence(t *testing.T) {
 	if evidence.Base.SHA != baseSHA {
 		t.Fatalf("Base.SHA = %q, want %q", evidence.Base.SHA, baseSHA)
 	}
+
 	if evidence.Head.SHA != headSHA {
 		t.Fatalf("Head.SHA = %q, want %q", evidence.Head.SHA, headSHA)
 	}
+
 	if evidence.MergeBase != baseSHA {
 		t.Fatalf("MergeBase = %q, want %q", evidence.MergeBase, baseSHA)
 	}
@@ -46,6 +50,7 @@ func TestGateGitEvidenceServiceCollectsRangeEvidence(t *testing.T) {
 		{Status: "M", Path: "README.md"},
 		{Status: "A", Path: "internal/chc/gate.go"},
 	})
+
 	if evidence.DiffStat == "" {
 		t.Fatal("DiffStat is empty")
 	}
@@ -65,6 +70,7 @@ func TestGateGitEvidenceServiceRejectsInvalidRefs(t *testing.T) {
 	if err == nil {
 		t.Fatal("Collect returned nil error")
 	}
+
 	if !strings.Contains(err.Error(), "resolve base ref") {
 		t.Fatalf("error = %q, want base ref context", err.Error())
 	}
@@ -117,6 +123,7 @@ func gateGitEvidenceOutput(t *testing.T, projectDir string, args ...string) stri
 	t.Helper()
 
 	cmd := exec.Command("git", append([]string{"-C", projectDir}, args...)...)
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("git %v failed: %v\n%s", args, err, string(output))
@@ -155,7 +162,7 @@ func assertGateGitCommits(t *testing.T, commits []GateGitCommit, wantSubjects []
 	}
 }
 
-func assertGateGitFiles(t *testing.T, files []GateGitChangedFile, want []GateGitChangedFile) {
+func assertGateGitFiles(t *testing.T, files, want []GateGitChangedFile) {
 	t.Helper()
 
 	if len(files) != len(want) {

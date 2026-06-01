@@ -106,6 +106,7 @@ func printGateGitEvidence(stdout io.Writer, evidence chc.GateGitEvidence) error 
 		if commit.Subject != "" {
 			value += " " + commit.Subject
 		}
+
 		lines = append(lines, fmt.Sprintf("commit: %s", value))
 	}
 
