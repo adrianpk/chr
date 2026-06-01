@@ -1,6 +1,6 @@
 # Ticket Review Integration Slicing Tracker
 
-Status: planned
+Status: reviewing
 
 Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 Spec Draft: `.prj/specs/drafts/ticket-review-integration-draft.md`
@@ -14,7 +14,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`.
-- [ ] Select the first pending slice for implementation.
+- [x] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with `make verify`.
 
@@ -22,7 +22,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | ticket review metadata contract | pending | `feat/slice-1-ticket-review-metadata-contract` | pending | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
+| Slice 1 | ticket review metadata contract | reviewing | `feat/slice-1-ticket-review-metadata-contract` | pending | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
 | Slice 2 | pr reference workflow | pending | `feat/slice-2-pr-reference-workflow` | pending | `.prj/reports/slices/ticket-review-integration/slice-2-pr-reference-workflow.md` |
 | Slice 3 | review mode configuration | pending | `feat/slice-3-review-mode-configuration` | pending | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | pending | `feat/slice-4-forge-provider-diagnostics` | pending | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
@@ -45,12 +45,12 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T1.1 Add ticket metadata fields and validation rules.
-- [ ] T1.2 Update ticket parser and renderer preservation behavior.
-- [ ] T1.3 Update ticket index/read models and board attention display.
-- [ ] T1.4 Add tests for metadata parsing, rendering, indexing, and legacy tickets.
-- [ ] T1.5 Add reference documentation for the ticket review metadata contract.
-- [ ] T1.6 Add slice report and tracker updates.
+- [x] T1.1 Add ticket metadata fields and validation rules. Commit: `1fb54e1`
+- [x] T1.2 Update ticket parser and renderer preservation behavior. Commit: `1fb54e1`
+- [x] T1.3 Update ticket index/read models and board attention display. Commit: `1fb54e1`
+- [x] T1.4 Add tests for metadata parsing, rendering, indexing, and legacy tickets. Commit: `1fb54e1`
+- [x] T1.5 Add reference documentation for the ticket review metadata contract. Commit: `ed0404f`
+- [x] T1.6 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 2: Pull Request Reference Workflow
 
@@ -203,7 +203,12 @@ Tasks:
 
 ## Validation Log
 
-- Planning validation pending.
+- Slice 1:
+  - `go test ./internal/chc -run 'Ticket|Board|Migrat'` - pass
+  - `go test ./internal/chcapp -run 'Ticket(List|Show|Board)|Migration'` - pass
+  - `go test ./internal/chctui -run 'Ticket|Board'` - pass
+  - `go test ./internal/chc ./internal/chcapp ./internal/chctui` - pass
+  - `make verify` - pass
 
 ## Notes
 

@@ -2,7 +2,7 @@
 title: "Ticket Review Integration Tracker"
 project_id: "chrysocoord"
 case_slug: "ticket-execution-loop"
-status: "planned"
+status: "reviewing"
 source_request_id: "chat-2026-06-01-ticket-review-integration"
 source_response_id: "codex-plan"
 created_at: "2026-06-01T00:00:00Z"
@@ -19,7 +19,7 @@ source for task completion, commit mapping, validation logs, and slice closure.
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | ticket review metadata contract | pending | `feat/slice-1-ticket-review-metadata-contract` | pending | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
+| Slice 1 | ticket review metadata contract | reviewing | `feat/slice-1-ticket-review-metadata-contract` | pending | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
 | Slice 2 | pr reference workflow | pending | `feat/slice-2-pr-reference-workflow` | pending | `.prj/reports/slices/ticket-review-integration/slice-2-pr-reference-workflow.md` |
 | Slice 3 | review mode configuration | pending | `feat/slice-3-review-mode-configuration` | pending | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | pending | `feat/slice-4-forge-provider-diagnostics` | pending | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
@@ -32,3 +32,5 @@ source for task completion, commit mapping, validation logs, and slice closure.
 
 - Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 - Tracker: `.prj/trackers/slicing-ticket-review-integration-tracker.md`
+- Slice 1 Report: `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md`
+- Slice 1 Validation: `make verify` - pass
