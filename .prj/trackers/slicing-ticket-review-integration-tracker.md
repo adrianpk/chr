@@ -28,7 +28,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 | Slice 4 | forge provider diagnostics | delivered | `feat/slice-4-forge-provider-diagnostics` | `#276` | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
 | Slice 5 | remote review adapter | delivered | `feat/slice-5-remote-review-adapter` | `#277` | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
 | Slice 6 | ticket review command | delivered | `feat/slice-6-ticket-review-command` | #278 | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
-| Slice 7 | serialized work preflight | pending | `feat/slice-7-serialized-work-preflight` | pending | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
+| Slice 7 | serialized work preflight | reviewing | `feat/slice-7-serialized-work-preflight` | pending | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
 | Slice 8 | repair handoff and docs | pending | `feat/slice-8-repair-handoff-docs` | pending | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
 
 ## Slice 1: Ticket Review Metadata Contract
@@ -171,13 +171,13 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T7.1 Add workspace-level agent operation lock for review/development paths.
-- [ ] T7.2 Add series/dependency metadata to work selection inputs.
-- [ ] T7.3 Add preflight checks for unresolved review repairs.
-- [ ] T7.4 Add preflight checks for prerequisite PR merged and contained in updated `dev`.
-- [ ] T7.5 Add scheduler behavior to select repair work before later series work.
-- [ ] T7.6 Add tests for blocked next slice, repair priority, stale dev, and lock conflicts.
-- [ ] T7.7 Add slice report and tracker updates.
+- [x] T7.1 Add workspace-level agent operation lock for review/development paths. Commit: `4e173a0`
+- [x] T7.2 Add series/dependency metadata to work selection inputs. Commit: `4e173a0`
+- [x] T7.3 Add preflight checks for unresolved review repairs. Commit: `4e173a0`
+- [x] T7.4 Add preflight checks for prerequisite PR merged and contained in updated `dev`. Commit: `4e173a0`
+- [x] T7.5 Add scheduler behavior to select repair work before later series work. Commit: `4e173a0`
+- [x] T7.6 Add tests for blocked next slice, repair priority, stale dev, and lock conflicts. Commit: `4e173a0`
+- [x] T7.7 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 8: Repair Handoff and Docs
 
@@ -235,6 +235,10 @@ Tasks:
   - `go test ./internal/chcapp -run 'TicketReview|TicketReviewMode|TicketReviewRef'` - pass
   - `go test ./internal/chc ./internal/chcapp` - pass
   - `golangci-lint run ./internal/chc ./internal/chcapp` - pass
+- Slice 7:
+  - `scripts/check-go-func-signatures.sh` - pass
+  - `go test ./internal/chc -run 'WorkSelection|AgentOperationLock'` - pass
+  - `go test ./internal/chcapp -run 'AgentWork|TicketLoop|TicketReview'` - pass
 
 ## Notes
 
@@ -242,3 +246,5 @@ Tasks:
   are committed to `dev`.
 - The reviewer prompt must stay inspection-only and anti-nit by default.
 - Remote comments are written only for findings; clean passes stay quiet.
+- Mid-slice user request added `scripts/check-go-func-signatures.sh` and wired
+  it into `make lint`, `make lint-strict`, and `make check`. Commit: `2a8c141`.
