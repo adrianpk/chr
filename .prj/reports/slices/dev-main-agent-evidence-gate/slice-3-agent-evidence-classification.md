@@ -1,11 +1,11 @@
 # Slice 3: Agent Evidence Classification
 
-Status: reviewing
+Status: delivered
 Slicing: Dev to Main Agent Evidence Gate
 Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`
 Branch: `feat/slice-3-agent-evidence-classification`
-PR: pending
+PR: #266
 
 ## Purpose
 
