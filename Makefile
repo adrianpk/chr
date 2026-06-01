@@ -13,7 +13,7 @@ QA_REF ?= 001
 GATE_BASE ?= origin/main
 GATE_HEAD ?= origin/dev
 
-.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
+.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
 
 fmt:
 	@$(GO) fmt ./...
@@ -26,12 +26,17 @@ test-coverage:
 	@$(GO) tool cover -func=$(COVERAGE_OUT)
 
 lint:
+	@scripts/check-go-func-signatures.sh
 	@golangci-lint run ./...
 
 lint-strict:
+	@scripts/check-go-func-signatures.sh
 	@golangci-lint run --timeout=5m ./...
 
-check: fmt test
+check-go-style:
+	@scripts/check-go-func-signatures.sh
+
+check: fmt check-go-style test
 
 verify: lint-strict test
 
