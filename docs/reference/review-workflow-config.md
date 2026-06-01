@@ -61,6 +61,9 @@ Defaults:
 
 Clean agentic review passes do not write ceremonial remote comments.
 
+Review workflow behavior is described in
+`docs/reference/ticket-review-workflow.md`.
+
 ## Provider Diagnostics
 
 Provider diagnostics verify that a pull request URL maps to a supported review

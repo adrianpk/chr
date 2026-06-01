@@ -239,6 +239,13 @@ Preview one ticket execution:
 chc ticket start CHC-1 --dry-run
 ```
 
+Review a ticket that is ready for review:
+
+```sh
+chc ticket review CHC-1 --result pass
+chc ticket review CHC-1 --result needs_changes --finding "Handle the nil input path."
+```
+
 Apply an execution result:
 
 ```sh
