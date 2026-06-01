@@ -52,15 +52,47 @@ func TestDetectReviewProviderReference(t *testing.T) {
 				t.Fatalf("DetectReviewProviderReference returned error: %v", err)
 			}
 
-			if reference.Provider != test.provider ||
-				reference.Host != test.host ||
-				reference.Owner != test.owner ||
-				reference.Repo != test.repo ||
-				reference.Number != test.number {
-
-				t.Fatalf("reference = %#v", reference)
-			}
+			assertReviewProviderReference(t, reference, test.provider, test.host, test.owner, test.repo, test.number)
 		})
+	}
+}
+
+type reviewProviderReferenceAssertion struct {
+	provider ReviewProvider
+	host     string
+	owner    string
+	repo     string
+	number   int
+}
+
+func assertReviewProviderReference(
+	t *testing.T,
+	reference ReviewProviderReference,
+	provider ReviewProvider,
+	host string,
+	owner string,
+	repo string,
+	number int,
+) {
+	t.Helper()
+
+	got := reviewProviderReferenceAssertion{
+		provider: reference.Provider,
+		host:     reference.Host,
+		owner:    reference.Owner,
+		repo:     reference.Repo,
+		number:   reference.Number,
+	}
+
+	want := reviewProviderReferenceAssertion{
+		provider: provider,
+		host:     host,
+		owner:    owner,
+		repo:     repo,
+		number:   number,
+	}
+	if got != want {
+		t.Fatalf("reference = %#v", reference)
 	}
 }
 
