@@ -29,6 +29,7 @@ type GateReport struct {
 	AgentManagedWork        []GateReportAgentManagedWork       `json:"agent_managed_work"`
 	ManualOrExternalChanges []GateReportManualOrExternalChange `json:"manual_or_external_changes"`
 	MissingAgentEvidence    []GateReportMissingAgentEvidence   `json:"missing_agent_evidence"`
+	HighRiskManualChanges   []GateReportHighRiskManualChange   `json:"high_risk_manual_changes"`
 	Validation              GateReportValidation               `json:"validation"`
 	Artifacts               GateReportArtifacts                `json:"artifacts"`
 	Failures                []string                           `json:"failures"`
@@ -73,6 +74,12 @@ type GateReportMissingAgentEvidence struct {
 	Reason      string `json:"reason"`
 }
 
+type GateReportHighRiskManualChange struct {
+	Path    string `json:"path"`
+	Status  string `json:"status"`
+	Pattern string `json:"pattern"`
+}
+
 type GateReportValidation struct {
 	Command  string `json:"command"`
 	ExitCode int    `json:"exit_code"`
@@ -115,6 +122,7 @@ func NewGateReport(
 		AgentManagedWork:        gateReportAgentManagedWork(classification.AgentManagedWork),
 		ManualOrExternalChanges: gateReportManualOrExternalChanges(classification.ManualOrExternalChanges),
 		MissingAgentEvidence:    gateReportMissingAgentEvidence(classification.MissingAgentEvidence),
+		HighRiskManualChanges:   gateReportHighRiskManualChanges(classification.HighRiskManualChanges),
 		Validation:              GateReportValidation(validation),
 		Artifacts:               artifacts,
 	}
@@ -219,6 +227,7 @@ func RenderGateReportMarkdown(report GateReport) string {
 	writeGateReportGitEvidence(&output, report)
 	writeGateReportAgentManagedWork(&output, report.AgentManagedWork)
 	writeGateReportManualOrExternalChanges(&output, report.ManualOrExternalChanges)
+	writeGateReportHighRiskManualChanges(&output, report.HighRiskManualChanges)
 	writeGateReportMissingAgentEvidence(&output, report.MissingAgentEvidence)
 	writeGateReportValidation(&output, report.Validation)
 	writeGateReportMessages(&output, "Failures", report.Failures)
@@ -375,6 +384,28 @@ func writeGateReportMissingAgentEvidence(output *strings.Builder, missing []Gate
 	output.WriteString("\n")
 }
 
+func writeGateReportHighRiskManualChanges(output *strings.Builder, changes []GateReportHighRiskManualChange) {
+	output.WriteString("## High-Risk Manual Changes\n\n")
+
+	if len(changes) == 0 {
+		output.WriteString("- none\n\n")
+
+		return
+	}
+
+	for _, item := range changes {
+		output.WriteString("- ")
+		output.WriteString(item.Status)
+		output.WriteString(" ")
+		output.WriteString(item.Path)
+		output.WriteString(" pattern=")
+		output.WriteString(emptyGateReportValue(item.Pattern))
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n")
+}
+
 func writeGateReportMessages(output *strings.Builder, title string, messages []string) {
 	output.WriteString("## " + title + "\n\n")
 
@@ -463,4 +494,14 @@ func gateReportMissingAgentEvidence(missing []GateMissingAgentEvidence) []GateRe
 	}
 
 	return reportMissing
+}
+
+func gateReportHighRiskManualChanges(changes []GateHighRiskManualChange) []GateReportHighRiskManualChange {
+	reportChanges := make([]GateReportHighRiskManualChange, 0, len(changes))
+
+	for _, item := range changes {
+		reportChanges = append(reportChanges, GateReportHighRiskManualChange(item))
+	}
+
+	return reportChanges
 }

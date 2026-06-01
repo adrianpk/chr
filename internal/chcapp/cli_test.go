@@ -390,6 +390,50 @@ func TestGateDevMainWarnsOnManualChangesWhenConfigured(t *testing.T) {
 	}
 }
 
+func TestGateDevMainWarnsOnHighRiskManualChangesWhenConfigured(t *testing.T) {
+	projectDir := newGateCLIGitProject(t)
+	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
+	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
+	writeGateCLIFile(t, projectDir, ".chc/user/config/gates.yml", `gates:
+  dev_main:
+    manual_changes:
+      warn_on_high_risk_paths: true
+    high_risk_paths:
+      - internal/runtime/**
+`)
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+
+	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
+
+	writeGateCLIFile(t, projectDir, "internal/runtime/runner.go", "package runtime\n")
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "change")
+
+	err := run(t.Context(), []string{
+		"gate",
+		"dev-main",
+		"--dir",
+		projectDir,
+		"--base",
+		baseSHA,
+		"--head",
+		"HEAD",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("gate dev-main returned error: %v", err)
+	}
+
+	report := readOnlyGateCLIJSONReport(t, projectDir)
+	if len(report.HighRiskManualChanges) != 1 {
+		t.Fatalf("HighRiskManualChanges = %#v, want one high-risk change", report.HighRiskManualChanges)
+	}
+
+	if len(report.Warnings) != 1 {
+		t.Fatalf("Warnings = %#v, want high-risk warning", report.Warnings)
+	}
+}
+
 func rootCommandIncludesPath(cmd *cli.Command, path ...string) bool {
 	current := cmd
 

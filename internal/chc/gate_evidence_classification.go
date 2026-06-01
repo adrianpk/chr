@@ -3,6 +3,7 @@ package chc
 import (
 	"context"
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -12,14 +13,16 @@ type GateEvidenceClassifier struct {
 }
 
 type GateEvidenceClassificationRequest struct {
-	ProjectDir string
-	Files      []GateGitChangedFile
+	ProjectDir    string
+	Files         []GateGitChangedFile
+	HighRiskPaths []string
 }
 
 type GateEvidenceClassification struct {
 	AgentManagedWork        []GateAgentManagedWork
 	ManualOrExternalChanges []GateManualOrExternalChange
 	MissingAgentEvidence    []GateMissingAgentEvidence
+	HighRiskManualChanges   []GateHighRiskManualChange
 }
 
 type GateAgentManagedWork struct {
@@ -40,6 +43,12 @@ type GateMissingAgentEvidence struct {
 	ExecutionID string
 	ReportPath  string
 	Reason      string
+}
+
+type GateHighRiskManualChange struct {
+	Path    string
+	Status  string
+	Pattern string
 }
 
 type gateExecutionEvidence struct {
@@ -96,9 +105,48 @@ func (c GateEvidenceClassifier) Classify(
 			Path:   path,
 			Status: file.Status,
 		})
+
+		pattern, ok := gateHighRiskPattern(path, request.HighRiskPaths)
+		if ok {
+			classification.HighRiskManualChanges = append(classification.HighRiskManualChanges, GateHighRiskManualChange{
+				Path:    path,
+				Status:  file.Status,
+				Pattern: pattern,
+			})
+		}
 	}
 
 	return classification, nil
+}
+
+func gateHighRiskPattern(filePath string, patterns []string) (string, bool) {
+	for _, pattern := range patterns {
+		pattern = filepath.ToSlash(strings.TrimSpace(pattern))
+		if pattern == "" {
+			continue
+		}
+
+		if gatePathMatchesPattern(filePath, pattern) {
+			return pattern, true
+		}
+	}
+
+	return "", false
+}
+
+func gatePathMatchesPattern(filePath, pattern string) bool {
+	if strings.HasSuffix(pattern, "/**") {
+		prefix := strings.TrimSuffix(pattern, "/**")
+
+		return filePath == prefix || strings.HasPrefix(filePath, prefix+"/")
+	}
+
+	matched, err := path.Match(pattern, filePath)
+	if err == nil && matched {
+		return true
+	}
+
+	return filePath == pattern
 }
 
 func collectGateExecutionEvidence(

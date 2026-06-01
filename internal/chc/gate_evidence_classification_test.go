@@ -49,6 +49,30 @@ func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing
 	}
 }
 
+func TestGateEvidenceClassifierClassifiesHighRiskManualChanges(t *testing.T) {
+	projectDir := t.TempDir()
+
+	classification, err := NewGateEvidenceClassifier().Classify(context.Background(), GateEvidenceClassificationRequest{
+		ProjectDir: projectDir,
+		Files: []GateGitChangedFile{
+			{Status: "M", Path: "internal/runtime/runner.go"},
+			{Status: "M", Path: "README.md"},
+		},
+		HighRiskPaths: []string{"internal/runtime/**"},
+	})
+	if err != nil {
+		t.Fatalf("Classify returned error: %v", err)
+	}
+
+	if len(classification.HighRiskManualChanges) != 1 {
+		t.Fatalf("HighRiskManualChanges = %#v, want one entry", classification.HighRiskManualChanges)
+	}
+
+	if classification.HighRiskManualChanges[0].Pattern != "internal/runtime/**" {
+		t.Fatalf("Pattern = %q, want internal/runtime/**", classification.HighRiskManualChanges[0].Pattern)
+	}
+}
+
 func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.T) {
 	projectDir := t.TempDir()
 	reportPath := filepath.Join(

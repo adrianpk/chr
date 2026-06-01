@@ -105,8 +105,9 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 	}
 
 	classification, err := chc.NewGateEvidenceClassifier().Classify(ctx, chc.GateEvidenceClassificationRequest{
-		ProjectDir: projectDir,
-		Files:      evidence.Files,
+		ProjectDir:    projectDir,
+		Files:         evidence.Files,
+		HighRiskPaths: config.DevMain.HighRiskPaths,
 	})
 	if err != nil {
 		return err
@@ -124,6 +125,10 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 
 	if config.DevMain.Traceability.WarnOnManualChanges && len(classification.ManualOrExternalChanges) > 0 {
 		report.Warnings = append(report.Warnings, "manual or external changes present")
+	}
+
+	if config.DevMain.ManualChanges.WarnOnHighRiskPaths && len(classification.HighRiskManualChanges) > 0 {
+		report.Warnings = append(report.Warnings, "high-risk manual changes present")
 	}
 
 	if config.DevMain.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0 {
