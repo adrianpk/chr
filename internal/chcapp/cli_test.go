@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -103,6 +104,128 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		}
 
 		t.Fatalf("root command does not include %s", strings.Join(path, " "))
+	}
+}
+
+func TestGateDevMainWritesReportsWhenValidationPasses(t *testing.T) {
+	projectDir := newGateCLIGitProject(t)
+	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
+	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
+
+	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "change")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"gate",
+		"dev-main",
+		"--dir",
+		projectDir,
+		"--base",
+		baseSHA,
+		"--head",
+		"HEAD",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("gate dev-main returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "status: passed") {
+		t.Fatalf("stdout = %q, want passed status", stdout.String())
+	}
+
+	report := readOnlyGateCLIJSONReport(t, projectDir)
+	if report.Status != chc.GateReportStatusPassed {
+		t.Fatalf("Status = %q, want passed", report.Status)
+	}
+
+	assertPathExists(t, report.Artifacts.MarkdownPath)
+}
+
+func TestGateDevMainWritesReportsWhenValidationFails(t *testing.T) {
+	projectDir := newGateCLIGitProject(t)
+	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
+	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
+
+	writeGateCLIFile(t, projectDir, "failing_test.go", `package gatecli
+
+import "testing"
+
+func TestFailure(t *testing.T) {
+	t.Fatal("expected failure")
+}
+`)
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "failing test")
+
+	err := run(t.Context(), []string{
+		"gate",
+		"dev-main",
+		"--dir",
+		projectDir,
+		"--base",
+		baseSHA,
+		"--head",
+		"HEAD",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("gate dev-main returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "gate validation failed") {
+		t.Fatalf("error = %q, want validation failure", err.Error())
+	}
+
+	report := readOnlyGateCLIJSONReport(t, projectDir)
+	if report.Status != chc.GateReportStatusFailed {
+		t.Fatalf("Status = %q, want failed", report.Status)
+	}
+
+	if report.Validation.Passed {
+		t.Fatalf("Validation.Passed = true, want false: %#v", report.Validation)
+	}
+}
+
+func TestGateDevMainWritesReportsWhenRefResolutionFails(t *testing.T) {
+	projectDir := newGateCLIGitProject(t)
+	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
+	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
+	runGateCLIGit(t, projectDir, "add", ".")
+	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+
+	err := run(t.Context(), []string{
+		"gate",
+		"dev-main",
+		"--dir",
+		projectDir,
+		"--base",
+		"missing-ref",
+		"--head",
+		"HEAD",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("gate dev-main returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "resolve base ref") {
+		t.Fatalf("error = %q, want base ref context", err.Error())
+	}
+
+	report := readOnlyGateCLIJSONReport(t, projectDir)
+	if report.Status != chc.GateReportStatusFailed {
+		t.Fatalf("Status = %q, want failed", report.Status)
+	}
+
+	if len(report.Failures) != 1 || !strings.Contains(report.Failures[0], "resolve base ref") {
+		t.Fatalf("Failures = %#v, want base ref failure", report.Failures)
 	}
 }
 
@@ -5499,6 +5622,84 @@ func runInDirectory(t *testing.T, dir string, runFunc func()) {
 	})
 
 	runFunc()
+}
+
+func newGateCLIGitProject(t *testing.T) string {
+	t.Helper()
+
+	projectDir := t.TempDir()
+	writeGateCLIFile(t, projectDir, filepath.Join(chc.DirectoryName, ".keep"), "")
+	runGateCLIGit(t, projectDir, "init")
+
+	return projectDir
+}
+
+func writeGateCLIFile(t *testing.T, projectDir, relativePath, content string) {
+	t.Helper()
+
+	path := filepath.Join(projectDir, filepath.FromSlash(relativePath))
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		t.Fatalf("create gate CLI file dir: %v", err)
+	}
+
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("write gate CLI file: %v", err)
+	}
+}
+
+func runGateCLIGit(t *testing.T, projectDir string, args ...string) {
+	t.Helper()
+
+	cmdArgs := append([]string{
+		"-C", projectDir,
+		"-c", "user.name=ChrysoCoord Test",
+		"-c", "user.email=chc@example.test",
+	}, args...)
+	cmd := exec.Command("git", cmdArgs...)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %v failed: %v\n%s", args, err, string(output))
+	}
+}
+
+func gateCLIGitOutput(t *testing.T, projectDir string, args ...string) string {
+	t.Helper()
+
+	cmd := exec.Command("git", append([]string{"-C", projectDir}, args...)...)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %v failed: %v\n%s", args, err, string(output))
+	}
+
+	return strings.TrimSpace(string(output))
+}
+
+func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) chc.GateReport {
+	t.Helper()
+
+	matches, err := filepath.Glob(filepath.Join(projectDir, ".chc", "user", "reports", "gates", "*.json"))
+	if err != nil {
+		t.Fatalf("glob gate reports: %v", err)
+	}
+
+	if len(matches) != 1 {
+		t.Fatalf("JSON report count = %d, want 1: %#v", len(matches), matches)
+	}
+
+	content := readFile(t, matches[0])
+
+	var report chc.GateReport
+	err = json.Unmarshal([]byte(content), &report)
+	if err != nil {
+		t.Fatalf("decode gate JSON report: %v", err)
+	}
+
+	return report
 }
 
 func assertPathExists(t *testing.T, path string) {
