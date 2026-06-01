@@ -56,6 +56,8 @@ Rationale and system shape:
 - [Agent sandbox and runtime](explanation/agent-sandbox-and-runtime.md)
 - [Document generation model](explanation/document-generation-model.md)
 - [Agent review model](explanation/agent-review-model.md)
+- [Testing and engineering doctrine](explanation/testing-and-engineering-doctrine.md)
+- [Dev to main gate direction](explanation/dev-main-gate-direction.md)
 - [Slicing workflow](explanation/slicing-workflow.md)
 - [Ticket resolution lifecycle](explanation/ticket-resolution-lifecycle.md)
 

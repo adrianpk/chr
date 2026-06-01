@@ -62,3 +62,6 @@ the ticket claimed and what the implementation changed.
 
 That review should be evidence for promotion, not a human ritual recreated with
 models.
+
+The future enforcement path for that evidence is described in
+[Dev to main gate direction](dev-main-gate-direction.md).
