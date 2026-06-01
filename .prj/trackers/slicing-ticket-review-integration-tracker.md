@@ -23,7 +23,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | ticket review metadata contract | delivered | `feat/slice-1-ticket-review-metadata-contract` | `#273` | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
-| Slice 2 | pr reference workflow | pending | `feat/slice-2-pr-reference-workflow` | pending | `.prj/reports/slices/ticket-review-integration/slice-2-pr-reference-workflow.md` |
+| Slice 2 | pr reference workflow | reviewing | `feat/slice-2-pr-reference-workflow` | pending | `.prj/reports/slices/ticket-review-integration/slice-2-pr-reference-workflow.md` |
 | Slice 3 | review mode configuration | pending | `feat/slice-3-review-mode-configuration` | pending | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | pending | `feat/slice-4-forge-provider-diagnostics` | pending | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
 | Slice 5 | remote review adapter | pending | `feat/slice-5-remote-review-adapter` | pending | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
@@ -66,12 +66,12 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T2.1 Add command/service support for attaching branch and pull request refs.
-- [ ] T2.2 Validate `ready_for_review` requirements for branch and PR metadata.
-- [ ] T2.3 Preserve existing PR refs during execution result application.
-- [ ] T2.4 Add CLI/TUI operation paths for branch and PR metadata updates.
-- [ ] T2.5 Add tests for valid refs, missing refs, and repeated updates.
-- [ ] T2.6 Add slice report and tracker updates.
+- [x] T2.1 Add command/service support for attaching branch and pull request refs. Commit: `f1f4188`
+- [x] T2.2 Validate `ready_for_review` requirements for branch and PR metadata. Commit: `f1f4188`
+- [x] T2.3 Preserve existing PR refs during execution result application. Commit: `f1f4188`
+- [x] T2.4 Add CLI/TUI operation paths for branch and PR metadata updates. Commit: `f1f4188`
+- [x] T2.5 Add tests for valid refs, missing refs, and repeated updates. Commit: `f1f4188`
+- [x] T2.6 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 3: Review Mode Configuration
 
@@ -207,6 +207,11 @@ Tasks:
   - `go test ./internal/chc -run 'Ticket|Board|Migrat'` - pass
   - `go test ./internal/chcapp -run 'Ticket(List|Show|Board)|Migration'` - pass
   - `go test ./internal/chctui -run 'Ticket|Board'` - pass
+  - `go test ./internal/chc ./internal/chcapp ./internal/chctui` - pass
+  - `make verify` - pass
+- Slice 2:
+  - `go test ./internal/chc -run 'Ticket(Review|Status)|ReviewMetadata'` - pass
+  - `go test ./internal/chcapp -run 'Ticket(ReviewRef|Status|ApplyResult)'` - pass
   - `go test ./internal/chc ./internal/chcapp ./internal/chctui` - pass
   - `make verify` - pass
 
