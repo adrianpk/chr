@@ -64,34 +64,7 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 	projectDir := t.TempDir()
 	createdAt := time.Date(2026, 6, 1, 12, 30, 45, 0, time.UTC)
 	artifacts := NewGateReportArtifacts(projectDir, createdAt)
-	report := NewGateReport(createdAt, GateGitEvidence{
-		Base:      GateGitRef{Ref: "main", SHA: "base-sha"},
-		Head:      GateGitRef{Ref: "dev", SHA: "head-sha"},
-		MergeBase: "base-sha",
-		Commits: []GateGitCommit{
-			{SHA: "head-sha", Subject: "add gate"},
-		},
-		Files: []GateGitChangedFile{
-			{Status: "M", Path: "internal/chc/gate.go"},
-		},
-	}, GateValidationResult{
-		Command:  DefaultGateValidationCommand,
-		ExitCode: 1,
-		Output:   "validation failed",
-	}, GateEvidenceClassification{
-		AgentManagedWork: []GateAgentManagedWork{
-			{
-				Path:        "internal/chc/gate.go",
-				Status:      "M",
-				TicketKey:   "CHC-1",
-				ExecutionID: "exec-1",
-				ReportPath:  ".chc/user/runtime/runs/CHC-1/exec-1/execution-report.md",
-			},
-		},
-		ManualOrExternalChanges: []GateManualOrExternalChange{
-			{Path: "README.md", Status: "M"},
-		},
-	}, artifacts)
+	report := gateReportMarkdownFixture(createdAt, artifacts)
 	report.Failures = []string{"validation failed"}
 
 	path, err := NewGateReportWriter().WriteMarkdown(context.Background(), report)
@@ -123,6 +96,37 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 			t.Fatalf("content missing %q:\n%s", want, string(content))
 		}
 	}
+}
+
+func gateReportMarkdownFixture(createdAt time.Time, artifacts GateReportArtifacts) GateReport {
+	return NewGateReport(createdAt, GateGitEvidence{
+		Base:      GateGitRef{Ref: "main", SHA: "base-sha"},
+		Head:      GateGitRef{Ref: "dev", SHA: "head-sha"},
+		MergeBase: "base-sha",
+		Commits: []GateGitCommit{
+			{SHA: "head-sha", Subject: "add gate"},
+		},
+		Files: []GateGitChangedFile{
+			{Status: "M", Path: "internal/chc/gate.go"},
+		},
+	}, GateValidationResult{
+		Command:  DefaultGateValidationCommand,
+		ExitCode: 1,
+		Output:   "validation failed",
+	}, GateEvidenceClassification{
+		AgentManagedWork: []GateAgentManagedWork{
+			{
+				Path:        "internal/chc/gate.go",
+				Status:      "M",
+				TicketKey:   "CHC-1",
+				ExecutionID: "exec-1",
+				ReportPath:  ".chc/user/runtime/runs/CHC-1/exec-1/execution-report.md",
+			},
+		},
+		ManualOrExternalChanges: []GateManualOrExternalChange{
+			{Path: "README.md", Status: "M"},
+		},
+	}, artifacts)
 }
 
 func TestGateReportWriterRejectsDirectoryTarget(t *testing.T) {

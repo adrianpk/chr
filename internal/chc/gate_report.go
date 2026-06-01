@@ -307,6 +307,7 @@ func writeGateReportValidation(output *strings.Builder, validation GateReportVal
 
 func writeGateReportAgentManagedWork(output *strings.Builder, work []GateReportAgentManagedWork) {
 	output.WriteString("## Agent-Managed Work\n\n")
+
 	if len(work) == 0 {
 		output.WriteString("- none\n\n")
 
@@ -332,6 +333,7 @@ func writeGateReportAgentManagedWork(output *strings.Builder, work []GateReportA
 
 func writeGateReportManualOrExternalChanges(output *strings.Builder, changes []GateReportManualOrExternalChange) {
 	output.WriteString("## Manual or External Changes\n\n")
+
 	if len(changes) == 0 {
 		output.WriteString("- none\n\n")
 
@@ -351,6 +353,7 @@ func writeGateReportManualOrExternalChanges(output *strings.Builder, changes []G
 
 func writeGateReportMissingAgentEvidence(output *strings.Builder, missing []GateReportMissingAgentEvidence) {
 	output.WriteString("## Missing Agent Evidence\n\n")
+
 	if len(missing) == 0 {
 		output.WriteString("- none\n\n")
 

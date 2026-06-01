@@ -78,6 +78,7 @@ func (c GateEvidenceClassifier) Classify(
 
 	for _, file := range request.Files {
 		path := filepath.ToSlash(file.Path)
+
 		evidence, ok := evidenceByPath[path]
 		if ok {
 			classification.AgentManagedWork = append(classification.AgentManagedWork, GateAgentManagedWork{
