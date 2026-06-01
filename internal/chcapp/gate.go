@@ -112,12 +112,21 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return err
 	}
 
-	report := chc.NewGateReport(createdAt, evidence, validation, classification, artifacts)
+	reportClassification := classification
+	if !config.DevMain.ManualChanges.List {
+		reportClassification.ManualOrExternalChanges = nil
+	}
+
+	report := chc.NewGateReport(createdAt, evidence, validation, reportClassification, artifacts)
 	if !validation.Passed {
 		report.Failures = []string{"validation failed"}
 	}
 
-	if len(classification.MissingAgentEvidence) > 0 {
+	if config.DevMain.Traceability.WarnOnManualChanges && len(classification.ManualOrExternalChanges) > 0 {
+		report.Warnings = append(report.Warnings, "manual or external changes present")
+	}
+
+	if config.DevMain.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0 {
 		report.Status = chc.GateReportStatusFailed
 		report.Failures = append(report.Failures, "missing agent evidence")
 	}
@@ -136,7 +145,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return fmt.Errorf("gate validation failed")
 	}
 
-	if len(classification.MissingAgentEvidence) > 0 {
+	if config.DevMain.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0 {
 		return fmt.Errorf("missing agent evidence")
 	}
 
