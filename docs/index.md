@@ -34,6 +34,7 @@ Exact contracts and command behavior:
 - [Authoring sessions](reference/authoring-sessions.md)
 - [Project CLI](reference/project-cli.md)
 - [Project registry](reference/project-registry.md)
+- [Dev to main gate](reference/dev-main-gate.md)
 - [Ticket parser](reference/ticket-parser.md)
 - [Ticket validation](reference/ticket-validation.md)
 - [Ticket execution](reference/ticket-execution.md)
