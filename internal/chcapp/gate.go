@@ -82,6 +82,7 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir, baseRef, headRef string) error {
 	createdAt := time.Now().UTC()
 	artifacts := chc.NewGateReportArtifacts(projectDir, createdAt)
+
 	config, err := chc.LoadGateConfig(projectDir)
 	if err != nil {
 		return err
@@ -113,28 +114,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return err
 	}
 
-	reportClassification := classification
-	if !config.DevMain.ManualChanges.List {
-		reportClassification.ManualOrExternalChanges = nil
-	}
-
-	report := chc.NewGateReport(createdAt, evidence, validation, reportClassification, artifacts)
-	if !validation.Passed {
-		report.Failures = []string{"validation failed"}
-	}
-
-	if config.DevMain.Traceability.WarnOnManualChanges && len(classification.ManualOrExternalChanges) > 0 {
-		report.Warnings = append(report.Warnings, "manual or external changes present")
-	}
-
-	if config.DevMain.ManualChanges.WarnOnHighRiskPaths && len(classification.HighRiskManualChanges) > 0 {
-		report.Warnings = append(report.Warnings, "high-risk manual changes present")
-	}
-
-	if config.DevMain.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0 {
-		report.Status = chc.GateReportStatusFailed
-		report.Failures = append(report.Failures, "missing agent evidence")
-	}
+	report := buildGateDevMainReport(createdAt, evidence, validation, classification, config.DevMain, artifacts)
 
 	err = writeGateReports(ctx, report)
 	if err != nil {
@@ -150,11 +130,75 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return fmt.Errorf("gate validation failed")
 	}
 
-	if config.DevMain.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0 {
+	if shouldFailGateMissingAgentEvidence(config.DevMain, classification) {
 		return fmt.Errorf("missing agent evidence")
 	}
 
 	return nil
+}
+
+func buildGateDevMainReport(
+	createdAt time.Time,
+	evidence chc.GateGitEvidence,
+	validation chc.GateValidationResult,
+	classification chc.GateEvidenceClassification,
+	config chc.GateDevMainConfig,
+	artifacts chc.GateReportArtifacts,
+) chc.GateReport {
+	reportClassification := classification
+	if !config.ManualChanges.List {
+		reportClassification.ManualOrExternalChanges = nil
+	}
+
+	report := chc.NewGateReport(createdAt, evidence, validation, reportClassification, artifacts)
+	report.Failures = gateDevMainFailures(validation, classification, config)
+
+	report.Warnings = gateDevMainWarnings(classification, config)
+	if len(report.Failures) > 0 {
+		report.Status = chc.GateReportStatusFailed
+	}
+
+	return report
+}
+
+func gateDevMainFailures(
+	validation chc.GateValidationResult,
+	classification chc.GateEvidenceClassification,
+	config chc.GateDevMainConfig,
+) []string {
+	failures := []string{}
+	if !validation.Passed {
+		failures = append(failures, "validation failed")
+	}
+
+	if shouldFailGateMissingAgentEvidence(config, classification) {
+		failures = append(failures, "missing agent evidence")
+	}
+
+	return failures
+}
+
+func gateDevMainWarnings(
+	classification chc.GateEvidenceClassification,
+	config chc.GateDevMainConfig,
+) []string {
+	warnings := []string{}
+	if config.Traceability.WarnOnManualChanges && len(classification.ManualOrExternalChanges) > 0 {
+		warnings = append(warnings, "manual or external changes present")
+	}
+
+	if config.ManualChanges.WarnOnHighRiskPaths && len(classification.HighRiskManualChanges) > 0 {
+		warnings = append(warnings, "high-risk manual changes present")
+	}
+
+	return warnings
+}
+
+func shouldFailGateMissingAgentEvidence(
+	config chc.GateDevMainConfig,
+	classification chc.GateEvidenceClassification,
+) bool {
+	return config.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0
 }
 
 func writeGateFailedEvidenceReport(

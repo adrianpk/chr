@@ -129,6 +129,7 @@ func parseGateConfigLine(rawLine, section, listKey string) (string, string, stri
 
 	key = strings.TrimSpace(key)
 	value = configStringValue(value)
+
 	return key, value, section, "", true
 }
 
