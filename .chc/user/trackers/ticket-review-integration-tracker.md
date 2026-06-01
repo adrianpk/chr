@@ -24,7 +24,7 @@ source for task completion, commit mapping, validation logs, and slice closure.
 | Slice 3 | review mode configuration | delivered | `feat/slice-3-review-mode-configuration` | `#275` | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | delivered | `feat/slice-4-forge-provider-diagnostics` | `#276` | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
 | Slice 5 | remote review adapter | delivered | `feat/slice-5-remote-review-adapter` | `#277` | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
-| Slice 6 | ticket review command | pending | `feat/slice-6-ticket-review-command` | pending | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
+| Slice 6 | ticket review command | reviewing | `feat/slice-6-ticket-review-command` | pending | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
 | Slice 7 | serialized work preflight | pending | `feat/slice-7-serialized-work-preflight` | pending | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
 | Slice 8 | repair handoff and docs | pending | `feat/slice-8-repair-handoff-docs` | pending | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
 
@@ -42,3 +42,5 @@ source for task completion, commit mapping, validation logs, and slice closure.
 - Slice 4 Validation: `go test ./internal/chc ./internal/chcapp` - pass
 - Slice 5 Report: `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md`
 - Slice 5 Validation: `go test ./internal/chc` - pass
+- Slice 6 Report: `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md`
+- Slice 6 Validation: `go test ./internal/chc ./internal/chcapp` - pass

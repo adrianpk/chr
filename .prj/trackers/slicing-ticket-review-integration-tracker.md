@@ -27,7 +27,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 | Slice 3 | review mode configuration | delivered | `feat/slice-3-review-mode-configuration` | `#275` | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | delivered | `feat/slice-4-forge-provider-diagnostics` | `#276` | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
 | Slice 5 | remote review adapter | delivered | `feat/slice-5-remote-review-adapter` | `#277` | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
-| Slice 6 | ticket review command | pending | `feat/slice-6-ticket-review-command` | pending | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
+| Slice 6 | ticket review command | reviewing | `feat/slice-6-ticket-review-command` | pending | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
 | Slice 7 | serialized work preflight | pending | `feat/slice-7-serialized-work-preflight` | pending | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
 | Slice 8 | repair handoff and docs | pending | `feat/slice-8-repair-handoff-docs` | pending | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
 
@@ -150,12 +150,12 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T6.1 Add ticket review command/service boundary.
-- [ ] T6.2 Add evidence assembler for ticket, execution, validation, and PR data.
-- [ ] T6.3 Add reviewer prompt/policy for inspection-only, high-signal review.
-- [ ] T6.4 Add result application for pass, needs changes, insufficient evidence, and human decision cases.
-- [ ] T6.5 Add tests for clean pass, blocking findings, non-blocking findings, missing remote access, and dry-run.
-- [ ] T6.6 Add slice report and tracker updates.
+- [x] T6.1 Add ticket review command/service boundary. Commit: `96d3129`
+- [x] T6.2 Add evidence assembler for ticket, execution, validation, and PR data. Commit: `96d3129`
+- [x] T6.3 Add reviewer prompt/policy for inspection-only, high-signal review. Commit: `96d3129`
+- [x] T6.4 Add result application for pass, needs changes, insufficient evidence, and human decision cases. Commit: `96d3129`
+- [x] T6.5 Add tests for clean pass, blocking findings, non-blocking findings, missing remote access, and dry-run. Commit: `96d3129`
+- [x] T6.6 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 7: Serialized Work Preflight
 
@@ -229,6 +229,12 @@ Tasks:
   - `go test ./internal/chc -run 'Review(Remote|Provider)|Config'` - pass
   - `go test ./internal/chc` - pass
   - `golangci-lint run ./internal/chc` - pass
+- Slice 6:
+  - `git diff --check` - pass
+  - `go test ./internal/chc -run 'TicketReview|ReviewRemote|ReviewProvider|Config'` - pass
+  - `go test ./internal/chcapp -run 'TicketReview|TicketReviewMode|TicketReviewRef'` - pass
+  - `go test ./internal/chc ./internal/chcapp` - pass
+  - `golangci-lint run ./internal/chc ./internal/chcapp` - pass
 
 ## Notes
 
