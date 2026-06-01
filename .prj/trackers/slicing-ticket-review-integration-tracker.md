@@ -22,7 +22,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | ticket review metadata contract | reviewing | `feat/slice-1-ticket-review-metadata-contract` | pending | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
+| Slice 1 | ticket review metadata contract | reviewing | `feat/slice-1-ticket-review-metadata-contract` | `#273` | `.prj/reports/slices/ticket-review-integration/slice-1-ticket-review-metadata-contract.md` |
 | Slice 2 | pr reference workflow | pending | `feat/slice-2-pr-reference-workflow` | pending | `.prj/reports/slices/ticket-review-integration/slice-2-pr-reference-workflow.md` |
 | Slice 3 | review mode configuration | pending | `feat/slice-3-review-mode-configuration` | pending | `.prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md` |
 | Slice 4 | forge provider diagnostics | pending | `feat/slice-4-forge-provider-diagnostics` | pending | `.prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md` |
