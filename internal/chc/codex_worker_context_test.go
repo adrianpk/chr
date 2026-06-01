@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
@@ -60,6 +61,16 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 		TicketKey:  "CHC-1",
 		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
 	}
+	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+		Key:       "CHC-1",
+		Title:     "Ready work",
+		Status:    TicketStatusReadyForDev,
+		Priority:  "normal",
+		Severity:  "normal",
+		Type:      "feature",
+		CreatedAt: testCodexWorkerContextTime(),
+		UpdatedAt: testCodexWorkerContextTime(),
+	})
 
 	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
 	if err != nil {
@@ -80,6 +91,97 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("content does not contain %q:\n%s", want, string(content))
 		}
+	}
+}
+
+func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testing.T) {
+	projectDir := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	record := ExecutionRecord{
+		ID:         "exec-1",
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
+	}
+	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+		Key:               "CHC-1",
+		Title:             "Repair work",
+		Status:            TicketStatusReadyForDev,
+		Priority:          "normal",
+		Severity:          "normal",
+		Type:              "feature",
+		Branch:            "feat/slice-8-repair-handoff-docs",
+		ReviewState:       "changes_requested",
+		ReviewRound:       2,
+		ReviewResult:      "needs_changes",
+		ReviewCommentsURL: "https://forge.example.com/adrianpk/chc/pulls/279",
+		ReviewRefs: []TicketReviewRef{{
+			Type:     "pull_request",
+			Provider: "forgejo",
+			URL:      "https://forge.example.com/adrianpk/chc/pulls/279",
+			ID:       "279",
+			Status:   "open",
+		}},
+		CreatedAt: testCodexWorkerContextTime(),
+		UpdatedAt: testCodexWorkerContextTime(),
+	})
+
+	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	if err != nil {
+		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(plan.WorkerContextPath)
+	if err != nil {
+		t.Fatalf("read context: %v", err)
+	}
+
+	for _, want := range []string{
+		"## Review Repair Handoff",
+		"- branch: feat/slice-8-repair-handoff-docs",
+		"- pull_request: https://forge.example.com/adrianpk/chc/pulls/279",
+		"- review_comments_url: https://forge.example.com/adrianpk/chc/pulls/279",
+		"Use the remote review comments as the source of detailed findings.",
+	} {
+		if !strings.Contains(string(content), want) {
+			t.Fatalf("content does not contain %q:\n%s", want, string(content))
+		}
+	}
+}
+
+func TestMaterializeCodexWorkerContextForExecutionBlocksRepairWithoutReviewComments(t *testing.T) {
+	projectDir := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	record := ExecutionRecord{
+		ID:         "exec-1",
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
+	}
+	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+		Key:          "CHC-1",
+		Title:        "Repair work",
+		Status:       TicketStatusReadyForDev,
+		Priority:     "normal",
+		Severity:     "normal",
+		Type:         "feature",
+		Branch:       "feat/slice-8-repair-handoff-docs",
+		ReviewState:  "changes_requested",
+		ReviewResult: "needs_changes",
+		ReviewRefs: []TicketReviewRef{{
+			Type:     "pull_request",
+			Provider: "forgejo",
+			URL:      "https://forge.example.com/adrianpk/chc/pulls/279",
+			ID:       "279",
+			Status:   "open",
+		}},
+		CreatedAt: testCodexWorkerContextTime(),
+		UpdatedAt: testCodexWorkerContextTime(),
+	})
+
+	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	if err == nil || !strings.Contains(err.Error(), "repair handoff requires review_comments_url") {
+		t.Fatalf("MaterializeCodexWorkerContextForExecution error = %v, want review_comments_url blocker", err)
 	}
 }
 
@@ -114,4 +216,43 @@ func testCodexWorkerContextOptions(path string) MaterializeCodexWorkerContextOpt
 		LogPath:        "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
 		ValidationPath: "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
 	}
+}
+
+func testCodexWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
+	return RuntimePlan{
+		ProjectDir:        projectDir,
+		ContainerWorkdir:  "/workspace",
+		WorkerContextPath: filepath.Join(runDir, "context.md"),
+		ResultPath:        filepath.Join(runDir, "result.json"),
+		LogPath:           filepath.Join(runDir, "runtime.log"),
+		ValidationPath:    filepath.Join(runDir, "validation.log"),
+		ValidationCommand: "go test ./...",
+		DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		RunArtifactDir:    runDir,
+		ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
+		Image:             "chc-agent-runtime:local",
+	}
+}
+
+func writeCodexWorkerContextTicket(t *testing.T, path string, ticket Ticket) {
+	t.Helper()
+
+	content, err := NewTicketRenderer().RenderTicket(ticket)
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	err = os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		t.Fatalf("create ticket dir: %v", err)
+	}
+
+	err = os.WriteFile(path, []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("write ticket: %v", err)
+	}
+}
+
+func testCodexWorkerContextTime() time.Time {
+	return time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC)
 }
