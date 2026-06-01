@@ -12,7 +12,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | Slice 1 | gate command and git evidence | delivered | `feat/slice-1-gate-command-git-evidence` | #264 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
 | Slice 2 | validation and report output | delivered | `feat/slice-2-validation-report-output` | #265 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
 | Slice 3 | agent evidence classification | delivered | `feat/slice-3-agent-evidence-classification` | #266 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
-| Slice 4 | gate policy configuration | pending | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
+| Slice 4 | gate policy configuration | reviewing | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |
 | Slice 5 | forgejo woodpecker integration | pending | `feat/slice-5-forgejo-woodpecker-integration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md` |
 | Slice 6 | docs qa and end to end validation | pending | `feat/slice-6-docs-qa-e2e-validation` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-6-docs-qa-e2e-validation.md` |
 
@@ -51,12 +51,12 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add gate config parser. | pending | pending |  |
-| T4.2 | Support validation command override. | pending | pending |  |
-| T4.3 | Support traceability mode and manual/external warning settings. | pending | pending |  |
-| T4.4 | Support high-risk path configuration as warning-only when enabled. | pending | pending |  |
-| T4.5 | Add tests for default policy and configured policy. | pending | pending |  |
-| T4.6 | Add slice report and tracker updates. | pending | pending |  |
+| T4.1 | Add gate config parser. | done | `1f0521c` | Added `.chc/user/config/gates.yml` parser and defaults. |
+| T4.2 | Support validation command override. | done | `28e1a4d` | Gate validation now reads configured command. |
+| T4.3 | Support traceability mode and manual/external warning settings. | done | `16a739e` | Added policy behavior for missing evidence, manual warnings, and manual listing. |
+| T4.4 | Support high-risk path configuration as warning-only when enabled. | done | `5066087` | Added high-risk manual change matching and report output. |
+| T4.5 | Add tests for default policy and configured policy. | done | `5066087` | Covered defaults, configured policy, CLI behavior, and high-risk matching. |
+| T4.6 | Add slice report and tracker updates. | done | this commit | Added the Slice 4 report and validation log. |
 
 ## Slice 5 Tasks
 
@@ -92,6 +92,10 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 - Slice 3: `go test ./internal/chc ./internal/chcapp -run 'GateReport|GateEvidence|GateDevMain'` (pass)
 - Slice 3: `go test ./internal/chcapp -run 'GateDevMain'` (pass)
 - Slice 3: `make verify` (pass)
+- Slice 4: `go test ./internal/chc -run GateConfig` (pass)
+- Slice 4: `go test ./internal/chc ./internal/chcapp -run 'GateValidation|GateDevMain'` (pass)
+- Slice 4: `go test ./internal/chc ./internal/chcapp -run 'GateEvidence|GateReport|GateDevMain'` (pass)
+- Slice 4: `make verify` (pass)
 
 ## Notes
 
