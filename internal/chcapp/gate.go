@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -75,33 +76,96 @@ func runGateDevMain(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
+	createdAt := time.Now().UTC()
+	artifacts := chc.NewGateReportArtifacts(projectContext.ProjectDir, createdAt)
+
 	evidence, err := chc.NewGateGitEvidenceService().Collect(ctx, chc.GateGitEvidenceRequest{
 		ProjectDir: projectContext.ProjectDir,
 		BaseRef:    cmd.String("base"),
 		HeadRef:    cmd.String("head"),
 	})
 	if err != nil {
+		report := chc.NewFailedGateReport(createdAt, cmd.String("base"), cmd.String("head"), artifacts, []string{err.Error()})
+		writeErr := writeGateReports(ctx, report)
+		if writeErr != nil {
+			return writeErr
+		}
+
 		return err
 	}
 
-	return printGateGitEvidence(stdout, evidence)
+	validation, err := chc.NewGateValidationRunner().Run(ctx, chc.GateValidationRequest{
+		ProjectDir: projectContext.ProjectDir,
+	})
+	if err != nil {
+		report := chc.NewGateReport(createdAt, evidence, validation, artifacts)
+		report.Failures = []string{err.Error()}
+
+		writeErr := writeGateReports(ctx, report)
+		if writeErr != nil {
+			return writeErr
+		}
+
+		return err
+	}
+
+	report := chc.NewGateReport(createdAt, evidence, validation, artifacts)
+	if !validation.Passed {
+		report.Failures = []string{"validation failed"}
+	}
+
+	err = writeGateReports(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	err = printGateDevMainReport(stdout, report)
+	if err != nil {
+		return err
+	}
+
+	if !validation.Passed {
+		return fmt.Errorf("gate validation failed")
+	}
+
+	return nil
 }
 
-func printGateGitEvidence(stdout io.Writer, evidence chc.GateGitEvidence) error {
+func writeGateReports(ctx context.Context, report chc.GateReport) error {
+	writer := chc.NewGateReportWriter()
+
+	_, err := writer.WriteJSON(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.WriteMarkdown(ctx, report)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func printGateDevMainReport(stdout io.Writer, report chc.GateReport) error {
 	lines := []string{
 		"gate: dev-main",
-		fmt.Sprintf("base: %s %s", evidence.Base.Ref, evidence.Base.SHA),
-		fmt.Sprintf("head: %s %s", evidence.Head.Ref, evidence.Head.SHA),
-		fmt.Sprintf("merge_base: %s", evidence.MergeBase),
-		fmt.Sprintf("commits: %d", len(evidence.Commits)),
-		fmt.Sprintf("changed_files: %d", len(evidence.Files)),
+		fmt.Sprintf("status: %s", report.Status),
+		fmt.Sprintf("base: %s %s", report.Base.Ref, report.Base.SHA),
+		fmt.Sprintf("head: %s %s", report.Head.Ref, report.Head.SHA),
+		fmt.Sprintf("merge_base: %s", report.MergeBase),
+		fmt.Sprintf("commits: %d", len(report.Commits)),
+		fmt.Sprintf("changed_files: %d", len(report.ChangedFiles)),
+		fmt.Sprintf("validation: %t", report.Validation.Passed),
+		fmt.Sprintf("json_report: %s", report.Artifacts.JSONPath),
+		fmt.Sprintf("markdown_report: %s", report.Artifacts.MarkdownPath),
 	}
 
-	if evidence.DiffStat != "" {
-		lines = append(lines, fmt.Sprintf("diff_stat: %s", evidence.DiffStat))
+	if report.DiffStat != "" {
+		lines = append(lines, fmt.Sprintf("diff_stat: %s", report.DiffStat))
 	}
 
-	for _, commit := range evidence.Commits {
+	for _, commit := range report.Commits {
 		value := commit.SHA
 		if commit.Subject != "" {
 			value += " " + commit.Subject
@@ -110,7 +174,7 @@ func printGateGitEvidence(stdout io.Writer, evidence chc.GateGitEvidence) error 
 		lines = append(lines, fmt.Sprintf("commit: %s", value))
 	}
 
-	for _, file := range evidence.Files {
+	for _, file := range report.ChangedFiles {
 		if file.Old != "" {
 			lines = append(lines, fmt.Sprintf("file: %s %s -> %s", file.Status, file.Old, file.Path))
 
