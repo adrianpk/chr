@@ -5,7 +5,7 @@ Slicing: Ticket Review Integration
 Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-review-integration-tracker.md`
 Branch: `feat/slice-8-repair-handoff-docs`
-PR: pending
+PR: #280
 
 ## Purpose
 
@@ -69,4 +69,3 @@ review workflow.
   live remote comment writing.
 - Full live Forgejo comment QA still depends on a disposable pull request or a
   dedicated fixture repository.
-
