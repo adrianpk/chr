@@ -9,7 +9,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | gate command and git evidence | reviewing | `feat/slice-1-gate-command-git-evidence` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
+| Slice 1 | gate command and git evidence | delivered | `feat/slice-1-gate-command-git-evidence` | #264 | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md` |
 | Slice 2 | validation and report output | pending | `feat/slice-2-validation-report-output` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md` |
 | Slice 3 | agent evidence classification | pending | `feat/slice-3-agent-evidence-classification` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-3-agent-evidence-classification.md` |
 | Slice 4 | gate policy configuration | pending | `feat/slice-4-gate-policy-configuration` | pending | `.prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md` |

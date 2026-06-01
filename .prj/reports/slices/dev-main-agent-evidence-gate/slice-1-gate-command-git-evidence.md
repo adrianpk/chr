@@ -1,11 +1,11 @@
 # Slice 1: Gate Command and Git Evidence
 
-Status: reviewing
+Status: delivered
 Slicing: Dev to Main Agent Evidence Gate
 Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`
 Branch: `feat/slice-1-gate-command-git-evidence`
-PR: pending
+PR: #264
 
 ## Purpose
 
