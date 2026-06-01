@@ -215,6 +215,13 @@ chc ticket status CHC-1 in_progress
 chc ticket status CHC-1 reviewing
 ```
 
+Inspect ticket review workflow mode:
+
+```sh
+chc ticket review-mode status
+chc ticket review-mode status --dry-run
+```
+
 Ticket creation requires a synopsis. The synopsis is short searchable metadata
 used by Board and detail views.
 

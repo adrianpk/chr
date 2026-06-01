@@ -28,6 +28,7 @@ func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newTicketListCommand(stdout),
 			newTicketLoopCommand(stdout),
 			newTicketNewCommand(stdout),
+			newTicketReviewModeCommand(stdout),
 			newTicketReviewRefCommand(stdout),
 			newTicketShowCommand(stdout),
 			newTicketStartCommand(stdout),
@@ -60,6 +61,25 @@ func newTicketReviewRefCommand(stdout io.Writer) *cli.Command {
 		Usage:  "Attach branch and pull request review metadata to one ticket",
 		Flags:  ticketReviewRefFlags(),
 		Action: ticketReviewRefAction(stdout),
+	}
+}
+
+func newTicketReviewModeCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "review-mode",
+		Usage: "Inspect ticket review workflow mode",
+		Commands: []*cli.Command{
+			newTicketReviewModeStatusCommand(stdout),
+		},
+	}
+}
+
+func newTicketReviewModeStatusCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "status",
+		Usage:  "Print active ticket review workflow mode",
+		Flags:  ticketReviewModeStatusFlags(),
+		Action: ticketReviewModeStatusAction(stdout),
 	}
 }
 
@@ -240,6 +260,15 @@ func ticketReviewRefFlags() []cli.Flag {
 	)
 }
 
+func ticketReviewModeStatusFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print the active mode without performing review work",
+		},
+	)
+}
+
 func ticketNewFlags() []cli.Flag {
 	return append(ticketProjectFlags(),
 		&cli.StringFlag{
@@ -300,6 +329,12 @@ func ticketCommentAction(stdout io.Writer) cli.ActionFunc {
 func ticketReviewRefAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketReviewRef(ctx, cmd, stdout)
+	}
+}
+
+func ticketReviewModeStatusAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketReviewModeStatus(ctx, cmd, stdout)
 	}
 }
 
@@ -1425,6 +1460,84 @@ func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	_, err = fmt.Fprintf(stdout, "ticket: %s review_ref\n", updated.Key)
 	if err != nil {
 		return fmt.Errorf("write ticket review-ref result: %w", err)
+	}
+
+	return nil
+}
+
+func runTicketReviewModeStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("ticket review-mode status does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
+
+	return printTicketReviewModeStatus(stdout, projectContext, config.Review, cmd.Bool("dry-run"))
+}
+
+func printTicketReviewModeStatus(
+	stdout io.Writer,
+	projectContext commandProjectContext,
+	config chc.ReviewWorkflowConfig,
+	dryRun bool,
+) error {
+	status := "ready"
+
+	err := chc.ValidateReviewWorkflowConfig(config)
+	if err != nil {
+		status = "invalid"
+	}
+
+	lines := []string{
+		"review_mode: status",
+		"project_id: " + projectContext.ProjectID,
+		"project_dir: " + projectContext.ProjectDir,
+		"mode: " + string(config.Mode),
+		"mode_status: " + status,
+		"description: " + chc.ReviewWorkflowModeDescription(config.Mode),
+		fmt.Sprintf("dry_run: %t", dryRun),
+		fmt.Sprintf("requires_remote_review: %t", config.Mode == chc.ReviewWorkflowModeAgenticReview),
+		fmt.Sprintf("requires_human_review: %t", config.Mode == chc.ReviewWorkflowModeHumanReview),
+		fmt.Sprintf("trusted_auto_merge: %t", config.Mode == chc.ReviewWorkflowModeTrustedAutoMerge),
+		"clean_pass_remote_comment: false",
+		fmt.Sprintf("non_blocking_comment_limit: %d", config.NonBlockingCommentLimit),
+	}
+
+	if err != nil {
+		lines = append(lines, "error: "+err.Error())
+	}
+
+	return printTicketReviewModeStatusLines(stdout, lines)
+}
+
+func printTicketReviewModeStatusLines(stdout io.Writer, lines []string) error {
+	for _, line := range lines {
+		_, err := fmt.Fprintln(stdout, line)
+		if err != nil {
+			return fmt.Errorf("write ticket review mode status: %w", err)
+		}
 	}
 
 	return nil

@@ -23,6 +23,10 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 	if config.Notifications != DefaultNotificationConfig() {
 		t.Fatalf("Notifications = %#v, want %#v", config.Notifications, DefaultNotificationConfig())
 	}
+
+	if config.Review != DefaultReviewWorkflowConfig() {
+		t.Fatalf("Review = %#v, want %#v", config.Review, DefaultReviewWorkflowConfig())
+	}
 }
 
 func TestLoadWorkspaceConfigParsesTicketAndRuntimeConfig(t *testing.T) {
@@ -82,6 +86,72 @@ func TestLoadWorkspaceConfigParsesNotificationConfig(t *testing.T) {
 	}
 	if config.Notifications != want {
 		t.Fatalf("Notifications = %#v, want %#v", config.Notifications, want)
+	}
+}
+
+func TestLoadWorkspaceConfigParsesReviewWorkflowConfig(t *testing.T) {
+	tests := []struct {
+		name string
+		mode ReviewWorkflowMode
+	}{
+		{name: "agentic", mode: ReviewWorkflowModeAgenticReview},
+		{name: "human", mode: ReviewWorkflowModeHumanReview},
+		{name: "trusted", mode: ReviewWorkflowModeTrustedAutoMerge},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			dir := t.TempDir()
+			writeWorkspaceConfig(t, dir, `review:
+  mode: `+string(test.mode)+`
+  non_blocking_comment_limit: 2
+`)
+
+			config, err := LoadWorkspaceConfig(dir)
+			if err != nil {
+				t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+			}
+
+			want := ReviewWorkflowConfig{
+				Mode:                    test.mode,
+				NonBlockingCommentLimit: 2,
+			}
+			if config.Review != want {
+				t.Fatalf("Review = %#v, want %#v", config.Review, want)
+			}
+		})
+	}
+}
+
+func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
+	tests := []struct {
+		name    string
+		config  ReviewWorkflowConfig
+		wantErr string
+	}{
+		{
+			name:    "mode",
+			config:  ReviewWorkflowConfig{Mode: "unknown", NonBlockingCommentLimit: 1},
+			wantErr: "invalid review workflow mode: unknown",
+		},
+		{
+			name:    "limit",
+			config:  ReviewWorkflowConfig{Mode: ReviewWorkflowModeHumanReview, NonBlockingCommentLimit: -1},
+			wantErr: "review non_blocking_comment_limit cannot be negative",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := ValidateReviewWorkflowConfig(test.config)
+			if err == nil {
+				t.Fatal("ValidateReviewWorkflowConfig returned nil error")
+			}
+
+			if err.Error() != test.wantErr {
+				t.Fatalf("ValidateReviewWorkflowConfig error = %q, want %q", err.Error(), test.wantErr)
+			}
+		})
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -12,6 +13,7 @@ type WorkspaceConfig struct {
 	TicketKeyPrefix string
 	Runtime         RuntimeConfig
 	Notifications   NotificationConfig
+	Review          ReviewWorkflowConfig
 }
 
 type RuntimeConfig struct {
@@ -26,6 +28,13 @@ type NotificationConfig struct {
 	Telegram TelegramNotificationConfig
 }
 
+type ReviewWorkflowConfig struct {
+	Mode                    ReviewWorkflowMode
+	NonBlockingCommentLimit int
+}
+
+type ReviewWorkflowMode string
+
 type TelegramNotificationConfig struct {
 	Enabled     bool
 	BotTokenEnv string
@@ -38,6 +47,13 @@ const (
 	DefaultRuntimeWorkdir           = "/workspace"
 	DefaultRuntimeArtifactDir       = ".chc/user/runtime/runs"
 	DefaultRuntimeValidationCommand = "make verify"
+
+	ReviewWorkflowModeAgenticReview    ReviewWorkflowMode = "agentic_review"
+	ReviewWorkflowModeHumanReview      ReviewWorkflowMode = "human_review"
+	ReviewWorkflowModeTrustedAutoMerge ReviewWorkflowMode = "trusted_auto_merge"
+
+	DefaultReviewWorkflowMode                    = ReviewWorkflowModeHumanReview
+	DefaultReviewWorkflowNonBlockingCommentLimit = 3
 )
 
 func DefaultRuntimeConfig() RuntimeConfig {
@@ -54,11 +70,19 @@ func DefaultNotificationConfig() NotificationConfig {
 	return NotificationConfig{}
 }
 
+func DefaultReviewWorkflowConfig() ReviewWorkflowConfig {
+	return ReviewWorkflowConfig{
+		Mode:                    DefaultReviewWorkflowMode,
+		NonBlockingCommentLimit: DefaultReviewWorkflowNonBlockingCommentLimit,
+	}
+}
+
 func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 	config := WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,
 		Runtime:         DefaultRuntimeConfig(),
 		Notifications:   DefaultNotificationConfig(),
+		Review:          DefaultReviewWorkflowConfig(),
 	}
 	path := UserPath(projectDir, "config.yml")
 
@@ -96,25 +120,7 @@ func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
 			continue
 		}
 
-		if section == "" && key == "key_prefix" {
-			setString(&config.TicketKeyPrefix, value)
-
-			continue
-		}
-
-		if section == "tickets" && key == "key_prefix" {
-			setString(&config.TicketKeyPrefix, value)
-
-			continue
-		}
-
-		if section == "runtime" {
-			setRuntimeConfigValue(&config.Runtime, key, value)
-		}
-
-		if section == "notifications" {
-			setNotificationConfigValue(&config.Notifications, key, value)
-		}
+		applyWorkspaceConfigValue(config, section, key, value)
 	}
 
 	err := scanner.Err()
@@ -123,6 +129,25 @@ func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
 	}
 
 	return nil
+}
+
+func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value string) {
+	switch section {
+	case "":
+		if key == "key_prefix" {
+			setString(&config.TicketKeyPrefix, value)
+		}
+	case "tickets":
+		if key == "key_prefix" {
+			setString(&config.TicketKeyPrefix, value)
+		}
+	case "runtime":
+		setRuntimeConfigValue(&config.Runtime, key, value)
+	case "notifications":
+		setNotificationConfigValue(&config.Notifications, key, value)
+	case "review":
+		setReviewWorkflowConfigValue(&config.Review, key, value)
+	}
 }
 
 func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, bool) {
@@ -174,9 +199,27 @@ func setNotificationConfigValue(config *NotificationConfig, key, value string) {
 	}
 }
 
+func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value string) {
+	switch key {
+	case "mode":
+		if value != "" {
+			config.Mode = ReviewWorkflowMode(value)
+		}
+	case "non_blocking_comment_limit":
+		setPositiveInt(&config.NonBlockingCommentLimit, value)
+	}
+}
+
 func setString(target *string, value string) {
 	if value != "" {
 		*target = value
+	}
+}
+
+func setPositiveInt(target *int, value string) {
+	parsed, ok := configPositiveIntValue(value)
+	if ok {
+		*target = parsed
 	}
 }
 
@@ -191,4 +234,18 @@ func configBoolValue(value string) bool {
 	default:
 		return false
 	}
+}
+
+func configPositiveIntValue(value string) (int, bool) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return 0, false
+	}
+
+	parsed, err := strconv.Atoi(value)
+	if err != nil || parsed < 0 {
+		return 0, false
+	}
+
+	return parsed, true
 }

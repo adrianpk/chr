@@ -28,6 +28,7 @@ Exact contracts and command behavior:
 - [CLI TUI action matrix](reference/cli-tui-action-matrix.md)
 - [Project workspace](reference/project-workspace.md)
 - [Runtime configuration](reference/runtime-config.md)
+- [Review workflow configuration](reference/review-workflow-config.md)
 - [Artifact generation backends](reference/artifact-generation-backends.md)
 - [Notifications](reference/notifications.md)
 - [Notification configuration](reference/notification-config.md)

@@ -3882,6 +3882,129 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 	}
 }
 
+func TestTicketReviewModeStatusPrintsDefaultMode(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review-mode",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review-mode status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"review_mode: status",
+		"mode: human_review",
+		"mode_status: ready",
+		"dry_run: true",
+		"requires_human_review: true",
+		"clean_pass_remote_comment: false",
+		"non_blocking_comment_limit: 3",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestTicketReviewModeStatusPrintsConfiguredModes(t *testing.T) {
+	tests := []struct {
+		name string
+		mode string
+		want string
+	}{
+		{name: "agentic", mode: "agentic_review", want: "requires_remote_review: true"},
+		{name: "human", mode: "human_review", want: "requires_human_review: true"},
+		{name: "trusted", mode: "trusted_auto_merge", want: "trusted_auto_merge: true"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			projectDir := newTestWorkspace(t)
+			devRoot := t.TempDir()
+
+			writeCLIWorkspaceConfig(t, projectDir, `review:
+  mode: `+test.mode+`
+  non_blocking_comment_limit: 1
+`)
+			addProject(t, devRoot, "example", projectDir)
+
+			var stdout bytes.Buffer
+
+			err := run(t.Context(), []string{
+				"ticket",
+				"review-mode",
+				"status",
+				"--dev-root",
+				devRoot,
+				"--dir",
+				projectDir,
+			}, &stdout, &bytes.Buffer{})
+			if err != nil {
+				t.Fatalf("ticket review-mode status returned error: %v", err)
+			}
+
+			for _, want := range []string{
+				"mode: " + test.mode,
+				"mode_status: ready",
+				test.want,
+				"non_blocking_comment_limit: 1",
+			} {
+				if !strings.Contains(stdout.String(), want) {
+					t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+				}
+			}
+		})
+	}
+}
+
+func TestTicketReviewModeStatusPrintsInvalidMode(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeCLIWorkspaceConfig(t, projectDir, `review:
+  mode: unknown
+`)
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review-mode",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review-mode status returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"mode: unknown",
+		"mode_status: invalid",
+		"error: invalid review workflow mode: unknown",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func TestTicketStatusRejectsInvalidStatus(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()

@@ -3,3 +3,6 @@ tickets:
   key_prefix: CHC
 notifications:
   telegram_enabled: false
+review:
+  mode: human_review
+  non_blocking_comment_limit: 3
