@@ -11,22 +11,37 @@ import (
 const DefaultTicketStatus = TicketStatusOpenLegacy
 
 type Ticket struct {
-	Key         string
-	Title       string
-	Synopsis    string
-	Status      string
-	Priority    string
-	Severity    string
-	Type        string
-	Tags        []string
-	UseCase     string
-	ProjectArea string
-	SourceKind  string
-	SourceRef   string
-	Slice       string
-	Body        string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	Key               string
+	Title             string
+	Synopsis          string
+	Status            string
+	Priority          string
+	Severity          string
+	Type              string
+	Tags              []string
+	UseCase           string
+	ProjectArea       string
+	SourceKind        string
+	SourceRef         string
+	Slice             string
+	Branch            string
+	ReviewRefs        []TicketReviewRef
+	ReviewState       string
+	ReviewRound       int
+	ReviewResult      string
+	ReviewCommentsURL string
+	BlockingFindings  []string
+	Body              string
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+type TicketReviewRef struct {
+	Type     string
+	Provider string
+	URL      string
+	ID       string
+	Status   string
 }
 
 type TicketRenderer interface {
@@ -62,21 +77,8 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		return fmt.Errorf("write ticket frontmatter: %w", err)
 	}
 
-	for _, field := range []struct {
-		key   string
-		value string
-	}{
-		{key: "key", value: ticket.Key},
-		{key: "title", value: ticket.Title},
-		{key: "synopsis", value: ticket.Synopsis},
-		{key: "status", value: ticket.Status},
-		{key: "priority", value: ticket.Priority},
-		{key: "severity", value: ticket.Severity},
-		{key: "type", value: ticket.Type},
-	} {
-		if err := writeTicketStringField(output, field.key, field.value); err != nil {
-			return err
-		}
+	if err := renderTicketCoreFrontmatter(output, ticket); err != nil {
+		return err
 	}
 
 	err = writeTicketListField(output, "tags", ticket.Tags)
@@ -84,21 +86,70 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		return err
 	}
 
-	for _, field := range []struct {
-		key   string
-		value string
-	}{
+	if err := renderTicketSourceFrontmatter(output, ticket); err != nil {
+		return err
+	}
+
+	if err := renderTicketReviewFrontmatter(output, ticket); err != nil {
+		return err
+	}
+
+	if err := renderTicketTimeFrontmatter(output, ticket); err != nil {
+		return err
+	}
+
+	_, err = output.WriteString("---\n\n")
+	if err != nil {
+		return fmt.Errorf("write ticket frontmatter: %w", err)
+	}
+
+	return nil
+}
+
+func renderTicketCoreFrontmatter(output *bytes.Buffer, ticket Ticket) error {
+	return writeTicketStringFields(output, []ticketStringField{
+		{key: "key", value: ticket.Key},
+		{key: "title", value: ticket.Title},
+		{key: "synopsis", value: ticket.Synopsis},
+		{key: "status", value: ticket.Status},
+		{key: "priority", value: ticket.Priority},
+		{key: "severity", value: ticket.Severity},
+		{key: "type", value: ticket.Type},
+	})
+}
+
+func renderTicketSourceFrontmatter(output *bytes.Buffer, ticket Ticket) error {
+	return writeTicketStringFields(output, []ticketStringField{
 		{key: "use_case", value: ticket.UseCase},
 		{key: "project_area", value: ticket.ProjectArea},
 		{key: "source_kind", value: ticket.SourceKind},
 		{key: "source_ref", value: ticket.SourceRef},
 		{key: "slice", value: ticket.Slice},
-	} {
-		if err := writeTicketStringField(output, field.key, field.value); err != nil {
-			return err
-		}
+		{key: "branch", value: ticket.Branch},
+	})
+}
+
+func renderTicketReviewFrontmatter(output *bytes.Buffer, ticket Ticket) error {
+	if err := writeTicketReviewRefsField(output, ticket.ReviewRefs); err != nil {
+		return err
 	}
 
+	if err := writeTicketStringFields(output, []ticketStringField{
+		{key: "review_state", value: ticket.ReviewState},
+		{key: "review_result", value: ticket.ReviewResult},
+		{key: "review_comments_url", value: ticket.ReviewCommentsURL},
+	}); err != nil {
+		return err
+	}
+
+	if err := writeTicketReviewRoundField(output, ticket.ReviewRound); err != nil {
+		return err
+	}
+
+	return writeTicketListField(output, "blocking_findings", ticket.BlockingFindings)
+}
+
+func renderTicketTimeFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 	for _, field := range []struct {
 		key   string
 		value time.Time
@@ -111,9 +162,19 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		}
 	}
 
-	_, err = output.WriteString("---\n\n")
-	if err != nil {
-		return fmt.Errorf("write ticket frontmatter: %w", err)
+	return nil
+}
+
+type ticketStringField struct {
+	key   string
+	value string
+}
+
+func writeTicketStringFields(output *bytes.Buffer, fields []ticketStringField) error {
+	for _, field := range fields {
+		if err := writeTicketStringField(output, field.key, field.value); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -125,6 +186,50 @@ func writeTicketStringField(output *bytes.Buffer, key, value string) error {
 
 func writeTicketListField(output *bytes.Buffer, key string, values []string) error {
 	return writeTicketEncodedField(output, key, yamlStringList(values))
+}
+
+func writeTicketReviewRoundField(output *bytes.Buffer, value int) error {
+	if value == 0 {
+		return writeTicketEncodedField(output, "review_round", yamlString(""))
+	}
+
+	return writeTicketEncodedField(output, "review_round", strconv.Itoa(value))
+}
+
+func writeTicketReviewRefsField(output *bytes.Buffer, refs []TicketReviewRef) error {
+	if len(refs) == 0 {
+		return writeTicketEncodedField(output, "review_refs", "[]")
+	}
+
+	_, err := output.WriteString("review_refs:\n")
+	if err != nil {
+		return fmt.Errorf("write ticket frontmatter: %w", err)
+	}
+
+	for _, ref := range refs {
+		for index, field := range []struct {
+			key   string
+			value string
+		}{
+			{key: "type", value: ref.Type},
+			{key: "provider", value: ref.Provider},
+			{key: "url", value: ref.URL},
+			{key: "id", value: ref.ID},
+			{key: "status", value: ref.Status},
+		} {
+			prefix := "    "
+			if index == 0 {
+				prefix = "  - "
+			}
+
+			_, err = fmt.Fprintf(output, "%s%s: %s\n", prefix, field.key, yamlString(field.value))
+			if err != nil {
+				return fmt.Errorf("write ticket frontmatter: %w", err)
+			}
+		}
+	}
+
+	return nil
 }
 
 func writeTicketEncodedField(output *bytes.Buffer, key, value string) error {

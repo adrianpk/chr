@@ -153,6 +153,15 @@ func BoardAttentionReasons(ticket IndexedTicket) []string {
 		reasons = append(reasons, "status is outside normal Board columns: "+ticket.Status)
 	}
 
+	switch ticket.ReviewState {
+	case "changes_requested":
+		reasons = append(reasons, "review changes requested")
+	case "insufficient_evidence":
+		reasons = append(reasons, "review evidence is insufficient")
+	case "needs_human_decision":
+		reasons = append(reasons, "review needs human decision")
+	}
+
 	return reasons
 }
 

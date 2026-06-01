@@ -27,6 +27,11 @@ type ParseTicketOptions struct {
 
 type ticketParser struct{}
 
+type ticketFrontmatter struct {
+	Metadata   map[string]string
+	ReviewRefs []TicketReviewRef
+}
+
 func NewTicketParser() TicketParser {
 	return &ticketParser{}
 }
@@ -47,7 +52,7 @@ func (p *ticketParser) ParseTicket(ctx context.Context, opts ParseTicketOptions)
 		return IndexedTicket{}, fmt.Errorf("stat ticket file: %w", err)
 	}
 
-	metadata, err := parseTicketFrontmatter(string(content))
+	frontmatter, err := parseTicketFrontmatter(string(content))
 	if err != nil {
 		return IndexedTicket{}, err
 	}
@@ -57,34 +62,102 @@ func (p *ticketParser) ParseTicket(ctx context.Context, opts ParseTicketOptions)
 		return IndexedTicket{}, err
 	}
 
-	return indexedTicketFromMetadata(opts, relativePath, info, content, metadata)
+	return indexedTicketFromMetadata(opts, relativePath, info, content, frontmatter)
 }
 
-func parseTicketFrontmatter(content string) (map[string]string, error) {
+func parseTicketFrontmatter(content string) (ticketFrontmatter, error) {
 	if !strings.HasPrefix(content, "---\n") {
-		return nil, fmt.Errorf("ticket frontmatter opening delimiter is required")
+		return ticketFrontmatter{}, fmt.Errorf("ticket frontmatter opening delimiter is required")
 	}
 
 	remaining := strings.TrimPrefix(content, "---\n")
 
 	end := strings.Index(remaining, "\n---")
 	if end < 0 {
-		return nil, fmt.Errorf("ticket frontmatter closing delimiter is required")
+		return ticketFrontmatter{}, fmt.Errorf("ticket frontmatter closing delimiter is required")
 	}
 
 	frontmatter := remaining[:end]
 	metadata := map[string]string{}
+	reviewRefs := []TicketReviewRef{}
 
-	for _, line := range strings.Split(frontmatter, "\n") {
+	lines := strings.Split(frontmatter, "\n")
+	for index := 0; index < len(lines); index++ {
+		line := lines[index]
+
 		key, value, ok := strings.Cut(line, ":")
 		if !ok {
 			continue
 		}
 
-		metadata[strings.TrimSpace(key)] = strings.TrimSpace(value)
+		key = strings.TrimSpace(key)
+		value = strings.TrimSpace(value)
+
+		if key == "review_refs" && value != "[]" {
+			parsedRefs, nextIndex := parseTicketReviewRefsBlock(lines, index+1)
+			reviewRefs = parsedRefs
+			index = nextIndex - 1
+
+			continue
+		}
+
+		metadata[key] = value
 	}
 
-	return metadata, nil
+	return ticketFrontmatter{Metadata: metadata, ReviewRefs: reviewRefs}, nil
+}
+
+func parseTicketReviewRefsBlock(lines []string, start int) ([]TicketReviewRef, int) {
+	refs := []TicketReviewRef{}
+	current := TicketReviewRef{}
+	hasCurrent := false
+	index := start
+
+	for ; index < len(lines); index++ {
+		line := lines[index]
+		if !strings.HasPrefix(line, "  ") {
+			break
+		}
+
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "- ") {
+			if hasCurrent {
+				refs = append(refs, current)
+			}
+
+			current = TicketReviewRef{}
+			hasCurrent = true
+			trimmed = strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
+		}
+
+		key, value, ok := strings.Cut(trimmed, ":")
+		if !ok || !hasCurrent {
+			continue
+		}
+
+		assignTicketReviewRefField(&current, strings.TrimSpace(key), unquoteMetadataString(value))
+	}
+
+	if hasCurrent {
+		refs = append(refs, current)
+	}
+
+	return refs, index
+}
+
+func assignTicketReviewRefField(ref *TicketReviewRef, key, value string) {
+	switch key {
+	case "type":
+		ref.Type = value
+	case "provider":
+		ref.Provider = value
+	case "url":
+		ref.URL = value
+	case "id":
+		ref.ID = value
+	case "status":
+		ref.Status = value
+	}
 }
 
 func indexedTicketFromMetadata(
@@ -92,41 +165,45 @@ func indexedTicketFromMetadata(
 	relativePath string,
 	info os.FileInfo,
 	content []byte,
-	metadata map[string]string,
+	frontmatter ticketFrontmatter,
 ) (IndexedTicket, error) {
-	createdAt, err := optionalTicketTime(metadata["created_at"])
-	if err != nil {
-		return IndexedTicket{}, err
-	}
+	metadata := frontmatter.Metadata
 
-	updatedAt, err := optionalTicketTime(metadata["updated_at"])
+	createdAt, updatedAt, reviewRound, err := parseIndexedTicketMetadataTimes(metadata)
 	if err != nil {
 		return IndexedTicket{}, err
 	}
 
 	ticket := IndexedTicket{
-		ProjectID:    opts.ProjectID,
-		Path:         opts.Path,
-		RelativePath: relativePath,
-		Key:          unquoteMetadataString(metadata["key"]),
-		Title:        unquoteMetadataString(metadata["title"]),
-		Synopsis:     unquoteMetadataString(metadata["synopsis"]),
-		Status:       unquoteMetadataString(metadata["status"]),
-		Priority:     unquoteMetadataString(metadata["priority"]),
-		Severity:     unquoteMetadataString(metadata["severity"]),
-		Type:         unquoteMetadataString(metadata["type"]),
-		Tags:         parseMetadataStringList(metadata["tags"]),
-		UseCase:      unquoteMetadataString(metadata["use_case"]),
-		ProjectArea:  unquoteMetadataString(metadata["project_area"]),
-		SourceKind:   unquoteMetadataString(metadata["source_kind"]),
-		SourceRef:    unquoteMetadataString(metadata["source_ref"]),
-		Slice:        unquoteMetadataString(metadata["slice"]),
-		CreatedAt:    createdAt,
-		UpdatedAt:    updatedAt,
-		FileMTime:    info.ModTime().UTC(),
-		FileSize:     info.Size(),
-		ContentHash:  contentHash(content),
-		IndexedAt:    opts.IndexedAt.UTC(),
+		ProjectID:         opts.ProjectID,
+		Path:              opts.Path,
+		RelativePath:      relativePath,
+		Key:               unquoteMetadataString(metadata["key"]),
+		Title:             unquoteMetadataString(metadata["title"]),
+		Synopsis:          unquoteMetadataString(metadata["synopsis"]),
+		Status:            unquoteMetadataString(metadata["status"]),
+		Priority:          unquoteMetadataString(metadata["priority"]),
+		Severity:          unquoteMetadataString(metadata["severity"]),
+		Type:              unquoteMetadataString(metadata["type"]),
+		Tags:              parseMetadataStringList(metadata["tags"]),
+		UseCase:           unquoteMetadataString(metadata["use_case"]),
+		ProjectArea:       unquoteMetadataString(metadata["project_area"]),
+		SourceKind:        unquoteMetadataString(metadata["source_kind"]),
+		SourceRef:         unquoteMetadataString(metadata["source_ref"]),
+		Slice:             unquoteMetadataString(metadata["slice"]),
+		Branch:            unquoteMetadataString(metadata["branch"]),
+		ReviewRefs:        frontmatter.ReviewRefs,
+		ReviewState:       unquoteMetadataString(metadata["review_state"]),
+		ReviewRound:       reviewRound,
+		ReviewResult:      unquoteMetadataString(metadata["review_result"]),
+		ReviewCommentsURL: unquoteMetadataString(metadata["review_comments_url"]),
+		BlockingFindings:  parseMetadataStringList(metadata["blocking_findings"]),
+		CreatedAt:         createdAt,
+		UpdatedAt:         updatedAt,
+		FileMTime:         info.ModTime().UTC(),
+		FileSize:          info.Size(),
+		ContentHash:       contentHash(content),
+		IndexedAt:         opts.IndexedAt.UTC(),
 	}
 
 	ticket.BoardColumn, _ = BoardTicketStatusFor(ticket.Status)
@@ -137,6 +214,25 @@ func indexedTicketFromMetadata(
 	}
 
 	return ticket, nil
+}
+
+func parseIndexedTicketMetadataTimes(metadata map[string]string) (*time.Time, *time.Time, int, error) {
+	createdAt, err := optionalTicketTime(metadata["created_at"])
+	if err != nil {
+		return nil, nil, 0, err
+	}
+
+	updatedAt, err := optionalTicketTime(metadata["updated_at"])
+	if err != nil {
+		return nil, nil, 0, err
+	}
+
+	reviewRound, err := optionalTicketInt(metadata["review_round"])
+	if err != nil {
+		return nil, nil, 0, err
+	}
+
+	return createdAt, updatedAt, reviewRound, nil
 }
 
 func relativeTicketPath(opts ParseTicketOptions) (string, error) {
@@ -207,6 +303,20 @@ func optionalTicketTime(value string) (*time.Time, error) {
 	parsed = parsed.UTC()
 
 	return &parsed, nil
+}
+
+func optionalTicketInt(value string) (int, error) {
+	value = unquoteMetadataString(value)
+	if value == "" {
+		return 0, nil
+	}
+
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("parse ticket integer: %w", err)
+	}
+
+	return parsed, nil
 }
 
 func contentHash(content []byte) string {

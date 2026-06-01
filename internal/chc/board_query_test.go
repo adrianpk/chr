@@ -83,6 +83,31 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 	}
 }
 
+func TestBoardQueryFlagsReviewStateAttention(t *testing.T) {
+	index := newTestTicketIndex(t)
+	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{
+		Key:         "CHC-1",
+		Status:      TicketStatusReadyForDev,
+		ReviewState: "changes_requested",
+	})
+
+	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
+		ProjectID: "project-1",
+	})
+	if err != nil {
+		t.Fatalf("ProjectBoard returned error: %v", err)
+	}
+
+	if board.NormalCount != 0 || board.AttentionCount != 1 {
+		t.Fatalf("board counts = %#v, want one attention ticket", board)
+	}
+
+	wantReasons := []string{"review changes requested"}
+	if !slices.Equal(board.Attention[0].Reasons, wantReasons) {
+		t.Fatalf("attention reasons = %#v, want review attention", board.Attention[0].Reasons)
+	}
+}
+
 func TestBoardQueryRejectsInvalidOptions(t *testing.T) {
 	_, err := NewBoardQuery(nil).ProjectBoard(context.Background(), BoardQueryOptions{})
 	if err == nil {
@@ -132,6 +157,7 @@ func upsertBoardQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadat
 	ticket := testIndexedTicket(metadata.Key, metadata.Tags)
 	ticket.Status = metadata.Status
 	ticket.BoardColumn, _ = BoardTicketStatusFor(metadata.Status)
+	ticket.ReviewState = metadata.ReviewState
 
 	err := index.UpsertTicket(context.Background(), ticket)
 	if err != nil {

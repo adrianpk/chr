@@ -57,6 +57,13 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	assertColumnExists(t, db, "indexed_tickets", "source_kind")
 	assertColumnExists(t, db, "indexed_tickets", "source_ref")
 	assertColumnExists(t, db, "indexed_tickets", "slice")
+	assertColumnExists(t, db, "indexed_tickets", "branch")
+	assertColumnExists(t, db, "indexed_tickets", "review_refs")
+	assertColumnExists(t, db, "indexed_tickets", "review_state")
+	assertColumnExists(t, db, "indexed_tickets", "review_round")
+	assertColumnExists(t, db, "indexed_tickets", "review_result")
+	assertColumnExists(t, db, "indexed_tickets", "review_comments_url")
+	assertColumnExists(t, db, "indexed_tickets", "blocking_findings")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -131,6 +138,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260526000008-add_board_ticket_metadata.sql": {
 			Data: []byte(testAddBoardTicketMetadataMigration()),
+		},
+		"assets/migration/sqlite/20260601000009-add_ticket_review_metadata.sql": {
+			Data: []byte(testAddTicketReviewMetadataMigration()),
 		},
 	}
 }
@@ -398,6 +408,41 @@ DROP INDEX IF EXISTS indexed_tickets_project_updated_idx;
 DROP INDEX IF EXISTS indexed_tickets_project_area_idx;
 DROP INDEX IF EXISTS indexed_tickets_project_use_case_idx;
 DROP INDEX IF EXISTS indexed_tickets_project_board_column_idx;
+`
+}
+
+func testAddTicketReviewMetadataMigration() string {
+	return `-- +migrate Up
+ALTER TABLE indexed_tickets
+ADD COLUMN branch text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN review_refs text NOT NULL DEFAULT '[]';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN review_state text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN review_round integer NOT NULL DEFAULT 0;
+
+ALTER TABLE indexed_tickets
+ADD COLUMN review_result text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN review_comments_url text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN blocking_findings text NOT NULL DEFAULT '[]';
+
+CREATE INDEX indexed_tickets_project_review_state_idx
+ON indexed_tickets (project_id, review_state);
+
+CREATE INDEX indexed_tickets_project_branch_idx
+ON indexed_tickets (project_id, branch);
+
+-- +migrate Down
+DROP INDEX IF EXISTS indexed_tickets_project_branch_idx;
+DROP INDEX IF EXISTS indexed_tickets_project_review_state_idx;
 `
 }
 

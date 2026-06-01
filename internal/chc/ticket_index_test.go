@@ -79,6 +79,38 @@ func TestTicketIndexGetsTicketByKey(t *testing.T) {
 	assertIndexedTicket(t, got, ticket)
 }
 
+func TestTicketIndexRoundTripsReviewMetadata(t *testing.T) {
+	index := newTestTicketIndex(t)
+	ticket := testIndexedTicket("CHC-1", []string{"uxui"})
+	ticket.Branch = "feat/slice-4-indexed-ticket-enrichment"
+	ticket.ReviewRefs = []TicketReviewRef{
+		{
+			Type:     "pull_request",
+			Provider: "forgejo",
+			URL:      "https://forge.example.com/owner/repo/pulls/44",
+			ID:       "44",
+			Status:   "open",
+		},
+	}
+	ticket.ReviewState = "changes_requested"
+	ticket.ReviewRound = 1
+	ticket.ReviewResult = "needs_changes"
+	ticket.ReviewCommentsURL = "https://forge.example.com/owner/repo/pulls/44"
+	ticket.BlockingFindings = []string{"RF-1"}
+
+	err := index.UpsertTicket(context.Background(), ticket)
+	if err != nil {
+		t.Fatalf("UpsertTicket returned error: %v", err)
+	}
+
+	got, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	if err != nil {
+		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
+	}
+
+	assertIndexedTicket(t, got, ticket)
+}
+
 func TestTicketIndexGetTicketByKeyRejectsMissingTicket(t *testing.T) {
 	index := newTestTicketIndex(t)
 
@@ -201,14 +233,60 @@ func assertIndexedTicket(t *testing.T, got, want IndexedTicket) {
 func assertIndexedTicketEnrichedMetadata(t *testing.T, got, want IndexedTicket) {
 	t.Helper()
 
-	enrichedMetadataMatches := got.Synopsis == want.Synopsis &&
+	assertIndexedTicketSourceMetadata(t, got, want)
+	assertIndexedTicketReviewMetadata(t, got, want)
+}
+
+func assertIndexedTicketSourceMetadata(t *testing.T, got, want IndexedTicket) {
+	t.Helper()
+
+	matches := got.Synopsis == want.Synopsis &&
 		got.Status == want.Status &&
 		got.BoardColumn == want.BoardColumn &&
 		got.SourceKind == want.SourceKind &&
 		got.SourceRef == want.SourceRef &&
 		got.Slice == want.Slice
+	if !matches {
+		t.Fatalf("source metadata = %#v, want %#v", got, want)
+	}
+}
 
-	if !enrichedMetadataMatches {
-		t.Fatalf("enriched metadata = %#v, want %#v", got, want)
+func assertIndexedTicketReviewMetadata(t *testing.T, got, want IndexedTicket) {
+	t.Helper()
+
+	matches := got.Branch == want.Branch &&
+		got.ReviewState == want.ReviewState &&
+		got.ReviewRound == want.ReviewRound &&
+		got.ReviewResult == want.ReviewResult &&
+		got.ReviewCommentsURL == want.ReviewCommentsURL
+	if !matches {
+		t.Fatalf("review metadata = %#v, want %#v", got, want)
+	}
+
+	assertTicketReviewRefs(t, got.ReviewRefs, want.ReviewRefs)
+	assertBlockingFindings(t, got.BlockingFindings, want.BlockingFindings)
+}
+
+func assertTicketReviewRefs(t *testing.T, got, want []TicketReviewRef) {
+	t.Helper()
+
+	if len(got) != len(want) {
+		t.Fatalf("ReviewRefs = %#v, want %#v", got, want)
+	}
+
+	if len(got) > 0 && got[0] != want[0] {
+		t.Fatalf("ReviewRefs = %#v, want %#v", got, want)
+	}
+}
+
+func assertBlockingFindings(t *testing.T, got, want []string) {
+	t.Helper()
+
+	if len(got) != len(want) {
+		t.Fatalf("BlockingFindings = %#v, want %#v", got, want)
+	}
+
+	if len(got) > 0 && got[0] != want[0] {
+		t.Fatalf("BlockingFindings = %#v, want %#v", got, want)
 	}
 }

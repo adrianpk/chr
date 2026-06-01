@@ -16,6 +16,11 @@ func ValidateIndexedTicket(ticket IndexedTicket) error {
 		return err
 	}
 
+	err = validateTicketReviewMetadata(ticket)
+	if err != nil {
+		return err
+	}
+
 	return validateTicketTimes(ticket)
 }
 
@@ -94,6 +99,68 @@ func isValidTicketSeverity(severity string) bool {
 func isValidTicketType(ticketType string) bool {
 	switch strings.TrimSpace(ticketType) {
 	case "", "task", "bug", "feature", "cleanup", "research", "docs":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateTicketReviewMetadata(ticket IndexedTicket) error {
+	if !isValidTicketReviewState(ticket.ReviewState) {
+		return fmt.Errorf("invalid ticket review_state: %s", ticket.ReviewState)
+	}
+
+	if !isValidTicketReviewResult(ticket.ReviewResult) {
+		return fmt.Errorf("invalid ticket review_result: %s", ticket.ReviewResult)
+	}
+
+	if ticket.ReviewRound < 0 {
+		return fmt.Errorf("ticket review_round cannot be negative")
+	}
+
+	for _, ref := range ticket.ReviewRefs {
+		if err := validateTicketReviewRef(ref); err != nil {
+			return err
+		}
+	}
+
+	for _, finding := range ticket.BlockingFindings {
+		if strings.TrimSpace(finding) == "" {
+			return fmt.Errorf("ticket blocking_findings cannot contain empty values")
+		}
+	}
+
+	return nil
+}
+
+func validateTicketReviewRef(ref TicketReviewRef) error {
+	if strings.TrimSpace(ref.Type) == "" {
+		return fmt.Errorf("ticket review ref type is required")
+	}
+
+	if strings.TrimSpace(ref.Provider) == "" {
+		return fmt.Errorf("ticket review ref provider is required")
+	}
+
+	if strings.TrimSpace(ref.URL) == "" {
+		return fmt.Errorf("ticket review ref url is required")
+	}
+
+	return nil
+}
+
+func isValidTicketReviewState(state string) bool {
+	switch strings.TrimSpace(state) {
+	case "", "pass", "changes_requested", "insufficient_evidence", "needs_human_decision":
+		return true
+	default:
+		return false
+	}
+}
+
+func isValidTicketReviewResult(result string) bool {
+	switch strings.TrimSpace(result) {
+	case "", "pass", "needs_changes", "insufficient_evidence", "needs_human_decision":
 		return true
 	default:
 		return false

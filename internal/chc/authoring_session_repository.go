@@ -324,7 +324,7 @@ func ParseAuthoringSession(content string) (AuthoringSession, error) {
 		return AuthoringSession{}, err
 	}
 
-	session, err := authoringSessionFromMetadata(metadata)
+	session, err := authoringSessionFromMetadata(metadata.Metadata)
 	if err != nil {
 		return AuthoringSession{}, err
 	}

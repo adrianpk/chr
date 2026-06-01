@@ -31,8 +31,23 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 		SourceKind:  "plan_tracking",
 		SourceRef:   ".chc/user/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
+		Branch:      "feat/slice-1-onboarding",
+		ReviewRefs: []TicketReviewRef{
+			{
+				Type:     "pull_request",
+				Provider: "forgejo",
+				URL:      "https://forge.example.com/owner/repo/pulls/123",
+				ID:       "123",
+				Status:   "open",
+			},
+		},
+		ReviewState:       "changes_requested",
+		ReviewRound:       1,
+		ReviewResult:      "needs_changes",
+		ReviewCommentsURL: "https://forge.example.com/owner/repo/pulls/123",
+		BlockingFindings:  []string{"RF-1"},
+		CreatedAt:         createdAt,
+		UpdatedAt:         updatedAt,
 	})
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
@@ -52,6 +67,7 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 	}
 
 	assertParsedTicketMetadata(t, ticket)
+	assertParsedTicketReviewMetadata(t, ticket)
 	assertParsedTicketTimes(t, ticket, createdAt, updatedAt)
 	assertParsedTicketFileState(t, ticket)
 }
@@ -94,9 +110,34 @@ type ticketMetadataValidationCase struct {
 func invalidTicketMetadataCases(content string) []ticketMetadataValidationCase {
 	cases := invalidRequiredTicketMetadataCases(content)
 	cases = append(cases, invalidClassificationTicketMetadataCases(content)...)
+	cases = append(cases, invalidReviewTicketMetadataCases(content)...)
 	cases = append(cases, invalidTimeTicketMetadataCases(content)...)
 
 	return cases
+}
+
+func invalidReviewTicketMetadataCases(content string) []ticketMetadataValidationCase {
+	withReviewState := strings.Replace(content, `review_state: ""`, `review_state: "unknown"`, 1)
+	withReviewResult := strings.Replace(content, `review_result: ""`, `review_result: "looks_good"`, 1)
+	withReviewRound := strings.Replace(content, `review_round: ""`, `review_round: -1`, 1)
+
+	return []ticketMetadataValidationCase{
+		{
+			name:    "invalid review_state",
+			content: withReviewState,
+			wantErr: "invalid ticket review_state: unknown",
+		},
+		{
+			name:    "invalid review_result",
+			content: withReviewResult,
+			wantErr: "invalid ticket review_result: looks_good",
+		},
+		{
+			name:    "invalid review_round",
+			content: withReviewRound,
+			wantErr: "ticket review_round cannot be negative",
+		},
+	}
 }
 
 func invalidRequiredTicketMetadataCases(content string) []ticketMetadataValidationCase {
@@ -253,6 +294,51 @@ func assertParsedTicketSourceMetadata(t *testing.T, ticket IndexedTicket) {
 
 	if !sourceMetadataMatches {
 		t.Fatalf("source metadata = %#v", ticket)
+	}
+}
+
+func assertParsedTicketReviewMetadata(t *testing.T, ticket IndexedTicket) {
+	t.Helper()
+
+	if ticket.Branch != "feat/slice-1-onboarding" {
+		t.Fatalf("Branch = %q, want review branch", ticket.Branch)
+	}
+
+	if len(ticket.ReviewRefs) != 1 {
+		t.Fatalf("ReviewRefs = %#v, want one PR ref", ticket.ReviewRefs)
+	}
+
+	ref := ticket.ReviewRefs[0]
+	assertParsedTicketReviewRef(t, ref)
+	assertParsedTicketReviewState(t, ticket)
+
+	if len(ticket.BlockingFindings) != 1 || ticket.BlockingFindings[0] != "RF-1" {
+		t.Fatalf("BlockingFindings = %#v, want RF-1", ticket.BlockingFindings)
+	}
+}
+
+func assertParsedTicketReviewRef(t *testing.T, ref TicketReviewRef) {
+	t.Helper()
+
+	matches := ref.Type == "pull_request" &&
+		ref.Provider == "forgejo" &&
+		ref.URL == "https://forge.example.com/owner/repo/pulls/123" &&
+		ref.ID == "123" &&
+		ref.Status == "open"
+	if !matches {
+		t.Fatalf("review ref = %#v, want Forgejo pull request ref", ref)
+	}
+}
+
+func assertParsedTicketReviewState(t *testing.T, ticket IndexedTicket) {
+	t.Helper()
+
+	matches := ticket.ReviewState == "changes_requested" &&
+		ticket.ReviewRound == 1 &&
+		ticket.ReviewResult == "needs_changes" &&
+		ticket.ReviewCommentsURL == "https://forge.example.com/owner/repo/pulls/123"
+	if !matches {
+		t.Fatalf("review metadata = %#v", ticket)
 	}
 }
 

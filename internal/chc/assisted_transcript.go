@@ -252,7 +252,7 @@ func parseAssistedTranscriptEvent(block string) (AssistedTranscriptEvent, error)
 		return AssistedTranscriptEvent{}, err
 	}
 
-	event, err := assistedTranscriptEventFromMetadata(metadata)
+	event, err := assistedTranscriptEventFromMetadata(metadata.Metadata)
 	if err != nil {
 		return AssistedTranscriptEvent{}, err
 	}

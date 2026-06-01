@@ -7,11 +7,23 @@ import (
 )
 
 func TestTicketRendererRendersFrontmatterAndBody(t *testing.T) {
-	createdAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
-	updatedAt := time.Date(2026, 5, 18, 13, 45, 0, 0, time.UTC)
 	renderer := NewTicketRenderer()
 
-	content, err := renderer.RenderTicket(Ticket{
+	content, err := renderer.RenderTicket(testRenderedTicket())
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	if content != wantRenderedTicket {
+		t.Fatalf("content =\n%s\nwant =\n%s", content, wantRenderedTicket)
+	}
+}
+
+func testRenderedTicket() Ticket {
+	createdAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
+	updatedAt := time.Date(2026, 5, 18, 13, 45, 0, 0, time.UTC)
+
+	return Ticket{
 		Key:         "CHC-1",
 		Title:       "Do something",
 		Synopsis:    "Implement the onboarding flow.",
@@ -24,14 +36,27 @@ func TestTicketRendererRendersFrontmatterAndBody(t *testing.T) {
 		SourceKind:  "plan_tracking",
 		SourceRef:   ".chc/user/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
-	})
-	if err != nil {
-		t.Fatalf("RenderTicket returned error: %v", err)
+		Branch:      "feat/slice-1-onboarding",
+		ReviewRefs: []TicketReviewRef{
+			{
+				Type:     "pull_request",
+				Provider: "forgejo",
+				URL:      "https://forge.example.com/owner/repo/pulls/123",
+				ID:       "123",
+				Status:   "open",
+			},
+		},
+		ReviewState:       "changes_requested",
+		ReviewRound:       1,
+		ReviewResult:      "needs_changes",
+		ReviewCommentsURL: "https://forge.example.com/owner/repo/pulls/123",
+		BlockingFindings:  []string{"RF-1"},
+		CreatedAt:         createdAt,
+		UpdatedAt:         updatedAt,
 	}
+}
 
-	want := `---
+const wantRenderedTicket = `---
 key: "CHC-1"
 title: "Do something"
 synopsis: "Implement the onboarding flow."
@@ -45,6 +70,18 @@ project_area: "frontend"
 source_kind: "plan_tracking"
 source_ref: ".chc/user/plans/onboarding-plan.md"
 slice: "Slice 1"
+branch: "feat/slice-1-onboarding"
+review_refs:
+  - type: "pull_request"
+    provider: "forgejo"
+    url: "https://forge.example.com/owner/repo/pulls/123"
+    id: "123"
+    status: "open"
+review_state: "changes_requested"
+review_result: "needs_changes"
+review_comments_url: "https://forge.example.com/owner/repo/pulls/123"
+review_round: 1
+blocking_findings: ["RF-1"]
 created_at: "2026-05-18T12:30:00Z"
 updated_at: "2026-05-18T13:45:00Z"
 ---
@@ -61,11 +98,6 @@ updated_at: "2026-05-18T13:45:00Z"
 
 # Validation
 `
-
-	if content != want {
-		t.Fatalf("content =\n%s\nwant =\n%s", content, want)
-	}
-}
 
 func TestTicketRendererKeepsOptionalFieldsEmpty(t *testing.T) {
 	renderer := NewTicketRenderer()
@@ -86,6 +118,13 @@ func TestTicketRendererKeepsOptionalFieldsEmpty(t *testing.T) {
 		`source_kind: ""`,
 		`source_ref: ""`,
 		`slice: ""`,
+		`branch: ""`,
+		`review_refs: []`,
+		`review_state: ""`,
+		`review_result: ""`,
+		`review_comments_url: ""`,
+		`review_round: ""`,
+		`blocking_findings: []`,
 		`created_at: ""`,
 		`updated_at: ""`,
 	} {

@@ -3,11 +3,13 @@ package chc
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -96,7 +98,8 @@ func (i *sqliteTicketIndex) ListProjectTickets(ctx context.Context, projectID st
 		ctx,
 		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
-    created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+    branch, review_refs, review_state, review_round, review_result, review_comments_url,
+    blocking_findings, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
 FROM indexed_tickets
 WHERE project_id = ?
 ORDER BY key`,
@@ -144,7 +147,8 @@ func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID
 		ctx,
 		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
-    created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+    branch, review_refs, review_state, review_round, review_result, review_comments_url,
+    blocking_findings, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
 FROM indexed_tickets
 WHERE project_id = ? AND key = ?`,
 		projectID,
@@ -188,14 +192,12 @@ func (i *sqliteTicketIndex) Close() error {
 	return nil
 }
 
-func upsertIndexedTicket(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) error {
-	_, err := tx.ExecContext(
-		ctx,
-		`INSERT INTO indexed_tickets (
+const upsertIndexedTicketSQL = `INSERT INTO indexed_tickets (
     project_id, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
-    created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    branch, review_refs, review_state, review_round, review_result, review_comments_url,
+    blocking_findings, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(project_id, path) DO UPDATE SET
     relative_path = excluded.relative_path,
     key = excluded.key,
@@ -211,12 +213,31 @@ ON CONFLICT(project_id, path) DO UPDATE SET
     source_kind = excluded.source_kind,
     source_ref = excluded.source_ref,
     slice = excluded.slice,
+    branch = excluded.branch,
+    review_refs = excluded.review_refs,
+    review_state = excluded.review_state,
+    review_round = excluded.review_round,
+    review_result = excluded.review_result,
+    review_comments_url = excluded.review_comments_url,
+    blocking_findings = excluded.blocking_findings,
     created_at = excluded.created_at,
     updated_at = excluded.updated_at,
     file_mtime = excluded.file_mtime,
     file_size = excluded.file_size,
     content_hash = excluded.content_hash,
-    indexed_at = excluded.indexed_at`,
+    indexed_at = excluded.indexed_at`
+
+func upsertIndexedTicket(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) error {
+	_, err := tx.ExecContext(ctx, upsertIndexedTicketSQL, indexedTicketUpsertArgs(ticket)...)
+	if err != nil {
+		return fmt.Errorf("upsert indexed ticket: %w", err)
+	}
+
+	return nil
+}
+
+func indexedTicketUpsertArgs(ticket IndexedTicket) []any {
+	return []any{
 		ticket.ProjectID,
 		ticket.Path,
 		ticket.RelativePath,
@@ -233,18 +254,20 @@ ON CONFLICT(project_id, path) DO UPDATE SET
 		ticket.SourceKind,
 		ticket.SourceRef,
 		ticket.Slice,
+		ticket.Branch,
+		mustJSON(ticket.ReviewRefs),
+		ticket.ReviewState,
+		ticket.ReviewRound,
+		ticket.ReviewResult,
+		ticket.ReviewCommentsURL,
+		mustJSON(ticket.BlockingFindings),
 		formatOptionalProjectTime(ticket.CreatedAt),
 		formatOptionalProjectTime(ticket.UpdatedAt),
 		formatProjectTime(ticket.FileMTime),
 		ticket.FileSize,
 		ticket.ContentHash,
 		formatProjectTime(ticket.IndexedAt),
-	)
-	if err != nil {
-		return fmt.Errorf("upsert indexed ticket: %w", err)
 	}
-
-	return nil
 }
 
 func replaceIndexedTicketTags(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) error {
@@ -317,15 +340,47 @@ ORDER BY tag`,
 func scanIndexedTicket(scanner projectScanner) (IndexedTicket, error) {
 	var ticket IndexedTicket
 
-	var createdAt sql.NullString
+	fields := indexedTicketScanFields{ticket: &ticket}
 
-	var updatedAt sql.NullString
+	err := scanner.Scan(fields.args()...)
+	if err != nil {
+		return IndexedTicket{}, fmt.Errorf("scan indexed ticket: %w", err)
+	}
 
-	var fileMTime string
+	err = fields.assignReviewMetadata()
+	if err != nil {
+		return IndexedTicket{}, err
+	}
 
-	var indexedAt string
+	err = assignIndexedTicketTimes(
+		&ticket,
+		fields.createdAt,
+		fields.updatedAt,
+		fields.fileMTime,
+		fields.indexedAt,
+	)
+	if err != nil {
+		return IndexedTicket{}, err
+	}
 
-	err := scanner.Scan(
+	return ticket, nil
+}
+
+type indexedTicketScanFields struct {
+	ticket *IndexedTicket
+
+	createdAt            sql.NullString
+	updatedAt            sql.NullString
+	fileMTime            string
+	indexedAt            string
+	reviewRefsJSON       string
+	blockingFindingsJSON string
+}
+
+func (f *indexedTicketScanFields) args() []any {
+	ticket := f.ticket
+
+	return []any{
 		&ticket.ProjectID,
 		&ticket.Path,
 		&ticket.RelativePath,
@@ -342,23 +397,51 @@ func scanIndexedTicket(scanner projectScanner) (IndexedTicket, error) {
 		&ticket.SourceKind,
 		&ticket.SourceRef,
 		&ticket.Slice,
-		&createdAt,
-		&updatedAt,
-		&fileMTime,
+		&ticket.Branch,
+		&f.reviewRefsJSON,
+		&ticket.ReviewState,
+		&ticket.ReviewRound,
+		&ticket.ReviewResult,
+		&ticket.ReviewCommentsURL,
+		&f.blockingFindingsJSON,
+		&f.createdAt,
+		&f.updatedAt,
+		&f.fileMTime,
 		&ticket.FileSize,
 		&ticket.ContentHash,
-		&indexedAt,
-	)
+		&f.indexedAt,
+	}
+}
+
+func (f *indexedTicketScanFields) assignReviewMetadata() error {
+	err := json.Unmarshal([]byte(defaultJSONList(f.reviewRefsJSON)), &f.ticket.ReviewRefs)
 	if err != nil {
-		return IndexedTicket{}, fmt.Errorf("scan indexed ticket: %w", err)
+		return fmt.Errorf("parse indexed ticket review refs: %w", err)
 	}
 
-	err = assignIndexedTicketTimes(&ticket, createdAt, updatedAt, fileMTime, indexedAt)
+	err = json.Unmarshal([]byte(defaultJSONList(f.blockingFindingsJSON)), &f.ticket.BlockingFindings)
 	if err != nil {
-		return IndexedTicket{}, err
+		return fmt.Errorf("parse indexed ticket blocking findings: %w", err)
 	}
 
-	return ticket, nil
+	return nil
+}
+
+func mustJSON(value any) string {
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(encoded)
+}
+
+func defaultJSONList(value string) string {
+	if strings.TrimSpace(value) == "" {
+		return "[]"
+	}
+
+	return value
 }
 
 func assignIndexedTicketTimes(

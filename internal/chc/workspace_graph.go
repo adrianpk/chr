@@ -296,14 +296,16 @@ func (b WorkspaceGraphBuilder) ticketNode(path string, info os.FileInfo, content
 		return WorkspaceNode{}, err
 	}
 
+	metadata := fields.Metadata
+
 	return WorkspaceNode{
 		Kind:         WorkspaceNodeTicket,
 		Path:         path,
 		RelativePath: b.relativePath(path),
-		Slug:         unquoteMetadataString(fields["key"]),
-		Title:        firstNonEmpty(unquoteMetadataString(fields["title"]), filepath.Base(path)),
-		Status:       unquoteMetadataString(fields["status"]),
-		CaseSlug:     unquoteMetadataString(fields["use_case"]),
+		Slug:         unquoteMetadataString(metadata["key"]),
+		Title:        firstNonEmpty(unquoteMetadataString(metadata["title"]), filepath.Base(path)),
+		Status:       unquoteMetadataString(metadata["status"]),
+		CaseSlug:     unquoteMetadataString(metadata["use_case"]),
 		SourceHash:   contentHash(content),
 		ModifiedAt:   info.ModTime().UTC(),
 		Size:         info.Size(),

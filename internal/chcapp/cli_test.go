@@ -2254,18 +2254,7 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", chc.Ticket{
-		Key:         "CHC-1",
-		Title:       "Do something",
-		Status:      "open",
-		Priority:    "high",
-		Severity:    "normal",
-		Type:        "task",
-		UseCase:     "onboarding",
-		ProjectArea: "uxui",
-		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
-		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
-	})
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketShowReviewTicket())
 
 	var stdout bytes.Buffer
 
@@ -2973,8 +2962,22 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 		Type:        "task",
 		UseCase:     "onboarding",
 		ProjectArea: "uxui",
-		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
-		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		Branch:      "feat/slice-1-ticket-review-metadata-contract",
+		ReviewRefs: []chc.TicketReviewRef{
+			{
+				Type:     "pull_request",
+				Provider: "forgejo",
+				URL:      "https://forge.example.com/owner/repo/pulls/123",
+				ID:       "123",
+				Status:   "open",
+			},
+		},
+		ReviewState:       "changes_requested",
+		ReviewRound:       1,
+		ReviewResult:      "needs_changes",
+		ReviewCommentsURL: "https://forge.example.com/owner/repo/pulls/123",
+		CreatedAt:         time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt:         time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 
 	var stdout bytes.Buffer
@@ -2992,7 +2995,44 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 		t.Fatalf("ticket show returned error: %v", err)
 	}
 
-	for _, want := range []string{
+	for _, want := range wantTicketShowReviewOutput() {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
+func testTicketShowReviewTicket() chc.Ticket {
+	return chc.Ticket{
+		Key:         "CHC-1",
+		Title:       "Do something",
+		Status:      "open",
+		Priority:    "high",
+		Severity:    "normal",
+		Type:        "task",
+		UseCase:     "onboarding",
+		ProjectArea: "uxui",
+		Branch:      "feat/slice-1-ticket-review-metadata-contract",
+		ReviewRefs: []chc.TicketReviewRef{
+			{
+				Type:     "pull_request",
+				Provider: "forgejo",
+				URL:      "https://forge.example.com/owner/repo/pulls/123",
+				ID:       "123",
+				Status:   "open",
+			},
+		},
+		ReviewState:       "changes_requested",
+		ReviewRound:       1,
+		ReviewResult:      "needs_changes",
+		ReviewCommentsURL: "https://forge.example.com/owner/repo/pulls/123",
+		CreatedAt:         time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt:         time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	}
+}
+
+func wantTicketShowReviewOutput() []string {
+	return []string{
 		"key: CHC-1",
 		"title: Do something",
 		"status: open",
@@ -3001,11 +3041,12 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 		"type: task",
 		"use_case: onboarding",
 		"project_area: uxui",
+		"branch: feat/slice-1-ticket-review-metadata-contract",
+		"review_state: changes_requested",
+		"review_round: 1",
+		"review_result: needs_changes",
+		"review_comments_url: https://forge.example.com/owner/repo/pulls/123",
 		"path: CHC-1-Do-something.md",
-	} {
-		if !strings.Contains(stdout.String(), want) {
-			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
-		}
 	}
 }
 
@@ -4084,10 +4125,10 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"database_exists: false",
 		"schema_migrations_exists: false",
 		"applied: 0",
-		"pending: 8",
+		"pending: 9",
 		"unknown: 0",
 		"pending_migration: 20260518000001 create_projects",
-		"pending_migration: 20260526000008 add_board_ticket_metadata",
+		"pending_migration: 20260601000009 add_ticket_review_metadata",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -4126,12 +4167,12 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 	for _, want := range []string{
 		"database_exists: true",
 		"schema_migrations_exists: true",
-		"available: 8",
-		"applied: 8",
+		"available: 9",
+		"applied: 9",
 		"pending: 0",
 		"unknown: 0",
 		"applied_migration: 20260518000001 create_projects",
-		"applied_migration: 20260526000008 add_board_ticket_metadata",
+		"applied_migration: 20260601000009 add_ticket_review_metadata",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)

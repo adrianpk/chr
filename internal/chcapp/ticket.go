@@ -1378,6 +1378,11 @@ func printTicketShow(stdout io.Writer, ticket chc.IndexedTicket) error {
 		"type: " + ticket.Type,
 		"use_case: " + ticket.UseCase,
 		"project_area: " + ticket.ProjectArea,
+		"branch: " + ticket.Branch,
+		"review_state: " + ticket.ReviewState,
+		fmt.Sprintf("review_round: %d", ticket.ReviewRound),
+		"review_result: " + ticket.ReviewResult,
+		"review_comments_url: " + ticket.ReviewCommentsURL,
 		"path: " + ticket.RelativePath,
 	}
 

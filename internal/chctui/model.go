@@ -1197,6 +1197,7 @@ func (m Model) renderSelectedTicketDetail() string {
 	output.WriteString(fmt.Sprintf("  Use Case: %s\n", ticket.UseCase))
 	output.WriteString(fmt.Sprintf("  Project Area: %s\n", ticket.ProjectArea))
 	renderTicketSourceDetail(&output, ticket)
+	renderTicketReviewDetail(&output, ticket)
 	output.WriteString(fmt.Sprintf("  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal))
 	output.WriteString(fmt.Sprintf("  Comments: %d\n", ticket.CommentCount))
 	output.WriteString(fmt.Sprintf("  Path: %s\n", ticketDisplayPath(ticket.RelativePath)))
@@ -1211,6 +1212,38 @@ func (m Model) renderSelectedTicketDetail() string {
 	}
 
 	return output.String()
+}
+
+func renderTicketReviewDetail(output *strings.Builder, ticket TicketView) {
+	if !hasTicketReviewDetail(ticket) {
+		return
+	}
+
+	renderTicketReviewStringDetail(output, "Branch", ticket.Branch)
+	renderTicketReviewStringDetail(output, "Review State", ticket.ReviewState)
+
+	if ticket.ReviewRound > 0 {
+		fmt.Fprintf(output, "  Review Round: %d\n", ticket.ReviewRound)
+	}
+
+	renderTicketReviewStringDetail(output, "Review Result", ticket.ReviewResult)
+	renderTicketReviewStringDetail(output, "Review Comments", ticket.ReviewCommentsURL)
+}
+
+func hasTicketReviewDetail(ticket TicketView) bool {
+	return ticket.Branch != "" ||
+		ticket.ReviewState != "" ||
+		ticket.ReviewResult != "" ||
+		ticket.ReviewCommentsURL != "" ||
+		ticket.ReviewRound > 0
+}
+
+func renderTicketReviewStringDetail(output *strings.Builder, label, value string) {
+	if value == "" {
+		return
+	}
+
+	fmt.Fprintf(output, "  %s: %s\n", label, value)
 }
 
 func renderTicketSourceDetail(output *strings.Builder, ticket TicketView) {
@@ -1603,26 +1636,31 @@ func lastRune(value string) string {
 }
 
 type TicketView struct {
-	Index            int
-	Key              string
-	Title            string
-	Synopsis         string
-	Status           string
-	Priority         string
-	Severity         string
-	Type             string
-	UseCase          string
-	ProjectArea      string
-	SourceKind       string
-	SourceRef        string
-	Slice            string
-	BoardColumn      string
-	AttentionReasons []string
-	RelativePath     string
-	ChecklistDone    int
-	ChecklistTotal   int
-	CommentCount     int
-	BodyLines        []string
+	Index             int
+	Key               string
+	Title             string
+	Synopsis          string
+	Status            string
+	Priority          string
+	Severity          string
+	Type              string
+	UseCase           string
+	ProjectArea       string
+	SourceKind        string
+	SourceRef         string
+	Slice             string
+	Branch            string
+	ReviewState       string
+	ReviewRound       int
+	ReviewResult      string
+	ReviewCommentsURL string
+	BoardColumn       string
+	AttentionReasons  []string
+	RelativePath      string
+	ChecklistDone     int
+	ChecklistTotal    int
+	CommentCount      int
+	BodyLines         []string
 }
 
 func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
@@ -1635,22 +1673,27 @@ func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 		}
 
 		view := TicketView{
-			Index:            index,
-			Key:              ticket.Key,
-			Title:            ticket.Title,
-			Synopsis:         ticket.Synopsis,
-			Status:           ticket.Status,
-			Priority:         ticket.Priority,
-			Severity:         ticket.Severity,
-			Type:             ticket.Type,
-			UseCase:          ticket.UseCase,
-			ProjectArea:      ticket.ProjectArea,
-			SourceKind:       ticket.SourceKind,
-			SourceRef:        ticket.SourceRef,
-			Slice:            ticket.Slice,
-			BoardColumn:      boardColumn,
-			AttentionReasons: chc.BoardAttentionReasons(ticket),
-			RelativePath:     ticket.RelativePath,
+			Index:             index,
+			Key:               ticket.Key,
+			Title:             ticket.Title,
+			Synopsis:          ticket.Synopsis,
+			Status:            ticket.Status,
+			Priority:          ticket.Priority,
+			Severity:          ticket.Severity,
+			Type:              ticket.Type,
+			UseCase:           ticket.UseCase,
+			ProjectArea:       ticket.ProjectArea,
+			SourceKind:        ticket.SourceKind,
+			SourceRef:         ticket.SourceRef,
+			Slice:             ticket.Slice,
+			Branch:            ticket.Branch,
+			ReviewState:       ticket.ReviewState,
+			ReviewRound:       ticket.ReviewRound,
+			ReviewResult:      ticket.ReviewResult,
+			ReviewCommentsURL: ticket.ReviewCommentsURL,
+			BoardColumn:       boardColumn,
+			AttentionReasons:  chc.BoardAttentionReasons(ticket),
+			RelativePath:      ticket.RelativePath,
 		}
 
 		detail := ticketMarkdownDetail(ticket.Path)
@@ -1679,6 +1722,10 @@ func (t TicketView) Matches(filter string) bool {
 		t.SourceKind,
 		t.SourceRef,
 		t.Slice,
+		t.Branch,
+		t.ReviewState,
+		t.ReviewResult,
+		t.ReviewCommentsURL,
 		t.RelativePath,
 	}
 
