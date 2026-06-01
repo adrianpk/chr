@@ -1,10 +1,13 @@
-# Slice 5 Report: Forgejo Woodpecker Integration
+# Slice 5: Forgejo Woodpecker Integration
 
-Status: implemented
+Status: delivered
 
+Slicing: Dev to Main Agent Evidence Gate
 Spec: `ops/specs/2026-06-01-dev-main-agent-evidence-gate.md`
 Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`
+Branch: `feat/slice-5-forgejo-woodpecker-integration`
+PR: #268
 
 ## Scope
 
