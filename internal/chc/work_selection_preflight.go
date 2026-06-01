@@ -73,14 +73,42 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 		return nil, err
 	}
 
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, operation, createdAt, err := normalizeAgentOperationLockOptions(opts)
 	if err != nil {
 		return nil, err
 	}
 
+	lockPath := agentOperationLockPath(projectDir)
+
+	file, err := createAgentOperationLockFile(lockPath)
+	if err != nil {
+		return nil, err
+	}
+
+	record := agentOperationLockRecord{
+		Operation: operation,
+		Owner:     strings.TrimSpace(opts.Owner),
+		PID:       os.Getpid(),
+		CreatedAt: createdAt.Format(time.RFC3339),
+	}
+
+	err = writeAgentOperationLockFile(file, lockPath, record)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AgentOperationLock{path: lockPath}, nil
+}
+
+func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (string, string, time.Time, error) {
+	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	if err != nil {
+		return "", "", time.Time{}, err
+	}
+
 	operation := strings.TrimSpace(opts.Operation)
 	if operation == "" {
-		return nil, fmt.Errorf("agent operation is required")
+		return "", "", time.Time{}, fmt.Errorf("agent operation is required")
 	}
 
 	createdAt := opts.Now.UTC()
@@ -88,8 +116,11 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 		createdAt = time.Now().UTC()
 	}
 
-	lockPath := agentOperationLockPath(projectDir)
-	err = os.MkdirAll(filepath.Dir(lockPath), 0o755)
+	return projectDir, operation, createdAt, nil
+}
+
+func createAgentOperationLockFile(lockPath string) (*os.File, error) {
+	err := os.MkdirAll(filepath.Dir(lockPath), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create agent operation lock directory: %w", err)
 	}
@@ -103,27 +134,35 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 		return nil, fmt.Errorf("create agent operation lock: %w", err)
 	}
 
-	record := agentOperationLockRecord{
-		Operation: operation,
-		Owner:     strings.TrimSpace(opts.Owner),
-		PID:       os.Getpid(),
-		CreatedAt: createdAt.Format(time.RFC3339),
-	}
+	return file, nil
+}
 
+func writeAgentOperationLockFile(file *os.File, lockPath string, record agentOperationLockRecord) error {
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
-	err = encoder.Encode(record)
+
+	err := encoder.Encode(record)
 	closeErr := file.Close()
+
 	if err != nil {
-		_ = os.Remove(lockPath)
-		return nil, fmt.Errorf("write agent operation lock: %w", err)
-	}
-	if closeErr != nil {
-		_ = os.Remove(lockPath)
-		return nil, fmt.Errorf("close agent operation lock: %w", closeErr)
+		removeErr := os.Remove(lockPath)
+		if removeErr != nil {
+			return fmt.Errorf("remove failed agent operation lock: %w", removeErr)
+		}
+
+		return fmt.Errorf("write agent operation lock: %w", err)
 	}
 
-	return &AgentOperationLock{path: lockPath}, nil
+	if closeErr != nil {
+		removeErr := os.Remove(lockPath)
+		if removeErr != nil {
+			return fmt.Errorf("remove failed agent operation lock: %w", removeErr)
+		}
+
+		return fmt.Errorf("close agent operation lock: %w", closeErr)
+	}
+
+	return nil
 }
 
 func (lock *AgentOperationLock) Release() error {
@@ -170,6 +209,7 @@ func RunWorkSelectionPreflight(ctx context.Context, opts WorkSelectionPreflightO
 		if err != nil {
 			return WorkSelectionPreflightResult{}, err
 		}
+
 		if blocked != nil {
 			result.Allowed = false
 			result.BlockReasons = append(result.BlockReasons, *blocked)
@@ -222,6 +262,7 @@ func agentOperationLockPath(projectDir string) string {
 
 func reviewRepairTickets(tickets []IndexedTicket) []IndexedTicket {
 	repairs := make([]IndexedTicket, 0)
+
 	for _, ticket := range tickets {
 		if isReviewRepairTicket(ticket) {
 			repairs = append(repairs, ticket)
@@ -257,14 +298,15 @@ func staleDevBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions
 		git = OSWorkSelectionGit{}
 	}
 
+	return staleDevBlockReasonForGit(ctx, projectDir, git)
+}
+
+func staleDevBlockReasonForGit(ctx context.Context, projectDir string, git WorkSelectionGit) (*WorkSelectionBlockReason, error) {
 	branch, err := git.CurrentBranch(ctx, projectDir)
 	if err != nil {
-		if errors.Is(err, errWorkSelectionGitUnavailable) {
-			return nil, nil
-		}
-
-		return nil, err
+		return nilIfGitUnavailable(err)
 	}
+
 	if branch != "dev" {
 		return &WorkSelectionBlockReason{
 			Code:   WorkSelectionBlockStaleDev,
@@ -274,12 +316,9 @@ func staleDevBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions
 
 	clean, err := git.WorktreeClean(ctx, projectDir)
 	if err != nil {
-		if errors.Is(err, errWorkSelectionGitUnavailable) {
-			return nil, nil
-		}
-
-		return nil, err
+		return nilIfGitUnavailable(err)
 	}
+
 	if !clean {
 		return &WorkSelectionBlockReason{
 			Code:   WorkSelectionBlockStaleDev,
@@ -289,12 +328,9 @@ func staleDevBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions
 
 	contains, err := git.DevContainsOriginDev(ctx, projectDir)
 	if err != nil {
-		if errors.Is(err, errWorkSelectionGitUnavailable) {
-			return nil, nil
-		}
-
-		return nil, err
+		return nilIfGitUnavailable(err)
 	}
+
 	if !contains {
 		return &WorkSelectionBlockReason{
 			Code:   WorkSelectionBlockStaleDev,
@@ -303,6 +339,14 @@ func staleDevBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions
 	}
 
 	return nil, nil
+}
+
+func nilIfGitUnavailable(err error) (*WorkSelectionBlockReason, error) {
+	if errors.Is(err, errWorkSelectionGitUnavailable) {
+		return nil, nil
+	}
+
+	return nil, err
 }
 
 var errWorkSelectionGitUnavailable = errors.New("work selection git unavailable")

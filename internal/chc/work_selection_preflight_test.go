@@ -17,6 +17,7 @@ func TestAgentOperationLockBlocksConcurrentOperation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AcquireAgentOperationLock returned error: %v", err)
 	}
+
 	defer func() {
 		if err := lock.Release(); err != nil {
 			t.Fatalf("Release returned error: %v", err)
@@ -50,6 +51,7 @@ func TestWorkSelectionPreflightPrioritizesReviewRepair(t *testing.T) {
 	if !result.Allowed {
 		t.Fatalf("Allowed = false, want true")
 	}
+
 	if len(result.SelectedTickets) != 1 || result.SelectedTickets[0].Key != "CHC-1" {
 		t.Fatalf("SelectedTickets = %#v, want CHC-1 repair", result.SelectedTickets)
 	}
@@ -73,6 +75,7 @@ func TestWorkSelectionPreflightBlocksLaterTicketWhenRepairPending(t *testing.T) 
 	if result.Allowed {
 		t.Fatalf("Allowed = true, want false")
 	}
+
 	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockReviewRepairPending {
 		t.Fatalf("BlockReasons = %#v, want review repair pending", result.BlockReasons)
 	}
@@ -95,6 +98,7 @@ func TestWorkSelectionPreflightBlocksStaleDev(t *testing.T) {
 	if result.Allowed {
 		t.Fatalf("Allowed = true, want false")
 	}
+
 	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockStaleDev {
 		t.Fatalf("BlockReasons = %#v, want stale dev", result.BlockReasons)
 	}
@@ -118,6 +122,7 @@ func TestWorkSelectionPreflightBlocksDevBehindOriginDev(t *testing.T) {
 	if result.Allowed {
 		t.Fatalf("Allowed = true, want false")
 	}
+
 	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockStaleDev {
 		t.Fatalf("BlockReasons = %#v, want stale dev", result.BlockReasons)
 	}

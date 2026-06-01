@@ -49,39 +49,11 @@ func (s service) StartReadyTicketLoop() (WorkOperationResult, error) {
 }
 
 func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error) {
-	err := s.ensureAgentWorkRuntime()
+	ticket, preflight, release, err := s.prepareAgentWorkTicket(ticketKey)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
-
-	ticket, err := s.ticketByKey(ticketKey)
-	if err != nil {
-		return AgentWorkResult{}, err
-	}
-
-	tickets, err := s.listProjectTickets()
-	if err != nil {
-		return AgentWorkResult{}, err
-	}
-
-	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
-	if err != nil {
-		return AgentWorkResult{}, err
-	}
-
-	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, chc.AgentOperationDevelopment)
-	if err != nil {
-		return AgentWorkResult{}, err
-	}
-	defer func() {
-		//nolint:errcheck // Operation result already comes from the main workflow.
-		_ = lock.Release()
-	}()
-
-	preflight, err := buildTicketStartPreflightForTicket(s.ctx, s.env, s.projectContext, ticket, s.assetsFS)
-	if err != nil {
-		return AgentWorkResult{}, chc.NewExecutionFailure(chc.ExecutionFailurePreflight, err)
-	}
+	defer release()
 
 	if !chc.RuntimeValidationPassed(preflight.Runtime.Checks) {
 		return AgentWorkResult{}, chc.NewExecutionFailure(
@@ -123,6 +95,45 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 		Tickets:   result.Tickets,
 		Execution: &record,
 	}, nil
+}
+
+func (s service) prepareAgentWorkTicket(ticketKey string) (chc.IndexedTicket, ticketStartPreflight, func(), error) {
+	err := s.ensureAgentWorkRuntime()
+	if err != nil {
+		return chc.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+	}
+
+	ticket, err := s.ticketByKey(ticketKey)
+	if err != nil {
+		return chc.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+	}
+
+	tickets, err := s.listProjectTickets()
+	if err != nil {
+		return chc.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+	}
+
+	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
+	if err != nil {
+		return chc.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+	}
+
+	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, chc.AgentOperationDevelopment)
+	if err != nil {
+		return chc.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+	}
+
+	preflight, err := buildTicketStartPreflightForTicket(s.ctx, s.env, s.projectContext, ticket, s.assetsFS)
+	if err != nil {
+		releaseErr := lock.Release()
+		if releaseErr != nil {
+			return chc.IndexedTicket{}, ticketStartPreflight{}, noopRelease, releaseErr
+		}
+
+		return chc.IndexedTicket{}, ticketStartPreflight{}, noopRelease, chc.NewExecutionFailure(chc.ExecutionFailurePreflight, err)
+	}
+
+	return ticket, preflight, releaseAgentOperationLock(lock), nil
 }
 
 func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
@@ -185,10 +196,8 @@ func (s service) startAgentWorkLoop(tickets []chc.IndexedTicket, eligibleCount i
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
-	defer func() {
-		//nolint:errcheck // Operation result already comes from the main workflow.
-		_ = lock.Release()
-	}()
+
+	defer releaseAgentOperationLock(lock)()
 
 	result, err := runTicketLoopExecution(s.ctx, s.env, s.projectContext, tickets, eligibleCount, s.assetsFS)
 	if err != nil {
@@ -252,13 +261,13 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]chc.Ind
 		return nil, 0, err
 	}
 
+	defer func() {
+		//nolint:errcheck // Query result already comes from the main workflow.
+		_ = index.Close()
+	}()
+
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
-		closeErr := index.Close()
-		if closeErr != nil {
-			return nil, 0, closeErr
-		}
-
 		return nil, 0, err
 	}
 
@@ -269,50 +278,10 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]chc.Ind
 		Order:     agentWorkOrder(opts.Order),
 	})
 	if err != nil {
-		closeErr := index.Close()
-		if closeErr != nil {
-			return nil, 0, closeErr
-		}
-
 		return nil, 0, err
 	}
 
-	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
-	if err != nil {
-		closeErr := index.Close()
-		if closeErr != nil {
-			return nil, 0, closeErr
-		}
-
-		return nil, 0, err
-	}
-
-	preflight, err := chc.RunWorkSelectionPreflight(s.ctx, chc.WorkSelectionPreflightOptions{
-		ProjectDir:        s.projectContext.ProjectDir,
-		Tickets:           allTickets,
-		RequireUpdatedDev: true,
-	})
-	if err != nil {
-		closeErr := index.Close()
-		if closeErr != nil {
-			return nil, 0, closeErr
-		}
-
-		return nil, 0, err
-	}
-	if !preflight.Allowed {
-		closeErr := index.Close()
-		if closeErr != nil {
-			return nil, 0, closeErr
-		}
-
-		return nil, 0, formatWorkSelectionPreflightError(preflight)
-	}
-	if len(preflight.SelectedTickets) > 0 && hasReviewRepairTicket(preflight.SelectedTickets) {
-		tickets = preflight.SelectedTickets
-	}
-
-	err = index.Close()
+	tickets, err = s.applyAgentWorkSelectionPreflight(index, tickets)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -321,6 +290,32 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]chc.Ind
 	tickets = ticketsForTicketLoopRun(eligibleTickets, ticketLoopRunOptions{MaxIterations: opts.MaxIterations})
 
 	return tickets, len(eligibleTickets), nil
+}
+
+func (s service) applyAgentWorkSelectionPreflight(index chc.TicketIndex, tickets []chc.IndexedTicket) ([]chc.IndexedTicket, error) {
+	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+
+	preflight, err := chc.RunWorkSelectionPreflight(s.ctx, chc.WorkSelectionPreflightOptions{
+		ProjectDir:        s.projectContext.ProjectDir,
+		Tickets:           allTickets,
+		RequireUpdatedDev: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !preflight.Allowed {
+		return nil, formatWorkSelectionPreflightError(preflight)
+	}
+
+	if len(preflight.SelectedTickets) > 0 && hasReviewRepairTicket(preflight.SelectedTickets) {
+		return preflight.SelectedTickets, nil
+	}
+
+	return tickets, nil
 }
 
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {

@@ -550,10 +550,8 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		if err != nil {
 			return err
 		}
-		defer func() {
-			//nolint:errcheck // Command result already comes from the main operation.
-			_ = lock.Release()
-		}()
+
+		defer releaseAgentOperationLock(lock)()
 
 		record, err := runAndPrintTicketStartExecution(ctx, stdout, preflight)
 		if err != nil {
@@ -598,33 +596,10 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
+	tickets, eligibleCount, err := selectTicketLoopTickets(ctx, index, projectContext, queryOptions, runOptions)
 	if err != nil {
 		return err
 	}
-
-	allTickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
-	if err != nil {
-		return err
-	}
-
-	preflight, err := chc.RunWorkSelectionPreflight(ctx, chc.WorkSelectionPreflightOptions{
-		ProjectDir:        projectContext.ProjectDir,
-		Tickets:           allTickets,
-		RequireUpdatedDev: true,
-	})
-	if err != nil {
-		return err
-	}
-	if !preflight.Allowed {
-		return formatWorkSelectionPreflightError(preflight)
-	}
-	if len(preflight.SelectedTickets) > 0 && hasReviewRepairTicket(preflight.SelectedTickets) {
-		tickets = preflight.SelectedTickets
-	}
-
-	eligibleTickets := deduplicateTicketLoopTickets(tickets)
-	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
 
 	if !cmd.Bool("dry-run") {
 		deps, err := appDependenciesFromCommand(cmd)
@@ -636,15 +611,56 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		if err != nil {
 			return err
 		}
-		defer func() {
-			//nolint:errcheck // Command result already comes from the main operation.
-			_ = lock.Release()
-		}()
 
-		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, len(eligibleTickets), deps.assetsFS)
+		defer releaseAgentOperationLock(lock)()
+
+		return runAndPrintTicketLoopExecution(ctx, stdout, env, projectContext, tickets, eligibleCount, deps.assetsFS)
 	}
 
 	return printTicketLoopPlan(stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
+}
+
+func selectTicketLoopTickets(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext, queryOptions chc.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) ([]chc.IndexedTicket, int, error) {
+	tickets, err := chc.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	tickets, err = applyTicketLoopPreflight(ctx, index, projectContext, tickets)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	eligibleTickets := deduplicateTicketLoopTickets(tickets)
+	tickets = ticketsForTicketLoopRun(eligibleTickets, runOptions)
+
+	return tickets, len(eligibleTickets), nil
+}
+
+func applyTicketLoopPreflight(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext, tickets []chc.IndexedTicket) ([]chc.IndexedTicket, error) {
+	allTickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+
+	preflight, err := chc.RunWorkSelectionPreflight(ctx, chc.WorkSelectionPreflightOptions{
+		ProjectDir:        projectContext.ProjectDir,
+		Tickets:           allTickets,
+		RequireUpdatedDev: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !preflight.Allowed {
+		return nil, formatWorkSelectionPreflightError(preflight)
+	}
+
+	if len(preflight.SelectedTickets) > 0 && hasReviewRepairTicket(preflight.SelectedTickets) {
+		return preflight.SelectedTickets, nil
+	}
+
+	return tickets, nil
 }
 
 func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) chc.TicketLoopQueryOptions {
@@ -709,6 +725,7 @@ func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandPr
 	if err != nil {
 		return err
 	}
+
 	if !preflight.Allowed {
 		return formatWorkSelectionPreflightError(preflight)
 	}
@@ -731,8 +748,10 @@ func formatWorkSelectionPreflightError(preflight chc.WorkSelectionPreflightResul
 
 func hasReviewRepairTicket(tickets []chc.IndexedTicket) bool {
 	for _, ticket := range tickets {
-		if ticket.Status == chc.TicketStatusReadyForDev &&
-			(ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes") {
+		readyForDev := ticket.Status == chc.TicketStatusReadyForDev
+		changesRequested := ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes"
+
+		if readyForDev && changesRequested {
 			return true
 		}
 	}
@@ -747,6 +766,15 @@ func acquireAgentOperationLock(ctx context.Context, projectContext commandProjec
 		Owner:      "chc",
 	})
 }
+
+func releaseAgentOperationLock(lock *chc.AgentOperationLock) func() {
+	return func() {
+		//nolint:errcheck // Operation result already comes from the main workflow.
+		_ = lock.Release()
+	}
+}
+
+func noopRelease() {}
 
 func runAndPrintTicketLoopExecution(
 	ctx context.Context,
@@ -1669,16 +1697,11 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 
 	adapter := chc.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
 
-	if !cmd.Bool("dry-run") {
-		lock, err := acquireAgentOperationLock(ctx, projectContext, chc.AgentOperationReview)
-		if err != nil {
-			return err
-		}
-		defer func() {
-			//nolint:errcheck // Command result already comes from the main operation.
-			_ = lock.Release()
-		}()
+	release, err := acquireTicketReviewLock(ctx, projectContext, cmd.Bool("dry-run"))
+	if err != nil {
+		return err
 	}
+	defer release()
 
 	result, err := chc.RunTicketReviewCommand(ctx, chc.TicketReviewCommandOptions{
 		Ticket:     ticket,
@@ -1693,14 +1716,33 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	if !cmd.Bool("dry-run") {
-		err = refreshProjectTicketIndex(ctx, index, projectContext)
-		if err != nil {
-			return err
-		}
+	err = refreshTicketIndexAfterReview(ctx, index, projectContext, cmd.Bool("dry-run"))
+	if err != nil {
+		return err
 	}
 
 	return printTicketReviewResult(stdout, projectContext, result)
+}
+
+func refreshTicketIndexAfterReview(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
+	if dryRun {
+		return nil
+	}
+
+	return refreshProjectTicketIndex(ctx, index, projectContext)
+}
+
+func acquireTicketReviewLock(ctx context.Context, projectContext commandProjectContext, dryRun bool) (func(), error) {
+	if dryRun {
+		return noopRelease, nil
+	}
+
+	lock, err := acquireAgentOperationLock(ctx, projectContext, chc.AgentOperationReview)
+	if err != nil {
+		return noopRelease, err
+	}
+
+	return releaseAgentOperationLock(lock), nil
 }
 
 func printTicketReviewResult(
