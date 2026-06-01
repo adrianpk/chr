@@ -13,6 +13,7 @@ type TicketActionID string
 
 const (
 	TicketActionAddComment       TicketActionID = "add_comment"
+	TicketActionAttachReviewRef  TicketActionID = "attach_review_ref"
 	TicketActionMoveStatus       TicketActionID = "move_status"
 	TicketActionToggleChecklist  TicketActionID = "toggle_checklist"
 	TicketActionAddChecklistItem TicketActionID = "add_checklist_item"
@@ -23,9 +24,11 @@ type TicketActionExecutor interface {
 }
 
 type TicketActionRequest struct {
-	Action TicketActionID
-	Key    string
-	Status string
+	Action    TicketActionID
+	Key       string
+	Status    string
+	Branch    string
+	ReviewRef *chc.TicketReviewRef
 }
 
 type TicketActionResult struct {

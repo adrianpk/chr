@@ -242,6 +242,12 @@ type TicketCommentRequest struct {
 	Body   string
 }
 
+type TicketReviewReferenceRequest struct {
+	Key    string
+	Branch string
+	Ref    *chc.TicketReviewRef
+}
+
 func (s service) AddSelectedTicketComment(ticketKey string) (TicketOperationResult, error) {
 	return s.AddTicketComment(TicketCommentRequest{
 		Key:    ticketKey,
@@ -273,6 +279,33 @@ func (s service) AddTicketComment(request TicketCommentRequest) (TicketOperation
 
 	return TicketOperationResult{
 		Message: "Added comment to ticket " + ticket.Key + ".",
+		Tickets: tickets,
+	}, nil
+}
+
+func (s service) AttachTicketReviewReference(request TicketReviewReferenceRequest) (TicketOperationResult, error) {
+	ticket, err := s.ticketByKey(request.Key)
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	err = chc.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(s.ctx, chc.UpdateTicketReviewMetadataOptions{
+		Path:      ticket.Path,
+		Branch:    request.Branch,
+		ReviewRef: request.Ref,
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	tickets, err := s.listProjectTickets()
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	return TicketOperationResult{
+		Message: "Attached review metadata to ticket " + ticket.Key + ".",
 		Tickets: tickets,
 	}, nil
 }

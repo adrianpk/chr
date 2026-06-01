@@ -75,6 +75,11 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 		return fmt.Errorf("read ticket file: %w", err)
 	}
 
+	err = validateTicketStatusTransitionMetadata(string(content), status)
+	if err != nil {
+		return err
+	}
+
 	updatedAt := opts.UpdatedAt.UTC()
 	if updatedAt.IsZero() {
 		updatedAt = time.Now().UTC()
@@ -94,6 +99,38 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 	}
 
 	return nil
+}
+
+func validateTicketStatusTransitionMetadata(content, status string) error {
+	if status != TicketStatusReadyForReview {
+		return nil
+	}
+
+	frontmatter, err := parseTicketFrontmatter(content)
+	if err != nil {
+		return err
+	}
+
+	branch := unquoteMetadataString(frontmatter.Metadata["branch"])
+	if strings.TrimSpace(branch) == "" {
+		return fmt.Errorf("ticket ready_for_review requires branch metadata")
+	}
+
+	if !hasPullRequestReviewRef(frontmatter.ReviewRefs) {
+		return fmt.Errorf("ticket ready_for_review requires a pull_request review ref")
+	}
+
+	return nil
+}
+
+func hasPullRequestReviewRef(refs []TicketReviewRef) bool {
+	for _, ref := range refs {
+		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
+			return true
+		}
+	}
+
+	return false
 }
 
 func IsValidTicketStatus(status string) bool {

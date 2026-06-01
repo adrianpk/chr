@@ -212,6 +212,17 @@ func (e tuiTicketActionExecutor) ExecuteTicketAction(
 		}
 
 		return ticketActionResult(result), nil
+	case chctui.TicketActionAttachReviewRef:
+		result, err := e.operations.AttachTicketReviewReference(TicketReviewReferenceRequest{
+			Key:    request.Key,
+			Branch: request.Branch,
+			Ref:    request.ReviewRef,
+		})
+		if err != nil {
+			return chctui.TicketActionResult{}, err
+		}
+
+		return ticketActionResult(result), nil
 	case chctui.TicketActionToggleChecklist:
 		return chctui.TicketActionResult{}, errors.New(
 			"checklist toggle requires a safe checklist item writer and is not available from this TUI action yet",

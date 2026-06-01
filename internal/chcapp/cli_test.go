@@ -3300,7 +3300,7 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -3322,6 +3322,39 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 		t.Fatalf("ticket apply-result returned error: %v", err)
 	}
 
+	assertTicketApplyResultOutput(t, stdout.String(), record)
+
+	content := readFile(t, ticketPath)
+	assertTicketApplyResultContent(t, content)
+
+	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "result-application.md"))
+	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "execution-report.md"))
+
+	tickets := listProjectTickets(t, devRoot, projectDir)
+	if len(tickets) != 1 || tickets[0].Status != "reviewing" {
+		t.Fatalf("indexed tickets = %#v, want reviewing CHC-1", tickets)
+	}
+}
+
+func testTicketWithReviewRef() chc.Ticket {
+	ticket := testTicket()
+	ticket.Branch = "feat/slice-2-pr-reference-workflow"
+	ticket.ReviewRefs = []chc.TicketReviewRef{
+		{
+			Type:     "pull_request",
+			Provider: "forgejo",
+			URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+			ID:       "274",
+			Status:   "open",
+		},
+	}
+
+	return ticket
+}
+
+func assertTicketApplyResultOutput(t *testing.T, stdout string, record chc.ExecutionRecord) {
+	t.Helper()
+
 	for _, want := range []string{
 		"execution: exec-apply",
 		"ticket: CHC-1",
@@ -3330,16 +3363,21 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 		"execution_report_path: " + filepath.Join(record.Artifacts.RunDir, "execution-report.md"),
 		"dry_run: false",
 	} {
-		if !strings.Contains(stdout.String(), want) {
-			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		if !strings.Contains(stdout, want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout)
 		}
 	}
+}
 
-	content := readFile(t, ticketPath)
+func assertTicketApplyResultContent(t *testing.T, content string) {
+	t.Helper()
+
 	for _, want := range []string{
 		`status: "reviewing"`,
 		"Execution `exec-apply` finished with status `succeeded`.",
 		"Summary: ready for review",
+		`branch: "feat/slice-2-pr-reference-workflow"`,
+		`url: "https://forge.example.com/adrianpk/chc/pulls/274"`,
 		"## ",
 		"- command: make verify",
 		"- status: succeeded",
@@ -3347,14 +3385,6 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 		if !strings.Contains(content, want) {
 			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
 		}
-	}
-
-	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "result-application.md"))
-	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "execution-report.md"))
-
-	tickets := listProjectTickets(t, devRoot, projectDir)
-	if len(tickets) != 1 || tickets[0].Status != "reviewing" {
-		t.Fatalf("indexed tickets = %#v, want reviewing CHC-1", tickets)
 	}
 }
 
@@ -3791,6 +3821,67 @@ func TestTicketStatusUpdatesTicket(t *testing.T) {
 	}
 }
 
+func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review-ref",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--branch",
+		"feat/slice-2-pr-reference-workflow",
+		"--provider",
+		"forgejo",
+		"--url",
+		"https://forge.example.com/adrianpk/chc/pulls/274",
+		"--id",
+		"274",
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review-ref returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "ticket: CHC-1 review_ref") {
+		t.Fatalf("stdout = %q, want review-ref result", stdout.String())
+	}
+
+	err = run(t.Context(), []string{
+		"ticket",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		chc.TicketStatusReadyForReview,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket status returned error: %v", err)
+	}
+
+	content := readFile(t, ticketPath)
+	for _, want := range []string{
+		`branch: "feat/slice-2-pr-reference-workflow"`,
+		`review_refs:`,
+		`url: "https://forge.example.com/adrianpk/chc/pulls/274"`,
+		`status: "ready_for_review"`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
+		}
+	}
+}
+
 func TestTicketStatusRejectsInvalidStatus(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -3807,6 +3898,28 @@ func TestTicketStatusRejectsInvalidStatus(t *testing.T) {
 		projectDir,
 		"CHC-1",
 		"unknown",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket status returned nil error")
+	}
+}
+
+func TestTicketStatusRejectsReadyForReviewWithoutReviewRef(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		chc.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")

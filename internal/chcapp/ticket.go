@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/urfave/cli/v3"
@@ -27,6 +28,7 @@ func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newTicketListCommand(stdout),
 			newTicketLoopCommand(stdout),
 			newTicketNewCommand(stdout),
+			newTicketReviewRefCommand(stdout),
 			newTicketShowCommand(stdout),
 			newTicketStartCommand(stdout),
 			newTicketStatusCommand(stdout),
@@ -49,6 +51,15 @@ func newTicketNewCommand(stdout io.Writer) *cli.Command {
 		Usage:  "Create a ticket in the current workspace",
 		Flags:  ticketNewFlags(),
 		Action: ticketNewAction(stdout),
+	}
+}
+
+func newTicketReviewRefCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "review-ref",
+		Usage:  "Attach branch and pull request review metadata to one ticket",
+		Flags:  ticketReviewRefFlags(),
+		Action: ticketReviewRefAction(stdout),
 	}
 }
 
@@ -198,6 +209,37 @@ func ticketCommentFlags() []cli.Flag {
 	)
 }
 
+func ticketReviewRefFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.StringFlag{
+			Name:  "branch",
+			Usage: "ticket implementation branch",
+		},
+		&cli.StringFlag{
+			Name:  "type",
+			Usage: "review reference type",
+			Value: "pull_request",
+		},
+		&cli.StringFlag{
+			Name:  "provider",
+			Usage: "review provider",
+		},
+		&cli.StringFlag{
+			Name:  "url",
+			Usage: "pull request URL",
+		},
+		&cli.StringFlag{
+			Name:  "id",
+			Usage: "provider pull request identifier",
+		},
+		&cli.StringFlag{
+			Name:  "ref-status",
+			Usage: "provider pull request status",
+			Value: "open",
+		},
+	)
+}
+
 func ticketNewFlags() []cli.Flag {
 	return append(ticketProjectFlags(),
 		&cli.StringFlag{
@@ -252,6 +294,12 @@ func ticketShowAction(stdout io.Writer) cli.ActionFunc {
 func ticketCommentAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketComment(ctx, cmd, stdout)
+	}
+}
+
+func ticketReviewRefAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketReviewRef(ctx, cmd, stdout)
 	}
 }
 
@@ -1333,6 +1381,78 @@ func runTicketComment(ctx context.Context, cmd *cli.Command, stdout io.Writer) e
 	}
 
 	return nil
+}
+
+func runTicketReviewRef(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("ticket review-ref requires exactly one ticket key argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	request, err := ticketReviewReferenceRequestFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	result, err := newService(ctx, env, projectContext, deps.assetsFS).AttachTicketReviewReference(request)
+	if err != nil {
+		return err
+	}
+
+	updated, err := ticketOperationResultTicket(result, request.Key)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(stdout, "ticket: %s review_ref\n", updated.Key)
+	if err != nil {
+		return fmt.Errorf("write ticket review-ref result: %w", err)
+	}
+
+	return nil
+}
+
+func ticketReviewReferenceRequestFromCommand(cmd *cli.Command) (TicketReviewReferenceRequest, error) {
+	request := TicketReviewReferenceRequest{
+		Key:    cmd.Args().First(),
+		Branch: cmd.String("branch"),
+	}
+
+	if strings.TrimSpace(cmd.String("url")) == "" {
+		return request, nil
+	}
+
+	if strings.TrimSpace(cmd.String("provider")) == "" {
+		return TicketReviewReferenceRequest{}, fmt.Errorf("ticket review-ref provider is required when url is set")
+	}
+
+	request.Ref = &chc.TicketReviewRef{
+		Type:     cmd.String("type"),
+		Provider: cmd.String("provider"),
+		URL:      cmd.String("url"),
+		ID:       cmd.String("id"),
+		Status:   cmd.String("ref-status"),
+	}
+
+	return request, nil
 }
 
 func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {

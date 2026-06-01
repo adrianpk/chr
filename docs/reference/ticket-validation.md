@@ -98,6 +98,9 @@ needs_human_decision
 
 Each `review_refs` entry requires `type`, `provider`, and `url`.
 
+Moving a ticket to `ready_for_review` requires both `branch` metadata and at
+least one `review_refs` entry with `type: "pull_request"`.
+
 `blocking_findings` cannot contain empty values.
 
 ## Time Consistency

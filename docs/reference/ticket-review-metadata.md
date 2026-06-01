@@ -51,6 +51,28 @@ contains the detailed review discussion.
 `blocking_findings` stores machine-readable identifiers for blocking findings,
 such as `RF-1`.
 
+## Attaching References
+
+Use `ticket review-ref` to attach branch and pull request metadata to a ticket:
+
+```text
+chc ticket review-ref CHC-1 \
+  --branch feat/slice-2-pr-reference-workflow \
+  --provider forgejo \
+  --url https://forge.example.com/adrianpk/chc/pulls/274 \
+  --id 274
+```
+
+The command updates an existing pull request reference when the URL matches, or
+when the provider, type, and non-empty provider ID match. Otherwise it appends a
+new review reference.
+
+The command may also set only the branch:
+
+```text
+chc ticket review-ref CHC-1 --branch feat/slice-2-pr-reference-workflow
+```
+
 ## Board Behavior
 
 Review metadata does not create additional board columns.
@@ -65,6 +87,9 @@ Tickets with `review_state: "insufficient_evidence"` or
 ## Validation
 
 Review references require `type`, `provider`, and `url`.
+
+Moving a ticket to `ready_for_review` requires both `branch` and at least one
+`pull_request` entry in `review_refs`.
 
 `review_round` cannot be negative.
 
