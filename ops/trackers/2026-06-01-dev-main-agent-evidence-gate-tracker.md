@@ -62,13 +62,13 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Investigate Forgejo/Woodpecker status, comments, and artifact link mechanisms. | pending | pending |  |
-| T5.2 | Add `chc gate woodpecker init`. | pending | pending |  |
-| T5.3 | Generate Woodpecker snippet and minimal config. | pending | pending |  |
-| T5.4 | Add non-destructive existing-config behavior. | pending | pending |  |
-| T5.5 | Add Forgejo/Woodpecker feedback integration selected by investigation. | pending | pending |  |
-| T5.6 | Add tests for helper behavior and feedback failure handling. | pending | pending |  |
-| T5.7 | Add slice report and tracker updates. | pending | pending |  |
+| T5.1 | Investigate Forgejo/Woodpecker status, comments, and artifact link mechanisms. | done | `a0261c4` | Selected Woodpecker CI status as the first feedback path. |
+| T5.2 | Add `chc gate woodpecker init`. | done | `2112a09` | Added the Woodpecker setup command under `gate`. |
+| T5.3 | Generate Woodpecker snippet and minimal config. | done | `2112a09` | Added deterministic snippet generation and missing-config creation. |
+| T5.4 | Add non-destructive existing-config behavior. | done | `2112a09` | Existing configs are not modified without `--write`; unmarked configs fail safely. |
+| T5.5 | Add Forgejo/Woodpecker feedback integration selected by investigation. | done | `2112a09` | Command output exposes `woodpecker-status` as the feedback mechanism. |
+| T5.6 | Add tests for helper behavior and feedback failure handling. | done | `2112a09` | Added helper and CLI coverage for dry-run, create, existing config, and marked updates. |
+| T5.7 | Add slice report and tracker updates. | done | this commit | Added the Slice 5 report and validation log. |
 
 ## Slice 6 Tasks
 
@@ -96,6 +96,8 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 - Slice 4: `go test ./internal/chc ./internal/chcapp -run 'GateValidation|GateDevMain'` (pass)
 - Slice 4: `go test ./internal/chc ./internal/chcapp -run 'GateEvidence|GateReport|GateDevMain'` (pass)
 - Slice 4: `make verify` (pass)
+- Slice 5: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 5: `make verify` (pass)
 
 ## Notes
 
