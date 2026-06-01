@@ -1,0 +1,10 @@
+gates:
+  dev_main:
+    validation_command: make verify
+    traceability:
+      mode: agent_only
+      fail_on_missing_agent_evidence: false
+      warn_on_manual_changes: true
+    manual_changes:
+      list: true
+      warn_on_high_risk_paths: false

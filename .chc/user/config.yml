@@ -1,0 +1,5 @@
+version: 1
+tickets:
+  key_prefix: CHC
+notifications:
+  telegram_enabled: false

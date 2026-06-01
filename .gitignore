@@ -2,3 +2,9 @@
 /bin/
 /qa/project/
 /qa/tmp/
+/.chc/user/indexes/
+/.chc/user/runtime/runs/
+/.chc/user/runtime/locks/
+/.chc/user/runtime/traces/
+/.chc/user/tmp/
+/.chc/user/reports/gates/
