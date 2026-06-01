@@ -30,6 +30,26 @@ This keeps the agent loop useful. A workflow that requires human review every
 few minutes turns the user into a bottleneck and reduces the value of
 orchestration.
 
+## Ticket-Level Review
+
+Ticket-level review is the lightweight checkpoint for one branch and pull
+request before the ticket proceeds toward integration into `dev`.
+
+This checkpoint is operational rather than ceremonial. The ticket stores the
+branch, pull request reference, review mode, review outcome, and repair handoff
+metadata. The remote pull request remains the place for provider-native review
+comments when the configured provider supports them.
+
+A clean review pass should avoid extra local comment noise. A review with
+findings should mark the ticket as needing repair by returning it to
+`ready_for_dev`, so the next agent work pass fixes that ticket before continuing
+serial slice work that assumes the development branch has advanced.
+
+The exact ticket metadata and state transitions are reference contracts:
+
+- [Ticket review workflow](../reference/ticket-review-workflow.md)
+- [Ticket review metadata](../reference/ticket-review-metadata.md)
+
 ## Integration Checkpoint
 
 The review point belongs around accumulated integration work:

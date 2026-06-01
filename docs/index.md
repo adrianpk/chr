@@ -16,6 +16,7 @@ Task-oriented guides:
 - [Full-system lab runbook](how-to/full-system-lab-runbook.md)
 - [Find execution and loop evidence](how-to/find-execution-and-loop-evidence.md)
 - [Inspect and recover local state](how-to/inspect-and-recover-local-state.md)
+- [Use Forgejo ticket review](how-to/use-forgejo-ticket-review.md)
 - [Adopt the dev to main gate in an existing project](how-to/adopt-dev-main-gate-in-existing-project.md)
 - [Use the dev to main gate with Woodpecker](how-to/use-dev-main-gate-with-woodpecker.md)
 
@@ -29,6 +30,8 @@ Exact contracts and command behavior:
 - [Project workspace](reference/project-workspace.md)
 - [Runtime configuration](reference/runtime-config.md)
 - [Review workflow configuration](reference/review-workflow-config.md)
+- [Ticket review workflow](reference/ticket-review-workflow.md)
+- [Ticket review metadata](reference/ticket-review-metadata.md)
 - [Artifact generation backends](reference/artifact-generation-backends.md)
 - [Notifications](reference/notifications.md)
 - [Notification configuration](reference/notification-config.md)

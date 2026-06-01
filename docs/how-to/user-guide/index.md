@@ -567,6 +567,44 @@ chc report show --execution <execution-id>
 Execution reports summarize the runtime plan, result status, validation status,
 changed files, and artifact paths for one execution.
 
+## Review a Ticket Pull Request
+
+Ticket review is optional and configured per workspace. It uses normal Board
+statuses and ticket metadata; it does not add a separate Board column.
+
+Inspect the configured mode:
+
+```sh
+chc ticket review-mode status
+```
+
+Check provider access for a pull request:
+
+```sh
+chc ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123
+```
+
+Review a ticket after its branch and pull request are recorded in the ticket:
+
+```sh
+chc ticket review CHC-1 --result pass
+```
+
+Record requested changes:
+
+```sh
+chc ticket review CHC-1 \
+  --result needs_changes \
+  --finding "Handle the nil input path before merge."
+```
+
+When review requests changes, the ticket returns to `ready_for_dev` with repair
+handoff metadata. The next work selection prioritizes the repair before later
+serial work that depends on an updated development branch.
+
+For the Forgejo setup flow, see
+[Use Forgejo ticket review](../use-forgejo-ticket-review.md).
+
 ## Run a Foreground Ticket Loop
 
 Preview eligible tickets:

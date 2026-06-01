@@ -246,6 +246,9 @@ chc ticket review CHC-1 --result pass
 chc ticket review CHC-1 --result needs_changes --finding "Handle the nil input path."
 ```
 
+See [Ticket review workflow](ticket-review-workflow.md) for review state
+transitions, pull request references, and repair handoff behavior.
+
 Apply an execution result:
 
 ```sh
