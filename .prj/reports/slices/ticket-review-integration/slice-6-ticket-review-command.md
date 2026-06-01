@@ -5,7 +5,7 @@ Slicing: Ticket Review Integration
 Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 Tracker: `.prj/trackers/slicing-ticket-review-integration-tracker.md`
 Branch: `feat/slice-6-ticket-review-command`
-PR: pending
+PR: #278
 
 ## Purpose
 
