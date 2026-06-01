@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -132,6 +133,7 @@ func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCode
 	}
 
 	handoff := opts.RepairHandoff
+
 	output.WriteString("## Review Repair Handoff\n\n")
 	output.WriteString("- branch: ")
 	output.WriteString(handoff.Branch)
@@ -149,7 +151,7 @@ func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCode
 	output.WriteString(handoff.ReviewResult)
 	output.WriteString("\n")
 	output.WriteString("- review_round: ")
-	output.WriteString(fmt.Sprintf("%d", handoff.ReviewRound))
+	output.WriteString(strconv.Itoa(handoff.ReviewRound))
 	output.WriteString("\n\n")
 	output.WriteString("Use the remote review comments as the source of detailed findings. Do not duplicate remote comments into the ticket.\n\n")
 }
