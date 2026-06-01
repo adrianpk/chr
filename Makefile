@@ -9,7 +9,7 @@ RUN_ARGS ?= --help
 QA_CASE ?= blog
 QA_REF ?= 001
 
-.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev qa-reset qa-test qa-smoke qa-reset-blog qa-test-blog qa-smoke-blog
+.PHONY: fmt test test-coverage lint lint-strict check verify dev-dirs run build build-run install clean-dev qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
 
 fmt:
 	@$(GO) fmt ./...
@@ -59,6 +59,9 @@ qa-test:
 
 qa-smoke:
 	@scripts/qa/smoke.sh $(QA_CASE) $(QA_REF)
+
+qa-gate:
+	@scripts/qa/gate.sh
 
 qa-reset-blog:
 	@$(MAKE) qa-reset QA_CASE=blog QA_REF=001
