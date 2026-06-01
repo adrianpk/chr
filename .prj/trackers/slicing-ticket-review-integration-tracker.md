@@ -29,7 +29,7 @@ Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
 | Slice 5 | remote review adapter | delivered | `feat/slice-5-remote-review-adapter` | `#277` | `.prj/reports/slices/ticket-review-integration/slice-5-remote-review-adapter.md` |
 | Slice 6 | ticket review command | delivered | `feat/slice-6-ticket-review-command` | #278 | `.prj/reports/slices/ticket-review-integration/slice-6-ticket-review-command.md` |
 | Slice 7 | serialized work preflight | delivered | `feat/slice-7-serialized-work-preflight` | #279 | `.prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md` |
-| Slice 8 | repair handoff and docs | pending | `feat/slice-8-repair-handoff-docs` | pending | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
+| Slice 8 | repair handoff and docs | reviewing | `feat/slice-8-repair-handoff-docs` | pending | `.prj/reports/slices/ticket-review-integration/slice-8-repair-handoff-docs.md` |
 
 ## Slice 1: Ticket Review Metadata Contract
 
@@ -193,13 +193,13 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T8.1 Add repair handoff context for existing branch and pull request.
-- [ ] T8.2 Add behavior for remote comment access failure during repair.
-- [ ] T8.3 Add tests for repair context, existing branch reuse, and no next-slice selection while repair is pending.
-- [ ] T8.4 Add reference docs for ticket review integration.
-- [ ] T8.5 Add how-to docs for Forgejo-first setup and review operation.
-- [ ] T8.6 Run `make verify` and a ticket review QA scenario.
-- [ ] T8.7 Add final cycle report and tracker closure.
+- [x] T8.1 Add repair handoff context for existing branch and pull request. Commit: `8ef7a48`
+- [x] T8.2 Add behavior for remote comment access failure during repair. Commits: `8ef7a48`, `6a77d47`
+- [x] T8.3 Add tests for repair context, existing branch reuse, and no next-slice selection while repair is pending. Commit: `8ef7a48`
+- [x] T8.4 Add reference docs for ticket review integration. Commit: `222089b`
+- [x] T8.5 Add how-to docs for Forgejo-first setup and review operation. Commit: `222089b`
+- [x] T8.6 Run `make verify` and a ticket review QA scenario. Commit: this commit
+- [x] T8.7 Add final cycle report and tracker closure. Commit: this commit
 
 ## Validation Log
 
@@ -241,6 +241,12 @@ Tasks:
   - `go test ./internal/chcapp -run 'AgentWork|TicketLoop|TicketReview'` - pass
   - `go test ./internal/chc ./internal/chcapp` - pass
   - `golangci-lint run ./internal/chc ./internal/chcapp` - pass
+- Slice 8:
+  - `git diff --check` - pass
+  - `scripts/check-go-func-signatures.sh` - pass
+  - `go test ./internal/chc -run 'CodexWorkerContext|WorkSelection|TicketReview'` - pass
+  - `make verify` - pass
+  - Ticket review QA scenario - pass
 
 ## Notes
 
