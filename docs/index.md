@@ -58,6 +58,7 @@ Rationale and system shape:
 - [Agent review model](explanation/agent-review-model.md)
 - [Testing and engineering doctrine](explanation/testing-and-engineering-doctrine.md)
 - [Dev to main gate direction](explanation/dev-main-gate-direction.md)
+- [Dev to main tooling gate spec draft](explanation/dev-main-tooling-gate-spec-draft.md)
 - [Slicing workflow](explanation/slicing-workflow.md)
 - [Ticket resolution lifecycle](explanation/ticket-resolution-lifecycle.md)
 
@@ -65,4 +66,4 @@ Rationale and system shape:
 
 Visual examples:
 
-- [Gallery](gallery/index.md)
+- [Gallery](explanation/gallery.md)

@@ -6,6 +6,9 @@ This document captures the need and direction for a future `dev` to `main`
 promotion gate. The goal is to make promotion evidence-driven without turning
 agent review into a linguistic judgment about whether code "looks good".
 
+An extensive pre-spec draft for this direction is available in
+[Dev to main tooling gate spec draft](dev-main-tooling-gate-spec-draft.md).
+
 ## Principle
 
 Promotion should be based on facts produced by tools.

@@ -1,11 +1,11 @@
 # ChrysoCoord
 
 <p align="center">
-  <img src="docs/assets/img/home/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
+  <img src="assets/img/home/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
 </p>
 
 <p align="center">
-  <a href="https://forge.adrianpk.com/adrianpk/chc/src/branch/main/docs/gallery/index.md">Gallery</a>
+  <a href="https://forge.adrianpk.com/adrianpk/chc/src/branch/main/docs/explanation/gallery.md">Gallery</a>
 </p>
 
 ChrysoCoord is a local software-development orchestrator for agentic work.
@@ -22,7 +22,7 @@ tickets, runtime artifacts, and execution state.
 
 <div align="center">
 
-<img src="docs/assets/img/home/chrysocoord-workflow.png" alt="ChrysoCoord workflow">
+<img src="assets/img/home/chrysocoord-workflow.png" alt="ChrysoCoord workflow">
 
 </div>
 

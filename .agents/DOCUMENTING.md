@@ -10,6 +10,10 @@ https://diataxis.fr
 - `docs/reference/` for contracts and exact behavior.
 - `docs/explanation/` for rationale and tradeoffs.
 
+The top level of `docs/` should contain only the four Diataxis quadrant
+directories above. If a quadrant needs internal structure, add subdirectories
+inside that quadrant instead of adding new top-level directories under `docs/`.
+
 ## Go examples
 
 - Keep setup and execution examples in Go project terms (`go test ./...`, `go run ./cmd/...`, `go build ./...`).
