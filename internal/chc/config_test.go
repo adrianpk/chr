@@ -115,11 +115,45 @@ func TestLoadWorkspaceConfigParsesReviewWorkflowConfig(t *testing.T) {
 			want := ReviewWorkflowConfig{
 				Mode:                    test.mode,
 				NonBlockingCommentLimit: 2,
+				Providers:               DefaultReviewProviderConfig(),
 			}
 			if config.Review != want {
 				t.Fatalf("Review = %#v, want %#v", config.Review, want)
 			}
 		})
+	}
+}
+
+func TestLoadWorkspaceConfigParsesReviewProviderConfig(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `review:
+  forgejo_enabled: true
+  forgejo_cli: tea-dev
+  forgejo_token_env: CHC_FORGEJO_TOKEN
+  github_enabled: false
+  github_cli: gh-dev
+  github_token_env: CHC_GITHUB_TOKEN
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := ReviewProviderConfig{
+		Forgejo: ReviewProviderTargetConfig{
+			Enabled:  true,
+			CLI:      "tea-dev",
+			TokenEnv: "CHC_FORGEJO_TOKEN",
+		},
+		GitHub: ReviewProviderTargetConfig{
+			Enabled:  false,
+			CLI:      "gh-dev",
+			TokenEnv: "CHC_GITHUB_TOKEN",
+		},
+	}
+	if config.Review.Providers != want {
+		t.Fatalf("Review.Providers = %#v, want %#v", config.Review.Providers, want)
 	}
 }
 

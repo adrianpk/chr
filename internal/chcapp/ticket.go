@@ -17,6 +17,8 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+var reviewProviderDiagnosticRunner chc.ReviewProviderDiagnosticRunner = chc.OSReviewProviderDiagnosticRunner{}
+
 func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "ticket",
@@ -69,8 +71,18 @@ func newTicketReviewModeCommand(stdout io.Writer) *cli.Command {
 		Name:  "review-mode",
 		Usage: "Inspect ticket review workflow mode",
 		Commands: []*cli.Command{
+			newTicketReviewModeDiagnosticsCommand(stdout),
 			newTicketReviewModeStatusCommand(stdout),
 		},
+	}
+}
+
+func newTicketReviewModeDiagnosticsCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "diagnostics",
+		Usage:  "Verify ticket review provider access",
+		Flags:  ticketReviewModeDiagnosticsFlags(),
+		Action: ticketReviewModeDiagnosticsAction(stdout),
 	}
 }
 
@@ -269,6 +281,19 @@ func ticketReviewModeStatusFlags() []cli.Flag {
 	)
 }
 
+func ticketReviewModeDiagnosticsFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.StringFlag{
+			Name:  "url",
+			Usage: "pull request URL to inspect",
+		},
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "skip remote pull request readability checks",
+		},
+	)
+}
+
 func ticketNewFlags() []cli.Flag {
 	return append(ticketProjectFlags(),
 		&cli.StringFlag{
@@ -335,6 +360,12 @@ func ticketReviewRefAction(stdout io.Writer) cli.ActionFunc {
 func ticketReviewModeStatusAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketReviewModeStatus(ctx, cmd, stdout)
+	}
+}
+
+func ticketReviewModeDiagnosticsAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketReviewModeDiagnostics(ctx, cmd, stdout)
 	}
 }
 
@@ -1495,6 +1526,82 @@ func runTicketReviewModeStatus(ctx context.Context, cmd *cli.Command, stdout io.
 	}
 
 	return printTicketReviewModeStatus(stdout, projectContext, config.Review, cmd.Bool("dry-run"))
+}
+
+func runTicketReviewModeDiagnostics(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 0 {
+		return fmt.Errorf("ticket review-mode diagnostics does not accept positional arguments")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	deps, err := appDependenciesFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
+		ExplicitDir:           cmd.String("dir"),
+		UseExplicitDir:        cmd.IsSet("dir"),
+		AllowCurrentDirectory: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
+
+	diagnostic := chc.RunReviewProviderDiagnostics(ctx, chc.ReviewProviderDiagnosticOptions{
+		Config: config.Review.Providers,
+		URL:    cmd.String("url"),
+		DryRun: cmd.Bool("dry-run"),
+		Runner: reviewProviderDiagnosticRunner,
+	})
+
+	return printTicketReviewModeDiagnostics(stdout, projectContext, diagnostic, cmd.Bool("dry-run"))
+}
+
+func printTicketReviewModeDiagnostics(
+	stdout io.Writer,
+	projectContext commandProjectContext,
+	diagnostic chc.ReviewProviderDiagnostic,
+	dryRun bool,
+) error {
+	reference := diagnostic.Reference
+	lines := []string{
+		"review_provider_diagnostics: status",
+		"project_id: " + projectContext.ProjectID,
+		"project_dir: " + projectContext.ProjectDir,
+		"url: " + reference.URL,
+		"provider: " + string(diagnostic.Provider),
+		"provider_status: " + diagnostic.Status,
+		"host: " + reference.Host,
+		"owner: " + reference.Owner,
+		"repo: " + reference.Repo,
+		fmt.Sprintf("number: %d", reference.Number),
+		fmt.Sprintf("dry_run: %t", dryRun),
+	}
+
+	for _, check := range diagnostic.Checks {
+		line := fmt.Sprintf("check.%s: %s", check.Name, check.Status)
+		if check.Reason != "" {
+			line += " reason=" + check.Reason
+		}
+
+		if check.Detail != "" {
+			line += " detail=" + check.Detail
+		}
+
+		lines = append(lines, line)
+	}
+
+	return printTicketReviewModeStatusLines(stdout, lines)
 }
 
 func printTicketReviewModeStatus(

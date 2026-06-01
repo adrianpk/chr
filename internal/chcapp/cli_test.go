@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -4005,6 +4006,94 @@ func TestTicketReviewModeStatusPrintsInvalidMode(t *testing.T) {
 	}
 }
 
+func TestTicketReviewModeDiagnosticsPrintsProviderStatus(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeCLIWorkspaceConfig(t, projectDir, `review:
+  forgejo_cli: tea
+  forgejo_token_env: CHC_FORGEJO_TOKEN
+`)
+	addProject(t, devRoot, "example", projectDir)
+
+	restoreRunner := replaceReviewProviderDiagnosticRunner(fakeCLIReviewProviderDiagnosticRunner{
+		paths: map[string]string{"tea": "/usr/bin/tea"},
+		env:   map[string]string{"CHC_FORGEJO_TOKEN": "secret"},
+	})
+	defer restoreRunner()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review-mode",
+		"diagnostics",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--url",
+		"https://forge.adrianpk.com/adrianpk/chc/pulls/275",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review-mode diagnostics returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"review_provider_diagnostics: status",
+		"provider: forgejo",
+		"provider_status: ready",
+		"host: forge.adrianpk.com",
+		"owner: adrianpk",
+		"repo: chc",
+		"number: 275",
+		"check.cli_available: ok reason=found detail=/usr/bin/tea",
+		"check.token_available: ok reason=found detail=CHC_FORGEJO_TOKEN",
+		"check.pr_readable: ok reason=readable",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestTicketReviewModeDiagnosticsPrintsMissingTooling(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	restoreRunner := replaceReviewProviderDiagnosticRunner(fakeCLIReviewProviderDiagnosticRunner{})
+	defer restoreRunner()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"review-mode",
+		"diagnostics",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--url",
+		"https://github.com/example/repo/pull/34",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket review-mode diagnostics returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"provider: github",
+		"provider_status: blocked",
+		"check.cli_available: fail reason=missing_cli detail=gh",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func TestTicketStatusRejectsInvalidStatus(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -6251,4 +6340,35 @@ func readTestFile(t *testing.T, path string) string {
 	}
 
 	return string(content)
+}
+
+type fakeCLIReviewProviderDiagnosticRunner struct {
+	paths  map[string]string
+	env    map[string]string
+	runErr error
+}
+
+func (runner fakeCLIReviewProviderDiagnosticRunner) LookPath(file string) (string, error) {
+	if path, ok := runner.paths[file]; ok {
+		return path, nil
+	}
+
+	return "", errors.New("not found")
+}
+
+func (runner fakeCLIReviewProviderDiagnosticRunner) LookupEnv(key string) string {
+	return runner.env[key]
+}
+
+func (runner fakeCLIReviewProviderDiagnosticRunner) Run(_ context.Context, _ string, _ ...string) error {
+	return runner.runErr
+}
+
+func replaceReviewProviderDiagnosticRunner(runner chc.ReviewProviderDiagnosticRunner) func() {
+	previous := reviewProviderDiagnosticRunner
+	reviewProviderDiagnosticRunner = runner
+
+	return func() {
+		reviewProviderDiagnosticRunner = previous
+	}
 }

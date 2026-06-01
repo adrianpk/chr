@@ -220,6 +220,8 @@ Inspect ticket review workflow mode:
 ```sh
 chc ticket review-mode status
 chc ticket review-mode status --dry-run
+chc ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123
+chc ticket review-mode diagnostics --url https://github.com/owner/repo/pull/123 --dry-run
 ```
 
 Ticket creation requires a synopsis. The synopsis is short searchable metadata

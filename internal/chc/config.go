@@ -31,9 +31,21 @@ type NotificationConfig struct {
 type ReviewWorkflowConfig struct {
 	Mode                    ReviewWorkflowMode
 	NonBlockingCommentLimit int
+	Providers               ReviewProviderConfig
 }
 
 type ReviewWorkflowMode string
+
+type ReviewProviderConfig struct {
+	Forgejo ReviewProviderTargetConfig
+	GitHub  ReviewProviderTargetConfig
+}
+
+type ReviewProviderTargetConfig struct {
+	Enabled  bool
+	CLI      string
+	TokenEnv string
+}
 
 type TelegramNotificationConfig struct {
 	Enabled     bool
@@ -54,6 +66,11 @@ const (
 
 	DefaultReviewWorkflowMode                    = ReviewWorkflowModeHumanReview
 	DefaultReviewWorkflowNonBlockingCommentLimit = 3
+
+	DefaultReviewProviderForgejoCLI      = "tea"
+	DefaultReviewProviderForgejoTokenEnv = "FORGEJO_TOKEN"
+	DefaultReviewProviderGitHubCLI       = "gh"
+	DefaultReviewProviderGitHubTokenEnv  = "GITHUB_TOKEN"
 )
 
 func DefaultRuntimeConfig() RuntimeConfig {
@@ -74,6 +91,22 @@ func DefaultReviewWorkflowConfig() ReviewWorkflowConfig {
 	return ReviewWorkflowConfig{
 		Mode:                    DefaultReviewWorkflowMode,
 		NonBlockingCommentLimit: DefaultReviewWorkflowNonBlockingCommentLimit,
+		Providers:               DefaultReviewProviderConfig(),
+	}
+}
+
+func DefaultReviewProviderConfig() ReviewProviderConfig {
+	return ReviewProviderConfig{
+		Forgejo: ReviewProviderTargetConfig{
+			Enabled:  true,
+			CLI:      DefaultReviewProviderForgejoCLI,
+			TokenEnv: DefaultReviewProviderForgejoTokenEnv,
+		},
+		GitHub: ReviewProviderTargetConfig{
+			Enabled:  true,
+			CLI:      DefaultReviewProviderGitHubCLI,
+			TokenEnv: DefaultReviewProviderGitHubTokenEnv,
+		},
 	}
 }
 
@@ -207,6 +240,18 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 		}
 	case "non_blocking_comment_limit":
 		setPositiveInt(&config.NonBlockingCommentLimit, value)
+	case "forgejo_enabled":
+		config.Providers.Forgejo.Enabled = configBoolValue(value)
+	case "forgejo_cli":
+		setString(&config.Providers.Forgejo.CLI, value)
+	case "forgejo_token_env":
+		setString(&config.Providers.Forgejo.TokenEnv, value)
+	case "github_enabled":
+		config.Providers.GitHub.Enabled = configBoolValue(value)
+	case "github_cli":
+		setString(&config.Providers.GitHub.CLI, value)
+	case "github_token_env":
+		setString(&config.Providers.GitHub.TokenEnv, value)
 	}
 }
 
