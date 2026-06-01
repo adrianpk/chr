@@ -81,6 +81,7 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		{"dump", "save"},
 		{"dump", "append"},
 		{"dump", "open"},
+		{"gate", "dev-main"},
 		{"quiz", "list"},
 		{"quiz", "start"},
 		{"quiz", "resume"},
