@@ -81,9 +81,8 @@ AI can summarize the report later, but the gate must be useful without AI.
 ### Project Portable
 
 The gate must work for a generic Go project managed by ChrysoCoord. It should
-not assume ChrysoCoord itself, RedWright, Warden, or any particular repository
-shape beyond a Git repository and a `.chc/user/` workspace when ChrysoCoord is
-initialized.
+not assume a particular repository shape beyond a Git repository and a
+`.chc/user/` workspace when ChrysoCoord is initialized.
 
 ### Forgejo First
 
