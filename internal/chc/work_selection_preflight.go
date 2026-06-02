@@ -16,6 +16,7 @@ import (
 const (
 	AgentOperationDevelopment = "development"
 	AgentOperationReview      = "review"
+	AgentOperationMerge       = "merge"
 
 	WorkSelectionBlockReviewRepairPending = "review_repair_pending"
 	WorkSelectionBlockStaleDev            = "stale_dev"

@@ -24,7 +24,7 @@ Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | merger handoff contract | delivered | `feat/slice-1-merger-handoff-contract` | `#283` | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
 | Slice 2 | merger preflight | delivered | `feat/slice-2-merger-preflight` | `#284` | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
-| Slice 3 | merge execution command | planned | `feat/slice-3-merge-execution-command` | pending | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
+| Slice 3 | merge execution command | reviewing | `feat/slice-3-merge-execution-command` | `#285` | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
 | Slice 4 | merger workflow docs | planned | `feat/slice-4-merger-workflow-docs` | pending | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
 
 ## Slice 1: Merger Handoff Contract
@@ -83,13 +83,21 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T3.1 Add CLI/service command for merging a reviewed ticket.
-- [ ] T3.2 Implement provider merge execution for Forgejo/Codeberg first.
-- [ ] T3.3 Add GitHub merge execution support when provider config is available.
-- [ ] T3.4 Apply merge result to ticket metadata and status.
-- [ ] T3.5 Add tests with provider fakes for dry-run, success, provider failure,
-  conflict, and blocked merge.
-- [ ] T3.6 Add slice report and tracker updates.
+- [x] T3.1 Add CLI/service command for merging a reviewed ticket. Commit: this commit
+- [x] T3.2 Implement provider merge execution for Forgejo/Codeberg first. Commit: this commit
+- [x] T3.3 Add GitHub merge execution support when provider config is available. Commit: this commit
+- [x] T3.4 Apply merge result to ticket metadata and status. Commit: this commit
+- [x] T3.5 Add tests with provider fakes for dry-run, success, provider failure,
+  conflict, and blocked merge. Commit: this commit
+- [x] T3.6 Add slice report and tracker updates. Commit: this commit
+
+Validation:
+
+- `scripts/check-go-func-signatures.sh`
+- `golangci-lint run --timeout=5m ./internal/chc/... ./internal/chcapp/...`
+- `go test ./internal/chc ./internal/chcapp`
+- `git diff --check`
+- `make verify`
 
 ## Slice 4: Merger Workflow Docs
 

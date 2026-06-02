@@ -3360,6 +3360,16 @@ func testTicketReadyForReview() chc.Ticket {
 	return ticket
 }
 
+func testTicketReadyForMerge() chc.Ticket {
+	ticket := testTicketWithReviewRef()
+	ticket.Status = chc.TicketStatusReadyForMerge
+	ticket.ReviewState = chc.TicketReviewCommandResultPass
+	ticket.ReviewResult = chc.TicketReviewCommandResultPass
+	ticket.ReviewRound = 1
+
+	return ticket
+}
+
 func setupCLIReviewRemoteEvidence(
 	t *testing.T,
 	devRoot string,
@@ -3368,7 +3378,7 @@ func setupCLIReviewRemoteEvidence(
 	t.Helper()
 
 	runner := newFakeCLIReviewRemoteRunner()
-	runner.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"head":{"sha":"abc123"}}`)
+	runner.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":true}`)
 	runner.outputs["tea api /repos/adrianpk/chc/pulls/274.diff"] = []byte("diff --git a/file.go b/file.go")
 	runner.outputs["tea api /repos/adrianpk/chc/issues/274/comments"] = []byte(`[]`)
 	runner.outputs["tea api /repos/adrianpk/chc/commits/abc123/statuses"] = []byte(`[]`)
@@ -4183,6 +4193,168 @@ func TestTicketReviewDryRunDoesNotMutateTicket(t *testing.T) {
 
 	if len(runner.inputs) != 0 {
 		t.Fatalf("remote inputs = %#v, want none", runner.inputs)
+	}
+}
+
+func TestTicketMergeDryRunDoesNotMutateTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+
+	defer restoreRunner()
+
+	before := readFile(t, ticketPath)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"merge",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket merge dry-run returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"ticket_merge: result",
+		"ticket: CHC-1",
+		"allowed: true",
+		"status: ready_for_merge",
+		"merge_state: pending",
+		"merge_strategy: rebase",
+		"dry_run: true",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	after := readFile(t, ticketPath)
+	if after != before {
+		t.Fatalf("dry-run mutated ticket:\n%s", after)
+	}
+
+	if len(runner.inputs) != 0 {
+		t.Fatalf("remote inputs = %#v, want none", runner.inputs)
+	}
+}
+
+func TestTicketMergeAppliesSuccessfulMerge(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+
+	defer restoreRunner()
+
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	runner.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"merge",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket merge returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"ticket_merge: result",
+		"ticket: CHC-1",
+		"allowed: true",
+		"status: done",
+		"merge_state: merged",
+		"merge_result: merged",
+		"merge_commit: abc123",
+		"dry_run: false",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	content := readFile(t, ticketPath)
+	for _, want := range []string{
+		`status: "done"`,
+		`merge_state: "merged"`,
+		`merge_result: "merged"`,
+		`merge_actor: "merger"`,
+		`merge_commit: "abc123"`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
+		}
+	}
+
+	input := string(runner.inputs[mergeCommand])
+	if !strings.Contains(input, `"Do":"rebase"`) {
+		t.Fatalf("merge payload = %q, want rebase strategy", input)
+	}
+}
+
+func TestTicketMergeRecordsProviderFailure(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+
+	defer restoreRunner()
+
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	runner.inputErrs[mergeCommand] = errors.New("provider failed")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"merge",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket merge returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"allowed: false",
+		"status: ready_for_merge",
+		"merge_state: blocked",
+		"merge_result: blocked",
+		"blocker: provider_unreadable kind=operational detail=provider failed",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	content := readFile(t, ticketPath)
+	for _, want := range []string{
+		`status: "ready_for_merge"`,
+		`merge_state: "blocked"`,
+		`merge_result: "blocked"`,
+		`merge_blocker: "provider failed"`,
+		`merged_at: ""`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
+		}
 	}
 }
 
@@ -6556,18 +6728,20 @@ func replaceReviewProviderDiagnosticRunner(runner chc.ReviewProviderDiagnosticRu
 }
 
 type fakeCLIReviewRemoteRunner struct {
-	outputs    map[string][]byte
-	outputErrs map[string]error
-	inputs     map[string][]byte
-	inputErrs  map[string]error
+	outputs      map[string][]byte
+	outputErrs   map[string]error
+	inputs       map[string][]byte
+	inputErrs    map[string]error
+	inputOutputs map[string][]byte
 }
 
 func newFakeCLIReviewRemoteRunner() *fakeCLIReviewRemoteRunner {
 	return &fakeCLIReviewRemoteRunner{
-		outputs:    map[string][]byte{},
-		outputErrs: map[string]error{},
-		inputs:     map[string][]byte{},
-		inputErrs:  map[string]error{},
+		outputs:      map[string][]byte{},
+		outputErrs:   map[string]error{},
+		inputs:       map[string][]byte{},
+		inputErrs:    map[string]error{},
+		inputOutputs: map[string][]byte{},
 	}
 }
 
@@ -6597,6 +6771,10 @@ func (runner *fakeCLIReviewRemoteRunner) Input(
 	}
 
 	runner.inputs[key] = input
+
+	if output, ok := runner.inputOutputs[key]; ok {
+		return output, nil
+	}
 
 	return []byte(`{}`), nil
 }

@@ -21,7 +21,7 @@ source for task completion, commit mapping, validation logs, and slice closure.
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | merger handoff contract | delivered | `feat/slice-1-merger-handoff-contract` | `#283` | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
 | Slice 2 | merger preflight | delivered | `feat/slice-2-merger-preflight` | `#284` | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
-| Slice 3 | merge execution command | planned | `feat/slice-3-merge-execution-command` | pending | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
+| Slice 3 | merge execution command | reviewing | `feat/slice-3-merge-execution-command` | `#285` | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
 | Slice 4 | merger workflow docs | planned | `feat/slice-4-merger-workflow-docs` | pending | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
 
 ## Operational Sources

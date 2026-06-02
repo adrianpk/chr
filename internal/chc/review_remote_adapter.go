@@ -62,6 +62,17 @@ type RemoteReviewWriteResult struct {
 	Comments  []RemoteReviewWrittenComment
 }
 
+type MergeRequest struct {
+	URL      string
+	Strategy string
+}
+
+type MergeResult struct {
+	Reference ReviewProviderReference
+	Strategy  string
+	SHA       string
+}
+
 type RemoteReviewWrittenComment struct {
 	Kind      string
 	Placement string
@@ -152,6 +163,29 @@ func (adapter RemoteReviewAdapter) WriteComments(
 	}
 
 	return result, nil
+}
+
+func (a RemoteReviewAdapter) Merge(ctx context.Context, req MergeRequest) (MergeResult, error) {
+	reference, config, err := a.resolve(req.URL)
+	if err != nil {
+		return MergeResult{}, err
+	}
+
+	payload, err := mergePayload(reference.Provider, req.Strategy)
+	if err != nil {
+		return MergeResult{}, err
+	}
+
+	output, err := a.runner.Input(ctx, config.CLI, payload, mergeArgs(reference, req.Strategy)...)
+	if err != nil {
+		return MergeResult{}, err
+	}
+
+	return MergeResult{
+		Reference: reference,
+		Strategy:  req.Strategy,
+		SHA:       mergeResultSHA(output),
+	}, nil
 }
 
 func (adapter RemoteReviewAdapter) resolve(
@@ -441,4 +475,64 @@ func githubIssueCommentsPath(reference ReviewProviderReference) string {
 
 func githubReviewCommentsPath(reference ReviewProviderReference) string {
 	return path.Join("repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number), "comments")
+}
+
+func mergePayload(provider ReviewProvider, strategy string) ([]byte, error) {
+	switch provider {
+	case ReviewProviderForgejo:
+		return json.Marshal(map[string]string{"Do": forgejoMergeStrategy(strategy)})
+	case ReviewProviderGitHub:
+		return []byte("{}"), nil
+	default:
+		return nil, fmt.Errorf("unsupported review provider: %s", provider)
+	}
+}
+
+func mergeArgs(reference ReviewProviderReference, strategy string) []string {
+	switch reference.Provider {
+	case ReviewProviderForgejo:
+		return []string{"api", "-X", "PUT", forgejoPullRequestMergePath(reference), "-d", "@-"}
+	case ReviewProviderGitHub:
+		return []string{"pr", "merge", reference.URL, githubMergeStrategyFlag(strategy)}
+	default:
+		return nil
+	}
+}
+
+func forgejoMergeStrategy(strategy string) string {
+	switch strategy {
+	case TicketMergeStrategyMerge:
+		return "merge"
+	case TicketMergeStrategySquash:
+		return "squash"
+	default:
+		return "rebase"
+	}
+}
+
+func githubMergeStrategyFlag(strategy string) string {
+	switch strategy {
+	case TicketMergeStrategyMerge:
+		return "--merge"
+	case TicketMergeStrategySquash:
+		return "--squash"
+	default:
+		return "--rebase"
+	}
+}
+
+func forgejoPullRequestMergePath(reference ReviewProviderReference) string {
+	return path.Join("/repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number), "merge")
+}
+
+func mergeResultSHA(output []byte) string {
+	var parsed struct {
+		SHA string `json:"sha"`
+	}
+
+	if err := json.Unmarshal(output, &parsed); err != nil {
+		return ""
+	}
+
+	return strings.TrimSpace(parsed.SHA)
 }

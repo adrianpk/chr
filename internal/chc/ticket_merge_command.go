@@ -1,0 +1,166 @@
+package chc
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"strings"
+	"time"
+)
+
+type TicketMergeCommandRemote interface {
+	TicketMergePreflightRemoteReader
+	Merge(context.Context, MergeRequest) (MergeResult, error)
+}
+
+type TicketMergeCommandOptions struct {
+	Ticket        IndexedTicket
+	Tickets       []IndexedTicket
+	Remote        TicketMergeCommandRemote
+	ExpectedBase  string
+	MergeStrategy string
+	DryRun        bool
+	MergedAt      time.Time
+}
+
+type TicketMergeCommandResult struct {
+	TicketKey     string
+	Preflight     TicketMergePreflightResult
+	Merge         MergeResult
+	Status        string
+	MergeState    string
+	MergeResult   string
+	MergeActor    string
+	MergeStrategy string
+	MergeCommit   string
+	MergeBlocker  string
+	DryRun        bool
+}
+
+func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) (TicketMergeCommandResult, error) {
+	if err := ctx.Err(); err != nil {
+		return TicketMergeCommandResult{}, err
+	}
+
+	preflight, err := RunTicketMergePreflight(ctx, TicketMergePreflightOptions{
+		Ticket:        opts.Ticket,
+		Tickets:       opts.Tickets,
+		Remote:        opts.Remote,
+		ExpectedBase:  opts.ExpectedBase,
+		MergeStrategy: opts.MergeStrategy,
+	})
+	if err != nil {
+		return TicketMergeCommandResult{}, err
+	}
+
+	result := ticketMergeCommandResult(opts.Ticket.Key, preflight, opts.DryRun)
+	if opts.DryRun {
+		return result, nil
+	}
+
+	if !preflight.Allowed {
+		return result, applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+	}
+
+	merge, err := opts.Remote.Merge(ctx, MergeRequest{URL: preflight.ReviewRef.URL, Strategy: preflight.MergeStrategy})
+	if err != nil {
+		result.Preflight.Allowed = false
+		result.Preflight.Blockers = append(result.Preflight.Blockers, TicketMergePreflightBlocker{
+			Code:   TicketMergePreflightBlockProviderUnreadable,
+			Kind:   TicketMergePreflightBlockKindOperational,
+			Detail: err.Error(),
+		})
+		result.MergeState = TicketMergeStateBlocked
+		result.MergeResult = TicketMergeResultBlocked
+		result.MergeBlocker = err.Error()
+
+		return result, applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+	}
+
+	result.Merge = merge
+	result.Status = TicketStatusDone
+	result.MergeState = TicketMergeStateMerged
+	result.MergeResult = TicketMergeResultMerged
+	result.MergeCommit = merge.SHA
+
+	return result, applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+}
+
+func ticketMergeCommandResult(ticketKey string, preflight TicketMergePreflightResult, dryRun bool) TicketMergeCommandResult {
+	result := TicketMergeCommandResult{
+		TicketKey:     ticketKey,
+		Preflight:     preflight,
+		Status:        TicketStatusReadyForMerge,
+		MergeState:    TicketMergeStatePending,
+		MergeResult:   "",
+		MergeActor:    TicketMergeActorMerger,
+		MergeStrategy: preflight.MergeStrategy,
+		DryRun:        dryRun,
+	}
+
+	if !preflight.Allowed {
+		result.MergeState = TicketMergeStateBlocked
+		result.MergeResult = TicketMergeResultBlocked
+		result.MergeBlocker = ticketMergeCommandBlockerSummary(preflight.Blockers)
+	}
+
+	return result
+}
+
+func ticketMergeCommandBlockerSummary(blockers []TicketMergePreflightBlocker) string {
+	if len(blockers) == 0 {
+		return ""
+	}
+
+	parts := make([]string, 0, len(blockers))
+	for _, blocker := range blockers {
+		parts = append(parts, blocker.Code)
+	}
+
+	return strings.Join(parts, ",")
+}
+
+func applyTicketMergeCommandResult(path string, result TicketMergeCommandResult, mergedAt time.Time) error {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("read ticket file: %w", err)
+	}
+
+	now := mergedAt.UTC()
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+
+	mergedAtValue := yamlString("")
+	if result.MergeState == TicketMergeStateMerged {
+		mergedAtValue = yamlTimestamp(now)
+	}
+
+	updated := string(content)
+	for _, field := range []struct {
+		key        string
+		value      string
+		beforeKeys []string
+	}{
+		{key: "status", value: yamlString(result.Status), beforeKeys: []string{"priority", "severity", "type"}},
+		{key: "merge_state", value: yamlString(result.MergeState), beforeKeys: []string{"merge_result", "merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_result", value: yamlString(result.MergeResult), beforeKeys: []string{"merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_actor", value: yamlString(result.MergeActor), beforeKeys: []string{"merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_commit", value: yamlString(result.MergeCommit), beforeKeys: []string{"merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_blocker", value: yamlString(result.MergeBlocker), beforeKeys: []string{"merged_at", "created_at"}},
+		{key: "merged_at", value: mergedAtValue, beforeKeys: []string{"created_at"}},
+		{key: "updated_at", value: yamlTimestamp(now), beforeKeys: nil},
+	} {
+		updated, err = setTicketFrontmatterScalarField(updated, field.key, field.value, field.beforeKeys)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = os.WriteFile(path, []byte(updated), 0o644)
+	if err != nil {
+		return fmt.Errorf("write ticket file: %w", err)
+	}
+
+	return nil
+}

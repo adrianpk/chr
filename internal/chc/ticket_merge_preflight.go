@@ -226,6 +226,7 @@ func parseForgeTicketMergeMetadata(rawJSON string) ticketMergeRemoteMetadata {
 	type forgeRef struct {
 		Ref string `json:"ref"`
 	}
+
 	type forgePullRequest struct {
 		State     string   `json:"state"`
 		Base      forgeRef `json:"base"`

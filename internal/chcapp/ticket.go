@@ -32,6 +32,7 @@ func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newTicketCommentCommand(stdout),
 			newTicketListCommand(stdout),
 			newTicketLoopCommand(stdout),
+			newTicketMergeCommand(stdout),
 			newTicketNewCommand(stdout),
 			newTicketReviewCommand(stdout),
 			newTicketReviewModeCommand(stdout),
@@ -76,6 +77,15 @@ func newTicketReviewCommand(stdout io.Writer) *cli.Command {
 		Usage:  "Apply an inspection-only ticket review result",
 		Flags:  ticketReviewFlags(),
 		Action: ticketReviewAction(stdout),
+	}
+}
+
+func newTicketMergeCommand(stdout io.Writer) *cli.Command {
+	return &cli.Command{
+		Name:   "merge",
+		Usage:  "Merge a reviewed ticket pull request",
+		Flags:  ticketMergeFlags(),
+		Action: ticketMergeAction(stdout),
 	}
 }
 
@@ -303,6 +313,25 @@ func ticketReviewFlags() []cli.Flag {
 	)
 }
 
+func ticketMergeFlags() []cli.Flag {
+	return append(ticketProjectFlags(),
+		&cli.StringFlag{
+			Name:  "strategy",
+			Usage: "merge strategy: merge, rebase, squash",
+			Value: chc.TicketMergeStrategyRebase,
+		},
+		&cli.StringFlag{
+			Name:  "base",
+			Usage: "expected pull request base branch",
+			Value: "dev",
+		},
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "print merge preflight without merging or writing ticket state",
+		},
+	)
+}
+
 func ticketReviewModeStatusFlags() []cli.Flag {
 	return append(ticketProjectFlags(),
 		&cli.BoolFlag{
@@ -391,6 +420,12 @@ func ticketReviewRefAction(stdout io.Writer) cli.ActionFunc {
 func ticketReviewAction(stdout io.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		return runTicketReview(ctx, cmd, stdout)
+	}
+}
+
+func ticketMergeAction(stdout io.Writer) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		return runTicketMerge(ctx, cmd, stdout)
 	}
 }
 
@@ -1724,7 +1759,89 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	return printTicketReviewResult(stdout, projectContext, result)
 }
 
+func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
+	if cmd.NArg() != 1 {
+		return fmt.Errorf("ticket merge requires exactly one ticket key argument")
+	}
+
+	env, err := newUserEnvironmentFromCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	projectContext, index, err := openTicketIndexForCommand(ctx, cmd, env)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+		return err
+	}
+
+	ticket, tickets, err := ticketMergeCommandTickets(ctx, index, projectContext, cmd.Args().First())
+	if err != nil {
+		return err
+	}
+
+	config, err := chc.LoadWorkspaceConfig(projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
+
+	release, err := acquireTicketMergeLock(ctx, projectContext, cmd.Bool("dry-run"))
+	if err != nil {
+		return err
+	}
+	defer release()
+
+	result, err := chc.RunTicketMergeCommand(ctx, chc.TicketMergeCommandOptions{
+		Ticket:        ticket,
+		Tickets:       tickets,
+		Remote:        chc.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
+		ExpectedBase:  cmd.String("base"),
+		MergeStrategy: cmd.String("strategy"),
+		DryRun:        cmd.Bool("dry-run"),
+		MergedAt:      time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := refreshTicketIndexAfterMerge(ctx, index, projectContext, cmd.Bool("dry-run")); err != nil {
+		return err
+	}
+
+	return printTicketMergeResult(stdout, projectContext, result)
+}
+
+func ticketMergeCommandTickets(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext, key string) (chc.IndexedTicket, []chc.IndexedTicket, error) {
+	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
+	if err != nil {
+		return chc.IndexedTicket{}, nil, err
+	}
+
+	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, key)
+	if err != nil {
+		return chc.IndexedTicket{}, nil, err
+	}
+
+	return ticket, tickets, nil
+}
+
 func refreshTicketIndexAfterReview(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
+	if dryRun {
+		return nil
+	}
+
+	return refreshProjectTicketIndex(ctx, index, projectContext)
+}
+
+func refreshTicketIndexAfterMerge(ctx context.Context, index chc.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
 	if dryRun {
 		return nil
 	}
@@ -1738,6 +1855,19 @@ func acquireTicketReviewLock(ctx context.Context, projectContext commandProjectC
 	}
 
 	lock, err := acquireAgentOperationLock(ctx, projectContext, chc.AgentOperationReview)
+	if err != nil {
+		return noopRelease, err
+	}
+
+	return releaseAgentOperationLock(lock), nil
+}
+
+func acquireTicketMergeLock(ctx context.Context, projectContext commandProjectContext, dryRun bool) (func(), error) {
+	if dryRun {
+		return noopRelease, nil
+	}
+
+	lock, err := acquireAgentOperationLock(ctx, projectContext, chc.AgentOperationMerge)
 	if err != nil {
 		return noopRelease, err
 	}
@@ -1777,6 +1907,35 @@ func printTicketReviewResult(
 		_, err := fmt.Fprintln(stdout, line)
 		if err != nil {
 			return fmt.Errorf("write ticket review result: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func printTicketMergeResult(stdout io.Writer, projectContext commandProjectContext, result chc.TicketMergeCommandResult) error {
+	lines := []string{
+		"ticket_merge: result",
+		"project_id: " + projectContext.ProjectID,
+		"ticket: " + result.TicketKey,
+		fmt.Sprintf("allowed: %t", result.Preflight.Allowed),
+		"status: " + result.Status,
+		"merge_state: " + result.MergeState,
+		"merge_result: " + result.MergeResult,
+		"merge_strategy: " + result.MergeStrategy,
+		"merge_commit: " + result.MergeCommit,
+		"review_ref: " + result.Preflight.ReviewRef.URL,
+		"provider: " + string(result.Preflight.Remote.Reference.Provider),
+		fmt.Sprintf("dry_run: %t", result.DryRun),
+	}
+
+	for _, blocker := range result.Preflight.Blockers {
+		lines = append(lines, "blocker: "+blocker.Code+" kind="+blocker.Kind+" detail="+blocker.Detail)
+	}
+
+	for _, line := range lines {
+		if _, err := fmt.Fprintln(stdout, line); err != nil {
+			return fmt.Errorf("write ticket merge result: %w", err)
 		}
 	}
 
