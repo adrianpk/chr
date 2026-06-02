@@ -1,9 +1,9 @@
-# Use Forgejo Ticket Review
+# Use Forgejo Ticket Review And Merge
 
 ## Goal
 
 Configure and run the Forgejo-first ticket review workflow for a ticket branch
-and pull request.
+and pull request, then merge the reviewed ticket.
 
 ## Prerequisites
 
@@ -84,6 +84,34 @@ When changes are requested, ChrysoCoord writes finding comments to the pull
 request, stores `review_comments_url`, and moves the ticket back to
 `ready_for_dev`.
 
+When review passes, ChrysoCoord stores passed review metadata and moves the
+ticket to `ready_for_merge`.
+
+## Merge Reviewed Work
+
+Preview the merge preflight without changing the pull request or ticket:
+
+```sh
+chc ticket merge CHC-1 --dry-run
+```
+
+Merge the reviewed pull request:
+
+```sh
+chc ticket merge CHC-1 --strategy rebase
+```
+
+The merge command verifies the ticket handoff, pull request readability, target
+base branch, head branch, mergeability, serial repair blockers, and merge
+strategy before calling the provider merge operation.
+
+On success, ChrysoCoord moves the ticket to `done` and records merge metadata.
+Clean merges do not write ceremonial pull request comments.
+
+When the merge is blocked, ChrysoCoord keeps the ticket in `ready_for_merge`
+with compact `merge_state`, `merge_result`, and `merge_blocker` metadata. The
+Board does not need a separate merge-failure column.
+
 ## Repair
 
 Run agent work normally:
@@ -98,4 +126,3 @@ detailed findings.
 
 If another `ready_for_dev` ticket is selected while a review repair is pending,
 work selection blocks and points at the pending repair ticket.
-

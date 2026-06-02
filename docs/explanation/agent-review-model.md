@@ -50,6 +50,35 @@ The exact ticket metadata and state transitions are reference contracts:
 - [Ticket review workflow](../reference/ticket-review-workflow.md)
 - [Ticket review metadata](../reference/ticket-review-metadata.md)
 
+## Merger Role
+
+The merger role is a separate operational role after a clean ticket review
+pass.
+
+`@dev` creates the branch and pull request. `@reviewer` inspects that pull
+request and either requests repair or records a pass. `@merger` receives only
+passed tickets in `ready_for_merge`, checks objective integration conditions,
+and merges the pull request.
+
+This role boundary is useful even when the same underlying model operates each
+role. It narrows the question the agent is allowed to answer:
+
+- `@dev`: what change satisfies the ticket?
+- `@reviewer`: did this branch satisfy the ticket with enough evidence?
+- `@merger`: is the already-reviewed pull request objectively mergeable?
+
+`@merger` should not re-run subjective code review, reopen style disagreements,
+or create a second approval ritual. It should block only on concrete integration
+problems such as unreadable provider state, wrong base branch, head mismatch,
+non-mergeability, pending serial repair work, or invalid merge strategy.
+
+The merge role gives the workflow a stable audit point without turning every
+successful review into extra local comments. Passed reviews normally merge
+quietly; blocked merges leave compact ticket metadata.
+
+The merge contract is described in
+[Ticket merge workflow](../reference/ticket-merge-workflow.md).
+
 ## Integration Checkpoint
 
 The review point belongs around accumulated integration work:

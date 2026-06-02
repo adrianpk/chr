@@ -31,6 +31,7 @@ Exact contracts and command behavior:
 - [Runtime configuration](reference/runtime-config.md)
 - [Review workflow configuration](reference/review-workflow-config.md)
 - [Ticket review workflow](reference/ticket-review-workflow.md)
+- [Ticket merge workflow](reference/ticket-merge-workflow.md)
 - [Ticket review metadata](reference/ticket-review-metadata.md)
 - [Artifact generation backends](reference/artifact-generation-backends.md)
 - [Notifications](reference/notifications.md)

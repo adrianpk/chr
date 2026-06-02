@@ -78,6 +78,21 @@ Clean passes update local review metadata and move the ticket to
 `needs_changes` writes finding comments to the pull request, updates local
 review metadata, and moves the ticket back to `ready_for_dev`.
 
+## Merge Handoff
+
+A clean review pass moves the ticket to `ready_for_merge`. That status is the
+handoff from `@reviewer` to `@merger`.
+
+The merger role runs objective merge preflight and then merges the pull request
+through the configured provider:
+
+```sh
+chc ticket merge CHC-1
+```
+
+Merge execution and blocked merge metadata are described in
+[Ticket merge workflow](ticket-merge-workflow.md).
+
 ## Repair Handoff
 
 Repair work reuses the existing branch and pull request.
@@ -102,11 +117,11 @@ worker.
 
 ## Serialized Work Selection
 
-Development and review operations are serialized per workspace.
+Development, review, and merge operations are serialized per workspace.
 
 Execution paths acquire `.chc/user/runtime/agent-operation.lock` before
-mutating ticket or review state. A second development or review operation in the
-same workspace is blocked while the lock is held.
+mutating ticket, review, or merge state. A second development, review, or merge
+operation in the same workspace is blocked while the lock is held.
 
 Work selection prioritizes unresolved review repairs before later
 `ready_for_dev` work. If a non-repair ticket is selected while a repair is
@@ -125,4 +140,3 @@ Provider diagnostics are available through:
 ```sh
 chc ticket review-mode diagnostics --url https://forge.example.com/owner/repo/pulls/123
 ```
-

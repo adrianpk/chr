@@ -10,6 +10,8 @@ The setting is independent from the separate `dev` to `main` promotion gate.
 ## Location
 
 Review workflow settings live in `.chc/user/config.yml` under `review:`.
+The same provider settings are used by ticket review diagnostics, remote review
+comments, and reviewed ticket merge execution.
 
 ```yml
 review:
@@ -63,6 +65,9 @@ Clean agentic review passes do not write ceremonial remote comments.
 
 Review workflow behavior is described in
 `docs/reference/ticket-review-workflow.md`.
+
+Reviewed ticket merge behavior is described in
+`docs/reference/ticket-merge-workflow.md`.
 
 ## Provider Diagnostics
 

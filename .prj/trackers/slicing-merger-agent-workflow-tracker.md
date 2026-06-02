@@ -25,7 +25,7 @@ Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
 | Slice 1 | merger handoff contract | delivered | `feat/slice-1-merger-handoff-contract` | `#283` | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
 | Slice 2 | merger preflight | delivered | `feat/slice-2-merger-preflight` | `#284` | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
 | Slice 3 | merge execution command | delivered | `feat/slice-3-merge-execution-command` | `#285` | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
-| Slice 4 | merger workflow docs | planned | `feat/slice-4-merger-workflow-docs` | pending | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
+| Slice 4 | merger workflow docs | reviewing | `feat/slice-4-merger-workflow-docs` | `#286` | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
 
 ## Slice 1: Merger Handoff Contract
 
@@ -113,14 +113,19 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T4.1 Update how-to documentation for reviewed ticket merge.
-- [ ] T4.2 Add or update reference documentation for merger metadata and
-  commands.
-- [ ] T4.3 Update explanation docs for `@dev`, `@reviewer`, and `@merger`
-  roles.
-- [ ] T4.4 Link ticket review workflow docs to merger handoff docs.
-- [ ] T4.5 Run docs-only validation.
-- [ ] T4.6 Add slice report and tracker closure updates.
+- [x] T4.1 Update how-to documentation for reviewed ticket merge. Commit: this commit
+- [x] T4.2 Add or update reference documentation for merger metadata and
+  commands. Commit: this commit
+- [x] T4.3 Update explanation docs for `@dev`, `@reviewer`, and `@merger`
+  roles. Commit: this commit
+- [x] T4.4 Link ticket review workflow docs to merger handoff docs. Commit: this commit
+- [x] T4.5 Run docs-only validation. Commit: this commit
+- [x] T4.6 Add slice report and tracker closure updates. Commit: this commit
+
+Validation:
+
+- `git diff --check`
+- `rg -n "ticket-merge-workflow|ready_for_merge|@merger" docs`
 
 ## Risks
 

@@ -249,6 +249,17 @@ chc ticket review CHC-1 --result needs_changes --finding "Handle the nil input p
 See [Ticket review workflow](ticket-review-workflow.md) for review state
 transitions, pull request references, and repair handoff behavior.
 
+Merge a reviewed ticket that is ready for merge:
+
+```sh
+chc ticket merge CHC-1
+chc ticket merge CHC-1 --dry-run
+chc ticket merge CHC-1 --base dev --strategy rebase
+```
+
+See [Ticket merge workflow](ticket-merge-workflow.md) for merge preflight,
+provider execution, and merge metadata behavior.
+
 Apply an execution result:
 
 ```sh

@@ -83,6 +83,9 @@ is available.
 `merge_blocker` stores a compact objective blocker reason when merge handoff
 cannot proceed.
 
+Merge command behavior, preflight blockers, and provider execution are
+specified in [Ticket merge workflow](ticket-merge-workflow.md).
+
 ## Attaching References
 
 Use `ticket review-ref` to attach branch and pull request metadata to a ticket:
@@ -125,6 +128,9 @@ Moving a ticket to `ready_for_review` requires both `branch` and at least one
 
 Moving a ticket to `ready_for_merge` requires passed review metadata,
 `branch`, and at least one `pull_request` entry in `review_refs`.
+
+Merging a ticket requires `ready_for_merge`, passed review metadata, `branch`,
+and a pull request reference.
 
 `review_round` cannot be negative.
 

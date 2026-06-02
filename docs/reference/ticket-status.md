@@ -53,7 +53,7 @@ Board column mapping:
 | `ready_for_dev` | Ready For Dev column. |
 | `in_progress` | In Progress column. |
 | `ready_for_review` | Ready For Review column. |
-| `ready_for_merge` | Ready For Merge column. |
+| `ready_for_merge` | Ready For Merge column; passed review waiting for objective merge preflight. |
 | `done` | Done column. |
 | `open` | Legacy alias for Backlog. |
 | `ready` | Legacy alias for Ready For Dev. |
