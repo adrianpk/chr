@@ -27,6 +27,12 @@ type IndexedTicket struct {
 	ReviewResult      string
 	ReviewCommentsURL string
 	BlockingFindings  []string
+	MergeState        string
+	MergeResult       string
+	MergeActor        string
+	MergeCommit       string
+	MergedAt          *time.Time
+	MergeBlocker      string
 	CreatedAt         *time.Time
 	UpdatedAt         *time.Time
 	FileMTime         time.Time

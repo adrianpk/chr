@@ -4630,10 +4630,11 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"database_exists: false",
 		"schema_migrations_exists: false",
 		"applied: 0",
-		"pending: 9",
+		"pending: 10",
 		"unknown: 0",
 		"pending_migration: 20260518000001 create_projects",
 		"pending_migration: 20260601000009 add_ticket_review_metadata",
+		"pending_migration: 20260602000010 add_ticket_merge_metadata",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -4672,12 +4673,13 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 	for _, want := range []string{
 		"database_exists: true",
 		"schema_migrations_exists: true",
-		"available: 9",
-		"applied: 9",
+		"available: 10",
+		"applied: 10",
 		"pending: 0",
 		"unknown: 0",
 		"applied_migration: 20260518000001 create_projects",
 		"applied_migration: 20260601000009 add_ticket_review_metadata",
+		"applied_migration: 20260602000010 add_ticket_merge_metadata",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)

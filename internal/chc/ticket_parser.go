@@ -169,7 +169,7 @@ func indexedTicketFromMetadata(
 ) (IndexedTicket, error) {
 	metadata := frontmatter.Metadata
 
-	createdAt, updatedAt, reviewRound, err := parseIndexedTicketMetadataTimes(metadata)
+	createdAt, updatedAt, mergedAt, reviewRound, err := parseIndexedTicketMetadataTimes(metadata)
 	if err != nil {
 		return IndexedTicket{}, err
 	}
@@ -198,6 +198,12 @@ func indexedTicketFromMetadata(
 		ReviewResult:      unquoteMetadataString(metadata["review_result"]),
 		ReviewCommentsURL: unquoteMetadataString(metadata["review_comments_url"]),
 		BlockingFindings:  parseMetadataStringList(metadata["blocking_findings"]),
+		MergeState:        unquoteMetadataString(metadata["merge_state"]),
+		MergeResult:       unquoteMetadataString(metadata["merge_result"]),
+		MergeActor:        unquoteMetadataString(metadata["merge_actor"]),
+		MergeCommit:       unquoteMetadataString(metadata["merge_commit"]),
+		MergedAt:          mergedAt,
+		MergeBlocker:      unquoteMetadataString(metadata["merge_blocker"]),
 		CreatedAt:         createdAt,
 		UpdatedAt:         updatedAt,
 		FileMTime:         info.ModTime().UTC(),
@@ -216,23 +222,28 @@ func indexedTicketFromMetadata(
 	return ticket, nil
 }
 
-func parseIndexedTicketMetadataTimes(metadata map[string]string) (*time.Time, *time.Time, int, error) {
+func parseIndexedTicketMetadataTimes(metadata map[string]string) (*time.Time, *time.Time, *time.Time, int, error) {
 	createdAt, err := optionalTicketTime(metadata["created_at"])
 	if err != nil {
-		return nil, nil, 0, err
+		return nil, nil, nil, 0, err
 	}
 
 	updatedAt, err := optionalTicketTime(metadata["updated_at"])
 	if err != nil {
-		return nil, nil, 0, err
+		return nil, nil, nil, 0, err
+	}
+
+	mergedAt, err := optionalTicketTime(metadata["merged_at"])
+	if err != nil {
+		return nil, nil, nil, 0, err
 	}
 
 	reviewRound, err := optionalTicketInt(metadata["review_round"])
 	if err != nil {
-		return nil, nil, 0, err
+		return nil, nil, nil, 0, err
 	}
 
-	return createdAt, updatedAt, reviewRound, nil
+	return createdAt, updatedAt, mergedAt, reviewRound, nil
 }
 
 func relativeTicketPath(opts ParseTicketOptions) (string, error) {

@@ -13,7 +13,7 @@ Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
 - [x] Create accepted spec.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
-- [x] Commit plan and tracker directly to `dev`. Commit: `6d8991d`
+- [x] Commit plan and tracker directly to `dev`. Commit: `8f8171d`
 - [ ] Select the first pending slice for implementation.
 - [ ] Complete all planned slices.
 - [ ] Validate completed slicing with the appropriate repository gate.
@@ -22,7 +22,7 @@ Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | merger handoff contract | planned | `feat/slice-1-merger-handoff-contract` | pending | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
+| Slice 1 | merger handoff contract | reviewing | `feat/slice-1-merger-handoff-contract` | `#283` | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
 | Slice 2 | merger preflight | planned | `feat/slice-2-merger-preflight` | pending | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
 | Slice 3 | merge execution command | planned | `feat/slice-3-merge-execution-command` | pending | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
 | Slice 4 | merger workflow docs | planned | `feat/slice-4-merger-workflow-docs` | pending | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
@@ -41,11 +41,11 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T1.1 Add or normalize ticket metadata for merge handoff and merge outcome.
-- [ ] T1.2 Update ticket parsing, rendering, and indexing preservation behavior.
-- [ ] T1.3 Add service-level handoff checks for `ready_for_merge` tickets.
-- [ ] T1.4 Add tests for passed-review handoff and legacy ticket preservation.
-- [ ] T1.5 Add slice report and tracker updates.
+- [x] T1.1 Add or normalize ticket metadata for merge handoff and merge outcome. Commit: this commit
+- [x] T1.2 Update ticket parsing, rendering, and indexing preservation behavior. Commit: this commit
+- [x] T1.3 Add service-level handoff checks for `ready_for_merge` tickets. Commit: this commit
+- [x] T1.4 Add tests for passed-review handoff and legacy ticket preservation. Commit: this commit
+- [x] T1.5 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 2: Merger Preflight
 

@@ -17,7 +17,32 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
 	indexedAt := time.Date(2026, 5, 18, 14, 30, 0, 0, time.UTC)
 
-	content, err := NewTicketRenderer().RenderTicket(Ticket{
+	content, err := NewTicketRenderer().RenderTicket(testParserRenderedTicket(createdAt, updatedAt))
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	writeTicketFile(t, path, content)
+
+	ticket, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{
+		ProjectID:  "project-1",
+		ProjectDir: dir,
+		TicketsDir: ticketsDir,
+		Path:       path,
+		IndexedAt:  indexedAt,
+	})
+	if err != nil {
+		t.Fatalf("ParseTicket returned error: %v", err)
+	}
+
+	assertParsedTicketMetadata(t, ticket)
+	assertParsedTicketReviewMetadata(t, ticket)
+	assertParsedTicketTimes(t, ticket, createdAt, updatedAt)
+	assertParsedTicketFileState(t, ticket)
+}
+
+func testParserRenderedTicket(createdAt, updatedAt time.Time) Ticket {
+	return Ticket{
 		Key:         "CHC-1",
 		Title:       "Do something",
 		Synopsis:    "Implement the onboarding flow.",
@@ -46,30 +71,15 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 		ReviewResult:      "needs_changes",
 		ReviewCommentsURL: "https://forge.example.com/owner/repo/pulls/123",
 		BlockingFindings:  []string{"RF-1"},
+		MergeState:        TicketMergeStateBlocked,
+		MergeResult:       TicketMergeResultNotMergeable,
+		MergeActor:        TicketMergeActorMerger,
+		MergeCommit:       "abc123",
+		MergedAt:          time.Date(2026, 5, 18, 14, 0, 0, 0, time.UTC),
+		MergeBlocker:      "merge conflict",
 		CreatedAt:         createdAt,
 		UpdatedAt:         updatedAt,
-	})
-	if err != nil {
-		t.Fatalf("RenderTicket returned error: %v", err)
 	}
-
-	writeTicketFile(t, path, content)
-
-	ticket, err := NewTicketParser().ParseTicket(context.Background(), ParseTicketOptions{
-		ProjectID:  "project-1",
-		ProjectDir: dir,
-		TicketsDir: ticketsDir,
-		Path:       path,
-		IndexedAt:  indexedAt,
-	})
-	if err != nil {
-		t.Fatalf("ParseTicket returned error: %v", err)
-	}
-
-	assertParsedTicketMetadata(t, ticket)
-	assertParsedTicketReviewMetadata(t, ticket)
-	assertParsedTicketTimes(t, ticket, createdAt, updatedAt)
-	assertParsedTicketFileState(t, ticket)
 }
 
 func TestTicketParserRejectsMissingFrontmatter(t *testing.T) {
@@ -311,6 +321,7 @@ func assertParsedTicketReviewMetadata(t *testing.T, ticket IndexedTicket) {
 	ref := ticket.ReviewRefs[0]
 	assertParsedTicketReviewRef(t, ref)
 	assertParsedTicketReviewState(t, ticket)
+	assertParsedTicketMergeMetadata(t, ticket)
 
 	if len(ticket.BlockingFindings) != 1 || ticket.BlockingFindings[0] != "RF-1" {
 		t.Fatalf("BlockingFindings = %#v, want RF-1", ticket.BlockingFindings)
@@ -339,6 +350,23 @@ func assertParsedTicketReviewState(t *testing.T, ticket IndexedTicket) {
 		ticket.ReviewCommentsURL == "https://forge.example.com/owner/repo/pulls/123"
 	if !matches {
 		t.Fatalf("review metadata = %#v", ticket)
+	}
+}
+
+func assertParsedTicketMergeMetadata(t *testing.T, ticket IndexedTicket) {
+	t.Helper()
+
+	matches := ticket.MergeState == "blocked" &&
+		ticket.MergeResult == "not_mergeable" &&
+		ticket.MergeActor == "merger" &&
+		ticket.MergeCommit == "abc123" &&
+		ticket.MergeBlocker == "merge conflict"
+	if !matches {
+		t.Fatalf("merge metadata = %#v, want merge metadata", ticket)
+	}
+
+	if ticket.MergedAt == nil || ticket.MergedAt.Format(time.RFC3339) != "2026-05-18T14:00:00Z" {
+		t.Fatalf("MergedAt = %#v, want 2026-05-18T14:00:00Z", ticket.MergedAt)
 	}
 }
 

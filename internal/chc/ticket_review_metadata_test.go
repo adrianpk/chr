@@ -151,6 +151,76 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 	}
 }
 
+func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
+	path := writeReviewMetadataTicket(t, Ticket{
+		Key:         "CHC-1",
+		Title:       "Do something",
+		Status:      TicketStatusReadyForReview,
+		Branch:      "feat/slice-1-merger-handoff-contract",
+		ReviewState: "changes_requested",
+		ReviewRefs: []TicketReviewRef{
+			{
+				Type:     "pull_request",
+				Provider: "forgejo",
+				URL:      "https://forge.example.com/adrianpk/chc/pulls/281",
+				ID:       "281",
+				Status:   "open",
+			},
+		},
+		CreatedAt: testReviewMetadataTime(12),
+		UpdatedAt: testReviewMetadataTime(12),
+	})
+
+	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+		Path:      path,
+		Status:    TicketStatusReadyForMerge,
+		UpdatedAt: testReviewMetadataTime(13),
+	})
+	if err == nil {
+		t.Fatal("UpdateStatus returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "requires passed review metadata") {
+		t.Fatalf("err = %v, want passed review metadata error", err)
+	}
+}
+
+func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
+	path := writeReviewMetadataTicket(t, Ticket{
+		Key:          "CHC-1",
+		Title:        "Do something",
+		Status:       TicketStatusReadyForReview,
+		Branch:       "feat/slice-1-merger-handoff-contract",
+		ReviewState:  TicketReviewCommandResultPass,
+		ReviewResult: TicketReviewCommandResultPass,
+		ReviewRefs: []TicketReviewRef{
+			{
+				Type:     "pull_request",
+				Provider: "forgejo",
+				URL:      "https://forge.example.com/adrianpk/chc/pulls/281",
+				ID:       "281",
+				Status:   "open",
+			},
+		},
+		CreatedAt: testReviewMetadataTime(12),
+		UpdatedAt: testReviewMetadataTime(12),
+	})
+
+	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+		Path:      path,
+		Status:    TicketStatusReadyForMerge,
+		UpdatedAt: testReviewMetadataTime(13),
+	})
+	if err != nil {
+		t.Fatalf("UpdateStatus returned error: %v", err)
+	}
+
+	content := readReviewMetadataTicket(t, path)
+	if !strings.Contains(content, `status: "ready_for_merge"`) {
+		t.Fatalf("ticket content does not contain ready_for_merge:\n%s", content)
+	}
+}
+
 func writeReviewMetadataTicket(t *testing.T, ticket Ticket) string {
 	t.Helper()
 

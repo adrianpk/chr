@@ -69,6 +69,22 @@ func TestValidateIndexedTicketAcceptsReviewMetadata(t *testing.T) {
 	}
 }
 
+func TestValidateIndexedTicketAcceptsMergeMetadata(t *testing.T) {
+	now := time.Date(2026, 5, 26, 10, 0, 0, 0, time.UTC)
+	ticket := validIndexedTicket(now)
+	ticket.MergeState = TicketMergeStateBlocked
+	ticket.MergeResult = TicketMergeResultNotMergeable
+	ticket.MergeActor = TicketMergeActorMerger
+	ticket.MergeCommit = "abc123"
+	ticket.MergedAt = &now
+	ticket.MergeBlocker = "merge conflict"
+
+	err := ValidateIndexedTicket(ticket)
+	if err != nil {
+		t.Fatalf("ValidateIndexedTicket returned error: %v", err)
+	}
+}
+
 func TestValidateIndexedTicketRejectsInvalidReviewMetadata(t *testing.T) {
 	now := time.Date(2026, 5, 26, 10, 0, 0, 0, time.UTC)
 
@@ -111,6 +127,47 @@ func TestValidateIndexedTicketRejectsInvalidReviewMetadata(t *testing.T) {
 				ticket.BlockingFindings = []string{""}
 			},
 			wantErr: "ticket blocking_findings cannot contain empty values",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ticket := validIndexedTicket(now)
+			tt.mutate(&ticket)
+
+			err := ValidateIndexedTicket(ticket)
+			if err == nil {
+				t.Fatal("ValidateIndexedTicket returned nil error")
+			}
+
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("error = %q, want %q", err.Error(), tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateIndexedTicketRejectsInvalidMergeMetadata(t *testing.T) {
+	now := time.Date(2026, 5, 26, 10, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name    string
+		mutate  func(*IndexedTicket)
+		wantErr string
+	}{
+		{
+			name: "invalid merge state",
+			mutate: func(ticket *IndexedTicket) {
+				ticket.MergeState = "waiting"
+			},
+			wantErr: "invalid ticket merge_state: waiting",
+		},
+		{
+			name: "invalid merge result",
+			mutate: func(ticket *IndexedTicket) {
+				ticket.MergeResult = "approved"
+			},
+			wantErr: "invalid ticket merge_result: approved",
 		},
 	}
 

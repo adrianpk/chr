@@ -99,7 +99,8 @@ func (i *sqliteTicketIndex) ListProjectTickets(ctx context.Context, projectID st
 		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
     branch, review_refs, review_state, review_round, review_result, review_comments_url,
-    blocking_findings, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+    blocking_findings, merge_state, merge_result, merge_actor, merge_commit, merged_at,
+    merge_blocker, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
 FROM indexed_tickets
 WHERE project_id = ?
 ORDER BY key`,
@@ -148,7 +149,8 @@ func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID
 		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
     branch, review_refs, review_state, review_round, review_result, review_comments_url,
-    blocking_findings, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+    blocking_findings, merge_state, merge_result, merge_actor, merge_commit, merged_at,
+    merge_blocker, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
 FROM indexed_tickets
 WHERE project_id = ? AND key = ?`,
 		projectID,
@@ -196,8 +198,9 @@ const upsertIndexedTicketSQL = `INSERT INTO indexed_tickets (
     project_id, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
     branch, review_refs, review_state, review_round, review_result, review_comments_url,
-    blocking_findings, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    blocking_findings, merge_state, merge_result, merge_actor, merge_commit, merged_at,
+    merge_blocker, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(project_id, path) DO UPDATE SET
     relative_path = excluded.relative_path,
     key = excluded.key,
@@ -220,6 +223,12 @@ ON CONFLICT(project_id, path) DO UPDATE SET
     review_result = excluded.review_result,
     review_comments_url = excluded.review_comments_url,
     blocking_findings = excluded.blocking_findings,
+    merge_state = excluded.merge_state,
+    merge_result = excluded.merge_result,
+    merge_actor = excluded.merge_actor,
+    merge_commit = excluded.merge_commit,
+    merged_at = excluded.merged_at,
+    merge_blocker = excluded.merge_blocker,
     created_at = excluded.created_at,
     updated_at = excluded.updated_at,
     file_mtime = excluded.file_mtime,
@@ -261,6 +270,12 @@ func indexedTicketUpsertArgs(ticket IndexedTicket) []any {
 		ticket.ReviewResult,
 		ticket.ReviewCommentsURL,
 		mustJSON(ticket.BlockingFindings),
+		ticket.MergeState,
+		ticket.MergeResult,
+		ticket.MergeActor,
+		ticket.MergeCommit,
+		formatOptionalProjectTime(ticket.MergedAt),
+		ticket.MergeBlocker,
 		formatOptionalProjectTime(ticket.CreatedAt),
 		formatOptionalProjectTime(ticket.UpdatedAt),
 		formatProjectTime(ticket.FileMTime),
@@ -356,6 +371,7 @@ func scanIndexedTicket(scanner projectScanner) (IndexedTicket, error) {
 		&ticket,
 		fields.createdAt,
 		fields.updatedAt,
+		fields.mergedAt,
 		fields.fileMTime,
 		fields.indexedAt,
 	)
@@ -371,6 +387,7 @@ type indexedTicketScanFields struct {
 
 	createdAt            sql.NullString
 	updatedAt            sql.NullString
+	mergedAt             sql.NullString
 	fileMTime            string
 	indexedAt            string
 	reviewRefsJSON       string
@@ -404,6 +421,12 @@ func (f *indexedTicketScanFields) args() []any {
 		&ticket.ReviewResult,
 		&ticket.ReviewCommentsURL,
 		&f.blockingFindingsJSON,
+		&ticket.MergeState,
+		&ticket.MergeResult,
+		&ticket.MergeActor,
+		&ticket.MergeCommit,
+		&f.mergedAt,
+		&ticket.MergeBlocker,
 		&f.createdAt,
 		&f.updatedAt,
 		&f.fileMTime,
@@ -448,6 +471,7 @@ func assignIndexedTicketTimes(
 	ticket *IndexedTicket,
 	createdAt sql.NullString,
 	updatedAt sql.NullString,
+	mergedAt sql.NullString,
 	fileMTime string,
 	indexedAt string,
 ) error {
@@ -467,6 +491,15 @@ func assignIndexedTicketTimes(
 		}
 
 		ticket.UpdatedAt = &parsedUpdatedAt
+	}
+
+	if mergedAt.Valid {
+		parsedMergedAt, err := parseProjectTime(mergedAt.String)
+		if err != nil {
+			return err
+		}
+
+		ticket.MergedAt = &parsedMergedAt
 	}
 
 	parsedFileMTime, err := parseProjectTime(fileMTime)

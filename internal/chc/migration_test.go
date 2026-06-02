@@ -64,6 +64,12 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	assertColumnExists(t, db, "indexed_tickets", "review_result")
 	assertColumnExists(t, db, "indexed_tickets", "review_comments_url")
 	assertColumnExists(t, db, "indexed_tickets", "blocking_findings")
+	assertColumnExists(t, db, "indexed_tickets", "merge_state")
+	assertColumnExists(t, db, "indexed_tickets", "merge_result")
+	assertColumnExists(t, db, "indexed_tickets", "merge_actor")
+	assertColumnExists(t, db, "indexed_tickets", "merge_commit")
+	assertColumnExists(t, db, "indexed_tickets", "merged_at")
+	assertColumnExists(t, db, "indexed_tickets", "merge_blocker")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -141,6 +147,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260601000009-add_ticket_review_metadata.sql": {
 			Data: []byte(testAddTicketReviewMetadataMigration()),
+		},
+		"assets/migration/sqlite/20260602000010-add_ticket_merge_metadata.sql": {
+			Data: []byte(testAddTicketMergeMetadataMigration()),
 		},
 	}
 }
@@ -443,6 +452,34 @@ ON indexed_tickets (project_id, branch);
 -- +migrate Down
 DROP INDEX IF EXISTS indexed_tickets_project_branch_idx;
 DROP INDEX IF EXISTS indexed_tickets_project_review_state_idx;
+`
+}
+
+func testAddTicketMergeMetadataMigration() string {
+	return `-- +migrate Up
+ALTER TABLE indexed_tickets
+ADD COLUMN merge_state text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN merge_result text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN merge_actor text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN merge_commit text NOT NULL DEFAULT '';
+
+ALTER TABLE indexed_tickets
+ADD COLUMN merged_at text DEFAULT NULL;
+
+ALTER TABLE indexed_tickets
+ADD COLUMN merge_blocker text NOT NULL DEFAULT '';
+
+CREATE INDEX indexed_tickets_project_merge_state_idx
+ON indexed_tickets (project_id, merge_state);
+
+-- +migrate Down
+DROP INDEX IF EXISTS indexed_tickets_project_merge_state_idx;
 `
 }
 

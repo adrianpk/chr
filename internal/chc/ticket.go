@@ -31,6 +31,12 @@ type Ticket struct {
 	ReviewResult      string
 	ReviewCommentsURL string
 	BlockingFindings  []string
+	MergeState        string
+	MergeResult       string
+	MergeActor        string
+	MergeCommit       string
+	MergedAt          time.Time
+	MergeBlocker      string
 	Body              string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
@@ -94,6 +100,10 @@ func renderTicketFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		return err
 	}
 
+	if err := renderTicketMergeFrontmatter(output, ticket); err != nil {
+		return err
+	}
+
 	if err := renderTicketTimeFrontmatter(output, ticket); err != nil {
 		return err
 	}
@@ -147,6 +157,20 @@ func renderTicketReviewFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 	}
 
 	return writeTicketListField(output, "blocking_findings", ticket.BlockingFindings)
+}
+
+func renderTicketMergeFrontmatter(output *bytes.Buffer, ticket Ticket) error {
+	if err := writeTicketStringFields(output, []ticketStringField{
+		{key: "merge_state", value: ticket.MergeState},
+		{key: "merge_result", value: ticket.MergeResult},
+		{key: "merge_actor", value: ticket.MergeActor},
+		{key: "merge_commit", value: ticket.MergeCommit},
+		{key: "merge_blocker", value: ticket.MergeBlocker},
+	}); err != nil {
+		return err
+	}
+
+	return writeTicketEncodedField(output, "merged_at", yamlTimestamp(ticket.MergedAt))
 }
 
 func renderTicketTimeFrontmatter(output *bytes.Buffer, ticket Ticket) error {

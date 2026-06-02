@@ -21,6 +21,11 @@ func ValidateIndexedTicket(ticket IndexedTicket) error {
 		return err
 	}
 
+	err = validateTicketMergeMetadata(ticket)
+	if err != nil {
+		return err
+	}
+
 	return validateTicketTimes(ticket)
 }
 
@@ -161,6 +166,36 @@ func isValidTicketReviewState(state string) bool {
 func isValidTicketReviewResult(result string) bool {
 	switch strings.TrimSpace(result) {
 	case "", "pass", "needs_changes", "insufficient_evidence", "needs_human_decision":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateTicketMergeMetadata(ticket IndexedTicket) error {
+	if !isValidTicketMergeState(ticket.MergeState) {
+		return fmt.Errorf("invalid ticket merge_state: %s", ticket.MergeState)
+	}
+
+	if !isValidTicketMergeResult(ticket.MergeResult) {
+		return fmt.Errorf("invalid ticket merge_result: %s", ticket.MergeResult)
+	}
+
+	return nil
+}
+
+func isValidTicketMergeState(state string) bool {
+	switch strings.TrimSpace(state) {
+	case "", "pending", "merged", "blocked":
+		return true
+	default:
+		return false
+	}
+}
+
+func isValidTicketMergeResult(result string) bool {
+	switch strings.TrimSpace(result) {
+	case "", "merged", "blocked", "not_mergeable":
 		return true
 	default:
 		return false

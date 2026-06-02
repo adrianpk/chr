@@ -102,13 +102,17 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 }
 
 func validateTicketStatusTransitionMetadata(content, status string) error {
-	if status != TicketStatusReadyForReview {
+	if status != TicketStatusReadyForReview && status != TicketStatusReadyForMerge {
 		return nil
 	}
 
 	frontmatter, err := parseTicketFrontmatter(content)
 	if err != nil {
 		return err
+	}
+
+	if status == TicketStatusReadyForMerge {
+		return validateReadyForMergeTransitionMetadata(frontmatter)
 	}
 
 	branch := unquoteMetadataString(frontmatter.Metadata["branch"])
@@ -121,6 +125,27 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 	}
 
 	return nil
+}
+
+func validateReadyForMergeTransitionMetadata(frontmatter ticketFrontmatter) error {
+	reviewRound, err := optionalTicketInt(frontmatter.Metadata["review_round"])
+	if err != nil {
+		return err
+	}
+
+	ticket := IndexedTicket{
+		Key:          unquoteMetadataString(frontmatter.Metadata["key"]),
+		Status:       TicketStatusReadyForMerge,
+		Branch:       unquoteMetadataString(frontmatter.Metadata["branch"]),
+		ReviewRefs:   frontmatter.ReviewRefs,
+		ReviewState:  unquoteMetadataString(frontmatter.Metadata["review_state"]),
+		ReviewResult: unquoteMetadataString(frontmatter.Metadata["review_result"]),
+		ReviewRound:  reviewRound,
+	}
+
+	_, err = ValidateTicketMergeHandoff(ticket)
+
+	return err
 }
 
 func hasPullRequestReviewRef(refs []TicketReviewRef) bool {

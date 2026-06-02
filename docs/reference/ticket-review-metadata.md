@@ -51,6 +51,38 @@ contains the detailed review discussion.
 `blocking_findings` stores machine-readable identifiers for blocking findings,
 such as `RF-1`.
 
+## Merge Handoff Fields
+
+Merge metadata records the objective handoff from `@reviewer` to `@merger`.
+It does not create a second review phase.
+
+`merge_state` stores the merger state:
+
+```text
+pending
+merged
+blocked
+```
+
+`merge_result` stores the last merge result:
+
+```text
+merged
+blocked
+not_mergeable
+```
+
+`merge_actor` stores the role that handled the merge. The first supported value
+is `merger`.
+
+`merge_commit` stores the resulting merge commit or provider merge SHA when it
+is available.
+
+`merged_at` stores the merge timestamp.
+
+`merge_blocker` stores a compact objective blocker reason when merge handoff
+cannot proceed.
+
 ## Attaching References
 
 Use `ticket review-ref` to attach branch and pull request metadata to a ticket:
@@ -90,6 +122,9 @@ Review references require `type`, `provider`, and `url`.
 
 Moving a ticket to `ready_for_review` requires both `branch` and at least one
 `pull_request` entry in `review_refs`.
+
+Moving a ticket to `ready_for_merge` requires passed review metadata,
+`branch`, and at least one `pull_request` entry in `review_refs`.
 
 `review_round` cannot be negative.
 

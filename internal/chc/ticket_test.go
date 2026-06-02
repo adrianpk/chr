@@ -51,6 +51,12 @@ func testRenderedTicket() Ticket {
 		ReviewResult:      "needs_changes",
 		ReviewCommentsURL: "https://forge.example.com/owner/repo/pulls/123",
 		BlockingFindings:  []string{"RF-1"},
+		MergeState:        "blocked",
+		MergeResult:       "not_mergeable",
+		MergeActor:        "merger",
+		MergeCommit:       "abc123",
+		MergedAt:          time.Date(2026, 5, 18, 14, 0, 0, 0, time.UTC),
+		MergeBlocker:      "merge conflict",
 		CreatedAt:         createdAt,
 		UpdatedAt:         updatedAt,
 	}
@@ -82,6 +88,12 @@ review_result: "needs_changes"
 review_comments_url: "https://forge.example.com/owner/repo/pulls/123"
 review_round: 1
 blocking_findings: ["RF-1"]
+merge_state: "blocked"
+merge_result: "not_mergeable"
+merge_actor: "merger"
+merge_commit: "abc123"
+merge_blocker: "merge conflict"
+merged_at: "2026-05-18T14:00:00Z"
 created_at: "2026-05-18T12:30:00Z"
 updated_at: "2026-05-18T13:45:00Z"
 ---
@@ -125,6 +137,12 @@ func TestTicketRendererKeepsOptionalFieldsEmpty(t *testing.T) {
 		`review_comments_url: ""`,
 		`review_round: ""`,
 		`blocking_findings: []`,
+		`merge_state: ""`,
+		`merge_result: ""`,
+		`merge_actor: ""`,
+		`merge_commit: ""`,
+		`merge_blocker: ""`,
+		`merged_at: ""`,
 		`created_at: ""`,
 		`updated_at: ""`,
 	} {
