@@ -1,6 +1,6 @@
 # Merger Agent Workflow Slicing Tracker
 
-Status: planned
+Status: completed
 
 Plan: `.prj/plans/slicing-merger-agent-workflow-plan.md`
 Spec: `.prj/specs/specs/merger-agent-workflow.md`
@@ -14,9 +14,9 @@ Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
 - [x] Commit plan and tracker directly to `dev`. Commit: `8f8171d`
-- [ ] Select the first pending slice for implementation.
-- [ ] Complete all planned slices.
-- [ ] Validate completed slicing with the appropriate repository gate.
+- [x] Select the first pending slice for implementation.
+- [x] Complete all planned slices.
+- [x] Validate completed slicing with the appropriate repository gate.
 
 ## Slice Status
 
@@ -25,7 +25,7 @@ Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
 | Slice 1 | merger handoff contract | delivered | `feat/slice-1-merger-handoff-contract` | `#283` | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
 | Slice 2 | merger preflight | delivered | `feat/slice-2-merger-preflight` | `#284` | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
 | Slice 3 | merge execution command | delivered | `feat/slice-3-merge-execution-command` | `#285` | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
-| Slice 4 | merger workflow docs | reviewing | `feat/slice-4-merger-workflow-docs` | `#286` | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
+| Slice 4 | merger workflow docs | delivered | `feat/slice-4-merger-workflow-docs` | `#286` | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
 
 ## Slice 1: Merger Handoff Contract
 

@@ -2,7 +2,7 @@
 title: "Merger Agent Workflow Tracker"
 project_id: "chrysocoord"
 case_slug: "ticket-execution-loop"
-status: "planned"
+status: "completed"
 source_request_id: "chat-2026-06-02-merger-agent-role"
 source_response_id: "codex-plan"
 created_at: "2026-06-02T00:00:00Z"
@@ -22,7 +22,7 @@ source for task completion, commit mapping, validation logs, and slice closure.
 | Slice 1 | merger handoff contract | delivered | `feat/slice-1-merger-handoff-contract` | `#283` | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
 | Slice 2 | merger preflight | delivered | `feat/slice-2-merger-preflight` | `#284` | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
 | Slice 3 | merge execution command | delivered | `feat/slice-3-merge-execution-command` | `#285` | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
-| Slice 4 | merger workflow docs | reviewing | `feat/slice-4-merger-workflow-docs` | `#286` | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
+| Slice 4 | merger workflow docs | delivered | `feat/slice-4-merger-workflow-docs` | `#286` | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
 
 ## Operational Sources
 
