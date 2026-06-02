@@ -23,7 +23,7 @@ Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | merger handoff contract | delivered | `feat/slice-1-merger-handoff-contract` | `#283` | `.prj/reports/slices/merger-agent-workflow/slice-1-merger-handoff-contract.md` |
-| Slice 2 | merger preflight | planned | `feat/slice-2-merger-preflight` | pending | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
+| Slice 2 | merger preflight | reviewing | `feat/slice-2-merger-preflight` | `#284` | `.prj/reports/slices/merger-agent-workflow/slice-2-merger-preflight.md` |
 | Slice 3 | merge execution command | planned | `feat/slice-3-merge-execution-command` | pending | `.prj/reports/slices/merger-agent-workflow/slice-3-merge-execution-command.md` |
 | Slice 4 | merger workflow docs | planned | `feat/slice-4-merger-workflow-docs` | pending | `.prj/reports/slices/merger-agent-workflow/slice-4-merger-workflow-docs.md` |
 
@@ -61,13 +61,13 @@ Pre-flight:
 
 Tasks:
 
-- [ ] T2.1 Add merger preflight service boundary and result model.
-- [ ] T2.2 Reuse provider diagnostics for PR readability and branch/base checks.
-- [ ] T2.3 Add serial repair blocker checks.
-- [ ] T2.4 Add blocker classification for operational versus repair blockers.
-- [ ] T2.5 Add tests for pass, missing metadata, wrong base, stale branch,
-  conflict, credentials, and serial blockers.
-- [ ] T2.6 Add slice report and tracker updates.
+- [x] T2.1 Add merger preflight service boundary and result model. Commit: this commit
+- [x] T2.2 Reuse provider diagnostics for PR readability and branch/base checks. Commit: this commit
+- [x] T2.3 Add serial repair blocker checks. Commit: this commit
+- [x] T2.4 Add blocker classification for operational versus repair blockers. Commit: this commit
+- [x] T2.5 Add tests for pass, missing metadata, wrong base, stale branch,
+  conflict, credentials, and serial blockers. Commit: this commit
+- [x] T2.6 Add slice report and tracker updates. Commit: this commit
 
 ## Slice 3: Merge Execution Command
 
