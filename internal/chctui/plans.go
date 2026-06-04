@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// PlanView is the terminal projection of a generated plan document.
 type PlanView struct {
 	Index        int
 	UseCaseTitle string

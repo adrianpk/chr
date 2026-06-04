@@ -9,8 +9,10 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// WorkActionID identifies an agent work action awaiting TUI confirmation.
 type WorkActionID string
 
+// Work action identifiers define supported agent work commands.
 const (
 	WorkActionStartTicket    WorkActionID = "start_ticket"
 	WorkActionStartReadyLoop WorkActionID = "start_ready_loop"
@@ -18,10 +20,12 @@ const (
 	WorkActionRequestStop    WorkActionID = "request_stop"
 )
 
+// WorkActionExecutor runs confirmed agent work actions.
 type WorkActionExecutor interface {
 	ExecuteWorkAction(action WorkActionRequest) (WorkActionResult, error)
 }
 
+// WorkActionRequest carries selected agent work action input.
 type WorkActionRequest struct {
 	Action         WorkActionID
 	TicketKey      string
@@ -29,12 +33,14 @@ type WorkActionRequest struct {
 	Order          chc.TicketLoopOrder
 }
 
+// WorkActionResult contains refreshed agent work state after an action.
 type WorkActionResult struct {
 	Message       string
 	Tickets       []chc.IndexedTicket
 	Observability ObservabilityView
 }
 
+// WorkActionState stores pending confirmation state for an agent work action.
 type WorkActionState struct {
 	Pending bool
 	Request WorkActionRequest
@@ -48,6 +54,7 @@ type workActionFinishedMsg struct {
 	Err     error
 }
 
+// NewWorkActionState builds the confirmation details for an agent work action.
 func NewWorkActionState(action WorkActionID, ticket TicketView) WorkActionState {
 	switch action {
 	case WorkActionStartTicket:

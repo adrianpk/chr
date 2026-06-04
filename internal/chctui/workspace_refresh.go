@@ -6,10 +6,13 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// WorkspaceRefreshExecutor rebuilds workspace graph and index state for the
+// TUI.
 type WorkspaceRefreshExecutor interface {
 	RefreshWorkspace() (WorkspaceRefreshResult, error)
 }
 
+// WorkspaceRefreshResult contains refreshed workspace state for the TUI.
 type WorkspaceRefreshResult struct {
 	Message              string
 	Graph                chc.WorkspaceGraph

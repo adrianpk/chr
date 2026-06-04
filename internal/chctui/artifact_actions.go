@@ -9,18 +9,22 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// ArtifactActionID identifies an artifact action awaiting TUI confirmation.
 type ArtifactActionID string
 
+// Artifact action identifiers define the supported artifact commands.
 const (
 	ArtifactActionCreateTicket           ArtifactActionID = "create_ticket"
 	ArtifactActionCreateAuthoringSession ArtifactActionID = "create_authoring_session"
 	ArtifactActionCreateContextQuiz      ArtifactActionID = "create_context_quiz"
 )
 
+// ArtifactActionExecutor runs confirmed artifact actions.
 type ArtifactActionExecutor interface {
 	ExecuteArtifactAction(action ArtifactActionID) (ArtifactActionResult, error)
 }
 
+// ArtifactActionResult contains refreshed artifact-facing state after an action.
 type ArtifactActionResult struct {
 	Message           string
 	Tickets           []chc.IndexedTicket
@@ -28,6 +32,8 @@ type ArtifactActionResult struct {
 	AuthoringSessions []chc.AuthoringSession
 }
 
+// ArtifactActionState stores the pending confirmation state for an artifact
+// action.
 type ArtifactActionState struct {
 	Pending bool
 	Action  ArtifactActionID
@@ -35,6 +41,8 @@ type ArtifactActionState struct {
 	Details []string
 }
 
+// NewArtifactActionState builds the confirmation details for an artifact
+// action.
 func NewArtifactActionState(action ArtifactActionID) ArtifactActionState {
 	switch action {
 	case ArtifactActionCreateTicket:

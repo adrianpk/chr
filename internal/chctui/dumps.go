@@ -7,10 +7,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// DumpScope narrows a dump view to an optional use-case scope.
 type DumpScope struct {
 	CaseSlug string
 }
 
+// DumpView is the terminal projection of a dump document.
 type DumpView struct {
 	Index        int
 	NodeID       string

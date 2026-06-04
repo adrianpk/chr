@@ -8,10 +8,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// QuizScope identifies the project or use-case scope for a quiz.
 type QuizScope struct {
 	CaseSlug string
 }
 
+// QuizView is the terminal projection of a quiz session or available scope.
 type QuizView struct {
 	Index                 int
 	Title                 string

@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// DocumentView is the terminal projection of a workspace document.
 type DocumentView struct {
 	Index        int
 	Family       string
@@ -22,6 +23,7 @@ type DocumentView struct {
 	Preview      string
 }
 
+// LoadDocumentViews discovers project Markdown documents for the TUI.
 func LoadDocumentViews(ctx context.Context, projectDir string) ([]DocumentView, error) {
 	documents := []DocumentView{}
 

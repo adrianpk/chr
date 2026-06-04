@@ -9,6 +9,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// ObservabilityView summarizes execution, loop, and runtime observability.
 type ObservabilityView struct {
 	DaemonStatus             string
 	DaemonPID                int
@@ -24,6 +25,7 @@ type ObservabilityView struct {
 	RuntimeChecks            []RuntimeCheckView
 }
 
+// ExecutionView is the terminal projection of one execution record.
 type ExecutionView struct {
 	ID             string
 	TicketKey      string
@@ -36,6 +38,7 @@ type ExecutionView struct {
 	ValidationPath string
 }
 
+// LoopRunView is the terminal projection of one agent loop run.
 type LoopRunView struct {
 	ID             string
 	Status         string
@@ -47,6 +50,7 @@ type LoopRunView struct {
 	FailureReason  string
 }
 
+// RuntimeCheckView is the terminal projection of one runtime readiness check.
 type RuntimeCheckView struct {
 	Name    string
 	Status  string
@@ -54,6 +58,7 @@ type RuntimeCheckView struct {
 	Message string
 }
 
+// NewObservabilityView selects the latest observability records for the TUI.
 func NewObservabilityView(
 	projectDir string,
 	daemon chc.DaemonState,

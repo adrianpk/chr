@@ -9,8 +9,10 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// TicketActionID identifies a ticket action awaiting TUI confirmation.
 type TicketActionID string
 
+// Ticket action identifiers define supported ticket commands.
 const (
 	TicketActionAddComment       TicketActionID = "add_comment"
 	TicketActionAttachReviewRef  TicketActionID = "attach_review_ref"
@@ -19,10 +21,12 @@ const (
 	TicketActionAddChecklistItem TicketActionID = "add_checklist_item"
 )
 
+// TicketActionExecutor runs confirmed ticket actions.
 type TicketActionExecutor interface {
 	ExecuteTicketAction(action TicketActionRequest) (TicketActionResult, error)
 }
 
+// TicketActionRequest carries selected ticket action input.
 type TicketActionRequest struct {
 	Action    TicketActionID
 	Key       string
@@ -31,11 +35,13 @@ type TicketActionRequest struct {
 	ReviewRef *chc.TicketReviewRef
 }
 
+// TicketActionResult contains refreshed ticket state after an action.
 type TicketActionResult struct {
 	Message string
 	Tickets []chc.IndexedTicket
 }
 
+// TicketActionState stores pending confirmation state for a ticket action.
 type TicketActionState struct {
 	Pending bool
 	Request TicketActionRequest
@@ -43,6 +49,7 @@ type TicketActionState struct {
 	Details []string
 }
 
+// NewTicketActionState builds the confirmation details for a ticket action.
 func NewTicketActionState(action TicketActionID, ticket TicketView, status string) TicketActionState {
 	request := TicketActionRequest{
 		Action: action,

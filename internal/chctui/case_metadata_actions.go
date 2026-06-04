@@ -15,10 +15,12 @@ const (
 	caseFieldCount
 )
 
+// CaseMetadataExecutor persists use-case metadata edits.
 type CaseMetadataExecutor interface {
 	SaveCaseMetadata(metadata chc.CaseMetadata) (CaseMetadataResult, error)
 }
 
+// CaseMetadataResult returns refreshed use-case metadata after a save.
 type CaseMetadataResult struct {
 	Message string
 	Case    chc.CaseMetadata

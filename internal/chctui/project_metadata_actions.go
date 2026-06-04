@@ -16,15 +16,18 @@ const (
 	projectFieldCount
 )
 
+// ProjectMetadataExecutor persists project metadata edits.
 type ProjectMetadataExecutor interface {
 	SaveProjectMetadata(metadata chc.ProjectMetadata) (ProjectMetadataResult, error)
 }
 
+// ProjectMetadataResult returns refreshed project metadata after a save.
 type ProjectMetadataResult struct {
 	Message  string
 	Metadata chc.ProjectMetadata
 }
 
+// ProjectEditState stores editable metadata form state.
 type ProjectEditState struct {
 	Active bool
 	Field  int

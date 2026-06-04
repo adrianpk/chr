@@ -8,10 +8,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// SourceOpenExecutor resolves selected source paths for editor opening.
 type SourceOpenExecutor interface {
 	OpenSource(path string) (SourceOpenResult, error)
 }
 
+// SourceOpenResult describes the selected source path.
 type SourceOpenResult struct {
 	EditorCommand            *exec.Cmd
 	EditorCommandDescription string

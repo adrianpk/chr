@@ -10,10 +10,12 @@ import (
 
 const agentWorkRefreshInterval = 2 * time.Second
 
+// AgentWorkRefreshExecutor reloads dashboard agent work state.
 type AgentWorkRefreshExecutor interface {
 	RefreshAgentWork() (AgentWorkRefreshResult, error)
 }
 
+// AgentWorkRefreshResult contains refreshed agent work rows for the dashboard.
 type AgentWorkRefreshResult struct {
 	Tickets       []chc.IndexedTicket
 	Observability ObservabilityView

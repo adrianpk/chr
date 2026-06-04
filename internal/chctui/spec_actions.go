@@ -7,22 +7,27 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// SpecActionID identifies a spec action awaiting TUI confirmation.
 type SpecActionID string
 
+// Spec action identifiers define supported spec commands.
 const (
 	SpecActionGenerate SpecActionID = "generate_spec"
 	SpecActionRefresh  SpecActionID = "refresh_specs"
 )
 
+// SpecActionExecutor runs confirmed spec actions.
 type SpecActionExecutor interface {
 	ExecuteSpecAction(request SpecActionRequest) (SpecActionResult, error)
 }
 
+// SpecActionRequest carries selected spec action input.
 type SpecActionRequest struct {
 	Action SpecActionID
 	Scope  QuizScope
 }
 
+// SpecActionResult contains refreshed spec state after an action.
 type SpecActionResult struct {
 	Message   string
 	Documents []DocumentView
@@ -30,6 +35,7 @@ type SpecActionResult struct {
 	Scope     QuizScope
 }
 
+// SpecActionState stores pending confirmation state for a spec action.
 type SpecActionState struct {
 	Pending bool
 	Request SpecActionRequest

@@ -7,8 +7,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// CommandAction identifies the kind of command palette operation to execute.
 type CommandAction string
 
+// Command actions define command palette routing targets.
 const (
 	CommandActionNavigate           CommandAction = "navigate"
 	CommandActionRefresh            CommandAction = "refresh"
@@ -23,6 +25,7 @@ const (
 	CommandActionPlanWork           CommandAction = "plan_work"
 )
 
+// Command describes one command palette entry.
 type Command struct {
 	ID          string
 	Title       string
@@ -39,6 +42,7 @@ type Command struct {
 	Work        WorkActionID
 }
 
+// CommandPaletteState stores command palette filtering and selection state.
 type CommandPaletteState struct {
 	Open     bool
 	Filter   string
@@ -46,12 +50,15 @@ type CommandPaletteState struct {
 	Commands []Command
 }
 
+// NewCommandPaletteState initializes command palette state with a copy of the
+// available commands.
 func NewCommandPaletteState(commands []Command) CommandPaletteState {
 	return CommandPaletteState{
 		Commands: append([]Command(nil), commands...),
 	}
 }
 
+// DefaultCommandRegistry returns the built-in TUI command palette entries.
 func DefaultCommandRegistry() []Command {
 	commands := []Command{
 		{ID: "refresh", Title: "Refresh", Description: "Reload workspace files into the runtime graph.", Action: CommandActionRefresh},
@@ -314,6 +321,7 @@ func (m Model) commandAvailableInCurrentView(command Command) bool {
 	return true
 }
 
+// Matches reports whether a command should be shown for the current filter.
 func (c Command) Matches(filter string) bool {
 	return strings.Contains(strings.ToLower(c.ID), filter) ||
 		strings.Contains(strings.ToLower(c.Title), filter) ||

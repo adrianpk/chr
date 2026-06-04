@@ -9,6 +9,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// AuthoringSessionView is the terminal projection of an authoring session.
 type AuthoringSessionView struct {
 	Index          int
 	ID             string
@@ -24,6 +25,7 @@ type AuthoringSessionView struct {
 	Outputs        []string
 }
 
+// NewAuthoringSessionViews converts core authoring sessions into TUI rows.
 func NewAuthoringSessionViews(sessions []chc.AuthoringSession) []AuthoringSessionView {
 	views := make([]AuthoringSessionView, 0, len(sessions))
 

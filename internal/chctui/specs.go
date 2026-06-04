@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// SpecView is the terminal projection of a spec document.
 type SpecView struct {
 	Index        int
 	UseCaseTitle string

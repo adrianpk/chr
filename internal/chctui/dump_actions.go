@@ -9,8 +9,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// DumpActionID identifies a dump action awaiting TUI confirmation.
 type DumpActionID string
 
+// Dump action identifiers define supported dump commands.
 const (
 	DumpActionCreate       DumpActionID = "create_dump"
 	DumpActionAppend       DumpActionID = "append_dump"
@@ -20,10 +22,12 @@ const (
 	DumpActionRefresh      DumpActionID = "refresh_dumps"
 )
 
+// DumpActionExecutor runs confirmed dump actions.
 type DumpActionExecutor interface {
 	ExecuteDumpAction(request DumpActionRequest) (DumpActionResult, error)
 }
 
+// DumpActionRequest carries selected dump action input.
 type DumpActionRequest struct {
 	Action  DumpActionID
 	Title   string
@@ -32,6 +36,7 @@ type DumpActionRequest struct {
 	Path    string
 }
 
+// DumpActionResult contains refreshed dump state after an action.
 type DumpActionResult struct {
 	Message                  string
 	Dumps                    []DumpView
@@ -41,6 +46,7 @@ type DumpActionResult struct {
 	EditorCommandDescription string
 }
 
+// DumpActionState stores pending confirmation state for a dump action.
 type DumpActionState struct {
 	Pending bool
 	Request DumpActionRequest
@@ -48,6 +54,7 @@ type DumpActionState struct {
 	Details []string
 }
 
+// DumpEditState stores in-terminal dump editing state.
 type DumpEditState struct {
 	Active bool
 	Path   string

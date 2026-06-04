@@ -12,8 +12,10 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// View identifies one TUI screen.
 type View string
 
+// Primary view identifiers define the shell tabs shown by default.
 const (
 	ViewProject View = "Project"
 	ViewCases   View = "Cases"
@@ -23,8 +25,11 @@ const (
 	ViewPlans   View = "Plans"
 	ViewDash    View = "Dash"
 	ViewHelp    View = "Help"
+)
 
-	// Legacy internal views kept for existing commands and non-shell rendering paths.
+// Legacy view identifiers are kept for existing commands and non-shell
+// rendering paths.
+const (
 	ViewDashboard View = "Dashboard"
 	ViewBoard     View = "Board"
 	ViewTickets   View = "Tickets"
@@ -66,6 +71,7 @@ var viewPlaceholders = map[View]string{
 	ViewHelp:      "Command palette and key help will appear here.",
 }
 
+// Options configures the initial TUI model and its service adapters.
 type Options struct {
 	ProjectDir           string
 	ProjectID            string
@@ -98,6 +104,7 @@ type Options struct {
 	SourceExecutor       SourceOpenExecutor
 }
 
+// Model is the Bubble Tea model for the Chrysocoord TUI.
 type Model struct {
 	projectDir               string
 	projectID                string
@@ -191,6 +198,8 @@ const (
 	boardAttentionColumn     = "attention"
 )
 
+// NewModel initializes a terminal UI model from loaded workspace state.
+//
 //nolint:funlen // Model construction keeps option mapping in one place.
 func NewModel(opts Options) Model {
 	workspaceIndex := opts.WorkspaceIndex
@@ -261,6 +270,7 @@ func NewModel(opts Options) Model {
 	}
 }
 
+// Run starts the terminal UI event loop.
 func Run(ctx context.Context, opts Options) error {
 	programOptions := []tea.ProgramOption{
 		tea.WithContext(ctx),
@@ -283,10 +293,12 @@ func Run(ctx context.Context, opts Options) error {
 	return nil
 }
 
+// Init satisfies tea.Model and returns the initial command.
 func (m Model) Init() tea.Cmd {
 	return agentWorkRefreshTickCmd()
 }
 
+// Update applies a Bubble Tea message to the model.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if updated, cmd, ok := m.updateSystemMessage(msg); ok {
 		return updated, cmd
@@ -354,6 +366,7 @@ func (m Model) updateActionFinishedMessage(msg tea.Msg) (tea.Model, tea.Cmd, boo
 	}
 }
 
+// View renders the current terminal screen.
 func (m Model) View() string {
 	if m.width > 0 && m.height > 0 {
 		return m.renderShell()
@@ -394,6 +407,7 @@ func (m Model) View() string {
 	return output.String()
 }
 
+// SelectedView returns the active TUI view.
 func (m Model) SelectedView() View {
 	return m.views[m.selected]
 }
@@ -1635,6 +1649,7 @@ func lastRune(value string) string {
 	return string(runes[len(runes)-1])
 }
 
+// TicketView is the terminal projection of an indexed ticket.
 type TicketView struct {
 	Index             int
 	Key               string
@@ -1663,6 +1678,7 @@ type TicketView struct {
 	BodyLines         []string
 }
 
+// NewTicketViews converts indexed tickets into TUI rows.
 func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 	views := make([]TicketView, 0, len(tickets))
 
@@ -1708,6 +1724,7 @@ func NewTicketViews(tickets []chc.IndexedTicket) []TicketView {
 	return views
 }
 
+// Matches reports whether a ticket row should be shown for the current filter.
 func (t TicketView) Matches(filter string) bool {
 	values := []string{
 		t.Key,

@@ -9,8 +9,10 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// PlanActionID identifies a plan action awaiting TUI confirmation.
 type PlanActionID string
 
+// Plan action identifiers define supported plan commands.
 const (
 	PlanActionGenerate            PlanActionID = "generate_missing_plan"
 	PlanActionRegenerate          PlanActionID = "regenerate_plan"
@@ -18,15 +20,18 @@ const (
 	PlanActionMaterializeTracking PlanActionID = "materialize_plan_tracking"
 )
 
+// PlanActionExecutor runs confirmed plan actions.
 type PlanActionExecutor interface {
 	ExecutePlanAction(request PlanActionRequest) (PlanActionResult, error)
 }
 
+// PlanActionRequest carries selected plan action input.
 type PlanActionRequest struct {
 	Action PlanActionID
 	Scope  QuizScope
 }
 
+// PlanActionResult contains refreshed plan state after an action.
 type PlanActionResult struct {
 	Message   string
 	Documents []DocumentView
@@ -35,6 +40,7 @@ type PlanActionResult struct {
 	Scope     QuizScope
 }
 
+// PlanActionState stores pending confirmation state for a plan action.
 type PlanActionState struct {
 	Pending bool
 	Request PlanActionRequest

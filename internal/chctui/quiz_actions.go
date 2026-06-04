@@ -8,8 +8,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// QuizActionID identifies a quiz action awaiting TUI confirmation.
 type QuizActionID string
 
+// Quiz action identifiers define supported quiz commands.
 const (
 	QuizActionStart    QuizActionID = "start_quiz"
 	QuizActionResume   QuizActionID = "resume_quiz"
@@ -22,10 +24,12 @@ const (
 	QuizActionFastMode QuizActionID = "quiz_fast_mode"
 )
 
+// QuizActionExecutor runs confirmed quiz actions.
 type QuizActionExecutor interface {
 	ExecuteQuizAction(request QuizActionRequest) (QuizActionResult, error)
 }
 
+// QuizActionRequest carries selected quiz action input.
 type QuizActionRequest struct {
 	Action QuizActionID
 	Scope  QuizScope
@@ -33,12 +37,14 @@ type QuizActionRequest struct {
 	Answer string
 }
 
+// QuizActionResult contains refreshed quiz state after an action.
 type QuizActionResult struct {
 	Message       string
 	Quizzes       []QuizView
 	SelectedScope QuizScope
 }
 
+// QuizActionState stores pending confirmation state for a quiz action.
 type QuizActionState struct {
 	Pending bool
 	Request QuizActionRequest
@@ -46,6 +52,7 @@ type QuizActionState struct {
 	Details []string
 }
 
+// QuizAnswerState stores in-terminal quiz answer editing state.
 type QuizAnswerState struct {
 	Active bool
 	Scope  QuizScope
