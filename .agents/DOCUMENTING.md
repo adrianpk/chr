@@ -20,7 +20,16 @@ inside that quadrant instead of adding new top-level directories under `docs/`.
 - Keep command examples aligned with actual `cmd/` entrypoints.
 - Keep package references aligned with Go import paths and package names.
 - API/reference docs should use Go names, signatures, structs, interfaces, and error contracts.
-- Public exported APIs should have useful Godoc when they are part of a package contract.
+- Exported package contracts must have useful Godoc. This includes exported
+  symbols in `internal/` packages when they are consumed across package
+  boundaries.
+- Exported struct fields and interface methods must be documented when they are
+  part of an input, output, config, or boundary contract.
+- Packages with exported contracts should include a local `README.md` when the
+  package needs a durable boundary, behavior, or usage explanation beyond
+  Godoc.
+- Package READMEs should avoid mixing unrelated documentation styles. Prefer a
+  consistent structure: purpose, boundary, API, types, behavior, and examples.
 
 ## Contract documentation
 

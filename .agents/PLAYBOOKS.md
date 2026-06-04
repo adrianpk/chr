@@ -7,6 +7,7 @@ This file indexes focused playbooks under `.agents/playbooks/`.
 - `.agents/playbooks/version-control-workflow.md`
 - `.agents/playbooks/slice-delivery.md`
 - `.agents/playbooks/slice-reporting.md`
+- `.agents/playbooks/testing-strategy.md`
 - `.agents/playbooks/ticket-workflow.md`
 - `.agents/playbooks/planned-delivery-workflow.md`
 - `.agents/playbooks/release-alignment.md`

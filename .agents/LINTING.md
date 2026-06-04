@@ -2,6 +2,9 @@
 
 This repository uses focused quality gates for Go application code.
 
+For test selection and risk-based testing techniques, follow
+`.agents/playbooks/testing-strategy.md`.
+
 ## Baseline checks
 
 - Formatting:
@@ -68,6 +71,9 @@ unrelated application tests.
 ## Rules
 
 - Do not skip tests for behavior changes.
+- Use `.agents/playbooks/testing-strategy.md` when choosing between baseline
+  table-driven tests and higher-rigor techniques such as fuzz, property, race,
+  benchmark, mutation, or CRAP-style risk review.
 - Fix failing checks before declaring work complete.
 - For docs-only changes, validate the diff and whitespace instead of running unrelated application tests.
 - Keep linter strictness high enough to catch defects, but avoid rules that encourage mechanical churn without improving maintainability.

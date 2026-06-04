@@ -43,6 +43,8 @@ This document defines coding rules for Go application code.
 
 ## Testing
 
+- Follow `.agents/playbooks/testing-strategy.md` when selecting the test
+  approach for behavior changes.
 - Use Go's standard `testing` package by default.
 - For bug fixes, first reproduce the defect with a failing test when feasible.
 - Prefer table-driven tests for input/output behavior.
