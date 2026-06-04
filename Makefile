@@ -13,7 +13,7 @@ QA_REF ?= 001
 GATE_BASE ?= origin/main
 GATE_HEAD ?= origin/dev
 
-.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
+.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style check-package-readmes dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
 
 fmt:
 	@$(GO) fmt ./...
@@ -27,14 +27,19 @@ test-coverage:
 
 lint:
 	@scripts/check-go-func-signatures.sh
+	@scripts/check-package-readmes.sh
 	@golangci-lint run ./...
 
 lint-strict:
 	@scripts/check-go-func-signatures.sh
+	@scripts/check-package-readmes.sh
 	@golangci-lint run --timeout=5m ./...
 
 check-go-style:
 	@scripts/check-go-func-signatures.sh
+
+check-package-readmes:
+	@scripts/check-package-readmes.sh
 
 check: fmt check-go-style test
 

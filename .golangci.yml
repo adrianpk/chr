@@ -62,6 +62,8 @@ linters:
 
     revive:
       rules:
+        - name: exported
+        - name: package-comments
         - name: indent-error-flow
         - name: superfluous-else
         - name: var-declaration

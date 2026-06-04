@@ -99,8 +99,9 @@ func WriteGeneratedPlanTracking(
 	return paths, nil
 }
 
-//nolint:wsl_v5 // Markdown rendering keeps adjacent writes together.
 // RenderGeneratedPlanTracking renders generated plan tracking as Markdown.
+//
+//nolint:wsl_v5 // Markdown rendering keeps adjacent writes together.
 func RenderGeneratedPlanTracking(tracking GeneratedPlanTracking) string {
 	var output bytes.Buffer
 
