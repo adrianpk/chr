@@ -2,12 +2,14 @@ package chcapp
 
 import "forge.adrianpk.com/chc/internal/chc"
 
+// WorkspacePathResolutionResult reports a workspace index path resolution.
 type WorkspacePathResolutionResult struct {
 	Node    chc.WorkspaceNode
 	Found   bool
 	Message string
 }
 
+// WorkspaceRelatedDocumentsResult contains documents related to a source path.
 type WorkspaceRelatedDocumentsResult struct {
 	Node     chc.WorkspaceNode
 	Related  []chc.WorkspaceNode
@@ -15,6 +17,7 @@ type WorkspaceRelatedDocumentsResult struct {
 	Message  string
 }
 
+// WorkspaceIndexSearchResult contains workspace index search matches.
 type WorkspaceIndexSearchResult struct {
 	Results []chc.WorkspaceIndexSearchResult
 	Message string

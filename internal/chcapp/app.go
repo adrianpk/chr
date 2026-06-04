@@ -33,6 +33,8 @@ func appDependenciesFromCommand(cmd *cli.Command) (appDependencies, error) {
 	return deps, nil
 }
 
+// Run executes the chc application with explicit process IO and embedded
+// command assets.
 func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.Writer, commandAssetsFS fs.FS) error {
 	deps := appDependencies{assetsFS: commandAssetsFS}
 	cmd := newRootCommand(stdin, stdout, stderr, deps)

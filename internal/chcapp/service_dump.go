@@ -12,10 +12,12 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// DumpScope narrows a dump operation to an optional use-case scope.
 type DumpScope struct {
 	CaseSlug string
 }
 
+// DumpView is the TUI-facing projection of a workspace dump document.
 type DumpView struct {
 	NodeID       string
 	UseCaseTitle string
@@ -29,35 +31,42 @@ type DumpView struct {
 	Content      string
 }
 
+// DumpListResult contains the current dump list and a status message.
 type DumpListResult struct {
 	Message string
 	Dumps   []DumpView
 }
 
+// DumpCreateRequest describes a new dump capture.
 type DumpCreateRequest struct {
 	Title   string
 	Content string
 	Scope   DumpScope
 }
 
+// DumpAppendRequest appends content to an existing dump.
 type DumpAppendRequest struct {
 	RelativePath string
 	Content      string
 }
 
+// DumpSaveRequest replaces the content of an existing dump.
 type DumpSaveRequest struct {
 	RelativePath string
 	Content      string
 }
 
+// DumpOpenRequest selects a dump for editing.
 type DumpOpenRequest struct {
 	RelativePath string
 }
 
+// DumpReadRequest selects a dump for reading.
 type DumpReadRequest struct {
 	RelativePath string
 }
 
+// DumpEditorCommand describes an external editor invocation.
 type DumpEditorCommand struct {
 	Program     string
 	Args        []string
@@ -65,10 +74,12 @@ type DumpEditorCommand struct {
 	Description string
 }
 
+// DumpEditorLauncher resolves the editor command for a dump path.
 type DumpEditorLauncher interface {
 	EditorCommand(ctx context.Context, path string) (DumpEditorCommand, error)
 }
 
+// DumpOperationResult is the TUI-facing result for dump operations.
 type DumpOperationResult struct {
 	Message       string
 	Dumps         []DumpView

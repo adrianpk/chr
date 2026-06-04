@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// SpecView is the TUI-facing projection of a spec document.
 type SpecView struct {
 	Index        int
 	UseCaseTitle string
@@ -24,15 +25,18 @@ type SpecView struct {
 	Content      string
 }
 
+// SpecListResult contains the current spec list and a status message.
 type SpecListResult struct {
 	Message string
 	Specs   []SpecView
 }
 
+// SpecGenerateRequest selects the quiz scope used to generate a spec.
 type SpecGenerateRequest struct {
 	Scope chc.QuizScope
 }
 
+// SpecOperationResult is the TUI-facing result for spec generation.
 type SpecOperationResult struct {
 	Message string
 	Spec    SpecView

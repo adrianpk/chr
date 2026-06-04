@@ -8,11 +8,13 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// WorkOperationResult is the TUI-facing result for agent work operations.
 type WorkOperationResult struct {
 	Message string
 	Tickets []chc.IndexedTicket
 }
 
+// AgentWorkResult summarizes runnable agent work for the dashboard.
 type AgentWorkResult struct {
 	Message       string
 	Tickets       []chc.IndexedTicket
@@ -23,6 +25,7 @@ type AgentWorkResult struct {
 	EligibleCount int
 }
 
+// AgentWorkSelectionOptions filters agent work selection.
 type AgentWorkSelectionOptions struct {
 	Statuses      []string
 	Filters       chc.TicketLoopFilters

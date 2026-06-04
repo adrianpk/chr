@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// PlanView is the TUI-facing projection of a generated plan document.
 type PlanView struct {
 	Index        int
 	UseCaseTitle string
@@ -25,28 +26,35 @@ type PlanView struct {
 	Content      string
 }
 
+// PlanListResult contains the current plan list and a status message.
 type PlanListResult struct {
 	Message string
 	Plans   []PlanView
 }
 
+// PlanGenerateRequest selects the quiz scope used to generate a plan.
 type PlanGenerateRequest struct {
 	Scope chc.QuizScope
 }
 
+// PlanRegenerateRequest selects the quiz scope used to replace a plan.
 type PlanRegenerateRequest struct {
 	Scope chc.QuizScope
 }
 
+// PlanTrackingRequest selects the plan scope used to materialize tracking
+// artifacts.
 type PlanTrackingRequest struct {
 	Scope chc.QuizScope
 }
 
+// PlanOperationResult is the TUI-facing result for plan generation operations.
 type PlanOperationResult struct {
 	Message string
 	Plan    PlanView
 }
 
+// PlanTrackingResult reports generated tracking artifacts for a plan.
 type PlanTrackingResult struct {
 	Message      string
 	Plan         PlanView

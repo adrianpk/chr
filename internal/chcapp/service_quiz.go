@@ -12,47 +12,57 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// QuizListResult contains the current quiz list and a status message.
 type QuizListResult struct {
 	Message string
 	States  []chc.QuizRuntimeState
 	Views   []QuizView
 }
 
+// QuizOperationResult is the TUI-facing result for quiz mutations.
 type QuizOperationResult struct {
 	Message string
 	State   chc.QuizRuntimeState
 }
 
+// QuizStartRequest selects the scope for a new quiz session.
 type QuizStartRequest struct {
 	Scope chc.QuizScope
 	Mode  chc.QuizMode
 }
 
+// QuizResumeRequest selects the scope for a resumed quiz session.
 type QuizResumeRequest struct {
 	Scope chc.QuizScope
 }
 
+// QuizAnswerRequest submits an answer for the active quiz question.
 type QuizAnswerRequest struct {
 	Scope  chc.QuizScope
 	Answer string
 }
 
+// QuizSkipRequest skips the active quiz question for the selected scope.
 type QuizSkipRequest struct {
 	Scope chc.QuizScope
 }
 
+// QuizCompleteRequest completes the quiz for the selected scope.
 type QuizCompleteRequest struct {
 	Scope chc.QuizScope
 }
 
+// QuizDraftSpecRequest selects the quiz scope used to draft a spec.
 type QuizDraftSpecRequest struct {
 	Scope chc.QuizScope
 }
 
+// QuizCancelRequest cancels the quiz for the selected scope.
 type QuizCancelRequest struct {
 	Scope chc.QuizScope
 }
 
+// QuizModeRequest changes the quiz interaction mode for the selected scope.
 type QuizModeRequest struct {
 	Scope chc.QuizScope
 	Mode  chc.QuizMode

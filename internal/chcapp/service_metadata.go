@@ -10,11 +10,13 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// ProjectMetadataSaveResult reports the saved project metadata.
 type ProjectMetadataSaveResult struct {
 	Message  string
 	Metadata chc.ProjectMetadata
 }
 
+// ProjectMetadataPatchRequest carries editable project metadata fields.
 type ProjectMetadataPatchRequest struct {
 	Name        *string
 	Description *string
@@ -46,12 +48,14 @@ func (s service) PatchProjectMetadata(request ProjectMetadataPatchRequest) (Proj
 	return s.SaveProjectMetadata(metadata)
 }
 
+// CaseMetadataSaveResult reports the saved use-case metadata.
 type CaseMetadataSaveResult struct {
 	Message string
 	Case    chc.CaseMetadata
 	Cases   []chc.CaseMetadata
 }
 
+// CaseMetadataPatchRequest carries editable use-case metadata fields.
 type CaseMetadataPatchRequest struct {
 	Slug        string
 	Name        *string

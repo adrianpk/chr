@@ -8,17 +8,23 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// ArtifactOperationResult is the TUI-facing result for artifact creation
+// actions.
 type ArtifactOperationResult struct {
 	Message           string
 	Tickets           []chc.IndexedTicket
 	AuthoringSessions []chc.AuthoringSession
 }
 
+// CreateAuthoringSessionResult identifies a persisted authoring session and
+// the files created for it.
 type CreateAuthoringSessionResult struct {
 	Session chc.AuthoringSession
 	Paths   chc.AuthoringSessionPaths
 }
 
+// CreateTicketRequest carries the metadata and body for a new repository
+// ticket.
 type CreateTicketRequest struct {
 	Title       string
 	Synopsis    string
@@ -35,6 +41,7 @@ type CreateTicketRequest struct {
 	Body        string
 }
 
+// CreateTicketResult identifies the created ticket.
 type CreateTicketResult struct {
 	Key  string
 	Path string
@@ -231,17 +238,20 @@ func (s service) reloadArtifactOperationState() (ArtifactOperationResult, error)
 	}, nil
 }
 
+// TicketOperationResult is the TUI-facing result for ticket mutations.
 type TicketOperationResult struct {
 	Message string
 	Tickets []chc.IndexedTicket
 }
 
+// TicketCommentRequest describes a comment to append to a ticket.
 type TicketCommentRequest struct {
 	Key    string
 	Author string
 	Body   string
 }
 
+// TicketReviewReferenceRequest describes review metadata to attach to a ticket.
 type TicketReviewReferenceRequest struct {
 	Key    string
 	Branch string

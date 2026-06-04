@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// DumpCurationRequest carries raw dump content into a curation provider.
 type DumpCurationRequest struct {
 	ProjectDir string
 	ProjectID  string
@@ -14,12 +15,14 @@ type DumpCurationRequest struct {
 	Scope      DumpScope
 }
 
+// DumpCurationResult contains the curated dump title and body.
 type DumpCurationResult struct {
 	PolishedBody string
 	Highlights   []string
 	Warnings     []string
 }
 
+// DumpCurationProvider curates raw dump content into a durable dump document.
 type DumpCurationProvider interface {
 	CurateDump(ctx context.Context, request DumpCurationRequest) (DumpCurationResult, error)
 }

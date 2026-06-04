@@ -11,8 +11,10 @@ import (
 	"forge.adrianpk.com/chc/internal/chc"
 )
 
+// QuizViewStatusNotStarted marks a quiz scope that has no active session yet.
 const QuizViewStatusNotStarted = "not_started"
 
+// QuizView is the TUI-facing projection of a quiz session or available scope.
 type QuizView struct {
 	Index                 int
 	Title                 string

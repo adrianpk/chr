@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// SourceOpenResult describes a source file selected for editor opening.
 type SourceOpenResult struct {
 	EditorCommand *DumpEditorCommand
 }

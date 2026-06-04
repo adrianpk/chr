@@ -2,6 +2,7 @@ package chcapp
 
 import "forge.adrianpk.com/chc/internal/chc"
 
+// WorkspaceRefreshResult reports the outcome of rebuilding workspace indexes.
 type WorkspaceRefreshResult struct {
 	Message              string
 	Graph                chc.WorkspaceGraph
