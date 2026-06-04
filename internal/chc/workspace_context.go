@@ -7,13 +7,17 @@ import (
 	"strings"
 )
 
+// WorkspaceContextScope defines a package boundary type.
 type WorkspaceContextScope string
 
 const (
-	WorkspaceContextScopeCase    WorkspaceContextScope = "case"
+	// WorkspaceContextScopeCase defines a package boundary constant.
+	WorkspaceContextScopeCase WorkspaceContextScope = "case"
+	// WorkspaceContextScopeProject defines a package boundary constant.
 	WorkspaceContextScopeProject WorkspaceContextScope = "project"
 )
 
+// WorkspaceContextRequest describes a package boundary value.
 type WorkspaceContextRequest struct {
 	ProjectDir string
 	Scope      WorkspaceContextScope
@@ -21,6 +25,7 @@ type WorkspaceContextRequest struct {
 	Graph      WorkspaceGraph
 }
 
+// WorkspaceContextAssembly describes a package boundary value.
 type WorkspaceContextAssembly struct {
 	ProjectDir               string
 	Scope                    WorkspaceContextScope
@@ -33,6 +38,7 @@ type WorkspaceContextAssembly struct {
 	UnresolvedCaseReferences []WorkspaceCaseReference
 }
 
+// NewCaseRootedWorkspaceContextRequest constructs the corresponding package service or value.
 func NewCaseRootedWorkspaceContextRequest(
 	projectDir string,
 	graph WorkspaceGraph,
@@ -46,6 +52,7 @@ func NewCaseRootedWorkspaceContextRequest(
 	}
 }
 
+// NewProjectWideWorkspaceContextRequest constructs the corresponding package service or value.
 func NewProjectWideWorkspaceContextRequest(projectDir string, graph WorkspaceGraph) WorkspaceContextRequest {
 	return WorkspaceContextRequest{
 		ProjectDir: projectDir,
@@ -54,6 +61,7 @@ func NewProjectWideWorkspaceContextRequest(projectDir string, graph WorkspaceGra
 	}
 }
 
+// AssembleWorkspaceContext executes the corresponding package operation.
 func AssembleWorkspaceContext(request WorkspaceContextRequest) (WorkspaceContextAssembly, error) {
 	projectDir, err := cleanAbsProjectDir(request.ProjectDir)
 	if err != nil {
@@ -106,6 +114,7 @@ func AssembleWorkspaceContext(request WorkspaceContextRequest) (WorkspaceContext
 	return assembly, nil
 }
 
+// RenderWorkspaceContextAssembly renders the corresponding package data.
 func RenderWorkspaceContextAssembly(assembly WorkspaceContextAssembly) string {
 	var output strings.Builder
 

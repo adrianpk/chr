@@ -9,15 +9,23 @@ import (
 )
 
 const (
-	TicketReviewCommandResultPass                  = "pass"
-	TicketReviewCommandResultNeedsChanges          = "needs_changes"
-	TicketReviewCommandResultInsufficientEvidence  = "insufficient_evidence"
-	TicketReviewCommandResultNeedsHumanDecision    = "needs_human_decision"
-	TicketReviewCommandActorReviewer               = "reviewer"
-	TicketReviewCommandCleanPassRemoteComment      = false
+	// TicketReviewCommandResultPass defines a package boundary constant.
+	TicketReviewCommandResultPass = "pass"
+	// TicketReviewCommandResultNeedsChanges defines a package boundary constant.
+	TicketReviewCommandResultNeedsChanges = "needs_changes"
+	// TicketReviewCommandResultInsufficientEvidence defines a package boundary constant.
+	TicketReviewCommandResultInsufficientEvidence = "insufficient_evidence"
+	// TicketReviewCommandResultNeedsHumanDecision defines a package boundary constant.
+	TicketReviewCommandResultNeedsHumanDecision = "needs_human_decision"
+	// TicketReviewCommandActorReviewer defines a package boundary constant.
+	TicketReviewCommandActorReviewer = "reviewer"
+	// TicketReviewCommandCleanPassRemoteComment defines a package boundary constant.
+	TicketReviewCommandCleanPassRemoteComment = false
+	// TicketReviewCommandInspectionOnlyPolicySummary defines a package boundary constant.
 	TicketReviewCommandInspectionOnlyPolicySummary = "inspect ticket, execution, validation, pull request, diff, comments, and checks without rerunning implementation"
 )
 
+// TicketReviewCommandOptions describes a package boundary value.
 type TicketReviewCommandOptions struct {
 	Ticket     IndexedTicket
 	Config     WorkspaceConfig
@@ -28,6 +36,7 @@ type TicketReviewCommandOptions struct {
 	ReviewedAt time.Time
 }
 
+// TicketReviewCommandResult describes a package boundary value.
 type TicketReviewCommandResult struct {
 	TicketKey        string
 	ReviewRef        TicketReviewRef
@@ -41,6 +50,7 @@ type TicketReviewCommandResult struct {
 	DryRun           bool
 }
 
+// RunTicketReviewCommand executes the corresponding package operation.
 func RunTicketReviewCommand(ctx context.Context, opts TicketReviewCommandOptions) (TicketReviewCommandResult, error) {
 	if err := ctx.Err(); err != nil {
 		return TicketReviewCommandResult{}, err

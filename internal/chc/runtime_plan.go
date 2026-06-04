@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// RuntimePlanOptions describes a package boundary value.
 type RuntimePlanOptions struct {
 	ProjectDir string
 	Config     RuntimeConfig
@@ -14,6 +15,7 @@ type RuntimePlanOptions struct {
 	RunID      string
 }
 
+// RuntimePlan describes a package boundary value.
 type RuntimePlan struct {
 	ProjectDir        string
 	WorkspaceDir      string
@@ -30,6 +32,7 @@ type RuntimePlan struct {
 	ValidationCommand string
 }
 
+// RuntimeMount describes a package boundary value.
 type RuntimeMount struct {
 	Source      string
 	Target      string
@@ -37,6 +40,7 @@ type RuntimeMount struct {
 	Description string
 }
 
+// PlanRuntime executes the corresponding package operation.
 func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	projectDir, err := resolveProjectDir(opts.ProjectDir)
 	if err != nil {

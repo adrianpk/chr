@@ -7,6 +7,7 @@ import (
 
 const reviewHandoffChangedFileLimit = 25
 
+// ReviewHandoffSummary describes a package boundary value.
 type ReviewHandoffSummary struct {
 	ExecutionID    string
 	ProjectID      string
@@ -26,6 +27,7 @@ type ReviewHandoffSummary struct {
 	NextAction     string
 }
 
+// NewReviewHandoffSummary constructs the corresponding package service or value.
 func NewReviewHandoffSummary(report ExecutionReport) ReviewHandoffSummary {
 	return ReviewHandoffSummary{
 		ExecutionID:    report.ExecutionID,
@@ -47,6 +49,7 @@ func NewReviewHandoffSummary(report ExecutionReport) ReviewHandoffSummary {
 	}
 }
 
+// RenderReviewHandoffSummaryMarkdown renders the corresponding package data.
 func RenderReviewHandoffSummaryMarkdown(summary ReviewHandoffSummary) string {
 	var output strings.Builder
 

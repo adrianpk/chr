@@ -7,10 +7,12 @@ import (
 	"time"
 )
 
+// TicketResultChangedFilesWriter defines a package boundary interface.
 type TicketResultChangedFilesWriter interface {
 	WriteChangedFiles(ctx context.Context, opts WriteChangedFilesOptions) error
 }
 
+// WriteChangedFilesOptions describes a package boundary value.
 type WriteChangedFilesOptions struct {
 	Application ResultApplication
 	CreatedAt   time.Time
@@ -20,12 +22,14 @@ type ticketResultChangedFilesWriter struct {
 	commenter TicketCommenter
 }
 
+// NewTicketResultChangedFilesWriter constructs the corresponding package service or value.
 func NewTicketResultChangedFilesWriter() TicketResultChangedFilesWriter {
 	return &ticketResultChangedFilesWriter{
 		commenter: NewTicketCommenter(),
 	}
 }
 
+// WriteChangedFiles writes the requested output.
 func (w *ticketResultChangedFilesWriter) WriteChangedFiles(
 	ctx context.Context,
 	opts WriteChangedFilesOptions,
@@ -46,6 +50,7 @@ func (w *ticketResultChangedFilesWriter) WriteChangedFiles(
 	})
 }
 
+// RenderResultApplicationChangedFilesBody renders the corresponding package data.
 func RenderResultApplicationChangedFilesBody(application ResultApplication) string {
 	var output strings.Builder
 

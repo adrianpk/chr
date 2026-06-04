@@ -19,6 +19,7 @@ const (
 	migrateDownMarker = "-- +migrate Down"
 )
 
+// Migration describes a package boundary value.
 type Migration struct {
 	Version string
 	Name    string
@@ -26,6 +27,7 @@ type Migration struct {
 	DownSQL string
 }
 
+// Migrator defines a package boundary interface.
 type Migrator interface {
 	Migrate(ctx context.Context, db *sql.DB) error
 }
@@ -35,8 +37,10 @@ type migrator struct {
 	now      func() time.Time
 }
 
+// MigratorOption defines a package boundary type.
 type MigratorOption func(*migrator)
 
+// NewMigrator constructs the corresponding package service or value.
 func NewMigrator(assetsFS fs.FS, opts ...MigratorOption) Migrator {
 	migrator := &migrator{
 		assetsFS: assetsFS,
@@ -50,6 +54,7 @@ func NewMigrator(assetsFS fs.FS, opts ...MigratorOption) Migrator {
 	return migrator
 }
 
+// WithMigratorClock executes the corresponding package operation.
 func WithMigratorClock(now func() time.Time) MigratorOption {
 	return func(migrator *migrator) {
 		if now != nil {
@@ -58,6 +63,7 @@ func WithMigratorClock(now func() time.Time) MigratorOption {
 	}
 }
 
+// Migrate executes the corresponding package operation.
 func (m *migrator) Migrate(ctx context.Context, db *sql.DB) error {
 	err := ctx.Err()
 	if err != nil {
@@ -143,6 +149,7 @@ func (m *migrator) applyMigration(ctx context.Context, db *sql.DB, migration Mig
 	return nil
 }
 
+// ReadSQLiteMigrations executes the corresponding package operation.
 func ReadSQLiteMigrations(assetsFS fs.FS) ([]Migration, error) {
 	entries, err := fs.ReadDir(assetsFS, sqliteMigrationDir)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 )
 
+// UserEnvironment defines a package boundary interface.
 type UserEnvironment interface {
 	ConfigDir() string
 	DataDir() string
@@ -21,6 +22,7 @@ type userEnvironment struct {
 	devMode   bool
 }
 
+// UserEnvironmentOptions describes a package boundary value.
 type UserEnvironmentOptions struct {
 	ConfigDir string
 	DataDir   string
@@ -35,6 +37,7 @@ type UserEnvironmentOptions struct {
 	DevRoot   string
 }
 
+// NewUserEnvironment constructs the corresponding package service or value.
 func NewUserEnvironment(opts UserEnvironmentOptions) (UserEnvironment, error) {
 	env := userEnvironment{
 		configDir: opts.ConfigDir,
@@ -67,22 +70,27 @@ func NewUserEnvironment(opts UserEnvironmentOptions) (UserEnvironment, error) {
 	return &env, nil
 }
 
+// ConfigDir executes the corresponding package operation.
 func (e *userEnvironment) ConfigDir() string {
 	return e.configDir
 }
 
+// DataDir executes the corresponding package operation.
 func (e *userEnvironment) DataDir() string {
 	return e.dataDir
 }
 
+// CacheDir executes the corresponding package operation.
 func (e *userEnvironment) CacheDir() string {
 	return e.cacheDir
 }
 
+// StateDir executes the corresponding package operation.
 func (e *userEnvironment) StateDir() string {
 	return e.stateDir
 }
 
+// DevMode executes the corresponding package operation.
 func (e *userEnvironment) DevMode() bool {
 	return e.devMode
 }

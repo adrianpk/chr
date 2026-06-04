@@ -12,6 +12,7 @@ import (
 
 const executionReportChangedFileLimit = 25
 
+// ExecutionReport describes a package boundary value.
 type ExecutionReport struct {
 	ExecutionID    string
 	ProjectID      string
@@ -31,11 +32,13 @@ type ExecutionReport struct {
 	UpdatedAt      time.Time
 }
 
+// ExecutionReportExecution describes a package boundary value.
 type ExecutionReportExecution struct {
 	Status      ExecutionStatus
 	FailureKind ExecutionFailureKind
 }
 
+// ExecutionReportRuntime describes a package boundary value.
 type ExecutionReportRuntime struct {
 	Image             string
 	DockerfilePath    string
@@ -43,6 +46,7 @@ type ExecutionReportRuntime struct {
 	ValidationCommand string
 }
 
+// ExecutionReportArtifacts describes a package boundary value.
 type ExecutionReportArtifacts struct {
 	RunDir         string
 	ResultPath     string
@@ -51,43 +55,54 @@ type ExecutionReportArtifacts struct {
 	ReportPath     string
 }
 
+// ExecutionReportResult describes a package boundary value.
 type ExecutionReportResult struct {
 	Available bool
 	Status    ExecutionResultStatus
 	Summary   string
 }
 
+// ExecutionReportValidation describes a package boundary value.
 type ExecutionReportValidation struct {
 	Command string
 	Path    string
 	Status  ExecutionReportValidationStatus
 }
 
+// ExecutionReportValidationStatus defines a package boundary type.
 type ExecutionReportValidationStatus string
 
 const (
-	ExecutionReportValidationNotRun    ExecutionReportValidationStatus = "not_run"
+	// ExecutionReportValidationNotRun defines a package boundary constant.
+	ExecutionReportValidationNotRun ExecutionReportValidationStatus = "not_run"
+	// ExecutionReportValidationSucceeded defines a package boundary constant.
 	ExecutionReportValidationSucceeded ExecutionReportValidationStatus = "succeeded"
-	ExecutionReportValidationFailed    ExecutionReportValidationStatus = "failed"
-	ExecutionReportValidationUnknown   ExecutionReportValidationStatus = "unknown"
+	// ExecutionReportValidationFailed defines a package boundary constant.
+	ExecutionReportValidationFailed ExecutionReportValidationStatus = "failed"
+	// ExecutionReportValidationUnknown defines a package boundary constant.
+	ExecutionReportValidationUnknown ExecutionReportValidationStatus = "unknown"
 )
 
+// ExecutionReportChangedFile describes a package boundary value.
 type ExecutionReportChangedFile struct {
 	Path    string
 	Summary string
 }
 
+// ExecutionReportChangedFilesSummary describes a package boundary value.
 type ExecutionReportChangedFilesSummary struct {
 	Total     int
 	Rendered  int
 	Truncated bool
 }
 
+// ExecutionReportOptions describes a package boundary value.
 type ExecutionReportOptions struct {
 	Execution ExecutionRecord
 	Result    *ExecutionResult
 }
 
+// NewExecutionReport constructs the corresponding package service or value.
 func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 	err := ValidateExecutionRecord(opts.Execution)
 	if err != nil {
@@ -193,6 +208,7 @@ func executionReportChangedFiles(result ExecutionResult) ([]ExecutionReportChang
 	return changedFiles, summary
 }
 
+// RenderExecutionReportMarkdown renders the corresponding package data.
 func RenderExecutionReportMarkdown(report ExecutionReport) string {
 	var output strings.Builder
 
@@ -209,16 +225,19 @@ func RenderExecutionReportMarkdown(report ExecutionReport) string {
 	return output.String()
 }
 
+// ExecutionReportWriter defines a package boundary interface.
 type ExecutionReportWriter interface {
 	WriteExecutionReport(ctx context.Context, report ExecutionReport) (string, error)
 }
 
 type executionReportWriter struct{}
 
+// NewExecutionReportWriter constructs the corresponding package service or value.
 func NewExecutionReportWriter() ExecutionReportWriter {
 	return &executionReportWriter{}
 }
 
+// ExecutionReportPath executes the corresponding package operation.
 func ExecutionReportPath(record ExecutionRecord) string {
 	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
 		return ""
@@ -227,6 +246,7 @@ func ExecutionReportPath(record ExecutionRecord) string {
 	return filepath.Join(record.Artifacts.RunDir, "execution-report.md")
 }
 
+// WriteExecutionReport writes the requested output.
 func (w *executionReportWriter) WriteExecutionReport(
 	ctx context.Context,
 	report ExecutionReport,

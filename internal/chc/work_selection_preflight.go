@@ -14,14 +14,20 @@ import (
 )
 
 const (
+	// AgentOperationDevelopment defines a package boundary constant.
 	AgentOperationDevelopment = "development"
-	AgentOperationReview      = "review"
-	AgentOperationMerge       = "merge"
+	// AgentOperationReview defines a package boundary constant.
+	AgentOperationReview = "review"
+	// AgentOperationMerge defines a package boundary constant.
+	AgentOperationMerge = "merge"
 
+	// WorkSelectionBlockReviewRepairPending defines a package boundary constant.
 	WorkSelectionBlockReviewRepairPending = "review_repair_pending"
-	WorkSelectionBlockStaleDev            = "stale_dev"
+	// WorkSelectionBlockStaleDev defines a package boundary constant.
+	WorkSelectionBlockStaleDev = "stale_dev"
 )
 
+// AgentOperationLockOptions describes a package boundary value.
 type AgentOperationLockOptions struct {
 	ProjectDir string
 	Operation  string
@@ -29,6 +35,7 @@ type AgentOperationLockOptions struct {
 	Now        time.Time
 }
 
+// AgentOperationLock describes a package boundary value.
 type AgentOperationLock struct {
 	path string
 }
@@ -40,6 +47,7 @@ type agentOperationLockRecord struct {
 	CreatedAt string `json:"created_at"`
 }
 
+// WorkSelectionPreflightOptions describes a package boundary value.
 type WorkSelectionPreflightOptions struct {
 	ProjectDir        string
 	Tickets           []IndexedTicket
@@ -48,26 +56,31 @@ type WorkSelectionPreflightOptions struct {
 	Git               WorkSelectionGit
 }
 
+// WorkSelectionPreflightResult describes a package boundary value.
 type WorkSelectionPreflightResult struct {
 	Allowed         bool
 	SelectedTickets []IndexedTicket
 	BlockReasons    []WorkSelectionBlockReason
 }
 
+// WorkSelectionBlockReason describes a package boundary value.
 type WorkSelectionBlockReason struct {
 	Code      string
 	TicketKey string
 	Detail    string
 }
 
+// WorkSelectionGit defines a package boundary interface.
 type WorkSelectionGit interface {
 	CurrentBranch(ctx context.Context, projectDir string) (string, error)
 	WorktreeClean(ctx context.Context, projectDir string) (bool, error)
 	DevContainsOriginDev(ctx context.Context, projectDir string) (bool, error)
 }
 
+// OSWorkSelectionGit describes a package boundary value.
 type OSWorkSelectionGit struct{}
 
+// AcquireAgentOperationLock executes the corresponding package operation.
 func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptions) (*AgentOperationLock, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -166,6 +179,7 @@ func writeAgentOperationLockFile(file *os.File, lockPath string, record agentOpe
 	return nil
 }
 
+// Release executes the corresponding package operation.
 func (lock *AgentOperationLock) Release() error {
 	if lock == nil || lock.path == "" {
 		return nil
@@ -181,6 +195,7 @@ func (lock *AgentOperationLock) Release() error {
 	return nil
 }
 
+// RunWorkSelectionPreflight executes the corresponding package operation.
 func RunWorkSelectionPreflight(ctx context.Context, opts WorkSelectionPreflightOptions) (WorkSelectionPreflightResult, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -220,6 +235,7 @@ func RunWorkSelectionPreflight(ctx context.Context, opts WorkSelectionPreflightO
 	return result, nil
 }
 
+// CurrentBranch executes the corresponding package operation.
 func (OSWorkSelectionGit) CurrentBranch(ctx context.Context, projectDir string) (string, error) {
 	output, err := exec.CommandContext(ctx, "git", "-C", projectDir, "branch", "--show-current").Output()
 	if err != nil {
@@ -229,6 +245,7 @@ func (OSWorkSelectionGit) CurrentBranch(ctx context.Context, projectDir string) 
 	return strings.TrimSpace(string(output)), nil
 }
 
+// WorktreeClean executes the corresponding package operation.
 func (OSWorkSelectionGit) WorktreeClean(ctx context.Context, projectDir string) (bool, error) {
 	output, err := exec.CommandContext(ctx, "git", "-C", projectDir, "status", "--porcelain").Output()
 	if err != nil {
@@ -238,6 +255,7 @@ func (OSWorkSelectionGit) WorktreeClean(ctx context.Context, projectDir string) 
 	return strings.TrimSpace(string(output)) == "", nil
 }
 
+// DevContainsOriginDev executes the corresponding package operation.
 func (OSWorkSelectionGit) DevContainsOriginDev(ctx context.Context, projectDir string) (bool, error) {
 	err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--verify", "origin/dev").Run()
 	if err != nil {

@@ -11,20 +11,31 @@ import (
 	"time"
 )
 
+// WorkspaceNodeKind defines a package boundary type.
 type WorkspaceNodeKind string
 
 const (
+	// WorkspaceNodeProject defines a package boundary constant.
 	WorkspaceNodeProject WorkspaceNodeKind = "project"
-	WorkspaceNodeCase    WorkspaceNodeKind = "case"
-	WorkspaceNodeDump    WorkspaceNodeKind = "dump"
-	WorkspaceNodeQuiz    WorkspaceNodeKind = "quiz"
-	WorkspaceNodeSpec    WorkspaceNodeKind = "spec"
-	WorkspaceNodePlan    WorkspaceNodeKind = "plan"
-	WorkspaceNodeTicket  WorkspaceNodeKind = "ticket"
-	WorkspaceNodeReport  WorkspaceNodeKind = "report"
+	// WorkspaceNodeCase defines a package boundary constant.
+	WorkspaceNodeCase WorkspaceNodeKind = "case"
+	// WorkspaceNodeDump defines a package boundary constant.
+	WorkspaceNodeDump WorkspaceNodeKind = "dump"
+	// WorkspaceNodeQuiz defines a package boundary constant.
+	WorkspaceNodeQuiz WorkspaceNodeKind = "quiz"
+	// WorkspaceNodeSpec defines a package boundary constant.
+	WorkspaceNodeSpec WorkspaceNodeKind = "spec"
+	// WorkspaceNodePlan defines a package boundary constant.
+	WorkspaceNodePlan WorkspaceNodeKind = "plan"
+	// WorkspaceNodeTicket defines a package boundary constant.
+	WorkspaceNodeTicket WorkspaceNodeKind = "ticket"
+	// WorkspaceNodeReport defines a package boundary constant.
+	WorkspaceNodeReport WorkspaceNodeKind = "report"
+	// WorkspaceNodeUnknown defines a package boundary constant.
 	WorkspaceNodeUnknown WorkspaceNodeKind = "unknown"
 )
 
+// WorkspaceGraph describes a package boundary value.
 type WorkspaceGraph struct {
 	Project                  *WorkspaceNode
 	Cases                    []WorkspaceNode
@@ -34,6 +45,7 @@ type WorkspaceGraph struct {
 	UnresolvedCaseReferences []WorkspaceCaseReference
 }
 
+// WorkspaceNode describes a package boundary value.
 type WorkspaceNode struct {
 	Kind         WorkspaceNodeKind
 	Path         string
@@ -52,25 +64,30 @@ type WorkspaceNode struct {
 	Size         int64
 }
 
+// WorkspaceGraphDiagnostic describes a package boundary value.
 type WorkspaceGraphDiagnostic struct {
 	Path    string
 	Kind    WorkspaceNodeKind
 	Message string
 }
 
+// WorkspaceCaseReference describes a package boundary value.
 type WorkspaceCaseReference struct {
 	CaseSlug   string
 	References []WorkspaceNode
 }
 
+// WorkspaceGraphBuilder describes a package boundary value.
 type WorkspaceGraphBuilder struct {
 	projectDir string
 }
 
+// NewWorkspaceGraphBuilder constructs the corresponding package service or value.
 func NewWorkspaceGraphBuilder(projectDir string) WorkspaceGraphBuilder {
 	return WorkspaceGraphBuilder{projectDir: projectDir}
 }
 
+// Build builds the requested workspace artifact.
 func (b WorkspaceGraphBuilder) Build(ctx context.Context) (WorkspaceGraph, error) {
 	graph := WorkspaceGraph{
 		CaseDocuments: map[string][]WorkspaceNode{},
@@ -340,6 +357,7 @@ func (g *WorkspaceGraph) finalize() {
 	})
 }
 
+// CaseView executes the corresponding package operation.
 func (g WorkspaceGraph) CaseView(slug string) ([]WorkspaceNode, bool) {
 	if !g.hasCase(slug) {
 		return nil, false

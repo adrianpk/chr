@@ -8,8 +8,10 @@ import (
 	"time"
 )
 
+// QuizModelProviderCodex defines a package boundary constant.
 const QuizModelProviderCodex = AgentProviderCodex
 
+// CodexQuizModelAdapter describes a package boundary value.
 type CodexQuizModelAdapter struct {
 	ProjectDir string
 	Command    string
@@ -18,11 +20,13 @@ type CodexQuizModelAdapter struct {
 	Runner     AgentRunner
 }
 
+// ActionRoutingQuizModelAdapter describes a package boundary value.
 type ActionRoutingQuizModelAdapter struct {
 	ActionAdapters map[QuizModelAction]QuizModelAdapter
 	DefaultAdapter QuizModelAdapter
 }
 
+// InvokeQuizModel invokes the configured model adapter.
 func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(
 	ctx context.Context,
 	request QuizModelRequest,
@@ -42,6 +46,7 @@ func (a ActionRoutingQuizModelAdapter) InvokeQuizModel(
 	return a.DefaultAdapter.InvokeQuizModel(ctx, request)
 }
 
+// InvokeQuizModel invokes the configured model adapter.
 func (a CodexQuizModelAdapter) InvokeQuizModel(
 	ctx context.Context,
 	request QuizModelRequest,

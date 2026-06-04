@@ -13,8 +13,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// ErrLoopRunNotFound identifies a package boundary error.
 var ErrLoopRunNotFound = errors.New("loop run not found")
 
+// LoopRunRepository defines a package boundary interface.
 type LoopRunRepository interface {
 	CreateLoopRun(ctx context.Context, record LoopRunRecord) error
 	UpdateLoopRun(ctx context.Context, record LoopRunRecord) error
@@ -27,6 +29,7 @@ type sqliteLoopRunRepository struct {
 	db *sql.DB
 }
 
+// NewLoopRunRepository constructs the corresponding package service or value.
 func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (LoopRunRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
@@ -51,6 +54,7 @@ func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.
 	return repository, nil
 }
 
+// NewLoopRunRepositoryFromDB constructs the corresponding package service or value.
 func NewLoopRunRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (LoopRunRepository, error) {
 	migrator := NewMigrator(assetsFS)
 
@@ -62,6 +66,7 @@ func NewLoopRunRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS)
 	return &sqliteLoopRunRepository{db: db}, nil
 }
 
+// CreateLoopRun executes the corresponding package operation.
 func (r *sqliteLoopRunRepository) CreateLoopRun(ctx context.Context, record LoopRunRecord) error {
 	err := ValidateLoopRunRecord(record)
 	if err != nil {
@@ -89,6 +94,7 @@ func (r *sqliteLoopRunRepository) CreateLoopRun(ctx context.Context, record Loop
 	return nil
 }
 
+// UpdateLoopRun executes the corresponding package operation.
 func (r *sqliteLoopRunRepository) UpdateLoopRun(ctx context.Context, record LoopRunRecord) error {
 	err := ValidateLoopRunRecord(record)
 	if err != nil {
@@ -125,6 +131,7 @@ func (r *sqliteLoopRunRepository) UpdateLoopRun(ctx context.Context, record Loop
 	return nil
 }
 
+// GetLoopRun executes the corresponding package operation.
 func (r *sqliteLoopRunRepository) GetLoopRun(ctx context.Context, id string) (LoopRunRecord, error) {
 	row := r.db.QueryRowContext(ctx, selectLoopRunSQL()+" WHERE id = ?", id)
 
@@ -140,6 +147,7 @@ func (r *sqliteLoopRunRepository) GetLoopRun(ctx context.Context, id string) (Lo
 	return record, nil
 }
 
+// ListProjectLoopRuns lists the requested data.
 func (r *sqliteLoopRunRepository) ListProjectLoopRuns(ctx context.Context, projectID string) ([]LoopRunRecord, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
@@ -174,6 +182,7 @@ func (r *sqliteLoopRunRepository) ListProjectLoopRuns(ctx context.Context, proje
 	return records, nil
 }
 
+// Close executes the corresponding package operation.
 func (r *sqliteLoopRunRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {

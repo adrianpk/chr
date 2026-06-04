@@ -10,6 +10,7 @@ import (
 
 const diagnosticBundleRelativePath = ".chc/maintenance/diagnostic-bundle.md"
 
+// DiagnosticBundle describes a package boundary value.
 type DiagnosticBundle struct {
 	ProjectDir             string
 	ProjectID              string
@@ -20,10 +21,12 @@ type DiagnosticBundle struct {
 	Reports                []ReportListEntry
 }
 
+// DiagnosticBundlePath executes the corresponding package operation.
 func DiagnosticBundlePath(projectDir string) string {
 	return filepath.Join(projectDir, filepath.FromSlash(diagnosticBundleRelativePath))
 }
 
+// RenderDiagnosticBundle renders the corresponding package data.
 func RenderDiagnosticBundle(bundle DiagnosticBundle) string {
 	var output strings.Builder
 
@@ -39,6 +42,7 @@ func RenderDiagnosticBundle(bundle DiagnosticBundle) string {
 	return output.String()
 }
 
+// WriteDiagnosticBundle executes the corresponding package operation.
 func WriteDiagnosticBundle(
 	ctx context.Context,
 	projectDir string,

@@ -6,23 +6,32 @@ import (
 )
 
 const (
+	// TicketMergeStatePending defines a package boundary constant.
 	TicketMergeStatePending = "pending"
-	TicketMergeStateMerged  = "merged"
+	// TicketMergeStateMerged defines a package boundary constant.
+	TicketMergeStateMerged = "merged"
+	// TicketMergeStateBlocked defines a package boundary constant.
 	TicketMergeStateBlocked = "blocked"
 
-	TicketMergeResultMerged       = "merged"
-	TicketMergeResultBlocked      = "blocked"
+	// TicketMergeResultMerged defines a package boundary constant.
+	TicketMergeResultMerged = "merged"
+	// TicketMergeResultBlocked defines a package boundary constant.
+	TicketMergeResultBlocked = "blocked"
+	// TicketMergeResultNotMergeable defines a package boundary constant.
 	TicketMergeResultNotMergeable = "not_mergeable"
 
+	// TicketMergeActorMerger defines a package boundary constant.
 	TicketMergeActorMerger = "merger"
 )
 
+// TicketMergeHandoff describes a package boundary value.
 type TicketMergeHandoff struct {
 	TicketKey string
 	Branch    string
 	ReviewRef TicketReviewRef
 }
 
+// ValidateTicketMergeHandoff validates the corresponding package boundary value.
 func ValidateTicketMergeHandoff(ticket IndexedTicket) (TicketMergeHandoff, error) {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return TicketMergeHandoff{}, fmt.Errorf("ticket key is required")

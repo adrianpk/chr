@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
+// QuizSpecDirectory defines a package boundary constant.
 const QuizSpecDirectory = "specs/drafts"
 
+// QuizDraftSpec describes a package boundary value.
 type QuizDraftSpec struct {
 	Scope            QuizScope
 	Title            string
@@ -24,12 +26,14 @@ type QuizDraftSpec struct {
 	CreatedAt        time.Time
 }
 
+// QuizDraftSpecPaths describes a package boundary value.
 type QuizDraftSpecPaths struct {
 	ScopeID      string
 	RelativePath string
 	Path         string
 }
 
+// QuizDraftSpecLayout executes the corresponding package operation.
 func QuizDraftSpecLayout(projectDir string, scope QuizScope) (QuizDraftSpecPaths, error) {
 	err := ValidateQuizScope(scope)
 	if err != nil {
@@ -50,6 +54,7 @@ func QuizDraftSpecLayout(projectDir string, scope QuizScope) (QuizDraftSpecPaths
 	}, nil
 }
 
+// WriteQuizDraftSpec executes the corresponding package operation.
 func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSpec) (QuizDraftSpecPaths, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -81,6 +86,7 @@ func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSp
 	return paths, nil
 }
 
+// RenderQuizDraftSpec renders the corresponding package data.
 func RenderQuizDraftSpec(spec QuizDraftSpec) string {
 	var output bytes.Buffer
 
@@ -108,6 +114,7 @@ func RenderQuizDraftSpec(spec QuizDraftSpec) string {
 	return output.String()
 }
 
+// ValidateQuizDraftSpec validates the corresponding package boundary value.
 func ValidateQuizDraftSpec(spec QuizDraftSpec) error {
 	err := ValidateQuizDraftSpecModelContent(spec)
 	if err != nil {
@@ -129,6 +136,7 @@ func ValidateQuizDraftSpec(spec QuizDraftSpec) error {
 	return nil
 }
 
+// ValidateQuizDraftSpecModelContent validates the corresponding package boundary value.
 func ValidateQuizDraftSpecModelContent(spec QuizDraftSpec) error {
 	if !spec.HasContent() {
 		return fmt.Errorf("quiz draft spec content is required")
@@ -146,6 +154,7 @@ func ValidateQuizDraftSpecModelContent(spec QuizDraftSpec) error {
 	return nil
 }
 
+// HasContent executes the corresponding package operation.
 func (s QuizDraftSpec) HasContent() bool {
 	return strings.TrimSpace(s.Title) != "" && strings.TrimSpace(s.Body) != ""
 }

@@ -10,6 +10,7 @@ import (
 
 var defaultLoopEligibleStatuses = []string{TicketStatusReadyForDev}
 
+// TicketLoopQueryOptions describes a package boundary value.
 type TicketLoopQueryOptions struct {
 	ProjectID string
 	Statuses  []string
@@ -17,6 +18,7 @@ type TicketLoopQueryOptions struct {
 	Order     TicketLoopOrder
 }
 
+// TicketLoopFilters describes a package boundary value.
 type TicketLoopFilters struct {
 	Priorities   []string
 	Severities   []string
@@ -26,24 +28,33 @@ type TicketLoopFilters struct {
 	UseCases     []string
 }
 
+// TicketLoopOrder defines a package boundary type.
 type TicketLoopOrder string
 
 const (
-	TicketLoopOrderKey              TicketLoopOrder = "key"
-	TicketLoopOrderCreatedAt        TicketLoopOrder = "created_at"
-	TicketLoopOrderPriority         TicketLoopOrder = "priority"
-	TicketLoopOrderSeverity         TicketLoopOrder = "severity"
+	// TicketLoopOrderKey defines a package boundary constant.
+	TicketLoopOrderKey TicketLoopOrder = "key"
+	// TicketLoopOrderCreatedAt defines a package boundary constant.
+	TicketLoopOrderCreatedAt TicketLoopOrder = "created_at"
+	// TicketLoopOrderPriority defines a package boundary constant.
+	TicketLoopOrderPriority TicketLoopOrder = "priority"
+	// TicketLoopOrderSeverity defines a package boundary constant.
+	TicketLoopOrderSeverity TicketLoopOrder = "severity"
+	// TicketLoopOrderPrioritySeverity defines a package boundary constant.
 	TicketLoopOrderPrioritySeverity TicketLoopOrder = "priority_severity"
 )
 
+// TicketLoopQuery describes a package boundary value.
 type TicketLoopQuery struct {
 	Index TicketIndex
 }
 
+// NewTicketLoopQuery constructs the corresponding package service or value.
 func NewTicketLoopQuery(index TicketIndex) TicketLoopQuery {
 	return TicketLoopQuery{Index: index}
 }
 
+// EligibleTickets executes the corresponding package operation.
 func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQueryOptions) ([]IndexedTicket, error) {
 	if opts.ProjectID == "" {
 		return nil, fmt.Errorf("project id is required")

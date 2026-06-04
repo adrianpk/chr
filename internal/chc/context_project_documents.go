@@ -13,6 +13,7 @@ import (
 
 var projectDocumentReferencePattern = regexp.MustCompile(`(?:^|[\s("'])((?:\.prj|docs|\.chc)/(?:[A-Za-z0-9._@=+,:;~/-]+)\.(?:md|markdown|txt|yml|yaml))(?:$|[\s)"',.])`)
 
+// ProjectDocumentContextOptions describes a package boundary value.
 type ProjectDocumentContextOptions struct {
 	ProjectID  string
 	ProjectDir string
@@ -21,6 +22,7 @@ type ProjectDocumentContextOptions struct {
 	IndexedAt  time.Time
 }
 
+// ProjectDocumentContext describes a package boundary value.
 type ProjectDocumentContext struct {
 	ProjectDir        string
 	WorkspaceDir      string
@@ -31,6 +33,7 @@ type ProjectDocumentContext struct {
 	Sources           []ContextSourceInventoryEntry
 }
 
+// LoadProjectDocumentContext loads the corresponding package data.
 func LoadProjectDocumentContext(opts ProjectDocumentContextOptions) (ProjectDocumentContext, error) {
 	projectDir, ticketPath, err := normalizeProjectDocumentContextOptions(opts)
 	if err != nil {
@@ -60,6 +63,7 @@ func LoadProjectDocumentContext(opts ProjectDocumentContextOptions) (ProjectDocu
 	}, nil
 }
 
+// RenderProjectContext renders the corresponding package data.
 func RenderProjectContext(ctx ProjectDocumentContext) string {
 	var output strings.Builder
 
@@ -73,6 +77,7 @@ func RenderProjectContext(ctx ProjectDocumentContext) string {
 	return output.String()
 }
 
+// RenderDocumentsContext renders the corresponding package data.
 func RenderDocumentsContext(ctx ProjectDocumentContext) string {
 	var output strings.Builder
 
@@ -89,6 +94,7 @@ func RenderDocumentsContext(ctx ProjectDocumentContext) string {
 	return output.String()
 }
 
+// RenderSourceInventory renders the corresponding package data.
 func RenderSourceInventory(sources []ContextSourceInventoryEntry) string {
 	var output strings.Builder
 

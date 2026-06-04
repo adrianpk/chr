@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// LoopReport describes a package boundary value.
 type LoopReport struct {
 	LoopID           string
 	ProjectID        string
@@ -20,6 +21,7 @@ type LoopReport struct {
 	UpdatedAt        time.Time
 }
 
+// LoopReportCounts describes a package boundary value.
 type LoopReportCounts struct {
 	Eligible  int
 	Processed int
@@ -27,18 +29,21 @@ type LoopReportCounts struct {
 	Failed    int
 }
 
+// LoopReportExecution describes a package boundary value.
 type LoopReportExecution struct {
 	ExecutionID string
 	TicketKey   string
 	Status      ExecutionStatus
 }
 
+// LoopReportExecutionSummary describes a package boundary value.
 type LoopReportExecutionSummary struct {
 	Total     int
 	Rendered  int
 	Truncated bool
 }
 
+// LoopReportOptions describes a package boundary value.
 type LoopReportOptions struct {
 	Loop       LoopRunRecord
 	Executions []ExecutionRecord
@@ -46,6 +51,7 @@ type LoopReportOptions struct {
 
 const loopReportExecutionLimit = 25
 
+// NewLoopReport constructs the corresponding package service or value.
 func NewLoopReport(opts LoopReportOptions) (LoopReport, error) {
 	err := ValidateLoopRunRecord(opts.Loop)
 	if err != nil {
@@ -102,6 +108,7 @@ func loopReportExecutions(records []ExecutionRecord) ([]LoopReportExecution, Loo
 	return executions, summary
 }
 
+// RenderLoopReportMarkdown renders the corresponding package data.
 func RenderLoopReportMarkdown(report LoopReport) string {
 	var output strings.Builder
 

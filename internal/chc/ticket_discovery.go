@@ -9,14 +9,17 @@ import (
 	"slices"
 )
 
+// TicketFileDiscoverer defines a package boundary interface.
 type TicketFileDiscoverer interface {
 	DiscoverTicketFiles(ctx context.Context, opts DiscoverTicketFilesOptions) ([]DiscoveredTicketFile, error)
 }
 
+// DiscoverTicketFilesOptions describes a package boundary value.
 type DiscoverTicketFilesOptions struct {
 	ProjectDir string
 }
 
+// DiscoveredTicketFile describes a package boundary value.
 type DiscoveredTicketFile struct {
 	Path         string
 	RelativePath string
@@ -24,10 +27,12 @@ type DiscoveredTicketFile struct {
 
 type ticketFileDiscoverer struct{}
 
+// NewTicketFileDiscoverer constructs the corresponding package service or value.
 func NewTicketFileDiscoverer() TicketFileDiscoverer {
 	return &ticketFileDiscoverer{}
 }
 
+// DiscoverTicketFiles executes the corresponding package operation.
 func (d *ticketFileDiscoverer) DiscoverTicketFiles(
 	ctx context.Context,
 	opts DiscoverTicketFilesOptions,

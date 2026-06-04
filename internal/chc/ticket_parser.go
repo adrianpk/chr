@@ -12,10 +12,12 @@ import (
 	"time"
 )
 
+// TicketParser defines a package boundary interface.
 type TicketParser interface {
 	ParseTicket(ctx context.Context, opts ParseTicketOptions) (IndexedTicket, error)
 }
 
+// ParseTicketOptions describes a package boundary value.
 type ParseTicketOptions struct {
 	ProjectID    string
 	ProjectDir   string
@@ -32,10 +34,12 @@ type ticketFrontmatter struct {
 	ReviewRefs []TicketReviewRef
 }
 
+// NewTicketParser constructs the corresponding package service or value.
 func NewTicketParser() TicketParser {
 	return &ticketParser{}
 }
 
+// ParseTicket executes the corresponding package operation.
 func (p *ticketParser) ParseTicket(ctx context.Context, opts ParseTicketOptions) (IndexedTicket, error) {
 	err := ctx.Err()
 	if err != nil {

@@ -10,15 +10,19 @@ import (
 	"strings"
 )
 
+// DefaultGateValidationCommand defines a package boundary constant.
 const DefaultGateValidationCommand = "go test ./..."
 
+// GateValidationRunner describes a package boundary value.
 type GateValidationRunner struct{}
 
+// GateValidationRequest describes a package boundary value.
 type GateValidationRequest struct {
 	ProjectDir string
 	Command    string
 }
 
+// GateValidationResult describes a package boundary value.
 type GateValidationResult struct {
 	Command  string
 	ExitCode int
@@ -26,10 +30,12 @@ type GateValidationResult struct {
 	Passed   bool
 }
 
+// NewGateValidationRunner constructs the corresponding package service or value.
 func NewGateValidationRunner() GateValidationRunner {
 	return GateValidationRunner{}
 }
 
+// Run executes the configured operation.
 func (r GateValidationRunner) Run(ctx context.Context, request GateValidationRequest) (GateValidationResult, error) {
 	projectDir := strings.TrimSpace(request.ProjectDir)
 	if projectDir == "" {

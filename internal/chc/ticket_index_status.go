@@ -6,16 +6,19 @@ import (
 	"time"
 )
 
+// TicketIndexStatusChecker defines a package boundary interface.
 type TicketIndexStatusChecker interface {
 	CheckProjectTicketIndex(ctx context.Context, opts CheckProjectTicketIndexOptions) (TicketIndexStatus, error)
 }
 
+// CheckProjectTicketIndexOptions describes a package boundary value.
 type CheckProjectTicketIndexOptions struct {
 	ProjectID  string
 	ProjectDir string
 	IndexedAt  time.Time
 }
 
+// TicketIndexStatus describes a package boundary value.
 type TicketIndexStatus struct {
 	Missing  []TicketIndexStatusFile
 	Stale    []TicketIndexStatusTicket
@@ -23,11 +26,13 @@ type TicketIndexStatus struct {
 	Invalid  []TicketIndexRebuildParseError
 }
 
+// TicketIndexStatusFile describes a package boundary value.
 type TicketIndexStatusFile struct {
 	Path         string
 	RelativePath string
 }
 
+// TicketIndexStatusTicket describes a package boundary value.
 type TicketIndexStatusTicket struct {
 	Indexed IndexedTicket
 	Parsed  IndexedTicket
@@ -40,8 +45,10 @@ type ticketIndexStatusChecker struct {
 	now        func() time.Time
 }
 
+// TicketIndexStatusCheckerOption defines a package boundary type.
 type TicketIndexStatusCheckerOption func(*ticketIndexStatusChecker)
 
+// NewTicketIndexStatusChecker constructs the corresponding package service or value.
 func NewTicketIndexStatusChecker(index TicketIndex, opts ...TicketIndexStatusCheckerOption) TicketIndexStatusChecker {
 	checker := &ticketIndexStatusChecker{
 		discoverer: NewTicketFileDiscoverer(),
@@ -57,6 +64,7 @@ func NewTicketIndexStatusChecker(index TicketIndex, opts ...TicketIndexStatusChe
 	return checker
 }
 
+// WithTicketIndexStatusCheckerClock executes the corresponding package operation.
 func WithTicketIndexStatusCheckerClock(now func() time.Time) TicketIndexStatusCheckerOption {
 	return func(checker *ticketIndexStatusChecker) {
 		if now != nil {
@@ -65,6 +73,7 @@ func WithTicketIndexStatusCheckerClock(now func() time.Time) TicketIndexStatusCh
 	}
 }
 
+// CheckProjectTicketIndex executes the corresponding package operation.
 func (c *ticketIndexStatusChecker) CheckProjectTicketIndex(
 	ctx context.Context,
 	opts CheckProjectTicketIndexOptions,

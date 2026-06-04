@@ -8,10 +8,12 @@ import (
 	"time"
 )
 
+// TicketResultValidationWriter defines a package boundary interface.
 type TicketResultValidationWriter interface {
 	WriteResultValidation(ctx context.Context, opts WriteResultValidationOptions) error
 }
 
+// WriteResultValidationOptions describes a package boundary value.
 type WriteResultValidationOptions struct {
 	Application ResultApplication
 	CreatedAt   time.Time
@@ -19,10 +21,12 @@ type WriteResultValidationOptions struct {
 
 type ticketResultValidationWriter struct{}
 
+// NewTicketResultValidationWriter constructs the corresponding package service or value.
 func NewTicketResultValidationWriter() TicketResultValidationWriter {
 	return &ticketResultValidationWriter{}
 }
 
+// WriteResultValidation writes the requested output.
 func (w *ticketResultValidationWriter) WriteResultValidation(
 	ctx context.Context,
 	opts WriteResultValidationOptions,

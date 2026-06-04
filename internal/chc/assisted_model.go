@@ -11,22 +11,31 @@ import (
 	"time"
 )
 
+// AssistedModelResponseStatus defines a package boundary type.
 type AssistedModelResponseStatus string
 
 const (
-	AssistedModelResponseReady   AssistedModelResponseStatus = "ready"
+	// AssistedModelResponseReady defines a package boundary constant.
+	AssistedModelResponseReady AssistedModelResponseStatus = "ready"
+	// AssistedModelResponseBlocked defines a package boundary constant.
 	AssistedModelResponseBlocked AssistedModelResponseStatus = "blocked"
 )
 
+// AssistedModelFailureKind defines a package boundary type.
 type AssistedModelFailureKind string
 
 const (
-	AssistedModelFailureInvalidRequest  AssistedModelFailureKind = "invalid_request"
-	AssistedModelFailureAdapter         AssistedModelFailureKind = "adapter"
+	// AssistedModelFailureInvalidRequest defines a package boundary constant.
+	AssistedModelFailureInvalidRequest AssistedModelFailureKind = "invalid_request"
+	// AssistedModelFailureAdapter defines a package boundary constant.
+	AssistedModelFailureAdapter AssistedModelFailureKind = "adapter"
+	// AssistedModelFailureInvalidResponse defines a package boundary constant.
 	AssistedModelFailureInvalidResponse AssistedModelFailureKind = "invalid_response"
-	AssistedModelFailureArtifact        AssistedModelFailureKind = "artifact"
+	// AssistedModelFailureArtifact defines a package boundary constant.
+	AssistedModelFailureArtifact AssistedModelFailureKind = "artifact"
 )
 
+// AssistedModelRequest describes a package boundary value.
 type AssistedModelRequest struct {
 	ID        string
 	SessionID string
@@ -38,6 +47,7 @@ type AssistedModelRequest struct {
 	CreatedAt time.Time
 }
 
+// AssistedModelResponse describes a package boundary value.
 type AssistedModelResponse struct {
 	ID        string
 	RequestID string
@@ -51,33 +61,39 @@ type AssistedModelResponse struct {
 	CreatedAt time.Time
 }
 
+// AssistedModelInvocationPaths describes a package boundary value.
 type AssistedModelInvocationPaths struct {
 	InvocationDir string
 	RequestPath   string
 	ResponsePath  string
 }
 
+// AssistedModelInvocationArtifacts describes a package boundary value.
 type AssistedModelInvocationArtifacts struct {
 	Paths    AssistedModelInvocationPaths
 	Request  AssistedModelRequest
 	Response AssistedModelResponse
 }
 
+// AssistedModelAdapter defines a package boundary interface.
 type AssistedModelAdapter interface {
 	InvokeAssistedModel(ctx context.Context, request AssistedModelRequest) (AssistedModelResponse, error)
 }
 
+// AssistedModelFailure describes a package boundary value.
 type AssistedModelFailure struct {
 	Kind AssistedModelFailureKind
 	Err  error
 }
 
+// FakeAssistedModelAdapter describes a package boundary value.
 type FakeAssistedModelAdapter struct {
 	Responses []AssistedModelResponse
 	Err       error
 	index     int
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s AssistedModelResponseStatus) Valid() bool {
 	switch s {
 	case AssistedModelResponseReady, AssistedModelResponseBlocked:
@@ -87,6 +103,7 @@ func (s AssistedModelResponseStatus) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (k AssistedModelFailureKind) Valid() bool {
 	switch k {
 	case AssistedModelFailureInvalidRequest,
@@ -99,6 +116,7 @@ func (k AssistedModelFailureKind) Valid() bool {
 	}
 }
 
+// Error executes the corresponding package operation.
 func (e AssistedModelFailure) Error() string {
 	if e.Err == nil {
 		return string(e.Kind)
@@ -107,14 +125,17 @@ func (e AssistedModelFailure) Error() string {
 	return fmt.Sprintf("%s: %s", e.Kind, e.Err.Error())
 }
 
+// Unwrap executes the corresponding package operation.
 func (e AssistedModelFailure) Unwrap() error {
 	return e.Err
 }
 
+// NewAssistedModelFailure constructs the corresponding package service or value.
 func NewAssistedModelFailure(kind AssistedModelFailureKind, err error) AssistedModelFailure {
 	return AssistedModelFailure{Kind: kind, Err: err}
 }
 
+// ClassifyAssistedModelFailure executes the corresponding package operation.
 func ClassifyAssistedModelFailure(err error) AssistedModelFailureKind {
 	var failure AssistedModelFailure
 
@@ -125,6 +146,7 @@ func ClassifyAssistedModelFailure(err error) AssistedModelFailureKind {
 	return AssistedModelFailureAdapter
 }
 
+// InvokeAssistedModel invokes the configured model adapter.
 func (a *FakeAssistedModelAdapter) InvokeAssistedModel(
 	ctx context.Context,
 	request AssistedModelRequest,
@@ -160,6 +182,7 @@ func (a *FakeAssistedModelAdapter) InvokeAssistedModel(
 	return response, nil
 }
 
+// InvokeAssistedModel executes the corresponding package operation.
 func InvokeAssistedModel(
 	ctx context.Context,
 	adapter AssistedModelAdapter,
@@ -190,6 +213,7 @@ func InvokeAssistedModel(
 	return response, nil
 }
 
+// ValidateAssistedModelRequest validates the corresponding package boundary value.
 func ValidateAssistedModelRequest(request AssistedModelRequest) error {
 	if strings.TrimSpace(request.ID) == "" {
 		return fmt.Errorf("assisted model request id is required")
@@ -226,6 +250,7 @@ func ValidateAssistedModelRequest(request AssistedModelRequest) error {
 	return nil
 }
 
+// ValidateAssistedModelResponse validates the corresponding package boundary value.
 func ValidateAssistedModelResponse(response AssistedModelResponse) error {
 	if strings.TrimSpace(response.ID) == "" {
 		return fmt.Errorf("assisted model response id is required")
@@ -263,6 +288,7 @@ func ValidateAssistedModelResponse(response AssistedModelResponse) error {
 	return nil
 }
 
+// PlanAssistedModelInvocationArtifacts executes the corresponding package operation.
 func PlanAssistedModelInvocationArtifacts(
 	sessionPaths AuthoringSessionPaths,
 	request AssistedModelRequest,
@@ -285,6 +311,7 @@ func PlanAssistedModelInvocationArtifacts(
 	}, nil
 }
 
+// RecordAssistedModelInvocation executes the corresponding package operation.
 func RecordAssistedModelInvocation(ctx context.Context, artifacts AssistedModelInvocationArtifacts) error {
 	err := ctx.Err()
 	if err != nil {
@@ -322,6 +349,7 @@ func RecordAssistedModelInvocation(ctx context.Context, artifacts AssistedModelI
 	return nil
 }
 
+// RenderAssistedModelRequest renders the corresponding package data.
 func RenderAssistedModelRequest(request AssistedModelRequest) string {
 	var output bytes.Buffer
 
@@ -344,6 +372,7 @@ func RenderAssistedModelRequest(request AssistedModelRequest) string {
 	return output.String()
 }
 
+// RenderAssistedModelResponse renders the corresponding package data.
 func RenderAssistedModelResponse(response AssistedModelResponse) string {
 	var output bytes.Buffer
 

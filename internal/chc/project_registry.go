@@ -15,8 +15,10 @@ import (
 
 const userDatabaseName = "chc.db"
 
+// ErrProjectNotFound identifies a package boundary error.
 var ErrProjectNotFound = errors.New("project not found")
 
+// ProjectRegistry defines a package boundary interface.
 type ProjectRegistry interface {
 	AddProject(ctx context.Context, project Project) error
 	ListProjects(ctx context.Context) ([]Project, error)
@@ -28,12 +30,14 @@ type ProjectRegistry interface {
 	Close() error
 }
 
+// ProjectRegistryOption defines a package boundary type.
 type ProjectRegistryOption func(*sqliteProjectRegistry)
 
 type sqliteProjectRegistry struct {
 	db *sql.DB
 }
 
+// NewProjectRegistry constructs the corresponding package service or value.
 func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (ProjectRegistry, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
@@ -60,6 +64,7 @@ func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS
 	return &sqliteProjectRegistry{db: db}, nil
 }
 
+// NewProjectRegistryFromDB constructs the corresponding package service or value.
 func NewProjectRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ProjectRegistry, error) {
 	migrator := NewMigrator(assetsFS)
 
@@ -71,6 +76,7 @@ func NewProjectRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (
 	return &sqliteProjectRegistry{db: db}, nil
 }
 
+// AddProject executes the corresponding package operation.
 func (r *sqliteProjectRegistry) AddProject(ctx context.Context, project Project) error {
 	err := validateProject(project)
 	if err != nil {
@@ -101,6 +107,7 @@ func (r *sqliteProjectRegistry) AddProject(ctx context.Context, project Project)
 	return nil
 }
 
+// ListProjects lists the requested data.
 func (r *sqliteProjectRegistry) ListProjects(ctx context.Context) ([]Project, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
@@ -136,18 +143,22 @@ ORDER BY name`,
 	return projects, nil
 }
 
+// GetProjectByName executes the corresponding package operation.
 func (r *sqliteProjectRegistry) GetProjectByName(ctx context.Context, name string) (Project, error) {
 	return r.getProject(ctx, "name", name)
 }
 
+// GetProjectByID executes the corresponding package operation.
 func (r *sqliteProjectRegistry) GetProjectByID(ctx context.Context, id string) (Project, error) {
 	return r.getProject(ctx, "id", id)
 }
 
+// GetProjectByPath executes the corresponding package operation.
 func (r *sqliteProjectRegistry) GetProjectByPath(ctx context.Context, path string) (Project, error) {
 	return r.getProject(ctx, "path", path)
 }
 
+// DisableProject executes the corresponding package operation.
 func (r *sqliteProjectRegistry) DisableProject(ctx context.Context, name string) (Project, error) {
 	project, err := r.GetProjectByName(ctx, name)
 	if err != nil {
@@ -164,6 +175,7 @@ func (r *sqliteProjectRegistry) DisableProject(ctx context.Context, name string)
 	return project, nil
 }
 
+// UpdateProjectPath executes the corresponding package operation.
 func (r *sqliteProjectRegistry) UpdateProjectPath(ctx context.Context, name, path string) (Project, error) {
 	if path == "" {
 		return Project{}, fmt.Errorf("project path is required")
@@ -219,6 +231,7 @@ func projectLookupColumn(field string) (string, error) {
 	}
 }
 
+// Close executes the corresponding package operation.
 func (r *sqliteProjectRegistry) Close() error {
 	err := r.db.Close()
 	if err != nil {

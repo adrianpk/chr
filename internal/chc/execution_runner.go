@@ -10,12 +10,15 @@ import (
 	"time"
 )
 
+// HarnessExecutor defines a package boundary interface.
 type HarnessExecutor interface {
 	Run(ctx context.Context, command HarnessCommand, stdout, stderr io.Writer) error
 }
 
+// OSHarnessExecutor describes a package boundary value.
 type OSHarnessExecutor struct{}
 
+// Run executes the configured operation.
 func (e OSHarnessExecutor) Run(ctx context.Context, command HarnessCommand, stdout, stderr io.Writer) error {
 	cmd := exec.CommandContext(ctx, command.Program, command.Args...)
 	cmd.Stdout = stdout
@@ -29,18 +32,21 @@ func (e OSHarnessExecutor) Run(ctx context.Context, command HarnessCommand, stdo
 	return nil
 }
 
+// ExecutionRunner describes a package boundary value.
 type ExecutionRunner struct {
 	Repository ExecutionRepository
 	Executor   HarnessExecutor
 	Now        func() time.Time
 }
 
+// RunExecutionOptions describes a package boundary value.
 type RunExecutionOptions struct {
 	Record     ExecutionRecord
 	Invocation HarnessInvocation
 	DryRun     bool
 }
 
+// NewExecutionRunner constructs the corresponding package service or value.
 func NewExecutionRunner(repository ExecutionRepository, executor HarnessExecutor) ExecutionRunner {
 	return ExecutionRunner{
 		Repository: repository,
@@ -49,6 +55,7 @@ func NewExecutionRunner(repository ExecutionRepository, executor HarnessExecutor
 	}
 }
 
+// Run executes the configured operation.
 func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (ExecutionRecord, error) {
 	record := opts.Record
 	if opts.DryRun {

@@ -9,12 +9,14 @@ import (
 
 const defaultPreviousAttemptMaxValidationLines = 12
 
+// PreviousAttemptContextOptions describes a package boundary value.
 type PreviousAttemptContextOptions struct {
 	Execution                  ExecutionRecord
 	PreviousAttemptContextPath string
 	MaxValidationLines         int
 }
 
+// PreviousAttemptContext describes a package boundary value.
 type PreviousAttemptContext struct {
 	ExecutionID                string
 	TicketKey                  string
@@ -32,6 +34,7 @@ type PreviousAttemptContext struct {
 	Sources                    []ContextSourceInventoryEntry
 }
 
+// LoadPreviousAttemptContext loads the corresponding package data.
 func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAttemptContext, error) {
 	err := ValidateExecutionRecord(opts.Execution)
 	if err != nil {
@@ -69,6 +72,7 @@ func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAtt
 	}, nil
 }
 
+// RenderPreviousAttemptContext renders the corresponding package data.
 func RenderPreviousAttemptContext(ctx PreviousAttemptContext) string {
 	var output strings.Builder
 
@@ -94,6 +98,7 @@ func RenderPreviousAttemptContext(ctx PreviousAttemptContext) string {
 	return output.String()
 }
 
+// RenderPreviousAttemptContextLink renders the corresponding package data.
 func RenderPreviousAttemptContextLink(path string) string {
 	path = strings.TrimSpace(path)
 	if path == "" {

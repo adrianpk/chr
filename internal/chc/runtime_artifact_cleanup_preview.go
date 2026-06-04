@@ -8,26 +8,31 @@ import (
 	"sort"
 )
 
+// RuntimeArtifactCleanupPreview describes a package boundary value.
 type RuntimeArtifactCleanupPreview struct {
 	ArtifactDir       string
 	ReferencedRunDirs []string
 	Candidates        []RuntimeArtifactCleanupCandidate
 }
 
+// RuntimeArtifactCleanupCandidate describes a package boundary value.
 type RuntimeArtifactCleanupCandidate struct {
 	Path string
 }
 
+// RuntimeArtifactCleanupPreviewService describes a package boundary value.
 type RuntimeArtifactCleanupPreviewService struct {
 	repository ExecutionRepository
 }
 
+// NewRuntimeArtifactCleanupPreviewService constructs the corresponding package service or value.
 func NewRuntimeArtifactCleanupPreviewService(
 	repository ExecutionRepository,
 ) RuntimeArtifactCleanupPreviewService {
 	return RuntimeArtifactCleanupPreviewService{repository: repository}
 }
 
+// Preview executes the corresponding package operation.
 func (s RuntimeArtifactCleanupPreviewService) Preview(
 	ctx context.Context,
 	projectDir string,

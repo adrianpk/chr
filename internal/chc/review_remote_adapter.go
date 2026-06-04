@@ -12,26 +12,35 @@ import (
 )
 
 const (
-	RemoteReviewCommentPlacementInline  = "inline"
+	// RemoteReviewCommentPlacementInline defines a package boundary constant.
+	RemoteReviewCommentPlacementInline = "inline"
+	// RemoteReviewCommentPlacementGeneral defines a package boundary constant.
 	RemoteReviewCommentPlacementGeneral = "general"
+	// RemoteReviewCommentPlacementSkipped defines a package boundary constant.
 	RemoteReviewCommentPlacementSkipped = "skipped"
 
-	RemoteReviewCommentKindBlocking    = "blocking"
+	// RemoteReviewCommentKindBlocking defines a package boundary constant.
+	RemoteReviewCommentKindBlocking = "blocking"
+	// RemoteReviewCommentKindNonBlocking defines a package boundary constant.
 	RemoteReviewCommentKindNonBlocking = "non_blocking"
 )
 
+// ReviewRemoteCommandRunner defines a package boundary interface.
 type ReviewRemoteCommandRunner interface {
 	Output(ctx context.Context, command string, args ...string) ([]byte, error)
 	Input(ctx context.Context, command string, input []byte, args ...string) ([]byte, error)
 }
 
+// OSReviewRemoteCommandRunner describes a package boundary value.
 type OSReviewRemoteCommandRunner struct{}
 
+// RemoteReviewAdapter describes a package boundary value.
 type RemoteReviewAdapter struct {
 	config ReviewProviderConfig
 	runner ReviewRemoteCommandRunner
 }
 
+// RemoteReviewSnapshot describes a package boundary value.
 type RemoteReviewSnapshot struct {
 	Reference          ReviewProviderReference
 	PullRequestJSON    string
@@ -42,6 +51,7 @@ type RemoteReviewSnapshot struct {
 	Capabilities       RemoteReviewCapabilities
 }
 
+// RemoteReviewCapabilities describes a package boundary value.
 type RemoteReviewCapabilities struct {
 	CanReadChecks       bool
 	CanWriteInline      bool
@@ -49,6 +59,7 @@ type RemoteReviewCapabilities struct {
 	InlineFallbackNotes []string
 }
 
+// RemoteReviewComment describes a package boundary value.
 type RemoteReviewComment struct {
 	Body     string
 	Path     string
@@ -57,22 +68,26 @@ type RemoteReviewComment struct {
 	Blocking bool
 }
 
+// RemoteReviewWriteResult describes a package boundary value.
 type RemoteReviewWriteResult struct {
 	Reference ReviewProviderReference
 	Comments  []RemoteReviewWrittenComment
 }
 
+// MergeRequest describes a package boundary value.
 type MergeRequest struct {
 	URL      string
 	Strategy string
 }
 
+// MergeResult describes a package boundary value.
 type MergeResult struct {
 	Reference ReviewProviderReference
 	Strategy  string
 	SHA       string
 }
 
+// RemoteReviewWrittenComment describes a package boundary value.
 type RemoteReviewWrittenComment struct {
 	Kind      string
 	Placement string
@@ -87,6 +102,7 @@ type remoteReviewPRMetadata struct {
 	} `json:"head"`
 }
 
+// Output executes the corresponding package operation.
 func (OSReviewRemoteCommandRunner) Output(ctx context.Context, command string, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, command, args...)
 
@@ -98,6 +114,7 @@ func (OSReviewRemoteCommandRunner) Output(ctx context.Context, command string, a
 	return output, nil
 }
 
+// Input executes the corresponding package operation.
 func (OSReviewRemoteCommandRunner) Input(
 	ctx context.Context,
 	command string,
@@ -115,6 +132,7 @@ func (OSReviewRemoteCommandRunner) Input(
 	return output, nil
 }
 
+// NewRemoteReviewAdapter constructs the corresponding package service or value.
 func NewRemoteReviewAdapter(config ReviewProviderConfig, runner ReviewRemoteCommandRunner) RemoteReviewAdapter {
 	if runner == nil {
 		runner = OSReviewRemoteCommandRunner{}
@@ -126,6 +144,7 @@ func NewRemoteReviewAdapter(config ReviewProviderConfig, runner ReviewRemoteComm
 	}
 }
 
+// Read executes the corresponding package operation.
 func (adapter RemoteReviewAdapter) Read(ctx context.Context, rawURL string) (RemoteReviewSnapshot, error) {
 	reference, config, err := adapter.resolve(rawURL)
 	if err != nil {
@@ -142,6 +161,7 @@ func (adapter RemoteReviewAdapter) Read(ctx context.Context, rawURL string) (Rem
 	}
 }
 
+// WriteComments writes the requested output.
 func (adapter RemoteReviewAdapter) WriteComments(
 	ctx context.Context,
 	rawURL string,
@@ -165,6 +185,7 @@ func (adapter RemoteReviewAdapter) WriteComments(
 	return result, nil
 }
 
+// Merge executes the corresponding package operation.
 func (a RemoteReviewAdapter) Merge(ctx context.Context, req MergeRequest) (MergeResult, error) {
 	reference, config, err := a.resolve(req.URL)
 	if err != nil {

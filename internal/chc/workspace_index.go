@@ -8,19 +8,24 @@ import (
 	"time"
 )
 
+// WorkspaceEdgeKind defines a package boundary type.
 type WorkspaceEdgeKind string
 
 const (
-	WorkspaceEdgeContains       WorkspaceEdgeKind = "contains"
+	// WorkspaceEdgeContains defines a package boundary constant.
+	WorkspaceEdgeContains WorkspaceEdgeKind = "contains"
+	// WorkspaceEdgeReferencesCase defines a package boundary constant.
 	WorkspaceEdgeReferencesCase WorkspaceEdgeKind = "references_case"
 )
 
+// WorkspaceEdge describes a package boundary value.
 type WorkspaceEdge struct {
 	From string
 	To   string
 	Kind WorkspaceEdgeKind
 }
 
+// WorkspaceIndex describes a package boundary value.
 type WorkspaceIndex struct {
 	NodesByID    map[string]WorkspaceNode
 	NodesByPath  map[string]string
@@ -33,6 +38,7 @@ type WorkspaceIndex struct {
 	BuiltAt      time.Time
 }
 
+// WorkspaceIndexHealth describes a package boundary value.
 type WorkspaceIndexHealth struct {
 	NodeCount                  int
 	EdgeCount                  int
@@ -43,12 +49,14 @@ type WorkspaceIndexHealth struct {
 	BuiltAt                    time.Time
 }
 
+// WorkspaceIndexChanges describes a package boundary value.
 type WorkspaceIndexChanges struct {
 	Added   []string
 	Changed []string
 	Removed []string
 }
 
+// NewWorkspaceIndexFromGraph constructs the corresponding package service or value.
 func NewWorkspaceIndexFromGraph(graph WorkspaceGraph) WorkspaceIndex {
 	index := WorkspaceIndex{
 		NodesByID:    map[string]WorkspaceNode{},
@@ -120,6 +128,7 @@ func (i *WorkspaceIndex) addUnresolvedCaseReferenceNodes(graph WorkspaceGraph) {
 	}
 }
 
+// BuildIndex builds the requested workspace artifact.
 func (b WorkspaceGraphBuilder) BuildIndex(ctx context.Context) (WorkspaceIndex, error) {
 	graph, err := b.Build(ctx)
 	if err != nil {
@@ -129,6 +138,7 @@ func (b WorkspaceGraphBuilder) BuildIndex(ctx context.Context) (WorkspaceIndex, 
 	return NewWorkspaceIndexFromGraph(graph), nil
 }
 
+// Health executes the corresponding package operation.
 func (i WorkspaceIndex) Health() WorkspaceIndexHealth {
 	return WorkspaceIndexHealth{
 		NodeCount:                len(i.NodesByID),
@@ -139,6 +149,7 @@ func (i WorkspaceIndex) Health() WorkspaceIndexHealth {
 	}
 }
 
+// HealthWithSemanticDigestStates executes the corresponding package operation.
 func (i WorkspaceIndex) HealthWithSemanticDigestStates(
 	states []WorkspaceSemanticDigestState,
 ) WorkspaceIndexHealth {
@@ -156,6 +167,7 @@ func (i WorkspaceIndex) HealthWithSemanticDigestStates(
 	return health
 }
 
+// ChangesSince executes the corresponding package operation.
 func (i WorkspaceIndex) ChangesSince(previous WorkspaceIndex) WorkspaceIndexChanges {
 	changes := WorkspaceIndexChanges{}
 
@@ -237,6 +249,7 @@ func (i *WorkspaceIndex) finalize() {
 	})
 }
 
+// WorkspaceNodeID executes the corresponding package operation.
 func WorkspaceNodeID(node WorkspaceNode) string {
 	switch {
 	case node.RelativePath != "":

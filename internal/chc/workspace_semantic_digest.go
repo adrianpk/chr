@@ -14,14 +14,19 @@ import (
 
 const workspaceSemanticDigestCacheSchemaVersion = 1
 
+// WorkspaceSemanticDigestStatus defines a package boundary type.
 type WorkspaceSemanticDigestStatus string
 
 const (
-	WorkspaceSemanticDigestReady   WorkspaceSemanticDigestStatus = "ready"
+	// WorkspaceSemanticDigestReady defines a package boundary constant.
+	WorkspaceSemanticDigestReady WorkspaceSemanticDigestStatus = "ready"
+	// WorkspaceSemanticDigestPending defines a package boundary constant.
 	WorkspaceSemanticDigestPending WorkspaceSemanticDigestStatus = "pending"
-	WorkspaceSemanticDigestStale   WorkspaceSemanticDigestStatus = "stale"
+	// WorkspaceSemanticDigestStale defines a package boundary constant.
+	WorkspaceSemanticDigestStale WorkspaceSemanticDigestStatus = "stale"
 )
 
+// WorkspaceSemanticDigest describes a package boundary value.
 type WorkspaceSemanticDigest struct {
 	NodeID      string
 	Path        string
@@ -33,16 +38,19 @@ type WorkspaceSemanticDigest struct {
 	GeneratedAt time.Time
 }
 
+// WorkspaceSemanticDigestState describes a package boundary value.
 type WorkspaceSemanticDigestState struct {
 	NodeID string
 	Status WorkspaceSemanticDigestStatus
 	Digest WorkspaceSemanticDigest
 }
 
+// WorkspaceSemanticDigestCache describes a package boundary value.
 type WorkspaceSemanticDigestCache struct {
 	Entries map[string]WorkspaceSemanticDigest
 }
 
+// WorkspaceSemanticDigestGenerator defines a package boundary interface.
 type WorkspaceSemanticDigestGenerator interface {
 	GenerateWorkspaceSemanticDigest(
 		ctx context.Context,
@@ -50,8 +58,10 @@ type WorkspaceSemanticDigestGenerator interface {
 	) (string, error)
 }
 
+// DeterministicWorkspaceSemanticDigestGenerator describes a package boundary value.
 type DeterministicWorkspaceSemanticDigestGenerator struct{}
 
+// WorkspaceSemanticDigestRequest describes a package boundary value.
 type WorkspaceSemanticDigestRequest struct {
 	NodeID     string
 	Node       WorkspaceNode
@@ -59,12 +69,14 @@ type WorkspaceSemanticDigestRequest struct {
 	PromptHash string
 }
 
+// WorkspaceSemanticDigestGeneration describes a package boundary value.
 type WorkspaceSemanticDigestGeneration struct {
 	NodeID string
 	Status WorkspaceSemanticDigestStatus
 	Digest WorkspaceSemanticDigest
 }
 
+// WorkspaceSemanticIndexWorker describes a package boundary value.
 type WorkspaceSemanticIndexWorker struct {
 	Generator  WorkspaceSemanticDigestGenerator
 	ModelID    string
@@ -72,6 +84,7 @@ type WorkspaceSemanticIndexWorker struct {
 	Now        func() time.Time
 }
 
+// WorkspaceSemanticIndexWorkerResult describes a package boundary value.
 type WorkspaceSemanticIndexWorkerResult struct {
 	Cache          WorkspaceSemanticDigestCache
 	Generated      []WorkspaceSemanticDigestGeneration
@@ -87,16 +100,19 @@ type workspaceSemanticDigestCacheFile struct {
 	Entries       []WorkspaceSemanticDigest `json:"entries"`
 }
 
+// WorkspaceSemanticDigestCachePath executes the corresponding package operation.
 func WorkspaceSemanticDigestCachePath(projectDir string) string {
 	return UserPath(projectDir, "tmp", "cache", "workspace-index", "semantic-digests.json")
 }
 
+// NewWorkspaceSemanticDigestCache constructs the corresponding package service or value.
 func NewWorkspaceSemanticDigestCache() WorkspaceSemanticDigestCache {
 	return WorkspaceSemanticDigestCache{
 		Entries: map[string]WorkspaceSemanticDigest{},
 	}
 }
 
+// ReadWorkspaceSemanticDigestCache executes the corresponding package operation.
 func ReadWorkspaceSemanticDigestCache(path string) (WorkspaceSemanticDigestCache, error) {
 	content, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -130,6 +146,7 @@ func ReadWorkspaceSemanticDigestCache(path string) (WorkspaceSemanticDigestCache
 	return cache, nil
 }
 
+// WriteWorkspaceSemanticDigestCache executes the corresponding package operation.
 func WriteWorkspaceSemanticDigestCache(path string, cache WorkspaceSemanticDigestCache) error {
 	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {
@@ -164,6 +181,7 @@ func invalidWorkspaceSemanticDigestCache(content []byte, cacheFile *workspaceSem
 	return json.Unmarshal(content, cacheFile) != nil
 }
 
+// WorkspaceSemanticDigestStates executes the corresponding package operation.
 func WorkspaceSemanticDigestStates(
 	index WorkspaceIndex,
 	cache WorkspaceSemanticDigestCache,
@@ -201,6 +219,7 @@ func WorkspaceSemanticDigestStates(
 	return states
 }
 
+// NewWorkspaceSemanticDigest constructs the corresponding package service or value.
 func NewWorkspaceSemanticDigest(
 	node WorkspaceNode,
 	modelID string,
@@ -220,6 +239,7 @@ func NewWorkspaceSemanticDigest(
 	}
 }
 
+// GenerateWorkspaceSemanticDigest generates the requested artifact.
 func (DeterministicWorkspaceSemanticDigestGenerator) GenerateWorkspaceSemanticDigest(
 	_ context.Context,
 	request WorkspaceSemanticDigestRequest,
@@ -240,6 +260,7 @@ func (DeterministicWorkspaceSemanticDigestGenerator) GenerateWorkspaceSemanticDi
 	return contentHash([]byte(strings.Join(parts, "\x00"))), nil
 }
 
+// Generate generates the requested artifact.
 func (w WorkspaceSemanticIndexWorker) Generate(
 	ctx context.Context,
 	index WorkspaceIndex,

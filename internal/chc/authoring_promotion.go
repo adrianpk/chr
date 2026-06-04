@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// QuizToDraftPromotionOptions describes a package boundary value.
 type QuizToDraftPromotionOptions struct {
 	ProjectDir   string
 	Session      AuthoringSession
@@ -17,6 +18,7 @@ type QuizToDraftPromotionOptions struct {
 	DryRun       bool
 }
 
+// QuizToDraftPromotionPlan describes a package boundary value.
 type QuizToDraftPromotionPlan struct {
 	Session    AuthoringSession
 	Layout     AuthoringArtifactLayout
@@ -25,6 +27,7 @@ type QuizToDraftPromotionPlan struct {
 	WouldWrite bool
 }
 
+// PlanQuizToDraftPromotion executes the corresponding package operation.
 func PlanQuizToDraftPromotion(opts QuizToDraftPromotionOptions) (QuizToDraftPromotionPlan, error) {
 	err := validateQuizToDraftPromotionOptions(opts)
 	if err != nil {
@@ -53,6 +56,7 @@ func PlanQuizToDraftPromotion(opts QuizToDraftPromotionOptions) (QuizToDraftProm
 	}, nil
 }
 
+// WriteQuizToDraftPromotion executes the corresponding package operation.
 func WriteQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
 	if plan.Layout.Collision.Exists && !plan.Layout.Collision.Allowed {
 		return fmt.Errorf("authoring draft artifact already exists: %s", plan.Layout.FullPath)
@@ -71,6 +75,7 @@ func WriteQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
 	return nil
 }
 
+// RenderDraftFromQuiz renders the corresponding package data.
 func RenderDraftFromQuiz(
 	session AuthoringSession,
 	source AuthoringArtifactRef,

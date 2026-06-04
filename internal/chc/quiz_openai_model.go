@@ -16,8 +16,10 @@ import (
 )
 
 const (
+	// QuizModelProviderOpenAI defines a package boundary constant.
 	QuizModelProviderOpenAI = "openai"
 
+	// QuizModelFastBatchSize defines a package boundary constant.
 	QuizModelFastBatchSize = 10
 
 	defaultOpenAIResponsesBaseURL  = "https://api.openai.com/v1"
@@ -26,6 +28,7 @@ const (
 	defaultOpenAIGenerationTimeout = 5 * time.Minute
 )
 
+// OpenAIQuizModelAdapter describes a package boundary value.
 type OpenAIQuizModelAdapter struct {
 	APIKey     string
 	BaseURL    string
@@ -91,6 +94,7 @@ type openAIResponsesError struct {
 	Type    string `json:"type"`
 }
 
+// InvokeQuizModel invokes the configured model adapter.
 func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 	ctx context.Context,
 	request QuizModelRequest,

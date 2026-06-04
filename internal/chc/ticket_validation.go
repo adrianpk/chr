@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// ValidateIndexedTicket validates the corresponding package boundary value.
 func ValidateIndexedTicket(ticket IndexedTicket) error {
 	err := validateRequiredTicketMetadata(ticket)
 	if err != nil {

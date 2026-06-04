@@ -8,10 +8,12 @@ import (
 	"time"
 )
 
+// TicketCommenter defines a package boundary interface.
 type TicketCommenter interface {
 	AddComment(ctx context.Context, opts AddTicketCommentOptions) error
 }
 
+// AddTicketCommentOptions describes a package boundary value.
 type AddTicketCommentOptions struct {
 	Path      string
 	Author    string
@@ -21,10 +23,12 @@ type AddTicketCommentOptions struct {
 
 type ticketCommenter struct{}
 
+// NewTicketCommenter constructs the corresponding package service or value.
 func NewTicketCommenter() TicketCommenter {
 	return &ticketCommenter{}
 }
 
+// AddComment executes the corresponding package operation.
 func (c *ticketCommenter) AddComment(ctx context.Context, opts AddTicketCommentOptions) error {
 	err := ctx.Err()
 	if err != nil {

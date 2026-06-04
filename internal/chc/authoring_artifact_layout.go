@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// AuthoringArtifactLayoutOptions describes a package boundary value.
 type AuthoringArtifactLayoutOptions struct {
 	ProjectDir   string
 	SessionID    string
@@ -18,6 +19,7 @@ type AuthoringArtifactLayoutOptions struct {
 	AllowReplace bool
 }
 
+// AuthoringArtifactLayout describes a package boundary value.
 type AuthoringArtifactLayout struct {
 	Ref       AuthoringArtifactRef
 	FullPath  string
@@ -25,12 +27,14 @@ type AuthoringArtifactLayout struct {
 	Collision AuthoringArtifactCollision
 }
 
+// AuthoringArtifactCollision describes a package boundary value.
 type AuthoringArtifactCollision struct {
 	Exists  bool
 	Path    string
 	Allowed bool
 }
 
+// AuthoringArtifactInventoryEntry describes a package boundary value.
 type AuthoringArtifactInventoryEntry struct {
 	SessionID  string
 	ArtifactID string
@@ -41,6 +45,7 @@ type AuthoringArtifactInventoryEntry struct {
 	Collision  bool
 }
 
+// PlanAuthoringArtifactLayout executes the corresponding package operation.
 func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (AuthoringArtifactLayout, error) {
 	err := validateAuthoringArtifactLayoutOptions(opts)
 	if err != nil {
@@ -69,6 +74,7 @@ func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (Authoring
 	}, nil
 }
 
+// AuthoringArtifactInventory executes the corresponding package operation.
 func AuthoringArtifactInventory(sessionID string, layouts []AuthoringArtifactLayout) []AuthoringArtifactInventoryEntry {
 	entries := make([]AuthoringArtifactInventoryEntry, 0, len(layouts))
 

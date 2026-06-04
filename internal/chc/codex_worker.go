@@ -6,9 +6,11 @@ import (
 )
 
 const (
+	// CodexWorkerProgram defines a package boundary constant.
 	CodexWorkerProgram = "codex"
 )
 
+// CodexWorkerCommandOptions describes a package boundary value.
 type CodexWorkerCommandOptions struct {
 	ExecutionID    string
 	TicketKey      string
@@ -19,17 +21,20 @@ type CodexWorkerCommandOptions struct {
 	ValidationPath string
 }
 
+// CodexWorkerCommand describes a package boundary value.
 type CodexWorkerCommand struct {
 	Program string
 	Args    []string
 	Env     []CodexWorkerEnv
 }
 
+// CodexWorkerEnv describes a package boundary value.
 type CodexWorkerEnv struct {
 	Name  string
 	Value string
 }
 
+// NewCodexWorkerCommand constructs the corresponding package service or value.
 func NewCodexWorkerCommand(opts CodexWorkerCommandOptions) (CodexWorkerCommand, error) {
 	err := validateCodexWorkerCommandOptions(opts)
 	if err != nil {
@@ -55,6 +60,7 @@ func NewCodexWorkerCommand(opts CodexWorkerCommandOptions) (CodexWorkerCommand, 
 	}, nil
 }
 
+// RenderCodexWorkerShellScript renders the corresponding package data.
 func RenderCodexWorkerShellScript(command CodexWorkerCommand) string {
 	parts := make([]string, 0, len(command.Env)+len(command.Args)+2)
 

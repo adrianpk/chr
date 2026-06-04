@@ -10,10 +10,12 @@ import (
 	"time"
 )
 
+// CodexWorkerContextMaterializer defines a package boundary interface.
 type CodexWorkerContextMaterializer interface {
 	MaterializeContext(ctx context.Context, opts MaterializeCodexWorkerContextOptions) error
 }
 
+// MaterializeCodexWorkerContextOptions describes a package boundary value.
 type MaterializeCodexWorkerContextOptions struct {
 	Path           string
 	ExecutionID    string
@@ -25,6 +27,7 @@ type MaterializeCodexWorkerContextOptions struct {
 	RepairHandoff  *CodexWorkerRepairHandoff
 }
 
+// CodexWorkerRepairHandoff describes a package boundary value.
 type CodexWorkerRepairHandoff struct {
 	Branch            string
 	PullRequestURL    string
@@ -36,10 +39,12 @@ type CodexWorkerRepairHandoff struct {
 
 type codexWorkerContextMaterializer struct{}
 
+// NewCodexWorkerContextMaterializer constructs the corresponding package service or value.
 func NewCodexWorkerContextMaterializer() CodexWorkerContextMaterializer {
 	return &codexWorkerContextMaterializer{}
 }
 
+// MaterializeCodexWorkerContextForExecution executes the corresponding package operation.
 func MaterializeCodexWorkerContextForExecution(
 	ctx context.Context,
 	record ExecutionRecord,
@@ -62,6 +67,7 @@ func MaterializeCodexWorkerContextForExecution(
 	})
 }
 
+// MaterializeContext executes the corresponding package operation.
 func (m *codexWorkerContextMaterializer) MaterializeContext(
 	ctx context.Context,
 	opts MaterializeCodexWorkerContextOptions,
@@ -91,6 +97,7 @@ func (m *codexWorkerContextMaterializer) MaterializeContext(
 	return nil
 }
 
+// RenderCodexWorkerContext renders the corresponding package data.
 func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string {
 	var output strings.Builder
 

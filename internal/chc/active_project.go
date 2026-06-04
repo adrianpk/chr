@@ -8,12 +8,15 @@ import (
 	"strings"
 )
 
+// ErrActiveProjectNotSelected identifies a package boundary error.
 var ErrActiveProjectNotSelected = errors.New("active project is not selected")
 
+// ActiveProject describes a package boundary value.
 type ActiveProject struct {
 	ProjectID string
 }
 
+// ActiveProjectStore defines a package boundary interface.
 type ActiveProjectStore interface {
 	LoadActiveProject() (ActiveProject, error)
 	SetActiveProject(activeProject ActiveProject) error
@@ -24,12 +27,14 @@ type activeProjectStore struct {
 	path string
 }
 
+// NewActiveProjectStore constructs the corresponding package service or value.
 func NewActiveProjectStore(env UserEnvironment) ActiveProjectStore {
 	return &activeProjectStore{
 		path: filepath.Join(env.ConfigDir(), "active-project"),
 	}
 }
 
+// NewActiveProject constructs the corresponding package service or value.
 func NewActiveProject(projectID string) (ActiveProject, error) {
 	if projectID == "" {
 		return ActiveProject{}, fmt.Errorf("active project id is required")
@@ -38,6 +43,7 @@ func NewActiveProject(projectID string) (ActiveProject, error) {
 	return ActiveProject{ProjectID: projectID}, nil
 }
 
+// LoadActiveProject loads the requested data.
 func (s *activeProjectStore) LoadActiveProject() (ActiveProject, error) {
 	content, err := os.ReadFile(s.path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -56,6 +62,7 @@ func (s *activeProjectStore) LoadActiveProject() (ActiveProject, error) {
 	return activeProject, nil
 }
 
+// SetActiveProject executes the corresponding package operation.
 func (s *activeProjectStore) SetActiveProject(activeProject ActiveProject) error {
 	_, err := NewActiveProject(activeProject.ProjectID)
 	if err != nil {
@@ -83,6 +90,7 @@ func (s *activeProjectStore) SetActiveProject(activeProject ActiveProject) error
 	return nil
 }
 
+// ClearActiveProject executes the corresponding package operation.
 func (s *activeProjectStore) ClearActiveProject() error {
 	err := os.Remove(s.path)
 	if errors.Is(err, os.ErrNotExist) {

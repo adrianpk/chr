@@ -11,10 +11,13 @@ import (
 )
 
 const (
-	DirectoryName     = ".chc"
+	// DirectoryName defines a package boundary constant.
+	DirectoryName = ".chc"
+	// UserDirectoryName defines a package boundary constant.
 	UserDirectoryName = "user"
 )
 
+// DefaultProfile defines a package boundary constant.
 const DefaultProfile = "standard"
 
 const (
@@ -22,6 +25,7 @@ const (
 	rootAssetDir         = "root"
 )
 
+// Workspace defines a package boundary interface.
 type Workspace interface {
 	Init(ctx context.Context, opts InitOptions) (InitResult, error)
 }
@@ -30,16 +34,19 @@ type workspace struct {
 	assetsFS fs.FS
 }
 
+// NewWorkspace constructs the corresponding package service or value.
 func NewWorkspace(assetsFS fs.FS) Workspace {
 	return &workspace{assetsFS: assetsFS}
 }
 
+// InitOptions describes a package boundary value.
 type InitOptions struct {
 	ProjectDir string
 	Profile    string
 	DryRun     bool
 }
 
+// InitResult describes a package boundary value.
 type InitResult struct {
 	Root    string
 	Created []string
@@ -80,16 +87,19 @@ var directories = []string{
 	"user/notifications",
 }
 
+// UserRelativePath executes the corresponding package operation.
 func UserRelativePath(elements ...string) string {
 	parts := append([]string{DirectoryName, UserDirectoryName}, elements...)
 
 	return filepath.ToSlash(filepath.Join(parts...))
 }
 
+// UserPath executes the corresponding package operation.
 func UserPath(projectDir string, elements ...string) string {
 	return filepath.Join(projectDir, filepath.FromSlash(UserRelativePath(elements...)))
 }
 
+// Init executes the corresponding package operation.
 func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, error) {
 	err := ctx.Err()
 	if err != nil {

@@ -8,8 +8,10 @@ import (
 	"time"
 )
 
+// DefaultTicketStatus defines a package boundary constant.
 const DefaultTicketStatus = TicketStatusOpenLegacy
 
+// Ticket describes a package boundary value.
 type Ticket struct {
 	Key               string
 	Title             string
@@ -42,6 +44,7 @@ type Ticket struct {
 	UpdatedAt         time.Time
 }
 
+// TicketReviewRef describes a package boundary value.
 type TicketReviewRef struct {
 	Type     string
 	Provider string
@@ -50,16 +53,19 @@ type TicketReviewRef struct {
 	Status   string
 }
 
+// TicketRenderer defines a package boundary interface.
 type TicketRenderer interface {
 	RenderTicket(ticket Ticket) (string, error)
 }
 
 type ticketRenderer struct{}
 
+// NewTicketRenderer constructs the corresponding package service or value.
 func NewTicketRenderer() TicketRenderer {
 	return &ticketRenderer{}
 }
 
+// RenderTicket executes the corresponding package operation.
 func (r *ticketRenderer) RenderTicket(ticket Ticket) (string, error) {
 	if ticket.Status == "" {
 		ticket.Status = DefaultTicketStatus

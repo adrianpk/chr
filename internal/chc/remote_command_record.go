@@ -8,13 +8,17 @@ import (
 	"time"
 )
 
+// RemoteCommandRecordStatus defines a package boundary type.
 type RemoteCommandRecordStatus string
 
 const (
+	// RemoteCommandRecordAccepted defines a package boundary constant.
 	RemoteCommandRecordAccepted RemoteCommandRecordStatus = "accepted"
+	// RemoteCommandRecordRejected defines a package boundary constant.
 	RemoteCommandRecordRejected RemoteCommandRecordStatus = "rejected"
 )
 
+// RemoteCommandRecord describes a package boundary value.
 type RemoteCommandRecord struct {
 	Request         RemoteCommandRequest
 	Status          RemoteCommandRecordStatus
@@ -22,6 +26,7 @@ type RemoteCommandRecord struct {
 	RejectionReason string
 }
 
+// NewAcceptedRemoteCommandRecord constructs the corresponding package service or value.
 func NewAcceptedRemoteCommandRecord(request RemoteCommandRequest) (RemoteCommandRecord, error) {
 	record := RemoteCommandRecord{
 		Request:        request,
@@ -37,6 +42,7 @@ func NewAcceptedRemoteCommandRecord(request RemoteCommandRequest) (RemoteCommand
 	return record, nil
 }
 
+// NewRejectedRemoteCommandRecord constructs the corresponding package service or value.
 func NewRejectedRemoteCommandRecord(
 	request RemoteCommandRequest,
 	rawText string,
@@ -63,6 +69,7 @@ func NewRejectedRemoteCommandRecord(
 	return record, nil
 }
 
+// ValidateRemoteCommandRecord validates the corresponding package boundary value.
 func ValidateRemoteCommandRecord(record RemoteCommandRecord) error {
 	if !record.Status.Valid() {
 		return fmt.Errorf("remote command record status is invalid: %s", record.Status)
@@ -83,6 +90,7 @@ func ValidateRemoteCommandRecord(record RemoteCommandRecord) error {
 	return nil
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s RemoteCommandRecordStatus) Valid() bool {
 	switch s {
 	case RemoteCommandRecordAccepted,
@@ -93,6 +101,7 @@ func (s RemoteCommandRecordStatus) Valid() bool {
 	}
 }
 
+// RemoteCommandHandoffCommand executes the corresponding package operation.
 func RemoteCommandHandoffCommand(request RemoteCommandRequest) string {
 	switch request.Intent {
 	case RemoteCommandIntentStatus:

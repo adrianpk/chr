@@ -17,6 +17,7 @@ const (
 	defaultContextSearchLineLength = 180
 )
 
+// TreeSearchContextOptions describes a package boundary value.
 type TreeSearchContextOptions struct {
 	ProjectDir        string
 	Ticket            IndexedTicket
@@ -25,6 +26,7 @@ type TreeSearchContextOptions struct {
 	MaxSearchHits     int
 }
 
+// TreeSearchContext describes a package boundary value.
 type TreeSearchContext struct {
 	ProjectDir string
 	Tree       []ContextTreeEntry
@@ -33,11 +35,13 @@ type TreeSearchContext struct {
 	Sources    []ContextSourceInventoryEntry
 }
 
+// ContextTreeEntry describes a package boundary value.
 type ContextTreeEntry struct {
 	Path  string
 	IsDir bool
 }
 
+// ContextSearchHit describes a package boundary value.
 type ContextSearchHit struct {
 	Term    string
 	Path    string
@@ -45,6 +49,7 @@ type ContextSearchHit struct {
 	Excerpt string
 }
 
+// LoadTreeSearchContext loads the corresponding package data.
 func LoadTreeSearchContext(opts TreeSearchContextOptions) (TreeSearchContext, error) {
 	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
 	if err != nil {
@@ -72,6 +77,7 @@ func LoadTreeSearchContext(opts TreeSearchContextOptions) (TreeSearchContext, er
 	}, nil
 }
 
+// DeriveContextSearchTerms executes the corresponding package operation.
 func DeriveContextSearchTerms(ticket IndexedTicket, validationCommand string) []string {
 	seen := map[string]struct{}{}
 	terms := make([]string, 0, 16)
@@ -93,6 +99,7 @@ func DeriveContextSearchTerms(ticket IndexedTicket, validationCommand string) []
 	return terms
 }
 
+// RenderCodeContext renders the corresponding package data.
 func RenderCodeContext(ctx TreeSearchContext) string {
 	var output strings.Builder
 

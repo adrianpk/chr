@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// AssistedArtifactSynthesisOptions describes a package boundary value.
 type AssistedArtifactSynthesisOptions struct {
 	ProjectDir     string
 	Session        AuthoringSession
@@ -20,12 +21,14 @@ type AssistedArtifactSynthesisOptions struct {
 	Now            func() time.Time
 }
 
+// AssistedArtifactSynthesisResult describes a package boundary value.
 type AssistedArtifactSynthesisResult struct {
 	Session AuthoringSession
 	Layout  AuthoringArtifactLayout
 	Content string
 }
 
+// SynthesizeAssistedArtifact executes the corresponding package operation.
 func SynthesizeAssistedArtifact(
 	ctx context.Context,
 	opts AssistedArtifactSynthesisOptions,
@@ -77,6 +80,7 @@ func SynthesizeAssistedArtifact(
 	}, nil
 }
 
+// RenderAssistedSynthesizedArtifact renders the corresponding package data.
 func RenderAssistedSynthesizedArtifact(
 	session AuthoringSession,
 	summary AssistedCuratedAnswerSummary,

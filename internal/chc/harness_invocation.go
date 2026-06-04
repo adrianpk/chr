@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// HarnessInvocationOptions describes a package boundary value.
 type HarnessInvocationOptions struct {
 	ExecutionID string
 	TicketKey   string
@@ -13,6 +14,7 @@ type HarnessInvocationOptions struct {
 	Plan        RuntimePlan
 }
 
+// HarnessInvocation describes a package boundary value.
 type HarnessInvocation struct {
 	ExecutionID string
 	TicketKey   string
@@ -23,11 +25,13 @@ type HarnessInvocation struct {
 	LogPath     string
 }
 
+// HarnessCommand describes a package boundary value.
 type HarnessCommand struct {
 	Program string
 	Args    []string
 }
 
+// NewHarnessInvocation constructs the corresponding package service or value.
 func NewHarnessInvocation(opts HarnessInvocationOptions) (HarnessInvocation, error) {
 	if opts.ExecutionID == "" {
 		return HarnessInvocation{}, fmt.Errorf("execution id is required")

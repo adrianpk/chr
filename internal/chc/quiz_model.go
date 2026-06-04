@@ -7,25 +7,37 @@ import (
 	"time"
 )
 
+// QuizModelAction defines a package boundary type.
 type QuizModelAction string
 
 const (
-	QuizModelActionNextQuestion            QuizModelAction = "quiz_next_question"
-	QuizModelActionDraftSpec               QuizModelAction = "quiz_to_draft_spec"
-	QuizModelActionGenerateSpec            QuizModelAction = "spec_generation"
-	QuizModelActionGeneratePlan            QuizModelAction = "plan_generation"
-	QuizModelActionGeneratePlanOutline     QuizModelAction = "plan_outline_generation"
+	// QuizModelActionNextQuestion defines a package boundary constant.
+	QuizModelActionNextQuestion QuizModelAction = "quiz_next_question"
+	// QuizModelActionDraftSpec defines a package boundary constant.
+	QuizModelActionDraftSpec QuizModelAction = "quiz_to_draft_spec"
+	// QuizModelActionGenerateSpec defines a package boundary constant.
+	QuizModelActionGenerateSpec QuizModelAction = "spec_generation"
+	// QuizModelActionGeneratePlan defines a package boundary constant.
+	QuizModelActionGeneratePlan QuizModelAction = "plan_generation"
+	// QuizModelActionGeneratePlanOutline defines a package boundary constant.
+	QuizModelActionGeneratePlanOutline QuizModelAction = "plan_outline_generation"
+	// QuizModelActionGeneratePlanSliceDetail defines a package boundary constant.
 	QuizModelActionGeneratePlanSliceDetail QuizModelAction = "plan_slice_detail_generation"
+	// QuizModelActionMaterializePlanTracking defines a package boundary constant.
 	QuizModelActionMaterializePlanTracking QuizModelAction = "plan_tracking_materialization"
 )
 
+// QuizModelResponseStatus defines a package boundary type.
 type QuizModelResponseStatus string
 
 const (
-	QuizModelResponseReady   QuizModelResponseStatus = "ready"
+	// QuizModelResponseReady defines a package boundary constant.
+	QuizModelResponseReady QuizModelResponseStatus = "ready"
+	// QuizModelResponseBlocked defines a package boundary constant.
 	QuizModelResponseBlocked QuizModelResponseStatus = "blocked"
 )
 
+// QuizModelRequest describes a package boundary value.
 type QuizModelRequest struct {
 	ID              string
 	Action          QuizModelAction
@@ -39,6 +51,7 @@ type QuizModelRequest struct {
 	CreatedAt       time.Time
 }
 
+// QuizModelContextSection describes a package boundary value.
 type QuizModelContextSection struct {
 	Name      string
 	Layer     string
@@ -47,10 +60,12 @@ type QuizModelContextSection struct {
 	Metadata  map[string]string
 }
 
+// QuizModelOutputContract describes a package boundary value.
 type QuizModelOutputContract struct {
 	RequiredFields []string
 }
 
+// QuizModelResponse describes a package boundary value.
 type QuizModelResponse struct {
 	ID           string
 	RequestID    string
@@ -67,10 +82,12 @@ type QuizModelResponse struct {
 	CreatedAt    time.Time
 }
 
+// QuizModelAdapter defines a package boundary interface.
 type QuizModelAdapter interface {
 	InvokeQuizModel(ctx context.Context, request QuizModelRequest) (QuizModelResponse, error)
 }
 
+// InvokeQuizModel executes the corresponding package operation.
 func InvokeQuizModel(
 	ctx context.Context,
 	adapter QuizModelAdapter,
@@ -98,6 +115,7 @@ func InvokeQuizModel(
 	return response, nil
 }
 
+// ValidateQuizModelRequest validates the corresponding package boundary value.
 func ValidateQuizModelRequest(request QuizModelRequest) error {
 	if strings.TrimSpace(request.ID) == "" {
 		return fmt.Errorf("quiz model request id is required")
@@ -149,6 +167,7 @@ func validateQuizModelRequestPayload(request QuizModelRequest) error {
 	return nil
 }
 
+// ValidateQuizModelResponse validates the corresponding package boundary value.
 func ValidateQuizModelResponse(response QuizModelResponse) error {
 	if strings.TrimSpace(response.ID) == "" {
 		return fmt.Errorf("quiz model response id is required")
@@ -187,6 +206,7 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 	return nil
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (a QuizModelAction) Valid() bool {
 	switch a {
 	case QuizModelActionNextQuestion,
@@ -226,6 +246,7 @@ func validateQuizModelReadyResponse(response QuizModelResponse) error {
 	return ValidateQuizQuestion(response.Question)
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s QuizModelResponseStatus) Valid() bool {
 	switch s {
 	case QuizModelResponseReady, QuizModelResponseBlocked:

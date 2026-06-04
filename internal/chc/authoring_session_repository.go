@@ -11,10 +11,13 @@ import (
 	"time"
 )
 
+// AuthoringSessionsDirectory defines a package boundary constant.
 const AuthoringSessionsDirectory = "authoring/sessions"
 
+// ErrAuthoringSessionNotFound identifies a package boundary error.
 var ErrAuthoringSessionNotFound = errors.New("authoring session not found")
 
+// AuthoringSessionRepository defines a package boundary interface.
 type AuthoringSessionRepository interface {
 	CreateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error)
 	UpdateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error)
@@ -24,6 +27,7 @@ type AuthoringSessionRepository interface {
 	ListTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error)
 }
 
+// AuthoringSessionPaths describes a package boundary value.
 type AuthoringSessionPaths struct {
 	SessionDir     string
 	SessionPath    string
@@ -35,10 +39,12 @@ type fileAuthoringSessionRepository struct {
 	projectDir string
 }
 
+// NewAuthoringSessionRepository constructs the corresponding package service or value.
 func NewAuthoringSessionRepository(projectDir string) AuthoringSessionRepository {
 	return &fileAuthoringSessionRepository{projectDir: projectDir}
 }
 
+// AuthoringSessionLayout executes the corresponding package operation.
 func AuthoringSessionLayout(projectDir, id string) AuthoringSessionPaths {
 	sessionDir := filepath.Join(projectDir, DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), id)
 
@@ -50,6 +56,7 @@ func AuthoringSessionLayout(projectDir, id string) AuthoringSessionPaths {
 	}
 }
 
+// CreateSession executes the corresponding package operation.
 func (r *fileAuthoringSessionRepository) CreateSession(
 	ctx context.Context,
 	session AuthoringSession,
@@ -94,6 +101,7 @@ func (r *fileAuthoringSessionRepository) CreateSession(
 	return paths, nil
 }
 
+// UpdateSession executes the corresponding package operation.
 func (r *fileAuthoringSessionRepository) UpdateSession(
 	ctx context.Context,
 	session AuthoringSession,
@@ -132,6 +140,7 @@ func (r *fileAuthoringSessionRepository) UpdateSession(
 	return paths, nil
 }
 
+// GetSession executes the corresponding package operation.
 func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id string) (AuthoringSession, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -157,6 +166,7 @@ func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id stri
 	return session, nil
 }
 
+// ListSessions lists the requested data.
 func (r *fileAuthoringSessionRepository) ListSessions(ctx context.Context) ([]AuthoringSession, error) {
 	sessionsDir := filepath.Join(r.projectDir, DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory))
 	sessions := []AuthoringSession{}
@@ -200,6 +210,7 @@ func (r *fileAuthoringSessionRepository) ListSessions(ctx context.Context) ([]Au
 	return sessions, nil
 }
 
+// AppendTranscriptEvents executes the corresponding package operation.
 func (r *fileAuthoringSessionRepository) AppendTranscriptEvents(
 	ctx context.Context,
 	sessionID string,
@@ -255,6 +266,7 @@ func (r *fileAuthoringSessionRepository) AppendTranscriptEvents(
 	return nil
 }
 
+// ListTranscriptEvents lists the requested data.
 func (r *fileAuthoringSessionRepository) ListTranscriptEvents(
 	ctx context.Context,
 	sessionID string,
@@ -300,6 +312,7 @@ func requireAuthoringSessionFile(path, sessionID string) error {
 	return nil
 }
 
+// RenderAuthoringSession renders the corresponding package data.
 func RenderAuthoringSession(session AuthoringSession, paths AuthoringSessionPaths) (string, error) {
 	err := ValidateAuthoringSession(session)
 	if err != nil {
@@ -318,6 +331,7 @@ func RenderAuthoringSession(session AuthoringSession, paths AuthoringSessionPath
 	return output.String(), nil
 }
 
+// ParseAuthoringSession parses the corresponding package data.
 func ParseAuthoringSession(content string) (AuthoringSession, error) {
 	metadata, err := parseTicketFrontmatter(content)
 	if err != nil {

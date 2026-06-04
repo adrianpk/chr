@@ -6,33 +6,41 @@ import (
 	"os"
 )
 
+// ExecutionArtifactDriftStatus defines a package boundary type.
 type ExecutionArtifactDriftStatus string
 
 const (
-	ExecutionArtifactDriftStatusOK      ExecutionArtifactDriftStatus = "ok"
+	// ExecutionArtifactDriftStatusOK defines a package boundary constant.
+	ExecutionArtifactDriftStatusOK ExecutionArtifactDriftStatus = "ok"
+	// ExecutionArtifactDriftStatusMissing defines a package boundary constant.
 	ExecutionArtifactDriftStatusMissing ExecutionArtifactDriftStatus = "missing_artifacts"
 )
 
+// ExecutionArtifactDriftDiagnostic describes a package boundary value.
 type ExecutionArtifactDriftDiagnostic struct {
 	Execution ExecutionRecord
 	Status    ExecutionArtifactDriftStatus
 	Artifacts []ExecutionArtifactPathDiagnostic
 }
 
+// ExecutionArtifactPathDiagnostic describes a package boundary value.
 type ExecutionArtifactPathDiagnostic struct {
 	Name   string
 	Path   string
 	Exists bool
 }
 
+// ExecutionArtifactDriftService describes a package boundary value.
 type ExecutionArtifactDriftService struct {
 	repository ExecutionRepository
 }
 
+// NewExecutionArtifactDriftService constructs the corresponding package service or value.
 func NewExecutionArtifactDriftService(repository ExecutionRepository) ExecutionArtifactDriftService {
 	return ExecutionArtifactDriftService{repository: repository}
 }
 
+// ListDiagnostics lists the requested data.
 func (s ExecutionArtifactDriftService) ListDiagnostics(
 	ctx context.Context,
 	projectID string,

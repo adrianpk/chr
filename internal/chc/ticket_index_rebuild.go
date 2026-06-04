@@ -6,21 +6,25 @@ import (
 	"time"
 )
 
+// TicketIndexRebuilder defines a package boundary interface.
 type TicketIndexRebuilder interface {
 	RebuildProjectTickets(ctx context.Context, opts RebuildProjectTicketsOptions) (RebuildProjectTicketsResult, error)
 }
 
+// RebuildProjectTicketsOptions describes a package boundary value.
 type RebuildProjectTicketsOptions struct {
 	ProjectID  string
 	ProjectDir string
 	IndexedAt  time.Time
 }
 
+// RebuildProjectTicketsResult describes a package boundary value.
 type RebuildProjectTicketsResult struct {
 	IndexedTickets int
 	ParseErrors    []TicketIndexRebuildParseError
 }
 
+// TicketIndexRebuildParseError describes a package boundary value.
 type TicketIndexRebuildParseError struct {
 	Path         string
 	RelativePath string
@@ -34,8 +38,10 @@ type ticketIndexRebuilder struct {
 	now        func() time.Time
 }
 
+// TicketIndexRebuilderOption defines a package boundary type.
 type TicketIndexRebuilderOption func(*ticketIndexRebuilder)
 
+// NewTicketIndexRebuilder constructs the corresponding package service or value.
 func NewTicketIndexRebuilder(index TicketIndex, opts ...TicketIndexRebuilderOption) TicketIndexRebuilder {
 	rebuilder := &ticketIndexRebuilder{
 		discoverer: NewTicketFileDiscoverer(),
@@ -51,6 +57,7 @@ func NewTicketIndexRebuilder(index TicketIndex, opts ...TicketIndexRebuilderOpti
 	return rebuilder
 }
 
+// WithTicketIndexRebuilderDiscoverer executes the corresponding package operation.
 func WithTicketIndexRebuilderDiscoverer(discoverer TicketFileDiscoverer) TicketIndexRebuilderOption {
 	return func(rebuilder *ticketIndexRebuilder) {
 		if discoverer != nil {
@@ -59,6 +66,7 @@ func WithTicketIndexRebuilderDiscoverer(discoverer TicketFileDiscoverer) TicketI
 	}
 }
 
+// WithTicketIndexRebuilderParser executes the corresponding package operation.
 func WithTicketIndexRebuilderParser(parser TicketParser) TicketIndexRebuilderOption {
 	return func(rebuilder *ticketIndexRebuilder) {
 		if parser != nil {
@@ -67,6 +75,7 @@ func WithTicketIndexRebuilderParser(parser TicketParser) TicketIndexRebuilderOpt
 	}
 }
 
+// WithTicketIndexRebuilderClock executes the corresponding package operation.
 func WithTicketIndexRebuilderClock(now func() time.Time) TicketIndexRebuilderOption {
 	return func(rebuilder *ticketIndexRebuilder) {
 		if now != nil {
@@ -75,6 +84,7 @@ func WithTicketIndexRebuilderClock(now func() time.Time) TicketIndexRebuilderOpt
 	}
 }
 
+// RebuildProjectTickets executes the corresponding package operation.
 func (r *ticketIndexRebuilder) RebuildProjectTickets(
 	ctx context.Context,
 	opts RebuildProjectTicketsOptions,

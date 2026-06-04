@@ -13,12 +13,15 @@ import (
 	"unicode"
 )
 
+// DefaultTicketKeyPrefix defines a package boundary constant.
 const DefaultTicketKeyPrefix = "CHC"
 
+// TicketRepository defines a package boundary interface.
 type TicketRepository interface {
 	CreateTicket(ctx context.Context, opts CreateTicketOptions) (CreateTicketResult, error)
 }
 
+// CreateTicketOptions describes a package boundary value.
 type CreateTicketOptions struct {
 	Title       string
 	Synopsis    string
@@ -35,11 +38,13 @@ type CreateTicketOptions struct {
 	Body        string
 }
 
+// CreateTicketResult describes a package boundary value.
 type CreateTicketResult struct {
 	Key  string
 	Path string
 }
 
+// TicketRepositoryOption defines a package boundary type.
 type TicketRepositoryOption func(*fileTicketRepository)
 
 type fileTicketRepository struct {
@@ -50,6 +55,7 @@ type fileTicketRepository struct {
 	nextKeyNumberFactory func(context.Context) (int, error)
 }
 
+// NewTicketRepository constructs the corresponding package service or value.
 func NewTicketRepository(projectDir string, opts ...TicketRepositoryOption) TicketRepository {
 	repository := &fileTicketRepository{
 		projectDir: projectDir,
@@ -65,6 +71,7 @@ func NewTicketRepository(projectDir string, opts ...TicketRepositoryOption) Tick
 	return repository
 }
 
+// WithTicketRepositoryKeyPrefix executes the corresponding package operation.
 func WithTicketRepositoryKeyPrefix(keyPrefix string) TicketRepositoryOption {
 	return func(repository *fileTicketRepository) {
 		if keyPrefix != "" {
@@ -73,6 +80,7 @@ func WithTicketRepositoryKeyPrefix(keyPrefix string) TicketRepositoryOption {
 	}
 }
 
+// WithTicketRepositoryRenderer executes the corresponding package operation.
 func WithTicketRepositoryRenderer(renderer TicketRenderer) TicketRepositoryOption {
 	return func(repository *fileTicketRepository) {
 		if renderer != nil {
@@ -81,6 +89,7 @@ func WithTicketRepositoryRenderer(renderer TicketRenderer) TicketRepositoryOptio
 	}
 }
 
+// WithTicketRepositoryClock executes the corresponding package operation.
 func WithTicketRepositoryClock(now func() time.Time) TicketRepositoryOption {
 	return func(repository *fileTicketRepository) {
 		if now != nil {
@@ -89,6 +98,7 @@ func WithTicketRepositoryClock(now func() time.Time) TicketRepositoryOption {
 	}
 }
 
+// WithTicketRepositoryNextKeyNumber executes the corresponding package operation.
 func WithTicketRepositoryNextKeyNumber(nextNumber int) TicketRepositoryOption {
 	return func(repository *fileTicketRepository) {
 		if nextNumber > 0 {
@@ -99,6 +109,7 @@ func WithTicketRepositoryNextKeyNumber(nextNumber int) TicketRepositoryOption {
 	}
 }
 
+// CreateTicket executes the corresponding package operation.
 func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTicketOptions) (CreateTicketResult, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -159,6 +170,7 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 	return CreateTicketResult{Key: key, Path: path}, nil
 }
 
+// NextTicketKeyNumber executes the corresponding package operation.
 func NextTicketKeyNumber(ctx context.Context, projectDir, keyPrefix string) (int, error) {
 	repository := &fileTicketRepository{
 		projectDir: projectDir,

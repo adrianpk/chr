@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// AssistedAnswerCurationOptions describes a package boundary value.
 type AssistedAnswerCurationOptions struct {
 	Session          AuthoringSession
 	SessionPaths     AuthoringSessionPaths
@@ -20,6 +21,7 @@ type AssistedAnswerCurationOptions struct {
 	Now              func() time.Time
 }
 
+// AssistedAnswerCurationResult describes a package boundary value.
 type AssistedAnswerCurationResult struct {
 	Session      AuthoringSession
 	Request      AssistedModelRequest
@@ -29,6 +31,7 @@ type AssistedAnswerCurationResult struct {
 	ArtifactPath string
 }
 
+// AssistedCuratedAnswerSummary describes a package boundary value.
 type AssistedCuratedAnswerSummary struct {
 	SessionID     string
 	GeneratedAt   time.Time
@@ -38,6 +41,7 @@ type AssistedCuratedAnswerSummary struct {
 	OpenQuestions []AssistedCuratedOpenQuestion
 }
 
+// AssistedCuratedAnswer describes a package boundary value.
 type AssistedCuratedAnswer struct {
 	QuestionID string
 	Question   string
@@ -45,12 +49,14 @@ type AssistedCuratedAnswer struct {
 	AnsweredAt time.Time
 }
 
+// AssistedCuratedOpenQuestion describes a package boundary value.
 type AssistedCuratedOpenQuestion struct {
 	QuestionID string
 	Question   string
 	TurnIndex  int
 }
 
+// CurateAssistedAnswers executes the corresponding package operation.
 func CurateAssistedAnswers(
 	ctx context.Context,
 	opts AssistedAnswerCurationOptions,
@@ -91,6 +97,7 @@ func CurateAssistedAnswers(
 	}, nil
 }
 
+// BuildAssistedCuratedAnswerSummary executes the corresponding package operation.
 func BuildAssistedCuratedAnswerSummary(
 	sessionID string,
 	events []AssistedTranscriptEvent,
@@ -131,6 +138,7 @@ func BuildAssistedCuratedAnswerSummary(
 	}
 }
 
+// RenderAssistedCuratedAnswerSummary renders the corresponding package data.
 func RenderAssistedCuratedAnswerSummary(summary AssistedCuratedAnswerSummary) string {
 	var output bytes.Buffer
 

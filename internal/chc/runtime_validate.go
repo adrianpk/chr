@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// RuntimeValidationOptions describes a package boundary value.
 type RuntimeValidationOptions struct {
 	ProjectDir string
 	Config     RuntimeConfig
@@ -12,11 +13,13 @@ type RuntimeValidationOptions struct {
 	RunID      string
 }
 
+// RuntimeValidationResult describes a package boundary value.
 type RuntimeValidationResult struct {
 	Plan   RuntimePlan
 	Checks []RuntimeValidationCheck
 }
 
+// RuntimeValidationCheck describes a package boundary value.
 type RuntimeValidationCheck struct {
 	Name    string
 	Path    string
@@ -24,6 +27,7 @@ type RuntimeValidationCheck struct {
 	Message string
 }
 
+// ValidateRuntime validates the corresponding package boundary value.
 func ValidateRuntime(opts RuntimeValidationOptions) (RuntimeValidationResult, error) {
 	plan, err := PlanRuntime(RuntimePlanOptions(opts))
 	if err != nil {
@@ -42,6 +46,7 @@ func ValidateRuntime(opts RuntimeValidationOptions) (RuntimeValidationResult, er
 	}, nil
 }
 
+// RuntimeValidationPassed executes the corresponding package operation.
 func RuntimeValidationPassed(checks []RuntimeValidationCheck) bool {
 	for _, check := range checks {
 		if !check.OK {

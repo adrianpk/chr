@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// WorkspaceCaseSuggestion describes a package boundary value.
 type WorkspaceCaseSuggestion struct {
 	Slug        string
 	Name        string
@@ -15,12 +16,14 @@ type WorkspaceCaseSuggestion struct {
 	Score       int
 }
 
+// WorkspaceRelatedDocumentsResult describes a package boundary value.
 type WorkspaceRelatedDocumentsResult struct {
 	Node     WorkspaceNode
 	Related  []WorkspaceNode
 	Resolved bool
 }
 
+// WorkspaceIndexSearchResult describes a package boundary value.
 type WorkspaceIndexSearchResult struct {
 	Node                  WorkspaceNode
 	NodeID                string
@@ -29,6 +32,7 @@ type WorkspaceIndexSearchResult struct {
 	SemanticDigestStatus  WorkspaceSemanticDigestStatus
 }
 
+// ListCases lists the requested data.
 func (i WorkspaceIndex) ListCases() []WorkspaceCaseSuggestion {
 	cases := make([]WorkspaceCaseSuggestion, 0, len(i.CasesBySlug))
 
@@ -48,6 +52,7 @@ func (i WorkspaceIndex) ListCases() []WorkspaceCaseSuggestion {
 	return cases
 }
 
+// SuggestCases executes the corresponding package operation.
 func (i WorkspaceIndex) SuggestCases(query string) []WorkspaceCaseSuggestion {
 	query = normalizeWorkspaceQuery(query)
 	if query == "" {
@@ -77,6 +82,7 @@ func (i WorkspaceIndex) SuggestCases(query string) []WorkspaceCaseSuggestion {
 	return suggestions
 }
 
+// ResolvePath executes the corresponding package operation.
 func (i WorkspaceIndex) ResolvePath(path string) (WorkspaceNode, bool) {
 	nodeID, ok := i.NodesByPath[filepath.ToSlash(path)]
 	if !ok {
@@ -88,6 +94,7 @@ func (i WorkspaceIndex) ResolvePath(path string) (WorkspaceNode, bool) {
 	return node, ok
 }
 
+// RelatedDocuments executes the corresponding package operation.
 func (i WorkspaceIndex) RelatedDocuments(nodeID string) WorkspaceRelatedDocumentsResult {
 	node, ok := i.NodesByID[nodeID]
 	if !ok {
@@ -125,10 +132,12 @@ func (i WorkspaceIndex) RelatedDocuments(nodeID string) WorkspaceRelatedDocument
 	return result
 }
 
+// Search executes the corresponding package operation.
 func (i WorkspaceIndex) Search(query string, cache WorkspaceSemanticDigestCache) []WorkspaceIndexSearchResult {
 	return i.SearchWithSemanticDigestStates(query, cache, nil)
 }
 
+// SearchWithSemanticDigestStates executes the corresponding package operation.
 func (i WorkspaceIndex) SearchWithSemanticDigestStates(
 	query string,
 	cache WorkspaceSemanticDigestCache,

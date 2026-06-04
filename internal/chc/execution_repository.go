@@ -13,8 +13,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// ErrExecutionNotFound identifies a package boundary error.
 var ErrExecutionNotFound = errors.New("execution not found")
 
+// ExecutionRepository defines a package boundary interface.
 type ExecutionRepository interface {
 	CreateExecution(ctx context.Context, record ExecutionRecord) error
 	UpdateExecution(ctx context.Context, record ExecutionRecord) error
@@ -28,6 +30,7 @@ type sqliteExecutionRepository struct {
 	db *sql.DB
 }
 
+// NewExecutionRepository constructs the corresponding package service or value.
 func NewExecutionRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (ExecutionRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
@@ -52,6 +55,7 @@ func NewExecutionRepository(ctx context.Context, env UserEnvironment, assetsFS f
 	return repository, nil
 }
 
+// NewExecutionRepositoryFromDB constructs the corresponding package service or value.
 func NewExecutionRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ExecutionRepository, error) {
 	migrator := NewMigrator(assetsFS)
 
@@ -63,6 +67,7 @@ func NewExecutionRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.F
 	return &sqliteExecutionRepository{db: db}, nil
 }
 
+// CreateExecution executes the corresponding package operation.
 func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record ExecutionRecord) error {
 	err := ValidateExecutionRecord(record)
 	if err != nil {
@@ -96,6 +101,7 @@ func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record 
 	return nil
 }
 
+// UpdateExecution executes the corresponding package operation.
 func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record ExecutionRecord) error {
 	err := ValidateExecutionRecord(record)
 	if err != nil {
@@ -138,6 +144,7 @@ func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record 
 	return nil
 }
 
+// GetExecution executes the corresponding package operation.
 func (r *sqliteExecutionRepository) GetExecution(ctx context.Context, id string) (ExecutionRecord, error) {
 	row := r.db.QueryRowContext(ctx, selectExecutionSQL()+" WHERE id = ?", id)
 
@@ -153,6 +160,7 @@ func (r *sqliteExecutionRepository) GetExecution(ctx context.Context, id string)
 	return record, nil
 }
 
+// ListProjectExecutions lists the requested data.
 func (r *sqliteExecutionRepository) ListProjectExecutions(
 	ctx context.Context,
 	projectID string,
@@ -179,6 +187,7 @@ func (r *sqliteExecutionRepository) ListProjectExecutions(
 	return records, nil
 }
 
+// ListTicketExecutions lists the requested data.
 func (r *sqliteExecutionRepository) ListTicketExecutions(
 	ctx context.Context,
 	projectID, ticketKey string,
@@ -226,6 +235,7 @@ func scanExecutionRows(rows *sql.Rows) ([]ExecutionRecord, error) {
 	return records, nil
 }
 
+// Close executes the corresponding package operation.
 func (r *sqliteExecutionRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {

@@ -8,13 +8,17 @@ import (
 	"strings"
 )
 
+// ExecutionResultStatus defines a package boundary type.
 type ExecutionResultStatus string
 
 const (
+	// ExecutionResultStatusSucceeded defines a package boundary constant.
 	ExecutionResultStatusSucceeded ExecutionResultStatus = "succeeded"
-	ExecutionResultStatusFailed    ExecutionResultStatus = "failed"
+	// ExecutionResultStatusFailed defines a package boundary constant.
+	ExecutionResultStatusFailed ExecutionResultStatus = "failed"
 )
 
+// ExecutionResult describes a package boundary value.
 type ExecutionResult struct {
 	ExecutionID  string                       `json:"execution_id"`
 	TicketKey    string                       `json:"ticket_key"`
@@ -23,11 +27,13 @@ type ExecutionResult struct {
 	ChangedFiles []ExecutionResultChangedFile `json:"changed_files,omitempty"`
 }
 
+// ExecutionResultChangedFile describes a package boundary value.
 type ExecutionResultChangedFile struct {
 	Path    string `json:"path"`
 	Summary string `json:"summary,omitempty"`
 }
 
+// LoadExecutionResult loads the corresponding package data.
 func LoadExecutionResult(path string) (ExecutionResult, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -57,6 +63,7 @@ func LoadExecutionResult(path string) (ExecutionResult, error) {
 	return result, nil
 }
 
+// ValidateExecutionResult validates the corresponding package boundary value.
 func ValidateExecutionResult(result ExecutionResult) error {
 	if result.ExecutionID == "" {
 		return fmt.Errorf("execution result id is required")
@@ -93,6 +100,7 @@ func validateExecutionResultChangedFiles(changedFiles []ExecutionResultChangedFi
 	return nil
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s ExecutionResultStatus) Valid() bool {
 	switch s {
 	case ExecutionResultStatusSucceeded,

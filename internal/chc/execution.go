@@ -5,16 +5,23 @@ import (
 	"time"
 )
 
+// ExecutionStatus defines a package boundary type.
 type ExecutionStatus string
 
 const (
-	ExecutionStatusPending   ExecutionStatus = "pending"
-	ExecutionStatusRunning   ExecutionStatus = "running"
+	// ExecutionStatusPending defines a package boundary constant.
+	ExecutionStatusPending ExecutionStatus = "pending"
+	// ExecutionStatusRunning defines a package boundary constant.
+	ExecutionStatusRunning ExecutionStatus = "running"
+	// ExecutionStatusSucceeded defines a package boundary constant.
 	ExecutionStatusSucceeded ExecutionStatus = "succeeded"
-	ExecutionStatusFailed    ExecutionStatus = "failed"
-	ExecutionStatusBlocked   ExecutionStatus = "blocked"
+	// ExecutionStatusFailed defines a package boundary constant.
+	ExecutionStatusFailed ExecutionStatus = "failed"
+	// ExecutionStatusBlocked defines a package boundary constant.
+	ExecutionStatusBlocked ExecutionStatus = "blocked"
 )
 
+// ExecutionRecord describes a package boundary value.
 type ExecutionRecord struct {
 	ID            string
 	ProjectID     string
@@ -30,6 +37,7 @@ type ExecutionRecord struct {
 	UpdatedAt     time.Time
 }
 
+// ExecutionRuntimeRef describes a package boundary value.
 type ExecutionRuntimeRef struct {
 	Image             string
 	DockerfilePath    string
@@ -37,6 +45,7 @@ type ExecutionRuntimeRef struct {
 	ValidationCommand string
 }
 
+// ExecutionArtifacts describes a package boundary value.
 type ExecutionArtifacts struct {
 	RunDir         string
 	ResultPath     string
@@ -44,6 +53,7 @@ type ExecutionArtifacts struct {
 	ValidationPath string
 }
 
+// ExecutionRecordFromRuntimePlan executes the corresponding package operation.
 func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan RuntimePlan) ExecutionRecord {
 	record.Runtime = ExecutionRuntimeRef{
 		Image:             plan.Image,
@@ -61,6 +71,7 @@ func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan RuntimePlan) Ex
 	return record
 }
 
+// ValidateExecutionRecord validates the corresponding package boundary value.
 func ValidateExecutionRecord(record ExecutionRecord) error {
 	if record.ID == "" {
 		return fmt.Errorf("execution id is required")
@@ -93,6 +104,7 @@ func ValidateExecutionRecord(record ExecutionRecord) error {
 	return nil
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s ExecutionStatus) Valid() bool {
 	switch s {
 	case ExecutionStatusPending,

@@ -9,10 +9,12 @@ import (
 	"time"
 )
 
+// TicketReviewMetadataUpdater defines a package boundary interface.
 type TicketReviewMetadataUpdater interface {
 	UpdateReviewMetadata(ctx context.Context, opts UpdateTicketReviewMetadataOptions) error
 }
 
+// UpdateTicketReviewMetadataOptions describes a package boundary value.
 type UpdateTicketReviewMetadataOptions struct {
 	Path      string
 	Branch    string
@@ -22,10 +24,12 @@ type UpdateTicketReviewMetadataOptions struct {
 
 type ticketReviewMetadataUpdater struct{}
 
+// NewTicketReviewMetadataUpdater constructs the corresponding package service or value.
 func NewTicketReviewMetadataUpdater() TicketReviewMetadataUpdater {
 	return &ticketReviewMetadataUpdater{}
 }
 
+// UpdateReviewMetadata executes the corresponding package operation.
 func (u *ticketReviewMetadataUpdater) UpdateReviewMetadata(
 	ctx context.Context,
 	opts UpdateTicketReviewMetadataOptions,

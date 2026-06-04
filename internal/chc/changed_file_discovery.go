@@ -9,20 +9,24 @@ import (
 	"strings"
 )
 
+// ChangedFileDiscoverer defines a package boundary interface.
 type ChangedFileDiscoverer interface {
 	DiscoverChangedFiles(ctx context.Context, opts DiscoverChangedFilesOptions) ([]ExecutionResultChangedFile, error)
 }
 
+// DiscoverChangedFilesOptions describes a package boundary value.
 type DiscoverChangedFilesOptions struct {
 	ProjectDir string
 }
 
 type gitChangedFileDiscoverer struct{}
 
+// NewChangedFileDiscoverer constructs the corresponding package service or value.
 func NewChangedFileDiscoverer() ChangedFileDiscoverer {
 	return &gitChangedFileDiscoverer{}
 }
 
+// DiscoverChangedFiles executes the corresponding package operation.
 func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(
 	ctx context.Context,
 	opts DiscoverChangedFilesOptions,

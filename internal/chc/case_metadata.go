@@ -11,10 +11,13 @@ import (
 	"unicode"
 )
 
+// CaseMetadataSchemaVersion defines a package boundary constant.
 const CaseMetadataSchemaVersion = 1
 
+// ErrCaseMetadataNotFound identifies a package boundary error.
 var ErrCaseMetadataNotFound = errors.New("case metadata not found")
 
+// CaseMetadata describes a package boundary value.
 type CaseMetadata struct {
 	SchemaVersion int
 	Slug          string
@@ -26,14 +29,17 @@ type CaseMetadata struct {
 	Exists        bool
 }
 
+// CaseMetadataService describes a package boundary value.
 type CaseMetadataService struct {
 	projectDir string
 }
 
+// NewCaseMetadataService constructs the corresponding package service or value.
 func NewCaseMetadataService(projectDir string) CaseMetadataService {
 	return CaseMetadataService{projectDir: projectDir}
 }
 
+// LoadAll loads the requested data.
 func (s CaseMetadataService) LoadAll() ([]CaseMetadata, error) {
 	root := CaseMetadataDirectory(s.projectDir)
 
@@ -72,6 +78,7 @@ func (s CaseMetadataService) LoadAll() ([]CaseMetadata, error) {
 	return cases, nil
 }
 
+// LoadPath loads the requested data.
 func (s CaseMetadataService) LoadPath(path string) (CaseMetadata, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -94,6 +101,7 @@ func (s CaseMetadataService) LoadPath(path string) (CaseMetadata, error) {
 	return metadata, nil
 }
 
+// Save persists the requested data.
 func (s CaseMetadataService) Save(metadata CaseMetadata) (CaseMetadata, error) {
 	metadata.SchemaVersion = CaseMetadataSchemaVersion
 
@@ -164,14 +172,17 @@ func validateCaseMetadataWriteHash(path string, metadata CaseMetadata) error {
 	return nil
 }
 
+// CaseMetadataDirectory executes the corresponding package operation.
 func CaseMetadataDirectory(projectDir string) string {
 	return UserPath(projectDir, "cases")
 }
 
+// CaseMetadataPath executes the corresponding package operation.
 func CaseMetadataPath(projectDir, slug string) string {
 	return filepath.Join(CaseMetadataDirectory(projectDir), slug+".md")
 }
 
+// ParseCaseMetadata parses the corresponding package data.
 func ParseCaseMetadata(content string) (CaseMetadata, error) {
 	frontmatter, body, err := splitMarkdownFrontmatter(content)
 	if err != nil {
@@ -200,6 +211,7 @@ func ParseCaseMetadata(content string) (CaseMetadata, error) {
 	return metadata, nil
 }
 
+// RenderCaseMetadata renders the corresponding package data.
 func RenderCaseMetadata(metadata CaseMetadata) string {
 	var output strings.Builder
 
@@ -220,6 +232,7 @@ func RenderCaseMetadata(metadata CaseMetadata) string {
 	return output.String()
 }
 
+// ValidateCaseMetadata validates the corresponding package boundary value.
 func ValidateCaseMetadata(metadata CaseMetadata) error {
 	if metadata.SchemaVersion != CaseMetadataSchemaVersion {
 		return fmt.Errorf("case metadata schema_version %d is unsupported", metadata.SchemaVersion)

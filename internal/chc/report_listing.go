@@ -10,13 +10,17 @@ import (
 	"strings"
 )
 
+// ReportKind defines a package boundary type.
 type ReportKind string
 
 const (
+	// ReportKindExecution defines a package boundary constant.
 	ReportKindExecution ReportKind = "execution"
-	ReportKindLoop      ReportKind = "loop"
+	// ReportKindLoop defines a package boundary constant.
+	ReportKindLoop ReportKind = "loop"
 )
 
+// ReportListFilter describes a package boundary value.
 type ReportListFilter struct {
 	Kind        ReportKind
 	TicketKey   string
@@ -25,6 +29,7 @@ type ReportListFilter struct {
 	Status      string
 }
 
+// ReportListEntry describes a package boundary value.
 type ReportListEntry struct {
 	Kind         ReportKind
 	Path         string
@@ -36,12 +41,15 @@ type ReportListEntry struct {
 	ResultPath   string
 }
 
+// ReportLister describes a package boundary value.
 type ReportLister struct{}
 
+// NewReportLister constructs the corresponding package service or value.
 func NewReportLister() ReportLister {
 	return ReportLister{}
 }
 
+// ListProjectReports lists the requested data.
 func (l ReportLister) ListProjectReports(
 	ctx context.Context,
 	projectDir string,

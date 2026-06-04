@@ -7,17 +7,25 @@ import (
 	"time"
 )
 
+// AssistedQuizLoopStopReason defines a package boundary type.
 type AssistedQuizLoopStopReason string
 
 const (
-	AssistedQuizLoopStopNone       AssistedQuizLoopStopReason = ""
-	AssistedQuizLoopStopCompleted  AssistedQuizLoopStopReason = "completed"
-	AssistedQuizLoopStopUser       AssistedQuizLoopStopReason = "user_stopped"
-	AssistedQuizLoopStopTurnLimit  AssistedQuizLoopStopReason = "turn_limit"
-	AssistedQuizLoopStopBlocked    AssistedQuizLoopStopReason = "blocked"
+	// AssistedQuizLoopStopNone defines a package boundary constant.
+	AssistedQuizLoopStopNone AssistedQuizLoopStopReason = ""
+	// AssistedQuizLoopStopCompleted defines a package boundary constant.
+	AssistedQuizLoopStopCompleted AssistedQuizLoopStopReason = "completed"
+	// AssistedQuizLoopStopUser defines a package boundary constant.
+	AssistedQuizLoopStopUser AssistedQuizLoopStopReason = "user_stopped"
+	// AssistedQuizLoopStopTurnLimit defines a package boundary constant.
+	AssistedQuizLoopStopTurnLimit AssistedQuizLoopStopReason = "turn_limit"
+	// AssistedQuizLoopStopBlocked defines a package boundary constant.
+	AssistedQuizLoopStopBlocked AssistedQuizLoopStopReason = "blocked"
+	// AssistedQuizLoopStopModelError defines a package boundary constant.
 	AssistedQuizLoopStopModelError AssistedQuizLoopStopReason = "model_error"
 )
 
+// AssistedQuizLoopOptions describes a package boundary value.
 type AssistedQuizLoopOptions struct {
 	Config           AssistedAuthoringConfig
 	Session          AuthoringSession
@@ -29,6 +37,7 @@ type AssistedQuizLoopOptions struct {
 	Now              func() time.Time
 }
 
+// AssistedQuizAskResult describes a package boundary value.
 type AssistedQuizAskResult struct {
 	Turn            AssistedAuthoringTurn
 	Request         AssistedModelRequest
@@ -37,6 +46,7 @@ type AssistedQuizAskResult struct {
 	StopReason      AssistedQuizLoopStopReason
 }
 
+// AssistedQuizAnswerOptions describes a package boundary value.
 type AssistedQuizAnswerOptions struct {
 	SessionID  string
 	TurnID     string
@@ -49,11 +59,13 @@ type AssistedQuizAnswerOptions struct {
 	Now        func() time.Time
 }
 
+// AssistedQuizAnswerResult describes a package boundary value.
 type AssistedQuizAnswerResult struct {
 	Turn       AssistedAuthoringTurn
 	StopReason AssistedQuizLoopStopReason
 }
 
+// AskNextAssistedQuizQuestion executes the corresponding package operation.
 func AskNextAssistedQuizQuestion(
 	ctx context.Context,
 	opts AssistedQuizLoopOptions,
@@ -101,6 +113,7 @@ func AskNextAssistedQuizQuestion(
 	}, nil
 }
 
+// AnswerAssistedQuizQuestion executes the corresponding package operation.
 func AnswerAssistedQuizQuestion(
 	ctx context.Context,
 	opts AssistedQuizAnswerOptions,

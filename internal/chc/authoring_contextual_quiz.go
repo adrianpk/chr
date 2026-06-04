@@ -13,11 +13,14 @@ import (
 )
 
 const (
+	// AuthoringQuizGenerationStrategyDeep defines a package boundary constant.
 	AuthoringQuizGenerationStrategyDeep = "deep"
 
+	// AuthoringQuizActionGeneration defines a package boundary constant.
 	AuthoringQuizActionGeneration = "authoring_quiz_generation"
 )
 
+// ContextualQuizGenerationOptions describes a package boundary value.
 type ContextualQuizGenerationOptions struct {
 	ProjectDir    string
 	Session       AuthoringSession
@@ -28,6 +31,7 @@ type ContextualQuizGenerationOptions struct {
 	Provider      AuthoringQuizQuestionProvider
 }
 
+// ContextualQuizGenerationPlan describes a package boundary value.
 type ContextualQuizGenerationPlan struct {
 	Session                AuthoringSession
 	Layout                 AuthoringArtifactLayout
@@ -39,6 +43,7 @@ type ContextualQuizGenerationPlan struct {
 	GeneratedQuestionCount int
 }
 
+// AuthoringQuizQuestionProvider defines a package boundary interface.
 type AuthoringQuizQuestionProvider interface {
 	GenerateAuthoringQuizQuestions(
 		ctx context.Context,
@@ -46,6 +51,7 @@ type AuthoringQuizQuestionProvider interface {
 	) (AuthoringQuizGenerationResult, error)
 }
 
+// AuthoringQuizGenerationRequest describes a package boundary value.
 type AuthoringQuizGenerationRequest struct {
 	ID              string
 	Action          string
@@ -60,6 +66,7 @@ type AuthoringQuizGenerationRequest struct {
 	CreatedAt       time.Time
 }
 
+// AuthoringQuizContextSection describes a package boundary value.
 type AuthoringQuizContextSection struct {
 	Name      string
 	Layer     string
@@ -67,10 +74,12 @@ type AuthoringQuizContextSection struct {
 	Content   string
 }
 
+// AuthoringQuizOutputContract describes a package boundary value.
 type AuthoringQuizOutputContract struct {
 	RequiredFields []string
 }
 
+// AuthoringQuizGenerationResult describes a package boundary value.
 type AuthoringQuizGenerationResult struct {
 	Provider  string
 	Strategy  string
@@ -78,6 +87,7 @@ type AuthoringQuizGenerationResult struct {
 	RawText   string
 }
 
+// AuthoringQuizQuestion describes a package boundary value.
 type AuthoringQuizQuestion struct {
 	ID                    string
 	Text                  string
@@ -86,17 +96,20 @@ type AuthoringQuizQuestion struct {
 	CompletionRecommended bool
 }
 
+// FakeAuthoringQuizQuestionProvider describes a package boundary value.
 type FakeAuthoringQuizQuestionProvider struct {
 	Result   AuthoringQuizGenerationResult
 	Requests []AuthoringQuizGenerationRequest
 	Err      error
 }
 
+// CodexAuthoringQuizQuestionProvider describes a package boundary value.
 type CodexAuthoringQuizQuestionProvider struct {
 	Program string
 	Runner  AgentRunner
 }
 
+// PlanContextualQuizGeneration executes the corresponding package operation.
 func PlanContextualQuizGeneration(
 	ctx context.Context,
 	opts ContextualQuizGenerationOptions,
@@ -141,6 +154,7 @@ func PlanContextualQuizGeneration(
 	}, nil
 }
 
+// WriteContextualQuiz executes the corresponding package operation.
 func WriteContextualQuiz(plan ContextualQuizGenerationPlan) error {
 	if plan.Layout.Collision.Exists && !plan.Layout.Collision.Allowed {
 		return fmt.Errorf("authoring quiz artifact already exists: %s", plan.Layout.FullPath)
@@ -159,6 +173,7 @@ func WriteContextualQuiz(plan ContextualQuizGenerationPlan) error {
 	return nil
 }
 
+// NewAuthoringQuizGenerationRequest constructs the corresponding package service or value.
 func NewAuthoringQuizGenerationRequest(
 	ctx context.Context,
 	projectDir string,
@@ -194,6 +209,7 @@ func NewAuthoringQuizGenerationRequest(
 	}, nil
 }
 
+// LoadAuthoringQuizContextSections loads the corresponding package data.
 func LoadAuthoringQuizContextSections(
 	ctx context.Context,
 	projectDir string,
@@ -229,6 +245,7 @@ func LoadAuthoringQuizContextSections(
 	return sections, nil
 }
 
+// RenderContextualQuizMarkdown renders the corresponding package data.
 func RenderContextualQuizMarkdown(
 	session AuthoringSession,
 	artifact AuthoringArtifactRef,
@@ -268,6 +285,7 @@ func RenderContextualQuizMarkdown(
 	return output.String()
 }
 
+// ValidateAuthoringQuizGenerationResult validates the corresponding package boundary value.
 func ValidateAuthoringQuizGenerationResult(result AuthoringQuizGenerationResult) error {
 	if strings.TrimSpace(result.Provider) == "" {
 		return fmt.Errorf("authoring quiz provider is required")
@@ -291,6 +309,7 @@ func ValidateAuthoringQuizGenerationResult(result AuthoringQuizGenerationResult)
 	return nil
 }
 
+// GenerateAuthoringQuizQuestions generates the requested artifact.
 func (p *FakeAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 	ctx context.Context,
 	request AuthoringQuizGenerationRequest,
@@ -308,6 +327,7 @@ func (p *FakeAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 	return p.Result, nil
 }
 
+// GenerateAuthoringQuizQuestions generates the requested artifact.
 func (p CodexAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
 	ctx context.Context,
 	request AuthoringQuizGenerationRequest,
@@ -373,6 +393,7 @@ func (p CodexAuthoringQuizQuestionProvider) agentRunner() AgentRunner {
 	return CodexAgentRunner{}
 }
 
+// ValidateAuthoringQuizGenerationRequest validates the corresponding package boundary value.
 func ValidateAuthoringQuizGenerationRequest(request AuthoringQuizGenerationRequest) error {
 	required := []struct {
 		name  string
@@ -420,6 +441,7 @@ func validateAuthoringQuizGenerationRequestShape(request AuthoringQuizGeneration
 	return nil
 }
 
+// ParseAuthoringQuizGenerationResult parses the corresponding package data.
 func ParseAuthoringQuizGenerationResult(output []byte) (AuthoringQuizGenerationResult, error) {
 	var payload struct {
 		Questions []struct {

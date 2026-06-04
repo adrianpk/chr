@@ -8,16 +8,20 @@ import (
 	"strings"
 )
 
+// GateTraceabilityMode defines a package boundary type.
 type GateTraceabilityMode string
 
 const (
+	// GateTraceabilityModeAgentOnly defines a package boundary constant.
 	GateTraceabilityModeAgentOnly GateTraceabilityMode = "agent_only"
 )
 
+// GateConfig describes a package boundary value.
 type GateConfig struct {
 	DevMain GateDevMainConfig
 }
 
+// GateDevMainConfig describes a package boundary value.
 type GateDevMainConfig struct {
 	ValidationCommand string
 	Traceability      GateTraceabilityConfig
@@ -25,17 +29,20 @@ type GateDevMainConfig struct {
 	HighRiskPaths     []string
 }
 
+// GateTraceabilityConfig describes a package boundary value.
 type GateTraceabilityConfig struct {
 	Mode                       GateTraceabilityMode
 	FailOnMissingAgentEvidence bool
 	WarnOnManualChanges        bool
 }
 
+// GateManualChangesConfig describes a package boundary value.
 type GateManualChangesConfig struct {
 	List                bool
 	WarnOnHighRiskPaths bool
 }
 
+// DefaultGateConfig executes the corresponding package operation.
 func DefaultGateConfig() GateConfig {
 	return GateConfig{
 		DevMain: GateDevMainConfig{
@@ -51,6 +58,7 @@ func DefaultGateConfig() GateConfig {
 	}
 }
 
+// LoadGateConfig loads the corresponding package data.
 func LoadGateConfig(projectDir string) (GateConfig, error) {
 	config := DefaultGateConfig()
 	path := UserPath(projectDir, "config", "gates.yml")

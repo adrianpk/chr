@@ -9,10 +9,13 @@ import (
 	"strings"
 )
 
+// ProjectMetadataSchemaVersion defines a package boundary constant.
 const ProjectMetadataSchemaVersion = 1
 
+// ErrProjectMetadataNotFound identifies a package boundary error.
 var ErrProjectMetadataNotFound = errors.New("project metadata not found")
 
+// ProjectMetadata describes a package boundary value.
 type ProjectMetadata struct {
 	SchemaVersion int
 	Name          string
@@ -23,14 +26,17 @@ type ProjectMetadata struct {
 	Exists        bool
 }
 
+// ProjectMetadataService describes a package boundary value.
 type ProjectMetadataService struct {
 	projectDir string
 }
 
+// NewProjectMetadataService constructs the corresponding package service or value.
 func NewProjectMetadataService(projectDir string) ProjectMetadataService {
 	return ProjectMetadataService{projectDir: projectDir}
 }
 
+// Load loads the requested data.
 func (s ProjectMetadataService) Load() (ProjectMetadata, error) {
 	path := ProjectMetadataPath(s.projectDir)
 
@@ -55,6 +61,7 @@ func (s ProjectMetadataService) Load() (ProjectMetadata, error) {
 	return metadata, nil
 }
 
+// Save persists the requested data.
 func (s ProjectMetadataService) Save(metadata ProjectMetadata) (ProjectMetadata, error) {
 	metadata.SchemaVersion = ProjectMetadataSchemaVersion
 
@@ -106,10 +113,12 @@ func validateProjectMetadataWriteHash(path string, metadata ProjectMetadata) err
 	return nil
 }
 
+// ProjectMetadataPath executes the corresponding package operation.
 func ProjectMetadataPath(projectDir string) string {
 	return UserPath(projectDir, "project.md")
 }
 
+// ParseProjectMetadata parses the corresponding package data.
 func ParseProjectMetadata(content string) (ProjectMetadata, error) {
 	frontmatter, body, err := splitMarkdownFrontmatter(content)
 	if err != nil {
@@ -138,6 +147,7 @@ func ParseProjectMetadata(content string) (ProjectMetadata, error) {
 	return metadata, nil
 }
 
+// RenderProjectMetadata renders the corresponding package data.
 func RenderProjectMetadata(metadata ProjectMetadata) string {
 	var output strings.Builder
 
@@ -158,6 +168,7 @@ func RenderProjectMetadata(metadata ProjectMetadata) string {
 	return output.String()
 }
 
+// ValidateProjectMetadata validates the corresponding package boundary value.
 func ValidateProjectMetadata(metadata ProjectMetadata) error {
 	if metadata.SchemaVersion != ProjectMetadataSchemaVersion {
 		return fmt.Errorf("project metadata schema_version %d is unsupported", metadata.SchemaVersion)

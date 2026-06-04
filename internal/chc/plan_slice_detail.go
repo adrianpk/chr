@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// GeneratedPlanSliceDetail describes a package boundary value.
 type GeneratedPlanSliceDetail struct {
 	Scope                  QuizScope
 	SliceID                string
@@ -23,12 +24,14 @@ type GeneratedPlanSliceDetail struct {
 	CreatedAt              time.Time
 }
 
+// GeneratedPlanSliceTask describes a package boundary value.
 type GeneratedPlanSliceTask struct {
 	ID         string
 	Summary    string
 	CommitHint string
 }
 
+// GeneratedPlanSliceTicketMetadata describes a package boundary value.
 type GeneratedPlanSliceTicketMetadata struct {
 	Title    string
 	Synopsis string
@@ -38,16 +41,19 @@ type GeneratedPlanSliceTicketMetadata struct {
 	Tags     []string
 }
 
+// GeneratedPlanSliceBranchMetadata describes a package boundary value.
 type GeneratedPlanSliceBranchMetadata struct {
 	BranchName string
 }
 
+// HasContent executes the corresponding package operation.
 func (d GeneratedPlanSliceDetail) HasContent() bool {
 	return strings.TrimSpace(d.SliceID) != "" ||
 		strings.TrimSpace(d.ShortName) != "" ||
 		len(d.Tasks) > 0
 }
 
+// ValidateGeneratedPlanSliceDetailContent validates the corresponding package boundary value.
 func ValidateGeneratedPlanSliceDetailContent(detail GeneratedPlanSliceDetail) error {
 	if err := ValidateQuizScope(detail.Scope); err != nil {
 		return err
@@ -117,6 +123,7 @@ func validateGeneratedPlanSliceDetailLists(detail GeneratedPlanSliceDetail) erro
 	return nil
 }
 
+// ValidateGeneratedPlanSliceDetailAgainstOutline validates the corresponding package boundary value.
 func ValidateGeneratedPlanSliceDetailAgainstOutline(
 	detail GeneratedPlanSliceDetail,
 	outline GeneratedPlanOutline,

@@ -2,6 +2,7 @@ package chc
 
 import "fmt"
 
+// ValidateNotificationConfig validates the corresponding package boundary value.
 func ValidateNotificationConfig(config NotificationConfig) error {
 	if !config.Telegram.Enabled {
 		return nil

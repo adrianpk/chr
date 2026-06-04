@@ -8,8 +8,10 @@ import (
 	"unicode"
 )
 
+// ActiveOperatorIDEnv defines a package boundary constant.
 const ActiveOperatorIDEnv = "CHC_OPERATOR_ID"
 
+// ProjectUserspace describes a package boundary value.
 type ProjectUserspace struct {
 	ProjectDir  string
 	OperatorID  string
@@ -17,15 +19,18 @@ type ProjectUserspace struct {
 	RelativeDir string
 }
 
+// ResolveProjectUserspaceOptions describes a package boundary value.
 type ResolveProjectUserspaceOptions struct {
 	ProjectDir string
 	LookupEnv  func(string) string
 }
 
+// EnsureProjectUserspaceOptions describes a package boundary value.
 type EnsureProjectUserspaceOptions struct {
 	ProjectDir string
 }
 
+// ResolveProjectUserspace executes the corresponding package operation.
 func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUserspace, error) {
 	projectDir, err := resolveProjectDir(opts.ProjectDir)
 	if err != nil {
@@ -56,6 +61,7 @@ func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUsersp
 	}, nil
 }
 
+// EnsureProjectUserspace executes the corresponding package operation.
 func EnsureProjectUserspace(ctx context.Context, opts EnsureProjectUserspaceOptions) (ProjectUserspace, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -77,6 +83,7 @@ func EnsureProjectUserspace(ctx context.Context, opts EnsureProjectUserspaceOpti
 	return userspace, nil
 }
 
+// IsValidOperatorID executes the corresponding package operation.
 func IsValidOperatorID(value string) bool {
 	value = strings.TrimSpace(value)
 	if value == "" || value == "." || value == ".." {

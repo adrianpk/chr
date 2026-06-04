@@ -2,6 +2,7 @@ package chc
 
 import "time"
 
+// Project describes a package boundary value.
 type Project struct {
 	ID            string
 	Name          string

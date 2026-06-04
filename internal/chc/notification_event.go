@@ -5,47 +5,73 @@ import (
 	"time"
 )
 
+// NotificationEventType defines a package boundary type.
 type NotificationEventType string
 
 const (
-	NotificationEventTicketBlocked    NotificationEventType = "ticket_blocked"
+	// NotificationEventTicketBlocked defines a package boundary constant.
+	NotificationEventTicketBlocked NotificationEventType = "ticket_blocked"
+	// NotificationEventValidationFailed defines a package boundary constant.
 	NotificationEventValidationFailed NotificationEventType = "validation_failed"
-	NotificationEventLoopFinished     NotificationEventType = "loop_finished"
-	NotificationEventLoopBlocked      NotificationEventType = "loop_blocked"
-	NotificationEventLoopFailed       NotificationEventType = "loop_failed"
-	NotificationEventDaemonAttention  NotificationEventType = "daemon_attention"
-	NotificationEventRemoteCommand    NotificationEventType = "remote_command"
-	NotificationEventManualTest       NotificationEventType = "manual_test"
+	// NotificationEventLoopFinished defines a package boundary constant.
+	NotificationEventLoopFinished NotificationEventType = "loop_finished"
+	// NotificationEventLoopBlocked defines a package boundary constant.
+	NotificationEventLoopBlocked NotificationEventType = "loop_blocked"
+	// NotificationEventLoopFailed defines a package boundary constant.
+	NotificationEventLoopFailed NotificationEventType = "loop_failed"
+	// NotificationEventDaemonAttention defines a package boundary constant.
+	NotificationEventDaemonAttention NotificationEventType = "daemon_attention"
+	// NotificationEventRemoteCommand defines a package boundary constant.
+	NotificationEventRemoteCommand NotificationEventType = "remote_command"
+	// NotificationEventManualTest defines a package boundary constant.
+	NotificationEventManualTest NotificationEventType = "manual_test"
 )
 
+// NotificationSeverity defines a package boundary type.
 type NotificationSeverity string
 
 const (
-	NotificationSeverityInfo     NotificationSeverity = "info"
-	NotificationSeverityWarning  NotificationSeverity = "warning"
-	NotificationSeverityError    NotificationSeverity = "error"
+	// NotificationSeverityInfo defines a package boundary constant.
+	NotificationSeverityInfo NotificationSeverity = "info"
+	// NotificationSeverityWarning defines a package boundary constant.
+	NotificationSeverityWarning NotificationSeverity = "warning"
+	// NotificationSeverityError defines a package boundary constant.
+	NotificationSeverityError NotificationSeverity = "error"
+	// NotificationSeverityCritical defines a package boundary constant.
 	NotificationSeverityCritical NotificationSeverity = "critical"
 )
 
+// NotificationStatus defines a package boundary type.
 type NotificationStatus string
 
 const (
-	NotificationStatusPending   NotificationStatus = "pending"
-	NotificationStatusSkipped   NotificationStatus = "skipped"
+	// NotificationStatusPending defines a package boundary constant.
+	NotificationStatusPending NotificationStatus = "pending"
+	// NotificationStatusSkipped defines a package boundary constant.
+	NotificationStatusSkipped NotificationStatus = "skipped"
+	// NotificationStatusDelivered defines a package boundary constant.
 	NotificationStatusDelivered NotificationStatus = "delivered"
-	NotificationStatusFailed    NotificationStatus = "failed"
+	// NotificationStatusFailed defines a package boundary constant.
+	NotificationStatusFailed NotificationStatus = "failed"
 )
 
+// NotificationSource defines a package boundary type.
 type NotificationSource string
 
 const (
+	// NotificationSourceTicketExecution defines a package boundary constant.
 	NotificationSourceTicketExecution NotificationSource = "ticket_execution"
-	NotificationSourceTicketLoop      NotificationSource = "ticket_loop"
-	NotificationSourceDaemon          NotificationSource = "daemon"
-	NotificationSourceRemoteCommand   NotificationSource = "remote_command"
-	NotificationSourceManual          NotificationSource = "manual"
+	// NotificationSourceTicketLoop defines a package boundary constant.
+	NotificationSourceTicketLoop NotificationSource = "ticket_loop"
+	// NotificationSourceDaemon defines a package boundary constant.
+	NotificationSourceDaemon NotificationSource = "daemon"
+	// NotificationSourceRemoteCommand defines a package boundary constant.
+	NotificationSourceRemoteCommand NotificationSource = "remote_command"
+	// NotificationSourceManual defines a package boundary constant.
+	NotificationSourceManual NotificationSource = "manual"
 )
 
+// NotificationEvent describes a package boundary value.
 type NotificationEvent struct {
 	ID            string
 	ProjectID     string
@@ -61,6 +87,7 @@ type NotificationEvent struct {
 	UpdatedAt     time.Time
 }
 
+// NotificationReferences describes a package boundary value.
 type NotificationReferences struct {
 	TicketKey   string
 	ExecutionID string
@@ -68,11 +95,13 @@ type NotificationReferences struct {
 	DaemonPID   int
 }
 
+// NotificationPayload describes a package boundary value.
 type NotificationPayload struct {
 	Summary string
 	Detail  string
 }
 
+// ValidateNotificationEvent validates the corresponding package boundary value.
 func ValidateNotificationEvent(event NotificationEvent) error {
 	if event.ID == "" {
 		return fmt.Errorf("notification event id is required")
@@ -111,6 +140,7 @@ func ValidateNotificationEvent(event NotificationEvent) error {
 	return validateNotificationTimes(event)
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (t NotificationEventType) Valid() bool {
 	switch t {
 	case NotificationEventTicketBlocked,
@@ -127,6 +157,7 @@ func (t NotificationEventType) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s NotificationSeverity) Valid() bool {
 	switch s {
 	case NotificationSeverityInfo,
@@ -139,6 +170,7 @@ func (s NotificationSeverity) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s NotificationStatus) Valid() bool {
 	switch s {
 	case NotificationStatusPending,
@@ -151,6 +183,7 @@ func (s NotificationStatus) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s NotificationSource) Valid() bool {
 	switch s {
 	case NotificationSourceTicketExecution,

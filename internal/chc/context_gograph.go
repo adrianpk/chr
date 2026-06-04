@@ -15,6 +15,7 @@ const (
 	defaultGoGraphTimeout    = 30 * time.Second
 )
 
+// GoGraphContextOptions describes a package boundary value.
 type GoGraphContextOptions struct {
 	ProjectDir  string
 	Terms       []string
@@ -25,6 +26,7 @@ type GoGraphContextOptions struct {
 	Runner      GoGraphCommandRunner
 }
 
+// GoGraphContext describes a package boundary value.
 type GoGraphContext struct {
 	ProjectDir string
 	Available  bool
@@ -36,6 +38,7 @@ type GoGraphContext struct {
 	Sources    []ContextSourceInventoryEntry
 }
 
+// GoGraphCommandResult describes a package boundary value.
 type GoGraphCommandResult struct {
 	Command  []string
 	Stdout   string
@@ -44,23 +47,28 @@ type GoGraphCommandResult struct {
 	Skipped  bool
 }
 
+// GoGraphQueryResult describes a package boundary value.
 type GoGraphQueryResult struct {
 	Name   string
 	Symbol string
 	Result GoGraphCommandResult
 }
 
+// GoGraphCommandRunner defines a package boundary interface.
 type GoGraphCommandRunner interface {
 	LookPath(file string) (string, error)
 	Run(ctx context.Context, dir, command string, args ...string) GoGraphCommandResult
 }
 
+// OSGoGraphCommandRunner describes a package boundary value.
 type OSGoGraphCommandRunner struct{}
 
+// LookPath executes the corresponding package operation.
 func (OSGoGraphCommandRunner) LookPath(file string) (string, error) {
 	return exec.LookPath(file)
 }
 
+// Run executes the configured operation.
 func (OSGoGraphCommandRunner) Run(
 	ctx context.Context,
 	dir string,
@@ -90,6 +98,7 @@ func (OSGoGraphCommandRunner) Run(
 	return result
 }
 
+// LoadGoGraphContext loads the corresponding package data.
 func LoadGoGraphContext(opts GoGraphContextOptions) (GoGraphContext, error) {
 	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
 	if err != nil {
@@ -134,6 +143,7 @@ func LoadGoGraphContext(opts GoGraphContextOptions) (GoGraphContext, error) {
 	}, nil
 }
 
+// RenderGoGraphContext renders the corresponding package data.
 func RenderGoGraphContext(ctx GoGraphContext) string {
 	var output strings.Builder
 

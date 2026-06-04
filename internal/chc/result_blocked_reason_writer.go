@@ -8,10 +8,12 @@ import (
 	"time"
 )
 
+// TicketResultBlockedReasonWriter defines a package boundary interface.
 type TicketResultBlockedReasonWriter interface {
 	WriteBlockedReason(ctx context.Context, opts WriteBlockedReasonOptions) error
 }
 
+// WriteBlockedReasonOptions describes a package boundary value.
 type WriteBlockedReasonOptions struct {
 	Application ResultApplication
 	CreatedAt   time.Time
@@ -19,10 +21,12 @@ type WriteBlockedReasonOptions struct {
 
 type ticketResultBlockedReasonWriter struct{}
 
+// NewTicketResultBlockedReasonWriter constructs the corresponding package service or value.
 func NewTicketResultBlockedReasonWriter() TicketResultBlockedReasonWriter {
 	return &ticketResultBlockedReasonWriter{}
 }
 
+// WriteBlockedReason writes the requested output.
 func (w *ticketResultBlockedReasonWriter) WriteBlockedReason(
 	ctx context.Context,
 	opts WriteBlockedReasonOptions,

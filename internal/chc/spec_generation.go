@@ -11,10 +11,12 @@ import (
 	"time"
 )
 
+// SpecDirectory defines a package boundary constant.
 const SpecDirectory = "specs"
 
 var generatedSpecChrysoCoordPathPattern = regexp.MustCompile(`\.chc(?:/[^\s\])"'` + "`" + `]+)?`)
 
+// GeneratedSpec describes a package boundary value.
 type GeneratedSpec struct {
 	Scope            QuizScope
 	Title            string
@@ -25,12 +27,14 @@ type GeneratedSpec struct {
 	CreatedAt        time.Time
 }
 
+// GeneratedSpecPaths describes a package boundary value.
 type GeneratedSpecPaths struct {
 	ScopeID      string
 	RelativePath string
 	Path         string
 }
 
+// GeneratedSpecLayout executes the corresponding package operation.
 func GeneratedSpecLayout(projectDir string, scope QuizScope) (GeneratedSpecPaths, error) {
 	err := ValidateQuizScope(scope)
 	if err != nil {
@@ -51,6 +55,7 @@ func GeneratedSpecLayout(projectDir string, scope QuizScope) (GeneratedSpecPaths
 	}, nil
 }
 
+// WriteGeneratedSpec executes the corresponding package operation.
 func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSpec) (GeneratedSpecPaths, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -82,6 +87,7 @@ func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSp
 	return paths, nil
 }
 
+// RenderGeneratedSpec renders the corresponding package data.
 func RenderGeneratedSpec(spec GeneratedSpec) string {
 	var output bytes.Buffer
 
@@ -119,6 +125,7 @@ func generatedSpecBodyWithoutDuplicateTitle(title, body string) string {
 	return body
 }
 
+// ValidateGeneratedSpec validates the corresponding package boundary value.
 func ValidateGeneratedSpec(spec GeneratedSpec) error {
 	if strings.TrimSpace(spec.Title) == "" {
 		return fmt.Errorf("generated spec title is required")
@@ -158,6 +165,7 @@ func validateGeneratedSpecChrysoCoordPathReferences(body string) error {
 	return nil
 }
 
+// NormalizeGeneratedSpecChrysoCoordPathReferences executes the corresponding package operation.
 func NormalizeGeneratedSpecChrysoCoordPathReferences(body string) string {
 	return generatedSpecChrysoCoordPathPattern.ReplaceAllStringFunc(body, func(match string) string {
 		path := strings.TrimRight(match, ".,;:")

@@ -8,27 +8,42 @@ import (
 )
 
 const (
+	// TicketMergePreflightBlockKindOperational defines a package boundary constant.
 	TicketMergePreflightBlockKindOperational = "operational"
-	TicketMergePreflightBlockKindRepair      = "repair"
+	// TicketMergePreflightBlockKindRepair defines a package boundary constant.
+	TicketMergePreflightBlockKindRepair = "repair"
 
-	TicketMergePreflightBlockMissingHandoff       = "missing_handoff"
-	TicketMergePreflightBlockProviderUnreadable   = "provider_unreadable"
-	TicketMergePreflightBlockPullRequestClosed    = "pull_request_closed"
-	TicketMergePreflightBlockWrongBase            = "wrong_base"
-	TicketMergePreflightBlockHeadMismatch         = "head_mismatch"
-	TicketMergePreflightBlockNotMergeable         = "not_mergeable"
-	TicketMergePreflightBlockRepairPending        = "serial_repair_pending"
+	// TicketMergePreflightBlockMissingHandoff defines a package boundary constant.
+	TicketMergePreflightBlockMissingHandoff = "missing_handoff"
+	// TicketMergePreflightBlockProviderUnreadable defines a package boundary constant.
+	TicketMergePreflightBlockProviderUnreadable = "provider_unreadable"
+	// TicketMergePreflightBlockPullRequestClosed defines a package boundary constant.
+	TicketMergePreflightBlockPullRequestClosed = "pull_request_closed"
+	// TicketMergePreflightBlockWrongBase defines a package boundary constant.
+	TicketMergePreflightBlockWrongBase = "wrong_base"
+	// TicketMergePreflightBlockHeadMismatch defines a package boundary constant.
+	TicketMergePreflightBlockHeadMismatch = "head_mismatch"
+	// TicketMergePreflightBlockNotMergeable defines a package boundary constant.
+	TicketMergePreflightBlockNotMergeable = "not_mergeable"
+	// TicketMergePreflightBlockRepairPending defines a package boundary constant.
+	TicketMergePreflightBlockRepairPending = "serial_repair_pending"
+	// TicketMergePreflightBlockInvalidMergeStrategy defines a package boundary constant.
 	TicketMergePreflightBlockInvalidMergeStrategy = "invalid_merge_strategy"
 
-	TicketMergeStrategyMerge  = "merge"
+	// TicketMergeStrategyMerge defines a package boundary constant.
+	TicketMergeStrategyMerge = "merge"
+	// TicketMergeStrategyRebase defines a package boundary constant.
 	TicketMergeStrategyRebase = "rebase"
+	// TicketMergeStrategySquash defines a package boundary constant.
 	TicketMergeStrategySquash = "squash"
 )
 
+// TicketMergePreflightRemoteReader defines a package boundary interface.
 type TicketMergePreflightRemoteReader interface {
 	Read(ctx context.Context, rawURL string) (RemoteReviewSnapshot, error)
 }
 
+// TicketMergePreflightOptions describes a package boundary value.
 type TicketMergePreflightOptions struct {
 	Ticket        IndexedTicket
 	Tickets       []IndexedTicket
@@ -37,6 +52,7 @@ type TicketMergePreflightOptions struct {
 	MergeStrategy string
 }
 
+// TicketMergePreflightResult describes a package boundary value.
 type TicketMergePreflightResult struct {
 	Allowed       bool
 	TicketKey     string
@@ -47,6 +63,7 @@ type TicketMergePreflightResult struct {
 	Blockers      []TicketMergePreflightBlocker
 }
 
+// TicketMergePreflightBlocker describes a package boundary value.
 type TicketMergePreflightBlocker struct {
 	Code   string
 	Kind   string
@@ -60,6 +77,7 @@ type ticketMergeRemoteMetadata struct {
 	Mergeable string
 }
 
+// RunTicketMergePreflight executes the corresponding package operation.
 func RunTicketMergePreflight(ctx context.Context, opts TicketMergePreflightOptions) (TicketMergePreflightResult, error) {
 	if err := ctx.Err(); err != nil {
 		return TicketMergePreflightResult{}, err

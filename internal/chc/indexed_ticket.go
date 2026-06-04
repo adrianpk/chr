@@ -2,6 +2,7 @@ package chc
 
 import "time"
 
+// IndexedTicket describes a package boundary value.
 type IndexedTicket struct {
 	ProjectID         string
 	Path              string

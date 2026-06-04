@@ -6,22 +6,31 @@ import (
 	"strings"
 )
 
+// ExecutionFailureKind defines a package boundary type.
 type ExecutionFailureKind string
 
 const (
-	ExecutionFailurePreflight     ExecutionFailureKind = "preflight"
-	ExecutionFailureRuntime       ExecutionFailureKind = "runtime"
-	ExecutionFailureHarness       ExecutionFailureKind = "harness"
-	ExecutionFailureWorker        ExecutionFailureKind = "worker"
-	ExecutionFailureValidation    ExecutionFailureKind = "validation"
+	// ExecutionFailurePreflight defines a package boundary constant.
+	ExecutionFailurePreflight ExecutionFailureKind = "preflight"
+	// ExecutionFailureRuntime defines a package boundary constant.
+	ExecutionFailureRuntime ExecutionFailureKind = "runtime"
+	// ExecutionFailureHarness defines a package boundary constant.
+	ExecutionFailureHarness ExecutionFailureKind = "harness"
+	// ExecutionFailureWorker defines a package boundary constant.
+	ExecutionFailureWorker ExecutionFailureKind = "worker"
+	// ExecutionFailureValidation defines a package boundary constant.
+	ExecutionFailureValidation ExecutionFailureKind = "validation"
+	// ExecutionFailureResultCapture defines a package boundary constant.
 	ExecutionFailureResultCapture ExecutionFailureKind = "result_capture"
 )
 
+// ExecutionFailure describes a package boundary value.
 type ExecutionFailure struct {
 	Kind ExecutionFailureKind
 	Err  error
 }
 
+// NewExecutionFailure constructs the corresponding package service or value.
 func NewExecutionFailure(kind ExecutionFailureKind, err error) ExecutionFailure {
 	return ExecutionFailure{
 		Kind: kind,
@@ -29,6 +38,7 @@ func NewExecutionFailure(kind ExecutionFailureKind, err error) ExecutionFailure 
 	}
 }
 
+// Error executes the corresponding package operation.
 func (e ExecutionFailure) Error() string {
 	if e.Err == nil {
 		return string(e.Kind)
@@ -37,10 +47,12 @@ func (e ExecutionFailure) Error() string {
 	return fmt.Sprintf("%s: %v", e.Kind, e.Err)
 }
 
+// Unwrap executes the corresponding package operation.
 func (e ExecutionFailure) Unwrap() error {
 	return e.Err
 }
 
+// ClassifyExecutionFailure executes the corresponding package operation.
 func ClassifyExecutionFailure(err error) ExecutionFailureKind {
 	var failure ExecutionFailure
 	if errors.As(err, &failure) {
@@ -50,6 +62,7 @@ func ClassifyExecutionFailure(err error) ExecutionFailureKind {
 	return ExecutionFailurePreflight
 }
 
+// ExecutionFailureKindFromReason executes the corresponding package operation.
 func ExecutionFailureKindFromReason(reason string) ExecutionFailureKind {
 	kind, _, found := strings.Cut(reason, ":")
 	if !found {

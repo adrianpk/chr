@@ -10,15 +10,21 @@ import (
 	"unicode"
 )
 
+// RemoteCommandIntent defines a package boundary type.
 type RemoteCommandIntent string
 
 const (
-	RemoteCommandIntentStatus        RemoteCommandIntent = "status"
-	RemoteCommandIntentLoopStart     RemoteCommandIntent = "loop_start"
-	RemoteCommandIntentTicketStart   RemoteCommandIntent = "ticket_start"
+	// RemoteCommandIntentStatus defines a package boundary constant.
+	RemoteCommandIntentStatus RemoteCommandIntent = "status"
+	// RemoteCommandIntentLoopStart defines a package boundary constant.
+	RemoteCommandIntentLoopStart RemoteCommandIntent = "loop_start"
+	// RemoteCommandIntentTicketStart defines a package boundary constant.
+	RemoteCommandIntentTicketStart RemoteCommandIntent = "ticket_start"
+	// RemoteCommandIntentTicketComment defines a package boundary constant.
 	RemoteCommandIntentTicketComment RemoteCommandIntent = "ticket_comment"
 )
 
+// RemoteCommandRequest describes a package boundary value.
 type RemoteCommandRequest struct {
 	ID              string
 	Sender          RemoteCommandSender
@@ -32,12 +38,14 @@ type RemoteCommandRequest struct {
 	CreatedAt       time.Time
 }
 
+// RemoteCommandSender describes a package boundary value.
 type RemoteCommandSender struct {
 	Channel     string
 	ExternalID  string
 	DisplayName string
 }
 
+// RemoteCommandLoopOptions describes a package boundary value.
 type RemoteCommandLoopOptions struct {
 	Statuses      []string
 	Priorities    []string
@@ -49,6 +57,7 @@ type RemoteCommandLoopOptions struct {
 	MaxIterations int
 }
 
+// RemoteCommandParseOptions describes a package boundary value.
 type RemoteCommandParseOptions struct {
 	Sender     RemoteCommandSender
 	Text       string
@@ -56,6 +65,7 @@ type RemoteCommandParseOptions struct {
 	CreatedAt  time.Time
 }
 
+// ParseRemoteCommandRequest parses the corresponding package data.
 func ParseRemoteCommandRequest(opts RemoteCommandParseOptions) (RemoteCommandRequest, error) {
 	request := RemoteCommandRequest{
 		Sender:     opts.Sender,
@@ -89,6 +99,7 @@ func ParseRemoteCommandRequest(opts RemoteCommandParseOptions) (RemoteCommandReq
 	return request, nil
 }
 
+// ValidateRemoteCommandRequest validates the corresponding package boundary value.
 func ValidateRemoteCommandRequest(request RemoteCommandRequest) error {
 	if request.ID == "" {
 		return fmt.Errorf("remote command id is required")
@@ -125,6 +136,7 @@ func ValidateRemoteCommandRequest(request RemoteCommandRequest) error {
 	return nil
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (i RemoteCommandIntent) Valid() bool {
 	switch i {
 	case RemoteCommandIntentStatus,

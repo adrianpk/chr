@@ -7,20 +7,26 @@ import (
 	"path/filepath"
 )
 
+// DaemonProjectStatus defines a package boundary type.
 type DaemonProjectStatus string
 
 const (
-	DaemonProjectStatusReady   DaemonProjectStatus = "ready"
+	// DaemonProjectStatusReady defines a package boundary constant.
+	DaemonProjectStatusReady DaemonProjectStatus = "ready"
+	// DaemonProjectStatusMissing defines a package boundary constant.
 	DaemonProjectStatusMissing DaemonProjectStatus = "missing"
+	// DaemonProjectStatusInvalid defines a package boundary constant.
 	DaemonProjectStatusInvalid DaemonProjectStatus = "invalid"
 )
 
+// DaemonProject describes a package boundary value.
 type DaemonProject struct {
 	Project Project
 	Status  DaemonProjectStatus
 	Reason  string
 }
 
+// LoadDaemonProjects loads the corresponding package data.
 func LoadDaemonProjects(ctx context.Context, registry ProjectRegistry) ([]DaemonProject, error) {
 	projects, err := registry.ListProjects(ctx)
 	if err != nil {

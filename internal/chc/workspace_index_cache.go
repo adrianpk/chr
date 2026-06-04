@@ -14,19 +14,25 @@ const workspaceIndexCacheSchemaVersion = 3
 
 var errInvalidWorkspaceIndexCache = errors.New("invalid workspace index cache")
 
+// WorkspaceIndexCacheStatus defines a package boundary type.
 type WorkspaceIndexCacheStatus string
 
 const (
-	WorkspaceIndexCacheMiss  WorkspaceIndexCacheStatus = "miss"
-	WorkspaceIndexCacheHit   WorkspaceIndexCacheStatus = "hit"
+	// WorkspaceIndexCacheMiss defines a package boundary constant.
+	WorkspaceIndexCacheMiss WorkspaceIndexCacheStatus = "miss"
+	// WorkspaceIndexCacheHit defines a package boundary constant.
+	WorkspaceIndexCacheHit WorkspaceIndexCacheStatus = "hit"
+	// WorkspaceIndexCacheStale defines a package boundary constant.
 	WorkspaceIndexCacheStale WorkspaceIndexCacheStatus = "stale"
 )
 
+// WorkspaceIndexCacheState describes a package boundary value.
 type WorkspaceIndexCacheState struct {
 	Status WorkspaceIndexCacheStatus
 	Path   string
 }
 
+// CachedWorkspaceIndexResult describes a package boundary value.
 type CachedWorkspaceIndexResult struct {
 	Graph WorkspaceGraph
 	Index WorkspaceIndex
@@ -39,6 +45,7 @@ type workspaceIndexCacheFile struct {
 	Index         WorkspaceIndex `json:"index"`
 }
 
+// BuildCachedIndex builds the requested workspace artifact.
 func (b WorkspaceGraphBuilder) BuildCachedIndex(ctx context.Context) (CachedWorkspaceIndexResult, error) {
 	graph, err := b.Build(ctx)
 	if err != nil {
@@ -87,6 +94,7 @@ func (b WorkspaceGraphBuilder) BuildCachedIndex(ctx context.Context) (CachedWork
 	}, nil
 }
 
+// WorkspaceIndexCachePath executes the corresponding package operation.
 func WorkspaceIndexCachePath(projectDir string) string {
 	return UserPath(projectDir, "tmp", "cache", "workspace-index", "structural-index.json")
 }

@@ -14,12 +14,14 @@ import (
 )
 
 const (
+	// AgentProviderCodex defines a package boundary constant.
 	AgentProviderCodex = "codex"
 
 	defaultCodexAgentCommand = "codex"
 	defaultCodexAgentTimeout = 20 * time.Minute
 )
 
+// AgentRunRequest describes a package boundary value.
 type AgentRunRequest struct {
 	ID                 string
 	Purpose            string
@@ -34,6 +36,7 @@ type AgentRunRequest struct {
 	DeferResponseTrace bool
 }
 
+// AgentRunResult describes a package boundary value.
 type AgentRunResult struct {
 	ID          string
 	Provider    string
@@ -52,28 +55,34 @@ type AgentRunResult struct {
 	Latency     time.Duration
 }
 
+// AgentRunner defines a package boundary interface.
 type AgentRunner interface {
 	RunAgent(ctx context.Context, request AgentRunRequest) (AgentRunResult, error)
 }
 
+// AgentCommand describes a package boundary value.
 type AgentCommand struct {
 	Program string
 	Args    []string
 	Dir     string
 }
 
+// AgentCommandResult describes a package boundary value.
 type AgentCommandResult struct {
 	Stdout  []byte
 	Stderr  []byte
 	Latency time.Duration
 }
 
+// AgentCommandExecutor defines a package boundary interface.
 type AgentCommandExecutor interface {
 	RunAgentCommand(ctx context.Context, command AgentCommand, stdin string, startedAt time.Time) (AgentCommandResult, error)
 }
 
+// OSAgentCommandExecutor describes a package boundary value.
 type OSAgentCommandExecutor struct{}
 
+// CodexAgentRunner describes a package boundary value.
 type CodexAgentRunner struct {
 	CommandExecutor AgentCommandExecutor
 }
@@ -85,6 +94,7 @@ type preparedAgentRun struct {
 	StartedAt  time.Time
 }
 
+// RunAgent executes the configured operation.
 func (r CodexAgentRunner) RunAgent(ctx context.Context, request AgentRunRequest) (AgentRunResult, error) {
 	err := ValidateAgentRunRequest(request)
 	if err != nil {
@@ -140,6 +150,7 @@ func (r CodexAgentRunner) RunAgent(ctx context.Context, request AgentRunRequest)
 	return result, nil
 }
 
+// RunAgentCommand executes the configured operation.
 func (OSAgentCommandExecutor) RunAgentCommand(
 	ctx context.Context,
 	command AgentCommand,
@@ -166,6 +177,7 @@ func (OSAgentCommandExecutor) RunAgentCommand(
 	}, err
 }
 
+// ValidateAgentRunRequest validates the corresponding package boundary value.
 func ValidateAgentRunRequest(request AgentRunRequest) error {
 	required := []struct {
 		name  string

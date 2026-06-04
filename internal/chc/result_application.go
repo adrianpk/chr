@@ -6,10 +6,13 @@ import (
 )
 
 const (
+	// TicketResultStatusReviewing defines a package boundary constant.
 	TicketResultStatusReviewing = "reviewing"
-	TicketResultStatusBlocked   = "blocked"
+	// TicketResultStatusBlocked defines a package boundary constant.
+	TicketResultStatusBlocked = "blocked"
 )
 
+// ResultApplication describes a package boundary value.
 type ResultApplication struct {
 	ExecutionID   string
 	ProjectID     string
@@ -24,17 +27,20 @@ type ResultApplication struct {
 	BlockedReason ResultApplicationBlockedReason
 }
 
+// ResultApplicationExecution describes a package boundary value.
 type ResultApplicationExecution struct {
 	Status        ExecutionStatus
 	FailureKind   ExecutionFailureKind
 	FailureReason string
 }
 
+// ResultApplicationComment describes a package boundary value.
 type ResultApplicationComment struct {
 	Author string
 	Body   string
 }
 
+// ResultApplicationEvidence describes a package boundary value.
 type ResultApplicationEvidence struct {
 	ValidationCommand string
 	ResultPath        string
@@ -42,11 +48,13 @@ type ResultApplicationEvidence struct {
 	ValidationPath    string
 }
 
+// ResultApplicationChangedFile describes a package boundary value.
 type ResultApplicationChangedFile struct {
 	Path    string
 	Summary string
 }
 
+// ResultApplicationBlockedReason describes a package boundary value.
 type ResultApplicationBlockedReason struct {
 	Kind           ExecutionFailureKind
 	Reason         string
@@ -55,6 +63,7 @@ type ResultApplicationBlockedReason struct {
 	ValidationPath string
 }
 
+// ResultApplicationOptions describes a package boundary value.
 type ResultApplicationOptions struct {
 	Execution     ExecutionRecord
 	Result        ExecutionResult
@@ -62,6 +71,7 @@ type ResultApplicationOptions struct {
 	CommentAuthor string
 }
 
+// NewResultApplication constructs the corresponding package service or value.
 func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, error) {
 	err := validateResultApplicationInputs(opts)
 	if err != nil {
@@ -146,6 +156,7 @@ func resultApplicationComment(author string, application ResultApplication) Resu
 	}
 }
 
+// RenderResultApplicationCommentBody renders the corresponding package data.
 func RenderResultApplicationCommentBody(application ResultApplication) string {
 	var body strings.Builder
 	body.WriteString("Execution `")

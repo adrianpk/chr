@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// NormalBoardColumns defines a package boundary variable.
 var NormalBoardColumns = []string{
 	TicketStatusBacklog,
 	TicketStatusReadyForDev,
@@ -16,14 +17,17 @@ var NormalBoardColumns = []string{
 	TicketStatusDone,
 }
 
+// BoardQuery describes a package boundary value.
 type BoardQuery struct {
 	Index TicketIndex
 }
 
+// BoardQueryOptions describes a package boundary value.
 type BoardQueryOptions struct {
 	ProjectID string
 }
 
+// Board describes a package boundary value.
 type Board struct {
 	ProjectID       string
 	Columns         []BoardColumn
@@ -35,6 +39,7 @@ type Board struct {
 	NormalColumnIDs []string
 }
 
+// BoardColumn describes a package boundary value.
 type BoardColumn struct {
 	ID      string
 	Title   string
@@ -42,15 +47,18 @@ type BoardColumn struct {
 	Tickets []IndexedTicket
 }
 
+// BoardAttentionTicket describes a package boundary value.
 type BoardAttentionTicket struct {
 	Ticket  IndexedTicket
 	Reasons []string
 }
 
+// NewBoardQuery constructs the corresponding package service or value.
 func NewBoardQuery(index TicketIndex) BoardQuery {
 	return BoardQuery{Index: index}
 }
 
+// ProjectBoard executes the corresponding package operation.
 func (q BoardQuery) ProjectBoard(ctx context.Context, opts BoardQueryOptions) (Board, error) {
 	if strings.TrimSpace(opts.ProjectID) == "" {
 		return Board{}, fmt.Errorf("project id is required")
@@ -142,6 +150,7 @@ func boardFromColumns(
 	return board
 }
 
+// BoardAttentionReasons executes the corresponding package operation.
 func BoardAttentionReasons(ticket IndexedTicket) []string {
 	reasons := []string{}
 
@@ -181,6 +190,7 @@ func sortedBoardAttentionTickets(tickets []BoardAttentionTicket) []BoardAttentio
 	return sorted
 }
 
+// BoardColumnTitle executes the corresponding package operation.
 func BoardColumnTitle(columnID string) string {
 	words := strings.Split(strings.ReplaceAll(columnID, "_", " "), " ")
 	for index, word := range words {

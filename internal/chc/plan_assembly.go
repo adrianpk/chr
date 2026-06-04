@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// AssembleGeneratedPlanBody executes the corresponding package operation.
 func AssembleGeneratedPlanBody(
 	outline GeneratedPlanOutline,
 	details []GeneratedPlanSliceDetail,

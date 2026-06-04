@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+// ReportLookupRequest describes a package boundary value.
 type ReportLookupRequest struct {
 	ReportID    string
 	Kind        ReportKind
@@ -16,21 +17,25 @@ type ReportLookupRequest struct {
 	Status      string
 }
 
+// ReportLookupResult describes a package boundary value.
 type ReportLookupResult struct {
 	Entry ReportListEntry
 	Body  string
 }
 
+// ReportLookupService describes a package boundary value.
 type ReportLookupService struct {
 	lister ReportLister
 }
 
+// NewReportLookupService constructs the corresponding package service or value.
 func NewReportLookupService() ReportLookupService {
 	return ReportLookupService{
 		lister: NewReportLister(),
 	}
 }
 
+// LookupReport executes the corresponding package operation.
 func (s ReportLookupService) LookupReport(
 	ctx context.Context,
 	projectDir string,

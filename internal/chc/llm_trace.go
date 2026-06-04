@@ -13,9 +13,13 @@ import (
 )
 
 const (
-	LLMTraceEnabledEnv   = "CHC_LLM_TRACE"
-	LLMTracePayloadsEnv  = "CHC_LLM_TRACE_PAYLOADS"
-	LLMTraceMaxBytesEnv  = "CHC_LLM_TRACE_MAX_BYTES"
+	// LLMTraceEnabledEnv defines a package boundary constant.
+	LLMTraceEnabledEnv = "CHC_LLM_TRACE"
+	// LLMTracePayloadsEnv defines a package boundary constant.
+	LLMTracePayloadsEnv = "CHC_LLM_TRACE_PAYLOADS"
+	// LLMTraceMaxBytesEnv defines a package boundary constant.
+	LLMTraceMaxBytesEnv = "CHC_LLM_TRACE_MAX_BYTES"
+	// LLMTraceKeepFilesEnv defines a package boundary constant.
 	LLMTraceKeepFilesEnv = "CHC_LLM_TRACE_KEEP_FILES"
 
 	defaultLLMTraceFileName  = "llm.ndjson"
@@ -25,6 +29,7 @@ const (
 
 var secretLikeFieldPattern = regexp.MustCompile(`(?i)(token|secret|password|authorization|api[_-]?key)`)
 
+// LLMTraceConfig describes a package boundary value.
 type LLMTraceConfig struct {
 	Enabled         bool
 	IncludePayloads bool
@@ -36,6 +41,7 @@ type LLMTraceConfig struct {
 	Now             func() time.Time
 }
 
+// LoadLLMTraceConfigOptions describes a package boundary value.
 type LoadLLMTraceConfigOptions struct {
 	ProjectDir string
 	LookupEnv  func(string) string
@@ -43,6 +49,7 @@ type LoadLLMTraceConfigOptions struct {
 	Now        func() time.Time
 }
 
+// LoadLLMTraceConfig loads the corresponding package data.
 func LoadLLMTraceConfig(opts LoadLLMTraceConfigOptions) (LLMTraceConfig, error) {
 	lookupEnv := opts.LookupEnv
 	if lookupEnv == nil {
@@ -83,6 +90,7 @@ func LoadLLMTraceConfig(opts LoadLLMTraceConfigOptions) (LLMTraceConfig, error) 
 	return config, nil
 }
 
+// RecordLLMTraceEvent executes the corresponding package operation.
 func RecordLLMTraceEvent(ctx context.Context, opts LoadLLMTraceConfigOptions, event map[string]any) {
 	config, err := LoadLLMTraceConfig(opts)
 	if err != nil {
@@ -94,6 +102,7 @@ func RecordLLMTraceEvent(ctx context.Context, opts LoadLLMTraceConfigOptions, ev
 	}
 }
 
+// WriteLLMTraceEvent executes the corresponding package operation.
 func WriteLLMTraceEvent(ctx context.Context, config LLMTraceConfig, event map[string]any) error {
 	err := ctx.Err()
 	if err != nil {

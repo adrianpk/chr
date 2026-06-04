@@ -5,16 +5,23 @@ import (
 	"time"
 )
 
+// LoopRunStatus defines a package boundary type.
 type LoopRunStatus string
 
 const (
-	LoopRunStatusPending   LoopRunStatus = "pending"
-	LoopRunStatusRunning   LoopRunStatus = "running"
+	// LoopRunStatusPending defines a package boundary constant.
+	LoopRunStatusPending LoopRunStatus = "pending"
+	// LoopRunStatusRunning defines a package boundary constant.
+	LoopRunStatusRunning LoopRunStatus = "running"
+	// LoopRunStatusSucceeded defines a package boundary constant.
 	LoopRunStatusSucceeded LoopRunStatus = "succeeded"
-	LoopRunStatusFailed    LoopRunStatus = "failed"
-	LoopRunStatusBlocked   LoopRunStatus = "blocked"
+	// LoopRunStatusFailed defines a package boundary constant.
+	LoopRunStatusFailed LoopRunStatus = "failed"
+	// LoopRunStatusBlocked defines a package boundary constant.
+	LoopRunStatusBlocked LoopRunStatus = "blocked"
 )
 
+// LoopRunRecord describes a package boundary value.
 type LoopRunRecord struct {
 	ID             string
 	ProjectID      string
@@ -30,6 +37,7 @@ type LoopRunRecord struct {
 	UpdatedAt      time.Time
 }
 
+// ValidateLoopRunRecord validates the corresponding package boundary value.
 func ValidateLoopRunRecord(record LoopRunRecord) error {
 	if record.ID == "" {
 		return fmt.Errorf("loop run id is required")
@@ -51,6 +59,7 @@ func ValidateLoopRunRecord(record LoopRunRecord) error {
 	return validateLoopRunTimes(record)
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s LoopRunStatus) Valid() bool {
 	switch s {
 	case LoopRunStatusPending,

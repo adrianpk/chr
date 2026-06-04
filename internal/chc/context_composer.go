@@ -6,13 +6,17 @@ import (
 	"strings"
 )
 
+// ContextSourceClass defines a package boundary type.
 type ContextSourceClass string
 
 const (
+	// ContextSourceClassInvariant defines a package boundary constant.
 	ContextSourceClassInvariant ContextSourceClass = "invariant"
-	ContextSourceClassFresh     ContextSourceClass = "fresh"
+	// ContextSourceClassFresh defines a package boundary constant.
+	ContextSourceClassFresh ContextSourceClass = "fresh"
 )
 
+// Valid reports whether the value is one of the supported constants.
 func (c ContextSourceClass) Valid() bool {
 	switch c {
 	case ContextSourceClassInvariant, ContextSourceClassFresh:
@@ -22,21 +26,33 @@ func (c ContextSourceClass) Valid() bool {
 	}
 }
 
+// ContextSourceKind defines a package boundary type.
 type ContextSourceKind string
 
 const (
-	ContextSourceKindAgentIdentity   ContextSourceKind = "agent_identity"
-	ContextSourceKindProject         ContextSourceKind = "project"
-	ContextSourceKindProtocol        ContextSourceKind = "protocol"
-	ContextSourceKindDocument        ContextSourceKind = "document"
-	ContextSourceKindFilesystemTree  ContextSourceKind = "filesystem_tree"
-	ContextSourceKindTextSearch      ContextSourceKind = "text_search"
-	ContextSourceKindGoGraph         ContextSourceKind = "gograph"
-	ContextSourceKindValidation      ContextSourceKind = "validation"
+	// ContextSourceKindAgentIdentity defines a package boundary constant.
+	ContextSourceKindAgentIdentity ContextSourceKind = "agent_identity"
+	// ContextSourceKindProject defines a package boundary constant.
+	ContextSourceKindProject ContextSourceKind = "project"
+	// ContextSourceKindProtocol defines a package boundary constant.
+	ContextSourceKindProtocol ContextSourceKind = "protocol"
+	// ContextSourceKindDocument defines a package boundary constant.
+	ContextSourceKindDocument ContextSourceKind = "document"
+	// ContextSourceKindFilesystemTree defines a package boundary constant.
+	ContextSourceKindFilesystemTree ContextSourceKind = "filesystem_tree"
+	// ContextSourceKindTextSearch defines a package boundary constant.
+	ContextSourceKindTextSearch ContextSourceKind = "text_search"
+	// ContextSourceKindGoGraph defines a package boundary constant.
+	ContextSourceKindGoGraph ContextSourceKind = "gograph"
+	// ContextSourceKindValidation defines a package boundary constant.
+	ContextSourceKindValidation ContextSourceKind = "validation"
+	// ContextSourceKindPreviousAttempt defines a package boundary constant.
 	ContextSourceKindPreviousAttempt ContextSourceKind = "previous_attempt"
-	ContextSourceKindOutputContract  ContextSourceKind = "output_contract"
+	// ContextSourceKindOutputContract defines a package boundary constant.
+	ContextSourceKindOutputContract ContextSourceKind = "output_contract"
 )
 
+// Valid reports whether the value is one of the supported constants.
 func (k ContextSourceKind) Valid() bool {
 	switch k {
 	case ContextSourceKindAgentIdentity,
@@ -55,6 +71,7 @@ func (k ContextSourceKind) Valid() bool {
 	}
 }
 
+// ContextComposerOptions describes a package boundary value.
 type ContextComposerOptions struct {
 	TicketKey   string
 	TicketPath  string
@@ -63,6 +80,7 @@ type ContextComposerOptions struct {
 	Sources     []ContextSourceInventoryEntry
 }
 
+// ContextCompositionPlan describes a package boundary value.
 type ContextCompositionPlan struct {
 	ProjectDir  string
 	TicketKey   string
@@ -73,6 +91,7 @@ type ContextCompositionPlan struct {
 	Readiness   ContextReadiness
 }
 
+// ContextArtifactPaths describes a package boundary value.
 type ContextArtifactPaths struct {
 	RunArtifactDir      string
 	MainContextPath     string
@@ -86,6 +105,7 @@ type ContextArtifactPaths struct {
 	SourceInventoryPath string
 }
 
+// ContextSourceInventoryEntry describes a package boundary value.
 type ContextSourceInventoryEntry struct {
 	ID          string
 	Kind        ContextSourceKind
@@ -97,19 +117,24 @@ type ContextSourceInventoryEntry struct {
 	Reason      string
 }
 
+// ContextReadinessStatus defines a package boundary type.
 type ContextReadinessStatus string
 
 const (
-	ContextReadinessReady   ContextReadinessStatus = "ready"
+	// ContextReadinessReady defines a package boundary constant.
+	ContextReadinessReady ContextReadinessStatus = "ready"
+	// ContextReadinessBlocked defines a package boundary constant.
 	ContextReadinessBlocked ContextReadinessStatus = "blocked"
 )
 
+// ContextReadiness describes a package boundary value.
 type ContextReadiness struct {
 	Status                 ContextReadinessStatus
 	Warnings               []string
 	MissingRequiredSources []ContextSourceInventoryEntry
 }
 
+// PlanContextComposition executes the corresponding package operation.
 func PlanContextComposition(opts ContextComposerOptions) (ContextCompositionPlan, error) {
 	err := validateContextComposerOptions(opts)
 	if err != nil {

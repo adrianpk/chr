@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// ParseQuizRawCaptureEntries parses the corresponding package data.
 func ParseQuizRawCaptureEntries(content string) ([]QuizEntry, error) {
 	blocks := strings.Split(content, "\n## Turn\n\n")
 	entries := []QuizEntry{}
@@ -24,6 +25,7 @@ func ParseQuizRawCaptureEntries(content string) ([]QuizEntry, error) {
 	return entries, nil
 }
 
+// CurateQuizEntries executes the corresponding package operation.
 func CurateQuizEntries(scope QuizScope, entries []QuizEntry, now time.Time) QuizCuratedNotes {
 	answered := quizAnsweredEntriesByTopic(entries)
 

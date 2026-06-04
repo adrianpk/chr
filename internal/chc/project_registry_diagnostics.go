@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+// ProjectRegistryDiagnostic describes a package boundary value.
 type ProjectRegistryDiagnostic struct {
 	Project         Project
 	Active          bool
@@ -15,20 +16,27 @@ type ProjectRegistryDiagnostic struct {
 	Status          ProjectRegistryDiagnosticStatus
 }
 
+// ProjectRegistryDiagnosticStatus defines a package boundary type.
 type ProjectRegistryDiagnosticStatus string
 
 const (
-	ProjectRegistryDiagnosticOK          ProjectRegistryDiagnosticStatus = "ok"
-	ProjectRegistryDiagnosticDisabled    ProjectRegistryDiagnosticStatus = "disabled"
+	// ProjectRegistryDiagnosticOK defines a package boundary constant.
+	ProjectRegistryDiagnosticOK ProjectRegistryDiagnosticStatus = "ok"
+	// ProjectRegistryDiagnosticDisabled defines a package boundary constant.
+	ProjectRegistryDiagnosticDisabled ProjectRegistryDiagnosticStatus = "disabled"
+	// ProjectRegistryDiagnosticMissingPath defines a package boundary constant.
 	ProjectRegistryDiagnosticMissingPath ProjectRegistryDiagnosticStatus = "missing_path"
+	// ProjectRegistryDiagnosticNoWorkspace defines a package boundary constant.
 	ProjectRegistryDiagnosticNoWorkspace ProjectRegistryDiagnosticStatus = "missing_workspace"
 )
 
+// ProjectRegistryDiagnosticsService describes a package boundary value.
 type ProjectRegistryDiagnosticsService struct {
 	registry ProjectRegistry
 	store    ActiveProjectStore
 }
 
+// NewProjectRegistryDiagnosticsService constructs the corresponding package service or value.
 func NewProjectRegistryDiagnosticsService(
 	registry ProjectRegistry,
 	store ActiveProjectStore,
@@ -39,6 +47,7 @@ func NewProjectRegistryDiagnosticsService(
 	}
 }
 
+// ListDiagnostics lists the requested data.
 func (s ProjectRegistryDiagnosticsService) ListDiagnostics(
 	ctx context.Context,
 ) ([]ProjectRegistryDiagnostic, error) {

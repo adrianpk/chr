@@ -8,11 +8,13 @@ import (
 	"time"
 )
 
+// TicketMergeCommandRemote defines a package boundary interface.
 type TicketMergeCommandRemote interface {
 	TicketMergePreflightRemoteReader
 	Merge(context.Context, MergeRequest) (MergeResult, error)
 }
 
+// TicketMergeCommandOptions describes a package boundary value.
 type TicketMergeCommandOptions struct {
 	Ticket        IndexedTicket
 	Tickets       []IndexedTicket
@@ -23,6 +25,7 @@ type TicketMergeCommandOptions struct {
 	MergedAt      time.Time
 }
 
+// TicketMergeCommandResult describes a package boundary value.
 type TicketMergeCommandResult struct {
 	TicketKey     string
 	Preflight     TicketMergePreflightResult
@@ -37,6 +40,7 @@ type TicketMergeCommandResult struct {
 	DryRun        bool
 }
 
+// RunTicketMergeCommand executes the corresponding package operation.
 func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) (TicketMergeCommandResult, error) {
 	if err := ctx.Err(); err != nil {
 		return TicketMergeCommandResult{}, err

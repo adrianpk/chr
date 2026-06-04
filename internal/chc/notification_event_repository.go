@@ -13,13 +13,16 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// ErrNotificationEventNotFound identifies a package boundary error.
 var ErrNotificationEventNotFound = errors.New("notification event not found")
 
+// NotificationAuditRecord describes a package boundary value.
 type NotificationAuditRecord struct {
 	Event   NotificationEvent
 	Channel string
 }
 
+// NotificationEventRepository defines a package boundary interface.
 type NotificationEventRepository interface {
 	CreateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
 	UpdateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
@@ -32,6 +35,7 @@ type sqliteNotificationEventRepository struct {
 	db *sql.DB
 }
 
+// NewNotificationEventRepository constructs the corresponding package service or value.
 func NewNotificationEventRepository(
 	ctx context.Context,
 	env UserEnvironment,
@@ -60,6 +64,7 @@ func NewNotificationEventRepository(
 	return repository, nil
 }
 
+// NewNotificationEventRepositoryFromDB constructs the corresponding package service or value.
 func NewNotificationEventRepositoryFromDB(
 	ctx context.Context,
 	db *sql.DB,
@@ -75,6 +80,7 @@ func NewNotificationEventRepositoryFromDB(
 	return &sqliteNotificationEventRepository{db: db}, nil
 }
 
+// CreateNotificationEvent executes the corresponding package operation.
 func (r *sqliteNotificationEventRepository) CreateNotificationEvent(
 	ctx context.Context,
 	record NotificationAuditRecord,
@@ -112,6 +118,7 @@ func (r *sqliteNotificationEventRepository) CreateNotificationEvent(
 	return nil
 }
 
+// UpdateNotificationEvent executes the corresponding package operation.
 func (r *sqliteNotificationEventRepository) UpdateNotificationEvent(
 	ctx context.Context,
 	record NotificationAuditRecord,
@@ -158,6 +165,7 @@ func (r *sqliteNotificationEventRepository) UpdateNotificationEvent(
 	return nil
 }
 
+// GetNotificationEvent executes the corresponding package operation.
 func (r *sqliteNotificationEventRepository) GetNotificationEvent(
 	ctx context.Context,
 	id string,
@@ -176,6 +184,7 @@ func (r *sqliteNotificationEventRepository) GetNotificationEvent(
 	return record, nil
 }
 
+// ListProjectNotificationEvents lists the requested data.
 func (r *sqliteNotificationEventRepository) ListProjectNotificationEvents(
 	ctx context.Context,
 	projectID string,
@@ -213,6 +222,7 @@ func (r *sqliteNotificationEventRepository) ListProjectNotificationEvents(
 	return records, nil
 }
 
+// Close executes the corresponding package operation.
 func (r *sqliteNotificationEventRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {
@@ -222,6 +232,7 @@ func (r *sqliteNotificationEventRepository) Close() error {
 	return nil
 }
 
+// ValidateNotificationAuditRecord validates the corresponding package boundary value.
 func ValidateNotificationAuditRecord(record NotificationAuditRecord) error {
 	return ValidateNotificationEvent(record.Event)
 }

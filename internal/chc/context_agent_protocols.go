@@ -10,6 +10,7 @@ import (
 
 const defaultAgentIdentityID = "default-go-software-infrastructure-agent"
 
+// AgentIdentity describes a package boundary value.
 type AgentIdentity struct {
 	ID                 string
 	Title              string
@@ -21,11 +22,13 @@ type AgentIdentity struct {
 	ForbiddenBehaviors []string
 }
 
+// AgentProtocolContextOptions describes a package boundary value.
 type AgentProtocolContextOptions struct {
 	ProjectDir string
 	TargetPath string
 }
 
+// AgentProtocolContext describes a package boundary value.
 type AgentProtocolContext struct {
 	ProjectDir    string
 	TargetPath    string
@@ -35,6 +38,7 @@ type AgentProtocolContext struct {
 	Sources       []ContextSourceInventoryEntry
 }
 
+// ContextDocument describes a package boundary value.
 type ContextDocument struct {
 	ID           string
 	Path         string
@@ -42,6 +46,7 @@ type ContextDocument struct {
 	Content      string
 }
 
+// DefaultAgentIdentity executes the corresponding package operation.
 func DefaultAgentIdentity() AgentIdentity {
 	return AgentIdentity{
 		ID:    defaultAgentIdentityID,
@@ -77,6 +82,7 @@ func DefaultAgentIdentity() AgentIdentity {
 	}
 }
 
+// LoadAgentProtocolContext loads the corresponding package data.
 func LoadAgentProtocolContext(opts AgentProtocolContextOptions) (AgentProtocolContext, error) {
 	projectDir, targetPath, targetDir, err := normalizeAgentProtocolContextOptions(opts)
 	if err != nil {
@@ -116,6 +122,7 @@ func LoadAgentProtocolContext(opts AgentProtocolContextOptions) (AgentProtocolCo
 	}, nil
 }
 
+// RenderAgentContext renders the corresponding package data.
 func RenderAgentContext(identity AgentIdentity) string {
 	var output strings.Builder
 
@@ -131,6 +138,7 @@ func RenderAgentContext(identity AgentIdentity) string {
 	return output.String()
 }
 
+// RenderProtocolsContext renders the corresponding package data.
 func RenderProtocolsContext(ctx AgentProtocolContext) string {
 	var output strings.Builder
 

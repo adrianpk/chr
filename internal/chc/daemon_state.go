@@ -5,17 +5,25 @@ import (
 	"time"
 )
 
+// DaemonStatus defines a package boundary type.
 type DaemonStatus string
 
 const (
-	DaemonStatusStopped  DaemonStatus = "stopped"
+	// DaemonStatusStopped defines a package boundary constant.
+	DaemonStatusStopped DaemonStatus = "stopped"
+	// DaemonStatusStarting defines a package boundary constant.
 	DaemonStatusStarting DaemonStatus = "starting"
-	DaemonStatusRunning  DaemonStatus = "running"
+	// DaemonStatusRunning defines a package boundary constant.
+	DaemonStatusRunning DaemonStatus = "running"
+	// DaemonStatusStopping defines a package boundary constant.
 	DaemonStatusStopping DaemonStatus = "stopping"
-	DaemonStatusStale    DaemonStatus = "stale"
-	DaemonStatusFailed   DaemonStatus = "failed"
+	// DaemonStatusStale defines a package boundary constant.
+	DaemonStatusStale DaemonStatus = "stale"
+	// DaemonStatusFailed defines a package boundary constant.
+	DaemonStatusFailed DaemonStatus = "failed"
 )
 
+// DaemonState describes a package boundary value.
 type DaemonState struct {
 	Status          DaemonStatus
 	PID             int
@@ -26,6 +34,7 @@ type DaemonState struct {
 	UpdatedAt       time.Time
 }
 
+// NewStoppedDaemonState constructs the corresponding package service or value.
 func NewStoppedDaemonState(updatedAt time.Time) DaemonState {
 	return DaemonState{
 		Status:    DaemonStatusStopped,
@@ -33,6 +42,7 @@ func NewStoppedDaemonState(updatedAt time.Time) DaemonState {
 	}
 }
 
+// ValidateDaemonState validates the corresponding package boundary value.
 func ValidateDaemonState(state DaemonState) error {
 	if !state.Status.Valid() {
 		return fmt.Errorf("daemon status is invalid: %s", state.Status)
@@ -50,6 +60,7 @@ func ValidateDaemonState(state DaemonState) error {
 	return validateDaemonStateTimes(state)
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s DaemonStatus) Valid() bool {
 	switch s {
 	case DaemonStatusStopped,

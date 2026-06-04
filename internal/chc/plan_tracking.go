@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// GeneratedPlanTracking describes a package boundary value.
 type GeneratedPlanTracking struct {
 	Scope       QuizScope
 	PlanPath    string
@@ -20,6 +21,7 @@ type GeneratedPlanTracking struct {
 	CreatedAt   time.Time
 }
 
+// GeneratedPlanTrackingTicket describes a package boundary value.
 type GeneratedPlanTrackingTicket struct {
 	Key          string
 	Path         string
@@ -35,12 +37,14 @@ type GeneratedPlanTrackingTicket struct {
 	Dependencies []string
 }
 
+// GeneratedPlanTrackingPaths describes a package boundary value.
 type GeneratedPlanTrackingPaths struct {
 	ScopeID      string
 	RelativePath string
 	Path         string
 }
 
+// GeneratedPlanTrackingLayout executes the corresponding package operation.
 func GeneratedPlanTrackingLayout(projectDir string, scope QuizScope) (GeneratedPlanTrackingPaths, error) {
 	err := ValidateQuizScope(scope)
 	if err != nil {
@@ -61,6 +65,7 @@ func GeneratedPlanTrackingLayout(projectDir string, scope QuizScope) (GeneratedP
 	}, nil
 }
 
+// WriteGeneratedPlanTracking executes the corresponding package operation.
 func WriteGeneratedPlanTracking(
 	ctx context.Context,
 	projectDir string,
@@ -95,6 +100,7 @@ func WriteGeneratedPlanTracking(
 }
 
 //nolint:wsl_v5 // Markdown rendering keeps adjacent writes together.
+// RenderGeneratedPlanTracking renders generated plan tracking as Markdown.
 func RenderGeneratedPlanTracking(tracking GeneratedPlanTracking) string {
 	var output bytes.Buffer
 
@@ -134,6 +140,7 @@ func RenderGeneratedPlanTracking(tracking GeneratedPlanTracking) string {
 	return output.String()
 }
 
+// ValidateGeneratedPlanTracking validates the corresponding package boundary value.
 func ValidateGeneratedPlanTracking(tracking GeneratedPlanTracking) error {
 	if strings.TrimSpace(tracking.Title) == "" {
 		return fmt.Errorf("plan tracking title is required")
@@ -170,6 +177,7 @@ func ValidateGeneratedPlanTracking(tracking GeneratedPlanTracking) error {
 	return nil
 }
 
+// ValidateGeneratedPlanTrackingTicket validates the corresponding package boundary value.
 func ValidateGeneratedPlanTrackingTicket(ticket GeneratedPlanTrackingTicket) error {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return fmt.Errorf("ticket key is required")
@@ -190,6 +198,7 @@ func ValidateGeneratedPlanTrackingTicket(ticket GeneratedPlanTrackingTicket) err
 	return nil
 }
 
+// ValidateGeneratedPlanTrackingModelContent validates the corresponding package boundary value.
 func ValidateGeneratedPlanTrackingModelContent(tracking GeneratedPlanTracking) error {
 	if strings.TrimSpace(tracking.Title) == "" {
 		return fmt.Errorf("plan tracking title is required")
@@ -212,6 +221,7 @@ func ValidateGeneratedPlanTrackingModelContent(tracking GeneratedPlanTracking) e
 	return nil
 }
 
+// ValidateGeneratedPlanTrackingTicketModelContent validates the corresponding package boundary value.
 func ValidateGeneratedPlanTrackingTicketModelContent(ticket GeneratedPlanTrackingTicket) error {
 	if strings.TrimSpace(ticket.Key) != "" {
 		return fmt.Errorf("key must be empty before materialization")
@@ -244,6 +254,7 @@ func ValidateGeneratedPlanTrackingTicketModelContent(ticket GeneratedPlanTrackin
 	return nil
 }
 
+// HasContent executes the corresponding package operation.
 func (t GeneratedPlanTracking) HasContent() bool {
 	return strings.TrimSpace(t.Title) != "" || strings.TrimSpace(t.Body) != "" || len(t.Tickets) > 0
 }

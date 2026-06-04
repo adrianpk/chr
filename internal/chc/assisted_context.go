@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// AssistedAuthoringContextPackageOptions describes a package boundary value.
 type AssistedAuthoringContextPackageOptions struct {
 	ProjectDir       string
 	TargetPath       string
@@ -16,6 +17,7 @@ type AssistedAuthoringContextPackageOptions struct {
 	TranscriptEvents []AssistedTranscriptEvent
 }
 
+// AssistedAuthoringContextPackage describes a package boundary value.
 type AssistedAuthoringContextPackage struct {
 	ProjectDir        string
 	WorkspaceDir      string
@@ -27,6 +29,7 @@ type AssistedAuthoringContextPackage struct {
 	Sources           []ContextSourceInventoryEntry
 }
 
+// AssistedTranscriptSummary describes a package boundary value.
 type AssistedTranscriptSummary struct {
 	QuestionCount       int
 	AnswerCount         int
@@ -36,6 +39,7 @@ type AssistedTranscriptSummary struct {
 	LastResultSummary   string
 }
 
+// AssistedTranscriptQuestionGap describes a package boundary value.
 type AssistedTranscriptQuestionGap struct {
 	TurnID     string
 	TurnIndex  int
@@ -43,6 +47,7 @@ type AssistedTranscriptQuestionGap struct {
 	Prompt     string
 }
 
+// LoadAssistedAuthoringContextPackage loads the corresponding package data.
 func LoadAssistedAuthoringContextPackage(
 	opts AssistedAuthoringContextPackageOptions,
 ) (AssistedAuthoringContextPackage, error) {
@@ -93,6 +98,7 @@ func LoadAssistedAuthoringContextPackage(
 	}, nil
 }
 
+// RenderAssistedAuthoringContextPackage renders the corresponding package data.
 func RenderAssistedAuthoringContextPackage(pkg AssistedAuthoringContextPackage) string {
 	var output strings.Builder
 

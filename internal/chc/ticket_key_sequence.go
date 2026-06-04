@@ -13,11 +13,13 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// TicketKeySequenceRepository defines a package boundary interface.
 type TicketKeySequenceRepository interface {
 	ReserveNextTicketKey(ctx context.Context, opts ReserveNextTicketKeyOptions) (int, error)
 	Close() error
 }
 
+// ReserveNextTicketKeyOptions describes a package boundary value.
 type ReserveNextTicketKeyOptions struct {
 	ProjectID string
 	Prefix    string
@@ -29,6 +31,7 @@ type sqliteTicketKeySequenceRepository struct {
 	db *sql.DB
 }
 
+// NewTicketKeySequenceRepository constructs the corresponding package service or value.
 func NewTicketKeySequenceRepository(
 	ctx context.Context,
 	env UserEnvironment,
@@ -57,6 +60,7 @@ func NewTicketKeySequenceRepository(
 	return repository, nil
 }
 
+// NewTicketKeySequenceRepositoryFromDB constructs the corresponding package service or value.
 func NewTicketKeySequenceRepositoryFromDB(
 	ctx context.Context,
 	db *sql.DB,
@@ -72,6 +76,7 @@ func NewTicketKeySequenceRepositoryFromDB(
 	return &sqliteTicketKeySequenceRepository{db: db}, nil
 }
 
+// ReserveNextTicketKey executes the corresponding package operation.
 func (r *sqliteTicketKeySequenceRepository) ReserveNextTicketKey(
 	ctx context.Context,
 	opts ReserveNextTicketKeyOptions,
@@ -106,6 +111,7 @@ func (r *sqliteTicketKeySequenceRepository) ReserveNextTicketKey(
 	return nextNumber, nil
 }
 
+// Close executes the corresponding package operation.
 func (r *sqliteTicketKeySequenceRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {

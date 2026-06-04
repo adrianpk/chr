@@ -8,16 +8,19 @@ import (
 	"strings"
 )
 
+// GateEvidenceClassifier describes a package boundary value.
 type GateEvidenceClassifier struct {
 	ReportLister ReportLister
 }
 
+// GateEvidenceClassificationRequest describes a package boundary value.
 type GateEvidenceClassificationRequest struct {
 	ProjectDir    string
 	Files         []GateGitChangedFile
 	HighRiskPaths []string
 }
 
+// GateEvidenceClassification describes a package boundary value.
 type GateEvidenceClassification struct {
 	AgentManagedWork        []GateAgentManagedWork
 	ManualOrExternalChanges []GateManualOrExternalChange
@@ -25,6 +28,7 @@ type GateEvidenceClassification struct {
 	HighRiskManualChanges   []GateHighRiskManualChange
 }
 
+// GateAgentManagedWork describes a package boundary value.
 type GateAgentManagedWork struct {
 	Path        string
 	Status      string
@@ -33,11 +37,13 @@ type GateAgentManagedWork struct {
 	ReportPath  string
 }
 
+// GateManualOrExternalChange describes a package boundary value.
 type GateManualOrExternalChange struct {
 	Path   string
 	Status string
 }
 
+// GateMissingAgentEvidence describes a package boundary value.
 type GateMissingAgentEvidence struct {
 	TicketKey   string
 	ExecutionID string
@@ -45,6 +51,7 @@ type GateMissingAgentEvidence struct {
 	Reason      string
 }
 
+// GateHighRiskManualChange describes a package boundary value.
 type GateHighRiskManualChange struct {
 	Path    string
 	Status  string
@@ -58,12 +65,14 @@ type gateExecutionEvidence struct {
 	changedFile ExecutionResultChangedFile
 }
 
+// NewGateEvidenceClassifier constructs the corresponding package service or value.
 func NewGateEvidenceClassifier() GateEvidenceClassifier {
 	return GateEvidenceClassifier{
 		ReportLister: NewReportLister(),
 	}
 }
 
+// Classify executes the corresponding package operation.
 func (c GateEvidenceClassifier) Classify(
 	ctx context.Context,
 	request GateEvidenceClassificationRequest,

@@ -11,27 +11,33 @@ import (
 	"strings"
 )
 
+// DefaultTelegramAPIBaseURL defines a package boundary constant.
 const DefaultTelegramAPIBaseURL = "https://api.telegram.org"
 
+// TelegramMessage describes a package boundary value.
 type TelegramMessage struct {
 	ChatID string
 	Text   string
 }
 
+// TelegramSendResult describes a package boundary value.
 type TelegramSendResult struct {
 	StatusCode int
 	Body       string
 }
 
+// TelegramHTTPClient defines a package boundary interface.
 type TelegramHTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+// TelegramSender describes a package boundary value.
 type TelegramSender struct {
 	Client  TelegramHTTPClient
 	BaseURL string
 }
 
+// RenderTelegramNotificationMessage renders the corresponding package data.
 func RenderTelegramNotificationMessage(event NotificationEvent) TelegramMessage {
 	text := event.Payload.Summary
 	if event.Payload.Detail != "" {
@@ -43,6 +49,7 @@ func RenderTelegramNotificationMessage(event NotificationEvent) TelegramMessage 
 	}
 }
 
+// NewTelegramSender constructs the corresponding package service or value.
 func NewTelegramSender(client TelegramHTTPClient) TelegramSender {
 	if client == nil {
 		client = http.DefaultClient
@@ -54,6 +61,7 @@ func NewTelegramSender(client TelegramHTTPClient) TelegramSender {
 	}
 }
 
+// SendMessage sends the requested message.
 func (s TelegramSender) SendMessage(
 	ctx context.Context,
 	token string,

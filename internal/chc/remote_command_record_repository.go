@@ -14,8 +14,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// ErrRemoteCommandRecordNotFound identifies a package boundary error.
 var ErrRemoteCommandRecordNotFound = errors.New("remote command record not found")
 
+// RemoteCommandRecordRepository defines a package boundary interface.
 type RemoteCommandRecordRepository interface {
 	CreateRemoteCommandRecord(ctx context.Context, record RemoteCommandRecord) error
 	GetRemoteCommandRecord(ctx context.Context, id string) (RemoteCommandRecord, error)
@@ -27,6 +29,7 @@ type sqliteRemoteCommandRecordRepository struct {
 	db *sql.DB
 }
 
+// NewRemoteCommandRecordRepository constructs the corresponding package service or value.
 func NewRemoteCommandRecordRepository(
 	ctx context.Context,
 	env UserEnvironment,
@@ -55,6 +58,7 @@ func NewRemoteCommandRecordRepository(
 	return repository, nil
 }
 
+// NewRemoteCommandRecordRepositoryFromDB constructs the corresponding package service or value.
 func NewRemoteCommandRecordRepositoryFromDB(
 	ctx context.Context,
 	db *sql.DB,
@@ -70,6 +74,7 @@ func NewRemoteCommandRecordRepositoryFromDB(
 	return &sqliteRemoteCommandRecordRepository{db: db}, nil
 }
 
+// CreateRemoteCommandRecord executes the corresponding package operation.
 func (r *sqliteRemoteCommandRecordRepository) CreateRemoteCommandRecord(
 	ctx context.Context,
 	record RemoteCommandRecord,
@@ -112,6 +117,7 @@ func (r *sqliteRemoteCommandRecordRepository) CreateRemoteCommandRecord(
 	return nil
 }
 
+// GetRemoteCommandRecord executes the corresponding package operation.
 func (r *sqliteRemoteCommandRecordRepository) GetRemoteCommandRecord(
 	ctx context.Context,
 	id string,
@@ -130,6 +136,7 @@ func (r *sqliteRemoteCommandRecordRepository) GetRemoteCommandRecord(
 	return record, nil
 }
 
+// ListRemoteCommandRecords lists the requested data.
 func (r *sqliteRemoteCommandRecordRepository) ListRemoteCommandRecords(
 	ctx context.Context,
 ) ([]RemoteCommandRecord, error) {
@@ -162,6 +169,7 @@ func (r *sqliteRemoteCommandRecordRepository) ListRemoteCommandRecords(
 	return records, nil
 }
 
+// Close executes the corresponding package operation.
 func (r *sqliteRemoteCommandRecordRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {

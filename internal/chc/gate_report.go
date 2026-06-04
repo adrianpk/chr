@@ -10,13 +10,17 @@ import (
 	"time"
 )
 
+// GateReportStatus defines a package boundary type.
 type GateReportStatus string
 
 const (
+	// GateReportStatusPassed defines a package boundary constant.
 	GateReportStatusPassed GateReportStatus = "passed"
+	// GateReportStatusFailed defines a package boundary constant.
 	GateReportStatusFailed GateReportStatus = "failed"
 )
 
+// GateReport describes a package boundary value.
 type GateReport struct {
 	CreatedAt               time.Time                          `json:"created_at"`
 	Status                  GateReportStatus                   `json:"status"`
@@ -38,22 +42,26 @@ type GateReport struct {
 	Metadata                map[string]string                  `json:"metadata,omitempty"`
 }
 
+// GateReportRef describes a package boundary value.
 type GateReportRef struct {
 	Ref string `json:"ref"`
 	SHA string `json:"sha"`
 }
 
+// GateReportCommit describes a package boundary value.
 type GateReportCommit struct {
 	SHA     string `json:"sha"`
 	Subject string `json:"subject"`
 }
 
+// GateReportChangedFile describes a package boundary value.
 type GateReportChangedFile struct {
 	Status string `json:"status"`
 	Path   string `json:"path"`
 	Old    string `json:"old,omitempty"`
 }
 
+// GateReportAgentManagedWork describes a package boundary value.
 type GateReportAgentManagedWork struct {
 	Path        string `json:"path"`
 	Status      string `json:"status"`
@@ -62,11 +70,13 @@ type GateReportAgentManagedWork struct {
 	ReportPath  string `json:"report_path"`
 }
 
+// GateReportManualOrExternalChange describes a package boundary value.
 type GateReportManualOrExternalChange struct {
 	Path   string `json:"path"`
 	Status string `json:"status"`
 }
 
+// GateReportMissingAgentEvidence describes a package boundary value.
 type GateReportMissingAgentEvidence struct {
 	TicketKey   string `json:"ticket_key"`
 	ExecutionID string `json:"execution_id"`
@@ -74,12 +84,14 @@ type GateReportMissingAgentEvidence struct {
 	Reason      string `json:"reason"`
 }
 
+// GateReportHighRiskManualChange describes a package boundary value.
 type GateReportHighRiskManualChange struct {
 	Path    string `json:"path"`
 	Status  string `json:"status"`
 	Pattern string `json:"pattern"`
 }
 
+// GateReportValidation describes a package boundary value.
 type GateReportValidation struct {
 	Command  string `json:"command"`
 	ExitCode int    `json:"exit_code"`
@@ -87,17 +99,21 @@ type GateReportValidation struct {
 	Passed   bool   `json:"passed"`
 }
 
+// GateReportArtifacts describes a package boundary value.
 type GateReportArtifacts struct {
 	JSONPath     string `json:"json_path"`
 	MarkdownPath string `json:"markdown_path"`
 }
 
+// GateReportWriter describes a package boundary value.
 type GateReportWriter struct{}
 
+// NewGateReportWriter constructs the corresponding package service or value.
 func NewGateReportWriter() GateReportWriter {
 	return GateReportWriter{}
 }
 
+// NewGateReport constructs the corresponding package service or value.
 func NewGateReport(
 	createdAt time.Time,
 	evidence GateGitEvidence,
@@ -128,6 +144,7 @@ func NewGateReport(
 	}
 }
 
+// NewFailedGateReport constructs the corresponding package service or value.
 func NewFailedGateReport(
 	createdAt time.Time,
 	baseRef string,
@@ -145,6 +162,7 @@ func NewFailedGateReport(
 	}
 }
 
+// NewGateReportArtifacts constructs the corresponding package service or value.
 func NewGateReportArtifacts(projectDir string, createdAt time.Time) GateReportArtifacts {
 	fileBase := "dev-main-" + createdAt.UTC().Format("20060102T150405Z")
 
@@ -154,6 +172,7 @@ func NewGateReportArtifacts(projectDir string, createdAt time.Time) GateReportAr
 	}
 }
 
+// WriteJSON writes the requested output.
 func (w GateReportWriter) WriteJSON(ctx context.Context, report GateReport) (string, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -188,6 +207,7 @@ func (w GateReportWriter) WriteJSON(ctx context.Context, report GateReport) (str
 	return path, nil
 }
 
+// WriteMarkdown writes the requested output.
 func (w GateReportWriter) WriteMarkdown(ctx context.Context, report GateReport) (string, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -219,6 +239,7 @@ func (w GateReportWriter) WriteMarkdown(ctx context.Context, report GateReport) 
 	return path, nil
 }
 
+// RenderGateReportMarkdown renders the corresponding package data.
 func RenderGateReportMarkdown(report GateReport) string {
 	var output strings.Builder
 

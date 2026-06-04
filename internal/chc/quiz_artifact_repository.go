@@ -11,10 +11,13 @@ import (
 )
 
 const (
+	// QuizArtifactsDirectory defines a package boundary constant.
 	QuizArtifactsDirectory = "quizzes"
-	QuizRuntimeDirectory   = "tmp/quiz-runtime"
+	// QuizRuntimeDirectory defines a package boundary constant.
+	QuizRuntimeDirectory = "tmp/quiz-runtime"
 )
 
+// QuizArtifactPaths describes a package boundary value.
 type QuizArtifactPaths struct {
 	ScopeID             string
 	RawRelativePath     string
@@ -25,6 +28,7 @@ type QuizArtifactPaths struct {
 	RuntimePath         string
 }
 
+// QuizArtifactRepository defines a package boundary interface.
 type QuizArtifactRepository interface {
 	Paths(scope QuizScope) (QuizArtifactPaths, error)
 	AppendRawCapture(ctx context.Context, state QuizRuntimeState, entry QuizEntry) (QuizArtifactPaths, error)
@@ -34,6 +38,7 @@ type QuizArtifactRepository interface {
 	LoadRuntimeState(ctx context.Context, scope QuizScope) (QuizRuntimeState, error)
 }
 
+// QuizCuratedNotes describes a package boundary value.
 type QuizCuratedNotes struct {
 	Scope                      QuizScope
 	Status                     string
@@ -50,10 +55,12 @@ type fileQuizArtifactRepository struct {
 	projectDir string
 }
 
+// NewQuizArtifactRepository constructs the corresponding package service or value.
 func NewQuizArtifactRepository(projectDir string) QuizArtifactRepository {
 	return &fileQuizArtifactRepository{projectDir: projectDir}
 }
 
+// QuizArtifactLayout executes the corresponding package operation.
 func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, error) {
 	err := ValidateQuizScope(scope)
 	if err != nil {
@@ -80,10 +87,12 @@ func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, 
 	}, nil
 }
 
+// Paths executes the corresponding package operation.
 func (r *fileQuizArtifactRepository) Paths(scope QuizScope) (QuizArtifactPaths, error) {
 	return QuizArtifactLayout(r.projectDir, scope)
 }
 
+// AppendRawCapture executes the corresponding package operation.
 func (r *fileQuizArtifactRepository) AppendRawCapture(
 	ctx context.Context,
 	state QuizRuntimeState,
@@ -135,6 +144,7 @@ func (r *fileQuizArtifactRepository) AppendRawCapture(
 	return paths, nil
 }
 
+// WriteCuratedNotes writes the requested output.
 func (r *fileQuizArtifactRepository) WriteCuratedNotes(
 	ctx context.Context,
 	notes QuizCuratedNotes,
@@ -176,6 +186,7 @@ func (r *fileQuizArtifactRepository) WriteCuratedNotes(
 	return paths, nil
 }
 
+// LoadRawCaptureEntries loads the requested data.
 func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 	ctx context.Context,
 	scope QuizScope,
@@ -202,6 +213,7 @@ func (r *fileQuizArtifactRepository) LoadRawCaptureEntries(
 	return ParseQuizRawCaptureEntries(string(content))
 }
 
+// SaveRuntimeState persists the requested data.
 func (r *fileQuizArtifactRepository) SaveRuntimeState(
 	ctx context.Context,
 	state QuizRuntimeState,
@@ -239,6 +251,7 @@ func (r *fileQuizArtifactRepository) SaveRuntimeState(
 	return paths, nil
 }
 
+// LoadRuntimeState loads the requested data.
 func (r *fileQuizArtifactRepository) LoadRuntimeState(ctx context.Context, scope QuizScope) (QuizRuntimeState, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -270,6 +283,7 @@ func (r *fileQuizArtifactRepository) LoadRuntimeState(ctx context.Context, scope
 	return state, nil
 }
 
+// RenderQuizRawCapture renders the corresponding package data.
 func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 	var output bytes.Buffer
 
@@ -319,6 +333,7 @@ func RenderQuizRawCapture(state QuizRuntimeState, entry QuizEntry) string {
 	return output.String()
 }
 
+// RenderQuizCuratedNotes renders the corresponding package data.
 func RenderQuizCuratedNotes(paths QuizArtifactPaths, notes QuizCuratedNotes) string {
 	var output bytes.Buffer
 

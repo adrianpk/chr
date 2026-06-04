@@ -7,17 +7,20 @@ import (
 	"time"
 )
 
+// TicketReconciler defines a package boundary interface.
 type TicketReconciler interface {
 	ReconcileProjectTickets(ctx context.Context, opts ReconcileProjectTicketsOptions) (TicketReconciliationResult, error)
 	ReconcileProjectTicket(ctx context.Context, opts ReconcileProjectTicketOptions) (TicketReconciliationResult, error)
 }
 
+// ReconcileProjectTicketsOptions describes a package boundary value.
 type ReconcileProjectTicketsOptions struct {
 	ProjectID    string
 	ProjectDir   string
 	ReconciledAt time.Time
 }
 
+// ReconcileProjectTicketOptions describes a package boundary value.
 type ReconcileProjectTicketOptions struct {
 	ProjectID    string
 	ProjectDir   string
@@ -25,15 +28,19 @@ type ReconcileProjectTicketOptions struct {
 	ReconciledAt time.Time
 }
 
+// TicketReconciliationResult describes a package boundary value.
 type TicketReconciliationResult struct {
 	IndexedTickets int
 	Blockers       []TicketReconciliationBlocker
 }
 
+// TicketReconciliationBlockerKind defines a package boundary type.
 type TicketReconciliationBlockerKind string
 
+// TicketReconciliationBlockerParseError defines a package boundary constant.
 const TicketReconciliationBlockerParseError TicketReconciliationBlockerKind = "parse_error"
 
+// TicketReconciliationBlocker describes a package boundary value.
 type TicketReconciliationBlocker struct {
 	Kind         TicketReconciliationBlockerKind
 	Path         string
@@ -41,10 +48,12 @@ type TicketReconciliationBlocker struct {
 	Err          error
 }
 
+// HasBlockers executes the corresponding package operation.
 func (r TicketReconciliationResult) HasBlockers() bool {
 	return len(r.Blockers) > 0
 }
 
+// FirstBlocker executes the corresponding package operation.
 func (r TicketReconciliationResult) FirstBlocker() (TicketReconciliationBlocker, bool) {
 	if len(r.Blockers) == 0 {
 		return TicketReconciliationBlocker{}, false
@@ -59,6 +68,7 @@ type ticketReconciler struct {
 	index     TicketIndex
 }
 
+// NewTicketReconciler constructs the corresponding package service or value.
 func NewTicketReconciler(index TicketIndex) TicketReconciler {
 	return &ticketReconciler{
 		rebuilder: NewTicketIndexRebuilder(index),
@@ -67,6 +77,7 @@ func NewTicketReconciler(index TicketIndex) TicketReconciler {
 	}
 }
 
+// ReconcileProjectTickets executes the corresponding package operation.
 func (r *ticketReconciler) ReconcileProjectTickets(
 	ctx context.Context,
 	opts ReconcileProjectTicketsOptions,
@@ -91,6 +102,7 @@ func (r *ticketReconciler) ReconcileProjectTickets(
 	}, nil
 }
 
+// ReconcileProjectTicket executes the corresponding package operation.
 func (r *ticketReconciler) ReconcileProjectTicket(
 	ctx context.Context,
 	opts ReconcileProjectTicketOptions,

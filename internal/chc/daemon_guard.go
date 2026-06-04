@@ -5,8 +5,10 @@ import (
 	"time"
 )
 
+// DefaultDaemonStaleAfter defines a package boundary constant.
 const DefaultDaemonStaleAfter = 5 * time.Minute
 
+// DaemonStartGuardDecision describes a package boundary value.
 type DaemonStartGuardDecision struct {
 	Allowed bool
 	Stale   bool
@@ -14,6 +16,7 @@ type DaemonStartGuardDecision struct {
 	State   DaemonState
 }
 
+// EvaluateDaemonStartGuard executes the corresponding package operation.
 func EvaluateDaemonStartGuard(state DaemonState, now time.Time, staleAfter time.Duration) (DaemonStartGuardDecision, error) {
 	err := ValidateDaemonState(state)
 	if err != nil {

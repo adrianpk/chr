@@ -5,41 +5,61 @@ import (
 	"time"
 )
 
+// AssistedAuthoringIntent defines a package boundary type.
 type AssistedAuthoringIntent string
 
 const (
-	AssistedAuthoringIntentDiscover   AssistedAuthoringIntent = "discover"
-	AssistedAuthoringIntentClarify    AssistedAuthoringIntent = "clarify"
-	AssistedAuthoringIntentCurate     AssistedAuthoringIntent = "curate"
+	// AssistedAuthoringIntentDiscover defines a package boundary constant.
+	AssistedAuthoringIntentDiscover AssistedAuthoringIntent = "discover"
+	// AssistedAuthoringIntentClarify defines a package boundary constant.
+	AssistedAuthoringIntentClarify AssistedAuthoringIntent = "clarify"
+	// AssistedAuthoringIntentCurate defines a package boundary constant.
+	AssistedAuthoringIntentCurate AssistedAuthoringIntent = "curate"
+	// AssistedAuthoringIntentSynthesize defines a package boundary constant.
 	AssistedAuthoringIntentSynthesize AssistedAuthoringIntent = "synthesize"
 )
 
+// AssistedAuthoringTurnStatus defines a package boundary type.
 type AssistedAuthoringTurnStatus string
 
 const (
-	AssistedAuthoringTurnPending   AssistedAuthoringTurnStatus = "pending"
-	AssistedAuthoringTurnAsked     AssistedAuthoringTurnStatus = "asked"
-	AssistedAuthoringTurnAnswered  AssistedAuthoringTurnStatus = "answered"
+	// AssistedAuthoringTurnPending defines a package boundary constant.
+	AssistedAuthoringTurnPending AssistedAuthoringTurnStatus = "pending"
+	// AssistedAuthoringTurnAsked defines a package boundary constant.
+	AssistedAuthoringTurnAsked AssistedAuthoringTurnStatus = "asked"
+	// AssistedAuthoringTurnAnswered defines a package boundary constant.
+	AssistedAuthoringTurnAnswered AssistedAuthoringTurnStatus = "answered"
+	// AssistedAuthoringTurnCompleted defines a package boundary constant.
 	AssistedAuthoringTurnCompleted AssistedAuthoringTurnStatus = "completed"
-	AssistedAuthoringTurnBlocked   AssistedAuthoringTurnStatus = "blocked"
+	// AssistedAuthoringTurnBlocked defines a package boundary constant.
+	AssistedAuthoringTurnBlocked AssistedAuthoringTurnStatus = "blocked"
 )
 
+// AssistedAuthoringCompletionReason defines a package boundary type.
 type AssistedAuthoringCompletionReason string
 
 const (
+	// AssistedAuthoringCompletionEnoughContext defines a package boundary constant.
 	AssistedAuthoringCompletionEnoughContext AssistedAuthoringCompletionReason = "enough_context"
-	AssistedAuthoringCompletionUserStopped   AssistedAuthoringCompletionReason = "user_stopped"
-	AssistedAuthoringCompletionTurnLimit     AssistedAuthoringCompletionReason = "turn_limit"
+	// AssistedAuthoringCompletionUserStopped defines a package boundary constant.
+	AssistedAuthoringCompletionUserStopped AssistedAuthoringCompletionReason = "user_stopped"
+	// AssistedAuthoringCompletionTurnLimit defines a package boundary constant.
+	AssistedAuthoringCompletionTurnLimit AssistedAuthoringCompletionReason = "turn_limit"
 )
 
+// AssistedAuthoringBlockedReason defines a package boundary type.
 type AssistedAuthoringBlockedReason string
 
 const (
+	// AssistedAuthoringBlockedMissingContext defines a package boundary constant.
 	AssistedAuthoringBlockedMissingContext AssistedAuthoringBlockedReason = "missing_context"
-	AssistedAuthoringBlockedModelFailure   AssistedAuthoringBlockedReason = "model_failure"
-	AssistedAuthoringBlockedInvalidAnswer  AssistedAuthoringBlockedReason = "invalid_answer"
+	// AssistedAuthoringBlockedModelFailure defines a package boundary constant.
+	AssistedAuthoringBlockedModelFailure AssistedAuthoringBlockedReason = "model_failure"
+	// AssistedAuthoringBlockedInvalidAnswer defines a package boundary constant.
+	AssistedAuthoringBlockedInvalidAnswer AssistedAuthoringBlockedReason = "invalid_answer"
 )
 
+// AssistedAuthoringConfig describes a package boundary value.
 type AssistedAuthoringConfig struct {
 	SessionID        string
 	ProjectID        string
@@ -50,6 +70,7 @@ type AssistedAuthoringConfig struct {
 	RequireArtifacts bool
 }
 
+// AssistedAuthoringTurn describes a package boundary value.
 type AssistedAuthoringTurn struct {
 	ID        string
 	SessionID string
@@ -63,6 +84,7 @@ type AssistedAuthoringTurn struct {
 	UpdatedAt time.Time
 }
 
+// AssistedAuthoringQuestion describes a package boundary value.
 type AssistedAuthoringQuestion struct {
 	ID        string
 	Prompt    string
@@ -70,12 +92,14 @@ type AssistedAuthoringQuestion struct {
 	Required  bool
 }
 
+// AssistedAuthoringAnswer describes a package boundary value.
 type AssistedAuthoringAnswer struct {
 	QuestionID string
 	Text       string
 	AnsweredAt time.Time
 }
 
+// AssistedAuthoringTurnResult describes a package boundary value.
 type AssistedAuthoringTurnResult struct {
 	CompletionReason AssistedAuthoringCompletionReason
 	BlockedReason    AssistedAuthoringBlockedReason
@@ -83,6 +107,7 @@ type AssistedAuthoringTurnResult struct {
 	NextIntent       AssistedAuthoringIntent
 }
 
+// ValidateAssistedAuthoringConfig validates the corresponding package boundary value.
 func ValidateAssistedAuthoringConfig(config AssistedAuthoringConfig) error {
 	if config.SessionID == "" {
 		return fmt.Errorf("assisted authoring session id is required")
@@ -111,6 +136,7 @@ func ValidateAssistedAuthoringConfig(config AssistedAuthoringConfig) error {
 	return nil
 }
 
+// ValidateAssistedAuthoringTurn validates the corresponding package boundary value.
 func ValidateAssistedAuthoringTurn(turn AssistedAuthoringTurn) error {
 	if turn.ID == "" {
 		return fmt.Errorf("assisted authoring turn id is required")
@@ -140,6 +166,7 @@ func ValidateAssistedAuthoringTurn(turn AssistedAuthoringTurn) error {
 	return validateAssistedAuthoringTurnTimes(turn)
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (i AssistedAuthoringIntent) Valid() bool {
 	switch i {
 	case AssistedAuthoringIntentDiscover,
@@ -152,6 +179,7 @@ func (i AssistedAuthoringIntent) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s AssistedAuthoringTurnStatus) Valid() bool {
 	switch s {
 	case AssistedAuthoringTurnPending,
@@ -165,6 +193,7 @@ func (s AssistedAuthoringTurnStatus) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (r AssistedAuthoringCompletionReason) Valid() bool {
 	switch r {
 	case AssistedAuthoringCompletionEnoughContext,
@@ -176,6 +205,7 @@ func (r AssistedAuthoringCompletionReason) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (r AssistedAuthoringBlockedReason) Valid() bool {
 	switch r {
 	case AssistedAuthoringBlockedMissingContext,

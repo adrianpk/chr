@@ -8,10 +8,12 @@ import (
 	"strings"
 )
 
+// ContextPackageMaterializer defines a package boundary interface.
 type ContextPackageMaterializer interface {
 	MaterializeContextPackage(ctx context.Context, opts MaterializeContextPackageOptions) error
 }
 
+// MaterializeContextPackageOptions describes a package boundary value.
 type MaterializeContextPackageOptions struct {
 	Composition       ContextCompositionPlan
 	Plan              RuntimePlan
@@ -26,10 +28,12 @@ type MaterializeContextPackageOptions struct {
 
 type contextPackageMaterializer struct{}
 
+// NewContextPackageMaterializer constructs the corresponding package service or value.
 func NewContextPackageMaterializer() ContextPackageMaterializer {
 	return &contextPackageMaterializer{}
 }
 
+// MaterializeContextPackage executes the corresponding package operation.
 func (m *contextPackageMaterializer) MaterializeContextPackage(
 	ctx context.Context,
 	opts MaterializeContextPackageOptions,
@@ -65,6 +69,7 @@ func (m *contextPackageMaterializer) MaterializeContextPackage(
 	return nil
 }
 
+// RenderMainContextPackage renders the corresponding package data.
 func RenderMainContextPackage(opts MaterializeContextPackageOptions) string {
 	var output strings.Builder
 
@@ -79,6 +84,7 @@ func RenderMainContextPackage(opts MaterializeContextPackageOptions) string {
 	return output.String()
 }
 
+// RenderContextPackageDryRun renders the corresponding package data.
 func RenderContextPackageDryRun(opts MaterializeContextPackageOptions) string {
 	var output strings.Builder
 

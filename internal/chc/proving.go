@@ -15,6 +15,7 @@ import (
 	"strings"
 )
 
+// ProvingObjective describes a package boundary value.
 type ProvingObjective struct {
 	ID             string
 	TicketKey      string
@@ -28,6 +29,7 @@ type ProvingObjective struct {
 	Body           string
 }
 
+// ProvingSandboxRunOptions describes a package boundary value.
 type ProvingSandboxRunOptions struct {
 	ProjectDir    string
 	ObjectivePath string
@@ -37,6 +39,7 @@ type ProvingSandboxRunOptions struct {
 	Stderr        io.Writer
 }
 
+// ProvingSandboxRunResult describes a package boundary value.
 type ProvingSandboxRunResult struct {
 	Objective  ProvingObjective
 	Plan       RuntimePlan
@@ -46,6 +49,7 @@ type ProvingSandboxRunResult struct {
 	DryRun     bool
 }
 
+// ProvingValidationCommandResult describes a package boundary value.
 type ProvingValidationCommandResult struct {
 	Command  string
 	ExitCode int
@@ -53,6 +57,7 @@ type ProvingValidationCommandResult struct {
 	Stderr   string
 }
 
+// ProvingValidationResult describes a package boundary value.
 type ProvingValidationResult struct {
 	Objective ProvingObjective
 	Commands  []ProvingValidationCommandResult
@@ -60,8 +65,10 @@ type ProvingValidationResult struct {
 	LogPath   string
 }
 
+// ProvingValidationRunner defines a package boundary type.
 type ProvingValidationRunner func(context.Context, string, ProvingObjective) (ProvingValidationResult, error)
 
+// ProvingRalphLoopOptions describes a package boundary value.
 type ProvingRalphLoopOptions struct {
 	ProjectDir       string
 	ObjectivePath    string
@@ -72,6 +79,7 @@ type ProvingRalphLoopOptions struct {
 	Stderr           io.Writer
 }
 
+// ProvingRalphLoopResult describes a package boundary value.
 type ProvingRalphLoopResult struct {
 	Objective   ProvingObjective
 	Attempts    []ProvingRalphLoopAttempt
@@ -80,6 +88,7 @@ type ProvingRalphLoopResult struct {
 	SummaryPath string
 }
 
+// ProvingRalphLoopAttempt describes a package boundary value.
 type ProvingRalphLoopAttempt struct {
 	Number           int
 	ObjectiveID      string
@@ -94,17 +103,26 @@ type ProvingRalphLoopAttempt struct {
 }
 
 const (
-	ProvingRalphLoopStatusPassed  = "passed"
-	ProvingRalphLoopStatusFailed  = "failed"
+	// ProvingRalphLoopStatusPassed defines a package boundary constant.
+	ProvingRalphLoopStatusPassed = "passed"
+	// ProvingRalphLoopStatusFailed defines a package boundary constant.
+	ProvingRalphLoopStatusFailed = "failed"
+	// ProvingRalphLoopStatusBlocked defines a package boundary constant.
 	ProvingRalphLoopStatusBlocked = "blocked"
 
+	// ProvingRalphLoopStopValidationPassed defines a package boundary constant.
 	ProvingRalphLoopStopValidationPassed = "validation_passed"
-	ProvingRalphLoopStopRepeatedFailure  = "repeated_failure"
-	ProvingRalphLoopStopMaxAttempts      = "max_attempts"
-	ProvingRalphLoopStopAgentFailed      = "agent_failed"
+	// ProvingRalphLoopStopRepeatedFailure defines a package boundary constant.
+	ProvingRalphLoopStopRepeatedFailure = "repeated_failure"
+	// ProvingRalphLoopStopMaxAttempts defines a package boundary constant.
+	ProvingRalphLoopStopMaxAttempts = "max_attempts"
+	// ProvingRalphLoopStopAgentFailed defines a package boundary constant.
+	ProvingRalphLoopStopAgentFailed = "agent_failed"
+	// ProvingRalphLoopStopValidationFailed defines a package boundary constant.
 	ProvingRalphLoopStopValidationFailed = "validation_failed"
 )
 
+// LoadProvingObjective loads the corresponding package data.
 func LoadProvingObjective(path string) (ProvingObjective, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -119,6 +137,7 @@ func LoadProvingObjective(path string) (ProvingObjective, error) {
 	return objective, nil
 }
 
+// ParseProvingObjective parses the corresponding package data.
 func ParseProvingObjective(content string) (ProvingObjective, error) {
 	normalized := strings.ReplaceAll(content, "\r\n", "\n")
 	if !strings.HasPrefix(normalized, "---\n") {
@@ -160,6 +179,7 @@ func ParseProvingObjective(content string) (ProvingObjective, error) {
 	return objective, nil
 }
 
+// RunProvingSandbox executes the corresponding package operation.
 func RunProvingSandbox(ctx context.Context, opts ProvingSandboxRunOptions) (ProvingSandboxRunResult, error) {
 	projectDir, objective, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
 	if err != nil {
@@ -169,6 +189,7 @@ func RunProvingSandbox(ctx context.Context, opts ProvingSandboxRunOptions) (Prov
 	return RunProvingSandboxForObjective(ctx, opts, projectDir, objective)
 }
 
+// RunProvingSandboxForObjective executes the corresponding package operation.
 func RunProvingSandboxForObjective(
 	ctx context.Context,
 	opts ProvingSandboxRunOptions,
@@ -203,6 +224,7 @@ func RunProvingSandboxForObjective(
 	return result, nil
 }
 
+// RunProvingValidation executes the corresponding package operation.
 func RunProvingValidation(ctx context.Context, projectDir, objectivePath string) (ProvingValidationResult, error) {
 	projectDir, objective, err := loadProvingObjectiveForProject(projectDir, objectivePath)
 	if err != nil {
@@ -212,6 +234,7 @@ func RunProvingValidation(ctx context.Context, projectDir, objectivePath string)
 	return RunProvingValidationForObjective(ctx, projectDir, objective)
 }
 
+// RunProvingValidationForObjective executes the corresponding package operation.
 func RunProvingValidationForObjective(
 	ctx context.Context,
 	projectDir string,
@@ -251,6 +274,7 @@ func RunProvingValidationForObjective(
 	return result, nil
 }
 
+// RunProvingRalphLoop executes the corresponding package operation.
 func RunProvingRalphLoop(ctx context.Context, opts ProvingRalphLoopOptions) (ProvingRalphLoopResult, error) {
 	projectDir, objective, err := loadProvingObjectiveForProject(opts.ProjectDir, opts.ObjectivePath)
 	if err != nil {
@@ -382,6 +406,7 @@ func runProvingRalphLoopAttempt(
 	return attempt, &validation, "", ""
 }
 
+// ProvingValidationCommands executes the corresponding package operation.
 func ProvingValidationCommands() []string {
 	return []string{
 		"make compile",
@@ -473,6 +498,7 @@ func commandExitCode(err error) int {
 	return -1
 }
 
+// RenderProvingValidationResult renders the corresponding package data.
 func RenderProvingValidationResult(result ProvingValidationResult) string {
 	var output strings.Builder
 
@@ -514,6 +540,7 @@ func RenderProvingValidationResult(result ProvingValidationResult) string {
 	return output.String()
 }
 
+// RenderProvingValidationFeedback renders the corresponding package data.
 func RenderProvingValidationFeedback(result ProvingValidationResult) string {
 	var output strings.Builder
 
@@ -552,6 +579,7 @@ func RenderProvingValidationFeedback(result ProvingValidationResult) string {
 	return output.String()
 }
 
+// RenderProvingRalphLoopResult renders the corresponding package data.
 func RenderProvingRalphLoopResult(result ProvingRalphLoopResult) string {
 	var output strings.Builder
 
@@ -621,6 +649,7 @@ func writeProvingRalphLoopAttempt(output *strings.Builder, attempt ProvingRalphL
 	output.WriteString("\n")
 }
 
+// ProvingValidationFailureSignature executes the corresponding package operation.
 func ProvingValidationFailureSignature(result ProvingValidationResult) string {
 	hash := sha256.New()
 
@@ -642,6 +671,7 @@ func ProvingValidationFailureSignature(result ProvingValidationResult) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
+// PlanProvingSandboxRun executes the corresponding package operation.
 func PlanProvingSandboxRun(projectDir, objectivePath string) (ProvingSandboxRunResult, error) {
 	projectDir, objective, err := loadProvingObjectiveForProject(projectDir, objectivePath)
 	if err != nil {
@@ -651,6 +681,7 @@ func PlanProvingSandboxRun(projectDir, objectivePath string) (ProvingSandboxRunR
 	return PlanProvingSandboxRunForObjective(projectDir, objective)
 }
 
+// PlanProvingSandboxRunForObjective executes the corresponding package operation.
 func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjective) (ProvingSandboxRunResult, error) {
 	config, err := LoadWorkspaceConfig(projectDir)
 	if err != nil {
@@ -758,6 +789,7 @@ func writeProvingRalphLoopSummary(result ProvingRalphLoopResult) error {
 	return nil
 }
 
+// RenderProvingWorkerContext renders the corresponding package data.
 func RenderProvingWorkerContext(result ProvingSandboxRunResult) string {
 	var output strings.Builder
 

@@ -8,10 +8,12 @@ import (
 	"time"
 )
 
+// TicketStatusUpdater defines a package boundary interface.
 type TicketStatusUpdater interface {
 	UpdateStatus(ctx context.Context, opts UpdateTicketStatusOptions) error
 }
 
+// UpdateTicketStatusOptions describes a package boundary value.
 type UpdateTicketStatusOptions struct {
 	Path      string
 	Status    string
@@ -19,20 +21,33 @@ type UpdateTicketStatusOptions struct {
 }
 
 const (
-	TicketStatusBacklog        = "backlog"
-	TicketStatusReadyForDev    = "ready_for_dev"
-	TicketStatusInProgress     = "in_progress"
+	// TicketStatusBacklog defines a package boundary constant.
+	TicketStatusBacklog = "backlog"
+	// TicketStatusReadyForDev defines a package boundary constant.
+	TicketStatusReadyForDev = "ready_for_dev"
+	// TicketStatusInProgress defines a package boundary constant.
+	TicketStatusInProgress = "in_progress"
+	// TicketStatusReadyForReview defines a package boundary constant.
 	TicketStatusReadyForReview = "ready_for_review"
-	TicketStatusReadyForMerge  = "ready_for_merge"
-	TicketStatusDone           = "done"
+	// TicketStatusReadyForMerge defines a package boundary constant.
+	TicketStatusReadyForMerge = "ready_for_merge"
+	// TicketStatusDone defines a package boundary constant.
+	TicketStatusDone = "done"
 
-	TicketStatusOpenLegacy      = "open"
-	TicketStatusReadyLegacy     = "ready"
+	// TicketStatusOpenLegacy defines a package boundary constant.
+	TicketStatusOpenLegacy = "open"
+	// TicketStatusReadyLegacy defines a package boundary constant.
+	TicketStatusReadyLegacy = "ready"
+	// TicketStatusReviewingLegacy defines a package boundary constant.
 	TicketStatusReviewingLegacy = "reviewing"
-	TicketStatusBlockedLegacy   = "blocked"
-	TicketStatusSolvedLegacy    = "solved"
-	TicketStatusMergedLegacy    = "merged"
-	TicketStatusClosedLegacy    = "closed"
+	// TicketStatusBlockedLegacy defines a package boundary constant.
+	TicketStatusBlockedLegacy = "blocked"
+	// TicketStatusSolvedLegacy defines a package boundary constant.
+	TicketStatusSolvedLegacy = "solved"
+	// TicketStatusMergedLegacy defines a package boundary constant.
+	TicketStatusMergedLegacy = "merged"
+	// TicketStatusClosedLegacy defines a package boundary constant.
+	TicketStatusClosedLegacy = "closed"
 )
 
 var normalBoardTicketStatuses = map[string]struct{}{
@@ -55,10 +70,12 @@ var legacyTicketStatusAliases = map[string]string{
 
 type ticketStatusUpdater struct{}
 
+// NewTicketStatusUpdater constructs the corresponding package service or value.
 func NewTicketStatusUpdater() TicketStatusUpdater {
 	return &ticketStatusUpdater{}
 }
 
+// UpdateStatus executes the corresponding package operation.
 func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicketStatusOptions) error {
 	err := ctx.Err()
 	if err != nil {
@@ -158,6 +175,7 @@ func hasPullRequestReviewRef(refs []TicketReviewRef) bool {
 	return false
 }
 
+// IsValidTicketStatus executes the corresponding package operation.
 func IsValidTicketStatus(status string) bool {
 	status = strings.TrimSpace(status)
 	if _, ok := normalBoardTicketStatuses[status]; ok {
@@ -171,12 +189,14 @@ func IsValidTicketStatus(status string) bool {
 	return status == TicketStatusBlockedLegacy
 }
 
+// IsNormalBoardTicketStatus executes the corresponding package operation.
 func IsNormalBoardTicketStatus(status string) bool {
 	_, ok := normalBoardTicketStatuses[strings.TrimSpace(status)]
 
 	return ok
 }
 
+// BoardTicketStatusFor executes the corresponding package operation.
 func BoardTicketStatusFor(status string) (string, bool) {
 	status = strings.TrimSpace(status)
 	if IsNormalBoardTicketStatus(status) {

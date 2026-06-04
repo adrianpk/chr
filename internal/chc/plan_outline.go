@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// GeneratedPlanOutline describes a package boundary value.
 type GeneratedPlanOutline struct {
 	Scope              QuizScope
 	Title              string
@@ -20,6 +21,7 @@ type GeneratedPlanOutline struct {
 	CreatedAt          time.Time
 }
 
+// GeneratedPlanOutlineSlice describes a package boundary value.
 type GeneratedPlanOutlineSlice struct {
 	ID                     string
 	ShortName              string
@@ -33,18 +35,21 @@ type GeneratedPlanOutlineSlice struct {
 	ImplementationBoundary string
 }
 
+// GeneratedPlanOutlineDependency describes a package boundary value.
 type GeneratedPlanOutlineDependency struct {
 	FromSliceID string
 	ToSliceID   string
 	Reason      string
 }
 
+// HasContent executes the corresponding package operation.
 func (o GeneratedPlanOutline) HasContent() bool {
 	return strings.TrimSpace(o.Title) != "" ||
 		strings.TrimSpace(o.Summary) != "" ||
 		len(o.Slices) > 0
 }
 
+// Slice executes the corresponding package operation.
 func (o GeneratedPlanOutline) Slice(sliceID string) (GeneratedPlanOutlineSlice, bool) {
 	for _, slice := range o.Slices {
 		if slice.ID == sliceID {
@@ -55,6 +60,7 @@ func (o GeneratedPlanOutline) Slice(sliceID string) (GeneratedPlanOutlineSlice, 
 	return GeneratedPlanOutlineSlice{}, false
 }
 
+// ValidateGeneratedPlanOutline validates the corresponding package boundary value.
 func ValidateGeneratedPlanOutline(outline GeneratedPlanOutline) error {
 	if err := ValidateQuizScope(outline.Scope); err != nil {
 		return err

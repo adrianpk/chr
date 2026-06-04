@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// WorkspaceConfig describes a package boundary value.
 type WorkspaceConfig struct {
 	TicketKeyPrefix string
 	Runtime         RuntimeConfig
@@ -16,6 +17,7 @@ type WorkspaceConfig struct {
 	Review          ReviewWorkflowConfig
 }
 
+// RuntimeConfig describes a package boundary value.
 type RuntimeConfig struct {
 	Image             string
 	DockerfilePath    string
@@ -24,29 +26,35 @@ type RuntimeConfig struct {
 	ValidationCommand string
 }
 
+// NotificationConfig describes a package boundary value.
 type NotificationConfig struct {
 	Telegram TelegramNotificationConfig
 }
 
+// ReviewWorkflowConfig describes a package boundary value.
 type ReviewWorkflowConfig struct {
 	Mode                    ReviewWorkflowMode
 	NonBlockingCommentLimit int
 	Providers               ReviewProviderConfig
 }
 
+// ReviewWorkflowMode defines a package boundary type.
 type ReviewWorkflowMode string
 
+// ReviewProviderConfig describes a package boundary value.
 type ReviewProviderConfig struct {
 	Forgejo ReviewProviderTargetConfig
 	GitHub  ReviewProviderTargetConfig
 }
 
+// ReviewProviderTargetConfig describes a package boundary value.
 type ReviewProviderTargetConfig struct {
 	Enabled  bool
 	CLI      string
 	TokenEnv string
 }
 
+// TelegramNotificationConfig describes a package boundary value.
 type TelegramNotificationConfig struct {
 	Enabled     bool
 	BotTokenEnv string
@@ -54,25 +62,40 @@ type TelegramNotificationConfig struct {
 }
 
 const (
-	DefaultRuntimeImage             = "chc-agent-runtime:local"
-	DefaultRuntimeDockerfilePath    = ".chc/user/runtime/agent/Dockerfile"
-	DefaultRuntimeWorkdir           = "/workspace"
-	DefaultRuntimeArtifactDir       = ".chc/user/runtime/runs"
+	// DefaultRuntimeImage defines a package boundary constant.
+	DefaultRuntimeImage = "chc-agent-runtime:local"
+	// DefaultRuntimeDockerfilePath defines a package boundary constant.
+	DefaultRuntimeDockerfilePath = ".chc/user/runtime/agent/Dockerfile"
+	// DefaultRuntimeWorkdir defines a package boundary constant.
+	DefaultRuntimeWorkdir = "/workspace"
+	// DefaultRuntimeArtifactDir defines a package boundary constant.
+	DefaultRuntimeArtifactDir = ".chc/user/runtime/runs"
+	// DefaultRuntimeValidationCommand defines a package boundary constant.
 	DefaultRuntimeValidationCommand = "make verify"
 
-	ReviewWorkflowModeAgenticReview    ReviewWorkflowMode = "agentic_review"
-	ReviewWorkflowModeHumanReview      ReviewWorkflowMode = "human_review"
+	// ReviewWorkflowModeAgenticReview defines a package boundary constant.
+	ReviewWorkflowModeAgenticReview ReviewWorkflowMode = "agentic_review"
+	// ReviewWorkflowModeHumanReview defines a package boundary constant.
+	ReviewWorkflowModeHumanReview ReviewWorkflowMode = "human_review"
+	// ReviewWorkflowModeTrustedAutoMerge defines a package boundary constant.
 	ReviewWorkflowModeTrustedAutoMerge ReviewWorkflowMode = "trusted_auto_merge"
 
-	DefaultReviewWorkflowMode                    = ReviewWorkflowModeHumanReview
+	// DefaultReviewWorkflowMode defines a package boundary constant.
+	DefaultReviewWorkflowMode = ReviewWorkflowModeHumanReview
+	// DefaultReviewWorkflowNonBlockingCommentLimit defines a package boundary constant.
 	DefaultReviewWorkflowNonBlockingCommentLimit = 3
 
-	DefaultReviewProviderForgejoCLI      = "tea"
+	// DefaultReviewProviderForgejoCLI defines a package boundary constant.
+	DefaultReviewProviderForgejoCLI = "tea"
+	// DefaultReviewProviderForgejoTokenEnv defines a package boundary constant.
 	DefaultReviewProviderForgejoTokenEnv = "FORGEJO_TOKEN"
-	DefaultReviewProviderGitHubCLI       = "gh"
-	DefaultReviewProviderGitHubTokenEnv  = "GITHUB_TOKEN"
+	// DefaultReviewProviderGitHubCLI defines a package boundary constant.
+	DefaultReviewProviderGitHubCLI = "gh"
+	// DefaultReviewProviderGitHubTokenEnv defines a package boundary constant.
+	DefaultReviewProviderGitHubTokenEnv = "GITHUB_TOKEN"
 )
 
+// DefaultRuntimeConfig executes the corresponding package operation.
 func DefaultRuntimeConfig() RuntimeConfig {
 	return RuntimeConfig{
 		Image:             DefaultRuntimeImage,
@@ -83,10 +106,12 @@ func DefaultRuntimeConfig() RuntimeConfig {
 	}
 }
 
+// DefaultNotificationConfig executes the corresponding package operation.
 func DefaultNotificationConfig() NotificationConfig {
 	return NotificationConfig{}
 }
 
+// DefaultReviewWorkflowConfig executes the corresponding package operation.
 func DefaultReviewWorkflowConfig() ReviewWorkflowConfig {
 	return ReviewWorkflowConfig{
 		Mode:                    DefaultReviewWorkflowMode,
@@ -95,6 +120,7 @@ func DefaultReviewWorkflowConfig() ReviewWorkflowConfig {
 	}
 }
 
+// DefaultReviewProviderConfig executes the corresponding package operation.
 func DefaultReviewProviderConfig() ReviewProviderConfig {
 	return ReviewProviderConfig{
 		Forgejo: ReviewProviderTargetConfig{
@@ -110,6 +136,7 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 	}
 }
 
+// LoadWorkspaceConfig loads the corresponding package data.
 func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 	config := WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,

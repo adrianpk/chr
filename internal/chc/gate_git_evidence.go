@@ -8,14 +8,17 @@ import (
 	"strings"
 )
 
+// GateGitEvidenceService describes a package boundary value.
 type GateGitEvidenceService struct{}
 
+// GateGitEvidenceRequest describes a package boundary value.
 type GateGitEvidenceRequest struct {
 	ProjectDir string
 	BaseRef    string
 	HeadRef    string
 }
 
+// GateGitEvidence describes a package boundary value.
 type GateGitEvidence struct {
 	Base      GateGitRef
 	Head      GateGitRef
@@ -25,16 +28,19 @@ type GateGitEvidence struct {
 	DiffStat  string
 }
 
+// GateGitRef describes a package boundary value.
 type GateGitRef struct {
 	Ref string
 	SHA string
 }
 
+// GateGitCommit describes a package boundary value.
 type GateGitCommit struct {
 	SHA     string
 	Subject string
 }
 
+// GateGitChangedFile describes a package boundary value.
 type GateGitChangedFile struct {
 	Status string
 	Path   string
@@ -48,10 +54,12 @@ type gateGitEvidenceRequest struct {
 	rangeRef   string
 }
 
+// NewGateGitEvidenceService constructs the corresponding package service or value.
 func NewGateGitEvidenceService() GateGitEvidenceService {
 	return GateGitEvidenceService{}
 }
 
+// Collect executes the corresponding package operation.
 func (s GateGitEvidenceService) Collect(
 	ctx context.Context,
 	request GateGitEvidenceRequest,

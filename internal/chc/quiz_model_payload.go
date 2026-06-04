@@ -8,18 +8,26 @@ import (
 )
 
 const (
+	// QuizModelDeepAction defines a package boundary constant.
 	QuizModelDeepAction = "quiz_question_generation"
+	// QuizModelFastAction defines a package boundary constant.
 	QuizModelFastAction = "quiz_fast_question_generation"
 
+	// QuizModelDeepStrategy defines a package boundary constant.
 	QuizModelDeepStrategy = "deep"
+	// QuizModelFastStrategy defines a package boundary constant.
 	QuizModelFastStrategy = "batch"
 
+	// QuizModelContextLayerProject defines a package boundary constant.
 	QuizModelContextLayerProject = "project"
-	QuizModelContextLayerQuiz    = "quizzes"
+	// QuizModelContextLayerQuiz defines a package boundary constant.
+	QuizModelContextLayerQuiz = "quizzes"
 
+	// QuizModelMaxTags defines a package boundary constant.
 	QuizModelMaxTags = 8
 )
 
+// QuizModelQuestionRequiredFields defines a package boundary variable.
 var QuizModelQuestionRequiredFields = []string{
 	"question",
 	"tags",
@@ -27,6 +35,7 @@ var QuizModelQuestionRequiredFields = []string{
 	"completion_recommended",
 }
 
+// QuizModelPayload describes a package boundary value.
 type QuizModelPayload struct {
 	Project         QuizModelProjectPayload         `json:"project"`
 	Quiz            QuizModelQuizPayload            `json:"quiz"`
@@ -35,6 +44,7 @@ type QuizModelPayload struct {
 	OutputContract  QuizModelOutputContractPayload  `json:"output_contract"`
 }
 
+// QuizModelProjectPayload describes a package boundary value.
 type QuizModelProjectPayload struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -42,6 +52,7 @@ type QuizModelProjectPayload struct {
 	StackSlug   string `json:"stack_slug,omitempty"`
 }
 
+// QuizModelQuizPayload describes a package boundary value.
 type QuizModelQuizPayload struct {
 	ID         string `json:"id"`
 	UseCaseID  string `json:"use_case_id,omitempty"`
@@ -49,12 +60,14 @@ type QuizModelQuizPayload struct {
 	Mode       string `json:"mode"`
 }
 
+// QuizModelCurrentQuestionPayload describes a package boundary value.
 type QuizModelCurrentQuestionPayload struct {
 	Question     string         `json:"question"`
 	Tags         []string       `json:"tags"`
 	PromptIntent map[string]any `json:"prompt_intent"`
 }
 
+// QuizModelEntryPayload describes a package boundary value.
 type QuizModelEntryPayload struct {
 	Question string   `json:"question"`
 	Answer   string   `json:"answer"`
@@ -62,11 +75,13 @@ type QuizModelEntryPayload struct {
 	Tags     []string `json:"tags"`
 }
 
+// QuizModelOutputContractPayload describes a package boundary value.
 type QuizModelOutputContractPayload struct {
 	RequiredFields    []string `json:"required_fields"`
 	RenderedTextField string   `json:"rendered_text_field"`
 }
 
+// QuizModelQuestionPayload describes a package boundary value.
 type QuizModelQuestionPayload struct {
 	Question              string   `json:"question"`
 	Tags                  []string `json:"tags"`
@@ -74,22 +89,26 @@ type QuizModelQuestionPayload struct {
 	CompletionRecommended bool     `json:"completion_recommended"`
 }
 
+// QuizModelFastQuestionPayload describes a package boundary value.
 type QuizModelFastQuestionPayload struct {
 	Questions []QuizModelQuestionPayload `json:"questions"`
 }
 
+// QuizModelDraftSpecPayload describes a package boundary value.
 type QuizModelDraftSpecPayload struct {
 	Title  string `json:"title"`
 	Body   string `json:"body"`
 	Status string `json:"status"`
 }
 
+// QuizModelPlanPayload describes a package boundary value.
 type QuizModelPlanPayload struct {
 	Title  string `json:"title"`
 	Body   string `json:"body"`
 	Status string `json:"status"`
 }
 
+// QuizModelPlanOutlinePayload describes a package boundary value.
 type QuizModelPlanOutlinePayload struct {
 	Title              string                                  `json:"title"`
 	Status             string                                  `json:"status"`
@@ -102,6 +121,7 @@ type QuizModelPlanOutlinePayload struct {
 	Dependencies       []QuizModelPlanOutlineDependencyPayload `json:"dependencies"`
 }
 
+// QuizModelPlanOutlineSlicePayload describes a package boundary value.
 type QuizModelPlanOutlineSlicePayload struct {
 	ID                     string   `json:"id"`
 	ShortName              string   `json:"short_name"`
@@ -115,12 +135,14 @@ type QuizModelPlanOutlineSlicePayload struct {
 	ImplementationBoundary string   `json:"implementation_boundary"`
 }
 
+// QuizModelPlanOutlineDependencyPayload describes a package boundary value.
 type QuizModelPlanOutlineDependencyPayload struct {
 	FromSliceID string `json:"from_slice_id"`
 	ToSliceID   string `json:"to_slice_id"`
 	Reason      string `json:"reason"`
 }
 
+// QuizModelPlanSliceDetailPayload describes a package boundary value.
 type QuizModelPlanSliceDetailPayload struct {
 	SliceID                string                                  `json:"slice_id"`
 	ShortName              string                                  `json:"short_name"`
@@ -136,12 +158,14 @@ type QuizModelPlanSliceDetailPayload struct {
 	NonGoals               []string                                `json:"non_goals"`
 }
 
+// QuizModelPlanSliceTaskPayload describes a package boundary value.
 type QuizModelPlanSliceTaskPayload struct {
 	ID         string `json:"id"`
 	Summary    string `json:"summary"`
 	CommitHint string `json:"commit_hint"`
 }
 
+// QuizModelPlanSliceTicketMetadataPayload describes a package boundary value.
 type QuizModelPlanSliceTicketMetadataPayload struct {
 	Title    string   `json:"title"`
 	Synopsis string   `json:"synopsis"`
@@ -151,10 +175,12 @@ type QuizModelPlanSliceTicketMetadataPayload struct {
 	Tags     []string `json:"tags"`
 }
 
+// QuizModelPlanSliceBranchMetadataPayload describes a package boundary value.
 type QuizModelPlanSliceBranchMetadataPayload struct {
 	BranchName string `json:"branch_name"`
 }
 
+// QuizModelPlanTrackingPayload describes a package boundary value.
 type QuizModelPlanTrackingPayload struct {
 	Title   string                               `json:"title"`
 	Body    string                               `json:"body"`
@@ -162,6 +188,7 @@ type QuizModelPlanTrackingPayload struct {
 	Tickets []QuizModelPlanTrackingTicketPayload `json:"tickets"`
 }
 
+// QuizModelPlanTrackingTicketPayload describes a package boundary value.
 type QuizModelPlanTrackingTicketPayload struct {
 	SliceID      string   `json:"slice_id"`
 	Title        string   `json:"title"`
@@ -175,6 +202,7 @@ type QuizModelPlanTrackingTicketPayload struct {
 	Dependencies []string `json:"dependencies"`
 }
 
+// QuizModelPromptIntentPayload describes a package boundary value.
 type QuizModelPromptIntentPayload struct {
 	Kind               string         `json:"kind"`
 	Controls           []string       `json:"controls"`
@@ -184,6 +212,7 @@ type QuizModelPromptIntentPayload struct {
 	Metadata           map[string]any `json:"metadata"`
 }
 
+// NewQuizModelOutputContract constructs the corresponding package service or value.
 func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModelOutputContractPayload {
 	if action == QuizModelActionGeneratePlanSliceDetail {
 		return QuizModelOutputContractPayload{
@@ -257,6 +286,7 @@ func quizModelPlanSliceDetailRequiredFields() []string {
 	}
 }
 
+// ValidateQuizModelQuestionPayload validates the corresponding package boundary value.
 func ValidateQuizModelQuestionPayload(payload QuizModelQuestionPayload) (QuizModelQuestionPayload, error) {
 	normalized := QuizModelQuestionPayload{
 		Question:              strings.TrimSpace(payload.Question),
@@ -273,6 +303,7 @@ func ValidateQuizModelQuestionPayload(payload QuizModelQuestionPayload) (QuizMod
 	return normalized, nil
 }
 
+// DecodeQuizModelQuestionPayload decodes the corresponding package payload.
 func DecodeQuizModelQuestionPayload(content []byte) (QuizModelQuestionPayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -294,6 +325,7 @@ func DecodeQuizModelQuestionPayload(content []byte) (QuizModelQuestionPayload, e
 	return ValidateQuizModelQuestionPayload(payload)
 }
 
+// DecodeQuizModelFastQuestionPayload decodes the corresponding package payload.
 func DecodeQuizModelFastQuestionPayload(content []byte) (QuizModelFastQuestionPayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -315,6 +347,7 @@ func DecodeQuizModelFastQuestionPayload(content []byte) (QuizModelFastQuestionPa
 	return ValidateQuizModelFastQuestionPayload(payload)
 }
 
+// DecodeQuizModelDraftSpecPayload decodes the corresponding package payload.
 func DecodeQuizModelDraftSpecPayload(content []byte) (QuizModelDraftSpecPayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -336,6 +369,7 @@ func DecodeQuizModelDraftSpecPayload(content []byte) (QuizModelDraftSpecPayload,
 	return ValidateQuizModelDraftSpecPayload(payload)
 }
 
+// DecodeQuizModelPlanPayload decodes the corresponding package payload.
 func DecodeQuizModelPlanPayload(content []byte) (QuizModelPlanPayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -357,6 +391,7 @@ func DecodeQuizModelPlanPayload(content []byte) (QuizModelPlanPayload, error) {
 	return ValidateQuizModelPlanPayload(payload)
 }
 
+// DecodeQuizModelPlanOutlinePayload decodes the corresponding package payload.
 func DecodeQuizModelPlanOutlinePayload(content []byte) (QuizModelPlanOutlinePayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -380,6 +415,7 @@ func DecodeQuizModelPlanOutlinePayload(content []byte) (QuizModelPlanOutlinePayl
 	return ValidateQuizModelPlanOutlinePayload(payload)
 }
 
+// DecodeQuizModelPlanSliceDetailPayload decodes the corresponding package payload.
 func DecodeQuizModelPlanSliceDetailPayload(content []byte) (QuizModelPlanSliceDetailPayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -403,6 +439,7 @@ func DecodeQuizModelPlanSliceDetailPayload(content []byte) (QuizModelPlanSliceDe
 	return ValidateQuizModelPlanSliceDetailPayload(payload)
 }
 
+// DecodeQuizModelPlanTrackingPayload decodes the corresponding package payload.
 func DecodeQuizModelPlanTrackingPayload(content []byte) (QuizModelPlanTrackingPayload, error) {
 	fields, err := quizModelRawJSONFields(content)
 	if err != nil {
@@ -424,6 +461,7 @@ func DecodeQuizModelPlanTrackingPayload(content []byte) (QuizModelPlanTrackingPa
 	return ValidateQuizModelPlanTrackingPayload(payload)
 }
 
+// ValidateQuizModelFastQuestionPayload validates the corresponding package boundary value.
 func ValidateQuizModelFastQuestionPayload(payload QuizModelFastQuestionPayload) (QuizModelFastQuestionPayload, error) {
 	if len(payload.Questions) == 0 {
 		return QuizModelFastQuestionPayload{}, fmt.Errorf("quiz model fast response questions must be an array with at least one question")
@@ -442,6 +480,7 @@ func ValidateQuizModelFastQuestionPayload(payload QuizModelFastQuestionPayload) 
 	return QuizModelFastQuestionPayload{Questions: questions}, nil
 }
 
+// ValidateQuizModelDraftSpecPayload validates the corresponding package boundary value.
 func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizModelDraftSpecPayload, error) {
 	normalized := QuizModelDraftSpecPayload{
 		Title:  strings.TrimSpace(payload.Title),
@@ -464,6 +503,7 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 	return normalized, nil
 }
 
+// ValidateQuizModelPlanPayload validates the corresponding package boundary value.
 func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPayload, error) {
 	normalized := QuizModelPlanPayload{
 		Title:  strings.TrimSpace(payload.Title),
@@ -486,6 +526,7 @@ func ValidateQuizModelPlanPayload(payload QuizModelPlanPayload) (QuizModelPlanPa
 	return normalized, nil
 }
 
+// ValidateQuizModelPlanOutlinePayload validates the corresponding package boundary value.
 func ValidateQuizModelPlanOutlinePayload(payload QuizModelPlanOutlinePayload) (QuizModelPlanOutlinePayload, error) {
 	normalized := normalizeQuizModelPlanOutlinePayload(payload)
 	outline := generatedPlanOutlineFromPayload(QuizScope{ProjectID: "payload-validation"}, normalized)
@@ -579,6 +620,7 @@ func generatedPlanOutlineFromPayload(
 	return outline
 }
 
+// ValidateQuizModelPlanSliceDetailPayload validates the corresponding package boundary value.
 func ValidateQuizModelPlanSliceDetailPayload(
 	payload QuizModelPlanSliceDetailPayload,
 ) (QuizModelPlanSliceDetailPayload, error) {
@@ -675,6 +717,7 @@ func generatedPlanSliceDetailFromPayload(
 	return detail
 }
 
+// ValidateQuizModelPlanTrackingPayload validates the corresponding package boundary value.
 func ValidateQuizModelPlanTrackingPayload(
 	payload QuizModelPlanTrackingPayload,
 ) (QuizModelPlanTrackingPayload, error) {
@@ -713,6 +756,7 @@ func ValidateQuizModelPlanTrackingPayload(
 	return normalized, nil
 }
 
+// ValidateQuizModelPlanTrackingTicketPayload validates the corresponding package boundary value.
 func ValidateQuizModelPlanTrackingTicketPayload(
 	payload QuizModelPlanTrackingTicketPayload,
 ) (QuizModelPlanTrackingTicketPayload, error) {
@@ -792,6 +836,7 @@ func normalizePlanTrackingDependencies(dependencies []string) []string {
 	return normalized
 }
 
+// NewQuizModelPromptIntent constructs the corresponding package service or value.
 func NewQuizModelPromptIntent(payload QuizModelQuestionPayload, routingState map[string]any) QuizModelPromptIntentPayload {
 	return QuizModelPromptIntentPayload{
 		Kind:               "quiz_question",
@@ -809,6 +854,7 @@ func NewQuizModelPromptIntent(payload QuizModelQuestionPayload, routingState map
 	}
 }
 
+// QuizModelContextSectionsForPayload executes the corresponding package operation.
 func QuizModelContextSectionsForPayload(payload QuizModelPayload) ([]QuizModelContextSection, error) {
 	err := ValidateQuizModelPayload(payload)
 	if err != nil {
@@ -867,6 +913,7 @@ func QuizModelContextSectionsForPayload(payload QuizModelPayload) ([]QuizModelCo
 	}, nil
 }
 
+// ValidateQuizModelPayload validates the corresponding package boundary value.
 func ValidateQuizModelPayload(payload QuizModelPayload) error {
 	if strings.TrimSpace(payload.Project.ID) == "" {
 		return fmt.Errorf("quiz model payload project id is required")

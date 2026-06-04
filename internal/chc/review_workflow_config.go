@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// ValidateReviewWorkflowConfig validates the corresponding package boundary value.
 func ValidateReviewWorkflowConfig(config ReviewWorkflowConfig) error {
 	if !IsValidReviewWorkflowMode(config.Mode) {
 		return fmt.Errorf("invalid review workflow mode: %s", config.Mode)
@@ -17,6 +18,7 @@ func ValidateReviewWorkflowConfig(config ReviewWorkflowConfig) error {
 	return nil
 }
 
+// IsValidReviewWorkflowMode executes the corresponding package operation.
 func IsValidReviewWorkflowMode(mode ReviewWorkflowMode) bool {
 	switch ReviewWorkflowMode(strings.TrimSpace(string(mode))) {
 	case ReviewWorkflowModeAgenticReview,
@@ -28,6 +30,7 @@ func IsValidReviewWorkflowMode(mode ReviewWorkflowMode) bool {
 	}
 }
 
+// ReviewWorkflowModeDescription executes the corresponding package operation.
 func ReviewWorkflowModeDescription(mode ReviewWorkflowMode) string {
 	switch mode {
 	case ReviewWorkflowModeAgenticReview:

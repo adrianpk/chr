@@ -11,8 +11,10 @@ import (
 	"time"
 )
 
+// PlanDirectory defines a package boundary constant.
 const PlanDirectory = "plans"
 
+// GeneratedPlan describes a package boundary value.
 type GeneratedPlan struct {
 	Scope            QuizScope
 	Title            string
@@ -23,18 +25,21 @@ type GeneratedPlan struct {
 	CreatedAt        time.Time
 }
 
+// GeneratedPlanPaths describes a package boundary value.
 type GeneratedPlanPaths struct {
 	ScopeID      string
 	RelativePath string
 	Path         string
 }
 
+// ArchivedPlanPaths describes a package boundary value.
 type ArchivedPlanPaths struct {
 	ScopeID      string
 	RelativePath string
 	Path         string
 }
 
+// GeneratedPlanLayout executes the corresponding package operation.
 func GeneratedPlanLayout(projectDir string, scope QuizScope) (GeneratedPlanPaths, error) {
 	err := ValidateQuizScope(scope)
 	if err != nil {
@@ -55,6 +60,7 @@ func GeneratedPlanLayout(projectDir string, scope QuizScope) (GeneratedPlanPaths
 	}, nil
 }
 
+// ArchivedPlanLayout executes the corresponding package operation.
 func ArchivedPlanLayout(projectDir string, scope QuizScope, archivedAt time.Time) (ArchivedPlanPaths, error) {
 	err := ValidateQuizScope(scope)
 	if err != nil {
@@ -87,6 +93,7 @@ func ArchivedPlanLayout(projectDir string, scope QuizScope, archivedAt time.Time
 	}, nil
 }
 
+// WriteGeneratedPlan executes the corresponding package operation.
 func WriteGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPlan) (GeneratedPlanPaths, error) {
 	err := ctx.Err()
 	if err != nil {
@@ -116,6 +123,7 @@ func WriteGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPl
 	return paths, nil
 }
 
+// ArchiveGeneratedPlan executes the corresponding package operation.
 func ArchiveGeneratedPlan(
 	ctx context.Context,
 	projectDir string,
@@ -161,6 +169,7 @@ func ArchiveGeneratedPlan(
 	return archivePaths, true, nil
 }
 
+// RenderArchivedPlan renders the corresponding package data.
 func RenderArchivedPlan(content, sourceRelativePath string, archivedAt time.Time) string {
 	archiveMetadata := []string{
 		"archived_from: " + yamlString(filepath.ToSlash(sourceRelativePath)),
@@ -182,6 +191,7 @@ func RenderArchivedPlan(content, sourceRelativePath string, archivedAt time.Time
 	return trimmed[:insertAt] + "\n" + strings.Join(archiveMetadata, "\n") + trimmed[insertAt:]
 }
 
+// RenderGeneratedPlan renders the corresponding package data.
 func RenderGeneratedPlan(plan GeneratedPlan) string {
 	var output bytes.Buffer
 
@@ -205,6 +215,7 @@ func RenderGeneratedPlan(plan GeneratedPlan) string {
 	return output.String()
 }
 
+// ValidateGeneratedPlan validates the corresponding package boundary value.
 func ValidateGeneratedPlan(plan GeneratedPlan) error {
 	if strings.TrimSpace(plan.Title) == "" {
 		return fmt.Errorf("generated plan title is required")
@@ -226,6 +237,7 @@ func ValidateGeneratedPlan(plan GeneratedPlan) error {
 	return nil
 }
 
+// ValidateGeneratedPlanModelContent validates the corresponding package boundary value.
 func ValidateGeneratedPlanModelContent(plan GeneratedPlan) error {
 	if strings.TrimSpace(plan.Title) == "" {
 		return fmt.Errorf("generated plan title is required")
@@ -238,6 +250,7 @@ func ValidateGeneratedPlanModelContent(plan GeneratedPlan) error {
 	return ValidateQuizScope(plan.Scope)
 }
 
+// HasContent executes the corresponding package operation.
 func (p GeneratedPlan) HasContent() bool {
 	return strings.TrimSpace(p.Title) != "" || strings.TrimSpace(p.Body) != ""
 }

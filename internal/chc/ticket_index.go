@@ -15,8 +15,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// ErrTicketNotFound identifies a package boundary error.
 var ErrTicketNotFound = errors.New("ticket not found")
 
+// TicketIndex defines a package boundary interface.
 type TicketIndex interface {
 	UpsertTicket(ctx context.Context, ticket IndexedTicket) error
 	ListProjectTickets(ctx context.Context, projectID string) ([]IndexedTicket, error)
@@ -29,6 +31,7 @@ type sqliteTicketIndex struct {
 	db *sql.DB
 }
 
+// NewTicketIndex constructs the corresponding package service or value.
 func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (TicketIndex, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
@@ -53,6 +56,7 @@ func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (T
 	return index, nil
 }
 
+// NewTicketIndexFromDB constructs the corresponding package service or value.
 func NewTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (TicketIndex, error) {
 	migrator := NewMigrator(assetsFS)
 
@@ -64,6 +68,7 @@ func NewTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (Tick
 	return &sqliteTicketIndex{db: db}, nil
 }
 
+// UpsertTicket executes the corresponding package operation.
 func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTicket) error {
 	err := validateIndexedTicket(ticket)
 	if err != nil {
@@ -93,6 +98,7 @@ func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTick
 	return nil
 }
 
+// ListProjectTickets lists the requested data.
 func (i *sqliteTicketIndex) ListProjectTickets(ctx context.Context, projectID string) ([]IndexedTicket, error) {
 	rows, err := i.db.QueryContext(
 		ctx,
@@ -143,6 +149,7 @@ ORDER BY key`,
 	return tickets, nil
 }
 
+// GetProjectTicketByKey executes the corresponding package operation.
 func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID, key string) (IndexedTicket, error) {
 	row := i.db.QueryRowContext(
 		ctx,
@@ -176,6 +183,7 @@ WHERE project_id = ? AND key = ?`,
 	return ticket, nil
 }
 
+// DeleteProjectTickets executes the corresponding package operation.
 func (i *sqliteTicketIndex) DeleteProjectTickets(ctx context.Context, projectID string) error {
 	_, err := i.db.ExecContext(ctx, "DELETE FROM indexed_tickets WHERE project_id = ?", projectID)
 	if err != nil {
@@ -185,6 +193,7 @@ func (i *sqliteTicketIndex) DeleteProjectTickets(ctx context.Context, projectID 
 	return nil
 }
 
+// Close executes the corresponding package operation.
 func (i *sqliteTicketIndex) Close() error {
 	err := i.db.Close()
 	if err != nil {

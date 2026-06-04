@@ -13,6 +13,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// MigrationStatus describes a package boundary value.
 type MigrationStatus struct {
 	DatabasePath      string
 	DatabaseExists    bool
@@ -23,24 +24,29 @@ type MigrationStatus struct {
 	Unknown           []AppliedMigration
 }
 
+// AppliedMigration describes a package boundary value.
 type AppliedMigration struct {
 	Version   string
 	Name      string
 	AppliedAt string
 }
 
+// MigrationStatusChecker describes a package boundary value.
 type MigrationStatusChecker struct {
 	assetsFS fs.FS
 }
 
+// NewMigrationStatusChecker constructs the corresponding package service or value.
 func NewMigrationStatusChecker(assetsFS fs.FS) MigrationStatusChecker {
 	return MigrationStatusChecker{assetsFS: assetsFS}
 }
 
+// UserDatabasePath executes the corresponding package operation.
 func UserDatabasePath(env UserEnvironment) string {
 	return filepath.Join(env.DataDir(), userDatabaseName)
 }
 
+// Check executes the corresponding package operation.
 func (c MigrationStatusChecker) Check(
 	ctx context.Context,
 	env UserEnvironment,

@@ -7,51 +7,74 @@ import (
 )
 
 const (
+	// DefaultQuizQuestionBudget defines a package boundary constant.
 	DefaultQuizQuestionBudget = 50
-	MaxQuizFollowUpDepth      = 3
+	// MaxQuizFollowUpDepth defines a package boundary constant.
+	MaxQuizFollowUpDepth = 3
 
+	// QuizBranchReturnReasonMaxDepth defines a package boundary constant.
 	QuizBranchReturnReasonMaxDepth = "max_depth_reached"
-	QuizBranchReturnReasonSkipped  = "skipped"
+	// QuizBranchReturnReasonSkipped defines a package boundary constant.
+	QuizBranchReturnReasonSkipped = "skipped"
 )
 
+// QuizScope describes a package boundary value.
 type QuizScope struct {
 	ProjectID string
 	CaseSlug  string
 }
 
+// QuizRuntimeStatus defines a package boundary type.
 type QuizRuntimeStatus string
 
 const (
-	QuizRuntimeStatusIdle      QuizRuntimeStatus = "idle"
-	QuizRuntimeStatusActive    QuizRuntimeStatus = "active"
-	QuizRuntimeStatusDone      QuizRuntimeStatus = "done"
+	// QuizRuntimeStatusIdle defines a package boundary constant.
+	QuizRuntimeStatusIdle QuizRuntimeStatus = "idle"
+	// QuizRuntimeStatusActive defines a package boundary constant.
+	QuizRuntimeStatusActive QuizRuntimeStatus = "active"
+	// QuizRuntimeStatusDone defines a package boundary constant.
+	QuizRuntimeStatusDone QuizRuntimeStatus = "done"
+	// QuizRuntimeStatusCancelled defines a package boundary constant.
 	QuizRuntimeStatusCancelled QuizRuntimeStatus = "cancelled"
-	QuizRuntimeStatusBlocked   QuizRuntimeStatus = "blocked"
+	// QuizRuntimeStatusBlocked defines a package boundary constant.
+	QuizRuntimeStatusBlocked QuizRuntimeStatus = "blocked"
 )
 
+// QuizMode defines a package boundary type.
 type QuizMode string
 
 const (
+	// QuizModeDeep defines a package boundary constant.
 	QuizModeDeep QuizMode = "deep"
+	// QuizModeFast defines a package boundary constant.
 	QuizModeFast QuizMode = "fast"
 )
 
+// QuizEntryStatus defines a package boundary type.
 type QuizEntryStatus string
 
 const (
+	// QuizEntryStatusAnswered defines a package boundary constant.
 	QuizEntryStatusAnswered QuizEntryStatus = "answered"
-	QuizEntryStatusSkipped  QuizEntryStatus = "skipped"
+	// QuizEntryStatusSkipped defines a package boundary constant.
+	QuizEntryStatusSkipped QuizEntryStatus = "skipped"
 )
 
+// QuizCoverageStatus defines a package boundary type.
 type QuizCoverageStatus string
 
 const (
-	QuizCoverageStatusPending  QuizCoverageStatus = "pending"
-	QuizCoverageStatusActive   QuizCoverageStatus = "active"
-	QuizCoverageStatusCovered  QuizCoverageStatus = "covered"
+	// QuizCoverageStatusPending defines a package boundary constant.
+	QuizCoverageStatusPending QuizCoverageStatus = "pending"
+	// QuizCoverageStatusActive defines a package boundary constant.
+	QuizCoverageStatusActive QuizCoverageStatus = "active"
+	// QuizCoverageStatusCovered defines a package boundary constant.
+	QuizCoverageStatusCovered QuizCoverageStatus = "covered"
+	// QuizCoverageStatusDeferred defines a package boundary constant.
 	QuizCoverageStatusDeferred QuizCoverageStatus = "deferred"
 )
 
+// QuizRuntimeState describes a package boundary value.
 type QuizRuntimeState struct {
 	ID                 string
 	ProjectID          string
@@ -73,6 +96,7 @@ type QuizRuntimeState struct {
 	UpdatedAt          time.Time
 }
 
+// QuizQuestion describes a package boundary value.
 type QuizQuestion struct {
 	ID        string
 	Prompt    string
@@ -86,6 +110,7 @@ type QuizQuestion struct {
 	CreatedAt time.Time
 }
 
+// QuizEntry describes a package boundary value.
 type QuizEntry struct {
 	ID           string
 	QuestionID   string
@@ -102,6 +127,7 @@ type QuizEntry struct {
 	AnsweredAt   time.Time
 }
 
+// QuizCoverageTopic describes a package boundary value.
 type QuizCoverageTopic struct {
 	ID            string
 	Label         string
@@ -111,6 +137,7 @@ type QuizCoverageTopic struct {
 	SkipCount     int
 }
 
+// QuizTrailNode describes a package boundary value.
 type QuizTrailNode struct {
 	QuestionID string
 	Prompt     string
@@ -118,6 +145,7 @@ type QuizTrailNode struct {
 	Depth      int
 }
 
+// QuizCandidate describes a package boundary value.
 type QuizCandidate struct {
 	ID        string
 	Prompt    string
@@ -129,6 +157,7 @@ type QuizCandidate struct {
 	CreatedAt time.Time
 }
 
+// ValidateQuizRuntimeState validates the corresponding package boundary value.
 func ValidateQuizRuntimeState(state QuizRuntimeState) error {
 	err := validateQuizRuntimeIdentity(state)
 	if err != nil {
@@ -153,6 +182,7 @@ func ValidateQuizRuntimeState(state QuizRuntimeState) error {
 	return validateQuizRuntimeArtifacts(state)
 }
 
+// ValidateQuizScope validates the corresponding package boundary value.
 func ValidateQuizScope(scope QuizScope) error {
 	if strings.TrimSpace(scope.ProjectID) == "" {
 		return fmt.Errorf("quiz scope project id is required")
@@ -161,6 +191,7 @@ func ValidateQuizScope(scope QuizScope) error {
 	return nil
 }
 
+// ValidateQuizQuestion validates the corresponding package boundary value.
 func ValidateQuizQuestion(question QuizQuestion) error {
 	err := validateQuizQuestionCore(question)
 	if err != nil {
@@ -170,6 +201,7 @@ func ValidateQuizQuestion(question QuizQuestion) error {
 	return validateQuizQuestionRoute(question)
 }
 
+// ValidateQuizEntry validates the corresponding package boundary value.
 func ValidateQuizEntry(entry QuizEntry) error {
 	err := validateQuizEntryCore(entry)
 	if err != nil {
@@ -184,6 +216,7 @@ func ValidateQuizEntry(entry QuizEntry) error {
 	return validateQuizEntryTimes(entry)
 }
 
+// ValidateQuizCoverageTopic validates the corresponding package boundary value.
 func ValidateQuizCoverageTopic(topic QuizCoverageTopic) error {
 	if strings.TrimSpace(topic.ID) == "" {
 		return fmt.Errorf("quiz coverage topic id is required")
@@ -216,6 +249,7 @@ func ValidateQuizCoverageTopic(topic QuizCoverageTopic) error {
 	return nil
 }
 
+// ValidateQuizTrailNode validates the corresponding package boundary value.
 func ValidateQuizTrailNode(node QuizTrailNode) error {
 	if strings.TrimSpace(node.QuestionID) == "" {
 		return fmt.Errorf("quiz trail node question id is required")
@@ -232,6 +266,7 @@ func ValidateQuizTrailNode(node QuizTrailNode) error {
 	return validateQuizDepth(node.Depth)
 }
 
+// ValidateQuizCandidate validates the corresponding package boundary value.
 func ValidateQuizCandidate(candidate QuizCandidate) error {
 	if strings.TrimSpace(candidate.ID) == "" {
 		return fmt.Errorf("quiz candidate id is required")
@@ -261,6 +296,7 @@ func ValidateQuizCandidate(candidate QuizCandidate) error {
 	return nil
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s QuizRuntimeStatus) Valid() bool {
 	switch s {
 	case QuizRuntimeStatusIdle,
@@ -274,6 +310,7 @@ func (s QuizRuntimeStatus) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (m QuizMode) Valid() bool {
 	switch m {
 	case QuizModeDeep, QuizModeFast:
@@ -283,6 +320,7 @@ func (m QuizMode) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s QuizEntryStatus) Valid() bool {
 	switch s {
 	case QuizEntryStatusAnswered, QuizEntryStatusSkipped:
@@ -292,6 +330,7 @@ func (s QuizEntryStatus) Valid() bool {
 	}
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (s QuizCoverageStatus) Valid() bool {
 	switch s {
 	case QuizCoverageStatusPending,

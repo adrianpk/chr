@@ -8,15 +8,21 @@ import (
 	"time"
 )
 
+// AssistedTranscriptEventType defines a package boundary type.
 type AssistedTranscriptEventType string
 
 const (
+	// AssistedTranscriptEventQuestion defines a package boundary constant.
 	AssistedTranscriptEventQuestion AssistedTranscriptEventType = "question"
-	AssistedTranscriptEventAnswer   AssistedTranscriptEventType = "answer"
-	AssistedTranscriptEventResult   AssistedTranscriptEventType = "result"
-	AssistedTranscriptEventState    AssistedTranscriptEventType = "state"
+	// AssistedTranscriptEventAnswer defines a package boundary constant.
+	AssistedTranscriptEventAnswer AssistedTranscriptEventType = "answer"
+	// AssistedTranscriptEventResult defines a package boundary constant.
+	AssistedTranscriptEventResult AssistedTranscriptEventType = "result"
+	// AssistedTranscriptEventState defines a package boundary constant.
+	AssistedTranscriptEventState AssistedTranscriptEventType = "state"
 )
 
+// AssistedTranscriptEvent describes a package boundary value.
 type AssistedTranscriptEvent struct {
 	ID        string
 	SessionID string
@@ -31,6 +37,7 @@ type AssistedTranscriptEvent struct {
 	CreatedAt time.Time
 }
 
+// ValidateAssistedTranscriptEvent validates the corresponding package boundary value.
 func ValidateAssistedTranscriptEvent(event AssistedTranscriptEvent) error {
 	if event.ID == "" {
 		return fmt.Errorf("assisted transcript event id is required")
@@ -72,6 +79,7 @@ func ValidateAssistedTranscriptEvent(event AssistedTranscriptEvent) error {
 	return nil
 }
 
+// Valid reports whether the value is one of the supported constants.
 func (t AssistedTranscriptEventType) Valid() bool {
 	switch t {
 	case AssistedTranscriptEventQuestion,
@@ -84,6 +92,7 @@ func (t AssistedTranscriptEventType) Valid() bool {
 	}
 }
 
+// AssistedTranscriptEventsFromTurn executes the corresponding package operation.
 func AssistedTranscriptEventsFromTurn(turn AssistedAuthoringTurn) ([]AssistedTranscriptEvent, error) {
 	err := ValidateAssistedAuthoringTurn(turn)
 	if err != nil {
@@ -111,6 +120,7 @@ func AssistedTranscriptEventsFromTurn(turn AssistedAuthoringTurn) ([]AssistedTra
 	return events, nil
 }
 
+// RenderAssistedTranscriptEvent renders the corresponding package data.
 func RenderAssistedTranscriptEvent(event AssistedTranscriptEvent) (string, error) {
 	err := ValidateAssistedTranscriptEvent(event)
 	if err != nil {
@@ -125,6 +135,7 @@ func RenderAssistedTranscriptEvent(event AssistedTranscriptEvent) (string, error
 	return output.String(), nil
 }
 
+// ParseAssistedTranscriptEvents parses the corresponding package data.
 func ParseAssistedTranscriptEvents(content string) ([]AssistedTranscriptEvent, error) {
 	blocks := splitAssistedTranscriptBlocks(content)
 	events := make([]AssistedTranscriptEvent, 0, len(blocks))

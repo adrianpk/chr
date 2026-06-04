@@ -5,12 +5,14 @@ import (
 	"strings"
 )
 
+// ContextReadinessHandoffOptions describes a package boundary value.
 type ContextReadinessHandoffOptions struct {
 	Composition   ContextCompositionPlan
 	Plan          RuntimePlan
 	RequiredKinds []ContextSourceKind
 }
 
+// ContextReadinessHandoff describes a package boundary value.
 type ContextReadinessHandoff struct {
 	Status       ContextReadinessStatus
 	Completeness ContextCompleteness
@@ -20,22 +22,26 @@ type ContextReadinessHandoff struct {
 	RuntimeNotes []string
 }
 
+// ContextCompleteness describes a package boundary value.
 type ContextCompleteness struct {
 	Passed int
 	Total  int
 }
 
+// ContextReadinessIssue describes a package boundary value.
 type ContextReadinessIssue struct {
 	Field   string
 	Message string
 }
 
+// ContextArtifactLink describes a package boundary value.
 type ContextArtifactLink struct {
 	Name          string
 	HostPath      string
 	ContainerPath string
 }
 
+// EvaluateContextReadinessHandoff executes the corresponding package operation.
 func EvaluateContextReadinessHandoff(opts ContextReadinessHandoffOptions) ContextReadinessHandoff {
 	checks := contextReadinessChecks(opts)
 	issues := contextReadinessIssues(checks)
@@ -55,6 +61,7 @@ func EvaluateContextReadinessHandoff(opts ContextReadinessHandoffOptions) Contex
 	}
 }
 
+// RenderContextReadinessHandoff renders the corresponding package data.
 func RenderContextReadinessHandoff(handoff ContextReadinessHandoff) string {
 	var output strings.Builder
 
@@ -69,6 +76,7 @@ func RenderContextReadinessHandoff(handoff ContextReadinessHandoff) string {
 	return output.String()
 }
 
+// String executes the corresponding package operation.
 func (c ContextCompleteness) String() string {
 	if c.Total == 0 {
 		return "0/0"

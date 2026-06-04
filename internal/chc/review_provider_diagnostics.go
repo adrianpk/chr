@@ -12,22 +12,33 @@ import (
 	"strings"
 )
 
+// ReviewProvider defines a package boundary type.
 type ReviewProvider string
 
 const (
-	ReviewProviderForgejo     ReviewProvider = "forgejo"
-	ReviewProviderGitHub      ReviewProvider = "github"
+	// ReviewProviderForgejo defines a package boundary constant.
+	ReviewProviderForgejo ReviewProvider = "forgejo"
+	// ReviewProviderGitHub defines a package boundary constant.
+	ReviewProviderGitHub ReviewProvider = "github"
+	// ReviewProviderUnsupported defines a package boundary constant.
 	ReviewProviderUnsupported ReviewProvider = "unsupported"
 
-	ReviewProviderDiagnosticStatusReady       = "ready"
-	ReviewProviderDiagnosticStatusBlocked     = "blocked"
+	// ReviewProviderDiagnosticStatusReady defines a package boundary constant.
+	ReviewProviderDiagnosticStatusReady = "ready"
+	// ReviewProviderDiagnosticStatusBlocked defines a package boundary constant.
+	ReviewProviderDiagnosticStatusBlocked = "blocked"
+	// ReviewProviderDiagnosticStatusUnsupported defines a package boundary constant.
 	ReviewProviderDiagnosticStatusUnsupported = "unsupported"
 
-	ReviewProviderDiagnosticCheckOK      = "ok"
-	ReviewProviderDiagnosticCheckFail    = "fail"
+	// ReviewProviderDiagnosticCheckOK defines a package boundary constant.
+	ReviewProviderDiagnosticCheckOK = "ok"
+	// ReviewProviderDiagnosticCheckFail defines a package boundary constant.
+	ReviewProviderDiagnosticCheckFail = "fail"
+	// ReviewProviderDiagnosticCheckSkipped defines a package boundary constant.
 	ReviewProviderDiagnosticCheckSkipped = "skipped"
 )
 
+// ReviewProviderReference describes a package boundary value.
 type ReviewProviderReference struct {
 	Provider ReviewProvider
 	URL      string
@@ -37,6 +48,7 @@ type ReviewProviderReference struct {
 	Number   int
 }
 
+// ReviewProviderDiagnosticOptions describes a package boundary value.
 type ReviewProviderDiagnosticOptions struct {
 	Config ReviewProviderConfig
 	URL    string
@@ -44,14 +56,17 @@ type ReviewProviderDiagnosticOptions struct {
 	Runner ReviewProviderDiagnosticRunner
 }
 
+// ReviewProviderDiagnosticRunner defines a package boundary interface.
 type ReviewProviderDiagnosticRunner interface {
 	LookPath(file string) (string, error)
 	LookupEnv(key string) string
 	Run(ctx context.Context, command string, args ...string) error
 }
 
+// OSReviewProviderDiagnosticRunner describes a package boundary value.
 type OSReviewProviderDiagnosticRunner struct{}
 
+// ReviewProviderDiagnostic describes a package boundary value.
 type ReviewProviderDiagnostic struct {
 	Status    string
 	Provider  ReviewProvider
@@ -59,6 +74,7 @@ type ReviewProviderDiagnostic struct {
 	Checks    []ReviewProviderDiagnosticCheck
 }
 
+// ReviewProviderDiagnosticCheck describes a package boundary value.
 type ReviewProviderDiagnosticCheck struct {
 	Name   string
 	Status string
@@ -66,14 +82,17 @@ type ReviewProviderDiagnosticCheck struct {
 	Detail string
 }
 
+// LookPath executes the corresponding package operation.
 func (OSReviewProviderDiagnosticRunner) LookPath(file string) (string, error) {
 	return exec.LookPath(file)
 }
 
+// LookupEnv executes the corresponding package operation.
 func (OSReviewProviderDiagnosticRunner) LookupEnv(key string) string {
 	return os.Getenv(key)
 }
 
+// Run executes the configured operation.
 func (OSReviewProviderDiagnosticRunner) Run(ctx context.Context, command string, args ...string) error {
 	cmd := exec.CommandContext(ctx, command, args...)
 	if err := cmd.Run(); err != nil {
@@ -83,6 +102,7 @@ func (OSReviewProviderDiagnosticRunner) Run(ctx context.Context, command string,
 	return nil
 }
 
+// DetectReviewProviderReference executes the corresponding package operation.
 func DetectReviewProviderReference(rawURL string) (ReviewProviderReference, error) {
 	trimmed := strings.TrimSpace(rawURL)
 	if trimmed == "" {
@@ -116,6 +136,7 @@ func DetectReviewProviderReference(rawURL string) (ReviewProviderReference, erro
 	return reference, nil
 }
 
+// RunReviewProviderDiagnostics executes the corresponding package operation.
 func RunReviewProviderDiagnostics(ctx context.Context, opts ReviewProviderDiagnosticOptions) ReviewProviderDiagnostic {
 	runner := opts.Runner
 	if runner == nil {

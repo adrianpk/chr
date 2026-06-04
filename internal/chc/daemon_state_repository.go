@@ -15,8 +15,10 @@ import (
 
 const daemonStateID = "daemon"
 
+// ErrDaemonStateNotFound identifies a package boundary error.
 var ErrDaemonStateNotFound = errors.New("daemon state not found")
 
+// DaemonStateRepository defines a package boundary interface.
 type DaemonStateRepository interface {
 	GetDaemonState(ctx context.Context) (DaemonState, error)
 	UpsertDaemonState(ctx context.Context, state DaemonState) error
@@ -30,6 +32,7 @@ type sqliteDaemonStateRepository struct {
 	db *sql.DB
 }
 
+// NewDaemonStateRepository constructs the corresponding package service or value.
 func NewDaemonStateRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (DaemonStateRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
@@ -54,6 +57,7 @@ func NewDaemonStateRepository(ctx context.Context, env UserEnvironment, assetsFS
 	return repository, nil
 }
 
+// NewDaemonStateRepositoryFromDB constructs the corresponding package service or value.
 func NewDaemonStateRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (DaemonStateRepository, error) {
 	migrator := NewMigrator(assetsFS)
 
@@ -65,6 +69,7 @@ func NewDaemonStateRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs
 	return &sqliteDaemonStateRepository{db: db}, nil
 }
 
+// GetDaemonState executes the corresponding package operation.
 func (r *sqliteDaemonStateRepository) GetDaemonState(ctx context.Context) (DaemonState, error) {
 	row := r.db.QueryRowContext(ctx, selectDaemonStateSQL()+" WHERE id = ?", daemonStateID)
 
@@ -80,6 +85,7 @@ func (r *sqliteDaemonStateRepository) GetDaemonState(ctx context.Context) (Daemo
 	return state, nil
 }
 
+// UpsertDaemonState executes the corresponding package operation.
 func (r *sqliteDaemonStateRepository) UpsertDaemonState(ctx context.Context, state DaemonState) error {
 	err := ValidateDaemonState(state)
 	if err != nil {
@@ -103,6 +109,7 @@ func (r *sqliteDaemonStateRepository) UpsertDaemonState(ctx context.Context, sta
 	return nil
 }
 
+// UpdateDaemonHeartbeat executes the corresponding package operation.
 func (r *sqliteDaemonStateRepository) UpdateDaemonHeartbeat(ctx context.Context, heartbeatAt time.Time) error {
 	result, err := r.db.ExecContext(
 		ctx,
@@ -127,6 +134,7 @@ func (r *sqliteDaemonStateRepository) UpdateDaemonHeartbeat(ctx context.Context,
 	return nil
 }
 
+// RequestDaemonStop executes the corresponding package operation.
 func (r *sqliteDaemonStateRepository) RequestDaemonStop(ctx context.Context, requestedAt time.Time) error {
 	result, err := r.db.ExecContext(
 		ctx,
@@ -157,6 +165,7 @@ WHERE id = ? AND status IN (?, ?, ?)`,
 	return nil
 }
 
+// ClearDaemonState executes the corresponding package operation.
 func (r *sqliteDaemonStateRepository) ClearDaemonState(ctx context.Context) error {
 	_, err := r.db.ExecContext(ctx, "DELETE FROM daemon_state WHERE id = ?", daemonStateID)
 	if err != nil {
@@ -166,6 +175,7 @@ func (r *sqliteDaemonStateRepository) ClearDaemonState(ctx context.Context) erro
 	return nil
 }
 
+// Close executes the corresponding package operation.
 func (r *sqliteDaemonStateRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {
