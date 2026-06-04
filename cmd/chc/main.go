@@ -1,3 +1,4 @@
+// Package main assembles the chc command-line application.
 package main
 
 import (
