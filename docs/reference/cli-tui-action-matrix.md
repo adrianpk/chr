@@ -49,6 +49,7 @@ Status values:
 | Quizzes | Complete selected quiz | answer editor `alt+d` | `chc quiz complete [--use-case ...]` | `service.CompleteQuiz` | `matched` | Same runtime quiz service. |
 | Quizzes | Refresh quizzes | `F4`, `r` | `chc quiz list` | `service.ListQuizzes` | `matched` | Same runtime quiz list service. |
 | Specs | Generate spec | `F5`, `g` | `chc spec generate [--use-case ...]` | `service.GenerateSpec` through `tuiSpecActionExecutor` and CLI command | `matched` | Same spec generation service. |
+| Specs | Generate Gherkin acceptance feature | `F5`, `f` | `chc acceptance feature generate [--use-case ...]` | `service.GenerateAcceptanceFeature` through `tuiSpecActionExecutor` and CLI command | `partial` | Same generation service. If more information is needed, both surfaces report the feature-round note path; interactive answer collection is not implemented yet. |
 | Specs | Refresh specs | `F5`, `r` | `chc spec list` | `service.ListSpecs` | `matched` | Same spec list service. |
 | Plans | Generate missing plan | `F6`, `g` | `chc plan generate [--use-case ...]` | `service.GeneratePlan` through `tuiPlanActionExecutor` and CLI command | `matched` | Same plan generation service. |
 | Plans | Regenerate plan | `F6`, `G`, confirm | `chc plan regenerate [--use-case ...]` | `service.RegeneratePlan` | `matched` | Same plan regeneration service. |
@@ -81,6 +82,7 @@ Status values:
 | Quiz | `quiz-mode-deep` | Switch selected runtime quiz to deep mode. | `chc quiz mode deep ...` | `service.SwitchQuizMode` | `matched` | Same service path. |
 | Quiz | `quiz-mode-fast` | Switch selected runtime quiz to fast mode. | `chc quiz mode fast ...` | `service.SwitchQuizMode` | `matched` | Same service path. |
 | Spec | `generate-spec` | Generate selected spec. | `chc spec generate ...` | `service.GenerateSpec` | `matched` | Command is gated to Specs view. |
+| Acceptance | `generate-acceptance-feature` | Generate selected Gherkin acceptance feature. | `chc acceptance feature generate ...` | `service.GenerateAcceptanceFeature` | `partial` | Command is gated to Specs view. Missing scenario detail is persisted as feature-round notes; TUI answer collection is not implemented yet. |
 | Spec | `refresh-specs` | Reload spec views. | `chc spec list` | `service.ListSpecs` | `matched` | Command is gated to Specs view. |
 | Plan | `generate-plan` | Generate missing selected plan. | `chc plan generate ...` | `service.GeneratePlan` | `matched` | Command is gated to Plans view. |
 | Plan | `regenerate-plan` | Regenerate selected plan. | `chc plan regenerate ...` | `service.RegeneratePlan` | `matched` | Command is gated to Plans view. |

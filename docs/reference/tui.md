@@ -68,7 +68,8 @@ Available command families:
 - Dump creation, edit, and refresh.
 - Quiz start, resume, answer, skip, complete, cancel, refresh, deep mode, and
   fast mode.
-- Spec generation and refresh, only in the Specs view.
+- Spec generation, Gherkin acceptance feature generation, and refresh, only in
+  the Specs view.
 - Plan generation, regeneration, tracking creation, and refresh, only in the
   Plans view.
 - Ticket comment and selected ticket status transitions.
@@ -78,6 +79,10 @@ Available command families:
 checklist item` are capability checks in the current TUI. They report an
 unavailable-operation error until their safe writers or provider-backed paths
 are implemented.
+
+Acceptance feature generation can return `needs_more_info`. In that case the
+TUI reports the feature-round note path. Interactive collection of those
+feature-round answers is not implemented in the current TUI.
 
 ## Project View
 

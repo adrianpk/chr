@@ -193,9 +193,10 @@ Inside the palette:
 | `esc` | Close the palette. |
 
 The palette includes navigation, refresh, selected-source inspection, artifact
-creation, dump, quiz, spec, plan, ticket, and work commands. Some commands are
-view-gated. Spec commands appear only in Specs. Plan commands appear only in
-Plans, and plan tracking appears only when the selected plan exists.
+creation, dump, quiz, spec, acceptance feature, plan, ticket, and work commands.
+Some commands are view-gated. Spec and acceptance feature commands appear only
+in Specs. Plan commands appear only in Plans, and plan tracking appears only
+when the selected plan exists.
 
 Palette commands that change files open the same confirmation prompt used by
 direct keybindings. Confirm with `enter` or cancel with `esc`.
@@ -326,7 +327,7 @@ metadata, project context, use-case metadata, use-case context, dumps, quizzes,
 and related workspace documents. Specs are generated from the Specs tab.
 
 Spec generation writes the Markdown spec only. For behavior-testable use cases,
-a separate acceptance feature workflow can later derive a `.feature` artifact
+the `Generate acceptance feature` action derives a Gherkin `.feature` artifact
 from the spec, quiz, and dump context.
 
 | Key | Behavior |
@@ -336,6 +337,10 @@ from the spec, quiz, and dump context.
 | `f` | Generate an acceptance feature for the selected use case. |
 | `r` | Refresh specs from disk. |
 
+You can also press `:` in the Specs view and run `Generate acceptance feature`
+from the command palette. The TUI labels the action as an acceptance feature;
+the generated artifact is a Gherkin feature file.
+
 Spec and acceptance feature generation are asynchronous. While either is
 running, the TUI shows a working state and ignores other spec actions until the
 request finishes.
@@ -344,6 +349,11 @@ If acceptance feature generation succeeds, the status line shows the generated
 `.chc/user/acceptance/<case>.feature` path. If more scenario detail is needed,
 the status line shows the `.chc/user/acceptance/<case>-feature-round.md` path
 so you can review the default-oriented prompts before trying again.
+
+Current limitation: those feature-round prompts are persisted, but the TUI does
+not yet collect the follow-up answers interactively. Until that answer flow is
+implemented, the prompt answers must be added to the feature-round note before
+retrying generation.
 
 Equivalent CLI commands:
 

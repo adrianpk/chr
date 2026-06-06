@@ -201,6 +201,10 @@ checks. If more scenario detail is needed, or the use case is not suitable for a
 feature artifact, the command reports that status without writing a file. See
 [Acceptance feature generation](acceptance-feature-generation.md).
 
+When the command returns `needs_more_info`, it writes feature-round prompts when
+the model provides them. Recording answers to those prompts is a separate manual
+step in the current implementation.
+
 ## Plans
 
 List, generate, regenerate, and materialize plan tracking:

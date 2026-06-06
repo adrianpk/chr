@@ -77,8 +77,10 @@ Spec generation produces the Markdown spec only. For behavior-testable use
 cases, the separate acceptance feature workflow derives a linked Gherkin feature
 artifact from the spec, quiz, and dump context. If scenario details are missing,
 it writes feature-round notes with inferred defaults before another generation
-attempt. This keeps general requirements discovery separate from `.feature`
-formalization.
+attempt. The feature-round material is acceptance-specific; it should complete
+missing scenario details without moving Gherkin-shaped questioning into the
+general quiz. This keeps general requirements discovery separate from
+`.feature` formalization.
 
 Plans are generated from the same workspace material plus existing specs. A plan
 is an implementation decomposition: slices, ordering, dependencies, tasks,

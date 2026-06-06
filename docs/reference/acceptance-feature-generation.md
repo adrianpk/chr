@@ -13,9 +13,10 @@ The target workflow is:
 dump -> quiz -> spec -> acceptance feature round -> .feature
 ```
 
-The general quiz gathers requirements for the use case. The acceptance feature
-round uses the spec, quiz, and dump context to decide whether a feature can be
-generated or whether default-oriented follow-up questions are needed.
+The general quiz gathers requirements for the use case. Acceptance feature
+generation uses the spec, quiz, dump, and existing feature-round context to
+decide whether a feature can be generated or whether default-oriented follow-up
+questions are needed.
 
 The acceptance feature workflow can carry a readiness decision:
 
@@ -56,6 +57,11 @@ When generation needs more information, ChrysoCoord writes feature-round notes:
 
 Those notes contain focused prompts with inferred defaults and empty answer
 slots. A later generation attempt reads the notes as acceptance context.
+
+Current limitation: ChrysoCoord writes the feature-round prompts, but the TUI
+does not yet collect their answers with the quiz-style interaction loop. Until
+that flow exists, the answers must be recorded in the feature-round note before
+retrying generation.
 
 Generated features should include traceability tags such as:
 
