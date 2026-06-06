@@ -13,7 +13,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 | Slice 2 | readiness-aware quiz questions | delivered | `feat/slice-2-readiness-aware-quiz-questions` | #290 | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
 | Slice 3 | feature artifact checks | delivered | `feat/slice-3-feature-artifact-checks` | #291 | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
 | Slice 4 | spec feature generation | delivered | `feat/slice-4-spec-feature-generation` | #292 | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
-| Slice 5 | acceptance workflow docs | planned | `feat/slice-5-acceptance-workflow-docs` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
+| Slice 5 | acceptance workflow docs | reviewing | `feat/slice-5-acceptance-workflow-docs` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
 
 ## Slice 1 Tasks
 
@@ -57,11 +57,11 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Add command and workflow reference docs for acceptance feature generation. | pending | pending | |
-| T5.2 | Update user guide or explanation docs for Gherkin suitability behavior. | pending | pending | |
-| T5.3 | Document the deferred `godog` acceptance-test execution path. | pending | pending | |
-| T5.4 | Run `make verify`. | pending | pending | |
-| T5.5 | Add final cycle report and tracker closure. | pending | pending | |
+| T5.1 | Add command and workflow reference docs for acceptance feature generation. | done | `2553dc8` | Added reference docs, command reference, workspace layout, and index entry. |
+| T5.2 | Update user guide or explanation docs for Gherkin suitability behavior. | done | `2553dc8` | Updated user guide and document generation explanation. |
+| T5.3 | Document the deferred `godog` acceptance-test execution path. | done | `2553dc8` | Documented `godog` as deferred, not implemented execution evidence. |
+| T5.4 | Run `make verify`. | done | `1bd65c8` | Fixed strict lint findings and verified lint plus tests. |
+| T5.5 | Add final cycle report and tracker closure. | done | this commit | Added Slice 5 report and tracker status for review. |
 
 ## Validation Log
 
@@ -81,6 +81,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 - Slice 4: `go test ./internal/chc` (pass)
 - Slice 4: `go test ./internal/chcapp` (pass)
 - Slice 4 post-merge: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 5: `make verify` (pass)
 
 ## Notes
 
