@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 1 - spec feature decoupling
+Active Slice: Slice 2 - acceptance feature service
 
 Spec: `ops/specs/2026-06-06-separate-acceptance-feature-workflow.md`
 Tracker: `ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md`
