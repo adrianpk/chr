@@ -1,11 +1,11 @@
 # Slice 3: Acceptance Feature CLI
 
-Status: reviewing
+Status: delivered
 Slicing: Separate Acceptance Feature Workflow
 Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 Tracker: `ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md`
 Branch: `feat/slice-3-acceptance-feature-cli`
-PR: pending
+PR: `#296`
 
 ## Purpose
 
