@@ -52,7 +52,7 @@ func TestRootCommandDefaultsToTUIAction(t *testing.T) {
 func TestRootCommandIncludesTUICommand(t *testing.T) {
 	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
 
-	for _, name := range []string{"dump", "metadata", "plan", "quiz", "spec", "tui", "work"} {
+	for _, name := range []string{"acceptance", "dump", "metadata", "plan", "quiz", "spec", "tui", "work"} {
 		if rootCommandIncludesCommand(cmd, name) {
 			continue
 		}
@@ -93,6 +93,7 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		{"quiz", "complete"},
 		{"quiz", "cancel"},
 		{"quiz", "mode"},
+		{"acceptance", "feature", "generate"},
 		{"spec", "list"},
 		{"spec", "generate"},
 		{"plan", "list"},
@@ -106,6 +107,75 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		}
 
 		t.Fatalf("root command does not include %s", strings.Join(path, " "))
+	}
+}
+
+func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
+	var stdout bytes.Buffer
+
+	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
+		Message: "Acceptance feature generated.",
+		Status:  chc.AcceptanceFeatureStatusGenerated,
+		Feature: ".chc/user/acceptance/blog.feature",
+	})
+	if err != nil {
+		t.Fatalf("writeAcceptanceFeatureGenerateResult returned error: %v", err)
+	}
+
+	got := stdout.String()
+	for _, want := range []string{
+		"Acceptance feature generated.\n",
+		"status: generated\n",
+		"feature: .chc/user/acceptance/blog.feature\n",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("output missing %q in:\n%s", want, got)
+		}
+	}
+}
+
+func TestAcceptanceFeatureGenerateOutputNeedsMoreInfo(t *testing.T) {
+	var stdout bytes.Buffer
+
+	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
+		Message:         "Acceptance feature needs more information.",
+		Status:          chc.AcceptanceFeatureStatusNeedsMoreInfo,
+		RejectionReason: "Missing observable failure path.",
+	})
+	if err != nil {
+		t.Fatalf("writeAcceptanceFeatureGenerateResult returned error: %v", err)
+	}
+
+	got := stdout.String()
+	for _, want := range []string{
+		"status: needs_more_info\n",
+		"reason: Missing observable failure path.\n",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("output missing %q in:\n%s", want, got)
+		}
+	}
+}
+
+func TestAcceptanceFeatureGenerateOutputNotApplicable(t *testing.T) {
+	var stdout bytes.Buffer
+
+	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
+		Message:         "Acceptance feature not applicable.",
+		Status:          chc.AcceptanceFeatureStatusNotApplicable,
+		RejectionReason: "The topic is not observable behavior.",
+	})
+	if err != nil {
+		t.Fatalf("writeAcceptanceFeatureGenerateResult returned error: %v", err)
+	}
+
+	got := stdout.String()
+	if !strings.Contains(got, "status: not_applicable\n") {
+		t.Fatalf("output = %q, want not_applicable status", got)
+	}
+
+	if !strings.Contains(got, "reason: The topic is not observable behavior.\n") {
+		t.Fatalf("output = %q, want reason", got)
 	}
 }
 
