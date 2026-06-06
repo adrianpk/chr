@@ -122,6 +122,29 @@ Feature: Article authoring
 	}
 }
 
+func TestCheckAcceptanceFeatureArtifactAcceptsBackgroundSteps(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec
+Feature: Article authoring
+
+  Background:
+    Given an existing article draft
+
+  Scenario: Publish report is written
+    When the editor publishes the article
+    Then a publication report is written
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	if !result.Valid {
+		t.Fatalf("valid = false, findings = %#v", result.Findings)
+	}
+}
+
 func TestCheckAcceptanceFeatureArtifactRequiresGivenWhenThen(t *testing.T) {
 	feature := validAcceptanceFeatureArtifact()
 	feature.Body = `@spec:article-authoring-spec
@@ -259,6 +282,56 @@ func TestWriteAcceptanceFeatureRejectsInvalidArtifact(t *testing.T) {
 	}
 
 	assertAcceptanceFeatureFinding(t, result, "vague_step")
+}
+
+func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T) {
+	notes := AcceptanceFeatureRoundNotes{
+		Scope:           QuizScope{ProjectID: "project-1", CaseSlug: "followups"},
+		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
+		RejectionReason: "More queue behavior is needed.",
+		Prompts: []AcceptanceFeaturePrompt{
+			{
+				ID:            "time_source_default",
+				Question:      "Confirm time source?",
+				DefaultAnswer: "Use an injected clock.",
+			},
+			{
+				ID:            "due_boundary_default",
+				Question:      "Confirm due boundary?",
+				DefaultAnswer: "Due at or before now.",
+			},
+		},
+		SourceRequestID:  "request-1",
+		SourceResponseID: "response-1",
+		CreatedAt:        quizRuntimeTestTime(),
+	}
+
+	existing := `# Acceptance Feature Round
+
+## Prompts
+
+### time_source_default
+
+- Question: Confirm time source?
+- Default: Use an injected clock.
+- Answer: Use an injected UTC clock.
+
+### old_prompt
+
+- Question: Old prompt?
+- Default: Old default.
+- Answer: Old answer.
+`
+
+	merged := MergeAcceptanceFeatureRoundAnswers(notes, existing)
+
+	if merged.Prompts[0].Answer != "Use an injected UTC clock." {
+		t.Fatalf("Answer = %q, want preserved answer", merged.Prompts[0].Answer)
+	}
+
+	if merged.Prompts[1].Answer != "" {
+		t.Fatalf("new prompt Answer = %q, want empty", merged.Prompts[1].Answer)
+	}
 }
 
 func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {

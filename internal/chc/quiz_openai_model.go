@@ -1125,6 +1125,9 @@ Return status not_applicable when the topic is not naturally suited to an accept
 Return status rejected when a feature was attempted but would be unsafe, vague, or invalid; explain why in rejection_reason.
 Clarification prompts must ask the user to confirm or adjust an inferred default instead of restating schema terms.
 Generated feature bodies must include traceability tags and concrete Given, When, and Then steps.
+Use at least one supported traceability tag on the feature or on every scenario: @spec:, @requirement:, @acceptance-criterion:, or @behavior:.
+Other tags may be included as metadata, but they do not satisfy traceability by themselves.
+If an acceptance_feature_round context section includes answers, treat those answers as resolving their own prompts unless an accepted or active decision document directly contradicts them.
 Always include status, body, rejection_reason, and clarification_prompts. Use an empty string for body or rejection_reason when not applicable, and an empty array for clarification_prompts when not needed.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.

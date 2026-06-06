@@ -273,6 +273,13 @@ func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope chc
 		CreatedAt:        response.CreatedAt.UTC(),
 	}
 
+	existing, err := s.existingAcceptanceFeatureRoundNotes(ctx, scope)
+	if err != nil {
+		return chc.AcceptanceFeatureRoundPaths{}, err
+	}
+
+	notes = chc.MergeAcceptanceFeatureRoundAnswers(notes, existing)
+
 	paths, err := chc.WriteAcceptanceFeatureRoundNotes(ctx, s.projectContext.ProjectDir, notes)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_round_notes_failed", map[string]string{
@@ -290,6 +297,29 @@ func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope chc
 	})
 
 	return paths, nil
+}
+
+func (s service) existingAcceptanceFeatureRoundNotes(ctx context.Context, scope chc.QuizScope) (string, error) {
+	err := ctx.Err()
+	if err != nil {
+		return "", err
+	}
+
+	paths, err := chc.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return "", err
+	}
+
+	content, err := os.ReadFile(paths.Path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+
+		return "", fmt.Errorf("read existing acceptance feature round notes: %w", err)
+	}
+
+	return string(content), nil
 }
 
 func sortedAcceptanceFeatureContextNodeIDs(index chc.WorkspaceIndex) []string {

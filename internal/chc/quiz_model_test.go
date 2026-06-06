@@ -848,6 +848,23 @@ func TestQuizModelFeatureInstructionsRequireEmptyFallbackFields(t *testing.T) {
 	}
 }
 
+func TestQuizModelFeatureInstructionsDescribeTraceabilityAndRoundAnswers(t *testing.T) {
+	instructions := quizModelFeatureGenerationInstructions()
+
+	for _, want := range []string{
+		"@spec:",
+		"@requirement:",
+		"@acceptance-criterion:",
+		"@behavior:",
+		"acceptance_feature_round context section includes answers",
+		"treat those answers as resolving their own prompts",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Fatalf("feature generation instructions missing %q in: %q", want, instructions)
+		}
+	}
+}
+
 func TestQuizModelSpecGenerationInstructionsDoNotOverfitPathPolicy(t *testing.T) {
 	instructions := quizModelSpecGenerationInstructions()
 

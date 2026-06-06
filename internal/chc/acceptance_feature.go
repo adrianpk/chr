@@ -39,6 +39,7 @@ type AcceptanceFeaturePrompt struct {
 	Question      string `json:"question"`
 	DefaultAnswer string `json:"default_answer"`
 	Reason        string `json:"reason"`
+	Answer        string `json:"answer,omitempty"`
 }
 
 // AcceptanceFeatureArtifact describes a generated Gherkin feature artifact.
@@ -161,6 +162,7 @@ func normalizeAcceptanceFeaturePrompts(prompts []AcceptanceFeaturePrompt) []Acce
 			Question:      strings.TrimSpace(prompt.Question),
 			DefaultAnswer: strings.TrimSpace(prompt.DefaultAnswer),
 			Reason:        strings.TrimSpace(prompt.Reason),
+			Answer:        strings.TrimSpace(prompt.Answer),
 		}
 
 		if cleaned.ID == "" || cleaned.Question == "" || cleaned.DefaultAnswer == "" {
@@ -320,13 +322,70 @@ func RenderAcceptanceFeatureRoundNotes(paths AcceptanceFeatureRoundPaths, notes 
 			output.WriteString("- Reason: " + prompt.Reason + "\n")
 		}
 
-		output.WriteString("- Answer:\n\n")
+		output.WriteString("- Answer:")
+
+		if prompt.Answer != "" {
+			output.WriteString(" " + prompt.Answer)
+		}
+
+		output.WriteString("\n\n")
 	}
 
 	output.WriteString("## Source\n\n")
 	output.WriteString("- feature round: " + paths.RelativePath + "\n")
 
 	return output.String()
+}
+
+// MergeAcceptanceFeatureRoundAnswers copies existing Markdown answers into matching new prompts.
+func MergeAcceptanceFeatureRoundAnswers(notes AcceptanceFeatureRoundNotes, existingContent string) AcceptanceFeatureRoundNotes {
+	answers := acceptanceFeatureRoundAnswers(existingContent)
+	if len(answers) == 0 {
+		return notes
+	}
+
+	merged := notes
+
+	merged.Prompts = make([]AcceptanceFeaturePrompt, len(notes.Prompts))
+	for index, prompt := range notes.Prompts {
+		merged.Prompts[index] = prompt
+		if strings.TrimSpace(prompt.Answer) != "" {
+			continue
+		}
+
+		answer := answers[prompt.ID]
+		if answer != "" {
+			merged.Prompts[index].Answer = answer
+		}
+	}
+
+	return merged
+}
+
+func acceptanceFeatureRoundAnswers(content string) map[string]string {
+	answers := map[string]string{}
+	lines := strings.Split(content, "\n")
+	currentID := ""
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "### ") {
+			currentID = strings.TrimSpace(strings.TrimPrefix(trimmed, "### "))
+
+			continue
+		}
+
+		if currentID == "" || !strings.HasPrefix(trimmed, "- Answer:") {
+			continue
+		}
+
+		answer := strings.TrimSpace(strings.TrimPrefix(trimmed, "- Answer:"))
+		if answer != "" {
+			answers[currentID] = answer
+		}
+	}
+
+	return answers
 }
 
 // ValidateAcceptanceFeatureArtifact validates the corresponding package boundary value.
@@ -413,6 +472,8 @@ type acceptanceFeatureChecker struct {
 	pendingTags  []string
 	featureTags  []string
 	featureSeen  bool
+	inBackground bool
+	background   acceptanceFeatureScenario
 	scenarios    []acceptanceFeatureScenario
 	currentIndex int
 }
@@ -449,7 +510,12 @@ func (c *acceptanceFeatureChecker) checkStructuralLine(lineNumber int, line stri
 		c.featureSeen = true
 		c.featureTags = append([]string(nil), c.pendingTags...)
 		c.pendingTags = nil
+		c.inBackground = false
+	case strings.HasPrefix(line, "Background:"):
+		c.inBackground = true
+		c.currentIndex = -1
 	case strings.HasPrefix(line, "Scenario:") || strings.HasPrefix(line, "Scenario Outline:"):
+		c.inBackground = false
 		c.addScenario(lineNumber, line)
 	case acceptanceFeatureStepKind(line) != "":
 		c.addStep(lineNumber, line)
@@ -483,6 +549,12 @@ func (c *acceptanceFeatureChecker) addScenario(lineNumber int, line string) {
 
 func (c *acceptanceFeatureChecker) addStep(lineNumber int, line string) {
 	if c.currentIndex < 0 {
+		if c.inBackground {
+			c.addBackgroundStep(line)
+
+			return
+		}
+
 		c.addFinding("step_without_scenario", "feature step must belong to a scenario", lineNumber)
 
 		return
@@ -498,6 +570,19 @@ func (c *acceptanceFeatureChecker) addStep(lineNumber int, line string) {
 		scenario.when = true
 	case "then":
 		scenario.then = true
+	}
+}
+
+func (c *acceptanceFeatureChecker) addBackgroundStep(line string) {
+	c.background.hasStep = true
+
+	switch acceptanceFeatureStepKind(line) {
+	case "given":
+		c.background.given = true
+	case "when":
+		c.background.when = true
+	case "then":
+		c.background.then = true
 	}
 }
 
@@ -520,7 +605,7 @@ func (c *acceptanceFeatureChecker) checkScenario(scenario acceptanceFeatureScena
 		c.addFinding("missing_scenario_name", "scenario must have a name", scenario.line)
 	}
 
-	if !scenario.given {
+	if !scenario.given && !c.background.given {
 		c.addFinding("missing_given", "scenario must include a Given step", scenario.line)
 	}
 
