@@ -11,7 +11,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | spec feature decoupling | delivered | `feat/slice-1-spec-feature-decoupling` | `#294` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md` |
 | Slice 2 | acceptance feature service | delivered | `feat/slice-2-acceptance-feature-service` | `#295` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
-| Slice 3 | acceptance feature cli | planned | `feat/slice-3-acceptance-feature-cli` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
+| Slice 3 | acceptance feature cli | reviewing | `feat/slice-3-acceptance-feature-cli` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
 | Slice 4 | feature round defaults | pending | `feat/slice-4-feature-round-defaults` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
 | Slice 5 | acceptance feature tui action | pending | `feat/slice-5-acceptance-feature-tui-action` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
 | Slice 6 | acceptance workflow docs and fixture | pending | `feat/slice-6-acceptance-workflow-docs-and-fixture` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md` |
@@ -40,11 +40,11 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Add `acceptance feature generate` command wiring. | pending | pending |  |
-| T3.2 | Add command output for generated, needs-more-info, and not-applicable. | pending | pending |  |
-| T3.3 | Add CLI tests. | pending | pending |  |
-| T3.4 | Add command reference updates if needed for this slice. | pending | pending |  |
-| T3.5 | Add slice report and tracker updates. | pending | pending |  |
+| T3.1 | Add `acceptance feature generate` command wiring. | done | `c98209d` | Added top-level `acceptance feature generate` command. |
+| T3.2 | Add command output for generated, needs-more-info, and not-applicable. | done | `c98209d` | Command prints status, feature path, and reason output. |
+| T3.3 | Add CLI tests. | done | `fe91585` | Added command registration and output tests. |
+| T3.4 | Add command reference updates if needed for this slice. | done | `561cb1b` | Documented acceptance feature command and removed old spec-generation feature wording. |
+| T3.5 | Add slice report and tracker updates. | done | this commit | Added Slice 3 report, tracker status, and validation log. |
 
 ## Slice 4 Tasks
 
@@ -83,6 +83,10 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
   - `go test ./internal/chc ./internal/chcapp` (pass)
   - `make verify` (pass)
 - Slice 2:
+  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `make verify` (pass)
+- Slice 3:
+  - `go test ./internal/chcapp -run 'RootCommand|AcceptanceFeatureGenerate'` (pass)
   - `go test ./internal/chc ./internal/chcapp` (pass)
   - `make verify` (pass)
 
