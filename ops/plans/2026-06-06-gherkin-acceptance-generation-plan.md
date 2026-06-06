@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 1 - acceptance readiness contract
+Active Slice: Slice 2 - readiness-aware quiz questions
 
 Spec: `ops/specs/2026-06-06-gherkin-acceptance-generation.md`
 Tracker: `ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md`
