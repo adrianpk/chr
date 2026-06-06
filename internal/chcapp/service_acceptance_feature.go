@@ -222,10 +222,7 @@ func (s service) appendAcceptanceFeatureGenerationContextSections(sections []chc
 	return s.appendAcceptanceFeatureRoundContextSection(sections, scope)
 }
 
-func (s service) appendAcceptanceFeatureRoundContextSection(
-	sections []chc.QuizModelContextSection,
-	scope chc.QuizScope,
-) ([]chc.QuizModelContextSection, error) {
+func (s service) appendAcceptanceFeatureRoundContextSection(sections []chc.QuizModelContextSection, scope chc.QuizScope) ([]chc.QuizModelContextSection, error) {
 	paths, err := chc.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return nil, err
@@ -253,13 +250,7 @@ func (s service) appendAcceptanceFeatureRoundContextSection(
 	return sections, nil
 }
 
-func (s service) writeAcceptanceFeatureRoundNotes(
-	ctx context.Context,
-	scope chc.QuizScope,
-	request chc.QuizModelRequest,
-	response chc.QuizModelResponse,
-	feature chc.AcceptanceFeatureGeneration,
-) (chc.AcceptanceFeatureRoundPaths, error) {
+func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope chc.QuizScope, request chc.QuizModelRequest, response chc.QuizModelResponse, feature chc.AcceptanceFeatureGeneration) (chc.AcceptanceFeatureRoundPaths, error) {
 	notes := chc.AcceptanceFeatureRoundNotes{
 		Scope:            scope,
 		Status:           feature.Status,

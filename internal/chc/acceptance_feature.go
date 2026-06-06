@@ -259,11 +259,7 @@ func WriteAcceptanceFeature(
 }
 
 // WriteAcceptanceFeatureRoundNotes executes the corresponding package operation.
-func WriteAcceptanceFeatureRoundNotes(
-	ctx context.Context,
-	projectDir string,
-	notes AcceptanceFeatureRoundNotes,
-) (AcceptanceFeatureRoundPaths, error) {
+func WriteAcceptanceFeatureRoundNotes(ctx context.Context, projectDir string, notes AcceptanceFeatureRoundNotes) (AcceptanceFeatureRoundPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
