@@ -1088,9 +1088,6 @@ Fence every multi-line example in a Markdown code block with a language tag, suc
 Never emit raw front matter, YAML, JSON, command output, or code snippets as plain paragraphs or headings.
 Set status to draft because generated specs require user review.
 Return body without a top-level title heading; the renderer adds the H1 from title.
-Do not generate Gherkin feature content in this response.
-Do not include fenced gherkin blocks or full Feature/Scenario documents in the spec body.
-Write acceptance criteria as prose bullets; a separate acceptance feature workflow will generate feature artifacts later.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
 `)

@@ -44,23 +44,24 @@ testing is useful.
 
 ## Slice 1: Spec Feature Decoupling
 
-Goal: make spec generation produce only the spec and stop embedding or writing
-Gherkin feature output.
+Goal: make spec generation produce only the spec and stop returning or writing
+acceptance feature output.
 
 Behavior:
 
 - `spec generate` writes only `.chc/user/specs/<case>-spec.md`.
-- The spec model instructions prohibit fenced Gherkin blocks in the spec body.
 - The spec model output no longer treats feature output as part of normal spec
   generation.
-- Existing acceptance criteria remain in prose.
+- Spec body content remains governed by normal spec quality rules, not
+  Gherkin-specific rejection.
 - Existing static feature validation code remains available for later slices.
 
 Tasks:
 
 - T1.1 Remove feature writing from `GenerateSpec`.
 - T1.2 Update spec generation instructions and schema expectations.
-- T1.3 Add tests that reject or prevent embedded fenced Gherkin in spec output.
+- T1.3 Add tests that spec output remains neutral about Gherkin examples while
+  rejecting structured feature payloads.
 - T1.4 Update affected docs or references that claim spec generation writes
   feature files.
 - T1.5 Add slice report and tracker updates.
@@ -179,5 +180,5 @@ Tasks:
 - Keep `.feature` files as first-class acceptance artifacts.
 - Do not execute `godog`; only preserve a layout that makes later execution
   straightforward.
-- If a spec body includes fenced Gherkin after Slice 1, treat it as a generation
-  contract failure unless a compatibility shim is explicitly chosen.
+- Do not add content-based Gherkin rejection to spec generation; the separated
+  workflow boundary is the structured feature payload and artifact writing.

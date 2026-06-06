@@ -803,17 +803,17 @@ func TestQuizModelSpecGenerationInstructionsFenceMultilineExamples(t *testing.T)
 	}
 }
 
-func TestQuizModelSpecGenerationInstructionsForbidEmbeddedGherkin(t *testing.T) {
+func TestQuizModelSpecGenerationInstructionsDoNotMentionFeatureGeneration(t *testing.T) {
 	instructions := quizModelSpecGenerationInstructions()
 
-	for _, want := range []string{
-		"Do not generate Gherkin feature content",
-		"Do not include fenced gherkin blocks",
-		"Write acceptance criteria as prose bullets",
-		"separate acceptance feature workflow",
+	for _, forbidden := range []string{
+		"Gherkin",
+		"gherkin",
+		"Feature/Scenario",
+		"acceptance feature workflow",
 	} {
-		if !strings.Contains(instructions, want) {
-			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
+		if strings.Contains(instructions, forbidden) {
+			t.Fatalf("spec generation instructions contain %q in: %q", forbidden, instructions)
 		}
 	}
 }
@@ -1288,20 +1288,24 @@ func TestQuizModelResponseFromGeneratedSpecOutputRejectsFeatureField(t *testing.
 	}
 }
 
-func TestQuizModelResponseFromGeneratedSpecOutputRejectsEmbeddedGherkin(t *testing.T) {
+func TestQuizModelResponseFromGeneratedSpecOutputAllowsGherkinExampleInBody(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Action = QuizModelActionGenerateSpec
 	request.Strategy = "spec_generation"
 	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	_, err := quizModelResponseFromOutput(request, []byte("{\n"+
+	response, err := quizModelResponseFromOutput(request, []byte("{\n"+
 		`"title": "Editorial Review Spec",`+"\n"+
 		`"body": "Acceptance Criteria\n\n`+"```gherkin"+`\nFeature: Editorial review\n`+"```"+`\n",`+"\n"+
 		`"status": "draft"`+"\n"+
 		"}"))
-	if err == nil {
-		t.Fatal("quizModelResponseFromOutput returned nil error")
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if !strings.Contains(response.DraftSpec.Body, "Feature: Editorial review") {
+		t.Fatalf("body = %q, want Gherkin example preserved", response.DraftSpec.Body)
 	}
 }
 

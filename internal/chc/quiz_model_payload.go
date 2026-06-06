@@ -504,21 +504,11 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec body is required")
 	}
 
-	if quizModelSpecBodyHasEmbeddedGherkin(normalized.Body) {
-		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec body must not include embedded gherkin")
-	}
-
 	if normalized.Status != "draft" {
 		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec status must be draft")
 	}
 
 	return normalized, nil
-}
-
-func quizModelSpecBodyHasEmbeddedGherkin(body string) bool {
-	lower := strings.ToLower(body)
-
-	return strings.Contains(lower, "```gherkin")
 }
 
 // ValidateQuizModelFeaturePayload validates the corresponding package boundary value.

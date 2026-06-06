@@ -21,11 +21,7 @@ acceptance feature workflow.
 `.chc/user/acceptance/<case>.feature`.
 
 The spec model output contract no longer accepts a `feature` field. Spec
-generation instructions explicitly require prose acceptance criteria and forbid
-Gherkin feature documents or fenced Gherkin blocks in the spec response.
-
-Generated spec validation rejects spec bodies that include fenced Gherkin,
-preventing embedded `.feature` content from being persisted as a spec.
+generation remains neutral about the spec body's subject matter.
 
 ## Implementation Notes
 
@@ -42,7 +38,6 @@ responses that still include optional feature content.
 - `SpecOperationResult` no longer exposes acceptance feature fields.
 - Generated spec model output no longer includes `feature`.
 - Generated spec model output rejects extra fields.
-- Generated spec bodies must not include fenced `gherkin` blocks.
 - Spec generation writes only Markdown specs.
 
 ## Files of Interest

@@ -62,7 +62,7 @@ func TestValidateGeneratedSpecRejectsUnsupportedChrysoCoordPathReference(t *test
 	}
 }
 
-func TestValidateGeneratedSpecRejectsEmbeddedGherkin(t *testing.T) {
+func TestValidateGeneratedSpecAllowsGherkinExample(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope:     QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:     "Newsletter Distribution",
@@ -71,8 +71,8 @@ func TestValidateGeneratedSpecRejectsEmbeddedGherkin(t *testing.T) {
 	}
 
 	err := ValidateGeneratedSpec(spec)
-	if err == nil {
-		t.Fatal("ValidateGeneratedSpec returned nil error")
+	if err != nil {
+		t.Fatalf("ValidateGeneratedSpec returned error: %v", err)
 	}
 }
 

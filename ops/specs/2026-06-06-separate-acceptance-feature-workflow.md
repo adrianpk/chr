@@ -10,11 +10,11 @@ ChrysoCoord should separate acceptance feature generation from general
 requirements discovery and specification generation.
 
 The current workflow can bias quiz questions toward Gherkin-oriented slots and
-can produce Gherkin content inside the generated specification body instead of
-writing a dedicated `.feature` artifact. This makes the user answer low-level
-actor/trigger questions too early and makes later tools, such as `godog` or
-agent validation workflows, parse Markdown instead of consuming a conventional
-feature file path.
+can treat feature generation as part of specification generation instead of
+writing a dedicated `.feature` artifact through a separate operation. This makes
+the user answer low-level actor/trigger questions too early and makes later
+tools, such as `godog` or agent validation workflows, depend on spec generation
+instead of consuming a conventional feature file path.
 
 The desired workflow is:
 
@@ -29,7 +29,7 @@ dump, quiz, and spec material.
 ## Goals
 
 - Keep the general quiz centered on use-case discovery instead of Gherkin slots.
-- Generate specifications without embedded `.feature` blocks.
+- Generate specifications without a structured feature payload.
 - Add a separate acceptance feature generation operation.
 - Write Gherkin feature files to a conventional path:
 
@@ -67,11 +67,9 @@ acceptance-testable, the quiz continues as normal dump/spec clarification.
 
 Spec generation writes only the specification artifact.
 
-The generated spec may contain acceptance criteria written in prose, but it must
-not contain fenced Gherkin blocks or a full feature document. If the model
-attempts to emit embedded Gherkin in the spec body, the generation path should
-either reject that output or normalize it before writing, depending on the
-slice's chosen implementation boundary.
+The generated spec is governed by the spec output contract. It must not include
+a structured feature payload or write a `.feature` artifact as part of spec
+generation.
 
 ### Acceptance Feature Generation
 
@@ -117,7 +115,7 @@ embed the full feature body.
 ## Acceptance Criteria
 
 - `spec generate` no longer writes `.feature` files.
-- `spec generate` no longer embeds fenced Gherkin in generated spec Markdown.
+- `spec generate` no longer requests or returns a structured feature payload.
 - A dedicated acceptance feature command can generate
   `.chc/user/acceptance/<case>.feature`.
 - Feature generation uses spec, quiz, dump, project, and use-case context.
@@ -136,5 +134,4 @@ embed the full feature body.
 - Whether feature-round notes should live at
   `.chc/user/acceptance/<case>-feature-notes.md` or under the quiz artifact
   directory.
-- Whether embedded Gherkin in a spec body should fail generation immediately or
-  be extracted into the structured feature field during a compatibility period.
+- Whether generated specs should later link to generated feature artifacts.

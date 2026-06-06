@@ -135,10 +135,6 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 		return fmt.Errorf("generated spec body is required")
 	}
 
-	if generatedSpecBodyHasEmbeddedGherkin(spec.Body) {
-		return fmt.Errorf("generated spec body must not include embedded gherkin")
-	}
-
 	err := validateGeneratedSpecChrysoCoordPathReferences(spec.Body)
 	if err != nil {
 		return err
@@ -154,10 +150,6 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 	}
 
 	return nil
-}
-
-func generatedSpecBodyHasEmbeddedGherkin(body string) bool {
-	return strings.Contains(strings.ToLower(body), "```gherkin")
 }
 
 func validateGeneratedSpecChrysoCoordPathReferences(body string) error {

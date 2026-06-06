@@ -93,29 +93,6 @@ Feature: Blog publishing
 	assertGeneratedSpecResult(t, projectDir, result)
 }
 
-func TestServiceGenerateSpecRejectsEmbeddedGherkinBody(t *testing.T) {
-	projectDir := t.TempDir()
-	writeServiceQuizFixture(t, projectDir)
-	writeSpecGenerationUseCaseFixture(t, projectDir)
-
-	clock := serviceQuizClock()
-	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizDraftSpecResponseWithBody("response-spec", clock(), "```gherkin\nFeature: Blog publishing\n```"),
-		},
-	}
-	operations := newTestService(t, projectDir)
-	operations.quizModel = model
-	operations.now = clock
-
-	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: chc.QuizScope{CaseSlug: "blog"},
-	})
-	if err == nil {
-		t.Fatal("GenerateSpec returned nil error")
-	}
-}
-
 func writeSpecGenerationUseCaseFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
