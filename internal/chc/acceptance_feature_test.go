@@ -1,8 +1,11 @@
 package chc
 
 import (
+	"context"
+	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -159,6 +162,52 @@ Feature: Article authoring
 	assertAcceptanceFeatureFinding(t, result, "implementation_detail")
 }
 
+func TestWriteAcceptanceFeatureWritesCheckedArtifact(t *testing.T) {
+	projectDir := t.TempDir()
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = validAcceptanceFeatureBody()
+
+	paths, result, err := WriteAcceptanceFeature(context.Background(), projectDir, feature)
+	if err != nil {
+		t.Fatalf("WriteAcceptanceFeature returned error: %v", err)
+	}
+
+	if !result.Valid {
+		t.Fatalf("valid = false, findings = %#v", result.Findings)
+	}
+
+	if paths.RelativePath != ".chc/user/acceptance/article-authoring.feature" {
+		t.Fatalf("relative path = %q", paths.RelativePath)
+	}
+
+	content, err := os.ReadFile(paths.Path)
+	if err != nil {
+		t.Fatalf("ReadFile returned error: %v", err)
+	}
+
+	if !strings.Contains(string(content), "Feature: Article authoring") {
+		t.Fatalf("feature content = %q", string(content))
+	}
+}
+
+func TestWriteAcceptanceFeatureRejectsInvalidArtifact(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then it works correctly
+`
+
+	_, result, err := WriteAcceptanceFeature(context.Background(), t.TempDir(), feature)
+	if err == nil {
+		t.Fatal("WriteAcceptanceFeature returned nil error")
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "vague_step")
+}
+
 func assertAcceptanceFeatureFinding(t *testing.T, result AcceptanceFeatureCheckResult, code string) {
 	t.Helper()
 
@@ -182,4 +231,16 @@ func validAcceptanceFeatureArtifact() AcceptanceFeatureArtifact {
 		Body:        "Feature: Article authoring\n",
 		CreatedAt:   quizRuntimeTestTime(),
 	}
+}
+
+func validAcceptanceFeatureBody() string {
+	return `@spec:article-authoring-spec @use-case:article-authoring
+Feature: Article authoring
+
+  @requirement:publish-report
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then a publication report is written
+`
 }

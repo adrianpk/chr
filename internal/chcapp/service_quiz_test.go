@@ -1024,6 +1024,17 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) chc.Qu
 	}
 }
 
+func serviceQuizDraftSpecResponseWithFeature(
+	responseID string,
+	createdAt time.Time,
+	feature chc.AcceptanceFeatureGeneration,
+) chc.QuizModelResponse {
+	response := serviceQuizDraftSpecResponse(responseID, createdAt)
+	response.DraftSpec.Feature = feature
+
+	return response
+}
+
 func serviceQuizStagedPlanResponses(createdAt time.Time) []chc.QuizModelResponse {
 	return []chc.QuizModelResponse{
 		serviceQuizPlanOutlineResponse("response-plan-outline", createdAt),
