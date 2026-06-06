@@ -38,10 +38,8 @@ type SpecGenerateRequest struct {
 
 // SpecOperationResult is the TUI-facing result for spec generation.
 type SpecOperationResult struct {
-	Message                 string
-	Spec                    SpecView
-	AcceptanceFeature       string
-	AcceptanceFeatureStatus string
+	Message string
+	Spec    SpecView
 }
 
 func (s service) ListSpecs() (SpecListResult, error) {
@@ -164,83 +162,12 @@ func (s service) generateSpec(ctx context.Context, scope chc.QuizScope) (SpecOpe
 		"path":          paths.Path,
 	})
 
-	featureStatus, featurePath, err := s.writeGeneratedSpecFeature(ctx, scope, paths, response)
-	if err != nil {
-		return SpecOperationResult{}, err
-	}
-
-	s.appendPlanGenerationLog("generate_spec_feature_status", map[string]string{
-		"case_slug":     scope.CaseSlug,
-		"request_id":    modelRequest.ID,
-		"response_id":   response.ID,
-		"status":        featureStatus,
-		"relative_path": featurePath,
-	})
-
 	view := s.specViewFromPath(scope, paths.RelativePath, paths.Path)
 
 	return SpecOperationResult{
-		Message:                 "Spec generated.",
-		Spec:                    view,
-		AcceptanceFeature:       featurePath,
-		AcceptanceFeatureStatus: featureStatus,
+		Message: "Spec generated.",
+		Spec:    view,
 	}, nil
-}
-
-func (s service) writeGeneratedSpecFeature(
-	ctx context.Context,
-	scope chc.QuizScope,
-	specPaths chc.GeneratedSpecPaths,
-	response chc.QuizModelResponse,
-) (string, string, error) {
-	feature := response.DraftSpec.Feature
-	if !feature.HasContent() {
-		return chc.AcceptanceFeatureStatusNotApplicable, "", nil
-	}
-
-	if feature.Status != chc.AcceptanceFeatureStatusGenerated {
-		s.appendPlanGenerationLog("generate_spec_feature_skipped", map[string]string{
-			"case_slug": scope.CaseSlug,
-			"status":    feature.Status,
-			"reason":    feature.RejectionReason,
-		})
-
-		return feature.Status, "", nil
-	}
-
-	artifact := chc.AcceptanceFeatureArtifact{
-		Scope:            scope,
-		SpecSlug:         specPaths.ScopeID + "-spec",
-		SpecPath:         specPaths.RelativePath,
-		UseCaseSlug:      scope.CaseSlug,
-		Body:             feature.Body,
-		SourceRequestID:  response.RequestID,
-		SourceResponseID: response.ID,
-		CreatedAt:        response.CreatedAt.UTC(),
-	}
-
-	featurePaths, check, err := chc.WriteAcceptanceFeature(ctx, s.projectContext.ProjectDir, artifact)
-	if err != nil {
-		return s.rejectedGeneratedSpecFeature(scope, check, err), "", nil
-	}
-
-	s.appendPlanGenerationLog("generate_spec_feature_written", map[string]string{
-		"case_slug":     scope.CaseSlug,
-		"relative_path": featurePaths.RelativePath,
-		"path":          featurePaths.Path,
-	})
-
-	return chc.AcceptanceFeatureStatusGenerated, featurePaths.RelativePath, nil
-}
-
-func (s service) rejectedGeneratedSpecFeature(scope chc.QuizScope, check chc.AcceptanceFeatureCheckResult, err error) string {
-	s.appendPlanGenerationLog("generate_spec_feature_rejected", map[string]string{
-		"case_slug": scope.CaseSlug,
-		"findings":  fmt.Sprintf("%d", len(check.Findings)),
-		"error":     err.Error(),
-	})
-
-	return chc.AcceptanceFeatureStatusRejected
 }
 
 func (s service) specViewFromScope(scope quizReadScope, index chc.WorkspaceIndex) SpecView {

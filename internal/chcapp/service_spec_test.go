@@ -54,7 +54,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	assertSpecGenerationContext(t, request)
 }
 
-func TestServiceGenerateSpecWritesGeneratedFeature(t *testing.T) {
+func TestServiceGenerateSpecDoesNotWriteGeneratedFeature(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 	writeSpecGenerationUseCaseFixture(t, projectDir)
@@ -84,56 +84,6 @@ Feature: Blog publishing
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
-	}
-
-	if result.AcceptanceFeatureStatus != chc.AcceptanceFeatureStatusGenerated {
-		t.Fatalf("feature status = %q, want generated", result.AcceptanceFeatureStatus)
-	}
-
-	if result.AcceptanceFeature != ".chc/user/acceptance/blog.feature" {
-		t.Fatalf("feature path = %q", result.AcceptanceFeature)
-	}
-
-	feature := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "acceptance", "blog.feature"))
-	if !strings.Contains(feature, "Feature: Blog publishing") {
-		t.Fatalf("feature missing body:\n%s", feature)
-	}
-}
-
-func TestServiceGenerateSpecRejectsInvalidGeneratedFeature(t *testing.T) {
-	projectDir := t.TempDir()
-	writeServiceQuizFixture(t, projectDir)
-	writeSpecGenerationUseCaseFixture(t, projectDir)
-
-	clock := serviceQuizClock()
-	model := &fakeServiceQuizModel{
-		responses: []chc.QuizModelResponse{
-			serviceQuizDraftSpecResponseWithFeature("response-spec", clock(), chc.AcceptanceFeatureGeneration{
-				Status: chc.AcceptanceFeatureStatusGenerated,
-				Body: `@spec:blog-spec
-Feature: Blog publishing
-
-  Scenario: Editorial review is preserved
-    Given an article draft exists
-    When the editor publishes the article
-    Then it works correctly
-`,
-			}),
-		},
-	}
-	operations := newTestService(t, projectDir)
-	operations.quizModel = model
-	operations.now = clock
-
-	result, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: chc.QuizScope{CaseSlug: "blog"},
-	})
-	if err != nil {
-		t.Fatalf("GenerateSpec returned error: %v", err)
-	}
-
-	if result.AcceptanceFeatureStatus != chc.AcceptanceFeatureStatusRejected {
-		t.Fatalf("feature status = %q, want rejected", result.AcceptanceFeatureStatus)
 	}
 
 	if _, err := os.Stat(filepath.Join(projectDir, ".chc", "user", "acceptance", "blog.feature")); !os.IsNotExist(err) {
