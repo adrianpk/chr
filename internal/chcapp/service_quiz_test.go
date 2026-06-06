@@ -224,6 +224,7 @@ path writes a report file and returns an accepted status.
 
 	operations := newTestService(t, projectDir)
 	operations.now = serviceQuizClock()
+
 	state, err := operations.newQuizRuntimeState(chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, chc.QuizModeDeep)
 	if err != nil {
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
@@ -248,9 +249,11 @@ path writes a report file and returns an accepted status.
 	}
 
 	foundSection := false
+
 	for _, section := range request.ContextSections {
 		if section.Name == "acceptance_readiness" {
 			foundSection = true
+
 			break
 		}
 	}
@@ -276,6 +279,7 @@ This is a documentation-only architecture cleanup for a package boundary.
 
 	operations := newTestService(t, projectDir)
 	operations.now = serviceQuizClock()
+
 	state, err := operations.newQuizRuntimeState(chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, chc.QuizModeDeep)
 	if err != nil {
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
@@ -312,6 +316,7 @@ The project has an existing file and should write an output report.
 
 	operations := newTestService(t, projectDir)
 	operations.now = serviceQuizClock()
+
 	state, err := operations.newQuizRuntimeState(chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, chc.QuizModeDeep)
 	if err != nil {
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)

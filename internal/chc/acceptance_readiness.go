@@ -241,6 +241,7 @@ func validateAcceptanceReadinessNotApplicable(readiness AcceptanceReadiness) err
 
 func validateAcceptanceReadinessMissing(slots []AcceptanceReadinessSlot) error {
 	seen := map[AcceptanceReadinessSlot]bool{}
+
 	for _, slot := range slots {
 		if !slot.Valid() {
 			return fmt.Errorf("acceptance readiness missing slot is invalid: %s", slot)
@@ -287,6 +288,7 @@ func normalizeAcceptanceReadinessSlots(slots []AcceptanceReadinessSlot) []Accept
 func normalizeStringList(values []string) []string {
 	normalized := make([]string, 0, len(values))
 	seen := map[string]bool{}
+
 	for _, value := range values {
 		cleaned := strings.TrimSpace(value)
 		if cleaned == "" || seen[cleaned] {
@@ -306,9 +308,11 @@ func normalizeAcceptanceReadinessElements(elements map[AcceptanceReadinessSlot][
 	}
 
 	normalized := map[AcceptanceReadinessSlot][]string{}
+
 	for slot, values := range elements {
 		cleanedSlot := AcceptanceReadinessSlot(strings.TrimSpace(string(slot)))
 		cleanedValues := normalizeStringList(values)
+
 		if cleanedSlot == "" || len(cleanedValues) == 0 {
 			continue
 		}

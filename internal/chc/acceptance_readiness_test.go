@@ -59,6 +59,7 @@ func TestValidateAcceptanceReadinessAcceptsNeedsMoreInfoDecision(t *testing.T) {
 	readiness.Decision = AcceptanceReadinessNeedsMoreInfo
 	readiness.Missing = []AcceptanceReadinessSlot{AcceptanceReadinessSlotFailurePath}
 	delete(readiness.InferredElements, AcceptanceReadinessSlotFailurePath)
+
 	readiness.CandidateScenarios = nil
 
 	normalized, err := ValidateAcceptanceReadiness(readiness)

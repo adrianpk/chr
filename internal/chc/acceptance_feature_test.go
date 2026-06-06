@@ -215,9 +215,11 @@ func assertAcceptanceFeatureFinding(t *testing.T, result AcceptanceFeatureCheckR
 		t.Fatalf("valid = true, want finding %q", code)
 	}
 
-	if !slices.ContainsFunc(result.Findings, func(finding AcceptanceFeatureCheckFinding) bool {
+	found := slices.ContainsFunc(result.Findings, func(finding AcceptanceFeatureCheckFinding) bool {
 		return finding.Code == code
-	}) {
+	})
+
+	if !found {
 		t.Fatalf("findings = %#v, want %q", result.Findings, code)
 	}
 }

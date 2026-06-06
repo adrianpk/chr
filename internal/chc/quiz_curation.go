@@ -63,6 +63,7 @@ func quizAcceptanceReadinessNotes(entries []QuizEntry) []string {
 		if missing := strings.TrimSpace(readiness["missing"]); missing != "" {
 			note += "; missing: " + missing
 		}
+
 		if inferred := strings.TrimSpace(readiness["inferred"]); inferred != "" {
 			note += "; inferred: " + inferred
 		}
@@ -129,6 +130,7 @@ func inferredStringList(value any) string {
 	}
 
 	texts := []string{}
+
 	for _, value := range values {
 		text := inferredString(value)
 		if text != "" {
@@ -146,11 +148,13 @@ func inferredReadinessSlots(value any) string {
 	}
 
 	slots := []string{}
+
 	for slot, slotValues := range values {
 		if inferredStringList(slotValues) != "" {
 			slots = append(slots, slot)
 		}
 	}
+
 	sort.Strings(slots)
 
 	return strings.Join(slots, ", ")

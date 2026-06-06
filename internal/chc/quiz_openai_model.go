@@ -802,6 +802,7 @@ func quizModelRoutingState(
 	}
 	if request.Payload.AcceptanceReadiness != nil {
 		state["acceptance_readiness"] = request.Payload.AcceptanceReadiness
+
 		promptIntent, ok := quizModelAcceptanceReadinessPromptIntent(*request.Payload.AcceptanceReadiness)
 		if ok {
 			state["acceptance_prompt_intent"] = promptIntent
@@ -1324,7 +1325,12 @@ func quizModelDraftSpecJSONSchema() map[string]any {
 
 func quizModelSpecJSONSchema() map[string]any {
 	schema := quizModelDraftSpecJSONSchema()
-	properties, _ := schema["properties"].(map[string]any)
+
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		return schema
+	}
+
 	properties["feature"] = quizModelFeatureJSONSchema()
 
 	return schema

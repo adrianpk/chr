@@ -523,20 +523,12 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 
 // ValidateQuizModelFeaturePayload validates the corresponding package boundary value.
 func ValidateQuizModelFeaturePayload(payload QuizModelFeaturePayload) (QuizModelFeaturePayload, error) {
-	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration{
-		Status:          payload.Status,
-		Body:            payload.Body,
-		RejectionReason: payload.RejectionReason,
-	})
+	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration(payload))
 	if err != nil {
 		return QuizModelFeaturePayload{}, err
 	}
 
-	return QuizModelFeaturePayload{
-		Status:          feature.Status,
-		Body:            feature.Body,
-		RejectionReason: feature.RejectionReason,
-	}, nil
+	return QuizModelFeaturePayload(feature), nil
 }
 
 // ValidateQuizModelPlanPayload validates the corresponding package boundary value.
@@ -897,6 +889,15 @@ func QuizModelContextSectionsForPayload(payload QuizModelPayload) ([]QuizModelCo
 		return nil, err
 	}
 
+	sections, err := quizModelBaseContextSections(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return quizModelAppendAcceptanceReadinessSection(sections, payload.AcceptanceReadiness)
+}
+
+func quizModelBaseContextSections(payload QuizModelPayload) ([]QuizModelContextSection, error) {
 	project, err := quizModelJSONContent(payload.Project)
 	if err != nil {
 		return nil, err
@@ -917,7 +918,7 @@ func QuizModelContextSectionsForPayload(payload QuizModelPayload) ([]QuizModelCo
 		return nil, err
 	}
 
-	sections := []QuizModelContextSection{
+	return []QuizModelContextSection{
 		{
 			Name:      "project",
 			Layer:     QuizModelContextLayerProject,
@@ -946,28 +947,41 @@ func QuizModelContextSectionsForPayload(payload QuizModelPayload) ([]QuizModelCo
 			Content:   currentQuestion,
 			Metadata:  map[string]string{"context_layer": QuizModelContextLayerQuiz},
 		},
+	}, nil
+}
+
+func quizModelAppendAcceptanceReadinessSection(sections []QuizModelContextSection, readiness *AcceptanceReadiness) ([]QuizModelContextSection, error) {
+	if readiness == nil {
+		return sections, nil
 	}
 
-	if payload.AcceptanceReadiness != nil {
-		acceptanceReadiness, err := quizModelJSONContent(payload.AcceptanceReadiness)
-		if err != nil {
-			return nil, err
-		}
-
-		sections = append(sections, QuizModelContextSection{
-			Name:      "acceptance_readiness",
-			Layer:     QuizModelContextLayerQuiz,
-			Authority: "request_context",
-			Content:   acceptanceReadiness,
-			Metadata:  map[string]string{"context_layer": QuizModelContextLayerQuiz},
-		})
+	acceptanceReadiness, err := quizModelJSONContent(readiness)
+	if err != nil {
+		return nil, err
 	}
+
+	sections = append(sections, QuizModelContextSection{
+		Name:      "acceptance_readiness",
+		Layer:     QuizModelContextLayerQuiz,
+		Authority: "request_context",
+		Content:   acceptanceReadiness,
+		Metadata:  map[string]string{"context_layer": QuizModelContextLayerQuiz},
+	})
 
 	return sections, nil
 }
 
 // ValidateQuizModelPayload validates the corresponding package boundary value.
 func ValidateQuizModelPayload(payload QuizModelPayload) error {
+	err := validateQuizModelPayloadHeader(payload)
+	if err != nil {
+		return err
+	}
+
+	return validateQuizModelPayloadEntries(payload.RecentEntries)
+}
+
+func validateQuizModelPayloadHeader(payload QuizModelPayload) error {
 	if strings.TrimSpace(payload.Project.ID) == "" {
 		return fmt.Errorf("quiz model payload project id is required")
 	}
@@ -995,7 +1009,11 @@ func ValidateQuizModelPayload(payload QuizModelPayload) error {
 		}
 	}
 
-	for index, entry := range payload.RecentEntries {
+	return nil
+}
+
+func validateQuizModelPayloadEntries(entries []QuizModelEntryPayload) error {
+	for index, entry := range entries {
 		if strings.TrimSpace(entry.Question) == "" {
 			return fmt.Errorf("quiz model payload recent entry %d question is required", index+1)
 		}
@@ -1069,6 +1087,7 @@ func validateQuizModelFields(fields, required, optional []string) error {
 	for _, field := range required {
 		allowed[field] = true
 	}
+
 	for _, field := range optional {
 		allowed[field] = true
 	}

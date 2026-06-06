@@ -96,6 +96,7 @@ func ValidateAcceptanceFeatureGeneration(feature AcceptanceFeatureGeneration) (A
 		if normalized.RejectionReason == "" {
 			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature rejected status requires reason")
 		}
+
 		normalized.Body = ""
 	case AcceptanceFeatureStatusNotApplicable:
 		normalized.Body = ""
@@ -246,6 +247,11 @@ func (c *acceptanceFeatureChecker) checkLine(lineNumber int, line string) {
 	}
 
 	lower := strings.ToLower(line)
+	c.checkStructuralLine(lineNumber, line)
+	c.checkUnsafeLineContent(lineNumber, lower)
+}
+
+func (c *acceptanceFeatureChecker) checkStructuralLine(lineNumber int, line string) {
 	switch {
 	case strings.HasPrefix(line, "Feature:"):
 		c.featureSeen = true
@@ -256,7 +262,9 @@ func (c *acceptanceFeatureChecker) checkLine(lineNumber int, line string) {
 	case acceptanceFeatureStepKind(line) != "":
 		c.addStep(lineNumber, line)
 	}
+}
 
+func (c *acceptanceFeatureChecker) checkUnsafeLineContent(lineNumber int, lower string) {
 	if acceptanceFeatureHasOpenQuestion(lower) {
 		c.addFinding("open_question", "feature content must not depend on open questions", lineNumber)
 	}

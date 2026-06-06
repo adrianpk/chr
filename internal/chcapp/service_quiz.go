@@ -679,6 +679,7 @@ func quizAcceptanceReadinessFromContext(
 
 	inferred := quizAcceptanceInferredElements(content)
 	missing := quizAcceptanceMissingSlots(inferred)
+
 	if len(missing) == 0 {
 		return chc.AcceptanceReadiness{
 			Decision:           chc.AcceptanceReadinessGenerate,
@@ -769,6 +770,7 @@ func quizAcceptanceMissingSlots(inferred map[chc.AcceptanceReadinessSlot][]strin
 		chc.AcceptanceReadinessSlotSuccessPath,
 	}
 	missing := []chc.AcceptanceReadinessSlot{}
+
 	for _, slot := range required {
 		if len(inferred[slot]) == 0 {
 			missing = append(missing, slot)

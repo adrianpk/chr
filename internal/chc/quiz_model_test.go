@@ -830,36 +830,28 @@ func TestQuizModelQuestionInstructionsMatchRedWrightContextBoundary(t *testing.T
 	}
 
 	for _, instruction := range instructions {
-		if strings.Contains(instruction, "selected context sections") {
-			t.Fatalf("question instructions mention selected context sections: %q", instruction)
-		}
+		assertQuizModelQuestionInstructionBoundary(t, instruction)
+	}
+}
 
-		if !strings.Contains(instruction, "service has already selected the quiz scope and routing state") {
-			t.Fatalf("question instructions do not keep service-selected scope: %q", instruction)
-		}
+func assertQuizModelQuestionInstructionBoundary(t *testing.T, instruction string) {
+	t.Helper()
 
-		if !strings.Contains(instruction, "functional analyst discovering requirements") {
-			t.Fatalf("question instructions do not define analyst role: %q", instruction)
-		}
+	if strings.Contains(instruction, "selected context sections") {
+		t.Fatalf("question instructions mention selected context sections: %q", instruction)
+	}
 
-		if !strings.Contains(instruction, "routing_state as binding conductor context") {
-			t.Fatalf("question instructions do not bind routing state: %q", instruction)
-		}
-
-		if !strings.Contains(instruction, "one specific operational aspect") {
-			t.Fatalf("question instructions do not define single-aspect focus: %q", instruction)
-		}
-
-		if !strings.Contains(instruction, "one area is becoming overrepresented") {
-			t.Fatalf("question instructions do not define topic shift signal: %q", instruction)
-		}
-
-		if !strings.Contains(instruction, "acceptance_readiness") {
-			t.Fatalf("question instructions do not mention acceptance readiness: %q", instruction)
-		}
-
-		if !strings.Contains(instruction, "do not force Gherkin terminology") {
-			t.Fatalf("question instructions do not protect user-facing wording: %q", instruction)
+	for _, want := range []string{
+		"service has already selected the quiz scope and routing state",
+		"functional analyst discovering requirements",
+		"routing_state as binding conductor context",
+		"one specific operational aspect",
+		"one area is becoming overrepresented",
+		"acceptance_readiness",
+		"do not force Gherkin terminology",
+	} {
+		if !strings.Contains(instruction, want) {
+			t.Fatalf("question instructions missing %q in: %q", want, instruction)
 		}
 	}
 }

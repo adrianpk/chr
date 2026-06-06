@@ -221,13 +221,7 @@ func (s service) writeGeneratedSpecFeature(
 
 	featurePaths, check, err := chc.WriteAcceptanceFeature(ctx, s.projectContext.ProjectDir, artifact)
 	if err != nil {
-		s.appendPlanGenerationLog("generate_spec_feature_rejected", map[string]string{
-			"case_slug": scope.CaseSlug,
-			"findings":  fmt.Sprintf("%d", len(check.Findings)),
-			"error":     err.Error(),
-		})
-
-		return chc.AcceptanceFeatureStatusRejected, "", nil
+		return s.rejectedGeneratedSpecFeature(scope, check, err), "", nil
 	}
 
 	s.appendPlanGenerationLog("generate_spec_feature_written", map[string]string{
@@ -237,6 +231,16 @@ func (s service) writeGeneratedSpecFeature(
 	})
 
 	return chc.AcceptanceFeatureStatusGenerated, featurePaths.RelativePath, nil
+}
+
+func (s service) rejectedGeneratedSpecFeature(scope chc.QuizScope, check chc.AcceptanceFeatureCheckResult, err error) string {
+	s.appendPlanGenerationLog("generate_spec_feature_rejected", map[string]string{
+		"case_slug": scope.CaseSlug,
+		"findings":  fmt.Sprintf("%d", len(check.Findings)),
+		"error":     err.Error(),
+	})
+
+	return chc.AcceptanceFeatureStatusRejected
 }
 
 func (s service) specViewFromScope(scope quizReadScope, index chc.WorkspaceIndex) SpecView {
