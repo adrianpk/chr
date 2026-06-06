@@ -10,7 +10,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | spec feature decoupling | delivered | `feat/slice-1-spec-feature-decoupling` | `#294` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md` |
-| Slice 2 | acceptance feature service | planned | `feat/slice-2-acceptance-feature-service` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
+| Slice 2 | acceptance feature service | reviewing | `feat/slice-2-acceptance-feature-service` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
 | Slice 3 | acceptance feature cli | pending | `feat/slice-3-acceptance-feature-cli` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
 | Slice 4 | feature round defaults | pending | `feat/slice-4-feature-round-defaults` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
 | Slice 5 | acceptance feature tui action | pending | `feat/slice-5-acceptance-feature-tui-action` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
@@ -30,11 +30,11 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Add feature generation request, result, and model contract. | pending | pending |  |
-| T2.2 | Build feature-generation context from spec, quiz, dump, project, and use-case artifacts. | pending | pending |  |
-| T2.3 | Write checked features to `.chc/user/acceptance/<case>.feature`. | pending | pending |  |
-| T2.4 | Add service tests for generated, rejected, needs-more-info, and not-applicable flows. | pending | pending |  |
-| T2.5 | Add slice report and tracker updates. | pending | pending |  |
+| T2.1 | Add feature generation request, result, and model contract. | done | `648644c`, corrected by `f8573a3`, `5ed3d64` | Added feature action, statuses, schema, decoder, and provider routing. |
+| T2.2 | Build feature-generation context from spec, quiz, dump, project, and use-case artifacts. | done | `50436c1`, corrected by `ef35761`, `5ed3d64` | Added service request construction and context sections including specs. |
+| T2.3 | Write checked features to `.chc/user/acceptance/<case>.feature`. | done | `adec408`, corrected by `5ed3d64` | Generated features write only after static checks pass. |
+| T2.4 | Add service tests for generated, rejected, needs-more-info, and not-applicable flows. | done | `336d472`, corrected by `6c298de` | Added dedicated service tests for all feature generation outcomes. |
+| T2.5 | Add slice report and tracker updates. | done | this commit | Added Slice 2 report, tracker status, and validation log. |
 
 ## Slice 3 Tasks
 
@@ -80,6 +80,9 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 - Slice 1:
   - `go test ./internal/chc ./internal/chcapp -run 'Spec|Feature|Gherkin'` (pass)
+  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `make verify` (pass)
+- Slice 2:
   - `go test ./internal/chc ./internal/chcapp` (pass)
   - `make verify` (pass)
 
