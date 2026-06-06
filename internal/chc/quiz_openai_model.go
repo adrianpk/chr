@@ -543,10 +543,7 @@ func quizModelFeatureGeneration(payload QuizModelDraftSpecPayload) AcceptanceFea
 	return AcceptanceFeatureGeneration{}
 }
 
-func quizModelFeatureResponseFromOutput(
-	request QuizModelRequest,
-	output []byte,
-) (QuizModelResponse, error) {
+func quizModelFeatureResponseFromOutput(request QuizModelRequest, output []byte) (QuizModelResponse, error) {
 	payload, err := DecodeQuizModelFeaturePayload(extractJSONObject(output))
 	if err != nil {
 		return QuizModelResponse{}, err
