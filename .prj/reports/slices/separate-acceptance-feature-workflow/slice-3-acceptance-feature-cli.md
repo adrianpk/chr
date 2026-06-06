@@ -52,5 +52,5 @@ as quiz, spec, and plan generation.
 
 ## Risks and Follow-ups
 
-- Feature-round defaults are pending in Slice 4.
-- TUI action wiring is pending in Slice 5.
+- Feature-round defaults were delivered in Slice 4.
+- TUI action wiring was delivered in Slice 5.

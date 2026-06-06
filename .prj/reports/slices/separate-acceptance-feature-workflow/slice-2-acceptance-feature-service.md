@@ -60,6 +60,6 @@ a hard service error. Contract failures and missing spec context remain errors.
 
 ## Risks and Follow-ups
 
-- CLI wiring is pending in Slice 3.
-- Feature-round default confirmation is pending in Slice 4.
-- TUI action wiring is pending in Slice 5.
+- CLI wiring was delivered in Slice 3.
+- Feature-round default confirmation was delivered in Slice 4.
+- TUI action wiring was delivered in Slice 5.

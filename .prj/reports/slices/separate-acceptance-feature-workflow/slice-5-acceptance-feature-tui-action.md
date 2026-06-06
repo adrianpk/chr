@@ -56,5 +56,5 @@ state just like existing spec actions.
 
 ## Risks and Follow-ups
 
-- Final user-guide and fixture validation are pending in Slice 6.
+- Final user-guide and fixture validation were delivered in Slice 6.
 - `godog` execution remains deferred.

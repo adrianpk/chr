@@ -57,5 +57,5 @@ dump, quiz, and spec material already exist.
 
 ## Risks and Follow-ups
 
-- TUI rendering and action wiring are pending in Slice 5.
+- TUI rendering and action wiring were delivered in Slice 5.
 - `godog` execution remains deferred.

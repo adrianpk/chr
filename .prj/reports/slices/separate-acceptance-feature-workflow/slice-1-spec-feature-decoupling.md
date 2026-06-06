@@ -57,6 +57,6 @@ responses that still include optional feature content.
 ## Risks and Follow-ups
 
 - The dedicated acceptance feature service, CLI, feature round, and TUI action
-  are still pending in later slices.
+  were delivered by later slices in this workflow.
 - Existing generated feature schema code was removed from the spec model path;
-  Slice 2 should add a new schema at the dedicated feature-generation boundary.
+  Slice 2 added the new schema at the dedicated feature-generation boundary.
