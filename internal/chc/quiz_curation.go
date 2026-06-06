@@ -1,6 +1,7 @@
 package chc
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strconv"
@@ -33,6 +34,7 @@ func CurateQuizEntries(scope QuizScope, entries []QuizEntry, now time.Time) Quiz
 		Scope:                      scope,
 		Status:                     "curated",
 		Decisions:                  quizDecisionNotes(answered),
+		AcceptanceReadiness:        quizAcceptanceReadinessNotes(entries),
 		Constraints:                quizKeywordNotes(entries, quizConstraintKeywords()),
 		Preferences:                quizKeywordNotes(entries, quizPreferenceKeywords()),
 		OpenQuestions:              quizOpenQuestionNotes(entries),
@@ -40,6 +42,118 @@ func CurateQuizEntries(scope QuizScope, entries []QuizEntry, now time.Time) Quiz
 		Entries:                    entries,
 		UpdatedAt:                  now.UTC().Format(time.RFC3339),
 	}
+}
+
+func quizAcceptanceReadinessNotes(entries []QuizEntry) []string {
+	seen := map[string]bool{}
+	notes := []string{}
+
+	for _, entry := range entries {
+		readiness := quizAcceptanceReadinessFromPromptIntent(entry.PromptIntent)
+		if readiness == nil {
+			continue
+		}
+
+		decision := strings.TrimSpace(readiness["decision"])
+		if decision == "" {
+			continue
+		}
+
+		note := "Decision: " + decision
+		if missing := strings.TrimSpace(readiness["missing"]); missing != "" {
+			note += "; missing: " + missing
+		}
+		if inferred := strings.TrimSpace(readiness["inferred"]); inferred != "" {
+			note += "; inferred: " + inferred
+		}
+
+		if seen[note] {
+			continue
+		}
+
+		seen[note] = true
+		notes = append(notes, note)
+	}
+
+	sort.Strings(notes)
+
+	return notes
+}
+
+func quizAcceptanceReadinessFromPromptIntent(value string) map[string]string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(value), &payload); err != nil {
+		return nil
+	}
+
+	metadata, ok := payload["metadata"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	routingState, ok := metadata["routing_state"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	readiness, ok := routingState["acceptance_readiness"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	return map[string]string{
+		"decision": inferredString(readiness["decision"]),
+		"missing":  inferredStringList(readiness["missing"]),
+		"inferred": inferredReadinessSlots(readiness["inferred_elements"]),
+	}
+}
+
+func inferredString(value any) string {
+	text, ok := value.(string)
+	if !ok {
+		return ""
+	}
+
+	return strings.TrimSpace(text)
+}
+
+func inferredStringList(value any) string {
+	values, ok := value.([]any)
+	if !ok {
+		return ""
+	}
+
+	texts := []string{}
+	for _, value := range values {
+		text := inferredString(value)
+		if text != "" {
+			texts = append(texts, text)
+		}
+	}
+
+	return strings.Join(texts, ", ")
+}
+
+func inferredReadinessSlots(value any) string {
+	values, ok := value.(map[string]any)
+	if !ok {
+		return ""
+	}
+
+	slots := []string{}
+	for slot, slotValues := range values {
+		if inferredStringList(slotValues) != "" {
+			slots = append(slots, slot)
+		}
+	}
+	sort.Strings(slots)
+
+	return strings.Join(slots, ", ")
 }
 
 func parseQuizRawTurn(index int, block string) (QuizEntry, error) {

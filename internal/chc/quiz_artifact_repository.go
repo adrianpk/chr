@@ -43,6 +43,7 @@ type QuizCuratedNotes struct {
 	Scope                      QuizScope
 	Status                     string
 	Decisions                  []string
+	AcceptanceReadiness        []string
 	Constraints                []string
 	Preferences                []string
 	OpenQuestions              []string
@@ -347,6 +348,7 @@ func RenderQuizCuratedNotes(paths QuizArtifactPaths, notes QuizCuratedNotes) str
 	output.WriteString("---\n\n")
 	output.WriteString("# Quiz Notes\n\n")
 	renderQuizCuratedSection(&output, "Decisions", notes.Decisions)
+	renderQuizCuratedSection(&output, "Acceptance Readiness", notes.AcceptanceReadiness)
 	renderQuizCuratedSection(&output, "Constraints", notes.Constraints)
 	renderQuizCuratedSection(&output, "Preferences", notes.Preferences)
 	renderQuizCuratedSection(&output, "Open Questions", notes.OpenQuestions)

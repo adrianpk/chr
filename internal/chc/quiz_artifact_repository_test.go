@@ -88,11 +88,12 @@ func TestQuizArtifactRepositoryWritesCuratedNotes(t *testing.T) {
 	repository := NewQuizArtifactRepository(dir)
 
 	paths, err := repository.WriteCuratedNotes(context.Background(), QuizCuratedNotes{
-		Scope:       QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
-		Decisions:   []string{"Use one visible question at a time."},
-		Constraints: []string{"Do not expose fast candidate internals."},
-		Entries:     []QuizEntry{validQuizEntry()},
-		UpdatedAt:   quizRuntimeTestTime().Format(time.RFC3339),
+		Scope:               QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
+		Decisions:           []string{"Use one visible question at a time."},
+		AcceptanceReadiness: []string{"Decision: needs_more_info; missing: actor"},
+		Constraints:         []string{"Do not expose fast candidate internals."},
+		Entries:             []QuizEntry{validQuizEntry()},
+		UpdatedAt:           quizRuntimeTestTime().Format(time.RFC3339),
 	})
 	if err != nil {
 		t.Fatalf("WriteCuratedNotes returned error: %v", err)
@@ -105,6 +106,8 @@ func TestQuizArtifactRepositoryWritesCuratedNotes(t *testing.T) {
 		`raw_path: ".chc/user/quizzes/article-authoring-quiz-raw.md"`,
 		"## Decisions",
 		"- Use one visible question at a time.",
+		"## Acceptance Readiness",
+		"- Decision: needs_more_info; missing: actor",
 		"## Constraints",
 		"- Do not expose fast candidate internals.",
 		"## Provenance",
@@ -223,6 +226,22 @@ func TestCurateQuizEntriesDistillsAnsweredTurns(t *testing.T) {
 
 	if !strings.Contains(notes.Decisions[0], "workflow") {
 		t.Fatalf("decision missing topic:\n%s", notes.Decisions[0])
+	}
+}
+
+func TestCurateQuizEntriesPreservesAcceptanceReadiness(t *testing.T) {
+	entry := quizEntryWith(func(entry *QuizEntry) {
+		entry.PromptIntent = `{"kind":"quiz_question","metadata":{"routing_state":{"acceptance_readiness":{"decision":"needs_more_info","missing":["actor","trigger"],"inferred_elements":{"observable_outcome":["Report is written."]}}}}}`
+	})
+
+	notes := CurateQuizEntries(
+		QuizScope{ProjectID: "project-1"},
+		[]QuizEntry{entry},
+		quizRuntimeTestTime(),
+	)
+
+	if !containsString(notes.AcceptanceReadiness, "Decision: needs_more_info; missing: actor, trigger; inferred: observable_outcome") {
+		t.Fatalf("acceptance readiness = %#v", notes.AcceptanceReadiness)
 	}
 }
 
