@@ -172,6 +172,7 @@ Feature: Blog publishing
 	operations.now = clock
 
 	executor := newTUISpecActionExecutor(operations)
+
 	result, err := executor.ExecuteSpecAction(chctui.SpecActionRequest{
 		Action: chctui.SpecActionGenerateFeature,
 		Scope:  chctui.QuizScope{CaseSlug: "blog"},
