@@ -12,7 +12,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 | Slice 1 | acceptance readiness contract | delivered | `feat/slice-1-acceptance-readiness-contract` | #289 | `.prj/reports/slices/gherkin-acceptance-generation/slice-1-acceptance-readiness-contract.md` |
 | Slice 2 | readiness-aware quiz questions | delivered | `feat/slice-2-readiness-aware-quiz-questions` | #290 | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
 | Slice 3 | feature artifact checks | delivered | `feat/slice-3-feature-artifact-checks` | #291 | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
-| Slice 4 | spec feature generation | planned | `feat/slice-4-spec-feature-generation` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
+| Slice 4 | spec feature generation | reviewing | `feat/slice-4-spec-feature-generation` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
 | Slice 5 | acceptance workflow docs | planned | `feat/slice-5-acceptance-workflow-docs` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
 
 ## Slice 1 Tasks
@@ -47,11 +47,11 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Extend spec generation model contracts for optional feature output. | pending | pending | |
-| T4.2 | Write accepted feature artifacts to the project workspace. | pending | pending | |
-| T4.3 | Report feature generation status in spec generation results and logs. | pending | pending | |
-| T4.4 | Add tests for generated, rejected, and not-applicable feature output. | pending | pending | |
-| T4.5 | Add slice report and tracker updates. | pending | pending | |
+| T4.1 | Extend spec generation model contracts for optional feature output. | done | `348c80a` | Added optional model `feature` output, validation, schema, response transport, and prompt guidance. |
+| T4.2 | Write accepted feature artifacts to the project workspace. | done | `e100a1e` | Added checked feature writing and connected spec generation to `.chc/user/acceptance/<scope>.feature`. |
+| T4.3 | Report feature generation status in spec generation results and logs. | done | `ff19c25` | Added explicit final feature status logging for spec generation. |
+| T4.4 | Add tests for generated, rejected, and not-applicable feature output. | done | `9bafb1d` | Covered generated feature writes, invalid feature rejection, and not-applicable status. |
+| T4.5 | Add slice report and tracker updates. | done | this commit | Added Slice 4 report, tracker status, and validation log. |
 
 ## Slice 5 Tasks
 
@@ -77,6 +77,9 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 - Slice 3: `go test ./internal/chc -run 'AcceptanceFeature|CheckAcceptanceFeature'` (pass)
 - Slice 3: `go test ./internal/chc` (pass)
 - Slice 3 post-merge: `go test ./internal/chc` (pass)
+- Slice 4: `go test ./internal/chc ./internal/chcapp -run 'GeneratedSpecFeatureSchema|SpecGenerationInstructionsDescribeOptionalFeature|GeneratedSpecOutputCarriesFeature|WriteAcceptanceFeature|ServiceGenerateSpec.*Feature|ServiceGenerateSpecRejectsInvalidGeneratedFeature|ServiceGenerateSpecReportsNotApplicableFeature'` (pass)
+- Slice 4: `go test ./internal/chc` (pass)
+- Slice 4: `go test ./internal/chcapp` (pass)
 
 ## Notes
 
