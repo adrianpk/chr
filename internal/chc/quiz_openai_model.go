@@ -554,7 +554,12 @@ func quizModelFeatureResponseFromOutput(request QuizModelRequest, output []byte)
 		RequestID: request.ID,
 		Provider:  "openai",
 		Status:    QuizModelResponseReady,
-		Feature:   AcceptanceFeatureGeneration(payload),
+		Feature: AcceptanceFeatureGeneration{
+			Status:               payload.Status,
+			Body:                 payload.Body,
+			RejectionReason:      payload.RejectionReason,
+			ClarificationPrompts: payload.ClarificationPrompts,
+		},
 		RawText:   strings.TrimSpace(string(output)),
 		CreatedAt: request.CreatedAt,
 	}, nil
@@ -1120,9 +1125,10 @@ func quizModelFeatureGenerationInstructions() string {
 You generate a Gherkin acceptance feature artifact from the selected project or use case context.
 Use the structured request payload and all context sections as the sole source of truth.
 Return status generated only when the context supports concrete observable behavior and the feature body can pass static checks.
-Return status needs_more_info when the context has acceptance potential but scenario details are still missing; explain the missing information in rejection_reason.
+Return status needs_more_info when the context has acceptance potential but scenario details are still missing; explain the missing information in rejection_reason and include default-oriented clarification_prompts.
 Return status not_applicable when the topic is not naturally suited to an acceptance feature; explain why in rejection_reason.
 Return status rejected when a feature was attempted but would be unsafe, vague, or invalid; explain why in rejection_reason.
+Clarification prompts must ask the user to confirm or adjust an inferred default instead of restating schema terms.
 Generated feature bodies must include traceability tags and concrete Given, When, and Then steps.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
@@ -1359,6 +1365,30 @@ func quizModelSpecJSONSchema() map[string]any {
 }
 
 func quizModelFeatureJSONSchema() map[string]any {
+	promptSchema := map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"id", "question", "default_answer", "reason"},
+		"properties": map[string]any{
+			"id": map[string]any{
+				"type":        "string",
+				"description": "Stable short prompt id.",
+			},
+			"question": map[string]any{
+				"type":        "string",
+				"description": "One concise user-facing question.",
+			},
+			"default_answer": map[string]any{
+				"type":        "string",
+				"description": "Best inferred answer the user can confirm or adjust.",
+			},
+			"reason": map[string]any{
+				"type":        "string",
+				"description": "Why this answer is needed for acceptance scenarios.",
+			},
+		},
+	}
+
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -1380,6 +1410,11 @@ func quizModelFeatureJSONSchema() map[string]any {
 			"rejection_reason": map[string]any{
 				"type":        "string",
 				"description": "Reason generation needs more information, was rejected, or is not applicable.",
+			},
+			"clarification_prompts": map[string]any{
+				"type":        "array",
+				"description": "Default-oriented prompts required when status is needs_more_info.",
+				"items":       promptSchema,
 			},
 		},
 	}

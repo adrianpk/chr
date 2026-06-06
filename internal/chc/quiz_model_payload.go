@@ -104,9 +104,10 @@ type QuizModelDraftSpecPayload struct {
 
 // QuizModelFeaturePayload describes optional generated feature output.
 type QuizModelFeaturePayload struct {
-	Status          string `json:"status"`
-	Body            string `json:"body,omitempty"`
-	RejectionReason string `json:"rejection_reason,omitempty"`
+	Status               string                    `json:"status"`
+	Body                 string                    `json:"body,omitempty"`
+	RejectionReason      string                    `json:"rejection_reason,omitempty"`
+	ClarificationPrompts []AcceptanceFeaturePrompt `json:"clarification_prompts,omitempty"`
 }
 
 // QuizModelPlanPayload describes a package boundary value.
@@ -391,7 +392,7 @@ func DecodeQuizModelFeaturePayload(content []byte) (QuizModelFeaturePayload, err
 		return QuizModelFeaturePayload{}, err
 	}
 
-	err = validateQuizModelFields(fields, []string{"status"}, []string{"body", "rejection_reason"})
+	err = validateQuizModelFields(fields, []string{"status"}, []string{"body", "rejection_reason", "clarification_prompts"})
 	if err != nil {
 		return QuizModelFeaturePayload{}, err
 	}
@@ -542,12 +543,22 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 
 // ValidateQuizModelFeaturePayload validates the corresponding package boundary value.
 func ValidateQuizModelFeaturePayload(payload QuizModelFeaturePayload) (QuizModelFeaturePayload, error) {
-	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration(payload))
+	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration{
+		Status:               payload.Status,
+		Body:                 payload.Body,
+		RejectionReason:      payload.RejectionReason,
+		ClarificationPrompts: payload.ClarificationPrompts,
+	})
 	if err != nil {
 		return QuizModelFeaturePayload{}, err
 	}
 
-	return QuizModelFeaturePayload(feature), nil
+	return QuizModelFeaturePayload{
+		Status:               feature.Status,
+		Body:                 feature.Body,
+		RejectionReason:      feature.RejectionReason,
+		ClarificationPrompts: feature.ClarificationPrompts,
+	}, nil
 }
 
 // ValidateQuizModelPlanPayload validates the corresponding package boundary value.

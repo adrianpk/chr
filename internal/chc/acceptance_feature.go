@@ -27,9 +27,18 @@ const (
 
 // AcceptanceFeatureGeneration describes optional model-generated feature content.
 type AcceptanceFeatureGeneration struct {
-	Status          string
-	Body            string
-	RejectionReason string
+	Status               string
+	Body                 string
+	RejectionReason      string
+	ClarificationPrompts []AcceptanceFeaturePrompt
+}
+
+// AcceptanceFeaturePrompt describes one default-oriented feature clarification prompt.
+type AcceptanceFeaturePrompt struct {
+	ID            string `json:"id"`
+	Question      string `json:"question"`
+	DefaultAnswer string `json:"default_answer"`
+	Reason        string `json:"reason"`
 }
 
 // AcceptanceFeatureArtifact describes a generated Gherkin feature artifact.
@@ -84,9 +93,10 @@ func (g AcceptanceFeatureGeneration) HasContent() bool {
 // ValidateAcceptanceFeatureGeneration validates the corresponding package boundary value.
 func ValidateAcceptanceFeatureGeneration(feature AcceptanceFeatureGeneration) (AcceptanceFeatureGeneration, error) {
 	normalized := AcceptanceFeatureGeneration{
-		Status:          strings.TrimSpace(feature.Status),
-		Body:            strings.TrimSpace(feature.Body),
-		RejectionReason: strings.TrimSpace(feature.RejectionReason),
+		Status:               strings.TrimSpace(feature.Status),
+		Body:                 strings.TrimSpace(feature.Body),
+		RejectionReason:      strings.TrimSpace(feature.RejectionReason),
+		ClarificationPrompts: normalizeAcceptanceFeaturePrompts(feature.ClarificationPrompts),
 	}
 
 	switch normalized.Status {
@@ -94,9 +104,15 @@ func ValidateAcceptanceFeatureGeneration(feature AcceptanceFeatureGeneration) (A
 		if normalized.Body == "" {
 			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature generated status requires body")
 		}
+
+		normalized.ClarificationPrompts = nil
 	case AcceptanceFeatureStatusNeedsMoreInfo:
 		if normalized.RejectionReason == "" {
 			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature needs_more_info status requires reason")
+		}
+
+		if len(normalized.ClarificationPrompts) == 0 {
+			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature needs_more_info status requires clarification prompts")
 		}
 
 		normalized.Body = ""
@@ -106,13 +122,42 @@ func ValidateAcceptanceFeatureGeneration(feature AcceptanceFeatureGeneration) (A
 		}
 
 		normalized.Body = ""
+		normalized.ClarificationPrompts = nil
 	case AcceptanceFeatureStatusNotApplicable:
 		normalized.Body = ""
+		normalized.ClarificationPrompts = nil
 	default:
 		return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature status is invalid: %s", normalized.Status)
 	}
 
 	return normalized, nil
+}
+
+func normalizeAcceptanceFeaturePrompts(prompts []AcceptanceFeaturePrompt) []AcceptanceFeaturePrompt {
+	normalized := make([]AcceptanceFeaturePrompt, 0, len(prompts))
+	seen := map[string]bool{}
+
+	for _, prompt := range prompts {
+		cleaned := AcceptanceFeaturePrompt{
+			ID:            strings.TrimSpace(prompt.ID),
+			Question:      strings.TrimSpace(prompt.Question),
+			DefaultAnswer: strings.TrimSpace(prompt.DefaultAnswer),
+			Reason:        strings.TrimSpace(prompt.Reason),
+		}
+
+		if cleaned.ID == "" || cleaned.Question == "" || cleaned.DefaultAnswer == "" {
+			continue
+		}
+
+		if seen[cleaned.ID] {
+			continue
+		}
+
+		seen[cleaned.ID] = true
+		normalized = append(normalized, cleaned)
+	}
+
+	return normalized
 }
 
 // AcceptanceFeatureLayout executes the corresponding package operation.
