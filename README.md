@@ -37,10 +37,10 @@ is explicit, inspectable, and separated from the host workflow.
 ## Control Surface
 
 ChrysoCoord is operated through a TUI and mirrored CLI commands. The TUI gives
-the user a project-manager view: specs, plans, tickets, board state, runtime
-activity, and review evidence. The CLI exposes the same workflow as commands
-that users can script and agents can invoke when they need to interact with the
-project workflow directly.
+the user a project-manager view: specs, Gherkin feature files, plans, tickets,
+board state, runtime activity, and review evidence. The CLI exposes the same
+workflow as commands that users can script and agents can invoke when they need
+to interact with the project workflow directly.
 
 Dumps and quizzes capture context. Specs and Gherkin feature files describe the
 expected behavior. Plans organize the work. Tickets are the executable unit. The
