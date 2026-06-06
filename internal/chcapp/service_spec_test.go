@@ -93,7 +93,7 @@ Feature: Blog publishing
 	assertGeneratedSpecResult(t, projectDir, result)
 }
 
-func TestServiceGenerateSpecReportsNotApplicableFeature(t *testing.T) {
+func TestServiceGenerateSpecRejectsEmbeddedGherkinBody(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
 	writeSpecGenerationUseCaseFixture(t, projectDir)
@@ -101,28 +101,18 @@ func TestServiceGenerateSpecReportsNotApplicableFeature(t *testing.T) {
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
 		responses: []chc.QuizModelResponse{
-			serviceQuizDraftSpecResponseWithFeature("response-spec", clock(), chc.AcceptanceFeatureGeneration{
-				Status: chc.AcceptanceFeatureStatusNotApplicable,
-			}),
+			serviceQuizDraftSpecResponseWithBody("response-spec", clock(), "```gherkin\nFeature: Blog publishing\n```"),
 		},
 	}
 	operations := newTestService(t, projectDir)
 	operations.quizModel = model
 	operations.now = clock
 
-	result, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
+	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
 		Scope: chc.QuizScope{CaseSlug: "blog"},
 	})
-	if err != nil {
-		t.Fatalf("GenerateSpec returned error: %v", err)
-	}
-
-	if result.AcceptanceFeatureStatus != chc.AcceptanceFeatureStatusNotApplicable {
-		t.Fatalf("feature status = %q, want not_applicable", result.AcceptanceFeatureStatus)
-	}
-
-	if result.AcceptanceFeature != "" {
-		t.Fatalf("feature path = %q, want empty", result.AcceptanceFeature)
+	if err == nil {
+		t.Fatal("GenerateSpec returned nil error")
 	}
 }
 

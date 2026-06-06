@@ -62,6 +62,20 @@ func TestValidateGeneratedSpecRejectsUnsupportedChrysoCoordPathReference(t *test
 	}
 }
 
+func TestValidateGeneratedSpecRejectsEmbeddedGherkin(t *testing.T) {
+	spec := GeneratedSpec{
+		Scope:     QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Title:     "Newsletter Distribution",
+		Body:      "Acceptance Criteria\n\n```gherkin\nFeature: Newsletter distribution\n```\n",
+		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
+	}
+
+	err := ValidateGeneratedSpec(spec)
+	if err == nil {
+		t.Fatal("ValidateGeneratedSpec returned nil error")
+	}
+}
+
 func TestValidateGeneratedSpecAllowsKnownChrysoCoordPathReferences(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
