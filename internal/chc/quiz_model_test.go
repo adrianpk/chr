@@ -212,6 +212,31 @@ func TestQuizModelProviderPayloadKeepsNextQuestionContextOutOfProviderText(t *te
 	}
 }
 
+func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Payload.AcceptanceReadiness = &AcceptanceReadiness{
+		Decision:   AcceptanceReadinessNeedsMoreInfo,
+		Confidence: 0.66,
+		Reasons:    []string{"Need actor details."},
+		Missing:    []AcceptanceReadinessSlot{AcceptanceReadinessSlotActor},
+	}
+
+	payload := quizModelProviderPayload(request)
+
+	if _, ok := payload["context_sections"]; ok {
+		t.Fatalf("next-question provider payload includes context_sections: %#v", payload)
+	}
+
+	readiness, ok := payload["acceptance_readiness"].(*AcceptanceReadiness)
+	if !ok {
+		t.Fatalf("acceptance_readiness = %#v, want readiness payload", payload["acceptance_readiness"])
+	}
+
+	if readiness.Decision != AcceptanceReadinessNeedsMoreInfo {
+		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
+	}
+}
+
 func TestOpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload(t *testing.T) {
 	request := validQuizModelRequest()
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
@@ -783,6 +808,14 @@ func TestQuizModelQuestionInstructionsMatchRedWrightContextBoundary(t *testing.T
 		if !strings.Contains(instruction, "one area is becoming overrepresented") {
 			t.Fatalf("question instructions do not define topic shift signal: %q", instruction)
 		}
+
+		if !strings.Contains(instruction, "acceptance_readiness") {
+			t.Fatalf("question instructions do not mention acceptance readiness: %q", instruction)
+		}
+
+		if !strings.Contains(instruction, "do not force Gherkin terminology") {
+			t.Fatalf("question instructions do not protect user-facing wording: %q", instruction)
+		}
 	}
 }
 
@@ -822,6 +855,41 @@ func TestQuizModelRoutingStateCarriesTopicConductorSignals(t *testing.T) {
 
 	if streak["count"] != 2 {
 		t.Fatalf("recent topic count = %#v, want 2", streak["count"])
+	}
+}
+
+func TestQuizModelRoutingStateCarriesAcceptanceReadinessPromptIntent(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Payload.AcceptanceReadiness = &AcceptanceReadiness{
+		Decision:   AcceptanceReadinessNeedsMoreInfo,
+		Confidence: 0.66,
+		Reasons:    []string{"Need actor details."},
+		Missing:    []AcceptanceReadinessSlot{AcceptanceReadinessSlotActor},
+	}
+
+	state := quizModelRoutingState(request, QuizModelQuestionPayload{
+		Question:              "Who starts this workflow?",
+		Tags:                  []string{"actor"},
+		FollowUpDepth:         1,
+		CompletionRecommended: false,
+	})
+
+	readiness, ok := state["acceptance_readiness"].(*AcceptanceReadiness)
+	if !ok {
+		t.Fatalf("acceptance_readiness = %#v, want readiness payload", state["acceptance_readiness"])
+	}
+
+	if readiness.Decision != AcceptanceReadinessNeedsMoreInfo {
+		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
+	}
+
+	intent, ok := state["acceptance_prompt_intent"].(AcceptanceReadinessPromptIntent)
+	if !ok {
+		t.Fatalf("acceptance_prompt_intent = %#v, want prompt intent", state["acceptance_prompt_intent"])
+	}
+
+	if intent.Slot != string(AcceptanceReadinessSlotActor) {
+		t.Fatalf("slot = %q, want actor", intent.Slot)
 	}
 }
 

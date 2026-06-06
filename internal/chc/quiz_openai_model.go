@@ -199,6 +199,9 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 		"current_question": request.Payload.CurrentQuestion,
 		"output_contract":  request.Payload.OutputContract,
 	}
+	if request.Payload.AcceptanceReadiness != nil {
+		payload["acceptance_readiness"] = request.Payload.AcceptanceReadiness
+	}
 
 	hasContextAction := request.Action == QuizModelActionDraftSpec ||
 		request.Action == QuizModelActionGenerateSpec ||
@@ -769,7 +772,7 @@ func quizModelRoutingState(
 ) map[string]any {
 	entryCount := request.Payload.Quiz.EntryCount
 
-	return map[string]any{
+	state := map[string]any{
 		"phase":                    quizModelPhase(payload),
 		"entry_count":              entryCount,
 		"remaining_questions":      quizModelMaxInt(DefaultQuizQuestionBudget-entryCount, 0),
@@ -784,6 +787,32 @@ func quizModelRoutingState(
 		"fallback_reason":          "",
 		"candidate_count":          len(request.RuntimeState.Candidates),
 	}
+	if request.Payload.AcceptanceReadiness != nil {
+		state["acceptance_readiness"] = request.Payload.AcceptanceReadiness
+		promptIntent, ok := quizModelAcceptanceReadinessPromptIntent(*request.Payload.AcceptanceReadiness)
+		if ok {
+			state["acceptance_prompt_intent"] = promptIntent
+		}
+	}
+
+	return state
+}
+
+func quizModelAcceptanceReadinessPromptIntent(
+	readiness AcceptanceReadiness,
+) (AcceptanceReadinessPromptIntent, bool) {
+	if readiness.Decision != AcceptanceReadinessNeedsMoreInfo {
+		return AcceptanceReadinessPromptIntent{}, false
+	}
+
+	for _, slot := range readiness.Missing {
+		intent, err := NewAcceptanceReadinessPromptIntent(slot)
+		if err == nil {
+			return intent, true
+		}
+	}
+
+	return AcceptanceReadinessPromptIntent{}, false
 }
 
 func quizModelMaxInt(left, right int) int {
@@ -890,6 +919,9 @@ You generate exactly one next question for a project quiz.
 The service has already selected the quiz scope and routing state; do not change the scope.
 You are acting as a functional analyst discovering requirements for a future specification.
 Use routing_state as binding conductor context: keep the phase, follow-up depth, topic coverage, and branch-return guidance.
+When acceptance_readiness is present, use it as guidance for whether the use case is naturally acceptance-testable.
+If acceptance_readiness.decision is needs_more_info, ask about the first missing Gherkin-like slot through one ordinary user-facing question.
+If acceptance_readiness.decision is not_applicable, continue normal dump-oriented discovery and do not force Gherkin terminology.
 Ask exactly one concise question about one specific operational aspect at a time.
 Use follow-ups only when they materially improve clarity.
 Shift topics when routing_state shows one area is becoming overrepresented.
@@ -906,6 +938,9 @@ You generate the next %d questions for a project quiz fast mode.
 The service has already selected the quiz scope and routing state; do not change the scope.
 You are acting as a functional analyst discovering requirements for a future specification.
 Use routing_state as binding conductor context: keep the phase, follow-up depth, topic coverage, and branch-return guidance.
+When acceptance_readiness is present, use it as guidance for whether the use case is naturally acceptance-testable.
+If acceptance_readiness.decision is needs_more_info, bias early questions toward missing actor, trigger, initial state, observable outcome, success path, failure path, or boundary details without naming Gherkin.
+If acceptance_readiness.decision is not_applicable, continue normal dump-oriented discovery and do not force Gherkin terminology.
 Prepare concise questions, each about one specific operational aspect.
 Use follow-ups only when they materially improve clarity.
 Shift topics when routing_state shows one area is becoming overrepresented.
