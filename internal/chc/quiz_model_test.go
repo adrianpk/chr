@@ -196,19 +196,29 @@ func TestQuizModelContextSectionsForPayloadMatchesRedWrightShape(t *testing.T) {
 	}
 }
 
-func TestQuizModelProviderPayloadKeepsNextQuestionContextOutOfProviderText(t *testing.T) {
+func TestQuizModelProviderPayloadIncludesNextQuestionContext(t *testing.T) {
 	request := validQuizModelRequest()
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
 		Authority: ".chc/user/dumps/project-context.md",
-		Content:   "Detailed project dump that should not be sent to next-question generation.",
+		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
 	payload := quizModelProviderPayload(request)
 
-	if _, ok := payload["context_sections"]; ok {
-		t.Fatalf("next-question provider payload includes context_sections: %#v", payload)
+	contextSections, ok := payload["context_sections"].([]map[string]any)
+	if !ok {
+		t.Fatalf("context_sections = %#v, want context section payloads", payload["context_sections"])
+	}
+
+	if len(contextSections) == 0 {
+		t.Fatal("context_sections is empty")
+	}
+
+	last := contextSections[len(contextSections)-1]
+	if last["content"] != "Detailed project dump that should guide next-question generation." {
+		t.Fatalf("last context section = %#v", last)
 	}
 }
 
@@ -223,8 +233,8 @@ func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
 
 	payload := quizModelProviderPayload(request)
 
-	if _, ok := payload["context_sections"]; ok {
-		t.Fatalf("next-question provider payload includes context_sections: %#v", payload)
+	if _, ok := payload["context_sections"]; !ok {
+		t.Fatalf("next-question provider payload missing context_sections: %#v", payload)
 	}
 
 	readiness, ok := payload["acceptance_readiness"].(*AcceptanceReadiness)
@@ -237,13 +247,13 @@ func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
 	}
 }
 
-func TestOpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload(t *testing.T) {
+func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *testing.T) {
 	request := validQuizModelRequest()
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
 		Authority: ".chc/user/dumps/project-context.md",
-		Content:   "Detailed project dump that should not be sent to next-question generation.",
+		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
 	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
@@ -265,8 +275,8 @@ func TestOpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload(t *testi
 		t.Fatalf("metadata = %#v, want next-question action", envelope.Metadata)
 	}
 
-	if _, ok := input["context_sections"]; ok {
-		t.Fatalf("next-question input includes context_sections: %#v", input)
+	if _, ok := input["context_sections"]; !ok {
+		t.Fatalf("next-question input missing context_sections: %#v", input)
 	}
 
 	for _, key := range []string{"project", "quiz", "recent_entries", "current_question", "output_contract"} {

@@ -654,20 +654,6 @@ func quizAcceptanceReadinessFromContext(
 	content := strings.ToLower(quizContextText(sections))
 	reasons := []string{"The quiz context was inspected for acceptance-test readiness."}
 
-	if state.QuestionsAsked > 0 {
-		return chc.AcceptanceReadiness{
-			Decision:   chc.AcceptanceReadinessNeedsMoreInfo,
-			Confidence: 0.5,
-			Reasons:    reasons,
-			Missing: []chc.AcceptanceReadinessSlot{
-				chc.AcceptanceReadinessSlotActor,
-				chc.AcceptanceReadinessSlotTrigger,
-				chc.AcceptanceReadinessSlotObservableOutcome,
-			},
-			InferredElements: map[chc.AcceptanceReadinessSlot][]string{},
-		}
-	}
-
 	if quizContextLooksNonAcceptanceTestable(content) {
 		return chc.AcceptanceReadiness{
 			Decision:         chc.AcceptanceReadinessNotApplicable,

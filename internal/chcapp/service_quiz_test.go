@@ -345,6 +345,57 @@ The project has an existing file and should write an output report.
 	}
 }
 
+func TestNewQuizModelRequestDoesNotResetAcceptanceSlotsAfterFirstQuestion(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "curated-blog-context.md"), `---
+title: "Curated Blog Context"
+status: "curated"
+case: "blog"
+---
+
+# Curated Blog Context
+
+A user sends an API request for an existing project before publication. The
+success path accepts the request and writes a visible status response.
+`)
+
+	operations := newTestService(t, projectDir)
+	operations.now = serviceQuizClock()
+
+	state, err := operations.newQuizRuntimeState(chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, chc.QuizModeDeep)
+	if err != nil {
+		t.Fatalf("newQuizRuntimeState returned error: %v", err)
+	}
+
+	state.QuestionsAsked = 1
+	state.AnswersRecorded = 1
+
+	request, err := operations.newQuizModelRequest(state)
+	if err != nil {
+		t.Fatalf("newQuizModelRequest returned error: %v", err)
+	}
+
+	readiness := request.Payload.AcceptanceReadiness
+	if readiness == nil {
+		t.Fatal("AcceptanceReadiness = nil")
+	}
+
+	if readiness.Decision != chc.AcceptanceReadinessGenerate {
+		t.Fatalf("decision = %q, want generate from accumulated context", readiness.Decision)
+	}
+
+	for _, slot := range []chc.AcceptanceReadinessSlot{
+		chc.AcceptanceReadinessSlotActor,
+		chc.AcceptanceReadinessSlotTrigger,
+		chc.AcceptanceReadinessSlotObservableOutcome,
+	} {
+		if slices.Contains(readiness.Missing, slot) {
+			t.Fatalf("missing = %#v, should not reset %s after first question", readiness.Missing, slot)
+		}
+	}
+}
+
 func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)

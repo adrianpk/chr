@@ -203,7 +203,8 @@ func quizModelProviderPayload(request QuizModelRequest) map[string]any {
 		payload["acceptance_readiness"] = request.Payload.AcceptanceReadiness
 	}
 
-	hasContextAction := request.Action == QuizModelActionDraftSpec ||
+	hasContextAction := request.Action == QuizModelActionNextQuestion ||
+		request.Action == QuizModelActionDraftSpec ||
 		request.Action == QuizModelActionGenerateSpec ||
 		request.Action == QuizModelActionGeneratePlan ||
 		request.Action == QuizModelActionGeneratePlanOutline ||
@@ -934,7 +935,7 @@ The service has already selected the quiz scope and routing state; do not change
 You are acting as a functional analyst discovering requirements for a future specification.
 Use routing_state as binding conductor context: keep the phase, follow-up depth, topic coverage, and branch-return guidance.
 When acceptance_readiness is present, use it as guidance for whether the use case is naturally acceptance-testable.
-If acceptance_readiness.decision is needs_more_info, ask about the first missing Gherkin-like slot through one ordinary user-facing question.
+If acceptance_readiness.decision is needs_more_info, use the first missing acceptance slot as internal guidance only; ask a natural question about the use case behavior, not about the schema.
 If acceptance_readiness.decision is not_applicable, continue normal dump-oriented discovery and do not force Gherkin terminology.
 Ask exactly one concise question about one specific operational aspect at a time.
 Use follow-ups only when they materially improve clarity.
@@ -953,7 +954,7 @@ The service has already selected the quiz scope and routing state; do not change
 You are acting as a functional analyst discovering requirements for a future specification.
 Use routing_state as binding conductor context: keep the phase, follow-up depth, topic coverage, and branch-return guidance.
 When acceptance_readiness is present, use it as guidance for whether the use case is naturally acceptance-testable.
-If acceptance_readiness.decision is needs_more_info, bias early questions toward missing actor, trigger, initial state, observable outcome, success path, failure path, or boundary details without naming Gherkin.
+If acceptance_readiness.decision is needs_more_info, bias early questions toward concrete use-case behavior that may clarify missing acceptance slots, without naming Gherkin or the slot schema.
 If acceptance_readiness.decision is not_applicable, continue normal dump-oriented discovery and do not force Gherkin terminology.
 Prepare concise questions, each about one specific operational aspect.
 Use follow-ups only when they materially improve clarity.
