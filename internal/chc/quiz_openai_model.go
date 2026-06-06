@@ -393,6 +393,7 @@ func (a OpenAIQuizModelAdapter) httpClient(request QuizModelRequest) *http.Clien
 func openAIQuizModelTimeout(action QuizModelAction) time.Duration {
 	switch action {
 	case QuizModelActionGenerateSpec,
+		QuizModelActionGenerateAcceptanceFeature,
 		QuizModelActionGeneratePlan,
 		QuizModelActionGeneratePlanOutline,
 		QuizModelActionGeneratePlanSliceDetail,
@@ -447,6 +448,8 @@ func quizModelResponseFromOutput(request QuizModelRequest, output []byte) (QuizM
 		return quizModelQuestionResponseFromOutput(request, output)
 	case QuizModelActionDraftSpec, QuizModelActionGenerateSpec:
 		return quizModelDraftSpecResponseFromOutput(request, output)
+	case QuizModelActionGenerateAcceptanceFeature:
+		return quizModelFeatureResponseFromOutput(request, output)
 	case QuizModelActionGeneratePlan:
 		return quizModelPlanResponseFromOutput(request, output)
 	case QuizModelActionGeneratePlanOutline:
@@ -538,6 +541,30 @@ func quizModelDraftSpecResponseFromOutput(
 
 func quizModelFeatureGeneration(payload QuizModelDraftSpecPayload) AcceptanceFeatureGeneration {
 	return AcceptanceFeatureGeneration{}
+}
+
+func quizModelFeatureResponseFromOutput(
+	request QuizModelRequest,
+	output []byte,
+) (QuizModelResponse, error) {
+	payload, err := DecodeQuizModelFeaturePayload(extractJSONObject(output))
+	if err != nil {
+		return QuizModelResponse{}, err
+	}
+
+	return QuizModelResponse{
+		ID:        quizModelResponseID(request),
+		RequestID: request.ID,
+		Provider:  "openai",
+		Status:    QuizModelResponseReady,
+		Feature: AcceptanceFeatureGeneration{
+			Status:          payload.Status,
+			Body:            payload.Body,
+			RejectionReason: payload.RejectionReason,
+		},
+		RawText:   strings.TrimSpace(string(output)),
+		CreatedAt: request.CreatedAt,
+	}, nil
 }
 
 func quizModelPlanResponseFromOutput(
@@ -911,6 +938,8 @@ func quizModelInstructions(request QuizModelRequest) string {
 		return quizModelPlanSliceDetailGenerationInstructions()
 	case request.Action == QuizModelActionGenerateSpec:
 		return quizModelSpecGenerationInstructions()
+	case request.Action == QuizModelActionGenerateAcceptanceFeature:
+		return quizModelFeatureGenerationInstructions()
 	case request.Action == QuizModelActionDraftSpec:
 		return quizModelDraftSpecInstructions()
 	case request.Mode == QuizModeFast:
@@ -1093,6 +1122,20 @@ Return only the JSON object required by the response schema.
 `)
 }
 
+func quizModelFeatureGenerationInstructions() string {
+	return strings.TrimSpace(`
+You generate a Gherkin acceptance feature artifact from the selected project or use case context.
+Use the structured request payload and all context sections as the sole source of truth.
+Return status generated only when the context supports concrete observable behavior and the feature body can pass static checks.
+Return status needs_more_info when the context has acceptance potential but scenario details are still missing; explain the missing information in rejection_reason.
+Return status not_applicable when the topic is not naturally suited to an acceptance feature; explain why in rejection_reason.
+Return status rejected when a feature was attempted but would be unsafe, vague, or invalid; explain why in rejection_reason.
+Generated feature bodies must include traceability tags and concrete Given, When, and Then steps.
+Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
+Return only the JSON object required by the response schema.
+`)
+}
+
 func quizModelDraftSpecInstructions() string {
 	return strings.TrimSpace(`
 You generate a draft specification from a completed project dump and quiz.
@@ -1135,6 +1178,12 @@ func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 			"generated_spec",
 			"Draft specification generated from project and use-case context.",
 			quizModelSpecJSONSchema(),
+		)
+	case request.Action == QuizModelActionGenerateAcceptanceFeature:
+		return quizModelJSONSchemaTextFormat(
+			"acceptance_feature",
+			"Acceptance feature generated from project, use-case, quiz, dump, and spec context.",
+			quizModelFeatureJSONSchema(),
 		)
 	case request.Action == QuizModelActionDraftSpec:
 		return quizModelJSONSchemaTextFormat(
@@ -1314,6 +1363,33 @@ func quizModelDraftSpecJSONSchema() map[string]any {
 
 func quizModelSpecJSONSchema() map[string]any {
 	return quizModelDraftSpecJSONSchema()
+}
+
+func quizModelFeatureJSONSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"status"},
+		"properties": map[string]any{
+			"status": map[string]any{
+				"type": "string",
+				"enum": []string{
+					AcceptanceFeatureStatusGenerated,
+					AcceptanceFeatureStatusNeedsMoreInfo,
+					AcceptanceFeatureStatusRejected,
+					AcceptanceFeatureStatusNotApplicable,
+				},
+			},
+			"body": map[string]any{
+				"type":        "string",
+				"description": "Gherkin feature body when status is generated.",
+			},
+			"rejection_reason": map[string]any{
+				"type":        "string",
+				"description": "Reason generation needs more information, was rejected, or is not applicable.",
+			},
+		},
+	}
 }
 
 func quizModelPlanJSONSchema() map[string]any {

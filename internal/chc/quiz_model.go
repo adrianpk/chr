@@ -17,6 +17,8 @@ const (
 	QuizModelActionDraftSpec QuizModelAction = "quiz_to_draft_spec"
 	// QuizModelActionGenerateSpec defines a package boundary constant.
 	QuizModelActionGenerateSpec QuizModelAction = "spec_generation"
+	// QuizModelActionGenerateAcceptanceFeature defines a package boundary constant.
+	QuizModelActionGenerateAcceptanceFeature QuizModelAction = "acceptance_feature_generation"
 	// QuizModelActionGeneratePlan defines a package boundary constant.
 	QuizModelActionGeneratePlan QuizModelAction = "plan_generation"
 	// QuizModelActionGeneratePlanOutline defines a package boundary constant.
@@ -74,6 +76,7 @@ type QuizModelResponse struct {
 	Question     QuizQuestion
 	Candidates   []QuizCandidate
 	DraftSpec    QuizDraftSpec
+	Feature      AcceptanceFeatureGeneration
 	Plan         GeneratedPlan
 	PlanOutline  GeneratedPlanOutline
 	SliceDetail  GeneratedPlanSliceDetail
@@ -212,6 +215,7 @@ func (a QuizModelAction) Valid() bool {
 	case QuizModelActionNextQuestion,
 		QuizModelActionDraftSpec,
 		QuizModelActionGenerateSpec,
+		QuizModelActionGenerateAcceptanceFeature,
 		QuizModelActionGeneratePlan,
 		QuizModelActionGeneratePlanOutline,
 		QuizModelActionGeneratePlanSliceDetail,
@@ -225,6 +229,11 @@ func (a QuizModelAction) Valid() bool {
 func validateQuizModelReadyResponse(response QuizModelResponse) error {
 	if response.DraftSpec.HasContent() {
 		return ValidateQuizDraftSpecModelContent(response.DraftSpec)
+	}
+
+	if response.Feature.HasContent() {
+		_, err := ValidateAcceptanceFeatureGeneration(response.Feature)
+		return err
 	}
 
 	if response.Plan.HasContent() {

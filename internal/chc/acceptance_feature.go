@@ -17,6 +17,8 @@ const (
 const (
 	// AcceptanceFeatureStatusGenerated defines a package boundary constant.
 	AcceptanceFeatureStatusGenerated = "generated"
+	// AcceptanceFeatureStatusNeedsMoreInfo defines a package boundary constant.
+	AcceptanceFeatureStatusNeedsMoreInfo = "needs_more_info"
 	// AcceptanceFeatureStatusRejected defines a package boundary constant.
 	AcceptanceFeatureStatusRejected = "rejected"
 	// AcceptanceFeatureStatusNotApplicable defines a package boundary constant.
@@ -92,6 +94,12 @@ func ValidateAcceptanceFeatureGeneration(feature AcceptanceFeatureGeneration) (A
 		if normalized.Body == "" {
 			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature generated status requires body")
 		}
+	case AcceptanceFeatureStatusNeedsMoreInfo:
+		if normalized.RejectionReason == "" {
+			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature needs_more_info status requires reason")
+		}
+
+		normalized.Body = ""
 	case AcceptanceFeatureStatusRejected:
 		if normalized.RejectionReason == "" {
 			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature rejected status requires reason")

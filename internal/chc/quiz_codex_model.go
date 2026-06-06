@@ -117,6 +117,8 @@ func codexQuizModelOutputSchema(action QuizModelAction) ([]byte, error) {
 	switch action {
 	case QuizModelActionGenerateSpec:
 		schema = quizModelDraftSpecJSONSchema()
+	case QuizModelActionGenerateAcceptanceFeature:
+		schema = quizModelFeatureJSONSchema()
 	case QuizModelActionGeneratePlan:
 		schema = quizModelPlanJSONSchema()
 	case QuizModelActionMaterializePlanTracking:
@@ -165,6 +167,8 @@ func codexWorkspaceDiscoveryInstructions(action QuizModelAction) string {
 	switch action {
 	case QuizModelActionGenerateSpec:
 		return codexDecisionDocumentDiscoveryInstructions("the generated spec")
+	case QuizModelActionGenerateAcceptanceFeature:
+		return codexDecisionDocumentDiscoveryInstructions("the generated acceptance feature")
 	case QuizModelActionGeneratePlan,
 		QuizModelActionGeneratePlanOutline,
 		QuizModelActionGeneratePlanSliceDetail:

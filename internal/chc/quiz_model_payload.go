@@ -243,6 +243,13 @@ func NewQuizModelOutputContract(action QuizModelAction, mode QuizMode) QuizModel
 		}
 	}
 
+	if action == QuizModelActionGenerateAcceptanceFeature {
+		return QuizModelOutputContractPayload{
+			RequiredFields:    []string{"status"},
+			RenderedTextField: "body",
+		}
+	}
+
 	if action == QuizModelActionMaterializePlanTracking {
 		return QuizModelOutputContractPayload{
 			RequiredFields:    []string{"title", "body", "status", "tickets"},
@@ -375,6 +382,28 @@ func DecodeQuizModelDraftSpecPayload(content []byte) (QuizModelDraftSpecPayload,
 	}
 
 	return ValidateQuizModelDraftSpecPayload(payload)
+}
+
+// DecodeQuizModelFeaturePayload decodes the corresponding package payload.
+func DecodeQuizModelFeaturePayload(content []byte) (QuizModelFeaturePayload, error) {
+	fields, err := quizModelRawJSONFields(content)
+	if err != nil {
+		return QuizModelFeaturePayload{}, err
+	}
+
+	err = validateQuizModelFields(fields, []string{"status"}, []string{"body", "rejection_reason"})
+	if err != nil {
+		return QuizModelFeaturePayload{}, err
+	}
+
+	var payload QuizModelFeaturePayload
+
+	err = decodeStrictQuizModelJSON(content, &payload)
+	if err != nil {
+		return QuizModelFeaturePayload{}, err
+	}
+
+	return ValidateQuizModelFeaturePayload(payload)
 }
 
 // DecodeQuizModelPlanPayload decodes the corresponding package payload.

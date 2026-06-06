@@ -55,6 +55,10 @@ func newQuizModelAdapter(projectDir string) chc.QuizModelAdapter {
 		actionAdapters[chc.QuizModelActionGenerateSpec] = chc.CodexQuizModelAdapter{ProjectDir: projectDir}
 	}
 
+	if codexGenerationBackend("CHC_ACCEPTANCE_FEATURE_GENERATION_BACKEND") {
+		actionAdapters[chc.QuizModelActionGenerateAcceptanceFeature] = chc.CodexQuizModelAdapter{ProjectDir: projectDir}
+	}
+
 	if codexGenerationBackend("CHC_PLAN_GENERATION_BACKEND") {
 		actionAdapters[chc.QuizModelActionGeneratePlan] = chc.CodexQuizModelAdapter{ProjectDir: projectDir}
 	}

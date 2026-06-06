@@ -107,6 +107,7 @@ func TestNewQuizModelAdapterRoutesArtifactGenerationToCodexByDefault(t *testing.
 
 	for _, action := range []chc.QuizModelAction{
 		chc.QuizModelActionGenerateSpec,
+		chc.QuizModelActionGenerateAcceptanceFeature,
 		chc.QuizModelActionGeneratePlan,
 		chc.QuizModelActionMaterializePlanTracking,
 	} {
@@ -118,6 +119,7 @@ func TestNewQuizModelAdapterRoutesArtifactGenerationToCodexByDefault(t *testing.
 
 func TestNewQuizModelAdapterCanRouteArtifactGenerationToOpenAI(t *testing.T) {
 	t.Setenv("CHC_SPEC_GENERATION_BACKEND", "openai")
+	t.Setenv("CHC_ACCEPTANCE_FEATURE_GENERATION_BACKEND", "openai")
 	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
 	t.Setenv("CHC_PLAN_TRACKING_GENERATION_BACKEND", "openai")
 
