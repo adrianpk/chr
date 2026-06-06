@@ -10,7 +10,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | spec feature decoupling | delivered | `feat/slice-1-spec-feature-decoupling` | `#294` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md` |
-| Slice 2 | acceptance feature service | reviewing | `feat/slice-2-acceptance-feature-service` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
+| Slice 2 | acceptance feature service | reviewing | `feat/slice-2-acceptance-feature-service` | `#295` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
 | Slice 3 | acceptance feature cli | pending | `feat/slice-3-acceptance-feature-cli` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
 | Slice 4 | feature round defaults | pending | `feat/slice-4-feature-round-defaults` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
 | Slice 5 | acceptance feature tui action | pending | `feat/slice-5-acceptance-feature-tui-action` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
