@@ -9,7 +9,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | acceptance readiness contract | planned | `feat/slice-1-acceptance-readiness-contract` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-1-acceptance-readiness-contract.md` |
+| Slice 1 | acceptance readiness contract | reviewing | `feat/slice-1-acceptance-readiness-contract` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-1-acceptance-readiness-contract.md` |
 | Slice 2 | readiness-aware quiz questions | planned | `feat/slice-2-readiness-aware-quiz-questions` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
 | Slice 3 | feature artifact checks | planned | `feat/slice-3-feature-artifact-checks` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
 | Slice 4 | spec feature generation | planned | `feat/slice-4-spec-feature-generation` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
@@ -19,10 +19,10 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add acceptance readiness types and validation. | pending | pending | |
-| T1.2 | Add semantic prompt intent rendering for acceptance readiness slots. | pending | pending | |
-| T1.3 | Add tests for valid, missing, contradictory, and non-applicable readiness payloads. | pending | pending | |
-| T1.4 | Add slice report and tracker updates. | pending | pending | |
+| T1.1 | Add acceptance readiness types and validation. | done | `0563555` | Added readiness decisions, slots, normalization, and validation. |
+| T1.2 | Add semantic prompt intent rendering for acceptance readiness slots. | done | `0563555` | Added slot-specific semantic contracts and forbidden-slot metadata. |
+| T1.3 | Add tests for valid, missing, contradictory, and non-applicable readiness payloads. | done | `0563555` | Added focused package tests for readiness decisions and prompt intent construction. |
+| T1.4 | Add slice report and tracker updates. | done | this commit | Added Slice 1 report, tracker status, and validation log. |
 
 ## Slice 2 Tasks
 
@@ -65,7 +65,8 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 ## Validation Log
 
-- Planning: not run yet.
+- Slice 1: `go test ./internal/chc -run AcceptanceReadiness` (pass)
+- Slice 1: `go test ./internal/chc` (pass)
 
 ## Notes
 
