@@ -42,9 +42,9 @@ activity, and review evidence. The CLI exposes the same workflow as commands
 that users can script and agents can invoke when they need to interact with the
 project workflow directly.
 
-Dumps and quizzes capture context. Specs and plans organize the work. Tickets
-are the executable unit. The board shows what is ready, running, blocked, or
-waiting for review.
+Dumps and quizzes capture context. Specs and Gherkin feature files describe the
+expected behavior. Plans organize the work. Tickets are the executable unit. The
+board shows what is ready, running, blocked, or waiting for review.
 
 Once the queue is shaped, the agent can work autonomously through ready tickets.
 The user can still run one ticket, run the full queue, stop the loop, inspect
