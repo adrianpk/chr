@@ -57,6 +57,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 		EnableShellCompletion: true,
 		Action:                runDefaultTUIAction(stdin, stdout, deps),
 		Commands: []*cli.Command{
+			newAcceptanceCommand(stdout, deps),
 			newAuthorCommand(stdout, deps),
 			newDaemonCommand(stdout, deps),
 			newDumpCommand(stdout, deps),
