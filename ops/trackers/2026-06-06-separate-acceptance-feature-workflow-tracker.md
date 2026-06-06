@@ -22,7 +22,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | --- | --- | --- | --- | --- |
 | T1.1 | Remove feature writing from `GenerateSpec`. | done | `95b8871` | Spec generation now writes only the Markdown spec. |
 | T1.2 | Update spec generation instructions and schema expectations. | done | `c9914e0` | Spec output schema no longer includes `feature`; stale feature fields are rejected. |
-| T1.3 | Add tests that spec output remains neutral about Gherkin examples while rejecting structured feature payloads. | done | `e210b73` | Spec body content is not rejected for Gherkin examples. |
+| T1.3 | Add tests that spec output remains neutral about Gherkin examples while rejecting structured feature payloads. | done | `e210b73`, corrected by `9626bcc` | Spec body content is not rejected for Gherkin examples. |
 | T1.4 | Update affected docs or references that claim spec generation writes feature files. | done | `ff0fc93` | Docs now describe spec generation as spec-only. |
 | T1.5 | Add slice report and tracker updates. | done | this commit | Added Slice 1 report, tracker status, and validation log. |
 
