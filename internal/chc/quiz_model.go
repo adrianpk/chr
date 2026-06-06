@@ -233,6 +233,7 @@ func validateQuizModelReadyResponse(response QuizModelResponse) error {
 
 	if response.Feature.HasContent() {
 		_, err := ValidateAcceptanceFeatureGeneration(response.Feature)
+
 		return err
 	}
 

@@ -130,12 +130,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope chc.QuizSc
 			"error":     err.Error(),
 		})
 
-		return AcceptanceFeatureOperationResult{
-			Message:         acceptanceFeatureResultMessage(chc.AcceptanceFeatureStatusRejected),
-			Status:          chc.AcceptanceFeatureStatusRejected,
-			RejectionReason: err.Error(),
-			Check:           check,
-		}, nil
+		return rejectedAcceptanceFeatureResult(check, err)
 	}
 
 	s.appendPlanGenerationLog("generate_acceptance_feature_written", map[string]string{
@@ -221,6 +216,15 @@ func specNodeSlug(node chc.WorkspaceNode) string {
 	name := filepath.Base(node.RelativePath)
 
 	return name[:len(name)-len(filepath.Ext(name))]
+}
+
+func rejectedAcceptanceFeatureResult(check chc.AcceptanceFeatureCheckResult, err error) (AcceptanceFeatureOperationResult, error) {
+	return AcceptanceFeatureOperationResult{
+		Message:         acceptanceFeatureResultMessage(chc.AcceptanceFeatureStatusRejected),
+		Status:          chc.AcceptanceFeatureStatusRejected,
+		RejectionReason: err.Error(),
+		Check:           check,
+	}, nil
 }
 
 func acceptanceFeatureResultMessage(status string) string {
