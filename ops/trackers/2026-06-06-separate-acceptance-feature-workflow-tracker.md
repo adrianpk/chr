@@ -13,7 +13,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Slice 2 | acceptance feature service | delivered | `feat/slice-2-acceptance-feature-service` | `#295` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
 | Slice 3 | acceptance feature cli | delivered | `feat/slice-3-acceptance-feature-cli` | `#296` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
 | Slice 4 | feature round defaults | delivered | `feat/slice-4-feature-round-defaults` | `#297` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
-| Slice 5 | acceptance feature tui action | in_progress | `feat/slice-5-acceptance-feature-tui-action` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
+| Slice 5 | acceptance feature tui action | reviewing | `feat/slice-5-acceptance-feature-tui-action` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
 | Slice 6 | acceptance workflow docs and fixture | pending | `feat/slice-6-acceptance-workflow-docs-and-fixture` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md` |
 
 ## Slice 1 Tasks
@@ -60,11 +60,11 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Add acceptance feature read model fields for Specs or a focused Acceptance action surface. | pending | pending |  |
-| T5.2 | Add TUI action executor support for feature generation. | pending | pending |  |
-| T5.3 | Render feature status/path and needs-more-info prompts. | pending | pending |  |
-| T5.4 | Add TUI tests for command/action availability and result rendering. | pending | pending |  |
-| T5.5 | Add slice report and tracker updates. | pending | pending |  |
+| T5.1 | Add acceptance feature read model fields for Specs or a focused Acceptance action surface. | done | `ff4d32b` | Extended `SpecActionResult` with acceptance feature status, path, feature-round path, and reason fields. |
+| T5.2 | Add TUI action executor support for feature generation. | done | `ff4d32b` | Added Specs view key/action and adapter dispatch through `GenerateAcceptanceFeature`. |
+| T5.3 | Render feature status/path and needs-more-info prompts. | done | `ff4d32b` | TUI status message now includes generated feature path, feature-round path, and reason when provided. |
+| T5.4 | Add TUI tests for command/action availability and result rendering. | done | `5d7656f`, corrected by `cf3f83d` | Added TUI model and adapter coverage. |
+| T5.5 | Add slice report and tracker updates. | done | this commit | Added Slice 5 report, tracker status, and validation log. |
 
 ## Slice 6 Tasks
 
@@ -93,6 +93,11 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
   - `go test ./internal/chc -run 'AcceptanceFeature|QuizModelFeature'` (pass)
   - `go test ./internal/chcapp -run 'ServiceGenerateAcceptanceFeature'` (pass)
   - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `make verify` (pass)
+- Slice 5:
+  - `go test ./internal/chctui -run 'SpecGenerationCommands|GeneratesSpecFromSpecsKey|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
+  - `go test ./internal/chcapp -run 'TUISpecAdapterGeneratesAcceptanceFeature'` (pass)
+  - `go test ./internal/chcapp -run 'TUISpecAdapterGeneratesAcceptanceFeature' && go test ./internal/chctui -run 'SpecGenerationCommands|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
   - `make verify` (pass)
 
 ## Notes
