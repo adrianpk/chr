@@ -37,6 +37,23 @@ func TestAcceptanceFeatureLayoutRejectsNestedCaseSlug(t *testing.T) {
 	}
 }
 
+func TestAcceptanceFeatureRoundLayoutUsesCanonicalPath(t *testing.T) {
+	projectDir := t.TempDir()
+
+	paths, err := AcceptanceFeatureRoundLayout(projectDir, QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"})
+	if err != nil {
+		t.Fatalf("AcceptanceFeatureRoundLayout returned error: %v", err)
+	}
+
+	if paths.RelativePath != ".chc/user/acceptance/article-authoring-feature-round.md" {
+		t.Fatalf("relative path = %q", paths.RelativePath)
+	}
+
+	if paths.Path != filepath.Join(projectDir, ".chc", "user", "acceptance", "article-authoring-feature-round.md") {
+		t.Fatalf("path = %q", paths.Path)
+	}
+}
+
 func TestValidateAcceptanceFeatureArtifactRequiresTraceabilityInputs(t *testing.T) {
 	feature := validAcceptanceFeatureArtifact()
 	feature.SpecSlug = ""
@@ -206,6 +223,48 @@ func TestWriteAcceptanceFeatureRejectsInvalidArtifact(t *testing.T) {
 	}
 
 	assertAcceptanceFeatureFinding(t, result, "vague_step")
+}
+
+func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {
+	projectDir := t.TempDir()
+	notes := AcceptanceFeatureRoundNotes{
+		Scope:           QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
+		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
+		RejectionReason: "The failure behavior is not explicit.",
+		Prompts: []AcceptanceFeaturePrompt{
+			{
+				ID:            "failure-behavior",
+				Question:      "What should happen when publishing fails?",
+				DefaultAnswer: "The article remains unpublished and the user sees the failure.",
+				Reason:        "The feature needs one observable rejection path.",
+			},
+		},
+		SourceRequestID:  "request-feature",
+		SourceResponseID: "response-feature",
+		CreatedAt:        quizRuntimeTestTime(),
+	}
+
+	paths, err := WriteAcceptanceFeatureRoundNotes(context.Background(), projectDir, notes)
+	if err != nil {
+		t.Fatalf("WriteAcceptanceFeatureRoundNotes returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(paths.Path)
+	if err != nil {
+		t.Fatalf("ReadFile returned error: %v", err)
+	}
+
+	text := string(content)
+	for _, want := range []string{
+		`status: "needs_more_info"`,
+		"### failure-behavior",
+		"- Default: The article remains unpublished and the user sees the failure.",
+		"- Answer:",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("round notes missing %q in:\n%s", want, text)
+		}
+	}
 }
 
 func assertAcceptanceFeatureFinding(t *testing.T, result AcceptanceFeatureCheckResult, code string) {

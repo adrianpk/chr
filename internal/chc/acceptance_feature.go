@@ -60,6 +60,24 @@ type AcceptanceFeaturePaths struct {
 	Path         string
 }
 
+// AcceptanceFeatureRoundNotes describes persisted feature-round clarification notes.
+type AcceptanceFeatureRoundNotes struct {
+	Scope            QuizScope
+	Status           string
+	RejectionReason  string
+	Prompts          []AcceptanceFeaturePrompt
+	SourceRequestID  string
+	SourceResponseID string
+	CreatedAt        time.Time
+}
+
+// AcceptanceFeatureRoundPaths describes the canonical feature-round note paths.
+type AcceptanceFeatureRoundPaths struct {
+	ScopeID      string
+	RelativePath string
+	Path         string
+}
+
 // AcceptanceFeatureCheckResult describes static feature validation output.
 type AcceptanceFeatureCheckResult struct {
 	Valid    bool
@@ -181,6 +199,27 @@ func AcceptanceFeatureLayout(projectDir string, scope QuizScope) (AcceptanceFeat
 	}, nil
 }
 
+// AcceptanceFeatureRoundLayout executes the corresponding package operation.
+func AcceptanceFeatureRoundLayout(projectDir string, scope QuizScope) (AcceptanceFeatureRoundPaths, error) {
+	err := ValidateQuizScope(scope)
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(scope)
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
+
+	relativePath := UserRelativePath(AcceptanceFeatureDirectory, scopeID+"-feature-round.md")
+
+	return AcceptanceFeatureRoundPaths{
+		ScopeID:      scopeID,
+		RelativePath: relativePath,
+		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+	}, nil
+}
+
 // WriteAcceptanceFeature executes the corresponding package operation.
 func WriteAcceptanceFeature(
 	ctx context.Context,
@@ -219,9 +258,78 @@ func WriteAcceptanceFeature(
 	return paths, result, nil
 }
 
+// WriteAcceptanceFeatureRoundNotes executes the corresponding package operation.
+func WriteAcceptanceFeatureRoundNotes(
+	ctx context.Context,
+	projectDir string,
+	notes AcceptanceFeatureRoundNotes,
+) (AcceptanceFeatureRoundPaths, error) {
+	err := ctx.Err()
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
+
+	err = ValidateAcceptanceFeatureRoundNotes(notes)
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
+
+	paths, err := AcceptanceFeatureRoundLayout(projectDir, notes.Scope)
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
+
+	err = os.MkdirAll(filepath.Dir(paths.Path), 0o755)
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, fmt.Errorf("create acceptance feature round directory: %w", err)
+	}
+
+	err = os.WriteFile(paths.Path, []byte(RenderAcceptanceFeatureRoundNotes(paths, notes)), 0o644)
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, fmt.Errorf("write acceptance feature round notes: %w", err)
+	}
+
+	return paths, nil
+}
+
 // RenderAcceptanceFeature renders the corresponding package data.
 func RenderAcceptanceFeature(feature AcceptanceFeatureArtifact) string {
 	return strings.TrimSpace(feature.Body) + "\n"
+}
+
+// RenderAcceptanceFeatureRoundNotes renders the corresponding package data.
+func RenderAcceptanceFeatureRoundNotes(paths AcceptanceFeatureRoundPaths, notes AcceptanceFeatureRoundNotes) string {
+	var output strings.Builder
+
+	output.WriteString("---\n")
+	output.WriteString("title: " + yamlString("Acceptance Feature Round") + "\n")
+	output.WriteString("status: " + yamlString(notes.Status) + "\n")
+	output.WriteString("type: " + yamlString("acceptance_feature_round") + "\n")
+	output.WriteString("case: " + yamlString(notes.Scope.CaseSlug) + "\n")
+	output.WriteString("source_request: " + yamlString(notes.SourceRequestID) + "\n")
+	output.WriteString("source_response: " + yamlString(notes.SourceResponseID) + "\n")
+	output.WriteString("updated_at: " + yamlString(notes.CreatedAt.UTC().Format(time.RFC3339)) + "\n")
+	output.WriteString("---\n\n")
+	output.WriteString("# Acceptance Feature Round\n\n")
+	output.WriteString("## Missing Information\n\n")
+	output.WriteString(strings.TrimSpace(notes.RejectionReason) + "\n\n")
+	output.WriteString("## Prompts\n\n")
+
+	for _, prompt := range notes.Prompts {
+		output.WriteString("### " + prompt.ID + "\n\n")
+		output.WriteString("- Question: " + prompt.Question + "\n")
+		output.WriteString("- Default: " + prompt.DefaultAnswer + "\n")
+		if prompt.Reason != "" {
+			output.WriteString("- Reason: " + prompt.Reason + "\n")
+		}
+
+		output.WriteString("- Answer:\n\n")
+	}
+
+	output.WriteString("## Source\n\n")
+	output.WriteString("- feature round: " + paths.RelativePath + "\n")
+
+	return output.String()
 }
 
 // ValidateAcceptanceFeatureArtifact validates the corresponding package boundary value.
@@ -245,6 +353,40 @@ func ValidateAcceptanceFeatureArtifact(feature AcceptanceFeatureArtifact) error 
 
 	if feature.CreatedAt.IsZero() {
 		return fmt.Errorf("acceptance feature created time is required")
+	}
+
+	return nil
+}
+
+// ValidateAcceptanceFeatureRoundNotes validates the corresponding package boundary value.
+func ValidateAcceptanceFeatureRoundNotes(notes AcceptanceFeatureRoundNotes) error {
+	err := ValidateQuizScope(notes.Scope)
+	if err != nil {
+		return err
+	}
+
+	if strings.TrimSpace(notes.Status) != AcceptanceFeatureStatusNeedsMoreInfo {
+		return fmt.Errorf("acceptance feature round status must be needs_more_info")
+	}
+
+	if strings.TrimSpace(notes.RejectionReason) == "" {
+		return fmt.Errorf("acceptance feature round rejection reason is required")
+	}
+
+	if len(normalizeAcceptanceFeaturePrompts(notes.Prompts)) == 0 {
+		return fmt.Errorf("acceptance feature round prompts are required")
+	}
+
+	if strings.TrimSpace(notes.SourceRequestID) == "" {
+		return fmt.Errorf("acceptance feature round source request id is required")
+	}
+
+	if strings.TrimSpace(notes.SourceResponseID) == "" {
+		return fmt.Errorf("acceptance feature round source response id is required")
+	}
+
+	if notes.CreatedAt.IsZero() {
+		return fmt.Errorf("acceptance feature round created time is required")
 	}
 
 	return nil
