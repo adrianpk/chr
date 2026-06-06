@@ -12,7 +12,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Slice 1 | spec feature decoupling | delivered | `feat/slice-1-spec-feature-decoupling` | `#294` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md` |
 | Slice 2 | acceptance feature service | delivered | `feat/slice-2-acceptance-feature-service` | `#295` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
 | Slice 3 | acceptance feature cli | delivered | `feat/slice-3-acceptance-feature-cli` | `#296` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
-| Slice 4 | feature round defaults | in_progress | `feat/slice-4-feature-round-defaults` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
+| Slice 4 | feature round defaults | reviewing | `feat/slice-4-feature-round-defaults` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
 | Slice 5 | acceptance feature tui action | pending | `feat/slice-5-acceptance-feature-tui-action` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
 | Slice 6 | acceptance workflow docs and fixture | pending | `feat/slice-6-acceptance-workflow-docs-and-fixture` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md` |
 
@@ -50,11 +50,11 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add feature readiness/default prompt model. | pending | pending |  |
-| T4.2 | Persist feature-round notes under a stable acceptance artifact path. | pending | pending |  |
-| T4.3 | Use feature-round notes as input for subsequent feature generation. | pending | pending |  |
-| T4.4 | Add tests for default confirmation and missing-info persistence. | pending | pending |  |
-| T4.5 | Add slice report and tracker updates. | pending | pending |  |
+| T4.1 | Add feature readiness/default prompt model. | done | `ee9c2c4`, corrected by `4df227e` | Added structured clarification prompts for feature `needs_more_info` responses. |
+| T4.2 | Persist feature-round notes under a stable acceptance artifact path. | done | `0748c73`, corrected by `a0a31d0`, `4df227e` | Added `.chc/user/acceptance/<case>-feature-round.md`. |
+| T4.3 | Use feature-round notes as input for subsequent feature generation. | done | `eddad16`, corrected by `a0a31d0`, `4df227e` | Existing feature-round notes are appended as acceptance context. |
+| T4.4 | Add tests for default confirmation and missing-info persistence. | done | `8576d62` | Added payload, round note, and service context coverage. |
+| T4.5 | Add slice report and tracker updates. | done | this commit | Added Slice 4 report, tracker status, and validation log. |
 
 ## Slice 5 Tasks
 
@@ -87,6 +87,11 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
   - `make verify` (pass)
 - Slice 3:
   - `go test ./internal/chcapp -run 'RootCommand|AcceptanceFeatureGenerate'` (pass)
+  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `make verify` (pass)
+- Slice 4:
+  - `go test ./internal/chc -run 'AcceptanceFeature|QuizModelFeature'` (pass)
+  - `go test ./internal/chcapp -run 'ServiceGenerateAcceptanceFeature'` (pass)
   - `go test ./internal/chc ./internal/chcapp` (pass)
   - `make verify` (pass)
 
