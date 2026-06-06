@@ -2,6 +2,7 @@ package chc
 
 import (
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -40,6 +41,135 @@ func TestValidateAcceptanceFeatureArtifactRequiresTraceabilityInputs(t *testing.
 	err := ValidateAcceptanceFeatureArtifact(feature)
 	if err == nil {
 		t.Fatal("ValidateAcceptanceFeatureArtifact returned nil error")
+	}
+}
+
+func TestCheckAcceptanceFeatureArtifactAcceptsValidFeature(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec @use-case:article-authoring
+Feature: Article authoring
+
+  @requirement:publish-report
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then a publication report is written
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	if !result.Valid {
+		t.Fatalf("valid = false, findings = %#v", result.Findings)
+	}
+}
+
+func TestCheckAcceptanceFeatureArtifactRequiresGivenWhenThen(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec
+Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing article draft
+    Then a publication report is written
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "missing_when")
+}
+
+func TestCheckAcceptanceFeatureArtifactRejectsVagueSteps(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec
+Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then it works correctly
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "vague_step")
+}
+
+func TestCheckAcceptanceFeatureArtifactRequiresTraceability(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then a publication report is written
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "missing_traceability")
+}
+
+func TestCheckAcceptanceFeatureArtifactRejectsOpenQuestionScenarios(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec
+Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then an open question decides which report is written
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "open_question")
+}
+
+func TestCheckAcceptanceFeatureArtifactRejectsImplementationDetails(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec
+Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing database table contains an article draft
+    When the editor publishes the article
+    Then a publication report is written
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "implementation_detail")
+}
+
+func assertAcceptanceFeatureFinding(t *testing.T, result AcceptanceFeatureCheckResult, code string) {
+	t.Helper()
+
+	if result.Valid {
+		t.Fatalf("valid = true, want finding %q", code)
+	}
+
+	if !slices.ContainsFunc(result.Findings, func(finding AcceptanceFeatureCheckFinding) bool {
+		return finding.Code == code
+	}) {
+		t.Fatalf("findings = %#v, want %q", result.Findings, code)
 	}
 }
 
