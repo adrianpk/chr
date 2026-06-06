@@ -1098,11 +1098,7 @@ func serviceQuizDraftSpecResponseWithFeature(
 	return response
 }
 
-func serviceQuizAcceptanceFeatureResponse(
-	responseID string,
-	createdAt time.Time,
-	feature chc.AcceptanceFeatureGeneration,
-) chc.QuizModelResponse {
+func serviceQuizAcceptanceFeatureResponse(responseID string, createdAt time.Time, feature chc.AcceptanceFeatureGeneration) chc.QuizModelResponse {
 	return chc.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
