@@ -146,3 +146,49 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 		t.Fatalf("mode message = %q, want mode switched", modeResult.Message)
 	}
 }
+
+func TestTUISpecAdapterGeneratesAcceptanceFeature(t *testing.T) {
+	projectDir := t.TempDir()
+	writeAcceptanceFeatureServiceFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), chc.AcceptanceFeatureGeneration{
+				Status: chc.AcceptanceFeatureStatusGenerated,
+				Body: `@spec:blog-spec @use-case:blog
+Feature: Blog publishing
+
+  Scenario: Editorial review is preserved
+    Given an article draft has editorial review status
+    When the article is published
+    Then the published article keeps the editorial review status
+`,
+			}),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	executor := newTUISpecActionExecutor(operations)
+	result, err := executor.ExecuteSpecAction(chctui.SpecActionRequest{
+		Action: chctui.SpecActionGenerateFeature,
+		Scope:  chctui.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("ExecuteSpecAction returned error: %v", err)
+	}
+
+	if result.AcceptanceFeatureStatus != chc.AcceptanceFeatureStatusGenerated {
+		t.Fatalf("AcceptanceFeatureStatus = %q, want generated", result.AcceptanceFeatureStatus)
+	}
+
+	if result.AcceptanceFeaturePath != ".chc/user/acceptance/blog.feature" {
+		t.Fatalf("AcceptanceFeaturePath = %q, want feature path", result.AcceptanceFeaturePath)
+	}
+
+	if len(result.Specs) == 0 {
+		t.Fatal("Specs is empty, want refreshed specs")
+	}
+}
