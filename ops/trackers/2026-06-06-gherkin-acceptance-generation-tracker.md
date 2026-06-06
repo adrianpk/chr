@@ -11,7 +11,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | acceptance readiness contract | delivered | `feat/slice-1-acceptance-readiness-contract` | #289 | `.prj/reports/slices/gherkin-acceptance-generation/slice-1-acceptance-readiness-contract.md` |
 | Slice 2 | readiness-aware quiz questions | delivered | `feat/slice-2-readiness-aware-quiz-questions` | #290 | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
-| Slice 3 | feature artifact checks | planned | `feat/slice-3-feature-artifact-checks` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
+| Slice 3 | feature artifact checks | reviewing | `feat/slice-3-feature-artifact-checks` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
 | Slice 4 | spec feature generation | planned | `feat/slice-4-spec-feature-generation` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
 | Slice 5 | acceptance workflow docs | planned | `feat/slice-5-acceptance-workflow-docs` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
 
@@ -38,10 +38,10 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Add acceptance feature artifact types and layout helpers. | pending | pending | |
-| T3.2 | Add deterministic static feature checks. | pending | pending | |
-| T3.3 | Add tests for valid features, missing Given/When/Then, vague steps, missing traceability, and open-question scenarios. | pending | pending | |
-| T3.4 | Add slice report and tracker updates. | pending | pending | |
+| T3.1 | Add acceptance feature artifact types and layout helpers. | done | `2f8f245` | Added feature artifact contract, canonical `.chc/user/acceptance/<scope>.feature` layout, and layout validation. |
+| T3.2 | Add deterministic static feature checks. | done | `ffa196e` | Added line-oriented feature structure, step, traceability, open-question, vague-step, and implementation-detail checks. |
+| T3.3 | Add tests for valid features, missing Given/When/Then, vague steps, missing traceability, and open-question scenarios. | done | `298a671` | Added focused coverage for valid and rejected feature bodies. |
+| T3.4 | Add slice report and tracker updates. | done | this commit | Added Slice 3 report, tracker status, and validation log. |
 
 ## Slice 4 Tasks
 
@@ -73,6 +73,9 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 - Slice 2: `go test ./internal/chc` (pass)
 - Slice 2: `go test ./internal/chcapp` (pass)
 - Slice 2 post-merge: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 3: `go test ./internal/chc -run 'AcceptanceFeatureLayout|ValidateAcceptanceFeatureArtifact'` (pass)
+- Slice 3: `go test ./internal/chc -run 'AcceptanceFeature|CheckAcceptanceFeature'` (pass)
+- Slice 3: `go test ./internal/chc` (pass)
 
 ## Notes
 
