@@ -1,6 +1,6 @@
 # Slice 6: Acceptance Workflow Docs And Fixture
 
-Status: reviewing
+Status: delivered
 Slicing: Separate Acceptance Feature Workflow
 Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 Tracker: `ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md`
