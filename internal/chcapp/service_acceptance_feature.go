@@ -3,6 +3,7 @@ package chcapp
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"forge.adrianpk.com/chc/internal/chc"
 )
@@ -60,7 +61,7 @@ func (s service) generateAcceptanceFeature(
 		return AcceptanceFeatureOperationResult{}, err
 	}
 
-	_, err = s.latestSpecNodeForFeatureScope(scope)
+	specNode, err := s.latestSpecNodeForFeatureScope(scope)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_spec_missing", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -102,16 +103,60 @@ func (s service) generateAcceptanceFeature(
 		return AcceptanceFeatureOperationResult{}, err
 	}
 
-	s.appendPlanGenerationLog("generate_acceptance_feature_status", map[string]string{
-		"case_slug": scope.CaseSlug,
-		"status":    feature.Status,
-		"reason":    feature.RejectionReason,
+	if feature.Status != chc.AcceptanceFeatureStatusGenerated {
+		s.appendPlanGenerationLog("generate_acceptance_feature_status", map[string]string{
+			"case_slug": scope.CaseSlug,
+			"status":    feature.Status,
+			"reason":    feature.RejectionReason,
+		})
+
+		return AcceptanceFeatureOperationResult{
+			Message:         acceptanceFeatureResultMessage(feature.Status),
+			Status:          feature.Status,
+			RejectionReason: feature.RejectionReason,
+		}, nil
+	}
+
+	artifact := chc.AcceptanceFeatureArtifact{
+		Scope:            scope,
+		SpecSlug:         specNodeSlug(specNode),
+		SpecPath:         specNode.RelativePath,
+		UseCaseSlug:      scope.CaseSlug,
+		Body:             feature.Body,
+		SourceRequestID:  modelRequest.ID,
+		SourceResponseID: response.ID,
+		CreatedAt:        response.CreatedAt.UTC(),
+	}
+
+	paths, check, err := chc.WriteAcceptanceFeature(ctx, s.projectContext.ProjectDir, artifact)
+	if err != nil {
+		s.appendPlanGenerationLog("generate_acceptance_feature_rejected", map[string]string{
+			"case_slug": scope.CaseSlug,
+			"findings":  fmt.Sprintf("%d", len(check.Findings)),
+			"error":     err.Error(),
+		})
+
+		return AcceptanceFeatureOperationResult{
+			Message:         acceptanceFeatureResultMessage(chc.AcceptanceFeatureStatusRejected),
+			Status:          chc.AcceptanceFeatureStatusRejected,
+			RejectionReason: err.Error(),
+			Check:           check,
+		}, nil
+	}
+
+	s.appendPlanGenerationLog("generate_acceptance_feature_written", map[string]string{
+		"case_slug":     scope.CaseSlug,
+		"request_id":    modelRequest.ID,
+		"response_id":   response.ID,
+		"relative_path": paths.RelativePath,
+		"path":          paths.Path,
 	})
 
 	return AcceptanceFeatureOperationResult{
-		Message:         acceptanceFeatureResultMessage(feature.Status),
-		Status:          feature.Status,
-		RejectionReason: feature.RejectionReason,
+		Message: acceptanceFeatureResultMessage(chc.AcceptanceFeatureStatusGenerated),
+		Status:  chc.AcceptanceFeatureStatusGenerated,
+		Feature: paths.RelativePath,
+		Check:   check,
 	}, nil
 }
 
@@ -179,6 +224,12 @@ func sortedAcceptanceFeatureContextNodeIDs(index chc.WorkspaceIndex) []string {
 		chc.WorkspaceNodeQuiz,
 		chc.WorkspaceNodeSpec,
 	})
+}
+
+func specNodeSlug(node chc.WorkspaceNode) string {
+	name := filepath.Base(node.RelativePath)
+
+	return name[:len(name)-len(filepath.Ext(name))]
 }
 
 func acceptanceFeatureResultMessage(status string) string {
