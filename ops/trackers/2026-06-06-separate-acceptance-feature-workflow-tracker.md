@@ -1,6 +1,6 @@
 # Separate Acceptance Feature Workflow Tracker
 
-Status: planned
+Status: in_progress
 
 Spec: `ops/specs/2026-06-06-separate-acceptance-feature-workflow.md`
 Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
@@ -9,7 +9,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | spec feature decoupling | planned | `feat/slice-1-spec-feature-decoupling` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md` |
+| Slice 1 | spec feature decoupling | reviewing | `feat/slice-1-spec-feature-decoupling` | `#294` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md` |
 | Slice 2 | acceptance feature service | pending | `feat/slice-2-acceptance-feature-service` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
 | Slice 3 | acceptance feature cli | pending | `feat/slice-3-acceptance-feature-cli` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
 | Slice 4 | feature round defaults | pending | `feat/slice-4-feature-round-defaults` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
@@ -20,11 +20,11 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Remove feature writing from `GenerateSpec`. | pending | pending |  |
-| T1.2 | Update spec generation instructions and schema expectations. | pending | pending |  |
-| T1.3 | Add tests that reject or prevent embedded fenced Gherkin in spec output. | pending | pending |  |
-| T1.4 | Update affected docs or references that claim spec generation writes feature files. | pending | pending |  |
-| T1.5 | Add slice report and tracker updates. | pending | pending |  |
+| T1.1 | Remove feature writing from `GenerateSpec`. | done | `95b8871` | Spec generation now writes only the Markdown spec. |
+| T1.2 | Update spec generation instructions and schema expectations. | done | `c9914e0` | Spec output schema no longer includes `feature`; stale feature fields are rejected. |
+| T1.3 | Add tests that reject or prevent embedded fenced Gherkin in spec output. | done | `e210b73` | Generated spec validation rejects fenced Gherkin blocks. |
+| T1.4 | Update affected docs or references that claim spec generation writes feature files. | done | `ff0fc93` | Docs now describe spec generation as spec-only. |
+| T1.5 | Add slice report and tracker updates. | done | this commit | Added Slice 1 report, tracker status, and validation log. |
 
 ## Slice 2 Tasks
 
@@ -78,7 +78,10 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 
 ## Validation Log
 
-- pending
+- Slice 1:
+  - `go test ./internal/chc ./internal/chcapp -run 'Spec|Feature|Gherkin'` (pass)
+  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `make verify` (pass)
 
 ## Notes
 
