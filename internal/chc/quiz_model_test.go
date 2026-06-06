@@ -339,6 +339,34 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 	}
 }
 
+func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecFeatureSchema(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGenerateSpec
+	request.Strategy = "spec_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+
+	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	if err != nil {
+		t.Fatalf("openAIRequestBody returned error: %v", err)
+	}
+
+	envelope, _ := decodeOpenAIQuizRequestBody(t, body)
+
+	if envelope.Text.Format.Name != "generated_spec" {
+		t.Fatalf("format name = %q, want generated_spec", envelope.Text.Format.Name)
+	}
+
+	properties, ok := envelope.Text.Format.Schema["properties"].(map[string]any)
+	if !ok {
+		t.Fatalf("schema properties = %#v, want map", envelope.Text.Format.Schema["properties"])
+	}
+
+	if _, ok := properties["feature"]; !ok {
+		t.Fatalf("schema properties missing feature: %#v", properties)
+	}
+}
+
 func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Action = QuizModelActionGeneratePlanOutline
@@ -758,6 +786,23 @@ func TestQuizModelSpecGenerationInstructionsFenceMultilineExamples(t *testing.T)
 	for _, want := range []string{
 		"Fence every multi-line example in a Markdown code block",
 		"Never emit raw front matter, YAML, JSON, command output, or code snippets as plain paragraphs or headings",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
+		}
+	}
+}
+
+func TestQuizModelSpecGenerationInstructionsDescribeOptionalFeature(t *testing.T) {
+	instructions := quizModelSpecGenerationInstructions()
+
+	for _, want := range []string{
+		"acceptance_readiness.decision is generate",
+		"feature with status generated",
+		"feature with status rejected",
+		"feature with status not_applicable",
+		"traceability tags",
+		"Given, When, and Then",
 	} {
 		if !strings.Contains(instructions, want) {
 			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
@@ -1219,6 +1264,35 @@ func TestQuizModelResponseFromDraftSpecOutput(t *testing.T) {
 
 	if response.DraftSpec.Title != "Editorial Review Spec" {
 		t.Fatalf("title = %q", response.DraftSpec.Title)
+	}
+}
+
+func TestQuizModelResponseFromGeneratedSpecOutputCarriesFeature(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGenerateSpec
+	request.Strategy = "spec_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
+
+	response, err := quizModelResponseFromOutput(request, []byte(`{
+		"title": "Editorial Review Spec",
+		"body": "The workflow must preserve editorial review.",
+		"status": "draft",
+		"feature": {
+			"status": "generated",
+			"body": "@spec:editorial-review-spec\nFeature: Editorial review\n\n  Scenario: Review is preserved\n    Given an article draft exists\n    When the editor publishes it\n    Then the review status is preserved\n"
+		}
+	}`))
+	if err != nil {
+		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.DraftSpec.Feature.Status != AcceptanceFeatureStatusGenerated {
+		t.Fatalf("feature status = %q, want generated", response.DraftSpec.Feature.Status)
+	}
+
+	if !strings.Contains(response.DraftSpec.Feature.Body, "Feature: Editorial review") {
+		t.Fatalf("feature body = %q", response.DraftSpec.Feature.Body)
 	}
 }
 

@@ -97,9 +97,17 @@ type QuizModelFastQuestionPayload struct {
 
 // QuizModelDraftSpecPayload describes a package boundary value.
 type QuizModelDraftSpecPayload struct {
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	Status string `json:"status"`
+	Title   string                   `json:"title"`
+	Body    string                   `json:"body"`
+	Status  string                   `json:"status"`
+	Feature *QuizModelFeaturePayload `json:"feature,omitempty"`
+}
+
+// QuizModelFeaturePayload describes optional generated feature output.
+type QuizModelFeaturePayload struct {
+	Status          string `json:"status"`
+	Body            string `json:"body,omitempty"`
+	RejectionReason string `json:"rejection_reason,omitempty"`
 }
 
 // QuizModelPlanPayload describes a package boundary value.
@@ -355,7 +363,7 @@ func DecodeQuizModelDraftSpecPayload(content []byte) (QuizModelDraftSpecPayload,
 		return QuizModelDraftSpecPayload{}, err
 	}
 
-	err = validateQuizModelExactFields(fields, []string{"title", "body", "status"})
+	err = validateQuizModelFields(fields, []string{"title", "body", "status"}, []string{"feature"})
 	if err != nil {
 		return QuizModelDraftSpecPayload{}, err
 	}
@@ -501,7 +509,34 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec status must be draft")
 	}
 
+	if payload.Feature != nil {
+		feature, err := ValidateQuizModelFeaturePayload(*payload.Feature)
+		if err != nil {
+			return QuizModelDraftSpecPayload{}, err
+		}
+
+		normalized.Feature = &feature
+	}
+
 	return normalized, nil
+}
+
+// ValidateQuizModelFeaturePayload validates the corresponding package boundary value.
+func ValidateQuizModelFeaturePayload(payload QuizModelFeaturePayload) (QuizModelFeaturePayload, error) {
+	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration{
+		Status:          payload.Status,
+		Body:            payload.Body,
+		RejectionReason: payload.RejectionReason,
+	})
+	if err != nil {
+		return QuizModelFeaturePayload{}, err
+	}
+
+	return QuizModelFeaturePayload{
+		Status:          feature.Status,
+		Body:            feature.Body,
+		RejectionReason: feature.RejectionReason,
+	}, nil
 }
 
 // ValidateQuizModelPlanPayload validates the corresponding package boundary value.
@@ -1015,6 +1050,10 @@ func decodeStrictQuizModelJSON(content []byte, target any) error {
 }
 
 func validateQuizModelExactFields(fields, required []string) error {
+	return validateQuizModelFields(fields, required, nil)
+}
+
+func validateQuizModelFields(fields, required, optional []string) error {
 	seen := map[string]bool{}
 	for _, field := range fields {
 		seen[field] = true
@@ -1028,6 +1067,9 @@ func validateQuizModelExactFields(fields, required []string) error {
 
 	allowed := map[string]bool{}
 	for _, field := range required {
+		allowed[field] = true
+	}
+	for _, field := range optional {
 		allowed[field] = true
 	}
 

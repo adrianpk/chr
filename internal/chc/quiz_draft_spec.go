@@ -18,6 +18,7 @@ type QuizDraftSpec struct {
 	Scope            QuizScope
 	Title            string
 	Body             string
+	Feature          AcceptanceFeatureGeneration
 	SourceQuizPath   string
 	SourceRawPath    string
 	SourceDumpPaths  []string
@@ -133,6 +134,13 @@ func ValidateQuizDraftSpec(spec QuizDraftSpec) error {
 		return fmt.Errorf("quiz draft spec created time is required")
 	}
 
+	if spec.Feature.HasContent() {
+		_, err = ValidateAcceptanceFeatureGeneration(spec.Feature)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -149,6 +157,13 @@ func ValidateQuizDraftSpecModelContent(spec QuizDraftSpec) error {
 
 	if spec.CreatedAt.IsZero() {
 		return fmt.Errorf("quiz draft spec created time is required")
+	}
+
+	if spec.Feature.HasContent() {
+		_, err = ValidateAcceptanceFeatureGeneration(spec.Feature)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -12,6 +12,22 @@ const (
 	AcceptanceFeatureDirectory = "acceptance"
 )
 
+const (
+	// AcceptanceFeatureStatusGenerated defines a package boundary constant.
+	AcceptanceFeatureStatusGenerated = "generated"
+	// AcceptanceFeatureStatusRejected defines a package boundary constant.
+	AcceptanceFeatureStatusRejected = "rejected"
+	// AcceptanceFeatureStatusNotApplicable defines a package boundary constant.
+	AcceptanceFeatureStatusNotApplicable = "not_applicable"
+)
+
+// AcceptanceFeatureGeneration describes optional model-generated feature content.
+type AcceptanceFeatureGeneration struct {
+	Status          string
+	Body            string
+	RejectionReason string
+}
+
 // AcceptanceFeatureArtifact describes a generated Gherkin feature artifact.
 type AcceptanceFeatureArtifact struct {
 	Scope            QuizScope
@@ -52,6 +68,40 @@ type acceptanceFeatureScenario struct {
 	when    bool
 	then    bool
 	hasStep bool
+}
+
+// HasContent reports whether generated feature content is present.
+func (g AcceptanceFeatureGeneration) HasContent() bool {
+	return strings.TrimSpace(g.Status) != "" ||
+		strings.TrimSpace(g.Body) != "" ||
+		strings.TrimSpace(g.RejectionReason) != ""
+}
+
+// ValidateAcceptanceFeatureGeneration validates the corresponding package boundary value.
+func ValidateAcceptanceFeatureGeneration(feature AcceptanceFeatureGeneration) (AcceptanceFeatureGeneration, error) {
+	normalized := AcceptanceFeatureGeneration{
+		Status:          strings.TrimSpace(feature.Status),
+		Body:            strings.TrimSpace(feature.Body),
+		RejectionReason: strings.TrimSpace(feature.RejectionReason),
+	}
+
+	switch normalized.Status {
+	case AcceptanceFeatureStatusGenerated:
+		if normalized.Body == "" {
+			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature generated status requires body")
+		}
+	case AcceptanceFeatureStatusRejected:
+		if normalized.RejectionReason == "" {
+			return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature rejected status requires reason")
+		}
+		normalized.Body = ""
+	case AcceptanceFeatureStatusNotApplicable:
+		normalized.Body = ""
+	default:
+		return AcceptanceFeatureGeneration{}, fmt.Errorf("acceptance feature status is invalid: %s", normalized.Status)
+	}
+
+	return normalized, nil
 }
 
 // AcceptanceFeatureLayout executes the corresponding package operation.
