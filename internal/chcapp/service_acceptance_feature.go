@@ -3,6 +3,7 @@ package chcapp
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"forge.adrianpk.com/chc/internal/chc"
@@ -18,6 +19,7 @@ type AcceptanceFeatureOperationResult struct {
 	Message         string
 	Status          string
 	Feature         string
+	FeatureRound    string
 	RejectionReason string
 	Check           chc.AcceptanceFeatureCheckResult
 }
@@ -104,9 +106,20 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope chc.QuizSc
 			"reason":    feature.RejectionReason,
 		})
 
+		var featureRoundPath string
+		if feature.Status == chc.AcceptanceFeatureStatusNeedsMoreInfo {
+			paths, err := s.writeAcceptanceFeatureRoundNotes(ctx, scope, modelRequest, response, feature)
+			if err != nil {
+				return AcceptanceFeatureOperationResult{}, err
+			}
+
+			featureRoundPath = paths.RelativePath
+		}
+
 		return AcceptanceFeatureOperationResult{
 			Message:         acceptanceFeatureResultMessage(feature.Status),
 			Status:          feature.Status,
+			FeatureRound:    featureRoundPath,
 			RejectionReason: feature.RejectionReason,
 		}, nil
 	}
@@ -201,7 +214,79 @@ func (s service) newAcceptanceFeatureModelRequest(state chc.QuizRuntimeState) (c
 }
 
 func (s service) appendAcceptanceFeatureGenerationContextSections(sections []chc.QuizModelContextSection, scope chc.QuizScope) ([]chc.QuizModelContextSection, error) {
-	return s.appendGenerationContextSections(sections, scope, sortedAcceptanceFeatureContextNodeIDs)
+	sections, err := s.appendGenerationContextSections(sections, scope, sortedAcceptanceFeatureContextNodeIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.appendAcceptanceFeatureRoundContextSection(sections, scope)
+}
+
+func (s service) appendAcceptanceFeatureRoundContextSection(
+	sections []chc.QuizModelContextSection,
+	scope chc.QuizScope,
+) ([]chc.QuizModelContextSection, error) {
+	paths, err := chc.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := os.ReadFile(paths.Path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return sections, nil
+		}
+
+		return nil, fmt.Errorf("read acceptance feature round notes: %w", err)
+	}
+
+	sections = append(sections, chc.QuizModelContextSection{
+		Name:      "acceptance_feature_round",
+		Layer:     "acceptance",
+		Authority: "user",
+		Content:   string(content),
+		Metadata: map[string]string{
+			"path": paths.RelativePath,
+		},
+	})
+
+	return sections, nil
+}
+
+func (s service) writeAcceptanceFeatureRoundNotes(
+	ctx context.Context,
+	scope chc.QuizScope,
+	request chc.QuizModelRequest,
+	response chc.QuizModelResponse,
+	feature chc.AcceptanceFeatureGeneration,
+) (chc.AcceptanceFeatureRoundPaths, error) {
+	notes := chc.AcceptanceFeatureRoundNotes{
+		Scope:            scope,
+		Status:           feature.Status,
+		RejectionReason:  feature.RejectionReason,
+		Prompts:          feature.ClarificationPrompts,
+		SourceRequestID:  request.ID,
+		SourceResponseID: response.ID,
+		CreatedAt:        response.CreatedAt.UTC(),
+	}
+
+	paths, err := chc.WriteAcceptanceFeatureRoundNotes(ctx, s.projectContext.ProjectDir, notes)
+	if err != nil {
+		s.appendPlanGenerationLog("generate_acceptance_feature_round_notes_failed", map[string]string{
+			"case_slug": scope.CaseSlug,
+			"error":     err.Error(),
+		})
+
+		return chc.AcceptanceFeatureRoundPaths{}, err
+	}
+
+	s.appendPlanGenerationLog("generate_acceptance_feature_round_notes_written", map[string]string{
+		"case_slug":     scope.CaseSlug,
+		"relative_path": paths.RelativePath,
+		"path":          paths.Path,
+	})
+
+	return paths, nil
 }
 
 func sortedAcceptanceFeatureContextNodeIDs(index chc.WorkspaceIndex) []string {

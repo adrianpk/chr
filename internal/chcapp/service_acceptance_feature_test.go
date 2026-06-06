@@ -122,6 +122,14 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), chc.AcceptanceFeatureGeneration{
 				Status:          chc.AcceptanceFeatureStatusNeedsMoreInfo,
 				RejectionReason: "Missing observable failure path.",
+				ClarificationPrompts: []chc.AcceptanceFeaturePrompt{
+					{
+						ID:            "failure-path",
+						Question:      "What should happen when publishing fails?",
+						DefaultAnswer: "The article remains unpublished and the user sees a failure message.",
+						Reason:        "The feature needs one observable failure path.",
+					},
+				},
 			}),
 		},
 	}
@@ -142,6 +150,21 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 
 	if !strings.Contains(result.RejectionReason, "failure path") {
 		t.Fatalf("RejectionReason = %q", result.RejectionReason)
+	}
+
+	if result.FeatureRound != ".chc/user/acceptance/blog-feature-round.md" {
+		t.Fatalf("FeatureRound = %q, want feature round path", result.FeatureRound)
+	}
+
+	round := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "acceptance", "blog-feature-round.md"))
+	for _, want := range []string{
+		"### failure-path",
+		"- Default: The article remains unpublished and the user sees a failure message.",
+		"- Answer:",
+	} {
+		if !strings.Contains(round, want) {
+			t.Fatalf("feature round notes missing %q in:\n%s", want, round)
+		}
 	}
 }
 
@@ -174,6 +197,60 @@ func TestServiceGenerateAcceptanceFeatureReportsNotApplicable(t *testing.T) {
 	}
 }
 
+func TestServiceGenerateAcceptanceFeatureUsesFeatureRoundNotesAsContext(t *testing.T) {
+	projectDir := t.TempDir()
+	writeAcceptanceFeatureServiceFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "acceptance", "blog-feature-round.md"), `---
+title: "Acceptance Feature Round"
+status: "needs_more_info"
+type: "acceptance_feature_round"
+case: "blog"
+---
+
+# Acceptance Feature Round
+
+## Prompts
+
+### failure-path
+
+- Question: What should happen when publishing fails?
+- Default: The article remains unpublished.
+- Answer: The article remains unpublished and the command reports the failed dependency.
+`)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []chc.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), chc.AcceptanceFeatureGeneration{
+				Status: chc.AcceptanceFeatureStatusGenerated,
+				Body: `@spec:blog-spec @use-case:blog
+Feature: Blog publishing
+
+  Scenario: Publishing dependency fails
+    Given an article draft has editorial review status
+    When the publish dependency fails
+    Then the article remains unpublished and the command reports the failed dependency
+`,
+			}),
+		},
+	}
+	operations := newTestService(t, projectDir)
+	operations.quizModel = model
+	operations.now = clock
+
+	_, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
+		Scope: chc.QuizScope{CaseSlug: "blog"},
+	})
+	if err != nil {
+		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
+	}
+
+	request := model.requests[len(model.requests)-1]
+	if !quizModelRequestHasSection(request, "acceptance_feature_round") {
+		t.Fatalf("request sections = %#v, want acceptance feature round context", request.ContextSections)
+	}
+}
+
 func writeAcceptanceFeatureServiceFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
@@ -189,4 +266,14 @@ case_slug: "blog"
 
 Publishing must preserve editorial review status.
 `)
+}
+
+func quizModelRequestHasSection(request chc.QuizModelRequest, name string) bool {
+	for _, section := range request.ContextSections {
+		if section.Name == name {
+			return true
+		}
+	}
+
+	return false
 }
