@@ -11,7 +11,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | acceptance readiness contract | delivered | `feat/slice-1-acceptance-readiness-contract` | #289 | `.prj/reports/slices/gherkin-acceptance-generation/slice-1-acceptance-readiness-contract.md` |
 | Slice 2 | readiness-aware quiz questions | delivered | `feat/slice-2-readiness-aware-quiz-questions` | #290 | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
-| Slice 3 | feature artifact checks | reviewing | `feat/slice-3-feature-artifact-checks` | #291 | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
+| Slice 3 | feature artifact checks | delivered | `feat/slice-3-feature-artifact-checks` | #291 | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
 | Slice 4 | spec feature generation | planned | `feat/slice-4-spec-feature-generation` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
 | Slice 5 | acceptance workflow docs | planned | `feat/slice-5-acceptance-workflow-docs` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
 
@@ -76,6 +76,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 - Slice 3: `go test ./internal/chc -run 'AcceptanceFeatureLayout|ValidateAcceptanceFeatureArtifact'` (pass)
 - Slice 3: `go test ./internal/chc -run 'AcceptanceFeature|CheckAcceptanceFeature'` (pass)
 - Slice 3: `go test ./internal/chc` (pass)
+- Slice 3 post-merge: `go test ./internal/chc` (pass)
 
 ## Notes
 

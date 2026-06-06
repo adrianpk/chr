@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 3 - feature artifact checks
+Active Slice: Slice 4 - spec feature generation
 
 Spec: `ops/specs/2026-06-06-gherkin-acceptance-generation.md`
 Tracker: `ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md`
