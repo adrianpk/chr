@@ -64,6 +64,42 @@ func TestValidateAcceptanceFeatureArtifactRequiresTraceabilityInputs(t *testing.
 	}
 }
 
+func TestValidateAcceptanceFeatureGenerationRequiresPromptsForNeedsMoreInfo(t *testing.T) {
+	_, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration{
+		Status:          AcceptanceFeatureStatusNeedsMoreInfo,
+		RejectionReason: "The failure behavior is missing.",
+	})
+	if err == nil {
+		t.Fatal("ValidateAcceptanceFeatureGeneration returned nil error")
+	}
+}
+
+func TestDecodeQuizModelFeaturePayloadKeepsClarificationPrompts(t *testing.T) {
+	payload, err := DecodeQuizModelFeaturePayload([]byte(`{
+		"status": "needs_more_info",
+		"rejection_reason": "The failure behavior is missing.",
+		"clarification_prompts": [
+			{
+				"id": "failure-path",
+				"question": "What should happen when publishing fails?",
+				"default_answer": "The article remains unpublished.",
+				"reason": "The feature needs one observable failure path."
+			}
+		]
+	}`))
+	if err != nil {
+		t.Fatalf("DecodeQuizModelFeaturePayload returned error: %v", err)
+	}
+
+	if len(payload.ClarificationPrompts) != 1 {
+		t.Fatalf("ClarificationPrompts = %#v, want one prompt", payload.ClarificationPrompts)
+	}
+
+	if payload.ClarificationPrompts[0].DefaultAnswer != "The article remains unpublished." {
+		t.Fatalf("DefaultAnswer = %q", payload.ClarificationPrompts[0].DefaultAnswer)
+	}
+}
+
 func TestCheckAcceptanceFeatureArtifactAcceptsValidFeature(t *testing.T) {
 	feature := validAcceptanceFeatureArtifact()
 	feature.Body = `@spec:article-authoring-spec @use-case:article-authoring
