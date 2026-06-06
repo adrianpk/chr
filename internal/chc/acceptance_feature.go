@@ -1,7 +1,9 @@
 package chc
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -123,6 +125,49 @@ func AcceptanceFeatureLayout(projectDir string, scope QuizScope) (AcceptanceFeat
 		RelativePath: relativePath,
 		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
 	}, nil
+}
+
+// WriteAcceptanceFeature executes the corresponding package operation.
+func WriteAcceptanceFeature(
+	ctx context.Context,
+	projectDir string,
+	feature AcceptanceFeatureArtifact,
+) (AcceptanceFeaturePaths, AcceptanceFeatureCheckResult, error) {
+	err := ctx.Err()
+	if err != nil {
+		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+	}
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+	}
+
+	if !result.Valid {
+		return AcceptanceFeaturePaths{}, result, fmt.Errorf("acceptance feature static checks failed")
+	}
+
+	paths, err := AcceptanceFeatureLayout(projectDir, feature.Scope)
+	if err != nil {
+		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+	}
+
+	err = os.MkdirAll(filepath.Dir(paths.Path), 0o755)
+	if err != nil {
+		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, fmt.Errorf("create acceptance feature directory: %w", err)
+	}
+
+	err = os.WriteFile(paths.Path, []byte(RenderAcceptanceFeature(feature)), 0o644)
+	if err != nil {
+		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, fmt.Errorf("write acceptance feature: %w", err)
+	}
+
+	return paths, result, nil
+}
+
+// RenderAcceptanceFeature renders the corresponding package data.
+func RenderAcceptanceFeature(feature AcceptanceFeatureArtifact) string {
+	return strings.TrimSpace(feature.Body) + "\n"
 }
 
 // ValidateAcceptanceFeatureArtifact validates the corresponding package boundary value.
