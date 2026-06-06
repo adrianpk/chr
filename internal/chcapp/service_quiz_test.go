@@ -206,6 +206,95 @@ func TestQuizModelCurrentQuestionPayloadUsesActiveQuestionPromptIntent(t *testin
 	}
 }
 
+func TestNewQuizModelRequestIncludesAcceptanceReadiness(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "curated-blog-context.md"), `---
+title: "Curated Blog Context"
+status: "curated"
+case: "blog"
+---
+
+# Curated Blog Context
+
+A CLI user runs a publish command for an existing project. The expected success
+path writes a report file and returns an accepted status.
+`)
+
+	operations := newTestService(t, projectDir)
+	operations.now = serviceQuizClock()
+	state, err := operations.newQuizRuntimeState(chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, chc.QuizModeDeep)
+	if err != nil {
+		t.Fatalf("newQuizRuntimeState returned error: %v", err)
+	}
+
+	request, err := operations.newQuizModelRequest(state)
+	if err != nil {
+		t.Fatalf("newQuizModelRequest returned error: %v", err)
+	}
+
+	readiness := request.Payload.AcceptanceReadiness
+	if readiness == nil {
+		t.Fatal("AcceptanceReadiness = nil")
+	}
+
+	if readiness.Decision != chc.AcceptanceReadinessGenerate {
+		t.Fatalf("decision = %q, want generate", readiness.Decision)
+	}
+
+	if len(readiness.InferredElements[chc.AcceptanceReadinessSlotActor]) == 0 {
+		t.Fatalf("inferred elements = %#v, want actor", readiness.InferredElements)
+	}
+
+	foundSection := false
+	for _, section := range request.ContextSections {
+		if section.Name == "acceptance_readiness" {
+			foundSection = true
+			break
+		}
+	}
+
+	if !foundSection {
+		t.Fatalf("context sections missing acceptance_readiness: %#v", request.ContextSections)
+	}
+}
+
+func TestNewQuizModelRequestMarksNonAcceptanceContextNotApplicable(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "curated-blog-context.md"), `---
+title: "Curated Blog Context"
+status: "curated"
+case: "blog"
+---
+
+# Curated Blog Context
+
+This is a documentation-only architecture cleanup for a package boundary.
+`)
+
+	operations := newTestService(t, projectDir)
+	operations.now = serviceQuizClock()
+	state, err := operations.newQuizRuntimeState(chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, chc.QuizModeDeep)
+	if err != nil {
+		t.Fatalf("newQuizRuntimeState returned error: %v", err)
+	}
+
+	request, err := operations.newQuizModelRequest(state)
+	if err != nil {
+		t.Fatalf("newQuizModelRequest returned error: %v", err)
+	}
+
+	readiness := request.Payload.AcceptanceReadiness
+	if readiness == nil {
+		t.Fatal("AcceptanceReadiness = nil")
+	}
+
+	if readiness.Decision != chc.AcceptanceReadinessNotApplicable {
+		t.Fatalf("decision = %q, want not_applicable", readiness.Decision)
+	}
+}
+
 func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)

@@ -45,13 +45,13 @@ type AcceptanceReadinessSlot string
 
 // AcceptanceReadiness describes whether context is ready for Gherkin generation.
 type AcceptanceReadiness struct {
-	Decision              AcceptanceReadinessDecision
-	Confidence            float64
-	Reasons               []string
-	Missing               []AcceptanceReadinessSlot
-	InferredElements      map[AcceptanceReadinessSlot][]string
-	CandidateScenarios    []string
-	BlockingOpenQuestions []string
+	Decision              AcceptanceReadinessDecision          `json:"decision"`
+	Confidence            float64                              `json:"confidence"`
+	Reasons               []string                             `json:"reasons"`
+	Missing               []AcceptanceReadinessSlot            `json:"missing"`
+	InferredElements      map[AcceptanceReadinessSlot][]string `json:"inferred_elements"`
+	CandidateScenarios    []string                             `json:"candidate_scenarios"`
+	BlockingOpenQuestions []string                             `json:"blocking_open_questions"`
 }
 
 // AcceptanceReadinessPromptIntent describes one semantic readiness question.

@@ -37,11 +37,12 @@ var QuizModelQuestionRequiredFields = []string{
 
 // QuizModelPayload describes a package boundary value.
 type QuizModelPayload struct {
-	Project         QuizModelProjectPayload         `json:"project"`
-	Quiz            QuizModelQuizPayload            `json:"quiz"`
-	RecentEntries   []QuizModelEntryPayload         `json:"recent_entries"`
-	CurrentQuestion QuizModelCurrentQuestionPayload `json:"current_question"`
-	OutputContract  QuizModelOutputContractPayload  `json:"output_contract"`
+	Project             QuizModelProjectPayload         `json:"project"`
+	Quiz                QuizModelQuizPayload            `json:"quiz"`
+	RecentEntries       []QuizModelEntryPayload         `json:"recent_entries"`
+	CurrentQuestion     QuizModelCurrentQuestionPayload `json:"current_question"`
+	AcceptanceReadiness *AcceptanceReadiness            `json:"acceptance_readiness,omitempty"`
+	OutputContract      QuizModelOutputContractPayload  `json:"output_contract"`
 }
 
 // QuizModelProjectPayload describes a package boundary value.
@@ -881,7 +882,7 @@ func QuizModelContextSectionsForPayload(payload QuizModelPayload) ([]QuizModelCo
 		return nil, err
 	}
 
-	return []QuizModelContextSection{
+	sections := []QuizModelContextSection{
 		{
 			Name:      "project",
 			Layer:     QuizModelContextLayerProject,
@@ -910,7 +911,24 @@ func QuizModelContextSectionsForPayload(payload QuizModelPayload) ([]QuizModelCo
 			Content:   currentQuestion,
 			Metadata:  map[string]string{"context_layer": QuizModelContextLayerQuiz},
 		},
-	}, nil
+	}
+
+	if payload.AcceptanceReadiness != nil {
+		acceptanceReadiness, err := quizModelJSONContent(payload.AcceptanceReadiness)
+		if err != nil {
+			return nil, err
+		}
+
+		sections = append(sections, QuizModelContextSection{
+			Name:      "acceptance_readiness",
+			Layer:     QuizModelContextLayerQuiz,
+			Authority: "request_context",
+			Content:   acceptanceReadiness,
+			Metadata:  map[string]string{"context_layer": QuizModelContextLayerQuiz},
+		})
+	}
+
+	return sections, nil
 }
 
 // ValidateQuizModelPayload validates the corresponding package boundary value.
@@ -933,6 +951,13 @@ func ValidateQuizModelPayload(payload QuizModelPayload) error {
 
 	if len(payload.OutputContract.RequiredFields) == 0 {
 		return fmt.Errorf("quiz model payload output contract is required")
+	}
+
+	if payload.AcceptanceReadiness != nil {
+		_, err := ValidateAcceptanceReadiness(*payload.AcceptanceReadiness)
+		if err != nil {
+			return fmt.Errorf("quiz model payload acceptance readiness: %w", err)
+		}
 	}
 
 	for index, entry := range payload.RecentEntries {

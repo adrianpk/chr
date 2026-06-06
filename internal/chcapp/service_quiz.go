@@ -348,12 +348,20 @@ func (s service) newQuizModelRequest(state chc.QuizRuntimeState) (chc.QuizModelR
 		return chc.QuizModelRequest{}, err
 	}
 
-	sections, err := chc.QuizModelContextSectionsForPayload(payload)
+	coreSections, err := chc.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
 		return chc.QuizModelRequest{}, err
 	}
 
-	sections, err = s.appendQuizSupplementalContextSections(sections, scope)
+	supplementalSections, err := s.appendQuizSupplementalContextSections(nil, scope)
+	if err != nil {
+		return chc.QuizModelRequest{}, err
+	}
+
+	readiness := quizAcceptanceReadinessFromContext(state, append(coreSections, supplementalSections...))
+	payload.AcceptanceReadiness = &readiness
+
+	coreSections, err = chc.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
 		return chc.QuizModelRequest{}, err
 	}
@@ -366,7 +374,7 @@ func (s service) newQuizModelRequest(state chc.QuizRuntimeState) (chc.QuizModelR
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
-		ContextSections: sections,
+		ContextSections: append(coreSections, supplementalSections...),
 		OutputContract: chc.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
@@ -637,6 +645,147 @@ func quizModelPromptIntentFromJSON(value string) map[string]any {
 	}
 
 	return promptIntent
+}
+
+func quizAcceptanceReadinessFromContext(
+	state chc.QuizRuntimeState,
+	sections []chc.QuizModelContextSection,
+) chc.AcceptanceReadiness {
+	content := strings.ToLower(quizContextText(sections))
+	reasons := []string{"The quiz context was inspected for acceptance-test readiness."}
+
+	if state.QuestionsAsked > 0 {
+		return chc.AcceptanceReadiness{
+			Decision:   chc.AcceptanceReadinessNeedsMoreInfo,
+			Confidence: 0.5,
+			Reasons:    reasons,
+			Missing: []chc.AcceptanceReadinessSlot{
+				chc.AcceptanceReadinessSlotActor,
+				chc.AcceptanceReadinessSlotTrigger,
+				chc.AcceptanceReadinessSlotObservableOutcome,
+			},
+			InferredElements: map[chc.AcceptanceReadinessSlot][]string{},
+		}
+	}
+
+	if quizContextLooksNonAcceptanceTestable(content) {
+		return chc.AcceptanceReadiness{
+			Decision:         chc.AcceptanceReadinessNotApplicable,
+			Confidence:       0.7,
+			Reasons:          append(reasons, "The context appears internal, architectural, documentation-only, or refactor-oriented."),
+			InferredElements: map[chc.AcceptanceReadinessSlot][]string{},
+		}
+	}
+
+	inferred := quizAcceptanceInferredElements(content)
+	missing := quizAcceptanceMissingSlots(inferred)
+	if len(missing) == 0 {
+		return chc.AcceptanceReadiness{
+			Decision:           chc.AcceptanceReadinessGenerate,
+			Confidence:         0.72,
+			Reasons:            append(reasons, "The context includes actor, trigger, initial state, outcome, and success-path signals."),
+			InferredElements:   inferred,
+			CandidateScenarios: []string{"Primary behavior succeeds and produces the expected observable outcome."},
+		}
+	}
+
+	return chc.AcceptanceReadiness{
+		Decision:         chc.AcceptanceReadinessNeedsMoreInfo,
+		Confidence:       0.64,
+		Reasons:          append(reasons, "The context has some acceptance-test signals, but key scenario elements are missing."),
+		Missing:          missing,
+		InferredElements: inferred,
+	}
+}
+
+func quizContextText(sections []chc.QuizModelContextSection) string {
+	var output strings.Builder
+	for _, section := range sections {
+		output.WriteString(section.Content)
+		output.WriteString("\n")
+	}
+
+	return output.String()
+}
+
+func quizContextLooksNonAcceptanceTestable(content string) bool {
+	nonAcceptanceSignals := []string{
+		"documentation-only",
+		"docs-only",
+		"internal refactor",
+		"refactor only",
+		"architecture cleanup",
+		"package boundary",
+	}
+	for _, signal := range nonAcceptanceSignals {
+		if strings.Contains(content, signal) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func quizAcceptanceInferredElements(content string) map[chc.AcceptanceReadinessSlot][]string {
+	inferred := map[chc.AcceptanceReadinessSlot][]string{}
+
+	if quizContainsAny(content, "user", "operator", "cli", "api client", "worker", "scheduler", "reviewer") {
+		inferred[chc.AcceptanceReadinessSlotActor] = []string{"An actor is referenced by the source context."}
+	}
+
+	if quizContainsAny(content, "command", "request", "event", "runs", "starts", "trigger", "action") {
+		inferred[chc.AcceptanceReadinessSlotTrigger] = []string{"A trigger is referenced by the source context."}
+	}
+
+	if quizContainsAny(content, "given", "existing", "configured", "before", "state", "project", "ticket", "file") {
+		inferred[chc.AcceptanceReadinessSlotInitialState] = []string{"An initial state is referenced by the source context."}
+	}
+
+	if quizContainsAny(content, "output", "report", "status", "response", "error", "file", "written", "created") {
+		inferred[chc.AcceptanceReadinessSlotObservableOutcome] = []string{"An observable outcome is referenced by the source context."}
+	}
+
+	if quizContainsAny(content, "success", "succeeds", "passes", "accepted", "valid", "expected") {
+		inferred[chc.AcceptanceReadinessSlotSuccessPath] = []string{"A success path is referenced by the source context."}
+	}
+
+	if quizContainsAny(content, "failure", "fails", "invalid", "reject", "error", "missing") {
+		inferred[chc.AcceptanceReadinessSlotFailurePath] = []string{"A failure path is referenced by the source context."}
+	}
+
+	if quizContainsAny(content, "out of scope", "non-goal", "boundary", "must not", "do not") {
+		inferred[chc.AcceptanceReadinessSlotBoundaries] = []string{"A boundary is referenced by the source context."}
+	}
+
+	return inferred
+}
+
+func quizAcceptanceMissingSlots(inferred map[chc.AcceptanceReadinessSlot][]string) []chc.AcceptanceReadinessSlot {
+	required := []chc.AcceptanceReadinessSlot{
+		chc.AcceptanceReadinessSlotActor,
+		chc.AcceptanceReadinessSlotTrigger,
+		chc.AcceptanceReadinessSlotInitialState,
+		chc.AcceptanceReadinessSlotObservableOutcome,
+		chc.AcceptanceReadinessSlotSuccessPath,
+	}
+	missing := []chc.AcceptanceReadinessSlot{}
+	for _, slot := range required {
+		if len(inferred[slot]) == 0 {
+			missing = append(missing, slot)
+		}
+	}
+
+	return missing
+}
+
+func quizContainsAny(content string, values ...string) bool {
+	for _, value := range values {
+		if strings.Contains(content, value) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func quizModelQuestionTags(question chc.QuizQuestion) []string {
