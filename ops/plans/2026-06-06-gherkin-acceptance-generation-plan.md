@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 4 - spec feature generation
+Active Slice: Slice 5 - acceptance workflow docs
 
 Spec: `ops/specs/2026-06-06-gherkin-acceptance-generation.md`
 Tracker: `ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md`
