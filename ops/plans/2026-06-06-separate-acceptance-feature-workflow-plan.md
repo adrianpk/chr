@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 3 - acceptance feature cli
+Active Slice: Slice 4 - feature round defaults
 
 Spec: `ops/specs/2026-06-06-separate-acceptance-feature-workflow.md`
 Tracker: `ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md`
