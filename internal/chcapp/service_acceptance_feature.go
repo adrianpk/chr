@@ -23,10 +23,7 @@ type AcceptanceFeatureOperationResult struct {
 }
 
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
-func (s service) GenerateAcceptanceFeature(
-	ctx context.Context,
-	request AcceptanceFeatureGenerateRequest,
-) (AcceptanceFeatureOperationResult, error) {
+func (s service) GenerateAcceptanceFeature(ctx context.Context, request AcceptanceFeatureGenerateRequest) (AcceptanceFeatureOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	var result AcceptanceFeatureOperationResult
 
@@ -42,10 +39,7 @@ func (s service) GenerateAcceptanceFeature(
 }
 
 //nolint:funlen,wsl_v5 // Generation flow is intentionally linear for logging and failure attribution.
-func (s service) generateAcceptanceFeature(
-	ctx context.Context,
-	scope chc.QuizScope,
-) (AcceptanceFeatureOperationResult, error) {
+func (s service) generateAcceptanceFeature(ctx context.Context, scope chc.QuizScope) (AcceptanceFeatureOperationResult, error) {
 	s.appendPlanGenerationLog("generate_acceptance_feature_started", map[string]string{
 		"case_slug": scope.CaseSlug,
 		"timeout":   longGenerationTimeout.String(),
@@ -211,10 +205,7 @@ func (s service) newAcceptanceFeatureModelRequest(state chc.QuizRuntimeState) (c
 	}, nil
 }
 
-func (s service) appendAcceptanceFeatureGenerationContextSections(
-	sections []chc.QuizModelContextSection,
-	scope chc.QuizScope,
-) ([]chc.QuizModelContextSection, error) {
+func (s service) appendAcceptanceFeatureGenerationContextSections(sections []chc.QuizModelContextSection, scope chc.QuizScope) ([]chc.QuizModelContextSection, error) {
 	return s.appendGenerationContextSections(sections, scope, sortedAcceptanceFeatureContextNodeIDs)
 }
 
