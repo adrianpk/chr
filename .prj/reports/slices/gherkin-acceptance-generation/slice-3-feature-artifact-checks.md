@@ -5,7 +5,7 @@ Slicing: Gherkin Acceptance Generation
 Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 Tracker: `ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md`
 Branch: `feat/slice-3-feature-artifact-checks`
-PR: pending
+PR: `#291`
 
 ## Purpose
 
