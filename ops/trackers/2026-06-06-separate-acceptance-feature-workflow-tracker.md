@@ -14,7 +14,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Slice 3 | acceptance feature cli | delivered | `feat/slice-3-acceptance-feature-cli` | `#296` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
 | Slice 4 | feature round defaults | delivered | `feat/slice-4-feature-round-defaults` | `#297` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
 | Slice 5 | acceptance feature tui action | delivered | `feat/slice-5-acceptance-feature-tui-action` | `#298` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
-| Slice 6 | acceptance workflow docs and fixture | pending | `feat/slice-6-acceptance-workflow-docs-and-fixture` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md` |
+| Slice 6 | acceptance workflow docs and fixture | in_progress | `feat/slice-6-acceptance-workflow-docs-and-fixture` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md` |
 
 ## Slice 1 Tasks
 
