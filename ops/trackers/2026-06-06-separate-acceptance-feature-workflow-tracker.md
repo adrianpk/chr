@@ -13,7 +13,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Slice 2 | acceptance feature service | delivered | `feat/slice-2-acceptance-feature-service` | `#295` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md` |
 | Slice 3 | acceptance feature cli | delivered | `feat/slice-3-acceptance-feature-cli` | `#296` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-3-acceptance-feature-cli.md` |
 | Slice 4 | feature round defaults | delivered | `feat/slice-4-feature-round-defaults` | `#297` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md` |
-| Slice 5 | acceptance feature tui action | reviewing | `feat/slice-5-acceptance-feature-tui-action` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
+| Slice 5 | acceptance feature tui action | reviewing | `feat/slice-5-acceptance-feature-tui-action` | `#298` | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-5-acceptance-feature-tui-action.md` |
 | Slice 6 | acceptance workflow docs and fixture | pending | `feat/slice-6-acceptance-workflow-docs-and-fixture` | pending | `.prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md` |
 
 ## Slice 1 Tasks
