@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -292,6 +293,50 @@ This is a documentation-only architecture cleanup for a package boundary.
 
 	if readiness.Decision != chc.AcceptanceReadinessNotApplicable {
 		t.Fatalf("decision = %q, want not_applicable", readiness.Decision)
+	}
+}
+
+func TestNewQuizModelRequestMarksIncompleteAcceptanceContextNeedsMoreInfo(t *testing.T) {
+	projectDir := t.TempDir()
+	writeServiceQuizFixture(t, projectDir)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "curated-blog-context.md"), `---
+title: "Curated Blog Context"
+status: "curated"
+case: "blog"
+---
+
+# Curated Blog Context
+
+The project has an existing file and should write an output report.
+`)
+
+	operations := newTestService(t, projectDir)
+	operations.now = serviceQuizClock()
+	state, err := operations.newQuizRuntimeState(chc.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, chc.QuizModeDeep)
+	if err != nil {
+		t.Fatalf("newQuizRuntimeState returned error: %v", err)
+	}
+
+	request, err := operations.newQuizModelRequest(state)
+	if err != nil {
+		t.Fatalf("newQuizModelRequest returned error: %v", err)
+	}
+
+	readiness := request.Payload.AcceptanceReadiness
+	if readiness == nil {
+		t.Fatal("AcceptanceReadiness = nil")
+	}
+
+	if readiness.Decision != chc.AcceptanceReadinessNeedsMoreInfo {
+		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
+	}
+
+	if !slices.Contains(readiness.Missing, chc.AcceptanceReadinessSlotActor) {
+		t.Fatalf("missing = %#v, want actor", readiness.Missing)
+	}
+
+	if len(readiness.InferredElements[chc.AcceptanceReadinessSlotObservableOutcome]) == 0 {
+		t.Fatalf("inferred elements = %#v, want observable outcome", readiness.InferredElements)
 	}
 }
 
