@@ -10,7 +10,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | acceptance readiness contract | delivered | `feat/slice-1-acceptance-readiness-contract` | #289 | `.prj/reports/slices/gherkin-acceptance-generation/slice-1-acceptance-readiness-contract.md` |
-| Slice 2 | readiness-aware quiz questions | planned | `feat/slice-2-readiness-aware-quiz-questions` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
+| Slice 2 | readiness-aware quiz questions | reviewing | `feat/slice-2-readiness-aware-quiz-questions` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
 | Slice 3 | feature artifact checks | planned | `feat/slice-3-feature-artifact-checks` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
 | Slice 4 | spec feature generation | planned | `feat/slice-4-spec-feature-generation` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
 | Slice 5 | acceptance workflow docs | planned | `feat/slice-5-acceptance-workflow-docs` | pending | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
@@ -28,11 +28,11 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Extend quiz model request payloads with acceptance readiness context. | pending | pending | |
-| T2.2 | Update quiz question prompt construction to include readiness guidance. | pending | pending | |
-| T2.3 | Persist readiness decisions and inferred elements with quiz runtime or curated quiz artifacts. | pending | pending | |
-| T2.4 | Add tests for suitable, needs-more-info, and not-applicable quiz flows. | pending | pending | |
-| T2.5 | Add slice report and tracker updates. | pending | pending | |
+| T2.1 | Extend quiz model request payloads with acceptance readiness context. | done | `4bd7660` | Added optional readiness payload, validation, context section, and service request derivation. |
+| T2.2 | Update quiz question prompt construction to include readiness guidance. | done | `8300c83` | Added provider payload exposure, routing-state prompt intent, and deep/fast question guidance. |
+| T2.3 | Persist readiness decisions and inferred elements with quiz runtime or curated quiz artifacts. | done | `10c1fce` | Added curated `Acceptance Readiness` notes derived from persisted prompt intent provenance. |
+| T2.4 | Add tests for suitable, needs-more-info, and not-applicable quiz flows. | done | `afde96d` | Covered generate, needs-more-info, and not-applicable service quiz request flows. |
+| T2.5 | Add slice report and tracker updates. | done | this commit | Added Slice 2 report, tracker status, and validation log. |
 
 ## Slice 3 Tasks
 
@@ -67,6 +67,11 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 - Slice 1: `go test ./internal/chc -run AcceptanceReadiness` (pass)
 - Slice 1: `go test ./internal/chc` (pass)
+- Slice 2: `go test ./internal/chc -run 'QuizModelProviderPayloadCarriesAcceptanceReadiness|QuizModelQuestionInstructions|QuizModelRoutingStateCarriesAcceptanceReadiness|OpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload'` (pass)
+- Slice 2: `go test ./internal/chc -run 'QuizArtifactRepositoryWritesCuratedNotes|CurateQuizEntriesPreservesAcceptanceReadiness|QuizArtifactRepositoryLoadsRawCaptureEntries'` (pass)
+- Slice 2: `go test ./internal/chcapp -run 'NewQuizModelRequest.*Acceptance'` (pass)
+- Slice 2: `go test ./internal/chc` (pass)
+- Slice 2: `go test ./internal/chcapp` (pass)
 
 ## Notes
 
