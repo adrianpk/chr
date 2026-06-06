@@ -990,6 +990,13 @@ func (m *fakeServiceQuizModel) InvokeQuizModel(
 			return serviceQuizPlanResponse("response-fallback-plan", request.CreatedAt), nil
 		}
 
+		if request.Action == chc.QuizModelActionGenerateAcceptanceFeature {
+			return serviceQuizAcceptanceFeatureResponse("response-fallback-feature", request.CreatedAt, chc.AcceptanceFeatureGeneration{
+				Status:          chc.AcceptanceFeatureStatusNotApplicable,
+				RejectionReason: "No acceptance feature context is available.",
+			}), nil
+		}
+
 		if request.Action == chc.QuizModelActionMaterializePlanTracking {
 			return serviceQuizPlanTrackingResponse("response-fallback", request.CreatedAt), nil
 		}
@@ -1089,6 +1096,22 @@ func serviceQuizDraftSpecResponseWithFeature(
 	response.DraftSpec.Feature = feature
 
 	return response
+}
+
+func serviceQuizAcceptanceFeatureResponse(
+	responseID string,
+	createdAt time.Time,
+	feature chc.AcceptanceFeatureGeneration,
+) chc.QuizModelResponse {
+	return chc.QuizModelResponse{
+		ID:        responseID,
+		RequestID: "filled-by-fake",
+		Provider:  "fake",
+		Status:    chc.QuizModelResponseReady,
+		Feature:   feature,
+		RawText:   "raw acceptance feature",
+		CreatedAt: createdAt,
+	}
 }
 
 func serviceQuizStagedPlanResponses(createdAt time.Time) []chc.QuizModelResponse {
