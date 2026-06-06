@@ -537,15 +537,7 @@ func quizModelDraftSpecResponseFromOutput(
 }
 
 func quizModelFeatureGeneration(payload QuizModelDraftSpecPayload) AcceptanceFeatureGeneration {
-	if payload.Feature == nil {
-		return AcceptanceFeatureGeneration{}
-	}
-
-	return AcceptanceFeatureGeneration{
-		Status:          payload.Feature.Status,
-		Body:            payload.Feature.Body,
-		RejectionReason: payload.Feature.RejectionReason,
-	}
+	return AcceptanceFeatureGeneration{}
 }
 
 func quizModelPlanResponseFromOutput(
@@ -1096,10 +1088,9 @@ Fence every multi-line example in a Markdown code block with a language tag, suc
 Never emit raw front matter, YAML, JSON, command output, or code snippets as plain paragraphs or headings.
 Set status to draft because generated specs require user review.
 Return body without a top-level title heading; the renderer adds the H1 from title.
-When acceptance_readiness.decision is generate and the context supports observable behavior, include feature with status generated and a Gherkin body.
-When feature generation would depend on open questions or static-check-unsafe scenarios, include feature with status rejected and a concise rejection_reason.
-When acceptance_readiness.decision is not_applicable or absent, include feature with status not_applicable.
-The feature body must include traceability tags and concrete Given, When, and Then steps.
+Do not generate Gherkin feature content in this response.
+Do not include fenced gherkin blocks or full Feature/Scenario documents in the spec body.
+Write acceptance criteria as prose bullets; a separate acceptance feature workflow will generate feature artifacts later.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
 `)
@@ -1325,42 +1316,7 @@ func quizModelDraftSpecJSONSchema() map[string]any {
 }
 
 func quizModelSpecJSONSchema() map[string]any {
-	schema := quizModelDraftSpecJSONSchema()
-
-	properties, ok := schema["properties"].(map[string]any)
-	if !ok {
-		return schema
-	}
-
-	properties["feature"] = quizModelFeatureJSONSchema()
-
-	return schema
-}
-
-func quizModelFeatureJSONSchema() map[string]any {
-	return map[string]any{
-		"type":                 "object",
-		"additionalProperties": false,
-		"required":             []string{"status"},
-		"properties": map[string]any{
-			"status": map[string]any{
-				"type": "string",
-				"enum": []string{
-					AcceptanceFeatureStatusGenerated,
-					AcceptanceFeatureStatusRejected,
-					AcceptanceFeatureStatusNotApplicable,
-				},
-			},
-			"body": map[string]any{
-				"type":        "string",
-				"description": "Gherkin feature body when status is generated.",
-			},
-			"rejection_reason": map[string]any{
-				"type":        "string",
-				"description": "Reason the feature was rejected or not applicable.",
-			},
-		},
-	}
+	return quizModelDraftSpecJSONSchema()
 }
 
 func quizModelPlanJSONSchema() map[string]any {

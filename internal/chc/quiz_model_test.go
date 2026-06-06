@@ -349,7 +349,7 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 	}
 }
 
-func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecFeatureSchema(t *testing.T) {
+func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecSchemaWithoutFeature(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Action = QuizModelActionGenerateSpec
 	request.Strategy = "spec_generation"
@@ -372,8 +372,8 @@ func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecFeatureSchema(t *testi
 		t.Fatalf("schema properties = %#v, want map", envelope.Text.Format.Schema["properties"])
 	}
 
-	if _, ok := properties["feature"]; !ok {
-		t.Fatalf("schema properties missing feature: %#v", properties)
+	if _, ok := properties["feature"]; ok {
+		t.Fatalf("schema properties includes feature: %#v", properties)
 	}
 }
 
@@ -803,16 +803,14 @@ func TestQuizModelSpecGenerationInstructionsFenceMultilineExamples(t *testing.T)
 	}
 }
 
-func TestQuizModelSpecGenerationInstructionsDescribeOptionalFeature(t *testing.T) {
+func TestQuizModelSpecGenerationInstructionsForbidEmbeddedGherkin(t *testing.T) {
 	instructions := quizModelSpecGenerationInstructions()
 
 	for _, want := range []string{
-		"acceptance_readiness.decision is generate",
-		"feature with status generated",
-		"feature with status rejected",
-		"feature with status not_applicable",
-		"traceability tags",
-		"Given, When, and Then",
+		"Do not generate Gherkin feature content",
+		"Do not include fenced gherkin blocks",
+		"Write acceptance criteria as prose bullets",
+		"separate acceptance feature workflow",
 	} {
 		if !strings.Contains(instructions, want) {
 			t.Fatalf("spec generation instructions missing %q in: %q", want, instructions)
@@ -1269,14 +1267,14 @@ func TestQuizModelResponseFromDraftSpecOutput(t *testing.T) {
 	}
 }
 
-func TestQuizModelResponseFromGeneratedSpecOutputCarriesFeature(t *testing.T) {
+func TestQuizModelResponseFromGeneratedSpecOutputRejectsFeatureField(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Action = QuizModelActionGenerateSpec
 	request.Strategy = "spec_generation"
 	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	response, err := quizModelResponseFromOutput(request, []byte(`{
+	_, err := quizModelResponseFromOutput(request, []byte(`{
 		"title": "Editorial Review Spec",
 		"body": "The workflow must preserve editorial review.",
 		"status": "draft",
@@ -1285,16 +1283,25 @@ func TestQuizModelResponseFromGeneratedSpecOutputCarriesFeature(t *testing.T) {
 			"body": "@spec:editorial-review-spec\nFeature: Editorial review\n\n  Scenario: Review is preserved\n    Given an article draft exists\n    When the editor publishes it\n    Then the review status is preserved\n"
 		}
 	}`))
-	if err != nil {
-		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	if err == nil {
+		t.Fatal("quizModelResponseFromOutput returned nil error")
 	}
+}
 
-	if response.DraftSpec.Feature.Status != AcceptanceFeatureStatusGenerated {
-		t.Fatalf("feature status = %q, want generated", response.DraftSpec.Feature.Status)
-	}
+func TestQuizModelResponseFromGeneratedSpecOutputRejectsEmbeddedGherkin(t *testing.T) {
+	request := validQuizModelRequest()
+	request.Action = QuizModelActionGenerateSpec
+	request.Strategy = "spec_generation"
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionGenerateSpec, request.Mode)
+	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	if !strings.Contains(response.DraftSpec.Feature.Body, "Feature: Editorial review") {
-		t.Fatalf("feature body = %q", response.DraftSpec.Feature.Body)
+	_, err := quizModelResponseFromOutput(request, []byte("{\n"+
+		`"title": "Editorial Review Spec",`+"\n"+
+		`"body": "Acceptance Criteria\n\n`+"```gherkin"+`\nFeature: Editorial review\n`+"```"+`\n",`+"\n"+
+		`"status": "draft"`+"\n"+
+		"}"))
+	if err == nil {
+		t.Fatal("quizModelResponseFromOutput returned nil error")
 	}
 }
 

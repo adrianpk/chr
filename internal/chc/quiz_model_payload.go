@@ -97,10 +97,9 @@ type QuizModelFastQuestionPayload struct {
 
 // QuizModelDraftSpecPayload describes a package boundary value.
 type QuizModelDraftSpecPayload struct {
-	Title   string                   `json:"title"`
-	Body    string                   `json:"body"`
-	Status  string                   `json:"status"`
-	Feature *QuizModelFeaturePayload `json:"feature,omitempty"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+	Status string `json:"status"`
 }
 
 // QuizModelFeaturePayload describes optional generated feature output.
@@ -363,7 +362,7 @@ func DecodeQuizModelDraftSpecPayload(content []byte) (QuizModelDraftSpecPayload,
 		return QuizModelDraftSpecPayload{}, err
 	}
 
-	err = validateQuizModelFields(fields, []string{"title", "body", "status"}, []string{"feature"})
+	err = validateQuizModelExactFields(fields, []string{"title", "body", "status"})
 	if err != nil {
 		return QuizModelDraftSpecPayload{}, err
 	}
@@ -505,20 +504,21 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec body is required")
 	}
 
+	if quizModelSpecBodyHasEmbeddedGherkin(normalized.Body) {
+		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec body must not include embedded gherkin")
+	}
+
 	if normalized.Status != "draft" {
 		return QuizModelDraftSpecPayload{}, fmt.Errorf("quiz draft spec status must be draft")
 	}
 
-	if payload.Feature != nil {
-		feature, err := ValidateQuizModelFeaturePayload(*payload.Feature)
-		if err != nil {
-			return QuizModelDraftSpecPayload{}, err
-		}
-
-		normalized.Feature = &feature
-	}
-
 	return normalized, nil
+}
+
+func quizModelSpecBodyHasEmbeddedGherkin(body string) bool {
+	lower := strings.ToLower(body)
+
+	return strings.Contains(lower, "```gherkin")
 }
 
 // ValidateQuizModelFeaturePayload validates the corresponding package boundary value.
