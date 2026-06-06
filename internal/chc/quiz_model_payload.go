@@ -543,22 +543,12 @@ func ValidateQuizModelDraftSpecPayload(payload QuizModelDraftSpecPayload) (QuizM
 
 // ValidateQuizModelFeaturePayload validates the corresponding package boundary value.
 func ValidateQuizModelFeaturePayload(payload QuizModelFeaturePayload) (QuizModelFeaturePayload, error) {
-	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration{
-		Status:               payload.Status,
-		Body:                 payload.Body,
-		RejectionReason:      payload.RejectionReason,
-		ClarificationPrompts: payload.ClarificationPrompts,
-	})
+	feature, err := ValidateAcceptanceFeatureGeneration(AcceptanceFeatureGeneration(payload))
 	if err != nil {
 		return QuizModelFeaturePayload{}, err
 	}
 
-	return QuizModelFeaturePayload{
-		Status:               feature.Status,
-		Body:                 feature.Body,
-		RejectionReason:      feature.RejectionReason,
-		ClarificationPrompts: feature.ClarificationPrompts,
-	}, nil
+	return QuizModelFeaturePayload(feature), nil
 }
 
 // ValidateQuizModelPlanPayload validates the corresponding package boundary value.

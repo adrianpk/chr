@@ -100,28 +100,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope chc.QuizSc
 	}
 
 	if feature.Status != chc.AcceptanceFeatureStatusGenerated {
-		s.appendPlanGenerationLog("generate_acceptance_feature_status", map[string]string{
-			"case_slug": scope.CaseSlug,
-			"status":    feature.Status,
-			"reason":    feature.RejectionReason,
-		})
-
-		var featureRoundPath string
-		if feature.Status == chc.AcceptanceFeatureStatusNeedsMoreInfo {
-			paths, err := s.writeAcceptanceFeatureRoundNotes(ctx, scope, modelRequest, response, feature)
-			if err != nil {
-				return AcceptanceFeatureOperationResult{}, err
-			}
-
-			featureRoundPath = paths.RelativePath
-		}
-
-		return AcceptanceFeatureOperationResult{
-			Message:         acceptanceFeatureResultMessage(feature.Status),
-			Status:          feature.Status,
-			FeatureRound:    featureRoundPath,
-			RejectionReason: feature.RejectionReason,
-		}, nil
+		return s.acceptanceFeatureNonGeneratedResult(ctx, scope, modelRequest, response, feature)
 	}
 
 	artifact := chc.AcceptanceFeatureArtifact{
@@ -160,6 +139,39 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope chc.QuizSc
 		Feature: paths.RelativePath,
 		Check:   check,
 	}, nil
+}
+
+func (s service) acceptanceFeatureNonGeneratedResult(ctx context.Context, scope chc.QuizScope, request chc.QuizModelRequest, response chc.QuizModelResponse, feature chc.AcceptanceFeatureGeneration) (AcceptanceFeatureOperationResult, error) {
+	s.appendPlanGenerationLog("generate_acceptance_feature_status", map[string]string{
+		"case_slug": scope.CaseSlug,
+		"status":    feature.Status,
+		"reason":    feature.RejectionReason,
+	})
+
+	featureRoundPath, err := s.acceptanceFeatureRoundPath(ctx, scope, request, response, feature)
+	if err != nil {
+		return AcceptanceFeatureOperationResult{}, err
+	}
+
+	return AcceptanceFeatureOperationResult{
+		Message:         acceptanceFeatureResultMessage(feature.Status),
+		Status:          feature.Status,
+		FeatureRound:    featureRoundPath,
+		RejectionReason: feature.RejectionReason,
+	}, nil
+}
+
+func (s service) acceptanceFeatureRoundPath(ctx context.Context, scope chc.QuizScope, request chc.QuizModelRequest, response chc.QuizModelResponse, feature chc.AcceptanceFeatureGeneration) (string, error) {
+	if feature.Status != chc.AcceptanceFeatureStatusNeedsMoreInfo {
+		return "", nil
+	}
+
+	paths, err := s.writeAcceptanceFeatureRoundNotes(ctx, scope, request, response, feature)
+	if err != nil {
+		return "", err
+	}
+
+	return paths.RelativePath, nil
 }
 
 func (s service) latestSpecNodeForFeatureScope(scope chc.QuizScope) (chc.WorkspaceNode, error) {

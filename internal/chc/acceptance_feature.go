@@ -315,6 +315,7 @@ func RenderAcceptanceFeatureRoundNotes(paths AcceptanceFeatureRoundPaths, notes 
 		output.WriteString("### " + prompt.ID + "\n\n")
 		output.WriteString("- Question: " + prompt.Question + "\n")
 		output.WriteString("- Default: " + prompt.DefaultAnswer + "\n")
+
 		if prompt.Reason != "" {
 			output.WriteString("- Reason: " + prompt.Reason + "\n")
 		}

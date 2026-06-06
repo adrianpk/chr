@@ -554,12 +554,7 @@ func quizModelFeatureResponseFromOutput(request QuizModelRequest, output []byte)
 		RequestID: request.ID,
 		Provider:  "openai",
 		Status:    QuizModelResponseReady,
-		Feature: AcceptanceFeatureGeneration{
-			Status:               payload.Status,
-			Body:                 payload.Body,
-			RejectionReason:      payload.RejectionReason,
-			ClarificationPrompts: payload.ClarificationPrompts,
-		},
+		Feature:   AcceptanceFeatureGeneration(payload),
 		RawText:   strings.TrimSpace(string(output)),
 		CreatedAt: request.CreatedAt,
 	}, nil
