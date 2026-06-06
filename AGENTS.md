@@ -28,22 +28,33 @@ It is not a product or runtime specification.
 - Report validation results explicitly.
 - Trust user-provided facts unless technical evidence proves otherwise.
 
-## 4) Workspace and Git Safety
+## 4) State Alignment Before Action
+
+- When the user asks a status question, expresses confusion, challenges the
+  current state, or asks what comes next, answer with the verified state first
+  and do not change files, branches, tickets, trackers, or PRs in that response.
+- Only execute changes after the user gives a clear follow-up instruction such
+  as "continue", "do it", "close it", "activate it", or "start the next slice".
+- Before closing, activating, or starting a slice, verify the current branch,
+  remote `dev`, tracker active slice, and PR or merge state. Report mismatches
+  before making changes.
+
+## 5) Workspace and Git Safety
 
 - When this workspace uses git, `origin` is the default canonical remote unless local instructions say otherwise.
 - Never perform destructive Git operations without explicit approval.
 
-## 5) Language and Documentation Rules
+## 6) Language and Documentation Rules
 
 - All code and workspace documentation must be written in English.
 - Keep naming, comments, and workspace text in English.
 
-## 6) Scope Boundary
+## 7) Scope Boundary
 
 - Keep this file focused on working rules.
 - Product and runtime specifications belong in `docs/`.
 
-## 7) Referenced Agent Docs
+## 8) Referenced Agent Docs
 
 - `.agents/DOCUMENTING.md` — documentation model and placement rules.
 - `.agents/CONVENTIONS.md` — coding standards and codebase boundaries.
