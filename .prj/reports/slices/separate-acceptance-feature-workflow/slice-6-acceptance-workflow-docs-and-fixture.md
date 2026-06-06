@@ -5,7 +5,7 @@ Slicing: Separate Acceptance Feature Workflow
 Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 Tracker: `ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md`
 Branch: `feat/slice-6-acceptance-workflow-docs-and-fixture`
-PR: pending
+PR: `#299`
 
 ## Purpose
 
