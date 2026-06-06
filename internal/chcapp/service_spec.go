@@ -169,6 +169,14 @@ func (s service) generateSpec(ctx context.Context, scope chc.QuizScope) (SpecOpe
 		return SpecOperationResult{}, err
 	}
 
+	s.appendPlanGenerationLog("generate_spec_feature_status", map[string]string{
+		"case_slug":     scope.CaseSlug,
+		"request_id":    modelRequest.ID,
+		"response_id":   response.ID,
+		"status":        featureStatus,
+		"relative_path": featurePath,
+	})
+
 	view := s.specViewFromPath(scope, paths.RelativePath, paths.Path)
 
 	return SpecOperationResult{
