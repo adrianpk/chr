@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 4 - feature round defaults
+Active Slice: Slice 5 - acceptance feature tui action
 
 Spec: `ops/specs/2026-06-06-separate-acceptance-feature-workflow.md`
 Tracker: `ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md`
