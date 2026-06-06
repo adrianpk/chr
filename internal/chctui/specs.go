@@ -102,7 +102,7 @@ func (m Model) renderSpecs() string {
 }
 
 func (m Model) specActionHint() string {
-	return "g generate spec  r refresh"
+	return "g generate spec  f generate feature  r refresh"
 }
 
 func (m Model) selectedSpecView() (SpecView, bool) {

@@ -39,14 +39,31 @@ func newTUIPlanActionExecutor(
 func (e tuiSpecActionExecutor) ExecuteSpecAction(
 	request chctui.SpecActionRequest,
 ) (chctui.SpecActionResult, error) {
+	result := chctui.SpecActionResult{}
+
 	switch request.Action {
 	case chctui.SpecActionGenerate:
-		_, err := e.operations.GenerateSpec(e.operations.ctx, SpecGenerateRequest{
+		generated, err := e.operations.GenerateSpec(e.operations.ctx, SpecGenerateRequest{
 			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			return chctui.SpecActionResult{}, err
 		}
+
+		result.Message = generated.Message
+	case chctui.SpecActionGenerateFeature:
+		generated, err := e.operations.GenerateAcceptanceFeature(e.operations.ctx, AcceptanceFeatureGenerateRequest{
+			Scope: chc.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		})
+		if err != nil {
+			return chctui.SpecActionResult{}, err
+		}
+
+		result.Message = generated.Message
+		result.AcceptanceFeatureStatus = generated.Status
+		result.AcceptanceFeaturePath = generated.Feature
+		result.AcceptanceFeatureRound = generated.FeatureRound
+		result.AcceptanceFeatureReason = generated.RejectionReason
 	case chctui.SpecActionRefresh:
 	default:
 		return chctui.SpecActionResult{}, errors.New("unknown spec action")
@@ -62,17 +79,15 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 		return chctui.SpecActionResult{}, err
 	}
 
-	message := "Specs refreshed."
-	if request.Action == chctui.SpecActionGenerate {
-		message = "Spec generated."
+	if result.Message == "" {
+		result.Message = "Specs refreshed."
 	}
 
-	return chctui.SpecActionResult{
-		Message:   message,
-		Documents: documents,
-		Specs:     specs,
-		Scope:     request.Scope,
-	}, nil
+	result.Documents = documents
+	result.Specs = specs
+	result.Scope = request.Scope
+
+	return result, nil
 }
 
 //nolint:cyclop,funlen,wsl_v5 // Adapter dispatch keeps action-specific service calls in one place.

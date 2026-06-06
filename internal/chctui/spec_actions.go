@@ -12,8 +12,9 @@ type SpecActionID string
 
 // Spec action identifiers define supported spec commands.
 const (
-	SpecActionGenerate SpecActionID = "generate_spec"
-	SpecActionRefresh  SpecActionID = "refresh_specs"
+	SpecActionGenerate        SpecActionID = "generate_spec"
+	SpecActionGenerateFeature SpecActionID = "generate_acceptance_feature"
+	SpecActionRefresh         SpecActionID = "refresh_specs"
 )
 
 // SpecActionExecutor runs confirmed spec actions.
@@ -29,10 +30,14 @@ type SpecActionRequest struct {
 
 // SpecActionResult contains refreshed spec state after an action.
 type SpecActionResult struct {
-	Message   string
-	Documents []DocumentView
-	Specs     []SpecView
-	Scope     QuizScope
+	Message                 string
+	Documents               []DocumentView
+	Specs                   []SpecView
+	Scope                   QuizScope
+	AcceptanceFeatureStatus string
+	AcceptanceFeaturePath   string
+	AcceptanceFeatureRound  string
+	AcceptanceFeatureReason string
 }
 
 // SpecActionState stores pending confirmation state for a spec action.
@@ -73,6 +78,13 @@ func (m Model) updateSpecsKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "g":
 		cmd := m.startSpecAction(SpecActionRequest{
 			Action: SpecActionGenerate,
+			Scope:  m.selectedSpecScope(),
+		})
+
+		return m, cmd
+	case "f":
+		cmd := m.startSpecAction(SpecActionRequest{
+			Action: SpecActionGenerateFeature,
 			Scope:  m.selectedSpecScope(),
 		})
 
@@ -191,13 +203,15 @@ func (m *Model) applySpecActionResult(result SpecActionResult) {
 		m.selectSpecByScope(result.Scope)
 	}
 
-	m.statusMessage = result.Message
+	m.statusMessage = specActionResultMessage(result)
 }
 
 func specActionTitle(action SpecActionID) string {
 	switch action {
 	case SpecActionGenerate:
 		return "Generate spec"
+	case SpecActionGenerateFeature:
+		return "Generate acceptance feature"
 	case SpecActionRefresh:
 		return "Refresh specs"
 	default:
@@ -209,9 +223,32 @@ func specBusyMessage(request SpecActionRequest) string {
 	switch request.Action {
 	case SpecActionGenerate:
 		return "Generating spec..."
+	case SpecActionGenerateFeature:
+		return "Generating acceptance feature..."
 	case SpecActionRefresh:
 		return "Refreshing specs..."
 	default:
 		return "Running spec action..."
 	}
+}
+
+func specActionResultMessage(result SpecActionResult) string {
+	if result.AcceptanceFeatureStatus == "" {
+		return result.Message
+	}
+
+	parts := []string{result.Message, "status: " + result.AcceptanceFeatureStatus}
+	if result.AcceptanceFeaturePath != "" {
+		parts = append(parts, "feature: "+result.AcceptanceFeaturePath)
+	}
+
+	if result.AcceptanceFeatureRound != "" {
+		parts = append(parts, "feature round: "+result.AcceptanceFeatureRound)
+	}
+
+	if result.AcceptanceFeatureReason != "" {
+		parts = append(parts, "reason: "+result.AcceptanceFeatureReason)
+	}
+
+	return strings.Join(parts, "  ")
 }

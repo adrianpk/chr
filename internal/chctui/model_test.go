@@ -1085,20 +1085,24 @@ func TestDefaultCommandRegistryDoesNotExposeDraftCreation(t *testing.T) {
 	}
 }
 
-func TestGenerateSpecCommandOnlyAppearsInSpecs(t *testing.T) {
+func TestSpecGenerationCommandsOnlyAppearInSpecs(t *testing.T) {
 	model := NewModel(Options{})
 	model.selected = 3
 	model.commandPalette.Filter = "generate"
 
 	if commands := model.filteredCommands(); len(commands) != 0 {
-		t.Fatalf("quiz commands include generate spec: %#v", commands)
+		t.Fatalf("quiz commands include spec generation actions: %#v", commands)
 	}
 
 	model.selected = 4
 
 	commands := model.filteredCommands()
-	if len(commands) != 1 || commands[0].ID != "generate-spec" {
-		t.Fatalf("spec commands = %#v, want generate-spec", commands)
+	if len(commands) != 2 {
+		t.Fatalf("spec commands = %#v, want two generate commands", commands)
+	}
+
+	if commands[0].ID != "generate-spec" || commands[1].ID != "generate-acceptance-feature" {
+		t.Fatalf("spec commands = %#v, want spec and acceptance feature generation", commands)
 	}
 }
 
@@ -3798,6 +3802,53 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 
 	if len(confirmed.documents) != 1 || confirmed.documents[0].Title != "Generated Spec" {
 		t.Fatalf("documents = %#v, want generated spec", confirmed.documents)
+	}
+}
+
+func TestModelGeneratesAcceptanceFeatureFromSpecsKey(t *testing.T) {
+	executor := &fakeSpecActionExecutor{
+		result: SpecActionResult{
+			Message:                 "Acceptance feature needs more information.",
+			AcceptanceFeatureStatus: "needs_more_info",
+			AcceptanceFeatureRound:  ".chc/user/acceptance/blog-feature-round.md",
+			AcceptanceFeatureReason: "Missing observable failure path.",
+		},
+	}
+	model := NewModel(Options{
+		SpecExecutor: executor,
+		Specs: []SpecView{
+			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}, Status: "draft"},
+		},
+	})
+	model.selected = 4
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("f")})
+	busy := requireUpdatedModel(t, updated)
+
+	if !busy.specBusy {
+		t.Fatal("spec action is not marked busy")
+	}
+
+	if busy.statusMessage != "Generating acceptance feature..." {
+		t.Fatalf("statusMessage = %q, want acceptance feature busy message", busy.statusMessage)
+	}
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != SpecActionGenerateFeature {
+		t.Fatalf("executor action = %q, want %q", executor.request.Action, SpecActionGenerateFeature)
+	}
+
+	for _, want := range []string{
+		"Acceptance feature needs more information.",
+		"status: needs_more_info",
+		"feature round: .chc/user/acceptance/blog-feature-round.md",
+		"reason: Missing observable failure path.",
+	} {
+		if !strings.Contains(confirmed.statusMessage, want) {
+			t.Fatalf("statusMessage missing %q: %q", want, confirmed.statusMessage)
+		}
 	}
 }
 
