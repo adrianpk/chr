@@ -173,6 +173,17 @@ chc spec generate --use-case billing
 Spec generation reads accumulated project and use-case material, including
 metadata, context, dumps, quizzes, and related workspace documents.
 
+When quiz and spec context is suitable for behavior-oriented acceptance
+criteria, spec generation may also write a linked Gherkin feature artifact:
+
+```text
+.chc/user/acceptance/<scope>.feature
+```
+
+The Markdown spec remains canonical. Feature artifacts are written only when
+the generated Gherkin passes static checks. See
+[Acceptance feature generation](acceptance-feature-generation.md).
+
 ## Plans
 
 List, generate, regenerate, and materialize plan tracking:

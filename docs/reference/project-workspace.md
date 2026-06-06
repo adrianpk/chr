@@ -84,6 +84,7 @@ AGENTS.md
     sessions/
   dumps/
   quizzes/
+  acceptance/
   playbooks/
   reports/
   indexes/

@@ -325,6 +325,12 @@ Specs are generated from accumulated project and use-case material: project
 metadata, project context, use-case metadata, use-case context, dumps, quizzes,
 and related workspace documents. Specs are generated from the Specs tab.
 
+When the selected use case has clear behavior signals, spec generation can also
+produce a linked Gherkin feature artifact under
+`.chc/user/acceptance/<scope>.feature`. If the use case is not naturally suited
+to acceptance scenarios, or the generated feature fails static checks, the spec
+still writes and the feature status is reported as not applicable or rejected.
+
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a use case. |

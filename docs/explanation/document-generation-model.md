@@ -73,6 +73,13 @@ edit specs instead of creating draft artifacts.
 Specs are generated from accumulated project and use-case material. They are the
 place where expected behavior is made explicit before implementation planning.
 
+For behavior-testable use cases, spec generation can also produce a linked
+Gherkin feature artifact. This artifact is optional and does not replace the
+spec. ChrysoCoord first uses quiz context to decide whether acceptance
+readiness is `generate`, `needs_more_info`, or `not_applicable`. When generated
+feature content fails static checks, the spec remains valid output and the
+feature is reported as rejected rather than treated as acceptance evidence.
+
 Plans are generated from the same workspace material plus existing specs. A plan
 is an implementation decomposition: slices, ordering, dependencies, tasks,
 branch expectations, pull request expectations, and validation criteria.
