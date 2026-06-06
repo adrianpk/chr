@@ -333,16 +333,24 @@ from the spec, quiz, and dump context.
 | --- | --- |
 | `up` / `down` or `k` / `j` | Select a use case. |
 | `g` | Generate a spec for the selected use case. |
+| `f` | Generate an acceptance feature for the selected use case. |
 | `r` | Refresh specs from disk. |
 
-Spec generation is asynchronous. While it is running, the TUI shows a working
-state and ignores other spec actions until the request finishes.
+Spec and acceptance feature generation are asynchronous. While either is
+running, the TUI shows a working state and ignores other spec actions until the
+request finishes.
+
+If acceptance feature generation succeeds, the status line shows the generated
+`.chc/user/acceptance/<case>.feature` path. If more scenario detail is needed,
+the status line shows the `.chc/user/acceptance/<case>-feature-round.md` path
+so you can review the default-oriented prompts before trying again.
 
 Equivalent CLI commands:
 
 ```sh
 chc spec list
 chc spec generate --use-case billing
+chc acceptance feature generate --use-case billing
 ```
 
 ## Generate Plans and Tracking in the TUI

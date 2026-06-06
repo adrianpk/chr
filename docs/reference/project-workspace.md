@@ -85,6 +85,8 @@ AGENTS.md
   dumps/
   quizzes/
   acceptance/
+    <case>.feature
+    <case>-feature-round.md
   playbooks/
   reports/
   indexes/

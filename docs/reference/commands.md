@@ -189,6 +189,13 @@ Generated features are written under:
 .chc/user/acceptance/<scope>.feature
 ```
 
+If generation needs more scenario detail, ChrysoCoord writes feature-round notes
+under:
+
+```text
+.chc/user/acceptance/<scope>-feature-round.md
+```
+
 Feature artifacts are written only when the generated Gherkin passes static
 checks. If more scenario detail is needed, or the use case is not suitable for a
 feature artifact, the command reports that status without writing a file. See

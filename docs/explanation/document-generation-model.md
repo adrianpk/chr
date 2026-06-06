@@ -74,9 +74,11 @@ Specs are generated from accumulated project and use-case material. They are the
 place where expected behavior is made explicit before implementation planning.
 
 Spec generation produces the Markdown spec only. For behavior-testable use
-cases, a separate acceptance feature workflow can later derive a linked Gherkin
-feature artifact from the spec, quiz, and dump context. This keeps general
-requirements discovery separate from `.feature` formalization.
+cases, the separate acceptance feature workflow derives a linked Gherkin feature
+artifact from the spec, quiz, and dump context. If scenario details are missing,
+it writes feature-round notes with inferred defaults before another generation
+attempt. This keeps general requirements discovery separate from `.feature`
+formalization.
 
 Plans are generated from the same workspace material plus existing specs. A plan
 is an implementation decomposition: slices, ordering, dependencies, tasks,

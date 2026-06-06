@@ -1,8 +1,5 @@
 # Acceptance Feature Generation
 
-Acceptance feature generation is becoming a separate workflow from spec
-generation.
-
 When a use case is naturally behavior-testable, ChrysoCoord should generate a
 linked Gherkin `.feature` artifact from the canonical Markdown spec and related
 quiz/dump context. The spec remains the source of truth. The feature file is
@@ -16,10 +13,9 @@ The target workflow is:
 dump -> quiz -> spec -> acceptance feature round -> .feature
 ```
 
-The general quiz gathers requirements for the use case. A later acceptance
-feature round should use the spec, quiz, and dump context to decide whether a
-feature can be generated or whether default-oriented follow-up questions are
-needed.
+The general quiz gathers requirements for the use case. The acceptance feature
+round uses the spec, quiz, and dump context to decide whether a feature can be
+generated or whether default-oriented follow-up questions are needed.
 
 The acceptance feature workflow can carry a readiness decision:
 
@@ -44,13 +40,22 @@ language, while preserving the selected scenario gap.
 
 ## Generated Artifact
 
-Feature generation should write:
+Feature generation writes:
 
 ```text
 .chc/user/acceptance/<scope>.feature
 ```
 
 Spec generation does not write this file. It generates only the Markdown spec.
+
+When generation needs more information, ChrysoCoord writes feature-round notes:
+
+```text
+.chc/user/acceptance/<scope>-feature-round.md
+```
+
+Those notes contain focused prompts with inferred defaults and empty answer
+slots. A later generation attempt reads the notes as acceptance context.
 
 Generated features should include traceability tags such as:
 
