@@ -1,6 +1,6 @@
 # Gherkin Acceptance Generation Tracker
 
-Status: planned
+Status: delivered
 
 Spec: `ops/specs/2026-06-06-gherkin-acceptance-generation.md`
 Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
@@ -13,7 +13,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 | Slice 2 | readiness-aware quiz questions | delivered | `feat/slice-2-readiness-aware-quiz-questions` | #290 | `.prj/reports/slices/gherkin-acceptance-generation/slice-2-readiness-aware-quiz-questions.md` |
 | Slice 3 | feature artifact checks | delivered | `feat/slice-3-feature-artifact-checks` | #291 | `.prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md` |
 | Slice 4 | spec feature generation | delivered | `feat/slice-4-spec-feature-generation` | #292 | `.prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md` |
-| Slice 5 | acceptance workflow docs | reviewing | `feat/slice-5-acceptance-workflow-docs` | #293 | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
+| Slice 5 | acceptance workflow docs | delivered | `feat/slice-5-acceptance-workflow-docs` | #293 | `.prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md` |
 
 ## Slice 1 Tasks
 
@@ -82,10 +82,10 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 - Slice 4: `go test ./internal/chcapp` (pass)
 - Slice 4 post-merge: `go test ./internal/chc ./internal/chcapp` (pass)
 - Slice 5: `make verify` (pass)
+- Slice 5 post-merge: `make verify` (pass)
 
 ## Notes
 
 - `godog` execution is intentionally deferred.
 - Feature files are acceptance artifacts and do not replace specs.
-- Plan and tracker must be committed to `dev` before Slice 1 implementation
-  starts.
+- All planned slices have been delivered.

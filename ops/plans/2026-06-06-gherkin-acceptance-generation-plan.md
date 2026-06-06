@@ -1,8 +1,8 @@
 # Gherkin Acceptance Generation Plan
 
-Status: planned
+Status: delivered
 
-Active Slice: Slice 5 - acceptance workflow docs
+Active Slice: complete
 
 Spec: `ops/specs/2026-06-06-gherkin-acceptance-generation.md`
 Tracker: `ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md`
