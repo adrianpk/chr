@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -814,6 +815,35 @@ func TestQuizModelSpecGenerationInstructionsDoNotMentionFeatureGeneration(t *tes
 	} {
 		if strings.Contains(instructions, forbidden) {
 			t.Fatalf("spec generation instructions contain %q in: %q", forbidden, instructions)
+		}
+	}
+}
+
+func TestQuizModelFeatureSchemaRequiresAllStrictProperties(t *testing.T) {
+	schema := quizModelFeatureJSONSchema()
+
+	required, ok := schema["required"].([]string)
+	if !ok {
+		t.Fatalf("required = %#v, want string list", schema["required"])
+	}
+
+	for _, want := range []string{"status", "body", "rejection_reason", "clarification_prompts"} {
+		if !slices.Contains(required, want) {
+			t.Fatalf("required = %#v, missing %q", required, want)
+		}
+	}
+}
+
+func TestQuizModelFeatureInstructionsRequireEmptyFallbackFields(t *testing.T) {
+	instructions := quizModelFeatureGenerationInstructions()
+
+	for _, want := range []string{
+		"Always include status, body, rejection_reason, and clarification_prompts",
+		"Use an empty string for body or rejection_reason when not applicable",
+		"an empty array for clarification_prompts when not needed",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Fatalf("feature generation instructions missing %q in: %q", want, instructions)
 		}
 	}
 }

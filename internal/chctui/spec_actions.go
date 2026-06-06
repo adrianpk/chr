@@ -184,7 +184,7 @@ func (m *Model) completeSpecAction(message specActionFinishedMsg) {
 	m.specBusy = false
 
 	if message.Err != nil {
-		m.statusMessage = savedArtifactFailureStatus("Spec", "spec", message.Err)
+		m.statusMessage = specActionFailureStatus(message.Request.Action, message.Err)
 
 		return
 	}
@@ -229,6 +229,15 @@ func specBusyMessage(request SpecActionRequest) string {
 		return "Refreshing specs..."
 	default:
 		return "Running spec action..."
+	}
+}
+
+func specActionFailureStatus(action SpecActionID, err error) string {
+	switch action {
+	case SpecActionGenerateFeature:
+		return savedArtifactFailureStatus("Acceptance feature", "acceptance feature", err)
+	default:
+		return savedArtifactFailureStatus("Spec", "spec", err)
 	}
 }
 

@@ -3873,6 +3873,27 @@ func TestModelReportsSpecGenerationFailureShowsLastSavedSpec(t *testing.T) {
 	}
 }
 
+func TestModelReportsAcceptanceFeatureGenerationFailureWithFeatureLabel(t *testing.T) {
+	executor := &fakeSpecActionExecutor{err: errors.New("invalid JSON schema")}
+	model := NewModel(Options{
+		SpecExecutor: executor,
+		Specs: []SpecView{
+			{Title: "Blog Spec", Scope: QuizScope{CaseSlug: "blog"}, Status: "draft", Content: "# Blog Spec"},
+		},
+	})
+	model.selected = 4
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("f")})
+	busy := requireUpdatedModel(t, updated)
+
+	updated, _ = busy.Update(cmd())
+	confirmed := requireUpdatedModel(t, updated)
+
+	if confirmed.statusMessage != "Acceptance feature failed; showing last saved acceptance feature: invalid JSON schema" {
+		t.Fatalf("statusMessage = %q, want acceptance feature failure", confirmed.statusMessage)
+	}
+}
+
 //nolint:cyclop,funlen // End-to-end TUI action test validates several state updates together.
 func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 	executor := &fakePlanActionExecutor{

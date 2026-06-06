@@ -1125,6 +1125,7 @@ Return status not_applicable when the topic is not naturally suited to an accept
 Return status rejected when a feature was attempted but would be unsafe, vague, or invalid; explain why in rejection_reason.
 Clarification prompts must ask the user to confirm or adjust an inferred default instead of restating schema terms.
 Generated feature bodies must include traceability tags and concrete Given, When, and Then steps.
+Always include status, body, rejection_reason, and clarification_prompts. Use an empty string for body or rejection_reason when not applicable, and an empty array for clarification_prompts when not needed.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
 `)
@@ -1387,7 +1388,7 @@ func quizModelFeatureJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
-		"required":             []string{"status"},
+		"required":             []string{"status", "body", "rejection_reason", "clarification_prompts"},
 		"properties": map[string]any{
 			"status": map[string]any{
 				"type": "string",
