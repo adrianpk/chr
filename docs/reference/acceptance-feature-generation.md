@@ -93,7 +93,13 @@ If static checks fail, the feature must not be written as acceptance evidence.
 
 This iteration does not execute `godog` and does not generate step definitions.
 
-A later workflow can run generated `.feature` files through `godog`, fail on
-undefined or pending steps, and record `godog` output as normal validation
-evidence. Until then, generated feature files are acceptance artifacts, not
-executable test results.
+A planned later workflow should let an agent use generated `.feature` files as
+acceptance-test source material. For Go projects, that workflow will likely use
+[`godog`](https://github.com/cucumber/godog), the Cucumber BDD framework for
+Go, to connect Gherkin scenarios with executable step definitions.
+
+That later workflow can generate or update acceptance tests from the feature
+artifact, run selected `.feature` files through `godog`, fail on undefined or
+pending steps, and record `godog` output as normal validation evidence. Until
+then, generated feature files are acceptance artifacts, not executable test
+results.

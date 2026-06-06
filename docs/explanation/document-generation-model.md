@@ -82,6 +82,10 @@ missing scenario details without moving Gherkin-shaped questioning into the
 general quiz. This keeps general requirements discovery separate from
 `.feature` formalization.
 
+The `.feature` artifact is also intended to become source material for a later
+agent workflow that generates executable acceptance tests. For Go projects, that
+future workflow will likely target `godog` step definitions and validation runs.
+
 Plans are generated from the same workspace material plus existing specs. A plan
 is an implementation decomposition: slices, ordering, dependencies, tasks,
 branch expectations, pull request expectations, and validation criteria.
