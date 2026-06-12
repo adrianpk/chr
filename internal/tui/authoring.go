@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // AuthoringSessionView is the terminal projection of an authoring session.
@@ -26,11 +26,11 @@ type AuthoringSessionView struct {
 }
 
 // NewAuthoringSessionViews converts core authoring sessions into TUI rows.
-func NewAuthoringSessionViews(sessions []workspace.AuthoringSession) []AuthoringSessionView {
+func NewAuthoringSessionViews(sessions []core.AuthoringSession) []AuthoringSessionView {
 	views := make([]AuthoringSessionView, 0, len(sessions))
 
 	for index, session := range sessions {
-		paths := workspace.AuthoringSessionLayout("", session.ID)
+		paths := core.AuthoringSessionLayout("", session.ID)
 		views = append(views, AuthoringSessionView{
 			Index:          index,
 			ID:             session.ID,
@@ -145,7 +145,7 @@ func (m *Model) selectNextAuthoringSession() {
 	}
 }
 
-func authoringArtifactPaths(refs []workspace.AuthoringArtifactRef) []string {
+func authoringArtifactPaths(refs []core.AuthoringArtifactRef) []string {
 	paths := make([]string, 0, len(refs))
 	for _, ref := range refs {
 		if ref.Path != "" {

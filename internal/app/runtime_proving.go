@@ -8,7 +8,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newRuntimeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -189,7 +189,7 @@ func runRuntimeInit(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	result, err := workspace.NewRuntimeAssets(deps.assetsFS).Init(ctx, workspace.RuntimeInitOptions{
+	result, err := core.NewRuntimeAssets(deps.assetsFS).Init(ctx, core.RuntimeInitOptions{
 		ProjectDir: projectContext.ProjectDir,
 		DryRun:     cmd.Bool("dry-run"),
 	})
@@ -224,12 +224,12 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
 
-	result, err := workspace.ValidateRuntime(workspace.RuntimeValidationOptions{
+	result, err := core.ValidateRuntime(core.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -242,7 +242,7 @@ func runRuntimeValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return err
 	}
 
-	if !workspace.RuntimeValidationPassed(result.Checks) {
+	if !core.RuntimeValidationPassed(result.Checks) {
 		return fmt.Errorf("runtime validation failed")
 	}
 
@@ -259,7 +259,7 @@ func runProvingRun(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return fmt.Errorf("proving run requires --objective")
 	}
 
-	result, err := workspace.RunProvingSandbox(ctx, workspace.ProvingSandboxRunOptions{
+	result, err := core.RunProvingSandbox(ctx, core.ProvingSandboxRunOptions{
 		ProjectDir:    cmd.String("dir"),
 		ObjectivePath: objectivePath,
 		DryRun:        cmd.Bool("dry-run"),
@@ -281,7 +281,7 @@ func runProvingRalph(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return fmt.Errorf("proving ralph requires --objective")
 	}
 
-	result, err := workspace.RunProvingRalphLoop(ctx, workspace.ProvingRalphLoopOptions{
+	result, err := core.RunProvingRalphLoop(ctx, core.ProvingRalphLoopOptions{
 		ProjectDir:    cmd.String("dir"),
 		ObjectivePath: objectivePath,
 		MaxAttempts:   cmd.Int("max-attempts"),
@@ -295,7 +295,7 @@ func runProvingRalph(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	if result.Status != workspace.ProvingRalphLoopStatusPassed {
+	if result.Status != core.ProvingRalphLoopStatusPassed {
 		return fmt.Errorf("proving ralph loop failed")
 	}
 
@@ -312,7 +312,7 @@ func runProvingValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 		return fmt.Errorf("proving validate requires --objective")
 	}
 
-	result, err := workspace.RunProvingValidation(ctx, cmd.String("dir"), objectivePath)
+	result, err := core.RunProvingValidation(ctx, cmd.String("dir"), objectivePath)
 	if err != nil {
 		return err
 	}
@@ -329,7 +329,7 @@ func runProvingValidate(ctx context.Context, cmd *cli.Command, stdout io.Writer)
 	return nil
 }
 
-func printProvingRalphResult(stdout io.Writer, result workspace.ProvingRalphLoopResult) error {
+func printProvingRalphResult(stdout io.Writer, result core.ProvingRalphLoopResult) error {
 	lines := []string{
 		fmt.Sprintf("proving_ralph: %s", result.Status),
 		fmt.Sprintf("objective_id: %s", result.Objective.ID),
@@ -363,7 +363,7 @@ func printProvingRalphResult(stdout io.Writer, result workspace.ProvingRalphLoop
 	return nil
 }
 
-func printProvingRunResult(stdout io.Writer, result workspace.ProvingSandboxRunResult) error {
+func printProvingRunResult(stdout io.Writer, result core.ProvingSandboxRunResult) error {
 	status := "completed"
 	if result.DryRun {
 		status = "planned"
@@ -394,7 +394,7 @@ func printProvingRunResult(stdout io.Writer, result workspace.ProvingSandboxRunR
 	return nil
 }
 
-func printProvingValidationResult(stdout io.Writer, result workspace.ProvingValidationResult) error {
+func printProvingValidationResult(stdout io.Writer, result core.ProvingValidationResult) error {
 	lines := []string{
 		fmt.Sprintf("proving_validation: %t", result.Passed),
 		fmt.Sprintf("objective_id: %s", result.Objective.ID),
@@ -419,7 +419,7 @@ func printProvingValidationResult(stdout io.Writer, result workspace.ProvingVali
 	return nil
 }
 
-func formatHarnessCommand(command workspace.HarnessCommand) string {
+func formatHarnessCommand(command core.HarnessCommand) string {
 	parts := append([]string{command.Program}, command.Args...)
 
 	return strings.Join(parts, " ")
@@ -427,12 +427,12 @@ func formatHarnessCommand(command workspace.HarnessCommand) string {
 
 func printRuntimeValidateResult(
 	stdout io.Writer,
-	result workspace.RuntimeValidationResult,
+	result core.RuntimeValidationResult,
 	dryRun bool,
 ) error {
 	plan := result.Plan
 
-	_, err := fmt.Fprintf(stdout, "runtime: %s\n", displayPath(plan.ProjectDir, workspace.UserPath(plan.ProjectDir, "runtime")))
+	_, err := fmt.Fprintf(stdout, "runtime: %s\n", displayPath(plan.ProjectDir, core.UserPath(plan.ProjectDir, "runtime")))
 	if err != nil {
 		return fmt.Errorf("write runtime result: %w", err)
 	}
@@ -469,7 +469,7 @@ func printRuntimeValidateResult(
 func printRuntimeValidationChecks(
 	stdout io.Writer,
 	projectDir string,
-	checks []workspace.RuntimeValidationCheck,
+	checks []core.RuntimeValidationCheck,
 ) error {
 	_, err := fmt.Fprintln(stdout, "checks:")
 	if err != nil {
@@ -501,7 +501,7 @@ func printRuntimeValidationChecks(
 	return nil
 }
 
-func printRuntimeInitResult(stdout io.Writer, result workspace.RuntimeInitResult) error {
+func printRuntimeInitResult(stdout io.Writer, result core.RuntimeInitResult) error {
 	_, err := fmt.Fprintf(stdout, "runtime: %s\n", result.Root)
 	if err != nil {
 		return fmt.Errorf("write runtime result: %w", err)

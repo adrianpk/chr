@@ -43,7 +43,7 @@ Ticket execution uses Docker as the sandbox boundary.
 
 The host-side `chc` process resolves the project, selects the ticket, plans the
 runtime, composes context, writes artifacts, and invokes Docker. The container
-runs Codex against the mounted workspace.
+runs Codex against the mounted core.
 
 The container does not own context selection. It receives explicit artifacts and
 paths.

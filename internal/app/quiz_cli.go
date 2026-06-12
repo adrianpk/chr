@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newQuizCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -114,7 +114,7 @@ func quizStartFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "quiz mode: deep or fast",
-			Value: string(workspace.QuizModeDeep),
+			Value: string(core.QuizModeDeep),
 		},
 	)
 }
@@ -215,7 +215,7 @@ func runQuizStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 		return fmt.Errorf("quiz start does not accept positional arguments")
 	}
 
-	mode := workspace.QuizMode(cmd.String("mode"))
+	mode := core.QuizMode(cmd.String("mode"))
 	if !mode.Valid() {
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
@@ -328,7 +328,7 @@ func runQuizMode(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 		return fmt.Errorf("quiz mode requires exactly one mode argument")
 	}
 
-	mode := workspace.QuizMode(cmd.Args().First())
+	mode := core.QuizMode(cmd.Args().First())
 	if !mode.Valid() {
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
@@ -346,8 +346,8 @@ func runQuizMode(ctx context.Context, cmd *cli.Command, stdout io.Writer) error 
 	return printQuizOperationResult(stdout, result)
 }
 
-func workspaceScopeFromCommand(cmd *cli.Command) workspace.QuizScope {
-	return workspace.QuizScope{CaseSlug: cmd.String("use-case")}
+func workspaceScopeFromCommand(cmd *cli.Command) core.QuizScope {
+	return core.QuizScope{CaseSlug: cmd.String("use-case")}
 }
 
 func printQuizOperationResult(stdout io.Writer, result QuizOperationResult) error {

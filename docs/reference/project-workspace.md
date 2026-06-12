@@ -283,6 +283,6 @@ run `runtime.validation_command`.
 
 ## Go Package Boundary
 
-Project workspace behavior lives in the core `internal/workspace` package.
+Project workspace behavior lives in the core `internal/core` package.
 
 The CLI entrypoint under `cmd/chc` wires commands and delegates workspace behavior to `chc.Workspace`.

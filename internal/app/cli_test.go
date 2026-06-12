@@ -20,7 +20,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
@@ -115,7 +115,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message: "Acceptance feature generated.",
-		Status:  workspace.AcceptanceFeatureStatusGenerated,
+		Status:  core.AcceptanceFeatureStatusGenerated,
 		Feature: ".chc/user/acceptance/blog.feature",
 	})
 	if err != nil {
@@ -139,7 +139,7 @@ func TestAcceptanceFeatureGenerateOutputNeedsMoreInfo(t *testing.T) {
 
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message:         "Acceptance feature needs more information.",
-		Status:          workspace.AcceptanceFeatureStatusNeedsMoreInfo,
+		Status:          core.AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "Missing observable failure path.",
 	})
 	if err != nil {
@@ -162,7 +162,7 @@ func TestAcceptanceFeatureGenerateOutputNotApplicable(t *testing.T) {
 
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message:         "Acceptance feature not applicable.",
-		Status:          workspace.AcceptanceFeatureStatusNotApplicable,
+		Status:          core.AcceptanceFeatureStatusNotApplicable,
 		RejectionReason: "The topic is not observable behavior.",
 	})
 	if err != nil {
@@ -251,7 +251,7 @@ func TestGateDevMainWritesReportsWhenValidationPasses(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != workspace.GateReportStatusPassed {
+	if report.Status != core.GateReportStatusPassed {
 		t.Fatalf("Status = %q, want passed", report.Status)
 	}
 
@@ -305,7 +305,7 @@ func TestFailure(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != workspace.GateReportStatusFailed {
+	if report.Status != core.GateReportStatusFailed {
 		t.Fatalf("Status = %q, want failed", report.Status)
 	}
 
@@ -340,7 +340,7 @@ func TestGateDevMainWritesReportsWhenRefResolutionFails(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != workspace.GateReportStatusFailed {
+	if report.Status != core.GateReportStatusFailed {
 		t.Fatalf("Status = %q, want failed", report.Status)
 	}
 
@@ -359,7 +359,7 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(workspace.DirectoryName, workspace.UserDirectoryName, "runtime", "runs", "CHC-1", "exec-1", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHC-1", "exec-1", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -393,7 +393,7 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != workspace.GateReportStatusFailed {
+	if report.Status != core.GateReportStatusFailed {
 		t.Fatalf("Status = %q, want failed", report.Status)
 	}
 
@@ -421,7 +421,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(workspace.DirectoryName, workspace.UserDirectoryName, "runtime", "runs", "CHC-1", "exec-1", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHC-1", "exec-1", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -451,7 +451,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	}
 
 	report := readOnlyGateCLIJSONReport(t, projectDir)
-	if report.Status != workspace.GateReportStatusPassed {
+	if report.Status != core.GateReportStatusPassed {
 		t.Fatalf("Status = %q, want passed", report.Status)
 	}
 }
@@ -677,7 +677,7 @@ func TestInitRejectsFileTarget(t *testing.T) {
 
 func TestMetadataProjectSetSavesProjectMetadata(t *testing.T) {
 	projectDir := t.TempDir()
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspace.DirectoryName, ".keep"), "")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, ".keep"), "")
 
 	var stdout bytes.Buffer
 
@@ -698,7 +698,7 @@ func TestMetadataProjectSetSavesProjectMetadata(t *testing.T) {
 		t.Fatalf("metadata project set returned error: %v", err)
 	}
 
-	metadata, err := workspace.NewProjectMetadataService(projectDir).Load()
+	metadata, err := core.NewProjectMetadataService(projectDir).Load()
 	if err != nil {
 		t.Fatalf("Load returned error: %v", err)
 	}
@@ -732,8 +732,8 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 		t.Fatalf("dump new returned error: %v", err)
 	}
 
-	dumpPath := filepath.ToSlash(filepath.Join(workspace.DirectoryName, workspace.UserDirectoryName, "dumps", "cli-dump.md"))
-	rawDumpPath := filepath.ToSlash(filepath.Join(workspace.DirectoryName, workspace.UserDirectoryName, "dumps", "cli-dump-raw.md"))
+	dumpPath := filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "dumps", "cli-dump.md"))
+	rawDumpPath := filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "dumps", "cli-dump-raw.md"))
 
 	if !strings.Contains(stdout.String(), "Created dump "+dumpPath+".") {
 		t.Fatalf("dump new stdout = %q, want curated dump path", stdout.String())
@@ -775,7 +775,7 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 
 func TestMetadataCaseSetCreatesUseCaseMetadata(t *testing.T) {
 	projectDir := t.TempDir()
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspace.DirectoryName, ".keep"), "")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, ".keep"), "")
 
 	var stdout bytes.Buffer
 
@@ -797,7 +797,7 @@ func TestMetadataCaseSetCreatesUseCaseMetadata(t *testing.T) {
 		t.Fatalf("metadata case set returned error: %v", err)
 	}
 
-	metadata, err := workspace.NewCaseMetadataService(projectDir).LoadPath(workspace.CaseMetadataPath(projectDir, "blog"))
+	metadata, err := core.NewCaseMetadataService(projectDir).LoadPath(core.CaseMetadataPath(projectDir, "blog"))
 	if err != nil {
 		t.Fatalf("LoadPath returned error: %v", err)
 	}
@@ -880,8 +880,8 @@ func TestDaemonStatusPrintsStoredRunningState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt.Add(time.Minute)
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:        workspace.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:        core.DaemonStatusRunning,
 		PID:           1234,
 		StartedAt:     &startedAt,
 		HeartbeatAt:   &heartbeatAt,
@@ -922,8 +922,8 @@ func TestDaemonStatusPrintsStoredStoppingState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	stopRequestedAt := startedAt.Add(time.Minute)
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:          workspace.DaemonStatusStopping,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:          core.DaemonStatusStopping,
 		PID:             1234,
 		StartedAt:       &startedAt,
 		StopRequestedAt: &stopRequestedAt,
@@ -958,8 +958,8 @@ func TestDaemonStatusPrintsStoredStaleState(t *testing.T) {
 	devRoot := t.TempDir()
 	updatedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:        workspace.DaemonStatusStale,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:        core.DaemonStatusStale,
 		PID:           1234,
 		FailureReason: "missing process",
 		UpdatedAt:     updatedAt,
@@ -994,8 +994,8 @@ func TestDaemonStatusRecoversStaleRunningState(t *testing.T) {
 	startedAt := time.Now().UTC().Add(-10 * time.Minute)
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:      workspace.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:      core.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -1026,7 +1026,7 @@ func TestDaemonStatusRecoversStaleRunningState(t *testing.T) {
 	}
 
 	state := getDaemonState(t, devRoot)
-	if state.Status != workspace.DaemonStatusStale {
+	if state.Status != core.DaemonStatusStale {
 		t.Fatalf("daemon state = %#v, want stale", state)
 	}
 }
@@ -1068,8 +1068,8 @@ func TestDaemonStartDryRunRejectsFreshRunningState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:      workspace.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:      core.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -1413,8 +1413,8 @@ func TestDaemonStartDryRunAllowsStaleRunningState(t *testing.T) {
 	startedAt := time.Now().UTC().Add(-10 * time.Minute)
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:      workspace.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:      core.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -1518,7 +1518,7 @@ func TestDaemonStartRunsForegroundLoop(t *testing.T) {
 	}
 
 	state := getDaemonState(t, devRoot)
-	if state.Status != workspace.DaemonStatusStopped {
+	if state.Status != core.DaemonStatusStopped {
 		t.Fatalf("daemon state = %#v, want stopped", state)
 	}
 }
@@ -1546,8 +1546,8 @@ func TestDaemonStartRejectsFreshRunningState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:      workspace.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:      core.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -1574,8 +1574,8 @@ func TestDaemonStopRequestsRunningDaemonStop(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:      workspace.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:      core.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -1600,7 +1600,7 @@ func TestDaemonStopRequestsRunningDaemonStop(t *testing.T) {
 	}
 
 	state := getDaemonState(t, devRoot)
-	if state.Status != workspace.DaemonStatusStopping || state.StopRequestedAt == nil {
+	if state.Status != core.DaemonStatusStopping || state.StopRequestedAt == nil {
 		t.Fatalf("daemon state = %#v, want stopping with stop request", state)
 	}
 }
@@ -1631,8 +1631,8 @@ func TestDaemonStopRequestedHelperReadsStopRequest(t *testing.T) {
 	startedAt := time.Now().UTC()
 	stopRequestedAt := startedAt.Add(time.Minute)
 
-	upsertDaemonState(t, devRoot, workspace.DaemonState{
-		Status:          workspace.DaemonStatusStopping,
+	upsertDaemonState(t, devRoot, core.DaemonState{
+		Status:          core.DaemonStatusStopping,
 		PID:             1234,
 		StartedAt:       &startedAt,
 		StopRequestedAt: &stopRequestedAt,
@@ -2118,7 +2118,7 @@ func TestNotifyTelegramTestSendsAndRecordsAudit(t *testing.T) {
 		t.Fatalf("len(records) = %d, want 1", len(records))
 	}
 
-	if records[0].Event.Status != workspace.NotificationStatusDelivered {
+	if records[0].Event.Status != core.NotificationStatusDelivered {
 		t.Fatalf("notification status = %q, want delivered", records[0].Event.Status)
 	}
 }
@@ -2177,7 +2177,7 @@ func TestNotifyTelegramPollPersistsFixtureRecords(t *testing.T) {
 		t.Fatalf("remote command records = %d, want 2", len(records))
 	}
 
-	if records[0].Status != workspace.RemoteCommandRecordAccepted || records[1].Status != workspace.RemoteCommandRecordRejected {
+	if records[0].Status != core.RemoteCommandRecordAccepted || records[1].Status != core.RemoteCommandRecordRejected {
 		t.Fatalf("records = %#v, want accepted then rejected", records)
 	}
 }
@@ -2232,7 +2232,7 @@ func installTestTelegramSender(t *testing.T) *testTelegramPayload {
 	t.Cleanup(server.Close)
 
 	previousSender := notifyTelegramSender
-	notifyTelegramSender = workspace.TelegramSender{
+	notifyTelegramSender = core.TelegramSender{
 		Client:  server.Client(),
 		BaseURL: server.URL,
 	}
@@ -2352,22 +2352,22 @@ func TestTicketBoardPrintsBoardColumns(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Backlog.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Backlog.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Backlog work",
 		Synopsis:  "Prepare backlog work.",
-		Status:    workspace.TicketStatusBacklog,
+		Status:    core.TicketStatusBacklog,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "task",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Review.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Review.md", core.Ticket{
 		Key:       "CHC-2",
 		Title:     "Review work",
 		Synopsis:  "Review implemented work.",
-		Status:    workspace.TicketStatusReadyForReview,
+		Status:    core.TicketStatusReadyForReview,
 		Priority:  "high",
 		Severity:  "normal",
 		Type:      "feature",
@@ -2468,8 +2468,8 @@ func writeTicketLoopDryRunTickets(t *testing.T, projectDir string) {
 func testLoopTicket(
 	key, title, status, priority, severity, ticketType, useCase, projectArea string,
 	tags []string,
-) workspace.Ticket {
-	return workspace.Ticket{
+) core.Ticket {
+	return core.Ticket{
 		Key:         key,
 		Title:       title,
 		Status:      status,
@@ -2484,7 +2484,7 @@ func testLoopTicket(
 	}
 }
 
-func withLoopTicketCreatedAt(ticket workspace.Ticket, createdAt time.Time) workspace.Ticket {
+func withLoopTicketCreatedAt(ticket core.Ticket, createdAt time.Time) core.Ticket {
 	ticket.CreatedAt = createdAt
 	ticket.UpdatedAt = createdAt
 
@@ -2545,7 +2545,7 @@ func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 		t.Fatalf("loop runs = %d, want 1", len(loopRuns))
 	}
 
-	if loopRuns[0].Status != workspace.LoopRunStatusSucceeded || loopRuns[0].ProcessedCount != 1 {
+	if loopRuns[0].Status != core.LoopRunStatusSucceeded || loopRuns[0].ProcessedCount != 1 {
 		t.Fatalf("loop run = %#v, want succeeded with one processed ticket", loopRuns[0])
 	}
 }
@@ -2896,7 +2896,7 @@ func TestTicketLoopDispatchesConfiguredFinishedNotification(t *testing.T) {
 	}
 
 	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
-	assertNotificationEvent(t, records, 0, workspace.NotificationEventLoopFinished, workspace.NotificationStatusDelivered)
+	assertNotificationEvent(t, records, 0, core.NotificationEventLoopFinished, core.NotificationStatusDelivered)
 
 	if gotPayload.ChatID != "123456" {
 		t.Fatalf("telegram chat id = %q, want configured chat id", gotPayload.ChatID)
@@ -2963,7 +2963,7 @@ func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 		t.Fatalf("loop runs = %d, want 1", len(loopRuns))
 	}
 
-	if loopRuns[0].Status != workspace.LoopRunStatusFailed || loopRuns[0].FailedCount != 1 {
+	if loopRuns[0].Status != core.LoopRunStatusFailed || loopRuns[0].FailedCount != 1 {
 		t.Fatalf("loop run = %#v, want failed with one failed ticket", loopRuns[0])
 	}
 }
@@ -2993,15 +2993,15 @@ func TestTicketLoopRecordsFailedNotification(t *testing.T) {
 	}
 
 	notificationRecords := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
-	assertNotificationEvent(t, notificationRecords, 0, workspace.NotificationEventLoopFailed, workspace.NotificationStatusSkipped)
+	assertNotificationEvent(t, notificationRecords, 0, core.NotificationEventLoopFailed, core.NotificationStatusSkipped)
 }
 
 func TestTicketLoopRecordsBlockedNotifications(t *testing.T) {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
-	record := workspace.LoopRunRecord{
+	record := core.LoopRunRecord{
 		ID:             "loop-1",
 		ProjectID:      "project-1",
-		Status:         workspace.LoopRunStatusBlocked,
+		Status:         core.LoopRunStatusBlocked,
 		EligibleCount:  1,
 		ProcessedCount: 1,
 		BlockedCount:   1,
@@ -3014,7 +3014,7 @@ func TestTicketLoopRecordsBlockedNotifications(t *testing.T) {
 		t.Fatal("loopRunNotificationEvent returned false")
 	}
 
-	if event.Type != workspace.NotificationEventLoopBlocked {
+	if event.Type != core.NotificationEventLoopBlocked {
 		t.Fatalf("event type = %q, want loop_blocked", event.Type)
 	}
 }
@@ -3024,7 +3024,7 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:         "CHC-1",
 		Title:       "Do something",
 		Status:      "open",
@@ -3034,7 +3034,7 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 		UseCase:     "onboarding",
 		ProjectArea: "uxui",
 		Branch:      "feat/slice-1-ticket-review-metadata-contract",
-		ReviewRefs: []workspace.TicketReviewRef{
+		ReviewRefs: []core.TicketReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -3073,8 +3073,8 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	}
 }
 
-func testTicketShowReviewTicket() workspace.Ticket {
-	return workspace.Ticket{
+func testTicketShowReviewTicket() core.Ticket {
+	return core.Ticket{
 		Key:         "CHC-1",
 		Title:       "Do something",
 		Status:      "open",
@@ -3084,7 +3084,7 @@ func testTicketShowReviewTicket() workspace.Ticket {
 		UseCase:     "onboarding",
 		ProjectArea: "uxui",
 		Branch:      "feat/slice-1-ticket-review-metadata-contract",
-		ReviewRefs: []workspace.TicketReviewRef{
+		ReviewRefs: []core.TicketReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -3292,10 +3292,10 @@ func TestTicketStartPrintsWorkerFailure(t *testing.T) {
 	}
 }
 
-func assertTicketStartSucceededExecution(t *testing.T, record workspace.ExecutionRecord, projectDir string) {
+func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionRecord, projectDir string) {
 	t.Helper()
 
-	if record.Status != workspace.ExecutionStatusSucceeded {
+	if record.Status != core.ExecutionStatusSucceeded {
 		t.Fatalf("Status = %q, want succeeded", record.Status)
 	}
 
@@ -3375,8 +3375,8 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, workspace.ExecutionStatusSucceeded, "")
-	writeApplyResultFile(t, record, workspace.ExecutionResultStatusSucceeded, "ready for review")
+	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
 
 	var stdout bytes.Buffer
 
@@ -3407,10 +3407,10 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	}
 }
 
-func testTicketWithReviewRef() workspace.Ticket {
+func testTicketWithReviewRef() core.Ticket {
 	ticket := testTicket()
 	ticket.Branch = "feat/slice-2-pr-reference-workflow"
-	ticket.ReviewRefs = []workspace.TicketReviewRef{
+	ticket.ReviewRefs = []core.TicketReviewRef{
 		{
 			Type:     "pull_request",
 			Provider: "forgejo",
@@ -3423,18 +3423,18 @@ func testTicketWithReviewRef() workspace.Ticket {
 	return ticket
 }
 
-func testTicketReadyForReview() workspace.Ticket {
+func testTicketReadyForReview() core.Ticket {
 	ticket := testTicketWithReviewRef()
-	ticket.Status = workspace.TicketStatusReadyForReview
+	ticket.Status = core.TicketStatusReadyForReview
 
 	return ticket
 }
 
-func testTicketReadyForMerge() workspace.Ticket {
+func testTicketReadyForMerge() core.Ticket {
 	ticket := testTicketWithReviewRef()
-	ticket.Status = workspace.TicketStatusReadyForMerge
-	ticket.ReviewState = workspace.TicketReviewCommandResultPass
-	ticket.ReviewResult = workspace.TicketReviewCommandResultPass
+	ticket.Status = core.TicketStatusReadyForMerge
+	ticket.ReviewState = core.TicketReviewCommandResultPass
+	ticket.ReviewResult = core.TicketReviewCommandResultPass
 	ticket.ReviewRound = 1
 
 	return ticket
@@ -3458,7 +3458,7 @@ func setupCLIReviewRemoteEvidence(
 	return runner, replaceReviewRemoteCommandRunner(runner)
 }
 
-func assertTicketApplyResultOutput(t *testing.T, stdout string, record workspace.ExecutionRecord) {
+func assertTicketApplyResultOutput(t *testing.T, stdout string, record core.ExecutionRecord) {
 	t.Helper()
 
 	for _, want := range []string{
@@ -3501,8 +3501,8 @@ func TestTicketApplyResultRecordsBlockedNotification(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, workspace.ExecutionStatusFailed, "codex failed")
-	writeApplyResultFile(t, record, workspace.ExecutionResultStatusFailed, "blocked by compile error")
+	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusFailed, "codex failed")
+	writeApplyResultFile(t, record, core.ExecutionResultStatusFailed, "blocked by compile error")
 
 	err := run(t.Context(), []string{
 		"ticket",
@@ -3518,7 +3518,7 @@ func TestTicketApplyResultRecordsBlockedNotification(t *testing.T) {
 	}
 
 	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
-	assertNotificationEvent(t, records, 0, workspace.NotificationEventTicketBlocked, workspace.NotificationStatusSkipped)
+	assertNotificationEvent(t, records, 0, core.NotificationEventTicketBlocked, core.NotificationStatusSkipped)
 
 	if records[0].Event.References.ExecutionID != record.ID {
 		t.Fatalf("execution reference = %q, want %q", records[0].Event.References.ExecutionID, record.ID)
@@ -3532,8 +3532,8 @@ func TestTicketApplyResultDryRunDoesNotMutateTicket(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, workspace.ExecutionStatusSucceeded, "")
-	writeApplyResultFile(t, record, workspace.ExecutionResultStatusSucceeded, "ready for review")
+	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
 
 	before := readFile(t, ticketPath)
 
@@ -3778,7 +3778,7 @@ func TestTicketShowRejectsMissingTicket(t *testing.T) {
 func TestTicketCommentAppendsComment(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -3831,7 +3831,7 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 
 	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Do-something.md")
 
-	content, err := workspace.NewTicketRenderer().RenderTicket(workspace.Ticket{
+	content, err := core.NewTicketRenderer().RenderTicket(core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -3852,7 +3852,7 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 		t.Fatalf("write ticket: %v", err)
 	}
 
-	indexTicket(t, devRoot, projectDir, workspace.IndexedTicket{
+	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
 		Key:          "CHC-1",
 		Title:        "Do something",
 		Status:       "open",
@@ -3887,7 +3887,7 @@ func TestTicketCommentRejectsMissingTicket(t *testing.T) {
 func TestTicketStatusUpdatesTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -3969,7 +3969,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHC-1",
-		workspace.TicketStatusReadyForReview,
+		core.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
@@ -4553,7 +4553,7 @@ func TestTicketStatusRejectsReadyForReviewWithoutReviewRef(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHC-1",
-		workspace.TicketStatusReadyForReview,
+		core.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")
@@ -4584,14 +4584,14 @@ func TestTicketStatusRejectsMissingTicket(t *testing.T) {
 func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
-	indexTicket(t, devRoot, projectDir, workspace.IndexedTicket{
+	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
 		Key:          "CHC-9",
 		Title:        "Old",
 		Status:       "open",
@@ -4676,7 +4676,7 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 func TestIndexStatusReportsCleanIndex(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -4725,7 +4725,7 @@ func TestIndexStatusReportsCleanIndex(t *testing.T) {
 func TestIndexStatusReportsMissingTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -4760,7 +4760,7 @@ func TestIndexStatusReportsMissingTickets(t *testing.T) {
 func TestIndexStatusReportsStaleTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -4780,7 +4780,7 @@ func TestIndexStatusReportsStaleTickets(t *testing.T) {
 		t.Fatalf("index rebuild returned error: %v", err)
 	}
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something else",
 		Status:    "open",
@@ -5215,7 +5215,7 @@ func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
 		"execution: exec-1 ticket: CHC-1 status: succeeded artifact_status: missing_artifacts",
 		"artifact: exec-1 name: run_dir exists: true path: " + record.Artifacts.RunDir,
 		"artifact: exec-1 name: result exists: false path: " + record.Artifacts.ResultPath,
-		"artifact: exec-1 name: report exists: false path: " + workspace.ExecutionReportPath(record),
+		"artifact: exec-1 name: report exists: false path: " + core.ExecutionReportPath(record),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -5408,7 +5408,7 @@ func TestProjectAddRegistersProject(t *testing.T) {
 		t.Fatalf("stdout = %q, want registered project", stdout.String())
 	}
 
-	assertPathExists(t, filepath.Join(devRoot, "data", "chc", "workspace.db"))
+	assertPathExists(t, filepath.Join(devRoot, "data", "chc", "core.db"))
 }
 
 func TestProjectAddRejectsProjectWithoutWorkspace(t *testing.T) {
@@ -5690,10 +5690,10 @@ func selectProject(t *testing.T, devRoot, selector string) {
 	}
 }
 
-func createCLIExecutionRecord(t *testing.T, devRoot string, record workspace.ExecutionRecord) {
+func createCLIExecutionRecord(t *testing.T, devRoot string, record core.ExecutionRecord) {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -5701,7 +5701,7 @@ func createCLIExecutionRecord(t *testing.T, devRoot string, record workspace.Exe
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := workspace.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	repository, err := core.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -5719,23 +5719,23 @@ func createCLIExecutionRecord(t *testing.T, devRoot string, record workspace.Exe
 	}
 }
 
-func cliExecutionRecord(projectDir, runDir string) workspace.ExecutionRecord {
+func cliExecutionRecord(projectDir, runDir string) core.ExecutionRecord {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
 	finishedAt := now.Add(time.Minute)
 
-	return workspace.ExecutionRecord{
+	return core.ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  projectID(projectDir),
 		TicketKey:  "CHC-1",
 		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
-		Status:     workspace.ExecutionStatusSucceeded,
-		Runtime: workspace.ExecutionRuntimeRef{
+		Status:     core.ExecutionStatusSucceeded,
+		Runtime: core.ExecutionRuntimeRef{
 			Image:             "chc-agent-runtime:local",
 			DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Artifacts: workspace.ExecutionArtifacts{
+		Artifacts: core.ExecutionArtifacts{
 			RunDir:         runDir,
 			ResultPath:     filepath.Join(runDir, "result.json"),
 			LogPath:        filepath.Join(runDir, "runtime.log"),
@@ -5748,7 +5748,7 @@ func cliExecutionRecord(projectDir, runDir string) workspace.ExecutionRecord {
 	}
 }
 
-func writeCLIExecutionArtifacts(t *testing.T, record workspace.ExecutionRecord) {
+func writeCLIExecutionArtifacts(t *testing.T, record core.ExecutionRecord) {
 	t.Helper()
 
 	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
@@ -5760,7 +5760,7 @@ func writeCLIExecutionArtifacts(t *testing.T, record workspace.ExecutionRecord) 
 		record.Artifacts.ResultPath,
 		record.Artifacts.LogPath,
 		record.Artifacts.ValidationPath,
-		workspace.ExecutionReportPath(record),
+		core.ExecutionReportPath(record),
 	} {
 		err = os.WriteFile(path, []byte("artifact\n"), 0o644)
 		if err != nil {
@@ -5769,7 +5769,7 @@ func writeCLIExecutionArtifacts(t *testing.T, record workspace.ExecutionRecord) 
 	}
 }
 
-func upsertDaemonState(t *testing.T, devRoot string, state workspace.DaemonState) {
+func upsertDaemonState(t *testing.T, devRoot string, state core.DaemonState) {
 	t.Helper()
 
 	repository := newDaemonStateRepositoryForTest(t, devRoot)
@@ -5780,7 +5780,7 @@ func upsertDaemonState(t *testing.T, devRoot string, state workspace.DaemonState
 	}
 }
 
-func getDaemonState(t *testing.T, devRoot string) workspace.DaemonState {
+func getDaemonState(t *testing.T, devRoot string) core.DaemonState {
 	t.Helper()
 
 	repository := newDaemonStateRepositoryForTest(t, devRoot)
@@ -5793,10 +5793,10 @@ func getDaemonState(t *testing.T, devRoot string) workspace.DaemonState {
 	return state
 }
 
-func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) workspace.DaemonStateRepository {
+func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) core.DaemonStateRepository {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -5804,7 +5804,7 @@ func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) workspace.Dae
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := workspace.NewDaemonStateRepository(t.Context(), env, testAssetsFS())
+	repository, err := core.NewDaemonStateRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewDaemonStateRepository returned error: %v", err)
 	}
@@ -5819,10 +5819,10 @@ func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) workspace.Dae
 	return repository
 }
 
-func indexTicket(t *testing.T, devRoot, projectDir string, ticket workspace.IndexedTicket) {
+func indexTicket(t *testing.T, devRoot, projectDir string, ticket core.IndexedTicket) {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -5830,7 +5830,7 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket workspace.Inde
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := workspace.NewTicketIndex(t.Context(), env, testAssetsFS())
+	index, err := core.NewTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}
@@ -5856,10 +5856,10 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket workspace.Inde
 	}
 }
 
-func listProjectTickets(t *testing.T, devRoot, projectDir string) []workspace.IndexedTicket {
+func listProjectTickets(t *testing.T, devRoot, projectDir string) []core.IndexedTicket {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -5867,7 +5867,7 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []workspace.In
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := workspace.NewTicketIndex(t.Context(), env, testAssetsFS())
+	index, err := core.NewTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}
@@ -5887,10 +5887,10 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []workspace.In
 	return tickets
 }
 
-func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []workspace.ExecutionRecord {
+func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []core.ExecutionRecord {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -5898,7 +5898,7 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := workspace.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	repository, err := core.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -5918,10 +5918,10 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 	return records
 }
 
-func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []workspace.LoopRunRecord {
+func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []core.LoopRunRecord {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -5929,7 +5929,7 @@ func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []workspace.Lo
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := workspace.NewLoopRunRepository(t.Context(), env, testAssetsFS())
+	repository, err := core.NewLoopRunRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewLoopRunRepository returned error: %v", err)
 	}
@@ -5953,12 +5953,12 @@ func createApplyResultExecution(
 	t *testing.T,
 	devRoot string,
 	projectDir string,
-	status workspace.ExecutionStatus,
+	status core.ExecutionStatus,
 	failureReason string,
-) workspace.ExecutionRecord {
+) core.ExecutionRecord {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -5966,7 +5966,7 @@ func createApplyResultExecution(
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := workspace.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	repository, err := core.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -5990,26 +5990,26 @@ func createApplyResultExecution(
 
 func testApplyResultExecutionRecord(
 	projectDir string,
-	status workspace.ExecutionStatus,
+	status core.ExecutionStatus,
 	failureReason string,
-) workspace.ExecutionRecord {
+) core.ExecutionRecord {
 	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-apply")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
-	return workspace.ExecutionRecord{
+	return core.ExecutionRecord{
 		ID:            "exec-apply",
 		ProjectID:     projectID(projectDir),
 		TicketKey:     "CHC-1",
 		TicketPath:    filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Do-something.md"),
 		Status:        status,
 		FailureReason: failureReason,
-		Runtime: workspace.ExecutionRuntimeRef{
+		Runtime: core.ExecutionRuntimeRef{
 			Image:             "chc-runtime:latest",
 			DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Artifacts: workspace.ExecutionArtifacts{
+		Artifacts: core.ExecutionArtifacts{
 			RunDir:         runDir,
 			ResultPath:     filepath.Join(runDir, "result.json"),
 			LogPath:        filepath.Join(runDir, "runtime.log"),
@@ -6022,8 +6022,8 @@ func testApplyResultExecutionRecord(
 
 func writeApplyResultFile(
 	t *testing.T,
-	record workspace.ExecutionRecord,
-	status workspace.ExecutionResultStatus,
+	record core.ExecutionRecord,
+	status core.ExecutionResultStatus,
 	summary string,
 ) {
 	t.Helper()
@@ -6058,8 +6058,8 @@ func readFile(t *testing.T, path string) string {
 	return string(content)
 }
 
-func testTicket() workspace.Ticket {
-	return workspace.Ticket{
+func testTicket() core.Ticket {
+	return core.Ticket{
 		Key:         "CHC-1",
 		Title:       "Do something",
 		Status:      "open",
@@ -6077,12 +6077,12 @@ type fakeTicketStartHarnessExecutor struct {
 	commands       []string
 	err            error
 	failWorker     bool
-	resultStatuses map[string]workspace.ExecutionResultStatus
+	resultStatuses map[string]core.ExecutionResultStatus
 }
 
 func (e *fakeTicketStartHarnessExecutor) Run(
 	_ context.Context,
-	command workspace.HarnessCommand,
+	command core.HarnessCommand,
 	stdout io.Writer,
 	stderr io.Writer,
 ) error {
@@ -6100,7 +6100,7 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 	}
 
 	if e.failWorker && isFakeTicketStartWorkerCommand(command) {
-		return workspace.NewExecutionFailure(workspace.ExecutionFailureHarness, fmt.Errorf("codex failed"))
+		return core.NewExecutionFailure(core.ExecutionFailureHarness, fmt.Errorf("codex failed"))
 	}
 
 	err = e.writeFakeTicketStartResult(command)
@@ -6111,11 +6111,11 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 	return e.err
 }
 
-func isFakeTicketStartWorkerCommand(command workspace.HarnessCommand) bool {
+func isFakeTicketStartWorkerCommand(command core.HarnessCommand) bool {
 	return command.Args[0] == "run" && harnessEnvValue(command, "CHC_RESULT_PATH") != ""
 }
 
-func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command workspace.HarnessCommand) error {
+func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command core.HarnessCommand) error {
 	if command.Args[0] != "run" {
 		return nil
 	}
@@ -6125,7 +6125,7 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command work
 		return nil
 	}
 
-	status := workspace.ExecutionResultStatusSucceeded
+	status := core.ExecutionResultStatusSucceeded
 	ticketKey := harnessEnvValue(command, "CHC_TICKET_KEY")
 
 	configured, ok := e.resultStatuses[ticketKey]
@@ -6140,7 +6140,7 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command work
 	return os.WriteFile(containerPathToProjectPath(command, resultPath), []byte(content), 0o644)
 }
 
-func harnessEnvValue(command workspace.HarnessCommand, name string) string {
+func harnessEnvValue(command core.HarnessCommand, name string) string {
 	prefix := name + "="
 	for _, arg := range command.Args {
 		if strings.HasPrefix(arg, prefix) {
@@ -6151,7 +6151,7 @@ func harnessEnvValue(command workspace.HarnessCommand, name string) string {
 	return ""
 }
 
-func containerPathToProjectPath(command workspace.HarnessCommand, path string) string {
+func containerPathToProjectPath(command core.HarnessCommand, path string) string {
 	for index, arg := range command.Args {
 		if arg == "--volume" && index+1 < len(command.Args) {
 			parts := strings.SplitN(command.Args[index+1], ":", 2)
@@ -6169,7 +6169,7 @@ func installFakeTicketStartHarnessExecutor(t *testing.T, err error) *fakeTicketS
 
 	executor := &fakeTicketStartHarnessExecutor{err: err}
 	previous := newTicketStartHarnessExecutor
-	newTicketStartHarnessExecutor = func() workspace.HarnessExecutor {
+	newTicketStartHarnessExecutor = func() core.HarnessExecutor {
 		return executor
 	}
 
@@ -6180,12 +6180,12 @@ func installFakeTicketStartHarnessExecutor(t *testing.T, err error) *fakeTicketS
 	return executor
 }
 
-func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket workspace.Ticket) string {
+func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket core.Ticket) string {
 	t.Helper()
 
 	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", filepath.FromSlash(relativePath))
 
-	content, err := workspace.NewTicketRenderer().RenderTicket(ticket)
+	content, err := core.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
@@ -6307,12 +6307,12 @@ func installFakeAuthoringQuizProvider(t *testing.T) {
 	t.Helper()
 
 	previous := newAuthoringQuizQuestionProvider
-	newAuthoringQuizQuestionProvider = func() workspace.AuthoringQuizQuestionProvider {
-		return &workspace.FakeAuthoringQuizQuestionProvider{
-			Result: workspace.AuthoringQuizGenerationResult{
+	newAuthoringQuizQuestionProvider = func() core.AuthoringQuizQuestionProvider {
+		return &core.FakeAuthoringQuizQuestionProvider{
+			Result: core.AuthoringQuizGenerationResult{
 				Provider: "fake",
-				Strategy: workspace.AuthoringQuizGenerationStrategyDeep,
-				Questions: []workspace.AuthoringQuizQuestion{
+				Strategy: core.AuthoringQuizGenerationStrategyDeep,
+				Questions: []core.AuthoringQuizQuestion{
 					{
 						ID:                    "Q1",
 						Text:                  "Which user workflow should the specification pin down first?",
@@ -6537,10 +6537,10 @@ func listNotificationEventsForTest(
 	t *testing.T,
 	devRoot string,
 	projectID string,
-) []workspace.NotificationAuditRecord {
+) []core.NotificationAuditRecord {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -6548,7 +6548,7 @@ func listNotificationEventsForTest(
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := workspace.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
+	repository, err := core.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewNotificationEventRepository returned error: %v", err)
 	}
@@ -6568,10 +6568,10 @@ func listNotificationEventsForTest(
 	return records
 }
 
-func listRemoteCommandRecordsForTest(t *testing.T, devRoot string) []workspace.RemoteCommandRecord {
+func listRemoteCommandRecordsForTest(t *testing.T, devRoot string) []core.RemoteCommandRecord {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -6579,7 +6579,7 @@ func listRemoteCommandRecordsForTest(t *testing.T, devRoot string) []workspace.R
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := workspace.NewRemoteCommandRecordRepository(t.Context(), env, testAssetsFS())
+	repository, err := core.NewRemoteCommandRecordRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewRemoteCommandRecordRepository returned error: %v", err)
 	}
@@ -6601,10 +6601,10 @@ func listRemoteCommandRecordsForTest(t *testing.T, devRoot string) []workspace.R
 
 func assertNotificationEvent(
 	t *testing.T,
-	records []workspace.NotificationAuditRecord,
+	records []core.NotificationAuditRecord,
 	index int,
-	eventType workspace.NotificationEventType,
-	status workspace.NotificationStatus,
+	eventType core.NotificationEventType,
+	status core.NotificationStatus,
 ) {
 	t.Helper()
 
@@ -6626,10 +6626,10 @@ func assertNotificationEvent(
 	}
 }
 
-func chcTestUserEnvironment(t *testing.T) (workspace.UserEnvironment, error) {
+func chcTestUserEnvironment(t *testing.T) (core.UserEnvironment, error) {
 	t.Helper()
 
-	return workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	return core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: t.TempDir(),
 	})
@@ -6662,7 +6662,7 @@ func newGateCLIGitProject(t *testing.T) string {
 	t.Helper()
 
 	projectDir := t.TempDir()
-	writeGateCLIFile(t, projectDir, filepath.Join(workspace.DirectoryName, ".keep"), "")
+	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, ".keep"), "")
 	runGateCLIGit(t, projectDir, "init")
 
 	return projectDir
@@ -6713,7 +6713,7 @@ func gateCLIGitOutput(t *testing.T, projectDir string, args ...string) string {
 	return strings.TrimSpace(string(output))
 }
 
-func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) workspace.GateReport {
+func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) core.GateReport {
 	t.Helper()
 
 	matches, err := filepath.Glob(filepath.Join(projectDir, ".chc", "user", "reports", "gates", "*.json"))
@@ -6727,7 +6727,7 @@ func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) workspace.GateRe
 
 	content := readFile(t, matches[0])
 
-	var report workspace.GateReport
+	var report core.GateReport
 
 	err = json.Unmarshal([]byte(content), &report)
 	if err != nil {
@@ -6788,7 +6788,7 @@ func (runner fakeCLIReviewProviderDiagnosticRunner) Run(_ context.Context, _ str
 	return runner.runErr
 }
 
-func replaceReviewProviderDiagnosticRunner(runner workspace.ReviewProviderDiagnosticRunner) func() {
+func replaceReviewProviderDiagnosticRunner(runner core.ReviewProviderDiagnosticRunner) func() {
 	previous := reviewProviderDiagnosticRunner
 	reviewProviderDiagnosticRunner = runner
 
@@ -6849,7 +6849,7 @@ func (runner *fakeCLIReviewRemoteRunner) Input(
 	return []byte(`{}`), nil
 }
 
-func replaceReviewRemoteCommandRunner(runner workspace.ReviewRemoteCommandRunner) func() {
+func replaceReviewRemoteCommandRunner(runner core.ReviewRemoteCommandRunner) func() {
 	previous := reviewRemoteCommandRunner
 	reviewRemoteCommandRunner = runner
 

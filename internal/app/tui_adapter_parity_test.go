@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"forge.adrianpk.com/chc/internal/core"
 	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 func TestTUIDumpAdapterUsesDumpServices(t *testing.T) {
@@ -47,7 +47,7 @@ func createDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor) s
 		t.Fatalf("create message = %q, want created dump message", createResult.Message)
 	}
 
-	return filepath.ToSlash(filepath.Join(workspace.DirectoryName, workspace.UserDirectoryName, "dumps", "adapter-notes.md"))
+	return filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "dumps", "adapter-notes.md"))
 }
 
 func editDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor, dumpPath string) {
@@ -97,7 +97,7 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponse("response-2", "question-2", clock()),
 		},
@@ -136,7 +136,7 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 	modeResult, err := executor.ExecuteQuizAction(tui.QuizActionRequest{
 		Action: tui.QuizActionFastMode,
 		Scope:  tui.QuizScope{CaseSlug: "blog"},
-		Mode:   string(workspace.QuizModeFast),
+		Mode:   string(core.QuizModeFast),
 	})
 	if err != nil {
 		t.Fatalf("ExecuteQuizAction mode returned error: %v", err)
@@ -153,9 +153,9 @@ func TestTUISpecAdapterGeneratesAcceptanceFeature(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), workspace.AcceptanceFeatureGeneration{
-				Status: workspace.AcceptanceFeatureStatusGenerated,
+		responses: []core.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
+				Status: core.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
 Feature: Blog publishing
 
@@ -181,7 +181,7 @@ Feature: Blog publishing
 		t.Fatalf("ExecuteSpecAction returned error: %v", err)
 	}
 
-	if result.AcceptanceFeatureStatus != workspace.AcceptanceFeatureStatusGenerated {
+	if result.AcceptanceFeatureStatus != core.AcceptanceFeatureStatusGenerated {
 		t.Fatalf("AcceptanceFeatureStatus = %q, want generated", result.AcceptanceFeatureStatus)
 	}
 

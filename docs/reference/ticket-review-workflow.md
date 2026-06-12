@@ -117,7 +117,7 @@ worker.
 
 ## Serialized Work Selection
 
-Development, review, and merge operations are serialized per workspace.
+Development, review, and merge operations are serialized per core.
 
 Execution paths acquire `.chc/user/runtime/agent-operation.lock` before
 mutating ticket, review, or merge state. A second development, review, or merge

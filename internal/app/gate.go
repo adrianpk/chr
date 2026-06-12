@@ -8,7 +8,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newGateCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -143,7 +143,7 @@ func runGateWoodpeckerInit(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return err
 	}
 
-	result, err := workspace.InitGateWoodpecker(workspace.GateWoodpeckerInitRequest{
+	result, err := core.InitGateWoodpecker(core.GateWoodpeckerInitRequest{
 		ProjectDir: projectContext.ProjectDir,
 		DryRun:     cmd.Bool("dry-run"),
 		Write:      cmd.Bool("write"),
@@ -155,7 +155,7 @@ func runGateWoodpeckerInit(ctx context.Context, cmd *cli.Command, stdout io.Writ
 	return printGateWoodpeckerInitResult(stdout, result)
 }
 
-func printGateWoodpeckerInitResult(stdout io.Writer, result workspace.GateWoodpeckerInitResult) error {
+func printGateWoodpeckerInitResult(stdout io.Writer, result core.GateWoodpeckerInitResult) error {
 	_, err := fmt.Fprintf(stdout, "woodpecker: init\nconfig: %s\naction: %s\nfeedback: %s\nwrote: %t\n\n%s",
 		result.ConfigPath,
 		result.Action,
@@ -169,14 +169,14 @@ func printGateWoodpeckerInitResult(stdout io.Writer, result workspace.GateWoodpe
 
 func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir, baseRef, headRef string) error {
 	createdAt := time.Now().UTC()
-	artifacts := workspace.NewGateReportArtifacts(projectDir, createdAt)
+	artifacts := core.NewGateReportArtifacts(projectDir, createdAt)
 
-	config, err := workspace.LoadGateConfig(projectDir)
+	config, err := core.LoadGateConfig(projectDir)
 	if err != nil {
 		return err
 	}
 
-	evidence, err := workspace.NewGateGitEvidenceService().Collect(ctx, workspace.GateGitEvidenceRequest{
+	evidence, err := core.NewGateGitEvidenceService().Collect(ctx, core.GateGitEvidenceRequest{
 		ProjectDir: projectDir,
 		BaseRef:    baseRef,
 		HeadRef:    headRef,
@@ -185,7 +185,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return writeGateFailedEvidenceReport(ctx, createdAt, baseRef, headRef, artifacts, err)
 	}
 
-	validation, err := workspace.NewGateValidationRunner().Run(ctx, workspace.GateValidationRequest{
+	validation, err := core.NewGateValidationRunner().Run(ctx, core.GateValidationRequest{
 		ProjectDir: projectDir,
 		Command:    config.DevMain.ValidationCommand,
 	})
@@ -193,7 +193,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return writeGateFailedValidationRunReport(ctx, createdAt, evidence, validation, artifacts, err)
 	}
 
-	classification, err := workspace.NewGateEvidenceClassifier().Classify(ctx, workspace.GateEvidenceClassificationRequest{
+	classification, err := core.NewGateEvidenceClassifier().Classify(ctx, core.GateEvidenceClassificationRequest{
 		ProjectDir:    projectDir,
 		Files:         evidence.Files,
 		HighRiskPaths: config.DevMain.HighRiskPaths,
@@ -227,32 +227,32 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 
 func buildGateDevMainReport(
 	createdAt time.Time,
-	evidence workspace.GateGitEvidence,
-	validation workspace.GateValidationResult,
-	classification workspace.GateEvidenceClassification,
-	config workspace.GateDevMainConfig,
-	artifacts workspace.GateReportArtifacts,
-) workspace.GateReport {
+	evidence core.GateGitEvidence,
+	validation core.GateValidationResult,
+	classification core.GateEvidenceClassification,
+	config core.GateDevMainConfig,
+	artifacts core.GateReportArtifacts,
+) core.GateReport {
 	reportClassification := classification
 	if !config.ManualChanges.List {
 		reportClassification.ManualOrExternalChanges = nil
 	}
 
-	report := workspace.NewGateReport(createdAt, evidence, validation, reportClassification, artifacts)
+	report := core.NewGateReport(createdAt, evidence, validation, reportClassification, artifacts)
 	report.Failures = gateDevMainFailures(validation, classification, config)
 
 	report.Warnings = gateDevMainWarnings(classification, config)
 	if len(report.Failures) > 0 {
-		report.Status = workspace.GateReportStatusFailed
+		report.Status = core.GateReportStatusFailed
 	}
 
 	return report
 }
 
 func gateDevMainFailures(
-	validation workspace.GateValidationResult,
-	classification workspace.GateEvidenceClassification,
-	config workspace.GateDevMainConfig,
+	validation core.GateValidationResult,
+	classification core.GateEvidenceClassification,
+	config core.GateDevMainConfig,
 ) []string {
 	failures := []string{}
 	if !validation.Passed {
@@ -267,8 +267,8 @@ func gateDevMainFailures(
 }
 
 func gateDevMainWarnings(
-	classification workspace.GateEvidenceClassification,
-	config workspace.GateDevMainConfig,
+	classification core.GateEvidenceClassification,
+	config core.GateDevMainConfig,
 ) []string {
 	warnings := []string{}
 	if config.Traceability.WarnOnManualChanges && len(classification.ManualOrExternalChanges) > 0 {
@@ -283,8 +283,8 @@ func gateDevMainWarnings(
 }
 
 func shouldFailGateMissingAgentEvidence(
-	config workspace.GateDevMainConfig,
-	classification workspace.GateEvidenceClassification,
+	config core.GateDevMainConfig,
+	classification core.GateEvidenceClassification,
 ) bool {
 	return config.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0
 }
@@ -294,10 +294,10 @@ func writeGateFailedEvidenceReport(
 	createdAt time.Time,
 	baseRef string,
 	headRef string,
-	artifacts workspace.GateReportArtifacts,
+	artifacts core.GateReportArtifacts,
 	cause error,
 ) error {
-	report := workspace.NewFailedGateReport(createdAt, baseRef, headRef, artifacts, []string{cause.Error()})
+	report := core.NewFailedGateReport(createdAt, baseRef, headRef, artifacts, []string{cause.Error()})
 
 	err := writeGateReports(ctx, report)
 	if err != nil {
@@ -310,12 +310,12 @@ func writeGateFailedEvidenceReport(
 func writeGateFailedValidationRunReport(
 	ctx context.Context,
 	createdAt time.Time,
-	evidence workspace.GateGitEvidence,
-	validation workspace.GateValidationResult,
-	artifacts workspace.GateReportArtifacts,
+	evidence core.GateGitEvidence,
+	validation core.GateValidationResult,
+	artifacts core.GateReportArtifacts,
 	cause error,
 ) error {
-	report := workspace.NewGateReport(createdAt, evidence, validation, workspace.GateEvidenceClassification{}, artifacts)
+	report := core.NewGateReport(createdAt, evidence, validation, core.GateEvidenceClassification{}, artifacts)
 	report.Failures = []string{cause.Error()}
 
 	err := writeGateReports(ctx, report)
@@ -326,8 +326,8 @@ func writeGateFailedValidationRunReport(
 	return cause
 }
 
-func writeGateReports(ctx context.Context, report workspace.GateReport) error {
-	writer := workspace.NewGateReportWriter()
+func writeGateReports(ctx context.Context, report core.GateReport) error {
+	writer := core.NewGateReportWriter()
 
 	_, err := writer.WriteJSON(ctx, report)
 	if err != nil {
@@ -342,7 +342,7 @@ func writeGateReports(ctx context.Context, report workspace.GateReport) error {
 	return nil
 }
 
-func printGateDevMainReport(stdout io.Writer, report workspace.GateReport) error {
+func printGateDevMainReport(stdout io.Writer, report core.GateReport) error {
 	lines := []string{
 		"gate: dev-main",
 		fmt.Sprintf("status: %s", report.Status),

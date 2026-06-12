@@ -253,7 +253,7 @@ Changed file objects contain:
 - `path`: workspace-relative changed file path.
 - `summary`: optional concise change summary.
 
-Changed file paths must be relative to the workspace. Absolute paths and paths
+Changed file paths must be relative to the core. Absolute paths and paths
 that escape the workspace are rejected.
 
 The worker must write this envelope before it exits successfully. If the worker

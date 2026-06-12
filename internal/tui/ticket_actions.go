@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // TicketActionID identifies a ticket action awaiting TUI confirmation.
@@ -32,13 +32,13 @@ type TicketActionRequest struct {
 	Key       string
 	Status    string
 	Branch    string
-	ReviewRef *workspace.TicketReviewRef
+	ReviewRef *core.TicketReviewRef
 }
 
 // TicketActionResult contains refreshed ticket state after an action.
 type TicketActionResult struct {
 	Message string
-	Tickets []workspace.IndexedTicket
+	Tickets []core.IndexedTicket
 }
 
 // TicketActionState stores pending confirmation state for a ticket action.

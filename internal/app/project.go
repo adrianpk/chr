@@ -11,7 +11,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newProjectCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -65,7 +65,7 @@ func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer, asse
 		return err
 	}
 
-	registry, err := workspace.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func runProjectAdd(ctx context.Context, cmd *cli.Command, stdout io.Writer, asse
 		projectName = filepath.Base(projectDir)
 	}
 
-	project := workspace.Project{
+	project := core.Project{
 		ID:           projectID(projectDir),
 		Name:         projectName,
 		Path:         projectDir,
@@ -126,7 +126,7 @@ func runProjectList(ctx context.Context, cmd *cli.Command, stdout io.Writer, ass
 		return err
 	}
 
-	registry, err := workspace.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -176,12 +176,12 @@ func runProjectCurrent(ctx context.Context, cmd *cli.Command, stdout io.Writer, 
 		return err
 	}
 
-	activeProject, err := workspace.NewActiveProjectStore(env).LoadActiveProject()
+	activeProject, err := core.NewActiveProjectStore(env).LoadActiveProject()
 	if err != nil {
 		return err
 	}
 
-	registry, err := workspace.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer, a
 		return err
 	}
 
-	registry, err := workspace.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -253,12 +253,12 @@ func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer, a
 		return err
 	}
 
-	activeProject, err := workspace.NewActiveProject(project.ID)
+	activeProject, err := core.NewActiveProject(project.ID)
 	if err != nil {
 		return err
 	}
 
-	store := workspace.NewActiveProjectStore(env)
+	store := core.NewActiveProjectStore(env)
 
 	err = store.SetActiveProject(activeProject)
 	if err != nil {
@@ -273,24 +273,24 @@ func runProjectSelect(ctx context.Context, cmd *cli.Command, stdout io.Writer, a
 	return nil
 }
 
-func resolveProjectSelection(ctx context.Context, registry workspace.ProjectRegistry, selector string) (workspace.Project, error) {
+func resolveProjectSelection(ctx context.Context, registry core.ProjectRegistry, selector string) (core.Project, error) {
 	project, err := registry.GetProjectByName(ctx, selector)
 	if err == nil {
 		return project, nil
 	}
 
-	if !errors.Is(err, workspace.ErrProjectNotFound) {
-		return workspace.Project{}, err
+	if !errors.Is(err, core.ErrProjectNotFound) {
+		return core.Project{}, err
 	}
 
 	projectPath, pathErr := filepath.Abs(selector)
 	if pathErr != nil {
-		return workspace.Project{}, fmt.Errorf("resolve project selector path: %w", pathErr)
+		return core.Project{}, fmt.Errorf("resolve project selector path: %w", pathErr)
 	}
 
 	project, err = registry.GetProjectByPath(ctx, projectPath)
 	if err != nil {
-		return workspace.Project{}, fmt.Errorf("resolve project selection: %w", err)
+		return core.Project{}, fmt.Errorf("resolve project selection: %w", err)
 	}
 
 	return project, nil

@@ -12,7 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func TestModelViewRendersProjectAndNavigation(t *testing.T) {
@@ -267,8 +267,8 @@ func TestModelNavigatesWithFunctionKeys(t *testing.T) {
 func TestModelEditsAndSavesProjectMetadata(t *testing.T) {
 	executor := &fakeProjectMetadataExecutor{}
 	model := NewModel(Options{
-		ProjectMetadata: workspace.ProjectMetadata{
-			SchemaVersion: workspace.ProjectMetadataSchemaVersion,
+		ProjectMetadata: core.ProjectMetadata{
+			SchemaVersion: core.ProjectMetadataSchemaVersion,
 			Name:          "Old",
 			Description:   "Old description.",
 		},
@@ -319,8 +319,8 @@ func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
 	projectExecutor := &fakeProjectMetadataExecutor{}
 	workspaceExecutor := &fakeWorkspaceRefreshExecutor{
 		result: WorkspaceRefreshResult{
-			Graph: workspace.WorkspaceGraph{
-				Project: &workspace.WorkspaceNode{
+			Graph: core.WorkspaceGraph{
+				Project: &core.WorkspaceNode{
 					Name:        "Graph Project",
 					Description: "Graph description.",
 					Path:        ".chc/user/project.md",
@@ -330,8 +330,8 @@ func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
 		},
 	}
 	model := NewModel(Options{
-		ProjectMetadata: workspace.ProjectMetadata{
-			SchemaVersion: workspace.ProjectMetadataSchemaVersion,
+		ProjectMetadata: core.ProjectMetadata{
+			SchemaVersion: core.ProjectMetadataSchemaVersion,
 			Name:          "Edited Project",
 			Context:       "Preserved context.",
 		},
@@ -361,8 +361,8 @@ func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
 
 func TestModelProjectEditAcceptsSpaces(t *testing.T) {
 	model := NewModel(Options{
-		ProjectMetadata: workspace.ProjectMetadata{
-			SchemaVersion: workspace.ProjectMetadataSchemaVersion,
+		ProjectMetadata: core.ProjectMetadata{
+			SchemaVersion: core.ProjectMetadataSchemaVersion,
 			Name:          "Old",
 			Description:   "Old description.",
 		},
@@ -392,8 +392,8 @@ func TestModelProjectEditAcceptsSpaces(t *testing.T) {
 
 func TestModelProjectEditInsertsAtCursor(t *testing.T) {
 	model := NewModel(Options{
-		ProjectMetadata: workspace.ProjectMetadata{
-			SchemaVersion: workspace.ProjectMetadataSchemaVersion,
+		ProjectMetadata: core.ProjectMetadata{
+			SchemaVersion: core.ProjectMetadataSchemaVersion,
 			Name:          "Old",
 			Description:   "Old description.",
 		},
@@ -482,8 +482,8 @@ func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
 	caseExecutor := &fakeCaseMetadataExecutor{}
 	workspaceExecutor := &fakeWorkspaceRefreshExecutor{
 		result: WorkspaceRefreshResult{
-			Graph: workspace.WorkspaceGraph{
-				Cases: []workspace.WorkspaceNode{
+			Graph: core.WorkspaceGraph{
+				Cases: []core.WorkspaceNode{
 					{
 						Slug:        "blog-publishing",
 						Name:        "Graph Case",
@@ -492,14 +492,14 @@ func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
 						SourceHash:  "hash-case",
 					},
 				},
-				CaseDocuments: map[string][]workspace.WorkspaceNode{},
+				CaseDocuments: map[string][]core.WorkspaceNode{},
 			},
 		},
 	}
 	model := NewModel(Options{
-		Cases: []workspace.CaseMetadata{
+		Cases: []core.CaseMetadata{
 			{
-				SchemaVersion: workspace.CaseMetadataSchemaVersion,
+				SchemaVersion: core.CaseMetadataSchemaVersion,
 				Slug:          "blog-publishing",
 				Name:          "Edited Case",
 				Context:       "Preserved context.",
@@ -531,9 +531,9 @@ func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
 
 func TestModelFiltersCaseMetadata(t *testing.T) {
 	model := NewModel(Options{
-		Cases: []workspace.CaseMetadata{
-			{SchemaVersion: workspace.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
-			{SchemaVersion: workspace.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
+		Cases: []core.CaseMetadata{
+			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
+			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
 		},
 	})
 
@@ -558,9 +558,9 @@ func TestModelFiltersCaseMetadata(t *testing.T) {
 
 func TestCasesUseTabForPanesAndArrowsWithinFocusedPane(t *testing.T) {
 	model := NewModel(Options{
-		Cases: []workspace.CaseMetadata{
-			{SchemaVersion: workspace.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
-			{SchemaVersion: workspace.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
+		Cases: []core.CaseMetadata{
+			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "blog", Name: "Blog Publishing"},
+			{SchemaVersion: core.CaseMetadataSchemaVersion, Slug: "runtime", Name: "Runtime Observation"},
 		},
 	})
 
@@ -601,8 +601,8 @@ func TestModelRefreshesWorkspaceGraphFromCommandPalette(t *testing.T) {
 	executor := &fakeWorkspaceRefreshExecutor{
 		result: WorkspaceRefreshResult{
 			Message: "Workspace refreshed.",
-			Graph: workspace.WorkspaceGraph{
-				Project: &workspace.WorkspaceNode{Name: "External"},
+			Graph: core.WorkspaceGraph{
+				Project: &core.WorkspaceNode{Name: "External"},
 			},
 		},
 	}
@@ -625,8 +625,8 @@ func TestProjectRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 	executor := &fakeWorkspaceRefreshExecutor{
 		result: WorkspaceRefreshResult{
 			Message: "Workspace refreshed.",
-			Graph: workspace.WorkspaceGraph{
-				Project: &workspace.WorkspaceNode{Name: "External"},
+			Graph: core.WorkspaceGraph{
+				Project: &core.WorkspaceNode{Name: "External"},
 			},
 		},
 	}
@@ -650,18 +650,18 @@ func TestCasesRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 	executor := &fakeWorkspaceRefreshExecutor{
 		result: WorkspaceRefreshResult{
 			Message: "Workspace refreshed.",
-			Graph: workspace.WorkspaceGraph{
-				Cases: []workspace.WorkspaceNode{
+			Graph: core.WorkspaceGraph{
+				Cases: []core.WorkspaceNode{
 					{Slug: "external", Name: "External Case"},
 				},
-				CaseDocuments: map[string][]workspace.WorkspaceNode{},
+				CaseDocuments: map[string][]core.WorkspaceNode{},
 			},
 		},
 	}
 	model := NewModel(Options{
 		WorkspaceExecutor: executor,
 	})
-	model.cases = []workspace.CaseMetadata{{Slug: "blog", Name: "Blog"}}
+	model.cases = []core.CaseMetadata{{Slug: "blog", Name: "Blog"}}
 	model.selected = 1
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
@@ -678,11 +678,11 @@ func TestCasesRefreshKeyRebuildsWorkspaceGraph(t *testing.T) {
 
 func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 	model := NewModel(Options{
-		ProjectMetadata: workspace.ProjectMetadata{
+		ProjectMetadata: core.ProjectMetadata{
 			Name:        "Fallback",
 			Description: "Fallback description.",
 		},
-		Cases: []workspace.CaseMetadata{
+		Cases: []core.CaseMetadata{
 			{
 				Slug:        "fallback",
 				Name:        "Fallback Case",
@@ -690,14 +690,14 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 				Context:     "Preserved context.",
 			},
 		},
-		WorkspaceGraph: workspace.WorkspaceGraph{
-			Project: &workspace.WorkspaceNode{
+		WorkspaceGraph: core.WorkspaceGraph{
+			Project: &core.WorkspaceNode{
 				Name:        "Graph Project",
 				Description: "Graph description.",
 				Path:        ".chc/user/project.md",
 				SourceHash:  "hash-project",
 			},
-			Cases: []workspace.WorkspaceNode{
+			Cases: []core.WorkspaceNode{
 				{
 					Slug:        "fallback",
 					Name:        "Graph Case",
@@ -706,7 +706,7 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 					SourceHash:  "hash-case",
 				},
 			},
-			CaseDocuments: map[string][]workspace.WorkspaceNode{},
+			CaseDocuments: map[string][]core.WorkspaceNode{},
 		},
 	})
 
@@ -728,34 +728,34 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 }
 
 func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
-	initialGraph := workspace.WorkspaceGraph{
-		ProjectWide: []workspace.WorkspaceNode{
+	initialGraph := core.WorkspaceGraph{
+		ProjectWide: []core.WorkspaceNode{
 			{
-				Kind:         workspace.WorkspaceNodeSpec,
+				Kind:         core.WorkspaceNodeSpec,
 				RelativePath: ".chc/user/specs/old.md",
 				Title:        "Old",
 				SourceHash:   "old",
 			},
 		},
-		CaseDocuments: map[string][]workspace.WorkspaceNode{},
+		CaseDocuments: map[string][]core.WorkspaceNode{},
 	}
-	refreshedGraph := workspace.WorkspaceGraph{
-		ProjectWide: []workspace.WorkspaceNode{
+	refreshedGraph := core.WorkspaceGraph{
+		ProjectWide: []core.WorkspaceNode{
 			{
-				Kind:         workspace.WorkspaceNodeSpec,
+				Kind:         core.WorkspaceNodeSpec,
 				RelativePath: ".chc/user/specs/new.md",
 				Title:        "New",
 				SourceHash:   "new",
 			},
 		},
-		CaseDocuments: map[string][]workspace.WorkspaceNode{},
+		CaseDocuments: map[string][]core.WorkspaceNode{},
 	}
 	executor := &fakeWorkspaceRefreshExecutor{
 		result: WorkspaceRefreshResult{
 			Graph: refreshedGraph,
-			Index: workspace.NewWorkspaceIndexFromGraph(refreshedGraph),
-			SemanticDigestStates: []workspace.WorkspaceSemanticDigestState{
-				{NodeID: "spec:.chc/user/specs/new.md", Status: workspace.WorkspaceSemanticDigestPending},
+			Index: core.NewWorkspaceIndexFromGraph(refreshedGraph),
+			SemanticDigestStates: []core.WorkspaceSemanticDigestState{
+				{NodeID: "spec:.chc/user/specs/new.md", Status: core.WorkspaceSemanticDigestPending},
 			},
 		},
 	}
@@ -777,22 +777,22 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 
 func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {
 	model := NewModel(Options{
-		WorkspaceGraph: workspace.WorkspaceGraph{
-			Cases: []workspace.WorkspaceNode{
+		WorkspaceGraph: core.WorkspaceGraph{
+			Cases: []core.WorkspaceNode{
 				{Slug: "blog", Name: "Blog"},
 			},
-			CaseDocuments: map[string][]workspace.WorkspaceNode{
+			CaseDocuments: map[string][]core.WorkspaceNode{
 				"blog": {
-					{Kind: workspace.WorkspaceNodeDump, RelativePath: ".chc/user/dumps/blog.md", CaseSlug: "blog"},
-					{Kind: workspace.WorkspaceNodeSpec, RelativePath: ".chc/user/specs/blog.md", CaseSlug: "blog"},
-					{Kind: workspace.WorkspaceNodeTicket, RelativePath: ".chc/user/tickets/CHC-1.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeDump, RelativePath: ".chc/user/dumps/blog.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeSpec, RelativePath: ".chc/user/specs/blog.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeTicket, RelativePath: ".chc/user/tickets/CHC-1.md", CaseSlug: "blog"},
 				},
 			},
-			UnresolvedCaseReferences: []workspace.WorkspaceCaseReference{
+			UnresolvedCaseReferences: []core.WorkspaceCaseReference{
 				{
 					CaseSlug: "blog",
-					References: []workspace.WorkspaceNode{
-						{Kind: workspace.WorkspaceNodePlan, CaseSlug: "blog"},
+					References: []core.WorkspaceNode{
+						{Kind: core.WorkspaceNodePlan, CaseSlug: "blog"},
 					},
 				},
 			},
@@ -816,13 +816,13 @@ func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {
 
 func TestModelShowsUnresolvedCaseReferencesInCaseList(t *testing.T) {
 	model := NewModel(Options{
-		WorkspaceGraph: workspace.WorkspaceGraph{
-			UnresolvedCaseReferences: []workspace.WorkspaceCaseReference{
+		WorkspaceGraph: core.WorkspaceGraph{
+			UnresolvedCaseReferences: []core.WorkspaceCaseReference{
 				{
 					CaseSlug: "missing",
-					References: []workspace.WorkspaceNode{
-						{Kind: workspace.WorkspaceNodePlan, CaseSlug: "missing"},
-						{Kind: workspace.WorkspaceNodeSpec, CaseSlug: "missing"},
+					References: []core.WorkspaceNode{
+						{Kind: core.WorkspaceNodePlan, CaseSlug: "missing"},
+						{Kind: core.WorkspaceNodeSpec, CaseSlug: "missing"},
 					},
 				},
 			},
@@ -842,16 +842,16 @@ func TestModelShowsUnresolvedCaseReferencesInCaseList(t *testing.T) {
 }
 
 func TestModelFiltersCasesWithWorkspaceIndexSuggestions(t *testing.T) {
-	index := workspace.WorkspaceIndex{
-		NodesByID: map[string]workspace.WorkspaceNode{
+	index := core.WorkspaceIndex{
+		NodesByID: map[string]core.WorkspaceNode{
 			"case:blog": {
-				Kind:        workspace.WorkspaceNodeCase,
+				Kind:        core.WorkspaceNodeCase,
 				Slug:        "blog",
 				Name:        "Blog Publishing",
 				Description: "Publish articles.",
 			},
 			"case:runtime": {
-				Kind:        workspace.WorkspaceNodeCase,
+				Kind:        core.WorkspaceNodeCase,
 				Slug:        "runtime",
 				Name:        "Runtime Operations",
 				Description: "Observe runtime work.",
@@ -874,14 +874,14 @@ func TestModelFiltersCasesWithWorkspaceIndexSuggestions(t *testing.T) {
 
 func TestModelShowsWorkspaceIndexHealthInDash(t *testing.T) {
 	model := NewModel(Options{
-		WorkspaceGraph: workspace.WorkspaceGraph{
-			ProjectWide: []workspace.WorkspaceNode{
-				{Kind: workspace.WorkspaceNodeSpec, RelativePath: ".chc/user/specs/one.md"},
+		WorkspaceGraph: core.WorkspaceGraph{
+			ProjectWide: []core.WorkspaceNode{
+				{Kind: core.WorkspaceNodeSpec, RelativePath: ".chc/user/specs/one.md"},
 			},
-			CaseDocuments: map[string][]workspace.WorkspaceNode{},
+			CaseDocuments: map[string][]core.WorkspaceNode{},
 		},
-		SemanticDigestStates: []workspace.WorkspaceSemanticDigestState{
-			{NodeID: "spec:.chc/user/specs/one.md", Status: workspace.WorkspaceSemanticDigestPending},
+		SemanticDigestStates: []core.WorkspaceSemanticDigestState{
+			{NodeID: "spec:.chc/user/specs/one.md", Status: core.WorkspaceSemanticDigestPending},
 		},
 	})
 
@@ -901,9 +901,9 @@ func TestModelShowsWorkspaceIndexHealthInDash(t *testing.T) {
 func TestModelRefreshReportsWorkspaceDiagnostics(t *testing.T) {
 	executor := &fakeWorkspaceRefreshExecutor{
 		result: WorkspaceRefreshResult{
-			Graph: workspace.WorkspaceGraph{
-				Diagnostics: []workspace.WorkspaceGraphDiagnostic{
-					{Path: ".chc/user/cases/broken.md", Kind: workspace.WorkspaceNodeCase, Message: "invalid"},
+			Graph: core.WorkspaceGraph{
+				Diagnostics: []core.WorkspaceGraphDiagnostic{
+					{Path: ".chc/user/cases/broken.md", Kind: core.WorkspaceNodeCase, Message: "invalid"},
 				},
 			},
 		},
@@ -1029,10 +1029,10 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 
 func TestModelPlansArtifactActionCommand(t *testing.T) {
 	model := NewModel(Options{
-		WorkspaceIndex: workspace.WorkspaceIndex{
-			NodesByID: map[string]workspace.WorkspaceNode{
+		WorkspaceIndex: core.WorkspaceIndex{
+			NodesByID: map[string]core.WorkspaceNode{
 				"case:blog": {
-					Kind: workspace.WorkspaceNodeCase,
+					Kind: core.WorkspaceNodeCase,
 					Slug: "blog",
 					Name: "Blog Publishing",
 				},
@@ -1267,13 +1267,13 @@ func TestModelRendersDocumentRefreshHints(t *testing.T) {
 
 func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 	model := NewModel(Options{
-		Cases: []workspace.CaseMetadata{
+		Cases: []core.CaseMetadata{
 			{Slug: "blog", Name: "Blog"},
 		},
-		WorkspaceIndex: workspace.WorkspaceIndex{
-			NodesByID: map[string]workspace.WorkspaceNode{
+		WorkspaceIndex: core.WorkspaceIndex{
+			NodesByID: map[string]core.WorkspaceNode{
 				"case:blog": {
-					Kind: workspace.WorkspaceNodeCase,
+					Kind: core.WorkspaceNodeCase,
 					Slug: "blog",
 					Name: "Blog",
 				},
@@ -1281,7 +1281,7 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 			CasesBySlug: map[string]string{"blog": "case:blog"},
 		},
 	})
-	model.cases = []workspace.CaseMetadata{{Slug: "blog", Name: "Blog"}}
+	model.cases = []core.CaseMetadata{{Slug: "blog", Name: "Blog"}}
 	model.selected = 1
 	model.commandPalette.Open = true
 	model.commandPalette.Filter = "create-dump"
@@ -1666,11 +1666,11 @@ func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
 	}
 	model := NewModel(Options{
 		SourceExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Key:          "CHC-1",
 				Title:        "Preview command",
-				Status:       workspace.TicketStatusBacklog,
+				Status:       core.TicketStatusBacklog,
 				RelativePath: "local-preview/CHC-1-preview-command.md",
 			},
 		},
@@ -1707,11 +1707,11 @@ func TestModelCtrlEOpensSelectedTicketSource(t *testing.T) {
 	}
 	model := NewModel(Options{
 		SourceExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Key:          "CHC-1",
 				Title:        "Preview command",
-				Status:       workspace.TicketStatusBacklog,
+				Status:       core.TicketStatusBacklog,
 				RelativePath: "local-preview/CHC-1-preview-command.md",
 			},
 		},
@@ -1738,11 +1738,11 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 	}
 	model := NewModel(Options{
 		SourceExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Key:          "CHC-1",
 				Title:        "Preview command",
-				Status:       workspace.TicketStatusBacklog,
+				Status:       core.TicketStatusBacklog,
 				RelativePath: "CHC-1-preview-command.md",
 			},
 		},
@@ -1763,11 +1763,11 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 
 func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Key:          "CHC-1",
 				Title:        "Long detail",
-				Status:       workspace.TicketStatusBacklog,
+				Status:       core.TicketStatusBacklog,
 				RelativePath: "CHC-1-long-detail.md",
 			},
 		},
@@ -1789,11 +1789,11 @@ func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
 
 func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Key:          "CHC-1",
 				Title:        "Long detail",
-				Status:       workspace.TicketStatusBacklog,
+				Status:       core.TicketStatusBacklog,
 				RelativePath: "CHC-1-long-detail.md",
 			},
 		},
@@ -1840,11 +1840,11 @@ func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
 
 func TestModelScrollsFocusedTicketDetail(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Key:          "CHC-1",
 				Title:        "Long detail",
-				Status:       workspace.TicketStatusBacklog,
+				Status:       core.TicketStatusBacklog,
 				RelativePath: "CHC-1-long-detail.md",
 			},
 		},
@@ -1964,19 +1964,19 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 	executor := &fakeArtifactActionExecutor{
 		result: ArtifactActionResult{
 			Message: "Created ticket CHC-1 at .chc/user/tickets/CHC-1-tui-created-ticket.md",
-			Tickets: []workspace.IndexedTicket{
+			Tickets: []core.IndexedTicket{
 				{Key: "CHC-1", Title: "TUI created ticket", Status: "open"},
 			},
 			Documents: []DocumentView{
 				{Index: 0, Title: "TUI Plan"},
 			},
-			AuthoringSessions: []workspace.AuthoringSession{
+			AuthoringSessions: []core.AuthoringSession{
 				{
 					ID:        "author-20260522-100000",
 					ProjectID: "project-1",
-					Status:    workspace.AuthoringSessionStatusDraft,
-					Mode:      workspace.AuthoringSessionModeTUI,
-					Target:    workspace.AuthoringTargetSpec,
+					Status:    core.AuthoringSessionStatusDraft,
+					Mode:      core.AuthoringSessionModeTUI,
+					Target:    core.AuthoringTargetSpec,
 					Topic:     "TUI artifact creation",
 				},
 			},
@@ -2030,7 +2030,7 @@ func TestModelReportsArtifactActionError(t *testing.T) {
 
 func TestModelPlansTicketActionCommand(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "open"},
 		},
 	})
@@ -2076,7 +2076,7 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 
 func TestModelCancelsTicketAction(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "open"},
 		},
 	})
@@ -2108,14 +2108,14 @@ func TestModelConfirmsTicketAction(t *testing.T) {
 	executor := &fakeTicketActionExecutor{
 		result: TicketActionResult{
 			Message: "Moved ticket CHC-1 to ready.",
-			Tickets: []workspace.IndexedTicket{
+			Tickets: []core.IndexedTicket{
 				{Key: "CHC-1", Title: "First", Status: "ready"},
 			},
 		},
 	}
 	model := NewModel(Options{
 		TicketExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "open"},
 		},
 	})
@@ -2159,7 +2159,7 @@ func TestModelReportsTicketActionError(t *testing.T) {
 	executor := &fakeTicketActionExecutor{err: errors.New("invalid ticket status")}
 	model := NewModel(Options{
 		TicketExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "open"},
 		},
 	})
@@ -2189,7 +2189,7 @@ func TestModelReportsTicketActionError(t *testing.T) {
 
 func TestModelPlansWorkActionCommand(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "ready"},
 		},
 	})
@@ -2232,7 +2232,7 @@ func TestModelPlansWorkActionCommand(t *testing.T) {
 
 func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "Ready frontend", Status: "ready_for_dev", Priority: "high"},
 			{Key: "CHC-2", Title: "Backlog backend", Status: "backlog", Priority: "normal"},
 		},
@@ -2306,7 +2306,7 @@ func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 
 func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "Ready normal", Status: "ready_for_dev", Priority: "normal", Severity: "normal"},
 			{Key: "CHC-2", Title: "Ready critical", Status: "ready_for_dev", Priority: "critical", Severity: "critical"},
 		},
@@ -2354,7 +2354,7 @@ func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 		t.Fatalf("PriorityFilter = %q, want critical", request.PriorityFilter)
 	}
 
-	if request.Order != workspace.TicketLoopOrderPriority {
+	if request.Order != core.TicketLoopOrderPriority {
 		t.Fatalf("Order = %q, want priority", request.Order)
 	}
 
@@ -2372,7 +2372,7 @@ func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	executor := &fakeAgentWorkRefreshExecutor{
 		result: AgentWorkRefreshResult{
-			Tickets: []workspace.IndexedTicket{
+			Tickets: []core.IndexedTicket{
 				{Key: "CHC-2", Title: "Fresh ready", Status: "ready_for_dev"},
 			},
 			Observability: ObservabilityView{
@@ -2383,7 +2383,7 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	}
 	model := NewModel(Options{
 		AgentWorkExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "Old ready", Status: "ready_for_dev"},
 		},
 	})
@@ -2497,7 +2497,7 @@ func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
 
 func TestModelCancelsWorkAction(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "ready"},
 		},
 	})
@@ -2531,7 +2531,7 @@ func TestModelStartsWorkActionOnConfirm(t *testing.T) {
 	}
 	model := NewModel(Options{
 		WorkExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "ready"},
 		},
 	})
@@ -2570,7 +2570,7 @@ func TestModelCompletesWorkAction(t *testing.T) {
 	}
 	model := NewModel(Options{
 		WorkExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "ready"},
 		},
 	})
@@ -2612,7 +2612,7 @@ func TestModelReportsWorkActionError(t *testing.T) {
 	executor := &fakeWorkActionExecutor{err: errors.New("runtime validation failed")}
 	model := NewModel(Options{
 		WorkExecutor: executor,
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "ready"},
 		},
 	})
@@ -2687,13 +2687,13 @@ func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
 		"# Description\n\nFirst paragraph.\n\n    indented code\n\n- [ ] Task\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n\nComment body.\n",
 	)
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Path:         ticketPath,
 				RelativePath: "long.md",
 				Key:          "CHC-1",
 				Title:        "Long body",
-				Status:       workspace.TicketStatusBacklog,
+				Status:       core.TicketStatusBacklog,
 			},
 		},
 	})
@@ -2722,7 +2722,7 @@ func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
 	}
 }
 
-func ticketBoardTestTickets(t *testing.T, projectDir string) []workspace.IndexedTicket {
+func ticketBoardTestTickets(t *testing.T, projectDir string) []core.IndexedTicket {
 	t.Helper()
 
 	firstPath := writeTicketViewFile(
@@ -2733,7 +2733,7 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []workspace.Indexed
 	)
 	secondPath := writeTicketViewFile(t, projectDir, "ready.md", "- [ ] Ready\n")
 
-	return []workspace.IndexedTicket{
+	return []core.IndexedTicket{
 		{
 			Path:         firstPath,
 			RelativePath: "open.md",
@@ -2767,7 +2767,7 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []workspace.Indexed
 
 func TestModelSelectsTickets(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "open"},
 			{Key: "CHC-2", Title: "Second", Status: "open"},
 		},
@@ -2793,9 +2793,9 @@ func TestModelSelectsTickets(t *testing.T) {
 
 func TestModelNavigatesBoardColumns(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: workspace.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Second", Status: workspace.TicketStatusReadyForDev},
+		Tickets: []core.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: core.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Second", Status: core.TicketStatusReadyForDev},
 		},
 	})
 	model.selected = 6
@@ -2807,7 +2807,7 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	if navigated.activeBoardColumn() != workspace.TicketStatusReadyForDev {
+	if navigated.activeBoardColumn() != core.TicketStatusReadyForDev {
 		t.Fatalf("board column = %q, want ready_for_dev", navigated.activeBoardColumn())
 	}
 
@@ -2828,9 +2828,9 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 
 func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: workspace.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Second", Status: workspace.TicketStatusReadyForDev},
+		Tickets: []core.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: core.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Second", Status: core.TicketStatusReadyForDev},
 		},
 	})
 	model.selected = 6
@@ -2854,17 +2854,17 @@ func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 
 func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{
 				Key:      "CHC-1",
 				Title:    "Legacy ready ticket",
-				Status:   workspace.TicketStatusReadyLegacy,
+				Status:   core.TicketStatusReadyLegacy,
 				Priority: "high",
 			},
 			{
 				Key:      "CHC-15",
 				Title:    "Implement filesystem-backed Post store and slug normalization",
-				Status:   workspace.TicketStatusReadyForDev,
+				Status:   core.TicketStatusReadyForDev,
 				Priority: "normal",
 			},
 		},
@@ -2906,9 +2906,9 @@ func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
 
 func TestModelTogglesBoardAttentionView(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: workspace.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Blocked", Status: workspace.TicketStatusBlockedLegacy},
+		Tickets: []core.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: core.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Blocked", Status: core.TicketStatusBlockedLegacy},
 		},
 	})
 	model.selected = 6
@@ -2939,20 +2939,20 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 		t.Fatal("board attention view is still active")
 	}
 
-	if normal.activeBoardColumn() != workspace.TicketStatusBacklog {
+	if normal.activeBoardColumn() != core.TicketStatusBacklog {
 		t.Fatalf("board column = %q, want backlog", normal.activeBoardColumn())
 	}
 }
 
 func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
-			{Key: "CHC-1", Title: "Backlog ticket", Status: workspace.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Ready ticket", Status: workspace.TicketStatusReadyForDev},
-			{Key: "CHC-3", Title: "Progress ticket", Status: workspace.TicketStatusInProgress},
-			{Key: "CHC-4", Title: "Review ticket", Status: workspace.TicketStatusReadyForReview},
-			{Key: "CHC-5", Title: "Merge ticket", Status: workspace.TicketStatusReadyForMerge},
-			{Key: "CHC-6", Title: "Done ticket", Status: workspace.TicketStatusDone},
+		Tickets: []core.IndexedTicket{
+			{Key: "CHC-1", Title: "Backlog ticket", Status: core.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Ready ticket", Status: core.TicketStatusReadyForDev},
+			{Key: "CHC-3", Title: "Progress ticket", Status: core.TicketStatusInProgress},
+			{Key: "CHC-4", Title: "Review ticket", Status: core.TicketStatusReadyForReview},
+			{Key: "CHC-5", Title: "Merge ticket", Status: core.TicketStatusReadyForMerge},
+			{Key: "CHC-6", Title: "Done ticket", Status: core.TicketStatusDone},
 		},
 	})
 	model.selected = 6
@@ -2990,17 +2990,17 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 		t.Fatalf("selectedTicket = %d, want 1", restored.selectedTicket)
 	}
 
-	if restored.activeBoardColumn() != workspace.TicketStatusReadyForDev {
+	if restored.activeBoardColumn() != core.TicketStatusReadyForDev {
 		t.Fatalf("activeBoardColumn = %q, want ready_for_dev", restored.activeBoardColumn())
 	}
 }
 
 func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
-			{Key: "CHC-1", Title: "First ticket", Status: workspace.TicketStatusReadyForDev},
-			{Key: "CHC-2", Title: "Second ticket", Status: workspace.TicketStatusReadyForDev},
-			{Key: "CHC-3", Title: "Third ticket with enough words to wrap across several card body lines", Status: workspace.TicketStatusReadyForDev},
+		Tickets: []core.IndexedTicket{
+			{Key: "CHC-1", Title: "First ticket", Status: core.TicketStatusReadyForDev},
+			{Key: "CHC-2", Title: "Second ticket", Status: core.TicketStatusReadyForDev},
+			{Key: "CHC-3", Title: "Third ticket with enough words to wrap across several card body lines", Status: core.TicketStatusReadyForDev},
 		},
 	})
 	model.selectedTicket = 2
@@ -3026,9 +3026,9 @@ func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 
 func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
-			{Key: "CHC-1", Title: "Normal ticket", Status: workspace.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Blocked ticket", Status: workspace.TicketStatusBlockedLegacy},
+		Tickets: []core.IndexedTicket{
+			{Key: "CHC-1", Title: "Normal ticket", Status: core.TicketStatusBacklog},
+			{Key: "CHC-2", Title: "Blocked ticket", Status: core.TicketStatusBlockedLegacy},
 		},
 	})
 	model.selected = 6
@@ -3060,7 +3060,7 @@ func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 
 func TestTicketFilterMatchesMetadata(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "Fix publishing", Status: "open"},
 			{
 				Key:        "CHC-2",
@@ -3155,19 +3155,19 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 	updated := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
 	model := NewModel(Options{
-		AuthoringSessions: []workspace.AuthoringSession{
+		AuthoringSessions: []core.AuthoringSession{
 			{
 				ID:        "auth-1",
 				ProjectID: "project-1",
-				Status:    workspace.AuthoringSessionStatusActive,
-				Mode:      workspace.AuthoringSessionModeAssisted,
-				Target:    workspace.AuthoringTargetSpec,
+				Status:    core.AuthoringSessionStatusActive,
+				Mode:      core.AuthoringSessionModeAssisted,
+				Target:    core.AuthoringTargetSpec,
 				Topic:     "Billing sync",
 				UpdatedAt: updated,
-				Inputs: []workspace.AuthoringArtifactRef{
+				Inputs: []core.AuthoringArtifactRef{
 					{Path: ".prj/dumps/billing.md"},
 				},
-				Outputs: []workspace.AuthoringArtifactRef{
+				Outputs: []core.AuthoringArtifactRef{
 					{Path: ".chc/user/specs/auth-1-billing-sync.md"},
 				},
 			},
@@ -3289,23 +3289,23 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 
 	view := NewObservabilityView(
 		projectDir,
-		workspace.NewStoppedDaemonState(newer),
-		[]workspace.ExecutionRecord{
-			{ID: "exec-old", Status: workspace.ExecutionStatusSucceeded, UpdatedAt: older},
-			{ID: "exec-new", Status: workspace.ExecutionStatusFailed, UpdatedAt: newer},
+		core.NewStoppedDaemonState(newer),
+		[]core.ExecutionRecord{
+			{ID: "exec-old", Status: core.ExecutionStatusSucceeded, UpdatedAt: older},
+			{ID: "exec-new", Status: core.ExecutionStatusFailed, UpdatedAt: newer},
 		},
-		[]workspace.LoopRunRecord{
-			{ID: "loop-old", Status: workspace.LoopRunStatusSucceeded, UpdatedAt: older},
-			{ID: "loop-new", Status: workspace.LoopRunStatusFailed, UpdatedAt: newer},
+		[]core.LoopRunRecord{
+			{ID: "loop-old", Status: core.LoopRunStatusSucceeded, UpdatedAt: older},
+			{ID: "loop-new", Status: core.LoopRunStatusFailed, UpdatedAt: newer},
 		},
-		workspace.RuntimeValidationResult{
-			Plan: workspace.RuntimePlan{
+		core.RuntimeValidationResult{
+			Plan: core.RuntimePlan{
 				Image:             "image",
 				DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
 				ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
 				ValidationCommand: "make verify",
 			},
-			Checks: []workspace.RuntimeValidationCheck{
+			Checks: []core.RuntimeValidationCheck{
 				{Name: "dockerfile", Path: filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
 			},
 		},
@@ -4627,7 +4627,7 @@ func TestModelViewUsesWindowRealEstate(t *testing.T) {
 	model := NewModel(Options{
 		ProjectDir: "/workspace/project",
 		ProjectID:  "project-1",
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "open"},
 		},
 	})
@@ -4755,11 +4755,11 @@ func (e *fakePlanActionExecutor) ExecutePlanAction(request PlanActionRequest) (P
 }
 
 type fakeProjectMetadataExecutor struct {
-	saved workspace.ProjectMetadata
+	saved core.ProjectMetadata
 }
 
 func (e *fakeProjectMetadataExecutor) SaveProjectMetadata(
-	metadata workspace.ProjectMetadata,
+	metadata core.ProjectMetadata,
 ) (ProjectMetadataResult, error) {
 	e.saved = metadata
 
@@ -4770,15 +4770,15 @@ func (e *fakeProjectMetadataExecutor) SaveProjectMetadata(
 }
 
 type fakeCaseMetadataExecutor struct {
-	saved workspace.CaseMetadata
+	saved core.CaseMetadata
 }
 
 func (e *fakeCaseMetadataExecutor) SaveCaseMetadata(
-	metadata workspace.CaseMetadata,
+	metadata core.CaseMetadata,
 ) (CaseMetadataResult, error) {
 	e.saved = metadata
 
-	e.saved.SchemaVersion = workspace.CaseMetadataSchemaVersion
+	e.saved.SchemaVersion = core.CaseMetadataSchemaVersion
 	if e.saved.Slug == "" {
 		e.saved.Slug = "blog-publishing"
 	}
@@ -4788,7 +4788,7 @@ func (e *fakeCaseMetadataExecutor) SaveCaseMetadata(
 	return CaseMetadataResult{
 		Message: "Case metadata saved.",
 		Case:    e.saved,
-		Cases:   []workspace.CaseMetadata{e.saved},
+		Cases:   []core.CaseMetadata{e.saved},
 	}, nil
 }
 
@@ -4849,7 +4849,7 @@ func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (W
 func testSuccessfulWorkActionResult() WorkActionResult {
 	return WorkActionResult{
 		Message: "Execution exec-1 for ticket CHC-1 finished with status succeeded.",
-		Tickets: []workspace.IndexedTicket{
+		Tickets: []core.IndexedTicket{
 			{Key: "CHC-1", Title: "First", Status: "reviewing"},
 		},
 		Observability: ObservabilityView{

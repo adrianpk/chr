@@ -152,7 +152,7 @@ chc maintenance registry set-path --dry-run example /path/to/project
 Repair commands require the project name, not the project path or id.
 
 `set-path` requires the target directory to contain `.chc/`. It does not create
-or initialize a workspace.
+or initialize a core.
 
 Repair commands update only the project registry row. They do not mutate ticket
 files, runtime artifacts, execution records, or the active project selection.

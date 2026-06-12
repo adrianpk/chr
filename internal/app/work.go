@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -162,7 +162,7 @@ func workServiceFromCommand(
 func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
 		Statuses: cmd.StringSlice("status"),
-		Filters: workspace.TicketLoopFilters{
+		Filters: core.TicketLoopFilters{
 			Priorities:   cmd.StringSlice("priority"),
 			Severities:   cmd.StringSlice("severity"),
 			ProjectAreas: cmd.StringSlice("project-area"),
@@ -170,7 +170,7 @@ func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOp
 			Types:        cmd.StringSlice("type"),
 			UseCases:     cmd.StringSlice("use-case"),
 		},
-		Order: workspace.TicketLoopOrder(cmd.String("order")),
+		Order: core.TicketLoopOrder(cmd.String("order")),
 	}
 }
 
@@ -249,7 +249,7 @@ func printAgentWorkRunAllExecution(stdout io.Writer, result AgentWorkResult) err
 	return nil
 }
 
-func printAgentWorkTicketQueue(stdout io.Writer, tickets []workspace.IndexedTicket) error {
+func printAgentWorkTicketQueue(stdout io.Writer, tickets []core.IndexedTicket) error {
 	for _, ticket := range tickets {
 		_, err := fmt.Fprintf(
 			stdout,

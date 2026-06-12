@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 const agentWorkRefreshInterval = 2 * time.Second
@@ -17,7 +17,7 @@ type AgentWorkRefreshExecutor interface {
 
 // AgentWorkRefreshResult contains refreshed agent work rows for the dashboard.
 type AgentWorkRefreshResult struct {
-	Tickets       []workspace.IndexedTicket
+	Tickets       []core.IndexedTicket
 	Observability ObservabilityView
 }
 

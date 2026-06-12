@@ -57,7 +57,7 @@ Status values:
 | Plans | Refresh plans | `F6`, `r` | `chc plan list` | `service.ListPlans` | `matched` | Same plan list service. |
 | Board | Select/filter tickets | `F7`, arrows, `/` | `chc ticket list` filters | `internal/tui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
 | Board | Move between normal Board columns | `F7`, `left` / `right` or `h` / `l` | `chc ticket board` | `internal/tui.Model.selectBoardColumn`, `service.Board` | `matched` | CLI prints all Board columns; TUI navigates one compact column at a time. |
-| Board | Toggle attention view | `F7`, `alt+a` | `chc ticket board` attention summary | `internal/tui.Model.toggleBoardAttention`, `workspace.BoardAttentionReasons` | `matched` | TUI shows attention tickets separately; CLI prints attention count through the same Board service. |
+| Board | Toggle attention view | `F7`, `alt+a` | `chc ticket board` attention summary | `internal/tui.Model.toggleBoardAttention`, `core.BoardAttentionReasons` | `matched` | TUI shows attention tickets separately; CLI prints attention count through the same Board service. |
 | Board | Maximize Board ticket pane | `F7`, ticket pane, `alt+m` | `chc ticket board` | `internal/tui.renderMaximizedBoardWorkspace`, `service.Board` | `matched` | TUI renders a multi-column Board; CLI prints equivalent column data. |
 | Board | Selected ticket detail | `F7`, selected ticket detail pane | `chc ticket show <key>` | `internal/tui.Model.renderSelectedTicketDetail`, `runTicketShow` | `matched` | TUI detail includes indexed metadata and bounded Markdown context; CLI shows the selected ticket file. |
 

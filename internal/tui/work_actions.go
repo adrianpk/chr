@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // WorkActionID identifies an agent work action awaiting TUI confirmation.
@@ -30,13 +30,13 @@ type WorkActionRequest struct {
 	Action         WorkActionID
 	TicketKey      string
 	PriorityFilter string
-	Order          workspace.TicketLoopOrder
+	Order          core.TicketLoopOrder
 }
 
 // WorkActionResult contains refreshed agent work state after an action.
 type WorkActionResult struct {
 	Message       string
-	Tickets       []workspace.IndexedTicket
+	Tickets       []core.IndexedTicket
 	Observability ObservabilityView
 }
 

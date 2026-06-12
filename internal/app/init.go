@@ -7,11 +7,11 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
-	workspaceInitializer := workspace.NewWorkspace(deps.assetsFS)
+	workspaceInitializer := core.NewWorkspace(deps.assetsFS)
 
 	return &cli.Command{
 		Name:  "init",
@@ -25,7 +25,7 @@ func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			&cli.StringFlag{
 				Name:  "profile",
 				Usage: "workspace profile: standard, personal, minimal",
-				Value: workspace.DefaultProfile,
+				Value: core.DefaultProfile,
 			},
 			&cli.BoolFlag{
 				Name:  "dry-run",
@@ -37,7 +37,7 @@ func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 				return fmt.Errorf("init does not accept positional arguments")
 			}
 
-			result, err := workspaceInitializer.Init(ctx, workspace.InitOptions{
+			result, err := workspaceInitializer.Init(ctx, core.InitOptions{
 				ProjectDir: cmd.String("dir"),
 				Profile:    cmd.String("profile"),
 				DryRun:     cmd.Bool("dry-run"),
@@ -51,7 +51,7 @@ func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	}
 }
 
-func printInitResult(stdout io.Writer, result workspace.InitResult) error {
+func printInitResult(stdout io.Writer, result core.InitResult) error {
 	_, err := fmt.Fprintf(stdout, "workspace: %s\n", result.Root)
 	if err != nil {
 		return fmt.Errorf("write workspace result: %w", err)

@@ -9,7 +9,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func projectRegistryFlags() []cli.Flag {
@@ -21,13 +21,13 @@ func projectRegistryFlags() []cli.Flag {
 	}
 }
 
-func newUserEnvironmentFromCommand(cmd *cli.Command) (workspace.UserEnvironment, error) {
+func newUserEnvironmentFromCommand(cmd *cli.Command) (core.UserEnvironment, error) {
 	return newUserEnvironment(cmd.String("dev-root"))
 }
 
-func newUserEnvironment(devRoot string) (workspace.UserEnvironment, error) {
+func newUserEnvironment(devRoot string) (core.UserEnvironment, error) {
 	if devRoot != "" {
-		return workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+		return core.NewUserEnvironment(core.UserEnvironmentOptions{
 			DevMode: true,
 			DevRoot: devRoot,
 		})
@@ -38,7 +38,7 @@ func newUserEnvironment(devRoot string) (workspace.UserEnvironment, error) {
 		return nil, fmt.Errorf("resolve user home directory: %w", err)
 	}
 
-	return workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	return core.NewUserEnvironment(core.UserEnvironmentOptions{
 		HomeDir:   homeDir,
 		XDGConfig: os.Getenv("XDG_CONFIG_HOME"),
 		XDGData:   os.Getenv("XDG_DATA_HOME"),
@@ -48,13 +48,13 @@ func newUserEnvironment(devRoot string) (workspace.UserEnvironment, error) {
 }
 
 func requireWorkspace(projectDir string) error {
-	info, err := os.Stat(filepath.Join(projectDir, workspace.DirectoryName))
+	info, err := os.Stat(filepath.Join(projectDir, core.DirectoryName))
 	if err != nil {
 		return fmt.Errorf("inspect project workspace: %w", err)
 	}
 
 	if !info.IsDir() {
-		return fmt.Errorf("project workspace is not a directory: %s", filepath.Join(projectDir, workspace.DirectoryName))
+		return fmt.Errorf("project workspace is not a directory: %s", filepath.Join(projectDir, core.DirectoryName))
 	}
 
 	return nil

@@ -5,22 +5,22 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // ArtifactOperationResult is the TUI-facing result for artifact creation
 // actions.
 type ArtifactOperationResult struct {
 	Message           string
-	Tickets           []workspace.IndexedTicket
-	AuthoringSessions []workspace.AuthoringSession
+	Tickets           []core.IndexedTicket
+	AuthoringSessions []core.AuthoringSession
 }
 
 // CreateAuthoringSessionResult identifies a persisted authoring session and
 // the files created for it.
 type CreateAuthoringSessionResult struct {
-	Session workspace.AuthoringSession
-	Paths   workspace.AuthoringSessionPaths
+	Session core.AuthoringSession
+	Paths   core.AuthoringSessionPaths
 }
 
 // CreateTicketRequest carries the metadata and body for a new repository
@@ -56,7 +56,7 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 		return CreateTicketResult{}, errors.New("ticket synopsis is required")
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return CreateTicketResult{}, err
 	}
@@ -66,13 +66,13 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 		return CreateTicketResult{}, err
 	}
 
-	repository := workspace.NewTicketRepository(
+	repository := core.NewTicketRepository(
 		s.projectContext.ProjectDir,
-		workspace.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
-		workspace.WithTicketRepositoryNextKeyNumber(nextNumber),
+		core.WithTicketRepositoryKeyPrefix(config.TicketKeyPrefix),
+		core.WithTicketRepositoryNextKeyNumber(nextNumber),
 	)
 
-	result, err := repository.CreateTicket(s.ctx, workspace.CreateTicketOptions{
+	result, err := repository.CreateTicket(s.ctx, core.CreateTicketOptions{
 		Title:       request.Title,
 		Synopsis:    request.Synopsis,
 		Status:      request.Status,
@@ -103,12 +103,12 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 }
 
 func (s service) reserveNextTicketKeyNumber(keyPrefix string) (int, error) {
-	seed, err := workspace.NextTicketKeyNumber(s.ctx, s.projectContext.ProjectDir, keyPrefix)
+	seed, err := core.NextTicketKeyNumber(s.ctx, s.projectContext.ProjectDir, keyPrefix)
 	if err != nil {
 		return 0, err
 	}
 
-	repository, err := workspace.NewTicketKeySequenceRepository(s.ctx, s.env, s.assetsFS)
+	repository, err := core.NewTicketKeySequenceRepository(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return 0, err
 	}
@@ -118,7 +118,7 @@ func (s service) reserveNextTicketKeyNumber(keyPrefix string) (int, error) {
 		_ = repository.Close()
 	}()
 
-	return repository.ReserveNextTicketKey(s.ctx, workspace.ReserveNextTicketKeyOptions{
+	return repository.ReserveNextTicketKey(s.ctx, core.ReserveNextTicketKeyOptions{
 		ProjectID: s.projectContext.ProjectID,
 		Prefix:    keyPrefix,
 		Seed:      seed,
@@ -151,7 +151,7 @@ func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
 }
 
 func (s service) refreshCreatedTicketIndex(ticketPath string) error {
-	index, err := workspace.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func (s service) refreshCreatedTicketIndex(ticketPath string) error {
 		_ = index.Close()
 	}()
 
-	result, err := workspace.NewTicketReconciler(index).ReconcileProjectTicket(s.ctx, workspace.ReconcileProjectTicketOptions{
+	result, err := core.NewTicketReconciler(index).ReconcileProjectTicket(s.ctx, core.ReconcileProjectTicketOptions{
 		ProjectID:    s.projectContext.ProjectID,
 		ProjectDir:   s.projectContext.ProjectDir,
 		TicketPath:   ticketPath,
@@ -182,12 +182,12 @@ func (s service) refreshCreatedTicketIndex(ticketPath string) error {
 
 func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 	now := time.Now().UTC()
-	session := workspace.AuthoringSession{
+	session := core.AuthoringSession{
 		ID:        authoringSessionID(now),
 		ProjectID: s.projectContext.ProjectID,
-		Status:    workspace.AuthoringSessionStatusDraft,
-		Mode:      workspace.AuthoringSessionModeTUI,
-		Target:    workspace.AuthoringTargetSpec,
+		Status:    core.AuthoringSessionStatusDraft,
+		Mode:      core.AuthoringSessionModeTUI,
+		Target:    core.AuthoringTargetSpec,
 		Topic:     "TUI artifact creation",
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -209,8 +209,8 @@ func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 	return reloaded, nil
 }
 
-func (s service) CreateAuthoringSession(session workspace.AuthoringSession) (CreateAuthoringSessionResult, error) {
-	paths, err := workspace.NewAuthoringSessionRepository(s.projectContext.ProjectDir).CreateSession(s.ctx, session)
+func (s service) CreateAuthoringSession(session core.AuthoringSession) (CreateAuthoringSessionResult, error) {
+	paths, err := core.NewAuthoringSessionRepository(s.projectContext.ProjectDir).CreateSession(s.ctx, session)
 	if err != nil {
 		return CreateAuthoringSessionResult{}, err
 	}
@@ -241,7 +241,7 @@ func (s service) reloadArtifactOperationState() (ArtifactOperationResult, error)
 // TicketOperationResult is the TUI-facing result for ticket mutations.
 type TicketOperationResult struct {
 	Message string
-	Tickets []workspace.IndexedTicket
+	Tickets []core.IndexedTicket
 }
 
 // TicketCommentRequest describes a comment to append to a ticket.
@@ -255,7 +255,7 @@ type TicketCommentRequest struct {
 type TicketReviewReferenceRequest struct {
 	Key    string
 	Branch string
-	Ref    *workspace.TicketReviewRef
+	Ref    *core.TicketReviewRef
 }
 
 func (s service) AddSelectedTicketComment(ticketKey string) (TicketOperationResult, error) {
@@ -272,7 +272,7 @@ func (s service) AddTicketComment(request TicketCommentRequest) (TicketOperation
 		return TicketOperationResult{}, err
 	}
 
-	err = workspace.NewTicketCommenter().AddComment(s.ctx, workspace.AddTicketCommentOptions{
+	err = core.NewTicketCommenter().AddComment(s.ctx, core.AddTicketCommentOptions{
 		Path:      ticket.Path,
 		Author:    request.Author,
 		Body:      request.Body,
@@ -299,7 +299,7 @@ func (s service) AttachTicketReviewReference(request TicketReviewReferenceReques
 		return TicketOperationResult{}, err
 	}
 
-	err = workspace.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(s.ctx, workspace.UpdateTicketReviewMetadataOptions{
+	err = core.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(s.ctx, core.UpdateTicketReviewMetadataOptions{
 		Path:      ticket.Path,
 		Branch:    request.Branch,
 		ReviewRef: request.Ref,
@@ -334,7 +334,7 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 		return TicketOperationResult{}, err
 	}
 
-	err = workspace.NewTicketStatusUpdater().UpdateStatus(s.ctx, workspace.UpdateTicketStatusOptions{
+	err = core.NewTicketStatusUpdater().UpdateStatus(s.ctx, core.UpdateTicketStatusOptions{
 		Path:      ticket.Path,
 		Status:    status,
 		UpdatedAt: time.Now().UTC(),
@@ -354,7 +354,7 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 	}, nil
 }
 
-func (s service) listProjectTickets() ([]workspace.IndexedTicket, error) {
+func (s service) listProjectTickets() ([]core.IndexedTicket, error) {
 	board, err := s.Board()
 	if err != nil {
 		return nil, err
@@ -363,10 +363,10 @@ func (s service) listProjectTickets() ([]workspace.IndexedTicket, error) {
 	return board.Tickets, nil
 }
 
-func (s service) Board() (workspace.Board, error) {
-	index, err := workspace.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+func (s service) Board() (core.Board, error) {
+	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
-		return workspace.Board{}, err
+		return core.Board{}, err
 	}
 
 	defer func() {
@@ -376,18 +376,18 @@ func (s service) Board() (workspace.Board, error) {
 
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
-		return workspace.Board{}, err
+		return core.Board{}, err
 	}
 
-	return workspace.NewBoardQuery(index).ProjectBoard(s.ctx, workspace.BoardQueryOptions{
+	return core.NewBoardQuery(index).ProjectBoard(s.ctx, core.BoardQueryOptions{
 		ProjectID: s.projectContext.ProjectID,
 	})
 }
 
-func (s service) ticketByKey(key string) (workspace.IndexedTicket, error) {
-	index, err := workspace.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+func (s service) ticketByKey(key string) (core.IndexedTicket, error) {
+	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
-		return workspace.IndexedTicket{}, err
+		return core.IndexedTicket{}, err
 	}
 
 	defer func() {
@@ -397,7 +397,7 @@ func (s service) ticketByKey(key string) (workspace.IndexedTicket, error) {
 
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
-		return workspace.IndexedTicket{}, err
+		return core.IndexedTicket{}, err
 	}
 
 	return index.GetProjectTicketByKey(s.ctx, s.projectContext.ProjectID, key)

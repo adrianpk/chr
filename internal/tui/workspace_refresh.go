@@ -3,7 +3,7 @@ package tui
 import (
 	"fmt"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // WorkspaceRefreshExecutor rebuilds workspace graph and index state for the
@@ -15,12 +15,12 @@ type WorkspaceRefreshExecutor interface {
 // WorkspaceRefreshResult contains refreshed workspace state for the TUI.
 type WorkspaceRefreshResult struct {
 	Message              string
-	Graph                workspace.WorkspaceGraph
-	Index                workspace.WorkspaceIndex
-	IndexHealth          workspace.WorkspaceIndexHealth
-	IndexChanges         workspace.WorkspaceIndexChanges
-	IndexCache           workspace.WorkspaceIndexCacheState
-	SemanticDigestStates []workspace.WorkspaceSemanticDigestState
+	Graph                core.WorkspaceGraph
+	Index                core.WorkspaceIndex
+	IndexHealth          core.WorkspaceIndexHealth
+	IndexChanges         core.WorkspaceIndexChanges
+	IndexCache           core.WorkspaceIndexCacheState
+	SemanticDigestStates []core.WorkspaceSemanticDigestState
 }
 
 func (m *Model) refreshWorkspace() {
@@ -45,7 +45,7 @@ func (m *Model) refreshWorkspace() {
 	result.IndexChanges = result.Index.ChangesSince(m.workspaceIndex)
 	m.workspaceGraph = result.Graph
 	m.workspaceIndex = result.Index
-	m.semanticDigestStates = append([]workspace.WorkspaceSemanticDigestState(nil), result.SemanticDigestStates...)
+	m.semanticDigestStates = append([]core.WorkspaceSemanticDigestState(nil), result.SemanticDigestStates...)
 	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
 	m.cases = casesFromWorkspaceIndex(result.Index, result.Graph, m.cases)
 	m.clampSelectedCase()
@@ -69,7 +69,7 @@ func (m *Model) refreshWorkspaceGraphAfterWrite() bool {
 	result.IndexChanges = result.Index.ChangesSince(m.workspaceIndex)
 	m.workspaceGraph = result.Graph
 	m.workspaceIndex = result.Index
-	m.semanticDigestStates = append([]workspace.WorkspaceSemanticDigestState(nil), result.SemanticDigestStates...)
+	m.semanticDigestStates = append([]core.WorkspaceSemanticDigestState(nil), result.SemanticDigestStates...)
 	m.projectMetadata = projectMetadataFromWorkspaceGraph(m.projectMetadata, result.Graph)
 	m.cases = casesFromWorkspaceIndex(result.Index, result.Graph, m.cases)
 	m.clampSelectedCase()
@@ -77,18 +77,18 @@ func (m *Model) refreshWorkspaceGraphAfterWrite() bool {
 	return true
 }
 
-func workspaceIndexFromRefreshResult(result WorkspaceRefreshResult) workspace.WorkspaceIndex {
+func workspaceIndexFromRefreshResult(result WorkspaceRefreshResult) core.WorkspaceIndex {
 	if len(result.Index.NodesByID) > 0 {
 		return result.Index
 	}
 
-	return workspace.NewWorkspaceIndexFromGraph(result.Graph)
+	return core.NewWorkspaceIndexFromGraph(result.Graph)
 }
 
 func projectMetadataFromWorkspaceGraph(
-	current workspace.ProjectMetadata,
-	graph workspace.WorkspaceGraph,
-) workspace.ProjectMetadata {
+	current core.ProjectMetadata,
+	graph core.WorkspaceGraph,
+) core.ProjectMetadata {
 	if graph.Project == nil {
 		return current
 	}

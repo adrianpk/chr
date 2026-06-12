@@ -5,31 +5,31 @@ import (
 	"fmt"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // WorkOperationResult is the TUI-facing result for agent work operations.
 type WorkOperationResult struct {
 	Message string
-	Tickets []workspace.IndexedTicket
+	Tickets []core.IndexedTicket
 }
 
 // AgentWorkResult summarizes runnable agent work for the dashboard.
 type AgentWorkResult struct {
 	Message       string
-	Tickets       []workspace.IndexedTicket
-	Execution     *workspace.ExecutionRecord
-	LoopRun       *workspace.LoopRunRecord
-	Executions    []workspace.ExecutionRecord
-	SelectedQueue []workspace.IndexedTicket
+	Tickets       []core.IndexedTicket
+	Execution     *core.ExecutionRecord
+	LoopRun       *core.LoopRunRecord
+	Executions    []core.ExecutionRecord
+	SelectedQueue []core.IndexedTicket
 	EligibleCount int
 }
 
 // AgentWorkSelectionOptions filters agent work selection.
 type AgentWorkSelectionOptions struct {
 	Statuses      []string
-	Filters       workspace.TicketLoopFilters
-	Order         workspace.TicketLoopOrder
+	Filters       core.TicketLoopFilters
+	Order         core.TicketLoopOrder
 	MaxIterations int
 }
 
@@ -58,9 +58,9 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 	}
 	defer release()
 
-	if !workspace.RuntimeValidationPassed(preflight.Runtime.Checks) {
-		return AgentWorkResult{}, workspace.NewExecutionFailure(
-			workspace.ExecutionFailureRuntime,
+	if !core.RuntimeValidationPassed(preflight.Runtime.Checks) {
+		return AgentWorkResult{}, core.NewExecutionFailure(
+			core.ExecutionFailureRuntime,
 			errors.New("runtime validation failed"),
 		)
 	}
@@ -100,40 +100,40 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 	}, nil
 }
 
-func (s service) prepareAgentWorkTicket(ticketKey string) (workspace.IndexedTicket, ticketStartPreflight, func(), error) {
+func (s service) prepareAgentWorkTicket(ticketKey string) (core.IndexedTicket, ticketStartPreflight, func(), error) {
 	err := s.ensureAgentWorkRuntime()
 	if err != nil {
-		return workspace.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
 	}
 
 	ticket, err := s.ticketByKey(ticketKey)
 	if err != nil {
-		return workspace.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
 	}
 
 	tickets, err := s.listProjectTickets()
 	if err != nil {
-		return workspace.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
 	}
 
 	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
 	if err != nil {
-		return workspace.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
 	}
 
-	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, workspace.AgentOperationDevelopment)
+	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
 	if err != nil {
-		return workspace.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
+		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
 	}
 
 	preflight, err := buildTicketStartPreflightForTicket(s.ctx, s.env, s.projectContext, ticket, s.assetsFS)
 	if err != nil {
 		releaseErr := lock.Release()
 		if releaseErr != nil {
-			return workspace.IndexedTicket{}, ticketStartPreflight{}, noopRelease, releaseErr
+			return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, releaseErr
 		}
 
-		return workspace.IndexedTicket{}, ticketStartPreflight{}, noopRelease, workspace.NewExecutionFailure(workspace.ExecutionFailurePreflight, err)
+		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
 	return ticket, preflight, releaseAgentOperationLock(lock), nil
@@ -194,8 +194,8 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 	}, nil
 }
 
-func (s service) startAgentWorkLoop(tickets []workspace.IndexedTicket, eligibleCount int) (AgentWorkResult, error) {
-	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, workspace.AgentOperationDevelopment)
+func (s service) startAgentWorkLoop(tickets []core.IndexedTicket, eligibleCount int) (AgentWorkResult, error) {
+	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -258,8 +258,8 @@ func (s service) RequestDaemonStop() (WorkOperationResult, error) {
 	return result, nil
 }
 
-func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]workspace.IndexedTicket, int, error) {
-	index, err := workspace.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]core.IndexedTicket, int, error) {
+	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -274,7 +274,7 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]workspa
 		return nil, 0, err
 	}
 
-	tickets, err := workspace.NewTicketLoopQuery(index).EligibleTickets(s.ctx, workspace.TicketLoopQueryOptions{
+	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(s.ctx, core.TicketLoopQueryOptions{
 		ProjectID: s.projectContext.ProjectID,
 		Statuses:  agentWorkStatuses(opts.Statuses),
 		Filters:   opts.Filters,
@@ -295,13 +295,13 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]workspa
 	return tickets, len(eligibleTickets), nil
 }
 
-func (s service) applyAgentWorkSelectionPreflight(index workspace.TicketIndex, tickets []workspace.IndexedTicket) ([]workspace.IndexedTicket, error) {
+func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, tickets []core.IndexedTicket) ([]core.IndexedTicket, error) {
 	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
 	if err != nil {
 		return nil, err
 	}
 
-	preflight, err := workspace.RunWorkSelectionPreflight(s.ctx, workspace.WorkSelectionPreflightOptions{
+	preflight, err := core.RunWorkSelectionPreflight(s.ctx, core.WorkSelectionPreflightOptions{
 		ProjectDir:        s.projectContext.ProjectDir,
 		Tickets:           allTickets,
 		RequireUpdatedDev: true,
@@ -323,23 +323,23 @@ func (s service) applyAgentWorkSelectionPreflight(index workspace.TicketIndex, t
 
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
-		Statuses:      []string{workspace.TicketStatusReadyForDev},
-		Order:         workspace.TicketLoopOrderCreatedAt,
+		Statuses:      []string{core.TicketStatusReadyForDev},
+		Order:         core.TicketLoopOrderCreatedAt,
 		MaxIterations: maxIterations,
 	}
 }
 
 func agentWorkStatuses(statuses []string) []string {
 	if len(statuses) == 0 {
-		return []string{workspace.TicketStatusReadyForDev}
+		return []string{core.TicketStatusReadyForDev}
 	}
 
 	return statuses
 }
 
-func agentWorkOrder(order workspace.TicketLoopOrder) workspace.TicketLoopOrder {
+func agentWorkOrder(order core.TicketLoopOrder) core.TicketLoopOrder {
 	if order == "" {
-		return workspace.TicketLoopOrderCreatedAt
+		return core.TicketLoopOrderCreatedAt
 	}
 
 	return order
@@ -364,7 +364,7 @@ func (s service) reloadWorkOperationState() (WorkOperationResult, error) {
 }
 
 func (s service) ensureAgentWorkRuntime() error {
-	_, err := workspace.NewRuntimeAssets(s.assetsFS).Init(s.ctx, workspace.RuntimeInitOptions{
+	_, err := core.NewRuntimeAssets(s.assetsFS).Init(s.ctx, core.RuntimeInitOptions{
 		ProjectDir: s.projectContext.ProjectDir,
 	})
 	if err != nil {

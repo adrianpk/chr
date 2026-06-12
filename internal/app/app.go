@@ -9,8 +9,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
+	"forge.adrianpk.com/chc/internal/core"
 	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 type appDependencies struct {
@@ -150,7 +150,7 @@ func runTUICommandAction(stdin io.Reader, stdout io.Writer, deps appDependencies
 
 func loadTUIOptions(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	stdin io.Reader,
 	stdout io.Writer,
@@ -223,12 +223,12 @@ func loadTUIContentData(data *tuiOptionsData) error {
 }
 
 func loadTUIMetadataData(data *tuiOptionsData) error {
-	projectMetadata, err := workspace.NewProjectMetadataService(data.projectContext.ProjectDir).Load()
+	projectMetadata, err := core.NewProjectMetadataService(data.projectContext.ProjectDir).Load()
 	if err != nil {
 		return err
 	}
 
-	cases, err := workspace.NewCaseMetadataService(data.projectContext.ProjectDir).LoadAll()
+	cases, err := core.NewCaseMetadataService(data.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return err
 	}
@@ -267,44 +267,44 @@ func loadTUIIndexData(data *tuiOptionsData) error {
 func loadTUIWorkspaceState(
 	ctx context.Context,
 	projectContext commandProjectContext,
-) (workspace.WorkspaceGraph, workspace.WorkspaceIndex, []workspace.WorkspaceSemanticDigestState, error) {
-	result, err := workspace.NewWorkspaceGraphBuilder(projectContext.ProjectDir).BuildCachedIndex(ctx)
+) (core.WorkspaceGraph, core.WorkspaceIndex, []core.WorkspaceSemanticDigestState, error) {
+	result, err := core.NewWorkspaceGraphBuilder(projectContext.ProjectDir).BuildCachedIndex(ctx)
 	if err != nil {
-		return workspace.WorkspaceGraph{}, workspace.WorkspaceIndex{}, nil, err
+		return core.WorkspaceGraph{}, core.WorkspaceIndex{}, nil, err
 	}
 
-	cache, err := workspace.ReadWorkspaceSemanticDigestCache(
-		workspace.WorkspaceSemanticDigestCachePath(projectContext.ProjectDir),
+	cache, err := core.ReadWorkspaceSemanticDigestCache(
+		core.WorkspaceSemanticDigestCachePath(projectContext.ProjectDir),
 	)
 	if err != nil {
-		return workspace.WorkspaceGraph{}, workspace.WorkspaceIndex{}, nil, err
+		return core.WorkspaceGraph{}, core.WorkspaceIndex{}, nil, err
 	}
 
-	states := workspace.WorkspaceSemanticDigestStates(result.Index, cache, "", "")
+	states := core.WorkspaceSemanticDigestStates(result.Index, cache, "", "")
 
 	return result.Graph, result.Index, states, nil
 }
 
 type tuiOptionsData struct {
 	ctx                  context.Context
-	env                  workspace.UserEnvironment
+	env                  core.UserEnvironment
 	projectContext       commandProjectContext
 	stdin                io.Reader
 	stdout               io.Writer
 	assetsFS             fs.FS
-	tickets              []workspace.IndexedTicket
+	tickets              []core.IndexedTicket
 	documents            []tui.DocumentView
 	dumps                []tui.DumpView
 	quizzes              []tui.QuizView
 	specs                []tui.SpecView
 	plans                []tui.PlanView
-	projectMetadata      workspace.ProjectMetadata
-	cases                []workspace.CaseMetadata
-	authoringSessions    []workspace.AuthoringSession
+	projectMetadata      core.ProjectMetadata
+	cases                []core.CaseMetadata
+	authoringSessions    []core.AuthoringSession
 	observability        tui.ObservabilityView
-	workspaceGraph       workspace.WorkspaceGraph
-	workspaceIndex       workspace.WorkspaceIndex
-	semanticDigestStates []workspace.WorkspaceSemanticDigestState
+	workspaceGraph       core.WorkspaceGraph
+	workspaceIndex       core.WorkspaceIndex
+	semanticDigestStates []core.WorkspaceSemanticDigestState
 	operations           service
 }
 
@@ -344,10 +344,10 @@ func newTUIOptions(data tuiOptionsData) tui.Options {
 
 func loadTUITickets(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
-) ([]workspace.IndexedTicket, error) {
+) ([]core.IndexedTicket, error) {
 	board, err := newService(ctx, env, projectContext, assetsFS).Board()
 	if err != nil {
 		return nil, err
@@ -359,8 +359,8 @@ func loadTUITickets(
 func loadTUIAuthoringSessions(
 	ctx context.Context,
 	projectContext commandProjectContext,
-) ([]workspace.AuthoringSession, error) {
-	sessions, err := workspace.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
+) ([]core.AuthoringSession, error) {
+	sessions, err := core.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +370,7 @@ func loadTUIAuthoringSessions(
 
 func loadTUIObservability(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
 ) (tui.ObservabilityView, error) {
@@ -389,12 +389,12 @@ func loadTUIObservability(
 		return tui.ObservabilityView{}, err
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return tui.ObservabilityView{}, err
 	}
 
-	runtime, err := workspace.ValidateRuntime(workspace.RuntimeValidationOptions{
+	runtime, err := core.ValidateRuntime(core.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -405,10 +405,10 @@ func loadTUIObservability(
 	return tui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime), nil
 }
 
-func loadTUIDaemonState(ctx context.Context, env workspace.UserEnvironment, assetsFS fs.FS) (workspace.DaemonState, error) {
-	repository, err := workspace.NewDaemonStateRepository(ctx, env, assetsFS)
+func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) (core.DaemonState, error) {
+	repository, err := core.NewDaemonStateRepository(ctx, env, assetsFS)
 	if err != nil {
-		return workspace.DaemonState{}, err
+		return core.DaemonState{}, err
 	}
 
 	defer func() {
@@ -417,12 +417,12 @@ func loadTUIDaemonState(ctx context.Context, env workspace.UserEnvironment, asse
 	}()
 
 	state, err := repository.GetDaemonState(ctx)
-	if errors.Is(err, workspace.ErrDaemonStateNotFound) {
-		return workspace.NewStoppedDaemonState(time.Now().UTC()), nil
+	if errors.Is(err, core.ErrDaemonStateNotFound) {
+		return core.NewStoppedDaemonState(time.Now().UTC()), nil
 	}
 
 	if err != nil {
-		return workspace.DaemonState{}, err
+		return core.DaemonState{}, err
 	}
 
 	return state, nil
@@ -430,11 +430,11 @@ func loadTUIDaemonState(ctx context.Context, env workspace.UserEnvironment, asse
 
 func loadTUIExecutions(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectID string,
 	assetsFS fs.FS,
-) ([]workspace.ExecutionRecord, error) {
-	repository, err := workspace.NewExecutionRepository(ctx, env, assetsFS)
+) ([]core.ExecutionRecord, error) {
+	repository, err := core.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err
 	}
@@ -454,11 +454,11 @@ func loadTUIExecutions(
 
 func loadTUILoopRuns(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectID string,
 	assetsFS fs.FS,
-) ([]workspace.LoopRunRecord, error) {
-	repository, err := workspace.NewLoopRunRepository(ctx, env, assetsFS)
+) ([]core.LoopRunRecord, error) {
+	repository, err := core.NewLoopRunRepository(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err
 	}

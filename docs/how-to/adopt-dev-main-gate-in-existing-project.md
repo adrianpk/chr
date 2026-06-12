@@ -21,7 +21,7 @@ This creates the project-local ChrysoCoord workspace under:
 .chc/user/
 ```
 
-The dev-to-main gate reads and writes under that workspace. It does not read
+The dev-to-main gate reads and writes under that core. It does not read
 unrelated project planning directories.
 
 ## Start With Informational Traceability
@@ -66,7 +66,7 @@ chc gate dev-main --base origin/main --head origin/dev
 ```
 
 Use local refs that match the project's branch model. The command requires a
-Git repository and a ChrysoCoord workspace.
+Git repository and a ChrysoCoord core.
 
 ## Read The Baseline Evidence
 

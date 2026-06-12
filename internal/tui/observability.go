@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // ObservabilityView summarizes execution, loop, and runtime observability.
@@ -61,10 +61,10 @@ type RuntimeCheckView struct {
 // NewObservabilityView selects the latest observability records for the TUI.
 func NewObservabilityView(
 	projectDir string,
-	daemon workspace.DaemonState,
-	executions []workspace.ExecutionRecord,
-	loops []workspace.LoopRunRecord,
-	runtime workspace.RuntimeValidationResult,
+	daemon core.DaemonState,
+	executions []core.ExecutionRecord,
+	loops []core.LoopRunRecord,
+	runtime core.RuntimeValidationResult,
 ) ObservabilityView {
 	return ObservabilityView{
 		DaemonStatus:             string(daemon.Status),
@@ -186,8 +186,8 @@ func renderExecutionDetail(execution ExecutionView) string {
 	return output.String()
 }
 
-func latestExecution(executions []workspace.ExecutionRecord) workspace.ExecutionRecord {
-	var latest workspace.ExecutionRecord
+func latestExecution(executions []core.ExecutionRecord) core.ExecutionRecord {
+	var latest core.ExecutionRecord
 	for _, execution := range executions {
 		if latest.ID == "" || execution.UpdatedAt.After(latest.UpdatedAt) {
 			latest = execution
@@ -197,8 +197,8 @@ func latestExecution(executions []workspace.ExecutionRecord) workspace.Execution
 	return latest
 }
 
-func latestLoopRun(loops []workspace.LoopRunRecord) workspace.LoopRunRecord {
-	var latest workspace.LoopRunRecord
+func latestLoopRun(loops []core.LoopRunRecord) core.LoopRunRecord {
+	var latest core.LoopRunRecord
 	for _, loop := range loops {
 		if latest.ID == "" || loop.UpdatedAt.After(latest.UpdatedAt) {
 			latest = loop
@@ -208,7 +208,7 @@ func latestLoopRun(loops []workspace.LoopRunRecord) workspace.LoopRunRecord {
 	return latest
 }
 
-func newExecutionView(projectDir string, execution workspace.ExecutionRecord) ExecutionView {
+func newExecutionView(projectDir string, execution core.ExecutionRecord) ExecutionView {
 	if execution.ID == "" {
 		return ExecutionView{}
 	}
@@ -226,7 +226,7 @@ func newExecutionView(projectDir string, execution workspace.ExecutionRecord) Ex
 	}
 }
 
-func newLoopRunView(loop workspace.LoopRunRecord) LoopRunView {
+func newLoopRunView(loop core.LoopRunRecord) LoopRunView {
 	if loop.ID == "" {
 		return LoopRunView{}
 	}
@@ -243,7 +243,7 @@ func newLoopRunView(loop workspace.LoopRunRecord) LoopRunView {
 	}
 }
 
-func newRuntimeCheckViews(projectDir string, checks []workspace.RuntimeValidationCheck) []RuntimeCheckView {
+func newRuntimeCheckViews(projectDir string, checks []core.RuntimeValidationCheck) []RuntimeCheckView {
 	views := make([]RuntimeCheckView, 0, len(checks))
 	for _, check := range checks {
 		views = append(views, RuntimeCheckView{

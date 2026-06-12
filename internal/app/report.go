@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newReportCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -115,7 +115,7 @@ func runReportList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	reports, err := workspace.NewReportLister().ListProjectReports(ctx, projectContext.ProjectDir, filter)
+	reports, err := core.NewReportLister().ListProjectReports(ctx, projectContext.ProjectDir, filter)
 	if err != nil {
 		return err
 	}
@@ -152,13 +152,13 @@ func runReportShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	result, err := workspace.NewReportLookupService().LookupReport(ctx, projectContext.ProjectDir, request)
+	result, err := core.NewReportLookupService().LookupReport(ctx, projectContext.ProjectDir, request)
 	if err != nil {
 		return err
 	}
 
 	if cmd.Bool("metadata") {
-		return printReportList(stdout, []workspace.ReportListEntry{result.Entry})
+		return printReportList(stdout, []core.ReportListEntry{result.Entry})
 	}
 
 	_, err = fmt.Fprint(stdout, result.Body)
@@ -169,13 +169,13 @@ func runReportShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return nil
 }
 
-func reportListFilterFromCommand(cmd *cli.Command) (workspace.ReportListFilter, error) {
+func reportListFilterFromCommand(cmd *cli.Command) (core.ReportListFilter, error) {
 	kind, err := reportKindFromString(cmd.String("kind"))
 	if err != nil {
-		return workspace.ReportListFilter{}, err
+		return core.ReportListFilter{}, err
 	}
 
-	return workspace.ReportListFilter{
+	return core.ReportListFilter{
 		Kind:        kind,
 		TicketKey:   cmd.String("ticket"),
 		ExecutionID: cmd.String("execution"),
@@ -184,10 +184,10 @@ func reportListFilterFromCommand(cmd *cli.Command) (workspace.ReportListFilter, 
 	}, nil
 }
 
-func reportLookupRequestFromCommand(cmd *cli.Command) (workspace.ReportLookupRequest, error) {
+func reportLookupRequestFromCommand(cmd *cli.Command) (core.ReportLookupRequest, error) {
 	kind, err := reportKindFromString(cmd.String("kind"))
 	if err != nil {
-		return workspace.ReportLookupRequest{}, err
+		return core.ReportLookupRequest{}, err
 	}
 
 	reportID := ""
@@ -195,7 +195,7 @@ func reportLookupRequestFromCommand(cmd *cli.Command) (workspace.ReportLookupReq
 		reportID = cmd.Args().First()
 	}
 
-	request := workspace.ReportLookupRequest{
+	request := core.ReportLookupRequest{
 		ReportID:    reportID,
 		Kind:        kind,
 		TicketKey:   cmd.String("ticket"),
@@ -205,13 +205,13 @@ func reportLookupRequestFromCommand(cmd *cli.Command) (workspace.ReportLookupReq
 	}
 
 	if reportLookupRequestIsEmpty(request) {
-		return workspace.ReportLookupRequest{}, fmt.Errorf("report show requires a report id or lookup filter")
+		return core.ReportLookupRequest{}, fmt.Errorf("report show requires a report id or lookup filter")
 	}
 
 	return request, nil
 }
 
-func reportLookupRequestIsEmpty(request workspace.ReportLookupRequest) bool {
+func reportLookupRequestIsEmpty(request core.ReportLookupRequest) bool {
 	return request.ReportID == "" &&
 		request.Kind == "" &&
 		request.TicketKey == "" &&
@@ -220,20 +220,20 @@ func reportLookupRequestIsEmpty(request workspace.ReportLookupRequest) bool {
 		request.Status == ""
 }
 
-func reportKindFromString(value string) (workspace.ReportKind, error) {
+func reportKindFromString(value string) (core.ReportKind, error) {
 	switch value {
 	case "":
 		return "", nil
-	case string(workspace.ReportKindExecution):
-		return workspace.ReportKindExecution, nil
-	case string(workspace.ReportKindLoop):
-		return workspace.ReportKindLoop, nil
+	case string(core.ReportKindExecution):
+		return core.ReportKindExecution, nil
+	case string(core.ReportKindLoop):
+		return core.ReportKindLoop, nil
 	default:
 		return "", fmt.Errorf("unsupported report kind: %s", value)
 	}
 }
 
-func printReportList(stdout io.Writer, reports []workspace.ReportListEntry) error {
+func printReportList(stdout io.Writer, reports []core.ReportListEntry) error {
 	for _, report := range reports {
 		_, err := fmt.Fprintf(
 			stdout,

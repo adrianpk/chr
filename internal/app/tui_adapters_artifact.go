@@ -3,8 +3,8 @@ package app
 import (
 	"errors"
 
+	"forge.adrianpk.com/chc/internal/core"
 	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 type tuiWorkspaceRefreshExecutor struct {
@@ -49,7 +49,7 @@ func newTUIProjectMetadataExecutor(
 }
 
 func (e tuiProjectMetadataExecutor) SaveProjectMetadata(
-	metadata workspace.ProjectMetadata,
+	metadata core.ProjectMetadata,
 ) (tui.ProjectMetadataResult, error) {
 	result, err := e.operations.SaveProjectMetadata(metadata)
 	if err != nil {
@@ -75,7 +75,7 @@ func newTUICaseMetadataExecutor(
 }
 
 func (e tuiCaseMetadataExecutor) SaveCaseMetadata(
-	metadata workspace.CaseMetadata,
+	metadata core.CaseMetadata,
 ) (tui.CaseMetadataResult, error) {
 	result, err := e.operations.SaveCaseMetadata(metadata)
 	if err != nil {

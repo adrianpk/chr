@@ -12,7 +12,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newAuthorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -28,8 +28,8 @@ func newAuthorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	}
 }
 
-var newAuthoringQuizQuestionProvider = func() workspace.AuthoringQuizQuestionProvider {
-	return workspace.CodexAuthoringQuizQuestionProvider{}
+var newAuthoringQuizQuestionProvider = func() core.AuthoringQuizQuestionProvider {
+	return core.CodexAuthoringQuizQuestionProvider{}
 }
 
 func newAuthorAssistedCommand(stdout io.Writer) *cli.Command {
@@ -183,7 +183,7 @@ func authorAssistedStartFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(workspace.AuthoringTargetSpec),
+			Value: string(core.AuthoringTargetSpec),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -262,7 +262,7 @@ func authorAssistedFinalizeFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "target-kind",
 			Usage: "target artifact kind",
-			Value: string(workspace.AuthoringArtifactKindSpec),
+			Value: string(core.AuthoringArtifactKindSpec),
 		},
 		&cli.StringFlag{
 			Name:  "target-name",
@@ -280,12 +280,12 @@ func authorSessionFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "authoring mode",
-			Value: string(workspace.AuthoringSessionModeMarkdownDirect),
+			Value: string(core.AuthoringSessionModeMarkdownDirect),
 		},
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(workspace.AuthoringTargetDraft),
+			Value: string(core.AuthoringTargetDraft),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -303,7 +303,7 @@ func authorQuizNewFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(workspace.AuthoringTargetSpec),
+			Value: string(core.AuthoringTargetSpec),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -452,7 +452,7 @@ func runAuthorSessionList(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	sessions, err := workspace.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
+	sessions, err := core.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
 	if err != nil {
 		return err
 	}
@@ -490,7 +490,7 @@ func runAuthorSessionShow(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	repository := workspace.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := core.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSession(ctx, repository, cmd.Args().First())
 	if err != nil {
@@ -525,10 +525,10 @@ func runAuthorContextualQuizNew(
 	cmd *cli.Command,
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	session workspace.AuthoringSession,
+	session core.AuthoringSession,
 	now time.Time,
 ) error {
-	plan, err := workspace.PlanContextualQuizGeneration(ctx, workspace.ContextualQuizGenerationOptions{
+	plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
 		ProjectDir:    projectContext.ProjectDir,
 		Session:       session,
 		Now:           now,
@@ -545,12 +545,12 @@ func runAuthorContextualQuizNew(
 		return printAuthorContextualQuizPlan(stdout, plan, true, projectContext.ProjectDir)
 	}
 
-	err = workspace.WriteContextualQuiz(plan)
+	err = core.WriteContextualQuiz(plan)
 	if err != nil {
 		return err
 	}
 
-	_, err = workspace.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
+	_, err = core.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, plan.Session)
 	if err != nil {
 		return err
 	}
@@ -575,7 +575,7 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 		return fmt.Errorf("quiz path is required")
 	}
 
-	repository := workspace.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := core.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSessionForPromotion(
 		ctx,
@@ -588,7 +588,7 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 		return err
 	}
 
-	plan, err := workspace.PlanQuizToDraftPromotion(workspace.QuizToDraftPromotionOptions{
+	plan, err := core.PlanQuizToDraftPromotion(core.QuizToDraftPromotionOptions{
 		ProjectDir:   projectContext.ProjectDir,
 		Session:      session,
 		QuizPath:     quizPath,
@@ -604,7 +604,7 @@ func runAuthorPromoteQuizToDraft(ctx context.Context, cmd *cli.Command, stdout i
 		return printAuthorPromotionPlan(stdout, plan, true)
 	}
 
-	err = workspace.WriteQuizToDraftPromotion(plan)
+	err = core.WriteQuizToDraftPromotion(plan)
 	if err != nil {
 		return err
 	}
@@ -634,7 +634,7 @@ func runAuthorAssistedStart(ctx context.Context, cmd *cli.Command, stdout io.Wri
 		return err
 	}
 
-	paths, err := workspace.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, session)
+	paths, err := core.NewAuthoringSessionRepository(projectContext.ProjectDir).CreateSession(ctx, session)
 	if err != nil {
 		return err
 	}
@@ -663,23 +663,23 @@ func runAuthorAssistedResume(ctx context.Context, cmd *cli.Command, stdout io.Wr
 	}
 
 	now := time.Now().UTC()
-	response := workspace.AssistedModelResponse{
+	response := core.AssistedModelResponse{
 		ID:        "response-" + authoringSessionID(now),
 		Provider:  "fake",
-		Status:    workspace.AssistedModelResponseReady,
-		Question:  workspace.AssistedAuthoringQuestion{ID: "question-" + authoringSessionID(now), Prompt: question, Required: true},
+		Status:    core.AssistedModelResponseReady,
+		Question:  core.AssistedAuthoringQuestion{ID: "question-" + authoringSessionID(now), Prompt: question, Required: true},
 		RawText:   question,
 		CreatedAt: now,
 	}
 
-	result, err := workspace.AskNextAssistedQuizQuestion(ctx, workspace.AssistedQuizLoopOptions{
+	result, err := core.AskNextAssistedQuizQuestion(ctx, core.AssistedQuizLoopOptions{
 		Config:           assistedConfigFromCommand(cmd, state.Session),
 		Session:          state.Session,
 		SessionPaths:     state.Paths,
 		ContextPackage:   state.ContextPackage,
 		TranscriptEvents: state.Events,
 		Repository:       state.Repository,
-		Adapter:          &workspace.FakeAssistedModelAdapter{Responses: []workspace.AssistedModelResponse{response}},
+		Adapter:          &core.FakeAssistedModelAdapter{Responses: []core.AssistedModelResponse{response}},
 		Now:              func() time.Time { return now },
 	})
 	if err != nil {
@@ -699,12 +699,12 @@ func runAuthorAssistedAnswer(ctx context.Context, cmd *cli.Command, stdout io.Wr
 		return err
 	}
 
-	result, err := workspace.AnswerAssistedQuizQuestion(ctx, workspace.AssistedQuizAnswerOptions{
+	result, err := core.AnswerAssistedQuizQuestion(ctx, core.AssistedQuizAnswerOptions{
 		SessionID:  state.Session.ID,
 		TurnID:     strings.TrimSpace(cmd.String("turn")),
 		TurnIndex:  cmd.Int("turn-index"),
-		Intent:     workspace.AssistedAuthoringIntentDiscover,
-		Question:   workspace.AssistedAuthoringQuestion{ID: strings.TrimSpace(cmd.String("question-id")), Prompt: strings.TrimSpace(cmd.String("question")), Required: true},
+		Intent:     core.AssistedAuthoringIntentDiscover,
+		Question:   core.AssistedAuthoringQuestion{ID: strings.TrimSpace(cmd.String("question-id")), Prompt: strings.TrimSpace(cmd.String("question")), Required: true},
 		AnswerText: strings.TrimSpace(cmd.String("answer")),
 		UserStop:   cmd.Bool("stop"),
 		Repository: state.Repository,
@@ -747,12 +747,12 @@ func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.
 
 	now := time.Now().UTC()
 
-	curation, err := workspace.CurateAssistedAnswers(ctx, workspace.AssistedAnswerCurationOptions{
+	curation, err := core.CurateAssistedAnswers(ctx, core.AssistedAnswerCurationOptions{
 		Session:          state.Session,
 		SessionPaths:     state.Paths,
 		TranscriptEvents: state.Events,
 		Repository:       state.Repository,
-		Adapter: &workspace.FakeAssistedModelAdapter{Responses: []workspace.AssistedModelResponse{
+		Adapter: &core.FakeAssistedModelAdapter{Responses: []core.AssistedModelResponse{
 			authorAssistedCurationResponse(state.Session, summaryText, now),
 		}},
 		Now: func() time.Time { return now },
@@ -761,12 +761,12 @@ func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.
 		return err
 	}
 
-	synthesis, err := workspace.SynthesizeAssistedArtifact(ctx, workspace.AssistedArtifactSynthesisOptions{
+	synthesis, err := core.SynthesizeAssistedArtifact(ctx, core.AssistedArtifactSynthesisOptions{
 		ProjectDir:     state.ProjectDir,
 		Session:        curation.Session,
 		CuratedSummary: curation.Summary,
 		SourceRef:      curation.ArtifactRef,
-		TargetKind:     workspace.AuthoringArtifactKind(cmd.String("target-kind")),
+		TargetKind:     core.AuthoringArtifactKind(cmd.String("target-kind")),
 		TargetName:     strings.TrimSpace(cmd.String("target-name")),
 		AllowReplace:   cmd.Bool("allow-replace"),
 		Repository:     state.Repository,
@@ -781,11 +781,11 @@ func runAuthorAssistedFinalize(ctx context.Context, cmd *cli.Command, stdout io.
 
 type authorAssistedState struct {
 	ProjectDir     string
-	Session        workspace.AuthoringSession
-	Paths          workspace.AuthoringSessionPaths
-	Events         []workspace.AssistedTranscriptEvent
-	ContextPackage workspace.AssistedAuthoringContextPackage
-	Repository     workspace.AuthoringSessionRepository
+	Session        core.AuthoringSession
+	Paths          core.AuthoringSessionPaths
+	Events         []core.AssistedTranscriptEvent
+	ContextPackage core.AssistedAuthoringContextPackage
+	Repository     core.AuthoringSessionRepository
 }
 
 func loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssistedState, error) {
@@ -799,21 +799,21 @@ func loadAuthorAssistedState(ctx context.Context, cmd *cli.Command) (authorAssis
 		return authorAssistedState{}, fmt.Errorf("authoring session is required")
 	}
 
-	repository := workspace.NewAuthoringSessionRepository(projectContext.ProjectDir)
+	repository := core.NewAuthoringSessionRepository(projectContext.ProjectDir)
 
 	session, err := resolveAuthoringSession(ctx, repository, sessionHandle)
 	if err != nil {
 		return authorAssistedState{}, err
 	}
 
-	paths := workspace.AuthoringSessionLayout(projectContext.ProjectDir, session.ID)
+	paths := core.AuthoringSessionLayout(projectContext.ProjectDir, session.ID)
 
 	events, err := repository.ListTranscriptEvents(ctx, session.ID)
 	if err != nil {
 		return authorAssistedState{}, err
 	}
 
-	contextPackage, err := workspace.LoadAssistedAuthoringContextPackage(workspace.AssistedAuthoringContextPackageOptions{
+	contextPackage, err := core.LoadAssistedAuthoringContextPackage(core.AssistedAuthoringContextPackageOptions{
 		ProjectDir:       projectContext.ProjectDir,
 		Session:          session,
 		SessionPaths:     paths,
@@ -855,18 +855,18 @@ func assistedSessionFromCommand(
 	cmd *cli.Command,
 	projectContext commandProjectContext,
 	now time.Time,
-) (workspace.AuthoringSession, error) {
+) (core.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return workspace.AuthoringSession{}, fmt.Errorf("authoring topic is required")
+		return core.AuthoringSession{}, fmt.Errorf("authoring topic is required")
 	}
 
-	session := workspace.AuthoringSession{
+	session := core.AuthoringSession{
 		ID:          authoringSessionID(now),
 		ProjectID:   projectContext.ProjectID,
-		Status:      workspace.AuthoringSessionStatusActive,
-		Mode:        workspace.AuthoringSessionModeAssisted,
-		Target:      workspace.AuthoringTarget(cmd.String("target")),
+		Status:      core.AuthoringSessionStatusActive,
+		Mode:        core.AuthoringSessionModeAssisted,
+		Target:      core.AuthoringTarget(cmd.String("target")),
 		Topic:       topic,
 		CreatedAt:   now,
 		StartedAt:   &now,
@@ -874,9 +874,9 @@ func assistedSessionFromCommand(
 		Description: strings.TrimSpace(cmd.String("description")),
 	}
 
-	err := workspace.ValidateAuthoringSession(session)
+	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return workspace.AuthoringSession{}, err
+		return core.AuthoringSession{}, err
 	}
 
 	return session, nil
@@ -886,27 +886,27 @@ func authoringSessionFromCommand(
 	cmd *cli.Command,
 	projectContext commandProjectContext,
 	now time.Time,
-) (workspace.AuthoringSession, error) {
+) (core.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return workspace.AuthoringSession{}, fmt.Errorf("authoring topic is required")
+		return core.AuthoringSession{}, fmt.Errorf("authoring topic is required")
 	}
 
-	session := workspace.AuthoringSession{
+	session := core.AuthoringSession{
 		ID:          authoringSessionID(now),
 		ProjectID:   projectContext.ProjectID,
-		Status:      workspace.AuthoringSessionStatusDraft,
-		Mode:        workspace.AuthoringSessionMode(cmd.String("mode")),
-		Target:      workspace.AuthoringTarget(cmd.String("target")),
+		Status:      core.AuthoringSessionStatusDraft,
+		Mode:        core.AuthoringSessionMode(cmd.String("mode")),
+		Target:      core.AuthoringTarget(cmd.String("target")),
 		Topic:       topic,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 		Description: strings.TrimSpace(cmd.String("description")),
 	}
 
-	err := workspace.ValidateAuthoringSession(session)
+	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return workspace.AuthoringSession{}, err
+		return core.AuthoringSession{}, err
 	}
 
 	return session, nil
@@ -916,59 +916,59 @@ func quizSessionFromCommand(
 	cmd *cli.Command,
 	projectContext commandProjectContext,
 	now time.Time,
-) (workspace.AuthoringSession, error) {
+) (core.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return workspace.AuthoringSession{}, fmt.Errorf("quiz topic is required")
+		return core.AuthoringSession{}, fmt.Errorf("quiz topic is required")
 	}
 
-	session := workspace.AuthoringSession{
+	session := core.AuthoringSession{
 		ID:        authoringSessionID(now),
 		ProjectID: projectContext.ProjectID,
-		Status:    workspace.AuthoringSessionStatusDraft,
-		Mode:      workspace.AuthoringSessionModeContextual,
-		Target:    workspace.AuthoringTarget(cmd.String("target")),
+		Status:    core.AuthoringSessionStatusDraft,
+		Mode:      core.AuthoringSessionModeContextual,
+		Target:    core.AuthoringTarget(cmd.String("target")),
 		Topic:     topic,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 
-	err := workspace.ValidateAuthoringSession(session)
+	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return workspace.AuthoringSession{}, err
+		return core.AuthoringSession{}, err
 	}
 
 	return session, nil
 }
 
-func contextualQuizProviderFromCommand() workspace.AuthoringQuizQuestionProvider {
+func contextualQuizProviderFromCommand() core.AuthoringQuizQuestionProvider {
 	return newAuthoringQuizQuestionProvider()
 }
 
-func assistedConfigFromCommand(cmd *cli.Command, session workspace.AuthoringSession) workspace.AssistedAuthoringConfig {
-	return workspace.AssistedAuthoringConfig{
+func assistedConfigFromCommand(cmd *cli.Command, session core.AuthoringSession) core.AssistedAuthoringConfig {
+	return core.AssistedAuthoringConfig{
 		SessionID:    session.ID,
 		ProjectID:    session.ProjectID,
 		Target:       session.Target,
-		Intent:       workspace.AssistedAuthoringIntentDiscover,
+		Intent:       core.AssistedAuthoringIntentDiscover,
 		MaxTurns:     cmd.Int("max-turns"),
 		MaxFollowUps: cmd.Int("max-follow-ups"),
 	}
 }
 
 func authorAssistedCurationResponse(
-	session workspace.AuthoringSession,
+	session core.AuthoringSession,
 	summary string,
 	now time.Time,
-) workspace.AssistedModelResponse {
-	return workspace.AssistedModelResponse{
+) core.AssistedModelResponse {
+	return core.AssistedModelResponse{
 		ID:        "curation-response-" + session.ID,
 		RequestID: "curation-" + session.ID,
 		SessionID: session.ID,
 		TurnID:    "curation",
 		Provider:  "fake",
-		Status:    workspace.AssistedModelResponseReady,
-		Question: workspace.AssistedAuthoringQuestion{
+		Status:    core.AssistedModelResponseReady,
+		Question: core.AssistedAuthoringQuestion{
 			ID:       "curation-ready-" + session.ID,
 			Prompt:   "Curation is ready.",
 			Required: false,
@@ -984,12 +984,12 @@ func authoringSessionID(now time.Time) string {
 
 func resolveAuthoringSession(
 	ctx context.Context,
-	repository workspace.AuthoringSessionRepository,
+	repository core.AuthoringSessionRepository,
 	handle string,
-) (workspace.AuthoringSession, error) {
+) (core.AuthoringSession, error) {
 	handle = strings.TrimSpace(handle)
 	if handle == "" {
-		return workspace.AuthoringSession{}, fmt.Errorf("authoring session is required")
+		return core.AuthoringSession{}, fmt.Errorf("authoring session is required")
 	}
 
 	session, err := repository.GetSession(ctx, handle)
@@ -997,13 +997,13 @@ func resolveAuthoringSession(
 		return session, nil
 	}
 
-	if !errors.Is(err, workspace.ErrAuthoringSessionNotFound) {
-		return workspace.AuthoringSession{}, err
+	if !errors.Is(err, core.ErrAuthoringSessionNotFound) {
+		return core.AuthoringSession{}, err
 	}
 
 	sessions, listErr := repository.ListSessions(ctx)
 	if listErr != nil {
-		return workspace.AuthoringSession{}, listErr
+		return core.AuthoringSession{}, listErr
 	}
 
 	matches := matchingAuthoringSessions(sessions, handle)
@@ -1012,19 +1012,19 @@ func resolveAuthoringSession(
 	}
 
 	if len(matches) > 1 {
-		return workspace.AuthoringSession{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
+		return core.AuthoringSession{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
 	}
 
-	return workspace.AuthoringSession{}, fmt.Errorf("%w: %s", workspace.ErrAuthoringSessionNotFound, handle)
+	return core.AuthoringSession{}, fmt.Errorf("%w: %s", core.ErrAuthoringSessionNotFound, handle)
 }
 
 func resolveAuthoringSessionForPromotion(
 	ctx context.Context,
-	repository workspace.AuthoringSessionRepository,
+	repository core.AuthoringSessionRepository,
 	projectDir string,
 	handle string,
 	artifactPath string,
-) (workspace.AuthoringSession, error) {
+) (core.AuthoringSession, error) {
 	if strings.TrimSpace(handle) != "" {
 		return resolveAuthoringSession(ctx, repository, handle)
 	}
@@ -1034,16 +1034,16 @@ func resolveAuthoringSessionForPromotion(
 
 func resolveAuthoringSessionFromArtifact(
 	ctx context.Context,
-	repository workspace.AuthoringSessionRepository,
+	repository core.AuthoringSessionRepository,
 	projectDir string,
 	artifactPath string,
-) (workspace.AuthoringSession, error) {
+) (core.AuthoringSession, error) {
 	sessions, err := repository.ListSessions(ctx)
 	if err != nil {
-		return workspace.AuthoringSession{}, err
+		return core.AuthoringSession{}, err
 	}
 
-	matches := []workspace.AuthoringSession{}
+	matches := []core.AuthoringSession{}
 	normalizedPath := normalizeAuthoringArtifactPath(projectDir, artifactPath)
 
 	for _, session := range sessions {
@@ -1057,14 +1057,14 @@ func resolveAuthoringSessionFromArtifact(
 	}
 
 	if len(matches) > 1 {
-		return workspace.AuthoringSession{}, fmt.Errorf("authoring artifact path is ambiguous: %s", artifactPath)
+		return core.AuthoringSession{}, fmt.Errorf("authoring artifact path is ambiguous: %s", artifactPath)
 	}
 
-	return workspace.AuthoringSession{}, fmt.Errorf("authoring session is required when artifact metadata cannot identify one session")
+	return core.AuthoringSession{}, fmt.Errorf("authoring session is required when artifact metadata cannot identify one session")
 }
 
 func authoringSessionHasArtifact(
-	session workspace.AuthoringSession,
+	session core.AuthoringSession,
 	projectDir string,
 	artifactPath string,
 ) bool {
@@ -1095,9 +1095,9 @@ func normalizeAuthoringArtifactPath(projectDir, artifactPath string) string {
 	return filepath.ToSlash(path)
 }
 
-func matchingAuthoringSessions(sessions []workspace.AuthoringSession, handle string) []workspace.AuthoringSession {
+func matchingAuthoringSessions(sessions []core.AuthoringSession, handle string) []core.AuthoringSession {
 	handleSlug := authoringHandleSlug(handle)
-	matches := []workspace.AuthoringSession{}
+	matches := []core.AuthoringSession{}
 
 	for _, session := range sessions {
 		if authoringSessionMatchesHandle(session, handle, handleSlug) {
@@ -1108,7 +1108,7 @@ func matchingAuthoringSessions(sessions []workspace.AuthoringSession, handle str
 	return matches
 }
 
-func authoringSessionMatchesHandle(session workspace.AuthoringSession, handle, handleSlug string) bool {
+func authoringSessionMatchesHandle(session core.AuthoringSession, handle, handleSlug string) bool {
 	if strings.EqualFold(session.ID, handle) {
 		return true
 	}
@@ -1146,7 +1146,7 @@ func authoringHandleSlug(value string) string {
 	return strings.Trim(builder.String(), "-")
 }
 
-func printAuthorAssistedQuestion(stdout io.Writer, result workspace.AssistedQuizAskResult) error {
+func printAuthorAssistedQuestion(stdout io.Writer, result core.AssistedQuizAskResult) error {
 	lines := []string{
 		"assisted: question",
 		"turn: " + result.Turn.ID,
@@ -1157,14 +1157,14 @@ func printAuthorAssistedQuestion(stdout io.Writer, result workspace.AssistedQuiz
 		"response: " + result.InvocationPaths.ResponsePath,
 	}
 
-	if result.StopReason != workspace.AssistedQuizLoopStopNone {
+	if result.StopReason != core.AssistedQuizLoopStopNone {
 		lines = append(lines, "stop_reason: "+string(result.StopReason))
 	}
 
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorAssistedAnswer(stdout io.Writer, result workspace.AssistedQuizAnswerResult) error {
+func printAuthorAssistedAnswer(stdout io.Writer, result core.AssistedQuizAnswerResult) error {
 	lines := []string{
 		"assisted: answer",
 		"turn: " + result.Turn.ID,
@@ -1172,7 +1172,7 @@ func printAuthorAssistedAnswer(stdout io.Writer, result workspace.AssistedQuizAn
 		"question_id: " + result.Turn.Question.ID,
 	}
 
-	if result.StopReason != workspace.AssistedQuizLoopStopNone {
+	if result.StopReason != core.AssistedQuizLoopStopNone {
 		lines = append(lines, "stop_reason: "+string(result.StopReason))
 	}
 
@@ -1181,8 +1181,8 @@ func printAuthorAssistedAnswer(stdout io.Writer, result workspace.AssistedQuizAn
 
 func printAuthorAssistedStatus(
 	stdout io.Writer,
-	session workspace.AuthoringSession,
-	events []workspace.AssistedTranscriptEvent,
+	session core.AuthoringSession,
+	events []core.AssistedTranscriptEvent,
 ) error {
 	questions, answers, results := assistedEventCounts(events)
 
@@ -1199,8 +1199,8 @@ func printAuthorAssistedStatus(
 
 func printAuthorAssistedFinalized(
 	stdout io.Writer,
-	curation workspace.AssistedAnswerCurationResult,
-	synthesis workspace.AssistedArtifactSynthesisResult,
+	curation core.AssistedAnswerCurationResult,
+	synthesis core.AssistedArtifactSynthesisResult,
 ) error {
 	return writeAuthorLines(stdout, []string{
 		"assisted: finalized",
@@ -1212,8 +1212,8 @@ func printAuthorAssistedFinalized(
 
 func printAuthorSessionCreated(
 	stdout io.Writer,
-	session workspace.AuthoringSession,
-	paths workspace.AuthoringSessionPaths,
+	session core.AuthoringSession,
+	paths core.AuthoringSessionPaths,
 	projectDir string,
 ) error {
 	lines := []string{
@@ -1229,7 +1229,7 @@ func printAuthorSessionCreated(
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorSession(stdout io.Writer, session workspace.AuthoringSession) error {
+func printAuthorSession(stdout io.Writer, session core.AuthoringSession) error {
 	lines := []string{
 		"session: " + session.ID,
 		"status: " + string(session.Status),
@@ -1247,7 +1247,7 @@ func printAuthorSession(stdout io.Writer, session workspace.AuthoringSession) er
 
 func printAuthorContextualQuizPlan(
 	stdout io.Writer,
-	plan workspace.ContextualQuizGenerationPlan,
+	plan core.ContextualQuizGenerationPlan,
 	dryRun bool,
 	projectDir string,
 ) error {
@@ -1283,7 +1283,7 @@ func printAuthorContextualQuizPlan(
 	return nil
 }
 
-func printAuthorPromotionPlan(stdout io.Writer, plan workspace.QuizToDraftPromotionPlan, dryRun bool) error {
+func printAuthorPromotionPlan(stdout io.Writer, plan core.QuizToDraftPromotionPlan, dryRun bool) error {
 	lines := []string{
 		"promotion: quiz-to-draft",
 		fmt.Sprintf("dry_run: %t", dryRun),
@@ -1307,7 +1307,7 @@ func printAuthorPromotionPlan(stdout io.Writer, plan workspace.QuizToDraftPromot
 	return nil
 }
 
-func assistedEventCounts(events []workspace.AssistedTranscriptEvent) (int, int, int) {
+func assistedEventCounts(events []core.AssistedTranscriptEvent) (int, int, int) {
 	questions := map[string]struct{}{}
 	answers := map[string]struct{}{}
 
@@ -1315,13 +1315,13 @@ func assistedEventCounts(events []workspace.AssistedTranscriptEvent) (int, int, 
 
 	for _, event := range events {
 		switch event.Type {
-		case workspace.AssistedTranscriptEventQuestion:
+		case core.AssistedTranscriptEventQuestion:
 			questions[event.Question.ID] = struct{}{}
-		case workspace.AssistedTranscriptEventAnswer:
+		case core.AssistedTranscriptEventAnswer:
 			answers[event.Answer.QuestionID] = struct{}{}
-		case workspace.AssistedTranscriptEventResult:
+		case core.AssistedTranscriptEventResult:
 			results++
-		case workspace.AssistedTranscriptEventState:
+		case core.AssistedTranscriptEventState:
 		}
 	}
 

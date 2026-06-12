@@ -7,7 +7,7 @@ chc tui --dir /path/to/project
 ```
 
 The TUI loads project state from disk and writes durable Markdown artifacts back
-to the workspace.
+to the core.
 
 See [CLI TUI action matrix](cli-tui-action-matrix.md) for current parity
 between TUI actions and command-line operations.

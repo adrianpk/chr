@@ -3,8 +3,8 @@ package app
 import (
 	"errors"
 
+	"forge.adrianpk.com/chc/internal/core"
 	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 type tuiWorkActionExecutor struct {
@@ -58,7 +58,7 @@ func (e tuiWorkActionExecutor) ExecuteWorkAction(
 
 func agentWorkSelectionOptionsFromTUIRequest(request tui.WorkActionRequest) AgentWorkSelectionOptions {
 	opts := AgentWorkSelectionOptions{
-		Statuses: []string{workspace.TicketStatusReadyForDev},
+		Statuses: []string{core.TicketStatusReadyForDev},
 		Order:    request.Order,
 	}
 	if request.PriorityFilter != "" {

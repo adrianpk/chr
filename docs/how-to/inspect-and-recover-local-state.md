@@ -109,7 +109,7 @@ The command reports missing run directories, result artifacts, runtime logs,
 validation logs, and execution reports.
 
 Use this before relying on historical execution evidence or before preparing a
-handoff for a damaged workspace.
+handoff for a damaged core.
 
 ## Preview Runtime Artifact Cleanup
 

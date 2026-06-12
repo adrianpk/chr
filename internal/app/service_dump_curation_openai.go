@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 const (
@@ -256,7 +256,7 @@ func (p openAIDumpCurationProvider) openAIInput(request DumpCurationRequest) dum
 func (p openAIDumpCurationProvider) projectPayload(request DumpCurationRequest) dumpCurationOpenAIProject {
 	project := dumpCurationOpenAIProject{ID: request.ProjectID}
 
-	metadata, err := workspace.NewProjectMetadataService(request.ProjectDir).Load()
+	metadata, err := core.NewProjectMetadataService(request.ProjectDir).Load()
 	if err != nil {
 		return project
 	}
@@ -277,7 +277,7 @@ func (p openAIDumpCurationProvider) contextSections(
 		request.ProjectDir,
 		"project_document",
 		"project",
-		workspace.ProjectMetadataPath(""),
+		core.ProjectMetadataPath(""),
 	)
 
 	if strings.TrimSpace(request.Scope.CaseSlug) != "" {
@@ -286,7 +286,7 @@ func (p openAIDumpCurationProvider) contextSections(
 			request.ProjectDir,
 			"use_case_document",
 			"use_case",
-			workspace.CaseMetadataPath("", request.Scope.CaseSlug),
+			core.CaseMetadataPath("", request.Scope.CaseSlug),
 		)
 	}
 
@@ -437,7 +437,7 @@ func (p openAIDumpCurationProvider) recordRequest(
 	ctx context.Context,
 	trace dumpCurationOpenAITrace,
 ) {
-	workspace.RecordLLMTraceEvent(ctx, workspace.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, map[string]any{
+	core.RecordLLMTraceEvent(ctx, core.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, map[string]any{
 		"event":                 "llm_request",
 		"llm_call_id":           trace.CallID,
 		"request_id":            trace.RequestID,
@@ -477,7 +477,7 @@ func (p openAIDumpCurationProvider) recordResponse(
 		event["error"] = responseErr.Error()
 	}
 
-	workspace.RecordLLMTraceEvent(ctx, workspace.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, event)
+	core.RecordLLMTraceEvent(ctx, core.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, event)
 }
 
 func dumpCurationInstructions() string {

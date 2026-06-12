@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
@@ -50,9 +50,9 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
-	t.Setenv(workspace.LLMTraceEnabledEnv, "1")
-	t.Setenv(workspace.LLMTracePayloadsEnv, "1")
-	t.Setenv(workspace.ActiveOperatorIDEnv, "test-user")
+	t.Setenv(core.LLMTraceEnabledEnv, "1")
+	t.Setenv(core.LLMTracePayloadsEnv, "1")
+	t.Setenv(core.ActiveOperatorIDEnv, "test-user")
 
 	server := newDumpCurationTraceTestServer(t)
 	defer server.Close()
@@ -78,7 +78,7 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 		t.Fatalf("PolishedBody = %q", result.PolishedBody)
 	}
 
-	tracePath := filepath.Join(projectDir, workspace.DirectoryName, "user", "log", "llm", "llm.ndjson")
+	tracePath := filepath.Join(projectDir, core.DirectoryName, "user", "log", "llm", "llm.ndjson")
 
 	trace, err := os.ReadFile(tracePath)
 	if err != nil {
@@ -93,7 +93,7 @@ func TestCodexDumpCurationProviderUsesAgentRunner(t *testing.T) {
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
 	runner := &fakeDumpCurationAgentRunner{
-		result: workspace.AgentRunResult{
+		result: core.AgentRunResult{
 			ID:     "dump-curation-trace-dump",
 			Output: []byte(`{"polished_body":"Polished body.","highlights":["Source point."],"warnings":[]}`),
 		},
@@ -218,15 +218,15 @@ type fakeDumpCurationProvider struct {
 }
 
 type fakeDumpCurationAgentRunner struct {
-	request workspace.AgentRunRequest
-	result  workspace.AgentRunResult
+	request core.AgentRunRequest
+	result  core.AgentRunResult
 	err     error
 }
 
 func (r *fakeDumpCurationAgentRunner) RunAgent(
 	_ context.Context,
-	request workspace.AgentRunRequest,
-) (workspace.AgentRunResult, error) {
+	request core.AgentRunRequest,
+) (core.AgentRunResult, error) {
 	r.request = request
 
 	return r.result, r.err

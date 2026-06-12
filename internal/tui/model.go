@@ -9,7 +9,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // View identifies one TUI screen.
@@ -75,21 +75,21 @@ var viewPlaceholders = map[View]string{
 type Options struct {
 	ProjectDir           string
 	ProjectID            string
-	ProjectMetadata      workspace.ProjectMetadata
-	Cases                []workspace.CaseMetadata
+	ProjectMetadata      core.ProjectMetadata
+	Cases                []core.CaseMetadata
 	Stdin                io.Reader
 	Stdout               io.Writer
-	Tickets              []workspace.IndexedTicket
+	Tickets              []core.IndexedTicket
 	Documents            []DocumentView
 	Dumps                []DumpView
 	Quizzes              []QuizView
 	Specs                []SpecView
 	Plans                []PlanView
-	AuthoringSessions    []workspace.AuthoringSession
+	AuthoringSessions    []core.AuthoringSession
 	Observability        ObservabilityView
-	WorkspaceGraph       workspace.WorkspaceGraph
-	WorkspaceIndex       workspace.WorkspaceIndex
-	SemanticDigestStates []workspace.WorkspaceSemanticDigestState
+	WorkspaceGraph       core.WorkspaceGraph
+	WorkspaceIndex       core.WorkspaceIndex
+	SemanticDigestStates []core.WorkspaceSemanticDigestState
 	ActionExecutor       ArtifactActionExecutor
 	DumpExecutor         DumpActionExecutor
 	QuizExecutor         QuizActionExecutor
@@ -108,11 +108,11 @@ type Options struct {
 type Model struct {
 	projectDir               string
 	projectID                string
-	projectMetadata          workspace.ProjectMetadata
+	projectMetadata          core.ProjectMetadata
 	selectedProjectField     int
 	projectEdit              ProjectEditState
 	projectDirty             bool
-	cases                    []workspace.CaseMetadata
+	cases                    []core.CaseMetadata
 	selectedCase             int
 	selectedCaseField        int
 	caseEdit                 ProjectEditState
@@ -131,7 +131,7 @@ type Model struct {
 	tickets                  []TicketView
 	selectedTicket           int
 	agentWorkPriorityFilter  string
-	agentWorkOrder           workspace.TicketLoopOrder
+	agentWorkOrder           core.TicketLoopOrder
 	boardColumn              string
 	previousBoardColumn      string
 	ticketFilter             string
@@ -153,9 +153,9 @@ type Model struct {
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
-	workspaceGraph           workspace.WorkspaceGraph
-	workspaceIndex           workspace.WorkspaceIndex
-	semanticDigestStates     []workspace.WorkspaceSemanticDigestState
+	workspaceGraph           core.WorkspaceGraph
+	workspaceIndex           core.WorkspaceIndex
+	semanticDigestStates     []core.WorkspaceSemanticDigestState
 	commandPalette           CommandPaletteState
 	artifactAction           ArtifactActionState
 	actionExecutor           ArtifactActionExecutor
@@ -204,7 +204,7 @@ const (
 func NewModel(opts Options) Model {
 	workspaceIndex := opts.WorkspaceIndex
 	if len(workspaceIndex.NodesByID) == 0 {
-		workspaceIndex = workspace.NewWorkspaceIndexFromGraph(opts.WorkspaceGraph)
+		workspaceIndex = core.NewWorkspaceIndexFromGraph(opts.WorkspaceGraph)
 	}
 
 	projectMetadata := opts.ProjectMetadata
@@ -225,7 +225,7 @@ func NewModel(opts Options) Model {
 	}
 
 	if strings.TrimSpace(projectMetadata.SourcePath) == "" && strings.TrimSpace(opts.ProjectDir) != "" {
-		projectMetadata.SourcePath = workspace.ProjectMetadataPath(opts.ProjectDir)
+		projectMetadata.SourcePath = core.ProjectMetadataPath(opts.ProjectDir)
 	}
 
 	tickets := NewTicketViews(opts.Tickets)
@@ -241,7 +241,7 @@ func NewModel(opts Options) Model {
 		verticalSplitPercent:     defaultPanelSplitPercent,
 		horizontalSplitPercent:   defaultPanelSplitPercent,
 		tickets:                  tickets,
-		agentWorkOrder:           workspace.TicketLoopOrderCreatedAt,
+		agentWorkOrder:           core.TicketLoopOrderCreatedAt,
 		boardColumn:              boardColumn,
 		previousBoardColumn:      boardColumn,
 		documents:                append([]DocumentView(nil), opts.Documents...),
@@ -253,7 +253,7 @@ func NewModel(opts Options) Model {
 		observability:            opts.Observability,
 		workspaceGraph:           opts.WorkspaceGraph,
 		workspaceIndex:           workspaceIndex,
-		semanticDigestStates:     append([]workspace.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
+		semanticDigestStates:     append([]core.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
 		commandPalette:           NewCommandPaletteState(DefaultCommandRegistry()),
 		actionExecutor:           opts.ActionExecutor,
 		dumpExecutor:             opts.DumpExecutor,
@@ -1132,9 +1132,9 @@ func (m Model) renderBoardHeaderColumnLine() string {
 
 	return fmt.Sprintf(
 		"  %s (%d/%d)\n",
-		workspace.BoardColumnTitle(m.activeBoardColumn()),
+		core.BoardColumnTitle(m.activeBoardColumn()),
 		m.activeBoardColumnPosition()+1,
-		len(workspace.NormalBoardColumns),
+		len(core.NormalBoardColumns),
 	)
 }
 
@@ -1505,15 +1505,15 @@ func (m Model) activeBoardColumn() string {
 		return m.previousNormalBoardColumn()
 	}
 
-	if workspace.IsNormalBoardTicketStatus(m.boardColumn) {
+	if core.IsNormalBoardTicketStatus(m.boardColumn) {
 		return m.boardColumn
 	}
 
-	return workspace.TicketStatusBacklog
+	return core.TicketStatusBacklog
 }
 
 func (m Model) activeBoardColumnPosition() int {
-	for index, column := range workspace.NormalBoardColumns {
+	for index, column := range core.NormalBoardColumns {
 		if column == m.activeBoardColumn() {
 			return index
 		}
@@ -1570,11 +1570,11 @@ func (m *Model) toggleBoardAttention() {
 }
 
 func (m Model) previousNormalBoardColumn() string {
-	if workspace.IsNormalBoardTicketStatus(m.previousBoardColumn) {
+	if core.IsNormalBoardTicketStatus(m.previousBoardColumn) {
 		return m.previousBoardColumn
 	}
 
-	return workspace.TicketStatusBacklog
+	return core.TicketStatusBacklog
 }
 
 func (m *Model) selectPreviousBoardColumn() {
@@ -1588,12 +1588,12 @@ func (m *Model) selectPreviousBoardColumn() {
 
 	position := m.activeBoardColumnPosition()
 	if position == 0 {
-		position = len(workspace.NormalBoardColumns) - 1
+		position = len(core.NormalBoardColumns) - 1
 	} else {
 		position--
 	}
 
-	m.selectBoardColumn(workspace.NormalBoardColumns[position])
+	m.selectBoardColumn(core.NormalBoardColumns[position])
 }
 
 func (m *Model) selectNextBoardColumn() {
@@ -1606,11 +1606,11 @@ func (m *Model) selectNextBoardColumn() {
 	}
 
 	position := m.activeBoardColumnPosition() + 1
-	if position >= len(workspace.NormalBoardColumns) {
+	if position >= len(core.NormalBoardColumns) {
 		position = 0
 	}
 
-	m.selectBoardColumn(workspace.NormalBoardColumns[position])
+	m.selectBoardColumn(core.NormalBoardColumns[position])
 }
 
 func (m Model) boardColumnNavigationActive() bool {
@@ -1618,7 +1618,7 @@ func (m Model) boardColumnNavigationActive() bool {
 }
 
 func (m *Model) selectBoardColumn(column string) {
-	if !workspace.IsNormalBoardTicketStatus(column) {
+	if !core.IsNormalBoardTicketStatus(column) {
 		return
 	}
 
@@ -1628,7 +1628,7 @@ func (m *Model) selectBoardColumn(column string) {
 }
 
 func defaultBoardColumn(tickets []TicketView) string {
-	for _, column := range workspace.NormalBoardColumns {
+	for _, column := range core.NormalBoardColumns {
 		for _, ticket := range tickets {
 			if ticket.BoardColumn == column {
 				return column
@@ -1636,7 +1636,7 @@ func defaultBoardColumn(tickets []TicketView) string {
 		}
 	}
 
-	return workspace.TicketStatusBacklog
+	return core.TicketStatusBacklog
 }
 
 func lastRune(value string) string {
@@ -1679,12 +1679,12 @@ type TicketView struct {
 }
 
 // NewTicketViews converts indexed tickets into TUI rows.
-func NewTicketViews(tickets []workspace.IndexedTicket) []TicketView {
+func NewTicketViews(tickets []core.IndexedTicket) []TicketView {
 	views := make([]TicketView, 0, len(tickets))
 
 	for index, ticket := range tickets {
-		boardColumn, ok := workspace.BoardTicketStatusFor(ticket.Status)
-		if ok && workspace.IsNormalBoardTicketStatus(ticket.BoardColumn) {
+		boardColumn, ok := core.BoardTicketStatusFor(ticket.Status)
+		if ok && core.IsNormalBoardTicketStatus(ticket.BoardColumn) {
 			boardColumn = ticket.BoardColumn
 		}
 
@@ -1708,7 +1708,7 @@ func NewTicketViews(tickets []workspace.IndexedTicket) []TicketView {
 			ReviewResult:      ticket.ReviewResult,
 			ReviewCommentsURL: ticket.ReviewCommentsURL,
 			BoardColumn:       boardColumn,
-			AttentionReasons:  workspace.BoardAttentionReasons(ticket),
+			AttentionReasons:  core.BoardAttentionReasons(ticket),
 			RelativePath:      ticket.RelativePath,
 		}
 

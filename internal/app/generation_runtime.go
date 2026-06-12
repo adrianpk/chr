@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 const longGenerationTimeout = 5 * time.Minute
@@ -41,7 +41,7 @@ func (g *generationGuard) release(key string) {
 func (s service) withGenerationRuntime(
 	parent context.Context,
 	kind string,
-	scope workspace.QuizScope,
+	scope core.QuizScope,
 	run func(context.Context) error,
 ) error {
 	key := s.generationRuntimeKey(kind, scope)
@@ -61,6 +61,6 @@ func (s service) withGenerationRuntime(
 	return run(ctx)
 }
 
-func (s service) generationRuntimeKey(kind string, scope workspace.QuizScope) string {
+func (s service) generationRuntimeKey(kind string, scope core.QuizScope) string {
 	return s.projectContext.ProjectDir + ":" + kind + ":" + specScopeID(scope)
 }

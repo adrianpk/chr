@@ -137,7 +137,7 @@ creation is not available in the container.
 
 Future clone, commit, and push execution should inherit a repository-scoped PAT
 through an explicit secret environment variable. That PAT is not required for
-the current proving-ground flow because it works on the mounted workspace.
+the current proving-ground flow because it works on the mounted core.
 
 ## Boundaries
 

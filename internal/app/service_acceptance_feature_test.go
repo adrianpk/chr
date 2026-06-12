@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
@@ -15,9 +15,9 @@ func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), workspace.AcceptanceFeatureGeneration{
-				Status: workspace.AcceptanceFeatureStatusGenerated,
+		responses: []core.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
+				Status: core.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
 Feature: Blog publishing
 
@@ -34,13 +34,13 @@ Feature: Blog publishing
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
 	}
 
-	if result.Status != workspace.AcceptanceFeatureStatusGenerated {
+	if result.Status != core.AcceptanceFeatureStatusGenerated {
 		t.Fatalf("Status = %q, want generated", result.Status)
 	}
 
@@ -54,7 +54,7 @@ Feature: Blog publishing
 	}
 
 	request := model.requests[len(model.requests)-1]
-	if request.Action != workspace.QuizModelActionGenerateAcceptanceFeature {
+	if request.Action != core.QuizModelActionGenerateAcceptanceFeature {
 		t.Fatalf("Action = %q, want acceptance feature generation", request.Action)
 	}
 
@@ -78,9 +78,9 @@ func TestServiceGenerateAcceptanceFeatureRejectsInvalidGeneratedFeature(t *testi
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), workspace.AcceptanceFeatureGeneration{
-				Status: workspace.AcceptanceFeatureStatusGenerated,
+		responses: []core.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
+				Status: core.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
 Feature: Blog publishing
 
@@ -97,13 +97,13 @@ Feature: Blog publishing
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
 	}
 
-	if result.Status != workspace.AcceptanceFeatureStatusRejected {
+	if result.Status != core.AcceptanceFeatureStatusRejected {
 		t.Fatalf("Status = %q, want rejected", result.Status)
 	}
 
@@ -118,11 +118,11 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), workspace.AcceptanceFeatureGeneration{
-				Status:          workspace.AcceptanceFeatureStatusNeedsMoreInfo,
+		responses: []core.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
+				Status:          core.AcceptanceFeatureStatusNeedsMoreInfo,
 				RejectionReason: "Missing observable failure path.",
-				ClarificationPrompts: []workspace.AcceptanceFeaturePrompt{
+				ClarificationPrompts: []core.AcceptanceFeaturePrompt{
 					{
 						ID:            "failure-path",
 						Question:      "What should happen when publishing fails?",
@@ -138,13 +138,13 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
 	}
 
-	if result.Status != workspace.AcceptanceFeatureStatusNeedsMoreInfo {
+	if result.Status != core.AcceptanceFeatureStatusNeedsMoreInfo {
 		t.Fatalf("Status = %q, want needs_more_info", result.Status)
 	}
 
@@ -175,11 +175,11 @@ func TestServiceGenerateAcceptanceFeaturePreservesExistingFeatureRoundAnswers(t 
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), workspace.AcceptanceFeatureGeneration{
-				Status:          workspace.AcceptanceFeatureStatusNeedsMoreInfo,
+		responses: []core.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
+				Status:          core.AcceptanceFeatureStatusNeedsMoreInfo,
 				RejectionReason: "Missing observable failure path.",
-				ClarificationPrompts: []workspace.AcceptanceFeaturePrompt{
+				ClarificationPrompts: []core.AcceptanceFeaturePrompt{
 					{
 						ID:            "failure-path",
 						Question:      "What should happen when publishing fails?",
@@ -199,7 +199,7 @@ func TestServiceGenerateAcceptanceFeaturePreservesExistingFeatureRoundAnswers(t 
 	operations.now = clock
 
 	_, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
@@ -243,9 +243,9 @@ func TestServiceGenerateAcceptanceFeatureReportsNotApplicable(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), workspace.AcceptanceFeatureGeneration{
-				Status:          workspace.AcceptanceFeatureStatusNotApplicable,
+		responses: []core.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
+				Status:          core.AcceptanceFeatureStatusNotApplicable,
 				RejectionReason: "The topic is editorial guidance, not observable behavior.",
 			}),
 		},
@@ -255,13 +255,13 @@ func TestServiceGenerateAcceptanceFeatureReportsNotApplicable(t *testing.T) {
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
 	}
 
-	if result.Status != workspace.AcceptanceFeatureStatusNotApplicable {
+	if result.Status != core.AcceptanceFeatureStatusNotApplicable {
 		t.Fatalf("Status = %q, want not_applicable", result.Status)
 	}
 }
@@ -289,9 +289,9 @@ case: "blog"
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), workspace.AcceptanceFeatureGeneration{
-				Status: workspace.AcceptanceFeatureStatusGenerated,
+		responses: []core.QuizModelResponse{
+			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
+				Status: core.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
 Feature: Blog publishing
 
@@ -308,7 +308,7 @@ Feature: Blog publishing
 	operations.now = clock
 
 	_, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
@@ -337,7 +337,7 @@ Publishing must preserve editorial review status.
 `)
 }
 
-func quizModelRequestHasSection(request workspace.QuizModelRequest, name string) bool {
+func quizModelRequestHasSection(request core.QuizModelRequest, name string) bool {
 	for _, section := range request.ContextSections {
 		if section.Name == name {
 			return true

@@ -11,7 +11,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newDaemonCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -131,7 +131,7 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	repository, err := workspace.NewDaemonStateRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewDaemonStateRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	}()
 
 	state, err := repository.GetDaemonState(ctx)
-	if errors.Is(err, workspace.ErrDaemonStateNotFound) {
+	if errors.Is(err, core.ErrDaemonStateNotFound) {
 		return printDaemonStoppedStatus(stdout, env)
 	}
 
@@ -158,7 +158,7 @@ func runDaemonStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	return printDaemonStateStatus(stdout, env, state)
 }
 
-func printDaemonStoppedStatus(stdout io.Writer, env workspace.UserEnvironment) error {
+func printDaemonStoppedStatus(stdout io.Writer, env core.UserEnvironment) error {
 	lines := []string{
 		"daemon: stopped",
 		"state: missing",
@@ -169,7 +169,7 @@ func printDaemonStoppedStatus(stdout io.Writer, env workspace.UserEnvironment) e
 	return printDaemonLines(stdout, lines)
 }
 
-func printDaemonStateStatus(stdout io.Writer, env workspace.UserEnvironment, state workspace.DaemonState) error {
+func printDaemonStateStatus(stdout io.Writer, env core.UserEnvironment, state core.DaemonState) error {
 	lines := []string{
 		fmt.Sprintf("daemon: %s", state.Status),
 		"state: stored",
@@ -216,7 +216,7 @@ func runDaemonStop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return printDaemonPlan(stdout, "stop", env)
 }
 
-func printDaemonPlan(stdout io.Writer, action string, env workspace.UserEnvironment) error {
+func printDaemonPlan(stdout io.Writer, action string, env core.UserEnvironment) error {
 	lines := []string{
 		"daemon: planned",
 		fmt.Sprintf("action: %s", action),
@@ -240,16 +240,16 @@ type daemonForegroundLoopResult struct {
 func runDaemonForegroundLoop(
 	ctx context.Context,
 	stdout io.Writer,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	assetsFS fs.FS,
-	decision workspace.DaemonStartGuardDecision,
+	decision core.DaemonStartGuardDecision,
 	maxIterations int,
 ) error {
 	if !decision.Allowed {
 		return fmt.Errorf("daemon start blocked: %s", decision.Reason)
 	}
 
-	stateRepository, err := workspace.NewDaemonStateRepository(ctx, env, assetsFS)
+	stateRepository, err := core.NewDaemonStateRepository(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -261,8 +261,8 @@ func runDaemonForegroundLoop(
 
 	startedAt := time.Now().UTC()
 
-	runningState := workspace.DaemonState{
-		Status:      workspace.DaemonStatusRunning,
+	runningState := core.DaemonState{
+		Status:      core.DaemonStatusRunning,
 		PID:         os.Getpid(),
 		StartedAt:   &startedAt,
 		HeartbeatAt: &startedAt,
@@ -283,7 +283,7 @@ func runDaemonForegroundLoop(
 
 	stoppedAt := time.Now().UTC()
 
-	err = stateRepository.UpsertDaemonState(ctx, workspace.NewStoppedDaemonState(stoppedAt))
+	err = stateRepository.UpsertDaemonState(ctx, core.NewStoppedDaemonState(stoppedAt))
 	if err != nil {
 		return err
 	}
@@ -293,12 +293,12 @@ func runDaemonForegroundLoop(
 
 func runDaemonForegroundIterations(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	assetsFS fs.FS,
-	stateRepository workspace.DaemonStateRepository,
+	stateRepository core.DaemonStateRepository,
 	maxIterations int,
 ) (daemonForegroundLoopResult, error) {
-	registry, err := workspace.NewProjectRegistry(ctx, env, assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}
@@ -308,7 +308,7 @@ func runDaemonForegroundIterations(
 		_ = registry.Close()
 	}()
 
-	index, err := workspace.NewTicketIndex(ctx, env, assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, assetsFS)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}
@@ -339,7 +339,7 @@ func runDaemonForegroundIterations(
 			break
 		}
 
-		projects, err := workspace.LoadDaemonProjects(ctx, registry)
+		projects, err := core.LoadDaemonProjects(ctx, registry)
 		if err != nil {
 			return daemonForegroundLoopResult{}, err
 		}
@@ -358,12 +358,12 @@ func runDaemonForegroundIterations(
 
 func refreshDaemonProjects(
 	ctx context.Context,
-	index workspace.TicketIndex,
-	projects []workspace.DaemonProject,
+	index core.TicketIndex,
+	projects []core.DaemonProject,
 	result *daemonForegroundLoopResult,
 ) error {
 	for _, project := range projects {
-		if project.Status != workspace.DaemonProjectStatusReady {
+		if project.Status != core.DaemonProjectStatusReady {
 			result.ProjectsSkipped++
 
 			continue
@@ -388,12 +388,12 @@ func refreshDaemonProjects(
 
 func failDaemonForegroundState(
 	ctx context.Context,
-	stateRepository workspace.DaemonStateRepository,
+	stateRepository core.DaemonStateRepository,
 	cause error,
 ) {
 	failedAt := time.Now().UTC()
-	failedState := workspace.DaemonState{
-		Status:        workspace.DaemonStatusFailed,
+	failedState := core.DaemonState{
+		Status:        core.DaemonStatusFailed,
 		FailureReason: cause.Error(),
 		UpdatedAt:     failedAt,
 	}
@@ -418,12 +418,12 @@ func printDaemonForegroundLoopResult(stdout io.Writer, result daemonForegroundLo
 
 func recoverStaleDaemonState(
 	ctx context.Context,
-	repository workspace.DaemonStateRepository,
-	state workspace.DaemonState,
-) (workspace.DaemonState, error) {
-	decision, err := workspace.EvaluateDaemonStartGuard(state, time.Now().UTC(), workspace.DefaultDaemonStaleAfter)
+	repository core.DaemonStateRepository,
+	state core.DaemonState,
+) (core.DaemonState, error) {
+	decision, err := core.EvaluateDaemonStartGuard(state, time.Now().UTC(), core.DefaultDaemonStaleAfter)
 	if err != nil {
-		return workspace.DaemonState{}, err
+		return core.DaemonState{}, err
 	}
 
 	if !decision.Stale {
@@ -432,20 +432,20 @@ func recoverStaleDaemonState(
 
 	recoveredAt := time.Now().UTC()
 	recovered := state
-	recovered.Status = workspace.DaemonStatusStale
+	recovered.Status = core.DaemonStatusStale
 	recovered.StopRequestedAt = nil
 	recovered.FailureReason = "daemon state is stale"
 	recovered.UpdatedAt = recoveredAt
 
 	err = repository.UpsertDaemonState(ctx, recovered)
 	if err != nil {
-		return workspace.DaemonState{}, err
+		return core.DaemonState{}, err
 	}
 
 	return recovered, nil
 }
 
-func requestDaemonStop(ctx context.Context, stdout io.Writer, env workspace.UserEnvironment, assetsFS fs.FS) error {
+func requestDaemonStop(ctx context.Context, stdout io.Writer, env core.UserEnvironment, assetsFS fs.FS) error {
 	requestedAt := time.Now().UTC()
 
 	result, err := requestDaemonStopState(ctx, env, assetsFS, requestedAt)
@@ -468,19 +468,19 @@ func requestDaemonStop(ctx context.Context, stdout io.Writer, env workspace.User
 	})
 }
 
-func daemonStopRequested(ctx context.Context, stateRepository workspace.DaemonStateRepository) (bool, error) {
+func daemonStopRequested(ctx context.Context, stateRepository core.DaemonStateRepository) (bool, error) {
 	state, err := stateRepository.GetDaemonState(ctx)
 	if err != nil {
 		return false, err
 	}
 
-	return state.Status == workspace.DaemonStatusStopping && state.StopRequestedAt != nil, nil
+	return state.Status == core.DaemonStatusStopping && state.StopRequestedAt != nil, nil
 }
 
-func daemonStartGuardDecision(ctx context.Context, env workspace.UserEnvironment, assetsFS fs.FS) (workspace.DaemonStartGuardDecision, error) {
-	repository, err := workspace.NewDaemonStateRepository(ctx, env, assetsFS)
+func daemonStartGuardDecision(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) (core.DaemonStartGuardDecision, error) {
+	repository, err := core.NewDaemonStateRepository(ctx, env, assetsFS)
 	if err != nil {
-		return workspace.DaemonStartGuardDecision{}, err
+		return core.DaemonStartGuardDecision{}, err
 	}
 
 	defer func() {
@@ -489,21 +489,21 @@ func daemonStartGuardDecision(ctx context.Context, env workspace.UserEnvironment
 	}()
 
 	state, err := repository.GetDaemonState(ctx)
-	if errors.Is(err, workspace.ErrDaemonStateNotFound) {
-		return workspace.DaemonStartGuardDecision{
+	if errors.Is(err, core.ErrDaemonStateNotFound) {
+		return core.DaemonStartGuardDecision{
 			Allowed: true,
 			Reason:  "daemon state is missing",
 		}, nil
 	}
 
 	if err != nil {
-		return workspace.DaemonStartGuardDecision{}, err
+		return core.DaemonStartGuardDecision{}, err
 	}
 
-	return workspace.EvaluateDaemonStartGuard(state, time.Now().UTC(), workspace.DefaultDaemonStaleAfter)
+	return core.EvaluateDaemonStartGuard(state, time.Now().UTC(), core.DefaultDaemonStaleAfter)
 }
 
-func printDaemonStartPlan(stdout io.Writer, env workspace.UserEnvironment, decision workspace.DaemonStartGuardDecision) error {
+func printDaemonStartPlan(stdout io.Writer, env core.UserEnvironment, decision core.DaemonStartGuardDecision) error {
 	lines := []string{
 		"daemon: planned",
 		"action: start",

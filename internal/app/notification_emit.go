@@ -9,32 +9,32 @@ import (
 	"os"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func emitTicketBlockedNotification(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	plan ticketApplyResultPlan,
 	assetsFS fs.FS,
 ) error {
-	if plan.Application.TicketStatus != workspace.TicketResultStatusBlocked {
+	if plan.Application.TicketStatus != core.TicketResultStatusBlocked {
 		return nil
 	}
 
 	now := time.Now().UTC()
-	event := workspace.NotificationEvent{
+	event := core.NotificationEvent{
 		ID:        workflowNotificationEventID(plan.ProjectContext.ProjectID, "ticket-blocked", now),
 		ProjectID: plan.ProjectContext.ProjectID,
-		Type:      workspace.NotificationEventTicketBlocked,
-		Severity:  workspace.NotificationSeverityWarning,
-		Status:    workspace.NotificationStatusSkipped,
-		Source:    workspace.NotificationSourceTicketExecution,
-		References: workspace.NotificationReferences{
+		Type:      core.NotificationEventTicketBlocked,
+		Severity:  core.NotificationSeverityWarning,
+		Status:    core.NotificationStatusSkipped,
+		Source:    core.NotificationSourceTicketExecution,
+		References: core.NotificationReferences{
 			TicketKey:   plan.Application.TicketKey,
 			ExecutionID: plan.Application.ExecutionID,
 		},
-		Payload: workspace.NotificationPayload{
+		Payload: core.NotificationPayload{
 			Summary: fmt.Sprintf("Ticket %s is blocked", plan.Application.TicketKey),
 			Detail:  ticketBlockedNotificationDetail(plan),
 		},
@@ -47,9 +47,9 @@ func emitTicketBlockedNotification(
 
 func emitLoopRunNotification(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	record workspace.LoopRunRecord,
+	record core.LoopRunRecord,
 	assetsFS fs.FS,
 ) error {
 	event, ok := loopRunNotificationEvent(projectContext, record, time.Now().UTC())
@@ -62,29 +62,29 @@ func emitLoopRunNotification(
 
 func loopRunNotificationEvent(
 	projectContext commandProjectContext,
-	record workspace.LoopRunRecord,
+	record core.LoopRunRecord,
 	now time.Time,
-) (workspace.NotificationEvent, bool) {
-	if record.Status == workspace.LoopRunStatusSucceeded && record.ProcessedCount == 0 {
-		return workspace.NotificationEvent{}, false
+) (core.NotificationEvent, bool) {
+	if record.Status == core.LoopRunStatusSucceeded && record.ProcessedCount == 0 {
+		return core.NotificationEvent{}, false
 	}
 
 	eventType, severity := loopRunNotificationType(record.Status)
 	if eventType == "" {
-		return workspace.NotificationEvent{}, false
+		return core.NotificationEvent{}, false
 	}
 
-	return workspace.NotificationEvent{
+	return core.NotificationEvent{
 		ID:        workflowNotificationEventID(projectContext.ProjectID, string(eventType), now),
 		ProjectID: projectContext.ProjectID,
 		Type:      eventType,
 		Severity:  severity,
-		Status:    workspace.NotificationStatusSkipped,
-		Source:    workspace.NotificationSourceTicketLoop,
-		References: workspace.NotificationReferences{
+		Status:    core.NotificationStatusSkipped,
+		Source:    core.NotificationSourceTicketLoop,
+		References: core.NotificationReferences{
 			LoopRunID: record.ID,
 		},
-		Payload: workspace.NotificationPayload{
+		Payload: core.NotificationPayload{
 			Summary: loopRunNotificationSummary(record),
 			Detail:  loopRunNotificationDetail(record),
 		},
@@ -93,14 +93,14 @@ func loopRunNotificationEvent(
 	}, true
 }
 
-func loopRunNotificationType(status workspace.LoopRunStatus) (workspace.NotificationEventType, workspace.NotificationSeverity) {
+func loopRunNotificationType(status core.LoopRunStatus) (core.NotificationEventType, core.NotificationSeverity) {
 	switch status {
-	case workspace.LoopRunStatusSucceeded:
-		return workspace.NotificationEventLoopFinished, workspace.NotificationSeverityInfo
-	case workspace.LoopRunStatusBlocked:
-		return workspace.NotificationEventLoopBlocked, workspace.NotificationSeverityWarning
-	case workspace.LoopRunStatusFailed:
-		return workspace.NotificationEventLoopFailed, workspace.NotificationSeverityError
+	case core.LoopRunStatusSucceeded:
+		return core.NotificationEventLoopFinished, core.NotificationSeverityInfo
+	case core.LoopRunStatusBlocked:
+		return core.NotificationEventLoopBlocked, core.NotificationSeverityWarning
+	case core.LoopRunStatusFailed:
+		return core.NotificationEventLoopFailed, core.NotificationSeverityError
 	default:
 		return "", ""
 	}
@@ -108,19 +108,19 @@ func loopRunNotificationType(status workspace.LoopRunStatus) (workspace.Notifica
 
 func emitWorkflowNotification(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	event workspace.NotificationEvent,
+	event core.NotificationEvent,
 	assetsFS fs.FS,
 ) error {
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
 
 	record := workflowNotificationAuditRecord(event, config.Notifications)
 
-	repository, err := workspace.NewNotificationEventRepository(ctx, env, assetsFS)
+	repository, err := core.NewNotificationEventRepository(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func emitWorkflowNotification(
 		return err
 	}
 
-	if record.Event.Status != workspace.NotificationStatusPending {
+	if record.Event.Status != core.NotificationStatusPending {
 		return nil
 	}
 
@@ -143,24 +143,24 @@ func emitWorkflowNotification(
 }
 
 func workflowNotificationAuditRecord(
-	event workspace.NotificationEvent,
-	config workspace.NotificationConfig,
-) workspace.NotificationAuditRecord {
+	event core.NotificationEvent,
+	config core.NotificationConfig,
+) core.NotificationAuditRecord {
 	if !config.Telegram.Enabled {
-		event.Status = workspace.NotificationStatusSkipped
+		event.Status = core.NotificationStatusSkipped
 
-		return workspace.NotificationAuditRecord{Event: event}
+		return core.NotificationAuditRecord{Event: event}
 	}
 
-	event.Status = workspace.NotificationStatusPending
-	record := workspace.NotificationAuditRecord{
+	event.Status = core.NotificationStatusPending
+	record := core.NotificationAuditRecord{
 		Event:   event,
 		Channel: "telegram",
 	}
 
-	err := workspace.ValidateNotificationConfig(config)
+	err := core.ValidateNotificationConfig(config)
 	if err != nil {
-		record.Event.Status = workspace.NotificationStatusFailed
+		record.Event.Status = core.NotificationStatusFailed
 		record.Event.FailureReason = err.Error()
 	}
 
@@ -169,11 +169,11 @@ func workflowNotificationAuditRecord(
 
 func dispatchWorkflowTelegramNotification(
 	ctx context.Context,
-	repository workspace.NotificationEventRepository,
-	record workspace.NotificationAuditRecord,
-	telegram workspace.TelegramNotificationConfig,
+	repository core.NotificationEventRepository,
+	record core.NotificationAuditRecord,
+	telegram core.TelegramNotificationConfig,
 ) error {
-	message := workspace.RenderTelegramNotificationMessage(record.Event)
+	message := core.RenderTelegramNotificationMessage(record.Event)
 	message.ChatID = telegram.ChatID
 
 	token := os.Getenv(telegram.BotTokenEnv)
@@ -181,14 +181,14 @@ func dispatchWorkflowTelegramNotification(
 	finishedAt := time.Now().UTC()
 
 	if sendErr != nil {
-		record.Event.Status = workspace.NotificationStatusFailed
+		record.Event.Status = core.NotificationStatusFailed
 		record.Event.FailureReason = sendErr.Error()
 		record.Event.UpdatedAt = finishedAt
 
 		return repository.UpdateNotificationEvent(ctx, record)
 	}
 
-	record.Event.Status = workspace.NotificationStatusDelivered
+	record.Event.Status = core.NotificationStatusDelivered
 	record.Event.DeliveredAt = &finishedAt
 	record.Event.UpdatedAt = finishedAt
 
@@ -204,20 +204,20 @@ func ticketBlockedNotificationDetail(plan ticketApplyResultPlan) string {
 	return detail
 }
 
-func loopRunNotificationSummary(record workspace.LoopRunRecord) string {
+func loopRunNotificationSummary(record core.LoopRunRecord) string {
 	switch record.Status {
-	case workspace.LoopRunStatusSucceeded:
+	case core.LoopRunStatusSucceeded:
 		return fmt.Sprintf("Ticket loop %s finished", record.ID)
-	case workspace.LoopRunStatusBlocked:
+	case core.LoopRunStatusBlocked:
 		return fmt.Sprintf("Ticket loop %s stopped on a blocker", record.ID)
-	case workspace.LoopRunStatusFailed:
+	case core.LoopRunStatusFailed:
 		return fmt.Sprintf("Ticket loop %s failed", record.ID)
 	default:
 		return fmt.Sprintf("Ticket loop %s changed state", record.ID)
 	}
 }
 
-func loopRunNotificationDetail(record workspace.LoopRunRecord) string {
+func loopRunNotificationDetail(record core.LoopRunRecord) string {
 	detail := fmt.Sprintf(
 		"Eligible: %d\nProcessed: %d\nBlocked: %d\nFailed: %d",
 		record.EligibleCount,

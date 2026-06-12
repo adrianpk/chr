@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
@@ -97,7 +97,7 @@ func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {
 		t.Fatal("LoopRun is nil")
 	}
 
-	loopMatches := result.LoopRun.Status == workspace.LoopRunStatusSucceeded &&
+	loopMatches := result.LoopRun.Status == core.LoopRunStatusSucceeded &&
 		result.LoopRun.EligibleCount == 2 &&
 		result.LoopRun.ProcessedCount == 2
 	if !loopMatches {
@@ -165,10 +165,10 @@ func TestServicePreviewAgentWorkLoopAppliesSelection(t *testing.T) {
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
 	result, err := operations.PreviewAgentWorkLoop(AgentWorkSelectionOptions{
-		Filters: workspace.TicketLoopFilters{
+		Filters: core.TicketLoopFilters{
 			Priorities: []string{"high"},
 		},
-		Order: workspace.TicketLoopOrderPriority,
+		Order: core.TicketLoopOrderPriority,
 	})
 	if err != nil {
 		t.Fatalf("PreviewAgentWorkLoop returned error: %v", err)
@@ -182,7 +182,7 @@ func TestServicePreviewAgentWorkLoopAppliesSelection(t *testing.T) {
 func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 	t.Helper()
 
-	env, err := workspace.NewUserEnvironment(workspace.UserEnvironmentOptions{
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
 	})
@@ -196,7 +196,7 @@ func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 	}, testAssetsFS())
 }
 
-func indexedAgentWorkTicketKeys(tickets []workspace.IndexedTicket) []string {
+func indexedAgentWorkTicketKeys(tickets []core.IndexedTicket) []string {
 	keys := make([]string, 0, len(tickets))
 	for _, ticket := range tickets {
 		keys = append(keys, ticket.Key)

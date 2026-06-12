@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 type commandProjectContext struct {
@@ -23,11 +23,11 @@ type commandProjectContextOptions struct {
 }
 
 type commandProjectContextResolver struct {
-	env      workspace.UserEnvironment
+	env      core.UserEnvironment
 	assetsFS fs.FS
 }
 
-func newCommandProjectContextResolver(env workspace.UserEnvironment, assetsFS fs.FS) commandProjectContextResolver {
+func newCommandProjectContextResolver(env core.UserEnvironment, assetsFS fs.FS) commandProjectContextResolver {
 	return commandProjectContextResolver{env: env, assetsFS: assetsFS}
 }
 
@@ -39,12 +39,12 @@ func (r commandProjectContextResolver) Resolve(
 		return resolveProjectDirectory(opts.ExplicitDir)
 	}
 
-	activeProject, err := workspace.NewActiveProjectStore(r.env).LoadActiveProject()
+	activeProject, err := core.NewActiveProjectStore(r.env).LoadActiveProject()
 	if err == nil {
 		return r.resolveActiveProject(ctx, activeProject)
 	}
 
-	if !errors.Is(err, workspace.ErrActiveProjectNotSelected) {
+	if !errors.Is(err, core.ErrActiveProjectNotSelected) {
 		return commandProjectContext{}, err
 	}
 
@@ -57,9 +57,9 @@ func (r commandProjectContextResolver) Resolve(
 
 func (r commandProjectContextResolver) resolveActiveProject(
 	ctx context.Context,
-	activeProject workspace.ActiveProject,
+	activeProject core.ActiveProject,
 ) (commandProjectContext, error) {
-	registry, err := workspace.NewProjectRegistry(ctx, r.env, r.assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, r.env, r.assetsFS)
 	if err != nil {
 		return commandProjectContext{}, err
 	}
@@ -98,7 +98,7 @@ func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
 	}, nil
 }
 
-func resolveRegisteredProjectDirectory(project workspace.Project) (commandProjectContext, error) {
+func resolveRegisteredProjectDirectory(project core.Project) (commandProjectContext, error) {
 	if project.Path == "" {
 		return commandProjectContext{}, fmt.Errorf("registered project path is required: %s", project.Name)
 	}
@@ -112,7 +112,7 @@ func resolveRegisteredProjectDirectory(project workspace.Project) (commandProjec
 		return commandProjectContext{}, fmt.Errorf("registered project path is not a directory: %s", project.Path)
 	}
 
-	workspacePath := filepath.Join(project.Path, workspace.DirectoryName)
+	workspacePath := filepath.Join(project.Path, core.DirectoryName)
 
 	info, err = os.Stat(workspacePath)
 	if err != nil {

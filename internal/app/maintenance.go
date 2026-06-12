@@ -9,7 +9,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newMaintenanceCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -209,7 +209,7 @@ func runMaintenanceBundle(ctx context.Context, cmd *cli.Command, stdout io.Write
 		return err
 	}
 
-	path, err := workspace.WriteDiagnosticBundle(ctx, projectContext.ProjectDir, bundle)
+	path, err := core.WriteDiagnosticBundle(ctx, projectContext.ProjectDir, bundle)
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Wri
 		return err
 	}
 
-	status, err := workspace.NewMigrationStatusChecker(deps.assetsFS).Check(ctx, env)
+	status, err := core.NewMigrationStatusChecker(deps.assetsFS).Check(ctx, env)
 	if err != nil {
 		return err
 	}
@@ -247,23 +247,23 @@ func runMaintenanceDBStatus(ctx context.Context, cmd *cli.Command, stdout io.Wri
 
 func collectDiagnosticBundle(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
-) (workspace.DiagnosticBundle, error) {
-	migrationStatus, err := workspace.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
+) (core.DiagnosticBundle, error) {
+	migrationStatus, err := core.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
 	if err != nil {
-		return workspace.DiagnosticBundle{}, err
+		return core.DiagnosticBundle{}, err
 	}
 
 	registryDiagnostics, err := collectDiagnosticBundleRegistry(ctx, env, assetsFS)
 	if err != nil {
-		return workspace.DiagnosticBundle{}, err
+		return core.DiagnosticBundle{}, err
 	}
 
-	repository, err := workspace.NewExecutionRepository(ctx, env, assetsFS)
+	repository, err := core.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
-		return workspace.DiagnosticBundle{}, err
+		return core.DiagnosticBundle{}, err
 	}
 
 	defer func() {
@@ -271,29 +271,29 @@ func collectDiagnosticBundle(
 		_ = repository.Close()
 	}()
 
-	executionArtifacts, err := workspace.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	executionArtifacts, err := core.NewExecutionArtifactDriftService(repository).ListDiagnostics(
 		ctx,
 		projectContext.ProjectID,
 	)
 	if err != nil {
-		return workspace.DiagnosticBundle{}, err
+		return core.DiagnosticBundle{}, err
 	}
 
-	cleanupPreview, err := workspace.NewRuntimeArtifactCleanupPreviewService(repository).Preview(
+	cleanupPreview, err := core.NewRuntimeArtifactCleanupPreviewService(repository).Preview(
 		ctx,
 		projectContext.ProjectDir,
 		projectContext.ProjectID,
 	)
 	if err != nil {
-		return workspace.DiagnosticBundle{}, err
+		return core.DiagnosticBundle{}, err
 	}
 
-	reports, err := workspace.NewReportLister().ListProjectReports(ctx, projectContext.ProjectDir, workspace.ReportListFilter{})
+	reports, err := core.NewReportLister().ListProjectReports(ctx, projectContext.ProjectDir, core.ReportListFilter{})
 	if err != nil {
-		return workspace.DiagnosticBundle{}, err
+		return core.DiagnosticBundle{}, err
 	}
 
-	return workspace.DiagnosticBundle{
+	return core.DiagnosticBundle{
 		ProjectDir:             projectContext.ProjectDir,
 		ProjectID:              projectContext.ProjectID,
 		MigrationStatus:        migrationStatus,
@@ -306,10 +306,10 @@ func collectDiagnosticBundle(
 
 func collectDiagnosticBundleRegistry(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	assetsFS fs.FS,
-) ([]workspace.ProjectRegistryDiagnostic, error) {
-	registry, err := workspace.NewProjectRegistry(ctx, env, assetsFS)
+) ([]core.ProjectRegistryDiagnostic, error) {
+	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err
 	}
@@ -319,9 +319,9 @@ func collectDiagnosticBundleRegistry(
 		_ = registry.Close()
 	}()
 
-	diagnostics, err := workspace.NewProjectRegistryDiagnosticsService(
+	diagnostics, err := core.NewProjectRegistryDiagnosticsService(
 		registry,
-		workspace.NewActiveProjectStore(env),
+		core.NewActiveProjectStore(env),
 	).ListDiagnostics(ctx)
 	if err != nil {
 		return nil, err
@@ -353,7 +353,7 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 		return err
 	}
 
-	repository, err := workspace.NewExecutionRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewExecutionRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -363,7 +363,7 @@ func runMaintenanceExecutionArtifacts(ctx context.Context, cmd *cli.Command, std
 		_ = repository.Close()
 	}()
 
-	diagnostics, err := workspace.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	diagnostics, err := core.NewExecutionArtifactDriftService(repository).ListDiagnostics(
 		ctx,
 		projectContext.ProjectID,
 	)
@@ -397,7 +397,7 @@ func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command
 		return err
 	}
 
-	repository, err := workspace.NewExecutionRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewExecutionRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -407,7 +407,7 @@ func runMaintenanceExecutionCleanupPreview(ctx context.Context, cmd *cli.Command
 		_ = repository.Close()
 	}()
 
-	preview, err := workspace.NewRuntimeArtifactCleanupPreviewService(repository).Preview(
+	preview, err := core.NewRuntimeArtifactCleanupPreviewService(repository).Preview(
 		ctx,
 		projectContext.ProjectDir,
 		projectContext.ProjectID,
@@ -434,7 +434,7 @@ func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout 
 		return err
 	}
 
-	registry, err := workspace.NewProjectRegistry(ctx, env, deps.assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -444,9 +444,9 @@ func runMaintenanceRegistryStatus(ctx context.Context, cmd *cli.Command, stdout 
 		_ = registry.Close()
 	}()
 
-	diagnostics, err := workspace.NewProjectRegistryDiagnosticsService(
+	diagnostics, err := core.NewProjectRegistryDiagnosticsService(
 		registry,
-		workspace.NewActiveProjectStore(env),
+		core.NewActiveProjectStore(env),
 	).ListDiagnostics(ctx)
 	if err != nil {
 		return err
@@ -470,7 +470,7 @@ func runMaintenanceRegistryDisable(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	registry, err := workspace.NewProjectRegistry(ctx, env, deps.assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -524,7 +524,7 @@ func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout
 		return err
 	}
 
-	registry, err := workspace.NewProjectRegistry(ctx, env, deps.assetsFS)
+	registry, err := core.NewProjectRegistry(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -556,7 +556,7 @@ func runMaintenanceRegistrySetPath(ctx context.Context, cmd *cli.Command, stdout
 	return printProjectRegistrySetPath(stdout, project, previousPath, false)
 }
 
-func printMigrationStatus(stdout io.Writer, status workspace.MigrationStatus) error {
+func printMigrationStatus(stdout io.Writer, status core.MigrationStatus) error {
 	lines := []string{
 		fmt.Sprintf("database: %s", status.DatabasePath),
 		fmt.Sprintf("database_exists: %t", status.DatabaseExists),
@@ -587,7 +587,7 @@ func printMigrationStatus(stdout io.Writer, status workspace.MigrationStatus) er
 	return printUnknownMigrations(stdout, status.Unknown)
 }
 
-func printAppliedMigrations(stdout io.Writer, migrations []workspace.AppliedMigration) error {
+func printAppliedMigrations(stdout io.Writer, migrations []core.AppliedMigration) error {
 	for _, migration := range migrations {
 		_, err := fmt.Fprintf(
 			stdout,
@@ -604,7 +604,7 @@ func printAppliedMigrations(stdout io.Writer, migrations []workspace.AppliedMigr
 	return nil
 }
 
-func printPendingMigrations(stdout io.Writer, migrations []workspace.Migration) error {
+func printPendingMigrations(stdout io.Writer, migrations []core.Migration) error {
 	for _, migration := range migrations {
 		_, err := fmt.Fprintf(stdout, "pending_migration: %s %s\n", migration.Version, migration.Name)
 		if err != nil {
@@ -615,7 +615,7 @@ func printPendingMigrations(stdout io.Writer, migrations []workspace.Migration) 
 	return nil
 }
 
-func printUnknownMigrations(stdout io.Writer, migrations []workspace.AppliedMigration) error {
+func printUnknownMigrations(stdout io.Writer, migrations []core.AppliedMigration) error {
 	for _, migration := range migrations {
 		_, err := fmt.Fprintf(
 			stdout,
@@ -634,7 +634,7 @@ func printUnknownMigrations(stdout io.Writer, migrations []workspace.AppliedMigr
 
 func printProjectRegistryDiagnostics(
 	stdout io.Writer,
-	diagnostics []workspace.ProjectRegistryDiagnostic,
+	diagnostics []core.ProjectRegistryDiagnostic,
 ) error {
 	_, err := fmt.Fprintf(stdout, "projects: %d\n", len(diagnostics))
 	if err != nil {
@@ -664,13 +664,13 @@ func printProjectRegistryDiagnostics(
 
 func printExecutionArtifactDriftDiagnostics(
 	stdout io.Writer,
-	diagnostics []workspace.ExecutionArtifactDriftDiagnostic,
+	diagnostics []core.ExecutionArtifactDriftDiagnostic,
 ) error {
 	drifted := 0
 	missingArtifacts := 0
 
 	for _, diagnostic := range diagnostics {
-		if diagnostic.Status != workspace.ExecutionArtifactDriftStatusOK {
+		if diagnostic.Status != core.ExecutionArtifactDriftStatusOK {
 			drifted++
 		}
 
@@ -706,7 +706,7 @@ func printExecutionArtifactDriftDiagnostics(
 
 func printRuntimeArtifactCleanupPreview(
 	stdout io.Writer,
-	preview workspace.RuntimeArtifactCleanupPreview,
+	preview core.RuntimeArtifactCleanupPreview,
 ) error {
 	lines := []string{
 		fmt.Sprintf("artifact_dir: %s", preview.ArtifactDir),
@@ -734,7 +734,7 @@ func printRuntimeArtifactCleanupPreview(
 
 func printExecutionArtifactDriftDiagnostic(
 	stdout io.Writer,
-	diagnostic workspace.ExecutionArtifactDriftDiagnostic,
+	diagnostic core.ExecutionArtifactDriftDiagnostic,
 ) error {
 	_, err := fmt.Fprintf(
 		stdout,
@@ -765,7 +765,7 @@ func printExecutionArtifactDriftDiagnostic(
 	return nil
 }
 
-func printProjectRegistryDisable(stdout io.Writer, project workspace.Project, dryRun bool) error {
+func printProjectRegistryDisable(stdout io.Writer, project core.Project, dryRun bool) error {
 	action := "disabled"
 	if dryRun {
 		action = "would_disable"
@@ -781,7 +781,7 @@ func printProjectRegistryDisable(stdout io.Writer, project workspace.Project, dr
 
 func printProjectRegistrySetPath(
 	stdout io.Writer,
-	project workspace.Project,
+	project core.Project,
 	previousPath string,
 	dryRun bool,
 ) error {

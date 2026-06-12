@@ -9,20 +9,20 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
 	projectDir := t.TempDir()
 
-	err := os.MkdirAll(filepath.Dir(workspace.ProjectMetadataPath(projectDir)), 0o755)
+	err := os.MkdirAll(filepath.Dir(core.ProjectMetadataPath(projectDir)), 0o755)
 	if err != nil {
 		t.Fatalf("create .chc: %v", err)
 	}
 
 	err = os.WriteFile(
-		workspace.ProjectMetadataPath(projectDir),
-		[]byte(workspace.RenderProjectMetadata(workspace.ProjectMetadata{
+		core.ProjectMetadataPath(projectDir),
+		[]byte(core.RenderProjectMetadata(core.ProjectMetadata{
 			Name:        "Service Project",
 			Description: "Loaded by service.",
 		})),
@@ -70,8 +70,8 @@ func TestServiceSaveProjectMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 	operations := newTestService(t, projectDir)
 
-	result, err := operations.SaveProjectMetadata(workspace.ProjectMetadata{
-		SchemaVersion: workspace.ProjectMetadataSchemaVersion,
+	result, err := operations.SaveProjectMetadata(core.ProjectMetadata{
+		SchemaVersion: core.ProjectMetadataSchemaVersion,
 		Name:          "Saved Project",
 		Description:   "Saved through service.",
 	})
@@ -87,7 +87,7 @@ func TestServiceSaveProjectMetadata(t *testing.T) {
 		t.Fatalf("Metadata.Name = %q, want Saved Project", result.Metadata.Name)
 	}
 
-	loaded, err := workspace.NewProjectMetadataService(projectDir).Load()
+	loaded, err := core.NewProjectMetadataService(projectDir).Load()
 	if err != nil {
 		t.Fatalf("Load returned error: %v", err)
 	}
@@ -100,16 +100,16 @@ func TestServiceSaveProjectMetadata(t *testing.T) {
 func TestNewQuizModelAdapterRoutesArtifactGenerationToCodexByDefault(t *testing.T) {
 	adapter := newQuizModelAdapter(t.TempDir())
 
-	routing, ok := adapter.(workspace.ActionRoutingQuizModelAdapter)
+	routing, ok := adapter.(core.ActionRoutingQuizModelAdapter)
 	if !ok {
 		t.Fatalf("adapter = %T, want action routing adapter", adapter)
 	}
 
-	for _, action := range []workspace.QuizModelAction{
-		workspace.QuizModelActionGenerateSpec,
-		workspace.QuizModelActionGenerateAcceptanceFeature,
-		workspace.QuizModelActionGeneratePlan,
-		workspace.QuizModelActionMaterializePlanTracking,
+	for _, action := range []core.QuizModelAction{
+		core.QuizModelActionGenerateSpec,
+		core.QuizModelActionGenerateAcceptanceFeature,
+		core.QuizModelActionGeneratePlan,
+		core.QuizModelActionMaterializePlanTracking,
 	} {
 		if _, ok := routing.ActionAdapters[action]; !ok {
 			t.Fatalf("%s action is not routed: %#v", action, routing.ActionAdapters)
@@ -125,7 +125,7 @@ func TestNewQuizModelAdapterCanRouteArtifactGenerationToOpenAI(t *testing.T) {
 
 	adapter := newQuizModelAdapter(t.TempDir())
 
-	if _, ok := adapter.(workspace.OpenAIQuizModelAdapter); !ok {
+	if _, ok := adapter.(core.OpenAIQuizModelAdapter); !ok {
 		t.Fatalf("adapter = %T, want OpenAI adapter", adapter)
 	}
 }
@@ -152,8 +152,8 @@ func TestServiceSaveCaseMetadataReloadsCases(t *testing.T) {
 	projectDir := t.TempDir()
 	operations := newTestService(t, projectDir)
 
-	result, err := operations.SaveCaseMetadata(workspace.CaseMetadata{
-		SchemaVersion: workspace.CaseMetadataSchemaVersion,
+	result, err := operations.SaveCaseMetadata(core.CaseMetadata{
+		SchemaVersion: core.CaseMetadataSchemaVersion,
 		Name:          "Saved Case",
 		Description:   "Saved through service.",
 	})
@@ -610,7 +610,7 @@ func assertServiceSuggestsWorkspaceCases(t *testing.T, operations service) {
 func assertServiceResolvesWorkspaceRelatedDocuments(t *testing.T, operations service) {
 	t.Helper()
 
-	resolved, err := operations.ResolveWorkspacePath(filepath.ToSlash(filepath.Join(workspace.DirectoryName, workspace.UserDirectoryName, "specs", "blog-spec.md")))
+	resolved, err := operations.ResolveWorkspacePath(filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "specs", "blog-spec.md")))
 	if err != nil {
 		t.Fatalf("ResolveWorkspacePath returned error: %v", err)
 	}
@@ -619,12 +619,12 @@ func assertServiceResolvesWorkspaceRelatedDocuments(t *testing.T, operations ser
 		t.Fatalf("resolved = %#v, want Blog Spec", resolved)
 	}
 
-	related, err := operations.RelatedWorkspaceDocuments(workspace.WorkspaceNodeID(resolved.Node))
+	related, err := operations.RelatedWorkspaceDocuments(core.WorkspaceNodeID(resolved.Node))
 	if err != nil {
 		t.Fatalf("RelatedWorkspaceDocuments returned error: %v", err)
 	}
 
-	if !related.Resolved || len(related.Related) != 1 || related.Related[0].Kind != workspace.WorkspaceNodeTicket {
+	if !related.Resolved || len(related.Related) != 1 || related.Related[0].Kind != core.WorkspaceNodeTicket {
 		t.Fatalf("related = %#v, want related ticket", related)
 	}
 }
@@ -633,24 +633,24 @@ func TestServiceSearchWorkspaceIndexUsesSemanticDigestCache(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
-	graph, err := workspace.NewWorkspaceGraphBuilder(projectDir).Build(t.Context())
+	graph, err := core.NewWorkspaceGraphBuilder(projectDir).Build(t.Context())
 	if err != nil {
 		t.Fatalf("Build returned error: %v", err)
 	}
 
-	index := workspace.NewWorkspaceIndexFromGraph(graph)
-	cache := workspace.NewWorkspaceSemanticDigestCache()
+	index := core.NewWorkspaceIndexFromGraph(graph)
+	cache := core.NewWorkspaceSemanticDigestCache()
 
 	for nodeID, node := range index.NodesByID {
-		if node.Kind == workspace.WorkspaceNodePlan {
-			cache.Entries[nodeID] = workspace.WorkspaceSemanticDigest{
+		if node.Kind == core.WorkspaceNodePlan {
+			cache.Entries[nodeID] = core.WorkspaceSemanticDigest{
 				NodeID: nodeID,
 				Digest: "editorial roadmap publishing workflow",
 			}
 		}
 	}
 
-	err = workspace.WriteWorkspaceSemanticDigestCache(workspace.WorkspaceSemanticDigestCachePath(projectDir), cache)
+	err = core.WriteWorkspaceSemanticDigestCache(core.WorkspaceSemanticDigestCachePath(projectDir), cache)
 	if err != nil {
 		t.Fatalf("WriteWorkspaceSemanticDigestCache returned error: %v", err)
 	}
@@ -688,7 +688,7 @@ func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 		t.Fatalf("ticket title = %q, want TUI created ticket", result.Tickets[0].Title)
 	}
 
-	if result.Tickets[0].Status != workspace.TicketStatusBacklog {
+	if result.Tickets[0].Status != core.TicketStatusBacklog {
 		t.Fatalf("ticket status = %q, want backlog", result.Tickets[0].Status)
 	}
 
@@ -703,11 +703,11 @@ func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 
 func TestServiceBoardReturnsSharedBoardReadModel(t *testing.T) {
 	projectDir := newTestWorkspace(t)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Backlog.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Backlog.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Backlog work",
 		Synopsis:  "Prepare backlog work.",
-		Status:    workspace.TicketStatusBacklog,
+		Status:    core.TicketStatusBacklog,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "task",
@@ -750,11 +750,11 @@ func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 		t.Fatalf("AuthoringSessions = %#v, want one session", result.AuthoringSessions)
 	}
 
-	if result.AuthoringSessions[0].Mode != workspace.AuthoringSessionModeTUI {
+	if result.AuthoringSessions[0].Mode != core.AuthoringSessionModeTUI {
 		t.Fatalf("session mode = %q, want tui", result.AuthoringSessions[0].Mode)
 	}
 
-	if result.AuthoringSessions[0].Target != workspace.AuthoringTargetSpec {
+	if result.AuthoringSessions[0].Target != core.AuthoringTargetSpec {
 		t.Fatalf("session target = %q, want spec", result.AuthoringSessions[0].Target)
 	}
 
@@ -765,7 +765,7 @@ func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 
 func TestServiceMutatesSelectedTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", workspace.Ticket{
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
 		Key:       "CHC-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -890,26 +890,26 @@ func (l *fakeDumpEditorLauncher) EditorCommand(_ context.Context, path string) (
 	return l.command, l.err
 }
 
-func assertWorkspaceIndexCacheMiss(t *testing.T, cache workspace.WorkspaceIndexCacheState) {
+func assertWorkspaceIndexCacheMiss(t *testing.T, cache core.WorkspaceIndexCacheState) {
 	t.Helper()
 
-	if cache.Status != workspace.WorkspaceIndexCacheMiss {
-		t.Fatalf("IndexCache.Status = %q, want %q", cache.Status, workspace.WorkspaceIndexCacheMiss)
+	if cache.Status != core.WorkspaceIndexCacheMiss {
+		t.Fatalf("IndexCache.Status = %q, want %q", cache.Status, core.WorkspaceIndexCacheMiss)
 	}
 }
 
 func writeServiceWorkspaceQueryFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeServiceWorkspaceFile(t, workspace.ProjectMetadataPath(projectDir), workspace.RenderProjectMetadata(workspace.ProjectMetadata{
+	writeServiceWorkspaceFile(t, core.ProjectMetadataPath(projectDir), core.RenderProjectMetadata(core.ProjectMetadata{
 		Name:        "Example",
 		Description: "Example project.",
 	}))
-	writeServiceWorkspaceFile(t, workspace.CaseMetadataPath(projectDir, "blog"), workspace.RenderCaseMetadata(workspace.CaseMetadata{
+	writeServiceWorkspaceFile(t, core.CaseMetadataPath(projectDir, "blog"), core.RenderCaseMetadata(core.CaseMetadata{
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspace.DirectoryName, workspace.UserDirectoryName, "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, core.UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "accepted"
 case: "blog"
@@ -917,14 +917,14 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspace.DirectoryName, workspace.UserDirectoryName, "plans", "project-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, core.UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---
 
 # Project Plan
 `)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Write.md", workspace.Ticket{
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Write.md", core.Ticket{
 		Key:         "CHC-1",
 		Title:       "Write article",
 		Status:      "ready",

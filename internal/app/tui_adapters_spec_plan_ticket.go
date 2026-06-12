@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"forge.adrianpk.com/chc/internal/core"
 	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 type tuiTicketActionExecutor struct {
@@ -44,7 +44,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 	switch request.Action {
 	case tui.SpecActionGenerate:
 		generated, err := e.operations.GenerateSpec(e.operations.ctx, SpecGenerateRequest{
-			Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			return tui.SpecActionResult{}, err
@@ -53,7 +53,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 		result.Message = generated.Message
 	case tui.SpecActionGenerateFeature:
 		generated, err := e.operations.GenerateAcceptanceFeature(e.operations.ctx, AcceptanceFeatureGenerateRequest{
-			Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			return tui.SpecActionResult{}, err
@@ -100,12 +100,12 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 	})
 
 	message := ""
-	var tickets []workspace.IndexedTicket
+	var tickets []core.IndexedTicket
 
 	switch request.Action {
 	case tui.PlanActionGenerate:
 		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{
-			Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
@@ -120,7 +120,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 		message = result.Message
 	case tui.PlanActionRegenerate:
 		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{
-			Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{
@@ -135,7 +135,7 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(
 		message = result.Message
 	case tui.PlanActionMaterializeTracking:
 		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{
-			Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+			Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			e.operations.appendPlanGenerationLog("tui_plan_action_failed", map[string]string{

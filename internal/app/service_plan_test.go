@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"forge.adrianpk.com/chc/internal/core"
 	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 //nolint:funlen // Integration-style service assertion keeps fixture and checks together.
@@ -51,7 +51,7 @@ The implementation must preserve editorial review.
 	operations.now = clock
 
 	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -78,11 +78,11 @@ The implementation must preserve editorial review.
 		t.Fatalf("model requests = %d, want outline and slice detail requests", len(model.requests))
 	}
 
-	if model.requests[0].Action != workspace.QuizModelActionGeneratePlanOutline {
+	if model.requests[0].Action != core.QuizModelActionGeneratePlanOutline {
 		t.Fatalf("first action = %q, want plan outline generation", model.requests[0].Action)
 	}
 
-	if model.requests[1].Action != workspace.QuizModelActionGeneratePlanSliceDetail {
+	if model.requests[1].Action != core.QuizModelActionGeneratePlanSliceDetail {
 		t.Fatalf("second action = %q, want plan slice detail generation", model.requests[1].Action)
 	}
 
@@ -118,7 +118,7 @@ The implementation must preserve editorial review.
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizPlanResponse("response-plan", clock()),
 		},
 	}
@@ -127,7 +127,7 @@ The implementation must preserve editorial review.
 	operations.now = clock
 
 	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -141,7 +141,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("model requests = %d, want single plan generation request", len(model.requests))
 	}
 
-	if model.requests[0].Action != workspace.QuizModelActionGeneratePlan {
+	if model.requests[0].Action != core.QuizModelActionGeneratePlan {
 		t.Fatalf("action = %q, want plan generation", model.requests[0].Action)
 	}
 
@@ -166,7 +166,7 @@ The implementation must preserve editorial review.
 `)
 
 	operations := newTestService(t, projectDir)
-	scope := workspace.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
@@ -177,7 +177,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("newPlanOutlineGenerationModelRequest returned error: %v", err)
 	}
 
-	if request.Action != workspace.QuizModelActionGeneratePlanOutline {
+	if request.Action != core.QuizModelActionGeneratePlanOutline {
 		t.Fatalf("Action = %q, want plan outline generation", request.Action)
 	}
 
@@ -221,7 +221,7 @@ The implementation must preserve editorial review.
 `)
 
 	operations := newTestService(t, projectDir)
-	scope := workspace.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
@@ -232,7 +232,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("newPlanGenerationModelRequest returned error: %v", err)
 	}
 
-	if request.Action != workspace.QuizModelActionGeneratePlan {
+	if request.Action != core.QuizModelActionGeneratePlan {
 		t.Fatalf("Action = %q, want plan generation", request.Action)
 	}
 
@@ -268,7 +268,7 @@ The implementation must preserve editorial review.
 `)
 
 	operations := newTestService(t, projectDir)
-	scope := workspace.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
+	scope := core.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
 	state, err := operations.specGenerationRuntimeState(scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
@@ -280,7 +280,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("newPlanSliceDetailGenerationModelRequest returned error: %v", err)
 	}
 
-	if request.Action != workspace.QuizModelActionGeneratePlanSliceDetail {
+	if request.Action != core.QuizModelActionGeneratePlanSliceDetail {
 		t.Fatalf("Action = %q, want plan slice detail generation", request.Action)
 	}
 
@@ -336,7 +336,7 @@ Manual edits that must remain recoverable.
 	operations.now = clock
 
 	result, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("RegeneratePlan returned error: %v", err)
@@ -384,7 +384,7 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 	operations.now = clock
 
 	_, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("RegeneratePlan returned error: %v", err)
@@ -412,7 +412,7 @@ func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
 	badDetail.SliceDetail.ShortName = "renamed slice"
 
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizPlanOutlineResponse("response-plan-outline", clock()),
 			badDetail,
 		},
@@ -422,7 +422,7 @@ func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
 	operations.now = clock
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil {
 		t.Fatal("GeneratePlan returned nil error, want slice detail validation failure")
@@ -453,7 +453,7 @@ Implement planning foundation.
 
 	now := time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC)
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizPlanTrackingResponse("response-tracking", now),
 		},
 	}
@@ -462,7 +462,7 @@ Implement planning foundation.
 	operations.now = fixedServiceClock(now)
 
 	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("MaterializePlanTracking returned error: %v", err)
@@ -499,7 +499,7 @@ Implement planning foundation.
 	)
 	assertMaterializedPlanTrackingTicketContent(t, ticket)
 
-	if len(model.requests) != 1 || model.requests[0].Action != workspace.QuizModelActionMaterializePlanTracking {
+	if len(model.requests) != 1 || model.requests[0].Action != core.QuizModelActionMaterializePlanTracking {
 		t.Fatalf("model requests = %#v, want plan tracking materialization", model.requests)
 	}
 }
@@ -517,13 +517,13 @@ case_slug: "blog"
 `)
 
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			{
 				ID:        "response-invalid-tracking",
 				RequestID: "filled-by-fake",
 				Provider:  "fake",
-				Status:    workspace.QuizModelResponseReady,
-				PlanTracking: workspace.GeneratedPlanTracking{
+				Status:    core.QuizModelResponseReady,
+				PlanTracking: core.GeneratedPlanTracking{
 					Title:     "Invalid Tracking",
 					Body:      "Missing generated tickets.",
 					CreatedAt: time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC),
@@ -536,7 +536,7 @@ case_slug: "blog"
 	operations.quizModel = model
 
 	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil {
 		t.Fatal("MaterializePlanTracking returned nil error")
@@ -551,7 +551,7 @@ func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T
 	writeServiceQuizFixture(t, projectDir)
 
 	operations := newTestService(t, projectDir)
-	payloads := []workspace.GeneratedPlanTrackingTicket{
+	payloads := []core.GeneratedPlanTrackingTicket{
 		validPlanTrackingTicketPayload(),
 		{
 			SliceID:  "Slice 2",
@@ -565,7 +565,7 @@ func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T
 	}
 
 	_, err := operations.createPlanTrackingTickets(
-		workspace.QuizScope{CaseSlug: "blog"},
+		core.QuizScope{CaseSlug: "blog"},
 		".chc/user/plans/blog-plan.md",
 		".chc/user/plans/blog-tracking.md",
 		payloads,
@@ -587,10 +587,10 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 	payload.Path = ".chc/user/tickets/blog/LLM-99-owned-by-model.md"
 
 	_, err := operations.createPlanTrackingTickets(
-		workspace.QuizScope{CaseSlug: "blog"},
+		core.QuizScope{CaseSlug: "blog"},
 		".chc/user/plans/blog-plan.md",
 		".chc/user/plans/blog-tracking.md",
-		[]workspace.GeneratedPlanTrackingTicket{payload},
+		[]core.GeneratedPlanTrackingTicket{payload},
 	)
 	if err == nil || !strings.Contains(err.Error(), "generated ticket key must be empty") {
 		t.Fatalf("createPlanTrackingTickets error = %v, want generated key error", err)
@@ -599,8 +599,8 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
 }
 
-func validPlanTrackingTicketPayload() workspace.GeneratedPlanTrackingTicket {
-	return workspace.GeneratedPlanTrackingTicket{
+func validPlanTrackingTicketPayload() core.GeneratedPlanTrackingTicket {
+	return core.GeneratedPlanTrackingTicket{
 		SliceID:  "Slice 1",
 		Title:    "Implement planning foundation",
 		Synopsis: "Build the planning foundation slice.",
@@ -632,10 +632,10 @@ func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
 	}
 }
 
-func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket workspace.IndexedTicket) {
+func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket core.IndexedTicket) {
 	t.Helper()
 
-	if ticket.Status != workspace.TicketStatusReadyForDev {
+	if ticket.Status != core.TicketStatusReadyForDev {
 		t.Fatalf("ticket status = %q, want ready_for_dev", ticket.Status)
 	}
 
@@ -660,7 +660,7 @@ func TestServiceMaterializePlanTrackingRequiresExistingPlan(t *testing.T) {
 	operations.quizModel = model
 
 	_, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil || !strings.Contains(err.Error(), "plan is required before tracking can be created") {
 		t.Fatalf("MaterializePlanTracking error = %v, want missing plan error", err)
@@ -695,7 +695,7 @@ case_slug: "blog"
 	operations.quizModel = model
 
 	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("MaterializePlanTracking returned error: %v", err)
@@ -734,7 +734,7 @@ Manual edits that must remain recoverable.
 	operations.now = clock
 
 	_, err := operations.RegeneratePlan(t.Context(), PlanRegenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil {
 		t.Fatal("RegeneratePlan returned nil error, want archive failure")
@@ -789,7 +789,7 @@ case: "blog"
 	operations.now = clock
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -821,7 +821,7 @@ func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
 	operations.quizModel = model
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -855,7 +855,7 @@ Manual plan content.
 	operations.quizModel = model
 
 	result, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GeneratePlan returned error: %v", err)
@@ -964,7 +964,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 	done := make(chan error, 1)
 	go func() {
 		_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-			Scope: workspace.QuizScope{CaseSlug: "blog"},
+			Scope: core.QuizScope{CaseSlug: "blog"},
 		})
 		done <- err
 	}()
@@ -972,7 +972,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 	<-model.started
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err == nil || !strings.Contains(err.Error(), "plan generation already running for scope blog") {
 		t.Fatalf("GeneratePlan error = %v, want guard error", err)
@@ -1029,8 +1029,8 @@ func fixedServiceClock(now time.Time) func() time.Time {
 	}
 }
 
-func validServiceGeneratedPlanOutline(scope workspace.QuizScope, createdAt time.Time) workspace.GeneratedPlanOutline {
-	return workspace.GeneratedPlanOutline{
+func validServiceGeneratedPlanOutline(scope core.QuizScope, createdAt time.Time) core.GeneratedPlanOutline {
+	return core.GeneratedPlanOutline{
 		Scope:              scope,
 		Title:              "Staged Plan Generation",
 		Status:             "planned",
@@ -1039,7 +1039,7 @@ func validServiceGeneratedPlanOutline(scope workspace.QuizScope, createdAt time.
 		OpenQuestions:      []string{"Should staged generation be default?"},
 		Risks:              []string{"More model calls."},
 		ValidationStrategy: "Validate schema and request construction.",
-		Slices: []workspace.GeneratedPlanOutlineSlice{
+		Slices: []core.GeneratedPlanOutlineSlice{
 			{
 				ID:                     "Slice 1",
 				ShortName:              "outline generation contract",
@@ -1063,13 +1063,13 @@ type deadlineCapturingPlanModel struct {
 
 func (m *deadlineCapturingPlanModel) InvokeQuizModel(
 	ctx context.Context,
-	request workspace.QuizModelRequest,
-) (workspace.QuizModelResponse, error) {
+	request core.QuizModelRequest,
+) (core.QuizModelResponse, error) {
 	deadline, ok := ctx.Deadline()
 	m.hasDeadline = ok
 	m.remaining = time.Until(deadline)
 
-	if request.Action == workspace.QuizModelActionGeneratePlanOutline {
+	if request.Action == core.QuizModelActionGeneratePlanOutline {
 		return serviceQuizPlanOutlineResponse("response-plan-outline", request.CreatedAt), nil
 	}
 
@@ -1093,8 +1093,8 @@ func newBlockingPlanModel() *blockingPlanModel {
 
 func (m *blockingPlanModel) InvokeQuizModel(
 	_ context.Context,
-	request workspace.QuizModelRequest,
-) (workspace.QuizModelResponse, error) {
+	request core.QuizModelRequest,
+) (core.QuizModelResponse, error) {
 	m.mu.Lock()
 	m.count++
 	m.mu.Unlock()
@@ -1102,7 +1102,7 @@ func (m *blockingPlanModel) InvokeQuizModel(
 	m.once.Do(func() { close(m.started) })
 	<-m.release
 
-	if request.Action == workspace.QuizModelActionGeneratePlanOutline {
+	if request.Action == core.QuizModelActionGeneratePlanOutline {
 		return serviceQuizPlanOutlineResponse("response-plan-outline", request.CreatedAt), nil
 	}
 

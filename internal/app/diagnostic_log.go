@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func (s service) appendPlanGenerationLog(event string, fields map[string]string) {
@@ -26,7 +26,7 @@ func (s service) appendPlanGenerationLog(event string, fields map[string]string)
 		return
 	}
 
-	path := workspace.UserPath(s.projectContext.ProjectDir, "runtime", "plan-generation.log")
+	path := core.UserPath(s.projectContext.ProjectDir, "runtime", "plan-generation.log")
 
 	err = os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {

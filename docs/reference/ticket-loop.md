@@ -12,7 +12,7 @@ status reporting, and daemon coordination are separate concerns.
 
 The eligible ticket query reads from the existing ticket index. It does not
 scan ticket files, refresh the index, update ticket state, create execution
-records, or mutate the workspace.
+records, or mutate the core.
 
 Required input:
 

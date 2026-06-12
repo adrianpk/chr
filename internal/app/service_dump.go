@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // DumpScope narrows a dump operation to an optional use-case scope.
@@ -228,7 +228,7 @@ func (s service) OpenDump(request DumpOpenRequest) (DumpOperationResult, error) 
 }
 
 func (s service) dumpDirectory() string {
-	return workspace.DumpDirectory(s.projectContext.ProjectDir)
+	return core.DumpDirectory(s.projectContext.ProjectDir)
 }
 
 func (s service) resolveDumpPath(relativePath string) (string, error) {
@@ -242,8 +242,8 @@ func (s service) resolveDumpPath(relativePath string) (string, error) {
 		return "", fmt.Errorf("dump path must be project-relative")
 	}
 
-	if filepath.ToSlash(filepath.Dir(cleanPath)) != workspace.UserRelativePath("dumps") {
-		return "", fmt.Errorf("dump path must be under %s", workspace.UserRelativePath("dumps"))
+	if filepath.ToSlash(filepath.Dir(cleanPath)) != core.UserRelativePath("dumps") {
+		return "", fmt.Errorf("dump path must be under %s", core.UserRelativePath("dumps"))
 	}
 
 	path := filepath.Join(s.projectContext.ProjectDir, cleanPath)
@@ -404,8 +404,8 @@ func (s service) createDumpPairFiles(
 	return "", fmt.Errorf("create dump file: exhausted unique names for %q", title)
 }
 
-func (s service) dumpViewsFromIndex(index workspace.WorkspaceIndex) []DumpView {
-	nodeIDs := append([]string(nil), index.ByKind[workspace.WorkspaceNodeDump]...)
+func (s service) dumpViewsFromIndex(index core.WorkspaceIndex) []DumpView {
+	nodeIDs := append([]string(nil), index.ByKind[core.WorkspaceNodeDump]...)
 	sort.Strings(nodeIDs)
 
 	dumps := make([]DumpView, 0, len(nodeIDs))
@@ -415,7 +415,7 @@ func (s service) dumpViewsFromIndex(index workspace.WorkspaceIndex) []DumpView {
 			continue
 		}
 
-		if workspace.IsRawDumpNode(node) {
+		if core.IsRawDumpNode(node) {
 			continue
 		}
 
@@ -425,7 +425,7 @@ func (s service) dumpViewsFromIndex(index workspace.WorkspaceIndex) []DumpView {
 	return dumps
 }
 
-func (s service) dumpViewFromNode(nodeID string, node workspace.WorkspaceNode) DumpView {
+func (s service) dumpViewFromNode(nodeID string, node core.WorkspaceNode) DumpView {
 	return DumpView{
 		NodeID:       nodeID,
 		UseCaseTitle: s.dumpUseCaseTitle(node.CaseSlug),
@@ -445,7 +445,7 @@ func (s service) dumpUseCaseTitle(caseSlug string) string {
 		return "Project-wide"
 	}
 
-	cases, err := workspace.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
+	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
 	if err == nil {
 		for _, metadata := range cases {
 			if metadata.Slug == caseSlug && strings.TrimSpace(metadata.Name) != "" {

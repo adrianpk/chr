@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // QuizViewStatusNotStarted marks a quiz scope that has no active session yet.
@@ -18,9 +18,9 @@ const QuizViewStatusNotStarted = "not_started"
 type QuizView struct {
 	Index                 int
 	Title                 string
-	Scope                 workspace.QuizScope
+	Scope                 core.QuizScope
 	Status                string
-	Mode                  workspace.QuizMode
+	Mode                  core.QuizMode
 	RawPath               string
 	CuratedPath           string
 	RuntimePath           string
@@ -36,7 +36,7 @@ type QuizView struct {
 	CuratedPreview        string
 }
 
-func (s service) quizViewsFromStates(states []workspace.QuizRuntimeState) ([]QuizView, error) {
+func (s service) quizViewsFromStates(states []core.QuizRuntimeState) ([]QuizView, error) {
 	scopes, err := s.quizReadScopes()
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (s service) quizViewsFromStates(states []workspace.QuizRuntimeState) ([]Qui
 
 func (s service) quizViewFromScope(
 	scope quizReadScope,
-	stateByScope map[string]workspace.QuizRuntimeState,
+	stateByScope map[string]core.QuizRuntimeState,
 ) (QuizView, error) {
 	state, ok := stateByScope[quizScopeKey(scope.scope)]
 	if ok {
@@ -83,11 +83,11 @@ func (s service) quizViewFromScope(
 
 func (s service) appendRuntimeOnlyQuizViews(
 	views []QuizView,
-	states []workspace.QuizRuntimeState,
+	states []core.QuizRuntimeState,
 	knownScopes map[string]bool,
 ) ([]QuizView, error) {
 	for _, state := range states {
-		scope := workspace.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
+		scope := core.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 		if knownScopes[quizScopeKey(scope)] {
 			continue
 		}
@@ -106,7 +106,7 @@ func (s service) appendRuntimeOnlyQuizViews(
 func (s service) quizReadScopes() ([]quizReadScope, error) {
 	projectTitle := s.projectContext.ProjectID
 
-	projectMetadata, err := workspace.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
+	projectMetadata, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
 	if err != nil {
 		return nil, err
 	}
@@ -117,10 +117,10 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 
 	scopes := []quizReadScope{{
 		title: projectTitle,
-		scope: workspace.QuizScope{ProjectID: s.projectContext.ProjectID},
+		scope: core.QuizScope{ProjectID: s.projectContext.ProjectID},
 	}}
 
-	cases, err := workspace.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
+	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadAll()
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 
 		scopes = append(scopes, quizReadScope{
 			title: title,
-			scope: workspace.QuizScope{
+			scope: core.QuizScope{
 				ProjectID: s.projectContext.ProjectID,
 				CaseSlug:  metadata.Slug,
 			},
@@ -154,8 +154,8 @@ func (s service) quizReadScopes() ([]quizReadScope, error) {
 	return scopes, nil
 }
 
-func (s service) quizViewFromState(title string, state workspace.QuizRuntimeState) (QuizView, error) {
-	scope := workspace.QuizScope{
+func (s service) quizViewFromState(title string, state core.QuizRuntimeState) (QuizView, error) {
+	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
@@ -186,7 +186,7 @@ func (s service) quizViewFromState(title string, state workspace.QuizRuntimeStat
 	}, nil
 }
 
-func (s service) notStartedQuizView(title string, scope workspace.QuizScope) (QuizView, error) {
+func (s service) notStartedQuizView(title string, scope core.QuizScope) (QuizView, error) {
 	paths, err := s.quizRepository().Paths(scope)
 	if err != nil {
 		return QuizView{}, err
@@ -196,11 +196,11 @@ func (s service) notStartedQuizView(title string, scope workspace.QuizScope) (Qu
 		Title:          title,
 		Scope:          scope,
 		Status:         QuizViewStatusNotStarted,
-		Mode:           workspace.QuizModeDeep,
+		Mode:           core.QuizModeDeep,
 		RawPath:        paths.RawRelativePath,
 		CuratedPath:    paths.CuratedRelativePath,
 		RuntimePath:    paths.RuntimeRelativePath,
-		QuestionBudget: workspace.DefaultQuizQuestionBudget,
+		QuestionBudget: core.DefaultQuizQuestionBudget,
 		CuratedPreview: s.quizCuratedPreview(paths.CuratedPath),
 	}, nil
 }
@@ -232,7 +232,7 @@ func (s service) quizCuratedPreview(path string) string {
 	return strings.Join(lines, "\n")
 }
 
-func quizActiveQuestionSummary(state workspace.QuizRuntimeState) string {
+func quizActiveQuestionSummary(state core.QuizRuntimeState) string {
 	if state.ActiveQuestion == nil {
 		return ""
 	}
@@ -240,7 +240,7 @@ func quizActiveQuestionSummary(state workspace.QuizRuntimeState) string {
 	return state.ActiveQuestion.Prompt
 }
 
-func quizTrailSummary(state workspace.QuizRuntimeState) string {
+func quizTrailSummary(state core.QuizRuntimeState) string {
 	if len(state.Trail) == 0 {
 		return ""
 	}
@@ -258,10 +258,10 @@ func quizTrailSummary(state workspace.QuizRuntimeState) string {
 	return strings.Join(segments, " > ")
 }
 
-func quizStateByScope(states []workspace.QuizRuntimeState) map[string]workspace.QuizRuntimeState {
-	stateByScope := map[string]workspace.QuizRuntimeState{}
+func quizStateByScope(states []core.QuizRuntimeState) map[string]core.QuizRuntimeState {
+	stateByScope := map[string]core.QuizRuntimeState{}
 	for _, state := range states {
-		stateByScope[quizScopeKey(workspace.QuizScope{
+		stateByScope[quizScopeKey(core.QuizScope{
 			ProjectID: state.ProjectID,
 			CaseSlug:  state.CaseSlug,
 		})] = state
@@ -270,7 +270,7 @@ func quizStateByScope(states []workspace.QuizRuntimeState) map[string]workspace.
 	return stateByScope
 }
 
-func quizRuntimeOnlyTitle(state workspace.QuizRuntimeState) string {
+func quizRuntimeOnlyTitle(state core.QuizRuntimeState) string {
 	if strings.TrimSpace(state.CaseSlug) != "" {
 		return state.CaseSlug
 	}
@@ -278,11 +278,11 @@ func quizRuntimeOnlyTitle(state workspace.QuizRuntimeState) string {
 	return state.ProjectID
 }
 
-func quizScopeKey(scope workspace.QuizScope) string {
+func quizScopeKey(scope core.QuizScope) string {
 	return scope.ProjectID + "/" + scope.CaseSlug
 }
 
 type quizReadScope struct {
 	title string
-	scope workspace.QuizScope
+	scope core.QuizScope
 }

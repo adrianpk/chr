@@ -7,23 +7,23 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 type service struct {
 	ctx            context.Context
-	env            workspace.UserEnvironment
+	env            core.UserEnvironment
 	assetsFS       fs.FS
 	projectContext commandProjectContext
 	dumpEditor     DumpEditorLauncher
 	dumpCurator    DumpCurationProvider
-	quizModel      workspace.QuizModelAdapter
+	quizModel      core.QuizModelAdapter
 	now            func() time.Time
 }
 
 func newService(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
 ) service {
@@ -47,31 +47,31 @@ func newDumpCurationProvider(projectDir string) DumpCurationProvider {
 	return codexDumpCurationProvider{ProjectDir: projectDir}
 }
 
-func newQuizModelAdapter(projectDir string) workspace.QuizModelAdapter {
-	defaultAdapter := workspace.OpenAIQuizModelAdapter{ProjectDir: projectDir}
-	actionAdapters := map[workspace.QuizModelAction]workspace.QuizModelAdapter{}
+func newQuizModelAdapter(projectDir string) core.QuizModelAdapter {
+	defaultAdapter := core.OpenAIQuizModelAdapter{ProjectDir: projectDir}
+	actionAdapters := map[core.QuizModelAction]core.QuizModelAdapter{}
 
 	if codexGenerationBackend("CHC_SPEC_GENERATION_BACKEND") {
-		actionAdapters[workspace.QuizModelActionGenerateSpec] = workspace.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionGenerateSpec] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
 	}
 
 	if codexGenerationBackend("CHC_ACCEPTANCE_FEATURE_GENERATION_BACKEND") {
-		actionAdapters[workspace.QuizModelActionGenerateAcceptanceFeature] = workspace.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionGenerateAcceptanceFeature] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
 	}
 
 	if codexGenerationBackend("CHC_PLAN_GENERATION_BACKEND") {
-		actionAdapters[workspace.QuizModelActionGeneratePlan] = workspace.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionGeneratePlan] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
 	}
 
 	if codexGenerationBackend("CHC_PLAN_TRACKING_GENERATION_BACKEND") {
-		actionAdapters[workspace.QuizModelActionMaterializePlanTracking] = workspace.CodexQuizModelAdapter{ProjectDir: projectDir}
+		actionAdapters[core.QuizModelActionMaterializePlanTracking] = core.CodexQuizModelAdapter{ProjectDir: projectDir}
 	}
 
 	if len(actionAdapters) == 0 {
 		return defaultAdapter
 	}
 
-	return workspace.ActionRoutingQuizModelAdapter{
+	return core.ActionRoutingQuizModelAdapter{
 		ActionAdapters: actionAdapters,
 		DefaultAdapter: defaultAdapter,
 	}

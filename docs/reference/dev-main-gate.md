@@ -21,7 +21,7 @@ Optional flags:
 The command exits non-zero when validation fails or when configured
 traceability policy requires agent evidence that is missing.
 
-The command requires a managed project workspace. Create one with `chc init`
+The command requires a managed project core. Create one with `chc init`
 before running the gate in a project for the first time.
 
 ## Evidence

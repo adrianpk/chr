@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func newAcceptanceCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -71,7 +71,7 @@ func writeAcceptanceFeatureGenerateResult(stdout io.Writer, result AcceptanceFea
 		return fmt.Errorf("write acceptance feature generate result: %w", err)
 	}
 
-	if result.Status == workspace.AcceptanceFeatureStatusGenerated {
+	if result.Status == core.AcceptanceFeatureStatusGenerated {
 		_, err = fmt.Fprintf(stdout, "feature: %s\n", result.Feature)
 		if err != nil {
 			return fmt.Errorf("write acceptance feature generate result: %w", err)

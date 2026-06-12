@@ -27,7 +27,7 @@ Exact contracts and command behavior:
 - [Commands](reference/commands.md)
 - [TUI](reference/tui.md)
 - [CLI TUI action matrix](reference/cli-tui-action-matrix.md)
-- [Project workspace](reference/project-workspace.md)
+- [Project workspace](reference/project-core.md)
 - [Acceptance feature generation](reference/acceptance-feature-generation.md)
 - [Runtime configuration](reference/runtime-config.md)
 - [Review workflow configuration](reference/review-workflow-config.md)

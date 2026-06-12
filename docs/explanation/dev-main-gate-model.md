@@ -25,7 +25,7 @@ The gate provides:
 - reference documentation, Woodpecker guidance, and a repeatable QA scenario.
 
 The gate is usable from the CLI and from Woodpecker. It writes durable evidence
-inside the managed project workspace.
+inside the managed project core.
 
 ## Workspace Boundary
 

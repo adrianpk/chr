@@ -3,23 +3,23 @@ package tui
 import (
 	"sort"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
-func casesFromWorkspaceGraph(graph workspace.WorkspaceGraph, fallback []workspace.CaseMetadata) []workspace.CaseMetadata {
+func casesFromWorkspaceGraph(graph core.WorkspaceGraph, fallback []core.CaseMetadata) []core.CaseMetadata {
 	if len(graph.Cases) == 0 {
-		return append([]workspace.CaseMetadata(nil), fallback...)
+		return append([]core.CaseMetadata(nil), fallback...)
 	}
 
-	fallbackBySlug := make(map[string]workspace.CaseMetadata, len(fallback))
+	fallbackBySlug := make(map[string]core.CaseMetadata, len(fallback))
 	for _, metadata := range fallback {
 		fallbackBySlug[metadata.Slug] = metadata
 	}
 
-	cases := make([]workspace.CaseMetadata, 0, len(graph.Cases))
+	cases := make([]core.CaseMetadata, 0, len(graph.Cases))
 	for _, node := range graph.Cases {
 		metadata := fallbackBySlug[node.Slug]
-		metadata.SchemaVersion = workspace.CaseMetadataSchemaVersion
+		metadata.SchemaVersion = core.CaseMetadataSchemaVersion
 		metadata.Slug = node.Slug
 		metadata.Name = node.Name
 		metadata.Description = node.Description
@@ -33,24 +33,24 @@ func casesFromWorkspaceGraph(graph workspace.WorkspaceGraph, fallback []workspac
 }
 
 func casesFromWorkspaceIndex(
-	index workspace.WorkspaceIndex,
-	graph workspace.WorkspaceGraph,
-	fallback []workspace.CaseMetadata,
-) []workspace.CaseMetadata {
+	index core.WorkspaceIndex,
+	graph core.WorkspaceGraph,
+	fallback []core.CaseMetadata,
+) []core.CaseMetadata {
 	suggestions := index.ListCases()
 	if len(suggestions) == 0 {
 		return casesFromWorkspaceGraph(graph, fallback)
 	}
 
-	fallbackBySlug := make(map[string]workspace.CaseMetadata, len(fallback))
+	fallbackBySlug := make(map[string]core.CaseMetadata, len(fallback))
 	for _, metadata := range fallback {
 		fallbackBySlug[metadata.Slug] = metadata
 	}
 
-	cases := make([]workspace.CaseMetadata, 0, len(suggestions))
+	cases := make([]core.CaseMetadata, 0, len(suggestions))
 	for _, suggestion := range suggestions {
 		metadata := fallbackBySlug[suggestion.Slug]
-		metadata.SchemaVersion = workspace.CaseMetadataSchemaVersion
+		metadata.SchemaVersion = core.CaseMetadataSchemaVersion
 		metadata.Slug = suggestion.Slug
 		metadata.Name = suggestion.Name
 		metadata.Description = suggestion.Description
@@ -62,12 +62,12 @@ func casesFromWorkspaceIndex(
 	return cases
 }
 
-func workspaceIndexCaseDocumentCount(index workspace.WorkspaceIndex, slug string, kind workspace.WorkspaceNodeKind) int {
+func workspaceIndexCaseDocumentCount(index core.WorkspaceIndex, slug string, kind core.WorkspaceNodeKind) int {
 	count := 0
 
 	for _, nodeID := range index.ByCaseSlug[slug] {
 		node := index.NodesByID[nodeID]
-		if kind == workspace.WorkspaceNodeDump && workspace.IsRawDumpNode(node) {
+		if kind == core.WorkspaceNodeDump && core.IsRawDumpNode(node) {
 			continue
 		}
 
@@ -79,11 +79,11 @@ func workspaceIndexCaseDocumentCount(index workspace.WorkspaceIndex, slug string
 	return count
 }
 
-func workspaceGraphProjectDocumentCount(graph workspace.WorkspaceGraph, kind workspace.WorkspaceNodeKind) int {
+func workspaceGraphProjectDocumentCount(graph core.WorkspaceGraph, kind core.WorkspaceNodeKind) int {
 	count := 0
 
 	for _, node := range graph.ProjectWide {
-		if kind == workspace.WorkspaceNodeDump && workspace.IsRawDumpNode(node) {
+		if kind == core.WorkspaceNodeDump && core.IsRawDumpNode(node) {
 			continue
 		}
 
@@ -95,7 +95,7 @@ func workspaceGraphProjectDocumentCount(graph workspace.WorkspaceGraph, kind wor
 	return count
 }
 
-func workspaceGraphCaseReferenceCount(graph workspace.WorkspaceGraph, slug string) int {
+func workspaceGraphCaseReferenceCount(graph core.WorkspaceGraph, slug string) int {
 	for _, unresolved := range graph.UnresolvedCaseReferences {
 		if unresolved.CaseSlug == slug {
 			return len(unresolved.References)
@@ -105,8 +105,8 @@ func workspaceGraphCaseReferenceCount(graph workspace.WorkspaceGraph, slug strin
 	return 0
 }
 
-func workspaceGraphUnresolvedCaseReferences(graph workspace.WorkspaceGraph) []workspace.WorkspaceCaseReference {
-	references := append([]workspace.WorkspaceCaseReference(nil), graph.UnresolvedCaseReferences...)
+func workspaceGraphUnresolvedCaseReferences(graph core.WorkspaceGraph) []core.WorkspaceCaseReference {
+	references := append([]core.WorkspaceCaseReference(nil), graph.UnresolvedCaseReferences...)
 	sort.Slice(references, func(i, j int) bool {
 		return references[i].CaseSlug < references[j].CaseSlug
 	})

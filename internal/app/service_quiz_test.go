@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) {
@@ -18,7 +18,7 @@ func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) 
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 		},
 	}
@@ -27,7 +27,7 @@ func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) 
 	operations.now = clock
 
 	result, err := operations.StartQuiz(QuizStartRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("StartQuiz returned error: %v", err)
@@ -37,11 +37,11 @@ func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) 
 		t.Fatalf("Message = %q, want Quiz started.", result.Message)
 	}
 
-	if result.State.Status != workspace.QuizRuntimeStatusActive {
+	if result.State.Status != core.QuizRuntimeStatusActive {
 		t.Fatalf("State.Status = %q, want active", result.State.Status)
 	}
 
-	if result.State.Mode != workspace.QuizModeDeep {
+	if result.State.Mode != core.QuizModeDeep {
 		t.Fatalf("State.Mode = %q, want deep", result.State.Mode)
 	}
 
@@ -78,7 +78,7 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponse("response-2", "question-2", clock()),
 		},
@@ -88,15 +88,15 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 	operations.now = clock
 
 	_, err := operations.StartQuiz(QuizStartRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
-		Mode:  workspace.QuizModeFast,
+		Scope: core.QuizScope{CaseSlug: "blog"},
+		Mode:  core.QuizModeFast,
 	})
 	if err != nil {
 		t.Fatalf("StartQuiz returned error: %v", err)
 	}
 
 	result, err := operations.AnswerQuiz(QuizAnswerRequest{
-		Scope:  workspace.QuizScope{CaseSlug: "blog"},
+		Scope:  core.QuizScope{CaseSlug: "blog"},
 		Answer: "The authoring flow needs editorial review before publication.",
 	})
 	if err != nil {
@@ -135,8 +135,8 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizModelResponseWithQuestion("response-1", serviceQuizQuestion(workspace.QuizQuestion{
+		responses: []core.QuizModelResponse{
+			serviceQuizModelResponseWithQuestion("response-1", serviceQuizQuestion(core.QuizQuestion{
 				ID:        "question-1",
 				Prompt:    "What should the workflow preserve?",
 				Topic:     "workflow",
@@ -152,13 +152,13 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 	operations.quizModel = model
 	operations.now = clock
 
-	_, err := operations.StartQuiz(QuizStartRequest{Scope: workspace.QuizScope{CaseSlug: "blog"}})
+	_, err := operations.StartQuiz(QuizStartRequest{Scope: core.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatalf("StartQuiz returned error: %v", err)
 	}
 
 	_, err = operations.AnswerQuiz(QuizAnswerRequest{
-		Scope:  workspace.QuizScope{CaseSlug: "blog"},
+		Scope:  core.QuizScope{CaseSlug: "blog"},
 		Answer: "The workflow must preserve editorial review.",
 	})
 	if err != nil {
@@ -187,7 +187,7 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 }
 
 func TestQuizModelCurrentQuestionPayloadUsesActiveQuestionPromptIntent(t *testing.T) {
-	payload := quizModelQuestionPayloadFromQuestion(workspace.QuizQuestion{
+	payload := quizModelQuestionPayloadFromQuestion(core.QuizQuestion{
 		ID:        "question-1",
 		Prompt:    "What should the workflow preserve?",
 		Required:  true,
@@ -225,7 +225,7 @@ path writes a report file and returns an accepted status.
 	operations := newTestService(t, projectDir)
 	operations.now = serviceQuizClock()
 
-	state, err := operations.newQuizRuntimeState(workspace.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, workspace.QuizModeDeep)
+	state, err := operations.newQuizRuntimeState(core.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, core.QuizModeDeep)
 	if err != nil {
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
 	}
@@ -240,11 +240,11 @@ path writes a report file and returns an accepted status.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != workspace.AcceptanceReadinessGenerate {
+	if readiness.Decision != core.AcceptanceReadinessGenerate {
 		t.Fatalf("decision = %q, want generate", readiness.Decision)
 	}
 
-	if len(readiness.InferredElements[workspace.AcceptanceReadinessSlotActor]) == 0 {
+	if len(readiness.InferredElements[core.AcceptanceReadinessSlotActor]) == 0 {
 		t.Fatalf("inferred elements = %#v, want actor", readiness.InferredElements)
 	}
 
@@ -280,7 +280,7 @@ This is a documentation-only architecture cleanup for a package boundary.
 	operations := newTestService(t, projectDir)
 	operations.now = serviceQuizClock()
 
-	state, err := operations.newQuizRuntimeState(workspace.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, workspace.QuizModeDeep)
+	state, err := operations.newQuizRuntimeState(core.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, core.QuizModeDeep)
 	if err != nil {
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
 	}
@@ -295,7 +295,7 @@ This is a documentation-only architecture cleanup for a package boundary.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != workspace.AcceptanceReadinessNotApplicable {
+	if readiness.Decision != core.AcceptanceReadinessNotApplicable {
 		t.Fatalf("decision = %q, want not_applicable", readiness.Decision)
 	}
 }
@@ -317,7 +317,7 @@ The project has an existing file and should write an output report.
 	operations := newTestService(t, projectDir)
 	operations.now = serviceQuizClock()
 
-	state, err := operations.newQuizRuntimeState(workspace.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, workspace.QuizModeDeep)
+	state, err := operations.newQuizRuntimeState(core.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, core.QuizModeDeep)
 	if err != nil {
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
 	}
@@ -332,15 +332,15 @@ The project has an existing file and should write an output report.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != workspace.AcceptanceReadinessNeedsMoreInfo {
+	if readiness.Decision != core.AcceptanceReadinessNeedsMoreInfo {
 		t.Fatalf("decision = %q, want needs_more_info", readiness.Decision)
 	}
 
-	if !slices.Contains(readiness.Missing, workspace.AcceptanceReadinessSlotActor) {
+	if !slices.Contains(readiness.Missing, core.AcceptanceReadinessSlotActor) {
 		t.Fatalf("missing = %#v, want actor", readiness.Missing)
 	}
 
-	if len(readiness.InferredElements[workspace.AcceptanceReadinessSlotObservableOutcome]) == 0 {
+	if len(readiness.InferredElements[core.AcceptanceReadinessSlotObservableOutcome]) == 0 {
 		t.Fatalf("inferred elements = %#v, want observable outcome", readiness.InferredElements)
 	}
 }
@@ -363,7 +363,7 @@ success path accepts the request and writes a visible status response.
 	operations := newTestService(t, projectDir)
 	operations.now = serviceQuizClock()
 
-	state, err := operations.newQuizRuntimeState(workspace.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, workspace.QuizModeDeep)
+	state, err := operations.newQuizRuntimeState(core.QuizScope{ProjectID: "service-project", CaseSlug: "blog"}, core.QuizModeDeep)
 	if err != nil {
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
 	}
@@ -381,14 +381,14 @@ success path accepts the request and writes a visible status response.
 		t.Fatal("AcceptanceReadiness = nil")
 	}
 
-	if readiness.Decision != workspace.AcceptanceReadinessGenerate {
+	if readiness.Decision != core.AcceptanceReadinessGenerate {
 		t.Fatalf("decision = %q, want generate from accumulated context", readiness.Decision)
 	}
 
-	for _, slot := range []workspace.AcceptanceReadinessSlot{
-		workspace.AcceptanceReadinessSlotActor,
-		workspace.AcceptanceReadinessSlotTrigger,
-		workspace.AcceptanceReadinessSlotObservableOutcome,
+	for _, slot := range []core.AcceptanceReadinessSlot{
+		core.AcceptanceReadinessSlotActor,
+		core.AcceptanceReadinessSlotTrigger,
+		core.AcceptanceReadinessSlotObservableOutcome,
 	} {
 		if slices.Contains(readiness.Missing, slot) {
 			t.Fatalf("missing = %#v, should not reset %s after first question", readiness.Missing, slot)
@@ -402,12 +402,12 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponseWithCandidates(
 				"response-1",
 				"question-1",
 				clock(),
-				[]workspace.QuizCandidate{
+				[]core.QuizCandidate{
 					serviceQuizCandidate("candidate-2", "What constraint matters next?", clock()),
 					serviceQuizCandidate("candidate-3", "What preference matters next?", clock()),
 				},
@@ -419,8 +419,8 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 	operations.now = clock
 
 	startResult, err := operations.StartQuiz(QuizStartRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
-		Mode:  workspace.QuizModeFast,
+		Scope: core.QuizScope{CaseSlug: "blog"},
+		Mode:  core.QuizModeFast,
 	})
 	if err != nil {
 		t.Fatalf("StartQuiz returned error: %v", err)
@@ -431,7 +431,7 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 	}
 
 	firstAnswer, err := operations.AnswerQuiz(QuizAnswerRequest{
-		Scope:  workspace.QuizScope{CaseSlug: "blog"},
+		Scope:  core.QuizScope{CaseSlug: "blog"},
 		Answer: "The workflow must preserve ownership.",
 	})
 	if err != nil {
@@ -476,7 +476,7 @@ func TestServiceQuizUpdatesCuratedNotesIteratively(t *testing.T) {
 		t.Fatalf("curated notes mirrored raw question:\n%s", curated)
 	}
 
-	if result.State.Status != workspace.QuizRuntimeStatusActive {
+	if result.State.Status != core.QuizRuntimeStatusActive {
 		t.Fatalf("status = %q, want active", result.State.Status)
 	}
 }
@@ -486,7 +486,7 @@ func TestServiceCompleteQuizDoesNotGenerateDraftSpec(t *testing.T) {
 	writeServiceQuizFixture(t, projectDir)
 
 	model, result := completeServiceQuizWithAnswer(t, projectDir)
-	if result.State.Status != workspace.QuizRuntimeStatusDone {
+	if result.State.Status != core.QuizRuntimeStatusDone {
 		t.Fatalf("status = %q, want done", result.State.Status)
 	}
 
@@ -507,13 +507,13 @@ func TestServiceGenerateQuizDraftSpecUsesCuratedNotes(t *testing.T) {
 	model, _ := completeServiceQuizWithAnswer(t, projectDir)
 
 	result, err := model.operations.GenerateQuizDraftSpec(QuizDraftSpecRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateQuizDraftSpec returned error: %v", err)
 	}
 
-	if result.State.Status != workspace.QuizRuntimeStatusDone {
+	if result.State.Status != core.QuizRuntimeStatusDone {
 		t.Fatalf("status = %q, want done", result.State.Status)
 	}
 
@@ -527,7 +527,7 @@ func TestServiceGenerateQuizDraftSpecUsesCuratedNotes(t *testing.T) {
 	})
 
 	draftRequest := model.model.requests[len(model.model.requests)-1]
-	if draftRequest.Action != workspace.QuizModelActionDraftSpec {
+	if draftRequest.Action != core.QuizModelActionDraftSpec {
 		t.Fatalf("draft action = %q", draftRequest.Action)
 	}
 
@@ -544,7 +544,7 @@ func answerServiceQuiz(t *testing.T, projectDir string) (serviceQuizFixture, Qui
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponse("response-2", "question-2", clock()),
 			serviceQuizDraftSpecResponse("response-3", clock()),
@@ -554,13 +554,13 @@ func answerServiceQuiz(t *testing.T, projectDir string) (serviceQuizFixture, Qui
 	operations.quizModel = model
 	operations.now = clock
 
-	_, err := operations.StartQuiz(QuizStartRequest{Scope: workspace.QuizScope{CaseSlug: "blog"}})
+	_, err := operations.StartQuiz(QuizStartRequest{Scope: core.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatalf("StartQuiz returned error: %v", err)
 	}
 
 	result, err := operations.AnswerQuiz(QuizAnswerRequest{
-		Scope:  workspace.QuizScope{CaseSlug: "blog"},
+		Scope:  core.QuizScope{CaseSlug: "blog"},
 		Answer: "The workflow must preserve editorial review before publication.",
 	})
 	if err != nil {
@@ -578,7 +578,7 @@ func completeServiceQuizWithAnswer(
 
 	fixture, _ := answerServiceQuiz(t, projectDir)
 
-	result, err := fixture.operations.CompleteQuiz(QuizCompleteRequest{Scope: workspace.QuizScope{CaseSlug: "blog"}})
+	result, err := fixture.operations.CompleteQuiz(QuizCompleteRequest{Scope: core.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatalf("CompleteQuiz returned error: %v", err)
 	}
@@ -596,7 +596,7 @@ func assertServiceQuizContentContains(t *testing.T, content string, values []str
 	}
 }
 
-func assertServiceQuizRedWrightPayload(t *testing.T, request workspace.QuizModelRequest) {
+func assertServiceQuizRedWrightPayload(t *testing.T, request core.QuizModelRequest) {
 	t.Helper()
 
 	if request.Payload.Project.Name != "Quiz Project" {
@@ -618,9 +618,9 @@ func TestServiceQuizTrailRecoversAfterMaxDepthBranch(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
-			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(workspace.QuizQuestion{
+			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(core.QuizQuestion{
 				ID:        "question-2",
 				Prompt:    "What follow-up matters?",
 				Topic:     "workflow",
@@ -629,7 +629,7 @@ func TestServiceQuizTrailRecoversAfterMaxDepthBranch(t *testing.T) {
 				TrunkID:   "question-1",
 				CreatedAt: clock(),
 			})),
-			serviceQuizModelResponseWithQuestion("response-3", serviceQuizQuestion(workspace.QuizQuestion{
+			serviceQuizModelResponseWithQuestion("response-3", serviceQuizQuestion(core.QuizQuestion{
 				ID:        "question-3",
 				Prompt:    "What final detail matters?",
 				Topic:     "workflow",
@@ -645,7 +645,7 @@ func TestServiceQuizTrailRecoversAfterMaxDepthBranch(t *testing.T) {
 	operations.quizModel = model
 	operations.now = clock
 
-	result, err := operations.StartQuiz(QuizStartRequest{Scope: workspace.QuizScope{CaseSlug: "blog"}})
+	result, err := operations.StartQuiz(QuizStartRequest{Scope: core.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatalf("StartQuiz returned error: %v", err)
 	}
@@ -674,9 +674,9 @@ func TestServiceQuizSkipReturnsToTrunkCoverage(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
-			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(workspace.QuizQuestion{
+			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(core.QuizQuestion{
 				ID:        "question-2",
 				Prompt:    "What follow-up matters?",
 				Topic:     "workflow",
@@ -685,7 +685,7 @@ func TestServiceQuizSkipReturnsToTrunkCoverage(t *testing.T) {
 				TrunkID:   "question-1",
 				CreatedAt: clock(),
 			})),
-			serviceQuizModelResponseWithQuestion("response-3", serviceQuizQuestion(workspace.QuizQuestion{
+			serviceQuizModelResponseWithQuestion("response-3", serviceQuizQuestion(core.QuizQuestion{
 				ID:        "question-3",
 				Prompt:    "What broader area should be covered next?",
 				Topic:     "coverage",
@@ -699,7 +699,7 @@ func TestServiceQuizSkipReturnsToTrunkCoverage(t *testing.T) {
 	operations.quizModel = model
 	operations.now = clock
 
-	_, err := operations.StartQuiz(QuizStartRequest{Scope: workspace.QuizScope{CaseSlug: "blog"}})
+	_, err := operations.StartQuiz(QuizStartRequest{Scope: core.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatalf("StartQuiz returned error: %v", err)
 	}
@@ -707,7 +707,7 @@ func TestServiceQuizSkipReturnsToTrunkCoverage(t *testing.T) {
 	result := answerServiceQuizForTrail(t, operations, "This needs a follow-up.")
 	assertServiceQuizTrailIDs(t, result.State.Trail, []string{"question-1", "question-2"})
 
-	result, err = operations.SkipQuiz(QuizSkipRequest{Scope: workspace.QuizScope{CaseSlug: "blog"}})
+	result, err = operations.SkipQuiz(QuizSkipRequest{Scope: core.QuizScope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatalf("SkipQuiz returned error: %v", err)
 	}
@@ -731,7 +731,7 @@ func answerServiceQuizForTrail(
 	t.Helper()
 
 	result, err := operations.AnswerQuiz(QuizAnswerRequest{
-		Scope:  workspace.QuizScope{CaseSlug: "blog"},
+		Scope:  core.QuizScope{CaseSlug: "blog"},
 		Answer: answer,
 	})
 	if err != nil {
@@ -741,7 +741,7 @@ func answerServiceQuizForTrail(
 	return result
 }
 
-func assertServiceQuizTrailIDs(t *testing.T, trail []workspace.QuizTrailNode, ids []string) {
+func assertServiceQuizTrailIDs(t *testing.T, trail []core.QuizTrailNode, ids []string) {
 	t.Helper()
 
 	if len(trail) != len(ids) {
@@ -761,7 +761,7 @@ func TestServiceQuizLifecycleOperations(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponse("response-2", "question-2", clock()),
 		},
@@ -798,11 +798,11 @@ func TestServiceListQuizzesReturnsScopedReadModels(t *testing.T) {
 	}
 
 	blogView := findQuizViewByScope(t, result.Views, "blog")
-	if blogView.Status != string(workspace.QuizRuntimeStatusActive) {
+	if blogView.Status != string(core.QuizRuntimeStatusActive) {
 		t.Fatalf("blog status = %q, want active", blogView.Status)
 	}
 
-	if blogView.Mode != workspace.QuizModeFast {
+	if blogView.Mode != core.QuizModeFast {
 		t.Fatalf("blog mode = %q, want fast", blogView.Mode)
 	}
 
@@ -824,13 +824,13 @@ func assertServiceQuizSwitchAndSkip(t *testing.T, operations service) {
 	}
 
 	modeResult, err := operations.SwitchQuizMode(QuizModeRequest{
-		Mode: workspace.QuizModeFast,
+		Mode: core.QuizModeFast,
 	})
 	if err != nil {
 		t.Fatalf("SwitchQuizMode returned error: %v", err)
 	}
 
-	if modeResult.State.Mode != workspace.QuizModeFast {
+	if modeResult.State.Mode != core.QuizModeFast {
 		t.Fatalf("Mode = %q, want fast", modeResult.State.Mode)
 	}
 
@@ -870,7 +870,7 @@ func assertServiceQuizResumeListAndComplete(t *testing.T, operations service) {
 		t.Fatalf("CompleteQuiz returned error: %v", err)
 	}
 
-	if completeResult.State.Status != workspace.QuizRuntimeStatusDone {
+	if completeResult.State.Status != core.QuizRuntimeStatusDone {
 		t.Fatalf("complete status = %q, want done", completeResult.State.Status)
 	}
 }
@@ -879,20 +879,20 @@ func assertServiceQuizCancel(t *testing.T, operations service) {
 	t.Helper()
 
 	_, err := operations.StartQuiz(QuizStartRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("StartQuiz case returned error: %v", err)
 	}
 
 	cancelResult, err := operations.CancelQuiz(QuizCancelRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("CancelQuiz returned error: %v", err)
 	}
 
-	if cancelResult.State.Status != workspace.QuizRuntimeStatusCancelled {
+	if cancelResult.State.Status != core.QuizRuntimeStatusCancelled {
 		t.Fatalf("cancel status = %q, want cancelled", cancelResult.State.Status)
 	}
 }
@@ -914,7 +914,7 @@ func findQuizViewByScope(t *testing.T, views []QuizView, caseSlug string) QuizVi
 func writeServiceQuizReadModelState(t *testing.T, projectDir string, updated time.Time) {
 	t.Helper()
 
-	repository := workspace.NewQuizArtifactRepository(projectDir)
+	repository := core.NewQuizArtifactRepository(projectDir)
 	state := serviceQuizReadModelRuntimeState(updated)
 
 	_, err := repository.SaveRuntimeState(t.Context(), state)
@@ -922,8 +922,8 @@ func writeServiceQuizReadModelState(t *testing.T, projectDir string, updated tim
 		t.Fatalf("SaveRuntimeState returned error: %v", err)
 	}
 
-	_, err = repository.WriteCuratedNotes(t.Context(), workspace.QuizCuratedNotes{
-		Scope:     workspace.QuizScope{ProjectID: "service-project", CaseSlug: "blog"},
+	_, err = repository.WriteCuratedNotes(t.Context(), core.QuizCuratedNotes{
+		Scope:     core.QuizScope{ProjectID: "service-project", CaseSlug: "blog"},
 		Status:    "curated",
 		Decisions: []string{"Preserve editorial review."},
 		UpdatedAt: updated.Format(time.RFC3339),
@@ -933,18 +933,18 @@ func writeServiceQuizReadModelState(t *testing.T, projectDir string, updated tim
 	}
 }
 
-func serviceQuizReadModelRuntimeState(updated time.Time) workspace.QuizRuntimeState {
-	return workspace.QuizRuntimeState{
+func serviceQuizReadModelRuntimeState(updated time.Time) core.QuizRuntimeState {
+	return core.QuizRuntimeState{
 		ID:              "quiz-blog",
 		ProjectID:       "service-project",
 		CaseSlug:        "blog",
-		Status:          workspace.QuizRuntimeStatusActive,
-		Mode:            workspace.QuizModeFast,
+		Status:          core.QuizRuntimeStatusActive,
+		Mode:            core.QuizModeFast,
 		QuestionBudget:  50,
 		QuestionsAsked:  1,
 		AnswersRecorded: 0,
 		SkipsRecorded:   0,
-		ActiveQuestion: &workspace.QuizQuestion{
+		ActiveQuestion: &core.QuizQuestion{
 			ID:        "question-1",
 			Prompt:    "What should be clarified before writing?",
 			Topic:     "clarity",
@@ -952,7 +952,7 @@ func serviceQuizReadModelRuntimeState(updated time.Time) workspace.QuizRuntimeSt
 			TrunkID:   "question-1",
 			CreatedAt: updated,
 		},
-		Trail: []workspace.QuizTrailNode{
+		Trail: []core.QuizTrailNode{
 			{QuestionID: "question-1", Prompt: "What should be clarified?", Topic: "clarity", Depth: 1},
 		},
 		RawPath:     ".chc/user/quizzes/blog-quiz-raw.md",
@@ -962,42 +962,42 @@ func serviceQuizReadModelRuntimeState(updated time.Time) workspace.QuizRuntimeSt
 }
 
 type fakeServiceQuizModel struct {
-	requests  []workspace.QuizModelRequest
-	responses []workspace.QuizModelResponse
+	requests  []core.QuizModelRequest
+	responses []core.QuizModelResponse
 }
 
 //nolint:nestif // Test fake keeps action fallback behavior in one place.
 func (m *fakeServiceQuizModel) InvokeQuizModel(
 	_ context.Context,
-	request workspace.QuizModelRequest,
-) (workspace.QuizModelResponse, error) {
+	request core.QuizModelRequest,
+) (core.QuizModelResponse, error) {
 	m.requests = append(m.requests, request)
 
 	if len(m.responses) == 0 {
-		if request.Action == workspace.QuizModelActionDraftSpec || request.Action == workspace.QuizModelActionGenerateSpec {
+		if request.Action == core.QuizModelActionDraftSpec || request.Action == core.QuizModelActionGenerateSpec {
 			return serviceQuizDraftSpecResponse("response-fallback", request.CreatedAt), nil
 		}
 
-		if request.Action == workspace.QuizModelActionGeneratePlanOutline {
+		if request.Action == core.QuizModelActionGeneratePlanOutline {
 			return serviceQuizPlanOutlineResponse("response-fallback-outline", request.CreatedAt), nil
 		}
 
-		if request.Action == workspace.QuizModelActionGeneratePlanSliceDetail {
+		if request.Action == core.QuizModelActionGeneratePlanSliceDetail {
 			return serviceQuizPlanSliceDetailResponse("response-fallback-slice-detail", request.CreatedAt), nil
 		}
 
-		if request.Action == workspace.QuizModelActionGeneratePlan {
+		if request.Action == core.QuizModelActionGeneratePlan {
 			return serviceQuizPlanResponse("response-fallback-plan", request.CreatedAt), nil
 		}
 
-		if request.Action == workspace.QuizModelActionGenerateAcceptanceFeature {
-			return serviceQuizAcceptanceFeatureResponse("response-fallback-feature", request.CreatedAt, workspace.AcceptanceFeatureGeneration{
-				Status:          workspace.AcceptanceFeatureStatusNotApplicable,
+		if request.Action == core.QuizModelActionGenerateAcceptanceFeature {
+			return serviceQuizAcceptanceFeatureResponse("response-fallback-feature", request.CreatedAt, core.AcceptanceFeatureGeneration{
+				Status:          core.AcceptanceFeatureStatusNotApplicable,
 				RejectionReason: "No acceptance feature context is available.",
 			}), nil
 		}
 
-		if request.Action == workspace.QuizModelActionMaterializePlanTracking {
+		if request.Action == core.QuizModelActionMaterializePlanTracking {
 			return serviceQuizPlanTrackingResponse("response-fallback", request.CreatedAt), nil
 		}
 
@@ -1015,11 +1015,11 @@ func writeServiceQuizFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, "AGENTS.md"), "Agent protocol context.\n")
-	writeServiceWorkspaceFile(t, workspace.ProjectMetadataPath(projectDir), workspace.RenderProjectMetadata(workspace.ProjectMetadata{
+	writeServiceWorkspaceFile(t, core.ProjectMetadataPath(projectDir), core.RenderProjectMetadata(core.ProjectMetadata{
 		Name:        "Quiz Project",
 		Description: "Project metadata for quiz context.",
 	}))
-	writeServiceWorkspaceFile(t, workspace.CaseMetadataPath(projectDir, "blog"), workspace.RenderCaseMetadata(workspace.CaseMetadata{
+	writeServiceWorkspaceFile(t, core.CaseMetadataPath(projectDir, "blog"), core.RenderCaseMetadata(core.CaseMetadata{
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
@@ -1048,13 +1048,13 @@ func serviceQuizModelResponse(
 	responseID string,
 	questionID string,
 	createdAt time.Time,
-) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
-		Question: workspace.QuizQuestion{
+		Status:    core.QuizModelResponseReady,
+		Question: core.QuizQuestion{
 			ID:        questionID,
 			Prompt:    "What should the workflow preserve?",
 			Required:  true,
@@ -1068,14 +1068,14 @@ func serviceQuizModelResponse(
 	}
 }
 
-func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
-		DraftSpec: workspace.QuizDraftSpec{
-			Scope:          workspace.QuizScope{ProjectID: "service-project"},
+		Status:    core.QuizModelResponseReady,
+		DraftSpec: core.QuizDraftSpec{
+			Scope:          core.QuizScope{ProjectID: "service-project"},
 			Title:          "Quiz Generated Spec",
 			Body:           "Generated behavior from dump and quiz context.",
 			SourceQuizPath: ".chc/user/quizzes/project-quiz.md",
@@ -1090,41 +1090,41 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) worksp
 func serviceQuizDraftSpecResponseWithFeature(
 	responseID string,
 	createdAt time.Time,
-	feature workspace.AcceptanceFeatureGeneration,
-) workspace.QuizModelResponse {
+	feature core.AcceptanceFeatureGeneration,
+) core.QuizModelResponse {
 	response := serviceQuizDraftSpecResponse(responseID, createdAt)
 	response.DraftSpec.Feature = feature
 
 	return response
 }
 
-func serviceQuizAcceptanceFeatureResponse(responseID string, createdAt time.Time, feature workspace.AcceptanceFeatureGeneration) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+func serviceQuizAcceptanceFeatureResponse(responseID string, createdAt time.Time, feature core.AcceptanceFeatureGeneration) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
+		Status:    core.QuizModelResponseReady,
 		Feature:   feature,
 		RawText:   "raw acceptance feature",
 		CreatedAt: createdAt,
 	}
 }
 
-func serviceQuizStagedPlanResponses(createdAt time.Time) []workspace.QuizModelResponse {
-	return []workspace.QuizModelResponse{
+func serviceQuizStagedPlanResponses(createdAt time.Time) []core.QuizModelResponse {
+	return []core.QuizModelResponse{
 		serviceQuizPlanOutlineResponse("response-plan-outline", createdAt),
 		serviceQuizPlanSliceDetailResponse("response-plan-slice-detail", createdAt),
 	}
 }
 
-func serviceQuizPlanResponse(responseID string, createdAt time.Time) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+func serviceQuizPlanResponse(responseID string, createdAt time.Time) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
-		Plan: workspace.GeneratedPlan{
-			Scope:     workspace.QuizScope{ProjectID: "service-project"},
+		Status:    core.QuizModelResponseReady,
+		Plan: core.GeneratedPlan{
+			Scope:     core.QuizScope{ProjectID: "service-project"},
 			Title:     "Generated Implementation Plan",
 			Body:      "## High-level implementation strategy\n\nImplement the generated plan in one pass.\n",
 			CreatedAt: createdAt,
@@ -1134,14 +1134,14 @@ func serviceQuizPlanResponse(responseID string, createdAt time.Time) workspace.Q
 	}
 }
 
-func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
-		PlanOutline: workspace.GeneratedPlanOutline{
-			Scope:              workspace.QuizScope{ProjectID: "service-project"},
+		Status:    core.QuizModelResponseReady,
+		PlanOutline: core.GeneratedPlanOutline{
+			Scope:              core.QuizScope{ProjectID: "service-project"},
 			Title:              "Generated Implementation Plan",
 			Status:             "planned",
 			Summary:            "Implement the planning foundation.",
@@ -1149,7 +1149,7 @@ func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) work
 			OpenQuestions:      []string{},
 			Risks:              []string{"Generated output needs review."},
 			ValidationStrategy: "Run focused and repository tests.",
-			Slices: []workspace.GeneratedPlanOutlineSlice{
+			Slices: []core.GeneratedPlanOutlineSlice{
 				{
 					ID:                     "Slice 1",
 					ShortName:              "Foundation",
@@ -1163,7 +1163,7 @@ func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) work
 					ImplementationBoundary: "Foundation behavior only.",
 				},
 			},
-			Dependencies: []workspace.GeneratedPlanOutlineDependency{},
+			Dependencies: []core.GeneratedPlanOutlineDependency{},
 			CreatedAt:    createdAt,
 		},
 		RawText:   "raw generated plan outline",
@@ -1171,19 +1171,19 @@ func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) work
 	}
 }
 
-func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
-		SliceDetail: workspace.GeneratedPlanSliceDetail{
-			Scope:               workspace.QuizScope{ProjectID: "service-project"},
+		Status:    core.QuizModelResponseReady,
+		SliceDetail: core.GeneratedPlanSliceDetail{
+			Scope:               core.QuizScope{ProjectID: "service-project"},
 			SliceID:             "Slice 1",
 			ShortName:           "Foundation",
 			Objective:           "Implement the planning foundation.",
 			ImplementationNotes: []string{"Keep the first slice focused on the planning foundation."},
-			Tasks: []workspace.GeneratedPlanSliceTask{
+			Tasks: []core.GeneratedPlanSliceTask{
 				{
 					ID:         "T1.1",
 					Summary:    "Implement the planning foundation.",
@@ -1191,7 +1191,7 @@ func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) 
 				},
 			},
 			AcceptanceCriteria: []string{"Foundation behavior is covered by tests."},
-			TicketMetadata: workspace.GeneratedPlanSliceTicketMetadata{
+			TicketMetadata: core.GeneratedPlanSliceTicketMetadata{
 				Title:    "Implement planning foundation",
 				Synopsis: "Build the planning foundation slice.",
 				Priority: "normal",
@@ -1199,7 +1199,7 @@ func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) 
 				Type:     "task",
 				Tags:     []string{"plan"},
 			},
-			BranchMetadata: workspace.GeneratedPlanSliceBranchMetadata{
+			BranchMetadata: core.GeneratedPlanSliceBranchMetadata{
 				BranchName: "feat/slice-1-foundation",
 			},
 			PRExpectations:         []string{"Open one PR against dev."},
@@ -1213,18 +1213,18 @@ func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) 
 	}
 }
 
-func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
-		PlanTracking: workspace.GeneratedPlanTracking{
-			Scope:     workspace.QuizScope{ProjectID: "service-project"},
+		Status:    core.QuizModelResponseReady,
+		PlanTracking: core.GeneratedPlanTracking{
+			Scope:     core.QuizScope{ProjectID: "service-project"},
 			Title:     "Generated Plan Tracking",
 			Body:      "Track the generated plan slices through tickets.",
 			CreatedAt: createdAt,
-			Tickets: []workspace.GeneratedPlanTrackingTicket{
+			Tickets: []core.GeneratedPlanTrackingTicket{
 				{
 					SliceID:  "Slice 1",
 					Title:    "Implement planning foundation",
@@ -1243,19 +1243,19 @@ func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) wor
 	}
 }
 
-func serviceQuizModelResponseWithQuestion(responseID string, question workspace.QuizQuestion) workspace.QuizModelResponse {
-	return workspace.QuizModelResponse{
+func serviceQuizModelResponseWithQuestion(responseID string, question core.QuizQuestion) core.QuizModelResponse {
+	return core.QuizModelResponse{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    workspace.QuizModelResponseReady,
+		Status:    core.QuizModelResponseReady,
 		Question:  question,
 		RawText:   "raw model text",
 		CreatedAt: question.CreatedAt,
 	}
 }
 
-func serviceQuizQuestion(question workspace.QuizQuestion) workspace.QuizQuestion {
+func serviceQuizQuestion(question core.QuizQuestion) core.QuizQuestion {
 	question.Required = true
 
 	return question
@@ -1265,8 +1265,8 @@ func serviceQuizModelResponseWithCandidates(
 	responseID string,
 	questionID string,
 	createdAt time.Time,
-	candidates []workspace.QuizCandidate,
-) workspace.QuizModelResponse {
+	candidates []core.QuizCandidate,
+) core.QuizModelResponse {
 	response := serviceQuizModelResponse(responseID, questionID, createdAt)
 	response.Candidates = candidates
 
@@ -1277,8 +1277,8 @@ func serviceQuizCandidate(
 	id string,
 	prompt string,
 	createdAt time.Time,
-) workspace.QuizCandidate {
-	return workspace.QuizCandidate{
+) core.QuizCandidate {
+	return core.QuizCandidate{
 		ID:        id,
 		Prompt:    prompt,
 		Topic:     "workflow",
@@ -1295,7 +1295,7 @@ func serviceQuizClock() func() time.Time {
 
 func assertQuizModelRequestSections(
 	t *testing.T,
-	request workspace.QuizModelRequest,
+	request core.QuizModelRequest,
 	names []string,
 ) {
 	t.Helper()

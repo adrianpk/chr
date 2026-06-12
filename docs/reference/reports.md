@@ -2,7 +2,7 @@
 
 Reports are Markdown summaries of execution and loop evidence.
 
-They are project-local artifacts under the managed project workspace. Reports
+They are project-local artifacts under the managed project core. Reports
 summarize existing records and artifacts; they do not replace tickets,
 execution records, loop records, runtime logs, validation artifacts, or result
 envelopes.

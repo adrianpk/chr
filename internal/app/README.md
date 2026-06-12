@@ -10,7 +10,7 @@ and the local TUI.
 The package owns CLI command construction, stream wiring, command asset wiring,
 and adapter-facing service operations. It delegates durable domain behavior,
 workspace indexing, persistence, ticket management, generation, and validation
-to `internal/workspace`.
+to `internal/core`.
 
 ## API
 
@@ -21,7 +21,7 @@ application service methods.
 
 ## Behavior
 
-Service operations load project context, call core `internal/workspace` services, and
+Service operations load project context, call core `internal/core` services, and
 return view-oriented results for CLI or TUI rendering. The package should stay
 adapter-oriented and avoid owning reusable domain workflows.
 

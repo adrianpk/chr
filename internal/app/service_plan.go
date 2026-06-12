@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // PlanView is the TUI-facing projection of a generated plan document.
@@ -20,7 +20,7 @@ type PlanView struct {
 	UseCaseTitle string
 	Title        string
 	Status       string
-	Scope        workspace.QuizScope
+	Scope        core.QuizScope
 	RelativePath string
 	UpdatedAt    time.Time
 	Content      string
@@ -34,18 +34,18 @@ type PlanListResult struct {
 
 // PlanGenerateRequest selects the quiz scope used to generate a plan.
 type PlanGenerateRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // PlanRegenerateRequest selects the quiz scope used to replace a plan.
 type PlanRegenerateRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // PlanTrackingRequest selects the plan scope used to materialize tracking
 // artifacts.
 type PlanTrackingRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // PlanOperationResult is the TUI-facing result for plan generation operations.
@@ -59,7 +59,7 @@ type PlanTrackingResult struct {
 	Message      string
 	Plan         PlanView
 	TrackingPath string
-	Tickets      []workspace.IndexedTicket
+	Tickets      []core.IndexedTicket
 }
 
 func (s service) ListPlans() (PlanListResult, error) {
@@ -113,8 +113,8 @@ func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) 
 	return result, err
 }
 
-func (s service) existingGeneratedPlan(scope workspace.QuizScope) (PlanView, bool, error) {
-	paths, err := workspace.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
+func (s service) existingGeneratedPlan(scope core.QuizScope) (PlanView, bool, error) {
+	paths, err := core.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return PlanView{}, false, err
 	}
@@ -132,7 +132,7 @@ func (s service) existingGeneratedPlan(scope workspace.QuizScope) (PlanView, boo
 }
 
 //nolint:funlen // Generation flow is intentionally linear for logging and failure attribution.
-func (s service) generatePlan(ctx context.Context, scope workspace.QuizScope) (PlanOperationResult, error) {
+func (s service) generatePlan(ctx context.Context, scope core.QuizScope) (PlanOperationResult, error) {
 	s.appendPlanGenerationLog("generate_plan_started", map[string]string{
 		"case_slug": scope.CaseSlug,
 		"timeout":   longGenerationTimeout.String(),
@@ -161,7 +161,7 @@ func (s service) generatePlan(ctx context.Context, scope workspace.QuizScope) (P
 	plan.SourceRequestID = strings.Join(requestIDs, ",")
 	plan.SourceResponseID = strings.Join(responseIDs, ",")
 
-	paths, err := workspace.WriteGeneratedPlan(ctx, s.projectContext.ProjectDir, plan)
+	paths, err := core.WriteGeneratedPlan(ctx, s.projectContext.ProjectDir, plan)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_plan_write_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -189,9 +189,9 @@ func (s service) generatePlan(ctx context.Context, scope workspace.QuizScope) (P
 
 func (s service) generatePlanWithConfiguredBackend(
 	ctx context.Context,
-	scope workspace.QuizScope,
-	state workspace.QuizRuntimeState,
-) (workspace.GeneratedPlan, []string, []string, error) {
+	scope core.QuizScope,
+	state core.QuizRuntimeState,
+) (core.GeneratedPlan, []string, []string, error) {
 	if codexGenerationBackend("CHC_PLAN_GENERATION_BACKEND") {
 		return s.generateSinglePassPlan(ctx, scope, state)
 	}
@@ -201,12 +201,12 @@ func (s service) generatePlanWithConfiguredBackend(
 
 func (s service) generateSinglePassPlan(
 	ctx context.Context,
-	scope workspace.QuizScope,
-	state workspace.QuizRuntimeState,
-) (workspace.GeneratedPlan, []string, []string, error) {
+	scope core.QuizScope,
+	state core.QuizRuntimeState,
+) (core.GeneratedPlan, []string, []string, error) {
 	modelRequest, err := s.newPlanGenerationModelRequest(state)
 	if err != nil {
-		return workspace.GeneratedPlan{}, nil, nil, err
+		return core.GeneratedPlan{}, nil, nil, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_single_pass_started", map[string]string{
@@ -215,9 +215,9 @@ func (s service) generateSinglePassPlan(
 		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
 	})
 
-	response, err := workspace.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return workspace.GeneratedPlan{}, nil, nil, err
+		return core.GeneratedPlan{}, nil, nil, err
 	}
 
 	plan := response.Plan
@@ -237,19 +237,19 @@ func (s service) generateSinglePassPlan(
 
 func (s service) generateStagedPlan(
 	ctx context.Context,
-	scope workspace.QuizScope,
-	state workspace.QuizRuntimeState,
-) (workspace.GeneratedPlan, []string, []string, error) {
+	scope core.QuizScope,
+	state core.QuizRuntimeState,
+) (core.GeneratedPlan, []string, []string, error) {
 	outline, sourcePaths, requestIDs, responseIDs, err := s.generatePlanOutline(ctx, scope, state)
 	if err != nil {
-		return workspace.GeneratedPlan{}, nil, nil, err
+		return core.GeneratedPlan{}, nil, nil, err
 	}
 
-	details := make([]workspace.GeneratedPlanSliceDetail, 0, len(outline.Slices))
+	details := make([]core.GeneratedPlanSliceDetail, 0, len(outline.Slices))
 	for _, slice := range outline.Slices {
 		detail, requestID, responseID, err := s.generatePlanSliceDetail(ctx, state, outline, slice.ID)
 		if err != nil {
-			return workspace.GeneratedPlan{}, nil, nil, err
+			return core.GeneratedPlan{}, nil, nil, err
 		}
 
 		details = append(details, detail)
@@ -257,12 +257,12 @@ func (s service) generateStagedPlan(
 		responseIDs = append(responseIDs, responseID)
 	}
 
-	body, err := workspace.AssembleGeneratedPlanBody(outline, details, requestIDs, responseIDs)
+	body, err := core.AssembleGeneratedPlanBody(outline, details, requestIDs, responseIDs)
 	if err != nil {
-		return workspace.GeneratedPlan{}, nil, nil, err
+		return core.GeneratedPlan{}, nil, nil, err
 	}
 
-	plan := workspace.GeneratedPlan{
+	plan := core.GeneratedPlan{
 		Scope:       scope,
 		Title:       outline.Title,
 		Body:        body,
@@ -275,12 +275,12 @@ func (s service) generateStagedPlan(
 
 func (s service) generatePlanOutline(
 	ctx context.Context,
-	scope workspace.QuizScope,
-	state workspace.QuizRuntimeState,
-) (workspace.GeneratedPlanOutline, []string, []string, []string, error) {
+	scope core.QuizScope,
+	state core.QuizRuntimeState,
+) (core.GeneratedPlanOutline, []string, []string, []string, error) {
 	modelRequest, err := s.newPlanOutlineGenerationModelRequest(state)
 	if err != nil {
-		return workspace.GeneratedPlanOutline{}, nil, nil, nil, err
+		return core.GeneratedPlanOutline{}, nil, nil, nil, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_outline_started", map[string]string{
@@ -289,9 +289,9 @@ func (s service) generatePlanOutline(
 		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
 	})
 
-	response, err := workspace.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return workspace.GeneratedPlanOutline{}, nil, nil, nil, err
+		return core.GeneratedPlanOutline{}, nil, nil, nil, err
 	}
 
 	outline := response.PlanOutline
@@ -315,13 +315,13 @@ func (s service) generatePlanOutline(
 
 func (s service) generatePlanSliceDetail(
 	ctx context.Context,
-	state workspace.QuizRuntimeState,
-	outline workspace.GeneratedPlanOutline,
+	state core.QuizRuntimeState,
+	outline core.GeneratedPlanOutline,
 	targetSliceID string,
-) (workspace.GeneratedPlanSliceDetail, string, string, error) {
+) (core.GeneratedPlanSliceDetail, string, string, error) {
 	modelRequest, err := s.newPlanSliceDetailGenerationModelRequest(state, outline, targetSliceID)
 	if err != nil {
-		return workspace.GeneratedPlanSliceDetail{}, "", "", err
+		return core.GeneratedPlanSliceDetail{}, "", "", err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_slice_detail_started", map[string]string{
@@ -330,17 +330,17 @@ func (s service) generatePlanSliceDetail(
 		"slice_id":   targetSliceID,
 	})
 
-	response, err := workspace.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return workspace.GeneratedPlanSliceDetail{}, "", "", err
+		return core.GeneratedPlanSliceDetail{}, "", "", err
 	}
 
 	detail := response.SliceDetail
 	detail.Scope = outline.Scope
 	detail.CreatedAt = response.CreatedAt.UTC()
 
-	if err := workspace.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, targetSliceID); err != nil {
-		return workspace.GeneratedPlanSliceDetail{}, "", "", err
+	if err := core.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, targetSliceID); err != nil {
+		return core.GeneratedPlanSliceDetail{}, "", "", err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_slice_detail_finished", map[string]string{
@@ -369,7 +369,7 @@ func (s service) RegeneratePlan(ctx context.Context, request PlanRegenerateReque
 	return result, err
 }
 
-func (s service) regeneratePlan(ctx context.Context, scope workspace.QuizScope) (PlanOperationResult, error) {
+func (s service) regeneratePlan(ctx context.Context, scope core.QuizScope) (PlanOperationResult, error) {
 	archivedAt := s.utcNow()
 
 	s.appendPlanGenerationLog("regenerate_plan_started", map[string]string{
@@ -377,7 +377,7 @@ func (s service) regeneratePlan(ctx context.Context, scope workspace.QuizScope) 
 		"timeout":   longGenerationTimeout.String(),
 	})
 
-	archivePaths, archived, err := workspace.ArchiveGeneratedPlan(
+	archivePaths, archived, err := core.ArchiveGeneratedPlan(
 		ctx,
 		s.projectContext.ProjectDir,
 		scope,
@@ -422,7 +422,7 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 		return PlanTrackingResult{}, fmt.Errorf("plan is required before tracking can be created")
 	}
 
-	trackingPaths, err := workspace.GeneratedPlanTrackingLayout(s.projectContext.ProjectDir, scope)
+	trackingPaths, err := core.GeneratedPlanTrackingLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
@@ -455,7 +455,7 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 
 func (s service) materializePlanTracking(
 	ctx context.Context,
-	scope workspace.QuizScope,
+	scope core.QuizScope,
 	plan PlanView,
 	trackingRelativePath string,
 ) (PlanTrackingResult, error) {
@@ -469,7 +469,7 @@ func (s service) materializePlanTracking(
 		return PlanTrackingResult{}, err
 	}
 
-	response, err := workspace.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := core.InvokeQuizModel(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
@@ -487,7 +487,7 @@ func (s service) materializePlanTracking(
 
 	tracking.Tickets = createdTickets
 
-	paths, err := workspace.WriteGeneratedPlanTracking(ctx, s.projectContext.ProjectDir, tracking)
+	paths, err := core.WriteGeneratedPlanTracking(ctx, s.projectContext.ProjectDir, tracking)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
@@ -506,22 +506,22 @@ func (s service) materializePlanTracking(
 }
 
 func (s service) createPlanTrackingTickets(
-	scope workspace.QuizScope,
+	scope core.QuizScope,
 	planPath string,
 	trackingPath string,
-	ticketPayloads []workspace.GeneratedPlanTrackingTicket,
-) ([]workspace.GeneratedPlanTrackingTicket, error) {
+	ticketPayloads []core.GeneratedPlanTrackingTicket,
+) ([]core.GeneratedPlanTrackingTicket, error) {
 	if err := validatePlanTrackingTicketPayloads(ticketPayloads); err != nil {
 		return nil, err
 	}
 
-	created := make([]workspace.GeneratedPlanTrackingTicket, 0, len(ticketPayloads))
+	created := make([]core.GeneratedPlanTrackingTicket, 0, len(ticketPayloads))
 
 	for _, payload := range ticketPayloads {
 		result, err := s.CreateTicket(CreateTicketRequest{
 			Title:       payload.Title,
 			Synopsis:    payload.Synopsis,
-			Status:      workspace.TicketStatusReadyForDev,
+			Status:      core.TicketStatusReadyForDev,
 			Priority:    payload.Priority,
 			Severity:    payload.Severity,
 			Type:        payload.Type,
@@ -545,7 +545,7 @@ func (s service) createPlanTrackingTickets(
 	return created, nil
 }
 
-func validatePlanTrackingTicketPayloads(ticketPayloads []workspace.GeneratedPlanTrackingTicket) error {
+func validatePlanTrackingTicketPayloads(ticketPayloads []core.GeneratedPlanTrackingTicket) error {
 	if len(ticketPayloads) == 0 {
 		return fmt.Errorf("plan tracking ticket payloads are required")
 	}
@@ -559,7 +559,7 @@ func validatePlanTrackingTicketPayloads(ticketPayloads []workspace.GeneratedPlan
 	return nil
 }
 
-func validatePlanTrackingTicketPayload(payload workspace.GeneratedPlanTrackingTicket) error {
+func validatePlanTrackingTicketPayload(payload core.GeneratedPlanTrackingTicket) error {
 	switch {
 	case strings.TrimSpace(payload.Key) != "":
 		return fmt.Errorf("generated ticket key must be empty")
@@ -581,7 +581,7 @@ func validatePlanTrackingTicketPayload(payload workspace.GeneratedPlanTrackingTi
 }
 
 //nolint:wsl_v5 // Markdown body construction benefits from local grouping.
-func renderPlanTrackingTicketBody(planPath, trackingPath string, ticket workspace.GeneratedPlanTrackingTicket) string {
+func renderPlanTrackingTicketBody(planPath, trackingPath string, ticket core.GeneratedPlanTrackingTicket) string {
 	var output strings.Builder
 
 	output.WriteString("# Description\n\n")
@@ -625,7 +625,7 @@ func relativeProjectPath(projectDir, path string) string {
 	return filepath.ToSlash(relativePath)
 }
 
-func (s service) planViewFromScope(scope quizReadScope, index workspace.WorkspaceIndex) PlanView {
+func (s service) planViewFromScope(scope quizReadScope, index core.WorkspaceIndex) PlanView {
 	node, ok := s.latestPlanNodeForScope(scope.scope, index)
 	if !ok {
 		return PlanView{
@@ -640,9 +640,9 @@ func (s service) planViewFromScope(scope quizReadScope, index workspace.Workspac
 }
 
 //nolint:wsl_v5 // Tight loop keeps filtering and candidate assignment together.
-func (s service) latestPlanNodeForScope(scope workspace.QuizScope, index workspace.WorkspaceIndex) (workspace.WorkspaceNode, bool) {
-	nodes := []workspace.WorkspaceNode{}
-	for _, nodeID := range index.ByKind[workspace.WorkspaceNodePlan] {
+func (s service) latestPlanNodeForScope(scope core.QuizScope, index core.WorkspaceIndex) (core.WorkspaceNode, bool) {
+	nodes := []core.WorkspaceNode{}
+	for _, nodeID := range index.ByKind[core.WorkspaceNodePlan] {
 		node, ok := index.NodesByID[nodeID]
 		if !ok {
 			continue
@@ -656,7 +656,7 @@ func (s service) latestPlanNodeForScope(scope workspace.QuizScope, index workspa
 	}
 
 	if len(nodes) == 0 {
-		return workspace.WorkspaceNode{}, false
+		return core.WorkspaceNode{}, false
 	}
 
 	sort.SliceStable(nodes, func(i, j int) bool {
@@ -666,7 +666,7 @@ func (s service) latestPlanNodeForScope(scope workspace.QuizScope, index workspa
 	return nodes[0], true
 }
 
-func (s service) planViewFromNode(scope workspace.QuizScope, fallbackTitle string, node workspace.WorkspaceNode) PlanView {
+func (s service) planViewFromNode(scope core.QuizScope, fallbackTitle string, node core.WorkspaceNode) PlanView {
 	title := node.Title
 	if strings.TrimSpace(title) == "" {
 		title = fallbackTitle
@@ -680,7 +680,7 @@ func (s service) planViewFromNode(scope workspace.QuizScope, fallbackTitle strin
 	)
 }
 
-func (s service) planViewFromPath(scope workspace.QuizScope, relativePath, path string) PlanView {
+func (s service) planViewFromPath(scope core.QuizScope, relativePath, path string) PlanView {
 	content, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		content = nil
@@ -721,73 +721,73 @@ func (v PlanView) withMetadata(useCaseTitle, title, status string, updatedAt tim
 	return v
 }
 
-func (s service) newPlanOutlineGenerationModelRequest(state workspace.QuizRuntimeState) (workspace.QuizModelRequest, error) {
+func (s service) newPlanOutlineGenerationModelRequest(state core.QuizRuntimeState) (core.QuizModelRequest, error) {
 	return s.newPlanningModelRequest(
 		state,
-		workspace.QuizModelActionGeneratePlanOutline,
+		core.QuizModelActionGeneratePlanOutline,
 		"plan_outline_generation",
 		"plan-outline-generation",
 	)
 }
 
-func (s service) newPlanGenerationModelRequest(state workspace.QuizRuntimeState) (workspace.QuizModelRequest, error) {
+func (s service) newPlanGenerationModelRequest(state core.QuizRuntimeState) (core.QuizModelRequest, error) {
 	return s.newPlanningModelRequest(
 		state,
-		workspace.QuizModelActionGeneratePlan,
+		core.QuizModelActionGeneratePlan,
 		"plan_generation",
 		"plan-generation",
 	)
 }
 
 func (s service) newPlanSliceDetailGenerationModelRequest(
-	state workspace.QuizRuntimeState,
-	outline workspace.GeneratedPlanOutline,
+	state core.QuizRuntimeState,
+	outline core.GeneratedPlanOutline,
 	targetSliceID string,
-) (workspace.QuizModelRequest, error) {
-	scope := workspace.QuizScope{
+) (core.QuizModelRequest, error) {
+	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	if err := workspace.ValidateGeneratedPlanOutline(outline); err != nil {
-		return workspace.QuizModelRequest{}, err
+	if err := core.ValidateGeneratedPlanOutline(outline); err != nil {
+		return core.QuizModelRequest{}, err
 	}
 
 	targetSlice, ok := outline.Slice(targetSliceID)
 	if !ok {
-		return workspace.QuizModelRequest{}, fmt.Errorf("plan outline slice is unknown: %s", targetSliceID)
+		return core.QuizModelRequest{}, fmt.Errorf("plan outline slice is unknown: %s", targetSliceID)
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, workspace.QuizModelActionGeneratePlanSliceDetail)
+	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionGeneratePlanSliceDetail)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	sections, err := workspace.QuizModelContextSectionsForPayload(payload)
+	sections, err := core.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	sections, err = s.appendPlanGenerationContextSections(sections, scope)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	sections, err = appendPlanSliceDetailContextSections(sections, outline, targetSlice)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	return workspace.QuizModelRequest{
+	return core.QuizModelRequest{
 		ID:              fmt.Sprintf("plan-slice-detail-generation-%s-%s", specScopeID(scope), planSliceIDSlug(targetSliceID)),
-		Action:          workspace.QuizModelActionGeneratePlanSliceDetail,
+		Action:          core.QuizModelActionGeneratePlanSliceDetail,
 		Strategy:        "plan_slice_detail_generation",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: workspace.QuizModelOutputContract{
+		OutputContract: core.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
@@ -795,41 +795,41 @@ func (s service) newPlanSliceDetailGenerationModelRequest(
 }
 
 func (s service) newPlanningModelRequest(
-	state workspace.QuizRuntimeState,
-	action workspace.QuizModelAction,
+	state core.QuizRuntimeState,
+	action core.QuizModelAction,
 	strategy string,
 	idPrefix string,
-) (workspace.QuizModelRequest, error) {
-	scope := workspace.QuizScope{
+) (core.QuizModelRequest, error) {
+	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
 	payload, err := s.newQuizModelPayload(scope, state, action)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	sections, err := workspace.QuizModelContextSectionsForPayload(payload)
+	sections, err := core.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	sections, err = s.appendPlanGenerationContextSections(sections, scope)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	if scope.CaseSlug == "" {
 		planningSections, err := s.projectWidePlanningSections()
 		if err != nil {
-			return workspace.QuizModelRequest{}, err
+			return core.QuizModelRequest{}, err
 		}
 
 		sections = append(sections, planningSections...)
 	}
 
-	return workspace.QuizModelRequest{
+	return core.QuizModelRequest{
 		ID:              fmt.Sprintf("%s-%s", idPrefix, specScopeID(scope)),
 		Action:          action,
 		Strategy:        strategy,
@@ -838,7 +838,7 @@ func (s service) newPlanningModelRequest(
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: workspace.QuizModelOutputContract{
+		OutputContract: core.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
@@ -846,10 +846,10 @@ func (s service) newPlanningModelRequest(
 }
 
 func appendPlanSliceDetailContextSections(
-	sections []workspace.QuizModelContextSection,
-	outline workspace.GeneratedPlanOutline,
-	targetSlice workspace.GeneratedPlanOutlineSlice,
-) ([]workspace.QuizModelContextSection, error) {
+	sections []core.QuizModelContextSection,
+	outline core.GeneratedPlanOutline,
+	targetSlice core.GeneratedPlanOutlineSlice,
+) ([]core.QuizModelContextSection, error) {
 	outlineContent, err := json.MarshalIndent(outline, "", "  ")
 	if err != nil {
 		return nil, err
@@ -860,7 +860,7 @@ func appendPlanSliceDetailContextSections(
 		return nil, err
 	}
 
-	sections = append(sections, workspace.QuizModelContextSection{
+	sections = append(sections, core.QuizModelContextSection{
 		Name:      "plan_outline",
 		Layer:     "plan",
 		Authority: "generated_plan_outline",
@@ -870,7 +870,7 @@ func appendPlanSliceDetailContextSections(
 			"status": outline.Status,
 		},
 	})
-	sections = append(sections, workspace.QuizModelContextSection{
+	sections = append(sections, core.QuizModelContextSection{
 		Name:      "target_slice",
 		Layer:     "plan",
 		Authority: targetSlice.ID,
@@ -893,25 +893,25 @@ func planSliceIDSlug(sliceID string) string {
 }
 
 func (s service) newPlanTrackingModelRequest(
-	state workspace.QuizRuntimeState,
+	state core.QuizRuntimeState,
 	plan PlanView,
-) (workspace.QuizModelRequest, error) {
-	scope := workspace.QuizScope{
+) (core.QuizModelRequest, error) {
+	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, workspace.QuizModelActionMaterializePlanTracking)
+	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionMaterializePlanTracking)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	sections, err := workspace.QuizModelContextSectionsForPayload(payload)
+	sections, err := core.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	sections = append(sections, workspace.QuizModelContextSection{
+	sections = append(sections, core.QuizModelContextSection{
 		Name:      "implementation_plan",
 		Layer:     "plan",
 		Authority: plan.RelativePath,
@@ -923,16 +923,16 @@ func (s service) newPlanTrackingModelRequest(
 		},
 	})
 
-	return workspace.QuizModelRequest{
+	return core.QuizModelRequest{
 		ID:              fmt.Sprintf("plan-tracking-%s", specScopeID(scope)),
-		Action:          workspace.QuizModelActionMaterializePlanTracking,
+		Action:          core.QuizModelActionMaterializePlanTracking,
 		Strategy:        "plan_tracking_materialization",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: workspace.QuizModelOutputContract{
+		OutputContract: core.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),

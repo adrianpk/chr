@@ -24,7 +24,7 @@ AGENTS.md     # top-level agent operating contract
 
 - Command packages under `cmd/` should assemble dependencies, parse process-level configuration, start lifecycle components, and stay thin.
 - Application behavior should live in `internal/` by default.
-- ChrysoCoord core behavior should live under `internal/workspace`.
+- ChrysoCoord core behavior should live under `internal/core`.
 - ChrysoCoord application operations should live under `internal/app` behind
   the central operation service boundary.
 - Use `pkg/` only for contracts, envelope types, or libraries that are intentionally shared outside the module.
@@ -67,7 +67,7 @@ adapter wrapper over it.
 
 ## Workspace Index
 
-`internal/workspace` owns the workspace index model.
+`internal/core` owns the workspace index model.
 
 The workspace index is a local graph/read-model over project Markdown files. It
 is not a database and it must not become the durable source of truth. The

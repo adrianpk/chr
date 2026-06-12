@@ -142,7 +142,7 @@ chc tui --dir /path/to/project
 The TUI is the main interactive surface for project context, use cases, dumps,
 quizzes, specs, plans, tickets, and execution activity. It loads durable
 workspace files from disk and writes normal Markdown artifacts back to the
-workspace.
+core.
 
 ## Navigate the TUI
 
@@ -591,7 +591,7 @@ changed files, and artifact paths for one execution.
 
 ## Review a Ticket Pull Request
 
-Ticket review is optional and configured per workspace. It uses normal Board
+Ticket review is optional and configured per core. It uses normal Board
 statuses and ticket metadata; it does not add a separate Board column.
 
 Inspect the configured mode:
@@ -890,7 +890,7 @@ Docker receives the same files through the project mount, usually under
 
 ## Reference
 
-- [Project workspace](../../reference/project-workspace.md)
+- [Project workspace](../../reference/project-core.md)
 - [TUI](../../reference/tui.md)
 - [Authoring sessions](../../reference/authoring-sessions.md)
 - [Project CLI](../../reference/project-cli.md)

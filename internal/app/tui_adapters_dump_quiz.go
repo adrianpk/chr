@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os/exec"
 
+	"forge.adrianpk.com/chc/internal/core"
 	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/workspace"
 )
 
 type tuiDumpActionExecutor struct {
@@ -83,8 +83,8 @@ func executeQuizOperationRefresh(_ tui.QuizActionRequest) (string, error) {
 
 func (e tuiQuizActionExecutor) executeQuizOperationStart(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.StartQuiz(QuizStartRequest{
-		Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
-		Mode:  workspace.QuizModeDeep,
+		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Mode:  core.QuizModeDeep,
 	})
 	if err != nil {
 		return "", err
@@ -95,7 +95,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationStart(request tui.QuizActionR
 
 func (e tuiQuizActionExecutor) executeQuizOperationResume(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.ResumeQuiz(QuizResumeRequest{
-		Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 	})
 	if err != nil {
 		return "", err
@@ -106,7 +106,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationResume(request tui.QuizAction
 
 func (e tuiQuizActionExecutor) executeQuizOperationAnswer(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.AnswerQuiz(QuizAnswerRequest{
-		Scope:  workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope:  core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		Answer: request.Answer,
 	})
 	if err != nil {
@@ -118,7 +118,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationAnswer(request tui.QuizAction
 
 func (e tuiQuizActionExecutor) executeQuizOperationSkip(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.SkipQuiz(QuizSkipRequest{
-		Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 	})
 	if err != nil {
 		return "", err
@@ -129,7 +129,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationSkip(request tui.QuizActionRe
 
 func (e tuiQuizActionExecutor) executeQuizOperationComplete(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.CompleteQuiz(QuizCompleteRequest{
-		Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 	})
 	if err != nil {
 		return "", err
@@ -140,7 +140,7 @@ func (e tuiQuizActionExecutor) executeQuizOperationComplete(request tui.QuizActi
 
 func (e tuiQuizActionExecutor) executeQuizOperationCancel(request tui.QuizActionRequest) (string, error) {
 	result, err := e.operations.CancelQuiz(QuizCancelRequest{
-		Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 	})
 	if err != nil {
 		return "", err
@@ -150,10 +150,10 @@ func (e tuiQuizActionExecutor) executeQuizOperationCancel(request tui.QuizAction
 }
 
 func (e tuiQuizActionExecutor) executeQuizOperationMode(request tui.QuizActionRequest) (string, error) {
-	mode := workspace.QuizMode(request.Mode)
+	mode := core.QuizMode(request.Mode)
 
 	result, err := e.operations.SwitchQuizMode(QuizModeRequest{
-		Scope: workspace.QuizScope{CaseSlug: request.Scope.CaseSlug},
+		Scope: core.QuizScope{CaseSlug: request.Scope.CaseSlug},
 		Mode:  mode,
 	})
 	if err != nil {

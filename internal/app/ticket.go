@@ -14,12 +14,12 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 var (
-	reviewProviderDiagnosticRunner workspace.ReviewProviderDiagnosticRunner = workspace.OSReviewProviderDiagnosticRunner{}
-	reviewRemoteCommandRunner      workspace.ReviewRemoteCommandRunner      = workspace.OSReviewRemoteCommandRunner{}
+	reviewProviderDiagnosticRunner core.ReviewProviderDiagnosticRunner = core.OSReviewProviderDiagnosticRunner{}
+	reviewRemoteCommandRunner      core.ReviewRemoteCommandRunner      = core.OSReviewRemoteCommandRunner{}
 )
 
 func newTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -300,7 +300,7 @@ func ticketReviewFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "result",
 			Usage: "review result: pass, needs_changes, insufficient_evidence, needs_human_decision",
-			Value: workspace.TicketReviewCommandResultPass,
+			Value: core.TicketReviewCommandResultPass,
 		},
 		&cli.StringSliceFlag{
 			Name:  "finding",
@@ -318,7 +318,7 @@ func ticketMergeFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "strategy",
 			Usage: "merge strategy: merge, rebase, squash",
-			Value: workspace.TicketMergeStrategyRebase,
+			Value: core.TicketMergeStrategyRebase,
 		},
 		&cli.StringFlag{
 			Name:  "base",
@@ -467,38 +467,38 @@ func ticketApplyResultAction(stdout io.Writer) cli.ActionFunc {
 
 type ticketStartPreflight struct {
 	AssetsFS       fs.FS
-	Env            workspace.UserEnvironment
+	Env            core.UserEnvironment
 	ProjectContext commandProjectContext
-	Ticket         workspace.IndexedTicket
-	Record         workspace.ExecutionRecord
-	Runtime        workspace.RuntimeValidationResult
+	Ticket         core.IndexedTicket
+	Record         core.ExecutionRecord
+	Runtime        core.RuntimeValidationResult
 }
 
 type ticketStartSelection struct {
 	ProjectContext commandProjectContext
-	Ticket         workspace.IndexedTicket
+	Ticket         core.IndexedTicket
 }
 
 type ticketApplyResultPlan struct {
 	ProjectContext commandProjectContext
-	Record         workspace.ExecutionRecord
-	Result         workspace.ExecutionResult
-	Application    workspace.ResultApplication
+	Record         core.ExecutionRecord
+	Result         core.ExecutionResult
+	Application    core.ResultApplication
 	ReportPath     string
 }
 
 type ticketLoopExecutionResult struct {
-	Record       workspace.LoopRunRecord
-	Executions   []workspace.ExecutionRecord
-	Applications []workspace.ResultApplication
+	Record       core.LoopRunRecord
+	Executions   []core.ExecutionRecord
+	Applications []core.ResultApplication
 }
 
 type ticketLoopRunOptions struct {
 	MaxIterations int
 }
 
-var newTicketStartHarnessExecutor = func() workspace.HarnessExecutor {
-	return workspace.OSHarnessExecutor{}
+var newTicketStartHarnessExecutor = func() core.HarnessExecutor {
+	return core.OSHarnessExecutor{}
 }
 
 func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -545,14 +545,14 @@ func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	return nil
 }
 
-func ticketOperationResultTicket(result TicketOperationResult, key string) (workspace.IndexedTicket, error) {
+func ticketOperationResultTicket(result TicketOperationResult, key string) (core.IndexedTicket, error) {
 	for _, ticket := range result.Tickets {
 		if ticket.Key == key {
 			return ticket, nil
 		}
 	}
 
-	return workspace.IndexedTicket{}, fmt.Errorf("ticket not found after operation: %s", key)
+	return core.IndexedTicket{}, fmt.Errorf("ticket not found after operation: %s", key)
 }
 
 func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -562,13 +562,13 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 
 	preflight, err := buildTicketStartPreflight(ctx, cmd)
 	if err != nil {
-		return workspace.NewExecutionFailure(workspace.ExecutionFailurePreflight, err)
+		return core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
-	if !workspace.RuntimeValidationPassed(preflight.Runtime.Checks) {
-		preflight.Record.Status = workspace.ExecutionStatusBlocked
-		preflight.Record.FailureReason = workspace.NewExecutionFailure(
-			workspace.ExecutionFailureRuntime,
+	if !core.RuntimeValidationPassed(preflight.Runtime.Checks) {
+		preflight.Record.Status = core.ExecutionStatusBlocked
+		preflight.Record.FailureReason = core.NewExecutionFailure(
+			core.ExecutionFailureRuntime,
 			fmt.Errorf("runtime validation failed"),
 		).Error()
 
@@ -577,11 +577,11 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 			return err
 		}
 
-		return workspace.NewExecutionFailure(workspace.ExecutionFailureRuntime, fmt.Errorf("runtime validation failed"))
+		return core.NewExecutionFailure(core.ExecutionFailureRuntime, fmt.Errorf("runtime validation failed"))
 	}
 
 	if !cmd.Bool("dry-run") {
-		lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, workspace.AgentOperationDevelopment)
+		lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, core.AgentOperationDevelopment)
 		if err != nil {
 			return err
 		}
@@ -642,7 +642,7 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 			return err
 		}
 
-		lock, err := acquireAgentOperationLock(ctx, projectContext, workspace.AgentOperationDevelopment)
+		lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationDevelopment)
 		if err != nil {
 			return err
 		}
@@ -655,8 +655,8 @@ func runTicketLoop(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return printTicketLoopPlan(stdout, projectContext, queryOptions, tickets, cmd.Bool("dry-run"))
 }
 
-func selectTicketLoopTickets(ctx context.Context, index workspace.TicketIndex, projectContext commandProjectContext, queryOptions workspace.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) ([]workspace.IndexedTicket, int, error) {
-	tickets, err := workspace.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
+func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) ([]core.IndexedTicket, int, error) {
+	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -672,13 +672,13 @@ func selectTicketLoopTickets(ctx context.Context, index workspace.TicketIndex, p
 	return tickets, len(eligibleTickets), nil
 }
 
-func applyTicketLoopPreflight(ctx context.Context, index workspace.TicketIndex, projectContext commandProjectContext, tickets []workspace.IndexedTicket) ([]workspace.IndexedTicket, error) {
+func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, tickets []core.IndexedTicket) ([]core.IndexedTicket, error) {
 	allTickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
 		return nil, err
 	}
 
-	preflight, err := workspace.RunWorkSelectionPreflight(ctx, workspace.WorkSelectionPreflightOptions{
+	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{
 		ProjectDir:        projectContext.ProjectDir,
 		Tickets:           allTickets,
 		RequireUpdatedDev: true,
@@ -698,11 +698,11 @@ func applyTicketLoopPreflight(ctx context.Context, index workspace.TicketIndex, 
 	return tickets, nil
 }
 
-func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) workspace.TicketLoopQueryOptions {
-	return workspace.TicketLoopQueryOptions{
+func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.TicketLoopQueryOptions {
+	return core.TicketLoopQueryOptions{
 		ProjectID: projectID,
 		Statuses:  cmd.StringSlice("status"),
-		Filters: workspace.TicketLoopFilters{
+		Filters: core.TicketLoopFilters{
 			Priorities:   cmd.StringSlice("priority"),
 			Severities:   cmd.StringSlice("severity"),
 			ProjectAreas: cmd.StringSlice("project-area"),
@@ -710,7 +710,7 @@ func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) works
 			Types:        cmd.StringSlice("type"),
 			UseCases:     cmd.StringSlice("use-case"),
 		},
-		Order: workspace.TicketLoopOrder(cmd.String("order")),
+		Order: core.TicketLoopOrder(cmd.String("order")),
 	}
 }
 
@@ -725,7 +725,7 @@ func ticketLoopRunOptionsFromCommand(cmd *cli.Command) (ticketLoopRunOptions, er
 	return opts, nil
 }
 
-func ticketsForTicketLoopRun(tickets []workspace.IndexedTicket, opts ticketLoopRunOptions) []workspace.IndexedTicket {
+func ticketsForTicketLoopRun(tickets []core.IndexedTicket, opts ticketLoopRunOptions) []core.IndexedTicket {
 	if opts.MaxIterations == 0 || len(tickets) <= opts.MaxIterations {
 		return tickets
 	}
@@ -733,8 +733,8 @@ func ticketsForTicketLoopRun(tickets []workspace.IndexedTicket, opts ticketLoopR
 	return tickets[:opts.MaxIterations]
 }
 
-func deduplicateTicketLoopTickets(tickets []workspace.IndexedTicket) []workspace.IndexedTicket {
-	selected := make([]workspace.IndexedTicket, 0, len(tickets))
+func deduplicateTicketLoopTickets(tickets []core.IndexedTicket) []core.IndexedTicket {
+	selected := make([]core.IndexedTicket, 0, len(tickets))
 	seen := map[string]struct{}{}
 
 	for _, ticket := range tickets {
@@ -750,8 +750,8 @@ func deduplicateTicketLoopTickets(tickets []workspace.IndexedTicket) []workspace
 	return selected
 }
 
-func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandProjectContext, tickets []workspace.IndexedTicket, selectedTicketKey string) error {
-	preflight, err := workspace.RunWorkSelectionPreflight(ctx, workspace.WorkSelectionPreflightOptions{
+func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandProjectContext, tickets []core.IndexedTicket, selectedTicketKey string) error {
+	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{
 		ProjectDir:        projectContext.ProjectDir,
 		Tickets:           tickets,
 		SelectedTicketKey: selectedTicketKey,
@@ -768,7 +768,7 @@ func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandPr
 	return nil
 }
 
-func formatWorkSelectionPreflightError(preflight workspace.WorkSelectionPreflightResult) error {
+func formatWorkSelectionPreflightError(preflight core.WorkSelectionPreflightResult) error {
 	if len(preflight.BlockReasons) == 0 {
 		return fmt.Errorf("work selection preflight blocked")
 	}
@@ -781,9 +781,9 @@ func formatWorkSelectionPreflightError(preflight workspace.WorkSelectionPrefligh
 	return fmt.Errorf("work selection preflight blocked: %s detail=%s", reason.Code, reason.Detail)
 }
 
-func hasReviewRepairTicket(tickets []workspace.IndexedTicket) bool {
+func hasReviewRepairTicket(tickets []core.IndexedTicket) bool {
 	for _, ticket := range tickets {
-		readyForDev := ticket.Status == workspace.TicketStatusReadyForDev
+		readyForDev := ticket.Status == core.TicketStatusReadyForDev
 		changesRequested := ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes"
 
 		if readyForDev && changesRequested {
@@ -794,15 +794,15 @@ func hasReviewRepairTicket(tickets []workspace.IndexedTicket) bool {
 	return false
 }
 
-func acquireAgentOperationLock(ctx context.Context, projectContext commandProjectContext, operation string) (*workspace.AgentOperationLock, error) {
-	return workspace.AcquireAgentOperationLock(ctx, workspace.AgentOperationLockOptions{
+func acquireAgentOperationLock(ctx context.Context, projectContext commandProjectContext, operation string) (*core.AgentOperationLock, error) {
+	return core.AcquireAgentOperationLock(ctx, core.AgentOperationLockOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Operation:  operation,
 		Owner:      "chc",
 	})
 }
 
-func releaseAgentOperationLock(lock *workspace.AgentOperationLock) func() {
+func releaseAgentOperationLock(lock *core.AgentOperationLock) func() {
 	return func() {
 		//nolint:errcheck // Operation result already comes from the main workflow.
 		_ = lock.Release()
@@ -814,9 +814,9 @@ func noopRelease() {}
 func runAndPrintTicketLoopExecution(
 	ctx context.Context,
 	stdout io.Writer,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	tickets []workspace.IndexedTicket,
+	tickets []core.IndexedTicket,
 	eligibleCount int,
 	assetsFS fs.FS,
 ) error {
@@ -836,13 +836,13 @@ func runAndPrintTicketLoopExecution(
 func printTicketLoopPlan(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	opts workspace.TicketLoopQueryOptions,
-	tickets []workspace.IndexedTicket,
+	opts core.TicketLoopQueryOptions,
+	tickets []core.IndexedTicket,
 	dryRun bool,
 ) error {
 	order := opts.Order
 	if order == "" {
-		order = workspace.TicketLoopOrderCreatedAt
+		order = core.TicketLoopOrderCreatedAt
 	}
 
 	lines := []string{
@@ -883,13 +883,13 @@ func printTicketLoopPlan(
 
 func runTicketLoopExecution(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	tickets []workspace.IndexedTicket,
+	tickets []core.IndexedTicket,
 	eligibleCount int,
 	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
-	repository, err := workspace.NewLoopRunRepository(ctx, env, assetsFS)
+	repository, err := core.NewLoopRunRepository(ctx, env, assetsFS)
 	if err != nil {
 		return ticketLoopExecutionResult{}, err
 	}
@@ -918,7 +918,7 @@ func runTicketLoopExecution(
 		result.Applications = append(result.Applications, application)
 
 		record.ProcessedCount++
-		if application.TicketStatus == workspace.TicketResultStatusBlocked {
+		if application.TicketStatus == core.TicketResultStatusBlocked {
 			record.BlockedCount++
 
 			break
@@ -930,11 +930,11 @@ func runTicketLoopExecution(
 
 func failTicketLoopExecution(
 	ctx context.Context,
-	env workspace.UserEnvironment,
-	repository workspace.LoopRunRepository,
+	env core.UserEnvironment,
+	repository core.LoopRunRepository,
 	projectContext commandProjectContext,
 	result ticketLoopExecutionResult,
-	record workspace.LoopRunRecord,
+	record core.LoopRunRecord,
 	cause error,
 	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
@@ -958,11 +958,11 @@ func failTicketLoopExecution(
 
 func finishTicketLoopExecution(
 	ctx context.Context,
-	env workspace.UserEnvironment,
-	repository workspace.LoopRunRepository,
+	env core.UserEnvironment,
+	repository core.LoopRunRepository,
 	projectContext commandProjectContext,
 	result ticketLoopExecutionResult,
-	record workspace.LoopRunRecord,
+	record core.LoopRunRecord,
 	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
 	record = finishLoopRunRecord(record)
@@ -984,41 +984,41 @@ func finishTicketLoopExecution(
 
 func executeLoopTicket(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	ticket workspace.IndexedTicket,
+	ticket core.IndexedTicket,
 	assetsFS fs.FS,
-) (workspace.ExecutionRecord, workspace.ResultApplication, error) {
+) (core.ExecutionRecord, core.ResultApplication, error) {
 	preflight, err := buildTicketStartPreflightForTicket(ctx, env, projectContext, ticket, assetsFS)
 	if err != nil {
-		return workspace.ExecutionRecord{}, workspace.ResultApplication{}, err
+		return core.ExecutionRecord{}, core.ResultApplication{}, err
 	}
 
 	record, err := runTicketStartExecution(ctx, env, preflight.Record, preflight.Runtime, assetsFS)
 	if err != nil {
-		return record, workspace.ResultApplication{}, err
+		return record, core.ResultApplication{}, err
 	}
 
 	plan, err := buildTicketApplyResultPlanForRecord(projectContext, record)
 	if err != nil {
-		return record, workspace.ResultApplication{}, err
+		return record, core.ResultApplication{}, err
 	}
 
 	err = applyTicketResult(ctx, env, plan, assetsFS)
 	if err != nil {
-		return record, workspace.ResultApplication{}, err
+		return record, core.ResultApplication{}, err
 	}
 
 	return record, plan.Application, nil
 }
 
-func newRunningLoopRunRecord(projectID string, eligibleCount int) workspace.LoopRunRecord {
+func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRecord {
 	now := time.Now().UTC()
 
-	return workspace.LoopRunRecord{
+	return core.LoopRunRecord{
 		ID:            loopRunID(projectID, now),
 		ProjectID:     projectID,
-		Status:        workspace.LoopRunStatusRunning,
+		Status:        core.LoopRunStatusRunning,
 		EligibleCount: eligibleCount,
 		CreatedAt:     now,
 		StartedAt:     &now,
@@ -1026,12 +1026,12 @@ func newRunningLoopRunRecord(projectID string, eligibleCount int) workspace.Loop
 	}
 }
 
-func finishLoopRunRecord(record workspace.LoopRunRecord) workspace.LoopRunRecord {
+func finishLoopRunRecord(record core.LoopRunRecord) core.LoopRunRecord {
 	finishedAt := time.Now().UTC()
 
-	record.Status = workspace.LoopRunStatusSucceeded
+	record.Status = core.LoopRunStatusSucceeded
 	if record.BlockedCount > 0 {
-		record.Status = workspace.LoopRunStatusBlocked
+		record.Status = core.LoopRunStatusBlocked
 	}
 
 	record.FinishedAt = &finishedAt
@@ -1040,9 +1040,9 @@ func finishLoopRunRecord(record workspace.LoopRunRecord) workspace.LoopRunRecord
 	return record
 }
 
-func failLoopRunRecord(record workspace.LoopRunRecord, cause error) workspace.LoopRunRecord {
+func failLoopRunRecord(record core.LoopRunRecord, cause error) core.LoopRunRecord {
 	finishedAt := time.Now().UTC()
-	record.Status = workspace.LoopRunStatusFailed
+	record.Status = core.LoopRunStatusFailed
 	record.FinishedAt = &finishedAt
 	record.UpdatedAt = finishedAt
 	record.FailureReason = cause.Error()
@@ -1122,7 +1122,7 @@ func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Write
 func buildTicketApplyResultPlan(
 	ctx context.Context,
 	cmd *cli.Command,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 ) (ticketApplyResultPlan, error) {
 	deps, err := appDependenciesFromCommand(cmd)
 	if err != nil {
@@ -1138,7 +1138,7 @@ func buildTicketApplyResultPlan(
 		return ticketApplyResultPlan{}, err
 	}
 
-	repository, err := workspace.NewExecutionRepository(ctx, env, deps.assetsFS)
+	repository, err := core.NewExecutionRepository(ctx, env, deps.assetsFS)
 	if err != nil {
 		return ticketApplyResultPlan{}, err
 	}
@@ -1158,18 +1158,18 @@ func buildTicketApplyResultPlan(
 
 func buildTicketApplyResultPlanForRecord(
 	projectContext commandProjectContext,
-	record workspace.ExecutionRecord,
+	record core.ExecutionRecord,
 ) (ticketApplyResultPlan, error) {
 	if record.ProjectID != projectContext.ProjectID {
 		return ticketApplyResultPlan{}, fmt.Errorf("execution project mismatch: %s", record.ProjectID)
 	}
 
-	result, err := workspace.LoadExecutionResult(record.Artifacts.ResultPath)
+	result, err := core.LoadExecutionResult(record.Artifacts.ResultPath)
 	if err != nil {
 		return ticketApplyResultPlan{}, err
 	}
 
-	application, err := workspace.NewResultApplication(workspace.ResultApplicationOptions{
+	application, err := core.NewResultApplication(core.ResultApplicationOptions{
 		Execution:     record,
 		Result:        result,
 		CommentAuthor: "chc",
@@ -1187,10 +1187,10 @@ func buildTicketApplyResultPlanForRecord(
 	}, nil
 }
 
-func applyTicketResult(ctx context.Context, env workspace.UserEnvironment, plan ticketApplyResultPlan, assetsFS fs.FS) error {
+func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, assetsFS fs.FS) error {
 	appliedAt := time.Now().UTC()
 
-	err := workspace.NewTicketResultStateWriter().WriteResultState(ctx, workspace.WriteResultStateOptions{
+	err := core.NewTicketResultStateWriter().WriteResultState(ctx, core.WriteResultStateOptions{
 		Application: plan.Application,
 		UpdatedAt:   appliedAt,
 	})
@@ -1198,7 +1198,7 @@ func applyTicketResult(ctx context.Context, env workspace.UserEnvironment, plan 
 		return err
 	}
 
-	err = workspace.NewTicketResultCommentWriter().WriteResultComment(ctx, workspace.WriteResultCommentOptions{
+	err = core.NewTicketResultCommentWriter().WriteResultComment(ctx, core.WriteResultCommentOptions{
 		Application: plan.Application,
 		CreatedAt:   appliedAt,
 	})
@@ -1206,7 +1206,7 @@ func applyTicketResult(ctx context.Context, env workspace.UserEnvironment, plan 
 		return err
 	}
 
-	err = workspace.NewTicketResultValidationWriter().WriteResultValidation(ctx, workspace.WriteResultValidationOptions{
+	err = core.NewTicketResultValidationWriter().WriteResultValidation(ctx, core.WriteResultValidationOptions{
 		Application: plan.Application,
 		CreatedAt:   appliedAt,
 	})
@@ -1214,7 +1214,7 @@ func applyTicketResult(ctx context.Context, env workspace.UserEnvironment, plan 
 		return err
 	}
 
-	err = workspace.NewTicketResultChangedFilesWriter().WriteChangedFiles(ctx, workspace.WriteChangedFilesOptions{
+	err = core.NewTicketResultChangedFilesWriter().WriteChangedFiles(ctx, core.WriteChangedFilesOptions{
 		Application: plan.Application,
 		CreatedAt:   appliedAt,
 	})
@@ -1222,7 +1222,7 @@ func applyTicketResult(ctx context.Context, env workspace.UserEnvironment, plan 
 		return err
 	}
 
-	err = workspace.NewTicketResultBlockedReasonWriter().WriteBlockedReason(ctx, workspace.WriteBlockedReasonOptions{
+	err = core.NewTicketResultBlockedReasonWriter().WriteBlockedReason(ctx, core.WriteBlockedReasonOptions{
 		Application: plan.Application,
 		CreatedAt:   appliedAt,
 	})
@@ -1250,12 +1250,12 @@ func applyTicketResult(ctx context.Context, env workspace.UserEnvironment, plan 
 
 func refreshAppliedTicketIndex(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	plan ticketApplyResultPlan,
 	appliedAt time.Time,
 	assetsFS fs.FS,
 ) error {
-	index, err := workspace.NewTicketIndex(ctx, env, assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -1265,7 +1265,7 @@ func refreshAppliedTicketIndex(
 		_ = index.Close()
 	}()
 
-	result, err := workspace.NewTicketReconciler(index).ReconcileProjectTicket(ctx, workspace.ReconcileProjectTicketOptions{
+	result, err := core.NewTicketReconciler(index).ReconcileProjectTicket(ctx, core.ReconcileProjectTicketOptions{
 		ProjectID:    plan.ProjectContext.ProjectID,
 		ProjectDir:   plan.ProjectContext.ProjectDir,
 		TicketPath:   plan.Application.TicketPath,
@@ -1305,7 +1305,7 @@ func writeTicketApplyResultReport(plan ticketApplyResultPlan, appliedAt time.Tim
 }
 
 func writeTicketExecutionReport(ctx context.Context, plan ticketApplyResultPlan) error {
-	report, err := workspace.NewExecutionReport(workspace.ExecutionReportOptions{
+	report, err := core.NewExecutionReport(core.ExecutionReportOptions{
 		Execution: plan.Record,
 		Result:    &plan.Result,
 	})
@@ -1313,7 +1313,7 @@ func writeTicketExecutionReport(ctx context.Context, plan ticketApplyResultPlan)
 		return err
 	}
 
-	_, err = workspace.NewExecutionReportWriter().WriteExecutionReport(ctx, report)
+	_, err = core.NewExecutionReportWriter().WriteExecutionReport(ctx, report)
 	if err != nil {
 		return err
 	}
@@ -1328,7 +1328,7 @@ func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun
 		fmt.Sprintf("ticket_path: %s", plan.Application.TicketPath),
 		fmt.Sprintf("status: %s", plan.Application.TicketStatus),
 		fmt.Sprintf("result_status: %s", plan.Result.Status),
-		fmt.Sprintf("execution_report_path: %s", workspace.ExecutionReportPath(plan.Record)),
+		fmt.Sprintf("execution_report_path: %s", core.ExecutionReportPath(plan.Record)),
 		fmt.Sprintf("report_path: %s", plan.ReportPath),
 		fmt.Sprintf("dry_run: %t", dryRun),
 	}
@@ -1347,7 +1347,7 @@ func runAndPrintTicketStartExecution(
 	ctx context.Context,
 	stdout io.Writer,
 	preflight ticketStartPreflight,
-) (workspace.ExecutionRecord, error) {
+) (core.ExecutionRecord, error) {
 	record, err := runTicketStartExecution(ctx, preflight.Env, preflight.Record, preflight.Runtime, preflight.AssetsFS)
 	if err == nil {
 		return record, nil
@@ -1355,7 +1355,7 @@ func runAndPrintTicketStartExecution(
 
 	printErr := printTicketStartResult(stdout, preflight.Ticket, record, preflight.Runtime, false)
 	if printErr != nil {
-		return workspace.ExecutionRecord{}, printErr
+		return core.ExecutionRecord{}, printErr
 	}
 
 	return record, err
@@ -1382,19 +1382,19 @@ func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketSta
 
 func buildTicketStartPreflightForTicket(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	ticket workspace.IndexedTicket,
+	ticket core.IndexedTicket,
 	assetsFS fs.FS,
 ) (ticketStartPreflight, error) {
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
 	record := newPendingExecutionRecord(projectContext.ProjectID, ticket)
 
-	result, err := workspace.ValidateRuntime(workspace.RuntimeValidationOptions{
+	result, err := core.ValidateRuntime(core.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 		TicketKey:  ticket.Key,
@@ -1404,7 +1404,7 @@ func buildTicketStartPreflightForTicket(
 		return ticketStartPreflight{}, err
 	}
 
-	record = workspace.ExecutionRecordFromRuntimePlan(record, result.Plan)
+	record = core.ExecutionRecordFromRuntimePlan(record, result.Plan)
 
 	return ticketStartPreflight{
 		AssetsFS:       assetsFS,
@@ -1416,7 +1416,7 @@ func buildTicketStartPreflightForTicket(
 	}, nil
 }
 
-func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env workspace.UserEnvironment, assetsFS fs.FS) (ticketStartSelection, error) {
+func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env core.UserEnvironment, assetsFS fs.FS) (ticketStartSelection, error) {
 	projectContext, err := newCommandProjectContextResolver(env, assetsFS).Resolve(ctx, commandProjectContextOptions{
 		ExplicitDir:           cmd.String("dir"),
 		UseExplicitDir:        cmd.IsSet("dir"),
@@ -1426,7 +1426,7 @@ func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env workspac
 		return ticketStartSelection{}, err
 	}
 
-	index, err := workspace.NewTicketIndex(ctx, env, assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, assetsFS)
 	if err != nil {
 		return ticketStartSelection{}, err
 	}
@@ -1462,15 +1462,15 @@ func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env workspac
 	}, nil
 }
 
-func newPendingExecutionRecord(projectID string, ticket workspace.IndexedTicket) workspace.ExecutionRecord {
+func newPendingExecutionRecord(projectID string, ticket core.IndexedTicket) core.ExecutionRecord {
 	now := time.Now().UTC()
 
-	return workspace.ExecutionRecord{
+	return core.ExecutionRecord{
 		ID:         executionID(projectID, ticket.Key, now),
 		ProjectID:  projectID,
 		TicketKey:  ticket.Key,
 		TicketPath: ticket.Path,
-		Status:     workspace.ExecutionStatusPending,
+		Status:     core.ExecutionStatusPending,
 		CreatedAt:  now,
 		UpdatedAt:  now,
 	}
@@ -1478,14 +1478,14 @@ func newPendingExecutionRecord(projectID string, ticket workspace.IndexedTicket)
 
 func runTicketStartExecution(
 	ctx context.Context,
-	env workspace.UserEnvironment,
-	record workspace.ExecutionRecord,
-	result workspace.RuntimeValidationResult,
+	env core.UserEnvironment,
+	record core.ExecutionRecord,
+	result core.RuntimeValidationResult,
 	assetsFS fs.FS,
-) (workspace.ExecutionRecord, error) {
-	repository, err := workspace.NewExecutionRepository(ctx, env, assetsFS)
+) (core.ExecutionRecord, error) {
+	repository, err := core.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
-		return workspace.ExecutionRecord{}, err
+		return core.ExecutionRecord{}, err
 	}
 
 	defer func() {
@@ -1495,27 +1495,27 @@ func runTicketStartExecution(
 
 	err = repository.CreateExecution(ctx, record)
 	if err != nil {
-		return workspace.ExecutionRecord{}, err
+		return core.ExecutionRecord{}, err
 	}
 
-	err = workspace.MaterializeCodexWorkerContextForExecution(ctx, record, result.Plan)
+	err = core.MaterializeCodexWorkerContextForExecution(ctx, record, result.Plan)
 	if err != nil {
-		return workspace.ExecutionRecord{}, workspace.NewExecutionFailure(workspace.ExecutionFailurePreflight, err)
+		return core.ExecutionRecord{}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
-	invocation, err := workspace.NewHarnessInvocation(workspace.HarnessInvocationOptions{
+	invocation, err := core.NewHarnessInvocation(core.HarnessInvocationOptions{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
 		TicketPath:  record.TicketPath,
 		Plan:        result.Plan,
 	})
 	if err != nil {
-		return workspace.ExecutionRecord{}, err
+		return core.ExecutionRecord{}, err
 	}
 
-	runner := workspace.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
+	runner := core.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
 
-	return runner.Run(ctx, workspace.RunExecutionOptions{
+	return runner.Run(ctx, core.RunExecutionOptions{
 		Record:     record,
 		Invocation: invocation,
 	})
@@ -1529,9 +1529,9 @@ func executionID(projectID, ticketKey string, createdAt time.Time) string {
 
 func printTicketStartResult(
 	stdout io.Writer,
-	ticket workspace.IndexedTicket,
-	record workspace.ExecutionRecord,
-	result workspace.RuntimeValidationResult,
+	ticket core.IndexedTicket,
+	record core.ExecutionRecord,
+	result core.RuntimeValidationResult,
 	dryRun bool,
 ) error {
 	lines := []string{
@@ -1557,12 +1557,12 @@ func printTicketStartResult(
 	return printRuntimeValidateResult(stdout, result, dryRun)
 }
 
-func printTicketStartFailure(stdout io.Writer, record workspace.ExecutionRecord) error {
+func printTicketStartFailure(stdout io.Writer, record core.ExecutionRecord) error {
 	if record.FailureReason == "" {
 		return nil
 	}
 
-	kind := workspace.ExecutionFailureKindFromReason(record.FailureReason)
+	kind := core.ExecutionFailureKindFromReason(record.FailureReason)
 	if kind != "" {
 		_, err := fmt.Fprintf(stdout, "failure_kind: %s\n", kind)
 		if err != nil {
@@ -1578,7 +1578,7 @@ func printTicketStartFailure(stdout io.Writer, record workspace.ExecutionRecord)
 	return printTicketStartDiagnostics(stdout, record)
 }
 
-func printTicketStartDiagnostics(stdout io.Writer, record workspace.ExecutionRecord) error {
+func printTicketStartDiagnostics(stdout io.Writer, record core.ExecutionRecord) error {
 	diagnostics := []struct {
 		name string
 		path string
@@ -1725,12 +1725,12 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 		return err
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
 
-	adapter := workspace.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
+	adapter := core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
 
 	release, err := acquireTicketReviewLock(ctx, projectContext, cmd.Bool("dry-run"))
 	if err != nil {
@@ -1738,7 +1738,7 @@ func runTicketReview(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	}
 	defer release()
 
-	result, err := workspace.RunTicketReviewCommand(ctx, workspace.TicketReviewCommandOptions{
+	result, err := core.RunTicketReviewCommand(ctx, core.TicketReviewCommandOptions{
 		Ticket:     ticket,
 		Config:     config,
 		Result:     cmd.String("result"),
@@ -1788,7 +1788,7 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
@@ -1799,10 +1799,10 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 	defer release()
 
-	result, err := workspace.RunTicketMergeCommand(ctx, workspace.TicketMergeCommandOptions{
+	result, err := core.RunTicketMergeCommand(ctx, core.TicketMergeCommandOptions{
 		Ticket:        ticket,
 		Tickets:       tickets,
-		Remote:        workspace.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
+		Remote:        core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
 		ExpectedBase:  cmd.String("base"),
 		MergeStrategy: cmd.String("strategy"),
 		DryRun:        cmd.Bool("dry-run"),
@@ -1819,21 +1819,21 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	return printTicketMergeResult(stdout, projectContext, result)
 }
 
-func ticketMergeCommandTickets(ctx context.Context, index workspace.TicketIndex, projectContext commandProjectContext, key string) (workspace.IndexedTicket, []workspace.IndexedTicket, error) {
+func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (core.IndexedTicket, []core.IndexedTicket, error) {
 	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
-		return workspace.IndexedTicket{}, nil, err
+		return core.IndexedTicket{}, nil, err
 	}
 
 	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, key)
 	if err != nil {
-		return workspace.IndexedTicket{}, nil, err
+		return core.IndexedTicket{}, nil, err
 	}
 
 	return ticket, tickets, nil
 }
 
-func refreshTicketIndexAfterReview(ctx context.Context, index workspace.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
+func refreshTicketIndexAfterReview(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
 	if dryRun {
 		return nil
 	}
@@ -1841,7 +1841,7 @@ func refreshTicketIndexAfterReview(ctx context.Context, index workspace.TicketIn
 	return refreshProjectTicketIndex(ctx, index, projectContext)
 }
 
-func refreshTicketIndexAfterMerge(ctx context.Context, index workspace.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
+func refreshTicketIndexAfterMerge(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
 	if dryRun {
 		return nil
 	}
@@ -1854,7 +1854,7 @@ func acquireTicketReviewLock(ctx context.Context, projectContext commandProjectC
 		return noopRelease, nil
 	}
 
-	lock, err := acquireAgentOperationLock(ctx, projectContext, workspace.AgentOperationReview)
+	lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationReview)
 	if err != nil {
 		return noopRelease, err
 	}
@@ -1867,7 +1867,7 @@ func acquireTicketMergeLock(ctx context.Context, projectContext commandProjectCo
 		return noopRelease, nil
 	}
 
-	lock, err := acquireAgentOperationLock(ctx, projectContext, workspace.AgentOperationMerge)
+	lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationMerge)
 	if err != nil {
 		return noopRelease, err
 	}
@@ -1878,7 +1878,7 @@ func acquireTicketMergeLock(ctx context.Context, projectContext commandProjectCo
 func printTicketReviewResult(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	result workspace.TicketReviewCommandResult,
+	result core.TicketReviewCommandResult,
 ) error {
 	lines := []string{
 		"ticket_review: result",
@@ -1892,7 +1892,7 @@ func printTicketReviewResult(
 		"provider: " + string(result.RemoteSnapshot.Reference.Provider),
 		fmt.Sprintf("remote_comments: %d", len(result.RemoteComments)),
 		fmt.Sprintf("dry_run: %t", result.DryRun),
-		"policy: " + workspace.TicketReviewCommandInspectionOnlyPolicySummary,
+		"policy: " + core.TicketReviewCommandInspectionOnlyPolicySummary,
 	}
 
 	for _, finding := range result.BlockingFindings {
@@ -1913,7 +1913,7 @@ func printTicketReviewResult(
 	return nil
 }
 
-func printTicketMergeResult(stdout io.Writer, projectContext commandProjectContext, result workspace.TicketMergeCommandResult) error {
+func printTicketMergeResult(stdout io.Writer, projectContext commandProjectContext, result core.TicketMergeCommandResult) error {
 	lines := []string{
 		"ticket_merge: result",
 		"project_id: " + projectContext.ProjectID,
@@ -1966,7 +1966,7 @@ func runTicketReviewModeStatus(ctx context.Context, cmd *cli.Command, stdout io.
 		return err
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
@@ -1998,12 +1998,12 @@ func runTicketReviewModeDiagnostics(ctx context.Context, cmd *cli.Command, stdou
 		return err
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
 
-	diagnostic := workspace.RunReviewProviderDiagnostics(ctx, workspace.ReviewProviderDiagnosticOptions{
+	diagnostic := core.RunReviewProviderDiagnostics(ctx, core.ReviewProviderDiagnosticOptions{
 		Config: config.Review.Providers,
 		URL:    cmd.String("url"),
 		DryRun: cmd.Bool("dry-run"),
@@ -2016,7 +2016,7 @@ func runTicketReviewModeDiagnostics(ctx context.Context, cmd *cli.Command, stdou
 func printTicketReviewModeDiagnostics(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	diagnostic workspace.ReviewProviderDiagnostic,
+	diagnostic core.ReviewProviderDiagnostic,
 	dryRun bool,
 ) error {
 	reference := diagnostic.Reference
@@ -2053,12 +2053,12 @@ func printTicketReviewModeDiagnostics(
 func printTicketReviewModeStatus(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	config workspace.ReviewWorkflowConfig,
+	config core.ReviewWorkflowConfig,
 	dryRun bool,
 ) error {
 	status := "ready"
 
-	err := workspace.ValidateReviewWorkflowConfig(config)
+	err := core.ValidateReviewWorkflowConfig(config)
 	if err != nil {
 		status = "invalid"
 	}
@@ -2069,11 +2069,11 @@ func printTicketReviewModeStatus(
 		"project_dir: " + projectContext.ProjectDir,
 		"mode: " + string(config.Mode),
 		"mode_status: " + status,
-		"description: " + workspace.ReviewWorkflowModeDescription(config.Mode),
+		"description: " + core.ReviewWorkflowModeDescription(config.Mode),
 		fmt.Sprintf("dry_run: %t", dryRun),
-		fmt.Sprintf("requires_remote_review: %t", config.Mode == workspace.ReviewWorkflowModeAgenticReview),
-		fmt.Sprintf("requires_human_review: %t", config.Mode == workspace.ReviewWorkflowModeHumanReview),
-		fmt.Sprintf("trusted_auto_merge: %t", config.Mode == workspace.ReviewWorkflowModeTrustedAutoMerge),
+		fmt.Sprintf("requires_remote_review: %t", config.Mode == core.ReviewWorkflowModeAgenticReview),
+		fmt.Sprintf("requires_human_review: %t", config.Mode == core.ReviewWorkflowModeHumanReview),
+		fmt.Sprintf("trusted_auto_merge: %t", config.Mode == core.ReviewWorkflowModeTrustedAutoMerge),
 		"clean_pass_remote_comment: false",
 		fmt.Sprintf("non_blocking_comment_limit: %d", config.NonBlockingCommentLimit),
 	}
@@ -2110,7 +2110,7 @@ func ticketReviewReferenceRequestFromCommand(cmd *cli.Command) (TicketReviewRefe
 		return TicketReviewReferenceRequest{}, fmt.Errorf("ticket review-ref provider is required when url is set")
 	}
 
-	request.Ref = &workspace.TicketReviewRef{
+	request.Ref = &core.TicketReviewRef{
 		Type:     cmd.String("type"),
 		Provider: cmd.String("provider"),
 		URL:      cmd.String("url"),
@@ -2154,7 +2154,7 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 	return printTicketShow(stdout, ticket)
 }
 
-func printTicketShow(stdout io.Writer, ticket workspace.IndexedTicket) error {
+func printTicketShow(stdout io.Writer, ticket core.IndexedTicket) error {
 	lines := []string{
 		"key: " + ticket.Key,
 		"title: " + ticket.Title,
@@ -2206,7 +2206,7 @@ func runTicketList(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	index, err := workspace.NewTicketIndex(ctx, env, deps.assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -2261,7 +2261,7 @@ func runTicketBoard(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	return printTicketBoard(stdout, board)
 }
 
-func printTicketBoard(stdout io.Writer, board workspace.Board) error {
+func printTicketBoard(stdout io.Writer, board core.Board) error {
 	lines := []string{
 		fmt.Sprintf("total: %d", board.TotalCount),
 		fmt.Sprintf("normal: %d", board.NormalCount),
@@ -2283,7 +2283,7 @@ func printTicketBoard(stdout io.Writer, board workspace.Board) error {
 	return nil
 }
 
-func printTicketBoardColumn(stdout io.Writer, column workspace.BoardColumn) error {
+func printTicketBoardColumn(stdout io.Writer, column core.BoardColumn) error {
 	_, err := fmt.Fprintf(stdout, "column: %s\t%s\t%d\n", column.ID, column.Title, column.Count)
 	if err != nil {
 		return fmt.Errorf("write ticket board column: %w", err)
@@ -2307,7 +2307,7 @@ func printTicketBoardColumn(stdout io.Writer, column workspace.BoardColumn) erro
 	return nil
 }
 
-func printTicketList(stdout io.Writer, tickets []workspace.IndexedTicket) error {
+func printTicketList(stdout io.Writer, tickets []core.IndexedTicket) error {
 	for _, ticket := range tickets {
 		_, err := fmt.Fprintf(
 			stdout,
@@ -2332,8 +2332,8 @@ func printTicketList(stdout io.Writer, tickets []workspace.IndexedTicket) error 
 func openTicketIndexForCommand(
 	ctx context.Context,
 	cmd *cli.Command,
-	env workspace.UserEnvironment,
-) (commandProjectContext, workspace.TicketIndex, error) {
+	env core.UserEnvironment,
+) (commandProjectContext, core.TicketIndex, error) {
 	deps, err := appDependenciesFromCommand(cmd)
 	if err != nil {
 		return commandProjectContext{}, nil, err
@@ -2348,7 +2348,7 @@ func openTicketIndexForCommand(
 		return commandProjectContext{}, nil, err
 	}
 
-	index, err := workspace.NewTicketIndex(ctx, env, deps.assetsFS)
+	index, err := core.NewTicketIndex(ctx, env, deps.assetsFS)
 	if err != nil {
 		return commandProjectContext{}, nil, err
 	}
@@ -2356,8 +2356,8 @@ func openTicketIndexForCommand(
 	return projectContext, index, nil
 }
 
-func refreshProjectTicketIndex(ctx context.Context, index workspace.TicketIndex, projectContext commandProjectContext) error {
-	result, err := workspace.NewTicketReconciler(index).ReconcileProjectTickets(ctx, workspace.ReconcileProjectTicketsOptions{
+func refreshProjectTicketIndex(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext) error {
+	result, err := core.NewTicketReconciler(index).ReconcileProjectTickets(ctx, core.ReconcileProjectTicketsOptions{
 		ProjectID:    projectContext.ProjectID,
 		ProjectDir:   projectContext.ProjectDir,
 		ReconciledAt: time.Now().UTC(),

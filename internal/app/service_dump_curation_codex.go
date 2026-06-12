@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 type codexDumpCurationProvider struct {
@@ -15,7 +15,7 @@ type codexDumpCurationProvider struct {
 	Command    string
 	Model      string
 	Timeout    time.Duration
-	Runner     workspace.AgentRunner
+	Runner     core.AgentRunner
 }
 
 func (p codexDumpCurationProvider) CurateDump(
@@ -27,32 +27,32 @@ func (p codexDumpCurationProvider) CurateDump(
 		return DumpCurationResult{}, err
 	}
 
-	run, err := workspace.RunCodexAgent(ctx, p.agentRunner(), runRequest)
+	run, err := core.RunCodexAgent(ctx, p.agentRunner(), runRequest)
 	if err != nil {
 		return DumpCurationResult{}, err
 	}
 
 	curation, err := decodeDumpCurationPayload(run.Output)
 	if err != nil {
-		workspace.RecordAgentRunResponseEvent(ctx, runRequest, run, "parse_error", err)
+		core.RecordAgentRunResponseEvent(ctx, runRequest, run, "parse_error", err)
 
 		return DumpCurationResult{}, err
 	}
 
-	workspace.RecordAgentRunResponseEvent(ctx, runRequest, run, "ready", nil)
+	core.RecordAgentRunResponseEvent(ctx, runRequest, run, "ready", nil)
 
 	return curation, nil
 }
 
-func (p codexDumpCurationProvider) agentRunRequest(request DumpCurationRequest) (workspace.AgentRunRequest, error) {
+func (p codexDumpCurationProvider) agentRunRequest(request DumpCurationRequest) (core.AgentRunRequest, error) {
 	prompt, err := codexDumpCurationPrompt(request)
 	if err != nil {
-		return workspace.AgentRunRequest{}, err
+		return core.AgentRunRequest{}, err
 	}
 
 	schema, err := json.MarshalIndent(dumpCurationJSONSchema(), "", "  ")
 	if err != nil {
-		return workspace.AgentRunRequest{}, fmt.Errorf("marshal Codex dump curation schema: %w", err)
+		return core.AgentRunRequest{}, fmt.Errorf("marshal Codex dump curation schema: %w", err)
 	}
 
 	projectDir := strings.TrimSpace(p.ProjectDir)
@@ -60,7 +60,7 @@ func (p codexDumpCurationProvider) agentRunRequest(request DumpCurationRequest) 
 		projectDir = request.ProjectDir
 	}
 
-	return workspace.AgentRunRequest{
+	return core.AgentRunRequest{
 		ID:                 dumpCurationRequestID(request),
 		Purpose:            "dump_curation",
 		ProjectDir:         projectDir,
@@ -74,12 +74,12 @@ func (p codexDumpCurationProvider) agentRunRequest(request DumpCurationRequest) 
 	}, nil
 }
 
-func (p codexDumpCurationProvider) agentRunner() workspace.AgentRunner {
+func (p codexDumpCurationProvider) agentRunner() core.AgentRunner {
 	if p.Runner != nil {
 		return p.Runner
 	}
 
-	return workspace.CodexAgentRunner{}
+	return core.CodexAgentRunner{}
 }
 
 func codexDumpCurationPrompt(request DumpCurationRequest) (string, error) {

@@ -6,7 +6,7 @@ import (
 	"io/fs"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 type daemonStopRequestResult struct {
@@ -16,11 +16,11 @@ type daemonStopRequestResult struct {
 
 func requestDaemonStopState(
 	ctx context.Context,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	assets fs.FS,
 	requestedAt time.Time,
 ) (daemonStopRequestResult, error) {
-	repository, err := workspace.NewDaemonStateRepository(ctx, env, assets)
+	repository, err := core.NewDaemonStateRepository(ctx, env, assets)
 	if err != nil {
 		return daemonStopRequestResult{}, err
 	}
@@ -31,7 +31,7 @@ func requestDaemonStopState(
 	}()
 
 	err = repository.RequestDaemonStop(ctx, requestedAt)
-	if errors.Is(err, workspace.ErrDaemonStateNotFound) {
+	if errors.Is(err, core.ErrDaemonStateNotFound) {
 		return daemonStopRequestResult{AlreadyStopped: true}, nil
 	}
 

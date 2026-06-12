@@ -7,7 +7,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 const (
@@ -230,11 +230,11 @@ func (m Model) renderProjectInput(width int) string {
 
 func (m Model) renderProjectArtifactLines() []string {
 	return []string{
-		fmt.Sprintf("Board tickets     %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, workspace.WorkspaceNodeTicket)),
-		fmt.Sprintf("Dumps             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, workspace.WorkspaceNodeDump)),
-		fmt.Sprintf("Quizzes           %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, workspace.WorkspaceNodeQuiz)),
-		fmt.Sprintf("Specs             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, workspace.WorkspaceNodeSpec)),
-		fmt.Sprintf("Plans             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, workspace.WorkspaceNodePlan)),
+		fmt.Sprintf("Board tickets     %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, core.WorkspaceNodeTicket)),
+		fmt.Sprintf("Dumps             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, core.WorkspaceNodeDump)),
+		fmt.Sprintf("Quizzes           %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, core.WorkspaceNodeQuiz)),
+		fmt.Sprintf("Specs             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, core.WorkspaceNodeSpec)),
+		fmt.Sprintf("Plans             %d", workspaceGraphProjectDocumentCount(m.workspaceGraph, core.WorkspaceNodePlan)),
 		fmt.Sprintf("Diagnostics       %d", len(m.workspaceGraph.Diagnostics)),
 	}
 }
@@ -453,11 +453,11 @@ func (m Model) renderCaseArtifactLines() []string {
 	}
 
 	return []string{
-		fmt.Sprintf("Dumps             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, workspace.WorkspaceNodeDump)),
-		fmt.Sprintf("Quizzes           %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, workspace.WorkspaceNodeQuiz)),
-		fmt.Sprintf("Specs             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, workspace.WorkspaceNodeSpec)),
-		fmt.Sprintf("Plans             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, workspace.WorkspaceNodePlan)),
-		fmt.Sprintf("Board tickets     %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, workspace.WorkspaceNodeTicket)),
+		fmt.Sprintf("Dumps             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, core.WorkspaceNodeDump)),
+		fmt.Sprintf("Quizzes           %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, core.WorkspaceNodeQuiz)),
+		fmt.Sprintf("Specs             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, core.WorkspaceNodeSpec)),
+		fmt.Sprintf("Plans             %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, core.WorkspaceNodePlan)),
+		fmt.Sprintf("Board tickets     %d", workspaceIndexCaseDocumentCount(m.workspaceIndex, metadata.Slug, core.WorkspaceNodeTicket)),
 		fmt.Sprintf("Unresolved refs   %d", workspaceGraphCaseReferenceCount(m.workspaceGraph, metadata.Slug)),
 		"",
 		"Source",
@@ -465,25 +465,25 @@ func (m Model) renderCaseArtifactLines() []string {
 	}
 }
 
-func (m Model) selectedCaseMetadata() (workspace.CaseMetadata, bool) {
+func (m Model) selectedCaseMetadata() (core.CaseMetadata, bool) {
 	if len(m.cases) == 0 || m.selectedCase < 0 || m.selectedCase >= len(m.cases) {
-		return workspace.CaseMetadata{}, false
+		return core.CaseMetadata{}, false
 	}
 
 	return m.cases[m.selectedCase], true
 }
 
-func (m Model) filteredCases() []workspace.CaseMetadata {
+func (m Model) filteredCases() []core.CaseMetadata {
 	filter := strings.ToLower(strings.TrimSpace(m.caseFilter))
 	if filter == "" {
-		return append([]workspace.CaseMetadata(nil), m.cases...)
+		return append([]core.CaseMetadata(nil), m.cases...)
 	}
 
 	if len(m.workspaceIndex.CasesBySlug) > 0 {
 		return m.caseMetadataFromSuggestions(m.workspaceIndex.SuggestCases(filter))
 	}
 
-	cases := []workspace.CaseMetadata{}
+	cases := []core.CaseMetadata{}
 	for _, metadata := range m.cases {
 		haystack := strings.ToLower(metadata.Name + " " + metadata.Description)
 		if strings.Contains(haystack, filter) {
@@ -495,17 +495,17 @@ func (m Model) filteredCases() []workspace.CaseMetadata {
 }
 
 func (m Model) caseMetadataFromSuggestions(
-	suggestions []workspace.WorkspaceCaseSuggestion,
-) []workspace.CaseMetadata {
-	bySlug := make(map[string]workspace.CaseMetadata, len(m.cases))
+	suggestions []core.WorkspaceCaseSuggestion,
+) []core.CaseMetadata {
+	bySlug := make(map[string]core.CaseMetadata, len(m.cases))
 	for _, metadata := range m.cases {
 		bySlug[metadata.Slug] = metadata
 	}
 
-	cases := make([]workspace.CaseMetadata, 0, len(suggestions))
+	cases := make([]core.CaseMetadata, 0, len(suggestions))
 	for _, suggestion := range suggestions {
 		metadata := bySlug[suggestion.Slug]
-		metadata.SchemaVersion = workspace.CaseMetadataSchemaVersion
+		metadata.SchemaVersion = core.CaseMetadataSchemaVersion
 		metadata.Slug = suggestion.Slug
 		metadata.Name = suggestion.Name
 		metadata.Description = suggestion.Description
@@ -752,20 +752,20 @@ func (m Model) renderMaximizedBoardWorkspace(width, height int) string {
 	}
 
 	columnsPerRow := boardMaximizedColumnsPerRow(width)
-	rows := boardMaximizedRows(len(workspace.NormalBoardColumns), columnsPerRow)
+	rows := boardMaximizedRows(len(core.NormalBoardColumns), columnsPerRow)
 	rowHeight := maxInt(height/rows, 1)
 	renderedRows := make([]string, 0, rows)
 
 	for row := range rows {
 		start := row * columnsPerRow
 
-		end := minInt(start+columnsPerRow, len(workspace.NormalBoardColumns))
+		end := minInt(start+columnsPerRow, len(core.NormalBoardColumns))
 		if start >= end {
 			break
 		}
 
 		renderedRows = append(renderedRows, m.renderMaximizedBoardRow(
-			workspace.NormalBoardColumns[start:end],
+			core.NormalBoardColumns[start:end],
 			width,
 			rowHeight,
 		))
@@ -786,7 +786,7 @@ func (m Model) renderMaximizedBoardRow(columns []string, width, height int) stri
 
 		tickets := m.ticketsForBoardColumn(column)
 		lines := m.renderMaximizedBoardColumnLines(tickets, maxInt(columnWidth-4, 1), height-2)
-		title := fmt.Sprintf("%s (%d)", workspace.BoardColumnTitle(column), len(tickets))
+		title := fmt.Sprintf("%s (%d)", core.BoardColumnTitle(column), len(tickets))
 
 		panels = append(panels, renderPanel(title, lines, columnWidth, height, m.activeBoardColumn() == column))
 	}
@@ -1009,19 +1009,19 @@ func compactTicketCell(value string, width int, center bool) string {
 
 func compactTicketStatusLabel(status string) string {
 	labels := map[string]string{
-		workspace.TicketStatusBacklog:         "BL",
-		workspace.TicketStatusReadyForDev:     "RFD",
-		workspace.TicketStatusInProgress:      "IP",
-		workspace.TicketStatusReadyForReview:  "RFR",
-		workspace.TicketStatusReadyForMerge:   "RFM",
-		workspace.TicketStatusDone:            "DONE",
-		workspace.TicketStatusOpenLegacy:      "OPN",
-		workspace.TicketStatusReadyLegacy:     "RDY",
-		workspace.TicketStatusReviewingLegacy: "REV",
-		workspace.TicketStatusBlockedLegacy:   "BLK",
-		workspace.TicketStatusSolvedLegacy:    "SLV",
-		workspace.TicketStatusMergedLegacy:    "DONE",
-		workspace.TicketStatusClosedLegacy:    "CLS",
+		core.TicketStatusBacklog:         "BL",
+		core.TicketStatusReadyForDev:     "RFD",
+		core.TicketStatusInProgress:      "IP",
+		core.TicketStatusReadyForReview:  "RFR",
+		core.TicketStatusReadyForMerge:   "RFM",
+		core.TicketStatusDone:            "DONE",
+		core.TicketStatusOpenLegacy:      "OPN",
+		core.TicketStatusReadyLegacy:     "RDY",
+		core.TicketStatusReviewingLegacy: "REV",
+		core.TicketStatusBlockedLegacy:   "BLK",
+		core.TicketStatusSolvedLegacy:    "SLV",
+		core.TicketStatusMergedLegacy:    "DONE",
+		core.TicketStatusClosedLegacy:    "CLS",
 	}
 
 	label, ok := labels[strings.TrimSpace(status)]
@@ -1051,17 +1051,17 @@ func compactBoardColumnLabel(column string) string {
 	switch strings.TrimSpace(column) {
 	case boardAttentionColumn:
 		return "ATT"
-	case workspace.TicketStatusBacklog:
+	case core.TicketStatusBacklog:
 		return "BL"
-	case workspace.TicketStatusReadyForDev:
+	case core.TicketStatusReadyForDev:
 		return "RFD"
-	case workspace.TicketStatusInProgress:
+	case core.TicketStatusInProgress:
 		return "IP"
-	case workspace.TicketStatusReadyForReview:
+	case core.TicketStatusReadyForReview:
 		return "RFR"
-	case workspace.TicketStatusReadyForMerge:
+	case core.TicketStatusReadyForMerge:
 		return "RFM"
-	case workspace.TicketStatusDone:
+	case core.TicketStatusDone:
 		return "Done"
 	default:
 		return truncatePlainLine(humanizeCompactToken(column), 5)
@@ -1098,7 +1098,7 @@ func (m Model) renderBoardFocusHeaderLines(limit int) []string {
 		fmt.Sprintf("%s (%d/%d)",
 			compactBoardColumnLabel(m.activeBoardColumn()),
 			m.activeBoardColumnPosition()+1,
-			len(workspace.NormalBoardColumns),
+			len(core.NormalBoardColumns),
 		),
 		"",
 	}, limit)

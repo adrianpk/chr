@@ -5,7 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 const (
@@ -17,14 +17,14 @@ const (
 
 // CaseMetadataExecutor persists use-case metadata edits.
 type CaseMetadataExecutor interface {
-	SaveCaseMetadata(metadata workspace.CaseMetadata) (CaseMetadataResult, error)
+	SaveCaseMetadata(metadata core.CaseMetadata) (CaseMetadataResult, error)
 }
 
 // CaseMetadataResult returns refreshed use-case metadata after a save.
 type CaseMetadataResult struct {
 	Message string
-	Case    workspace.CaseMetadata
-	Cases   []workspace.CaseMetadata
+	Case    core.CaseMetadata
+	Cases   []core.CaseMetadata
 }
 
 func (m Model) updateCasesKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -206,7 +206,7 @@ func (m *Model) selectNextCase() {
 	m.selectedCase = m.caseIndexForSlug(cases[position+1].Slug)
 }
 
-func (m *Model) selectedCasePosition(cases []workspace.CaseMetadata) int {
+func (m *Model) selectedCasePosition(cases []core.CaseMetadata) int {
 	selected, ok := m.selectedCaseMetadata()
 	if !ok {
 		return 0
@@ -245,7 +245,7 @@ func (m *Model) clampSelectedCase() {
 	}
 }
 
-func caseSliceContainsSlug(cases []workspace.CaseMetadata, slug string) bool {
+func caseSliceContainsSlug(cases []core.CaseMetadata, slug string) bool {
 	for _, current := range cases {
 		if current.Slug == slug {
 			return true
@@ -316,8 +316,8 @@ func (m *Model) applyCaseFieldEdit() {
 }
 
 func (m *Model) newCase() {
-	m.cases = append(m.cases, workspace.CaseMetadata{
-		SchemaVersion: workspace.CaseMetadataSchemaVersion,
+	m.cases = append(m.cases, core.CaseMetadata{
+		SchemaVersion: core.CaseMetadataSchemaVersion,
 		Name:          "",
 		Description:   "",
 		Context:       "",
@@ -372,7 +372,7 @@ func (m *Model) applyCaseMetadataResult(result CaseMetadataResult) {
 	}
 
 	if len(result.Cases) > 0 {
-		m.cases = append([]workspace.CaseMetadata(nil), result.Cases...)
+		m.cases = append([]core.CaseMetadata(nil), result.Cases...)
 	} else if result.Case.Slug != "" {
 		m.upsertCase(result.Case)
 	}
@@ -384,7 +384,7 @@ func (m *Model) applyCaseMetadataResult(result CaseMetadataResult) {
 	m.clampSelectedCase()
 }
 
-func (m *Model) upsertCase(metadata workspace.CaseMetadata) {
+func (m *Model) upsertCase(metadata core.CaseMetadata) {
 	for index, current := range m.cases {
 		if current.Slug == metadata.Slug {
 			m.cases[index] = metadata

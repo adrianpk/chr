@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // PlanActionID identifies a plan action awaiting TUI confirmation.
@@ -36,7 +36,7 @@ type PlanActionResult struct {
 	Message   string
 	Documents []DocumentView
 	Plans     []PlanView
-	Tickets   []workspace.IndexedTicket
+	Tickets   []core.IndexedTicket
 	Scope     QuizScope
 }
 

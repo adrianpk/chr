@@ -11,10 +11,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
-var notifyTelegramSender = workspace.NewTelegramSender(http.DefaultClient)
+var notifyTelegramSender = core.NewTelegramSender(http.DefaultClient)
 
 func newNotifyCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
@@ -151,7 +151,7 @@ func runNotifyStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) er
 	return printNotifyStatus(stdout, projectContext, config)
 }
 
-func loadNotifyTelegramPollFixture(path string) ([]workspace.RemoteCommandRecord, error) {
+func loadNotifyTelegramPollFixture(path string) ([]core.RemoteCommandRecord, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("open telegram update fixture: %w", err)
@@ -162,16 +162,16 @@ func loadNotifyTelegramPollFixture(path string) ([]workspace.RemoteCommandRecord
 		_ = file.Close()
 	}()
 
-	updates, err := workspace.DecodeTelegramUpdates(file)
+	updates, err := core.DecodeTelegramUpdates(file)
 	if err != nil {
 		return nil, err
 	}
 
 	now := time.Now().UTC()
 
-	records := make([]workspace.RemoteCommandRecord, 0, len(updates))
+	records := make([]core.RemoteCommandRecord, 0, len(updates))
 	for _, update := range updates {
-		record, err := workspace.RemoteCommandRecordFromTelegramUpdate(update, now)
+		record, err := core.RemoteCommandRecordFromTelegramUpdate(update, now)
 		if err != nil {
 			return nil, err
 		}
@@ -184,11 +184,11 @@ func loadNotifyTelegramPollFixture(path string) ([]workspace.RemoteCommandRecord
 
 func persistRemoteCommandRecords(
 	ctx context.Context,
-	env workspace.UserEnvironment,
-	records []workspace.RemoteCommandRecord,
+	env core.UserEnvironment,
+	records []core.RemoteCommandRecord,
 	assetsFS fs.FS,
 ) error {
-	repository, err := workspace.NewRemoteCommandRecordRepository(ctx, env, assetsFS)
+	repository, err := core.NewRemoteCommandRecordRepository(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -210,7 +210,7 @@ func persistRemoteCommandRecords(
 
 func printNotifyTelegramPollResult(
 	stdout io.Writer,
-	records []workspace.RemoteCommandRecord,
+	records []core.RemoteCommandRecord,
 	dryRun bool,
 ) error {
 	lines := []string{
@@ -245,7 +245,7 @@ func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writ
 		return err
 	}
 
-	err = workspace.ValidateNotificationConfig(config.Notifications)
+	err = core.ValidateNotificationConfig(config.Notifications)
 	if err != nil {
 		return err
 	}
@@ -265,15 +265,15 @@ func runNotifyTelegramTest(ctx context.Context, cmd *cli.Command, stdout io.Writ
 func loadNotifyProjectConfig(
 	ctx context.Context,
 	cmd *cli.Command,
-) (workspace.UserEnvironment, commandProjectContext, workspace.WorkspaceConfig, error) {
+) (core.UserEnvironment, commandProjectContext, core.WorkspaceConfig, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
-		return nil, commandProjectContext{}, workspace.WorkspaceConfig{}, err
+		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
 	}
 
 	deps, err := appDependenciesFromCommand(cmd)
 	if err != nil {
-		return nil, commandProjectContext{}, workspace.WorkspaceConfig{}, err
+		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
 	}
 
 	projectContext, err := newCommandProjectContextResolver(env, deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
@@ -282,22 +282,22 @@ func loadNotifyProjectConfig(
 		AllowCurrentDirectory: true,
 	})
 	if err != nil {
-		return nil, commandProjectContext{}, workspace.WorkspaceConfig{}, err
+		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
 	}
 
-	config, err := workspace.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
-		return nil, commandProjectContext{}, workspace.WorkspaceConfig{}, err
+		return nil, commandProjectContext{}, core.WorkspaceConfig{}, err
 	}
 
 	return env, projectContext, config, nil
 }
 
-func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, config workspace.WorkspaceConfig) error {
+func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, config core.WorkspaceConfig) error {
 	telegram := config.Notifications.Telegram
 	telegramStatus := "disabled"
 
-	err := workspace.ValidateNotificationConfig(config.Notifications)
+	err := core.ValidateNotificationConfig(config.Notifications)
 	if err != nil {
 		telegramStatus = "invalid"
 	} else if telegram.Enabled {
@@ -324,7 +324,7 @@ func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, c
 func printNotifyTelegramTestPlan(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	telegram workspace.TelegramNotificationConfig,
+	telegram core.TelegramNotificationConfig,
 ) error {
 	return printNotifyLines(stdout, []string{
 		"telegram_test: planned",
@@ -340,19 +340,19 @@ func printNotifyTelegramTestPlan(
 func runNotifyTelegramTestDispatch(
 	ctx context.Context,
 	stdout io.Writer,
-	env workspace.UserEnvironment,
+	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	telegram workspace.TelegramNotificationConfig,
+	telegram core.TelegramNotificationConfig,
 	assetsFS fs.FS,
 ) error {
 	now := time.Now().UTC()
 	event := notifyTelegramTestEvent(projectContext, now)
-	record := workspace.NotificationAuditRecord{
+	record := core.NotificationAuditRecord{
 		Event:   event,
 		Channel: "telegram",
 	}
 
-	repository, err := workspace.NewNotificationEventRepository(ctx, env, assetsFS)
+	repository, err := core.NewNotificationEventRepository(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -367,7 +367,7 @@ func runNotifyTelegramTestDispatch(
 		return err
 	}
 
-	message := workspace.RenderTelegramNotificationMessage(event)
+	message := core.RenderTelegramNotificationMessage(event)
 	message.ChatID = telegram.ChatID
 
 	token := os.Getenv(telegram.BotTokenEnv)
@@ -375,7 +375,7 @@ func runNotifyTelegramTestDispatch(
 	finishedAt := time.Now().UTC()
 
 	if sendErr != nil {
-		record.Event.Status = workspace.NotificationStatusFailed
+		record.Event.Status = core.NotificationStatusFailed
 		record.Event.FailureReason = sendErr.Error()
 		record.Event.UpdatedAt = finishedAt
 
@@ -387,7 +387,7 @@ func runNotifyTelegramTestDispatch(
 		return sendErr
 	}
 
-	record.Event.Status = workspace.NotificationStatusDelivered
+	record.Event.Status = core.NotificationStatusDelivered
 	record.Event.DeliveredAt = &finishedAt
 	record.Event.UpdatedAt = finishedAt
 
@@ -399,15 +399,15 @@ func runNotifyTelegramTestDispatch(
 	return printNotifyTelegramTestSent(stdout, projectContext, record, result)
 }
 
-func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time) workspace.NotificationEvent {
-	return workspace.NotificationEvent{
+func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time) core.NotificationEvent {
+	return core.NotificationEvent{
 		ID:        fmt.Sprintf("telegram-test-%d", now.UnixNano()),
 		ProjectID: projectContext.ProjectID,
-		Type:      workspace.NotificationEventManualTest,
-		Severity:  workspace.NotificationSeverityInfo,
-		Status:    workspace.NotificationStatusPending,
-		Source:    workspace.NotificationSourceManual,
-		Payload: workspace.NotificationPayload{
+		Type:      core.NotificationEventManualTest,
+		Severity:  core.NotificationSeverityInfo,
+		Status:    core.NotificationStatusPending,
+		Source:    core.NotificationSourceManual,
+		Payload: core.NotificationPayload{
 			Summary: "ChrysoCoord Telegram notification test for " + projectContext.ProjectID,
 			Detail:  "Project directory: " + projectContext.ProjectDir,
 		},
@@ -419,8 +419,8 @@ func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time
 func printNotifyTelegramTestSent(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	record workspace.NotificationAuditRecord,
-	result workspace.TelegramSendResult,
+	record core.NotificationAuditRecord,
+	result core.TelegramSendResult,
 ) error {
 	return printNotifyLines(stdout, []string{
 		"telegram_test: sent",

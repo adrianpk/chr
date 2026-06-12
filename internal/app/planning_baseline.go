@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 const projectWidePlanningMaxFiles = 80
@@ -43,7 +43,7 @@ type projectWidePlanningReadiness struct {
 	RequireProvisionalLabel bool     `json:"require_provisional_label"`
 }
 
-func (s service) projectWidePlanningSections() ([]workspace.QuizModelContextSection, error) {
+func (s service) projectWidePlanningSections() ([]core.QuizModelContextSection, error) {
 	baseline, err := s.projectWidePlanningBaseline()
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (s service) projectWidePlanningSections() ([]workspace.QuizModelContextSect
 		return nil, fmt.Errorf("marshal project-wide planning slots: %w", err)
 	}
 
-	return []workspace.QuizModelContextSection{
+	return []core.QuizModelContextSection{
 		{
 			Name:      "project_wide_planning_baseline",
 			Layer:     "project",
@@ -102,7 +102,7 @@ func (s service) projectWidePlanningSections() ([]workspace.QuizModelContextSect
 func (s service) projectWidePlanningBaseline() (projectWidePlanningBaseline, error) {
 	baseline := projectWidePlanningBaseline{
 		ProjectDir:         s.projectContext.ProjectDir,
-		WorkspaceDirExists: pathExists(filepath.Join(s.projectContext.ProjectDir, workspace.DirectoryName)),
+		WorkspaceDirExists: pathExists(filepath.Join(s.projectContext.ProjectDir, core.DirectoryName)),
 		MakefileExists:     pathExists(filepath.Join(s.projectContext.ProjectDir, "Makefile")),
 		ReadmeExists:       pathExists(filepath.Join(s.projectContext.ProjectDir, "README.md")),
 	}

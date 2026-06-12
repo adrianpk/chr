@@ -9,63 +9,63 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 // QuizListResult contains the current quiz list and a status message.
 type QuizListResult struct {
 	Message string
-	States  []workspace.QuizRuntimeState
+	States  []core.QuizRuntimeState
 	Views   []QuizView
 }
 
 // QuizOperationResult is the TUI-facing result for quiz mutations.
 type QuizOperationResult struct {
 	Message string
-	State   workspace.QuizRuntimeState
+	State   core.QuizRuntimeState
 }
 
 // QuizStartRequest selects the scope for a new quiz session.
 type QuizStartRequest struct {
-	Scope workspace.QuizScope
-	Mode  workspace.QuizMode
+	Scope core.QuizScope
+	Mode  core.QuizMode
 }
 
 // QuizResumeRequest selects the scope for a resumed quiz session.
 type QuizResumeRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // QuizAnswerRequest submits an answer for the active quiz question.
 type QuizAnswerRequest struct {
-	Scope  workspace.QuizScope
+	Scope  core.QuizScope
 	Answer string
 }
 
 // QuizSkipRequest skips the active quiz question for the selected scope.
 type QuizSkipRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // QuizCompleteRequest completes the quiz for the selected scope.
 type QuizCompleteRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // QuizDraftSpecRequest selects the quiz scope used to draft a spec.
 type QuizDraftSpecRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // QuizCancelRequest cancels the quiz for the selected scope.
 type QuizCancelRequest struct {
-	Scope workspace.QuizScope
+	Scope core.QuizScope
 }
 
 // QuizModeRequest changes the quiz interaction mode for the selected scope.
 type QuizModeRequest struct {
-	Scope workspace.QuizScope
-	Mode  workspace.QuizMode
+	Scope core.QuizScope
+	Mode  core.QuizMode
 }
 
 func (s service) ListQuizzes() (QuizListResult, error) {
@@ -87,7 +87,7 @@ func (s service) StartQuiz(request QuizStartRequest) (QuizOperationResult, error
 
 	mode := request.Mode
 	if mode == "" {
-		mode = workspace.QuizModeDeep
+		mode = core.QuizModeDeep
 	}
 
 	state, err := s.newQuizRuntimeState(scope, mode)
@@ -123,11 +123,11 @@ func (s service) AnswerQuiz(request QuizAnswerRequest) (QuizOperationResult, err
 		return QuizOperationResult{}, fmt.Errorf("quiz answer is required")
 	}
 
-	return s.recordQuizOutcome(s.quizScope(request.Scope), workspace.QuizEntryStatusAnswered, answer)
+	return s.recordQuizOutcome(s.quizScope(request.Scope), core.QuizEntryStatusAnswered, answer)
 }
 
 func (s service) SkipQuiz(request QuizSkipRequest) (QuizOperationResult, error) {
-	return s.recordQuizOutcome(s.quizScope(request.Scope), workspace.QuizEntryStatusSkipped, "")
+	return s.recordQuizOutcome(s.quizScope(request.Scope), core.QuizEntryStatusSkipped, "")
 }
 
 func (s service) CompleteQuiz(request QuizCompleteRequest) (QuizOperationResult, error) {
@@ -139,7 +139,7 @@ func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperat
 }
 
 func (s service) CancelQuiz(request QuizCancelRequest) (QuizOperationResult, error) {
-	return s.stopQuiz(s.quizScope(request.Scope), workspace.QuizRuntimeStatusCancelled, "Quiz cancelled.")
+	return s.stopQuiz(s.quizScope(request.Scope), core.QuizRuntimeStatusCancelled, "Quiz cancelled.")
 }
 
 func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, error) {
@@ -158,7 +158,7 @@ func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, e
 	state.Candidates = nil
 	state.UpdatedAt = s.utcNow()
 
-	if state.Status == workspace.QuizRuntimeStatusIdle && state.Mode == workspace.QuizModeFast {
+	if state.Status == core.QuizRuntimeStatusIdle && state.Mode == core.QuizModeFast {
 		state, err = s.generateNextQuizQuestion(state)
 		if err != nil {
 			return QuizOperationResult{}, err
@@ -174,8 +174,8 @@ func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, e
 }
 
 func (s service) recordQuizOutcome(
-	scope workspace.QuizScope,
-	status workspace.QuizEntryStatus,
+	scope core.QuizScope,
+	status core.QuizEntryStatus,
 	answer string,
 ) (QuizOperationResult, error) {
 	repository := s.quizRepository()
@@ -185,7 +185,7 @@ func (s service) recordQuizOutcome(
 		return QuizOperationResult{}, err
 	}
 
-	if state.Status != workspace.QuizRuntimeStatusActive || state.ActiveQuestion == nil {
+	if state.Status != core.QuizRuntimeStatusActive || state.ActiveQuestion == nil {
 		return QuizOperationResult{}, fmt.Errorf("quiz has no active question")
 	}
 
@@ -208,7 +208,7 @@ func (s service) recordQuizOutcome(
 			return QuizOperationResult{}, err
 		}
 	} else {
-		state.Status = workspace.QuizRuntimeStatusDone
+		state.Status = core.QuizRuntimeStatusDone
 	}
 
 	state.UpdatedAt = s.utcNow()
@@ -222,8 +222,8 @@ func (s service) recordQuizOutcome(
 }
 
 func (s service) stopQuiz(
-	scope workspace.QuizScope,
-	status workspace.QuizRuntimeStatus,
+	scope core.QuizScope,
+	status core.QuizRuntimeStatus,
 	message string,
 ) (QuizOperationResult, error) {
 	repository := s.quizRepository()
@@ -246,7 +246,7 @@ func (s service) stopQuiz(
 	return QuizOperationResult{Message: message, State: state}, nil
 }
 
-func (s service) completeQuiz(scope workspace.QuizScope) (QuizOperationResult, error) {
+func (s service) completeQuiz(scope core.QuizScope) (QuizOperationResult, error) {
 	repository := s.quizRepository()
 
 	state, err := repository.LoadRuntimeState(s.ctx, scope)
@@ -254,7 +254,7 @@ func (s service) completeQuiz(scope workspace.QuizScope) (QuizOperationResult, e
 		return QuizOperationResult{}, err
 	}
 
-	state.Status = workspace.QuizRuntimeStatusDone
+	state.Status = core.QuizRuntimeStatusDone
 	state.ActiveQuestion = nil
 	state.Candidates = nil
 	state.UpdatedAt = s.utcNow()
@@ -272,7 +272,7 @@ func (s service) completeQuiz(scope workspace.QuizScope) (QuizOperationResult, e
 	return QuizOperationResult{Message: "Quiz completed.", State: state}, nil
 }
 
-func (s service) generateQuizDraftSpec(scope workspace.QuizScope) (QuizOperationResult, error) {
+func (s service) generateQuizDraftSpec(scope core.QuizScope) (QuizOperationResult, error) {
 	repository := s.quizRepository()
 
 	state, err := repository.LoadRuntimeState(s.ctx, scope)
@@ -293,18 +293,18 @@ func (s service) generateQuizDraftSpec(scope workspace.QuizScope) (QuizOperation
 	return QuizOperationResult{Message: "Spec generated.", State: state}, nil
 }
 
-func (s service) writeQuizCuratedNotes(scope workspace.QuizScope) (workspace.QuizArtifactPaths, error) {
+func (s service) writeQuizCuratedNotes(scope core.QuizScope) (core.QuizArtifactPaths, error) {
 	repository := s.quizRepository()
 
 	entries, err := repository.LoadRawCaptureEntries(s.ctx, scope)
 	if err != nil {
-		return workspace.QuizArtifactPaths{}, err
+		return core.QuizArtifactPaths{}, err
 	}
 
-	return repository.WriteCuratedNotes(s.ctx, workspace.CurateQuizEntries(scope, entries, s.utcNow()))
+	return repository.WriteCuratedNotes(s.ctx, core.CurateQuizEntries(scope, entries, s.utcNow()))
 }
 
-func (s service) generateNextQuizQuestion(state workspace.QuizRuntimeState) (workspace.QuizRuntimeState, error) {
+func (s service) generateNextQuizQuestion(state core.QuizRuntimeState) (core.QuizRuntimeState, error) {
 	if len(state.Candidates) > 0 {
 		state = activateQuizCandidate(state, state.Candidates[0], s.utcNow())
 		state.Candidates = state.Candidates[1:]
@@ -314,68 +314,68 @@ func (s service) generateNextQuizQuestion(state workspace.QuizRuntimeState) (wor
 
 	request, err := s.newQuizModelRequest(state)
 	if err != nil {
-		return workspace.QuizRuntimeState{}, err
+		return core.QuizRuntimeState{}, err
 	}
 
-	response, err := workspace.InvokeQuizModel(s.ctx, s.quizModel, request)
+	response, err := core.InvokeQuizModel(s.ctx, s.quizModel, request)
 	if err != nil {
-		return workspace.QuizRuntimeState{}, err
+		return core.QuizRuntimeState{}, err
 	}
 
-	if response.Status == workspace.QuizModelResponseBlocked {
-		state.Status = workspace.QuizRuntimeStatusBlocked
+	if response.Status == core.QuizModelResponseBlocked {
+		state.Status = core.QuizRuntimeStatusBlocked
 		state.ActiveQuestion = nil
 		state.UpdatedAt = response.CreatedAt.UTC()
 
 		return state, nil
 	}
 
-	state.Status = workspace.QuizRuntimeStatusActive
+	state.Status = core.QuizRuntimeStatusActive
 	state = activateQuizQuestion(state, response.Question, response.CreatedAt.UTC())
 	state.Candidates = response.Candidates
 
 	return state, nil
 }
 
-func (s service) newQuizModelRequest(state workspace.QuizRuntimeState) (workspace.QuizModelRequest, error) {
-	scope := workspace.QuizScope{
+func (s service) newQuizModelRequest(state core.QuizRuntimeState) (core.QuizModelRequest, error) {
+	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, workspace.QuizModelActionNextQuestion)
+	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionNextQuestion)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	coreSections, err := workspace.QuizModelContextSectionsForPayload(payload)
+	coreSections, err := core.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	supplementalSections, err := s.appendQuizSupplementalContextSections(nil, scope)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	readiness := quizAcceptanceReadinessFromContext(state, append(coreSections, supplementalSections...))
 	payload.AcceptanceReadiness = &readiness
 
-	coreSections, err = workspace.QuizModelContextSectionsForPayload(payload)
+	coreSections, err = core.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	return workspace.QuizModelRequest{
+	return core.QuizModelRequest{
 		ID:              fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1),
-		Action:          workspace.QuizModelActionNextQuestion,
+		Action:          core.QuizModelActionNextQuestion,
 		Strategy:        quizModelStrategy(state.Mode),
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: append(coreSections, supplementalSections...),
-		OutputContract: workspace.QuizModelOutputContract{
+		OutputContract: core.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
@@ -383,21 +383,21 @@ func (s service) newQuizModelRequest(state workspace.QuizRuntimeState) (workspac
 }
 
 func (s service) writeQuizDraftSpec(
-	state workspace.QuizRuntimeState,
-	paths workspace.QuizArtifactPaths,
+	state core.QuizRuntimeState,
+	paths core.QuizArtifactPaths,
 ) error {
 	request, err := s.newQuizDraftSpecModelRequest(state, paths)
 	if err != nil {
 		return err
 	}
 
-	response, err := workspace.InvokeQuizModel(s.ctx, s.quizModel, request)
+	response, err := core.InvokeQuizModel(s.ctx, s.quizModel, request)
 	if err != nil {
 		return err
 	}
 
 	spec := response.DraftSpec
-	spec.Scope = workspace.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
+	spec.Scope = core.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 	spec.SourceQuizPath = paths.CuratedRelativePath
 	spec.SourceRawPath = paths.RawRelativePath
 	spec.SourceDumpPaths = quizDumpSourcePaths(request.ContextSections)
@@ -405,33 +405,33 @@ func (s service) writeQuizDraftSpec(
 	spec.SourceResponseID = response.ID
 	spec.CreatedAt = response.CreatedAt.UTC()
 
-	_, err = workspace.WriteQuizDraftSpec(s.ctx, s.projectContext.ProjectDir, spec)
+	_, err = core.WriteQuizDraftSpec(s.ctx, s.projectContext.ProjectDir, spec)
 
 	return err
 }
 
 func (s service) newQuizDraftSpecModelRequest(
-	state workspace.QuizRuntimeState,
-	paths workspace.QuizArtifactPaths,
-) (workspace.QuizModelRequest, error) {
-	scope := workspace.QuizScope{
+	state core.QuizRuntimeState,
+	paths core.QuizArtifactPaths,
+) (core.QuizModelRequest, error) {
+	scope := core.QuizScope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, workspace.QuizModelActionDraftSpec)
+	payload, err := s.newQuizModelPayload(scope, state, core.QuizModelActionDraftSpec)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
-	sections, err := workspace.QuizModelContextSectionsForPayload(payload)
+	sections, err := core.QuizModelContextSectionsForPayload(payload)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	sections, err = s.appendQuizSupplementalContextSections(sections, scope)
 	if err != nil {
-		return workspace.QuizModelRequest{}, err
+		return core.QuizModelRequest{}, err
 	}
 
 	sections = appendQuizFileContextSection(
@@ -442,16 +442,16 @@ func (s service) newQuizDraftSpecModelRequest(
 		paths.CuratedRelativePath,
 	)
 
-	return workspace.QuizModelRequest{
+	return core.QuizModelRequest{
 		ID:              fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID),
-		Action:          workspace.QuizModelActionDraftSpec,
+		Action:          core.QuizModelActionDraftSpec,
 		Strategy:        "draft_spec",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: workspace.QuizModelOutputContract{
+		OutputContract: core.QuizModelOutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
@@ -459,49 +459,49 @@ func (s service) newQuizDraftSpecModelRequest(
 }
 
 func (s service) newQuizModelPayload(
-	scope workspace.QuizScope,
-	state workspace.QuizRuntimeState,
-	action workspace.QuizModelAction,
-) (workspace.QuizModelPayload, error) {
+	scope core.QuizScope,
+	state core.QuizRuntimeState,
+	action core.QuizModelAction,
+) (core.QuizModelPayload, error) {
 	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, scope)
 	if err != nil {
-		return workspace.QuizModelPayload{}, err
+		return core.QuizModelPayload{}, err
 	}
 
-	return workspace.QuizModelPayload{
+	return core.QuizModelPayload{
 		Project:         s.quizModelProjectPayload(),
 		Quiz:            quizModelQuizPayload(state),
 		RecentEntries:   quizModelRecentEntryPayloads(entries, 5),
 		CurrentQuestion: quizModelCurrentQuestionPayload(state, entries),
-		OutputContract:  workspace.NewQuizModelOutputContract(action, state.Mode),
+		OutputContract:  core.NewQuizModelOutputContract(action, state.Mode),
 	}, nil
 }
 
-func (s service) newQuizRuntimeState(scope workspace.QuizScope, mode workspace.QuizMode) (workspace.QuizRuntimeState, error) {
+func (s service) newQuizRuntimeState(scope core.QuizScope, mode core.QuizMode) (core.QuizRuntimeState, error) {
 	paths, err := s.quizRepository().Paths(scope)
 	if err != nil {
-		return workspace.QuizRuntimeState{}, err
+		return core.QuizRuntimeState{}, err
 	}
 
 	now := s.utcNow()
 
-	return workspace.QuizRuntimeState{
+	return core.QuizRuntimeState{
 		ID:             "quiz-" + paths.ScopeID,
 		ProjectID:      scope.ProjectID,
 		CaseSlug:       scope.CaseSlug,
-		Status:         workspace.QuizRuntimeStatusIdle,
+		Status:         core.QuizRuntimeStatusIdle,
 		Mode:           mode,
-		QuestionBudget: workspace.DefaultQuizQuestionBudget,
+		QuestionBudget: core.DefaultQuizQuestionBudget,
 		RawPath:        paths.RawRelativePath,
 		CuratedPath:    paths.CuratedRelativePath,
 		UpdatedAt:      now,
 	}, nil
 }
 
-func (s service) quizModelProjectPayload() workspace.QuizModelProjectPayload {
-	payload := workspace.QuizModelProjectPayload{ID: s.projectContext.ProjectID}
+func (s service) quizModelProjectPayload() core.QuizModelProjectPayload {
+	payload := core.QuizModelProjectPayload{ID: s.projectContext.ProjectID}
 
-	metadata, err := workspace.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
+	metadata, err := core.NewProjectMetadataService(s.projectContext.ProjectDir).Load()
 	if err != nil {
 		return payload
 	}
@@ -513,11 +513,11 @@ func (s service) quizModelProjectPayload() workspace.QuizModelProjectPayload {
 }
 
 func (s service) appendQuizSupplementalContextSections(
-	sections []workspace.QuizModelContextSection,
-	scope workspace.QuizScope,
-) ([]workspace.QuizModelContextSection, error) {
+	sections []core.QuizModelContextSection,
+	scope core.QuizScope,
+) ([]core.QuizModelContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
-	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", workspace.ProjectMetadataPath(""))
+	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", core.ProjectMetadataPath(""))
 
 	if scope.CaseSlug != "" {
 		sections = appendQuizFileContextSection(
@@ -525,7 +525,7 @@ func (s service) appendQuizSupplementalContextSections(
 			s.projectContext.ProjectDir,
 			"use_case_document",
 			"use_case",
-			workspace.CaseMetadataPath("", scope.CaseSlug),
+			core.CaseMetadataPath("", scope.CaseSlug),
 		)
 	}
 
@@ -534,9 +534,9 @@ func (s service) appendQuizSupplementalContextSections(
 		return nil, err
 	}
 
-	for _, nodeID := range index.ByKind[workspace.WorkspaceNodeDump] {
+	for _, nodeID := range index.ByKind[core.WorkspaceNodeDump] {
 		node := index.NodesByID[nodeID]
-		if workspace.IsRawDumpNode(node) {
+		if core.IsRawDumpNode(node) {
 			continue
 		}
 
@@ -550,8 +550,8 @@ func (s service) appendQuizSupplementalContextSections(
 	return sections, nil
 }
 
-func quizModelQuizPayload(state workspace.QuizRuntimeState) workspace.QuizModelQuizPayload {
-	return workspace.QuizModelQuizPayload{
+func quizModelQuizPayload(state core.QuizRuntimeState) core.QuizModelQuizPayload {
+	return core.QuizModelQuizPayload{
 		ID:         state.ID,
 		UseCaseID:  state.CaseSlug,
 		EntryCount: state.AnswersRecorded + state.SkipsRecorded,
@@ -559,9 +559,9 @@ func quizModelQuizPayload(state workspace.QuizRuntimeState) workspace.QuizModelQ
 	}
 }
 
-func quizModelRecentEntryPayloads(entries []workspace.QuizEntry, limit int) []workspace.QuizModelEntryPayload {
+func quizModelRecentEntryPayloads(entries []core.QuizEntry, limit int) []core.QuizModelEntryPayload {
 	if limit <= 0 {
-		return []workspace.QuizModelEntryPayload{}
+		return []core.QuizModelEntryPayload{}
 	}
 
 	start := len(entries) - limit
@@ -569,9 +569,9 @@ func quizModelRecentEntryPayloads(entries []workspace.QuizEntry, limit int) []wo
 		start = 0
 	}
 
-	payloads := make([]workspace.QuizModelEntryPayload, 0, len(entries[start:]))
+	payloads := make([]core.QuizModelEntryPayload, 0, len(entries[start:]))
 	for _, entry := range entries[start:] {
-		payloads = append(payloads, workspace.QuizModelEntryPayload{
+		payloads = append(payloads, core.QuizModelEntryPayload{
 			Question: entry.Question,
 			Answer:   entry.Answer,
 			Status:   string(entry.Status),
@@ -583,15 +583,15 @@ func quizModelRecentEntryPayloads(entries []workspace.QuizEntry, limit int) []wo
 }
 
 func quizModelCurrentQuestionPayload(
-	state workspace.QuizRuntimeState,
-	entries []workspace.QuizEntry,
-) workspace.QuizModelCurrentQuestionPayload {
+	state core.QuizRuntimeState,
+	entries []core.QuizEntry,
+) core.QuizModelCurrentQuestionPayload {
 	if state.ActiveQuestion != nil {
 		return quizModelQuestionPayloadFromQuestion(*state.ActiveQuestion)
 	}
 
 	if len(entries) == 0 {
-		return workspace.QuizModelCurrentQuestionPayload{PromptIntent: map[string]any{}}
+		return core.QuizModelCurrentQuestionPayload{PromptIntent: map[string]any{}}
 	}
 
 	entry := entries[len(entries)-1]
@@ -606,14 +606,14 @@ func quizModelCurrentQuestionPayload(
 		}
 	}
 
-	return workspace.QuizModelCurrentQuestionPayload{
+	return core.QuizModelCurrentQuestionPayload{
 		Question:     entry.Question,
 		Tags:         quizModelEntryTags(entry),
 		PromptIntent: promptIntent,
 	}
 }
 
-func quizModelQuestionPayloadFromQuestion(question workspace.QuizQuestion) workspace.QuizModelCurrentQuestionPayload {
+func quizModelQuestionPayloadFromQuestion(question core.QuizQuestion) core.QuizModelCurrentQuestionPayload {
 	promptIntent := quizModelPromptIntentFromJSON(question.Rationale)
 	if len(promptIntent) == 0 {
 		promptIntent = map[string]any{
@@ -624,7 +624,7 @@ func quizModelQuestionPayloadFromQuestion(question workspace.QuizQuestion) works
 		}
 	}
 
-	return workspace.QuizModelCurrentQuestionPayload{
+	return core.QuizModelCurrentQuestionPayload{
 		Question:     question.Prompt,
 		Tags:         quizModelQuestionTags(question),
 		PromptIntent: promptIntent,
@@ -648,18 +648,18 @@ func quizModelPromptIntentFromJSON(value string) map[string]any {
 }
 
 func quizAcceptanceReadinessFromContext(
-	state workspace.QuizRuntimeState,
-	sections []workspace.QuizModelContextSection,
-) workspace.AcceptanceReadiness {
+	state core.QuizRuntimeState,
+	sections []core.QuizModelContextSection,
+) core.AcceptanceReadiness {
 	content := strings.ToLower(quizContextText(sections))
 	reasons := []string{"The quiz context was inspected for acceptance-test readiness."}
 
 	if quizContextLooksNonAcceptanceTestable(content) {
-		return workspace.AcceptanceReadiness{
-			Decision:         workspace.AcceptanceReadinessNotApplicable,
+		return core.AcceptanceReadiness{
+			Decision:         core.AcceptanceReadinessNotApplicable,
 			Confidence:       0.7,
 			Reasons:          append(reasons, "The context appears internal, architectural, documentation-only, or refactor-oriented."),
-			InferredElements: map[workspace.AcceptanceReadinessSlot][]string{},
+			InferredElements: map[core.AcceptanceReadinessSlot][]string{},
 		}
 	}
 
@@ -667,8 +667,8 @@ func quizAcceptanceReadinessFromContext(
 	missing := quizAcceptanceMissingSlots(inferred)
 
 	if len(missing) == 0 {
-		return workspace.AcceptanceReadiness{
-			Decision:           workspace.AcceptanceReadinessGenerate,
+		return core.AcceptanceReadiness{
+			Decision:           core.AcceptanceReadinessGenerate,
 			Confidence:         0.72,
 			Reasons:            append(reasons, "The context includes actor, trigger, initial state, outcome, and success-path signals."),
 			InferredElements:   inferred,
@@ -676,8 +676,8 @@ func quizAcceptanceReadinessFromContext(
 		}
 	}
 
-	return workspace.AcceptanceReadiness{
-		Decision:         workspace.AcceptanceReadinessNeedsMoreInfo,
+	return core.AcceptanceReadiness{
+		Decision:         core.AcceptanceReadinessNeedsMoreInfo,
 		Confidence:       0.64,
 		Reasons:          append(reasons, "The context has some acceptance-test signals, but key scenario elements are missing."),
 		Missing:          missing,
@@ -685,7 +685,7 @@ func quizAcceptanceReadinessFromContext(
 	}
 }
 
-func quizContextText(sections []workspace.QuizModelContextSection) string {
+func quizContextText(sections []core.QuizModelContextSection) string {
 	var output strings.Builder
 	for _, section := range sections {
 		output.WriteString(section.Content)
@@ -713,49 +713,49 @@ func quizContextLooksNonAcceptanceTestable(content string) bool {
 	return false
 }
 
-func quizAcceptanceInferredElements(content string) map[workspace.AcceptanceReadinessSlot][]string {
-	inferred := map[workspace.AcceptanceReadinessSlot][]string{}
+func quizAcceptanceInferredElements(content string) map[core.AcceptanceReadinessSlot][]string {
+	inferred := map[core.AcceptanceReadinessSlot][]string{}
 
 	if quizContainsAny(content, "user", "operator", "cli", "api client", "worker", "scheduler", "reviewer") {
-		inferred[workspace.AcceptanceReadinessSlotActor] = []string{"An actor is referenced by the source context."}
+		inferred[core.AcceptanceReadinessSlotActor] = []string{"An actor is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "command", "request", "event", "runs", "starts", "trigger", "action") {
-		inferred[workspace.AcceptanceReadinessSlotTrigger] = []string{"A trigger is referenced by the source context."}
+		inferred[core.AcceptanceReadinessSlotTrigger] = []string{"A trigger is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "given", "existing", "configured", "before", "state", "project", "ticket", "file") {
-		inferred[workspace.AcceptanceReadinessSlotInitialState] = []string{"An initial state is referenced by the source context."}
+		inferred[core.AcceptanceReadinessSlotInitialState] = []string{"An initial state is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "output", "report", "status", "response", "error", "file", "written", "created") {
-		inferred[workspace.AcceptanceReadinessSlotObservableOutcome] = []string{"An observable outcome is referenced by the source context."}
+		inferred[core.AcceptanceReadinessSlotObservableOutcome] = []string{"An observable outcome is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "success", "succeeds", "passes", "accepted", "valid", "expected") {
-		inferred[workspace.AcceptanceReadinessSlotSuccessPath] = []string{"A success path is referenced by the source context."}
+		inferred[core.AcceptanceReadinessSlotSuccessPath] = []string{"A success path is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "failure", "fails", "invalid", "reject", "error", "missing") {
-		inferred[workspace.AcceptanceReadinessSlotFailurePath] = []string{"A failure path is referenced by the source context."}
+		inferred[core.AcceptanceReadinessSlotFailurePath] = []string{"A failure path is referenced by the source context."}
 	}
 
 	if quizContainsAny(content, "out of scope", "non-goal", "boundary", "must not", "do not") {
-		inferred[workspace.AcceptanceReadinessSlotBoundaries] = []string{"A boundary is referenced by the source context."}
+		inferred[core.AcceptanceReadinessSlotBoundaries] = []string{"A boundary is referenced by the source context."}
 	}
 
 	return inferred
 }
 
-func quizAcceptanceMissingSlots(inferred map[workspace.AcceptanceReadinessSlot][]string) []workspace.AcceptanceReadinessSlot {
-	required := []workspace.AcceptanceReadinessSlot{
-		workspace.AcceptanceReadinessSlotActor,
-		workspace.AcceptanceReadinessSlotTrigger,
-		workspace.AcceptanceReadinessSlotInitialState,
-		workspace.AcceptanceReadinessSlotObservableOutcome,
-		workspace.AcceptanceReadinessSlotSuccessPath,
+func quizAcceptanceMissingSlots(inferred map[core.AcceptanceReadinessSlot][]string) []core.AcceptanceReadinessSlot {
+	required := []core.AcceptanceReadinessSlot{
+		core.AcceptanceReadinessSlotActor,
+		core.AcceptanceReadinessSlotTrigger,
+		core.AcceptanceReadinessSlotInitialState,
+		core.AcceptanceReadinessSlotObservableOutcome,
+		core.AcceptanceReadinessSlotSuccessPath,
 	}
-	missing := []workspace.AcceptanceReadinessSlot{}
+	missing := []core.AcceptanceReadinessSlot{}
 
 	for _, slot := range required {
 		if len(inferred[slot]) == 0 {
@@ -776,7 +776,7 @@ func quizContainsAny(content string, values ...string) bool {
 	return false
 }
 
-func quizModelQuestionTags(question workspace.QuizQuestion) []string {
+func quizModelQuestionTags(question core.QuizQuestion) []string {
 	if strings.TrimSpace(question.Topic) == "" {
 		return []string{}
 	}
@@ -784,7 +784,7 @@ func quizModelQuestionTags(question workspace.QuizQuestion) []string {
 	return []string{question.Topic}
 }
 
-func quizModelEntryTags(entry workspace.QuizEntry) []string {
+func quizModelEntryTags(entry core.QuizEntry) []string {
 	if len(entry.Tags) > 0 {
 		return entry.Tags
 	}
@@ -796,27 +796,27 @@ func quizModelEntryTags(entry workspace.QuizEntry) []string {
 	return []string{entry.Topic}
 }
 
-func quizModelStrategy(mode workspace.QuizMode) string {
-	if mode == workspace.QuizModeFast {
-		return workspace.QuizModelFastStrategy
+func quizModelStrategy(mode core.QuizMode) string {
+	if mode == core.QuizModeFast {
+		return core.QuizModelFastStrategy
 	}
 
-	return workspace.QuizModelDeepStrategy
+	return core.QuizModelDeepStrategy
 }
 
-func (s service) listQuizRuntimeStates() ([]workspace.QuizRuntimeState, error) {
-	root := workspace.UserPath(s.projectContext.ProjectDir, filepath.FromSlash(workspace.QuizRuntimeDirectory))
+func (s service) listQuizRuntimeStates() ([]core.QuizRuntimeState, error) {
+	root := core.UserPath(s.projectContext.ProjectDir, filepath.FromSlash(core.QuizRuntimeDirectory))
 
 	entries, err := os.ReadDir(root)
 	if errors.Is(err, os.ErrNotExist) {
-		return []workspace.QuizRuntimeState{}, nil
+		return []core.QuizRuntimeState{}, nil
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("read quiz runtime directory: %w", err)
 	}
 
-	states := []workspace.QuizRuntimeState{}
+	states := []core.QuizRuntimeState{}
 	repository := s.quizRepository()
 
 	for _, entry := range entries {
@@ -824,7 +824,7 @@ func (s service) listQuizRuntimeStates() ([]workspace.QuizRuntimeState, error) {
 			continue
 		}
 
-		scope := workspace.QuizScope{
+		scope := core.QuizScope{
 			ProjectID: s.projectContext.ProjectID,
 			CaseSlug:  strings.TrimSuffix(entry.Name(), ".json"),
 		}
@@ -843,11 +843,11 @@ func (s service) listQuizRuntimeStates() ([]workspace.QuizRuntimeState, error) {
 	return states, nil
 }
 
-func (s service) quizRepository() workspace.QuizArtifactRepository {
-	return workspace.NewQuizArtifactRepository(s.projectContext.ProjectDir)
+func (s service) quizRepository() core.QuizArtifactRepository {
+	return core.NewQuizArtifactRepository(s.projectContext.ProjectDir)
 }
 
-func (s service) quizScope(scope workspace.QuizScope) workspace.QuizScope {
+func (s service) quizScope(scope core.QuizScope) core.QuizScope {
 	scope.ProjectID = s.projectContext.ProjectID
 
 	return scope
@@ -862,12 +862,12 @@ func (s service) utcNow() time.Time {
 }
 
 func appendQuizFileContextSection(
-	sections []workspace.QuizModelContextSection,
+	sections []core.QuizModelContextSection,
 	projectDir string,
 	name string,
 	layer string,
 	path string,
-) []workspace.QuizModelContextSection {
+) []core.QuizModelContextSection {
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(projectDir, path)
 	}
@@ -877,7 +877,7 @@ func appendQuizFileContextSection(
 		return sections
 	}
 
-	return append(sections, workspace.QuizModelContextSection{
+	return append(sections, core.QuizModelContextSection{
 		Name:      name,
 		Layer:     layer,
 		Authority: filepath.ToSlash(path),
@@ -886,10 +886,10 @@ func appendQuizFileContextSection(
 }
 
 func appendQuizNodeContextSection(
-	sections []workspace.QuizModelContextSection,
+	sections []core.QuizModelContextSection,
 	projectDir string,
-	node workspace.WorkspaceNode,
-) []workspace.QuizModelContextSection {
+	node core.WorkspaceNode,
+) []core.QuizModelContextSection {
 	content, err := os.ReadFile(filepath.Join(projectDir, filepath.FromSlash(node.RelativePath)))
 	if err != nil {
 		return sections
@@ -900,7 +900,7 @@ func appendQuizNodeContextSection(
 		name = "use_case_dump"
 	}
 
-	return append(sections, workspace.QuizModelContextSection{
+	return append(sections, core.QuizModelContextSection{
 		Name:      name,
 		Layer:     "dump",
 		Authority: node.RelativePath,
@@ -908,7 +908,7 @@ func appendQuizNodeContextSection(
 	})
 }
 
-func quizDumpSourcePaths(sections []workspace.QuizModelContextSection) []string {
+func quizDumpSourcePaths(sections []core.QuizModelContextSection) []string {
 	paths := []string{}
 
 	for _, section := range sections {
@@ -921,14 +921,14 @@ func quizDumpSourcePaths(sections []workspace.QuizModelContextSection) []string 
 }
 
 func quizEntryFromState(
-	state workspace.QuizRuntimeState,
-	status workspace.QuizEntryStatus,
+	state core.QuizRuntimeState,
+	status core.QuizEntryStatus,
 	answer string,
 	now time.Time,
-) workspace.QuizEntry {
+) core.QuizEntry {
 	question := *state.ActiveQuestion
 
-	return workspace.QuizEntry{
+	return core.QuizEntry{
 		ID:           fmt.Sprintf("entry-%03d", state.QuestionsAsked),
 		QuestionID:   question.ID,
 		Question:     question.Prompt,
@@ -945,30 +945,30 @@ func quizEntryFromState(
 	}
 }
 
-func updateQuizStateAfterEntry(state workspace.QuizRuntimeState, entry workspace.QuizEntry) workspace.QuizRuntimeState {
-	if entry.Status == workspace.QuizEntryStatusAnswered {
+func updateQuizStateAfterEntry(state core.QuizRuntimeState, entry core.QuizEntry) core.QuizRuntimeState {
+	if entry.Status == core.QuizEntryStatusAnswered {
 		state.AnswersRecorded++
 	}
 
-	if entry.Status == workspace.QuizEntryStatusSkipped {
+	if entry.Status == core.QuizEntryStatusSkipped {
 		state.SkipsRecorded++
 	}
 
-	state.Status = workspace.QuizRuntimeStatusIdle
+	state.Status = core.QuizRuntimeStatusIdle
 	state.ActiveQuestion = nil
 	state.ActiveTopic = ""
 
-	if entry.Status == workspace.QuizEntryStatusSkipped {
+	if entry.Status == core.QuizEntryStatusSkipped {
 		state.Trail = nil
-		state.BranchReturnReason = workspace.QuizBranchReturnReasonSkipped
-	} else if entry.Depth >= workspace.MaxQuizFollowUpDepth {
+		state.BranchReturnReason = core.QuizBranchReturnReasonSkipped
+	} else if entry.Depth >= core.MaxQuizFollowUpDepth {
 		state.Trail = nil
-		state.BranchReturnReason = workspace.QuizBranchReturnReasonMaxDepth
+		state.BranchReturnReason = core.QuizBranchReturnReasonMaxDepth
 	} else {
 		state.BranchReturnReason = ""
 	}
 
-	if state.Mode == workspace.QuizModeDeep {
+	if state.Mode == core.QuizModeDeep {
 		state.Candidates = nil
 	}
 
@@ -976,11 +976,11 @@ func updateQuizStateAfterEntry(state workspace.QuizRuntimeState, entry workspace
 }
 
 func activateQuizQuestion(
-	state workspace.QuizRuntimeState,
-	question workspace.QuizQuestion,
+	state core.QuizRuntimeState,
+	question core.QuizQuestion,
 	now time.Time,
-) workspace.QuizRuntimeState {
-	state.Status = workspace.QuizRuntimeStatusActive
+) core.QuizRuntimeState {
+	state.Status = core.QuizRuntimeStatusActive
 	state.ActiveQuestion = &question
 	state.ActiveTopic = question.Topic
 	state.Trail = quizTrailForQuestion(state.Trail, question)
@@ -992,11 +992,11 @@ func activateQuizQuestion(
 }
 
 func activateQuizCandidate(
-	state workspace.QuizRuntimeState,
-	candidate workspace.QuizCandidate,
+	state core.QuizRuntimeState,
+	candidate core.QuizCandidate,
 	now time.Time,
-) workspace.QuizRuntimeState {
-	question := workspace.QuizQuestion{
+) core.QuizRuntimeState {
+	question := core.QuizQuestion{
 		ID:        candidate.ID,
 		Prompt:    candidate.Prompt,
 		Required:  true,
@@ -1023,8 +1023,8 @@ func activateQuizCandidate(
 	return state
 }
 
-func quizTrailForQuestion(trail []workspace.QuizTrailNode, question workspace.QuizQuestion) []workspace.QuizTrailNode {
-	node := workspace.QuizTrailNode{
+func quizTrailForQuestion(trail []core.QuizTrailNode, question core.QuizQuestion) []core.QuizTrailNode {
+	node := core.QuizTrailNode{
 		QuestionID: question.ID,
 		Prompt:     question.Prompt,
 		Topic:      question.Topic,
@@ -1032,7 +1032,7 @@ func quizTrailForQuestion(trail []workspace.QuizTrailNode, question workspace.Qu
 	}
 
 	if question.Depth <= 1 {
-		return []workspace.QuizTrailNode{node}
+		return []core.QuizTrailNode{node}
 	}
 
 	parentIndex := -1
@@ -1046,10 +1046,10 @@ func quizTrailForQuestion(trail []workspace.QuizTrailNode, question workspace.Qu
 	}
 
 	if parentIndex < 0 {
-		return []workspace.QuizTrailNode{node}
+		return []core.QuizTrailNode{node}
 	}
 
-	next := append([]workspace.QuizTrailNode(nil), trail[:parentIndex+1]...)
+	next := append([]core.QuizTrailNode(nil), trail[:parentIndex+1]...)
 	next = append(next, node)
 
 	return next

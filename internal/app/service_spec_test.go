@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/workspace"
+	"forge.adrianpk.com/chc/internal/core"
 )
 
 func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
@@ -18,7 +18,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizDraftSpecResponse("response-spec", clock()),
 		},
 	}
@@ -27,7 +27,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	operations.now = clock
 
 	result, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
@@ -36,7 +36,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	assertGeneratedSpecResult(t, projectDir, result)
 
 	request := model.requests[len(model.requests)-1]
-	if request.Action != workspace.QuizModelActionGenerateSpec {
+	if request.Action != core.QuizModelActionGenerateSpec {
 		t.Fatalf("Action = %q, want spec generation", request.Action)
 	}
 
@@ -61,9 +61,9 @@ func TestServiceGenerateSpecDoesNotWriteGeneratedFeature(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
-			serviceQuizDraftSpecResponseWithFeature("response-spec", clock(), workspace.AcceptanceFeatureGeneration{
-				Status: workspace.AcceptanceFeatureStatusGenerated,
+		responses: []core.QuizModelResponse{
+			serviceQuizDraftSpecResponseWithFeature("response-spec", clock(), core.AcceptanceFeatureGeneration{
+				Status: core.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
 Feature: Blog publishing
 
@@ -80,7 +80,7 @@ Feature: Blog publishing
 	operations.now = clock
 
 	result, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
@@ -191,7 +191,7 @@ func assertGeneratedSpecResult(t *testing.T, projectDir string, result SpecOpera
 	}
 }
 
-func assertSpecGenerationContext(t *testing.T, request workspace.QuizModelRequest) {
+func assertSpecGenerationContext(t *testing.T, request core.QuizModelRequest) {
 	t.Helper()
 
 	for _, section := range request.ContextSections {
@@ -247,7 +247,7 @@ case: "blog"
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []workspace.QuizModelResponse{
+		responses: []core.QuizModelResponse{
 			serviceQuizDraftSpecResponse("response-spec", clock()),
 		},
 	}
@@ -256,7 +256,7 @@ case: "blog"
 	operations.now = clock
 
 	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
@@ -284,7 +284,7 @@ func TestServiceGenerateSpecUsesLongGenerationDeadline(t *testing.T) {
 	operations.quizModel = model
 
 	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: workspace.QuizScope{CaseSlug: "blog"},
+		Scope: core.QuizScope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
@@ -340,8 +340,8 @@ type deadlineCapturingSpecModel struct {
 
 func (m *deadlineCapturingSpecModel) InvokeQuizModel(
 	ctx context.Context,
-	request workspace.QuizModelRequest,
-) (workspace.QuizModelResponse, error) {
+	request core.QuizModelRequest,
+) (core.QuizModelResponse, error) {
 	deadline, ok := ctx.Deadline()
 	m.hasDeadline = ok
 	m.remaining = time.Until(deadline)
