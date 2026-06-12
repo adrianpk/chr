@@ -8,11 +8,11 @@ application.
 ## Boundary
 
 The package embeds command assets, wires process IO, and delegates application
-execution to `internal/chcapp`. It should not contain domain, persistence, TUI,
+execution to `internal/app`. It should not contain domain, persistence, TUI,
 or workflow logic.
 
 ## Behavior
 
 `main` passes command arguments, standard streams, and embedded assets into
-`chcapp.Run`. Errors are written to standard error and terminate the process
+`app.Run`. Errors are written to standard error and terminate the process
 with a non-zero status.

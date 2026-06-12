@@ -1,0 +1,172 @@
+package workspace
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestInitGateWoodpeckerDryRunDoesNotWriteConfig(t *testing.T) {
+	projectDir := t.TempDir()
+
+	result, err := InitGateWoodpecker(GateWoodpeckerInitRequest{
+		ProjectDir: projectDir,
+		DryRun:     true,
+	})
+	if err != nil {
+		t.Fatalf("InitGateWoodpecker returned error: %v", err)
+	}
+
+	if result.Action != "dry-run" {
+		t.Fatalf("Action = %q, want dry-run", result.Action)
+	}
+
+	if result.Wrote {
+		t.Fatal("Wrote = true, want false")
+	}
+
+	if result.FeedbackMechanism != GateWoodpeckerFeedbackMechanism {
+		t.Fatalf("FeedbackMechanism = %q, want %q", result.FeedbackMechanism, GateWoodpeckerFeedbackMechanism)
+	}
+
+	assertGateWoodpeckerConfigMissing(t, projectDir)
+	assertGateWoodpeckerSnippet(t, result.Snippet)
+}
+
+func TestInitGateWoodpeckerCreatesMissingConfig(t *testing.T) {
+	projectDir := t.TempDir()
+
+	result, err := InitGateWoodpecker(GateWoodpeckerInitRequest{
+		ProjectDir: projectDir,
+	})
+	if err != nil {
+		t.Fatalf("InitGateWoodpecker returned error: %v", err)
+	}
+
+	if result.Action != "created" {
+		t.Fatalf("Action = %q, want created", result.Action)
+	}
+
+	if !result.Wrote {
+		t.Fatal("Wrote = false, want true")
+	}
+
+	content := readGateWoodpeckerConfig(t, projectDir)
+	assertGateWoodpeckerSnippet(t, content)
+}
+
+func TestInitGateWoodpeckerDoesNotModifyExistingConfigWithoutWrite(t *testing.T) {
+	projectDir := t.TempDir()
+	existing := "steps:\n  existing:\n    image: golang:1.25\n"
+	writeGateWoodpeckerConfig(t, projectDir, existing)
+
+	result, err := InitGateWoodpecker(GateWoodpeckerInitRequest{
+		ProjectDir: projectDir,
+	})
+	if err != nil {
+		t.Fatalf("InitGateWoodpecker returned error: %v", err)
+	}
+
+	if result.Action != "exists" {
+		t.Fatalf("Action = %q, want exists", result.Action)
+	}
+
+	if result.Wrote {
+		t.Fatal("Wrote = true, want false")
+	}
+
+	content := readGateWoodpeckerConfig(t, projectDir)
+	if content != existing {
+		t.Fatalf("existing config changed:\n%s", content)
+	}
+}
+
+func TestInitGateWoodpeckerRefusesUnmarkedExistingConfigWithWrite(t *testing.T) {
+	projectDir := t.TempDir()
+	existing := "steps:\n  existing:\n    image: golang:1.25\n"
+	writeGateWoodpeckerConfig(t, projectDir, existing)
+
+	_, err := InitGateWoodpecker(GateWoodpeckerInitRequest{
+		ProjectDir: projectDir,
+		Write:      true,
+	})
+	if err == nil {
+		t.Fatal("InitGateWoodpecker returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "without ChrysoCoord marker") {
+		t.Fatalf("error = %q, want marker refusal", err.Error())
+	}
+
+	content := readGateWoodpeckerConfig(t, projectDir)
+	if content != existing {
+		t.Fatalf("existing config changed:\n%s", content)
+	}
+}
+
+func TestInitGateWoodpeckerUpdatesMarkedExistingConfigWithWrite(t *testing.T) {
+	projectDir := t.TempDir()
+	writeGateWoodpeckerConfig(t, projectDir, gateWoodpeckerMarker+"\nold: true\n")
+
+	result, err := InitGateWoodpecker(GateWoodpeckerInitRequest{
+		ProjectDir: projectDir,
+		Write:      true,
+	})
+	if err != nil {
+		t.Fatalf("InitGateWoodpecker returned error: %v", err)
+	}
+
+	if result.Action != "updated" {
+		t.Fatalf("Action = %q, want updated", result.Action)
+	}
+
+	content := readGateWoodpeckerConfig(t, projectDir)
+	assertGateWoodpeckerSnippet(t, content)
+}
+
+func assertGateWoodpeckerConfigMissing(t *testing.T, projectDir string) {
+	t.Helper()
+
+	_, err := os.Stat(filepath.Join(projectDir, gateWoodpeckerConfigFile))
+	if !os.IsNotExist(err) {
+		t.Fatalf("Woodpecker config stat error = %v, want not exist", err)
+	}
+}
+
+func assertGateWoodpeckerSnippet(t *testing.T, content string) {
+	t.Helper()
+
+	for _, expected := range []string{
+		gateWoodpeckerMarker,
+		"event: pull_request",
+		"chc-dev-main-gate",
+		"chc gate dev-main",
+	} {
+		if strings.Contains(content, expected) {
+			continue
+		}
+
+		t.Fatalf("snippet does not contain %q:\n%s", expected, content)
+	}
+}
+
+func writeGateWoodpeckerConfig(t *testing.T, projectDir, content string) {
+	t.Helper()
+
+	err := os.WriteFile(filepath.Join(projectDir, gateWoodpeckerConfigFile), []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("write Woodpecker config: %v", err)
+	}
+}
+
+func readGateWoodpeckerConfig(t *testing.T, projectDir string) string {
+	t.Helper()
+
+	content, err := os.ReadFile(filepath.Join(projectDir, gateWoodpeckerConfigFile))
+	if err != nil {
+		t.Fatalf("read Woodpecker config: %v", err)
+	}
+
+	return string(content)
+}

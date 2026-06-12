@@ -11,7 +11,7 @@ boundary before they rely on indexed ticket state.
 
 ## Go Contract
 
-The core contract lives in `internal/chc`:
+The core contract lives in `internal/workspace`:
 
 ```go
 type TicketReconciler interface {

@@ -1,0 +1,393 @@
+package workspace
+
+import (
+	"encoding/json"
+	"fmt"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+)
+
+// ParseQuizRawCaptureEntries parses the corresponding package data.
+func ParseQuizRawCaptureEntries(content string) ([]QuizEntry, error) {
+	blocks := strings.Split(content, "\n## Turn\n\n")
+	entries := []QuizEntry{}
+
+	for index, block := range blocks[1:] {
+		entry, err := parseQuizRawTurn(index+1, block)
+		if err != nil {
+			return nil, err
+		}
+
+		entries = append(entries, entry)
+	}
+
+	return entries, nil
+}
+
+// CurateQuizEntries executes the corresponding package operation.
+func CurateQuizEntries(scope QuizScope, entries []QuizEntry, now time.Time) QuizCuratedNotes {
+	answered := quizAnsweredEntriesByTopic(entries)
+
+	return QuizCuratedNotes{
+		Scope:                      scope,
+		Status:                     "curated",
+		Decisions:                  quizDecisionNotes(answered),
+		AcceptanceReadiness:        quizAcceptanceReadinessNotes(entries),
+		Constraints:                quizKeywordNotes(entries, quizConstraintKeywords()),
+		Preferences:                quizKeywordNotes(entries, quizPreferenceKeywords()),
+		OpenQuestions:              quizOpenQuestionNotes(entries),
+		ImplementationImplications: quizImplementationImplications(answered, entries),
+		Entries:                    entries,
+		UpdatedAt:                  now.UTC().Format(time.RFC3339),
+	}
+}
+
+func quizAcceptanceReadinessNotes(entries []QuizEntry) []string {
+	seen := map[string]bool{}
+	notes := []string{}
+
+	for _, entry := range entries {
+		readiness := quizAcceptanceReadinessFromPromptIntent(entry.PromptIntent)
+		if readiness == nil {
+			continue
+		}
+
+		decision := strings.TrimSpace(readiness["decision"])
+		if decision == "" {
+			continue
+		}
+
+		note := "Decision: " + decision
+		if missing := strings.TrimSpace(readiness["missing"]); missing != "" {
+			note += "; missing: " + missing
+		}
+
+		if inferred := strings.TrimSpace(readiness["inferred"]); inferred != "" {
+			note += "; inferred: " + inferred
+		}
+
+		if seen[note] {
+			continue
+		}
+
+		seen[note] = true
+		notes = append(notes, note)
+	}
+
+	sort.Strings(notes)
+
+	return notes
+}
+
+func quizAcceptanceReadinessFromPromptIntent(value string) map[string]string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal([]byte(value), &payload); err != nil {
+		return nil
+	}
+
+	metadata, ok := payload["metadata"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	routingState, ok := metadata["routing_state"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	readiness, ok := routingState["acceptance_readiness"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	return map[string]string{
+		"decision": inferredString(readiness["decision"]),
+		"missing":  inferredStringList(readiness["missing"]),
+		"inferred": inferredReadinessSlots(readiness["inferred_elements"]),
+	}
+}
+
+func inferredString(value any) string {
+	text, ok := value.(string)
+	if !ok {
+		return ""
+	}
+
+	return strings.TrimSpace(text)
+}
+
+func inferredStringList(value any) string {
+	values, ok := value.([]any)
+	if !ok {
+		return ""
+	}
+
+	texts := []string{}
+
+	for _, value := range values {
+		text := inferredString(value)
+		if text != "" {
+			texts = append(texts, text)
+		}
+	}
+
+	return strings.Join(texts, ", ")
+}
+
+func inferredReadinessSlots(value any) string {
+	values, ok := value.(map[string]any)
+	if !ok {
+		return ""
+	}
+
+	slots := []string{}
+
+	for slot, slotValues := range values {
+		if inferredStringList(slotValues) != "" {
+			slots = append(slots, slot)
+		}
+	}
+
+	sort.Strings(slots)
+
+	return strings.Join(slots, ", ")
+}
+
+func parseQuizRawTurn(index int, block string) (QuizEntry, error) {
+	entry := QuizEntry{
+		ID: fmt.Sprintf("entry-%03d", index),
+	}
+	metadata, body := splitQuizTurnMetadata(block)
+
+	entry.QuestionID = metadata["question_id"]
+	entry.Status = QuizEntryStatus(metadata["status"])
+	entry.Mode = QuizMode(metadata["mode"])
+	entry.Topic = metadata["topic"]
+	entry.Depth = parseQuizTurnDepth(metadata["depth"])
+	entry.ParentID = metadata["parent_id"]
+	entry.Tags = parseQuizTurnTags(metadata["tags"])
+	entry.PromptIntent = sectionAfterLabel(body, "Prompt intent:")
+	entry.Question = sectionAfterLabel(body, "Question:")
+	entry.Answer = sectionAfterLabel(body, "Answer:")
+	entry.CreatedAt = quizRawTurnTime(block)
+	entry.AnsweredAt = entry.CreatedAt
+
+	err := ValidateQuizEntry(entry)
+	if err != nil {
+		return QuizEntry{}, err
+	}
+
+	return entry, nil
+}
+
+func splitQuizTurnMetadata(block string) (map[string]string, string) {
+	parts := strings.SplitN(block, "\n\n", 2)
+	metadata := map[string]string{}
+
+	for _, line := range strings.Split(parts[0], "\n") {
+		line = strings.TrimSpace(strings.TrimPrefix(line, "- "))
+
+		key, value, ok := strings.Cut(line, ":")
+		if ok {
+			metadata[strings.TrimSpace(key)] = strings.TrimSpace(value)
+		}
+	}
+
+	if len(parts) == 1 {
+		return metadata, ""
+	}
+
+	return metadata, parts[1]
+}
+
+func sectionAfterLabel(body, label string) string {
+	_, rest, ok := strings.Cut(body, label)
+	if !ok {
+		return ""
+	}
+
+	rest = strings.TrimLeft(rest, "\n")
+	value, _, _ := strings.Cut(rest, "\n\n")
+
+	return strings.TrimSpace(value)
+}
+
+func parseQuizTurnDepth(value string) int {
+	depth, err := strconv.Atoi(strings.TrimSpace(value))
+	if err != nil {
+		return 1
+	}
+
+	return depth
+}
+
+func parseQuizTurnTags(value string) []string {
+	tags := []string{}
+
+	for _, tag := range strings.Split(value, ",") {
+		tag = strings.TrimSpace(tag)
+		if tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	return tags
+}
+
+func quizRawTurnTime(block string) time.Time {
+	for _, line := range strings.Split(block, "\n") {
+		key, value, ok := strings.Cut(strings.TrimSpace(line), ":")
+		if !ok || key != "updated_at" {
+			continue
+		}
+
+		parsed, err := time.Parse(time.RFC3339, strings.Trim(strings.TrimSpace(value), `"`))
+		if err == nil {
+			return parsed.UTC()
+		}
+	}
+
+	return time.Unix(1, 0).UTC()
+}
+
+func quizAnsweredEntriesByTopic(entries []QuizEntry) map[string][]QuizEntry {
+	answered := map[string][]QuizEntry{}
+
+	for _, entry := range entries {
+		if entry.Status != QuizEntryStatusAnswered {
+			continue
+		}
+
+		topic := strings.TrimSpace(entry.Topic)
+		answered[topic] = append(answered[topic], entry)
+	}
+
+	return answered
+}
+
+func quizDecisionNotes(answered map[string][]QuizEntry) []string {
+	notes := []string{}
+	for _, topic := range sortedQuizTopics(answered) {
+		notes = append(notes, topic+": "+joinQuizAnswerInsights(answered[topic]))
+	}
+
+	return notes
+}
+
+func quizKeywordNotes(entries []QuizEntry, keywords []string) []string {
+	notes := []string{}
+
+	for _, entry := range entries {
+		if entry.Status != QuizEntryStatusAnswered {
+			continue
+		}
+
+		answer := strings.TrimSpace(entry.Answer)
+		if containsQuizKeyword(answer, keywords) {
+			notes = append(notes, entry.Topic+": "+firstQuizSentence(answer))
+		}
+	}
+
+	return compactUniqueStrings(notes)
+}
+
+func quizOpenQuestionNotes(entries []QuizEntry) []string {
+	notes := []string{}
+
+	for _, entry := range entries {
+		if entry.Status == QuizEntryStatusSkipped {
+			notes = append(notes, entry.Topic+": "+strings.TrimSpace(entry.Question))
+		}
+	}
+
+	return notes
+}
+
+func quizImplementationImplications(answered map[string][]QuizEntry, entries []QuizEntry) []string {
+	if len(entries) == 0 {
+		return []string{"No quiz answers have been captured yet."}
+	}
+
+	return []string{
+		fmt.Sprintf("Use %d answered quiz topic groups as source material for draft specification behavior.", len(answered)),
+		"Preserve unresolved skipped questions as review prompts before accepting the generated spec.",
+	}
+}
+
+func sortedQuizTopics(entries map[string][]QuizEntry) []string {
+	topics := make([]string, 0, len(entries))
+	for topic := range entries {
+		topics = append(topics, topic)
+	}
+
+	sort.Strings(topics)
+
+	return topics
+}
+
+func joinQuizAnswerInsights(entries []QuizEntry) string {
+	insights := []string{}
+
+	for _, entry := range entries {
+		insights = append(insights, firstQuizSentence(entry.Answer))
+		if len(insights) == 3 {
+			break
+		}
+	}
+
+	return strings.Join(compactUniqueStrings(insights), "; ")
+}
+
+func firstQuizSentence(value string) string {
+	value = strings.TrimSpace(strings.ReplaceAll(value, "\n", " "))
+	for _, marker := range []string{". ", "! ", "? "} {
+		if before, _, ok := strings.Cut(value, marker); ok {
+			return strings.TrimSpace(before) + strings.TrimSpace(marker)
+		}
+	}
+
+	return value
+}
+
+func containsQuizKeyword(value string, keywords []string) bool {
+	value = strings.ToLower(value)
+	for _, keyword := range keywords {
+		if strings.Contains(value, keyword) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func compactUniqueStrings(values []string) []string {
+	seen := map[string]bool{}
+	compact := []string{}
+
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" || seen[value] {
+			continue
+		}
+
+		seen[value] = true
+		compact = append(compact, value)
+	}
+
+	return compact
+}
+
+func quizConstraintKeywords() []string {
+	return []string{"must", "need", "required", "cannot", "do not", "never"}
+}
+
+func quizPreferenceKeywords() []string {
+	return []string{"prefer", "want", "like", "should"}
+}

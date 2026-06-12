@@ -16,7 +16,7 @@ This document defines coding rules for Go application code.
 - Keep command packages under `cmd/` as assembly entrypoints.
 - Keep transport adapters thin and delegate execution to package-owned services or workflows.
 - Keep reusable CLI, TUI, and future transport operations centered in the
-  `internal/chcapp` operation service.
+  `internal/app` operation service.
 - Do not duplicate an operation workflow inside an adapter when the behavior can
   be invoked from another adapter.
 - Split operation service methods across files when it improves readability,

@@ -18,26 +18,26 @@ Status values:
 
 | Domain | Action | TUI entrypoint | CLI command | Service path | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Navigation | Open Project view | `F1` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Cases view | `F2` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Dumps view | `F3` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Quizzes view | `F4` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Specs view | `F5` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Plans view | `F6` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Board view | `F7` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Dash view | `F8` | none | `internal/chctui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
-| Navigation | Open Help view | `F9` | `chc --help`, command-specific `--help` | `internal/chctui.Model.selectView`, `urfave/cli` help | `matched` | Different surfaces, same help intent. |
-| Layout | Move pane focus | `tab`, `shift+tab`, `esc` | none | `internal/chctui.Model.selectNextPane`, `selectPreviousPane`, `selectPrimaryPane` | `intentionally_interactive` | TUI-only layout state. |
-| Layout | Maximize focused pane | `alt+m` | none | `internal/chctui.Model.toggleMaximizedPane` | `intentionally_interactive` | TUI-only layout state. Board ticket-pane maximization renders all normal Board columns. |
-| Layout | Resize panes | mouse drag | none | `internal/chctui.Model.applyLayoutDrag` | `intentionally_interactive` | TUI-only layout state. |
+| Navigation | Open Project view | `F1` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Cases view | `F2` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Dumps view | `F3` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Quizzes view | `F4` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Specs view | `F5` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Plans view | `F6` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Board view | `F7` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Dash view | `F8` | none | `internal/tui.Model.selectView` | `intentionally_interactive` | TUI view navigation. |
+| Navigation | Open Help view | `F9` | `chc --help`, command-specific `--help` | `internal/tui.Model.selectView`, `urfave/cli` help | `matched` | Different surfaces, same help intent. |
+| Layout | Move pane focus | `tab`, `shift+tab`, `esc` | none | `internal/tui.Model.selectNextPane`, `selectPreviousPane`, `selectPrimaryPane` | `intentionally_interactive` | TUI-only layout state. |
+| Layout | Maximize focused pane | `alt+m` | none | `internal/tui.Model.toggleMaximizedPane` | `intentionally_interactive` | TUI-only layout state. Board ticket-pane maximization renders all normal Board columns. |
+| Layout | Resize panes | mouse drag | none | `internal/tui.Model.applyLayoutDrag` | `intentionally_interactive` | TUI-only layout state. |
 | Shell | Quit TUI | `q`, `ctrl+c`, `F10` | process exit | Bubble Tea quit | `intentionally_interactive` | Terminal lifecycle. |
-| Palette | Open command palette | `:` | none | `internal/chctui.CommandPaletteState` | `intentionally_interactive` | TUI-only command launcher. |
-| Project | Edit project metadata field | `F1`, field selection, `enter` or `e` | `chc metadata project set --name ... --description ... --context ...` | `internal/chctui.ProjectEditState`, `service.SaveProjectMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
+| Palette | Open command palette | `:` | none | `internal/tui.CommandPaletteState` | `intentionally_interactive` | TUI-only command launcher. |
+| Project | Edit project metadata field | `F1`, field selection, `enter` or `e` | `chc metadata project set --name ... --description ... --context ...` | `internal/tui.ProjectEditState`, `service.SaveProjectMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
 | Project | Save project metadata | `F1`, `s` or `ctrl+s` | `chc metadata project set ...` | `service.SaveProjectMetadata` through `tuiProjectMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
 | Project | Refresh workspace state | `F1`, `r` | `chc index rebuild`, `chc index status` partially | `service.RefreshWorkspace` through `tuiWorkspaceRefreshExecutor` | `missing_cli` | CLI index commands cover ticket index, not full workspace graph refresh. |
-| Cases | Select/filter use cases | `F2`, arrows, `/` | none | `internal/chctui` filter state | `intentionally_interactive` | List navigation/filtering is TUI-only. |
-| Cases | Create use case entry | `F2`, `n` | `chc metadata case set <slug> --name ... --description ... --context ...` | `internal/chctui.Model.newCase`, saved by `service.SaveCaseMetadata` | `matched` | CLI creates by slug and metadata flags. |
-| Cases | Edit use-case metadata field | `F2`, `enter` or `e` | `chc metadata case set <slug> ...` | `internal/chctui.ProjectEditState`, `service.SaveCaseMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
+| Cases | Select/filter use cases | `F2`, arrows, `/` | none | `internal/tui` filter state | `intentionally_interactive` | List navigation/filtering is TUI-only. |
+| Cases | Create use case entry | `F2`, `n` | `chc metadata case set <slug> --name ... --description ... --context ...` | `internal/tui.Model.newCase`, saved by `service.SaveCaseMetadata` | `matched` | CLI creates by slug and metadata flags. |
+| Cases | Edit use-case metadata field | `F2`, `enter` or `e` | `chc metadata case set <slug> ...` | `internal/tui.ProjectEditState`, `service.SaveCaseMetadata` | `matched` | CLI edits by flag instead of interactive field focus. |
 | Cases | Save selected use case | `F2`, `s` or `ctrl+s` | `chc metadata case set <slug> ...` | `service.SaveCaseMetadata` through `tuiCaseMetadataExecutor` and CLI command | `matched` | Same metadata save service. |
 | Dumps | Create dump | `F3`, `c`, confirm | `chc dump new --title ... --content ... [--use-case ...]` | `service.CreateDump` through `tuiDumpActionExecutor` and CLI command | `matched` | Same dump creation service. |
 | Dumps | Edit dump in TUI editor | `F3`, `enter`, `ctrl+s` | `chc dump show <path>`, `chc dump save <path> --content ...`, `chc dump append <path> --content ...` | `service.ReadDump`, `service.SaveDump`, `service.AppendDump` | `matched` | CLI is non-interactive and path-based. |
@@ -55,19 +55,19 @@ Status values:
 | Plans | Regenerate plan | `F6`, `G`, confirm | `chc plan regenerate [--use-case ...]` | `service.RegeneratePlan` | `matched` | Same plan regeneration service. |
 | Plans | Create plan tracking and tickets | `F6`, `alt+t`, confirm | `chc plan tracking create [--use-case ...]` | `service.MaterializePlanTracking` | `matched` | Same plan tracking materialization service. |
 | Plans | Refresh plans | `F6`, `r` | `chc plan list` | `service.ListPlans` | `matched` | Same plan list service. |
-| Board | Select/filter tickets | `F7`, arrows, `/` | `chc ticket list` filters | `internal/chctui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
-| Board | Move between normal Board columns | `F7`, `left` / `right` or `h` / `l` | `chc ticket board` | `internal/chctui.Model.selectBoardColumn`, `service.Board` | `matched` | CLI prints all Board columns; TUI navigates one compact column at a time. |
-| Board | Toggle attention view | `F7`, `alt+a` | `chc ticket board` attention summary | `internal/chctui.Model.toggleBoardAttention`, `chc.BoardAttentionReasons` | `matched` | TUI shows attention tickets separately; CLI prints attention count through the same Board service. |
-| Board | Maximize Board ticket pane | `F7`, ticket pane, `alt+m` | `chc ticket board` | `internal/chctui.renderMaximizedBoardWorkspace`, `service.Board` | `matched` | TUI renders a multi-column Board; CLI prints equivalent column data. |
-| Board | Selected ticket detail | `F7`, selected ticket detail pane | `chc ticket show <key>` | `internal/chctui.Model.renderSelectedTicketDetail`, `runTicketShow` | `matched` | TUI detail includes indexed metadata and bounded Markdown context; CLI shows the selected ticket file. |
+| Board | Select/filter tickets | `F7`, arrows, `/` | `chc ticket list` filters | `internal/tui` filter state, `runTicketList` | `matched` | CLI exposes ticket listing/filtering, TUI provides interactive selection. |
+| Board | Move between normal Board columns | `F7`, `left` / `right` or `h` / `l` | `chc ticket board` | `internal/tui.Model.selectBoardColumn`, `service.Board` | `matched` | CLI prints all Board columns; TUI navigates one compact column at a time. |
+| Board | Toggle attention view | `F7`, `alt+a` | `chc ticket board` attention summary | `internal/tui.Model.toggleBoardAttention`, `workspace.BoardAttentionReasons` | `matched` | TUI shows attention tickets separately; CLI prints attention count through the same Board service. |
+| Board | Maximize Board ticket pane | `F7`, ticket pane, `alt+m` | `chc ticket board` | `internal/tui.renderMaximizedBoardWorkspace`, `service.Board` | `matched` | TUI renders a multi-column Board; CLI prints equivalent column data. |
+| Board | Selected ticket detail | `F7`, selected ticket detail pane | `chc ticket show <key>` | `internal/tui.Model.renderSelectedTicketDetail`, `runTicketShow` | `matched` | TUI detail includes indexed metadata and bounded Markdown context; CLI shows the selected ticket file. |
 
 ## Command Palette Commands
 
 | Domain | Command palette id | TUI action | CLI command | Service path | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | Workspace | `refresh` | Reload workspace files into runtime graph. | `chc index rebuild`, `chc index status` partially | `service.RefreshWorkspace` | `missing_cli` | CLI index commands target ticket index, not the full TUI workspace graph refresh. |
-| Help | `help` | Navigate to Help view. | `chc --help` | `internal/chctui.Model.selectView`, CLI help | `matched` | Equivalent intent, different presentation. |
-| Selection | `open-source` | Show selected source path. | none | `internal/chctui.Model.selectedSourcePath` | `missing_cli` | CLI has path outputs in list/show commands, but no selected-source concept. |
+| Help | `help` | Navigate to Help view. | `chc --help` | `internal/tui.Model.selectView`, CLI help | `matched` | Equivalent intent, different presentation. |
+| Selection | `open-source` | Show selected source path. | none | `internal/tui.Model.selectedSourcePath` | `missing_cli` | CLI has path outputs in list/show commands, but no selected-source concept. |
 | Ticket | `create-ticket` | Create default task ticket. | `chc ticket new <title> --synopsis ...` | `service.CreateTicket`; TUI also wraps defaults with `service.CreateDefaultTicket` | `matched` | CLI supports full metadata; TUI uses default metadata through the same ticket creation service. |
 | Dump | `create-dump` | Create selected project/use-case dump. | `chc dump new ...` | `service.CreateDump` | `matched` | Same service path. |
 | Dump | `edit-dump` | Open selected dump in TUI editor. | `chc dump show`, `chc dump save`, `chc dump append` | `service.ReadDump`, `service.SaveDump`, `service.AppendDump` | `matched` | CLI is non-interactive and path-based. |
@@ -114,8 +114,8 @@ Command availability gates:
 
 | Domain | CLI command | TUI equivalent | Service path | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Shell | `chc` | Opens TUI | `runDefaultTUIAction`, `chctui.Run` | `matched` | Root command launches the operational console. |
-| Shell | `chc tui --dir <path>` | Opens TUI | `runTUICommandAction`, `chctui.Run` | `matched` | Explicit TUI command. |
+| Shell | `chc` | Opens TUI | `runDefaultTUIAction`, `tui.Run` | `matched` | Root command launches the operational console. |
+| Shell | `chc tui --dir <path>` | Opens TUI | `runTUICommandAction`, `tui.Run` | `matched` | Explicit TUI command. |
 | Workspace | `chc init` | none | `chc.Workspace.Init` | `missing_tui` | Workspace bootstrap is CLI-only. |
 | Runtime | `chc runtime init` | none | `chc.Workspace.InitRuntime` through runtime command | `missing_tui` | Runtime asset installation is CLI-only. |
 | Runtime | `chc runtime validate` | Dash displays runtime evidence only | `runRuntimeValidate` | `missing_tui` | TUI does not run runtime validation directly. |

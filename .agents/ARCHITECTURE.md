@@ -24,8 +24,8 @@ AGENTS.md     # top-level agent operating contract
 
 - Command packages under `cmd/` should assemble dependencies, parse process-level configuration, start lifecycle components, and stay thin.
 - Application behavior should live in `internal/` by default.
-- ChrysoCoord core behavior should live under `internal/chc`.
-- ChrysoCoord application operations should live under `internal/chcapp` behind
+- ChrysoCoord core behavior should live under `internal/workspace`.
+- ChrysoCoord application operations should live under `internal/app` behind
   the central operation service boundary.
 - Use `pkg/` only for contracts, envelope types, or libraries that are intentionally shared outside the module.
 - Keep package boundaries aligned to behavior and ownership, not generic utility buckets.
@@ -37,7 +37,7 @@ AGENTS.md     # top-level agent operating contract
 
 ## Application Operation Service
 
-`internal/chcapp` owns the application operation service boundary.
+`internal/app` owns the application operation service boundary.
 
 The operation service is the shared implementation path for behaviors that can
 be invoked from more than one adapter, including the CLI, TUI, and future
@@ -59,7 +59,7 @@ entity services such as ProjectService, TicketService, or AuthoringService.
 Adapter-facing wrappers belong in adapter-specific files such as
 `tui_adapters.go`. They may depend on adapter result types. Production
 `service*.go` files must stay adapter-neutral and must not import
-`internal/chctui`.
+`internal/tui`.
 
 Narrow interfaces are acceptable when an adapter needs a small contract, but
 they should usually be implemented by the central operation service or a thin
@@ -67,7 +67,7 @@ adapter wrapper over it.
 
 ## Workspace Index
 
-`internal/chc` owns the workspace index model.
+`internal/workspace` owns the workspace index model.
 
 The workspace index is a local graph/read-model over project Markdown files. It
 is not a database and it must not become the durable source of truth. The

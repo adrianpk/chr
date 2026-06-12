@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"os"
 
-	"forge.adrianpk.com/chc/internal/chcapp"
+	"forge.adrianpk.com/chc/internal/app"
 )
 
 //go:embed assets
 var assetsFS embed.FS
 
 func main() {
-	err := chcapp.Run(context.Background(), os.Args[1:], os.Stdin, os.Stdout, os.Stderr, assetsFS)
+	err := app.Run(context.Background(), os.Args[1:], os.Stdin, os.Stdout, os.Stderr, assetsFS)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
