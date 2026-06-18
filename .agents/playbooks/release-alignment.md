@@ -29,4 +29,8 @@ For docs-only alignment PRs, use this validation section instead:
 - release-alignment gate skipped by docs-only exception
 ```
 
-6. Merge `dev -> main` only through PR, using rebase + fast-forward.
+6. Stop after the PR is open and the gate result has been reported.
+7. The user owns the final `dev -> main` PR merge unless they explicitly ask
+   the agent to merge it.
+8. When explicitly asked to merge, merge `dev -> main` only through PR, using
+   rebase + fast-forward.
