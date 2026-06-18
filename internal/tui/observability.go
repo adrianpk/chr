@@ -18,11 +18,24 @@ type ObservabilityView struct {
 	DaemonFailure            string
 	LatestExecution          ExecutionView
 	LatestLoop               LoopRunView
+	RecentEvents             []AgentEventView
 	RuntimeImage             string
 	RuntimeDockerfile        string
 	RuntimeArtifactDir       string
 	RuntimeValidationCommand string
 	RuntimeChecks            []RuntimeCheckView
+}
+
+// AgentEventView is the terminal projection of one agent-work event.
+type AgentEventView struct {
+	Time          string
+	Level         string
+	TicketKey     string
+	Message       string
+	LoopID        string
+	ExecutionID   string
+	RuntimeLog    string
+	ValidationLog string
 }
 
 // ExecutionView is the terminal projection of one execution record.
@@ -65,6 +78,7 @@ func NewObservabilityView(
 	executions []core.ExecutionRecord,
 	loops []core.LoopRunRecord,
 	runtime core.RuntimeValidationResult,
+	events []core.AgentEvent,
 ) ObservabilityView {
 	return ObservabilityView{
 		DaemonStatus:             string(daemon.Status),
@@ -74,12 +88,39 @@ func NewObservabilityView(
 		DaemonFailure:            daemon.FailureReason,
 		LatestExecution:          newExecutionView(projectDir, latestExecution(executions)),
 		LatestLoop:               newLoopRunView(latestLoopRun(loops)),
+		RecentEvents:             newAgentEventViews(projectDir, events),
 		RuntimeImage:             runtime.Plan.Image,
 		RuntimeDockerfile:        relativeRuntimePath(projectDir, runtime.Plan.DockerfilePath),
 		RuntimeArtifactDir:       relativeRuntimePath(projectDir, runtime.Plan.ArtifactDir),
 		RuntimeValidationCommand: runtime.Plan.ValidationCommand,
 		RuntimeChecks:            newRuntimeCheckViews(projectDir, runtime.Checks),
 	}
+}
+
+func newAgentEventViews(projectDir string, events []core.AgentEvent) []AgentEventView {
+	views := make([]AgentEventView, 0, len(events))
+	for _, event := range events {
+		views = append(views, AgentEventView{
+			Time:          renderAgentEventTime(event.Timestamp),
+			Level:         string(event.Level),
+			TicketKey:     event.TicketKey,
+			Message:       event.Message,
+			LoopID:        event.LoopID,
+			ExecutionID:   event.ExecutionID,
+			RuntimeLog:    relativeRuntimePath(projectDir, event.Refs["runtime_log_path"]),
+			ValidationLog: relativeRuntimePath(projectDir, event.Refs["validation_log_path"]),
+		})
+	}
+
+	return views
+}
+
+func renderAgentEventTime(value time.Time) string {
+	if value.IsZero() {
+		return ""
+	}
+
+	return value.Local().Format("15:04:05")
 }
 
 func (m Model) renderAgent() string {

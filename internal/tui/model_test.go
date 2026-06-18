@@ -3298,17 +3298,8 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 			{ID: "loop-old", Status: core.LoopRunStatusSucceeded, UpdatedAt: older},
 			{ID: "loop-new", Status: core.LoopRunStatusFailed, UpdatedAt: newer},
 		},
-		core.RuntimeValidationResult{
-			Plan: core.RuntimePlan{
-				Image:             "image",
-				DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-				ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
-				ValidationCommand: "make verify",
-			},
-			Checks: []core.RuntimeValidationCheck{
-				{Name: "dockerfile", Path: filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
-			},
-		},
+		testObservabilityRuntimeResult(projectDir),
+		testObservabilityAgentEvents(projectDir, newer),
 	)
 
 	if view.LatestExecution.ID != "exec-new" {
@@ -3321,6 +3312,50 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 
 	if view.RuntimeDockerfile != ".chc/user/runtime/agent/Dockerfile" {
 		t.Fatalf("RuntimeDockerfile = %q, want relative runtime path", view.RuntimeDockerfile)
+	}
+
+	if len(view.RecentEvents) != 1 {
+		t.Fatalf("RecentEvents length = %d, want 1", len(view.RecentEvents))
+	}
+
+	if view.RecentEvents[0].Message != "CHC-2 worker started" {
+		t.Fatalf("RecentEvents[0].Message = %q, want CHC-2 worker started", view.RecentEvents[0].Message)
+	}
+
+	if view.RecentEvents[0].RuntimeLog != ".chc/user/runtime/runs/CHC-2/exec-new/runtime.log" {
+		t.Fatalf("RecentEvents[0].RuntimeLog = %q, want relative runtime log path", view.RecentEvents[0].RuntimeLog)
+	}
+}
+
+func testObservabilityRuntimeResult(projectDir string) core.RuntimeValidationResult {
+	return core.RuntimeValidationResult{
+		Plan: core.RuntimePlan{
+			Image:             "image",
+			DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+			ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
+			ValidationCommand: "make verify",
+		},
+		Checks: []core.RuntimeValidationCheck{
+			{Name: "dockerfile", Path: filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
+		},
+	}
+}
+
+func testObservabilityAgentEvents(projectDir string, timestamp time.Time) []core.AgentEvent {
+	return []core.AgentEvent{
+		{
+			SchemaVersion: core.AgentEventSchemaVersion,
+			Timestamp:     timestamp,
+			LoopID:        "loop-new",
+			ExecutionID:   "exec-new",
+			TicketKey:     "CHC-2",
+			Phase:         core.AgentEventPhaseWorkerStarted,
+			Level:         core.AgentEventLevelInfo,
+			Message:       "CHC-2 worker started",
+			Refs: core.AgentEventRefs{
+				"runtime_log_path": filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-2", "exec-new", "runtime.log"),
+			},
+		},
 	}
 }
 

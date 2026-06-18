@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"io/fs"
+	"sort"
 	"time"
 
 	"github.com/urfave/cli/v3"
@@ -402,7 +403,103 @@ func loadTUIObservability(
 		return tui.ObservabilityView{}, err
 	}
 
-	return tui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime), nil
+	events := loadTUIAgentEvents(ctx, projectContext.ProjectDir, config.Runtime, executions, loops)
+
+	return tui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime, events), nil
+}
+
+func loadTUIAgentEvents(ctx context.Context, projectDir string, config core.RuntimeConfig, executions []core.ExecutionRecord, loops []core.LoopRunRecord) []core.AgentEvent {
+	events := []core.AgentEvent{}
+
+	loop := latestTUILoopRun(loops)
+	if loop.ID != "" {
+		plan, err := core.PlanRuntime(core.RuntimePlanOptions{
+			ProjectDir: projectDir,
+			Config:     config,
+			RunID:      loop.ID,
+		})
+		if err == nil {
+			events = append(events, readTUIAgentEvents(ctx, core.AgentEventStreamPath(plan.RunArtifactDir))...)
+		}
+	}
+
+	execution := latestTUIExecution(executions)
+	if execution.ID != "" {
+		events = append(events, readTUIAgentEvents(ctx, core.AgentEventStreamPath(execution.Artifacts.RunDir))...)
+	}
+
+	return recentTUIAgentEvents(events, 50)
+}
+
+func readTUIAgentEvents(ctx context.Context, path string) []core.AgentEvent {
+	stream, err := core.ReadAgentEventStream(ctx, path)
+	if err != nil {
+		return nil
+	}
+
+	return stream.Events
+}
+
+func recentTUIAgentEvents(events []core.AgentEvent, limit int) []core.AgentEvent {
+	deduped := dedupeTUIAgentEvents(events)
+	sort.SliceStable(deduped, func(left, right int) bool {
+		return deduped[left].Timestamp.Before(deduped[right].Timestamp)
+	})
+
+	if limit > 0 && len(deduped) > limit {
+		return deduped[len(deduped)-limit:]
+	}
+
+	return deduped
+}
+
+func dedupeTUIAgentEvents(events []core.AgentEvent) []core.AgentEvent {
+	seen := map[string]bool{}
+	deduped := make([]core.AgentEvent, 0, len(events))
+
+	for _, event := range events {
+		key := tuiAgentEventKey(event)
+		if seen[key] {
+			continue
+		}
+
+		seen[key] = true
+
+		deduped = append(deduped, event)
+	}
+
+	return deduped
+}
+
+func tuiAgentEventKey(event core.AgentEvent) string {
+	return event.Timestamp.Format(time.RFC3339Nano) + "\x00" +
+		event.LoopID + "\x00" +
+		event.ExecutionID + "\x00" +
+		event.TicketKey + "\x00" +
+		string(event.Phase) + "\x00" +
+		event.Message
+}
+
+func latestTUIExecution(executions []core.ExecutionRecord) core.ExecutionRecord {
+	var latest core.ExecutionRecord
+	for _, execution := range executions {
+		if latest.ID == "" || execution.UpdatedAt.After(latest.UpdatedAt) {
+			latest = execution
+		}
+	}
+
+	return latest
+}
+
+func latestTUILoopRun(loops []core.LoopRunRecord) core.LoopRunRecord {
+	var latest core.LoopRunRecord
+	for _, loop := range loops {
+		if latest.ID == "" || loop.UpdatedAt.After(latest.UpdatedAt) {
+			latest = loop
+		}
+	}
+
+	return latest
 }
 
 func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) (core.DaemonState, error) {
