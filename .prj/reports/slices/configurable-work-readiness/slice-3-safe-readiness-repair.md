@@ -1,11 +1,11 @@
 # Slice 3: Safe Readiness Repair
 
-Status: reviewing
+Status: delivered
 Slicing: Configurable Work Readiness
 Plan: `ops/plans/2026-06-18-configurable-work-readiness-plan.md`
 Tracker: `ops/trackers/2026-06-18-configurable-work-readiness-tracker.md`
 Branch: `feat/slice-3-safe-readiness-repair`
-PR: pending
+PR: `#315`
 
 ## Purpose
 

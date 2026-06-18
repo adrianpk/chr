@@ -1,8 +1,8 @@
 # Configurable Work Readiness Plan
 
-Status: reviewing
+Status: active
 
-Active Slice: Slice 3 - safe readiness repair
+Active Slice: Slice 4 - dash readiness guidance
 
 Tracker: `ops/trackers/2026-06-18-configurable-work-readiness-tracker.md`
 
