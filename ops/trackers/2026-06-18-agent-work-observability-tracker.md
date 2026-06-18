@@ -16,7 +16,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 | Slice 2 | work lifecycle events | delivered | `feat/slice-2-work-lifecycle-events` | `#309` | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
 | Slice 3 | dash live work stream | delivered | `feat/slice-3-dash-live-work-stream` | `#310` | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
 | Slice 4 | execution log lookup | delivered | `feat/slice-4-execution-log-lookup` | `#311` | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
-| Slice 5 | event readback recovery | active | `feat/slice-5-event-readback-recovery` | pending | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
+| Slice 5 | event readback recovery | reviewing | `feat/slice-5-event-readback-recovery` | pending | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
 
 ## Slice 1 Tasks
 
@@ -59,10 +59,10 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Add event stream summary/readback behavior. | planned | pending | Latest known loop/ticket/execution state. |
-| T5.2 | Surface latest known work state in CLI or Dash diagnostics. | planned | pending | Degraded summaries for partial streams. |
-| T5.3 | Document recovery inspection for interrupted runs. | planned | pending | User-facing how-to or reference update. |
-| T5.4 | Add the slice implementation report and validation evidence. | planned | pending | Report path defined in slice map. |
+| T5.1 | Add event stream summary/readback behavior. | done | `6f25c78` | Latest known loop/ticket/execution state. |
+| T5.2 | Surface latest known work state in CLI or Dash diagnostics. | done | `d68d75a` | Adds `chc work events <event-stream-path>`. |
+| T5.3 | Document recovery inspection for interrupted runs. | done | `4be7a5f` | Updates how-to, command reference, and specs. |
+| T5.4 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Validation Log
 
@@ -75,6 +75,9 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 - `make verify` (pass)
 - `go test ./internal/app` (pass)
 - `go test ./internal/tui` (pass)
+- `make verify` (pass)
+- `go test ./internal/core` (pass)
+- `go test ./internal/app` (pass)
 - `make verify` (pass)
 
 ## Notes
