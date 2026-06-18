@@ -87,8 +87,9 @@ func TestWorkSelectionPreflightBlocksStaleDev(t *testing.T) {
 		Tickets:           []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
 		RequireUpdatedDev: true,
 		Git: fakeWorkSelectionGit{
-			branch: "feat/slice-7-serialized-work-preflight",
-			clean:  true,
+			branch:      "feat/slice-7-serialized-work-preflight",
+			clean:       true,
+			containsRef: true,
 		},
 	})
 	if err != nil {
@@ -110,9 +111,9 @@ func TestWorkSelectionPreflightBlocksDevBehindOriginDev(t *testing.T) {
 		Tickets:           []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
 		RequireUpdatedDev: true,
 		Git: fakeWorkSelectionGit{
-			branch:            "dev",
-			clean:             true,
-			devContainsOrigin: false,
+			branch:      "dev",
+			clean:       true,
+			containsRef: false,
 		},
 	})
 	if err != nil {
@@ -129,9 +130,9 @@ func TestWorkSelectionPreflightBlocksDevBehindOriginDev(t *testing.T) {
 }
 
 type fakeWorkSelectionGit struct {
-	branch            string
-	clean             bool
-	devContainsOrigin bool
+	branch      string
+	clean       bool
+	containsRef bool
 }
 
 func (git fakeWorkSelectionGit) CurrentBranch(context.Context, string) (string, error) {
@@ -142,6 +143,6 @@ func (git fakeWorkSelectionGit) WorktreeClean(context.Context, string) (bool, er
 	return git.clean, nil
 }
 
-func (git fakeWorkSelectionGit) DevContainsOriginDev(context.Context, string) (bool, error) {
-	return git.devContainsOrigin, nil
+func (git fakeWorkSelectionGit) BranchContainsRef(context.Context, string, string, string) (bool, error) {
+	return git.containsRef, nil
 }

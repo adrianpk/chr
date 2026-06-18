@@ -52,6 +52,7 @@ type WorkSelectionPreflightOptions struct {
 	ProjectDir        string
 	Tickets           []IndexedTicket
 	SelectedTicketKey string
+	BranchPolicy      WorkBranchPolicy
 	RequireUpdatedDev bool
 	Git               WorkSelectionGit
 }
@@ -74,7 +75,7 @@ type WorkSelectionBlockReason struct {
 type WorkSelectionGit interface {
 	CurrentBranch(ctx context.Context, projectDir string) (string, error)
 	WorktreeClean(ctx context.Context, projectDir string) (bool, error)
-	DevContainsOriginDev(ctx context.Context, projectDir string) (bool, error)
+	BranchContainsRef(ctx context.Context, projectDir, branch, ref string) (bool, error)
 }
 
 // OSWorkSelectionGit describes a package boundary value.
@@ -220,8 +221,8 @@ func RunWorkSelectionPreflight(ctx context.Context, opts WorkSelectionPreflightO
 		}
 	}
 
-	if opts.RequireUpdatedDev {
-		blocked, err := staleDevBlockReason(ctx, opts)
+	if shouldEvaluateWorkBranchPolicy(opts) {
+		blocked, err := workBranchPolicyBlockReason(ctx, opts)
 		if err != nil {
 			return WorkSelectionPreflightResult{}, err
 		}
@@ -255,14 +256,14 @@ func (OSWorkSelectionGit) WorktreeClean(ctx context.Context, projectDir string) 
 	return strings.TrimSpace(string(output)) == "", nil
 }
 
-// DevContainsOriginDev executes the corresponding package operation.
-func (OSWorkSelectionGit) DevContainsOriginDev(ctx context.Context, projectDir string) (bool, error) {
-	err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--verify", "origin/dev").Run()
+// BranchContainsRef executes the corresponding package operation.
+func (OSWorkSelectionGit) BranchContainsRef(ctx context.Context, projectDir, branch, ref string) (bool, error) {
+	err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--verify", ref).Run()
 	if err != nil {
 		return true, normalizeGitPreflightError(err)
 	}
 
-	err = exec.CommandContext(ctx, "git", "-C", projectDir, "merge-base", "--is-ancestor", "origin/dev", "dev").Run()
+	err = exec.CommandContext(ctx, "git", "-C", projectDir, "merge-base", "--is-ancestor", ref, branch).Run()
 	if err == nil {
 		return true, nil
 	}
@@ -306,7 +307,11 @@ func hasTicketKey(tickets []IndexedTicket, key string) bool {
 	return false
 }
 
-func staleDevBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions) (*WorkSelectionBlockReason, error) {
+func shouldEvaluateWorkBranchPolicy(opts WorkSelectionPreflightOptions) bool {
+	return opts.RequireUpdatedDev || opts.BranchPolicy != (WorkBranchPolicy{})
+}
+
+func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions) (*WorkSelectionBlockReason, error) {
 	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
 	if err != nil {
 		return nil, err
@@ -317,47 +322,116 @@ func staleDevBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions
 		git = OSWorkSelectionGit{}
 	}
 
-	return staleDevBlockReasonForGit(ctx, projectDir, git)
+	policy := opts.BranchPolicy
+	if policy == (WorkBranchPolicy{}) {
+		policy = DefaultWorkBranchPolicy()
+	}
+
+	return workBranchPolicyBlockReasonForGit(ctx, projectDir, git, policy)
 }
 
-func staleDevBlockReasonForGit(ctx context.Context, projectDir string, git WorkSelectionGit) (*WorkSelectionBlockReason, error) {
+func workBranchPolicyBlockReasonForGit(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy) (*WorkSelectionBlockReason, error) {
+	err := ValidateWorkBranchPolicy(policy)
+	if err != nil {
+		return nil, err
+	}
+
+	if policy.Mode == WorkBranchPolicyModeNoGitEnforcement {
+		return nil, nil
+	}
+
+	return runWorkBranchPolicyChecks(ctx, projectDir, git, policy)
+}
+
+func runWorkBranchPolicyChecks(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy) (*WorkSelectionBlockReason, error) {
 	branch, err := git.CurrentBranch(ctx, projectDir)
 	if err != nil {
 		return nilIfGitUnavailable(err)
 	}
 
-	if branch != "dev" {
-		return &WorkSelectionBlockReason{
-			Code:   WorkSelectionBlockStaleDev,
-			Detail: fmt.Sprintf("work selection requires local dev branch, current branch is %q", branch),
-		}, nil
+	expectedBranch := strings.TrimSpace(policy.IntegrationBranch)
+
+	blocked := workBranchPolicyCurrentBranchBlockReason(policy, branch, expectedBranch)
+	if blocked != nil {
+		return blocked, nil
 	}
 
+	if policy.RequireCleanWorktree {
+		blocked, err = workBranchPolicyCleanBlockReason(ctx, projectDir, git, policy)
+		if blocked != nil || err != nil {
+			return blocked, err
+		}
+	}
+
+	if policy.Mode == WorkBranchPolicyModeIntegrationBranch && policy.RequireRemoteTracking {
+		blocked, err = workBranchPolicyRemoteBlockReason(ctx, projectDir, git, policy, expectedBranch)
+		if blocked != nil || err != nil {
+			return blocked, err
+		}
+	}
+
+	return nil, nil
+}
+
+func workBranchPolicyCurrentBranchBlockReason(policy WorkBranchPolicy, branch, expectedBranch string) *WorkSelectionBlockReason {
+	if policy.Mode != WorkBranchPolicyModeIntegrationBranch || branch == expectedBranch {
+		return nil
+	}
+
+	return &WorkSelectionBlockReason{
+		Code: WorkSelectionBlockStaleDev,
+		Detail: fmt.Sprintf(
+			"work selection requires local %s branch, current branch is %q",
+			expectedBranch,
+			branch,
+		),
+	}
+}
+
+func workBranchPolicyCleanBlockReason(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy) (*WorkSelectionBlockReason, error) {
 	clean, err := git.WorktreeClean(ctx, projectDir)
 	if err != nil {
 		return nilIfGitUnavailable(err)
 	}
 
-	if !clean {
-		return &WorkSelectionBlockReason{
-			Code:   WorkSelectionBlockStaleDev,
-			Detail: "work selection requires a clean local dev worktree",
-		}, nil
+	if clean {
+		return nil, nil
 	}
 
-	contains, err := git.DevContainsOriginDev(ctx, projectDir)
+	return &WorkSelectionBlockReason{
+		Code:   WorkSelectionBlockStaleDev,
+		Detail: workSelectionCleanWorktreeDetail(policy),
+	}, nil
+}
+
+func workBranchPolicyRemoteBlockReason(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy, expectedBranch string) (*WorkSelectionBlockReason, error) {
+	remoteRef := strings.TrimSpace(policy.CanonicalRemote) + "/" + expectedBranch
+
+	contains, err := git.BranchContainsRef(ctx, projectDir, expectedBranch, remoteRef)
 	if err != nil {
 		return nilIfGitUnavailable(err)
 	}
 
-	if !contains {
-		return &WorkSelectionBlockReason{
-			Code:   WorkSelectionBlockStaleDev,
-			Detail: "work selection requires local dev to contain origin/dev",
-		}, nil
+	if contains {
+		return nil, nil
 	}
 
-	return nil, nil
+	return &WorkSelectionBlockReason{
+		Code: WorkSelectionBlockStaleDev,
+		Detail: fmt.Sprintf(
+			"work selection requires local %s to contain %s",
+			expectedBranch,
+			remoteRef,
+		),
+	}, nil
+}
+
+func workSelectionCleanWorktreeDetail(policy WorkBranchPolicy) string {
+	if policy.Mode == WorkBranchPolicyModeIntegrationBranch {
+		return fmt.Sprintf("work selection requires a clean local %s worktree", policy.IntegrationBranch)
+	}
+
+	return "work selection requires a clean local worktree"
 }
 
 func nilIfGitUnavailable(err error) (*WorkSelectionBlockReason, error) {
