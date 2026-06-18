@@ -14,7 +14,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | agent event model | delivered | `feat/slice-1-agent-event-model` | `#308` | `.prj/reports/slices/agent-work-observability/slice-1-agent-event-model.md` |
 | Slice 2 | work lifecycle events | delivered | `feat/slice-2-work-lifecycle-events` | `#309` | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
-| Slice 3 | dash live work stream | active | `feat/slice-3-dash-live-work-stream` | pending | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
+| Slice 3 | dash live work stream | reviewing | `feat/slice-3-dash-live-work-stream` | pending | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
 | Slice 4 | execution log lookup | planned | `feat/slice-4-execution-log-lookup` | pending | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
 | Slice 5 | event readback recovery | planned | `feat/slice-5-event-readback-recovery` | pending | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
 
@@ -40,11 +40,11 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Add a TUI read model for recent agent events. | planned | pending | Reads durable event streams. |
-| T3.2 | Render the work-running screen as a live event stream with lock notice. | planned | pending | Replace static wait text. |
-| T3.3 | Refresh event state while foreground work is active. | planned | pending | Keep navigation locked. |
-| T3.4 | Add TUI tests for modal lock behavior and event rendering. | planned | pending | Avoid regressions around `workBusy`. |
-| T3.5 | Add the slice implementation report and validation evidence. | planned | pending | Report path defined in slice map. |
+| T3.1 | Add a TUI read model for recent agent events. | done | `e75e21c` | Reads latest loop and execution streams. |
+| T3.2 | Render the work-running screen as a live event stream with lock notice. | done | `02f7d20` | Replaces static wait text. |
+| T3.3 | Refresh event state while foreground work is active. | done | `b0f97d4` | Keeps keyboard and mouse navigation locked. |
+| T3.4 | Add TUI tests for modal lock behavior and event rendering. | done | `02f7d20`, `b0f97d4` | Covers event rendering, busy refresh, and footer lock. |
+| T3.5 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 4 Tasks
 
@@ -68,6 +68,9 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 - `go test ./internal/core` (pass)
 - `make verify` (pass)
+- `go test ./internal/app` (pass)
+- `make verify` (pass)
+- `go test ./internal/tui` (pass)
 - `go test ./internal/app` (pass)
 - `make verify` (pass)
 
