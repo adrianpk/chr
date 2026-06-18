@@ -65,7 +65,11 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 		)
 	}
 
-	record, err := runTicketStartExecution(s.ctx, s.env, preflight.Record, preflight.Runtime, s.assetsFS)
+	events := ticketExecutionEvents{
+		Sink: agentWorkExecutionEventSink(preflight.Record),
+	}
+
+	record, err := runTicketStartExecution(s.ctx, s.env, preflight.Record, preflight.Runtime, events, s.assetsFS)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -75,7 +79,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 		return AgentWorkResult{}, err
 	}
 
-	err = applyTicketResult(s.ctx, s.env, plan, s.assetsFS)
+	err = applyTicketResult(s.ctx, s.env, plan, events, s.assetsFS)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}

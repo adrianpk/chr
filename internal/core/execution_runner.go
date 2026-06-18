@@ -36,6 +36,7 @@ func (e OSHarnessExecutor) Run(ctx context.Context, command HarnessCommand, stdo
 type ExecutionRunner struct {
 	Repository ExecutionRepository
 	Executor   HarnessExecutor
+	EventSink  AgentEventSink
 	Now        func() time.Time
 }
 

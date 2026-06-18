@@ -493,6 +493,11 @@ type ticketLoopExecutionResult struct {
 	Applications []core.ResultApplication
 }
 
+type ticketExecutionEvents struct {
+	LoopID string
+	Sink   core.AgentEventSink
+}
+
 type ticketLoopRunOptions struct {
 	MaxIterations int
 }
@@ -906,10 +911,15 @@ func runTicketLoopExecution(
 		return ticketLoopExecutionResult{}, err
 	}
 
+	loopSink := agentWorkLoopEventSink(projectContext.ProjectDir, record)
+
 	result := ticketLoopExecutionResult{Record: record}
 
 	for _, ticket := range tickets {
-		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket, assetsFS)
+		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket, ticketExecutionEvents{
+			LoopID: record.ID,
+			Sink:   loopSink,
+		}, assetsFS)
 		if err != nil {
 			return failTicketLoopExecution(ctx, env, repository, projectContext, result, record, err, assetsFS)
 		}
@@ -987,6 +997,7 @@ func executeLoopTicket(
 	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	ticket core.IndexedTicket,
+	events ticketExecutionEvents,
 	assetsFS fs.FS,
 ) (core.ExecutionRecord, core.ResultApplication, error) {
 	preflight, err := buildTicketStartPreflightForTicket(ctx, env, projectContext, ticket, assetsFS)
@@ -994,7 +1005,9 @@ func executeLoopTicket(
 		return core.ExecutionRecord{}, core.ResultApplication{}, err
 	}
 
-	record, err := runTicketStartExecution(ctx, env, preflight.Record, preflight.Runtime, assetsFS)
+	events.Sink = core.NewAgentEventFanoutSink(events.Sink, agentWorkExecutionEventSink(preflight.Record))
+
+	record, err := runTicketStartExecution(ctx, env, preflight.Record, preflight.Runtime, events, assetsFS)
 	if err != nil {
 		return record, core.ResultApplication{}, err
 	}
@@ -1004,7 +1017,7 @@ func executeLoopTicket(
 		return record, core.ResultApplication{}, err
 	}
 
-	err = applyTicketResult(ctx, env, plan, assetsFS)
+	err = applyTicketResult(ctx, env, plan, events, assetsFS)
 	if err != nil {
 		return record, core.ResultApplication{}, err
 	}
@@ -1110,7 +1123,7 @@ func runTicketApplyResult(ctx context.Context, cmd *cli.Command, stdout io.Write
 			return err
 		}
 
-		err = applyTicketResult(ctx, env, plan, deps.assetsFS)
+		err = applyTicketResult(ctx, env, plan, ticketExecutionEvents{}, deps.assetsFS)
 		if err != nil {
 			return err
 		}
@@ -1187,7 +1200,13 @@ func buildTicketApplyResultPlanForRecord(
 	}, nil
 }
 
-func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, assetsFS fs.FS) error {
+func applyTicketResult(
+	ctx context.Context,
+	env core.UserEnvironment,
+	plan ticketApplyResultPlan,
+	events ticketExecutionEvents,
+	assetsFS fs.FS,
+) error {
 	appliedAt := time.Now().UTC()
 
 	err := core.NewTicketResultStateWriter().WriteResultState(ctx, core.WriteResultStateOptions{
@@ -1348,7 +1367,9 @@ func runAndPrintTicketStartExecution(
 	stdout io.Writer,
 	preflight ticketStartPreflight,
 ) (core.ExecutionRecord, error) {
-	record, err := runTicketStartExecution(ctx, preflight.Env, preflight.Record, preflight.Runtime, preflight.AssetsFS)
+	record, err := runTicketStartExecution(ctx, preflight.Env, preflight.Record, preflight.Runtime, ticketExecutionEvents{
+		Sink: agentWorkExecutionEventSink(preflight.Record),
+	}, preflight.AssetsFS)
 	if err == nil {
 		return record, nil
 	}
@@ -1481,6 +1502,7 @@ func runTicketStartExecution(
 	env core.UserEnvironment,
 	record core.ExecutionRecord,
 	result core.RuntimeValidationResult,
+	events ticketExecutionEvents,
 	assetsFS fs.FS,
 ) (core.ExecutionRecord, error) {
 	repository, err := core.NewExecutionRepository(ctx, env, assetsFS)
@@ -1514,6 +1536,7 @@ func runTicketStartExecution(
 	}
 
 	runner := core.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
+	runner.EventSink = events.Sink
 
 	return runner.Run(ctx, core.RunExecutionOptions{
 		Record:     record,
