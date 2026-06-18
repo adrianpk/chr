@@ -2689,6 +2689,75 @@ func TestWorkTicketRunsSelectedTicket(t *testing.T) {
 	}
 }
 
+func TestWorkDoctorReportsDefaultGitReadiness(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"doctor",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work doctor returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: doctor",
+		"status: blocked",
+		"mode: integration_branch",
+		"integration_branch: dev",
+		"canonical_remote: origin",
+		"diagnostic: git_unavailable\tblocking\tgit state is unavailable:",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestWorkDoctorHonorsNoGitEnforcementConfig(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  mode: no_git_enforcement
+`)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"doctor",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work doctor returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: doctor",
+		"status: ready",
+		"mode: no_git_enforcement",
+		"diagnostics: 0",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
