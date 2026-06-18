@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 2 - work lifecycle events
+Active Slice: Slice 3 - dash live work stream
 
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 
