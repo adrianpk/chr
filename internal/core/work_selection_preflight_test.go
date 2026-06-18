@@ -82,11 +82,11 @@ func TestWorkSelectionPreflightBlocksLaterTicketWhenRepairPending(t *testing.T) 
 	}
 }
 
-func TestWorkSelectionPreflightBlocksStaleDev(t *testing.T) {
+func TestWorkSelectionPreflightBlocksWrongIntegrationBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
-		ProjectDir:        t.TempDir(),
-		Tickets:           []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
-		RequireUpdatedDev: true,
+		ProjectDir:          t.TempDir(),
+		Tickets:             []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		RequireBranchPolicy: true,
 		Git: fakeWorkSelectionGit{
 			branch:      "feat/slice-7-serialized-work-preflight",
 			clean:       true,
@@ -101,16 +101,16 @@ func TestWorkSelectionPreflightBlocksStaleDev(t *testing.T) {
 		t.Fatalf("Allowed = true, want false")
 	}
 
-	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockStaleDev {
-		t.Fatalf("BlockReasons = %#v, want stale dev", result.BlockReasons)
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockBranchPolicy {
+		t.Fatalf("BlockReasons = %#v, want branch policy blocked", result.BlockReasons)
 	}
 }
 
-func TestWorkSelectionPreflightBlocksDevBehindOriginDev(t *testing.T) {
+func TestWorkSelectionPreflightBlocksIntegrationBranchBehindRemote(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
-		ProjectDir:        t.TempDir(),
-		Tickets:           []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
-		RequireUpdatedDev: true,
+		ProjectDir:          t.TempDir(),
+		Tickets:             []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		RequireBranchPolicy: true,
 		Git: fakeWorkSelectionGit{
 			branch:      "dev",
 			clean:       true,
@@ -125,8 +125,8 @@ func TestWorkSelectionPreflightBlocksDevBehindOriginDev(t *testing.T) {
 		t.Fatalf("Allowed = true, want false")
 	}
 
-	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockStaleDev {
-		t.Fatalf("BlockReasons = %#v, want stale dev", result.BlockReasons)
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockBranchPolicy {
+		t.Fatalf("BlockReasons = %#v, want branch policy blocked", result.BlockReasons)
 	}
 }
 

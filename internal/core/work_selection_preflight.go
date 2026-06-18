@@ -23,8 +23,8 @@ const (
 
 	// WorkSelectionBlockReviewRepairPending defines a package boundary constant.
 	WorkSelectionBlockReviewRepairPending = "review_repair_pending"
-	// WorkSelectionBlockStaleDev defines a package boundary constant.
-	WorkSelectionBlockStaleDev = "stale_dev"
+	// WorkSelectionBlockBranchPolicy defines a package boundary constant.
+	WorkSelectionBlockBranchPolicy = "branch_policy_blocked"
 )
 
 // AgentOperationLockOptions describes a package boundary value.
@@ -49,12 +49,12 @@ type agentOperationLockRecord struct {
 
 // WorkSelectionPreflightOptions describes a package boundary value.
 type WorkSelectionPreflightOptions struct {
-	ProjectDir        string
-	Tickets           []IndexedTicket
-	SelectedTicketKey string
-	BranchPolicy      WorkBranchPolicy
-	RequireUpdatedDev bool
-	Git               WorkSelectionGit
+	ProjectDir          string
+	Tickets             []IndexedTicket
+	SelectedTicketKey   string
+	BranchPolicy        WorkBranchPolicy
+	RequireBranchPolicy bool
+	Git                 WorkSelectionGit
 }
 
 // WorkSelectionPreflightResult describes a package boundary value.
@@ -308,7 +308,7 @@ func hasTicketKey(tickets []IndexedTicket, key string) bool {
 }
 
 func shouldEvaluateWorkBranchPolicy(opts WorkSelectionPreflightOptions) bool {
-	return opts.RequireUpdatedDev || opts.BranchPolicy != (WorkBranchPolicy{})
+	return opts.RequireBranchPolicy || opts.BranchPolicy != (WorkBranchPolicy{})
 }
 
 func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions) (*WorkSelectionBlockReason, error) {
@@ -379,7 +379,7 @@ func workBranchPolicyCurrentBranchBlockReason(policy WorkBranchPolicy, branch, e
 	}
 
 	return &WorkSelectionBlockReason{
-		Code: WorkSelectionBlockStaleDev,
+		Code: WorkSelectionBlockBranchPolicy,
 		Detail: fmt.Sprintf(
 			"work selection requires local %s branch, current branch is %q",
 			expectedBranch,
@@ -399,7 +399,7 @@ func workBranchPolicyCleanBlockReason(ctx context.Context, projectDir string, gi
 	}
 
 	return &WorkSelectionBlockReason{
-		Code:   WorkSelectionBlockStaleDev,
+		Code:   WorkSelectionBlockBranchPolicy,
 		Detail: workSelectionCleanWorktreeDetail(policy),
 	}, nil
 }
@@ -417,7 +417,7 @@ func workBranchPolicyRemoteBlockReason(ctx context.Context, projectDir string, g
 	}
 
 	return &WorkSelectionBlockReason{
-		Code: WorkSelectionBlockStaleDev,
+		Code: WorkSelectionBlockBranchPolicy,
 		Detail: fmt.Sprintf(
 			"work selection requires local %s to contain %s",
 			expectedBranch,

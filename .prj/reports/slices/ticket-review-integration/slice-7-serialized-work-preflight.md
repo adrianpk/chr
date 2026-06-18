@@ -39,7 +39,7 @@ concurrent development and review operations in the same workspace.
 - Added `RunWorkSelectionPreflight` with machine-readable block reason codes.
 - Added block reason codes:
   - `review_repair_pending`
-  - `stale_dev`
+  - `branch_policy_blocked`
 - Added a local style check for newly added multiline Go function signatures.
 
 ## Files of Interest

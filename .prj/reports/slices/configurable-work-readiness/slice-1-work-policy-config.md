@@ -26,10 +26,10 @@ ChrysoCoord's default `dev` workflow or configure a different branch policy.
 
 ## Implementation Notes
 
-- The first slice keeps the existing `stale_dev` block code for compatibility.
-  Later slices add clearer diagnostics and doctor output.
-- `RequireUpdatedDev` remains as a compatibility path for existing direct core
-  tests and callers that have not yet moved to config-driven policy.
+- Work-selection block codes now use branch-policy terminology instead of
+  `dev`-specific vocabulary.
+- `RequireBranchPolicy` remains as an explicit direct-core fallback when callers
+  need default policy evaluation without passing a loaded workspace config.
 - `current_branch` mode checks cleanliness but does not enforce a specific
   branch name or remote ref.
 - `no_git_enforcement` skips Git checks but still honors review-repair ordering.
