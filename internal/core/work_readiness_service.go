@@ -202,6 +202,7 @@ func checkWorkReadinessRemote(ctx context.Context, projectDir string, git WorkRe
 }
 
 func finalizeWorkReadinessReport(report WorkReadinessReport) WorkReadinessReport {
+	report = planWorkReadinessRepairs(report)
 	report.Status = WorkReadinessStatusReady
 	for _, diagnostic := range report.Diagnostics {
 		if diagnostic.Severity == WorkReadinessSeverityBlocking {
@@ -212,6 +213,73 @@ func finalizeWorkReadinessReport(report WorkReadinessReport) WorkReadinessReport
 	}
 
 	return report
+}
+
+func planWorkReadinessRepairs(report WorkReadinessReport) WorkReadinessReport {
+	for index := range report.Diagnostics {
+		report.Diagnostics[index].Repair = plannedWorkReadinessRepair(report.Policy, report.Diagnostics[index])
+	}
+
+	return report
+}
+
+func plannedWorkReadinessRepair(policy WorkBranchPolicy, diagnostic WorkReadinessDiagnostic) WorkReadinessRepair {
+	if !policy.AllowSafeRepair {
+		return manualWorkReadinessRepair("safe repair is disabled by work policy")
+	}
+
+	switch diagnostic.Code {
+	case WorkReadinessDiagnosticWrongBranch:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairSwitchBranch,
+			Safe:      true,
+			Detail:    fmt.Sprintf("switch to existing branch %s", diagnostic.ExpectedBranch),
+		}
+	case WorkReadinessDiagnosticMissingBranch:
+		if policy.AllowBranchCreation {
+			return WorkReadinessRepair{
+				Available: true,
+				Code:      WorkReadinessRepairCreateBranch,
+				Safe:      true,
+				Detail:    fmt.Sprintf("create branch %s from the current branch", diagnostic.ExpectedBranch),
+			}
+		}
+
+		return manualWorkReadinessRepair("branch creation is disabled by work policy")
+	case WorkReadinessDiagnosticRuntimeArtifactsVisible:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairIgnoreRuntimeArtifacts,
+			Safe:      true,
+			Detail:    "exclude ChrysoCoord runtime artifacts from local Git status",
+		}
+	case WorkReadinessDiagnosticMissingRemoteRef:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairFetchRemote,
+			Safe:      true,
+			Detail:    fmt.Sprintf("fetch configured remote %s", diagnostic.Remote),
+		}
+	case WorkReadinessDiagnosticBranchBehindRemote:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairFastForwardBranch,
+			Safe:      true,
+			Detail:    fmt.Sprintf("fast-forward %s from %s", diagnostic.ExpectedBranch, diagnostic.RemoteRef),
+		}
+	default:
+		return manualWorkReadinessRepair("manual intervention required")
+	}
+}
+
+func manualWorkReadinessRepair(detail string) WorkReadinessRepair {
+	return WorkReadinessRepair{
+		Available: false,
+		Code:      WorkReadinessRepairManual,
+		Safe:      false,
+		Detail:    detail,
+	}
 }
 
 func splitWorktreeStatus(lines []string) ([]string, []string) {
