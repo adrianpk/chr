@@ -5,7 +5,7 @@ Slicing: Configurable Work Readiness
 Plan: `ops/plans/2026-06-18-configurable-work-readiness-plan.md`
 Tracker: `ops/trackers/2026-06-18-configurable-work-readiness-tracker.md`
 Branch: `feat/slice-4-dash-readiness-guidance`
-PR: pending
+PR: `#316`
 
 ## Purpose
 
