@@ -32,7 +32,7 @@ func newWorkDoctorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:   "doctor",
 		Usage:  "Inspect work readiness without starting agent work",
-		Flags:  workProjectFlags(),
+		Flags:  workDoctorFlags(),
 		Action: workDoctorAction(stdout, deps),
 	}
 }
@@ -82,6 +82,15 @@ func workProjectFlags() []cli.Flag {
 			Name:  "dir",
 			Usage: "project directory override",
 			Value: ".",
+		},
+	)
+}
+
+func workDoctorFlags() []cli.Flag {
+	return append(workProjectFlags(),
+		&cli.BoolFlag{
+			Name:  "fix-safe",
+			Usage: "apply safe readiness repairs before printing the report",
 		},
 	)
 }
@@ -141,6 +150,18 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 		branchPolicy, err := workSelectionBranchPolicy(projectContext.ProjectDir)
 		if err != nil {
 			return err
+		}
+
+		if cmd.Bool("fix-safe") {
+			result, err := core.RepairWorkReadiness(ctx, core.WorkReadinessRepairOptions{
+				ProjectDir: projectContext.ProjectDir,
+				Policy:     branchPolicy,
+			})
+			if err != nil {
+				return err
+			}
+
+			return printWorkRepairResult(stdout, projectContext, result)
 		}
 
 		report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
@@ -492,7 +513,36 @@ func printAgentWorkTicketQueue(stdout io.Writer, tickets []core.IndexedTicket) e
 }
 
 func printWorkReadinessReport(stdout io.Writer, projectContext commandProjectContext, report core.WorkReadinessReport) error {
-	lines := []string{
+	if err := printAgentWorkLines(stdout, workReadinessReportLines(projectContext, report)); err != nil {
+		return err
+	}
+
+	return printWorkReadinessDiagnostics(stdout, report)
+}
+
+func printWorkRepairResult(stdout io.Writer, projectContext commandProjectContext, result core.WorkReadinessRepairResult) error {
+	lines := workReadinessReportLines(projectContext, result.After)
+	lines = append(lines[:2], append([]string{
+		"fix_safe: true",
+		fmt.Sprintf("repairs_applied: %d", len(result.Applied)),
+	}, lines[2:]...)...)
+
+	if err := printAgentWorkLines(stdout, lines); err != nil {
+		return err
+	}
+
+	for _, repair := range result.Applied {
+		_, err := fmt.Fprintf(stdout, "repair_applied: %s\t%s\n", repair.Code, repair.Detail)
+		if err != nil {
+			return fmt.Errorf("write agent work result: %w", err)
+		}
+	}
+
+	return printWorkReadinessDiagnostics(stdout, result.After)
+}
+
+func workReadinessReportLines(projectContext commandProjectContext, report core.WorkReadinessReport) []string {
+	return []string{
 		"work: doctor",
 		fmt.Sprintf("project: %s", projectContext.ProjectID),
 		fmt.Sprintf("status: %s", report.Status),
@@ -504,11 +554,9 @@ func printWorkReadinessReport(stdout io.Writer, projectContext commandProjectCon
 		fmt.Sprintf("current_branch: %s", emptyWorkDoctorField(report.CurrentBranch)),
 		fmt.Sprintf("diagnostics: %d", len(report.Diagnostics)),
 	}
+}
 
-	if err := printAgentWorkLines(stdout, lines); err != nil {
-		return err
-	}
-
+func printWorkReadinessDiagnostics(stdout io.Writer, report core.WorkReadinessReport) error {
 	for _, diagnostic := range report.Diagnostics {
 		_, err := fmt.Fprintf(
 			stdout,
@@ -516,6 +564,23 @@ func printWorkReadinessReport(stdout io.Writer, projectContext commandProjectCon
 			diagnostic.Code,
 			diagnostic.Severity,
 			diagnostic.Detail,
+		)
+		if err != nil {
+			return fmt.Errorf("write agent work result: %w", err)
+		}
+
+		if diagnostic.Repair.Code == "" {
+			continue
+		}
+
+		_, err = fmt.Fprintf(
+			stdout,
+			"repair: %s\t%s\t%t\t%t\t%s\n",
+			diagnostic.Code,
+			diagnostic.Repair.Code,
+			diagnostic.Repair.Available,
+			diagnostic.Repair.Safe,
+			diagnostic.Repair.Detail,
 		)
 		if err != nil {
 			return fmt.Errorf("write agent work result: %w", err)

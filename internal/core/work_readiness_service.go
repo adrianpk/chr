@@ -38,6 +38,10 @@ type WorkReadinessGit interface {
 type WorkReadinessRepairGit interface {
 	WorkReadinessGit
 	ExcludeLocalPattern(ctx context.Context, projectDir, pattern string) (bool, error)
+	FetchRemote(ctx context.Context, projectDir, remote string) error
+	FastForwardBranch(ctx context.Context, projectDir, branch, ref string) error
+	SwitchBranch(ctx context.Context, projectDir, branch string) error
+	CreateBranch(ctx context.Context, projectDir, branch string) error
 }
 
 // OSWorkReadinessGit describes a package boundary value.
@@ -87,14 +91,39 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 
 // RepairWorkReadiness executes the corresponding package operation.
 func RepairWorkReadiness(ctx context.Context, opts WorkReadinessRepairOptions) (WorkReadinessRepairResult, error) {
-	err := ctx.Err()
+	settings, err := newWorkReadinessRepairSettings(ctx, opts)
 	if err != nil {
 		return WorkReadinessRepairResult{}, err
 	}
 
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	before, err := settings.check(ctx)
 	if err != nil {
 		return WorkReadinessRepairResult{}, err
+	}
+
+	result := WorkReadinessRepairResult{Before: before, After: before}
+	if !settings.policy.AllowSafeRepair {
+		return result, nil
+	}
+
+	return runRepairLoop(ctx, settings, result)
+}
+
+type workReadinessRepairSettings struct {
+	projectDir string
+	policy     WorkBranchPolicy
+	git        WorkReadinessRepairGit
+}
+
+func newWorkReadinessRepairSettings(ctx context.Context, opts WorkReadinessRepairOptions) (workReadinessRepairSettings, error) {
+	err := ctx.Err()
+	if err != nil {
+		return workReadinessRepairSettings{}, err
+	}
+
+	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	if err != nil {
+		return workReadinessRepairSettings{}, err
 	}
 
 	policy := opts.Policy
@@ -107,50 +136,64 @@ func RepairWorkReadiness(ctx context.Context, opts WorkReadinessRepairOptions) (
 		git = OSWorkReadinessGit{}
 	}
 
-	before, err := CheckWorkReadiness(ctx, WorkReadinessOptions{
-		ProjectDir: projectDir,
-		Policy:     policy,
-		Git:        git,
+	return workReadinessRepairSettings{
+		projectDir: projectDir,
+		policy:     policy,
+		git:        git,
+	}, nil
+}
+
+func (settings workReadinessRepairSettings) check(ctx context.Context) (WorkReadinessReport, error) {
+	return CheckWorkReadiness(ctx, WorkReadinessOptions{
+		ProjectDir: settings.projectDir,
+		Policy:     settings.policy,
+		Git:        settings.git,
 	})
-	if err != nil {
-		return WorkReadinessRepairResult{}, err
-	}
+}
 
-	result := WorkReadinessRepairResult{Before: before, After: before}
-	if !policy.AllowSafeRepair {
-		return result, nil
-	}
+func runRepairLoop(ctx context.Context, settings workReadinessRepairSettings, result WorkReadinessRepairResult) (WorkReadinessRepairResult, error) {
+	current := result.Before
+	for range 3 {
+		applied, err := applySafeRepairs(ctx, settings.projectDir, settings.git, current.Diagnostics)
+		if err != nil {
+			return WorkReadinessRepairResult{}, err
+		}
 
-	result.Applied, err = applySafeWorkReadinessRepairs(ctx, projectDir, git, before.Diagnostics)
-	if err != nil {
-		return WorkReadinessRepairResult{}, err
-	}
+		if len(applied) == 0 {
+			break
+		}
 
-	result.After, err = CheckWorkReadiness(ctx, WorkReadinessOptions{
-		ProjectDir: projectDir,
-		Policy:     policy,
-		Git:        git,
-	})
-	if err != nil {
-		return WorkReadinessRepairResult{}, err
+		result.Applied = append(result.Applied, applied...)
+
+		current, err = settings.check(ctx)
+		if err != nil {
+			return WorkReadinessRepairResult{}, err
+		}
+
+		result.After = current
+		if current.Status == WorkReadinessStatusReady {
+			break
+		}
 	}
 
 	return result, nil
 }
 
-func applySafeWorkReadinessRepairs(
-	ctx context.Context,
-	projectDir string,
-	git WorkReadinessRepairGit,
-	diagnostics []WorkReadinessDiagnostic,
-) ([]WorkReadinessAppliedRepair, error) {
+func applySafeRepairs(ctx context.Context, projectDir string, git WorkReadinessRepairGit, diagnostics []WorkReadinessDiagnostic) ([]WorkReadinessAppliedRepair, error) {
 	applied := make([]WorkReadinessAppliedRepair, 0)
+	branchMutationSafe := branchMutationRepairSafe(diagnostics)
+	run := repairRun{
+		projectDir:         projectDir,
+		git:                git,
+		branchMutationSafe: branchMutationSafe,
+	}
+
 	for _, diagnostic := range diagnostics {
 		if !diagnostic.Repair.Available || !diagnostic.Repair.Safe {
 			continue
 		}
 
-		repair, ok, err := applySafeWorkReadinessRepair(ctx, projectDir, git, diagnostic)
+		repair, ok, err := applySafeRepair(ctx, run, diagnostic)
 		if err != nil {
 			return nil, err
 		}
@@ -163,26 +206,119 @@ func applySafeWorkReadinessRepairs(
 	return applied, nil
 }
 
-func applySafeWorkReadinessRepair(
-	ctx context.Context,
-	projectDir string,
-	git WorkReadinessRepairGit,
-	diagnostic WorkReadinessDiagnostic,
-) (WorkReadinessAppliedRepair, bool, error) {
+type repairRun struct {
+	projectDir         string
+	git                WorkReadinessRepairGit
+	branchMutationSafe bool
+}
+
+func branchMutationRepairSafe(diagnostics []WorkReadinessDiagnostic) bool {
+	return !diagnosticsContain(
+		diagnostics,
+		WorkReadinessDiagnosticDirtyWorktree,
+		WorkReadinessDiagnosticGitStateInProgress,
+	)
+}
+
+func diagnosticsContain(diagnostics []WorkReadinessDiagnostic, codes ...WorkReadinessDiagnosticCode) bool {
+	for _, diagnostic := range diagnostics {
+		for _, code := range codes {
+			if diagnostic.Code == code {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
 	switch diagnostic.Repair.Code {
 	case WorkReadinessRepairIgnoreRuntimeArtifacts:
-		changed, err := git.ExcludeLocalPattern(ctx, projectDir, ".chc/user/runtime/")
-		if err != nil {
-			return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
-		}
-
-		return WorkReadinessAppliedRepair{
-			Code:   WorkReadinessRepairIgnoreRuntimeArtifacts,
-			Detail: "excluded .chc/user/runtime/ in local Git info exclude",
-		}, changed, nil
+		return applyRuntimeArtifactsRepair(ctx, run)
+	case WorkReadinessRepairFetchRemote:
+		return applyFetchRemoteRepair(ctx, run, diagnostic)
+	case WorkReadinessRepairFastForwardBranch:
+		return applyFastForwardRepair(ctx, run, diagnostic)
+	case WorkReadinessRepairSwitchBranch:
+		return applySwitchBranchRepair(ctx, run, diagnostic)
+	case WorkReadinessRepairCreateBranch:
+		return applyCreateBranchRepair(ctx, run, diagnostic)
 	default:
 		return WorkReadinessAppliedRepair{}, false, nil
 	}
+}
+
+func applyRuntimeArtifactsRepair(ctx context.Context, run repairRun) (WorkReadinessAppliedRepair, bool, error) {
+	changed, err := run.git.ExcludeLocalPattern(ctx, run.projectDir, ".chc/user/runtime/")
+	if err != nil {
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairIgnoreRuntimeArtifacts,
+		Detail: "excluded .chc/user/runtime/ in local Git info exclude",
+	}, changed, nil
+}
+
+func applyFetchRemoteRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+	err := run.git.FetchRemote(ctx, run.projectDir, diagnostic.Remote)
+	if err != nil {
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("fetch remote: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairFetchRemote,
+		Detail: fmt.Sprintf("fetched %s", diagnostic.Remote),
+	}, true, nil
+}
+
+func applyFastForwardRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+	if !run.branchMutationSafe {
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
+
+	err := run.git.FastForwardBranch(ctx, run.projectDir, diagnostic.ExpectedBranch, diagnostic.RemoteRef)
+	if err != nil {
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("fast-forward branch: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairFastForwardBranch,
+		Detail: fmt.Sprintf("fast-forwarded %s from %s", diagnostic.ExpectedBranch, diagnostic.RemoteRef),
+	}, true, nil
+}
+
+func applySwitchBranchRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+	if !run.branchMutationSafe {
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
+
+	err := run.git.SwitchBranch(ctx, run.projectDir, diagnostic.ExpectedBranch)
+	if err != nil {
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("switch branch: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairSwitchBranch,
+		Detail: fmt.Sprintf("switched to %s", diagnostic.ExpectedBranch),
+	}, true, nil
+}
+
+func applyCreateBranchRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+	if !run.branchMutationSafe {
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
+
+	err := run.git.CreateBranch(ctx, run.projectDir, diagnostic.ExpectedBranch)
+	if err != nil {
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("create branch: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairCreateBranch,
+		Detail: fmt.Sprintf("created branch %s", diagnostic.ExpectedBranch),
+	}, true, nil
 }
 
 func checkWorkReadinessGitState(ctx context.Context, projectDir string, git WorkReadinessGit, report WorkReadinessReport) (WorkReadinessReport, error) {
@@ -316,6 +452,7 @@ func checkWorkReadinessRemote(ctx context.Context, projectDir string, git WorkRe
 
 func finalizeWorkReadinessReport(report WorkReadinessReport) WorkReadinessReport {
 	report = planWorkReadinessRepairs(report)
+
 	report.Status = WorkReadinessStatusReady
 	for _, diagnostic := range report.Diagnostics {
 		if diagnostic.Severity == WorkReadinessSeverityBlocking {
@@ -583,6 +720,35 @@ func (OSWorkReadinessGit) ExcludeLocalPattern(ctx context.Context, projectDir, p
 	return appendLineIfMissing(path, pattern)
 }
 
+// FetchRemote executes the corresponding package operation.
+func (OSWorkReadinessGit) FetchRemote(ctx context.Context, projectDir, remote string) error {
+	return runWorkReadinessGit(ctx, projectDir, "fetch", remote)
+}
+
+// FastForwardBranch executes the corresponding package operation.
+func (git OSWorkReadinessGit) FastForwardBranch(ctx context.Context, projectDir, branch, ref string) error {
+	current, err := git.CurrentBranch(ctx, projectDir)
+	if err != nil {
+		return err
+	}
+
+	if current != branch {
+		return fmt.Errorf("current branch is %s, expected %s", current, branch)
+	}
+
+	return runWorkReadinessGit(ctx, projectDir, "merge", "--ff-only", ref)
+}
+
+// SwitchBranch executes the corresponding package operation.
+func (OSWorkReadinessGit) SwitchBranch(ctx context.Context, projectDir, branch string) error {
+	return runWorkReadinessGit(ctx, projectDir, "switch", branch)
+}
+
+// CreateBranch executes the corresponding package operation.
+func (OSWorkReadinessGit) CreateBranch(ctx context.Context, projectDir, branch string) error {
+	return runWorkReadinessGit(ctx, projectDir, "switch", "-c", branch)
+}
+
 func gitRefExists(ctx context.Context, projectDir, ref string) (bool, error) {
 	output, err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--verify", ref).CombinedOutput()
 	if err == nil {
@@ -614,6 +780,22 @@ func gitCommandOutputLooksUnavailable(output []byte) bool {
 	return strings.Contains(string(output), "not a git repository")
 }
 
+func runWorkReadinessGit(ctx context.Context, projectDir string, args ...string) error {
+	commandArgs := append([]string{"-C", projectDir}, args...)
+
+	output, err := exec.CommandContext(ctx, "git", commandArgs...).CombinedOutput()
+	if err == nil {
+		return nil
+	}
+
+	detail := strings.TrimSpace(string(output))
+	if detail == "" {
+		return fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
+	}
+
+	return fmt.Errorf("git %s: %w: %s", strings.Join(args, " "), err, detail)
+}
+
 func appendLineIfMissing(path, value string) (bool, error) {
 	value = strings.TrimSpace(value)
 	if value == "" {
@@ -638,6 +820,7 @@ func appendLineIfMissing(path, value string) (bool, error) {
 	if next != "" && !strings.HasSuffix(next, "\n") {
 		next += "\n"
 	}
+
 	next += value + "\n"
 
 	err = os.WriteFile(path, []byte(next), 0o644)
