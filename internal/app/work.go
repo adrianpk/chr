@@ -19,11 +19,21 @@ func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Name:  "work",
 		Usage: "Run agent work for tickets",
 		Commands: []*cli.Command{
+			newWorkDoctorCommand(stdout, deps),
 			newWorkEventsCommand(stdout, deps),
 			newWorkLogsCommand(stdout, deps),
 			newWorkTicketCommand(stdout, deps),
 			newWorkRunAllCommand(stdout, deps),
 		},
+	}
+}
+
+func newWorkDoctorCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+	return &cli.Command{
+		Name:   "doctor",
+		Usage:  "Inspect work readiness without starting agent work",
+		Flags:  workProjectFlags(),
+		Action: workDoctorAction(stdout, deps),
 	}
 }
 
@@ -115,6 +125,34 @@ func workRunAllFlags() []cli.Flag {
 			Usage: "ticket order: key, created_at, priority, severity, priority_severity",
 		},
 	)
+}
+
+func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		if cmd.NArg() != 0 {
+			return fmt.Errorf("work doctor does not accept positional arguments")
+		}
+
+		_, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
+		if err != nil {
+			return err
+		}
+
+		branchPolicy, err := workSelectionBranchPolicy(projectContext.ProjectDir)
+		if err != nil {
+			return err
+		}
+
+		report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
+			ProjectDir: projectContext.ProjectDir,
+			Policy:     branchPolicy,
+		})
+		if err != nil {
+			return err
+		}
+
+		return printWorkReadinessReport(stdout, projectContext, report)
+	}
 }
 
 func workTicketAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
@@ -451,6 +489,48 @@ func printAgentWorkTicketQueue(stdout io.Writer, tickets []core.IndexedTicket) e
 	}
 
 	return nil
+}
+
+func printWorkReadinessReport(stdout io.Writer, projectContext commandProjectContext, report core.WorkReadinessReport) error {
+	lines := []string{
+		"work: doctor",
+		fmt.Sprintf("project: %s", projectContext.ProjectID),
+		fmt.Sprintf("status: %s", report.Status),
+		fmt.Sprintf("mode: %s", report.Policy.Mode),
+		fmt.Sprintf("integration_branch: %s", emptyWorkDoctorField(report.Policy.IntegrationBranch)),
+		fmt.Sprintf("canonical_remote: %s", emptyWorkDoctorField(report.Policy.CanonicalRemote)),
+		fmt.Sprintf("require_clean_worktree: %t", report.Policy.RequireCleanWorktree),
+		fmt.Sprintf("require_remote_tracking: %t", report.Policy.RequireRemoteTracking),
+		fmt.Sprintf("current_branch: %s", emptyWorkDoctorField(report.CurrentBranch)),
+		fmt.Sprintf("diagnostics: %d", len(report.Diagnostics)),
+	}
+
+	if err := printAgentWorkLines(stdout, lines); err != nil {
+		return err
+	}
+
+	for _, diagnostic := range report.Diagnostics {
+		_, err := fmt.Fprintf(
+			stdout,
+			"diagnostic: %s\t%s\t%s\n",
+			diagnostic.Code,
+			diagnostic.Severity,
+			diagnostic.Detail,
+		)
+		if err != nil {
+			return fmt.Errorf("write agent work result: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func emptyWorkDoctorField(value string) string {
+	if strings.TrimSpace(value) == "" {
+		return "none"
+	}
+
+	return value
 }
 
 func printAgentWorkLines(stdout io.Writer, lines []string) error {
