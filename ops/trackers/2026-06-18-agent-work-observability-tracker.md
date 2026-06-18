@@ -14,8 +14,8 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | agent event model | delivered | `feat/slice-1-agent-event-model` | `#308` | `.prj/reports/slices/agent-work-observability/slice-1-agent-event-model.md` |
 | Slice 2 | work lifecycle events | delivered | `feat/slice-2-work-lifecycle-events` | `#309` | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
-| Slice 3 | dash live work stream | reviewing | `feat/slice-3-dash-live-work-stream` | pending | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
-| Slice 4 | execution log lookup | planned | `feat/slice-4-execution-log-lookup` | pending | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
+| Slice 3 | dash live work stream | delivered | `feat/slice-3-dash-live-work-stream` | `#310` | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
+| Slice 4 | execution log lookup | active | `feat/slice-4-execution-log-lookup` | pending | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
 | Slice 5 | event readback recovery | planned | `feat/slice-5-event-readback-recovery` | pending | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
 
 ## Slice 1 Tasks

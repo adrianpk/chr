@@ -1,11 +1,11 @@
 # Slice 3: Dash Live Work Stream
 
-Status: reviewing
+Status: delivered
 Slicing: Agent Work Observability
 Plan: `ops/plans/2026-06-18-agent-work-observability-plan.md`
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 Branch: `feat/slice-3-dash-live-work-stream`
-PR: pending
+PR: #310
 
 ## Purpose
 
