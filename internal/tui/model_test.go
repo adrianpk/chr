@@ -2621,6 +2621,7 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 				Time:          "11:31:02",
 				Level:         "info",
 				TicketKey:     "CHC-2",
+				ExecutionID:   "exec-2",
 				Message:       "worker started",
 				RuntimeLog:    ".chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
 				ValidationLog: ".chc/user/runtime/runs/CHC-2/exec-2/validation.log",
@@ -2640,6 +2641,7 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 		"11:31:03 CHC-2 error: validation failed",
 		"Runtime log: .chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
 		"Validation log: .chc/user/runtime/runs/CHC-2/exec-2/validation.log",
+		"Lookup: chc work logs exec-2",
 	} {
 		if !strings.Contains(action, want) {
 			t.Fatalf("renderWorkAction() missing %q:\n%s", want, action)

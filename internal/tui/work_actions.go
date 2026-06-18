@@ -168,24 +168,36 @@ func (m Model) renderRunningWorkAction() string {
 		}
 	}
 
-	runtimeLog, validationLog := latestWorkActionLogPaths(events)
-	if runtimeLog != "" || validationLog != "" {
-		output.WriteString("\nDetails\n")
-
-		if runtimeLog != "" {
-			output.WriteString("  Runtime log: ")
-			output.WriteString(runtimeLog)
-			output.WriteString("\n")
-		}
-
-		if validationLog != "" {
-			output.WriteString("  Validation log: ")
-			output.WriteString(validationLog)
-			output.WriteString("\n")
-		}
-	}
+	output.WriteString(renderWorkActionDetails(events))
 
 	return strings.TrimRight(output.String(), "\n")
+}
+
+func renderWorkActionDetails(events []AgentEventView) string {
+	runtimeLog, validationLog, executionID := latestWorkActionDetails(events)
+	if runtimeLog == "" && validationLog == "" && executionID == "" {
+		return ""
+	}
+
+	var output strings.Builder
+
+	output.WriteString("\nDetails\n")
+	writeWorkActionDetail(&output, "Runtime log: ", runtimeLog)
+	writeWorkActionDetail(&output, "Validation log: ", validationLog)
+	writeWorkActionDetail(&output, "Lookup: chc work logs ", executionID)
+
+	return output.String()
+}
+
+func writeWorkActionDetail(output *strings.Builder, label, value string) {
+	if value == "" {
+		return
+	}
+
+	output.WriteString("  ")
+	output.WriteString(label)
+	output.WriteString(value)
+	output.WriteString("\n")
 }
 
 func recentWorkActionEvents(events []AgentEventView, limit int) []AgentEventView {
@@ -223,10 +235,11 @@ func renderWorkActionEvent(event AgentEventView) string {
 	return strings.Join(parts, " ")
 }
 
-func latestWorkActionLogPaths(events []AgentEventView) (string, string) {
+func latestWorkActionDetails(events []AgentEventView) (string, string, string) {
 	var (
 		runtimeLog    string
 		validationLog string
+		executionID   string
 	)
 
 	for index := len(events) - 1; index >= 0; index-- {
@@ -239,12 +252,16 @@ func latestWorkActionLogPaths(events []AgentEventView) (string, string) {
 			validationLog = strings.TrimSpace(event.ValidationLog)
 		}
 
-		if runtimeLog != "" && validationLog != "" {
+		if executionID == "" {
+			executionID = strings.TrimSpace(event.ExecutionID)
+		}
+
+		if runtimeLog != "" && validationLog != "" && executionID != "" {
 			break
 		}
 	}
 
-	return runtimeLog, validationLog
+	return runtimeLog, validationLog, executionID
 }
 
 func (m Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
