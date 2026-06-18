@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/urfave/cli/v3"
 
@@ -15,9 +16,20 @@ func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Name:  "work",
 		Usage: "Run agent work for tickets",
 		Commands: []*cli.Command{
+			newWorkLogsCommand(stdout, deps),
 			newWorkTicketCommand(stdout, deps),
 			newWorkRunAllCommand(stdout, deps),
 		},
+	}
+}
+
+func newWorkLogsCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+	return &cli.Command{
+		Name:      "logs",
+		Usage:     "Locate runtime logs for one execution",
+		ArgsUsage: "<execution-id>",
+		Flags:     workProjectFlags(),
+		Action:    workLogsAction(stdout, deps),
 	}
 }
 
@@ -137,6 +149,40 @@ func workRunAllAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	}
 }
 
+func workLogsAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		if cmd.NArg() != 1 {
+			return fmt.Errorf("work logs requires exactly one execution id argument")
+		}
+
+		operations, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
+		if err != nil {
+			return err
+		}
+
+		repository, err := core.NewExecutionRepository(ctx, operations.env, deps.assetsFS)
+		if err != nil {
+			return err
+		}
+
+		defer func() {
+			//nolint:errcheck // Lookup result is already complete at this point.
+			_ = repository.Close()
+		}()
+
+		record, err := repository.GetExecution(ctx, cmd.Args().First())
+		if err != nil {
+			return err
+		}
+
+		if record.ProjectID != projectContext.ProjectID {
+			return fmt.Errorf("%w: %s", core.ErrExecutionNotFound, cmd.Args().First())
+		}
+
+		return printWorkExecutionLogs(stdout, projectContext.ProjectDir, record)
+	}
+}
+
 func workServiceFromCommand(
 	ctx context.Context,
 	cmd *cli.Command,
@@ -247,6 +293,59 @@ func printAgentWorkRunAllExecution(stdout io.Writer, result AgentWorkResult) err
 	}
 
 	return nil
+}
+
+func printWorkExecutionLogs(stdout io.Writer, projectDir string, record core.ExecutionRecord) error {
+	entries := []struct {
+		label string
+		path  string
+	}{
+		{label: "run_dir", path: record.Artifacts.RunDir},
+		{label: "runtime_log", path: record.Artifacts.LogPath},
+		{label: "validation_log", path: record.Artifacts.ValidationPath},
+		{label: "result", path: record.Artifacts.ResultPath},
+		{label: "execution_report", path: core.ExecutionReportPath(record)},
+		{label: "events", path: core.AgentEventStreamPath(record.Artifacts.RunDir)},
+	}
+
+	lines := []string{
+		"work: logs",
+		fmt.Sprintf("execution: %s", record.ID),
+		fmt.Sprintf("ticket: %s", record.TicketKey),
+		fmt.Sprintf("status: %s", record.Status),
+		fmt.Sprintf("validation_command: %s", record.Runtime.ValidationCommand),
+	}
+
+	for _, entry := range entries {
+		exists, err := workLogPathExists(entry.path)
+		if err != nil {
+			return err
+		}
+
+		lines = append(lines,
+			fmt.Sprintf("%s_path: %s", entry.label, relativeProjectPath(projectDir, entry.path)),
+			fmt.Sprintf("%s_exists: %t", entry.label, exists),
+		)
+	}
+
+	return printAgentWorkLines(stdout, lines)
+}
+
+func workLogPathExists(path string) (bool, error) {
+	if path == "" {
+		return false, nil
+	}
+
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+
+	return false, fmt.Errorf("inspect work log path %s: %w", path, err)
 }
 
 func printAgentWorkTicketQueue(stdout io.Writer, tickets []core.IndexedTicket) error {
