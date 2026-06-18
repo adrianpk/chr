@@ -86,3 +86,16 @@ type WorkReadinessRepair struct {
 	Safe      bool
 	Detail    string
 }
+
+// WorkReadinessRepairResult describes a package boundary value.
+type WorkReadinessRepairResult struct {
+	Before  WorkReadinessReport
+	After   WorkReadinessReport
+	Applied []WorkReadinessAppliedRepair
+}
+
+// WorkReadinessAppliedRepair describes a package boundary value.
+type WorkReadinessAppliedRepair struct {
+	Code   WorkReadinessRepairCode
+	Detail string
+}

@@ -17,6 +17,13 @@ type WorkReadinessOptions struct {
 	Git        WorkReadinessGit
 }
 
+// WorkReadinessRepairOptions describes a package boundary value.
+type WorkReadinessRepairOptions struct {
+	ProjectDir string
+	Policy     WorkBranchPolicy
+	Git        WorkReadinessRepairGit
+}
+
 // WorkReadinessGit defines a package boundary interface.
 type WorkReadinessGit interface {
 	CurrentBranch(ctx context.Context, projectDir string) (string, error)
@@ -25,6 +32,12 @@ type WorkReadinessGit interface {
 	RefExists(ctx context.Context, projectDir, ref string) (bool, error)
 	BranchContainsRef(ctx context.Context, projectDir, branch, ref string) (bool, error)
 	GitStateInProgress(ctx context.Context, projectDir string) (string, bool, error)
+}
+
+// WorkReadinessRepairGit defines a package boundary interface.
+type WorkReadinessRepairGit interface {
+	WorkReadinessGit
+	ExcludeLocalPattern(ctx context.Context, projectDir, pattern string) (bool, error)
 }
 
 // OSWorkReadinessGit describes a package boundary value.
@@ -70,6 +83,106 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 	}
 
 	return checkWorkReadinessGitState(ctx, projectDir, git, report)
+}
+
+// RepairWorkReadiness executes the corresponding package operation.
+func RepairWorkReadiness(ctx context.Context, opts WorkReadinessRepairOptions) (WorkReadinessRepairResult, error) {
+	err := ctx.Err()
+	if err != nil {
+		return WorkReadinessRepairResult{}, err
+	}
+
+	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	if err != nil {
+		return WorkReadinessRepairResult{}, err
+	}
+
+	policy := opts.Policy
+	if policy == (WorkBranchPolicy{}) {
+		policy = DefaultWorkBranchPolicy()
+	}
+
+	git := opts.Git
+	if git == nil {
+		git = OSWorkReadinessGit{}
+	}
+
+	before, err := CheckWorkReadiness(ctx, WorkReadinessOptions{
+		ProjectDir: projectDir,
+		Policy:     policy,
+		Git:        git,
+	})
+	if err != nil {
+		return WorkReadinessRepairResult{}, err
+	}
+
+	result := WorkReadinessRepairResult{Before: before, After: before}
+	if !policy.AllowSafeRepair {
+		return result, nil
+	}
+
+	result.Applied, err = applySafeWorkReadinessRepairs(ctx, projectDir, git, before.Diagnostics)
+	if err != nil {
+		return WorkReadinessRepairResult{}, err
+	}
+
+	result.After, err = CheckWorkReadiness(ctx, WorkReadinessOptions{
+		ProjectDir: projectDir,
+		Policy:     policy,
+		Git:        git,
+	})
+	if err != nil {
+		return WorkReadinessRepairResult{}, err
+	}
+
+	return result, nil
+}
+
+func applySafeWorkReadinessRepairs(
+	ctx context.Context,
+	projectDir string,
+	git WorkReadinessRepairGit,
+	diagnostics []WorkReadinessDiagnostic,
+) ([]WorkReadinessAppliedRepair, error) {
+	applied := make([]WorkReadinessAppliedRepair, 0)
+	for _, diagnostic := range diagnostics {
+		if !diagnostic.Repair.Available || !diagnostic.Repair.Safe {
+			continue
+		}
+
+		repair, ok, err := applySafeWorkReadinessRepair(ctx, projectDir, git, diagnostic)
+		if err != nil {
+			return nil, err
+		}
+
+		if ok {
+			applied = append(applied, repair)
+		}
+	}
+
+	return applied, nil
+}
+
+func applySafeWorkReadinessRepair(
+	ctx context.Context,
+	projectDir string,
+	git WorkReadinessRepairGit,
+	diagnostic WorkReadinessDiagnostic,
+) (WorkReadinessAppliedRepair, bool, error) {
+	switch diagnostic.Repair.Code {
+	case WorkReadinessRepairIgnoreRuntimeArtifacts:
+		changed, err := git.ExcludeLocalPattern(ctx, projectDir, ".chc/user/runtime/")
+		if err != nil {
+			return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
+		}
+
+		return WorkReadinessAppliedRepair{
+			Code:   WorkReadinessRepairIgnoreRuntimeArtifacts,
+			Detail: "excluded .chc/user/runtime/ in local Git info exclude",
+		}, changed, nil
+	default:
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
 }
 
 func checkWorkReadinessGitState(ctx context.Context, projectDir string, git WorkReadinessGit, report WorkReadinessReport) (WorkReadinessReport, error) {
@@ -455,6 +568,21 @@ func (OSWorkReadinessGit) GitStateInProgress(ctx context.Context, projectDir str
 	return "", false, nil
 }
 
+// ExcludeLocalPattern executes the corresponding package operation.
+func (OSWorkReadinessGit) ExcludeLocalPattern(ctx context.Context, projectDir, pattern string) (bool, error) {
+	err := ctx.Err()
+	if err != nil {
+		return false, err
+	}
+
+	path, err := gitPath(ctx, projectDir, "info/exclude")
+	if err != nil {
+		return false, err
+	}
+
+	return appendLineIfMissing(path, pattern)
+}
+
 func gitRefExists(ctx context.Context, projectDir, ref string) (bool, error) {
 	output, err := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--verify", ref).CombinedOutput()
 	if err == nil {
@@ -484,6 +612,50 @@ func gitPath(ctx context.Context, projectDir, path string) (string, error) {
 
 func gitCommandOutputLooksUnavailable(output []byte) bool {
 	return strings.Contains(string(output), "not a git repository")
+}
+
+func appendLineIfMissing(path, value string) (bool, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return false, nil
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return false, fmt.Errorf("read %s: %w", path, err)
+	}
+
+	if lineExists(string(content), value) {
+		return false, nil
+	}
+
+	err = os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		return false, fmt.Errorf("create %s parent: %w", path, err)
+	}
+
+	next := string(content)
+	if next != "" && !strings.HasSuffix(next, "\n") {
+		next += "\n"
+	}
+	next += value + "\n"
+
+	err = os.WriteFile(path, []byte(next), 0o644)
+	if err != nil {
+		return false, fmt.Errorf("write %s: %w", path, err)
+	}
+
+	return true, nil
+}
+
+func lineExists(content, value string) bool {
+	for _, line := range strings.Split(content, "\n") {
+		if strings.TrimSpace(line) == value {
+			return true
+		}
+	}
+
+	return false
 }
 
 func workReadinessNonEmptyLines(value string) []string {
