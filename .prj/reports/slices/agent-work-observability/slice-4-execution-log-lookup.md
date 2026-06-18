@@ -1,11 +1,11 @@
 # Slice 4: Execution Log Lookup
 
-Status: reviewing
+Status: delivered
 Slicing: Agent Work Observability
 Plan: `ops/plans/2026-06-18-agent-work-observability-plan.md`
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 Branch: `feat/slice-4-execution-log-lookup`
-PR: pending
+PR: #311
 
 ## Purpose
 

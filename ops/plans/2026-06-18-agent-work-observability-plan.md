@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 4 - execution log lookup
+Active Slice: Slice 5 - event readback recovery
 
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 
