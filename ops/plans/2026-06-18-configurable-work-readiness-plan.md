@@ -1,6 +1,6 @@
 # Configurable Work Readiness Plan
 
-Status: planned
+Status: reviewing
 
 Active Slice: Slice 1 - work policy config
 
