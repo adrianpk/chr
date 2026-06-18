@@ -3,6 +3,10 @@ package core
 import (
 	"context"
 	"errors"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -103,6 +107,143 @@ func TestCheckWorkReadinessNoGitEnforcementSkipsGit(t *testing.T) {
 	}
 }
 
+func TestRepairWorkReadinessIgnoresRuntimeArtifacts(t *testing.T) {
+	git := &fakeWorkReadinessRepairGit{
+		branch:            "dev",
+		cleanStatus:       []string{"?? .chc/user/runtime/runs/"},
+		branchExists:      true,
+		remoteRefExists:   true,
+		branchContainsRef: true,
+	}
+
+	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
+		ProjectDir: t.TempDir(),
+		Policy:     DefaultWorkBranchPolicy(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("RepairWorkReadiness returned error: %v", err)
+	}
+
+	assertAppliedWorkReadinessRepair(t, result, WorkReadinessRepairIgnoreRuntimeArtifacts)
+
+	if result.After.Status != WorkReadinessStatusReady {
+		t.Fatalf("After.Status = %s, want ready", result.After.Status)
+	}
+
+	result, err = RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
+		ProjectDir: t.TempDir(),
+		Policy:     DefaultWorkBranchPolicy(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("RepairWorkReadiness second run returned error: %v", err)
+	}
+
+	if len(result.Applied) != 0 {
+		t.Fatalf("Applied = %#v, want no idempotent repairs", result.Applied)
+	}
+}
+
+func TestRepairWorkReadinessFetchesThenFastForwardsBranch(t *testing.T) {
+	git := &fakeWorkReadinessRepairGit{
+		branch:            "dev",
+		branchExists:      true,
+		remoteRefExists:   false,
+		branchContainsRef: false,
+	}
+
+	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
+		ProjectDir: t.TempDir(),
+		Policy:     DefaultWorkBranchPolicy(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("RepairWorkReadiness returned error: %v", err)
+	}
+
+	assertAppliedWorkReadinessRepair(t, result, WorkReadinessRepairFetchRemote)
+	assertAppliedWorkReadinessRepair(t, result, WorkReadinessRepairFastForwardBranch)
+
+	if result.After.Status != WorkReadinessStatusReady {
+		t.Fatalf("After.Status = %s, want ready", result.After.Status)
+	}
+}
+
+func TestRepairWorkReadinessCreatesAllowedMissingBranch(t *testing.T) {
+	policy := DefaultWorkBranchPolicy()
+	policy.RequireRemoteTracking = false
+	policy.AllowBranchCreation = true
+	git := &fakeWorkReadinessRepairGit{
+		branch:       "main",
+		branchExists: false,
+	}
+
+	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
+		ProjectDir: t.TempDir(),
+		Policy:     policy,
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("RepairWorkReadiness returned error: %v", err)
+	}
+
+	assertAppliedWorkReadinessRepair(t, result, WorkReadinessRepairCreateBranch)
+
+	if result.After.Status != WorkReadinessStatusReady {
+		t.Fatalf("After.Status = %s, want ready", result.After.Status)
+	}
+}
+
+func TestRepairWorkReadinessRefusesBranchMutationWithUserChanges(t *testing.T) {
+	git := &fakeWorkReadinessRepairGit{
+		branch:            "main",
+		cleanStatus:       []string{" M main.go"},
+		branchExists:      true,
+		remoteRefExists:   true,
+		branchContainsRef: true,
+	}
+
+	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
+		ProjectDir: t.TempDir(),
+		Policy:     DefaultWorkBranchPolicy(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("RepairWorkReadiness returned error: %v", err)
+	}
+
+	if len(result.Applied) != 0 {
+		t.Fatalf("Applied = %#v, want no branch repair with user changes", result.Applied)
+	}
+
+	if git.branch != "main" {
+		t.Fatalf("branch = %s, want main", git.branch)
+	}
+}
+
+func TestOSWorkReadinessGitExcludeLocalPatternIsIdempotent(t *testing.T) {
+	projectDir := t.TempDir()
+	runWorkReadinessTestGit(t, projectDir, "init")
+
+	git := OSWorkReadinessGit{}
+	for range 2 {
+		_, err := git.ExcludeLocalPattern(context.Background(), projectDir, ".chc/user/runtime/")
+		if err != nil {
+			t.Fatalf("ExcludeLocalPattern returned error: %v", err)
+		}
+	}
+
+	content, err := os.ReadFile(filepath.Join(projectDir, ".git", "info", "exclude"))
+	if err != nil {
+		t.Fatalf("read local exclude: %v", err)
+	}
+
+	if count := strings.Count(string(content), ".chc/user/runtime/"); count != 1 {
+		t.Fatalf("exclude content = %q, want one runtime pattern", string(content))
+	}
+}
+
 func assertWorkReadinessDiagnostic(t *testing.T, report WorkReadinessReport, code WorkReadinessDiagnosticCode) {
 	t.Helper()
 
@@ -117,6 +258,34 @@ func assertWorkReadinessDiagnostic(t *testing.T, report WorkReadinessReport, cod
 	}
 
 	t.Fatalf("Diagnostics = %#v, want code %s", report.Diagnostics, code)
+}
+
+func assertAppliedWorkReadinessRepair(t *testing.T, result WorkReadinessRepairResult, code WorkReadinessRepairCode) {
+	t.Helper()
+
+	for _, repair := range result.Applied {
+		if repair.Code == code {
+			return
+		}
+	}
+
+	t.Fatalf("Applied = %#v, want code %s", result.Applied, code)
+}
+
+func runWorkReadinessTestGit(t *testing.T, projectDir string, args ...string) {
+	t.Helper()
+
+	commandArgs := append([]string{
+		"-C", projectDir,
+		"-c", "user.name=ChrysoCoord Test",
+		"-c", "user.email=chc@example.test",
+	}, args...)
+	cmd := exec.Command("git", commandArgs...)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %v failed: %v\n%s", args, err, string(output))
+	}
 }
 
 type fakeWorkReadinessGit struct {
@@ -176,4 +345,78 @@ func (git fakeWorkReadinessGit) GitStateInProgress(context.Context, string) (str
 	}
 
 	return git.gitState, git.gitStateActive, nil
+}
+
+type fakeWorkReadinessRepairGit struct {
+	branch            string
+	cleanStatus       []string
+	branchExists      bool
+	remoteRefExists   bool
+	branchContainsRef bool
+	gitState          string
+	gitStateActive    bool
+	excludedPatterns  []string
+}
+
+func (git *fakeWorkReadinessRepairGit) CurrentBranch(context.Context, string) (string, error) {
+	return git.branch, nil
+}
+
+func (git *fakeWorkReadinessRepairGit) WorktreeStatus(context.Context, string) ([]string, error) {
+	return git.cleanStatus, nil
+}
+
+func (git *fakeWorkReadinessRepairGit) BranchExists(context.Context, string, string) (bool, error) {
+	return git.branchExists, nil
+}
+
+func (git *fakeWorkReadinessRepairGit) RefExists(context.Context, string, string) (bool, error) {
+	return git.remoteRefExists, nil
+}
+
+func (git *fakeWorkReadinessRepairGit) BranchContainsRef(context.Context, string, string, string) (bool, error) {
+	return git.branchContainsRef, nil
+}
+
+func (git *fakeWorkReadinessRepairGit) GitStateInProgress(context.Context, string) (string, bool, error) {
+	return git.gitState, git.gitStateActive, nil
+}
+
+func (git *fakeWorkReadinessRepairGit) ExcludeLocalPattern(_ context.Context, _, pattern string) (bool, error) {
+	for _, existing := range git.excludedPatterns {
+		if existing == pattern {
+			return false, nil
+		}
+	}
+
+	_, userChanges := splitWorktreeStatus(git.cleanStatus)
+	git.cleanStatus = userChanges
+	git.excludedPatterns = append(git.excludedPatterns, pattern)
+
+	return true, nil
+}
+
+func (git *fakeWorkReadinessRepairGit) FetchRemote(context.Context, string, string) error {
+	git.remoteRefExists = true
+
+	return nil
+}
+
+func (git *fakeWorkReadinessRepairGit) FastForwardBranch(context.Context, string, string, string) error {
+	git.branchContainsRef = true
+
+	return nil
+}
+
+func (git *fakeWorkReadinessRepairGit) SwitchBranch(_ context.Context, _, branch string) error {
+	git.branch = branch
+
+	return nil
+}
+
+func (git *fakeWorkReadinessRepairGit) CreateBranch(_ context.Context, _, branch string) error {
+	git.branch = branch
+	git.branchExists = true
+
+	return nil
 }

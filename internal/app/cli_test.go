@@ -2758,6 +2758,54 @@ func TestWorkDoctorHonorsNoGitEnforcementConfig(t *testing.T) {
 	}
 }
 
+func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
+	projectDir := newGateCLIGitProject(t)
+	devRoot := t.TempDir()
+
+	runGateCLIGit(t, projectDir, "switch", "-c", "dev")
+	runGateCLIGit(t, projectDir, "add", ".chc/.keep")
+	runGateCLIGit(t, projectDir, "commit", "-m", "base")
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  require_remote_tracking: false
+`)
+	runGateCLIGit(t, projectDir, "add", ".chc/user/config.yml")
+	runGateCLIGit(t, projectDir, "commit", "-m", "work config")
+	writeGateCLIFile(t, projectDir, ".chc/user/runtime/runs/run-1/events.jsonl", "{}\n")
+	addProject(t, devRoot, "example", projectDir)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"doctor",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--fix-safe",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work doctor --fix-safe returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: doctor",
+		"fix_safe: true",
+		"repairs_applied: 1",
+		"repair_applied: ignore_runtime_artifacts\texcluded .chc/user/runtime/ in local Git info exclude",
+		"status: ready",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	exclude := readFile(t, filepath.Join(projectDir, ".git", "info", "exclude"))
+	if !strings.Contains(exclude, ".chc/user/runtime/") {
+		t.Fatalf("exclude = %q, want runtime ignore", exclude)
+	}
+}
+
 func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
