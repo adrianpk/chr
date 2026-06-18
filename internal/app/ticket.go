@@ -683,10 +683,15 @@ func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, proje
 		return nil, err
 	}
 
+	branchPolicy, err := workSelectionBranchPolicy(projectContext.ProjectDir)
+	if err != nil {
+		return nil, err
+	}
+
 	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{
-		ProjectDir:        projectContext.ProjectDir,
-		Tickets:           allTickets,
-		RequireUpdatedDev: true,
+		ProjectDir:   projectContext.ProjectDir,
+		Tickets:      allTickets,
+		BranchPolicy: branchPolicy,
 	})
 	if err != nil {
 		return nil, err
@@ -756,11 +761,16 @@ func deduplicateTicketLoopTickets(tickets []core.IndexedTicket) []core.IndexedTi
 }
 
 func enforceWorkSelectionPreflight(ctx context.Context, projectContext commandProjectContext, tickets []core.IndexedTicket, selectedTicketKey string) error {
+	branchPolicy, err := workSelectionBranchPolicy(projectContext.ProjectDir)
+	if err != nil {
+		return err
+	}
+
 	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{
 		ProjectDir:        projectContext.ProjectDir,
 		Tickets:           tickets,
 		SelectedTicketKey: selectedTicketKey,
-		RequireUpdatedDev: true,
+		BranchPolicy:      branchPolicy,
 	})
 	if err != nil {
 		return err
