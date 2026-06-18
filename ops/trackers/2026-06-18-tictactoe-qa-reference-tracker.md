@@ -1,6 +1,6 @@
 # Tictactoe QA Reference Tracker
 
-Status: reviewing
+Status: complete
 
 Plan: `ops/plans/2026-06-18-tictactoe-qa-reference-plan.md`
 
@@ -8,7 +8,7 @@ Plan: `ops/plans/2026-06-18-tictactoe-qa-reference-plan.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | tictactoe qa reference | reviewing | `feat/slice-1-tictactoe-qa-reference` | pending | `.prj/reports/slices/tictactoe-qa-reference/slice-1-tictactoe-qa-reference.md` |
+| Slice 1 | tictactoe qa reference | delivered | `feat/slice-1-tictactoe-qa-reference` | `#306` | `.prj/reports/slices/tictactoe-qa-reference/slice-1-tictactoe-qa-reference.md` |
 
 ## Slice 1 Tasks
 
@@ -17,7 +17,7 @@ Plan: `ops/plans/2026-06-18-tictactoe-qa-reference-plan.md`
 | T1.1 | Add the tictactoe Go reference project with a compilable incomplete CLI. | done | `eb74b1b` | Project is small, standard-library only, and intentionally incomplete. |
 | T1.2 | Seed ChrysoCoord project, use-case, dump, and quiz artifacts for the CLI gameplay workflow. | done | `c5bb571` | Primary flow has no generated specs, plans, tracking, or tickets. |
 | T1.3 | Add reset/test/smoke wiring and documentation for the tictactoe QA case. | done | `6b4f9de` | Scenario resets through the existing QA reference mechanism. |
-| T1.4 | Validate the resettable scenario and add the slice implementation report. | done | this commit | Added reviewing report and validation evidence. |
+| T1.4 | Validate the resettable scenario and add the slice implementation report. | done | `7a37d66` | Added delivered report and validation evidence. |
 
 ## Validation Log
 
