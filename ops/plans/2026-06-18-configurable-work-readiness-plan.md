@@ -1,8 +1,8 @@
 # Configurable Work Readiness Plan
 
-Status: reviewing
+Status: active
 
-Active Slice: Slice 1 - work policy config
+Active Slice: Slice 2 - work doctor diagnostics
 
 Tracker: `ops/trackers/2026-06-18-configurable-work-readiness-tracker.md`
 

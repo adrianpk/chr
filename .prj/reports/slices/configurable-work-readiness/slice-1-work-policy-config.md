@@ -1,11 +1,11 @@
 # Slice 1: Work Policy Config
 
-Status: reviewing
+Status: delivered
 Slicing: Configurable Work Readiness
 Plan: `ops/plans/2026-06-18-configurable-work-readiness-plan.md`
 Tracker: `ops/trackers/2026-06-18-configurable-work-readiness-tracker.md`
 Branch: `feat/slice-1-work-policy-config`
-PR: pending
+PR: #313
 
 ## Purpose
 
