@@ -2689,6 +2689,126 @@ func TestWorkTicketRunsSelectedTicket(t *testing.T) {
 	}
 }
 
+func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	record := cliExecutionRecord(projectDir, runDir)
+
+	addProject(t, devRoot, "example", projectDir)
+	createCLIExecutionRecord(t, devRoot, record)
+	writeCLIExecutionArtifacts(t, record)
+
+	err := os.WriteFile(core.AgentEventStreamPath(record.Artifacts.RunDir), []byte("{}\n"), 0o644)
+	if err != nil {
+		t.Fatalf("write events stream: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"work",
+		"logs",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"exec-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work logs returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: logs",
+		"execution: exec-1",
+		"ticket: CHC-1",
+		"status: succeeded",
+		"validation_command: make verify",
+		"run_dir_path: .chc/user/runtime/runs/CHC-1/exec-1",
+		"run_dir_exists: true",
+		"runtime_log_path: .chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
+		"runtime_log_exists: true",
+		"validation_log_path: .chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+		"validation_log_exists: true",
+		"execution_report_path: .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md",
+		"execution_report_exists: true",
+		"events_path: .chc/user/runtime/runs/CHC-1/exec-1/events.jsonl",
+		"events_exists: true",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestWorkLogsReportsMissingArtifacts(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	record := cliExecutionRecord(projectDir, runDir)
+
+	addProject(t, devRoot, "example", projectDir)
+	createCLIExecutionRecord(t, devRoot, record)
+
+	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
+	if err != nil {
+		t.Fatalf("create run dir: %v", err)
+	}
+
+	var stdout bytes.Buffer
+
+	err = run(t.Context(), []string{
+		"work",
+		"logs",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"exec-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work logs returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"run_dir_exists: true",
+		"runtime_log_exists: false",
+		"validation_log_exists: false",
+		"result_exists: false",
+		"execution_report_exists: false",
+		"events_exists: false",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestWorkLogsRejectsMissingExecution(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"work",
+		"logs",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"exec-missing",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("work logs returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "execution not found: exec-missing") {
+		t.Fatalf("error = %v, want missing execution", err)
+	}
+}
+
 func TestWorkRunAllExecutesReadyTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
