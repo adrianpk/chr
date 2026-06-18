@@ -276,22 +276,30 @@ chc work run-all
 
 Dash shows agent-work operations:
 
+- work readiness status and repair guidance;
 - ready queue;
 - current loop or execution state;
 - recent execution and loop outcomes.
 
 When Dash is selected, the TUI periodically reloads ticket and observability
-state from persisted execution, loop, daemon, and runtime records. Refresh does
-not start work or mutate ticket files.
+state from persisted execution, loop, daemon, runtime, and work-readiness
+records. Refresh does not start work or mutate ticket files.
 
 Dash work actions use confirmation prompts:
 
 - `enter` starts the selected ticket;
 - `p` cycles the ready-queue priority filter;
 - `o` cycles the ready-queue order;
-- `R` runs all visible `ready_for_dev` tickets with the selected priority and
-  order;
+- `a` or `R` runs all visible `ready_for_dev` tickets with the selected
+  priority and order;
+- `x` applies safe work-readiness repairs when Dash reports one is available;
 - `s` requests agent stop.
+
+When work readiness is blocked, Dash blocks ticket execution and run-all actions
+before starting agent work. If a safe repair is available, apply `x`, confirm
+the repair, and retry the work action. If Dash reports manual action required,
+use the diagnostic text or `chc work doctor --dir <project>` to inspect the
+same readiness report outside the TUI.
 
 ## Confirmation Modes
 

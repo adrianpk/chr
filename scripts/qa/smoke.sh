@@ -34,6 +34,18 @@ fi
 output_file="$(mktemp)"
 trap 'rm -f "$output_file"' EXIT HUP INT TERM
 
+if ! (cd "$repo_root" && go run ./cmd/chc work doctor --dir "$active_dir" >"$output_file" 2>&1); then
+	echo "qa smoke failed: work readiness doctor failed" >&2
+	cat "$output_file" >&2
+	exit 1
+fi
+
+if ! grep -q '^status: ready$' "$output_file"; then
+	echo "qa smoke failed: work readiness is not ready after reset" >&2
+	cat "$output_file" >&2
+	exit 1
+fi
+
 if [ "$case_name" = "blog" ]; then
 	if "$repo_root/scripts/qa/test.sh" "$case_name" >"$output_file" 2>&1; then
 		echo "qa smoke failed: baseline test unexpectedly passed" >&2

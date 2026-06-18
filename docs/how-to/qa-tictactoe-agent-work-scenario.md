@@ -24,6 +24,15 @@ make qa-test-tictactoe
 The baseline should pass. The project is intentionally incomplete, but it is
 compilable and has enough seed tests to verify the reset.
 
+Run the smoke check before opening the TUI manually:
+
+```sh
+make qa-smoke-tictactoe
+```
+
+The smoke check resets the scenario, verifies the independent Git repository,
+confirms work readiness is ready, and runs the baseline tests.
+
 ## Open CHC
 
 Open CHC against the active scenario:
@@ -58,6 +67,9 @@ Run the generated ticket loop:
 ```sh
 chc work run-all --use-case cli-gameplay --order key
 ```
+
+In Dash, blocked work readiness appears in the Current panel. Use `x` to apply
+a safe repair when one is available, then retry the work action.
 
 Use this scenario to observe whether ChrysoCoord can preserve preseeded human
 context into generated artifacts, launch Codex worker executions for generated

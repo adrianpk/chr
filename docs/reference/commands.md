@@ -312,6 +312,18 @@ chc ticket loop --dry-run
 
 ## Agent Work
 
+Inspect readiness before starting agent work:
+
+```sh
+chc work doctor
+```
+
+Apply safe readiness repairs and print the resulting report:
+
+```sh
+chc work doctor --fix-safe
+```
+
 Run agent work for one ticket:
 
 ```sh

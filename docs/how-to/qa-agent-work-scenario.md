@@ -32,7 +32,8 @@ make qa-smoke-blog
 
 The smoke check resets the scenario, confirms the active project is ignored by
 the parent repository, confirms it has an independent Git repository, and
-confirms the expected failing test is still present.
+confirms work readiness is ready before manual TUI runs. It also confirms the
+expected failing test is still present.
 
 ## Open CHC
 
@@ -59,6 +60,8 @@ The agent should reproduce the failing unknown-post test, fix the status code,
 and leave validation evidence in the ticket workflow.
 
 Agent work initializes missing runtime assets automatically before execution.
+If Dash reports blocked work readiness, use `x` to apply a safe repair when one
+is available, then retry the ticket action.
 
 ## Generate Comments Work
 
