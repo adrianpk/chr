@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -16,10 +19,21 @@ func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Name:  "work",
 		Usage: "Run agent work for tickets",
 		Commands: []*cli.Command{
+			newWorkEventsCommand(stdout, deps),
 			newWorkLogsCommand(stdout, deps),
 			newWorkTicketCommand(stdout, deps),
 			newWorkRunAllCommand(stdout, deps),
 		},
+	}
+}
+
+func newWorkEventsCommand(stdout io.Writer, deps appDependencies) *cli.Command {
+	return &cli.Command{
+		Name:      "events",
+		Usage:     "Summarize one agent event stream",
+		ArgsUsage: "<event-stream-path>",
+		Flags:     workProjectFlags(),
+		Action:    workEventsAction(stdout, deps),
 	}
 }
 
@@ -149,6 +163,30 @@ func workRunAllAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	}
 }
 
+func workEventsAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
+	return func(ctx context.Context, cmd *cli.Command) error {
+		if cmd.NArg() != 1 {
+			return fmt.Errorf("work events requires exactly one event stream path argument")
+		}
+
+		_, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
+		if err != nil {
+			return err
+		}
+
+		path := resolveWorkEventStreamPath(projectContext.ProjectDir, cmd.Args().First())
+
+		stream, err := core.ReadAgentEventStream(ctx, path)
+		if err != nil {
+			return err
+		}
+
+		summary := core.SummarizeAgentEventStream(stream)
+
+		return printWorkEventStreamSummary(stdout, projectContext.ProjectDir, summary)
+	}
+}
+
 func workLogsAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		if cmd.NArg() != 1 {
@@ -181,6 +219,15 @@ func workLogsAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 
 		return printWorkExecutionLogs(stdout, projectContext.ProjectDir, record)
 	}
+}
+
+func resolveWorkEventStreamPath(projectDir, path string) string {
+	path = strings.TrimSpace(path)
+	if filepath.IsAbs(path) {
+		return filepath.Clean(path)
+	}
+
+	return filepath.Join(projectDir, filepath.FromSlash(path))
 }
 
 func workServiceFromCommand(
@@ -329,6 +376,42 @@ func printWorkExecutionLogs(stdout io.Writer, projectDir string, record core.Exe
 	}
 
 	return printAgentWorkLines(stdout, lines)
+}
+
+func printWorkEventStreamSummary(stdout io.Writer, projectDir string, summary core.AgentEventStreamSummary) error {
+	lines := []string{
+		"work: events",
+		fmt.Sprintf("path: %s", relativeProjectPath(projectDir, summary.Path)),
+		fmt.Sprintf("events: %d", summary.EventCount),
+		fmt.Sprintf("malformed: %d", summary.MalformedCount),
+		fmt.Sprintf("degraded: %t", summary.Degraded),
+		fmt.Sprintf("status: %s", summary.Status),
+		fmt.Sprintf("latest_time: %s", formatWorkEventSummaryTime(summary.LatestTimestamp)),
+		fmt.Sprintf("latest_loop: %s", emptyWorkEventSummaryField(summary.LatestLoopID)),
+		fmt.Sprintf("latest_ticket: %s", emptyWorkEventSummaryField(summary.LatestTicketKey)),
+		fmt.Sprintf("latest_execution: %s", emptyWorkEventSummaryField(summary.LatestExecutionID)),
+		fmt.Sprintf("latest_phase: %s", emptyWorkEventSummaryField(string(summary.LatestPhase))),
+		fmt.Sprintf("latest_level: %s", emptyWorkEventSummaryField(string(summary.LatestLevel))),
+		fmt.Sprintf("latest_message: %s", emptyWorkEventSummaryField(summary.LatestMessage)),
+	}
+
+	return printAgentWorkLines(stdout, lines)
+}
+
+func formatWorkEventSummaryTime(value time.Time) string {
+	if value.IsZero() {
+		return "none"
+	}
+
+	return value.Format(time.RFC3339)
+}
+
+func emptyWorkEventSummaryField(value string) string {
+	if strings.TrimSpace(value) == "" {
+		return "none"
+	}
+
+	return value
 }
 
 func workLogPathExists(path string) (bool, error) {

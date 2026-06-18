@@ -2809,6 +2809,93 @@ func TestWorkLogsRejectsMissingExecution(t *testing.T) {
 	}
 }
 
+func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	streamPath := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "loop-1", "events.jsonl")
+	event := core.AgentEvent{
+		SchemaVersion: core.AgentEventSchemaVersion,
+		Timestamp:     time.Date(2026, 6, 18, 12, 30, 0, 0, time.UTC),
+		ProjectID:     projectID(projectDir),
+		LoopID:        "loop-1",
+		TicketKey:     "CHC-1",
+		ExecutionID:   "exec-1",
+		Phase:         core.AgentEventPhaseWorkBlocked,
+		Level:         core.AgentEventLevelWarn,
+		Message:       "CHC-1 blocked",
+	}
+
+	writeCLIAgentEventStream(t, streamPath, marshalCLIAgentEventLine(t, event), "{not-json")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"events",
+		"--dir",
+		projectDir,
+		".chc/user/runtime/runs/loop-1/events.jsonl",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work events returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: events",
+		"path: .chc/user/runtime/runs/loop-1/events.jsonl",
+		"events: 1",
+		"malformed: 1",
+		"degraded: true",
+		"status: blocked",
+		"latest_time: 2026-06-18T12:30:00Z",
+		"latest_loop: loop-1",
+		"latest_ticket: CHC-1",
+		"latest_execution: exec-1",
+		"latest_phase: work_blocked",
+		"latest_level: warn",
+		"latest_message: CHC-1 blocked",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
+func TestWorkEventsSummarizesMissingEventStream(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"events",
+		"--dir",
+		projectDir,
+		".chc/user/runtime/runs/missing/events.jsonl",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work events returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"path: .chc/user/runtime/runs/missing/events.jsonl",
+		"events: 0",
+		"malformed: 0",
+		"degraded: false",
+		"status: unknown",
+		"latest_time: none",
+		"latest_loop: none",
+		"latest_ticket: none",
+		"latest_execution: none",
+		"latest_phase: none",
+		"latest_level: none",
+		"latest_message: none",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func TestWorkRunAllExecutesReadyTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -5887,6 +5974,31 @@ func writeCLIExecutionArtifacts(t *testing.T, record core.ExecutionRecord) {
 			t.Fatalf("write artifact %q: %v", path, err)
 		}
 	}
+}
+
+func writeCLIAgentEventStream(t *testing.T, path string, lines ...string) {
+	t.Helper()
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		t.Fatalf("create event stream dir: %v", err)
+	}
+
+	err = os.WriteFile(path, []byte(strings.Join(lines, "\n")+"\n"), 0o644)
+	if err != nil {
+		t.Fatalf("write event stream: %v", err)
+	}
+}
+
+func marshalCLIAgentEventLine(t *testing.T, event core.AgentEvent) string {
+	t.Helper()
+
+	data, err := json.Marshal(event)
+	if err != nil {
+		t.Fatalf("marshal event: %v", err)
+	}
+
+	return string(data)
 }
 
 func upsertDaemonState(t *testing.T, devRoot string, state core.DaemonState) {
