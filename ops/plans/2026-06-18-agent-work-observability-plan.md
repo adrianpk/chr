@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: Slice 1 - agent event model
+Active Slice: Slice 2 - work lifecycle events
 
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 
@@ -132,4 +132,3 @@ Tasks:
 - T5.2 Surface latest known work state in CLI or Dash diagnostics.
 - T5.3 Document recovery inspection for interrupted runs.
 - T5.4 Add the slice implementation report and validation evidence.
-
