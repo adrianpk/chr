@@ -23,8 +23,14 @@ func (e tuiAgentWorkRefreshExecutor) RefreshAgentWork() (tui.AgentWorkRefreshRes
 		return tui.AgentWorkRefreshResult{}, err
 	}
 
+	readiness, err := loadTUIWorkReadiness(e.operations.ctx, e.operations.projectContext)
+	if err != nil {
+		return tui.AgentWorkRefreshResult{}, err
+	}
+
 	return tui.AgentWorkRefreshResult{
 		Tickets:       tickets,
 		Observability: observability,
+		Readiness:     readiness,
 	}, nil
 }

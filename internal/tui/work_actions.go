@@ -14,10 +14,11 @@ type WorkActionID string
 
 // Work action identifiers define supported agent work commands.
 const (
-	WorkActionStartTicket    WorkActionID = "start_ticket"
-	WorkActionStartReadyLoop WorkActionID = "start_ready_loop"
-	WorkActionRunAllReady    WorkActionID = "run_all_ready"
-	WorkActionRequestStop    WorkActionID = "request_stop"
+	WorkActionStartTicket     WorkActionID = "start_ticket"
+	WorkActionStartReadyLoop  WorkActionID = "start_ready_loop"
+	WorkActionRunAllReady     WorkActionID = "run_all_ready"
+	WorkActionRepairReadiness WorkActionID = "repair_readiness"
+	WorkActionRequestStop     WorkActionID = "request_stop"
 )
 
 // WorkActionExecutor runs confirmed agent work actions.
@@ -38,6 +39,7 @@ type WorkActionResult struct {
 	Message       string
 	Tickets       []core.IndexedTicket
 	Observability ObservabilityView
+	Readiness     WorkReadinessView
 }
 
 // WorkActionState stores pending confirmation state for an agent work action.
@@ -60,59 +62,59 @@ const maxWorkActionEventRows = 8
 func NewWorkActionState(action WorkActionID, ticket TicketView) WorkActionState {
 	switch action {
 	case WorkActionStartTicket:
-		return WorkActionState{
-			Pending: true,
-			Request: WorkActionRequest{
-				Action:    action,
-				TicketKey: ticket.Key,
-			},
-			Title: "Start selected ticket",
-			Details: []string{
-				"Ticket: " + ticket.Key,
-				"Runs the configured runtime harness.",
-				"Execution evidence will be surfaced after completion.",
-			},
-		}
+		return newStartTicketWorkActionState(ticket)
 	case WorkActionStartReadyLoop:
-		return WorkActionState{
-			Pending: true,
-			Request: WorkActionRequest{
-				Action: action,
-			},
-			Title: "Start ready ticket loop",
-			Details: []string{
-				"Status filter: ready_for_dev",
-				"Max iterations: 1",
-				"Stops on blocked or failed work.",
-			},
-		}
+		return newSimpleWorkActionState(action, "Start ready ticket loop", []string{
+			"Status filter: ready_for_dev",
+			"Max iterations: 1",
+			"Stops on blocked or failed work.",
+		})
 	case WorkActionRunAllReady:
-		return WorkActionState{
-			Pending: true,
-			Request: WorkActionRequest{
-				Action: action,
-			},
-			Title: "Run all ready tickets",
-			Details: []string{
-				"Status filter: ready_for_dev",
-				"Order: oldest first",
-				"Stops on blocked or failed work.",
-			},
-		}
+		return newSimpleWorkActionState(action, "Run all ready tickets", []string{
+			"Status filter: ready_for_dev",
+			"Order: oldest first",
+			"Stops on blocked or failed work.",
+		})
+	case WorkActionRepairReadiness:
+		return newSimpleWorkActionState(action, "Apply safe readiness repair", []string{
+			"Runs safe readiness repair only.",
+			"Does not start agent work automatically.",
+			"Retry the work action after readiness is ready.",
+		})
 	case WorkActionRequestStop:
-		return WorkActionState{
-			Pending: true,
-			Request: WorkActionRequest{
-				Action: action,
-			},
-			Title: "Request agent stop",
-			Details: []string{
-				"Requests daemon stop through the daemon state repository.",
-				"Running foreground loops observe this stop request.",
-			},
-		}
+		return newSimpleWorkActionState(action, "Request agent stop", []string{
+			"Requests daemon stop through the daemon state repository.",
+			"Running foreground loops observe this stop request.",
+		})
 	default:
 		return WorkActionState{}
+	}
+}
+
+func newStartTicketWorkActionState(ticket TicketView) WorkActionState {
+	return WorkActionState{
+		Pending: true,
+		Request: WorkActionRequest{
+			Action:    WorkActionStartTicket,
+			TicketKey: ticket.Key,
+		},
+		Title: "Start selected ticket",
+		Details: []string{
+			"Ticket: " + ticket.Key,
+			"Runs the configured runtime harness.",
+			"Execution evidence will be surfaced after completion.",
+		},
+	}
+}
+
+func newSimpleWorkActionState(action WorkActionID, title string, details []string) WorkActionState {
+	return WorkActionState{
+		Pending: true,
+		Request: WorkActionRequest{
+			Action: action,
+		},
+		Title:   title,
+		Details: details,
 	}
 }
 
@@ -351,6 +353,12 @@ func (m *Model) startWorkAction(request WorkActionRequest) tea.Cmd {
 		return nil
 	}
 
+	if workActionRequiresReadiness(request.Action) && m.workReadiness.blocked() {
+		m.statusMessage = m.blockedWorkReadinessStatus()
+
+		return nil
+	}
+
 	m.workBusy = true
 	m.statusMessage = workBusyMessage(request)
 
@@ -376,6 +384,7 @@ func (m *Model) applyWorkActionResult(result WorkActionResult) {
 	}
 
 	m.observability = result.Observability
+	m.workReadiness = result.Readiness
 	m.statusMessage = result.Message
 }
 
@@ -391,9 +400,28 @@ func workBusyMessage(request WorkActionRequest) string {
 		return "Starting ready ticket loop..."
 	case WorkActionRunAllReady:
 		return "Running all ready tickets..."
+	case WorkActionRepairReadiness:
+		return "Applying safe readiness repair..."
 	case WorkActionRequestStop:
 		return "Requesting agent stop..."
 	default:
 		return "Running work action..."
 	}
+}
+
+func workActionRequiresReadiness(action WorkActionID) bool {
+	switch action {
+	case WorkActionStartTicket, WorkActionStartReadyLoop, WorkActionRunAllReady:
+		return true
+	default:
+		return false
+	}
+}
+
+func (m Model) blockedWorkReadinessStatus() string {
+	if m.workReadiness.safeRepairAvailable() {
+		return "Work readiness blocked. Press x to apply safe repair."
+	}
+
+	return "Work readiness blocked. Manual action required."
 }

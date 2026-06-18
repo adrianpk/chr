@@ -19,6 +19,7 @@ type AgentWorkRefreshExecutor interface {
 type AgentWorkRefreshResult struct {
 	Tickets       []core.IndexedTicket
 	Observability ObservabilityView
+	Readiness     WorkReadinessView
 }
 
 type agentWorkRefreshTickMsg struct{}
@@ -61,6 +62,7 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	}
 
 	m.observability = msg.result.Observability
+	m.workReadiness = msg.result.Readiness
 
 	return agentWorkRefreshTickCmd()
 }

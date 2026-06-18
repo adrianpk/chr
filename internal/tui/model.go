@@ -87,6 +87,7 @@ type Options struct {
 	Plans                []PlanView
 	AuthoringSessions    []core.AuthoringSession
 	Observability        ObservabilityView
+	WorkReadiness        WorkReadinessView
 	WorkspaceGraph       core.WorkspaceGraph
 	WorkspaceIndex       core.WorkspaceIndex
 	SemanticDigestStates []core.WorkspaceSemanticDigestState
@@ -153,6 +154,7 @@ type Model struct {
 	authoringSessions        []AuthoringSessionView
 	selectedAuthoringSession int
 	observability            ObservabilityView
+	workReadiness            WorkReadinessView
 	workspaceGraph           core.WorkspaceGraph
 	workspaceIndex           core.WorkspaceIndex
 	semanticDigestStates     []core.WorkspaceSemanticDigestState
@@ -251,6 +253,7 @@ func NewModel(opts Options) Model {
 		plans:                    normalizePlanViews(opts.Plans),
 		authoringSessions:        NewAuthoringSessionViews(opts.AuthoringSessions),
 		observability:            opts.Observability,
+		workReadiness:            opts.WorkReadiness,
 		workspaceGraph:           opts.WorkspaceGraph,
 		workspaceIndex:           workspaceIndex,
 		semanticDigestStates:     append([]core.WorkspaceSemanticDigestState(nil), opts.SemanticDigestStates...),
@@ -727,6 +730,8 @@ func (m *Model) handleDashActionKey(key string) bool {
 		m.cycleAgentWorkPriorityFilter()
 	case "o":
 		m.cycleAgentWorkOrder()
+	case "x":
+		m.handleDashRepairReadinessKey()
 	case "s":
 		m.planWorkAction(WorkActionRequestStop)
 	default:
@@ -734,6 +739,16 @@ func (m *Model) handleDashActionKey(key string) bool {
 	}
 
 	return true
+}
+
+func (m *Model) handleDashRepairReadinessKey() {
+	if !m.workReadiness.safeRepairAvailable() {
+		m.statusMessage = "No safe readiness repair is available."
+
+		return
+	}
+
+	m.planWorkAction(WorkActionRepairReadiness)
 }
 
 func (m *Model) handleNavigationCommandKey(key string) (tea.Cmd, bool) {
@@ -1326,7 +1341,7 @@ func (m Model) renderKeys() string {
 	case m.SelectedView() == ViewPlans:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, g generates missing plan, G regenerates, r refreshes, q quits"
 	case m.SelectedView() == ViewDash:
-		return "Keys: F1-F9 or click changes tab, tab changes pane, a runs all ready tickets, enter starts selected ticket, s requests stop, q quits"
+		return "Keys: F1-F9 or click changes tab, tab changes pane, a runs all ready tickets, enter starts selected ticket, x repairs readiness, s requests stop, q quits"
 	case m.SelectedView() == ViewAuthoring:
 		return "Keys: F1-F9 or click changes tab, tab changes pane, alt+e edits source, up/down selects or scrolls, q quits"
 	default:

@@ -244,10 +244,16 @@ func loadTUIMetadataData(data *tuiOptionsData) error {
 		return err
 	}
 
+	workReadiness, err := loadTUIWorkReadiness(data.ctx, data.projectContext)
+	if err != nil {
+		return err
+	}
+
 	data.projectMetadata = projectMetadata
 	data.cases = cases
 	data.authoringSessions = authoringSessions
 	data.observability = observability
+	data.workReadiness = workReadiness
 
 	return nil
 }
@@ -303,6 +309,7 @@ type tuiOptionsData struct {
 	cases                []core.CaseMetadata
 	authoringSessions    []core.AuthoringSession
 	observability        tui.ObservabilityView
+	workReadiness        tui.WorkReadinessView
 	workspaceGraph       core.WorkspaceGraph
 	workspaceIndex       core.WorkspaceIndex
 	semanticDigestStates []core.WorkspaceSemanticDigestState
@@ -325,6 +332,7 @@ func newTUIOptions(data tuiOptionsData) tui.Options {
 		Plans:                data.plans,
 		AuthoringSessions:    data.authoringSessions,
 		Observability:        data.observability,
+		WorkReadiness:        data.workReadiness,
 		WorkspaceGraph:       data.workspaceGraph,
 		WorkspaceIndex:       data.workspaceIndex,
 		SemanticDigestStates: data.semanticDigestStates,
@@ -406,6 +414,23 @@ func loadTUIObservability(
 	events := loadTUIAgentEvents(ctx, projectContext.ProjectDir, config.Runtime, executions, loops)
 
 	return tui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime, events), nil
+}
+
+func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectContext) (tui.WorkReadinessView, error) {
+	branchPolicy, err := workSelectionBranchPolicy(projectContext.ProjectDir)
+	if err != nil {
+		return tui.WorkReadinessView{}, err
+	}
+
+	report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
+		ProjectDir: projectContext.ProjectDir,
+		Policy:     branchPolicy,
+	})
+	if err != nil {
+		return tui.WorkReadinessView{}, err
+	}
+
+	return tui.NewWorkReadinessView(report), nil
 }
 
 func loadTUIAgentEvents(ctx context.Context, projectDir string, config core.RuntimeConfig, executions []core.ExecutionRecord, loops []core.LoopRunRecord) []core.AgentEvent {

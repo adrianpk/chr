@@ -2271,6 +2271,42 @@ func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 	}
 }
 
+func TestModelRendersDashWorkReadinessGuidance(t *testing.T) {
+	model := NewModel(Options{
+		WorkReadiness: WorkReadinessView{
+			Status:            "blocked",
+			CurrentBranch:     "feature/current",
+			IntegrationBranch: "dev",
+			Diagnostics: []WorkReadinessDiagnosticView{
+				{
+					Code:            "wrong_branch",
+					Detail:          "expected dev but found feature/current",
+					RepairCode:      "switch_branch",
+					RepairAvailable: true,
+					RepairSafe:      true,
+				},
+			},
+		},
+	})
+	model.selected = 7
+
+	view := model.View()
+	for _, want := range []string{
+		"Readiness",
+		"Status: blocked",
+		"Current branch: feature/current",
+		"Expected branch: dev",
+		"wrong_branch: expected dev but found feature/current",
+		"Repair: x apply safe repair",
+		"x Apply safe readiness repair",
+		"x repairs readiness",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
 func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 	model := NewModel(Options{})
 	model.selected = 7
@@ -2297,6 +2333,45 @@ func TestModelDashRunAllKeyPlansWorkAction(t *testing.T) {
 		"Status filter: ready_for_dev",
 		"Priority filter: all",
 		"Order: oldest first",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestModelDashRepairReadinessKeyPlansWorkAction(t *testing.T) {
+	model := NewModel(Options{
+		WorkReadiness: WorkReadinessView{
+			Status: "blocked",
+			Diagnostics: []WorkReadinessDiagnosticView{
+				{
+					Code:            "runtime_artifacts_visible",
+					RepairCode:      "ignore_runtime_artifacts",
+					RepairAvailable: true,
+					RepairSafe:      true,
+				},
+			},
+		},
+	})
+	model.selected = 7
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("x")})
+	planned := requireUpdatedModel(t, updated)
+
+	if !planned.workAction.Pending {
+		t.Fatal("work action is not pending")
+	}
+
+	if planned.workAction.Request.Action != WorkActionRepairReadiness {
+		t.Fatalf("work action = %q, want %q", planned.workAction.Request.Action, WorkActionRepairReadiness)
+	}
+
+	view := planned.View()
+	for _, want := range []string{
+		"Confirm Work Action",
+		"Apply safe readiness repair",
+		"Does not start agent work automatically.",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -2379,6 +2454,7 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 				LatestExecution: ExecutionView{ID: "exec-2", TicketKey: "CHC-2", Status: "running"},
 				LatestLoop:      LoopRunView{ID: "loop-2", Status: "running", EligibleCount: 1},
 			},
+			Readiness: WorkReadinessView{Status: "ready", CurrentBranch: "dev"},
 		},
 	}
 	model := NewModel(Options{
@@ -2409,6 +2485,10 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 
 	if refreshed.observability.LatestExecution.ID != "exec-2" {
 		t.Fatalf("LatestExecution.ID = %q, want exec-2", refreshed.observability.LatestExecution.ID)
+	}
+
+	if refreshed.workReadiness.Status != "ready" {
+		t.Fatalf("workReadiness.Status = %q, want ready", refreshed.workReadiness.Status)
 	}
 }
 
@@ -2607,6 +2687,84 @@ func TestModelStartsWorkActionOnConfirm(t *testing.T) {
 
 	if !strings.Contains(action, "No agent events recorded yet.") {
 		t.Fatalf("renderWorkAction() = %q, want empty event stream state", action)
+	}
+}
+
+func TestModelBlocksWorkActionWhenReadinessBlocked(t *testing.T) {
+	executor := &fakeWorkActionExecutor{}
+	model := NewModel(Options{
+		WorkExecutor:  executor,
+		WorkReadiness: testBlockedWorkReadinessView(),
+		Tickets: []core.IndexedTicket{
+			{Key: "CHC-1", Title: "First", Status: "ready_for_dev"},
+		},
+	})
+	model.selected = 7
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("a")})
+	planned := requireUpdatedModel(t, updated)
+
+	updated, cmd := planned.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	blocked := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("blocked work action returned command")
+	}
+
+	if blocked.workBusy {
+		t.Fatal("workBusy = true, want blocked before execution")
+	}
+
+	if executor.called {
+		t.Fatal("executor was called for blocked readiness")
+	}
+
+	if blocked.statusMessage != "Work readiness blocked. Press x to apply safe repair." {
+		t.Fatalf("statusMessage = %q, want readiness blocker", blocked.statusMessage)
+	}
+}
+
+func TestModelRunsRepairReadinessAction(t *testing.T) {
+	executor := &fakeWorkActionExecutor{
+		result: WorkActionResult{
+			Message: "Safe readiness repair applied. Retry the work action.",
+			Readiness: WorkReadinessView{
+				Status: "ready",
+				RepairsApplied: []WorkReadinessAppliedRepairView{
+					{Code: "ignore_runtime_artifacts", Detail: "excluded .chc runtime artifacts"},
+				},
+			},
+		},
+	}
+	model := NewModel(Options{
+		WorkExecutor:  executor,
+		WorkReadiness: testBlockedWorkReadinessView(),
+	})
+	model.selected = 7
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("x")})
+	planned := requireUpdatedModel(t, updated)
+
+	updated, cmd := planned.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	busy := requireUpdatedModel(t, updated)
+
+	if cmd == nil {
+		t.Fatal("repair readiness command is nil")
+	}
+
+	updated, _ = busy.Update(cmd())
+	repaired := requireUpdatedModel(t, updated)
+
+	if executor.request.Action != WorkActionRepairReadiness {
+		t.Fatalf("executor action = %q, want %q", executor.request.Action, WorkActionRepairReadiness)
+	}
+
+	if repaired.workReadiness.Status != "ready" {
+		t.Fatalf("workReadiness.Status = %q, want ready", repaired.workReadiness.Status)
+	}
+
+	if repaired.statusMessage != executor.result.Message {
+		t.Fatalf("statusMessage = %q, want repair message", repaired.statusMessage)
 	}
 }
 
@@ -4948,6 +5106,7 @@ func (e *fakeTicketActionExecutor) ExecuteTicketAction(request TicketActionReque
 }
 
 type fakeWorkActionExecutor struct {
+	called  bool
 	request WorkActionRequest
 	result  WorkActionResult
 	err     error
@@ -4984,6 +5143,7 @@ func (e *fakeSourceOpenExecutor) OpenSource(path string) (SourceOpenResult, erro
 }
 
 func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (WorkActionResult, error) {
+	e.called = true
 	e.request = request
 
 	return e.result, e.err
@@ -4997,6 +5157,20 @@ func testSuccessfulWorkActionResult() WorkActionResult {
 		},
 		Observability: ObservabilityView{
 			LatestExecution: ExecutionView{ID: "exec-1", Status: "succeeded"},
+		},
+	}
+}
+
+func testBlockedWorkReadinessView() WorkReadinessView {
+	return WorkReadinessView{
+		Status: "blocked",
+		Diagnostics: []WorkReadinessDiagnosticView{
+			{
+				Code:            "runtime_artifacts_visible",
+				RepairCode:      "ignore_runtime_artifacts",
+				RepairAvailable: true,
+				RepairSafe:      true,
+			},
 		},
 	}
 }

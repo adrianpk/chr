@@ -15,6 +15,15 @@ func (m Model) renderDash() string {
 
 	output.WriteString("Dash\n")
 	output.WriteString("Agent Work\n\n")
+	output.WriteString("Readiness\n")
+
+	for _, line := range m.renderDashReadinessLines(4) {
+		output.WriteString("  ")
+		output.WriteString(line)
+		output.WriteString("\n")
+	}
+
+	output.WriteString("\n")
 	output.WriteString("Queue\n")
 	output.WriteString("  Priority: ")
 	output.WriteString(displayDashPriorityFilter(m.agentWorkPriorityFilter))
@@ -51,9 +60,12 @@ func (m Model) renderDash() string {
 	}
 
 	output.WriteString("\nActions\n")
-	output.WriteString("  a Run all ready tickets\n")
-	output.WriteString("  enter Start selected ticket\n")
-	output.WriteString("  s Request agent stop")
+
+	for _, line := range m.renderDashActionLines() {
+		output.WriteString("  ")
+		output.WriteString(line)
+		output.WriteString("\n")
+	}
 
 	return output.String()
 }
@@ -67,17 +79,16 @@ func (m Model) renderDashWorkspace(width, height int) string {
 		"",
 	}, m.renderAgentWorkQueueLines(maxInt(height-5, 1))...)
 
-	currentLines := m.renderAgentWorkCurrentLines()
+	currentLines := append(m.renderDashReadinessLines(maxInt(height/3, 3)), "")
+	currentLines = append(currentLines, m.renderAgentWorkCurrentLines()...)
+
 	recentLines := append([]string{
 		"Actions",
-		"  a Run all ready tickets",
-		"  enter Start selected ticket",
-		"  p Cycle priority filter",
-		"  o Cycle queue order",
-		"  s Request agent stop",
-		"",
+	}, indentDashActionLines(m.renderDashActionLines())...)
+	recentLines = append(recentLines, "",
 		"Recent",
-	}, m.renderAgentWorkRecentLines()...)
+	)
+	recentLines = append(recentLines, m.renderAgentWorkRecentLines()...)
 
 	switch m.maximizedPane {
 	case 0:
@@ -101,6 +112,130 @@ func (m Model) renderDashWorkspace(width, height int) string {
 			m.renderDetailPanel("Recent", recentLines, rightWidth, rightBottomHeight, m.selectedPane == 2),
 		),
 	), width, height)
+}
+
+func (m Model) renderDashReadinessLines(limit int) []string {
+	view := m.workReadiness
+	lines := []string{"Status: " + displayWorkReadinessStatus(view.Status)}
+
+	lines = appendWorkReadinessContextLines(lines, view)
+	lines = appendWorkReadinessAppliedRepairLines(lines, view.RepairsApplied)
+
+	diagnosticLines := renderDashReadinessDiagnosticLines(view.Diagnostics, limit)
+	if len(diagnosticLines) == 0 {
+		if view.ready() {
+			return append(lines, "No blocking diagnostics.")
+		}
+
+		return lines
+	}
+
+	lines = append(lines, diagnosticLines...)
+
+	return appendDashReadinessRepairGuidance(lines, view)
+}
+
+func appendWorkReadinessContextLines(lines []string, view WorkReadinessView) []string {
+	if strings.TrimSpace(view.CurrentBranch) != "" {
+		lines = append(lines, "Current branch: "+view.CurrentBranch)
+	}
+
+	if strings.TrimSpace(view.IntegrationBranch) != "" {
+		lines = append(lines, "Expected branch: "+view.IntegrationBranch)
+	}
+
+	return lines
+}
+
+func appendWorkReadinessAppliedRepairLines(lines []string, repairs []WorkReadinessAppliedRepairView) []string {
+	for _, repair := range repairs {
+		lines = append(lines, renderAppliedReadinessRepairLine(repair))
+	}
+
+	return lines
+}
+
+func renderDashReadinessDiagnosticLines(diagnostics []WorkReadinessDiagnosticView, limit int) []string {
+	lines := []string{}
+
+	remaining := 0
+
+	for index, diagnostic := range diagnostics {
+		if index >= limit {
+			remaining = len(diagnostics) - index
+
+			break
+		}
+
+		lines = append(lines, renderWorkReadinessDiagnosticLine(diagnostic))
+	}
+
+	if remaining > 0 {
+		lines = append(lines, fmt.Sprintf("+%d more diagnostics", remaining))
+	}
+
+	return lines
+}
+
+func appendDashReadinessRepairGuidance(lines []string, view WorkReadinessView) []string {
+	if view.safeRepairAvailable() {
+		return append(lines, "Repair: x apply safe repair")
+	}
+
+	if view.blocked() {
+		return append(lines, "Repair: manual action required")
+	}
+
+	return lines
+}
+
+func (m Model) renderDashActionLines() []string {
+	lines := []string{
+		"a Run all ready tickets",
+		"enter Start selected ticket",
+		"p Cycle priority filter",
+		"o Cycle queue order",
+	}
+	if m.workReadiness.safeRepairAvailable() {
+		lines = append(lines, "x Apply safe readiness repair")
+	}
+
+	return append(lines, "s Request agent stop")
+}
+
+func indentDashActionLines(lines []string) []string {
+	indented := make([]string, 0, len(lines))
+	for _, line := range lines {
+		indented = append(indented, "  "+line)
+	}
+
+	return indented
+}
+
+func displayWorkReadinessStatus(status string) string {
+	if strings.TrimSpace(status) == "" {
+		return "unknown"
+	}
+
+	return status
+}
+
+func renderWorkReadinessDiagnosticLine(diagnostic WorkReadinessDiagnosticView) string {
+	line := diagnostic.Code
+	if strings.TrimSpace(diagnostic.Detail) != "" {
+		line += ": " + diagnostic.Detail
+	}
+
+	return line
+}
+
+func renderAppliedReadinessRepairLine(repair WorkReadinessAppliedRepairView) string {
+	line := "Applied: " + repair.Code
+	if strings.TrimSpace(repair.Detail) != "" {
+		line += ": " + repair.Detail
+	}
+
+	return line
 }
 
 func (m Model) readyAgentWorkTickets() []TicketView {
