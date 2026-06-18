@@ -15,6 +15,7 @@ type WorkspaceConfig struct {
 	Runtime         RuntimeConfig
 	Notifications   NotificationConfig
 	Review          ReviewWorkflowConfig
+	Work            WorkConfig
 }
 
 // RuntimeConfig describes a package boundary value.
@@ -53,6 +54,25 @@ type ReviewProviderTargetConfig struct {
 	CLI      string
 	TokenEnv string
 }
+
+// WorkConfig describes a package boundary value.
+type WorkConfig struct {
+	BranchPolicy WorkBranchPolicy
+}
+
+// WorkBranchPolicy describes a package boundary value.
+type WorkBranchPolicy struct {
+	Mode                  WorkBranchPolicyMode
+	IntegrationBranch     string
+	CanonicalRemote       string
+	RequireCleanWorktree  bool
+	RequireRemoteTracking bool
+	AllowSafeRepair       bool
+	AllowBranchCreation   bool
+}
+
+// WorkBranchPolicyMode defines a package boundary type.
+type WorkBranchPolicyMode string
 
 // TelegramNotificationConfig describes a package boundary value.
 type TelegramNotificationConfig struct {
@@ -93,6 +113,18 @@ const (
 	DefaultReviewProviderGitHubCLI = "gh"
 	// DefaultReviewProviderGitHubTokenEnv defines a package boundary constant.
 	DefaultReviewProviderGitHubTokenEnv = "GITHUB_TOKEN"
+
+	// WorkBranchPolicyModeIntegrationBranch defines a package boundary constant.
+	WorkBranchPolicyModeIntegrationBranch WorkBranchPolicyMode = "integration_branch"
+	// WorkBranchPolicyModeCurrentBranch defines a package boundary constant.
+	WorkBranchPolicyModeCurrentBranch WorkBranchPolicyMode = "current_branch"
+	// WorkBranchPolicyModeNoGitEnforcement defines a package boundary constant.
+	WorkBranchPolicyModeNoGitEnforcement WorkBranchPolicyMode = "no_git_enforcement"
+
+	// DefaultWorkIntegrationBranch defines a package boundary constant.
+	DefaultWorkIntegrationBranch = "dev"
+	// DefaultWorkCanonicalRemote defines a package boundary constant.
+	DefaultWorkCanonicalRemote = "origin"
 )
 
 // DefaultRuntimeConfig executes the corresponding package operation.
@@ -136,6 +168,26 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 	}
 }
 
+// DefaultWorkConfig executes the corresponding package operation.
+func DefaultWorkConfig() WorkConfig {
+	return WorkConfig{
+		BranchPolicy: DefaultWorkBranchPolicy(),
+	}
+}
+
+// DefaultWorkBranchPolicy executes the corresponding package operation.
+func DefaultWorkBranchPolicy() WorkBranchPolicy {
+	return WorkBranchPolicy{
+		Mode:                  WorkBranchPolicyModeIntegrationBranch,
+		IntegrationBranch:     DefaultWorkIntegrationBranch,
+		CanonicalRemote:       DefaultWorkCanonicalRemote,
+		RequireCleanWorktree:  true,
+		RequireRemoteTracking: true,
+		AllowSafeRepair:       true,
+		AllowBranchCreation:   false,
+	}
+}
+
 // LoadWorkspaceConfig loads the corresponding package data.
 func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 	config := WorkspaceConfig{
@@ -143,6 +195,7 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 		Runtime:         DefaultRuntimeConfig(),
 		Notifications:   DefaultNotificationConfig(),
 		Review:          DefaultReviewWorkflowConfig(),
+		Work:            DefaultWorkConfig(),
 	}
 	path := UserPath(projectDir, "config.yml")
 
@@ -207,6 +260,8 @@ func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value stri
 		setNotificationConfigValue(&config.Notifications, key, value)
 	case "review":
 		setReviewWorkflowConfigValue(&config.Review, key, value)
+	case "work":
+		setWorkConfigValue(&config.Work, key, value)
 	}
 }
 
@@ -279,6 +334,27 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 		setString(&config.Providers.GitHub.CLI, value)
 	case "github_token_env":
 		setString(&config.Providers.GitHub.TokenEnv, value)
+	}
+}
+
+func setWorkConfigValue(config *WorkConfig, key, value string) {
+	switch key {
+	case "mode":
+		if value != "" {
+			config.BranchPolicy.Mode = WorkBranchPolicyMode(value)
+		}
+	case "integration_branch":
+		setString(&config.BranchPolicy.IntegrationBranch, value)
+	case "canonical_remote":
+		setString(&config.BranchPolicy.CanonicalRemote, value)
+	case "require_clean_worktree":
+		config.BranchPolicy.RequireCleanWorktree = configBoolValue(value)
+	case "require_remote_tracking":
+		config.BranchPolicy.RequireRemoteTracking = configBoolValue(value)
+	case "allow_safe_repair":
+		config.BranchPolicy.AllowSafeRepair = configBoolValue(value)
+	case "allow_branch_creation":
+		config.BranchPolicy.AllowBranchCreation = configBoolValue(value)
 	}
 }
 

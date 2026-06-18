@@ -27,6 +27,10 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 	if config.Review != DefaultReviewWorkflowConfig() {
 		t.Fatalf("Review = %#v, want %#v", config.Review, DefaultReviewWorkflowConfig())
 	}
+
+	if config.Work != DefaultWorkConfig() {
+		t.Fatalf("Work = %#v, want %#v", config.Work, DefaultWorkConfig())
+	}
 }
 
 func TestLoadWorkspaceConfigParsesTicketAndRuntimeConfig(t *testing.T) {
@@ -157,6 +161,39 @@ func TestLoadWorkspaceConfigParsesReviewProviderConfig(t *testing.T) {
 	}
 }
 
+func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `work:
+  mode: current_branch
+  integration_branch: develop
+  canonical_remote: upstream
+  require_clean_worktree: false
+  require_remote_tracking: false
+  allow_safe_repair: false
+  allow_branch_creation: true
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := WorkConfig{
+		BranchPolicy: WorkBranchPolicy{
+			Mode:                  WorkBranchPolicyModeCurrentBranch,
+			IntegrationBranch:     "develop",
+			CanonicalRemote:       "upstream",
+			RequireCleanWorktree:  false,
+			RequireRemoteTracking: false,
+			AllowSafeRepair:       false,
+			AllowBranchCreation:   true,
+		},
+	}
+	if config.Work != want {
+		t.Fatalf("Work = %#v, want %#v", config.Work, want)
+	}
+}
+
 func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -184,6 +221,53 @@ func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
 
 			if err.Error() != test.wantErr {
 				t.Fatalf("ValidateReviewWorkflowConfig error = %q, want %q", err.Error(), test.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateWorkConfigRejectsInvalidConfig(t *testing.T) {
+	tests := []struct {
+		name    string
+		config  WorkConfig
+		wantErr string
+	}{
+		{
+			name: "mode",
+			config: WorkConfig{
+				BranchPolicy: WorkBranchPolicy{Mode: "unknown"},
+			},
+			wantErr: "invalid work branch policy mode: unknown",
+		},
+		{
+			name: "integration branch",
+			config: WorkConfig{
+				BranchPolicy: WorkBranchPolicy{Mode: WorkBranchPolicyModeIntegrationBranch},
+			},
+			wantErr: "work integration_branch is required",
+		},
+		{
+			name: "remote",
+			config: WorkConfig{
+				BranchPolicy: WorkBranchPolicy{
+					Mode:                  WorkBranchPolicyModeIntegrationBranch,
+					IntegrationBranch:     "dev",
+					RequireRemoteTracking: true,
+				},
+			},
+			wantErr: "work canonical_remote is required when remote tracking is required",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := ValidateWorkConfig(test.config)
+			if err == nil {
+				t.Fatal("ValidateWorkConfig returned nil error")
+			}
+
+			if err.Error() != test.wantErr {
+				t.Fatalf("ValidateWorkConfig error = %q, want %q", err.Error(), test.wantErr)
 			}
 		})
 	}
