@@ -1,6 +1,6 @@
 # Configurable Work Readiness Tracker
 
-Status: active
+Status: reviewing
 
 Plan: `ops/plans/2026-06-18-configurable-work-readiness-plan.md`
 
@@ -14,7 +14,7 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | work policy config | delivered | `feat/slice-1-work-policy-config` | `#313` | `.prj/reports/slices/configurable-work-readiness/slice-1-work-policy-config.md` |
 | Slice 2 | work doctor diagnostics | delivered | `feat/slice-2-work-doctor-diagnostics` | `#314` | `.prj/reports/slices/configurable-work-readiness/slice-2-work-doctor-diagnostics.md` |
-| Slice 3 | safe readiness repair | active | `feat/slice-3-safe-readiness-repair` | pending | `.prj/reports/slices/configurable-work-readiness/slice-3-safe-readiness-repair.md` |
+| Slice 3 | safe readiness repair | reviewing | `feat/slice-3-safe-readiness-repair` | pending | `.prj/reports/slices/configurable-work-readiness/slice-3-safe-readiness-repair.md` |
 | Slice 4 | dash readiness guidance | planned | `feat/slice-4-dash-readiness-guidance` | pending | `.prj/reports/slices/configurable-work-readiness/slice-4-dash-readiness-guidance.md` |
 
 ## Slice 1 Tasks
@@ -41,11 +41,11 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Add repair planning for known readiness diagnostics. | pending | pending | Respect config and safety boundaries. |
-| T3.2 | Implement safe runtime-artifact ignore repair. | pending | pending | Do not hide user-owned changes. |
-| T3.3 | Implement safe branch/remote repair primitives. | pending | pending | No reset, stash, force-push, or conflict resolution. |
-| T3.4 | Add repair tests for idempotence and unsafe-state refusal. | pending | pending | Include negative tests for user changes. |
-| T3.5 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T3.1 | Add repair planning for known readiness diagnostics. | done | `6772370` | Repairs are attached to diagnostics and respect policy gates. |
+| T3.2 | Implement safe runtime-artifact ignore repair. | done | `852df8f` | Uses local `.git/info/exclude`, not project `.gitignore`. |
+| T3.3 | Implement safe branch/remote repair primitives. | done | `5fe1b1a` | Adds fetch, switch, create, and fast-forward repair without reset, stash, force-push, or conflict resolution. |
+| T3.4 | Add repair tests for idempotence and unsafe-state refusal. | done | `6b13d8d` | Covers idempotence, user-change refusal, branch creation, fetch plus fast-forward, and CLI `--fix-safe`. |
+| T3.5 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 4 Tasks
 
@@ -70,6 +70,11 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 - Slice 2: `go test ./internal/core ./internal/app` (pass)
 - Slice 2: `make lint-strict` (pass)
 - Slice 2: `make verify` (pass)
+- Slice 3: `go test ./internal/core -run 'WorkReadiness|WorkSelectionPreflight'` (pass)
+- Slice 3: `go test ./internal/app -run 'WorkDoctor'` (pass)
+- Slice 3: `go test ./internal/core ./internal/app` (pass)
+- Slice 3: `make lint-strict` (pass)
+- Slice 3: `make verify` (pass)
 
 ## Notes
 

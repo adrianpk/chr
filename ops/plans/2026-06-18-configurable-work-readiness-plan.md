@@ -1,6 +1,6 @@
 # Configurable Work Readiness Plan
 
-Status: active
+Status: reviewing
 
 Active Slice: Slice 3 - safe readiness repair
 
