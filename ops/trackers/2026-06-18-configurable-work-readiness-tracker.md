@@ -1,6 +1,6 @@
 # Configurable Work Readiness Tracker
 
-Status: active
+Status: reviewing
 
 Plan: `ops/plans/2026-06-18-configurable-work-readiness-plan.md`
 
@@ -15,7 +15,7 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 | Slice 1 | work policy config | delivered | `feat/slice-1-work-policy-config` | `#313` | `.prj/reports/slices/configurable-work-readiness/slice-1-work-policy-config.md` |
 | Slice 2 | work doctor diagnostics | delivered | `feat/slice-2-work-doctor-diagnostics` | `#314` | `.prj/reports/slices/configurable-work-readiness/slice-2-work-doctor-diagnostics.md` |
 | Slice 3 | safe readiness repair | delivered | `feat/slice-3-safe-readiness-repair` | `#315` | `.prj/reports/slices/configurable-work-readiness/slice-3-safe-readiness-repair.md` |
-| Slice 4 | dash readiness guidance | active | `feat/slice-4-dash-readiness-guidance` | pending | `.prj/reports/slices/configurable-work-readiness/slice-4-dash-readiness-guidance.md` |
+| Slice 4 | dash readiness guidance | reviewing | `feat/slice-4-dash-readiness-guidance` | pending | `.prj/reports/slices/configurable-work-readiness/slice-4-dash-readiness-guidance.md` |
 
 ## Slice 1 Tasks
 
@@ -51,11 +51,11 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add a TUI read model for work readiness diagnostics. | pending | pending | Reuse core diagnostics. |
-| T4.2 | Render blocked readiness state and repair guidance in Dash. | pending | pending | Replace opaque work-action failures. |
-| T4.3 | Wire safe repair and retry into Dash work actions where safe. | pending | pending | Avoid unsafe automatic repairs. |
-| T4.4 | Update docs and QA smoke coverage. | pending | pending | Catch readiness blockers before manual TUI runs. |
-| T4.5 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T4.1 | Add a TUI read model for work readiness diagnostics. | done | `9f6de9a` | Reuses core diagnostics in TUI options, refresh, and action results. |
+| T4.2 | Render blocked readiness state and repair guidance in Dash. | done | `9f6de9a` | Dash Current panel includes readiness status, diagnostics, and repair guidance. |
+| T4.3 | Wire safe repair and retry into Dash work actions where safe. | done | `9f6de9a` | `x` confirms safe repair; blocked work actions stop before execution. |
+| T4.4 | Update docs and QA smoke coverage. | done | `43f502a` | QA reset now creates a ready `dev` plus local `origin/dev`; smoke checks `work doctor`. |
+| T4.5 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Validation Log
 
@@ -75,6 +75,10 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 - Slice 3: `go test ./internal/core ./internal/app` (pass)
 - Slice 3: `make lint-strict` (pass)
 - Slice 3: `make verify` (pass)
+- Slice 4: `go test ./internal/tui ./internal/app` (pass)
+- Slice 4: `make qa-smoke-tictactoe` (pass)
+- Slice 4: `make qa-smoke-blog` (pass)
+- Slice 4: `make verify` (pass)
 
 ## Notes
 
