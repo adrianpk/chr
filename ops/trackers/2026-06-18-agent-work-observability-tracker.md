@@ -13,7 +13,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | agent event model | delivered | `feat/slice-1-agent-event-model` | `#308` | `.prj/reports/slices/agent-work-observability/slice-1-agent-event-model.md` |
-| Slice 2 | work lifecycle events | active | `feat/slice-2-work-lifecycle-events` | pending | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
+| Slice 2 | work lifecycle events | reviewing | `feat/slice-2-work-lifecycle-events` | pending | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
 | Slice 3 | dash live work stream | planned | `feat/slice-3-dash-live-work-stream` | pending | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
 | Slice 4 | execution log lookup | planned | `feat/slice-4-execution-log-lookup` | pending | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
 | Slice 5 | event readback recovery | planned | `feat/slice-5-event-readback-recovery` | pending | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
@@ -31,10 +31,10 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Wire an event sink into work loop and ticket execution paths. | planned | pending | Preserve existing execution semantics. |
-| T2.2 | Emit loop and ticket lifecycle events at high-signal boundaries. | planned | pending | No raw Codex stream in primary event feed. |
-| T2.3 | Cover lifecycle emission with service or CLI tests. | planned | pending | Include run-all path. |
-| T2.4 | Add the slice implementation report and validation evidence. | planned | pending | Report path defined in slice map. |
+| T2.1 | Wire an event sink into work loop and ticket execution paths. | done | `7078ff2` | Preserve existing execution semantics. |
+| T2.2 | Emit loop and ticket lifecycle events at high-signal boundaries. | done | `6ae5ed5` | No raw Codex stream in primary event feed. |
+| T2.3 | Cover lifecycle emission with service or CLI tests. | done | `6d1b194` | Includes run-all path. |
+| T2.4 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 3 Tasks
 
@@ -67,6 +67,8 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 ## Validation Log
 
 - `go test ./internal/core` (pass)
+- `make verify` (pass)
+- `go test ./internal/app` (pass)
 - `make verify` (pass)
 
 ## Notes
