@@ -1,11 +1,11 @@
 # Slice 1: Agent Event Model
 
-Status: reviewing
+Status: delivered
 Slicing: Agent Work Observability
 Plan: `ops/plans/2026-06-18-agent-work-observability-plan.md`
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 Branch: `feat/slice-1-agent-event-model`
-PR: pending
+PR: #308
 
 ## Purpose
 
@@ -62,4 +62,3 @@ can tolerate streams that have not been created yet.
 - No runtime code emits events yet; that is Slice 2.
 - The TUI still renders the static running screen until Slice 3 wires the event
   read model into Dash.
-
