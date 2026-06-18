@@ -121,6 +121,76 @@ func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {
 	}
 }
 
+func TestServiceStartAllReadyAgentWorkEmitsLifecycleEvents(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	writeRuntimeTemplate(t, projectDir)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAllReadyAgentWork()
+	if err != nil {
+		t.Fatalf("StartAllReadyAgentWork returned error: %v", err)
+	}
+
+	if result.LoopRun == nil {
+		t.Fatal("LoopRun is nil")
+	}
+
+	assertRunAllAgentEventStreams(t, projectDir, result)
+}
+
+func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result AgentWorkResult) {
+	t.Helper()
+
+	loopStream := readAgentEventStream(t, filepath.Join(
+		projectDir,
+		".chc",
+		"user",
+		"runtime",
+		"runs",
+		result.LoopRun.ID,
+		core.AgentEventStreamFileName,
+	))
+	assertAgentEventPhases(t, loopStream.Events, []core.AgentEventPhase{
+		core.AgentEventPhaseLoopStarted,
+		core.AgentEventPhaseTicketSelected,
+		core.AgentEventPhaseExecutionCreated,
+		core.AgentEventPhaseRuntimePrepared,
+		core.AgentEventPhaseWorkerStarted,
+		core.AgentEventPhaseWorkerFinished,
+		core.AgentEventPhaseValidationStarted,
+		core.AgentEventPhaseValidationFinished,
+		core.AgentEventPhaseResultApplied,
+		core.AgentEventPhaseTicketStatusUpdated,
+		core.AgentEventPhaseLoopFinished,
+	})
+
+	execution := result.Executions[0]
+	executionStream := readAgentEventStream(t, core.AgentEventStreamPath(execution.Artifacts.RunDir))
+	assertAgentEventPhases(t, executionStream.Events, []core.AgentEventPhase{
+		core.AgentEventPhaseExecutionCreated,
+		core.AgentEventPhaseRuntimePrepared,
+		core.AgentEventPhaseWorkerStarted,
+		core.AgentEventPhaseWorkerFinished,
+		core.AgentEventPhaseValidationStarted,
+		core.AgentEventPhaseValidationFinished,
+		core.AgentEventPhaseResultApplied,
+		core.AgentEventPhaseTicketStatusUpdated,
+	})
+
+	for _, event := range executionStream.Events {
+		if event.LoopID != result.LoopRun.ID {
+			t.Fatalf("event LoopID = %q, want %q", event.LoopID, result.LoopRun.ID)
+		}
+	}
+}
+
 func TestServicePreviewAllReadyAgentWorkDoesNotExecute(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -203,4 +273,46 @@ func indexedAgentWorkTicketKeys(tickets []core.IndexedTicket) []string {
 	}
 
 	return keys
+}
+
+func readAgentEventStream(t *testing.T, path string) core.AgentEventStream {
+	t.Helper()
+
+	stream, err := core.ReadAgentEventStream(t.Context(), path)
+	if err != nil {
+		t.Fatalf("ReadAgentEventStream returned error: %v", err)
+	}
+
+	if len(stream.Malformed) != 0 {
+		t.Fatalf("Malformed events = %#v, want none", stream.Malformed)
+	}
+
+	return stream
+}
+
+func assertAgentEventPhases(t *testing.T, events []core.AgentEvent, want []core.AgentEventPhase) {
+	t.Helper()
+
+	got := make([]core.AgentEventPhase, 0, len(events))
+	for _, event := range events {
+		got = append(got, event.Phase)
+	}
+
+	if !agentEventPhasesEqual(got, want) {
+		t.Fatalf("event phases = %#v, want %#v", got, want)
+	}
+}
+
+func agentEventPhasesEqual(left, right []core.AgentEventPhase) bool {
+	if len(left) != len(right) {
+		return false
+	}
+
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+
+	return true
 }
