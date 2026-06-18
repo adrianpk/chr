@@ -1,6 +1,6 @@
 # Configurable Work Readiness Tracker
 
-Status: active
+Status: reviewing
 
 Plan: `ops/plans/2026-06-18-configurable-work-readiness-plan.md`
 
@@ -13,7 +13,7 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | work policy config | delivered | `feat/slice-1-work-policy-config` | `#313` | `.prj/reports/slices/configurable-work-readiness/slice-1-work-policy-config.md` |
-| Slice 2 | work doctor diagnostics | active | `feat/slice-2-work-doctor-diagnostics` | pending | `.prj/reports/slices/configurable-work-readiness/slice-2-work-doctor-diagnostics.md` |
+| Slice 2 | work doctor diagnostics | reviewing | `feat/slice-2-work-doctor-diagnostics` | pending | `.prj/reports/slices/configurable-work-readiness/slice-2-work-doctor-diagnostics.md` |
 | Slice 3 | safe readiness repair | planned | `feat/slice-3-safe-readiness-repair` | pending | `.prj/reports/slices/configurable-work-readiness/slice-3-safe-readiness-repair.md` |
 | Slice 4 | dash readiness guidance | planned | `feat/slice-4-dash-readiness-guidance` | pending | `.prj/reports/slices/configurable-work-readiness/slice-4-dash-readiness-guidance.md` |
 
@@ -31,11 +31,11 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Add work readiness diagnostic and status models. | pending | pending | Include policy values in diagnostics. |
-| T2.2 | Add a core readiness service that evaluates policy and Git state. | pending | pending | Classify known Git failures. |
-| T2.3 | Add `chc work doctor` output. | pending | pending | No agent work should start. |
-| T2.4 | Add CLI/core tests for classified diagnostics. | pending | pending | Cover missing remote ref and branch-behind states. |
-| T2.5 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T2.1 | Add work readiness diagnostic and status models. | done | `68f76c2` | Include policy values in diagnostics. |
+| T2.2 | Add a core readiness service that evaluates policy and Git state. | done | `a3c89d0` | Classifies known Git failures. |
+| T2.3 | Add `chc work doctor` output. | done | `1ead8e0` | No agent work starts. |
+| T2.4 | Add CLI/core tests for classified diagnostics. | done | `a94b9c5` | Covers missing remote ref, branch-behind, runtime artifacts, and no-Git mode. |
+| T2.5 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 3 Tasks
 
@@ -65,6 +65,11 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 - Slice 1: `go test ./internal/core ./internal/app` (pass)
 - Slice 1: `make lint-strict` (pass)
 - Slice 1: `make verify` (pass)
+- Slice 2: `go test ./internal/core -run 'WorkReadiness|WorkSelectionPreflight'` (pass)
+- Slice 2: `go test ./internal/app -run 'WorkDoctor'` (pass)
+- Slice 2: `go test ./internal/core ./internal/app` (pass)
+- Slice 2: `make lint-strict` (pass)
+- Slice 2: `make verify` (pass)
 
 ## Notes
 
