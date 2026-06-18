@@ -33,7 +33,8 @@ orchestration.
 ## Ticket-Level Review
 
 Ticket-level review is the lightweight checkpoint for one branch and pull
-request before the ticket proceeds toward integration into `dev`.
+request before the ticket proceeds toward integration into the configured
+integration branch.
 
 This checkpoint is operational rather than ceremonial. The ticket stores the
 branch, pull request reference, review mode, review outcome, and repair handoff

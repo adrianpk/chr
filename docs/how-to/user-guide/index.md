@@ -84,6 +84,38 @@ Preview validation without running Docker:
 chc runtime validate --dry-run
 ```
 
+## Configure Work Readiness
+
+Work readiness protects the project before ChrysoCoord starts agent work. The
+default policy expects a clean `dev` branch with `origin` as the canonical
+remote, but projects can configure their own branch posture in
+`.chc/user/config.yml`.
+
+Example:
+
+```yml
+work:
+  mode: integration_branch
+  integration_branch: develop
+  canonical_remote: upstream
+  require_clean_worktree: true
+  require_remote_tracking: true
+  allow_safe_repair: true
+  allow_branch_creation: false
+```
+
+Inspect readiness:
+
+```sh
+chc work doctor
+```
+
+Apply safe repair when ChrysoCoord reports one:
+
+```sh
+chc work doctor --fix-safe
+```
+
 ## Register and Select Projects
 
 Register a managed project:
@@ -446,6 +478,8 @@ Ticket and work operations are available from the command palette:
 | Move ticket to reviewing | Move the selected ticket to `reviewing`. |
 | Start selected ticket | Run the configured runtime harness for the selected ticket. |
 | Start ready ticket loop | Run one ready ticket through the agent loop. |
+| Run all visible ready tickets | Run the Dash ready queue with the selected filters and order. |
+| Apply safe readiness repair | Apply a non-destructive readiness repair when Dash reports one. |
 | Request agent stop | Request daemon stop through local daemon state. |
 
 Checklist toggle and checklist item creation commands are visible as capability
@@ -465,6 +499,8 @@ chc ticket status CHC-1 in_progress
 chc ticket status CHC-1 reviewing
 chc ticket start CHC-1
 chc ticket loop --status ready --max-iterations 1
+chc work run-all
+chc work doctor --fix-safe
 chc daemon stop
 ```
 
@@ -473,8 +509,23 @@ chc daemon stop
 Open the Dash view with `F8`.
 
 Dash shows agent activity and runtime evidence loaded from local state. Use it
-after ticket execution, ready-loop execution, or daemon activity to inspect the
-latest operational state.
+before work to inspect readiness, during work to watch the event stream, and
+after work to inspect recent execution or loop outcomes.
+
+Dash shows:
+
+- work readiness and safe repair hints;
+- ready queue filters and ordering;
+- current loop or ticket execution state;
+- recent human-readable agent events;
+- recent execution and loop outcomes.
+
+When readiness is blocked, Dash prevents ticket execution and run-all actions
+before the runtime worker starts. Press `x` to apply a safe repair when Dash
+offers one, confirm the repair, and retry the work action.
+
+For a CLI-first inspection flow, see
+[Observe agent work](../observe-agent-work.md).
 
 ## Get Help in the TUI
 
@@ -664,6 +715,39 @@ chc report show --loop <loop-id>
 
 Loop reports summarize loop status, ticket selection, execution outcomes, and
 stop reasons.
+
+## Run All Ready Agent Work
+
+Preview the ready queue without execution:
+
+```sh
+chc work run-all --dry-run --order priority_severity
+```
+
+Run all matching ready tickets:
+
+```sh
+chc work run-all --order priority_severity
+```
+
+Filter by use case, priority, severity, project area, tag, type, or status:
+
+```sh
+chc work run-all --dry-run --use-case billing --priority high --order key
+```
+
+`work run-all` uses the same readiness policy and execution loop as Dash. It
+stops on blocked or failed work and leaves loop, execution, report, log, and
+event-stream evidence under the configured runtime artifact directory.
+
+Inspect the evidence:
+
+```sh
+chc report list --kind loop
+chc report list --kind execution
+chc work logs <execution-id>
+chc work events .chc/user/runtime/runs/<loop-id>/events.jsonl
+```
 
 ## Capture Authoring Context
 
@@ -890,7 +974,9 @@ Docker receives the same files through the project mount, usually under
 
 ## Reference
 
-- [Project workspace](../../reference/project-core.md)
+- [Project workspace](../../reference/project-workspace.md)
+- [Work readiness](../../reference/work-readiness.md)
+- [Agent work observability](../../reference/agent-work-observability.md)
 - [TUI](../../reference/tui.md)
 - [Authoring sessions](../../reference/authoring-sessions.md)
 - [Project CLI](../../reference/project-cli.md)

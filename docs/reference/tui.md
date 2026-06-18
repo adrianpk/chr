@@ -279,6 +279,7 @@ Dash shows agent-work operations:
 - work readiness status and repair guidance;
 - ready queue;
 - current loop or execution state;
+- recent human-readable agent event messages;
 - recent execution and loop outcomes.
 
 When Dash is selected, the TUI periodically reloads ticket and observability
@@ -300,6 +301,9 @@ before starting agent work. If a safe repair is available, apply `x`, confirm
 the repair, and retry the work action. If Dash reports manual action required,
 use the diagnostic text or `chc work doctor --dir <project>` to inspect the
 same readiness report outside the TUI.
+
+Event stream rendering, runtime logs, report lookup, and CLI readback are
+documented in [Agent work observability](agent-work-observability.md).
 
 ## Confirmation Modes
 

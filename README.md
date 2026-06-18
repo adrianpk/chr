@@ -104,10 +104,12 @@ More documentation:
 - [Documentation index](docs/index.md)
 - [Getting started tutorial](docs/tutorials/getting-started.md)
 - [User guide](docs/how-to/user-guide/index.md)
+- [Observe agent work](docs/how-to/observe-agent-work.md)
 - [Inspect and recover local state](docs/how-to/inspect-and-recover-local-state.md)
 - [Find execution and loop evidence](docs/how-to/find-execution-and-loop-evidence.md)
 - [Reference](docs/reference/project-workspace.md)
 - [Explanation](docs/explanation/architecture.md)
+- [Changelog](CHANGELOG.md)
 
 ## Repositories
 

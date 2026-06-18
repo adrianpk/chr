@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Ticket merge workflow integrates a reviewed ticket pull request into `dev`
-after a passed ticket review.
+Ticket merge workflow integrates a reviewed ticket pull request into the
+configured work integration branch after a passed ticket review.
 
 This workflow formalizes the `@reviewer -> @merger` handoff. It is not a
 second code review phase and it is separate from the `dev` to `main` promotion
@@ -41,7 +41,7 @@ chc ticket merge CHC-1 --dry-run
 Select the expected base branch and merge strategy:
 
 ```sh
-chc ticket merge CHC-1 --base dev --strategy rebase
+chc ticket merge CHC-1 --base develop --strategy rebase
 ```
 
 Supported strategies are:
@@ -52,7 +52,8 @@ rebase
 squash
 ```
 
-The default expected base is `dev`. The default strategy is `rebase`.
+The default expected base is the configured work integration branch. The
+default strategy is `rebase`.
 
 ## Required Handoff
 

@@ -171,6 +171,42 @@ runtime:
   validation_command: make verify
 ```
 
+## Work Config
+
+`.chc/user/config.yml` may define the project-local work readiness policy under
+`work:`.
+
+Supported work fields:
+
+- `mode`: one of `integration_branch`, `current_branch`, or
+  `no_git_enforcement`.
+- `integration_branch`: branch expected by `integration_branch` mode and used
+  as the default ticket merge base.
+- `canonical_remote`: remote used for remote tracking checks.
+- `require_clean_worktree`: whether visible changes block agent work.
+- `require_remote_tracking`: whether the configured branch must track the
+  configured remote ref.
+- `allow_safe_repair`: whether ChrysoCoord may run non-destructive readiness
+  repairs.
+- `allow_branch_creation`: whether safe repair may create the configured local
+  branch.
+
+Example:
+
+```yml
+work:
+  mode: integration_branch
+  integration_branch: dev
+  canonical_remote: origin
+  require_clean_worktree: true
+  require_remote_tracking: true
+  allow_safe_repair: true
+  allow_branch_creation: false
+```
+
+See [Work readiness](work-readiness.md) for diagnostics, repair behavior, and
+Dash integration.
+
 ## Notification Config
 
 `.chc/user/config.yml` may also define notification settings under

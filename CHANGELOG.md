@@ -1,0 +1,90 @@
+# Changelog
+
+Notable project changes are summarized here for users and maintainers.
+
+This changelog groups changes by capability. It intentionally omits mechanical
+slice bookkeeping, lint-only edits, and minor wording-only commits.
+
+## Unreleased
+
+Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `0be53e3` on
+`dev`.
+
+### Added
+
+- Added a Docker-backed ticket execution path with execution records, runtime
+  context artifacts, result envelopes, validation output, changed-file
+  detection, result application, and execution reports.
+- Added foreground ticket loops, loop run records, loop reports, filtered
+  ticket selection, and ready-queue ordering.
+- Added Dash agent-work controls in the TUI, including selected-ticket work,
+  ready-loop execution, run-all-ready execution, stop requests, queue filters,
+  and runtime observability.
+- Added agent work event streams, human-readable Dash event rendering, CLI event
+  readback with degraded-stream handling, and execution log lookup.
+- Added configurable work readiness with project-local branch policy, work
+  diagnostics, safe repair planning, safe repair execution, and Dash repair
+  guidance.
+- Added ticket review and merge workflows, including pull request metadata,
+  review mode configuration, provider diagnostics, remote review adapters,
+  review result application, repair handoff prioritization, merge preflight,
+  provider merge execution, and merge metadata.
+- Added Gherkin acceptance feature generation as a separate workflow from spec
+  generation, including feature-round prompts, feature artifact checks, CLI and
+  TUI actions, and documentation.
+- Added QA reference projects and reset/test/smoke tooling for blog, dialer, and
+  tictactoe agent-work scenarios.
+- Added the tictactoe QA reference and preserved a successful completed agent
+  implementation as versioned evidence.
+- Added dev-to-main gate tooling, gate reports, policy configuration, and
+  Woodpecker workflow generation.
+- Added maintenance and recovery commands for diagnostic bundles, SQLite
+  migration state, project registry drift, registry repair, execution artifact
+  drift, and runtime artifact cleanup previews.
+- Added notification and remote command intake support for Telegram-backed
+  setup checks, notification audit records, loop/ticket notifications, and
+  fixture-based remote command handoff parsing.
+- Added Markdown-first authoring sessions and assisted authoring flows for
+  generating and promoting project documentation artifacts.
+- Added workspace graph/index work, semantic digest support, cache boundaries,
+  and TUI consumers for project-local Markdown artifacts.
+- Added extensive Diataxis documentation for commands, TUI behavior, runtime,
+  ticket execution, reporting, review, merge, maintenance, notifications,
+  acceptance generation, and QA workflows.
+
+### Changed
+
+- Moved the application code into clearer `internal/app`, `internal/core`, and
+  `internal/tui` package boundaries.
+- Reworked generated specs so spec generation remains behavior-focused and no
+  longer embeds Gherkin feature output.
+- Reworked project and case metadata toward Markdown-first project-local
+  records instead of treating SQLite indexes as authoritative.
+- Reworked branch/readiness checks so agent work and merge preflight use
+  configured work policy instead of hardcoded branch names.
+- Expanded the TUI from project/case editing into a broader operational console
+  for documents, specs, plans, Board, Dash, commands, and runtime state.
+- Expanded command coverage so CLI and TUI work actions route through shared
+  service paths where both surfaces exist.
+- Updated workspace initialization profiles, protocol assets, runtime
+  Dockerfiles, and generated project files to match the current workflow.
+
+### Fixed
+
+- Fixed acceptance feature generation to preserve feature-round answers and
+  satisfy Codex feature schema expectations.
+- Fixed spec generation context so generated specs stay neutral and do not
+  accidentally produce feature artifacts.
+- Fixed work readiness so ChrysoCoord-owned runtime artifacts can be repaired
+  safely without treating them as user-owned dirty state.
+- Fixed work readiness diagnostics so missing branches, missing remote refs,
+  behind-remote branches, invalid policy, dirty worktrees, and Git in-progress
+  states produce actionable reports instead of raw Git failures.
+- Fixed merge preflight defaults so the expected pull request base comes from
+  configured work policy.
+- Fixed multiple TUI and acceptance workflow lint issues while keeping local
+  strict lint rules intact.
+
+## v0.1.0 - 2026-05-23
+
+Initial tagged release.

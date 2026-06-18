@@ -3,7 +3,7 @@
 ## Purpose
 
 Review workflow configuration controls how ticket or slice work is reviewed
-before integration into `dev`.
+before integration into the configured integration branch.
 
 The setting is independent from the separate `dev` to `main` promotion gate.
 

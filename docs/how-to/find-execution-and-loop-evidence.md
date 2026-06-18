@@ -7,6 +7,9 @@ Reports summarize evidence that already exists. They do not replace execution
 records, result artifacts, runtime logs, validation output, ticket comments, or
 loop records.
 
+For a live Dash and CLI workflow while work is running, see
+[Observe agent work](observe-agent-work.md).
+
 ## List Available Reports
 
 List all reports for the resolved project:

@@ -286,7 +286,7 @@ Merge a reviewed ticket that is ready for merge:
 ```sh
 chc ticket merge CHC-1
 chc ticket merge CHC-1 --dry-run
-chc ticket merge CHC-1 --base dev --strategy rebase
+chc ticket merge CHC-1 --base develop --strategy rebase
 ```
 
 See [Ticket merge workflow](ticket-merge-workflow.md) for merge preflight,
@@ -354,6 +354,8 @@ chc work run-all --dry-run --tag backend --order priority_severity
 `chc ticket loop`: `--status`, `--priority`, `--severity`, `--project-area`,
 `--tag`, `--type`, `--use-case`, and `--order`.
 
+Readiness behavior is documented in [Work readiness](work-readiness.md).
+
 Locate runtime artifacts for one execution:
 
 ```sh
@@ -366,6 +368,9 @@ Summarize an event stream for recovery or diagnostics:
 chc work events .chc/user/runtime/runs/CHC-1/exec-1/events.jsonl
 chc work events .chc/user/runtime/runs/loop-1/events.jsonl
 ```
+
+Event streams, runtime logs, reports, and Dash rendering are documented in
+[Agent work observability](agent-work-observability.md).
 
 ## QA Scenarios
 

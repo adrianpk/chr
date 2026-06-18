@@ -439,6 +439,7 @@ Inspect evidence:
 
 ```sh
 chc report show --execution <execution-id>
+chc work logs <execution-id>
 make verify
 git diff
 ```
@@ -448,7 +449,38 @@ Expected result:
 - the runtime writes execution artifacts under `.chc/user/runtime/runs/`;
 - the ticket records progress, blockers, or completion evidence;
 - validation output is inspectable;
+- runtime logs and event streams are discoverable;
 - changed files can be reviewed with `git diff`.
+
+## Agent Work Ready Queue
+
+Preview the ready queue through the agent-work facade:
+
+```sh
+chc work run-all \
+  --order priority_severity \
+  --dry-run
+```
+
+Run the ready queue:
+
+```sh
+chc work run-all \
+  --order priority_severity
+```
+
+Observe the run from Dash with `F8`, or inspect evidence after it finishes:
+
+```sh
+chc report list --kind loop
+chc report list --kind execution
+chc report show --loop <loop-id>
+chc work events .chc/user/runtime/runs/<loop-id>/events.jsonl
+```
+
+The run should stop on a blocked or failed ticket instead of spinning forever.
+Use `chc work doctor` or Dash readiness diagnostics when work is blocked before
+execution starts.
 
 ## Foreground Ticket Loop
 

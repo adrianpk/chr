@@ -106,5 +106,5 @@ This verifies the runtime boundary and prints execution-scoped artifact paths.
 ## Next Reading
 
 - [User guide](../how-to/user-guide/index.md)
-- [Project workspace reference](../reference/project-core.md)
+- [Project workspace reference](../reference/project-workspace.md)
 - [Ticket execution reference](../reference/ticket-execution.md)
