@@ -349,6 +349,7 @@ Reset a QA scenario from its versioned reference copy:
 ```sh
 make qa-reset QA_CASE=blog QA_REF=001
 make qa-reset-blog
+make qa-reset-tictactoe
 ```
 
 Run the active scenario tests:
@@ -356,6 +357,7 @@ Run the active scenario tests:
 ```sh
 make qa-test QA_CASE=blog
 make qa-test-blog
+make qa-test-tictactoe
 ```
 
 Run scenario smoke validation:
@@ -363,11 +365,15 @@ Run scenario smoke validation:
 ```sh
 make qa-smoke QA_CASE=blog QA_REF=001
 make qa-smoke-blog
+make qa-smoke-tictactoe
 ```
 
 QA references live under `qa/ref/<ref>/<case>`. Active project copies live
 under ignored `qa/project/<case>` directories, and previous active copies are
 moved to ignored `qa/tmp/<case>` directories during reset.
+
+The `blog` smoke check expects the seeded unknown-post failure. Other smoke
+checks expect the reset project to pass its baseline tests.
 
 ## Index
 

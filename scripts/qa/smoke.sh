@@ -34,15 +34,27 @@ fi
 output_file="$(mktemp)"
 trap 'rm -f "$output_file"' EXIT HUP INT TERM
 
-if "$repo_root/scripts/qa/test.sh" "$case_name" >"$output_file" 2>&1; then
-	echo "qa smoke failed: baseline test unexpectedly passed" >&2
-	exit 1
+if [ "$case_name" = "blog" ]; then
+	if "$repo_root/scripts/qa/test.sh" "$case_name" >"$output_file" 2>&1; then
+		echo "qa smoke failed: baseline test unexpectedly passed" >&2
+		exit 1
+	fi
+
+	if ! grep -q 'status = 500, want 404' "$output_file"; then
+		echo "qa smoke failed: baseline failure did not match the expected unknown-post bug" >&2
+		cat "$output_file" >&2
+		exit 1
+	fi
+
+	echo "qa smoke ok: qa/project/$case_name reset, ignored, git-initialized, and failing as expected"
+
+	exit 0
 fi
 
-if ! grep -q 'status = 500, want 404' "$output_file"; then
-	echo "qa smoke failed: baseline failure did not match the expected unknown-post bug" >&2
+if ! "$repo_root/scripts/qa/test.sh" "$case_name" >"$output_file" 2>&1; then
+	echo "qa smoke failed: baseline tests failed" >&2
 	cat "$output_file" >&2
 	exit 1
 fi
 
-echo "qa smoke ok: qa/project/$case_name reset, ignored, git-initialized, and failing as expected"
+echo "qa smoke ok: qa/project/$case_name reset, ignored, git-initialized, and tests passed"

@@ -14,6 +14,7 @@ Task-oriented guides:
 
 - [User guide](how-to/user-guide/index.md)
 - [Full-system lab runbook](how-to/full-system-lab-runbook.md)
+- [QA tictactoe agent work scenario](how-to/qa-tictactoe-agent-work-scenario.md)
 - [Find execution and loop evidence](how-to/find-execution-and-loop-evidence.md)
 - [Inspect and recover local state](how-to/inspect-and-recover-local-state.md)
 - [Use Forgejo ticket review](how-to/use-forgejo-ticket-review.md)

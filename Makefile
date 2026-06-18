@@ -13,7 +13,7 @@ QA_REF ?= 001
 GATE_BASE ?= origin/main
 GATE_HEAD ?= origin/dev
 
-.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style check-package-readmes dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog
+.PHONY: fmt test test-coverage lint lint-strict check verify check-go-style check-package-readmes dev-dirs run build build-run install clean-dev gate-dev-main qa-reset qa-test qa-smoke qa-gate qa-reset-blog qa-test-blog qa-smoke-blog qa-reset-tictactoe qa-test-tictactoe qa-smoke-tictactoe
 
 fmt:
 	@$(GO) fmt ./...
@@ -89,3 +89,12 @@ qa-test-blog:
 
 qa-smoke-blog:
 	@$(MAKE) qa-smoke QA_CASE=blog QA_REF=001
+
+qa-reset-tictactoe:
+	@$(MAKE) qa-reset QA_CASE=tictactoe QA_REF=003
+
+qa-test-tictactoe:
+	@$(MAKE) qa-test QA_CASE=tictactoe
+
+qa-smoke-tictactoe:
+	@$(MAKE) qa-smoke QA_CASE=tictactoe QA_REF=003
