@@ -1,6 +1,6 @@
 # Configurable Work Readiness Tracker
 
-Status: reviewing
+Status: delivered
 
 Plan: `ops/plans/2026-06-18-configurable-work-readiness-plan.md`
 
@@ -15,7 +15,7 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 | Slice 1 | work policy config | delivered | `feat/slice-1-work-policy-config` | `#313` | `.prj/reports/slices/configurable-work-readiness/slice-1-work-policy-config.md` |
 | Slice 2 | work doctor diagnostics | delivered | `feat/slice-2-work-doctor-diagnostics` | `#314` | `.prj/reports/slices/configurable-work-readiness/slice-2-work-doctor-diagnostics.md` |
 | Slice 3 | safe readiness repair | delivered | `feat/slice-3-safe-readiness-repair` | `#315` | `.prj/reports/slices/configurable-work-readiness/slice-3-safe-readiness-repair.md` |
-| Slice 4 | dash readiness guidance | reviewing | `feat/slice-4-dash-readiness-guidance` | `#316` | `.prj/reports/slices/configurable-work-readiness/slice-4-dash-readiness-guidance.md` |
+| Slice 4 | dash readiness guidance | delivered | `feat/slice-4-dash-readiness-guidance` | `#316` | `.prj/reports/slices/configurable-work-readiness/slice-4-dash-readiness-guidance.md` |
 
 ## Slice 1 Tasks
 
