@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 )
@@ -129,6 +130,155 @@ func TestWorkSelectionPreflightBlocksDevBehindOriginDev(t *testing.T) {
 	}
 }
 
+func TestWorkSelectionPreflightAllowsConfiguredIntegrationBranch(t *testing.T) {
+	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
+		ProjectDir: t.TempDir(),
+		Tickets:    []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		BranchPolicy: WorkBranchPolicy{
+			Mode:                  WorkBranchPolicyModeIntegrationBranch,
+			IntegrationBranch:     "develop",
+			CanonicalRemote:       "upstream",
+			RequireCleanWorktree:  true,
+			RequireRemoteTracking: true,
+		},
+		Git: fakeWorkSelectionGit{
+			branch:      "develop",
+			clean:       true,
+			containsRef: true,
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunWorkSelectionPreflight returned error: %v", err)
+	}
+
+	if !result.Allowed {
+		t.Fatalf("Allowed = false, want true: %#v", result.BlockReasons)
+	}
+}
+
+func TestWorkSelectionPreflightBlocksConfiguredIntegrationBranchBehindRemote(t *testing.T) {
+	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
+		ProjectDir: t.TempDir(),
+		Tickets:    []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		BranchPolicy: WorkBranchPolicy{
+			Mode:                  WorkBranchPolicyModeIntegrationBranch,
+			IntegrationBranch:     "develop",
+			CanonicalRemote:       "upstream",
+			RequireCleanWorktree:  true,
+			RequireRemoteTracking: true,
+		},
+		Git: fakeWorkSelectionGit{
+			branch:      "develop",
+			clean:       true,
+			containsRef: false,
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunWorkSelectionPreflight returned error: %v", err)
+	}
+
+	if result.Allowed {
+		t.Fatalf("Allowed = true, want false")
+	}
+
+	if len(result.BlockReasons) != 1 || !strings.Contains(result.BlockReasons[0].Detail, "upstream/develop") {
+		t.Fatalf("BlockReasons = %#v, want upstream/develop detail", result.BlockReasons)
+	}
+}
+
+func TestWorkSelectionPreflightCurrentBranchModeAllowsAnyCleanBranch(t *testing.T) {
+	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
+		ProjectDir: t.TempDir(),
+		Tickets:    []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		BranchPolicy: WorkBranchPolicy{
+			Mode:                 WorkBranchPolicyModeCurrentBranch,
+			RequireCleanWorktree: true,
+		},
+		Git: fakeWorkSelectionGit{
+			branch:      "feature/current-work",
+			clean:       true,
+			containsRef: false,
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunWorkSelectionPreflight returned error: %v", err)
+	}
+
+	if !result.Allowed {
+		t.Fatalf("Allowed = false, want true: %#v", result.BlockReasons)
+	}
+}
+
+func TestWorkSelectionPreflightCurrentBranchModeRequiresCleanWorktree(t *testing.T) {
+	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
+		ProjectDir: t.TempDir(),
+		Tickets:    []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		BranchPolicy: WorkBranchPolicy{
+			Mode:                 WorkBranchPolicyModeCurrentBranch,
+			RequireCleanWorktree: true,
+		},
+		Git: fakeWorkSelectionGit{
+			branch: "feature/current-work",
+			clean:  false,
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunWorkSelectionPreflight returned error: %v", err)
+	}
+
+	if result.Allowed {
+		t.Fatalf("Allowed = true, want false")
+	}
+
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Detail != "work selection requires a clean local worktree" {
+		t.Fatalf("BlockReasons = %#v, want generic clean worktree detail", result.BlockReasons)
+	}
+}
+
+func TestWorkSelectionPreflightNoGitEnforcementSkipsGitChecks(t *testing.T) {
+	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
+		ProjectDir: t.TempDir(),
+		Tickets:    []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		BranchPolicy: WorkBranchPolicy{
+			Mode: WorkBranchPolicyModeNoGitEnforcement,
+		},
+		Git: failingWorkSelectionGit{},
+	})
+	if err != nil {
+		t.Fatalf("RunWorkSelectionPreflight returned error: %v", err)
+	}
+
+	if !result.Allowed {
+		t.Fatalf("Allowed = false, want true: %#v", result.BlockReasons)
+	}
+}
+
+func TestWorkSelectionPreflightNoGitEnforcementKeepsReviewRepairOrdering(t *testing.T) {
+	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
+		ProjectDir: t.TempDir(),
+		Tickets: []IndexedTicket{
+			{Key: "CHC-1", Status: TicketStatusReadyForDev, ReviewState: "changes_requested"},
+			{Key: "CHC-2", Status: TicketStatusReadyForDev},
+		},
+		SelectedTicketKey: "CHC-2",
+		BranchPolicy: WorkBranchPolicy{
+			Mode: WorkBranchPolicyModeNoGitEnforcement,
+		},
+		Git: failingWorkSelectionGit{},
+	})
+	if err != nil {
+		t.Fatalf("RunWorkSelectionPreflight returned error: %v", err)
+	}
+
+	if result.Allowed {
+		t.Fatalf("Allowed = true, want false")
+	}
+
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockReviewRepairPending {
+		t.Fatalf("BlockReasons = %#v, want review repair pending", result.BlockReasons)
+	}
+}
+
 type fakeWorkSelectionGit struct {
 	branch      string
 	clean       bool
@@ -145,4 +295,18 @@ func (git fakeWorkSelectionGit) WorktreeClean(context.Context, string) (bool, er
 
 func (git fakeWorkSelectionGit) BranchContainsRef(context.Context, string, string, string) (bool, error) {
 	return git.containsRef, nil
+}
+
+type failingWorkSelectionGit struct{}
+
+func (failingWorkSelectionGit) CurrentBranch(context.Context, string) (string, error) {
+	return "", errors.New("current branch should not be read")
+}
+
+func (failingWorkSelectionGit) WorktreeClean(context.Context, string) (bool, error) {
+	return false, errors.New("worktree should not be read")
+}
+
+func (failingWorkSelectionGit) BranchContainsRef(context.Context, string, string, string) (bool, error) {
+	return false, errors.New("remote ref should not be read")
 }
