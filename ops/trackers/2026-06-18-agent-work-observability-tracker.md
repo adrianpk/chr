@@ -12,7 +12,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | agent event model | planned | `feat/slice-1-agent-event-model` | pending | `.prj/reports/slices/agent-work-observability/slice-1-agent-event-model.md` |
+| Slice 1 | agent event model | reviewing | `feat/slice-1-agent-event-model` | pending | `.prj/reports/slices/agent-work-observability/slice-1-agent-event-model.md` |
 | Slice 2 | work lifecycle events | planned | `feat/slice-2-work-lifecycle-events` | pending | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
 | Slice 3 | dash live work stream | planned | `feat/slice-3-dash-live-work-stream` | pending | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
 | Slice 4 | execution log lookup | planned | `feat/slice-4-execution-log-lookup` | pending | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
@@ -22,10 +22,10 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add the `AgentEvent` model and validation helpers. | planned | pending | Core model only. |
-| T1.2 | Add JSONL append/read primitives for runtime event streams. | planned | pending | Append-only file storage. |
-| T1.3 | Add unit tests for persistence, ordering, and malformed-line handling. | planned | pending | Reader must tolerate partial corruption. |
-| T1.4 | Add the slice implementation report and validation evidence. | planned | pending | Report path defined in slice map. |
+| T1.1 | Add the `AgentEvent` model and validation helpers. | done | `689ac63` | Core model only. |
+| T1.2 | Add JSONL append/read primitives for runtime event streams. | done | `b9c6239` | Append-only file storage. |
+| T1.3 | Add unit tests for persistence, ordering, and malformed-line handling. | done | `3ff06cf` | Reader tolerates partial corruption. |
+| T1.4 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 2 Tasks
 
@@ -66,7 +66,8 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 ## Validation Log
 
-- Planning artifacts only; implementation validation starts with Slice 1.
+- `go test ./internal/core` (pass)
+- `make verify` (pass)
 
 ## Notes
 
@@ -75,4 +76,3 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
   logs.
 - Detailed runtime/container logs can remain CLI-first until the event stream
   contract is in place.
-
