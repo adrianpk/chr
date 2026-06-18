@@ -15,7 +15,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 | Slice 1 | agent event model | delivered | `feat/slice-1-agent-event-model` | `#308` | `.prj/reports/slices/agent-work-observability/slice-1-agent-event-model.md` |
 | Slice 2 | work lifecycle events | delivered | `feat/slice-2-work-lifecycle-events` | `#309` | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
 | Slice 3 | dash live work stream | delivered | `feat/slice-3-dash-live-work-stream` | `#310` | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
-| Slice 4 | execution log lookup | active | `feat/slice-4-execution-log-lookup` | pending | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
+| Slice 4 | execution log lookup | reviewing | `feat/slice-4-execution-log-lookup` | pending | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
 | Slice 5 | event readback recovery | planned | `feat/slice-5-event-readback-recovery` | pending | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
 
 ## Slice 1 Tasks
@@ -50,10 +50,10 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add a log lookup command or extend an existing report/runtime command. | planned | pending | CLI-first is acceptable. |
-| T4.2 | Connect event refs to lookup output or hint text. | planned | pending | Avoid hardcoding container ids when unavailable. |
-| T4.3 | Add command tests for successful and missing-log lookup. | planned | pending | Include missing execution path. |
-| T4.4 | Add the slice implementation report and validation evidence. | planned | pending | Report path defined in slice map. |
+| T4.1 | Add a log lookup command or extend an existing report/runtime command. | done | `b97391c` | Adds `chc work logs <execution-id>`. |
+| T4.2 | Connect event refs to lookup output or hint text. | done | `e5a56bf` | TUI event details show the lookup command. |
+| T4.3 | Add command tests for successful and missing-log lookup. | done | `f25e14c` | Covers successful, missing artifact, and missing execution paths. |
+| T4.4 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 5 Tasks
 
@@ -72,6 +72,9 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 - `make verify` (pass)
 - `go test ./internal/tui` (pass)
 - `go test ./internal/app` (pass)
+- `make verify` (pass)
+- `go test ./internal/app` (pass)
+- `go test ./internal/tui` (pass)
 - `make verify` (pass)
 
 ## Notes
