@@ -2412,6 +2412,48 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	}
 }
 
+func TestModelRefreshesDashAgentWorkWhileWorkBusy(t *testing.T) {
+	executor := &fakeAgentWorkRefreshExecutor{
+		result: AgentWorkRefreshResult{
+			Observability: ObservabilityView{
+				RecentEvents: []AgentEventView{
+					{Time: "12:00:00", TicketKey: "CHC-2", Message: "worker started"},
+				},
+			},
+		},
+	}
+	model := NewModel(Options{AgentWorkExecutor: executor})
+	model.selected = 7
+	model.workBusy = true
+	model.statusMessage = "Running all ready tickets..."
+
+	updated, cmd := model.Update(agentWorkRefreshTickMsg{})
+	refreshing := requireUpdatedModel(t, updated)
+
+	if cmd == nil {
+		t.Fatal("refresh command is nil")
+	}
+
+	if !refreshing.agentWorkRefreshInFlight {
+		t.Fatal("agentWorkRefreshInFlight = false, want refresh in flight")
+	}
+
+	updated, _ = refreshing.Update(agentWorkRefreshFinishedMsg{result: executor.result})
+	refreshed := requireUpdatedModel(t, updated)
+
+	if len(refreshed.observability.RecentEvents) != 1 {
+		t.Fatalf("RecentEvents length = %d, want 1", len(refreshed.observability.RecentEvents))
+	}
+
+	if refreshed.observability.RecentEvents[0].Message != "worker started" {
+		t.Fatalf("RecentEvents[0].Message = %q, want worker started", refreshed.observability.RecentEvents[0].Message)
+	}
+
+	if !refreshed.workBusy {
+		t.Fatal("workBusy = false, want foreground action retained during refresh")
+	}
+}
+
 func TestModelSkipsDashAgentWorkRefreshWhenOneIsInFlight(t *testing.T) {
 	executor := &fakeAgentWorkRefreshExecutor{}
 	model := NewModel(Options{AgentWorkExecutor: executor})
@@ -2602,6 +2644,29 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 		if !strings.Contains(action, want) {
 			t.Fatalf("renderWorkAction() missing %q:\n%s", want, action)
 		}
+	}
+}
+
+func TestModelBlocksFooterMouseWhileWorkBusy(t *testing.T) {
+	model := NewModel(Options{})
+	model.width = 100
+	model.height = 30
+	model.workBusy = true
+
+	updated, cmd := model.Update(tea.MouseMsg{
+		X:      95,
+		Y:      29,
+		Action: tea.MouseActionPress,
+		Button: tea.MouseButtonLeft,
+	})
+	blocked := requireUpdatedModel(t, updated)
+
+	if cmd != nil {
+		t.Fatal("mouse update returned command while work action is running")
+	}
+
+	if blocked.statusMessage != "Work action already running." {
+		t.Fatalf("statusMessage = %q, want work busy status", blocked.statusMessage)
 	}
 }
 

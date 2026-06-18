@@ -555,6 +555,16 @@ func (m Model) updateMouse(msg tea.MouseMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	return m.updateMousePress(event)
+}
+
+func (m Model) updateMousePress(event tea.MouseEvent) (tea.Model, tea.Cmd) {
+	if m.workBusy {
+		m.statusMessage = "Work action already running."
+
+		return m, nil
+	}
+
 	width := maxInt(m.width, 60)
 	height := maxInt(m.height, minShellHeight)
 
