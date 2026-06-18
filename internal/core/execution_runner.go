@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
@@ -44,6 +45,7 @@ type ExecutionRunner struct {
 type RunExecutionOptions struct {
 	Record     ExecutionRecord
 	Invocation HarnessInvocation
+	LoopID     string
 	DryRun     bool
 }
 
@@ -92,15 +94,20 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 		return ExecutionRecord{}, err
 	}
 
-	err = r.runHarness(ctx, opts.Invocation, logFile, validationFile)
+	err = r.runHarness(ctx, opts, record, logFile, validationFile)
 	if err != nil {
 		return r.failExecution(ctx, record, err)
 	}
 
-	err = captureExecutionResult(record)
+	result, err := captureExecutionResult(record)
 	if err != nil {
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkFailed, AgentEventLevelError,
+			fmt.Sprintf("%s result capture failed", record.TicketKey))
+
 		return r.failExecution(ctx, record, err)
 	}
+
+	r.emitChangedFilesDetected(ctx, opts.LoopID, record, result)
 
 	return r.markExecutionSucceeded(ctx, record)
 }
@@ -179,21 +186,51 @@ func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (*os.File, *os.F
 	return logFile, validationFile, nil
 }
 
-func (r ExecutionRunner) runHarness(ctx context.Context, invocation HarnessInvocation, log, validationLog io.Writer) error {
-	err := r.Executor.Run(ctx, invocation.Build, log, log)
+func (r ExecutionRunner) runHarness(ctx context.Context, opts RunExecutionOptions, record ExecutionRecord, log, validationLog io.Writer) error {
+	err := r.Executor.Run(ctx, opts.Invocation.Build, log, log)
 	if err != nil {
-		return harnessFailure(err)
+		failure := harnessFailure(err)
+
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkFailed, AgentEventLevelError,
+			fmt.Sprintf("%s runtime preparation failed", record.TicketKey))
+
+		return failure
 	}
 
-	err = r.Executor.Run(ctx, invocation.Run, log, log)
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseRuntimePrepared, AgentEventLevelInfo,
+		fmt.Sprintf("%s runtime prepared", record.TicketKey))
+
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkerStarted, AgentEventLevelInfo,
+		fmt.Sprintf("%s worker started", record.TicketKey))
+
+	err = r.Executor.Run(ctx, opts.Invocation.Run, log, log)
 	if err != nil {
-		return workerFailure(err)
+		failure := workerFailure(err)
+
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkerFinished, AgentEventLevelError,
+			fmt.Sprintf("%s worker failed", record.TicketKey))
+
+		return failure
 	}
 
-	err = r.Executor.Run(ctx, invocation.Validation, validationLog, validationLog)
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseWorkerFinished, AgentEventLevelInfo,
+		fmt.Sprintf("%s worker finished", record.TicketKey))
+
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseValidationStarted, AgentEventLevelInfo,
+		fmt.Sprintf("%s validation started: %s", record.TicketKey, record.Runtime.ValidationCommand))
+
+	err = r.Executor.Run(ctx, opts.Invocation.Validation, validationLog, validationLog)
 	if err != nil {
-		return validationFailure(err)
+		failure := validationFailure(err)
+
+		r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseValidationFinished, AgentEventLevelError,
+			fmt.Sprintf("%s validation failed: %s", record.TicketKey, record.Runtime.ValidationCommand))
+
+		return failure
 	}
+
+	r.emitExecutionAgentEvent(ctx, opts.LoopID, record, AgentEventPhaseValidationFinished, AgentEventLevelInfo,
+		fmt.Sprintf("%s validation passed: %s", record.TicketKey, record.Runtime.ValidationCommand))
 
 	return nil
 }
@@ -233,13 +270,18 @@ func validationFailure(err error) error {
 	return NewExecutionFailure(ExecutionFailureValidation, err)
 }
 
-func captureExecutionResult(record ExecutionRecord) error {
+func captureExecutionResult(record ExecutionRecord) (ExecutionResult, error) {
 	result, err := LoadExecutionResult(record.Artifacts.ResultPath)
 	if err != nil {
-		return NewExecutionFailure(ExecutionFailureResultCapture, err)
+		return ExecutionResult{}, NewExecutionFailure(ExecutionFailureResultCapture, err)
 	}
 
-	return validateExecutionResultForRecord(result, record)
+	err = validateExecutionResultForRecord(result, record)
+	if err != nil {
+		return ExecutionResult{}, err
+	}
+
+	return result, nil
 }
 
 func validateExecutionResultForRecord(result ExecutionResult, record ExecutionRecord) error {
@@ -277,6 +319,63 @@ func (r ExecutionRunner) failExecution(ctx context.Context, record ExecutionReco
 	}
 
 	return record, cause
+}
+
+func (r ExecutionRunner) emitChangedFilesDetected(ctx context.Context, loopID string, record ExecutionRecord, result ExecutionResult) {
+	if len(result.ChangedFiles) == 0 {
+		return
+	}
+
+	r.emitExecutionAgentEvent(ctx, loopID, record, AgentEventPhaseChangedFilesDetected, AgentEventLevelInfo,
+		fmt.Sprintf("%s changed files detected: %d", record.TicketKey, len(result.ChangedFiles)))
+}
+
+func (r ExecutionRunner) emitExecutionAgentEvent(ctx context.Context, loopID string, record ExecutionRecord, phase AgentEventPhase, level AgentEventLevel, message string) {
+	if r.EventSink == nil {
+		return
+	}
+
+	err := r.EventSink.EmitAgentEvent(ctx, AgentEvent{
+		SchemaVersion: AgentEventSchemaVersion,
+		Timestamp:     time.Now().UTC(),
+		ProjectID:     record.ProjectID,
+		LoopID:        loopID,
+		ExecutionID:   record.ID,
+		TicketKey:     record.TicketKey,
+		Phase:         phase,
+		Level:         level,
+		Message:       message,
+		Refs:          executionAgentEventRefs(record),
+	})
+	if err != nil {
+		return
+	}
+}
+
+func executionAgentEventRefs(record ExecutionRecord) AgentEventRefs {
+	return compactAgentEventRefs(AgentEventRefs{
+		"ticket_path":           record.TicketPath,
+		"context_path":          filepath.Join(record.Artifacts.RunDir, "context.md"),
+		"result_path":           record.Artifacts.ResultPath,
+		"runtime_log_path":      record.Artifacts.LogPath,
+		"validation_command":    record.Runtime.ValidationCommand,
+		"validation_log_path":   record.Artifacts.ValidationPath,
+		"execution_report_path": ExecutionReportPath(record),
+	})
+}
+
+func compactAgentEventRefs(refs AgentEventRefs) AgentEventRefs {
+	for key, value := range refs {
+		if value == "" {
+			delete(refs, key)
+		}
+	}
+
+	if len(refs) == 0 {
+		return nil
+	}
+
+	return refs
 }
 
 func (r ExecutionRunner) now() time.Time {

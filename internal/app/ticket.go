@@ -912,16 +912,19 @@ func runTicketLoopExecution(
 	}
 
 	loopSink := agentWorkLoopEventSink(projectContext.ProjectDir, record)
+	emitLoopStartedAgentEvent(ctx, loopSink, record)
 
 	result := ticketLoopExecutionResult{Record: record}
 
 	for _, ticket := range tickets {
+		emitTicketSelectedAgentEvent(ctx, loopSink, record, ticket)
+
 		execution, application, err := executeLoopTicket(ctx, env, projectContext, ticket, ticketExecutionEvents{
 			LoopID: record.ID,
 			Sink:   loopSink,
 		}, assetsFS)
 		if err != nil {
-			return failTicketLoopExecution(ctx, env, repository, projectContext, result, record, err, assetsFS)
+			return failTicketLoopExecution(ctx, env, repository, projectContext, result, record, loopSink, err, assetsFS)
 		}
 
 		result.Executions = append(result.Executions, execution)
@@ -935,7 +938,7 @@ func runTicketLoopExecution(
 		}
 	}
 
-	return finishTicketLoopExecution(ctx, env, repository, projectContext, result, record, assetsFS)
+	return finishTicketLoopExecution(ctx, env, repository, projectContext, result, record, loopSink, assetsFS)
 }
 
 func failTicketLoopExecution(
@@ -945,6 +948,7 @@ func failTicketLoopExecution(
 	projectContext commandProjectContext,
 	result ticketLoopExecutionResult,
 	record core.LoopRunRecord,
+	eventSink core.AgentEventSink,
 	cause error,
 	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
@@ -957,6 +961,7 @@ func failTicketLoopExecution(
 	}
 
 	result.Record = record
+	emitLoopFailedAgentEvents(ctx, eventSink, record, cause)
 
 	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
 	if err != nil {
@@ -973,6 +978,7 @@ func finishTicketLoopExecution(
 	projectContext commandProjectContext,
 	result ticketLoopExecutionResult,
 	record core.LoopRunRecord,
+	eventSink core.AgentEventSink,
 	assetsFS fs.FS,
 ) (ticketLoopExecutionResult, error) {
 	record = finishLoopRunRecord(record)
@@ -983,6 +989,7 @@ func finishTicketLoopExecution(
 	}
 
 	result.Record = record
+	emitLoopFinishedAgentEvent(ctx, eventSink, record)
 
 	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
 	if err != nil {
@@ -1200,13 +1207,7 @@ func buildTicketApplyResultPlanForRecord(
 	}, nil
 }
 
-func applyTicketResult(
-	ctx context.Context,
-	env core.UserEnvironment,
-	plan ticketApplyResultPlan,
-	events ticketExecutionEvents,
-	assetsFS fs.FS,
-) error {
+func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, events ticketExecutionEvents, assetsFS fs.FS) error {
 	appliedAt := time.Now().UTC()
 
 	err := core.NewTicketResultStateWriter().WriteResultState(ctx, core.WriteResultStateOptions{
@@ -1263,6 +1264,8 @@ func applyTicketResult(
 	if err != nil {
 		return err
 	}
+
+	emitTicketApplicationAgentEvents(ctx, events, plan)
 
 	return emitTicketBlockedNotification(ctx, env, plan, assetsFS)
 }
@@ -1520,6 +1523,21 @@ func runTicketStartExecution(
 		return core.ExecutionRecord{}, err
 	}
 
+	emitAgentWorkEvent(ctx, events.Sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      events.LoopID,
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Phase:       core.AgentEventPhaseExecutionCreated,
+		Message:     fmt.Sprintf("%s execution created: %s", record.TicketKey, record.ID),
+		Refs: core.AgentEventRefs{
+			"ticket_path":         record.TicketPath,
+			"result_path":         record.Artifacts.ResultPath,
+			"runtime_log_path":    record.Artifacts.LogPath,
+			"validation_log_path": record.Artifacts.ValidationPath,
+		},
+	})
+
 	err = core.MaterializeCodexWorkerContextForExecution(ctx, record, result.Plan)
 	if err != nil {
 		return core.ExecutionRecord{}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
@@ -1541,6 +1559,7 @@ func runTicketStartExecution(
 	return runner.Run(ctx, core.RunExecutionOptions{
 		Record:     record,
 		Invocation: invocation,
+		LoopID:     events.LoopID,
 	})
 }
 
