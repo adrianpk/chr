@@ -2559,8 +2559,49 @@ func TestModelStartsWorkActionOnConfirm(t *testing.T) {
 	}
 
 	action := busy.renderWorkAction()
-	if !strings.Contains(action, "Work Action Running") || !strings.Contains(action, "Please wait") {
+	if !strings.Contains(action, "Work Action Running") || !strings.Contains(action, "Navigation is locked until this action finishes.") {
 		t.Fatalf("renderWorkAction() = %q, want running overlay", action)
+	}
+
+	if !strings.Contains(action, "No agent events recorded yet.") {
+		t.Fatalf("renderWorkAction() = %q, want empty event stream state", action)
+	}
+}
+
+func TestModelRendersWorkActionEventStream(t *testing.T) {
+	model := NewModel(Options{})
+	model.workBusy = true
+	model.statusMessage = "Running all ready tickets..."
+	model.observability = ObservabilityView{
+		RecentEvents: []AgentEventView{
+			{Time: "11:31:00", Level: "info", Message: "loop started"},
+			{
+				Time:          "11:31:02",
+				Level:         "info",
+				TicketKey:     "CHC-2",
+				Message:       "worker started",
+				RuntimeLog:    ".chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
+				ValidationLog: ".chc/user/runtime/runs/CHC-2/exec-2/validation.log",
+			},
+			{Time: "11:31:03", Level: "error", TicketKey: "CHC-2", Message: "validation failed"},
+		},
+	}
+
+	action := model.renderWorkAction()
+	for _, want := range []string{
+		"Work Action Running",
+		"Running all ready tickets...",
+		"Navigation is locked until this action finishes.",
+		"Events",
+		"11:31:00 loop started",
+		"11:31:02 CHC-2 worker started",
+		"11:31:03 CHC-2 error: validation failed",
+		"Runtime log: .chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
+		"Validation log: .chc/user/runtime/runs/CHC-2/exec-2/validation.log",
+	} {
+		if !strings.Contains(action, want) {
+			t.Fatalf("renderWorkAction() missing %q:\n%s", want, action)
+		}
 	}
 }
 

@@ -54,6 +54,8 @@ type workActionFinishedMsg struct {
 	Err     error
 }
 
+const maxWorkActionEventRows = 8
+
 // NewWorkActionState builds the confirmation details for an agent work action.
 func NewWorkActionState(action WorkActionID, ticket TicketView) WorkActionState {
 	switch action {
@@ -116,7 +118,7 @@ func NewWorkActionState(action WorkActionID, ticket TicketView) WorkActionState 
 
 func (m Model) renderWorkAction() string {
 	if m.workBusy {
-		return strings.TrimRight("\n\nWork Action Running\n  "+m.statusMessage+"\n\n  Please wait for this action to finish.", "\n")
+		return m.renderRunningWorkAction()
 	}
 
 	if !m.workAction.Pending {
@@ -138,6 +140,111 @@ func (m Model) renderWorkAction() string {
 	output.WriteString("  Esc: cancel\n")
 
 	return strings.TrimRight(output.String(), "\n")
+}
+
+func (m Model) renderRunningWorkAction() string {
+	var output strings.Builder
+
+	output.WriteString("\n\nWork Action Running\n")
+
+	if strings.TrimSpace(m.statusMessage) != "" {
+		output.WriteString("  ")
+		output.WriteString(m.statusMessage)
+		output.WriteString("\n")
+	}
+
+	output.WriteString("  Navigation is locked until this action finishes.\n")
+
+	output.WriteString("\nEvents\n")
+
+	events := recentWorkActionEvents(m.observability.RecentEvents, maxWorkActionEventRows)
+	if len(events) == 0 {
+		output.WriteString("  No agent events recorded yet.\n")
+	} else {
+		for _, event := range events {
+			output.WriteString("  ")
+			output.WriteString(renderWorkActionEvent(event))
+			output.WriteString("\n")
+		}
+	}
+
+	runtimeLog, validationLog := latestWorkActionLogPaths(events)
+	if runtimeLog != "" || validationLog != "" {
+		output.WriteString("\nDetails\n")
+
+		if runtimeLog != "" {
+			output.WriteString("  Runtime log: ")
+			output.WriteString(runtimeLog)
+			output.WriteString("\n")
+		}
+
+		if validationLog != "" {
+			output.WriteString("  Validation log: ")
+			output.WriteString(validationLog)
+			output.WriteString("\n")
+		}
+	}
+
+	return strings.TrimRight(output.String(), "\n")
+}
+
+func recentWorkActionEvents(events []AgentEventView, limit int) []AgentEventView {
+	if limit <= 0 || len(events) <= limit {
+		return events
+	}
+
+	return events[len(events)-limit:]
+}
+
+func renderWorkActionEvent(event AgentEventView) string {
+	message := strings.TrimSpace(event.Message)
+	if message == "" {
+		message = "event recorded"
+	}
+
+	level := strings.TrimSpace(event.Level)
+	if level != "" && level != string(core.AgentEventLevelInfo) {
+		message = level + ": " + message
+	}
+
+	ticketKey := strings.TrimSpace(event.TicketKey)
+
+	parts := make([]string, 0, 3)
+	if strings.TrimSpace(event.Time) != "" {
+		parts = append(parts, event.Time)
+	}
+
+	if ticketKey != "" && !strings.HasPrefix(message, ticketKey+" ") && message != ticketKey {
+		parts = append(parts, ticketKey)
+	}
+
+	parts = append(parts, message)
+
+	return strings.Join(parts, " ")
+}
+
+func latestWorkActionLogPaths(events []AgentEventView) (string, string) {
+	var (
+		runtimeLog    string
+		validationLog string
+	)
+
+	for index := len(events) - 1; index >= 0; index-- {
+		event := events[index]
+		if runtimeLog == "" {
+			runtimeLog = strings.TrimSpace(event.RuntimeLog)
+		}
+
+		if validationLog == "" {
+			validationLog = strings.TrimSpace(event.ValidationLog)
+		}
+
+		if runtimeLog != "" && validationLog != "" {
+			break
+		}
+	}
+
+	return runtimeLog, validationLog
 }
 
 func (m Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
