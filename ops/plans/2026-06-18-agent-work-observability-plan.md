@@ -1,8 +1,8 @@
 # Agent Work Observability Plan
 
-Status: planned
+Status: delivered
 
-Active Slice: Slice 5 - event readback recovery
+Active Slice: complete
 
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 

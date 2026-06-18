@@ -1,6 +1,6 @@
 # Agent Work Observability Tracker
 
-Status: planned
+Status: delivered
 
 Plan: `ops/plans/2026-06-18-agent-work-observability-plan.md`
 
@@ -16,7 +16,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 | Slice 2 | work lifecycle events | delivered | `feat/slice-2-work-lifecycle-events` | `#309` | `.prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md` |
 | Slice 3 | dash live work stream | delivered | `feat/slice-3-dash-live-work-stream` | `#310` | `.prj/reports/slices/agent-work-observability/slice-3-dash-live-work-stream.md` |
 | Slice 4 | execution log lookup | delivered | `feat/slice-4-execution-log-lookup` | `#311` | `.prj/reports/slices/agent-work-observability/slice-4-execution-log-lookup.md` |
-| Slice 5 | event readback recovery | reviewing | `feat/slice-5-event-readback-recovery` | pending | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
+| Slice 5 | event readback recovery | delivered | `feat/slice-5-event-readback-recovery` | `#312` | `.prj/reports/slices/agent-work-observability/slice-5-event-readback-recovery.md` |
 
 ## Slice 1 Tasks
 
@@ -87,3 +87,5 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
   logs.
 - Detailed runtime/container logs can remain CLI-first until the event stream
   contract is in place.
+- Tuning needed: no. The planned five slices are delivered and the final slice
+  passed `make verify`.

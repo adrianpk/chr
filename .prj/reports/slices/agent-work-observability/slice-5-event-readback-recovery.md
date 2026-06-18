@@ -1,11 +1,11 @@
 # Slice 5: Event Readback Recovery
 
-Status: reviewing
+Status: delivered
 Slicing: Agent Work Observability
 Plan: `ops/plans/2026-06-18-agent-work-observability-plan.md`
 Tracker: `ops/trackers/2026-06-18-agent-work-observability-tracker.md`
 Branch: `feat/slice-5-event-readback-recovery`
-PR: pending
+PR: #312
 
 ## Purpose
 
