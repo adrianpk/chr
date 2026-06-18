@@ -126,14 +126,14 @@ The expanded/debug path should expose execution details:
 - runtime log path;
 - validation log path.
 
-The first implementation may expose the deeper path as a CLI hint such as:
+The first implementation exposes deeper paths through CLI commands:
 
 ```text
 chc work logs <execution-id>
+chc work events <event-stream-path>
 ```
 
-or another command chosen during implementation. The TUI does not need to embed
-a full log viewer in the first slice set.
+The TUI does not need to embed a full log viewer in the first slice set.
 
 ### Modal Execution
 
@@ -188,4 +188,3 @@ Recovery does not need to resume work automatically in this iteration.
 - Whether container identifiers are always available from every runtime backend.
 - Whether old event streams should participate in existing maintenance cleanup
   commands.
-

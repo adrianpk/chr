@@ -100,6 +100,27 @@ If a loop id exists, loop-level events should be written to the loop stream.
 Ticket execution events may be written to both the loop stream and the
 execution stream if the implementation needs a complete aggregate stream.
 
+## Readback Summary
+
+Event stream readback should summarize the latest valid event even when the
+stream contains malformed lines.
+
+The summary should include:
+
+- event count;
+- malformed line count;
+- degraded flag;
+- latest loop id;
+- latest ticket key;
+- latest execution id;
+- latest phase;
+- latest level;
+- latest message;
+- inferred status.
+
+Known statuses are `unknown`, `running`, `succeeded`, `blocked`, `failed`, and
+`stopped`.
+
 ## Rendering Model
 
 The TUI should render recent events as lines:
@@ -130,4 +151,3 @@ Rendering rules:
 Event streams are runtime evidence. They should follow the same retention and
 cleanup posture as existing execution reports and runtime logs unless a later
 maintenance spec defines different behavior.
-

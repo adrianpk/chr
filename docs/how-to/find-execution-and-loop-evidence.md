@@ -110,6 +110,34 @@ available, and failure information when recorded.
 Use the report first to choose the source artifact to inspect next. The source
 artifacts remain the detailed evidence.
 
+## Inspect Runtime Logs
+
+Locate detailed runtime artifacts for one execution:
+
+```sh
+chc work logs exec-1
+```
+
+The command prints the run directory, runtime log, validation log, result file,
+execution report, and event stream path. Each artifact includes an `*_exists`
+field so missing files are visible without hiding the execution identity.
+
+## Recover Latest Known Event State
+
+Summarize an event stream from either an execution or a loop:
+
+```sh
+chc work events .chc/user/runtime/runs/CHC-1/exec-1/events.jsonl
+chc work events .chc/user/runtime/runs/loop-1/events.jsonl
+```
+
+Use this after an interrupted run when the report is incomplete or absent. The
+summary shows the latest known loop, ticket, execution, phase, level, message,
+and inferred status.
+
+If the stream contains malformed lines, `degraded: true` and `malformed: <n>`
+are reported, but the latest valid event is still summarized.
+
 ## Review Handoff
 
 Review handoff summaries are concise Markdown summaries for review surfaces.

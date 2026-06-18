@@ -342,6 +342,19 @@ chc work run-all --dry-run --tag backend --order priority_severity
 `chc ticket loop`: `--status`, `--priority`, `--severity`, `--project-area`,
 `--tag`, `--type`, `--use-case`, and `--order`.
 
+Locate runtime artifacts for one execution:
+
+```sh
+chc work logs exec-1
+```
+
+Summarize an event stream for recovery or diagnostics:
+
+```sh
+chc work events .chc/user/runtime/runs/CHC-1/exec-1/events.jsonl
+chc work events .chc/user/runtime/runs/loop-1/events.jsonl
+```
+
 ## QA Scenarios
 
 Reset a QA scenario from its versioned reference copy:
