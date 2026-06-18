@@ -3771,8 +3771,14 @@ func setupCLIReviewRemoteEvidence(
 ) (*fakeCLIReviewRemoteRunner, func()) {
 	t.Helper()
 
+	return setupCLIReviewRemoteBase(t, devRoot, projectDir, "dev")
+}
+
+func setupCLIReviewRemoteBase(t *testing.T, devRoot, projectDir, base string) (*fakeCLIReviewRemoteRunner, func()) {
+	t.Helper()
+
 	runner := newFakeCLIReviewRemoteRunner()
-	runner.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":true}`)
+	runner.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"state":"open","base":{"ref":"` + base + `"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":true}`)
 	runner.outputs["tea api /repos/adrianpk/chc/pulls/274.diff"] = []byte("diff --git a/file.go b/file.go")
 	runner.outputs["tea api /repos/adrianpk/chc/issues/274/comments"] = []byte(`[]`)
 	runner.outputs["tea api /repos/adrianpk/chc/commits/abc123/statuses"] = []byte(`[]`)
@@ -4697,6 +4703,52 @@ func TestTicketMergeAppliesSuccessfulMerge(t *testing.T) {
 	input := string(runner.inputs[mergeCommand])
 	if !strings.Contains(input, `"Do":"rebase"`) {
 		t.Fatalf("merge payload = %q, want rebase strategy", input)
+	}
+}
+
+func TestTicketMergeUsesConfiguredIntegrationBranch(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  integration_branch: develop
+  canonical_remote: upstream
+`)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+
+	runner, restoreRunner := setupCLIReviewRemoteBase(t, devRoot, projectDir, "develop")
+
+	defer restoreRunner()
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"merge",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"--dry-run",
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket merge returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"ticket_merge: result",
+		"allowed: true",
+		"merge_state: pending",
+		"dry_run: true",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+
+	if len(runner.inputs) != 0 {
+		t.Fatalf("remote inputs = %#v, want none", runner.inputs)
 	}
 }
 

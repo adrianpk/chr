@@ -1050,7 +1050,7 @@ Each slice must include:
 Tasks must be implementation-oriented and should generally map to one Conventional Commit.
 Each slice must map to one ticket, one branch, one pull request, one review cycle, and one merge cycle.
 Default to sequential slices unless isolated slices are truly parallelizable.
-Assume the integration branch is dev unless context says otherwise.
+Use the integration branch from project configuration or provided context; only fall back to the default integration branch when no explicit policy is available.
 Use deterministic branch names shaped like feature/<use-case>/<slice-id>-<short-name>.
 Aim for 4 to 8 slices for normal work and up to 12 for large manageable work.
 If more than 12 slices are needed, explicitly flag the use case as unusually large, explain why, and suggest smaller use cases or phases.

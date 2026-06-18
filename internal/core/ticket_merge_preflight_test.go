@@ -13,7 +13,7 @@ func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 	remote := fakeTicketMergePreflightRemote{
 		snapshot: RemoteReviewSnapshot{
 			Reference:       ReviewProviderReference{Provider: ReviewProviderForgejo},
-			PullRequestJSON: `{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
+			PullRequestJSON: `{"state":"open","base":{"ref":"develop"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
 		},
 	}
 
@@ -21,7 +21,7 @@ func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 		Ticket:        ticket,
 		Tickets:       []IndexedTicket{ticket},
 		Remote:        remote,
-		ExpectedBase:  "dev",
+		ExpectedBase:  "develop",
 		MergeStrategy: TicketMergeStrategyRebase,
 	})
 	if err != nil {

@@ -322,8 +322,7 @@ func ticketMergeFlags() []cli.Flag {
 		},
 		&cli.StringFlag{
 			Name:  "base",
-			Usage: "expected pull request base branch",
-			Value: "dev",
+			Usage: "expected pull request base branch; defaults to the configured integration branch",
 		},
 		&cli.BoolFlag{
 			Name:  "dry-run",
@@ -1840,7 +1839,7 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return err
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, expectedBase, err := ticketMergeCommandConfig(projectContext.ProjectDir, cmd)
 	if err != nil {
 		return err
 	}
@@ -1855,7 +1854,7 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		Ticket:        ticket,
 		Tickets:       tickets,
 		Remote:        core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
-		ExpectedBase:  cmd.String("base"),
+		ExpectedBase:  expectedBase,
 		MergeStrategy: cmd.String("strategy"),
 		DryRun:        cmd.Bool("dry-run"),
 		MergedAt:      time.Now().UTC(),
@@ -1869,6 +1868,27 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	return printTicketMergeResult(stdout, projectContext, result)
+}
+
+func ticketMergeCommandConfig(projectDir string, cmd *cli.Command) (core.WorkspaceConfig, string, error) {
+	config, err := core.LoadWorkspaceConfig(projectDir)
+	if err != nil {
+		return core.WorkspaceConfig{}, "", err
+	}
+
+	if err := core.ValidateWorkConfig(config.Work); err != nil {
+		return core.WorkspaceConfig{}, "", err
+	}
+
+	return config, ticketMergeExpectedBase(cmd, config.Work.BranchPolicy), nil
+}
+
+func ticketMergeExpectedBase(cmd *cli.Command, policy core.WorkBranchPolicy) string {
+	if base := strings.TrimSpace(cmd.String("base")); cmd.IsSet("base") && base != "" {
+		return base
+	}
+
+	return policy.IntegrationBranch
 }
 
 func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (core.IndexedTicket, []core.IndexedTicket, error) {

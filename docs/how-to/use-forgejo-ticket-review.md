@@ -9,9 +9,10 @@ and pull request, then merge the reviewed ticket.
 
 - `tea` is installed.
 - A Forgejo API token is available in `FORGEJO_TOKEN`.
-- The ticket implementation branch has a pull request targeting `dev`.
-- The workspace is on local `dev`, clean, and up to date with `origin/dev`
-  before starting development or repair work.
+- The ticket implementation branch has a pull request targeting the configured
+  integration branch.
+- The workspace satisfies the configured work branch policy before starting
+  development or repair work.
 
 ## Configure Review
 

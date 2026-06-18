@@ -128,7 +128,7 @@ func RunTicketMergePreflight(ctx context.Context, opts TicketMergePreflightOptio
 func newTicketMergePreflightResult(opts TicketMergePreflightOptions) TicketMergePreflightResult {
 	expectedBase := strings.TrimSpace(opts.ExpectedBase)
 	if expectedBase == "" {
-		expectedBase = "dev"
+		expectedBase = DefaultWorkIntegrationBranch
 	}
 
 	mergeStrategy := strings.TrimSpace(opts.MergeStrategy)

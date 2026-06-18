@@ -127,8 +127,9 @@ Work selection prioritizes unresolved review repairs before later
 `ready_for_dev` work. If a non-repair ticket is selected while a repair is
 pending, selection fails with a machine-readable preflight blocker.
 
-Git workspaces must be on local `dev`, have a clean worktree, and have local
-`dev` contain `origin/dev` before work selection proceeds.
+Git workspaces must satisfy the configured work branch policy before work
+selection proceeds. By default that means the local integration branch is clean
+and contains the configured canonical remote tracking branch.
 
 ## Provider Access
 
