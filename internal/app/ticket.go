@@ -1211,10 +1211,16 @@ func buildTicketApplyResultPlanForRecord(
 		return ticketApplyResultPlan{}, err
 	}
 
+	changedFiles, err := discoverTicketApplyResultChangedFiles(ctx, record)
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
 	application, err := core.NewResultApplication(core.ResultApplicationOptions{
 		Execution:         record,
 		Result:            result,
 		EvidenceReadiness: &readiness,
+		ChangedFiles:      changedFiles,
 		CommentAuthor:     "chc",
 	})
 	if err != nil {
@@ -1228,6 +1234,27 @@ func buildTicketApplyResultPlanForRecord(
 		Application:    application,
 		ReportPath:     filepath.Join(record.Artifacts.RunDir, "result-application.md"),
 	}, nil
+}
+
+func discoverTicketApplyResultChangedFiles(ctx context.Context, record core.ExecutionRecord) ([]core.ResultApplicationChangedFile, error) {
+	if record.Workspace.Mode != core.WorkWorkspaceModeWorktree || record.Workspace.ExecutionWorkspaceDir == "" {
+		return nil, nil
+	}
+
+	changedFiles, err := core.NewChangedFileDiscoverer().DiscoverChangedFiles(ctx, core.DiscoverChangedFilesOptions{
+		ProjectDir:   record.Workspace.ProjectCheckoutDir,
+		WorkspaceDir: record.Workspace.ExecutionWorkspaceDir,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]core.ResultApplicationChangedFile, 0, len(changedFiles))
+	for _, changedFile := range changedFiles {
+		result = append(result, core.ResultApplicationChangedFile(changedFile))
+	}
+
+	return result, nil
 }
 
 func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, events ticketExecutionEvents, assetsFS fs.FS) error {
