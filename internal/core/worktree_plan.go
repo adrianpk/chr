@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 )
 
@@ -54,14 +55,21 @@ func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
 		return WorktreePlan{}, err
 	}
 
+	worktreeRoot := resolveProjectPath(projectDir, workspace.WorktreeRoot)
+
+	worktreePath, err := worktreeTargetPath(worktreeRoot, ticketKey, opts.WorktreePath)
+	if err != nil {
+		return WorktreePlan{}, err
+	}
+
 	return WorktreePlan{
 		ProjectDir:   projectDir,
 		TicketKey:    ticketKey,
 		Branch:       branch,
 		BaseRef:      baseRef,
 		BaseSHA:      strings.TrimSpace(opts.BaseSHA),
-		WorktreeRoot: resolveProjectPath(projectDir, workspace.WorktreeRoot),
-		WorktreePath: strings.TrimSpace(opts.WorktreePath),
+		WorktreeRoot: worktreeRoot,
+		WorktreePath: worktreePath,
 	}, nil
 }
 
@@ -94,6 +102,7 @@ func worktreeBaseRef(policy WorkBranchPolicy, workspace WorkWorkspaceConfig) (st
 	case WorktreeBasePolicyRemoteIntegrationBranch:
 		remote := strings.TrimSpace(policy.CanonicalRemote)
 		branch := strings.TrimSpace(policy.IntegrationBranch)
+
 		if remote == "" || branch == "" {
 			return "", fmt.Errorf("remote integration branch base requires canonical remote and integration branch")
 		}
@@ -111,4 +120,51 @@ func worktreeBaseRef(policy WorkBranchPolicy, workspace WorkWorkspaceConfig) (st
 	default:
 		return "", fmt.Errorf("invalid work worktree_base: %s", workspace.WorktreeBase)
 	}
+}
+
+func worktreeTargetPath(worktreeRoot, ticketKey, configuredPath string) (string, error) {
+	path := strings.TrimSpace(configuredPath)
+	if path != "" {
+		return filepath.Clean(path), nil
+	}
+
+	component := WorktreePathComponent(ticketKey)
+	if component == "" {
+		return "", fmt.Errorf("ticket key %q cannot be used as a worktree path component", ticketKey)
+	}
+
+	return filepath.Join(worktreeRoot, component), nil
+}
+
+// WorktreePathComponent executes the corresponding package operation.
+func WorktreePathComponent(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	output := strings.Builder{}
+	lastDash := false
+
+	for _, char := range value {
+		if worktreePathRuneAllowed(char) {
+			output.WriteRune(char)
+
+			lastDash = false
+
+			continue
+		}
+
+		if !lastDash {
+			output.WriteRune('-')
+
+			lastDash = true
+		}
+	}
+
+	return strings.Trim(output.String(), "-_.")
+}
+
+func worktreePathRuneAllowed(char rune) bool {
+	return (char >= 'a' && char <= 'z') ||
+		(char >= '0' && char <= '9') ||
+		char == '-' ||
+		char == '_' ||
+		char == '.'
 }
