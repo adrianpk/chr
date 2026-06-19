@@ -305,7 +305,7 @@ func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, ticket
 		return nil, err
 	}
 
-	branchPolicy, err := workSelectionBranchPolicy(s.projectContext.ProjectDir)
+	workConfig, err := workSelectionWorkConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +313,8 @@ func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, ticket
 	preflight, err := core.RunWorkSelectionPreflight(s.ctx, core.WorkSelectionPreflightOptions{
 		ProjectDir:   s.projectContext.ProjectDir,
 		Tickets:      allTickets,
-		BranchPolicy: branchPolicy,
+		BranchPolicy: workConfig.BranchPolicy,
+		Workspace:    workConfig.Workspace,
 	})
 	if err != nil {
 		return nil, err

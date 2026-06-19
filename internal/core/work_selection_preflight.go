@@ -53,6 +53,7 @@ type WorkSelectionPreflightOptions struct {
 	Tickets             []IndexedTicket
 	SelectedTicketKey   string
 	BranchPolicy        WorkBranchPolicy
+	Workspace           WorkWorkspaceConfig
 	RequireBranchPolicy bool
 	Git                 WorkSelectionGit
 }
@@ -327,11 +328,29 @@ func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPrefligh
 		policy = DefaultWorkBranchPolicy()
 	}
 
-	return workBranchPolicyBlockReasonForGit(ctx, projectDir, git, policy)
+	workspace := opts.Workspace
+	if workspace == (WorkWorkspaceConfig{}) {
+		workspace = DefaultWorkWorkspaceConfig()
+	} else {
+		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+	}
+
+	return workBranchPolicyBlockReasonForGit(ctx, projectDir, git, policy, workspace)
 }
 
-func workBranchPolicyBlockReasonForGit(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy) (*WorkSelectionBlockReason, error) {
+func workBranchPolicyBlockReasonForGit(
+	ctx context.Context,
+	projectDir string,
+	git WorkSelectionGit,
+	policy WorkBranchPolicy,
+	workspace WorkWorkspaceConfig,
+) (*WorkSelectionBlockReason, error) {
 	err := ValidateWorkBranchPolicy(policy)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ValidateWorkWorkspaceConfig(workspace)
 	if err != nil {
 		return nil, err
 	}
@@ -340,10 +359,16 @@ func workBranchPolicyBlockReasonForGit(ctx context.Context, projectDir string, g
 		return nil, nil
 	}
 
-	return runWorkBranchPolicyChecks(ctx, projectDir, git, policy)
+	return runWorkBranchPolicyChecks(ctx, projectDir, git, policy, workspace)
 }
 
-func runWorkBranchPolicyChecks(ctx context.Context, projectDir string, git WorkSelectionGit, policy WorkBranchPolicy) (*WorkSelectionBlockReason, error) {
+func runWorkBranchPolicyChecks(
+	ctx context.Context,
+	projectDir string,
+	git WorkSelectionGit,
+	policy WorkBranchPolicy,
+	workspace WorkWorkspaceConfig,
+) (*WorkSelectionBlockReason, error) {
 	branch, err := git.CurrentBranch(ctx, projectDir)
 	if err != nil {
 		return nilIfGitUnavailable(err)
@@ -356,7 +381,7 @@ func runWorkBranchPolicyChecks(ctx context.Context, projectDir string, git WorkS
 		return blocked, nil
 	}
 
-	if policy.RequireCleanWorktree {
+	if policy.RequireCleanWorktree && workspace.Mode != WorkWorkspaceModeWorktree {
 		blocked, err = workBranchPolicyCleanBlockReason(ctx, projectDir, git, policy)
 		if blocked != nil || err != nil {
 			return blocked, err

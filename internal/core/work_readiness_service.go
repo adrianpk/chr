@@ -459,7 +459,7 @@ func checkWorkReadinessWorktree(ctx context.Context, projectDir string, git Work
 	}
 
 	if len(runtimeArtifacts) > 0 {
-		report.Diagnostics = append(report.Diagnostics, runtimeArtifactsVisibleDiagnostic(len(runtimeArtifacts)))
+		report.Diagnostics = append(report.Diagnostics, runtimeArtifactsVisibleDiagnostic(report.Workspace.Mode, len(runtimeArtifacts)))
 	}
 
 	if len(userChanges) > 0 {
@@ -665,10 +665,15 @@ func missingBranchDiagnostic(expectedBranch, currentBranch string) WorkReadiness
 	}
 }
 
-func runtimeArtifactsVisibleDiagnostic(count int) WorkReadinessDiagnostic {
+func runtimeArtifactsVisibleDiagnostic(mode WorkWorkspaceMode, count int) WorkReadinessDiagnostic {
+	severity := WorkReadinessSeverityBlocking
+	if mode == WorkWorkspaceModeWorktree {
+		severity = WorkReadinessSeverityInfo
+	}
+
 	return WorkReadinessDiagnostic{
 		Code:     WorkReadinessDiagnosticRuntimeArtifactsVisible,
-		Severity: WorkReadinessSeverityBlocking,
+		Severity: severity,
 		Detail:   fmt.Sprintf("chrysocoord runtime artifacts are visible to git: %d", count),
 	}
 }
@@ -688,7 +693,7 @@ func userCheckoutDirtyDiagnostic(mode WorkWorkspaceMode, count int) WorkReadines
 
 	return WorkReadinessDiagnostic{
 		Code:     WorkReadinessDiagnosticDirtyUserCheckout,
-		Severity: WorkReadinessSeverityBlocking,
+		Severity: WorkReadinessSeverityInfo,
 		Detail:   fmt.Sprintf("user checkout has visible changes: %d", count),
 	}
 }

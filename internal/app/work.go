@@ -147,7 +147,7 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 			return err
 		}
 
-		branchPolicy, err := workSelectionBranchPolicy(projectContext.ProjectDir)
+		workConfig, err := workSelectionWorkConfig(projectContext.ProjectDir)
 		if err != nil {
 			return err
 		}
@@ -155,7 +155,8 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 		if cmd.Bool("fix-safe") {
 			result, err := core.RepairWorkReadiness(ctx, core.WorkReadinessRepairOptions{
 				ProjectDir: projectContext.ProjectDir,
-				Policy:     branchPolicy,
+				Policy:     workConfig.BranchPolicy,
+				Workspace:  workConfig.Workspace,
 			})
 			if err != nil {
 				return err
@@ -166,7 +167,8 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 
 		report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
 			ProjectDir: projectContext.ProjectDir,
-			Policy:     branchPolicy,
+			Policy:     workConfig.BranchPolicy,
+			Workspace:  workConfig.Workspace,
 		})
 		if err != nil {
 			return err

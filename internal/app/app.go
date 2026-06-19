@@ -417,14 +417,15 @@ func loadTUIObservability(
 }
 
 func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectContext) (tui.WorkReadinessView, error) {
-	branchPolicy, err := workSelectionBranchPolicy(projectContext.ProjectDir)
+	workConfig, err := workSelectionWorkConfig(projectContext.ProjectDir)
 	if err != nil {
 		return tui.WorkReadinessView{}, err
 	}
 
 	report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
 		ProjectDir: projectContext.ProjectDir,
-		Policy:     branchPolicy,
+		Policy:     workConfig.BranchPolicy,
+		Workspace:  workConfig.Workspace,
 	})
 	if err != nil {
 		return tui.WorkReadinessView{}, err

@@ -87,14 +87,15 @@ func agentWorkSelectionOptionsFromTUIRequest(request tui.WorkActionRequest) Agen
 }
 
 func (e tuiWorkActionExecutor) repairReadinessResult() (tui.WorkActionResult, error) {
-	branchPolicy, err := workSelectionBranchPolicy(e.operations.projectContext.ProjectDir)
+	workConfig, err := workSelectionWorkConfig(e.operations.projectContext.ProjectDir)
 	if err != nil {
 		return tui.WorkActionResult{}, err
 	}
 
 	result, err := core.RepairWorkReadiness(e.operations.ctx, core.WorkReadinessRepairOptions{
 		ProjectDir: e.operations.projectContext.ProjectDir,
-		Policy:     branchPolicy,
+		Policy:     workConfig.BranchPolicy,
+		Workspace:  workConfig.Workspace,
 	})
 	if err != nil {
 		return tui.WorkActionResult{}, err

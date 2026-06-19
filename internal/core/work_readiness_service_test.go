@@ -108,7 +108,15 @@ func TestCheckWorkReadinessReportsDirtyUserCheckoutInWorktreeMode(t *testing.T) 
 		t.Fatalf("CheckWorkReadiness returned error: %v", err)
 	}
 
-	assertWorkReadinessDiagnostic(t, report, WorkReadinessDiagnosticDirtyUserCheckout)
+	assertWorkReadinessDiagnosticSeverity(t, workReadinessDiagnosticAssertion{
+		report:   report,
+		code:     WorkReadinessDiagnosticDirtyUserCheckout,
+		severity: WorkReadinessSeverityInfo,
+	})
+
+	if report.Status != WorkReadinessStatusReady {
+		t.Fatalf("Status = %s, want ready", report.Status)
+	}
 
 	if report.UserCheckout.State != WorktreeStateDirty {
 		t.Fatalf("UserCheckout.State = %s, want dirty", report.UserCheckout.State)
@@ -287,6 +295,28 @@ func assertWorkReadinessDiagnostic(t *testing.T, report WorkReadinessReport, cod
 	}
 
 	t.Fatalf("Diagnostics = %#v, want code %s", report.Diagnostics, code)
+}
+
+type workReadinessDiagnosticAssertion struct {
+	report   WorkReadinessReport
+	code     WorkReadinessDiagnosticCode
+	severity WorkReadinessSeverity
+}
+
+func assertWorkReadinessDiagnosticSeverity(t *testing.T, assertion workReadinessDiagnosticAssertion) {
+	t.Helper()
+
+	for _, diagnostic := range assertion.report.Diagnostics {
+		if diagnostic.Code == assertion.code {
+			if diagnostic.Severity != assertion.severity {
+				t.Fatalf("%s severity = %s, want %s", assertion.code, diagnostic.Severity, assertion.severity)
+			}
+
+			return
+		}
+	}
+
+	t.Fatalf("Diagnostics = %#v, want code %s", assertion.report.Diagnostics, assertion.code)
 }
 
 func assertAppliedWorkReadinessRepair(t *testing.T, result WorkReadinessRepairResult, code WorkReadinessRepairCode) {

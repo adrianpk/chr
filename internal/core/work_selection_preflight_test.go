@@ -235,6 +235,38 @@ func TestWorkSelectionPreflightCurrentBranchModeRequiresCleanWorktree(t *testing
 	}
 }
 
+func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T) {
+	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
+		ProjectDir: t.TempDir(),
+		Tickets:    []IndexedTicket{{Key: "CHC-1", Status: TicketStatusReadyForDev}},
+		BranchPolicy: WorkBranchPolicy{
+			Mode:                  WorkBranchPolicyModeIntegrationBranch,
+			IntegrationBranch:     "dev",
+			CanonicalRemote:       "origin",
+			RequireCleanWorktree:  true,
+			RequireRemoteTracking: true,
+		},
+		Workspace: WorkWorkspaceConfig{
+			Mode:            WorkWorkspaceModeWorktree,
+			WorktreeRoot:    DefaultWorktreeRoot,
+			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		},
+		Git: fakeWorkSelectionGit{
+			branch:      "dev",
+			clean:       false,
+			containsRef: true,
+		},
+	})
+	if err != nil {
+		t.Fatalf("RunWorkSelectionPreflight returned error: %v", err)
+	}
+
+	if !result.Allowed {
+		t.Fatalf("Allowed = false, want true: %#v", result.BlockReasons)
+	}
+}
+
 func TestWorkSelectionPreflightNoGitEnforcementSkipsGitChecks(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
