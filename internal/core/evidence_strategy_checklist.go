@@ -57,6 +57,28 @@ func ParseEvidenceStrategyChecklist(content string) (EvidenceStrategyChecklist, 
 	}, nil
 }
 
+// RenderEvidenceStrategyChecklist renders a deterministic v1 strategy block.
+func RenderEvidenceStrategyChecklist(checklist EvidenceStrategyChecklist) (string, error) {
+	items, err := requireEvidenceStrategyChecklistItems(checklist.Items)
+	if err != nil {
+		return "", err
+	}
+
+	var output strings.Builder
+	output.WriteString(EvidenceStrategyChecklistStartAnchor)
+	output.WriteString("\n")
+
+	for _, label := range EvidenceStrategyChecklistLabels() {
+		output.WriteString(renderEvidenceStrategyChecklistItem(items[label]))
+		output.WriteString("\n")
+	}
+
+	output.WriteString(EvidenceStrategyChecklistEndAnchor)
+	output.WriteString("\n")
+
+	return output.String(), nil
+}
+
 // EvidenceStrategyChecklistLabels returns labels in canonical render order.
 func EvidenceStrategyChecklistLabels() []string {
 	return []string{
@@ -167,6 +189,21 @@ func parseEvidenceStrategyChecklistValue(value string) (string, string) {
 	}
 
 	return strings.TrimSpace(status), strings.TrimSpace(detail)
+}
+
+func renderEvidenceStrategyChecklistItem(item EvidenceStrategyChecklistItem) string {
+	checked := " "
+	if item.Checked {
+		checked = "x"
+	}
+
+	value := strings.TrimSpace(item.Status)
+	detail := strings.TrimSpace(item.Detail)
+	if detail != "" {
+		value += "; " + detail
+	}
+
+	return fmt.Sprintf("- [%s] %s: %s", checked, item.Label, value)
 }
 
 func requireEvidenceStrategyChecklistItems(

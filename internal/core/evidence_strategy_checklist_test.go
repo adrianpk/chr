@@ -128,6 +128,69 @@ func TestParseEvidenceStrategyChecklistRejectsMalformedBlocks(t *testing.T) {
 	}
 }
 
+func TestRenderEvidenceStrategyChecklistRendersCanonicalBlock(t *testing.T) {
+	checklist := EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]EvidenceStrategyChecklistItem{
+			EvidenceStrategyChecklistLabelStrategy: {
+				Label:   EvidenceStrategyChecklistLabelStrategy,
+				Checked: true,
+				Status:  "planned",
+				Detail:  "change_kind=bugfix; risk=medium",
+			},
+			EvidenceStrategyChecklistLabelGherkin: {
+				Label:  EvidenceStrategyChecklistLabelGherkin,
+				Status: "required",
+				Detail: "path=.chc/user/acceptance/bug.feature; reason=user-visible",
+			},
+			EvidenceStrategyChecklistLabelTests: {
+				Label:  EvidenceStrategyChecklistLabelTests,
+				Status: "mixed",
+				Detail: "reason=unit and fuzz coverage",
+			},
+			EvidenceStrategyChecklistLabelValidation: {
+				Label:  EvidenceStrategyChecklistLabelValidation,
+				Status: "pending",
+				Detail: "commands=make verify; evidence=none",
+			},
+			EvidenceStrategyChecklistLabelSummary: {
+				Label:  EvidenceStrategyChecklistLabelSummary,
+				Status: "pending",
+			},
+		},
+	}
+
+	got, err := RenderEvidenceStrategyChecklist(checklist)
+	if err != nil {
+		t.Fatalf("RenderEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	want := `<!-- chc:evidence-strategy:v1 -->
+- [x] Evidence strategy: planned; change_kind=bugfix; risk=medium
+- [ ] Gherkin: required; path=.chc/user/acceptance/bug.feature; reason=user-visible
+- [ ] Tests: mixed; reason=unit and fuzz coverage
+- [ ] Validation: pending; commands=make verify; evidence=none
+- [ ] Evidence summary: pending
+<!-- /chc:evidence-strategy -->
+`
+	if got != want {
+		t.Fatalf("rendered checklist:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestRenderEvidenceStrategyChecklistRejectsMissingItems(t *testing.T) {
+	_, err := RenderEvidenceStrategyChecklist(EvidenceStrategyChecklist{
+		Items: map[string]EvidenceStrategyChecklistItem{},
+	})
+	if err == nil {
+		t.Fatal("RenderEvidenceStrategyChecklist returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "missing evidence strategy checklist label: Evidence strategy") {
+		t.Fatalf("error = %q", err.Error())
+	}
+}
+
 func assertEvidenceStrategyChecklistItem(
 	t *testing.T,
 	checklist EvidenceStrategyChecklist,
