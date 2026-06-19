@@ -4,9 +4,7 @@
   <img src="assets/img/home/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
 </p>
 
-<p align="center">
-  <a href="https://forge.adrianpk.com/adrianpk/chc/src/branch/main/docs/explanation/gallery.md">Gallery</a>
-</p>
+[Gallery](docs/explanation/gallery.md)
 
 ChrysoCoord is a local software-development orchestrator for agentic work.
 

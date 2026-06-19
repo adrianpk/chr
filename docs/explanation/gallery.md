@@ -2,57 +2,90 @@
 
 Visual examples of ChrysoCoord in use.
 
-These screenshots use a seeded CRM dialer project to show the main TUI surfaces
-without requiring a live agent run.
+This gallery follows a seeded reference project through context, specification,
+planning, board state, ticket execution, review state, and runtime proof.
 
-## Project
+## Context
 
-![Project window](../../assets/img/gallery/01-project-window.png)
+![Project context](../../assets/img/gallery/chc-agent-work-03-project-context.png)
 
-The project view summarizes the selected workspace, local `.chc/user/` files,
-and generated artifact counts.
+The project view keeps workspace context and generated artifacts visible.
 
-![Project](../../assets/img/gallery/02-project.png)
+![Use case CLI gameplay](../../assets/img/gallery/chc-agent-work-04-use-case-cli-gameplay.png)
 
-## Use Cases
+Use cases keep feature work scoped before it becomes implementation work.
 
-![Cases](../../assets/img/gallery/03-cases.png)
+![Dump CLI gameplay context](../../assets/img/gallery/chc-agent-work-05-dump-cli-gameplay-context.png)
 
-Cases group related project work and keep feature context separate from
-project-wide context.
+Dumps preserve rough context in natural language.
 
-## Context Capture
+![Quizzes list](../../assets/img/gallery/chc-agent-work-06-quizzes-list.png)
 
-![Dumps](../../assets/img/gallery/04-dumps.png)
+Quizzes capture focused answers without turning the user into a spec machine.
 
-Dumps preserve rough project knowledge before it becomes a formal spec.
+## Specification
 
-![Quizzes](../../assets/img/gallery/05-quizzes.png)
+![Spec CLI gameplay](../../assets/img/gallery/chc-agent-work-07-spec-cli-gameplay.png)
 
-Quizzes capture focused answers that help the agent clarify requirements.
+Specs turn captured context into expected behavior and acceptance boundaries.
 
-## Generated Work
+![Plan sliced implementation](../../assets/img/gallery/chc-agent-work-08-plan-sliced-implementation.png)
 
-![Specs](../../assets/img/gallery/06-specs.png)
-
-Specs turn captured context into expected behavior.
-
-![Plans](../../assets/img/gallery/07-plans.png)
-
-Plans and trackers turn the spec into visible implementation work.
+Plans slice the work into tickets that the agent loop can process.
 
 ## Board
 
-![Board detail](../../assets/img/gallery/08-board-detail.png)
+![Board empty backlog column](../../assets/img/gallery/chc-agent-work-09-board-empty-backlog-column.png)
 
-The board detail view shows the selected ticket and its execution context.
+The board exposes ticket state as the implementation queue changes.
 
-![Board columns](../../assets/img/gallery/09-board-columns.png)
+![Board ready dev columns](../../assets/img/gallery/chc-agent-work-10-board-ready-dev-columns.png)
 
-The column view shows the implementation queue across ticket states.
+Generated tickets appear on the board once planning has produced implementable
+work.
 
 ## Dash
 
-![Dash](../../assets/img/gallery/10-dash.png)
+![Dash ready queue](../../assets/img/gallery/chc-agent-work-02-dash-ready-queue.png)
 
-Dash is the runtime surface for agent execution and queue progress.
+Dash shows the ready queue before execution starts.
+
+![Dash ready queue before run](../../assets/img/gallery/chc-agent-work-11-dash-ready-queue-before-run.png)
+
+Dash shows the queue before execution begins.
+
+![Help placeholder](../../assets/img/gallery/chc-agent-work-12-help-placeholder.png)
+
+The runtime surface includes a place for operational help and hints.
+
+![Dash work running start](../../assets/img/gallery/chc-agent-work-14-dash-work-running-start.png)
+
+Once running, Dash reports the active task and current execution state.
+
+![Dash work running later](../../assets/img/gallery/chc-agent-work-15-dash-work-running-later.png)
+
+The execution surface keeps progress visible during a long agent run.
+
+![Dash loop succeeded](../../assets/img/gallery/chc-agent-work-16-dash-loop-succeeded.png)
+
+Successful completion returns the loop result to the operator.
+
+## Review
+
+![Board ready for review columns](../../assets/img/gallery/chc-agent-work-17-board-ready-for-review-columns.png)
+
+Completed work moves into review state on the board.
+
+## Runtime Proof
+
+![Terminal game in progress](../../assets/img/gallery/chc-agent-work-20-terminal-game-in-progress.png)
+
+Runtime behavior provides evidence beyond a static diff.
+
+![Terminal game win](../../assets/img/gallery/chc-agent-work-21-terminal-game-win.png)
+
+The completed reference app reaches a successful gameplay state.
+
+## Previous Version
+
+The earlier gallery is preserved in [Old Gallery](old-gallery.md).
