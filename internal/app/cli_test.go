@@ -2782,6 +2782,45 @@ func TestWorkDoctorHonorsNoGitEnforcementConfig(t *testing.T) {
 	}
 }
 
+func TestWorkDoctorReportsWorktreeWorkspaceMode(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  mode: no_git_enforcement
+  workspace_mode: worktree
+`)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"work",
+		"doctor",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("work doctor returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		"work: doctor",
+		"status: ready",
+		"mode: no_git_enforcement",
+		"workspace_mode: worktree",
+		"user_checkout_state: unknown",
+		"ticket_worktree_state: unknown",
+		"diagnostics: 0",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
+		}
+	}
+}
+
 func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 	projectDir := newGateCLIGitProject(t)
 	devRoot := t.TempDir()

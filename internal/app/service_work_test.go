@@ -221,6 +221,29 @@ func TestServicePreviewAllReadyAgentWorkDoesNotExecute(t *testing.T) {
 	}
 }
 
+func TestServicePreviewAgentWorkLoopAcceptsWorktreeWorkspaceMode(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  workspace_mode: worktree
+`)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.PreviewAgentWorkLoop(AgentWorkSelectionOptions{})
+	if err != nil {
+		t.Fatalf("PreviewAgentWorkLoop returned error: %v", err)
+	}
+
+	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHC-1" {
+		t.Fatalf("preview result = %#v, want one CHC-1 queued ticket", result)
+	}
+}
+
 func TestServicePreviewAgentWorkLoopAppliesSelection(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
