@@ -6435,7 +6435,7 @@ func writeApplyResultFile(
 	}
 
 	content := fmt.Sprintf(
-		`{"execution_id":%q,"ticket_key":%q,"status":%q,"summary":%q}`,
+		`{"execution_id":%q,"ticket_key":%q,"status":%q,"summary":%q,"evidence_summary":{"strategy":"planned","produced":"evidence produced","validation":"validation passed"}}`,
 		record.ID,
 		record.TicketKey,
 		status,
@@ -6536,7 +6536,8 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command core
 
 	content := `{"execution_id":"` + harnessEnvValue(command, "CHC_EXECUTION_ID") +
 		`","ticket_key":"` + ticketKey +
-		`","status":"` + string(status) + `","summary":"done"}`
+		`","status":"` + string(status) +
+		`","summary":"done","evidence_summary":{"strategy":"planned","produced":"evidence produced","validation":"validation passed"}}`
 
 	return os.WriteFile(containerPathToProjectPath(command, resultPath), []byte(content), 0o644)
 }

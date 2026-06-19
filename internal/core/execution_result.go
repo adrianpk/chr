@@ -20,11 +20,21 @@ const (
 
 // ExecutionResult describes a package boundary value.
 type ExecutionResult struct {
-	ExecutionID  string                       `json:"execution_id"`
-	TicketKey    string                       `json:"ticket_key"`
-	Status       ExecutionResultStatus        `json:"status"`
-	Summary      string                       `json:"summary"`
-	ChangedFiles []ExecutionResultChangedFile `json:"changed_files,omitempty"`
+	ExecutionID     string                         `json:"execution_id"`
+	TicketKey       string                         `json:"ticket_key"`
+	Status          ExecutionResultStatus          `json:"status"`
+	Summary         string                         `json:"summary"`
+	EvidenceSummary ExecutionResultEvidenceSummary `json:"evidence_summary"`
+	ChangedFiles    []ExecutionResultChangedFile   `json:"changed_files,omitempty"`
+}
+
+// ExecutionResultEvidenceSummary describes evidence produced by the worker.
+type ExecutionResultEvidenceSummary struct {
+	Strategy      string   `json:"strategy"`
+	Produced      string   `json:"produced"`
+	Validation    string   `json:"validation"`
+	Deviations    []string `json:"deviations,omitempty"`
+	RemainingRisk []string `json:"remaining_risk,omitempty"`
 }
 
 // ExecutionResultChangedFile describes a package boundary value.
@@ -77,9 +87,30 @@ func ValidateExecutionResult(result ExecutionResult) error {
 		return fmt.Errorf("execution result status is invalid: %s", result.Status)
 	}
 
-	err := validateExecutionResultChangedFiles(result.ChangedFiles)
+	err := validateExecutionResultEvidenceSummary(result.EvidenceSummary)
 	if err != nil {
 		return err
+	}
+
+	err = validateExecutionResultChangedFiles(result.ChangedFiles)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateExecutionResultEvidenceSummary(summary ExecutionResultEvidenceSummary) error {
+	if strings.TrimSpace(summary.Strategy) == "" {
+		return fmt.Errorf("execution result evidence_summary.strategy is required")
+	}
+
+	if strings.TrimSpace(summary.Produced) == "" {
+		return fmt.Errorf("execution result evidence_summary.produced is required")
+	}
+
+	if strings.TrimSpace(summary.Validation) == "" {
+		return fmt.Errorf("execution result evidence_summary.validation is required")
 	}
 
 	return nil

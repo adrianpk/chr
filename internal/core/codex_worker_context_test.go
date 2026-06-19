@@ -37,6 +37,7 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 		"Before finishing:",
 		"Update Validation and Evidence summary.",
 		"- `status`: `succeeded` or `failed`.",
+		"- `evidence_summary`: required object with `strategy`, `produced`, and `validation`.",
 		"- `changed_files`: optional list of workspace-relative changed file summaries.",
 	} {
 		if !strings.Contains(string(content), want) {

@@ -241,7 +241,7 @@ func TestExecutionRunnerClassifiesFailedResultAsValidationFailure(t *testing.T) 
 
 	executor := &fakeHarnessExecutor{
 		resultPath:    record.Artifacts.ResultPath,
-		resultContent: `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"failed","summary":"tests failed"}`,
+		resultContent: `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"failed","summary":"tests failed","evidence_summary":{"strategy":"planned","produced":"none","validation":"failed"}}`,
 	}
 	runner := NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
@@ -396,7 +396,7 @@ func (e *fakeHarnessExecutor) writeResultForWorkerRun(command HarnessCommand) er
 
 	content := e.resultContent
 	if content == "" {
-		content = `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"succeeded","summary":"done"}`
+		content = `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"succeeded","summary":"done","evidence_summary":{"strategy":"planned","produced":"evidence produced","validation":"validation passed"}}`
 	}
 
 	return os.WriteFile(e.resultPath, []byte(content), 0o644)

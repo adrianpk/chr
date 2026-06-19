@@ -15,6 +15,11 @@ func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing
 		TicketKey:   "CHC-1",
 		Status:      ExecutionResultStatusSucceeded,
 		Summary:     "implemented",
+		EvidenceSummary: ExecutionResultEvidenceSummary{
+			Strategy:   "planned",
+			Produced:   "updated gate",
+			Validation: "validation passed",
+		},
 		ChangedFiles: []ExecutionResultChangedFile{
 			{Path: "internal/core/gate.go", Summary: "updated gate"},
 		},
@@ -129,7 +134,15 @@ func writeGateEvidenceExecutionArtifacts(
 	runDir := filepath.Join(projectDir, DirectoryName, UserDirectoryName, "runtime", "runs", ticketKey, executionID)
 	resultPath := filepath.Join(runDir, "result.json")
 	reportPath := filepath.Join(runDir, "execution-report.md")
-	resultContent := `{"execution_id":"` + result.ExecutionID + `","ticket_key":"` + result.TicketKey + `","status":"` + string(result.Status) + `","summary":"` + result.Summary + `","changed_files":[{"path":"` + result.ChangedFiles[0].Path + `","summary":"` + result.ChangedFiles[0].Summary + `"}]}`
+	resultContent := `{"execution_id":"` + result.ExecutionID +
+		`","ticket_key":"` + result.TicketKey +
+		`","status":"` + string(result.Status) +
+		`","summary":"` + result.Summary +
+		`","evidence_summary":{"strategy":"` + result.EvidenceSummary.Strategy +
+		`","produced":"` + result.EvidenceSummary.Produced +
+		`","validation":"` + result.EvidenceSummary.Validation +
+		`"},"changed_files":[{"path":"` + result.ChangedFiles[0].Path +
+		`","summary":"` + result.ChangedFiles[0].Summary + `"}]}`
 
 	writeGateEvidenceFile(t, resultPath, resultContent)
 	writeGateEvidenceFile(t, reportPath, `# Execution Report

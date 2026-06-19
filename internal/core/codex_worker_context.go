@@ -144,6 +144,9 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString("- `ticket_key`: must match the ticket key above.\n")
 	output.WriteString("- `status`: `succeeded` or `failed`.\n")
 	output.WriteString("- `summary`: concise human-readable result summary.\n")
+	output.WriteString("- `evidence_summary`: required object with `strategy`, `produced`, and `validation`.\n")
+	output.WriteString("- `evidence_summary.deviations`: optional list of deviations from the planned strategy.\n")
+	output.WriteString("- `evidence_summary.remaining_risk`: optional list of remaining risks.\n")
 	output.WriteString("- `changed_files`: optional list of workspace-relative changed file summaries.\n")
 
 	return output.String()

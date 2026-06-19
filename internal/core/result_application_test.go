@@ -169,9 +169,10 @@ func testResultApplicationExecutionRecord(dir string) ExecutionRecord {
 
 func testResultApplicationResult(record ExecutionRecord) ExecutionResult {
 	return ExecutionResult{
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		Status:      ExecutionResultStatusSucceeded,
-		Summary:     "ready for review",
+		ExecutionID:     record.ID,
+		TicketKey:       record.TicketKey,
+		Status:          ExecutionResultStatusSucceeded,
+		Summary:         "ready for review",
+		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 }

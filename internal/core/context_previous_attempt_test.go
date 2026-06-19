@@ -19,6 +19,11 @@ func TestLoadPreviousAttemptContextLoadsValidationAndResult(t *testing.T) {
 		"ticket_key": "CHC-1",
 		"status": "failed",
 		"summary": "tests still fail",
+		"evidence_summary": {
+			"strategy": "planned regression test",
+			"produced": "implementation update",
+			"validation": "go test ./... failed"
+		},
 		"changed_files": [
 			{"path": "internal/todo/store.go", "summary": "implemented completion"}
 		]

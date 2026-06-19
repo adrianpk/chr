@@ -8,10 +8,11 @@ import (
 func TestReviewHandoffSummaryRendersSucceededExecution(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
 	result := ExecutionResult{
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		Status:      ExecutionResultStatusSucceeded,
-		Summary:     "ready for review",
+		ExecutionID:     record.ID,
+		TicketKey:       record.TicketKey,
+		Status:          ExecutionResultStatusSucceeded,
+		Summary:         "ready for review",
+		EvidenceSummary: testExecutionResultEvidenceSummary(),
 		ChangedFiles: []ExecutionResultChangedFile{
 			{Path: "internal/core/review_handoff_summary.go", Summary: "add handoff summary"},
 		},
@@ -51,10 +52,11 @@ func TestReviewHandoffSummaryRendersFailedExecution(t *testing.T) {
 	record.Status = ExecutionStatusFailed
 	record.FailureReason = "validation: make verify failed"
 	result := ExecutionResult{
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		Status:      ExecutionResultStatusFailed,
-		Summary:     "validation failed",
+		ExecutionID:     record.ID,
+		TicketKey:       record.TicketKey,
+		Status:          ExecutionResultStatusFailed,
+		Summary:         "validation failed",
+		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 
 	report, err := NewExecutionReport(ExecutionReportOptions{
@@ -86,10 +88,11 @@ func TestReviewHandoffSummaryRendersBlockedExecution(t *testing.T) {
 	record.Status = ExecutionStatusBlocked
 	record.FailureReason = "worker: codex could not resolve compile error"
 	result := ExecutionResult{
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		Status:      ExecutionResultStatusFailed,
-		Summary:     "blocked by compile error",
+		ExecutionID:     record.ID,
+		TicketKey:       record.TicketKey,
+		Status:          ExecutionResultStatusFailed,
+		Summary:         "blocked by compile error",
+		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 
 	report, err := NewExecutionReport(ExecutionReportOptions{

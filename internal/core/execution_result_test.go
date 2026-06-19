@@ -12,6 +12,13 @@ func TestLoadExecutionResultParsesEnvelope(t *testing.T) {
 		"ticket_key": "CHC-1",
 		"status": "succeeded",
 		"summary": "done",
+		"evidence_summary": {
+			"strategy": "planned mixed tests",
+			"produced": "unit test added",
+			"validation": "go test ./internal/core passed",
+			"deviations": ["none"],
+			"remaining_risk": ["none"]
+		},
 		"changed_files": [
 			{
 				"path": "internal/core/execution_result.go",
@@ -31,6 +38,10 @@ func TestLoadExecutionResultParsesEnvelope(t *testing.T) {
 
 	if result.Status != ExecutionResultStatusSucceeded {
 		t.Fatalf("Status = %q, want succeeded", result.Status)
+	}
+
+	if result.EvidenceSummary.Strategy != "planned mixed tests" {
+		t.Fatalf("EvidenceSummary.Strategy = %q, want planned mixed tests", result.EvidenceSummary.Strategy)
 	}
 
 	if len(result.ChangedFiles) != 1 {
@@ -55,7 +66,12 @@ func TestLoadExecutionResultRejectsInvalidEnvelope(t *testing.T) {
 	path := writeExecutionResultFile(t, `{
 		"execution_id": "exec-1",
 		"ticket_key": "CHC-1",
-		"status": "unknown"
+		"status": "unknown",
+		"evidence_summary": {
+			"strategy": "planned",
+			"produced": "none",
+			"validation": "not run"
+		}
 	}`)
 
 	_, err := LoadExecutionResult(path)
@@ -69,6 +85,11 @@ func TestLoadExecutionResultRejectsInvalidChangedFilePath(t *testing.T) {
 		"execution_id": "exec-1",
 		"ticket_key": "CHC-1",
 		"status": "succeeded",
+		"evidence_summary": {
+			"strategy": "planned",
+			"produced": "none",
+			"validation": "not run"
+		},
 		"changed_files": [
 			{
 				"path": "../outside.go"
@@ -79,6 +100,28 @@ func TestLoadExecutionResultRejectsInvalidChangedFilePath(t *testing.T) {
 	_, err := LoadExecutionResult(path)
 	if err == nil {
 		t.Fatal("LoadExecutionResult returned nil error")
+	}
+}
+
+func TestLoadExecutionResultRejectsMissingEvidenceSummary(t *testing.T) {
+	path := writeExecutionResultFile(t, `{
+		"execution_id": "exec-1",
+		"ticket_key": "CHC-1",
+		"status": "succeeded",
+		"summary": "done"
+	}`)
+
+	_, err := LoadExecutionResult(path)
+	if err == nil {
+		t.Fatal("LoadExecutionResult returned nil error")
+	}
+}
+
+func testExecutionResultEvidenceSummary() ExecutionResultEvidenceSummary {
+	return ExecutionResultEvidenceSummary{
+		Strategy:   "planned",
+		Produced:   "evidence produced",
+		Validation: "validation passed",
 	}
 }
 
