@@ -80,34 +80,32 @@ func inspectWorktree(ctx context.Context, settings worktreeServiceSettings) (Wor
 		return WorktreeInspection{}, fmt.Errorf("list worktrees: %w", err)
 	}
 
-	return classifyWorktree(ctx, settings, entries)
+	return classifyWorktree(ctx, worktreeInspectionRun{settings: settings, entries: entries})
 }
 
-func classifyWorktree(
-	ctx context.Context,
-	settings worktreeServiceSettings,
-	entries []WorktreeGitEntry,
-) (WorktreeInspection, error) {
-	if entry, ok := worktreeEntryByPath(entries, settings.plan.WorktreePath); ok {
-		return classifyTargetWorktree(ctx, settings, entry)
-	}
-
-	if entry, ok := worktreeEntryByBranch(entries, settings.plan.Branch); ok {
-		return branchInUseWorktreeInspection(settings.plan, entry), nil
-	}
-
-	if worktreePathExists(settings.plan.WorktreePath) {
-		return orphanedWorktreeInspection(settings.plan, WorktreeGitEntry{}), nil
-	}
-
-	return missingWorktreeInspection(settings.plan), nil
+type worktreeInspectionRun struct {
+	settings worktreeServiceSettings
+	entries  []WorktreeGitEntry
 }
 
-func classifyTargetWorktree(
-	ctx context.Context,
-	settings worktreeServiceSettings,
-	entry WorktreeGitEntry,
-) (WorktreeInspection, error) {
+func classifyWorktree(ctx context.Context, run worktreeInspectionRun) (WorktreeInspection, error) {
+	if entry, ok := worktreeEntryByPath(run.entries, run.settings.plan.WorktreePath); ok {
+		return run.target(ctx, entry)
+	}
+
+	if entry, ok := worktreeEntryByBranch(run.entries, run.settings.plan.Branch); ok {
+		return branchInUseWorktreeInspection(run.settings.plan, entry), nil
+	}
+
+	if worktreePathExists(run.settings.plan.WorktreePath) {
+		return orphanedWorktreeInspection(run.settings.plan, WorktreeGitEntry{}), nil
+	}
+
+	return missingWorktreeInspection(run.settings.plan), nil
+}
+
+func (run worktreeInspectionRun) target(ctx context.Context, entry WorktreeGitEntry) (WorktreeInspection, error) {
+	settings := run.settings
 	if entry.Prunable {
 		return orphanedWorktreeInspection(settings.plan, entry), nil
 	}
@@ -156,81 +154,83 @@ func worktreePathExists(path string) bool {
 }
 
 func missingWorktreeInspection(plan WorktreePlan) WorktreeInspection {
-	return worktreeInspection(plan, WorktreeStateMissing, WorktreeGitEntry{}, nil, WorktreeDiagnostic{
+	return worktreeInspection(worktreeInspectionInput{plan: plan, state: WorktreeStateMissing, diagnostic: WorktreeDiagnostic{
 		Code:           WorktreeDiagnosticMissing,
 		Detail:         fmt.Sprintf("worktree path %s is missing", plan.WorktreePath),
 		ExpectedPath:   plan.WorktreePath,
 		ExpectedBranch: plan.Branch,
-	})
+	}})
 }
 
 func cleanWorktreeInspection(plan WorktreePlan, entry WorktreeGitEntry) WorktreeInspection {
-	return worktreeInspection(plan, WorktreeStateClean, entry, nil, WorktreeDiagnostic{
+	return worktreeInspection(worktreeInspectionInput{plan: plan, state: WorktreeStateClean, entry: entry, diagnostic: WorktreeDiagnostic{
 		Code:           WorktreeDiagnosticClean,
 		Detail:         fmt.Sprintf("worktree %s is clean", plan.WorktreePath),
 		Path:           entry.Path,
 		Branch:         entry.Branch,
 		ExpectedPath:   plan.WorktreePath,
 		ExpectedBranch: plan.Branch,
-	})
+	}})
 }
 
 func dirtyWorktreeInspection(plan WorktreePlan, entry WorktreeGitEntry, status []string) WorktreeInspection {
-	return worktreeInspection(plan, WorktreeStateDirty, entry, status, WorktreeDiagnostic{
+	return worktreeInspection(worktreeInspectionInput{plan: plan, state: WorktreeStateDirty, entry: entry, status: status, diagnostic: WorktreeDiagnostic{
 		Code:           WorktreeDiagnosticDirty,
 		Detail:         fmt.Sprintf("worktree %s has visible changes: %d", plan.WorktreePath, len(status)),
 		Path:           entry.Path,
 		Branch:         entry.Branch,
 		ExpectedPath:   plan.WorktreePath,
 		ExpectedBranch: plan.Branch,
-	})
+	}})
 }
 
 func mismatchedWorktreeInspection(plan WorktreePlan, entry WorktreeGitEntry) WorktreeInspection {
-	return worktreeInspection(plan, WorktreeStateMismatched, entry, nil, WorktreeDiagnostic{
+	return worktreeInspection(worktreeInspectionInput{plan: plan, state: WorktreeStateMismatched, entry: entry, diagnostic: WorktreeDiagnostic{
 		Code:           WorktreeDiagnosticMismatched,
 		Detail:         fmt.Sprintf("worktree path %s is assigned to branch %s", plan.WorktreePath, entry.Branch),
 		Path:           entry.Path,
 		Branch:         entry.Branch,
 		ExpectedPath:   plan.WorktreePath,
 		ExpectedBranch: plan.Branch,
-	})
+	}})
 }
 
 func branchInUseWorktreeInspection(plan WorktreePlan, entry WorktreeGitEntry) WorktreeInspection {
-	return worktreeInspection(plan, WorktreeStateBranchInUse, entry, nil, WorktreeDiagnostic{
+	return worktreeInspection(worktreeInspectionInput{plan: plan, state: WorktreeStateBranchInUse, entry: entry, diagnostic: WorktreeDiagnostic{
 		Code:           WorktreeDiagnosticBranchInUse,
 		Detail:         fmt.Sprintf("branch %s is already checked out at %s", plan.Branch, entry.Path),
 		Path:           entry.Path,
 		Branch:         entry.Branch,
 		ExpectedPath:   plan.WorktreePath,
 		ExpectedBranch: plan.Branch,
-	})
+	}})
 }
 
 func orphanedWorktreeInspection(plan WorktreePlan, entry WorktreeGitEntry) WorktreeInspection {
-	return worktreeInspection(plan, WorktreeStateOrphaned, entry, nil, WorktreeDiagnostic{
+	return worktreeInspection(worktreeInspectionInput{plan: plan, state: WorktreeStateOrphaned, entry: entry, diagnostic: WorktreeDiagnostic{
 		Code:           WorktreeDiagnosticOrphaned,
 		Detail:         fmt.Sprintf("worktree path %s exists without a usable Git worktree entry", plan.WorktreePath),
 		Path:           entry.Path,
 		Branch:         entry.Branch,
 		ExpectedPath:   plan.WorktreePath,
 		ExpectedBranch: plan.Branch,
-	})
+	}})
 }
 
-func worktreeInspection(
-	plan WorktreePlan,
-	state WorktreeState,
-	entry WorktreeGitEntry,
-	status []string,
-	diagnostic WorktreeDiagnostic,
-) WorktreeInspection {
+type worktreeInspectionInput struct {
+	plan       WorktreePlan
+	state      WorktreeState
+	entry      WorktreeGitEntry
+	status     []string
+	diagnostic WorktreeDiagnostic
+}
+
+func worktreeInspection(input worktreeInspectionInput) WorktreeInspection {
 	return WorktreeInspection{
-		Plan:        plan,
-		State:       state,
-		Diagnostics: []WorktreeDiagnostic{diagnostic},
-		Entry:       entry,
-		StatusLines: append([]string(nil), status...),
+		Plan:        input.plan,
+		State:       input.state,
+		Diagnostics: []WorktreeDiagnostic{input.diagnostic},
+		Entry:       input.entry,
+		StatusLines: append([]string(nil), input.status...),
 	}
 }

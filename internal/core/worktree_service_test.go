@@ -1,0 +1,340 @@
+package core
+
+import (
+	"context"
+	"errors"
+	"os"
+	"path/filepath"
+	"slices"
+	"testing"
+	"time"
+)
+
+func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
+	dir := t.TempDir()
+
+	plan, err := NewWorktreePlan(WorktreePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  "CHC-1 Add CLI",
+		Branch:     "feat/chc-1-add-cli",
+	})
+	if err != nil {
+		t.Fatalf("NewWorktreePlan returned error: %v", err)
+	}
+
+	wantRoot := filepath.Join(dir, ".chc", "user", "runtime", "worktrees")
+
+	if plan.BaseRef != "origin/dev" {
+		t.Fatalf("BaseRef = %q, want origin/dev", plan.BaseRef)
+	}
+
+	if plan.WorktreeRoot != wantRoot {
+		t.Fatalf("WorktreeRoot = %q, want %q", plan.WorktreeRoot, wantRoot)
+	}
+
+	if plan.WorktreePath != filepath.Join(wantRoot, "chc-1-add-cli") {
+		t.Fatalf("WorktreePath = %q, want deterministic ticket path", plan.WorktreePath)
+	}
+}
+
+func TestWorktreePathComponentSanitizesTicketKeys(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  string
+	}{
+		{name: "simple", value: "CHC-1", want: "chc-1"},
+		{name: "spaces", value: "CHC-1 Add CLI", want: "chc-1-add-cli"},
+		{name: "slashes", value: "../CHC/1", want: "chc-1"},
+		{name: "symbols", value: "!!!CHC@@@1!!!", want: "chc-1"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := WorktreePathComponent(test.value); got != test.want {
+				t.Fatalf("WorktreePathComponent(%q) = %q, want %q", test.value, got, test.want)
+			}
+		})
+	}
+}
+
+func TestParseWorktreeGitListReadsPorcelainEntries(t *testing.T) {
+	entries := parseWorktreeGitList(`worktree /repo
+HEAD abc123
+branch refs/heads/dev
+
+worktree /repo/.chc/user/runtime/worktrees/chc-1
+HEAD def456
+branch refs/heads/feat/chc-1
+
+worktree /tmp/orphan
+HEAD 000000
+detached
+prunable gitdir file points to non-existent location
+`)
+
+	if len(entries) != 3 {
+		t.Fatalf("len(entries) = %d, want 3", len(entries))
+	}
+
+	if entries[1].Path != "/repo/.chc/user/runtime/worktrees/chc-1" || entries[1].Branch != "feat/chc-1" {
+		t.Fatalf("entry[1] = %#v, want worktree branch entry", entries[1])
+	}
+
+	if !entries[2].Detached || !entries[2].Prunable {
+		t.Fatalf("entry[2] = %#v, want detached prunable entry", entries[2])
+	}
+}
+
+func TestWorktreeServicePrepareCreatesBranchAndAddsMissingWorktree(t *testing.T) {
+	dir := t.TempDir()
+	git := newFakeWorktreeGit()
+	service := WorktreeService{Git: git}
+
+	result, err := service.Prepare(context.Background(), WorktreePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  "CHC-1",
+		Branch:     "feat/chc-1",
+	})
+	if err != nil {
+		t.Fatalf("Prepare returned error: %v", err)
+	}
+
+	if !slices.Equal(git.fetched, []string{"origin"}) {
+		t.Fatalf("fetched = %#v, want origin", git.fetched)
+	}
+
+	if !result.CreatedBranch || !result.AddedWorktree {
+		t.Fatalf("result = %#v, want created branch and added worktree", result)
+	}
+
+	if got := git.createdBranches["feat/chc-1"]; got != "origin/dev" {
+		t.Fatalf("created branch base = %q, want origin/dev", got)
+	}
+
+	if len(git.addedWorktrees) != 1 || git.addedWorktrees[0].branch != "feat/chc-1" {
+		t.Fatalf("added worktrees = %#v, want feat/chc-1 add", git.addedWorktrees)
+	}
+}
+
+func TestWorktreeServicePrepareReusesExistingCleanWorktree(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+	git := newFakeWorktreeGit()
+	git.branches[plan.Branch] = true
+	git.entries = []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch, Head: "base-sha"}}
+	service := WorktreeService{Git: git}
+
+	result, err := service.Prepare(context.Background(), WorktreePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  plan.TicketKey,
+		Branch:     plan.Branch,
+	})
+	if err != nil {
+		t.Fatalf("Prepare returned error: %v", err)
+	}
+
+	if result.Inspection.State != WorktreeStateClean {
+		t.Fatalf("Inspection.State = %q, want clean", result.Inspection.State)
+	}
+
+	if result.AddedWorktree {
+		t.Fatal("AddedWorktree = true, want existing worktree reuse")
+	}
+}
+
+func TestWorktreeServiceInspectClassifiesTargetStates(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+
+	tests := []struct {
+		name     string
+		entries  []WorktreeGitEntry
+		statuses map[string][]string
+		want     WorktreeState
+	}{
+		{name: "missing", want: WorktreeStateMissing},
+		{
+			name:    "clean",
+			entries: []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}},
+			want:    WorktreeStateClean,
+		},
+		{
+			name:     "dirty",
+			entries:  []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}},
+			statuses: map[string][]string{plan.WorktreePath: {" M main.go"}},
+			want:     WorktreeStateDirty,
+		},
+		{
+			name:    "mismatched",
+			entries: []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: "feat/other"}},
+			want:    WorktreeStateMismatched,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assertWorktreeInspectionState(t, dir, worktreeInspectionStateAssertion{
+				entries:  test.entries,
+				statuses: test.statuses,
+				want:     test.want,
+			})
+		})
+	}
+}
+
+func TestWorktreeServiceInspectClassifiesBranchInUseAndOrphaned(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+
+	branchInUse := []WorktreeGitEntry{{Path: filepath.Join(dir, "other-worktree"), Branch: plan.Branch}}
+	assertWorktreeInspectionState(t, dir, worktreeInspectionStateAssertion{
+		entries: branchInUse,
+		want:    WorktreeStateBranchInUse,
+	})
+
+	if err := writeWorktreeTestDir(plan.WorktreePath); err != nil {
+		t.Fatalf("create orphaned worktree path: %v", err)
+	}
+
+	assertWorktreeInspectionState(t, dir, worktreeInspectionStateAssertion{want: WorktreeStateOrphaned})
+}
+
+func TestWorktreeMetadataRoundTrips(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+	updatedAt := time.Date(2026, 6, 19, 12, 0, 0, 0, time.UTC)
+	metadata := NewWorktreeMetadata(plan, updatedAt)
+	metadata.LastExecutionID = "exec-1"
+	metadata.LastExecutionStatus = "ready_for_review"
+
+	path, err := WorktreeMetadataPath(plan)
+	if err != nil {
+		t.Fatalf("WorktreeMetadataPath returned error: %v", err)
+	}
+
+	if err := WriteWorktreeMetadata(path, metadata); err != nil {
+		t.Fatalf("WriteWorktreeMetadata returned error: %v", err)
+	}
+
+	got, err := ReadWorktreeMetadata(path)
+	if err != nil {
+		t.Fatalf("ReadWorktreeMetadata returned error: %v", err)
+	}
+
+	if got != metadata {
+		t.Fatalf("metadata = %#v, want %#v", got, metadata)
+	}
+}
+
+type worktreeInspectionStateAssertion struct {
+	entries  []WorktreeGitEntry
+	statuses map[string][]string
+	want     WorktreeState
+}
+
+func assertWorktreeInspectionState(t *testing.T, dir string, assertion worktreeInspectionStateAssertion) {
+	t.Helper()
+
+	plan := testWorktreePlan(t, dir)
+	git := newFakeWorktreeGit()
+	git.entries = assertion.entries
+	git.statuses = assertion.statuses
+	service := WorktreeService{Git: git}
+
+	inspection, err := service.Inspect(context.Background(), WorktreePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  plan.TicketKey,
+		Branch:     plan.Branch,
+	})
+	if err != nil {
+		t.Fatalf("Inspect returned error: %v", err)
+	}
+
+	if inspection.State != assertion.want {
+		t.Fatalf("Inspection.State = %q, want %q; diagnostics=%#v", inspection.State, assertion.want, inspection.Diagnostics)
+	}
+}
+
+func testWorktreePlan(t *testing.T, dir string) WorktreePlan {
+	t.Helper()
+
+	plan, err := NewWorktreePlan(WorktreePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  "CHC-1",
+		Branch:     "feat/chc-1",
+	})
+	if err != nil {
+		t.Fatalf("NewWorktreePlan returned error: %v", err)
+	}
+
+	return plan
+}
+
+func writeWorktreeTestDir(path string) error {
+	return os.MkdirAll(path, 0o755)
+}
+
+type fakeWorktreeGit struct {
+	fetched         []string
+	refs            map[string]string
+	branches        map[string]bool
+	createdBranches map[string]string
+	addedWorktrees  []fakeAddedWorktree
+	entries         []WorktreeGitEntry
+	statuses        map[string][]string
+}
+
+type fakeAddedWorktree struct {
+	path   string
+	branch string
+}
+
+func newFakeWorktreeGit() *fakeWorktreeGit {
+	return &fakeWorktreeGit{
+		refs:            map[string]string{"origin/dev": "base-sha"},
+		branches:        map[string]bool{},
+		createdBranches: map[string]string{},
+		statuses:        map[string][]string{},
+	}
+}
+
+func (git *fakeWorktreeGit) FetchRemote(_ context.Context, _, remote string) error {
+	git.fetched = append(git.fetched, remote)
+
+	return nil
+}
+
+func (git *fakeWorktreeGit) ResolveRef(_ context.Context, _, ref string) (string, error) {
+	sha, ok := git.refs[ref]
+	if !ok {
+		return "", errors.New("missing ref")
+	}
+
+	return sha, nil
+}
+
+func (git *fakeWorktreeGit) BranchExists(_ context.Context, _, branch string) (bool, error) {
+	return git.branches[branch], nil
+}
+
+func (git *fakeWorktreeGit) CreateBranch(_ context.Context, _, branch, baseRef string) error {
+	git.branches[branch] = true
+	git.createdBranches[branch] = baseRef
+
+	return nil
+}
+
+func (git *fakeWorktreeGit) AddWorktree(_ context.Context, _, path, branch string) error {
+	git.addedWorktrees = append(git.addedWorktrees, fakeAddedWorktree{path: path, branch: branch})
+
+	return nil
+}
+
+func (git *fakeWorktreeGit) WorktreeList(context.Context, string) ([]WorktreeGitEntry, error) {
+	return append([]WorktreeGitEntry(nil), git.entries...), nil
+}
+
+func (git *fakeWorktreeGit) WorktreeStatus(_ context.Context, path string) ([]string, error) {
+	return append([]string(nil), git.statuses[path]...), nil
+}
