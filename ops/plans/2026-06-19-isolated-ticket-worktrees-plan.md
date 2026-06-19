@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 6: branch and PR lifecycle
+Active Slice: Slice 7: review repair and cleanup
 
 Tracker: `ops/trackers/2026-06-19-isolated-ticket-worktrees-tracker.md`
 

@@ -16,7 +16,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice 4 | runtime workspace mount | delivered | `feat/slice-4-runtime-workspace-mount` | `#331` | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
 | Slice 5 | execution workspace results | delivered | `feat/slice-5-execution-workspace-results` | `#332` | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
 | Slice 6 | branch and PR lifecycle | delivered | `feat/slice-6-branch-and-pr-lifecycle` | `#333` | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
-| Slice 7 | review repair and cleanup | planned | `feat/slice-7-review-repair-and-cleanup` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
+| Slice 7 | review repair and cleanup | reviewing | `feat/slice-7-review-repair-and-cleanup` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
 | Slice 8 | docs and QA proving | planned | `feat/slice-8-docs-and-qa-proving` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
 
 ## Slice 1 Tasks
@@ -101,14 +101,14 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T7.1 | Add review-repair worktree lookup using ticket branch and PR metadata. | pending | pending | Repair should reuse ticket workspace. |
-| T7.2 | Add safe recreation of missing repair worktrees from valid ticket branches. | pending | pending | Recreate only when safe. |
-| T7.3 | Add dirty repair worktree diagnostics and stop conditions. | pending | pending | No destructive cleanup. |
-| T7.4 | Add cleanup operation for clean merged ticket worktrees. | pending | pending | `after_merge` policy. |
-| T7.5 | Add cleanup blockers for dirty, mismatched, or unknown worktrees. | pending | pending | Explicit manual state. |
-| T7.6 | Add doctor reporting and safe repair hooks for orphaned clean worktrees. | pending | pending | Keep hygiene local-first. |
-| T7.7 | Add tests for repair reuse, missing-worktree recreation, dirty blockers, idempotent cleanup, and no dirty deletion. | pending | pending | Safety-critical coverage. |
-| T7.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T7.1 | Add review-repair worktree lookup using ticket branch and PR metadata. | done | `496aa1b` | Review-repair tickets reuse the branch metadata attached alongside PR refs. |
+| T7.2 | Add safe recreation of missing repair worktrees from valid ticket branches. | done | `496aa1b` | Start-agent coverage proves repair execution prepares the existing ticket branch workspace. |
+| T7.3 | Add dirty repair worktree diagnostics and stop conditions. | done | `c812e60` | Readiness keeps dirty ticket worktrees blocking and separates orphaned diagnostics. |
+| T7.4 | Add cleanup operation for clean merged ticket worktrees. | done | `803df5e`, `2cf2785` | Merge cleanup removes clean ticket worktrees under `after_merge`. |
+| T7.5 | Add cleanup blockers for dirty, mismatched, or unknown worktrees. | done | `803df5e` | Cleanup blocks dirty, mismatched, branch-in-use, and orphaned states. |
+| T7.6 | Add doctor reporting and safe repair hooks for orphaned clean worktrees. | done | `c812e60` | Doctor repair can remove empty orphaned ticket worktree paths only. |
+| T7.7 | Add tests for repair reuse, missing-worktree recreation, dirty blockers, idempotent cleanup, and no dirty deletion. | done | `803df5e`, `2cf2785`, `496aa1b`, `c812e60`, `04486b0` | Core and app tests cover cleanup, merge integration, repair reuse, orphan safety, and strict lint shape. |
+| T7.8 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 8 Tasks
 
@@ -145,6 +145,11 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - Slice 6: `make lint-strict` (pass)
 - Slice 6: `make verify` (pass)
 - Slice 6 closure: merged into `dev` as PR `#333`.
+- Slice 7: `go test ./internal/core -run 'TestRepairWorkReadinessRemovesEmptyOrphanedTicketWorktree|TestRepairWorkReadinessDoesNotRemoveNonEmptyOrphanedTicketWorktree|TestRepairWorkReadinessPrunesStaleWorktreeMetadata|TestCheckWorkReadinessBlocksDirtyTicketWorktree'` (pass)
+- Slice 7: `go test ./internal/core -run 'Worktree|WorkReadiness|TicketMergeCommand'` (pass)
+- Slice 7: `go test ./internal/app -run 'TestTicketMerge|TestServiceStartAgentWorkTicketReusesReviewRepairBranch|TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace|TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree|TestWorkDoctor'` (pass)
+- Slice 7: `make lint-strict` (pass)
+- Slice 7: `make verify` (pass)
 
 ## Open Decisions
 
