@@ -86,6 +86,35 @@ func TestCheckWorkReadinessReportsRuntimeArtifactsSeparately(t *testing.T) {
 	assertWorkReadinessDiagnostic(t, report, WorkReadinessDiagnosticDirtyWorktree)
 }
 
+func TestCheckWorkReadinessReportsDirtyUserCheckoutInWorktreeMode(t *testing.T) {
+	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
+		ProjectDir: t.TempDir(),
+		Policy:     DefaultWorkBranchPolicy(),
+		Workspace: WorkWorkspaceConfig{
+			Mode:            WorkWorkspaceModeWorktree,
+			WorktreeRoot:    DefaultWorktreeRoot,
+			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		},
+		Git: fakeWorkReadinessGit{
+			branch:            "dev",
+			cleanStatus:       []string{" M main.go"},
+			branchExists:      true,
+			remoteRefExists:   true,
+			branchContainsRef: true,
+		},
+	})
+	if err != nil {
+		t.Fatalf("CheckWorkReadiness returned error: %v", err)
+	}
+
+	assertWorkReadinessDiagnostic(t, report, WorkReadinessDiagnosticDirtyUserCheckout)
+
+	if report.UserCheckout.State != WorktreeStateDirty {
+		t.Fatalf("UserCheckout.State = %s, want dirty", report.UserCheckout.State)
+	}
+}
+
 func TestCheckWorkReadinessNoGitEnforcementSkipsGit(t *testing.T) {
 	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
 		ProjectDir: t.TempDir(),

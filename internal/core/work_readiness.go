@@ -22,6 +22,8 @@ const (
 	WorkReadinessDiagnosticMissingBranch WorkReadinessDiagnosticCode = "missing_branch"
 	// WorkReadinessDiagnosticDirtyWorktree defines a package boundary constant.
 	WorkReadinessDiagnosticDirtyWorktree WorkReadinessDiagnosticCode = "dirty_worktree"
+	// WorkReadinessDiagnosticDirtyUserCheckout defines a package boundary constant.
+	WorkReadinessDiagnosticDirtyUserCheckout WorkReadinessDiagnosticCode = "dirty_user_checkout"
 	// WorkReadinessDiagnosticRuntimeArtifactsVisible defines a package boundary constant.
 	WorkReadinessDiagnosticRuntimeArtifactsVisible WorkReadinessDiagnosticCode = "runtime_artifacts_visible"
 	// WorkReadinessDiagnosticMissingRemoteRef defines a package boundary constant.
@@ -60,14 +62,26 @@ type WorkReadinessRepairCode string
 
 // WorkReadinessReport describes a package boundary value.
 type WorkReadinessReport struct {
-	ProjectDir    string
-	Policy        WorkBranchPolicy
-	Workspace     WorkWorkspaceConfig
-	Status        WorkReadinessStatus
-	Diagnostics   []WorkReadinessDiagnostic
-	CurrentBranch string
-	TicketKey     string
-	TicketBranch  string
+	ProjectDir     string
+	Policy         WorkBranchPolicy
+	Workspace      WorkWorkspaceConfig
+	Status         WorkReadinessStatus
+	Diagnostics    []WorkReadinessDiagnostic
+	CurrentBranch  string
+	TicketKey      string
+	TicketBranch   string
+	UserCheckout   WorkReadinessWorkspaceState
+	TicketWorktree WorkReadinessWorkspaceState
+}
+
+// WorkReadinessWorkspaceState describes one workspace inspected by readiness.
+type WorkReadinessWorkspaceState struct {
+	Path        string
+	State       WorktreeState
+	Branch      string
+	BaseRef     string
+	BaseSHA     string
+	StatusLines []string
 }
 
 // WorkReadinessDiagnostic describes a package boundary value.

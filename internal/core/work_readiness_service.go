@@ -451,15 +451,30 @@ func checkWorkReadinessWorktree(ctx context.Context, projectDir string, git Work
 	}
 
 	runtimeArtifacts, userChanges := splitWorktreeStatus(status)
+	report.UserCheckout = WorkReadinessWorkspaceState{
+		Path:        projectDir,
+		State:       workReadinessStateForStatus(userChanges),
+		Branch:      report.CurrentBranch,
+		StatusLines: append([]string(nil), status...),
+	}
+
 	if len(runtimeArtifacts) > 0 {
 		report.Diagnostics = append(report.Diagnostics, runtimeArtifactsVisibleDiagnostic(len(runtimeArtifacts)))
 	}
 
 	if len(userChanges) > 0 {
-		report.Diagnostics = append(report.Diagnostics, dirtyWorktreeDiagnostic(len(userChanges)))
+		report.Diagnostics = append(report.Diagnostics, userCheckoutDirtyDiagnostic(report.Workspace.Mode, len(userChanges)))
 	}
 
 	return report, nil
+}
+
+func workReadinessStateForStatus(status []string) WorktreeState {
+	if len(status) > 0 {
+		return WorktreeStateDirty
+	}
+
+	return WorktreeStateClean
 }
 
 func checkWorkReadinessRemote(ctx context.Context, projectDir string, git WorkReadinessGit, report WorkReadinessReport) (WorkReadinessReport, error) {
@@ -663,6 +678,18 @@ func dirtyWorktreeDiagnostic(count int) WorkReadinessDiagnostic {
 		Code:     WorkReadinessDiagnosticDirtyWorktree,
 		Severity: WorkReadinessSeverityBlocking,
 		Detail:   fmt.Sprintf("worktree has user-visible changes: %d", count),
+	}
+}
+
+func userCheckoutDirtyDiagnostic(mode WorkWorkspaceMode, count int) WorkReadinessDiagnostic {
+	if mode != WorkWorkspaceModeWorktree {
+		return dirtyWorktreeDiagnostic(count)
+	}
+
+	return WorkReadinessDiagnostic{
+		Code:     WorkReadinessDiagnosticDirtyUserCheckout,
+		Severity: WorkReadinessSeverityBlocking,
+		Detail:   fmt.Sprintf("user checkout has visible changes: %d", count),
 	}
 }
 
