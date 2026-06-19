@@ -1237,6 +1237,7 @@ func (m Model) renderSelectedTicketDetail() string {
 	output.WriteString(fmt.Sprintf("  Project Area: %s\n", ticket.ProjectArea))
 	renderTicketSourceDetail(&output, ticket)
 	renderTicketReviewDetail(&output, ticket)
+	renderTicketEvidenceDetail(&output, ticket)
 	output.WriteString(fmt.Sprintf("  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal))
 	output.WriteString(fmt.Sprintf("  Comments: %d\n", ticket.CommentCount))
 	output.WriteString(fmt.Sprintf("  Path: %s\n", ticketDisplayPath(ticket.RelativePath)))
@@ -1251,6 +1252,32 @@ func (m Model) renderSelectedTicketDetail() string {
 	}
 
 	return output.String()
+}
+
+func renderTicketEvidenceDetail(output *strings.Builder, ticket TicketView) {
+	if ticket.Evidence.Status == "" {
+		return
+	}
+
+	fmt.Fprintf(output, "  Evidence: %s\n", ticket.Evidence.Status)
+
+	if ticket.Evidence.Error != "" {
+		fmt.Fprintf(output, "    Error: %s\n", ticket.Evidence.Error)
+
+		return
+	}
+
+	for _, item := range ticket.Evidence.Items {
+		fmt.Fprintf(output, "    %s: %s (%s)\n", item.Label, item.Status, checkedStateLabel(item.Checked))
+	}
+}
+
+func checkedStateLabel(checked bool) string {
+	if checked {
+		return "done"
+	}
+
+	return "pending"
 }
 
 func renderTicketReviewDetail(output *strings.Builder, ticket TicketView) {
@@ -1701,6 +1728,7 @@ type TicketView struct {
 	ChecklistTotal    int
 	CommentCount      int
 	BodyLines         []string
+	Evidence          core.EvidenceStrategySummary
 }
 
 // NewTicketViews converts indexed tickets into TUI rows.
@@ -1742,6 +1770,7 @@ func NewTicketViews(tickets []core.IndexedTicket) []TicketView {
 		view.ChecklistTotal = detail.ChecklistTotal
 		view.CommentCount = detail.CommentCount
 		view.BodyLines = detail.BodyLines
+		view.Evidence = detail.Evidence
 
 		views = append(views, view)
 	}
@@ -1785,6 +1814,7 @@ type ticketMarkdownDetailView struct {
 	ChecklistTotal int
 	CommentCount   int
 	BodyLines      []string
+	Evidence       core.EvidenceStrategySummary
 }
 
 type ticketMarkdownParser struct {
@@ -1800,7 +1830,11 @@ func ticketMarkdownDetail(path string) ticketMarkdownDetailView {
 		return ticketMarkdownDetailView{}
 	}
 
-	parser := ticketMarkdownParser{}
+	parser := ticketMarkdownParser{
+		detail: ticketMarkdownDetailView{
+			Evidence: core.SummarizeEvidenceStrategyChecklist(string(content)),
+		},
+	}
 
 	for _, line := range strings.Split(string(content), "\n") {
 		parser.readLine(line)

@@ -28,14 +28,16 @@ type ObservabilityView struct {
 
 // AgentEventView is the terminal projection of one agent-work event.
 type AgentEventView struct {
-	Time          string
-	Level         string
-	TicketKey     string
-	Message       string
-	LoopID        string
-	ExecutionID   string
-	RuntimeLog    string
-	ValidationLog string
+	Time            string
+	Level           string
+	TicketKey       string
+	Message         string
+	LoopID          string
+	ExecutionID     string
+	TicketPath      string
+	RuntimeLog      string
+	ValidationLog   string
+	ExecutionReport string
 }
 
 // ExecutionView is the terminal projection of one execution record.
@@ -107,8 +109,13 @@ func newAgentEventViews(projectDir string, events []core.AgentEvent) []AgentEven
 			Message:       event.Message,
 			LoopID:        event.LoopID,
 			ExecutionID:   event.ExecutionID,
+			TicketPath:    relativeRuntimePath(projectDir, event.Refs["ticket_path"]),
 			RuntimeLog:    relativeRuntimePath(projectDir, event.Refs["runtime_log_path"]),
 			ValidationLog: relativeRuntimePath(projectDir, event.Refs["validation_log_path"]),
+			ExecutionReport: relativeRuntimePath(
+				projectDir,
+				event.Refs["execution_report_path"],
+			),
 		})
 	}
 

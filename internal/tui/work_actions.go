@@ -176,17 +176,19 @@ func (m Model) renderRunningWorkAction() string {
 }
 
 func renderWorkActionDetails(events []AgentEventView) string {
-	runtimeLog, validationLog, executionID := latestWorkActionDetails(events)
-	if runtimeLog == "" && validationLog == "" && executionID == "" {
+	details := latestWorkActionDetails(events)
+	if details.empty() {
 		return ""
 	}
 
 	var output strings.Builder
 
 	output.WriteString("\nDetails\n")
-	writeWorkActionDetail(&output, "Runtime log: ", runtimeLog)
-	writeWorkActionDetail(&output, "Validation log: ", validationLog)
-	writeWorkActionDetail(&output, "Lookup: chc work logs ", executionID)
+	writeWorkActionDetail(&output, "Ticket: ", details.TicketPath)
+	writeWorkActionDetail(&output, "Execution report: ", details.ExecutionReport)
+	writeWorkActionDetail(&output, "Runtime log: ", details.RuntimeLog)
+	writeWorkActionDetail(&output, "Validation log: ", details.ValidationLog)
+	writeWorkActionDetail(&output, "Lookup: chc work logs ", details.ExecutionID)
 
 	return output.String()
 }
@@ -237,33 +239,61 @@ func renderWorkActionEvent(event AgentEventView) string {
 	return strings.Join(parts, " ")
 }
 
-func latestWorkActionDetails(events []AgentEventView) (string, string, string) {
-	var (
-		runtimeLog    string
-		validationLog string
-		executionID   string
-	)
+type workActionDetails struct {
+	TicketPath      string
+	ExecutionReport string
+	RuntimeLog      string
+	ValidationLog   string
+	ExecutionID     string
+}
+
+func (d workActionDetails) empty() bool {
+	return d.TicketPath == "" &&
+		d.ExecutionReport == "" &&
+		d.RuntimeLog == "" &&
+		d.ValidationLog == "" &&
+		d.ExecutionID == ""
+}
+
+func latestWorkActionDetails(events []AgentEventView) workActionDetails {
+	details := workActionDetails{}
 
 	for index := len(events) - 1; index >= 0; index-- {
 		event := events[index]
-		if runtimeLog == "" {
-			runtimeLog = strings.TrimSpace(event.RuntimeLog)
+		if details.TicketPath == "" {
+			details.TicketPath = strings.TrimSpace(event.TicketPath)
 		}
 
-		if validationLog == "" {
-			validationLog = strings.TrimSpace(event.ValidationLog)
+		if details.ExecutionReport == "" {
+			details.ExecutionReport = strings.TrimSpace(event.ExecutionReport)
 		}
 
-		if executionID == "" {
-			executionID = strings.TrimSpace(event.ExecutionID)
+		if details.RuntimeLog == "" {
+			details.RuntimeLog = strings.TrimSpace(event.RuntimeLog)
 		}
 
-		if runtimeLog != "" && validationLog != "" && executionID != "" {
+		if details.ValidationLog == "" {
+			details.ValidationLog = strings.TrimSpace(event.ValidationLog)
+		}
+
+		if details.ExecutionID == "" {
+			details.ExecutionID = strings.TrimSpace(event.ExecutionID)
+		}
+
+		if !details.empty() && workActionDetailsComplete(details) {
 			break
 		}
 	}
 
-	return runtimeLog, validationLog, executionID
+	return details
+}
+
+func workActionDetailsComplete(details workActionDetails) bool {
+	return details.TicketPath != "" &&
+		details.ExecutionReport != "" &&
+		details.RuntimeLog != "" &&
+		details.ValidationLog != "" &&
+		details.ExecutionID != ""
 }
 
 func (m Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {

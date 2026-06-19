@@ -2776,13 +2776,15 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 		RecentEvents: []AgentEventView{
 			{Time: "11:31:00", Level: "info", Message: "loop started"},
 			{
-				Time:          "11:31:02",
-				Level:         "info",
-				TicketKey:     "CHC-2",
-				ExecutionID:   "exec-2",
-				Message:       "worker started",
-				RuntimeLog:    ".chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
-				ValidationLog: ".chc/user/runtime/runs/CHC-2/exec-2/validation.log",
+				Time:            "11:31:02",
+				Level:           "info",
+				TicketKey:       "CHC-2",
+				ExecutionID:     "exec-2",
+				Message:         "worker started",
+				TicketPath:      ".chc/user/tickets/CHC-2.md",
+				RuntimeLog:      ".chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
+				ValidationLog:   ".chc/user/runtime/runs/CHC-2/exec-2/validation.log",
+				ExecutionReport: ".chc/user/runtime/runs/CHC-2/exec-2/execution-report.md",
 			},
 			{Time: "11:31:03", Level: "error", TicketKey: "CHC-2", Message: "validation failed"},
 		},
@@ -2797,6 +2799,8 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 		"11:31:00 loop started",
 		"11:31:02 CHC-2 worker started",
 		"11:31:03 CHC-2 error: validation failed",
+		"Ticket: .chc/user/tickets/CHC-2.md",
+		"Execution report: .chc/user/runtime/runs/CHC-2/exec-2/execution-report.md",
 		"Runtime log: .chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
 		"Validation log: .chc/user/runtime/runs/CHC-2/exec-2/validation.log",
 		"Lookup: chc work logs exec-2",
@@ -2944,6 +2948,37 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 	}
 }
 
+func TestModelRendersTicketEvidenceDetail(t *testing.T) {
+	projectDir := t.TempDir()
+	ticketPath := writeTicketViewFile(t, projectDir, "evidence.md", testTicketEvidenceDetailBody())
+	model := NewModel(Options{
+		Tickets: []core.IndexedTicket{{
+			Path:         ticketPath,
+			RelativePath: "evidence.md",
+			Key:          "CHC-1",
+			Title:        "Add CLI behavior",
+			Status:       core.TicketStatusBacklog,
+			Type:         "feature",
+		}},
+	})
+	model.selected = 6
+
+	view := model.View()
+
+	for _, want := range []string{
+		"Evidence: complete",
+		"Evidence strategy: complete (done)",
+		"Gherkin: required (done)",
+		"Tests: mixed (done)",
+		"Validation: passed (done)",
+		"Evidence summary: complete (done)",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("View() missing %q:\n%s", want, view)
+		}
+	}
+}
+
 func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
 	projectDir := t.TempDir()
 	ticketPath := writeTicketViewFile(
@@ -3029,6 +3064,19 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []core.IndexedTicke
 			ProjectArea:  "tasks",
 		},
 	}
+}
+
+func testTicketEvidenceDetailBody() string {
+	return `# Description
+
+<!-- chc:evidence-strategy:v1 -->
+- [x] Evidence strategy: complete; change_kind=cli_behavior; risk=medium
+- [x] Gherkin: required; path=.chc/user/acceptance/cli.feature
+- [x] Tests: mixed; unit and CLI coverage
+- [x] Validation: passed; make verify
+- [x] Evidence summary: complete; ready for review
+<!-- /chc:evidence-strategy -->
+`
 }
 
 func TestModelSelectsTickets(t *testing.T) {
