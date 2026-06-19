@@ -17,15 +17,21 @@ type CodexWorkerContextMaterializer interface {
 
 // MaterializeCodexWorkerContextOptions describes a package boundary value.
 type MaterializeCodexWorkerContextOptions struct {
-	Path           string
-	ExecutionID    string
-	TicketKey      string
-	TicketPath     string
-	ResultPath     string
-	LogPath        string
-	ValidationPath string
-	RepairHandoff  *CodexWorkerRepairHandoff
-	Evidence       *WorkerEvidenceContext
+	Path                  string
+	ExecutionID           string
+	TicketKey             string
+	TicketPath            string
+	ResultPath            string
+	LogPath               string
+	ValidationPath        string
+	WorkspaceMode         WorkWorkspaceMode
+	ProjectCheckoutDir    string
+	ExecutionWorkspaceDir string
+	TicketBranch          string
+	WorkspaceBaseRef      string
+	WorkspaceBaseSHA      string
+	RepairHandoff         *CodexWorkerRepairHandoff
+	Evidence              *WorkerEvidenceContext
 }
 
 // CodexWorkerRepairHandoff describes a package boundary value.
@@ -70,15 +76,21 @@ func MaterializeCodexWorkerContextForExecution(
 	}
 
 	return NewCodexWorkerContextMaterializer().MaterializeContext(ctx, MaterializeCodexWorkerContextOptions{
-		Path:           plan.WorkerContextPath,
-		ExecutionID:    record.ID,
-		TicketKey:      record.TicketKey,
-		TicketPath:     containerProjectPath(plan, record.TicketPath),
-		ResultPath:     containerProjectPath(plan, plan.ResultPath),
-		LogPath:        containerProjectPath(plan, plan.LogPath),
-		ValidationPath: containerProjectPath(plan, plan.ValidationPath),
-		RepairHandoff:  repairHandoff,
-		Evidence:       evidence,
+		Path:                  plan.WorkerContextPath,
+		ExecutionID:           record.ID,
+		TicketKey:             record.TicketKey,
+		TicketPath:            containerProjectPath(plan, record.TicketPath),
+		ResultPath:            containerProjectPath(plan, plan.ResultPath),
+		LogPath:               containerProjectPath(plan, plan.LogPath),
+		ValidationPath:        containerProjectPath(plan, plan.ValidationPath),
+		WorkspaceMode:         plan.WorkspaceMode,
+		ProjectCheckoutDir:    plan.ProjectCheckoutDir,
+		ExecutionWorkspaceDir: plan.ExecutionWorkspaceDir,
+		TicketBranch:          plan.TicketBranch,
+		WorkspaceBaseRef:      plan.WorkspaceBaseRef,
+		WorkspaceBaseSHA:      plan.WorkspaceBaseSHA,
+		RepairHandoff:         repairHandoff,
+		Evidence:              evidence,
 	})
 }
 
@@ -127,6 +139,7 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString("- ticket_path: ")
 	output.WriteString(opts.TicketPath)
 	output.WriteString("\n\n")
+	writeCodexWorkerWorkspaceContext(&output, opts)
 	output.WriteString("## Artifacts\n\n")
 	output.WriteString("- result_path: ")
 	output.WriteString(opts.ResultPath)
@@ -151,6 +164,28 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString("- `changed_files`: optional list of workspace-relative changed file summaries.\n")
 
 	return output.String()
+}
+
+func writeCodexWorkerWorkspaceContext(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
+	output.WriteString("## Workspace\n\n")
+	output.WriteString("- workspace_mode: ")
+	output.WriteString(nonEmptyWorkerContextValue(string(opts.WorkspaceMode), string(WorkWorkspaceModeProject)))
+	output.WriteString("\n")
+	output.WriteString("- project_checkout_dir: ")
+	output.WriteString(nonEmptyWorkerContextValue(opts.ProjectCheckoutDir, "unknown"))
+	output.WriteString("\n")
+	output.WriteString("- execution_workspace_dir: ")
+	output.WriteString(nonEmptyWorkerContextValue(opts.ExecutionWorkspaceDir, "unknown"))
+	output.WriteString("\n")
+	output.WriteString("- ticket_branch: ")
+	output.WriteString(nonEmptyWorkerContextValue(opts.TicketBranch, "unknown"))
+	output.WriteString("\n")
+	output.WriteString("- workspace_base_ref: ")
+	output.WriteString(nonEmptyWorkerContextValue(opts.WorkspaceBaseRef, "unknown"))
+	output.WriteString("\n")
+	output.WriteString("- workspace_base_sha: ")
+	output.WriteString(nonEmptyWorkerContextValue(opts.WorkspaceBaseSHA, "unknown"))
+	output.WriteString("\n\n")
 }
 
 func writeCodexWorkerEvidenceStrategy(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {

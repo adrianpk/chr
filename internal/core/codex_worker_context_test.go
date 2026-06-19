@@ -28,6 +28,13 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 		"- execution_id: exec-1",
 		"- ticket_key: CHC-1",
 		"- ticket_path: /workspace/.chc/user/tickets/CHC-1.md",
+		"## Workspace",
+		"- workspace_mode: project",
+		"- project_checkout_dir: /project",
+		"- execution_workspace_dir: /project",
+		"- ticket_branch: chc/CHC-1",
+		"- workspace_base_ref: origin/dev",
+		"- workspace_base_sha: abc123",
 		"- result_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
 		"- log_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
 		"- validation_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
@@ -50,17 +57,23 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
 	plan := RuntimePlan{
-		ProjectDir:        projectDir,
-		ContainerWorkdir:  "/workspace",
-		WorkerContextPath: filepath.Join(runDir, "context.md"),
-		ResultPath:        filepath.Join(runDir, "result.json"),
-		LogPath:           filepath.Join(runDir, "runtime.log"),
-		ValidationPath:    filepath.Join(runDir, "validation.log"),
-		ValidationCommand: "go test ./...",
-		DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-		RunArtifactDir:    runDir,
-		ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
-		Image:             "chc-agent-runtime:local",
+		ProjectDir:            projectDir,
+		ContainerWorkdir:      "/workspace",
+		WorkerContextPath:     filepath.Join(runDir, "context.md"),
+		ResultPath:            filepath.Join(runDir, "result.json"),
+		LogPath:               filepath.Join(runDir, "runtime.log"),
+		ValidationPath:        filepath.Join(runDir, "validation.log"),
+		ValidationCommand:     "go test ./...",
+		DockerfilePath:        filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		RunArtifactDir:        runDir,
+		ArtifactDir:           filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
+		Image:                 "chc-agent-runtime:local",
+		ProjectCheckoutDir:    projectDir,
+		ExecutionWorkspaceDir: projectDir,
+		WorkspaceMode:         WorkWorkspaceModeProject,
+		TicketBranch:          "chc/CHC-1",
+		WorkspaceBaseRef:      "origin/dev",
+		WorkspaceBaseSHA:      "abc123",
 	}
 	record := ExecutionRecord{
 		ID:         "exec-1",
@@ -103,38 +116,8 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 func TestMaterializeCodexWorkerContextForExecutionUsesWorktreeContainerPaths(t *testing.T) {
 	projectDir := t.TempDir()
 	executionWorkspaceDir := filepath.Join(projectDir, ".chc", "user", "worktrees", "CHC-1")
-	runDir := filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
-	plan := RuntimePlan{
-		ProjectDir:            projectDir,
-		ProjectCheckoutDir:    projectDir,
-		ExecutionWorkspaceDir: executionWorkspaceDir,
-		WorkspaceMode:         WorkWorkspaceModeWorktree,
-		ContainerWorkdir:      "/workspace",
-		WorkerContextPath:     filepath.Join(runDir, "context.md"),
-		ResultPath:            filepath.Join(runDir, "result.json"),
-		LogPath:               filepath.Join(runDir, "runtime.log"),
-		ValidationPath:        filepath.Join(runDir, "validation.log"),
-		ValidationCommand:     "go test ./...",
-		DockerfilePath:        filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-		RunArtifactDir:        runDir,
-		ArtifactDir:           filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs"),
-		Image:                 "chc-agent-runtime:local",
-	}
-	record := ExecutionRecord{
-		ID:         "exec-1",
-		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(executionWorkspaceDir, ".chc", "user", "tickets", "CHC-1.md"),
-	}
-	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
-		Key:       "CHC-1",
-		Title:     "Ready work",
-		Status:    TicketStatusReadyForDev,
-		Priority:  "normal",
-		Severity:  "normal",
-		Type:      "feature",
-		CreatedAt: testCodexWorkerContextTime(),
-		UpdatedAt: testCodexWorkerContextTime(),
-	})
+	plan := testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir)
+	record := testCodexWorkerContextWorktreeRecord(t, executionWorkspaceDir)
 
 	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
 	if err != nil {
@@ -148,6 +131,12 @@ func TestMaterializeCodexWorkerContextForExecutionUsesWorktreeContainerPaths(t *
 
 	for _, want := range []string{
 		"- ticket_path: /workspace/.chc/user/tickets/CHC-1.md",
+		"- workspace_mode: worktree",
+		"- project_checkout_dir: " + projectDir,
+		"- execution_workspace_dir: " + executionWorkspaceDir,
+		"- ticket_branch: chc/CHC-1",
+		"- workspace_base_ref: origin/dev",
+		"- workspace_base_sha: abc123",
 		"- result_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
 		"- log_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
 		"- validation_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
@@ -481,30 +470,88 @@ func TestCodexWorkerContextMaterializerRejectsMissingRequiredFields(t *testing.T
 
 func testCodexWorkerContextOptions(path string) MaterializeCodexWorkerContextOptions {
 	return MaterializeCodexWorkerContextOptions{
-		Path:           path,
-		ExecutionID:    "exec-1",
-		TicketKey:      "CHC-1",
-		TicketPath:     "/workspace/.chc/user/tickets/CHC-1.md",
-		ResultPath:     "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
-		LogPath:        "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
-		ValidationPath: "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+		Path:                  path,
+		ExecutionID:           "exec-1",
+		TicketKey:             "CHC-1",
+		TicketPath:            "/workspace/.chc/user/tickets/CHC-1.md",
+		ResultPath:            "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
+		LogPath:               "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
+		ValidationPath:        "/workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+		WorkspaceMode:         WorkWorkspaceModeProject,
+		ProjectCheckoutDir:    "/project",
+		ExecutionWorkspaceDir: "/project",
+		TicketBranch:          "chc/CHC-1",
+		WorkspaceBaseRef:      "origin/dev",
+		WorkspaceBaseSHA:      "abc123",
 	}
 }
 
 func testCodexWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
 	return RuntimePlan{
-		ProjectDir:        projectDir,
-		ContainerWorkdir:  "/workspace",
-		WorkerContextPath: filepath.Join(runDir, "context.md"),
-		ResultPath:        filepath.Join(runDir, "result.json"),
-		LogPath:           filepath.Join(runDir, "runtime.log"),
-		ValidationPath:    filepath.Join(runDir, "validation.log"),
-		ValidationCommand: "go test ./...",
-		DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-		RunArtifactDir:    runDir,
-		ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
-		Image:             "chc-agent-runtime:local",
+		ProjectDir:            projectDir,
+		ProjectCheckoutDir:    projectDir,
+		ExecutionWorkspaceDir: projectDir,
+		WorkspaceMode:         WorkWorkspaceModeProject,
+		TicketBranch:          "chc/CHC-1",
+		WorkspaceBaseRef:      "origin/dev",
+		WorkspaceBaseSHA:      "abc123",
+		ContainerWorkdir:      "/workspace",
+		WorkerContextPath:     filepath.Join(runDir, "context.md"),
+		ResultPath:            filepath.Join(runDir, "result.json"),
+		LogPath:               filepath.Join(runDir, "runtime.log"),
+		ValidationPath:        filepath.Join(runDir, "validation.log"),
+		ValidationCommand:     "go test ./...",
+		DockerfilePath:        filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		RunArtifactDir:        runDir,
+		ArtifactDir:           filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
+		Image:                 "chc-agent-runtime:local",
 	}
+}
+
+func testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir string) RuntimePlan {
+	runDir := filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+
+	return RuntimePlan{
+		ProjectDir:            projectDir,
+		ProjectCheckoutDir:    projectDir,
+		ExecutionWorkspaceDir: executionWorkspaceDir,
+		WorkspaceMode:         WorkWorkspaceModeWorktree,
+		TicketBranch:          "chc/CHC-1",
+		WorkspaceBaseRef:      "origin/dev",
+		WorkspaceBaseSHA:      "abc123",
+		ContainerWorkdir:      "/workspace",
+		WorkerContextPath:     filepath.Join(runDir, "context.md"),
+		ResultPath:            filepath.Join(runDir, "result.json"),
+		LogPath:               filepath.Join(runDir, "runtime.log"),
+		ValidationPath:        filepath.Join(runDir, "validation.log"),
+		ValidationCommand:     "go test ./...",
+		DockerfilePath:        filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		RunArtifactDir:        runDir,
+		ArtifactDir:           filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs"),
+		Image:                 "chc-agent-runtime:local",
+	}
+}
+
+func testCodexWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string) ExecutionRecord {
+	t.Helper()
+
+	record := ExecutionRecord{
+		ID:         "exec-1",
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(executionWorkspaceDir, ".chc", "user", "tickets", "CHC-1.md"),
+	}
+	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+		Key:       "CHC-1",
+		Title:     "Ready work",
+		Status:    TicketStatusReadyForDev,
+		Priority:  "normal",
+		Severity:  "normal",
+		Type:      "feature",
+		CreatedAt: testCodexWorkerContextTime(),
+		UpdatedAt: testCodexWorkerContextTime(),
+	})
+
+	return record
 }
 
 func writeCodexWorkerContextTicket(t *testing.T, path string, ticket Ticket) {
