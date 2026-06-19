@@ -1,6 +1,6 @@
 # Isolated Ticket Worktrees Tracker
 
-Status: planned
+Status: reviewing
 
 Plan: `ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md`
 
@@ -10,7 +10,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | workspace execution config | planned | `feat/slice-1-workspace-execution-config` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
+| Slice 1 | workspace execution config | reviewing | `feat/slice-1-workspace-execution-config` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
 | Slice 2 | worktree state service | planned | `feat/slice-2-worktree-state-service` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
 | Slice 3 | readiness workspace split | planned | `feat/slice-3-readiness-workspace-split` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
 | Slice 4 | runtime workspace mount | planned | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
@@ -23,13 +23,13 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add workspace execution config fields under the existing work/runtime configuration boundary. | pending | pending | Decide final placement while preserving config compatibility. |
-| T1.2 | Define controlled values for workspace mode, worktree base policy, worktree cleanup policy, and worktree root. | pending | pending | Keep values explicit and documented. |
-| T1.3 | Set defaults that preserve current project-mounted execution behavior in existing workspaces. | pending | pending | No behavior switch in Slice 1. |
-| T1.4 | Add config parser and validation coverage for omitted defaults, explicit worktree settings, and invalid enum values. | pending | pending | Table-driven tests expected. |
-| T1.5 | Add runtime plan value fields for project checkout vs execution workspace without changing harness mount behavior. | pending | pending | Prepares later slices. |
-| T1.6 | Document the config fields and migration posture in reference docs. | pending | pending | Mark behavior as configured/planned where not enforced yet. |
-| T1.7 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T1.1 | Add workspace execution config fields under the existing work/runtime configuration boundary. | done | `770ccd7` | Placed execution workspace config under `work:`. |
+| T1.2 | Define controlled values for workspace mode, worktree base policy, worktree cleanup policy, and worktree root. | done | `0c887c8` | Added explicit enum values and workspace validation helpers. |
+| T1.3 | Set defaults that preserve current project-mounted execution behavior in existing workspaces. | done | `f902837` | Default is `workspace_mode: project`; no behavior switch in Slice 1. |
+| T1.4 | Add config parser and validation coverage for omitted defaults, explicit worktree settings, and invalid enum values. | done | `1c7bfdc` | Added table-driven parser and validation coverage. |
+| T1.5 | Add runtime plan value fields for project checkout vs execution workspace without changing harness mount behavior. | done | `df7f790` | Runtime plan records execution workspace metadata while mounts remain project-based. |
+| T1.6 | Document the config fields and migration posture in reference docs. | done | `3ce20bc` | Reference docs mark worktree behavior as configured/planned. |
+| T1.7 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 2 Tasks
 
@@ -125,10 +125,13 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 ## Validation Log
 
 - Planning: `git diff --check` (pass)
+- Slice 1: `go test ./internal/core -run 'TestLoadWorkspaceConfig.*Work|TestValidateWorkConfigRejectsInvalid.*Config|TestPlanRuntime|TestCodexCredentialMountsUseReadOnlyRootCodexPaths|TestValidateRuntime'` (pass)
+- Slice 1: `make verify` (pass)
 
 ## Open Decisions
 
-- Final config placement: `work.workspace_mode` versus `runtime.workspace_mode`.
+- Final config placement: resolved as `work.workspace_mode` with related
+  `work.worktree_*` fields.
 - Whether execution workspace metadata requires a SQLite migration in Slice 5
   or can remain report-only until the behavior is proven.
 - Whether worktree metadata should be central-only, file-based under the
