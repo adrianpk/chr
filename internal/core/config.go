@@ -16,6 +16,7 @@ type WorkspaceConfig struct {
 	Notifications   NotificationConfig
 	Review          ReviewWorkflowConfig
 	Work            WorkConfig
+	Evidence        EvidenceConfig
 }
 
 // RuntimeConfig describes a package boundary value.
@@ -59,6 +60,31 @@ type ReviewProviderTargetConfig struct {
 type WorkConfig struct {
 	BranchPolicy WorkBranchPolicy
 }
+
+// EvidenceConfig describes a package boundary value.
+type EvidenceConfig struct {
+	Strategy EvidenceStrategyConfig
+}
+
+// EvidenceStrategyConfig describes a package boundary value.
+type EvidenceStrategyConfig struct {
+	Enabled              bool
+	Mode                 EvidenceStrategyMode
+	TicketChecklist      EvidenceTicketChecklistPolicy
+	GherkinPolicy        EvidenceGherkinPolicy
+	StrictReadyForReview bool
+	AllowUserEdits       bool
+	ExecutionReportCopy  bool
+}
+
+// EvidenceStrategyMode defines a package boundary type.
+type EvidenceStrategyMode string
+
+// EvidenceTicketChecklistPolicy defines a package boundary type.
+type EvidenceTicketChecklistPolicy string
+
+// EvidenceGherkinPolicy defines a package boundary type.
+type EvidenceGherkinPolicy string
 
 // WorkBranchPolicy describes a package boundary value.
 type WorkBranchPolicy struct {
@@ -125,6 +151,23 @@ const (
 	DefaultWorkIntegrationBranch = "dev"
 	// DefaultWorkCanonicalRemote defines a package boundary constant.
 	DefaultWorkCanonicalRemote = "origin"
+
+	// EvidenceStrategyModeInline defines a package boundary constant.
+	EvidenceStrategyModeInline EvidenceStrategyMode = "inline"
+	// EvidenceStrategyModeSeparatePass defines a package boundary constant.
+	EvidenceStrategyModeSeparatePass EvidenceStrategyMode = "separate_pass"
+
+	// EvidenceTicketChecklistPolicyRequired defines a package boundary constant.
+	EvidenceTicketChecklistPolicyRequired EvidenceTicketChecklistPolicy = "required"
+	// EvidenceTicketChecklistPolicyOptional defines a package boundary constant.
+	EvidenceTicketChecklistPolicyOptional EvidenceTicketChecklistPolicy = "optional"
+
+	// EvidenceGherkinPolicyActiveWhenApplicable defines a package boundary constant.
+	EvidenceGherkinPolicyActiveWhenApplicable EvidenceGherkinPolicy = "active_when_applicable"
+	// EvidenceGherkinPolicyDisabled defines a package boundary constant.
+	EvidenceGherkinPolicyDisabled EvidenceGherkinPolicy = "disabled"
+	// EvidenceGherkinPolicyManualOnly defines a package boundary constant.
+	EvidenceGherkinPolicyManualOnly EvidenceGherkinPolicy = "manual_only"
 )
 
 // DefaultRuntimeConfig executes the corresponding package operation.
@@ -175,6 +218,26 @@ func DefaultWorkConfig() WorkConfig {
 	}
 }
 
+// DefaultEvidenceConfig executes the corresponding package operation.
+func DefaultEvidenceConfig() EvidenceConfig {
+	return EvidenceConfig{
+		Strategy: DefaultEvidenceStrategyConfig(),
+	}
+}
+
+// DefaultEvidenceStrategyConfig executes the corresponding package operation.
+func DefaultEvidenceStrategyConfig() EvidenceStrategyConfig {
+	return EvidenceStrategyConfig{
+		Enabled:              true,
+		Mode:                 EvidenceStrategyModeInline,
+		TicketChecklist:      EvidenceTicketChecklistPolicyRequired,
+		GherkinPolicy:        EvidenceGherkinPolicyActiveWhenApplicable,
+		StrictReadyForReview: true,
+		AllowUserEdits:       true,
+		ExecutionReportCopy:  true,
+	}
+}
+
 // DefaultWorkBranchPolicy executes the corresponding package operation.
 func DefaultWorkBranchPolicy() WorkBranchPolicy {
 	return WorkBranchPolicy{
@@ -196,6 +259,7 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 		Notifications:   DefaultNotificationConfig(),
 		Review:          DefaultReviewWorkflowConfig(),
 		Work:            DefaultWorkConfig(),
+		Evidence:        DefaultEvidenceConfig(),
 	}
 	path := UserPath(projectDir, "config.yml")
 
@@ -262,6 +326,8 @@ func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value stri
 		setReviewWorkflowConfigValue(&config.Review, key, value)
 	case "work":
 		setWorkConfigValue(&config.Work, key, value)
+	case "evidence", "evidence.strategy":
+		setEvidenceConfigValue(&config.Evidence, key, value)
 	}
 }
 
@@ -274,6 +340,10 @@ func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, 
 	indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
 	if indent == 0 && strings.HasSuffix(line, ":") {
 		return "", "", strings.TrimSuffix(line, ":"), false
+	}
+
+	if indent > 0 && strings.HasSuffix(line, ":") && !strings.Contains(section, ".") {
+		return "", "", section + "." + strings.TrimSuffix(line, ":"), false
 	}
 
 	if indent == 0 {
@@ -355,6 +425,50 @@ func setWorkConfigValue(config *WorkConfig, key, value string) {
 		config.BranchPolicy.AllowSafeRepair = configBoolValue(value)
 	case "allow_branch_creation":
 		config.BranchPolicy.AllowBranchCreation = configBoolValue(value)
+	}
+}
+
+func setEvidenceConfigValue(config *EvidenceConfig, key, value string) {
+	setEvidenceStrategyConfigValue(&config.Strategy, key, value)
+}
+
+func setEvidenceStrategyConfigValue(config *EvidenceStrategyConfig, key, value string) {
+	if setEvidenceStrategyBoolConfigValue(config, key, value) {
+		return
+	}
+
+	setEvidenceStrategyEnumConfigValue(config, key, value)
+}
+
+func setEvidenceStrategyBoolConfigValue(config *EvidenceStrategyConfig, key, value string) bool {
+	switch key {
+	case "enabled":
+		config.Enabled = configBoolValue(value)
+	case "strict_ready_for_review":
+		config.StrictReadyForReview = configBoolValue(value)
+	case "allow_user_edits":
+		config.AllowUserEdits = configBoolValue(value)
+	case "execution_report_copy":
+		config.ExecutionReportCopy = configBoolValue(value)
+	default:
+		return false
+	}
+
+	return true
+}
+
+func setEvidenceStrategyEnumConfigValue(config *EvidenceStrategyConfig, key, value string) {
+	if value == "" {
+		return
+	}
+
+	switch key {
+	case "mode":
+		config.Mode = EvidenceStrategyMode(value)
+	case "ticket_checklist":
+		config.TicketChecklist = EvidenceTicketChecklistPolicy(value)
+	case "gherkin_policy":
+		config.GherkinPolicy = EvidenceGherkinPolicy(value)
 	}
 }
 
