@@ -58,6 +58,12 @@ evidence:
 - `disabled`: Gherkin is not required by evidence strategy.
 - `manual_only`: Gherkin is created only when explicitly requested.
 
+Gherkin is considered active when `gherkin_policy` is `active_when_applicable`
+and the project already has `.feature` artifacts under
+`.chc/user/acceptance/`. Active Gherkin applies to tickets that change
+observable CLI, TUI, API, domain, acceptance workflow, or user-visible bugfix
+behavior.
+
 ## Defaults
 
 Defaults are intentionally strict enough to make agent work inspectable:
@@ -89,6 +95,7 @@ Required ticket evidence:
 - an anchored `chc:evidence-strategy:v1` checklist exists and parses;
 - `Evidence strategy` is checked and `complete`;
 - `Gherkin` is checked when its status is `required`;
+- active/applicable Gherkin cannot be marked `not_applicable`;
 - `Tests` is checked unless its status is `none`;
 - `Validation` is checked and `passed`;
 - `Evidence summary` is checked and `complete`.

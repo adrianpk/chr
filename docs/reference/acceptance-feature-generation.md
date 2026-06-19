@@ -89,6 +89,46 @@ Static checks require:
 
 If static checks fail, the feature must not be written as acceptance evidence.
 
+## Evidence Strategy Interaction
+
+The Test/Evidence Strategy pass treats Gherkin as active when the project has
+existing acceptance feature artifacts under:
+
+```text
+.chc/user/acceptance/*.feature
+```
+
+With the default `evidence.strategy.gherkin_policy: active_when_applicable`,
+active Gherkin becomes required for tickets that change observable behavior.
+Observable behavior includes CLI behavior, TUI behavior, API behavior, domain
+use cases, acceptance workflow behavior, and user-visible bug fixes.
+
+For those tickets, the worker context tells the agent:
+
+- whether Gherkin is active for the project;
+- whether it applies to the ticket;
+- which `.feature` path should be updated first;
+- which evidence decision matrix row applies.
+
+If active Gherkin applies, the ticket checklist must record:
+
+```text
+Gherkin: required; path=<feature path>; reason=<observable behavior reason>
+```
+
+The item can be checked only after the `.feature` artifact is created or
+updated. Marking it `not_applicable` for an active, applicable behavior ticket
+blocks `ready_for_review` with `gherkin_required_missing`.
+
+Gherkin remains non-universal. Docs-only, Godoc-only, metadata-only, internal
+refactor, test-only cleanup, and low-level parser or validator work can still
+record Gherkin as `not_applicable` when no observable behavior scenario is
+being specified.
+
+Set `evidence.strategy.gherkin_policy: disabled` to remove Gherkin from the
+evidence gate. Set `manual_only` when a project wants feature artifacts only
+after explicit human request.
+
 ## Godog Status
 
 This iteration does not execute `godog` and does not generate step definitions.
