@@ -15,7 +15,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice 3 | readiness workspace split | delivered | `feat/slice-3-readiness-workspace-split` | `#330` | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
 | Slice 4 | runtime workspace mount | delivered | `feat/slice-4-runtime-workspace-mount` | `#331` | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
 | Slice 5 | execution workspace results | delivered | `feat/slice-5-execution-workspace-results` | `#332` | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
-| Slice 6 | branch and PR lifecycle | planned | `feat/slice-6-branch-and-pr-lifecycle` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
+| Slice 6 | branch and PR lifecycle | reviewing | `feat/slice-6-branch-and-pr-lifecycle` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
 | Slice 7 | review repair and cleanup | planned | `feat/slice-7-review-repair-and-cleanup` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
 | Slice 8 | docs and QA proving | planned | `feat/slice-8-docs-and-qa-proving` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
 
@@ -88,14 +88,14 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T6.1 | Define branch selection rules for tickets with and without existing `branch` metadata. | pending | pending | Ticket metadata should become operational. |
-| T6.2 | Integrate worktree preparation into ticket start/work execution before runtime context materialization. | pending | pending | Runtime should see prepared workspace. |
-| T6.3 | Add branch creation from `origin/<integration_branch>` with conflict diagnostics. | pending | pending | No silent local checkout base. |
-| T6.4 | Ensure worktree checkout and branch state are recorded in ticket, execution, and event evidence. | pending | pending | Visible in Dash/reports. |
-| T6.5 | Confirm host-side commit/push/PR creation reads from the ticket worktree in worktree mode. | pending | pending | Worker container does not need to push. |
-| T6.6 | Add run-all tests proving sequential worktree preparation without pre-creating the full queue. | pending | pending | Preserve one active task. |
-| T6.7 | Add conflict tests for branch already exists with unrelated history or unsafe remote state. | pending | pending | Block instead of reset. |
-| T6.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T6.1 | Define branch selection rules for tickets with and without existing `branch` metadata. | done | `54ce330` | Existing ticket branch metadata is authoritative; missing branches derive from ticket key and title. |
+| T6.2 | Integrate worktree preparation into ticket start/work execution before runtime context materialization. | done | `26a4184` | Ticket execution prepares the ticket worktree before runtime validation and context materialization. |
+| T6.3 | Add branch creation from `origin/<integration_branch>` with conflict diagnostics. | done | `3e9c2d1` | Existing branches must contain the configured base ref; unrelated branches block instead of being reset. |
+| T6.4 | Ensure worktree checkout and branch state are recorded in ticket, execution, and event evidence. | done | `26a4184` | Execution records, worktree metadata, ticket branch metadata, and agent events expose branch/worktree state. |
+| T6.5 | Confirm host-side commit/push/PR creation reads from the ticket worktree in worktree mode. | done | `26a4184` | Host-side post-worker state uses execution workspace metadata; the worker container still does not own push or PR operations. |
+| T6.6 | Add run-all tests proving sequential worktree preparation without pre-creating the full queue. | done | `26a4184` | Service test proves a two-ticket queue with `MaxIterations: 1` prepares only the selected ticket worktree. |
+| T6.7 | Add conflict tests for branch already exists with unrelated history or unsafe remote state. | done | `3e9c2d1` | Core test covers an existing ticket branch that does not contain the selected base ref. |
+| T6.8 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 7 Tasks
 
@@ -140,6 +140,10 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - Slice 5: `go test ./internal/core -run 'TestNewResultApplication|TestChangedFileDiscoverer|TestParseGitStatusChangedFiles' && go test ./internal/app -run 'TestTicketApplyResultDiscoversWorktreeChangedFiles|TestTicketApplyResultAppliesExecutionResult'` (pass)
 - Slice 5: `make lint-strict` (pass)
 - Slice 5: `make verify` (pass)
+- Slice 6: `go test ./internal/core -run 'TestSelectTicketBranch|TestWorktreeService|TestChangedFileDiscoverer|TestNewResultApplication'` (pass)
+- Slice 6: `go test ./internal/app -run 'TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace|TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree|TestServiceStartAgentWorkTicketReusesTicketExecution|TestServiceStartAllReadyAgentWorkEmitsLifecycleEvents|TestTicketApplyResultDiscoversWorktreeChangedFiles|TestTicketApplyResultAppliesExecutionResult'` (pass)
+- Slice 6: `make lint-strict` (pass)
+- Slice 6: `make verify` (pass)
 
 ## Open Decisions
 
