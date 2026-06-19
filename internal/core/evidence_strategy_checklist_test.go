@@ -191,6 +191,96 @@ func TestRenderEvidenceStrategyChecklistRejectsMissingItems(t *testing.T) {
 	}
 }
 
+func TestUpsertEvidenceStrategyChecklistInsertsMissingBlock(t *testing.T) {
+	content := `---
+key: "CHC-1"
+title: "Ticket"
+updated_at: "2026-06-19T10:00:00Z"
+---
+
+# Description
+
+Keep this body.
+
+# Comments
+
+Keep comments.
+
+# Blocker
+
+Keep blockers.
+`
+
+	updated, err := UpsertEvidenceStrategyChecklist(content, testEvidenceStrategyChecklistModel())
+	if err != nil {
+		t.Fatalf("UpsertEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	assertTextOrder(t, updated, `updated_at: "2026-06-19T10:00:00Z"`, EvidenceStrategyChecklistStartAnchor)
+	assertTextOrder(t, updated, EvidenceStrategyChecklistEndAnchor, "# Description")
+
+	for _, want := range []string{
+		"Keep this body.",
+		"# Comments\n\nKeep comments.",
+		"# Blocker\n\nKeep blockers.",
+	} {
+		if !strings.Contains(updated, want) {
+			t.Fatalf("updated content missing %q:\n%s", want, updated)
+		}
+	}
+}
+
+func TestUpsertEvidenceStrategyChecklistUpdatesOnlyProvidedItems(t *testing.T) {
+	updates := EvidenceStrategyChecklist{
+		Items: map[string]EvidenceStrategyChecklistItem{
+			EvidenceStrategyChecklistLabelValidation: {
+				Label:   EvidenceStrategyChecklistLabelValidation,
+				Checked: true,
+				Status:  "passed",
+				Detail:  "commands=make verify; evidence=.chc/user/runtime/runs/1/report.md",
+			},
+		},
+	}
+
+	updated, err := UpsertEvidenceStrategyChecklist(testEvidenceStrategyChecklistMarkdown(), updates)
+	if err != nil {
+		t.Fatalf("UpsertEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	checklist, err := ParseEvidenceStrategyChecklist(updated)
+	if err != nil {
+		t.Fatalf("ParseEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	validation := assertEvidenceStrategyChecklistItem(t, checklist, EvidenceStrategyChecklistLabelValidation)
+	if !validation.Checked || validation.Status != "passed" {
+		t.Fatalf("validation item = %#v, want checked passed", validation)
+	}
+
+	tests := assertEvidenceStrategyChecklistItem(t, checklist, EvidenceStrategyChecklistLabelTests)
+	if tests.Status != "mixed" || tests.Detail != "reason=unit and fuzz coverage" {
+		t.Fatalf("tests item = %#v, want preserved mixed detail", tests)
+	}
+}
+
+func TestUpsertEvidenceStrategyChecklistRejectsMalformedExistingBlock(t *testing.T) {
+	content := strings.Replace(
+		testEvidenceStrategyChecklistMarkdown(),
+		"- [ ] Validation: pending",
+		"- [ ] Validation: maybe",
+		1,
+	)
+
+	_, err := UpsertEvidenceStrategyChecklist(content, testEvidenceStrategyChecklistModel())
+	if err == nil {
+		t.Fatal("UpsertEvidenceStrategyChecklist returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "invalid Validation status: maybe") {
+		t.Fatalf("error = %q", err.Error())
+	}
+}
+
 func assertEvidenceStrategyChecklistItem(
 	t *testing.T,
 	checklist EvidenceStrategyChecklist,
@@ -204,6 +294,56 @@ func assertEvidenceStrategyChecklistItem(
 	}
 
 	return item
+}
+
+func assertTextOrder(t *testing.T, content, before, after string) {
+	t.Helper()
+
+	beforeIndex := strings.Index(content, before)
+	if beforeIndex < 0 {
+		t.Fatalf("content missing %q:\n%s", before, content)
+	}
+
+	afterIndex := strings.Index(content, after)
+	if afterIndex < 0 {
+		t.Fatalf("content missing %q:\n%s", after, content)
+	}
+
+	if beforeIndex >= afterIndex {
+		t.Fatalf("%q appears after %q in:\n%s", before, after, content)
+	}
+}
+
+func testEvidenceStrategyChecklistModel() EvidenceStrategyChecklist {
+	return EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]EvidenceStrategyChecklistItem{
+			EvidenceStrategyChecklistLabelStrategy: {
+				Label:  EvidenceStrategyChecklistLabelStrategy,
+				Status: "planned",
+				Detail: "change_kind=bugfix; risk=medium; test_timing=before; note=regression",
+			},
+			EvidenceStrategyChecklistLabelGherkin: {
+				Label:  EvidenceStrategyChecklistLabelGherkin,
+				Status: "required",
+				Detail: "path=.chc/user/acceptance/bug.feature; reason=user-visible",
+			},
+			EvidenceStrategyChecklistLabelTests: {
+				Label:  EvidenceStrategyChecklistLabelTests,
+				Status: "mixed",
+				Detail: "reason=unit and fuzz coverage",
+			},
+			EvidenceStrategyChecklistLabelValidation: {
+				Label:  EvidenceStrategyChecklistLabelValidation,
+				Status: "pending",
+				Detail: "commands=make verify; evidence=none",
+			},
+			EvidenceStrategyChecklistLabelSummary: {
+				Label:  EvidenceStrategyChecklistLabelSummary,
+				Status: "pending",
+			},
+		},
+	}
 }
 
 func testEvidenceStrategyChecklistMarkdown() string {

@@ -79,6 +79,30 @@ func RenderEvidenceStrategyChecklist(checklist EvidenceStrategyChecklist) (strin
 	return output.String(), nil
 }
 
+// UpsertEvidenceStrategyChecklist inserts or updates the v1 strategy block.
+func UpsertEvidenceStrategyChecklist(content string, updates EvidenceStrategyChecklist) (string, error) {
+	existing, err := ParseEvidenceStrategyChecklist(content)
+	if err != nil {
+		return "", err
+	}
+
+	checklist, err := evidenceStrategyChecklistForUpsert(existing, updates)
+	if err != nil {
+		return "", err
+	}
+
+	rendered, err := RenderEvidenceStrategyChecklist(checklist)
+	if err != nil {
+		return "", err
+	}
+
+	if existing.Found {
+		return replaceEvidenceStrategyChecklistBlock(content, rendered)
+	}
+
+	return insertEvidenceStrategyChecklistBlock(content, rendered), nil
+}
+
 // EvidenceStrategyChecklistLabels returns labels in canonical render order.
 func EvidenceStrategyChecklistLabels() []string {
 	return []string{
@@ -191,6 +215,63 @@ func parseEvidenceStrategyChecklistValue(value string) (string, string) {
 	return strings.TrimSpace(status), strings.TrimSpace(detail)
 }
 
+func evidenceStrategyChecklistForUpsert(
+	existing EvidenceStrategyChecklist,
+	updates EvidenceStrategyChecklist,
+) (EvidenceStrategyChecklist, error) {
+	if existing.Found {
+		return mergeEvidenceStrategyChecklists(existing, updates)
+	}
+
+	for label, item := range updates.Items {
+		if err := validateEvidenceStrategyChecklistItem(label, item); err != nil {
+			return EvidenceStrategyChecklist{}, err
+		}
+	}
+
+	return updates, nil
+}
+
+func mergeEvidenceStrategyChecklists(
+	existing EvidenceStrategyChecklist,
+	updates EvidenceStrategyChecklist,
+) (EvidenceStrategyChecklist, error) {
+	merged := EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]EvidenceStrategyChecklistItem{},
+	}
+
+	for _, label := range EvidenceStrategyChecklistLabels() {
+		merged.Items[label] = existing.Items[label]
+	}
+
+	for label, item := range updates.Items {
+		if err := validateEvidenceStrategyChecklistItem(label, item); err != nil {
+			return EvidenceStrategyChecklist{}, err
+		}
+
+		merged.Items[label] = item
+	}
+
+	return merged, nil
+}
+
+func validateEvidenceStrategyChecklistItem(label string, item EvidenceStrategyChecklistItem) error {
+	if !isEvidenceStrategyChecklistLabel(label) {
+		return fmt.Errorf("unknown evidence strategy checklist label: %s", label)
+	}
+
+	if item.Label != label {
+		return fmt.Errorf("evidence strategy checklist item label mismatch: %s", label)
+	}
+
+	if !isValidEvidenceStrategyChecklistStatus(label, item.Status) {
+		return fmt.Errorf("invalid %s status: %s", label, item.Status)
+	}
+
+	return nil
+}
+
 func renderEvidenceStrategyChecklistItem(item EvidenceStrategyChecklistItem) string {
 	checked := " "
 	if item.Checked {
@@ -204,6 +285,44 @@ func renderEvidenceStrategyChecklistItem(item EvidenceStrategyChecklistItem) str
 	}
 
 	return fmt.Sprintf("- [%s] %s: %s", checked, item.Label, value)
+}
+
+func replaceEvidenceStrategyChecklistBlock(content, rendered string) (string, error) {
+	start := strings.Index(content, EvidenceStrategyChecklistStartAnchor)
+	end := strings.Index(content, EvidenceStrategyChecklistEndAnchor)
+	if start < 0 || end < 0 || end < start {
+		return "", fmt.Errorf("evidence strategy checklist anchors are required")
+	}
+
+	end += len(EvidenceStrategyChecklistEndAnchor)
+
+	return content[:start] + strings.TrimRight(rendered, "\n") + content[end:], nil
+}
+
+func insertEvidenceStrategyChecklistBlock(content, rendered string) string {
+	insertAt := evidenceStrategyChecklistInsertOffset(content)
+	prefix := strings.TrimRight(content[:insertAt], "\n")
+	suffix := strings.TrimLeft(content[insertAt:], "\n")
+
+	if suffix == "" {
+		return prefix + "\n\n" + rendered
+	}
+
+	return prefix + "\n\n" + rendered + "\n" + suffix
+}
+
+func evidenceStrategyChecklistInsertOffset(content string) int {
+	if !strings.HasPrefix(content, "---\n") {
+		return 0
+	}
+
+	remaining := content[len("---\n"):]
+	end := strings.Index(remaining, "\n---")
+	if end < 0 {
+		return 0
+	}
+
+	return len("---\n") + end + len("\n---")
 }
 
 func requireEvidenceStrategyChecklistItems(
