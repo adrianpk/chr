@@ -59,6 +59,7 @@ type ReviewProviderTargetConfig struct {
 // WorkConfig describes a package boundary value.
 type WorkConfig struct {
 	BranchPolicy WorkBranchPolicy
+	Workspace    WorkWorkspaceConfig
 }
 
 // EvidenceConfig describes a package boundary value.
@@ -99,6 +100,23 @@ type WorkBranchPolicy struct {
 
 // WorkBranchPolicyMode defines a package boundary type.
 type WorkBranchPolicyMode string
+
+// WorkWorkspaceConfig describes workspace ownership for agent execution.
+type WorkWorkspaceConfig struct {
+	Mode            WorkWorkspaceMode
+	WorktreeRoot    string
+	WorktreeBase    WorktreeBasePolicy
+	WorktreeCleanup WorktreeCleanupPolicy
+}
+
+// WorkWorkspaceMode defines a package boundary type.
+type WorkWorkspaceMode string
+
+// WorktreeBasePolicy defines a package boundary type.
+type WorktreeBasePolicy string
+
+// WorktreeCleanupPolicy defines a package boundary type.
+type WorktreeCleanupPolicy string
 
 // TelegramNotificationConfig describes a package boundary value.
 type TelegramNotificationConfig struct {
@@ -425,6 +443,20 @@ func setWorkConfigValue(config *WorkConfig, key, value string) {
 		config.BranchPolicy.AllowSafeRepair = configBoolValue(value)
 	case "allow_branch_creation":
 		config.BranchPolicy.AllowBranchCreation = configBoolValue(value)
+	case "workspace_mode":
+		if value != "" {
+			config.Workspace.Mode = WorkWorkspaceMode(value)
+		}
+	case "worktree_root":
+		setString(&config.Workspace.WorktreeRoot, value)
+	case "worktree_base":
+		if value != "" {
+			config.Workspace.WorktreeBase = WorktreeBasePolicy(value)
+		}
+	case "worktree_cleanup":
+		if value != "" {
+			config.Workspace.WorktreeCleanup = WorktreeCleanupPolicy(value)
+		}
 	}
 }
 
