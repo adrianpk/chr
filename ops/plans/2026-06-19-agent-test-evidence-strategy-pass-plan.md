@@ -2,7 +2,7 @@
 
 Status: active
 
-Active Slice: Slice 4 - review evidence gate
+Active Slice: Slice 5 - gherkin test policy
 
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 
