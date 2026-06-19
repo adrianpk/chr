@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 2: worktree state service
+Active Slice: none
 
 Tracker: `ops/trackers/2026-06-19-isolated-ticket-worktrees-tracker.md`
 

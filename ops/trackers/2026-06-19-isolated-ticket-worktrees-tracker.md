@@ -11,7 +11,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | workspace execution config | delivered | `feat/slice-1-workspace-execution-config` | `#328` | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
-| Slice 2 | worktree state service | reviewing | `feat/slice-2-worktree-state-service` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
+| Slice 2 | worktree state service | delivered | `feat/slice-2-worktree-state-service` | `#329` | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
 | Slice 3 | readiness workspace split | planned | `feat/slice-3-readiness-workspace-split` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
 | Slice 4 | runtime workspace mount | planned | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
 | Slice 5 | execution workspace results | planned | `feat/slice-5-execution-workspace-results` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |

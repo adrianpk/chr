@@ -1,11 +1,11 @@
 # Slice 2: Worktree State Service
 
-Status: reviewing
+Status: delivered
 Slicing: Isolated Ticket Worktrees
 Plan: `ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md`
 Tracker: `ops/trackers/2026-06-19-isolated-ticket-worktrees-tracker.md`
 Branch: `feat/slice-2-worktree-state-service`
-PR: pending
+PR: `#329`
 
 ## Purpose
 
