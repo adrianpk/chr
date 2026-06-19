@@ -1,6 +1,6 @@
 # Agent Test/Evidence Strategy Pass Tracker
 
-Status: planned
+Status: active
 
 Plan: `ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md`
 
@@ -12,7 +12,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | evidence strategy config | planned | `feat/slice-1-evidence-strategy-config` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md` |
+| Slice 1 | evidence strategy config | active | `feat/slice-1-evidence-strategy-config` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md` |
 | Slice 2 | evidence checklist writer | planned | `feat/slice-2-evidence-checklist-writer` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-2-evidence-checklist-writer.md` |
 | Slice 3 | worker strategy context | planned | `feat/slice-3-worker-strategy-context` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-3-worker-strategy-context.md` |
 | Slice 4 | review evidence gate | planned | `feat/slice-4-review-evidence-gate` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-4-review-evidence-gate.md` |
@@ -99,4 +99,3 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
   slicing.
 - The ticket checklist is the primary operational source; runtime reports are
   secondary trace evidence.
-

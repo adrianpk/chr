@@ -2,7 +2,7 @@
 
 Status: planned
 
-Active Slice: none
+Active Slice: Slice 1 - evidence strategy config
 
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 
@@ -212,4 +212,3 @@ Tasks:
 - T6.5 Add or update QA fixture coverage for no-test docs work, behavior work
   with Gherkin, and blocked validation.
 - T6.6 Add the slice implementation report and validation evidence.
-
