@@ -154,6 +154,14 @@ func testExecutionRecord(now time.Time) ExecutionRecord {
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
+		Workspace: ExecutionWorkspaceRef{
+			Mode:                  WorkWorkspaceModeWorktree,
+			ProjectCheckoutDir:    "/tmp/project",
+			ExecutionWorkspaceDir: "/tmp/project/.chc/user/worktrees/CHC-1",
+			BaseRef:               "origin/dev",
+			BaseSHA:               "abc123",
+			TicketBranch:          "chc/CHC-1",
+		},
 		Artifacts: ExecutionArtifacts{
 			RunDir:     "/tmp/project/.chc/user/runtime/runs/exec-1",
 			ResultPath: "/tmp/project/.chc/user/runtime/runs/exec-1/result.json",

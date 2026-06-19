@@ -84,6 +84,12 @@ func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record 
 		record.Runtime.DockerfilePath,
 		record.Runtime.ContainerWorkdir,
 		record.Runtime.ValidationCommand,
+		string(record.Workspace.Mode),
+		record.Workspace.ProjectCheckoutDir,
+		record.Workspace.ExecutionWorkspaceDir,
+		record.Workspace.BaseRef,
+		record.Workspace.BaseSHA,
+		record.Workspace.TicketBranch,
 		record.Artifacts.RunDir,
 		record.Artifacts.ResultPath,
 		record.Artifacts.LogPath,
@@ -117,6 +123,12 @@ func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record 
 		record.Runtime.DockerfilePath,
 		record.Runtime.ContainerWorkdir,
 		record.Runtime.ValidationCommand,
+		string(record.Workspace.Mode),
+		record.Workspace.ProjectCheckoutDir,
+		record.Workspace.ExecutionWorkspaceDir,
+		record.Workspace.BaseRef,
+		record.Workspace.BaseSHA,
+		record.Workspace.TicketBranch,
 		record.Artifacts.RunDir,
 		record.Artifacts.ResultPath,
 		record.Artifacts.LogPath,
@@ -249,10 +261,17 @@ type executionScanner interface {
 	Scan(dest ...any) error
 }
 
+type executionRecordTimes struct {
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	StartedAt  *time.Time
+	FinishedAt *time.Time
+}
+
 func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
 	var record ExecutionRecord
 
-	var status string
+	var status, workspaceMode string
 
 	var createdAt, updatedAt string
 
@@ -268,6 +287,12 @@ func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
 		&record.Runtime.DockerfilePath,
 		&record.Runtime.ContainerWorkdir,
 		&record.Runtime.ValidationCommand,
+		&workspaceMode,
+		&record.Workspace.ProjectCheckoutDir,
+		&record.Workspace.ExecutionWorkspaceDir,
+		&record.Workspace.BaseRef,
+		&record.Workspace.BaseSHA,
+		&record.Workspace.TicketBranch,
 		&record.Artifacts.RunDir,
 		&record.Artifacts.ResultPath,
 		&record.Artifacts.LogPath,
@@ -282,48 +307,69 @@ func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
 		return ExecutionRecord{}, fmt.Errorf("scan execution: %w", err)
 	}
 
-	parsedCreatedAt, err := parseProjectTime(createdAt)
-	if err != nil {
-		return ExecutionRecord{}, err
-	}
-
-	parsedUpdatedAt, err := parseProjectTime(updatedAt)
+	times, err := parseExecutionRecordTimes(createdAt, updatedAt, startedAt, finishedAt)
 	if err != nil {
 		return ExecutionRecord{}, err
 	}
 
 	record.Status = ExecutionStatus(status)
-	record.CreatedAt = parsedCreatedAt
-	record.UpdatedAt = parsedUpdatedAt
-
-	record.StartedAt, err = parseOptionalExecutionTime(startedAt)
-	if err != nil {
-		return ExecutionRecord{}, err
-	}
-
-	record.FinishedAt, err = parseOptionalExecutionTime(finishedAt)
-	if err != nil {
-		return ExecutionRecord{}, err
-	}
+	record.Workspace.Mode = WorkWorkspaceMode(workspaceMode)
+	record.CreatedAt = times.CreatedAt
+	record.UpdatedAt = times.UpdatedAt
+	record.StartedAt = times.StartedAt
+	record.FinishedAt = times.FinishedAt
 
 	return record, nil
+}
+
+func parseExecutionRecordTimes(createdAt, updatedAt string, startedAt, finishedAt sql.NullString) (executionRecordTimes, error) {
+	parsedCreatedAt, err := parseProjectTime(createdAt)
+	if err != nil {
+		return executionRecordTimes{}, err
+	}
+
+	parsedUpdatedAt, err := parseProjectTime(updatedAt)
+	if err != nil {
+		return executionRecordTimes{}, err
+	}
+
+	parsedStartedAt, err := parseOptionalExecutionTime(startedAt)
+	if err != nil {
+		return executionRecordTimes{}, err
+	}
+
+	parsedFinishedAt, err := parseOptionalExecutionTime(finishedAt)
+	if err != nil {
+		return executionRecordTimes{}, err
+	}
+
+	return executionRecordTimes{
+		CreatedAt:  parsedCreatedAt,
+		UpdatedAt:  parsedUpdatedAt,
+		StartedAt:  parsedStartedAt,
+		FinishedAt: parsedFinishedAt,
+	}, nil
 }
 
 func insertExecutionSQL() string {
 	return `INSERT INTO execution_records (
     id, project_id, ticket_key, ticket_path, status,
     runtime_image, runtime_dockerfile_path, runtime_container_workdir,
-    runtime_validation_command, artifact_run_dir, artifact_result_path,
+    runtime_validation_command, workspace_mode, workspace_project_checkout_dir,
+    workspace_execution_dir, workspace_base_ref, workspace_base_sha,
+    workspace_ticket_branch, artifact_run_dir, artifact_result_path,
     artifact_log_path, artifact_validation_path, failure_reason,
     created_at, started_at, finished_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 }
 
 func updateExecutionSQL() string {
 	return `UPDATE execution_records
 SET project_id = ?, ticket_key = ?, ticket_path = ?, status = ?,
     runtime_image = ?, runtime_dockerfile_path = ?, runtime_container_workdir = ?,
-    runtime_validation_command = ?, artifact_run_dir = ?, artifact_result_path = ?,
+    runtime_validation_command = ?, workspace_mode = ?, workspace_project_checkout_dir = ?,
+    workspace_execution_dir = ?, workspace_base_ref = ?, workspace_base_sha = ?,
+    workspace_ticket_branch = ?, artifact_run_dir = ?, artifact_result_path = ?,
     artifact_log_path = ?, artifact_validation_path = ?, failure_reason = ?,
     created_at = ?, started_at = ?, finished_at = ?, updated_at = ?
 WHERE id = ?`
@@ -332,7 +378,9 @@ WHERE id = ?`
 func selectExecutionSQL() string {
 	return `SELECT id, project_id, ticket_key, ticket_path, status,
     runtime_image, runtime_dockerfile_path, runtime_container_workdir,
-    runtime_validation_command, artifact_run_dir, artifact_result_path,
+    runtime_validation_command, workspace_mode, workspace_project_checkout_dir,
+    workspace_execution_dir, workspace_base_ref, workspace_base_sha,
+    workspace_ticket_branch, artifact_run_dir, artifact_result_path,
     artifact_log_path, artifact_validation_path, failure_reason,
     created_at, started_at, finished_at, updated_at
 FROM execution_records`

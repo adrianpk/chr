@@ -70,6 +70,12 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	assertColumnExists(t, db, "indexed_tickets", "merge_commit")
 	assertColumnExists(t, db, "indexed_tickets", "merged_at")
 	assertColumnExists(t, db, "indexed_tickets", "merge_blocker")
+	assertColumnExists(t, db, "execution_records", "workspace_mode")
+	assertColumnExists(t, db, "execution_records", "workspace_project_checkout_dir")
+	assertColumnExists(t, db, "execution_records", "workspace_execution_dir")
+	assertColumnExists(t, db, "execution_records", "workspace_base_ref")
+	assertColumnExists(t, db, "execution_records", "workspace_base_sha")
+	assertColumnExists(t, db, "execution_records", "workspace_ticket_branch")
 	assertMigrationApplied(t, db, "20260518000001", "create_projects", "2026-05-18T12:30:00Z")
 }
 
@@ -150,6 +156,9 @@ func testMigrationFS() fstest.MapFS {
 		},
 		"assets/migration/sqlite/20260602000010-add_ticket_merge_metadata.sql": {
 			Data: []byte(testAddTicketMergeMetadataMigration()),
+		},
+		"assets/migration/sqlite/20260619000011-add_execution_workspace_metadata.sql": {
+			Data: []byte(testAddExecutionWorkspaceMetadataMigration()),
 		},
 	}
 }
@@ -480,6 +489,31 @@ ON indexed_tickets (project_id, merge_state);
 
 -- +migrate Down
 DROP INDEX IF EXISTS indexed_tickets_project_merge_state_idx;
+`
+}
+
+func testAddExecutionWorkspaceMetadataMigration() string {
+	return `-- +migrate Up
+ALTER TABLE execution_records
+ADD COLUMN workspace_mode text NOT NULL DEFAULT '';
+
+ALTER TABLE execution_records
+ADD COLUMN workspace_project_checkout_dir text NOT NULL DEFAULT '';
+
+ALTER TABLE execution_records
+ADD COLUMN workspace_execution_dir text NOT NULL DEFAULT '';
+
+ALTER TABLE execution_records
+ADD COLUMN workspace_base_ref text NOT NULL DEFAULT '';
+
+ALTER TABLE execution_records
+ADD COLUMN workspace_base_sha text NOT NULL DEFAULT '';
+
+ALTER TABLE execution_records
+ADD COLUMN workspace_ticket_branch text NOT NULL DEFAULT '';
+
+-- +migrate Down
+SELECT 1;
 `
 }
 
