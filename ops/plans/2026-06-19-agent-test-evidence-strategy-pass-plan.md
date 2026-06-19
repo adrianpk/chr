@@ -1,8 +1,8 @@
 # Agent Test/Evidence Strategy Pass Plan
 
-Status: planned
+Status: active
 
-Active Slice: Slice 1 - evidence strategy config
+Active Slice: none
 
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 

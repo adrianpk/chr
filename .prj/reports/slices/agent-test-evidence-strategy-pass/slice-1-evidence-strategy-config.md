@@ -1,11 +1,11 @@
 # Slice 1: Evidence Strategy Config
 
-Status: reviewing
+Status: delivered
 Slicing: Agent Test/Evidence Strategy Pass
 Plan: `ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md`
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 Branch: `feat/slice-1-evidence-strategy-config`
-PR: pending
+PR: `#320`
 
 ## Purpose
 
