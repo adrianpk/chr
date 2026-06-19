@@ -258,6 +258,12 @@ type TicketReviewReferenceRequest struct {
 	Ref    *core.TicketReviewRef
 }
 
+// TicketEvidenceStrategyChecklistRequest describes a ticket strategy checklist write.
+type TicketEvidenceStrategyChecklistRequest struct {
+	Key       string
+	Checklist core.EvidenceStrategyChecklist
+}
+
 func (s service) AddSelectedTicketComment(ticketKey string) (TicketOperationResult, error) {
 	return s.AddTicketComment(TicketCommentRequest{
 		Key:    ticketKey,
@@ -316,6 +322,37 @@ func (s service) AttachTicketReviewReference(request TicketReviewReferenceReques
 
 	return TicketOperationResult{
 		Message: "Attached review metadata to ticket " + ticket.Key + ".",
+		Tickets: tickets,
+	}, nil
+}
+
+func (s service) UpsertTicketEvidenceStrategyChecklist(
+	request TicketEvidenceStrategyChecklistRequest,
+) (TicketOperationResult, error) {
+	ticket, err := s.ticketByKey(request.Key)
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	err = core.NewTicketEvidenceStrategyChecklistWriter().UpsertEvidenceStrategyChecklist(
+		s.ctx,
+		core.UpsertTicketEvidenceStrategyChecklistOptions{
+			Path:      ticket.Path,
+			Checklist: request.Checklist,
+			UpdatedAt: time.Now().UTC(),
+		},
+	)
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	tickets, err := s.listProjectTickets()
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	return TicketOperationResult{
+		Message: "Updated evidence strategy checklist for ticket " + ticket.Key + ".",
 		Tickets: tickets,
 	}, nil
 }
