@@ -16,7 +16,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice 4 | runtime workspace mount | delivered | `feat/slice-4-runtime-workspace-mount` | `#331` | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
 | Slice 5 | execution workspace results | delivered | `feat/slice-5-execution-workspace-results` | `#332` | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
 | Slice 6 | branch and PR lifecycle | delivered | `feat/slice-6-branch-and-pr-lifecycle` | `#333` | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
-| Slice 7 | review repair and cleanup | reviewing | `feat/slice-7-review-repair-and-cleanup` | `#334` | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
+| Slice 7 | review repair and cleanup | delivered | `feat/slice-7-review-repair-and-cleanup` | `#334` | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
 | Slice 8 | docs and QA proving | planned | `feat/slice-8-docs-and-qa-proving` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
 
 ## Slice 1 Tasks
@@ -150,6 +150,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - Slice 7: `go test ./internal/app -run 'TestTicketMerge|TestServiceStartAgentWorkTicketReusesReviewRepairBranch|TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace|TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree|TestWorkDoctor'` (pass)
 - Slice 7: `make lint-strict` (pass)
 - Slice 7: `make verify` (pass)
+- Slice 7 closure: merged into `dev` as PR `#334`.
 
 ## Open Decisions
 
