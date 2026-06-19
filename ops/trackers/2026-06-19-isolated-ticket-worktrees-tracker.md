@@ -13,7 +13,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice 1 | workspace execution config | delivered | `feat/slice-1-workspace-execution-config` | `#328` | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
 | Slice 2 | worktree state service | delivered | `feat/slice-2-worktree-state-service` | `#329` | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
 | Slice 3 | readiness workspace split | delivered | `feat/slice-3-readiness-workspace-split` | `#330` | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
-| Slice 4 | runtime workspace mount | planned | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
+| Slice 4 | runtime workspace mount | reviewing | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
 | Slice 5 | execution workspace results | planned | `feat/slice-5-execution-workspace-results` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
 | Slice 6 | branch and PR lifecycle | planned | `feat/slice-6-branch-and-pr-lifecycle` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
 | Slice 7 | review repair and cleanup | planned | `feat/slice-7-review-repair-and-cleanup` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
@@ -62,14 +62,14 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Extend `RuntimePlan` with execution workspace host path and workspace mode metadata. | pending | pending | Must preserve current path display in project mode. |
-| T4.2 | Update runtime mount planning to use `ExecutionWorkspaceDir` as the writable project workspace mount source. | pending | pending | The Docker mount source changes only in worktree mode. |
-| T4.3 | Preserve existing project-mode mount output exactly where possible. | pending | pending | Regression protection. |
-| T4.4 | Update context artifact link rendering so container paths are derived from the execution workspace. | pending | pending | Container paths should remain stable. |
-| T4.5 | Add worker context fields for project checkout, execution workspace, base ref, base SHA, and ticket branch. | pending | pending | Helps agents and humans understand boundary. |
-| T4.6 | Update runtime validation output to show the execution workspace. | pending | pending | Useful before actual runs. |
-| T4.7 | Add harness invocation and runtime plan tests for project and worktree modes. | pending | pending | Include Docker mount assertions. |
-| T4.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T4.1 | Extend `RuntimePlan` with execution workspace host path and workspace mode metadata. | done | `8e3ee70` | Added ticket branch and workspace base metadata to runtime planning. |
+| T4.2 | Update runtime mount planning to use `ExecutionWorkspaceDir` as the writable project workspace mount source. | done | `be3518b` | Worktree mode mounts the execution workspace at the container workdir. |
+| T4.3 | Preserve existing project-mode mount output exactly where possible. | done | `21932e9` | Project mode ignores alternate execution workspace input and mounts the project checkout. |
+| T4.4 | Update context artifact link rendering so container paths are derived from the execution workspace. | done | `20d57fd` | Runtime artifacts and container links are rooted at the mounted host workspace. |
+| T4.5 | Add worker context fields for project checkout, execution workspace, base ref, base SHA, and ticket branch. | done | `47c6e9d` | Worker context includes a dedicated workspace section. |
+| T4.6 | Update runtime validation output to show the execution workspace. | done | `b930cd7` | Runtime validation prints and checks the execution workspace. |
+| T4.7 | Add harness invocation and runtime plan tests for project and worktree modes. | done | `4503487` | Added Docker validation command coverage for worktree mode. |
+| T4.8 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 5 Tasks
 
@@ -133,6 +133,8 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - Slice 3: `go test ./internal/core -run 'WorkReadiness|WorkSelectionPreflight|Worktree' && go test ./internal/app -run 'WorkDoctor|PreviewAgentWork|StartAgentWork' && go test ./internal/tui -run 'WorkReadiness|Dash|Model'` (pass)
 - Slice 3: `make lint-strict` (pass)
 - Slice 3: `make verify` (pass)
+- Slice 4: `go test ./internal/core -run 'TestPlanRuntime|TestNewHarnessInvocation|TestMaterializeCodexWorkerContextForExecution|TestRenderMainContextPackage|TestValidateRuntime' && go test ./internal/app -run 'TestRuntimeValidatePrintsRuntimePlan'` (pass)
+- Slice 4: `make verify` (pass)
 
 ## Open Decisions
 
@@ -155,3 +157,4 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
   integration ref is the default operational base.
 - The first implementation should prefer clear diagnostics over automatic
   repair whenever Git state is ambiguous.
+- Slice 8 must update the changelog for the isolated ticket worktrees cycle.
