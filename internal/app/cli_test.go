@@ -3843,6 +3843,62 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	}
 }
 
+func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticket := testTicketWithReviewRef()
+	ticket.Body = testApplyResultTicketBody(t)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
+	worktreeDir := newApplyResultGitRepo(t)
+	writeGateCLIFile(t, projectDir, "README.md", "dirty user checkout\n")
+	writeGateCLIFile(t, worktreeDir, filepath.Join("internal", "core", "worktree.go"), "package core\n")
+
+	addProject(t, devRoot, "example", projectDir)
+
+	record := testApplyResultExecutionRecord(projectDir, core.ExecutionStatusSucceeded, "")
+	record.Workspace = core.ExecutionWorkspaceRef{
+		Mode:                  core.WorkWorkspaceModeWorktree,
+		ProjectCheckoutDir:    projectDir,
+		ExecutionWorkspaceDir: worktreeDir,
+		BaseRef:               "origin/dev",
+		BaseSHA:               "abc123",
+		TicketBranch:          "chc/CHC-1",
+	}
+	runDir := filepath.Join(worktreeDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-apply")
+	record.Artifacts = core.ExecutionArtifacts{
+		RunDir:         runDir,
+		ResultPath:     filepath.Join(runDir, "result.json"),
+		LogPath:        filepath.Join(runDir, "runtime.log"),
+		ValidationPath: filepath.Join(runDir, "validation.log"),
+	}
+	createApplyResultExecutionRecord(t, devRoot, record)
+	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"apply-result",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		record.ID,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket apply-result returned error: %v", err)
+	}
+
+	content := readFile(t, ticketPath)
+	if !strings.Contains(content, "internal/core/worktree.go") {
+		t.Fatalf("ticket content missing worktree changed file:\n%s", content)
+	}
+
+	if strings.Contains(content, "README.md") {
+		t.Fatalf("ticket content includes user checkout changed file:\n%s", content)
+	}
+}
+
 func TestTicketApplyResultBlocksMissingEvidenceStrategy(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
@@ -6736,6 +6792,16 @@ func createApplyResultExecution(
 ) core.ExecutionRecord {
 	t.Helper()
 
+	record := testApplyResultExecutionRecord(projectDir, status, failureReason)
+
+	createApplyResultExecutionRecord(t, devRoot, record)
+
+	return record
+}
+
+func createApplyResultExecutionRecord(t *testing.T, devRoot string, record core.ExecutionRecord) {
+	t.Helper()
+
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
 		DevMode: true,
 		DevRoot: devRoot,
@@ -6756,14 +6822,10 @@ func createApplyResultExecution(
 		}
 	}()
 
-	record := testApplyResultExecutionRecord(projectDir, status, failureReason)
-
 	err = repository.CreateExecution(t.Context(), record)
 	if err != nil {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
-
-	return record
 }
 
 func testApplyResultExecutionRecord(
@@ -6823,6 +6885,20 @@ func writeApplyResultFile(
 	if err != nil {
 		t.Fatalf("write result file: %v", err)
 	}
+}
+
+func newApplyResultGitRepo(t *testing.T) string {
+	t.Helper()
+
+	dir := t.TempDir()
+	cmd := exec.Command("git", "-C", dir, "init")
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git init failed: %v\n%s", err, string(output))
+	}
+
+	return dir
 }
 
 func readFile(t *testing.T, path string) string {
