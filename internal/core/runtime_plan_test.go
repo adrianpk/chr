@@ -218,36 +218,40 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	if plan.ProjectCheckoutDir != dir {
-		t.Fatalf("ProjectCheckoutDir = %q, want %q", plan.ProjectCheckoutDir, dir)
+	wantArtifactDir := filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs")
+	wantFields := map[string]string{
+		"ProjectCheckoutDir":    dir,
+		"ExecutionWorkspaceDir": executionWorkspaceDir,
+		"WorkspaceDir":          filepath.Join(executionWorkspaceDir, ".chc"),
+		"ArtifactDir":           wantArtifactDir,
+		"ResultPath":            filepath.Join(wantArtifactDir, "result.json"),
+		"WorkspaceMode":         string(WorkWorkspaceModeWorktree),
+		"TicketKey":             "CHC-1",
+		"TicketBranch":          "chc/CHC-1",
+		"WorkspaceBaseRef":      "origin/dev",
+		"WorkspaceBaseSHA":      "abc123",
+		"MountSource":           executionWorkspaceDir,
+		"MountDescription":      "execution workspace",
+	}
+	gotFields := map[string]string{
+		"ProjectCheckoutDir":    plan.ProjectCheckoutDir,
+		"ExecutionWorkspaceDir": plan.ExecutionWorkspaceDir,
+		"WorkspaceDir":          plan.WorkspaceDir,
+		"ArtifactDir":           plan.ArtifactDir,
+		"ResultPath":            plan.ResultPath,
+		"WorkspaceMode":         string(plan.WorkspaceMode),
+		"TicketKey":             plan.TicketKey,
+		"TicketBranch":          plan.TicketBranch,
+		"WorkspaceBaseRef":      plan.WorkspaceBaseRef,
+		"WorkspaceBaseSHA":      plan.WorkspaceBaseSHA,
+		"MountSource":           plan.Mounts[0].Source,
+		"MountDescription":      plan.Mounts[0].Description,
 	}
 
-	if plan.ExecutionWorkspaceDir != executionWorkspaceDir {
-		t.Fatalf("ExecutionWorkspaceDir = %q, want %q", plan.ExecutionWorkspaceDir, executionWorkspaceDir)
-	}
-
-	if plan.WorkspaceMode != WorkWorkspaceModeWorktree {
-		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, WorkWorkspaceModeWorktree)
-	}
-
-	if plan.TicketKey != "CHC-1" {
-		t.Fatalf("TicketKey = %q, want CHC-1", plan.TicketKey)
-	}
-
-	if plan.TicketBranch != "chc/CHC-1" {
-		t.Fatalf("TicketBranch = %q, want chc/CHC-1", plan.TicketBranch)
-	}
-
-	if plan.WorkspaceBaseRef != "origin/dev" {
-		t.Fatalf("WorkspaceBaseRef = %q, want origin/dev", plan.WorkspaceBaseRef)
-	}
-
-	if plan.WorkspaceBaseSHA != "abc123" {
-		t.Fatalf("WorkspaceBaseSHA = %q, want abc123", plan.WorkspaceBaseSHA)
-	}
-
-	if plan.Mounts[0].Source != dir {
-		t.Fatalf("Mount source = %q, want project checkout %q", plan.Mounts[0].Source, dir)
+	for name, want := range wantFields {
+		if gotFields[name] != want {
+			t.Fatalf("%s = %q, want %q", name, gotFields[name], want)
+		}
 	}
 }
 

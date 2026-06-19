@@ -108,7 +108,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		DockerfilePath:        dockerfilePath,
 		Image:                 config.Image,
 		ContainerWorkdir:      config.Workdir,
-		Mounts:                runtimeMounts(projectDir, config.Workdir),
+		Mounts:                runtimeMounts(projectDir, executionWorkspaceDir, workspace.Mode, config.Workdir),
 		ArtifactDir:           artifactDir,
 		RunArtifactDir:        runArtifactDir,
 		WorkerContextPath:     filepath.Join(runArtifactDir, "context.md"),
@@ -176,13 +176,21 @@ func resolveProjectPath(projectDir, configuredPath string) string {
 	return filepath.Join(projectDir, path)
 }
 
-func runtimeMounts(projectDir, workdir string) []RuntimeMount {
+func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceMode, workdir string) []RuntimeMount {
+	mountSource := projectDir
+	mountDescription := "project workspace"
+
+	if mode == WorkWorkspaceModeWorktree {
+		mountSource = executionWorkspaceDir
+		mountDescription = "execution workspace"
+	}
+
 	mounts := []RuntimeMount{
 		{
-			Source:      projectDir,
+			Source:      mountSource,
 			Target:      cleanContainerPath(workdir),
 			ReadOnly:    false,
-			Description: "project workspace",
+			Description: mountDescription,
 		},
 	}
 
