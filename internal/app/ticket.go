@@ -1387,12 +1387,18 @@ func ticketExecutionReportEvidenceChecklist(path string) (*core.EvidenceStrategy
 		return nil, "", fmt.Errorf("read evidence strategy ticket: %w", err)
 	}
 
-	checklist, err := core.ParseEvidenceStrategyChecklist(string(content))
+	checklist, checklistError := ticketExecutionReportEvidenceChecklistContent(string(content))
+
+	return checklist, checklistError, nil
+}
+
+func ticketExecutionReportEvidenceChecklistContent(content string) (*core.EvidenceStrategyChecklist, string) {
+	checklist, err := core.ParseEvidenceStrategyChecklist(content)
 	if err != nil {
-		return nil, err.Error(), nil
+		return nil, err.Error()
 	}
 
-	return &checklist, "", nil
+	return &checklist, ""
 }
 
 func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun bool) error {

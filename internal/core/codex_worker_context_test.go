@@ -241,7 +241,7 @@ func TestRenderCodexWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) 
 	}
 
 	opts := testCodexWorkerContextOptions("/tmp/context.md")
-	opts.Evidence = &CodexWorkerEvidenceStrategyContext{
+	opts.Evidence = &WorkerEvidenceContext{
 		Config:    DefaultEvidenceStrategyConfig(),
 		Checklist: &checklist,
 	}
@@ -292,7 +292,7 @@ func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testi
 	}
 
 	opts := testCodexWorkerContextOptions("/tmp/context.md")
-	opts.Evidence = &CodexWorkerEvidenceStrategyContext{
+	opts.Evidence = &WorkerEvidenceContext{
 		Config:    DefaultEvidenceStrategyConfig(),
 		Checklist: &checklist,
 	}

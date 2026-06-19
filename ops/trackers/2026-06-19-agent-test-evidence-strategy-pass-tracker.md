@@ -45,12 +45,12 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Extend context materialization with an Evidence Strategy section. | pending | pending | Inline worker pass, no second container. |
-| T3.2 | Include current evidence config and parsed checklist state in the worker context. | pending | pending | Existing user edits are strong input. |
-| T3.3 | Update the worker result contract to require evidence summary metadata. | pending | pending | Keep result envelope machine-readable. |
-| T3.4 | Copy strategy and evidence summary into runtime reports when enabled. | pending | pending | Reports are trace evidence, not primary state. |
-| T3.5 | Add context and result-contract tests for docs-only and behavior-change tickets. | pending | pending | Proves no-test and required-evidence paths. |
-| T3.6 | Add the slice implementation report and validation evidence. | pending | pending | Report required before PR. |
+| T3.1 | Extend context materialization with an Evidence Strategy section. | done | `47b243c` | Inline worker pass, no second container. |
+| T3.2 | Include current evidence config and parsed checklist state in the worker context. | done | `c76a8f5` | Existing user edits are strong input. |
+| T3.3 | Update the worker result contract to require evidence summary metadata. | done | `38526a4` | Result envelope now requires evidence summary metadata. |
+| T3.4 | Copy strategy and evidence summary into runtime reports when enabled. | done | `69a5ef5` | Reports copy strategy trace evidence when configured. |
+| T3.5 | Add context and result-contract tests for docs-only and behavior-change tickets. | done | `cd8f8de` | Proves no-test and required-evidence paths. |
+| T3.6 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 4 Tasks
 
@@ -95,6 +95,14 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 - Slice 2: `golangci-lint run --timeout=5m ./internal/core ./internal/app` (pass)
 - Slice 2: `make verify` (pass)
 - Slice 2: PR `#321` merged to `dev` on 2026-06-19.
+- Slice 3: `go test ./internal/core -run 'ExecutionResult|CodexWorkerContext|ExecutionRunner|ExecutionReport|ReviewHandoff|ResultApplication|PreviousAttempt|GateEvidenceClassifier'` (pass)
+- Slice 3: `go test ./internal/app -run 'Ticket(Start|ApplyResult|Loop)|ApplyResult|TicketStart'` (pass)
+- Slice 3: `go test ./internal/core -run 'ExecutionReport|ExecutionResult'` (pass)
+- Slice 3: `go test ./internal/app -run 'TicketApplyResult'` (pass)
+- Slice 3: `go test ./internal/core -run 'CodexWorkerContext|ExecutionResult'` (pass)
+- Slice 3: `go test ./internal/core ./internal/app` (pass)
+- Slice 3: `make lint-strict` (pass)
+- Slice 3: `make verify` (pass)
 
 ## Notes
 

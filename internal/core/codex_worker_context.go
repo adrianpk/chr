@@ -25,7 +25,7 @@ type MaterializeCodexWorkerContextOptions struct {
 	LogPath        string
 	ValidationPath string
 	RepairHandoff  *CodexWorkerRepairHandoff
-	Evidence       *CodexWorkerEvidenceStrategyContext
+	Evidence       *WorkerEvidenceContext
 }
 
 // CodexWorkerRepairHandoff describes a package boundary value.
@@ -38,8 +38,8 @@ type CodexWorkerRepairHandoff struct {
 	ReviewRound       int
 }
 
-// CodexWorkerEvidenceStrategyContext describes ticket evidence strategy input.
-type CodexWorkerEvidenceStrategyContext struct {
+// WorkerEvidenceContext describes ticket evidence strategy input.
+type WorkerEvidenceContext struct {
 	Config         EvidenceStrategyConfig
 	Checklist      *EvidenceStrategyChecklist
 	ChecklistError string
@@ -63,7 +63,7 @@ func MaterializeCodexWorkerContextForExecution(
 		return err
 	}
 
-	evidence, err := codexWorkerEvidenceStrategyContext(ctx, plan.ProjectDir, record.TicketPath)
+	evidence, err := loadWorkerEvidence(ctx, plan.ProjectDir, record.TicketPath)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func writeCodexWorkerEvidenceStrategy(output *strings.Builder, opts MaterializeC
 	output.WriteString("The ticket checklist is the operational source of truth.\n\n")
 }
 
-func writeCodexWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *CodexWorkerEvidenceStrategyContext) {
+func writeCodexWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *WorkerEvidenceContext) {
 	if evidence == nil {
 		return
 	}
@@ -203,7 +203,7 @@ func writeCodexWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *C
 	output.WriteString("\n\n")
 }
 
-func writeCodexWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence *CodexWorkerEvidenceStrategyContext) {
+func writeCodexWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence *WorkerEvidenceContext) {
 	if evidence == nil {
 		return
 	}
@@ -226,6 +226,7 @@ func writeCodexWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence
 	}
 
 	output.WriteString("- status: present\n\n")
+
 	for _, label := range EvidenceStrategyChecklistLabels() {
 		item, ok := evidence.Checklist.Item(label)
 		if !ok {
@@ -288,11 +289,7 @@ func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCode
 	output.WriteString("Use the remote review comments as the source of detailed findings. Do not duplicate remote comments into the ticket.\n\n")
 }
 
-func codexWorkerEvidenceStrategyContext(
-	ctx context.Context,
-	projectDir string,
-	ticketPath string,
-) (*CodexWorkerEvidenceStrategyContext, error) {
+func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*WorkerEvidenceContext, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -307,18 +304,22 @@ func codexWorkerEvidenceStrategyContext(
 		return nil, fmt.Errorf("read evidence strategy ticket: %w", err)
 	}
 
-	checklist, err := ParseEvidenceStrategyChecklist(string(content))
+	checklist, checklistError := parseWorkerEvidenceChecklist(string(content))
+
+	return &WorkerEvidenceContext{
+		Config:         config.Evidence.Strategy,
+		Checklist:      checklist,
+		ChecklistError: checklistError,
+	}, nil
+}
+
+func parseWorkerEvidenceChecklist(content string) (*EvidenceStrategyChecklist, string) {
+	checklist, err := ParseEvidenceStrategyChecklist(content)
 	if err != nil {
-		return &CodexWorkerEvidenceStrategyContext{
-			Config:         config.Evidence.Strategy,
-			ChecklistError: err.Error(),
-		}, nil
+		return nil, err.Error()
 	}
 
-	return &CodexWorkerEvidenceStrategyContext{
-		Config:    config.Evidence.Strategy,
-		Checklist: &checklist,
-	}, nil
+	return &checklist, ""
 }
 
 func codexWorkerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*CodexWorkerRepairHandoff, error) {

@@ -109,7 +109,26 @@ func TestNewExecutionReportRejectsMismatchedResult(t *testing.T) {
 
 func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	result := ExecutionResult{
+	result := testExecutionReportRichEvidenceResult(record)
+	checklist := testEvidenceStrategyChecklistModel()
+
+	report, err := NewExecutionReport(ExecutionReportOptions{
+		Execution:         record,
+		Result:            &result,
+		IncludeEvidence:   true,
+		EvidenceChecklist: &checklist,
+	})
+	if err != nil {
+		t.Fatalf("NewExecutionReport returned error: %v", err)
+	}
+
+	markdown := RenderExecutionReportMarkdown(report)
+
+	assertExecutionReportMarkdownIncludesEvidenceSections(t, markdown, record)
+}
+
+func testExecutionReportRichEvidenceResult(record ExecutionRecord) ExecutionResult {
+	return ExecutionResult{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
 		Status:      ExecutionResultStatusSucceeded,
@@ -125,19 +144,10 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 			{Path: "internal/core/execution_report.go", Summary: "add report model"},
 		},
 	}
-	checklist := testEvidenceStrategyChecklistModel()
+}
 
-	report, err := NewExecutionReport(ExecutionReportOptions{
-		Execution:         record,
-		Result:            &result,
-		IncludeEvidence:   true,
-		EvidenceChecklist: &checklist,
-	})
-	if err != nil {
-		t.Fatalf("NewExecutionReport returned error: %v", err)
-	}
-
-	markdown := RenderExecutionReportMarkdown(report)
+func assertExecutionReportMarkdownIncludesEvidenceSections(t *testing.T, markdown string, record ExecutionRecord) {
+	t.Helper()
 
 	for _, want := range []string{
 		"# Execution Report",

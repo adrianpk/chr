@@ -155,7 +155,9 @@ func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 		Status:    opts.Result.Status,
 		Summary:   opts.Result.Summary,
 	}
+
 	report.ChangedFiles, report.ChangedSummary = executionReportChangedFiles(*opts.Result)
+
 	if opts.IncludeEvidence {
 		report.Evidence = executionReportEvidence(opts)
 	}
@@ -475,6 +477,7 @@ func writeExecutionReportEvidence(output *strings.Builder, evidence ExecutionRep
 
 	output.WriteString("### Ticket Checklist\n\n")
 	writeExecutionReportField(output, "status", evidence.ChecklistStatus)
+
 	if strings.TrimSpace(evidence.ChecklistError) != "" {
 		writeExecutionReportField(output, "error", evidence.ChecklistError)
 	}
@@ -486,6 +489,7 @@ func writeExecutionReportEvidence(output *strings.Builder, evidence ExecutionRep
 	}
 
 	output.WriteString("\n")
+
 	for _, item := range evidence.ChecklistItems {
 		writeExecutionReportEvidenceChecklistItem(output, item)
 	}
@@ -588,6 +592,7 @@ func writeExecutionReportList(output *strings.Builder, name string, values []str
 	output.WriteString("- ")
 	output.WriteString(name)
 	output.WriteString(":\n")
+
 	for _, value := range values {
 		output.WriteString("  - ")
 		output.WriteString(emptyExecutionReportValue(value))
