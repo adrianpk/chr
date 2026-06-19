@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 3: readiness workspace split
+Active Slice: Slice 4: runtime workspace mount
 
 Tracker: `ops/trackers/2026-06-19-isolated-ticket-worktrees-tracker.md`
 

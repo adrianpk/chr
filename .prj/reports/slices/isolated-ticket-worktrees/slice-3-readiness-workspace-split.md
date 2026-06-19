@@ -1,11 +1,11 @@
 # Slice 3: Readiness Workspace Split
 
-Status: reviewing
+Status: delivered
 Slicing: Isolated Ticket Worktrees
 Plan: `ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md`
 Tracker: `ops/trackers/2026-06-19-isolated-ticket-worktrees-tracker.md`
 Branch: `feat/slice-3-readiness-workspace-split`
-PR: pending
+PR: #330
 
 ## Purpose
 
