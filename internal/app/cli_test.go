@@ -3695,7 +3695,9 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+	ticket := testTicketWithReviewRef()
+	ticket.Body = testApplyResultTicketBody(t)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -3724,10 +3726,92 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 
 	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "result-application.md"))
 	assertPathExists(t, filepath.Join(record.Artifacts.RunDir, "execution-report.md"))
+	assertApplyResultExecutionReportEvidence(t, readFile(t, filepath.Join(record.Artifacts.RunDir, "execution-report.md")))
 
 	tickets := listProjectTickets(t, devRoot, projectDir)
 	if len(tickets) != 1 || tickets[0].Status != "reviewing" {
 		t.Fatalf("indexed tickets = %#v, want reviewing CHC-1", tickets)
+	}
+}
+
+func testApplyResultTicketBody(t *testing.T) string {
+	t.Helper()
+
+	return testApplyResultEvidenceChecklistBlock(t) + `
+# Description
+
+Apply behavior.
+
+# Checklist
+
+# Acceptance
+
+# Comments
+
+# Blocker
+
+# Validation
+`
+}
+
+func testApplyResultEvidenceChecklistBlock(t *testing.T) string {
+	t.Helper()
+
+	checklist := core.EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]core.EvidenceStrategyChecklistItem{
+			core.EvidenceStrategyChecklistLabelStrategy: {
+				Label:  core.EvidenceStrategyChecklistLabelStrategy,
+				Status: "planned",
+				Detail: "change_kind=bugfix; risk=medium; test_timing=before",
+			},
+			core.EvidenceStrategyChecklistLabelGherkin: {
+				Label:  core.EvidenceStrategyChecklistLabelGherkin,
+				Status: "not_applicable",
+				Detail: "reason=internal behavior",
+			},
+			core.EvidenceStrategyChecklistLabelTests: {
+				Label:  core.EvidenceStrategyChecklistLabelTests,
+				Status: "unit",
+				Detail: "reason=state transition",
+			},
+			core.EvidenceStrategyChecklistLabelValidation: {
+				Label:  core.EvidenceStrategyChecklistLabelValidation,
+				Status: "passed",
+				Detail: "commands=make verify",
+			},
+			core.EvidenceStrategyChecklistLabelSummary: {
+				Label:  core.EvidenceStrategyChecklistLabelSummary,
+				Status: "complete",
+			},
+		},
+	}
+
+	rendered, err := core.RenderEvidenceStrategyChecklist(checklist)
+	if err != nil {
+		t.Fatalf("RenderEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	return rendered
+}
+
+func assertApplyResultExecutionReportEvidence(t *testing.T, content string) {
+	t.Helper()
+
+	for _, want := range []string{
+		"## Evidence Strategy",
+		"### Result Summary",
+		"- strategy: planned",
+		"- produced: evidence produced",
+		"- validation: validation passed",
+		"### Ticket Checklist",
+		"- status: present",
+		"- Evidence strategy: checked=false; status=planned; change_kind=bugfix",
+		"- Tests: checked=false; status=unit; reason=state transition",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("execution report missing %q:\n%s", want, content)
+		}
 	}
 }
 

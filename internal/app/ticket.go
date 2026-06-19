@@ -1336,10 +1336,17 @@ func writeTicketApplyResultReport(plan ticketApplyResultPlan, appliedAt time.Tim
 }
 
 func writeTicketExecutionReport(ctx context.Context, plan ticketApplyResultPlan) error {
-	report, err := core.NewExecutionReport(core.ExecutionReportOptions{
+	opts := core.ExecutionReportOptions{
 		Execution: plan.Record,
 		Result:    &plan.Result,
-	})
+	}
+
+	err := addTicketExecutionReportEvidenceOptions(&opts, plan)
+	if err != nil {
+		return err
+	}
+
+	report, err := core.NewExecutionReport(opts)
 	if err != nil {
 		return err
 	}
@@ -1350,6 +1357,42 @@ func writeTicketExecutionReport(ctx context.Context, plan ticketApplyResultPlan)
 	}
 
 	return nil
+}
+
+func addTicketExecutionReportEvidenceOptions(opts *core.ExecutionReportOptions, plan ticketApplyResultPlan) error {
+	config, err := core.LoadWorkspaceConfig(plan.ProjectContext.ProjectDir)
+	if err != nil {
+		return fmt.Errorf("load evidence strategy config: %w", err)
+	}
+
+	if !config.Evidence.Strategy.Enabled || !config.Evidence.Strategy.ExecutionReportCopy {
+		return nil
+	}
+
+	checklist, checklistError, err := ticketExecutionReportEvidenceChecklist(plan.Application.TicketPath)
+	if err != nil {
+		return err
+	}
+
+	opts.IncludeEvidence = true
+	opts.EvidenceChecklist = checklist
+	opts.EvidenceChecklistError = checklistError
+
+	return nil
+}
+
+func ticketExecutionReportEvidenceChecklist(path string) (*core.EvidenceStrategyChecklist, string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, "", fmt.Errorf("read evidence strategy ticket: %w", err)
+	}
+
+	checklist, err := core.ParseEvidenceStrategyChecklist(string(content))
+	if err != nil {
+		return nil, err.Error(), nil
+	}
+
+	return &checklist, "", nil
 }
 
 func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun bool) error {

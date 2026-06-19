@@ -41,14 +41,24 @@ func TestNewExecutionReportIncludesResultEvidence(t *testing.T) {
 		TicketKey:   record.TicketKey,
 		Status:      ExecutionResultStatusSucceeded,
 		Summary:     "ready for review",
+		EvidenceSummary: ExecutionResultEvidenceSummary{
+			Strategy:      "bugfix regression strategy",
+			Produced:      "unit and fuzz coverage",
+			Validation:    "make verify passed",
+			Deviations:    []string{"mutation testing skipped"},
+			RemainingRisk: []string{"manual CLI smoke not run"},
+		},
 		ChangedFiles: []ExecutionResultChangedFile{
 			{Path: "internal/core/execution_report.go", Summary: "add report model"},
 		},
 	}
+	checklist := testEvidenceStrategyChecklistModel()
 
 	report, err := NewExecutionReport(ExecutionReportOptions{
-		Execution: record,
-		Result:    &result,
+		Execution:         record,
+		Result:            &result,
+		IncludeEvidence:   true,
+		EvidenceChecklist: &checklist,
 	})
 	if err != nil {
 		t.Fatalf("NewExecutionReport returned error: %v", err)
@@ -60,6 +70,14 @@ func TestNewExecutionReportIncludesResultEvidence(t *testing.T) {
 
 	if report.Result.Summary != "ready for review" {
 		t.Fatalf("Result.Summary = %q, want ready for review", report.Result.Summary)
+	}
+
+	if !report.Evidence.Enabled {
+		t.Fatal("Evidence.Enabled = false, want true")
+	}
+
+	if report.Evidence.Strategy != "bugfix regression strategy" {
+		t.Fatalf("Evidence.Strategy = %q, want copied strategy", report.Evidence.Strategy)
 	}
 
 	if report.Validation.Status != ExecutionReportValidationSucceeded {
@@ -74,9 +92,10 @@ func TestNewExecutionReportIncludesResultEvidence(t *testing.T) {
 func TestNewExecutionReportRejectsMismatchedResult(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
 	result := ExecutionResult{
-		ExecutionID: "exec-other",
-		TicketKey:   record.TicketKey,
-		Status:      ExecutionResultStatusSucceeded,
+		ExecutionID:     "exec-other",
+		TicketKey:       record.TicketKey,
+		Status:          ExecutionResultStatusSucceeded,
+		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 
 	_, err := NewExecutionReport(ExecutionReportOptions{
@@ -95,14 +114,24 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 		TicketKey:   record.TicketKey,
 		Status:      ExecutionResultStatusSucceeded,
 		Summary:     "ready for review",
+		EvidenceSummary: ExecutionResultEvidenceSummary{
+			Strategy:      "bugfix regression strategy",
+			Produced:      "unit and fuzz coverage",
+			Validation:    "make verify passed",
+			Deviations:    []string{"mutation testing skipped"},
+			RemainingRisk: []string{"manual CLI smoke not run"},
+		},
 		ChangedFiles: []ExecutionResultChangedFile{
 			{Path: "internal/core/execution_report.go", Summary: "add report model"},
 		},
 	}
+	checklist := testEvidenceStrategyChecklistModel()
 
 	report, err := NewExecutionReport(ExecutionReportOptions{
-		Execution: record,
-		Result:    &result,
+		Execution:         record,
+		Result:            &result,
+		IncludeEvidence:   true,
+		EvidenceChecklist: &checklist,
 	})
 	if err != nil {
 		t.Fatalf("NewExecutionReport returned error: %v", err)
@@ -126,6 +155,19 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 		"- path: " + record.Artifacts.ValidationPath,
 		"## Result",
 		"- summary: ready for review",
+		"## Evidence Strategy",
+		"### Result Summary",
+		"- strategy: bugfix regression strategy",
+		"- produced: unit and fuzz coverage",
+		"- validation: make verify passed",
+		"- deviations:",
+		"  - mutation testing skipped",
+		"- remaining_risk:",
+		"  - manual CLI smoke not run",
+		"### Ticket Checklist",
+		"- status: present",
+		"- Evidence strategy: checked=false; status=planned; change_kind=bugfix",
+		"- Tests: checked=false; status=mixed; reason=unit and fuzz coverage",
 		"## Changed Files",
 		"- total: 1",
 		"- rendered: 1",
@@ -143,10 +185,11 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 func TestNewExecutionReportSortsAndBoundsChangedFiles(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
 	result := ExecutionResult{
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		Status:      ExecutionResultStatusSucceeded,
-		Summary:     "ready for review",
+		ExecutionID:     record.ID,
+		TicketKey:       record.TicketKey,
+		Status:          ExecutionResultStatusSucceeded,
+		Summary:         "ready for review",
+		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 
 	for index := 29; index >= 0; index-- {
@@ -189,10 +232,11 @@ func TestNewExecutionReportSortsAndBoundsChangedFiles(t *testing.T) {
 func TestExecutionReportWriterWritesMarkdownReport(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
 	result := ExecutionResult{
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		Status:      ExecutionResultStatusSucceeded,
-		Summary:     "ready for review",
+		ExecutionID:     record.ID,
+		TicketKey:       record.TicketKey,
+		Status:          ExecutionResultStatusSucceeded,
+		Summary:         "ready for review",
+		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 
 	report, err := NewExecutionReport(ExecutionReportOptions{

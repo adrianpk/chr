@@ -23,6 +23,7 @@ type ExecutionReport struct {
 	Artifacts      ExecutionReportArtifacts
 	Result         ExecutionReportResult
 	Validation     ExecutionReportValidation
+	Evidence       ExecutionReportEvidence
 	ChangedFiles   []ExecutionReportChangedFile
 	ChangedSummary ExecutionReportChangedFilesSummary
 	FailureReason  string
@@ -69,6 +70,28 @@ type ExecutionReportValidation struct {
 	Status  ExecutionReportValidationStatus
 }
 
+// ExecutionReportEvidence describes copied strategy and evidence result data.
+type ExecutionReportEvidence struct {
+	Enabled         bool
+	ResultAvailable bool
+	Strategy        string
+	Produced        string
+	Validation      string
+	Deviations      []string
+	RemainingRisk   []string
+	ChecklistStatus string
+	ChecklistError  string
+	ChecklistItems  []ExecutionReportEvidenceChecklistItem
+}
+
+// ExecutionReportEvidenceChecklistItem describes one copied strategy checklist item.
+type ExecutionReportEvidenceChecklistItem struct {
+	Label   string
+	Checked bool
+	Status  string
+	Detail  string
+}
+
 // ExecutionReportValidationStatus defines a package boundary type.
 type ExecutionReportValidationStatus string
 
@@ -98,8 +121,11 @@ type ExecutionReportChangedFilesSummary struct {
 
 // ExecutionReportOptions describes a package boundary value.
 type ExecutionReportOptions struct {
-	Execution ExecutionRecord
-	Result    *ExecutionResult
+	Execution              ExecutionRecord
+	Result                 *ExecutionResult
+	IncludeEvidence        bool
+	EvidenceChecklist      *EvidenceStrategyChecklist
+	EvidenceChecklistError string
 }
 
 // NewExecutionReport constructs the corresponding package service or value.
@@ -112,6 +138,10 @@ func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 	report := executionReportFromRecord(opts.Execution)
 
 	if opts.Result == nil {
+		if opts.IncludeEvidence {
+			report.Evidence = executionReportEvidence(opts)
+		}
+
 		return report, nil
 	}
 
@@ -126,6 +156,9 @@ func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 		Summary:   opts.Result.Summary,
 	}
 	report.ChangedFiles, report.ChangedSummary = executionReportChangedFiles(*opts.Result)
+	if opts.IncludeEvidence {
+		report.Evidence = executionReportEvidence(opts)
+	}
 
 	return report, nil
 }
@@ -208,6 +241,58 @@ func executionReportChangedFiles(result ExecutionResult) ([]ExecutionReportChang
 	return changedFiles, summary
 }
 
+func executionReportEvidence(opts ExecutionReportOptions) ExecutionReportEvidence {
+	evidence := ExecutionReportEvidence{
+		Enabled:         true,
+		ChecklistStatus: executionReportEvidenceChecklistStatus(opts.EvidenceChecklist, opts.EvidenceChecklistError),
+		ChecklistError:  strings.TrimSpace(opts.EvidenceChecklistError),
+		ChecklistItems:  executionReportEvidenceChecklistItems(opts.EvidenceChecklist),
+	}
+
+	if opts.Result == nil {
+		return evidence
+	}
+
+	evidence.ResultAvailable = true
+	evidence.Strategy = opts.Result.EvidenceSummary.Strategy
+	evidence.Produced = opts.Result.EvidenceSummary.Produced
+	evidence.Validation = opts.Result.EvidenceSummary.Validation
+	evidence.Deviations = append([]string(nil), opts.Result.EvidenceSummary.Deviations...)
+	evidence.RemainingRisk = append([]string(nil), opts.Result.EvidenceSummary.RemainingRisk...)
+
+	return evidence
+}
+
+func executionReportEvidenceChecklistStatus(checklist *EvidenceStrategyChecklist, err string) string {
+	if strings.TrimSpace(err) != "" {
+		return "malformed"
+	}
+
+	if checklist == nil || !checklist.Found {
+		return "missing"
+	}
+
+	return "present"
+}
+
+func executionReportEvidenceChecklistItems(checklist *EvidenceStrategyChecklist) []ExecutionReportEvidenceChecklistItem {
+	if checklist == nil || !checklist.Found {
+		return nil
+	}
+
+	items := make([]ExecutionReportEvidenceChecklistItem, 0, len(EvidenceStrategyChecklistLabels()))
+	for _, label := range EvidenceStrategyChecklistLabels() {
+		item, ok := checklist.Item(label)
+		if !ok {
+			continue
+		}
+
+		items = append(items, ExecutionReportEvidenceChecklistItem(item))
+	}
+
+	return items
+}
+
 // RenderExecutionReportMarkdown renders the corresponding package data.
 func RenderExecutionReportMarkdown(report ExecutionReport) string {
 	var output strings.Builder
@@ -219,6 +304,7 @@ func RenderExecutionReportMarkdown(report ExecutionReport) string {
 	writeExecutionReportArtifacts(&output, report.Artifacts)
 	writeExecutionReportValidation(&output, report.Validation)
 	writeExecutionReportResult(&output, report.Result)
+	writeExecutionReportEvidence(&output, report.Evidence)
 	writeExecutionReportChangedFiles(&output, report.ChangedFiles, report.ChangedSummary)
 	writeExecutionReportFailure(&output, report)
 
@@ -368,6 +454,66 @@ func writeExecutionReportResult(output *strings.Builder, result ExecutionReportR
 	output.WriteString("\n")
 }
 
+func writeExecutionReportEvidence(output *strings.Builder, evidence ExecutionReportEvidence) {
+	if !evidence.Enabled {
+		return
+	}
+
+	output.WriteString("## Evidence Strategy\n\n")
+	output.WriteString("### Result Summary\n\n")
+
+	if !evidence.ResultAvailable {
+		output.WriteString("No execution evidence summary was available.\n\n")
+	} else {
+		writeExecutionReportField(output, "strategy", evidence.Strategy)
+		writeExecutionReportField(output, "produced", evidence.Produced)
+		writeExecutionReportField(output, "validation", evidence.Validation)
+		writeExecutionReportList(output, "deviations", evidence.Deviations)
+		writeExecutionReportList(output, "remaining_risk", evidence.RemainingRisk)
+		output.WriteString("\n")
+	}
+
+	output.WriteString("### Ticket Checklist\n\n")
+	writeExecutionReportField(output, "status", evidence.ChecklistStatus)
+	if strings.TrimSpace(evidence.ChecklistError) != "" {
+		writeExecutionReportField(output, "error", evidence.ChecklistError)
+	}
+
+	if len(evidence.ChecklistItems) == 0 {
+		output.WriteString("\n")
+
+		return
+	}
+
+	output.WriteString("\n")
+	for _, item := range evidence.ChecklistItems {
+		writeExecutionReportEvidenceChecklistItem(output, item)
+	}
+
+	output.WriteString("\n")
+}
+
+func writeExecutionReportEvidenceChecklistItem(output *strings.Builder, item ExecutionReportEvidenceChecklistItem) {
+	checked := "false"
+	if item.Checked {
+		checked = "true"
+	}
+
+	output.WriteString("- ")
+	output.WriteString(item.Label)
+	output.WriteString(": checked=")
+	output.WriteString(checked)
+	output.WriteString("; status=")
+	output.WriteString(item.Status)
+
+	if strings.TrimSpace(item.Detail) != "" {
+		output.WriteString("; ")
+		output.WriteString(item.Detail)
+	}
+
+	output.WriteString("\n")
+}
+
 func writeExecutionReportChangedFiles(
 	output *strings.Builder,
 	changedFiles []ExecutionReportChangedFile,
@@ -430,6 +576,23 @@ func writeExecutionReportFailure(output *strings.Builder, report ExecutionReport
 	}
 
 	writeExecutionReportField(output, "reason", report.FailureReason)
+}
+
+func writeExecutionReportList(output *strings.Builder, name string, values []string) {
+	if len(values) == 0 {
+		writeExecutionReportField(output, name, "none")
+
+		return
+	}
+
+	output.WriteString("- ")
+	output.WriteString(name)
+	output.WriteString(":\n")
+	for _, value := range values {
+		output.WriteString("  - ")
+		output.WriteString(emptyExecutionReportValue(value))
+		output.WriteString("\n")
+	}
 }
 
 func writeExecutionReportField(output *strings.Builder, name, value string) {
