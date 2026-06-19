@@ -12,7 +12,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | workspace execution config | delivered | `feat/slice-1-workspace-execution-config` | `#328` | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
 | Slice 2 | worktree state service | delivered | `feat/slice-2-worktree-state-service` | `#329` | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
-| Slice 3 | readiness workspace split | planned | `feat/slice-3-readiness-workspace-split` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
+| Slice 3 | readiness workspace split | reviewing | `feat/slice-3-readiness-workspace-split` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
 | Slice 4 | runtime workspace mount | planned | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
 | Slice 5 | execution workspace results | planned | `feat/slice-5-execution-workspace-results` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
 | Slice 6 | branch and PR lifecycle | planned | `feat/slice-6-branch-and-pr-lifecycle` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
@@ -48,15 +48,15 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Extend work readiness input with workspace mode and optional ticket key. | pending | pending | Keep legacy callers compatible. |
-| T3.2 | Split dirty-state diagnostics into user checkout and ticket worktree diagnostics. | pending | pending | Avoid ambiguous `dirty_worktree` wording where possible. |
-| T3.3 | Make user checkout dirtiness informational in worktree mode. | pending | pending | This is the main user-facing behavior change. |
-| T3.4 | Make ticket worktree dirtiness blocking in worktree mode. | pending | pending | Dirty worktree cannot be discarded automatically. |
-| T3.5 | Add remote-base diagnostics for failed fetch and missing `<remote>/<integration_branch>`. | pending | pending | Remote base is operational truth. |
-| T3.6 | Update `chc work doctor` output and service models to expose both workspace states. | pending | pending | Include readable state fields. |
-| T3.7 | Add safe repair coverage for fetch, root creation, and non-destructive worktree metadata pruning. | pending | pending | Safe repair must remain non-destructive. |
-| T3.8 | Add CLI/service/TUI tests for legacy mode and worktree mode readiness. | pending | pending | Preserve current project mode behavior. |
-| T3.9 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T3.1 | Extend work readiness input with workspace mode and optional ticket key. | done | `011d555` | Legacy callers remain compatible through defaults. |
+| T3.2 | Split dirty-state diagnostics into user checkout and ticket worktree diagnostics. | done | `3f387c6` | Worktree mode has explicit `dirty_user_checkout` diagnostics. |
+| T3.3 | Make user checkout dirtiness informational in worktree mode. | done | `b02ce7b` | Work selection no longer blocks on the user's dirty or stale checkout in worktree mode. |
+| T3.4 | Make ticket worktree dirtiness blocking in worktree mode. | done | `df57f9b` | Dirty, mismatched, branch-in-use, and orphaned ticket worktrees block. |
+| T3.5 | Add remote-base diagnostics for failed fetch and missing `<remote>/<integration_branch>`. | done | `c0286ba` | Worktree mode validates the fetched remote base instead of local branch containment. |
+| T3.6 | Update `chc work doctor` output and service models to expose both workspace states. | done | `c28b9e4` | Doctor and Dash expose workspace mode, user checkout state, and ticket worktree state. |
+| T3.7 | Add safe repair coverage for fetch, root creation, and non-destructive worktree metadata pruning. | done | `88c4cdb` | Safe repair can create roots and remove stale metadata without deleting worktrees. |
+| T3.8 | Add CLI/service/TUI tests for legacy mode and worktree mode readiness. | done | `ec8cc69` | Added CLI, service, TUI, and core coverage for the new readiness surfaces. |
+| T3.9 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 4 Tasks
 
@@ -130,6 +130,9 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - Slice 2: `go test ./internal/core -run 'Worktree'` (pass)
 - Slice 2: `make lint-strict` (pass)
 - Slice 2: `make verify` (pass)
+- Slice 3: `go test ./internal/core -run 'WorkReadiness|WorkSelectionPreflight|Worktree' && go test ./internal/app -run 'WorkDoctor|PreviewAgentWork|StartAgentWork' && go test ./internal/tui -run 'WorkReadiness|Dash|Model'` (pass)
+- Slice 3: `make lint-strict` (pass)
+- Slice 3: `make verify` (pass)
 
 ## Open Decisions
 
