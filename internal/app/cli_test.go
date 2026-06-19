@@ -1904,12 +1904,16 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 
 	for _, want := range []string{
 		"dry_run: true",
+		"workspace_mode: project",
+		"project_checkout_dir: .",
+		"execution_workspace_dir: .",
 		"image: chc-agent-runtime:local",
 		"dockerfile: .chc/user/runtime/agent/Dockerfile",
 		"workdir: /workspace",
 		"artifact_dir: .chc/user/runtime/runs",
 		"mount: . -> /workspace read_only=false",
 		"checks:",
+		"ok    execution_workspace .",
 		"ok    workspace    .chc",
 		"ok    dockerfile   .chc/user/runtime/agent/Dockerfile",
 		"ok    artifact_dir .chc/user/runtime/runs",

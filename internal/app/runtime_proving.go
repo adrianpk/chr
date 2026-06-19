@@ -439,6 +439,9 @@ func printRuntimeValidateResult(
 
 	lines := []string{
 		fmt.Sprintf("dry_run: %t", dryRun),
+		fmt.Sprintf("workspace_mode: %s", plan.WorkspaceMode),
+		fmt.Sprintf("project_checkout_dir: %s", displayPath(plan.ProjectDir, plan.ProjectCheckoutDir)),
+		fmt.Sprintf("execution_workspace_dir: %s", displayPath(plan.ProjectDir, plan.ExecutionWorkspaceDir)),
 		fmt.Sprintf("image: %s", plan.Image),
 		fmt.Sprintf("dockerfile: %s", displayPath(plan.ProjectDir, plan.DockerfilePath)),
 		fmt.Sprintf("workdir: %s", plan.ContainerWorkdir),

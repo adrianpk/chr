@@ -40,6 +40,7 @@ func ValidateRuntime(opts RuntimeValidationOptions) (RuntimeValidationResult, er
 	}
 
 	checks := []RuntimeValidationCheck{
+		checkDirectory("execution_workspace", plan.ExecutionWorkspaceDir),
 		checkDirectory("workspace", plan.WorkspaceDir),
 		checkFile("dockerfile", plan.DockerfilePath),
 		checkDirectory("artifact_dir", plan.ArtifactDir),
