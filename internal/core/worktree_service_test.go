@@ -249,6 +249,142 @@ func TestWorktreeMetadataRoundTrips(t *testing.T) {
 	}
 }
 
+func TestCleanupMergedTicketWorktreeRemovesCleanWorktreeAndMetadata(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+	git := newFakeWorktreeGit()
+	git.entries = []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}}
+	writeWorktreeTestMetadata(t, plan)
+
+	result, err := CleanupMergedTicketWorktree(context.Background(), WorktreeCleanupOptions{
+		ProjectDir: dir,
+		TicketKey:  plan.TicketKey,
+		Branch:     plan.Branch,
+		Workspace:  testCleanupWorktreeWorkspace(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("CleanupMergedTicketWorktree returned error: %v", err)
+	}
+
+	if result.Status != WorktreeCleanupStatusRemoved || !result.RemovedWorktree || !result.RemovedMetadata {
+		t.Fatalf("result = %#v, want removed worktree and metadata", result)
+	}
+
+	if len(git.removedWorktrees) != 1 || git.removedWorktrees[0] != plan.WorktreePath {
+		t.Fatalf("removedWorktrees = %#v, want %q", git.removedWorktrees, plan.WorktreePath)
+	}
+
+	assertWorktreeMetadataMissing(t, plan)
+}
+
+func TestCleanupMergedTicketWorktreeBlocksDirtyWorktree(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+	git := newFakeWorktreeGit()
+	git.entries = []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}}
+	git.statuses[plan.WorktreePath] = []string{" M main.go"}
+
+	result, err := CleanupMergedTicketWorktree(context.Background(), WorktreeCleanupOptions{
+		ProjectDir: dir,
+		TicketKey:  plan.TicketKey,
+		Branch:     plan.Branch,
+		Workspace:  testCleanupWorktreeWorkspace(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("CleanupMergedTicketWorktree returned error: %v", err)
+	}
+
+	if result.Status != WorktreeCleanupStatusBlocked || result.RemovedWorktree {
+		t.Fatalf("result = %#v, want blocked without removal", result)
+	}
+
+	if len(git.removedWorktrees) != 0 {
+		t.Fatalf("removedWorktrees = %#v, want none", git.removedWorktrees)
+	}
+}
+
+func TestCleanupMergedTicketWorktreePrunesMissingMetadata(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+	git := newFakeWorktreeGit()
+	writeWorktreeTestMetadata(t, plan)
+
+	result, err := CleanupMergedTicketWorktree(context.Background(), WorktreeCleanupOptions{
+		ProjectDir: dir,
+		TicketKey:  plan.TicketKey,
+		Branch:     plan.Branch,
+		Workspace:  testCleanupWorktreeWorkspace(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("CleanupMergedTicketWorktree returned error: %v", err)
+	}
+
+	if result.Status != WorktreeCleanupStatusSkipped || !result.RemovedMetadata {
+		t.Fatalf("result = %#v, want skipped with metadata prune", result)
+	}
+
+	assertWorktreeMetadataMissing(t, plan)
+}
+
+func TestCleanupMergedTicketWorktreeBlocksBranchInUse(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+	git := newFakeWorktreeGit()
+	git.entries = []WorktreeGitEntry{{Path: filepath.Join(dir, "other-worktree"), Branch: plan.Branch}}
+
+	result, err := CleanupMergedTicketWorktree(context.Background(), WorktreeCleanupOptions{
+		ProjectDir: dir,
+		TicketKey:  plan.TicketKey,
+		Branch:     plan.Branch,
+		Workspace:  testCleanupWorktreeWorkspace(),
+		Git:        git,
+	})
+	if err != nil {
+		t.Fatalf("CleanupMergedTicketWorktree returned error: %v", err)
+	}
+
+	if result.Status != WorktreeCleanupStatusBlocked || result.Detail == "" {
+		t.Fatalf("result = %#v, want blocked branch-in-use detail", result)
+	}
+}
+
+func testCleanupWorktreeWorkspace() WorkWorkspaceConfig {
+	workspace := DefaultWorkWorkspaceConfig()
+	workspace.Mode = WorkWorkspaceModeWorktree
+
+	return workspace
+}
+
+func writeWorktreeTestMetadata(t *testing.T, plan WorktreePlan) {
+	t.Helper()
+
+	path, err := WorktreeMetadataPath(plan)
+	if err != nil {
+		t.Fatalf("WorktreeMetadataPath returned error: %v", err)
+	}
+
+	if err := WriteWorktreeMetadata(path, NewWorktreeMetadata(plan, time.Now())); err != nil {
+		t.Fatalf("WriteWorktreeMetadata returned error: %v", err)
+	}
+}
+
+func assertWorktreeMetadataMissing(t *testing.T, plan WorktreePlan) {
+	t.Helper()
+
+	path, err := WorktreeMetadataPath(plan)
+	if err != nil {
+		t.Fatalf("WorktreeMetadataPath returned error: %v", err)
+	}
+
+	_, err = os.Stat(path)
+	if !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("metadata path %s stat error = %v, want missing", path, err)
+	}
+}
+
 type worktreeInspectionStateAssertion struct {
 	entries  []WorktreeGitEntry
 	statuses map[string][]string
@@ -304,6 +440,7 @@ type fakeWorktreeGit struct {
 	branchContainsRef map[string]bool
 	createdBranches   map[string]string
 	addedWorktrees    []fakeAddedWorktree
+	removedWorktrees  []string
 	entries           []WorktreeGitEntry
 	statuses          map[string][]string
 	fetchErr          error
@@ -365,6 +502,12 @@ func (git *fakeWorktreeGit) CreateBranch(_ context.Context, _, branch, baseRef s
 
 func (git *fakeWorktreeGit) AddWorktree(_ context.Context, _, path, branch string) error {
 	git.addedWorktrees = append(git.addedWorktrees, fakeAddedWorktree{path: path, branch: branch})
+
+	return nil
+}
+
+func (git *fakeWorktreeGit) RemoveWorktree(_ context.Context, _, path string) error {
+	git.removedWorktrees = append(git.removedWorktrees, path)
 
 	return nil
 }

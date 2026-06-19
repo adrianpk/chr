@@ -16,6 +16,7 @@ type WorktreeGit interface {
 	BranchContainsRef(ctx context.Context, projectDir, branch, ref string) (bool, error)
 	CreateBranch(ctx context.Context, projectDir, branch, baseRef string) error
 	AddWorktree(ctx context.Context, projectDir, path, branch string) error
+	RemoveWorktree(ctx context.Context, projectDir, path string) error
 	WorktreeList(ctx context.Context, projectDir string) ([]WorktreeGitEntry, error)
 	WorktreeStatus(ctx context.Context, path string) ([]string, error)
 }
@@ -76,6 +77,11 @@ func (OSWorktreeGit) CreateBranch(ctx context.Context, projectDir, branch, baseR
 // AddWorktree executes the corresponding package operation.
 func (OSWorktreeGit) AddWorktree(ctx context.Context, projectDir, path, branch string) error {
 	return runWorktreeGit(ctx, projectDir, "worktree", "add", path, branch)
+}
+
+// RemoveWorktree executes the corresponding package operation.
+func (OSWorktreeGit) RemoveWorktree(ctx context.Context, projectDir, path string) error {
+	return runWorktreeGit(ctx, projectDir, "worktree", "remove", path)
 }
 
 // WorktreeList executes the corresponding package operation.
