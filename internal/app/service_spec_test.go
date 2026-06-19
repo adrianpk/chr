@@ -71,6 +71,11 @@ Feature: Blog publishing
     Given an article draft exists
     When the editor publishes the article
     Then the editorial review status is preserved
+
+  Scenario: Publishing dependency fails
+    Given an article draft exists
+    When the publishing dependency is unavailable
+    Then the article remains unpublished and the editor sees the failure
 `,
 			}),
 		},

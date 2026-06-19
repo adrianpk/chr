@@ -73,6 +73,16 @@ Feature: Billing sync
 Each scenario must describe observable behavior with concrete Given, When, and
 Then steps.
 
+Generated features must not be satisfied by a trivial hardcoded happy path. For
+observable behavior, the generated artifact should include more than one
+behavior path: at least one normal success path and at least one rejection,
+failure, boundary, terminal, or no-change path when the available context
+supports it.
+
+Gherkin should stay focused on user-visible behavior. Combinatorial internal
+cases belong in unit, table-driven, fuzz, property, or integration tests instead
+of being expanded into long `.feature` files.
+
 ## Static Checks
 
 Feature files are checked before they are written as acceptance artifacts.
@@ -80,7 +90,8 @@ Feature files are checked before they are written as acceptance artifacts.
 Static checks require:
 
 - a `Feature:` heading;
-- at least one `Scenario:` or `Scenario Outline:`;
+- more than one `Scenario:` or `Scenario Outline:`;
+- at least one rejection, failure, boundary, terminal, or no-change path;
 - Given, When, and Then steps for every scenario;
 - traceability to spec behavior through supported tags;
 - no dependency on open questions;
@@ -108,6 +119,8 @@ For those tickets, the worker context tells the agent:
 - whether Gherkin is active for the project;
 - whether it applies to the ticket;
 - which `.feature` path should be updated first;
+- that an existing `.feature` path is not sufficient evidence by itself;
+- that the feature must be checked for weak happy-path-only coverage;
 - which evidence decision matrix row applies.
 
 If active Gherkin applies, the ticket checklist must record:

@@ -96,6 +96,7 @@ type acceptanceFeatureScenario struct {
 	name    string
 	line    int
 	tags    []string
+	text    []string
 	given   bool
 	when    bool
 	then    bool
@@ -542,6 +543,7 @@ func (c *acceptanceFeatureChecker) addScenario(lineNumber int, line string) {
 		name: name,
 		line: lineNumber,
 		tags: append([]string(nil), c.pendingTags...),
+		text: []string{name},
 	})
 	c.currentIndex = len(c.scenarios) - 1
 	c.pendingTags = nil
@@ -562,6 +564,7 @@ func (c *acceptanceFeatureChecker) addStep(lineNumber int, line string) {
 
 	scenario := &c.scenarios[c.currentIndex]
 	scenario.hasStep = true
+	scenario.text = append(scenario.text, line)
 
 	switch acceptanceFeatureStepKind(line) {
 	case "given":
@@ -595,8 +598,26 @@ func (c *acceptanceFeatureChecker) checkDocument() {
 		c.addFinding("missing_scenario", "feature must include at least one scenario", 0)
 	}
 
+	c.checkBehaviorDepth()
+
 	for _, scenario := range c.scenarios {
 		c.checkScenario(scenario)
+	}
+}
+
+func (c *acceptanceFeatureChecker) checkBehaviorDepth() {
+	if len(c.scenarios) == 0 {
+		return
+	}
+
+	if len(c.scenarios) == 1 {
+		c.addFinding("insufficient_behavior_paths", "feature must cover more than one observable behavior path", c.scenarios[0].line)
+
+		return
+	}
+
+	if !acceptanceFeatureHasContrastPath(c.scenarios) {
+		c.addFinding("missing_contrast_path", "feature must include at least one rejection, failure, boundary, terminal, or no-change path", c.scenarios[0].line)
 	}
 }
 
@@ -632,6 +653,52 @@ func (c *acceptanceFeatureChecker) addFinding(code, message string, line int) {
 		Message: message,
 		Line:    line,
 	})
+}
+
+func acceptanceFeatureHasContrastPath(scenarios []acceptanceFeatureScenario) bool {
+	for _, scenario := range scenarios {
+		text := strings.ToLower(strings.Join(scenario.text, " "))
+		if acceptanceFeatureTextHasContrastSignal(text) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func acceptanceFeatureTextHasContrastSignal(text string) bool {
+	for _, phrase := range []string{
+		"already",
+		"blocked",
+		"boundary",
+		"cannot",
+		"denied",
+		"draw",
+		"duplicate",
+		"empty",
+		"ends",
+		"error",
+		"exhausted",
+		"fail",
+		"failure",
+		"full",
+		"invalid",
+		"missing",
+		"occupied",
+		"reject",
+		"rejected",
+		"remains",
+		"terminal",
+		"timeout",
+		"unavailable",
+		"unchanged",
+	} {
+		if strings.Contains(text, phrase) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func acceptanceFeatureStepKind(line string) string {

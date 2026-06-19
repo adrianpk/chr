@@ -110,6 +110,12 @@ Feature: Article authoring
     Given an existing article draft
     When the editor publishes the article
     Then a publication report is written
+
+  @requirement:publish-report
+  Scenario: Publishing dependency fails
+    Given an existing article draft
+    When the publishing dependency is unavailable
+    Then the article remains unpublished
 `
 
 	result, err := CheckAcceptanceFeatureArtifact(feature)
@@ -133,6 +139,10 @@ Feature: Article authoring
   Scenario: Publish report is written
     When the editor publishes the article
     Then a publication report is written
+
+  Scenario: Publishing dependency fails
+    When the publishing dependency is unavailable
+    Then the article remains unpublished
 `
 
 	result, err := CheckAcceptanceFeatureArtifact(feature)
@@ -161,6 +171,49 @@ Feature: Article authoring
 	}
 
 	assertAcceptanceFeatureFinding(t, result, "missing_when")
+}
+
+func TestCheckAcceptanceFeatureArtifactRejectsSingleBehaviorPath(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec
+Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then a publication report is written
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "insufficient_behavior_paths")
+}
+
+func TestCheckAcceptanceFeatureArtifactRejectsMissingContrastPath(t *testing.T) {
+	feature := validAcceptanceFeatureArtifact()
+	feature.Body = `@spec:article-authoring-spec
+Feature: Article authoring
+
+  Scenario: Publish report is written
+    Given an existing article draft
+    When the editor publishes the article
+    Then a publication report is written
+
+  Scenario: Publish report is visible
+    Given a published article exists
+    When the editor views the publication report
+    Then the publication report is visible
+`
+
+	result, err := CheckAcceptanceFeatureArtifact(feature)
+	if err != nil {
+		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
+	}
+
+	assertAcceptanceFeatureFinding(t, result, "missing_contrast_path")
 }
 
 func TestCheckAcceptanceFeatureArtifactRejectsVagueSteps(t *testing.T) {
@@ -412,5 +465,11 @@ Feature: Article authoring
     Given an existing article draft
     When the editor publishes the article
     Then a publication report is written
+
+  @requirement:publish-report
+  Scenario: Publishing dependency fails
+    Given an existing article draft
+    When the publishing dependency is unavailable
+    Then the article remains unpublished
 `
 }

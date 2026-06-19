@@ -163,6 +163,11 @@ Feature: Blog publishing
     Given an article draft has editorial review status
     When the article is published
     Then the published article keeps the editorial review status
+
+  Scenario: Publishing dependency fails
+    Given an article draft has editorial review status
+    When the publishing dependency is unavailable
+    Then the article remains unpublished and the editor sees the failure
 `,
 			}),
 		},

@@ -127,6 +127,11 @@ new tests or Gherkin are needed. Bug fixes, parsers, validators, state machines,
 configuration changes, observable CLI/TUI/API behavior, IO, concurrency, and
 safety-sensitive work should receive stronger evidence by default.
 
+For observable behavior, Gherkin evidence should not collapse to a single
+happy-path demonstration. It should cover enough user-visible behavior to resist
+a trivial hardcoded implementation, while leaving combinatorial internal cases
+to unit, table-driven, fuzz, property, or integration tests.
+
 ## Enforcement Direction
 
 ChrysoCoord can start by recommending this doctrine and preserving it as project

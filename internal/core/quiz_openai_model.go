@@ -1127,6 +1127,10 @@ Clarification prompts must ask the user to confirm or adjust an inferred default
 Generated feature bodies must include traceability tags and concrete Given, When, and Then steps.
 Use at least one supported traceability tag on the feature or on every scenario: @spec:, @requirement:, @acceptance-criterion:, or @behavior:.
 Other tags may be included as metadata, but they do not satisfy traceability by themselves.
+Do not generate a feature that a trivial hardcoded happy-path implementation could satisfy.
+When observable behavior applies, include more than one behavior path: at least one normal success path and at least one rejection, failure, boundary, terminal, or no-change path when the context supports it.
+Keep combinatorial internal cases in unit, table-driven, fuzz, or property tests instead of bloating Gherkin.
+Return status needs_more_info instead of generated when the available context only supports one weak happy-path scenario.
 If an acceptance_feature_round context section includes answers, treat those answers as resolving their own prompts unless an accepted or active decision document directly contradicts them.
 Always include status, body, rejection_reason, and clarification_prompts. Use an empty string for body or rejection_reason when not applicable, and an empty array for clarification_prompts when not needed.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.

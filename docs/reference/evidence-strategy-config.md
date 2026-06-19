@@ -65,6 +65,12 @@ and the project already has `.feature` artifacts under
 observable CLI, TUI, API, domain, acceptance workflow, or user-visible bugfix
 behavior.
 
+When active Gherkin applies, the worker must read the required feature and
+decide whether it is strong enough for the ticket. An existing feature path is
+not sufficient evidence by itself. The feature should cover more than one
+observable behavior path and include a rejection, failure, boundary, terminal,
+or no-change path when applicable.
+
 ## Defaults
 
 Defaults are intentionally strict enough to make agent work inspectable:
@@ -119,6 +125,7 @@ Required ticket evidence:
 - `Evidence strategy` is checked and `complete`;
 - `Gherkin` is checked when its status is `required`;
 - active/applicable Gherkin cannot be marked `not_applicable`;
+- required Gherkin evidence cannot be only a weak happy-path-only artifact;
 - `Tests` is checked unless its status is `none`;
 - `Validation` is checked and `passed`;
 - `Evidence summary` is checked and `complete`.

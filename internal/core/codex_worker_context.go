@@ -248,6 +248,21 @@ func writeCodexWorkerGherkinPolicy(output *strings.Builder, gherkin EvidenceGher
 	}
 
 	output.WriteString("\n")
+	writeCodexWorkerGherkinQualityPolicy(output, gherkin)
+}
+
+func writeCodexWorkerGherkinQualityPolicy(output *strings.Builder, gherkin EvidenceGherkinContext) {
+	if !gherkin.Active || !gherkin.Applies {
+		return
+	}
+
+	output.WriteString("### Gherkin Evidence Quality\n\n")
+	output.WriteString("- Read the required Gherkin feature before implementation.\n")
+	output.WriteString("- Do not treat an existing feature path as sufficient evidence by itself.\n")
+	output.WriteString("- If the feature could be satisfied by a trivial hardcoded happy path, update it before moving the ticket to review.\n")
+	output.WriteString("- For observable behavior, prefer at least one normal success path and one rejection, failure, boundary, terminal, or no-change path when applicable.\n")
+	output.WriteString("- Keep combinatorial internal cases in unit, table-driven, fuzz, or property tests instead of bloating Gherkin.\n")
+	output.WriteString("- If the existing feature is intentionally unchanged, record the concrete reason in the ticket evidence checklist and evidence summary.\n\n")
 }
 
 func writeCodexWorkerSuggestedStrategy(output *strings.Builder, guidance EvidenceStrategyGuidance) {

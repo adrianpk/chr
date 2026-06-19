@@ -865,6 +865,22 @@ func TestQuizModelFeatureInstructionsDescribeTraceabilityAndRoundAnswers(t *test
 	}
 }
 
+func TestQuizModelFeatureInstructionsRejectTrivialHappyPathCoverage(t *testing.T) {
+	instructions := quizModelFeatureGenerationInstructions()
+
+	for _, want := range []string{
+		"trivial hardcoded happy-path implementation",
+		"more than one behavior path",
+		"one normal success path",
+		"rejection, failure, boundary, terminal, or no-change path",
+		"Return status needs_more_info instead of generated",
+	} {
+		if !strings.Contains(instructions, want) {
+			t.Fatalf("feature generation instructions missing %q in: %q", want, instructions)
+		}
+	}
+}
+
 func TestQuizModelSpecGenerationInstructionsDoNotOverfitPathPolicy(t *testing.T) {
 	instructions := quizModelSpecGenerationInstructions()
 

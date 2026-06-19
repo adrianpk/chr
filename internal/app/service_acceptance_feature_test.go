@@ -18,14 +18,7 @@ func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
 		responses: []core.QuizModelResponse{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), core.AcceptanceFeatureGeneration{
 				Status: core.AcceptanceFeatureStatusGenerated,
-				Body: `@spec:blog-spec @use-case:blog
-Feature: Blog publishing
-
-  Scenario: Editorial review is preserved
-    Given an article draft has editorial review status
-    When the article is published
-    Then the published article keeps the editorial review status
-`,
+				Body:   validBlogAcceptanceFeatureBody(),
 			}),
 		},
 	}
@@ -299,6 +292,11 @@ Feature: Blog publishing
     Given an article draft has editorial review status
     When the publish dependency fails
     Then the article remains unpublished and the command reports the failed dependency
+
+  Scenario: Editorial review is preserved
+    Given an article draft has editorial review status
+    When the article is published
+    Then the published article keeps the editorial review status
 `,
 			}),
 		},
@@ -335,6 +333,22 @@ case_slug: "blog"
 
 Publishing must preserve editorial review status.
 `)
+}
+
+func validBlogAcceptanceFeatureBody() string {
+	return `@spec:blog-spec @use-case:blog
+Feature: Blog publishing
+
+  Scenario: Editorial review is preserved
+    Given an article draft has editorial review status
+    When the article is published
+    Then the published article keeps the editorial review status
+
+  Scenario: Publishing dependency fails
+    Given an article draft has editorial review status
+    When the publishing dependency is unavailable
+    Then the article remains unpublished and the editor sees the failure
+`
 }
 
 func quizModelRequestHasSection(request core.QuizModelRequest, name string) bool {
