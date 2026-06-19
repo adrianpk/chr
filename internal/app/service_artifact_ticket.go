@@ -326,9 +326,7 @@ func (s service) AttachTicketReviewReference(request TicketReviewReferenceReques
 	}, nil
 }
 
-func (s service) UpsertTicketEvidenceStrategyChecklist(
-	request TicketEvidenceStrategyChecklistRequest,
-) (TicketOperationResult, error) {
+func (s service) UpsertTicketEvidenceStrategyChecklist(request TicketEvidenceStrategyChecklistRequest) (TicketOperationResult, error) {
 	ticket, err := s.ticketByKey(request.Key)
 	if err != nil {
 		return TicketOperationResult{}, err

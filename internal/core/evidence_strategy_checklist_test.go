@@ -19,9 +19,11 @@ func TestParseEvidenceStrategyChecklistParsesAnchoredBlock(t *testing.T) {
 	if !strategy.Checked {
 		t.Fatal("strategy Checked = false, want true")
 	}
+
 	if strategy.Status != "planned" {
 		t.Fatalf("strategy Status = %q, want planned", strategy.Status)
 	}
+
 	if strategy.Detail != "change_kind=bugfix; risk=medium; test_timing=before; note=regression" {
 		t.Fatalf("strategy Detail = %q", strategy.Detail)
 	}
@@ -30,6 +32,7 @@ func TestParseEvidenceStrategyChecklistParsesAnchoredBlock(t *testing.T) {
 	if gherkin.Checked {
 		t.Fatal("gherkin Checked = true, want false")
 	}
+
 	if gherkin.Status != "required" {
 		t.Fatalf("gherkin Status = %q, want required", gherkin.Status)
 	}
@@ -47,11 +50,40 @@ func TestParseEvidenceStrategyChecklistReportsMissingBlock(t *testing.T) {
 }
 
 func TestParseEvidenceStrategyChecklistRejectsMalformedBlocks(t *testing.T) {
-	for _, tt := range []struct {
-		name    string
-		content string
-		wantErr string
-	}{
+	for _, tt := range malformedEvidenceStrategyChecklistCases() {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := ParseEvidenceStrategyChecklist(tt.content)
+			if err == nil {
+				t.Fatal("ParseEvidenceStrategyChecklist returned nil error")
+			}
+
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("error = %q, want %q", err.Error(), tt.wantErr)
+			}
+		})
+	}
+}
+
+type malformedEvidenceStrategyChecklistCase struct {
+	name    string
+	content string
+	wantErr string
+}
+
+func malformedEvidenceStrategyChecklistCases() []malformedEvidenceStrategyChecklistCase {
+	return []malformedEvidenceStrategyChecklistCase{
+		malformedEvidenceStrategyChecklistAnchorCases()[0],
+		malformedEvidenceStrategyChecklistAnchorCases()[1],
+		malformedEvidenceStrategyChecklistDuplicateLabelCase(),
+		malformedEvidenceStrategyChecklistMissingLabelCase(),
+		malformedEvidenceStrategyChecklistCheckedStateCase(),
+		malformedEvidenceStrategyChecklistUnknownLabelCase(),
+		malformedEvidenceStrategyChecklistInvalidStatusCase(),
+	}
+}
+
+func malformedEvidenceStrategyChecklistAnchorCases() []malformedEvidenceStrategyChecklistCase {
+	return []malformedEvidenceStrategyChecklistCase{
 		{
 			name:    "end without start",
 			content: "# Ticket\n" + EvidenceStrategyChecklistEndAnchor + "\n",
@@ -64,67 +96,71 @@ func TestParseEvidenceStrategyChecklistRejectsMalformedBlocks(t *testing.T) {
 				"- [ ] Evidence strategy: planned\n",
 			wantErr: "start anchor without end anchor",
 		},
-		{
-			name: "duplicate label",
-			content: strings.Replace(
-				testEvidenceStrategyChecklistMarkdown(),
-				"- [ ] Evidence summary: pending",
-				"- [ ] Evidence summary: pending\n- [ ] Evidence summary: pending",
-				1,
-			),
-			wantErr: "duplicate evidence strategy checklist label: Evidence summary",
-		},
-		{
-			name: "missing label",
-			content: strings.Replace(
-				testEvidenceStrategyChecklistMarkdown(),
-				"- [ ] Tests: mixed; reason=unit and fuzz coverage\n",
-				"",
-				1,
-			),
-			wantErr: "missing evidence strategy checklist label: Tests",
-		},
-		{
-			name: "invalid checked state",
-			content: strings.Replace(
-				testEvidenceStrategyChecklistMarkdown(),
-				"- [ ] Tests: mixed",
-				"- [?] Tests: mixed",
-				1,
-			),
-			wantErr: "invalid checklist checked state",
-		},
-		{
-			name: "unknown label",
-			content: strings.Replace(
-				testEvidenceStrategyChecklistMarkdown(),
-				"- [ ] Tests: mixed",
-				"- [ ] Test plan: mixed",
-				1,
-			),
-			wantErr: "unknown evidence strategy checklist label: Test plan",
-		},
-		{
-			name: "invalid status",
-			content: strings.Replace(
-				testEvidenceStrategyChecklistMarkdown(),
-				"- [ ] Validation: pending",
-				"- [ ] Validation: maybe",
-				1,
-			),
-			wantErr: "invalid Validation status: maybe",
-		},
-	} {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := ParseEvidenceStrategyChecklist(tt.content)
-			if err == nil {
-				t.Fatal("ParseEvidenceStrategyChecklist returned nil error")
-			}
+	}
+}
 
-			if !strings.Contains(err.Error(), tt.wantErr) {
-				t.Fatalf("error = %q, want %q", err.Error(), tt.wantErr)
-			}
-		})
+func malformedEvidenceStrategyChecklistDuplicateLabelCase() malformedEvidenceStrategyChecklistCase {
+	return malformedEvidenceStrategyChecklistCase{
+		name: "duplicate label",
+		content: strings.Replace(
+			testEvidenceStrategyChecklistMarkdown(),
+			"- [ ] Evidence summary: pending",
+			"- [ ] Evidence summary: pending\n- [ ] Evidence summary: pending",
+			1,
+		),
+		wantErr: "duplicate evidence strategy checklist label: Evidence summary",
+	}
+}
+
+func malformedEvidenceStrategyChecklistMissingLabelCase() malformedEvidenceStrategyChecklistCase {
+	return malformedEvidenceStrategyChecklistCase{
+		name: "missing label",
+		content: strings.Replace(
+			testEvidenceStrategyChecklistMarkdown(),
+			"- [ ] Tests: mixed; reason=unit and fuzz coverage\n",
+			"",
+			1,
+		),
+		wantErr: "missing evidence strategy checklist label: Tests",
+	}
+}
+
+func malformedEvidenceStrategyChecklistCheckedStateCase() malformedEvidenceStrategyChecklistCase {
+	return malformedEvidenceStrategyChecklistCase{
+		name: "invalid checked state",
+		content: strings.Replace(
+			testEvidenceStrategyChecklistMarkdown(),
+			"- [ ] Tests: mixed",
+			"- [?] Tests: mixed",
+			1,
+		),
+		wantErr: "invalid checklist checked state",
+	}
+}
+
+func malformedEvidenceStrategyChecklistUnknownLabelCase() malformedEvidenceStrategyChecklistCase {
+	return malformedEvidenceStrategyChecklistCase{
+		name: "unknown label",
+		content: strings.Replace(
+			testEvidenceStrategyChecklistMarkdown(),
+			"- [ ] Tests: mixed",
+			"- [ ] Test plan: mixed",
+			1,
+		),
+		wantErr: "unknown evidence strategy checklist label: Test plan",
+	}
+}
+
+func malformedEvidenceStrategyChecklistInvalidStatusCase() malformedEvidenceStrategyChecklistCase {
+	return malformedEvidenceStrategyChecklistCase{
+		name: "invalid status",
+		content: strings.Replace(
+			testEvidenceStrategyChecklistMarkdown(),
+			"- [ ] Validation: pending",
+			"- [ ] Validation: maybe",
+			1,
+		),
+		wantErr: "invalid Validation status: maybe",
 	}
 }
 
@@ -281,11 +317,7 @@ func TestUpsertEvidenceStrategyChecklistRejectsMalformedExistingBlock(t *testing
 	}
 }
 
-func assertEvidenceStrategyChecklistItem(
-	t *testing.T,
-	checklist EvidenceStrategyChecklist,
-	label string,
-) EvidenceStrategyChecklistItem {
+func assertEvidenceStrategyChecklistItem(t *testing.T, checklist EvidenceStrategyChecklist, label string) EvidenceStrategyChecklistItem {
 	t.Helper()
 
 	item, ok := checklist.Item(label)

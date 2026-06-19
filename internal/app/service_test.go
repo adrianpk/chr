@@ -809,6 +809,33 @@ func TestServiceMutatesSelectedTicket(t *testing.T) {
 	}
 }
 
+func TestServiceUpsertTicketEvidenceStrategyChecklistPreservesTicketContent(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	ticketPath := writeServiceEvidenceStrategyTicket(t, projectDir)
+	operations := newTestService(t, projectDir)
+
+	result, err := operations.UpsertTicketEvidenceStrategyChecklist(TicketEvidenceStrategyChecklistRequest{
+		Key:       "CHC-1",
+		Checklist: serviceTestEvidenceStrategyChecklist(),
+	})
+	if err != nil {
+		t.Fatalf("UpsertTicketEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	if result.Message != "Updated evidence strategy checklist for ticket CHC-1." {
+		t.Fatalf("Message = %q", result.Message)
+	}
+
+	if len(result.Tickets) != 1 || result.Tickets[0].Key != "CHC-1" {
+		t.Fatalf("Tickets = %#v, want reloaded CHC-1", result.Tickets)
+	}
+
+	content := readServiceWorkspaceFile(t, ticketPath)
+	assertServiceEvidenceStrategyTicketContent(t, content)
+
+	assertServiceEvidenceStrategyValidationPending(t, content)
+}
+
 func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
@@ -830,6 +857,121 @@ func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
 
 	if result.Tickets == nil {
 		t.Fatal("Tickets = nil, want reloaded empty slice")
+	}
+}
+
+func serviceTestEvidenceStrategyChecklist() core.EvidenceStrategyChecklist {
+	return core.EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]core.EvidenceStrategyChecklistItem{
+			core.EvidenceStrategyChecklistLabelStrategy: {
+				Label:  core.EvidenceStrategyChecklistLabelStrategy,
+				Status: "planned",
+				Detail: "change_kind=bugfix; risk=medium; test_timing=before; note=regression",
+			},
+			core.EvidenceStrategyChecklistLabelGherkin: {
+				Label:  core.EvidenceStrategyChecklistLabelGherkin,
+				Status: "required",
+				Detail: "path=.chc/user/acceptance/bug.feature; reason=user-visible",
+			},
+			core.EvidenceStrategyChecklistLabelTests: {
+				Label:  core.EvidenceStrategyChecklistLabelTests,
+				Status: "mixed",
+				Detail: "reason=unit and fuzz coverage",
+			},
+			core.EvidenceStrategyChecklistLabelValidation: {
+				Label:  core.EvidenceStrategyChecklistLabelValidation,
+				Status: "pending",
+				Detail: "commands=make verify; evidence=none",
+			},
+			core.EvidenceStrategyChecklistLabelSummary: {
+				Label:  core.EvidenceStrategyChecklistLabelSummary,
+				Status: "pending",
+			},
+		},
+	}
+}
+
+func writeServiceEvidenceStrategyTicket(t *testing.T, projectDir string) string {
+	t.Helper()
+
+	return writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
+		Key:       "CHC-1",
+		Title:     "Do something",
+		Synopsis:  "Preserve ticket body while adding evidence strategy.",
+		Status:    core.TicketStatusReadyForDev,
+		CreatedAt: testTime(),
+		UpdatedAt: testTime(),
+		Body: `# Description
+
+Keep this description.
+
+# Comments
+
+Keep comments.
+
+# Blocker
+
+Keep blockers.
+
+# Validation
+
+Keep validation notes.
+`,
+	})
+}
+
+func assertServiceEvidenceStrategyTicketContent(t *testing.T, content string) {
+	t.Helper()
+
+	assertServiceTextOrder(t, content, core.EvidenceStrategyChecklistStartAnchor, "# Description")
+
+	for _, want := range []string{
+		"Keep this description.",
+		"# Comments\n\nKeep comments.",
+		"# Blocker\n\nKeep blockers.",
+		"# Validation\n\nKeep validation notes.",
+		`updated_at: "`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content missing %q:\n%s", want, content)
+		}
+	}
+}
+
+func assertServiceEvidenceStrategyValidationPending(t *testing.T, content string) {
+	t.Helper()
+
+	checklist, err := core.ParseEvidenceStrategyChecklist(content)
+	if err != nil {
+		t.Fatalf("ParseEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	validation, ok := checklist.Item(core.EvidenceStrategyChecklistLabelValidation)
+	if !ok {
+		t.Fatal("validation checklist item missing")
+	}
+
+	if validation.Status != "pending" {
+		t.Fatalf("validation status = %q, want pending", validation.Status)
+	}
+}
+
+func assertServiceTextOrder(t *testing.T, content, before, after string) {
+	t.Helper()
+
+	beforeIndex := strings.Index(content, before)
+	if beforeIndex < 0 {
+		t.Fatalf("content missing %q:\n%s", before, content)
+	}
+
+	afterIndex := strings.Index(content, after)
+	if afterIndex < 0 {
+		t.Fatalf("content missing %q:\n%s", after, content)
+	}
+
+	if beforeIndex >= afterIndex {
+		t.Fatalf("%q appears after %q in:\n%s", before, after, content)
 	}
 }
 

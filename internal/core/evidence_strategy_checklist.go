@@ -46,7 +46,7 @@ func ParseEvidenceStrategyChecklist(content string) (EvidenceStrategyChecklist, 
 		return EvidenceStrategyChecklist{Found: found}, err
 	}
 
-	items, err := parseEvidenceStrategyChecklistItems(block)
+	items, err := parseChecklistItems(block)
 	if err != nil {
 		return EvidenceStrategyChecklist{}, err
 	}
@@ -59,7 +59,7 @@ func ParseEvidenceStrategyChecklist(content string) (EvidenceStrategyChecklist, 
 
 // RenderEvidenceStrategyChecklist renders a deterministic v1 strategy block.
 func RenderEvidenceStrategyChecklist(checklist EvidenceStrategyChecklist) (string, error) {
-	items, err := requireEvidenceStrategyChecklistItems(checklist.Items)
+	items, err := requireChecklistItems(checklist.Items)
 	if err != nil {
 		return "", err
 	}
@@ -86,7 +86,7 @@ func UpsertEvidenceStrategyChecklist(content string, updates EvidenceStrategyChe
 		return "", err
 	}
 
-	checklist, err := evidenceStrategyChecklistForUpsert(existing, updates)
+	checklist, err := checklistForUpsert(existing, updates)
 	if err != nil {
 		return "", err
 	}
@@ -144,7 +144,7 @@ func evidenceStrategyChecklistBlock(content string) (string, bool, error) {
 	return content[start+len(EvidenceStrategyChecklistStartAnchor) : end], true, nil
 }
 
-func parseEvidenceStrategyChecklistItems(block string) (map[string]EvidenceStrategyChecklistItem, error) {
+func parseChecklistItems(block string) (map[string]EvidenceStrategyChecklistItem, error) {
 	items := map[string]EvidenceStrategyChecklistItem{}
 
 	for lineNumber, line := range strings.Split(block, "\n") {
@@ -169,7 +169,7 @@ func parseEvidenceStrategyChecklistItems(block string) (map[string]EvidenceStrat
 		items[item.Label] = item
 	}
 
-	return requireEvidenceStrategyChecklistItems(items)
+	return requireChecklistItems(items)
 }
 
 func parseEvidenceStrategyChecklistLine(line string) (EvidenceStrategyChecklistItem, bool, error) {
@@ -177,11 +177,13 @@ func parseEvidenceStrategyChecklistLine(line string) (EvidenceStrategyChecklistI
 		return EvidenceStrategyChecklistItem{}, false, nil
 	}
 
-	if len(line) < len("- [ ] ") || line[3] != ' ' && line[3] != 'x' && line[3] != 'X' || line[4] != ']' {
-		return EvidenceStrategyChecklistItem{}, true, fmt.Errorf("invalid checklist checked state")
+	checked, err := parseEvidenceStrategyChecklistChecked(line)
+	if err != nil {
+		return EvidenceStrategyChecklistItem{}, true, err
 	}
 
 	remainder := strings.TrimSpace(line[len("- [ ] "):])
+
 	label, value, found := strings.Cut(remainder, ":")
 	if !found {
 		return EvidenceStrategyChecklistItem{}, true, fmt.Errorf("checklist item requires label and value")
@@ -199,14 +201,30 @@ func parseEvidenceStrategyChecklistLine(line string) (EvidenceStrategyChecklistI
 
 	return EvidenceStrategyChecklistItem{
 		Label:   label,
-		Checked: line[3] == 'x' || line[3] == 'X',
+		Checked: checked,
 		Status:  status,
 		Detail:  detail,
 	}, true, nil
 }
 
+func parseEvidenceStrategyChecklistChecked(line string) (bool, error) {
+	if len(line) < len("- [ ] ") || line[4] != ']' {
+		return false, fmt.Errorf("invalid checklist checked state")
+	}
+
+	switch line[3] {
+	case ' ':
+		return false, nil
+	case 'x', 'X':
+		return true, nil
+	default:
+		return false, fmt.Errorf("invalid checklist checked state")
+	}
+}
+
 func parseEvidenceStrategyChecklistValue(value string) (string, string) {
 	value = strings.TrimSpace(value)
+
 	status, detail, found := strings.Cut(value, ";")
 	if !found {
 		return strings.TrimSpace(value), ""
@@ -215,12 +233,9 @@ func parseEvidenceStrategyChecklistValue(value string) (string, string) {
 	return strings.TrimSpace(status), strings.TrimSpace(detail)
 }
 
-func evidenceStrategyChecklistForUpsert(
-	existing EvidenceStrategyChecklist,
-	updates EvidenceStrategyChecklist,
-) (EvidenceStrategyChecklist, error) {
+func checklistForUpsert(existing, updates EvidenceStrategyChecklist) (EvidenceStrategyChecklist, error) {
 	if existing.Found {
-		return mergeEvidenceStrategyChecklists(existing, updates)
+		return mergeChecklists(existing, updates)
 	}
 
 	for label, item := range updates.Items {
@@ -232,10 +247,7 @@ func evidenceStrategyChecklistForUpsert(
 	return updates, nil
 }
 
-func mergeEvidenceStrategyChecklists(
-	existing EvidenceStrategyChecklist,
-	updates EvidenceStrategyChecklist,
-) (EvidenceStrategyChecklist, error) {
+func mergeChecklists(existing, updates EvidenceStrategyChecklist) (EvidenceStrategyChecklist, error) {
 	merged := EvidenceStrategyChecklist{
 		Found: true,
 		Items: map[string]EvidenceStrategyChecklistItem{},
@@ -279,6 +291,7 @@ func renderEvidenceStrategyChecklistItem(item EvidenceStrategyChecklistItem) str
 	}
 
 	value := strings.TrimSpace(item.Status)
+
 	detail := strings.TrimSpace(item.Detail)
 	if detail != "" {
 		value += "; " + detail
@@ -289,6 +302,7 @@ func renderEvidenceStrategyChecklistItem(item EvidenceStrategyChecklistItem) str
 
 func replaceEvidenceStrategyChecklistBlock(content, rendered string) (string, error) {
 	start := strings.Index(content, EvidenceStrategyChecklistStartAnchor)
+
 	end := strings.Index(content, EvidenceStrategyChecklistEndAnchor)
 	if start < 0 || end < 0 || end < start {
 		return "", fmt.Errorf("evidence strategy checklist anchors are required")
@@ -317,6 +331,7 @@ func evidenceStrategyChecklistInsertOffset(content string) int {
 	}
 
 	remaining := content[len("---\n"):]
+
 	end := strings.Index(remaining, "\n---")
 	if end < 0 {
 		return 0
@@ -325,9 +340,7 @@ func evidenceStrategyChecklistInsertOffset(content string) int {
 	return len("---\n") + end + len("\n---")
 }
 
-func requireEvidenceStrategyChecklistItems(
-	items map[string]EvidenceStrategyChecklistItem,
-) (map[string]EvidenceStrategyChecklistItem, error) {
+func requireChecklistItems(items map[string]EvidenceStrategyChecklistItem) (map[string]EvidenceStrategyChecklistItem, error) {
 	for _, label := range EvidenceStrategyChecklistLabels() {
 		if _, ok := items[label]; ok {
 			continue

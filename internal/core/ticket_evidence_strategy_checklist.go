@@ -27,10 +27,7 @@ func NewTicketEvidenceStrategyChecklistWriter() TicketEvidenceStrategyChecklistW
 }
 
 // UpsertEvidenceStrategyChecklist writes or updates the ticket evidence strategy block.
-func (w *ticketEvidenceStrategyChecklistWriter) UpsertEvidenceStrategyChecklist(
-	ctx context.Context,
-	opts UpsertTicketEvidenceStrategyChecklistOptions,
-) error {
+func (w *ticketEvidenceStrategyChecklistWriter) UpsertEvidenceStrategyChecklist(ctx context.Context, opts UpsertTicketEvidenceStrategyChecklistOptions) error {
 	err := ctx.Err()
 	if err != nil {
 		return err
