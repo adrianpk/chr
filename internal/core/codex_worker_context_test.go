@@ -209,6 +209,108 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *te
 	}
 }
 
+func TestRenderCodexWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) {
+	checklist := EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]EvidenceStrategyChecklistItem{
+			EvidenceStrategyChecklistLabelStrategy: {
+				Label:  EvidenceStrategyChecklistLabelStrategy,
+				Status: "planned",
+				Detail: "change_kind=docs_only; risk=low; test_timing=none",
+			},
+			EvidenceStrategyChecklistLabelGherkin: {
+				Label:  EvidenceStrategyChecklistLabelGherkin,
+				Status: "not_applicable",
+				Detail: "reason=documentation-only change",
+			},
+			EvidenceStrategyChecklistLabelTests: {
+				Label:  EvidenceStrategyChecklistLabelTests,
+				Status: "none",
+				Detail: "reason=no runtime behavior",
+			},
+			EvidenceStrategyChecklistLabelValidation: {
+				Label:  EvidenceStrategyChecklistLabelValidation,
+				Status: "pending",
+				Detail: "commands=docs review",
+			},
+			EvidenceStrategyChecklistLabelSummary: {
+				Label:  EvidenceStrategyChecklistLabelSummary,
+				Status: "pending",
+			},
+		},
+	}
+
+	opts := testCodexWorkerContextOptions("/tmp/context.md")
+	opts.Evidence = &CodexWorkerEvidenceStrategyContext{
+		Config:    DefaultEvidenceStrategyConfig(),
+		Checklist: &checklist,
+	}
+
+	content := RenderCodexWorkerContext(opts)
+
+	for _, want := range []string{
+		"- Evidence strategy: checked=false; status=planned; change_kind=docs_only",
+		"- Gherkin: checked=false; status=not_applicable; reason=documentation-only change",
+		"- Tests: checked=false; status=none; reason=no runtime behavior",
+		"- `evidence_summary`: required object with `strategy`, `produced`, and `validation`.",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("content does not contain %q:\n%s", want, content)
+		}
+	}
+}
+
+func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testing.T) {
+	checklist := EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]EvidenceStrategyChecklistItem{
+			EvidenceStrategyChecklistLabelStrategy: {
+				Label:  EvidenceStrategyChecklistLabelStrategy,
+				Status: "planned",
+				Detail: "change_kind=behavior; risk=high; test_timing=before",
+			},
+			EvidenceStrategyChecklistLabelGherkin: {
+				Label:  EvidenceStrategyChecklistLabelGherkin,
+				Status: "required",
+				Detail: "path=.chc/user/acceptance/checkout.feature",
+			},
+			EvidenceStrategyChecklistLabelTests: {
+				Label:  EvidenceStrategyChecklistLabelTests,
+				Status: "mixed",
+				Detail: "reason=unit table and fuzz coverage",
+			},
+			EvidenceStrategyChecklistLabelValidation: {
+				Label:  EvidenceStrategyChecklistLabelValidation,
+				Status: "pending",
+				Detail: "commands=make verify",
+			},
+			EvidenceStrategyChecklistLabelSummary: {
+				Label:  EvidenceStrategyChecklistLabelSummary,
+				Status: "pending",
+			},
+		},
+	}
+
+	opts := testCodexWorkerContextOptions("/tmp/context.md")
+	opts.Evidence = &CodexWorkerEvidenceStrategyContext{
+		Config:    DefaultEvidenceStrategyConfig(),
+		Checklist: &checklist,
+	}
+
+	content := RenderCodexWorkerContext(opts)
+
+	for _, want := range []string{
+		"- Evidence strategy: checked=false; status=planned; change_kind=behavior",
+		"- Gherkin: checked=false; status=required; path=.chc/user/acceptance/checkout.feature",
+		"- Tests: checked=false; status=mixed; reason=unit table and fuzz coverage",
+		"- `evidence_summary.deviations`: optional list of deviations from the planned strategy.",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("content does not contain %q:\n%s", want, content)
+		}
+	}
+}
+
 func TestMaterializeCodexWorkerContextForExecutionBlocksRepairWithoutReviewComments(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")

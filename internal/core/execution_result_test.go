@@ -117,6 +117,60 @@ func TestLoadExecutionResultRejectsMissingEvidenceSummary(t *testing.T) {
 	}
 }
 
+func TestLoadExecutionResultAcceptsEvidenceSummaryForChangeKinds(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{
+			name: "docs only",
+			content: `{
+				"execution_id": "exec-1",
+				"ticket_key": "CHC-1",
+				"status": "succeeded",
+				"summary": "updated docs",
+				"evidence_summary": {
+					"strategy": "docs-only strategy; tests not required",
+					"produced": "documentation updated",
+					"validation": "manual documentation review"
+				}
+			}`,
+			want: "docs-only strategy; tests not required",
+		},
+		{
+			name: "behavior change",
+			content: `{
+				"execution_id": "exec-1",
+				"ticket_key": "CHC-1",
+				"status": "succeeded",
+				"summary": "updated behavior",
+				"evidence_summary": {
+					"strategy": "behavior strategy; table tests and fuzzing",
+					"produced": "unit table tests, fuzz target, and Gherkin scenario",
+					"validation": "make verify passed",
+					"deviations": ["mutation testing not configured"],
+					"remaining_risk": ["manual CLI smoke deferred"]
+				}
+			}`,
+			want: "behavior strategy; table tests and fuzzing",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			path := writeExecutionResultFile(t, tt.content)
+
+			result, err := LoadExecutionResult(path)
+			if err != nil {
+				t.Fatalf("LoadExecutionResult returned error: %v", err)
+			}
+
+			if result.EvidenceSummary.Strategy != tt.want {
+				t.Fatalf("EvidenceSummary.Strategy = %q, want %q", result.EvidenceSummary.Strategy, tt.want)
+			}
+		})
+	}
+}
+
 func testExecutionResultEvidenceSummary() ExecutionResultEvidenceSummary {
 	return ExecutionResultEvidenceSummary{
 		Strategy:   "planned",
