@@ -309,6 +309,7 @@ func TestCleanupMergedTicketWorktreePrunesMissingMetadata(t *testing.T) {
 	dir := t.TempDir()
 	plan := testWorktreePlan(t, dir)
 	git := newFakeWorktreeGit()
+
 	writeWorktreeTestMetadata(t, plan)
 
 	result, err := CleanupMergedTicketWorktree(context.Background(), WorktreeCleanupOptions{

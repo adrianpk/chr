@@ -736,17 +736,25 @@ func checkWorkReadinessTicketWorktree(ctx context.Context, check workReadinessWo
 		return report, nil
 	}
 
+	report.TicketWorktree = workReadinessStateWithBaseFallback(inspection, report.TicketWorktree)
+
+	return addTicketWorktreeDiagnostic(report, inspection), nil
+}
+
+func workReadinessStateWithBaseFallback(inspection WorktreeInspection, fallback WorkReadinessWorkspaceState) WorkReadinessWorkspaceState {
 	state := workReadinessStateFromInspection(inspection)
 	if state.BaseRef == "" {
-		state.BaseRef = report.TicketWorktree.BaseRef
+		state.BaseRef = fallback.BaseRef
 	}
 
 	if state.BaseSHA == "" {
-		state.BaseSHA = report.TicketWorktree.BaseSHA
+		state.BaseSHA = fallback.BaseSHA
 	}
 
-	report.TicketWorktree = state
+	return state
+}
 
+func addTicketWorktreeDiagnostic(report WorkReadinessReport, inspection WorktreeInspection) WorkReadinessReport {
 	switch inspection.State {
 	case WorktreeStateDirty:
 		report.Diagnostics = append(report.Diagnostics, dirtyTicketWorktreeDiagnostic(inspection))
@@ -758,7 +766,7 @@ func checkWorkReadinessTicketWorktree(ctx context.Context, check workReadinessWo
 		report = checkStaleWorktreeMetadata(report, inspection)
 	}
 
-	return report, nil
+	return report
 }
 
 func checkStaleWorktreeMetadata(report WorkReadinessReport, inspection WorktreeInspection) WorkReadinessReport {

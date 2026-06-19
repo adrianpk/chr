@@ -83,6 +83,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 	git := newFakeWorktreeGit()
 	git.entries = []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}}
 	writeWorktreeTestMetadata(t, plan)
+
 	remote := fakeTicketMergeCommandRemote{
 		snapshot: mergeCommandSnapshot(),
 		merge: MergeResult{
