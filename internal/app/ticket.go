@@ -1028,7 +1028,7 @@ func executeLoopTicket(
 		return record, core.ResultApplication{}, err
 	}
 
-	plan, err := buildTicketApplyResultPlanForRecord(projectContext, record)
+	plan, err := buildTicketApplyResultPlanForRecord(ctx, projectContext, record)
 	if err != nil {
 		return record, core.ResultApplication{}, err
 	}
@@ -1182,10 +1182,11 @@ func buildTicketApplyResultPlan(
 		return ticketApplyResultPlan{}, err
 	}
 
-	return buildTicketApplyResultPlanForRecord(projectContext, record)
+	return buildTicketApplyResultPlanForRecord(ctx, projectContext, record)
 }
 
 func buildTicketApplyResultPlanForRecord(
+	ctx context.Context,
 	projectContext commandProjectContext,
 	record core.ExecutionRecord,
 ) (ticketApplyResultPlan, error) {
@@ -1198,7 +1199,7 @@ func buildTicketApplyResultPlanForRecord(
 		return ticketApplyResultPlan{}, err
 	}
 
-	readiness, err := ticketEvidenceReadiness(ticketEvidenceRequest{
+	readiness, err := ticketEvidenceReadiness(ctx, ticketEvidenceRequest{
 		ProjectDir: projectContext.ProjectDir,
 		TicketPath: record.TicketPath,
 		Execution:  &record,

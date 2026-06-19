@@ -3834,6 +3834,7 @@ func TestTicketApplyResultBlocksActiveApplicableGherkinNotApplicable(t *testing.
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	writeCLIAcceptanceFeature(t, projectDir, ".chc/user/acceptance/onboarding.feature")
+
 	ticket := testTicketWithReviewRef()
 	ticket.Body = testApplyResultTicketBody(t)
 	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)

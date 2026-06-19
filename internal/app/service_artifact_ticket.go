@@ -400,7 +400,7 @@ func (s service) validateReadyForReviewEvidence(ticket core.IndexedTicket, statu
 		return nil
 	}
 
-	readiness, err := ticketEvidenceReadiness(ticketEvidenceRequest{
+	readiness, err := ticketEvidenceReadiness(s.ctx, ticketEvidenceRequest{
 		ProjectDir: s.projectContext.ProjectDir,
 		TicketPath: ticket.Path,
 	})

@@ -74,7 +74,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 		return AgentWorkResult{}, err
 	}
 
-	plan, err := buildTicketApplyResultPlanForRecord(s.projectContext, record)
+	plan, err := buildTicketApplyResultPlanForRecord(s.ctx, s.projectContext, record)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}

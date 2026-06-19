@@ -9,19 +9,13 @@ import (
 )
 
 type ticketEvidenceRequest struct {
-	Context    context.Context
 	ProjectDir string
 	TicketPath string
 	Execution  *core.ExecutionRecord
 	Result     *core.ExecutionResult
 }
 
-func ticketEvidenceReadiness(request ticketEvidenceRequest) (core.EvidenceReadinessResult, error) {
-	ctx := request.Context
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
+func ticketEvidenceReadiness(ctx context.Context, request ticketEvidenceRequest) (core.EvidenceReadinessResult, error) {
 	config, err := core.LoadWorkspaceConfig(request.ProjectDir)
 	if err != nil {
 		return core.EvidenceReadinessResult{}, fmt.Errorf("load evidence strategy config: %w", err)
