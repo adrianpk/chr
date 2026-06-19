@@ -2,7 +2,7 @@
 
 Status: active
 
-Active Slice: none
+Active Slice: Slice 3 - worker strategy context
 
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 
