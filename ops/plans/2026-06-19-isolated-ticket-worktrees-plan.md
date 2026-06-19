@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 1: workspace execution config
+Active Slice: none
 
 Tracker: `ops/trackers/2026-06-19-isolated-ticket-worktrees-tracker.md`
 

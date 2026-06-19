@@ -1,6 +1,6 @@
 # Isolated Ticket Worktrees Tracker
 
-Status: reviewing
+Status: in_progress
 
 Plan: `ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md`
 
@@ -10,7 +10,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | workspace execution config | reviewing | `feat/slice-1-workspace-execution-config` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
+| Slice 1 | workspace execution config | delivered | `feat/slice-1-workspace-execution-config` | `#328` | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
 | Slice 2 | worktree state service | planned | `feat/slice-2-worktree-state-service` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
 | Slice 3 | readiness workspace split | planned | `feat/slice-3-readiness-workspace-split` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
 | Slice 4 | runtime workspace mount | planned | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
@@ -29,7 +29,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | T1.4 | Add config parser and validation coverage for omitted defaults, explicit worktree settings, and invalid enum values. | done | `1c7bfdc` | Added table-driven parser and validation coverage. |
 | T1.5 | Add runtime plan value fields for project checkout vs execution workspace without changing harness mount behavior. | done | `df7f790` | Runtime plan records execution workspace metadata while mounts remain project-based. |
 | T1.6 | Document the config fields and migration posture in reference docs. | done | `3ce20bc` | Reference docs mark worktree behavior as configured/planned. |
-| T1.7 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
+| T1.7 | Add the slice implementation report and validation evidence. | done | `76449ea` | Report delivered through PR `#328`. |
 
 ## Slice 2 Tasks
 
