@@ -20,6 +20,7 @@ type ExecutionReport struct {
 	TicketPath     string
 	Execution      ExecutionReportExecution
 	Runtime        ExecutionReportRuntime
+	Workspace      ExecutionReportWorkspace
 	Artifacts      ExecutionReportArtifacts
 	Result         ExecutionReportResult
 	Validation     ExecutionReportValidation
@@ -45,6 +46,16 @@ type ExecutionReportRuntime struct {
 	DockerfilePath    string
 	ContainerWorkdir  string
 	ValidationCommand string
+}
+
+// ExecutionReportWorkspace describes execution workspace metadata.
+type ExecutionReportWorkspace struct {
+	Mode                  WorkWorkspaceMode
+	ProjectCheckoutDir    string
+	ExecutionWorkspaceDir string
+	BaseRef               string
+	BaseSHA               string
+	TicketBranch          string
 }
 
 // ExecutionReportArtifacts describes a package boundary value.
@@ -181,6 +192,14 @@ func executionReportFromRecord(record ExecutionRecord) ExecutionReport {
 			ContainerWorkdir:  record.Runtime.ContainerWorkdir,
 			ValidationCommand: record.Runtime.ValidationCommand,
 		},
+		Workspace: ExecutionReportWorkspace{
+			Mode:                  record.Workspace.Mode,
+			ProjectCheckoutDir:    record.Workspace.ProjectCheckoutDir,
+			ExecutionWorkspaceDir: record.Workspace.ExecutionWorkspaceDir,
+			BaseRef:               record.Workspace.BaseRef,
+			BaseSHA:               record.Workspace.BaseSHA,
+			TicketBranch:          record.Workspace.TicketBranch,
+		},
 		Artifacts: ExecutionReportArtifacts{
 			RunDir:         record.Artifacts.RunDir,
 			ResultPath:     record.Artifacts.ResultPath,
@@ -303,6 +322,7 @@ func RenderExecutionReportMarkdown(report ExecutionReport) string {
 	writeExecutionReportSummary(&output, report)
 	writeExecutionReportTimes(&output, report)
 	writeExecutionReportRuntime(&output, report.Runtime)
+	writeExecutionReportWorkspace(&output, report.Workspace)
 	writeExecutionReportArtifacts(&output, report.Artifacts)
 	writeExecutionReportValidation(&output, report.Validation)
 	writeExecutionReportResult(&output, report.Result)
@@ -421,6 +441,17 @@ func writeExecutionReportRuntime(output *strings.Builder, runtime ExecutionRepor
 	writeExecutionReportField(output, "dockerfile", runtime.DockerfilePath)
 	writeExecutionReportField(output, "container_workdir", runtime.ContainerWorkdir)
 	writeExecutionReportField(output, "validation_command", runtime.ValidationCommand)
+	output.WriteString("\n")
+}
+
+func writeExecutionReportWorkspace(output *strings.Builder, workspace ExecutionReportWorkspace) {
+	output.WriteString("## Workspace\n\n")
+	writeExecutionReportField(output, "mode", string(workspace.Mode))
+	writeExecutionReportField(output, "project_checkout_dir", workspace.ProjectCheckoutDir)
+	writeExecutionReportField(output, "execution_workspace_dir", workspace.ExecutionWorkspaceDir)
+	writeExecutionReportField(output, "base_ref", workspace.BaseRef)
+	writeExecutionReportField(output, "base_sha", workspace.BaseSHA)
+	writeExecutionReportField(output, "ticket_branch", workspace.TicketBranch)
 	output.WriteString("\n")
 }
 

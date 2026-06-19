@@ -29,6 +29,7 @@ type ExecutionRecord struct {
 	TicketPath    string
 	Status        ExecutionStatus
 	Runtime       ExecutionRuntimeRef
+	Workspace     ExecutionWorkspaceRef
 	Artifacts     ExecutionArtifacts
 	FailureReason string
 	CreatedAt     time.Time
@@ -43,6 +44,16 @@ type ExecutionRuntimeRef struct {
 	DockerfilePath    string
 	ContainerWorkdir  string
 	ValidationCommand string
+}
+
+// ExecutionWorkspaceRef describes where the agent work ran.
+type ExecutionWorkspaceRef struct {
+	Mode                  WorkWorkspaceMode
+	ProjectCheckoutDir    string
+	ExecutionWorkspaceDir string
+	BaseRef               string
+	BaseSHA               string
+	TicketBranch          string
 }
 
 // ExecutionArtifacts describes a package boundary value.
@@ -60,6 +71,14 @@ func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan RuntimePlan) Ex
 		DockerfilePath:    plan.DockerfilePath,
 		ContainerWorkdir:  plan.ContainerWorkdir,
 		ValidationCommand: plan.ValidationCommand,
+	}
+	record.Workspace = ExecutionWorkspaceRef{
+		Mode:                  plan.WorkspaceMode,
+		ProjectCheckoutDir:    plan.ProjectCheckoutDir,
+		ExecutionWorkspaceDir: plan.ExecutionWorkspaceDir,
+		BaseRef:               plan.WorkspaceBaseRef,
+		BaseSHA:               plan.WorkspaceBaseSHA,
+		TicketBranch:          plan.TicketBranch,
 	}
 	record.Artifacts = ExecutionArtifacts{
 		RunDir:         plan.RunArtifactDir,

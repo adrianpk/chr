@@ -191,15 +191,21 @@ func TestValidateExecutionRecordRejectsFinishedBeforeStarted(t *testing.T) {
 func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 	dir := t.TempDir()
 	plan := RuntimePlan{
-		Image:             "chc-agent-runtime:local",
-		DockerfilePath:    filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-		ContainerWorkdir:  "/workspace",
-		RunArtifactDir:    filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1"),
-		WorkerContextPath: filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "context.md"),
-		ResultPath:        filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "result.json"),
-		LogPath:           filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "runtime.log"),
-		ValidationPath:    filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "validation.log"),
-		ValidationCommand: "make verify",
+		Image:                 "chc-agent-runtime:local",
+		DockerfilePath:        filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		ContainerWorkdir:      "/workspace",
+		WorkspaceMode:         WorkWorkspaceModeWorktree,
+		ProjectCheckoutDir:    dir,
+		ExecutionWorkspaceDir: filepath.Join(dir, ".chc", "user", "worktrees", "CHC-1"),
+		WorkspaceBaseRef:      "origin/dev",
+		WorkspaceBaseSHA:      "abc123",
+		TicketBranch:          "chc/CHC-1",
+		RunArtifactDir:        filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1"),
+		WorkerContextPath:     filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "context.md"),
+		ResultPath:            filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "result.json"),
+		LogPath:               filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "runtime.log"),
+		ValidationPath:        filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "validation.log"),
+		ValidationCommand:     "make verify",
 	}
 
 	record := ExecutionRecordFromRuntimePlan(ExecutionRecord{ID: "exec-1"}, plan)
@@ -218,6 +224,18 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 
 	if record.Artifacts.ValidationPath != plan.ValidationPath {
 		t.Fatalf("Artifacts.ValidationPath = %q, want %q", record.Artifacts.ValidationPath, plan.ValidationPath)
+	}
+
+	if record.Workspace.Mode != WorkWorkspaceModeWorktree {
+		t.Fatalf("Workspace.Mode = %q, want worktree", record.Workspace.Mode)
+	}
+
+	if record.Workspace.ExecutionWorkspaceDir != plan.ExecutionWorkspaceDir {
+		t.Fatalf("Workspace.ExecutionWorkspaceDir = %q, want %q", record.Workspace.ExecutionWorkspaceDir, plan.ExecutionWorkspaceDir)
+	}
+
+	if record.Workspace.TicketBranch != "chc/CHC-1" {
+		t.Fatalf("Workspace.TicketBranch = %q, want chc/CHC-1", record.Workspace.TicketBranch)
 	}
 }
 
