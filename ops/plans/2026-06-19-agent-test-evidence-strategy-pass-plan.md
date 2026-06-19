@@ -1,8 +1,8 @@
 # Agent Test/Evidence Strategy Pass Plan
 
-Status: active
+Status: delivered
 
-Active Slice: Slice 6 - evidence visibility docs
+Active Slice: none
 
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 

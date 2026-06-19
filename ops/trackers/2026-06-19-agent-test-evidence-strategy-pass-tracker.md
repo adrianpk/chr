@@ -1,6 +1,6 @@
 # Agent Test/Evidence Strategy Pass Tracker
 
-Status: active
+Status: delivered
 
 Plan: `ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md`
 
@@ -17,7 +17,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 | Slice 3 | worker strategy context | delivered | `feat/slice-3-worker-strategy-context` | `#322` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-3-worker-strategy-context.md` |
 | Slice 4 | review evidence gate | delivered | `feat/slice-4-review-evidence-gate` | `#323` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-4-review-evidence-gate.md` |
 | Slice 5 | gherkin test policy | delivered | `feat/slice-5-gherkin-test-policy` | `#324` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-5-gherkin-test-policy.md` |
-| Slice 6 | evidence visibility docs | reviewing | `feat/slice-6-evidence-visibility-docs` | `#325` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md` |
+| Slice 6 | evidence visibility docs | delivered | `feat/slice-6-evidence-visibility-docs` | `#325` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md` |
 
 ## Slice 1 Tasks
 
@@ -121,6 +121,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 - Slice 6: `make qa-smoke-tictactoe` (pass)
 - Slice 6: `make lint-strict` (pass)
 - Slice 6: `make verify` (pass)
+- Slice 6: PR `#325` merged to `dev` on 2026-06-19.
 
 ## Notes
 
