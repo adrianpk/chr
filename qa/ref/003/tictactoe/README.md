@@ -23,3 +23,18 @@ chc
 
 The intended exercise is to generate the spec, generate the plan, create plan
 tracking, then run the generated ready tickets through the agent-work loop.
+
+The reference also includes evidence strategy examples under:
+
+```text
+.chc/user/evidence-examples/
+```
+
+Those examples cover:
+
+- documentation work where no tests or Gherkin are needed;
+- CLI behavior work where active Gherkin is required;
+- blocked validation that should prevent review handoff.
+
+The acceptance feature at `.chc/user/acceptance/cli-gameplay.feature` makes
+Gherkin active for observable CLI behavior during evidence strategy decisions.

@@ -69,4 +69,23 @@ if ! "$repo_root/scripts/qa/test.sh" "$case_name" >"$output_file" 2>&1; then
 	exit 1
 fi
 
+if [ "$case_name" = "tictactoe" ]; then
+	for fixture in \
+		".chc/user/acceptance/cli-gameplay.feature" \
+		".chc/user/evidence-examples/docs-no-tests.md" \
+		".chc/user/evidence-examples/behavior-gherkin.md" \
+		".chc/user/evidence-examples/blocked-validation.md"
+	do
+		if [ ! -f "$active_dir/$fixture" ]; then
+			echo "qa smoke failed: missing tictactoe evidence fixture $fixture" >&2
+			exit 1
+		fi
+	done
+
+	if ! grep -q 'Validation: blocked' "$active_dir/.chc/user/evidence-examples/blocked-validation.md"; then
+		echo "qa smoke failed: blocked validation fixture is missing blocked evidence" >&2
+		exit 1
+	fi
+fi
+
 echo "qa smoke ok: qa/project/$case_name reset, ignored, git-initialized, and tests passed"
