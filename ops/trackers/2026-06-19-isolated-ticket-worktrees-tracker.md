@@ -1,0 +1,148 @@
+# Isolated Ticket Worktrees Tracker
+
+Status: planned
+
+Plan: `ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md`
+
+Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
+
+## Slice Status
+
+| Slice | Short Name | Status | Branch | PR | Report |
+| --- | --- | --- | --- | --- | --- |
+| Slice 1 | workspace execution config | planned | `feat/slice-1-workspace-execution-config` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
+| Slice 2 | worktree state service | planned | `feat/slice-2-worktree-state-service` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
+| Slice 3 | readiness workspace split | planned | `feat/slice-3-readiness-workspace-split` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
+| Slice 4 | runtime workspace mount | planned | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
+| Slice 5 | execution workspace results | planned | `feat/slice-5-execution-workspace-results` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
+| Slice 6 | branch and PR lifecycle | planned | `feat/slice-6-branch-and-pr-lifecycle` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
+| Slice 7 | review repair and cleanup | planned | `feat/slice-7-review-repair-and-cleanup` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
+| Slice 8 | docs and QA proving | planned | `feat/slice-8-docs-and-qa-proving` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
+
+## Slice 1 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T1.1 | Add workspace execution config fields under the existing work/runtime configuration boundary. | pending | pending | Decide final placement while preserving config compatibility. |
+| T1.2 | Define controlled values for workspace mode, worktree base policy, worktree cleanup policy, and worktree root. | pending | pending | Keep values explicit and documented. |
+| T1.3 | Set defaults that preserve current project-mounted execution behavior in existing workspaces. | pending | pending | No behavior switch in Slice 1. |
+| T1.4 | Add config parser and validation coverage for omitted defaults, explicit worktree settings, and invalid enum values. | pending | pending | Table-driven tests expected. |
+| T1.5 | Add runtime plan value fields for project checkout vs execution workspace without changing harness mount behavior. | pending | pending | Prepares later slices. |
+| T1.6 | Document the config fields and migration posture in reference docs. | pending | pending | Mark behavior as configured/planned where not enforced yet. |
+| T1.7 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+
+## Slice 2 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T2.1 | Add a Git worktree planning model with ticket key, branch, base ref, base SHA, root, and target path. | pending | pending | Core package boundary. |
+| T2.2 | Add a command abstraction for `git fetch`, `git rev-parse`, `git branch`, `git worktree add`, `git worktree list`, and `git status`. | pending | pending | Prefer deterministic fake executor tests. |
+| T2.3 | Implement deterministic worktree path selection using the configured root and ticket key. | pending | pending | Sanitize ticket key/path safely. |
+| T2.4 | Implement safe creation from the fetched remote integration ref. | pending | pending | No local checkout base by default. |
+| T2.5 | Implement inspection and diagnostics for missing, clean, dirty, mismatched, branch-in-use, and orphaned worktree states. | pending | pending | Diagnostics should be stable. |
+| T2.6 | Add optional metadata read/write for ticket worktree identity and last execution hints. | pending | pending | Metadata advisory; Git remains source of truth. |
+| T2.7 | Add table-driven service tests with fake Git command output and temp repositories where useful. | pending | pending | Cover path and state variants. |
+| T2.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+
+## Slice 3 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T3.1 | Extend work readiness input with workspace mode and optional ticket key. | pending | pending | Keep legacy callers compatible. |
+| T3.2 | Split dirty-state diagnostics into user checkout and ticket worktree diagnostics. | pending | pending | Avoid ambiguous `dirty_worktree` wording where possible. |
+| T3.3 | Make user checkout dirtiness informational in worktree mode. | pending | pending | This is the main user-facing behavior change. |
+| T3.4 | Make ticket worktree dirtiness blocking in worktree mode. | pending | pending | Dirty worktree cannot be discarded automatically. |
+| T3.5 | Add remote-base diagnostics for failed fetch and missing `<remote>/<integration_branch>`. | pending | pending | Remote base is operational truth. |
+| T3.6 | Update `chc work doctor` output and service models to expose both workspace states. | pending | pending | Include readable state fields. |
+| T3.7 | Add safe repair coverage for fetch, root creation, and non-destructive worktree metadata pruning. | pending | pending | Safe repair must remain non-destructive. |
+| T3.8 | Add CLI/service/TUI tests for legacy mode and worktree mode readiness. | pending | pending | Preserve current project mode behavior. |
+| T3.9 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+
+## Slice 4 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T4.1 | Extend `RuntimePlan` with execution workspace host path and workspace mode metadata. | pending | pending | Must preserve current path display in project mode. |
+| T4.2 | Update runtime mount planning to use `ExecutionWorkspaceDir` as the writable project workspace mount source. | pending | pending | The Docker mount source changes only in worktree mode. |
+| T4.3 | Preserve existing project-mode mount output exactly where possible. | pending | pending | Regression protection. |
+| T4.4 | Update context artifact link rendering so container paths are derived from the execution workspace. | pending | pending | Container paths should remain stable. |
+| T4.5 | Add worker context fields for project checkout, execution workspace, base ref, base SHA, and ticket branch. | pending | pending | Helps agents and humans understand boundary. |
+| T4.6 | Update runtime validation output to show the execution workspace. | pending | pending | Useful before actual runs. |
+| T4.7 | Add harness invocation and runtime plan tests for project and worktree modes. | pending | pending | Include Docker mount assertions. |
+| T4.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+
+## Slice 5 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T5.1 | Extend execution record/runtime report models with workspace mode, execution workspace path, base ref, base SHA, and ticket branch. | pending | pending | Durable enough for later review. |
+| T5.2 | Add persistence migration or compatible report-only fallback for the new execution workspace metadata. | pending | pending | Prefer durable record if schema impact is manageable. |
+| T5.3 | Update changed-file discovery to accept an explicit workspace root. | pending | pending | Must not inspect user checkout in worktree mode. |
+| T5.4 | Ensure discovered paths are normalized relative to the project root semantics, not absolute worktree paths. | pending | pending | Result JSON remains project-relative. |
+| T5.5 | Update result application to load execution workspace metadata and inspect the right Git state. | pending | pending | Review/evidence gates still apply. |
+| T5.6 | Add tests proving user checkout changes are ignored during result discovery in worktree mode. | pending | pending | Core value of this slicing. |
+| T5.7 | Add tests proving validation and evidence gates still use the same result contract. | pending | pending | Avoid regressions from workspace split. |
+| T5.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+
+## Slice 6 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T6.1 | Define branch selection rules for tickets with and without existing `branch` metadata. | pending | pending | Ticket metadata should become operational. |
+| T6.2 | Integrate worktree preparation into ticket start/work execution before runtime context materialization. | pending | pending | Runtime should see prepared workspace. |
+| T6.3 | Add branch creation from `origin/<integration_branch>` with conflict diagnostics. | pending | pending | No silent local checkout base. |
+| T6.4 | Ensure worktree checkout and branch state are recorded in ticket, execution, and event evidence. | pending | pending | Visible in Dash/reports. |
+| T6.5 | Confirm host-side commit/push/PR creation reads from the ticket worktree in worktree mode. | pending | pending | Worker container does not need to push. |
+| T6.6 | Add run-all tests proving sequential worktree preparation without pre-creating the full queue. | pending | pending | Preserve one active task. |
+| T6.7 | Add conflict tests for branch already exists with unrelated history or unsafe remote state. | pending | pending | Block instead of reset. |
+| T6.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+
+## Slice 7 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T7.1 | Add review-repair worktree lookup using ticket branch and PR metadata. | pending | pending | Repair should reuse ticket workspace. |
+| T7.2 | Add safe recreation of missing repair worktrees from valid ticket branches. | pending | pending | Recreate only when safe. |
+| T7.3 | Add dirty repair worktree diagnostics and stop conditions. | pending | pending | No destructive cleanup. |
+| T7.4 | Add cleanup operation for clean merged ticket worktrees. | pending | pending | `after_merge` policy. |
+| T7.5 | Add cleanup blockers for dirty, mismatched, or unknown worktrees. | pending | pending | Explicit manual state. |
+| T7.6 | Add doctor reporting and safe repair hooks for orphaned clean worktrees. | pending | pending | Keep hygiene local-first. |
+| T7.7 | Add tests for repair reuse, missing-worktree recreation, dirty blockers, idempotent cleanup, and no dirty deletion. | pending | pending | Safety-critical coverage. |
+| T7.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+
+## Slice 8 Tasks
+
+| Task | Description | Status | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| T8.1 | Update runtime config, work readiness, ticket execution, and user guide docs. | pending | pending | Explain default and migration posture. |
+| T8.2 | Update Dash/TUI reference docs for workspace visibility. | pending | pending | User should know where agent writes. |
+| T8.3 | Add or update QA reference fixtures to exercise isolated worktree mode. | pending | pending | Resettable scenarios required. |
+| T8.4 | Add smoke scripts or make targets for the worktree QA scenarios. | pending | pending | Prefer reusable commands. |
+| T8.5 | Run end-to-end QA proving with a dirty user checkout and a clean ticket worktree. | pending | pending | Proves core user benefit. |
+| T8.6 | Record the default-switch decision in tracker notes with validation evidence. | pending | pending | Do not flip default without evidence. |
+| T8.7 | Add the slice implementation report and final cycle report. | pending | pending | Final report summarizes all slices. |
+
+## Validation Log
+
+- Planning: `git diff --check` (pass)
+
+## Open Decisions
+
+- Final config placement: `work.workspace_mode` versus `runtime.workspace_mode`.
+- Whether execution workspace metadata requires a SQLite migration in Slice 5
+  or can remain report-only until the behavior is proven.
+- Whether worktree metadata should be central-only, file-based under the
+  worktree root, or both.
+- Whether `worktree` becomes the default for new projects during Slice 8 or
+  remains opt-in until another proving cycle.
+
+## Notes
+
+- This slicing intentionally starts with config and planning models before
+  introducing Git worktree mutation.
+- Worktree execution must not copy uncommitted user checkout changes into agent
+  workspaces.
+- The user checkout can be stale or dirty in worktree mode; the fetched remote
+  integration ref is the default operational base.
+- The first implementation should prefer clear diagnostics over automatic
+  repair whenever Git state is ambiguous.
