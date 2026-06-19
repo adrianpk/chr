@@ -61,6 +61,33 @@ func TestRenderMainContextPackageUsesDockerVisiblePaths(t *testing.T) {
 	}
 }
 
+func TestRenderMainContextPackageUsesWorktreeDockerVisiblePaths(t *testing.T) {
+	projectDir := t.TempDir()
+	executionWorkspaceDir := filepath.Join(projectDir, ".chc", "user", "worktrees", "CHC-1")
+	runDir := filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	plan := testContextPackageRuntimePlan(projectDir, runDir)
+	plan.ProjectCheckoutDir = projectDir
+	plan.ExecutionWorkspaceDir = executionWorkspaceDir
+	plan.WorkspaceMode = WorkWorkspaceModeWorktree
+	composition := testContextPackageComposition(t, plan)
+
+	rendered := RenderMainContextPackage(MaterializeContextPackageOptions{
+		Composition: composition,
+		Plan:        plan,
+	})
+
+	for _, want := range []string{
+		"/workspace/.chc/user/runtime/runs/CHC-1/exec-1/context/agent.md",
+		"/workspace/.chc/user/runtime/runs/CHC-1/exec-1/context/code-context.md",
+		"/workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
+		"host: `" + filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1", "result.json") + "`",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("main context missing %q:\n%s", want, rendered)
+		}
+	}
+}
+
 func TestRenderContextPackageDryRunShowsIncludedAndSkippedSources(t *testing.T) {
 	dir := t.TempDir()
 	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")

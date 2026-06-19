@@ -134,6 +134,54 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 	}
 }
 
+func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
+	projectDir := t.TempDir()
+	executionWorkspaceDir := filepath.Join(projectDir, ".chc", "user", "worktrees", "CHC-1")
+
+	plan, err := PlanRuntime(RuntimePlanOptions{
+		ProjectDir: projectDir,
+		Workspace: WorkWorkspaceConfig{
+			Mode:            WorkWorkspaceModeWorktree,
+			WorktreeRoot:    DefaultWorktreeRoot,
+			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		},
+		ExecutionWorkspaceDir: executionWorkspaceDir,
+		TicketKey:             "CHC-1",
+		RunID:                 "exec-123",
+	})
+	if err != nil {
+		t.Fatalf("PlanRuntime returned error: %v", err)
+	}
+
+	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		ExecutionID: "exec-123",
+		TicketKey:   "CHC-1",
+		TicketPath:  filepath.Join(executionWorkspaceDir, ".chc", "user", "tickets", "CHC-1.md"),
+		Plan:        plan,
+	})
+	if err != nil {
+		t.Fatalf("NewHarnessInvocation returned error: %v", err)
+	}
+
+	wantVolume := executionWorkspaceDir + ":/workspace"
+	if !slices.Contains(invocation.Run.Args, wantVolume) {
+		t.Fatalf("Run.Args missing worktree volume %q: %#v", wantVolume, invocation.Run.Args)
+	}
+
+	for _, want := range []string{
+		"CHC_TICKET_PATH=/workspace/.chc/user/tickets/CHC-1.md",
+		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/context.md",
+		"CHC_RESULT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/result.json",
+		"CHC_LOG_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/runtime.log",
+		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
+	} {
+		if !slices.Contains(invocation.Run.Args, want) {
+			t.Fatalf("Run.Args missing %q: %#v", want, invocation.Run.Args)
+		}
+	}
+}
+
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	_, err := NewHarnessInvocation(HarnessInvocationOptions{
 		TicketKey:  "CHC-1",

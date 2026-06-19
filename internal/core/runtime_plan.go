@@ -79,9 +79,9 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 
 	executionWorkspaceDir := runtimeExecutionWorkspaceDir(projectDir, workspace.Mode, opts.ExecutionWorkspaceDir)
 
-	workspaceDir := filepath.Join(projectDir, DirectoryName)
+	workspaceDir := filepath.Join(executionWorkspaceDir, DirectoryName)
 	dockerfilePath := resolveProjectPath(projectDir, config.DockerfilePath)
-	artifactDir := resolveProjectPath(projectDir, config.ArtifactDir)
+	artifactDir := resolveProjectPath(executionWorkspaceDir, config.ArtifactDir)
 	runArtifactDir := artifactDir
 
 	if opts.TicketKey != "" && opts.RunID != "" {

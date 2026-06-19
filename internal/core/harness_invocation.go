@@ -173,12 +173,21 @@ func dockerVolumeArg(mount RuntimeMount) string {
 }
 
 func containerProjectPath(plan RuntimePlan, path string) string {
-	relative, err := filepath.Rel(plan.ProjectDir, path)
+	relative, err := filepath.Rel(plan.ContainerPathHostRoot(), path)
 	if err != nil || strings.HasPrefix(relative, "..") || filepath.IsAbs(relative) {
 		return filepath.ToSlash(path)
 	}
 
 	return cleanContainerPath(filepath.ToSlash(filepath.Join(plan.ContainerWorkdir, relative)))
+}
+
+// ContainerPathHostRoot returns the host path mounted at ContainerWorkdir.
+func (plan RuntimePlan) ContainerPathHostRoot() string {
+	if plan.WorkspaceMode == WorkWorkspaceModeWorktree && strings.TrimSpace(plan.ExecutionWorkspaceDir) != "" {
+		return plan.ExecutionWorkspaceDir
+	}
+
+	return plan.ProjectDir
 }
 
 func cleanDockerName(name string) string {
