@@ -148,6 +148,33 @@ func TestEvaluateEvidenceReadinessRequiresFinalChecklistEvidence(t *testing.T) {
 	}
 }
 
+func TestEvaluateEvidenceReadinessRejectsNotApplicableGherkinWhenActiveApplies(t *testing.T) {
+	result := EvaluateEvidenceReadiness(EvidenceReadinessRequest{
+		Config: DefaultEvidenceStrategyConfig(),
+		Checklist: testCompleteEvidenceReadinessChecklistWith(func(checklist *EvidenceStrategyChecklist) {
+			item, _ := checklist.Item(EvidenceStrategyChecklistLabelGherkin)
+			item.Checked = true
+			item.Status = "not_applicable"
+			item.Detail = "reason=claimed internal only"
+			checklist.Items[item.Label] = item
+		}),
+		Gherkin: EvidenceGherkinContext{
+			Policy:       EvidenceGherkinPolicyActiveWhenApplicable,
+			Active:       true,
+			Applies:      true,
+			RequiredPath: ".chc/user/acceptance/checkout.feature",
+		},
+	})
+
+	if result.Allowed {
+		t.Fatal("Allowed = true, want false")
+	}
+
+	if !evidenceDiagnosticsContain(result.Diagnostics, EvidenceStrategyDiagnosticGherkinRequiredMissing) {
+		t.Fatalf("diagnostics = %#v, want active Gherkin blocker", result.Diagnostics)
+	}
+}
+
 func testCompleteEvidenceReadinessChecklist() *EvidenceStrategyChecklist {
 	return testCompleteEvidenceReadinessChecklistWith(func(_ *EvidenceStrategyChecklist) {})
 }

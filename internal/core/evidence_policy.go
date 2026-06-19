@@ -29,6 +29,12 @@ type EvidenceStrategyGuidance struct {
 	Reason     string
 }
 
+// EvidenceDecisionMatrixRow describes one default evidence matrix row.
+type EvidenceDecisionMatrixRow struct {
+	ChangeKind      string
+	DefaultEvidence string
+}
+
 // EvidencePolicyContext describes ticket policy guidance for a worker.
 type EvidencePolicyContext struct {
 	Gherkin  EvidenceGherkinContext
@@ -97,6 +103,26 @@ func EvidenceGuidanceForTicket(ticket IndexedTicket, gherkin EvidenceGherkinCont
 	}
 
 	return guidance
+}
+
+// EvidenceDecisionMatrixRows returns the default evidence decision matrix.
+func EvidenceDecisionMatrixRows() []EvidenceDecisionMatrixRow {
+	return []EvidenceDecisionMatrixRow{
+		{"docs_only, godoc_only, metadata_only", "No new tests. Validate links, formatting, or repository docs checks when available."},
+		{"test_only", "Run the relevant test command and repository validation. No Gherkin unless observable behavior is being specified."},
+		{"refactor_no_behavior", "Run existing tests and validation. Add tests only when the refactor exposes an obvious missing safety net."},
+		{"bugfix", "Prefer a failing regression test before or during implementation. Add Gherkin when user-visible behavior changes and Gherkin is active."},
+		{"behavior, cli_behavior, tui_behavior, api_behavior", "Add or update tests for the behavior. Add or update Gherkin when active and applicable."},
+		{"parsing_or_validation", "Prefer table-driven tests and fuzz/property-style checks when the input space warrants it."},
+		{"state_machine", "Prefer table-driven transition tests, invariants, and invalid-state checks."},
+		{"persistence_or_filesystem", "Prefer integration tests with temp directories, fixtures, and failure cases."},
+		{"network_or_external_io", "Prefer fakes, timeout/failure cases, and integration tests when practical."},
+		{"concurrency_or_timeout", "Prefer boundedness checks, timeout tests, race-oriented validation, and failure-path tests."},
+		{"configuration", "Test defaulting, invalid config, and override behavior."},
+		{"performance", "Add benchmarks or boundedness evidence only when the ticket changes performance-sensitive behavior."},
+		{"security_or_safety", "Require explicit tests or validation evidence unless impossible; missing evidence blocks review."},
+		{"unknown", "Default to conservative evidence and do not move to review without a clear strategy."},
+	}
 }
 
 func acceptanceFeaturePaths(projectDir string) ([]string, error) {

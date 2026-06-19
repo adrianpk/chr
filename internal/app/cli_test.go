@@ -3830,6 +3830,44 @@ func TestTicketApplyResultAllowsMissingOptionalEvidenceStrategy(t *testing.T) {
 	}
 }
 
+func TestTicketApplyResultBlocksActiveApplicableGherkinNotApplicable(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeCLIAcceptanceFeature(t, projectDir, ".chc/user/acceptance/onboarding.feature")
+	ticket := testTicketWithReviewRef()
+	ticket.Body = testApplyResultTicketBody(t)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
+
+	addProject(t, devRoot, "example", projectDir)
+
+	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"apply-result",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		record.ID,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket apply-result returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "status: blocked") {
+		t.Fatalf("stdout = %q, want blocked status", stdout.String())
+	}
+
+	content := readFile(t, ticketPath)
+	if !strings.Contains(content, "gherkin_required_missing") {
+		t.Fatalf("ticket content missing Gherkin blocker:\n%s", content)
+	}
+}
+
 func testApplyResultTicketBody(t *testing.T) string {
 	t.Helper()
 
@@ -6882,6 +6920,22 @@ func writeCLIWorkspaceConfig(t *testing.T, projectDir, content string) {
 	err = os.WriteFile(configPath, []byte(content), 0o644)
 	if err != nil {
 		t.Fatalf("write workspace config: %v", err)
+	}
+}
+
+func writeCLIAcceptanceFeature(t *testing.T, projectDir, relativePath string) {
+	t.Helper()
+
+	path := filepath.Join(projectDir, relativePath)
+
+	err := os.MkdirAll(filepath.Dir(path), 0o755)
+	if err != nil {
+		t.Fatalf("create acceptance feature directory: %v", err)
+	}
+
+	err = os.WriteFile(path, []byte("Feature: Onboarding\n"), 0o644)
+	if err != nil {
+		t.Fatalf("write acceptance feature: %v", err)
 	}
 }
 

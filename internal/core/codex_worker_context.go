@@ -43,6 +43,7 @@ type WorkerEvidenceContext struct {
 	Config         EvidenceStrategyConfig
 	Checklist      *EvidenceStrategyChecklist
 	ChecklistError string
+	Policy         EvidencePolicyContext
 }
 
 type codexWorkerContextMaterializer struct{}
@@ -155,6 +156,7 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 func writeCodexWorkerEvidenceStrategy(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
 	output.WriteString("## Evidence Strategy\n\n")
 	writeCodexWorkerEvidenceStrategyConfig(output, opts.Evidence)
+	writeCodexWorkerEvidencePolicy(output, opts.Evidence)
 	writeCodexWorkerEvidenceStrategyChecklist(output, opts.Evidence)
 	output.WriteString("Before modifying project files:\n\n")
 	output.WriteString("1. Read the ticket and any existing evidence-strategy checklist.\n")
@@ -201,6 +203,82 @@ func writeCodexWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *W
 	output.WriteString("- execution_report_copy: ")
 	output.WriteString(strconv.FormatBool(config.ExecutionReportCopy))
 	output.WriteString("\n\n")
+}
+
+func writeCodexWorkerEvidencePolicy(output *strings.Builder, evidence *WorkerEvidenceContext) {
+	if evidence == nil {
+		return
+	}
+
+	if evidence.Policy.Gherkin.Policy == "" && evidence.Policy.Guidance.ChangeKind == "" {
+		return
+	}
+
+	writeCodexWorkerGherkinPolicy(output, evidence.Policy.Gherkin)
+	writeCodexWorkerSuggestedStrategy(output, evidence.Policy.Guidance)
+	writeCodexWorkerDecisionMatrix(output)
+}
+
+func writeCodexWorkerGherkinPolicy(output *strings.Builder, gherkin EvidenceGherkinContext) {
+	output.WriteString("### Project Gherkin\n\n")
+	output.WriteString("- policy: ")
+	output.WriteString(string(gherkin.Policy))
+	output.WriteString("\n")
+	output.WriteString("- active: ")
+	output.WriteString(strconv.FormatBool(gherkin.Active))
+	output.WriteString("\n")
+	output.WriteString("- applies_to_ticket: ")
+	output.WriteString(strconv.FormatBool(gherkin.Applies))
+	output.WriteString("\n")
+	output.WriteString("- required_path: ")
+	output.WriteString(nonEmptyWorkerContextValue(gherkin.RequiredPath, "none"))
+	output.WriteString("\n")
+	output.WriteString("- reason: ")
+	output.WriteString(nonEmptyWorkerContextValue(gherkin.Reason, "not evaluated"))
+	output.WriteString("\n")
+	if len(gherkin.FeaturePaths) > 0 {
+		output.WriteString("- feature_paths:\n")
+		for _, path := range gherkin.FeaturePaths {
+			output.WriteString("  - ")
+			output.WriteString(path)
+			output.WriteString("\n")
+		}
+	}
+	output.WriteString("\n")
+}
+
+func writeCodexWorkerSuggestedStrategy(output *strings.Builder, guidance EvidenceStrategyGuidance) {
+	output.WriteString("### Suggested Strategy\n\n")
+	output.WriteString("- change_kind: ")
+	output.WriteString(nonEmptyWorkerContextValue(guidance.ChangeKind, "unknown"))
+	output.WriteString("\n")
+	output.WriteString("- risk: ")
+	output.WriteString(nonEmptyWorkerContextValue(guidance.Risk, "unknown"))
+	output.WriteString("\n")
+	output.WriteString("- test_timing: ")
+	output.WriteString(nonEmptyWorkerContextValue(guidance.TestTiming, "during"))
+	output.WriteString("\n")
+	output.WriteString("- gherkin: ")
+	output.WriteString(nonEmptyWorkerContextValue(guidance.Gherkin, "inactive"))
+	output.WriteString("\n")
+	output.WriteString("- tests: ")
+	output.WriteString(nonEmptyWorkerContextValue(guidance.Tests, "Classify evidence before implementation."))
+	output.WriteString("\n")
+	output.WriteString("- reason: ")
+	output.WriteString(nonEmptyWorkerContextValue(guidance.Reason, "Use ticket context."))
+	output.WriteString("\n\n")
+}
+
+func writeCodexWorkerDecisionMatrix(output *strings.Builder) {
+	output.WriteString("### Evidence Decision Matrix\n\n")
+	for _, row := range EvidenceDecisionMatrixRows() {
+		output.WriteString("- ")
+		output.WriteString(row.ChangeKind)
+		output.WriteString(": ")
+		output.WriteString(row.DefaultEvidence)
+		output.WriteString("\n")
+	}
+	output.WriteString("\n")
 }
 
 func writeCodexWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence *WorkerEvidenceContext) {
@@ -260,6 +338,14 @@ func writeCodexWorkerChecklistItem(output *strings.Builder, item EvidenceStrateg
 	output.WriteString("\n")
 }
 
+func nonEmptyWorkerContextValue(value, fallback string) string {
+	if strings.TrimSpace(value) == "" {
+		return fallback
+	}
+
+	return value
+}
+
 func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
 	if opts.RepairHandoff == nil {
 		return
@@ -305,11 +391,25 @@ func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*Wo
 	}
 
 	checklist, checklistError := parseWorkerEvidenceChecklist(string(content))
+	ticket, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{
+		ProjectDir: projectDir,
+		Path:       ticketPath,
+		IndexedAt:  time.Now().UTC(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("read evidence strategy ticket metadata: %w", err)
+	}
+
+	policy, err := DetectEvidencePolicyContext(projectDir, config.Evidence.Strategy, ticket)
+	if err != nil {
+		return nil, err
+	}
 
 	return &WorkerEvidenceContext{
 		Config:         config.Evidence.Strategy,
 		Checklist:      checklist,
 		ChecklistError: checklistError,
+		Policy:         policy,
 	}, nil
 }
 

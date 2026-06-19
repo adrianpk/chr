@@ -12,6 +12,7 @@ type EvidenceReadinessRequest struct {
 	ChecklistError string
 	Execution      *ExecutionRecord
 	Result         *ExecutionResult
+	Gherkin        EvidenceGherkinContext
 	ReviewRefs     []TicketReviewRef
 }
 
@@ -70,6 +71,7 @@ func evidenceGateDisabled(config EvidenceStrategyConfig) bool {
 func evidenceReadinessDiagnostics(request EvidenceReadinessRequest) []EvidenceReadinessDiagnostic {
 	diagnostics := evidenceRuntimeDiagnostics(request)
 	diagnostics = append(diagnostics, evidenceChecklistDiagnostics(request)...)
+	diagnostics = append(diagnostics, evidencePolicyDiagnostics(request)...)
 	diagnostics = append(diagnostics, evidenceSummaryDiagnostics(request)...)
 
 	return diagnostics
@@ -252,6 +254,34 @@ func evidenceSummaryDiagnostics(request EvidenceReadinessRequest) []EvidenceRead
 
 	return []EvidenceReadinessDiagnostic{
 		evidenceDiagnostic(EvidenceStrategyDiagnosticSummaryMissing, "execution result evidence_summary is incomplete"),
+	}
+}
+
+func evidencePolicyDiagnostics(request EvidenceReadinessRequest) []EvidenceReadinessDiagnostic {
+	if !request.Gherkin.Active || !request.Gherkin.Applies {
+		return nil
+	}
+
+	if request.Checklist == nil || request.ChecklistError != "" {
+		return nil
+	}
+
+	item, ok := request.Checklist.Item(EvidenceStrategyChecklistLabelGherkin)
+	if !ok {
+		return nil
+	}
+
+	if item.Status == "required" {
+		return nil
+	}
+
+	reason := "active Gherkin applies to this observable behavior"
+	if strings.TrimSpace(request.Gherkin.RequiredPath) != "" {
+		reason += "; required_path=" + request.Gherkin.RequiredPath
+	}
+
+	return []EvidenceReadinessDiagnostic{
+		evidenceDiagnostic(EvidenceStrategyDiagnosticGherkinRequiredMissing, reason),
 	}
 }
 

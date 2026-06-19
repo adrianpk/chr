@@ -209,6 +209,56 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *te
 	}
 }
 
+func TestMaterializeCodexWorkerContextForExecutionIncludesGherkinPolicyGuidance(t *testing.T) {
+	projectDir := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	record := ExecutionRecord{
+		ID:         "exec-1",
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
+	}
+	writeEvidencePolicyFeature(t, projectDir, ".chc/user/acceptance/checkout.feature")
+	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+		Key:         "CHC-1",
+		Title:       "Add CLI checkout command",
+		Status:      TicketStatusReadyForDev,
+		Priority:    "normal",
+		Severity:    "normal",
+		Type:        "feature",
+		UseCase:     "checkout",
+		ProjectArea: "cli",
+		CreatedAt:   testCodexWorkerContextTime(),
+		UpdatedAt:   testCodexWorkerContextTime(),
+	})
+
+	err := MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	if err != nil {
+		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(plan.WorkerContextPath)
+	if err != nil {
+		t.Fatalf("read context: %v", err)
+	}
+
+	for _, want := range []string{
+		"### Project Gherkin",
+		"- active: true",
+		"- applies_to_ticket: true",
+		"- required_path: .chc/user/acceptance/checkout.feature",
+		"### Suggested Strategy",
+		"- change_kind: cli_behavior",
+		"- gherkin: required",
+		"### Evidence Decision Matrix",
+		"- parsing_or_validation: Prefer table-driven tests and fuzz/property-style checks when the input space warrants it.",
+	} {
+		if !strings.Contains(string(content), want) {
+			t.Fatalf("content does not contain %q:\n%s", want, string(content))
+		}
+	}
+}
+
 func TestRenderCodexWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) {
 	checklist := EvidenceStrategyChecklist{
 		Found: true,
