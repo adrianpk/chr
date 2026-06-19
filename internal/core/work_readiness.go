@@ -28,6 +28,8 @@ const (
 	WorkReadinessDiagnosticDirtyTicketWorktree WorkReadinessDiagnosticCode = "dirty_ticket_worktree"
 	// WorkReadinessDiagnosticUnsafeTicketWorktree defines a package boundary constant.
 	WorkReadinessDiagnosticUnsafeTicketWorktree WorkReadinessDiagnosticCode = "unsafe_ticket_worktree"
+	// WorkReadinessDiagnosticOrphanedTicketWorktree defines a package boundary constant.
+	WorkReadinessDiagnosticOrphanedTicketWorktree WorkReadinessDiagnosticCode = "orphaned_ticket_worktree"
 	// WorkReadinessDiagnosticWorktreeRootMissing defines a package boundary constant.
 	WorkReadinessDiagnosticWorktreeRootMissing WorkReadinessDiagnosticCode = "worktree_root_missing"
 	// WorkReadinessDiagnosticStaleWorktreeMetadata defines a package boundary constant.
@@ -61,6 +63,8 @@ const (
 	WorkReadinessRepairCreateWorktreeRoot WorkReadinessRepairCode = "create_worktree_root"
 	// WorkReadinessRepairPruneWorktreeMetadata defines a package boundary constant.
 	WorkReadinessRepairPruneWorktreeMetadata WorkReadinessRepairCode = "prune_worktree_metadata"
+	// WorkReadinessRepairRemoveOrphanedWorktree defines a package boundary constant.
+	WorkReadinessRepairRemoveOrphanedWorktree WorkReadinessRepairCode = "remove_orphaned_worktree"
 	// WorkReadinessRepairManual defines a package boundary constant.
 	WorkReadinessRepairManual WorkReadinessRepairCode = "manual"
 )

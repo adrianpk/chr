@@ -332,6 +332,8 @@ func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadines
 		return applyCreateWorktreeRootRepair(diagnostic)
 	case WorkReadinessRepairPruneWorktreeMetadata:
 		return applyPruneWorktreeMetadataRepair(diagnostic)
+	case WorkReadinessRepairRemoveOrphanedWorktree:
+		return applyRemoveOrphanedWorktreeRepair(diagnostic)
 	default:
 		return WorkReadinessAppliedRepair{}, false, nil
 	}
@@ -441,6 +443,34 @@ func applyPruneWorktreeMetadataRepair(diagnostic WorkReadinessDiagnostic) (WorkR
 	return WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairPruneWorktreeMetadata,
 		Detail: fmt.Sprintf("removed stale worktree metadata %s", diagnostic.Path),
+	}, true, nil
+}
+
+func applyRemoveOrphanedWorktreeRepair(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+	if strings.TrimSpace(diagnostic.Path) == "" {
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
+
+	entries, err := os.ReadDir(diagnostic.Path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return WorkReadinessAppliedRepair{}, false, nil
+		}
+
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("inspect orphaned worktree path: %w", err)
+	}
+
+	if len(entries) > 0 {
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
+
+	if err := os.Remove(diagnostic.Path); err != nil {
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("remove orphaned worktree path: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairRemoveOrphanedWorktree,
+		Detail: fmt.Sprintf("removed empty orphaned worktree path %s", diagnostic.Path),
 	}, true, nil
 }
 
@@ -720,8 +750,10 @@ func checkWorkReadinessTicketWorktree(ctx context.Context, check workReadinessWo
 	switch inspection.State {
 	case WorktreeStateDirty:
 		report.Diagnostics = append(report.Diagnostics, dirtyTicketWorktreeDiagnostic(inspection))
-	case WorktreeStateMismatched, WorktreeStateBranchInUse, WorktreeStateOrphaned:
+	case WorktreeStateMismatched, WorktreeStateBranchInUse:
 		report.Diagnostics = append(report.Diagnostics, unsafeTicketWorktreeDiagnostic(inspection))
+	case WorktreeStateOrphaned:
+		report.Diagnostics = append(report.Diagnostics, orphanedTicketWorktreeDiagnostic(inspection))
 	case WorktreeStateMissing:
 		report = checkStaleWorktreeMetadata(report, inspection)
 	}
@@ -858,6 +890,13 @@ func workspaceWorkReadinessRepair(diagnostic WorkReadinessDiagnostic) (WorkReadi
 			Code:      WorkReadinessRepairPruneWorktreeMetadata,
 			Safe:      true,
 			Detail:    fmt.Sprintf("remove stale worktree metadata %s", diagnostic.Path),
+		}, true
+	case WorkReadinessDiagnosticOrphanedTicketWorktree:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairRemoveOrphanedWorktree,
+			Safe:      true,
+			Detail:    fmt.Sprintf("remove empty orphaned worktree path %s", diagnostic.Path),
 		}, true
 	default:
 		return WorkReadinessRepair{}, false
@@ -1001,6 +1040,22 @@ func unsafeTicketWorktreeDiagnostic(inspection WorktreeInspection) WorkReadiness
 		Detail:         detail,
 		ExpectedBranch: inspection.Plan.Branch,
 		RemoteRef:      inspection.Plan.BaseRef,
+	}
+}
+
+func orphanedTicketWorktreeDiagnostic(inspection WorktreeInspection) WorkReadinessDiagnostic {
+	detail := fmt.Sprintf("ticket worktree %s is orphaned", inspection.Plan.WorktreePath)
+	if len(inspection.Diagnostics) > 0 {
+		detail = inspection.Diagnostics[0].Detail
+	}
+
+	return WorkReadinessDiagnostic{
+		Code:           WorkReadinessDiagnosticOrphanedTicketWorktree,
+		Severity:       WorkReadinessSeverityBlocking,
+		Detail:         detail,
+		ExpectedBranch: inspection.Plan.Branch,
+		RemoteRef:      inspection.Plan.BaseRef,
+		Path:           inspection.Plan.WorktreePath,
 	}
 }
 

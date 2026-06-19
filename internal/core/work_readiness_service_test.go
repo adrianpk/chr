@@ -412,6 +412,68 @@ func TestRepairWorkReadinessPrunesStaleWorktreeMetadata(t *testing.T) {
 	assertReadinessPathMissing(t, metadataPath)
 }
 
+func TestRepairWorkReadinessRemovesEmptyOrphanedTicketWorktree(t *testing.T) {
+	projectDir := t.TempDir()
+	workspace := testWorktreeWorkspaceConfig()
+	workspace.WorktreeRoot = "isolated-worktrees"
+	plan := testWorkReadinessPlan(t, projectDir, workspace)
+
+	if err := os.MkdirAll(plan.WorktreePath, 0o755); err != nil {
+		t.Fatalf("create orphaned worktree path: %v", err)
+	}
+
+	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
+		ProjectDir:   projectDir,
+		Policy:       DefaultWorkBranchPolicy(),
+		Workspace:    workspace,
+		TicketKey:    "CHC-1",
+		TicketBranch: "feat/chc-1",
+		WorktreeGit:  newFakeWorktreeGit(),
+		Git: &fakeWorkReadinessRepairGit{
+			branch: "dev",
+		},
+	})
+	if err != nil {
+		t.Fatalf("RepairWorkReadiness returned error: %v", err)
+	}
+
+	assertAppliedWorkReadinessRepair(t, result, WorkReadinessRepairRemoveOrphanedWorktree)
+	assertReadinessPathMissing(t, plan.WorktreePath)
+}
+
+func TestRepairWorkReadinessDoesNotRemoveNonEmptyOrphanedTicketWorktree(t *testing.T) {
+	projectDir := t.TempDir()
+	workspace := testWorktreeWorkspaceConfig()
+	workspace.WorktreeRoot = "isolated-worktrees"
+	plan := testWorkReadinessPlan(t, projectDir, workspace)
+
+	if err := os.MkdirAll(plan.WorktreePath, 0o755); err != nil {
+		t.Fatalf("create orphaned worktree path: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(plan.WorktreePath, "main.go"), []byte("package main\n"), 0o644); err != nil {
+		t.Fatalf("write orphaned worktree file: %v", err)
+	}
+
+	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
+		ProjectDir:   projectDir,
+		Policy:       DefaultWorkBranchPolicy(),
+		Workspace:    workspace,
+		TicketKey:    "CHC-1",
+		TicketBranch: "feat/chc-1",
+		WorktreeGit:  newFakeWorktreeGit(),
+		Git: &fakeWorkReadinessRepairGit{
+			branch: "dev",
+		},
+	})
+	if err != nil {
+		t.Fatalf("RepairWorkReadiness returned error: %v", err)
+	}
+
+	assertNotAppliedWorkReadinessRepair(t, result, WorkReadinessRepairRemoveOrphanedWorktree)
+	assertReadinessPathExists(t, plan.WorktreePath)
+}
+
 func TestRepairWorkReadinessRefusesBranchMutationWithUserChanges(t *testing.T) {
 	git := &fakeWorkReadinessRepairGit{
 		branch:            "main",
@@ -511,6 +573,16 @@ func assertAppliedWorkReadinessRepair(t *testing.T, result WorkReadinessRepairRe
 	t.Fatalf("Applied = %#v, want code %s", result.Applied, code)
 }
 
+func assertNotAppliedWorkReadinessRepair(t *testing.T, result WorkReadinessRepairResult, code WorkReadinessRepairCode) {
+	t.Helper()
+
+	for _, repair := range result.Applied {
+		if repair.Code == code {
+			t.Fatalf("Applied = %#v, want no code %s", result.Applied, code)
+		}
+	}
+}
+
 func testWorktreeWorkspaceConfig() WorkWorkspaceConfig {
 	return WorkWorkspaceConfig{
 		Mode:            WorkWorkspaceModeWorktree,
@@ -518,6 +590,23 @@ func testWorktreeWorkspaceConfig() WorkWorkspaceConfig {
 		WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
 		WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 	}
+}
+
+func testWorkReadinessPlan(t *testing.T, projectDir string, workspace WorkWorkspaceConfig) WorktreePlan {
+	t.Helper()
+
+	plan, err := NewWorktreePlan(WorktreePlanOptions{
+		ProjectDir:   projectDir,
+		TicketKey:    "CHC-1",
+		Branch:       "feat/chc-1",
+		BranchPolicy: DefaultWorkBranchPolicy(),
+		Workspace:    workspace,
+	})
+	if err != nil {
+		t.Fatalf("NewWorktreePlan returned error: %v", err)
+	}
+
+	return plan
 }
 
 func assertReadinessPathExists(t *testing.T, path string) {
