@@ -335,71 +335,81 @@ func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPrefligh
 		workspace = fillWorkWorkspaceConfigDefaults(workspace)
 	}
 
-	return workBranchPolicyBlockReasonForGit(ctx, projectDir, git, policy, workspace)
+	return workBranchPolicyBlockReasonForGit(ctx, workBranchPolicyCheck{
+		projectDir: projectDir,
+		git:        git,
+		policy:     policy,
+		workspace:  workspace,
+	})
 }
 
-func workBranchPolicyBlockReasonForGit(
-	ctx context.Context,
-	projectDir string,
-	git WorkSelectionGit,
-	policy WorkBranchPolicy,
-	workspace WorkWorkspaceConfig,
-) (*WorkSelectionBlockReason, error) {
-	err := ValidateWorkBranchPolicy(policy)
+type workBranchPolicyCheck struct {
+	projectDir string
+	git        WorkSelectionGit
+	policy     WorkBranchPolicy
+	workspace  WorkWorkspaceConfig
+}
+
+func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
+	err := ValidateWorkBranchPolicy(check.policy)
 	if err != nil {
 		return nil, err
 	}
 
-	err = ValidateWorkWorkspaceConfig(workspace)
+	err = ValidateWorkWorkspaceConfig(check.workspace)
 	if err != nil {
 		return nil, err
 	}
 
-	if policy.Mode == WorkBranchPolicyModeNoGitEnforcement {
+	if check.policy.Mode == WorkBranchPolicyModeNoGitEnforcement {
 		return nil, nil
 	}
 
-	return runWorkBranchPolicyChecks(ctx, projectDir, git, policy, workspace)
+	return runWorkBranchPolicyChecks(ctx, check)
 }
 
-func runWorkBranchPolicyChecks(
-	ctx context.Context,
-	projectDir string,
-	git WorkSelectionGit,
-	policy WorkBranchPolicy,
-	workspace WorkWorkspaceConfig,
-) (*WorkSelectionBlockReason, error) {
-	if workspace.Mode == WorkWorkspaceModeWorktree {
+func runWorkBranchPolicyChecks(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
+	if check.workspace.Mode == WorkWorkspaceModeWorktree {
 		return nil, nil
 	}
 
-	branch, err := git.CurrentBranch(ctx, projectDir)
+	branch, err := check.git.CurrentBranch(ctx, check.projectDir)
 	if err != nil {
 		return nilIfGitUnavailable(err)
 	}
 
-	expectedBranch := strings.TrimSpace(policy.IntegrationBranch)
+	expectedBranch := strings.TrimSpace(check.policy.IntegrationBranch)
 
-	blocked := workBranchPolicyCurrentBranchBlockReason(policy, branch, expectedBranch)
+	blocked := workBranchPolicyCurrentBranchBlockReason(check.policy, branch, expectedBranch)
 	if blocked != nil {
 		return blocked, nil
 	}
 
-	if policy.RequireCleanWorktree && workspace.Mode != WorkWorkspaceModeWorktree {
-		blocked, err = workBranchPolicyCleanBlockReason(ctx, projectDir, git, policy)
-		if blocked != nil || err != nil {
-			return blocked, err
-		}
+	return workBranchPolicyRemainingBlockReason(ctx, check, expectedBranch)
+}
+
+func workBranchPolicyRemainingBlockReason(ctx context.Context, check workBranchPolicyCheck, expectedBranch string) (*WorkSelectionBlockReason, error) {
+	if blocked, err := workBranchPolicyCleanBlockReasonIfNeeded(ctx, check); blocked != nil || err != nil {
+		return blocked, err
 	}
 
-	if policy.Mode == WorkBranchPolicyModeIntegrationBranch && policy.RequireRemoteTracking {
-		blocked, err = workBranchPolicyRemoteBlockReason(ctx, projectDir, git, policy, expectedBranch)
-		if blocked != nil || err != nil {
-			return blocked, err
-		}
+	return workBranchPolicyRemoteBlockReasonIfNeeded(ctx, check, expectedBranch)
+}
+
+func workBranchPolicyCleanBlockReasonIfNeeded(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
+	if !check.policy.RequireCleanWorktree {
+		return nil, nil
 	}
 
-	return nil, nil
+	return workBranchPolicyCleanBlockReason(ctx, check.projectDir, check.git, check.policy)
+}
+
+func workBranchPolicyRemoteBlockReasonIfNeeded(ctx context.Context, check workBranchPolicyCheck, expectedBranch string) (*WorkSelectionBlockReason, error) {
+	if check.policy.Mode != WorkBranchPolicyModeIntegrationBranch || !check.policy.RequireRemoteTracking {
+		return nil, nil
+	}
+
+	return workBranchPolicyRemoteBlockReason(ctx, check.projectDir, check.git, check.policy, expectedBranch)
 }
 
 func workBranchPolicyCurrentBranchBlockReason(policy WorkBranchPolicy, branch, expectedBranch string) *WorkSelectionBlockReason {

@@ -28,6 +28,10 @@ const (
 	WorkReadinessDiagnosticDirtyTicketWorktree WorkReadinessDiagnosticCode = "dirty_ticket_worktree"
 	// WorkReadinessDiagnosticUnsafeTicketWorktree defines a package boundary constant.
 	WorkReadinessDiagnosticUnsafeTicketWorktree WorkReadinessDiagnosticCode = "unsafe_ticket_worktree"
+	// WorkReadinessDiagnosticWorktreeRootMissing defines a package boundary constant.
+	WorkReadinessDiagnosticWorktreeRootMissing WorkReadinessDiagnosticCode = "worktree_root_missing"
+	// WorkReadinessDiagnosticStaleWorktreeMetadata defines a package boundary constant.
+	WorkReadinessDiagnosticStaleWorktreeMetadata WorkReadinessDiagnosticCode = "stale_worktree_metadata"
 	// WorkReadinessDiagnosticRuntimeArtifactsVisible defines a package boundary constant.
 	WorkReadinessDiagnosticRuntimeArtifactsVisible WorkReadinessDiagnosticCode = "runtime_artifacts_visible"
 	// WorkReadinessDiagnosticMissingRemoteRef defines a package boundary constant.
@@ -53,6 +57,10 @@ const (
 	WorkReadinessRepairSwitchBranch WorkReadinessRepairCode = "switch_branch"
 	// WorkReadinessRepairCreateBranch defines a package boundary constant.
 	WorkReadinessRepairCreateBranch WorkReadinessRepairCode = "create_branch"
+	// WorkReadinessRepairCreateWorktreeRoot defines a package boundary constant.
+	WorkReadinessRepairCreateWorktreeRoot WorkReadinessRepairCode = "create_worktree_root"
+	// WorkReadinessRepairPruneWorktreeMetadata defines a package boundary constant.
+	WorkReadinessRepairPruneWorktreeMetadata WorkReadinessRepairCode = "prune_worktree_metadata"
 	// WorkReadinessRepairManual defines a package boundary constant.
 	WorkReadinessRepairManual WorkReadinessRepairCode = "manual"
 )
@@ -99,6 +107,7 @@ type WorkReadinessDiagnostic struct {
 	ExpectedBranch string
 	Remote         string
 	RemoteRef      string
+	Path           string
 	Repair         WorkReadinessRepair
 }
 

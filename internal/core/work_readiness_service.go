@@ -57,14 +57,63 @@ type OSWorkReadinessGit struct{}
 
 // CheckWorkReadiness executes the corresponding package operation.
 func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkReadinessReport, error) {
-	err := ctx.Err()
+	settings, err := newWorkReadinessSettings(ctx, opts)
 	if err != nil {
 		return WorkReadinessReport{}, err
 	}
 
+	report := WorkReadinessReport{
+		ProjectDir:   settings.projectDir,
+		Policy:       settings.policy,
+		Workspace:    settings.workspace,
+		Status:       WorkReadinessStatusReady,
+		TicketKey:    settings.ticketKey,
+		TicketBranch: settings.ticketBranch,
+	}
+
+	if err := ValidateWorkBranchPolicy(settings.policy); err != nil {
+		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
+
+		return finalizeWorkReadinessReport(report), nil
+	}
+
+	if err := ValidateWorkWorkspaceConfig(settings.workspace); err != nil {
+		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
+
+		return finalizeWorkReadinessReport(report), nil
+	}
+
+	if settings.policy.Mode == WorkBranchPolicyModeNoGitEnforcement {
+		return report, nil
+	}
+
+	return workReadinessGitStateCheck{
+		projectDir:  settings.projectDir,
+		git:         settings.git,
+		worktreeGit: settings.worktreeGit,
+		report:      report,
+	}.run(ctx)
+}
+
+type workReadinessSettings struct {
+	projectDir   string
+	policy       WorkBranchPolicy
+	workspace    WorkWorkspaceConfig
+	ticketKey    string
+	ticketBranch string
+	git          WorkReadinessGit
+	worktreeGit  WorktreeGit
+}
+
+func newWorkReadinessSettings(ctx context.Context, opts WorkReadinessOptions) (workReadinessSettings, error) {
+	err := ctx.Err()
+	if err != nil {
+		return workReadinessSettings{}, err
+	}
+
 	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
 	if err != nil {
-		return WorkReadinessReport{}, err
+		return workReadinessSettings{}, err
 	}
 
 	policy := opts.Policy
@@ -79,33 +128,6 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 		workspace = fillWorkWorkspaceConfigDefaults(workspace)
 	}
 
-	report := WorkReadinessReport{
-		ProjectDir:   projectDir,
-		Policy:       policy,
-		Workspace:    workspace,
-		Status:       WorkReadinessStatusReady,
-		TicketKey:    strings.TrimSpace(opts.TicketKey),
-		TicketBranch: strings.TrimSpace(opts.TicketBranch),
-	}
-
-	err = ValidateWorkBranchPolicy(policy)
-	if err != nil {
-		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
-
-		return finalizeWorkReadinessReport(report), nil
-	}
-
-	err = ValidateWorkWorkspaceConfig(workspace)
-	if err != nil {
-		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
-
-		return finalizeWorkReadinessReport(report), nil
-	}
-
-	if policy.Mode == WorkBranchPolicyModeNoGitEnforcement {
-		return report, nil
-	}
-
 	git := opts.Git
 	if git == nil {
 		git = OSWorkReadinessGit{}
@@ -116,7 +138,15 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 		worktreeGit = OSWorktreeGit{}
 	}
 
-	return checkWorkReadinessGitState(ctx, projectDir, git, worktreeGit, report)
+	return workReadinessSettings{
+		projectDir:   projectDir,
+		policy:       policy,
+		workspace:    workspace,
+		ticketKey:    strings.TrimSpace(opts.TicketKey),
+		ticketBranch: strings.TrimSpace(opts.TicketBranch),
+		git:          git,
+		worktreeGit:  worktreeGit,
+	}, nil
 }
 
 // RepairWorkReadiness executes the corresponding package operation.
@@ -298,6 +328,10 @@ func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadines
 		return applySwitchBranchRepair(ctx, run, diagnostic)
 	case WorkReadinessRepairCreateBranch:
 		return applyCreateBranchRepair(ctx, run, diagnostic)
+	case WorkReadinessRepairCreateWorktreeRoot:
+		return applyCreateWorktreeRootRepair(diagnostic)
+	case WorkReadinessRepairPruneWorktreeMetadata:
+		return applyPruneWorktreeMetadataRepair(diagnostic)
 	default:
 		return WorkReadinessAppliedRepair{}, false, nil
 	}
@@ -375,14 +409,52 @@ func applyCreateBranchRepair(ctx context.Context, run repairRun, diagnostic Work
 	}, true, nil
 }
 
-func checkWorkReadinessGitState(
-	ctx context.Context,
-	projectDir string,
-	git WorkReadinessGit,
-	worktreeGit WorktreeGit,
-	report WorkReadinessReport,
-) (WorkReadinessReport, error) {
-	branch, err := git.CurrentBranch(ctx, projectDir)
+func applyCreateWorktreeRootRepair(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+	if strings.TrimSpace(diagnostic.Path) == "" {
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
+
+	if err := os.MkdirAll(diagnostic.Path, 0o755); err != nil {
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("create worktree root: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairCreateWorktreeRoot,
+		Detail: fmt.Sprintf("created worktree root %s", diagnostic.Path),
+	}, true, nil
+}
+
+func applyPruneWorktreeMetadataRepair(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+	if strings.TrimSpace(diagnostic.Path) == "" {
+		return WorkReadinessAppliedRepair{}, false, nil
+	}
+
+	err := os.Remove(diagnostic.Path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return WorkReadinessAppliedRepair{}, false, nil
+		}
+
+		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("prune worktree metadata: %w", err)
+	}
+
+	return WorkReadinessAppliedRepair{
+		Code:   WorkReadinessRepairPruneWorktreeMetadata,
+		Detail: fmt.Sprintf("removed stale worktree metadata %s", diagnostic.Path),
+	}, true, nil
+}
+
+type workReadinessGitStateCheck struct {
+	projectDir  string
+	git         WorkReadinessGit
+	worktreeGit WorktreeGit
+	report      WorkReadinessReport
+}
+
+func (check workReadinessGitStateCheck) run(ctx context.Context) (WorkReadinessReport, error) {
+	report := check.report
+
+	branch, err := check.git.CurrentBranch(ctx, check.projectDir)
 	if err != nil {
 		report.Diagnostics = append(report.Diagnostics, gitUnavailableDiagnostic(err))
 
@@ -391,7 +463,7 @@ func checkWorkReadinessGitState(
 
 	report.CurrentBranch = branch
 
-	state, inProgress, err := git.GitStateInProgress(ctx, projectDir)
+	state, inProgress, err := check.git.GitStateInProgress(ctx, check.projectDir)
 	if err != nil {
 		report.Diagnostics = append(report.Diagnostics, gitUnavailableDiagnostic(err))
 
@@ -402,34 +474,56 @@ func checkWorkReadinessGitState(
 		report.Diagnostics = append(report.Diagnostics, gitStateInProgressDiagnostic(state))
 	}
 
-	report, err = checkWorkReadinessWorktree(ctx, projectDir, git, report)
+	report, err = checkWorkReadinessWorktree(ctx, check.projectDir, check.git, report)
 	if err != nil {
 		return WorkReadinessReport{}, err
 	}
 
-	if report.Workspace.Mode == WorkWorkspaceModeWorktree {
-		report, err = checkWorkReadinessRemoteBase(ctx, projectDir, worktreeGit, report)
-		if err != nil {
-			return WorkReadinessReport{}, err
-		}
-	} else {
-		report, err = checkWorkReadinessBranch(ctx, projectDir, git, report)
-		if err != nil {
-			return WorkReadinessReport{}, err
-		}
-
-		report, err = checkWorkReadinessRemote(ctx, projectDir, git, report)
-		if err != nil {
-			return WorkReadinessReport{}, err
-		}
+	report, err = check.baseReadiness(ctx, report)
+	if err != nil {
+		return WorkReadinessReport{}, err
 	}
 
-	report, err = checkWorkReadinessTicketWorktree(ctx, projectDir, worktreeGit, report)
+	report, err = checkWorkReadinessTicketWorktree(ctx, workReadinessWorktreeCheck{
+		projectDir: check.projectDir,
+		git:        check.worktreeGit,
+		report:     report,
+	})
 	if err != nil {
 		return WorkReadinessReport{}, err
 	}
 
 	return finalizeWorkReadinessReport(report), nil
+}
+
+func (check workReadinessGitStateCheck) baseReadiness(ctx context.Context, report WorkReadinessReport) (WorkReadinessReport, error) {
+	if report.Workspace.Mode == WorkWorkspaceModeWorktree {
+		report = checkWorkReadinessWorktreeRoot(check.projectDir, report)
+
+		return checkWorkReadinessRemoteBase(ctx, workReadinessWorktreeCheck{
+			projectDir: check.projectDir,
+			git:        check.worktreeGit,
+			report:     report,
+		})
+	}
+
+	report, err := checkWorkReadinessBranch(ctx, check.projectDir, check.git, report)
+	if err != nil {
+		return WorkReadinessReport{}, err
+	}
+
+	return checkWorkReadinessRemote(ctx, check.projectDir, check.git, report)
+}
+
+func checkWorkReadinessWorktreeRoot(projectDir string, report WorkReadinessReport) WorkReadinessReport {
+	root := resolveProjectPath(projectDir, report.Workspace.WorktreeRoot)
+	if pathExists(root) {
+		return report
+	}
+
+	report.Diagnostics = append(report.Diagnostics, worktreeRootMissingDiagnostic(root))
+
+	return report
 }
 
 func checkWorkReadinessBranch(ctx context.Context, projectDir string, git WorkReadinessGit, report WorkReadinessReport) (WorkReadinessReport, error) {
@@ -537,17 +631,20 @@ func checkWorkReadinessRemote(ctx context.Context, projectDir string, git WorkRe
 	return report, nil
 }
 
-func checkWorkReadinessRemoteBase(
-	ctx context.Context,
-	projectDir string,
-	git WorktreeGit,
-	report WorkReadinessReport,
-) (WorkReadinessReport, error) {
+type workReadinessWorktreeCheck struct {
+	projectDir string
+	git        WorktreeGit
+	report     WorkReadinessReport
+}
+
+func checkWorkReadinessRemoteBase(ctx context.Context, check workReadinessWorktreeCheck) (WorkReadinessReport, error) {
+	report := check.report
 	if report.Workspace.WorktreeBase != WorktreeBasePolicyRemoteIntegrationBranch {
 		return report, nil
 	}
 
 	remote := strings.TrimSpace(report.Policy.CanonicalRemote)
+
 	baseRef, err := worktreeBaseRef(report.Policy, report.Workspace)
 	if err != nil {
 		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
@@ -555,14 +652,14 @@ func checkWorkReadinessRemoteBase(
 		return report, nil
 	}
 
-	if err := git.FetchRemote(ctx, projectDir, remote); err != nil {
+	if err := check.git.FetchRemote(ctx, check.projectDir, remote); err != nil {
 		report.Diagnostics = append(report.Diagnostics, remoteBaseFetchFailedDiagnostic(remote, baseRef, err))
 
 		return report, nil
 	}
 
-	baseSHA, err := git.ResolveRef(ctx, projectDir, baseRef)
-	if err != nil {
+	baseSHA, resolved := check.resolveBase(ctx, baseRef)
+	if !resolved {
 		report.Diagnostics = append(
 			report.Diagnostics,
 			missingRemoteRefDiagnostic(remote, baseRef, report.Policy.IntegrationBranch),
@@ -577,12 +674,17 @@ func checkWorkReadinessRemoteBase(
 	return report, nil
 }
 
-func checkWorkReadinessTicketWorktree(
-	ctx context.Context,
-	projectDir string,
-	git WorktreeGit,
-	report WorkReadinessReport,
-) (WorkReadinessReport, error) {
+func (check workReadinessWorktreeCheck) resolveBase(ctx context.Context, baseRef string) (string, bool) {
+	baseSHA, err := check.git.ResolveRef(ctx, check.projectDir, baseRef)
+	if err != nil {
+		return "", false
+	}
+
+	return baseSHA, true
+}
+
+func checkWorkReadinessTicketWorktree(ctx context.Context, check workReadinessWorktreeCheck) (WorkReadinessReport, error) {
+	report := check.report
 	if report.Workspace.Mode != WorkWorkspaceModeWorktree {
 		return report, nil
 	}
@@ -591,8 +693,8 @@ func checkWorkReadinessTicketWorktree(
 		return report, nil
 	}
 
-	inspection, err := WorktreeService{Git: git}.Inspect(ctx, WorktreePlanOptions{
-		ProjectDir:   projectDir,
+	inspection, err := WorktreeService{Git: check.git}.Inspect(ctx, WorktreePlanOptions{
+		ProjectDir:   check.projectDir,
 		TicketKey:    report.TicketKey,
 		Branch:       report.TicketBranch,
 		BranchPolicy: report.Policy,
@@ -608,19 +710,34 @@ func checkWorkReadinessTicketWorktree(
 	if state.BaseRef == "" {
 		state.BaseRef = report.TicketWorktree.BaseRef
 	}
+
 	if state.BaseSHA == "" {
 		state.BaseSHA = report.TicketWorktree.BaseSHA
 	}
 
 	report.TicketWorktree = state
+
 	switch inspection.State {
 	case WorktreeStateDirty:
 		report.Diagnostics = append(report.Diagnostics, dirtyTicketWorktreeDiagnostic(inspection))
 	case WorktreeStateMismatched, WorktreeStateBranchInUse, WorktreeStateOrphaned:
 		report.Diagnostics = append(report.Diagnostics, unsafeTicketWorktreeDiagnostic(inspection))
+	case WorktreeStateMissing:
+		report = checkStaleWorktreeMetadata(report, inspection)
 	}
 
 	return report, nil
+}
+
+func checkStaleWorktreeMetadata(report WorkReadinessReport, inspection WorktreeInspection) WorkReadinessReport {
+	path, err := WorktreeMetadataPath(inspection.Plan)
+	if err != nil || !pathExists(path) {
+		return report
+	}
+
+	report.Diagnostics = append(report.Diagnostics, staleWorktreeMetadataDiagnostic(path))
+
+	return report
 }
 
 func workReadinessStateFromInspection(inspection WorktreeInspection) WorkReadinessWorkspaceState {
@@ -662,6 +779,18 @@ func plannedWorkReadinessRepair(policy WorkBranchPolicy, diagnostic WorkReadines
 		return manualWorkReadinessRepair("safe repair is disabled by work policy")
 	}
 
+	if repair, ok := branchWorkReadinessRepair(policy, diagnostic); ok {
+		return repair
+	}
+
+	if repair, ok := workspaceWorkReadinessRepair(diagnostic); ok {
+		return repair
+	}
+
+	return manualWorkReadinessRepair("manual intervention required")
+}
+
+func branchWorkReadinessRepair(policy WorkBranchPolicy, diagnostic WorkReadinessDiagnostic) (WorkReadinessRepair, bool) {
 	switch diagnostic.Code {
 	case WorkReadinessDiagnosticWrongBranch:
 		return WorkReadinessRepair{
@@ -669,7 +798,7 @@ func plannedWorkReadinessRepair(policy WorkBranchPolicy, diagnostic WorkReadines
 			Code:      WorkReadinessRepairSwitchBranch,
 			Safe:      true,
 			Detail:    fmt.Sprintf("switch to existing branch %s", diagnostic.ExpectedBranch),
-		}
+		}, true
 	case WorkReadinessDiagnosticMissingBranch:
 		if policy.AllowBranchCreation {
 			return WorkReadinessRepair{
@@ -677,40 +806,61 @@ func plannedWorkReadinessRepair(policy WorkBranchPolicy, diagnostic WorkReadines
 				Code:      WorkReadinessRepairCreateBranch,
 				Safe:      true,
 				Detail:    fmt.Sprintf("create branch %s from the current branch", diagnostic.ExpectedBranch),
-			}
+			}, true
 		}
 
-		return manualWorkReadinessRepair("branch creation is disabled by work policy")
-	case WorkReadinessDiagnosticRuntimeArtifactsVisible:
-		return WorkReadinessRepair{
-			Available: true,
-			Code:      WorkReadinessRepairIgnoreRuntimeArtifacts,
-			Safe:      true,
-			Detail:    "exclude ChrysoCoord runtime artifacts from local Git status",
-		}
+		return manualWorkReadinessRepair("branch creation is disabled by work policy"), true
 	case WorkReadinessDiagnosticMissingRemoteRef:
 		return WorkReadinessRepair{
 			Available: true,
 			Code:      WorkReadinessRepairFetchRemote,
 			Safe:      true,
 			Detail:    fmt.Sprintf("fetch configured remote %s", diagnostic.Remote),
-		}
+		}, true
 	case WorkReadinessDiagnosticRemoteBaseFetchFailed:
 		return WorkReadinessRepair{
 			Available: true,
 			Code:      WorkReadinessRepairFetchRemote,
 			Safe:      true,
 			Detail:    fmt.Sprintf("fetch configured remote %s", diagnostic.Remote),
-		}
+		}, true
 	case WorkReadinessDiagnosticBranchBehindRemote:
 		return WorkReadinessRepair{
 			Available: true,
 			Code:      WorkReadinessRepairFastForwardBranch,
 			Safe:      true,
 			Detail:    fmt.Sprintf("fast-forward %s from %s", diagnostic.ExpectedBranch, diagnostic.RemoteRef),
-		}
+		}, true
 	default:
-		return manualWorkReadinessRepair("manual intervention required")
+		return WorkReadinessRepair{}, false
+	}
+}
+
+func workspaceWorkReadinessRepair(diagnostic WorkReadinessDiagnostic) (WorkReadinessRepair, bool) {
+	switch diagnostic.Code {
+	case WorkReadinessDiagnosticRuntimeArtifactsVisible:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairIgnoreRuntimeArtifacts,
+			Safe:      true,
+			Detail:    "exclude ChrysoCoord runtime artifacts from local Git status",
+		}, true
+	case WorkReadinessDiagnosticWorktreeRootMissing:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairCreateWorktreeRoot,
+			Safe:      true,
+			Detail:    fmt.Sprintf("create worktree root %s", diagnostic.Path),
+		}, true
+	case WorkReadinessDiagnosticStaleWorktreeMetadata:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairPruneWorktreeMetadata,
+			Safe:      true,
+			Detail:    fmt.Sprintf("remove stale worktree metadata %s", diagnostic.Path),
+		}, true
+	default:
+		return WorkReadinessRepair{}, false
 	}
 }
 
@@ -851,6 +1001,24 @@ func unsafeTicketWorktreeDiagnostic(inspection WorktreeInspection) WorkReadiness
 		Detail:         detail,
 		ExpectedBranch: inspection.Plan.Branch,
 		RemoteRef:      inspection.Plan.BaseRef,
+	}
+}
+
+func worktreeRootMissingDiagnostic(path string) WorkReadinessDiagnostic {
+	return WorkReadinessDiagnostic{
+		Code:     WorkReadinessDiagnosticWorktreeRootMissing,
+		Severity: WorkReadinessSeverityInfo,
+		Detail:   fmt.Sprintf("worktree root %s is missing", path),
+		Path:     path,
+	}
+}
+
+func staleWorktreeMetadataDiagnostic(path string) WorkReadinessDiagnostic {
+	return WorkReadinessDiagnostic{
+		Code:     WorkReadinessDiagnosticStaleWorktreeMetadata,
+		Severity: WorkReadinessSeverityInfo,
+		Detail:   fmt.Sprintf("worktree metadata %s points to a missing worktree", path),
+		Path:     path,
 	}
 }
 
@@ -1098,4 +1266,10 @@ func workReadinessNonEmptyLines(value string) []string {
 	}
 
 	return lines
+}
+
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+
+	return err == nil
 }

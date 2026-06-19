@@ -197,6 +197,7 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 
 func workDoctorTicketContext(cmd *cli.Command, operations service) (string, string, error) {
 	ticketKey := strings.TrimSpace(cmd.String("ticket"))
+
 	ticketBranch := strings.TrimSpace(cmd.String("ticket-branch"))
 	if ticketKey == "" {
 		return "", ticketBranch, nil
