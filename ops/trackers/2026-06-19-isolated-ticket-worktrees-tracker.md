@@ -14,7 +14,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice 2 | worktree state service | delivered | `feat/slice-2-worktree-state-service` | `#329` | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
 | Slice 3 | readiness workspace split | delivered | `feat/slice-3-readiness-workspace-split` | `#330` | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
 | Slice 4 | runtime workspace mount | delivered | `feat/slice-4-runtime-workspace-mount` | `#331` | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
-| Slice 5 | execution workspace results | planned | `feat/slice-5-execution-workspace-results` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
+| Slice 5 | execution workspace results | reviewing | `feat/slice-5-execution-workspace-results` | `#332` | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
 | Slice 6 | branch and PR lifecycle | planned | `feat/slice-6-branch-and-pr-lifecycle` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-6-branch-and-pr-lifecycle.md` |
 | Slice 7 | review repair and cleanup | planned | `feat/slice-7-review-repair-and-cleanup` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-7-review-repair-and-cleanup.md` |
 | Slice 8 | docs and QA proving | planned | `feat/slice-8-docs-and-qa-proving` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-8-docs-and-qa-proving.md` |
@@ -75,14 +75,14 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Extend execution record/runtime report models with workspace mode, execution workspace path, base ref, base SHA, and ticket branch. | pending | pending | Durable enough for later review. |
-| T5.2 | Add persistence migration or compatible report-only fallback for the new execution workspace metadata. | pending | pending | Prefer durable record if schema impact is manageable. |
-| T5.3 | Update changed-file discovery to accept an explicit workspace root. | pending | pending | Must not inspect user checkout in worktree mode. |
-| T5.4 | Ensure discovered paths are normalized relative to the project root semantics, not absolute worktree paths. | pending | pending | Result JSON remains project-relative. |
-| T5.5 | Update result application to load execution workspace metadata and inspect the right Git state. | pending | pending | Review/evidence gates still apply. |
-| T5.6 | Add tests proving user checkout changes are ignored during result discovery in worktree mode. | pending | pending | Core value of this slicing. |
-| T5.7 | Add tests proving validation and evidence gates still use the same result contract. | pending | pending | Avoid regressions from workspace split. |
-| T5.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T5.1 | Extend execution record/runtime report models with workspace mode, execution workspace path, base ref, base SHA, and ticket branch. | done | `c5dab13` | Execution records and reports include durable workspace metadata. |
+| T5.2 | Add persistence migration or compatible report-only fallback for the new execution workspace metadata. | done | `6a3c84f` | Added additive SQLite migration and repository persistence coverage. |
+| T5.3 | Update changed-file discovery to accept an explicit workspace root. | done | `f73945f` | Discovery can run against the execution workspace. |
+| T5.4 | Ensure discovered paths are normalized relative to the project root semantics, not absolute worktree paths. | done | `dc82d01` | Discovery rejects absolute and parent-relative paths. |
+| T5.5 | Update result application to load execution workspace metadata and inspect the right Git state. | done | `2dc5f31` | `ticket apply-result` discovers changed files from worktree execution records. |
+| T5.6 | Add tests proving user checkout changes are ignored during result discovery in worktree mode. | done | `3d2fad2` | CLI test covers dirty checkout ignored while worktree changes are reported. |
+| T5.7 | Add tests proving validation and evidence gates still use the same result contract. | done | `ad5b654` | Core test covers evidence blockers with workspace metadata. |
+| T5.8 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 6 Tasks
 
@@ -135,6 +135,11 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - Slice 3: `make verify` (pass)
 - Slice 4: `go test ./internal/core -run 'TestPlanRuntime|TestNewHarnessInvocation|TestMaterializeCodexWorkerContextForExecution|TestRenderMainContextPackage|TestValidateRuntime' && go test ./internal/app -run 'TestRuntimeValidatePrintsRuntimePlan'` (pass)
 - Slice 4: `make verify` (pass)
+- Slice 5: `go test ./internal/core -run 'ExecutionRecord|ExecutionRepository|ExecutionReport|Migrator|Migration'` (pass)
+- Slice 5: `go test ./internal/core -run 'ChangedFileDiscoverer|ParseGitStatusChangedFiles'` (pass)
+- Slice 5: `go test ./internal/core -run 'TestNewResultApplication|TestChangedFileDiscoverer|TestParseGitStatusChangedFiles' && go test ./internal/app -run 'TestTicketApplyResultDiscoversWorktreeChangedFiles|TestTicketApplyResultAppliesExecutionResult'` (pass)
+- Slice 5: `make lint-strict` (pass)
+- Slice 5: `make verify` (pass)
 
 ## Open Decisions
 
