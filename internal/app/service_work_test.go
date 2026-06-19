@@ -210,6 +210,39 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 	assertPathNotExists(t, plan.WorktreePath)
 }
 
+func TestServiceStartAgentWorkTicketReusesReviewRepairBranch(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	preparer := installFakeTicketStartWorktreePreparer(t)
+
+	writeRuntimeTemplate(t, projectDir)
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  workspace_mode: worktree
+`)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Repair.md", testReviewRepairTicket())
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAgentWorkTicket("CHC-1")
+	if err != nil {
+		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
+	}
+
+	if len(preparer.results) != 1 {
+		t.Fatalf("prepared worktrees = %d, want 1", len(preparer.results))
+	}
+
+	if preparer.results[0].Plan.Branch != "feat/chc-1-review-repair" {
+		t.Fatalf("prepared branch = %q, want existing repair branch", preparer.results[0].Plan.Branch)
+	}
+
+	if result.Execution == nil || result.Execution.Workspace.TicketBranch != "feat/chc-1-review-repair" {
+		t.Fatalf("Execution = %#v, want repair branch workspace", result.Execution)
+	}
+}
+
 func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()

@@ -2509,7 +2509,27 @@ Loop behavior.
 # Blocker
 
 # Validation
-`
+	`
+}
+
+func testReviewRepairTicket() core.Ticket {
+	ticket := testLoopTicket(
+		"CHC-1", "Review repair", core.TicketStatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
+	)
+	ticket.Branch = "feat/chc-1-review-repair"
+	ticket.ReviewState = "changes_requested"
+	ticket.ReviewResult = core.TicketReviewCommandResultNeedsChanges
+	ticket.ReviewRound = 1
+	ticket.ReviewCommentsURL = "https://forge.example.com/adrianpk/chc/pulls/274"
+	ticket.ReviewRefs = []core.TicketReviewRef{{
+		Type:     "pull_request",
+		Provider: "forgejo",
+		URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+		ID:       "274",
+		Status:   "open",
+	}}
+
+	return ticket
 }
 
 func withLoopTicketCreatedAt(ticket core.Ticket, createdAt time.Time) core.Ticket {
