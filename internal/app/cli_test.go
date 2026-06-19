@@ -2479,9 +2479,33 @@ func testLoopTicket(
 		UseCase:     useCase,
 		ProjectArea: projectArea,
 		Tags:        tags,
+		Body:        testLoopTicketBody(),
 		CreatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt:   time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	}
+}
+
+func testLoopTicketBody() string {
+	rendered, err := testCompleteEvidenceChecklistBlock()
+	if err != nil {
+		panic(err)
+	}
+
+	return rendered + `
+# Description
+
+Loop behavior.
+
+# Checklist
+
+# Acceptance
+
+# Comments
+
+# Blocker
+
+# Validation
+`
 }
 
 func withLoopTicketCreatedAt(ticket core.Ticket, createdAt time.Time) core.Ticket {
@@ -3734,6 +3758,78 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	}
 }
 
+func TestTicketApplyResultBlocksMissingEvidenceStrategy(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+
+	addProject(t, devRoot, "example", projectDir)
+
+	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"apply-result",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		record.ID,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket apply-result returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "status: blocked") {
+		t.Fatalf("stdout = %q, want blocked status", stdout.String())
+	}
+
+	content := readFile(t, ticketPath)
+	for _, want := range []string{
+		`status: "blocked"`,
+		"- kind: validation",
+		"evidence_strategy_missing",
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
+		}
+	}
+}
+
+func TestTicketApplyResultAllowsMissingOptionalEvidenceStrategy(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeCLIWorkspaceConfig(t, projectDir, "evidence:\n  strategy:\n    ticket_checklist: optional\n")
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+
+	addProject(t, devRoot, "example", projectDir)
+
+	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"apply-result",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		record.ID,
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket apply-result returned error: %v", err)
+	}
+
+	if !strings.Contains(stdout.String(), "status: reviewing") {
+		t.Fatalf("stdout = %q, want reviewing status", stdout.String())
+	}
+}
+
 func testApplyResultTicketBody(t *testing.T) string {
 	t.Helper()
 
@@ -3757,42 +3853,51 @@ Apply behavior.
 func testApplyResultEvidenceChecklistBlock(t *testing.T) string {
 	t.Helper()
 
-	checklist := core.EvidenceStrategyChecklist{
-		Found: true,
-		Items: map[string]core.EvidenceStrategyChecklistItem{
-			core.EvidenceStrategyChecklistLabelStrategy: {
-				Label:  core.EvidenceStrategyChecklistLabelStrategy,
-				Status: "planned",
-				Detail: "change_kind=bugfix; risk=medium; test_timing=before",
-			},
-			core.EvidenceStrategyChecklistLabelGherkin: {
-				Label:  core.EvidenceStrategyChecklistLabelGherkin,
-				Status: "not_applicable",
-				Detail: "reason=internal behavior",
-			},
-			core.EvidenceStrategyChecklistLabelTests: {
-				Label:  core.EvidenceStrategyChecklistLabelTests,
-				Status: "unit",
-				Detail: "reason=state transition",
-			},
-			core.EvidenceStrategyChecklistLabelValidation: {
-				Label:  core.EvidenceStrategyChecklistLabelValidation,
-				Status: "passed",
-				Detail: "commands=make verify",
-			},
-			core.EvidenceStrategyChecklistLabelSummary: {
-				Label:  core.EvidenceStrategyChecklistLabelSummary,
-				Status: "complete",
-			},
-		},
-	}
-
-	rendered, err := core.RenderEvidenceStrategyChecklist(checklist)
+	rendered, err := testCompleteEvidenceChecklistBlock()
 	if err != nil {
 		t.Fatalf("RenderEvidenceStrategyChecklist returned error: %v", err)
 	}
 
 	return rendered
+}
+
+func testCompleteEvidenceChecklistBlock() (string, error) {
+	checklist := core.EvidenceStrategyChecklist{
+		Found: true,
+		Items: map[string]core.EvidenceStrategyChecklistItem{
+			core.EvidenceStrategyChecklistLabelStrategy: {
+				Label:   core.EvidenceStrategyChecklistLabelStrategy,
+				Checked: true,
+				Status:  "complete",
+				Detail:  "change_kind=bugfix; risk=medium; test_timing=before",
+			},
+			core.EvidenceStrategyChecklistLabelGherkin: {
+				Label:   core.EvidenceStrategyChecklistLabelGherkin,
+				Checked: true,
+				Status:  "not_applicable",
+				Detail:  "reason=internal behavior",
+			},
+			core.EvidenceStrategyChecklistLabelTests: {
+				Label:   core.EvidenceStrategyChecklistLabelTests,
+				Checked: true,
+				Status:  "unit",
+				Detail:  "reason=state transition",
+			},
+			core.EvidenceStrategyChecklistLabelValidation: {
+				Label:   core.EvidenceStrategyChecklistLabelValidation,
+				Checked: true,
+				Status:  "passed",
+				Detail:  "commands=make verify",
+			},
+			core.EvidenceStrategyChecklistLabelSummary: {
+				Label:   core.EvidenceStrategyChecklistLabelSummary,
+				Checked: true,
+				Status:  "complete",
+			},
+		},
+	}
+
+	return core.RenderEvidenceStrategyChecklist(checklist)
 }
 
 func assertApplyResultExecutionReportEvidence(t *testing.T, content string) {
@@ -3806,8 +3911,8 @@ func assertApplyResultExecutionReportEvidence(t *testing.T, content string) {
 		"- validation: validation passed",
 		"### Ticket Checklist",
 		"- status: present",
-		"- Evidence strategy: checked=false; status=planned; change_kind=bugfix",
-		"- Tests: checked=false; status=unit; reason=state transition",
+		"- Evidence strategy: checked=true; status=complete; change_kind=bugfix",
+		"- Tests: checked=true; status=unit; reason=state transition",
 	} {
 		if !strings.Contains(content, want) {
 			t.Fatalf("execution report missing %q:\n%s", want, content)
@@ -4344,7 +4449,9 @@ func TestTicketStatusUpdatesTicket(t *testing.T) {
 func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	ticket := testTicket()
+	ticket.Body = testApplyResultTicketBody(t)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -4399,6 +4506,66 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 		if !strings.Contains(content, want) {
 			t.Fatalf("ticket content does not contain %q:\n%s", want, content)
 		}
+	}
+}
+
+func TestTicketStatusBlocksReadyForReviewWithoutEvidenceStrategy(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		core.TicketStatusReadyForReview,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("ticket status returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "evidence_strategy_missing") {
+		t.Fatalf("err = %v, want missing evidence strategy", err)
+	}
+
+	content := readFile(t, ticketPath)
+	if strings.Contains(content, `status: "ready_for_review"`) {
+		t.Fatalf("ticket content moved to ready_for_review:\n%s", content)
+	}
+}
+
+func TestTicketStatusAllowsReadyForReviewWithOptionalEvidenceStrategy(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	writeCLIWorkspaceConfig(t, projectDir, "evidence:\n  strategy:\n    ticket_checklist: optional\n")
+
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+
+	addProject(t, devRoot, "example", projectDir)
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"status",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+		core.TicketStatusReadyForReview,
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket status returned error: %v", err)
+	}
+
+	content := readFile(t, ticketPath)
+	if !strings.Contains(content, `status: "ready_for_review"`) {
+		t.Fatalf("ticket content does not contain ready_for_review:\n%s", content)
 	}
 }
 

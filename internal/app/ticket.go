@@ -1198,10 +1198,21 @@ func buildTicketApplyResultPlanForRecord(
 		return ticketApplyResultPlan{}, err
 	}
 
+	readiness, err := ticketEvidenceReadiness(ticketEvidenceRequest{
+		ProjectDir: projectContext.ProjectDir,
+		TicketPath: record.TicketPath,
+		Execution:  &record,
+		Result:     &result,
+	})
+	if err != nil {
+		return ticketApplyResultPlan{}, err
+	}
+
 	application, err := core.NewResultApplication(core.ResultApplicationOptions{
-		Execution:     record,
-		Result:        result,
-		CommentAuthor: "chc",
+		Execution:         record,
+		Result:            result,
+		EvidenceReadiness: &readiness,
+		CommentAuthor:     "chc",
 	})
 	if err != nil {
 		return ticketApplyResultPlan{}, err

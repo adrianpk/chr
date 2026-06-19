@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -369,6 +370,11 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 		return TicketOperationResult{}, err
 	}
 
+	err = s.validateReadyForReviewEvidence(ticket, status)
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
 	err = core.NewTicketStatusUpdater().UpdateStatus(s.ctx, core.UpdateTicketStatusOptions{
 		Path:      ticket.Path,
 		Status:    status,
@@ -387,6 +393,26 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 		Message: "Moved ticket " + ticket.Key + " to " + status + ".",
 		Tickets: tickets,
 	}, nil
+}
+
+func (s service) validateReadyForReviewEvidence(ticket core.IndexedTicket, status string) error {
+	if strings.TrimSpace(status) != core.TicketStatusReadyForReview {
+		return nil
+	}
+
+	readiness, err := ticketEvidenceReadiness(ticketEvidenceRequest{
+		ProjectDir: s.projectContext.ProjectDir,
+		TicketPath: ticket.Path,
+	})
+	if err != nil {
+		return err
+	}
+
+	if readiness.Allowed {
+		return nil
+	}
+
+	return fmt.Errorf("ticket ready_for_review evidence gate failed: %s", readiness.BlockerReason())
 }
 
 func (s service) listProjectTickets() ([]core.IndexedTicket, error) {

@@ -78,6 +78,41 @@ func TestNewResultApplicationMapsFailedExecutionToBlocked(t *testing.T) {
 	}
 }
 
+func TestNewResultApplicationBlocksFailedEvidenceReadiness(t *testing.T) {
+	record := testResultApplicationExecutionRecord(t.TempDir())
+	result := testResultApplicationResult(record)
+	readiness := EvidenceReadinessResult{
+		Allowed: false,
+		Diagnostics: []EvidenceReadinessDiagnostic{
+			{
+				Code:   EvidenceStrategyDiagnosticMissing,
+				Reason: "ticket evidence strategy checklist is missing",
+			},
+		},
+	}
+
+	application, err := NewResultApplication(ResultApplicationOptions{
+		Execution:         record,
+		Result:            result,
+		EvidenceReadiness: &readiness,
+	})
+	if err != nil {
+		t.Fatalf("NewResultApplication returned error: %v", err)
+	}
+
+	if application.TicketStatus != TicketResultStatusBlocked {
+		t.Fatalf("TicketStatus = %q, want blocked", application.TicketStatus)
+	}
+
+	if application.BlockedReason.Kind != ExecutionFailureValidation {
+		t.Fatalf("BlockedReason.Kind = %q, want validation", application.BlockedReason.Kind)
+	}
+
+	if !strings.Contains(application.BlockedReason.Reason, "evidence_strategy_missing") {
+		t.Fatalf("BlockedReason.Reason = %q, want evidence diagnostic", application.BlockedReason.Reason)
+	}
+}
+
 func TestNewResultApplicationPreservesChangedFiles(t *testing.T) {
 	record := testResultApplicationExecutionRecord(t.TempDir())
 	result := testResultApplicationResult(record)

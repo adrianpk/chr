@@ -65,10 +65,11 @@ type ResultApplicationBlockedReason struct {
 
 // ResultApplicationOptions describes a package boundary value.
 type ResultApplicationOptions struct {
-	Execution     ExecutionRecord
-	Result        ExecutionResult
-	ChangedFiles  []ResultApplicationChangedFile
-	CommentAuthor string
+	Execution         ExecutionRecord
+	Result            ExecutionResult
+	EvidenceReadiness *EvidenceReadinessResult
+	ChangedFiles      []ResultApplicationChangedFile
+	CommentAuthor     string
 }
 
 // NewResultApplication constructs the corresponding package service or value.
@@ -83,7 +84,7 @@ func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, err
 		ProjectID:    opts.Execution.ProjectID,
 		TicketKey:    opts.Execution.TicketKey,
 		TicketPath:   opts.Execution.TicketPath,
-		TicketStatus: ticketStatusForResultApplication(opts.Execution, opts.Result),
+		TicketStatus: ticketStatusForResultApplication(opts),
 		Execution: ResultApplicationExecution{
 			Status:        opts.Execution.Status,
 			FailureKind:   ExecutionFailureKindFromReason(opts.Execution.FailureReason),
@@ -100,7 +101,7 @@ func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, err
 	}
 
 	application.Comment = resultApplicationComment(opts.CommentAuthor, application)
-	application.BlockedReason = resultApplicationBlockedReason(application)
+	application.BlockedReason = blockedResultReason(opts, application)
 
 	return application, nil
 }
@@ -137,8 +138,9 @@ func validateResultApplicationInputs(opts ResultApplicationOptions) error {
 	return nil
 }
 
-func ticketStatusForResultApplication(record ExecutionRecord, result ExecutionResult) string {
-	if record.Status == ExecutionStatusSucceeded && result.Status == ExecutionResultStatusSucceeded {
+func ticketStatusForResultApplication(opts ResultApplicationOptions) string {
+	readinessAllowsReview := opts.EvidenceReadiness == nil || opts.EvidenceReadiness.Allowed
+	if opts.Execution.Status == ExecutionStatusSucceeded && opts.Result.Status == ExecutionResultStatusSucceeded && readinessAllowsReview {
 		return TicketResultStatusReviewing
 	}
 
@@ -178,9 +180,22 @@ func RenderResultApplicationCommentBody(application ResultApplication) string {
 	return body.String()
 }
 
-func resultApplicationBlockedReason(application ResultApplication) ResultApplicationBlockedReason {
+func blockedResultReason(opts ResultApplicationOptions, application ResultApplication) ResultApplicationBlockedReason {
 	if application.TicketStatus != TicketResultStatusBlocked {
 		return ResultApplicationBlockedReason{}
+	}
+
+	evidenceBlocked := opts.Execution.Status == ExecutionStatusSucceeded &&
+		opts.EvidenceReadiness != nil &&
+		!opts.EvidenceReadiness.Allowed
+	if evidenceBlocked {
+		return ResultApplicationBlockedReason{
+			Kind:           ExecutionFailureValidation,
+			Reason:         opts.EvidenceReadiness.BlockerReason(),
+			LogPath:        application.Evidence.LogPath,
+			ResultPath:     application.Evidence.ResultPath,
+			ValidationPath: application.Evidence.ValidationPath,
+		}
 	}
 
 	return ResultApplicationBlockedReason{
