@@ -113,6 +113,59 @@ func TestNewResultApplicationBlocksFailedEvidenceReadiness(t *testing.T) {
 	}
 }
 
+func TestNewResultApplicationBlocksEvidenceReadinessWithWorkspaceMetadata(t *testing.T) {
+	projectDir := t.TempDir()
+	worktreeDir := t.TempDir()
+	record := testResultApplicationExecutionRecord(projectDir)
+	record.Workspace = ExecutionWorkspaceRef{
+		Mode:                  WorkWorkspaceModeWorktree,
+		ProjectCheckoutDir:    projectDir,
+		ExecutionWorkspaceDir: worktreeDir,
+		BaseRef:               "origin/dev",
+		BaseSHA:               "abc123",
+		TicketBranch:          "chc/CHC-1",
+	}
+	result := testResultApplicationResult(record)
+	readiness := EvidenceReadinessResult{
+		Allowed: false,
+		Diagnostics: []EvidenceReadinessDiagnostic{
+			{
+				Code:   EvidenceStrategyDiagnosticValidationMissing,
+				Reason: "validation evidence is missing",
+			},
+		},
+	}
+
+	application, err := NewResultApplication(ResultApplicationOptions{
+		Execution:         record,
+		Result:            result,
+		EvidenceReadiness: &readiness,
+	})
+	if err != nil {
+		t.Fatalf("NewResultApplication returned error: %v", err)
+	}
+
+	if application.TicketStatus != TicketResultStatusBlocked {
+		t.Fatalf("TicketStatus = %q, want blocked", application.TicketStatus)
+	}
+
+	if application.BlockedReason.Kind != ExecutionFailureValidation {
+		t.Fatalf("BlockedReason.Kind = %q, want validation", application.BlockedReason.Kind)
+	}
+
+	if !strings.Contains(application.BlockedReason.Reason, "validation_missing") {
+		t.Fatalf("BlockedReason.Reason = %q, want validation evidence diagnostic", application.BlockedReason.Reason)
+	}
+
+	if application.Evidence.ValidationPath != record.Artifacts.ValidationPath {
+		t.Fatalf("Evidence.ValidationPath = %q, want %q", application.Evidence.ValidationPath, record.Artifacts.ValidationPath)
+	}
+
+	if application.BlockedReason.ResultPath != record.Artifacts.ResultPath {
+		t.Fatalf("BlockedReason.ResultPath = %q, want %q", application.BlockedReason.ResultPath, record.Artifacts.ResultPath)
+	}
+}
+
 func TestNewResultApplicationPreservesChangedFiles(t *testing.T) {
 	record := testResultApplicationExecutionRecord(t.TempDir())
 	result := testResultApplicationResult(record)
