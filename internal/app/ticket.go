@@ -473,9 +473,23 @@ type ticketStartPreflight struct {
 	Runtime        core.RuntimeValidationResult
 }
 
+type ticketStartPreflightOptions struct {
+	PrepareWorktree bool
+}
+
 type ticketStartSelection struct {
 	ProjectContext commandProjectContext
 	Ticket         core.IndexedTicket
+}
+
+type ticketStartWorkspace struct {
+	Ticket                core.IndexedTicket
+	TicketPath            string
+	TicketBranch          string
+	ExecutionWorkspaceDir string
+	WorkspaceBaseRef      string
+	WorkspaceBaseSHA      string
+	PreparedWorktree      bool
 }
 
 type ticketApplyResultPlan struct {
@@ -503,6 +517,16 @@ type ticketLoopRunOptions struct {
 
 var newTicketStartHarnessExecutor = func() core.HarnessExecutor {
 	return core.OSHarnessExecutor{}
+}
+
+type ticketStartWorktreePreparer interface {
+	Prepare(context.Context, core.WorktreePlanOptions) (core.WorktreePrepareResult, error)
+}
+
+var newTicketStartWorktreePreparer = func() ticketStartWorktreePreparer {
+	service := core.NewWorktreeService()
+
+	return service
 }
 
 func runTicketStatus(ctx context.Context, cmd *cli.Command, stdout io.Writer) error {
@@ -1327,6 +1351,10 @@ func refreshAppliedTicketIndex(
 	appliedAt time.Time,
 	assetsFS fs.FS,
 ) error {
+	if plan.Record.Workspace.Mode == core.WorkWorkspaceModeWorktree {
+		return nil
+	}
+
 	index, err := core.NewTicketIndex(ctx, env, assetsFS)
 	if err != nil {
 		return err
@@ -1500,7 +1528,9 @@ func buildTicketStartPreflight(ctx context.Context, cmd *cli.Command) (ticketSta
 		return ticketStartPreflight{}, err
 	}
 
-	return buildTicketStartPreflightForTicket(ctx, env, selection.ProjectContext, selection.Ticket, deps.assetsFS)
+	return buildTicketStartPreflightForTicketWithOptions(ctx, env, selection.ProjectContext, selection.Ticket, deps.assetsFS, ticketStartPreflightOptions{
+		PrepareWorktree: !cmd.Bool("dry-run"),
+	})
 }
 
 func buildTicketStartPreflightForTicket(
@@ -1510,18 +1540,37 @@ func buildTicketStartPreflightForTicket(
 	ticket core.IndexedTicket,
 	assetsFS fs.FS,
 ) (ticketStartPreflight, error) {
+	return buildTicketStartPreflightForTicketWithOptions(ctx, env, projectContext, ticket, assetsFS, ticketStartPreflightOptions{
+		PrepareWorktree: true,
+	})
+}
+
+func buildTicketStartPreflightForTicketWithOptions(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, ticket core.IndexedTicket, assetsFS fs.FS, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
 	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
-	record := newPendingExecutionRecord(projectContext.ProjectID, ticket)
+	workspace, err := prepareTicketStartWorkspace(ctx, projectContext, ticket, config, opts)
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+
+	record := newPendingExecutionRecord(projectContext.ProjectID, workspace.Ticket)
+	if workspace.TicketPath != "" {
+		record.TicketPath = workspace.TicketPath
+	}
 
 	result, err := core.ValidateRuntime(core.RuntimeValidationOptions{
-		ProjectDir: projectContext.ProjectDir,
-		Config:     config.Runtime,
-		TicketKey:  ticket.Key,
-		RunID:      record.ID,
+		ProjectDir:            projectContext.ProjectDir,
+		Config:                config.Runtime,
+		Workspace:             config.Work.Workspace,
+		ExecutionWorkspaceDir: workspace.ExecutionWorkspaceDir,
+		TicketKey:             workspace.Ticket.Key,
+		TicketBranch:          workspace.TicketBranch,
+		WorkspaceBaseRef:      workspace.WorkspaceBaseRef,
+		WorkspaceBaseSHA:      workspace.WorkspaceBaseSHA,
+		RunID:                 record.ID,
 	})
 	if err != nil {
 		return ticketStartPreflight{}, err
@@ -1533,10 +1582,152 @@ func buildTicketStartPreflightForTicket(
 		AssetsFS:       assetsFS,
 		Env:            env,
 		ProjectContext: projectContext,
-		Ticket:         ticket,
+		Ticket:         workspace.Ticket,
 		Record:         record,
 		Runtime:        result,
 	}, nil
+}
+
+func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProjectContext, ticket core.IndexedTicket, config core.WorkspaceConfig, opts ticketStartPreflightOptions) (ticketStartWorkspace, error) {
+	workspace := ticketStartWorkspace{
+		Ticket:     ticket,
+		TicketPath: ticket.Path,
+	}
+	if config.Work.Workspace.Mode != core.WorkWorkspaceModeWorktree {
+		return workspace, nil
+	}
+
+	selection, err := core.SelectTicketBranch(ticket)
+	if err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	planOptions := core.WorktreePlanOptions{
+		ProjectDir:   projectContext.ProjectDir,
+		TicketKey:    ticket.Key,
+		Branch:       selection.Branch,
+		BranchPolicy: config.Work.BranchPolicy,
+		Workspace:    config.Work.Workspace,
+		WorktreePath: workspace.ExecutionWorkspaceDir,
+	}
+
+	if !opts.PrepareWorktree {
+		return previewTicketStartWorktree(ticket, planOptions)
+	}
+
+	return prepareTicketStartWorktree(ctx, projectContext.ProjectDir, ticket, config, selection, planOptions)
+}
+
+func previewTicketStartWorktree(ticket core.IndexedTicket, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
+	plan, err := core.NewWorktreePlan(planOptions)
+	if err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	return ticketStartWorkspaceFromPlan(ticket, plan)
+}
+
+func prepareTicketStartWorktree(ctx context.Context, projectDir string, ticket core.IndexedTicket, config core.WorkspaceConfig, selection core.TicketBranchSelection, planOptions core.WorktreePlanOptions) (ticketStartWorkspace, error) {
+	result, err := newTicketStartWorktreePreparer().Prepare(ctx, planOptions)
+	if err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	workspace, err := ticketStartWorkspaceFromPlan(ticket, result.Plan)
+	if err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	workspace.PreparedWorktree = true
+
+	if selection.Derived {
+		workspace, err = writeDerivedTicketBranch(ctx, workspace, selection.Branch)
+		if err != nil {
+			return ticketStartWorkspace{}, err
+		}
+	}
+
+	if err := writeTicketStartWorktreeMetadata(result.Plan); err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	if err := ensureTicketStartRuntimeArtifactDir(projectDir, config, workspace); err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	return workspace, nil
+}
+
+func ticketStartWorkspaceFromPlan(ticket core.IndexedTicket, plan core.WorktreePlan) (ticketStartWorkspace, error) {
+	ticketPath, err := equivalentProjectPath(plan.ProjectDir, plan.WorktreePath, ticket.Path)
+	if err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	return ticketStartWorkspace{
+		Ticket:                ticket,
+		TicketPath:            ticketPath,
+		TicketBranch:          plan.Branch,
+		ExecutionWorkspaceDir: plan.WorktreePath,
+		WorkspaceBaseRef:      plan.BaseRef,
+		WorkspaceBaseSHA:      plan.BaseSHA,
+	}, nil
+}
+
+func writeDerivedTicketBranch(ctx context.Context, workspace ticketStartWorkspace, branch string) (ticketStartWorkspace, error) {
+	err := core.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(ctx, core.UpdateTicketReviewMetadataOptions{
+		Path:      workspace.TicketPath,
+		Branch:    branch,
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return ticketStartWorkspace{}, err
+	}
+
+	workspace.Ticket.Branch = branch
+
+	return workspace, nil
+}
+
+func writeTicketStartWorktreeMetadata(plan core.WorktreePlan) error {
+	path, err := core.WorktreeMetadataPath(plan)
+	if err != nil {
+		return err
+	}
+
+	return core.WriteWorktreeMetadata(path, core.NewWorktreeMetadata(plan, time.Now().UTC()))
+}
+
+func ensureTicketStartRuntimeArtifactDir(projectDir string, config core.WorkspaceConfig, workspace ticketStartWorkspace) error {
+	plan, err := core.PlanRuntime(core.RuntimePlanOptions{
+		ProjectDir:            projectDir,
+		Config:                config.Runtime,
+		Workspace:             config.Work.Workspace,
+		ExecutionWorkspaceDir: workspace.ExecutionWorkspaceDir,
+		TicketKey:             workspace.Ticket.Key,
+		TicketBranch:          workspace.TicketBranch,
+		WorkspaceBaseRef:      workspace.WorkspaceBaseRef,
+		WorkspaceBaseSHA:      workspace.WorkspaceBaseSHA,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(plan.ArtifactDir, 0o755)
+	if err != nil {
+		return fmt.Errorf("create execution workspace artifact directory: %w", err)
+	}
+
+	return nil
+}
+
+func equivalentProjectPath(sourceRoot, targetRoot, path string) (string, error) {
+	relative, err := filepath.Rel(sourceRoot, path)
+	if err != nil || strings.HasPrefix(relative, "..") || filepath.IsAbs(relative) {
+		return "", fmt.Errorf("path %q is not under source root %q", path, sourceRoot)
+	}
+
+	return filepath.Join(targetRoot, relative), nil
 }
 
 func selectTicketStartTicket(ctx context.Context, cmd *cli.Command, env core.UserEnvironment, assetsFS fs.FS) (ticketStartSelection, error) {
@@ -1622,20 +1813,8 @@ func runTicketStartExecution(
 		return core.ExecutionRecord{}, err
 	}
 
-	emitAgentWorkEvent(ctx, events.Sink, core.AgentEvent{
-		ProjectID:   record.ProjectID,
-		LoopID:      events.LoopID,
-		ExecutionID: record.ID,
-		TicketKey:   record.TicketKey,
-		Phase:       core.AgentEventPhaseExecutionCreated,
-		Message:     fmt.Sprintf("%s execution created: %s", record.TicketKey, record.ID),
-		Refs: core.AgentEventRefs{
-			"ticket_path":         record.TicketPath,
-			"result_path":         record.Artifacts.ResultPath,
-			"runtime_log_path":    record.Artifacts.LogPath,
-			"validation_log_path": record.Artifacts.ValidationPath,
-		},
-	})
+	emitBranchPreparedAgentEvent(ctx, events, record)
+	emitExecutionCreatedAgentEvent(ctx, events, record)
 
 	err = core.MaterializeCodexWorkerContextForExecution(ctx, record, result.Plan)
 	if err != nil {

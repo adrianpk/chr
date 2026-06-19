@@ -73,6 +73,143 @@ func TestServiceStartAgentWorkTicketInitializesRuntime(t *testing.T) {
 	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "runs"))
 }
 
+func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	preparer := installFakeTicketStartWorktreePreparer(t)
+
+	writeRuntimeTemplate(t, projectDir)
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  workspace_mode: worktree
+`)
+
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAgentWorkTicket("CHC-1")
+	if err != nil {
+		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
+	}
+
+	if len(preparer.results) != 1 {
+		t.Fatalf("prepared worktrees = %d, want 1", len(preparer.results))
+	}
+
+	if result.Execution == nil {
+		t.Fatal("Execution is nil")
+	}
+
+	assertPreparedTicketWorktreeWorkspace(t, ticketPath, preparer.results[0], *result.Execution)
+}
+
+func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared core.WorktreePrepareResult, execution core.ExecutionRecord) {
+	t.Helper()
+
+	if prepared.Plan.Branch != "chc/chc-1-ready-frontend" {
+		t.Fatalf("prepared branch = %q, want derived branch", prepared.Plan.Branch)
+	}
+
+	if execution.Workspace.Mode != core.WorkWorkspaceModeWorktree {
+		t.Fatalf("Workspace.Mode = %q, want worktree", execution.Workspace.Mode)
+	}
+
+	if execution.Workspace.ExecutionWorkspaceDir != prepared.Plan.WorktreePath {
+		t.Fatalf("ExecutionWorkspaceDir = %q, want %q", execution.Workspace.ExecutionWorkspaceDir, prepared.Plan.WorktreePath)
+	}
+
+	if execution.Workspace.TicketBranch != prepared.Plan.Branch {
+		t.Fatalf("TicketBranch = %q, want %q", execution.Workspace.TicketBranch, prepared.Plan.Branch)
+	}
+
+	if !strings.HasPrefix(execution.TicketPath, prepared.Plan.WorktreePath) {
+		t.Fatalf("TicketPath = %q, want path inside worktree %q", execution.TicketPath, prepared.Plan.WorktreePath)
+	}
+
+	projectTicket := readFile(t, ticketPath)
+	if strings.Contains(projectTicket, `branch: "chc/chc-1-ready-frontend"`) {
+		t.Fatalf("project checkout ticket was mutated:\n%s", projectTicket)
+	}
+
+	worktreeTicket := readFile(t, execution.TicketPath)
+	for _, want := range []string{
+		`branch: "chc/chc-1-ready-frontend"`,
+		`status: "reviewing"`,
+	} {
+		if !strings.Contains(worktreeTicket, want) {
+			t.Fatalf("worktree ticket missing %q:\n%s", want, worktreeTicket)
+		}
+	}
+
+	metadataPath, err := core.WorktreeMetadataPath(prepared.Plan)
+	if err != nil {
+		t.Fatalf("WorktreeMetadataPath returned error: %v", err)
+	}
+
+	assertPathExists(t, metadataPath)
+}
+
+func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	preparer := installFakeTicketStartWorktreePreparer(t)
+
+	writeRuntimeTemplate(t, projectDir)
+	writeCLIWorkspaceConfig(t, projectDir, `work:
+  workspace_mode: worktree
+`)
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{
+		Statuses:      []string{core.TicketStatusReadyForDev},
+		Order:         core.TicketLoopOrderCreatedAt,
+		MaxIterations: 1,
+	})
+	if err != nil {
+		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
+	}
+
+	if result.EligibleCount != 2 {
+		t.Fatalf("EligibleCount = %d, want 2", result.EligibleCount)
+	}
+
+	if len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHC-1" {
+		t.Fatalf("SelectedQueue = %#v, want only CHC-1 selected", result.SelectedQueue)
+	}
+
+	if len(preparer.results) != 1 {
+		t.Fatalf("prepared worktrees = %d, want only selected ticket", len(preparer.results))
+	}
+
+	if preparer.results[0].Plan.TicketKey != "CHC-1" {
+		t.Fatalf("prepared ticket = %q, want CHC-1", preparer.results[0].Plan.TicketKey)
+	}
+
+	plan, err := core.NewWorktreePlan(core.WorktreePlanOptions{
+		ProjectDir: projectDir,
+		TicketKey:  "CHC-2",
+		Branch:     "chc/chc-2-ready-backend",
+	})
+	if err != nil {
+		t.Fatalf("NewWorktreePlan returned error: %v", err)
+	}
+
+	assertPathNotExists(t, plan.WorktreePath)
+}
+
 func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()

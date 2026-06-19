@@ -117,6 +117,7 @@ func (settings worktreeServiceSettings) ensureBranch(ctx context.Context) (bool,
 		if err != nil {
 			return false, fmt.Errorf("inspect worktree branch base: %w", err)
 		}
+
 		if !containsBase {
 			return false, fmt.Errorf("worktree branch %s does not contain base %s", settings.plan.Branch, settings.plan.BaseRef)
 		}

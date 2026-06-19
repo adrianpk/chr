@@ -136,6 +136,46 @@ func emitTicketSelectedAgentEvent(ctx context.Context, sink core.AgentEventSink,
 	})
 }
 
+func emitBranchPreparedAgentEvent(ctx context.Context, events ticketExecutionEvents, record core.ExecutionRecord) {
+	if record.Workspace.Mode != core.WorkWorkspaceModeWorktree {
+		return
+	}
+
+	emitAgentWorkEvent(ctx, events.Sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      events.LoopID,
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Phase:       core.AgentEventPhaseBranchPrepared,
+		Message:     fmt.Sprintf("%s branch prepared: %s", record.TicketKey, record.Workspace.TicketBranch),
+		Refs: compactAppAgentEventRefs(core.AgentEventRefs{
+			"ticket_path":             record.TicketPath,
+			"ticket_branch":           record.Workspace.TicketBranch,
+			"project_checkout_dir":    record.Workspace.ProjectCheckoutDir,
+			"execution_workspace_dir": record.Workspace.ExecutionWorkspaceDir,
+			"workspace_base_ref":      record.Workspace.BaseRef,
+			"workspace_base_sha":      record.Workspace.BaseSHA,
+		}),
+	})
+}
+
+func emitExecutionCreatedAgentEvent(ctx context.Context, events ticketExecutionEvents, record core.ExecutionRecord) {
+	emitAgentWorkEvent(ctx, events.Sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      events.LoopID,
+		ExecutionID: record.ID,
+		TicketKey:   record.TicketKey,
+		Phase:       core.AgentEventPhaseExecutionCreated,
+		Message:     fmt.Sprintf("%s execution created: %s", record.TicketKey, record.ID),
+		Refs: core.AgentEventRefs{
+			"ticket_path":         record.TicketPath,
+			"result_path":         record.Artifacts.ResultPath,
+			"runtime_log_path":    record.Artifacts.LogPath,
+			"validation_log_path": record.Artifacts.ValidationPath,
+		},
+	})
+}
+
 func emitLoopFailedAgentEvents(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, cause error) {
 	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
 		ProjectID: record.ProjectID,

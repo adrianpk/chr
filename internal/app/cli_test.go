@@ -7035,6 +7035,102 @@ func installFakeTicketStartHarnessExecutor(t *testing.T, err error) *fakeTicketS
 	return executor
 }
 
+type fakeTicketStartWorktreePreparer struct {
+	results []core.WorktreePrepareResult
+}
+
+func (p *fakeTicketStartWorktreePreparer) Prepare(_ context.Context, opts core.WorktreePlanOptions) (core.WorktreePrepareResult, error) {
+	plan, err := core.NewWorktreePlan(opts)
+	if err != nil {
+		return core.WorktreePrepareResult{}, err
+	}
+
+	plan.BaseSHA = "base-sha"
+
+	if err := copyTicketStartWorktreeFixture(opts.ProjectDir, plan.WorktreePath); err != nil {
+		return core.WorktreePrepareResult{}, err
+	}
+
+	result := core.WorktreePrepareResult{
+		Plan:          plan,
+		CreatedBranch: true,
+		AddedWorktree: true,
+	}
+	p.results = append(p.results, result)
+
+	return result, nil
+}
+
+func copyTicketStartWorktreeFixture(projectDir, worktreeDir string) error {
+	if err := os.MkdirAll(worktreeDir, 0o755); err != nil {
+		return err
+	}
+
+	if output, err := exec.Command("git", "-C", worktreeDir, "init").CombinedOutput(); err != nil {
+		return fmt.Errorf("git init worktree fixture: %w: %s", err, strings.TrimSpace(string(output)))
+	}
+
+	ticketDir := filepath.Join(projectDir, ".chc", "user", "tickets")
+
+	err := filepath.WalkDir(ticketDir, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+
+		if entry.IsDir() {
+			return nil
+		}
+
+		relative, err := filepath.Rel(projectDir, path)
+		if err != nil {
+			return err
+		}
+
+		return copyTicketStartWorktreeFixtureFile(projectDir, worktreeDir, relative)
+	})
+	if err != nil {
+		return err
+	}
+
+	return copyTicketStartWorktreeFixtureFile(
+		projectDir,
+		worktreeDir,
+		filepath.Join(".chc", "user", "runtime", "agent", "Dockerfile"),
+	)
+}
+
+func copyTicketStartWorktreeFixtureFile(projectDir, worktreeDir, relativePath string) error {
+	source := filepath.Join(projectDir, relativePath)
+	target := filepath.Join(worktreeDir, relativePath)
+
+	content, err := os.ReadFile(source)
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		return err
+	}
+
+	return os.WriteFile(target, content, 0o644)
+}
+
+func installFakeTicketStartWorktreePreparer(t *testing.T) *fakeTicketStartWorktreePreparer {
+	t.Helper()
+
+	preparer := &fakeTicketStartWorktreePreparer{}
+	previous := newTicketStartWorktreePreparer
+	newTicketStartWorktreePreparer = func() ticketStartWorktreePreparer {
+		return preparer
+	}
+
+	t.Cleanup(func() {
+		newTicketStartWorktreePreparer = previous
+	})
+
+	return preparer
+}
+
 func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket core.Ticket) string {
 	t.Helper()
 
