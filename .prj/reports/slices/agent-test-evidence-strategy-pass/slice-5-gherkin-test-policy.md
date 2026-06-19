@@ -5,7 +5,7 @@ Slicing: Agent Test/Evidence Strategy Pass
 Plan: `ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md`
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 Branch: `feat/slice-5-gherkin-test-policy`
-PR: pending
+PR: `#324`
 
 ## Purpose
 
