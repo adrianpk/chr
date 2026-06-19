@@ -9,6 +9,7 @@ import (
 func TestDetectEvidenceGherkinContextUsesAcceptanceFeatureArtifacts(t *testing.T) {
 	projectDir := t.TempDir()
 	writeEvidencePolicyFeature(t, projectDir, ".chc/user/acceptance/checkout.feature")
+
 	ticket := testEvidencePolicyTicket(func(ticket *IndexedTicket) {
 		ticket.Type = "feature"
 		ticket.UseCase = "checkout"
@@ -32,6 +33,7 @@ func TestDetectEvidenceGherkinContextUsesAcceptanceFeatureArtifacts(t *testing.T
 func TestDetectEvidenceGherkinContextHonorsDisabledPolicy(t *testing.T) {
 	projectDir := t.TempDir()
 	writeEvidencePolicyFeature(t, projectDir, ".chc/user/acceptance/checkout.feature")
+
 	config := DefaultEvidenceStrategyConfig()
 	config.GherkinPolicy = EvidenceGherkinPolicyDisabled
 

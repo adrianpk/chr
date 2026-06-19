@@ -35,6 +35,11 @@ type EvidenceDecisionMatrixRow struct {
 	DefaultEvidence string
 }
 
+type evidenceKeywordRule struct {
+	Kind  string
+	Terms []string
+}
+
 // EvidencePolicyContext describes ticket policy guidance for a worker.
 type EvidencePolicyContext struct {
 	Gherkin  EvidenceGherkinContext
@@ -63,6 +68,7 @@ func DetectEvidenceGherkinContext(projectDir string, config EvidenceStrategyConf
 
 	applies := TicketNeedsGherkin(ticket)
 	active := config.GherkinPolicy == EvidenceGherkinPolicyActiveWhenApplicable && len(featurePaths) > 0
+
 	context := EvidenceGherkinContext{
 		Policy:       config.GherkinPolicy,
 		Active:       active,
@@ -150,6 +156,7 @@ func acceptanceFeaturePaths(projectDir string) ([]string, error) {
 	if os.IsNotExist(err) {
 		return nil, nil
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("scan acceptance feature artifacts: %w", err)
 	}
@@ -191,38 +198,33 @@ func evidenceRequiredGherkinPath(featurePaths []string, ticket IndexedTicket) st
 
 func evidenceChangeKind(ticket IndexedTicket) string {
 	text := strings.ToLower(strings.Join(evidenceTicketTerms(ticket), " "))
-	switch {
-	case ticket.Type == "docs":
+
+	if ticket.Type == "docs" {
 		return "docs_only"
-	case strings.Contains(text, "godoc"):
-		return "godoc_only"
-	case ticket.Type == "bug":
-		return "bugfix"
-	case strings.Contains(text, "parser") || strings.Contains(text, "parse") || strings.Contains(text, "validation") || strings.Contains(text, "validator"):
-		return "parsing_or_validation"
-	case strings.Contains(text, "state machine") || strings.Contains(text, "transition"):
-		return "state_machine"
-	case strings.Contains(text, "filesystem") || strings.Contains(text, "file ") || strings.Contains(text, "sqlite") || strings.Contains(text, "persistence"):
-		return "persistence_or_filesystem"
-	case strings.Contains(text, "network") || strings.Contains(text, "http") || strings.Contains(text, "api client"):
-		return "network_or_external_io"
-	case strings.Contains(text, "concurrency") || strings.Contains(text, "timeout") || strings.Contains(text, "worker") || strings.Contains(text, "queue"):
-		return "concurrency_or_timeout"
-	case strings.Contains(text, "config") || strings.Contains(text, "default") || strings.Contains(text, "override"):
-		return "configuration"
-	case strings.Contains(text, "cli"):
-		return "cli_behavior"
-	case strings.Contains(text, "tui") || strings.Contains(text, "board") || strings.Contains(text, "dash"):
-		return "tui_behavior"
-	case strings.Contains(text, "api"):
-		return "api_behavior"
-	case ticket.Type == "feature" || strings.TrimSpace(ticket.UseCase) != "":
-		return "behavior"
-	case ticket.Type == "cleanup":
-		return "refactor_no_behavior"
-	default:
-		return "unknown"
 	}
+
+	if strings.Contains(text, "godoc") {
+		return "godoc_only"
+	}
+
+	if ticket.Type == "bug" {
+		return "bugfix"
+	}
+
+	kind := evidenceKeywordChangeKind(text)
+	if kind != "" {
+		return kind
+	}
+
+	if ticket.Type == "feature" || strings.TrimSpace(ticket.UseCase) != "" {
+		return "behavior"
+	}
+
+	if ticket.Type == "cleanup" {
+		return "refactor_no_behavior"
+	}
+
+	return "unknown"
 }
 
 func evidenceTicketTerms(ticket IndexedTicket) []string {
@@ -230,6 +232,40 @@ func evidenceTicketTerms(ticket IndexedTicket) []string {
 	terms = append(terms, ticket.Tags...)
 
 	return terms
+}
+
+func evidenceKeywordChangeKind(text string) string {
+	for _, rule := range evidenceKeywordRules() {
+		if evidenceTextContainsAny(text, rule.Terms) {
+			return rule.Kind
+		}
+	}
+
+	return ""
+}
+
+func evidenceKeywordRules() []evidenceKeywordRule {
+	return []evidenceKeywordRule{
+		{Kind: "parsing_or_validation", Terms: []string{"parser", "parse", "validation", "validator"}},
+		{Kind: "state_machine", Terms: []string{"state machine", "transition"}},
+		{Kind: "persistence_or_filesystem", Terms: []string{"filesystem", "file ", "sqlite", "persistence"}},
+		{Kind: "network_or_external_io", Terms: []string{"network", "http", "api client"}},
+		{Kind: "concurrency_or_timeout", Terms: []string{"concurrency", "timeout", "worker", "queue"}},
+		{Kind: "configuration", Terms: []string{"config", "default", "override"}},
+		{Kind: "cli_behavior", Terms: []string{"cli"}},
+		{Kind: "tui_behavior", Terms: []string{"tui", "board", "dash"}},
+		{Kind: "api_behavior", Terms: []string{"api"}},
+	}
+}
+
+func evidenceTextContainsAny(text string, terms []string) bool {
+	for _, term := range terms {
+		if strings.Contains(text, term) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func evidenceRisk(ticket IndexedTicket, kind string) string {

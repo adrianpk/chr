@@ -236,14 +236,17 @@ func writeCodexWorkerGherkinPolicy(output *strings.Builder, gherkin EvidenceGher
 	output.WriteString("- reason: ")
 	output.WriteString(nonEmptyWorkerContextValue(gherkin.Reason, "not evaluated"))
 	output.WriteString("\n")
+
 	if len(gherkin.FeaturePaths) > 0 {
 		output.WriteString("- feature_paths:\n")
+
 		for _, path := range gherkin.FeaturePaths {
 			output.WriteString("  - ")
 			output.WriteString(path)
 			output.WriteString("\n")
 		}
 	}
+
 	output.WriteString("\n")
 }
 
@@ -271,6 +274,7 @@ func writeCodexWorkerSuggestedStrategy(output *strings.Builder, guidance Evidenc
 
 func writeCodexWorkerDecisionMatrix(output *strings.Builder) {
 	output.WriteString("### Evidence Decision Matrix\n\n")
+
 	for _, row := range EvidenceDecisionMatrixRows() {
 		output.WriteString("- ")
 		output.WriteString(row.ChangeKind)
@@ -278,6 +282,7 @@ func writeCodexWorkerDecisionMatrix(output *strings.Builder) {
 		output.WriteString(row.DefaultEvidence)
 		output.WriteString("\n")
 	}
+
 	output.WriteString("\n")
 }
 
@@ -391,6 +396,7 @@ func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*Wo
 	}
 
 	checklist, checklistError := parseWorkerEvidenceChecklist(string(content))
+
 	ticket, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{
 		ProjectDir: projectDir,
 		Path:       ticketPath,
