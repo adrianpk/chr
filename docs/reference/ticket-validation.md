@@ -101,6 +101,10 @@ Each `review_refs` entry requires `type`, `provider`, and `url`.
 Moving a ticket to `ready_for_review` requires both `branch` metadata and at
 least one `review_refs` entry with `type: "pull_request"`.
 
+When strict evidence strategy gating is enabled, `ready_for_review` also
+requires a parseable completed evidence strategy checklist. The gate rejects
+missing, malformed, blocked, or failing evidence before the status changes.
+
 `blocking_findings` cannot contain empty values.
 
 ## Time Consistency

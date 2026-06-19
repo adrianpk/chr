@@ -68,14 +68,28 @@ The command:
 
 - resolves the project through the command project context resolver;
 - finds the ticket by key in the user-level ticket index;
+- validates `ready_for_review` requirements when that status is requested;
 - updates `status` in Markdown frontmatter;
 - updates `updated_at`;
 - writes the modified Markdown ticket file.
+
+## `ready_for_review` Requirements
+
+Moving a ticket to `ready_for_review` requires:
+
+- `branch` metadata;
+- at least one `review_refs` entry with `type: "pull_request"`;
+- completed evidence strategy checklist items when strict evidence gating is
+  enabled.
+
+If strict evidence gating rejects the transition, the command returns an error
+and leaves the ticket unchanged.
 
 ## Scope
 
 The command does not rebuild the ticket index.
 
-The command does not enforce transition rules between statuses yet.
+The command does not enforce a complete status state machine. It enforces only
+the metadata and evidence gates required by review and merge handoff statuses.
 
 The command does not move ticket files between directories.

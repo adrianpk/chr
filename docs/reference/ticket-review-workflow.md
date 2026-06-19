@@ -42,6 +42,8 @@ Before a ticket can move to `ready_for_review`, it must have:
 
 - `branch`
 - at least one `review_refs` entry with `type: "pull_request"`
+- required evidence strategy checklist items completed when strict evidence
+  gating is enabled.
 
 Attach them with:
 
@@ -52,6 +54,10 @@ chc ticket review-ref CHC-1 \
   --url https://forge.example.com/owner/repo/pulls/123 \
   --id 123
 ```
+
+The evidence gate is configured under `.chc/user/config.yml` at
+`evidence.strategy`. See
+[Evidence strategy configuration](evidence-strategy-config.md).
 
 ## Review Command
 

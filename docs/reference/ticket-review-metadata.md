@@ -126,6 +126,10 @@ Review references require `type`, `provider`, and `url`.
 Moving a ticket to `ready_for_review` requires both `branch` and at least one
 `pull_request` entry in `review_refs`.
 
+When strict evidence strategy gating is enabled, moving a ticket to
+`ready_for_review` also requires completed evidence checklist items. Missing,
+malformed, blocked, or failing evidence prevents the transition.
+
 Moving a ticket to `ready_for_merge` requires passed review metadata,
 `branch`, and at least one `pull_request` entry in `review_refs`.
 

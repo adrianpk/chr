@@ -145,6 +145,7 @@ The command:
 - resolves the target project;
 - loads the execution record from the user-level SQLite database;
 - loads the execution result envelope from the execution artifact path;
+- evaluates evidence readiness before review handoff;
 - builds a `ResultApplication`;
 - writes ticket status, execution comment, validation evidence, changed files,
   and blocked reason content;
@@ -156,6 +157,12 @@ The command:
 
 Use `--dry-run` to print the planned application without mutating ticket
 Markdown, refreshing the index, or writing report artifacts.
+
+Successful execution and successful result status are not enough to enter
+review when strict evidence gating is enabled. Missing checklist state,
+malformed checklist content, blocked evidence, failed validation, runtime
+failure, or incomplete result `evidence_summary` leaves the ticket `blocked`
+with a classified blocker reason.
 
 ## Application Fields
 
