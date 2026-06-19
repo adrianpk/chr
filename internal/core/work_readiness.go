@@ -62,9 +62,12 @@ type WorkReadinessRepairCode string
 type WorkReadinessReport struct {
 	ProjectDir    string
 	Policy        WorkBranchPolicy
+	Workspace     WorkWorkspaceConfig
 	Status        WorkReadinessStatus
 	Diagnostics   []WorkReadinessDiagnostic
 	CurrentBranch string
+	TicketKey     string
+	TicketBranch  string
 }
 
 // WorkReadinessDiagnostic describes a package boundary value.

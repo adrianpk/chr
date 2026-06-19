@@ -12,16 +12,24 @@ import (
 
 // WorkReadinessOptions describes a package boundary value.
 type WorkReadinessOptions struct {
-	ProjectDir string
-	Policy     WorkBranchPolicy
-	Git        WorkReadinessGit
+	ProjectDir   string
+	Policy       WorkBranchPolicy
+	Workspace    WorkWorkspaceConfig
+	TicketKey    string
+	TicketBranch string
+	Git          WorkReadinessGit
+	WorktreeGit  WorktreeGit
 }
 
 // WorkReadinessRepairOptions describes a package boundary value.
 type WorkReadinessRepairOptions struct {
-	ProjectDir string
-	Policy     WorkBranchPolicy
-	Git        WorkReadinessRepairGit
+	ProjectDir   string
+	Policy       WorkBranchPolicy
+	Workspace    WorkWorkspaceConfig
+	TicketKey    string
+	TicketBranch string
+	Git          WorkReadinessRepairGit
+	WorktreeGit  WorktreeGit
 }
 
 // WorkReadinessGit defines a package boundary interface.
@@ -64,13 +72,30 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 		policy = DefaultWorkBranchPolicy()
 	}
 
+	workspace := opts.Workspace
+	if workspace == (WorkWorkspaceConfig{}) {
+		workspace = DefaultWorkWorkspaceConfig()
+	} else {
+		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+	}
+
 	report := WorkReadinessReport{
-		ProjectDir: projectDir,
-		Policy:     policy,
-		Status:     WorkReadinessStatusReady,
+		ProjectDir:   projectDir,
+		Policy:       policy,
+		Workspace:    workspace,
+		Status:       WorkReadinessStatusReady,
+		TicketKey:    strings.TrimSpace(opts.TicketKey),
+		TicketBranch: strings.TrimSpace(opts.TicketBranch),
 	}
 
 	err = ValidateWorkBranchPolicy(policy)
+	if err != nil {
+		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
+
+		return finalizeWorkReadinessReport(report), nil
+	}
+
+	err = ValidateWorkWorkspaceConfig(workspace)
 	if err != nil {
 		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
 
@@ -110,9 +135,13 @@ func RepairWorkReadiness(ctx context.Context, opts WorkReadinessRepairOptions) (
 }
 
 type workReadinessRepairSettings struct {
-	projectDir string
-	policy     WorkBranchPolicy
-	git        WorkReadinessRepairGit
+	projectDir   string
+	policy       WorkBranchPolicy
+	workspace    WorkWorkspaceConfig
+	ticketKey    string
+	ticketBranch string
+	git          WorkReadinessRepairGit
+	worktreeGit  WorktreeGit
 }
 
 func newWorkReadinessRepairSettings(ctx context.Context, opts WorkReadinessRepairOptions) (workReadinessRepairSettings, error) {
@@ -131,23 +160,43 @@ func newWorkReadinessRepairSettings(ctx context.Context, opts WorkReadinessRepai
 		policy = DefaultWorkBranchPolicy()
 	}
 
+	workspace := opts.Workspace
+	if workspace == (WorkWorkspaceConfig{}) {
+		workspace = DefaultWorkWorkspaceConfig()
+	} else {
+		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+	}
+
 	git := opts.Git
 	if git == nil {
 		git = OSWorkReadinessGit{}
 	}
 
+	worktreeGit := opts.WorktreeGit
+	if worktreeGit == nil {
+		worktreeGit = OSWorktreeGit{}
+	}
+
 	return workReadinessRepairSettings{
-		projectDir: projectDir,
-		policy:     policy,
-		git:        git,
+		projectDir:   projectDir,
+		policy:       policy,
+		workspace:    workspace,
+		ticketKey:    strings.TrimSpace(opts.TicketKey),
+		ticketBranch: strings.TrimSpace(opts.TicketBranch),
+		git:          git,
+		worktreeGit:  worktreeGit,
 	}, nil
 }
 
 func (settings workReadinessRepairSettings) check(ctx context.Context) (WorkReadinessReport, error) {
 	return CheckWorkReadiness(ctx, WorkReadinessOptions{
-		ProjectDir: settings.projectDir,
-		Policy:     settings.policy,
-		Git:        settings.git,
+		ProjectDir:   settings.projectDir,
+		Policy:       settings.policy,
+		Workspace:    settings.workspace,
+		TicketKey:    settings.ticketKey,
+		TicketBranch: settings.ticketBranch,
+		Git:          settings.git,
+		WorktreeGit:  settings.worktreeGit,
 	})
 }
 
