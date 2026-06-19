@@ -14,6 +14,9 @@ type RuntimePlanOptions struct {
 	Workspace             WorkWorkspaceConfig
 	ExecutionWorkspaceDir string
 	TicketKey             string
+	TicketBranch          string
+	WorkspaceBaseRef      string
+	WorkspaceBaseSHA      string
 	RunID                 string
 }
 
@@ -23,6 +26,10 @@ type RuntimePlan struct {
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
 	WorkspaceMode         WorkWorkspaceMode
+	TicketKey             string
+	TicketBranch          string
+	WorkspaceBaseRef      string
+	WorkspaceBaseSHA      string
 	WorkspaceDir          string
 	DockerfilePath        string
 	Image                 string
@@ -93,6 +100,10 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		WorkspaceMode:         workspace.Mode,
+		TicketKey:             strings.TrimSpace(opts.TicketKey),
+		TicketBranch:          strings.TrimSpace(opts.TicketBranch),
+		WorkspaceBaseRef:      strings.TrimSpace(opts.WorkspaceBaseRef),
+		WorkspaceBaseSHA:      strings.TrimSpace(opts.WorkspaceBaseSHA),
 		WorkspaceDir:          workspaceDir,
 		DockerfilePath:        dockerfilePath,
 		Image:                 config.Image,

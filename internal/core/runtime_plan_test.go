@@ -209,6 +209,10 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
+		TicketKey:             "CHC-1",
+		TicketBranch:          "chc/CHC-1",
+		WorkspaceBaseRef:      "origin/dev",
+		WorkspaceBaseSHA:      "abc123",
 	})
 	if err != nil {
 		t.Fatalf("PlanRuntime returned error: %v", err)
@@ -224,6 +228,22 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 
 	if plan.WorkspaceMode != WorkWorkspaceModeWorktree {
 		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, WorkWorkspaceModeWorktree)
+	}
+
+	if plan.TicketKey != "CHC-1" {
+		t.Fatalf("TicketKey = %q, want CHC-1", plan.TicketKey)
+	}
+
+	if plan.TicketBranch != "chc/CHC-1" {
+		t.Fatalf("TicketBranch = %q, want chc/CHC-1", plan.TicketBranch)
+	}
+
+	if plan.WorkspaceBaseRef != "origin/dev" {
+		t.Fatalf("WorkspaceBaseRef = %q, want origin/dev", plan.WorkspaceBaseRef)
+	}
+
+	if plan.WorkspaceBaseSHA != "abc123" {
+		t.Fatalf("WorkspaceBaseSHA = %q, want abc123", plan.WorkspaceBaseSHA)
 	}
 
 	if plan.Mounts[0].Source != dir {

@@ -12,6 +12,9 @@ type RuntimeValidationOptions struct {
 	Workspace             WorkWorkspaceConfig
 	ExecutionWorkspaceDir string
 	TicketKey             string
+	TicketBranch          string
+	WorkspaceBaseRef      string
+	WorkspaceBaseSHA      string
 	RunID                 string
 }
 
