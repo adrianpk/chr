@@ -34,6 +34,7 @@ Exact contracts and command behavior:
 - [Agent work observability](reference/agent-work-observability.md)
 - [Acceptance feature generation](reference/acceptance-feature-generation.md)
 - [Runtime configuration](reference/runtime-config.md)
+- [Evidence strategy configuration](reference/evidence-strategy-config.md)
 - [Review workflow configuration](reference/review-workflow-config.md)
 - [Ticket review workflow](reference/ticket-review-workflow.md)
 - [Ticket merge workflow](reference/ticket-merge-workflow.md)
