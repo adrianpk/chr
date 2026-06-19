@@ -21,23 +21,28 @@ type TicketMergeCommandOptions struct {
 	Remote        TicketMergeCommandRemote
 	ExpectedBase  string
 	MergeStrategy string
+	ProjectDir    string
+	BranchPolicy  WorkBranchPolicy
+	Workspace     WorkWorkspaceConfig
+	WorktreeGit   WorktreeGit
 	DryRun        bool
 	MergedAt      time.Time
 }
 
 // TicketMergeCommandResult describes a package boundary value.
 type TicketMergeCommandResult struct {
-	TicketKey     string
-	Preflight     TicketMergePreflightResult
-	Merge         MergeResult
-	Status        string
-	MergeState    string
-	MergeResult   string
-	MergeActor    string
-	MergeStrategy string
-	MergeCommit   string
-	MergeBlocker  string
-	DryRun        bool
+	TicketKey       string
+	Preflight       TicketMergePreflightResult
+	Merge           MergeResult
+	Status          string
+	MergeState      string
+	MergeResult     string
+	MergeActor      string
+	MergeStrategy   string
+	MergeCommit     string
+	MergeBlocker    string
+	WorktreeCleanup WorktreeCleanupResult
+	DryRun          bool
 }
 
 // RunTicketMergeCommand executes the corresponding package operation.
@@ -87,7 +92,32 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 	result.MergeResult = TicketMergeResultMerged
 	result.MergeCommit = merge.SHA
 
-	return result, applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+	err = applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+	if err != nil {
+		return result, err
+	}
+
+	result.WorktreeCleanup, err = ticketMergeWorktreeCleanup(ctx, opts, result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func ticketMergeWorktreeCleanup(ctx context.Context, opts TicketMergeCommandOptions, result TicketMergeCommandResult) (WorktreeCleanupResult, error) {
+	if result.MergeState != TicketMergeStateMerged || opts.Workspace.Mode != WorkWorkspaceModeWorktree {
+		return WorktreeCleanupResult{}, nil
+	}
+
+	return CleanupMergedTicketWorktree(ctx, WorktreeCleanupOptions{
+		ProjectDir:   opts.ProjectDir,
+		TicketKey:    opts.Ticket.Key,
+		Branch:       opts.Ticket.Branch,
+		BranchPolicy: opts.BranchPolicy,
+		Workspace:    opts.Workspace,
+		Git:          opts.WorktreeGit,
+	})
 }
 
 func ticketMergeCommandResult(ticketKey string, preflight TicketMergePreflightResult, dryRun bool) TicketMergeCommandResult {

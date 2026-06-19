@@ -2125,6 +2125,9 @@ func runTicketMerge(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		Remote:        core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
 		ExpectedBase:  expectedBase,
 		MergeStrategy: cmd.String("strategy"),
+		ProjectDir:    projectContext.ProjectDir,
+		BranchPolicy:  config.Work.BranchPolicy,
+		Workspace:     config.Work.Workspace,
 		DryRun:        cmd.Bool("dry-run"),
 		MergedAt:      time.Now().UTC(),
 	})
@@ -2272,6 +2275,13 @@ func printTicketMergeResult(stdout io.Writer, projectContext commandProjectConte
 
 	for _, blocker := range result.Preflight.Blockers {
 		lines = append(lines, "blocker: "+blocker.Code+" kind="+blocker.Kind+" detail="+blocker.Detail)
+	}
+
+	if result.WorktreeCleanup.Status != "" {
+		lines = append(lines,
+			"worktree_cleanup: "+result.WorktreeCleanup.Status,
+			"worktree_cleanup_detail: "+result.WorktreeCleanup.Detail,
+		)
 	}
 
 	for _, line := range lines {

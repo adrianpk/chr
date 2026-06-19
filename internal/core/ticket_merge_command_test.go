@@ -76,6 +76,48 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 	}
 }
 
+func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
+	ticket, _ := writeMergeCommandTicket(t)
+	projectDir := t.TempDir()
+	plan := testMergeCommandWorktreePlan(t, projectDir, ticket)
+	git := newFakeWorktreeGit()
+	git.entries = []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}}
+	writeWorktreeTestMetadata(t, plan)
+	remote := fakeTicketMergeCommandRemote{
+		snapshot: mergeCommandSnapshot(),
+		merge: MergeResult{
+			Reference: ReviewProviderReference{Provider: ReviewProviderForgejo},
+			Strategy:  TicketMergeStrategyRebase,
+			SHA:       "abc123",
+		},
+	}
+
+	result, err := RunTicketMergeCommand(t.Context(), TicketMergeCommandOptions{
+		Ticket:        ticket,
+		Tickets:       []IndexedTicket{ticket},
+		Remote:        remote,
+		MergeStrategy: TicketMergeStrategyRebase,
+		ProjectDir:    projectDir,
+		BranchPolicy:  DefaultWorkBranchPolicy(),
+		Workspace:     testCleanupWorktreeWorkspace(),
+		WorktreeGit:   git,
+		MergedAt:      testMergeCommandTime(),
+	})
+	if err != nil {
+		t.Fatalf("RunTicketMergeCommand returned error: %v", err)
+	}
+
+	if result.WorktreeCleanup.Status != WorktreeCleanupStatusRemoved {
+		t.Fatalf("WorktreeCleanup = %#v, want removed", result.WorktreeCleanup)
+	}
+
+	if len(git.removedWorktrees) != 1 || git.removedWorktrees[0] != plan.WorktreePath {
+		t.Fatalf("removedWorktrees = %#v, want %q", git.removedWorktrees, plan.WorktreePath)
+	}
+
+	assertWorktreeMetadataMissing(t, plan)
+}
+
 func TestRunTicketMergeCommandRecordsProviderFailure(t *testing.T) {
 	ticket, path := writeMergeCommandTicket(t)
 
@@ -229,4 +271,21 @@ func blockedMergeCommandSnapshot() RemoteReviewSnapshot {
 
 func testMergeCommandTime() time.Time {
 	return time.Date(2026, 6, 2, 12, 0, 0, 0, time.UTC)
+}
+
+func testMergeCommandWorktreePlan(t *testing.T, projectDir string, ticket IndexedTicket) WorktreePlan {
+	t.Helper()
+
+	plan, err := NewWorktreePlan(WorktreePlanOptions{
+		ProjectDir:   projectDir,
+		TicketKey:    ticket.Key,
+		Branch:       ticket.Branch,
+		BranchPolicy: DefaultWorkBranchPolicy(),
+		Workspace:    testCleanupWorktreeWorkspace(),
+	})
+	if err != nil {
+		t.Fatalf("NewWorktreePlan returned error: %v", err)
+	}
+
+	return plan
 }
