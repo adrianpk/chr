@@ -113,6 +113,14 @@ func (settings worktreeServiceSettings) ensureBranch(ctx context.Context) (bool,
 	}
 
 	if branchExists {
+		containsBase, err := settings.git.BranchContainsRef(ctx, settings.plan.ProjectDir, settings.plan.Branch, settings.plan.BaseRef)
+		if err != nil {
+			return false, fmt.Errorf("inspect worktree branch base: %w", err)
+		}
+		if !containsBase {
+			return false, fmt.Errorf("worktree branch %s does not contain base %s", settings.plan.Branch, settings.plan.BaseRef)
+		}
+
 		return false, nil
 	}
 

@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -12,6 +13,7 @@ type WorktreeGit interface {
 	FetchRemote(ctx context.Context, projectDir, remote string) error
 	ResolveRef(ctx context.Context, projectDir, ref string) (string, error)
 	BranchExists(ctx context.Context, projectDir, branch string) (bool, error)
+	BranchContainsRef(ctx context.Context, projectDir, branch, ref string) (bool, error)
 	CreateBranch(ctx context.Context, projectDir, branch, baseRef string) error
 	AddWorktree(ctx context.Context, projectDir, path, branch string) error
 	WorktreeList(ctx context.Context, projectDir string) ([]WorktreeGitEntry, error)
@@ -49,6 +51,21 @@ func (OSWorktreeGit) ResolveRef(ctx context.Context, projectDir, ref string) (st
 // BranchExists executes the corresponding package operation.
 func (OSWorktreeGit) BranchExists(ctx context.Context, projectDir, branch string) (bool, error) {
 	return gitRefExists(ctx, projectDir, "refs/heads/"+branch)
+}
+
+// BranchContainsRef executes the corresponding package operation.
+func (OSWorktreeGit) BranchContainsRef(ctx context.Context, projectDir, branch, ref string) (bool, error) {
+	err := exec.CommandContext(ctx, "git", "-C", projectDir, "merge-base", "--is-ancestor", ref, branch).Run()
+	if err == nil {
+		return true, nil
+	}
+
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+		return false, nil
+	}
+
+	return false, err
 }
 
 // CreateBranch executes the corresponding package operation.

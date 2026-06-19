@@ -143,6 +143,28 @@ func TestWorktreeServicePrepareReusesExistingCleanWorktree(t *testing.T) {
 	}
 }
 
+func TestWorktreeServicePrepareBlocksExistingBranchWithoutBase(t *testing.T) {
+	dir := t.TempDir()
+	plan := testWorktreePlan(t, dir)
+	git := newFakeWorktreeGit()
+	git.branches[plan.Branch] = true
+	git.branchContainsRef[branchContainsRefKey(plan.Branch, plan.BaseRef)] = false
+	service := WorktreeService{Git: git}
+
+	_, err := service.Prepare(context.Background(), WorktreePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  plan.TicketKey,
+		Branch:     plan.Branch,
+	})
+	if err == nil {
+		t.Fatal("Prepare returned nil error")
+	}
+
+	if got := err.Error(); got != "worktree branch feat/chc-1 does not contain base origin/dev" {
+		t.Fatalf("error = %q, want branch base blocker", got)
+	}
+}
+
 func TestWorktreeServiceInspectClassifiesTargetStates(t *testing.T) {
 	dir := t.TempDir()
 	plan := testWorktreePlan(t, dir)
@@ -276,14 +298,15 @@ func writeWorktreeTestDir(path string) error {
 }
 
 type fakeWorktreeGit struct {
-	fetched         []string
-	refs            map[string]string
-	branches        map[string]bool
-	createdBranches map[string]string
-	addedWorktrees  []fakeAddedWorktree
-	entries         []WorktreeGitEntry
-	statuses        map[string][]string
-	fetchErr        error
+	fetched           []string
+	refs              map[string]string
+	branches          map[string]bool
+	branchContainsRef map[string]bool
+	createdBranches   map[string]string
+	addedWorktrees    []fakeAddedWorktree
+	entries           []WorktreeGitEntry
+	statuses          map[string][]string
+	fetchErr          error
 }
 
 type fakeAddedWorktree struct {
@@ -293,10 +316,11 @@ type fakeAddedWorktree struct {
 
 func newFakeWorktreeGit() *fakeWorktreeGit {
 	return &fakeWorktreeGit{
-		refs:            map[string]string{"origin/dev": "base-sha"},
-		branches:        map[string]bool{},
-		createdBranches: map[string]string{},
-		statuses:        map[string][]string{},
+		refs:              map[string]string{"origin/dev": "base-sha"},
+		branches:          map[string]bool{},
+		branchContainsRef: map[string]bool{},
+		createdBranches:   map[string]string{},
+		statuses:          map[string][]string{},
 	}
 }
 
@@ -323,6 +347,15 @@ func (git *fakeWorktreeGit) BranchExists(_ context.Context, _, branch string) (b
 	return git.branches[branch], nil
 }
 
+func (git *fakeWorktreeGit) BranchContainsRef(_ context.Context, _, branch, ref string) (bool, error) {
+	contains, ok := git.branchContainsRef[branchContainsRefKey(branch, ref)]
+	if !ok {
+		return true, nil
+	}
+
+	return contains, nil
+}
+
 func (git *fakeWorktreeGit) CreateBranch(_ context.Context, _, branch, baseRef string) error {
 	git.branches[branch] = true
 	git.createdBranches[branch] = baseRef
@@ -342,4 +375,8 @@ func (git *fakeWorktreeGit) WorktreeList(context.Context, string) ([]WorktreeGit
 
 func (git *fakeWorktreeGit) WorktreeStatus(_ context.Context, path string) ([]string, error) {
 	return append([]string(nil), git.statuses[path]...), nil
+}
+
+func branchContainsRefKey(branch, ref string) string {
+	return branch + "\x00" + ref
 }
