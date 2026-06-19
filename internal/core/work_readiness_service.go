@@ -402,19 +402,26 @@ func checkWorkReadinessGitState(
 		report.Diagnostics = append(report.Diagnostics, gitStateInProgressDiagnostic(state))
 	}
 
-	report, err = checkWorkReadinessBranch(ctx, projectDir, git, report)
-	if err != nil {
-		return WorkReadinessReport{}, err
-	}
-
 	report, err = checkWorkReadinessWorktree(ctx, projectDir, git, report)
 	if err != nil {
 		return WorkReadinessReport{}, err
 	}
 
-	report, err = checkWorkReadinessRemote(ctx, projectDir, git, report)
-	if err != nil {
-		return WorkReadinessReport{}, err
+	if report.Workspace.Mode == WorkWorkspaceModeWorktree {
+		report, err = checkWorkReadinessRemoteBase(ctx, projectDir, worktreeGit, report)
+		if err != nil {
+			return WorkReadinessReport{}, err
+		}
+	} else {
+		report, err = checkWorkReadinessBranch(ctx, projectDir, git, report)
+		if err != nil {
+			return WorkReadinessReport{}, err
+		}
+
+		report, err = checkWorkReadinessRemote(ctx, projectDir, git, report)
+		if err != nil {
+			return WorkReadinessReport{}, err
+		}
 	}
 
 	report, err = checkWorkReadinessTicketWorktree(ctx, projectDir, worktreeGit, report)
@@ -530,6 +537,46 @@ func checkWorkReadinessRemote(ctx context.Context, projectDir string, git WorkRe
 	return report, nil
 }
 
+func checkWorkReadinessRemoteBase(
+	ctx context.Context,
+	projectDir string,
+	git WorktreeGit,
+	report WorkReadinessReport,
+) (WorkReadinessReport, error) {
+	if report.Workspace.WorktreeBase != WorktreeBasePolicyRemoteIntegrationBranch {
+		return report, nil
+	}
+
+	remote := strings.TrimSpace(report.Policy.CanonicalRemote)
+	baseRef, err := worktreeBaseRef(report.Policy, report.Workspace)
+	if err != nil {
+		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
+
+		return report, nil
+	}
+
+	if err := git.FetchRemote(ctx, projectDir, remote); err != nil {
+		report.Diagnostics = append(report.Diagnostics, remoteBaseFetchFailedDiagnostic(remote, baseRef, err))
+
+		return report, nil
+	}
+
+	baseSHA, err := git.ResolveRef(ctx, projectDir, baseRef)
+	if err != nil {
+		report.Diagnostics = append(
+			report.Diagnostics,
+			missingRemoteRefDiagnostic(remote, baseRef, report.Policy.IntegrationBranch),
+		)
+
+		return report, nil
+	}
+
+	report.TicketWorktree.BaseRef = baseRef
+	report.TicketWorktree.BaseSHA = baseSHA
+
+	return report, nil
+}
+
 func checkWorkReadinessTicketWorktree(
 	ctx context.Context,
 	projectDir string,
@@ -557,7 +604,15 @@ func checkWorkReadinessTicketWorktree(
 		return report, nil
 	}
 
-	report.TicketWorktree = workReadinessStateFromInspection(inspection)
+	state := workReadinessStateFromInspection(inspection)
+	if state.BaseRef == "" {
+		state.BaseRef = report.TicketWorktree.BaseRef
+	}
+	if state.BaseSHA == "" {
+		state.BaseSHA = report.TicketWorktree.BaseSHA
+	}
+
+	report.TicketWorktree = state
 	switch inspection.State {
 	case WorktreeStateDirty:
 		report.Diagnostics = append(report.Diagnostics, dirtyTicketWorktreeDiagnostic(inspection))
@@ -634,6 +689,13 @@ func plannedWorkReadinessRepair(policy WorkBranchPolicy, diagnostic WorkReadines
 			Detail:    "exclude ChrysoCoord runtime artifacts from local Git status",
 		}
 	case WorkReadinessDiagnosticMissingRemoteRef:
+		return WorkReadinessRepair{
+			Available: true,
+			Code:      WorkReadinessRepairFetchRemote,
+			Safe:      true,
+			Detail:    fmt.Sprintf("fetch configured remote %s", diagnostic.Remote),
+		}
+	case WorkReadinessDiagnosticRemoteBaseFetchFailed:
 		return WorkReadinessRepair{
 			Available: true,
 			Code:      WorkReadinessRepairFetchRemote,
@@ -811,6 +873,16 @@ func branchBehindRemoteDiagnostic(remote, remoteRef, expectedBranch string) Work
 		ExpectedBranch: expectedBranch,
 		Remote:         remote,
 		RemoteRef:      remoteRef,
+	}
+}
+
+func remoteBaseFetchFailedDiagnostic(remote, remoteRef string, err error) WorkReadinessDiagnostic {
+	return WorkReadinessDiagnostic{
+		Code:      WorkReadinessDiagnosticRemoteBaseFetchFailed,
+		Severity:  WorkReadinessSeverityBlocking,
+		Detail:    fmt.Sprintf("fetch %s failed before resolving %s: %v", remote, remoteRef, err),
+		Remote:    remote,
+		RemoteRef: remoteRef,
 	}
 }
 

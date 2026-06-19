@@ -32,6 +32,8 @@ const (
 	WorkReadinessDiagnosticRuntimeArtifactsVisible WorkReadinessDiagnosticCode = "runtime_artifacts_visible"
 	// WorkReadinessDiagnosticMissingRemoteRef defines a package boundary constant.
 	WorkReadinessDiagnosticMissingRemoteRef WorkReadinessDiagnosticCode = "missing_remote_ref"
+	// WorkReadinessDiagnosticRemoteBaseFetchFailed defines a package boundary constant.
+	WorkReadinessDiagnosticRemoteBaseFetchFailed WorkReadinessDiagnosticCode = "remote_base_fetch_failed"
 	// WorkReadinessDiagnosticBranchBehindRemote defines a package boundary constant.
 	WorkReadinessDiagnosticBranchBehindRemote WorkReadinessDiagnosticCode = "branch_behind_remote"
 	// WorkReadinessDiagnosticGitStateInProgress defines a package boundary constant.

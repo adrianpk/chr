@@ -369,6 +369,10 @@ func runWorkBranchPolicyChecks(
 	policy WorkBranchPolicy,
 	workspace WorkWorkspaceConfig,
 ) (*WorkSelectionBlockReason, error) {
+	if workspace.Mode == WorkWorkspaceModeWorktree {
+		return nil, nil
+	}
+
 	branch, err := git.CurrentBranch(ctx, projectDir)
 	if err != nil {
 		return nilIfGitUnavailable(err)

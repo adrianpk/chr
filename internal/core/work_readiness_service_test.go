@@ -88,9 +88,10 @@ func TestCheckWorkReadinessReportsRuntimeArtifactsSeparately(t *testing.T) {
 
 func TestCheckWorkReadinessReportsDirtyUserCheckoutInWorktreeMode(t *testing.T) {
 	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
-		ProjectDir: t.TempDir(),
-		Policy:     DefaultWorkBranchPolicy(),
-		Workspace:  testWorktreeWorkspaceConfig(),
+		ProjectDir:  t.TempDir(),
+		Policy:      DefaultWorkBranchPolicy(),
+		Workspace:   testWorktreeWorkspaceConfig(),
+		WorktreeGit: newFakeWorktreeGit(),
 		Git: fakeWorkReadinessGit{
 			branch:            "dev",
 			cleanStatus:       []string{" M main.go"},
@@ -159,6 +160,77 @@ func TestCheckWorkReadinessBlocksDirtyTicketWorktree(t *testing.T) {
 	if report.TicketWorktree.State != WorktreeStateDirty {
 		t.Fatalf("TicketWorktree.State = %s, want dirty", report.TicketWorktree.State)
 	}
+}
+
+func TestCheckWorkReadinessWorktreeModeFetchesRemoteBase(t *testing.T) {
+	worktreeGit := newFakeWorktreeGit()
+	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
+		ProjectDir:  t.TempDir(),
+		Policy:      DefaultWorkBranchPolicy(),
+		Workspace:   testWorktreeWorkspaceConfig(),
+		WorktreeGit: worktreeGit,
+		Git: fakeWorkReadinessGit{
+			branch:         "feature/user-work",
+			cleanStatus:    []string{" M notes.md"},
+			gitState:       "",
+			gitStateActive: false,
+		},
+	})
+	if err != nil {
+		t.Fatalf("CheckWorkReadiness returned error: %v", err)
+	}
+
+	if report.Status != WorkReadinessStatusReady {
+		t.Fatalf("Status = %s, want ready: %#v", report.Status, report.Diagnostics)
+	}
+
+	if strings.Join(worktreeGit.fetched, ",") != "origin" {
+		t.Fatalf("fetched = %#v, want origin", worktreeGit.fetched)
+	}
+
+	if report.TicketWorktree.BaseRef != "origin/dev" || report.TicketWorktree.BaseSHA != "base-sha" {
+		t.Fatalf("TicketWorktree = %#v, want origin/dev base", report.TicketWorktree)
+	}
+}
+
+func TestCheckWorkReadinessWorktreeModeReportsRemoteBaseFetchFailure(t *testing.T) {
+	worktreeGit := newFakeWorktreeGit()
+	worktreeGit.fetchErr = errors.New("network unavailable")
+
+	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
+		ProjectDir:  t.TempDir(),
+		Policy:      DefaultWorkBranchPolicy(),
+		Workspace:   testWorktreeWorkspaceConfig(),
+		WorktreeGit: worktreeGit,
+		Git: fakeWorkReadinessGit{
+			branch: "dev",
+		},
+	})
+	if err != nil {
+		t.Fatalf("CheckWorkReadiness returned error: %v", err)
+	}
+
+	assertWorkReadinessDiagnostic(t, report, WorkReadinessDiagnosticRemoteBaseFetchFailed)
+}
+
+func TestCheckWorkReadinessWorktreeModeReportsMissingRemoteBaseRef(t *testing.T) {
+	worktreeGit := newFakeWorktreeGit()
+	delete(worktreeGit.refs, "origin/dev")
+
+	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
+		ProjectDir:  t.TempDir(),
+		Policy:      DefaultWorkBranchPolicy(),
+		Workspace:   testWorktreeWorkspaceConfig(),
+		WorktreeGit: worktreeGit,
+		Git: fakeWorkReadinessGit{
+			branch: "dev",
+		},
+	})
+	if err != nil {
+		t.Fatalf("CheckWorkReadiness returned error: %v", err)
+	}
+
+	assertWorkReadinessDiagnostic(t, report, WorkReadinessDiagnosticMissingRemoteRef)
 }
 
 func TestCheckWorkReadinessNoGitEnforcementSkipsGit(t *testing.T) {

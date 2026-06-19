@@ -283,6 +283,7 @@ type fakeWorktreeGit struct {
 	addedWorktrees  []fakeAddedWorktree
 	entries         []WorktreeGitEntry
 	statuses        map[string][]string
+	fetchErr        error
 }
 
 type fakeAddedWorktree struct {
@@ -300,6 +301,10 @@ func newFakeWorktreeGit() *fakeWorktreeGit {
 }
 
 func (git *fakeWorktreeGit) FetchRemote(_ context.Context, _, remote string) error {
+	if git.fetchErr != nil {
+		return git.fetchErr
+	}
+
 	git.fetched = append(git.fetched, remote)
 
 	return nil

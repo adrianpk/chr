@@ -253,9 +253,9 @@ func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T)
 			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 		},
 		Git: fakeWorkSelectionGit{
-			branch:      "dev",
+			branch:      "feature/user-work",
 			clean:       false,
-			containsRef: true,
+			containsRef: false,
 		},
 	})
 	if err != nil {
