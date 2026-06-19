@@ -14,6 +14,7 @@ type WorktreeService struct {
 // WorktreePrepareResult describes a package boundary value.
 type WorktreePrepareResult struct {
 	Plan          WorktreePlan
+	Inspection    WorktreeInspection
 	CreatedBranch bool
 	AddedWorktree bool
 }
@@ -85,7 +86,7 @@ func prepareWorktree(ctx context.Context, settings worktreeServiceSettings) (Wor
 		return WorktreePrepareResult{}, err
 	}
 
-	return settings.addWorktree(ctx, result)
+	return settings.addMissing(ctx, result)
 }
 
 func (settings worktreeServiceSettings) prepareBase(ctx context.Context, result *WorktreePrepareResult) error {
@@ -130,7 +131,21 @@ func (settings worktreeServiceSettings) ensureRoot() error {
 	return nil
 }
 
-func (settings worktreeServiceSettings) addWorktree(ctx context.Context, result WorktreePrepareResult) (WorktreePrepareResult, error) {
+func (settings worktreeServiceSettings) addMissing(ctx context.Context, result WorktreePrepareResult) (WorktreePrepareResult, error) {
+	inspection, err := inspectWorktree(ctx, settings)
+	if err != nil {
+		return WorktreePrepareResult{}, err
+	}
+
+	result.Inspection = inspection
+	if inspection.State != WorktreeStateMissing {
+		if worktreeStateReusable(inspection.State) {
+			return result, nil
+		}
+
+		return WorktreePrepareResult{}, worktreePrepareBlockedError(inspection)
+	}
+
 	if err := settings.git.AddWorktree(ctx, settings.plan.ProjectDir, settings.plan.WorktreePath, settings.plan.Branch); err != nil {
 		return WorktreePrepareResult{}, fmt.Errorf("add worktree: %w", err)
 	}
@@ -138,4 +153,16 @@ func (settings worktreeServiceSettings) addWorktree(ctx context.Context, result 
 	result.AddedWorktree = true
 
 	return result, nil
+}
+
+func worktreeStateReusable(state WorktreeState) bool {
+	return state == WorktreeStateClean || state == WorktreeStateDirty
+}
+
+func worktreePrepareBlockedError(inspection WorktreeInspection) error {
+	if len(inspection.Diagnostics) == 0 {
+		return fmt.Errorf("worktree is not safe to prepare: %s", inspection.State)
+	}
+
+	return fmt.Errorf("worktree is not safe to prepare: %s: %s", inspection.State, inspection.Diagnostics[0].Detail)
 }
