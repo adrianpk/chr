@@ -13,7 +13,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | evidence strategy config | delivered | `feat/slice-1-evidence-strategy-config` | `#320` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md` |
-| Slice 2 | evidence checklist writer | planned | `feat/slice-2-evidence-checklist-writer` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-2-evidence-checklist-writer.md` |
+| Slice 2 | evidence checklist writer | active | `feat/slice-2-evidence-checklist-writer` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-2-evidence-checklist-writer.md` |
 | Slice 3 | worker strategy context | planned | `feat/slice-3-worker-strategy-context` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-3-worker-strategy-context.md` |
 | Slice 4 | review evidence gate | planned | `feat/slice-4-review-evidence-gate` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-4-review-evidence-gate.md` |
 | Slice 5 | gherkin test policy | planned | `feat/slice-5-gherkin-test-policy` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-5-gherkin-test-policy.md` |

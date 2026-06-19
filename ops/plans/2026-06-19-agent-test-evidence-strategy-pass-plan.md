@@ -2,7 +2,7 @@
 
 Status: active
 
-Active Slice: none
+Active Slice: Slice 2 - evidence checklist writer
 
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 
