@@ -77,12 +77,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		return RuntimePlan{}, err
 	}
 
-	executionWorkspaceDir := opts.ExecutionWorkspaceDir
-	if executionWorkspaceDir == "" {
-		executionWorkspaceDir = projectDir
-	} else {
-		executionWorkspaceDir = resolveProjectPath(projectDir, executionWorkspaceDir)
-	}
+	executionWorkspaceDir := runtimeExecutionWorkspaceDir(projectDir, workspace.Mode, opts.ExecutionWorkspaceDir)
 
 	workspaceDir := filepath.Join(projectDir, DirectoryName)
 	dockerfilePath := resolveProjectPath(projectDir, config.DockerfilePath)
@@ -174,6 +169,14 @@ func resolveProjectPath(projectDir, configuredPath string) string {
 	}
 
 	return filepath.Join(projectDir, path)
+}
+
+func runtimeExecutionWorkspaceDir(projectDir string, mode WorkWorkspaceMode, configuredPath string) string {
+	if mode != WorkWorkspaceModeWorktree || strings.TrimSpace(configuredPath) == "" {
+		return projectDir
+	}
+
+	return resolveProjectPath(projectDir, configuredPath)
 }
 
 func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceMode, workdir string) []RuntimeMount {

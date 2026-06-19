@@ -255,6 +255,38 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 	}
 }
 
+func TestPlanRuntimePreservesProjectModeWorkspaceMount(t *testing.T) {
+	dir := t.TempDir()
+	executionWorkspaceDir := filepath.Join(dir, ".chc", "user", "runtime", "worktrees", "CHC-1")
+
+	plan, err := PlanRuntime(RuntimePlanOptions{
+		ProjectDir: dir,
+		Workspace: WorkWorkspaceConfig{
+			Mode: WorkWorkspaceModeProject,
+		},
+		ExecutionWorkspaceDir: executionWorkspaceDir,
+	})
+	if err != nil {
+		t.Fatalf("PlanRuntime returned error: %v", err)
+	}
+
+	if plan.ExecutionWorkspaceDir != dir {
+		t.Fatalf("ExecutionWorkspaceDir = %q, want project dir %q", plan.ExecutionWorkspaceDir, dir)
+	}
+
+	if plan.Mounts[0].Source != dir {
+		t.Fatalf("Mount source = %q, want project dir %q", plan.Mounts[0].Source, dir)
+	}
+
+	if plan.Mounts[0].Target != "/workspace" {
+		t.Fatalf("Mount target = %q, want /workspace", plan.Mounts[0].Target)
+	}
+
+	if plan.Mounts[0].Description != "project workspace" {
+		t.Fatalf("Mount description = %q, want project workspace", plan.Mounts[0].Description)
+	}
+}
+
 func TestCodexCredentialMountsUseReadOnlyRootCodexPaths(t *testing.T) {
 	homeDir := t.TempDir()
 	writeRuntimePlanTestFile(t, filepath.Join(homeDir, ".codex", "auth.json"), "{}\n")
