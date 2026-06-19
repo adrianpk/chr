@@ -2,7 +2,7 @@
 
 Status: active
 
-Active Slice: Slice 5 - gherkin test policy
+Active Slice: Slice 6 - evidence visibility docs
 
 Tracker: `ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md`
 
