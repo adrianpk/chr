@@ -67,12 +67,12 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Add project-level active Gherkin detection based on existing acceptance feature configuration/artifacts. | pending | pending | Must be explicit and testable. |
-| T5.2 | Add strategy guidance rendering for change kind, risk, test timing, and evidence matrix. | pending | pending | Evidence-first, not universal TDD. |
-| T5.3 | Add required Gherkin checks for active/applicable behavior tickets. | pending | pending | If active and applicable, `.feature` must exist or update. |
-| T5.4 | Add tests for docs-only no-test strategy, user-visible Gherkin-required strategy, bugfix regression guidance, and parser table/fuzz guidance. | pending | pending | Use table-driven tests where possible. |
-| T5.5 | Update acceptance/Gherkin docs to explain the evidence strategy interaction. | pending | pending | Tie into existing acceptance workflow. |
-| T5.6 | Add the slice implementation report and validation evidence. | pending | pending | Report required before PR. |
+| T5.1 | Add project-level active Gherkin detection based on existing acceptance feature configuration/artifacts. | done | `271d865` | Detects `.chc/user/acceptance/*.feature` under active policy. |
+| T5.2 | Add strategy guidance rendering for change kind, risk, test timing, and evidence matrix. | done | `45febeb`, `10d4f26` | Worker context renders active Gherkin, suggested strategy, and decision matrix. |
+| T5.3 | Add required Gherkin checks for active/applicable behavior tickets. | done | `45febeb`, `e75f453` | Active applicable Gherkin rejects `not_applicable` at review gate. |
+| T5.4 | Add tests for docs-only no-test strategy, user-visible Gherkin-required strategy, bugfix regression guidance, and parser table/fuzz guidance. | done | `271d865`, `45febeb` | Core policy, worker context, readiness, and apply-result coverage. |
+| T5.5 | Update acceptance/Gherkin docs to explain the evidence strategy interaction. | done | `b37d681` | Acceptance feature docs explain active/applicable Gherkin. |
+| T5.6 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 6 Tasks
 
@@ -110,6 +110,10 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 - Slice 4: `make lint-strict` (pass)
 - Slice 4: `make verify` (pass)
 - Slice 4: PR `#323` merged to `dev` on 2026-06-19.
+- Slice 5: `go test ./internal/core -run 'Evidence.*Policy|EvidenceReadiness|CodexWorkerContext'` (pass)
+- Slice 5: `go test ./internal/app -run 'TestTicketApplyResult'` (pass)
+- Slice 5: `make lint-strict` (pass)
+- Slice 5: `make verify` (pass)
 
 ## Notes
 
