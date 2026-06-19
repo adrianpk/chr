@@ -11,7 +11,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | workspace execution config | delivered | `feat/slice-1-workspace-execution-config` | `#328` | `.prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md` |
-| Slice 2 | worktree state service | planned | `feat/slice-2-worktree-state-service` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
+| Slice 2 | worktree state service | reviewing | `feat/slice-2-worktree-state-service` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-2-worktree-state-service.md` |
 | Slice 3 | readiness workspace split | planned | `feat/slice-3-readiness-workspace-split` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-3-readiness-workspace-split.md` |
 | Slice 4 | runtime workspace mount | planned | `feat/slice-4-runtime-workspace-mount` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-4-runtime-workspace-mount.md` |
 | Slice 5 | execution workspace results | planned | `feat/slice-5-execution-workspace-results` | pending | `.prj/reports/slices/isolated-ticket-worktrees/slice-5-execution-workspace-results.md` |
@@ -35,14 +35,14 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Add a Git worktree planning model with ticket key, branch, base ref, base SHA, root, and target path. | pending | pending | Core package boundary. |
-| T2.2 | Add a command abstraction for `git fetch`, `git rev-parse`, `git branch`, `git worktree add`, `git worktree list`, and `git status`. | pending | pending | Prefer deterministic fake executor tests. |
-| T2.3 | Implement deterministic worktree path selection using the configured root and ticket key. | pending | pending | Sanitize ticket key/path safely. |
-| T2.4 | Implement safe creation from the fetched remote integration ref. | pending | pending | No local checkout base by default. |
-| T2.5 | Implement inspection and diagnostics for missing, clean, dirty, mismatched, branch-in-use, and orphaned worktree states. | pending | pending | Diagnostics should be stable. |
-| T2.6 | Add optional metadata read/write for ticket worktree identity and last execution hints. | pending | pending | Metadata advisory; Git remains source of truth. |
-| T2.7 | Add table-driven service tests with fake Git command output and temp repositories where useful. | pending | pending | Cover path and state variants. |
-| T2.8 | Add the slice implementation report and validation evidence. | pending | pending | Report status should be `reviewing` before PR. |
+| T2.1 | Add a Git worktree planning model with ticket key, branch, base ref, base SHA, root, and target path. | done | `f90a9b4` | Core package boundary. |
+| T2.2 | Add a command abstraction for `git fetch`, `git rev-parse`, `git branch`, `git worktree add`, `git worktree list`, and `git status`. | done | `dea4881` | Deterministic OS adapter and porcelain parser. |
+| T2.3 | Implement deterministic worktree path selection using the configured root and ticket key. | done | `5519b44` | Ticket keys are sanitized into stable path components. |
+| T2.4 | Implement safe creation from the fetched remote integration ref. | done | `ac410bf` | Preparation fetches the canonical remote base and creates missing ticket branches. |
+| T2.5 | Implement inspection and diagnostics for missing, clean, dirty, mismatched, branch-in-use, and orphaned worktree states. | done | `878d40e` | Diagnostics use stable state and diagnostic codes. |
+| T2.6 | Add optional metadata read/write for ticket worktree identity and last execution hints. | done | `896cf63` | Metadata is advisory; Git remains source of truth. |
+| T2.7 | Add table-driven service tests with fake Git command output and temp repositories where useful. | done | `0674231` | Covers planning, path sanitization, porcelain parsing, preparation, inspection, and metadata round trip. |
+| T2.8 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |
 
 ## Slice 3 Tasks
 
@@ -127,6 +127,9 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 - Planning: `git diff --check` (pass)
 - Slice 1: `go test ./internal/core -run 'TestLoadWorkspaceConfig.*Work|TestValidateWorkConfigRejectsInvalid.*Config|TestPlanRuntime|TestCodexCredentialMountsUseReadOnlyRootCodexPaths|TestValidateRuntime'` (pass)
 - Slice 1: `make verify` (pass)
+- Slice 2: `go test ./internal/core -run 'Worktree'` (pass)
+- Slice 2: `make lint-strict` (pass)
+- Slice 2: `make verify` (pass)
 
 ## Open Decisions
 
