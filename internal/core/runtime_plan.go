@@ -9,27 +9,32 @@ import (
 
 // RuntimePlanOptions describes a package boundary value.
 type RuntimePlanOptions struct {
-	ProjectDir string
-	Config     RuntimeConfig
-	TicketKey  string
-	RunID      string
+	ProjectDir            string
+	Config                RuntimeConfig
+	Workspace             WorkWorkspaceConfig
+	ExecutionWorkspaceDir string
+	TicketKey             string
+	RunID                 string
 }
 
 // RuntimePlan describes a package boundary value.
 type RuntimePlan struct {
-	ProjectDir        string
-	WorkspaceDir      string
-	DockerfilePath    string
-	Image             string
-	ContainerWorkdir  string
-	Mounts            []RuntimeMount
-	ArtifactDir       string
-	RunArtifactDir    string
-	WorkerContextPath string
-	ResultPath        string
-	LogPath           string
-	ValidationPath    string
-	ValidationCommand string
+	ProjectDir            string
+	ProjectCheckoutDir    string
+	ExecutionWorkspaceDir string
+	WorkspaceMode         WorkWorkspaceMode
+	WorkspaceDir          string
+	DockerfilePath        string
+	Image                 string
+	ContainerWorkdir      string
+	Mounts                []RuntimeMount
+	ArtifactDir           string
+	RunArtifactDir        string
+	WorkerContextPath     string
+	ResultPath            string
+	LogPath               string
+	ValidationPath        string
+	ValidationCommand     string
 }
 
 // RuntimeMount describes a package boundary value.
@@ -54,6 +59,24 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 
 	config = fillRuntimeConfigDefaults(config)
 
+	workspace := opts.Workspace
+	if workspace == (WorkWorkspaceConfig{}) {
+		workspace = DefaultWorkWorkspaceConfig()
+	} else {
+		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+	}
+
+	if err := ValidateWorkWorkspaceConfig(workspace); err != nil {
+		return RuntimePlan{}, err
+	}
+
+	executionWorkspaceDir := opts.ExecutionWorkspaceDir
+	if executionWorkspaceDir == "" {
+		executionWorkspaceDir = projectDir
+	} else {
+		executionWorkspaceDir = resolveProjectPath(projectDir, executionWorkspaceDir)
+	}
+
 	workspaceDir := filepath.Join(projectDir, DirectoryName)
 	dockerfilePath := resolveProjectPath(projectDir, config.DockerfilePath)
 	artifactDir := resolveProjectPath(projectDir, config.ArtifactDir)
@@ -66,19 +89,22 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	}
 
 	return RuntimePlan{
-		ProjectDir:        projectDir,
-		WorkspaceDir:      workspaceDir,
-		DockerfilePath:    dockerfilePath,
-		Image:             config.Image,
-		ContainerWorkdir:  config.Workdir,
-		Mounts:            runtimeMounts(projectDir, config.Workdir),
-		ArtifactDir:       artifactDir,
-		RunArtifactDir:    runArtifactDir,
-		WorkerContextPath: filepath.Join(runArtifactDir, "context.md"),
-		ResultPath:        filepath.Join(runArtifactDir, "result.json"),
-		LogPath:           filepath.Join(runArtifactDir, "runtime.log"),
-		ValidationPath:    filepath.Join(runArtifactDir, "validation.log"),
-		ValidationCommand: config.ValidationCommand,
+		ProjectDir:            projectDir,
+		ProjectCheckoutDir:    projectDir,
+		ExecutionWorkspaceDir: executionWorkspaceDir,
+		WorkspaceMode:         workspace.Mode,
+		WorkspaceDir:          workspaceDir,
+		DockerfilePath:        dockerfilePath,
+		Image:                 config.Image,
+		ContainerWorkdir:      config.Workdir,
+		Mounts:                runtimeMounts(projectDir, config.Workdir),
+		ArtifactDir:           artifactDir,
+		RunArtifactDir:        runArtifactDir,
+		WorkerContextPath:     filepath.Join(runArtifactDir, "context.md"),
+		ResultPath:            filepath.Join(runArtifactDir, "result.json"),
+		LogPath:               filepath.Join(runArtifactDir, "runtime.log"),
+		ValidationPath:        filepath.Join(runArtifactDir, "validation.log"),
+		ValidationCommand:     config.ValidationCommand,
 	}, nil
 }
 
@@ -103,6 +129,28 @@ func fillRuntimeConfigDefaults(config RuntimeConfig) RuntimeConfig {
 
 	if config.ValidationCommand == "" {
 		config.ValidationCommand = defaults.ValidationCommand
+	}
+
+	return config
+}
+
+func fillWorkWorkspaceConfigDefaults(config WorkWorkspaceConfig) WorkWorkspaceConfig {
+	defaults := DefaultWorkWorkspaceConfig()
+
+	if config.Mode == "" {
+		config.Mode = defaults.Mode
+	}
+
+	if config.WorktreeRoot == "" {
+		config.WorktreeRoot = defaults.WorktreeRoot
+	}
+
+	if config.WorktreeBase == "" {
+		config.WorktreeBase = defaults.WorktreeBase
+	}
+
+	if config.WorktreeCleanup == "" {
+		config.WorktreeCleanup = defaults.WorktreeCleanup
 	}
 
 	return config

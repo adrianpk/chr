@@ -14,16 +14,33 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	if plan.ProjectDir != dir {
-		t.Fatalf("ProjectDir = %q, want %q", plan.ProjectDir, dir)
+	if plan.WorkspaceMode != WorkWorkspaceModeProject {
+		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, WorkWorkspaceModeProject)
 	}
 
-	if plan.WorkspaceDir != filepath.Join(dir, ".chc") {
-		t.Fatalf("WorkspaceDir = %q, want .chc path", plan.WorkspaceDir)
+	wantPaths := map[string]string{
+		"ProjectDir":            dir,
+		"ProjectCheckoutDir":    dir,
+		"ExecutionWorkspaceDir": dir,
+		"WorkspaceDir":          filepath.Join(dir, ".chc"),
+		"DockerfilePath":        filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		"ArtifactDir":           filepath.Join(dir, ".chc", "user", "runtime", "runs"),
+		"ResultPath":            filepath.Join(dir, ".chc", "user", "runtime", "runs", "result.json"),
 	}
 
-	if plan.DockerfilePath != filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile") {
-		t.Fatalf("DockerfilePath = %q, want default Dockerfile path", plan.DockerfilePath)
+	gotPaths := map[string]string{
+		"ProjectDir":            plan.ProjectDir,
+		"ProjectCheckoutDir":    plan.ProjectCheckoutDir,
+		"ExecutionWorkspaceDir": plan.ExecutionWorkspaceDir,
+		"WorkspaceDir":          plan.WorkspaceDir,
+		"DockerfilePath":        plan.DockerfilePath,
+		"ArtifactDir":           plan.ArtifactDir,
+		"ResultPath":            plan.ResultPath,
+	}
+	for name, want := range wantPaths {
+		if gotPaths[name] != want {
+			t.Fatalf("%s = %q, want %q", name, gotPaths[name], want)
+		}
 	}
 
 	if plan.Image != DefaultRuntimeImage {
@@ -32,14 +49,6 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 
 	if plan.ContainerWorkdir != DefaultRuntimeWorkdir {
 		t.Fatalf("ContainerWorkdir = %q, want %q", plan.ContainerWorkdir, DefaultRuntimeWorkdir)
-	}
-
-	if plan.ArtifactDir != filepath.Join(dir, ".chc", "user", "runtime", "runs") {
-		t.Fatalf("ArtifactDir = %q, want default artifact dir", plan.ArtifactDir)
-	}
-
-	if plan.ResultPath != filepath.Join(dir, ".chc", "user", "runtime", "runs", "result.json") {
-		t.Fatalf("ResultPath = %q, want default result path", plan.ResultPath)
 	}
 }
 
@@ -184,6 +193,41 @@ func TestPlanRuntimeNormalizesRelativeContainerWorkdirMount(t *testing.T) {
 
 	if plan.Mounts[0].ReadOnly {
 		t.Fatal("Mount is read-only, want writable project mount")
+	}
+}
+
+func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
+	dir := t.TempDir()
+	executionWorkspaceDir := filepath.Join(dir, ".chc", "user", "runtime", "worktrees", "CHC-1")
+
+	plan, err := PlanRuntime(RuntimePlanOptions{
+		ProjectDir: dir,
+		Workspace: WorkWorkspaceConfig{
+			Mode:            WorkWorkspaceModeWorktree,
+			WorktreeRoot:    DefaultWorktreeRoot,
+			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		},
+		ExecutionWorkspaceDir: executionWorkspaceDir,
+	})
+	if err != nil {
+		t.Fatalf("PlanRuntime returned error: %v", err)
+	}
+
+	if plan.ProjectCheckoutDir != dir {
+		t.Fatalf("ProjectCheckoutDir = %q, want %q", plan.ProjectCheckoutDir, dir)
+	}
+
+	if plan.ExecutionWorkspaceDir != executionWorkspaceDir {
+		t.Fatalf("ExecutionWorkspaceDir = %q, want %q", plan.ExecutionWorkspaceDir, executionWorkspaceDir)
+	}
+
+	if plan.WorkspaceMode != WorkWorkspaceModeWorktree {
+		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, WorkWorkspaceModeWorktree)
+	}
+
+	if plan.Mounts[0].Source != dir {
+		t.Fatalf("Mount source = %q, want project checkout %q", plan.Mounts[0].Source, dir)
 	}
 }
 

@@ -7,10 +7,12 @@ import (
 
 // RuntimeValidationOptions describes a package boundary value.
 type RuntimeValidationOptions struct {
-	ProjectDir string
-	Config     RuntimeConfig
-	TicketKey  string
-	RunID      string
+	ProjectDir            string
+	Config                RuntimeConfig
+	Workspace             WorkWorkspaceConfig
+	ExecutionWorkspaceDir string
+	TicketKey             string
+	RunID                 string
 }
 
 // RuntimeValidationResult describes a package boundary value.
