@@ -192,6 +192,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 			AllowSafeRepair:       false,
 			AllowBranchCreation:   true,
 		},
+		Workspace: DefaultWorkWorkspaceConfig(),
 	}
 	if config.Work != want {
 		t.Fatalf("Work = %#v, want %#v", config.Work, want)

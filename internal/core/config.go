@@ -254,6 +254,7 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 func DefaultWorkConfig() WorkConfig {
 	return WorkConfig{
 		BranchPolicy: DefaultWorkBranchPolicy(),
+		Workspace:    DefaultWorkWorkspaceConfig(),
 	}
 }
 
@@ -287,6 +288,16 @@ func DefaultWorkBranchPolicy() WorkBranchPolicy {
 		RequireRemoteTracking: true,
 		AllowSafeRepair:       true,
 		AllowBranchCreation:   false,
+	}
+}
+
+// DefaultWorkWorkspaceConfig executes the corresponding package operation.
+func DefaultWorkWorkspaceConfig() WorkWorkspaceConfig {
+	return WorkWorkspaceConfig{
+		Mode:            WorkWorkspaceModeProject,
+		WorktreeRoot:    DefaultWorktreeRoot,
+		WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+		WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 	}
 }
 
