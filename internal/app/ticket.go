@@ -2284,10 +2284,10 @@ func runTicketShow(ctx context.Context, cmd *cli.Command, stdout io.Writer) erro
 		return err
 	}
 
-	return printTicketShow(stdout, ticket)
+	return printTicketShow(stdout, ticket, ticketEvidenceSummary(ticket))
 }
 
-func printTicketShow(stdout io.Writer, ticket core.IndexedTicket) error {
+func printTicketShow(stdout io.Writer, ticket core.IndexedTicket, evidence core.EvidenceStrategySummary) error {
 	lines := []string{
 		"key: " + ticket.Key,
 		"title: " + ticket.Title,
@@ -2304,6 +2304,8 @@ func printTicketShow(stdout io.Writer, ticket core.IndexedTicket) error {
 		"review_comments_url: " + ticket.ReviewCommentsURL,
 		"path: " + ticket.RelativePath,
 	}
+
+	lines = append(lines, ticketEvidenceShowLines(evidence)...)
 
 	for _, line := range lines {
 		_, err := fmt.Fprintln(stdout, line)
@@ -2425,12 +2427,13 @@ func printTicketBoardColumn(stdout io.Writer, column core.BoardColumn) error {
 	for _, ticket := range column.Tickets {
 		_, err = fmt.Fprintf(
 			stdout,
-			"%s\t%s\t%s\t%s\t%s\n",
+			"%s\t%s\t%s\t%s\t%s\t%s\n",
 			ticket.Key,
 			ticket.Status,
 			ticket.Priority,
 			ticket.Type,
 			ticket.Title,
+			ticketEvidenceStatusCell(ticketEvidenceSummary(ticket)),
 		)
 		if err != nil {
 			return fmt.Errorf("write ticket board row: %w", err)
@@ -2444,7 +2447,7 @@ func printTicketList(stdout io.Writer, tickets []core.IndexedTicket) error {
 	for _, ticket := range tickets {
 		_, err := fmt.Fprintf(
 			stdout,
-			"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+			"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 			ticket.Key,
 			ticket.Title,
 			ticket.Status,
@@ -2453,6 +2456,7 @@ func printTicketList(stdout io.Writer, tickets []core.IndexedTicket) error {
 			ticket.Type,
 			ticket.UseCase,
 			ticket.RelativePath,
+			ticketEvidenceStatusCell(ticketEvidenceSummary(ticket)),
 		)
 		if err != nil {
 			return fmt.Errorf("write ticket list result: %w", err)
@@ -2460,6 +2464,73 @@ func printTicketList(stdout io.Writer, tickets []core.IndexedTicket) error {
 	}
 
 	return nil
+}
+
+func ticketEvidenceSummary(ticket core.IndexedTicket) core.EvidenceStrategySummary {
+	content, err := os.ReadFile(ticket.Path)
+	if err != nil {
+		return core.EvidenceStrategySummary{}
+	}
+
+	return core.SummarizeEvidenceStrategyChecklist(string(content))
+}
+
+func ticketEvidenceShowLines(evidence core.EvidenceStrategySummary) []string {
+	if !ticketEvidenceVisible(evidence) {
+		return nil
+	}
+
+	lines := []string{"evidence: " + string(evidence.Status)}
+	if evidence.Error != "" {
+		return append(lines, "evidence_error: "+evidence.Error)
+	}
+
+	for _, item := range evidence.Items {
+		lines = append(lines, ticketEvidenceItemLine(item))
+	}
+
+	return lines
+}
+
+func ticketEvidenceItemLine(item core.EvidenceStrategySummaryItem) string {
+	return ticketEvidenceItemKey(item.Label) + ": " + item.Status + " " + ticketEvidenceItemState(item.Checked)
+}
+
+func ticketEvidenceItemKey(label string) string {
+	switch label {
+	case core.EvidenceStrategyChecklistLabelStrategy:
+		return "evidence_strategy"
+	case core.EvidenceStrategyChecklistLabelGherkin:
+		return "evidence_gherkin"
+	case core.EvidenceStrategyChecklistLabelTests:
+		return "evidence_tests"
+	case core.EvidenceStrategyChecklistLabelValidation:
+		return "evidence_validation"
+	case core.EvidenceStrategyChecklistLabelSummary:
+		return "evidence_summary"
+	default:
+		return "evidence_" + strings.ToLower(strings.ReplaceAll(label, " ", "_"))
+	}
+}
+
+func ticketEvidenceItemState(checked bool) string {
+	if checked {
+		return "done"
+	}
+
+	return "pending"
+}
+
+func ticketEvidenceStatusCell(evidence core.EvidenceStrategySummary) string {
+	if !ticketEvidenceVisible(evidence) {
+		return "-"
+	}
+
+	return string(evidence.Status)
+}
+
+func ticketEvidenceVisible(evidence core.EvidenceStrategySummary) bool {
+	return evidence.Status != "" && evidence.Status != core.EvidenceStrategySummaryStatusMissing
 }
 
 func openTicketIndexForCommand(

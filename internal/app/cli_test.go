@@ -3421,6 +3421,36 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	}
 }
 
+func TestTicketShowPrintsEvidenceStrategySummary(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	addProject(t, devRoot, "example", projectDir)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	appendTicketEvidenceStrategy(t, ticketPath)
+
+	var stdout bytes.Buffer
+
+	err := run(t.Context(), []string{
+		"ticket",
+		"show",
+		"--dev-root",
+		devRoot,
+		"--dir",
+		projectDir,
+		"CHC-1",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("ticket show returned error: %v", err)
+	}
+
+	for _, want := range wantTicketShowEvidenceOutput() {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+}
+
 func testTicketShowReviewTicket() core.Ticket {
 	return core.Ticket{
 		Key:         "CHC-1",
@@ -3466,6 +3496,17 @@ func wantTicketShowReviewOutput() []string {
 		"review_result: needs_changes",
 		"review_comments_url: https://forge.example.com/owner/repo/pulls/123",
 		"path: CHC-1-Do-something.md",
+	}
+}
+
+func wantTicketShowEvidenceOutput() []string {
+	return []string{
+		"evidence: complete",
+		"evidence_strategy: complete done",
+		"evidence_gherkin: required done",
+		"evidence_tests: mixed done",
+		"evidence_validation: passed done",
+		"evidence_summary: complete done",
 	}
 }
 
@@ -6893,6 +6934,34 @@ func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, tick
 	}
 
 	return ticketPath
+}
+
+func appendTicketEvidenceStrategy(t *testing.T, ticketPath string) {
+	t.Helper()
+
+	content, err := os.ReadFile(ticketPath)
+	if err != nil {
+		t.Fatalf("read ticket: %v", err)
+	}
+
+	content = append(content, []byte(testTicketEvidenceStrategyBlock())...)
+
+	err = os.WriteFile(ticketPath, content, 0o644)
+	if err != nil {
+		t.Fatalf("write ticket: %v", err)
+	}
+}
+
+func testTicketEvidenceStrategyBlock() string {
+	return `
+<!-- chc:evidence-strategy:v1 -->
+- [x] Evidence strategy: complete; change_kind=cli_behavior; risk=medium
+- [x] Gherkin: required; path=.chc/user/acceptance/cli.feature
+- [x] Tests: mixed; unit and CLI coverage
+- [x] Validation: passed; make verify
+- [x] Evidence summary: complete; ready for review
+<!-- /chc:evidence-strategy -->
+`
 }
 
 func newTestWorkspace(t *testing.T) string {
