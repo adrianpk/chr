@@ -105,7 +105,16 @@ func changedFilePathFromGitStatusLine(line string) string {
 		_, path, _ = strings.Cut(path, " -> ")
 	}
 
-	return filepath.ToSlash(strings.Trim(path, `"`))
+	return normalizeChangedFilePath(path)
+}
+
+func normalizeChangedFilePath(path string) string {
+	path = filepath.ToSlash(strings.Trim(path, `"`))
+	if path == "." || filepath.IsAbs(path) || strings.HasPrefix(path, "../") {
+		return ""
+	}
+
+	return path
 }
 
 func operationalChangedFile(path string) bool {

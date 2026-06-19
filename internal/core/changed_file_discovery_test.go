@@ -76,6 +76,14 @@ func TestChangedFileDiscovererRejectsMissingProjectDir(t *testing.T) {
 	}
 }
 
+func TestParseGitStatusChangedFilesRejectsNonProjectRelativePaths(t *testing.T) {
+	changedFiles := parseGitStatusChangedFiles(" M /tmp/worktree/main.go\n M ../outside.go\n M internal/core/result.go\n")
+
+	assertChangedFilePaths(t, changedFiles, []string{
+		"internal/core/result.go",
+	})
+}
+
 func newChangedFileDiscoveryGitRepo(t *testing.T) string {
 	t.Helper()
 
