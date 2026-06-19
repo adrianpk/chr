@@ -12,7 +12,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | evidence strategy config | active | `feat/slice-1-evidence-strategy-config` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md` |
+| Slice 1 | evidence strategy config | reviewing | `feat/slice-1-evidence-strategy-config` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md` |
 | Slice 2 | evidence checklist writer | planned | `feat/slice-2-evidence-checklist-writer` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-2-evidence-checklist-writer.md` |
 | Slice 3 | worker strategy context | planned | `feat/slice-3-worker-strategy-context` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-3-worker-strategy-context.md` |
 | Slice 4 | review evidence gate | planned | `feat/slice-4-review-evidence-gate` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-4-review-evidence-gate.md` |
@@ -23,12 +23,12 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add evidence strategy config structs, defaults, and parser support under `.chc/user/config.yml`. | pending | pending | Defaults should preserve current behavior until later slices enforce strategy. |
-| T1.2 | Add enum validation for strategy mode, checklist policy, Gherkin policy, strict gating, user edits, and report copy behavior. | pending | pending | Invalid config should fail clearly. |
-| T1.3 | Add core strategy status and diagnostic value types used by later slices. | pending | pending | No behavior gate yet. |
-| T1.4 | Add config tests for omitted defaults, explicit overrides, and invalid values. | pending | pending | Prefer table-driven coverage. |
-| T1.5 | Document the config contract in reference docs. | pending | pending | Sane defaults plus override behavior. |
-| T1.6 | Add the slice implementation report and validation evidence. | pending | pending | Report required before PR. |
+| T1.1 | Add evidence strategy config structs, defaults, and parser support under `.chc/user/config.yml`. | done | `44ea5a0` | Defaults preserve current behavior until later slices enforce strategy. |
+| T1.2 | Add enum validation for strategy mode, checklist policy, Gherkin policy, strict gating, user edits, and report copy behavior. | done | `b880c70` | Invalid enum values fail clearly. |
+| T1.3 | Add core strategy status and diagnostic value types used by later slices. | done | `d655841` | No behavior gate yet. |
+| T1.4 | Add config tests for omitted defaults, explicit overrides, and invalid values. | done | `ed8d9b4` | Covers defaults, overrides, and invalid enum values. |
+| T1.5 | Document the config contract in reference docs. | done | `9ead9ca` | Sane defaults plus override behavior. |
+| T1.6 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 2 Tasks
 
@@ -87,7 +87,9 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 ## Validation Log
 
-- Planning only: validation not run yet.
+- Slice 1: `go test ./internal/core -run 'WorkspaceConfig|EvidenceStrategy|Validate.*Config'` (pass)
+- Slice 1: `golangci-lint run --timeout=5m ./internal/core` (pass)
+- Slice 1: `make verify` (pass)
 
 ## Notes
 
