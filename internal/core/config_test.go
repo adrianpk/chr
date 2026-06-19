@@ -175,6 +175,10 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
   require_remote_tracking: false
   allow_safe_repair: false
   allow_branch_creation: true
+  workspace_mode: worktree
+  worktree_root: .chc/user/runtime/custom-worktrees
+  worktree_base: local_integration_branch
+  worktree_cleanup: manual
 `)
 
 	config, err := LoadWorkspaceConfig(dir)
@@ -192,8 +196,32 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 			AllowSafeRepair:       false,
 			AllowBranchCreation:   true,
 		},
-		Workspace: DefaultWorkWorkspaceConfig(),
+		Workspace: WorkWorkspaceConfig{
+			Mode:            WorkWorkspaceModeWorktree,
+			WorktreeRoot:    ".chc/user/runtime/custom-worktrees",
+			WorktreeBase:    WorktreeBasePolicyLocalIntegrationBranch,
+			WorktreeCleanup: WorktreeCleanupPolicyManual,
+		},
 	}
+	if config.Work != want {
+		t.Fatalf("Work = %#v, want %#v", config.Work, want)
+	}
+}
+
+func TestLoadWorkspaceConfigKeepsWorkWorkspaceDefaultsForMissingKeys(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `work:
+  workspace_mode: worktree
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := DefaultWorkConfig()
+	want.Workspace.Mode = WorkWorkspaceModeWorktree
+
 	if config.Work != want {
 		t.Fatalf("Work = %#v, want %#v", config.Work, want)
 	}
@@ -322,7 +350,7 @@ func TestValidateEvidenceStrategyConfigRejectsInvalidConfig(t *testing.T) {
 	}
 }
 
-func TestValidateWorkConfigRejectsInvalidConfig(t *testing.T) {
+func TestValidateWorkConfigRejectsInvalidBranchPolicyConfig(t *testing.T) {
 	tests := []struct {
 		name    string
 		config  WorkConfig
@@ -357,15 +385,82 @@ func TestValidateWorkConfigRejectsInvalidConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := ValidateWorkConfig(test.config)
-			if err == nil {
-				t.Fatal("ValidateWorkConfig returned nil error")
-			}
-
-			if err.Error() != test.wantErr {
-				t.Fatalf("ValidateWorkConfig error = %q, want %q", err.Error(), test.wantErr)
-			}
+			assertValidateWorkConfigError(t, test.config, test.wantErr)
 		})
+	}
+}
+
+func TestValidateWorkConfigRejectsInvalidWorkspaceConfig(t *testing.T) {
+	tests := []struct {
+		name    string
+		config  WorkConfig
+		wantErr string
+	}{
+		{
+			name: "workspace mode",
+			config: WorkConfig{
+				BranchPolicy: DefaultWorkBranchPolicy(),
+				Workspace:    WorkWorkspaceConfig{Mode: "unknown"},
+			},
+			wantErr: "invalid work workspace_mode: unknown",
+		},
+		{
+			name: "worktree root",
+			config: WorkConfig{
+				BranchPolicy: DefaultWorkBranchPolicy(),
+				Workspace: WorkWorkspaceConfig{
+					Mode:            WorkWorkspaceModeWorktree,
+					WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+					WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+				},
+			},
+			wantErr: "work worktree_root is required",
+		},
+		{
+			name: "worktree base",
+			config: WorkConfig{
+				BranchPolicy: DefaultWorkBranchPolicy(),
+				Workspace: WorkWorkspaceConfig{
+					Mode:            WorkWorkspaceModeWorktree,
+					WorktreeRoot:    DefaultWorktreeRoot,
+					WorktreeBase:    "unknown",
+					WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+				},
+			},
+			wantErr: "invalid work worktree_base: unknown",
+		},
+		{
+			name: "worktree cleanup",
+			config: WorkConfig{
+				BranchPolicy: DefaultWorkBranchPolicy(),
+				Workspace: WorkWorkspaceConfig{
+					Mode:            WorkWorkspaceModeWorktree,
+					WorktreeRoot:    DefaultWorktreeRoot,
+					WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+					WorktreeCleanup: "unknown",
+				},
+			},
+			wantErr: "invalid work worktree_cleanup: unknown",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assertValidateWorkConfigError(t, test.config, test.wantErr)
+		})
+	}
+}
+
+func assertValidateWorkConfigError(t *testing.T, config WorkConfig, wantErr string) {
+	t.Helper()
+
+	err := ValidateWorkConfig(config)
+	if err == nil {
+		t.Fatal("ValidateWorkConfig returned nil error")
+	}
+
+	if err.Error() != wantErr {
+		t.Fatalf("ValidateWorkConfig error = %q, want %q", err.Error(), wantErr)
 	}
 }
 
