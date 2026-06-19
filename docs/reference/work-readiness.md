@@ -22,6 +22,10 @@ work:
   require_remote_tracking: true
   allow_safe_repair: true
   allow_branch_creation: false
+  workspace_mode: project
+  worktree_root: .chc/user/runtime/worktrees
+  worktree_base: remote_integration_branch
+  worktree_cleanup: after_merge
 ```
 
 Generated config may omit these fields. Omitted fields use the default work
@@ -40,6 +44,10 @@ Default work policy:
 | `require_remote_tracking` | `true` |
 | `allow_safe_repair` | `true` |
 | `allow_branch_creation` | `false` |
+| `workspace_mode` | `project` |
+| `worktree_root` | `.chc/user/runtime/worktrees` |
+| `worktree_base` | `remote_integration_branch` |
+| `worktree_cleanup` | `after_merge` |
 
 The defaults preserve ChrysoCoord's own `dev` plus `origin` workflow while
 making the policy explicit and replaceable per project.
@@ -53,6 +61,22 @@ making the policy explicit and replaceable per project.
 | `no_git_enforcement` | Branch, remote, and worktree checks are skipped. Review-repair ordering still applies. |
 
 Unknown modes are configuration errors.
+
+## Workspace Execution Mode
+
+Workspace execution configuration defines where future ticket execution work
+will be prepared.
+
+| Field | Values | Behavior |
+| --- | --- | --- |
+| `workspace_mode` | `project`, `worktree` | `project` preserves the current project checkout execution boundary. `worktree` opts into isolated ticket worktree preparation as that behavior is introduced by the isolated worktree delivery cycle. |
+| `worktree_root` | project-relative or absolute path | Directory used for ticket worktrees when `workspace_mode` is `worktree`. |
+| `worktree_base` | `remote_integration_branch`, `local_integration_branch`, `current_branch` | Base selection policy for future worktree creation. |
+| `worktree_cleanup` | `after_merge`, `manual`, `never` | Cleanup policy for clean merged ticket worktrees. |
+
+Current default behavior remains project-mounted execution. The worktree fields
+are parsed, validated, and exposed in runtime planning so later slices can move
+execution without changing the config contract again.
 
 ## Diagnostics
 

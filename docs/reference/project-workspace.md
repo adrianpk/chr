@@ -190,6 +190,14 @@ Supported work fields:
   repairs.
 - `allow_branch_creation`: whether safe repair may create the configured local
   branch.
+- `workspace_mode`: workspace execution mode. Defaults to `project`.
+- `worktree_root`: project-relative or absolute root for future ticket
+  worktrees.
+- `worktree_base`: base selection policy for future ticket worktree creation.
+  Supported values are `remote_integration_branch`, `local_integration_branch`,
+  and `current_branch`.
+- `worktree_cleanup`: cleanup policy for clean merged ticket worktrees.
+  Supported values are `after_merge`, `manual`, and `never`.
 
 Example:
 
@@ -202,6 +210,10 @@ work:
   require_remote_tracking: true
   allow_safe_repair: true
   allow_branch_creation: false
+  workspace_mode: project
+  worktree_root: .chc/user/runtime/worktrees
+  worktree_base: remote_integration_branch
+  worktree_cleanup: after_merge
 ```
 
 See [Work readiness](work-readiness.md) for diagnostics, repair behavior, and
@@ -260,6 +272,10 @@ project directory and `.chc/user/config.yml` runtime fields.
 Path semantics:
 
 - `project_root`: absolute path to the managed project.
+- `project_checkout`: absolute path to the user-visible checkout.
+- `execution_workspace`: absolute path where agent execution is expected to
+  operate. In `project` mode this is the same path as `project_checkout`.
+- `workspace_mode`: effective work workspace mode.
 - `workspace_root`: absolute path to `.chc/` inside the project.
 - `dockerfile`: absolute path resolved from `runtime.dockerfile`.
 - `artifact_dir`: absolute path resolved from `runtime.artifact_dir`.
@@ -272,6 +288,10 @@ Docker mount contract:
 - the project root is mounted read-write into the container;
 - the container target is `runtime.workdir`;
 - relative container workdirs are normalized to absolute paths.
+
+During the isolated ticket worktree rollout, the runtime plan exposes
+`execution_workspace` before changing the writable Docker mount source. Project
+mode therefore remains fully compatible with existing managed projects.
 
 The planner only computes paths and mount metadata. It does not create
 directories, build images, run Docker, or execute validation commands.

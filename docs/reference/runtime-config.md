@@ -53,6 +53,18 @@ image tag, container workdir, and planned mount. The dry-run path prints the
 plan without building an image, starting a container, running the harness, or
 executing the validation command.
 
+The runtime plan also records the effective workspace execution metadata from
+`work:`:
+
+- `workspace_mode`: `project` by default.
+- `project_checkout`: the user-visible project checkout.
+- `execution_workspace`: the path intended for agent work. In `project` mode
+  this is the project checkout.
+
+Worktree execution fields are parsed and validated before the runtime mount is
+switched. Existing projects therefore keep the current project-mounted behavior
+unless they explicitly opt into later worktree execution behavior.
+
 Human output uses project-relative paths for files inside the managed project
 and groups path checks under `checks:`.
 
