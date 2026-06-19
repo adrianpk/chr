@@ -373,4 +373,3 @@ QA proving should add project-level smoke commands once the fixtures exist.
 - Container-side commit/push support with explicit credentials.
 - Worktree disk usage reporting in Dash.
 - Scheduled cleanup for stale merged worktrees.
-

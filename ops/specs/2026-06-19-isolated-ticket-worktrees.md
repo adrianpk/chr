@@ -880,4 +880,3 @@ QA scenarios should include:
 - Should `run-all` pre-create worktrees for the full queue or create one
   worktree at a time? This spec recommends one at a time to preserve sequential
   semantics and reduce cleanup surface.
-
