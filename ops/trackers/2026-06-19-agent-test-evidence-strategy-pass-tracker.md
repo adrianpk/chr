@@ -56,12 +56,12 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add an evidence readiness evaluator over parsed ticket strategy state, execution result, validation result, and review refs. | pending | pending | Produces classified blockers. |
-| T4.2 | Integrate the evaluator into ticket result application. | pending | pending | Worker completion cannot bypass evidence. |
-| T4.3 | Integrate strict evidence gating into ticket status transitions to `ready_for_review`. | pending | pending | Manual status changes should respect strict mode. |
-| T4.4 | Add tests for passed, missing, malformed, blocked, validation-failed, and optional-strategy paths. | pending | pending | Include disabled/optional config. |
-| T4.5 | Update reference docs for review-transition evidence requirements. | pending | pending | Keep review workflow docs current. |
-| T4.6 | Add the slice implementation report and validation evidence. | pending | pending | Report required before PR. |
+| T4.1 | Add an evidence readiness evaluator over parsed ticket strategy state, execution result, validation result, and review refs. | done | `d915612` | Produces classified blockers. |
+| T4.2 | Integrate the evaluator into ticket result application. | done | `f917d38` | Worker completion cannot bypass evidence. |
+| T4.3 | Integrate strict evidence gating into ticket status transitions to `ready_for_review`. | done | `f917d38` | Manual status changes respect strict mode. |
+| T4.4 | Add tests for passed, missing, malformed, blocked, validation-failed, and optional-strategy paths. | done | `f917d38` | Includes disabled/optional config and loop fixture coverage. |
+| T4.5 | Update reference docs for review-transition evidence requirements. | done | `30054e0` | Review workflow docs describe the gate and opt-outs. |
+| T4.6 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Slice 5 Tasks
 
@@ -104,6 +104,11 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 - Slice 3: `make lint-strict` (pass)
 - Slice 3: `make verify` (pass)
 - Slice 3: PR `#322` merged to `dev` on 2026-06-19.
+- Slice 4: `go test ./internal/core -run 'ResultApplication|EvidenceReadiness|TicketStatusUpdater'` (pass)
+- Slice 4: `go test ./internal/app -run 'TestTicket(ApplyResult|ReviewRef|Status)'` (pass)
+- Slice 4: `go test ./internal/app -run 'TestTicketLoopExecutesEligibleTickets|TestTicketLoopHonorsMaxIterations|TestWorkRunAllExecutesReadyTickets|TestTicketLoopDispatchesConfiguredFinishedNotification|TestServiceStartAgentWorkTicketReusesTicketExecution|TestServiceStartAllReadyAgentWork'` (pass)
+- Slice 4: `make lint-strict` (pass)
+- Slice 4: `make verify` (pass)
 
 ## Notes
 
