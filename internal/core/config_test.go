@@ -31,6 +31,10 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 	if config.Work != DefaultWorkConfig() {
 		t.Fatalf("Work = %#v, want %#v", config.Work, DefaultWorkConfig())
 	}
+
+	if config.Evidence != DefaultEvidenceConfig() {
+		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, DefaultEvidenceConfig())
+	}
 }
 
 func TestLoadWorkspaceConfigParsesTicketAndRuntimeConfig(t *testing.T) {
@@ -194,6 +198,60 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 	}
 }
 
+func TestLoadWorkspaceConfigParsesEvidenceStrategyConfig(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `evidence:
+  strategy:
+    enabled: false
+    mode: separate_pass
+    ticket_checklist: optional
+    gherkin_policy: manual_only
+    strict_ready_for_review: false
+    allow_user_edits: false
+    execution_report_copy: false
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := EvidenceConfig{
+		Strategy: EvidenceStrategyConfig{
+			Enabled:              false,
+			Mode:                 EvidenceStrategyModeSeparatePass,
+			TicketChecklist:      EvidenceTicketChecklistPolicyOptional,
+			GherkinPolicy:        EvidenceGherkinPolicyManualOnly,
+			StrictReadyForReview: false,
+			AllowUserEdits:       false,
+			ExecutionReportCopy:  false,
+		},
+	}
+	if config.Evidence != want {
+		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, want)
+	}
+}
+
+func TestLoadWorkspaceConfigKeepsEvidenceDefaultsForMissingKeys(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `evidence:
+  strategy:
+    gherkin_policy: disabled
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := DefaultEvidenceConfig()
+	want.Strategy.GherkinPolicy = EvidenceGherkinPolicyDisabled
+
+	if config.Evidence != want {
+		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, want)
+	}
+}
+
 func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -221,6 +279,43 @@ func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
 
 			if err.Error() != test.wantErr {
 				t.Fatalf("ValidateReviewWorkflowConfig error = %q, want %q", err.Error(), test.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateEvidenceStrategyConfigRejectsInvalidConfig(t *testing.T) {
+	tests := []struct {
+		name    string
+		config  EvidenceStrategyConfig
+		wantErr string
+	}{
+		{
+			name:    "mode",
+			config:  EvidenceStrategyConfig{Mode: "unknown", TicketChecklist: EvidenceTicketChecklistPolicyRequired, GherkinPolicy: EvidenceGherkinPolicyActiveWhenApplicable},
+			wantErr: "invalid evidence strategy mode: unknown",
+		},
+		{
+			name:    "ticket checklist",
+			config:  EvidenceStrategyConfig{Mode: EvidenceStrategyModeInline, TicketChecklist: "unknown", GherkinPolicy: EvidenceGherkinPolicyActiveWhenApplicable},
+			wantErr: "invalid evidence ticket_checklist policy: unknown",
+		},
+		{
+			name:    "gherkin policy",
+			config:  EvidenceStrategyConfig{Mode: EvidenceStrategyModeInline, TicketChecklist: EvidenceTicketChecklistPolicyRequired, GherkinPolicy: "unknown"},
+			wantErr: "invalid evidence gherkin_policy: unknown",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := ValidateEvidenceStrategyConfig(test.config)
+			if err == nil {
+				t.Fatal("ValidateEvidenceStrategyConfig returned nil error")
+			}
+
+			if err.Error() != test.wantErr {
+				t.Fatalf("ValidateEvidenceStrategyConfig error = %q, want %q", err.Error(), test.wantErr)
 			}
 		})
 	}
