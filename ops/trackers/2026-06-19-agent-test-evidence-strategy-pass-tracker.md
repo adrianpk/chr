@@ -17,7 +17,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 | Slice 3 | worker strategy context | delivered | `feat/slice-3-worker-strategy-context` | `#322` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-3-worker-strategy-context.md` |
 | Slice 4 | review evidence gate | delivered | `feat/slice-4-review-evidence-gate` | `#323` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-4-review-evidence-gate.md` |
 | Slice 5 | gherkin test policy | delivered | `feat/slice-5-gherkin-test-policy` | `#324` | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-5-gherkin-test-policy.md` |
-| Slice 6 | evidence visibility docs | active | `feat/slice-6-evidence-visibility-docs` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md` |
+| Slice 6 | evidence visibility docs | reviewing | `feat/slice-6-evidence-visibility-docs` | pending | `.prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md` |
 
 ## Slice 1 Tasks
 
@@ -78,12 +78,12 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T6.1 | Add evidence status to indexed ticket detail or a derived Board read model. | pending | pending | Avoid making runtime logs the only visibility path. |
-| T6.2 | Render evidence status in Board detail and relevant Dash messages. | pending | pending | Concise status only. |
-| T6.3 | Update ticket show/list/board CLI output where appropriate. | pending | pending | Keep output readable. |
-| T6.4 | Update user guide, command reference, runtime config, ticket execution, ticket review workflow, and testing doctrine docs. | pending | pending | Document defaults and overrides. |
-| T6.5 | Add or update QA fixture coverage for no-test docs work, behavior work with Gherkin, and blocked validation. | pending | pending | Keep scenarios resettable. |
-| T6.6 | Add the slice implementation report and validation evidence. | pending | pending | Report required before PR. |
+| T6.1 | Add evidence status to indexed ticket detail or a derived Board read model. | done | `4c2e18a` | Core derives concise evidence summaries from ticket Markdown. |
+| T6.2 | Render evidence status in Board detail and relevant Dash messages. | done | `b1a6775` | Board detail and Dash work-action details show concise evidence references. |
+| T6.3 | Update ticket show/list/board CLI output where appropriate. | done | `3163031` | CLI show/list/board print evidence status without changing normal columns. |
+| T6.4 | Update user guide, command reference, runtime config, ticket execution, ticket review workflow, and testing doctrine docs. | done | `93630e6` | Docs cover defaults, visibility, review gating, and evidence references. |
+| T6.5 | Add or update QA fixture coverage for no-test docs work, behavior work with Gherkin, and blocked validation. | done | `bf44f46` | Tic-tac-toe reference includes resettable evidence examples and active Gherkin. |
+| T6.6 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
 ## Validation Log
 
@@ -115,6 +115,12 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 - Slice 5: `make lint-strict` (pass)
 - Slice 5: `make verify` (pass)
 - Slice 5: PR `#324` merged to `dev` on 2026-06-19.
+- Slice 6: `go test ./internal/core -run 'SummarizeEvidenceStrategyChecklist|NewEvidenceStrategySummary'` (pass)
+- Slice 6: `go test ./internal/tui -run 'TestModelRendersTicketEvidenceDetail|TestModelRendersWorkActionEventStream'` (pass)
+- Slice 6: `go test ./internal/app -run 'TestTicketShowPrintsEvidenceStrategySummary|TestTicketListPrintsIndexedTickets|TestTicketBoardPrintsBoardColumns'` (pass)
+- Slice 6: `make qa-smoke-tictactoe` (pass)
+- Slice 6: `make lint-strict` (pass)
+- Slice 6: `make verify` (pass)
 
 ## Notes
 

@@ -3426,6 +3426,7 @@ func TestTicketShowPrintsEvidenceStrategySummary(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
+
 	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
 	appendTicketEvidenceStrategy(t, ticketPath)
 
