@@ -31,6 +31,11 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 		"- result_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/result.json",
 		"- log_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
 		"- validation_path: /workspace/.chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+		"## Evidence Strategy",
+		"Before modifying project files:",
+		"Write or update the ticket evidence-strategy checklist.",
+		"Before finishing:",
+		"Update Validation and Evidence summary.",
 		"- `status`: `succeeded` or `failed`.",
 		"- `changed_files`: optional list of workspace-relative changed file summaries.",
 	} {

@@ -123,6 +123,7 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString(opts.ValidationPath)
 	output.WriteString("\n\n")
 	writeCodexWorkerRepairHandoff(&output, opts)
+	writeCodexWorkerEvidenceStrategyInstructions(&output)
 	output.WriteString("## Result Contract\n\n")
 	output.WriteString("Write a JSON object to `result_path` with these fields:\n\n")
 	output.WriteString("- `execution_id`: must match the execution ID above.\n")
@@ -132,6 +133,24 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString("- `changed_files`: optional list of workspace-relative changed file summaries.\n")
 
 	return output.String()
+}
+
+func writeCodexWorkerEvidenceStrategyInstructions(output *strings.Builder) {
+	output.WriteString("## Evidence Strategy\n\n")
+	output.WriteString("Before modifying project files:\n\n")
+	output.WriteString("1. Read the ticket and any existing evidence-strategy checklist.\n")
+	output.WriteString("2. Classify the change kind and risk.\n")
+	output.WriteString("3. Decide whether Gherkin applies.\n")
+	output.WriteString("4. Decide whether new tests are required.\n")
+	output.WriteString("5. Decide test timing: before, during, after, or none.\n")
+	output.WriteString("6. Write or update the ticket evidence-strategy checklist.\n")
+	output.WriteString("7. Treat the checklist as an operational contract during implementation.\n\n")
+	output.WriteString("Before finishing:\n\n")
+	output.WriteString("1. Re-read the strategy checklist.\n")
+	output.WriteString("2. Reconcile planned evidence with produced evidence.\n")
+	output.WriteString("3. Update Validation and Evidence summary.\n")
+	output.WriteString("4. Do not move the ticket to ready_for_review if required evidence is missing, failing, or blocked.\n\n")
+	output.WriteString("The ticket checklist is the operational source of truth.\n\n")
 }
 
 func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
