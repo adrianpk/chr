@@ -1,11 +1,11 @@
 # Slice 4: Runtime Workspace Mount
 
-Status: reviewing
+Status: delivered
 Slicing: Isolated Ticket Worktrees
 Plan: `ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md`
 Tracker: `ops/trackers/2026-06-19-isolated-ticket-worktrees-tracker.md`
 Branch: `feat/slice-4-runtime-workspace-mount`
-PR: pending
+PR: #331
 
 ## Purpose
 
