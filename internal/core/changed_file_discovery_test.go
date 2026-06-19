@@ -44,6 +44,28 @@ func TestChangedFileDiscovererHandlesCleanWorktree(t *testing.T) {
 	}
 }
 
+func TestChangedFileDiscovererUsesExplicitWorkspaceDir(t *testing.T) {
+	projectDir := newChangedFileDiscoveryGitRepo(t)
+	workspaceDir := newChangedFileDiscoveryGitRepo(t)
+	writeChangedFileDiscoveryFile(t, projectDir, "README.md", "dirty user checkout\n")
+	writeChangedFileDiscoveryFile(t, workspaceDir, "internal/core/result.go", "package core\n")
+
+	changedFiles, err := NewChangedFileDiscoverer().DiscoverChangedFiles(
+		context.Background(),
+		DiscoverChangedFilesOptions{
+			ProjectDir:   projectDir,
+			WorkspaceDir: workspaceDir,
+		},
+	)
+	if err != nil {
+		t.Fatalf("DiscoverChangedFiles returned error: %v", err)
+	}
+
+	assertChangedFilePaths(t, changedFiles, []string{
+		"internal/core/result.go",
+	})
+}
+
 func TestChangedFileDiscovererRejectsMissingProjectDir(t *testing.T) {
 	_, err := NewChangedFileDiscoverer().DiscoverChangedFiles(
 		context.Background(),

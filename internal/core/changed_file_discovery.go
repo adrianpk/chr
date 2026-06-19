@@ -16,7 +16,8 @@ type ChangedFileDiscoverer interface {
 
 // DiscoverChangedFilesOptions describes a package boundary value.
 type DiscoverChangedFilesOptions struct {
-	ProjectDir string
+	ProjectDir   string
+	WorkspaceDir string
 }
 
 type gitChangedFileDiscoverer struct{}
@@ -31,7 +32,8 @@ func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(
 	ctx context.Context,
 	opts DiscoverChangedFilesOptions,
 ) ([]ExecutionResultChangedFile, error) {
-	if strings.TrimSpace(opts.ProjectDir) == "" {
+	workspaceDir := changedFileDiscoveryWorkspaceDir(opts)
+	if strings.TrimSpace(workspaceDir) == "" {
 		return nil, fmt.Errorf("project directory is required")
 	}
 
@@ -39,7 +41,7 @@ func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(
 		ctx,
 		"git",
 		"-C",
-		opts.ProjectDir,
+		workspaceDir,
 		"status",
 		"--porcelain=v1",
 		"--untracked-files=all",
@@ -49,6 +51,14 @@ func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(
 	}
 
 	return parseGitStatusChangedFiles(string(output)), nil
+}
+
+func changedFileDiscoveryWorkspaceDir(opts DiscoverChangedFilesOptions) string {
+	if strings.TrimSpace(opts.WorkspaceDir) != "" {
+		return opts.WorkspaceDir
+	}
+
+	return opts.ProjectDir
 }
 
 func parseGitStatusChangedFiles(output string) []ExecutionResultChangedFile {
