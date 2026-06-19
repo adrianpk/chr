@@ -92,6 +92,14 @@ func workDoctorFlags() []cli.Flag {
 			Name:  "fix-safe",
 			Usage: "apply safe readiness repairs before printing the report",
 		},
+		&cli.StringFlag{
+			Name:  "ticket",
+			Usage: "ticket key to include ticket worktree readiness",
+		},
+		&cli.StringFlag{
+			Name:  "ticket-branch",
+			Usage: "ticket branch override for ticket worktree readiness",
+		},
 	)
 }
 
@@ -142,7 +150,7 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 			return fmt.Errorf("work doctor does not accept positional arguments")
 		}
 
-		_, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
+		operations, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
 		if err != nil {
 			return err
 		}
@@ -152,11 +160,18 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 			return err
 		}
 
+		ticketKey, ticketBranch, err := workDoctorTicketContext(cmd, operations)
+		if err != nil {
+			return err
+		}
+
 		if cmd.Bool("fix-safe") {
 			result, err := core.RepairWorkReadiness(ctx, core.WorkReadinessRepairOptions{
-				ProjectDir: projectContext.ProjectDir,
-				Policy:     workConfig.BranchPolicy,
-				Workspace:  workConfig.Workspace,
+				ProjectDir:   projectContext.ProjectDir,
+				Policy:       workConfig.BranchPolicy,
+				Workspace:    workConfig.Workspace,
+				TicketKey:    ticketKey,
+				TicketBranch: ticketBranch,
 			})
 			if err != nil {
 				return err
@@ -166,9 +181,11 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 		}
 
 		report, err := core.CheckWorkReadiness(ctx, core.WorkReadinessOptions{
-			ProjectDir: projectContext.ProjectDir,
-			Policy:     workConfig.BranchPolicy,
-			Workspace:  workConfig.Workspace,
+			ProjectDir:   projectContext.ProjectDir,
+			Policy:       workConfig.BranchPolicy,
+			Workspace:    workConfig.Workspace,
+			TicketKey:    ticketKey,
+			TicketBranch: ticketBranch,
 		})
 		if err != nil {
 			return err
@@ -176,6 +193,25 @@ func workDoctorAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 
 		return printWorkReadinessReport(stdout, projectContext, report)
 	}
+}
+
+func workDoctorTicketContext(cmd *cli.Command, operations service) (string, string, error) {
+	ticketKey := strings.TrimSpace(cmd.String("ticket"))
+	ticketBranch := strings.TrimSpace(cmd.String("ticket-branch"))
+	if ticketKey == "" {
+		return "", ticketBranch, nil
+	}
+
+	if ticketBranch != "" {
+		return ticketKey, ticketBranch, nil
+	}
+
+	ticket, err := operations.ticketByKey(ticketKey)
+	if err != nil {
+		return "", "", err
+	}
+
+	return ticketKey, ticket.Branch, nil
 }
 
 func workTicketAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
@@ -544,18 +580,29 @@ func printWorkRepairResult(stdout io.Writer, projectContext commandProjectContex
 }
 
 func workReadinessReportLines(projectContext commandProjectContext, report core.WorkReadinessReport) []string {
-	return []string{
+	lines := []string{
 		"work: doctor",
 		fmt.Sprintf("project: %s", projectContext.ProjectID),
 		fmt.Sprintf("status: %s", report.Status),
 		fmt.Sprintf("mode: %s", report.Policy.Mode),
+		fmt.Sprintf("workspace_mode: %s", report.Workspace.Mode),
 		fmt.Sprintf("integration_branch: %s", emptyWorkDoctorField(report.Policy.IntegrationBranch)),
 		fmt.Sprintf("canonical_remote: %s", emptyWorkDoctorField(report.Policy.CanonicalRemote)),
 		fmt.Sprintf("require_clean_worktree: %t", report.Policy.RequireCleanWorktree),
 		fmt.Sprintf("require_remote_tracking: %t", report.Policy.RequireRemoteTracking),
 		fmt.Sprintf("current_branch: %s", emptyWorkDoctorField(report.CurrentBranch)),
+		fmt.Sprintf("user_checkout_state: %s", emptyWorkDoctorState(report.UserCheckout.State)),
+		fmt.Sprintf("user_checkout_path: %s", workDoctorPathField(projectContext.ProjectDir, report.UserCheckout.Path)),
+		fmt.Sprintf("ticket_key: %s", emptyWorkDoctorField(report.TicketKey)),
+		fmt.Sprintf("ticket_branch: %s", emptyWorkDoctorField(report.TicketBranch)),
+		fmt.Sprintf("ticket_worktree_state: %s", emptyWorkDoctorState(report.TicketWorktree.State)),
+		fmt.Sprintf("ticket_worktree_path: %s", workDoctorPathField(projectContext.ProjectDir, report.TicketWorktree.Path)),
+		fmt.Sprintf("ticket_worktree_base_ref: %s", emptyWorkDoctorField(report.TicketWorktree.BaseRef)),
+		fmt.Sprintf("ticket_worktree_base_sha: %s", emptyWorkDoctorField(report.TicketWorktree.BaseSHA)),
 		fmt.Sprintf("diagnostics: %d", len(report.Diagnostics)),
 	}
+
+	return lines
 }
 
 func printWorkReadinessDiagnostics(stdout io.Writer, report core.WorkReadinessReport) error {
@@ -598,6 +645,22 @@ func emptyWorkDoctorField(value string) string {
 	}
 
 	return value
+}
+
+func emptyWorkDoctorState(value core.WorktreeState) string {
+	if value == "" {
+		return "unknown"
+	}
+
+	return string(value)
+}
+
+func workDoctorPathField(projectDir, path string) string {
+	if strings.TrimSpace(path) == "" {
+		return "none"
+	}
+
+	return emptyWorkDoctorField(relativeProjectPath(projectDir, path))
 }
 
 func printAgentWorkLines(stdout io.Writer, lines []string) error {

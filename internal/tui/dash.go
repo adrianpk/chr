@@ -136,12 +136,20 @@ func (m Model) renderDashReadinessLines(limit int) []string {
 }
 
 func appendWorkReadinessContextLines(lines []string, view WorkReadinessView) []string {
+	if strings.TrimSpace(view.WorkspaceMode) != "" {
+		lines = append(lines, "Workspace mode: "+view.WorkspaceMode)
+	}
+
 	if strings.TrimSpace(view.CurrentBranch) != "" {
 		lines = append(lines, "Current branch: "+view.CurrentBranch)
 	}
 
 	if strings.TrimSpace(view.IntegrationBranch) != "" {
 		lines = append(lines, "Expected branch: "+view.IntegrationBranch)
+	}
+
+	if strings.TrimSpace(view.TicketWorktree.State) != "" {
+		lines = append(lines, "Ticket worktree: "+view.TicketWorktree.State)
 	}
 
 	return lines

@@ -6,11 +6,26 @@ import "forge.adrianpk.com/chc/internal/core"
 type WorkReadinessView struct {
 	Status            string
 	Mode              string
+	WorkspaceMode     string
 	IntegrationBranch string
 	CanonicalRemote   string
 	CurrentBranch     string
+	UserCheckoutState string
+	UserCheckoutPath  string
+	TicketKey         string
+	TicketBranch      string
+	TicketWorktree    WorkReadinessWorkspaceView
 	Diagnostics       []WorkReadinessDiagnosticView
 	RepairsApplied    []WorkReadinessAppliedRepairView
+}
+
+// WorkReadinessWorkspaceView is the TUI projection of one inspected workspace.
+type WorkReadinessWorkspaceView struct {
+	Path    string
+	State   string
+	Branch  string
+	BaseRef string
+	BaseSHA string
 }
 
 // WorkReadinessDiagnosticView is the TUI projection of one readiness diagnostic.
@@ -35,9 +50,15 @@ func NewWorkReadinessView(report core.WorkReadinessReport) WorkReadinessView {
 	return WorkReadinessView{
 		Status:            string(report.Status),
 		Mode:              string(report.Policy.Mode),
+		WorkspaceMode:     string(report.Workspace.Mode),
 		IntegrationBranch: report.Policy.IntegrationBranch,
 		CanonicalRemote:   report.Policy.CanonicalRemote,
 		CurrentBranch:     report.CurrentBranch,
+		UserCheckoutState: string(report.UserCheckout.State),
+		UserCheckoutPath:  report.UserCheckout.Path,
+		TicketKey:         report.TicketKey,
+		TicketBranch:      report.TicketBranch,
+		TicketWorktree:    newWorkReadinessWorkspaceView(report.TicketWorktree),
 		Diagnostics:       newWorkReadinessDiagnosticViews(report.Diagnostics),
 	}
 }
@@ -65,6 +86,16 @@ func newWorkReadinessDiagnosticViews(diagnostics []core.WorkReadinessDiagnostic)
 	}
 
 	return views
+}
+
+func newWorkReadinessWorkspaceView(state core.WorkReadinessWorkspaceState) WorkReadinessWorkspaceView {
+	return WorkReadinessWorkspaceView{
+		Path:    state.Path,
+		State:   string(state.State),
+		Branch:  state.Branch,
+		BaseRef: state.BaseRef,
+		BaseSHA: state.BaseSHA,
+	}
 }
 
 func newWorkReadinessAppliedRepairViews(repairs []core.WorkReadinessAppliedRepair) []WorkReadinessAppliedRepairView {
