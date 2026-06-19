@@ -24,6 +24,10 @@ const (
 	WorkReadinessDiagnosticDirtyWorktree WorkReadinessDiagnosticCode = "dirty_worktree"
 	// WorkReadinessDiagnosticDirtyUserCheckout defines a package boundary constant.
 	WorkReadinessDiagnosticDirtyUserCheckout WorkReadinessDiagnosticCode = "dirty_user_checkout"
+	// WorkReadinessDiagnosticDirtyTicketWorktree defines a package boundary constant.
+	WorkReadinessDiagnosticDirtyTicketWorktree WorkReadinessDiagnosticCode = "dirty_ticket_worktree"
+	// WorkReadinessDiagnosticUnsafeTicketWorktree defines a package boundary constant.
+	WorkReadinessDiagnosticUnsafeTicketWorktree WorkReadinessDiagnosticCode = "unsafe_ticket_worktree"
 	// WorkReadinessDiagnosticRuntimeArtifactsVisible defines a package boundary constant.
 	WorkReadinessDiagnosticRuntimeArtifactsVisible WorkReadinessDiagnosticCode = "runtime_artifacts_visible"
 	// WorkReadinessDiagnosticMissingRemoteRef defines a package boundary constant.

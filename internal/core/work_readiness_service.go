@@ -111,7 +111,12 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 		git = OSWorkReadinessGit{}
 	}
 
-	return checkWorkReadinessGitState(ctx, projectDir, git, report)
+	worktreeGit := opts.WorktreeGit
+	if worktreeGit == nil {
+		worktreeGit = OSWorktreeGit{}
+	}
+
+	return checkWorkReadinessGitState(ctx, projectDir, git, worktreeGit, report)
 }
 
 // RepairWorkReadiness executes the corresponding package operation.
@@ -370,7 +375,13 @@ func applyCreateBranchRepair(ctx context.Context, run repairRun, diagnostic Work
 	}, true, nil
 }
 
-func checkWorkReadinessGitState(ctx context.Context, projectDir string, git WorkReadinessGit, report WorkReadinessReport) (WorkReadinessReport, error) {
+func checkWorkReadinessGitState(
+	ctx context.Context,
+	projectDir string,
+	git WorkReadinessGit,
+	worktreeGit WorktreeGit,
+	report WorkReadinessReport,
+) (WorkReadinessReport, error) {
 	branch, err := git.CurrentBranch(ctx, projectDir)
 	if err != nil {
 		report.Diagnostics = append(report.Diagnostics, gitUnavailableDiagnostic(err))
@@ -402,6 +413,11 @@ func checkWorkReadinessGitState(ctx context.Context, projectDir string, git Work
 	}
 
 	report, err = checkWorkReadinessRemote(ctx, projectDir, git, report)
+	if err != nil {
+		return WorkReadinessReport{}, err
+	}
+
+	report, err = checkWorkReadinessTicketWorktree(ctx, projectDir, worktreeGit, report)
 	if err != nil {
 		return WorkReadinessReport{}, err
 	}
@@ -512,6 +528,55 @@ func checkWorkReadinessRemote(ctx context.Context, projectDir string, git WorkRe
 	}
 
 	return report, nil
+}
+
+func checkWorkReadinessTicketWorktree(
+	ctx context.Context,
+	projectDir string,
+	git WorktreeGit,
+	report WorkReadinessReport,
+) (WorkReadinessReport, error) {
+	if report.Workspace.Mode != WorkWorkspaceModeWorktree {
+		return report, nil
+	}
+
+	if strings.TrimSpace(report.TicketKey) == "" || strings.TrimSpace(report.TicketBranch) == "" {
+		return report, nil
+	}
+
+	inspection, err := WorktreeService{Git: git}.Inspect(ctx, WorktreePlanOptions{
+		ProjectDir:   projectDir,
+		TicketKey:    report.TicketKey,
+		Branch:       report.TicketBranch,
+		BranchPolicy: report.Policy,
+		Workspace:    report.Workspace,
+	})
+	if err != nil {
+		report.Diagnostics = append(report.Diagnostics, gitUnavailableDiagnostic(err))
+
+		return report, nil
+	}
+
+	report.TicketWorktree = workReadinessStateFromInspection(inspection)
+	switch inspection.State {
+	case WorktreeStateDirty:
+		report.Diagnostics = append(report.Diagnostics, dirtyTicketWorktreeDiagnostic(inspection))
+	case WorktreeStateMismatched, WorktreeStateBranchInUse, WorktreeStateOrphaned:
+		report.Diagnostics = append(report.Diagnostics, unsafeTicketWorktreeDiagnostic(inspection))
+	}
+
+	return report, nil
+}
+
+func workReadinessStateFromInspection(inspection WorktreeInspection) WorkReadinessWorkspaceState {
+	return WorkReadinessWorkspaceState{
+		Path:        inspection.Plan.WorktreePath,
+		State:       inspection.State,
+		Branch:      inspection.Plan.Branch,
+		BaseRef:     inspection.Plan.BaseRef,
+		BaseSHA:     inspection.Plan.BaseSHA,
+		StatusLines: append([]string(nil), inspection.StatusLines...),
+	}
 }
 
 func finalizeWorkReadinessReport(report WorkReadinessReport) WorkReadinessReport {
@@ -695,6 +760,35 @@ func userCheckoutDirtyDiagnostic(mode WorkWorkspaceMode, count int) WorkReadines
 		Code:     WorkReadinessDiagnosticDirtyUserCheckout,
 		Severity: WorkReadinessSeverityInfo,
 		Detail:   fmt.Sprintf("user checkout has visible changes: %d", count),
+	}
+}
+
+func dirtyTicketWorktreeDiagnostic(inspection WorktreeInspection) WorkReadinessDiagnostic {
+	return WorkReadinessDiagnostic{
+		Code:     WorkReadinessDiagnosticDirtyTicketWorktree,
+		Severity: WorkReadinessSeverityBlocking,
+		Detail: fmt.Sprintf(
+			"ticket worktree %s has visible changes: %d",
+			inspection.Plan.WorktreePath,
+			len(inspection.StatusLines),
+		),
+		ExpectedBranch: inspection.Plan.Branch,
+		RemoteRef:      inspection.Plan.BaseRef,
+	}
+}
+
+func unsafeTicketWorktreeDiagnostic(inspection WorktreeInspection) WorkReadinessDiagnostic {
+	detail := fmt.Sprintf("ticket worktree %s is %s", inspection.Plan.WorktreePath, inspection.State)
+	if len(inspection.Diagnostics) > 0 {
+		detail = inspection.Diagnostics[0].Detail
+	}
+
+	return WorkReadinessDiagnostic{
+		Code:           WorkReadinessDiagnosticUnsafeTicketWorktree,
+		Severity:       WorkReadinessSeverityBlocking,
+		Detail:         detail,
+		ExpectedBranch: inspection.Plan.Branch,
+		RemoteRef:      inspection.Plan.BaseRef,
 	}
 }
 

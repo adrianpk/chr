@@ -90,12 +90,7 @@ func TestCheckWorkReadinessReportsDirtyUserCheckoutInWorktreeMode(t *testing.T) 
 	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
 		ProjectDir: t.TempDir(),
 		Policy:     DefaultWorkBranchPolicy(),
-		Workspace: WorkWorkspaceConfig{
-			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    DefaultWorktreeRoot,
-			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
-		},
+		Workspace:  testWorktreeWorkspaceConfig(),
 		Git: fakeWorkReadinessGit{
 			branch:            "dev",
 			cleanStatus:       []string{" M main.go"},
@@ -120,6 +115,49 @@ func TestCheckWorkReadinessReportsDirtyUserCheckoutInWorktreeMode(t *testing.T) 
 
 	if report.UserCheckout.State != WorktreeStateDirty {
 		t.Fatalf("UserCheckout.State = %s, want dirty", report.UserCheckout.State)
+	}
+}
+
+func TestCheckWorkReadinessBlocksDirtyTicketWorktree(t *testing.T) {
+	projectDir := t.TempDir()
+	workspace := testWorktreeWorkspaceConfig()
+	plan, err := NewWorktreePlan(WorktreePlanOptions{
+		ProjectDir:   projectDir,
+		TicketKey:    "CHC-1",
+		Branch:       "feat/chc-1",
+		BranchPolicy: DefaultWorkBranchPolicy(),
+		Workspace:    workspace,
+	})
+	if err != nil {
+		t.Fatalf("NewWorktreePlan returned error: %v", err)
+	}
+
+	worktreeGit := newFakeWorktreeGit()
+	worktreeGit.entries = []WorktreeGitEntry{{Path: plan.WorktreePath, Branch: plan.Branch}}
+	worktreeGit.statuses[plan.WorktreePath] = []string{" M main.go"}
+
+	report, err := CheckWorkReadiness(context.Background(), WorkReadinessOptions{
+		ProjectDir:   projectDir,
+		Policy:       DefaultWorkBranchPolicy(),
+		Workspace:    workspace,
+		TicketKey:    "CHC-1",
+		TicketBranch: "feat/chc-1",
+		WorktreeGit:  worktreeGit,
+		Git: fakeWorkReadinessGit{
+			branch:            "dev",
+			branchExists:      true,
+			remoteRefExists:   true,
+			branchContainsRef: true,
+		},
+	})
+	if err != nil {
+		t.Fatalf("CheckWorkReadiness returned error: %v", err)
+	}
+
+	assertWorkReadinessDiagnostic(t, report, WorkReadinessDiagnosticDirtyTicketWorktree)
+
+	if report.TicketWorktree.State != WorktreeStateDirty {
+		t.Fatalf("TicketWorktree.State = %s, want dirty", report.TicketWorktree.State)
 	}
 }
 
@@ -329,6 +367,15 @@ func assertAppliedWorkReadinessRepair(t *testing.T, result WorkReadinessRepairRe
 	}
 
 	t.Fatalf("Applied = %#v, want code %s", result.Applied, code)
+}
+
+func testWorktreeWorkspaceConfig() WorkWorkspaceConfig {
+	return WorkWorkspaceConfig{
+		Mode:            WorkWorkspaceModeWorktree,
+		WorktreeRoot:    DefaultWorktreeRoot,
+		WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+		WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+	}
 }
 
 func runWorkReadinessTestGit(t *testing.T, projectDir string, args ...string) {
