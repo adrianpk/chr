@@ -165,10 +165,31 @@ const (
 	// WorkBranchPolicyModeNoGitEnforcement defines a package boundary constant.
 	WorkBranchPolicyModeNoGitEnforcement WorkBranchPolicyMode = "no_git_enforcement"
 
+	// WorkWorkspaceModeProject defines a package boundary constant.
+	WorkWorkspaceModeProject WorkWorkspaceMode = "project"
+	// WorkWorkspaceModeWorktree defines a package boundary constant.
+	WorkWorkspaceModeWorktree WorkWorkspaceMode = "worktree"
+
+	// WorktreeBasePolicyRemoteIntegrationBranch defines a package boundary constant.
+	WorktreeBasePolicyRemoteIntegrationBranch WorktreeBasePolicy = "remote_integration_branch"
+	// WorktreeBasePolicyLocalIntegrationBranch defines a package boundary constant.
+	WorktreeBasePolicyLocalIntegrationBranch WorktreeBasePolicy = "local_integration_branch"
+	// WorktreeBasePolicyCurrentBranch defines a package boundary constant.
+	WorktreeBasePolicyCurrentBranch WorktreeBasePolicy = "current_branch"
+
+	// WorktreeCleanupPolicyAfterMerge defines a package boundary constant.
+	WorktreeCleanupPolicyAfterMerge WorktreeCleanupPolicy = "after_merge"
+	// WorktreeCleanupPolicyManual defines a package boundary constant.
+	WorktreeCleanupPolicyManual WorktreeCleanupPolicy = "manual"
+	// WorktreeCleanupPolicyNever defines a package boundary constant.
+	WorktreeCleanupPolicyNever WorktreeCleanupPolicy = "never"
+
 	// DefaultWorkIntegrationBranch defines a package boundary constant.
 	DefaultWorkIntegrationBranch = "dev"
 	// DefaultWorkCanonicalRemote defines a package boundary constant.
 	DefaultWorkCanonicalRemote = "origin"
+	// DefaultWorktreeRoot defines a package boundary constant.
+	DefaultWorktreeRoot = ".chc/user/runtime/worktrees"
 
 	// EvidenceStrategyModeInline defines a package boundary constant.
 	EvidenceStrategyModeInline EvidenceStrategyMode = "inline"
@@ -426,36 +447,53 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 }
 
 func setWorkConfigValue(config *WorkConfig, key, value string) {
+	if setWorkBranchPolicyConfigValue(&config.BranchPolicy, key, value) {
+		return
+	}
+
+	setWorkWorkspaceConfigValue(&config.Workspace, key, value)
+}
+
+func setWorkBranchPolicyConfigValue(config *WorkBranchPolicy, key, value string) bool {
 	switch key {
 	case "mode":
 		if value != "" {
-			config.BranchPolicy.Mode = WorkBranchPolicyMode(value)
+			config.Mode = WorkBranchPolicyMode(value)
 		}
 	case "integration_branch":
-		setString(&config.BranchPolicy.IntegrationBranch, value)
+		setString(&config.IntegrationBranch, value)
 	case "canonical_remote":
-		setString(&config.BranchPolicy.CanonicalRemote, value)
+		setString(&config.CanonicalRemote, value)
 	case "require_clean_worktree":
-		config.BranchPolicy.RequireCleanWorktree = configBoolValue(value)
+		config.RequireCleanWorktree = configBoolValue(value)
 	case "require_remote_tracking":
-		config.BranchPolicy.RequireRemoteTracking = configBoolValue(value)
+		config.RequireRemoteTracking = configBoolValue(value)
 	case "allow_safe_repair":
-		config.BranchPolicy.AllowSafeRepair = configBoolValue(value)
+		config.AllowSafeRepair = configBoolValue(value)
 	case "allow_branch_creation":
-		config.BranchPolicy.AllowBranchCreation = configBoolValue(value)
+		config.AllowBranchCreation = configBoolValue(value)
+	default:
+		return false
+	}
+
+	return true
+}
+
+func setWorkWorkspaceConfigValue(config *WorkWorkspaceConfig, key, value string) {
+	switch key {
 	case "workspace_mode":
 		if value != "" {
-			config.Workspace.Mode = WorkWorkspaceMode(value)
+			config.Mode = WorkWorkspaceMode(value)
 		}
 	case "worktree_root":
-		setString(&config.Workspace.WorktreeRoot, value)
+		setString(&config.WorktreeRoot, value)
 	case "worktree_base":
 		if value != "" {
-			config.Workspace.WorktreeBase = WorktreeBasePolicy(value)
+			config.WorktreeBase = WorktreeBasePolicy(value)
 		}
 	case "worktree_cleanup":
 		if value != "" {
-			config.Workspace.WorktreeCleanup = WorktreeCleanupPolicy(value)
+			config.WorktreeCleanup = WorktreeCleanupPolicy(value)
 		}
 	}
 }
