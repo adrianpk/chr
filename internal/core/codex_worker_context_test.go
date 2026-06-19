@@ -154,6 +154,60 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testi
 	}
 }
 
+func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *testing.T) {
+	projectDir := t.TempDir()
+	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
+	record := ExecutionRecord{
+		ID:         "exec-1",
+		TicketKey:  "CHC-1",
+		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
+	}
+
+	checklist, err := RenderEvidenceStrategyChecklist(testEvidenceStrategyChecklistModel())
+	if err != nil {
+		t.Fatalf("RenderEvidenceStrategyChecklist returned error: %v", err)
+	}
+
+	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
+		Key:       "CHC-1",
+		Title:     "Behavior work",
+		Status:    TicketStatusReadyForDev,
+		Priority:  "normal",
+		Severity:  "normal",
+		Type:      "feature",
+		Body:      "# Description\n\nImplement behavior.\n\n" + checklist,
+		CreatedAt: testCodexWorkerContextTime(),
+		UpdatedAt: testCodexWorkerContextTime(),
+	})
+
+	err = MaterializeCodexWorkerContextForExecution(context.Background(), record, plan)
+	if err != nil {
+		t.Fatalf("MaterializeCodexWorkerContextForExecution returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(plan.WorkerContextPath)
+	if err != nil {
+		t.Fatalf("read context: %v", err)
+	}
+
+	for _, want := range []string{
+		"### Effective Config",
+		"- enabled: true",
+		"- mode: inline",
+		"- ticket_checklist: required",
+		"- gherkin_policy: active_when_applicable",
+		"### Existing Checklist",
+		"- status: present",
+		"- Evidence strategy: checked=false; status=planned; change_kind=bugfix",
+		"- Gherkin: checked=false; status=required; path=.chc/user/acceptance/bug.feature",
+	} {
+		if !strings.Contains(string(content), want) {
+			t.Fatalf("content does not contain %q:\n%s", want, string(content))
+		}
+	}
+}
+
 func TestMaterializeCodexWorkerContextForExecutionBlocksRepairWithoutReviewComments(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")

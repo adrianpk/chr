@@ -25,6 +25,7 @@ type MaterializeCodexWorkerContextOptions struct {
 	LogPath        string
 	ValidationPath string
 	RepairHandoff  *CodexWorkerRepairHandoff
+	Evidence       *CodexWorkerEvidenceStrategyContext
 }
 
 // CodexWorkerRepairHandoff describes a package boundary value.
@@ -35,6 +36,13 @@ type CodexWorkerRepairHandoff struct {
 	ReviewState       string
 	ReviewResult      string
 	ReviewRound       int
+}
+
+// CodexWorkerEvidenceStrategyContext describes ticket evidence strategy input.
+type CodexWorkerEvidenceStrategyContext struct {
+	Config         EvidenceStrategyConfig
+	Checklist      *EvidenceStrategyChecklist
+	ChecklistError string
 }
 
 type codexWorkerContextMaterializer struct{}
@@ -55,6 +63,11 @@ func MaterializeCodexWorkerContextForExecution(
 		return err
 	}
 
+	evidence, err := codexWorkerEvidenceStrategyContext(ctx, plan.ProjectDir, record.TicketPath)
+	if err != nil {
+		return err
+	}
+
 	return NewCodexWorkerContextMaterializer().MaterializeContext(ctx, MaterializeCodexWorkerContextOptions{
 		Path:           plan.WorkerContextPath,
 		ExecutionID:    record.ID,
@@ -64,6 +77,7 @@ func MaterializeCodexWorkerContextForExecution(
 		LogPath:        containerProjectPath(plan, plan.LogPath),
 		ValidationPath: containerProjectPath(plan, plan.ValidationPath),
 		RepairHandoff:  repairHandoff,
+		Evidence:       evidence,
 	})
 }
 
@@ -123,7 +137,7 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	output.WriteString(opts.ValidationPath)
 	output.WriteString("\n\n")
 	writeCodexWorkerRepairHandoff(&output, opts)
-	writeCodexWorkerEvidenceStrategyInstructions(&output)
+	writeCodexWorkerEvidenceStrategy(&output, opts)
 	output.WriteString("## Result Contract\n\n")
 	output.WriteString("Write a JSON object to `result_path` with these fields:\n\n")
 	output.WriteString("- `execution_id`: must match the execution ID above.\n")
@@ -135,8 +149,10 @@ func RenderCodexWorkerContext(opts MaterializeCodexWorkerContextOptions) string 
 	return output.String()
 }
 
-func writeCodexWorkerEvidenceStrategyInstructions(output *strings.Builder) {
+func writeCodexWorkerEvidenceStrategy(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
 	output.WriteString("## Evidence Strategy\n\n")
+	writeCodexWorkerEvidenceStrategyConfig(output, opts.Evidence)
+	writeCodexWorkerEvidenceStrategyChecklist(output, opts.Evidence)
 	output.WriteString("Before modifying project files:\n\n")
 	output.WriteString("1. Read the ticket and any existing evidence-strategy checklist.\n")
 	output.WriteString("2. Classify the change kind and risk.\n")
@@ -151,6 +167,93 @@ func writeCodexWorkerEvidenceStrategyInstructions(output *strings.Builder) {
 	output.WriteString("3. Update Validation and Evidence summary.\n")
 	output.WriteString("4. Do not move the ticket to ready_for_review if required evidence is missing, failing, or blocked.\n\n")
 	output.WriteString("The ticket checklist is the operational source of truth.\n\n")
+}
+
+func writeCodexWorkerEvidenceStrategyConfig(output *strings.Builder, evidence *CodexWorkerEvidenceStrategyContext) {
+	if evidence == nil {
+		return
+	}
+
+	config := evidence.Config
+
+	output.WriteString("### Effective Config\n\n")
+	output.WriteString("- enabled: ")
+	output.WriteString(strconv.FormatBool(config.Enabled))
+	output.WriteString("\n")
+	output.WriteString("- mode: ")
+	output.WriteString(string(config.Mode))
+	output.WriteString("\n")
+	output.WriteString("- ticket_checklist: ")
+	output.WriteString(string(config.TicketChecklist))
+	output.WriteString("\n")
+	output.WriteString("- gherkin_policy: ")
+	output.WriteString(string(config.GherkinPolicy))
+	output.WriteString("\n")
+	output.WriteString("- strict_ready_for_review: ")
+	output.WriteString(strconv.FormatBool(config.StrictReadyForReview))
+	output.WriteString("\n")
+	output.WriteString("- allow_user_edits: ")
+	output.WriteString(strconv.FormatBool(config.AllowUserEdits))
+	output.WriteString("\n")
+	output.WriteString("- execution_report_copy: ")
+	output.WriteString(strconv.FormatBool(config.ExecutionReportCopy))
+	output.WriteString("\n\n")
+}
+
+func writeCodexWorkerEvidenceStrategyChecklist(output *strings.Builder, evidence *CodexWorkerEvidenceStrategyContext) {
+	if evidence == nil {
+		return
+	}
+
+	output.WriteString("### Existing Checklist\n\n")
+
+	if evidence.ChecklistError != "" {
+		output.WriteString("- status: malformed\n")
+		output.WriteString("- error: ")
+		output.WriteString(evidence.ChecklistError)
+		output.WriteString("\n\n")
+
+		return
+	}
+
+	if evidence.Checklist == nil || !evidence.Checklist.Found {
+		output.WriteString("- status: missing\n\n")
+
+		return
+	}
+
+	output.WriteString("- status: present\n\n")
+	for _, label := range EvidenceStrategyChecklistLabels() {
+		item, ok := evidence.Checklist.Item(label)
+		if !ok {
+			continue
+		}
+
+		writeCodexWorkerChecklistItem(output, item)
+	}
+
+	output.WriteString("\n")
+}
+
+func writeCodexWorkerChecklistItem(output *strings.Builder, item EvidenceStrategyChecklistItem) {
+	checked := "false"
+	if item.Checked {
+		checked = "true"
+	}
+
+	output.WriteString("- ")
+	output.WriteString(item.Label)
+	output.WriteString(": checked=")
+	output.WriteString(checked)
+	output.WriteString("; status=")
+	output.WriteString(item.Status)
+
+	if item.Detail != "" {
+		output.WriteString("; ")
+		output.WriteString(item.Detail)
+	}
+
+	output.WriteString("\n")
 }
 
 func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCodexWorkerContextOptions) {
@@ -180,6 +283,39 @@ func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCode
 	output.WriteString(strconv.Itoa(handoff.ReviewRound))
 	output.WriteString("\n\n")
 	output.WriteString("Use the remote review comments as the source of detailed findings. Do not duplicate remote comments into the ticket.\n\n")
+}
+
+func codexWorkerEvidenceStrategyContext(
+	ctx context.Context,
+	projectDir string,
+	ticketPath string,
+) (*CodexWorkerEvidenceStrategyContext, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	config, err := LoadWorkspaceConfig(projectDir)
+	if err != nil {
+		return nil, fmt.Errorf("load evidence strategy config: %w", err)
+	}
+
+	content, err := os.ReadFile(ticketPath)
+	if err != nil {
+		return nil, fmt.Errorf("read evidence strategy ticket: %w", err)
+	}
+
+	checklist, err := ParseEvidenceStrategyChecklist(string(content))
+	if err != nil {
+		return &CodexWorkerEvidenceStrategyContext{
+			Config:         config.Evidence.Strategy,
+			ChecklistError: err.Error(),
+		}, nil
+	}
+
+	return &CodexWorkerEvidenceStrategyContext{
+		Config:    config.Evidence.Strategy,
+		Checklist: &checklist,
+	}, nil
 }
 
 func codexWorkerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*CodexWorkerRepairHandoff, error) {
