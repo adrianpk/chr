@@ -182,6 +182,53 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 	}
 }
 
+func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T) {
+	projectDir := t.TempDir()
+	executionWorkspaceDir := filepath.Join(projectDir, ".chc", "user", "worktrees", "CHC-1")
+
+	plan, err := PlanRuntime(RuntimePlanOptions{
+		ProjectDir: projectDir,
+		Config: RuntimeConfig{
+			ValidationCommand: "go test ./...",
+		},
+		Workspace: WorkWorkspaceConfig{
+			Mode:            WorkWorkspaceModeWorktree,
+			WorktreeRoot:    DefaultWorktreeRoot,
+			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		},
+		ExecutionWorkspaceDir: executionWorkspaceDir,
+		TicketKey:             "CHC-1",
+		RunID:                 "exec-123",
+	})
+	if err != nil {
+		t.Fatalf("PlanRuntime returned error: %v", err)
+	}
+
+	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+		ExecutionID: "exec-123",
+		TicketKey:   "CHC-1",
+		TicketPath:  filepath.Join(executionWorkspaceDir, ".chc", "user", "tickets", "CHC-1.md"),
+		Plan:        plan,
+	})
+	if err != nil {
+		t.Fatalf("NewHarnessInvocation returned error: %v", err)
+	}
+
+	for _, want := range []string{
+		executionWorkspaceDir + ":/workspace",
+		"/workspace",
+		"CHC_EXECUTION_ID=exec-123",
+		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
+		"chc-agent-runtime:local",
+		"go test ./...",
+	} {
+		if !slices.Contains(invocation.Validation.Args, want) {
+			t.Fatalf("Validation.Args missing %q: %#v", want, invocation.Validation.Args)
+		}
+	}
+}
+
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	_, err := NewHarnessInvocation(HarnessInvocationOptions{
 		TicketKey:  "CHC-1",
