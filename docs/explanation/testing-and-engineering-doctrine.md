@@ -107,6 +107,26 @@ That means encouraging tickets and acceptance criteria that ask:
 The agent should not blindly add heavyweight testing. It should choose the
 smallest testing strategy that addresses the actual risk.
 
+ChrysoCoord now models that choice as an evidence strategy pass inside normal
+ticket execution. Before editing project files, the worker is expected to decide
+and record:
+
+- the change kind and risk level;
+- whether Gherkin applies;
+- which test forms are useful, if any;
+- which validation command proves the result;
+- the final evidence summary after implementation.
+
+The decision is persisted in the ticket evidence strategy checklist. This keeps
+the strategy visible to humans and reusable by later agent attempts without
+requiring a separate planning container by default.
+
+The default posture is strict but not maximal. Documentation-only, Godoc-only,
+metadata-only, and non-behavioral refactor tickets can explicitly record that no
+new tests or Gherkin are needed. Bug fixes, parsers, validators, state machines,
+configuration changes, observable CLI/TUI/API behavior, IO, concurrency, and
+safety-sensitive work should receive stronger evidence by default.
+
 ## Enforcement Direction
 
 ChrysoCoord can start by recommending this doctrine and preserving it as project

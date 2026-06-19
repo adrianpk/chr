@@ -97,6 +97,7 @@ Dash should show:
 - ready queue;
 - current loop or execution state;
 - recent event messages;
+- ticket, execution report, runtime log, and validation log refs when present;
 - recent execution and loop outcomes;
 - safe repair hints when readiness blocks work.
 

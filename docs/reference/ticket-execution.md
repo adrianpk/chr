@@ -25,6 +25,7 @@ to update tickets, comments, status, or validation evidence.
 - result artifact path.
 - runtime log path.
 - validation artifact path.
+- execution report path.
 - failure reason.
 
 ## Status Values
@@ -72,6 +73,14 @@ On success, the command creates a `pending` execution record with:
 The execution ID is used as the runtime run ID, so artifact paths are scoped
 under the configured runtime run directory.
 
+The run directory can later contain:
+
+- `events.jsonl`: append-only agent event stream.
+- `execution-report.md`: execution summary and copied evidence strategy when
+  enabled.
+- `result-application.md`: result application report.
+- runtime and validation logs from the configured harness.
+
 `--dry-run` prints the same preflight output and runtime validation checks but
 does not create an execution record. Ticket index reconciliation may still update
 the user-level index because ticket selection always uses the indexed ticket
@@ -79,6 +88,10 @@ view.
 
 If runtime validation fails, the command prints the failed checks and exits with
 an error without creating an execution record.
+
+During TUI work actions, Dash reads persisted event streams and displays recent
+human-readable events plus paths for the ticket, execution report, runtime log,
+and validation log when those references are available.
 
 ## Harness Invocation Contract
 

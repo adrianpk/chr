@@ -236,7 +236,23 @@ chc ticket board
 ```
 
 `chc ticket board` prints Board totals, normal Board columns, and tickets in
-each column for the resolved project.
+each column for the resolved project. Ticket rows include a final evidence
+status cell. The cell is `-` when the ticket has no evidence strategy checklist;
+otherwise it is `complete`, `incomplete`, `blocked`, or `malformed`.
+
+`chc ticket list` prints the same compact evidence status as the final field.
+
+`chc ticket show <key>` prints detailed evidence fields when the ticket contains
+an anchored evidence strategy checklist:
+
+```text
+evidence: complete
+evidence_strategy: complete done
+evidence_gherkin: required done
+evidence_tests: mixed done
+evidence_validation: passed done
+evidence_summary: complete done
+```
 
 Update ticket state:
 
@@ -361,6 +377,9 @@ Locate runtime artifacts for one execution:
 ```sh
 chc work logs exec-1
 ```
+
+Dash and agent event streams may also point directly to `ticket_path`,
+`execution_report_path`, `runtime_log_path`, and `validation_log_path`.
 
 Summarize an event stream for recovery or diagnostics:
 

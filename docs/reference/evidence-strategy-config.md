@@ -4,7 +4,8 @@ Evidence strategy configuration controls how ChrysoCoord prepares ticket
 workers to decide and record testing, validation, Gherkin, and runtime evidence.
 
 The configuration controls ticket checklist writing, worker context, execution
-report copying, and review-transition gating.
+report copying, review-transition gating, and whether the same evidence can be
+inspected from ticket and runtime surfaces.
 
 ## Location
 
@@ -78,6 +79,28 @@ Defaults are intentionally strict enough to make agent work inspectable:
 
 The defaults are designed to require no user decision for normal projects while
 still allowing projects to relax or redirect the behavior through config.
+
+## Visibility Surfaces
+
+The ticket checklist is the primary operational source. ChrysoCoord derives
+short evidence summaries from that checklist for user-facing views.
+
+- Board ticket detail shows the overall evidence state and each checklist item.
+- `chc ticket show <key>` prints detailed evidence fields when a checklist is
+  present or malformed.
+- `chc ticket list` and `chc ticket board` include a compact evidence status
+  cell.
+- Dash work events can include the ticket path, execution report path, runtime
+  log path, and validation log path after execution starts or completes.
+- Execution reports copy strategy evidence when `execution_report_copy: true`.
+
+The summary statuses are:
+
+- `missing`: no anchored checklist exists.
+- `malformed`: a checklist anchor exists but parsing failed.
+- `blocked`: one or more checklist items are explicitly blocked.
+- `incomplete`: evidence exists but is not complete enough for review.
+- `complete`: the checklist satisfies the default readiness shape.
 
 ## Review Transition Gate
 

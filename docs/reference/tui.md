@@ -248,8 +248,14 @@ attention view.
 
 The selected ticket detail includes synopsis, source metadata, slice metadata,
 checklist counts, comment counts, bounded Markdown body context, checklist
-preview, recent comment headings, attention reasons, and the source path when
-available.
+preview, evidence strategy summary, recent comment headings, attention reasons,
+and the source path when available.
+
+Evidence summary renders the overall checklist state plus strategy, Gherkin,
+tests, validation, and evidence-summary item states. Malformed evidence blocks
+show the parse error. Tickets without the anchored evidence checklist show
+`missing` in Board detail; CLI list and board output render missing evidence as
+`-`.
 
 The compact Board header marks the active column explicitly and also shows a
 column strip with the active normal column or attention view in brackets.
@@ -280,6 +286,8 @@ Dash shows agent-work operations:
 - ready queue;
 - current loop or execution state;
 - recent human-readable agent event messages;
+- ticket, execution report, runtime log, and validation log paths when event
+  refs are available;
 - recent execution and loop outcomes.
 
 When Dash is selected, the TUI periodically reloads ticket and observability

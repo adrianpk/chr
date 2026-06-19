@@ -464,8 +464,18 @@ column cycle.
 The compact Board shows one normal column at a time and marks the active column
 in the header and column strip. The detail pane includes status metadata,
 synopsis, source metadata, slice metadata, checklist counts, comment counts,
-bounded Markdown body preview, checklist preview, recent comment headings,
-attention reasons, and the ticket path when those fields are available.
+evidence strategy status, bounded Markdown body preview, checklist preview,
+recent comment headings, attention reasons, and the ticket path when those
+fields are available.
+
+When a ticket contains the anchored evidence strategy checklist, Board detail
+shows a concise summary:
+
+- overall evidence state: `complete`, `incomplete`, `blocked`, or `malformed`;
+- strategy, Gherkin, tests, validation, and evidence-summary item states.
+
+Tickets without an evidence strategy checklist show `missing` in Board detail.
+CLI list and board output keep missing evidence compact with `-`.
 
 Ticket and work operations are available from the command palette:
 
@@ -518,6 +528,8 @@ Dash shows:
 - ready queue filters and ordering;
 - current loop or ticket execution state;
 - recent human-readable agent events;
+- ticket, execution report, runtime log, and validation log paths when the
+  event stream includes them.
 - recent execution and loop outcomes.
 
 When readiness is blocked, Dash prevents ticket execution and run-all actions
@@ -640,10 +652,18 @@ chc report show --execution <execution-id>
 Execution reports summarize the runtime plan, result status, validation status,
 changed files, and artifact paths for one execution.
 
+When evidence strategy report copying is enabled, execution reports also copy
+the ticket evidence strategy and final evidence summary so the checklist and
+runtime trace can be inspected together.
+
 ## Review a Ticket Pull Request
 
 Ticket review is optional and configured per core. It uses normal Board
 statuses and ticket metadata; it does not add a separate Board column.
+
+With default evidence strategy settings, a ticket must have completed evidence
+before `ready_for_review`. Use Board detail or `chc ticket show <key>` to inspect
+the checklist summary before applying a result or requesting review.
 
 Inspect the configured mode:
 

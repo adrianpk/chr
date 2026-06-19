@@ -59,6 +59,17 @@ The evidence gate is configured under `.chc/user/config.yml` at
 `evidence.strategy`. See
 [Evidence strategy configuration](evidence-strategy-config.md).
 
+Inspect evidence before review with:
+
+```sh
+chc ticket show CHC-1
+chc ticket board
+```
+
+The Board selected-ticket detail shows the same derived checklist summary in a
+human-readable form. CLI list and board output keep the status compact so the
+normal Board columns remain stable.
+
 ## Review Command
 
 `chc ticket review` applies an explicit review result to a
