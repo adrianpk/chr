@@ -378,9 +378,11 @@ func emitTicketBlockedAgentEvent(ctx context.Context, events ticketExecutionEven
 }
 
 func ticketReviewAgentEventLevel(ticket core.IndexedTicket) core.AgentEventLevel {
-	if core.IsTicketReviewRepair(ticket) ||
+	warns := core.IsTicketReviewRepair(ticket) ||
 		ticket.ReviewResult == core.TicketReviewCommandResultInsufficientEvidence ||
-		ticket.ReviewResult == core.TicketReviewCommandResultNeedsHumanDecision {
+		ticket.ReviewResult == core.TicketReviewCommandResultNeedsHumanDecision
+
+	if warns {
 		return core.AgentEventLevelWarn
 	}
 

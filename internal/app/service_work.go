@@ -504,15 +504,20 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 
 func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions) (core.IndexedTicket, bool, error) {
 	cycleTicket := opts.Ticket
+	runsAgenticReview := agentWorkCycleRunsAgenticReview(opts.Policy, opts.Application)
+	runsTrustedReview := agentWorkCycleRunsTrustedAutoMergeReview(opts.Policy, opts.Application)
 
 	var err error
-	if agentWorkCycleRunsAgenticReview(opts.Policy, opts.Application) {
+
+	if runsAgenticReview {
 		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, opts.Ticket, opts.Policy.Mode)
+
 		cycleTicket, err = s.runAgenticReviewCycle(opts.Ticket, opts.Execution, opts.Application, opts.ReviewConfig)
 	}
 
-	if agentWorkCycleRunsTrustedAutoMergeReview(opts.Policy, opts.Application) {
+	if runsTrustedReview {
 		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, opts.Ticket, opts.Policy.Mode)
+
 		cycleTicket, err = s.runTrustedAutoMergeReviewCycle(opts.Ticket, opts.Execution, opts.Application)
 	}
 
@@ -520,8 +525,7 @@ func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions
 		return core.IndexedTicket{}, false, err
 	}
 
-	if agentWorkCycleRunsAgenticReview(opts.Policy, opts.Application) ||
-		agentWorkCycleRunsTrustedAutoMergeReview(opts.Policy, opts.Application) {
+	if runsAgenticReview || runsTrustedReview {
 		emitReviewFinishedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, cycleTicket)
 	}
 
