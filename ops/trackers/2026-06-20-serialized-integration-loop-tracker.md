@@ -29,7 +29,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | T1.4 | Decide whether Slice 1 introduces a dedicated `integration_cycles` table or defers it. | done | pending | Deferred table creation; Slice 1 uses existing durable state plus side-effect-free planning contracts. |
 | T1.5 | If a table is introduced, add an additive migration and repository tests. | done | pending | Not applicable for Slice 1 because the table was explicitly deferred. |
 | T1.6 | Add tests for policy mapping across `human_review`, `agentic_review`, and `trusted_auto_merge`. | done | pending | Added table-driven tests for policy mapping, planner validation, and value validation. |
-| T1.7 | Add docs or reference notes for cycle mode semantics. | pending | pending | |
+| T1.7 | Add docs or reference notes for cycle mode semantics. | done | pending | Added ticket loop and review workflow notes for serialized cycle mode semantics. |
 | T1.8 | Add the slice implementation report and validation evidence. | pending | pending | |
 
 ## Slice 2 Tasks

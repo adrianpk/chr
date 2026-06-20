@@ -6,7 +6,34 @@ The ticket loop is a foreground runner that processes eligible tickets from one
 managed project.
 
 The first loop boundary is ticket selection. Execution, result application,
-status reporting, and daemon coordination are separate concerns.
+review policy, merge policy, status reporting, and daemon coordination are
+separate concerns.
+
+## Integration Cycle Policy
+
+Serialized integration loop work treats one ticket integration cycle as the unit
+of progress:
+
+```text
+select one ticket
+develop
+apply review policy
+merge or block
+rehydrate state
+select the next ticket
+```
+
+The cycle policy is derived from `review.mode`:
+
+- `human_review`: develop one ticket, create the review handoff, and stop before
+  later normal work.
+- `agentic_review`: develop one ticket, run high-level review, merge approved
+  work, and then continue.
+- `trusted_auto_merge`: develop one ticket and skip the separate review role,
+  but still merge before continuing.
+
+The cycle policy model is side-effect free. It does not by itself execute,
+review, merge, or mutate tickets.
 
 ## Eligible Ticket Query
 

@@ -36,6 +36,10 @@ review execution treats that as insufficient evidence.
 `trusted_auto_merge` trusts the configured process and does not add a review
 stop before integration.
 
+In serialized integration loop mode, `trusted_auto_merge` still requires the
+selected ticket to merge before the loop continues to later normal work. It only
+skips the separate reviewer role.
+
 ## Fields
 
 - `mode`: one of `human_review`, `agentic_review`, or `trusted_auto_merge`.
