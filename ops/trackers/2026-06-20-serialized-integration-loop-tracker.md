@@ -12,7 +12,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | cycle policy and state model | reviewing | `feat/slice-1-cycle-policy-and-state-model` | pending | `.prj/reports/slices/serialized-integration-loop/slice-1-cycle-policy-and-state-model.md` |
+| Slice 1 | cycle policy and state model | delivered | `feat/slice-1-cycle-policy-and-state-model` | `#336` | `.prj/reports/slices/serialized-integration-loop/slice-1-cycle-policy-and-state-model.md` |
 | Slice 2 | one-ticket cycle runner | planned | `feat/slice-2-one-ticket-cycle-runner` | pending | `.prj/reports/slices/serialized-integration-loop/slice-2-one-ticket-cycle-runner.md` |
 | Slice 3 | high-level agentic review | planned | `feat/slice-3-high-level-agentic-review` | pending | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | planned | `feat/slice-4-merge-before-next-ticket` | pending | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |

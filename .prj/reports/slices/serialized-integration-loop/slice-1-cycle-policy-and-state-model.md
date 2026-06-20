@@ -1,11 +1,11 @@
 # Slice 1: Cycle Policy and State Model
 
-Status: reviewing
+Status: delivered
 Slicing: Serialized Integration Loop
 Plan: `ops/plans/2026-06-20-serialized-integration-loop-plan.md`
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 Branch: `feat/slice-1-cycle-policy-and-state-model`
-PR: pending
+PR: `#336`
 
 ## Purpose
 
