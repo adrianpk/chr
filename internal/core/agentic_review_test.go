@@ -131,6 +131,119 @@ func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	assertAgenticReviewArtifactExists(t, artifact.SummaryPath)
 }
 
+func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
+	ticketPath := writeAgenticReviewTicket(t, Ticket{
+		Key:    "CHC-1",
+		Title:  "Ready",
+		Status: TicketStatusReadyForReview,
+		Branch: "feat/chc-1",
+	})
+
+	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
+		Ticket: IndexedTicket{
+			Key:    "CHC-1",
+			Path:   ticketPath,
+			Status: TicketStatusReadyForReview,
+			Branch: "feat/chc-1",
+		},
+		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
+			Decision: IntegrationReviewDecisionPass,
+			Summary:  "Ready to merge.",
+		}),
+	})
+	if err == nil || !strings.Contains(err.Error(), "requires a pull_request review ref") {
+		t.Fatalf("error = %v, want missing pull request review ref", err)
+	}
+}
+
+func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
+	ref := TicketReviewRef{
+		Type:     "pull_request",
+		Provider: "forgejo",
+		URL:      "https://forge.example.com/owner/repo/pulls/1",
+		ID:       "1",
+		Status:   "open",
+	}
+	ticketPath := writeAgenticReviewTicket(t, Ticket{
+		Key:        "CHC-1",
+		Title:      "Ready",
+		Status:     TicketStatusReadyForReview,
+		Branch:     "feat/chc-1",
+		ReviewRefs: []TicketReviewRef{ref},
+	})
+
+	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
+		Ticket: IndexedTicket{
+			Key:        "CHC-1",
+			Path:       ticketPath,
+			Status:     TicketStatusReadyForReview,
+			Branch:     "feat/chc-1",
+			ReviewRefs: []TicketReviewRef{ref},
+		},
+		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
+			Decision: IntegrationReviewDecisionPass,
+			Summary:  "Ready to merge.",
+		}),
+	})
+	if err != nil {
+		t.Fatalf("ApplyAgenticReviewResult returned error: %v", err)
+	}
+
+	content := readAgenticReviewTicket(t, ticketPath)
+	for _, want := range []string{
+		`status: "ready_for_merge"`,
+		`review_state: "pass"`,
+		`review_result: "pass"`,
+		`review_comments_url: "https://forge.example.com/owner/repo/pulls/1"`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket missing %q:\n%s", want, content)
+		}
+	}
+}
+
+func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing.T) {
+	ticketPath := writeAgenticReviewTicket(t, Ticket{
+		Key:    "CHC-1",
+		Title:  "Ready",
+		Status: TicketStatusReadyForReview,
+		Branch: "feat/chc-1",
+	})
+
+	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
+		Ticket: IndexedTicket{
+			Key:    "CHC-1",
+			Path:   ticketPath,
+			Status: TicketStatusReadyForReview,
+			Branch: "feat/chc-1",
+		},
+		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
+			Decision: IntegrationReviewDecisionNeedsChanges,
+			Summary:  "Needs repair.",
+			BlockingFindings: []AgenticReviewFinding{{
+				Category: AgenticReviewFindingCorrectness,
+				Title:    "Broken behavior",
+				Detail:   "The main flow fails.",
+			}},
+		}),
+	})
+	if err != nil {
+		t.Fatalf("ApplyAgenticReviewResult returned error: %v", err)
+	}
+
+	content := readAgenticReviewTicket(t, ticketPath)
+	for _, want := range []string{
+		`status: "ready_for_dev"`,
+		`review_state: "changes_requested"`,
+		`review_result: "needs_changes"`,
+		`correctness: Broken behavior - The main flow fails.`,
+	} {
+		if !strings.Contains(content, want) {
+			t.Fatalf("ticket missing %q:\n%s", want, content)
+		}
+	}
+}
+
 type fakeAgenticReviewAgentRunner struct{}
 
 func (fakeAgenticReviewAgentRunner) RunAgent(_ context.Context, request AgentRunRequest) (AgentRunResult, error) {
@@ -158,5 +271,43 @@ func assertAgenticReviewArtifactExists(t *testing.T, path string) {
 
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("artifact %s stat error: %v", path, err)
+	}
+}
+
+func writeAgenticReviewTicket(t *testing.T, ticket Ticket) string {
+	t.Helper()
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "CHC-1.md")
+	content, err := NewTicketRenderer().RenderTicket(ticket)
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile returned error: %v", err)
+	}
+
+	return path
+}
+
+func readAgenticReviewTicket(t *testing.T, path string) string {
+	t.Helper()
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile returned error: %v", err)
+	}
+
+	return string(content)
+}
+
+func agenticReviewArtifactForTest(result AgenticReviewResult) AgenticReviewArtifact {
+	return AgenticReviewArtifact{
+		SummaryPath: "/tmp/chc-agentic-review-summary.md",
+		Run: AgentRunResult{
+			ID: "review-1",
+		},
+		Result: result,
 	}
 }

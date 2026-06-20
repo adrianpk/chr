@@ -62,6 +62,13 @@ type AgenticReviewArtifact struct {
 	Result      AgenticReviewResult
 }
 
+// ApplyAgenticReviewResultOptions describes local ticket metadata application.
+type ApplyAgenticReviewResultOptions struct {
+	Ticket     IndexedTicket
+	Artifact   AgenticReviewArtifact
+	ReviewedAt time.Time
+}
+
 // AgenticReviewRunner executes a local agentic review.
 type AgenticReviewRunner interface {
 	Review(ctx context.Context, review AgenticReviewContext) (AgenticReviewArtifact, error)
@@ -307,13 +314,49 @@ func ValidateAgenticReviewResult(result AgenticReviewResult) error {
 		return fmt.Errorf("agentic review needs_changes requires blocking findings")
 	}
 
-	for _, finding := range append([]AgenticReviewFinding{}, append(result.BlockingFindings, result.NonBlockingNotes...)...) {
+	for _, finding := range agenticReviewFindings(result) {
 		if err := validateAgenticReviewFinding(finding); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// ApplyAgenticReviewResult writes local review metadata to the ticket.
+func ApplyAgenticReviewResult(opts ApplyAgenticReviewResultOptions) (TicketReviewCommandResult, error) {
+	if strings.TrimSpace(opts.Ticket.Path) == "" {
+		return TicketReviewCommandResult{}, fmt.Errorf("agentic review ticket path is required")
+	}
+
+	reviewResult := ticketReviewResultForAgenticDecision(opts.Artifact.Result.Decision)
+	ref := agenticReviewMetadataRef(opts.Ticket, opts.Artifact)
+	result := TicketReviewCommandResult{
+		TicketKey:        opts.Ticket.Key,
+		ReviewRef:        ref,
+		ReviewState:      ticketReviewStateForResult(reviewResult),
+		ReviewResult:     reviewResult,
+		ReviewRound:      opts.Ticket.ReviewRound + 1,
+		Status:           ticketReviewStatusForResult(reviewResult),
+		BlockingFindings: agenticReviewBlockingFindingBodies(opts.Artifact.Result),
+	}
+
+	if result.Status == TicketStatusReadyForMerge {
+		ticket := opts.Ticket
+		ticket.Status = result.Status
+		ticket.ReviewState = result.ReviewState
+		ticket.ReviewResult = result.ReviewResult
+
+		if _, err := ValidateTicketMergeHandoff(ticket); err != nil {
+			return TicketReviewCommandResult{}, err
+		}
+	}
+
+	if err := applyTicketReviewCommandResult(opts.Ticket.Path, result, opts.ReviewedAt); err != nil {
+		return TicketReviewCommandResult{}, err
+	}
+
+	return result, nil
 }
 
 // WriteAgenticReviewSummary writes a human-readable review summary.
@@ -344,6 +387,78 @@ func (r CodexAgenticReviewRunner) agentRunner() AgentRunner {
 	}
 
 	return CodexAgentRunner{}
+}
+
+func agenticReviewFindings(result AgenticReviewResult) []AgenticReviewFinding {
+	findings := make([]AgenticReviewFinding, 0, len(result.BlockingFindings)+len(result.NonBlockingNotes))
+	findings = append(findings, result.BlockingFindings...)
+	findings = append(findings, result.NonBlockingNotes...)
+
+	return findings
+}
+
+func ticketReviewResultForAgenticDecision(decision IntegrationReviewDecision) string {
+	switch decision {
+	case IntegrationReviewDecisionPass:
+		return TicketReviewCommandResultPass
+	case IntegrationReviewDecisionNeedsChanges:
+		return TicketReviewCommandResultNeedsChanges
+	case IntegrationReviewDecisionInsufficientEvidence:
+		return TicketReviewCommandResultInsufficientEvidence
+	case IntegrationReviewDecisionHumanRequired:
+		return TicketReviewCommandResultNeedsHumanDecision
+	default:
+		return TicketReviewCommandResultNeedsHumanDecision
+	}
+}
+
+func ticketReviewStateForResult(result string) string {
+	state, _ := ticketReviewCommandStateAndStatus(result)
+
+	return state
+}
+
+func ticketReviewStatusForResult(result string) string {
+	_, status := ticketReviewCommandStateAndStatus(result)
+
+	return status
+}
+
+func agenticReviewMetadataRef(ticket IndexedTicket, artifact AgenticReviewArtifact) TicketReviewRef {
+	if ref, ok := firstTicketPullRequestReviewRef(ticket.ReviewRefs); ok {
+		return ref
+	}
+
+	return TicketReviewRef{
+		Type:     "local_review",
+		Provider: "chc",
+		URL:      artifact.SummaryPath,
+		ID:       artifact.Run.ID,
+		Status:   string(artifact.Result.Decision),
+	}
+}
+
+func firstTicketPullRequestReviewRef(refs []TicketReviewRef) (TicketReviewRef, bool) {
+	for _, ref := range refs {
+		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
+			return ref, true
+		}
+	}
+
+	return TicketReviewRef{}, false
+}
+
+func agenticReviewBlockingFindingBodies(result AgenticReviewResult) []string {
+	if len(result.BlockingFindings) == 0 && result.Decision != IntegrationReviewDecisionPass {
+		return []string{result.Summary}
+	}
+
+	findings := make([]string, 0, len(result.BlockingFindings))
+	for _, finding := range result.BlockingFindings {
+		findings = append(findings, finding.Category+": "+finding.Title+" - "+finding.Detail)
+	}
+
+	return findings
 }
 
 func validateAgenticReviewFinding(finding AgenticReviewFinding) error {
