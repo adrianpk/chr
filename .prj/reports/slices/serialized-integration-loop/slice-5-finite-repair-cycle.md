@@ -5,7 +5,7 @@ Slicing: Serialized Integration Loop
 Plan: `ops/plans/2026-06-20-serialized-integration-loop-plan.md`
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 Branch: `feat/slice-5-finite-repair-cycle`
-PR: pending
+PR: `#340`
 
 ## Purpose
 
