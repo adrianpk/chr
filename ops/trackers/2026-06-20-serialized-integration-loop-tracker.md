@@ -25,7 +25,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | --- | --- | --- | --- | --- |
 | T1.1 | Add core value types for integration cycle mode, phase, status, and blocker. | done | pending | Added package-level integration cycle enums and validation helpers. |
 | T1.2 | Add policy resolution from existing review workflow configuration. | done | pending | Mapped `review.mode` to cycle policy without changing defaults or runtime behavior. |
-| T1.3 | Add a side-effect-free cycle planning function for one selected ticket. | pending | pending | |
+| T1.3 | Add a side-effect-free cycle planning function for one selected ticket. | done | pending | Planner returns selected-ticket cycle metadata with no IO or ticket mutation. |
 | T1.4 | Decide whether Slice 1 introduces a dedicated `integration_cycles` table or defers it. | pending | pending | |
 | T1.5 | If a table is introduced, add an additive migration and repository tests. | pending | pending | |
 | T1.6 | Add tests for policy mapping across `human_review`, `agentic_review`, and `trusted_auto_merge`. | pending | pending | |

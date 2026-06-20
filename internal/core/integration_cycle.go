@@ -25,6 +25,23 @@ type IntegrationCyclePolicy struct {
 	RequiresMerge       bool
 }
 
+// IntegrationCyclePlan describes the next ticket integration cycle without side effects.
+type IntegrationCyclePlan struct {
+	ProjectID string
+	Ticket    IndexedTicket
+	Policy    IntegrationCyclePolicy
+	Phase     IntegrationCyclePhase
+	Status    IntegrationCycleStatus
+	Blocker   IntegrationCycleBlocker
+}
+
+// IntegrationCyclePlanOptions describes input for planning one selected ticket cycle.
+type IntegrationCyclePlanOptions struct {
+	ProjectID    string
+	Ticket       IndexedTicket
+	ReviewConfig ReviewWorkflowConfig
+}
+
 const (
 	// IntegrationCycleModeHumanReview stops after development handoff for human review.
 	IntegrationCycleModeHumanReview IntegrationCycleMode = "human_review"
@@ -203,4 +220,29 @@ func IntegrationCyclePolicyFromReviewConfig(config ReviewWorkflowConfig) (Integr
 	default:
 		return IntegrationCyclePolicy{}, fmt.Errorf("unsupported review workflow mode: %s", config.Mode)
 	}
+}
+
+// PlanIntegrationCycle describes one selected ticket cycle without mutating state.
+func PlanIntegrationCycle(opts IntegrationCyclePlanOptions) (IntegrationCyclePlan, error) {
+	if opts.ProjectID == "" {
+		return IntegrationCyclePlan{}, fmt.Errorf("integration cycle project id is required")
+	}
+
+	if opts.Ticket.Key == "" {
+		return IntegrationCyclePlan{}, fmt.Errorf("integration cycle ticket key is required")
+	}
+
+	policy, err := IntegrationCyclePolicyFromReviewConfig(opts.ReviewConfig)
+	if err != nil {
+		return IntegrationCyclePlan{}, err
+	}
+
+	return IntegrationCyclePlan{
+		ProjectID: opts.ProjectID,
+		Ticket:    opts.Ticket,
+		Policy:    policy,
+		Phase:     IntegrationCyclePhaseSelected,
+		Status:    IntegrationCycleStatusPending,
+		Blocker:   IntegrationCycleBlockerNone,
+	}, nil
 }
