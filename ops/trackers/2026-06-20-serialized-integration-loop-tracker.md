@@ -14,7 +14,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | cycle policy and state model | delivered | `feat/slice-1-cycle-policy-and-state-model` | `#336` | `.prj/reports/slices/serialized-integration-loop/slice-1-cycle-policy-and-state-model.md` |
 | Slice 2 | one-ticket cycle runner | delivered | `feat/slice-2-one-ticket-cycle-runner` | `#337` | `.prj/reports/slices/serialized-integration-loop/slice-2-one-ticket-cycle-runner.md` |
-| Slice 3 | high-level agentic review | planned | `feat/slice-3-high-level-agentic-review` | pending | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
+| Slice 3 | high-level agentic review | reviewing | `feat/slice-3-high-level-agentic-review` | pending | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | planned | `feat/slice-4-merge-before-next-ticket` | pending | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |
 | Slice 5 | finite repair cycle | planned | `feat/slice-5-finite-repair-cycle` | pending | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
 | Slice 6 | observability docs and QA | planned | `feat/slice-6-observability-docs-and-qa` | pending | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
@@ -49,14 +49,14 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Define the reviewer context artifact and prompt contract. | pending | pending | |
-| T3.2 | Add structured review result parsing and validation. | pending | pending | |
-| T3.3 | Persist local review artifacts under `.chc/`. | pending | pending | |
-| T3.4 | Apply `pass`, `needs_changes`, `insufficient_evidence`, and `human_required` outcomes to ticket state. | pending | pending | |
-| T3.5 | Add non-blocking note handling with existing comment limits. | pending | pending | |
-| T3.6 | Add fake-reviewer tests for clean pass and high-level blocking findings. | pending | pending | |
-| T3.7 | Add tests proving cosmetic findings do not block when validation passed. | pending | pending | |
-| T3.8 | Add the slice implementation report and validation evidence. | pending | pending | |
+| T3.1 | Define the reviewer context artifact and prompt contract. | done | `4ccb3fb` | Added local review context rendering and Codex reviewer prompt. |
+| T3.2 | Add structured review result parsing and validation. | done | `4ccb3fb` | Added strict JSON parsing, schema, decision validation, and finding validation. |
+| T3.3 | Persist local review artifacts under `.chc/`. | done | `4ccb3fb` | Reviews write context, structured result, summary, and Codex run artifacts under runtime review directories. |
+| T3.4 | Apply `pass`, `needs_changes`, `insufficient_evidence`, and `human_required` outcomes to ticket state. | done | `f838c0e`, `7a4fa6b` | Core maps review decisions to ticket review metadata; app applies them during `work run-all`. |
+| T3.5 | Add non-blocking note handling with existing comment limits. | done | `7a4fa6b` | Agentic review non-blocking notes become limited local ticket comments. |
+| T3.6 | Add fake-reviewer tests for clean pass and high-level blocking findings. | done | `7a4fa6b` | Service tests cover pass and `needs_changes` decisions through a fake reviewer. |
+| T3.7 | Add tests proving cosmetic findings do not block when validation passed. | done | `7a4fa6b` | Cosmetic notes are written without preventing `ready_for_merge`. |
+| T3.8 | Add the slice implementation report and validation evidence. | done | this commit | Report added with final validation evidence. |
 
 ## Slice 4 Tasks
 
@@ -108,6 +108,11 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 - Slice 2: `go test ./internal/app ./internal/core` (pass)
 - Slice 2: `make lint-strict` (pass)
 - Slice 2: `make verify` (pass)
+- Slice 3: `go test ./internal/core -run AgenticReview` (pass)
+- Slice 3: `go test ./internal/app -run 'AgenticReview|StartAllReadyAgentWork|WorkRunAll'` (pass)
+- Slice 3: `make lint-strict` (pass)
+- Slice 3: `go test ./internal/app ./internal/core` (pass)
+- Slice 3: `make verify` (pass)
 
 ## Open Decisions
 

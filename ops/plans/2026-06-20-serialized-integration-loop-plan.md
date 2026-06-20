@@ -1,8 +1,8 @@
 # Serialized Integration Loop Plan
 
-Status: planned
+Status: active
 
-Active Slice: Slice 1: cycle policy and state model
+Active Slice: Slice 3: high-level agentic review
 
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 
