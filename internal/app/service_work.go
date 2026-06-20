@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -43,6 +44,10 @@ type agentWorkIntegrationCycleState struct {
 	Result        ticketLoopExecutionResult
 	Record        core.LoopRunRecord
 	SelectedQueue []core.IndexedTicket
+}
+
+var newAgenticReviewRunner = func() core.AgenticReviewRunner {
+	return core.CodexAgenticReviewRunner{}
 }
 
 func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, error) {
@@ -356,6 +361,12 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	state.Result.Applications = append(state.Result.Applications, application)
 	state.Record.ProcessedCount++
 
+	if agentWorkCycleRunsAgenticReview(cyclePlan.Policy, application) {
+		if err := s.runAgenticReviewCycle(execution, application, selection.ReviewConfig); err != nil {
+			return state, false, err
+		}
+	}
+
 	if agentWorkCycleStopsAfterDevelopment(cyclePlan.Policy, application) {
 		state.Record.BlockedCount++
 
@@ -363,6 +374,110 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	}
 
 	return state, false, nil
+}
+
+func (s service) runAgenticReviewCycle(execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) error {
+	reviewedAt := s.now().UTC()
+	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
+
+	ticket, err := parseAgenticReviewTicket(s.ctx, s.projectContext.ProjectID, reviewProjectDir, application.TicketPath, reviewedAt)
+	if err != nil {
+		return err
+	}
+
+	artifact, err := newAgenticReviewRunner().Review(s.ctx, core.AgenticReviewContext{
+		ProjectID:           s.projectContext.ProjectID,
+		ProjectDir:          reviewProjectDir,
+		Ticket:              ticket,
+		Execution:           execution,
+		Application:         application,
+		ExecutionReportPath: core.ExecutionReportPath(execution),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = core.ApplyAgenticReviewResult(core.ApplyAgenticReviewResultOptions{
+		Ticket:     ticket,
+		Artifact:   artifact,
+		ReviewedAt: reviewedAt,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = writeAgenticReviewNonBlockingComments(s.ctx, ticket.Path, artifact.Result.NonBlockingNotes, config.NonBlockingCommentLimit, reviewedAt)
+	if err != nil {
+		return err
+	}
+
+	return s.refreshAgenticReviewTicketIndex(execution, ticket.Path, reviewedAt)
+}
+
+func parseAgenticReviewTicket(ctx context.Context, projectID, projectDir, ticketPath string, indexedAt time.Time) (core.IndexedTicket, error) {
+	return core.NewTicketParser().ParseTicket(ctx, core.ParseTicketOptions{
+		ProjectID:  projectID,
+		ProjectDir: projectDir,
+		Path:       ticketPath,
+		IndexedAt:  indexedAt,
+	})
+}
+
+func writeAgenticReviewNonBlockingComments(ctx context.Context, ticketPath string, notes []core.AgenticReviewFinding, limit int, createdAt time.Time) error {
+	for index, note := range limitedAgenticReviewNotes(notes, limit) {
+		err := core.NewTicketCommenter().AddComment(ctx, core.AddTicketCommentOptions{
+			Path:      ticketPath,
+			Author:    "chc-reviewer",
+			Body:      renderAgenticReviewNonBlockingComment(note),
+			CreatedAt: createdAt.Add(time.Duration(index) * time.Nanosecond),
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func limitedAgenticReviewNotes(notes []core.AgenticReviewFinding, limit int) []core.AgenticReviewFinding {
+	if limit <= 0 || len(notes) == 0 {
+		return nil
+	}
+
+	if len(notes) <= limit {
+		return notes
+	}
+
+	return notes[:limit]
+}
+
+func renderAgenticReviewNonBlockingComment(note core.AgenticReviewFinding) string {
+	return fmt.Sprintf("Agentic review note (%s): %s\n\n%s", note.Category, note.Title, note.Detail)
+}
+
+func (s service) refreshAgenticReviewTicketIndex(execution core.ExecutionRecord, ticketPath string, reviewedAt time.Time) error {
+	if execution.Workspace.Mode == core.WorkWorkspaceModeWorktree {
+		return nil
+	}
+
+	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		//nolint:errcheck // The command result already comes from the main operation.
+		_ = index.Close()
+	}()
+
+	_, err = core.NewTicketReconciler(index).ReconcileProjectTicket(s.ctx, core.ReconcileProjectTicketOptions{
+		ProjectID:    s.projectContext.ProjectID,
+		ProjectDir:   s.projectContext.ProjectDir,
+		TicketPath:   ticketPath,
+		ReconciledAt: reviewedAt,
+	})
+
+	return err
 }
 
 func (s service) failAgentWorkIntegrationCycles(repository core.LoopRunRepository, state agentWorkIntegrationCycleState, eventSink core.AgentEventSink, initialEligibleCount int, cause error) (ticketLoopExecutionResult, []core.IndexedTicket, int, error) {
@@ -473,6 +588,10 @@ func validateAgentWorkSelectionOptions(opts AgentWorkSelectionOptions) error {
 	return nil
 }
 
+func agentWorkCycleRunsAgenticReview(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
+	return policy.Mode == core.IntegrationCycleModeAgenticReview && application.TicketStatus != core.TicketResultStatusBlocked
+}
+
 func agentWorkCycleStopsAfterDevelopment(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
 	if application.TicketStatus == core.TicketResultStatusBlocked {
 		return true
@@ -503,6 +622,14 @@ func agentWorkOrder(order core.TicketLoopOrder) core.TicketLoopOrder {
 	}
 
 	return order
+}
+
+func agenticReviewProjectDir(projectContext commandProjectContext, execution core.ExecutionRecord) string {
+	if execution.Workspace.Mode == core.WorkWorkspaceModeWorktree && execution.Workspace.ExecutionWorkspaceDir != "" {
+		return execution.Workspace.ExecutionWorkspaceDir
+	}
+
+	return projectContext.ProjectDir
 }
 
 func workOperationResultFromAgentWork(result AgentWorkResult) WorkOperationResult {

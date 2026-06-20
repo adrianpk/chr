@@ -1,6 +1,9 @@
 package app
 
 import (
+	"context"
+	"encoding/json"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -282,6 +285,89 @@ func TestServiceStartAllReadyAgentWorkStopsBeforeSecondTicket(t *testing.T) {
 	}
 }
 
+func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+
+	runner := installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
+		Decision: core.IntegrationReviewDecisionPass,
+		Summary:  "Implementation is correct and validation evidence is sufficient.",
+		NonBlockingNotes: []core.AgenticReviewFinding{{
+			Category: core.AgenticReviewFindingCosmetic,
+			Title:    "Optional wording cleanup",
+			Detail:   "One help sentence could be clearer, but behavior is correct.",
+		}},
+	})
+
+	writeRuntimeTemplate(t, projectDir)
+	writeAgenticReviewLoopConfig(t, projectDir)
+
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAllReadyAgentWork()
+	if err != nil {
+		t.Fatalf("StartAllReadyAgentWork returned error: %v", err)
+	}
+
+	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
+	assertAgenticReviewRunnerCall(t, runner, projectDir, "CHC-1")
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForMerge)
+	assertAgenticReviewRunArtifact(t, projectDir, "CHC-1", result.Executions[0].ID)
+	assertTicketContains(t, ticketPath, `review_state: "pass"`)
+	assertTicketContains(t, ticketPath, `review_result: "pass"`)
+	assertTicketContains(t, ticketPath, "Agentic review note (cosmetic): Optional wording cleanup")
+}
+
+func TestServiceStartAllReadyAgentWorkHandlesAgenticReviewNeedsChanges(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+	installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
+		Decision: core.IntegrationReviewDecisionNeedsChanges,
+		Summary:  "The implementation is missing a required behavior.",
+		BlockingFindings: []core.AgenticReviewFinding{{
+			Category: core.AgenticReviewFindingCorrectness,
+			Title:    "Missing invalid input handling",
+			Detail:   "The ticket requires invalid input recovery, but the implementation accepts bad moves.",
+		}},
+	})
+
+	writeRuntimeTemplate(t, projectDir)
+	writeAgenticReviewLoopConfig(t, projectDir)
+
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAllReadyAgentWork()
+	if err != nil {
+		t.Fatalf("StartAllReadyAgentWork returned error: %v", err)
+	}
+
+	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForDev)
+	assertTicketContains(t, ticketPath, `review_state: "changes_requested"`)
+	assertTicketContains(t, ticketPath, `review_result: "needs_changes"`)
+	assertTicketContains(t, ticketPath, "correctness: Missing invalid input handling")
+}
+
 func assertAgentWorkLoopRunBlockedAfterOneTicket(t *testing.T, record core.LoopRunRecord) {
 	t.Helper()
 
@@ -477,6 +563,141 @@ func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 		ProjectDir: projectDir,
 		ProjectID:  projectID(projectDir),
 	}, testAssetsFS())
+}
+
+type fakeServiceAgenticReviewRunner struct {
+	result  core.AgenticReviewResult
+	reviews []core.AgenticReviewContext
+}
+
+func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.AgenticReviewContext) (core.AgenticReviewArtifact, error) {
+	r.reviews = append(r.reviews, review)
+
+	runDir := core.AgenticReviewRunDir(review.ProjectDir, review.Ticket.Key, review.Execution.ID)
+	if err := os.MkdirAll(runDir, 0o755); err != nil {
+		return core.AgenticReviewArtifact{}, err
+	}
+
+	resultPath := filepath.Join(runDir, "result.json")
+
+	resultBody, err := json.Marshal(r.result)
+	if err != nil {
+		return core.AgenticReviewArtifact{}, err
+	}
+
+	if err := os.WriteFile(resultPath, resultBody, 0o644); err != nil {
+		return core.AgenticReviewArtifact{}, err
+	}
+
+	contextPath := filepath.Join(runDir, "context.md")
+	if err := os.WriteFile(contextPath, []byte(core.RenderAgenticReviewContext(review)), 0o644); err != nil {
+		return core.AgenticReviewArtifact{}, err
+	}
+
+	artifact := core.AgenticReviewArtifact{
+		ContextPath: contextPath,
+		ResultPath:  resultPath,
+		SummaryPath: filepath.Join(runDir, "summary.md"),
+		Run: core.AgentRunResult{
+			ID:     "review-" + review.Ticket.Key,
+			RunDir: runDir,
+		},
+		Result: r.result,
+	}
+	if err := core.WriteAgenticReviewSummary(artifact); err != nil {
+		return core.AgenticReviewArtifact{}, err
+	}
+
+	return artifact, nil
+}
+
+func installFakeAgenticReviewRunner(t *testing.T, result core.AgenticReviewResult) *fakeServiceAgenticReviewRunner {
+	t.Helper()
+
+	runner := &fakeServiceAgenticReviewRunner{result: result}
+	previous := newAgenticReviewRunner
+	newAgenticReviewRunner = func() core.AgenticReviewRunner {
+		return runner
+	}
+
+	t.Cleanup(func() {
+		newAgenticReviewRunner = previous
+	})
+
+	return runner
+}
+
+func writeAgenticReviewLoopConfig(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeCLIWorkspaceConfig(t, projectDir, `review:
+  mode: agentic_review
+  non_blocking_comment_limit: 1
+`)
+}
+
+func testLoopTicketWithPullRequestRef(key, title string) core.Ticket {
+	ticket := testLoopTicket(key, title, core.TicketStatusReadyForDev, "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"})
+	ticket.Branch = "feat/" + strings.ToLower(key) + "-ready"
+	ticket.ReviewRefs = []core.TicketReviewRef{{
+		Type:     "pull_request",
+		Provider: "forgejo",
+		URL:      "https://forge.example.com/adrianpk/chc/pulls/338",
+		ID:       "338",
+		Status:   "open",
+	}}
+
+	return ticket
+}
+
+func assertAgenticReviewRunnerCall(t *testing.T, runner *fakeServiceAgenticReviewRunner, projectDir, ticketKey string) {
+	t.Helper()
+
+	if len(runner.reviews) != 1 {
+		t.Fatalf("agentic review calls = %d, want 1", len(runner.reviews))
+	}
+
+	review := runner.reviews[0]
+	if review.ProjectDir != projectDir {
+		t.Fatalf("review ProjectDir = %q, want %q", review.ProjectDir, projectDir)
+	}
+
+	if review.Ticket.Key != ticketKey {
+		t.Fatalf("review ticket = %q, want %q", review.Ticket.Key, ticketKey)
+	}
+}
+
+func assertAgenticReviewRunArtifact(t *testing.T, projectDir, ticketKey, executionID string) {
+	t.Helper()
+
+	runDir := core.AgenticReviewRunDir(projectDir, ticketKey, executionID)
+	assertPathExists(t, filepath.Join(runDir, "context.md"))
+	assertPathExists(t, filepath.Join(runDir, "result.json"))
+	assertPathExists(t, filepath.Join(runDir, "summary.md"))
+}
+
+func assertAgentWorkTicketState(t *testing.T, tickets []core.IndexedTicket, ticketKey, status string) {
+	t.Helper()
+
+	for _, ticket := range tickets {
+		if ticket.Key == ticketKey {
+			if ticket.Status != status {
+				t.Fatalf("%s status = %q, want %q", ticketKey, ticket.Status, status)
+			}
+
+			return
+		}
+	}
+
+	t.Fatalf("ticket %s not found in %#v", ticketKey, tickets)
+}
+
+func assertTicketContains(t *testing.T, ticketPath, want string) {
+	t.Helper()
+
+	if content := readFile(t, ticketPath); !strings.Contains(content, want) {
+		t.Fatalf("ticket %s missing %q:\n%s", ticketPath, want, content)
+	}
 }
 
 func indexedAgentWorkTicketKeys(tickets []core.IndexedTicket) []string {
