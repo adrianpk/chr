@@ -1723,6 +1723,11 @@ func ensureTicketStartRuntimeArtifactDir(projectDir string, config core.Workspac
 }
 
 func equivalentProjectPath(sourceRoot, targetRoot, path string) (string, error) {
+	targetRelative, targetErr := filepath.Rel(targetRoot, path)
+	if targetErr == nil && !strings.HasPrefix(targetRelative, "..") && !filepath.IsAbs(targetRelative) {
+		return path, nil
+	}
+
 	relative, err := filepath.Rel(sourceRoot, path)
 	if err != nil || strings.HasPrefix(relative, "..") || filepath.IsAbs(relative) {
 		return "", fmt.Errorf("path %q is not under source root %q", path, sourceRoot)

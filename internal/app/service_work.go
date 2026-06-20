@@ -62,6 +62,7 @@ type agentWorkPostDevelopmentOptions struct {
 	Application  core.ResultApplication
 	Selection    agentWorkLoopSelection
 	ReviewConfig core.ReviewWorkflowConfig
+	LoopSink     core.AgentEventSink
 }
 
 var newAgenticReviewRunner = func() core.AgenticReviewRunner {
@@ -387,6 +388,7 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 		Application:  application,
 		Selection:    selection,
 		ReviewConfig: selection.ReviewConfig,
+		LoopSink:     loopSink,
 	})
 	if err != nil {
 		return state, false, err
@@ -407,6 +409,14 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 		return false, err
 	}
 
+	finalExecution := opts.Execution
+	if stop {
+		cycleTicket, finalExecution, stop, err = s.repairAgentWorkCycleTicket(state, opts, cycleTicket)
+		if err != nil {
+			return false, err
+		}
+	}
+
 	if stop {
 		state.Record.BlockedCount++
 
@@ -419,7 +429,7 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 
 	merge, err := s.runAgentWorkMergeCycle(agentWorkMergeCycleOptions{
 		Ticket:       cycleTicket,
-		Execution:    opts.Execution,
+		Execution:    finalExecution,
 		WorkConfig:   opts.Selection.WorkConfig,
 		ReviewConfig: opts.ReviewConfig,
 	})
@@ -435,6 +445,46 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 	}
 
 	return false, nil
+}
+
+func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket core.IndexedTicket) (core.IndexedTicket, core.ExecutionRecord, bool, error) {
+	if !agentWorkCycleRunsRepair(opts.Policy, ticket) {
+		return ticket, opts.Execution, true, nil
+	}
+
+	if !core.TicketReviewRepairAllowed(ticket, core.DefaultTicketReviewRepairLimit) {
+		return ticket, opts.Execution, true, nil
+	}
+
+	execution, application, err := executeLoopTicket(s.ctx, s.env, s.projectContext, ticket, ticketExecutionEvents{
+		LoopID: state.Record.ID,
+		Sink:   opts.LoopSink,
+	}, s.assetsFS)
+	if err != nil {
+		return ticket, execution, false, err
+	}
+
+	state.Result.Executions = append(state.Result.Executions, execution)
+	state.Result.Applications = append(state.Result.Applications, application)
+
+	if application.TicketStatus == core.TicketResultStatusBlocked {
+		return ticket, execution, true, nil
+	}
+
+	reviewedTicket, stop, err := s.reviewAgentWorkCycleTicket(agentWorkPostDevelopmentOptions{
+		Ticket:       ticket,
+		Policy:       opts.Policy,
+		Execution:    execution,
+		Application:  application,
+		Selection:    opts.Selection,
+		ReviewConfig: opts.ReviewConfig,
+		LoopSink:     opts.LoopSink,
+	})
+	if err != nil {
+		return core.IndexedTicket{}, execution, false, err
+	}
+
+	return reviewedTicket, execution, stop, nil
 }
 
 func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions) (core.IndexedTicket, bool, error) {
@@ -795,6 +845,10 @@ func agentWorkCycleRunsAgenticReview(policy core.IntegrationCyclePolicy, applica
 
 func agentWorkCycleRunsTrustedAutoMergeReview(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
 	return policy.Mode == core.IntegrationCycleModeTrustedAutoMerge && application.TicketStatus != core.TicketResultStatusBlocked
+}
+
+func agentWorkCycleRunsRepair(policy core.IntegrationCyclePolicy, ticket core.IndexedTicket) bool {
+	return policy.Mode == core.IntegrationCycleModeAgenticReview && core.IsTicketReviewRepair(ticket)
 }
 
 func agentWorkCycleStopsBeforeMerge(policy core.IntegrationCyclePolicy) bool {
