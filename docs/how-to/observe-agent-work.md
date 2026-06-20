@@ -18,6 +18,8 @@ Dash shows:
 - work readiness;
 - ready-ticket queue;
 - current execution or loop state;
+- current or latest integration phase;
+- latest event message or stop reason;
 - recent human-readable agent events;
 - recent execution and loop outcomes.
 
@@ -67,6 +69,13 @@ Dash renders recent agent events as readable progress messages. During normal
 execution, expect events for ticket selection, execution creation, runtime
 preparation, worker start and finish, validation, result application, and ticket
 status updates.
+
+In serialized integration modes, also expect events for:
+
+- `cycle_rehydrated` after the ticket result is applied;
+- `review_started` and `review_finished`;
+- `repair_started` and `repair_finished` when review requests changes;
+- `merge_started` and `merge_finished` when the ticket reaches merge.
 
 If the screen appears quiet, check whether readiness is blocked, whether the
 current ticket is waiting for the Docker/Codex worker, or whether the execution

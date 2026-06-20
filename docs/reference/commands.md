@@ -370,6 +370,10 @@ chc work run-all --dry-run --tag backend --order priority_severity
 `chc ticket loop`: `--status`, `--priority`, `--severity`, `--project-area`,
 `--tag`, `--type`, `--use-case`, and `--order`.
 
+In serialized integration modes, `work run-all` completes the current ticket's
+development, review policy, repair when applicable, and merge or block before
+selecting the next normal ticket.
+
 Readiness behavior is documented in [Work readiness](work-readiness.md).
 
 Locate runtime artifacts for one execution:

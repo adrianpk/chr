@@ -527,6 +527,7 @@ Dash shows:
 - work readiness and safe repair hints;
 - ready queue filters and ordering;
 - current loop or ticket execution state;
+- current or latest integration phase and event message;
 - recent human-readable agent events;
 - ticket, execution report, runtime log, and validation log paths when the
   event stream includes them.
@@ -692,8 +693,10 @@ chc ticket review CHC-1 \
 ```
 
 When review requests changes, the ticket returns to `ready_for_dev` with repair
-handoff metadata. The next work selection prioritizes the repair before later
-serial work that depends on an updated development branch.
+handoff metadata. In `agentic_review` loop mode, ChrysoCoord runs one default
+repair execution for that same ticket, reviews it again, and only then merges
+or blocks. Later normal tickets do not start while that repair cycle is
+unfinished.
 
 For the Forgejo setup flow, see
 [Use Forgejo ticket review](../use-forgejo-ticket-review.md).
@@ -756,9 +759,11 @@ Filter by use case, priority, severity, project area, tag, type, or status:
 chc work run-all --dry-run --use-case billing --priority high --order key
 ```
 
-`work run-all` uses the same readiness policy and execution loop as Dash. It
-stops on blocked or failed work and leaves loop, execution, report, log, and
-event-stream evidence under the configured runtime artifact directory.
+`work run-all` uses the same readiness policy and execution loop as Dash. In
+serialized integration modes, it completes the current ticket's development,
+review policy, repair when applicable, and merge or block before selecting the
+next normal ticket. It leaves loop, execution, report, log, and event-stream
+evidence under the configured runtime artifact directory.
 
 Inspect the evidence:
 

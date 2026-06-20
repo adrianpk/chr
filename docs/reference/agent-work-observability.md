@@ -52,6 +52,7 @@ Known phases include:
 - `loop_started`
 - `loop_finished`
 - `ticket_selected`
+- `cycle_rehydrated`
 - `execution_created`
 - `branch_prepared`
 - `runtime_prepared`
@@ -62,6 +63,12 @@ Known phases include:
 - `validation_finished`
 - `result_applied`
 - `ticket_status_updated`
+- `review_started`
+- `review_finished`
+- `repair_started`
+- `repair_finished`
+- `merge_started`
+- `merge_finished`
 - `work_blocked`
 - `work_failed`
 - `work_stopped`
@@ -76,7 +83,11 @@ Event refs may include:
 | Ref | Meaning |
 | --- | --- |
 | `ticket_path` | Project-relative ticket path. |
-| `branch` | Git branch prepared for the work. |
+| `ticket_branch` | Git branch prepared for the work. |
+| `review_ref` | Pull request or review surface URL. |
+| `review_comments_url` | Review comments URL used for repair handoff. |
+| `merge_commit` | Merge commit SHA when the provider returns one. |
+| `merge_blocker` | Compact merge blocker when merge fails or blocks. |
 | `container_id` | Runtime container id when known. |
 | `validation_command` | Validation command used for the run. |
 | `context_path` | Runtime context artifact path. |
@@ -96,6 +107,8 @@ Dash should show:
 - current work readiness;
 - ready queue;
 - current loop or execution state;
+- current or latest integration phase;
+- latest event message or stop reason;
 - recent event messages;
 - ticket, execution report, runtime log, and validation log refs when present;
 - recent execution and loop outcomes;

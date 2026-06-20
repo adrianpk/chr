@@ -32,6 +32,14 @@ Includes:
 - blocked ticket count;
 - failed ticket count.
 
+### Stop Reason
+
+Includes the derived reason the loop stopped or continued. Examples:
+
+- completed all selected integration cycles;
+- stopped because the current ticket integration cycle blocked;
+- failed before completing integration work.
+
 ### Times
 
 Includes:

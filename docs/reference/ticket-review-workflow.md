@@ -123,14 +123,19 @@ worker context includes a Review Repair Handoff section with:
 - review comments URL
 - review state and result
 - review round
+- local blocking findings
 
-The handoff points the worker at remote review comments as the source of
-detailed findings. ChrysoCoord does not copy remote comments into ticket
-comments.
+The handoff points the worker at local blocking findings and remote review
+comments as the source of repair work. ChrysoCoord does not copy remote
+comments into ticket comments.
 
 If repair metadata lacks `review_comments_url`, branch metadata, or the pull
 request reference, worker context materialization stops before launching the
 worker.
+
+In `agentic_review` loop mode, ChrysoCoord performs one default repair
+execution for a `needs_changes` ticket and then runs review again. If review
+still requests changes, the loop blocks and later normal tickets do not start.
 
 ## Serialized Work Selection
 

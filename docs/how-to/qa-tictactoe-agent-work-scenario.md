@@ -74,3 +74,32 @@ a safe repair when one is available, then retry the work action.
 Use this scenario to observe whether ChrysoCoord can preserve preseeded human
 context into generated artifacts, launch Codex worker executions for generated
 tickets, run project validation, and move tickets to `reviewing` or `blocked`.
+
+## Serialized Loop Barrier Fixture
+
+The resettable reference also includes a two-ticket fixture under:
+
+```text
+.chc/user/fixtures/serialized-loop-tickets/
+```
+
+Use it when you want to exercise the loop barrier without regenerating tickets:
+
+```sh
+cd qa/project/tictactoe
+cp .chc/user/fixtures/serialized-loop-tickets/CHC-*.md .chc/user/tickets/
+chc ticket board
+chc work run-all --use-case cli-gameplay --order key
+```
+
+Expected behavior:
+
+- CHC-1 is selected before CHC-2.
+- CHC-2 does not start while CHC-1 is waiting for review, repair, or merge.
+- Dash shows the current phase and latest event from the persisted event
+  stream.
+- `chc report show --loop <loop-id>` includes the loop stop reason.
+
+For a full `agentic_review` or `trusted_auto_merge` merge barrier test, attach
+real pull request metadata to the fixture tickets and configure the review
+provider before running `chc work run-all`.

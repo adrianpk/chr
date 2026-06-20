@@ -17,9 +17,10 @@ of progress:
 ```text
 select one ticket
 develop
-apply review policy
-merge or block
 rehydrate state
+apply review policy
+repair once when review requests changes
+merge or block
 select the next ticket
 ```
 
@@ -28,7 +29,8 @@ The cycle policy is derived from `review.mode`:
 - `human_review`: develop one ticket, create the review handoff, and stop before
   later normal work.
 - `agentic_review`: develop one ticket, run high-level review, merge approved
-  work, and then continue.
+  work, repair the same ticket once when review requests changes, and then
+  continue only after merge.
 - `trusted_auto_merge`: develop one ticket and skip the separate review role,
   but still merge before continuing.
 
@@ -164,6 +166,10 @@ Loop stop conditions:
 - no eligible tickets completes the run with zero processed tickets;
 - `--max-iterations` caps how many eligible tickets are attempted;
 - the first blocked ticket result stops the run and marks the loop blocked;
+- a review request that still fails after the default repair attempt stops the
+  run and marks the loop blocked;
+- a merge preflight or provider merge blocker stops the run and marks the loop
+  blocked;
 - the first execution failure stops the run and marks the loop failed;
 - duplicate ticket keys in one selected run are attempted only once.
 

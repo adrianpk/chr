@@ -33,6 +33,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `0be53e3` on
   review mode configuration, provider diagnostics, remote review adapters,
   review result application, repair handoff prioritization, merge preflight,
   provider merge execution, and merge metadata.
+- Added serialized integration-loop observability for cycle rehydration,
+  review, repair, and merge phases, plus Dash phase display and loop stop
+  reasons.
 - Added Gherkin acceptance feature generation as a separate workflow from spec
   generation, including feature-round prompts, feature artifact checks, CLI and
   TUI actions, and documentation.
@@ -66,6 +69,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `0be53e3` on
   records instead of treating SQLite indexes as authoritative.
 - Reworked branch/readiness checks so agent work and merge preflight use
   configured work policy instead of hardcoded branch names.
+- Reworked ready-ticket loop execution so later tickets wait for the current
+  ticket to pass review policy and merge, or block after the finite repair
+  limit.
 - Expanded the TUI from project/case editing into a broader operational console
   for documents, specs, plans, Board, Dash, commands, and runtime state.
 - Expanded command coverage so CLI and TUI work actions route through shared
