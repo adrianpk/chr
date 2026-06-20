@@ -488,6 +488,7 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
+
 	runner := installFakeAgenticReviewRunnerSequence(t, []core.AgenticReviewResult{
 		agenticReviewNeedsChangesResult("Missing invalid input handling"),
 		{
@@ -544,6 +545,7 @@ func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *tes
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
+
 	runner := installFakeAgenticReviewRunnerSequence(t, []core.AgenticReviewResult{
 		agenticReviewNeedsChangesResult("Missing invalid input handling"),
 		agenticReviewNeedsChangesResult("Still missing invalid input handling"),
@@ -979,6 +981,7 @@ func assertRepairExecutionContextContains(t *testing.T, execution core.Execution
 
 	contextPath := filepath.Join(execution.Artifacts.RunDir, "context.md")
 	content := readFile(t, contextPath)
+
 	for _, expected := range []string{
 		"## Review Repair Handoff",
 		want,

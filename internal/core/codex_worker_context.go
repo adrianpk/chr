@@ -441,6 +441,7 @@ func writeCodexWorkerRepairFindings(output *strings.Builder, findings []string) 
 	}
 
 	output.WriteString("- blocking_findings:\n")
+
 	for _, finding := range findings {
 		trimmed := strings.TrimSpace(finding)
 		if trimmed == "" {
