@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 // IntegrationCycleMode defines the policy used by one ticket integration cycle.
 type IntegrationCycleMode string
 
@@ -14,6 +16,14 @@ type IntegrationCycleBlocker string
 
 // IntegrationReviewDecision defines the outcome of an integration review phase.
 type IntegrationReviewDecision string
+
+// IntegrationCyclePolicy describes how one selected ticket should move through integration.
+type IntegrationCyclePolicy struct {
+	Mode                IntegrationCycleMode
+	RequiresReview      bool
+	RequiresHumanReview bool
+	RequiresMerge       bool
+}
 
 const (
 	// IntegrationCycleModeHumanReview stops after development handoff for human review.
@@ -162,5 +172,35 @@ func (d IntegrationReviewDecision) Valid() bool {
 		return true
 	default:
 		return false
+	}
+}
+
+// IntegrationCyclePolicyFromReviewConfig maps review workflow config to cycle behavior.
+func IntegrationCyclePolicyFromReviewConfig(config ReviewWorkflowConfig) (IntegrationCyclePolicy, error) {
+	if err := ValidateReviewWorkflowConfig(config); err != nil {
+		return IntegrationCyclePolicy{}, err
+	}
+
+	switch config.Mode {
+	case ReviewWorkflowModeHumanReview:
+		return IntegrationCyclePolicy{
+			Mode:                IntegrationCycleModeHumanReview,
+			RequiresReview:      true,
+			RequiresHumanReview: true,
+			RequiresMerge:       false,
+		}, nil
+	case ReviewWorkflowModeAgenticReview:
+		return IntegrationCyclePolicy{
+			Mode:           IntegrationCycleModeAgenticReview,
+			RequiresReview: true,
+			RequiresMerge:  true,
+		}, nil
+	case ReviewWorkflowModeTrustedAutoMerge:
+		return IntegrationCyclePolicy{
+			Mode:          IntegrationCycleModeTrustedAutoMerge,
+			RequiresMerge: true,
+		}, nil
+	default:
+		return IntegrationCyclePolicy{}, fmt.Errorf("unsupported review workflow mode: %s", config.Mode)
 	}
 }
