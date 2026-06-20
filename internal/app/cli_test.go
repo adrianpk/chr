@@ -3131,23 +3131,31 @@ func TestWorkRunAllExecutesReadyTickets(t *testing.T) {
 	for _, want := range []string{
 		"work: run-all",
 		"loop: loop-",
-		"status: succeeded",
+		"status: blocked",
 		"eligible: 2",
-		"processed: 2",
+		"processed: 1",
+		"skipped: 1",
+		"blocked: 1",
 		"execution: exec-",
 		"CHC-1",
-		"CHC-2",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
 	}
 
-	for _, ticketKey := range []string{"CHC-1", "CHC-2"} {
-		records := listTicketExecutions(t, devRoot, projectID(projectDir), ticketKey)
-		if len(records) != 1 {
-			t.Fatalf("%s execution records = %d, want 1", ticketKey, len(records))
-		}
+	if strings.Contains(stdout.String(), "CHC-2") {
+		t.Fatalf("stdout contains second ticket execution:\n%s", stdout.String())
+	}
+
+	chc1Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(chc1Records) != 1 {
+		t.Fatalf("CHC-1 execution records = %d, want 1", len(chc1Records))
+	}
+
+	chc2Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
+	if len(chc2Records) != 0 {
+		t.Fatalf("CHC-2 execution records = %d, want 0", len(chc2Records))
 	}
 }
 
@@ -3180,6 +3188,8 @@ func TestWorkRunAllDryRunPrintsQueue(t *testing.T) {
 		"dry_run: true",
 		"order: created_at",
 		"eligible: 1",
+		"cycle_ticket: CHC-1",
+		"remaining_eligible: 0",
 		"ticket: CHC-1\tReady frontend\tready_for_dev",
 	} {
 		if !strings.Contains(stdout.String(), want) {

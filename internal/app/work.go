@@ -141,6 +141,10 @@ func workRunAllFlags() []cli.Flag {
 			Name:  "order",
 			Usage: "ticket order: key, created_at, priority, severity, priority_severity",
 		},
+		&cli.IntFlag{
+			Name:  "max-iterations",
+			Usage: "maximum integration cycles to run; 0 means until no eligible tickets or a cycle barrier is reached",
+		},
 	)
 }
 
@@ -361,7 +365,8 @@ func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOp
 			Types:        cmd.StringSlice("type"),
 			UseCases:     cmd.StringSlice("use-case"),
 		},
-		Order: core.TicketLoopOrder(cmd.String("order")),
+		Order:         core.TicketLoopOrder(cmd.String("order")),
+		MaxIterations: cmd.Int("max-iterations"),
 	}
 }
 
@@ -394,6 +399,8 @@ func printAgentWorkRunAllPreview(
 		"dry_run: true",
 		fmt.Sprintf("order: %s", agentWorkOrder(selection.Order)),
 		fmt.Sprintf("eligible: %d", result.EligibleCount),
+		fmt.Sprintf("cycle_ticket: %s", agentWorkPreviewCycleTicket(result.SelectedQueue)),
+		fmt.Sprintf("remaining_eligible: %d", agentWorkPreviewRemainingEligible(result)),
 	}
 
 	if err := printAgentWorkLines(stdout, lines); err != nil {
@@ -401,6 +408,23 @@ func printAgentWorkRunAllPreview(
 	}
 
 	return printAgentWorkTicketQueue(stdout, result.SelectedQueue)
+}
+
+func agentWorkPreviewCycleTicket(queue []core.IndexedTicket) string {
+	if len(queue) == 0 {
+		return "(none)"
+	}
+
+	return queue[0].Key
+}
+
+func agentWorkPreviewRemainingEligible(result AgentWorkResult) int {
+	remaining := result.EligibleCount - len(result.SelectedQueue)
+	if remaining < 0 {
+		return 0
+	}
+
+	return remaining
 }
 
 func printAgentWorkRunAllExecution(stdout io.Writer, result AgentWorkResult) error {

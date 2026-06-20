@@ -267,22 +267,26 @@ func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {
 		t.Fatal("LoopRun is nil")
 	}
 
-	loopMatches := result.LoopRun.Status == core.LoopRunStatusSucceeded &&
+	loopMatches := result.LoopRun.Status == core.LoopRunStatusBlocked &&
 		result.LoopRun.EligibleCount == 2 &&
-		result.LoopRun.ProcessedCount == 2
+		result.LoopRun.ProcessedCount == 1 &&
+		result.LoopRun.BlockedCount == 1
 	if !loopMatches {
-		t.Fatalf("LoopRun = %#v, want succeeded loop with two processed tickets", result.LoopRun)
+		t.Fatalf("LoopRun = %#v, want blocked loop with one processed ticket", result.LoopRun)
 	}
 
-	if gotKeys := indexedAgentWorkTicketKeys(result.SelectedQueue); strings.Join(gotKeys, ",") != "CHC-1,CHC-2" {
-		t.Fatalf("SelectedQueue keys = %#v, want oldest-first CHC-1, CHC-2", gotKeys)
+	if gotKeys := indexedAgentWorkTicketKeys(result.SelectedQueue); strings.Join(gotKeys, ",") != "CHC-1" {
+		t.Fatalf("SelectedQueue keys = %#v, want oldest-first CHC-1 only", gotKeys)
 	}
 
-	for _, ticketKey := range []string{"CHC-1", "CHC-2"} {
-		records := listTicketExecutions(t, devRoot, projectID(projectDir), ticketKey)
-		if len(records) != 1 {
-			t.Fatalf("%s execution records = %d, want 1", ticketKey, len(records))
-		}
+	chc1Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(chc1Records) != 1 {
+		t.Fatalf("CHC-1 execution records = %d, want 1", len(chc1Records))
+	}
+
+	chc2Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
+	if len(chc2Records) != 0 {
+		t.Fatalf("CHC-2 execution records = %d, want 0", len(chc2Records))
 	}
 
 	loopRuns := listProjectLoopRuns(t, devRoot, projectID(projectDir))

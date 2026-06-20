@@ -33,6 +33,12 @@ type AgentWorkSelectionOptions struct {
 	MaxIterations int
 }
 
+type agentWorkLoopSelection struct {
+	Tickets       []core.IndexedTicket
+	EligibleCount int
+	ReviewConfig  core.ReviewWorkflowConfig
+}
+
 func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, error) {
 	result, err := s.StartAgentWorkTicket(ticketKey)
 	if err != nil {
@@ -149,12 +155,7 @@ func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
 		return AgentWorkResult{}, err
 	}
 
-	tickets, eligibleCount, err := s.agentWorkLoopTickets(defaultAgentWorkSelectionOptions(1))
-	if err != nil {
-		return AgentWorkResult{}, err
-	}
-
-	return s.startAgentWorkLoop(tickets, eligibleCount)
+	return s.startAgentWorkLoop(defaultAgentWorkSelectionOptions(1))
 }
 
 func (s service) StartAllReadyAgentWork() (AgentWorkResult, error) {
@@ -167,12 +168,11 @@ func (s service) StartAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkRe
 		return AgentWorkResult{}, err
 	}
 
-	tickets, eligibleCount, err := s.agentWorkLoopTickets(opts)
-	if err != nil {
+	if err := validateAgentWorkSelectionOptions(opts); err != nil {
 		return AgentWorkResult{}, err
 	}
 
-	return s.startAgentWorkLoop(tickets, eligibleCount)
+	return s.startAgentWorkLoop(opts)
 }
 
 func (s service) PreviewAllReadyAgentWork() (AgentWorkResult, error) {
@@ -180,7 +180,11 @@ func (s service) PreviewAllReadyAgentWork() (AgentWorkResult, error) {
 }
 
 func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
-	tickets, eligibleCount, err := s.agentWorkLoopTickets(opts)
+	if err := validateAgentWorkSelectionOptions(opts); err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	selection, err := s.agentWorkLoopSelection(opts)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -191,14 +195,14 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 	}
 
 	return AgentWorkResult{
-		Message:       fmt.Sprintf("Ready agent-work queue contains %d eligible tickets.", eligibleCount),
+		Message:       fmt.Sprintf("Ready agent-work queue contains %d eligible tickets.", selection.EligibleCount),
 		Tickets:       reloaded.Tickets,
-		SelectedQueue: tickets,
-		EligibleCount: eligibleCount,
+		SelectedQueue: selection.Tickets,
+		EligibleCount: selection.EligibleCount,
 	}, nil
 }
 
-func (s service) startAgentWorkLoop(tickets []core.IndexedTicket, eligibleCount int) (AgentWorkResult, error) {
+func (s service) startAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
 	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
 	if err != nil {
 		return AgentWorkResult{}, err
@@ -206,7 +210,7 @@ func (s service) startAgentWorkLoop(tickets []core.IndexedTicket, eligibleCount 
 
 	defer releaseAgentOperationLock(lock)()
 
-	result, err := runTicketLoopExecution(s.ctx, s.env, s.projectContext, tickets, eligibleCount, s.assetsFS)
+	result, selectedQueue, eligibleCount, err := s.runAgentWorkIntegrationCycles(opts)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -228,7 +232,7 @@ func (s service) startAgentWorkLoop(tickets []core.IndexedTicket, eligibleCount 
 		Tickets:       reloaded.Tickets,
 		LoopRun:       &result.Record,
 		Executions:    result.Executions,
-		SelectedQueue: tickets,
+		SelectedQueue: selectedQueue,
 		EligibleCount: eligibleCount,
 	}, nil
 }
@@ -262,10 +266,122 @@ func (s service) RequestDaemonStop() (WorkOperationResult, error) {
 	return result, nil
 }
 
-func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]core.IndexedTicket, int, error) {
+func (s service) runAgentWorkIntegrationCycles(
+	opts AgentWorkSelectionOptions,
+) (ticketLoopExecutionResult, []core.IndexedTicket, int, error) {
+	repository, err := core.NewLoopRunRepository(s.ctx, s.env, s.assetsFS)
+	if err != nil {
+		return ticketLoopExecutionResult{}, nil, 0, err
+	}
+
+	defer func() {
+		//nolint:errcheck // Command result already comes from the main operation.
+		_ = repository.Close()
+	}()
+
+	selection, err := s.agentWorkLoopSelection(opts)
+	if err != nil {
+		return ticketLoopExecutionResult{}, nil, 0, err
+	}
+
+	record := newRunningLoopRunRecord(s.projectContext.ProjectID, selection.EligibleCount)
+	if err := repository.CreateLoopRun(s.ctx, record); err != nil {
+		return ticketLoopExecutionResult{}, nil, 0, err
+	}
+
+	loopSink := agentWorkLoopEventSink(s.projectContext.ProjectDir, record)
+	emitLoopStartedAgentEvent(s.ctx, loopSink, record)
+
+	result := ticketLoopExecutionResult{Record: record}
+	selectedQueue := make([]core.IndexedTicket, 0)
+	initialEligibleCount := selection.EligibleCount
+	processedCycles := 0
+
+	for len(selection.Tickets) > 0 && agentWorkCycleLimitAllowsNext(opts, processedCycles) {
+		ticket := selection.Tickets[0]
+		cyclePlan, err := core.PlanIntegrationCycle(core.IntegrationCyclePlanOptions{
+			ProjectID:    s.projectContext.ProjectID,
+			Ticket:       ticket,
+			ReviewConfig: selection.ReviewConfig,
+		})
+		if err != nil {
+			failed, failErr := failTicketLoopExecution(
+				s.ctx,
+				s.env,
+				repository,
+				s.projectContext,
+				result,
+				record,
+				loopSink,
+				err,
+				s.assetsFS,
+			)
+
+			return failed, selectedQueue, initialEligibleCount, failErr
+		}
+
+		selectedQueue = append(selectedQueue, ticket)
+		emitTicketSelectedAgentEvent(s.ctx, loopSink, record, ticket)
+
+		execution, application, err := executeLoopTicket(s.ctx, s.env, s.projectContext, ticket, ticketExecutionEvents{
+			LoopID: record.ID,
+			Sink:   loopSink,
+		}, s.assetsFS)
+		if err != nil {
+			failed, failErr := failTicketLoopExecution(
+				s.ctx,
+				s.env,
+				repository,
+				s.projectContext,
+				result,
+				record,
+				loopSink,
+				err,
+				s.assetsFS,
+			)
+
+			return failed, selectedQueue, initialEligibleCount, failErr
+		}
+
+		result.Executions = append(result.Executions, execution)
+		result.Applications = append(result.Applications, application)
+
+		record.ProcessedCount++
+		processedCycles++
+
+		if agentWorkCycleStopsAfterDevelopment(cyclePlan.Policy, application) {
+			record.BlockedCount++
+
+			break
+		}
+
+		selection, err = s.agentWorkLoopSelection(opts)
+		if err != nil {
+			failed, failErr := failTicketLoopExecution(
+				s.ctx,
+				s.env,
+				repository,
+				s.projectContext,
+				result,
+				record,
+				loopSink,
+				err,
+				s.assetsFS,
+			)
+
+			return failed, selectedQueue, initialEligibleCount, failErr
+		}
+	}
+
+	finished, err := finishTicketLoopExecution(s.ctx, s.env, repository, s.projectContext, result, record, loopSink, s.assetsFS)
+
+	return finished, selectedQueue, initialEligibleCount, err
+}
+
+func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWorkLoopSelection, error) {
 	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
-		return nil, 0, err
+		return agentWorkLoopSelection{}, err
 	}
 
 	defer func() {
@@ -275,7 +391,12 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]core.In
 
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
-		return nil, 0, err
+		return agentWorkLoopSelection{}, err
+	}
+
+	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		return agentWorkLoopSelection{}, err
 	}
 
 	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(s.ctx, core.TicketLoopQueryOptions{
@@ -285,27 +406,30 @@ func (s service) agentWorkLoopTickets(opts AgentWorkSelectionOptions) ([]core.In
 		Order:     agentWorkOrder(opts.Order),
 	})
 	if err != nil {
-		return nil, 0, err
+		return agentWorkLoopSelection{}, err
 	}
 
-	tickets, err = s.applyAgentWorkSelectionPreflight(index, tickets)
+	tickets, err = s.applyAgentWorkSelectionPreflight(index, tickets, config.Work)
 	if err != nil {
-		return nil, 0, err
+		return agentWorkLoopSelection{}, err
 	}
 
 	eligibleTickets := deduplicateTicketLoopTickets(tickets)
-	tickets = ticketsForTicketLoopRun(eligibleTickets, ticketLoopRunOptions{MaxIterations: opts.MaxIterations})
+	tickets = ticketsForTicketLoopRun(eligibleTickets, ticketLoopRunOptions{MaxIterations: 1})
 
-	return tickets, len(eligibleTickets), nil
+	return agentWorkLoopSelection{
+		Tickets:       tickets,
+		EligibleCount: len(eligibleTickets),
+		ReviewConfig:  config.Review,
+	}, nil
 }
 
-func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, tickets []core.IndexedTicket) ([]core.IndexedTicket, error) {
+func (s service) applyAgentWorkSelectionPreflight(
+	index core.TicketIndex,
+	tickets []core.IndexedTicket,
+	workConfig core.WorkConfig,
+) ([]core.IndexedTicket, error) {
 	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
-	if err != nil {
-		return nil, err
-	}
-
-	workConfig, err := workSelectionWorkConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return nil, err
 	}
@@ -329,6 +453,43 @@ func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, ticket
 	}
 
 	return tickets, nil
+}
+
+func agentWorkLoopWorkspaceConfig(projectDir string) (core.WorkspaceConfig, error) {
+	config, err := core.LoadWorkspaceConfig(projectDir)
+	if err != nil {
+		return core.WorkspaceConfig{}, err
+	}
+
+	if err := core.ValidateWorkConfig(config.Work); err != nil {
+		return core.WorkspaceConfig{}, err
+	}
+
+	if err := core.ValidateReviewWorkflowConfig(config.Review); err != nil {
+		return core.WorkspaceConfig{}, err
+	}
+
+	return config, nil
+}
+
+func agentWorkCycleLimitAllowsNext(opts AgentWorkSelectionOptions, processedCycles int) bool {
+	return opts.MaxIterations == 0 || processedCycles < opts.MaxIterations
+}
+
+func validateAgentWorkSelectionOptions(opts AgentWorkSelectionOptions) error {
+	if opts.MaxIterations < 0 {
+		return fmt.Errorf("max-iterations must be greater than or equal to zero")
+	}
+
+	return nil
+}
+
+func agentWorkCycleStopsAfterDevelopment(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
+	if application.TicketStatus == core.TicketResultStatusBlocked {
+		return true
+	}
+
+	return policy.RequiresReview || policy.RequiresHumanReview || policy.RequiresMerge
 }
 
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {
