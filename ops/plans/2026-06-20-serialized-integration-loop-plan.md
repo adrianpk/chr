@@ -2,7 +2,7 @@
 
 Status: active
 
-Active Slice: Slice 4: merge-before-next-ticket
+Active Slice: Slice 5: finite repair cycle
 
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 
