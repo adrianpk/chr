@@ -13,7 +13,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | cycle policy and state model | delivered | `feat/slice-1-cycle-policy-and-state-model` | `#336` | `.prj/reports/slices/serialized-integration-loop/slice-1-cycle-policy-and-state-model.md` |
-| Slice 2 | one-ticket cycle runner | planned | `feat/slice-2-one-ticket-cycle-runner` | pending | `.prj/reports/slices/serialized-integration-loop/slice-2-one-ticket-cycle-runner.md` |
+| Slice 2 | one-ticket cycle runner | reviewing | `feat/slice-2-one-ticket-cycle-runner` | pending | `.prj/reports/slices/serialized-integration-loop/slice-2-one-ticket-cycle-runner.md` |
 | Slice 3 | high-level agentic review | planned | `feat/slice-3-high-level-agentic-review` | pending | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | planned | `feat/slice-4-merge-before-next-ticket` | pending | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |
 | Slice 5 | finite repair cycle | planned | `feat/slice-5-finite-repair-cycle` | pending | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
@@ -36,14 +36,14 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Introduce a cycle runner that selects one ticket per iteration. | pending | pending | |
-| T2.2 | Refactor current loop execution to delegate development to the cycle runner. | pending | pending | |
-| T2.3 | Refresh ticket index and config after each cycle. | pending | pending | |
-| T2.4 | Stop `human_review` mode after `ready_for_review` handoff. | pending | pending | |
-| T2.5 | Update dry-run output to describe first selected cycle and remaining eligible tickets. | pending | pending | |
-| T2.6 | Replace tests that expect two development-only processed tickets with tests that expect a barrier after the first unfinished integration cycle. | pending | pending | |
-| T2.7 | Add tests proving no second ticket starts until the first reaches a terminal cycle state. | pending | pending | |
-| T2.8 | Add the slice implementation report and validation evidence. | pending | pending | |
+| T2.1 | Introduce a cycle runner that selects one ticket per iteration. | done | `1ee364c`, `57a06e7` | Added work-run integration cycle runner state and per-cycle ticket selection. |
+| T2.2 | Refactor current loop execution to delegate development to the cycle runner. | done | `1ee364c`, `57a06e7` | `work run-all` now uses the integration cycle runner instead of a stale multi-ticket queue. |
+| T2.3 | Refresh ticket index and config after each cycle. | done | `1ee364c` | Each continuation path reselects from refreshed ticket index and workspace config. |
+| T2.4 | Stop `human_review` mode after `ready_for_review` handoff. | done | `1ee364c` | Development success now records a loop barrier when review or merge is still required. |
+| T2.5 | Update dry-run output to describe first selected cycle and remaining eligible tickets. | done | `1ee364c` | Dry-run prints `cycle_ticket` and `remaining_eligible`. |
+| T2.6 | Replace tests that expect two development-only processed tickets with tests that expect a barrier after the first unfinished integration cycle. | done | `1ee364c`, `57a06e7` | Updated service and CLI expectations for one processed ticket plus blocked loop status. |
+| T2.7 | Add tests proving no second ticket starts until the first reaches a terminal cycle state. | done | `1ee364c`, `57a06e7` | Tests assert CHC-2 has no execution record when CHC-1 is still waiting for integration. |
+| T2.8 | Add the slice implementation report and validation evidence. | done | this commit | Report added with final validation evidence. |
 
 ## Slice 3 Tasks
 
@@ -104,6 +104,10 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 - Slice 1 T1.6: `go test ./internal/core -run 'IntegrationCycle'` (pass)
 - Slice 1 T1.8: `make lint-strict` (pass)
 - Slice 1 T1.8: `make verify` (pass)
+- Slice 2: `go test ./internal/app -run 'AgentWorkLoop|WorkRunAll'` (pass)
+- Slice 2: `go test ./internal/app ./internal/core` (pass)
+- Slice 2: `make lint-strict` (pass)
+- Slice 2: `make verify` (pass)
 
 ## Open Decisions
 
