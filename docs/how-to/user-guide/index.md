@@ -983,10 +983,12 @@ Docker receives the same files through the project mount, usually under
 
 - Context composition runs outside Docker.
 - Docker is the runtime sandbox boundary.
-- The mounted host workspace is the initial execution mode.
-- Avoid editing a project while an agent run is active.
-- Clone/worktree execution and PAT-backed push from inside the container are
-  future runtime-workspace concerns.
+- Project mode mounts the user-visible checkout into Docker.
+- Worktree mode prepares a ticket-specific Git worktree and mounts that
+  execution workspace into Docker.
+- Avoid editing the mounted execution workspace while an agent run is active.
+- PAT-backed push from inside the container is not part of the current local
+  runtime boundary.
 - Assisted authoring prepares Markdown documents; it does not execute tickets or
   run the Docker worker.
 - Assisted authoring does not include implicit conversation history. Relevant

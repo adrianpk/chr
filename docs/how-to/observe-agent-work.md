@@ -116,6 +116,11 @@ Summarize an event stream:
 chc work events .chc/user/runtime/runs/CHC-1/<execution-id>/events.jsonl
 ```
 
+In `worktree` execution mode, runtime artifacts live under the ticket
+worktree's `.chc/user/runtime/runs/...` directory. Prefer the paths printed by
+`chc work logs <execution-id>` when following an active run from outside that
+worktree.
+
 For run-all, summarize the loop stream when one is present:
 
 ```sh

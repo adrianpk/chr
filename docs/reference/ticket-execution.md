@@ -52,6 +52,17 @@ Execution records copy runtime references from the computed runtime plan at the
 time of execution. This keeps later review tied to the runtime boundary that was
 used for that attempt, even if project config changes later.
 
+Execution records also store workspace execution metadata:
+
+- `workspace_mode`: `project` or `worktree`.
+- `workspace_project_checkout_dir`: the user-visible project checkout.
+- `workspace_execution_dir`: the workspace mounted into Docker for this
+  execution.
+
+In `project` mode, the project checkout and execution workspace are the same
+directory. In `worktree` mode, ChrysoCoord prepares a ticket-specific Git
+worktree and uses that path as the execution workspace.
+
 ## Ticket Start Preflight
 
 `chc ticket start <ticket-key>` prepares one ticket execution without invoking
@@ -119,6 +130,9 @@ The run command renders:
 - the configured container workdir;
 - execution environment variables;
 - the Codex worker shell command.
+
+The mounted source is the runtime plan execution workspace. In worktree mode
+this is the prepared ticket worktree, not the user's active checkout.
 
 The validation command renders:
 
@@ -275,7 +289,7 @@ process fails before writing a valid envelope, the execution failure kind is
 
 ## Changed File Discovery
 
-The changed-file discoverer inspects the project git worktree with:
+The changed-file discoverer inspects the execution workspace with:
 
 ```sh
 git status --porcelain=v1 --untracked-files=all

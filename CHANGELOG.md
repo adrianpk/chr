@@ -15,6 +15,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `0be53e3` on
 - Added a Docker-backed ticket execution path with execution records, runtime
   context artifacts, result envelopes, validation output, changed-file
   detection, result application, and execution reports.
+- Added isolated ticket worktree execution so agent runs can prepare
+  ticket-specific Git worktrees, mount the isolated workspace into Docker,
+  preserve execution workspace metadata, and keep the user's active checkout
+  separate from agent edits.
 - Added foreground ticket loops, loop run records, loop reports, filtered
   ticket selection, and ready-queue ordering.
 - Added Dash agent-work controls in the TUI, including selected-ticket work,

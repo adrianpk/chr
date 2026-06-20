@@ -59,11 +59,13 @@ The runtime plan also records the effective workspace execution metadata from
 - `workspace_mode`: `project` by default.
 - `project_checkout`: the user-visible project checkout.
 - `execution_workspace`: the path intended for agent work. In `project` mode
-  this is the project checkout.
+  this is the project checkout. In `worktree` mode this is the prepared ticket
+  worktree.
 
-Worktree execution fields are parsed and validated before the runtime mount is
-switched. Existing projects therefore keep the current project-mounted behavior
-unless they explicitly opt into later worktree execution behavior.
+Existing projects keep project-mounted execution unless they explicitly opt
+into `work.workspace_mode: worktree`. In worktree mode, ticket execution
+prepares the isolated Git worktree first and the runtime mount points Docker at
+that execution workspace.
 
 Human output uses project-relative paths for files inside the managed project
 and groups path checks under `checks:`.

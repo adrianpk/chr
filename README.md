@@ -29,8 +29,9 @@ questions. The agent does the heavy work after that. It formalizes the feature,
 plans the implementation, creates tickets, executes them one by one or as a
 ready queue, then records what happened.
 
-Ticket work runs through a Docker-based sandboxed runtime boundary. Execution
-is explicit, inspectable, and separated from the host workflow.
+Ticket work runs through a Docker-based sandboxed runtime boundary. When
+enabled, ticket worktrees keep agent edits out of the user's active checkout
+while keeping execution explicit and inspectable.
 
 ## Control Surface
 

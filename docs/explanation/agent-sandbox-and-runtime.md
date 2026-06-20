@@ -56,12 +56,20 @@ output. Evidence can include:
 This evidence lets the user inspect what happened, where the agent got stuck,
 and what should happen next.
 
-## Current Boundary
+## Workspace Boundary
 
-The current execution model mounts the existing project workspace into the
-container. The host project and the runtime view are therefore the same working
-tree through the Docker mount.
+ChrysoCoord separates the user-visible project checkout from the execution
+workspace used by the runtime plan.
 
-This keeps the model simple and inspectable. It also means the user should avoid
-editing the project while an agent run is active. Clone-based execution and
-PAT-backed push from inside the container are later runtime-workspace concerns.
+In `project` mode, both paths are the same directory. The host project and the
+runtime view are the same working tree through the Docker mount.
+
+In `worktree` mode, ChrysoCoord prepares a ticket-specific Git worktree before
+the worker starts. Docker mounts that worktree into the container, so agent
+edits happen outside the user's active checkout while still using normal Git
+branches and local artifacts.
+
+The host-side `chc` process still owns coordination, readiness checks, event
+streams, result capture, validation, and ticket updates. The container receives
+the prepared workspace and explicit context; it does not choose a different
+repository boundary by itself.

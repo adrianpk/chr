@@ -191,9 +191,8 @@ Supported work fields:
 - `allow_branch_creation`: whether safe repair may create the configured local
   branch.
 - `workspace_mode`: workspace execution mode. Defaults to `project`.
-- `worktree_root`: project-relative or absolute root for future ticket
-  worktrees.
-- `worktree_base`: base selection policy for future ticket worktree creation.
+- `worktree_root`: project-relative or absolute root for ticket worktrees.
+- `worktree_base`: base selection policy for ticket worktree creation.
   Supported values are `remote_integration_branch`, `local_integration_branch`,
   and `current_branch`.
 - `worktree_cleanup`: cleanup policy for clean merged ticket worktrees.
@@ -274,7 +273,8 @@ Path semantics:
 - `project_root`: absolute path to the managed project.
 - `project_checkout`: absolute path to the user-visible checkout.
 - `execution_workspace`: absolute path where agent execution is expected to
-  operate. In `project` mode this is the same path as `project_checkout`.
+  operate. In `project` mode this is the same path as `project_checkout`. In
+  `worktree` mode this is the prepared ticket worktree.
 - `workspace_mode`: effective work workspace mode.
 - `workspace_root`: absolute path to `.chc/` inside the project.
 - `dockerfile`: absolute path resolved from `runtime.dockerfile`.
@@ -285,13 +285,14 @@ Path semantics:
 
 Docker mount contract:
 
-- the project root is mounted read-write into the container;
+- the execution workspace is mounted read-write into the container;
 - the container target is `runtime.workdir`;
 - relative container workdirs are normalized to absolute paths.
 
-During the isolated ticket worktree rollout, the runtime plan exposes
-`execution_workspace` before changing the writable Docker mount source. Project
-mode therefore remains fully compatible with existing managed projects.
+Project mode remains fully compatible with existing managed projects because
+the execution workspace is the user-visible project checkout. Worktree mode
+changes only the execution workspace: ChrysoCoord prepares a ticket-specific Git
+worktree and mounts that path into Docker.
 
 The planner only computes paths and mount metadata. It does not create
 directories, build images, run Docker, or execute validation commands.

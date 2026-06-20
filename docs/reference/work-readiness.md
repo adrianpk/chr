@@ -64,19 +64,26 @@ Unknown modes are configuration errors.
 
 ## Workspace Execution Mode
 
-Workspace execution configuration defines where future ticket execution work
-will be prepared.
+Workspace execution configuration defines where ticket execution work is
+prepared before the Docker runtime starts.
 
 | Field | Values | Behavior |
 | --- | --- | --- |
-| `workspace_mode` | `project`, `worktree` | `project` preserves the current project checkout execution boundary. `worktree` opts into isolated ticket worktree preparation as that behavior is introduced by the isolated worktree delivery cycle. |
+| `workspace_mode` | `project`, `worktree` | `project` runs ticket work in the user-visible project checkout. `worktree` prepares a ticket-specific Git worktree and runs the agent against that isolated workspace. |
 | `worktree_root` | project-relative or absolute path | Directory used for ticket worktrees when `workspace_mode` is `worktree`. |
-| `worktree_base` | `remote_integration_branch`, `local_integration_branch`, `current_branch` | Base selection policy for future worktree creation. |
+| `worktree_base` | `remote_integration_branch`, `local_integration_branch`, `current_branch` | Base selection policy for ticket worktree creation. |
 | `worktree_cleanup` | `after_merge`, `manual`, `never` | Cleanup policy for clean merged ticket worktrees. |
 
-Current default behavior remains project-mounted execution. The worktree fields
-are parsed, validated, and exposed in runtime planning so later slices can move
-execution without changing the config contract again.
+Default behavior remains project-mounted execution for compatibility. Projects
+that set `workspace_mode: worktree` get a deterministic ticket worktree under
+`worktree_root`, execution paths inside that worktree, and worktree metadata
+under `<worktree_root>/.metadata/`.
+
+In worktree mode, ChrysoCoord still checks the user checkout before starting
+work. The user checkout readiness check protects the integration branch and
+remote tracking state, while the ticket worktree inspection reports whether the
+isolated execution workspace is missing, clean, dirty, mismatched, branch-owned
+elsewhere, or orphaned.
 
 ## Diagnostics
 
@@ -101,6 +108,7 @@ Typical blocking diagnostics include:
   rebase.
 - `git_unavailable`: Git state could not be inspected.
 - `policy_invalid`: work configuration is invalid.
+- `worktree_root_missing`: the configured ticket worktree root does not exist.
 
 Work may start only when there are no blocking diagnostics.
 
@@ -116,6 +124,7 @@ chc work doctor --fix-safe
 Safe repair may:
 
 - add ChrysoCoord runtime artifact paths to local ignore state;
+- create the configured ticket worktree root;
 - fetch the configured canonical remote;
 - fast-forward the configured integration branch;
 - switch to the configured branch when no user work would be lost;
