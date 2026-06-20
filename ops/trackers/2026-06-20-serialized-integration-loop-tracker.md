@@ -28,7 +28,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | T1.3 | Add a side-effect-free cycle planning function for one selected ticket. | done | pending | Planner returns selected-ticket cycle metadata with no IO or ticket mutation. |
 | T1.4 | Decide whether Slice 1 introduces a dedicated `integration_cycles` table or defers it. | done | pending | Deferred table creation; Slice 1 uses existing durable state plus side-effect-free planning contracts. |
 | T1.5 | If a table is introduced, add an additive migration and repository tests. | done | pending | Not applicable for Slice 1 because the table was explicitly deferred. |
-| T1.6 | Add tests for policy mapping across `human_review`, `agentic_review`, and `trusted_auto_merge`. | pending | pending | |
+| T1.6 | Add tests for policy mapping across `human_review`, `agentic_review`, and `trusted_auto_merge`. | done | pending | Added table-driven tests for policy mapping, planner validation, and value validation. |
 | T1.7 | Add docs or reference notes for cycle mode semantics. | pending | pending | |
 | T1.8 | Add the slice implementation report and validation evidence. | pending | pending | |
 
@@ -98,6 +98,10 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 ## Validation Log
 
 - Planning: `git diff --check` (pass)
+- Slice 1 T1.1: `go test ./internal/core` (pass)
+- Slice 1 T1.2: `go test ./internal/core -run 'ReviewWorkflow|IntegrationCycle'` (pass)
+- Slice 1 T1.3: `go test ./internal/core -run IntegrationCycle` (pass)
+- Slice 1 T1.6: `go test ./internal/core -run 'IntegrationCycle'` (pass)
 
 ## Open Decisions
 

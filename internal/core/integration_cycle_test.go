@@ -1,0 +1,158 @@
+package core
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
+	for _, testCase := range []struct {
+		name   string
+		mode   ReviewWorkflowMode
+		policy IntegrationCyclePolicy
+	}{
+		{
+			name: "human review",
+			mode: ReviewWorkflowModeHumanReview,
+			policy: IntegrationCyclePolicy{
+				Mode:                IntegrationCycleModeHumanReview,
+				RequiresReview:      true,
+				RequiresHumanReview: true,
+				RequiresMerge:       false,
+			},
+		},
+		{
+			name: "agentic review",
+			mode: ReviewWorkflowModeAgenticReview,
+			policy: IntegrationCyclePolicy{
+				Mode:           IntegrationCycleModeAgenticReview,
+				RequiresReview: true,
+				RequiresMerge:  true,
+			},
+		},
+		{
+			name: "trusted auto merge",
+			mode: ReviewWorkflowModeTrustedAutoMerge,
+			policy: IntegrationCyclePolicy{
+				Mode:          IntegrationCycleModeTrustedAutoMerge,
+				RequiresMerge: true,
+			},
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			got, err := IntegrationCyclePolicyFromReviewConfig(ReviewWorkflowConfig{
+				Mode: testCase.mode,
+			})
+			if err != nil {
+				t.Fatalf("IntegrationCyclePolicyFromReviewConfig returned error: %v", err)
+			}
+
+			if got != testCase.policy {
+				t.Fatalf("policy = %#v, want %#v", got, testCase.policy)
+			}
+		})
+	}
+}
+
+func TestIntegrationCyclePolicyFromReviewConfigRejectsInvalidConfig(t *testing.T) {
+	_, err := IntegrationCyclePolicyFromReviewConfig(ReviewWorkflowConfig{
+		Mode: "unknown",
+	})
+	if err == nil || !strings.Contains(err.Error(), "invalid review workflow mode: unknown") {
+		t.Fatalf("error = %v, want invalid review workflow mode", err)
+	}
+}
+
+func TestPlanIntegrationCycleBuildsSelectedPendingPlan(t *testing.T) {
+	ticket := IndexedTicket{
+		Key:    "CHC-1",
+		Title:  "Add serialized loop",
+		Status: TicketStatusReadyForDev,
+	}
+
+	got, err := PlanIntegrationCycle(IntegrationCyclePlanOptions{
+		ProjectID: "project-1",
+		Ticket:    ticket,
+		ReviewConfig: ReviewWorkflowConfig{
+			Mode: ReviewWorkflowModeAgenticReview,
+		},
+	})
+	if err != nil {
+		t.Fatalf("PlanIntegrationCycle returned error: %v", err)
+	}
+
+	if got.ProjectID != "project-1" || got.Ticket.Key != "CHC-1" {
+		t.Fatalf("plan identity = %#v, want project and ticket identity", got)
+	}
+
+	if got.Policy.Mode != IntegrationCycleModeAgenticReview || !got.Policy.RequiresReview || !got.Policy.RequiresMerge {
+		t.Fatalf("policy = %#v, want agentic review policy", got.Policy)
+	}
+
+	if got.Phase != IntegrationCyclePhaseSelected || got.Status != IntegrationCycleStatusPending || got.Blocker != IntegrationCycleBlockerNone {
+		t.Fatalf("plan state = phase %q status %q blocker %q, want selected pending none", got.Phase, got.Status, got.Blocker)
+	}
+}
+
+func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
+	for _, testCase := range []struct {
+		name string
+		opts IntegrationCyclePlanOptions
+		want string
+	}{
+		{
+			name: "missing project id",
+			opts: IntegrationCyclePlanOptions{
+				Ticket:       IndexedTicket{Key: "CHC-1"},
+				ReviewConfig: ReviewWorkflowConfig{Mode: ReviewWorkflowModeHumanReview},
+			},
+			want: "integration cycle project id is required",
+		},
+		{
+			name: "missing ticket key",
+			opts: IntegrationCyclePlanOptions{
+				ProjectID:    "project-1",
+				ReviewConfig: ReviewWorkflowConfig{Mode: ReviewWorkflowModeHumanReview},
+			},
+			want: "integration cycle ticket key is required",
+		},
+		{
+			name: "invalid review config",
+			opts: IntegrationCyclePlanOptions{
+				ProjectID:    "project-1",
+				Ticket:       IndexedTicket{Key: "CHC-1"},
+				ReviewConfig: ReviewWorkflowConfig{Mode: "unknown"},
+			},
+			want: "invalid review workflow mode: unknown",
+		},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			_, err := PlanIntegrationCycle(testCase.opts)
+			if err == nil || err.Error() != testCase.want {
+				t.Fatalf("error = %v, want %q", err, testCase.want)
+			}
+		})
+	}
+}
+
+func TestIntegrationCycleValuesValidateSupportedConstants(t *testing.T) {
+	if !IntegrationCycleModeAgenticReview.Valid() || IntegrationCycleMode("unknown").Valid() {
+		t.Fatal("IntegrationCycleMode.Valid returned unexpected result")
+	}
+
+	if !IntegrationCyclePhaseReviewing.Valid() || IntegrationCyclePhase("unknown").Valid() {
+		t.Fatal("IntegrationCyclePhase.Valid returned unexpected result")
+	}
+
+	if !IntegrationCycleStatusBlocked.Valid() || IntegrationCycleStatus("unknown").Valid() {
+		t.Fatal("IntegrationCycleStatus.Valid returned unexpected result")
+	}
+
+	if !IntegrationCycleBlockerMergeBlocked.Valid() || IntegrationCycleBlocker("unknown").Valid() {
+		t.Fatal("IntegrationCycleBlocker.Valid returned unexpected result")
+	}
+
+	if !IntegrationReviewDecisionNeedsChanges.Valid() || IntegrationReviewDecision("unknown").Valid() {
+		t.Fatal("IntegrationReviewDecision.Valid returned unexpected result")
+	}
+}
