@@ -1,6 +1,6 @@
 # Serialized Integration Loop Tracker
 
-Status: active
+Status: delivered
 
 Plan: `ops/plans/2026-06-20-serialized-integration-loop-plan.md`
 
@@ -17,7 +17,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | Slice 3 | high-level agentic review | delivered | `feat/slice-3-high-level-agentic-review` | `#338` | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | delivered | `feat/slice-4-merge-before-next-ticket` | `#339` | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |
 | Slice 5 | finite repair cycle | delivered | `feat/slice-5-finite-repair-cycle` | `#340` | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
-| Slice 6 | observability docs and QA | reviewing | `feat/slice-6-observability-docs-and-qa` | `#341` | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
+| Slice 6 | observability docs and QA | delivered | `feat/slice-6-observability-docs-and-qa` | `#341` | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
 
 ## Slice 1 Tasks
 

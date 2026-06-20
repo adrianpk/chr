@@ -1,8 +1,8 @@
 # Serialized Integration Loop Plan
 
-Status: active
+Status: delivered
 
-Active Slice: Slice 6: observability docs and QA
+Active Slice: none
 
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 
