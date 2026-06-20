@@ -16,7 +16,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | Slice 2 | one-ticket cycle runner | delivered | `feat/slice-2-one-ticket-cycle-runner` | `#337` | `.prj/reports/slices/serialized-integration-loop/slice-2-one-ticket-cycle-runner.md` |
 | Slice 3 | high-level agentic review | delivered | `feat/slice-3-high-level-agentic-review` | `#338` | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | delivered | `feat/slice-4-merge-before-next-ticket` | `#339` | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |
-| Slice 5 | finite repair cycle | active | `feat/slice-5-finite-repair-cycle` | pending | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
+| Slice 5 | finite repair cycle | reviewing | `feat/slice-5-finite-repair-cycle` | pending | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
 | Slice 6 | observability docs and QA | planned | `feat/slice-6-observability-docs-and-qa` | pending | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
 
 ## Slice 1 Tasks
@@ -74,13 +74,13 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Add durable repair count handling. | pending | pending | |
-| T5.2 | Feed review findings into the repair worker context. | pending | pending | |
-| T5.3 | Ensure repair selection outranks all later normal work. | pending | pending | |
-| T5.4 | Re-run review after repair. | pending | pending | |
-| T5.5 | Block after the configured/default repair limit. | pending | pending | |
-| T5.6 | Add tests for one successful repair, repeated review failure, missing repair handoff, and later-ticket blocking. | pending | pending | |
-| T5.7 | Add the slice implementation report and validation evidence. | pending | pending | |
+| T5.1 | Add durable repair count handling. | done | `9c24b96` | Repair count is derived from durable `review_round` metadata. |
+| T5.2 | Feed review findings into the repair worker context. | done | `02332d9` | Repair handoff now includes local blocking findings alongside the review comments URL. |
+| T5.3 | Ensure repair selection outranks all later normal work. | done | `9c24b96`, `3796633` | Repair tickets continue to outrank later normal work; service tests prove later work waits while repair runs or blocks. |
+| T5.4 | Re-run review after repair. | done | `c161c18` | The loop executes repair and invokes agentic review again before merge decisions. |
+| T5.5 | Block after the configured/default repair limit. | done | `9c24b96`, `c161c18`, `3796633` | The default limit is one repair execution; repeated `needs_changes` blocks the loop. |
+| T5.6 | Add tests for one successful repair, repeated review failure, missing repair handoff, and later-ticket blocking. | done | `9c24b96`, `02332d9`, `3796633` | Core covers repair limits and handoff blockers; app covers successful repair and repeated review failure before later tickets. |
+| T5.7 | Add the slice implementation report and validation evidence. | done | this commit | Report added with final validation evidence. |
 
 ## Slice 6 Tasks
 
@@ -118,6 +118,11 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 - Slice 4: `go test ./internal/app` (pass)
 - Slice 4: `make lint-strict` (pass)
 - Slice 4: `make verify` (pass)
+- Slice 5: `go test ./internal/core -run 'TicketReviewRepair|RepairHandoff|CodexWorkerContext'` (pass)
+- Slice 5: `go test ./internal/app -run 'Repair|AgenticReview|StartAllReadyAgentWork|WorkRunAll'` (pass)
+- Slice 5: `go test ./internal/app ./internal/core` (pass)
+- Slice 5: `make lint-strict` (pass)
+- Slice 5: `make verify` (pass)
 
 ## Open Decisions
 
