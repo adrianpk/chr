@@ -22,6 +22,7 @@ type AgentWorkResult struct {
 	Execution     *core.ExecutionRecord
 	LoopRun       *core.LoopRunRecord
 	Executions    []core.ExecutionRecord
+	Merges        []core.TicketMergeCommandResult
 	SelectedQueue []core.IndexedTicket
 	EligibleCount int
 }
@@ -38,6 +39,7 @@ type agentWorkLoopSelection struct {
 	Tickets       []core.IndexedTicket
 	EligibleCount int
 	ReviewConfig  core.ReviewWorkflowConfig
+	WorkConfig    core.WorkConfig
 }
 
 type agentWorkIntegrationCycleState struct {
@@ -243,6 +245,7 @@ func (s service) startAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkRe
 		Tickets:       reloaded.Tickets,
 		LoopRun:       &result.Record,
 		Executions:    result.Executions,
+		Merges:        result.Merges,
 		SelectedQueue: selectedQueue,
 		EligibleCount: eligibleCount,
 	}, nil
@@ -361,29 +364,57 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	state.Result.Applications = append(state.Result.Applications, application)
 	state.Record.ProcessedCount++
 
-	if agentWorkCycleRunsAgenticReview(cyclePlan.Policy, application) {
-		if err := s.runAgenticReviewCycle(execution, application, selection.ReviewConfig); err != nil {
-			return state, false, err
-		}
-	}
-
-	if agentWorkCycleStopsAfterDevelopment(cyclePlan.Policy, application) {
+	if application.TicketStatus == core.TicketResultStatusBlocked {
 		state.Record.BlockedCount++
 
 		return state, true, nil
 	}
 
+	cycleTicket := ticket
+	if agentWorkCycleRunsAgenticReview(cyclePlan.Policy, application) {
+		cycleTicket, err = s.runAgenticReviewCycle(ticket, execution, application, selection.ReviewConfig)
+		if err != nil {
+			return state, false, err
+		}
+	} else if agentWorkCycleRunsTrustedAutoMergeReview(cyclePlan.Policy, application) {
+		cycleTicket, err = s.runTrustedAutoMergeReviewCycle(ticket, execution, application)
+		if err != nil {
+			return state, false, err
+		}
+	}
+
+	if agentWorkCycleStopsBeforeMerge(cyclePlan.Policy) || !agentWorkCycleTicketReadyForMerge(cyclePlan.Policy, cycleTicket) {
+		state.Record.BlockedCount++
+
+		return state, true, nil
+	}
+
+	if cyclePlan.Policy.RequiresMerge {
+		merge, err := s.runAgentWorkMergeCycle(cycleTicket, execution, selection.WorkConfig, selection.ReviewConfig)
+		if err != nil {
+			return state, false, err
+		}
+
+		state.Result.Merges = append(state.Result.Merges, merge)
+		if agentWorkCycleMergeBlocked(merge) {
+			state.Record.BlockedCount++
+
+			return state, true, nil
+		}
+	}
+
 	return state, false, nil
 }
 
-func (s service) runAgenticReviewCycle(execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) error {
+func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) (core.IndexedTicket, error) {
 	reviewedAt := s.now().UTC()
 	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
 
 	ticket, err := parseAgenticReviewTicket(s.ctx, s.projectContext.ProjectID, reviewProjectDir, application.TicketPath, reviewedAt)
 	if err != nil {
-		return err
+		return core.IndexedTicket{}, err
 	}
+	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
 
 	artifact, err := newAgenticReviewRunner().Review(s.ctx, core.AgenticReviewContext{
 		ProjectID:           s.projectContext.ProjectID,
@@ -394,24 +425,143 @@ func (s service) runAgenticReviewCycle(execution core.ExecutionRecord, applicati
 		ExecutionReportPath: core.ExecutionReportPath(execution),
 	})
 	if err != nil {
-		return err
+		return core.IndexedTicket{}, err
 	}
 
-	_, err = core.ApplyAgenticReviewResult(core.ApplyAgenticReviewResultOptions{
+	result, err := core.ApplyAgenticReviewResult(core.ApplyAgenticReviewResultOptions{
 		Ticket:     ticket,
 		Artifact:   artifact,
 		ReviewedAt: reviewedAt,
 	})
 	if err != nil {
-		return err
+		return core.IndexedTicket{}, err
 	}
 
 	err = writeAgenticReviewNonBlockingComments(s.ctx, ticket.Path, artifact.Result.NonBlockingNotes, config.NonBlockingCommentLimit, reviewedAt)
 	if err != nil {
-		return err
+		return core.IndexedTicket{}, err
 	}
 
-	return s.refreshAgenticReviewTicketIndex(execution, ticket.Path, reviewedAt)
+	if err := s.refreshAgenticReviewTicketIndex(execution, ticket.Path, reviewedAt); err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	ticket.Status = result.Status
+	ticket.ReviewState = result.ReviewState
+	ticket.ReviewResult = result.ReviewResult
+	ticket.ReviewRound = result.ReviewRound
+
+	return ticket, nil
+}
+
+func (s service) runTrustedAutoMergeReviewCycle(selected core.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication) (core.IndexedTicket, error) {
+	reviewedAt := s.now().UTC()
+	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
+
+	ticket, err := parseAgenticReviewTicket(s.ctx, s.projectContext.ProjectID, reviewProjectDir, application.TicketPath, reviewedAt)
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
+
+	result, err := core.ApplyTrustedAutoMergeReview(core.ApplyTrustedAutoMergeReviewOptions{
+		Ticket:     ticket,
+		ReviewedAt: reviewedAt,
+	})
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	if err := s.refreshAgenticReviewTicketIndex(execution, ticket.Path, reviewedAt); err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	ticket.Status = result.Status
+	ticket.ReviewState = result.ReviewState
+	ticket.ReviewResult = result.ReviewResult
+	ticket.ReviewRound = result.ReviewRound
+
+	return ticket, nil
+}
+
+func agentWorkTicketWithSelectedReviewMetadata(ticket, selected core.IndexedTicket) core.IndexedTicket {
+	if ticket.Branch == "" {
+		ticket.Branch = selected.Branch
+	}
+
+	if len(ticket.ReviewRefs) == 0 {
+		ticket.ReviewRefs = selected.ReviewRefs
+	}
+
+	return ticket
+}
+
+func (s service) runAgentWorkMergeCycle(
+	ticket core.IndexedTicket,
+	execution core.ExecutionRecord,
+	workConfig core.WorkConfig,
+	reviewConfig core.ReviewWorkflowConfig,
+) (core.TicketMergeCommandResult, error) {
+	mergedAt := s.now().UTC()
+
+	tickets, err := s.agentWorkMergeTickets(execution, mergedAt)
+	if err != nil {
+		return core.TicketMergeCommandResult{}, err
+	}
+
+	result, err := core.RunTicketMergeCommand(s.ctx, core.TicketMergeCommandOptions{
+		Ticket:        ticket,
+		Tickets:       tickets,
+		Remote:        core.NewRemoteReviewAdapter(reviewConfig.Providers, reviewRemoteCommandRunner),
+		ExpectedBase:  workConfig.BranchPolicy.IntegrationBranch,
+		MergeStrategy: core.TicketMergeStrategyRebase,
+		ProjectDir:    s.projectContext.ProjectDir,
+		BranchPolicy:  workConfig.BranchPolicy,
+		Workspace:     workConfig.Workspace,
+		MergedAt:      mergedAt,
+	})
+	if err != nil {
+		return core.TicketMergeCommandResult{}, err
+	}
+
+	if err := s.refreshAgenticReviewTicketIndex(execution, ticket.Path, mergedAt); err != nil {
+		return core.TicketMergeCommandResult{}, err
+	}
+
+	return result, nil
+}
+
+func (s service) agentWorkMergeTickets(execution core.ExecutionRecord, indexedAt time.Time) ([]core.IndexedTicket, error) {
+	if execution.Workspace.Mode == core.WorkWorkspaceModeWorktree {
+		return parseProjectTicketsFromDir(s.ctx, s.projectContext.ProjectID, agenticReviewProjectDir(s.projectContext, execution), indexedAt)
+	}
+
+	return s.listProjectTickets()
+}
+
+func parseProjectTicketsFromDir(ctx context.Context, projectID, projectDir string, indexedAt time.Time) ([]core.IndexedTicket, error) {
+	files, err := core.NewTicketFileDiscoverer().DiscoverTicketFiles(ctx, core.DiscoverTicketFilesOptions{ProjectDir: projectDir})
+	if err != nil {
+		return nil, err
+	}
+
+	parser := core.NewTicketParser()
+	tickets := make([]core.IndexedTicket, 0, len(files))
+	for _, file := range files {
+		ticket, err := parser.ParseTicket(ctx, core.ParseTicketOptions{
+			ProjectID:  projectID,
+			ProjectDir: projectDir,
+			Path:       file.Path,
+			IndexedAt:  indexedAt,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		tickets = append(tickets, ticket)
+	}
+
+	return tickets, nil
 }
 
 func parseAgenticReviewTicket(ctx context.Context, projectID, projectDir, ticketPath string, indexedAt time.Time) (core.IndexedTicket, error) {
@@ -529,6 +679,7 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 		Tickets:       tickets,
 		EligibleCount: len(eligibleTickets),
 		ReviewConfig:  config.Review,
+		WorkConfig:    config.Work,
 	}, nil
 }
 
@@ -592,12 +743,24 @@ func agentWorkCycleRunsAgenticReview(policy core.IntegrationCyclePolicy, applica
 	return policy.Mode == core.IntegrationCycleModeAgenticReview && application.TicketStatus != core.TicketResultStatusBlocked
 }
 
-func agentWorkCycleStopsAfterDevelopment(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
-	if application.TicketStatus == core.TicketResultStatusBlocked {
+func agentWorkCycleRunsTrustedAutoMergeReview(policy core.IntegrationCyclePolicy, application core.ResultApplication) bool {
+	return policy.Mode == core.IntegrationCycleModeTrustedAutoMerge && application.TicketStatus != core.TicketResultStatusBlocked
+}
+
+func agentWorkCycleStopsBeforeMerge(policy core.IntegrationCyclePolicy) bool {
+	return policy.RequiresHumanReview
+}
+
+func agentWorkCycleTicketReadyForMerge(policy core.IntegrationCyclePolicy, ticket core.IndexedTicket) bool {
+	if !policy.RequiresMerge {
 		return true
 	}
 
-	return policy.RequiresReview || policy.RequiresHumanReview || policy.RequiresMerge
+	return ticket.Status == core.TicketStatusReadyForMerge
+}
+
+func agentWorkCycleMergeBlocked(result core.TicketMergeCommandResult) bool {
+	return result.MergeState != core.TicketMergeStateMerged || result.Status != core.TicketStatusDone
 }
 
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {

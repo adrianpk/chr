@@ -504,6 +504,7 @@ type ticketLoopExecutionResult struct {
 	Record       core.LoopRunRecord
 	Executions   []core.ExecutionRecord
 	Applications []core.ResultApplication
+	Merges       []core.TicketMergeCommandResult
 }
 
 type ticketExecutionEvents struct {

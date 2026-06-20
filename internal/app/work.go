@@ -461,6 +461,13 @@ func printAgentWorkRunAllExecution(stdout io.Writer, result AgentWorkResult) err
 		}
 	}
 
+	for _, merge := range result.Merges {
+		_, err := fmt.Fprintf(stdout, "merge: %s\t%s\t%s\t%s\n", merge.TicketKey, merge.MergeState, merge.MergeResult, merge.MergeCommit)
+		if err != nil {
+			return fmt.Errorf("write agent work result: %w", err)
+		}
+	}
+
 	return nil
 }
 
