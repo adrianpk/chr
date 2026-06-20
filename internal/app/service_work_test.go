@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -302,30 +303,179 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 
 	writeRuntimeTemplate(t, projectDir)
 	writeAgenticReviewLoopConfig(t, projectDir)
+	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+	defer restoreRunner()
+
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	runnerRemote.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
 
 	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
 		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
+		"CHC-2", "Ready backend",
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAllReadyAgentWork()
+	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
 	if err != nil {
 		t.Fatalf("StartAllReadyAgentWork returned error: %v", err)
 	}
 
-	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
-	assertAgenticReviewRunnerCall(t, runner, projectDir, "CHC-1")
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForMerge)
+	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 1)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 1)
+	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHC-1", "CHC-2"})
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-2", core.TicketStatusDone)
 	assertAgenticReviewRunArtifact(t, projectDir, "CHC-1", result.Executions[0].ID)
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `review_result: "pass"`)
+	assertTicketContains(t, ticketPath, `merge_state: "merged"`)
+	assertTicketContains(t, ticketPath, `merge_result: "merged"`)
 	assertTicketContains(t, ticketPath, "Agentic review note (cosmetic): Optional wording cleanup")
+
+	if len(result.Merges) != 2 {
+		t.Fatalf("merges = %d, want 2", len(result.Merges))
+	}
+}
+
+func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+	installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
+		Decision: core.IntegrationReviewDecisionPass,
+		Summary:  "Implementation is correct and validation evidence is sufficient.",
+	})
+
+	writeRuntimeTemplate(t, projectDir)
+	writeAgenticReviewLoopConfig(t, projectDir)
+	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+	defer restoreRunner()
+	runnerRemote.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":false}`)
+
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-2", "Ready backend"),
+		time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
+	))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	if err != nil {
+		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
+	}
+
+	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForMerge)
+	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
+	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
+	assertTicketContains(t, ticketPath, `merge_blocker: "not_mergeable"`)
+
+	if len(result.Merges) != 1 || result.Merges[0].MergeState != core.TicketMergeStateBlocked {
+		t.Fatalf("merge result = %#v, want one blocked merge", result.Merges)
+	}
+}
+
+func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+	installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
+		Decision: core.IntegrationReviewDecisionPass,
+		Summary:  "Implementation is correct and validation evidence is sufficient.",
+	})
+
+	writeRuntimeTemplate(t, projectDir)
+	writeAgenticReviewLoopConfig(t, projectDir)
+	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+	defer restoreRunner()
+
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	runnerRemote.inputErrs[mergeCommand] = errors.New("provider failed")
+
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-2", "Ready backend"),
+		time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
+	))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	if err != nil {
+		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
+	}
+
+	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForMerge)
+	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
+	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
+	assertTicketContains(t, ticketPath, `merge_blocker: "provider failed"`)
+
+	if len(result.Merges) != 1 || result.Merges[0].MergeState != core.TicketMergeStateBlocked {
+		t.Fatalf("merge result = %#v, want one blocked merge", result.Merges)
+	}
+}
+
+func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+	runner := installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
+		Decision: core.IntegrationReviewDecisionNeedsChanges,
+		Summary:  "This runner must not be called in trusted auto-merge mode.",
+	})
+
+	writeRuntimeTemplate(t, projectDir)
+	writeTrustedAutoMergeLoopConfig(t, projectDir)
+	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+	defer restoreRunner()
+
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	runnerRemote.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-2", "Ready backend"),
+		time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
+	))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	if err != nil {
+		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
+	}
+
+	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 1)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 1)
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-2", core.TicketStatusDone)
+
+	if len(runner.reviews) != 0 {
+		t.Fatalf("agentic review calls = %d, want 0", len(runner.reviews))
+	}
+
+	if len(result.Merges) != 2 {
+		t.Fatalf("merges = %d, want 2", len(result.Merges))
+	}
 }
 
 func TestServiceStartAllReadyAgentWorkHandlesAgenticReviewNeedsChanges(t *testing.T) {
@@ -385,6 +535,26 @@ func assertAgentWorkLoopRunBlockedAfterOneTicket(t *testing.T, record core.LoopR
 
 	if record.BlockedCount != 1 {
 		t.Fatalf("LoopRun.BlockedCount = %d, want 1", record.BlockedCount)
+	}
+}
+
+func assertAgentWorkLoopRunProcessedTwoTickets(t *testing.T, record core.LoopRunRecord) {
+	t.Helper()
+
+	if record.Status != core.LoopRunStatusSucceeded {
+		t.Fatalf("LoopRun.Status = %q, want %q", record.Status, core.LoopRunStatusSucceeded)
+	}
+
+	if record.EligibleCount != 2 {
+		t.Fatalf("LoopRun.EligibleCount = %d, want 2", record.EligibleCount)
+	}
+
+	if record.ProcessedCount != 2 {
+		t.Fatalf("LoopRun.ProcessedCount = %d, want 2", record.ProcessedCount)
+	}
+
+	if record.BlockedCount != 0 {
+		t.Fatalf("LoopRun.BlockedCount = %d, want 0", record.BlockedCount)
 	}
 }
 
@@ -636,14 +806,22 @@ func writeAgenticReviewLoopConfig(t *testing.T, projectDir string) {
 `)
 }
 
+func writeTrustedAutoMergeLoopConfig(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeCLIWorkspaceConfig(t, projectDir, `review:
+  mode: trusted_auto_merge
+`)
+}
+
 func testLoopTicketWithPullRequestRef(key, title string) core.Ticket {
 	ticket := testLoopTicket(key, title, core.TicketStatusReadyForDev, "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"})
-	ticket.Branch = "feat/" + strings.ToLower(key) + "-ready"
+	ticket.Branch = "feat/slice-2-pr-reference-workflow"
 	ticket.ReviewRefs = []core.TicketReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
-		URL:      "https://forge.example.com/adrianpk/chc/pulls/338",
-		ID:       "338",
+		URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+		ID:       "274",
 		Status:   "open",
 	}}
 
@@ -664,6 +842,25 @@ func assertAgenticReviewRunnerCall(t *testing.T, runner *fakeServiceAgenticRevie
 
 	if review.Ticket.Key != ticketKey {
 		t.Fatalf("review ticket = %q, want %q", review.Ticket.Key, ticketKey)
+	}
+}
+
+func assertAgenticReviewRunnerCalls(t *testing.T, runner *fakeServiceAgenticReviewRunner, projectDir string, ticketKeys []string) {
+	t.Helper()
+
+	if len(runner.reviews) != len(ticketKeys) {
+		t.Fatalf("agentic review calls = %d, want %d", len(runner.reviews), len(ticketKeys))
+	}
+
+	for index, ticketKey := range ticketKeys {
+		review := runner.reviews[index]
+		if review.ProjectDir != projectDir {
+			t.Fatalf("review[%d] ProjectDir = %q, want %q", index, review.ProjectDir, projectDir)
+		}
+
+		if review.Ticket.Key != ticketKey {
+			t.Fatalf("review[%d] ticket = %q, want %q", index, review.Ticket.Key, ticketKey)
+		}
 	}
 }
 
