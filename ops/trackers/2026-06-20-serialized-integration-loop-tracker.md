@@ -62,13 +62,13 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add merge phase orchestration to the cycle runner. | pending | pending | |
-| T4.2 | Reuse existing ticket merge command/preflight behavior instead of duplicating provider logic. | pending | pending | |
-| T4.3 | Ensure `trusted_auto_merge` still requires merge before continuing. | pending | pending | |
-| T4.4 | Add tests proving ticket 2 starts only after ticket 1 has merge metadata and status `done`. | pending | pending | |
-| T4.5 | Add tests for merge preflight blocked, provider merge failed, and cleanup after merge. | pending | pending | |
-| T4.6 | Update loop report output with merge phase and merge result. | pending | pending | |
-| T4.7 | Add the slice implementation report and validation evidence. | pending | pending | |
+| T4.1 | Add merge phase orchestration to the cycle runner. | done | `b78afb3`, `76883ad` | The work loop now runs merge after review pass before selecting later tickets. |
+| T4.2 | Reuse existing ticket merge command/preflight behavior instead of duplicating provider logic. | done | `b78afb3` | Loop merge delegates to `core.RunTicketMergeCommand` with configured work and review settings. |
+| T4.3 | Ensure `trusted_auto_merge` still requires merge before continuing. | done | `79f4c6a`, `b78afb3`, `6f6460e` | Trusted mode writes pass review handoff metadata and still merges before continuing. |
+| T4.4 | Add tests proving ticket 2 starts only after ticket 1 has merge metadata and status `done`. | done | `6f6460e`, `76883ad` | Service tests cover two-ticket continuation only after merge success. |
+| T4.5 | Add tests for merge preflight blocked, provider merge failed, and cleanup after merge. | done | `6f6460e` | Service tests cover blocked preflight and provider failure; cleanup remains covered by existing merge command tests. |
+| T4.6 | Update loop report output with merge phase and merge result. | done | `b78afb3` | `work run-all` execution output now includes merge result rows. |
+| T4.7 | Add the slice implementation report and validation evidence. | done | this commit | Report added with final validation evidence. |
 
 ## Slice 5 Tasks
 
@@ -113,6 +113,11 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 - Slice 3: `make lint-strict` (pass)
 - Slice 3: `go test ./internal/app ./internal/core` (pass)
 - Slice 3: `make verify` (pass)
+- Slice 4: `go test ./internal/app -run 'StartAllReadyAgentWork|WorkRunAll'` (pass)
+- Slice 4: `go test ./internal/core -run 'TrustedAutoMerge|TicketMergeCommand|TicketMergePreflight|IntegrationCycle'` (pass)
+- Slice 4: `go test ./internal/app` (pass)
+- Slice 4: `make lint-strict` (pass)
+- Slice 4: `make verify` (pass)
 
 ## Open Decisions
 
