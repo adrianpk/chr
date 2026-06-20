@@ -2238,6 +2238,7 @@ func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 		},
 		Observability: ObservabilityView{
 			LatestExecution: ExecutionView{ID: "exec-1", TicketKey: "CHC-1", Status: "succeeded"},
+			LatestEvent:     AgentEventView{Phase: "merge_finished", Message: "CHC-1 merge finished: merged"},
 			LatestLoop: LoopRunView{
 				ID:             "loop-1",
 				Status:         "succeeded",
@@ -2256,6 +2257,8 @@ func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 		"Ready frontend",
 		"Current",
 		"Loop: loop-1",
+		"Phase: merge_finished",
+		"Last event: CHC-1 merge finished: merged",
 		"Execution: exec-1",
 		"Recent",
 		"a Run all ready tickets",
@@ -3638,6 +3641,10 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 
 	if view.RecentEvents[0].RuntimeLog != ".chc/user/runtime/runs/CHC-2/exec-new/runtime.log" {
 		t.Fatalf("RecentEvents[0].RuntimeLog = %q, want relative runtime log path", view.RecentEvents[0].RuntimeLog)
+	}
+
+	if view.LatestEvent.Phase != string(core.AgentEventPhaseWorkerStarted) {
+		t.Fatalf("LatestEvent.Phase = %q, want worker_started", view.LatestEvent.Phase)
 	}
 }
 

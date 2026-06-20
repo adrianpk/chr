@@ -25,6 +25,10 @@ func TestNewLoopReportBuildsSummaryFromLoopRun(t *testing.T) {
 	if report.ExecutionSummary.Total != 0 {
 		t.Fatalf("ExecutionSummary.Total = %d, want 0", report.ExecutionSummary.Total)
 	}
+
+	if report.StopReason != "loop stopped because the current ticket integration cycle blocked" {
+		t.Fatalf("StopReason = %q, want blocked cycle reason", report.StopReason)
+	}
 }
 
 func TestNewLoopReportIncludesRelatedExecutions(t *testing.T) {
@@ -111,6 +115,8 @@ func TestRenderLoopReportMarkdownIncludesLoopEvidence(t *testing.T) {
 		"- eligible: 3",
 		"- processed: 2",
 		"- blocked: 1",
+		"## Stop Reason",
+		"- reason: loop stopped because the current ticket integration cycle blocked",
 		"## Executions",
 		"- total: 2",
 		"- exec-1 CHC-1 succeeded",

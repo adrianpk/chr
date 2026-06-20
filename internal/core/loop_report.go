@@ -12,6 +12,7 @@ type LoopReport struct {
 	ProjectID        string
 	Status           LoopRunStatus
 	Counts           LoopReportCounts
+	StopReason       string
 	FailureReason    string
 	Executions       []LoopReportExecution
 	ExecutionSummary LoopReportExecutionSummary
@@ -75,6 +76,7 @@ func loopReportFromRecord(record LoopRunRecord) LoopReport {
 			Blocked:   record.BlockedCount,
 			Failed:    record.FailedCount,
 		},
+		StopReason:    loopReportStopReason(record),
 		FailureReason: record.FailureReason,
 		CreatedAt:     record.CreatedAt,
 		StartedAt:     record.StartedAt,
@@ -115,11 +117,31 @@ func RenderLoopReportMarkdown(report LoopReport) string {
 	output.WriteString("# Loop Report\n\n")
 	writeLoopReportSummary(&output, report)
 	writeLoopReportCounts(&output, report.Counts)
+	writeLoopReportStopReason(&output, report.StopReason)
 	writeLoopReportTimes(&output, report)
 	writeLoopReportExecutions(&output, report.Executions, report.ExecutionSummary)
 	writeLoopReportFailure(&output, report.FailureReason)
 
 	return output.String()
+}
+
+func loopReportStopReason(record LoopRunRecord) string {
+	switch {
+	case record.Status == LoopRunStatusFailed && strings.TrimSpace(record.FailureReason) != "":
+		return record.FailureReason
+	case record.Status == LoopRunStatusFailed:
+		return "loop failed before completing integration work"
+	case record.BlockedCount > 0:
+		return "loop stopped because the current ticket integration cycle blocked"
+	case record.Status == LoopRunStatusSucceeded && record.EligibleCount == 0:
+		return "loop completed with no eligible tickets"
+	case record.Status == LoopRunStatusSucceeded:
+		return "loop completed all selected integration cycles"
+	case record.Status == LoopRunStatusRunning:
+		return "loop is still running"
+	default:
+		return "loop stop reason is unknown"
+	}
 }
 
 func writeLoopReportSummary(output *strings.Builder, report LoopReport) {
@@ -136,6 +158,12 @@ func writeLoopReportCounts(output *strings.Builder, counts LoopReportCounts) {
 	writeLoopReportField(output, "processed", fmt.Sprintf("%d", counts.Processed))
 	writeLoopReportField(output, "blocked", fmt.Sprintf("%d", counts.Blocked))
 	writeLoopReportField(output, "failed", fmt.Sprintf("%d", counts.Failed))
+	output.WriteString("\n")
+}
+
+func writeLoopReportStopReason(output *strings.Builder, reason string) {
+	output.WriteString("## Stop Reason\n\n")
+	writeLoopReportField(output, "reason", reason)
 	output.WriteString("\n")
 }
 

@@ -18,6 +18,7 @@ type ObservabilityView struct {
 	DaemonFailure            string
 	LatestExecution          ExecutionView
 	LatestLoop               LoopRunView
+	LatestEvent              AgentEventView
 	RecentEvents             []AgentEventView
 	RuntimeImage             string
 	RuntimeDockerfile        string
@@ -30,6 +31,7 @@ type ObservabilityView struct {
 type AgentEventView struct {
 	Time            string
 	Level           string
+	Phase           string
 	TicketKey       string
 	Message         string
 	LoopID          string
@@ -90,6 +92,7 @@ func NewObservabilityView(
 		DaemonFailure:            daemon.FailureReason,
 		LatestExecution:          newExecutionView(projectDir, latestExecution(executions)),
 		LatestLoop:               newLoopRunView(latestLoopRun(loops)),
+		LatestEvent:              latestAgentEventView(projectDir, events),
 		RecentEvents:             newAgentEventViews(projectDir, events),
 		RuntimeImage:             runtime.Plan.Image,
 		RuntimeDockerfile:        relativeRuntimePath(projectDir, runtime.Plan.DockerfilePath),
@@ -105,6 +108,7 @@ func newAgentEventViews(projectDir string, events []core.AgentEvent) []AgentEven
 		views = append(views, AgentEventView{
 			Time:          renderAgentEventTime(event.Timestamp),
 			Level:         string(event.Level),
+			Phase:         string(event.Phase),
 			TicketKey:     event.TicketKey,
 			Message:       event.Message,
 			LoopID:        event.LoopID,
@@ -120,6 +124,27 @@ func newAgentEventViews(projectDir string, events []core.AgentEvent) []AgentEven
 	}
 
 	return views
+}
+
+func latestAgentEventView(projectDir string, events []core.AgentEvent) AgentEventView {
+	var latest core.AgentEvent
+
+	for _, event := range events {
+		if latest.Timestamp.IsZero() || event.Timestamp.After(latest.Timestamp) {
+			latest = event
+		}
+	}
+
+	if latest.Timestamp.IsZero() {
+		return AgentEventView{}
+	}
+
+	views := newAgentEventViews(projectDir, []core.AgentEvent{latest})
+	if len(views) == 0 {
+		return AgentEventView{}
+	}
+
+	return views[0]
 }
 
 func renderAgentEventTime(value time.Time) string {

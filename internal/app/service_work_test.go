@@ -535,6 +535,7 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `merge_state: "merged"`)
 	assertRepairExecutionContextContains(t, result.Executions[1], "correctness: Missing invalid input handling")
+	assertAgentWorkRepairEventPhases(t, projectDir, result)
 
 	if len(result.Merges) != 2 {
 		t.Fatalf("merges = %d, want 2", len(result.Merges))
@@ -680,6 +681,7 @@ func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result Agent
 		core.AgentEventPhaseValidationFinished,
 		core.AgentEventPhaseResultApplied,
 		core.AgentEventPhaseTicketStatusUpdated,
+		core.AgentEventPhaseCycleRehydrated,
 		core.AgentEventPhaseLoopFinished,
 	})
 
@@ -701,6 +703,28 @@ func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result Agent
 			t.Fatalf("event LoopID = %q, want %q", event.LoopID, result.LoopRun.ID)
 		}
 	}
+}
+
+func assertAgentWorkRepairEventPhases(t *testing.T, projectDir string, result AgentWorkResult) {
+	t.Helper()
+
+	loopStream := readAgentEventStream(t, filepath.Join(
+		projectDir,
+		".chc",
+		"user",
+		"runtime",
+		"runs",
+		result.LoopRun.ID,
+		core.AgentEventStreamFileName,
+	))
+	assertAgentEventPhaseSubsequence(t, loopStream.Events, []core.AgentEventPhase{
+		core.AgentEventPhaseReviewStarted,
+		core.AgentEventPhaseReviewFinished,
+		core.AgentEventPhaseRepairStarted,
+		core.AgentEventPhaseRepairFinished,
+		core.AgentEventPhaseMergeStarted,
+		core.AgentEventPhaseMergeFinished,
+	})
 }
 
 func TestServicePreviewAllReadyAgentWorkDoesNotExecute(t *testing.T) {
@@ -1039,6 +1063,30 @@ func assertAgentEventPhases(t *testing.T, events []core.AgentEvent, want []core.
 	if !agentEventPhasesEqual(got, want) {
 		t.Fatalf("event phases = %#v, want %#v", got, want)
 	}
+}
+
+func assertAgentEventPhaseSubsequence(t *testing.T, events []core.AgentEvent, want []core.AgentEventPhase) {
+	t.Helper()
+
+	next := 0
+	for _, event := range events {
+		if next < len(want) && event.Phase == want[next] {
+			next++
+		}
+	}
+
+	if next != len(want) {
+		t.Fatalf("event phases do not contain subsequence %#v: %#v", want, agentEventPhases(events))
+	}
+}
+
+func agentEventPhases(events []core.AgentEvent) []core.AgentEventPhase {
+	phases := make([]core.AgentEventPhase, 0, len(events))
+	for _, event := range events {
+		phases = append(phases, event.Phase)
+	}
+
+	return phases
 }
 
 func agentEventPhasesEqual(left, right []core.AgentEventPhase) bool {

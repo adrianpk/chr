@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"forge.adrianpk.com/chc/internal/core"
@@ -73,6 +74,42 @@ func agentWorkApplicationRefs(plan ticketApplyResultPlan) core.AgentEventRefs {
 	})
 }
 
+func agentWorkReviewRefs(ticket core.IndexedTicket) core.AgentEventRefs {
+	return compactAppAgentEventRefs(core.AgentEventRefs{
+		"ticket_path":         agentWorkTicketPath(ticket),
+		"ticket_branch":       ticket.Branch,
+		"review_ref":          firstAgentWorkPullRequestURL(ticket),
+		"review_comments_url": ticket.ReviewCommentsURL,
+	})
+}
+
+func agentWorkMergeRefs(result core.TicketMergeCommandResult) core.AgentEventRefs {
+	return compactAppAgentEventRefs(core.AgentEventRefs{
+		"review_ref":    result.Preflight.ReviewRef.URL,
+		"merge_commit":  result.MergeCommit,
+		"merge_blocker": result.MergeBlocker,
+	})
+}
+
+func agentWorkTicketPath(ticket core.IndexedTicket) string {
+	path := strings.TrimSpace(ticket.RelativePath)
+	if path != "" {
+		return path
+	}
+
+	return ticket.Path
+}
+
+func firstAgentWorkPullRequestURL(ticket core.IndexedTicket) string {
+	for _, ref := range ticket.ReviewRefs {
+		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
+			return ref.URL
+		}
+	}
+
+	return ""
+}
+
 func compactAppAgentEventRefs(refs core.AgentEventRefs) core.AgentEventRefs {
 	for key, value := range refs {
 		if value == "" {
@@ -133,6 +170,97 @@ func emitTicketSelectedAgentEvent(ctx context.Context, sink core.AgentEventSink,
 		Phase:     core.AgentEventPhaseTicketSelected,
 		Message:   fmt.Sprintf("%s selected: %s", ticket.Key, ticket.Title),
 		Refs:      agentWorkTicketRefs(ticket),
+	})
+}
+
+func emitCycleRehydratedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, application core.ResultApplication) {
+	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      record.ID,
+		ExecutionID: execution.ID,
+		TicketKey:   application.TicketKey,
+		Phase:       core.AgentEventPhaseCycleRehydrated,
+		Message:     fmt.Sprintf("%s cycle rehydrated: ticket status %s", application.TicketKey, application.TicketStatus),
+		Refs: compactAppAgentEventRefs(core.AgentEventRefs{
+			"ticket_path":           application.TicketPath,
+			"execution_report_path": core.ExecutionReportPath(execution),
+			"runtime_log_path":      application.Evidence.LogPath,
+			"validation_log_path":   application.Evidence.ValidationPath,
+		}),
+	})
+}
+
+func emitReviewStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket core.IndexedTicket, mode core.IntegrationCycleMode) {
+	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      record.ID,
+		ExecutionID: execution.ID,
+		TicketKey:   ticket.Key,
+		Phase:       core.AgentEventPhaseReviewStarted,
+		Message:     fmt.Sprintf("%s review started: %s", ticket.Key, mode),
+		Refs:        agentWorkReviewRefs(ticket),
+	})
+}
+
+func emitReviewFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket core.IndexedTicket) {
+	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      record.ID,
+		ExecutionID: execution.ID,
+		TicketKey:   ticket.Key,
+		Phase:       core.AgentEventPhaseReviewFinished,
+		Level:       ticketReviewAgentEventLevel(ticket),
+		Message:     fmt.Sprintf("%s review finished: %s", ticket.Key, nonEmptyAgentWorkEventValue(ticket.ReviewResult, ticket.Status)),
+		Refs:        agentWorkReviewRefs(ticket),
+	})
+}
+
+func emitRepairStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, ticket core.IndexedTicket) {
+	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
+		ProjectID: record.ProjectID,
+		LoopID:    record.ID,
+		TicketKey: ticket.Key,
+		Phase:     core.AgentEventPhaseRepairStarted,
+		Message:   fmt.Sprintf("%s repair started: review round %d", ticket.Key, ticket.ReviewRound),
+		Refs:      agentWorkReviewRefs(ticket),
+	})
+}
+
+func emitRepairFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket core.IndexedTicket) {
+	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      record.ID,
+		ExecutionID: execution.ID,
+		TicketKey:   ticket.Key,
+		Phase:       core.AgentEventPhaseRepairFinished,
+		Level:       ticketReviewAgentEventLevel(ticket),
+		Message:     fmt.Sprintf("%s repair finished: %s", ticket.Key, nonEmptyAgentWorkEventValue(ticket.ReviewResult, ticket.Status)),
+		Refs:        agentWorkReviewRefs(ticket),
+	})
+}
+
+func emitMergeStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket core.IndexedTicket) {
+	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      record.ID,
+		ExecutionID: execution.ID,
+		TicketKey:   ticket.Key,
+		Phase:       core.AgentEventPhaseMergeStarted,
+		Message:     fmt.Sprintf("%s merge started", ticket.Key),
+		Refs:        agentWorkReviewRefs(ticket),
+	})
+}
+
+func emitMergeFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, result core.TicketMergeCommandResult) {
+	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
+		ProjectID:   record.ProjectID,
+		LoopID:      record.ID,
+		ExecutionID: execution.ID,
+		TicketKey:   result.TicketKey,
+		Phase:       core.AgentEventPhaseMergeFinished,
+		Level:       mergeAgentEventLevel(result),
+		Message:     fmt.Sprintf("%s merge finished: %s", result.TicketKey, nonEmptyAgentWorkEventValue(result.MergeResult, result.MergeState)),
+		Refs:        agentWorkMergeRefs(result),
 	})
 }
 
@@ -247,4 +375,30 @@ func emitTicketBlockedAgentEvent(ctx context.Context, events ticketExecutionEven
 		Message:     fmt.Sprintf("%s blocked: %s", plan.Application.TicketKey, plan.Application.BlockedReason.Reason),
 		Refs:        agentWorkApplicationRefs(plan),
 	})
+}
+
+func ticketReviewAgentEventLevel(ticket core.IndexedTicket) core.AgentEventLevel {
+	if core.IsTicketReviewRepair(ticket) ||
+		ticket.ReviewResult == core.TicketReviewCommandResultInsufficientEvidence ||
+		ticket.ReviewResult == core.TicketReviewCommandResultNeedsHumanDecision {
+		return core.AgentEventLevelWarn
+	}
+
+	return core.AgentEventLevelInfo
+}
+
+func mergeAgentEventLevel(result core.TicketMergeCommandResult) core.AgentEventLevel {
+	if agentWorkCycleMergeBlocked(result) {
+		return core.AgentEventLevelWarn
+	}
+
+	return core.AgentEventLevelInfo
+}
+
+func nonEmptyAgentWorkEventValue(value, fallback string) string {
+	if strings.TrimSpace(value) != "" {
+		return value
+	}
+
+	return fallback
 }

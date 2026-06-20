@@ -58,6 +58,7 @@ type agentWorkMergeCycleOptions struct {
 type agentWorkPostDevelopmentOptions struct {
 	Ticket       core.IndexedTicket
 	Policy       core.IntegrationCyclePolicy
+	Record       core.LoopRunRecord
 	Execution    core.ExecutionRecord
 	Application  core.ResultApplication
 	Selection    agentWorkLoopSelection
@@ -384,6 +385,7 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	stop, err := s.finishAgentWorkIntegrationCycle(&state, agentWorkPostDevelopmentOptions{
 		Ticket:       ticket,
 		Policy:       cyclePlan.Policy,
+		Record:       state.Record,
 		Execution:    execution,
 		Application:  application,
 		Selection:    selection,
@@ -398,6 +400,8 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 }
 
 func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions) (bool, error) {
+	emitCycleRehydratedAgentEvent(s.ctx, opts.LoopSink, state.Record, opts.Execution, opts.Application)
+
 	if opts.Application.TicketStatus == core.TicketResultStatusBlocked {
 		state.Record.BlockedCount++
 
@@ -427,6 +431,8 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 		return false, nil
 	}
 
+	emitMergeStartedAgentEvent(s.ctx, opts.LoopSink, state.Record, finalExecution, cycleTicket)
+
 	merge, err := s.runAgentWorkMergeCycle(agentWorkMergeCycleOptions{
 		Ticket:       cycleTicket,
 		Execution:    finalExecution,
@@ -438,6 +444,8 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 	}
 
 	state.Result.Merges = append(state.Result.Merges, merge)
+	emitMergeFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, finalExecution, merge)
+
 	if agentWorkCycleMergeBlocked(merge) {
 		state.Record.BlockedCount++
 
@@ -456,6 +464,8 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 		return ticket, opts.Execution, true, nil
 	}
 
+	emitRepairStartedAgentEvent(s.ctx, opts.LoopSink, state.Record, ticket)
+
 	execution, application, err := executeLoopTicket(s.ctx, s.env, s.projectContext, ticket, ticketExecutionEvents{
 		LoopID: state.Record.ID,
 		Sink:   opts.LoopSink,
@@ -468,12 +478,15 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 	state.Result.Applications = append(state.Result.Applications, application)
 
 	if application.TicketStatus == core.TicketResultStatusBlocked {
+		emitRepairFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, execution, ticket)
+
 		return ticket, execution, true, nil
 	}
 
 	reviewedTicket, stop, err := s.reviewAgentWorkCycleTicket(agentWorkPostDevelopmentOptions{
 		Ticket:       ticket,
 		Policy:       opts.Policy,
+		Record:       state.Record,
 		Execution:    execution,
 		Application:  application,
 		Selection:    opts.Selection,
@@ -484,6 +497,8 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 		return core.IndexedTicket{}, execution, false, err
 	}
 
+	emitRepairFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, execution, reviewedTicket)
+
 	return reviewedTicket, execution, stop, nil
 }
 
@@ -492,15 +507,22 @@ func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions
 
 	var err error
 	if agentWorkCycleRunsAgenticReview(opts.Policy, opts.Application) {
+		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, opts.Ticket, opts.Policy.Mode)
 		cycleTicket, err = s.runAgenticReviewCycle(opts.Ticket, opts.Execution, opts.Application, opts.ReviewConfig)
 	}
 
 	if agentWorkCycleRunsTrustedAutoMergeReview(opts.Policy, opts.Application) {
+		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, opts.Ticket, opts.Policy.Mode)
 		cycleTicket, err = s.runTrustedAutoMergeReviewCycle(opts.Ticket, opts.Execution, opts.Application)
 	}
 
 	if err != nil {
 		return core.IndexedTicket{}, false, err
+	}
+
+	if agentWorkCycleRunsAgenticReview(opts.Policy, opts.Application) ||
+		agentWorkCycleRunsTrustedAutoMergeReview(opts.Policy, opts.Application) {
+		emitReviewFinishedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, cycleTicket)
 	}
 
 	stop := agentWorkCycleStopsBeforeMerge(opts.Policy) || !agentWorkCycleTicketReadyForMerge(opts.Policy, cycleTicket)

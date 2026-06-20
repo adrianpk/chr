@@ -454,6 +454,13 @@ func (m Model) renderAgentWorkCurrentLines() []string {
 		)
 	}
 
+	if m.observability.LatestEvent.Phase != "" {
+		lines = append(lines,
+			fmt.Sprintf("Phase: %s", m.observability.LatestEvent.Phase),
+			fmt.Sprintf("Last event: %s", m.observability.LatestEvent.Message),
+		)
+	}
+
 	if execution.ID != "" {
 		lines = append(lines,
 			fmt.Sprintf("Ticket: %s", execution.TicketKey),

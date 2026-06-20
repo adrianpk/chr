@@ -20,6 +20,8 @@ const (
 	AgentEventPhaseLoopFinished AgentEventPhase = "loop_finished"
 	// AgentEventPhaseTicketSelected defines a package boundary constant.
 	AgentEventPhaseTicketSelected AgentEventPhase = "ticket_selected"
+	// AgentEventPhaseCycleRehydrated defines a package boundary constant.
+	AgentEventPhaseCycleRehydrated AgentEventPhase = "cycle_rehydrated"
 	// AgentEventPhaseExecutionCreated defines a package boundary constant.
 	AgentEventPhaseExecutionCreated AgentEventPhase = "execution_created"
 	// AgentEventPhaseBranchPrepared defines a package boundary constant.
@@ -40,6 +42,18 @@ const (
 	AgentEventPhaseResultApplied AgentEventPhase = "result_applied"
 	// AgentEventPhaseTicketStatusUpdated defines a package boundary constant.
 	AgentEventPhaseTicketStatusUpdated AgentEventPhase = "ticket_status_updated"
+	// AgentEventPhaseReviewStarted defines a package boundary constant.
+	AgentEventPhaseReviewStarted AgentEventPhase = "review_started"
+	// AgentEventPhaseReviewFinished defines a package boundary constant.
+	AgentEventPhaseReviewFinished AgentEventPhase = "review_finished"
+	// AgentEventPhaseRepairStarted defines a package boundary constant.
+	AgentEventPhaseRepairStarted AgentEventPhase = "repair_started"
+	// AgentEventPhaseRepairFinished defines a package boundary constant.
+	AgentEventPhaseRepairFinished AgentEventPhase = "repair_finished"
+	// AgentEventPhaseMergeStarted defines a package boundary constant.
+	AgentEventPhaseMergeStarted AgentEventPhase = "merge_started"
+	// AgentEventPhaseMergeFinished defines a package boundary constant.
+	AgentEventPhaseMergeFinished AgentEventPhase = "merge_finished"
 	// AgentEventPhaseWorkBlocked defines a package boundary constant.
 	AgentEventPhaseWorkBlocked AgentEventPhase = "work_blocked"
 	// AgentEventPhaseWorkFailed defines a package boundary constant.
@@ -117,6 +131,7 @@ func (p AgentEventPhase) Valid() bool {
 	case AgentEventPhaseLoopStarted,
 		AgentEventPhaseLoopFinished,
 		AgentEventPhaseTicketSelected,
+		AgentEventPhaseCycleRehydrated,
 		AgentEventPhaseExecutionCreated,
 		AgentEventPhaseBranchPrepared,
 		AgentEventPhaseRuntimePrepared,
@@ -127,6 +142,12 @@ func (p AgentEventPhase) Valid() bool {
 		AgentEventPhaseValidationFinished,
 		AgentEventPhaseResultApplied,
 		AgentEventPhaseTicketStatusUpdated,
+		AgentEventPhaseReviewStarted,
+		AgentEventPhaseReviewFinished,
+		AgentEventPhaseRepairStarted,
+		AgentEventPhaseRepairFinished,
+		AgentEventPhaseMergeStarted,
+		AgentEventPhaseMergeFinished,
 		AgentEventPhaseWorkBlocked,
 		AgentEventPhaseWorkFailed,
 		AgentEventPhaseWorkStopped:
