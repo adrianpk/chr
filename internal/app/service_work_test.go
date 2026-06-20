@@ -484,18 +484,69 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 	}
 }
 
-func TestServiceStartAllReadyAgentWorkHandlesAgenticReviewNeedsChanges(t *testing.T) {
+func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNextTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
-	installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
-		Decision: core.IntegrationReviewDecisionNeedsChanges,
-		Summary:  "The implementation is missing a required behavior.",
-		BlockingFindings: []core.AgenticReviewFinding{{
-			Category: core.AgenticReviewFindingCorrectness,
-			Title:    "Missing invalid input handling",
-			Detail:   "The ticket requires invalid input recovery, but the implementation accepts bad moves.",
-		}},
+	runner := installFakeAgenticReviewRunnerSequence(t, []core.AgenticReviewResult{
+		agenticReviewNeedsChangesResult("Missing invalid input handling"),
+		{
+			Decision: core.IntegrationReviewDecisionPass,
+			Summary:  "Repair is correct and validation evidence is sufficient.",
+		},
+		{
+			Decision: core.IntegrationReviewDecisionPass,
+			Summary:  "Implementation is correct and validation evidence is sufficient.",
+		},
+	})
+
+	writeRuntimeTemplate(t, projectDir)
+	writeAgenticReviewLoopConfig(t, projectDir)
+
+	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
+	defer restoreRunner()
+
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	runnerRemote.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
+
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	))
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
+		"CHC-2", "Ready backend",
+	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
+
+	operations := newAgentWorkTestService(t, devRoot, projectDir)
+
+	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	if err != nil {
+		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
+	}
+
+	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 2)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 1)
+	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHC-1", "CHC-1", "CHC-2"})
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHC-2", core.TicketStatusDone)
+	assertTicketContains(t, ticketPath, `review_round: 2`)
+	assertTicketContains(t, ticketPath, `review_state: "pass"`)
+	assertTicketContains(t, ticketPath, `merge_state: "merged"`)
+	assertRepairExecutionContextContains(t, result.Executions[1], "correctness: Missing invalid input handling")
+
+	if len(result.Merges) != 2 {
+		t.Fatalf("merges = %d, want 2", len(result.Merges))
+	}
+}
+
+func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+	installFakeTicketStartHarnessExecutor(t, nil)
+	runner := installFakeAgenticReviewRunnerSequence(t, []core.AgenticReviewResult{
+		agenticReviewNeedsChangesResult("Missing invalid input handling"),
+		agenticReviewNeedsChangesResult("Still missing invalid input handling"),
 	})
 
 	writeRuntimeTemplate(t, projectDir)
@@ -505,8 +556,8 @@ func TestServiceStartAllReadyAgentWorkHandlesAgenticReviewNeedsChanges(t *testin
 		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
+		"CHC-2", "Ready backend",
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -517,11 +568,18 @@ func TestServiceStartAllReadyAgentWorkHandlesAgenticReviewNeedsChanges(t *testin
 	}
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 2)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
+	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHC-1", "CHC-1"})
 	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForDev)
+	assertTicketContains(t, ticketPath, `review_round: 2`)
 	assertTicketContains(t, ticketPath, `review_state: "changes_requested"`)
 	assertTicketContains(t, ticketPath, `review_result: "needs_changes"`)
-	assertTicketContains(t, ticketPath, "correctness: Missing invalid input handling")
+	assertTicketContains(t, ticketPath, "correctness: Still missing invalid input handling")
+
+	if len(result.Merges) != 0 {
+		t.Fatalf("merges = %d, want 0", len(result.Merges))
+	}
 }
 
 func assertAgentWorkLoopRunBlockedAfterOneTicket(t *testing.T, record core.LoopRunRecord) {
@@ -743,10 +801,12 @@ func newAgentWorkTestService(t *testing.T, devRoot, projectDir string) service {
 
 type fakeServiceAgenticReviewRunner struct {
 	result  core.AgenticReviewResult
+	results []core.AgenticReviewResult
 	reviews []core.AgenticReviewContext
 }
 
 func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.AgenticReviewContext) (core.AgenticReviewArtifact, error) {
+	result := r.resultForReview(len(r.reviews))
 	r.reviews = append(r.reviews, review)
 
 	runDir := core.AgenticReviewRunDir(review.ProjectDir, review.Ticket.Key, review.Execution.ID)
@@ -756,7 +816,7 @@ func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.A
 
 	resultPath := filepath.Join(runDir, "result.json")
 
-	resultBody, err := json.Marshal(r.result)
+	resultBody, err := json.Marshal(result)
 	if err != nil {
 		return core.AgenticReviewArtifact{}, err
 	}
@@ -778,7 +838,7 @@ func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.A
 			ID:     "review-" + review.Ticket.Key,
 			RunDir: runDir,
 		},
-		Result: r.result,
+		Result: result,
 	}
 	if err := core.WriteAgenticReviewSummary(artifact); err != nil {
 		return core.AgenticReviewArtifact{}, err
@@ -787,10 +847,38 @@ func (r *fakeServiceAgenticReviewRunner) Review(_ context.Context, review core.A
 	return artifact, nil
 }
 
+func (r *fakeServiceAgenticReviewRunner) resultForReview(index int) core.AgenticReviewResult {
+	if len(r.results) == 0 {
+		return r.result
+	}
+
+	if index >= len(r.results) {
+		return r.results[len(r.results)-1]
+	}
+
+	return r.results[index]
+}
+
 func installFakeAgenticReviewRunner(t *testing.T, result core.AgenticReviewResult) *fakeServiceAgenticReviewRunner {
 	t.Helper()
 
 	runner := &fakeServiceAgenticReviewRunner{result: result}
+	previous := newAgenticReviewRunner
+	newAgenticReviewRunner = func() core.AgenticReviewRunner {
+		return runner
+	}
+
+	t.Cleanup(func() {
+		newAgenticReviewRunner = previous
+	})
+
+	return runner
+}
+
+func installFakeAgenticReviewRunnerSequence(t *testing.T, results []core.AgenticReviewResult) *fakeServiceAgenticReviewRunner {
+	t.Helper()
+
+	runner := &fakeServiceAgenticReviewRunner{results: results}
 	previous := newAgenticReviewRunner
 	newAgenticReviewRunner = func() core.AgenticReviewRunner {
 		return runner
@@ -883,6 +971,33 @@ func assertTicketContains(t *testing.T, ticketPath, want string) {
 
 	if content := readFile(t, ticketPath); !strings.Contains(content, want) {
 		t.Fatalf("ticket %s missing %q:\n%s", ticketPath, want, content)
+	}
+}
+
+func assertRepairExecutionContextContains(t *testing.T, execution core.ExecutionRecord, want string) {
+	t.Helper()
+
+	contextPath := filepath.Join(execution.Artifacts.RunDir, "context.md")
+	content := readFile(t, contextPath)
+	for _, expected := range []string{
+		"## Review Repair Handoff",
+		want,
+	} {
+		if !strings.Contains(content, expected) {
+			t.Fatalf("repair context missing %q:\n%s", expected, content)
+		}
+	}
+}
+
+func agenticReviewNeedsChangesResult(title string) core.AgenticReviewResult {
+	return core.AgenticReviewResult{
+		Decision: core.IntegrationReviewDecisionNeedsChanges,
+		Summary:  "The implementation is missing a required behavior.",
+		BlockingFindings: []core.AgenticReviewFinding{{
+			Category: core.AgenticReviewFindingCorrectness,
+			Title:    title,
+			Detail:   "The ticket requires invalid input recovery, but the implementation accepts bad moves.",
+		}},
 	}
 }
 
