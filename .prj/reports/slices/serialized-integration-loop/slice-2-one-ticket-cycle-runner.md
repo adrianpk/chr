@@ -1,11 +1,11 @@
 # Slice 2: One-Ticket Cycle Runner
 
-Status: reviewing
+Status: delivered
 Slicing: Serialized Integration Loop
 Plan: `ops/plans/2026-06-20-serialized-integration-loop-plan.md`
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 Branch: `feat/slice-2-one-ticket-cycle-runner`
-PR: pending
+PR: `#337`
 
 ## Purpose
 
