@@ -211,9 +211,21 @@ CREATE INDEX integration_cycles_loop_id_idx ON integration_cycles(loop_id);
 CREATE INDEX integration_cycles_project_ticket_idx ON integration_cycles(project_id, ticket_key);
 ```
 
-The first slice may avoid a new table if the implementation can produce durable
-reports from existing loop, execution, ticket, review, and merge records. If it
-does so, the decision must be recorded in the tracker.
+The first slice does not introduce a dedicated `integration_cycles` table.
+
+Reason:
+
+- existing ticket frontmatter already stores ticket, review, and merge handoff
+  state;
+- execution records already store ticket execution attempts and workspace
+  metadata;
+- loop records already store the parent run;
+- Slice 1 only introduces side-effect-free planning contracts;
+- persistence can remain additive in a later slice when the runner needs
+  durable per-cycle records for reports or recovery.
+
+A later slice may still add this table if report reconstruction from existing
+state becomes ambiguous or too expensive.
 
 ## Invariants
 

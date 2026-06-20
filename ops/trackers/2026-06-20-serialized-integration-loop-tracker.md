@@ -26,8 +26,8 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | T1.1 | Add core value types for integration cycle mode, phase, status, and blocker. | done | pending | Added package-level integration cycle enums and validation helpers. |
 | T1.2 | Add policy resolution from existing review workflow configuration. | done | pending | Mapped `review.mode` to cycle policy without changing defaults or runtime behavior. |
 | T1.3 | Add a side-effect-free cycle planning function for one selected ticket. | done | pending | Planner returns selected-ticket cycle metadata with no IO or ticket mutation. |
-| T1.4 | Decide whether Slice 1 introduces a dedicated `integration_cycles` table or defers it. | pending | pending | |
-| T1.5 | If a table is introduced, add an additive migration and repository tests. | pending | pending | |
+| T1.4 | Decide whether Slice 1 introduces a dedicated `integration_cycles` table or defers it. | done | pending | Deferred table creation; Slice 1 uses existing durable state plus side-effect-free planning contracts. |
+| T1.5 | If a table is introduced, add an additive migration and repository tests. | done | pending | Not applicable for Slice 1 because the table was explicitly deferred. |
 | T1.6 | Add tests for policy mapping across `human_review`, `agentic_review`, and `trusted_auto_merge`. | pending | pending | |
 | T1.7 | Add docs or reference notes for cycle mode semantics. | pending | pending | |
 | T1.8 | Add the slice implementation report and validation evidence. | pending | pending | |
@@ -101,8 +101,9 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 ## Open Decisions
 
-- Whether Slice 1 introduces a dedicated `integration_cycles` table or relies on
-  report reconstruction from existing durable state.
+- Slice 1 defers a dedicated `integration_cycles` table and relies on existing
+  ticket, execution, review, merge, and loop state until the runner needs a
+  persistence table.
 - Whether `chc work ticket <ticket>` should remain development-only or gain a
   separate full-cycle single-ticket command.
 - Whether project templates should eventually default to `agentic_review`,
