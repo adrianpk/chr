@@ -91,6 +91,7 @@ func (r CodexAgenticReviewRunner) Review(ctx context.Context, review AgenticRevi
 	}
 
 	contextPath := filepath.Join(runDir, "context.md")
+
 	contextBody := RenderAgenticReviewContext(review)
 	if err := os.WriteFile(contextPath, []byte(contextBody), 0o644); err != nil {
 		return AgenticReviewArtifact{}, fmt.Errorf("write agentic review context: %w", err)
@@ -185,6 +186,7 @@ func RenderAgenticReviewContext(review AgenticReviewContext) string {
 	writeAgenticReviewField(&output, "runtime_log", review.Application.Evidence.LogPath)
 
 	output.WriteString("\n## Review References\n\n")
+
 	if len(review.Ticket.ReviewRefs) == 0 {
 		output.WriteString("- none\n")
 	} else {
@@ -200,16 +202,19 @@ func RenderAgenticReviewContext(review AgenticReviewContext) string {
 	}
 
 	output.WriteString("\n## Changed Files\n\n")
+
 	if len(review.Application.ChangedFiles) == 0 {
 		output.WriteString("- none reported\n")
 	} else {
 		for _, changedFile := range review.Application.ChangedFiles {
 			output.WriteString("- ")
 			output.WriteString(changedFile.Path)
+
 			if strings.TrimSpace(changedFile.Summary) != "" {
 				output.WriteString(": ")
 				output.WriteString(changedFile.Summary)
 			}
+
 			output.WriteString("\n")
 		}
 	}
@@ -289,6 +294,7 @@ func ParseAgenticReviewResult(payload []byte) (AgenticReviewResult, error) {
 
 	decoder := json.NewDecoder(strings.NewReader(string(payload)))
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&result); err != nil {
 		return AgenticReviewResult{}, fmt.Errorf("decode agentic review result: %w", err)
 	}
@@ -514,11 +520,13 @@ func writeAgenticReviewField(output *strings.Builder, key, value string) {
 	output.WriteString("- ")
 	output.WriteString(key)
 	output.WriteString(": ")
+
 	if strings.TrimSpace(value) == "" {
 		output.WriteString("(none)")
 	} else {
 		output.WriteString(value)
 	}
+
 	output.WriteString("\n")
 }
 
@@ -527,7 +535,9 @@ func safeAgenticReviewPathPart(value string) string {
 	value = strings.ReplaceAll(value, string(os.PathSeparator), "-")
 	value = strings.ReplaceAll(value, "/", "-")
 	value = strings.ReplaceAll(value, "\\", "-")
+
 	value = strings.ReplaceAll(value, " ", "-")
+
 	if value == "" {
 		return time.Now().UTC().Format("20060102150405")
 	}

@@ -66,54 +66,14 @@ func TestParseAgenticReviewResultRejectsUnknownFindingCategory(t *testing.T) {
 
 func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	projectDir := t.TempDir()
+
 	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md")
 	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
 		t.Fatalf("MkdirAll returned error: %v", err)
 	}
 
 	now := time.Date(2026, 6, 20, 12, 0, 0, 0, time.UTC)
-
-	review := AgenticReviewContext{
-		ProjectID:  "project-1",
-		ProjectDir: projectDir,
-		Ticket: IndexedTicket{
-			Key:    "CHC-1",
-			Title:  "Implement feature",
-			Status: TicketStatusReadyForReview,
-			Path:   ticketPath,
-		},
-		Execution: ExecutionRecord{
-			ID:         "exec-1",
-			ProjectID:  "project-1",
-			TicketKey:  "CHC-1",
-			TicketPath: ticketPath,
-			Status:     ExecutionStatusSucceeded,
-			CreatedAt:  now,
-			UpdatedAt:  now,
-			Runtime: ExecutionRuntimeRef{
-				Image:             "runtime",
-				DockerfilePath:    "Dockerfile",
-				ContainerWorkdir:  "/workspace",
-				ValidationCommand: "go test ./...",
-			},
-			Artifacts: ExecutionArtifacts{
-				RunDir:         filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1"),
-				ResultPath:     "result.json",
-				LogPath:        "runtime.log",
-				ValidationPath: "validation.log",
-			},
-		},
-		Application: ResultApplication{
-			TicketKey: "CHC-1",
-			Evidence: ResultApplicationEvidence{
-				ResultPath:        "result.json",
-				LogPath:           "runtime.log",
-				ValidationPath:    "validation.log",
-				ValidationCommand: "go test ./...",
-			},
-		},
-		ExecutionReportPath: "execution-report.md",
-	}
+	review := testAgenticReviewContext(projectDir, ticketPath, now)
 
 	runner := CodexAgenticReviewRunner{Runner: fakeAgenticReviewAgentRunner{}}
 
@@ -129,6 +89,62 @@ func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	assertAgenticReviewArtifactExists(t, artifact.ContextPath)
 	assertAgenticReviewArtifactExists(t, artifact.ResultPath)
 	assertAgenticReviewArtifactExists(t, artifact.SummaryPath)
+}
+
+func testAgenticReviewContext(projectDir, ticketPath string, now time.Time) AgenticReviewContext {
+	return AgenticReviewContext{
+		ProjectID:           "project-1",
+		ProjectDir:          projectDir,
+		Ticket:              testAgenticReviewIndexedTicket(ticketPath),
+		Execution:           testAgenticReviewExecution(projectDir, ticketPath, now),
+		Application:         testAgenticReviewApplication(),
+		ExecutionReportPath: "execution-report.md",
+	}
+}
+
+func testAgenticReviewIndexedTicket(ticketPath string) IndexedTicket {
+	return IndexedTicket{
+		Key:    "CHC-1",
+		Title:  "Implement feature",
+		Status: TicketStatusReadyForReview,
+		Path:   ticketPath,
+	}
+}
+
+func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) ExecutionRecord {
+	return ExecutionRecord{
+		ID:         "exec-1",
+		ProjectID:  "project-1",
+		TicketKey:  "CHC-1",
+		TicketPath: ticketPath,
+		Status:     ExecutionStatusSucceeded,
+		CreatedAt:  now,
+		UpdatedAt:  now,
+		Runtime: ExecutionRuntimeRef{
+			Image:             "runtime",
+			DockerfilePath:    "Dockerfile",
+			ContainerWorkdir:  "/workspace",
+			ValidationCommand: "go test ./...",
+		},
+		Artifacts: ExecutionArtifacts{
+			RunDir:         filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1"),
+			ResultPath:     "result.json",
+			LogPath:        "runtime.log",
+			ValidationPath: "validation.log",
+		},
+	}
+}
+
+func testAgenticReviewApplication() ResultApplication {
+	return ResultApplication{
+		TicketKey: "CHC-1",
+		Evidence: ResultApplicationEvidence{
+			ResultPath:        "result.json",
+			LogPath:           "runtime.log",
+			ValidationPath:    "validation.log",
+			ValidationCommand: "go test ./...",
+		},
+	}
 }
 
 func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
@@ -279,6 +295,7 @@ func writeAgenticReviewTicket(t *testing.T, ticket Ticket) string {
 
 	dir := t.TempDir()
 	path := filepath.Join(dir, "CHC-1.md")
+
 	content, err := NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
