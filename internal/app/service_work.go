@@ -39,6 +39,12 @@ type agentWorkLoopSelection struct {
 	ReviewConfig  core.ReviewWorkflowConfig
 }
 
+type agentWorkIntegrationCycleState struct {
+	Result        ticketLoopExecutionResult
+	Record        core.LoopRunRecord
+	SelectedQueue []core.IndexedTicket
+}
+
 func (s service) StartSelectedTicket(ticketKey string) (WorkOperationResult, error) {
 	result, err := s.StartAgentWorkTicket(ticketKey)
 	if err != nil {
@@ -290,90 +296,79 @@ func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (
 	loopSink := agentWorkLoopEventSink(s.projectContext.ProjectDir, record)
 	emitLoopStartedAgentEvent(s.ctx, loopSink, record)
 
-	result := ticketLoopExecutionResult{Record: record}
-	selectedQueue := make([]core.IndexedTicket, 0)
+	state := agentWorkIntegrationCycleState{
+		Result:        ticketLoopExecutionResult{Record: record},
+		Record:        record,
+		SelectedQueue: make([]core.IndexedTicket, 0),
+	}
 	initialEligibleCount := selection.EligibleCount
 	processedCycles := 0
 
 	for len(selection.Tickets) > 0 && agentWorkCycleLimitAllowsNext(opts, processedCycles) {
-		ticket := selection.Tickets[0]
-		cyclePlan, err := core.PlanIntegrationCycle(core.IntegrationCyclePlanOptions{
-			ProjectID:    s.projectContext.ProjectID,
-			Ticket:       ticket,
-			ReviewConfig: selection.ReviewConfig,
-		})
-		if err != nil {
-			failed, failErr := failTicketLoopExecution(
-				s.ctx,
-				s.env,
-				repository,
-				s.projectContext,
-				result,
-				record,
-				loopSink,
-				err,
-				s.assetsFS,
-			)
+		var stop bool
 
-			return failed, selectedQueue, initialEligibleCount, failErr
+		state, stop, err = s.runAgentWorkIntegrationCycle(selection, state, loopSink)
+		if err != nil {
+			return s.failAgentWorkIntegrationCycles(repository, state, loopSink, initialEligibleCount, err)
 		}
 
-		selectedQueue = append(selectedQueue, ticket)
-		emitTicketSelectedAgentEvent(s.ctx, loopSink, record, ticket)
-
-		execution, application, err := executeLoopTicket(s.ctx, s.env, s.projectContext, ticket, ticketExecutionEvents{
-			LoopID: record.ID,
-			Sink:   loopSink,
-		}, s.assetsFS)
-		if err != nil {
-			failed, failErr := failTicketLoopExecution(
-				s.ctx,
-				s.env,
-				repository,
-				s.projectContext,
-				result,
-				record,
-				loopSink,
-				err,
-				s.assetsFS,
-			)
-
-			return failed, selectedQueue, initialEligibleCount, failErr
-		}
-
-		result.Executions = append(result.Executions, execution)
-		result.Applications = append(result.Applications, application)
-
-		record.ProcessedCount++
 		processedCycles++
 
-		if agentWorkCycleStopsAfterDevelopment(cyclePlan.Policy, application) {
-			record.BlockedCount++
-
+		if stop {
 			break
 		}
 
 		selection, err = s.agentWorkLoopSelection(opts)
 		if err != nil {
-			failed, failErr := failTicketLoopExecution(
-				s.ctx,
-				s.env,
-				repository,
-				s.projectContext,
-				result,
-				record,
-				loopSink,
-				err,
-				s.assetsFS,
-			)
-
-			return failed, selectedQueue, initialEligibleCount, failErr
+			return s.failAgentWorkIntegrationCycles(repository, state, loopSink, initialEligibleCount, err)
 		}
 	}
 
-	finished, err := finishTicketLoopExecution(s.ctx, s.env, repository, s.projectContext, result, record, loopSink, s.assetsFS)
+	finished, err := finishTicketLoopExecution(s.ctx, s.env, repository, s.projectContext, state.Result, state.Record, loopSink, s.assetsFS)
 
-	return finished, selectedQueue, initialEligibleCount, err
+	return finished, state.SelectedQueue, initialEligibleCount, err
+}
+
+func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink) (agentWorkIntegrationCycleState, bool, error) {
+	ticket := selection.Tickets[0]
+
+	cyclePlan, err := core.PlanIntegrationCycle(core.IntegrationCyclePlanOptions{
+		ProjectID:    s.projectContext.ProjectID,
+		Ticket:       ticket,
+		ReviewConfig: selection.ReviewConfig,
+	})
+	if err != nil {
+		return state, false, err
+	}
+
+	state.SelectedQueue = append(state.SelectedQueue, ticket)
+	emitTicketSelectedAgentEvent(s.ctx, loopSink, state.Record, ticket)
+
+	execution, application, err := executeLoopTicket(s.ctx, s.env, s.projectContext, ticket, ticketExecutionEvents{
+		LoopID: state.Record.ID,
+		Sink:   loopSink,
+	}, s.assetsFS)
+	if err != nil {
+		return state, false, err
+	}
+
+	state.Result.Executions = append(state.Result.Executions, execution)
+	state.Result.Applications = append(state.Result.Applications, application)
+	state.Record.ProcessedCount++
+
+	if agentWorkCycleStopsAfterDevelopment(cyclePlan.Policy, application) {
+		state.Record.BlockedCount++
+
+		return state, true, nil
+	}
+
+	return state, false, nil
+}
+
+func (s service) failAgentWorkIntegrationCycles(repository core.LoopRunRepository, state agentWorkIntegrationCycleState, eventSink core.AgentEventSink, initialEligibleCount int, cause error) (ticketLoopExecutionResult, []core.IndexedTicket, int, error) {
+	failed, err := failTicketLoopExecution(s.ctx, s.env, repository, s.projectContext, state.Result, state.Record, eventSink, cause, s.assetsFS)
+
+	return failed, state.SelectedQueue, initialEligibleCount, err
 }
 
 func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWorkLoopSelection, error) {

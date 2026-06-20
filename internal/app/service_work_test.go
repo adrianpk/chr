@@ -243,7 +243,7 @@ func TestServiceStartAgentWorkTicketReusesReviewRepairBranch(t *testing.T) {
 	}
 }
 
-func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {
+func TestServiceStartAllReadyAgentWorkStopsBeforeSecondTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
@@ -267,31 +267,47 @@ func TestServiceStartAllReadyAgentWorkReusesLoopExecution(t *testing.T) {
 		t.Fatal("LoopRun is nil")
 	}
 
-	loopMatches := result.LoopRun.Status == core.LoopRunStatusBlocked &&
-		result.LoopRun.EligibleCount == 2 &&
-		result.LoopRun.ProcessedCount == 1 &&
-		result.LoopRun.BlockedCount == 1
-	if !loopMatches {
-		t.Fatalf("LoopRun = %#v, want blocked loop with one processed ticket", result.LoopRun)
-	}
+	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
 
 	if gotKeys := indexedAgentWorkTicketKeys(result.SelectedQueue); strings.Join(gotKeys, ",") != "CHC-1" {
 		t.Fatalf("SelectedQueue keys = %#v, want oldest-first CHC-1 only", gotKeys)
 	}
 
-	chc1Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
-	if len(chc1Records) != 1 {
-		t.Fatalf("CHC-1 execution records = %d, want 1", len(chc1Records))
-	}
-
-	chc2Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
-	if len(chc2Records) != 0 {
-		t.Fatalf("CHC-2 execution records = %d, want 0", len(chc2Records))
-	}
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 1)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
 
 	loopRuns := listProjectLoopRuns(t, devRoot, projectID(projectDir))
 	if len(loopRuns) != 1 {
 		t.Fatalf("loop runs = %d, want 1", len(loopRuns))
+	}
+}
+
+func assertAgentWorkLoopRunBlockedAfterOneTicket(t *testing.T, record core.LoopRunRecord) {
+	t.Helper()
+
+	if record.Status != core.LoopRunStatusBlocked {
+		t.Fatalf("LoopRun.Status = %q, want %q", record.Status, core.LoopRunStatusBlocked)
+	}
+
+	if record.EligibleCount != 2 {
+		t.Fatalf("LoopRun.EligibleCount = %d, want 2", record.EligibleCount)
+	}
+
+	if record.ProcessedCount != 1 {
+		t.Fatalf("LoopRun.ProcessedCount = %d, want 1", record.ProcessedCount)
+	}
+
+	if record.BlockedCount != 1 {
+		t.Fatalf("LoopRun.BlockedCount = %d, want 1", record.BlockedCount)
+	}
+}
+
+func assertTicketExecutionRecordCount(t *testing.T, devRoot, projectDir, ticketKey string, want int) {
+	t.Helper()
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), ticketKey)
+	if len(records) != want {
+		t.Fatalf("%s execution records = %d, want %d", ticketKey, len(records), want)
 	}
 }
 
