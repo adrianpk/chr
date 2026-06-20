@@ -303,6 +303,7 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 
 	writeRuntimeTemplate(t, projectDir)
 	writeAgenticReviewLoopConfig(t, projectDir)
+
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
@@ -353,8 +354,10 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T
 
 	writeRuntimeTemplate(t, projectDir)
 	writeAgenticReviewLoopConfig(t, projectDir)
+
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
+
 	runnerRemote.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":false}`)
 
 	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
@@ -396,6 +399,7 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) 
 
 	writeRuntimeTemplate(t, projectDir)
 	writeAgenticReviewLoopConfig(t, projectDir)
+
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
@@ -434,6 +438,7 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
+
 	runner := installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
 		Decision: core.IntegrationReviewDecisionNeedsChanges,
 		Summary:  "This runner must not be called in trusted auto-merge mode.",
@@ -441,6 +446,7 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 
 	writeRuntimeTemplate(t, projectDir)
 	writeTrustedAutoMergeLoopConfig(t, projectDir)
+
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
@@ -826,23 +832,6 @@ func testLoopTicketWithPullRequestRef(key, title string) core.Ticket {
 	}}
 
 	return ticket
-}
-
-func assertAgenticReviewRunnerCall(t *testing.T, runner *fakeServiceAgenticReviewRunner, projectDir, ticketKey string) {
-	t.Helper()
-
-	if len(runner.reviews) != 1 {
-		t.Fatalf("agentic review calls = %d, want 1", len(runner.reviews))
-	}
-
-	review := runner.reviews[0]
-	if review.ProjectDir != projectDir {
-		t.Fatalf("review ProjectDir = %q, want %q", review.ProjectDir, projectDir)
-	}
-
-	if review.Ticket.Key != ticketKey {
-		t.Fatalf("review ticket = %q, want %q", review.Ticket.Key, ticketKey)
-	}
 }
 
 func assertAgenticReviewRunnerCalls(t *testing.T, runner *fakeServiceAgenticReviewRunner, projectDir string, ticketKeys []string) {
