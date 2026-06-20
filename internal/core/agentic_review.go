@@ -1,0 +1,421 @@
+package core
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+)
+
+const (
+	// AgenticReviewFindingCorrectness defines a package boundary constant.
+	AgenticReviewFindingCorrectness = "correctness"
+	// AgenticReviewFindingScope defines a package boundary constant.
+	AgenticReviewFindingScope = "scope"
+	// AgenticReviewFindingEvidence defines a package boundary constant.
+	AgenticReviewFindingEvidence = "evidence"
+	// AgenticReviewFindingContract defines a package boundary constant.
+	AgenticReviewFindingContract = "contract"
+	// AgenticReviewFindingSafety defines a package boundary constant.
+	AgenticReviewFindingSafety = "safety"
+	// AgenticReviewFindingMergeability defines a package boundary constant.
+	AgenticReviewFindingMergeability = "mergeability"
+	// AgenticReviewFindingCosmetic defines a package boundary constant.
+	AgenticReviewFindingCosmetic = "cosmetic"
+)
+
+// AgenticReviewContext describes the local evidence given to the reviewer.
+type AgenticReviewContext struct {
+	ProjectID           string
+	ProjectDir          string
+	Ticket              IndexedTicket
+	Execution           ExecutionRecord
+	Application         ResultApplication
+	ExecutionReportPath string
+}
+
+// AgenticReviewResult describes the structured agentic review decision.
+type AgenticReviewResult struct {
+	Decision          IntegrationReviewDecision `json:"decision"`
+	Summary           string                    `json:"summary"`
+	BlockingFindings  []AgenticReviewFinding    `json:"blocking_findings,omitempty"`
+	NonBlockingNotes  []AgenticReviewFinding    `json:"non_blocking_notes,omitempty"`
+	ReviewedArtifacts []string                  `json:"reviewed_artifacts,omitempty"`
+}
+
+// AgenticReviewFinding describes one blocking or non-blocking review note.
+type AgenticReviewFinding struct {
+	Category string `json:"category"`
+	Title    string `json:"title"`
+	Detail   string `json:"detail"`
+}
+
+// AgenticReviewArtifact describes files produced by one local review.
+type AgenticReviewArtifact struct {
+	ContextPath string
+	ResultPath  string
+	SummaryPath string
+	Run         AgentRunResult
+	Result      AgenticReviewResult
+}
+
+// AgenticReviewRunner executes a local agentic review.
+type AgenticReviewRunner interface {
+	Review(ctx context.Context, review AgenticReviewContext) (AgenticReviewArtifact, error)
+}
+
+// CodexAgenticReviewRunner runs the high-level review through Codex.
+type CodexAgenticReviewRunner struct {
+	Runner AgentRunner
+}
+
+// Review executes the corresponding operation.
+func (r CodexAgenticReviewRunner) Review(ctx context.Context, review AgenticReviewContext) (AgenticReviewArtifact, error) {
+	if err := ValidateAgenticReviewContext(review); err != nil {
+		return AgenticReviewArtifact{}, err
+	}
+
+	runDir := AgenticReviewRunDir(review.ProjectDir, review.Ticket.Key, review.Execution.ID)
+	if err := os.MkdirAll(runDir, 0o755); err != nil {
+		return AgenticReviewArtifact{}, fmt.Errorf("create agentic review directory: %w", err)
+	}
+
+	contextPath := filepath.Join(runDir, "context.md")
+	contextBody := RenderAgenticReviewContext(review)
+	if err := os.WriteFile(contextPath, []byte(contextBody), 0o644); err != nil {
+		return AgenticReviewArtifact{}, fmt.Errorf("write agentic review context: %w", err)
+	}
+
+	agentRun, err := RunCodexAgent(ctx, r.agentRunner(), AgentRunRequest{
+		ID:           "review-" + review.Ticket.Key + "-" + review.Execution.ID,
+		Purpose:      "agentic_review",
+		ProjectDir:   review.ProjectDir,
+		RunDir:       runDir,
+		Prompt:       AgenticReviewPrompt(contextBody),
+		OutputSchema: AgenticReviewOutputSchema(),
+		OutputName:   "result.json",
+	})
+	if err != nil {
+		return AgenticReviewArtifact{}, err
+	}
+
+	result, err := ParseAgenticReviewResult(agentRun.Output)
+	if err != nil {
+		return AgenticReviewArtifact{}, err
+	}
+
+	artifact := AgenticReviewArtifact{
+		ContextPath: contextPath,
+		ResultPath:  agentRun.OutputPath,
+		SummaryPath: filepath.Join(runDir, "summary.md"),
+		Run:         agentRun,
+		Result:      result,
+	}
+
+	if err := WriteAgenticReviewSummary(artifact); err != nil {
+		return AgenticReviewArtifact{}, err
+	}
+
+	return artifact, nil
+}
+
+// AgenticReviewRunDir returns the local artifact directory for one review.
+func AgenticReviewRunDir(projectDir, ticketKey, executionID string) string {
+	return UserPath(projectDir, "runtime", "reviews", safeAgenticReviewPathPart(ticketKey), safeAgenticReviewPathPart(executionID))
+}
+
+// ValidateAgenticReviewContext validates the corresponding package boundary value.
+func ValidateAgenticReviewContext(review AgenticReviewContext) error {
+	required := []struct {
+		name  string
+		value string
+	}{
+		{name: "project id", value: review.ProjectID},
+		{name: "project dir", value: review.ProjectDir},
+		{name: "ticket key", value: review.Ticket.Key},
+		{name: "ticket path", value: review.Ticket.Path},
+		{name: "execution id", value: review.Execution.ID},
+		{name: "execution report path", value: review.ExecutionReportPath},
+	}
+
+	for _, field := range required {
+		if strings.TrimSpace(field.value) == "" {
+			return fmt.Errorf("agentic review %s is required", field.name)
+		}
+	}
+
+	if review.Execution.ProjectID != review.ProjectID {
+		return fmt.Errorf("agentic review execution project mismatch: %s", review.Execution.ProjectID)
+	}
+
+	if review.Execution.TicketKey != review.Ticket.Key {
+		return fmt.Errorf("agentic review execution ticket mismatch: %s", review.Execution.TicketKey)
+	}
+
+	return nil
+}
+
+// RenderAgenticReviewContext renders the reviewer context artifact.
+func RenderAgenticReviewContext(review AgenticReviewContext) string {
+	var output strings.Builder
+
+	output.WriteString("# Agentic Review Context\n\n")
+	writeAgenticReviewField(&output, "project_id", review.ProjectID)
+	writeAgenticReviewField(&output, "ticket_key", review.Ticket.Key)
+	writeAgenticReviewField(&output, "ticket_title", review.Ticket.Title)
+	writeAgenticReviewField(&output, "ticket_status", review.Ticket.Status)
+	writeAgenticReviewField(&output, "ticket_path", review.Ticket.Path)
+	writeAgenticReviewField(&output, "branch", review.Ticket.Branch)
+	writeAgenticReviewField(&output, "execution_id", review.Execution.ID)
+	writeAgenticReviewField(&output, "execution_status", string(review.Execution.Status))
+	writeAgenticReviewField(&output, "execution_report_path", review.ExecutionReportPath)
+	writeAgenticReviewField(&output, "result_path", review.Application.Evidence.ResultPath)
+	writeAgenticReviewField(&output, "validation_command", review.Application.Evidence.ValidationCommand)
+	writeAgenticReviewField(&output, "validation_log", review.Application.Evidence.ValidationPath)
+	writeAgenticReviewField(&output, "runtime_log", review.Application.Evidence.LogPath)
+
+	output.WriteString("\n## Review References\n\n")
+	if len(review.Ticket.ReviewRefs) == 0 {
+		output.WriteString("- none\n")
+	} else {
+		for _, ref := range review.Ticket.ReviewRefs {
+			output.WriteString("- type: ")
+			output.WriteString(ref.Type)
+			output.WriteString("; provider: ")
+			output.WriteString(ref.Provider)
+			output.WriteString("; url: ")
+			output.WriteString(ref.URL)
+			output.WriteString("\n")
+		}
+	}
+
+	output.WriteString("\n## Changed Files\n\n")
+	if len(review.Application.ChangedFiles) == 0 {
+		output.WriteString("- none reported\n")
+	} else {
+		for _, changedFile := range review.Application.ChangedFiles {
+			output.WriteString("- ")
+			output.WriteString(changedFile.Path)
+			if strings.TrimSpace(changedFile.Summary) != "" {
+				output.WriteString(": ")
+				output.WriteString(changedFile.Summary)
+			}
+			output.WriteString("\n")
+		}
+	}
+
+	return output.String()
+}
+
+// AgenticReviewPrompt renders the Codex reviewer prompt.
+func AgenticReviewPrompt(contextBody string) string {
+	return strings.TrimSpace(`You are reviewing one completed implementation ticket.
+
+Use the provided context and inspect referenced local files as needed.
+This is a high-level correctness review, not a style preference pass.
+
+Block only for objective issues:
+- correctness defects
+- scope mismatch
+- missing or weak evidence
+- broken contracts
+- safety or data-loss risk
+- mergeability problems
+
+Do not block for cosmetic style, optional refactors, naming preferences, or
+non-critical cleanup when configured validation passed.
+
+Return only JSON matching the provided schema.
+
+`+contextBody) + "\n"
+}
+
+// AgenticReviewOutputSchema returns the JSON schema for Codex review output.
+func AgenticReviewOutputSchema() []byte {
+	return []byte(`{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision", "summary", "blocking_findings", "non_blocking_notes"],
+  "properties": {
+    "decision": {
+      "type": "string",
+      "enum": ["pass", "needs_changes", "insufficient_evidence", "human_required"]
+    },
+    "summary": {"type": "string"},
+    "blocking_findings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    },
+    "non_blocking_notes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    },
+    "reviewed_artifacts": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "title", "detail"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["correctness", "scope", "evidence", "contract", "safety", "mergeability", "cosmetic"]
+        },
+        "title": {"type": "string"},
+        "detail": {"type": "string"}
+      }
+    }
+  }
+}`)
+}
+
+// ParseAgenticReviewResult parses and validates JSON review output.
+func ParseAgenticReviewResult(payload []byte) (AgenticReviewResult, error) {
+	var result AgenticReviewResult
+
+	decoder := json.NewDecoder(strings.NewReader(string(payload)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&result); err != nil {
+		return AgenticReviewResult{}, fmt.Errorf("decode agentic review result: %w", err)
+	}
+
+	if err := ValidateAgenticReviewResult(result); err != nil {
+		return AgenticReviewResult{}, err
+	}
+
+	return result, nil
+}
+
+// ValidateAgenticReviewResult validates one structured review result.
+func ValidateAgenticReviewResult(result AgenticReviewResult) error {
+	if !result.Decision.Valid() {
+		return fmt.Errorf("invalid agentic review decision: %s", result.Decision)
+	}
+
+	if strings.TrimSpace(result.Summary) == "" {
+		return fmt.Errorf("agentic review summary is required")
+	}
+
+	if result.Decision == IntegrationReviewDecisionNeedsChanges && len(result.BlockingFindings) == 0 {
+		return fmt.Errorf("agentic review needs_changes requires blocking findings")
+	}
+
+	for _, finding := range append([]AgenticReviewFinding{}, append(result.BlockingFindings, result.NonBlockingNotes...)...) {
+		if err := validateAgenticReviewFinding(finding); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// WriteAgenticReviewSummary writes a human-readable review summary.
+func WriteAgenticReviewSummary(artifact AgenticReviewArtifact) error {
+	var output strings.Builder
+
+	output.WriteString("# Agentic Review\n\n")
+	writeAgenticReviewField(&output, "decision", string(artifact.Result.Decision))
+	writeAgenticReviewField(&output, "summary", artifact.Result.Summary)
+	writeAgenticReviewField(&output, "result", artifact.ResultPath)
+
+	output.WriteString("\n## Blocking Findings\n\n")
+	writeAgenticReviewFindings(&output, artifact.Result.BlockingFindings)
+
+	output.WriteString("\n## Non-Blocking Notes\n\n")
+	writeAgenticReviewFindings(&output, artifact.Result.NonBlockingNotes)
+
+	if err := os.WriteFile(artifact.SummaryPath, []byte(output.String()), 0o644); err != nil {
+		return fmt.Errorf("write agentic review summary: %w", err)
+	}
+
+	return nil
+}
+
+func (r CodexAgenticReviewRunner) agentRunner() AgentRunner {
+	if r.Runner != nil {
+		return r.Runner
+	}
+
+	return CodexAgentRunner{}
+}
+
+func validateAgenticReviewFinding(finding AgenticReviewFinding) error {
+	if !validAgenticReviewFindingCategory(finding.Category) {
+		return fmt.Errorf("invalid agentic review finding category: %s", finding.Category)
+	}
+
+	if strings.TrimSpace(finding.Title) == "" {
+		return fmt.Errorf("agentic review finding title is required")
+	}
+
+	if strings.TrimSpace(finding.Detail) == "" {
+		return fmt.Errorf("agentic review finding detail is required")
+	}
+
+	return nil
+}
+
+func validAgenticReviewFindingCategory(category string) bool {
+	switch strings.TrimSpace(category) {
+	case AgenticReviewFindingCorrectness,
+		AgenticReviewFindingScope,
+		AgenticReviewFindingEvidence,
+		AgenticReviewFindingContract,
+		AgenticReviewFindingSafety,
+		AgenticReviewFindingMergeability,
+		AgenticReviewFindingCosmetic:
+		return true
+	default:
+		return false
+	}
+}
+
+func writeAgenticReviewFindings(output *strings.Builder, findings []AgenticReviewFinding) {
+	if len(findings) == 0 {
+		output.WriteString("- none\n")
+
+		return
+	}
+
+	for _, finding := range findings {
+		output.WriteString("- ")
+		output.WriteString(finding.Category)
+		output.WriteString(": ")
+		output.WriteString(finding.Title)
+		output.WriteString(" - ")
+		output.WriteString(finding.Detail)
+		output.WriteString("\n")
+	}
+}
+
+func writeAgenticReviewField(output *strings.Builder, key, value string) {
+	output.WriteString("- ")
+	output.WriteString(key)
+	output.WriteString(": ")
+	if strings.TrimSpace(value) == "" {
+		output.WriteString("(none)")
+	} else {
+		output.WriteString(value)
+	}
+	output.WriteString("\n")
+}
+
+func safeAgenticReviewPathPart(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	value = strings.ReplaceAll(value, string(os.PathSeparator), "-")
+	value = strings.ReplaceAll(value, "/", "-")
+	value = strings.ReplaceAll(value, "\\", "-")
+	value = strings.ReplaceAll(value, " ", "-")
+	if value == "" {
+		return time.Now().UTC().Format("20060102150405")
+	}
+
+	return value
+}
