@@ -136,23 +136,31 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 }
 
 func TestIntegrationCycleValuesValidateSupportedConstants(t *testing.T) {
-	if !IntegrationCycleModeAgenticReview.Valid() || IntegrationCycleMode("unknown").Valid() {
-		t.Fatal("IntegrationCycleMode.Valid returned unexpected result")
-	}
+	t.Run("mode", func(t *testing.T) {
+		assertIntegrationCycleValidity(t, IntegrationCycleModeAgenticReview.Valid(), IntegrationCycleMode("unknown").Valid())
+	})
 
-	if !IntegrationCyclePhaseReviewing.Valid() || IntegrationCyclePhase("unknown").Valid() {
-		t.Fatal("IntegrationCyclePhase.Valid returned unexpected result")
-	}
+	t.Run("phase", func(t *testing.T) {
+		assertIntegrationCycleValidity(t, IntegrationCyclePhaseReviewing.Valid(), IntegrationCyclePhase("unknown").Valid())
+	})
 
-	if !IntegrationCycleStatusBlocked.Valid() || IntegrationCycleStatus("unknown").Valid() {
-		t.Fatal("IntegrationCycleStatus.Valid returned unexpected result")
-	}
+	t.Run("status", func(t *testing.T) {
+		assertIntegrationCycleValidity(t, IntegrationCycleStatusBlocked.Valid(), IntegrationCycleStatus("unknown").Valid())
+	})
 
-	if !IntegrationCycleBlockerMergeBlocked.Valid() || IntegrationCycleBlocker("unknown").Valid() {
-		t.Fatal("IntegrationCycleBlocker.Valid returned unexpected result")
-	}
+	t.Run("blocker", func(t *testing.T) {
+		assertIntegrationCycleValidity(t, IntegrationCycleBlockerMergeBlocked.Valid(), IntegrationCycleBlocker("unknown").Valid())
+	})
 
-	if !IntegrationReviewDecisionNeedsChanges.Valid() || IntegrationReviewDecision("unknown").Valid() {
-		t.Fatal("IntegrationReviewDecision.Valid returned unexpected result")
+	t.Run("review decision", func(t *testing.T) {
+		assertIntegrationCycleValidity(t, IntegrationReviewDecisionNeedsChanges.Valid(), IntegrationReviewDecision("unknown").Valid())
+	})
+}
+
+func assertIntegrationCycleValidity(t *testing.T, valid, invalid bool) {
+	t.Helper()
+
+	if !valid || invalid {
+		t.Fatalf("valid = %t invalid = %t, want true false", valid, invalid)
 	}
 }
