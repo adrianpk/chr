@@ -2,7 +2,7 @@
 
 Status: active
 
-Active Slice: Slice 3: high-level agentic review
+Active Slice: Slice 4: merge-before-next-ticket
 
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 
