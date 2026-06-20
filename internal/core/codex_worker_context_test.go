@@ -168,6 +168,7 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testi
 		ReviewRound:       2,
 		ReviewResult:      "needs_changes",
 		ReviewCommentsURL: "https://forge.example.com/adrianpk/chc/pulls/279",
+		BlockingFindings:  []string{"correctness: Missing invalid input handling"},
 		ReviewRefs: []TicketReviewRef{{
 			Type:     "pull_request",
 			Provider: "forgejo",
@@ -194,7 +195,9 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testi
 		"- branch: feat/slice-8-repair-handoff-docs",
 		"- pull_request: https://forge.example.com/adrianpk/chc/pulls/279",
 		"- review_comments_url: https://forge.example.com/adrianpk/chc/pulls/279",
-		"Use the remote review comments as the source of detailed findings.",
+		"- blocking_findings:",
+		"  - correctness: Missing invalid input handling",
+		"Use the local blocking findings and remote review comments as the source of repair work.",
 	} {
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("content does not contain %q:\n%s", want, string(content))

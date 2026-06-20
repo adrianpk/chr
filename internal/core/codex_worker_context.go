@@ -42,6 +42,7 @@ type CodexWorkerRepairHandoff struct {
 	ReviewState       string
 	ReviewResult      string
 	ReviewRound       int
+	BlockingFindings  []string
 }
 
 // WorkerEvidenceContext describes ticket evidence strategy input.
@@ -426,8 +427,30 @@ func writeCodexWorkerRepairHandoff(output *strings.Builder, opts MaterializeCode
 	output.WriteString("\n")
 	output.WriteString("- review_round: ")
 	output.WriteString(strconv.Itoa(handoff.ReviewRound))
-	output.WriteString("\n\n")
-	output.WriteString("Use the remote review comments as the source of detailed findings. Do not duplicate remote comments into the ticket.\n\n")
+	output.WriteString("\n")
+	writeCodexWorkerRepairFindings(output, handoff.BlockingFindings)
+	output.WriteString("\n")
+	output.WriteString("Use the local blocking findings and remote review comments as the source of repair work. Do not duplicate remote comments into the ticket.\n\n")
+}
+
+func writeCodexWorkerRepairFindings(output *strings.Builder, findings []string) {
+	if len(findings) == 0 {
+		output.WriteString("- blocking_findings: []\n")
+
+		return
+	}
+
+	output.WriteString("- blocking_findings:\n")
+	for _, finding := range findings {
+		trimmed := strings.TrimSpace(finding)
+		if trimmed == "" {
+			continue
+		}
+
+		output.WriteString("  - ")
+		output.WriteString(strings.ReplaceAll(trimmed, "\n", " "))
+		output.WriteString("\n")
+	}
 }
 
 func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*WorkerEvidenceContext, error) {
@@ -512,6 +535,7 @@ func codexWorkerRepairHandoff(ctx context.Context, projectDir, ticketPath string
 		ReviewState:       ticket.ReviewState,
 		ReviewResult:      ticket.ReviewResult,
 		ReviewRound:       ticket.ReviewRound,
+		BlockingFindings:  append([]string(nil), ticket.BlockingFindings...),
 	}, nil
 }
 
