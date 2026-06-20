@@ -7,7 +7,7 @@ slice bookkeeping, lint-only edits, and minor wording-only commits.
 
 ## Unreleased
 
-Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `0be53e3` on
+Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 `dev`.
 
 ### Added
@@ -33,6 +33,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `0be53e3` on
   review mode configuration, provider diagnostics, remote review adapters,
   review result application, repair handoff prioritization, merge preflight,
   provider merge execution, and merge metadata.
+- Added a serialized ticket integration loop that completes development,
+  review, bounded repair, and merge for the current ticket before selecting
+  later ready work.
 - Added serialized integration-loop observability for cycle rehydration,
   review, repair, and merge phases, plus Dash phase display and loop stop
   reasons.
