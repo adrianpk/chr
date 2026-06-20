@@ -294,8 +294,7 @@ func reviewRepairTickets(tickets []IndexedTicket) []IndexedTicket {
 }
 
 func isReviewRepairTicket(ticket IndexedTicket) bool {
-	return ticket.Status == TicketStatusReadyForDev &&
-		(ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes")
+	return IsTicketReviewRepair(ticket)
 }
 
 func hasTicketKey(tickets []IndexedTicket, key string) bool {
