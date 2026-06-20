@@ -266,9 +266,7 @@ func (s service) RequestDaemonStop() (WorkOperationResult, error) {
 	return result, nil
 }
 
-func (s service) runAgentWorkIntegrationCycles(
-	opts AgentWorkSelectionOptions,
-) (ticketLoopExecutionResult, []core.IndexedTicket, int, error) {
+func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (ticketLoopExecutionResult, []core.IndexedTicket, int, error) {
 	repository, err := core.NewLoopRunRepository(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketLoopExecutionResult{}, nil, 0, err
