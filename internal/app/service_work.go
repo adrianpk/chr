@@ -48,6 +48,13 @@ type agentWorkIntegrationCycleState struct {
 	SelectedQueue []core.IndexedTicket
 }
 
+type agentWorkMergeCycleOptions struct {
+	Ticket       core.IndexedTicket
+	Execution    core.ExecutionRecord
+	WorkConfig   core.WorkConfig
+	ReviewConfig core.ReviewWorkflowConfig
+}
+
 var newAgenticReviewRunner = func() core.AgenticReviewRunner {
 	return core.CodexAgenticReviewRunner{}
 }
@@ -390,7 +397,12 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	}
 
 	if cyclePlan.Policy.RequiresMerge {
-		merge, err := s.runAgentWorkMergeCycle(cycleTicket, execution, selection.WorkConfig, selection.ReviewConfig)
+		merge, err := s.runAgentWorkMergeCycle(agentWorkMergeCycleOptions{
+			Ticket:       cycleTicket,
+			Execution:    execution,
+			WorkConfig:   selection.WorkConfig,
+			ReviewConfig: selection.ReviewConfig,
+		})
 		if err != nil {
 			return state, false, err
 		}
@@ -496,35 +508,30 @@ func agentWorkTicketWithSelectedReviewMetadata(ticket, selected core.IndexedTick
 	return ticket
 }
 
-func (s service) runAgentWorkMergeCycle(
-	ticket core.IndexedTicket,
-	execution core.ExecutionRecord,
-	workConfig core.WorkConfig,
-	reviewConfig core.ReviewWorkflowConfig,
-) (core.TicketMergeCommandResult, error) {
+func (s service) runAgentWorkMergeCycle(opts agentWorkMergeCycleOptions) (core.TicketMergeCommandResult, error) {
 	mergedAt := s.now().UTC()
 
-	tickets, err := s.agentWorkMergeTickets(execution, mergedAt)
+	tickets, err := s.agentWorkMergeTickets(opts.Execution, mergedAt)
 	if err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}
 
 	result, err := core.RunTicketMergeCommand(s.ctx, core.TicketMergeCommandOptions{
-		Ticket:        ticket,
+		Ticket:        opts.Ticket,
 		Tickets:       tickets,
-		Remote:        core.NewRemoteReviewAdapter(reviewConfig.Providers, reviewRemoteCommandRunner),
-		ExpectedBase:  workConfig.BranchPolicy.IntegrationBranch,
+		Remote:        core.NewRemoteReviewAdapter(opts.ReviewConfig.Providers, reviewRemoteCommandRunner),
+		ExpectedBase:  opts.WorkConfig.BranchPolicy.IntegrationBranch,
 		MergeStrategy: core.TicketMergeStrategyRebase,
 		ProjectDir:    s.projectContext.ProjectDir,
-		BranchPolicy:  workConfig.BranchPolicy,
-		Workspace:     workConfig.Workspace,
+		BranchPolicy:  opts.WorkConfig.BranchPolicy,
+		Workspace:     opts.WorkConfig.Workspace,
 		MergedAt:      mergedAt,
 	})
 	if err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}
 
-	if err := s.refreshAgenticReviewTicketIndex(execution, ticket.Path, mergedAt); err != nil {
+	if err := s.refreshAgenticReviewTicketIndex(opts.Execution, opts.Ticket.Path, mergedAt); err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}
 
