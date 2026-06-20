@@ -422,11 +422,7 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 	}, nil
 }
 
-func (s service) applyAgentWorkSelectionPreflight(
-	index core.TicketIndex,
-	tickets []core.IndexedTicket,
-	workConfig core.WorkConfig,
-) ([]core.IndexedTicket, error) {
+func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, tickets []core.IndexedTicket, workConfig core.WorkConfig) ([]core.IndexedTicket, error) {
 	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
 	if err != nil {
 		return nil, err
