@@ -17,7 +17,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | Slice 3 | high-level agentic review | delivered | `feat/slice-3-high-level-agentic-review` | `#338` | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | delivered | `feat/slice-4-merge-before-next-ticket` | `#339` | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |
 | Slice 5 | finite repair cycle | delivered | `feat/slice-5-finite-repair-cycle` | `#340` | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
-| Slice 6 | observability docs and QA | active | `feat/slice-6-observability-docs-and-qa` | pending | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
+| Slice 6 | observability docs and QA | reviewing | `feat/slice-6-observability-docs-and-qa` | pending | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
 
 ## Slice 1 Tasks
 
@@ -86,14 +86,14 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T6.1 | Update agent event types/messages for cycle selection, review, repair, merge, and rehydration. | pending | pending | |
-| T6.2 | Update Dash rendering for active cycle phase and stop reason. | pending | pending | |
-| T6.3 | Update loop and execution reports with cycle details. | pending | pending | |
-| T6.4 | Update user guide, ticket loop reference, review workflow reference, and changelog. | pending | pending | |
-| T6.5 | Add or update resettable QA fixture with two dependent tickets. | pending | pending | |
-| T6.6 | Add smoke or manual runbook proving ticket 2 does not start until ticket 1 is merged. | pending | pending | |
-| T6.7 | Run `make verify` and relevant QA smoke commands. | pending | pending | |
-| T6.8 | Add the slice implementation report and final cycle report. | pending | pending | |
+| T6.1 | Update agent event types/messages for cycle selection, review, repair, merge, and rehydration. | done | `8862c4e`, `69923fb` | Added durable phases for cycle rehydration, review, repair, and merge. |
+| T6.2 | Update Dash rendering for active cycle phase and stop reason. | done | `8862c4e` | Dash now shows latest persisted phase and event message. |
+| T6.3 | Update loop and execution reports with cycle details. | done | `8862c4e` | Loop reports now include a derived stop reason. |
+| T6.4 | Update user guide, ticket loop reference, review workflow reference, and changelog. | done | `c3faa66` | Updated user guide, reference docs, how-to docs, and changelog. |
+| T6.5 | Add or update resettable QA fixture with two dependent tickets. | done | `c3faa66` | Added a two-ticket tic-tac-toe fixture under `.chc/user/fixtures/serialized-loop-tickets/`. |
+| T6.6 | Add smoke or manual runbook proving ticket 2 does not start until ticket 1 is merged. | done | `c3faa66` | QA runbook documents the serialized barrier fixture and expected observations. |
+| T6.7 | Run `make verify` and relevant QA smoke commands. | done | this commit | `make verify` and non-resetting `make qa-test-tictactoe` passed. |
+| T6.8 | Add the slice implementation report and final cycle report. | done | this commit | Report added with final validation evidence. |
 
 ## Validation Log
 
@@ -123,6 +123,13 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 - Slice 5: `go test ./internal/app ./internal/core` (pass)
 - Slice 5: `make lint-strict` (pass)
 - Slice 5: `make verify` (pass)
+- Slice 6: `go test ./internal/core -run 'AgentEvent|LoopReport'` (pass)
+- Slice 6: `go test ./internal/app -run 'StartAllReadyAgentWork|WorkRunAll'` (pass)
+- Slice 6: `go test ./internal/tui -run 'Dash|Observability|WorkActionEventStream'` (pass)
+- Slice 6: `go test ./internal/app ./internal/core ./internal/tui` (pass)
+- Slice 6: `make qa-test-tictactoe` (pass)
+- Slice 6: `make lint-strict` (pass)
+- Slice 6: `make verify` (pass)
 
 ## Open Decisions
 
