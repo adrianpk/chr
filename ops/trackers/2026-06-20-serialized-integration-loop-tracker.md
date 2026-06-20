@@ -16,8 +16,8 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | Slice 2 | one-ticket cycle runner | delivered | `feat/slice-2-one-ticket-cycle-runner` | `#337` | `.prj/reports/slices/serialized-integration-loop/slice-2-one-ticket-cycle-runner.md` |
 | Slice 3 | high-level agentic review | delivered | `feat/slice-3-high-level-agentic-review` | `#338` | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | delivered | `feat/slice-4-merge-before-next-ticket` | `#339` | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |
-| Slice 5 | finite repair cycle | reviewing | `feat/slice-5-finite-repair-cycle` | `#340` | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
-| Slice 6 | observability docs and QA | planned | `feat/slice-6-observability-docs-and-qa` | pending | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
+| Slice 5 | finite repair cycle | delivered | `feat/slice-5-finite-repair-cycle` | `#340` | `.prj/reports/slices/serialized-integration-loop/slice-5-finite-repair-cycle.md` |
+| Slice 6 | observability docs and QA | active | `feat/slice-6-observability-docs-and-qa` | pending | `.prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md` |
 
 ## Slice 1 Tasks
 

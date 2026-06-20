@@ -2,7 +2,7 @@
 
 Status: active
 
-Active Slice: Slice 5: finite repair cycle
+Active Slice: Slice 6: observability docs and QA
 
 Tracker: `ops/trackers/2026-06-20-serialized-integration-loop-tracker.md`
 
