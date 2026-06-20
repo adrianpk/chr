@@ -1,6 +1,6 @@
 # Serialized Integration Loop Tracker
 
-Status: planned
+Status: active
 
 Plan: `ops/plans/2026-06-20-serialized-integration-loop-plan.md`
 
@@ -12,7 +12,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | cycle policy and state model | planned | `feat/slice-1-cycle-policy-and-state-model` | pending | `.prj/reports/slices/serialized-integration-loop/slice-1-cycle-policy-and-state-model.md` |
+| Slice 1 | cycle policy and state model | reviewing | `feat/slice-1-cycle-policy-and-state-model` | pending | `.prj/reports/slices/serialized-integration-loop/slice-1-cycle-policy-and-state-model.md` |
 | Slice 2 | one-ticket cycle runner | planned | `feat/slice-2-one-ticket-cycle-runner` | pending | `.prj/reports/slices/serialized-integration-loop/slice-2-one-ticket-cycle-runner.md` |
 | Slice 3 | high-level agentic review | planned | `feat/slice-3-high-level-agentic-review` | pending | `.prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md` |
 | Slice 4 | merge-before-next-ticket | planned | `feat/slice-4-merge-before-next-ticket` | pending | `.prj/reports/slices/serialized-integration-loop/slice-4-merge-before-next-ticket.md` |
@@ -23,14 +23,14 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add core value types for integration cycle mode, phase, status, and blocker. | done | pending | Added package-level integration cycle enums and validation helpers. |
-| T1.2 | Add policy resolution from existing review workflow configuration. | done | pending | Mapped `review.mode` to cycle policy without changing defaults or runtime behavior. |
-| T1.3 | Add a side-effect-free cycle planning function for one selected ticket. | done | pending | Planner returns selected-ticket cycle metadata with no IO or ticket mutation. |
-| T1.4 | Decide whether Slice 1 introduces a dedicated `integration_cycles` table or defers it. | done | pending | Deferred table creation; Slice 1 uses existing durable state plus side-effect-free planning contracts. |
-| T1.5 | If a table is introduced, add an additive migration and repository tests. | done | pending | Not applicable for Slice 1 because the table was explicitly deferred. |
-| T1.6 | Add tests for policy mapping across `human_review`, `agentic_review`, and `trusted_auto_merge`. | done | pending | Added table-driven tests for policy mapping, planner validation, and value validation. |
-| T1.7 | Add docs or reference notes for cycle mode semantics. | done | pending | Added ticket loop and review workflow notes for serialized cycle mode semantics. |
-| T1.8 | Add the slice implementation report and validation evidence. | pending | pending | |
+| T1.1 | Add core value types for integration cycle mode, phase, status, and blocker. | done | `a774f32` | Added package-level integration cycle enums and validation helpers. |
+| T1.2 | Add policy resolution from existing review workflow configuration. | done | `b9a694c` | Mapped `review.mode` to cycle policy without changing defaults or runtime behavior. |
+| T1.3 | Add a side-effect-free cycle planning function for one selected ticket. | done | `f5009c1` | Planner returns selected-ticket cycle metadata with no IO or ticket mutation. |
+| T1.4 | Decide whether Slice 1 introduces a dedicated `integration_cycles` table or defers it. | done | `02a435b` | Deferred table creation; Slice 1 uses existing durable state plus side-effect-free planning contracts. |
+| T1.5 | If a table is introduced, add an additive migration and repository tests. | done | `02a435b` | Not applicable for Slice 1 because the table was explicitly deferred. |
+| T1.6 | Add tests for policy mapping across `human_review`, `agentic_review`, and `trusted_auto_merge`. | done | `61daf4e`, `7eb0cba` | Added table-driven tests for policy mapping, planner validation, value validation, and strict-lint shape. |
+| T1.7 | Add docs or reference notes for cycle mode semantics. | done | `84c44d6` | Added ticket loop and review workflow notes for serialized cycle mode semantics. |
+| T1.8 | Add the slice implementation report and validation evidence. | done | this commit | Report added with final validation evidence. |
 
 ## Slice 2 Tasks
 
@@ -102,6 +102,8 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 - Slice 1 T1.2: `go test ./internal/core -run 'ReviewWorkflow|IntegrationCycle'` (pass)
 - Slice 1 T1.3: `go test ./internal/core -run IntegrationCycle` (pass)
 - Slice 1 T1.6: `go test ./internal/core -run 'IntegrationCycle'` (pass)
+- Slice 1 T1.8: `make lint-strict` (pass)
+- Slice 1 T1.8: `make verify` (pass)
 
 ## Open Decisions
 
