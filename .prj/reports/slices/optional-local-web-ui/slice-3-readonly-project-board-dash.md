@@ -1,6 +1,6 @@
 # Slice 3: Read-Only Project Board And Dash
 
-Status: ready for PR
+Status: reviewing
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 
@@ -11,6 +11,8 @@ Spec: `ops/specs/2026-06-29-optional-local-web-ui.md`
 Branch: `feat/slice-3-readonly-project-board-dash`
 
 Expected PR Title: `feat(slice-3): read-only project board and dash`
+
+PR: `#345`
 
 ## Summary
 
