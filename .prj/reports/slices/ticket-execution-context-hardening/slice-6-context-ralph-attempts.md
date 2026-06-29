@@ -48,13 +48,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/context_previous_attempt.go`
-- `internal/chc/context_previous_attempt_test.go`
+- `internal/chr/context_previous_attempt.go`
+- `internal/chr/context_previous_attempt_test.go`
 - `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoadPreviousAttemptContext|TestRenderPreviousAttemptContextLink'`: pass
+- `go test ./internal/chr -run 'TestLoadPreviousAttemptContext|TestRenderPreviousAttemptContextLink'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

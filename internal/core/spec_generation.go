@@ -14,7 +14,7 @@ import (
 // SpecDirectory defines a package boundary constant.
 const SpecDirectory = "specs"
 
-var generatedSpecChrysoCoordPathPattern = regexp.MustCompile(`\.chc(?:/[^\s\])"'` + "`" + `]+)?`)
+var generatedSpecChrysoPathPattern = regexp.MustCompile(`\.chr(?:/[^\s\])"'` + "`" + `]+)?`)
 
 // GeneratedSpec describes a package boundary value.
 type GeneratedSpec struct {
@@ -62,7 +62,7 @@ func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSp
 		return GeneratedSpecPaths{}, err
 	}
 
-	spec.Body = NormalizeGeneratedSpecChrysoCoordPathReferences(spec.Body)
+	spec.Body = NormalizeGeneratedSpecChrysoPathReferences(spec.Body)
 
 	err = ValidateGeneratedSpec(spec)
 	if err != nil {
@@ -135,7 +135,7 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 		return fmt.Errorf("generated spec body is required")
 	}
 
-	err := validateGeneratedSpecChrysoCoordPathReferences(spec.Body)
+	err := validateGeneratedSpecChrysoPathReferences(spec.Body)
 	if err != nil {
 		return err
 	}
@@ -152,44 +152,44 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 	return nil
 }
 
-func validateGeneratedSpecChrysoCoordPathReferences(body string) error {
-	for _, match := range generatedSpecChrysoCoordPathPattern.FindAllString(body, -1) {
+func validateGeneratedSpecChrysoPathReferences(body string) error {
+	for _, match := range generatedSpecChrysoPathPattern.FindAllString(body, -1) {
 		path := strings.TrimRight(match, ".,;:")
-		if generatedSpecChrysoCoordPathReferenceAllowed(path) {
+		if generatedSpecChrysoPathReferenceAllowed(path) {
 			continue
 		}
 
-		return fmt.Errorf("generated spec body references unsupported ChrysoCoord path %q", path)
+		return fmt.Errorf("generated spec body references unsupported Chryso path %q", path)
 	}
 
 	return nil
 }
 
-// NormalizeGeneratedSpecChrysoCoordPathReferences executes the corresponding package operation.
-func NormalizeGeneratedSpecChrysoCoordPathReferences(body string) string {
-	return generatedSpecChrysoCoordPathPattern.ReplaceAllStringFunc(body, func(match string) string {
+// NormalizeGeneratedSpecChrysoPathReferences executes the corresponding package operation.
+func NormalizeGeneratedSpecChrysoPathReferences(body string) string {
+	return generatedSpecChrysoPathPattern.ReplaceAllStringFunc(body, func(match string) string {
 		path := strings.TrimRight(match, ".,;:")
 		suffix := strings.TrimPrefix(match, path)
 
-		if generatedSpecChrysoCoordPathReferenceAllowed(path) {
+		if generatedSpecChrysoPathReferenceAllowed(path) {
 			return match
 		}
 
-		if strings.HasPrefix(path, ".chc/") {
-			return ".chc/user/" + strings.TrimPrefix(path, ".chc/") + suffix
+		if strings.HasPrefix(path, ".chr/") {
+			return ".chr/user/" + strings.TrimPrefix(path, ".chr/") + suffix
 		}
 
 		return path + suffix
 	})
 }
 
-func generatedSpecChrysoCoordPathReferenceAllowed(path string) bool {
-	if path == ".chc" || path == ".chc/" || path == ".chc/user" || path == ".chc/user/" {
+func generatedSpecChrysoPathReferenceAllowed(path string) bool {
+	if path == ".chr" || path == ".chr/" || path == ".chr/user" || path == ".chr/user/" {
 		return true
 	}
 
 	switch path {
-	case ".chc/user/config.yml", ".chc/user/manifest.md", ".chc/user/project.md":
+	case ".chr/user/config.yml", ".chr/user/manifest.md", ".chr/user/project.md":
 		return true
 	}
 
@@ -204,7 +204,7 @@ func generatedSpecChrysoCoordPathReferenceAllowed(path string) bool {
 		"runtime",
 		"tmp",
 	} {
-		prefix := ".chc/user/" + directory
+		prefix := ".chr/user/" + directory
 		if path == prefix || strings.HasPrefix(path, prefix+"/") {
 			return true
 		}

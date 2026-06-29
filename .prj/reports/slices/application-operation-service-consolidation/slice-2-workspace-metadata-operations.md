@@ -26,11 +26,11 @@ executor interfaces as adapter wrappers.
 
 ## Implementation Notes
 
-The operation service continues to be unexported inside `internal/chcapp`.
+The operation service continues to be unexported inside `internal/chrapp`.
 The new metadata operation result types live next to their service methods and
 do not import TUI types.
 
-The TUI-facing executors still satisfy `internal/chctui` interfaces, but they no
+The TUI-facing executors still satisfy `internal/chrtui` interfaces, but they no
 longer own the metadata save workflows.
 
 ## Contracts Added or Changed
@@ -43,13 +43,13 @@ longer own the metadata save workflows.
 
 ## Files of Interest
 
-- `internal/chcapp/service_metadata.go`
-- `internal/chcapp/service_test.go`
-- `internal/chcapp/app.go`
+- `internal/chrapp/service_metadata.go`
+- `internal/chrapp/service_test.go`
+- `internal/chrapp/app.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui` passed on 2026-05-23.
+- `go test ./internal/chrapp ./internal/chrtui` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

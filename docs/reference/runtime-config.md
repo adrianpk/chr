@@ -1,9 +1,9 @@
 # Runtime Configuration
 
-Runtime configuration may live in the managed project's `.chc/user/config.yml` file
+Runtime configuration may live in the managed project's `.chr/user/config.yml` file
 under the `runtime:` key.
 
-When fields are omitted, ChrysoCoord uses local defaults suitable for the
+When fields are omitted, Chryso uses local defaults suitable for the
 project-owned runtime scaffold.
 
 New workspaces omit runtime defaults from generated config so users only edit
@@ -19,18 +19,18 @@ runtime values when they are making a real project decision.
 
 ## Default Values
 
-- `image`: `chc-agent-runtime:local`
-- `dockerfile`: `.chc/user/runtime/agent/Dockerfile`
+- `image`: `chr-agent-runtime:local`
+- `dockerfile`: `.chr/user/runtime/agent/Dockerfile`
 - `workdir`: `/workspace`
-- `artifact_dir`: `.chc/user/runtime/runs`
+- `artifact_dir`: `.chr/user/runtime/runs`
 - `validation_command`: `make verify`
 
 Example override:
 
 ```yml
 runtime:
-  image: chc-agent-runtime:local
-  dockerfile: .chc/user/runtime/agent/Dockerfile
+  image: chr-agent-runtime:local
+  dockerfile: .chr/user/runtime/agent/Dockerfile
   validation_command: make verify
 ```
 
@@ -39,13 +39,13 @@ runtime:
 Preview the runtime boundary without invoking Docker:
 
 ```sh
-chc runtime validate --dry-run
+chr runtime validate --dry-run
 ```
 
 Validate the configured runtime:
 
 ```sh
-chc runtime validate
+chr runtime validate
 ```
 
 Runtime validation checks the workspace, Dockerfile path, artifact directory,

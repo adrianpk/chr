@@ -26,7 +26,7 @@ func TestTicketResultStateWriterWritesReviewingState(t *testing.T) {
 		`status: "reviewing"`,
 		`updated_at: "2026-05-19T13:00:00Z"`,
 		`title: "Do something"`,
-		"## 2026-05-19T12:30:00Z chc",
+		"## 2026-05-19T12:30:00Z chr",
 		`"Existing comment."`,
 	} {
 		if !strings.Contains(content, want) {
@@ -69,7 +69,7 @@ func writeResultStateTicket(t *testing.T, status string) string {
 
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	ticket := Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    status,
 		CreatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
@@ -81,7 +81,7 @@ func writeResultStateTicket(t *testing.T, status string) string {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
 
-	content += "\n## 2026-05-19T12:30:00Z chc\n\n\"Existing comment.\"\n"
+	content += "\n## 2026-05-19T12:30:00Z chr\n\n\"Existing comment.\"\n"
 
 	err = os.WriteFile(path, []byte(content), 0o644)
 	if err != nil {
@@ -106,7 +106,7 @@ func testResultStateApplication(path, status string) ResultApplication {
 	return ResultApplication{
 		ExecutionID:  "exec-1",
 		ProjectID:    "project-1",
-		TicketKey:    "CHC-1",
+		TicketKey:    "CHR-1",
 		TicketPath:   path,
 		TicketStatus: status,
 	}

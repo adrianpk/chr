@@ -89,7 +89,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `make verify`
 
 ## Slice 2: Quiz Artifact Repository
@@ -114,7 +114,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `make verify`
 
 ## Slice 3: Quiz Service Operations
@@ -142,7 +142,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
 - `make verify`
 
 ## Slice 4: Scoped Quiz Read Model
@@ -164,7 +164,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 
@@ -188,7 +188,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chctui ./internal/chcapp`
+- `go test ./internal/chrtui ./internal/chrapp`
 - `make verify`
 
 
@@ -214,7 +214,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 
@@ -239,7 +239,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 
@@ -267,7 +267,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Open Decisions

@@ -12,7 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func TestModelViewRendersProjectAndNavigation(t *testing.T) {
@@ -194,7 +194,7 @@ func TestMouseClickSelectsShellTab(t *testing.T) {
 func TestMouseClickSelectsDumpTextPane(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project Context", RelativePath: ".chc/user/dumps/project-context.md", Preview: "# Project Context"},
+			{Title: "Project Context", RelativePath: ".chr/user/dumps/project-context.md", Preview: "# Project Context"},
 		},
 	})
 	model.selected = 2
@@ -323,7 +323,7 @@ func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
 				Project: &core.WorkspaceNode{
 					Name:        "Graph Project",
 					Description: "Graph description.",
-					Path:        ".chc/user/project.md",
+					Path:        ".chr/user/project.md",
 					SourceHash:  "hash-project",
 				},
 			},
@@ -488,7 +488,7 @@ func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
 						Slug:        "blog-publishing",
 						Name:        "Graph Case",
 						Description: "Graph case description.",
-						Path:        ".chc/user/cases/blog-publishing.md",
+						Path:        ".chr/user/cases/blog-publishing.md",
 						SourceHash:  "hash-case",
 					},
 				},
@@ -694,7 +694,7 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 			Project: &core.WorkspaceNode{
 				Name:        "Graph Project",
 				Description: "Graph description.",
-				Path:        ".chc/user/project.md",
+				Path:        ".chr/user/project.md",
 				SourceHash:  "hash-project",
 			},
 			Cases: []core.WorkspaceNode{
@@ -702,7 +702,7 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 					Slug:        "fallback",
 					Name:        "Graph Case",
 					Description: "Graph case description.",
-					Path:        ".chc/user/cases/fallback.md",
+					Path:        ".chr/user/cases/fallback.md",
 					SourceHash:  "hash-case",
 				},
 			},
@@ -732,7 +732,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 		ProjectWide: []core.WorkspaceNode{
 			{
 				Kind:         core.WorkspaceNodeSpec,
-				RelativePath: ".chc/user/specs/old.md",
+				RelativePath: ".chr/user/specs/old.md",
 				Title:        "Old",
 				SourceHash:   "old",
 			},
@@ -743,7 +743,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 		ProjectWide: []core.WorkspaceNode{
 			{
 				Kind:         core.WorkspaceNodeSpec,
-				RelativePath: ".chc/user/specs/new.md",
+				RelativePath: ".chr/user/specs/new.md",
 				Title:        "New",
 				SourceHash:   "new",
 			},
@@ -755,7 +755,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 			Graph: refreshedGraph,
 			Index: core.NewWorkspaceIndexFromGraph(refreshedGraph),
 			SemanticDigestStates: []core.WorkspaceSemanticDigestState{
-				{NodeID: "spec:.chc/user/specs/new.md", Status: core.WorkspaceSemanticDigestPending},
+				{NodeID: "spec:.chr/user/specs/new.md", Status: core.WorkspaceSemanticDigestPending},
 			},
 		},
 	}
@@ -766,7 +766,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 
 	model.refreshWorkspace()
 
-	if _, ok := model.workspaceIndex.NodesByID["spec:.chc/user/specs/new.md"]; !ok {
+	if _, ok := model.workspaceIndex.NodesByID["spec:.chr/user/specs/new.md"]; !ok {
 		t.Fatalf("workspaceIndex.NodesByID = %#v, want refreshed spec", model.workspaceIndex.NodesByID)
 	}
 
@@ -783,9 +783,9 @@ func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {
 			},
 			CaseDocuments: map[string][]core.WorkspaceNode{
 				"blog": {
-					{Kind: core.WorkspaceNodeDump, RelativePath: ".chc/user/dumps/blog.md", CaseSlug: "blog"},
-					{Kind: core.WorkspaceNodeSpec, RelativePath: ".chc/user/specs/blog.md", CaseSlug: "blog"},
-					{Kind: core.WorkspaceNodeTicket, RelativePath: ".chc/user/tickets/CHC-1.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeDump, RelativePath: ".chr/user/dumps/blog.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeSpec, RelativePath: ".chr/user/specs/blog.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeTicket, RelativePath: ".chr/user/tickets/CHR-1.md", CaseSlug: "blog"},
 				},
 			},
 			UnresolvedCaseReferences: []core.WorkspaceCaseReference{
@@ -876,12 +876,12 @@ func TestModelShowsWorkspaceIndexHealthInDash(t *testing.T) {
 	model := NewModel(Options{
 		WorkspaceGraph: core.WorkspaceGraph{
 			ProjectWide: []core.WorkspaceNode{
-				{Kind: core.WorkspaceNodeSpec, RelativePath: ".chc/user/specs/one.md"},
+				{Kind: core.WorkspaceNodeSpec, RelativePath: ".chr/user/specs/one.md"},
 			},
 			CaseDocuments: map[string][]core.WorkspaceNode{},
 		},
 		SemanticDigestStates: []core.WorkspaceSemanticDigestState{
-			{NodeID: "spec:.chc/user/specs/one.md", Status: core.WorkspaceSemanticDigestPending},
+			{NodeID: "spec:.chr/user/specs/one.md", Status: core.WorkspaceSemanticDigestPending},
 		},
 	})
 
@@ -903,7 +903,7 @@ func TestModelRefreshReportsWorkspaceDiagnostics(t *testing.T) {
 		result: WorkspaceRefreshResult{
 			Graph: core.WorkspaceGraph{
 				Diagnostics: []core.WorkspaceGraphDiagnostic{
-					{Path: ".chc/user/cases/broken.md", Kind: core.WorkspaceNodeCase, Message: "invalid"},
+					{Path: ".chr/user/cases/broken.md", Kind: core.WorkspaceNodeCase, Message: "invalid"},
 				},
 			},
 		},
@@ -1008,7 +1008,7 @@ func TestModelExecutesNavigationCommand(t *testing.T) {
 func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 	model := NewModel(Options{
 		Specs: []SpecView{
-			{Index: 0, Title: "Spec", RelativePath: ".chc/user/specs/tui.md"},
+			{Index: 0, Title: "Spec", RelativePath: ".chr/user/specs/tui.md"},
 		},
 	})
 	model.selected = 4
@@ -1022,7 +1022,7 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	if navigated.statusMessage != "Selected source path: .chc/user/specs/tui.md" {
+	if navigated.statusMessage != "Selected source path: .chr/user/specs/tui.md" {
 		t.Fatalf("statusMessage = %q, want selected source path", navigated.statusMessage)
 	}
 }
@@ -1166,16 +1166,16 @@ func TestModelRefreshesDumpsFromDumpsKey(t *testing.T) {
 		result: DumpActionResult{
 			Message: "Dumps refreshed.",
 			Dumps: []DumpView{
-				{Title: "First", RelativePath: ".chc/user/dumps/first.md"},
-				{Title: "Second", RelativePath: ".chc/user/dumps/second.md"},
+				{Title: "First", RelativePath: ".chr/user/dumps/first.md"},
+				{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
 			},
-			SelectedPath: ".chc/user/dumps/second.md",
+			SelectedPath: ".chr/user/dumps/second.md",
 		},
 	}
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Second", RelativePath: ".chc/user/dumps/second.md"},
+			{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
 		},
 	})
 	model.selected = 2
@@ -1200,7 +1200,7 @@ func TestModelRefreshesDumpsFromDumpsKey(t *testing.T) {
 		t.Fatal("selectedDumpView returned no dump")
 	}
 
-	if dump.RelativePath != ".chc/user/dumps/second.md" {
+	if dump.RelativePath != ".chr/user/dumps/second.md" {
 		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
@@ -1317,9 +1317,9 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 func TestModelConfirmsDumpAction(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Created dump .chc/user/dumps/project-dump.md.",
+			Message: "Created dump .chr/user/dumps/project-dump.md.",
 			Dumps: []DumpView{
-				{Title: "Project dump", RelativePath: ".chc/user/dumps/project-dump.md"},
+				{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
 			},
 		},
 	}
@@ -1380,7 +1380,7 @@ func TestModelRendersEmptyDumpState(t *testing.T) {
 func TestModelPlansEditDumpCommand(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chc/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
 		},
 	})
 	model.selected = 2
@@ -1402,7 +1402,7 @@ func TestModelPlansEditDumpCommand(t *testing.T) {
 		t.Fatalf("dump action = %q, want %q", planned.dumpAction.Request.Action, DumpActionEdit)
 	}
 
-	if planned.dumpAction.Request.Path != ".chc/user/dumps/project-dump.md" {
+	if planned.dumpAction.Request.Path != ".chr/user/dumps/project-dump.md" {
 		t.Fatalf("dump path = %q", planned.dumpAction.Request.Path)
 	}
 }
@@ -1410,15 +1410,15 @@ func TestModelPlansEditDumpCommand(t *testing.T) {
 func TestModelEditsSelectedDumpDirectlyWithEnter(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:      "Editing dump .chc/user/dumps/project-dump.md.",
+			Message:      "Editing dump .chr/user/dumps/project-dump.md.",
 			Content:      "# Project dump\n\nExisting Markdown.",
-			SelectedPath: ".chc/user/dumps/project-dump.md",
+			SelectedPath: ".chr/user/dumps/project-dump.md",
 		},
 	}
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chc/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
 		},
 	})
 	model.selected = 2
@@ -1451,9 +1451,9 @@ func TestModelEditsSelectedDumpDirectlyWithEnter(t *testing.T) {
 func TestModelConfirmsAppendDumpAction(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Appended dump .chc/user/dumps/project-dump.md.",
+			Message: "Appended dump .chr/user/dumps/project-dump.md.",
 			Dumps: []DumpView{
-				{Title: "Project dump", RelativePath: ".chc/user/dumps/project-dump.md"},
+				{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
 			},
 		},
 	}
@@ -1462,7 +1462,7 @@ func TestModelConfirmsAppendDumpAction(t *testing.T) {
 		Pending: true,
 		Request: DumpActionRequest{
 			Action:  DumpActionAppend,
-			Path:    ".chc/user/dumps/project-dump.md",
+			Path:    ".chr/user/dumps/project-dump.md",
 			Content: "Appended dump note from the TUI.",
 		},
 	}
@@ -1486,9 +1486,9 @@ func TestModelConfirmsAppendDumpAction(t *testing.T) {
 func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:      "Editing dump .chc/user/dumps/project-dump.md.",
+			Message:      "Editing dump .chr/user/dumps/project-dump.md.",
 			Content:      "# Project dump\n\nExisting Markdown.",
-			SelectedPath: ".chc/user/dumps/project-dump.md",
+			SelectedPath: ".chr/user/dumps/project-dump.md",
 		},
 	}
 	model := NewModel(Options{DumpExecutor: executor})
@@ -1496,7 +1496,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		Pending: true,
 		Request: DumpActionRequest{
 			Action: DumpActionEdit,
-			Path:   ".chc/user/dumps/project-dump.md",
+			Path:   ".chr/user/dumps/project-dump.md",
 		},
 	}
 
@@ -1515,7 +1515,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		t.Fatal("dumpEdit.Active = false, want active edit")
 	}
 
-	if confirmed.dumpEdit.Path != ".chc/user/dumps/project-dump.md" {
+	if confirmed.dumpEdit.Path != ".chr/user/dumps/project-dump.md" {
 		t.Fatalf("dumpEdit.Path = %q", confirmed.dumpEdit.Path)
 	}
 
@@ -1523,7 +1523,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		t.Fatalf("dumpEdit value = %q", confirmed.dumpEdit.Input.Value())
 	}
 
-	if confirmed.statusMessage != "Editing .chc/user/dumps/project-dump.md" {
+	if confirmed.statusMessage != "Editing .chr/user/dumps/project-dump.md" {
 		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
 	}
 }
@@ -1531,15 +1531,15 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 func TestModelSavesInternalDumpEdit(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Saved dump .chc/user/dumps/project-dump.md.",
+			Message: "Saved dump .chr/user/dumps/project-dump.md.",
 			Dumps: []DumpView{
-				{Title: "Project dump", RelativePath: ".chc/user/dumps/project-dump.md"},
+				{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
 			},
-			SelectedPath: ".chc/user/dumps/project-dump.md",
+			SelectedPath: ".chr/user/dumps/project-dump.md",
 		},
 	}
 	model := NewModel(Options{DumpExecutor: executor})
-	model.startDumpEdit(".chc/user/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+	model.startDumpEdit(".chr/user/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
 
@@ -1567,7 +1567,7 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 			{
 				Title:        "Project dump",
 				Status:       "raw",
-				RelativePath: ".chc/user/dumps/project-dump.md",
+				RelativePath: ".chr/user/dumps/project-dump.md",
 			},
 		},
 	})
@@ -1575,7 +1575,7 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 	model.selectedPane = 1
 	model.width = 100
 	model.height = 24
-	model.startDumpEdit(".chc/user/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+	model.startDumpEdit(".chr/user/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
 
 	view := model.View()
 
@@ -1594,10 +1594,10 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 func TestModelCancelsInternalDumpEdit(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chc/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
 		},
 	})
-	model.startDumpEdit(".chc/user/dumps/project-dump.md", "# Project dump")
+	model.startDumpEdit(".chr/user/dumps/project-dump.md", "# Project dump")
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
@@ -1615,7 +1615,7 @@ func TestModelCancelsInternalDumpEdit(t *testing.T) {
 		t.Fatal("selectedDumpView returned no dump")
 	}
 
-	if dump.RelativePath != ".chc/user/dumps/project-dump.md" {
+	if dump.RelativePath != ".chr/user/dumps/project-dump.md" {
 		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
@@ -1623,7 +1623,7 @@ func TestModelCancelsInternalDumpEdit(t *testing.T) {
 func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:                  "Editing dump .chc/user/dumps/project-dump.md.",
+			Message:                  "Editing dump .chr/user/dumps/project-dump.md.",
 			EditorCommand:            exec.Command("true"),
 			EditorCommandDescription: "nvim project-dump.md",
 		},
@@ -1631,7 +1631,7 @@ func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chc/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
 		},
 	})
 	model.selected = 2
@@ -1651,7 +1651,7 @@ func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 		t.Fatalf("dump action = %q, want %q", executor.request.Action, DumpActionExternalEdit)
 	}
 
-	wantStatus := "External editor opened. chc will resume when the editor process exits."
+	wantStatus := "External editor opened. chr will resume when the editor process exits."
 	if confirmed.statusMessage != wantStatus {
 		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
 	}
@@ -1668,10 +1668,10 @@ func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
 		SourceExecutor: executor,
 		Tickets: []core.IndexedTicket{
 			{
-				Key:          "CHC-1",
+				Key:          "CHR-1",
 				Title:        "Preview command",
 				Status:       core.TicketStatusBacklog,
-				RelativePath: "local-preview/CHC-1-preview-command.md",
+				RelativePath: "local-preview/CHR-1-preview-command.md",
 			},
 		},
 	})
@@ -1688,11 +1688,11 @@ func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
 		t.Fatal("cmd = nil, want external editor command")
 	}
 
-	if executor.path != ".chc/user/tickets/local-preview/CHC-1-preview-command.md" {
+	if executor.path != ".chr/user/tickets/local-preview/CHR-1-preview-command.md" {
 		t.Fatalf("source path = %q", executor.path)
 	}
 
-	wantStatus := "External editor opened. chc will resume when the editor process exits."
+	wantStatus := "External editor opened. chr will resume when the editor process exits."
 	if confirmed.statusMessage != wantStatus {
 		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
 	}
@@ -1709,10 +1709,10 @@ func TestModelCtrlEOpensSelectedTicketSource(t *testing.T) {
 		SourceExecutor: executor,
 		Tickets: []core.IndexedTicket{
 			{
-				Key:          "CHC-1",
+				Key:          "CHR-1",
 				Title:        "Preview command",
 				Status:       core.TicketStatusBacklog,
-				RelativePath: "local-preview/CHC-1-preview-command.md",
+				RelativePath: "local-preview/CHR-1-preview-command.md",
 			},
 		},
 	})
@@ -1724,7 +1724,7 @@ func TestModelCtrlEOpensSelectedTicketSource(t *testing.T) {
 		t.Fatal("cmd = nil, want external editor command")
 	}
 
-	if executor.path != ".chc/user/tickets/local-preview/CHC-1-preview-command.md" {
+	if executor.path != ".chr/user/tickets/local-preview/CHR-1-preview-command.md" {
 		t.Fatalf("source path = %q", executor.path)
 	}
 }
@@ -1740,10 +1740,10 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 		SourceExecutor: executor,
 		Tickets: []core.IndexedTicket{
 			{
-				Key:          "CHC-1",
+				Key:          "CHR-1",
 				Title:        "Preview command",
 				Status:       core.TicketStatusBacklog,
-				RelativePath: "CHC-1-preview-command.md",
+				RelativePath: "CHR-1-preview-command.md",
 			},
 		},
 	})
@@ -1756,7 +1756,7 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 		t.Fatal("cmd = nil, want external editor command")
 	}
 
-	if executor.path != ".chc/user/tickets/CHC-1-preview-command.md" {
+	if executor.path != ".chr/user/tickets/CHR-1-preview-command.md" {
 		t.Fatalf("source path = %q", executor.path)
 	}
 }
@@ -1765,10 +1765,10 @@ func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
 			{
-				Key:          "CHC-1",
+				Key:          "CHR-1",
 				Title:        "Long detail",
 				Status:       core.TicketStatusBacklog,
-				RelativePath: "CHC-1-long-detail.md",
+				RelativePath: "CHR-1-long-detail.md",
 			},
 		},
 	})
@@ -1791,10 +1791,10 @@ func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
 			{
-				Key:          "CHC-1",
+				Key:          "CHR-1",
 				Title:        "Long detail",
 				Status:       core.TicketStatusBacklog,
-				RelativePath: "CHC-1-long-detail.md",
+				RelativePath: "CHR-1-long-detail.md",
 			},
 		},
 	})
@@ -1842,10 +1842,10 @@ func TestModelScrollsFocusedTicketDetail(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
 			{
-				Key:          "CHC-1",
+				Key:          "CHR-1",
 				Title:        "Long detail",
 				Status:       core.TicketStatusBacklog,
-				RelativePath: "CHC-1-long-detail.md",
+				RelativePath: "CHR-1-long-detail.md",
 			},
 		},
 	})
@@ -1879,9 +1879,9 @@ func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 
 	updated, _ := model.Update(dumpEditorFinishedMsg{
 		err:        errors.New("exit status 135"),
-		path:       ".chc/user/dumps/project-dump.md",
+		path:       ".chr/user/dumps/project-dump.md",
 		command:    "nvim project-dump.md",
-		workingDir: "/workspace/.chc/user/dumps",
+		workingDir: "/workspace/.chr/user/dumps",
 	})
 
 	failed, ok := updated.(Model)
@@ -1892,7 +1892,7 @@ func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 	for _, want := range []string{
 		"Edit failed:",
 		"command=nvim project-dump.md",
-		"dir=/workspace/.chc/user/dumps",
+		"dir=/workspace/.chr/user/dumps",
 		"exit status 135",
 	} {
 		if !strings.Contains(failed.statusMessage, want) {
@@ -1904,22 +1904,22 @@ func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 func TestModelRefreshesDumpsAfterEditorFinishes(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Edited dump .chc/user/dumps/second.md.",
+			Message: "Edited dump .chr/user/dumps/second.md.",
 			Dumps: []DumpView{
-				{Title: "First", RelativePath: ".chc/user/dumps/first.md"},
-				{Title: "Second", RelativePath: ".chc/user/dumps/second.md"},
+				{Title: "First", RelativePath: ".chr/user/dumps/first.md"},
+				{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
 			},
-			SelectedPath: ".chc/user/dumps/second.md",
+			SelectedPath: ".chr/user/dumps/second.md",
 		},
 	}
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Second", RelativePath: ".chc/user/dumps/second.md"},
+			{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
 		},
 	})
 
-	updated, _ := model.Update(dumpEditorFinishedMsg{path: ".chc/user/dumps/second.md"})
+	updated, _ := model.Update(dumpEditorFinishedMsg{path: ".chr/user/dumps/second.md"})
 
 	refreshed, ok := updated.(Model)
 	if !ok {
@@ -1935,7 +1935,7 @@ func TestModelRefreshesDumpsAfterEditorFinishes(t *testing.T) {
 		t.Fatal("selectedDumpView returned no dump")
 	}
 
-	if dump.RelativePath != ".chc/user/dumps/second.md" {
+	if dump.RelativePath != ".chr/user/dumps/second.md" {
 		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
@@ -1963,9 +1963,9 @@ func TestModelCancelsArtifactAction(t *testing.T) {
 func TestModelConfirmsArtifactAction(t *testing.T) {
 	executor := &fakeArtifactActionExecutor{
 		result: ArtifactActionResult{
-			Message: "Created ticket CHC-1 at .chc/user/tickets/CHC-1-tui-created-ticket.md",
+			Message: "Created ticket CHR-1 at .chr/user/tickets/CHR-1-tui-created-ticket.md",
 			Tickets: []core.IndexedTicket{
-				{Key: "CHC-1", Title: "TUI created ticket", Status: "open"},
+				{Key: "CHR-1", Title: "TUI created ticket", Status: "open"},
 			},
 			Documents: []DocumentView{
 				{Index: 0, Title: "TUI Plan"},
@@ -2031,7 +2031,7 @@ func TestModelReportsArtifactActionError(t *testing.T) {
 func TestModelPlansTicketActionCommand(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "open"},
+			{Key: "CHR-1", Title: "First", Status: "open"},
 		},
 	})
 	model.commandPalette.Open = true
@@ -2052,8 +2052,8 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 		t.Fatal("ticket action is not pending")
 	}
 
-	if planned.ticketAction.Request.Key != "CHC-1" {
-		t.Fatalf("ticket action key = %q, want CHC-1", planned.ticketAction.Request.Key)
+	if planned.ticketAction.Request.Key != "CHR-1" {
+		t.Fatalf("ticket action key = %q, want CHR-1", planned.ticketAction.Request.Key)
 	}
 
 	if planned.ticketAction.Request.Status != "ready" {
@@ -2064,7 +2064,7 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 	for _, want := range []string{
 		"Confirm Ticket Action",
 		"Move ticket status",
-		"Ticket: CHC-1",
+		"Ticket: CHR-1",
 		"New status: ready",
 		"enter confirms ticket action",
 	} {
@@ -2077,7 +2077,7 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 func TestModelCancelsTicketAction(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "open"},
+			{Key: "CHR-1", Title: "First", Status: "open"},
 		},
 	})
 
@@ -2107,16 +2107,16 @@ func TestModelCancelsTicketAction(t *testing.T) {
 func TestModelConfirmsTicketAction(t *testing.T) {
 	executor := &fakeTicketActionExecutor{
 		result: TicketActionResult{
-			Message: "Moved ticket CHC-1 to ready.",
+			Message: "Moved ticket CHR-1 to ready.",
 			Tickets: []core.IndexedTicket{
-				{Key: "CHC-1", Title: "First", Status: "ready"},
+				{Key: "CHR-1", Title: "First", Status: "ready"},
 			},
 		},
 	}
 	model := NewModel(Options{
 		TicketExecutor: executor,
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "open"},
+			{Key: "CHR-1", Title: "First", Status: "open"},
 		},
 	})
 
@@ -2138,8 +2138,8 @@ func TestModelConfirmsTicketAction(t *testing.T) {
 		t.Fatalf("executor action = %q, want %q", executor.request.Action, TicketActionMoveStatus)
 	}
 
-	if executor.request.Key != "CHC-1" || executor.request.Status != "ready" {
-		t.Fatalf("executor request = %#v, want CHC-1 ready", executor.request)
+	if executor.request.Key != "CHR-1" || executor.request.Status != "ready" {
+		t.Fatalf("executor request = %#v, want CHR-1 ready", executor.request)
 	}
 
 	if confirmed.ticketAction.Pending {
@@ -2160,7 +2160,7 @@ func TestModelReportsTicketActionError(t *testing.T) {
 	model := NewModel(Options{
 		TicketExecutor: executor,
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "open"},
+			{Key: "CHR-1", Title: "First", Status: "open"},
 		},
 	})
 
@@ -2190,7 +2190,7 @@ func TestModelReportsTicketActionError(t *testing.T) {
 func TestModelPlansWorkActionCommand(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "ready"},
+			{Key: "CHR-1", Title: "First", Status: "ready"},
 		},
 	})
 	model.commandPalette.Open = true
@@ -2211,15 +2211,15 @@ func TestModelPlansWorkActionCommand(t *testing.T) {
 		t.Fatal("work action is not pending")
 	}
 
-	if planned.workAction.Request.TicketKey != "CHC-1" {
-		t.Fatalf("work action ticket key = %q, want CHC-1", planned.workAction.Request.TicketKey)
+	if planned.workAction.Request.TicketKey != "CHR-1" {
+		t.Fatalf("work action ticket key = %q, want CHR-1", planned.workAction.Request.TicketKey)
 	}
 
 	view := planned.View()
 	for _, want := range []string{
 		"Confirm Work Action",
 		"Start selected ticket",
-		"Ticket: CHC-1",
+		"Ticket: CHR-1",
 		"Enter: confirm",
 		"Esc: cancel",
 		"enter confirms work action",
@@ -2233,12 +2233,12 @@ func TestModelPlansWorkActionCommand(t *testing.T) {
 func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "Ready frontend", Status: "ready_for_dev", Priority: "high"},
-			{Key: "CHC-2", Title: "Backlog backend", Status: "backlog", Priority: "normal"},
+			{Key: "CHR-1", Title: "Ready frontend", Status: "ready_for_dev", Priority: "high"},
+			{Key: "CHR-2", Title: "Backlog backend", Status: "backlog", Priority: "normal"},
 		},
 		Observability: ObservabilityView{
-			LatestExecution: ExecutionView{ID: "exec-1", TicketKey: "CHC-1", Status: "succeeded"},
-			LatestEvent:     AgentEventView{Phase: "merge_finished", Message: "CHC-1 merge finished: merged"},
+			LatestExecution: ExecutionView{ID: "exec-1", TicketKey: "CHR-1", Status: "succeeded"},
+			LatestEvent:     AgentEventView{Phase: "merge_finished", Message: "CHR-1 merge finished: merged"},
 			LatestLoop: LoopRunView{
 				ID:             "loop-1",
 				Status:         "succeeded",
@@ -2253,12 +2253,12 @@ func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 	for _, want := range []string{
 		"Agent Work",
 		"Queue",
-		"CHC-1",
+		"CHR-1",
 		"Ready frontend",
 		"Current",
 		"Loop: loop-1",
 		"Phase: merge_finished",
-		"Last event: CHC-1 merge finished: merged",
+		"Last event: CHR-1 merge finished: merged",
 		"Execution: exec-1",
 		"Recent",
 		"a Run all ready tickets",
@@ -2385,8 +2385,8 @@ func TestModelDashRepairReadinessKeyPlansWorkAction(t *testing.T) {
 func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "Ready normal", Status: "ready_for_dev", Priority: "normal", Severity: "normal"},
-			{Key: "CHC-2", Title: "Ready critical", Status: "ready_for_dev", Priority: "critical", Severity: "critical"},
+			{Key: "CHR-1", Title: "Ready normal", Status: "ready_for_dev", Priority: "normal", Severity: "normal"},
+			{Key: "CHR-2", Title: "Ready critical", Status: "ready_for_dev", Priority: "critical", Severity: "critical"},
 		},
 	})
 	model.selected = 7
@@ -2401,7 +2401,7 @@ func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
 	view := filtered.View()
 	for _, want := range []string{
 		"Priority: critical",
-		"CHC-2",
+		"CHR-2",
 		"Ready critical",
 	} {
 		if !strings.Contains(view, want) {
@@ -2451,10 +2451,10 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	executor := &fakeAgentWorkRefreshExecutor{
 		result: AgentWorkRefreshResult{
 			Tickets: []core.IndexedTicket{
-				{Key: "CHC-2", Title: "Fresh ready", Status: "ready_for_dev"},
+				{Key: "CHR-2", Title: "Fresh ready", Status: "ready_for_dev"},
 			},
 			Observability: ObservabilityView{
-				LatestExecution: ExecutionView{ID: "exec-2", TicketKey: "CHC-2", Status: "running"},
+				LatestExecution: ExecutionView{ID: "exec-2", TicketKey: "CHR-2", Status: "running"},
 				LatestLoop:      LoopRunView{ID: "loop-2", Status: "running", EligibleCount: 1},
 			},
 			Readiness: WorkReadinessView{Status: "ready", CurrentBranch: "dev"},
@@ -2463,7 +2463,7 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	model := NewModel(Options{
 		AgentWorkExecutor: executor,
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "Old ready", Status: "ready_for_dev"},
+			{Key: "CHR-1", Title: "Old ready", Status: "ready_for_dev"},
 		},
 	})
 	model.selected = 7
@@ -2482,8 +2482,8 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	updated, _ = refreshing.Update(agentWorkRefreshFinishedMsg{result: executor.result})
 	refreshed := requireUpdatedModel(t, updated)
 
-	if len(refreshed.tickets) != 1 || refreshed.tickets[0].Key != "CHC-2" {
-		t.Fatalf("tickets = %#v, want refreshed CHC-2", refreshed.tickets)
+	if len(refreshed.tickets) != 1 || refreshed.tickets[0].Key != "CHR-2" {
+		t.Fatalf("tickets = %#v, want refreshed CHR-2", refreshed.tickets)
 	}
 
 	if refreshed.observability.LatestExecution.ID != "exec-2" {
@@ -2500,7 +2500,7 @@ func TestModelRefreshesDashAgentWorkWhileWorkBusy(t *testing.T) {
 		result: AgentWorkRefreshResult{
 			Observability: ObservabilityView{
 				RecentEvents: []AgentEventView{
-					{Time: "12:00:00", TicketKey: "CHC-2", Message: "worker started"},
+					{Time: "12:00:00", TicketKey: "CHR-2", Message: "worker started"},
 				},
 			},
 		},
@@ -2584,7 +2584,7 @@ func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
 		{
 			name: "running",
 			observability: ObservabilityView{
-				LatestExecution: ExecutionView{ID: "exec-running", TicketKey: "CHC-1", Status: "running"},
+				LatestExecution: ExecutionView{ID: "exec-running", TicketKey: "CHR-1", Status: "running"},
 				LatestLoop:      LoopRunView{ID: "loop-running", Status: "running", EligibleCount: 2, ProcessedCount: 1},
 			},
 			want: []string{"Status: running", "Execution status: running", "Loop loop-running  running"},
@@ -2592,7 +2592,7 @@ func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
 		{
 			name: "failed",
 			observability: ObservabilityView{
-				LatestExecution: ExecutionView{ID: "exec-failed", TicketKey: "CHC-2", Status: "failed"},
+				LatestExecution: ExecutionView{ID: "exec-failed", TicketKey: "CHR-2", Status: "failed"},
 				LatestLoop:      LoopRunView{ID: "loop-failed", Status: "failed", EligibleCount: 2, FailedCount: 1},
 			},
 			want: []string{"Status: failed", "Execution status: failed", "Loop loop-failed  failed"},
@@ -2600,7 +2600,7 @@ func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
 		{
 			name: "blocked",
 			observability: ObservabilityView{
-				LatestExecution: ExecutionView{ID: "exec-blocked", TicketKey: "CHC-3", Status: "succeeded"},
+				LatestExecution: ExecutionView{ID: "exec-blocked", TicketKey: "CHR-3", Status: "succeeded"},
 				LatestLoop:      LoopRunView{ID: "loop-blocked", Status: "blocked", EligibleCount: 2, BlockedCount: 1},
 			},
 			want: []string{"Status: blocked", "Execution status: succeeded", "Loop loop-blocked  blocked"},
@@ -2623,7 +2623,7 @@ func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
 func TestModelCancelsWorkAction(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "ready"},
+			{Key: "CHR-1", Title: "First", Status: "ready"},
 		},
 	})
 
@@ -2657,7 +2657,7 @@ func TestModelStartsWorkActionOnConfirm(t *testing.T) {
 	model := NewModel(Options{
 		WorkExecutor: executor,
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "ready"},
+			{Key: "CHR-1", Title: "First", Status: "ready"},
 		},
 	})
 
@@ -2679,7 +2679,7 @@ func TestModelStartsWorkActionOnConfirm(t *testing.T) {
 		t.Fatal("workBusy = false, want true")
 	}
 
-	if busy.statusMessage != "Starting agent work for CHC-1..." {
+	if busy.statusMessage != "Starting agent work for CHR-1..." {
 		t.Fatalf("statusMessage = %q, want starting work status", busy.statusMessage)
 	}
 
@@ -2699,7 +2699,7 @@ func TestModelBlocksWorkActionWhenReadinessBlocked(t *testing.T) {
 		WorkExecutor:  executor,
 		WorkReadiness: testBlockedWorkReadinessView(),
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "ready_for_dev"},
+			{Key: "CHR-1", Title: "First", Status: "ready_for_dev"},
 		},
 	})
 	model.selected = 7
@@ -2734,7 +2734,7 @@ func TestModelRunsRepairReadinessAction(t *testing.T) {
 			Readiness: WorkReadinessView{
 				Status: "ready",
 				RepairsApplied: []WorkReadinessAppliedRepairView{
-					{Code: "ignore_runtime_artifacts", Detail: "excluded .chc runtime artifacts"},
+					{Code: "ignore_runtime_artifacts", Detail: "excluded .chr runtime artifacts"},
 				},
 			},
 		},
@@ -2781,15 +2781,15 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 			{
 				Time:            "11:31:02",
 				Level:           "info",
-				TicketKey:       "CHC-2",
+				TicketKey:       "CHR-2",
 				ExecutionID:     "exec-2",
 				Message:         "worker started",
-				TicketPath:      ".chc/user/tickets/CHC-2.md",
-				RuntimeLog:      ".chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
-				ValidationLog:   ".chc/user/runtime/runs/CHC-2/exec-2/validation.log",
-				ExecutionReport: ".chc/user/runtime/runs/CHC-2/exec-2/execution-report.md",
+				TicketPath:      ".chr/user/tickets/CHR-2.md",
+				RuntimeLog:      ".chr/user/runtime/runs/CHR-2/exec-2/runtime.log",
+				ValidationLog:   ".chr/user/runtime/runs/CHR-2/exec-2/validation.log",
+				ExecutionReport: ".chr/user/runtime/runs/CHR-2/exec-2/execution-report.md",
 			},
-			{Time: "11:31:03", Level: "error", TicketKey: "CHC-2", Message: "validation failed"},
+			{Time: "11:31:03", Level: "error", TicketKey: "CHR-2", Message: "validation failed"},
 		},
 	}
 
@@ -2800,13 +2800,13 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 		"Navigation is locked until this action finishes.",
 		"Events",
 		"11:31:00 loop started",
-		"11:31:02 CHC-2 worker started",
-		"11:31:03 CHC-2 error: validation failed",
-		"Ticket: .chc/user/tickets/CHC-2.md",
-		"Execution report: .chc/user/runtime/runs/CHC-2/exec-2/execution-report.md",
-		"Runtime log: .chc/user/runtime/runs/CHC-2/exec-2/runtime.log",
-		"Validation log: .chc/user/runtime/runs/CHC-2/exec-2/validation.log",
-		"Lookup: chc work logs exec-2",
+		"11:31:02 CHR-2 worker started",
+		"11:31:03 CHR-2 error: validation failed",
+		"Ticket: .chr/user/tickets/CHR-2.md",
+		"Execution report: .chr/user/runtime/runs/CHR-2/exec-2/execution-report.md",
+		"Runtime log: .chr/user/runtime/runs/CHR-2/exec-2/runtime.log",
+		"Validation log: .chr/user/runtime/runs/CHR-2/exec-2/validation.log",
+		"Lookup: chr work logs exec-2",
 	} {
 		if !strings.Contains(action, want) {
 			t.Fatalf("renderWorkAction() missing %q:\n%s", want, action)
@@ -2844,7 +2844,7 @@ func TestModelCompletesWorkAction(t *testing.T) {
 	model := NewModel(Options{
 		WorkExecutor: executor,
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "ready"},
+			{Key: "CHR-1", Title: "First", Status: "ready"},
 		},
 	})
 
@@ -2860,8 +2860,8 @@ func TestModelCompletesWorkAction(t *testing.T) {
 	updated, _ = busy.Update(cmd())
 	confirmed := requireUpdatedModel(t, updated)
 
-	if executor.request.Action != WorkActionStartTicket || executor.request.TicketKey != "CHC-1" {
-		t.Fatalf("executor request = %#v, want start CHC-1", executor.request)
+	if executor.request.Action != WorkActionStartTicket || executor.request.TicketKey != "CHR-1" {
+		t.Fatalf("executor request = %#v, want start CHR-1", executor.request)
 	}
 
 	if confirmed.workAction.Pending {
@@ -2886,7 +2886,7 @@ func TestModelReportsWorkActionError(t *testing.T) {
 	model := NewModel(Options{
 		WorkExecutor: executor,
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "ready"},
+			{Key: "CHR-1", Title: "First", Status: "ready"},
 		},
 	})
 
@@ -2928,22 +2928,22 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 	for _, want := range []string{
 		"Board",
 		"Backlog (1/6)",
-		"CHC-1",
+		"CHR-1",
 		"Fix publishing",
 		"Selected Ticket",
 		"Synopsis: Fix the publishing workflow.",
 		"Source: plan_tracking",
-		"Source Ref: .chc/user/plans/blog-plan.md",
+		"Source Ref: .chr/user/plans/blog-plan.md",
 		"Slice: Slice 1",
 		"Checklist: 1 done / 2 total",
 		"Comments: 1",
-		"Path: .chc/user/tickets/open.md",
+		"Path: .chr/user/tickets/open.md",
 		"Body:",
 		"Investigate publishing failure.",
 		"- [x] Done",
 		"- [ ] Pending",
 		"# Comments",
-		"2026-05-22T10:00:00Z chc",
+		"2026-05-22T10:00:00Z chr",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -2958,7 +2958,7 @@ func TestModelRendersTicketEvidenceDetail(t *testing.T) {
 		Tickets: []core.IndexedTicket{{
 			Path:         ticketPath,
 			RelativePath: "evidence.md",
-			Key:          "CHC-1",
+			Key:          "CHR-1",
 			Title:        "Add CLI behavior",
 			Status:       core.TicketStatusBacklog,
 			Type:         "feature",
@@ -2988,14 +2988,14 @@ func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
 		t,
 		projectDir,
 		"long.md",
-		"# Description\n\nFirst paragraph.\n\n    indented code\n\n- [ ] Task\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n\nComment body.\n",
+		"# Description\n\nFirst paragraph.\n\n    indented code\n\n- [ ] Task\n\n# Comments\n\n## 2026-05-22T10:00:00Z chr\n\nComment body.\n",
 	)
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
 			{
 				Path:         ticketPath,
 				RelativePath: "long.md",
-				Key:          "CHC-1",
+				Key:          "CHR-1",
 				Title:        "Long body",
 				Status:       core.TicketStatusBacklog,
 			},
@@ -3033,7 +3033,7 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []core.IndexedTicke
 		t,
 		projectDir,
 		"open.md",
-		"Investigate publishing failure.\n\n- [x] Done\n- [ ] Pending\n\n# Comments\n\n## 2026-05-22T10:00:00Z chc\n",
+		"Investigate publishing failure.\n\n- [x] Done\n- [ ] Pending\n\n# Comments\n\n## 2026-05-22T10:00:00Z chr\n",
 	)
 	secondPath := writeTicketViewFile(t, projectDir, "ready.md", "- [ ] Ready\n")
 
@@ -3041,7 +3041,7 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []core.IndexedTicke
 		{
 			Path:         firstPath,
 			RelativePath: "open.md",
-			Key:          "CHC-1",
+			Key:          "CHR-1",
 			Title:        "Fix publishing",
 			Synopsis:     "Fix the publishing workflow.",
 			Status:       "open",
@@ -3051,13 +3051,13 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []core.IndexedTicke
 			UseCase:      "cli-blog",
 			ProjectArea:  "indexing",
 			SourceKind:   "plan_tracking",
-			SourceRef:    ".chc/user/plans/blog-plan.md",
+			SourceRef:    ".chr/user/plans/blog-plan.md",
 			Slice:        "Slice 1",
 		},
 		{
 			Path:         secondPath,
 			RelativePath: "ready.md",
-			Key:          "CHC-2",
+			Key:          "CHR-2",
 			Title:        "Add completion",
 			Status:       "ready",
 			Priority:     "normal",
@@ -3072,21 +3072,21 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []core.IndexedTicke
 func testTicketEvidenceDetailBody() string {
 	return `# Description
 
-<!-- chc:evidence-strategy:v1 -->
+<!-- chr:evidence-strategy:v1 -->
 - [x] Evidence strategy: complete; change_kind=cli_behavior; risk=medium
-- [x] Gherkin: required; path=.chc/user/acceptance/cli.feature
+- [x] Gherkin: required; path=.chr/user/acceptance/cli.feature
 - [x] Tests: mixed; unit and CLI coverage
 - [x] Validation: passed; make verify
 - [x] Evidence summary: complete; ready for review
-<!-- /chc:evidence-strategy -->
+<!-- /chr:evidence-strategy -->
 `
 }
 
 func TestModelSelectsTickets(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "open"},
-			{Key: "CHC-2", Title: "Second", Status: "open"},
+			{Key: "CHR-1", Title: "First", Status: "open"},
+			{Key: "CHR-2", Title: "Second", Status: "open"},
 		},
 	})
 	model.selected = 6
@@ -3103,16 +3103,16 @@ func TestModelSelectsTickets(t *testing.T) {
 		t.Fatal("selectedTicketView returned no ticket")
 	}
 
-	if ticket.Key != "CHC-2" {
-		t.Fatalf("selected ticket = %q, want CHC-2", ticket.Key)
+	if ticket.Key != "CHR-2" {
+		t.Fatalf("selected ticket = %q, want CHR-2", ticket.Key)
 	}
 }
 
 func TestModelNavigatesBoardColumns(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: core.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Second", Status: core.TicketStatusReadyForDev},
+			{Key: "CHR-1", Title: "First", Status: core.TicketStatusBacklog},
+			{Key: "CHR-2", Title: "Second", Status: core.TicketStatusReadyForDev},
 		},
 	})
 	model.selected = 6
@@ -3138,16 +3138,16 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 		t.Fatal("selectedTicketView returned no ticket")
 	}
 
-	if ticket.Key != "CHC-2" {
-		t.Fatalf("selected ticket = %q, want CHC-2", ticket.Key)
+	if ticket.Key != "CHR-2" {
+		t.Fatalf("selected ticket = %q, want CHR-2", ticket.Key)
 	}
 }
 
 func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: core.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Second", Status: core.TicketStatusReadyForDev},
+			{Key: "CHR-1", Title: "First", Status: core.TicketStatusBacklog},
+			{Key: "CHR-2", Title: "Second", Status: core.TicketStatusReadyForDev},
 		},
 	})
 	model.selected = 6
@@ -3161,7 +3161,7 @@ func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 
 	for _, want := range []string{
 		"RFD (2/6)",
-		"> CHC-2",
+		"> CHR-2",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -3173,13 +3173,13 @@ func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
 			{
-				Key:      "CHC-1",
+				Key:      "CHR-1",
 				Title:    "Legacy ready ticket",
 				Status:   core.TicketStatusReadyLegacy,
 				Priority: "high",
 			},
 			{
-				Key:      "CHC-15",
+				Key:      "CHR-15",
 				Title:    "Implement filesystem-backed Post store and slug normalization",
 				Status:   core.TicketStatusReadyForDev,
 				Priority: "normal",
@@ -3224,8 +3224,8 @@ func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
 func TestModelTogglesBoardAttentionView(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: core.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Blocked", Status: core.TicketStatusBlockedLegacy},
+			{Key: "CHR-1", Title: "First", Status: core.TicketStatusBacklog},
+			{Key: "CHR-2", Title: "Blocked", Status: core.TicketStatusBlockedLegacy},
 		},
 	})
 	model.selected = 6
@@ -3240,7 +3240,7 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 	view := attention.View()
 	for _, want := range []string{
 		"Attention (1)",
-		"! CHC-2",
+		"! CHR-2",
 		"Attention:",
 		"status is blocked",
 	} {
@@ -3264,12 +3264,12 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "Backlog ticket", Status: core.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Ready ticket", Status: core.TicketStatusReadyForDev},
-			{Key: "CHC-3", Title: "Progress ticket", Status: core.TicketStatusInProgress},
-			{Key: "CHC-4", Title: "Review ticket", Status: core.TicketStatusReadyForReview},
-			{Key: "CHC-5", Title: "Merge ticket", Status: core.TicketStatusReadyForMerge},
-			{Key: "CHC-6", Title: "Done ticket", Status: core.TicketStatusDone},
+			{Key: "CHR-1", Title: "Backlog ticket", Status: core.TicketStatusBacklog},
+			{Key: "CHR-2", Title: "Ready ticket", Status: core.TicketStatusReadyForDev},
+			{Key: "CHR-3", Title: "Progress ticket", Status: core.TicketStatusInProgress},
+			{Key: "CHR-4", Title: "Review ticket", Status: core.TicketStatusReadyForReview},
+			{Key: "CHR-5", Title: "Merge ticket", Status: core.TicketStatusReadyForMerge},
+			{Key: "CHR-6", Title: "Done ticket", Status: core.TicketStatusDone},
 		},
 	})
 	model.selected = 6
@@ -3291,7 +3291,7 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 		"Ready For Review (1)",
 		"Ready For Merge (1)",
 		"Done (1)",
-		"│> CHC-2  RFD",
+		"│> CHR-2  RFD",
 		"├",
 		"│Ready ticket",
 	} {
@@ -3315,9 +3315,9 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First ticket", Status: core.TicketStatusReadyForDev},
-			{Key: "CHC-2", Title: "Second ticket", Status: core.TicketStatusReadyForDev},
-			{Key: "CHC-3", Title: "Third ticket with enough words to wrap across several card body lines", Status: core.TicketStatusReadyForDev},
+			{Key: "CHR-1", Title: "First ticket", Status: core.TicketStatusReadyForDev},
+			{Key: "CHR-2", Title: "Second ticket", Status: core.TicketStatusReadyForDev},
+			{Key: "CHR-3", Title: "Third ticket with enough words to wrap across several card body lines", Status: core.TicketStatusReadyForDev},
 		},
 	})
 	model.selectedTicket = 2
@@ -3326,7 +3326,7 @@ func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 	rendered := strings.Join(lines, "\n")
 
 	for _, want := range []string{
-		"│> CHC-3  RFD",
+		"│> CHR-3  RFD",
 		"│Third ticket with enough",
 		"│words to wrap across several",
 		"│card body lines",
@@ -3336,7 +3336,7 @@ func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 		}
 	}
 
-	if strings.Contains(rendered, "CHC-1") {
+	if strings.Contains(rendered, "CHR-1") {
 		t.Fatalf("maximized column did not scroll to selected ticket:\n%s", rendered)
 	}
 }
@@ -3344,8 +3344,8 @@ func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "Normal ticket", Status: core.TicketStatusBacklog},
-			{Key: "CHC-2", Title: "Blocked ticket", Status: core.TicketStatusBlockedLegacy},
+			{Key: "CHR-1", Title: "Normal ticket", Status: core.TicketStatusBacklog},
+			{Key: "CHR-2", Title: "Blocked ticket", Status: core.TicketStatusBlockedLegacy},
 		},
 	})
 	model.selected = 6
@@ -3362,7 +3362,7 @@ func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 
 	for _, want := range []string{
 		"Attention",
-		"CHC-2",
+		"CHR-2",
 		"Blocked ticket",
 	} {
 		if !strings.Contains(view, want) {
@@ -3378,9 +3378,9 @@ func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 func TestTicketFilterMatchesMetadata(t *testing.T) {
 	model := NewModel(Options{
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "Fix publishing", Status: "open"},
+			{Key: "CHR-1", Title: "Fix publishing", Status: "open"},
 			{
-				Key:        "CHC-2",
+				Key:        "CHR-2",
 				Title:      "Add completion",
 				Synopsis:   "Finish generated tickets from a plan.",
 				Status:     "ready",
@@ -3395,8 +3395,8 @@ func TestTicketFilterMatchesMetadata(t *testing.T) {
 		t.Fatalf("len(filteredTickets) = %d, want 1", len(tickets))
 	}
 
-	if tickets[0].Key != "CHC-2" {
-		t.Fatalf("filtered ticket = %q, want CHC-2", tickets[0].Key)
+	if tickets[0].Key != "CHR-2" {
+		t.Fatalf("filtered ticket = %q, want CHR-2", tickets[0].Key)
 	}
 }
 
@@ -3408,7 +3408,7 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 				UseCaseTitle: "Blog Publishing",
 				Status:       "accepted",
 				Title:        "TUI Navigation",
-				RelativePath: ".chc/user/specs/tui-navigation.md",
+				RelativePath: ".chr/user/specs/tui-navigation.md",
 				Content:      "# TUI Navigation\n\nStatus: accepted\n\nNavigation details.",
 			},
 		},
@@ -3422,7 +3422,7 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 		"accepted",
 		"Blog Publishing",
 		"TUI Navigation",
-		".chc/user/specs/tui-navigation.md",
+		".chr/user/specs/tui-navigation.md",
 		"Navigation details.",
 	} {
 		if !strings.Contains(view, want) {
@@ -3433,13 +3433,13 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 
 func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 	projectDir := t.TempDir()
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "user", "dumps"), "context.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "dumps"), "context.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "specs", "specs"), "feature.md", "# Feature Spec\n\nStatus: accepted\n\nDetails.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "trackers"), "feature-tracker.md", "# Feature Tracker\n\nStatus: planned\n")
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "archive"), "blog-plan-20260525.md", "# Archived Blog Plan\n\nStatus: planned\n")
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "archive"), "blog-spec-20260525.md", "# Archived Blog Spec\n\nStatus: draft\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "archive"), "blog-plan-20260525.md", "# Archived Blog Plan\n\nStatus: planned\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "archive"), "blog-spec-20260525.md", "# Archived Blog Spec\n\nStatus: draft\n")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "drafts"), "legacy-draft.md", "# Legacy Draft\n\nStatus: draft\n")
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chc", "user", "drafts"), "runtime-draft.md", "# Runtime Draft\n\nStatus: draft\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "drafts"), "runtime-draft.md", "# Runtime Draft\n\nStatus: draft\n")
 
 	documents, err := LoadDocumentViews(t.Context(), projectDir)
 	if err != nil {
@@ -3485,7 +3485,7 @@ func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 					{Path: ".prj/dumps/billing.md"},
 				},
 				Outputs: []core.AuthoringArtifactRef{
-					{Path: ".chc/user/specs/auth-1-billing-sync.md"},
+					{Path: ".chr/user/specs/auth-1-billing-sync.md"},
 				},
 			},
 		},
@@ -3502,9 +3502,9 @@ func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 		"Billing sync",
 		"Selected Authoring Session",
 		"ID: auth-1",
-		"Transcript: .chc/authoring/sessions/auth-1/transcript.md",
+		"Transcript: .chr/authoring/sessions/auth-1/transcript.md",
 		"Inputs: .prj/dumps/billing.md",
-		"Outputs: .chc/user/specs/auth-1-billing-sync.md",
+		"Outputs: .chr/user/specs/auth-1-billing-sync.md",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -3531,14 +3531,14 @@ func TestModelRendersAgentObservability(t *testing.T) {
 			},
 			LatestExecution: ExecutionView{
 				ID:             "exec-1",
-				TicketKey:      "CHC-1",
+				TicketKey:      "CHR-1",
 				Status:         "failed",
 				UpdatedAt:      "2026-05-22T10:02:00Z",
 				FailureReason:  "validation failed",
-				RunDir:         ".chc/user/runtime/runs/CHC-1/exec-1",
-				ResultPath:     ".chc/user/runtime/runs/CHC-1/exec-1/result.json",
-				LogPath:        ".chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
-				ValidationPath: ".chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+				RunDir:         ".chr/user/runtime/runs/CHR-1/exec-1",
+				ResultPath:     ".chr/user/runtime/runs/CHR-1/exec-1/result.json",
+				LogPath:        ".chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
+				ValidationPath: ".chr/user/runtime/runs/CHR-1/exec-1/validation.log",
 			},
 		},
 	})
@@ -3555,8 +3555,8 @@ func TestModelRendersAgentObservability(t *testing.T) {
 		"ID: loop-1",
 		"Counts: 3 eligible / 1 processed / 1 blocked / 0 failed",
 		"Latest Execution",
-		"Ticket: CHC-1",
-		"Validation: .chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+		"Ticket: CHR-1",
+		"Validation: .chr/user/runtime/runs/CHR-1/exec-1/validation.log",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -3567,13 +3567,13 @@ func TestModelRendersAgentObservability(t *testing.T) {
 func TestModelRendersRuntimeObservability(t *testing.T) {
 	model := NewModel(Options{
 		Observability: ObservabilityView{
-			RuntimeImage:             "chc-agent-runtime:local",
-			RuntimeDockerfile:        ".chc/user/runtime/agent/Dockerfile",
-			RuntimeArtifactDir:       ".chc/user/runtime/runs",
+			RuntimeImage:             "chr-agent-runtime:local",
+			RuntimeDockerfile:        ".chr/user/runtime/agent/Dockerfile",
+			RuntimeArtifactDir:       ".chr/user/runtime/runs",
 			RuntimeValidationCommand: "make verify",
 			RuntimeChecks: []RuntimeCheckView{
-				{Name: "workspace", Status: "ok", Path: ".chc", Message: "ok"},
-				{Name: "dockerfile", Status: "fail", Path: ".chc/user/runtime/agent/Dockerfile", Message: "missing"},
+				{Name: "workspace", Status: "ok", Path: ".chr", Message: "ok"},
+				{Name: "dockerfile", Status: "fail", Path: ".chr/user/runtime/agent/Dockerfile", Message: "missing"},
 			},
 		},
 	})
@@ -3584,9 +3584,9 @@ func TestModelRendersRuntimeObservability(t *testing.T) {
 
 	for _, want := range []string{
 		"Runtime",
-		"Image: chc-agent-runtime:local",
-		"Dockerfile: .chc/user/runtime/agent/Dockerfile",
-		"Artifact Dir: .chc/user/runtime/runs",
+		"Image: chr-agent-runtime:local",
+		"Dockerfile: .chr/user/runtime/agent/Dockerfile",
+		"Artifact Dir: .chr/user/runtime/runs",
 		"Validation: make verify",
 		"workspace",
 		"dockerfile",
@@ -3627,7 +3627,7 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 		t.Fatalf("LatestLoop.ID = %q, want loop-new", view.LatestLoop.ID)
 	}
 
-	if view.RuntimeDockerfile != ".chc/user/runtime/agent/Dockerfile" {
+	if view.RuntimeDockerfile != ".chr/user/runtime/agent/Dockerfile" {
 		t.Fatalf("RuntimeDockerfile = %q, want relative runtime path", view.RuntimeDockerfile)
 	}
 
@@ -3635,11 +3635,11 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 		t.Fatalf("RecentEvents length = %d, want 1", len(view.RecentEvents))
 	}
 
-	if view.RecentEvents[0].Message != "CHC-2 worker started" {
-		t.Fatalf("RecentEvents[0].Message = %q, want CHC-2 worker started", view.RecentEvents[0].Message)
+	if view.RecentEvents[0].Message != "CHR-2 worker started" {
+		t.Fatalf("RecentEvents[0].Message = %q, want CHR-2 worker started", view.RecentEvents[0].Message)
 	}
 
-	if view.RecentEvents[0].RuntimeLog != ".chc/user/runtime/runs/CHC-2/exec-new/runtime.log" {
+	if view.RecentEvents[0].RuntimeLog != ".chr/user/runtime/runs/CHR-2/exec-new/runtime.log" {
 		t.Fatalf("RecentEvents[0].RuntimeLog = %q, want relative runtime log path", view.RecentEvents[0].RuntimeLog)
 	}
 
@@ -3652,12 +3652,12 @@ func testObservabilityRuntimeResult(projectDir string) core.RuntimeValidationRes
 	return core.RuntimeValidationResult{
 		Plan: core.RuntimePlan{
 			Image:             "image",
-			DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-			ArtifactDir:       filepath.Join(projectDir, ".chc", "user", "runtime", "runs"),
+			DockerfilePath:    filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+			ArtifactDir:       filepath.Join(projectDir, ".chr", "user", "runtime", "runs"),
 			ValidationCommand: "make verify",
 		},
 		Checks: []core.RuntimeValidationCheck{
-			{Name: "dockerfile", Path: filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
+			{Name: "dockerfile", Path: filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
 		},
 	}
 }
@@ -3669,12 +3669,12 @@ func testObservabilityAgentEvents(projectDir string, timestamp time.Time) []core
 			Timestamp:     timestamp,
 			LoopID:        "loop-new",
 			ExecutionID:   "exec-new",
-			TicketKey:     "CHC-2",
+			TicketKey:     "CHR-2",
 			Phase:         core.AgentEventPhaseWorkerStarted,
 			Level:         core.AgentEventLevelInfo,
-			Message:       "CHC-2 worker started",
+			Message:       "CHR-2 worker started",
 			Refs: core.AgentEventRefs{
-				"runtime_log_path": filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-2", "exec-new", "runtime.log"),
+				"runtime_log_path": filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-2", "exec-new", "runtime.log"),
 			},
 		},
 	}
@@ -3715,8 +3715,8 @@ func TestModelRendersScopedDumps(t *testing.T) {
 				UseCaseTitle: "Project-wide",
 				Status:       "raw",
 				Scope:        DumpScope{},
-				RelativePath: ".chc/user/dumps/project-context.md",
-				SourcePath:   ".chc/user/dumps/project-context-raw.md",
+				RelativePath: ".chr/user/dumps/project-context.md",
+				SourcePath:   ".chr/user/dumps/project-context-raw.md",
 				UpdatedAt:    updated,
 				Preview:      "Project-wide notes.",
 			},
@@ -3725,7 +3725,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 				UseCaseTitle: "Blog Publishing",
 				Status:       "curated",
 				Scope:        DumpScope{CaseSlug: "blog"},
-				RelativePath: ".chc/user/dumps/blog-context.md",
+				RelativePath: ".chr/user/dumps/blog-context.md",
 				UpdatedAt:    updated,
 				Preview:      "Use-case notes.",
 			},
@@ -3738,7 +3738,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 		"Dumps",
 		"Project-wide",
 		"Blog Publishing",
-		"Raw: .chc/user/dumps/project-context-raw.md",
+		"Raw: .chr/user/dumps/project-context-raw.md",
 		"Project-wide notes.",
 		"enter edit  alt+e external  c create  r refresh",
 	} {
@@ -3750,7 +3750,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 	for _, unwanted := range []string{
 		"Use Case     Status      Title",
 		"Selected Dump",
-		"Path: .chc/user/dumps/project-context.md",
+		"Path: .chr/user/dumps/project-context.md",
 		"Updated:",
 		"Status:",
 	} {
@@ -3788,7 +3788,7 @@ func TestModelRendersDumpContentWithMarkdownLineBreaks(t *testing.T) {
 		Dumps: []DumpView{
 			{
 				Title:        "Project Context",
-				RelativePath: ".chc/user/dumps/project-context.md",
+				RelativePath: ".chr/user/dumps/project-context.md",
 				Preview:      "---\ntitle: \"Project Context\"\n---\n\n# Project Context\n\nNotes.",
 			},
 		},
@@ -3809,11 +3809,11 @@ func TestModelRendersDumpContentWithMarkdownLineBreaks(t *testing.T) {
 func TestModelSelectsDumpsIndependentlyFromDocuments(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project Context", RelativePath: ".chc/user/dumps/project-context.md"},
-			{Title: "Blog Context", Scope: DumpScope{CaseSlug: "blog"}, RelativePath: ".chc/user/dumps/blog-context.md"},
+			{Title: "Project Context", RelativePath: ".chr/user/dumps/project-context.md"},
+			{Title: "Blog Context", Scope: DumpScope{CaseSlug: "blog"}, RelativePath: ".chr/user/dumps/blog-context.md"},
 		},
 		Documents: []DocumentView{
-			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chc/user/specs/spec.md"},
+			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/user/specs/spec.md"},
 		},
 	})
 	model.selected = 2
@@ -3848,9 +3848,9 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 				Status:         "not_started",
 				Mode:           "deep",
 				Scope:          QuizScope{},
-				RawPath:        ".chc/user/quizzes/project-quiz-raw.md",
-				CuratedPath:    ".chc/user/quizzes/project-quiz.md",
-				RuntimePath:    ".chc/user/tmp/quiz-runtime/project.json",
+				RawPath:        ".chr/user/quizzes/project-quiz-raw.md",
+				CuratedPath:    ".chr/user/quizzes/project-quiz.md",
+				RuntimePath:    ".chr/user/tmp/quiz-runtime/project.json",
 				QuestionBudget: 50,
 			},
 			{
@@ -3858,9 +3858,9 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 				Status:                "active",
 				Mode:                  "fast",
 				Scope:                 QuizScope{CaseSlug: "blog"},
-				RawPath:               ".chc/user/quizzes/blog-quiz-raw.md",
-				CuratedPath:           ".chc/user/quizzes/blog-quiz.md",
-				RuntimePath:           ".chc/user/tmp/quiz-runtime/blog.json",
+				RawPath:               ".chr/user/quizzes/blog-quiz-raw.md",
+				CuratedPath:           ".chr/user/quizzes/blog-quiz.md",
+				RuntimePath:           ".chr/user/tmp/quiz-runtime/blog.json",
 				QuestionBudget:        50,
 				QuestionsAsked:        2,
 				AnswersRecorded:       1,
@@ -3898,9 +3898,9 @@ func TestModelHidesTechnicalQuizDetails(t *testing.T) {
 				Status:                "active",
 				Mode:                  "fast",
 				Scope:                 QuizScope{CaseSlug: "blog"},
-				RawPath:               ".chc/user/quizzes/blog-quiz-raw.md",
-				CuratedPath:           ".chc/user/quizzes/blog-quiz.md",
-				RuntimePath:           ".chc/user/tmp/quiz-runtime/blog.json",
+				RawPath:               ".chr/user/quizzes/blog-quiz-raw.md",
+				CuratedPath:           ".chr/user/quizzes/blog-quiz.md",
+				RuntimePath:           ".chr/user/tmp/quiz-runtime/blog.json",
 				QuestionBudget:        50,
 				QuestionsAsked:        2,
 				CandidateCount:        2,
@@ -3967,7 +3967,7 @@ func TestModelSelectsQuizzesIndependentlyFromDocuments(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}},
 		},
 		Documents: []DocumentView{
-			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chc/user/specs/spec.md"},
+			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/user/specs/spec.md"},
 		},
 	})
 	model.selected = 3
@@ -4112,7 +4112,7 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 		result: SpecActionResult{
 			Message: "Spec generated.",
 			Documents: []DocumentView{
-				{Family: "spec", Status: "draft", Title: "Generated Spec", RelativePath: ".chc/user/specs/drafts/blog-quiz-spec.md"},
+				{Family: "spec", Status: "draft", Title: "Generated Spec", RelativePath: ".chr/user/specs/drafts/blog-quiz-spec.md"},
 			},
 		},
 	}
@@ -4166,7 +4166,7 @@ func TestModelGeneratesAcceptanceFeatureFromSpecsKey(t *testing.T) {
 		result: SpecActionResult{
 			Message:                 "Acceptance feature needs more information.",
 			AcceptanceFeatureStatus: "needs_more_info",
-			AcceptanceFeatureRound:  ".chc/user/acceptance/blog-feature-round.md",
+			AcceptanceFeatureRound:  ".chr/user/acceptance/blog-feature-round.md",
 			AcceptanceFeatureReason: "Missing observable failure path.",
 		},
 	}
@@ -4199,7 +4199,7 @@ func TestModelGeneratesAcceptanceFeatureFromSpecsKey(t *testing.T) {
 	for _, want := range []string{
 		"Acceptance feature needs more information.",
 		"status: needs_more_info",
-		"feature round: .chc/user/acceptance/blog-feature-round.md",
+		"feature round: .chr/user/acceptance/blog-feature-round.md",
 		"reason: Missing observable failure path.",
 	} {
 		if !strings.Contains(confirmed.statusMessage, want) {
@@ -4256,7 +4256,7 @@ func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 		result: PlanActionResult{
 			Message: "Plan generated.",
 			Documents: []DocumentView{
-				{Family: "plan", Status: "planned", Title: "Generated Plan", RelativePath: ".chc/user/plans/blog-plan.md"},
+				{Family: "plan", Status: "planned", Title: "Generated Plan", RelativePath: ".chr/user/plans/blog-plan.md"},
 			},
 			Plans: []PlanView{
 				{UseCaseTitle: "Project", Title: "Project", Scope: QuizScope{}, Status: "missing"},
@@ -4332,7 +4332,7 @@ func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
 				Title:        "Blog Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chc/user/plans/blog-plan.md",
+				RelativePath: ".chr/user/plans/blog-plan.md",
 				Content:      "# Blog Plan",
 			},
 		},
@@ -4362,7 +4362,7 @@ func TestModelRefusesGeneratePlanWhenPlanExists(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chc/user/plans/blog-plan.md",
+				RelativePath: ".chr/user/plans/blog-plan.md",
 				Content:      "# Generated Plan\n\nExisting.",
 			},
 		},
@@ -4399,7 +4399,7 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 					Title:        "Regenerated Plan",
 					Scope:        QuizScope{CaseSlug: "blog"},
 					Status:       "planned",
-					RelativePath: ".chc/user/plans/blog-plan.md",
+					RelativePath: ".chr/user/plans/blog-plan.md",
 				},
 			},
 			Scope: QuizScope{CaseSlug: "blog"},
@@ -4412,7 +4412,7 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chc/user/plans/blog-plan.md",
+				RelativePath: ".chr/user/plans/blog-plan.md",
 				Content:      "# Generated Plan\n\nExisting.",
 			},
 		},
@@ -4511,7 +4511,7 @@ func TestModelShowsPlanTrackingOnlyWhenPlanExists(t *testing.T) {
 			Title:        "Generated Plan",
 			Scope:        QuizScope{CaseSlug: "blog"},
 			Status:       "planned",
-			RelativePath: ".chc/user/plans/blog-plan.md",
+			RelativePath: ".chr/user/plans/blog-plan.md",
 			Content:      "# Generated Plan\n",
 		},
 	})
@@ -4530,7 +4530,7 @@ func TestModelPlansPlanTrackingWithAltT(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chc/user/plans/blog-plan.md",
+				RelativePath: ".chr/user/plans/blog-plan.md",
 				Content:      "# Generated Plan\n",
 			},
 		},
@@ -4583,7 +4583,7 @@ func TestModelBlocksPlanTrackingWhileBusy(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chc/user/plans/blog-plan.md",
+				RelativePath: ".chr/user/plans/blog-plan.md",
 				Content:      "# Generated Plan\n",
 			},
 		},
@@ -4614,7 +4614,7 @@ func TestModelBlocksRegenerateWhileBusy(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chc/user/plans/blog-plan.md",
+				RelativePath: ".chr/user/plans/blog-plan.md",
 				Content:      "# Generated Plan\n",
 			},
 		},
@@ -4681,7 +4681,7 @@ func TestPlanTrackingCommandOnlyAppearsWhenPlanExists(t *testing.T) {
 		{
 			Title:        "Generated Plan",
 			Status:       "planned",
-			RelativePath: ".chc/user/plans/project-plan.md",
+			RelativePath: ".chr/user/plans/project-plan.md",
 			Content:      "# Generated Plan\n",
 		},
 	})
@@ -4984,7 +4984,7 @@ func TestModelViewUsesWindowRealEstate(t *testing.T) {
 		ProjectDir: "/workspace/project",
 		ProjectID:  "project-1",
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "open"},
+			{Key: "CHR-1", Title: "First", Status: "open"},
 		},
 	})
 
@@ -5206,9 +5206,9 @@ func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (W
 
 func testSuccessfulWorkActionResult() WorkActionResult {
 	return WorkActionResult{
-		Message: "Execution exec-1 for ticket CHC-1 finished with status succeeded.",
+		Message: "Execution exec-1 for ticket CHR-1 finished with status succeeded.",
 		Tickets: []core.IndexedTicket{
-			{Key: "CHC-1", Title: "First", Status: "reviewing"},
+			{Key: "CHR-1", Title: "First", Status: "reviewing"},
 		},
 		Observability: ObservabilityView{
 			LatestExecution: ExecutionView{ID: "exec-1", Status: "succeeded"},
@@ -5239,8 +5239,8 @@ func (e *fakeAgentWorkRefreshExecutor) RefreshAgentWork() (AgentWorkRefreshResul
 func assertConfirmedArtifactState(t *testing.T, model Model) {
 	t.Helper()
 
-	if len(model.tickets) != 1 || model.tickets[0].Key != "CHC-1" {
-		t.Fatalf("tickets = %#v, want reloaded CHC-1 ticket", model.tickets)
+	if len(model.tickets) != 1 || model.tickets[0].Key != "CHR-1" {
+		t.Fatalf("tickets = %#v, want reloaded CHR-1 ticket", model.tickets)
 	}
 
 	if len(model.documents) != 1 || model.documents[0].Title != "TUI Plan" {

@@ -105,20 +105,20 @@ func (s RemoteCommandRecordStatus) Valid() bool {
 func RemoteCommandHandoffCommand(request RemoteCommandRequest) string {
 	switch request.Intent {
 	case RemoteCommandIntentStatus:
-		return "chc daemon status"
+		return "chr daemon status"
 	case RemoteCommandIntentLoopStart:
 		return remoteLoopHandoffCommand(request)
 	case RemoteCommandIntentTicketStart:
-		return "chc ticket start " + request.TicketKey
+		return "chr ticket start " + request.TicketKey
 	case RemoteCommandIntentTicketComment:
-		return "chc ticket comment " + request.TicketKey + " " + shellQuoteRemoteArgument(request.Comment)
+		return "chr ticket comment " + request.TicketKey + " " + shellQuoteRemoteArgument(request.Comment)
 	default:
 		return ""
 	}
 }
 
 func remoteLoopHandoffCommand(request RemoteCommandRequest) string {
-	parts := []string{"chc", "ticket", "loop"}
+	parts := []string{"chr", "ticket", "loop"}
 	parts = appendRemoteLoopFlags(parts, "--status", request.Loop.Statuses)
 	parts = appendRemoteLoopFlags(parts, "--priority", request.Loop.Priorities)
 	parts = appendRemoteLoopFlags(parts, "--severity", request.Loop.Severities)

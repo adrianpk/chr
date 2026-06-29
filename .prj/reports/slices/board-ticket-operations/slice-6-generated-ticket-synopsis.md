@@ -45,17 +45,17 @@ explicit synopsis and source metadata.
 
 ## Files of Interest
 
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chc/plan_tracking.go`
-- `internal/chc/ticket_repository.go`
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/service_plan.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chr/plan_tracking.go`
+- `internal/chr/ticket_repository.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/service_plan.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
-- `go test ./internal/chcapp -run TestServiceMaterializePlanTrackingCreatesTrackingAndTickets`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
+- `go test ./internal/chrapp -run TestServiceMaterializePlanTrackingCreatesTrackingAndTickets`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

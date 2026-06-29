@@ -5,12 +5,12 @@ Status: initial
 Sources:
 
 - `/home/adrian/Downloads/context_composition_and_document_transitions.md`
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 - `https://www.bytesizego.com/blog/gograph-a-go-cli-that-parses-your-codebase-for-ai-agents`
 
 ## Purpose
 
-Define how `chc` should derive technical context from a repository before and
+Define how `chr` should derive technical context from a repository before and
 during ticket execution.
 
 The goal is to provide the agent with relevant code abstractions without dumping

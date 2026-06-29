@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os/exec"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/tui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/tui"
 )
 
 type tuiDumpActionExecutor struct {

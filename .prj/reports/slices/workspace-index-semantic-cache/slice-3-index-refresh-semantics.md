@@ -44,12 +44,12 @@ compatibility with existing tests and executors.
 
 ## Files of Interest
 
-- `internal/chc/workspace_index.go`
-- `internal/chc/workspace_index_test.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/service_workspace.go`
-- `internal/chctui/model.go`
-- `internal/chctui/workspace_refresh.go`
+- `internal/chr/workspace_index.go`
+- `internal/chr/workspace_index_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/service_workspace.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/workspace_refresh.go`
 - `.prj/reports/slices/workspace-index-semantic-cache/slice-3-index-refresh-semantics.md`
 - `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 

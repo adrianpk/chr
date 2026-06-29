@@ -1,0 +1,5680 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 513B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/golang:1.25-bookworm
+#2 DONE 1.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [1/3] FROM docker.io/library/golang:1.25-bookworm@sha256:bbb255b0e131db500cf0520adc97441d2260cf629c7fa7e39e025ddf53995a24
+#4 DONE 0.0s
+
+#5 [2/3] WORKDIR /workspace
+#5 CACHED
+
+#6 [3/3] RUN apt-get update     && apt-get install -y --no-install-recommends         bash         ca-certificates         curl         git         make         nodejs         npm     && ln -sf /usr/local/go/bin/go /usr/local/bin/go     && ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt     && npm install -g @openai/codex     && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 exporting to image
+#7 exporting layers done
+#7 writing image sha256:280b8ffa0eab47f91507400453d2aae117a7cc9ca367db21f155a9991f882968 0.0s done
+#7 naming to docker.io/library/chr-agent-runtime:local done
+#7 DONE 0.1s
+Reading prompt from stdin...
+OpenAI Codex v0.141.0
+--------
+workdir: /workspace
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019eda07-938a-7b31-bb0c-f0437c4a6ebc
+--------
+user
+# Codex Worker Context
+
+## Ticket
+
+- execution_id: exec-c4b72e7ae4e31f4d
+- ticket_key: CHR-3
+- ticket_path: /workspace/.chr/user/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md
+
+## Artifacts
+
+- result_path: /workspace/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+- log_path: /workspace/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/runtime.log
+- validation_path: /workspace/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/validation.log
+
+## Result Contract
+
+Write a JSON object to `result_path` with these fields:
+
+- `execution_id`: must match the execution ID above.
+- `ticket_key`: must match the ticket key above.
+- `status`: `succeeded` or `failed`.
+- `summary`: concise human-readable result summary.
+- `changed_files`: optional list of workspace-relative changed file summaries.
+
+codex
+I’ll read the ticket and project conventions first, then inspect the current Go code before making the scoped CLI rendering change.
+exec
+/bin/bash -lc "pwd && rg --files -g '"'!*vendor*'"'" in /workspace
+ succeeded in 0ms:
+/workspace
+README.md
+AGENTS.md
+go.mod
+internal/game/game_test.go
+internal/game/game.go
+cmd/tictactoe/main.go
+
+exec
+/bin/bash -lc "sed -n '1,220p' /workspace/.chr/user/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md" in /workspace
+ succeeded in 0ms:
+---
+key: "CHR-3"
+title: "CLI board rendering"
+synopsis: "Add testable board, prompt, error, and result rendering for the CLI."
+status: "ready_for_dev"
+priority: "normal"
+severity: "normal"
+type: "feature"
+tags: ["case-cli-gameplay", "area-cmd-tictactoe", "type-implementation", "plan-cli-gameplay"]
+use_case: "cli-gameplay"
+project_area: "plan"
+source_kind: "plan_tracking"
+source_ref: ".chr/user/plans/cli-gameplay-plan.md"
+slice: "S03"
+branch: ""
+review_refs: []
+review_state: ""
+review_result: ""
+review_comments_url: ""
+review_round: ""
+blocking_findings: []
+merge_state: ""
+merge_result: ""
+merge_actor: ""
+merge_commit: ""
+merge_blocker: ""
+merged_at: ""
+created_at: "2026-06-18T08:53:02Z"
+updated_at: "2026-06-18T08:53:02Z"
+---
+
+# Description
+
+Add deterministic CLI rendering helpers and tests in `cmd/tictactoe`.
+
+Source plan: `.chr/user/plans/cli-gameplay-plan.md`
+Tracking: `.chr/user/plans/cli-gameplay-tracking.md`
+Slice: S03
+
+## Objective
+
+Add deterministic presentation helpers for board display, prompts, recoverable errors, and final result text.
+
+## Tasks
+
+- Add rendering tests for empty boards, partial boards, prompts, recoverable error text, winner messages, and draw messages.
+- Add board rendering helpers in `cmd/tictactoe`.
+- Display empty cells as positions `1` through `9` and occupied cells as `X` or `O`.
+- Add prompt helpers that include the current player.
+- Add result helpers for winner and draw outcomes.
+- Avoid colors, cursor control, terminal UI packages, and domain-rule duplication.
+
+## Dependencies
+
+- `S02` must be merged because rendering should reflect finalized board, player, and outcome accessors.
+
+## Acceptance Criteria
+
+- Initial board clearly shows available positions.
+- Partial boards show player marks.
+- Prompts include the current player.
+- Winner and draw messages are clear and deterministic.
+- Rendering code stays in `cmd/tictactoe` and does not own domain rules.
+- Tests use only Go's standard library.
+
+## Validation Expectations
+
+- Run `go test ./...`.
+- Use standard-library assertions for deterministic rendering tests.
+- Avoid brittle overmatching beyond text that is part of the user-facing contract.
+
+## Branch and PR
+
+- Base: `dev`
+- Branch: `feature/cli-gameplay/s03-cli-rendering`
+- Target: `dev`
+- PR scope: one PR for presentation helpers and rendering tests only.
+
+## References
+
+- Tracking: `CLI Gameplay Execution Tracking`
+- Source plan: `.chr/user/plans/cli-gameplay-plan.md`
+- Project and case docs: `.chr/user/project.md`, `.chr/user/cases/cli-gameplay.md`
+- Curated context: `.chr/user/dumps/cli-gameplay-context.md`, `.chr/user/dumps/project-context.md`, `.chr/user/quizzes/cli-gameplay-quiz.md`
+- Agent constraints: `AGENTS.md`, `.agents/CONVENTIONS.md`
+- Decision discovery: no ADR/RFC/decision-log/engineering-principles documents found.
+
+# Dependencies
+
+- S02
+
+# Comments
+
+# Blocker
+
+# Validation
+
+exec
+/bin/bash -lc "sed -n '1,220p' /workspace/.agents/CONVENTIONS.md" in /workspace
+ succeeded in 0ms:
+# Tictactoe Conventions
+
+- Keep game rules in `internal/game`.
+- Keep `cmd/tictactoe` focused on argument parsing, prompts, and process I/O.
+- Use only Go's standard library.
+- Prefer table-driven tests for rules and input parsing.
+- Use Go fuzz tests for user input parsing when useful.
+- Use `testing/quick` for small invariant-style checks when the behavior is
+  stable enough to express as a property.
+- Do not add mutation-testing tools or third-party assertion libraries.
+
+codex
+The ticket is scoped to presentation helpers under `cmd/tictactoe`. I’m checking the existing game API now so the renderer uses domain accessors instead of recreating rules.
+exec
+/bin/bash -lc "sed -n '1,220p' AGENTS.md" in /workspace
+ succeeded in 0ms:
+# Tictactoe Agent Instructions
+
+Read this document before working in this reference project.
+
+This project is a Chryso QA scenario. Follow generated Chryso tickets
+and keep changes scoped to the selected ticket.
+
+Use only Go's standard library. Do not add external dependencies, persistence,
+network services, terminal UI frameworks, or non-CLI interfaces.
+
+## Referenced Agent Docs
+
+- `.agents/CONVENTIONS.md` - Go and testing conventions for this project.
+
+exec
+/bin/bash -lc "sed -n '1,260p' internal/game/game.go" in /workspace
+ succeeded in 0ms:
+package game
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+type Mark string
+
+const (
+	Empty Mark = ""
+	X     Mark = "X"
+	O     Mark = "O"
+)
+
+type Outcome int
+
+const (
+	OutcomeInProgress Outcome = iota
+	OutcomeXWon
+	OutcomeOWon
+	OutcomeDraw
+)
+
+type Board struct {
+	cells [9]Mark
+}
+
+type Game struct {
+	board         Board
+	currentPlayer Mark
+	outcome       Outcome
+}
+
+func NewBoard() Board {
+	return Board{}
+}
+
+func NewGame() Game {
+	return Game{
+		board:         NewBoard(),
+		currentPlayer: X,
+		outcome:       OutcomeInProgress,
+	}
+}
+
+func ParsePosition(input string) (int, error) {
+	value, err := strconv.Atoi(strings.TrimSpace(input))
+	if err != nil {
+		return 0, fmt.Errorf("position must be a number from 1 to 9")
+	}
+
+	if value < 1 || value > 9 {
+		return 0, fmt.Errorf("position must be between 1 and 9")
+	}
+
+	return value - 1, nil
+}
+
+func (g Game) Board() Board {
+	return g.board
+}
+
+func (g Game) CurrentPlayer() Mark {
+	return g.currentPlayer
+}
+
+func (g Game) Outcome() Outcome {
+	return g.outcome
+}
+
+func (g Game) Over() bool {
+	return g.outcome != OutcomeInProgress
+}
+
+func (g Game) Draw() bool {
+	return g.outcome == OutcomeDraw
+}
+
+func (g Game) Winner() (Mark, bool) {
+	switch g.outcome {
+	case OutcomeXWon:
+		return X, true
+	case OutcomeOWon:
+		return O, true
+	default:
+		return Empty, false
+	}
+}
+
+func (g Game) Play(index int) (Game, error) {
+	return g.ApplyMove(index, g.currentPlayer)
+}
+
+func (g Game) ApplyMove(index int, mark Mark) (Game, error) {
+	if g.Over() {
+		return g, fmt.Errorf("game is already over")
+	}
+
+	if mark != X && mark != O {
+		return g, fmt.Errorf("mark must be X or O")
+	}
+
+	if mark != g.currentPlayer {
+		return g, fmt.Errorf("it is %s's turn", g.currentPlayer)
+	}
+
+	board, err := g.board.Place(index, mark)
+	if err != nil {
+		return g, err
+	}
+
+	next := Game{
+		board:         board,
+		currentPlayer: mark,
+		outcome:       outcomeForBoard(board),
+	}
+	if next.outcome == OutcomeInProgress {
+		next.currentPlayer = nextPlayer(mark)
+	}
+
+	return next, nil
+}
+
+func (b Board) At(index int) (Mark, error) {
+	if index < 0 || index >= len(b.cells) {
+		return Empty, fmt.Errorf("cell index out of range")
+	}
+
+	return b.cells[index], nil
+}
+
+func (b Board) Place(index int, mark Mark) (Board, error) {
+	if mark != X && mark != O {
+		return b, fmt.Errorf("mark must be X or O")
+	}
+
+	if index < 0 || index >= len(b.cells) {
+		return b, fmt.Errorf("cell index out of range")
+	}
+
+	if b.cells[index] != Empty {
+		return b, fmt.Errorf("cell is already occupied")
+	}
+
+	b.cells[index] = mark
+
+	return b, nil
+}
+
+func (b Board) Winner() (Mark, bool) {
+	lines := [][3]int{
+		{0, 1, 2},
+		{3, 4, 5},
+		{6, 7, 8},
+		{0, 3, 6},
+		{1, 4, 7},
+		{2, 5, 8},
+		{0, 4, 8},
+		{2, 4, 6},
+	}
+
+	for _, line := range lines {
+		mark := b.cells[line[0]]
+		if mark != Empty && mark == b.cells[line[1]] && mark == b.cells[line[2]] {
+			return mark, true
+		}
+	}
+
+	return Empty, false
+}
+
+func (b Board) Full() bool {
+	for _, cell := range b.cells {
+		if cell == Empty {
+			return false
+		}
+	}
+
+	return true
+}
+
+func outcomeForBoard(board Board) Outcome {
+	winner, ok := board.Winner()
+	if ok {
+		switch winner {
+		case X:
+			return OutcomeXWon
+		case O:
+			return OutcomeOWon
+		}
+	}
+
+	if board.Full() {
+		return OutcomeDraw
+	}
+
+	return OutcomeInProgress
+}
+
+func nextPlayer(mark Mark) Mark {
+	if mark == X {
+		return O
+	}
+
+	return X
+}
+
+exec
+/bin/bash -lc "sed -n '1,260p' cmd/tictactoe/main.go" in /workspace
+ succeeded in 0ms:
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	if wantsHelp(os.Args[1:]) {
+		printUsage()
+		return
+	}
+
+	fmt.Fprintln(os.Stdout, "tic-tac-toe CLI seed")
+	fmt.Fprintln(os.Stdout, "gameplay loop is not implemented yet")
+}
+
+func wantsHelp(args []string) bool {
+	for _, arg := range args {
+		switch arg {
+		case "-h", "--help", "help":
+			return true
+		}
+	}
+
+	return false
+}
+
+func printUsage() {
+	fmt.Fprintln(os.Stdout, "Usage: tictactoe")
+	fmt.Fprintln(os.Stdout)
+	fmt.Fprintln(os.Stdout, "Run a local two-player tic-tac-toe game in the terminal.")
+}
+
+exec
+/bin/bash -lc "sed -n '1,320p' internal/game/game_test.go" in /workspace
+ succeeded in 0ms:
+package game
+
+import "testing"
+
+func TestParsePosition(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		want    int
+		wantErr bool
+	}{
+		{name: "first cell", input: "1", want: 0},
+		{name: "last cell", input: "9", want: 8},
+		{name: "trims whitespace", input: " 5\n", want: 4},
+		{name: "rejects zero", input: "0", wantErr: true},
+		{name: "rejects ten", input: "10", wantErr: true},
+		{name: "rejects text", input: "center", wantErr: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := ParsePosition(test.input)
+			if test.wantErr {
+				if err == nil {
+					t.Fatal("ParsePosition returned nil error")
+				}
+
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("ParsePosition returned error: %v", err)
+			}
+
+			if got != test.want {
+				t.Fatalf("ParsePosition = %d, want %d", got, test.want)
+			}
+		})
+	}
+}
+
+func TestBoardPlace(t *testing.T) {
+	board := NewBoard()
+
+	board, err := board.Place(4, X)
+	if err != nil {
+		t.Fatalf("Place returned error: %v", err)
+	}
+
+	got, err := board.At(4)
+	if err != nil {
+		t.Fatalf("At returned error: %v", err)
+	}
+
+	if got != X {
+		t.Fatalf("At = %q, want %q", got, X)
+	}
+
+	_, err = board.Place(4, O)
+	if err == nil {
+		t.Fatal("Place returned nil error for occupied cell")
+	}
+}
+
+func TestNewGameStartsWithX(t *testing.T) {
+	game := NewGame()
+
+	if game.CurrentPlayer() != X {
+		t.Fatalf("CurrentPlayer = %q, want %q", game.CurrentPlayer(), X)
+	}
+
+	if game.Outcome() != OutcomeInProgress {
+		t.Fatalf("Outcome = %v, want %v", game.Outcome(), OutcomeInProgress)
+	}
+
+	if game.Over() {
+		t.Fatal("Over = true, want false")
+	}
+
+	if game.Draw() {
+		t.Fatal("Draw = true, want false")
+	}
+
+	if winner, ok := game.Winner(); ok || winner != Empty {
+		t.Fatalf("Winner = %q, %t; want %q, false", winner, ok, Empty)
+	}
+}
+
+func TestGameApplyMoveAlternatesAfterValidNonTerminalMoves(t *testing.T) {
+	tests := []struct {
+		name              string
+		index             int
+		mark              Mark
+		wantCurrentPlayer Mark
+	}{
+		{name: "X opens in top left", index: 0, mark: X, wantCurrentPlayer: O},
+		{name: "O answers in center", index: 4, mark: O, wantCurrentPlayer: X},
+		{name: "X takes bottom right", index: 8, mark: X, wantCurrentPlayer: O},
+	}
+
+	game := NewGame()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			next, err := game.ApplyMove(test.index, test.mark)
+			if err != nil {
+				t.Fatalf("ApplyMove returned error: %v", err)
+			}
+
+			got, err := next.Board().At(test.index)
+			if err != nil {
+				t.Fatalf("At returned error: %v", err)
+			}
+
+			if got != test.mark {
+				t.Fatalf("At = %q, want %q", got, test.mark)
+			}
+
+			if next.CurrentPlayer() != test.wantCurrentPlayer {
+				t.Fatalf("CurrentPlayer = %q, want %q", next.CurrentPlayer(), test.wantCurrentPlayer)
+			}
+
+			if next.Outcome() != OutcomeInProgress {
+				t.Fatalf("Outcome = %v, want %v", next.Outcome(), OutcomeInProgress)
+			}
+
+			game = next
+		})
+	}
+}
+
+func TestGamePlayUsesCurrentPlayer(t *testing.T) {
+	game := NewGame()
+
+	game, err := game.Play(4)
+	if err != nil {
+		t.Fatalf("Play returned error: %v", err)
+	}
+
+	got, err := game.Board().At(4)
+	if err != nil {
+		t.Fatalf("At returned error: %v", err)
+	}
+
+	if got != X {
+		t.Fatalf("At = %q, want %q", got, X)
+	}
+
+	if game.CurrentPlayer() != O {
+		t.Fatalf("CurrentPlayer = %q, want %q", game.CurrentPlayer(), O)
+	}
+}
+
+func TestGameApplyMoveRejectsInvalidMovesWithoutMutation(t *testing.T) {
+	gameWithOccupiedCell := mustApplyMoves(t, NewGame(), []move{
+		{index: 0, mark: X},
+	})
+
+	tests := []struct {
+		name  string
+		game  Game
+		index int
+		mark  Mark
+	}{
+		{name: "negative index", game: NewGame(), index: -1, mark: X},
+		{name: "high index", game: NewGame(), index: 9, mark: X},
+		{name: "empty mark", game: NewGame(), index: 0, mark: Empty},
+		{name: "unknown mark", game: NewGame(), index: 0, mark: Mark("Z")},
+		{name: "mark out of turn", game: NewGame(), index: 0, mark: O},
+		{name: "occupied cell", game: gameWithOccupiedCell, index: 0, mark: O},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := test.game.ApplyMove(test.index, test.mark)
+			if err == nil {
+				t.Fatal("ApplyMove returned nil error")
+			}
+
+			if got != test.game {
+				t.Fatalf("ApplyMove mutated game state: got %#v, want %#v", got, test.game)
+			}
+		})
+	}
+}
+
+func TestGameApplyMoveStopsAfterTerminalOutcomes(t *testing.T) {
+	tests := []struct {
+		name              string
+		moves             []move
+		wantOutcome       Outcome
+		wantCurrentPlayer Mark
+		wantWinner        Mark
+	}{
+		{
+			name: "X win",
+			moves: []move{
+				{index: 0, mark: X},
+				{index: 3, mark: O},
+				{index: 1, mark: X},
+				{index: 4, mark: O},
+				{index: 2, mark: X},
+			},
+			wantOutcome:       OutcomeXWon,
+			wantCurrentPlayer: X,
+			wantWinner:        X,
+		},
+		{
+			name: "O win",
+			moves: []move{
+				{index: 0, mark: X},
+				{index: 3, mark: O},
+				{index: 1, mark: X},
+				{index: 4, mark: O},
+				{index: 8, mark: X},
+				{index: 5, mark: O},
+			},
+			wantOutcome:       OutcomeOWon,
+			wantCurrentPlayer: O,
+			wantWinner:        O,
+		},
+		{
+			name: "draw",
+			moves: []move{
+				{index: 0, mark: X},
+				{index: 1, mark: O},
+				{index: 2, mark: X},
+				{index: 4, mark: O},
+				{index: 3, mark: X},
+				{index: 5, mark: O},
+				{index: 7, mark: X},
+				{index: 6, mark: O},
+				{index: 8, mark: X},
+			},
+			wantOutcome:       OutcomeDraw,
+			wantCurrentPlayer: X,
+			wantWinner:        Empty,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			game := mustApplyMoves(t, NewGame(), test.moves)
+
+			if game.Outcome() != test.wantOutcome {
+				t.Fatalf("Outcome = %v, want %v", game.Outcome(), test.wantOutcome)
+			}
+
+			if game.CurrentPlayer() != test.wantCurrentPlayer {
+				t.Fatalf("CurrentPlayer = %q, want %q", game.CurrentPlayer(), test.wantCurrentPlayer)
+			}
+
+			if !game.Over() {
+				t.Fatal("Over = false, want true")
+			}
+
+			if game.Draw() != (test.wantOutcome == OutcomeDraw) {
+				t.Fatalf("Draw = %t, want %t", game.Draw(), test.wantOutcome == OutcomeDraw)
+			}
+
+			winner, ok := game.Winner()
+			if test.wantWinner == Empty {
+				if ok || winner != Empty {
+					t.Fatalf("Winner = %q, %t; want %q, false", winner, ok, Empty)
+				}
+			} else if !ok || winner != test.wantWinner {
+				t.Fatalf("Winner = %q, %t; want %q, true", winner, ok, test.wantWinner)
+			}
+
+			got, err := game.Play(0)
+			if err == nil {
+				t.Fatal("Play returned nil error after terminal outcome")
+			}
+
+			if got != game {
+				t.Fatalf("Play after terminal outcome mutated game state: got %#v, want %#v", got, game)
+			}
+		})
+	}
+}
+
+func TestBoardWinner(t *testing.T) {
+	tests := []struct {
+		name    string
+		board   Board
+		want    Mark
+		wantWin bool
+	}{
+		{
+			name:    "top row",
+			board:   Board{cells: [9]Mark{X, X, X, Empty, O, Empty, O, Empty, Empty}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "middle row",
+			board:   Board{cells: [9]Mark{O, Empty, X, X, X, X, Empty, O, Empty}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "bottom row",
+			board:   Board{cells: [9]Mark{O, Empty, Empty, X, O, Empty, X, X, X}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "left column",
+			board:   Board{cells: [9]Mark{O, X, Empty, O, X, Empty, O, Empty, X}},
+			want:    O,
+			wantWin: true,
+		},
+		{
+			name:    "middle column",
+			board:   Board{cells: [9]Mark{X, O, Empty, Empty, O, X, X, O, Empty}},
+			want:    O,
+			wantWin: true,
+		},
+		{
+			name:    "right column",
+			board:   Board{cells: [9]Mark{X, Empty, O, X, Empty, O, Empty, X, O}},
+
+exec
+/bin/bash -lc 'go test ./...' in /workspace
+ succeeded in 14124ms:
+?   	example.com/chr-qa-tictactoe/cmd/tictactoe	[no test files]
+ok  	example.com/chr-qa-tictactoe/internal/game	0.004s
+
+codex
+The current CLI only has the seed/help output, and the game package already exposes `Board().At`, `CurrentPlayer`, `Winner`, and `Draw`. I’m adding a small renderer file plus package-main tests that assert the exact user-facing strings.
+exec
+/bin/bash -lc 'cat go.mod' in /workspace
+ succeeded in 0ms:
+module example.com/chr-qa-tictactoe
+
+go 1.24
+
+exec
+/bin/bash -lc 'find . -maxdepth 3 -type f | sort' in /workspace
+ succeeded in 0ms:
+./.agents/CONVENTIONS.md
+./.chr/user/config.yml
+./.chr/user/manifest.md
+./.chr/user/project.md
+./.git/COMMIT_EDITMSG
+./.git/HEAD
+./.git/MERGE_RR
+./.git/config
+./.git/description
+./.git/hooks/applypatch-msg.sample
+./.git/hooks/commit-msg.sample
+./.git/hooks/fsmonitor-watchman.sample
+./.git/hooks/post-update.sample
+./.git/hooks/pre-applypatch.sample
+./.git/hooks/pre-commit.sample
+./.git/hooks/pre-merge-commit.sample
+./.git/hooks/pre-push.sample
+./.git/hooks/pre-rebase.sample
+./.git/hooks/pre-receive.sample
+./.git/hooks/prepare-commit-msg.sample
+./.git/hooks/push-to-checkout.sample
+./.git/hooks/sendemail-validate.sample
+./.git/hooks/update.sample
+./.git/index
+./.git/info/exclude
+./.git/logs/HEAD
+./AGENTS.md
+./README.md
+./cmd/tictactoe/main.go
+./go.mod
+./internal/game/game.go
+./internal/game/game_test.go
+
+exec
+/bin/bash -lc "sed -n '220,520p' internal/game/game_test.go" in /workspace
+ succeeded in 0ms:
+		},
+		{
+			name: "draw",
+			moves: []move{
+				{index: 0, mark: X},
+				{index: 1, mark: O},
+				{index: 2, mark: X},
+				{index: 4, mark: O},
+				{index: 3, mark: X},
+				{index: 5, mark: O},
+				{index: 7, mark: X},
+				{index: 6, mark: O},
+				{index: 8, mark: X},
+			},
+			wantOutcome:       OutcomeDraw,
+			wantCurrentPlayer: X,
+			wantWinner:        Empty,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			game := mustApplyMoves(t, NewGame(), test.moves)
+
+			if game.Outcome() != test.wantOutcome {
+				t.Fatalf("Outcome = %v, want %v", game.Outcome(), test.wantOutcome)
+			}
+
+			if game.CurrentPlayer() != test.wantCurrentPlayer {
+				t.Fatalf("CurrentPlayer = %q, want %q", game.CurrentPlayer(), test.wantCurrentPlayer)
+			}
+
+			if !game.Over() {
+				t.Fatal("Over = false, want true")
+			}
+
+			if game.Draw() != (test.wantOutcome == OutcomeDraw) {
+				t.Fatalf("Draw = %t, want %t", game.Draw(), test.wantOutcome == OutcomeDraw)
+			}
+
+			winner, ok := game.Winner()
+			if test.wantWinner == Empty {
+				if ok || winner != Empty {
+					t.Fatalf("Winner = %q, %t; want %q, false", winner, ok, Empty)
+				}
+			} else if !ok || winner != test.wantWinner {
+				t.Fatalf("Winner = %q, %t; want %q, true", winner, ok, test.wantWinner)
+			}
+
+			got, err := game.Play(0)
+			if err == nil {
+				t.Fatal("Play returned nil error after terminal outcome")
+			}
+
+			if got != game {
+				t.Fatalf("Play after terminal outcome mutated game state: got %#v, want %#v", got, game)
+			}
+		})
+	}
+}
+
+func TestBoardWinner(t *testing.T) {
+	tests := []struct {
+		name    string
+		board   Board
+		want    Mark
+		wantWin bool
+	}{
+		{
+			name:    "top row",
+			board:   Board{cells: [9]Mark{X, X, X, Empty, O, Empty, O, Empty, Empty}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "middle row",
+			board:   Board{cells: [9]Mark{O, Empty, X, X, X, X, Empty, O, Empty}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "bottom row",
+			board:   Board{cells: [9]Mark{O, Empty, Empty, X, O, Empty, X, X, X}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "left column",
+			board:   Board{cells: [9]Mark{O, X, Empty, O, X, Empty, O, Empty, X}},
+			want:    O,
+			wantWin: true,
+		},
+		{
+			name:    "middle column",
+			board:   Board{cells: [9]Mark{X, O, Empty, Empty, O, X, X, O, Empty}},
+			want:    O,
+			wantWin: true,
+		},
+		{
+			name:    "right column",
+			board:   Board{cells: [9]Mark{X, Empty, O, X, Empty, O, Empty, X, O}},
+			want:    O,
+			wantWin: true,
+		},
+		{
+			name:    "descending diagonal",
+			board:   Board{cells: [9]Mark{X, O, Empty, Empty, X, O, Empty, Empty, X}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "ascending diagonal",
+			board:   Board{cells: [9]Mark{O, Empty, X, Empty, X, O, X, Empty, Empty}},
+			want:    X,
+			wantWin: true,
+		},
+		{
+			name:    "full board with no winner",
+			board:   Board{cells: [9]Mark{X, O, X, X, O, O, O, X, X}},
+			want:    Empty,
+			wantWin: false,
+		},
+		{
+			name:    "incomplete board with no winner",
+			board:   Board{cells: [9]Mark{X, O, Empty, Empty, X, O, O, Empty, Empty}},
+			want:    Empty,
+			wantWin: false,
+		},
+		{
+			name:    "mixed line does not win",
+			board:   Board{cells: [9]Mark{X, O, X, Empty, Empty, Empty, Empty, Empty, Empty}},
+			want:    Empty,
+			wantWin: false,
+		},
+		{
+			name:    "empty board has no winner",
+			board:   NewBoard(),
+			want:    Empty,
+			wantWin: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, gotWin := test.board.Winner()
+
+			if got != test.want {
+				t.Fatalf("Winner mark = %q, want %q", got, test.want)
+			}
+
+			if gotWin != test.wantWin {
+				t.Fatalf("Winner ok = %t, want %t", gotWin, test.wantWin)
+			}
+		})
+	}
+}
+
+type move struct {
+	index int
+	mark  Mark
+}
+
+func mustApplyMoves(t *testing.T, game Game, moves []move) Game {
+	t.Helper()
+
+	for _, move := range moves {
+		next, err := game.ApplyMove(move.index, move.mark)
+		if err != nil {
+			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
+		}
+
+		game = next
+	}
+
+	return game
+}
+
+func TestBoardFull(t *testing.T) {
+	tests := []struct {
+		name  string
+		board Board
+		want  bool
+	}{
+		{
+			name:  "full board",
+			board: Board{cells: [9]Mark{X, O, X, X, O, O, O, X, X}},
+			want:  true,
+		},
+		{
+			name:  "one empty cell",
+			board: Board{cells: [9]Mark{X, O, X, X, Empty, O, O, X, X}},
+			want:  false,
+		},
+		{
+			name:  "empty board",
+			board: NewBoard(),
+			want:  false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.board.Full()
+
+			if got != test.want {
+				t.Fatalf("Full = %t, want %t", got, test.want)
+			}
+		})
+	}
+}
+
+exec
+/bin/bash -lc 'git status --short' in /workspace
+ exited 128 in 0ms:
+fatal: detected dubious ownership in repository at '/workspace'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /workspace
+
+codex
+I’m keeping the helpers unexported in `cmd/tictactoe` and returning plain strings with no color or terminal control. The result helper will ask the `game.Game` for `Winner` and `Draw`, so it does not duplicate outcome rules.
+apply patch
+patch: completed
+/workspace/cmd/tictactoe/render.go
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8113922c3a70411f4b4ea11bb1017dbe8d750b5a
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(game game.Game) string {
++	if winner, ok := game.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if game.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8113922c3a70411f4b4ea11bb1017dbe8d750b5a
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(game game.Game) string {
++	if winner, ok := game.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if game.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+
+codex
+The renderer is in place. I’m adding focused table-style tests for the empty board, a partial board, prompts, recoverable errors, both winner messages, and the draw message.
+apply patch
+patch: completed
+/workspace/cmd/tictactoe/render_test.go
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8113922c3a70411f4b4ea11bb1017dbe8d750b5a
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(game game.Game) string {
++	if winner, ok := game.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if game.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2ad15e184882fbd4458e4bfbf5ac35015f9a3b1
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name  string
++		game  game.Game
++		want  string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	game := game.NewGame()
++	for _, move := range moves {
++		next, err := game.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		game = next
++	}
++
++	return game
++}
+
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8113922c3a70411f4b4ea11bb1017dbe8d750b5a
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(game game.Game) string {
++	if winner, ok := game.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if game.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2ad15e184882fbd4458e4bfbf5ac35015f9a3b1
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name  string
++		game  game.Game
++		want  string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	game := game.NewGame()
++	for _, move := range moves {
++		next, err := game.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		game = next
++	}
++
++	return game
++}
+
+codex
+The tests now define the user-facing string contract. I’m formatting the new files and running the full test suite next.
+exec
+/bin/bash -lc 'gofmt -w cmd/tictactoe/render.go cmd/tictactoe/render_test.go' in /workspace
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'git -c safe.directory=/workspace status --short' in /workspace
+ succeeded in 0ms:
+ M .chr/user/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md
+ M .chr/user/tickets/cli-gameplay/CHR-2-Move-state-transitions.md
+ M internal/game/game.go
+ M internal/game/game_test.go
+?? .chr/user/runtime/agent-operation.lock
+?? .chr/user/runtime/runs/
+?? .chr/user/tmp/
+?? cmd/tictactoe/render.go
+?? cmd/tictactoe/render_test.go
+
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8113922c3a70411f4b4ea11bb1017dbe8d750b5a
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(game game.Game) string {
++	if winner, ok := game.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if game.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2ad15e184882fbd4458e4bfbf5ac35015f9a3b1
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name  string
++		game  game.Game
++		want  string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	game := game.NewGame()
++	for _, move := range moves {
++		next, err := game.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		game = next
++	}
++
++	return game
++}
+
+codex
+There are pre-existing modified ticket files and `internal/game` changes in the worktree; I’m leaving those untouched. My scoped changes are the two new renderer files under `cmd/tictactoe`.
+exec
+/bin/bash -lc 'go test ./...' in /workspace
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8113922c3a70411f4b4ea11bb1017dbe8d750b5a
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(game game.Game) string {
++	if winner, ok := game.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if game.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2ad15e184882fbd4458e4bfbf5ac35015f9a3b1
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name  string
++		game  game.Game
++		want  string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	game := game.NewGame()
++	for _, move := range moves {
++		next, err := game.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		game = next
++	}
++
++	return game
++}
+
+ succeeded in 598ms:
+ok  	example.com/chr-qa-tictactoe/cmd/tictactoe	0.003s
+ok  	example.com/chr-qa-tictactoe/internal/game	(cached)
+
+codex
+`go test ./...` passes. I’m checking the source plan/tracking for any specific wording or naming expectations before finalizing the ticket artifact.
+exec
+/bin/bash -lc "sed -n '1,220p' cmd/tictactoe/render.go" in /workspace
+ succeeded in 0ms:
+package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	"example.com/chr-qa-tictactoe/internal/game"
+)
+
+func renderBoard(board game.Board) string {
+	var builder strings.Builder
+
+	for row := 0; row < 3; row++ {
+		if row > 0 {
+			builder.WriteString("\n---+---+---\n")
+		}
+
+		for col := 0; col < 3; col++ {
+			if col > 0 {
+				builder.WriteString("|")
+			}
+
+			index := row*3 + col
+			builder.WriteString(" ")
+			builder.WriteString(renderCell(board, index))
+			builder.WriteString(" ")
+		}
+	}
+
+	return builder.String()
+}
+
+func renderCell(board game.Board, index int) string {
+	mark, err := board.At(index)
+	if err != nil {
+		panic(fmt.Sprintf("render cell %d: %v", index, err))
+	}
+
+	if mark == game.Empty {
+		return strconv.Itoa(index + 1)
+	}
+
+	return string(mark)
+}
+
+func renderPrompt(player game.Mark) string {
+	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
+}
+
+func renderRecoverableError(err error) string {
+	if err == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("Invalid move: %v. Try again.", err)
+}
+
+func renderResult(game game.Game) string {
+	if winner, ok := game.Winner(); ok {
+		return fmt.Sprintf("Player %s wins!", winner)
+	}
+
+	if game.Draw() {
+		return "Game ended in a draw."
+	}
+
+	return ""
+}
+
+exec
+/bin/bash -lc 'rg -n "S03|render|prompt|draw|wins|Invalid move|board" .chr/user/plans .chr/user/dumps .chr/user/cases .chr/user/project.md' in /workspace
+ succeeded in 0ms:
+.chr/user/project.md:12:show a 3x3 board, alternate X and O turns, accept moves from standard input,
+.chr/user/project.md:13:reject invalid moves, detect wins and draws, and exit cleanly.
+.chr/user/cases/cli-gameplay.md:8:terminal. The CLI should display the board, prompt for moves, alternate turns,
+.chr/user/cases/cli-gameplay.md:10:draw.
+.chr/user/dumps/cli-gameplay-context.md:19:- Display a 3x3 board with clear available cells.
+.chr/user/dumps/cli-gameplay-context.md:24:- Detect all row, column, and diagonal wins.
+.chr/user/dumps/cli-gameplay-context.md:25:- Detect a draw when the board is full with no winner.
+.chr/user/dumps/cli-gameplay-context.md:26:- Print the final board and result before exiting.
+.chr/user/dumps/cli-gameplay-context.md:37:- Use table-driven tests for rules, move validation, wins, and draws.
+.chr/user/dumps/cli-gameplay-context-raw.md:12:sees a board, and enters moves. Use numbers 1 through 9 for cells because that
+.chr/user/dumps/cli-gameplay-context-raw.md:13:is easy to explain in a CLI and easy to test. The board should show which cells
+.chr/user/dumps/cli-gameplay-context-raw.md:20:The game ends when X or O gets three in a row, or when the board fills with no
+.chr/user/dumps/cli-gameplay-context-raw.md:21:winner. The app should print the final board and a clear result. It does not
+.chr/user/dumps/cli-gameplay-context-raw.md:24:For tests, I care more about confidence than ceremony. Table tests for wins,
+.chr/user/dumps/cli-gameplay-context-raw.md:25:draws, and invalid moves are expected. Fuzzing makes sense for parsing move
+.chr/user/dumps/cli-gameplay-context-raw.md:27:like accepted moves always point inside the board. Do not add mutation testing
+.chr/user/plans/cli-gameplay-tracking.md:24:| 3 | `S03` CLI board rendering | `cli-gameplay-s03-cli-rendering` | `feature/cli-gameplay/s03-cli-rendering` | `S02` | Not started |
+.chr/user/plans/cli-gameplay-tracking.md:25:| 4 | `S04` Interactive gameplay loop | `cli-gameplay-s04-gameplay-loop` | `feature/cli-gameplay/s04-gameplay-loop` | `S03` | Not started |
+.chr/user/plans/cli-gameplay-tracking.md:32:3. `cli-gameplay-s03-cli-rendering`
+.chr/user/plans/cli-gameplay-tracking.md:48:- Keep argument handling, prompts, rendering, stdin/stdout, and process behavior in `cmd/tictactoe`.
+.chr/user/plans/cli-gameplay-tracking.md:51:- Prefer table-driven tests for rules, parsing, validation, wins, draws, and state transitions.
+.chr/user/plans/cli-gameplay-tracking.md:56:The use case is complete when `go test ./...` passes, `tictactoe` runs a full local two-player stdin/stdout game, `X` starts, turns advance only after valid moves, all wins and draws are detected, the final board and result are printed, help behavior still works, and scripted CLI flows cover win, draw, invalid-input recovery, occupied-cell recovery, and help.
+.chr/user/plans/cli-gameplay-tracking.md:62:- S03: CHR-3 - CLI board rendering (`.chr/user/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md`)
+.chr/user/plans/cli-gameplay-plan.md:19:Implement from the domain outward: finish board outcomes, add turn-aware state transitions, add deterministic CLI rendering, wire the interactive loop, then harden test coverage around rules, parsing, state transitions, and scripted CLI flows.
+.chr/user/plans/cli-gameplay-plan.md:27:- objective: Complete board-level win and full-board detection in `internal/game`.
+.chr/user/plans/cli-gameplay-plan.md:30:- implementation notes: Add table-driven tests for all rows, columns, diagonals, no-winner states, full boards, and non-full boards. Implement `Board.Winner` and `Board.Full` without adding I/O or external packages.
+.chr/user/plans/cli-gameplay-plan.md:31:- acceptance criteria: All eight win lines are detected; mixed or incomplete boards do not report false winners; full boards return true; boards with empty cells return false; `go test ./...` passes.
+.chr/user/plans/cli-gameplay-plan.md:33:- associated tasks: `test(game): cover board outcome detection`; `feat(game): implement winner and full-board rules`.
+.chr/user/plans/cli-gameplay-plan.md:36:- PR expectations: One focused PR limited to board outcome behavior and tests.
+.chr/user/plans/cli-gameplay-plan.md:46:- acceptance criteria: `X` starts; valid moves alternate `X` and `O`; invalid moves preserve board and current player; occupied cells are rejected; wins and draws prevent further mutation; table-driven transition tests pass.
+.chr/user/plans/cli-gameplay-plan.md:53:### S03 - CLI board rendering
+.chr/user/plans/cli-gameplay-plan.md:55:- slice identifier: `S03`
+.chr/user/plans/cli-gameplay-plan.md:56:- title: CLI board rendering
+.chr/user/plans/cli-gameplay-plan.md:57:- objective: Add deterministic presentation helpers for board display, prompts, recoverable errors, and final result text.
+.chr/user/plans/cli-gameplay-plan.md:61:- acceptance criteria: Initial board clearly shows available positions; partial boards show player marks; prompts include current player; winner and draw messages are clear; rendering tests use only standard-library assertions.
+.chr/user/plans/cli-gameplay-plan.md:63:- associated tasks: `test(cmd): cover board prompt and result rendering`; `feat(cmd): add CLI rendering helpers`.
+.chr/user/plans/cli-gameplay-plan.md:64:- ticket metadata: `cli-gameplay-s03-cli-rendering`, labels `case:cli-gameplay`, `area:cmd/tictactoe`, `type:implementation`, priority `P2`.
+.chr/user/plans/cli-gameplay-plan.md:65:- branch metadata: base `dev`, branch `feature/cli-gameplay/s03-cli-rendering`, target `dev`.
+.chr/user/plans/cli-gameplay-plan.md:66:- PR expectations: One PR for presentation helpers and rendering tests only.
+.chr/user/plans/cli-gameplay-plan.md:73:- implementation rationale: Once domain behavior and rendering are stable, the command can orchestrate the full game while keeping `main` thin and testable.
+.chr/user/plans/cli-gameplay-plan.md:74:- dependencies: `S03`.
+.chr/user/plans/cli-gameplay-plan.md:75:- implementation notes: Add an injectable command boundary such as `run(args []string, in io.Reader, out io.Writer, errOut io.Writer) int`. Preserve `-h`, `--help`, and `help`. Read moves line by line, parse positions through `internal/game`, report invalid text, out-of-range positions, and occupied cells as recoverable errors, and print the final board plus winner or draw before exit.
+.chr/user/plans/cli-gameplay-plan.md:76:- acceptance criteria: Running `tictactoe` starts a full game; help still prints usage; invalid input is visible and does not advance the turn; occupied cells do not advance the turn; wins and draws exit cleanly with status `0`; scripted CLI tests pass; `go test ./...` passes.
+.chr/user/plans/cli-gameplay-plan.md:90:- implementation notes: Expand table-driven tests for any remaining parser, rule, validation, win, draw, and transition gaps. Add a Go fuzz test for `ParsePosition` because parsing is already a separate boundary. Add `testing/quick` only if a simple stable invariant is natural, such as valid parsed positions always mapping to indexes `0` through `8`. Do not add mutation testing tools or third-party assertions.
+.chr/user/plans/cli-gameplay-plan.md:91:- acceptance criteria: Rule tests cover all win lines and draw states; state tests cover invalid moves without turn advancement; parser tests cover valid positions, whitespace, non-numeric input, and boundaries; CLI tests cover win, draw, help, invalid input recovery, and occupied-cell recovery; fuzz target compiles and runs with a short fuzz time; `go test ./...` passes.
+.chr/user/plans/cli-gameplay-plan.md:100:1. `S01` completes foundational board outcomes.
+.chr/user/plans/cli-gameplay-plan.md:102:3. `S03` adds stable CLI rendering against the domain shape.
+.chr/user/plans/cli-gameplay-plan.md:103:4. `S04` wires stdin/stdout gameplay using the domain and rendering helpers.
+.chr/user/plans/cli-gameplay-plan.md:113:| `S02` | `S01` | Move application must know when wins and draws end the game. |
+.chr/user/plans/cli-gameplay-plan.md:114:| `S03` | `S02` | Rendering should reflect finalized board, player, and outcome accessors. |
+.chr/user/plans/cli-gameplay-plan.md:115:| `S04` | `S03` | The loop needs stable board, prompt, error, and result text helpers. |
+.chr/user/plans/cli-gameplay-plan.md:124:| `S01` | Add board outcome tests for wins and full boards. | `test(game): cover board outcome detection` |
+.chr/user/plans/cli-gameplay-plan.md:125:| `S01` | Implement winner and full-board rules. | `feat(game): implement winner and full-board rules` |
+.chr/user/plans/cli-gameplay-plan.md:128:| `S03` | Add rendering tests for empty boards, partial boards, prompts, and final results. | `test(cmd): cover board prompt and result rendering` |
+.chr/user/plans/cli-gameplay-plan.md:129:| `S03` | Add board, prompt, invalid-message, and result rendering helpers. | `feat(cmd): add CLI rendering helpers` |
+.chr/user/plans/cli-gameplay-plan.md:130:| `S04` | Add scripted command tests for help, win, draw, invalid input, and occupied-cell recovery. | `test(cmd): cover scripted gameplay flows` |
+.chr/user/plans/cli-gameplay-plan.md:141:| `cli-gameplay-s03-cli-rendering` | `S03` | CLI board rendering | `feature/cli-gameplay/s03-cli-rendering` | `cmd/tictactoe` | `go test ./...` |
+.chr/user/plans/cli-gameplay-plan.md:149:Use `dev` as the integration branch. Create one branch per slice from latest `dev` after the prior slice merges: `feature/cli-gameplay/s01-game-outcomes`, `feature/cli-gameplay/s02-move-state`, `feature/cli-gameplay/s03-cli-rendering`, `feature/cli-gameplay/s04-gameplay-loop`, and `feature/cli-gameplay/s05-test-hardening`.
+.chr/user/plans/cli-gameplay-plan.md:159:Merge in slice order: `S01`, `S02`, `S03`, `S04`, then `S05`. After each merge, update local `dev`, rerun `go test ./...`, and create the next branch from the updated integration branch. Do not batch merge multiple slices unless each PR has passed its own review and validation.
+.chr/user/plans/cli-gameplay-plan.md:163:Reviewers must verify that rules remain in `internal/game`, process I/O remains in `cmd/tictactoe`, and all implementation and tests use only Go's standard library. Review must specifically check invalid text, out-of-range positions, occupied cells, turn preservation after invalid input, all row/column/diagonal wins, draw detection, final board printing, help behavior, and absence of optional replay or non-goal features.
+.chr/user/plans/cli-gameplay-plan.md:167:The use case is complete when `go test ./...` passes, `tictactoe` can run a full local two-player game from stdin/stdout, the initial board shows positions `1` through `9`, `X` starts, turns alternate only after valid moves, invalid text and out-of-range positions are recoverable without advancing the turn, occupied cells are rejected without advancing the turn, all wins and draws produce a clear final result, and the final board is printed before exit.
+.chr/user/plans/cli-gameplay-plan.md:169:Additional validation should include `go run ./cmd/tictactoe --help`, one scripted `X` win, one scripted draw, one scripted invalid-input recovery flow, one scripted occupied-cell recovery flow, and a short `go test -fuzz=FuzzParsePosition -fuzztime=5s ./internal/game` run if `S05` adds the parser fuzz target.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:21:Implement from the domain outward: complete board outcome rules, add a small game-state transition layer, add CLI rendering, wire the interactive loop, then harden tests and final validation.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:29:- objective: Complete board-level win and draw detection in `internal/game`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:32:- implementation notes: Implement all row, column, and diagonal win lines in `Board.Winner`; implement `Board.Full`; keep board logic independent from stdin/stdout; preserve standard-library-only tests.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:33:- acceptance criteria: All eight win lines are detected; no winner is reported for incomplete or mixed boards; full boards are detected; non-full boards are not detected as full; `go test ./...` passes.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:35:- associated tasks: `test(game): cover board winners and full-board detection`; `feat(game): implement winner and full detection`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:38:- PR expectations: One focused PR covering only board outcome logic and tests; review should verify all win lines and draw prerequisites.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:47:- implementation notes: Introduce a small `Game` or equivalent state type with board, current player, and terminal outcome accessors; start with `X`; alternate turns only after valid non-terminal moves; reject occupied cells, out-of-range indexes, and moves after game over without mutating state.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:48:- acceptance criteria: `X` starts; valid moves alternate `X` and `O`; invalid moves leave the current player unchanged; occupied cells are rejected; win and draw states stop further moves; tests cover state transitions table-first.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:55:### S03 - CLI Board Rendering
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:57:- slice identifier: `S03`
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:58:- title: CLI board rendering
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:59:- objective: Add deterministic CLI presentation helpers for board display, prompts, invalid input messages, and final result text.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:62:- implementation notes: Keep rendering helpers in `cmd/tictactoe`; display empty cells as positions `1` through `9`; display occupied cells as `X` or `O`; avoid colors, cursor control, and terminal UI packages; keep text stable enough for CLI-facing tests.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:63:- acceptance criteria: Initial board clearly shows available cells; marked board shows player marks; prompt includes the current player; win and draw result text is clear; rendering tests use only standard library assertions.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:65:- associated tasks: `test(cmd): cover board and result rendering`; `feat(cmd): add tic-tac-toe CLI rendering helpers`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:66:- ticket metadata: `cli-gameplay-s03-cli-rendering`, labels `case:cli-gameplay`, `area:cmd/tictactoe`, `type:implementation`, priority `P2`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:67:- branch metadata: base `dev`, branch `feature/cli-gameplay/s03-cli-rendering`, target `dev`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:68:- PR expectations: One PR for presentation helpers only; review should verify that rendering does not leak process I/O into domain code.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:75:- implementation rationale: With domain rules and rendering in place, the command can run a full local game while keeping I/O injectable for tests.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:76:- dependencies: `S03`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:77:- implementation notes: Add a `run(args []string, in io.Reader, out io.Writer, errOut io.Writer) int` style boundary or equivalent; keep `main` thin; preserve help handling; read moves line by line; call `game.ParsePosition`; print recoverable errors for invalid text, out-of-range positions, and occupied cells; print final board and winner or draw before exit.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:78:- acceptance criteria: `tictactoe` runs a full game; `-h`, `--help`, and `help` still print usage; invalid input is visible and does not advance the turn; occupied cells do not advance the turn; wins and draws exit cleanly with status `0`; `go test ./...` passes.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:80:- associated tasks: `feat(cmd): wire interactive gameplay loop`; `test(cmd): cover scripted win, draw, and invalid input flows`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:93:- acceptance criteria: Rule tests cover all win lines and draw states; state tests cover invalid moves without turn advancement; parse tests cover text, whitespace, range boundaries, and valid positions; CLI-facing tests cover at least one win, one draw, help, invalid input, and occupied-cell recovery; `go test ./...` passes.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:102:1. `S01` completes low-level board outcomes.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:104:3. `S03` adds CLI presentation once state shape is stable.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:115:| `S02` | `S01` | Turn state must know when a move creates a win or draw. |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:116:| `S03` | `S02` | Rendering should reflect the finalized domain state and current player. |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:117:| `S04` | `S03` | The loop needs stable prompts, board output, and result text. |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:126:| `S01` | Add table-driven board outcome tests. | `test(game): cover board winners and full-board detection` |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:127:| `S01` | Implement `Winner` and `Full`. | `feat(game): implement board outcome detection` |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:130:| `S03` | Add rendering tests for empty, partial, and final boards. | `test(cmd): cover tic-tac-toe rendering` |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:131:| `S03` | Add board, prompt, and result rendering helpers. | `feat(cmd): add board rendering helpers` |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:132:| `S04` | Add scripted CLI tests for win, draw, help, and invalid input. | `test(cmd): cover gameplay loop flows` |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:143:| `cli-gameplay-s03-cli-rendering` | `S03` | CLI board rendering | `feature/cli-gameplay/s03-cli-rendering` | `cmd/tictactoe` | `go test ./...` |
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:151:Use `dev` as the integration branch. Create one branch per slice from the latest `dev` after the prior slice merges. Use deterministic branch names: `feature/cli-gameplay/s01-game-outcomes`, `feature/cli-gameplay/s02-move-state`, `feature/cli-gameplay/s03-cli-rendering`, `feature/cli-gameplay/s04-gameplay-loop`, and `feature/cli-gameplay/s05-test-hardening`.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:161:Merge in slice order: `S01`, `S02`, `S03`, `S04`, then `S05`. After each merge, update local `dev`, rerun `go test ./...`, and create the next branch from the updated integration branch. Do not batch merge multiple slices unless all individual PRs have passed review and validation.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:165:Reviewers should verify that game rules remain in `internal/game`, process I/O remains in `cmd/tictactoe`, and all code uses only Go's standard library. Review must check invalid input behavior specifically: invalid text, out-of-range numbers, and occupied cells must be rejected without advancing the turn. Review should also verify all row, column, and diagonal wins, draw detection, final board printing, help behavior, and absence of optional replay or non-goal features.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:169:The use case is complete when `go test ./...` passes, the command can run a full two-player game from stdin/stdout, the initial board shows positions `1` through `9`, `X` starts, turns alternate only after valid moves, invalid moves are visible and recoverable, occupied cells are rejected without losing the turn, all wins and draws produce a clear final result, and the final board is printed before exit.
+.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md:171:Additional validation: run a scripted X win through `go run ./cmd/tictactoe`; run a scripted draw; run a scripted invalid-input flow that proves the same player remains on turn; run `go run ./cmd/tictactoe --help`; run the parser fuzz target with a short fuzz time if `S05` adds one.
+
+exec
+/bin/bash -lc "sed -n '1,280p' cmd/tictactoe/render_test.go" in /workspace
+ succeeded in 0ms:
+package main
+
+import (
+	"errors"
+	"testing"
+
+	"example.com/chr-qa-tictactoe/internal/game"
+)
+
+func TestRenderBoard(t *testing.T) {
+	tests := []struct {
+		name  string
+		board game.Board
+		want  string
+	}{
+		{
+			name:  "empty board",
+			board: game.NewBoard(),
+			want: " 1 | 2 | 3 \n" +
+				"---+---+---\n" +
+				" 4 | 5 | 6 \n" +
+				"---+---+---\n" +
+				" 7 | 8 | 9 ",
+		},
+		{
+			name: "partial board",
+			board: mustPlaceMarks(t, []renderMove{
+				{index: 0, mark: game.X},
+				{index: 4, mark: game.O},
+				{index: 8, mark: game.X},
+			}),
+			want: " X | 2 | 3 \n" +
+				"---+---+---\n" +
+				" 4 | O | 6 \n" +
+				"---+---+---\n" +
+				" 7 | 8 | X ",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := renderBoard(test.board)
+
+			if got != test.want {
+				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
+	got := renderPrompt(game.O)
+	want := "Player O, choose a position (1-9): "
+
+	if got != want {
+		t.Fatalf("renderPrompt() = %q, want %q", got, want)
+	}
+}
+
+func TestRenderRecoverableError(t *testing.T) {
+	got := renderRecoverableError(errors.New("cell is already occupied"))
+	want := "Invalid move: cell is already occupied. Try again."
+
+	if got != want {
+		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
+	}
+}
+
+func TestRenderResult(t *testing.T) {
+	tests := []struct {
+		name string
+		game game.Game
+		want string
+	}{
+		{
+			name: "X winner",
+			game: mustApplyGameMoves(t, []renderMove{
+				{index: 0, mark: game.X},
+				{index: 3, mark: game.O},
+				{index: 1, mark: game.X},
+				{index: 4, mark: game.O},
+				{index: 2, mark: game.X},
+			}),
+			want: "Player X wins!",
+		},
+		{
+			name: "O winner",
+			game: mustApplyGameMoves(t, []renderMove{
+				{index: 0, mark: game.X},
+				{index: 3, mark: game.O},
+				{index: 1, mark: game.X},
+				{index: 4, mark: game.O},
+				{index: 8, mark: game.X},
+				{index: 5, mark: game.O},
+			}),
+			want: "Player O wins!",
+		},
+		{
+			name: "draw",
+			game: mustApplyGameMoves(t, []renderMove{
+				{index: 0, mark: game.X},
+				{index: 1, mark: game.O},
+				{index: 2, mark: game.X},
+				{index: 4, mark: game.O},
+				{index: 3, mark: game.X},
+				{index: 5, mark: game.O},
+				{index: 7, mark: game.X},
+				{index: 6, mark: game.O},
+				{index: 8, mark: game.X},
+			}),
+			want: "Game ended in a draw.",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := renderResult(test.game)
+
+			if got != test.want {
+				t.Fatalf("renderResult() = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+type renderMove struct {
+	index int
+	mark  game.Mark
+}
+
+func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
+	t.Helper()
+
+	board := game.NewBoard()
+	for _, move := range moves {
+		next, err := board.Place(move.index, move.mark)
+		if err != nil {
+			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
+		}
+
+		board = next
+	}
+
+	return board
+}
+
+func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
+	t.Helper()
+
+	game := game.NewGame()
+	for _, move := range moves {
+		next, err := game.ApplyMove(move.index, move.mark)
+		if err != nil {
+			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
+		}
+
+		game = next
+	}
+
+	return game
+}
+
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8113922c3a70411f4b4ea11bb1017dbe8d750b5a
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(game game.Game) string {
++	if winner, ok := game.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if game.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2ad15e184882fbd4458e4bfbf5ac35015f9a3b1
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name  string
++		game  game.Game
++		want  string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	game := game.NewGame()
++	for _, move := range moves {
++		next, err := game.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		game = next
++	}
++
++	return game
++}
+
+codex
+The plan confirms this slice only needs stable renderer helpers, not the gameplay loop. I’m doing one small cleanup in the new code to avoid package-name shadowing, then I’ll rerun tests and write the result JSON.
+apply patch
+patch: completed
+/workspace/cmd/tictactoe/render.go
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2ad15e184882fbd4458e4bfbf5ac35015f9a3b1
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name  string
++		game  game.Game
++		want  string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	game := game.NewGame()
++	for _, move := range moves {
++		next, err := game.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		game = next
++	}
++
++	return game
++}
+
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2ad15e184882fbd4458e4bfbf5ac35015f9a3b1
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name  string
++		game  game.Game
++		want  string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	game := game.NewGame()
++	for _, move := range moves {
++		next, err := game.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		game = next
++	}
++
++	return game
++}
+
+apply patch
+patch: completed
+/workspace/cmd/tictactoe/render_test.go
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+codex
+The cleanup is applied. I’m formatting again and running validation.
+exec
+/bin/bash -lc 'gofmt -w cmd/tictactoe/render.go cmd/tictactoe/render_test.go' in /workspace
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'go test ./...' in /workspace
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+ succeeded in 496ms:
+ok  	example.com/chr-qa-tictactoe/cmd/tictactoe	0.005s
+ok  	example.com/chr-qa-tictactoe/internal/game	(cached)
+
+codex
+Validation passes. I’m reviewing the scoped diff, then I’ll write the required Chryso result JSON.
+exec
+/bin/bash -lc 'git -c safe.directory=/workspace diff -- cmd/tictactoe/render.go cmd/tictactoe/render_test.go' in /workspace
+ succeeded in 0ms:
+exec
+/bin/bash -lc 'git -c safe.directory=/workspace status --short -- cmd/tictactoe/render.go cmd/tictactoe/render_test.go .chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json' in /workspace
+ succeeded in 0ms:
+?? cmd/tictactoe/render.go
+?? cmd/tictactoe/render_test.go
+
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+codex
+The renderer files are new, so `git diff` has no tracked diff for them yet; status shows only those new `cmd/tictactoe` files in this ticket scope. I’m creating the required result artifact now.
+exec
+/bin/bash -lc 'ls -la .chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d' in /workspace
+ succeeded in 0ms:
+total 120
+drwxr-xr-x 1 1000 1000     70 Jun 18 09:19 .
+drwxr-xr-x 1 1000 1000     42 Jun 18 09:19 ..
+-rw-r--r-- 1 1000 1000    813 Jun 18 09:19 context.md
+-rw-r--r-- 1 1000 1000 115003 Jun 18 09:23 runtime.log
+-rw-r--r-- 1 1000 1000      0 Jun 18 09:19 validation.log
+
+exec
+/bin/bash -lc "test -f .chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json && sed -n '1,120p' .chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json || true" in /workspace
+ succeeded in 0ms:
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+codex
+I’m writing the result contract with `status: succeeded`, including only the two renderer files as changed files for this ticket.
+apply patch
+patch: completed
+/workspace/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+diff --git a/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..d6551150c12aed5014b3c9499e11139dc61fb05d
+--- /dev/null
++++ b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+@@ -0,0 +1,16 @@
++{
++  "execution_id": "exec-c4b72e7ae4e31f4d",
++  "ticket_key": "CHR-3",
++  "status": "succeeded",
++  "summary": "Added deterministic CLI board, prompt, recoverable error, and result rendering helpers with standard-library tests. Validation passed with go test ./...",
++  "changed_files": [
++    {
++      "path": "cmd/tictactoe/render.go",
++      "summary": "Adds deterministic board, prompt, recoverable error, and game result rendering helpers."
++    },
++    {
++      "path": "cmd/tictactoe/render_test.go",
++      "summary": "Covers empty and partial boards, prompt text, recoverable error text, winner messages, and draw messages."
++    }
++  ]
++}
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+diff --git a/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..d6551150c12aed5014b3c9499e11139dc61fb05d
+--- /dev/null
++++ b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+@@ -0,0 +1,16 @@
++{
++  "execution_id": "exec-c4b72e7ae4e31f4d",
++  "ticket_key": "CHR-3",
++  "status": "succeeded",
++  "summary": "Added deterministic CLI board, prompt, recoverable error, and result rendering helpers with standard-library tests. Validation passed with go test ./...",
++  "changed_files": [
++    {
++      "path": "cmd/tictactoe/render.go",
++      "summary": "Adds deterministic board, prompt, recoverable error, and game result rendering helpers."
++    },
++    {
++      "path": "cmd/tictactoe/render_test.go",
++      "summary": "Covers empty and partial boards, prompt text, recoverable error text, winner messages, and draw messages."
++    }
++  ]
++}
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+codex
+The result artifact is written. I’m doing one final JSON/readback and status check so the closeout is accurate.
+exec
+/bin/bash -lc "sed -n '1,200p' .chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json" in /workspace
+ succeeded in 0ms:
+{
+  "execution_id": "exec-c4b72e7ae4e31f4d",
+  "ticket_key": "CHR-3",
+  "status": "succeeded",
+  "summary": "Added deterministic CLI board, prompt, recoverable error, and result rendering helpers with standard-library tests. Validation passed with go test ./...",
+  "changed_files": [
+    {
+      "path": "cmd/tictactoe/render.go",
+      "summary": "Adds deterministic board, prompt, recoverable error, and game result rendering helpers."
+    },
+    {
+      "path": "cmd/tictactoe/render_test.go",
+      "summary": "Covers empty and partial boards, prompt text, recoverable error text, winner messages, and draw messages."
+    }
+  ]
+}
+
+exec
+/bin/bash -lc 'git -c safe.directory=/workspace status --short -- cmd/tictactoe/render.go cmd/tictactoe/render_test.go .chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json' in /workspace
+ succeeded in 0ms:
+?? .chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+?? cmd/tictactoe/render.go
+?? cmd/tictactoe/render_test.go
+
+exec
+/bin/bash -lc 'go test ./...' in /workspace
+diff --git a/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..d6551150c12aed5014b3c9499e11139dc61fb05d
+--- /dev/null
++++ b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+@@ -0,0 +1,16 @@
++{
++  "execution_id": "exec-c4b72e7ae4e31f4d",
++  "ticket_key": "CHR-3",
++  "status": "succeeded",
++  "summary": "Added deterministic CLI board, prompt, recoverable error, and result rendering helpers with standard-library tests. Validation passed with go test ./...",
++  "changed_files": [
++    {
++      "path": "cmd/tictactoe/render.go",
++      "summary": "Adds deterministic board, prompt, recoverable error, and game result rendering helpers."
++    },
++    {
++      "path": "cmd/tictactoe/render_test.go",
++      "summary": "Covers empty and partial boards, prompt text, recoverable error text, winner messages, and draw messages."
++    }
++  ]
++}
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+ succeeded in 436ms:
+ok  	example.com/chr-qa-tictactoe/cmd/tictactoe	(cached)
+ok  	example.com/chr-qa-tictactoe/internal/game	(cached)
+
+codex
+Implemented CHR-3.
+
+Added deterministic CLI rendering helpers in [render.go](/workspace/cmd/tictactoe/render.go):
+- Board rendering with empty cells shown as `1` through `9`
+- Current-player prompt rendering
+- Recoverable error text rendering
+- Winner/draw result rendering via `game.Game` accessors
+
+Added tests in [render_test.go](/workspace/cmd/tictactoe/render_test.go) for empty/partial boards, prompts, errors, winner messages, and draw messages.
+
+Validation passed: `go test ./...`
+
+Wrote result artifact: [.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json](/workspace/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json)
+diff --git a/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..d6551150c12aed5014b3c9499e11139dc61fb05d
+--- /dev/null
++++ b/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+@@ -0,0 +1,16 @@
++{
++  "execution_id": "exec-c4b72e7ae4e31f4d",
++  "ticket_key": "CHR-3",
++  "status": "succeeded",
++  "summary": "Added deterministic CLI board, prompt, recoverable error, and result rendering helpers with standard-library tests. Validation passed with go test ./...",
++  "changed_files": [
++    {
++      "path": "cmd/tictactoe/render.go",
++      "summary": "Adds deterministic board, prompt, recoverable error, and game result rendering helpers."
++    },
++    {
++      "path": "cmd/tictactoe/render_test.go",
++      "summary": "Covers empty and partial boards, prompt text, recoverable error text, winner messages, and draw messages."
++    }
++  ]
++}
+diff --git a/cmd/tictactoe/render.go b/cmd/tictactoe/render.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..a527275c92c7f543e8262d09ee8244da21417180
+--- /dev/null
++++ b/cmd/tictactoe/render.go
+@@ -0,0 +1,69 @@
++package main
++
++import (
++	"fmt"
++	"strconv"
++	"strings"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func renderBoard(board game.Board) string {
++	var builder strings.Builder
++
++	for row := 0; row < 3; row++ {
++		if row > 0 {
++			builder.WriteString("\n---+---+---\n")
++		}
++
++		for col := 0; col < 3; col++ {
++			if col > 0 {
++				builder.WriteString("|")
++			}
++
++			index := row*3 + col
++			builder.WriteString(" ")
++			builder.WriteString(renderCell(board, index))
++			builder.WriteString(" ")
++		}
++	}
++
++	return builder.String()
++}
++
++func renderCell(board game.Board, index int) string {
++	mark, err := board.At(index)
++	if err != nil {
++		panic(fmt.Sprintf("render cell %d: %v", index, err))
++	}
++
++	if mark == game.Empty {
++		return strconv.Itoa(index + 1)
++	}
++
++	return string(mark)
++}
++
++func renderPrompt(player game.Mark) string {
++	return fmt.Sprintf("Player %s, choose a position (1-9): ", player)
++}
++
++func renderRecoverableError(err error) string {
++	if err == nil {
++		return ""
++	}
++
++	return fmt.Sprintf("Invalid move: %v. Try again.", err)
++}
++
++func renderResult(state game.Game) string {
++	if winner, ok := state.Winner(); ok {
++		return fmt.Sprintf("Player %s wins!", winner)
++	}
++
++	if state.Draw() {
++		return "Game ended in a draw."
++	}
++
++	return ""
++}
+diff --git a/cmd/tictactoe/render_test.go b/cmd/tictactoe/render_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..168bb7f8707636dbd48e436bceb036236ed37b66
+--- /dev/null
++++ b/cmd/tictactoe/render_test.go
+@@ -0,0 +1,161 @@
++package main
++
++import (
++	"errors"
++	"testing"
++
++	"example.com/chr-qa-tictactoe/internal/game"
++)
++
++func TestRenderBoard(t *testing.T) {
++	tests := []struct {
++		name  string
++		board game.Board
++		want  string
++	}{
++		{
++			name:  "empty board",
++			board: game.NewBoard(),
++			want: " 1 | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | 5 | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | 9 ",
++		},
++		{
++			name: "partial board",
++			board: mustPlaceMarks(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: " X | 2 | 3 \n" +
++				"---+---+---\n" +
++				" 4 | O | 6 \n" +
++				"---+---+---\n" +
++				" 7 | 8 | X ",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderBoard(test.board)
++
++			if got != test.want {
++				t.Fatalf("renderBoard() =\n%q\nwant\n%q", got, test.want)
++			}
++		})
++	}
++}
++
++func TestRenderPromptIncludesCurrentPlayer(t *testing.T) {
++	got := renderPrompt(game.O)
++	want := "Player O, choose a position (1-9): "
++
++	if got != want {
++		t.Fatalf("renderPrompt() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderRecoverableError(t *testing.T) {
++	got := renderRecoverableError(errors.New("cell is already occupied"))
++	want := "Invalid move: cell is already occupied. Try again."
++
++	if got != want {
++		t.Fatalf("renderRecoverableError() = %q, want %q", got, want)
++	}
++}
++
++func TestRenderResult(t *testing.T) {
++	tests := []struct {
++		name string
++		game game.Game
++		want string
++	}{
++		{
++			name: "X winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 2, mark: game.X},
++			}),
++			want: "Player X wins!",
++		},
++		{
++			name: "O winner",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 3, mark: game.O},
++				{index: 1, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 8, mark: game.X},
++				{index: 5, mark: game.O},
++			}),
++			want: "Player O wins!",
++		},
++		{
++			name: "draw",
++			game: mustApplyGameMoves(t, []renderMove{
++				{index: 0, mark: game.X},
++				{index: 1, mark: game.O},
++				{index: 2, mark: game.X},
++				{index: 4, mark: game.O},
++				{index: 3, mark: game.X},
++				{index: 5, mark: game.O},
++				{index: 7, mark: game.X},
++				{index: 6, mark: game.O},
++				{index: 8, mark: game.X},
++			}),
++			want: "Game ended in a draw.",
++		},
++	}
++
++	for _, test := range tests {
++		t.Run(test.name, func(t *testing.T) {
++			got := renderResult(test.game)
++
++			if got != test.want {
++				t.Fatalf("renderResult() = %q, want %q", got, test.want)
++			}
++		})
++	}
++}
++
++type renderMove struct {
++	index int
++	mark  game.Mark
++}
++
++func mustPlaceMarks(t *testing.T, moves []renderMove) game.Board {
++	t.Helper()
++
++	board := game.NewBoard()
++	for _, move := range moves {
++		next, err := board.Place(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("Place(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		board = next
++	}
++
++	return board
++}
++
++func mustApplyGameMoves(t *testing.T, moves []renderMove) game.Game {
++	t.Helper()
++
++	state := game.NewGame()
++	for _, move := range moves {
++		next, err := state.ApplyMove(move.index, move.mark)
++		if err != nil {
++			t.Fatalf("ApplyMove(%d, %q) returned error: %v", move.index, move.mark, err)
++		}
++
++		state = next
++	}
++
++	return state
++}
+
+tokens used
+86,335
+Implemented CHR-3.
+
+Added deterministic CLI rendering helpers in [render.go](/workspace/cmd/tictactoe/render.go):
+- Board rendering with empty cells shown as `1` through `9`
+- Current-player prompt rendering
+- Recoverable error text rendering
+- Winner/draw result rendering via `game.Game` accessors
+
+Added tests in [render_test.go](/workspace/cmd/tictactoe/render_test.go) for empty/partial boards, prompts, errors, winner messages, and draw messages.
+
+Validation passed: `go test ./...`
+
+Wrote result artifact: [.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json](/workspace/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json)

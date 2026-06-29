@@ -14,7 +14,7 @@ ticket execution.
 
 ## Delivered Behavior
 
-`chc init` now materializes `.chc/runtime/agent/Dockerfile` from each workspace
+`chr init` now materializes `.chr/runtime/agent/Dockerfile` from each workspace
 profile. Profile `config.yml` files also include runtime defaults that point to
 that Dockerfile and to the runtime artifact directory.
 
@@ -32,30 +32,30 @@ image or a full agent harness installer.
 New initialized project asset:
 
 ```text
-.chc/runtime/agent/Dockerfile
+.chr/runtime/agent/Dockerfile
 ```
 
 Profile config files now include:
 
 ```yml
 runtime:
-  image: chc-agent-runtime:local
-  dockerfile: .chc/runtime/agent/Dockerfile
+  image: chr-agent-runtime:local
+  dockerfile: .chr/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chc/runtime/runs
+  artifact_dir: .chr/runtime/runs
   validation_command: make verify
 ```
 
 ## Files of Interest
 
-- `cmd/chc/assets/workspace/profiles/*/runtime/agent/Dockerfile`
-- `cmd/chc/assets/workspace/profiles/*/config.yml`
-- `internal/chc/workspace_init_test.go`
+- `cmd/chr/assets/workspace/profiles/*/runtime/agent/Dockerfile`
+- `cmd/chr/assets/workspace/profiles/*/config.yml`
+- `internal/chr/workspace_init_test.go`
 - `docs/reference/project-workspace.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

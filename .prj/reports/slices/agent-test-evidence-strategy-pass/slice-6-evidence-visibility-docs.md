@@ -22,10 +22,10 @@ runtime evidence.
 - Board selected-ticket detail now shows overall evidence state plus strategy,
   Gherkin, tests, validation, and evidence-summary item states.
 - Dash work-action details now surface ticket, execution report, runtime log,
-  validation log, and `chc work logs` lookup references when event refs exist.
-- `chc ticket show` prints detailed evidence fields when a ticket has evidence
+  validation log, and `chr work logs` lookup references when event refs exist.
+- `chr ticket show` prints detailed evidence fields when a ticket has evidence
   state.
-- `chc ticket list` and `chc ticket board` append a compact evidence status
+- `chr ticket list` and `chr ticket board` append a compact evidence status
   cell while preserving normal Board columns.
 - User-facing documentation now describes the visibility surfaces, defaults,
   config overrides, and review handoff expectations.
@@ -63,7 +63,7 @@ runtime evidence.
 - `docs/reference/evidence-strategy-config.md`
 - `docs/reference/commands.md`
 - `docs/how-to/user-guide/index.md`
-- `qa/ref/003/tictactoe/.chc/user/evidence-examples/`
+- `qa/ref/003/tictactoe/.chr/user/evidence-examples/`
 - `scripts/qa/smoke.sh`
 
 ## Validation

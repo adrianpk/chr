@@ -5,12 +5,12 @@ Status: initial
 Sources:
 
 - `/home/adrian/Downloads/context_composition_and_document_transitions.md`
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 - `docs/reference/ticket-execution.md`
 
 ## Purpose
 
-Define the layered context model used when `chc` asks an agent to resolve one
+Define the layered context model used when `chr` asks an agent to resolve one
 ticket.
 
 The current execution flow already has project resolution, tickets, runtime
@@ -30,13 +30,13 @@ before pruning:
 - agent identity and role definition;
 - root `AGENTS.md` and nested `AGENTS.md` files that apply to the execution
   path;
-- project-local `.chc/` configuration, tickets, runtime assets, and workflow
+- project-local `.chr/` configuration, tickets, runtime assets, and workflow
   documents;
 - project-local documentation and conventions;
 - ticket use-case documents, including related specs, drafts, plans, trackers,
   dumps, and quizzes;
 - filesystem tree output for orientation;
-- text search over source, tests, docs, and `.chc/`;
+- text search over source, tests, docs, and `.chr/`;
 - selected `gograph` query output for Go code context;
 - validation commands and expected completion signals;
 - current execution attempt metadata;
@@ -57,15 +57,15 @@ inventory.
 The context composer must remain compatible with the existing Docker runtime
 boundary.
 
-`chc` should compose context on the host side before Docker execution. The
+`chr` should compose context on the host side before Docker execution. The
 runtime container should receive the result through the existing mounted
 workspace and artifact paths:
 
-- `CHC_WORKER_CONTEXT_PATH` points to the materialized `context.md`;
-- `CHC_TICKET_PATH` points to the ticket or direct objective;
-- `CHC_RESULT_PATH` points to the result envelope;
-- `CHC_LOG_PATH` points to the agent log;
-- `CHC_VALIDATION_PATH` points to validation evidence.
+- `CHR_WORKER_CONTEXT_PATH` points to the materialized `context.md`;
+- `CHR_TICKET_PATH` points to the ticket or direct objective;
+- `CHR_RESULT_PATH` points to the result envelope;
+- `CHR_LOG_PATH` points to the agent log;
+- `CHR_VALIDATION_PATH` points to validation evidence.
 
 Additional composer outputs should live under the execution artifact directory,
 for example:
@@ -85,9 +85,9 @@ for example:
 The worker should be able to solve the ticket by reading `context.md` first and
 following references to sibling context artifacts when needed.
 
-The first implementation should not require the container to run `chc` or build
+The first implementation should not require the container to run `chr` or build
 context internally. Running context composition outside the container keeps
-workflow policy, pruning, source selection, and secret handling under `chc`
+workflow policy, pruning, source selection, and secret handling under `chr`
 control.
 
 ## Per-Execution Context Package
@@ -106,7 +106,7 @@ for example:
 - stable agent identity;
 - stable project conventions;
 - applicable `AGENTS.md` hierarchy;
-- stable `.chc/` workflow descriptions;
+- stable `.chr/` workflow descriptions;
 - stable project identity and ownership metadata.
 
 Those partials are an optimization, not the initial contract. The first
@@ -125,7 +125,7 @@ Invariant or cacheable context includes:
 - project identity;
 - project conventions;
 - applicable `AGENTS.md` hierarchy;
-- stable `.chc/` workflow descriptions;
+- stable `.chr/` workflow descriptions;
 - default validation policy;
 - repository-level documentation that changes rarely.
 
@@ -190,14 +190,14 @@ It includes:
 
 - project ID;
 - absolute project path;
-- project-local `.chc/` directory;
+- project-local `.chr/` directory;
 - local project config;
 - runtime config;
 - user-level project registry;
 - ticket index;
 - workspace mounting rules.
 - applicable `AGENTS.md` instructions;
-- project-local `.chc/` workflow and runtime assets;
+- project-local `.chr/` workflow and runtime assets;
 - project conventions, docs, and validation commands.
 
 This layer answers: which managed project and workspace are being operated on?

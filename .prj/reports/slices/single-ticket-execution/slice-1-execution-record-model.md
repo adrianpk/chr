@@ -52,13 +52,13 @@ Required record fields:
 
 ## Files of Interest
 
-- `internal/chc/execution.go`
-- `internal/chc/execution_test.go`
+- `internal/chr/execution.go`
+- `internal/chr/execution_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

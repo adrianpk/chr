@@ -141,11 +141,11 @@ func validNotificationEvent() NotificationEvent {
 		Status:    NotificationStatusPending,
 		Source:    NotificationSourceTicketExecution,
 		References: NotificationReferences{
-			TicketKey:   "CHC-1",
+			TicketKey:   "CHR-1",
 			ExecutionID: "execution-1",
 		},
 		Payload: NotificationPayload{
-			Summary: "Ticket CHC-1 is blocked",
+			Summary: "Ticket CHR-1 is blocked",
 			Detail:  "Validation failed after the configured retry threshold.",
 		},
 		CreatedAt: now,

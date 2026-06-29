@@ -60,12 +60,12 @@ Execution records also store workspace execution metadata:
   execution.
 
 In `project` mode, the project checkout and execution workspace are the same
-directory. In `worktree` mode, ChrysoCoord prepares a ticket-specific Git
+directory. In `worktree` mode, Chryso prepares a ticket-specific Git
 worktree and uses that path as the execution workspace.
 
 ## Ticket Start Preflight
 
-`chc ticket start <ticket-key>` prepares one ticket execution without invoking
+`chr ticket start <ticket-key>` prepares one ticket execution without invoking
 an agent harness.
 
 The command resolves the project through the standard project resolver, refreshes
@@ -145,13 +145,13 @@ The validation command renders:
 
 The run environment includes:
 
-- `CHC_EXECUTION_ID`;
-- `CHC_TICKET_KEY`;
-- `CHC_TICKET_PATH`;
-- `CHC_WORKER_CONTEXT_PATH`;
-- `CHC_RESULT_PATH`;
-- `CHC_LOG_PATH`.
-- `CHC_VALIDATION_PATH`.
+- `CHR_EXECUTION_ID`;
+- `CHR_TICKET_KEY`;
+- `CHR_TICKET_PATH`;
+- `CHR_WORKER_CONTEXT_PATH`;
+- `CHR_RESULT_PATH`;
+- `CHR_LOG_PATH`.
+- `CHR_VALIDATION_PATH`.
 - `OPENAI_API_KEY`, inherited by name when present.
 
 Runtime artifact paths are scoped by ticket key and execution ID when both are
@@ -181,7 +181,7 @@ The worker command requires:
 The command invokes:
 
 ```sh
-codex exec --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox < "$CHC_WORKER_CONTEXT_PATH"
+codex exec --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox < "$CHR_WORKER_CONTEXT_PATH"
 ```
 
 The runtime image must provide:
@@ -197,13 +197,13 @@ containers.
 
 The rendered command exports these environment variables for the worker process:
 
-- `CHC_EXECUTION_ID`;
-- `CHC_TICKET_KEY`;
-- `CHC_TICKET_PATH`;
-- `CHC_WORKER_CONTEXT_PATH`;
-- `CHC_RESULT_PATH`;
-- `CHC_LOG_PATH`;
-- `CHC_VALIDATION_PATH`.
+- `CHR_EXECUTION_ID`;
+- `CHR_TICKET_KEY`;
+- `CHR_TICKET_PATH`;
+- `CHR_WORKER_CONTEXT_PATH`;
+- `CHR_RESULT_PATH`;
+- `CHR_LOG_PATH`;
+- `CHR_VALIDATION_PATH`.
 - `OPENAI_API_KEY`, inherited by name when present.
 
 The worker command renderer does not execute Codex, run Docker, create context
@@ -238,7 +238,7 @@ It does not execute Codex, run validation, or write the result envelope.
 
 ## Agent Harness Invocation
 
-In non-dry-run mode, `chc ticket start <ticket-key>` creates the pending
+In non-dry-run mode, `chr ticket start <ticket-key>` creates the pending
 execution record and then invokes the rendered harness commands.
 
 The execution runner:
@@ -265,7 +265,7 @@ result envelope, or run validation.
 
 ## Execution Result Artifact
 
-The harness run command must write a JSON result envelope to `CHC_RESULT_PATH`.
+The harness run command must write a JSON result envelope to `CHR_RESULT_PATH`.
 
 Envelope fields:
 
@@ -299,7 +299,7 @@ It returns workspace-relative changed paths as execution result changed-file
 entries. The discoverer does not mutate the worktree, stage files, commit,
 revert, or clean files.
 
-Operational runtime artifacts under `.chc/user/runtime/` are ignored so worker
+Operational runtime artifacts under `.chr/user/runtime/` are ignored so worker
 context, logs, result envelopes, and validation artifacts are not reported as
 workspace edits.
 
@@ -312,7 +312,7 @@ When the result status is `failed`, the execution is marked `failed` even if the
 Docker commands exited successfully. When the result status is `succeeded`, the
 execution is marked `succeeded`.
 
-Process stdout and stderr continue to be written to `CHC_LOG_PATH`.
+Process stdout and stderr continue to be written to `CHR_LOG_PATH`.
 
 ## Failure Handling
 
@@ -370,7 +370,7 @@ The repository supports:
 Execution reporting is documented in:
 
 - `docs/reference/execution-reports.md` for the execution report format;
-- `docs/reference/reports.md` for `chc report list` and `chc report show`;
+- `docs/reference/reports.md` for `chr report list` and `chr report show`;
 - `docs/how-to/find-execution-and-loop-evidence.md` for practical evidence
   lookup.
 

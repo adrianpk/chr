@@ -35,7 +35,7 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 		t.Fatalf("WriteJSON returned error: %v", err)
 	}
 
-	if path != filepath.Join(projectDir, ".chc", "user", "reports", "gates", "dev-main-20260601T123045Z.json") {
+	if path != filepath.Join(projectDir, ".chr", "user", "reports", "gates", "dev-main-20260601T123045Z.json") {
 		t.Fatalf("path = %q, want timestamped JSON report path", path)
 	}
 
@@ -72,7 +72,7 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 		t.Fatalf("WriteMarkdown returned error: %v", err)
 	}
 
-	if path != filepath.Join(projectDir, ".chc", "user", "reports", "gates", "dev-main-20260601T123045Z.md") {
+	if path != filepath.Join(projectDir, ".chr", "user", "reports", "gates", "dev-main-20260601T123045Z.md") {
 		t.Fatalf("path = %q, want timestamped Markdown report path", path)
 	}
 
@@ -86,7 +86,7 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 		"- status: failed",
 		"- base: main base-sha",
 		"## Agent-Managed Work",
-		"ticket=CHC-1 execution=exec-1",
+		"ticket=CHR-1 execution=exec-1",
 		"## Manual or External Changes",
 		"- M README.md",
 		"- command: go test ./...",
@@ -118,9 +118,9 @@ func gateReportMarkdownFixture(createdAt time.Time, artifacts GateReportArtifact
 			{
 				Path:        "internal/core/gate.go",
 				Status:      "M",
-				TicketKey:   "CHC-1",
+				TicketKey:   "CHR-1",
 				ExecutionID: "exec-1",
-				ReportPath:  ".chc/user/runtime/runs/CHC-1/exec-1/execution-report.md",
+				ReportPath:  ".chr/user/runtime/runs/CHR-1/exec-1/execution-report.md",
 			},
 		},
 		ManualOrExternalChanges: []GateManualOrExternalChange{
@@ -131,7 +131,7 @@ func gateReportMarkdownFixture(createdAt time.Time, artifacts GateReportArtifact
 
 func TestGateReportWriterRejectsDirectoryTarget(t *testing.T) {
 	projectDir := t.TempDir()
-	path := filepath.Join(projectDir, ".chc", "user", "reports", "gates", "dev-main.json")
+	path := filepath.Join(projectDir, ".chr", "user", "reports", "gates", "dev-main.json")
 
 	err := os.MkdirAll(path, 0o755)
 	if err != nil {

@@ -1,14 +1,14 @@
 # Observe Agent Work
 
 Use this guide when an agent ticket run or ready-ticket queue is active and you
-want to see what ChrysoCoord is doing.
+want to see what Chryso is doing.
 
 ## Open Dash
 
 From the managed project:
 
 ```sh
-chc
+chr
 ```
 
 Open Dash with `F8`.
@@ -54,13 +54,13 @@ When Dash says manual action is required, inspect the same readiness state from
 the CLI:
 
 ```sh
-chc work doctor
+chr work doctor
 ```
 
 Apply safe repair from the CLI when available:
 
 ```sh
-chc work doctor --fix-safe
+chr work doctor --fix-safe
 ```
 
 ## Watch The Event Timeline
@@ -86,22 +86,22 @@ has already moved into report/log evidence.
 List execution and loop reports:
 
 ```sh
-chc report list --kind execution
-chc report list --kind loop
+chr report list --kind execution
+chr report list --kind loop
 ```
 
 Filter by ticket or status:
 
 ```sh
-chc report list --ticket CHC-1
-chc report list --kind execution --status succeeded
+chr report list --ticket CHR-1
+chr report list --kind execution --status succeeded
 ```
 
 Show a report:
 
 ```sh
-chc report show --execution <execution-id>
-chc report show --loop <loop-id>
+chr report show --execution <execution-id>
+chr report show --loop <loop-id>
 ```
 
 Reports are the best first stop after work finishes. They summarize status,
@@ -112,7 +112,7 @@ runtime artifacts, validation, changed files, and stop reasons.
 Locate logs and event stream paths for one execution:
 
 ```sh
-chc work logs <execution-id>
+chr work logs <execution-id>
 ```
 
 Then inspect the printed paths directly. The runtime log is the closest
@@ -122,18 +122,18 @@ log records the configured validation command output.
 Summarize an event stream:
 
 ```sh
-chc work events .chc/user/runtime/runs/CHC-1/<execution-id>/events.jsonl
+chr work events .chr/user/runtime/runs/CHR-1/<execution-id>/events.jsonl
 ```
 
 In `worktree` execution mode, runtime artifacts live under the ticket
-worktree's `.chc/user/runtime/runs/...` directory. Prefer the paths printed by
-`chc work logs <execution-id>` when following an active run from outside that
+worktree's `.chr/user/runtime/runs/...` directory. Prefer the paths printed by
+`chr work logs <execution-id>` when following an active run from outside that
 worktree.
 
 For run-all, summarize the loop stream when one is present:
 
 ```sh
-chc work events .chc/user/runtime/runs/<loop-id>/events.jsonl
+chr work events .chr/user/runtime/runs/<loop-id>/events.jsonl
 ```
 
 The event summary is useful when a stream is partially corrupted because it
@@ -144,19 +144,19 @@ counts malformed lines and still reports the latest readable state.
 Preview ready work:
 
 ```sh
-chc work run-all --dry-run --order priority_severity
+chr work run-all --dry-run --order priority_severity
 ```
 
 Run the visible ready queue:
 
 ```sh
-chc work run-all --order priority_severity
+chr work run-all --order priority_severity
 ```
 
 Run one ticket:
 
 ```sh
-chc work ticket CHC-1
+chr work ticket CHR-1
 ```
 
 Use Dash for live status while the command is active, and use reports, logs, and

@@ -5,14 +5,14 @@ Status: initial
 Sources:
 
 - `/home/adrian/Downloads/context_composition_and_document_transitions.md`
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 
 ## Purpose
 
 Define how project knowledge moves from rough conversation artifacts into
 execution-ready work.
 
-Most durable knowledge in `chc` is Markdown. The database supports indexing,
+Most durable knowledge in `chr` is Markdown. The database supports indexing,
 querying, and optimization, but Markdown remains the human-readable and
 versionable source of truth.
 
@@ -168,4 +168,4 @@ or an explicit supersession note.
 - Should insights be stored inside source documents or as separate derived
   artifacts?
 - When should ad hoc tickets generate specs retroactively?
-- Should transition commands live in `chc`, in agent playbooks, or in both?
+- Should transition commands live in `chr`, in agent playbooks, or in both?

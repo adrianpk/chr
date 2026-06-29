@@ -17,10 +17,10 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 		Status:   "open",
 	}
 	path := writeTrustedAutoMergeTicket(t, Ticket{
-		Key:        "CHC-1",
+		Key:        "CHR-1",
 		Title:      "Trusted ticket",
 		Status:     TicketResultStatusReviewing,
-		Branch:     "feat/chc-1",
+		Branch:     "feat/chr-1",
 		ReviewRefs: []TicketReviewRef{ref},
 		CreatedAt:  testTrustedAutoMergeTime(),
 		UpdatedAt:  testTrustedAutoMergeTime(),
@@ -28,10 +28,10 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 
 	result, err := ApplyTrustedAutoMergeReview(ApplyTrustedAutoMergeReviewOptions{
 		Ticket: IndexedTicket{
-			Key:        "CHC-1",
+			Key:        "CHR-1",
 			Path:       path,
 			Status:     TicketResultStatusReviewing,
-			Branch:     "feat/chc-1",
+			Branch:     "feat/chr-1",
 			ReviewRefs: []TicketReviewRef{ref},
 		},
 		ReviewedAt: testTrustedAutoMergeTime(),
@@ -59,20 +59,20 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 
 func TestApplyTrustedAutoMergeReviewRequiresPullRequestRef(t *testing.T) {
 	path := writeTrustedAutoMergeTicket(t, Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Trusted ticket",
 		Status:    TicketResultStatusReviewing,
-		Branch:    "feat/chc-1",
+		Branch:    "feat/chr-1",
 		CreatedAt: testTrustedAutoMergeTime(),
 		UpdatedAt: testTrustedAutoMergeTime(),
 	})
 
 	_, err := ApplyTrustedAutoMergeReview(ApplyTrustedAutoMergeReviewOptions{
 		Ticket: IndexedTicket{
-			Key:    "CHC-1",
+			Key:    "CHR-1",
 			Path:   path,
 			Status: TicketResultStatusReviewing,
-			Branch: "feat/chc-1",
+			Branch: "feat/chr-1",
 		},
 		ReviewedAt: testTrustedAutoMergeTime(),
 	})
@@ -89,7 +89,7 @@ func writeTrustedAutoMergeTicket(t *testing.T, ticket Ticket) string {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
 
-	path := filepath.Join(t.TempDir(), "CHC-1.md")
+	path := filepath.Join(t.TempDir(), "CHR-1.md")
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}

@@ -16,8 +16,8 @@ This slice turns the core project registry repository into usable one-shot comma
 
 This slice covers:
 
-- `chc project add <dir>`,
-- `chc project list`,
+- `chr project add <dir>`,
+- `chr project list`,
 - user environment construction from process paths,
 - development-mode path redirection for CLI tests and local development,
 - stable local project id generation,
@@ -28,7 +28,7 @@ This slice covers:
 
 ### T10.1 CLI User Environment Wiring
 
-Add CLI helpers for constructing `chc.UserEnvironment`.
+Add CLI helpers for constructing `chr.UserEnvironment`.
 
 Expected behavior:
 
@@ -38,12 +38,12 @@ Expected behavior:
 
 ### T10.2 Project Add Command
 
-Add `chc project add <dir>`.
+Add `chr project add <dir>`.
 
 Expected behavior:
 
 - resolve the project path to an absolute path,
-- require an existing `.chc/` directory,
+- require an existing `.chr/` directory,
 - default project name from the project directory basename,
 - allow overriding the name with `--name`,
 - generate a stable local id from the absolute path,
@@ -51,7 +51,7 @@ Expected behavior:
 
 ### T10.3 Project List Command
 
-Add `chc project list`.
+Add `chr project list`.
 
 Expected behavior:
 

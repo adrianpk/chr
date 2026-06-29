@@ -15,14 +15,14 @@ func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
 		ProjectDir: dir,
-		TicketKey:  "CHC-1 Add CLI",
-		Branch:     "feat/chc-1-add-cli",
+		TicketKey:  "CHR-1 Add CLI",
+		Branch:     "feat/chr-1-add-cli",
 	})
 	if err != nil {
 		t.Fatalf("NewWorktreePlan returned error: %v", err)
 	}
 
-	wantRoot := filepath.Join(dir, ".chc", "user", "runtime", "worktrees")
+	wantRoot := filepath.Join(dir, ".chr", "user", "runtime", "worktrees")
 
 	if plan.BaseRef != "origin/dev" {
 		t.Fatalf("BaseRef = %q, want origin/dev", plan.BaseRef)
@@ -32,7 +32,7 @@ func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
 		t.Fatalf("WorktreeRoot = %q, want %q", plan.WorktreeRoot, wantRoot)
 	}
 
-	if plan.WorktreePath != filepath.Join(wantRoot, "chc-1-add-cli") {
+	if plan.WorktreePath != filepath.Join(wantRoot, "chr-1-add-cli") {
 		t.Fatalf("WorktreePath = %q, want deterministic ticket path", plan.WorktreePath)
 	}
 }
@@ -43,10 +43,10 @@ func TestWorktreePathComponentSanitizesTicketKeys(t *testing.T) {
 		value string
 		want  string
 	}{
-		{name: "simple", value: "CHC-1", want: "chc-1"},
-		{name: "spaces", value: "CHC-1 Add CLI", want: "chc-1-add-cli"},
-		{name: "slashes", value: "../CHC/1", want: "chc-1"},
-		{name: "symbols", value: "!!!CHC@@@1!!!", want: "chc-1"},
+		{name: "simple", value: "CHR-1", want: "chr-1"},
+		{name: "spaces", value: "CHR-1 Add CLI", want: "chr-1-add-cli"},
+		{name: "slashes", value: "../CHR/1", want: "chr-1"},
+		{name: "symbols", value: "!!!CHR@@@1!!!", want: "chr-1"},
 	}
 
 	for _, test := range tests {
@@ -63,9 +63,9 @@ func TestParseWorktreeGitListReadsPorcelainEntries(t *testing.T) {
 HEAD abc123
 branch refs/heads/dev
 
-worktree /repo/.chc/user/runtime/worktrees/chc-1
+worktree /repo/.chr/user/runtime/worktrees/chr-1
 HEAD def456
-branch refs/heads/feat/chc-1
+branch refs/heads/feat/chr-1
 
 worktree /tmp/orphan
 HEAD 000000
@@ -77,7 +77,7 @@ prunable gitdir file points to non-existent location
 		t.Fatalf("len(entries) = %d, want 3", len(entries))
 	}
 
-	if entries[1].Path != "/repo/.chc/user/runtime/worktrees/chc-1" || entries[1].Branch != "feat/chc-1" {
+	if entries[1].Path != "/repo/.chr/user/runtime/worktrees/chr-1" || entries[1].Branch != "feat/chr-1" {
 		t.Fatalf("entry[1] = %#v, want worktree branch entry", entries[1])
 	}
 
@@ -93,8 +93,8 @@ func TestWorktreeServicePrepareCreatesBranchAndAddsMissingWorktree(t *testing.T)
 
 	result, err := service.Prepare(context.Background(), WorktreePlanOptions{
 		ProjectDir: dir,
-		TicketKey:  "CHC-1",
-		Branch:     "feat/chc-1",
+		TicketKey:  "CHR-1",
+		Branch:     "feat/chr-1",
 	})
 	if err != nil {
 		t.Fatalf("Prepare returned error: %v", err)
@@ -108,12 +108,12 @@ func TestWorktreeServicePrepareCreatesBranchAndAddsMissingWorktree(t *testing.T)
 		t.Fatalf("result = %#v, want created branch and added worktree", result)
 	}
 
-	if got := git.createdBranches["feat/chc-1"]; got != "origin/dev" {
+	if got := git.createdBranches["feat/chr-1"]; got != "origin/dev" {
 		t.Fatalf("created branch base = %q, want origin/dev", got)
 	}
 
-	if len(git.addedWorktrees) != 1 || git.addedWorktrees[0].branch != "feat/chc-1" {
-		t.Fatalf("added worktrees = %#v, want feat/chc-1 add", git.addedWorktrees)
+	if len(git.addedWorktrees) != 1 || git.addedWorktrees[0].branch != "feat/chr-1" {
+		t.Fatalf("added worktrees = %#v, want feat/chr-1 add", git.addedWorktrees)
 	}
 }
 
@@ -160,7 +160,7 @@ func TestWorktreeServicePrepareBlocksExistingBranchWithoutBase(t *testing.T) {
 		t.Fatal("Prepare returned nil error")
 	}
 
-	if got := err.Error(); got != "worktree branch feat/chc-1 does not contain base origin/dev" {
+	if got := err.Error(); got != "worktree branch feat/chr-1 does not contain base origin/dev" {
 		t.Fatalf("error = %q, want branch base blocker", got)
 	}
 }
@@ -420,8 +420,8 @@ func testWorktreePlan(t *testing.T, dir string) WorktreePlan {
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
 		ProjectDir: dir,
-		TicketKey:  "CHC-1",
-		Branch:     "feat/chc-1",
+		TicketKey:  "CHR-1",
+		Branch:     "feat/chr-1",
 	})
 	if err != nil {
 		t.Fatalf("NewWorktreePlan returned error: %v", err)

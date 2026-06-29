@@ -18,8 +18,8 @@ enabled state, and active project selection without mutating registry state.
 
 - Added project registry diagnostic model.
 - Added active project detection.
-- Added path existence and `.chc/` workspace checks.
-- Added `chc maintenance registry status`.
+- Added path existence and `.chr/` workspace checks.
+- Added `chr maintenance registry status`.
 - Added stable line-oriented output for project diagnostics.
 - Documented registry diagnostic behavior.
 
@@ -40,22 +40,22 @@ The command reports these statuses:
 - Added `ProjectRegistryDiagnostic`.
 - Added `ProjectRegistryDiagnosticStatus`.
 - Added `ProjectRegistryDiagnosticsService`.
-- Added `chc maintenance registry status`.
+- Added `chr maintenance registry status`.
 - Updated `docs/reference/maintenance.md`.
 
 ## Files of Interest
 
-- `internal/chc/project_registry_diagnostics.go`
-- `internal/chc/project_registry_diagnostics_test.go`
-- `internal/chcapp/maintenance.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/project_registry_diagnostics.go`
+- `internal/chr/project_registry_diagnostics_test.go`
+- `internal/chrapp/maintenance.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/maintenance.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'TestProjectRegistryDiagnostics'
-go test ./internal/chcapp -run 'TestMaintenanceRegistryStatus|TestMaintenanceDBStatus'
+go test ./internal/chr -run 'TestProjectRegistryDiagnostics'
+go test ./internal/chrapp -run 'TestMaintenanceRegistryStatus|TestMaintenanceDBStatus'
 make verify
 ```
 

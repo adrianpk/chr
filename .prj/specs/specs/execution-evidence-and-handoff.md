@@ -5,7 +5,7 @@ Status: initial
 Sources:
 
 - `/home/adrian/Downloads/context_composition_and_document_transitions.md`
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 - `docs/reference/ticket-result-application.md`
 
 ## Purpose
@@ -33,7 +33,7 @@ Ticket execution may produce:
 
 ## Result Contract
 
-The worker result should be machine-readable enough for `chc` to apply ticket
+The worker result should be machine-readable enough for `chr` to apply ticket
 updates.
 
 It should capture:
@@ -61,7 +61,7 @@ Examples:
 ## Machine-Readable Comments
 
 Ticket comments may eventually carry structured status blocks that humans can
-read and `chc` can parse.
+read and `chr` can parse.
 
 Useful machine-readable comment data includes:
 

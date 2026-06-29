@@ -11,10 +11,10 @@ loop commands directly.
 ## Delivered
 
 - Added the top-level `work` command.
-- Added `chc work ticket <ticket-key>` for selected-ticket agent work.
-- Added `chc work run-all` for all ready tickets using the shared agent-work
+- Added `chr work ticket <ticket-key>` for selected-ticket agent work.
+- Added `chr work run-all` for all ready tickets using the shared agent-work
   selection contract.
-- Added `chc work run-all --dry-run` to preview the selected queue without
+- Added `chr work run-all --dry-run` to preview the selected queue without
   creating execution or loop records.
 - Added CLI tests for selected-ticket execution, run-all execution, dry-run
   preview, and no eligible tickets.
@@ -22,6 +22,6 @@ loop commands directly.
 
 ## Validation
 
-- `go test ./internal/chcapp`
+- `go test ./internal/chrapp`
 - `make verify`
 - `git diff --check`

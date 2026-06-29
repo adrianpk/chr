@@ -16,7 +16,7 @@ request after objective preflight checks.
 
 - Added `RunTicketMergeCommand` as the service boundary for reviewed ticket
   merge execution.
-- Added `chc ticket merge <ticket-key>` with `--dry-run`, `--strategy`, and
+- Added `chr ticket merge <ticket-key>` with `--dry-run`, `--strategy`, and
   `--base` options.
 - Added Forgejo-compatible merge execution through `tea api`.
 - Added GitHub merge execution through `gh pr merge`.
@@ -50,17 +50,17 @@ value. Successful merges clear blocker metadata and set `merged_at`.
 
 ## Files of Interest
 
-- `internal/chc/ticket_merge_command.go`
-- `internal/chc/ticket_merge_command_test.go`
-- `internal/chc/review_remote_adapter.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/ticket_merge_command.go`
+- `internal/chr/ticket_merge_command_test.go`
+- `internal/chr/review_remote_adapter.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/cli_test.go`
 
 ## Validation
 
 - `scripts/check-go-func-signatures.sh`
-- `golangci-lint run --timeout=5m ./internal/chc/... ./internal/chcapp/...`
-- `go test ./internal/chc ./internal/chcapp`
+- `golangci-lint run --timeout=5m ./internal/chr/... ./internal/chrapp/...`
+- `go test ./internal/chr ./internal/chrapp`
 - `git diff --check`
 - `make verify`
 

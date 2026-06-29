@@ -54,13 +54,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/assisted_authoring.go`
-- `internal/chc/assisted_authoring_test.go`
+- `internal/chr/assisted_authoring.go`
+- `internal/chr/assisted_authoring_test.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestValidateAssistedAuthoring'`: pass
+- `go test ./internal/chr -run 'TestValidateAssistedAuthoring'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

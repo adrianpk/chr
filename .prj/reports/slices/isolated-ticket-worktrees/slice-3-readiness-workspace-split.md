@@ -25,7 +25,7 @@ user changes.
   ref, normally `origin/dev`.
 - Dirty, mismatched, branch-in-use, and orphaned ticket worktrees block
   readiness when a ticket context is available.
-- `chc work doctor` and Dash expose workspace mode, user checkout state, ticket
+- `chr work doctor` and Dash expose workspace mode, user checkout state, ticket
   worktree state, base ref, and base SHA.
 - Safe repair can fetch the configured remote, create a missing worktree root,
   and remove stale metadata for missing ticket worktrees without deleting
@@ -52,7 +52,7 @@ user changes.
   `stale_worktree_metadata`.
 - Added repair codes `create_worktree_root` and `prune_worktree_metadata`.
 - `WorkSelectionPreflightOptions` now accepts `Workspace`.
-- `chc work doctor` accepts `--ticket` and `--ticket-branch`.
+- `chr work doctor` accepts `--ticket` and `--ticket-branch`.
 
 ## Files of Interest
 

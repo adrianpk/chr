@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 const (
@@ -224,8 +224,8 @@ func (p openAIDumpCurationProvider) openAIRequestBody(
 		},
 		Store: false,
 		Metadata: map[string]string{
-			"chc_request_id": requestID,
-			"chc_action":     "dump_curation",
+			"chr_request_id": requestID,
+			"chr_action":     "dump_curation",
 		},
 	}
 
@@ -482,7 +482,7 @@ func (p openAIDumpCurationProvider) recordResponse(
 
 func dumpCurationInstructions() string {
 	return strings.TrimSpace(`
-You curate one ChrysoCoord dump capture.
+You curate one Chryso dump capture.
 Use only the structured request payload and context sections as the source of truth.
 Preserve the user's intent, meaningful wording, decisions, tensions, uncertainty, and open questions.
 Correct spelling, punctuation, grammar, paragraph flow, and obvious transcription noise.
@@ -536,7 +536,7 @@ func (p openAIDumpCurationProvider) openAIAPIKey() string {
 func (p openAIDumpCurationProvider) openAIModel() string {
 	model := strings.TrimSpace(p.Model)
 	if model == "" {
-		model = strings.TrimSpace(os.Getenv("CHC_OPENAI_MODEL"))
+		model = strings.TrimSpace(os.Getenv("CHR_OPENAI_MODEL"))
 	}
 
 	if model == "" {
@@ -549,7 +549,7 @@ func (p openAIDumpCurationProvider) openAIModel() string {
 func (p openAIDumpCurationProvider) openAIBaseURL() string {
 	baseURL := strings.TrimSpace(p.BaseURL)
 	if baseURL == "" {
-		baseURL = strings.TrimSpace(os.Getenv("CHC_OPENAI_BASE_URL"))
+		baseURL = strings.TrimSpace(os.Getenv("CHR_OPENAI_BASE_URL"))
 	}
 
 	if baseURL == "" {

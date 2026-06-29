@@ -22,8 +22,8 @@ rejection reason.
 The CLI adds:
 
 ```sh
-chc notify telegram poll --fixture updates.json --dry-run
-chc notify telegram poll --fixture updates.json
+chr notify telegram poll --fixture updates.json --dry-run
+chr notify telegram poll --fixture updates.json
 ```
 
 Dry-run prints parsed records without persistence. Non-dry-run persists accepted
@@ -40,17 +40,17 @@ and rejected records in user-level SQLite state.
 
 ## Files of Interest
 
-- `internal/chc/telegram_remote_command.go`
-- `internal/chc/remote_command_record.go`
-- `internal/chc/remote_command_record_repository.go`
-- `internal/chcapp/notify.go`
-- `cmd/chc/assets/migration/sqlite/20260521000007-create_remote_command_records.sql`
+- `internal/chr/telegram_remote_command.go`
+- `internal/chr/remote_command_record.go`
+- `internal/chr/remote_command_record_repository.go`
+- `internal/chrapp/notify.go`
+- `cmd/chr/assets/migration/sqlite/20260521000007-create_remote_command_records.sql`
 - `docs/reference/remote-commands.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'Test.*(RemoteCommand|Telegram|Migration)'`: pass
-- `go test ./internal/chcapp -run 'TestNotifyTelegramPoll'`: pass
+- `go test ./internal/chr -run 'Test.*(RemoteCommand|Telegram|Migration)'`: pass
+- `go test ./internal/chrapp -run 'TestNotifyTelegramPoll'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

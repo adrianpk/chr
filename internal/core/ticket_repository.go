@@ -14,7 +14,7 @@ import (
 )
 
 // DefaultTicketKeyPrefix defines a package boundary constant.
-const DefaultTicketKeyPrefix = "CHC"
+const DefaultTicketKeyPrefix = "CHR"
 
 // TicketRepository defines a package boundary interface.
 type TicketRepository interface {

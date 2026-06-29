@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // PlanView is the TUI-facing projection of a generated plan document.
@@ -192,7 +192,7 @@ func (s service) generatePlanWithConfiguredBackend(
 	scope core.QuizScope,
 	state core.QuizRuntimeState,
 ) (core.GeneratedPlan, []string, []string, error) {
-	if codexGenerationBackend("CHC_PLAN_GENERATION_BACKEND") {
+	if codexGenerationBackend("CHR_PLAN_GENERATION_BACKEND") {
 		return s.generateSinglePassPlan(ctx, scope, state)
 	}
 

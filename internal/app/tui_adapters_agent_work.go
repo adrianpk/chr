@@ -1,7 +1,7 @@
 package app
 
 import (
-	"forge.adrianpk.com/chc/internal/tui"
+	"forge.adrianpk.com/chr/internal/tui"
 )
 
 type tuiAgentWorkRefreshExecutor struct {

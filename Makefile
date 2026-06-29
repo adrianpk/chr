@@ -1,12 +1,12 @@
 GO := go
 DEV_ROOT ?= _workspace
-CHC_DEV_HOME := $(DEV_ROOT)/chc
-CHC_DEV_CONFIG := $(DEV_ROOT)/config/chc
+CHR_DEV_HOME := $(DEV_ROOT)/chr
+CHR_DEV_CONFIG := $(DEV_ROOT)/config/chr
 GO_BUILD_CACHE := $(CURDIR)/$(DEV_ROOT)/go-build-cache
 GOLANGCI_LINT_CACHE := $(CURDIR)/$(DEV_ROOT)/golangci-lint-cache
 BIN_DIR := bin
-BIN := $(BIN_DIR)/chc
-COVERAGE_OUT ?= /tmp/chc-coverage.out
+BIN := $(BIN_DIR)/chr
+COVERAGE_OUT ?= /tmp/chr-coverage.out
 RUN_ARGS ?= --help
 QA_CASE ?= blog
 QA_REF ?= 001
@@ -46,28 +46,28 @@ check: fmt check-go-style test
 verify: lint-strict test
 
 dev-dirs:
-	@mkdir -p $(CHC_DEV_HOME)
-	@mkdir -p $(CHC_DEV_CONFIG)
+	@mkdir -p $(CHR_DEV_HOME)
+	@mkdir -p $(CHR_DEV_CONFIG)
 
 run: dev-dirs
-	@$(GO) run ./cmd/chc $(RUN_ARGS)
+	@$(GO) run ./cmd/chr $(RUN_ARGS)
 
 build:
 	@mkdir -p $(BIN_DIR)
-	@$(GO) build -o $(BIN) ./cmd/chc
+	@$(GO) build -o $(BIN) ./cmd/chr
 
 build-run: build
 	@$(BIN) $(RUN_ARGS)
 
 install:
-	@$(GO) install ./cmd/chc
+	@$(GO) install ./cmd/chr
 
 clean-dev:
 	@rm -rf $(DEV_ROOT)
 
 gate-dev-main:
 	@mkdir -p $(GO_BUILD_CACHE) $(GOLANGCI_LINT_CACHE)
-	@GOCACHE=$(GO_BUILD_CACHE) GOLANGCI_LINT_CACHE=$(GOLANGCI_LINT_CACHE) $(GO) run ./cmd/chc gate dev-main --base $(GATE_BASE) --head $(GATE_HEAD)
+	@GOCACHE=$(GO_BUILD_CACHE) GOLANGCI_LINT_CACHE=$(GOLANGCI_LINT_CACHE) $(GO) run ./cmd/chr gate dev-main --base $(GATE_BASE) --head $(GATE_HEAD)
 
 qa-reset:
 	@scripts/qa/reset.sh $(QA_CASE) $(QA_REF)

@@ -13,7 +13,7 @@ Expose result application through a user-facing command.
 
 ## Delivered Behavior
 
-The CLI now exposes `chc ticket apply-result <execution-id>`.
+The CLI now exposes `chr ticket apply-result <execution-id>`.
 
 The command:
 
@@ -36,7 +36,7 @@ ticket Markdown, SQLite index state, or report artifacts.
 
 New CLI command:
 
-- `chc ticket apply-result <execution-id>`
+- `chr ticket apply-result <execution-id>`
 
 New flag:
 
@@ -44,13 +44,13 @@ New flag:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./cmd/chc ./internal/chc`: pass
+- `go test ./cmd/chr ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

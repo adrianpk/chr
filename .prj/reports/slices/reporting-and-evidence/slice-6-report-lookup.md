@@ -18,14 +18,14 @@ opening the report path.
 
 - Added report lookup by report id, ticket key, execution id, loop id, kind, or
   status.
-- Added `chc report show`.
+- Added `chr report show`.
 - Added Markdown body output for selected reports.
 - Added metadata output with `--metadata`.
 - Added explicit errors for missing and ambiguous lookups.
 
 ## Implementation Notes
 
-Report lookup reuses the report discovery boundary from `chc report list`.
+Report lookup reuses the report discovery boundary from `chr report list`.
 Lookup reads the selected Markdown report artifact and prints it without
 rewriting or re-rendering the report.
 
@@ -38,16 +38,16 @@ one report.
 - Added `ReportLookupRequest`.
 - Added `ReportLookupResult`.
 - Added `ReportLookupService`.
-- Added `chc report show`.
-- Added `chc report show --metadata`.
+- Added `chr report show`.
+- Added `chr report show --metadata`.
 - Updated `docs/reference/reports.md`.
 
 ## Files of Interest
 
-- `internal/chc/report_lookup.go`
-- `internal/chc/report_lookup_test.go`
-- `internal/chcapp/report.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/report_lookup.go`
+- `internal/chr/report_lookup_test.go`
+- `internal/chrapp/report.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/reports.md`
 
 ## Validation

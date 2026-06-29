@@ -13,13 +13,13 @@ older sessions, but users may edit generated Markdown directly.
 Create a session:
 
 ```sh
-chc author session new --target spec --topic "Billing sync"
+chr author session new --target spec --topic "Billing sync"
 ```
 
 List sessions:
 
 ```sh
-chc author session list
+chr author session list
 ```
 
 The list output includes headers:
@@ -32,7 +32,7 @@ author-20260522-073505   draft   spec    2026-05-22T07:35:05Z  Billing sync
 Show a session:
 
 ```sh
-chc author session show <session-handle>
+chr author session show <session-handle>
 ```
 
 The session handle may be the exact session id, the exact topic, or a unique
@@ -41,20 +41,20 @@ topic slug such as `billing-sync`. Existing `auth-...` session ids remain valid.
 Create a context-aware quiz:
 
 ```sh
-chc author quiz new --target spec --topic "Billing sync"
+chr author quiz new --target spec --topic "Billing sync"
 ```
 
 Successful creation prints the quiz path relative to the managed project:
 
 ```text
-quiz: created .chc/user/quizzes/author-20260522-073505-billing-sync.md
+quiz: created .chr/user/quizzes/author-20260522-073505-billing-sync.md
 session: author-20260522-073505
 ```
 
 Preview a context-aware quiz without writing files:
 
 ```sh
-chc author quiz new --target spec --topic "Billing sync" --dry-run
+chr author quiz new --target spec --topic "Billing sync" --dry-run
 ```
 
 All commands accept `--dir` to target another managed project.
@@ -62,13 +62,13 @@ All commands accept `--dir` to target another managed project.
 Start an assisted session:
 
 ```sh
-chc author assisted start --target spec --topic "Billing sync"
+chr author assisted start --target spec --topic "Billing sync"
 ```
 
 Ask the next assisted question with the current fake adapter path:
 
 ```sh
-chc author assisted resume \
+chr author assisted resume \
   --session <session-handle> \
   --fake-question "What should the spec include?"
 ```
@@ -76,7 +76,7 @@ chc author assisted resume \
 Submit one answer:
 
 ```sh
-chc author assisted answer \
+chr author assisted answer \
   --session <session-handle> \
   --turn turn-001 \
   --turn-index 1 \
@@ -88,13 +88,13 @@ chc author assisted answer \
 Show assisted transcript status:
 
 ```sh
-chc author assisted status --session <session-handle>
+chr author assisted status --session <session-handle>
 ```
 
 Finalize into a curated summary and synthesized artifact:
 
 ```sh
-chc author assisted finalize \
+chr author assisted finalize \
   --session <session-handle> \
   --fake-summary "Billing sync needs retry behavior and idempotent writes." \
   --target-kind spec \
@@ -106,7 +106,7 @@ chc author assisted finalize \
 Sessions are stored under:
 
 ```text
-.chc/authoring/sessions/<session-id>/
+.chr/authoring/sessions/<session-id>/
   session.md
   transcript.md
   artifacts.md
@@ -128,17 +128,17 @@ authoring step.
 
 ## Artifact Paths
 
-Generated authoring artifacts use project-local `.chc/` paths:
+Generated authoring artifacts use project-local `.chr/` paths:
 
 ```text
-.chc/user/dumps/
-.chc/user/quizzes/
-.chc/user/specs/
-.chc/user/plans/
-.chc/user/slice-sets/
-.chc/user/slices/
-.chc/user/trackers/
-.chc/user/tickets/
+.chr/user/dumps/
+.chr/user/quizzes/
+.chr/user/specs/
+.chr/user/plans/
+.chr/user/slice-sets/
+.chr/user/slices/
+.chr/user/trackers/
+.chr/user/tickets/
 ```
 
 The current generated filename shape is:
@@ -194,7 +194,7 @@ Context-aware quizzes are generated from a structured request that includes the
 authoring session, project context sections, the target artifact, the topic,
 and an output contract.
 
-The model response must be structured and validated before ChrysoCoord writes
+The model response must be structured and validated before Chryso writes
 the Markdown quiz artifact. Generic template questions are not used as a
 fallback.
 
@@ -204,7 +204,7 @@ The request sent to the quiz provider includes:
 - strategy: `deep`;
 - session id, target, topic, and requested question count;
 - context sections for the project, authoring session, agent protocol,
-  `.chc/` artifacts, docs, project tree, and Go inventory;
+  `.chr/` artifacts, docs, project tree, and Go inventory;
 - an output contract for question objects.
 
 The response must contain a `questions` array. Each question must include:
@@ -262,7 +262,7 @@ Assisted context includes:
 - default authoring analyst identity;
 - project and session metadata;
 - applicable `AGENTS.md` files;
-- selected `.chc/` protocol files;
+- selected `.chr/` protocol files;
 - selected session documents;
 - transcript summary and unanswered gaps;
 - source inventory.
@@ -275,11 +275,11 @@ captured in Markdown files or transcript events.
 Assisted sessions write these files:
 
 ```text
-.chc/authoring/sessions/<session-id>/transcript.md
-.chc/authoring/sessions/<session-id>/model/<request-id>/request.md
-.chc/authoring/sessions/<session-id>/model/<request-id>/response.md
-.chc/authoring/sessions/<session-id>/curated-summary.md
-.chc/<target-kind>/<session-id>-<target-name>.md
+.chr/authoring/sessions/<session-id>/transcript.md
+.chr/authoring/sessions/<session-id>/model/<request-id>/request.md
+.chr/authoring/sessions/<session-id>/model/<request-id>/response.md
+.chr/authoring/sessions/<session-id>/curated-summary.md
+.chr/<target-kind>/<session-id>-<target-name>.md
 ```
 
 The synthesized artifact is editable Markdown. Existing target artifacts are not

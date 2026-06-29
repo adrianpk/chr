@@ -45,14 +45,14 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 func TestLoadWorkspaceConfigParsesTicketAndRuntimeConfig(t *testing.T) {
 	dir := t.TempDir()
 	writeWorkspaceConfig(t, dir, `version: 1
-workspace_root: .chc
+workspace_root: .chr
 tickets:
   key_prefix: PRJ
 runtime:
   image: custom-agent:latest
-  dockerfile: .chc/user/runtime/custom.Dockerfile
+  dockerfile: .chr/user/runtime/custom.Dockerfile
   workdir: /repo
-  artifact_dir: .chc/user/runtime/custom-runs
+  artifact_dir: .chr/user/runtime/custom-runs
   validation_command: go test ./...
 `)
 
@@ -67,9 +67,9 @@ runtime:
 
 	want := RuntimeConfig{
 		Image:             "custom-agent:latest",
-		DockerfilePath:    ".chc/user/runtime/custom.Dockerfile",
+		DockerfilePath:    ".chr/user/runtime/custom.Dockerfile",
 		Workdir:           "/repo",
-		ArtifactDir:       ".chc/user/runtime/custom-runs",
+		ArtifactDir:       ".chr/user/runtime/custom-runs",
 		ValidationCommand: "go test ./...",
 	}
 	if config.Runtime != want {
@@ -81,7 +81,7 @@ func TestLoadWorkspaceConfigParsesNotificationConfig(t *testing.T) {
 	dir := t.TempDir()
 	writeWorkspaceConfig(t, dir, `notifications:
   telegram_enabled: true
-  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_bot_token_env: CHR_TELEGRAM_BOT_TOKEN
   telegram_chat_id: "123456"
 `)
 
@@ -93,7 +93,7 @@ func TestLoadWorkspaceConfigParsesNotificationConfig(t *testing.T) {
 	want := NotificationConfig{
 		Telegram: TelegramNotificationConfig{
 			Enabled:     true,
-			BotTokenEnv: "CHC_TELEGRAM_BOT_TOKEN",
+			BotTokenEnv: "CHR_TELEGRAM_BOT_TOKEN",
 			ChatID:      "123456",
 		},
 	}
@@ -142,10 +142,10 @@ func TestLoadWorkspaceConfigParsesReviewProviderConfig(t *testing.T) {
 	writeWorkspaceConfig(t, dir, `review:
   forgejo_enabled: true
   forgejo_cli: tea-dev
-  forgejo_token_env: CHC_FORGEJO_TOKEN
+  forgejo_token_env: CHR_FORGEJO_TOKEN
   github_enabled: false
   github_cli: gh-dev
-  github_token_env: CHC_GITHUB_TOKEN
+  github_token_env: CHR_GITHUB_TOKEN
 `)
 
 	config, err := LoadWorkspaceConfig(dir)
@@ -157,12 +157,12 @@ func TestLoadWorkspaceConfigParsesReviewProviderConfig(t *testing.T) {
 		Forgejo: ReviewProviderTargetConfig{
 			Enabled:  true,
 			CLI:      "tea-dev",
-			TokenEnv: "CHC_FORGEJO_TOKEN",
+			TokenEnv: "CHR_FORGEJO_TOKEN",
 		},
 		GitHub: ReviewProviderTargetConfig{
 			Enabled:  false,
 			CLI:      "gh-dev",
-			TokenEnv: "CHC_GITHUB_TOKEN",
+			TokenEnv: "CHR_GITHUB_TOKEN",
 		},
 	}
 	if config.Review.Providers != want {
@@ -181,7 +181,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
   allow_safe_repair: false
   allow_branch_creation: true
   workspace_mode: worktree
-  worktree_root: .chc/user/runtime/custom-worktrees
+  worktree_root: .chr/user/runtime/custom-worktrees
   worktree_base: local_integration_branch
   worktree_cleanup: manual
 `)
@@ -203,7 +203,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 		},
 		Workspace: WorkWorkspaceConfig{
 			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    ".chc/user/runtime/custom-worktrees",
+			WorktreeRoot:    ".chr/user/runtime/custom-worktrees",
 			WorktreeBase:    WorktreeBasePolicyLocalIntegrationBranch,
 			WorktreeCleanup: WorktreeCleanupPolicyManual,
 		},
@@ -294,7 +294,7 @@ func TestLoadWorkspaceConfigParsesWebConfig(t *testing.T) {
   port: 7444
   open_browser: true
   require_token: true
-  token_env: CUSTOM_CHC_WEB_TOKEN
+  token_env: CUSTOM_CHR_WEB_TOKEN
   allowed_origins: "https://example.test,https://ops.example.test"
   refresh_interval_seconds: 5
 `)
@@ -310,7 +310,7 @@ func TestLoadWorkspaceConfigParsesWebConfig(t *testing.T) {
 		Port:                   7444,
 		OpenBrowser:            true,
 		RequireToken:           WebTokenModeTrue,
-		TokenEnv:               "CUSTOM_CHC_WEB_TOKEN",
+		TokenEnv:               "CUSTOM_CHR_WEB_TOKEN",
 		AllowedOrigins:         []string{"https://example.test", "https://ops.example.test"},
 		RefreshIntervalSeconds: 5,
 	}
@@ -657,7 +657,7 @@ func assertValidateWorkConfigError(t *testing.T, config WorkConfig, wantErr stri
 func TestLoadWorkspaceConfigKeepsNotificationsDisabledByDefault(t *testing.T) {
 	dir := t.TempDir()
 	writeWorkspaceConfig(t, dir, `notifications:
-  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_bot_token_env: CHR_TELEGRAM_BOT_TOKEN
   telegram_chat_id: "123456"
 `)
 
@@ -716,7 +716,7 @@ func TestValidateNotificationConfigAcceptsEnabledTelegramConfig(t *testing.T) {
 	config := NotificationConfig{
 		Telegram: TelegramNotificationConfig{
 			Enabled:     true,
-			BotTokenEnv: "CHC_TELEGRAM_BOT_TOKEN",
+			BotTokenEnv: "CHR_TELEGRAM_BOT_TOKEN",
 			ChatID:      "123456",
 		},
 	}
@@ -748,7 +748,7 @@ func TestValidateNotificationConfigRejectsIncompleteTelegramConfig(t *testing.T)
 			config: NotificationConfig{
 				Telegram: TelegramNotificationConfig{
 					Enabled:     true,
-					BotTokenEnv: "CHC_TELEGRAM_BOT_TOKEN",
+					BotTokenEnv: "CHR_TELEGRAM_BOT_TOKEN",
 				},
 			},
 			wantErr: "telegram chat id is required",

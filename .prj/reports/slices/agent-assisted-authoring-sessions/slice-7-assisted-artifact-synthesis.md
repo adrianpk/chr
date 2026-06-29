@@ -47,13 +47,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/assisted_artifact_synthesis.go`
-- `internal/chc/assisted_artifact_synthesis_test.go`
+- `internal/chr/assisted_artifact_synthesis.go`
+- `internal/chr/assisted_artifact_synthesis_test.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestSynthesizeAssistedArtifact|TestRenderAssistedSynthesizedArtifact'`: pass
+- `go test ./internal/chr -run 'TestSynthesizeAssistedArtifact|TestRenderAssistedSynthesizedArtifact'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

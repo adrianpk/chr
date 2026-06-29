@@ -28,8 +28,8 @@ ticket and authoring workflows run through reusable application operations.
 
 ## Implementation Notes
 
-Artifact and ticket operation result types live in `internal/chcapp` and do not
-depend on `internal/chctui`.
+Artifact and ticket operation result types live in `internal/chrapp` and do not
+depend on `internal/chrtui`.
 
 The service still uses existing domain services and repositories for ticket
 creation, comments, status updates, authoring sessions, and ticket index
@@ -51,13 +51,13 @@ operation workflows.
 
 ## Files of Interest
 
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/service_test.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/service_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui` passed on 2026-05-23.
+- `go test ./internal/chrapp ./internal/chrtui` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

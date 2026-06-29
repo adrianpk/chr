@@ -41,15 +41,15 @@ resolve them from persisted loop/execution state.
 
 ## Files of Interest
 
-- `internal/chc/loop_report.go`
-- `internal/chc/loop_report_test.go`
+- `internal/chr/loop_report.go`
+- `internal/chr/loop_report_test.go`
 - `docs/reference/loop-reports.md`
 - `docs/reference/ticket-loop.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'Test(NewLoopReport|RenderLoopReport)'
+go test ./internal/chr -run 'Test(NewLoopReport|RenderLoopReport)'
 make verify
 ```
 

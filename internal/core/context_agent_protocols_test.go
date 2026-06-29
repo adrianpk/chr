@@ -40,15 +40,15 @@ func TestLoadAgentProtocolContextLoadsApplicableAgentsFiles(t *testing.T) {
 	}
 }
 
-func TestLoadAgentProtocolContextLoadsSelectedChcProtocolFiles(t *testing.T) {
+func TestLoadAgentProtocolContextLoadsSelectedChrProtocolFiles(t *testing.T) {
 	dir := t.TempDir()
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Root Protocol\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "user", "manifest.md"), "# Manifest\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "user", "config.yml"), "version: 1\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "user", "agents", "CONVENTIONS.md"), "# Conventions\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"), "FROM golang:1.22\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
-	writeTestFile(t, filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"), "# Ticket\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "user", "manifest.md"), "# Manifest\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "user", "config.yml"), "version: 1\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "user", "agents", "CONVENTIONS.md"), "# Conventions\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"), "FROM golang:1.22\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"), "# Ticket\n")
 
 	ctx, err := LoadAgentProtocolContext(AgentProtocolContextOptions{ProjectDir: dir})
 	if err != nil {
@@ -57,17 +57,17 @@ func TestLoadAgentProtocolContextLoadsSelectedChcProtocolFiles(t *testing.T) {
 
 	rendered := RenderProtocolsContext(ctx)
 	for _, want := range []string{
-		".chc/user/agents/CONVENTIONS.md",
-		".chc/user/config.yml",
-		".chc/user/manifest.md",
-		".chc/user/runtime/agent/Dockerfile",
+		".chr/user/agents/CONVENTIONS.md",
+		".chr/user/config.yml",
+		".chr/user/manifest.md",
+		".chr/user/runtime/agent/Dockerfile",
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("rendered protocols missing %q:\n%s", want, rendered)
 		}
 	}
 
-	for _, unwanted := range []string{"runtime.log", "CHC-1.md"} {
+	for _, unwanted := range []string{"runtime.log", "CHR-1.md"} {
 		if strings.Contains(rendered, unwanted) {
 			t.Fatalf("rendered protocols included %q:\n%s", unwanted, rendered)
 		}

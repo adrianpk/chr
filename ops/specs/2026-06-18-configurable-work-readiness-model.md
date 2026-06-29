@@ -9,9 +9,9 @@ Spec: `ops/specs/2026-06-18-configurable-work-readiness.md`
 ## Purpose
 
 This model defines the project-local work readiness policy and diagnostic
-contracts used before ChrysoCoord starts agent work.
+contracts used before Chryso starts agent work.
 
-The model is configuration-first. It should let projects keep ChrysoCoord's
+The model is configuration-first. It should let projects keep Chryso's
 default `dev` workflow or choose another Git posture without patching code.
 
 ## Workspace Config
@@ -77,7 +77,7 @@ Default work config:
 | `allow_safe_repair` | `true` |
 | `allow_branch_creation` | `false` |
 
-These defaults preserve the current ChrysoCoord workflow while making it
+These defaults preserve the current Chryso workflow while making it
 editable.
 
 ## Config File Shape
@@ -162,7 +162,7 @@ user changes.
 ## Invariants
 
 - Defaults must preserve existing `dev` plus `origin` behavior.
-- ChrysoCoord-owned runtime artifacts must not make work readiness appear dirty
+- Chryso-owned runtime artifacts must not make work readiness appear dirty
   once safe repair or the ignore contract has been applied.
 - A missing remote tracking ref is a diagnostic, not an unclassified Git error.
 - `no_git_enforcement` must skip branch, remote, and worktree checks but must

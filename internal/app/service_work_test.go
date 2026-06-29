@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
@@ -19,22 +19,22 @@ func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
 	installFakeTicketStartHarnessExecutor(t, nil)
 
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkTicket("CHC-1")
+	result, err := operations.StartAgentWorkTicket("CHR-1")
 	if err != nil {
 		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
 	}
 
-	if result.Execution == nil || result.Execution.TicketKey != "CHC-1" {
-		t.Fatalf("Execution = %#v, want CHC-1 execution", result.Execution)
+	if result.Execution == nil || result.Execution.TicketKey != "CHR-1" {
+		t.Fatalf("Execution = %#v, want CHR-1 execution", result.Execution)
 	}
 
-	if !strings.Contains(result.Message, "Execution "+result.Execution.ID+" for ticket CHC-1 finished") {
+	if !strings.Contains(result.Message, "Execution "+result.Execution.ID+" for ticket CHR-1 finished") {
 		t.Fatalf("Message = %q, want execution summary", result.Message)
 	}
 
@@ -46,7 +46,7 @@ func TestServiceStartAgentWorkTicketReusesTicketExecution(t *testing.T) {
 		t.Fatalf("Tickets = %#v, want reviewing ticket after result application", result.Tickets)
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 1 {
 		t.Fatalf("execution records = %d, want 1", len(records))
 	}
@@ -62,19 +62,19 @@ func TestServiceStartAgentWorkTicketInitializesRuntime(t *testing.T) {
 	devRoot := t.TempDir()
 	installFakeTicketStartHarnessExecutor(t, nil)
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	_, err := operations.StartAgentWorkTicket("CHC-1")
+	_, err := operations.StartAgentWorkTicket("CHR-1")
 	if err != nil {
 		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"))
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "runs"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "runs"))
 }
 
 func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
@@ -89,13 +89,13 @@ func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
   workspace_mode: worktree
 `)
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkTicket("CHC-1")
+	result, err := operations.StartAgentWorkTicket("CHR-1")
 	if err != nil {
 		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
 func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared core.WorktreePrepareResult, execution core.ExecutionRecord) {
 	t.Helper()
 
-	if prepared.Plan.Branch != "chc/chc-1-ready-frontend" {
+	if prepared.Plan.Branch != "chr/chr-1-ready-frontend" {
 		t.Fatalf("prepared branch = %q, want derived branch", prepared.Plan.Branch)
 	}
 
@@ -135,13 +135,13 @@ func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prep
 	}
 
 	projectTicket := readFile(t, ticketPath)
-	if strings.Contains(projectTicket, `branch: "chc/chc-1-ready-frontend"`) {
+	if strings.Contains(projectTicket, `branch: "chr/chr-1-ready-frontend"`) {
 		t.Fatalf("project checkout ticket was mutated:\n%s", projectTicket)
 	}
 
 	worktreeTicket := readFile(t, execution.TicketPath)
 	for _, want := range []string{
-		`branch: "chc/chc-1-ready-frontend"`,
+		`branch: "chr/chr-1-ready-frontend"`,
 		`status: "reviewing"`,
 	} {
 		if !strings.Contains(worktreeTicket, want) {
@@ -168,11 +168,11 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 	writeCLIWorkspaceConfig(t, projectDir, `work:
   workspace_mode: worktree
 `)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -190,22 +190,22 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 		t.Fatalf("EligibleCount = %d, want 2", result.EligibleCount)
 	}
 
-	if len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHC-1" {
-		t.Fatalf("SelectedQueue = %#v, want only CHC-1 selected", result.SelectedQueue)
+	if len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHR-1" {
+		t.Fatalf("SelectedQueue = %#v, want only CHR-1 selected", result.SelectedQueue)
 	}
 
 	if len(preparer.results) != 1 {
 		t.Fatalf("prepared worktrees = %d, want only selected ticket", len(preparer.results))
 	}
 
-	if preparer.results[0].Plan.TicketKey != "CHC-1" {
-		t.Fatalf("prepared ticket = %q, want CHC-1", preparer.results[0].Plan.TicketKey)
+	if preparer.results[0].Plan.TicketKey != "CHR-1" {
+		t.Fatalf("prepared ticket = %q, want CHR-1", preparer.results[0].Plan.TicketKey)
 	}
 
 	plan, err := core.NewWorktreePlan(core.WorktreePlanOptions{
 		ProjectDir: projectDir,
-		TicketKey:  "CHC-2",
-		Branch:     "chc/chc-2-ready-backend",
+		TicketKey:  "CHR-2",
+		Branch:     "chr/chr-2-ready-backend",
 	})
 	if err != nil {
 		t.Fatalf("NewWorktreePlan returned error: %v", err)
@@ -225,11 +225,11 @@ func TestServiceStartAgentWorkTicketReusesReviewRepairBranch(t *testing.T) {
 	writeCLIWorkspaceConfig(t, projectDir, `work:
   workspace_mode: worktree
 `)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Repair.md", testReviewRepairTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Repair.md", testReviewRepairTicket())
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkTicket("CHC-1")
+	result, err := operations.StartAgentWorkTicket("CHR-1")
 	if err != nil {
 		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
 	}
@@ -238,11 +238,11 @@ func TestServiceStartAgentWorkTicketReusesReviewRepairBranch(t *testing.T) {
 		t.Fatalf("prepared worktrees = %d, want 1", len(preparer.results))
 	}
 
-	if preparer.results[0].Plan.Branch != "feat/chc-1-review-repair" {
+	if preparer.results[0].Plan.Branch != "feat/chr-1-review-repair" {
 		t.Fatalf("prepared branch = %q, want existing repair branch", preparer.results[0].Plan.Branch)
 	}
 
-	if result.Execution == nil || result.Execution.Workspace.TicketBranch != "feat/chc-1-review-repair" {
+	if result.Execution == nil || result.Execution.Workspace.TicketBranch != "feat/chr-1-review-repair" {
 		t.Fatalf("Execution = %#v, want repair branch workspace", result.Execution)
 	}
 }
@@ -253,11 +253,11 @@ func TestServiceStartAllReadyAgentWorkStopsBeforeSecondTicket(t *testing.T) {
 	installFakeTicketStartHarnessExecutor(t, nil)
 
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -273,12 +273,12 @@ func TestServiceStartAllReadyAgentWorkStopsBeforeSecondTicket(t *testing.T) {
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
 
-	if gotKeys := indexedAgentWorkTicketKeys(result.SelectedQueue); strings.Join(gotKeys, ",") != "CHC-1" {
-		t.Fatalf("SelectedQueue keys = %#v, want oldest-first CHC-1 only", gotKeys)
+	if gotKeys := indexedAgentWorkTicketKeys(result.SelectedQueue); strings.Join(gotKeys, ",") != "CHR-1" {
+		t.Fatalf("SelectedQueue keys = %#v, want oldest-first CHR-1 only", gotKeys)
 	}
 
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 1)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 1)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
 
 	loopRuns := listProjectLoopRuns(t, devRoot, projectID(projectDir))
 	if len(loopRuns) != 1 {
@@ -307,15 +307,15 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
-	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chr/pulls/274/merge -d @-"
 	runnerRemote.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
-		"CHC-2", "Ready backend",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
+		"CHR-2", "Ready backend",
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -326,12 +326,12 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 	}
 
 	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 1)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 1)
-	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHC-1", "CHC-2"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-2", core.TicketStatusDone)
-	assertAgenticReviewRunArtifact(t, projectDir, "CHC-1", result.Executions[0].ID)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 1)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
+	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-2"})
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", core.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", core.TicketStatusDone)
+	assertAgenticReviewRunArtifact(t, projectDir, "CHR-1", result.Executions[0].ID)
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `review_result: "pass"`)
 	assertTicketContains(t, ticketPath, `merge_state: "merged"`)
@@ -358,14 +358,14 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
-	runnerRemote.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":false}`)
+	runnerRemote.outputs["tea api /repos/adrianpk/chr/pulls/274"] = []byte(`{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":false}`)
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-2", "Ready backend"),
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-2", "Ready backend"),
 		time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
 	))
 
@@ -377,8 +377,8 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T
 	}
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForMerge)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", core.TicketStatusReadyForMerge)
 	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_blocker: "not_mergeable"`)
@@ -403,15 +403,15 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) 
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
-	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chr/pulls/274/merge -d @-"
 	runnerRemote.inputErrs[mergeCommand] = errors.New("provider failed")
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-2", "Ready backend"),
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-2", "Ready backend"),
 		time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
 	))
 
@@ -423,8 +423,8 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) 
 	}
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForMerge)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", core.TicketStatusReadyForMerge)
 	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_blocker: "provider failed"`)
@@ -450,15 +450,15 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
-	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chr/pulls/274/merge -d @-"
 	runnerRemote.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-2", "Ready backend"),
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-2", "Ready backend"),
 		time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC),
 	))
 
@@ -470,10 +470,10 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 	}
 
 	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 1)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 1)
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-2", core.TicketStatusDone)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 1)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", core.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", core.TicketStatusDone)
 
 	if len(runner.reviews) != 0 {
 		t.Fatalf("agentic review calls = %d, want 0", len(runner.reviews))
@@ -507,15 +507,15 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 	runnerRemote, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 	defer restoreRunner()
 
-	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chr/pulls/274/merge -d @-"
 	runnerRemote.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
-		"CHC-2", "Ready backend",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
+		"CHR-2", "Ready backend",
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -526,11 +526,11 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 	}
 
 	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 2)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 1)
-	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHC-1", "CHC-1", "CHC-2"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-2", core.TicketStatusDone)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 2)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
+	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-1", "CHR-2"})
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", core.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", core.TicketStatusDone)
 	assertTicketContains(t, ticketPath, `review_round: 2`)
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `merge_state: "merged"`)
@@ -555,12 +555,12 @@ func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *tes
 	writeRuntimeTemplate(t, projectDir)
 	writeAgenticReviewLoopConfig(t, projectDir)
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(
-		testLoopTicketWithPullRequestRef("CHC-1", "Ready frontend"),
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(
+		testLoopTicketWithPullRequestRef("CHR-1", "Ready frontend"),
 		time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
-		"CHC-2", "Ready backend",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicketWithPullRequestRef(
+		"CHR-2", "Ready backend",
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -571,10 +571,10 @@ func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *tes
 	}
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-1", 2)
-	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHC-2", 0)
-	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHC-1", "CHC-1"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHC-1", core.TicketStatusReadyForDev)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 2)
+	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
+	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-1"})
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", core.TicketStatusReadyForDev)
 	assertTicketContains(t, ticketPath, `review_round: 2`)
 	assertTicketContains(t, ticketPath, `review_state: "changes_requested"`)
 	assertTicketContains(t, ticketPath, `review_result: "needs_changes"`)
@@ -640,8 +640,8 @@ func TestServiceStartAllReadyAgentWorkEmitsLifecycleEvents(t *testing.T) {
 	installFakeTicketStartHarnessExecutor(t, nil)
 
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -663,7 +663,7 @@ func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result Agent
 
 	loopStream := readAgentEventStream(t, filepath.Join(
 		projectDir,
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
@@ -710,7 +710,7 @@ func assertAgentWorkRepairEventPhases(t *testing.T, projectDir string, result Ag
 
 	loopStream := readAgentEventStream(t, filepath.Join(
 		projectDir,
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
@@ -731,8 +731,8 @@ func TestServicePreviewAllReadyAgentWorkDoesNotExecute(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -742,11 +742,11 @@ func TestServicePreviewAllReadyAgentWorkDoesNotExecute(t *testing.T) {
 		t.Fatalf("PreviewAllReadyAgentWork returned error: %v", err)
 	}
 
-	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHC-1" {
-		t.Fatalf("preview result = %#v, want one CHC-1 queued ticket", result)
+	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHR-1" {
+		t.Fatalf("preview result = %#v, want one CHR-1 queued ticket", result)
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 0 {
 		t.Fatalf("execution records = %d, want 0", len(records))
 	}
@@ -764,8 +764,8 @@ func TestServicePreviewAgentWorkLoopAcceptsWorktreeWorkspaceMode(t *testing.T) {
 	writeCLIWorkspaceConfig(t, projectDir, `work:
   workspace_mode: worktree
 `)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -775,8 +775,8 @@ func TestServicePreviewAgentWorkLoopAcceptsWorktreeWorkspaceMode(t *testing.T) {
 		t.Fatalf("PreviewAgentWorkLoop returned error: %v", err)
 	}
 
-	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHC-1" {
-		t.Fatalf("preview result = %#v, want one CHC-1 queued ticket", result)
+	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHR-1" {
+		t.Fatalf("preview result = %#v, want one CHR-1 queued ticket", result)
 	}
 }
 
@@ -784,11 +784,11 @@ func TestServicePreviewAgentWorkLoopAppliesSelection(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready normal", "ready_for_dev", "normal", "normal", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready normal", "ready_for_dev", "normal", "normal", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready high", "ready_for_dev", "high", "critical", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-2", "Ready high", "ready_for_dev", "high", "critical", "bug", "maintenance", "backend", []string{"api"},
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
@@ -803,8 +803,8 @@ func TestServicePreviewAgentWorkLoopAppliesSelection(t *testing.T) {
 		t.Fatalf("PreviewAgentWorkLoop returned error: %v", err)
 	}
 
-	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHC-2" {
-		t.Fatalf("preview result = %#v, want one high-priority CHC-2 queued ticket", result)
+	if result.EligibleCount != 1 || len(result.SelectedQueue) != 1 || result.SelectedQueue[0].Key != "CHR-2" {
+		t.Fatalf("preview result = %#v, want one high-priority CHR-2 queued ticket", result)
 	}
 }
 
@@ -940,7 +940,7 @@ func testLoopTicketWithPullRequestRef(key, title string) core.Ticket {
 	ticket.ReviewRefs = []core.TicketReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
-		URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+		URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
 		ID:       "274",
 		Status:   "open",
 	}}

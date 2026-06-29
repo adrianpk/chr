@@ -6,7 +6,7 @@ import (
 	"io/fs"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 type daemonStopRequestResult struct {

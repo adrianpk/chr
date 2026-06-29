@@ -16,11 +16,11 @@ Sources:
 
 ## Purpose
 
-Define the ChrysoCoord Bubble Tea terminal interface as a first-class local
+Define the Chryso Bubble Tea terminal interface as a first-class local
 operational console.
 
 The TUI is not a decorative wrapper around commands. It is the main human
-surface for operating a local ChrysoCoord project from a desktop development
+surface for operating a local Chryso project from a desktop development
 environment while preserving the CLI as the automation and expert surface.
 
 The TUI should make the system feel like one coherent local agent workflow
@@ -29,21 +29,21 @@ and implementation reports.
 
 ## Product Position
 
-ChrysoCoord remains a single local tool.
+Chryso remains a single local tool.
 
 The default human entry point is:
 
 ```sh
-chc
+chr
 ```
 
 The explicit equivalent remains:
 
 ```sh
-chc tui
+chr tui
 ```
 
-`chc --help` keeps command help behavior.
+`chr --help` keeps command help behavior.
 
 The TUI is designed for an interactive desktop development environment. CI,
 cron, pipes, non-interactive terminals, and remote automation are not the target
@@ -77,7 +77,7 @@ Workspace is the selected project context.
 It shows:
 
 - project name and path;
-- `.chc/` initialization status;
+- `.chr/` initialization status;
 - current registry status;
 - runtime readiness summary;
 - warning state when project-local assets are missing or inconsistent.
@@ -192,10 +192,10 @@ The TUI may show a future relationship like:
 ```text
 Plan
   Slice 1
-    Ticket CHC-12
-    Ticket CHC-13
+    Ticket CHR-12
+    Ticket CHR-13
   Slice 2
-    Ticket CHC-14
+    Ticket CHR-14
 ```
 
 The status shown beside each ticket must come from the ticket.
@@ -233,15 +233,15 @@ editing:
 
 ## Command Entry Behavior
 
-`chc` with no subcommand opens the TUI.
+`chr` with no subcommand opens the TUI.
 
-`chc tui` opens the same TUI.
+`chr tui` opens the same TUI.
 
-`chc --help` prints help.
+`chr --help` prints help.
 
 Subcommands keep their existing behavior.
 
-The default `chc` behavior should be implemented in the command layer, not by
+The default `chr` behavior should be implemented in the command layer, not by
 adding logic to `main.go` beyond assembly.
 
 ## Package Boundary
@@ -250,11 +250,11 @@ The TUI implementation should use a separate package boundary.
 
 Expected shape:
 
-- `cmd/chc`: main assembly only;
-- `internal/chcapp`: command construction and CLI/TUI entrypoints;
-- `internal/chctui`: Bubble Tea model, update, view, data loading, and UI
+- `cmd/chr`: main assembly only;
+- `internal/chrapp`: command construction and CLI/TUI entrypoints;
+- `internal/chrtui`: Bubble Tea model, update, view, data loading, and UI
   state;
-- `internal/chc`: domain models, repositories, and services.
+- `internal/chr`: domain models, repositories, and services.
 
 The TUI should not import CLI command output formatting as a data contract.
 
@@ -620,8 +620,8 @@ treated as extracted into this new TUI-specific set.
 
 ## Acceptance Criteria
 
-- `chc` opens the TUI by default.
-- `chc tui` opens the same TUI.
+- `chr` opens the TUI by default.
+- `chr tui` opens the same TUI.
 - The TUI has a dedicated package boundary.
 - The first screen or navigation model makes Board, Tickets, Documents, and
   Agent visible.

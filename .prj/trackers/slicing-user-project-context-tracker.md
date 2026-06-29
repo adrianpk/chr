@@ -3,7 +3,7 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-user-project-context-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 Specs:
 
 - `.prj/specs/specs/user-daemon-and-global-index.md`
@@ -11,7 +11,7 @@ Specs:
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Review existing project registry, CLI, and user environment implementation.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -47,8 +47,8 @@ Candidate tasks:
 
 Candidate tasks:
 
-- [x] Add `chc project select <name-or-path>`.
-- [x] Add `chc project current`.
+- [x] Add `chr project select <name-or-path>`.
+- [x] Add `chr project current`.
 - [x] Resolve registered project by name.
 - [x] Resolve registered project by path when unambiguous.
 - [x] Print stable current-project output.
@@ -72,7 +72,7 @@ Candidate tasks:
 Candidate tasks:
 
 - [x] Detect registered paths that no longer exist.
-- [x] Detect registered paths without `.chc/`.
+- [x] Detect registered paths without `.chr/`.
 - [x] Distinguish disabled projects from missing projects.
 - [x] Decide whether disable/remove commands belong here or in maintenance.
 - [x] Add recovery-oriented error messages.

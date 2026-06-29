@@ -18,14 +18,14 @@ func TestSummarizeAgentEventStreamKeepsLatestKnownState(t *testing.T) {
 	blocked := validAgentEvent()
 	blocked.Timestamp = started.Timestamp.Add(time.Minute)
 	blocked.LoopID = "loop-1"
-	blocked.TicketKey = "CHC-1"
+	blocked.TicketKey = "CHR-1"
 	blocked.ExecutionID = "exec-1"
 	blocked.Phase = AgentEventPhaseWorkBlocked
 	blocked.Level = AgentEventLevelWarn
-	blocked.Message = "CHC-1 blocked"
+	blocked.Message = "CHR-1 blocked"
 
 	summary := SummarizeAgentEventStream(AgentEventStream{
-		Path:   ".chc/user/runtime/runs/loop-1/events.jsonl",
+		Path:   ".chr/user/runtime/runs/loop-1/events.jsonl",
 		Events: []AgentEvent{started, blocked},
 	})
 
@@ -37,8 +37,8 @@ func TestSummarizeAgentEventStreamKeepsLatestKnownState(t *testing.T) {
 		t.Fatalf("LatestLoopID = %q, want loop-1", summary.LatestLoopID)
 	}
 
-	if summary.LatestTicketKey != "CHC-1" {
-		t.Fatalf("LatestTicketKey = %q, want CHC-1", summary.LatestTicketKey)
+	if summary.LatestTicketKey != "CHR-1" {
+		t.Fatalf("LatestTicketKey = %q, want CHR-1", summary.LatestTicketKey)
 	}
 
 	if summary.LatestExecutionID != "exec-1" {

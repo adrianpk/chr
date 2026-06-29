@@ -4,19 +4,19 @@ Status: accepted
 
 ## Purpose
 
-Define a manually reproducible QA scenario for validating the ChrysoCoord flow
+Define a manually reproducible QA scenario for validating the Chryso flow
 from seeded project context through spec generation, plan generation, tracking
 and ticket materialization, single-ticket execution, and agent-work loop
 execution.
 
-The scenario exists to test ChrysoCoord behavior, not to be a complex product
+The scenario exists to test Chryso behavior, not to be a complex product
 sample. The reference project must be realistic enough to exercise project
-structure, tests, documentation, `.chc` artifacts, and Git branching without
+structure, tests, documentation, `.chr` artifacts, and Git branching without
 making the domain implementation the source of most failures.
 
 ## Workspace Layout
 
-The QA workspace lives inside the `chc` repository under `qa/`.
+The QA workspace lives inside the `chr` repository under `qa/`.
 
 ```text
 qa/
@@ -32,11 +32,11 @@ qa/
         ...
 ```
 
-`qa/ref/001/blog` is versioned in the `chc` repository and is the canonical
+`qa/ref/001/blog` is versioned in the `chr` repository and is the canonical
 reference input.
 
 `qa/project/blog` is a generated active project copy used for manual testing.
-It must be ignored by the `chc` repository.
+It must be ignored by the `chr` repository.
 
 `qa/tmp/blog` is an ignored temporary location used to move aside the previous
 active project during reset. The reset flow may replace the previous
@@ -53,9 +53,9 @@ The reset operation must be destructive for the active project copy.
 - copy `qa/ref/001/blog` to `qa/project/blog`;
 - initialize `qa/project/blog` as an independent Git repository;
 - create a clean base commit in that repository;
-- leave `qa/project/blog` ready for `chc` to run from inside it.
+- leave `qa/project/blog` ready for `chr` to run from inside it.
 
-The active project Git repository must not interfere with the parent `chc`
+The active project Git repository must not interfere with the parent `chr`
 repository. Scripts must use explicit paths and `git -C qa/project/blog` when
 operating on the active project repository.
 
@@ -100,11 +100,11 @@ The seeded test suite must fail immediately after reset because of this bug.
 `make qa-test-blog` must run `go test ./...` in the active project and expose
 that expected failure.
 
-## Seeded ChrysoCoord Context
+## Seeded Chryso Context
 
-The reference project must include a `.chc` tree that respects the current
-project artifact layout. Generated or user-facing ChrysoCoord artifacts must
-live under `.chc/user/...` except for root files that CHC requires for project
+The reference project must include a `.chr` tree that respects the current
+project artifact layout. Generated or user-facing Chryso artifacts must
+live under `.chr/user/...` except for root files that CHR requires for project
 configuration or manifest compatibility.
 
 Seeded context must include:
@@ -130,7 +130,7 @@ The manual bug ticket must:
 ## Project Documentation
 
 Architecture decision records are project documentation, not hidden
-ChrysoCoord-only context.
+Chryso-only context.
 
 The blog reference project should use Diataxis documentation layout. ADRs should
 live under:
@@ -158,7 +158,7 @@ make qa-test-blog
 
 Then from `qa/project/blog`:
 
-1. Run `chc`.
+1. Run `chr`.
 2. Inspect the seeded bug ticket.
 3. Start single-ticket execution for the bug ticket.
 4. Validate that the test suite can become green after the ticket is resolved.
@@ -174,7 +174,7 @@ failures easy to reproduce, inspect, reset, and retry.
 
 ## Testing Preference
 
-The reference project and ChrysoCoord itself should express a test-based
+The reference project and Chryso itself should express a test-based
 engineering preference:
 
 - reproduce bugs with a failing test when feasible;
@@ -198,14 +198,14 @@ The first scenario does not need:
 - external dependencies;
 - remote Git hosting;
 - automatic execution of the full QA flow from one command;
-- formal ADR entities in the CHC model;
+- formal ADR entities in the CHR model;
 - configurable ADR paths.
 
 ## Open Questions
 
 - Whether future scenarios should cover bugs that require the agent to create
   the first failing test.
-- Whether CHC should eventually initialize managed project Git repositories on
+- Whether CHR should eventually initialize managed project Git repositories on
   demand.
 - Whether larger blog variants should reuse the same reference project lineage
   or live as separate numbered scenarios.

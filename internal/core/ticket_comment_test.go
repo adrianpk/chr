@@ -15,7 +15,7 @@ func TestTicketCommenterAddsComment(t *testing.T) {
 	updatedAt := time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)
 
 	content, err := NewTicketRenderer().RenderTicket(Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: createdAt,
@@ -60,7 +60,7 @@ func TestTicketCommenterCreatesMissingCommentsSection(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	createdAt := time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)
 	content := `---
-key: "CHC-1"
+key: "CHR-1"
 title: "Do something"
 status: "open"
 updated_at: "2026-05-18T12:00:00Z"
@@ -82,7 +82,7 @@ go test ./...
 
 	err = NewTicketCommenter().AddComment(context.Background(), AddTicketCommentOptions{
 		Path:      path,
-		Author:    "chc",
+		Author:    "chr",
 		Body:      "Execution finished.",
 		CreatedAt: createdAt,
 	})
@@ -97,7 +97,7 @@ go test ./...
 
 	for _, want := range []string{
 		`updated_at: "2026-05-18T12:00:00Z"`,
-		"# Comments\n\n## 2026-05-18T12:00:00Z chc\n\nExecution finished.",
+		"# Comments\n\n## 2026-05-18T12:00:00Z chr\n\nExecution finished.",
 		"# Validation",
 	} {
 		if !strings.Contains(string(updatedContent), want) {

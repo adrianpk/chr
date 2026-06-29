@@ -26,7 +26,7 @@ func TestValidateTicketMergeHandoffAcceptsPassedReview(t *testing.T) {
 		t.Fatalf("ValidateTicketMergeHandoff returned error: %v", err)
 	}
 
-	if handoff.TicketKey != "CHC-1" || handoff.Branch != "feat/slice-1-merger-handoff-contract" {
+	if handoff.TicketKey != "CHR-1" || handoff.Branch != "feat/slice-1-merger-handoff-contract" {
 		t.Fatalf("handoff = %#v, want ticket key and branch", handoff)
 	}
 

@@ -32,7 +32,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | T2.1 | Add validation command runner with default `go test ./...`. | done | `cd63af7` | Added default gate validation execution. |
 | T2.2 | Add gate JSON report model and writer. | done | `590d75e` | Added JSON report model, timestamped paths, and writer coverage. |
 | T2.3 | Add gate Markdown report renderer. | done | `b5ce589` | Added Markdown renderer and writer coverage. |
-| T2.4 | Add exit code handling. | done | `6af64c3` | Connected validation and report writing to `chc gate dev-main`. |
+| T2.4 | Add exit code handling. | done | `6af64c3` | Connected validation and report writing to `chr gate dev-main`. |
 | T2.5 | Add tests for pass, validation fail, report write behavior, and stale or invalid ref failures. | done | `51a7165` | Added CLI coverage for pass, validation fail, and invalid ref report flows. |
 | T2.6 | Add slice report and tracker updates. | done | this commit | Added the Slice 2 report and validation log. |
 
@@ -40,10 +40,10 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Discover gate-relevant reports under `.chc/user/reports`. | done | `9fccea6` | Reused project report discovery and resolved execution result paths from report metadata. |
+| T3.1 | Discover gate-relevant reports under `.chr/user/reports`. | done | `9fccea6` | Reused project report discovery and resolved execution result paths from report metadata. |
 | T3.2 | Classify agent-managed evidence from available run reports. | done | `ba4342f` | Added report fields and command integration for agent-managed work. |
 | T3.3 | Classify unmatched changed files as manual or external info. | done | `ba4342f` | Unmatched Git changes are reported as manual or external context. |
-| T3.4 | Add failure checks for missing ChrysoCoord-owned run evidence. | done | `e2a9299` | Missing execution evidence now fails the gate. |
+| T3.4 | Add failure checks for missing Chryso-owned run evidence. | done | `e2a9299` | Missing execution evidence now fails the gate. |
 | T3.5 | Add tests for agent-managed, manual/external, and missing-evidence cases. | done | `9bf60d3` | Added CLI assertions for manual context and missing evidence failures. |
 | T3.6 | Add slice report and tracker updates. | done | this commit | Added the Slice 3 report and validation log. |
 
@@ -51,7 +51,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add gate config parser. | done | `1f0521c` | Added `.chc/user/config/gates.yml` parser and defaults. |
+| T4.1 | Add gate config parser. | done | `1f0521c` | Added `.chr/user/config/gates.yml` parser and defaults. |
 | T4.2 | Support validation command override. | done | `28e1a4d` | Gate validation now reads configured command. |
 | T4.3 | Support traceability mode and manual/external warning settings. | done | `16a739e` | Added policy behavior for missing evidence, manual warnings, and manual listing. |
 | T4.4 | Support high-risk path configuration as warning-only when enabled. | done | `5066087` | Added high-risk manual change matching and report output. |
@@ -63,7 +63,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
 | T5.1 | Investigate Forgejo/Woodpecker status, comments, and artifact link mechanisms. | done | `a0261c4` | Selected Woodpecker CI status as the first feedback path. |
-| T5.2 | Add `chc gate woodpecker init`. | done | `2112a09` | Added the Woodpecker setup command under `gate`. |
+| T5.2 | Add `chr gate woodpecker init`. | done | `2112a09` | Added the Woodpecker setup command under `gate`. |
 | T5.3 | Generate Woodpecker snippet and minimal config. | done | `2112a09` | Added deterministic snippet generation and missing-config creation. |
 | T5.4 | Add non-destructive existing-config behavior. | done | `2112a09` | Existing configs are not modified without `--write`; unmarked configs fail safely. |
 | T5.5 | Add Forgejo/Woodpecker feedback integration selected by investigation. | done | `2112a09` | Command output exposes `woodpecker-status` as the feedback mechanism. |
@@ -83,24 +83,24 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 ## Validation Log
 
-- Slice 1: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 1: `go test ./internal/chr ./internal/chrapp` (pass)
 - Slice 1: `make verify` (pass)
-- Slice 2: `go test ./internal/chcapp -run GateDevMain` (pass)
-- Slice 2: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 2: `go test ./internal/chrapp -run GateDevMain` (pass)
+- Slice 2: `go test ./internal/chr ./internal/chrapp` (pass)
 - Slice 2: `make verify` (pass)
-- Slice 3: `go test ./internal/chc -run 'GateEvidence|ReportLister'` (pass)
-- Slice 3: `go test ./internal/chc ./internal/chcapp -run 'GateReport|GateEvidence|GateDevMain'` (pass)
-- Slice 3: `go test ./internal/chcapp -run 'GateDevMain'` (pass)
+- Slice 3: `go test ./internal/chr -run 'GateEvidence|ReportLister'` (pass)
+- Slice 3: `go test ./internal/chr ./internal/chrapp -run 'GateReport|GateEvidence|GateDevMain'` (pass)
+- Slice 3: `go test ./internal/chrapp -run 'GateDevMain'` (pass)
 - Slice 3: `make verify` (pass)
-- Slice 4: `go test ./internal/chc -run GateConfig` (pass)
-- Slice 4: `go test ./internal/chc ./internal/chcapp -run 'GateValidation|GateDevMain'` (pass)
-- Slice 4: `go test ./internal/chc ./internal/chcapp -run 'GateEvidence|GateReport|GateDevMain'` (pass)
+- Slice 4: `go test ./internal/chr -run GateConfig` (pass)
+- Slice 4: `go test ./internal/chr ./internal/chrapp -run 'GateValidation|GateDevMain'` (pass)
+- Slice 4: `go test ./internal/chr ./internal/chrapp -run 'GateEvidence|GateReport|GateDevMain'` (pass)
 - Slice 4: `make verify` (pass)
-- Slice 5: `go test ./internal/chc ./internal/chcapp` (pass)
+- Slice 5: `go test ./internal/chr ./internal/chrapp` (pass)
 - Slice 5: `make verify` (pass)
 - Slice 6: `make verify` (pass)
 - Slice 6: `make qa-gate` (pass)
-- Slice 6: `GOCACHE=/tmp/chc-gate-self.aRZ3ao/.go-build-cache go run /home/adrian/Projects/chrysocoord/cmd/chc gate dev-main --dir /tmp/chc-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
+- Slice 6: `GOCACHE=/tmp/chr-gate-self.aRZ3ao/.go-build-cache go run /home/adrian/Projects/chryso/cmd/chr gate dev-main --dir /tmp/chr-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
 
 ## Notes
 

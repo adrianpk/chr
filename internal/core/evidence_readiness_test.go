@@ -162,7 +162,7 @@ func TestEvaluateEvidenceReadinessRejectsNotApplicableGherkinWhenActiveApplies(t
 			Policy:       EvidenceGherkinPolicyActiveWhenApplicable,
 			Active:       true,
 			Applies:      true,
-			RequiredPath: ".chc/user/acceptance/checkout.feature",
+			RequiredPath: ".chr/user/acceptance/checkout.feature",
 		},
 	})
 
@@ -192,7 +192,7 @@ func testCompleteEvidenceReadinessChecklistWith(edit func(*EvidenceStrategyCheck
 				Label:   EvidenceStrategyChecklistLabelGherkin,
 				Checked: true,
 				Status:  "required",
-				Detail:  "path=.chc/user/acceptance/flow.feature",
+				Detail:  "path=.chr/user/acceptance/flow.feature",
 			},
 			EvidenceStrategyChecklistLabelTests: {
 				Label:   EvidenceStrategyChecklistLabelTests,
@@ -230,7 +230,7 @@ func testEvidenceReadinessExecution(edit func(*ExecutionRecord)) *ExecutionRecor
 	record := ExecutionRecord{
 		ID:        "exec-1",
 		ProjectID: "project-1",
-		TicketKey: "CHC-1",
+		TicketKey: "CHR-1",
 		Status:    ExecutionStatusSucceeded,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -244,7 +244,7 @@ func testEvidenceReadinessExecution(edit func(*ExecutionRecord)) *ExecutionRecor
 func testEvidenceReadinessResult(edit func(*ExecutionResult)) *ExecutionResult {
 	result := ExecutionResult{
 		ExecutionID: "exec-1",
-		TicketKey:   "CHC-1",
+		TicketKey:   "CHR-1",
 		Status:      ExecutionResultStatusSucceeded,
 		Summary:     "done",
 		EvidenceSummary: ExecutionResultEvidenceSummary{

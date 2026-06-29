@@ -19,7 +19,7 @@ This slice covers:
 - explicit `--dir` resolution;
 - active project fallback;
 - current-directory fallback for commands that allow it;
-- `.chc/` workspace validation before returning a context;
+- `.chr/` workspace validation before returning a context;
 - clear missing-context errors;
 - integrating `ticket new` with the resolver while preserving current-directory behavior;
 - focused CLI tests.
@@ -45,7 +45,7 @@ Resolution order:
 2. active project from `ActiveProjectStore`;
 3. current directory when the command allows current-directory fallback.
 
-The resolver should validate that the returned project directory has a `.chc/` workspace.
+The resolver should validate that the returned project directory has a `.chr/` workspace.
 
 For `ticket new`, the existing `--dir` behavior remains available. When `--dir` is omitted, the command can use the active project. If no active project exists, it falls back to the current directory to preserve existing behavior.
 
@@ -62,18 +62,18 @@ Expected behavior:
 - support active project fallback;
 - support current-directory fallback when enabled;
 - return clear errors when no project can be resolved;
-- validate `.chc/` before returning.
+- validate `.chr/` before returning.
 
 ### T1.2 Ticket New Integration
 
-Update `chc ticket new` to use the resolver.
+Update `chr ticket new` to use the resolver.
 
 Expected behavior:
 
 - `--dir <path>` keeps working;
 - omitted `--dir` uses the active project when one exists;
 - omitted `--dir` falls back to current directory when no active project exists;
-- ticket creation still reads `.chc/config.yml` from the resolved project.
+- ticket creation still reads `.chr/config.yml` from the resolved project.
 
 ### T1.3 Tests and Tracker
 

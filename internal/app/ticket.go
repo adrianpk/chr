@@ -14,7 +14,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 var (
@@ -839,7 +839,7 @@ func acquireAgentOperationLock(ctx context.Context, projectContext commandProjec
 	return core.AcquireAgentOperationLock(ctx, core.AgentOperationLockOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Operation:  operation,
-		Owner:      "chc",
+		Owner:      "chr",
 	})
 }
 
@@ -1246,7 +1246,7 @@ func buildTicketApplyResultPlanForRecord(
 		Result:            result,
 		EvidenceReadiness: &readiness,
 		ChangedFiles:      changedFiles,
-		CommentAuthor:     "chc",
+		CommentAuthor:     "chr",
 	})
 	if err != nil {
 		return ticketApplyResultPlan{}, err

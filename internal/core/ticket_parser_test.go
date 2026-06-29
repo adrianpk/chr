@@ -11,8 +11,8 @@ import (
 
 func TestTicketParserParsesRenderedTicket(t *testing.T) {
 	dir := t.TempDir()
-	ticketsDir := filepath.Join(dir, ".chc", "user", "tickets")
-	path := filepath.Join(ticketsDir, "onboarding", "CHC-1-Do-something.md")
+	ticketsDir := filepath.Join(dir, ".chr", "user", "tickets")
+	path := filepath.Join(ticketsDir, "onboarding", "CHR-1-Do-something.md")
 	createdAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
 	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
 	indexedAt := time.Date(2026, 5, 18, 14, 30, 0, 0, time.UTC)
@@ -43,7 +43,7 @@ func TestTicketParserParsesRenderedTicket(t *testing.T) {
 
 func testParserRenderedTicket(createdAt, updatedAt time.Time) Ticket {
 	return Ticket{
-		Key:         "CHC-1",
+		Key:         "CHR-1",
 		Title:       "Do something",
 		Synopsis:    "Implement the onboarding flow.",
 		Status:      "open",
@@ -54,7 +54,7 @@ func testParserRenderedTicket(createdAt, updatedAt time.Time) Ticket {
 		UseCase:     "onboarding",
 		ProjectArea: "frontend",
 		SourceKind:  "plan_tracking",
-		SourceRef:   ".chc/user/plans/onboarding-plan.md",
+		SourceRef:   ".chr/user/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
 		Branch:      "feat/slice-1-onboarding",
 		ReviewRefs: []TicketReviewRef{
@@ -94,7 +94,7 @@ func TestTicketParserRejectsMissingFrontmatter(t *testing.T) {
 
 func TestTicketParserRejectsInvalidMetadata(t *testing.T) {
 	content := renderParserTestTicket(t, Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		Priority:  "high",
@@ -154,7 +154,7 @@ func invalidRequiredTicketMetadataCases(content string) []ticketMetadataValidati
 	return []ticketMetadataValidationCase{
 		{
 			name:    "missing key",
-			content: strings.Replace(content, `key: "CHC-1"`, `key: ""`, 1),
+			content: strings.Replace(content, `key: "CHR-1"`, `key: ""`, 1),
 			wantErr: "ticket key is required",
 		},
 		{
@@ -276,11 +276,11 @@ func assertParsedTicketMetadata(t *testing.T, ticket IndexedTicket) {
 		t.Fatalf("ProjectID = %q, want project-1", ticket.ProjectID)
 	}
 
-	if ticket.RelativePath != "onboarding/CHC-1-Do-something.md" {
-		t.Fatalf("RelativePath = %q, want onboarding/CHC-1-Do-something.md", ticket.RelativePath)
+	if ticket.RelativePath != "onboarding/CHR-1-Do-something.md" {
+		t.Fatalf("RelativePath = %q, want onboarding/CHR-1-Do-something.md", ticket.RelativePath)
 	}
 
-	if ticket.Key != "CHC-1" || ticket.Title != "Do something" || ticket.Status != "open" {
+	if ticket.Key != "CHR-1" || ticket.Title != "Do something" || ticket.Status != "open" {
 		t.Fatalf("parsed metadata = %#v", ticket)
 	}
 
@@ -299,7 +299,7 @@ func assertParsedTicketSourceMetadata(t *testing.T, ticket IndexedTicket) {
 	t.Helper()
 
 	sourceMetadataMatches := ticket.SourceKind == "plan_tracking" &&
-		ticket.SourceRef == ".chc/user/plans/onboarding-plan.md" &&
+		ticket.SourceRef == ".chr/user/plans/onboarding-plan.md" &&
 		ticket.Slice == "Slice 1"
 
 	if !sourceMetadataMatches {

@@ -13,7 +13,7 @@ Prepare one ticket execution from the CLI without invoking an agent harness.
 
 ## Delivered Behavior
 
-`chc ticket start <ticket-key>` resolves a project, reconciles the ticket index,
+`chr ticket start <ticket-key>` resolves a project, reconciles the ticket index,
 selects one indexed ticket, validates the runtime boundary, and creates a
 `pending` execution record for that ticket.
 
@@ -33,7 +33,7 @@ with an error before persistence.
 
 New command:
 
-- `chc ticket start <ticket-key>`
+- `chr ticket start <ticket-key>`
 
 New CLI output fields:
 
@@ -47,13 +47,13 @@ The command also prints the existing runtime validation plan and check output.
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./cmd/chc ./internal/chc`: pass
+- `go test ./cmd/chr ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

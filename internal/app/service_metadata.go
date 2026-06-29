@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // ProjectMetadataSaveResult reports the saved project metadata.

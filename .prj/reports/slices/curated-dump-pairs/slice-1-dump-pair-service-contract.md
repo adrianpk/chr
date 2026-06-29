@@ -14,8 +14,8 @@ curated Markdown artifact plus a raw sibling with highlights.
 
 ## Delivered Behavior
 
-- `CreateDump` now creates `.chc/dumps/<slug>.md` as the curated primary dump.
-- `CreateDump` also creates `.chc/dumps/<slug>-raw.md` as the raw capture.
+- `CreateDump` now creates `.chr/dumps/<slug>.md` as the curated primary dump.
+- `CreateDump` also creates `.chr/dumps/<slug>-raw.md` as the raw capture.
 - The curated file records `status: "curated"`, `type: "dump"`, and a `source`
   reference to the raw sibling.
 - The raw file records `status: "raw"`, `type: "dump_raw"`, and a `curated`
@@ -25,7 +25,7 @@ curated Markdown artifact plus a raw sibling with highlights.
 - The service uses a dump-specific OpenAI curation provider when available.
 - LLM failures or missing configuration fall back to deterministic local
   curation without blocking dump capture.
-- CLI `chc dump new` uses the same service flow and reports the curated path.
+- CLI `chr dump new` uses the same service flow and reports the curated path.
 
 ## Implementation Notes
 
@@ -47,20 +47,20 @@ curated Markdown artifact plus a raw sibling with highlights.
 
 ## Files of Interest
 
-- `internal/chcapp/service_dump.go`
-- `internal/chcapp/service_dump_curation.go`
-- `internal/chcapp/service_dump_curation_openai.go`
-- `internal/chcapp/service_dump_curation_test.go`
-- `internal/chcapp/service_test.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/service_dump.go`
+- `internal/chrapp/service_dump_curation.go`
+- `internal/chrapp/service_dump_curation_openai.go`
+- `internal/chrapp/service_dump_curation_test.go`
+- `internal/chrapp/service_test.go`
+- `internal/chrapp/cli_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp` pass
-- `go test ./internal/chc ./internal/chcapp` pass
+- `go test ./internal/chrapp` pass
+- `go test ./internal/chr ./internal/chrapp` pass
 - `make verify` fail
-  - Fails on pre-existing strict lint issues in `internal/chc`,
-    `internal/chctui`, and related tests.
+  - Fails on pre-existing strict lint issues in `internal/chr`,
+    `internal/chrtui`, and related tests.
   - The final failing output no longer reports new issues from the curated dump
     pair files.
 

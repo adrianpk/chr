@@ -45,19 +45,19 @@ the detail expansion call.
 
 ## Files of Interest
 
-- `internal/chc/plan_slice_detail.go`
-- `internal/chc/plan_outline.go`
-- `internal/chc/quiz_model.go`
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chc/quiz_model_test.go`
-- `internal/chcapp/service_plan_test.go`
+- `internal/chr/plan_slice_detail.go`
+- `internal/chr/plan_outline.go`
+- `internal/chr/quiz_model.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chr/quiz_model_test.go`
+- `internal/chrapp/service_plan_test.go`
 
 ## Validation
 
-- `gofmt -w internal/chc/quiz_model.go internal/chc/plan_outline.go internal/chc/plan_slice_detail.go internal/chc/quiz_model_payload.go internal/chc/quiz_openai_model.go internal/chc/quiz_model_test.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go` - pass
-- `go test ./internal/chc ./internal/chcapp` - pass
+- `gofmt -w internal/chr/quiz_model.go internal/chr/plan_outline.go internal/chr/plan_slice_detail.go internal/chr/quiz_model_payload.go internal/chr/quiz_openai_model.go internal/chr/quiz_model_test.go internal/chrapp/service_plan.go internal/chrapp/service_plan_test.go` - pass
+- `go test ./internal/chr ./internal/chrapp` - pass
 - `go test ./...` - pass
 - `git diff --check` - pass
 - `make verify` - fail: `lint-strict` reports pre-existing lint debt in existing test, trace, service, and TUI files.

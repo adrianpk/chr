@@ -9,7 +9,7 @@ Plan the `MVP Agent Proving Ground` slicing.
 This slicing opens a temporary direct execution window before returning to the
 official post-cutoff roadmap.
 
-The purpose is to prove that `chc` can operate as a working agent runner: given
+The purpose is to prove that `chr` can operate as a working agent runner: given
 a controlled project and a concrete problem, it can run Codex in the agent
 sandbox, validate the result, iterate through a bounded Ralph Loop, and leave
 the code working.
@@ -22,7 +22,7 @@ Primary sources:
 - `.prj/specs/specs/ticket-resolution-lifecycle.md`
 - `.prj/specs/specs/ralph-loop.md`
 - `.prj/specs/specs/agent-sandbox-and-runtime.md`
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 
 ## Current State
 
@@ -97,7 +97,7 @@ Candidate scope:
 - add fixture source files;
 - include a deliberate backend bug;
 - include a missing "mark task completed" feature;
-- include `.chc/` runtime config and hand-authored sandbox Dockerfile;
+- include `.chr/` runtime config and hand-authored sandbox Dockerfile;
 - include compile, lint, and test validation commands;
 - include fixture materialization documentation or helper;
 - add slice implementation report;
@@ -132,7 +132,7 @@ Candidate scope:
 
 Expected outcome:
 
-- `chc` can receive a concrete proving objective even if ticket orchestration is
+- `chr` can receive a concrete proving objective even if ticket orchestration is
   bypassed for this window.
 
 ### Slice 3: Sandbox Codex Runner
@@ -233,7 +233,7 @@ Candidate scope:
 
 Expected outcome:
 
-- `chc` has proven that it can operate a sandboxed Codex agent that resolves a
+- `chr` has proven that it can operate a sandboxed Codex agent that resolves a
   non-trivial code task with validation.
 
 ## Validation Record

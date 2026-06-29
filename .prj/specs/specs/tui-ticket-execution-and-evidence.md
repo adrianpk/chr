@@ -55,9 +55,9 @@ Runtime validation should show compact checks:
 
 ```text
 checks:
-  ok      workspace     .chc
-  ok      dockerfile    .chc/runtime/agent/Dockerfile
-  ok      artifact_dir  .chc/runtime/runs
+  ok      workspace     .chr
+  ok      dockerfile    .chr/runtime/agent/Dockerfile
+  ok      artifact_dir  .chr/runtime/runs
   missing auth          ~/.codex/auth.json
 ```
 

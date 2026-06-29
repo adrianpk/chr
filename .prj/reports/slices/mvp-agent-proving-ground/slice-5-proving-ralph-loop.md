@@ -14,10 +14,10 @@ validation failure.
 
 ## Delivered Behavior
 
-`chc` now exposes:
+`chr` now exposes:
 
 ```sh
-chc proving ralph --dir <project> --objective <objective>
+chr proving ralph --dir <project> --objective <objective>
 ```
 
 The loop runs a sandboxed Codex invocation, validates the project, and retries
@@ -48,7 +48,7 @@ state is the validation failure rendered into the next `context.md`.
 
 New temporary CLI command:
 
-- `chc proving ralph`
+- `chr proving ralph`
 - `--dir`
 - `--objective`
 - `--max-attempts`
@@ -64,14 +64,14 @@ New core behavior:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `internal/chc/proving.go`
-- `internal/chc/proving_test.go`
+- `cmd/chr/main.go`
+- `internal/chr/proving.go`
+- `internal/chr/proving_test.go`
 - `docs/reference/mvp-agent-proving-ground.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

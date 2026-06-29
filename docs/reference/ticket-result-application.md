@@ -137,7 +137,7 @@ caller can avoid treating stale indexed state as current.
 
 ## Apply Result CLI
 
-`chc ticket apply-result <execution-id>` applies one stored execution result to
+`chr ticket apply-result <execution-id>` applies one stored execution result to
 its ticket.
 
 The command:

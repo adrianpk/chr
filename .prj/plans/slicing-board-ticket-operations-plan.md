@@ -9,7 +9,7 @@ Markdown tickets and SQLite metadata.
 
 This slicing covers the Board view, manual ticket creation, generated ticket
 synopsis, Board status flow, conservative attention signals, shared CLI/TUI
-service boundaries, and the first active userspace shape under `.chc/user/`.
+service boundaries, and the first active userspace shape under `.chr/user/`.
 
 ## Source
 
@@ -24,16 +24,16 @@ Primary sources:
 - `.prj/specs/specs/ticket-template.md`
 - `.prj/specs/specs/ticket-template-model.md`
 - `docs/reference/cli-tui-action-matrix.md`
-- `internal/chc/ticket.go`
-- `internal/chc/ticket_repository.go`
-- `internal/chc/ticket_parser.go`
-- `internal/chc/ticket_index.go`
-- `internal/chc/indexed_ticket.go`
-- `internal/chc/ticket_reconciliation.go`
-- `cmd/chc/assets/migration/sqlite/20260518000002-create_indexed_tickets.sql`
-- `internal/chctui/model.go`
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/tui_adapters_spec_plan_ticket.go`
+- `internal/chr/ticket.go`
+- `internal/chr/ticket_repository.go`
+- `internal/chr/ticket_parser.go`
+- `internal/chr/ticket_index.go`
+- `internal/chr/indexed_ticket.go`
+- `internal/chr/ticket_reconciliation.go`
+- `cmd/chr/assets/migration/sqlite/20260518000002-create_indexed_tickets.sql`
+- `internal/chrtui/model.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/tui_adapters_spec_plan_ticket.go`
 
 Repository history reviewed:
 
@@ -49,9 +49,9 @@ Repository history reviewed:
 The repository already has a useful ticket foundation:
 
 - Markdown ticket rendering and creation;
-- `CHC-<number>` key generation by scanning existing ticket files;
+- `CHR-<number>` key generation by scanning existing ticket files;
 - YAML-like frontmatter parsing;
-- user-level SQLite `chc.db`;
+- user-level SQLite `chr.db`;
 - `indexed_tickets` and `indexed_ticket_tags`;
 - index rebuild and status commands;
 - TUI Board and ticket detail views grouped by status;
@@ -66,7 +66,7 @@ The current foundation still uses older assumptions:
 - attention does not exist as a virtual view;
 - key allocation is filesystem-scan based;
 - SQLite index lacks Board-specific fields and source metadata;
-- `.chc/user/` active userspace is not modeled;
+- `.chr/user/` active userspace is not modeled;
 - compact vs maximized Board behavior is not explicit.
 
 ## Target Model
@@ -75,7 +75,7 @@ The target model keeps Markdown as the durable ticket body and uses SQLite as
 the operational metadata index for Board selection, filtering, source
 traceability, synopsis display, and attention.
 
-New ChrysoCoord-created tickets use Board statuses:
+New Chryso-created tickets use Board statuses:
 
 - `backlog`
 - `ready_for_dev`
@@ -87,8 +87,8 @@ New ChrysoCoord-created tickets use Board statuses:
 Legacy statuses are mapped or surfaced explicitly. Unknown statuses are visible
 through attention.
 
-The first userspace implementation prepares `.chc/user/` for the active
-operator. Full `.chc/operators/<operator-id>/...` remains outside this slicing
+The first userspace implementation prepares `.chr/user/` for the active
+operator. Full `.chr/operators/<operator-id>/...` remains outside this slicing
 but is documented in the spec/model so the insight is not lost.
 
 ## Slice Count Decision
@@ -158,7 +158,7 @@ Out of scope:
 
 ## Slice 2: Userspace Resolver
 
-Introduce the active `.chc/user/` userspace resolver without migrating all
+Introduce the active `.chr/user/` userspace resolver without migrating all
 artifact directories.
 
 Expected behavior:
@@ -166,10 +166,10 @@ Expected behavior:
 - Core code can resolve the project-local active userspace path.
 - The resolver reads a required active-operator environment value for workflows
   that need userspace ownership.
-- `.chc/user/` can be created by workspace initialization or a targeted
+- `.chr/user/` can be created by workspace initialization or a targeted
   workspace repair path.
 - Documentation explains `.envrc` as a convenience, not as a hard dependency.
-- Full `.chc/operators/<operator-id>/...` remains documented as future work.
+- Full `.chr/operators/<operator-id>/...` remains documented as future work.
 
 Out of scope:
 
@@ -207,7 +207,7 @@ Expected behavior:
 - Existing tickets without synopsis remain indexable.
 - Legacy statuses populate normalized Board columns when possible.
 - Unknown statuses remain queryable and attention-ready.
-- Existing `chc index rebuild` and `chc index status` keep working.
+- Existing `chr index rebuild` and `chr index status` keep working.
 
 Out of scope:
 
@@ -223,7 +223,7 @@ Expected behavior:
 - CLI ticket creation can accept synopsis.
 - Board/TUI-created tickets use `backlog` by default.
 - Service-level ticket creation validates required fields for
-  ChrysoCoord-created tickets.
+  Chryso-created tickets.
 - Ticket creation updates or refreshes the SQLite index.
 - Key allocation uses the new Board-safe allocation path when available.
 
@@ -346,7 +346,7 @@ Expected behavior:
 - Command reference documents Board/ticket changes.
 - TUI reference documents compact Board, attention, manual ticket creation, and
   maximized Board behavior.
-- Project workspace/runtime docs describe `.chc/user/` MVP and future
+- Project workspace/runtime docs describe `.chr/user/` MVP and future
   multi-operator direction.
 - SQLite migration reference documents Board metadata changes.
 - CLI/TUI action matrix reflects new shared operations.

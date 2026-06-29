@@ -26,7 +26,7 @@ project_id + key
 
 ## Repository
 
-The core API is exposed through `chc.TicketIndex`.
+The core API is exposed through `chr.TicketIndex`.
 
 Initial operations:
 

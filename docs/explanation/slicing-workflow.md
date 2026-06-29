@@ -3,7 +3,7 @@
 Slicing is the practice of breaking larger implementation work into small,
 reviewable units.
 
-ChrysoCoord uses slicing so the user can understand how a feature will be built
+Chryso uses slicing so the user can understand how a feature will be built
 before the agent starts making changes. A good slice is small enough to review
 and validate, but large enough to move the system forward.
 
@@ -30,7 +30,7 @@ and how implementation will be distributed across commits and pull requests.
 
 A slice groups related implementation tasks under one reviewable goal.
 
-Tasks are the smaller pieces of work inside a slice. In ChrysoCoord's delivery
+Tasks are the smaller pieces of work inside a slice. In Chryso's delivery
 style, tasks can correspond to commits. That makes the implementation trail
 easier to audit: a tracker can show what was planned, and the commit history can
 show how that work landed.

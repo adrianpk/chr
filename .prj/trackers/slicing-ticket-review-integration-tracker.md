@@ -5,7 +5,7 @@ Status: delivered
 Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 Spec Draft: `.prj/specs/drafts/ticket-review-integration-draft.md`
 Quiz: `.prj/quizzes/curated/ticket-review-integration-quiz.md`
-Mirror: `.chc/user/trackers/ticket-review-integration-tracker.md`
+Mirror: `.chr/user/trackers/ticket-review-integration-tracker.md`
 
 ## Slicing Checklist
 
@@ -204,47 +204,47 @@ Tasks:
 ## Validation Log
 
 - Slice 1:
-  - `go test ./internal/chc -run 'Ticket|Board|Migrat'` - pass
-  - `go test ./internal/chcapp -run 'Ticket(List|Show|Board)|Migration'` - pass
-  - `go test ./internal/chctui -run 'Ticket|Board'` - pass
-  - `go test ./internal/chc ./internal/chcapp ./internal/chctui` - pass
+  - `go test ./internal/chr -run 'Ticket|Board|Migrat'` - pass
+  - `go test ./internal/chrapp -run 'Ticket(List|Show|Board)|Migration'` - pass
+  - `go test ./internal/chrtui -run 'Ticket|Board'` - pass
+  - `go test ./internal/chr ./internal/chrapp ./internal/chrtui` - pass
   - `make verify` - pass
 - Slice 2:
-  - `go test ./internal/chc -run 'Ticket(Review|Status)|ReviewMetadata'` - pass
-  - `go test ./internal/chcapp -run 'Ticket(ReviewRef|Status|ApplyResult)'` - pass
-  - `go test ./internal/chc ./internal/chcapp ./internal/chctui` - pass
+  - `go test ./internal/chr -run 'Ticket(Review|Status)|ReviewMetadata'` - pass
+  - `go test ./internal/chrapp -run 'Ticket(ReviewRef|Status|ApplyResult)'` - pass
+  - `go test ./internal/chr ./internal/chrapp ./internal/chrtui` - pass
   - `make verify` - pass
 - Slice 3:
-  - `go test ./internal/chc -run 'Config|ReviewWorkflow'` - pass
-  - `go test ./internal/chcapp -run 'TicketReviewMode|Workspace|Init'` - pass
-  - `go test ./internal/chc ./internal/chcapp` - pass
+  - `go test ./internal/chr -run 'Config|ReviewWorkflow'` - pass
+  - `go test ./internal/chrapp -run 'TicketReviewMode|Workspace|Init'` - pass
+  - `go test ./internal/chr ./internal/chrapp` - pass
   - `make verify` - pass
 - Slice 4:
   - `git diff --check` - pass
-  - `go test ./internal/chc -run 'Config|ReviewProvider'` - pass
-  - `go test ./internal/chcapp -run 'TicketReviewMode|Workspace|Init'` - pass
-  - `go test ./internal/chc ./internal/chcapp` - pass
+  - `go test ./internal/chr -run 'Config|ReviewProvider'` - pass
+  - `go test ./internal/chrapp -run 'TicketReviewMode|Workspace|Init'` - pass
+  - `go test ./internal/chr ./internal/chrapp` - pass
 - Slice 5:
   - `git diff --check` - pass
-  - `go test ./internal/chc -run 'Review(Remote|Provider)|Config'` - pass
-  - `go test ./internal/chc` - pass
-  - `golangci-lint run ./internal/chc` - pass
+  - `go test ./internal/chr -run 'Review(Remote|Provider)|Config'` - pass
+  - `go test ./internal/chr` - pass
+  - `golangci-lint run ./internal/chr` - pass
 - Slice 6:
   - `git diff --check` - pass
-  - `go test ./internal/chc -run 'TicketReview|ReviewRemote|ReviewProvider|Config'` - pass
-  - `go test ./internal/chcapp -run 'TicketReview|TicketReviewMode|TicketReviewRef'` - pass
-  - `go test ./internal/chc ./internal/chcapp` - pass
-  - `golangci-lint run ./internal/chc ./internal/chcapp` - pass
+  - `go test ./internal/chr -run 'TicketReview|ReviewRemote|ReviewProvider|Config'` - pass
+  - `go test ./internal/chrapp -run 'TicketReview|TicketReviewMode|TicketReviewRef'` - pass
+  - `go test ./internal/chr ./internal/chrapp` - pass
+  - `golangci-lint run ./internal/chr ./internal/chrapp` - pass
 - Slice 7:
   - `scripts/check-go-func-signatures.sh` - pass
-  - `go test ./internal/chc -run 'WorkSelection|AgentOperationLock'` - pass
-  - `go test ./internal/chcapp -run 'AgentWork|TicketLoop|TicketReview'` - pass
-  - `go test ./internal/chc ./internal/chcapp` - pass
-  - `golangci-lint run ./internal/chc ./internal/chcapp` - pass
+  - `go test ./internal/chr -run 'WorkSelection|AgentOperationLock'` - pass
+  - `go test ./internal/chrapp -run 'AgentWork|TicketLoop|TicketReview'` - pass
+  - `go test ./internal/chr ./internal/chrapp` - pass
+  - `golangci-lint run ./internal/chr ./internal/chrapp` - pass
 - Slice 8:
   - `git diff --check` - pass
   - `scripts/check-go-func-signatures.sh` - pass
-  - `go test ./internal/chc -run 'CodexWorkerContext|WorkSelection|TicketReview'` - pass
+  - `go test ./internal/chr -run 'CodexWorkerContext|WorkSelection|TicketReview'` - pass
   - `make verify` - pass
   - Ticket review QA scenario - pass
 

@@ -20,13 +20,13 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 
 ## Task Commits
 
-- T1: `feat(chc): add active project model`
-- T2: `feat(chc): persist active project state`
-- T3: `test(chc): cover active project store`
+- T1: `feat(chr): add active project model`
+- T2: `feat(chr): persist active project state`
+- T3: `test(chr): cover active project store`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Notes

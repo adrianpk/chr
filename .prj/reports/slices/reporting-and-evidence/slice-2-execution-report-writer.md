@@ -21,7 +21,7 @@ connects it to result application.
 - Writes `execution-report.md` under the execution run directory.
 - Creates the report directory when needed.
 - Refuses to overwrite an existing non-report file.
-- Writes execution reports from `chc ticket apply-result`.
+- Writes execution reports from `chr ticket apply-result`.
 - Keeps dry-run result application side-effect free.
 
 ## Implementation Notes
@@ -35,24 +35,24 @@ same path are rejected.
 ## Contracts Added or Changed
 
 - Execution report artifact path: `<run_dir>/execution-report.md`.
-- `chc ticket apply-result` now writes both `result-application.md` and
+- `chr ticket apply-result` now writes both `result-application.md` and
   `execution-report.md`.
 - Dry-run result application does not write either report artifact.
 
 ## Files of Interest
 
-- `internal/chc/execution_report.go`
-- `internal/chc/execution_report_test.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/execution_report.go`
+- `internal/chr/execution_report_test.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/execution-reports.md`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'Test(ExecutionReportWriter|NewExecutionReport|RenderExecutionReport)'
-go test ./internal/chcapp -run 'TestTicketApplyResult'
+go test ./internal/chr -run 'Test(ExecutionReportWriter|NewExecutionReport|RenderExecutionReport)'
+go test ./internal/chrapp -run 'TestTicketApplyResult'
 make verify
 ```
 

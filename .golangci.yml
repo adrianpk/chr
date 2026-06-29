@@ -81,7 +81,7 @@ formatters:
       sections:
         - standard
         - default
-        - prefix(forge.adrianpk.com/chc)
+        - prefix(forge.adrianpk.com/chr)
 
 issues:
   max-issues-per-linter: 0

@@ -6,7 +6,7 @@ Sources:
 
 - `.prj/specs/specs/context-composition-pipeline.md`
 - `.prj/specs/specs/tui-product-surface.md`
-- `.prj/drafts/chc-cli-output-polish-notes.md`
+- `.prj/drafts/chr-cli-output-polish-notes.md`
 - `docs/explanation/document-generation-model.md`
 - `docs/reference/authoring-sessions.md`
 
@@ -73,7 +73,7 @@ It is useful when:
 
 - the user wants the system to extract project-specific knowledge;
 - the target artifact needs sharper inputs than a generic checklist can provide;
-- the available project docs, tickets, code inventory, and `.chc/` artifacts can
+- the available project docs, tickets, code inventory, and `.chr/` artifacts can
   shape better questions.
 
 The TUI must not present generic template questions as context-aware
@@ -95,7 +95,7 @@ Inputs:
 - source dump, spec, plan, tracker, ticket, or selected document;
 - current session transcript;
 - previous answers;
-- relevant `.chc/` artifacts;
+- relevant `.chr/` artifacts;
 - relevant docs;
 - file tree summary;
 - optional Go code context summaries.

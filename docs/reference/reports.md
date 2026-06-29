@@ -18,14 +18,14 @@ Related report formats:
 List reports for the resolved project:
 
 ```sh
-chc report list
+chr report list
 ```
 
 Project resolution follows the same rules as ticket commands. Use `--dir` to
 select a project explicitly:
 
 ```sh
-chc report list --dir /path/to/project
+chr report list --dir /path/to/project
 ```
 
 ## Output
@@ -33,7 +33,7 @@ chc report list --dir /path/to/project
 Each report is printed as one line:
 
 ```text
-kind: execution path: .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md ticket: CHC-1 execution: exec-1 loop: none status: succeeded
+kind: execution path: .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md ticket: CHR-1 execution: exec-1 loop: none status: succeeded
 ```
 
 Fields:
@@ -52,12 +52,12 @@ Missing fields render as `none`.
 Supported filters:
 
 ```sh
-chc report list --kind execution
-chc report list --kind loop
-chc report list --ticket CHC-1
-chc report list --execution exec-1
-chc report list --loop loop-1
-chc report list --status succeeded
+chr report list --kind execution
+chr report list --kind loop
+chr report list --ticket CHR-1
+chr report list --execution exec-1
+chr report list --loop loop-1
+chr report list --status succeeded
 ```
 
 Filters can be combined. All provided filters must match.
@@ -67,10 +67,10 @@ Filters can be combined. All provided filters must match.
 Show a report body by report id or lookup filter:
 
 ```sh
-chc report show .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md
-chc report show --execution exec-1
-chc report show --loop loop-1
-chc report show --ticket CHC-1 --kind execution
+chr report show .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md
+chr report show --execution exec-1
+chr report show --loop loop-1
+chr report show --ticket CHR-1 --kind execution
 ```
 
 The report id can be a project-relative report path, an absolute report path,
@@ -84,17 +84,17 @@ single report.
 To print metadata instead of the Markdown body:
 
 ```sh
-chc report show --execution exec-1 --metadata
+chr report show --execution exec-1 --metadata
 ```
 
-Metadata output uses the same stable line format as `chc report list`.
+Metadata output uses the same stable line format as `chr report list`.
 
 ## Discovery Boundary
 
 Report listing discovers Markdown report artifacts under:
 
 ```text
-.chc/user/runtime/runs/
+.chr/user/runtime/runs/
 ```
 
 Current discovered report filenames:

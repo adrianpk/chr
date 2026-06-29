@@ -43,13 +43,13 @@ transaction-safe ticket key allocation.
 
 ## Files of Interest
 
-- `cmd/chc/assets/migration/sqlite/20260526000008-add_board_ticket_metadata.sql`
-- `internal/chc/migration_test.go`
+- `cmd/chr/assets/migration/sqlite/20260526000008-add_board_ticket_metadata.sql`
+- `internal/chr/migration_test.go`
 - `docs/reference/sqlite-migrations.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestMigratorAppliesPendingMigrations|TestReadSQLiteMigrations'`
+- `go test ./internal/chr -run 'TestMigratorAppliesPendingMigrations|TestReadSQLiteMigrations'`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

@@ -98,7 +98,7 @@ func validateProjectMetadataWriteHash(path string, metadata ProjectMetadata) err
 
 	current, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("project metadata file changed outside CHC: source file is missing")
+		return fmt.Errorf("project metadata file changed outside CHR: source file is missing")
 	}
 
 	if err != nil {
@@ -107,7 +107,7 @@ func validateProjectMetadataWriteHash(path string, metadata ProjectMetadata) err
 
 	currentHash := contentHash(current)
 	if currentHash != metadata.SourceHash {
-		return fmt.Errorf("project metadata file changed outside CHC: refresh before saving")
+		return fmt.Errorf("project metadata file changed outside CHR: refresh before saving")
 	}
 
 	return nil

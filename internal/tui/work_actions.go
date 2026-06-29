@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // WorkActionID identifies an agent work action awaiting TUI confirmation.
@@ -188,7 +188,7 @@ func renderWorkActionDetails(events []AgentEventView) string {
 	writeWorkActionDetail(&output, "Execution report: ", details.ExecutionReport)
 	writeWorkActionDetail(&output, "Runtime log: ", details.RuntimeLog)
 	writeWorkActionDetail(&output, "Validation log: ", details.ValidationLog)
-	writeWorkActionDetail(&output, "Lookup: chc work logs ", details.ExecutionID)
+	writeWorkActionDetail(&output, "Lookup: chr work logs ", details.ExecutionID)
 
 	return output.String()
 }

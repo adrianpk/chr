@@ -11,9 +11,9 @@ import (
 func TestRuntimeArtifactCleanupPreviewReportsUnreferencedLeafDirs(t *testing.T) {
 	repository := newTestExecutionRepository(t)
 	projectDir := t.TempDir()
-	artifactDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs")
-	referencedDir := filepath.Join(artifactDir, "CHC-1", "exec-1")
-	unreferencedDir := filepath.Join(artifactDir, "CHC-2", "exec-2")
+	artifactDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs")
+	referencedDir := filepath.Join(artifactDir, "CHR-1", "exec-1")
+	unreferencedDir := filepath.Join(artifactDir, "CHR-2", "exec-2")
 
 	for _, dir := range []string{referencedDir, unreferencedDir} {
 		err := os.MkdirAll(dir, 0o755)

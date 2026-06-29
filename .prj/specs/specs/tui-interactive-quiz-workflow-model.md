@@ -204,22 +204,22 @@ Invariants:
 Project-wide quiz:
 
 ```text
-.chc/quizzes/project-quiz-raw.md
-.chc/quizzes/project-quiz.md
+.chr/quizzes/project-quiz-raw.md
+.chr/quizzes/project-quiz.md
 ```
 
 Use-case-scoped quiz:
 
 ```text
-.chc/quizzes/<case-slug>-quiz-raw.md
-.chc/quizzes/<case-slug>-quiz.md
+.chr/quizzes/<case-slug>-quiz-raw.md
+.chr/quizzes/<case-slug>-quiz.md
 ```
 
 Runtime state cache:
 
 ```text
-.chc/tmp/quiz-runtime/project.json
-.chc/tmp/quiz-runtime/<case-slug>.json
+.chr/tmp/quiz-runtime/project.json
+.chr/tmp/quiz-runtime/<case-slug>.json
 ```
 
 ### Raw Artifact Format
@@ -232,7 +232,7 @@ case_slug: <case-slug-or-empty>
 scope: project | use_case
 status: raw
 runtime_id: <runtime-id>
-curated_path: .chc/quizzes/<scope>-quiz.md
+curated_path: .chr/quizzes/<scope>-quiz.md
 updated_at: <timestamp>
 ```
 
@@ -259,7 +259,7 @@ project_id: <project-id>
 case_slug: <case-slug-or-empty>
 scope: project | use_case
 status: curated
-raw_path: .chc/quizzes/<scope>-quiz-raw.md
+raw_path: .chr/quizzes/<scope>-quiz-raw.md
 updated_at: <timestamp>
 ```
 
@@ -367,7 +367,7 @@ Each response must carry:
 
 For `quiz_next_question`, the structured payload is a question and optional
 candidate list. For `quiz_to_draft_spec`, the structured payload is a draft
-spec title and body that the service writes into `.chc/specs/drafts/` with
+spec title and body that the service writes into `.chr/specs/drafts/` with
 `status: draft`.
 
 Responses must be validated before they update runtime state or write durable
@@ -389,4 +389,4 @@ artifacts.
 - Whether curated artifacts should include a compact tag block in frontmatter or
   keep tags only per derived context entry later.
 - Whether archived historical quiz snapshots should live under
-  `.chc/quizzes/archive/`.
+  `.chr/quizzes/archive/`.

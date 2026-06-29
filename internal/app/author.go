@@ -12,7 +12,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func newAuthorCommand(stdout io.Writer, deps appDependencies) *cli.Command {

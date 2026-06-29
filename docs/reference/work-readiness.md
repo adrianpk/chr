@@ -2,16 +2,16 @@
 
 ## Purpose
 
-Work readiness is the preflight contract ChrysoCoord checks before starting
+Work readiness is the preflight contract Chryso checks before starting
 agent work.
 
 It protects the managed project from starting a ticket execution or ready queue
 from an unexpected repository state. The policy is project-local and
-configurable, so projects do not need to follow ChrysoCoord's own branch names.
+configurable, so projects do not need to follow Chryso's own branch names.
 
 ## Configuration
 
-Work readiness configuration lives in `.chc/user/config.yml` under `work:`.
+Work readiness configuration lives in `.chr/user/config.yml` under `work:`.
 
 ```yml
 work:
@@ -23,7 +23,7 @@ work:
   allow_safe_repair: true
   allow_branch_creation: false
   workspace_mode: project
-  worktree_root: .chc/user/runtime/worktrees
+  worktree_root: .chr/user/runtime/worktrees
   worktree_base: remote_integration_branch
   worktree_cleanup: after_merge
 ```
@@ -45,11 +45,11 @@ Default work policy:
 | `allow_safe_repair` | `true` |
 | `allow_branch_creation` | `false` |
 | `workspace_mode` | `project` |
-| `worktree_root` | `.chc/user/runtime/worktrees` |
+| `worktree_root` | `.chr/user/runtime/worktrees` |
 | `worktree_base` | `remote_integration_branch` |
 | `worktree_cleanup` | `after_merge` |
 
-The defaults preserve ChrysoCoord's own `dev` plus `origin` workflow while
+The defaults preserve Chryso's own `dev` plus `origin` workflow while
 making the policy explicit and replaceable per project.
 
 ## Modes
@@ -79,7 +79,7 @@ that set `workspace_mode: worktree` get a deterministic ticket worktree under
 `worktree_root`, execution paths inside that worktree, and worktree metadata
 under `<worktree_root>/.metadata/`.
 
-In worktree mode, ChrysoCoord still checks the user checkout before starting
+In worktree mode, Chryso still checks the user checkout before starting
 work. The user checkout readiness check protects the integration branch and
 remote tracking state, while the ticket worktree inspection reports whether the
 isolated execution workspace is missing, clean, dirty, mismatched, branch-owned
@@ -87,11 +87,11 @@ elsewhere, or orphaned.
 
 ## Diagnostics
 
-`chc work doctor` prints the effective policy, readiness status, diagnostics,
+`chr work doctor` prints the effective policy, readiness status, diagnostics,
 and repair guidance without starting agent work.
 
 ```sh
-chc work doctor
+chr work doctor
 ```
 
 Typical blocking diagnostics include:
@@ -100,7 +100,7 @@ Typical blocking diagnostics include:
   branch.
 - `missing_branch`: the configured branch is missing locally.
 - `dirty_worktree`: user-owned changes are visible.
-- `runtime_artifacts_visible`: ChrysoCoord runtime artifacts are visible to
+- `runtime_artifacts_visible`: Chryso runtime artifacts are visible to
   Git and can be safely ignored.
 - `missing_remote_ref`: the configured remote tracking ref is missing.
 - `branch_behind_remote`: the local branch is behind the configured remote ref.
@@ -114,16 +114,16 @@ Work may start only when there are no blocking diagnostics.
 
 ## Safe Repair
 
-When a diagnostic has a non-destructive repair, `chc work doctor --fix-safe`
+When a diagnostic has a non-destructive repair, `chr work doctor --fix-safe`
 applies it and prints the resulting readiness report.
 
 ```sh
-chc work doctor --fix-safe
+chr work doctor --fix-safe
 ```
 
 Safe repair may:
 
-- add ChrysoCoord runtime artifact paths to local ignore state;
+- add Chryso runtime artifact paths to local ignore state;
 - create the configured ticket worktree root;
 - fetch the configured canonical remote;
 - fast-forward the configured integration branch;
@@ -146,9 +146,9 @@ After repair, Dash reloads readiness so the user can retry the same work action.
 
 The same readiness policy is used by:
 
-- `chc work doctor`;
-- `chc work ticket <ticket-key>`;
-- `chc work run-all`;
+- `chr work doctor`;
+- `chr work ticket <ticket-key>`;
+- `chr work run-all`;
 - TUI Dash work actions;
 - ticket review-repair prioritization before later serial work.
 
@@ -156,6 +156,6 @@ Ticket review-repair ordering is not disabled by `no_git_enforcement`.
 
 ## Merge Base Defaults
 
-`chc ticket merge` uses the configured work integration branch as its default
+`chr ticket merge` uses the configured work integration branch as its default
 expected pull request base. Passing `--base` overrides that expectation for one
 command invocation.

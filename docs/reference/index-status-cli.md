@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`chc index status` reports whether the resolved project's derived ticket index
+`chr index status` reports whether the resolved project's derived ticket index
 matches canonical Markdown ticket files.
 
 This is a diagnostic command for users and agents. Normal ticket read workflows
@@ -12,14 +12,14 @@ those commands.
 ## Usage
 
 ```sh
-chc index status
+chr index status
 ```
 
 The command accepts the standard project resolution flags:
 
 ```sh
-chc index status --dir /path/to/project
-chc index status --dev-root _workspace
+chr index status --dir /path/to/project
+chr index status --dev-root _workspace
 ```
 
 ## Behavior
@@ -28,7 +28,7 @@ The command:
 
 - resolves the project through `--dir`, active project, or current directory;
 - opens the user-level SQLite ticket index;
-- discovers Markdown ticket files under `.chc/user/tickets`;
+- discovers Markdown ticket files under `.chr/user/tickets`;
 - compares discovered files against indexed ticket rows;
 - reports missing, stale, orphaned, and invalid ticket state;
 - exits with a non-zero status when any index drift exists.
@@ -51,10 +51,10 @@ missing: 1
 stale: 1
 orphaned: 1
 invalid: 1
-missing_ticket: CHC-1-Do-something.md
-stale_ticket: CHC-2-Update-flow.md
-orphaned_ticket: CHC-3-Removed.md
-invalid_ticket: CHC-4-Bad.md ticket frontmatter opening delimiter is required
+missing_ticket: CHR-1-Do-something.md
+stale_ticket: CHR-2-Update-flow.md
+orphaned_ticket: CHR-3-Removed.md
+invalid_ticket: CHR-4-Bad.md ticket frontmatter opening delimiter is required
 ```
 
 ## Exit Status

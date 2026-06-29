@@ -8,7 +8,7 @@ Status: delivered
 - [x] Commit plan and tracker directly to `dev`.
 - [x] Create slice branch from `dev`.
 - [x] Add root `AGENTS.md` profile asset.
-- [x] Materialize root files during `chc init`.
+- [x] Materialize root files during `chr init`.
 - [x] Preserve existing root `AGENTS.md`.
 - [x] Run validation.
 - [x] Push slice branch.

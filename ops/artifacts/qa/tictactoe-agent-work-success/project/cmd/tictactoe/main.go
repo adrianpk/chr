@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"example.com/chc-qa-tictactoe/internal/game"
+	"example.com/chr-qa-tictactoe/internal/game"
 )
 
 func main() {

@@ -14,7 +14,7 @@ Sources:
 
 Define the records the TUI must expose and the fields each screen should show.
 
-The TUI should make ChrysoCoord's Markdown-first state navigable without forcing
+The TUI should make Chryso's Markdown-first state navigable without forcing
 the user to understand every internal path.
 
 ## Overview Screen
@@ -183,7 +183,7 @@ Show:
 - derived index status;
 - config file path.
 
-Do not show `.chc/` root or Markdown canonical assets as editable settings.
+Do not show `.chr/` root or Markdown canonical assets as editable settings.
 
 ## Acceptance Criteria
 

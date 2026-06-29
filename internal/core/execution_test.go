@@ -12,7 +12,7 @@ func TestValidateExecutionRecordAcceptsValidRecord(t *testing.T) {
 	record := ExecutionRecord{
 		ID:        "exec-1",
 		ProjectID: "project-1",
-		TicketKey: "CHC-1",
+		TicketKey: "CHR-1",
 		Status:    ExecutionStatusPending,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -64,7 +64,7 @@ func missingExecutionIDTest(now time.Time) struct {
 		name: "id",
 		record: ExecutionRecord{
 			ProjectID: "project-1",
-			TicketKey: "CHC-1",
+			TicketKey: "CHR-1",
 			Status:    ExecutionStatusPending,
 			CreatedAt: now,
 			UpdatedAt: now,
@@ -83,7 +83,7 @@ func missingExecutionProjectIDTest(now time.Time) struct {
 		name: "project id",
 		record: ExecutionRecord{
 			ID:        "exec-1",
-			TicketKey: "CHC-1",
+			TicketKey: "CHR-1",
 			Status:    ExecutionStatusPending,
 			CreatedAt: now,
 			UpdatedAt: now,
@@ -122,7 +122,7 @@ func missingExecutionCreatedAtTest(now time.Time) struct {
 		record: ExecutionRecord{
 			ID:        "exec-1",
 			ProjectID: "project-1",
-			TicketKey: "CHC-1",
+			TicketKey: "CHR-1",
 			Status:    ExecutionStatusPending,
 			UpdatedAt: now,
 		},
@@ -141,7 +141,7 @@ func missingExecutionUpdatedAtTest(now time.Time) struct {
 		record: ExecutionRecord{
 			ID:        "exec-1",
 			ProjectID: "project-1",
-			TicketKey: "CHC-1",
+			TicketKey: "CHR-1",
 			Status:    ExecutionStatusPending,
 			CreatedAt: now,
 		},
@@ -154,7 +154,7 @@ func TestValidateExecutionRecordRejectsInvalidStatus(t *testing.T) {
 	record := ExecutionRecord{
 		ID:        "exec-1",
 		ProjectID: "project-1",
-		TicketKey: "CHC-1",
+		TicketKey: "CHR-1",
 		Status:    ExecutionStatus("unknown"),
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -174,7 +174,7 @@ func TestValidateExecutionRecordRejectsFinishedBeforeStarted(t *testing.T) {
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
-		TicketKey:  "CHC-1",
+		TicketKey:  "CHR-1",
 		Status:     ExecutionStatusFailed,
 		CreatedAt:  now,
 		StartedAt:  &startedAt,
@@ -191,20 +191,20 @@ func TestValidateExecutionRecordRejectsFinishedBeforeStarted(t *testing.T) {
 func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 	dir := t.TempDir()
 	plan := RuntimePlan{
-		Image:                 "chc-agent-runtime:local",
-		DockerfilePath:        filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		Image:                 "chr-agent-runtime:local",
+		DockerfilePath:        filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 		ContainerWorkdir:      "/workspace",
 		WorkspaceMode:         WorkWorkspaceModeWorktree,
 		ProjectCheckoutDir:    dir,
-		ExecutionWorkspaceDir: filepath.Join(dir, ".chc", "user", "worktrees", "CHC-1"),
+		ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "user", "worktrees", "CHR-1"),
 		WorkspaceBaseRef:      "origin/dev",
 		WorkspaceBaseSHA:      "abc123",
-		TicketBranch:          "chc/CHC-1",
-		RunArtifactDir:        filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1"),
-		WorkerContextPath:     filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "context.md"),
-		ResultPath:            filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "result.json"),
-		LogPath:               filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "runtime.log"),
-		ValidationPath:        filepath.Join(dir, ".chc", "user", "runtime", "runs", "exec-1", "validation.log"),
+		TicketBranch:          "chr/CHR-1",
+		RunArtifactDir:        filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1"),
+		WorkerContextPath:     filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1", "context.md"),
+		ResultPath:            filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1", "result.json"),
+		LogPath:               filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1", "runtime.log"),
+		ValidationPath:        filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1", "validation.log"),
 		ValidationCommand:     "make verify",
 	}
 
@@ -234,8 +234,8 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 		t.Fatalf("Workspace.ExecutionWorkspaceDir = %q, want %q", record.Workspace.ExecutionWorkspaceDir, plan.ExecutionWorkspaceDir)
 	}
 
-	if record.Workspace.TicketBranch != "chc/CHC-1" {
-		t.Fatalf("Workspace.TicketBranch = %q, want chc/CHC-1", record.Workspace.TicketBranch)
+	if record.Workspace.TicketBranch != "chr/CHR-1" {
+		t.Fatalf("Workspace.TicketBranch = %q, want chr/CHR-1", record.Workspace.TicketBranch)
 	}
 }
 

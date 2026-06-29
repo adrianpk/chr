@@ -13,10 +13,10 @@ Run one direct proving objective inside the fixture's agent sandbox.
 
 ## Delivered Behavior
 
-`chc` now exposes a temporary proving command:
+`chr` now exposes a temporary proving command:
 
 ```sh
-chc proving run --dir <project> --objective <objective> [--dry-run]
+chr proving run --dir <project> --objective <objective> [--dry-run]
 ```
 
 The command loads a direct proving objective, computes the fixture runtime plan,
@@ -46,7 +46,7 @@ not through hidden conversational memory.
 
 New temporary CLI command:
 
-- `chc proving run`
+- `chr proving run`
 - `--dir`
 - `--objective`
 - `--dry-run`
@@ -65,17 +65,17 @@ New reference doc:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `internal/chc/proving.go`
-- `internal/chc/proving_test.go`
+- `cmd/chr/main.go`
+- `internal/chr/proving.go`
+- `internal/chr/proving_test.go`
 - `docs/reference/mvp-agent-proving-ground.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestParseProving|TestPlanProving|TestRunProving|TestRenderProving'`: pass
+- `go test ./internal/chr -run 'TestParseProving|TestPlanProving|TestRunProving|TestRenderProving'`: pass
 - `./.prj/fixtures/mvp-agent-proving-ground/materialize-todolist.sh`: pass
-- `go run ./cmd/chc proving run --dir _workspace/testing/projects/todolist --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md --dry-run`: pass
-- `go run ./cmd/chc proving run --dir _workspace/testing/projects/todolist --objective .chc/proving/objectives/TODO-2-complete-task.md --dry-run`: pass
+- `go run ./cmd/chr proving run --dir _workspace/testing/projects/todolist --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md --dry-run`: pass
+- `go run ./cmd/chr proving run --dir _workspace/testing/projects/todolist --objective .chr/proving/objectives/TODO-2-complete-task.md --dry-run`: pass
 - `docker --version`: pass
 - `make verify`: pass
 

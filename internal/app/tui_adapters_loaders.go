@@ -1,6 +1,6 @@
 package app
 
-import "forge.adrianpk.com/chc/internal/tui"
+import "forge.adrianpk.com/chr/internal/tui"
 
 func loadTUIDumps(operations service) ([]tui.DumpView, error) {
 	result, err := operations.ListDumps()

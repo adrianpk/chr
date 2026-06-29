@@ -17,7 +17,7 @@ parsing Markdown or knowing dump filesystem layout rules.
 
 ## Delivered Behavior
 
-- The TUI accepts dump-specific state through `chctui.Options`.
+- The TUI accepts dump-specific state through `chrtui.Options`.
 - The app adapter loads dumps from the service and maps them into TUI state.
 - The Dumps screen renders scope, status, title, path, updated time, and
   preview.
@@ -28,8 +28,8 @@ parsing Markdown or knowing dump filesystem layout rules.
 
 ## Implementation Notes
 
-- `internal/chctui.DumpView` is intentionally separate from
-  `internal/chcapp.DumpView` to keep the TUI package independent from the app
+- `internal/chrtui.DumpView` is intentionally separate from
+  `internal/chrapp.DumpView` to keep the TUI package independent from the app
   service implementation.
 - `loadTUIDumps` is the adapter boundary that converts service results into TUI
   read state.
@@ -41,7 +41,7 @@ parsing Markdown or knowing dump filesystem layout rules.
 
 ## Contracts Added or Changed
 
-- Added `chctui.DumpScope` and `chctui.DumpView`.
+- Added `chrtui.DumpScope` and `chrtui.DumpView`.
 - Added `Options.Dumps`.
 - Added independent dump selection and navigation state.
 - Changed `F3 Dumps` to render from dump-specific state.
@@ -49,17 +49,17 @@ parsing Markdown or knowing dump filesystem layout rules.
 
 ## Files of Interest
 
-- `internal/chctui/dumps.go`
-- `internal/chctui/model.go`
-- `internal/chctui/shell.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model_test.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/tui_adapters.go`
+- `internal/chrtui/dumps.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/shell.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/tui_adapters.go`
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp`
+- `go test ./internal/chrtui ./internal/chrapp`
 - `make verify`
 
 ## Risks and Follow-ups

@@ -18,7 +18,7 @@ func TestTicketKeySequenceReservesSeedThenNextNumbers(t *testing.T) {
 
 	first, err := repository.ReserveNextTicketKey(context.Background(), ReserveNextTicketKeyOptions{
 		ProjectID: "project-1",
-		Prefix:    "CHC",
+		Prefix:    "CHR",
 		Seed:      7,
 		UpdatedAt: now,
 	})
@@ -28,7 +28,7 @@ func TestTicketKeySequenceReservesSeedThenNextNumbers(t *testing.T) {
 
 	second, err := repository.ReserveNextTicketKey(context.Background(), ReserveNextTicketKeyOptions{
 		ProjectID: "project-1",
-		Prefix:    "CHC",
+		Prefix:    "CHR",
 		Seed:      1,
 		UpdatedAt: now,
 	})
@@ -53,7 +53,7 @@ func TestTicketKeySequenceKeepsProjectPrefixesIndependent(t *testing.T) {
 
 	first, err := repository.ReserveNextTicketKey(context.Background(), ReserveNextTicketKeyOptions{
 		ProjectID: "project-1",
-		Prefix:    "CHC",
+		Prefix:    "CHR",
 		Seed:      1,
 		UpdatedAt: now,
 	})
@@ -88,7 +88,7 @@ func TestTicketKeySequenceAdvancesWhenFilesystemSeedIsHigher(t *testing.T) {
 
 	_, err = repository.ReserveNextTicketKey(context.Background(), ReserveNextTicketKeyOptions{
 		ProjectID: "project-1",
-		Prefix:    "CHC",
+		Prefix:    "CHR",
 		Seed:      1,
 		UpdatedAt: now,
 	})
@@ -98,7 +98,7 @@ func TestTicketKeySequenceAdvancesWhenFilesystemSeedIsHigher(t *testing.T) {
 
 	next, err := repository.ReserveNextTicketKey(context.Background(), ReserveNextTicketKeyOptions{
 		ProjectID: "project-1",
-		Prefix:    "CHC",
+		Prefix:    "CHR",
 		Seed:      10,
 		UpdatedAt: now,
 	})

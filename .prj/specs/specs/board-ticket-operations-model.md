@@ -12,7 +12,7 @@ The current implementation already has these relevant concepts:
 - `Ticket` renders Markdown frontmatter and body.
 - `IndexedTicket` stores searchable ticket metadata in SQLite.
 - `TicketRepository` creates Markdown tickets.
-- `TicketIndex` persists indexed ticket metadata in `chc.db`.
+- `TicketIndex` persists indexed ticket metadata in `chr.db`.
 - `TicketReconciler` refreshes SQLite rows from Markdown tickets.
 
 The Board MVP should evolve these models instead of introducing an unrelated
@@ -24,9 +24,9 @@ The ticket Markdown frontmatter should support:
 
 | Field | Required | Semantics |
 | --- | --- | --- |
-| `key` | yes | Human-facing ticket id such as `CHC-123`. |
+| `key` | yes | Human-facing ticket id such as `CHR-123`. |
 | `title` | yes | Short ticket title. |
-| `synopsis` | yes for new ChrysoCoord-created tickets | One short operational summary for Board rows and detail. |
+| `synopsis` | yes for new Chryso-created tickets | One short operational summary for Board rows and detail. |
 | `status` | yes | Board lifecycle status. |
 | `priority` | yes for Board-created tickets | Scheduling importance. |
 | `severity` | yes for Board-created tickets | Impact level. |
@@ -139,7 +139,7 @@ Recommended indexes:
 
 ## Ticket Key Allocation
 
-`CHC-XXX` remains the default human-facing key shape.
+`CHR-XXX` remains the default human-facing key shape.
 
 The MVP should move allocation toward SQLite-backed monotonic numbering so new
 ticket creation does not depend only on recursive file scans. Allocation must
@@ -152,7 +152,7 @@ The existing configurable key prefix should remain supported.
 MVP active userspace:
 
 ```text
-.chc/user/
+.chr/user/
 ```
 
 The active operator id is resolved from configuration or environment, but
@@ -161,7 +161,7 @@ artifact writes use the single active userspace path for now.
 Future multi-operator shape:
 
 ```text
-.chc/operators/<operator-id>/
+.chr/operators/<operator-id>/
 ```
 
 This future model is not part of the first Board implementation, but code that
@@ -177,13 +177,13 @@ to treat SQLite as operational project state, not only disposable user cache.
 The implementation should resolve this deliberately:
 
 - preserve existing user-level DB behavior where required by existing commands;
-- add or adapt a project-local DB under `.chc/user/` if needed for Board state;
+- add or adapt a project-local DB under `.chr/user/` if needed for Board state;
 - keep Markdown as the authoritative body source;
 - ensure index rebuild can recover Board metadata from Markdown when possible.
 
 ## Validation Rules
 
-- New ChrysoCoord-created tickets require non-empty title and synopsis.
+- New Chryso-created tickets require non-empty title and synopsis.
 - New Board-created tickets default to `backlog`.
 - New generated tickets must include source metadata when generated from plan
   tracking.

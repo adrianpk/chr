@@ -10,4 +10,4 @@ Boundary:
 - may parse embedded template files;
 - may write full-page or fragment HTML responses;
 - may compose presentation helper function maps;
-- must not resolve projects or execute ChrysoCoord operations.
+- must not resolve projects or execute Chryso operations.

@@ -28,11 +28,11 @@ presentation layer.
 
 ## Implementation Notes
 
-- `internal/chcapp.service` owns dump read/save/open operations and the editor
+- `internal/chrapp.service` owns dump read/save/open operations and the editor
   launcher dependency.
-- `internal/chcapp.tuiDumpActionExecutor` maps internal edit, save, external
+- `internal/chrapp.tuiDumpActionExecutor` maps internal edit, save, external
   edit, and refresh intents to service operations.
-- `internal/chctui.Model` keeps a dump edit state for internal Markdown edits
+- `internal/chrtui.Model` keeps a dump edit state for internal Markdown edits
   and handles external editor completion as a message.
 
 ## Contracts Added or Changed
@@ -47,16 +47,16 @@ presentation layer.
 
 ## Files of Interest
 
-- `internal/chcapp/service_dump.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chctui/dump_actions.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model_test.go`
+- `internal/chrapp/service_dump.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrtui/dump_actions.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui`
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

@@ -41,8 +41,8 @@ No new service abstractions were introduced.
 
 ## Files of Interest
 
-- `internal/chcapp/cli_test.go`
-- `internal/chcapp/tui_adapter_parity_test.go`
+- `internal/chrapp/cli_test.go`
+- `internal/chrapp/tui_adapter_parity_test.go`
 - `docs/reference/cli-tui-action-matrix.md`
 
 ## Validation

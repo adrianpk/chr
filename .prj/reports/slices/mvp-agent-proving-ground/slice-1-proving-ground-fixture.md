@@ -9,7 +9,7 @@ PR: #72
 
 ## Purpose
 
-Create the controlled project used to prove that `chc` can run a sandboxed
+Create the controlled project used to prove that `chr` can run a sandboxed
 Codex agent against a real code task.
 
 ## Delivered Behavior
@@ -32,7 +32,7 @@ The fixture is intentionally not green. It has:
 - a missing `CompleteTask` feature;
 - tests that expose both problems;
 - compile, lint, and test validation commands;
-- `.chc/` runtime config;
+- `.chr/` runtime config;
 - a hand-authored sandbox Dockerfile for agent execution.
 
 ## Implementation Notes
@@ -55,18 +55,18 @@ New fixture convention:
 - committed fixture source lives under `.prj/fixtures/mvp-agent-proving-ground/`;
 - generated proving projects live under `_workspace/testing/projects/`;
 - fixture validation is `make verify`;
-- fixture runtime image is `chc-todolist-agent:local`;
-- fixture runtime Dockerfile is `.chc/runtime/agent/Dockerfile`.
+- fixture runtime image is `chr-todolist-agent:local`;
+- fixture runtime Dockerfile is `.chr/runtime/agent/Dockerfile`.
 
 ## Files of Interest
 
 - `.prj/fixtures/mvp-agent-proving-ground/materialize-todolist.sh`
 - `.prj/fixtures/mvp-agent-proving-ground/todolist/internal/todo/store.go`
 - `.prj/fixtures/mvp-agent-proving-ground/todolist/internal/todo/store_test.go`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chc/config.yml`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chc/runtime/agent/Dockerfile`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chc/tickets/TODO-1-fix-task-id-reuse.md`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chc/tickets/TODO-2-complete-task.md`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/config.yml`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/runtime/agent/Dockerfile`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/tickets/TODO-1-fix-task-id-reuse.md`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/tickets/TODO-2-complete-task.md`
 
 ## Validation
 

@@ -43,7 +43,7 @@ PR: `#347`
 - `internal/webui/assets/templates/shell.html`
   - Adds case metadata edit, dump create, dump save, dump append, and write
     result templates.
-- `internal/webui/assets/static/chc.css`
+- `internal/webui/assets/static/chr.css`
   - Adds form and write-result styling.
 - `internal/webui/webui_test.go`
   - Covers action redirects and blocked write result envelopes.
@@ -55,7 +55,7 @@ PR: `#347`
 
 - `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Catalog|Artifact|WriteAction'` (pass)
 - `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- Temporary-project smoke with `go run ./cmd/chc web serve --dir /tmp/tmp.I8grD0CG1y --port 7335` plus:
+- Temporary-project smoke with `go run ./cmd/chr web serve --dir /tmp/tmp.I8grD0CG1y --port 7335` plus:
   - `curl -fsS http://127.0.0.1:7335/dumps` found the dump create form (pass)
   - `curl -X POST http://127.0.0.1:7335/actions` for dump create returned `303 /dumps` (pass)
   - `curl -X POST http://127.0.0.1:7335/actions` for case metadata update returned `303 /cases/detail?id=blog` (pass)

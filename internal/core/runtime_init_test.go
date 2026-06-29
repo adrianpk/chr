@@ -23,14 +23,14 @@ func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 		t.Fatalf("Root = %q, want runtime root", result.Root)
 	}
 
-	assertFile(t, dir, ".chc/user/runtime/agent/Dockerfile")
-	assertDir(t, dir, ".chc/user/runtime/runs")
+	assertFile(t, dir, ".chr/user/runtime/agent/Dockerfile")
+	assertDir(t, dir, ".chr/user/runtime/runs")
 
-	if !contains(result.Created, ".chc/user/runtime/agent/Dockerfile") {
+	if !contains(result.Created, ".chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 
-	if !contains(result.Created, ".chc/user/runtime/runs") {
+	if !contains(result.Created, ".chr/user/runtime/runs") {
 		t.Fatalf("Created = %#v, want runtime runs directory", result.Created)
 	}
 }
@@ -49,14 +49,14 @@ func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	assertNotExists(t, dir, ".chc/user/runtime/agent/Dockerfile")
-	assertNotExists(t, dir, ".chc/user/runtime/runs")
+	assertNotExists(t, dir, ".chr/user/runtime/agent/Dockerfile")
+	assertNotExists(t, dir, ".chr/user/runtime/runs")
 
-	if !contains(result.Created, ".chc/user/runtime/agent/Dockerfile") {
+	if !contains(result.Created, ".chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 
-	if !contains(result.Created, ".chc/user/runtime/runs") {
+	if !contains(result.Created, ".chr/user/runtime/runs") {
 		t.Fatalf("Created = %#v, want runtime runs directory", result.Created)
 	}
 }
@@ -65,7 +65,7 @@ func TestRuntimeInitSkipsExistingRuntimeTemplate(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
 
-	dockerfilePath := filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -91,7 +91,7 @@ func TestRuntimeInitSkipsExistingRuntimeTemplate(t *testing.T) {
 		t.Fatalf("runtime template content = %q, want custom content unchanged", string(content))
 	}
 
-	if !contains(result.Skipped, ".chc/user/runtime/agent/Dockerfile") {
+	if !contains(result.Skipped, ".chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("Skipped = %#v, want runtime Dockerfile", result.Skipped)
 	}
 }

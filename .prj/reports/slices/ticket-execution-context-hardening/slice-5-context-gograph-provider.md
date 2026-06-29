@@ -50,13 +50,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/context_gograph.go`
-- `internal/chc/context_gograph_test.go`
+- `internal/chr/context_gograph.go`
+- `internal/chr/context_gograph_test.go`
 - `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoadGoGraphContext'`: pass
+- `go test ./internal/chr -run 'TestLoadGoGraphContext'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

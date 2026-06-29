@@ -2,20 +2,20 @@
 
 ## Root
 
-ChrysoCoord uses `.chc/` as the project-local hidden directory.
+Chryso uses `.chr/` as the project-local hidden directory.
 
-The `chc` command creates and manages this directory inside the project where it runs. The directory is intentionally tied to the CLI name rather than the target repository name.
+The `chr` command creates and manages this directory inside the project where it runs. The directory is intentionally tied to the CLI name rather than the target repository name.
 
-Project ticket files and project protocol assets are local to `.chc/` inside each managed project.
+Project ticket files and project protocol assets are local to `.chr/` inside each managed project.
 
-ChrysoCoord may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chc/` source files.
+Chryso may also keep user-level state outside the project for daemon operation, project registration, and derived indexes. User-level state does not replace the project-local `.chr/` source files.
 
 Board and ticket operations use both layers:
 
-- Markdown tickets under `.chc/user/tickets/` are the durable ticket records.
+- Markdown tickets under `.chr/user/tickets/` are the durable ticket records.
 - The user-level SQLite index stores derived ticket metadata for fast listing,
   Board columns, attention detection, and ticket key allocation.
-- `.chc/user/` is the project-local active userspace boundary for workflows
+- `.chr/user/` is the project-local active userspace boundary for workflows
   that need an operator-owned location.
 
 Managed projects also receive a root-level `AGENTS.md` for compatibility with agent tooling that looks for this file at the repository root.
@@ -25,15 +25,15 @@ Managed projects also receive a root-level `AGENTS.md` for compatibility with ag
 Create the workspace in the current directory:
 
 ```sh
-chc init
+chr init
 ```
 
-`chc init` uses the `standard` profile by default.
+`chr init` uses the `standard` profile by default.
 
 Create the workspace with a specific profile:
 
 ```sh
-chc init --profile minimal
+chr init --profile minimal
 ```
 
 Supported initial profiles:
@@ -45,22 +45,22 @@ Supported initial profiles:
 Create the workspace in another project directory:
 
 ```sh
-chc init --dir /path/to/project
+chr init --dir /path/to/project
 ```
 
-`--dir` is an override for scripts or external initialization. The normal workflow is to change into the project and run `chc init`.
+`--dir` is an override for scripts or external initialization. The normal workflow is to change into the project and run `chr init`.
 
 Preview initialization without writing files:
 
 ```sh
-chc init --dry-run
+chr init --dry-run
 ```
 
 ## Initial Layout
 
 ```text
 AGENTS.md
-.chc/
+.chr/
   manifest.md
   config.yml
   agents/
@@ -99,19 +99,19 @@ AGENTS.md
 
 ## Active Userspace
 
-`.chc/user/` is the current project-local active userspace.
+`.chr/user/` is the current project-local active userspace.
 
 The MVP layout is intentionally single-active-operator. Workflows that need to
 bind a write to an operator resolve the operator id from:
 
 ```sh
-CHC_OPERATOR_ID
+CHR_OPERATOR_ID
 ```
 
 For direnv users, a project may set it in `.envrc`:
 
 ```sh
-export CHC_OPERATOR_ID=adrian
+export CHR_OPERATOR_ID=adrian
 ```
 
 Users who do not use direnv should export the same variable in their shell or
@@ -119,7 +119,7 @@ automation environment before running workflows that require operator
 ownership.
 
 The future multi-operator shape is expected to use an operator namespace such
-as `.chc/operators/<operator-id>/...`. The current `.chc/user/` path prepares
+as `.chr/operators/<operator-id>/...`. The current `.chr/user/` path prepares
 the boundary without relocating existing artifacts.
 
 ## Source of Truth
@@ -135,20 +135,20 @@ state are supporting artifacts. They may be rebuilt or regenerated when their
 source assets allow it.
 
 The workspace index is an in-memory structural model that may be cached under
-`.chc/user/tmp/`. That cache is discardable and must not become the durable source of
+`.chr/user/tmp/`. That cache is discardable and must not become the durable source of
 truth.
 
-The `.chc/` directory and Markdown-first artifact model are ChrysoCoord
+The `.chr/` directory and Markdown-first artifact model are Chryso
 invariants. They are not configured by generated workspace files.
 
-The generated files under `.chc/user/agents/` guide how an agent should work inside
-the managed project. They do not define or override ChrysoCoord's operational
+The generated files under `.chr/user/agents/` guide how an agent should work inside
+the managed project. They do not define or override Chryso's operational
 artifact layout. Directory placement for tickets, runtime evidence, reports,
-indexes, and authoring artifacts is a product contract owned by `chc`.
+indexes, and authoring artifacts is a product contract owned by `chr`.
 
 ## Runtime Config
 
-`.chc/user/config.yml` may define the project-local agent runtime contract under
+`.chr/user/config.yml` may define the project-local agent runtime contract under
 `runtime:`.
 
 Supported runtime fields:
@@ -159,21 +159,21 @@ Supported runtime fields:
 - `artifact_dir`: project-relative directory for host-readable runtime results.
 - `validation_command`: command future runtime validation uses inside the configured boundary.
 
-Generated config omits runtime defaults. When runtime fields are absent, `chc`
+Generated config omits runtime defaults. When runtime fields are absent, `chr`
 uses safe local defaults:
 
 ```yml
 runtime:
-  image: chc-agent-runtime:local
-  dockerfile: .chc/user/runtime/agent/Dockerfile
+  image: chr-agent-runtime:local
+  dockerfile: .chr/user/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chc/user/runtime/runs
+  artifact_dir: .chr/user/runtime/runs
   validation_command: make verify
 ```
 
 ## Work Config
 
-`.chc/user/config.yml` may define the project-local work readiness policy under
+`.chr/user/config.yml` may define the project-local work readiness policy under
 `work:`.
 
 Supported work fields:
@@ -186,7 +186,7 @@ Supported work fields:
 - `require_clean_worktree`: whether visible changes block agent work.
 - `require_remote_tracking`: whether the configured branch must track the
   configured remote ref.
-- `allow_safe_repair`: whether ChrysoCoord may run non-destructive readiness
+- `allow_safe_repair`: whether Chryso may run non-destructive readiness
   repairs.
 - `allow_branch_creation`: whether safe repair may create the configured local
   branch.
@@ -210,7 +210,7 @@ work:
   allow_safe_repair: true
   allow_branch_creation: false
   workspace_mode: project
-  worktree_root: .chc/user/runtime/worktrees
+  worktree_root: .chr/user/runtime/worktrees
   worktree_base: remote_integration_branch
   worktree_cleanup: after_merge
 ```
@@ -220,7 +220,7 @@ Dash integration.
 
 ## Web Config
 
-`.chc/user/config.yml` may define the optional local Web UI contract under
+`.chr/user/config.yml` may define the optional local Web UI contract under
 `web:`.
 
 The Web UI is disabled by default as a background behavior. Project commands,
@@ -228,19 +228,19 @@ the default TUI, agent work, ticket loops, and normal CLI operations do not
 start a server. The server starts only through:
 
 ```sh
-chc web serve
+chr web serve
 ```
 
 Supported web fields:
 
 - `enabled`: operator intent marker for project configuration. The server still
-  requires the explicit `chc web serve` command.
+  requires the explicit `chr web serve` command.
 - `host`: bind host. Defaults to `127.0.0.1`.
 - `port`: bind port. Defaults to `7331`.
 - `open_browser`: whether startup should request opening a browser.
 - `require_token`: one of `auto`, `true`, `false`, or `always`.
 - `token_env`: environment variable that contains the Web UI token when token
-  protection is required. Defaults to `CHC_WEB_TOKEN`.
+  protection is required. Defaults to `CHR_WEB_TOKEN`.
 - `allowed_origins`: comma-separated exact origins allowed for cross-origin
   browser requests. Empty means same-origin only.
 - `refresh_interval_seconds`: polling interval for browser refresh fragments.
@@ -255,7 +255,7 @@ web:
   port: 7331
   open_browser: false
   require_token: auto
-  token_env: CHC_WEB_TOKEN
+  token_env: CHR_WEB_TOKEN
   allowed_origins: ""
   refresh_interval_seconds: 2
 ```
@@ -269,8 +269,8 @@ web:
   port: 7331
   open_browser: false
   require_token: auto
-  token_env: CHC_WEB_TOKEN
-  allowed_origins: "https://chc.example.internal"
+  token_env: CHR_WEB_TOKEN
+  allowed_origins: "https://chr.example.internal"
   refresh_interval_seconds: 2
 ```
 
@@ -279,7 +279,7 @@ also require the token value to be present in `token_env`.
 
 ## Notification Config
 
-`.chc/user/config.yml` may also define notification settings under
+`.chr/user/config.yml` may also define notification settings under
 `notifications:`.
 
 Notifications are disabled by default. Telegram can be enabled with:
@@ -287,7 +287,7 @@ Notifications are disabled by default. Telegram can be enabled with:
 ```yml
 notifications:
   telegram_enabled: true
-  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_bot_token_env: CHR_TELEGRAM_BOT_TOKEN
   telegram_chat_id: "123456"
 ```
 
@@ -296,36 +296,36 @@ code. It is not stored in project configuration.
 
 ## Runtime Template
 
-`chc init` creates `.chc/user/runtime/agent/Dockerfile` for new managed projects.
+`chr init` creates `.chr/user/runtime/agent/Dockerfile` for new managed projects.
 This file is the project-local agent runtime template. It is owned by the
 managed project after initialization and may be edited to install project
 dependencies, agent tooling, or validation prerequisites.
 
-`chc init` does not overwrite an existing runtime Dockerfile.
+`chr init` does not overwrite an existing runtime Dockerfile.
 
 Existing managed projects can install missing runtime defaults without running
 full workspace initialization:
 
 ```sh
-chc runtime init
+chr runtime init
 ```
 
 Preview runtime initialization without writing files:
 
 ```sh
-chc runtime init --dry-run
+chr runtime init --dry-run
 ```
 
 Initialize runtime defaults for another project directory:
 
 ```sh
-chc runtime init --dir /path/to/project
+chr runtime init --dir /path/to/project
 ```
 
 ## Runtime Plan
 
 The runtime planner computes a side-effect-free Docker boundary plan from the
-project directory and `.chc/user/config.yml` runtime fields.
+project directory and `.chr/user/config.yml` runtime fields.
 
 Path semantics:
 
@@ -335,7 +335,7 @@ Path semantics:
   operate. In `project` mode this is the same path as `project_checkout`. In
   `worktree` mode this is the prepared ticket worktree.
 - `workspace_mode`: effective work workspace mode.
-- `workspace_root`: absolute path to `.chc/` inside the project.
+- `workspace_root`: absolute path to `.chr/` inside the project.
 - `dockerfile`: absolute path resolved from `runtime.dockerfile`.
 - `artifact_dir`: absolute path resolved from `runtime.artifact_dir`.
 - `run_artifact_dir`: `artifact_dir` or `artifact_dir/<run_id>` when a run ID is supplied.
@@ -350,7 +350,7 @@ Docker mount contract:
 
 Project mode remains fully compatible with existing managed projects because
 the execution workspace is the user-visible project checkout. Worktree mode
-changes only the execution workspace: ChrysoCoord prepares a ticket-specific Git
+changes only the execution workspace: Chryso prepares a ticket-specific Git
 worktree and mounts that path into Docker.
 
 The planner only computes paths and mount metadata. It does not create
@@ -361,26 +361,26 @@ directories, build images, run Docker, or execute validation commands.
 Validate the configured runtime boundary:
 
 ```sh
-chc runtime validate
+chr runtime validate
 ```
 
 Preview the validation plan without invoking Docker or running the configured
 validation command:
 
 ```sh
-chc runtime validate --dry-run
+chr runtime validate --dry-run
 ```
 
 Validate another managed project:
 
 ```sh
-chc runtime validate --dir /path/to/project --dry-run
+chr runtime validate --dir /path/to/project --dry-run
 ```
 
-Runtime validation loads `.chc/user/config.yml`, computes the runtime plan, prints
+Runtime validation loads `.chr/user/config.yml`, computes the runtime plan, prints
 the Docker build/run inputs, and checks required local paths:
 
-- `.chc/` workspace directory;
+- `.chr/` workspace directory;
 - configured runtime Dockerfile;
 - configured runtime artifact directory.
 
@@ -401,4 +401,4 @@ run `runtime.validation_command`.
 
 Project workspace behavior lives in the core `internal/core` package.
 
-The CLI entrypoint under `cmd/chc` wires commands and delegates workspace behavior to `chc.Workspace`.
+The CLI entrypoint under `cmd/chr` wires commands and delegates workspace behavior to `chr.Workspace`.

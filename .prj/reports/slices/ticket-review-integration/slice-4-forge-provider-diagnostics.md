@@ -18,7 +18,7 @@ or writes remote review state.
   settings.
 - Pull request URLs are detected as Forgejo-compatible when they use
   `/pulls/<number>` and as GitHub when they use `github.com/.../pull/<number>`.
-- `chc ticket review-mode diagnostics --url <pr-url>` prints provider mapping,
+- `chr ticket review-mode diagnostics --url <pr-url>` prints provider mapping,
   CLI availability, token availability, and pull request readability checks.
 - `--dry-run` skips remote pull request readability while still reporting local
   provider, CLI, and token evidence.
@@ -36,7 +36,7 @@ or writes remote review state.
 
 ## Contracts Added or Changed
 
-- `.chc/user/config.yml` review settings may define provider fields:
+- `.chr/user/config.yml` review settings may define provider fields:
   `forgejo_enabled`, `forgejo_cli`, `forgejo_token_env`, `github_enabled`,
   `github_cli`, and `github_token_env`.
 - Default provider config enables Forgejo-compatible providers with `tea` and
@@ -46,18 +46,18 @@ or writes remote review state.
 
 ## Files of Interest
 
-- `internal/chc/review_provider_diagnostics.go`
-- `internal/chc/config.go`
-- `internal/chcapp/ticket.go`
-- `cmd/chc/assets/workspace/profiles/standard/config.yml`
+- `internal/chr/review_provider_diagnostics.go`
+- `internal/chr/config.go`
+- `internal/chrapp/ticket.go`
+- `cmd/chr/assets/workspace/profiles/standard/config.yml`
 - `docs/reference/review-workflow-config.md`
 
 ## Validation
 
 - `git diff --check`
-- `go test ./internal/chc -run 'Config|ReviewProvider'`
-- `go test ./internal/chcapp -run 'TicketReviewMode|Workspace|Init'`
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr -run 'Config|ReviewProvider'`
+- `go test ./internal/chrapp -run 'TicketReviewMode|Workspace|Init'`
+- `go test ./internal/chr ./internal/chrapp`
 
 ## Risks and Follow-ups
 

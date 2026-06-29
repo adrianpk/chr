@@ -4,7 +4,7 @@ Status: draft
 
 ## Summary
 
-ChrysoCoord should extend the dump, quiz, and spec workflow so that
+Chryso should extend the dump, quiz, and spec workflow so that
 behavior-testable use cases can generate an associated Gherkin `.feature`
 artifact alongside the canonical specification.
 
@@ -68,7 +68,7 @@ worded. The useful pattern is:
 - forbidden-slot metadata that keeps a question focused on one topic;
 - bounded readiness questions that persist answers into reusable context.
 
-ChrysoCoord should use this pattern for acceptance readiness:
+Chryso should use this pattern for acceptance readiness:
 
 - keep stable acceptance slots internally;
 - let the LLM choose natural question wording;
@@ -187,7 +187,7 @@ When readiness is `generate`, spec generation should emit:
 Suggested path:
 
 ```text
-.chc/user/acceptance/<topic>.feature
+.chr/user/acceptance/<topic>.feature
 ```
 
 The feature should include traceability tags:
@@ -259,7 +259,7 @@ Implementation validation should include:
 
 ## Open Questions
 
-- Should `.chc/user/acceptance/` be the canonical artifact directory?
+- Should `.chr/user/acceptance/` be the canonical artifact directory?
 - Should readiness output be stored as a JSON artifact, embedded in generation
   metadata, or both?
 - Should failed feature generation block spec generation or produce a warning?

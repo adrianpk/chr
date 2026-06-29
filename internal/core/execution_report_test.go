@@ -153,7 +153,7 @@ func assertExecutionReportMarkdownIncludesEvidenceSections(t *testing.T, markdow
 		"# Execution Report",
 		"## Summary",
 		"- execution: exec-1",
-		"- ticket: CHC-1",
+		"- ticket: CHR-1",
 		"- status: succeeded",
 		"## Runtime",
 		"- validation_command: make verify",
@@ -163,7 +163,7 @@ func assertExecutionReportMarkdownIncludesEvidenceSections(t *testing.T, markdow
 		"- execution_workspace_dir: " + record.Workspace.ExecutionWorkspaceDir,
 		"- base_ref: origin/dev",
 		"- base_sha: abc123",
-		"- ticket_branch: chc/CHC-1",
+		"- ticket_branch: chr/CHR-1",
 		"## Artifacts",
 		"- result: " + record.Artifacts.ResultPath,
 		"- report: " + record.Artifacts.RunDir + "/execution-report.md",
@@ -328,7 +328,7 @@ func TestRenderExecutionReportMarkdownHandlesMissingResult(t *testing.T) {
 }
 
 func testExecutionReportRecord(dir string) ExecutionRecord {
-	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 21, 10, 0, 0, 0, time.UTC)
 	startedAt := now.Add(time.Minute)
 	finishedAt := now.Add(2 * time.Minute)
@@ -336,22 +336,22 @@ func testExecutionReportRecord(dir string) ExecutionRecord {
 	return ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
-		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:  "CHR-1",
+		TicketPath: filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
 		Status:     ExecutionStatusSucceeded,
 		Runtime: ExecutionRuntimeRef{
-			Image:             "chc-agent-runtime:local",
-			DockerfilePath:    filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+			Image:             "chr-agent-runtime:local",
+			DockerfilePath:    filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
 		Workspace: ExecutionWorkspaceRef{
 			Mode:                  WorkWorkspaceModeWorktree,
 			ProjectCheckoutDir:    dir,
-			ExecutionWorkspaceDir: filepath.Join(dir, ".chc", "user", "worktrees", "CHC-1"),
+			ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "user", "worktrees", "CHR-1"),
 			BaseRef:               "origin/dev",
 			BaseSHA:               "abc123",
-			TicketBranch:          "chc/CHC-1",
+			TicketBranch:          "chr/CHR-1",
 		},
 		Artifacts: ExecutionArtifacts{
 			RunDir:         runDir,

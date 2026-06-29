@@ -42,15 +42,15 @@ SQLite ticket index repository.
 
 ## Files of Interest
 
-- `internal/chc/indexed_ticket.go`
-- `internal/chc/ticket_parser.go`
-- `internal/chc/ticket_index.go`
-- `internal/chc/ticket_index_test.go`
+- `internal/chr/indexed_ticket.go`
+- `internal/chr/ticket_parser.go`
+- `internal/chr/ticket_index.go`
+- `internal/chr/ticket_index_test.go`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestTicketIndex|TestTicketParser|TestTicketIndexRebuild|TestTicketReconciliation'`
-- `go test ./internal/chc -run 'TestTicketIndex'`
+- `go test ./internal/chr -run 'TestTicketIndex|TestTicketParser|TestTicketIndexRebuild|TestTicketReconciliation'`
+- `go test ./internal/chr -run 'TestTicketIndex'`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

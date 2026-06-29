@@ -9,14 +9,14 @@ import (
 
 func TestLoadPreviousAttemptContextLoadsValidationAndResult(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
 	validationPath := filepath.Join(runDir, "validation.log")
 	resultPath := filepath.Join(runDir, "result.json")
 
 	writeTestFile(t, validationPath, "go test ./...\nFAIL package/store\nexpected complete task\ngot incomplete task\nFAIL package/store\n")
 	writeTestFile(t, resultPath, `{
 		"execution_id": "exec-1",
-		"ticket_key": "CHC-1",
+		"ticket_key": "CHR-1",
 		"status": "failed",
 		"summary": "tests still fail",
 		"evidence_summary": {
@@ -91,7 +91,7 @@ func TestLoadPreviousAttemptContextDegradesWhenArtifactsAreMissing(t *testing.T)
 }
 
 func TestRenderPreviousAttemptContextLink(t *testing.T) {
-	rendered := RenderPreviousAttemptContextLink(".chc/user/runtime/runs/CHC-1/exec-2/context/previous-attempt.md")
+	rendered := RenderPreviousAttemptContextLink(".chr/user/runtime/runs/CHR-1/exec-2/context/previous-attempt.md")
 
 	if !strings.Contains(rendered, "Previous Attempt") {
 		t.Fatalf("link missing heading:\n%s", rendered)
@@ -108,8 +108,8 @@ func testPreviousAttemptExecutionRecord(validationPath, resultPath string) Execu
 	return ExecutionRecord{
 		ID:            "exec-1",
 		ProjectID:     "project-1",
-		TicketKey:     "CHC-1",
-		TicketPath:    "/tmp/project/.chc/user/tickets/CHC-1.md",
+		TicketKey:     "CHR-1",
+		TicketPath:    "/tmp/project/.chr/user/tickets/CHR-1.md",
 		Status:        ExecutionStatusFailed,
 		FailureReason: string(ExecutionFailureValidation) + ": make verify failed",
 		Runtime: ExecutionRuntimeRef{

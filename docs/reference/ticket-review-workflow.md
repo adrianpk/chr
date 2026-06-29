@@ -48,22 +48,22 @@ Before a ticket can move to `ready_for_review`, it must have:
 Attach them with:
 
 ```sh
-chc ticket review-ref CHC-1 \
+chr ticket review-ref CHR-1 \
   --branch feat/slice-1-example \
   --provider forgejo \
   --url https://forge.example.com/owner/repo/pulls/123 \
   --id 123
 ```
 
-The evidence gate is configured under `.chc/user/config.yml` at
+The evidence gate is configured under `.chr/user/config.yml` at
 `evidence.strategy`. See
 [Evidence strategy configuration](evidence-strategy-config.md).
 
 Inspect evidence before review with:
 
 ```sh
-chc ticket show CHC-1
-chc ticket board
+chr ticket show CHR-1
+chr ticket board
 ```
 
 The Board selected-ticket detail shows the same derived checklist summary in a
@@ -72,19 +72,19 @@ normal Board columns remain stable.
 
 ## Review Command
 
-`chc ticket review` applies an explicit review result to a
+`chr ticket review` applies an explicit review result to a
 `ready_for_review` ticket.
 
 Clean pass:
 
 ```sh
-chc ticket review CHC-1 --result pass
+chr ticket review CHR-1 --result pass
 ```
 
 Blocking findings:
 
 ```sh
-chc ticket review CHC-1 \
+chr ticket review CHR-1 \
   --result needs_changes \
   --finding "Handle the nil input path before calling the parser."
 ```
@@ -104,7 +104,7 @@ The merger role runs objective merge preflight and then merges the pull request
 through the configured provider:
 
 ```sh
-chc ticket merge CHC-1
+chr ticket merge CHR-1
 ```
 
 Merge execution and blocked merge metadata are described in
@@ -126,14 +126,14 @@ worker context includes a Review Repair Handoff section with:
 - local blocking findings
 
 The handoff points the worker at local blocking findings and remote review
-comments as the source of repair work. ChrysoCoord does not copy remote
+comments as the source of repair work. Chryso does not copy remote
 comments into ticket comments.
 
 If repair metadata lacks `review_comments_url`, branch metadata, or the pull
 request reference, worker context materialization stops before launching the
 worker.
 
-In `agentic_review` loop mode, ChrysoCoord performs one default repair
+In `agentic_review` loop mode, Chryso performs one default repair
 execution for a `needs_changes` ticket and then runs review again. If review
 still requests changes, the loop blocks and later normal tickets do not start.
 
@@ -141,7 +141,7 @@ still requests changes, the loop blocks and later normal tickets do not start.
 
 Development, review, and merge operations are serialized per core.
 
-Execution paths acquire `.chc/user/runtime/agent-operation.lock` before
+Execution paths acquire `.chr/user/runtime/agent-operation.lock` before
 mutating ticket, review, or merge state. A second development, review, or merge
 operation in the same workspace is blocked while the lock is held.
 
@@ -161,5 +161,5 @@ remote comments. Forgejo-compatible providers use `tea`; GitHub uses `gh`.
 Provider diagnostics are available through:
 
 ```sh
-chc ticket review-mode diagnostics --url https://forge.example.com/owner/repo/pulls/123
+chr ticket review-mode diagnostics --url https://forge.example.com/owner/repo/pulls/123
 ```

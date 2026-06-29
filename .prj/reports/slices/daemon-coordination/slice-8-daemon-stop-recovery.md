@@ -13,12 +13,12 @@ Let users request daemon stop and recover stale daemon lifecycle state.
 
 ## Delivered Behavior
 
-`chc daemon stop` now persists stop requests for active daemon state.
+`chr daemon stop` now persists stop requests for active daemon state.
 
 The foreground run loop observes persisted stop requests between iterations and
 exits cleanly. Normal foreground exit writes stopped daemon state.
 
-`chc daemon status` recovers stale active daemon state by rewriting it as
+`chr daemon status` recovers stale active daemon state by rewriting it as
 `stale` with a stale failure reason.
 
 ## Implementation Notes
@@ -42,16 +42,16 @@ Changed CLI behavior:
 
 ## Files of Interest
 
-- `internal/chc/daemon_state_repository.go`
-- `internal/chc/daemon_state_repository_test.go`
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/daemon_state_repository.go`
+- `internal/chr/daemon_state_repository_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestDaemonStatus|TestDaemonStop|TestDaemonStart'`: pass
-- `go test ./internal/chc -run 'TestDaemonStateRepository'`: pass
+- `go test ./cmd/chr -run 'TestDaemonStatus|TestDaemonStop|TestDaemonStart'`: pass
+- `go test ./internal/chr -run 'TestDaemonStateRepository'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

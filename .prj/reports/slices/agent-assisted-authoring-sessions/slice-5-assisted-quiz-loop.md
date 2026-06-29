@@ -54,13 +54,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/assisted_quiz_loop.go`
-- `internal/chc/assisted_quiz_loop_test.go`
+- `internal/chr/assisted_quiz_loop.go`
+- `internal/chr/assisted_quiz_loop_test.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestAskNextAssistedQuizQuestion|TestAnswerAssistedQuizQuestion'`: pass
+- `go test ./internal/chr -run 'TestAskNextAssistedQuizQuestion|TestAnswerAssistedQuizQuestion'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

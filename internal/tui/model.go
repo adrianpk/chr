@@ -9,7 +9,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // View identifies one TUI screen.
@@ -105,7 +105,7 @@ type Options struct {
 	SourceExecutor       SourceOpenExecutor
 }
 
-// Model is the Bubble Tea model for the Chrysocoord TUI.
+// Model is the Bubble Tea model for the Chryso TUI.
 type Model struct {
 	projectDir               string
 	projectID                string

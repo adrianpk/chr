@@ -63,21 +63,21 @@ before changing SQLite schema, ticket creation services, or TUI rendering.
 
 ## Files of Interest
 
-- `internal/chc/ticket.go`
-- `internal/chc/ticket_status.go`
-- `internal/chc/indexed_ticket.go`
-- `internal/chc/ticket_parser.go`
-- `internal/chc/ticket_test.go`
-- `internal/chc/ticket_parser_test.go`
-- `internal/chc/ticket_status_test.go`
-- `internal/chc/ticket_validation_test.go`
+- `internal/chr/ticket.go`
+- `internal/chr/ticket_status.go`
+- `internal/chr/indexed_ticket.go`
+- `internal/chr/ticket_parser.go`
+- `internal/chr/ticket_test.go`
+- `internal/chr/ticket_parser_test.go`
+- `internal/chr/ticket_status_test.go`
+- `internal/chr/ticket_validation_test.go`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestTicketStatus|TestTicketRenderer|TestTicketParser'`
-- `go test ./internal/chc -run 'TestTicketRenderer'`
-- `go test ./internal/chc -run 'TestTicketParser'`
-- `go test ./internal/chc -run 'TestValidateIndexedTicket|TestTicketStatus'`
+- `go test ./internal/chr -run 'TestTicketStatus|TestTicketRenderer|TestTicketParser'`
+- `go test ./internal/chr -run 'TestTicketRenderer'`
+- `go test ./internal/chr -run 'TestTicketParser'`
+- `go test ./internal/chr -run 'TestValidateIndexedTicket|TestTicketStatus'`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

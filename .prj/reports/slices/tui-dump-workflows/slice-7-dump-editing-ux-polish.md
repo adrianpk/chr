@@ -37,14 +37,14 @@ available in the TUI.
 
 ## Files of Interest
 
-- `internal/chctui/dumps.go`
-- `internal/chctui/shell.go`
-- `internal/chctui/model_test.go`
+- `internal/chrtui/dumps.go`
+- `internal/chrtui/shell.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chctui`
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrtui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

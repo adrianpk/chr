@@ -49,9 +49,9 @@ The TUI is the normal human operating surface.
 
 The CLI remains the automation and expert interface.
 
-`chc` with no subcommand should open the TUI.
+`chr` with no subcommand should open the TUI.
 
-`chc tui` should open the same TUI explicitly.
+`chr tui` should open the same TUI explicitly.
 
 The implementation should use a dedicated internal TUI package, not a large
 inline command implementation.
@@ -96,10 +96,10 @@ domain mutations.
 Candidate scope:
 
 - add Bubble Tea dependencies;
-- add `internal/chctui` package;
-- add `chc tui` command;
-- make `chc` with no subcommand open the TUI;
-- keep `chc --help` behavior;
+- add `internal/chrtui` package;
+- add `chr tui` command;
+- make `chr` with no subcommand open the TUI;
+- keep `chr --help` behavior;
 - implement base model, update, and view;
 - show active project and navigation shell;
 - include placeholder read-only views for Dashboard, Board, Tickets, Documents,
@@ -108,7 +108,7 @@ Candidate scope:
 
 Expected outcome:
 
-- users can launch the TUI through `chc` or `chc tui` and see a stable
+- users can launch the TUI through `chr` or `chr tui` and see a stable
   project-aware operational shell.
 
 ### Slice 2: Read-Only Board And Ticket Detail

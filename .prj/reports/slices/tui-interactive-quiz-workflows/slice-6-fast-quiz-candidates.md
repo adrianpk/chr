@@ -36,29 +36,29 @@ request/response boundary.
 
 ## Contracts Added or Changed
 
-- `internal/chc.QuizModelResponse.Candidates`
-- `internal/chcapp.QuizView.CandidateCount`
-- `internal/chctui.QuizView.CandidateCount`
-- `internal/chctui.QuizActionDeepMode`
-- `internal/chctui.QuizActionFastMode`
-- `internal/chctui.QuizActionRequest.Mode`
+- `internal/chr.QuizModelResponse.Candidates`
+- `internal/chrapp.QuizView.CandidateCount`
+- `internal/chrtui.QuizView.CandidateCount`
+- `internal/chrtui.QuizActionDeepMode`
+- `internal/chrtui.QuizActionFastMode`
+- `internal/chrtui.QuizActionRequest.Mode`
 
 ## Files of Interest
 
-- `internal/chc/quiz_model.go`
-- `internal/chcapp/service_quiz.go`
-- `internal/chcapp/service_quiz_read.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chctui/quiz_actions.go`
-- `internal/chctui/quizzes.go`
-- `internal/chctui/command_palette.go`
-- `internal/chcapp/service_quiz_test.go`
-- `internal/chctui/model_test.go`
+- `internal/chr/quiz_model.go`
+- `internal/chrapp/service_quiz.go`
+- `internal/chrapp/service_quiz_read.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrtui/quiz_actions.go`
+- `internal/chrtui/quizzes.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrapp/service_quiz_test.go`
+- `internal/chrtui/model_test.go`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

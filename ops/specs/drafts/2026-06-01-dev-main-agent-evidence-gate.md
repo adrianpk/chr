@@ -4,15 +4,15 @@ Status: draft
 
 ## Summary
 
-ChrysoCoord needs a `dev` to `main` promotion gate that checks objective
+Chryso needs a `dev` to `main` promotion gate that checks objective
 evidence before accumulated work is promoted.
 
 The gate must be tooling-first and agent-aware. It must not behave like a
 generic PR reviewer, and it must not treat every project change as work that
-should be tracked through the ChrysoCoord board.
+should be tracked through the Chryso board.
 
 The board is primarily for agent-managed work. Human or external changes may
-exist outside ChrysoCoord and must not produce warnings or failures by default.
+exist outside Chryso and must not produce warnings or failures by default.
 
 ## Problem
 
@@ -23,13 +23,13 @@ sanity check, but it is not enough to justify a new gate.
 The missing value is promotion evidence:
 
 - which agent-managed work is included;
-- whether ChrysoCoord's own recorded runs have evidence;
+- whether Chryso's own recorded runs have evidence;
 - whether completed agent tickets have result artifacts;
 - whether the report matches the exact base/head being promoted;
 - what manual or external changes are present for context;
 - which validation commands passed or failed.
 
-The gate should verify ChrysoCoord's own claims about agent work. It should not
+The gate should verify Chryso's own claims about agent work. It should not
 accuse manual work of being missing from the board.
 
 ## Goals
@@ -46,8 +46,8 @@ accuse manual work of being missing from the board.
 ## Non-Goals
 
 - Do not implement an AI code reviewer.
-- Do not require every project change to have a ChrysoCoord ticket.
-- Do not require humans to create ChrysoCoord tickets for their own manual work.
+- Do not require every project change to have a Chryso ticket.
+- Do not require humans to create Chryso tickets for their own manual work.
 - Do not fail on manual or external changes by default.
 - Do not require Forgejo API integration in the first version.
 - Do not require coverage, CRAP, mutation testing, or fuzzing in the first
@@ -56,7 +56,7 @@ accuse manual work of being missing from the board.
 
 ## Core Rule
 
-Only ChrysoCoord-managed work is required to have ChrysoCoord evidence.
+Only Chryso-managed work is required to have Chryso evidence.
 
 Manual or external changes are listed for context only unless project policy
 explicitly configures stricter behavior.
@@ -74,7 +74,7 @@ stale base/head report -> fail
 
 ### Agent-Managed Work
 
-Work is agent-managed when ChrysoCoord has recorded it as part of ticket
+Work is agent-managed when Chryso has recorded it as part of ticket
 execution or loop execution.
 
 Signals may include:
@@ -85,12 +85,12 @@ Signals may include:
 - loop report;
 - result artifact;
 - changed-file summary;
-- commit SHA recorded by ChrysoCoord;
-- branch created or managed by ChrysoCoord.
+- commit SHA recorded by Chryso;
+- branch created or managed by Chryso.
 
 ### Manual or External Work
 
-Work is manual or external when it appears in the Git diff but ChrysoCoord has
+Work is manual or external when it appears in the Git diff but Chryso has
 no evidence that it produced it.
 
 This is not an error by default.
@@ -107,7 +107,7 @@ It should not emit a warning unless explicit policy asks for it.
 
 ### Evidence
 
-Evidence is structured or semi-structured data produced by ChrysoCoord or
+Evidence is structured or semi-structured data produced by Chryso or
 configured tools.
 
 Examples:
@@ -125,23 +125,23 @@ Examples:
 Initial command:
 
 ```sh
-chc gate dev-main --base main --head dev
+chr gate dev-main --base main --head dev
 ```
 
 CI-oriented form:
 
 ```sh
-chc gate dev-main --base origin/main --head origin/dev --ci
+chr gate dev-main --base origin/main --head origin/dev --ci
 ```
 
 Optional output flags:
 
 ```sh
-chc gate dev-main \
+chr gate dev-main \
   --base origin/main \
   --head origin/dev \
-  --json .chc/user/reports/gates/dev-main.json \
-  --markdown .chc/user/reports/gates/dev-main.md
+  --json .chr/user/reports/gates/dev-main.json \
+  --markdown .chr/user/reports/gates/dev-main.md
 ```
 
 ## Outputs
@@ -149,8 +149,8 @@ chc gate dev-main \
 The gate writes reports under the user workspace:
 
 ```text
-.chc/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.json
-.chc/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.md
+.chr/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.json
+.chr/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.md
 ```
 
 The JSON report is for automation. The Markdown report is for humans.
@@ -235,19 +235,19 @@ Collect:
 - diff stat;
 - file status: added, modified, deleted, renamed.
 
-### ChrysoCoord
+### Chryso
 
 Collect:
 
-- tickets touched by ChrysoCoord runs;
+- tickets touched by Chryso runs;
 - execution reports;
 - loop reports;
 - run IDs;
 - result artifacts;
 - changed-file summaries;
-- ticket status transitions caused by ChrysoCoord.
+- ticket status transitions caused by Chryso.
 
-The first version can be best-effort. If ChrysoCoord cannot map a Git change to
+The first version can be best-effort. If Chryso cannot map a Git change to
 agent-managed work, it should classify it as manual or external.
 
 ### Validation
@@ -269,18 +269,18 @@ The default gate fails when:
 - base or head cannot be resolved;
 - validation command fails;
 - report cannot be written;
-- a ChrysoCoord-recorded run references missing result artifacts;
-- a ChrysoCoord-managed ticket is marked completed by the system without
+- a Chryso-recorded run references missing result artifacts;
+- a Chryso-managed ticket is marked completed by the system without
   evidence;
 - an existing report is being verified and its base/head SHAs are stale.
 
 The default gate does not fail when:
 
-- files changed without ChrysoCoord tickets;
+- files changed without Chryso tickets;
 - commits lack ticket IDs;
 - docs changed manually;
 - code changed manually;
-- a human did not use the ChrysoCoord board.
+- a human did not use the Chryso board.
 
 ## Policy
 
@@ -323,14 +323,14 @@ steps:
   dev-main-gate:
     image: golang:1.25
     commands:
-      - go install ./cmd/chc
+      - go install ./cmd/chr
       - git fetch origin main dev
-      - chc gate dev-main --base origin/main --head origin/dev --ci
+      - chr gate dev-main --base origin/main --head origin/dev --ci
 ```
 
 The gate should exit non-zero on default failure conditions.
 
-The Markdown and JSON reports should be stored under `.chc/user/reports/gates/`
+The Markdown and JSON reports should be stored under `.chr/user/reports/gates/`
 so Woodpecker can preserve them as artifacts when configured.
 
 ## Forgejo
@@ -356,7 +356,7 @@ It should present:
 
 - objective failures;
 - validation results;
-- ChrysoCoord-managed work and its evidence;
+- Chryso-managed work and its evidence;
 - manual or external changes for context;
 - exact base/head SHAs.
 
@@ -366,11 +366,11 @@ It should not attempt to decide whether the whole release is semantically good.
 
 The first implementation should include:
 
-1. `chc gate dev-main --base --head`.
+1. `chr gate dev-main --base --head`.
 2. Git base/head/merge-base resolution.
 3. Commit and changed-file collection.
 4. Validation command execution.
-5. Basic ChrysoCoord report discovery under `.chc/user/reports`.
+5. Basic Chryso report discovery under `.chr/user/reports`.
 6. Classification into agent-managed vs manual/external when evidence is clear.
 7. JSON and Markdown report generation.
 8. Default failure conditions.
@@ -405,16 +405,16 @@ Draft model:
 
 ## Acceptance Criteria
 
-- The command works in a generic Go project initialized with ChrysoCoord.
+- The command works in a generic Go project initialized with Chryso.
 - The command does not require GitHub or GitLab.
 - The command does not require Forgejo API access.
 - The command can run in Woodpecker CI from a normal checkout.
-- The command writes Markdown and JSON reports under `.chc/user/reports/gates/`.
+- The command writes Markdown and JSON reports under `.chr/user/reports/gates/`.
 - The report records base/head SHAs.
 - The report lists validation results.
-- The report lists agent-managed work when ChrysoCoord evidence exists.
+- The report lists agent-managed work when Chryso evidence exists.
 - The report lists manual or external changes neutrally.
 - The default policy does not warn or fail merely because a change lacks a
-  ChrysoCoord ticket.
-- The default policy fails when ChrysoCoord's own recorded work lacks required
+  Chryso ticket.
+- The default policy fails when Chryso's own recorded work lacks required
   evidence.

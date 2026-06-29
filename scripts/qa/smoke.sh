@@ -34,7 +34,7 @@ fi
 output_file="$(mktemp)"
 trap 'rm -f "$output_file"' EXIT HUP INT TERM
 
-if ! (cd "$repo_root" && go run ./cmd/chc work doctor --dir "$active_dir" >"$output_file" 2>&1); then
+if ! (cd "$repo_root" && go run ./cmd/chr work doctor --dir "$active_dir" >"$output_file" 2>&1); then
 	echo "qa smoke failed: work readiness doctor failed" >&2
 	cat "$output_file" >&2
 	exit 1
@@ -71,10 +71,10 @@ fi
 
 if [ "$case_name" = "tictactoe" ]; then
 	for fixture in \
-		".chc/user/acceptance/cli-gameplay.feature" \
-		".chc/user/evidence-examples/docs-no-tests.md" \
-		".chc/user/evidence-examples/behavior-gherkin.md" \
-		".chc/user/evidence-examples/blocked-validation.md"
+		".chr/user/acceptance/cli-gameplay.feature" \
+		".chr/user/evidence-examples/docs-no-tests.md" \
+		".chr/user/evidence-examples/behavior-gherkin.md" \
+		".chr/user/evidence-examples/blocked-validation.md"
 	do
 		if [ ! -f "$active_dir/$fixture" ]; then
 			echo "qa smoke failed: missing tictactoe evidence fixture $fixture" >&2
@@ -82,7 +82,7 @@ if [ "$case_name" = "tictactoe" ]; then
 		fi
 	done
 
-	if ! grep -q 'Validation: blocked' "$active_dir/.chc/user/evidence-examples/blocked-validation.md"; then
+	if ! grep -q 'Validation: blocked' "$active_dir/.chr/user/evidence-examples/blocked-validation.md"; then
 		echo "qa smoke failed: blocked validation fixture is missing blocked evidence" >&2
 		exit 1
 	fi

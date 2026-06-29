@@ -122,7 +122,7 @@ func TestRunTicketMergePreflightBlocksSerialRepair(t *testing.T) {
 		Ticket: ticket,
 		Tickets: []IndexedTicket{
 			ticket,
-			{Key: "CHC-1", Status: TicketStatusReadyForDev, ReviewState: "changes_requested"},
+			{Key: "CHR-1", Status: TicketStatusReadyForDev, ReviewState: "changes_requested"},
 		},
 		Remote: fakeTicketMergePreflightRemote{},
 	})
@@ -151,9 +151,9 @@ func testMergePreflightTicket() IndexedTicket {
 
 	return IndexedTicket{
 		ProjectID:    "project-1",
-		Path:         "/tmp/project/.chc/user/tickets/CHC-2-Test.md",
-		RelativePath: "CHC-2-Test.md",
-		Key:          "CHC-2",
+		Path:         "/tmp/project/.chr/user/tickets/CHR-2-Test.md",
+		RelativePath: "CHR-2-Test.md",
+		Key:          "CHR-2",
 		Title:        "Test ticket",
 		Status:       TicketStatusReadyForMerge,
 		Branch:       "feat/slice-2-merger-preflight",

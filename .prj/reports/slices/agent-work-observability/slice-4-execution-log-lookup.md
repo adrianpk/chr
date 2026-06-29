@@ -17,7 +17,7 @@ without embedding a raw log viewer in the TUI.
 The CLI now supports:
 
 ```text
-chc work logs <execution-id>
+chr work logs <execution-id>
 ```
 
 The command resolves the current project, loads the execution record, and prints
@@ -29,7 +29,7 @@ The running work overlay now renders a direct lookup hint when recent events
 include an execution id:
 
 ```text
-Lookup: chc work logs <execution-id>
+Lookup: chr work logs <execution-id>
 ```
 
 This keeps the normal Dash event stream concise while giving users a stable
@@ -46,8 +46,8 @@ resolved project.
 
 ## Contracts Added or Changed
 
-- `chc work logs <execution-id>`
-- Work-running TUI details can include `Lookup: chc work logs <execution-id>`.
+- `chr work logs <execution-id>`
+- Work-running TUI details can include `Lookup: chr work logs <execution-id>`.
 
 ## Files of Interest
 

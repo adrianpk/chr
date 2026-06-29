@@ -8,13 +8,13 @@ Plan the `User Project Context` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> A user registers local projects and selects which project `chc` should operate on by default.
+> A user registers local projects and selects which project `chr` should operate on by default.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related specifications:
 
@@ -36,17 +36,17 @@ Already delivered:
 - development-mode path redirection;
 - project registry database;
 - project registry repository;
-- `chc project add <dir>`;
-- `chc project list`;
+- `chr project add <dir>`;
+- `chr project list`;
 - project path validation for registration.
 
 Delivered by this slicing:
 
 - active project persistence;
-- `chc project select`;
-- `chc project current`;
+- `chr project select`;
+- `chr project current`;
 - a reusable project context resolver for commands that can operate on the active project;
-- recovery behavior when the active project is missing, disabled, or no longer has a `.chc/` workspace.
+- recovery behavior when the active project is missing, disabled, or no longer has a `.chr/` workspace.
 
 ## Slicing Scope
 
@@ -104,11 +104,11 @@ Status: delivered.
 
 Delivery:
 
-- `chc project add <dir>`;
-- `chc project list`;
+- `chr project add <dir>`;
+- `chr project list`;
 - project name defaulting;
 - stable project id generation;
-- `.chc/` requirement for registered projects.
+- `.chr/` requirement for registered projects.
 
 Historical delivery:
 
@@ -151,11 +151,11 @@ Expose active project selection and inspection through CLI.
 
 Candidate scope:
 
-- `chc project select <name-or-path>`;
+- `chr project select <name-or-path>`;
 - accept a registered project name;
 - accept a registered project path when unambiguous;
 - reject unknown or disabled projects clearly;
-- `chc project current`;
+- `chr project current`;
 - stable, parseable output;
 - focused CLI tests.
 
@@ -181,7 +181,7 @@ Candidate scope:
 - resolve explicit `--project` or `--dir` when present;
 - fall back to active project state;
 - fall back to current directory only for commands whose semantics allow it;
-- validate `.chc/` exists before returning a project context;
+- validate `.chr/` exists before returning a project context;
 - return clear errors when no project can be resolved;
 - avoid duplicating project resolution logic across commands.
 
@@ -205,7 +205,7 @@ Make stale registered project paths understandable and recoverable.
 Candidate scope:
 
 - detect missing project paths;
-- detect registered paths without `.chc/`;
+- detect registered paths without `.chr/`;
 - report disabled projects distinctly from missing projects;
 - provide recovery-oriented errors;
 - decide whether disable/remove commands belong in this slicing or a later maintenance slicing.
@@ -245,10 +245,10 @@ Manual smoke checks for the completed slicing:
 ```sh
 make install
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir"
-chc project add "$tmpdir" --name sample --dev-root _workspace
-chc project select sample --dev-root _workspace
-chc project current --dev-root _workspace
+chr init --dir "$tmpdir"
+chr project add "$tmpdir" --name sample --dev-root _workspace
+chr project select sample --dev-root _workspace
+chr project current --dev-root _workspace
 ```
 
 ## Risks
@@ -256,7 +256,7 @@ chc project current --dev-root _workspace
 - Active project state can become stale if the project directory is moved or deleted.
 - Using names and paths for selection can create ambiguity if output and errors are not precise.
 - Project context resolution can become inconsistent if each command resolves project paths independently.
-- Development-mode path behavior must not write into the user's real `~/.chc` or `~/.config/chc`.
+- Development-mode path behavior must not write into the user's real `~/.chr` or `~/.config/chr`.
 
 ## Notes
 

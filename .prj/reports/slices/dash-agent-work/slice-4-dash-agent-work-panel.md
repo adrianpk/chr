@@ -22,6 +22,6 @@ actions.
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp`
+- `go test ./internal/chrtui ./internal/chrapp`
 - `make verify`
 - `git diff --check`

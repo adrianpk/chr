@@ -75,7 +75,7 @@ spec, ticket, or implementation plan.
 - The normal screen should make it clear how the user changes `name` and
   `description`; showing inferred values without an edit path is incomplete.
 - Markdown-only persistence direction:
-  - project-local files under `.chc/` should remain human-editable and cannot be
+  - project-local files under `.chr/` should remain human-editable and cannot be
     treated as a sealed vault;
   - Markdown is the source of truth for project and case documents;
   - the TUI/CLI may keep a lightweight in-memory workspace index for
@@ -122,7 +122,7 @@ spec, ticket, or implementation plan.
   - `name`
   - `description`
 - No additional fields are assumed for now.
-- Use cases are Markdown documents under `.chc/user/cases/`.
+- Use cases are Markdown documents under `.chr/user/cases/`.
 - Useful persistence metadata can exist below the UI surface:
   - stable `slug` or ID derived from the name;
   - `doc_path` for the Markdown representation.
@@ -138,7 +138,7 @@ spec, ticket, or implementation plan.
   - persist a human-editable Markdown file with YAML frontmatter.
 - A use case is conceptually a project-local container for related artifacts
   such as dumps, quizzes, specs, plans, and board work.
-- A use case belongs to the current project by containment under `.chc/`; a
+- A use case belongs to the current project by containment under `.chr/`; a
   `project_id` frontmatter field is not currently necessary for normal
   operation.
 - A `project_id` frontmatter field could help standalone file rehydration, but
@@ -228,7 +228,7 @@ spec, ticket, or implementation plan.
 
 ## Board
 
-- `Board` is the Kanban-like representation of boards under `.chc/`.
+- `Board` is the Kanban-like representation of boards under `.chr/`.
 - It should reflect the board model used by the project, not invent a separate
   ticket-only abstraction.
 - `~/Projects/redwright/` is a useful reference for how this kind of board

@@ -1,9 +1,9 @@
 # TUI Reference
 
-The TUI opens with `chc` or `chc tui`.
+The TUI opens with `chr` or `chr tui`.
 
 ```sh
-chc tui --dir /path/to/project
+chr tui --dir /path/to/project
 ```
 
 The TUI loads project state from disk and writes durable Markdown artifacts back
@@ -100,7 +100,7 @@ Refresh is blocked while project edits are active or unsaved.
 CLI equivalent:
 
 ```sh
-chc metadata project set --name "Project" --description "Description" --context "Context"
+chr metadata project set --name "Project" --description "Description" --context "Context"
 ```
 
 ## Cases View
@@ -124,7 +124,7 @@ Refresh is blocked while use-case edits are active or unsaved.
 CLI equivalent:
 
 ```sh
-chc metadata case set billing --name "Billing" --description "Description" --context "Context"
+chr metadata case set billing --name "Billing" --description "Description" --context "Context"
 ```
 
 ## Dumps View
@@ -145,12 +145,12 @@ disk and shown as metadata for the selected curated dump when available.
 CLI equivalents:
 
 ```sh
-chc dump list
-chc dump new --title "Notes" --content "Context." --use-case billing
-chc dump show .chc/user/dumps/notes.md
-chc dump save .chc/user/dumps/notes.md --content "# Notes"
-chc dump append .chc/user/dumps/notes.md --content "More context."
-chc dump open .chc/user/dumps/notes.md
+chr dump list
+chr dump new --title "Notes" --content "Context." --use-case billing
+chr dump show .chr/user/dumps/notes.md
+chr dump save .chr/user/dumps/notes.md --content "# Notes"
+chr dump append .chr/user/dumps/notes.md --content "More context."
+chr dump open .chr/user/dumps/notes.md
 ```
 
 ## Quizzes View
@@ -175,14 +175,14 @@ Answer entry:
 CLI equivalents:
 
 ```sh
-chc quiz list
-chc quiz start --use-case billing --mode deep
-chc quiz resume --use-case billing
-chc quiz answer --use-case billing --answer "Answer text."
-chc quiz skip --use-case billing
-chc quiz complete --use-case billing
-chc quiz cancel --use-case billing
-chc quiz mode fast --use-case billing
+chr quiz list
+chr quiz start --use-case billing --mode deep
+chr quiz resume --use-case billing
+chr quiz answer --use-case billing --answer "Answer text."
+chr quiz skip --use-case billing
+chr quiz complete --use-case billing
+chr quiz cancel --use-case billing
+chr quiz mode fast --use-case billing
 ```
 
 ## Specs View
@@ -199,8 +199,8 @@ related workspace documents.
 CLI equivalents:
 
 ```sh
-chc spec list
-chc spec generate --use-case billing
+chr spec list
+chr spec generate --use-case billing
 ```
 
 ## Plans View
@@ -221,10 +221,10 @@ content.
 CLI equivalents:
 
 ```sh
-chc plan list
-chc plan generate --use-case billing
-chc plan regenerate --use-case billing
-chc plan tracking create --use-case billing
+chr plan list
+chr plan generate --use-case billing
+chr plan regenerate --use-case billing
+chr plan tracking create --use-case billing
 ```
 
 ## Board View
@@ -266,16 +266,16 @@ confirmation prompts.
 CLI equivalents:
 
 ```sh
-chc ticket board
-chc ticket list
-chc ticket show CHC-1
-chc ticket status CHC-1 ready
-chc ticket status CHC-1 in_progress
-chc ticket status CHC-1 reviewing
-chc ticket start CHC-1
-chc ticket loop --status ready_for_dev --max-iterations 1
-chc work ticket CHC-1
-chc work run-all
+chr ticket board
+chr ticket list
+chr ticket show CHR-1
+chr ticket status CHR-1 ready
+chr ticket status CHR-1 in_progress
+chr ticket status CHR-1 reviewing
+chr ticket start CHR-1
+chr ticket loop --status ready_for_dev --max-iterations 1
+chr work ticket CHR-1
+chr work run-all
 ```
 
 ## Dash View
@@ -307,7 +307,7 @@ Dash work actions use confirmation prompts:
 When work readiness is blocked, Dash blocks ticket execution and run-all actions
 before starting agent work. If a safe repair is available, apply `x`, confirm
 the repair, and retry the work action. If Dash reports manual action required,
-use the diagnostic text or `chc work doctor --dir <project>` to inspect the
+use the diagnostic text or `chr work doctor --dir <project>` to inspect the
 same readiness report outside the TUI.
 
 Event stream rendering, runtime logs, report lookup, and CLI readback are

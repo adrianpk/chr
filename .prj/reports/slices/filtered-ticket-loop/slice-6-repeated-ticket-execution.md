@@ -14,7 +14,7 @@ execution and result application paths.
 
 ## Delivered Behavior
 
-`chc ticket loop` can now run without `--dry-run`.
+`chr ticket loop` can now run without `--dry-run`.
 
 The command:
 
@@ -51,13 +51,13 @@ Changed internals:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-loop.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestTicketLoop'`: pass
+- `go test ./cmd/chr -run 'TestTicketLoop'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

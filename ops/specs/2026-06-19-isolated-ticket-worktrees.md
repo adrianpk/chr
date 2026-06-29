@@ -17,7 +17,7 @@ Related:
 
 ## Summary
 
-ChrysoCoord should move ticket execution from the user's active checkout into an
+Chryso should move ticket execution from the user's active checkout into an
 isolated Git worktree created per ticket execution or per ticket branch.
 
 The system remains sequential: one active agent, one active ticket, one active
@@ -41,7 +41,7 @@ origin/<integration_branch>
   published operational base for agent work
 
 ticket worktree
-  created by ChrysoCoord from the published operational base
+  created by Chryso from the published operational base
   mounted into Docker as the writable workspace
   kept until ticket branch / PR lifecycle is complete
 ```
@@ -61,7 +61,7 @@ the user's local checkout state as the starting point for managed work.
 - Mount the ticket worktree, not the user's checkout, into the runtime
   container.
 - Let the user keep editing, browsing, or experimenting in the main checkout
-  while ChrysoCoord runs an agent task.
+  while Chryso runs an agent task.
 - Preserve deterministic runtime artifacts, event streams, execution reports,
   validation logs, and result application behavior.
 - Tie each ticket worktree to the ticket branch and PR lifecycle.
@@ -75,7 +75,7 @@ the user's local checkout state as the starting point for managed work.
 
 - Do not introduce parallel ticket execution.
 - Do not allow multiple active agents by default.
-- Do not require the user to adopt ChrysoCoord's own branch names.
+- Do not require the user to adopt Chryso's own branch names.
 - Do not copy uncommitted user changes into ticket worktrees automatically.
 - Do not treat the user's local integration branch as the source of truth when
   the canonical remote tracking ref is available.
@@ -93,9 +93,9 @@ the user's local checkout state as the starting point for managed work.
 The current runtime plan resolves:
 
 - `ProjectDir`: the managed project directory.
-- `DockerfilePath`: usually `.chc/user/runtime/agent/Dockerfile`.
+- `DockerfilePath`: usually `.chr/user/runtime/agent/Dockerfile`.
 - `ContainerWorkdir`: usually `/workspace`.
-- `ArtifactDir`: usually `.chc/user/runtime/runs`.
+- `ArtifactDir`: usually `.chr/user/runtime/runs`.
 - `WorkerContextPath`, `ResultPath`, `LogPath`, and `ValidationPath`.
 
 The Docker harness mounts the project directory as a writable volume:
@@ -107,7 +107,7 @@ host projectDir -> container /workspace
 The Codex worker then runs inside the Docker container:
 
 ```sh
-codex exec --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox < "$CHC_WORKER_CONTEXT_PATH"
+codex exec --skip-git-repo-check --dangerously-bypass-approvals-and-sandbox < "$CHR_WORKER_CONTEXT_PATH"
 ```
 
 This confirms the important distinction:
@@ -129,7 +129,7 @@ ProjectDir
   the user-facing managed project checkout
 
 ExecutionWorkspaceDir
-  the ChrysoCoord-owned ticket worktree mounted into the runtime container
+  the Chryso-owned ticket worktree mounted into the runtime container
 ```
 
 The Docker harness should mount:
@@ -138,7 +138,7 @@ The Docker harness should mount:
 host ExecutionWorkspaceDir -> container /workspace
 ```
 
-Runtime artifacts may remain under the user's `.chc/user/runtime/runs`
+Runtime artifacts may remain under the user's `.chr/user/runtime/runs`
 directory or move to a workspace-owned runtime directory, but the first version
 should preserve existing artifact paths when practical to avoid breaking event
 views and reports.
@@ -166,7 +166,7 @@ Proposed shape:
 ```yml
 work:
   workspace_mode: worktree
-  worktree_root: .chc/user/runtime/worktrees
+  worktree_root: .chr/user/runtime/worktrees
   worktree_base: remote_integration_branch
   worktree_cleanup: after_merge
 ```
@@ -184,13 +184,13 @@ Possible values:
 
 `worktree`
 
-: Ticket execution happens in a ChrysoCoord-owned Git worktree created from an
+: Ticket execution happens in a Chryso-owned Git worktree created from an
   explicit base ref.
 
 `worktree_root`
 
-: Project-relative directory where ChrysoCoord stores ticket worktrees.
-  Default: `.chc/user/runtime/worktrees`.
+: Project-relative directory where Chryso stores ticket worktrees.
+  Default: `.chr/user/runtime/worktrees`.
 
 `worktree_base`
 
@@ -261,7 +261,7 @@ Each ticket worktree should have a deterministic identity.
 Recommended path shape:
 
 ```text
-.chc/user/runtime/worktrees/<ticket-key>/
+.chr/user/runtime/worktrees/<ticket-key>/
 ```
 
 For repeated attempts against the same ticket branch, reuse the ticket worktree
@@ -274,7 +274,7 @@ attempts are attempts within that line.
 Execution-specific artifacts still live under:
 
 ```text
-.chc/user/runtime/runs/<ticket-key>/<execution-id>/
+.chr/user/runtime/runs/<ticket-key>/<execution-id>/
 ```
 
 This separates:
@@ -293,13 +293,13 @@ should make that field operational:
 ticket.branch -> git branch checked out by ticket worktree
 ```
 
-If the ticket branch is missing, ChrysoCoord creates it from the selected base
+If the ticket branch is missing, Chryso creates it from the selected base
 ref.
 
-If the ticket branch exists locally and remotely, ChrysoCoord must verify that
+If the ticket branch exists locally and remotely, Chryso must verify that
 the relationship is safe before reusing it.
 
-If the branch exists with unrelated history, ChrysoCoord must block and report
+If the branch exists with unrelated history, Chryso must block and report
 the conflict.
 
 ## Base Ref Selection
@@ -316,7 +316,7 @@ Usually:
 refs/remotes/origin/dev
 ```
 
-Before creating or updating a ticket worktree, ChrysoCoord should fetch the
+Before creating or updating a ticket worktree, Chryso should fetch the
 canonical remote.
 
 The operation must not use local `dev` merely because it exists. Local `dev`
@@ -419,7 +419,7 @@ There are two different dirty states.
 
 `ticket worktree dirty`
 
-: The ChrysoCoord-owned ticket worktree has uncommitted changes.
+: The Chryso-owned ticket worktree has uncommitted changes.
 
 In `worktree` mode:
 
@@ -444,7 +444,7 @@ Avoid generic `dirty_worktree` wording when more precise language is available.
 
 The user checkout may be stale without blocking isolated execution.
 
-The remote tracking ref may not be stale. Before execution, ChrysoCoord should
+The remote tracking ref may not be stale. Before execution, Chryso should
 fetch the canonical remote and verify that the selected base ref exists.
 
 If fetch fails:
@@ -472,7 +472,7 @@ The first implementation should keep runtime artifacts in the managed project
 artifact directory:
 
 ```text
-.chc/user/runtime/runs/<ticket-key>/<execution-id>/
+.chr/user/runtime/runs/<ticket-key>/<execution-id>/
 ```
 
 Reasons:
@@ -486,7 +486,7 @@ The ticket worktree should not be the only place where execution evidence lives.
 Worktree-specific metadata may be stored under:
 
 ```text
-.chc/user/runtime/worktrees/<ticket-key>/.chc-worktree.json
+.chr/user/runtime/worktrees/<ticket-key>/.chr-worktree.json
 ```
 
 or in the central runtime record. Prefer central records if a durable execution
@@ -512,7 +512,7 @@ depend on inference forever.
 
 ## Worktree Metadata
 
-A ticket worktree should be inspectable by ChrysoCoord without relying only on
+A ticket worktree should be inspectable by Chryso without relying only on
 Git's internal worktree list.
 
 Minimum metadata:
@@ -520,7 +520,7 @@ Minimum metadata:
 ```json
 {
   "version": 1,
-  "ticket_key": "CHC-123",
+  "ticket_key": "CHR-123",
   "branch": "feature/use-case/s01-slice",
   "base_ref": "origin/dev",
   "base_sha": "<sha>",
@@ -537,7 +537,7 @@ mismatch and prefer safe manual repair.
 
 ## Doctor Behavior
 
-`chc work doctor` should report both user checkout and ticket worktree state.
+`chr work doctor` should report both user checkout and ticket worktree state.
 
 In worktree mode, a healthy report should make the separation obvious:
 
@@ -588,7 +588,7 @@ Useful fields:
 workspace: worktree
 base: origin/dev @ <sha>
 ticket branch: <branch>
-worktree: .chc/user/runtime/worktrees/CHC-123
+worktree: .chr/user/runtime/worktrees/CHR-123
 user checkout: ignored / dirty / clean
 ```
 
@@ -605,15 +605,15 @@ by the agent.
 
 ## CLI Behavior
 
-`chc work doctor`
+`chr work doctor`
 
 : Shows project checkout state and worktree workspace state.
 
-`chc work ticket <key>`
+`chr work ticket <key>`
 
 : Uses worktree execution when configured.
 
-`chc work run-all`
+`chr work run-all`
 
 : Still processes tickets sequentially. Each ticket receives or reuses its own
   worktree.
@@ -621,10 +621,10 @@ by the agent.
 Possible future commands:
 
 ```sh
-chc work worktree list
-chc work worktree show <ticket-key>
-chc work worktree clean <ticket-key>
-chc work worktree clean --merged
+chr work worktree list
+chr work worktree show <ticket-key>
+chr work worktree clean <ticket-key>
+chr work worktree clean --merged
 ```
 
 These commands are optional. The first implementation can expose worktree state
@@ -691,11 +691,11 @@ The user may:
 - reset example projects;
 - open files in an editor.
 
-CHC should avoid surprising the user by:
+CHR should avoid surprising the user by:
 
 - not writing implementation changes into the active checkout;
 - reporting where work is actually happening;
-- keeping runtime evidence in the main `.chc/user/runtime/runs` tree;
+- keeping runtime evidence in the main `.chr/user/runtime/runs` tree;
 - making worktree cleanup explicit and recoverable.
 
 ## Failure Modes
@@ -777,7 +777,7 @@ runtime boundary.
 
 The safety improvement is filesystem ownership:
 
-- Codex writes to a ChrysoCoord-owned worktree;
+- Codex writes to a Chryso-owned worktree;
 - user checkout changes are not modified;
 - destructive repair can be scoped to the ticket worktree and still remain
   non-destructive by default.
@@ -857,14 +857,14 @@ QA scenarios should include:
 - Clean worktrees are removed after successful merge when cleanup policy is
   `after_merge`.
 - Dirty worktrees are never deleted automatically.
-- `chc work doctor` reports user checkout state separately from ticket
+- `chr work doctor` reports user checkout state separately from ticket
   worktree state.
 - The existing sequential execution model remains unchanged.
 
 ## Open Questions
 
 - Should `workspace_mode: worktree` live under `work:` or `runtime:`?
-- Should runtime artifacts remain in the main project `.chc/user/runtime/runs`
+- Should runtime artifacts remain in the main project `.chr/user/runtime/runs`
   directory forever, or should each worktree also receive local attempt
   artifacts?
 - Should a ticket worktree be keyed by ticket key, branch name, or execution ID?
@@ -874,7 +874,7 @@ QA scenarios should include:
 - Should cleanup run immediately after merge or as an explicit periodic doctor
   repair?
 - How much worktree metadata belongs in SQLite execution records versus
-  file-based metadata under `.chc/user/runtime/worktrees`?
+  file-based metadata under `.chr/user/runtime/worktrees`?
 - Should old `project` mode remain permanently supported, or become an escape
   hatch after worktree mode is proven?
 - Should `run-all` pre-create worktrees for the full queue or create one

@@ -51,15 +51,15 @@ Updated behavior:
 
 ## Files of Interest
 
-- `internal/chc/harness_invocation.go`
-- `internal/chc/harness_invocation_test.go`
-- `internal/chc/runtime_plan.go`
-- `internal/chc/execution.go`
+- `internal/chr/harness_invocation.go`
+- `internal/chr/harness_invocation_test.go`
+- `internal/chr/runtime_plan.go`
+- `internal/chr/execution.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

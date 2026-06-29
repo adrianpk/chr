@@ -9,14 +9,14 @@ Tracker: `.prj/trackers/slice-7-user-environment-paths-tracker.md`
 
 Add the user-level path resolver needed by the future project registry, global ticket index, and daemon.
 
-The resolver must keep user-level `chc` state separate from project-local `.chc/` state and must support development mode so work on this repository does not write to real user config or data paths.
+The resolver must keep user-level `chr` state separate from project-local `.chr/` state and must support development mode so work on this repository does not write to real user config or data paths.
 
 ## Scope
 
 This slice covers:
 
-- `chc.UserEnvironment`,
-- `chc.NewUserEnvironment(...)`,
+- `chr.UserEnvironment`,
+- `chr.NewUserEnvironment(...)`,
 - normal user path resolution for config, data, cache, and state,
 - development-mode path resolution into a local sandbox,
 - focused tests for path resolution.

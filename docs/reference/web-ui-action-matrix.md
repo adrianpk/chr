@@ -17,32 +17,32 @@ Status values:
 
 | Domain | Web UI entrypoint | CLI entrypoint | TUI entrypoint | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Web server | `chc web serve` | `chc web serve` | none | `web_only` | Explicit foreground process; no automatic startup from CLI or TUI workflows. |
-| Project | `/`, `/project` | `chc project current`, metadata commands | `F1` | `read_only_matched` | Shows resolved project, bind, refresh, and workspace paths. |
-| Cases | `/cases` | `chc metadata case set` for writes | `F2` | `matched` | Catalog and detail read project-local case metadata; detail form writes case metadata. |
-| Dumps | `/dumps` | `chc dump *` | `F3` | `matched` | Catalog, detail, create, save, and append use dump service paths. |
-| Quizzes | `/quizzes` | `chc quiz *` | `F4` | `web_subset` | Start and resume are exposed; answer, skip, complete, cancel, and mode-only updates remain CLI/TUI. |
-| Specs | `/specs` | `chc spec list`, `chc spec generate` | `F5` | `matched` | Catalog and generation action use spec service paths. |
-| Plans | `/plans` | `chc plan *` | `F6` | `matched` | Catalog, generate, regenerate, and tracking creation use plan service paths. |
-| Board | `/board` | `chc ticket board`, `chc ticket list`, `chc ticket show` | `F7` | `read_only_matched` | Board columns, attention, and ticket cards read the shared Board model. |
-| Dash | `/dash` | `chc work doctor`, `chc work run-all --dry-run`, `chc daemon stop` | `F8` | `web_subset` | Readiness, queue, current, recent events, work preview, and daemon stop are exposed. |
+| Web server | `chr web serve` | `chr web serve` | none | `web_only` | Explicit foreground process; no automatic startup from CLI or TUI workflows. |
+| Project | `/`, `/project` | `chr project current`, metadata commands | `F1` | `read_only_matched` | Shows resolved project, bind, refresh, and workspace paths. |
+| Cases | `/cases` | `chr metadata case set` for writes | `F2` | `matched` | Catalog and detail read project-local case metadata; detail form writes case metadata. |
+| Dumps | `/dumps` | `chr dump *` | `F3` | `matched` | Catalog, detail, create, save, and append use dump service paths. |
+| Quizzes | `/quizzes` | `chr quiz *` | `F4` | `web_subset` | Start and resume are exposed; answer, skip, complete, cancel, and mode-only updates remain CLI/TUI. |
+| Specs | `/specs` | `chr spec list`, `chr spec generate` | `F5` | `matched` | Catalog and generation action use spec service paths. |
+| Plans | `/plans` | `chr plan *` | `F6` | `matched` | Catalog, generate, regenerate, and tracking creation use plan service paths. |
+| Board | `/board` | `chr ticket board`, `chr ticket list`, `chr ticket show` | `F7` | `read_only_matched` | Board columns, attention, and ticket cards read the shared Board model. |
+| Dash | `/dash` | `chr work doctor`, `chr work run-all --dry-run`, `chr daemon stop` | `F8` | `web_subset` | Readiness, queue, current, recent events, work preview, and daemon stop are exposed. |
 
 ## Write Actions
 
 | Domain | Web action | CLI command | TUI action | Status | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Case metadata | `case.update` | `chc metadata case set` | Cases save | `matched` | Uses stale revision checks and writes project-local case metadata. |
-| Dump create | `dump.create` | `chc dump new` | Dumps create | `matched` | Creates curated dump artifacts through the dump service. |
-| Dump save | `dump.save` | `chc dump save` | Dumps editor save | `matched` | Uses revision checks before replacing content. |
-| Dump append | `dump.append` | `chc dump append` | Dump append action | `matched` | Appends to the selected dump through the dump service. |
-| Spec generate | `spec.generate` | `chc spec generate` | Specs generate | `matched` | Uses the same generation service and artifact contract. |
-| Plan generate | `plan.generate` | `chc plan generate` | Plans generate | `matched` | Uses the same generation service and existing-plan guard. |
-| Plan regenerate | `plan.regenerate` | `chc plan regenerate` | Plans regenerate | `matched` | Requires browser confirmation before replacement. |
-| Plan tracking create | `plan.tracking.create` | `chc plan tracking create` | Plans tracking action | `matched` | Materializes tracking artifacts and tickets from an existing plan. |
-| Quiz start | `quiz.start` | `chc quiz start` | Quizzes start | `matched` | Supports project or case scope and deep or fast mode. |
-| Quiz resume | `quiz.resume` | `chc quiz resume` | Quizzes resume | `matched` | Resumes the selected project or case quiz scope. |
-| Work preview | `work.preview` | `chc work run-all --dry-run` | Dash work preview | `matched` | Previews queue selection without starting agent execution. |
-| Daemon stop | `work.daemon.stop` | `chc daemon stop` | Dash stop request | `matched` | Requests stop through the shared daemon stop path. |
+| Case metadata | `case.update` | `chr metadata case set` | Cases save | `matched` | Uses stale revision checks and writes project-local case metadata. |
+| Dump create | `dump.create` | `chr dump new` | Dumps create | `matched` | Creates curated dump artifacts through the dump service. |
+| Dump save | `dump.save` | `chr dump save` | Dumps editor save | `matched` | Uses revision checks before replacing content. |
+| Dump append | `dump.append` | `chr dump append` | Dump append action | `matched` | Appends to the selected dump through the dump service. |
+| Spec generate | `spec.generate` | `chr spec generate` | Specs generate | `matched` | Uses the same generation service and artifact contract. |
+| Plan generate | `plan.generate` | `chr plan generate` | Plans generate | `matched` | Uses the same generation service and existing-plan guard. |
+| Plan regenerate | `plan.regenerate` | `chr plan regenerate` | Plans regenerate | `matched` | Requires browser confirmation before replacement. |
+| Plan tracking create | `plan.tracking.create` | `chr plan tracking create` | Plans tracking action | `matched` | Materializes tracking artifacts and tickets from an existing plan. |
+| Quiz start | `quiz.start` | `chr quiz start` | Quizzes start | `matched` | Supports project or case scope and deep or fast mode. |
+| Quiz resume | `quiz.resume` | `chr quiz resume` | Quizzes resume | `matched` | Resumes the selected project or case quiz scope. |
+| Work preview | `work.preview` | `chr work run-all --dry-run` | Dash work preview | `matched` | Previews queue selection without starting agent execution. |
+| Daemon stop | `work.daemon.stop` | `chr daemon stop` | Dash stop request | `matched` | Requests stop through the shared daemon stop path. |
 
 ## Boundaries
 

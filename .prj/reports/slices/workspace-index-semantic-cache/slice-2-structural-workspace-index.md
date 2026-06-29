@@ -49,14 +49,14 @@ source hash, modified time, and size.
 
 ## Files of Interest
 
-- `internal/chc/workspace_index.go`
-- `internal/chc/workspace_index_test.go`
+- `internal/chr/workspace_index.go`
+- `internal/chr/workspace_index_test.go`
 - `.prj/reports/slices/workspace-index-semantic-cache/slice-2-structural-workspace-index.md`
 - `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc` passed on 2026-05-23.
+- `go test ./internal/chr` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

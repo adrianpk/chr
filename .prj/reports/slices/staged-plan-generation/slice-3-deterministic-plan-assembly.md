@@ -30,7 +30,7 @@ The final generated plan artifact still uses the existing `GeneratedPlan`
 writer and keeps status `planned`. Existing archive-before-replace and
 same-scope generation guards continue to wrap the generation path.
 
-The assembler lives in `internal/chc` and validates that every outline slice has
+The assembler lives in `internal/chr` and validates that every outline slice has
 exactly one accepted detail response before returning Markdown. The service
 sets source request and response IDs after successful staged generation, then
 writes the canonical plan.
@@ -44,15 +44,15 @@ writes the canonical plan.
 
 ## Files of Interest
 
-- `internal/chc/plan_assembly.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chcapp/service_plan_test.go`
-- `internal/chcapp/service_quiz_test.go`
+- `internal/chr/plan_assembly.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chrapp/service_plan_test.go`
+- `internal/chrapp/service_quiz_test.go`
 
 ## Validation
 
-- `gofmt -w internal/chc/plan_assembly.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go internal/chcapp/service_quiz_test.go` - pass
-- `go test ./internal/chc ./internal/chcapp` - pass
+- `gofmt -w internal/chr/plan_assembly.go internal/chrapp/service_plan.go internal/chrapp/service_plan_test.go internal/chrapp/service_quiz_test.go` - pass
+- `go test ./internal/chr ./internal/chrapp` - pass
 - `go test ./...` - pass
 - `git diff --check` - pass
 - `make verify` - fail: `lint-strict` reports pre-existing lint debt in existing test, trace, service, and TUI files.

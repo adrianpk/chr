@@ -50,8 +50,8 @@ Supported commands:
 status
 @project-name status
 loop start --status ready_for_dev --priority high --max-iterations 1
-ticket start CHC-12
-ticket comment CHC-12 blocked on CI logs
+ticket start CHR-12
+ticket comment CHR-12 blocked on CI logs
 ```
 
 Loop flags may use either separate values or `--name=value` form:
@@ -80,8 +80,8 @@ Remote commands are intentionally narrower than the local CLI. They describe
 the user's requested intent, but they do not execute it directly.
 
 Accepted requests are mapped to CLI-equivalent handoff text, such as
-`chc daemon status`, `chc ticket loop`, `chc ticket start`, or
-`chc ticket comment`. Rejected requests store the rejection reason.
+`chr daemon status`, `chr ticket loop`, `chr ticket start`, or
+`chr ticket comment`. Rejected requests store the rejection reason.
 
 The local CLI remains the source of truth for actual project operations.
 
@@ -110,13 +110,13 @@ Telegram update fixtures use the `getUpdates` response shape:
 Preview parsing without persistence:
 
 ```sh
-chc notify telegram poll --fixture updates.json --dry-run
+chr notify telegram poll --fixture updates.json --dry-run
 ```
 
 Persist accepted and rejected handoff records from a fixture:
 
 ```sh
-chc notify telegram poll --fixture updates.json
+chr notify telegram poll --fixture updates.json
 ```
 
 This slice does not perform live Telegram polling. The fixture command provides

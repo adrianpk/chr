@@ -90,8 +90,8 @@ func supportedRemoteCommandTests() []struct {
 	}{
 		{name: "status", text: "@example status", intent: RemoteCommandIntentStatus, projectSelector: "example", assert: assertRemoteStatus},
 		{name: "loop", text: "@example loop start --status ready --priority high --max-iterations 2", intent: RemoteCommandIntentLoopStart, projectSelector: "example", assert: assertRemoteLoop},
-		{name: "ticket start", text: "ticket start CHC-12", intent: RemoteCommandIntentTicketStart, assert: assertRemoteTicketStart},
-		{name: "ticket comment", text: "ticket comment CHC-12 blocked on CI logs", intent: RemoteCommandIntentTicketComment, assert: assertRemoteTicketComment},
+		{name: "ticket start", text: "ticket start CHR-12", intent: RemoteCommandIntentTicketStart, assert: assertRemoteTicketStart},
+		{name: "ticket comment", text: "ticket comment CHR-12 blocked on CI logs", intent: RemoteCommandIntentTicketComment, assert: assertRemoteTicketComment},
 	}
 }
 
@@ -110,7 +110,7 @@ func unsupportedRemoteCommandTests() []struct {
 		{name: "status args", text: "status now", wantErr: "status remote command does not accept arguments"},
 		{name: "loop unsafe arg", text: "loop start now", wantErr: "argument must be a flag"},
 		{name: "loop unknown flag", text: "loop start --delete true", wantErr: "unsupported loop remote command flag"},
-		{name: "ticket unknown action", text: "ticket delete CHC-1", wantErr: "unsupported ticket remote command"},
+		{name: "ticket unknown action", text: "ticket delete CHR-1", wantErr: "unsupported ticket remote command"},
 	}
 }
 
@@ -147,7 +147,7 @@ func remoteParseOptions(text string) RemoteCommandParseOptions {
 }
 
 func remoteRequestWith(edit func(*RemoteCommandRequest)) RemoteCommandRequest {
-	request, err := ParseRemoteCommandRequest(remoteParseOptions("ticket start CHC-1"))
+	request, err := ParseRemoteCommandRequest(remoteParseOptions("ticket start CHR-1"))
 	if err != nil {
 		panic(err)
 	}
@@ -184,16 +184,16 @@ func assertRemoteLoop(t *testing.T, request RemoteCommandRequest) {
 func assertRemoteTicketStart(t *testing.T, request RemoteCommandRequest) {
 	t.Helper()
 
-	if request.TicketKey != "CHC-12" {
-		t.Fatalf("ticket key = %q, want CHC-12", request.TicketKey)
+	if request.TicketKey != "CHR-12" {
+		t.Fatalf("ticket key = %q, want CHR-12", request.TicketKey)
 	}
 }
 
 func assertRemoteTicketComment(t *testing.T, request RemoteCommandRequest) {
 	t.Helper()
 
-	if request.TicketKey != "CHC-12" {
-		t.Fatalf("ticket key = %q, want CHC-12", request.TicketKey)
+	if request.TicketKey != "CHR-12" {
+		t.Fatalf("ticket key = %q, want CHR-12", request.TicketKey)
 	}
 
 	if request.Comment != "blocked on CI logs" {

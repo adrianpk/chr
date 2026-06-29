@@ -340,14 +340,14 @@ func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadines
 }
 
 func applyRuntimeArtifactsRepair(ctx context.Context, run repairRun) (WorkReadinessAppliedRepair, bool, error) {
-	changed, err := run.git.ExcludeLocalPattern(ctx, run.projectDir, ".chc/user/runtime/")
+	changed, err := run.git.ExcludeLocalPattern(ctx, run.projectDir, ".chr/user/runtime/")
 	if err != nil {
 		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
 	}
 
 	return WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairIgnoreRuntimeArtifacts,
-		Detail: "excluded .chc/user/runtime/ in local Git info exclude",
+		Detail: "excluded .chr/user/runtime/ in local Git info exclude",
 	}, changed, nil
 }
 
@@ -883,7 +883,7 @@ func workspaceWorkReadinessRepair(diagnostic WorkReadinessDiagnostic) (WorkReadi
 			Available: true,
 			Code:      WorkReadinessRepairIgnoreRuntimeArtifacts,
 			Safe:      true,
-			Detail:    "exclude ChrysoCoord runtime artifacts from local Git status",
+			Detail:    "exclude Chryso runtime artifacts from local Git status",
 		}, true
 	case WorkReadinessDiagnosticWorktreeRootMissing:
 		return WorkReadinessRepair{
@@ -942,7 +942,7 @@ func splitWorktreeStatus(lines []string) ([]string, []string) {
 }
 
 func worktreeStatusLineIsRuntimeArtifact(line string) bool {
-	return strings.Contains(line, ".chc/user/runtime/")
+	return strings.Contains(line, ".chr/user/runtime/")
 }
 
 func policyInvalidDiagnostic(err error) WorkReadinessDiagnostic {
@@ -998,7 +998,7 @@ func runtimeArtifactsVisibleDiagnostic(mode WorkWorkspaceMode, count int) WorkRe
 	return WorkReadinessDiagnostic{
 		Code:     WorkReadinessDiagnosticRuntimeArtifactsVisible,
 		Severity: severity,
-		Detail:   fmt.Sprintf("chrysocoord runtime artifacts are visible to git: %d", count),
+		Detail:   fmt.Sprintf("chryso runtime artifacts are visible to git: %d", count),
 	}
 }
 

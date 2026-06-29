@@ -41,14 +41,14 @@ evidence is represented explicitly in the Markdown body.
 
 ## Files of Interest
 
-- `internal/chc/execution_report.go`
-- `internal/chc/execution_report_test.go`
+- `internal/chr/execution_report.go`
+- `internal/chr/execution_report_test.go`
 - `docs/reference/execution-reports.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'Test(NewExecutionReport|RenderExecutionReport)'
+go test ./internal/chr -run 'Test(NewExecutionReport|RenderExecutionReport)'
 make verify
 ```
 

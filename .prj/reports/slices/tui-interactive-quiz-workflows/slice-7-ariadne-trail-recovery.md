@@ -35,24 +35,24 @@ questions and candidates are valid only between depth 1 and
 
 ## Contracts Added or Changed
 
-- `internal/chc.QuizBranchReturnReasonMaxDepth`
-- `internal/chc.QuizRuntimeState.BranchReturnReason`
-- `internal/chcapp.QuizView.BranchReturnReason`
-- `internal/chctui.QuizView.BranchReturnReason`
+- `internal/chr.QuizBranchReturnReasonMaxDepth`
+- `internal/chr.QuizRuntimeState.BranchReturnReason`
+- `internal/chrapp.QuizView.BranchReturnReason`
+- `internal/chrtui.QuizView.BranchReturnReason`
 
 ## Files of Interest
 
-- `internal/chc/quiz_runtime.go`
-- `internal/chcapp/service_quiz.go`
-- `internal/chcapp/service_quiz_read.go`
-- `internal/chcapp/service_quiz_test.go`
-- `internal/chctui/quizzes.go`
-- `internal/chctui/model_test.go`
+- `internal/chr/quiz_runtime.go`
+- `internal/chrapp/service_quiz.go`
+- `internal/chrapp/service_quiz_read.go`
+- `internal/chrapp/service_quiz_test.go`
+- `internal/chrtui/quizzes.go`
+- `internal/chrtui/model_test.go`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

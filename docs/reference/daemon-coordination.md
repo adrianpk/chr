@@ -5,7 +5,7 @@
 Daemon coordination is the user-level process boundary for long-running local
 work across registered projects.
 
-The daemon lives in the `chc` binary. It is a local coordinator, not a hosted
+The daemon lives in the `chr` binary. It is a local coordinator, not a hosted
 service and not a notification transport.
 
 ## Command Boundary
@@ -13,14 +13,14 @@ service and not a notification transport.
 The daemon command group is:
 
 ```sh
-chc daemon
+chr daemon
 ```
 
 Supported skeleton commands:
 
-- `chc daemon status`;
-- `chc daemon start --dry-run`;
-- `chc daemon stop --dry-run`.
+- `chr daemon status`;
+- `chr daemon start --dry-run`;
+- `chr daemon stop --dry-run`.
 
 The skeleton resolves the user environment and prints the user-level data and
 state directories that later lifecycle slices will use.
@@ -122,7 +122,7 @@ Only enabled projects are returned for daemon work.
 
 Each enabled project is classified before work starts:
 
-- `ready`: project path exists, is a directory, and contains `.chc/`;
+- `ready`: project path exists, is a directory, and contains `.chr/`;
 - `missing`: project path does not exist;
 - `invalid`: project path is not usable for daemon work.
 
@@ -132,7 +132,7 @@ projects without failing the whole daemon process.
 
 ## Foreground Run Loop
 
-`chc daemon start` runs daemon coordination in the foreground.
+`chr daemon start` runs daemon coordination in the foreground.
 
 The foreground run:
 
@@ -151,7 +151,7 @@ The foreground loop does not run as an OS service.
 
 ## Stop and Recovery
 
-`chc daemon stop` persists a stop request when daemon state is active.
+`chr daemon stop` persists a stop request when daemon state is active.
 
 The command changes `starting`, `running`, or `stopping` state to `stopping` and
 sets `stop_requested_at`. If state is missing, the command reports the daemon as
@@ -160,14 +160,14 @@ already stopped.
 The foreground run loop checks for stop requests between iterations and exits
 cleanly when one is present. Normal exit writes stopped daemon state.
 
-`chc daemon status` also recovers stale active state. When stored `starting`,
+`chr daemon status` also recovers stale active state. When stored `starting`,
 `running`, or `stopping` state has not heartbeated within the stale threshold,
 status rewrites it as `stale` with a stale failure reason and prints the
 recovered state.
 
 ## Status Reporting
 
-`chc daemon status` reads the persisted daemon state.
+`chr daemon status` reads the persisted daemon state.
 
 When state is missing, the output includes:
 

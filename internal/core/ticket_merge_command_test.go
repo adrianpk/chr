@@ -205,7 +205,7 @@ func writeMergeCommandTicket(t *testing.T) (IndexedTicket, string) {
 
 	now := testMergeCommandTime()
 	ticket := Ticket{
-		Key:          "CHC-3",
+		Key:          "CHR-3",
 		Title:        "Merge reviewed ticket",
 		Status:       TicketStatusReadyForMerge,
 		Branch:       "feat/slice-3-merge-execution-command",

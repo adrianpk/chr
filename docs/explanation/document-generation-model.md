@@ -1,6 +1,6 @@
 # Document Generation Model
 
-ChrysoCoord treats project knowledge as Markdown-first material.
+Chryso treats project knowledge as Markdown-first material.
 
 Commands can create and connect documents, but the documents remain normal files
 that a technical user can inspect and edit. The command layer is there to reduce
@@ -121,6 +121,6 @@ stale.
 
 ## Conversation History
 
-ChrysoCoord does not depend on implicit prior conversation for ticket execution
+Chryso does not depend on implicit prior conversation for ticket execution
 or authoring continuity. Relevant discussion should be captured as Markdown
 artifacts, transcript events, dumps, quizzes, specs, plans, or tickets.

@@ -15,8 +15,8 @@ to persist scoped quiz raw capture, curated quiz notes, and runtime state.
 ## Delivered Behavior
 
 - Resolves canonical project-wide and use-case-scoped quiz artifact paths under
-  `.chc/quizzes/`.
-- Resolves canonical runtime state cache paths under `.chc/tmp/quiz-runtime/`.
+  `.chr/quizzes/`.
+- Resolves canonical runtime state cache paths under `.chr/tmp/quiz-runtime/`.
 - Appends raw quiz capture entries for answered or skipped activated
   questions.
 - Writes curated quiz notes from distilled decisions, constraints, preferences,
@@ -27,7 +27,7 @@ to persist scoped quiz raw capture, curated quiz notes, and runtime state.
 
 ## Implementation Notes
 
-The repository is file-backed and lives in `internal/chc`. It does not call the
+The repository is file-backed and lives in `internal/chr`. It does not call the
 model boundary, perform service orchestration, or expose TUI behavior.
 
 The raw and curated renderers are intentionally deterministic so later slices
@@ -36,25 +36,25 @@ in adapters.
 
 ## Contracts Added or Changed
 
-- `internal/chc.QuizArtifactRepository`
-- `internal/chc.NewQuizArtifactRepository`
-- `internal/chc.QuizArtifactLayout`
-- `internal/chc.QuizArtifactPaths`
-- `internal/chc.QuizCuratedNotes`
-- `internal/chc.RenderQuizRawCapture`
-- `internal/chc.RenderQuizCuratedNotes`
+- `internal/chr.QuizArtifactRepository`
+- `internal/chr.NewQuizArtifactRepository`
+- `internal/chr.QuizArtifactLayout`
+- `internal/chr.QuizArtifactPaths`
+- `internal/chr.QuizCuratedNotes`
+- `internal/chr.RenderQuizRawCapture`
+- `internal/chr.RenderQuizCuratedNotes`
 - `QuizArtifactsDirectory`
 - `QuizRuntimeDirectory`
 
 ## Files of Interest
 
-- `internal/chc/quiz_artifact_repository.go`
-- `internal/chc/quiz_artifact_repository_test.go`
+- `internal/chr/quiz_artifact_repository.go`
+- `internal/chr/quiz_artifact_repository_test.go`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `make verify`
 
 ## Risks and Follow-ups

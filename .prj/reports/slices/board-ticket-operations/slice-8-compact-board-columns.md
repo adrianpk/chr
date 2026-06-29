@@ -40,12 +40,12 @@ Turn the compact Board view into a one-column-at-a-time operational surface.
 
 ## Files of Interest
 
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chctui`
+- `go test ./internal/chrtui`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

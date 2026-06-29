@@ -33,7 +33,7 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 | --- | --- | --- | --- | --- |
 | T2.1 | Add work readiness diagnostic and status models. | done | `68f76c2` | Include policy values in diagnostics. |
 | T2.2 | Add a core readiness service that evaluates policy and Git state. | done | `a3c89d0` | Classifies known Git failures. |
-| T2.3 | Add `chc work doctor` output. | done | `1ead8e0` | No agent work starts. |
+| T2.3 | Add `chr work doctor` output. | done | `1ead8e0` | No agent work starts. |
 | T2.4 | Add CLI/core tests for classified diagnostics. | done | `a94b9c5` | Covers missing remote ref, branch-behind, runtime artifacts, and no-Git mode. |
 | T2.5 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 
@@ -82,6 +82,6 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 
 ## Notes
 
-- Defaults intentionally keep ChrysoCoord's own `dev` plus `origin` workflow.
+- Defaults intentionally keep Chryso's own `dev` plus `origin` workflow.
 - The feature should make those defaults configurable instead of hardcoded.
 - Repair behavior must stay non-destructive.

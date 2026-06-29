@@ -23,9 +23,9 @@ action without reading raw Git failures.
 - Ticket execution and run-all actions are blocked before execution when
   readiness is blocked.
 - Safe repair uses the same `core.RepairWorkReadiness` path as
-  `chc work doctor --fix-safe`.
+  `chr work doctor --fix-safe`.
 - QA reset creates a ready `dev` branch with a local `origin/dev` remote ref.
-- QA smoke checks `chc work doctor --dir <project>` before manual TUI runs.
+- QA smoke checks `chr work doctor --dir <project>` before manual TUI runs.
 
 ## Implementation Notes
 
@@ -45,7 +45,7 @@ action without reading raw Git failures.
   with readiness state.
 - Added `WorkActionRepairReadiness`.
 - Added Dash key `x` for safe readiness repair.
-- Extended QA smoke to require `status: ready` from `chc work doctor`.
+- Extended QA smoke to require `status: ready` from `chr work doctor`.
 
 ## Files of Interest
 

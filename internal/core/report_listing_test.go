@@ -14,10 +14,10 @@ func TestReportListerListsProjectReports(t *testing.T) {
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
 		UserDirectoryName,
@@ -31,7 +31,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"runtime.log",
 	), "log")
@@ -61,23 +61,23 @@ func TestReportListerFiltersReports(t *testing.T) {
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-2",
+		"CHR-2",
 		"exec-2",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHC-2\n- status: blocked\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-2\n- status: blocked\n")
 
 	reports, err := NewReportLister().ListProjectReports(context.Background(), projectDir, ReportListFilter{
 		Kind:      ReportKindExecution,
-		TicketKey: "CHC-2",
+		TicketKey: "CHR-2",
 		Status:    "blocked",
 	})
 	if err != nil {

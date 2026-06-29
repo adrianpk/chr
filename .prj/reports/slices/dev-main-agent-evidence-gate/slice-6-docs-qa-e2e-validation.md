@@ -14,8 +14,8 @@ gate behavior, and validate the completed slice set.
 
 ## Delivered Behavior
 
-- Added command reference coverage for `chc gate dev-main`.
-- Added command reference coverage for `chc gate woodpecker init`.
+- Added command reference coverage for `chr gate dev-main`.
+- Added command reference coverage for `chr gate woodpecker init`.
 - Added gate config and report schema reference.
 - Added a Woodpecker how-to guide.
 - Added `make qa-gate` as a repeatable local gate scenario.
@@ -26,9 +26,9 @@ gate behavior, and validate the completed slice set.
 
 The QA scenario uses a temporary Go project and a temporary Go build cache so it
 does not depend on the user's global Go cache or leave managed-project artifacts
-inside the ChrysoCoord repository.
+inside the Chryso repository.
 
-The self-gate validation used a temporary worktree to avoid writing `.chc/`
+The self-gate validation used a temporary worktree to avoid writing `.chr/`
 artifacts into the active checkout.
 
 ## Contracts Added or Changed
@@ -51,7 +51,7 @@ artifacts into the active checkout.
 
 - `make verify` (pass)
 - `make qa-gate` (pass)
-- `GOCACHE=/tmp/chc-gate-self.aRZ3ao/.go-build-cache go run /home/adrian/Projects/chrysocoord/cmd/chc gate dev-main --dir /tmp/chc-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
+- `GOCACHE=/tmp/chr-gate-self.aRZ3ao/.go-build-cache go run /home/adrian/Projects/chryso/cmd/chr gate dev-main --dir /tmp/chr-gate-self.aRZ3ao --base origin/dev --head HEAD` (pass)
 
 ## Risks and Follow-ups
 

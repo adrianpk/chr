@@ -4,7 +4,7 @@ Status: draft
 
 ## Summary
 
-ChrysoCoord should extend the dump, quiz, and spec workflow so that behavior-testable
+Chryso should extend the dump, quiz, and spec workflow so that behavior-testable
 use cases can produce an associated Gherkin feature artifact alongside the
 generated specification.
 
@@ -168,7 +168,7 @@ to be executable by Gherkin tooling.
 Suggested project-local path:
 
 ```text
-.chc/user/acceptance/<topic>.feature
+.chr/user/acceptance/<topic>.feature
 ```
 
 The feature should include tags that connect it to its source material:
@@ -251,7 +251,7 @@ files against project-specific step definitions.
 
 ## Open Questions
 
-- Should `.chc/user/acceptance/` become the canonical feature artifact location,
+- Should `.chr/user/acceptance/` become the canonical feature artifact location,
   or should acceptance artifacts live beside specs?
 - Should suitability output be stored as a separate JSON artifact, embedded in
   spec generation metadata, or both?

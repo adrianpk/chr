@@ -1,23 +1,23 @@
 ---
 title: "Merger Agent Workflow"
-project_id: "chrysocoord"
+project_id: "chryso"
 case_slug: "ticket-execution-loop"
 status: "accepted"
 source_request_id: "chat-2026-06-02-merger-agent-role"
 source_response_id: "codex-spec"
 created_at: "2026-06-02T00:00:00Z"
-mirror: ".chc/user/specs/merger-agent-workflow.md"
+mirror: ".chr/user/specs/merger-agent-workflow.md"
 ---
 
 # Merger Agent Workflow
 
-ChrysoCoord should formalize an `@merger` role after ticket review.
+Chryso should formalize an `@merger` role after ticket review.
 
 This role is an operational integration role. It is not a second review phase
 and must not reinterpret code quality after `@reviewer` has passed a ticket.
 
-This spec is mirrored in `.chc/user/specs/merger-agent-workflow.md` while the
-project evaluates self-hosted ChrysoCoord workflow adoption.
+This spec is mirrored in `.chr/user/specs/merger-agent-workflow.md` while the
+project evaluates self-hosted Chryso workflow adoption.
 
 ## Problem
 

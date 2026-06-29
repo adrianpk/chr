@@ -13,10 +13,10 @@ Capture compile, lint, test, and verify evidence for one proving objective.
 
 ## Delivered Behavior
 
-`chc` now exposes:
+`chr` now exposes:
 
 ```sh
-chc proving validate --dir <project> --objective <objective>
+chr proving validate --dir <project> --objective <objective>
 ```
 
 The command runs the fixture validation commands and writes a Markdown
@@ -43,7 +43,7 @@ unfixed.
 
 New temporary CLI command:
 
-- `chc proving validate`
+- `chr proving validate`
 - `--dir`
 - `--objective`
 
@@ -62,16 +62,16 @@ The default proving validation command list is:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `internal/chc/proving.go`
-- `internal/chc/proving_test.go`
+- `cmd/chr/main.go`
+- `internal/chr/proving.go`
+- `internal/chr/proving_test.go`
 - `docs/reference/mvp-agent-proving-ground.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestRunProvingValidation|TestParseProving|TestPlanProving|TestRunProving|TestRenderProving'`: pass
-- `go run ./cmd/chc proving validate --dir _workspace/testing/projects/todolist --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md`: expected failure with validation artifact
-- `go run ./cmd/chc proving validate --dir _workspace/testing/projects/todolist --objective .chc/proving/objectives/TODO-2-complete-task.md`: expected failure with validation artifact
+- `go test ./internal/chr -run 'TestRunProvingValidation|TestParseProving|TestPlanProving|TestRunProving|TestRenderProving'`: pass
+- `go run ./cmd/chr proving validate --dir _workspace/testing/projects/todolist --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md`: expected failure with validation artifact
+- `go run ./cmd/chr proving validate --dir _workspace/testing/projects/todolist --objective .chr/proving/objectives/TODO-2-complete-task.md`: expected failure with validation artifact
 - `make verify`: pass
 
 ## Risks and Follow-ups

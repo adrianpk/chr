@@ -16,10 +16,10 @@ the primary workflow.
 
 The CLI now includes a `notify` command group with:
 
-- `chc notify status`;
-- `chc notify telegram test --dry-run`.
+- `chr notify status`;
+- `chr notify telegram test --dry-run`.
 
-`notify status` resolves the project, loads `.chc/config.yml`, and reports
+`notify status` resolves the project, loads `.chr/config.yml`, and reports
 Telegram notification readiness.
 
 `notify telegram test --dry-run` renders the planned Telegram test payload from
@@ -40,23 +40,23 @@ exists.
 
 ## Contracts Added or Changed
 
-- Added `chc notify`.
-- Added `chc notify status`.
-- Added `chc notify telegram test --dry-run`.
+- Added `chr notify`.
+- Added `chr notify status`.
+- Added `chr notify telegram test --dry-run`.
 - Added CLI tests for readiness reporting, invalid config reporting, dry-run
   payload rendering, and non-dry-run blocking.
 
 ## Files of Interest
 
-- `internal/chcapp/app.go`
-- `internal/chcapp/notify.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/notify.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/commands.md`
 - `docs/reference/notifications.md`
 
 ## Validation
 
-- `go test ./internal/chcapp -run TestNotify`: pass
+- `go test ./internal/chrapp -run TestNotify`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

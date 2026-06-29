@@ -5,9 +5,9 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/tui"
-	"forge.adrianpk.com/chc/internal/webui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/tui"
+	"forge.adrianpk.com/chr/internal/webui"
 )
 
 type webViewProvider struct {

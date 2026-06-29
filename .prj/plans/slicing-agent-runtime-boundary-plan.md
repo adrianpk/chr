@@ -14,13 +14,13 @@ This slicing covers the use case:
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related documents:
 
-- `.prj/drafts/chc-command-surfaces-and-priority.md`
-- `.prj/drafts/chc-capability-map.md`
-- `.prj/drafts/chc-slicing-map.md`
+- `.prj/drafts/chr-command-surfaces-and-priority.md`
+- `.prj/drafts/chr-capability-map.md`
+- `.prj/drafts/chr-slicing-map.md`
 - `.prj/specs/specs/user-daemon-and-global-index.md`
 - `docs/reference/project-workspace.md`
 - `docs/reference/ticket-reconciliation.md`
@@ -35,7 +35,7 @@ Prerequisite delivered work:
 
 Already delivered:
 
-- project-local `.chc/` bootstrap;
+- project-local `.chr/` bootstrap;
 - project config file creation;
 - project registry and active context;
 - ticket model and global ticket index;
@@ -43,7 +43,7 @@ Already delivered:
 
 Delivered by this slicing:
 
-- a runtime config contract under `.chc/config.yml`;
+- a runtime config contract under `.chr/config.yml`;
 - an agent-runtime Dockerfile template;
 - a command to materialize runtime assets safely;
 - a computed runtime boundary plan for future execution;
@@ -95,7 +95,7 @@ Expected report: `.prj/reports/slices/agent-runtime-boundary/slice-1-runtime-con
 
 Goal:
 
-Add a typed runtime configuration model loaded from `.chc/config.yml`.
+Add a typed runtime configuration model loaded from `.chr/config.yml`.
 
 Candidate scope:
 
@@ -125,7 +125,7 @@ Candidate scope:
 
 - add an agent-runtime Dockerfile template to embedded assets;
 - add default runtime config fields to profile config files;
-- ensure `chc init` creates the runtime template without overwriting existing user files;
+- ensure `chr init` creates the runtime template without overwriting existing user files;
 - add focused init tests;
 - document the template purpose and ownership.
 
@@ -148,7 +148,7 @@ Expose safe runtime asset materialization as a CLI command.
 Candidate scope:
 
 - add a `runtime` command group if needed;
-- add `chc runtime init`;
+- add `chr runtime init`;
 - resolve project context through the existing resolver;
 - support dry-run output;
 - skip existing runtime files by default;
@@ -197,7 +197,7 @@ Expose runtime readiness checks without running an agent.
 
 Candidate scope:
 
-- add `chc runtime validate`;
+- add `chr runtime validate`;
 - resolve project context and runtime config;
 - verify required runtime files and directories;
 - print the computed Docker build/run plan;
@@ -213,7 +213,7 @@ Expected outcome:
 
 The slicing is complete when:
 
-- runtime config can be loaded from `.chc/config.yml`;
+- runtime config can be loaded from `.chr/config.yml`;
 - managed projects can receive a default agent-runtime Dockerfile template;
 - existing projects can materialize runtime defaults through CLI;
 - runtime paths and mounts can be computed through one core contract;
@@ -234,10 +234,10 @@ Manual smoke checks for the completed slicing:
 ```sh
 make install
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir"
-chc runtime init --dir "$tmpdir" --dry-run
-chc runtime init --dir "$tmpdir"
-chc runtime validate --dir "$tmpdir" --dry-run
+chr init --dir "$tmpdir"
+chr runtime init --dir "$tmpdir" --dry-run
+chr runtime init --dir "$tmpdir"
+chr runtime validate --dir "$tmpdir" --dry-run
 ```
 
 ## Risks

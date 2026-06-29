@@ -14,7 +14,7 @@ starting Docker, launching Codex, or reimplementing the ticket.
 
 ## Delivered Behavior
 
-- `chc ticket review <key>` applies an explicit review result to a
+- `chr ticket review <key>` applies an explicit review result to a
   `ready_for_review` ticket.
 - The command assembles ticket and remote pull request evidence through the
   remote review adapter.
@@ -37,24 +37,24 @@ starting Docker, launching Codex, or reimplementing the ticket.
 
 - Added `TicketReviewCommandResult` and `RunTicketReviewCommand`.
 - Added CLI command:
-  `chc ticket review <key> --result <result> [--finding <text>]`.
+  `chr ticket review <key> --result <result> [--finding <text>]`.
 - Supported results are `pass`, `needs_changes`, `insufficient_evidence`, and
   `needs_human_decision`.
 - Review command output is line-oriented and machine-readable.
 
 ## Files of Interest
 
-- `internal/chc/ticket_review_command.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/ticket_review_command.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/cli_test.go`
 
 ## Validation
 
 - `git diff --check`
-- `go test ./internal/chc -run 'TicketReview|ReviewRemote|ReviewProvider|Config'`
-- `go test ./internal/chcapp -run 'TicketReview|TicketReviewMode|TicketReviewRef'`
-- `go test ./internal/chc ./internal/chcapp`
-- `golangci-lint run ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr -run 'TicketReview|ReviewRemote|ReviewProvider|Config'`
+- `go test ./internal/chrapp -run 'TicketReview|TicketReviewMode|TicketReviewRef'`
+- `go test ./internal/chr ./internal/chrapp`
+- `golangci-lint run ./internal/chr ./internal/chrapp`
 
 ## Risks and Follow-ups
 

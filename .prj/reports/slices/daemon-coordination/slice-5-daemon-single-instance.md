@@ -22,7 +22,7 @@ The guard:
 - classifies active daemon state as stale when the heartbeat or start time is
   older than the stale threshold.
 
-`chc daemon start --dry-run` now prints the guard decision without writing
+`chr daemon start --dry-run` now prints the guard decision without writing
 state or acquiring ownership.
 
 ## Implementation Notes
@@ -47,16 +47,16 @@ Changed CLI dry-run output:
 
 ## Files of Interest
 
-- `internal/chc/daemon_guard.go`
-- `internal/chc/daemon_guard_test.go`
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/daemon_guard.go`
+- `internal/chr/daemon_guard_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestEvaluateDaemonStartGuard'`: pass
-- `go test ./cmd/chc -run 'TestDaemonStart'`: pass
+- `go test ./internal/chr -run 'TestEvaluateDaemonStartGuard'`: pass
+- `go test ./cmd/chr -run 'TestDaemonStart'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

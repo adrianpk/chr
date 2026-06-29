@@ -30,7 +30,7 @@ The core package now supports:
 The curated summary artifact is written under the authoring session directory:
 
 ```text
-.chc/authoring/sessions/<session-id>/curated-summary.md
+.chr/authoring/sessions/<session-id>/curated-summary.md
 ```
 
 The artifact remains Markdown-first and hand-editable. The model output is
@@ -52,13 +52,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/assisted_answer_curation.go`
-- `internal/chc/assisted_answer_curation_test.go`
+- `internal/chr/assisted_answer_curation.go`
+- `internal/chr/assisted_answer_curation_test.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestBuildAssistedCuratedAnswerSummary|TestCurateAssistedAnswers|TestRenderAssistedCuratedAnswerSummary'`: pass
+- `go test ./internal/chr -run 'TestBuildAssistedCuratedAnswerSummary|TestCurateAssistedAnswers|TestRenderAssistedCuratedAnswerSummary'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

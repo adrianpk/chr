@@ -1,6 +1,6 @@
 # Acceptance Feature Generation
 
-When a use case is naturally behavior-testable, ChrysoCoord should generate a
+When a use case is naturally behavior-testable, Chryso should generate a
 linked Gherkin `.feature` artifact from the canonical Markdown spec and related
 quiz/dump context. The spec remains the source of truth. The feature file is
 supporting acceptance evidence.
@@ -44,21 +44,21 @@ language, while preserving the selected scenario gap.
 Feature generation writes:
 
 ```text
-.chc/user/acceptance/<scope>.feature
+.chr/user/acceptance/<scope>.feature
 ```
 
 Spec generation does not write this file. It generates only the Markdown spec.
 
-When generation needs more information, ChrysoCoord writes feature-round notes:
+When generation needs more information, Chryso writes feature-round notes:
 
 ```text
-.chc/user/acceptance/<scope>-feature-round.md
+.chr/user/acceptance/<scope>-feature-round.md
 ```
 
 Those notes contain focused prompts with inferred defaults and empty answer
 slots. A later generation attempt reads the notes as acceptance context.
 
-Current limitation: ChrysoCoord writes the feature-round prompts, but the TUI
+Current limitation: Chryso writes the feature-round prompts, but the TUI
 does not yet collect their answers with the quiz-style interaction loop. Until
 that flow exists, the answers must be recorded in the feature-round note before
 retrying generation.
@@ -106,7 +106,7 @@ The Test/Evidence Strategy pass treats Gherkin as active when the project has
 existing acceptance feature artifacts under:
 
 ```text
-.chc/user/acceptance/*.feature
+.chr/user/acceptance/*.feature
 ```
 
 With the default `evidence.strategy.gherkin_policy: active_when_applicable`,

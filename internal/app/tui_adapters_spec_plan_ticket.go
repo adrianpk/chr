@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/tui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/tui"
 )
 
 type tuiTicketActionExecutor struct {

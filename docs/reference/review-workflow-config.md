@@ -9,7 +9,7 @@ The setting is independent from the separate `dev` to `main` promotion gate.
 
 ## Location
 
-Review workflow settings live in `.chc/user/config.yml` under `review:`.
+Review workflow settings live in `.chr/user/config.yml` under `review:`.
 The same provider settings are used by ticket review diagnostics, remote review
 comments, and reviewed ticket merge execution.
 
@@ -97,14 +97,14 @@ pull request review comments or pull request metadata.
 Run diagnostics for one pull request:
 
 ```sh
-chc ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123
+chr ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123
 ```
 
 Preview provider mapping and local CLI/token checks without reading the remote
 pull request:
 
 ```sh
-chc ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123 --dry-run
+chr ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123 --dry-run
 ```
 
 The command prints machine-readable check lines such as `provider_url`,
@@ -115,13 +115,13 @@ The command prints machine-readable check lines such as `provider_url`,
 Inspect the active review workflow mode:
 
 ```sh
-chc ticket review-mode status
+chr ticket review-mode status
 ```
 
 Preview the same information without performing review work:
 
 ```sh
-chc ticket review-mode status --dry-run
+chr ticket review-mode status --dry-run
 ```
 
 The command prints the active mode, validation status, mode implications, clean

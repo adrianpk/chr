@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // AcceptanceFeatureGenerateRequest selects the scope used to generate an acceptance feature.

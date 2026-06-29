@@ -4,7 +4,7 @@ Status: draft
 
 ## Purpose
 
-Define the local ChrysoCoord approach for embedding default assets into the `chc` binary while keeping those assets editable as normal repository files.
+Define the local Chryso approach for embedding default assets into the `chr` binary while keeping those assets editable as normal repository files.
 
 ## Current Direction
 
@@ -21,7 +21,7 @@ Default assets should live as non-binarized files under the command asset tree.
 Current candidate:
 
 ```text
-cmd/chc/assets/
+cmd/chr/assets/
   workspace/
     profiles/
       standard/
@@ -33,19 +33,19 @@ The binary embeds the top-level `assets` directory once.
 
 ## Init Profiles
 
-ChrysoCoord supports three initial workspace profiles:
+Chryso supports three initial workspace profiles:
 
-- `standard`: the default profile used by `chc init`.
+- `standard`: the default profile used by `chr init`.
 - `personal`: the full opinionated workflow for the author's own use.
 - `minimal`: a lightweight scaffold with the least practical default content.
 
 The command shape is:
 
 ```sh
-chc init
-chc init --profile standard
-chc init --profile personal
-chc init --profile minimal
+chr init
+chr init --profile standard
+chr init --profile personal
+chr init --profile minimal
 ```
 
 `standard` is selected when no profile is provided.
@@ -55,7 +55,7 @@ chc init --profile minimal
 The profile asset layout is:
 
 ```text
-cmd/chc/assets/workspace/profiles/
+cmd/chr/assets/workspace/profiles/
   standard/
     manifest.md
     config.yml
@@ -73,17 +73,17 @@ cmd/chc/assets/workspace/profiles/
     playbooks/
 ```
 
-Profiles are copied recursively into the target `.chc/` workspace.
+Profiles are copied recursively into the target `.chr/` workspace.
 
-Users may edit generated `.chc/` files freely after initialization.
+Users may edit generated `.chr/` files freely after initialization.
 
 ## Root AGENTS.md
 
 `AGENTS.md` is a required root-level file in managed projects.
 
-Even though most ChrysoCoord-managed state lives under `.chc/`, `AGENTS.md` must be materialized at the project root because external tools may look for it there.
+Even though most Chryso-managed state lives under `.chr/`, `AGENTS.md` must be materialized at the project root because external tools may look for it there.
 
-The root file should point to the project-local ChrysoCoord protocol under `.chc/` while still being useful to tools that only read `AGENTS.md`.
+The root file should point to the project-local Chryso protocol under `.chr/` while still being useful to tools that only read `AGENTS.md`.
 
 ## Default Agent Harness
 
@@ -95,7 +95,7 @@ Git worktrees remain useful for branch and checkout isolation, but they should n
 
 ## Runtime Assembly
 
-`cmd/chc/main.go` declares the embedded filesystem:
+`cmd/chr/main.go` declares the embedded filesystem:
 
 ```go
 //go:embed assets
@@ -122,10 +122,10 @@ The workspace initializer reads defaults from:
 assets/workspace/profiles/<profile>/
 ```
 
-Those files become the defaults written to a managed project's `.chc/` directory.
+Those files become the defaults written to a managed project's `.chr/` directory.
 
 ## Open Questions
 
-- Should all command-owned assets stay under `cmd/chc/assets/`, or should the project later move to a root `assets/` directory?
+- Should all command-owned assets stay under `cmd/chr/assets/`, or should the project later move to a root `assets/` directory?
 - What exact file set belongs in each profile?
 - Should tests use `testing/fstest.MapFS` for focused asset fixtures, or embed testdata assets per package?

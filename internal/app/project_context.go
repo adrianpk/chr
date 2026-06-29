@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 type commandProjectContext struct {

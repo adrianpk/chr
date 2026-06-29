@@ -8,14 +8,14 @@ Plan the `Maintenance and Recovery` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> A user can inspect and repair local `chc` state when files, database state,
+> A user can inspect and repair local `chr` state when files, database state,
 > or runtime artifacts drift.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related delivered work:
 
@@ -33,19 +33,19 @@ Delivered maintenance capabilities:
 
 - project resolution validates missing, disabled, and non-managed registered
   project paths;
-- `chc index rebuild` can reconstruct the derived ticket index from Markdown;
-- `chc index status` can report missing, stale, orphaned, and invalid ticket
+- `chr index rebuild` can reconstruct the derived ticket index from Markdown;
+- `chr index status` can report missing, stale, orphaned, and invalid ticket
   index entries;
 - runtime validation can inspect the configured Docker boundary;
 - execution records, loop runs, reports, and runtime artifacts preserve
   evidence;
-- `chc maintenance db status` reports migration status;
-- `chc maintenance registry status`, `disable`, and `set-path` expose registry
+- `chr maintenance db status` reports migration status;
+- `chr maintenance registry status`, `disable`, and `set-path` expose registry
   diagnostics and explicit repair;
-- `chc maintenance execution artifacts` detects execution artifact drift;
-- `chc maintenance execution cleanup-preview` previews unreferenced runtime
+- `chr maintenance execution artifacts` detects execution artifact drift;
+- `chr maintenance execution cleanup-preview` previews unreferenced runtime
   artifact directories;
-- `chc maintenance bundle` writes a local diagnostic bundle;
+- `chr maintenance bundle` writes a local diagnostic bundle;
 - maintenance workflows are documented under `docs/how-to/` and
   `docs/reference/`.
 
@@ -109,7 +109,7 @@ Candidate scope:
 - add migration status model derived from migration assets and
   `schema_migrations`;
 - report applied, pending, and unknown database migrations;
-- add `chc maintenance db status`;
+- add `chr maintenance db status`;
 - add tests for clean, pending, and unknown migration states;
 - document the command.
 
@@ -131,7 +131,7 @@ Expose registry drift across registered projects.
 
 Candidate scope:
 
-- list registered projects with path existence, `.chc/` presence, enabled
+- list registered projects with path existence, `.chr/` presence, enabled
   state, and active marker;
 - report actionable diagnostics for missing or unmanaged paths;
 - keep the command read-only;
@@ -230,7 +230,7 @@ Candidate scope:
 - gather command-readable state summaries;
 - include selected reports and maintenance diagnostics;
 - avoid copying secrets or credentials;
-- write a deterministic Markdown bundle under `.chc/maintenance/`;
+- write a deterministic Markdown bundle under `.chr/maintenance/`;
 - document bundle contents.
 
 Expected outcome:

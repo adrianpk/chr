@@ -32,35 +32,35 @@ Raw quiz capture remains append-only Markdown. The repository can read it back
 into quiz entries for curation, and missing raw capture resolves to an empty
 entry set so done can still produce an inspectable curated file.
 
-Draft specs are written under `.chc/specs/drafts/` as spec artifacts, not as a
+Draft specs are written under `.chr/specs/drafts/` as spec artifacts, not as a
 separate draft document family. The service supplies provenance to the curated
 quiz, raw quiz, dump context, model request, and model response.
 
 ## Contracts Added or Changed
 
-- `internal/chc.ParseQuizRawCaptureEntries`
-- `internal/chc.CurateQuizEntries`
-- `internal/chc.QuizDraftSpec`
-- `internal/chc.WriteQuizDraftSpec`
-- `internal/chc.QuizModelActionDraftSpec`
-- `internal/chc.QuizModelResponse.DraftSpec`
-- `internal/chc.QuizArtifactRepository.LoadRawCaptureEntries`
+- `internal/chr.ParseQuizRawCaptureEntries`
+- `internal/chr.CurateQuizEntries`
+- `internal/chr.QuizDraftSpec`
+- `internal/chr.WriteQuizDraftSpec`
+- `internal/chr.QuizModelActionDraftSpec`
+- `internal/chr.QuizModelResponse.DraftSpec`
+- `internal/chr.QuizArtifactRepository.LoadRawCaptureEntries`
 
 ## Files of Interest
 
-- `internal/chc/quiz_curation.go`
-- `internal/chc/quiz_draft_spec.go`
-- `internal/chc/quiz_artifact_repository.go`
-- `internal/chc/quiz_model.go`
-- `internal/chcapp/service_quiz.go`
-- `internal/chctui/quizzes.go`
+- `internal/chr/quiz_curation.go`
+- `internal/chr/quiz_draft_spec.go`
+- `internal/chr/quiz_artifact_repository.go`
+- `internal/chr/quiz_model.go`
+- `internal/chrapp/service_quiz.go`
+- `internal/chrtui/quizzes.go`
 - `.prj/specs/specs/tui-interactive-quiz-workflow.md`
 - `.prj/specs/specs/tui-interactive-quiz-workflow-model.md`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

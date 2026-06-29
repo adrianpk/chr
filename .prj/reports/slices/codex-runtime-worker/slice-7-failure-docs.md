@@ -48,15 +48,15 @@ Changed behavior:
 
 ## Files of Interest
 
-- `internal/chc/execution_failure.go`
-- `internal/chc/execution_runner.go`
-- `internal/chc/execution_runner_test.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/execution_failure.go`
+- `internal/chr/execution_runner.go`
+- `internal/chr/execution_runner_test.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc -run 'TestExecution(Failure|Runner)|TestTicketStartPrints(Worker|Harness)Failure'`:
+- `go test ./internal/chr ./cmd/chr -run 'TestExecution(Failure|Runner)|TestTicketStartPrints(Worker|Harness)Failure'`:
   pass
 - `make verify`: pass
 

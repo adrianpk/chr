@@ -29,7 +29,7 @@ writing review findings before the ticket review command is introduced.
 
 ## Implementation Notes
 
-- The adapter is in `internal/chc` and has no CLI surface in this slice.
+- The adapter is in `internal/chr` and has no CLI surface in this slice.
 - Command execution is injected through `ReviewRemoteCommandRunner`, which
   keeps tests deterministic and avoids requiring real forge credentials.
 - The adapter reuses provider URL detection and provider config from Slice 4.
@@ -47,16 +47,16 @@ writing review findings before the ticket review command is introduced.
 
 ## Files of Interest
 
-- `internal/chc/review_remote_adapter.go`
-- `internal/chc/review_remote_adapter_test.go`
-- `internal/chc/review_provider_diagnostics_test.go`
+- `internal/chr/review_remote_adapter.go`
+- `internal/chr/review_remote_adapter_test.go`
+- `internal/chr/review_provider_diagnostics_test.go`
 
 ## Validation
 
 - `git diff --check`
-- `go test ./internal/chc -run 'Review(Remote|Provider)|Config'`
-- `go test ./internal/chc`
-- `golangci-lint run ./internal/chc`
+- `go test ./internal/chr -run 'Review(Remote|Provider)|Config'`
+- `go test ./internal/chr`
+- `golangci-lint run ./internal/chr`
 
 ## Risks and Follow-ups
 

@@ -15,7 +15,7 @@ func TestTicketStatusUpdaterUpdatesStatus(t *testing.T) {
 	updatedAt := time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)
 
 	content, err := NewTicketRenderer().RenderTicket(Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: createdAt,

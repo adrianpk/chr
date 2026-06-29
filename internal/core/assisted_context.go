@@ -423,8 +423,8 @@ func writeAssistedContextProtocols(output *strings.Builder, ctx AgentProtocolCon
 	output.WriteString("## Protocols\n\n")
 	output.WriteString("### AGENTS.md\n\n")
 	writeContextDocuments(output, ctx.AgentFiles, "No applicable AGENTS.md files were found.")
-	output.WriteString("### .chc Protocol Files\n\n")
-	writeContextDocuments(output, ctx.ChcFiles, "No selected .chc protocol files were found.")
+	output.WriteString("### .chr Protocol Files\n\n")
+	writeContextDocuments(output, ctx.ChrFiles, "No selected .chr protocol files were found.")
 }
 
 func writeAssistedContextDocuments(output *strings.Builder, documents []ContextDocument) {

@@ -29,11 +29,11 @@ func TestResolveProjectUserspaceUsesActiveOperatorEnvironment(t *testing.T) {
 	}
 
 	if userspace.Path != filepath.Join(dir, DirectoryName, "user") {
-		t.Fatalf("Path = %q, want .chc/user", userspace.Path)
+		t.Fatalf("Path = %q, want .chr/user", userspace.Path)
 	}
 
-	if userspace.RelativeDir != ".chc/user" {
-		t.Fatalf("RelativeDir = %q, want .chc/user", userspace.RelativeDir)
+	if userspace.RelativeDir != ".chr/user" {
+		t.Fatalf("RelativeDir = %q, want .chr/user", userspace.RelativeDir)
 	}
 }
 

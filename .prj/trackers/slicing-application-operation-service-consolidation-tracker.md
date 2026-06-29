@@ -112,9 +112,9 @@ Task commits:
 Candidate tasks:
 
 - [x] Reduce TUI executor wrappers to thin adapter mappings.
-- [x] Remove obsolete TUI-named operation structs from `internal/chcapp`.
-- [x] Keep adapter-neutral operation types in `internal/chcapp`.
-- [x] Ensure operation service files do not import `internal/chctui`.
+- [x] Remove obsolete TUI-named operation structs from `internal/chrapp`.
+- [x] Keep adapter-neutral operation types in `internal/chrapp`.
+- [x] Ensure operation service files do not import `internal/chrtui`.
 - [x] Organize service methods across capability files without separate entity services.
 - [x] Add boundary tests or checks where practical.
 - [x] Add slice implementation report.
@@ -174,18 +174,18 @@ Task commits:
 
 ## Validation Log
 
-- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 1.
+- 2026-05-23: `go test ./internal/chrapp ./internal/chrtui` passed for Slice 1.
 - 2026-05-23: `make verify` passed for Slice 1.
-- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 2.
+- 2026-05-23: `go test ./internal/chrapp ./internal/chrtui` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 2.
-- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 3.
+- 2026-05-23: `go test ./internal/chrapp ./internal/chrtui` passed for Slice 3.
 - 2026-05-23: `make verify` passed for Slice 3.
-- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 4.
+- 2026-05-23: `go test ./internal/chrapp ./internal/chrtui` passed for Slice 4.
 - 2026-05-23: `make verify` passed for Slice 4.
-- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 5.
+- 2026-05-23: `go test ./internal/chrapp ./internal/chrtui` passed for Slice 5.
 - 2026-05-23: `make verify` passed for Slice 5.
-- 2026-05-23: `go test ./internal/chcapp -run 'TestTicket(New|Comment|Status)'` passed for Slice 6.
-- 2026-05-23: `go test ./internal/chcapp ./internal/chctui` passed for Slice 6.
+- 2026-05-23: `go test ./internal/chrapp -run 'TestTicket(New|Comment|Status)'` passed for Slice 6.
+- 2026-05-23: `go test ./internal/chrapp ./internal/chrtui` passed for Slice 6.
 - 2026-05-23: `make verify` passed for Slice 6.
 - 2026-05-23: `make verify` passed for Slice 7.
 - 2026-05-23: `make verify` passed after completing all planned slices.

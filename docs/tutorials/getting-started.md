@@ -5,7 +5,7 @@ the runtime boundary.
 
 ## Build the CLI
 
-From the ChrysoCoord repository:
+From the Chryso repository:
 
 ```sh
 make build
@@ -14,10 +14,10 @@ make build
 The binary is written to:
 
 ```text
-bin/chc
+bin/chr
 ```
 
-Use `make install` if you want `chc` on your Go binary path.
+Use `make install` if you want `chr` on your Go binary path.
 
 ## Initialize a Project
 
@@ -25,14 +25,14 @@ Move to a project you want to manage:
 
 ```sh
 cd /path/to/project
-chc init
+chr init
 ```
 
 This creates:
 
 ```text
 AGENTS.md
-.chc/
+.chr/
   config.yml
   manifest.md
   tickets/
@@ -41,26 +41,26 @@ AGENTS.md
       Dockerfile
 ```
 
-`chc init` does not overwrite an existing runtime Dockerfile.
+`chr init` does not overwrite an existing runtime Dockerfile.
 
 ## Validate the Runtime Boundary
 
 Preview the runtime plan:
 
 ```sh
-chc runtime validate --dry-run
+chr runtime validate --dry-run
 ```
 
 The command prints the effective Dockerfile, image, container workdir, mount,
-artifact paths, and local path checks. Runtime defaults come from `chc` unless
-the project overrides them in `.chc/user/config.yml`.
+artifact paths, and local path checks. Runtime defaults come from `chr` unless
+the project overrides them in `.chr/user/config.yml`.
 
 ## Create a Ticket
 
 Create a Markdown ticket:
 
 ```sh
-chc ticket new "Fix the failing task workflow" \
+chr ticket new "Fix the failing task workflow" \
   --synopsis "Fix the failing task workflow." \
   --type bug \
   --priority high
@@ -69,13 +69,13 @@ chc ticket new "Fix the failing task workflow" \
 List indexed tickets:
 
 ```sh
-chc ticket list
+chr ticket list
 ```
 
 Show one ticket:
 
 ```sh
-chc ticket show CHC-1
+chr ticket show CHR-1
 ```
 
 ## Register the Project
@@ -83,14 +83,14 @@ chc ticket show CHC-1
 Register the project for user-level coordination:
 
 ```sh
-chc project add /path/to/project
-chc project select /path/to/project
+chr project add /path/to/project
+chr project select /path/to/project
 ```
 
 Check the active project:
 
 ```sh
-chc project current
+chr project current
 ```
 
 ## Preview Ticket Execution
@@ -98,7 +98,7 @@ chc project current
 Prepare one ticket execution without running the worker:
 
 ```sh
-chc ticket start CHC-1 --dry-run
+chr ticket start CHR-1 --dry-run
 ```
 
 This verifies the runtime boundary and prints execution-scoped artifact paths.

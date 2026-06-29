@@ -10,13 +10,13 @@ PR: `#29`
 ## Purpose
 
 Add the first typed runtime configuration contract for project-local
-`.chc/config.yml` files.
+`.chr/config.yml` files.
 
 ## Delivered Behavior
 
 `LoadWorkspaceConfig` now returns a `RuntimeConfig` alongside the existing ticket
 key prefix. Missing runtime fields use deterministic defaults, and configured
-runtime values are read from the `runtime:` section in `.chc/config.yml`.
+runtime values are read from the `runtime:` section in `.chr/config.yml`.
 
 ## Implementation Notes
 
@@ -38,22 +38,22 @@ Default runtime config:
 
 ```yml
 runtime:
-  image: chc-agent-runtime:local
-  dockerfile: .chc/runtime/agent/Dockerfile
+  image: chr-agent-runtime:local
+  dockerfile: .chr/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chc/runtime/runs
+  artifact_dir: .chr/runtime/runs
   validation_command: make verify
 ```
 
 ## Files of Interest
 
-- `internal/chc/config.go`
-- `internal/chc/config_test.go`
+- `internal/chr/config.go`
+- `internal/chr/config_test.go`
 - `docs/reference/project-workspace.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

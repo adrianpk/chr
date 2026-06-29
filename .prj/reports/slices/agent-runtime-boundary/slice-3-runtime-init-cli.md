@@ -14,7 +14,7 @@ rerunning full workspace initialization.
 
 ## Delivered Behavior
 
-`chc runtime init` resolves the target project and installs missing runtime
+`chr runtime init` resolves the target project and installs missing runtime
 defaults. It supports explicit `--dir`, active project resolution through
 `--dev-root`, current-directory fallback, and `--dry-run`.
 
@@ -32,9 +32,9 @@ workspace initialization.
 New command:
 
 ```sh
-chc runtime init
-chc runtime init --dry-run
-chc runtime init --dir /path/to/project
+chr runtime init
+chr runtime init --dry-run
+chr runtime init --dir /path/to/project
 ```
 
 The command requires a managed project context and writes only missing runtime
@@ -42,15 +42,15 @@ assets.
 
 ## Files of Interest
 
-- `internal/chc/runtime_init.go`
-- `cmd/chc/main.go`
-- `internal/chc/runtime_init_test.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/runtime_init.go`
+- `cmd/chr/main.go`
+- `internal/chr/runtime_init_test.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/project-workspace.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

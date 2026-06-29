@@ -19,7 +19,7 @@ binary.
 
 - Added a migration status model.
 - Compared embedded SQLite migration assets with `schema_migrations`.
-- Added `chc maintenance db status`.
+- Added `chr maintenance db status`.
 - Reported database path, database existence, migration table existence,
   available, applied, pending, and unknown migration counts.
 - Added detailed applied, pending, and unknown migration rows.
@@ -40,23 +40,23 @@ migration is also reported as pending.
 - Added `AppliedMigration`.
 - Added `MigrationStatusChecker`.
 - Added `UserDatabasePath`.
-- Added `chc maintenance db status`.
+- Added `chr maintenance db status`.
 - Added `docs/reference/maintenance.md`.
 
 ## Files of Interest
 
-- `internal/chc/migration_status.go`
-- `internal/chc/migration_status_test.go`
-- `internal/chcapp/maintenance.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/migration_status.go`
+- `internal/chr/migration_status_test.go`
+- `internal/chrapp/maintenance.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/maintenance.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'TestMigrationStatus|TestMigrator|TestReadSQLiteMigrations'
-go test ./internal/chcapp -run 'TestMaintenanceDBStatus'
+go test ./internal/chr -run 'TestMigrationStatus|TestMigrator|TestReadSQLiteMigrations'
+go test ./internal/chrapp -run 'TestMaintenanceDBStatus'
 make verify
 ```
 

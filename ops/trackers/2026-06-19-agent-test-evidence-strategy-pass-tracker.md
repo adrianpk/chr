@@ -23,7 +23,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add evidence strategy config structs, defaults, and parser support under `.chc/user/config.yml`. | done | `44ea5a0` | Defaults preserve current behavior until later slices enforce strategy. |
+| T1.1 | Add evidence strategy config structs, defaults, and parser support under `.chr/user/config.yml`. | done | `44ea5a0` | Defaults preserve current behavior until later slices enforce strategy. |
 | T1.2 | Add enum validation for strategy mode, checklist policy, Gherkin policy, strict gating, user edits, and report copy behavior. | done | `b880c70` | Invalid enum values fail clearly. |
 | T1.3 | Add core strategy status and diagnostic value types used by later slices. | done | `d655841` | No behavior gate yet. |
 | T1.4 | Add config tests for omitted defaults, explicit overrides, and invalid values. | done | `ed8d9b4` | Covers defaults, overrides, and invalid enum values. |
@@ -67,7 +67,7 @@ Quiz: `ops/conv/quiz/2026-06-19-agent-test-evidence-strategy-pass-quiz.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Add project-level active Gherkin detection based on existing acceptance feature configuration/artifacts. | done | `271d865` | Detects `.chc/user/acceptance/*.feature` under active policy. |
+| T5.1 | Add project-level active Gherkin detection based on existing acceptance feature configuration/artifacts. | done | `271d865` | Detects `.chr/user/acceptance/*.feature` under active policy. |
 | T5.2 | Add strategy guidance rendering for change kind, risk, test timing, and evidence matrix. | done | `45febeb`, `10d4f26` | Worker context renders active Gherkin, suggested strategy, and decision matrix. |
 | T5.3 | Add required Gherkin checks for active/applicable behavior tickets. | done | `45febeb`, `e75f453` | Active applicable Gherkin rejects `not_applicable` at review gate. |
 | T5.4 | Add tests for docs-only no-test strategy, user-visible Gherkin-required strategy, bugfix regression guidance, and parser table/fuzz guidance. | done | `271d865`, `45febeb` | Core policy, worker context, readiness, and apply-result coverage. |

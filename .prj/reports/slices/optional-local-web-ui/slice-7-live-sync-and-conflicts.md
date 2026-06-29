@@ -73,7 +73,7 @@ Deferred transport:
   - Adds polling attributes to the workspace shell.
   - Adds hidden revision markers to each fragment.
   - Adds reload/discard actions for stale writes.
-- `internal/webui/assets/static/chc.css`
+- `internal/webui/assets/static/chr.css`
   - Adds compact action-row styling for conflict actions.
 - `internal/webui/webui_test.go`
   - Covers polling attributes, fragment revision markers, and stale conflict
@@ -86,7 +86,7 @@ Deferred transport:
 
 - `go test ./internal/webui` (pass)
 - `go test ./internal/app -run 'WebServe.*(Artifact|WriteAction|Revision|Handler|Board|Catalog)'` (pass)
-- Temporary-project smoke with `go run ./cmd/chc web serve --dir /tmp/... --port 7337` plus:
+- Temporary-project smoke with `go run ./cmd/chr web serve --dir /tmp/... --port 7337` plus:
   - `curl -fsS http://127.0.0.1:7337/healthz` (pass)
   - Full dump detail page exposed a `data-revision` marker (pass)
   - Direct workspace file mutation changed the dump detail fragment revision

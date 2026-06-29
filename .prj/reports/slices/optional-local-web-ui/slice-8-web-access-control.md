@@ -35,7 +35,7 @@ PR: `#350`
   - Passes sanitized request logging into the Web UI handler.
 - `internal/webui/webui.go`
   - Adds token enforcement for non-static Web UI routes.
-  - Supports `X-CHC-Web-Token`, `Authorization: Bearer`, and `?token=`.
+  - Supports `X-CHR-Web-Token`, `Authorization: Bearer`, and `?token=`.
   - Exempts `/healthz` and embedded static assets from token checks.
   - Enforces same-origin or explicitly allowed origins.
   - Supports allowed-origin CORS preflight responses.
@@ -56,10 +56,10 @@ PR: `#350`
 - `go test ./internal/webui` (pass)
 - `go test ./internal/app -run 'WebServe|RootCommand'` (pass)
 - Temporary-project smoke with
-  `CHC_WEB_TOKEN=... go run ./cmd/chc web serve --dir /tmp/... --host 0.0.0.0 --port 7338` plus:
+  `CHR_WEB_TOKEN=... go run ./cmd/chr web serve --dir /tmp/... --host 0.0.0.0 --port 7338` plus:
   - `/healthz` without token returned `200` (pass)
   - `/` without token returned `401` (pass)
-  - `/` with `X-CHC-Web-Token` returned `200` (pass)
+  - `/` with `X-CHR-Web-Token` returned `200` (pass)
   - allowed-origin `OPTIONS /actions` returned `204` (pass)
   - disallowed-origin request returned `403` (pass)
   - same-origin request through `127.0.0.1` while bound to `0.0.0.0`

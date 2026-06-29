@@ -52,19 +52,19 @@ the Cases list. They are diagnostic navigation metadata, not case definitions.
 
 ## Files of Interest
 
-- `internal/chc/workspace_graph.go`
-- `internal/chcapp/app.go`
-- `internal/chctui/model.go`
-- `internal/chctui/workspace_graph_projection.go`
-- `internal/chctui/workspace_refresh.go`
-- `internal/chctui/project_metadata_actions.go`
-- `internal/chctui/case_metadata_actions.go`
-- `internal/chctui/shell.go`
-- `internal/chctui/model_test.go`
+- `internal/chr/workspace_graph.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/workspace_graph_projection.go`
+- `internal/chrtui/workspace_refresh.go`
+- `internal/chrtui/project_metadata_actions.go`
+- `internal/chrtui/case_metadata_actions.go`
+- `internal/chrtui/shell.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp ./internal/chc ./cmd/chc` passed
+- `go test ./internal/chrtui ./internal/chrapp ./internal/chr ./cmd/chr` passed
   on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 

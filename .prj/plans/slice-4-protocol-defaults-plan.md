@@ -4,7 +4,7 @@ Status: delivered
 
 ## Purpose
 
-Add the first ChrysoCoord protocol defaults to the `standard` workspace profile.
+Add the first Chryso protocol defaults to the `standard` workspace profile.
 
 The defaults should give a managed Go project a coherent agent protocol without copying this repository's `.agents/` files mechanically.
 
@@ -12,8 +12,8 @@ The defaults should give a managed Go project a coherent agent protocol without 
 
 This slice covers:
 
-- adding `.chc/agents/*.md` defaults to the `standard` profile,
-- adding `.chc/agents/playbooks/*.md` defaults to the `standard` profile,
+- adding `.chr/agents/*.md` defaults to the `standard` profile,
+- adding `.chr/agents/playbooks/*.md` defaults to the `standard` profile,
 - keeping `personal` and `minimal` unchanged unless needed for validation,
 - verifying recursive profile materialization writes the protocol files,
 - documenting that `standard` includes protocol defaults.
@@ -65,7 +65,7 @@ make verify
 Manual behavior checks:
 
 ```sh
-go run ./cmd/chc init --dir "$tmpdir" --profile standard
-test -f "$tmpdir/.chc/agents/ARCHITECTURE.md"
-test -f "$tmpdir/.chc/agents/playbooks/ticket-workflow.md"
+go run ./cmd/chr init --dir "$tmpdir" --profile standard
+test -f "$tmpdir/.chr/agents/ARCHITECTURE.md"
+test -f "$tmpdir/.chr/agents/playbooks/ticket-workflow.md"
 ```

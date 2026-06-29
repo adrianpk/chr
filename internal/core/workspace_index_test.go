@@ -49,9 +49,9 @@ func assertWorkspaceIndexLookups(t *testing.T, index WorkspaceIndex, graph Works
 		t.Fatalf("ByCaseSlug[blog] = %#v, want spec and ticket", index.ByCaseSlug["blog"])
 	}
 
-	ticketID := index.TicketsByKey["CHC-1"]
+	ticketID := index.TicketsByKey["CHR-1"]
 	if ticketID == "" {
-		t.Fatal("TicketsByKey[CHC-1] is empty")
+		t.Fatal("TicketsByKey[CHR-1] is empty")
 	}
 }
 
@@ -60,7 +60,7 @@ func assertWorkspaceIndexEdges(t *testing.T, index WorkspaceIndex, graph Workspa
 
 	projectID := WorkspaceNodeID(*graph.Project)
 	caseID := WorkspaceNodeID(graph.Cases[0])
-	ticketID := index.TicketsByKey["CHC-1"]
+	ticketID := index.TicketsByKey["CHR-1"]
 
 	if !workspaceIndexHasEdge(index, projectID, caseID, WorkspaceEdgeContains) {
 		t.Fatalf("missing project contains case edge in %#v", index.Edges)
@@ -249,7 +249,7 @@ func TestWorkspaceIndexHealthReportsDiagnosticsAndUnresolvedReferences(t *testin
 			"known": "case:known",
 		},
 		Diagnostics: []WorkspaceGraphDiagnostic{
-			{Path: ".chc/user/cases/broken.md", Kind: WorkspaceNodeCase, Message: "invalid"},
+			{Path: ".chr/user/cases/broken.md", Kind: WorkspaceNodeCase, Message: "invalid"},
 		},
 		BuiltAt: time.Date(2026, 5, 23, 11, 0, 0, 0, time.UTC),
 	}
@@ -313,31 +313,31 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 				Kind: WorkspaceNodeCase,
 				Slug: "blog",
 			},
-			"spec:.chc/user/specs/blog.md": {
+			"spec:.chr/user/specs/blog.md": {
 				Kind:         WorkspaceNodeSpec,
-				RelativePath: ".chc/user/specs/blog.md",
+				RelativePath: ".chr/user/specs/blog.md",
 				Title:        "Blog Spec",
 				CaseSlug:     "blog",
 			},
-			"ticket:.chc/user/tickets/CHC-1.md": {
+			"ticket:.chr/user/tickets/CHR-1.md": {
 				Kind:         WorkspaceNodeTicket,
-				RelativePath: ".chc/user/tickets/CHC-1.md",
+				RelativePath: ".chr/user/tickets/CHR-1.md",
 				Title:        "Blog Ticket",
 				CaseSlug:     "blog",
 			},
 		},
 		NodesByPath: map[string]string{
-			".chc/user/specs/blog.md": "spec:.chc/user/specs/blog.md",
+			".chr/user/specs/blog.md": "spec:.chr/user/specs/blog.md",
 		},
 		ByCaseSlug: map[string][]string{
 			"blog": {
-				"spec:.chc/user/specs/blog.md",
-				"ticket:.chc/user/tickets/CHC-1.md",
+				"spec:.chr/user/specs/blog.md",
+				"ticket:.chr/user/tickets/CHR-1.md",
 			},
 		},
 	}
 
-	node, ok := index.ResolvePath(".chc/user/specs/blog.md")
+	node, ok := index.ResolvePath(".chr/user/specs/blog.md")
 	if !ok {
 		t.Fatal("ResolvePath returned ok=false, want true")
 	}
@@ -346,7 +346,7 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 		t.Fatalf("node.Title = %q, want Blog Spec", node.Title)
 	}
 
-	related := index.RelatedDocuments("spec:.chc/user/specs/blog.md")
+	related := index.RelatedDocuments("spec:.chr/user/specs/blog.md")
 	if !related.Resolved {
 		t.Fatal("RelatedDocuments returned Resolved=false, want true")
 	}

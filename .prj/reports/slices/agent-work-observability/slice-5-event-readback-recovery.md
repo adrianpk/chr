@@ -21,7 +21,7 @@ execution, phase, level, message, timestamp, and inferred work status.
 The CLI now supports:
 
 ```text
-chc work events <event-stream-path>
+chr work events <event-stream-path>
 ```
 
 The command accepts project-relative or absolute event stream paths. It can
@@ -47,7 +47,7 @@ diagnostics and do not prevent summary output.
 - `core.AgentEventReadbackStatus`
 - `core.SummarizeAgentEventStream`
 - `core.AgentEventReadbackStatusForEvent`
-- `chc work events <event-stream-path>`
+- `chr work events <event-stream-path>`
 
 ## Files of Interest
 

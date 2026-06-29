@@ -40,7 +40,7 @@ PR: `#346`
 - `internal/webui/assets/templates/shell.html`
   - Renders catalog cards and escaped text detail content inside the shared
     shell.
-- `internal/webui/assets/static/chc.css`
+- `internal/webui/assets/static/chr.css`
   - Adds styles for artifact grids, cards, detail actions, and preformatted
     content.
 - `internal/webui/webui_test.go`
@@ -54,13 +54,13 @@ PR: `#346`
 
 - `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Catalog|Artifact'` (pass)
 - `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- `go run ./cmd/chc web serve --dir . --port 7334` plus:
+- `go run ./cmd/chr web serve --dir . --port 7334` plus:
   - `curl -fsS http://127.0.0.1:7334/cases` (pass)
   - `curl -fsS http://127.0.0.1:7334/dumps` (pass)
   - `curl -fsS http://127.0.0.1:7334/quizzes` (pass)
   - `curl -fsS http://127.0.0.1:7334/specs` (pass)
   - `curl -fsS http://127.0.0.1:7334/plans` (pass)
-  - `curl -fsS http://127.0.0.1:7334/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fcurated%2F2026-06-02-merger-agent-role.md` (pass)
+  - `curl -fsS http://127.0.0.1:7334/dumps/detail?id=.chr%2Fuser%2Fdumps%2Fcurated%2F2026-06-02-merger-agent-role.md` (pass)
   - `/usr/bin/curl -fsS -H 'HX-Request: true'` for `/cases/fragment`,
     `/dumps/fragment`, `/quizzes/fragment`, `/specs/fragment`, and
     `/plans/fragment` (pass)

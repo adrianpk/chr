@@ -2,8 +2,8 @@
 set -eu
 
 repo_root="$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)"
-port="${CHC_WEB_SMOKE_PORT:-7340}"
-project_dir="${CHC_WEB_SMOKE_PROJECT:-}"
+port="${CHR_WEB_SMOKE_PORT:-7340}"
+project_dir="${CHR_WEB_SMOKE_PROJECT:-}"
 created_project=""
 
 if [ -z "$project_dir" ]; then
@@ -13,7 +13,7 @@ fi
 
 server_log="$(mktemp)"
 body_file="$(mktemp)"
-screenshot_dir="${CHC_WEB_SMOKE_SCREENSHOTS:-/tmp/chc-web-ui-smoke-$$}"
+screenshot_dir="${CHR_WEB_SMOKE_SCREENSHOTS:-/tmp/chr-web-ui-smoke-$$}"
 server_pid=""
 
 cleanup() {
@@ -71,24 +71,24 @@ require_command curl
 
 mkdir -p "$screenshot_dir"
 
-(cd "$repo_root" && go run ./cmd/chc init --dir "$project_dir" >/dev/null)
-(cd "$repo_root" && go run ./cmd/chc metadata project set --dir "$project_dir" \
+(cd "$repo_root" && go run ./cmd/chr init --dir "$project_dir" >/dev/null)
+(cd "$repo_root" && go run ./cmd/chr metadata project set --dir "$project_dir" \
 	--name "Web Smoke Project" \
 	--description "Temporary Web UI smoke project." \
 	--context "Web UI smoke context." >/dev/null)
-(cd "$repo_root" && go run ./cmd/chc metadata case set web-smoke --dir "$project_dir" \
+(cd "$repo_root" && go run ./cmd/chr metadata case set web-smoke --dir "$project_dir" \
 	--name "Web Smoke Case" \
 	--description "Temporary Web UI smoke case." \
 	--context "Case context for Web UI smoke." >/dev/null)
-(cd "$repo_root" && go run ./cmd/chc dump new --dir "$project_dir" \
+(cd "$repo_root" && go run ./cmd/chr dump new --dir "$project_dir" \
 	--title "Smoke Notes" \
 	--content "Initial Web UI smoke dump." >/dev/null)
-(cd "$repo_root" && go run ./cmd/chc ticket new "Smoke ticket" --dir "$project_dir" \
+(cd "$repo_root" && go run ./cmd/chr ticket new "Smoke ticket" --dir "$project_dir" \
 	--synopsis "Web UI smoke ticket." \
 	--type task \
 	--priority normal >/dev/null)
 
-(cd "$repo_root" && go run ./cmd/chc web serve --dir "$project_dir" --port "$port" --require-token false >"$server_log" 2>&1) &
+(cd "$repo_root" && go run ./cmd/chr web serve --dir "$project_dir" --port "$port" --require-token false >"$server_log" 2>&1) &
 server_pid="$!"
 
 ready=""
@@ -106,7 +106,7 @@ if [ -z "$ready" ]; then
 	exit 1
 fi
 
-fetch_expect "/" "ChrysoCoord"
+fetch_expect "/" "Chryso"
 fetch_expect "/project" "$project_dir"
 fetch_expect "/board" "Smoke ticket"
 fetch_expect "/dash" "Readiness"
@@ -116,8 +116,8 @@ fetch_expect "/quizzes" "Quizzes"
 fetch_expect "/specs" "Generate Spec"
 fetch_expect "/plans" "Generate Plan"
 fetch_hx_expect "/dumps/fragment" "Smoke Notes"
-fetch_expect "/assets/chc.css" ".app-shell"
-fetch_expect "/assets/chc-avatar.svg" "ChrysoCoord agent mark"
+fetch_expect "/assets/chr.css" ".app-shell"
+fetch_expect "/assets/chr-logo.png" ""
 
 if ! curl -fsS -X POST "http://127.0.0.1:$port/actions" \
 	-d "action=dump.create" \

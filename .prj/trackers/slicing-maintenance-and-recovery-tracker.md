@@ -3,11 +3,11 @@
 Status: delivered
 
 Plan: `.prj/plans/slicing-maintenance-and-recovery-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm existing index, project validation, runtime validation, and
   reporting prerequisites.
 - [x] Create slicing plan.
@@ -45,7 +45,7 @@ Candidate tasks:
 
 - [x] Add migration status model.
 - [x] Compare migration assets with `schema_migrations`.
-- [x] Add `chc maintenance db status`.
+- [x] Add `chr maintenance db status`.
 - [x] Add focused tests.
 - [x] Document the command.
 - [x] Add slice implementation report.
@@ -76,7 +76,7 @@ Pre-flight:
 Candidate tasks:
 
 - [x] List registry diagnostics for registered projects.
-- [x] Include path existence, `.chc/` presence, enabled state, and active marker.
+- [x] Include path existence, `.chr/` presence, enabled state, and active marker.
 - [x] Keep diagnostics read-only.
 - [x] Add focused tests.
 - [x] Document registry diagnostics.
@@ -206,7 +206,7 @@ Candidate tasks:
 - [x] Gather command-readable local state summaries.
 - [x] Include selected reports and maintenance diagnostics.
 - [x] Avoid copying secrets or credentials.
-- [x] Write deterministic Markdown bundle under `.chc/maintenance/`.
+- [x] Write deterministic Markdown bundle under `.chr/maintenance/`.
 - [x] Add focused tests.
 - [x] Add slice implementation report.
 - [x] Run `make verify`.

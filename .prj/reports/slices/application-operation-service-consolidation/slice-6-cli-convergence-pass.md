@@ -22,9 +22,9 @@ extraction.
 - Added a generic service ticket status operation.
 - Kept the existing TUI default-ticket and selected-ticket methods by
   delegating them to the generic service operations.
-- Routed `chc ticket new` through the service.
-- Routed `chc ticket comment` through the service.
-- Routed `chc ticket status` through the service.
+- Routed `chr ticket new` through the service.
+- Routed `chr ticket comment` through the service.
+- Routed `chr ticket status` through the service.
 - Preserved current CLI output contracts.
 
 ## Implementation Notes
@@ -49,15 +49,15 @@ and reload behavior.
 
 ## Files of Interest
 
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/service_test.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/service_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp -run 'TestTicket(New|Comment|Status)'` passed on
+- `go test ./internal/chrapp -run 'TestTicket(New|Comment|Status)'` passed on
   2026-05-23.
-- `go test ./internal/chcapp ./internal/chctui` passed on 2026-05-23.
+- `go test ./internal/chrapp ./internal/chrtui` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

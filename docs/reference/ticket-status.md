@@ -12,7 +12,7 @@ Status lives in ticket metadata, not in the file path.
 Update a ticket status with:
 
 ```sh
-chc ticket status <key> <status>
+chr ticket status <key> <status>
 ```
 
 The command accepts the standard ticket project flags:

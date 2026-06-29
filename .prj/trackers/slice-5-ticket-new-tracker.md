@@ -28,12 +28,12 @@ Spec: `.prj/specs/specs/ticket-template.md`
 ## Validation
 
 - `make verify`: pass
-- Manual `chc init` and `chc ticket new`: pass
+- Manual `chr init` and `chr ticket new`: pass
 
 ## Notes
 
 - Status stays in ticket metadata only.
-- Project-wise tickets use an empty or absent `use_case` and live directly under `.chc/tickets/`.
-- Use-case tickets live under `.chc/tickets/<use_case>/`.
+- Project-wise tickets use an empty or absent `use_case` and live directly under `.chr/tickets/`.
+- Use-case tickets live under `.chr/tickets/<use_case>/`.
 - This slice intentionally avoids SQLite and status transitions.
 - PR #5 was merged into `dev`.

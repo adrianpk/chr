@@ -17,11 +17,11 @@ diagnostics or remote review execution.
 - Workspace config supports `review.mode` with `human_review`,
   `agentic_review`, and `trusted_auto_merge`.
 - Workspace config supports `review.non_blocking_comment_limit`.
-- New workspaces include explicit review defaults in `.chc/user/config.yml`.
-- `chc ticket review-mode status` prints the active mode, validation status,
+- New workspaces include explicit review defaults in `.chr/user/config.yml`.
+- `chr ticket review-mode status` prints the active mode, validation status,
   mode implications, clean-pass remote comment policy, and non-blocking comment
   limit.
-- `chc ticket review-mode status --dry-run` prints the same read-only plan
+- `chr ticket review-mode status --dry-run` prints the same read-only plan
   without performing review work.
 
 ## Implementation Notes
@@ -34,7 +34,7 @@ diagnostics or remote review execution.
 
 ## Contracts Added or Changed
 
-- `.chc/user/config.yml` may include:
+- `.chr/user/config.yml` may include:
   `review.mode` and `review.non_blocking_comment_limit`.
 - Valid review modes are `human_review`, `agentic_review`, and
   `trusted_auto_merge`.
@@ -44,17 +44,17 @@ diagnostics or remote review execution.
 
 ## Files of Interest
 
-- `internal/chc/config.go`
-- `internal/chc/review_workflow_config.go`
-- `internal/chcapp/ticket.go`
-- `cmd/chc/assets/workspace/profiles/standard/config.yml`
+- `internal/chr/config.go`
+- `internal/chr/review_workflow_config.go`
+- `internal/chrapp/ticket.go`
+- `cmd/chr/assets/workspace/profiles/standard/config.yml`
 - `docs/reference/review-workflow-config.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'Config|ReviewWorkflow'`
-- `go test ./internal/chcapp -run 'TicketReviewMode|Workspace|Init'`
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr -run 'Config|ReviewWorkflow'`
+- `go test ./internal/chrapp -run 'TicketReviewMode|Workspace|Init'`
+- `go test ./internal/chr ./internal/chrapp`
 - `make verify`
 
 ## Risks and Follow-ups

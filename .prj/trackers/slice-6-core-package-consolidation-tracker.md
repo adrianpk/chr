@@ -20,14 +20,14 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 
 ## Task Commits
 
-- T6.1: `refactor(chc): move workspace init into core package`
-- T6.2: `refactor(chc): expose workspace API`
+- T6.1: `refactor(chr): move workspace init into core package`
+- T6.2: `refactor(chr): expose workspace API`
 - T6.3: `docs(workspace): align core package boundary`
 
 ## Validation
 
 - `make verify`: pass
-- Manual `chc init`: pass
+- Manual `chr init`: pass
 
 ## Notes
 

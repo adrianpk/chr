@@ -33,7 +33,7 @@ views without relying on duplicated Project/Case persistence.
 
 ## Implementation Notes
 
-The assembly API lives in `internal/chc` and uses existing context primitives:
+The assembly API lives in `internal/chr` and uses existing context primitives:
 `ContextDocument` and `ContextSourceInventoryEntry`.
 
 The graph remains lightweight. `WorkspaceNode` metadata decides what to include,
@@ -55,14 +55,14 @@ and reports are not part of the planned case/project context collection.
 
 ## Files of Interest
 
-- `internal/chc/workspace_context.go`
-- `internal/chc/workspace_context_test.go`
-- `internal/chc/authoring_contextual_quiz.go`
-- `internal/chc/authoring_contextual_quiz_test.go`
+- `internal/chr/workspace_context.go`
+- `internal/chr/workspace_context_test.go`
+- `internal/chr/authoring_contextual_quiz.go`
+- `internal/chr/authoring_contextual_quiz_test.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui ./cmd/chc` passed
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui ./cmd/chr` passed
   on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 

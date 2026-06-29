@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var projectDocumentReferencePattern = regexp.MustCompile(`(?:^|[\s("'])((?:\.prj|docs|\.chc)/(?:[A-Za-z0-9._@=+,:;~/-]+)\.(?:md|markdown|txt|yml|yaml))(?:$|[\s)"',.])`)
+var projectDocumentReferencePattern = regexp.MustCompile(`(?:^|[\s("'])((?:\.prj|docs|\.chr)/(?:[A-Za-z0-9._@=+,:;~/-]+)\.(?:md|markdown|txt|yml|yaml))(?:$|[\s)"',.])`)
 
 // ProjectDocumentContextOptions describes a package boundary value.
 type ProjectDocumentContextOptions struct {

@@ -1,0 +1,7 @@
+version: 1
+tickets:
+  key_prefix: CHR
+runtime:
+  validation_command: "go test ./..."
+notifications:
+  telegram_enabled: false

@@ -19,7 +19,7 @@ Board ticket operations slice set.
   equivalents.
 - Updated the TUI reference with Board keybindings and selected-ticket detail
   behavior.
-- Updated the command reference with `chc ticket board`, required ticket
+- Updated the command reference with `chr ticket board`, required ticket
   synopsis examples, and common ticket status operations.
 - Updated ticket status and validation references for normal Board statuses and
   accepted legacy statuses.
@@ -28,7 +28,7 @@ Board ticket operations slice set.
 - Updated SQLite migration reference with the Board metadata migration file and
   `ticket_key_sequences` role.
 - Updated project workspace reference with Markdown ticket, user-level SQLite,
-  and `.chc/user/` responsibilities.
+  and `.chr/user/` responsibilities.
 - Updated CLI/TUI parity matrix with Board navigation, attention, maximized
   Board, selected-ticket detail, and Board query service parity.
 - Updated tutorial and lab ticket creation examples to include required
@@ -47,7 +47,7 @@ Board ticket operations slice set.
   vocabulary.
 - Legacy status mapping is documented explicitly.
 - Ticket creation examples now include `--synopsis`.
-- `chc ticket board` is documented as the CLI equivalent for Board column
+- `chr ticket board` is documented as the CLI equivalent for Board column
   inspection.
 
 ## Files of Interest
@@ -68,13 +68,13 @@ Board ticket operations slice set.
 ## Validation
 
 - `git diff --check`
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `go test ./...`
 - `make verify`
 
 ## Risks and Follow-ups
 
-- Full multi-operator `.chc/operators/<operator-id>/...` layout remains
+- Full multi-operator `.chr/operators/<operator-id>/...` layout remains
   deferred.
 - Manual Markdown sync and LLM-assisted empty synopsis generation remain
   deferred.

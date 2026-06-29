@@ -3,12 +3,12 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-ticket-result-application-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
-Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
+Priority draft: `.prj/drafts/chr-command-surfaces-and-priority.md`
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm `Single Ticket Execution` is completed.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -260,7 +260,7 @@ Pre-flight:
 
 Candidate tasks:
 
-- [x] Add `chc ticket apply-result <execution-id>`.
+- [x] Add `chr ticket apply-result <execution-id>`.
 - [x] Resolve project context.
 - [x] Load one execution record.
 - [x] Apply ticket status, comments, evidence, and diagnostics.

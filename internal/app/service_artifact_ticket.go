@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // ArtifactOperationResult is the TUI-facing result for artifact creation

@@ -15,19 +15,19 @@ boundaries but no command-line surface.
 ## Delivered Behavior
 
 - Added project metadata save command:
-  `chc metadata project set`.
+  `chr metadata project set`.
 - Added use-case metadata create/update command:
-  `chc metadata case set <slug>`.
+  `chr metadata case set <slug>`.
 - Added dump commands:
-  `chc dump list`, `new`, `show`, `save`, `append`, and `open`.
+  `chr dump list`, `new`, `show`, `save`, `append`, and `open`.
 - Added runtime quiz commands:
-  `chc quiz list`, `start`, `resume`, `answer`, `skip`, `complete`,
+  `chr quiz list`, `start`, `resume`, `answer`, `skip`, `complete`,
   `cancel`, and `mode`.
 - Added spec commands:
-  `chc spec list` and `generate`.
+  `chr spec list` and `generate`.
 - Added plan commands:
-  `chc plan list`, `generate`, `regenerate`, and
-  `chc plan tracking create`.
+  `chr plan list`, `generate`, `regenerate`, and
+  `chr plan tracking create`.
 - Updated the CLI/TUI parity matrix to mark these service-backed TUI actions as
   matched.
 
@@ -45,21 +45,21 @@ single-ticket work start, ready-loop work start, and daemon stop as matched.
 
 ## Contracts Added or Changed
 
-- `chc metadata project set` maps to `service.SaveProjectMetadata`.
-- `chc metadata case set` maps to `service.SaveCaseMetadata`.
-- `chc dump *` maps to the existing dump service methods.
-- `chc quiz *` maps to the runtime quiz service methods.
-- `chc spec *` maps to the spec list/generation service methods.
-- `chc plan *` maps to the plan list/generation/tracking service methods.
+- `chr metadata project set` maps to `service.SaveProjectMetadata`.
+- `chr metadata case set` maps to `service.SaveCaseMetadata`.
+- `chr dump *` maps to the existing dump service methods.
+- `chr quiz *` maps to the runtime quiz service methods.
+- `chr spec *` maps to the spec list/generation service methods.
+- `chr plan *` maps to the plan list/generation/tracking service methods.
 
 ## Files of Interest
 
-- `internal/chcapp/metadata_cli.go`
-- `internal/chcapp/dump_cli.go`
-- `internal/chcapp/quiz_cli.go`
-- `internal/chcapp/spec_plan_cli.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/metadata_cli.go`
+- `internal/chrapp/dump_cli.go`
+- `internal/chrapp/quiz_cli.go`
+- `internal/chrapp/spec_plan_cli.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/cli-tui-action-matrix.md`
 
 ## Validation
@@ -73,7 +73,7 @@ single-ticket work start, ready-loop work start, and daemon stop as matched.
 
 - Model-backed commands still depend on the same generation runtime and model
   configuration as the TUI.
-- Workspace graph refresh remains a known parity gap because `chc index
-  rebuild` and `chc index status` only cover the ticket index.
+- Workspace graph refresh remains a known parity gap because `chr index
+  rebuild` and `chr index status` only cover the ticket index.
 - Slice 4 should add deeper parity tests around the new command adapters and
   the TUI service dispatch points.

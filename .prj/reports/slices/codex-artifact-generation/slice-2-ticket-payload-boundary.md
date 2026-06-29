@@ -45,14 +45,14 @@ materialization.
 
 ## Files of Interest
 
-- `internal/chc/plan_tracking.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chcapp/service_plan_test.go`
+- `internal/chr/plan_tracking.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chrapp/service_plan_test.go`
 
 ## Validation
 
-- `gofmt -w internal/chc/plan_tracking.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go`
-- `go test ./internal/chc ./internal/chcapp`
+- `gofmt -w internal/chr/plan_tracking.go internal/chrapp/service_plan.go internal/chrapp/service_plan_test.go`
+- `go test ./internal/chr ./internal/chrapp`
 - `make verify`
 
 ## Risks and Follow-ups

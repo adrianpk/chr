@@ -241,7 +241,7 @@ func TestExecutionRunnerClassifiesFailedResultAsValidationFailure(t *testing.T) 
 
 	executor := &fakeHarnessExecutor{
 		resultPath:    record.Artifacts.ResultPath,
-		resultContent: `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"failed","summary":"tests failed","evidence_summary":{"strategy":"planned","produced":"none","validation":"failed"}}`,
+		resultContent: `{"execution_id":"exec-1","ticket_key":"CHR-1","status":"failed","summary":"tests failed","evidence_summary":{"strategy":"planned","produced":"none","validation":"failed"}}`,
 	}
 	runner := NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
@@ -396,7 +396,7 @@ func (e *fakeHarnessExecutor) writeResultForWorkerRun(command HarnessCommand) er
 
 	content := e.resultContent
 	if content == "" {
-		content = `{"execution_id":"exec-1","ticket_key":"CHC-1","status":"succeeded","summary":"done","evidence_summary":{"strategy":"planned","produced":"evidence produced","validation":"validation passed"}}`
+		content = `{"execution_id":"exec-1","ticket_key":"CHR-1","status":"succeeded","summary":"done","evidence_summary":{"strategy":"planned","produced":"evidence produced","validation":"validation passed"}}`
 	}
 
 	return os.WriteFile(e.resultPath, []byte(content), 0o644)
@@ -407,7 +407,7 @@ func isWorkerHarnessCommand(command HarnessCommand) bool {
 }
 
 func isValidationHarnessCommand(command HarnessCommand) bool {
-	return slices.Contains(command.Args, "chc-exec-1-validation")
+	return slices.Contains(command.Args, "chr-exec-1-validation")
 }
 
 func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
@@ -434,18 +434,18 @@ func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
 }
 
 func testRunnerExecutionRecord(dir string) ExecutionRecord {
-	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
 	return ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
-		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:  "CHR-1",
+		TicketPath: filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
 		Status:     ExecutionStatusPending,
 		Runtime: ExecutionRuntimeRef{
-			Image:             "chc-agent-runtime:local",
-			DockerfilePath:    filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+			Image:             "chr-agent-runtime:local",
+			DockerfilePath:    filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
@@ -474,7 +474,7 @@ func testRunnerInvocation(record ExecutionRecord) HarnessInvocation {
 		},
 		Validation: HarnessCommand{
 			Program: "docker",
-			Args:    []string{"run", "--name", "chc-exec-1-validation"},
+			Args:    []string{"run", "--name", "chr-exec-1-validation"},
 		},
 		ResultPath: record.Artifacts.ResultPath,
 		LogPath:    record.Artifacts.LogPath,

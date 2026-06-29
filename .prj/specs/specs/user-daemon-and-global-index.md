@@ -6,26 +6,26 @@ Model: `.prj/specs/specs/user-daemon-and-global-index-model.md`
 
 ## Purpose
 
-Define the user-centric runtime model for `chc`.
+Define the user-centric runtime model for `chr`.
 
-`chc` is a local tool for one user managing multiple local Go projects. It is not a SaaS architecture and should not introduce account, tenant, or organization concepts.
+`chr` is a local tool for one user managing multiple local Go projects. It is not a SaaS architecture and should not introduce account, tenant, or organization concepts.
 
 ## One Binary
 
-`chc` remains a single binary.
+`chr` remains a single binary.
 
 The binary supports two execution modes:
 
-- one-shot CLI commands, such as `chc init` and `chc ticket new`;
-- a resident daemon command, `chc daemon`.
+- one-shot CLI commands, such as `chr init` and `chr ticket new`;
+- a resident daemon command, `chr daemon`.
 
-There should not be a separate `chcd` binary.
+There should not be a separate `chrd` binary.
 
 ## User Daemon
 
-`chc daemon` is a user daemon.
+`chr daemon` is a user daemon.
 
-The daemon may observe multiple registered local projects at the same time. This avoids running one `chc` process and one Telegram bot per project.
+The daemon may observe multiple registered local projects at the same time. This avoids running one `chr` process and one Telegram bot per project.
 
 The daemon is responsible for long-running behavior:
 
@@ -37,39 +37,39 @@ The daemon is responsible for long-running behavior:
 
 ## Project Workspace
 
-Each managed project owns a project-local `.chc/` directory.
+Each managed project owns a project-local `.chr/` directory.
 
-The `.chc/` directory contains durable project artifacts such as:
+The `.chr/` directory contains durable project artifacts such as:
 
 - project config;
 - Markdown tickets;
 - project protocol assets;
 - project-local runtime files when needed.
 
-Markdown ticket files are the durable canonical ticket representation. A cloned project containing `.chc/tickets/*.md` should contain enough information to rehydrate the ticket index on another machine.
+Markdown ticket files are the durable canonical ticket representation. A cloned project containing `.chr/tickets/*.md` should contain enough information to rehydrate the ticket index on another machine.
 
 ## User Environment
 
-`chc` needs an abstraction that resolves user-level paths.
+`chr` needs an abstraction that resolves user-level paths.
 
-This abstraction must support normal mode and development mode, so developing `chc` does not accidentally write to real user config or data paths.
+This abstraction must support normal mode and development mode, so developing `chr` does not accidentally write to real user config or data paths.
 
 Normal mode should resolve paths from platform conventions, for example:
 
 ```text
-config -> ~/.config/chc
-data   -> ~/.local/share/chc
-cache  -> ~/.cache/chc
-state  -> ~/.local/state/chc
+config -> ~/.config/chr
+data   -> ~/.local/share/chr
+cache  -> ~/.cache/chr
+state  -> ~/.local/state/chr
 ```
 
 Development mode should resolve those paths into a local sandbox, for example:
 
 ```text
-config -> ._workspace/config/chc
-data   -> ._workspace/data/chc
-cache  -> ._workspace/cache/chc
-state  -> ._workspace/state/chc
+config -> ._workspace/config/chr
+data   -> ._workspace/data/chr
+cache  -> ._workspace/cache/chr
+state  -> ._workspace/state/chr
 ```
 
 Exact directory names may change during implementation, but the separation must remain explicit.
@@ -78,17 +78,17 @@ Exact directory names may change during implementation, but the separation must 
 
 The daemon needs a user-local registry of projects it manages.
 
-The registry is not product data and does not replace project-local `.chc/` state. It only records which local projects this user's daemon should know about.
+The registry is not product data and does not replace project-local `.chr/` state. It only records which local projects this user's daemon should know about.
 
 Future commands may include:
 
 ```text
-chc project add .
-chc project list
-chc project reindex <project>
+chr project add .
+chr project list
+chr project reindex <project>
 ```
 
-Registering a cloned project should read its `.chc/` directory and rehydrate the global index from Markdown tickets.
+Registering a cloned project should read its `.chr/` directory and rehydrate the global index from Markdown tickets.
 
 ## Global Ticket Index
 
@@ -97,7 +97,7 @@ The ticket index is global to the user, not per project.
 The index should live under the user data directory, for example:
 
 ```text
-~/.local/share/chc/chc.db
+~/.local/share/chr/chr.db
 ```
 
 The index is derived from registered projects and their Markdown ticket files. It is an operational index for fast search, filtering, Telegram responses, and daemon loops.
@@ -120,15 +120,15 @@ CREATE TABLE projects (...);
 DROP TABLE IF EXISTS projects;
 ```
 
-The migrator should be a small core primitive owned by `chc`, not an external framework dependency. It should apply pending migrations in order, record applied versions, and make schema setup deterministic for CLI and daemon code.
+The migrator should be a small core primitive owned by `chr`, not an external framework dependency. It should apply pending migrations in order, record applied versions, and make schema setup deterministic for CLI and daemon code.
 
-The current implementation package direction is `internal/chc`. If a `pkg/core` package is introduced for reusable core primitives, that move should be explicit in its own slice rather than incidental to persistence work.
+The current implementation package direction is `internal/chr`. If a `pkg/core` package is introduced for reusable core primitives, that move should be explicit in its own slice rather than incidental to persistence work.
 
 ## Project Model
 
 The user daemon needs a project entity.
 
-A registered project represents a local project known by the user daemon. It does not replace project-local `.chc/config.yml`; it is the user-level record that allows one daemon to observe and operate across multiple local projects.
+A registered project represents a local project known by the user daemon. It does not replace project-local `.chr/config.yml`; it is the user-level record that allows one daemon to observe and operate across multiple local projects.
 
 The initial project attributes are:
 
@@ -166,23 +166,23 @@ Locks, active runs, traces, daemon process state, and transient Telegram state a
 
 ## Package Direction
 
-Core behavior should live under `internal/chc`.
+Core behavior should live under `internal/chr`.
 
-The current `internal/workspace` package name creates conceptual tension because the project-local `.chc/` workspace is one entity among several `chc` concepts. The core package should expose names such as:
+The current `internal/workspace` package name creates conceptual tension because the project-local `.chr/` workspace is one entity among several `chr` concepts. The core package should expose names such as:
 
 ```go
-chc.Workspace
-chc.NewWorkspace(...)
-chc.UserEnvironment
-chc.ProjectRegistry
-chc.TicketIndex
+chr.Workspace
+chr.NewWorkspace(...)
+chr.UserEnvironment
+chr.ProjectRegistry
+chr.TicketIndex
 ```
 
-The CLI package should wire commands and delegate behavior to `internal/chc`.
+The CLI package should wire commands and delegate behavior to `internal/chr`.
 
 ## Open Questions
 
 - What exact development-mode activation mechanism should be used?
 - Should the project registry live in YAML first, SQLite first, or both?
-- Which runtime files belong under user state versus project-local `.chc/runtime/`?
+- Which runtime files belong under user state versus project-local `.chr/runtime/`?
 - What exact filesystem watcher behavior is required for recursive ticket directories?

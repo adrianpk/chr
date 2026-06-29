@@ -29,8 +29,8 @@ The parser accepts a small command grammar:
 status
 @project status
 loop start --status ready --priority high --max-iterations 1
-ticket start CHC-12
-ticket comment CHC-12 blocked on CI logs
+ticket start CHR-12
+ticket comment CHR-12 blocked on CI logs
 ```
 
 ## Safety Boundary
@@ -55,8 +55,8 @@ existing local command behavior.
 
 ## Files of Interest
 
-- `internal/chc/remote_command.go`
-- `internal/chc/remote_command_test.go`
+- `internal/chr/remote_command.go`
+- `internal/chr/remote_command_test.go`
 - `docs/reference/remote-commands.md`
 - `docs/reference/notifications.md`
 - `docs/index.md`
@@ -64,7 +64,7 @@ existing local command behavior.
 
 ## Validation
 
-- `go test ./internal/chc -run 'Test.*RemoteCommand'`: pass
+- `go test ./internal/chr -run 'Test.*RemoteCommand'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

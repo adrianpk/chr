@@ -14,7 +14,7 @@ This slicing covers the use case:
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related specifications:
 
@@ -37,7 +37,7 @@ renumbered by this slicing plan.
 
 Delivered before this slicing:
 
-- `chc ticket new`;
+- `chr ticket new`;
 - ticket Markdown rendering;
 - ticket Markdown parsing;
 - indexed ticket model;
@@ -248,10 +248,10 @@ Manual smoke checks for the completed slicing:
 ```sh
 make install
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir"
-chc ticket new --dir "$tmpdir" "Do something"
-chc ticket list --dir "$tmpdir"
-chc ticket show --dir "$tmpdir" CHC-1
+chr init --dir "$tmpdir"
+chr ticket new --dir "$tmpdir" "Do something"
+chr ticket list --dir "$tmpdir"
+chr ticket show --dir "$tmpdir" CHR-1
 ```
 
 ## Risks

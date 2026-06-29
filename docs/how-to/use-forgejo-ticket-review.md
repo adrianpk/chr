@@ -16,7 +16,7 @@ and pull request, then merge the reviewed ticket.
 
 ## Configure Review
 
-Set review configuration in `.chc/user/config.yml`:
+Set review configuration in `.chr/user/config.yml`:
 
 ```yml
 review:
@@ -33,7 +33,7 @@ review:
 Check the active mode:
 
 ```sh
-chc ticket review-mode status
+chr ticket review-mode status
 ```
 
 ## Attach the Pull Request
@@ -41,7 +41,7 @@ chc ticket review-mode status
 Attach branch and pull request metadata to the ticket:
 
 ```sh
-chc ticket review-ref CHC-1 \
+chr ticket review-ref CHR-1 \
   --branch feat/slice-1-example \
   --provider forgejo \
   --url https://forge.example.com/owner/repo/pulls/123 \
@@ -51,7 +51,7 @@ chc ticket review-ref CHC-1 \
 Move the ticket to `ready_for_review` after implementation is complete:
 
 ```sh
-chc ticket status CHC-1 ready_for_review
+chr ticket status CHR-1 ready_for_review
 ```
 
 ## Check Provider Access
@@ -59,7 +59,7 @@ chc ticket status CHC-1 ready_for_review
 Run diagnostics against the pull request URL:
 
 ```sh
-chc ticket review-mode diagnostics --url https://forge.example.com/owner/repo/pulls/123
+chr ticket review-mode diagnostics --url https://forge.example.com/owner/repo/pulls/123
 ```
 
 The diagnostic output should report provider mapping, CLI availability, token
@@ -70,22 +70,22 @@ availability, and pull request readability.
 For a clean pass:
 
 ```sh
-chc ticket review CHC-1 --result pass
+chr ticket review CHR-1 --result pass
 ```
 
 For blocking findings:
 
 ```sh
-chc ticket review CHC-1 \
+chr ticket review CHR-1 \
   --result needs_changes \
   --finding "Handle the nil input path before calling the parser."
 ```
 
-When changes are requested, ChrysoCoord writes finding comments to the pull
+When changes are requested, Chryso writes finding comments to the pull
 request, stores `review_comments_url`, and moves the ticket back to
 `ready_for_dev`.
 
-When review passes, ChrysoCoord stores passed review metadata and moves the
+When review passes, Chryso stores passed review metadata and moves the
 ticket to `ready_for_merge`.
 
 ## Merge Reviewed Work
@@ -93,23 +93,23 @@ ticket to `ready_for_merge`.
 Preview the merge preflight without changing the pull request or ticket:
 
 ```sh
-chc ticket merge CHC-1 --dry-run
+chr ticket merge CHR-1 --dry-run
 ```
 
 Merge the reviewed pull request:
 
 ```sh
-chc ticket merge CHC-1 --strategy rebase
+chr ticket merge CHR-1 --strategy rebase
 ```
 
 The merge command verifies the ticket handoff, pull request readability, target
 base branch, head branch, mergeability, serial repair blockers, and merge
 strategy before calling the provider merge operation.
 
-On success, ChrysoCoord moves the ticket to `done` and records merge metadata.
+On success, Chryso moves the ticket to `done` and records merge metadata.
 Clean merges do not write ceremonial pull request comments.
 
-When the merge is blocked, ChrysoCoord keeps the ticket in `ready_for_merge`
+When the merge is blocked, Chryso keeps the ticket in `ready_for_merge`
 with compact `merge_state`, `merge_result`, and `merge_blocker` metadata. The
 Board does not need a separate merge-failure column.
 
@@ -118,7 +118,7 @@ Board does not need a separate merge-failure column.
 Run agent work normally:
 
 ```sh
-chc work ticket CHC-1
+chr work ticket CHR-1
 ```
 
 The worker context includes the existing branch, pull request URL, and review

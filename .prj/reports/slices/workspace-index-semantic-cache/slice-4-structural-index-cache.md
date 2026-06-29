@@ -15,7 +15,7 @@ keeping the filesystem as the source of truth.
 
 ## Delivered Behavior
 
-- Write `structural-index.json` under `.chc/tmp/cache/workspace-index/`.
+- Write `structural-index.json` under `.chr/tmp/cache/workspace-index/`.
 - Store a schema version, write timestamp, and the full structural index.
 - Load the cached index when schema and source facts remain valid.
 - Treat missing cache files as cache misses.
@@ -44,18 +44,18 @@ indexing. Those responsibilities belong to later semantic cache slices.
 
 ## Files of Interest
 
-- `internal/chc/workspace_index_cache.go`
-- `internal/chc/workspace_index_cache_test.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/service_workspace.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chctui/workspace_refresh.go`
+- `internal/chr/workspace_index_cache.go`
+- `internal/chr/workspace_index_cache_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/service_workspace.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrtui/workspace_refresh.go`
 - `.prj/reports/slices/workspace-index-semantic-cache/slice-4-structural-index-cache.md`
 - `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui` passed on 2026-05-23.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

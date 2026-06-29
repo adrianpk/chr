@@ -9,7 +9,7 @@ Plan the `Markdown-First Authoring Sessions` slicing.
 This slicing productizes the first authoring layer for operational documents:
 dumps, quizzes, drafts, specs, plans, slice sets, slices, and tickets. It keeps
 Markdown as the canonical editing and review surface while adding enough
-structure for `chc` to initialize, track, validate, and promote authoring work.
+structure for `chr` to initialize, track, validate, and promote authoring work.
 
 The goal is to move the current manual conversation-driven workflow into a
 durable product-owned workflow without starting with an adaptive model session
@@ -19,8 +19,8 @@ or a TUI.
 
 Primary sources:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
-- `.prj/drafts/chc-command-surfaces-and-priority.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
+- `.prj/drafts/chr-command-surfaces-and-priority.md`
 - `.prj/specs/specs/context-composition-pipeline.md`
 - `.agents/DOCUMENTING.md`
 
@@ -36,7 +36,7 @@ Prerequisite delivered work:
 
 Delivered:
 
-- project-local `.chc/` initialization;
+- project-local `.chr/` initialization;
 - Markdown ticket creation, parsing, indexing, status changes, and comments;
 - automatic reconciliation for hand-edited ticket Markdown;
 - Docker-based Codex ticket execution;
@@ -71,7 +71,7 @@ This slicing implements the base path and the first generated path:
    Users can create or edit artifacts by hand. Commands must tolerate those
    files and preserve Markdown as the durable source.
 2. Static generated authoring.
-   `chc` creates structured Markdown questionnaires, drafts, specs, plans, or
+   `chr` creates structured Markdown questionnaires, drafts, specs, plans, or
    slice-set skeletons that the user edits manually.
 
 Later slicings should build on the same model:
@@ -83,7 +83,7 @@ Later slicings should build on the same model:
 
 The authoring session runner is host-side coordination.
 
-`chc` owns:
+`chr` owns:
 
 - authoring session identity and status;
 - target document type and topic;
@@ -107,7 +107,7 @@ The planned model should support artifacts under project-local operational
 paths, including:
 
 ```text
-.chc/authoring/sessions/<session-id>/
+.chr/authoring/sessions/<session-id>/
   session.md
   transcript.md
   artifacts.md
@@ -117,13 +117,13 @@ Generated or promoted project artifacts remain in their canonical locations,
 for example:
 
 ```text
-.chc/dumps/
-.chc/quizzes/
-.chc/drafts/
-.chc/specs/
-.chc/plans/
-.chc/trackers/
-.chc/tickets/
+.chr/dumps/
+.chr/quizzes/
+.chr/drafts/
+.chr/specs/
+.chr/plans/
+.chr/trackers/
+.chr/tickets/
 ```
 
 Exact path names may be refined by implementation slices, but the invariant is
@@ -287,7 +287,7 @@ Candidate scope:
 - add `author session list`;
 - add `author session show`;
 - add `author quiz new` or equivalent target-specific entrypoint;
-- wire commands through the existing `internal/chcapp` command package;
+- wire commands through the existing `internal/chrapp` command package;
 - add CLI tests.
 
 Expected outcome:
@@ -351,7 +351,7 @@ Expected outcome:
 
 - Which first promotion path is most useful: quiz to draft, dump plus quiz to
   spec, or draft to spec?
-- Should authoring artifacts live only under `.chc/`, or should repository
+- Should authoring artifacts live only under `.chr/`, or should repository
   operational workspaces such as `.prj/` remain supported as an advanced mode?
 - Which metadata fields are required for every authoring artifact versus only
   for generated artifacts?

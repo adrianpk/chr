@@ -17,7 +17,7 @@ workflows out of TUI-specific executor structs.
 
 ## Delivered Behavior
 
-- Added a central unexported `service` type in `internal/chcapp`.
+- Added a central unexported `service` type in `internal/chrapp`.
 - Centralized shared operation dependencies on the service.
 - Added an adapter-neutral workspace refresh result.
 - Moved workspace refresh graph building behind the service boundary.
@@ -27,7 +27,7 @@ workflows out of TUI-specific executor structs.
 ## Implementation Notes
 
 The service is intentionally unexported for this slice. It only needs to be
-used inside `internal/chcapp` while the existing TUI adapter wiring remains in
+used inside `internal/chrapp` while the existing TUI adapter wiring remains in
 place.
 
 The first migrated path is workspace refresh because it is a focused operation
@@ -37,20 +37,20 @@ and work-control operations without redefining the boundary.
 ## Contracts Added or Changed
 
 - Added `service` as the central operation implementation type.
-- Added `WorkspaceRefreshResult` in `internal/chcapp`.
+- Added `WorkspaceRefreshResult` in `internal/chrapp`.
 - Added `service.RefreshWorkspace`.
-- Kept `chctui.WorkspaceRefreshExecutor` unchanged.
+- Kept `chrtui.WorkspaceRefreshExecutor` unchanged.
 
 ## Files of Interest
 
-- `internal/chcapp/service.go`
-- `internal/chcapp/service_workspace.go`
-- `internal/chcapp/service_test.go`
-- `internal/chcapp/app.go`
+- `internal/chrapp/service.go`
+- `internal/chrapp/service_workspace.go`
+- `internal/chrapp/service_test.go`
+- `internal/chrapp/app.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui` passed on 2026-05-23.
+- `go test ./internal/chrapp ./internal/chrtui` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

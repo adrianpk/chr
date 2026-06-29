@@ -6,16 +6,16 @@ Spec: `.prj/specs/specs/user-daemon-and-global-index.md`
 
 ## Workspace
 
-Represents a project-local `.chc/` directory.
+Represents a project-local `.chr/` directory.
 
 Fields:
 
 | Field | Semantics |
 | --- | --- |
 | `project_dir` | Absolute path to the project root. |
-| `workspace_dir` | Absolute path to `<project>/.chc`. |
-| `config_path` | Absolute path to `<project>/.chc/config.yml`. |
-| `tickets_dir` | Absolute path to `<project>/.chc/tickets`. |
+| `workspace_dir` | Absolute path to `<project>/.chr`. |
+| `config_path` | Absolute path to `<project>/.chr/config.yml`. |
+| `tickets_dir` | Absolute path to `<project>/.chr/tickets`. |
 
 ## User Environment
 
@@ -63,10 +63,10 @@ Rules:
 
 - `id` is stable on the local machine.
 - `name` is the human-facing identifier used by CLI and messaging surfaces.
-- `path` points to the project root, not the `.chc/` directory.
+- `path` points to the project root, not the `.chr/` directory.
 - `enabled` controls whether the daemon should observe the project.
 - `last_indexed_at` is operational metadata for the derived index.
-- The row does not replace project-local `.chc/config.yml`.
+- The row does not replace project-local `.chr/config.yml`.
 
 ## Migration
 
@@ -114,7 +114,7 @@ Rules:
 - Migrations are applied in filename order.
 - Already applied versions are skipped.
 - Failed migrations stop execution and return an error.
-- The migrator is a core `chc` primitive and must not require an external framework dependency.
+- The migrator is a core `chr` primitive and must not require an external framework dependency.
 
 ## Indexed Ticket
 
@@ -126,7 +126,7 @@ Fields:
 | --- | --- |
 | `project_id` | Registered project identity. |
 | `path` | Absolute ticket file path. |
-| `relative_path` | Ticket path relative to project root or `.chc/tickets`. |
+| `relative_path` | Ticket path relative to project root or `.chr/tickets`. |
 | `key` | Ticket key from Markdown metadata. |
 | `title` | Ticket title from Markdown metadata. |
 | `status` | Ticket status from Markdown metadata. |
@@ -147,8 +147,8 @@ Tags may be modeled as a separate indexed table.
 - Markdown ticket files are canonical.
 - The global SQLite database is derived and rebuildable.
 - The global SQLite database must not contain canonical ticket data that cannot be reconstructed from Markdown.
-- A single `chc daemon` process may observe multiple registered projects.
-- Project-local `.chc/` state and user-level `chc` state are separate concepts.
+- A single `chr daemon` process may observe multiple registered projects.
+- Project-local `.chr/` state and user-level `chr` state are separate concepts.
 - Development mode must be able to redirect user-level paths away from real user config and data directories.
 - The global database schema must be created through embedded migrations.
 - The `projects` table is the relational source for registered project records.

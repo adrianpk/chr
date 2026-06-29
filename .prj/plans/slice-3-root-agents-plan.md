@@ -4,16 +4,16 @@ Status: delivered
 
 ## Purpose
 
-Materialize a root-level `AGENTS.md` when `chc init` initializes a managed project.
+Materialize a root-level `AGENTS.md` when `chr init` initializes a managed project.
 
-External agent tooling may look for `AGENTS.md` at the project root, so the root file must exist outside `.chc/` even though ChrysoCoord-owned workspace state lives under `.chc/`.
+External agent tooling may look for `AGENTS.md` at the project root, so the root file must exist outside `.chr/` even though Chryso-owned workspace state lives under `.chr/`.
 
 ## Scope
 
 This slice covers:
 
 - adding root `AGENTS.md` to workspace profile assets,
-- writing root-level files during `chc init`,
+- writing root-level files during `chr init`,
 - preserving existing root `AGENTS.md` without overwrite,
 - reporting root file creation and skips in init output,
 - tests for root file materialization and non-overwrite behavior.
@@ -22,7 +22,7 @@ This slice covers:
 
 This slice does not cover:
 
-- full protocol defaults under `.chc/agents/`,
+- full protocol defaults under `.chr/agents/`,
 - root `AGENTS.md` content finalization beyond a useful first template,
 - ticket model,
 - agent execution,
@@ -39,8 +39,8 @@ make verify
 Manual behavior checks:
 
 ```sh
-go run ./cmd/chc init --dir "$tmpdir"
-go run ./cmd/chc init --dir "$tmpdir" --dry-run
+go run ./cmd/chr init --dir "$tmpdir"
+go run ./cmd/chr init --dir "$tmpdir" --dry-run
 ```
 
-Both checks must avoid creating `.chc/` in the ChrysoCoord repository itself.
+Both checks must avoid creating `.chr/` in the Chryso repository itself.

@@ -31,7 +31,7 @@ Existing comments and ticket sections are preserved.
 ## Implementation Notes
 
 The writer delegates Markdown insertion to the existing ticket commenter so the
-comment format and `updated_at` behavior remain consistent with `chc ticket
+comment format and `updated_at` behavior remain consistent with `chr ticket
 comment`.
 
 The result application model now renders the canonical execution comment body.
@@ -50,15 +50,15 @@ New functions:
 
 ## Files of Interest
 
-- `internal/chc/result_application.go`
-- `internal/chc/result_application_test.go`
-- `internal/chc/result_comment_writer.go`
-- `internal/chc/result_comment_writer_test.go`
+- `internal/chr/result_application.go`
+- `internal/chr/result_application_test.go`
+- `internal/chr/result_comment_writer.go`
+- `internal/chr/result_comment_writer_test.go`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

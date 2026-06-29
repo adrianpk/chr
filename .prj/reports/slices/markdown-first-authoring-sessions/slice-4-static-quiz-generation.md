@@ -47,13 +47,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/authoring_static_quiz.go`
-- `internal/chc/authoring_static_quiz_test.go`
+- `internal/chr/authoring_static_quiz.go`
+- `internal/chr/authoring_static_quiz_test.go`
 - `.prj/trackers/slicing-markdown-first-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestPlanStaticQuizGeneration|TestWriteStaticQuiz'`: pass
+- `go test ./internal/chr -run 'TestPlanStaticQuizGeneration|TestWriteStaticQuiz'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

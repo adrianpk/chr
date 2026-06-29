@@ -17,7 +17,7 @@ general quiz toward Gherkin concepts.
 
 Acceptance feature generation can now return default-oriented clarification
 prompts when it needs more information. The service writes those prompts to an
-editable feature-round note under `.chc/user/acceptance/<case>-feature-round.md`.
+editable feature-round note under `.chr/user/acceptance/<case>-feature-round.md`.
 Future feature generation requests include that note as acceptance context.
 
 ## Implementation Notes
@@ -33,7 +33,7 @@ dump, quiz, and spec material already exist.
 ## Contracts Added or Changed
 
 - Added `clarification_prompts` to the acceptance feature model payload.
-- Added `.chc/user/acceptance/<case>-feature-round.md` as the feature-round
+- Added `.chr/user/acceptance/<case>-feature-round.md` as the feature-round
   note path.
 - Added service behavior that writes feature-round notes on `needs_more_info`.
 - Added service behavior that includes existing feature-round notes in later
@@ -41,18 +41,18 @@ dump, quiz, and spec material already exist.
 
 ## Files of Interest
 
-- `internal/chc/acceptance_feature.go`
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chcapp/service_acceptance_feature.go`
-- `internal/chcapp/service_acceptance_feature_test.go`
-- `internal/chc/acceptance_feature_test.go`
+- `internal/chr/acceptance_feature.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chrapp/service_acceptance_feature.go`
+- `internal/chrapp/service_acceptance_feature_test.go`
+- `internal/chr/acceptance_feature_test.go`
 
 ## Validation
 
-- `go test ./internal/chc -run 'AcceptanceFeature|QuizModelFeature'` (pass)
-- `go test ./internal/chcapp -run 'ServiceGenerateAcceptanceFeature'` (pass)
-- `go test ./internal/chc ./internal/chcapp` (pass)
+- `go test ./internal/chr -run 'AcceptanceFeature|QuizModelFeature'` (pass)
+- `go test ./internal/chrapp -run 'ServiceGenerateAcceptanceFeature'` (pass)
+- `go test ./internal/chr ./internal/chrapp` (pass)
 - `make verify` (pass)
 
 ## Risks and Follow-ups

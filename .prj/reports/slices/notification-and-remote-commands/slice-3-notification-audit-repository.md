@@ -53,15 +53,15 @@ The repository follows the same shape as the execution and loop repositories:
 
 ## Files of Interest
 
-- `cmd/chc/assets/migration/sqlite/20260521000006-create_notification_events.sql`
-- `internal/chc/notification_event_repository.go`
-- `internal/chc/notification_event_repository_test.go`
-- `internal/chc/migration_test.go`
+- `cmd/chr/assets/migration/sqlite/20260521000006-create_notification_events.sql`
+- `internal/chr/notification_event_repository.go`
+- `internal/chr/notification_event_repository_test.go`
+- `internal/chr/migration_test.go`
 - `docs/reference/notifications.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestNotificationEventRepository|TestNewNotificationEventRepository|TestMigrator'`: pass
+- `go test ./internal/chr -run 'TestNotificationEventRepository|TestNewNotificationEventRepository|TestMigrator'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

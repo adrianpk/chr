@@ -45,13 +45,13 @@ New function:
 
 ## Files of Interest
 
-- `internal/chc/ticket_loop_query.go`
-- `internal/chc/ticket_loop_query_test.go`
+- `internal/chr/ticket_loop_query.go`
+- `internal/chr/ticket_loop_query_test.go`
 - `docs/reference/ticket-loop.md`
 
 ## Validation
 
-- `go test ./internal/chc -run TestTicketLoopQuery`: pass
+- `go test ./internal/chr -run TestTicketLoopQuery`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

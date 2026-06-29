@@ -177,7 +177,7 @@ func TestRenderEvidenceStrategyChecklistRendersCanonicalBlock(t *testing.T) {
 			EvidenceStrategyChecklistLabelGherkin: {
 				Label:  EvidenceStrategyChecklistLabelGherkin,
 				Status: "required",
-				Detail: "path=.chc/user/acceptance/bug.feature; reason=user-visible",
+				Detail: "path=.chr/user/acceptance/bug.feature; reason=user-visible",
 			},
 			EvidenceStrategyChecklistLabelTests: {
 				Label:  EvidenceStrategyChecklistLabelTests,
@@ -201,13 +201,13 @@ func TestRenderEvidenceStrategyChecklistRendersCanonicalBlock(t *testing.T) {
 		t.Fatalf("RenderEvidenceStrategyChecklist returned error: %v", err)
 	}
 
-	want := `<!-- chc:evidence-strategy:v1 -->
+	want := `<!-- chr:evidence-strategy:v1 -->
 - [x] Evidence strategy: planned; change_kind=bugfix; risk=medium
-- [ ] Gherkin: required; path=.chc/user/acceptance/bug.feature; reason=user-visible
+- [ ] Gherkin: required; path=.chr/user/acceptance/bug.feature; reason=user-visible
 - [ ] Tests: mixed; reason=unit and fuzz coverage
 - [ ] Validation: pending; commands=make verify; evidence=none
 - [ ] Evidence summary: pending
-<!-- /chc:evidence-strategy -->
+<!-- /chr:evidence-strategy -->
 `
 	if got != want {
 		t.Fatalf("rendered checklist:\n%s\nwant:\n%s", got, want)
@@ -229,7 +229,7 @@ func TestRenderEvidenceStrategyChecklistRejectsMissingItems(t *testing.T) {
 
 func TestUpsertEvidenceStrategyChecklistInsertsMissingBlock(t *testing.T) {
 	content := `---
-key: "CHC-1"
+key: "CHR-1"
 title: "Ticket"
 updated_at: "2026-06-19T10:00:00Z"
 ---
@@ -273,7 +273,7 @@ func TestUpsertEvidenceStrategyChecklistUpdatesOnlyProvidedItems(t *testing.T) {
 				Label:   EvidenceStrategyChecklistLabelValidation,
 				Checked: true,
 				Status:  "passed",
-				Detail:  "commands=make verify; evidence=.chc/user/runtime/runs/1/report.md",
+				Detail:  "commands=make verify; evidence=.chr/user/runtime/runs/1/report.md",
 			},
 		},
 	}
@@ -358,7 +358,7 @@ func testEvidenceStrategyChecklistModel() EvidenceStrategyChecklist {
 			EvidenceStrategyChecklistLabelGherkin: {
 				Label:  EvidenceStrategyChecklistLabelGherkin,
 				Status: "required",
-				Detail: "path=.chc/user/acceptance/bug.feature; reason=user-visible",
+				Detail: "path=.chr/user/acceptance/bug.feature; reason=user-visible",
 			},
 			EvidenceStrategyChecklistLabelTests: {
 				Label:  EvidenceStrategyChecklistLabelTests,
@@ -380,17 +380,17 @@ func testEvidenceStrategyChecklistModel() EvidenceStrategyChecklist {
 
 func testEvidenceStrategyChecklistMarkdown() string {
 	return `---
-key: "CHC-1"
+key: "CHR-1"
 ---
 
 # Description
 
-<!-- chc:evidence-strategy:v1 -->
+<!-- chr:evidence-strategy:v1 -->
   - [x] Evidence strategy: planned; change_kind=bugfix; risk=medium; test_timing=before; note=regression
-- [ ] Gherkin: required; path=.chc/user/acceptance/bug.feature; reason=user-visible
+- [ ] Gherkin: required; path=.chr/user/acceptance/bug.feature; reason=user-visible
 - [ ] Tests: mixed; reason=unit and fuzz coverage
 - [ ] Validation: pending; commands=make verify; evidence=none
 - [ ] Evidence summary: pending
-<!-- /chc:evidence-strategy -->
+<!-- /chr:evidence-strategy -->
 `
 }

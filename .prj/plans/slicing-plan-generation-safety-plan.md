@@ -21,9 +21,9 @@ Primary sources:
 - `.agents/playbooks/slice-delivery.md`
 - `.agents/playbooks/slice-reporting.md`
 - `.agents/SLICES.md`
-- Existing `internal/chcapp` plan generation service code
-- Existing `internal/chctui` `F6 Plans` action surface
-- Existing `.chc/plans/<scope>-plan.md` generated plan layout
+- Existing `internal/chrapp` plan generation service code
+- Existing `internal/chrtui` `F6 Plans` action surface
+- Existing `.chr/plans/<scope>-plan.md` generated plan layout
 - Conversation decisions about plan overwrite safety, archived plan visibility,
   expensive generation, and project-wide baseline-aware planning
 
@@ -70,7 +70,7 @@ The target model distinguishes cheap reads from expensive writes:
 - The service owns overwrite semantics, archive semantics, and generation
   locking.
 - The TUI emits intent only and renders service-provided results.
-- Archived plans live under `.chc/plans/archive/` and are ignored by default
+- Archived plans live under `.chr/plans/archive/` and are ignored by default
   operational context.
 - Generation failures leave existing plans untouched and report that the UI is
   showing the last saved plan.
@@ -133,7 +133,7 @@ Preserve the current canonical plan before any regenerate write.
 Expected behavior:
 
 - Regenerating an existing plan first copies it to
-  `.chc/plans/archive/<scope>-plan-<timestamp>.md`.
+  `.chr/plans/archive/<scope>-plan-<timestamp>.md`.
 - The canonical plan is replaced only after archive succeeds.
 - Regenerate of a missing plan behaves like create.
 - Archive metadata identifies the original canonical path and archive time.
@@ -152,9 +152,9 @@ planning context.
 
 Expected behavior:
 
-- `.chc/plans/archive/**` is excluded from active workspace indexing or from
+- `.chr/plans/archive/**` is excluded from active workspace indexing or from
   context section composition.
-- `.chc/specs/archive/**` is excluded if the same archive convention is present.
+- `.chr/specs/archive/**` is excluded if the same archive convention is present.
 - TUI plan lists show only canonical plans.
 - Plan generation provenance does not include archived paths.
 

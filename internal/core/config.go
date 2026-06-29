@@ -143,13 +143,13 @@ type TelegramNotificationConfig struct {
 
 const (
 	// DefaultRuntimeImage defines a package boundary constant.
-	DefaultRuntimeImage = "chc-agent-runtime:local"
+	DefaultRuntimeImage = "chr-agent-runtime:local"
 	// DefaultRuntimeDockerfilePath defines a package boundary constant.
-	DefaultRuntimeDockerfilePath = ".chc/user/runtime/agent/Dockerfile"
+	DefaultRuntimeDockerfilePath = ".chr/user/runtime/agent/Dockerfile"
 	// DefaultRuntimeWorkdir defines a package boundary constant.
 	DefaultRuntimeWorkdir = "/workspace"
 	// DefaultRuntimeArtifactDir defines a package boundary constant.
-	DefaultRuntimeArtifactDir = ".chc/user/runtime/runs"
+	DefaultRuntimeArtifactDir = ".chr/user/runtime/runs"
 	// DefaultRuntimeValidationCommand defines a package boundary constant.
 	DefaultRuntimeValidationCommand = "make verify"
 
@@ -188,7 +188,7 @@ const (
 	// DefaultWebPort defines a package boundary constant.
 	DefaultWebPort = 7331
 	// DefaultWebTokenEnv defines a package boundary constant.
-	DefaultWebTokenEnv = "CHC_WEB_TOKEN"
+	DefaultWebTokenEnv = "CHR_WEB_TOKEN"
 	// DefaultWebRefreshIntervalSeconds defines a package boundary constant.
 	DefaultWebRefreshIntervalSeconds = 2
 
@@ -223,7 +223,7 @@ const (
 	// DefaultWorkCanonicalRemote defines a package boundary constant.
 	DefaultWorkCanonicalRemote = "origin"
 	// DefaultWorktreeRoot defines a package boundary constant.
-	DefaultWorktreeRoot = ".chc/user/runtime/worktrees"
+	DefaultWorktreeRoot = ".chr/user/runtime/worktrees"
 
 	// EvidenceStrategyModeInline defines a package boundary constant.
 	EvidenceStrategyModeInline EvidenceStrategyMode = "inline"

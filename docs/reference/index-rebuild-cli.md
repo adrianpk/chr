@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`chc index rebuild` rebuilds the resolved project's derived ticket index from
+`chr index rebuild` rebuilds the resolved project's derived ticket index from
 canonical Markdown ticket files.
 
 This is a recovery and rehydration command. Normal ticket read workflows should
@@ -11,14 +11,14 @@ not depend on the user remembering to run it.
 ## Usage
 
 ```sh
-chc index rebuild
+chr index rebuild
 ```
 
 The command accepts the standard project resolution flags:
 
 ```sh
-chc index rebuild --dir /path/to/project
-chc index rebuild --dev-root _workspace
+chr index rebuild --dir /path/to/project
+chr index rebuild --dev-root _workspace
 ```
 
 ## Behavior
@@ -27,7 +27,7 @@ The command:
 
 - resolves the project through `--dir`, active project, or current directory;
 - opens the user-level SQLite ticket index;
-- discovers Markdown ticket files under `.chc/user/tickets`;
+- discovers Markdown ticket files under `.chr/user/tickets`;
 - deletes existing indexed ticket rows for the resolved project;
 - indexes successfully parsed tickets;
 - reports parse errors without failing the whole rebuild.
@@ -44,7 +44,7 @@ parse_errors: 0
 When parse errors exist, the command prints one line per invalid ticket:
 
 ```text
-parse_error: CHC-1-Bad.md ticket frontmatter opening delimiter is required
+parse_error: CHR-1-Bad.md ticket frontmatter opening delimiter is required
 ```
 
 ## Scope

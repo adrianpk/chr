@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 type codexDumpCurationProvider struct {
@@ -89,7 +89,7 @@ func codexDumpCurationPrompt(request DumpCurationRequest) (string, error) {
 	}
 
 	var prompt strings.Builder
-	prompt.WriteString("You are the ChrysoCoord dump curation backend.\n")
+	prompt.WriteString("You are the Chryso dump curation backend.\n")
 	prompt.WriteString("Curate the requested dump and return only the final JSON object matching the provided output schema.\n")
 	prompt.WriteString("Do not edit files, run commands, create commits, open pull requests, or ask follow-up questions.\n\n")
 	prompt.WriteString("Instructions:\n")

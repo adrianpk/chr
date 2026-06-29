@@ -148,7 +148,7 @@ func TestNewDaemonStateRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(root, "data", "chc", "core.db"))
+	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
 func newTestDaemonStateRepository(t *testing.T) DaemonStateRepository {

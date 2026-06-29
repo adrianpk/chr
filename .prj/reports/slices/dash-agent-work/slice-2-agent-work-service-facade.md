@@ -26,6 +26,6 @@ duplicating ticket execution or loop execution internals.
 
 ## Validation
 
-- `go test ./internal/chcapp`
+- `go test ./internal/chrapp`
 - `make verify`
 - `git diff --check`

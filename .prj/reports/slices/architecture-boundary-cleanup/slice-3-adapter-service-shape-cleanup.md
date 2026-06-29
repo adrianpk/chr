@@ -38,24 +38,24 @@ surface noise without changing CLI or TUI behavior.
 - Added `CaseMetadataPatchRequest`.
 - Replaced `quizScopeFlags` and `quizScopeFromCommand` with
   `workspaceScopeFlags` and `workspaceScopeFromCommand`.
-- Replaced `internal/chcapp/tui_adapters.go` with domain-specific adapter
+- Replaced `internal/chrapp/tui_adapters.go` with domain-specific adapter
   files.
 
 ## Files of Interest
 
-- `internal/chcapp/service_metadata.go`
-- `internal/chcapp/metadata_cli.go`
-- `internal/chcapp/quiz_cli.go`
-- `internal/chcapp/spec_plan_cli.go`
-- `internal/chcapp/tui_adapters_artifact.go`
-- `internal/chcapp/tui_adapters_dump_quiz.go`
-- `internal/chcapp/tui_adapters_loaders.go`
-- `internal/chcapp/tui_adapters_spec_plan_ticket.go`
-- `internal/chcapp/tui_adapters_work.go`
+- `internal/chrapp/service_metadata.go`
+- `internal/chrapp/metadata_cli.go`
+- `internal/chrapp/quiz_cli.go`
+- `internal/chrapp/spec_plan_cli.go`
+- `internal/chrapp/tui_adapters_artifact.go`
+- `internal/chrapp/tui_adapters_dump_quiz.go`
+- `internal/chrapp/tui_adapters_loaders.go`
+- `internal/chrapp/tui_adapters_spec_plan_ticket.go`
+- `internal/chrapp/tui_adapters_work.go`
 
 ## Validation
 
-- `go test ./internal/chcapp`
+- `go test ./internal/chrapp`
 - `go test ./...`
 - `make verify`
 

@@ -178,8 +178,8 @@ func (a OpenAIQuizModelAdapter) openAIRequestBody(request QuizModelRequest) ([]b
 		},
 		Store: false,
 		Metadata: map[string]string{
-			"chc_request_id": request.ID,
-			"chc_action":     string(request.Action),
+			"chr_request_id": request.ID,
+			"chr_action":     string(request.Action),
 		},
 	}
 
@@ -359,7 +359,7 @@ func (a OpenAIQuizModelAdapter) openAIAPIKey() string {
 func (a OpenAIQuizModelAdapter) openAIModel() string {
 	model := strings.TrimSpace(a.Model)
 	if model == "" {
-		model = strings.TrimSpace(os.Getenv("CHC_OPENAI_MODEL"))
+		model = strings.TrimSpace(os.Getenv("CHR_OPENAI_MODEL"))
 	}
 
 	if model == "" {
@@ -372,7 +372,7 @@ func (a OpenAIQuizModelAdapter) openAIModel() string {
 func (a OpenAIQuizModelAdapter) openAIBaseURL() string {
 	baseURL := strings.TrimSpace(a.BaseURL)
 	if baseURL == "" {
-		baseURL = strings.TrimSpace(os.Getenv("CHC_OPENAI_BASE_URL"))
+		baseURL = strings.TrimSpace(os.Getenv("CHR_OPENAI_BASE_URL"))
 	}
 
 	if baseURL == "" {

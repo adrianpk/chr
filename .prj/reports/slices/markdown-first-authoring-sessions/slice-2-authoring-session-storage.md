@@ -17,7 +17,7 @@ side-effect-free session model from Slice 1.
 The repository now has a filesystem-backed authoring session repository that
 can:
 
-- derive the session directory layout under `.chc/authoring/sessions/<id>/`;
+- derive the session directory layout under `.chr/authoring/sessions/<id>/`;
 - create `session.md`, `transcript.md`, and `artifacts.md`;
 - render `session.md` with frontmatter plus Markdown tables for inputs,
   outputs, and provenance;
@@ -50,13 +50,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/authoring_session_repository.go`
-- `internal/chc/authoring_session_repository_test.go`
+- `internal/chr/authoring_session_repository.go`
+- `internal/chr/authoring_session_repository_test.go`
 - `.prj/trackers/slicing-markdown-first-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestAuthoringSessionRepository|TestRenderAndParseAuthoringSession'`: pass
+- `go test ./internal/chr -run 'TestAuthoringSessionRepository|TestRenderAndParseAuthoringSession'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

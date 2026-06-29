@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/tui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/tui"
 )
 
 func TestTUIDumpAdapterUsesDumpServices(t *testing.T) {
@@ -43,7 +43,7 @@ func createDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor) s
 		t.Fatalf("ExecuteDumpAction create returned error: %v", err)
 	}
 
-	if createResult.Message != "Created dump .chc/user/dumps/adapter-notes.md." {
+	if createResult.Message != "Created dump .chr/user/dumps/adapter-notes.md." {
 		t.Fatalf("create message = %q, want created dump message", createResult.Message)
 	}
 
@@ -190,7 +190,7 @@ Feature: Blog publishing
 		t.Fatalf("AcceptanceFeatureStatus = %q, want generated", result.AcceptanceFeatureStatus)
 	}
 
-	if result.AcceptanceFeaturePath != ".chc/user/acceptance/blog.feature" {
+	if result.AcceptanceFeaturePath != ".chr/user/acceptance/blog.feature" {
 		t.Fatalf("AcceptanceFeaturePath = %q, want feature path", result.AcceptanceFeaturePath)
 	}
 

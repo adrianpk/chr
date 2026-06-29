@@ -1,6 +1,6 @@
 # Expose the Local Web UI Deliberately
 
-The Web UI is local by default. Running `chc web serve` binds to
+The Web UI is local by default. Running `chr web serve` binds to
 `127.0.0.1:7331` unless the project config or command flags say otherwise.
 
 Use a non-loopback bind only when another system is responsible for network
@@ -9,7 +9,7 @@ reachability, firewalling, and TLS termination.
 ## Local Only
 
 ```sh
-chc web serve
+chr web serve
 ```
 
 Expected boundary:
@@ -24,21 +24,21 @@ Expected boundary:
 Set a token before starting the server:
 
 ```sh
-export CHC_WEB_TOKEN='replace-with-a-long-random-value'
-chc web serve --host 0.0.0.0 --port 7331
+export CHR_WEB_TOKEN='replace-with-a-long-random-value'
+chr web serve --host 0.0.0.0 --port 7331
 ```
 
 Preview the resolved exposure boundary first:
 
 ```sh
-CHC_WEB_TOKEN='replace-with-a-long-random-value' \
-  chc web serve --host 0.0.0.0 --port 7331 --dry-run
+CHR_WEB_TOKEN='replace-with-a-long-random-value' \
+  chr web serve --host 0.0.0.0 --port 7331 --dry-run
 ```
 
 In `auto` mode, non-loopback binds require the token. The token can be supplied
 with one of these request forms:
 
-- `X-CHC-Web-Token: <token>`
+- `X-CHR-Web-Token: <token>`
 - `Authorization: Bearer <token>`
 - `?token=<token>`
 
@@ -55,17 +55,17 @@ web:
   host: 0.0.0.0
   port: 7331
   require_token: auto
-  token_env: CHC_WEB_TOKEN
-  allowed_origins: "https://chc.example.internal"
+  token_env: CHR_WEB_TOKEN
+  allowed_origins: "https://chr.example.internal"
 ```
 
 Allowed origins must be exact origins. Wildcards are not supported.
 
 ## Operator-Owned Boundary
 
-ChrysoCoord does not configure or manage Tailscale, Cloudflare Tunnel, reverse
+Chryso does not configure or manage Tailscale, Cloudflare Tunnel, reverse
 proxies, firewall rules, DNS, certificates, or public hosting. Keep those
-systems outside `chc` and expose the Web UI only through infrastructure you
+systems outside `chr` and expose the Web UI only through infrastructure you
 control.
 
 Startup and request logs do not print token values or query strings.

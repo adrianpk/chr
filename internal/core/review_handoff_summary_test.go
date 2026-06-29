@@ -32,7 +32,7 @@ func TestReviewHandoffSummaryRendersSucceededExecution(t *testing.T) {
 	for _, want := range []string{
 		"# Review Handoff Summary",
 		"- execution: exec-1",
-		"- ticket: CHC-1",
+		"- ticket: CHR-1",
 		"- status: succeeded",
 		"- result_status: succeeded",
 		"- summary: ready for review",

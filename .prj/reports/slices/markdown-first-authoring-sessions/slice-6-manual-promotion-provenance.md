@@ -27,7 +27,7 @@ The implementation can:
 - preserve source quiz and target draft provenance in the authoring session;
 - reject unallowed target collisions;
 - update the persisted authoring session after promotion;
-- expose the workflow through `chc author promote quiz-to-draft`;
+- expose the workflow through `chr author promote quiz-to-draft`;
 - support dry-run rendering without writing the draft or updating the session.
 
 ## Implementation Notes
@@ -56,22 +56,22 @@ Repository contract update:
 New user-facing command:
 
 ```text
-chc author promote quiz-to-draft
+chr author promote quiz-to-draft
 ```
 
 ## Files of Interest
 
-- `internal/chc/authoring_promotion.go`
-- `internal/chc/authoring_promotion_test.go`
-- `internal/chc/authoring_session_repository.go`
-- `internal/chcapp/author.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/authoring_promotion.go`
+- `internal/chr/authoring_promotion_test.go`
+- `internal/chr/authoring_session_repository.go`
+- `internal/chrapp/author.go`
+- `internal/chrapp/cli_test.go`
 - `.prj/trackers/slicing-markdown-first-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestPlanQuizToDraftPromotion|TestWriteQuizToDraftPromotion'`: pass
-- `go test ./internal/chcapp -run 'TestAuthor'`: pass
+- `go test ./internal/chr -run 'TestPlanQuizToDraftPromotion|TestWriteQuizToDraftPromotion'`: pass
+- `go test ./internal/chrapp -run 'TestAuthor'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

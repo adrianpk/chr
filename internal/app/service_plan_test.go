@@ -10,17 +10,17 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/tui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/tui"
 )
 
 //nolint:funlen // Integration-style service assertion keeps fixture and checks together.
 func TestServiceGeneratePlanUsesUseCaseContext(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "quizzes", "blog-quiz.md"), `---
 status: "curated"
 case_slug: "blog"
 ---
@@ -31,7 +31,7 @@ case_slug: "blog"
 
 - Preserve editorial review.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -61,7 +61,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("Message = %q, want Plan generated.", result.Message)
 	}
 
-	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"))
+	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"))
 	for _, want := range []string{
 		`status: "planned"`,
 		`case_slug: "blog"`,
@@ -101,11 +101,11 @@ The implementation must preserve editorial review.
 }
 
 func TestServiceGeneratePlanCanUseSinglePassCodexBackend(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "codex")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "codex")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -145,7 +145,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("action = %q, want plan generation", model.requests[0].Action)
 	}
 
-	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"))
+	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"))
 	if !strings.Contains(plan, "Implement the generated plan in one pass.") {
 		t.Fatalf("generated plan missing single-pass body in:\n%s", plan)
 	}
@@ -154,7 +154,7 @@ The implementation must preserve editorial review.
 func TestServiceBuildsPlanOutlineGenerationRequest(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -209,7 +209,7 @@ The implementation must preserve editorial review.
 func TestServiceBuildsPlanGenerationModelRequest(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -256,7 +256,7 @@ The implementation must preserve editorial review.
 func TestServiceBuildsPlanSliceDetailGenerationRequest(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -312,11 +312,11 @@ The implementation must preserve editorial review.
 }
 
 func TestServiceRegeneratePlanArchivesExistingPlanBeforeReplace(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Existing Blog Plan"
 status: "planned"
 case_slug: "blog"
@@ -346,11 +346,11 @@ Manual edits that must remain recoverable.
 		t.Fatalf("Message = %q, want Plan regenerated.", result.Message)
 	}
 
-	archivePath := filepath.Join(projectDir, ".chc", "user", "plans", "archive", "blog-plan-20260525-111213000000014.md")
+	archivePath := filepath.Join(projectDir, ".chr", "user", "plans", "archive", "blog-plan-20260525-111213000000014.md")
 	archivedPlan := readServiceWorkspaceFile(t, archivePath)
 	for _, want := range []string{
 		`title: "Existing Blog Plan"`,
-		`archived_from: ".chc/user/plans/blog-plan.md"`,
+		`archived_from: ".chr/user/plans/blog-plan.md"`,
 		`archived_at: "2026-05-25T11:12:13.000000014Z"`,
 		"Manual edits that must remain recoverable.",
 	} {
@@ -359,7 +359,7 @@ Manual edits that must remain recoverable.
 		}
 	}
 
-	canonicalPlan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"))
+	canonicalPlan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"))
 	if strings.Contains(canonicalPlan, "Manual edits that must remain recoverable.") {
 		t.Fatalf("canonical plan still contains old content:\n%s", canonicalPlan)
 	}
@@ -370,7 +370,7 @@ Manual edits that must remain recoverable.
 }
 
 func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -390,19 +390,19 @@ func TestServiceRegeneratePlanWithoutExistingPlanCreatesCanonicalPlan(t *testing
 		t.Fatalf("RegeneratePlan returned error: %v", err)
 	}
 
-	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"))
+	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"))
 	if !strings.Contains(plan, "# Generated Implementation Plan") {
 		t.Fatalf("canonical plan missing generated content:\n%s", plan)
 	}
 
-	archiveRoot := filepath.Join(projectDir, ".chc", "user", "plans", "archive")
+	archiveRoot := filepath.Join(projectDir, ".chr", "user", "plans", "archive")
 	if _, err := os.Stat(archiveRoot); !os.IsNotExist(err) {
 		t.Fatalf("archive root exists after missing-plan regenerate: %v", err)
 	}
 }
 
 func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -428,7 +428,7 @@ func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
 		t.Fatal("GeneratePlan returned nil error, want slice detail validation failure")
 	}
 
-	planPath := filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md")
+	planPath := filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md")
 	if _, statErr := os.Stat(planPath); !os.IsNotExist(statErr) {
 		t.Fatalf("plan path stat error = %v, want not exist", statErr)
 	}
@@ -438,7 +438,7 @@ func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
 func TestServiceMaterializePlanTrackingCreatesTrackingAndTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case_slug: "blog"
@@ -472,15 +472,15 @@ Implement planning foundation.
 		t.Fatalf("Message = %q, want created tracking message", result.Message)
 	}
 
-	if result.TrackingPath != ".chc/user/plans/blog-tracking.md" {
+	if result.TrackingPath != ".chr/user/plans/blog-tracking.md" {
 		t.Fatalf("TrackingPath = %q, want blog tracking path", result.TrackingPath)
 	}
 
-	tracking := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-tracking.md"))
+	tracking := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-tracking.md"))
 	for _, want := range []string{
-		`plan_path: ".chc/user/plans/blog-plan.md"`,
+		`plan_path: ".chr/user/plans/blog-plan.md"`,
 		"Track the generated plan slices through tickets.",
-		"Slice 1: CHC-1 - Implement planning foundation",
+		"Slice 1: CHR-1 - Implement planning foundation",
 	} {
 		if !strings.Contains(tracking, want) {
 			t.Fatalf("tracking missing %q in:\n%s", want, tracking)
@@ -495,7 +495,7 @@ Implement planning foundation.
 
 	ticket := readServiceWorkspaceFile(
 		t,
-		filepath.Join(projectDir, ".chc", "user", "tickets", "blog", "CHC-1-Implement-planning-foundation.md"),
+		filepath.Join(projectDir, ".chr", "user", "tickets", "blog", "CHR-1-Implement-planning-foundation.md"),
 	)
 	assertMaterializedPlanTrackingTicketContent(t, ticket)
 
@@ -507,7 +507,7 @@ Implement planning foundation.
 func TestServiceMaterializePlanTrackingDoesNotWriteOnInvalidGeneratedTracking(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case_slug: "blog"
@@ -542,8 +542,8 @@ case_slug: "blog"
 		t.Fatal("MaterializePlanTracking returned nil error")
 	}
 
-	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/plans/blog-tracking.md")
-	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
+	assertServiceWorkspacePathMissing(t, projectDir, ".chr/user/plans/blog-tracking.md")
+	assertServiceWorkspacePathMissing(t, projectDir, ".chr/user/tickets/blog")
 }
 
 func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T) {
@@ -566,15 +566,15 @@ func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T
 
 	_, err := operations.createPlanTrackingTickets(
 		core.QuizScope{CaseSlug: "blog"},
-		".chc/user/plans/blog-plan.md",
-		".chc/user/plans/blog-tracking.md",
+		".chr/user/plans/blog-plan.md",
+		".chr/user/plans/blog-tracking.md",
 		payloads,
 	)
 	if err == nil || !strings.Contains(err.Error(), "ticket summary is required") {
 		t.Fatalf("createPlanTrackingTickets error = %v, want missing summary error", err)
 	}
 
-	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
+	assertServiceWorkspacePathMissing(t, projectDir, ".chr/user/tickets/blog")
 }
 
 func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T) {
@@ -584,19 +584,19 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 	operations := newTestService(t, projectDir)
 	payload := validPlanTrackingTicketPayload()
 	payload.Key = "LLM-99"
-	payload.Path = ".chc/user/tickets/blog/LLM-99-owned-by-model.md"
+	payload.Path = ".chr/user/tickets/blog/LLM-99-owned-by-model.md"
 
 	_, err := operations.createPlanTrackingTickets(
 		core.QuizScope{CaseSlug: "blog"},
-		".chc/user/plans/blog-plan.md",
-		".chc/user/plans/blog-tracking.md",
+		".chr/user/plans/blog-plan.md",
+		".chr/user/plans/blog-tracking.md",
 		[]core.GeneratedPlanTrackingTicket{payload},
 	)
 	if err == nil || !strings.Contains(err.Error(), "generated ticket key must be empty") {
 		t.Fatalf("createPlanTrackingTickets error = %v, want generated key error", err)
 	}
 
-	assertServiceWorkspacePathMissing(t, projectDir, ".chc/user/tickets/blog")
+	assertServiceWorkspacePathMissing(t, projectDir, ".chr/user/tickets/blog")
 }
 
 func validPlanTrackingTicketPayload() core.GeneratedPlanTrackingTicket {
@@ -620,10 +620,10 @@ func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
 		`status: "ready_for_dev"`,
 		`synopsis: "Build the planning foundation slice."`,
 		`source_kind: "plan_tracking"`,
-		`source_ref: ".chc/user/plans/blog-plan.md"`,
+		`source_ref: ".chr/user/plans/blog-plan.md"`,
 		`slice: "Slice 1"`,
-		"Source plan: `.chc/user/plans/blog-plan.md`",
-		"Tracking: `.chc/user/plans/blog-tracking.md`",
+		"Source plan: `.chr/user/plans/blog-plan.md`",
+		"Tracking: `.chr/user/plans/blog-tracking.md`",
 		"Slice: Slice 1",
 	} {
 		if !strings.Contains(ticket, want) {
@@ -644,7 +644,7 @@ func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket core.Inde
 	}
 
 	sourceMetadataMatches := ticket.SourceKind == "plan_tracking" &&
-		ticket.SourceRef == ".chc/user/plans/blog-plan.md" &&
+		ticket.SourceRef == ".chr/user/plans/blog-plan.md" &&
 		ticket.Slice == "Slice 1"
 
 	if !sourceMetadataMatches {
@@ -674,7 +674,7 @@ func TestServiceMaterializePlanTrackingRequiresExistingPlan(t *testing.T) {
 func TestServiceMaterializePlanTrackingRefusesExistingTracking(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case_slug: "blog"
@@ -682,7 +682,7 @@ case_slug: "blog"
 
 # Blog Plan
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-tracking.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-tracking.md"), `---
 title: "Blog Tracking"
 status: "tracking"
 case_slug: "blog"
@@ -713,7 +713,7 @@ case_slug: "blog"
 func TestServiceRegeneratePlanPreservesCanonicalPlanWhenArchiveFails(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Existing Blog Plan"
 status: "planned"
 case_slug: "blog"
@@ -723,7 +723,7 @@ case_slug: "blog"
 
 Manual edits that must remain recoverable.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "archive"), "not a directory\n")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "archive"), "not a directory\n")
 
 	clock := fixedServiceClock(time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC))
 	model := &fakeServiceQuizModel{
@@ -740,7 +740,7 @@ Manual edits that must remain recoverable.
 		t.Fatal("RegeneratePlan returned nil error, want archive failure")
 	}
 
-	canonicalPlan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"))
+	canonicalPlan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"))
 	if !strings.Contains(canonicalPlan, "Manual edits that must remain recoverable.") {
 		t.Fatalf("canonical plan was not preserved:\n%s", canonicalPlan)
 	}
@@ -751,11 +751,11 @@ Manual edits that must remain recoverable.
 }
 
 func TestServiceGeneratePlanExcludesArchivedDocumentsFromContextAndProvenance(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -763,7 +763,7 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "archive", "blog-spec-20260525.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "archive", "blog-spec-20260525.md"), `---
 title: "Archived Blog Spec"
 status: "draft"
 case: "blog"
@@ -771,7 +771,7 @@ case: "blog"
 
 # Archived Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "archive", "blog-plan-20260525.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "archive", "blog-plan-20260525.md"), `---
 title: "Archived Blog Plan"
 status: "planned"
 case: "blog"
@@ -804,14 +804,14 @@ case: "blog"
 		}
 	}
 
-	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"))
+	plan := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"))
 	if strings.Contains(plan, "/archive/") {
 		t.Fatalf("generated provenance includes archived path:\n%s", plan)
 	}
 }
 
 func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -839,7 +839,7 @@ func TestServiceGeneratePlanUsesLongGenerationDeadline(t *testing.T) {
 func TestServiceGeneratePlanRefusesExistingCanonicalPlan(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Existing Blog Plan"
 status: "planned"
 case_slug: "blog"
@@ -865,7 +865,7 @@ Manual plan content.
 		t.Fatalf("Message = %q, want existing plan refusal", result.Message)
 	}
 
-	if result.Plan.RelativePath != ".chc/user/plans/blog-plan.md" {
+	if result.Plan.RelativePath != ".chr/user/plans/blog-plan.md" {
 		t.Fatalf("Plan.RelativePath = %q, want existing canonical path", result.Plan.RelativePath)
 	}
 
@@ -875,7 +875,7 @@ Manual plan content.
 }
 
 func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -906,7 +906,7 @@ func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
 		}
 	}
 
-	if generated.RelativePath != ".chc/user/plans/blog-plan.md" {
+	if generated.RelativePath != ".chr/user/plans/blog-plan.md" {
 		t.Fatalf("generated RelativePath = %q, want canonical plan path in TUI result: %#v", generated.RelativePath, result.Plans)
 	}
 
@@ -918,7 +918,7 @@ func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
 func TestTUIPlanGenerateReturnsRefusalMessageForExistingPlan(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Existing Blog Plan"
 status: "planned"
 case_slug: "blog"
@@ -952,7 +952,7 @@ Manual plan content.
 }
 
 func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
-	t.Setenv("CHC_PLAN_GENERATION_BACKEND", "openai")
+	t.Setenv("CHR_PLAN_GENERATION_BACKEND", "openai")
 
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
@@ -992,7 +992,7 @@ func TestServiceGeneratePlanBlocksConcurrentSameScopeGeneration(t *testing.T) {
 func TestServiceListPlansReturnsScopes(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case: "blog"

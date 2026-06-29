@@ -10,13 +10,13 @@ Tracker: `.prj/trackers/slice-9-project-registry-repository-tracker.md`
 
 Add the core project registry repository backed by the global user SQLite database.
 
-The registry stores local projects known by the user daemon. It does not replace project-local `.chc/` state and does not add CLI commands yet.
+The registry stores local projects known by the user daemon. It does not replace project-local `.chr/` state and does not add CLI commands yet.
 
 ## Scope
 
 This slice covers:
 
-- `chc.Project` model,
+- `chr.Project` model,
 - project registry repository interface and SQLite implementation,
 - opening the global database from `UserEnvironment.DataDir()`,
 - running embedded migrations before registry use,
@@ -64,7 +64,7 @@ Expected behavior:
 
 This slice does not cover:
 
-- `chc project add` or `chc project list` CLI commands,
+- `chr project add` or `chr project list` CLI commands,
 - ticket indexing,
 - daemon command,
 - filesystem watcher,

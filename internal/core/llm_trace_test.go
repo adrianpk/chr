@@ -161,7 +161,7 @@ func TestWriteLLMTraceEventRedactsSecretFieldsAndEnvironmentValues(t *testing.T)
 	config.Environ = func() []string {
 		return []string{
 			"OPENAI_API_KEY=env-secret",
-			"CHC_OTHER=value",
+			"CHR_OTHER=value",
 		}
 	}
 

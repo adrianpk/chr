@@ -47,14 +47,14 @@ authoring session view models.
 
 ## Files of Interest
 
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
 ```sh
-go test ./internal/chctui
+go test ./internal/chrtui
 make verify
 ```
 

@@ -17,15 +17,15 @@ func TestQuizArtifactLayoutResolvesProjectAndUseCasePaths(t *testing.T) {
 		t.Fatalf("QuizArtifactLayout project returned error: %v", err)
 	}
 
-	if projectPaths.RawRelativePath != ".chc/user/quizzes/project-quiz-raw.md" {
+	if projectPaths.RawRelativePath != ".chr/user/quizzes/project-quiz-raw.md" {
 		t.Fatalf("project raw path = %q", projectPaths.RawRelativePath)
 	}
 
-	if projectPaths.CuratedRelativePath != ".chc/user/quizzes/project-quiz.md" {
+	if projectPaths.CuratedRelativePath != ".chr/user/quizzes/project-quiz.md" {
 		t.Fatalf("project curated path = %q", projectPaths.CuratedRelativePath)
 	}
 
-	if projectPaths.RuntimeRelativePath != ".chc/user/tmp/quiz-runtime/project.json" {
+	if projectPaths.RuntimeRelativePath != ".chr/user/tmp/quiz-runtime/project.json" {
 		t.Fatalf("project runtime path = %q", projectPaths.RuntimeRelativePath)
 	}
 
@@ -34,15 +34,15 @@ func TestQuizArtifactLayoutResolvesProjectAndUseCasePaths(t *testing.T) {
 		t.Fatalf("QuizArtifactLayout case returned error: %v", err)
 	}
 
-	if casePaths.RawRelativePath != ".chc/user/quizzes/article-authoring-quiz-raw.md" {
+	if casePaths.RawRelativePath != ".chr/user/quizzes/article-authoring-quiz-raw.md" {
 		t.Fatalf("case raw path = %q", casePaths.RawRelativePath)
 	}
 
-	if casePaths.CuratedRelativePath != ".chc/user/quizzes/article-authoring-quiz.md" {
+	if casePaths.CuratedRelativePath != ".chr/user/quizzes/article-authoring-quiz.md" {
 		t.Fatalf("case curated path = %q", casePaths.CuratedRelativePath)
 	}
 
-	if casePaths.RuntimeRelativePath != ".chc/user/tmp/quiz-runtime/article-authoring.json" {
+	if casePaths.RuntimeRelativePath != ".chr/user/tmp/quiz-runtime/article-authoring.json" {
 		t.Fatalf("case runtime path = %q", casePaths.RuntimeRelativePath)
 	}
 }
@@ -103,7 +103,7 @@ func TestQuizArtifactRepositoryWritesCuratedNotes(t *testing.T) {
 	for _, want := range []string{
 		`status: "curated"`,
 		`case_slug: "article-authoring"`,
-		`raw_path: ".chc/user/quizzes/article-authoring-quiz-raw.md"`,
+		`raw_path: ".chr/user/quizzes/article-authoring-quiz-raw.md"`,
 		"## Decisions",
 		"- Use one visible question at a time.",
 		"## Acceptance Readiness",
@@ -251,9 +251,9 @@ func TestWriteQuizDraftSpecWritesSpecArtifactWithDraftStatus(t *testing.T) {
 		Scope:           QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		Title:           "Article Authoring Spec",
 		Body:            "Generated behavior.",
-		SourceQuizPath:  ".chc/user/quizzes/article-authoring-quiz.md",
-		SourceRawPath:   ".chc/user/quizzes/article-authoring-quiz-raw.md",
-		SourceDumpPaths: []string{".chc/user/dumps/article-authoring-context.md"},
+		SourceQuizPath:  ".chr/user/quizzes/article-authoring-quiz.md",
+		SourceRawPath:   ".chr/user/quizzes/article-authoring-quiz-raw.md",
+		SourceDumpPaths: []string{".chr/user/dumps/article-authoring-context.md"},
 		CreatedAt:       quizRuntimeTestTime(),
 	}
 
@@ -262,7 +262,7 @@ func TestWriteQuizDraftSpecWritesSpecArtifactWithDraftStatus(t *testing.T) {
 		t.Fatalf("WriteQuizDraftSpec returned error: %v", err)
 	}
 
-	if paths.RelativePath != ".chc/user/specs/drafts/article-authoring-quiz-spec.md" {
+	if paths.RelativePath != ".chr/user/specs/drafts/article-authoring-quiz-spec.md" {
 		t.Fatalf("relative path = %q", paths.RelativePath)
 	}
 
@@ -272,8 +272,8 @@ func TestWriteQuizDraftSpecWritesSpecArtifactWithDraftStatus(t *testing.T) {
 		`case_slug: "article-authoring"`,
 		"# Article Authoring Spec",
 		"Generated behavior.",
-		"- curated quiz: .chc/user/quizzes/article-authoring-quiz.md",
-		"- dump: .chc/user/dumps/article-authoring-context.md",
+		"- curated quiz: .chr/user/quizzes/article-authoring-quiz.md",
+		"- dump: .chr/user/dumps/article-authoring-context.md",
 	} {
 		if !strings.Contains(content, want) {
 			t.Fatalf("draft spec missing %q in:\n%s", want, content)

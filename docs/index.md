@@ -1,6 +1,6 @@
 # Documentation
 
-ChrysoCoord documentation follows Diataxis.
+Chryso documentation follows Diataxis.
 
 ## Tutorials
 

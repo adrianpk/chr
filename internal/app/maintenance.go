@@ -9,13 +9,13 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func newMaintenanceCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "maintenance",
-		Usage: "Inspect and recover local chc state",
+		Usage: "Inspect and recover local chr state",
 		Commands: []*cli.Command{
 			newMaintenanceBundleCommand(stdout),
 			newMaintenanceDBCommand(stdout),

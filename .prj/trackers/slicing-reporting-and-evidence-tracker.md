@@ -3,11 +3,11 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-reporting-and-evidence-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm execution, result application, loop, worker, and notification prerequisites are delivered.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -169,8 +169,8 @@ Pre-flight:
 
 Candidate tasks:
 
-- [x] Add `chc report` command group.
-- [x] Add `chc report list`.
+- [x] Add `chr report` command group.
+- [x] Add `chr report list`.
 - [x] Support report filters.
 - [x] Print stable output.
 - [x] Add CLI tests.
@@ -201,7 +201,7 @@ Pre-flight:
 
 Candidate tasks:
 
-- [x] Add `chc report show`.
+- [x] Add `chr report show`.
 - [x] Resolve reports by report id, ticket key, execution id, or loop id.
 - [x] Print report body or metadata predictably.
 - [x] Add clear errors for ambiguous or missing lookups.
@@ -279,22 +279,22 @@ Task commits:
 
 ## Validation Record
 
-- Slice 1 focused tests: `go test ./internal/chc -run 'Test(NewExecutionReport|RenderExecutionReport)'` pass.
+- Slice 1 focused tests: `go test ./internal/chr -run 'Test(NewExecutionReport|RenderExecutionReport)'` pass.
 - Slice 1 full validation: `make verify` pass.
-- Slice 2 focused tests: `go test ./internal/chc -run 'Test(ExecutionReportWriter|NewExecutionReport|RenderExecutionReport)'` pass.
-- Slice 2 focused CLI tests: `go test ./internal/chcapp -run 'TestTicketApplyResult'` pass.
+- Slice 2 focused tests: `go test ./internal/chr -run 'Test(ExecutionReportWriter|NewExecutionReport|RenderExecutionReport)'` pass.
+- Slice 2 focused CLI tests: `go test ./internal/chrapp -run 'TestTicketApplyResult'` pass.
 - Slice 2 full validation: `make verify` pass.
-- Slice 3 focused tests: `go test ./internal/chc -run 'Test(NewExecutionReport|RenderExecutionReport|ExecutionReportWriter)'` pass.
+- Slice 3 focused tests: `go test ./internal/chr -run 'Test(NewExecutionReport|RenderExecutionReport|ExecutionReportWriter)'` pass.
 - Slice 3 full validation: `make verify` pass.
-- Slice 4 focused tests: `go test ./internal/chc -run 'Test(NewLoopReport|RenderLoopReport)'` pass.
+- Slice 4 focused tests: `go test ./internal/chr -run 'Test(NewLoopReport|RenderLoopReport)'` pass.
 - Slice 4 full validation: `make verify` pass.
-- Slice 5 focused core tests: `go test ./internal/chc -run 'TestReportLister'` pass.
-- Slice 5 focused CLI tests: `go test ./internal/chcapp -run 'TestReportList'` pass.
+- Slice 5 focused core tests: `go test ./internal/chr -run 'TestReportLister'` pass.
+- Slice 5 focused CLI tests: `go test ./internal/chrapp -run 'TestReportList'` pass.
 - Slice 5 full validation: `make verify` pass.
-- Slice 6 focused tests: `go test ./internal/chc -run 'TestReportLookup|TestReportLister'` pass.
-- Slice 6 focused CLI tests: `go test ./internal/chcapp -run 'TestReportShow|TestReportList'` pass.
+- Slice 6 focused tests: `go test ./internal/chr -run 'TestReportLookup|TestReportLister'` pass.
+- Slice 6 focused CLI tests: `go test ./internal/chrapp -run 'TestReportShow|TestReportList'` pass.
 - Slice 6 full validation: `make verify` pass.
-- Slice 7 focused tests: `go test ./internal/chc -run 'TestReviewHandoffSummary|TestNewExecutionReport|TestRenderExecutionReport'` pass.
+- Slice 7 focused tests: `go test ./internal/chr -run 'TestReviewHandoffSummary|TestNewExecutionReport|TestRenderExecutionReport'` pass.
 - Slice 7 full validation: `make verify` pass.
 - Slice 8 full validation: `make verify` pass.
 

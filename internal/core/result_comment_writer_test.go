@@ -24,7 +24,7 @@ func TestTicketResultCommentWriterWritesExecutionComment(t *testing.T) {
 	content := readResultCommentTicket(t, path)
 	for _, want := range []string{
 		`updated_at: "2026-05-19T14:00:00Z"`,
-		"## 2026-05-19T14:00:00Z chc",
+		"## 2026-05-19T14:00:00Z chr",
 		"Execution `exec-1` finished with status `succeeded`.",
 		"Summary: ready for review",
 		"Existing comment.",
@@ -77,7 +77,7 @@ func writeResultCommentTicket(t *testing.T) string {
 
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	ticket := Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "reviewing",
 		CreatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
@@ -125,7 +125,7 @@ func testResultCommentApplication(path string) ResultApplication {
 		},
 	}
 	application.Comment = ResultApplicationComment{
-		Author: "chc",
+		Author: "chr",
 		Body:   RenderResultApplicationCommentBody(application),
 	}
 

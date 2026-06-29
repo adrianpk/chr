@@ -17,10 +17,10 @@ The repository now has a tree/search context loader that can:
 
 - capture a bounded, deterministic filesystem tree;
 - skip noisy directories such as `.git`, `node_modules`, `vendor`,
-  `_workspace`, and `.chc/runtime/runs`;
+  `_workspace`, and `.chr/runtime/runs`;
 - derive search terms from ticket key, title, tags, use case, project area, and
   validation command;
-- run bounded text search over source, tests, docs, and `.chc` files;
+- run bounded text search over source, tests, docs, and `.chr` files;
 - render tree and search results into `code-context.md` content;
 - record filesystem tree and text search source provenance.
 
@@ -49,13 +49,13 @@ Source provenance uses the existing source inventory model from Slice 1.
 
 ## Files of Interest
 
-- `internal/chc/context_tree_search.go`
-- `internal/chc/context_tree_search_test.go`
+- `internal/chr/context_tree_search.go`
+- `internal/chr/context_tree_search_test.go`
 - `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoadTreeSearchContext|TestRenderCodeContext'`: pass
+- `go test ./internal/chr -run 'TestLoadTreeSearchContext|TestRenderCodeContext'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

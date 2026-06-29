@@ -3,11 +3,11 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-filtered-ticket-loop-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm prerequisite execution and result-application slicings are completed.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.

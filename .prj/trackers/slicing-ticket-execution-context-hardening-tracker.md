@@ -3,7 +3,7 @@
 Status: delivered
 
 Plan: `.prj/plans/slicing-ticket-execution-context-hardening-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
@@ -79,7 +79,7 @@ Candidate tasks:
 
 - [x] Define default Go/software/infrastructure agent identity.
 - [x] Load applicable root and nested `AGENTS.md` files.
-- [x] Load selected `.chc/` workflow and runtime context.
+- [x] Load selected `.chr/` workflow and runtime context.
 - [x] Render `agent.md`.
 - [x] Render `protocols.md`.
 - [x] Record source provenance.
@@ -149,7 +149,7 @@ Candidate tasks:
 - [x] Derive text-search terms from ticket and validation context.
 - [x] Run targeted text searches.
 - [x] Render tree and search sections into `code-context.md`.
-- [x] Include relevant source, test, doc, and `.chc/` paths.
+- [x] Include relevant source, test, doc, and `.chr/` paths.
 - [x] Keep output deterministic enough for tests.
 - [x] Add slice implementation report.
 - [x] Run `make verify`.
@@ -250,7 +250,7 @@ Candidate tasks:
 - [x] Write `context.md` under `run_artifact_dir`.
 - [x] Write sibling context artifacts under `run_artifact_dir/context/`.
 - [x] Ensure paths are visible through the runtime mount.
-- [x] Keep `CHC_WORKER_CONTEXT_PATH` as the main Codex input.
+- [x] Keep `CHR_WORKER_CONTEXT_PATH` as the main Codex input.
 - [x] Add dry-run visibility for included sources.
 - [x] Test path rendering and artifact layout.
 - [x] Add slice implementation report.

@@ -18,7 +18,7 @@ Workspace configuration now includes a notification section with Telegram
 settings:
 
 - Telegram is disabled by default.
-- Telegram can be enabled through `.chc/config.yml`.
+- Telegram can be enabled through `.chr/config.yml`.
 - Bot tokens are referenced by environment variable name, not stored in the
   config file.
 - Enabled Telegram config requires both token environment variable name and chat
@@ -50,16 +50,16 @@ ticket configuration behavior.
 
 ## Files of Interest
 
-- `internal/chc/config.go`
-- `internal/chc/config_test.go`
-- `internal/chc/notification_config.go`
+- `internal/chr/config.go`
+- `internal/chr/config_test.go`
+- `internal/chr/notification_config.go`
 - `docs/reference/notification-config.md`
 - `docs/reference/project-workspace.md`
 - `docs/index.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoadWorkspaceConfig|TestValidateNotificationConfig'`: pass
+- `go test ./internal/chr -run 'TestLoadWorkspaceConfig|TestValidateNotificationConfig'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

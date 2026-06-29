@@ -10,14 +10,14 @@ PR: `#315`
 ## Purpose
 
 Add non-destructive repair execution to the work readiness layer so recoverable
-Git and ChrysoCoord runtime blockers can be fixed before starting agent work.
+Git and Chryso runtime blockers can be fixed before starting agent work.
 
 ## Delivered Behavior
 
-- `chc work doctor --fix-safe` now applies configured safe repairs and prints
+- `chr work doctor --fix-safe` now applies configured safe repairs and prints
   the resulting readiness report.
 - Readiness diagnostics now include planned repair metadata.
-- ChrysoCoord runtime artifacts can be excluded from Git dirtiness through the
+- Chryso runtime artifacts can be excluded from Git dirtiness through the
   local `.git/info/exclude` file.
 - Missing remote refs can trigger a fetch of the configured remote.
 - Existing integration branches can be switched to when branch mutation is safe.
@@ -47,7 +47,7 @@ Git and ChrysoCoord runtime blockers can be fixed before starting agent work.
 - Added `WorkReadinessRepairResult`.
 - Added `WorkReadinessAppliedRepair`.
 - Extended `WorkReadinessRepairGit` with safe repair primitives.
-- Added the CLI flag `chc work doctor --fix-safe`.
+- Added the CLI flag `chr work doctor --fix-safe`.
 - Doctor output now prints repair metadata for diagnostics and applied repairs
   when `--fix-safe` is used.
 

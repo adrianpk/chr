@@ -8,13 +8,13 @@ Model: `ops/specs/2026-06-18-configurable-work-readiness-model.md`
 
 ## Summary
 
-ChrysoCoord should prepare and validate agent work from a configurable project
+Chryso should prepare and validate agent work from a configurable project
 policy instead of assuming one hardcoded Git shape.
 
 The current work-selection preflight protects the user's repository before
 running agent work, but the protection is too rigid and too opaque. It assumes
 that work must happen on local `dev`, that `origin/dev` must exist, and that the
-worktree must be clean. Those defaults are useful for ChrysoCoord's own delivery
+worktree must be clean. Those defaults are useful for Chryso's own delivery
 workflow, but they should be project policy rather than product law.
 
 The desired behavior is a work readiness layer that:
@@ -27,21 +27,21 @@ The desired behavior is a work readiness layer that:
 
 ## Goals
 
-- Move branch and remote assumptions into `.chc/user/config.yml`.
+- Move branch and remote assumptions into `.chr/user/config.yml`.
 - Preserve the existing default policy: integration branch `dev`, canonical
   remote `origin`, clean worktree, and remote tracking.
 - Support projects that prefer a different integration branch, current-branch
   work, or no Git enforcement for local experiments.
 - Replace raw Git failures such as `exit status 128` with classified work
   readiness diagnostics.
-- Add a `chc work doctor` surface for checking and explaining readiness.
-- Add safe repair behavior for issues ChrysoCoord can resolve without losing
+- Add a `chr work doctor` surface for checking and explaining readiness.
+- Add safe repair behavior for issues Chryso can resolve without losing
   user work.
 - Make Dash show the same readiness information before agent work starts.
 
 ## Non-Goals
 
-- Do not remove the default `dev` workflow from ChrysoCoord's own repository.
+- Do not remove the default `dev` workflow from Chryso's own repository.
 - Do not force every project to use `dev`.
 - Do not automatically stash, reset, rebase, force-push, or resolve divergent
   histories.
@@ -105,7 +105,7 @@ Readiness checks should report concrete issues:
 - current branch does not match configured policy;
 - configured integration branch is missing;
 - worktree has user changes;
-- ChrysoCoord runtime artifacts are visible to Git;
+- Chryso runtime artifacts are visible to Git;
 - configured remote tracking ref is missing;
 - integration branch is behind its configured remote;
 - Git repository is absent or unreadable;
@@ -119,7 +119,7 @@ work readiness: blocked
 issue: wrong_branch
 current_branch: main
 expected_branch: dev
-configured_by: .chc/user/config.yml
+configured_by: .chr/user/config.yml
 repair: switch_to_branch
 ```
 
@@ -133,8 +133,8 @@ does not discard user work.
 
 Allowed safe repairs:
 
-- add ChrysoCoord-owned runtime paths to a local ignore mechanism;
-- remove stale ChrysoCoord operation locks when they are proven dead;
+- add Chryso-owned runtime paths to a local ignore mechanism;
+- remove stale Chryso operation locks when they are proven dead;
 - fetch the configured remote;
 - fast-forward the configured integration branch when it is cleanly behind;
 - switch to an existing configured integration branch when the worktree is
@@ -156,14 +156,14 @@ Disallowed automatic repairs:
 The first operator-facing surface should be:
 
 ```text
-chc work doctor
-chc work doctor --fix-safe
+chr work doctor
+chr work doctor --fix-safe
 ```
 
 Later work actions may use the same service directly:
 
 ```text
-chc work run-all --prepare
+chr work run-all --prepare
 ```
 
 The doctor should be useful outside the TUI and should be safe to run before an
@@ -180,7 +180,7 @@ states.
 
 ## Acceptance Criteria
 
-- Work branch policy is loaded from `.chc/user/config.yml` with default values
+- Work branch policy is loaded from `.chr/user/config.yml` with default values
   matching the current `dev`/`origin` behavior.
 - Work-selection preflight uses the configured policy instead of hardcoded
   `dev` and `origin/dev` names.
@@ -189,12 +189,12 @@ states.
 - Preflight diagnostics classify wrong branch, dirty worktree, missing remote
   tracking ref, and branch-behind-remote states without surfacing raw
   `exit status 128` as the primary error.
-- `chc work doctor` prints readiness status and diagnostics for the resolved
+- `chr work doctor` prints readiness status and diagnostics for the resolved
   project.
-- Safe repair can resolve ChrysoCoord-owned runtime artifact dirtiness and at
+- Safe repair can resolve Chryso-owned runtime artifact dirtiness and at
   least one branch/remote readiness issue without destructive Git operations.
 - Dash displays work readiness diagnostics when work cannot start.
-- Existing default behavior remains protective for ChrysoCoord's own workflow.
+- Existing default behavior remains protective for Chryso's own workflow.
 - Tests cover default policy, custom branch policy, current-branch mode,
   no-Git-enforcement mode, diagnostics, and safe repair behavior.
 

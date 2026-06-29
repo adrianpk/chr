@@ -28,7 +28,7 @@ use-case-scoped quiz state without parsing Markdown or runtime JSON directly.
 
 ## Implementation Notes
 
-The read model is built in `internal/chcapp` from service-owned quiz state and
+The read model is built in `internal/chrapp` from service-owned quiz state and
 metadata. The TUI receives already-normalized quiz views and only renders them.
 
 Not-started scopes still expose canonical raw, curated, and runtime paths so
@@ -37,28 +37,28 @@ without recomputing layout in the TUI.
 
 ## Contracts Added or Changed
 
-- `internal/chcapp.QuizView`
-- `internal/chcapp.QuizViewStatusNotStarted`
-- `internal/chctui.QuizView`
-- `internal/chctui.QuizScope`
-- `chctui.Options.Quizzes`
-- `chctui.Model` scoped quiz selection state
+- `internal/chrapp.QuizView`
+- `internal/chrapp.QuizViewStatusNotStarted`
+- `internal/chrtui.QuizView`
+- `internal/chrtui.QuizScope`
+- `chrtui.Options.Quizzes`
+- `chrtui.Model` scoped quiz selection state
 
 ## Files of Interest
 
-- `internal/chcapp/service_quiz_read.go`
-- `internal/chcapp/service_quiz.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chcapp/app.go`
-- `internal/chctui/quizzes.go`
-- `internal/chctui/model.go`
-- `internal/chctui/shell.go`
-- `internal/chctui/model_test.go`
+- `internal/chrapp/service_quiz_read.go`
+- `internal/chrapp/service_quiz.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/quizzes.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/shell.go`
+- `internal/chrtui/model_test.go`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

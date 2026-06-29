@@ -17,8 +17,8 @@ acceptance feature workflow.
 ## Delivered Behavior
 
 `GenerateSpec` now writes only the Markdown spec artifact under
-`.chc/user/specs/`. It no longer returns feature status or writes
-`.chc/user/acceptance/<case>.feature`.
+`.chr/user/specs/`. It no longer returns feature status or writes
+`.chr/user/acceptance/<case>.feature`.
 
 The spec model output contract no longer accepts a `feature` field. Spec
 generation remains neutral about the spec body's subject matter.
@@ -42,16 +42,16 @@ responses that still include optional feature content.
 
 ## Files of Interest
 
-- `internal/chcapp/service_spec.go`
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chc/spec_generation.go`
+- `internal/chrapp/service_spec.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chr/spec_generation.go`
 - `docs/reference/acceptance-feature-generation.md`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp -run 'Spec|Feature|Gherkin'` (pass)
-- `go test ./internal/chc ./internal/chcapp` (pass)
+- `go test ./internal/chr ./internal/chrapp -run 'Spec|Feature|Gherkin'` (pass)
+- `go test ./internal/chr ./internal/chrapp` (pass)
 - `make verify` (pass)
 
 ## Risks and Follow-ups

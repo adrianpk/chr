@@ -6,7 +6,7 @@ import (
 	"html/template"
 	"strings"
 
-	"forge.adrianpk.com/chc/internal/webui/htmx"
+	"forge.adrianpk.com/chr/internal/webui/htmx"
 )
 
 // Variant identifies a visual component variant.

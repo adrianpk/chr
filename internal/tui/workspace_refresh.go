@@ -3,7 +3,7 @@ package tui
 import (
 	"fmt"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // WorkspaceRefreshExecutor rebuilds workspace graph and index state for the

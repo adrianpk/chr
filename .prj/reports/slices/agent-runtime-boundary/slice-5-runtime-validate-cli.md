@@ -14,7 +14,7 @@ exists.
 
 ## Delivered Behavior
 
-`chc runtime validate` resolves the target project, loads runtime config,
+`chr runtime validate` resolves the target project, loads runtime config,
 computes the runtime plan, prints Docker boundary inputs, and checks required
 local runtime paths. It supports `--dir`, active project resolution through
 `--dev-root`, current-directory fallback, and `--dry-run`.
@@ -33,9 +33,9 @@ parsing CLI output.
 New command:
 
 ```sh
-chc runtime validate
-chc runtime validate --dry-run
-chc runtime validate --dir /path/to/project --dry-run
+chr runtime validate
+chr runtime validate --dry-run
+chr runtime validate --dir /path/to/project --dry-run
 ```
 
 Core validation checks:
@@ -46,15 +46,15 @@ Core validation checks:
 
 ## Files of Interest
 
-- `internal/chc/runtime_validate.go`
-- `cmd/chc/main.go`
-- `internal/chc/runtime_validate_test.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/runtime_validate.go`
+- `cmd/chr/main.go`
+- `internal/chr/runtime_validate_test.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/project-workspace.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

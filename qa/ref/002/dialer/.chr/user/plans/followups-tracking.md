@@ -1,0 +1,23 @@
+---
+title: "Follow-ups Tracking"
+project_id: "project-dialer-gallery"
+case_slug: "followups"
+status: "tracking"
+plan_path: ".chr/user/plans/followups-plan.md"
+created_at: "2026-05-30T15:40:00Z"
+---
+
+# Follow-ups Tracking
+
+| Slice | Ticket | Status |
+|---|---|---|
+| `FU-01` | `CHR-108` | ready_for_review |
+| `FU-02` | `CHR-109` | blocked |
+| `FU-03` | `CHR-110` | ready_for_dev |
+| `FU-04` | `CHR-111` | ready_for_merge |
+| `FU-05` | `CHR-112` | backlog |
+
+## Notes
+
+Follow-up work shows blocked and ready-for-merge states without requiring an
+actual agent run.

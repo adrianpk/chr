@@ -43,13 +43,13 @@ New functions:
 
 ## Files of Interest
 
-- `internal/chc/result_changed_files_writer.go`
-- `internal/chc/result_changed_files_writer_test.go`
+- `internal/chr/result_changed_files_writer.go`
+- `internal/chr/result_changed_files_writer_test.go`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

@@ -44,18 +44,18 @@ transient routing reason.
 
 ## Files of Interest
 
-- `internal/chc/quiz_runtime.go`
+- `internal/chr/quiz_runtime.go`
   - adds skipped branch return reason
-- `internal/chcapp/service_quiz.go`
+- `internal/chrapp/service_quiz.go`
   - returns skipped branches to trunk coverage
-- `internal/chcapp/service_quiz_test.go`
+- `internal/chrapp/service_quiz_test.go`
   - covers skip-driven trunk recovery
-- `internal/chc/quiz_model_test.go`
+- `internal/chr/quiz_model_test.go`
   - covers runtime depth after branch return
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
 - `git diff --check`
 - `make verify`
 

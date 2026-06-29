@@ -1,0 +1,19 @@
+version: 1
+workspace_root: .chr
+canonical_assets: markdown
+tickets:
+  key_prefix: TODO
+runtime:
+  image: chr-todolist-agent:local
+  dockerfile: .chr/runtime/agent/Dockerfile
+  workdir: /workspace
+  artifact_dir: .chr/runtime/runs
+  validation_command: make verify
+indexes:
+  sqlite:
+    enabled: false
+notifications:
+  telegram:
+    enabled: false
+  email:
+    enabled: false

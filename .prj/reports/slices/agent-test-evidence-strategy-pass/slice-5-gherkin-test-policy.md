@@ -20,7 +20,7 @@ container.
 ## Delivered Behavior
 
 - Added project-level Gherkin detection based on existing
-  `.chc/user/acceptance/*.feature` artifacts.
+  `.chr/user/acceptance/*.feature` artifacts.
 - Added ticket-level Gherkin applicability for observable behavior tickets.
 - Added default evidence guidance for change kind, risk, test timing, tests,
   and Gherkin.

@@ -63,7 +63,7 @@ Candidate tasks:
 - [x] Add service-owned dump operation contracts.
 - [x] Add dump scope model where empty case slug means project-wide.
 - [x] Move canonical dump path/layout decisions out of the TUI boundary.
-- [x] Align active dump loading with the `.chc/dumps` product layout or record
+- [x] Align active dump loading with the `.chr/dumps` product layout or record
       explicit compatibility handling.
 - [x] Add focused tests for service-level dump scope and path behavior.
 - [x] Add slice implementation report.
@@ -72,7 +72,7 @@ Candidate tasks:
 Task commits:
 
 - T1.1: `311402f` adds dump service contracts and canonical dump directory.
-- T1.2: `45b897a` aligns active dump document loading with `.chc/dumps`.
+- T1.2: `45b897a` aligns active dump document loading with `.chr/dumps`.
 - T1.3: `66cdb9e` adds service scope tests, report, and validation.
 
 ## Slice 2: Scoped Dump Read Model
@@ -165,8 +165,8 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp ./internal/chctui`
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Slice 7: Dump Editing UX Polish
@@ -189,8 +189,8 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chctui`
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrtui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Open Decisions

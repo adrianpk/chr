@@ -4,7 +4,7 @@ Status: active
 
 ## Purpose
 
-Add a coherent agent-work surface where users can tell ChrysoCoord to resolve
+Add a coherent agent-work surface where users can tell Chryso to resolve
 one ticket or start resolving all eligible tickets, with matching CLI and TUI
 behavior and a Dash view that shows live progress.
 
@@ -19,8 +19,8 @@ Primary sources:
 - `docs/reference/ticket-execution.md`
 - `docs/reference/ticket-loop.md`
 - `docs/reference/cli-tui-action-matrix.md`
-- Existing `chc ticket start <ticket-key>` command
-- Existing `chc ticket loop` command
+- Existing `chr ticket start <ticket-key>` command
+- Existing `chr ticket loop` command
 - Existing `service.StartSelectedTicket`
 - Existing `service.StartReadyTicketLoop`
 - Existing loop run, execution record, runtime artifact, and report models
@@ -41,8 +41,8 @@ Conversation decisions:
 
 Delivered on `dev`:
 
-- CLI can start one ticket with `chc ticket start <ticket-key>`.
-- CLI can run a foreground ticket loop with `chc ticket loop`.
+- CLI can start one ticket with `chr ticket start <ticket-key>`.
+- CLI can run a foreground ticket loop with `chr ticket loop`.
 - CLI loop supports status, priority, severity, area, tag, type, use-case, order,
   and max-iteration flags.
 - TUI Work actions can start a selected ticket.
@@ -188,14 +188,14 @@ Expected behavior:
 - CLI can run a specific ticket through the agent-work facade.
 - CLI can run all ready-for-dev tickets through the agent-work facade.
 - CLI can preview the run-all queue without execution.
-- Existing `chc ticket start` and `chc ticket loop` continue to work.
+- Existing `chr ticket start` and `chr ticket loop` continue to work.
 - Command output uses the standard Summary, selection, execution, and evidence
   style already used by ticket commands.
 
 Candidate tasks:
 
-- T3.1 Add `chc work ticket <ticket-key>` or equivalent command.
-- T3.2 Add `chc work run-all` or equivalent command.
+- T3.1 Add `chr work ticket <ticket-key>` or equivalent command.
+- T3.2 Add `chr work run-all` or equivalent command.
 - T3.3 Add dry-run preview for run-all.
 - T3.4 Add CLI tests for selected ticket, run-all, dry-run, and no eligible
       tickets.

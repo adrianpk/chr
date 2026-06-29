@@ -88,8 +88,8 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 				Scope:          QuizScope{ProjectID: "project-1"},
 				Title:          "Generated Spec",
 				Body:           "Generated behavior.",
-				SourceQuizPath: ".chc/user/quizzes/project-quiz.md",
-				SourceRawPath:  ".chc/user/quizzes/project-quiz-raw.md",
+				SourceQuizPath: ".chr/user/quizzes/project-quiz.md",
+				SourceRawPath:  ".chr/user/quizzes/project-quiz-raw.md",
 				CreatedAt:      quizRuntimeTestTime(),
 			},
 			CreatedAt: quizRuntimeTestTime(),
@@ -202,7 +202,7 @@ func TestQuizModelProviderPayloadIncludesNextQuestionContext(t *testing.T) {
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/user/dumps/project-context.md",
+		Authority: ".chr/user/dumps/project-context.md",
 		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
@@ -253,7 +253,7 @@ func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *te
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/user/dumps/project-context.md",
+		Authority: ".chr/user/dumps/project-context.md",
 		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
@@ -272,7 +272,7 @@ func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *te
 		t.Fatal("store = true, want false")
 	}
 
-	if envelope.Metadata["chc_action"] != string(QuizModelActionNextQuestion) {
+	if envelope.Metadata["chr_action"] != string(QuizModelActionNextQuestion) {
 		t.Fatalf("metadata = %#v, want next-question action", envelope.Metadata)
 	}
 
@@ -300,7 +300,7 @@ func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/user/dumps/project-context.md",
+		Authority: ".chr/user/dumps/project-context.md",
 		Content:   "Detailed project dump for draft spec synthesis.",
 	})
 
@@ -320,7 +320,7 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chc/user/dumps/project-context.md",
+		Authority: ".chr/user/dumps/project-context.md",
 		Content:   "Detailed project dump for draft spec synthesis.",
 		Metadata:  map[string]string{"source": "dump"},
 	})
@@ -332,7 +332,7 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 
 	envelope, input := decodeOpenAIQuizRequestBody(t, body)
 
-	if envelope.Metadata["chc_action"] != string(QuizModelActionDraftSpec) {
+	if envelope.Metadata["chr_action"] != string(QuizModelActionDraftSpec) {
 		t.Fatalf("metadata = %#v, want draft-spec action", envelope.Metadata)
 	}
 
@@ -387,7 +387,7 @@ func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testin
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "spec",
 		Layer:     "spec",
-		Authority: ".chc/user/specs/blog.md",
+		Authority: ".chr/user/specs/blog.md",
 		Content:   "Spec context for outline generation.",
 	})
 
@@ -412,7 +412,7 @@ func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
 
 	envelope, input := decodeOpenAIQuizRequestBody(t, body)
 
-	if envelope.Metadata["chc_action"] != string(QuizModelActionGeneratePlanOutline) {
+	if envelope.Metadata["chr_action"] != string(QuizModelActionGeneratePlanOutline) {
 		t.Fatalf("metadata = %#v, want plan-outline action", envelope.Metadata)
 	}
 
@@ -449,7 +449,7 @@ func TestOpenAIQuizModelRequestBodySerializesPlanSliceDetailContract(t *testing.
 
 	envelope, input := decodeOpenAIQuizRequestBody(t, body)
 
-	if envelope.Metadata["chc_action"] != string(QuizModelActionGeneratePlanSliceDetail) {
+	if envelope.Metadata["chr_action"] != string(QuizModelActionGeneratePlanSliceDetail) {
 		t.Fatalf("metadata = %#v, want plan-slice-detail action", envelope.Metadata)
 	}
 
@@ -731,7 +731,7 @@ func TestQuizModelPlanSliceDetailResponseFromOutput(t *testing.T) {
 		"tasks":[{
 			"id":"T1.1",
 			"summary":"Add the model action.",
-			"commit_hint":"feat(chc): add plan outline action"
+			"commit_hint":"feat(chr): add plan outline action"
 		}],
 		"acceptance_criteria":["The action validates."],
 		"ticket_metadata":{
@@ -886,7 +886,7 @@ func TestQuizModelSpecGenerationInstructionsDoNotOverfitPathPolicy(t *testing.T)
 
 	for _, forbidden := range []string{
 		"Do not propose arbitrary domain directories",
-		"Do not invent new ChrysoCoord persistence locations",
+		"Do not invent new Chryso persistence locations",
 	} {
 		if strings.Contains(instructions, forbidden) {
 			t.Fatalf("spec generation instructions contain overfitted path policy %q in: %q", forbidden, instructions)
@@ -1480,7 +1480,7 @@ func validGeneratedPlanSliceDetail(createdAt time.Time) GeneratedPlanSliceDetail
 			{
 				ID:         "T1.1",
 				Summary:    "Add the model action.",
-				CommitHint: "feat(chc): add plan outline action",
+				CommitHint: "feat(chr): add plan outline action",
 			},
 		},
 		AcceptanceCriteria: []string{"The action validates."},

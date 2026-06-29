@@ -51,12 +51,12 @@ used by the OpenAI structured-output format.
 
 ## Files of Interest
 
-- `internal/chc/quiz_model_test.go`
+- `internal/chr/quiz_model_test.go`
   - adds provider payload and response parity fixtures
 
 ## Validation
 
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `git diff --check`
 - `make verify`
 

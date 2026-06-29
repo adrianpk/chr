@@ -8,14 +8,14 @@ Plan the `Filtered Ticket Loop` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> A user starts a loop and `chc` keeps working through eligible tickets until
+> A user starts a loop and `chr` keeps working through eligible tickets until
 > completion, threshold, or blocker.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related documents:
 

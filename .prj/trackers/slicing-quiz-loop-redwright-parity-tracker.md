@@ -72,7 +72,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `git diff --check`
 - `make verify`
 
@@ -98,8 +98,8 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp`
-- `go test ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
+- `go test ./internal/chrapp`
 - `git diff --check`
 - `make verify`
 
@@ -121,7 +121,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
 - `git diff --check`
 - `make verify`
 
@@ -144,7 +144,7 @@ Task commits:
 
 Validation:
 
-- `go run ./cmd/chc --help`
+- `go run ./cmd/chr --help`
 - `git diff --check`
 - `make verify`
 

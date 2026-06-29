@@ -1,0 +1,12 @@
+{
+  "execution_id": "exec-7fe25b30b4955e1e",
+  "ticket_key": "CHR-5",
+  "status": "succeeded",
+  "summary": "Hardened internal game test coverage with additional parser boundary cases, a ParsePosition quick-check invariant, a ParsePosition fuzz target, and direct Board invalid-move validation tests. Required go test and short fuzz validation passed.",
+  "changed_files": [
+    {
+      "path": "internal/game/game_test.go",
+      "summary": "Added parser boundary cases, testing/quick invariant coverage, FuzzParsePosition, and direct Board At/Place invalid-state coverage."
+    }
+  ]
+}

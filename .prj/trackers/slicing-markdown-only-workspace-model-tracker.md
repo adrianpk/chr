@@ -77,7 +77,7 @@ Task commits:
 Candidate tasks:
 
 - [x] Add workspace graph model and builder.
-- [x] Scan `.chc/` Markdown files.
+- [x] Scan `.chr/` Markdown files.
 - [x] Parse frontmatter into lightweight nodes.
 - [x] Classify supported document kinds.
 - [x] Build case-rooted views.
@@ -91,7 +91,7 @@ Candidate tasks:
 Task commits:
 
 - T3.1: `0fa2ef0` adds workspace graph model and builder.
-- T3.2: `0fa2ef0` adds `.chc/` Markdown scanning and document classification.
+- T3.2: `0fa2ef0` adds `.chr/` Markdown scanning and document classification.
 - T3.3: `0fa2ef0` adds case-rooted/project-wide views and diagnostics.
 - T3.4: `86e47e8` adds slice implementation report and validation.
 
@@ -174,11 +174,11 @@ Task commits:
 
 - 2026-05-23: `make verify` passed.
 - 2026-05-23: `make verify` passed for Slice 2.
-- 2026-05-23: `go test ./internal/chc ./internal/chcapp ./internal/chctui ./cmd/chc` passed for Slice 3.
+- 2026-05-23: `go test ./internal/chr ./internal/chrapp ./internal/chrtui ./cmd/chr` passed for Slice 3.
 - 2026-05-23: `make verify` passed for Slice 3.
-- 2026-05-23: `go test ./internal/chctui ./internal/chcapp ./internal/chc ./cmd/chc` passed for Slice 4.
+- 2026-05-23: `go test ./internal/chrtui ./internal/chrapp ./internal/chr ./cmd/chr` passed for Slice 4.
 - 2026-05-23: `make verify` passed for Slice 4.
-- 2026-05-23: `go test ./internal/chctui ./internal/chcapp ./internal/chc ./cmd/chc` passed for Slice 5.
+- 2026-05-23: `go test ./internal/chrtui ./internal/chrapp ./internal/chr ./cmd/chr` passed for Slice 5.
 - 2026-05-23: `make verify` passed for Slice 5.
-- 2026-05-23: `go test ./internal/chc ./internal/chcapp ./internal/chctui ./cmd/chc` passed for Slice 6.
+- 2026-05-23: `go test ./internal/chr ./internal/chrapp ./internal/chrtui ./cmd/chr` passed for Slice 6.
 - 2026-05-23: `make verify` passed for Slice 6.

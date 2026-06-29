@@ -27,7 +27,7 @@ artifact and stores a session with output and provenance metadata.
 
 ## Implementation Notes
 
-The CLI wiring lives in `internal/chcapp`, keeping `cmd/chc/main.go` unchanged
+The CLI wiring lives in `internal/chrapp`, keeping `cmd/chr/main.go` unchanged
 as a dependency assembly entrypoint.
 
 This slice intentionally keeps the command surface compact. It exposes the
@@ -39,22 +39,22 @@ promotion for Slice 6.
 New user-facing commands:
 
 ```text
-chc author session new
-chc author session list
-chc author session show
-chc author quiz new
+chr author session new
+chr author session list
+chr author session show
+chr author quiz new
 ```
 
 ## Files of Interest
 
-- `internal/chcapp/author.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/author.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/cli_test.go`
 - `.prj/trackers/slicing-markdown-first-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chcapp -run 'TestAuthor'`: pass
+- `go test ./internal/chrapp -run 'TestAuthor'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

@@ -53,20 +53,20 @@ New functions:
 - `LoadExecutionResult`
 - `ValidateExecutionResult`
 
-Harnesses must write a result envelope to `CHC_RESULT_PATH`.
+Harnesses must write a result envelope to `CHR_RESULT_PATH`.
 
 ## Files of Interest
 
-- `internal/chc/execution_result.go`
-- `internal/chc/execution_result_test.go`
-- `internal/chc/execution_runner.go`
-- `internal/chc/execution_runner_test.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/execution_result.go`
+- `internal/chr/execution_result_test.go`
+- `internal/chr/execution_runner.go`
+- `internal/chr/execution_runner_test.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

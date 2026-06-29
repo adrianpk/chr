@@ -15,13 +15,13 @@ For a live Dash and CLI workflow while work is running, see
 List all reports for the resolved project:
 
 ```sh
-chc report list
+chr report list
 ```
 
 Select a project explicitly:
 
 ```sh
-chc report list --dir /path/to/project
+chr report list --dir /path/to/project
 ```
 
 Each line includes the report kind, project-relative path, ticket key,
@@ -32,37 +32,37 @@ execution id, loop id, and status when those fields are known.
 List only execution reports:
 
 ```sh
-chc report list --kind execution
+chr report list --kind execution
 ```
 
 List only loop reports:
 
 ```sh
-chc report list --kind loop
+chr report list --kind loop
 ```
 
 Find reports for one ticket:
 
 ```sh
-chc report list --ticket CHC-1
+chr report list --ticket CHR-1
 ```
 
 Find one execution:
 
 ```sh
-chc report list --execution exec-1
+chr report list --execution exec-1
 ```
 
 Find one loop:
 
 ```sh
-chc report list --loop loop-1
+chr report list --loop loop-1
 ```
 
 Filters can be combined:
 
 ```sh
-chc report list --kind execution --ticket CHC-1 --status succeeded
+chr report list --kind execution --ticket CHR-1 --status succeeded
 ```
 
 ## Show One Report
@@ -70,19 +70,19 @@ chc report list --kind execution --ticket CHC-1 --status succeeded
 Show the Markdown body of a report by execution id:
 
 ```sh
-chc report show --execution exec-1
+chr report show --execution exec-1
 ```
 
 Show a loop report by loop id:
 
 ```sh
-chc report show --loop loop-1
+chr report show --loop loop-1
 ```
 
 Show a report by project-relative path:
 
 ```sh
-chc report show .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md
+chr report show .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md
 ```
 
 If a lookup matches more than one report, the command fails with an ambiguity
@@ -93,10 +93,10 @@ error. Add a narrower filter such as `--kind`, `--execution`, or `--loop`.
 Use `--metadata` when you only need the selected report identity:
 
 ```sh
-chc report show --execution exec-1 --metadata
+chr report show --execution exec-1 --metadata
 ```
 
-Metadata output uses the same stable line format as `chc report list`.
+Metadata output uses the same stable line format as `chr report list`.
 
 ## Inspect Source Artifacts
 
@@ -118,7 +118,7 @@ artifacts remain the detailed evidence.
 Locate detailed runtime artifacts for one execution:
 
 ```sh
-chc work logs exec-1
+chr work logs exec-1
 ```
 
 The command prints the run directory, runtime log, validation log, result file,
@@ -130,8 +130,8 @@ field so missing files are visible without hiding the execution identity.
 Summarize an event stream from either an execution or a loop:
 
 ```sh
-chc work events .chc/user/runtime/runs/CHC-1/exec-1/events.jsonl
-chc work events .chc/user/runtime/runs/loop-1/events.jsonl
+chr work events .chr/user/runtime/runs/CHR-1/exec-1/events.jsonl
+chr work events .chr/user/runtime/runs/loop-1/events.jsonl
 ```
 
 Use this after an interrupted run when the report is incomplete or absent. The

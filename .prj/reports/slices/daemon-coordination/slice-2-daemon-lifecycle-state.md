@@ -50,13 +50,13 @@ Added core model:
 
 ## Files of Interest
 
-- `internal/chc/daemon_state.go`
-- `internal/chc/daemon_state_test.go`
+- `internal/chr/daemon_state.go`
+- `internal/chr/daemon_state_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestValidateDaemonState'`: pass
+- `go test ./internal/chr -run 'TestValidateDaemonState'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

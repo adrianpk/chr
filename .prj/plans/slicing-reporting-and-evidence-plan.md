@@ -8,14 +8,14 @@ Plan the `Reporting and Evidence` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> A user can understand what `chc` did, what changed, and why a ticket or loop
+> A user can understand what `chr` did, what changed, and why a ticket or loop
 > is in its current state.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related delivered work:
 
@@ -221,8 +221,8 @@ Expose report discovery through the CLI.
 
 Candidate scope:
 
-- add `chc report` command group;
-- add `chc report list`;
+- add `chr report` command group;
+- add `chr report list`;
 - support filtering by kind, ticket key, execution id, loop id, and status;
 - print stable tabular or line-oriented output;
 - add CLI tests.
@@ -245,7 +245,7 @@ Expose direct report lookup through the CLI.
 
 Candidate scope:
 
-- add `chc report show`;
+- add `chr report show`;
 - resolve reports by report id, ticket key, execution id, or loop id;
 - print the report body or metadata predictably;
 - add clear errors for ambiguous or missing lookups;

@@ -1,11 +1,11 @@
 # QA Agent Work Scenario
 
-This runbook exercises the seeded blog QA scenario from reset through CHC
+This runbook exercises the seeded blog QA scenario from reset through CHR
 artifact generation and ticket execution.
 
 ## Reset The Scenario
 
-From the ChrysoCoord repository:
+From the Chryso repository:
 
 ```sh
 make qa-reset-blog
@@ -35,13 +35,13 @@ the parent repository, confirms it has an independent Git repository, and
 confirms work readiness is ready before manual TUI runs. It also confirms the
 expected failing test is still present.
 
-## Open CHC
+## Open CHR
 
-Open CHC against the active scenario:
+Open CHR against the active scenario:
 
 ```sh
 cd qa/project/blog
-chc
+chr
 ```
 
 The project contains seeded metadata, dumps, quiz notes, ADRs, and one manual
@@ -53,7 +53,7 @@ or generated comments tickets.
 Use the TUI or CLI to run the manual ticket:
 
 ```sh
-chc work ticket CHC-1
+chr work ticket CHR-1
 ```
 
 The agent should reproduce the failing unknown-post test, fix the status code,
@@ -68,9 +68,9 @@ is available, then retry the ticket action.
 After the bug ticket flow is validated, generate comments artifacts:
 
 ```sh
-chc spec generate --use-case comments
-chc plan generate --use-case comments
-chc plan tracking create --use-case comments
+chr spec generate --use-case comments
+chr plan generate --use-case comments
+chr plan tracking create --use-case comments
 ```
 
 The generated spec and plan should use the seeded dumps, quiz notes, project
@@ -81,14 +81,14 @@ metadata, and ADRs under `docs/explanation/adr/`.
 Preview generated ready work:
 
 ```sh
-chc work run-all --dry-run --use-case comments --order key
+chr work run-all --dry-run --use-case comments --order key
 ```
 
 Run the generated ticket loop:
 
 ```sh
-chc work run-all --use-case comments --order key
+chr work run-all --use-case comments --order key
 ```
 
-Use this scenario to observe whether CHC can preserve context from seeded
+Use this scenario to observe whether CHR can preserve context from seeded
 inputs into specs, plans, tracking, tickets, and implementation work.

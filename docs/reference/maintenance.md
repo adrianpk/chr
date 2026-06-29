@@ -1,6 +1,6 @@
 # Maintenance
 
-Maintenance commands inspect and recover local `chc` state.
+Maintenance commands inspect and recover local `chr` state.
 
 They are intended for local diagnostics. They should report exact state before
 any repair or cleanup command mutates files or database rows.
@@ -13,25 +13,25 @@ For a task-oriented recovery sequence, see
 Write a project-local diagnostic bundle:
 
 ```sh
-chc maintenance bundle
+chr maintenance bundle
 ```
 
 Write a bundle for a specific project directory:
 
 ```sh
-chc maintenance bundle --dir /path/to/project
+chr maintenance bundle --dir /path/to/project
 ```
 
 Use an isolated development environment:
 
 ```sh
-chc maintenance bundle --dev-root /tmp/chc-dev --dir /path/to/project
+chr maintenance bundle --dev-root /tmp/chr-dev --dir /path/to/project
 ```
 
 The command writes:
 
 ```text
-.chc/maintenance/diagnostic-bundle.md
+.chr/maintenance/diagnostic-bundle.md
 ```
 
 The bundle includes command-readable local state summaries:
@@ -50,13 +50,13 @@ credential files, or token values.
 Inspect local SQLite migration state:
 
 ```sh
-chc maintenance db status
+chr maintenance db status
 ```
 
 Use an isolated development environment:
 
 ```sh
-chc maintenance db status --dev-root /tmp/chc-dev
+chr maintenance db status --dev-root /tmp/chr-dev
 ```
 
 The command compares embedded migration assets with the local
@@ -89,13 +89,13 @@ binary than the one currently running.
 Inspect registered project state:
 
 ```sh
-chc maintenance registry status
+chr maintenance registry status
 ```
 
 Use an isolated development environment:
 
 ```sh
-chc maintenance registry status --dev-root /tmp/chc-dev
+chr maintenance registry status --dev-root /tmp/chr-dev
 ```
 
 The command is read-only. It does not select, disable, remove, or repair
@@ -112,46 +112,46 @@ Each project row includes:
 - `enabled`: whether the registry row is enabled;
 - `active`: whether the project is currently selected;
 - `path_exists`: whether the registered path exists and is a directory;
-- `workspace_exists`: whether `<path>/.chc` exists and is a directory;
+- `workspace_exists`: whether `<path>/.chr` exists and is a directory;
 - `status`: diagnostic status;
 - `id`: registered project id.
 
 Diagnostic statuses:
 
-- `ok`: the project is enabled, the path exists, and `.chc/` exists;
+- `ok`: the project is enabled, the path exists, and `.chr/` exists;
 - `disabled`: the project row is disabled;
 - `missing_path`: the registered project path is missing or is not a directory;
-- `missing_workspace`: the path exists but does not contain `.chc/`.
+- `missing_workspace`: the path exists but does not contain `.chr/`.
 
 ## Project Registry Repair
 
 Disable a registered project:
 
 ```sh
-chc maintenance registry disable example
+chr maintenance registry disable example
 ```
 
 Preview the same operation:
 
 ```sh
-chc maintenance registry disable --dry-run example
+chr maintenance registry disable --dry-run example
 ```
 
 Update a registered project path:
 
 ```sh
-chc maintenance registry set-path example /path/to/project
+chr maintenance registry set-path example /path/to/project
 ```
 
 Preview the path update:
 
 ```sh
-chc maintenance registry set-path --dry-run example /path/to/project
+chr maintenance registry set-path --dry-run example /path/to/project
 ```
 
 Repair commands require the project name, not the project path or id.
 
-`set-path` requires the target directory to contain `.chc/`. It does not create
+`set-path` requires the target directory to contain `.chr/`. It does not create
 or initialize a core.
 
 Repair commands update only the project registry row. They do not mutate ticket
@@ -162,19 +162,19 @@ files, runtime artifacts, execution records, or the active project selection.
 Inspect execution records for missing runtime evidence:
 
 ```sh
-chc maintenance execution artifacts
+chr maintenance execution artifacts
 ```
 
 Inspect a specific project directory:
 
 ```sh
-chc maintenance execution artifacts --dir /path/to/project
+chr maintenance execution artifacts --dir /path/to/project
 ```
 
 Use an isolated development environment:
 
 ```sh
-chc maintenance execution artifacts --dev-root /tmp/chc-dev --dir /path/to/project
+chr maintenance execution artifacts --dev-root /tmp/chr-dev --dir /path/to/project
 ```
 
 The command is read-only. It does not create, rewrite, delete, or repair
@@ -215,19 +215,19 @@ Preview runtime artifact directories that are not referenced by current
 execution records:
 
 ```sh
-chc maintenance execution cleanup-preview
+chr maintenance execution cleanup-preview
 ```
 
 Preview a specific project directory:
 
 ```sh
-chc maintenance execution cleanup-preview --dir /path/to/project
+chr maintenance execution cleanup-preview --dir /path/to/project
 ```
 
 Use an isolated development environment:
 
 ```sh
-chc maintenance execution cleanup-preview --dev-root /tmp/chc-dev --dir /path/to/project
+chr maintenance execution cleanup-preview --dev-root /tmp/chr-dev --dir /path/to/project
 ```
 
 The command is read-only. It does not delete files or directories.

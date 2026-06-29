@@ -9,11 +9,11 @@ PR: #67
 
 ## Purpose
 
-Expose persisted daemon lifecycle state through `chc daemon status`.
+Expose persisted daemon lifecycle state through `chr daemon status`.
 
 ## Delivered Behavior
 
-`chc daemon status` now reads the daemon state repository.
+`chr daemon status` now reads the daemon state repository.
 
 When state is missing, the command reports:
 
@@ -46,13 +46,13 @@ Changed CLI behavior:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestDaemonStatus'`: pass
+- `go test ./cmd/chr -run 'TestDaemonStatus'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

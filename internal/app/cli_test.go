@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/webui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/webui"
 )
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
@@ -34,7 +34,7 @@ func testAssetsFS() fs.FS {
 		panic("resolve test asset path")
 	}
 
-	root := filepath.Join(filepath.Dir(file), "..", "..", "cmd", "chc")
+	root := filepath.Join(filepath.Dir(file), "..", "..", "cmd", "chr")
 
 	return os.DirFS(root)
 }
@@ -131,7 +131,7 @@ func TestWebServeDryRunPrintsResolvedDefaults(t *testing.T) {
 		"open_browser: false\n",
 		"require_token: auto\n",
 		"token_required: false\n",
-		"token_env: CHC_WEB_TOKEN\n",
+		"token_env: CHR_WEB_TOKEN\n",
 		"allowed_origins: same-origin\n",
 		"static_assets: embedded\n",
 	} {
@@ -226,7 +226,7 @@ func TestWebServeAutoTokenPolicyRequiresTokenForNonLoopback(t *testing.T) {
 
 	authorized := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
-	request.Header.Set("X-CHC-Web-Token", "secret-token")
+	request.Header.Set("X-CHR-Web-Token", "secret-token")
 	handler.ServeHTTP(authorized, request)
 
 	if authorized.Code != http.StatusOK {
@@ -249,7 +249,7 @@ func TestWebServeTokenPolicyRejectsMissingRequiredToken(t *testing.T) {
 		t.Fatal("newWebServeMux returned nil error")
 	}
 
-	if err.Error() != "web token is required but CHC_WEB_TOKEN is not set" {
+	if err.Error() != "web token is required but CHR_WEB_TOKEN is not set" {
 		t.Fatalf("error = %q, want missing token env", err.Error())
 	}
 }
@@ -298,7 +298,7 @@ func TestWebServeShell(t *testing.T) {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
 
-	for _, want := range []string{"ChrysoCoord", "Local Web UI", projectDir, "/assets/htmx.min.js"} {
+	for _, want := range []string{"Chryso", "Local Web UI", projectDir, "/assets/htmx.min.js"} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
@@ -315,7 +315,7 @@ func TestWebServeAssets(t *testing.T) {
 		t.Fatalf("newWebServeMux returned error: %v", err)
 	}
 
-	request := httptest.NewRequest(http.MethodGet, "/assets/chc.css", nil)
+	request := httptest.NewRequest(http.MethodGet, "/assets/chr.css", nil)
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, request)
 
@@ -366,7 +366,7 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 		t.Fatalf("status = %d, want %d: %s", recorder.Code, http.StatusOK, recorder.Body.String())
 	}
 
-	for _, want := range []string{"Board", "Ready For Dev", "CHC-1", "Ready frontend"} {
+	for _, want := range []string{"Board", "Ready For Dev", "CHR-1", "Ready frontend"} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
@@ -403,7 +403,7 @@ func TestWebServeArtifactCatalogUsesProjectArtifacts(t *testing.T) {
 
 	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
 		Family: "dumps",
-		ID:     ".chc/user/dumps/blog-context.md",
+		ID:     ".chr/user/dumps/blog-context.md",
 	})
 	if err != nil {
 		t.Fatalf("ArtifactDetailView returned error: %v", err)
@@ -422,7 +422,7 @@ func TestWebServeArtifactCatalogReportsMalformedCaseMetadata(t *testing.T) {
 		newWebServeBoardProjectContext(t, projectDir),
 	)
 
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "cases", "broken.md"), "# Missing frontmatter\n")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "cases", "broken.md"), "# Missing frontmatter\n")
 
 	_, err := provider.CatalogView(t.Context(), "cases")
 	if err == nil {
@@ -506,7 +506,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 
 	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
 		Family: "dumps",
-		ID:     ".chc/user/dumps/blog-context.md",
+		ID:     ".chr/user/dumps/blog-context.md",
 	})
 	if err != nil {
 		t.Fatalf("ArtifactDetailView returned error: %v", err)
@@ -515,7 +515,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chc/user/dumps/blog-context.md",
+		ID:       ".chr/user/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Updated Dump"},
@@ -531,7 +531,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chc/user/dumps/blog-context.md",
+		ID:       ".chr/user/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Stale Dump"},
@@ -544,7 +544,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 		t.Fatalf("stale status = %q, want stale", stale.Status)
 	}
 
-	if stale.ReloadURL != "/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fblog-context.md" || stale.DiscardURL != "/dumps" {
+	if stale.ReloadURL != "/dumps/detail?id=.chr%2Fuser%2Fdumps%2Fblog-context.md" || stale.DiscardURL != "/dumps" {
 		t.Fatalf("stale urls = reload %q discard %q, want dump conflict actions", stale.ReloadURL, stale.DiscardURL)
 	}
 }
@@ -559,12 +559,12 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 		newWebServeBoardProjectContext(t, projectDir),
 	)
 
-	detail := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
+	detail := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
 
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chc/user/dumps/blog-context.md",
+		ID:       ".chr/user/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Updated Dump"},
@@ -580,7 +580,7 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chc/user/dumps/blog-context.md",
+		ID:       ".chr/user/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Stale Dump"},
@@ -593,12 +593,12 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 		t.Fatalf("stale status = %q, want stale", stale.Status)
 	}
 
-	reloaded := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
+	reloaded := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
 
 	retry, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chc/user/dumps/blog-context.md",
+		ID:       ".chr/user/dumps/blog-context.md",
 		Revision: reloaded.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Retry Dump"},
@@ -623,13 +623,13 @@ func TestWebServeArtifactRevisionsChangeAfterWorkspaceMutation(t *testing.T) {
 	)
 
 	catalogBefore := mustWebArtifactCatalogView(t, provider, "dumps")
-	detailBefore := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
+	detailBefore := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
 
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-context.md"), `---
 title: "Blog Context"
 status: "curated"
 type: "dump"
-source: ".chc/user/dumps/blog-context-raw.md"
+source: ".chr/user/dumps/blog-context-raw.md"
 case: "blog"
 ---
 
@@ -639,7 +639,7 @@ Mutated outside the web view provider.
 `)
 
 	catalogAfter := mustWebArtifactCatalogView(t, provider, "dumps")
-	detailAfter := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
+	detailAfter := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
 
 	assertWebRevisionChanged(t, "catalog", catalogBefore.Revision, catalogAfter.Revision)
 	assertWebRevisionChanged(t, "detail", detailBefore.Revision, detailAfter.Revision)
@@ -756,7 +756,7 @@ func TestWebServeWriteActionGeneratesSpecWithService(t *testing.T) {
 		t.Fatalf("model requests = %#v, want generate spec request", model.requests)
 	}
 
-	if _, err := os.Stat(filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md")); err != nil {
 		t.Fatalf("generated spec missing: %v", err)
 	}
 }
@@ -765,8 +765,8 @@ func TestWebServeWriteActionPreviewsWorkWithoutExecuting(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	provider := newWebServeServiceFactoryProvider(t, projectDir, func(ctx context.Context) service {
@@ -785,7 +785,7 @@ func TestWebServeWriteActionPreviewsWorkWithoutExecuting(t *testing.T) {
 		t.Fatalf("result = %#v, want completed work preview", result)
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 0 {
 		t.Fatalf("execution records = %d, want 0", len(records))
 	}
@@ -843,9 +843,9 @@ func newWebServeServiceFactoryProvider(t *testing.T, projectDir string, factory 
 func newContextTestService(t *testing.T, ctx context.Context, projectDir string) service {
 	t.Helper()
 
-	env, err := chcTestUserEnvironment(t)
+	env, err := chrTestUserEnvironment(t)
 	if err != nil {
-		t.Fatalf("chcTestUserEnvironment returned error: %v", err)
+		t.Fatalf("chrTestUserEnvironment returned error: %v", err)
 	}
 
 	operations := newService(ctx, env, commandProjectContext{
@@ -877,8 +877,8 @@ func newContextAgentWorkTestService(t *testing.T, ctx context.Context, devRoot, 
 func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", core.Ticket{
-		Key:       "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Ready frontend",
 		Synopsis:  "Build the browser board.",
 		Status:    core.TicketStatusReadyForDev,
@@ -900,11 +900,11 @@ func writeWebServeArtifactFixture(t *testing.T, projectDir string) {
 		Description:   "Publish articles.",
 		Context:       "Use-case context.",
 	}))
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-context.md"), `---
 title: "Blog Context"
 status: "curated"
 type: "dump"
-source: ".chc/user/dumps/blog-context-raw.md"
+source: ".chr/user/dumps/blog-context-raw.md"
 case: "blog"
 ---
 
@@ -912,11 +912,11 @@ case: "blog"
 
 Use-case dump body.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context-raw.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-context-raw.md"), `---
 title: "Blog Context Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chc/user/dumps/blog-context.md"
+curated: ".chr/user/dumps/blog-context.md"
 case: "blog"
 ---
 
@@ -968,7 +968,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message: "Acceptance feature generated.",
 		Status:  core.AcceptanceFeatureStatusGenerated,
-		Feature: ".chc/user/acceptance/blog.feature",
+		Feature: ".chr/user/acceptance/blog.feature",
 	})
 	if err != nil {
 		t.Fatalf("writeAcceptanceFeatureGenerateResult returned error: %v", err)
@@ -978,7 +978,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 	for _, want := range []string{
 		"Acceptance feature generated.\n",
 		"status: generated\n",
-		"feature: .chc/user/acceptance/blog.feature\n",
+		"feature: .chr/user/acceptance/blog.feature\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in:\n%s", want, got)
@@ -1054,7 +1054,7 @@ func TestGateWoodpeckerInitDryRunPrintsConfigWithoutWriting(t *testing.T) {
 		"action: dry-run",
 		"feedback: woodpecker-status",
 		"wrote: false",
-		"chc-dev-main-gate",
+		"chr-dev-main-gate",
 	} {
 		if strings.Contains(output, expected) {
 			continue
@@ -1211,17 +1211,17 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHC-1", "exec-1", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHR-1", "exec-1", "execution-report.md"), `# Execution Report
 
 ## Summary
 
 - execution: exec-1
-- ticket: CHC-1
+- ticket: CHR-1
 - status: succeeded
 
 ## Artifacts
 
-- result: .chc/user/runtime/runs/CHC-1/exec-1/result.json
+- result: .chr/user/runtime/runs/CHR-1/exec-1/result.json
 `)
 	runGateCLIGit(t, projectDir, "add", ".")
 	runGateCLIGit(t, projectDir, "commit", "-m", "change")
@@ -1262,7 +1262,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	projectDir := newGateCLIGitProject(t)
 	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
-	writeGateCLIFile(t, projectDir, ".chc/user/config/gates.yml", `gates:
+	writeGateCLIFile(t, projectDir, ".chr/user/config/gates.yml", `gates:
   dev_main:
     traceability:
       fail_on_missing_agent_evidence: false
@@ -1273,17 +1273,17 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHC-1", "exec-1", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHR-1", "exec-1", "execution-report.md"), `# Execution Report
 
 ## Summary
 
 - execution: exec-1
-- ticket: CHC-1
+- ticket: CHR-1
 - status: succeeded
 
 ## Artifacts
 
-- result: .chc/user/runtime/runs/CHC-1/exec-1/result.json
+- result: .chr/user/runtime/runs/CHR-1/exec-1/result.json
 `)
 	runGateCLIGit(t, projectDir, "add", ".")
 	runGateCLIGit(t, projectDir, "commit", "-m", "change")
@@ -1312,7 +1312,7 @@ func TestGateDevMainWarnsOnManualChangesWhenConfigured(t *testing.T) {
 	projectDir := newGateCLIGitProject(t)
 	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
-	writeGateCLIFile(t, projectDir, ".chc/user/config/gates.yml", `gates:
+	writeGateCLIFile(t, projectDir, ".chr/user/config/gates.yml", `gates:
   dev_main:
     traceability:
       warn_on_manual_changes: true
@@ -1356,7 +1356,7 @@ func TestGateDevMainWarnsOnHighRiskManualChangesWhenConfigured(t *testing.T) {
 	projectDir := newGateCLIGitProject(t)
 	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
-	writeGateCLIFile(t, projectDir, ".chc/user/config/gates.yml", `gates:
+	writeGateCLIFile(t, projectDir, ".chr/user/config/gates.yml", `gates:
   dev_main:
     manual_changes:
       warn_on_high_risk_paths: true
@@ -1435,11 +1435,11 @@ func TestInitDryRunDoesNotWriteWorkspace(t *testing.T) {
 		t.Fatalf("init dry-run returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), "create .chc/user/agents") {
-		t.Fatalf("stdout = %q, want planned .chc paths", stdout.String())
+	if !strings.Contains(stdout.String(), "create .chr/user/agents") {
+		t.Fatalf("stdout = %q, want planned .chr paths", stdout.String())
 	}
 
-	assertPathNotExists(t, filepath.Join(projectDir, ".chc"))
+	assertPathNotExists(t, filepath.Join(projectDir, ".chr"))
 }
 
 func TestInitPreservesExistingRootAgents(t *testing.T) {
@@ -1482,14 +1482,14 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 		t.Fatalf("init standard returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "agents", "CONVENTIONS.md"))
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "agents", "playbooks", "ticket-workflow.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "agents", "CONVENTIONS.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "agents", "playbooks", "ticket-workflow.md"))
 	assertPathExists(t, filepath.Join(projectDir, "AGENTS.md"))
 
-	documenting := readTestFile(t, filepath.Join(projectDir, ".chc", "user", "agents", "DOCUMENTING.md"))
+	documenting := readTestFile(t, filepath.Join(projectDir, ".chr", "user", "agents", "DOCUMENTING.md"))
 	for _, unwanted := range []string{
-		"ChrysoCoord Artifacts",
-		"Use `.chc/` for project-local operational artifacts",
+		"Chryso Artifacts",
+		"Use `.chr/` for project-local operational artifacts",
 		"generated operational records",
 	} {
 		if strings.Contains(documenting, unwanted) {
@@ -1497,14 +1497,14 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 		}
 	}
 
-	architecture := readTestFile(t, filepath.Join(projectDir, ".chc", "user", "agents", "ARCHITECTURE.md"))
-	if strings.Contains(architecture, ".chc/         ChrysoCoord project-local state") {
-		t.Fatalf("ARCHITECTURE.md exposes .chc as application layout:\n%s", architecture)
+	architecture := readTestFile(t, filepath.Join(projectDir, ".chr", "user", "agents", "ARCHITECTURE.md"))
+	if strings.Contains(architecture, ".chr/         Chryso project-local state") {
+		t.Fatalf("ARCHITECTURE.md exposes .chr as application layout:\n%s", architecture)
 	}
 
-	invariants := readTestFile(t, filepath.Join(projectDir, ".chc", "user", "agents", "INVARIANTS.md"))
-	if strings.Contains(invariants, "Treat `.chc/` as project-local operational state") {
-		t.Fatalf("INVARIANTS.md contains old .chc operational rule:\n%s", invariants)
+	invariants := readTestFile(t, filepath.Join(projectDir, ".chr", "user", "agents", "INVARIANTS.md"))
+	if strings.Contains(invariants, "Treat `.chr/` as project-local operational state") {
+		t.Fatalf("INVARIANTS.md contains old .chr operational rule:\n%s", invariants)
 	}
 }
 
@@ -1679,7 +1679,7 @@ func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
 		t.Fatalf("spec list returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), ".chc/user/specs/blog-spec.md") {
+	if !strings.Contains(stdout.String(), ".chr/user/specs/blog-spec.md") {
 		t.Fatalf("spec list stdout = %q, want blog spec path", stdout.String())
 	}
 
@@ -1695,7 +1695,7 @@ func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
 		t.Fatalf("plan list returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), ".chc/user/plans/project-plan.md") {
+	if !strings.Contains(stdout.String(), ".chr/user/plans/project-plan.md") {
 		t.Fatalf("plan list stdout = %q, want project plan path", stdout.String())
 	}
 }
@@ -1718,8 +1718,8 @@ func TestDaemonStatusPrintsStoppedWhenStateIsMissing(t *testing.T) {
 	for _, want := range []string{
 		"daemon: stopped",
 		"state: missing",
-		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
-		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+		"data_dir: " + filepath.Join(devRoot, "data", "chr"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chr"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -1760,8 +1760,8 @@ func TestDaemonStatusPrintsStoredRunningState(t *testing.T) {
 		"started_at:",
 		"heartbeat_at:",
 		"updated_at:",
-		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
-		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+		"data_dir: " + filepath.Join(devRoot, "data", "chr"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chr"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -1906,8 +1906,8 @@ func TestDaemonStartDryRunPrintsPlan(t *testing.T) {
 		"allowed: true",
 		"stale: false",
 		"reason: daemon state is missing",
-		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
-		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+		"data_dir: " + filepath.Join(devRoot, "data", "chr"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chr"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -2109,8 +2109,8 @@ func TestAuthorQuizNewWritesSessionAndQuiz(t *testing.T) {
 	}
 
 	sessionID := authorSessionIDFromOutput(t, stdout.String())
-	sessionPath := filepath.Join(projectDir, ".chc", "authoring", "sessions", sessionID, "session.md")
-	quizPath := filepath.Join(projectDir, ".chc", "user", "quizzes", sessionID+"-billing-sync.md")
+	sessionPath := filepath.Join(projectDir, ".chr", "authoring", "sessions", sessionID, "session.md")
+	quizPath := filepath.Join(projectDir, ".chr", "user", "quizzes", sessionID+"-billing-sync.md")
 
 	for _, path := range []string{sessionPath, quizPath} {
 		_, err = os.Stat(path)
@@ -2139,7 +2139,7 @@ func TestAuthorPromoteQuizToDraftWritesDraftAndUpdatesSession(t *testing.T) {
 		t.Fatalf("author promote quiz-to-draft returned error: %v", err)
 	}
 
-	draftPath := filepath.Join(projectDir, ".chc", "user", "drafts", sessionID+"-billing-sync.md")
+	draftPath := filepath.Join(projectDir, ".chr", "user", "drafts", sessionID+"-billing-sync.md")
 
 	_, err = os.Stat(draftPath)
 	if err != nil {
@@ -2253,7 +2253,7 @@ func TestAuthorAssistedStartResumeAnswerStatusAndFinalize(t *testing.T) {
 		t.Fatalf("author assisted finalize returned error: %v", err)
 	}
 
-	for _, want := range []string{"assisted: finalized", "curated-summary.md", ".chc/user/specs/"} {
+	for _, want := range []string{"assisted: finalized", "curated-summary.md", ".chr/user/specs/"} {
 		if !strings.Contains(finalizeOut.String(), want) {
 			t.Fatalf("finalize output missing %q:\n%s", want, finalizeOut.String())
 		}
@@ -2321,8 +2321,8 @@ func TestDaemonStopDryRunPrintsPlan(t *testing.T) {
 		"daemon: planned",
 		"action: stop",
 		"dry_run: true",
-		"data_dir: " + filepath.Join(devRoot, "data", "chc"),
-		"state_dir: " + filepath.Join(devRoot, "state", "chc"),
+		"data_dir: " + filepath.Join(devRoot, "data", "chr"),
+		"state_dir: " + filepath.Join(devRoot, "state", "chr"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -2334,7 +2334,7 @@ func TestDaemonStartRunsForegroundLoop(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "user", "tickets"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "tickets"), 0o755)
 	if err != nil {
 		t.Fatalf("create tickets directory: %v", err)
 	}
@@ -2525,7 +2525,7 @@ func TestTicketNewCreatesTicket(t *testing.T) {
 		t.Fatalf("run returned error: %v", err)
 	}
 
-	wantPath := filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-Do-something.md")
+	wantPath := filepath.Join(dir, ".chr", "user", "tickets", "CHR-1-Do-something.md")
 	if !strings.Contains(stdout.String(), "ticket: "+wantPath) {
 		t.Fatalf("stdout = %q, want ticket path %q", stdout.String(), wantPath)
 	}
@@ -2536,7 +2536,7 @@ func TestTicketNewCreatesTicket(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		`key: "CHC-1"`,
+		`key: "CHR-1"`,
 		`title: "Do something"`,
 		`synopsis: "Do the implementation work."`,
 		`status: "backlog"`,
@@ -2552,7 +2552,7 @@ func TestTicketNewCreatesTicket(t *testing.T) {
 func TestTicketNewUsesConfigKeyPrefix(t *testing.T) {
 	dir := t.TempDir()
 
-	configPath := filepath.Join(dir, ".chc", "user", "config.yml")
+	configPath := filepath.Join(dir, ".chr", "user", "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
 	if err != nil {
@@ -2577,7 +2577,7 @@ func TestTicketNewUsesConfigKeyPrefix(t *testing.T) {
 		t.Fatalf("run returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(dir, ".chc", "user", "tickets", "PRJ-1-Do-something.md"))
+	assertPathExists(t, filepath.Join(dir, ".chr", "user", "tickets", "PRJ-1-Do-something.md"))
 }
 
 func TestTicketNewUsesActiveProject(t *testing.T) {
@@ -2610,7 +2610,7 @@ func TestTicketNewUsesActiveProject(t *testing.T) {
 		t.Fatalf("ticket new returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Active-project-ticket.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Active-project-ticket.md"))
 }
 
 func TestRuntimeInitCreatesTemplateWithExplicitDir(t *testing.T) {
@@ -2628,9 +2628,9 @@ func TestRuntimeInitCreatesTemplateWithExplicitDir(t *testing.T) {
 		t.Fatalf("runtime init returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
 
-	if !strings.Contains(stdout.String(), "create .chc/user/runtime/agent/Dockerfile") {
+	if !strings.Contains(stdout.String(), "create .chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
 	}
 }
@@ -2651,9 +2651,9 @@ func TestRuntimeInitDryRunDoesNotCreateTemplate(t *testing.T) {
 		t.Fatalf("runtime init returned error: %v", err)
 	}
 
-	assertPathNotExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"))
+	assertPathNotExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
 
-	if !strings.Contains(stdout.String(), "create .chc/user/runtime/agent/Dockerfile") {
+	if !strings.Contains(stdout.String(), "create .chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
 	}
 }
@@ -2661,7 +2661,7 @@ func TestRuntimeInitDryRunDoesNotCreateTemplate(t *testing.T) {
 func TestRuntimeInitSkipsExistingTemplate(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
-	dockerfilePath := filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -2694,7 +2694,7 @@ func TestRuntimeInitSkipsExistingTemplate(t *testing.T) {
 		t.Fatalf("runtime template content = %q, want custom content unchanged", string(content))
 	}
 
-	if !strings.Contains(stdout.String(), "skip existing .chc/user/runtime/agent/Dockerfile") {
+	if !strings.Contains(stdout.String(), "skip existing .chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile skip", stdout.String())
 	}
 }
@@ -2716,7 +2716,7 @@ func TestRuntimeInitUsesActiveProject(t *testing.T) {
 		t.Fatalf("runtime init returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
 }
 
 func TestRuntimeInitFallsBackToCurrentDirectory(t *testing.T) {
@@ -2734,7 +2734,7 @@ func TestRuntimeInitFallsBackToCurrentDirectory(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
 }
 
 func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
@@ -2759,16 +2759,16 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 		"workspace_mode: project",
 		"project_checkout_dir: .",
 		"execution_workspace_dir: .",
-		"image: chc-agent-runtime:local",
-		"dockerfile: .chc/user/runtime/agent/Dockerfile",
+		"image: chr-agent-runtime:local",
+		"dockerfile: .chr/user/runtime/agent/Dockerfile",
 		"workdir: /workspace",
-		"artifact_dir: .chc/user/runtime/runs",
+		"artifact_dir: .chr/user/runtime/runs",
 		"mount: . -> /workspace read_only=false",
 		"checks:",
 		"ok    execution_workspace .",
-		"ok    workspace    .chc",
-		"ok    dockerfile   .chc/user/runtime/agent/Dockerfile",
-		"ok    artifact_dir .chc/user/runtime/runs",
+		"ok    workspace    .chr",
+		"ok    dockerfile   .chr/user/runtime/agent/Dockerfile",
+		"ok    artifact_dir .chr/user/runtime/runs",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -2779,7 +2779,7 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 func TestRuntimeValidateFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "user", "runtime", "runs"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "runtime", "runs"), 0o755)
 	if err != nil {
 		t.Fatalf("create runtime runs dir: %v", err)
 	}
@@ -2827,7 +2827,7 @@ func TestNotifyStatusPrintsNotificationReadiness(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeCLIWorkspaceConfig(t, projectDir, `notifications:
   telegram_enabled: true
-  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_bot_token_env: CHR_TELEGRAM_BOT_TOKEN
   telegram_chat_id: "123456"
 `)
 
@@ -2849,7 +2849,7 @@ func TestNotifyStatusPrintsNotificationReadiness(t *testing.T) {
 		"project_dir: " + projectDir,
 		"telegram_enabled: true",
 		"telegram_status: ready",
-		"telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN",
+		"telegram_bot_token_env: CHR_TELEGRAM_BOT_TOKEN",
 		"telegram_chat_id: 123456",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -2892,7 +2892,7 @@ func TestNotifyTelegramTestDryRunPrintsPlan(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	writeCLIWorkspaceConfig(t, projectDir, `notifications:
   telegram_enabled: true
-  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_bot_token_env: CHR_TELEGRAM_BOT_TOKEN
   telegram_chat_id: "123456"
 `)
 
@@ -2913,9 +2913,9 @@ func TestNotifyTelegramTestDryRunPrintsPlan(t *testing.T) {
 	for _, want := range []string{
 		"telegram_test: planned",
 		"dry_run: true",
-		"bot_token_env: CHC_TELEGRAM_BOT_TOKEN",
+		"bot_token_env: CHR_TELEGRAM_BOT_TOKEN",
 		"chat_id: 123456",
-		"message: ChrysoCoord Telegram notification test",
+		"message: Chryso Telegram notification test",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -2945,7 +2945,7 @@ func TestNotifyTelegramTestRequiresDryRun(t *testing.T) {
 func TestNotifyTelegramTestSendsAndRecordsAudit(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	t.Setenv("CHC_TELEGRAM_BOT_TOKEN", "token-1")
+	t.Setenv("CHR_TELEGRAM_BOT_TOKEN", "token-1")
 
 	writeTelegramNotifyConfig(t, projectDir)
 
@@ -3048,7 +3048,7 @@ func writeTelegramNotifyConfig(t *testing.T, projectDir string) {
 
 	writeCLIWorkspaceConfig(t, projectDir, `notifications:
   telegram_enabled: true
-  telegram_bot_token_env: CHC_TELEGRAM_BOT_TOKEN
+  telegram_bot_token_env: CHR_TELEGRAM_BOT_TOKEN
   telegram_chat_id: "123456"
 `)
 }
@@ -3122,7 +3122,7 @@ func assertTelegramPayload(t *testing.T, gotPayload *testTelegramPayload) {
 		t.Fatalf("telegram chat_id = %q, want 123456", gotPayload.ChatID)
 	}
 
-	if !strings.Contains(gotPayload.Text, "ChrysoCoord Telegram notification test") {
+	if !strings.Contains(gotPayload.Text, "Chryso Telegram notification test") {
 		t.Fatalf("telegram text = %q, want test message", gotPayload.Text)
 	}
 }
@@ -3145,13 +3145,13 @@ func TestTicketNewFallsBackToCurrentDirectory(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Current-project-ticket.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Current-project-ticket.md"))
 }
 
 func TestProjectContextResolverRejectsMissingContext(t *testing.T) {
-	env, err := chcTestUserEnvironment(t)
+	env, err := chrTestUserEnvironment(t)
 	if err != nil {
-		t.Fatalf("chcTestUserEnvironment returned error: %v", err)
+		t.Fatalf("chrTestUserEnvironment returned error: %v", err)
 	}
 
 	_, err = newCommandProjectContextResolver(env, testAssetsFS()).Resolve(t.Context(), commandProjectContextOptions{})
@@ -3181,7 +3181,7 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketShowReviewTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketShowReviewTicket())
 
 	var stdout bytes.Buffer
 
@@ -3197,7 +3197,7 @@ func TestTicketListPrintsIndexedTickets(t *testing.T) {
 		t.Fatalf("ticket list returned error: %v", err)
 	}
 
-	want := "CHC-1\tDo something\topen\thigh\tnormal\ttask\tonboarding\tCHC-1-Do-something.md"
+	want := "CHR-1\tDo something\topen\thigh\tnormal\ttask\tonboarding\tCHR-1-Do-something.md"
 	if !strings.Contains(stdout.String(), want) {
 		t.Fatalf("stdout = %q, want ticket row %q", stdout.String(), want)
 	}
@@ -3208,8 +3208,8 @@ func TestTicketBoardPrintsBoardColumns(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Backlog.md", core.Ticket{
-		Key:       "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Backlog.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Backlog work",
 		Synopsis:  "Prepare backlog work.",
 		Status:    core.TicketStatusBacklog,
@@ -3219,8 +3219,8 @@ func TestTicketBoardPrintsBoardColumns(t *testing.T) {
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Review.md", core.Ticket{
-		Key:       "CHC-2",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Review.md", core.Ticket{
+		Key:       "CHR-2",
 		Title:     "Review work",
 		Synopsis:  "Review implemented work.",
 		Status:    core.TicketStatusReadyForReview,
@@ -3250,9 +3250,9 @@ func TestTicketBoardPrintsBoardColumns(t *testing.T) {
 		"normal: 2",
 		"attention: 0",
 		"column: backlog\tBacklog\t1",
-		"CHC-1\tbacklog\tnormal\ttask\tBacklog work",
+		"CHR-1\tbacklog\tnormal\ttask\tBacklog work",
 		"column: ready_for_review\tReady For Review\t1",
-		"CHC-2\tready_for_review\thigh\tfeature\tReview work",
+		"CHR-2\tready_for_review\thigh\tfeature\tReview work",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -3295,14 +3295,14 @@ func TestTicketLoopDryRunPrintsEligibleTickets(t *testing.T) {
 		"dry_run: true",
 		"order: priority",
 		"eligible: 1",
-		"ticket: CHC-1\tReady frontend\tready_for_dev\thigh\tcritical\tfeature\tonboarding\tCHC-1-Ready.md",
+		"ticket: CHR-1\tReady frontend\tready_for_dev\thigh\tcritical\tfeature\tonboarding\tCHR-1-Ready.md",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
 	}
 
-	if strings.Contains(stdout.String(), "CHC-2") || strings.Contains(stdout.String(), "CHC-3") {
+	if strings.Contains(stdout.String(), "CHR-2") || strings.Contains(stdout.String(), "CHR-3") {
 		t.Fatalf("stdout contains ineligible tickets:\n%s", stdout.String())
 	}
 }
@@ -3310,14 +3310,14 @@ func TestTicketLoopDryRunPrintsEligibleTickets(t *testing.T) {
 func writeTicketLoopDryRunTickets(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", testLoopTicket(
+		"CHR-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
 	))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-3-Open.md", testLoopTicket(
-		"CHC-3", "Open frontend", "open", "critical", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-3-Open.md", testLoopTicket(
+		"CHR-3", "Open frontend", "open", "critical", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 }
 
@@ -3366,17 +3366,17 @@ Loop behavior.
 
 func testReviewRepairTicket() core.Ticket {
 	ticket := testLoopTicket(
-		"CHC-1", "Review repair", core.TicketStatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
+		"CHR-1", "Review repair", core.TicketStatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
 	)
-	ticket.Branch = "feat/chc-1-review-repair"
+	ticket.Branch = "feat/chr-1-review-repair"
 	ticket.ReviewState = "changes_requested"
 	ticket.ReviewResult = core.TicketReviewCommandResultNeedsChanges
 	ticket.ReviewRound = 1
-	ticket.ReviewCommentsURL = "https://forge.example.com/adrianpk/chc/pulls/274"
+	ticket.ReviewCommentsURL = "https://forge.example.com/adrianpk/chr/pulls/274"
 	ticket.ReviewRefs = []core.TicketReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
-		URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+		URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
 		ID:       "274",
 		Status:   "open",
 	}}
@@ -3398,8 +3398,8 @@ func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	var stdout bytes.Buffer
@@ -3435,7 +3435,7 @@ func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 		t.Fatalf("commands = %#v, want build, worker run, and validation run", executor.commands)
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 1 {
 		t.Fatalf("execution records = %d, want 1", len(records))
 	}
@@ -3457,11 +3457,11 @@ func TestTicketLoopHonorsMaxIterations(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	var stdout bytes.Buffer
@@ -3486,20 +3486,20 @@ func TestTicketLoopHonorsMaxIterations(t *testing.T) {
 		"processed: 1",
 		"skipped: 1",
 		"execution: exec-",
-		"CHC-1",
+		"CHR-1",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
 	}
 
-	if strings.Contains(stdout.String(), "CHC-2") {
+	if strings.Contains(stdout.String(), "CHR-2") {
 		t.Fatalf("stdout contains execution beyond max iterations:\n%s", stdout.String())
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-2")
 	if len(records) != 0 {
-		t.Fatalf("CHC-2 execution records = %d, want 0", len(records))
+		t.Fatalf("CHR-2 execution records = %d, want 0", len(records))
 	}
 }
 
@@ -3510,8 +3510,8 @@ func TestTicketLoopCompletesWithNoEligibleTickets(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Open.md", testLoopTicket(
-		"CHC-1", "Open frontend", "open", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Open.md", testLoopTicket(
+		"CHR-1", "Open frontend", "open", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	var stdout bytes.Buffer
@@ -3553,8 +3553,8 @@ func TestWorkTicketRunsSelectedTicket(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	var stdout bytes.Buffer
@@ -3566,7 +3566,7 @@ func TestWorkTicketRunsSelectedTicket(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("work ticket returned error: %v", err)
@@ -3574,7 +3574,7 @@ func TestWorkTicketRunsSelectedTicket(t *testing.T) {
 
 	for _, want := range []string{
 		"work: ticket",
-		"ticket: CHC-1",
+		"ticket: CHR-1",
 		"execution: exec-",
 		"status: succeeded",
 	} {
@@ -3583,7 +3583,7 @@ func TestWorkTicketRunsSelectedTicket(t *testing.T) {
 		}
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 1 {
 		t.Fatalf("execution records = %d, want 1", len(records))
 	}
@@ -3702,14 +3702,14 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 	devRoot := t.TempDir()
 
 	runGateCLIGit(t, projectDir, "switch", "-c", "dev")
-	runGateCLIGit(t, projectDir, "add", ".chc/.keep")
+	runGateCLIGit(t, projectDir, "add", ".chr/.keep")
 	runGateCLIGit(t, projectDir, "commit", "-m", "base")
 	writeCLIWorkspaceConfig(t, projectDir, `work:
   require_remote_tracking: false
 `)
-	runGateCLIGit(t, projectDir, "add", ".chc/user/config.yml")
+	runGateCLIGit(t, projectDir, "add", ".chr/user/config.yml")
 	runGateCLIGit(t, projectDir, "commit", "-m", "work config")
-	writeGateCLIFile(t, projectDir, ".chc/user/runtime/runs/run-1/events.jsonl", "{}\n")
+	writeGateCLIFile(t, projectDir, ".chr/user/runtime/runs/run-1/events.jsonl", "{}\n")
 	addProject(t, devRoot, "example", projectDir)
 
 	var stdout bytes.Buffer
@@ -3731,7 +3731,7 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 		"work: doctor",
 		"fix_safe: true",
 		"repairs_applied: 1",
-		"repair_applied: ignore_runtime_artifacts\texcluded .chc/user/runtime/ in local Git info exclude",
+		"repair_applied: ignore_runtime_artifacts\texcluded .chr/user/runtime/ in local Git info exclude",
 		"status: ready",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -3740,7 +3740,7 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 	}
 
 	exclude := readFile(t, filepath.Join(projectDir, ".git", "info", "exclude"))
-	if !strings.Contains(exclude, ".chc/user/runtime/") {
+	if !strings.Contains(exclude, ".chr/user/runtime/") {
 		t.Fatalf("exclude = %q, want runtime ignore", exclude)
 	}
 }
@@ -3748,7 +3748,7 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 
 	addProject(t, devRoot, "example", projectDir)
@@ -3778,18 +3778,18 @@ func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 	for _, want := range []string{
 		"work: logs",
 		"execution: exec-1",
-		"ticket: CHC-1",
+		"ticket: CHR-1",
 		"status: succeeded",
 		"validation_command: make verify",
-		"run_dir_path: .chc/user/runtime/runs/CHC-1/exec-1",
+		"run_dir_path: .chr/user/runtime/runs/CHR-1/exec-1",
 		"run_dir_exists: true",
-		"runtime_log_path: .chc/user/runtime/runs/CHC-1/exec-1/runtime.log",
+		"runtime_log_path: .chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
 		"runtime_log_exists: true",
-		"validation_log_path: .chc/user/runtime/runs/CHC-1/exec-1/validation.log",
+		"validation_log_path: .chr/user/runtime/runs/CHR-1/exec-1/validation.log",
 		"validation_log_exists: true",
-		"execution_report_path: .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md",
+		"execution_report_path: .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md",
 		"execution_report_exists: true",
-		"events_path: .chc/user/runtime/runs/CHC-1/exec-1/events.jsonl",
+		"events_path: .chr/user/runtime/runs/CHR-1/exec-1/events.jsonl",
 		"events_exists: true",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -3801,7 +3801,7 @@ func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 func TestWorkLogsReportsMissingArtifacts(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 
 	addProject(t, devRoot, "example", projectDir)
@@ -3867,17 +3867,17 @@ func TestWorkLogsRejectsMissingExecution(t *testing.T) {
 
 func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
 	projectDir := newTestWorkspace(t)
-	streamPath := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "loop-1", "events.jsonl")
+	streamPath := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "loop-1", "events.jsonl")
 	event := core.AgentEvent{
 		SchemaVersion: core.AgentEventSchemaVersion,
 		Timestamp:     time.Date(2026, 6, 18, 12, 30, 0, 0, time.UTC),
 		ProjectID:     projectID(projectDir),
 		LoopID:        "loop-1",
-		TicketKey:     "CHC-1",
+		TicketKey:     "CHR-1",
 		ExecutionID:   "exec-1",
 		Phase:         core.AgentEventPhaseWorkBlocked,
 		Level:         core.AgentEventLevelWarn,
-		Message:       "CHC-1 blocked",
+		Message:       "CHR-1 blocked",
 	}
 
 	writeCLIAgentEventStream(t, streamPath, marshalCLIAgentEventLine(t, event), "{not-json")
@@ -3889,7 +3889,7 @@ func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
 		"events",
 		"--dir",
 		projectDir,
-		".chc/user/runtime/runs/loop-1/events.jsonl",
+		".chr/user/runtime/runs/loop-1/events.jsonl",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("work events returned error: %v", err)
@@ -3897,18 +3897,18 @@ func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
 
 	for _, want := range []string{
 		"work: events",
-		"path: .chc/user/runtime/runs/loop-1/events.jsonl",
+		"path: .chr/user/runtime/runs/loop-1/events.jsonl",
 		"events: 1",
 		"malformed: 1",
 		"degraded: true",
 		"status: blocked",
 		"latest_time: 2026-06-18T12:30:00Z",
 		"latest_loop: loop-1",
-		"latest_ticket: CHC-1",
+		"latest_ticket: CHR-1",
 		"latest_execution: exec-1",
 		"latest_phase: work_blocked",
 		"latest_level: warn",
-		"latest_message: CHC-1 blocked",
+		"latest_message: CHR-1 blocked",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -3926,14 +3926,14 @@ func TestWorkEventsSummarizesMissingEventStream(t *testing.T) {
 		"events",
 		"--dir",
 		projectDir,
-		".chc/user/runtime/runs/missing/events.jsonl",
+		".chr/user/runtime/runs/missing/events.jsonl",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("work events returned error: %v", err)
 	}
 
 	for _, want := range []string{
-		"path: .chc/user/runtime/runs/missing/events.jsonl",
+		"path: .chr/user/runtime/runs/missing/events.jsonl",
 		"events: 0",
 		"malformed: 0",
 		"degraded: false",
@@ -3959,11 +3959,11 @@ func TestWorkRunAllExecutesReadyTickets(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	var stdout bytes.Buffer
@@ -3989,25 +3989,25 @@ func TestWorkRunAllExecutesReadyTickets(t *testing.T) {
 		"skipped: 1",
 		"blocked: 1",
 		"execution: exec-",
-		"CHC-1",
+		"CHR-1",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
 	}
 
-	if strings.Contains(stdout.String(), "CHC-2") {
+	if strings.Contains(stdout.String(), "CHR-2") {
 		t.Fatalf("stdout contains second ticket execution:\n%s", stdout.String())
 	}
 
-	chc1Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
-	if len(chc1Records) != 1 {
-		t.Fatalf("CHC-1 execution records = %d, want 1", len(chc1Records))
+	chr1Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
+	if len(chr1Records) != 1 {
+		t.Fatalf("CHR-1 execution records = %d, want 1", len(chr1Records))
 	}
 
-	chc2Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
-	if len(chc2Records) != 0 {
-		t.Fatalf("CHC-2 execution records = %d, want 0", len(chc2Records))
+	chr2Records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-2")
+	if len(chr2Records) != 0 {
+		t.Fatalf("CHR-2 execution records = %d, want 0", len(chr2Records))
 	}
 }
 
@@ -4016,8 +4016,8 @@ func TestWorkRunAllDryRunPrintsQueue(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	var stdout bytes.Buffer
@@ -4040,16 +4040,16 @@ func TestWorkRunAllDryRunPrintsQueue(t *testing.T) {
 		"dry_run: true",
 		"order: created_at",
 		"eligible: 1",
-		"cycle_ticket: CHC-1",
+		"cycle_ticket: CHR-1",
 		"remaining_eligible: 0",
-		"ticket: CHC-1\tReady frontend\tready_for_dev",
+		"ticket: CHR-1\tReady frontend\tready_for_dev",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 0 {
 		t.Fatalf("execution records = %d, want 0", len(records))
 	}
@@ -4060,11 +4060,11 @@ func TestWorkRunAllDryRunAppliesFiltersAndOrder(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready normal", "ready_for_dev", "normal", "normal", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready normal", "ready_for_dev", "normal", "normal", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready high", "ready_for_dev", "high", "critical", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-2", "Ready high", "ready_for_dev", "high", "critical", "bug", "maintenance", "backend", []string{"api"},
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	var stdout bytes.Buffer
@@ -4092,15 +4092,15 @@ func TestWorkRunAllDryRunAppliesFiltersAndOrder(t *testing.T) {
 		"dry_run: true",
 		"order: priority",
 		"eligible: 1",
-		"ticket: CHC-2\tReady high\tready_for_dev",
+		"ticket: CHR-2\tReady high\tready_for_dev",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, output)
 		}
 	}
 
-	if strings.Contains(output, "CHC-1") {
-		t.Fatalf("stdout contains filtered ticket CHC-1:\n%s", output)
+	if strings.Contains(output, "CHR-1") {
+		t.Fatalf("stdout contains filtered ticket CHR-1:\n%s", output)
 	}
 }
 
@@ -4111,8 +4111,8 @@ func TestWorkRunAllCompletesWithNoEligibleTickets(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Open.md", testLoopTicket(
-		"CHC-1", "Open frontend", "open", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Open.md", testLoopTicket(
+		"CHR-1", "Open frontend", "open", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	var stdout bytes.Buffer
@@ -4144,7 +4144,7 @@ func TestWorkRunAllCompletesWithNoEligibleTickets(t *testing.T) {
 func TestTicketLoopDispatchesConfiguredFinishedNotification(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	t.Setenv("CHC_TELEGRAM_BOT_TOKEN", "token-1")
+	t.Setenv("CHR_TELEGRAM_BOT_TOKEN", "token-1")
 	installFakeTicketStartHarnessExecutor(t, nil)
 
 	gotPayload := installTestTelegramSender(t)
@@ -4152,8 +4152,8 @@ func TestTicketLoopDispatchesConfiguredFinishedNotification(t *testing.T) {
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
 	writeTelegramNotifyConfig(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	err := run(t.Context(), []string{
@@ -4188,11 +4188,11 @@ func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	), time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC)))
-	writeTicketMarkdownOnly(t, projectDir, "CHC-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
-		"CHC-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-2-Ready.md", withLoopTicketCreatedAt(testLoopTicket(
+		"CHR-2", "Ready backend", "ready_for_dev", "normal", "normal", "bug", "maintenance", "backend", []string{"api"},
 	), time.Date(2026, 5, 18, 13, 0, 0, 0, time.UTC)))
 
 	var stdout bytes.Buffer
@@ -4222,13 +4222,13 @@ func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 		}
 	}
 
-	if strings.Contains(stdout.String(), "CHC-2") {
+	if strings.Contains(stdout.String(), "CHR-2") {
 		t.Fatalf("stdout contains execution after failure:\n%s", stdout.String())
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-2")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-2")
 	if len(records) != 0 {
-		t.Fatalf("CHC-2 execution records = %d, want 0", len(records))
+		t.Fatalf("CHR-2 execution records = %d, want 0", len(records))
 	}
 
 	loopRuns := listProjectLoopRuns(t, devRoot, projectID(projectDir))
@@ -4249,8 +4249,8 @@ func TestTicketLoopRecordsFailedNotification(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
-		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Ready.md", testLoopTicket(
+		"CHR-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
 	))
 
 	err := run(t.Context(), []string{
@@ -4297,8 +4297,8 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 	devRoot := t.TempDir()
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:         "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:         "CHR-1",
 		Title:       "Do something",
 		Status:      "open",
 		Priority:    "high",
@@ -4333,7 +4333,7 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket show returned error: %v", err)
@@ -4352,7 +4352,7 @@ func TestTicketShowPrintsEvidenceStrategySummary(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 	appendTicketEvidenceStrategy(t, ticketPath)
 
 	var stdout bytes.Buffer
@@ -4364,7 +4364,7 @@ func TestTicketShowPrintsEvidenceStrategySummary(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket show returned error: %v", err)
@@ -4379,7 +4379,7 @@ func TestTicketShowPrintsEvidenceStrategySummary(t *testing.T) {
 
 func testTicketShowReviewTicket() core.Ticket {
 	return core.Ticket{
-		Key:         "CHC-1",
+		Key:         "CHR-1",
 		Title:       "Do something",
 		Status:      "open",
 		Priority:    "high",
@@ -4408,7 +4408,7 @@ func testTicketShowReviewTicket() core.Ticket {
 
 func wantTicketShowReviewOutput() []string {
 	return []string{
-		"key: CHC-1",
+		"key: CHR-1",
 		"title: Do something",
 		"status: open",
 		"priority: high",
@@ -4421,7 +4421,7 @@ func wantTicketShowReviewOutput() []string {
 		"review_round: 1",
 		"review_result: needs_changes",
 		"review_comments_url: https://forge.example.com/owner/repo/pulls/123",
-		"path: CHC-1-Do-something.md",
+		"path: CHR-1-Do-something.md",
 	}
 }
 
@@ -4442,7 +4442,7 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 
 	var stdout bytes.Buffer
 
@@ -4454,7 +4454,7 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 		"--dir",
 		projectDir,
 		"--dry-run",
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket start returned error: %v", err)
@@ -4462,20 +4462,20 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 
 	for _, want := range []string{
 		"execution: exec-",
-		"ticket: CHC-1",
-		"ticket_path: " + filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Do-something.md"),
+		"ticket: CHR-1",
+		"ticket_path: " + filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md"),
 		"status: pending",
 		"dry_run: true",
-		"run_artifact_dir: .chc/user/runtime/runs/CHC-1/exec-",
-		"result_path: .chc/user/runtime/runs/CHC-1/exec-",
-		"ok    dockerfile   .chc/user/runtime/agent/Dockerfile",
+		"run_artifact_dir: .chr/user/runtime/runs/CHR-1/exec-",
+		"result_path: .chr/user/runtime/runs/CHR-1/exec-",
+		"ok    dockerfile   .chr/user/runtime/agent/Dockerfile",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
 		}
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 0 {
 		t.Fatalf("execution records = %d, want 0", len(records))
 	}
@@ -4488,7 +4488,7 @@ func TestTicketStartCreatesPendingExecution(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 
 	var stdout bytes.Buffer
 
@@ -4499,7 +4499,7 @@ func TestTicketStartCreatesPendingExecution(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket start returned error: %v", err)
@@ -4509,7 +4509,7 @@ func TestTicketStartCreatesPendingExecution(t *testing.T) {
 		t.Fatalf("stdout = %q, want dry_run false", stdout.String())
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 1 {
 		t.Fatalf("execution records = %d, want 1", len(records))
 	}
@@ -4538,7 +4538,7 @@ func TestTicketStartPrintsHarnessFailure(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 
 	var stdout bytes.Buffer
 
@@ -4549,7 +4549,7 @@ func TestTicketStartPrintsHarnessFailure(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket start returned nil error")
@@ -4559,8 +4559,8 @@ func TestTicketStartPrintsHarnessFailure(t *testing.T) {
 		"status: failed",
 		"failure_kind: harness",
 		"failure_reason: harness: docker unavailable",
-		"diagnostic_log_path: " + filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1"),
-		"diagnostic_result_path: " + filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1"),
+		"diagnostic_log_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
+		"diagnostic_result_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -4576,7 +4576,7 @@ func TestTicketStartPrintsWorkerFailure(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 	writeRuntimeTemplate(t, projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 
 	var stdout bytes.Buffer
 
@@ -4587,7 +4587,7 @@ func TestTicketStartPrintsWorkerFailure(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket start returned nil error")
@@ -4597,9 +4597,9 @@ func TestTicketStartPrintsWorkerFailure(t *testing.T) {
 		"status: failed",
 		"failure_kind: worker",
 		"failure_reason: worker: codex failed",
-		"diagnostic_log_path: " + filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1"),
-		"diagnostic_result_path: " + filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1"),
-		"diagnostic_validation_path: " + filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1"),
+		"diagnostic_log_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
+		"diagnostic_result_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
+		"diagnostic_validation_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -4614,7 +4614,7 @@ func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionReco
 		t.Fatalf("Status = %q, want succeeded", record.Status)
 	}
 
-	if record.TicketPath != filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Do-something.md") {
+	if record.TicketPath != filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md") {
 		t.Fatalf("TicketPath = %q, want ticket path", record.TicketPath)
 	}
 
@@ -4622,7 +4622,7 @@ func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionReco
 		t.Fatalf("ID = %q, want exec prefix", record.ID)
 	}
 
-	if record.Artifacts.RunDir != filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", record.ID) {
+	if record.Artifacts.RunDir != filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", record.ID) {
 		t.Fatalf("Artifacts.RunDir = %q, want execution run dir", record.Artifacts.RunDir)
 	}
 
@@ -4637,7 +4637,7 @@ func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionReco
 		t.Fatalf("read worker context: %v", err)
 	}
 
-	if !strings.Contains(string(contextContent), "- ticket_path: /workspace/.chc/user/tickets/CHC-1-Do-something.md") {
+	if !strings.Contains(string(contextContent), "- ticket_path: /workspace/.chr/user/tickets/CHR-1-Do-something.md") {
 		t.Fatalf("worker context = %q, want container ticket path", string(contextContent))
 	}
 }
@@ -4646,13 +4646,13 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chc", "user", "runtime", "runs"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "runtime", "runs"), 0o755)
 	if err != nil {
 		t.Fatalf("create runtime runs dir: %v", err)
 	}
 
 	addProject(t, devRoot, "example", projectDir)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 
 	var stdout bytes.Buffer
 
@@ -4663,7 +4663,7 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket start returned nil error")
@@ -4677,7 +4677,7 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 		t.Fatalf("stdout = %q, want runtime failure kind", stdout.String())
 	}
 
-	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHR-1")
 	if len(records) != 0 {
 		t.Fatalf("execution records = %d, want 0", len(records))
 	}
@@ -4688,7 +4688,7 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 	devRoot := t.TempDir()
 	ticket := testTicketWithReviewRef()
 	ticket.Body = testApplyResultTicketBody(t)
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticket)
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -4721,7 +4721,7 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 
 	tickets := listProjectTickets(t, devRoot, projectDir)
 	if len(tickets) != 1 || tickets[0].Status != "reviewing" {
-		t.Fatalf("indexed tickets = %#v, want reviewing CHC-1", tickets)
+		t.Fatalf("indexed tickets = %#v, want reviewing CHR-1", tickets)
 	}
 }
 
@@ -4730,7 +4730,7 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 	devRoot := t.TempDir()
 	ticket := testTicketWithReviewRef()
 	ticket.Body = testApplyResultTicketBody(t)
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticket)
 	worktreeDir := newApplyResultGitRepo(t)
 	writeGateCLIFile(t, projectDir, "README.md", "dirty user checkout\n")
 	writeGateCLIFile(t, worktreeDir, filepath.Join("internal", "core", "worktree.go"), "package core\n")
@@ -4744,9 +4744,9 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 		ExecutionWorkspaceDir: worktreeDir,
 		BaseRef:               "origin/dev",
 		BaseSHA:               "abc123",
-		TicketBranch:          "chc/CHC-1",
+		TicketBranch:          "chr/CHR-1",
 	}
-	runDir := filepath.Join(worktreeDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-apply")
+	runDir := filepath.Join(worktreeDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-apply")
 	record.Artifacts = core.ExecutionArtifacts{
 		RunDir:         runDir,
 		ResultPath:     filepath.Join(runDir, "result.json"),
@@ -4784,7 +4784,7 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 func TestTicketApplyResultBlocksMissingEvidenceStrategy(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketWithReviewRef())
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -4826,7 +4826,7 @@ func TestTicketApplyResultAllowsMissingOptionalEvidenceStrategy(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 	writeCLIWorkspaceConfig(t, projectDir, "evidence:\n  strategy:\n    ticket_checklist: optional\n")
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketWithReviewRef())
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -4856,11 +4856,11 @@ func TestTicketApplyResultAllowsMissingOptionalEvidenceStrategy(t *testing.T) {
 func TestTicketApplyResultBlocksActiveApplicableGherkinNotApplicable(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeCLIAcceptanceFeature(t, projectDir, ".chc/user/acceptance/onboarding.feature")
+	writeCLIAcceptanceFeature(t, projectDir, ".chr/user/acceptance/onboarding.feature")
 
 	ticket := testTicketWithReviewRef()
 	ticket.Body = testApplyResultTicketBody(t)
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticket)
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -4989,7 +4989,7 @@ func testTicketWithReviewRef() core.Ticket {
 		{
 			Type:     "pull_request",
 			Provider: "forgejo",
-			URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+			URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
 			ID:       "274",
 			Status:   "open",
 		},
@@ -5029,10 +5029,10 @@ func setupCLIReviewRemoteBase(t *testing.T, devRoot, projectDir, base string) (*
 	t.Helper()
 
 	runner := newFakeCLIReviewRemoteRunner()
-	runner.outputs["tea api /repos/adrianpk/chc/pulls/274"] = []byte(`{"state":"open","base":{"ref":"` + base + `"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":true}`)
-	runner.outputs["tea api /repos/adrianpk/chc/pulls/274.diff"] = []byte("diff --git a/file.go b/file.go")
-	runner.outputs["tea api /repos/adrianpk/chc/issues/274/comments"] = []byte(`[]`)
-	runner.outputs["tea api /repos/adrianpk/chc/commits/abc123/statuses"] = []byte(`[]`)
+	runner.outputs["tea api /repos/adrianpk/chr/pulls/274"] = []byte(`{"state":"open","base":{"ref":"` + base + `"},"head":{"ref":"feat/slice-2-pr-reference-workflow","sha":"abc123"},"mergeable":true}`)
+	runner.outputs["tea api /repos/adrianpk/chr/pulls/274.diff"] = []byte("diff --git a/file.go b/file.go")
+	runner.outputs["tea api /repos/adrianpk/chr/issues/274/comments"] = []byte(`[]`)
+	runner.outputs["tea api /repos/adrianpk/chr/commits/abc123/statuses"] = []byte(`[]`)
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -5044,7 +5044,7 @@ func assertTicketApplyResultOutput(t *testing.T, stdout string, record core.Exec
 
 	for _, want := range []string{
 		"execution: exec-apply",
-		"ticket: CHC-1",
+		"ticket: CHR-1",
 		"status: reviewing",
 		"result_status: succeeded",
 		"execution_report_path: " + filepath.Join(record.Artifacts.RunDir, "execution-report.md"),
@@ -5064,7 +5064,7 @@ func assertTicketApplyResultContent(t *testing.T, content string) {
 		"Execution `exec-apply` finished with status `succeeded`.",
 		"Summary: ready for review",
 		`branch: "feat/slice-2-pr-reference-workflow"`,
-		`url: "https://forge.example.com/adrianpk/chc/pulls/274"`,
+		`url: "https://forge.example.com/adrianpk/chr/pulls/274"`,
 		"## ",
 		"- command: make verify",
 		"- status: succeeded",
@@ -5078,7 +5078,7 @@ func assertTicketApplyResultContent(t *testing.T, content string) {
 func TestTicketApplyResultRecordsBlockedNotification(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -5109,7 +5109,7 @@ func TestTicketApplyResultRecordsBlockedNotification(t *testing.T) {
 func TestTicketApplyResultDryRunDoesNotMutateTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -5145,16 +5145,16 @@ func TestReportListListsProjectReports(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
@@ -5175,8 +5175,8 @@ func TestReportListListsProjectReports(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		"kind: execution path: .chc/user/runtime/runs/CHC-1/exec-1/execution-report.md ticket: CHC-1 execution: exec-1 loop: none status: succeeded",
-		"kind: loop path: .chc/user/runtime/runs/loop-1/loop-report.md ticket: none execution: none loop: loop-1 status: blocked",
+		"kind: execution path: .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md ticket: CHR-1 execution: exec-1 loop: none status: succeeded",
+		"kind: loop path: .chr/user/runtime/runs/loop-1/loop-report.md ticket: none execution: none loop: loop-1 status: blocked",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -5188,23 +5188,23 @@ func TestReportListFiltersReports(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
-		"CHC-2",
+		"CHR-2",
 		"exec-2",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHC-2\n- status: blocked\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-2\n- status: blocked\n")
 
 	var stdout bytes.Buffer
 
@@ -5216,7 +5216,7 @@ func TestReportListFiltersReports(t *testing.T) {
 		"--kind",
 		"execution",
 		"--ticket",
-		"CHC-2",
+		"CHR-2",
 		"--status",
 		"blocked",
 	}, &stdout, &bytes.Buffer{})
@@ -5237,14 +5237,14 @@ func TestReportShowPrintsReportBody(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 
 	var stdout bytes.Buffer
 
@@ -5269,7 +5269,7 @@ func TestReportShowPrintsReportMetadata(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
@@ -5292,7 +5292,7 @@ func TestReportShowPrintsReportMetadata(t *testing.T) {
 		t.Fatalf("report show returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), "kind: loop path: .chc/user/runtime/runs/loop-1/loop-report.md") {
+	if !strings.Contains(stdout.String(), "kind: loop path: .chr/user/runtime/runs/loop-1/loop-report.md") {
 		t.Fatalf("stdout does not contain report metadata:\n%s", stdout.String())
 	}
 }
@@ -5301,23 +5301,23 @@ func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chc",
+		".chr",
 		"user",
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-2",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHC-1\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-1\n")
 
 	err := run(t.Context(), []string{
 		"report",
@@ -5325,7 +5325,7 @@ func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
 		"--dir",
 		projectDir,
 		"--ticket",
-		"CHC-1",
+		"CHR-1",
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("report show returned nil error")
@@ -5349,7 +5349,7 @@ func TestTicketShowRejectsMissingTicket(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket show returned nil error")
@@ -5359,8 +5359,8 @@ func TestTicketShowRejectsMissingTicket(t *testing.T) {
 func TestTicketCommentAppendsComment(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:       "CHC-1",
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
@@ -5380,7 +5380,7 @@ func TestTicketCommentAppendsComment(t *testing.T) {
 		projectDir,
 		"--author",
 		"adrian",
-		"CHC-1",
+		"CHR-1",
 		"Looks ready.",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
@@ -5410,10 +5410,10 @@ func TestTicketCommentAppendsComment(t *testing.T) {
 func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 	t.Helper()
 
-	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Do-something.md")
+	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md")
 
 	content, err := core.NewTicketRenderer().RenderTicket(core.Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
@@ -5434,10 +5434,10 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 	}
 
 	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
-		Key:          "CHC-1",
+		Key:          "CHR-1",
 		Title:        "Do something",
 		Status:       "open",
-		RelativePath: filepath.Join(".chc", "user", "tickets", "CHC-1-Do-something.md"),
+		RelativePath: filepath.Join(".chr", "user", "tickets", "CHR-1-Do-something.md"),
 		Path:         ticketPath,
 	})
 
@@ -5457,7 +5457,7 @@ func TestTicketCommentRejectsMissingTicket(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		"Looks ready.",
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
@@ -5468,8 +5468,8 @@ func TestTicketCommentRejectsMissingTicket(t *testing.T) {
 func TestTicketStatusUpdatesTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:       "CHC-1",
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
@@ -5487,14 +5487,14 @@ func TestTicketStatusUpdatesTicket(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		"ready",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), "ticket: CHC-1 ready") {
+	if !strings.Contains(stdout.String(), "ticket: CHR-1 ready") {
 		t.Fatalf("stdout = %q, want status result", stdout.String())
 	}
 
@@ -5513,7 +5513,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 	devRoot := t.TempDir()
 	ticket := testTicket()
 	ticket.Body = testApplyResultTicketBody(t)
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", ticket)
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", ticket)
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -5531,16 +5531,16 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 		"--provider",
 		"forgejo",
 		"--url",
-		"https://forge.example.com/adrianpk/chc/pulls/274",
+		"https://forge.example.com/adrianpk/chr/pulls/274",
 		"--id",
 		"274",
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket review-ref returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), "ticket: CHC-1 review_ref") {
+	if !strings.Contains(stdout.String(), "ticket: CHR-1 review_ref") {
 		t.Fatalf("stdout = %q, want review-ref result", stdout.String())
 	}
 
@@ -5551,7 +5551,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		core.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
@@ -5562,7 +5562,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 	for _, want := range []string{
 		`branch: "feat/slice-2-pr-reference-workflow"`,
 		`review_refs:`,
-		`url: "https://forge.example.com/adrianpk/chc/pulls/274"`,
+		`url: "https://forge.example.com/adrianpk/chr/pulls/274"`,
 		`status: "ready_for_review"`,
 	} {
 		if !strings.Contains(content, want) {
@@ -5574,7 +5574,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 func TestTicketStatusBlocksReadyForReviewWithoutEvidenceStrategy(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketWithReviewRef())
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -5585,7 +5585,7 @@ func TestTicketStatusBlocksReadyForReviewWithoutEvidenceStrategy(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		core.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
@@ -5607,7 +5607,7 @@ func TestTicketStatusAllowsReadyForReviewWithOptionalEvidenceStrategy(t *testing
 	devRoot := t.TempDir()
 	writeCLIWorkspaceConfig(t, projectDir, "evidence:\n  strategy:\n    ticket_checklist: optional\n")
 
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketWithReviewRef())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketWithReviewRef())
 
 	addProject(t, devRoot, "example", projectDir)
 
@@ -5618,7 +5618,7 @@ func TestTicketStatusAllowsReadyForReviewWithOptionalEvidenceStrategy(t *testing
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		core.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
@@ -5757,7 +5757,7 @@ func TestTicketReviewModeStatusPrintsInvalidMode(t *testing.T) {
 func TestTicketReviewPassUpdatesTicketWithoutRemoteComment(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForReview())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketReadyForReview())
 	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 
 	defer restoreRunner()
@@ -5773,7 +5773,7 @@ func TestTicketReviewPassUpdatesTicketWithoutRemoteComment(t *testing.T) {
 		projectDir,
 		"--result",
 		"pass",
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket review returned error: %v", err)
@@ -5781,7 +5781,7 @@ func TestTicketReviewPassUpdatesTicketWithoutRemoteComment(t *testing.T) {
 
 	for _, want := range []string{
 		"ticket_review: result",
-		"ticket: CHC-1",
+		"ticket: CHR-1",
 		"result: pass",
 		"review_state: pass",
 		"status: ready_for_merge",
@@ -5798,7 +5798,7 @@ func TestTicketReviewPassUpdatesTicketWithoutRemoteComment(t *testing.T) {
 		`status: "ready_for_merge"`,
 		`review_state: "pass"`,
 		`review_result: "pass"`,
-		`review_comments_url: "https://forge.example.com/adrianpk/chc/pulls/274"`,
+		`review_comments_url: "https://forge.example.com/adrianpk/chr/pulls/274"`,
 		`review_round: 1`,
 		`blocking_findings: []`,
 	} {
@@ -5815,7 +5815,7 @@ func TestTicketReviewPassUpdatesTicketWithoutRemoteComment(t *testing.T) {
 func TestTicketReviewNeedsChangesWritesRemoteFinding(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForReview())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketReadyForReview())
 	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 
 	defer restoreRunner()
@@ -5833,7 +5833,7 @@ func TestTicketReviewNeedsChangesWritesRemoteFinding(t *testing.T) {
 		"needs_changes",
 		"--finding",
 		"Handle nil input.",
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket review returned error: %v", err)
@@ -5863,7 +5863,7 @@ func TestTicketReviewNeedsChangesWritesRemoteFinding(t *testing.T) {
 		}
 	}
 
-	command := "tea api -X POST /repos/adrianpk/chc/issues/274/comments -d @-"
+	command := "tea api -X POST /repos/adrianpk/chr/issues/274/comments -d @-"
 	input := string(runner.inputs[command])
 
 	if !strings.Contains(input, "Handle nil input.") {
@@ -5874,7 +5874,7 @@ func TestTicketReviewNeedsChangesWritesRemoteFinding(t *testing.T) {
 func TestTicketReviewDryRunDoesNotMutateTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForReview())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketReadyForReview())
 	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 
 	defer restoreRunner()
@@ -5893,7 +5893,7 @@ func TestTicketReviewDryRunDoesNotMutateTicket(t *testing.T) {
 		"needs_changes",
 		"--finding",
 		"Handle nil input.",
-		"CHC-1",
+		"CHR-1",
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket review dry-run returned error: %v", err)
@@ -5912,7 +5912,7 @@ func TestTicketReviewDryRunDoesNotMutateTicket(t *testing.T) {
 func TestTicketMergeDryRunDoesNotMutateTicket(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketReadyForMerge())
 	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 
 	defer restoreRunner()
@@ -5929,7 +5929,7 @@ func TestTicketMergeDryRunDoesNotMutateTicket(t *testing.T) {
 		"--dir",
 		projectDir,
 		"--dry-run",
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket merge dry-run returned error: %v", err)
@@ -5937,7 +5937,7 @@ func TestTicketMergeDryRunDoesNotMutateTicket(t *testing.T) {
 
 	for _, want := range []string{
 		"ticket_merge: result",
-		"ticket: CHC-1",
+		"ticket: CHR-1",
 		"allowed: true",
 		"status: ready_for_merge",
 		"merge_state: pending",
@@ -5962,12 +5962,12 @@ func TestTicketMergeDryRunDoesNotMutateTicket(t *testing.T) {
 func TestTicketMergeAppliesSuccessfulMerge(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketReadyForMerge())
 	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 
 	defer restoreRunner()
 
-	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chr/pulls/274/merge -d @-"
 	runner.inputOutputs[mergeCommand] = []byte(`{"sha":"abc123"}`)
 
 	var stdout bytes.Buffer
@@ -5979,7 +5979,7 @@ func TestTicketMergeAppliesSuccessfulMerge(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket merge returned error: %v", err)
@@ -5987,7 +5987,7 @@ func TestTicketMergeAppliesSuccessfulMerge(t *testing.T) {
 
 	for _, want := range []string{
 		"ticket_merge: result",
-		"ticket: CHC-1",
+		"ticket: CHR-1",
 		"allowed: true",
 		"status: done",
 		"merge_state: merged",
@@ -6027,7 +6027,7 @@ func TestTicketMergeUsesConfiguredIntegrationBranch(t *testing.T) {
   integration_branch: develop
   canonical_remote: upstream
 `)
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketReadyForMerge())
 
 	runner, restoreRunner := setupCLIReviewRemoteBase(t, devRoot, projectDir, "develop")
 
@@ -6043,7 +6043,7 @@ func TestTicketMergeUsesConfiguredIntegrationBranch(t *testing.T) {
 		"--dir",
 		projectDir,
 		"--dry-run",
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket merge returned error: %v", err)
@@ -6068,12 +6068,12 @@ func TestTicketMergeUsesConfiguredIntegrationBranch(t *testing.T) {
 func TestTicketMergeRecordsProviderFailure(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicketReadyForMerge())
+	ticketPath := writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicketReadyForMerge())
 	runner, restoreRunner := setupCLIReviewRemoteEvidence(t, devRoot, projectDir)
 
 	defer restoreRunner()
 
-	mergeCommand := "tea api -X PUT /repos/adrianpk/chc/pulls/274/merge -d @-"
+	mergeCommand := "tea api -X PUT /repos/adrianpk/chr/pulls/274/merge -d @-"
 	runner.inputErrs[mergeCommand] = errors.New("provider failed")
 
 	var stdout bytes.Buffer
@@ -6085,7 +6085,7 @@ func TestTicketMergeRecordsProviderFailure(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket merge returned error: %v", err)
@@ -6123,13 +6123,13 @@ func TestTicketReviewModeDiagnosticsPrintsProviderStatus(t *testing.T) {
 
 	writeCLIWorkspaceConfig(t, projectDir, `review:
   forgejo_cli: tea
-  forgejo_token_env: CHC_FORGEJO_TOKEN
+  forgejo_token_env: CHR_FORGEJO_TOKEN
 `)
 	addProject(t, devRoot, "example", projectDir)
 
 	restoreRunner := replaceReviewProviderDiagnosticRunner(fakeCLIReviewProviderDiagnosticRunner{
 		paths: map[string]string{"tea": "/usr/bin/tea"},
-		env:   map[string]string{"CHC_FORGEJO_TOKEN": "secret"},
+		env:   map[string]string{"CHR_FORGEJO_TOKEN": "secret"},
 	})
 	defer restoreRunner()
 
@@ -6144,7 +6144,7 @@ func TestTicketReviewModeDiagnosticsPrintsProviderStatus(t *testing.T) {
 		"--dir",
 		projectDir,
 		"--url",
-		"https://forge.adrianpk.com/adrianpk/chc/pulls/275",
+		"https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket review-mode diagnostics returned error: %v", err)
@@ -6156,10 +6156,10 @@ func TestTicketReviewModeDiagnosticsPrintsProviderStatus(t *testing.T) {
 		"provider_status: ready",
 		"host: forge.adrianpk.com",
 		"owner: adrianpk",
-		"repo: chc",
+		"repo: chr",
 		"number: 275",
 		"check.cli_available: ok reason=found detail=/usr/bin/tea",
-		"check.token_available: ok reason=found detail=CHC_FORGEJO_TOKEN",
+		"check.token_available: ok reason=found detail=CHR_FORGEJO_TOKEN",
 		"check.pr_readable: ok reason=readable",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -6219,7 +6219,7 @@ func TestTicketStatusRejectsInvalidStatus(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		"unknown",
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
@@ -6231,7 +6231,7 @@ func TestTicketStatusRejectsReadyForReviewWithoutReviewRef(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", testTicket())
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", testTicket())
 	addProject(t, devRoot, "example", projectDir)
 
 	err := run(t.Context(), []string{
@@ -6241,7 +6241,7 @@ func TestTicketStatusRejectsReadyForReviewWithoutReviewRef(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		core.TicketStatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
@@ -6262,7 +6262,7 @@ func TestTicketStatusRejectsMissingTicket(t *testing.T) {
 		devRoot,
 		"--dir",
 		projectDir,
-		"CHC-1",
+		"CHR-1",
 		"ready",
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
@@ -6273,19 +6273,19 @@ func TestTicketStatusRejectsMissingTicket(t *testing.T) {
 func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:       "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 	indexTicket(t, devRoot, projectDir, core.IndexedTicket{
-		Key:          "CHC-9",
+		Key:          "CHR-9",
 		Title:        "Old",
 		Status:       "open",
-		RelativePath: "CHC-9-Old.md",
-		Path:         filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-9-Old.md"),
+		RelativePath: "CHR-9-Old.md",
+		Path:         filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-9-Old.md"),
 	})
 
 	var stdout bytes.Buffer
@@ -6316,8 +6316,8 @@ func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 		t.Fatalf("len(tickets) = %d, want 1", len(tickets))
 	}
 
-	if tickets[0].Key != "CHC-1" || tickets[0].Title != "Do something" {
-		t.Fatalf("ticket = %#v, want rebuilt CHC-1", tickets[0])
+	if tickets[0].Key != "CHR-1" || tickets[0].Title != "Do something" {
+		t.Fatalf("ticket = %#v, want rebuilt CHR-1", tickets[0])
 	}
 }
 
@@ -6325,7 +6325,7 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	badTicketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Bad.md")
+	badTicketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Bad.md")
 
 	err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755)
 	if err != nil {
@@ -6354,7 +6354,7 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 	for _, want := range []string{
 		"indexed: 0",
 		"parse_errors: 1",
-		"parse_error: CHC-1-Bad.md",
+		"parse_error: CHR-1-Bad.md",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -6365,8 +6365,8 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 func TestIndexStatusReportsCleanIndex(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:       "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
@@ -6414,8 +6414,8 @@ func TestIndexStatusReportsCleanIndex(t *testing.T) {
 func TestIndexStatusReportsMissingTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:       "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
@@ -6438,7 +6438,7 @@ func TestIndexStatusReportsMissingTickets(t *testing.T) {
 
 	for _, want := range []string{
 		"missing: 1",
-		"missing_ticket: CHC-1-Do-something.md",
+		"missing_ticket: CHR-1-Do-something.md",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -6449,8 +6449,8 @@ func TestIndexStatusReportsMissingTickets(t *testing.T) {
 func TestIndexStatusReportsStaleTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:       "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
@@ -6469,8 +6469,8 @@ func TestIndexStatusReportsStaleTickets(t *testing.T) {
 		t.Fatalf("index rebuild returned error: %v", err)
 	}
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Do-something.md", core.Ticket{
-		Key:       "CHC-1",
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Do-something.md", core.Ticket{
+		Key:       "CHR-1",
 		Title:     "Do something else",
 		Status:    "open",
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
@@ -6493,7 +6493,7 @@ func TestIndexStatusReportsStaleTickets(t *testing.T) {
 
 	for _, want := range []string{
 		"stale: 1",
-		"stale_ticket: CHC-1-Do-something.md",
+		"stale_ticket: CHR-1-Do-something.md",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -6505,7 +6505,7 @@ func TestIndexStatusReportsInvalidTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	badTicketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Bad.md")
+	badTicketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Bad.md")
 
 	err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755)
 	if err != nil {
@@ -6533,7 +6533,7 @@ func TestIndexStatusReportsInvalidTickets(t *testing.T) {
 
 	for _, want := range []string{
 		"invalid: 1",
-		"invalid_ticket: CHC-1-Bad.md",
+		"invalid_ticket: CHR-1-Bad.md",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -6628,7 +6628,7 @@ func TestMaintenanceRegistryStatusReportsRegisteredProjectDiagnostics(t *testing
 	addProject(t, devRoot, "example", projectDir)
 	addProject(t, devRoot, "no-workspace", noWorkspaceDir)
 
-	err := os.RemoveAll(filepath.Join(noWorkspaceDir, ".chc"))
+	err := os.RemoveAll(filepath.Join(noWorkspaceDir, ".chr"))
 	if err != nil {
 		t.Fatalf("RemoveAll returned error: %v", err)
 	}
@@ -6874,7 +6874,7 @@ func TestMaintenanceRegistrySetPathDryRunDoesNotMutateProject(t *testing.T) {
 func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 
 	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
@@ -6903,7 +6903,7 @@ func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
 		"executions: 1",
 		"drifted: 1",
 		"missing_artifacts: 4",
-		"execution: exec-1 ticket: CHC-1 status: succeeded artifact_status: missing_artifacts",
+		"execution: exec-1 ticket: CHR-1 status: succeeded artifact_status: missing_artifacts",
 		"artifact: exec-1 name: run_dir exists: true path: " + record.Artifacts.RunDir,
 		"artifact: exec-1 name: result exists: false path: " + record.Artifacts.ResultPath,
 		"artifact: exec-1 name: report exists: false path: " + core.ExecutionReportPath(record),
@@ -6917,7 +6917,7 @@ func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
 func TestMaintenanceExecutionArtifactsReportsCompleteArtifacts(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 	writeCLIExecutionArtifacts(t, record)
 	createCLIExecutionRecord(t, devRoot, record)
@@ -6941,7 +6941,7 @@ func TestMaintenanceExecutionArtifactsReportsCompleteArtifacts(t *testing.T) {
 		"executions: 1",
 		"drifted: 0",
 		"missing_artifacts: 0",
-		"execution: exec-1 ticket: CHC-1 status: succeeded artifact_status: ok",
+		"execution: exec-1 ticket: CHR-1 status: succeeded artifact_status: ok",
 		"artifact: exec-1 name: validation exists: true path: " + record.Artifacts.ValidationPath,
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -6953,9 +6953,9 @@ func TestMaintenanceExecutionArtifactsReportsCompleteArtifacts(t *testing.T) {
 func TestMaintenanceExecutionCleanupPreviewReportsUnreferencedArtifactDirs(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	artifactDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs")
-	referencedDir := filepath.Join(artifactDir, "CHC-1", "exec-1")
-	unreferencedDir := filepath.Join(artifactDir, "CHC-2", "exec-2")
+	artifactDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs")
+	referencedDir := filepath.Join(artifactDir, "CHR-1", "exec-1")
+	unreferencedDir := filepath.Join(artifactDir, "CHR-2", "exec-2")
 	record := cliExecutionRecord(projectDir, referencedDir)
 
 	for _, dir := range []string{referencedDir, unreferencedDir} {
@@ -6998,7 +6998,7 @@ func TestMaintenanceExecutionCleanupPreviewReportsUnreferencedArtifactDirs(t *te
 func TestMaintenanceExecutionCleanupPreviewDoesNotDeleteCandidates(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	unreferencedDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-2", "exec-2")
+	unreferencedDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-2", "exec-2")
 
 	err := os.MkdirAll(unreferencedDir, 0o755)
 	if err != nil {
@@ -7024,7 +7024,7 @@ func TestMaintenanceExecutionCleanupPreviewDoesNotDeleteCandidates(t *testing.T)
 func TestMaintenanceBundleWritesDiagnosticBundle(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	bundlePath := filepath.Join(projectDir, ".chc", "maintenance", "diagnostic-bundle.md")
+	bundlePath := filepath.Join(projectDir, ".chr", "maintenance", "diagnostic-bundle.md")
 
 	addProject(t, devRoot, "example", projectDir)
 	writeCLIWorkspaceConfig(t, projectDir, `version: 1
@@ -7075,7 +7075,7 @@ func TestProjectAddRegistersProject(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
 
-	err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755)
+	err := os.Mkdir(filepath.Join(projectDir, ".chr"), 0o755)
 	if err != nil {
 		t.Fatalf("create project workspace: %v", err)
 	}
@@ -7099,7 +7099,7 @@ func TestProjectAddRegistersProject(t *testing.T) {
 		t.Fatalf("stdout = %q, want registered project", stdout.String())
 	}
 
-	assertPathExists(t, filepath.Join(devRoot, "data", "chc", "core.db"))
+	assertPathExists(t, filepath.Join(devRoot, "data", "chr", "core.db"))
 }
 
 func TestProjectAddRejectsProjectWithoutWorkspace(t *testing.T) {
@@ -7119,7 +7119,7 @@ func TestProjectListPrintsRegisteredProjects(t *testing.T) {
 	projectDir := t.TempDir()
 	devRoot := t.TempDir()
 
-	err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755)
+	err := os.Mkdir(filepath.Join(projectDir, ".chr"), 0o755)
 	if err != nil {
 		t.Fatalf("create project workspace: %v", err)
 	}
@@ -7193,7 +7193,7 @@ func TestProjectSelectByNameStoresCurrentProject(t *testing.T) {
 		t.Fatalf("stdout = %q, want current project", currentStdout.String())
 	}
 
-	assertPathExists(t, filepath.Join(devRoot, "config", "chc", "active-project"))
+	assertPathExists(t, filepath.Join(devRoot, "config", "chr", "active-project"))
 }
 
 func TestProjectSelectByPathStoresCurrentProject(t *testing.T) {
@@ -7284,7 +7284,7 @@ func TestProjectSelectRejectsRegisteredPathWithoutWorkspace(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	err := os.RemoveAll(filepath.Join(projectDir, ".chc"))
+	err := os.RemoveAll(filepath.Join(projectDir, ".chr"))
 	if err != nil {
 		t.Fatalf("remove project workspace: %v", err)
 	}
@@ -7332,7 +7332,7 @@ func TestTicketNewRejectsActiveProjectWithoutWorkspace(t *testing.T) {
 	addProject(t, devRoot, "example", projectDir)
 	selectProject(t, devRoot, "example")
 
-	err := os.RemoveAll(filepath.Join(projectDir, ".chc"))
+	err := os.RemoveAll(filepath.Join(projectDir, ".chr"))
 	if err != nil {
 		t.Fatalf("remove project workspace: %v", err)
 	}
@@ -7417,12 +7417,12 @@ func cliExecutionRecord(projectDir, runDir string) core.ExecutionRecord {
 	return core.ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  projectID(projectDir),
-		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:  "CHR-1",
+		TicketPath: filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md"),
 		Status:     core.ExecutionStatusSucceeded,
 		Runtime: core.ExecutionRuntimeRef{
-			Image:             "chc-agent-runtime:local",
-			DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+			Image:             "chr-agent-runtime:local",
+			DockerfilePath:    filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
@@ -7715,19 +7715,19 @@ func testApplyResultExecutionRecord(
 	status core.ExecutionStatus,
 	failureReason string,
 ) core.ExecutionRecord {
-	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-apply")
+	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-apply")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
 	return core.ExecutionRecord{
 		ID:            "exec-apply",
 		ProjectID:     projectID(projectDir),
-		TicketKey:     "CHC-1",
-		TicketPath:    filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Do-something.md"),
+		TicketKey:     "CHR-1",
+		TicketPath:    filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md"),
 		Status:        status,
 		FailureReason: failureReason,
 		Runtime: core.ExecutionRuntimeRef{
-			Image:             "chc-runtime:latest",
-			DockerfilePath:    filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+			Image:             "chr-runtime:latest",
+			DockerfilePath:    filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
@@ -7796,7 +7796,7 @@ func readFile(t *testing.T, path string) string {
 
 func testTicket() core.Ticket {
 	return core.Ticket{
-		Key:         "CHC-1",
+		Key:         "CHR-1",
 		Title:       "Do something",
 		Status:      "open",
 		Priority:    "high",
@@ -7848,7 +7848,7 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 }
 
 func isFakeTicketStartWorkerCommand(command core.HarnessCommand) bool {
-	return command.Args[0] == "run" && harnessEnvValue(command, "CHC_RESULT_PATH") != ""
+	return command.Args[0] == "run" && harnessEnvValue(command, "CHR_RESULT_PATH") != ""
 }
 
 func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command core.HarnessCommand) error {
@@ -7856,20 +7856,20 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command core
 		return nil
 	}
 
-	resultPath := harnessEnvValue(command, "CHC_RESULT_PATH")
+	resultPath := harnessEnvValue(command, "CHR_RESULT_PATH")
 	if resultPath == "" {
 		return nil
 	}
 
 	status := core.ExecutionResultStatusSucceeded
-	ticketKey := harnessEnvValue(command, "CHC_TICKET_KEY")
+	ticketKey := harnessEnvValue(command, "CHR_TICKET_KEY")
 
 	configured, ok := e.resultStatuses[ticketKey]
 	if ok {
 		status = configured
 	}
 
-	content := `{"execution_id":"` + harnessEnvValue(command, "CHC_EXECUTION_ID") +
+	content := `{"execution_id":"` + harnessEnvValue(command, "CHR_EXECUTION_ID") +
 		`","ticket_key":"` + ticketKey +
 		`","status":"` + string(status) +
 		`","summary":"done","evidence_summary":{"strategy":"planned","produced":"evidence produced","validation":"validation passed"}}`
@@ -7952,7 +7952,7 @@ func copyTicketStartWorktreeFixture(projectDir, worktreeDir string) error {
 		return fmt.Errorf("git init worktree fixture: %w: %s", err, strings.TrimSpace(string(output)))
 	}
 
-	ticketDir := filepath.Join(projectDir, ".chc", "user", "tickets")
+	ticketDir := filepath.Join(projectDir, ".chr", "user", "tickets")
 
 	err := filepath.WalkDir(ticketDir, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -7977,7 +7977,7 @@ func copyTicketStartWorktreeFixture(projectDir, worktreeDir string) error {
 	return copyTicketStartWorktreeFixtureFile(
 		projectDir,
 		worktreeDir,
-		filepath.Join(".chc", "user", "runtime", "agent", "Dockerfile"),
+		filepath.Join(".chr", "user", "runtime", "agent", "Dockerfile"),
 	)
 }
 
@@ -8016,7 +8016,7 @@ func installFakeTicketStartWorktreePreparer(t *testing.T) *fakeTicketStartWorktr
 func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket core.Ticket) string {
 	t.Helper()
 
-	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", filepath.FromSlash(relativePath))
+	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", filepath.FromSlash(relativePath))
 
 	content, err := core.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
@@ -8054,13 +8054,13 @@ func appendTicketEvidenceStrategy(t *testing.T, ticketPath string) {
 
 func testTicketEvidenceStrategyBlock() string {
 	return `
-<!-- chc:evidence-strategy:v1 -->
+<!-- chr:evidence-strategy:v1 -->
 - [x] Evidence strategy: complete; change_kind=cli_behavior; risk=medium
-- [x] Gherkin: required; path=.chc/user/acceptance/cli.feature
+- [x] Gherkin: required; path=.chr/user/acceptance/cli.feature
 - [x] Tests: mixed; unit and CLI coverage
 - [x] Validation: passed; make verify
 - [x] Evidence summary: complete; ready for review
-<!-- /chc:evidence-strategy -->
+<!-- /chr:evidence-strategy -->
 `
 }
 
@@ -8069,7 +8069,7 @@ func newTestWorkspace(t *testing.T) string {
 
 	projectDir := t.TempDir()
 
-	err := os.Mkdir(filepath.Join(projectDir, ".chc"), 0o755)
+	err := os.Mkdir(filepath.Join(projectDir, ".chr"), 0o755)
 	if err != nil {
 		t.Fatalf("create project workspace: %v", err)
 	}
@@ -8080,7 +8080,7 @@ func newTestWorkspace(t *testing.T) string {
 func writeCLIWorkspaceConfig(t *testing.T, projectDir, content string) {
 	t.Helper()
 
-	configPath := filepath.Join(projectDir, ".chc", "user", "config.yml")
+	configPath := filepath.Join(projectDir, ".chr", "user", "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
 	if err != nil {
@@ -8375,7 +8375,7 @@ func authorQuizPathFromOutput(t *testing.T, output string) string {
 
 	for _, line := range strings.Split(output, "\n") {
 		value, ok := strings.CutPrefix(line, "path: ")
-		if ok && strings.Contains(value, ".chc/user/quizzes/") {
+		if ok && strings.Contains(value, ".chr/user/quizzes/") {
 			path = value
 		}
 	}
@@ -8392,7 +8392,7 @@ func authorQuizPathFromOutput(t *testing.T, output string) string {
 func writeRuntimeTemplate(t *testing.T, projectDir string) {
 	t.Helper()
 
-	dockerfilePath := filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -8404,7 +8404,7 @@ func writeRuntimeTemplate(t *testing.T, projectDir string) {
 		t.Fatalf("write runtime template: %v", err)
 	}
 
-	err = os.MkdirAll(filepath.Join(projectDir, ".chc", "user", "runtime", "runs"), 0o755)
+	err = os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "runtime", "runs"), 0o755)
 	if err != nil {
 		t.Fatalf("create runtime runs directory: %v", err)
 	}
@@ -8503,7 +8503,7 @@ func assertNotificationEvent(
 	}
 }
 
-func chcTestUserEnvironment(t *testing.T) (core.UserEnvironment, error) {
+func chrTestUserEnvironment(t *testing.T) (core.UserEnvironment, error) {
 	t.Helper()
 
 	return core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -8566,8 +8566,8 @@ func runGateCLIGit(t *testing.T, projectDir string, args ...string) {
 
 	cmdArgs := append([]string{
 		"-C", projectDir,
-		"-c", "user.name=ChrysoCoord Test",
-		"-c", "user.email=chc@example.test",
+		"-c", "user.name=Chryso Test",
+		"-c", "user.email=chr@example.test",
 	}, args...)
 	cmd := exec.Command("git", cmdArgs...)
 
@@ -8593,7 +8593,7 @@ func gateCLIGitOutput(t *testing.T, projectDir string, args ...string) string {
 func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) core.GateReport {
 	t.Helper()
 
-	matches, err := filepath.Glob(filepath.Join(projectDir, ".chc", "user", "reports", "gates", "*.json"))
+	matches, err := filepath.Glob(filepath.Join(projectDir, ".chr", "user", "reports", "gates", "*.json"))
 	if err != nil {
 		t.Fatalf("glob gate reports: %v", err)
 	}

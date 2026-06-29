@@ -68,7 +68,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp`: pass.
+- `go test ./internal/chrapp`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
 
@@ -94,7 +94,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp`: pass.
+- `go test ./internal/chrapp`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
 
@@ -123,7 +123,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp`: pass.
+- `go test ./internal/chrapp`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
 

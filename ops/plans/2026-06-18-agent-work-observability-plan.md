@@ -63,7 +63,7 @@ Goal: emit events from the existing work loop and execution lifecycle.
 
 Behavior:
 
-- `chc work run-all` emits loop-level events.
+- `chr work run-all` emits loop-level events.
 - Ticket execution emits ticket/execution-level events for start, worker
   finish, validation, result application, and blocked/failure outcomes.
 - Existing result application behavior is unchanged.

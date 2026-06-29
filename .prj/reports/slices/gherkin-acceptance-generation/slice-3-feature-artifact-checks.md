@@ -14,8 +14,8 @@ feature artifacts before later slices write them alongside specs.
 
 ## Delivered Behavior
 
-ChrysoCoord now has a canonical acceptance feature artifact layout under
-`.chc/user/acceptance/<scope>.feature`.
+Chryso now has a canonical acceptance feature artifact layout under
+`.chr/user/acceptance/<scope>.feature`.
 
 Generated feature artifacts can be checked without executing `godog`. Static
 checks validate Feature/Scenario structure, require each scenario to include
@@ -43,14 +43,14 @@ can also satisfy traceability when they use supported prefixes.
 
 ## Files of Interest
 
-- `internal/chc/acceptance_feature.go`
-- `internal/chc/acceptance_feature_test.go`
+- `internal/chr/acceptance_feature.go`
+- `internal/chr/acceptance_feature_test.go`
 
 ## Validation
 
-- `go test ./internal/chc -run 'AcceptanceFeatureLayout|ValidateAcceptanceFeatureArtifact'` (pass)
-- `go test ./internal/chc -run 'AcceptanceFeature|CheckAcceptanceFeature'` (pass)
-- `go test ./internal/chc` (pass)
+- `go test ./internal/chr -run 'AcceptanceFeatureLayout|ValidateAcceptanceFeatureArtifact'` (pass)
+- `go test ./internal/chr -run 'AcceptanceFeature|CheckAcceptanceFeature'` (pass)
+- `go test ./internal/chr` (pass)
 
 ## Risks and Follow-ups
 

@@ -6,8 +6,8 @@ Sources:
 
 - `.prj/specs/specs/context-composition-pipeline.md`
 - `.prj/plans/slicing-plan-generation-safety-plan.md`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chcapp/service_plan.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chrapp/service_plan.go`
 - Conversation decision: replace monolithic plan generation with a staged flow
   only if it reduces timeout and consistency risk without invalidating
   existing generated plans.

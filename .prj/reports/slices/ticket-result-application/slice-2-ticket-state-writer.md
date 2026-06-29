@@ -27,7 +27,7 @@ It preserves existing metadata, comments, and body sections.
 
 The writer delegates frontmatter mutation to the existing ticket status updater.
 This keeps status validation and Markdown update behavior consistent with
-`chc ticket status`.
+`chr ticket status`.
 
 This slice intentionally writes only state. Comments, validation evidence,
 changed files, and blocked reasons are handled by later slices.
@@ -45,16 +45,16 @@ New function:
 
 ## Files of Interest
 
-- `internal/chc/result_state_writer.go`
-- `internal/chc/result_state_writer_test.go`
+- `internal/chr/result_state_writer.go`
+- `internal/chr/result_state_writer_test.go`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups
 
 No CLI invokes the writer yet. Slice 8 is planned to expose result application
-through `chc ticket apply-result`.
+through `chr ticket apply-result`.

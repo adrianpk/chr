@@ -88,7 +88,7 @@ func TestCodexAgentRunnerWritesRunBundleAndReadsOutputFile(t *testing.T) {
 		}
 	}
 
-	if !strings.HasPrefix(result.RunDir, filepath.Join(projectDir, ".chc", "user", "tmp", "agent-runs")) {
+	if !strings.HasPrefix(result.RunDir, filepath.Join(projectDir, ".chr", "user", "tmp", "agent-runs")) {
 		t.Fatalf("run dir = %q, want userspace tmp agent-runs path", result.RunDir)
 	}
 

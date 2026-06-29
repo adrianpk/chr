@@ -14,10 +14,10 @@ func TestReportLookupFindsReportByExecutionID(t *testing.T) {
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n- status: succeeded\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 
 	result, err := NewReportLookupService().LookupReport(context.Background(), projectDir, ReportLookupRequest{
 		ExecutionID: "exec-1",
@@ -81,22 +81,22 @@ func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHC-1\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		DirectoryName,
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-2",
 		"execution-report.md",
-	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHC-1\n")
+	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-1\n")
 
 	_, err := NewReportLookupService().LookupReport(context.Background(), projectDir, ReportLookupRequest{
-		TicketKey: "CHC-1",
+		TicketKey: "CHR-1",
 	})
 	if err == nil {
 		t.Fatal("LookupReport returned nil error")

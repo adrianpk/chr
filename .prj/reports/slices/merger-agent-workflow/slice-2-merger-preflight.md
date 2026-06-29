@@ -15,7 +15,7 @@ request is integration-ready before any provider merge call exists.
 ## Delivered Behavior
 
 - Added `RunTicketMergePreflight` as a pure service boundary under
-  `internal/chc`.
+  `internal/chr`.
 - Added preflight result and blocker models with machine-readable blocker codes
   and blocker kind classification.
 - Reused the Slice 1 merge handoff contract to require `ready_for_merge`,
@@ -50,13 +50,13 @@ review adapter for Forgejo-compatible providers and GitHub.
 
 ## Files of Interest
 
-- `internal/chc/ticket_merge_preflight.go`
-- `internal/chc/ticket_merge_preflight_test.go`
+- `internal/chr/ticket_merge_preflight.go`
+- `internal/chr/ticket_merge_preflight_test.go`
 
 ## Validation
 
 - `scripts/check-go-func-signatures.sh`
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `git diff --check`
 
 ## Risks and Follow-ups

@@ -27,7 +27,7 @@ The command carries:
 - validation artifact path.
 
 The command renders `codex exec --skip-git-repo-check --full-auto` with shell
-input redirected from `CHC_WORKER_CONTEXT_PATH`.
+input redirected from `CHR_WORKER_CONTEXT_PATH`.
 
 ## Implementation Notes
 
@@ -49,13 +49,13 @@ New functions:
 
 ## Files of Interest
 
-- `internal/chc/codex_worker.go`
-- `internal/chc/codex_worker_test.go`
+- `internal/chr/codex_worker.go`
+- `internal/chr/codex_worker_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

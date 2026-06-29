@@ -4,19 +4,19 @@ Status: initial
 
 Sources:
 
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 - `docs/reference/ticket-execution.md`
 
 ## Purpose
 
-Define the boundary between `chc`, the runtime container, and Codex during
+Define the boundary between `chr`, the runtime container, and Codex during
 ticket execution.
 
 ## Execution Planes
 
 ### External Plane
 
-The external `chc` process owns:
+The external `chr` process owns:
 
 - project resolution;
 - ticket selection;
@@ -43,7 +43,7 @@ The runtime container owns:
 The internal plane should not decide global workflow policy.
 
 The internal plane should not rediscover the full project from scratch when
-`chc` can provide durable context artifacts. It may inspect source files during
+`chr` can provide durable context artifacts. It may inspect source files during
 execution, but project protocol, ticket intent, related documents, semantic code
 context, validation expectations, and Ralph Loop history should be prepared by
 the external plane and mounted into the container as artifacts.
@@ -57,7 +57,7 @@ It must produce Docker-compatible artifacts before the runtime container starts:
 - `context.md`, the main prompt consumed by `codex exec`;
 - optional source inventory artifacts used to justify selection;
 - selected project protocol excerpts, including applicable `AGENTS.md` files;
-- selected `.chc/` workflow and runtime context;
+- selected `.chr/` workflow and runtime context;
 - selected ticket/use-case document context;
 - selected semantic code context, initially from `gograph` CLI output;
 - previous Ralph Loop attempt summaries and validation failures when retrying;
@@ -65,19 +65,19 @@ It must produce Docker-compatible artifacts before the runtime container starts:
 
 The Docker runtime should receive these artifacts through the existing project
 workspace mount and path environment variables. The composer should not require
-`chc` to run inside the container for the initial implementation.
+`chr` to run inside the container for the initial implementation.
 
 The runtime remains responsible for executing Codex against the mounted
-workspace, while `chc` remains responsible for deciding what context is
+workspace, while `chr` remains responsible for deciding what context is
 materialized and how much of it is exposed to the worker.
 
 ## Runtime Injection Options
 
-Possible ways to make `chc` behavior available in the container include:
+Possible ways to make `chr` behavior available in the container include:
 
-- mount the `chc` binary;
-- install `chc` inside the image;
-- mount `chc` source code;
+- mount the `chr` binary;
+- install `chr` inside the image;
+- mount `chr` source code;
 - provide a minimal bridge command;
 - pass all required context and artifact paths at container startup.
 
@@ -149,7 +149,7 @@ add guardrails:
 ## Git and PR Safety
 
 The runtime may modify files, but branch, commit, push, and PR behavior should
-remain controlled by `chc` policy.
+remain controlled by `chr` policy.
 
 The system must define:
 
@@ -168,7 +168,7 @@ records. Sensitive environment values must be redacted.
 
 ## Open Questions
 
-- Should `chc` ever run inside the container, or should it always remain the
+- Should `chr` ever run inside the container, or should it always remain the
   external orchestrator?
 - What secret injection mechanism is acceptable for local use?
 - Should PR creation be allowed from inside the runtime?

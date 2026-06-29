@@ -17,7 +17,7 @@ Cases are fully rewired to graph-backed state.
 
 ## Delivered Behavior
 
-- TUI startup builds an initial `WorkspaceGraph` from `.chc/`.
+- TUI startup builds an initial `WorkspaceGraph` from `.chr/`.
 - The command palette `Refresh` command rebuilds the graph from filesystem
   state without restarting the TUI.
 - Refresh updates the model's runtime graph.
@@ -32,8 +32,8 @@ Cases are fully rewired to graph-backed state.
 
 The refresh flow is intentionally narrow:
 
-- `chcapp` owns the concrete `WorkspaceGraphBuilder` call.
-- `chctui` receives a `WorkspaceRefreshExecutor`.
+- `chrapp` owns the concrete `WorkspaceGraphBuilder` call.
+- `chrtui` receives a `WorkspaceRefreshExecutor`.
 - The TUI stores the current `WorkspaceGraph` but does not yet use it as the
   source for Project/Cases rendering.
 - Project and Cases remain on their existing Markdown services until the
@@ -48,15 +48,15 @@ The refresh flow is intentionally narrow:
 
 ## Files of Interest
 
-- `internal/chcapp/app.go`
-- `internal/chctui/workspace_refresh.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/workspace_refresh.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp ./internal/chc ./cmd/chc` passed
+- `go test ./internal/chrtui ./internal/chrapp ./internal/chr ./cmd/chr` passed
   on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 

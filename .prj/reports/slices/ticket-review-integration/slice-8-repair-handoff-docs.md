@@ -43,8 +43,8 @@ review workflow.
 
 ## Files of Interest
 
-- `internal/chc/codex_worker_context.go`
-- `internal/chc/codex_worker_context_test.go`
+- `internal/chr/codex_worker_context.go`
+- `internal/chr/codex_worker_context_test.go`
 - `docs/reference/ticket-review-workflow.md`
 - `docs/how-to/use-forgejo-ticket-review.md`
 - `docs/reference/review-workflow-config.md`
@@ -54,7 +54,7 @@ review workflow.
 
 - `git diff --check`
 - `scripts/check-go-func-signatures.sh`
-- `go test ./internal/chc -run 'CodexWorkerContext|WorkSelection|TicketReview'`
+- `go test ./internal/chr -run 'CodexWorkerContext|WorkSelection|TicketReview'`
 - `make verify`
 - Ticket review QA scenario:
   - initialize temporary workspace

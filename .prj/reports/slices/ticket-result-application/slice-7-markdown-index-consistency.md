@@ -42,14 +42,14 @@ Updated core interface:
 
 ## Files of Interest
 
-- `internal/chc/ticket_reconciliation.go`
-- `internal/chc/ticket_reconciliation_test.go`
+- `internal/chr/ticket_reconciliation.go`
+- `internal/chr/ticket_reconciliation_test.go`
 - `docs/reference/ticket-reconciliation.md`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

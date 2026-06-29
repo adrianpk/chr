@@ -58,17 +58,17 @@ partial context artifacts are planned under:
 
 ## Files of Interest
 
-- `internal/chc/context_composer.go`
-- `internal/chc/context_composer_test.go`
+- `internal/chr/context_composer.go`
+- `internal/chr/context_composer_test.go`
 - `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestPlanContextComposition'`: pass
+- `go test ./internal/chr -run 'TestPlanContextComposition'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups
 
 This slice defines the contract only. It does not yet collect `AGENTS.md`,
-`.chc/`, project documents, file tree output, text search, gograph output, or
+`.chr/`, project documents, file tree output, text search, gograph output, or
 Ralph attempt evidence.

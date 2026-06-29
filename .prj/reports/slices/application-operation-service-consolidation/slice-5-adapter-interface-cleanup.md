@@ -18,19 +18,19 @@ guardrail that service files stay adapter-neutral.
 ## Delivered Behavior
 
 - Moved all TUI executor wrapper structs and mapping methods out of
-  `internal/chcapp/app.go`.
-- Added `internal/chcapp/tui_adapters.go` as the dedicated TUI adapter mapping
+  `internal/chrapp/app.go`.
+- Added `internal/chrapp/tui_adapters.go` as the dedicated TUI adapter mapping
   file.
 - Kept `app.go` focused on command bootstrap, TUI option loading, and shared
   TUI state loaders.
 - Preserved existing TUI executor interfaces and runtime behavior.
 - Added a boundary test that prevents `service*.go` files from importing
-  `internal/chctui`.
+  `internal/chrtui`.
 
 ## Implementation Notes
 
 The service implementation remains central and split by capability files. The
-TUI wrappers still exist because `internal/chctui` owns TUI-facing interfaces
+TUI wrappers still exist because `internal/chrtui` owns TUI-facing interfaces
 and result models, but those wrappers now live in a file named for the adapter
 role.
 
@@ -40,19 +40,19 @@ contracts.
 
 ## Contracts Added or Changed
 
-- Added `internal/chcapp/tui_adapters.go` for TUI adapter mappings.
+- Added `internal/chrapp/tui_adapters.go` for TUI adapter mappings.
 - Added `TestServiceFilesDoNotImportTUIAdapter`.
-- Removed TUI executor wrapper definitions from `internal/chcapp/app.go`.
+- Removed TUI executor wrapper definitions from `internal/chrapp/app.go`.
 
 ## Files of Interest
 
-- `internal/chcapp/tui_adapters.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/service_boundary_test.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/service_boundary_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui` passed on 2026-05-23.
+- `go test ./internal/chrapp ./internal/chrtui` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

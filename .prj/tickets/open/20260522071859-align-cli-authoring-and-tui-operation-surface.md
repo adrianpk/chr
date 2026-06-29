@@ -22,8 +22,8 @@ commits: []
 
 ## Context
 
-The full-system lab run against `chc-blog-work` exposed a coherent UX problem:
-ChrysoCoord has a useful command foundation, but the human operation path is too
+The full-system lab run against `chr-blog-work` exposed a coherent UX problem:
+Chryso has a useful command foundation, but the human operation path is too
 noisy for daily use.
 
 The CLI must remain complete because it is valuable for automation, testing,
@@ -35,11 +35,11 @@ The user-facing operating model should become:
 
 - CLI as the executable foundation;
 - TUI as the primary local human workflow surface;
-- `.chc/` as the durable project-local source of truth.
+- `.chr/` as the durable project-local source of truth.
 
 Related feedback capture:
 
-- `.prj/drafts/chc-cli-output-polish-notes.md`
+- `.prj/drafts/chr-cli-output-polish-notes.md`
 
 ## Problem
 
@@ -55,7 +55,7 @@ The lab surfaced several linked issues:
   `canonical_assets`, runtime workdir, and artifact paths.
 - The workspace manifest repeats invariant/config-like facts instead of helping
   users understand the workspace.
-- Generated protocol docs blur project documentation rules with ChrysoCoord
+- Generated protocol docs blur project documentation rules with Chryso
   operational artifact layout.
 - The runbook originally overexposed developer-only flags such as `--dev-root`.
 - The CLI is necessary but insufficient as the daily human workflow surface.
@@ -70,10 +70,10 @@ The lab surfaced several linked issues:
   topic/status/target listings.
 - Static quiz generation is clearly positioned as a fallback/template mode.
 - Context-aware quiz generation exists for spec-quality knowledge extraction.
-- `.chc/config.yml` exposes only meaningful user decisions.
-- `.chc/manifest.md` is either useful orientation or removed from the required
+- `.chr/config.yml` exposes only meaningful user decisions.
+- `.chr/manifest.md` is either useful orientation or removed from the required
   context path.
-- ChrysoCoord operational artifact layout is enforced by the binary, not by
+- Chryso operational artifact layout is enforced by the binary, not by
   generated Markdown convention text.
 - A Bubble Tea TUI is specified as the main human workflow surface over the same
   command/domain operations.
@@ -81,9 +81,9 @@ The lab surfaced several linked issues:
 ## Actual
 
 - CLI output currently favors exhaustive technical detail over scannability.
-- `chc author quiz new` creates a session plus quiz with absolute paths and
+- `chr author quiz new` creates a session plus quiz with absolute paths and
   repeated session fields.
-- `chc author session list` returns rows without headers.
+- `chr author session list` returns rows without headers.
 - Static quiz questions are generic and hardcoded.
 - Generated workspace config and manifest include questionable configurable or
   pseudo-configurable fields.

@@ -29,7 +29,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | --- | --- | --- | --- | --- |
 | T1.1 | Add the `web` config section to the project/user config model with defaults. | done | `d628644`, `fd3498a` | Disabled by default with localhost bind defaults. |
 | T1.2 | Add config validation for host, port, refresh interval, token mode, and allowed origins. | done | `d628644`, `fd3498a` | Added `ValidateWebConfig` and loopback host detection. |
-| T1.3 | Add CLI parsing for `chc web serve`. | done | `4ba5578` | Registered the `web serve` command without changing default TUI behavior. |
+| T1.3 | Add CLI parsing for `chr web serve`. | done | `4ba5578` | Registered the `web serve` command without changing default TUI behavior. |
 | T1.4 | Add `--host`, `--port`, `--open-browser`, `--dry-run`, and `--require-token` command flags. | done | `4ba5578` | Flags override loaded web config. |
 | T1.5 | Add resolved-config output for normal startup and dry-run mode. | done | `4ba5578` | Dry-run prints project, bind, port, token mode, and healthz-only static mode. |
 | T1.6 | Add non-loopback bind warning output. | done | `4ba5578`, `fd3498a` | Warning prints for `0.0.0.0` and other non-loopback hosts. |
@@ -46,7 +46,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | T2.2 | Add `internal/webui/htmx` with the needed htmx attribute, request header, response header, and out-of-band swap helpers. | done | `f85f4ba`, `032ef29` | Copied/adapted primitives, no external module dependency. |
 | T2.3 | Add `internal/webui/render` with template rendering and function-map helpers. | done | `f85f4ba`, `032ef29` | Server-rendered HTML foundation. |
 | T2.4 | Add `internal/webui/ui` with the first needed UI primitives for nav, buttons, chips, links, and page layout. | done | `f85f4ba`, `032ef29` | Presentation-only helpers. |
-| T2.5 | Add embedded templates and static assets for HTML, CSS, htmx, and the application shell. | done | `f85f4ba` | Embedded `chc.css`, `htmx.min.js`, and shell templates. |
+| T2.5 | Add embedded templates and static assets for HTML, CSS, htmx, and the application shell. | done | `f85f4ba` | Embedded `chr.css`, `htmx.min.js`, and shell templates. |
 | T2.6 | Add root route handling for the application shell. | done | `f85f4ba` | `/` renders the browser-loadable shell. |
 | T2.7 | Add a bootstrap view model with resolved project identity, config, feature flags, and navigation model. | done | `f85f4ba` | Shell data includes project, bind, token, refresh, and navigation state. |
 | T2.8 | Add consistent HTML error page and htmx fragment error helpers. | done | `f85f4ba` | Initial render errors return stable HTTP errors; htmx fragment route added for bootstrap. |
@@ -146,7 +146,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
 | T9.1 | Define CSS tokens for color, type, spacing, borders, shadows, and status colors. | done | `9920097` | Chrysocolla/Go-adjacent identity with amber and danger accents. |
-| T9.2 | Implement the ChrysoCoord avatar asset in the repo-native asset format chosen by the implementation. | done | `9920097` | Added a rounded bot/agent SVG mark. |
+| T9.2 | Implement the Chryso avatar asset in the repo-native asset format chosen by the implementation. | done | `9920097` | Added a rounded bot/agent SVG mark. |
 | T9.3 | Apply reference-layout parity to Board and Dash. | done | `9920097` | Board and Dash use denser operational panels and responsive grid rules. |
 | T9.4 | Apply reference-layout parity to Dumps, Quizzes, Specs, and Plans. | done | `9920097` | Artifact catalogs and command forms share the refined card/action styling. |
 | T9.5 | Apply reference-layout parity to Project, Cases, Help, and command surfaces. | done | `9920097` | Project, Cases, detail panes, and command surfaces use the same tokens and density. |
@@ -159,14 +159,14 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T10.1 | Update `docs/reference/commands.md` for `chc web serve`. | done | `ede1ebcc` | Command contract. |
+| T10.1 | Update `docs/reference/commands.md` for `chr web serve`. | done | `ede1ebcc` | Command contract. |
 | T10.2 | Update `docs/reference/project-workspace.md` for `web` config. | done | `ede1ebcc` | Config contract. |
 | T10.3 | Update `docs/reference/cli-tui-action-matrix.md` or add the Web UI equivalent matrix if the existing matrix cannot represent a third surface. | done | `ede1ebcc` | Added Web UI equivalent matrix. |
 | T10.4 | Add a how-to for running the Web UI locally. | done | `ede1ebcc` | Local browser use. |
 | T10.5 | Add a how-to for explicit private-network or tunnel exposure. | done | `ede1ebcc` | Updated existing exposure how-to with dry-run preview and local how-to link. |
 | T10.6 | Add QA fixtures or smoke scripts for the main Web UI flows. | done | `a7e36f8b` | Added `scripts/qa/web-ui-smoke.sh`. |
 | T10.7 | Run full repository validation. | done | `99df926d` | `make verify` passed. |
-| T10.8 | Run browser smoke validation and capture evidence. | done | `a7e36f8b`, `99df926d` | Smoke script captured browser screenshots under `/tmp/chc-web-ui-smoke-326889`. |
+| T10.8 | Run browser smoke validation and capture evidence. | done | `a7e36f8b`, `99df926d` | Smoke script captured browser screenshots under `/tmp/chr-web-ui-smoke-326889`. |
 | T10.9 | Update changelog or release notes according to the repository's existing release documentation pattern. | done | `ede1ebcc` | Added optional Web UI changelog entry. |
 | T10.10 | Add the slice implementation report and final rollout evidence. | done | `99df926d`, `eed8b8b` | Final rollout closeout. |
 
@@ -178,34 +178,34 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 1: `make verify` (pass)
 - Slice 2 T2.1-T2.12: `go test ./internal/webui/... ./internal/app -run 'WebServe|Handler|Attrs|Button|Chip|Nav|Renderer'` (pass)
 - Slice 2: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- Slice 2 smoke: `go run ./cmd/chc web serve --dir . --port 7332`; `curl -fsS /`, `/assets/chc.css`, `/assets/htmx.min.js`, `/healthz` (pass)
+- Slice 2 smoke: `go run ./cmd/chr web serve --dir . --port 7332`; `curl -fsS /`, `/assets/chr.css`, `/assets/htmx.min.js`, `/healthz` (pass)
 - Slice 2: `make verify` (pass)
 - Slice 3 T3.1-T3.8: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Project|Board|Dash'` (pass)
 - Slice 3: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- Slice 3 smoke: `go run ./cmd/chc web serve --dir . --port 7333`; `curl -fsS /`, `/project`, `/board`, `/dash`, `/project/fragment`, `/board/fragment`, `/dash/fragment`, `/assets/chc.css` (pass)
+- Slice 3 smoke: `go run ./cmd/chr web serve --dir . --port 7333`; `curl -fsS /`, `/project`, `/board`, `/dash`, `/project/fragment`, `/board/fragment`, `/dash/fragment`, `/assets/chr.css` (pass)
 - Slice 3: `make verify` (pass)
 - Slice 4 T4.1-T4.7: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Catalog|Artifact'` (pass)
 - Slice 4: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- Slice 4 smoke: `go run ./cmd/chc web serve --dir . --port 7334`; `curl -fsS /cases`, `/dumps`, `/quizzes`, `/specs`, `/plans`, one `/dumps/detail`, catalog fragments, and one detail fragment (pass)
+- Slice 4 smoke: `go run ./cmd/chr web serve --dir . --port 7334`; `curl -fsS /cases`, `/dumps`, `/quizzes`, `/specs`, `/plans`, one `/dumps/detail`, catalog fragments, and one detail fragment (pass)
 - Slice 4: `make verify` (pass)
 - Slice 5 T5.1-T5.8: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Catalog|Artifact|WriteAction'` (pass)
 - Slice 5: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- Slice 5 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/tmp.I8grD0CG1y --port 7335`; `curl` covered dump create, case update, dump save, and stale dump rejection (pass)
+- Slice 5 smoke: temporary project served with `go run ./cmd/chr web serve --dir /tmp/tmp.I8grD0CG1y --port 7335`; `curl` covered dump create, case update, dump save, and stale dump rejection (pass)
 - Slice 5: `make verify` (pass)
 - Slice 6 T6.1-T6.9: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|WriteAction|Generation|WorkAction'` (pass)
 - Slice 6: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- Slice 6 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/tmp.IJQmMJO7zb --port 7336`; `curl` covered command forms, `work.preview`, and unsupported work-start rejection (pass)
+- Slice 6 smoke: temporary project served with `go run ./cmd/chr web serve --dir /tmp/tmp.IJQmMJO7zb --port 7336`; `curl` covered command forms, `work.preview`, and unsupported work-start rejection (pass)
 - Slice 6: `make verify` (pass)
 - Slice 7 T7.1-T7.7: `go test ./internal/webui && go test ./internal/app -run 'WebServe.*(Artifact|WriteAction|Revision|Handler|Board|Catalog)'` (pass)
-- Slice 7 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/... --port 7337`; `curl` covered healthz, detail revision marker, external file mutation changing htmx fragment revision, and Web UI `dump.save` redirect/write (pass)
+- Slice 7 smoke: temporary project served with `go run ./cmd/chr web serve --dir /tmp/... --port 7337`; `curl` covered healthz, detail revision marker, external file mutation changing htmx fragment revision, and Web UI `dump.save` redirect/write (pass)
 - Slice 7: `make verify` (pass)
 - Slice 8 T8.1-T8.7: `go test ./internal/webui && go test ./internal/app -run 'WebServe|RootCommand'` (pass)
-- Slice 8 smoke: temporary project served with `CHC_WEB_TOKEN=... go run ./cmd/chc web serve --dir /tmp/... --host 0.0.0.0 --port 7338`; `curl` covered token-required access, allowed-origin preflight, disallowed-origin rejection, wildcard-bind same-origin access, startup policy output, and sanitized logs (pass)
+- Slice 8 smoke: temporary project served with `CHR_WEB_TOKEN=... go run ./cmd/chr web serve --dir /tmp/... --host 0.0.0.0 --port 7338`; `curl` covered token-required access, allowed-origin preflight, disallowed-origin rejection, wildcard-bind same-origin access, startup policy output, and sanitized logs (pass)
 - Slice 8: `make verify` (pass)
 - Slice 9 T9.1-T9.7: `go test ./internal/webui` (pass)
-- Slice 9 screenshot smoke: `go run ./cmd/chc web serve --dir . --port 7339 --require-token false`; Chromium captured desktop Board/Dash at `1440x1000` and mobile Project/Dumps at `390x900` under `/tmp/chc-slice9-screenshots` (pass)
+- Slice 9 screenshot smoke: `go run ./cmd/chr web serve --dir . --port 7339 --require-token false`; Chromium captured desktop Board/Dash at `1440x1000` and mobile Project/Dumps at `390x900` under `/tmp/chr-slice9-screenshots` (pass)
 - Slice 9: `make verify` (pass)
-- Slice 10 smoke: `CHC_WEB_SMOKE_PORT=7340 scripts/qa/web-ui-smoke.sh`; pages, htmx fragments, `dump.create`, and browser screenshots under `/tmp/chc-web-ui-smoke-326889` (pass)
+- Slice 10 smoke: `CHR_WEB_SMOKE_PORT=7340 scripts/qa/web-ui-smoke.sh`; pages, htmx fragments, `dump.create`, and browser screenshots under `/tmp/chr-web-ui-smoke-326889` (pass)
 - Slice 10: `make verify` (pass)
 
 ## Open Decisions

@@ -33,7 +33,7 @@ Codex-backed invocation without changing the assisted authoring loop contract.
 Invocation artifacts are planned under:
 
 ```text
-.chc/authoring/sessions/<session-id>/model/<request-id>/
+.chr/authoring/sessions/<session-id>/model/<request-id>/
 ```
 
 with:
@@ -62,13 +62,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/assisted_model.go`
-- `internal/chc/assisted_model_test.go`
+- `internal/chr/assisted_model.go`
+- `internal/chr/assisted_model_test.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestInvokeAssistedModel|TestRecordAssistedModelInvocation|TestRenderAssistedModelArtifacts'`: pass
+- `go test ./internal/chr -run 'TestInvokeAssistedModel|TestRecordAssistedModelInvocation|TestRenderAssistedModelArtifacts'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

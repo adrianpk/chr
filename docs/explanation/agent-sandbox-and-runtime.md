@@ -1,8 +1,8 @@
 # Agent Sandbox and Runtime
 
-ChrysoCoord uses Docker as the sandboxed runtime boundary for ticket execution.
+Chryso uses Docker as the sandboxed runtime boundary for ticket execution.
 
-The host-side `chc` process owns coordination. It resolves the project, selects
+The host-side `chr` process owns coordination. It resolves the project, selects
 the ticket, builds the execution context, computes runtime paths, writes context
 artifacts, and invokes the configured harness. The container receives explicit
 inputs through the mounted project workspace and environment variables.
@@ -28,7 +28,7 @@ During ticket execution, the runtime receives:
 
 The harness can then run Codex inside the container, modify the mounted
 workspace, run validation, and write the result envelope expected by
-ChrysoCoord.
+Chryso.
 
 ## Harness
 
@@ -58,18 +58,18 @@ and what should happen next.
 
 ## Workspace Boundary
 
-ChrysoCoord separates the user-visible project checkout from the execution
+Chryso separates the user-visible project checkout from the execution
 workspace used by the runtime plan.
 
 In `project` mode, both paths are the same directory. The host project and the
 runtime view are the same working tree through the Docker mount.
 
-In `worktree` mode, ChrysoCoord prepares a ticket-specific Git worktree before
+In `worktree` mode, Chryso prepares a ticket-specific Git worktree before
 the worker starts. Docker mounts that worktree into the container, so agent
 edits happen outside the user's active checkout while still using normal Git
 branches and local artifacts.
 
-The host-side `chc` process still owns coordination, readiness checks, event
+The host-side `chr` process still owns coordination, readiness checks, event
 streams, result capture, validation, and ticket updates. The container receives
 the prepared workspace and explicit context; it does not choose a different
 repository boundary by itself.

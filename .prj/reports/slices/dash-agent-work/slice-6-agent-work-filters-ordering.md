@@ -11,7 +11,7 @@ facade, CLI, and Dash.
 
 - Added `AgentWorkSelectionOptions` for shared status, filter, order, and loop
   limit selection.
-- Wired `chc work run-all` to accept status, metadata filters, and order flags.
+- Wired `chr work run-all` to accept status, metadata filters, and order flags.
 - Added Dash priority filtering and queue ordering controls.
 - Passed Dash run-all selection state into the TUI work action executor.
 - Added service, CLI, and TUI tests for filtered selection and ordered queues.
@@ -19,6 +19,6 @@ facade, CLI, and Dash.
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
 - `make verify`
 - `git diff --check`

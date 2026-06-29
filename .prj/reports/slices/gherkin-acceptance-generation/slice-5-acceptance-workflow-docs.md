@@ -19,8 +19,8 @@ optional extension of spec generation. It explains readiness decisions,
 readiness slots, generated `.feature` artifact location, static checks, and the
 deferred `godog` execution path.
 
-The command reference and user guide now tell users that `chc spec generate`
-can write `.chc/user/acceptance/<scope>.feature` when context is suitable and
+The command reference and user guide now tell users that `chr spec generate`
+can write `.chr/user/acceptance/<scope>.feature` when context is suitable and
 static checks pass.
 
 The document generation model now records that feature files are supporting
@@ -32,7 +32,7 @@ sliced workflow.
 ## Implementation Notes
 
 No new command was added in this slice. The implemented command surface remains
-`chc spec generate`; the feature artifact is a conditional output of that
+`chr spec generate`; the feature artifact is a conditional output of that
 workflow.
 
 `godog` remains explicitly documented as deferred. Generated feature files are

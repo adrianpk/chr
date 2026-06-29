@@ -24,8 +24,8 @@ This slice covers:
 
 This slice does not cover:
 
-- `chc project select`;
-- `chc project current`;
+- `chr project select`;
+- `chr project current`;
 - command-level project context resolution;
 - ticket commands;
 - daemon behavior;
@@ -33,7 +33,7 @@ This slice does not cover:
 
 ## Design
 
-The active project state belongs to user-level configuration, not project-local `.chc/` state.
+The active project state belongs to user-level configuration, not project-local `.chr/` state.
 
 Initial persistence should be a small file under `UserEnvironment.ConfigDir()`. This keeps active selection as user preference, while project registry rows remain in the user-level SQLite database.
 

@@ -85,7 +85,7 @@ Behavior:
 - After development result application, the loop rehydrates ticket and policy
   state before deciding whether to continue.
 - `human_review` mode stops after producing a review handoff.
-- Existing explicit `chc work ticket <ticket>` remains available.
+- Existing explicit `chr work ticket <ticket>` remains available.
 - Existing `--max-iterations` limits integration cycles, not raw development
   executions.
 
@@ -124,7 +124,7 @@ Tasks:
 
 - T3.1 Define the reviewer context artifact and prompt contract.
 - T3.2 Add structured review result parsing and validation.
-- T3.3 Persist local review artifacts under `.chc/`.
+- T3.3 Persist local review artifacts under `.chr/`.
 - T3.4 Apply `pass`, `needs_changes`, `insufficient_evidence`, and
   `human_required` outcomes to ticket state.
 - T3.5 Add non-blocking note handling with existing comment limits.
@@ -228,7 +228,7 @@ Tasks:
 
 - Whether Slice 1 introduces a dedicated `integration_cycles` table or relies on
   report reconstruction from existing durable state.
-- Whether `chc work ticket <ticket>` should remain development-only or gain a
+- Whether `chr work ticket <ticket>` should remain development-only or gain a
   separate full-cycle single-ticket command.
 - Whether project templates should eventually default to `agentic_review`,
   `trusted_auto_merge`, or remain `human_review`.

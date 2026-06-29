@@ -17,7 +17,7 @@ tickets without executing them.
 The CLI now includes:
 
 ```sh
-chc ticket loop --dry-run
+chr ticket loop --dry-run
 ```
 
 The command:
@@ -56,13 +56,13 @@ New CLI command:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-loop.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestTicketLoop|TestTicketList'`: pass
+- `go test ./cmd/chr -run 'TestTicketLoop|TestTicketList'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

@@ -91,7 +91,7 @@ The effective default for new generated project config should be:
 ```yml
 work:
   workspace_mode: worktree
-  worktree_root: .chc/user/runtime/worktrees
+  worktree_root: .chr/user/runtime/worktrees
   worktree_base: remote_integration_branch
   worktree_cleanup: after_merge
 ```
@@ -105,7 +105,7 @@ way that surprises a user. The implementation should distinguish:
 
 Recommended rule:
 
-- new `chc init` output writes `workspace_mode: worktree`;
+- new `chr init` output writes `workspace_mode: worktree`;
 - existing config without `workspace_mode` continues using the current fallback
   until an explicit migration or doctor repair is accepted;
 - `doctor` and runtime validation recommend worktree mode when project mode is
@@ -215,7 +215,7 @@ Because the current context works, this should not be changed blindly.
 First implementation should add a render-only comparison mode:
 
 ```sh
-chc work context-preview <unit-key>
+chr work context-preview <unit-key>
 ```
 
 or an equivalent dry-run output from the existing execution command.

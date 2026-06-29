@@ -11,7 +11,7 @@ import (
 
 func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 	path := writeReviewMetadataTicket(t, Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    TicketStatusInProgress,
 		CreatedAt: testReviewMetadataTime(12),
@@ -24,7 +24,7 @@ func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 		ReviewRef: &TicketReviewRef{
 			Type:     "pull_request",
 			Provider: "forgejo",
-			URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+			URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
 			ID:       "274",
 			Status:   "open",
 		},
@@ -40,7 +40,7 @@ func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 		`review_refs:`,
 		`  - type: "pull_request"`,
 		`    provider: "forgejo"`,
-		`    url: "https://forge.example.com/adrianpk/chc/pulls/274"`,
+		`    url: "https://forge.example.com/adrianpk/chr/pulls/274"`,
 		`    id: "274"`,
 		`    status: "open"`,
 		`updated_at: "2026-05-18T13:00:00Z"`,
@@ -53,14 +53,14 @@ func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 
 func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 	path := writeReviewMetadataTicket(t, Ticket{
-		Key:    "CHC-1",
+		Key:    "CHR-1",
 		Title:  "Do something",
 		Status: TicketStatusInProgress,
 		ReviewRefs: []TicketReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
-				URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+				URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
 				ID:       "274",
 				Status:   "open",
 			},
@@ -74,7 +74,7 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 		ReviewRef: &TicketReviewRef{
 			Type:     "pull_request",
 			Provider: "forgejo",
-			URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+			URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
 			ID:       "274",
 			Status:   "merged",
 		},
@@ -85,7 +85,7 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 	}
 
 	content := readReviewMetadataTicket(t, path)
-	if strings.Count(content, `url: "https://forge.example.com/adrianpk/chc/pulls/274"`) != 1 {
+	if strings.Count(content, `url: "https://forge.example.com/adrianpk/chr/pulls/274"`) != 1 {
 		t.Fatalf("ticket content should contain one PR URL:\n%s", content)
 	}
 
@@ -96,7 +96,7 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 
 func TestTicketStatusUpdaterRequiresReviewMetadataForReadyForReview(t *testing.T) {
 	path := writeReviewMetadataTicket(t, Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    TicketStatusInProgress,
 		CreatedAt: testReviewMetadataTime(12),
@@ -119,7 +119,7 @@ func TestTicketStatusUpdaterRequiresReviewMetadataForReadyForReview(t *testing.T
 
 func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T) {
 	path := writeReviewMetadataTicket(t, Ticket{
-		Key:    "CHC-1",
+		Key:    "CHR-1",
 		Title:  "Do something",
 		Status: TicketStatusInProgress,
 		Branch: "feat/slice-2-pr-reference-workflow",
@@ -127,7 +127,7 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
-				URL:      "https://forge.example.com/adrianpk/chc/pulls/274",
+				URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
 				ID:       "274",
 				Status:   "open",
 			},
@@ -153,7 +153,7 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 
 func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 	path := writeReviewMetadataTicket(t, Ticket{
-		Key:         "CHC-1",
+		Key:         "CHR-1",
 		Title:       "Do something",
 		Status:      TicketStatusReadyForReview,
 		Branch:      "feat/slice-1-merger-handoff-contract",
@@ -162,7 +162,7 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
-				URL:      "https://forge.example.com/adrianpk/chc/pulls/281",
+				URL:      "https://forge.example.com/adrianpk/chr/pulls/281",
 				ID:       "281",
 				Status:   "open",
 			},
@@ -187,7 +187,7 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 
 func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 	path := writeReviewMetadataTicket(t, Ticket{
-		Key:          "CHC-1",
+		Key:          "CHR-1",
 		Title:        "Do something",
 		Status:       TicketStatusReadyForReview,
 		Branch:       "feat/slice-1-merger-handoff-contract",
@@ -197,7 +197,7 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
-				URL:      "https://forge.example.com/adrianpk/chc/pulls/281",
+				URL:      "https://forge.example.com/adrianpk/chr/pulls/281",
 				ID:       "281",
 				Status:   "open",
 			},

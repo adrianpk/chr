@@ -10,7 +10,7 @@ Sources:
 
 ## Purpose
 
-Define the `Project` screen for the ChrysoCoord TUI.
+Define the `Project` screen for the Chryso TUI.
 
 The `Project` tab is the place where the user sees and edits the managed
 project's own identity and project-level context. It is not an agent dashboard,
@@ -18,13 +18,13 @@ not an application branding surface, and not a workspace diagnostics screen.
 
 The tab must answer one question clearly:
 
-> What is this project, and what compact context should ChrysoCoord keep about
+> What is this project, and what compact context should Chryso keep about
 > it?
 
 ## User Model
 
 The primary user is a terminal/editor-oriented local operator. They may use the
-TUI, the CLI, or a text editor such as Emacs against files under `.chc/`.
+TUI, the CLI, or a text editor such as Emacs against files under `.chr/`.
 
 Manual file editing is a first-class workflow. The application must not assume
 that all changes originate from the TUI or CLI.
@@ -49,7 +49,7 @@ that all changes originate from the TUI or CLI.
 - The project path may appear as secondary information.
 - Workspace implementation details must not appear as normal content:
   - no `.prj` status;
-  - no `.chc` status when the TUI is already running normally;
+  - no `.chr` status when the TUI is already running normally;
   - no labels such as `scope`, `signals`, or `local state`;
   - no tracker count until trackers have a resolved product role.
 
@@ -60,7 +60,7 @@ Project metadata is stored as Markdown with YAML frontmatter.
 Proposed path:
 
 ```text
-.chc/project.md
+.chr/project.md
 ```
 
 The file is human-editable and belongs to the managed project workspace.
@@ -70,8 +70,8 @@ The file is human-editable and belongs to the managed project workspace.
 ```markdown
 ---
 schema_version: 1
-name: chc-blog-work
-description: CLI/blog workspace used to validate CHC authoring flows.
+name: chr-blog-work
+description: CLI/blog workspace used to validate CHR authoring flows.
 ---
 
 Long-form project context.
@@ -106,9 +106,9 @@ it, but must not depend on arbitrary body prose to populate structured columns.
 
 ## Persistence Model
 
-ChrysoCoord has one durable representation of project data:
+Chryso has one durable representation of project data:
 
-- `.chc/project.md` as the human-editable project file.
+- `.chr/project.md` as the human-editable project file.
 
 The file is the source of truth. Runtime code may build an ephemeral
 `WorkspaceGraph` from Markdown files for navigation, diagnostics, and context
@@ -119,7 +119,7 @@ the filesystem.
 @startuml
 title Project metadata source model
 
-rectangle ".chc/project.md\nMarkdown + YAML frontmatter" as File
+rectangle ".chr/project.md\nMarkdown + YAML frontmatter" as File
 component "Project metadata parser\nschema validation" as Parser
 component "Ephemeral WorkspaceGraph\nnavigation metadata" as Graph
 rectangle "Project screen" as UI
@@ -159,7 +159,7 @@ participant "TUI model" as Model
 participant "ProjectMetadataExecutor" as Executor
 participant "ProjectMetadataService" as Service
 participant "WorkspaceGraph" as Graph
-collections ".chc/project.md" as File
+collections ".chr/project.md" as File
 
 User -> UI: edit project metadata fields
 UI -> Model: update in-memory ProjectMetadata
@@ -172,7 +172,7 @@ Executor -> Service: Save(metadata)
 Service -> Service: validate schema and required fields
 Service -> File: read current file hash
 
-alt source hash changed outside CHC
+alt source hash changed outside CHR
     Service --> Executor: conflict error
     Executor --> UI: report refresh required
 else source hash matches or file is new
@@ -210,7 +210,7 @@ title Manual project metadata refresh
 
 actor User
 participant Editor
-collections ".chc/project.md" as File
+collections ".chr/project.md" as File
 participant "Project screen" as UI
 participant "WorkspaceGraph builder" as Graph
 
@@ -275,10 +275,10 @@ with other primary TUI screens.
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ Project                                                                     │
 │ Name                                                                        │
-│ [ chc-blog-work                                                           ] │
+│ [ chr-blog-work                                                           ] │
 │                                                                             │
 │ Description                                                                 │
-│ [ CLI/blog workspace used to validate CHC authoring flows.                ] │
+│ [ CLI/blog workspace used to validate CHR authoring flows.                ] │
 ├──────────────────────────────────────────────┬──────────────────────────────┤
 │ Context                                      │ Artifacts                    │
 │ [ Long-form Markdown project context...    ] │ tickets        12            │
@@ -288,7 +288,7 @@ with other primary TUI screens.
 │                                              │ plans           2            │
 │                                              │                              │
 │                                              │ Source                       │
-│                                              │ .chc/project.md              │
+│                                              │ .chr/project.md              │
 └──────────────────────────────────────────────┴──────────────────────────────┘
 
 Project  Cases  Dumps  Quizzes  Specs  Plans  Board  Dash  Help  Quit
@@ -318,7 +318,7 @@ Secondary read-only fields:
 Excluded from normal display:
 
 - internal project ID;
-- `.chc` existence when normal TUI startup already proves it;
+- `.chr` existence when normal TUI startup already proves it;
 - `.prj` status;
 - implementation labels such as `signals`, `scope`, or `local state`;
 - tracker count until the product model decides whether trackers remain
@@ -333,7 +333,7 @@ Initial complete interaction:
 - `Enter` or an explicit edit action enters field editing.
 - `Esc` cancels the current field edit.
 - A save action persists through `ProjectMetadataService`.
-- A refresh action reloads `.chc/project.md` into the runtime graph.
+- A refresh action reloads `.chr/project.md` into the runtime graph.
 - If the file changed outside the app, save shows a conflict instead of
   overwriting.
 - If the file is invalid, the tab shows an actionable diagnostic.
@@ -352,7 +352,7 @@ Project metadata contributes to agent context as follows:
   context unless a context builder explicitly needs them.
 
 The app should avoid treating README content as canonical project metadata once
-`.chc/project.md` exists. README inference may be used only as bootstrap or
+`.chr/project.md` exists. README inference may be used only as bootstrap or
 fallback.
 
 ## Adjacent Artifact Workflow
@@ -372,12 +372,12 @@ screen or durable artifact bucket unless a separate product role is established.
 
 ## Bootstrap Rules
 
-When `.chc/project.md` does not exist:
+When `.chr/project.md` does not exist:
 
 - the TUI may infer `name` from the project path;
 - the TUI may infer `description` from the first useful README paragraph;
 - inferred values should be visibly unsaved or presented as bootstrap defaults;
-- saving should create `.chc/project.md` through the shared domain service.
+- saving should create `.chr/project.md` through the shared domain service.
 
 ## Acceptance Criteria
 

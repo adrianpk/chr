@@ -757,7 +757,7 @@ func authoringQuizContainsSensitivePrompt(value string) bool {
 
 func authoringQuizCodexPrompt(payload string) string {
 	return strings.TrimSpace(`
-You generate context-aware authoring quiz questions for ChrysoCoord.
+You generate context-aware authoring quiz questions for Chryso.
 
 Use the provided structured request and context sections.
 Ask concrete, project-specific questions that help produce the requested target artifact.

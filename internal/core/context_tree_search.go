@@ -425,7 +425,7 @@ func treeSearchSources(treeEntries, searchHits int) []ContextSourceInventoryEntr
 			ID:          "text-search",
 			Kind:        ContextSourceKindTextSearch,
 			Class:       ContextSourceClassFresh,
-			Description: "Targeted text search over source, tests, docs, and .chc files.",
+			Description: "Targeted text search over source, tests, docs, and .chr files.",
 			Required:    false,
 			Included:    searchHits > 0,
 		},

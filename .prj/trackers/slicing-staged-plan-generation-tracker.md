@@ -61,15 +61,15 @@ Candidate tasks:
 Task commits:
 
 - `4d80405` docs(lint): require pre-commit quality gates
-- `4cc1b1f` feat(chc): add plan outline model contract
-- `c32aaea` feat(chc): add plan outline OpenAI contract
-- `9c343fb` feat(chcapp): build plan outline requests
-- `f1e5dd8` test(chc): cover plan outline generation contract
+- `4cc1b1f` feat(chr): add plan outline model contract
+- `c32aaea` feat(chr): add plan outline OpenAI contract
+- `9c343fb` feat(chrapp): build plan outline requests
+- `f1e5dd8` test(chr): cover plan outline generation contract
 
 Validation:
 
-- `gofmt -w internal/chc/quiz_model.go internal/chc/quiz_model_payload.go internal/chc/quiz_openai_model.go internal/chc/plan_outline.go internal/chc/quiz_model_test.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go` - pass.
-- `go test ./internal/chc ./internal/chcapp` - pass.
+- `gofmt -w internal/chr/quiz_model.go internal/chr/quiz_model_payload.go internal/chr/quiz_openai_model.go internal/chr/plan_outline.go internal/chr/quiz_model_test.go internal/chrapp/service_plan.go internal/chrapp/service_plan_test.go` - pass.
+- `go test ./internal/chr ./internal/chrapp` - pass.
 - `go test ./...` - pass.
 - `git diff --check` - pass.
 - `make verify` - fail: `lint-strict` reports pre-existing lint debt.
@@ -84,7 +84,7 @@ All planned slices are delivered:
 
 Completed slicing validation:
 
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
 - `go test ./...`
 - `git diff --check`
 - `make verify` remains blocked by pre-existing `lint-strict` debt.
@@ -112,15 +112,15 @@ Candidate tasks:
 
 Task commits:
 
-- `0c62bb4` feat(chc): add plan slice detail contract
-- `8166f11` feat(chc): add plan slice detail OpenAI contract
-- `e7ada61` feat(chcapp): build plan slice detail requests
-- `b505eb0` test(chc): cover plan slice detail contract
+- `0c62bb4` feat(chr): add plan slice detail contract
+- `8166f11` feat(chr): add plan slice detail OpenAI contract
+- `e7ada61` feat(chrapp): build plan slice detail requests
+- `b505eb0` test(chr): cover plan slice detail contract
 
 Validation:
 
-- `gofmt -w internal/chc/quiz_model.go internal/chc/plan_outline.go internal/chc/plan_slice_detail.go internal/chc/quiz_model_payload.go internal/chc/quiz_openai_model.go internal/chc/quiz_model_test.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go` - pass.
-- `go test ./internal/chc ./internal/chcapp` - pass.
+- `gofmt -w internal/chr/quiz_model.go internal/chr/plan_outline.go internal/chr/plan_slice_detail.go internal/chr/quiz_model_payload.go internal/chr/quiz_openai_model.go internal/chr/quiz_model_test.go internal/chrapp/service_plan.go internal/chrapp/service_plan_test.go` - pass.
+- `go test ./internal/chr ./internal/chrapp` - pass.
 - `go test ./...` - pass.
 - `git diff --check` - pass.
 - `make verify` - fail: `lint-strict` reports pre-existing lint debt.
@@ -143,14 +143,14 @@ Candidate tasks:
 
 Task commits:
 
-- `6213b78` feat(chc): assemble staged generated plans
-- `9853ae2` feat(chcapp): orchestrate staged plan generation
-- `6037cba` test(chcapp): cover staged plan generation
+- `6213b78` feat(chr): assemble staged generated plans
+- `9853ae2` feat(chrapp): orchestrate staged plan generation
+- `6037cba` test(chrapp): cover staged plan generation
 
 Validation:
 
-- `gofmt -w internal/chc/plan_assembly.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go internal/chcapp/service_quiz_test.go` - pass.
-- `go test ./internal/chc ./internal/chcapp` - pass.
+- `gofmt -w internal/chr/plan_assembly.go internal/chrapp/service_plan.go internal/chrapp/service_plan_test.go internal/chrapp/service_quiz_test.go` - pass.
+- `go test ./internal/chr ./internal/chrapp` - pass.
 - `go test ./...` - pass.
 - `git diff --check` - pass.
 - `make verify` - fail: `lint-strict` reports pre-existing lint debt.

@@ -12,7 +12,7 @@ import (
 
 const (
 	// DirectoryName defines a package boundary constant.
-	DirectoryName = ".chc"
+	DirectoryName = ".chr"
 	// UserDirectoryName defines a package boundary constant.
 	UserDirectoryName = "user"
 )

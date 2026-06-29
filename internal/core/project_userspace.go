@@ -9,7 +9,7 @@ import (
 )
 
 // ActiveOperatorIDEnv defines a package boundary constant.
-const ActiveOperatorIDEnv = "CHC_OPERATOR_ID"
+const ActiveOperatorIDEnv = "CHR_OPERATOR_ID"
 
 // ProjectUserspace describes a package boundary value.
 type ProjectUserspace struct {

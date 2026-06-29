@@ -3,7 +3,7 @@
 Status: delivered
 
 Plan: `.prj/plans/slicing-agent-assisted-authoring-sessions-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
@@ -114,7 +114,7 @@ Candidate tasks:
 
 - [x] Include agent identity for authoring analyst behavior.
 - [x] Include project and authoring session metadata.
-- [x] Include relevant `.chc/` artifacts and selected docs.
+- [x] Include relevant `.chr/` artifacts and selected docs.
 - [x] Include transcript summary and unanswered gaps.
 - [x] Materialize deterministic Markdown context.
 - [x] Add slice implementation report.

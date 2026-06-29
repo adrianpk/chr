@@ -12,7 +12,7 @@ func TestChangedFileDiscovererDiscoversWorkspaceChanges(t *testing.T) {
 	projectDir := newChangedFileDiscoveryGitRepo(t)
 	writeChangedFileDiscoveryFile(t, projectDir, "internal/core/new.go", "package core\n")
 	writeChangedFileDiscoveryFile(t, projectDir, "README.md", "changed\n")
-	writeChangedFileDiscoveryFile(t, projectDir, ".chc/user/runtime/runs/CHC-1/exec-1/result.json", "{}")
+	writeChangedFileDiscoveryFile(t, projectDir, ".chr/user/runtime/runs/CHR-1/exec-1/result.json", "{}")
 
 	changedFiles, err := NewChangedFileDiscoverer().DiscoverChangedFiles(
 		context.Background(),

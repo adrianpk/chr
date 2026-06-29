@@ -52,15 +52,15 @@ Changed behavior:
 
 ## Files of Interest
 
-- `internal/chc/harness_invocation.go`
-- `internal/chc/harness_invocation_test.go`
-- `internal/chc/execution_runner.go`
-- `internal/chc/execution_runner_test.go`
+- `internal/chr/harness_invocation.go`
+- `internal/chr/harness_invocation_test.go`
+- `internal/chr/execution_runner.go`
+- `internal/chr/execution_runner_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'Test(NewHarnessInvocation|ExecutionRunner)'`:
+- `go test ./internal/chr -run 'Test(NewHarnessInvocation|ExecutionRunner)'`:
   pass
 - `make verify`: pass
 

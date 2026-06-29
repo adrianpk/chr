@@ -1,12 +1,12 @@
 # Dev To Main Gate
 
 The dev-to-main gate collects promotion evidence before aligning `dev` into
-`main`. It is designed for generic Go projects managed by ChrysoCoord.
+`main`. It is designed for generic Go projects managed by Chryso.
 
 ## Command
 
 ```sh
-chc gate dev-main --base <ref> --head <ref>
+chr gate dev-main --base <ref> --head <ref>
 ```
 
 Required flags:
@@ -21,7 +21,7 @@ Optional flags:
 The command exits non-zero when validation fails or when configured
 traceability policy requires agent evidence that is missing.
 
-The command requires a managed project core. Create one with `chc init`
+The command requires a managed project core. Create one with `chr init`
 before running the gate in a project for the first time.
 
 ## Evidence
@@ -32,9 +32,9 @@ The gate records:
 - commits in the selected range;
 - changed files and Git statuses;
 - validation command, status, exit code, duration, stdout, and stderr;
-- ChrysoCoord-managed work detected from execution reports;
+- Chryso-managed work detected from execution reports;
 - manual or external changes when listing is enabled;
-- missing agent evidence when ChrysoCoord-owned work lacks result paths;
+- missing agent evidence when Chryso-owned work lacks result paths;
 - high-risk manual changes when configured.
 
 ## Reports
@@ -42,7 +42,7 @@ The gate records:
 Reports are written under:
 
 ```text
-.chc/user/reports/gates/
+.chr/user/reports/gates/
 ```
 
 Each run writes:
@@ -79,7 +79,7 @@ Top-level JSON fields:
 Project-local gate config lives at:
 
 ```text
-.chc/user/config/gates.yml
+.chr/user/config/gates.yml
 ```
 
 Supported shape:
@@ -130,9 +130,9 @@ gates:
 ```
 
 This records evidence and warns about manual or external changes without
-blocking adoption because old work has no ChrysoCoord execution history.
+blocking adoption because old work has no Chryso execution history.
 
-After new work is consistently executed through ChrysoCoord tickets, projects
+After new work is consistently executed through Chryso tickets, projects
 can tighten policy:
 
 ```yml
@@ -153,21 +153,21 @@ gates:
 Generate a Woodpecker workflow:
 
 ```sh
-chc gate woodpecker init
+chr gate woodpecker init
 ```
 
 Dry-run output:
 
 ```sh
-chc gate woodpecker init --dry-run
+chr gate woodpecker init --dry-run
 ```
 
 The generated workflow runs:
 
 ```sh
-chc gate dev-main --dir . --base ${CHC_GATE_BASE:-origin/main} --head ${CHC_GATE_HEAD:-HEAD}
+chr gate dev-main --dir . --base ${CHR_GATE_BASE:-origin/main} --head ${CHR_GATE_HEAD:-HEAD}
 ```
 
 Woodpecker status is the first supported Forgejo feedback path. The pipeline
 fails when the gate exits non-zero. Detailed evidence remains in
-`.chc/user/reports/gates/`.
+`.chr/user/reports/gates/`.

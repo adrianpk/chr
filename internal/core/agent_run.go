@@ -330,7 +330,7 @@ func codexAgentProgram(request AgentRunRequest) string {
 		return program
 	}
 
-	if program := strings.TrimSpace(os.Getenv("CHC_CODEX_COMMAND")); program != "" {
+	if program := strings.TrimSpace(os.Getenv("CHR_CODEX_COMMAND")); program != "" {
 		return program
 	}
 
@@ -342,7 +342,7 @@ func codexAgentModel(request AgentRunRequest) string {
 		return model
 	}
 
-	return strings.TrimSpace(os.Getenv("CHC_CODEX_MODEL"))
+	return strings.TrimSpace(os.Getenv("CHR_CODEX_MODEL"))
 }
 
 func codexAgentTimeout(request AgentRunRequest) time.Duration {
@@ -350,7 +350,7 @@ func codexAgentTimeout(request AgentRunRequest) time.Duration {
 		return request.Timeout
 	}
 
-	if value := strings.TrimSpace(os.Getenv("CHC_CODEX_TIMEOUT_SECONDS")); value != "" {
+	if value := strings.TrimSpace(os.Getenv("CHR_CODEX_TIMEOUT_SECONDS")); value != "" {
 		seconds, err := strconv.Atoi(value)
 		if err == nil && seconds > 0 {
 			return time.Duration(seconds) * time.Second

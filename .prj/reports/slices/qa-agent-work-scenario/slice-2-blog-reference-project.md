@@ -28,7 +28,7 @@ that can exercise the manual agent-work flow.
 ## Implementation Notes
 
 The service uses only the Go standard library and modern `http.ServeMux`
-method/path patterns. It avoids router dependencies so the scenario tests CHC
+method/path patterns. It avoids router dependencies so the scenario tests CHR
 workflow behavior rather than framework setup.
 
 The failing test is intentional. `make qa-test-blog` must fail until a later
@@ -64,4 +64,4 @@ agent-work run resolves the seeded bug ticket that Slice 3 will add.
 ## Risks and Follow-ups
 
 - Comments remain unimplemented until later generated work.
-- Seeded `.chc` context and ADRs are added in Slice 3.
+- Seeded `.chr` context and ADRs are added in Slice 3.

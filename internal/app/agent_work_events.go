@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func agentWorkLoopEventSink(projectDir string, record core.LoopRunRecord) core.AgentEventSink {

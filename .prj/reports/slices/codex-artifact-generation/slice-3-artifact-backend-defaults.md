@@ -34,29 +34,29 @@ direct-model behavior for that artifact type.
 
 ## Contracts Added or Changed
 
-- `CHC_DUMP_GENERATION_BACKEND=openai` selects direct OpenAI dump curation.
-- `CHC_SPEC_GENERATION_BACKEND=openai` selects direct OpenAI spec generation.
-- `CHC_PLAN_GENERATION_BACKEND=openai` selects staged direct-model plan
+- `CHR_DUMP_GENERATION_BACKEND=openai` selects direct OpenAI dump curation.
+- `CHR_SPEC_GENERATION_BACKEND=openai` selects direct OpenAI spec generation.
+- `CHR_PLAN_GENERATION_BACKEND=openai` selects staged direct-model plan
   generation.
-- `CHC_PLAN_TRACKING_GENERATION_BACKEND=openai` selects direct OpenAI plan
+- `CHR_PLAN_TRACKING_GENERATION_BACKEND=openai` selects direct OpenAI plan
   tracking synthesis.
 - Empty backend values use Codex for all four artifact kinds.
 
 ## Files of Interest
 
-- `internal/chc/agent_run.go`
-- `internal/chcapp/service.go`
-- `internal/chcapp/service_dump_curation_codex.go`
-- `internal/chcapp/service_dump_curation_test.go`
-- `internal/chcapp/service_plan_test.go`
-- `internal/chcapp/service_test.go`
+- `internal/chr/agent_run.go`
+- `internal/chrapp/service.go`
+- `internal/chrapp/service_dump_curation_codex.go`
+- `internal/chrapp/service_dump_curation_test.go`
+- `internal/chrapp/service_plan_test.go`
+- `internal/chrapp/service_test.go`
 - `docs/reference/artifact-generation-backends.md`
 - `docs/index.md`
 
 ## Validation
 
-- `gofmt -w internal/chc/agent_run.go internal/chcapp/service.go internal/chcapp/service_dump_curation_codex.go internal/chcapp/service_dump_curation_test.go internal/chcapp/service_plan_test.go internal/chcapp/service_test.go`
-- `go test ./internal/chc ./internal/chcapp`
+- `gofmt -w internal/chr/agent_run.go internal/chrapp/service.go internal/chrapp/service_dump_curation_codex.go internal/chrapp/service_dump_curation_test.go internal/chrapp/service_plan_test.go internal/chrapp/service_test.go`
+- `go test ./internal/chr ./internal/chrapp`
 - `make verify`
 
 ## Risks and Follow-ups

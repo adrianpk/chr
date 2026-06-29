@@ -126,7 +126,7 @@ func writeContextualQuizProjectFixture(t *testing.T, projectDir string) {
 		Description:   "Project description.",
 		Context:       "Project body.",
 	}))
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "project-context-plan.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "project-context-plan.md"), `---
 title: Project Context Plan
 ---
 

@@ -9,15 +9,15 @@ map.
 
 This slicing covers the use case:
 
-> `chc` notifies the user and accepts remote input when asynchronous execution
+> `chr` notifies the user and accepts remote input when asynchronous execution
 > needs attention.
 
 ## Source
 
 Primary sources:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
-- `.prj/drafts/chc-command-surfaces-and-priority.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
+- `.prj/drafts/chr-command-surfaces-and-priority.md`
 
 Related documents:
 
@@ -204,9 +204,9 @@ the primary workflow.
 
 Candidate scope:
 
-- add `chc notify` command group;
-- add `chc notify status`;
-- add `chc notify telegram test --dry-run`;
+- add `chr notify` command group;
+- add `chr notify status`;
+- add `chr notify telegram test --dry-run`;
 - render the planned Telegram test payload from config;
 - avoid network calls in dry-run mode;
 - add focused CLI tests.

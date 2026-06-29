@@ -3,7 +3,7 @@
 Status: active
 
 Spec Draft: `.prj/specs/drafts/ticket-review-integration-draft.md`
-Mirror: `.chc/user/quizzes/raw/ticket-review-integration-quiz-raw.md`
+Mirror: `.chr/user/quizzes/raw/ticket-review-integration-quiz-raw.md`
 
 ## Q1: Repair After Changes Requested
 
@@ -34,7 +34,7 @@ pull request, or should it initially write only a local artifact and change
 ticket state?
 
 Answer: The reviewer should leave the review in Forgejo or the active forge.
-That avoids noise in the ChrysoCoord ticket comment system, which is limited
+That avoids noise in the Chryso ticket comment system, which is limited
 and should stay clean. The ticket should only record that comments were left in
 the pull request.
 
@@ -45,7 +45,7 @@ comments when possible, or start with a general numbered findings comment?
 
 Answer: Prefer inline comments when possible because that better emulates human
 review workflow. Inline comments also help the supervising human lead inspect
-whether ChrysoCoord is doing its review work well. If inline comments are not
+whether Chryso is doing its review work well. If inline comments are not
 available or reliable, a general comment is acceptable.
 
 ## Q5: Clean Review Signal
@@ -94,15 +94,15 @@ Answer: No. Do not invent statuses that do not help the agent workflow. Use
 Question: Should references such as `@dev`, `@reviewer`, and `@user` be treated
 as configurable identities from the start, or as conventional text for now?
 
-Answer: Treat them as conventional text for now. ChrysoCoord does not need to
+Answer: Treat them as conventional text for now. Chryso does not need to
 institutionalize human or agentic users yet. Later it can gradually introduce
-user concepts. Even without formal user entities, ChrysoCoord can search for
+user concepts. Even without formal user entities, Chryso can search for
 these references in Markdown and pull request comments.
 
 ## Q11: Repair Context Source
 
 Question: When a development agent resumes a `changes_requested` ticket, should
-ChrysoCoord inject the remote comments into the worker context, or should the
+Chryso inject the remote comments into the worker context, or should the
 agent read them directly from the remote pull request?
 
 Answer: Prefer the pull request as the detail source for now. Duplicating

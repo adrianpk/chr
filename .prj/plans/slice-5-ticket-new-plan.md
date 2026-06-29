@@ -8,20 +8,20 @@ Tracker: `.prj/trackers/slice-5-ticket-new-tracker.md`
 
 ## Purpose
 
-Add the first usable ticket primitive: `chc ticket new`.
+Add the first usable ticket primitive: `chr ticket new`.
 
-The command should create a Markdown ticket file under `.chc/tickets/` using the initial ticket template model.
+The command should create a Markdown ticket file under `.chr/tickets/` using the initial ticket template model.
 
 ## Scope
 
 This slice covers:
 
-- ticket metadata and template rendering in `internal/chc`,
+- ticket metadata and template rendering in `internal/chr`,
 - generated ticket keys using the configured prefix and existing ticket files,
-- project-wise ticket creation under `.chc/tickets/`,
-- use-case ticket creation under `.chc/tickets/<use_case>/`,
+- project-wise ticket creation under `.chr/tickets/`,
+- use-case ticket creation under `.chr/tickets/<use_case>/`,
 - compact Markdown ticket body generation,
-- `chc ticket new` CLI wiring,
+- `chr ticket new` CLI wiring,
 - focused tests for key generation, path selection, and rendered content.
 
 ## Task Breakdown
@@ -43,16 +43,16 @@ Create the file-based ticket repository behavior.
 
 Expected behavior:
 
-- create `.chc/tickets/` when needed,
+- create `.chr/tickets/` when needed,
 - derive the next key from existing ticket filenames or metadata,
-- use the configured key prefix, defaulting to `CHC`,
-- write project-wise tickets directly under `.chc/tickets/`,
-- write use-case tickets under `.chc/tickets/<use_case>/`,
+- use the configured key prefix, defaulting to `CHR`,
+- write project-wise tickets directly under `.chr/tickets/`,
+- write use-case tickets under `.chr/tickets/<use_case>/`,
 - generate filenames as `key-truncated-name.md`.
 
 ### T5.3 CLI Command
 
-Expose the behavior through `chc ticket new`.
+Expose the behavior through `chr ticket new`.
 
 Expected behavior:
 
@@ -86,9 +86,9 @@ Manual behavior checks:
 
 ```sh
 tmpdir="$(mktemp -d)"
-go run ./cmd/chc init --dir "$tmpdir"
-go run ./cmd/chc ticket new --dir "$tmpdir" "Do something"
-test -f "$tmpdir/.chc/tickets/CHC-1-Do-something.md"
-go run ./cmd/chc ticket new --dir "$tmpdir" --use-case onboarding "Add setup flow"
-test -f "$tmpdir/.chc/tickets/onboarding/CHC-2-Add-setup-flow.md"
+go run ./cmd/chr init --dir "$tmpdir"
+go run ./cmd/chr ticket new --dir "$tmpdir" "Do something"
+test -f "$tmpdir/.chr/tickets/CHR-1-Do-something.md"
+go run ./cmd/chr ticket new --dir "$tmpdir" --use-case onboarding "Add setup flow"
+test -f "$tmpdir/.chr/tickets/onboarding/CHR-2-Add-setup-flow.md"
 ```

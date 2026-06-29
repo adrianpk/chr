@@ -17,7 +17,7 @@ state model or mutating authoring artifacts.
 
 ## Delivered Behavior
 
-- Loads Markdown artifacts from project-local `.prj` and `.chc` document
+- Loads Markdown artifacts from project-local `.prj` and `.chr` document
   families.
 - Renders the Documents view as a typed document index with status, title, path,
   updated time, and preview.
@@ -29,9 +29,9 @@ state model or mutating authoring artifacts.
 
 ## Implementation Notes
 
-`internal/chcapp` keeps ownership of project resolution and TUI startup data
-loading. It now loads documents through `internal/chctui.LoadDocumentViews` and
-authoring sessions through `chc.NewAuthoringSessionRepository`.
+`internal/chrapp` keeps ownership of project resolution and TUI startup data
+loading. It now loads documents through `internal/chrtui.LoadDocumentViews` and
+authoring sessions through `chr.NewAuthoringSessionRepository`.
 
 Document discovery is intentionally read-only and file-backed. It summarizes
 Markdown title/status/preview metadata and keeps source paths visible as
@@ -42,7 +42,7 @@ instead of parsing command output.
 
 ## Contracts Added or Changed
 
-- `chctui.Options` now accepts document view records and authoring sessions.
+- `chrtui.Options` now accepts document view records and authoring sessions.
 - The TUI startup path reads project-local Markdown documents and authoring
   sessions before entering Bubble Tea.
 - The Documents and Authoring views use up/down selection, matching ticket view
@@ -50,16 +50,16 @@ instead of parsing command output.
 
 ## Files of Interest
 
-- `internal/chcapp/app.go`
-- `internal/chctui/documents.go`
-- `internal/chctui/authoring.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/documents.go`
+- `internal/chrtui/authoring.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
 ```sh
-go test ./internal/chctui ./internal/chcapp
+go test ./internal/chrtui ./internal/chrapp
 make verify
 ```
 
@@ -67,7 +67,7 @@ All commands pass.
 
 ## Risks and Follow-ups
 
-- Document discovery is based on known `.prj` and `.chc` artifact directories;
+- Document discovery is based on known `.prj` and `.chr` artifact directories;
   later slices can add richer artifact classification if the domain exposes a
   shared document index.
 - The first document preview is plain text. Rich Markdown viewport behavior is

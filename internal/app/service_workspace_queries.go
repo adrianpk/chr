@@ -1,6 +1,6 @@
 package app
 
-import "forge.adrianpk.com/chc/internal/core"
+import "forge.adrianpk.com/chr/internal/core"
 
 // WorkspacePathResolutionResult reports a workspace index path resolution.
 type WorkspacePathResolutionResult struct {

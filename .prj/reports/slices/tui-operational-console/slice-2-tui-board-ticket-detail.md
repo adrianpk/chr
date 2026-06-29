@@ -28,10 +28,10 @@ rendering them as navigable board and list views with selected ticket detail.
 
 ## Implementation Notes
 
-`internal/chcapp` remains responsible for project resolution and ticket index
-loading. It passes indexed tickets into `internal/chctui` through TUI options.
+`internal/chrapp` remains responsible for project resolution and ticket index
+loading. It passes indexed tickets into `internal/chrtui` through TUI options.
 
-`internal/chctui` converts indexed tickets into package-local ticket view models
+`internal/chrtui` converts indexed tickets into package-local ticket view models
 so rendering and key handling stay isolated from index persistence details.
 
 Checklist and comment summaries are derived from the ticket Markdown file when
@@ -40,22 +40,22 @@ blocking TUI startup.
 
 ## Contracts Added or Changed
 
-- `chctui.Options` now accepts `Tickets []chc.IndexedTicket`.
-- `chc` and `chc tui` refresh and read the project ticket index before TUI
+- `chrtui.Options` now accepts `Tickets []chr.IndexedTicket`.
+- `chr` and `chr tui` refresh and read the project ticket index before TUI
   startup.
 - TUI navigation changes to left/right or tab for view navigation in order to
   reserve up/down for ticket selection inside ticket views.
 
 ## Files of Interest
 
-- `internal/chcapp/app.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
 ```sh
-go test ./internal/chctui ./internal/chcapp
+go test ./internal/chrtui ./internal/chrapp
 go test ./...
 make verify
 ```

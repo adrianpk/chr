@@ -1,8 +1,8 @@
 # Blog
 
-Small headless blog service used as a ChrysoCoord QA reference project.
+Small headless blog service used as a Chryso QA reference project.
 
-From the parent `chc` repository:
+From the parent `chr` repository:
 
 ```sh
 make qa-reset-blog

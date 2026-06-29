@@ -22,6 +22,6 @@ adding new CLI and Dash surfaces.
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
 - `make verify`
 - `git diff --check`

@@ -26,7 +26,7 @@ Slicing: `.prj/trackers/slicing-user-project-context-tracker.md`
 
 ## Validation
 
-- `go test ./cmd/chc`: pass
+- `go test ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Notes

@@ -17,8 +17,8 @@ uses Woodpecker pipeline status as the feedback mechanism.
 
 ## Changes
 
-- Added `chc gate woodpecker init`.
-- Added a reusable Woodpecker snippet that runs `chc gate dev-main`.
+- Added `chr gate woodpecker init`.
+- Added a reusable Woodpecker snippet that runs `chr gate dev-main`.
 - Added `--dry-run` support that never writes `.woodpecker.yml`.
 - Added safe missing-config creation.
 - Added non-destructive existing-config behavior.
@@ -28,13 +28,13 @@ uses Woodpecker pipeline status as the feedback mechanism.
 ## Feedback Mechanism
 
 The selected feedback mechanism is Woodpecker CI status. The generated workflow
-fails when `chc gate dev-main` exits non-zero, which gives Forgejo a promotion
+fails when `chr gate dev-main` exits non-zero, which gives Forgejo a promotion
 signal without requiring Forgejo API comments or status writes in the first
 implementation.
 
-Gate evidence remains local to `.chc/user/reports/gates/`.
+Gate evidence remains local to `.chr/user/reports/gates/`.
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp` passed.
+- `go test ./internal/chr ./internal/chrapp` passed.
 - `make verify` passed.

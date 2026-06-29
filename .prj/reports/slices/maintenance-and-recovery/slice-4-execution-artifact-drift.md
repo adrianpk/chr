@@ -19,7 +19,7 @@ manually.
 
 - Added project-scoped execution record listing.
 - Added execution artifact drift diagnostics.
-- Added `chc maintenance execution artifacts`.
+- Added `chr maintenance execution artifacts`.
 - Reported missing run directories, result artifacts, logs, validation logs, and
   execution reports.
 - Kept artifact diagnostics read-only.
@@ -38,23 +38,23 @@ for that project id. It does not mutate execution records or artifact files.
 
 - Extended `ExecutionRepository` with `ListProjectExecutions`.
 - Added `ExecutionArtifactDriftService`.
-- Added `chc maintenance execution artifacts`.
+- Added `chr maintenance execution artifacts`.
 - Updated `docs/reference/maintenance.md`.
 
 ## Files of Interest
 
-- `internal/chc/execution_repository.go`
-- `internal/chc/execution_artifact_drift.go`
-- `internal/chc/execution_artifact_drift_test.go`
-- `internal/chcapp/maintenance.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/execution_repository.go`
+- `internal/chr/execution_artifact_drift.go`
+- `internal/chr/execution_artifact_drift_test.go`
+- `internal/chrapp/maintenance.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/maintenance.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'TestExecution(Repository|ArtifactDrift)'
-go test ./internal/chcapp -run 'TestMaintenanceExecutionArtifacts'
+go test ./internal/chr -run 'TestExecution(Repository|ArtifactDrift)'
+go test ./internal/chrapp -run 'TestMaintenanceExecutionArtifacts'
 make verify
 ```
 

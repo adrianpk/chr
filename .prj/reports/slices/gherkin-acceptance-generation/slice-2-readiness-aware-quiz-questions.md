@@ -48,19 +48,19 @@ request.
 
 ## Files of Interest
 
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chc/quiz_curation.go`
-- `internal/chc/quiz_artifact_repository.go`
-- `internal/chcapp/service_quiz.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chr/quiz_curation.go`
+- `internal/chr/quiz_artifact_repository.go`
+- `internal/chrapp/service_quiz.go`
 
 ## Validation
 
-- `go test ./internal/chc -run 'QuizModelProviderPayloadCarriesAcceptanceReadiness|QuizModelQuestionInstructions|QuizModelRoutingStateCarriesAcceptanceReadiness|OpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload'` (pass)
-- `go test ./internal/chc -run 'QuizArtifactRepositoryWritesCuratedNotes|CurateQuizEntriesPreservesAcceptanceReadiness|QuizArtifactRepositoryLoadsRawCaptureEntries'` (pass)
-- `go test ./internal/chcapp -run 'NewQuizModelRequest.*Acceptance'` (pass)
-- `go test ./internal/chc` (pass)
-- `go test ./internal/chcapp` (pass)
+- `go test ./internal/chr -run 'QuizModelProviderPayloadCarriesAcceptanceReadiness|QuizModelQuestionInstructions|QuizModelRoutingStateCarriesAcceptanceReadiness|OpenAIQuizModelRequestBodySerializesFocusedNextQuestionPayload'` (pass)
+- `go test ./internal/chr -run 'QuizArtifactRepositoryWritesCuratedNotes|CurateQuizEntriesPreservesAcceptanceReadiness|QuizArtifactRepositoryLoadsRawCaptureEntries'` (pass)
+- `go test ./internal/chrapp -run 'NewQuizModelRequest.*Acceptance'` (pass)
+- `go test ./internal/chr` (pass)
+- `go test ./internal/chrapp` (pass)
 
 ## Risks and Follow-ups
 

@@ -3,12 +3,12 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-single-ticket-execution-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
-Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
+Priority draft: `.prj/drafts/chr-command-surfaces-and-priority.md`
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm `Agent Runtime Boundary` is completed.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -107,7 +107,7 @@ Pre-flight:
 
 Candidate tasks:
 
-- [x] Add `chc ticket start`.
+- [x] Add `chr ticket start`.
 - [x] Resolve project context through the existing resolver.
 - [x] Reconcile tickets before selecting work.
 - [x] Select one indexed ticket by key.
@@ -272,19 +272,19 @@ Task commits:
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
-- Slice 1 validation: `go test ./internal/chc` pass.
+- Slice 1 validation: `go test ./internal/chr` pass.
 - Slice 1 validation: `make verify` pass.
-- Slice 2 validation: `go test ./internal/chc` pass.
+- Slice 2 validation: `go test ./internal/chr` pass.
 - Slice 2 validation: `make verify` pass.
-- Slice 3 validation: `go test ./cmd/chc ./internal/chc` pass.
+- Slice 3 validation: `go test ./cmd/chr ./internal/chr` pass.
 - Slice 3 validation: `make verify` pass.
-- Slice 4 validation: `go test ./internal/chc ./cmd/chc` pass.
+- Slice 4 validation: `go test ./internal/chr ./cmd/chr` pass.
 - Slice 4 validation: `make verify` pass.
-- Slice 5 validation: `go test ./internal/chc ./cmd/chc` pass.
+- Slice 5 validation: `go test ./internal/chr ./cmd/chr` pass.
 - Slice 5 validation: `make verify` pass.
-- Slice 6 validation: `go test ./internal/chc ./cmd/chc` pass.
+- Slice 6 validation: `go test ./internal/chr ./cmd/chr` pass.
 - Slice 6 validation: `make verify` pass.
-- Slice 7 validation: `go test ./internal/chc ./cmd/chc` pass.
+- Slice 7 validation: `go test ./internal/chr ./cmd/chr` pass.
 - Slice 7 validation: `make verify` pass.
 - Completed slicing validation: `make verify` pass.
 

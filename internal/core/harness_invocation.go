@@ -89,7 +89,7 @@ func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePl
 		"run",
 		"--rm",
 		"--name",
-		cleanDockerName("chc-" + executionID),
+		cleanDockerName("chr-" + executionID),
 	}
 
 	for _, mount := range plan.Mounts {
@@ -98,13 +98,13 @@ func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePl
 
 	args = append(args,
 		"--workdir", plan.ContainerWorkdir,
-		"--env", "CHC_EXECUTION_ID="+executionID,
-		"--env", "CHC_TICKET_KEY="+ticketKey,
-		"--env", "CHC_TICKET_PATH="+containerProjectPath(plan, ticketPath),
-		"--env", "CHC_WORKER_CONTEXT_PATH="+containerProjectPath(plan, plan.WorkerContextPath),
-		"--env", "CHC_RESULT_PATH="+containerProjectPath(plan, plan.ResultPath),
-		"--env", "CHC_LOG_PATH="+containerProjectPath(plan, plan.LogPath),
-		"--env", "CHC_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
+		"--env", "CHR_EXECUTION_ID="+executionID,
+		"--env", "CHR_TICKET_KEY="+ticketKey,
+		"--env", "CHR_TICKET_PATH="+containerProjectPath(plan, ticketPath),
+		"--env", "CHR_WORKER_CONTEXT_PATH="+containerProjectPath(plan, plan.WorkerContextPath),
+		"--env", "CHR_RESULT_PATH="+containerProjectPath(plan, plan.ResultPath),
+		"--env", "CHR_LOG_PATH="+containerProjectPath(plan, plan.LogPath),
+		"--env", "CHR_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
 		"--env", "OPENAI_API_KEY",
 		plan.Image,
 		"/bin/sh",
@@ -123,7 +123,7 @@ func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessComma
 		"run",
 		"--rm",
 		"--name",
-		cleanDockerName("chc-" + executionID + "-validation"),
+		cleanDockerName("chr-" + executionID + "-validation"),
 	}
 
 	for _, mount := range plan.Mounts {
@@ -132,8 +132,8 @@ func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessComma
 
 	args = append(args,
 		"--workdir", plan.ContainerWorkdir,
-		"--env", "CHC_EXECUTION_ID="+executionID,
-		"--env", "CHC_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
+		"--env", "CHR_EXECUTION_ID="+executionID,
+		"--env", "CHR_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
 		plan.Image,
 		"/bin/sh",
 		"-lc",

@@ -96,7 +96,7 @@ func writeResultBlockedReasonTicket(t *testing.T, blockerHistory string) string 
 
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	ticket := Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "blocked",
 		CreatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),

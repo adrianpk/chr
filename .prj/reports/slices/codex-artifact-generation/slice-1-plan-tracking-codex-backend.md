@@ -15,7 +15,7 @@ the existing Go-owned tracking and ticket materialization flow.
 ## Delivered Behavior
 
 - Added Codex output schema support for `QuizModelActionMaterializePlanTracking`.
-- Added `CHC_PLAN_TRACKING_GENERATION_BACKEND=codex` routing for plan tracking
+- Added `CHR_PLAN_TRACKING_GENERATION_BACKEND=codex` routing for plan tracking
   model calls.
 - Preserved existing `MaterializePlanTracking` ownership of tracking writes and
   ticket creation.
@@ -30,31 +30,31 @@ parses the response through the same `quizModelResponseFromOutput` path as the
 direct model adapter.
 
 The service routing remains opt-in for this slice. Setting
-`CHC_PLAN_TRACKING_GENERATION_BACKEND=codex` routes only
+`CHR_PLAN_TRACKING_GENERATION_BACKEND=codex` routes only
 `QuizModelActionMaterializePlanTracking` to Codex; other actions continue to use
 their configured adapters.
 
 Codex is still limited to synthesis. It returns structured tracking JSON. Go
-validates the response, writes `.chc/user/plans/*-tracking.md`, and creates
+validates the response, writes `.chr/user/plans/*-tracking.md`, and creates
 ticket files.
 
 ## Contracts Added or Changed
 
 - `CodexQuizModelAdapter` supports `QuizModelActionMaterializePlanTracking`.
-- `newQuizModelAdapter` recognizes `CHC_PLAN_TRACKING_GENERATION_BACKEND=codex`.
+- `newQuizModelAdapter` recognizes `CHR_PLAN_TRACKING_GENERATION_BACKEND=codex`.
 
 ## Files of Interest
 
-- `internal/chc/quiz_codex_model.go`
-- `internal/chc/quiz_codex_model_test.go`
-- `internal/chcapp/service.go`
-- `internal/chcapp/service_test.go`
-- `internal/chcapp/service_plan_test.go`
+- `internal/chr/quiz_codex_model.go`
+- `internal/chr/quiz_codex_model_test.go`
+- `internal/chrapp/service.go`
+- `internal/chrapp/service_test.go`
+- `internal/chrapp/service_plan_test.go`
 
 ## Validation
 
-- `gofmt -w internal/chc/quiz_codex_model.go internal/chc/quiz_codex_model_test.go internal/chcapp/service.go internal/chcapp/service_test.go internal/chcapp/service_plan_test.go` - pass
-- `go test ./internal/chc ./internal/chcapp` - pass
+- `gofmt -w internal/chr/quiz_codex_model.go internal/chr/quiz_codex_model_test.go internal/chrapp/service.go internal/chrapp/service_test.go internal/chrapp/service_plan_test.go` - pass
+- `go test ./internal/chr ./internal/chrapp` - pass
 - `make verify` - pass
 
 ## Risks and Follow-ups

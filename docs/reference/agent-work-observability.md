@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Agent work observability is the contract for seeing what ChrysoCoord is doing
+Agent work observability is the contract for seeing what Chryso is doing
 while ticket execution or a ready-ticket queue is running.
 
 Observability is file-first. Runtime work writes durable reports, logs, result
@@ -17,8 +17,8 @@ Agent events are JSONL records written under runtime run directories.
 Preferred paths:
 
 ```text
-.chc/user/runtime/runs/<loop-id>/events.jsonl
-.chc/user/runtime/runs/<ticket-key>/<execution-id>/events.jsonl
+.chr/user/runtime/runs/<loop-id>/events.jsonl
+.chr/user/runtime/runs/<ticket-key>/<execution-id>/events.jsonl
 ```
 
 Loop-level streams describe queue progress. Execution-level streams describe
@@ -33,10 +33,10 @@ Each event records:
 | --- | --- |
 | `schema_version` | Event schema version. |
 | `timestamp` | UTC RFC3339 event time. |
-| `project_id` | Project id known to ChrysoCoord. |
+| `project_id` | Project id known to Chryso. |
 | `loop_id` | Loop id when the event belongs to a multi-ticket run. |
 | `execution_id` | Execution id when the event belongs to one ticket run. |
-| `ticket_key` | Ticket key such as `CHC-1`. |
+| `ticket_key` | Ticket key such as `CHR-1`. |
 | `phase` | Machine-readable lifecycle phase. |
 | `level` | `info`, `warn`, or `error`. |
 | `message` | Human-readable event message. |
@@ -122,8 +122,8 @@ or mutate ticket files.
 Summarize an event stream:
 
 ```sh
-chc work events .chc/user/runtime/runs/CHC-1/exec-1/events.jsonl
-chc work events .chc/user/runtime/runs/loop-1/events.jsonl
+chr work events .chr/user/runtime/runs/CHR-1/exec-1/events.jsonl
+chr work events .chr/user/runtime/runs/loop-1/events.jsonl
 ```
 
 The readback summary includes event counts, malformed line counts, latest known
@@ -147,7 +147,7 @@ unreadable.
 Locate detailed runtime artifacts for one execution:
 
 ```sh
-chc work logs <execution-id>
+chr work logs <execution-id>
 ```
 
 The command prints artifact paths and existence flags for:
@@ -167,10 +167,10 @@ activity. Use the event stream for the human-readable operational timeline.
 Reports summarize completed evidence:
 
 ```sh
-chc report list --kind execution
-chc report list --kind loop
-chc report show --execution <execution-id>
-chc report show --loop <loop-id>
+chr report list --kind execution
+chr report list --kind loop
+chr report show --execution <execution-id>
+chr report show --loop <loop-id>
 ```
 
 Execution and loop reports are the normal entry point for reviewing what

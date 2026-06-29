@@ -68,7 +68,7 @@ need a visible synopsis. The synopsis should be persisted, visible in the Board
 list/detail, and not force users to open the source plan/spec to understand the
 work.
 
-Ticket identity raised a larger question. A user-facing key such as `CHC-123`
+Ticket identity raised a larger question. A user-facing key such as `CHR-123`
 is useful, but UUIDs in Markdown are not enough if users can copy and duplicate
 them. A service would need to validate uniqueness. SQLite can help with
 constraints, monotonic key assignment, search, filtering, board columns, and
@@ -98,7 +98,7 @@ body in SQLite. SQLite should store operational metadata and references:
 Long body, comments, and full context remain in Markdown. The Board can list
 and filter from SQLite while the right pane can read Markdown by path.
 
-Synopsis should be mandatory in ChrysoCoord-created flows:
+Synopsis should be mandatory in Chryso-created flows:
 
 - LLM-generated tickets must include synopsis.
 - manually created tickets from Board should require synopsis.
@@ -116,10 +116,10 @@ necessary. Daemon watching should be mentioned as evaluated but not preferred
 because the project avoids keeping extra processes running when a stateless
 workflow is enough.
 
-The conversation opened a broader `.chc` multi-user concern. If several users
+The conversation opened a broader `.chr` multi-user concern. If several users
 generate artifacts in the same repo, collisions can happen not only for tickets
 but also dumps, quizzes, specs, plans, context, and tracking. A future direction
-is operator userspace under `.chc/operators/<operator-id>/...`. The operator id
+is operator userspace under `.chr/operators/<operator-id>/...`. The operator id
 could be resolved from local config, an environment variable, or `.envrc`.
 This should remain outside the MVP but recorded so the design does not need to
 rediscover the issue later.
@@ -127,9 +127,9 @@ rediscover the issue later.
 For MVP, assume a monouser repository/operator workflow, while documenting
 that multi-operator support should use namespaced operator artifacts soon.
 Even in MVP, it may be useful to prepare a single-user userspace shape such as
-`.chc/user/`, with the active user selected through a required environment
+`.chr/user/`, with the active user selected through a required environment
 variable. Users can set that through `.envrc` when using direnv, or by any
-other environment mechanism. Full `.chc/operators/<operator-id>/...`
+other environment mechanism. Full `.chr/operators/<operator-id>/...`
 multi-operator behavior remains outside MVP.
 
 Attention details should start with plain text in the UI. If that consumes too

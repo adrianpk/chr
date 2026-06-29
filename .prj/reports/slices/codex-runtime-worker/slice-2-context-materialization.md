@@ -51,14 +51,14 @@ Updated core type:
 
 ## Files of Interest
 
-- `internal/chc/runtime_plan.go`
-- `internal/chc/codex_worker_context.go`
-- `internal/chc/codex_worker_context_test.go`
+- `internal/chr/runtime_plan.go`
+- `internal/chr/codex_worker_context.go`
+- `internal/chr/codex_worker_context_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

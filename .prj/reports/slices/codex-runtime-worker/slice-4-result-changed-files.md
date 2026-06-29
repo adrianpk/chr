@@ -47,16 +47,16 @@ Updated core types:
 
 ## Files of Interest
 
-- `internal/chc/execution_result.go`
-- `internal/chc/execution_result_test.go`
-- `internal/chc/result_application.go`
-- `internal/chc/result_application_test.go`
+- `internal/chr/execution_result.go`
+- `internal/chr/execution_result_test.go`
+- `internal/chr/result_application.go`
+- `internal/chr/result_application_test.go`
 - `docs/reference/ticket-execution.md`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

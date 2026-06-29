@@ -18,7 +18,7 @@ Spec generation model output now supports an optional `feature` object with
 `generated`, `rejected`, or `not_applicable` status.
 
 When the model returns a generated feature, the service writes
-`.chc/user/acceptance/<scope>.feature` only after deterministic static checks
+`.chr/user/acceptance/<scope>.feature` only after deterministic static checks
 pass. Invalid generated features do not fail spec generation and are reported
 as rejected.
 
@@ -45,17 +45,17 @@ artifact can carry spec traceability and provenance.
 
 ## Files of Interest
 
-- `internal/chc/acceptance_feature.go`
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chc/quiz_draft_spec.go`
-- `internal/chcapp/service_spec.go`
+- `internal/chr/acceptance_feature.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chr/quiz_draft_spec.go`
+- `internal/chrapp/service_spec.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp -run 'GeneratedSpecFeatureSchema|SpecGenerationInstructionsDescribeOptionalFeature|GeneratedSpecOutputCarriesFeature|WriteAcceptanceFeature|ServiceGenerateSpec.*Feature|ServiceGenerateSpecRejectsInvalidGeneratedFeature|ServiceGenerateSpecReportsNotApplicableFeature'` (pass)
-- `go test ./internal/chc` (pass)
-- `go test ./internal/chcapp` (pass)
+- `go test ./internal/chr ./internal/chrapp -run 'GeneratedSpecFeatureSchema|SpecGenerationInstructionsDescribeOptionalFeature|GeneratedSpecOutputCarriesFeature|WriteAcceptanceFeature|ServiceGenerateSpec.*Feature|ServiceGenerateSpecRejectsInvalidGeneratedFeature|ServiceGenerateSpecReportsNotApplicableFeature'` (pass)
+- `go test ./internal/chr` (pass)
+- `go test ./internal/chrapp` (pass)
 
 ## Risks and Follow-ups
 

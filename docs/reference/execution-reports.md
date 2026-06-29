@@ -122,7 +122,7 @@ Execution reports are written to the execution run artifact directory:
 <run_dir>/execution-report.md
 ```
 
-For ticket result application, `chc ticket apply-result <execution-id>` writes
+For ticket result application, `chr ticket apply-result <execution-id>` writes
 this report after applying the result to ticket state. Dry-run result
 application prints the planned report path but does not write the report.
 

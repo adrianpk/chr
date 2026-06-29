@@ -40,14 +40,14 @@ Add a virtual Board attention view outside normal column navigation.
 
 ## Files of Interest
 
-- `internal/chc/board_query.go`
-- `internal/chc/board_query_test.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chr/board_query.go`
+- `internal/chr/board_query_test.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chctui`
+- `go test ./internal/chr ./internal/chrtui`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

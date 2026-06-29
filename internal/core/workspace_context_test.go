@@ -94,7 +94,7 @@ func TestAssembleWorkspaceContextReportsMissingFileAfterGraphBuild(t *testing.T)
 		t.Fatalf("Build returned error: %v", err)
 	}
 
-	missingPath := filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md")
+	missingPath := filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md")
 
 	err = os.Remove(missingPath)
 	if err != nil {
@@ -109,7 +109,7 @@ func TestAssembleWorkspaceContextReportsMissingFileAfterGraphBuild(t *testing.T)
 	var found bool
 
 	for _, source := range assembly.Sources {
-		if source.Path == ".chc/user/plans/blog-plan.md" {
+		if source.Path == ".chr/user/plans/blog-plan.md" {
 			found = true
 
 			if source.Included {
@@ -189,7 +189,7 @@ func writeWorkspaceContextCaseDocumentsFixture(t *testing.T, projectDir string) 
 func writeWorkspaceContextCaseSpecAndPlanFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
 title: Case Spec
 case: blog
 ---
@@ -198,7 +198,7 @@ case: blog
 
 Case specification body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "blog-plan.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
 title: Case Plan
 case: blog
 ---
@@ -212,11 +212,11 @@ Case plan body.
 func writeWorkspaceContextCaseDumpFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-dump.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-dump.md"), `---
 title: Case Dump
 status: curated
 type: dump
-source: .chc/user/dumps/blog-dump-raw.md
+source: .chr/user/dumps/blog-dump-raw.md
 case: blog
 ---
 
@@ -224,11 +224,11 @@ case: blog
 
 Curated case dump body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-dump-raw.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-dump-raw.md"), `---
 title: Case Dump Raw Capture
 status: raw
 type: dump_raw
-curated: .chc/user/dumps/blog-dump.md
+curated: .chr/user/dumps/blog-dump.md
 case: blog
 ---
 
@@ -241,10 +241,10 @@ Raw case dump body.
 func writeWorkspaceContextCaseQuizFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "quizzes", "blog-quiz.md"), `---
 title: Case Quiz
 status: curated
-raw_path: .chc/user/quizzes/blog-quiz-raw.md
+raw_path: .chr/user/quizzes/blog-quiz-raw.md
 case: blog
 ---
 
@@ -252,10 +252,10 @@ case: blog
 
 Curated case quiz body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "quizzes", "blog-quiz-raw.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "quizzes", "blog-quiz-raw.md"), `---
 title: Case Quiz Raw Capture
 status: raw
-curated_path: .chc/user/quizzes/blog-quiz.md
+curated_path: .chr/user/quizzes/blog-quiz.md
 case: blog
 ---
 
@@ -268,8 +268,8 @@ Raw case quiz body.
 func writeWorkspaceContextCaseTicketFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-board.md"), renderProjectDocumentTestTicket(t, Ticket{
-		Key:      "CHC-1",
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-board.md"), renderProjectDocumentTestTicket(t, Ticket{
+		Key:      "CHR-1",
 		Title:    "Board Ticket",
 		Status:   "ready",
 		Priority: "normal",
@@ -282,7 +282,7 @@ func writeWorkspaceContextCaseTicketFixture(t *testing.T, projectDir string) {
 func writeWorkspaceContextProjectDocumentsFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "plans", "project-plan.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "project-plan.md"), `---
 title: Project Plan
 ---
 
@@ -290,7 +290,7 @@ title: Project Plan
 
 Project plan body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "missing-case.md"), `---
+	writeTestFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "missing-case.md"), `---
 title: Missing Case Dump
 case: missing
 ---

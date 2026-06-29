@@ -29,19 +29,19 @@ objective merge preflight.
 Merge one reviewed ticket:
 
 ```sh
-chc ticket merge CHC-1
+chr ticket merge CHR-1
 ```
 
 Preview without provider or ticket mutation:
 
 ```sh
-chc ticket merge CHC-1 --dry-run
+chr ticket merge CHR-1 --dry-run
 ```
 
 Select the expected base branch and merge strategy:
 
 ```sh
-chc ticket merge CHC-1 --base develop --strategy rebase
+chr ticket merge CHR-1 --base develop --strategy rebase
 ```
 
 Supported strategies are:
@@ -69,7 +69,7 @@ The pull request reference is the provider-native merge surface.
 
 ## Preflight
 
-Before calling the provider merge operation, ChrysoCoord checks:
+Before calling the provider merge operation, Chryso checks:
 
 - ticket merge handoff metadata;
 - provider pull request readability;
@@ -102,7 +102,7 @@ in [Review workflow configuration](review-workflow-config.md).
 
 ## Successful Merge
 
-On success, ChrysoCoord updates ticket metadata:
+On success, Chryso updates ticket metadata:
 
 ```yaml
 status: "done"
@@ -121,7 +121,7 @@ Successful merges do not write ceremonial pull request or ticket comments.
 
 ## Blocked Merge
 
-When preflight or provider execution blocks the merge, ChrysoCoord keeps the
+When preflight or provider execution blocks the merge, Chryso keeps the
 ticket in `ready_for_merge` and records compact blocker metadata:
 
 ```yaml

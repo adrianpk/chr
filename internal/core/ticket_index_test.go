@@ -12,7 +12,7 @@ import (
 
 func TestTicketIndexUpsertsAndListsTickets(t *testing.T) {
 	index := newTestTicketIndex(t)
-	ticket := testIndexedTicket("CHC-1", []string{"uxui", "onboarding"})
+	ticket := testIndexedTicket("CHR-1", []string{"uxui", "onboarding"})
 
 	err := index.UpsertTicket(context.Background(), ticket)
 	if err != nil {
@@ -33,7 +33,7 @@ func TestTicketIndexUpsertsAndListsTickets(t *testing.T) {
 
 func TestTicketIndexReplacesTagsOnUpsert(t *testing.T) {
 	index := newTestTicketIndex(t)
-	ticket := testIndexedTicket("CHC-1", []string{"old"})
+	ticket := testIndexedTicket("CHR-1", []string{"old"})
 
 	err := index.UpsertTicket(context.Background(), ticket)
 	if err != nil {
@@ -64,14 +64,14 @@ func TestTicketIndexReplacesTagsOnUpsert(t *testing.T) {
 
 func TestTicketIndexGetsTicketByKey(t *testing.T) {
 	index := newTestTicketIndex(t)
-	ticket := testIndexedTicket("CHC-1", []string{"uxui"})
+	ticket := testIndexedTicket("CHR-1", []string{"uxui"})
 
 	err := index.UpsertTicket(context.Background(), ticket)
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
-	got, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	got, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
 	if err != nil {
 		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestTicketIndexGetsTicketByKey(t *testing.T) {
 
 func TestTicketIndexRoundTripsReviewMetadata(t *testing.T) {
 	index := newTestTicketIndex(t)
-	ticket := testIndexedTicket("CHC-1", []string{"uxui"})
+	ticket := testIndexedTicket("CHR-1", []string{"uxui"})
 	ticket.Branch = "feat/slice-4-indexed-ticket-enrichment"
 	ticket.ReviewRefs = []TicketReviewRef{
 		{
@@ -103,7 +103,7 @@ func TestTicketIndexRoundTripsReviewMetadata(t *testing.T) {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
-	got, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	got, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
 	if err != nil {
 		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestTicketIndexRoundTripsReviewMetadata(t *testing.T) {
 func TestTicketIndexGetTicketByKeyRejectsMissingTicket(t *testing.T) {
 	index := newTestTicketIndex(t)
 
-	_, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	_, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
 	if !errors.Is(err, ErrTicketNotFound) {
 		t.Fatalf("err = %v, want ErrTicketNotFound", err)
 	}
@@ -123,7 +123,7 @@ func TestTicketIndexGetTicketByKeyRejectsMissingTicket(t *testing.T) {
 func TestTicketIndexDeletesProjectTickets(t *testing.T) {
 	index := newTestTicketIndex(t)
 
-	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHC-1", nil))
+	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHR-1", nil))
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
@@ -160,8 +160,8 @@ func newTestTicketIndex(t *testing.T) TicketIndex {
 
 	addTestProject(t, registry, Project{
 		ID:           "project-1",
-		Name:         "chrysocoord",
-		Path:         "/tmp/chrysocoord",
+		Name:         "chryso",
+		Path:         "/tmp/chryso",
 		Enabled:      true,
 		RegisteredAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
@@ -187,7 +187,7 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 
 	return IndexedTicket{
 		ProjectID:    "project-1",
-		Path:         "/tmp/chrysocoord/.chc/user/tickets/" + key + ".md",
+		Path:         "/tmp/chryso/.chr/user/tickets/" + key + ".md",
 		RelativePath: key + ".md",
 		Key:          key,
 		Title:        "Do something",
@@ -201,7 +201,7 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 		UseCase:      "onboarding",
 		ProjectArea:  "frontend",
 		SourceKind:   "plan_tracking",
-		SourceRef:    ".chc/user/plans/onboarding-plan.md",
+		SourceRef:    ".chr/user/plans/onboarding-plan.md",
 		Slice:        "Slice 4",
 		CreatedAt:    timePtr(createdAt),
 		UpdatedAt:    timePtr(updatedAt),

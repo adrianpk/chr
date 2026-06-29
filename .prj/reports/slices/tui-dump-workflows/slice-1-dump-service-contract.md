@@ -23,15 +23,15 @@ projection outside the TUI layer.
 - The service exposes request/result contracts for future create, append, save,
   and open dump operations.
 - The canonical dump directory is resolved through the service/core boundary as
-  `.chc/dumps`.
-- The generic TUI document loader recognizes `.chc/dumps` as an active dump
+  `.chr/dumps`.
+- The generic TUI document loader recognizes `.chr/dumps` as an active dump
   source while preserving `.prj/dumps` compatibility.
 
 ## Implementation Notes
 
-- Added dump contracts in `internal/chcapp` so TUI adapters can depend on an
+- Added dump contracts in `internal/chrapp` so TUI adapters can depend on an
   executor boundary instead of implementing dump logic.
-- Added a core `chc.DumpDirectory` helper for the canonical project-local dump
+- Added a core `chr.DumpDirectory` helper for the canonical project-local dump
   path.
 - Dump listing is derived from `WorkspaceIndex` dump nodes rather than parsing
   Markdown in the TUI.
@@ -43,22 +43,22 @@ projection outside the TUI layer.
 
 - Added `DumpScope`, `DumpView`, `DumpListResult`, `DumpCreateRequest`,
   `DumpAppendRequest`, `DumpSaveRequest`, `DumpOpenRequest`, and
-  `DumpOperationResult` in `internal/chcapp`.
+  `DumpOperationResult` in `internal/chrapp`.
 - Added `service.ListDumps()`.
-- Added `chc.DumpDirectory(projectDir)`.
-- Changed active TUI document discovery to include `.chc/dumps`.
+- Added `chr.DumpDirectory(projectDir)`.
+- Changed active TUI document discovery to include `.chr/dumps`.
 
 ## Files of Interest
 
-- `internal/chc/dump.go`
-- `internal/chcapp/service_dump.go`
-- `internal/chcapp/service_test.go`
-- `internal/chctui/documents.go`
-- `internal/chctui/model_test.go`
+- `internal/chr/dump.go`
+- `internal/chrapp/service_dump.go`
+- `internal/chrapp/service_test.go`
+- `internal/chrtui/documents.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui ./internal/chc`
+- `go test ./internal/chrapp ./internal/chrtui ./internal/chr`
 - `make verify`
 
 ## Risks and Follow-ups

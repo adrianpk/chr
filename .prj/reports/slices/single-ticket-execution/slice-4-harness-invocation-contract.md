@@ -21,7 +21,7 @@ Runtime artifact paths can now be scoped under both ticket key and execution ID:
 
 `<artifact_dir>/<ticket_key>/<execution_id>/`
 
-`chc ticket start` passes the selected ticket key into runtime validation so the
+`chr ticket start` passes the selected ticket key into runtime validation so the
 pending execution record stores ticket-scoped artifact paths.
 
 ## Implementation Notes
@@ -32,10 +32,10 @@ artifacts.
 
 The run command carries execution context through environment variables:
 
-- `CHC_EXECUTION_ID`
-- `CHC_TICKET_KEY`
-- `CHC_RESULT_PATH`
-- `CHC_LOG_PATH`
+- `CHR_EXECUTION_ID`
+- `CHR_TICKET_KEY`
+- `CHR_RESULT_PATH`
+- `CHR_LOG_PATH`
 
 ## Contracts Added or Changed
 
@@ -54,17 +54,17 @@ both set, run artifacts are placed below `<artifact_dir>/<ticket_key>/<run_id>/`
 
 ## Files of Interest
 
-- `internal/chc/harness_invocation.go`
-- `internal/chc/harness_invocation_test.go`
-- `internal/chc/runtime_plan.go`
-- `internal/chc/runtime_plan_test.go`
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/harness_invocation.go`
+- `internal/chr/harness_invocation_test.go`
+- `internal/chr/runtime_plan.go`
+- `internal/chr/runtime_plan_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

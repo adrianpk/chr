@@ -1,10 +1,10 @@
 # Adopt The Dev To Main Gate In An Existing Project
 
 This guide starts from a Go project that already has history, tests, and
-development habits before ChrysoCoord is introduced.
+development habits before Chryso is introduced.
 
 The goal is gradual adoption. Existing work should become visible as baseline
-context, not fail because it was created before ChrysoCoord managed the
+context, not fail because it was created before Chryso managed the
 project.
 
 ## Initialize The Workspace
@@ -12,13 +12,13 @@ project.
 From the project root:
 
 ```sh
-chc init
+chr init
 ```
 
-This creates the project-local ChrysoCoord workspace under:
+This creates the project-local Chryso workspace under:
 
 ```text
-.chc/user/
+.chr/user/
 ```
 
 The dev-to-main gate reads and writes under that core. It does not read
@@ -29,7 +29,7 @@ unrelated project planning directories.
 Create:
 
 ```text
-.chc/user/config/gates.yml
+.chr/user/config/gates.yml
 ```
 
 Use a permissive policy for the first adoption pass:
@@ -48,7 +48,7 @@ gates:
 ```
 
 This runs validation, writes reports, and lists manual or external changes
-without blocking the project because older work has no ChrysoCoord execution
+without blocking the project because older work has no Chryso execution
 evidence.
 
 ## Run The First Gate
@@ -62,18 +62,18 @@ git fetch origin
 Run the gate against the current promotion range:
 
 ```sh
-chc gate dev-main --base origin/main --head origin/dev
+chr gate dev-main --base origin/main --head origin/dev
 ```
 
 Use local refs that match the project's branch model. The command requires a
-Git repository and a ChrysoCoord core.
+Git repository and a Chryso core.
 
 ## Read The Baseline Evidence
 
 Reports are written under:
 
 ```text
-.chc/user/reports/gates/
+.chr/user/reports/gates/
 ```
 
 Read the Markdown report first. It shows:
@@ -86,14 +86,14 @@ Read the Markdown report first. It shows:
 - high-risk manual changes when configured.
 
 The first report for an existing project is an adoption baseline. It records
-what ChrysoCoord can observe at the point where the project starts using the
+what Chryso can observe at the point where the project starts using the
 gate.
 
 ## Add Agent-Managed Work Over Time
 
-After adoption, create or generate tickets and let ChrysoCoord execute new work.
-Those executions create evidence under `.chc/user/` that later gate runs can
-classify as ChrysoCoord-managed.
+After adoption, create or generate tickets and let Chryso execute new work.
+Those executions create evidence under `.chr/user/` that later gate runs can
+classify as Chryso-managed.
 
 Manual work can continue to exist. The default recommendation is to list it as
 context first, then tighten policy only when the project has enough agent-run
@@ -129,14 +129,14 @@ They are warnings unless the project adds a stricter policy in a later version.
 Preview the workflow:
 
 ```sh
-chc gate woodpecker init --dry-run
+chr gate woodpecker init --dry-run
 ```
 
 Write it when the generated workflow matches the project:
 
 ```sh
-chc gate woodpecker init
+chr gate woodpecker init
 ```
 
 Existing `.woodpecker.yml` files are left unchanged unless they were generated
-by ChrysoCoord and `--write` is provided.
+by Chryso and `--write` is provided.

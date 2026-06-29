@@ -7,7 +7,7 @@ Source quiz: `.prj/quizzes/curated/dashboard-board-ticket-operations-quiz.md`
 
 ## Purpose
 
-Define the Board MVP as the operational ticket-flow surface for ChrysoCoord.
+Define the Board MVP as the operational ticket-flow surface for Chryso.
 
 The Board is not the later metrics dashboard. The later `F8` Dashboard may
 become a broader Grafana-like view for activity, throughput, validation, and
@@ -31,12 +31,12 @@ The MVP includes:
 - a SQLite operational metadata index;
 - conservative attention detection;
 - right-pane ticket detail inspection;
-- a single active project userspace under `.chc/user/`;
+- a single active project userspace under `.chr/user/`;
 - CLI and TUI routing through shared services.
 
 The MVP excludes:
 
-- full multi-operator `.chc/operators/<operator-id>/...`;
+- full multi-operator `.chr/operators/<operator-id>/...`;
 - daemon-based filesystem watching;
 - LLM-assisted Markdown sync for external tickets;
 - automatic archival of old done tickets;
@@ -72,7 +72,7 @@ UI labels should be human-readable and avoid underscores:
 Existing ticket status values should be migrated or aliased deliberately. The
 current historical values include `open`, `ready`, `reviewing`, `solved`,
 `merged`, and `closed`. The Board implementation must preserve readability for
-existing tickets while moving new ChrysoCoord-created tickets to the Board
+existing tickets while moving new Chryso-created tickets to the Board
 status vocabulary.
 
 ## Attention View
@@ -146,7 +146,7 @@ body store.
 The project already has:
 
 - a migration runner;
-- a user-level `chc.db`;
+- a user-level `chr.db`;
 - `indexed_tickets`;
 - `indexed_ticket_tags`;
 - ticket discovery, parsing, rebuilding, and reconciliation;
@@ -175,7 +175,7 @@ The MVP is a single-operator project workflow, but it should prepare a
 project-local active userspace:
 
 ```text
-.chc/
+.chr/
   user/
 ```
 
@@ -187,14 +187,14 @@ their shell or automation environment.
 The MVP does not need to fully implement:
 
 ```text
-.chc/
+.chr/
   operators/
     <operator-id>/
 ```
 
 The spec records that as the preferred future shape for multi-operator
 repositories. It avoids collisions between artifacts created by different
-operators while still allowing users to version or ignore their own `.chc`
+operators while still allowing users to version or ignore their own `.chr`
 workspace according to project policy.
 
 ## Sync Direction
@@ -213,7 +213,7 @@ Future sync may:
 - fill empty synopsis through LLM assistance when the body is useful;
 - preserve non-empty synopsis text.
 
-For the MVP, tickets created through ChrysoCoord should update the SQLite index
+For the MVP, tickets created through Chryso should update the SQLite index
 through service boundaries. Existing index rebuild and status commands remain
 the recovery path.
 
@@ -233,7 +233,7 @@ scriptable.
 
 ## Acceptance Criteria
 
-- New ChrysoCoord-created tickets include `synopsis`.
+- New Chryso-created tickets include `synopsis`.
 - New ticket statuses use the Board vocabulary.
 - Existing legacy statuses are mapped or surfaced without hiding tickets.
 - The SQLite ticket index stores Board metadata needed for list/detail views.
@@ -251,7 +251,7 @@ scriptable.
 ## Open Questions
 
 - Which exact environment variable name should select the active operator for
-  `.chc/user/`?
+  `.chr/user/`?
 - Should legacy statuses be migrated on write, mapped only for display, or both?
 - Should monotonic ticket allocation use a new SQLite sequence table or derive
   from existing indexed rows with a transaction lock?

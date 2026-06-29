@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const diagnosticBundleRelativePath = ".chc/maintenance/diagnostic-bundle.md"
+const diagnosticBundleRelativePath = ".chr/maintenance/diagnostic-bundle.md"
 
 // DiagnosticBundle describes a package boundary value.
 type DiagnosticBundle struct {

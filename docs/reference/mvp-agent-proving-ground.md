@@ -3,7 +3,7 @@
 ## Purpose
 
 The MVP Agent Proving Ground is a temporary direct execution path used to prove
-that `chc` can run Codex inside an agent sandbox for one controlled code task.
+that `chr` can run Codex inside an agent sandbox for one controlled code task.
 
 It is post-cutoff MVP hardening. It is not the final ticket workflow.
 
@@ -32,7 +32,7 @@ _workspace/testing/projects/todolist
 Direct proving objectives live under the fixture project:
 
 ```text
-.chc/proving/objectives/
+.chr/proving/objectives/
 ```
 
 Each objective declares:
@@ -49,9 +49,9 @@ Each objective declares:
 Preview the sandbox run without executing Docker:
 
 ```sh
-chc proving run \
+chr proving run \
   --dir _workspace/testing/projects/todolist \
-  --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md \
+  --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md \
   --dry-run
 ```
 
@@ -64,7 +64,7 @@ The dry run prints:
 - Docker build command;
 - Docker run command.
 
-Without `--dry-run`, `chc proving run`:
+Without `--dry-run`, `chr proving run`:
 
 - loads the objective;
 - computes the runtime plan;
@@ -79,9 +79,9 @@ Validation and Ralph Loop retries are provided by separate proving commands.
 Run validation for one objective:
 
 ```sh
-chc proving validate \
+chr proving validate \
   --dir _workspace/testing/projects/todolist \
-  --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md
+  --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md
 ```
 
 The validation runner executes:
@@ -99,9 +99,9 @@ The command exits non-zero when any validation command fails.
 Run a bounded Ralph Loop for one objective:
 
 ```sh
-chc proving ralph \
+chr proving ralph \
   --dir _workspace/testing/projects/todolist \
-  --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md
+  --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md
 ```
 
 The loop:

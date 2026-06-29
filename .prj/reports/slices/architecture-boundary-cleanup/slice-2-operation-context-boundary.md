@@ -46,15 +46,15 @@ parents explicitly.
 
 ## Files of Interest
 
-- `internal/chcapp/generation_runtime.go`
-- `internal/chcapp/service_spec.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chcapp/spec_plan_cli.go`
-- `internal/chcapp/tui_adapters.go`
+- `internal/chrapp/generation_runtime.go`
+- `internal/chrapp/service_spec.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chrapp/spec_plan_cli.go`
+- `internal/chrapp/tui_adapters.go`
 
 ## Validation
 
-- `go test ./internal/chcapp`
+- `go test ./internal/chrapp`
 - `go test ./...`
 - `make verify`
 

@@ -16,7 +16,7 @@ PR: `#351`
 
 ## Summary
 
-- Added ChrysoCoord Web UI visual identity using a chrysocolla/Go-adjacent
+- Added Chryso Web UI visual identity using a chrysocolla/Go-adjacent
   palette with amber and danger accents.
 - Added a repo-native rounded bot/agent avatar asset.
 - Refined layout density and responsive behavior across Project, Board, Dash,
@@ -26,11 +26,11 @@ PR: `#351`
 
 ## Changes
 
-- `internal/webui/assets/static/chc-avatar.svg`
-  - Adds the ChrysoCoord Web UI avatar asset.
+- `internal/webui/assets/static/chr-avatar.svg`
+  - Adds the Chryso Web UI avatar asset.
 - `internal/webui/assets/templates/shell.html`
   - Replaces the text-only brand mark with the embedded avatar image.
-- `internal/webui/assets/static/chc.css`
+- `internal/webui/assets/static/chr.css`
   - Defines the visual token set for color, type, spacing, borders, radius,
     shadows, and status accents.
   - Removes the heavy outer workspace card so repeated items and operational
@@ -45,11 +45,11 @@ PR: `#351`
 
 - `go test ./internal/webui` (pass)
 - Chromium screenshots generated and inspected from
-  `go run ./cmd/chc web serve --dir . --port 7339 --require-token false`:
-  - `/tmp/chc-slice9-screenshots/desktop-board.png` at `1440x1000` (pass)
-  - `/tmp/chc-slice9-screenshots/desktop-dash.png` at `1440x1000` (pass)
-  - `/tmp/chc-slice9-screenshots/mobile-project.png` at `390x900` (pass)
-  - `/tmp/chc-slice9-screenshots/mobile-dumps.png` at `390x900` (pass)
+  `go run ./cmd/chr web serve --dir . --port 7339 --require-token false`:
+  - `/tmp/chr-slice9-screenshots/desktop-board.png` at `1440x1000` (pass)
+  - `/tmp/chr-slice9-screenshots/desktop-dash.png` at `1440x1000` (pass)
+  - `/tmp/chr-slice9-screenshots/mobile-project.png` at `390x900` (pass)
+  - `/tmp/chr-slice9-screenshots/mobile-dumps.png` at `390x900` (pass)
 - `make verify` (pass)
 
 ## Notes

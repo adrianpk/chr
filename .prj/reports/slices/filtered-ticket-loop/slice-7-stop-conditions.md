@@ -14,7 +14,7 @@ blocked results, or execution failures.
 
 ## Delivered Behavior
 
-`chc ticket loop` now supports `--max-iterations`.
+`chr ticket loop` now supports `--max-iterations`.
 
 The command:
 
@@ -48,13 +48,13 @@ Changed loop run behavior:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-loop.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestTicketLoop'`: pass
+- `go test ./cmd/chr -run 'TestTicketLoop'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

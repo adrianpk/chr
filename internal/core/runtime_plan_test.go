@@ -22,10 +22,10 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 		"ProjectDir":            dir,
 		"ProjectCheckoutDir":    dir,
 		"ExecutionWorkspaceDir": dir,
-		"WorkspaceDir":          filepath.Join(dir, ".chc"),
-		"DockerfilePath":        filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-		"ArtifactDir":           filepath.Join(dir, ".chc", "user", "runtime", "runs"),
-		"ResultPath":            filepath.Join(dir, ".chc", "user", "runtime", "runs", "result.json"),
+		"WorkspaceDir":          filepath.Join(dir, ".chr"),
+		"DockerfilePath":        filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+		"ArtifactDir":           filepath.Join(dir, ".chr", "user", "runtime", "runs"),
+		"ResultPath":            filepath.Join(dir, ".chr", "user", "runtime", "runs", "result.json"),
 	}
 
 	gotPaths := map[string]string{
@@ -60,11 +60,11 @@ func TestPlanRuntimeUsesDefaultArtifactPaths(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	if plan.WorkerContextPath != filepath.Join(dir, ".chc", "user", "runtime", "runs", "context.md") {
+	if plan.WorkerContextPath != filepath.Join(dir, ".chr", "user", "runtime", "runs", "context.md") {
 		t.Fatalf("WorkerContextPath = %q, want default context path", plan.WorkerContextPath)
 	}
 
-	if plan.ValidationPath != filepath.Join(dir, ".chc", "user", "runtime", "runs", "validation.log") {
+	if plan.ValidationPath != filepath.Join(dir, ".chr", "user", "runtime", "runs", "validation.log") {
 		t.Fatalf("ValidationPath = %q, want default validation path", plan.ValidationPath)
 	}
 }
@@ -78,7 +78,7 @@ func TestPlanRuntimeUsesCustomConfig(t *testing.T) {
 			Image:             "example/runtime:dev",
 			DockerfilePath:    "ops/runtime.Dockerfile",
 			Workdir:           "/repo",
-			ArtifactDir:       "var/chc/runs",
+			ArtifactDir:       "var/chr/runs",
 			ValidationCommand: "go test ./...",
 		},
 	})
@@ -102,7 +102,7 @@ func TestPlanRuntimeUsesCustomConfig(t *testing.T) {
 		t.Fatalf("Mount target = %q, want /repo", plan.Mounts[0].Target)
 	}
 
-	if plan.ArtifactDir != filepath.Join(dir, "var", "chc", "runs") {
+	if plan.ArtifactDir != filepath.Join(dir, "var", "chr", "runs") {
 		t.Fatalf("ArtifactDir = %q, want custom artifact dir", plan.ArtifactDir)
 	}
 
@@ -122,7 +122,7 @@ func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	wantRunDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "run-123")
+	wantRunDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "run-123")
 	if plan.RunArtifactDir != wantRunDir {
 		t.Fatalf("RunArtifactDir = %q, want %q", plan.RunArtifactDir, wantRunDir)
 	}
@@ -149,14 +149,14 @@ func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: dir,
-		TicketKey:  "CHC-1",
+		TicketKey:  "CHR-1",
 		RunID:      "exec-123",
 	})
 	if err != nil {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	wantRunDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-123")
+	wantRunDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-123")
 	if plan.RunArtifactDir != wantRunDir {
 		t.Fatalf("RunArtifactDir = %q, want %q", plan.RunArtifactDir, wantRunDir)
 	}
@@ -198,7 +198,7 @@ func TestPlanRuntimeNormalizesRelativeContainerWorkdirMount(t *testing.T) {
 
 func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 	dir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(dir, ".chc", "user", "runtime", "worktrees", "CHC-1")
+	executionWorkspaceDir := filepath.Join(dir, ".chr", "user", "runtime", "worktrees", "CHR-1")
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: dir,
@@ -209,8 +209,8 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
-		TicketKey:             "CHC-1",
-		TicketBranch:          "chc/CHC-1",
+		TicketKey:             "CHR-1",
+		TicketBranch:          "chr/CHR-1",
 		WorkspaceBaseRef:      "origin/dev",
 		WorkspaceBaseSHA:      "abc123",
 	})
@@ -218,16 +218,16 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	wantArtifactDir := filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs")
+	wantArtifactDir := filepath.Join(executionWorkspaceDir, ".chr", "user", "runtime", "runs")
 	wantFields := map[string]string{
 		"ProjectCheckoutDir":    dir,
 		"ExecutionWorkspaceDir": executionWorkspaceDir,
-		"WorkspaceDir":          filepath.Join(executionWorkspaceDir, ".chc"),
+		"WorkspaceDir":          filepath.Join(executionWorkspaceDir, ".chr"),
 		"ArtifactDir":           wantArtifactDir,
 		"ResultPath":            filepath.Join(wantArtifactDir, "result.json"),
 		"WorkspaceMode":         string(WorkWorkspaceModeWorktree),
-		"TicketKey":             "CHC-1",
-		"TicketBranch":          "chc/CHC-1",
+		"TicketKey":             "CHR-1",
+		"TicketBranch":          "chr/CHR-1",
 		"WorkspaceBaseRef":      "origin/dev",
 		"WorkspaceBaseSHA":      "abc123",
 		"MountSource":           executionWorkspaceDir,
@@ -257,7 +257,7 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 
 func TestPlanRuntimePreservesProjectModeWorkspaceMount(t *testing.T) {
 	dir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(dir, ".chc", "user", "runtime", "worktrees", "CHC-1")
+	executionWorkspaceDir := filepath.Join(dir, ".chr", "user", "runtime", "worktrees", "CHR-1")
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: dir,

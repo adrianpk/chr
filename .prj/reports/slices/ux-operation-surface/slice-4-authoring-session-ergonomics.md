@@ -44,8 +44,8 @@ Ambiguous or unknown artifact paths fail without guessing.
 
 ## Files of Interest
 
-- `internal/chcapp/author.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/author.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/authoring-sessions.md`
 - `docs/reference/commands.md`
 - `docs/how-to/user-guide/index.md`
@@ -54,7 +54,7 @@ Ambiguous or unknown artifact paths fail without guessing.
 ## Validation
 
 ```sh
-go test ./internal/chcapp -run 'TestAuthor(Session|Quiz|Promote|Assisted)'
+go test ./internal/chrapp -run 'TestAuthor(Session|Quiz|Promote|Assisted)'
 make verify
 ```
 

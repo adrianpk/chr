@@ -21,6 +21,6 @@ ticket and observability state on a small polling cadence.
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp`
+- `go test ./internal/chrtui ./internal/chrapp`
 - `make verify`
 - `git diff --check`

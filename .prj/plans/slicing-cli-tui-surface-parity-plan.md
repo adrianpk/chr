@@ -10,7 +10,7 @@ application service logic.
 The goal is to make every real TUI operation auditable against an equivalent
 CLI operation, or an explicit documented gap. The CLI is not a legacy or
 secondary compatibility surface. It must be usable by operators and agents as
-part of normal ChrysoCoord workflows.
+part of normal Chryso workflows.
 
 ## Source
 
@@ -19,9 +19,9 @@ Primary sources:
 - `.agents/SLICES.md`
 - `.agents/playbooks/slice-delivery.md`
 - `.agents/playbooks/slice-reporting.md`
-- Existing `internal/chctui` keybindings and command palette actions
-- Existing `internal/chcapp` CLI commands and TUI adapters
-- Existing service files under `internal/chcapp/service_*.go`
+- Existing `internal/chrtui` keybindings and command palette actions
+- Existing `internal/chrapp` CLI commands and TUI adapters
+- Existing service files under `internal/chrapp/service_*.go`
 - Conversation decisions about CLI and TUI parity
 
 Conversation decisions:

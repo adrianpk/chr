@@ -53,7 +53,7 @@ func (m *Model) openSelectedSource() tea.Cmd {
 		return nil
 	}
 
-	m.statusMessage = "External editor opened. chc will resume when the editor process exits."
+	m.statusMessage = "External editor opened. chr will resume when the editor process exits."
 
 	return tea.ExecProcess(result.EditorCommand, func(err error) tea.Msg {
 		return sourceEditorFinishedMsg{
@@ -160,9 +160,9 @@ func ticketDisplayPath(relativePath string) string {
 		return ""
 	}
 
-	if strings.HasPrefix(relativePath, ".chc/") || strings.HasPrefix(relativePath, ".prj/") {
+	if strings.HasPrefix(relativePath, ".chr/") || strings.HasPrefix(relativePath, ".prj/") {
 		return relativePath
 	}
 
-	return fmt.Sprintf(".chc/user/tickets/%s", relativePath)
+	return fmt.Sprintf(".chr/user/tickets/%s", relativePath)
 }

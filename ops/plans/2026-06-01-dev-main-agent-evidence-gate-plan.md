@@ -11,7 +11,7 @@ Tracker: `ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md`
 
 Implement the approved dev-to-main gate spec as a sequence of behavior-first
 slices. The gate must produce objective promotion evidence for Forgejo and
-Woodpecker workflows without treating manual work outside the ChrysoCoord board
+Woodpecker workflows without treating manual work outside the Chryso board
 as an error.
 
 ## Delivery Rules
@@ -37,12 +37,12 @@ as an error.
 
 ## Slice 1: Gate Command and Git Evidence
 
-Goal: introduce the `chc gate dev-main` CLI path and collect deterministic Git
+Goal: introduce the `chr gate dev-main` CLI path and collect deterministic Git
 range evidence.
 
 Behavior:
 
-- `chc gate dev-main --base <ref> --head <ref>` resolves base, head, and merge
+- `chr gate dev-main --base <ref> --head <ref>` resolves base, head, and merge
   base.
 - The command collects commits, changed files, file statuses, and diff stats.
 - The command returns stable errors for invalid refs and invalid usage.
@@ -60,7 +60,7 @@ Tasks:
 ## Slice 2: Validation and Report Output
 
 Goal: run validation and write Markdown/JSON reports under
-`.chc/user/reports/gates/`.
+`.chr/user/reports/gates/`.
 
 Behavior:
 
@@ -82,33 +82,33 @@ Tasks:
 
 ## Slice 3: Agent Evidence Classification
 
-Goal: classify ChrysoCoord-managed evidence separately from manual or external
+Goal: classify Chryso-managed evidence separately from manual or external
 changes without producing false positives.
 
 Behavior:
 
-- The gate discovers available ChrysoCoord run/report artifacts.
+- The gate discovers available Chryso run/report artifacts.
 - Run reports are the minimum evidence for v1 agent-managed work.
 - Manual or external changes are listed as informational by default.
-- Missing evidence for ChrysoCoord-recorded work is a failure.
+- Missing evidence for Chryso-recorded work is a failure.
 
 Tasks:
 
-- T3.1 Discover gate-relevant reports under `.chc/user/reports`.
+- T3.1 Discover gate-relevant reports under `.chr/user/reports`.
 - T3.2 Classify agent-managed evidence from available run reports.
 - T3.3 Classify unmatched changed files as manual or external info.
-- T3.4 Add failure checks for missing ChrysoCoord-owned run evidence.
+- T3.4 Add failure checks for missing Chryso-owned run evidence.
 - T3.5 Add tests for agent-managed, manual/external, and missing-evidence cases.
 - T3.6 Add slice report and tracker updates.
 
 ## Slice 4: Gate Policy Configuration
 
-Goal: support `.chc/user/config/gates.yml` for project-specific validation and
+Goal: support `.chr/user/config/gates.yml` for project-specific validation and
 stricter traceability options while preserving safe defaults.
 
 Behavior:
 
-- The gate reads `.chc/user/config/gates.yml` when present.
+- The gate reads `.chr/user/config/gates.yml` when present.
 - Projects can override validation command.
 - Manual/external changes remain `info` by default.
 - Warnings and stricter behavior only appear when policy enables them.
@@ -129,7 +129,7 @@ Woodpecker setup helper.
 
 Behavior:
 
-- `chc gate woodpecker init` produces a runnable Woodpecker snippet.
+- `chr gate woodpecker init` produces a runnable Woodpecker snippet.
 - `--dry-run` never writes `.woodpecker.yml`.
 - If no `.woodpecker.yml` exists, the command may create a minimal config.
 - Existing config is not modified without `--write`.
@@ -141,7 +141,7 @@ Tasks:
 
 - T5.1 Investigate Forgejo/Woodpecker status, comments, and artifact link
   mechanisms.
-- T5.2 Add `chc gate woodpecker init`.
+- T5.2 Add `chr gate woodpecker init`.
 - T5.3 Generate Woodpecker snippet and minimal config.
 - T5.4 Add non-destructive existing-config behavior.
 - T5.5 Add Forgejo/Woodpecker feedback integration selected by investigation.

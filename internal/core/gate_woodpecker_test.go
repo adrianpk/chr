@@ -95,7 +95,7 @@ func TestInitGateWoodpeckerRefusesUnmarkedExistingConfigWithWrite(t *testing.T) 
 		t.Fatal("InitGateWoodpecker returned nil error")
 	}
 
-	if !strings.Contains(err.Error(), "without ChrysoCoord marker") {
+	if !strings.Contains(err.Error(), "without Chryso marker") {
 		t.Fatalf("error = %q, want marker refusal", err.Error())
 	}
 
@@ -140,8 +140,8 @@ func assertGateWoodpeckerSnippet(t *testing.T, content string) {
 	for _, expected := range []string{
 		gateWoodpeckerMarker,
 		"event: pull_request",
-		"chc-dev-main-gate",
-		"chc gate dev-main",
+		"chr-dev-main-gate",
+		"chr gate dev-main",
 	} {
 		if strings.Contains(content, expected) {
 			continue

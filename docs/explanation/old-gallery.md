@@ -1,6 +1,6 @@
 # Old Gallery
 
-Visual examples of the earlier ChrysoCoord gallery pass.
+Visual examples of the earlier Chryso gallery pass.
 
 These screenshots use a seeded CRM dialer project to show the main TUI surfaces
 without requiring a live agent run.
@@ -9,7 +9,7 @@ without requiring a live agent run.
 
 ![Project window](../../assets/img/old-gallery/01-project-window.png)
 
-The project view summarizes the selected workspace, local `.chc/user/` files,
+The project view summarizes the selected workspace, local `.chr/user/` files,
 and generated artifact counts.
 
 ![Project](../../assets/img/old-gallery/02-project.png)

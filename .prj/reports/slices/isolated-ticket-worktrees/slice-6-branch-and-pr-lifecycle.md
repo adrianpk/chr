@@ -18,7 +18,7 @@ container.
 - Ticket execution now selects an implementation branch before runtime
   materialization.
 - Existing ticket `branch` metadata remains authoritative.
-- Tickets without branch metadata derive a deterministic `chc/<ticket-slug>`
+- Tickets without branch metadata derive a deterministic `chr/<ticket-slug>`
   implementation branch.
 - Worktree-mode ticket execution prepares the ticket worktree before runtime
   validation and worker context materialization.

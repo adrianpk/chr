@@ -16,7 +16,7 @@ replaces it.
 
 - Regenerating an existing plan archives the current canonical file before
   invoking the model.
-- Archived plans are written under `.chc/plans/archive/`.
+- Archived plans are written under `.chr/plans/archive/`.
 - Archive filenames include the scope ID and UTC archive timestamp.
 - Archive content records `archived_from` and `archived_at` metadata.
 - Regenerating a missing plan behaves like create and does not create an
@@ -45,16 +45,16 @@ replaces it.
 
 ## Files of Interest
 
-- `internal/chc/plan_generation.go`
-- `internal/chc/plan_generation_test.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chcapp/service_plan_test.go`
-- `internal/chcapp/tui_adapters.go`
+- `internal/chr/plan_generation.go`
+- `internal/chr/plan_generation_test.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chrapp/service_plan_test.go`
+- `internal/chrapp/tui_adapters.go`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
-- `go test ./internal/chcapp`: pass
+- `go test ./internal/chr`: pass
+- `go test ./internal/chrapp`: pass
 - `go test ./...`: pass
 - `make verify`: fail
 

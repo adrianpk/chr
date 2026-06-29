@@ -3,7 +3,7 @@ package tui
 import (
 	"sort"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func casesFromWorkspaceGraph(graph core.WorkspaceGraph, fallback []core.CaseMetadata) []core.CaseMetadata {

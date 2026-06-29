@@ -10,9 +10,9 @@ PR: #265
 ## Purpose
 
 Run the default promotion validation and persist gate evidence as local project
-artifacts under `.chc/user/reports/gates/`.
+artifacts under `.chr/user/reports/gates/`.
 
-This slice turns `chc gate dev-main` from evidence-only output into a command
+This slice turns `chr gate dev-main` from evidence-only output into a command
 that records JSON and Markdown reports and returns failure when validation does
 not pass.
 
@@ -23,12 +23,12 @@ not pass.
 - Added timestamped Markdown gate reports.
 - Wrote reports for successful validation, failed validation, and Git evidence
   failures.
-- Made `chc gate dev-main` return an error when validation fails.
+- Made `chr gate dev-main` return an error when validation fails.
 - Printed generated report paths in command output.
 
 ## Implementation Notes
 
-Gate reports use `.chc/user/reports/gates/dev-main-<timestamp>.json` and the
+Gate reports use `.chr/user/reports/gates/dev-main-<timestamp>.json` and the
 matching `.md` file. The report model records Git evidence, validation result,
 failures, warnings, informational messages, and artifact paths.
 
@@ -39,21 +39,21 @@ validation commands remain part of Slice 4.
 
 - New default gate validation command: `go test ./...`.
 - New report artifacts:
-  - `.chc/user/reports/gates/dev-main-<timestamp>.json`
-  - `.chc/user/reports/gates/dev-main-<timestamp>.md`
-- `chc gate dev-main` now fails when validation fails.
+  - `.chr/user/reports/gates/dev-main-<timestamp>.json`
+  - `.chr/user/reports/gates/dev-main-<timestamp>.md`
+- `chr gate dev-main` now fails when validation fails.
 
 ## Files of Interest
 
-- `internal/chc/gate_validation.go`
-- `internal/chc/gate_report.go`
-- `internal/chcapp/gate.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/gate_validation.go`
+- `internal/chr/gate_report.go`
+- `internal/chrapp/gate.go`
+- `internal/chrapp/cli_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp -run GateDevMain` (pass)
-- `go test ./internal/chc ./internal/chcapp` (pass)
+- `go test ./internal/chrapp -run GateDevMain` (pass)
+- `go test ./internal/chr ./internal/chrapp` (pass)
 - `make verify` (pass)
 
 ## Risks and Follow-ups

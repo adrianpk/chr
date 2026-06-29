@@ -10,7 +10,7 @@ Sources:
 
 ## Purpose
 
-Define the `Cases` screen for the ChrysoCoord TUI.
+Define the `Cases` screen for the Chryso TUI.
 
 The `Cases` screen is where the user lists, creates, edits, searches, and
 orients work around project-local use cases. A case is a lightweight container
@@ -21,13 +21,13 @@ The screen must answer two questions clearly:
 
 > Which case am I working in?
 
-> What compact context should ChrysoCoord keep for that case?
+> What compact context should Chryso keep for that case?
 
 ## User Model
 
 The primary user is one terminal/editor-oriented local operator working in one
 managed project. The user may interact through the TUI, the CLI, or direct
-editing of files under `.chc/`.
+editing of files under `.chr/`.
 
 Manual file editing is a supported workflow. The application must preserve the
 same Markdown-only model used by `Project`: human-editable Markdown files are
@@ -38,8 +38,8 @@ view rebuilt from files.
 
 - The tab label is `Cases`.
 - A case belongs to the current project by containment under the project's
-  `.chc/` directory.
-- Do not store owner fields. ChrysoCoord is a local single-user app in this
+  `.chr/` directory.
+- Do not store owner fields. Chryso is a local single-user app in this
   model.
 - Do not store `project_id` in case frontmatter for normal operation.
 - The primary editable fields are:
@@ -61,7 +61,7 @@ Cases are stored as Markdown with YAML frontmatter.
 Proposed path pattern:
 
 ```text
-.chc/cases/<case-slug>.md
+.chr/cases/<case-slug>.md
 ```
 
 The slug is stable file identity. It may be derived from the initial name, but
@@ -109,9 +109,9 @@ not be parsed for structured columns.
 
 ## Persistence Model
 
-ChrysoCoord has one durable representation of case data:
+Chryso has one durable representation of case data:
 
-- `.chc/cases/<case-slug>.md` as the human-editable case file.
+- `.chr/cases/<case-slug>.md` as the human-editable case file.
 
 The file is the source of truth. Runtime code may build an ephemeral
 `WorkspaceGraph` from Markdown files for navigation, diagnostics, and context
@@ -122,7 +122,7 @@ the filesystem.
 @startuml
 title Case source model
 
-rectangle ".chc/cases/<slug>.md\nMarkdown + YAML frontmatter" as File
+rectangle ".chr/cases/<slug>.md\nMarkdown + YAML frontmatter" as File
 component "Case parser\nschema validation" as Parser
 component "Ephemeral WorkspaceGraph\nnavigation metadata" as Graph
 rectangle "Cases screen" as UI
@@ -158,7 +158,7 @@ participant "TUI model" as Model
 participant "CaseExecutor" as Executor
 participant "CaseService" as Service
 participant "WorkspaceGraph" as Graph
-collections ".chc/cases/<slug>.md" as File
+collections ".chr/cases/<slug>.md" as File
 
 User -> UI: edit case fields inline
 UI -> Model: update in-memory CaseMetadata
@@ -171,7 +171,7 @@ Executor -> Service: Save(metadata)
 Service -> Service: validate required fields and schema
 Service -> File: read current file hash
 
-alt source hash changed outside CHC
+alt source hash changed outside CHR
     Service --> Executor: conflict error
     Executor --> UI: report refresh required
 else source hash matches or case is new
@@ -196,7 +196,7 @@ title Manual case refresh
 
 actor User
 participant Editor
-collections ".chc/cases/<slug>.md" as File
+collections ".chr/cases/<slug>.md" as File
 participant "Cases screen" as UI
 participant "WorkspaceGraph builder" as Graph
 
@@ -267,7 +267,7 @@ The `Cases` screen uses the reusable editable-screen geometry shared with
 │                                    │ plans           1                     │
 │                                    │ board items      4                    │
 │                                    │ Source                                │
-│                                    │ .chc/cases/blog-publishing.md         │
+│                                    │ .chr/cases/blog-publishing.md         │
 └────────────────────────────────────┴───────────────────────────────────────┘
 
 Project  Cases  Dumps  Quizzes  Specs  Plans  Board  Dash  Help  Quit
@@ -330,7 +330,7 @@ Initial complete interaction:
 - A new case cannot be saved until `Name` is non-empty.
 - Field editing happens inline where the field is displayed.
 - A save action persists through the shared case service.
-- A refresh action rebuilds case state from `.chc/cases/*.md`.
+- A refresh action rebuilds case state from `.chr/cases/*.md`.
 - If a case file changed outside the app, save shows a conflict instead of
   overwriting.
 - If a case file is invalid, the screen shows an actionable diagnostic.
@@ -391,7 +391,7 @@ When no cases exist:
 - the detail region should explain that no case is selected through concise UI
   copy;
 - the new-case action should create an unsaved editable case in memory;
-- saving should create `.chc/cases/<slug>.md` through the shared domain service.
+- saving should create `.chr/cases/<slug>.md` through the shared domain service.
 
 ## Acceptance Criteria
 

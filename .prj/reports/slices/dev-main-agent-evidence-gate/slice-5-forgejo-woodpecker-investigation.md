@@ -7,7 +7,7 @@ Slicing: Dev to Main Agent Evidence Gate
 
 Woodpecker is the first practical feedback path for this slice. Its workflow
 syntax runs steps serially and a non-zero step exit fails the workflow, which is
-enough for `chc gate dev-main` to block promotion through CI status.
+enough for `chr gate dev-main` to block promotion through CI status.
 
 Woodpecker can run a single `.woodpecker.yml` workflow or multiple workflows
 under `.woodpecker/`. The setup helper should start with the single-file path
@@ -21,8 +21,8 @@ artifacts. API comments/status enrichment can be added later if required.
 ## Selected Mechanism
 
 - Generate a Woodpecker gate step.
-- Let Woodpecker fail the pipeline when `chc gate dev-main` exits non-zero.
-- Keep detailed evidence in `.chc/user/reports/gates/`.
+- Let Woodpecker fail the pipeline when `chr gate dev-main` exits non-zero.
+- Keep detailed evidence in `.chr/user/reports/gates/`.
 - Do not require Forgejo API tokens for the first integration.
 
 ## Sources

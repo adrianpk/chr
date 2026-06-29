@@ -1,95 +1,95 @@
 # User Guide
 
-This guide covers the ChrysoCoord workflow that exists today.
+This guide covers the Chryso workflow that exists today.
 
-ChrysoCoord is local-first. A managed project has a `.chc/` directory, while
+Chryso is local-first. A managed project has a `.chr/` directory, while
 user-level state stores project registration, indexes, execution records, loop
 records, and daemon state.
 
 ## Initialize a Workspace
 
-Create project-local ChrysoCoord state:
+Create project-local Chryso state:
 
 ```sh
-chc init
+chr init
 ```
 
 Use a different profile when needed:
 
 ```sh
-chc init --profile minimal
-chc init --profile personal
+chr init --profile minimal
+chr init --profile personal
 ```
 
 Preview initialization:
 
 ```sh
-chc init --dry-run
+chr init --dry-run
 ```
 
 Initialize another project directory:
 
 ```sh
-chc init --dir /path/to/project
+chr init --dir /path/to/project
 ```
 
 The initialized workspace includes ticket directories, project protocol files,
-minimal user-owned config, `.chc/user/`, and
-`.chc/user/runtime/agent/Dockerfile`.
+minimal user-owned config, `.chr/user/`, and
+`.chr/user/runtime/agent/Dockerfile`.
 
 Set an active operator id for workflows that need project-local userspace
 ownership:
 
 ```sh
-export CHC_OPERATOR_ID=adrian
+export CHR_OPERATOR_ID=adrian
 ```
 
 With direnv, the same export may live in `.envrc`.
 
 ## Configure Runtime Execution
 
-Runtime defaults are owned by `chc`. A new project does not need to repeat
-default runtime paths in `.chc/user/config.yml`.
+Runtime defaults are owned by `chr`. A new project does not need to repeat
+default runtime paths in `.chr/user/config.yml`.
 
 Override runtime settings only when the project has a real reason to do so:
 
 ```yml
 runtime:
-  image: chc-agent-runtime:local
-  dockerfile: .chc/user/runtime/agent/Dockerfile
+  image: chr-agent-runtime:local
+  dockerfile: .chr/user/runtime/agent/Dockerfile
   validation_command: make verify
 ```
 
 Install missing runtime defaults in an existing workspace:
 
 ```sh
-chc runtime init
+chr runtime init
 ```
 
 Preview runtime initialization:
 
 ```sh
-chc runtime init --dry-run
+chr runtime init --dry-run
 ```
 
 Validate the runtime boundary:
 
 ```sh
-chc runtime validate
+chr runtime validate
 ```
 
 Preview validation without running Docker:
 
 ```sh
-chc runtime validate --dry-run
+chr runtime validate --dry-run
 ```
 
 ## Configure Work Readiness
 
-Work readiness protects the project before ChrysoCoord starts agent work. The
+Work readiness protects the project before Chryso starts agent work. The
 default policy expects a clean `dev` branch with `origin` as the canonical
 remote, but projects can configure their own branch posture in
-`.chc/user/config.yml`.
+`.chr/user/config.yml`.
 
 Example:
 
@@ -107,13 +107,13 @@ work:
 Inspect readiness:
 
 ```sh
-chc work doctor
+chr work doctor
 ```
 
-Apply safe repair when ChrysoCoord reports one:
+Apply safe repair when Chryso reports one:
 
 ```sh
-chc work doctor --fix-safe
+chr work doctor --fix-safe
 ```
 
 ## Register and Select Projects
@@ -121,31 +121,31 @@ chc work doctor --fix-safe
 Register a managed project:
 
 ```sh
-chc project add /path/to/project
+chr project add /path/to/project
 ```
 
 Override the registry name:
 
 ```sh
-chc project add --name api-service /path/to/project
+chr project add --name api-service /path/to/project
 ```
 
 List registered projects:
 
 ```sh
-chc project list
+chr project list
 ```
 
 Select the active project:
 
 ```sh
-chc project select api-service
+chr project select api-service
 ```
 
 Print the active project:
 
 ```sh
-chc project current
+chr project current
 ```
 
 All project registry commands support `--dev-root` for isolated development
@@ -156,19 +156,19 @@ state.
 Open the local operational console from the resolved project:
 
 ```sh
-chc
+chr
 ```
 
 The explicit form is:
 
 ```sh
-chc tui
+chr tui
 ```
 
 Open a specific project directory:
 
 ```sh
-chc tui --dir /path/to/project
+chr tui --dir /path/to/project
 ```
 
 The TUI is the main interactive surface for project context, use cases, dumps,
@@ -179,13 +179,13 @@ core.
 ## Open the Local Web UI
 
 The Web UI is an optional browser surface over the same project state. It does
-not start from `chc`, `chc tui`, ticket loops, agent work, or other normal
+not start from `chr`, `chr tui`, ticket loops, agent work, or other normal
 commands.
 
 Start it explicitly from a managed project:
 
 ```sh
-chc web serve
+chr web serve
 ```
 
 Open:
@@ -197,13 +197,13 @@ http://127.0.0.1:7331
 Preview the resolved server configuration without listening on a socket:
 
 ```sh
-chc web serve --dry-run
+chr web serve --dry-run
 ```
 
 Open a specific project directory:
 
 ```sh
-chc web serve --dir /path/to/project
+chr web serve --dir /path/to/project
 ```
 
 The browser UI can manage the Board and the same project artifact families used
@@ -345,13 +345,13 @@ editor process and refreshes the dump list when the editor exits.
 Equivalent CLI commands:
 
 ```sh
-chc dump list
-chc dump new --title "Billing notes" --content "Initial context."
-chc dump new --title "Billing notes" --content "Use-case context." --use-case billing
-chc dump show .chc/user/dumps/billing-notes.md
-chc dump save .chc/user/dumps/billing-notes.md --content "# Billing notes"
-chc dump append .chc/user/dumps/billing-notes.md --content "Additional context."
-chc dump open .chc/user/dumps/billing-notes.md
+chr dump list
+chr dump new --title "Billing notes" --content "Initial context."
+chr dump new --title "Billing notes" --content "Use-case context." --use-case billing
+chr dump show .chr/user/dumps/billing-notes.md
+chr dump save .chr/user/dumps/billing-notes.md --content "# Billing notes"
+chr dump append .chr/user/dumps/billing-notes.md --content "Additional context."
+chr dump open .chr/user/dumps/billing-notes.md
 ```
 
 ## Run Quizzes in the TUI
@@ -384,14 +384,14 @@ fast mode actions for the selected quiz.
 Equivalent CLI commands:
 
 ```sh
-chc quiz list
-chc quiz start --use-case billing --mode deep
-chc quiz resume --use-case billing
-chc quiz answer --use-case billing --answer "Retries must be idempotent."
-chc quiz skip --use-case billing
-chc quiz complete --use-case billing
-chc quiz cancel --use-case billing
-chc quiz mode fast --use-case billing
+chr quiz list
+chr quiz start --use-case billing --mode deep
+chr quiz resume --use-case billing
+chr quiz answer --use-case billing --answer "Retries must be idempotent."
+chr quiz skip --use-case billing
+chr quiz complete --use-case billing
+chr quiz cancel --use-case billing
+chr quiz mode fast --use-case billing
 ```
 
 ## Generate Specs in the TUI
@@ -422,8 +422,8 @@ running, the TUI shows a working state and ignores other spec actions until the
 request finishes.
 
 If acceptance feature generation succeeds, the status line shows the generated
-`.chc/user/acceptance/<case>.feature` path. If more scenario detail is needed,
-the status line shows the `.chc/user/acceptance/<case>-feature-round.md` path
+`.chr/user/acceptance/<case>.feature` path. If more scenario detail is needed,
+the status line shows the `.chr/user/acceptance/<case>-feature-round.md` path
 so you can review the default-oriented prompts before trying again.
 
 Current limitation: those feature-round prompts are persisted, but the TUI does
@@ -434,9 +434,9 @@ retrying generation.
 Equivalent CLI commands:
 
 ```sh
-chc spec list
-chc spec generate --use-case billing
-chc acceptance feature generate --use-case billing
+chr spec list
+chr spec generate --use-case billing
+chr acceptance feature generate --use-case billing
 ```
 
 ## Generate Plans and Tracking in the TUI
@@ -470,10 +470,10 @@ TUI cannot start overlapping plan operations.
 Equivalent CLI commands:
 
 ```sh
-chc plan list
-chc plan generate --use-case billing
-chc plan regenerate --use-case billing
-chc plan tracking create --use-case billing
+chr plan list
+chr plan generate --use-case billing
+chr plan regenerate --use-case billing
+chr plan tracking create --use-case billing
 ```
 
 ## Use the Board
@@ -543,19 +543,19 @@ safe checklist writer has not been implemented.
 Equivalent CLI commands:
 
 ```sh
-chc ticket board
-chc ticket list
-chc ticket show CHC-1
-chc ticket new "Add completed task support" --synopsis "Add task completion support."
-chc ticket comment CHC-1 "TUI action recorded."
-chc ticket status CHC-1 ready
-chc ticket status CHC-1 in_progress
-chc ticket status CHC-1 reviewing
-chc ticket start CHC-1
-chc ticket loop --status ready --max-iterations 1
-chc work run-all
-chc work doctor --fix-safe
-chc daemon stop
+chr ticket board
+chr ticket list
+chr ticket show CHR-1
+chr ticket new "Add completed task support" --synopsis "Add task completion support."
+chr ticket comment CHR-1 "TUI action recorded."
+chr ticket status CHR-1 ready
+chr ticket status CHR-1 in_progress
+chr ticket status CHR-1 reviewing
+chr ticket start CHR-1
+chr ticket loop --status ready --max-iterations 1
+chr work run-all
+chr work doctor --fix-safe
+chr daemon stop
 ```
 
 ## Inspect Operations
@@ -595,7 +595,7 @@ modal state.
 Create a ticket:
 
 ```sh
-chc ticket new "Add completed task support" \
+chr ticket new "Add completed task support" \
   --synopsis "Add task completion support." \
   --type feature \
   --priority high
@@ -604,7 +604,7 @@ chc ticket new "Add completed task support" \
 Useful metadata:
 
 ```sh
-chc ticket new "Fix task ID reuse" \
+chr ticket new "Fix task ID reuse" \
   --synopsis "Fix task id reuse in the runtime path." \
   --type bug \
   --priority high \
@@ -617,41 +617,41 @@ chc ticket new "Fix task ID reuse" \
 List tickets:
 
 ```sh
-chc ticket list
+chr ticket list
 ```
 
 Show one ticket:
 
 ```sh
-chc ticket show CHC-1
+chr ticket show CHR-1
 ```
 
 Append a comment:
 
 ```sh
-chc ticket comment CHC-1 "Validation fails in the completion path."
+chr ticket comment CHR-1 "Validation fails in the completion path."
 ```
 
 Update status:
 
 ```sh
-chc ticket status CHC-1 ready
+chr ticket status CHR-1 ready
 ```
 
-Ticket files remain Markdown under `.chc/user/tickets/`.
+Ticket files remain Markdown under `.chr/user/tickets/`.
 
 ## Keep the Ticket Index Current
 
 Rebuild the ticket index:
 
 ```sh
-chc index rebuild
+chr index rebuild
 ```
 
 Check index status:
 
 ```sh
-chc index status
+chr index status
 ```
 
 Ticket commands refresh the index where they need indexed ticket data, but the
@@ -662,36 +662,36 @@ index commands are useful when inspecting drift explicitly.
 Preview execution:
 
 ```sh
-chc ticket start CHC-1 --dry-run
+chr ticket start CHR-1 --dry-run
 ```
 
 Run execution:
 
 ```sh
-chc ticket start CHC-1
+chr ticket start CHR-1
 ```
 
 Execution uses the configured Docker runtime. The worker receives
-`CHC_WORKER_CONTEXT_PATH`, reads `context.md`, writes `result.json`, and leaves
+`CHR_WORKER_CONTEXT_PATH`, reads `context.md`, writes `result.json`, and leaves
 runtime and validation logs under the execution run directory.
 
 Apply an execution result to the ticket:
 
 ```sh
-chc ticket apply-result <execution-id>
+chr ticket apply-result <execution-id>
 ```
 
 Preview result application:
 
 ```sh
-chc ticket apply-result <execution-id> --dry-run
+chr ticket apply-result <execution-id> --dry-run
 ```
 
 Inspect execution evidence:
 
 ```sh
-chc report list --ticket CHC-1
-chc report show --execution <execution-id>
+chr report list --ticket CHR-1
+chr report show --execution <execution-id>
 ```
 
 Execution reports summarize the runtime plan, result status, validation status,
@@ -707,37 +707,37 @@ Ticket review is optional and configured per core. It uses normal Board
 statuses and ticket metadata; it does not add a separate Board column.
 
 With default evidence strategy settings, a ticket must have completed evidence
-before `ready_for_review`. Use Board detail or `chc ticket show <key>` to inspect
+before `ready_for_review`. Use Board detail or `chr ticket show <key>` to inspect
 the checklist summary before applying a result or requesting review.
 
 Inspect the configured mode:
 
 ```sh
-chc ticket review-mode status
+chr ticket review-mode status
 ```
 
 Check provider access for a pull request:
 
 ```sh
-chc ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123
+chr ticket review-mode diagnostics --url https://forge.example.test/owner/repo/pulls/123
 ```
 
 Review a ticket after its branch and pull request are recorded in the ticket:
 
 ```sh
-chc ticket review CHC-1 --result pass
+chr ticket review CHR-1 --result pass
 ```
 
 Record requested changes:
 
 ```sh
-chc ticket review CHC-1 \
+chr ticket review CHR-1 \
   --result needs_changes \
   --finding "Handle the nil input path before merge."
 ```
 
 When review requests changes, the ticket returns to `ready_for_dev` with repair
-handoff metadata. In `agentic_review` loop mode, ChrysoCoord runs one default
+handoff metadata. In `agentic_review` loop mode, Chryso runs one default
 repair execution for that same ticket, reviews it again, and only then merges
 or blocks. Later normal tickets do not start while that repair cycle is
 unfinished.
@@ -750,13 +750,13 @@ For the Forgejo setup flow, see
 Preview eligible tickets:
 
 ```sh
-chc ticket loop --dry-run
+chr ticket loop --dry-run
 ```
 
 Filter the loop:
 
 ```sh
-chc ticket loop --dry-run \
+chr ticket loop --dry-run \
   --status ready \
   --priority high \
   --tag runtime \
@@ -767,7 +767,7 @@ chc ticket loop --dry-run \
 Run the foreground loop:
 
 ```sh
-chc ticket loop --max-iterations 3
+chr ticket loop --max-iterations 3
 ```
 
 The loop executes eligible tickets one at a time and stops on the first blocked
@@ -776,8 +776,8 @@ or failed ticket.
 Inspect loop evidence:
 
 ```sh
-chc report list --kind loop
-chc report show --loop <loop-id>
+chr report list --kind loop
+chr report show --loop <loop-id>
 ```
 
 Loop reports summarize loop status, ticket selection, execution outcomes, and
@@ -788,19 +788,19 @@ stop reasons.
 Preview the ready queue without execution:
 
 ```sh
-chc work run-all --dry-run --order priority_severity
+chr work run-all --dry-run --order priority_severity
 ```
 
 Run all matching ready tickets:
 
 ```sh
-chc work run-all --order priority_severity
+chr work run-all --order priority_severity
 ```
 
 Filter by use case, priority, severity, project area, tag, type, or status:
 
 ```sh
-chc work run-all --dry-run --use-case billing --priority high --order key
+chr work run-all --dry-run --use-case billing --priority high --order key
 ```
 
 `work run-all` uses the same readiness policy and execution loop as Dash. In
@@ -812,10 +812,10 @@ evidence under the configured runtime artifact directory.
 Inspect the evidence:
 
 ```sh
-chc report list --kind loop
-chc report list --kind execution
-chc work logs <execution-id>
-chc work events .chc/user/runtime/runs/<loop-id>/events.jsonl
+chr report list --kind loop
+chr report list --kind execution
+chr work logs <execution-id>
+chr work events .chr/user/runtime/runs/<loop-id>/events.jsonl
 ```
 
 ## Capture Authoring Context
@@ -823,19 +823,19 @@ chc work events .chc/user/runtime/runs/<loop-id>/events.jsonl
 Create an authoring session:
 
 ```sh
-chc author session new --target spec --topic "Billing sync"
+chr author session new --target spec --topic "Billing sync"
 ```
 
 List authoring sessions:
 
 ```sh
-chc author session list
+chr author session list
 ```
 
 Show one session:
 
 ```sh
-chc author session show <session-handle>
+chr author session show <session-handle>
 ```
 
 The session handle can be the exact id, exact topic, or a unique topic slug.
@@ -843,32 +843,32 @@ The session handle can be the exact id, exact topic, or a unique topic slug.
 Create a context-aware questionnaire:
 
 ```sh
-chc author quiz new --target spec --topic "Billing sync"
+chr author quiz new --target spec --topic "Billing sync"
 ```
 
 Preview the questionnaire first:
 
 ```sh
-chc author quiz new --target spec --topic "Billing sync" --dry-run
+chr author quiz new --target spec --topic "Billing sync" --dry-run
 ```
 
 After editing quiz answers, use them to create or refine a spec. Keep the spec
 in `status: draft` while it still needs review.
 
-Generated authoring artifacts remain Markdown under `.chc/`. The commands
+Generated authoring artifacts remain Markdown under `.chr/`. The commands
 initialize and connect artifacts; they do not replace direct editing.
 
 Run an assisted authoring session when you want the CLI to drive one question at
 a time while preserving every step as Markdown:
 
 ```sh
-chc author assisted start --target spec --topic "Billing sync"
+chr author assisted start --target spec --topic "Billing sync"
 ```
 
 Ask the next question:
 
 ```sh
-chc author assisted resume \
+chr author assisted resume \
   --session <session-handle> \
   --fake-question "What should the spec include?"
 ```
@@ -876,7 +876,7 @@ chc author assisted resume \
 Submit the answer:
 
 ```sh
-chc author assisted answer \
+chr author assisted answer \
   --session <session-handle> \
   --turn turn-001 \
   --turn-index 1 \
@@ -888,13 +888,13 @@ chc author assisted answer \
 Check progress:
 
 ```sh
-chc author assisted status --session <session-handle>
+chr author assisted status --session <session-handle>
 ```
 
 Finalize the session into a curated summary and target artifact:
 
 ```sh
-chc author assisted finalize \
+chr author assisted finalize \
   --session <session-handle> \
   --fake-summary "Billing sync needs retry behavior and idempotent writes." \
   --target-kind spec \
@@ -910,19 +910,19 @@ boundary before a real provider adapter is added.
 Check daemon status:
 
 ```sh
-chc daemon status
+chr daemon status
 ```
 
 Run one foreground coordination iteration:
 
 ```sh
-chc daemon start --max-iterations 1
+chr daemon start --max-iterations 1
 ```
 
 Request stop:
 
 ```sh
-chc daemon stop
+chr daemon stop
 ```
 
 The daemon is a local foreground coordinator. It is not a hosted service.
@@ -932,26 +932,26 @@ The daemon is a local foreground coordinator. It is not a hosted service.
 Inspect notification configuration:
 
 ```sh
-chc notify status
+chr notify status
 ```
 
 Preview a Telegram setup-check payload without contacting Telegram:
 
 ```sh
-chc notify telegram test --dry-run
+chr notify telegram test --dry-run
 ```
 
 Send the setup-check message when Telegram is configured:
 
 ```sh
-chc notify telegram test
+chr notify telegram test
 ```
 
 Parse Telegram update fixtures into remote command handoff records:
 
 ```sh
-chc notify telegram poll --fixture updates.json --dry-run
-chc notify telegram poll --fixture updates.json
+chr notify telegram poll --fixture updates.json --dry-run
+chr notify telegram poll --fixture updates.json
 ```
 
 Remote command intake is bounded. It stores accepted or rejected handoff records
@@ -963,23 +963,23 @@ comment. It does not expose arbitrary shell command execution.
 Write a local diagnostic bundle:
 
 ```sh
-chc maintenance bundle
+chr maintenance bundle
 ```
 
 Inspect database, registry, execution artifact, and cleanup-preview state:
 
 ```sh
-chc maintenance db status
-chc maintenance registry status
-chc maintenance execution artifacts
-chc maintenance execution cleanup-preview
+chr maintenance db status
+chr maintenance registry status
+chr maintenance execution artifacts
+chr maintenance execution cleanup-preview
 ```
 
 Repair moved or stale registry entries explicitly:
 
 ```sh
-chc maintenance registry disable example
-chc maintenance registry set-path example /path/to/project
+chr maintenance registry disable example
+chr maintenance registry set-path example /path/to/project
 ```
 
 Maintenance previews and diagnostics are read-only unless the command name
@@ -994,19 +994,19 @@ The proving-ground commands exercise direct sandbox behavior against controlled
 objectives:
 
 ```sh
-chc proving validate --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md
-chc proving run --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md --dry-run
-chc proving ralph --objective .chc/proving/objectives/TODO-1-fix-task-id-reuse.md --max-attempts 3
+chr proving validate --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md
+chr proving run --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md --dry-run
+chr proving ralph --objective .chr/proving/objectives/TODO-1-fix-task-id-reuse.md --max-attempts 3
 ```
 
 Use these commands for local runtime proofing, not as the main ticket workflow.
 
 ## Execution Context
 
-Before agent work, ChrysoCoord can compose a context package with:
+Before agent work, Chryso can compose a context package with:
 
 - agent identity;
-- applicable `AGENTS.md` and `.chc/` protocol files;
+- applicable `AGENTS.md` and `.chr/` protocol files;
 - project and ticket documents;
 - bounded file tree and text search context;
 - optional `gograph` output for Go code context;
@@ -1026,7 +1026,7 @@ Sibling context files live under:
 ```
 
 Docker receives the same files through the project mount, usually under
-`/workspace/.chc/user/runtime/runs/...`.
+`/workspace/.chr/user/runtime/runs/...`.
 
 ## Current Boundaries
 

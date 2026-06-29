@@ -22,11 +22,11 @@ Primary sources:
 
 - `.agents/playbooks/slice-delivery.md`
 - `.agents/playbooks/slice-reporting.md`
-- `internal/chcapp/app.go`
-- `internal/chctui/*_actions.go`
-- `internal/chctui/workspace_refresh.go`
-- `internal/chctui/project_metadata_actions.go`
-- `internal/chctui/case_metadata_actions.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/*_actions.go`
+- `internal/chrtui/workspace_refresh.go`
+- `internal/chrtui/project_metadata_actions.go`
+- `internal/chrtui/case_metadata_actions.go`
 
 Conversation decisions:
 
@@ -35,12 +35,12 @@ Conversation decisions:
 - Allow several narrow interfaces when useful for adapters.
 - Keep the implementation centered in one service type, split across files.
 - Keep adapters responsible for UX, transport, confirmation, and rendering.
-- Keep business and workflow logic out of `internal/chctui`.
+- Keep business and workflow logic out of `internal/chrtui`.
 - Future Telegram and email adapters should reuse the same operational path.
 
 ## Current State
 
-The current implementation has `internal/chcapp` constructing several
+The current implementation has `internal/chrapp` constructing several
 TUI-specific executor structs:
 
 - workspace refresh executor;
@@ -50,17 +50,17 @@ TUI-specific executor structs:
 - ticket action executor;
 - work action executor.
 
-Those executors already live in `internal/chcapp`, but they are named and
-typed around TUI contracts and return `internal/chctui` result types. This
+Those executors already live in `internal/chrapp`, but they are named and
+typed around TUI contracts and return `internal/chrtui` result types. This
 keeps operational flows coupled to the TUI adapter boundary.
 
 ## Target Model
 
 The target model is:
 
-- `internal/chcapp` owns a central operation service implementation.
+- `internal/chrapp` owns a central operation service implementation.
 - The service may be named `Service` if exported across packages, or `service`
-  if it stays internal to `internal/chcapp`.
+  if it stays internal to `internal/chrapp`.
 - The service can be split across files by capability:
   - workspace operations;
   - metadata operations;
@@ -70,11 +70,11 @@ The target model is:
 - The split is by files and methods, not by independent service implementations.
 - Narrow interfaces can describe adapter needs, but the central service remains
   the implementation.
-- `internal/chcapp` operation request and result types are adapter-neutral.
-- `internal/chctui` owns only TUI state, command planning, confirmation,
+- `internal/chrapp` operation request and result types are adapter-neutral.
+- `internal/chrtui` owns only TUI state, command planning, confirmation,
   keyboard handling, rendering, and mapping between TUI state and operation
   requests.
-- The operation service does not import `internal/chctui`.
+- The operation service does not import `internal/chrtui`.
 
 ## Out Of Scope
 
@@ -113,7 +113,7 @@ Introduce the central operation service boundary without changing behavior.
 
 Candidate scope:
 
-- add the central service type in `internal/chcapp`;
+- add the central service type in `internal/chrapp`;
 - centralize shared dependencies needed by operation methods;
 - add adapter-neutral request/result types for the first migrated boundary;
 - keep existing TUI options and behavior stable;
@@ -219,9 +219,9 @@ Clean up adapter-facing interfaces after service migration.
 Candidate scope:
 
 - reduce TUI executor wrappers to thin adapter mappings;
-- remove obsolete TUI-named operation structs from `internal/chcapp`;
-- keep adapter-neutral operation types in `internal/chcapp`;
-- ensure operation service files do not import `internal/chctui`;
+- remove obsolete TUI-named operation structs from `internal/chrapp`;
+- keep adapter-neutral operation types in `internal/chrapp`;
+- ensure operation service files do not import `internal/chrtui`;
 - organize service methods across capability files without splitting the
   implementation into separate entity services;
 - add tests or static checks for the intended import boundary where practical.

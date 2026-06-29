@@ -10,7 +10,7 @@ RedWright-style behavior instead of drifting into heavyweight, specification-lik
 questions.
 
 This slicing must preserve the existing service-owned architecture: adapters
-emit user intent, `internal/chcapp` coordinates operations, and `internal/chc`
+emit user intent, `internal/chrapp` coordinates operations, and `internal/chr`
 owns quiz runtime, artifacts, model payloads, and provider interpretation.
 
 ## Source
@@ -23,9 +23,9 @@ Primary sources:
 - `.agents/CONVENTIONS.md`
 - `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
-- `internal/chc` quiz runtime, model payload, repository, and provider code
-- `internal/chcapp` quiz service operations
-- `internal/chctui` quiz interaction surface
+- `internal/chr` quiz runtime, model payload, repository, and provider code
+- `internal/chrapp` quiz service operations
+- `internal/chrtui` quiz interaction surface
 - RedWright quiz behavior and artifacts as the parity reference
 
 Conversation decisions:
@@ -213,9 +213,9 @@ Out of scope:
 Run targeted tests per slice, expanding only when touched code crosses package
 boundaries:
 
-- `go test ./internal/chc`
-- `go test ./internal/chcapp`
-- `go test ./internal/chctui`
+- `go test ./internal/chr`
+- `go test ./internal/chrapp`
+- `go test ./internal/chrtui`
 - `make verify`
 
 Manual TUI validation belongs in Slice 4 after deterministic tests prove the

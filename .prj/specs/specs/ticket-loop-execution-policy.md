@@ -4,7 +4,7 @@ Status: initial
 
 Sources:
 
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 - `docs/reference/ticket-loop.md`
 
 ## Purpose

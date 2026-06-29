@@ -8,13 +8,13 @@ Plan the `Managed Project Bootstrap` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> A user initializes a Go project so it can be managed by `chc`.
+> A user initializes a Go project so it can be managed by `chr`.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related delivered plans:
 
@@ -30,7 +30,7 @@ The slicing is delivered.
 Already delivered:
 
 - CLI entrypoint using `urfave/cli`;
-- `chc init`;
+- `chr init`;
 - default current-directory initialization;
 - optional `--dir` override;
 - `standard`, `personal`, and `minimal` profile selection;
@@ -49,13 +49,13 @@ Bootstrap behavior gaps were closed by the safety pass. Further project registry
 This slicing includes:
 
 - CLI bootstrap;
-- project-local `.chc/` initialization;
+- project-local `.chr/` initialization;
 - embedded profile assets;
 - root `AGENTS.md`;
 - default protocol assets;
 - profile-specific defaults;
 - initialization dry-run and safety checks;
-- bootstrap validation and documentation needed to make `chc init` dependable.
+- bootstrap validation and documentation needed to make `chr init` dependable.
 
 ## Out of Scope
 
@@ -78,7 +78,7 @@ Status: delivered.
 
 Delivery:
 
-- root `chc` command;
+- root `chr` command;
 - `urfave/cli` command structure;
 - `init`, `project`, and `ticket` command families available.
 
@@ -88,8 +88,8 @@ Status: delivered.
 
 Delivery:
 
-- `chc init`;
-- creates `.chc/` under the target project;
+- `chr init`;
+- creates `.chr/` under the target project;
 - defaults to the current directory;
 - supports `--dir`.
 
@@ -122,7 +122,7 @@ Delivery:
 
 - standard profile protocol files;
 - standard profile playbooks;
-- generated `.chc/agents/` defaults.
+- generated `.chr/agents/` defaults.
 
 ### Bootstrap Safety Pass
 
@@ -135,7 +135,7 @@ Close initialization safety and inspectability gaps discovered after the first b
 Candidate scope:
 
 - verify dry-run output remains useful for existing and new paths;
-- verify existing `.chc/` content is not overwritten unexpectedly;
+- verify existing `.chr/` content is not overwritten unexpectedly;
 - verify root `AGENTS.md` preservation behavior is documented and tested from the CLI boundary;
 - expose clearer errors when the target directory is invalid or not writable;
 - keep behavior deterministic and small.
@@ -146,11 +146,11 @@ The safety pass was the final implementation slice for this slicing.
 
 The slicing is complete when:
 
-- `chc init` can initialize a Go project from the current directory;
-- `chc init --dir <path>` can initialize a target directory;
-- `chc init --profile standard` installs standard protocol defaults;
-- `chc init --profile personal` and `chc init --profile minimal` install their profile assets;
-- `chc init --dry-run` reports planned work without writing files;
+- `chr init` can initialize a Go project from the current directory;
+- `chr init --dir <path>` can initialize a target directory;
+- `chr init --profile standard` installs standard protocol defaults;
+- `chr init --profile personal` and `chr init --profile minimal` install their profile assets;
+- `chr init --dry-run` reports planned work without writing files;
 - existing root files are not overwritten silently;
 - invalid profile and invalid target failures are clear;
 - validation passes with `make verify`.
@@ -167,21 +167,21 @@ Manual smoke checks:
 
 ```sh
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir"
-test -d "$tmpdir/.chc"
+chr init --dir "$tmpdir"
+test -d "$tmpdir/.chr"
 test -f "$tmpdir/AGENTS.md"
 ```
 
 ```sh
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir" --dry-run
-test ! -e "$tmpdir/.chc"
+chr init --dir "$tmpdir" --dry-run
+test ! -e "$tmpdir/.chr"
 ```
 
 ```sh
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir" --profile standard
-test -f "$tmpdir/.chc/agents/CONVENTIONS.md"
+chr init --dir "$tmpdir" --profile standard
+test -f "$tmpdir/.chr/agents/CONVENTIONS.md"
 ```
 
 ## Risks

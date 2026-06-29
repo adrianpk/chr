@@ -114,7 +114,7 @@ func TestRenderAssistedSynthesizedArtifactIsDeterministic(t *testing.T) {
 		ID:          "spec:session-1:assisted-spec",
 		Kind:        AuthoringArtifactKindSpec,
 		Role:        AuthoringArtifactRoleOutput,
-		Path:        ".chc/user/specs/session-1-assisted-spec.md",
+		Path:        ".chr/user/specs/session-1-assisted-spec.md",
 		Description: "Synthesized assisted authoring artifact.",
 	}
 
@@ -134,7 +134,7 @@ func setupAssistedArtifactSynthesisTest(
 
 	repository := NewAuthoringSessionRepository(dir)
 	session := testAssistedContextSession(dir)
-	sourcePath := filepath.Join(dir, ".chc", "authoring", "sessions", session.ID, "curated-summary.md")
+	sourcePath := filepath.Join(dir, ".chr", "authoring", "sessions", session.ID, "curated-summary.md")
 	sourceRef := AuthoringArtifactRef{
 		ID:          "curated-summary-" + session.ID,
 		Kind:        AuthoringArtifactKindDraft,

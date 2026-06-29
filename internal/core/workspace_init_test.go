@@ -22,17 +22,17 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 		t.Fatalf("Root = %q, want %q", result.Root, filepath.Join(dir, DirectoryName))
 	}
 
-	assertDir(t, dir, ".chc/user/tickets/open")
-	assertDir(t, dir, ".chc/user/context")
-	assertDir(t, dir, ".chc/user/runtime/traces")
-	assertDir(t, dir, ".chc/user")
-	assertFile(t, dir, ".chc/user/manifest.md")
-	assertFile(t, dir, ".chc/user/config.yml")
-	assertFile(t, dir, ".chc/user/agents/CONVENTIONS.md")
-	assertFile(t, dir, ".chc/user/agents/playbooks/ticket-workflow.md")
-	assertFile(t, dir, ".chc/user/runtime/agent/Dockerfile")
+	assertDir(t, dir, ".chr/user/tickets/open")
+	assertDir(t, dir, ".chr/user/context")
+	assertDir(t, dir, ".chr/user/runtime/traces")
+	assertDir(t, dir, ".chr/user")
+	assertFile(t, dir, ".chr/user/manifest.md")
+	assertFile(t, dir, ".chr/user/config.yml")
+	assertFile(t, dir, ".chr/user/agents/CONVENTIONS.md")
+	assertFile(t, dir, ".chr/user/agents/playbooks/ticket-workflow.md")
+	assertFile(t, dir, ".chr/user/runtime/agent/Dockerfile")
 	assertFile(t, dir, "AGENTS.md")
-	assertNotExists(t, dir, ".chc/root/AGENTS.md")
+	assertNotExists(t, dir, ".chr/root/AGENTS.md")
 }
 
 func TestInitWritesUserOwnedWorkspaceConfig(t *testing.T) {
@@ -44,7 +44,7 @@ func TestInitWritesUserOwnedWorkspaceConfig(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chc", "user", "config.yml"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chr", "user", "config.yml"))
 	if err != nil {
 		t.Fatalf("read config: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestInitWritesUserOwnedWorkspaceConfig(t *testing.T) {
 	for _, want := range []string{
 		"version: 1",
 		"tickets:",
-		"  key_prefix: CHC",
+		"  key_prefix: CHR",
 		"notifications:",
 		"  telegram_enabled: false",
 	} {
@@ -86,7 +86,7 @@ func TestInitWritesWorkspaceManifestAsOrientation(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chc", "user", "manifest.md"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chr", "user", "manifest.md"))
 	if err != nil {
 		t.Fatalf("read manifest: %v", err)
 	}
@@ -118,11 +118,11 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	configPath := filepath.Join(dir, ".chc", "user", "config.yml")
+	configPath := filepath.Join(dir, ".chr", "user", "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
 	if err != nil {
-		t.Fatalf("create .chc: %v", err)
+		t.Fatalf("create .chr: %v", err)
 	}
 
 	err = os.WriteFile(configPath, []byte("custom: true\n"), 0o644)
@@ -175,7 +175,7 @@ func TestInitDoesNotOverwriteExistingRuntimeTemplate(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	dockerfilePath := filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -220,7 +220,7 @@ func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 		t.Fatalf("dry run created workspace or returned unexpected stat error: %v", err)
 	}
 
-	if !contains(result.Created, ".chc/user/runtime/agent/Dockerfile") {
+	if !contains(result.Created, ".chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 }
@@ -229,7 +229,7 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	err := os.MkdirAll(filepath.Join(dir, ".chc", "user", "agents"), 0o755)
+	err := os.MkdirAll(filepath.Join(dir, ".chr", "user", "agents"), 0o755)
 	if err != nil {
 		t.Fatalf("create existing dir: %v", err)
 	}
@@ -239,8 +239,8 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	if !contains(result.Skipped, ".chc/user/agents") {
-		t.Fatalf("Skipped = %#v, want .chc/user/agents", result.Skipped)
+	if !contains(result.Skipped, ".chr/user/agents") {
+		t.Fatalf("Skipped = %#v, want .chr/user/agents", result.Skipped)
 	}
 }
 
@@ -270,7 +270,7 @@ func TestInitUsesRequestedProfile(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chc", "user", "manifest.md"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chr", "user", "manifest.md"))
 	if err != nil {
 		t.Fatalf("read manifest: %v", err)
 	}
@@ -293,13 +293,13 @@ func TestInitRejectsUnknownProfile(t *testing.T) {
 func newTestInitializer() Workspace {
 	return NewWorkspace(fstest.MapFS{
 		"assets/workspace/profiles/standard/config.yml": {
-			Data: []byte("version: 1\ntickets:\n  key_prefix: CHC\nnotifications:\n  telegram_enabled: false\n"),
+			Data: []byte("version: 1\ntickets:\n  key_prefix: CHR\nnotifications:\n  telegram_enabled: false\n"),
 		},
 		"assets/workspace/profiles/standard/runtime/agent/Dockerfile": {
 			Data: []byte("FROM ubuntu:24.04\n"),
 		},
 		"assets/workspace/profiles/standard/manifest.md": {
-			Data: []byte("# ChrysoCoord Workspace\n\nThis directory stores ChrysoCoord's project-local working material.\n\n- `tickets/` stores project-local work items.\n- `runtime/` stores sandbox execution assets and evidence.\n"),
+			Data: []byte("# Chryso Workspace\n\nThis directory stores Chryso's project-local working material.\n\n- `tickets/` stores project-local work items.\n- `runtime/` stores sandbox execution assets and evidence.\n"),
 		},
 		"assets/workspace/profiles/standard/agents/CONVENTIONS.md": {
 			Data: []byte("# Conventions\n"),
@@ -311,7 +311,7 @@ func newTestInitializer() Workspace {
 			Data: []byte("# Agent Operating Contract\n"),
 		},
 		"assets/workspace/profiles/minimal/config.yml": {
-			Data: []byte("version: 1\ntickets:\n  key_prefix: CHC\nnotifications:\n  telegram_enabled: false\n"),
+			Data: []byte("version: 1\ntickets:\n  key_prefix: CHR\nnotifications:\n  telegram_enabled: false\n"),
 		},
 		"assets/workspace/profiles/minimal/runtime/agent/Dockerfile": {
 			Data: []byte("FROM ubuntu:24.04\n"),
@@ -323,7 +323,7 @@ func newTestInitializer() Workspace {
 			Data: []byte("# Minimal Agents\n"),
 		},
 		"assets/workspace/profiles/personal/config.yml": {
-			Data: []byte("version: 1\ntickets:\n  key_prefix: CHC\nnotifications:\n  telegram_enabled: false\n"),
+			Data: []byte("version: 1\ntickets:\n  key_prefix: CHR\nnotifications:\n  telegram_enabled: false\n"),
 		},
 		"assets/workspace/profiles/personal/runtime/agent/Dockerfile": {
 			Data: []byte("FROM ubuntu:24.04\n"),

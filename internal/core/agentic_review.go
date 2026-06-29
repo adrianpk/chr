@@ -437,7 +437,7 @@ func agenticReviewMetadataRef(ticket IndexedTicket, artifact AgenticReviewArtifa
 
 	return TicketReviewRef{
 		Type:     "local_review",
-		Provider: "chc",
+		Provider: "chr",
 		URL:      artifact.SummaryPath,
 		ID:       artifact.Run.ID,
 		Status:   string(artifact.Result.Decision),

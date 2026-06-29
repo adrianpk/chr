@@ -71,7 +71,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc -run 'Test(LoadLLMTraceConfig|WriteLLMTraceEvent|RecordLLMTraceEvent)'` - pass.
+- `go test ./internal/chr -run 'Test(LoadLLMTraceConfig|WriteLLMTraceEvent|RecordLLMTraceEvent)'` - pass.
 - `go test ./...` - pass.
 
 ## Slice 2: LLM Call Trace Integration
@@ -98,9 +98,9 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc -run 'TestOpenAIQuizModel(AdapterRecords|RequestBody|Timeout)|TestWriteLLMTraceEvent'` - pass.
-- `go test ./internal/chc -run 'Test(CodexAuthoringQuizQuestionProviderRecords|OpenAIQuizModelAdapterRecords|WriteLLMTraceEvent)'` - pass.
-- `go test ./internal/chcapp` - pass.
+- `go test ./internal/chr -run 'TestOpenAIQuizModel(AdapterRecords|RequestBody|Timeout)|TestWriteLLMTraceEvent'` - pass.
+- `go test ./internal/chr -run 'Test(CodexAuthoringQuizQuestionProviderRecords|OpenAIQuizModelAdapterRecords|WriteLLMTraceEvent)'` - pass.
+- `go test ./internal/chrapp` - pass.
 - `go test ./...` - pass.
 
 ## Slicing Closure
@@ -112,6 +112,6 @@ Tuning needed: no.
 Evidence:
 
 - Slice 1 delivered the reusable trace sink.
-- Slice 2 connected tracing to ChrysoCoord-owned LLM calls outside ticket
+- Slice 2 connected tracing to Chryso-owned LLM calls outside ticket
   execution containers.
 - `go test ./...` passed after Slice 2 delivery.

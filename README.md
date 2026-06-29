@@ -1,26 +1,26 @@
-# ChrysoCoord
+# Chryso
 
 <p align="center">
-  <img src="assets/img/home/chrysocoord-hero.png" alt="ChrysoCoord hero" width="760">
+  <img src="assets/img/home/chryso-hero.png" alt="Chryso hero" width="760">
 </p>
 
 [Gallery](docs/explanation/gallery.md)
 
-ChrysoCoord is a local software-development orchestrator for agentic work.
+Chryso is a local software-development orchestrator for agentic work.
 
 Think of it as a controlled, Go-oriented software factory that turns rough
 intent into organized implementation work, then allows agents to execute that
 work ticket by ticket while leaving a reviewable trail behind.
 
-Running `chc init` in the root of an existing Go project creates a reserved
-`.chc/` workspace where ChrysoCoord stores project context, generated documents,
+Running `chr init` in the root of an existing Go project creates a reserved
+`.chr/` workspace where Chryso stores project context, generated documents,
 tickets, runtime artifacts, and execution state.
 
 ## Workflow
 
 <div align="center">
 
-<img src="assets/img/home/chrysocoord-workflow.png" alt="ChrysoCoord workflow">
+<img src="assets/img/home/chryso-workflow.png" alt="Chryso workflow">
 
 </div>
 
@@ -35,14 +35,14 @@ while keeping execution explicit and inspectable.
 
 ## Control Surface
 
-ChrysoCoord is operated through a TUI, mirrored CLI commands, and an optional
+Chryso is operated through a TUI, mirrored CLI commands, and an optional
 local Web UI. The TUI gives the user a project-manager view: specs, Gherkin
 feature files, plans, tickets, board state, runtime activity, and review
 evidence. The CLI exposes the same workflow as commands that users can script
 and agents can invoke when they need to interact with the project workflow
 directly. The Web UI is an explicit local server for operators who want to
 manage the same board and project artifacts from a browser; it does not start
-unless the user runs `chc web serve`.
+unless the user runs `chr web serve`.
 
 Dumps and quizzes capture context. Specs and Gherkin feature files describe the
 expected behavior. Plans organize the work. Tickets are the executable unit. The
@@ -74,7 +74,7 @@ make build
 Run it from the repository:
 
 ```sh
-./bin/chc --help
+./bin/chr --help
 ```
 
 Install it into the active Go environment:
@@ -85,13 +85,13 @@ make install
 
 ## First Project
 
-Inside a project you want ChrysoCoord to manage:
+Inside a project you want Chryso to manage:
 
 ```sh
-chc init
-chc runtime validate --dry-run
-chc ticket new "Fix the failing task workflow" --type bug --priority high
-chc ticket list
+chr init
+chr runtime validate --dry-run
+chr ticket new "Fix the failing task workflow" --type bug --priority high
+chr ticket list
 ```
 
 This initializes the project workspace, checks the configured runtime boundary,
@@ -100,9 +100,9 @@ creates a first ticket, and lists the tickets available to the agent.
 To use the project registry:
 
 ```sh
-chc project add /path/to/project
-chc project select /path/to/project
-chc project current
+chr project add /path/to/project
+chr project select /path/to/project
+chr project current
 ```
 
 ## Documentation
@@ -123,8 +123,8 @@ More documentation:
 
 ## Repositories
 
-Official repository: https://forge.adrianpk.com/adrianpk/chc
+Official repository: https://forge.adrianpk.com/adrianpk/chr
 
 Public mirrors:
 
-- https://codeberg.org/adrianpk/chc
+- https://codeberg.org/adrianpk/chr

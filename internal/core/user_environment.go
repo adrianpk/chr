@@ -52,10 +52,10 @@ func NewUserEnvironment(opts UserEnvironmentOptions) (UserEnvironment, error) {
 			return nil, fmt.Errorf("development root is required in dev mode")
 		}
 
-		env.configDir = filepath.Join(opts.DevRoot, "config", "chc")
-		env.dataDir = filepath.Join(opts.DevRoot, "data", "chc")
-		env.cacheDir = filepath.Join(opts.DevRoot, "cache", "chc")
-		env.stateDir = filepath.Join(opts.DevRoot, "state", "chc")
+		env.configDir = filepath.Join(opts.DevRoot, "config", "chr")
+		env.dataDir = filepath.Join(opts.DevRoot, "data", "chr")
+		env.cacheDir = filepath.Join(opts.DevRoot, "cache", "chr")
+		env.stateDir = filepath.Join(opts.DevRoot, "state", "chr")
 	}
 
 	if !opts.DevMode {
@@ -135,48 +135,48 @@ func (e *userEnvironment) validate() error {
 
 func userConfigDir(opts UserEnvironmentOptions) string {
 	if opts.XDGConfig != "" {
-		return filepath.Join(opts.XDGConfig, "chc")
+		return filepath.Join(opts.XDGConfig, "chr")
 	}
 
 	if opts.HomeDir == "" {
 		return ""
 	}
 
-	return filepath.Join(opts.HomeDir, ".config", "chc")
+	return filepath.Join(opts.HomeDir, ".config", "chr")
 }
 
 func userDataDir(opts UserEnvironmentOptions) string {
 	if opts.XDGData != "" {
-		return filepath.Join(opts.XDGData, "chc")
+		return filepath.Join(opts.XDGData, "chr")
 	}
 
 	if opts.HomeDir == "" {
 		return ""
 	}
 
-	return filepath.Join(opts.HomeDir, ".local", "share", "chc")
+	return filepath.Join(opts.HomeDir, ".local", "share", "chr")
 }
 
 func userCacheDir(opts UserEnvironmentOptions) string {
 	if opts.XDGCache != "" {
-		return filepath.Join(opts.XDGCache, "chc")
+		return filepath.Join(opts.XDGCache, "chr")
 	}
 
 	if opts.HomeDir == "" {
 		return ""
 	}
 
-	return filepath.Join(opts.HomeDir, ".cache", "chc")
+	return filepath.Join(opts.HomeDir, ".cache", "chr")
 }
 
 func userStateDir(opts UserEnvironmentOptions) string {
 	if opts.XDGState != "" {
-		return filepath.Join(opts.XDGState, "chc")
+		return filepath.Join(opts.XDGState, "chr")
 	}
 
 	if opts.HomeDir == "" {
 		return ""
 	}
 
-	return filepath.Join(opts.HomeDir, ".local", "state", "chc")
+	return filepath.Join(opts.HomeDir, ".local", "state", "chr")
 }

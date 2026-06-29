@@ -41,15 +41,15 @@ execution report and source artifacts.
 
 ## Files of Interest
 
-- `internal/chc/review_handoff_summary.go`
-- `internal/chc/review_handoff_summary_test.go`
+- `internal/chr/review_handoff_summary.go`
+- `internal/chr/review_handoff_summary_test.go`
 - `docs/reference/review-handoff-summaries.md`
 - `docs/reference/reports.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'TestReviewHandoffSummary|TestNewExecutionReport|TestRenderExecutionReport'
+go test ./internal/chr -run 'TestReviewHandoffSummary|TestNewExecutionReport|TestRenderExecutionReport'
 make verify
 ```
 

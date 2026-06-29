@@ -18,11 +18,11 @@ func TestDetectReviewProviderReference(t *testing.T) {
 	}{
 		{
 			name:     "forgejo",
-			rawURL:   "https://forge.adrianpk.com/adrianpk/chc/pulls/275",
+			rawURL:   "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 			provider: ReviewProviderForgejo,
 			host:     "forge.adrianpk.com",
 			owner:    "adrianpk",
-			repo:     "chc",
+			repo:     "chr",
 			number:   275,
 		},
 		{
@@ -104,7 +104,7 @@ func TestRunReviewProviderDiagnosticsReady(t *testing.T) {
 
 	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
 		Config: DefaultReviewProviderConfig(),
-		URL:    "https://forge.adrianpk.com/adrianpk/chc/pulls/275",
+		URL:    "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 		Runner: runner,
 	})
 
@@ -173,7 +173,7 @@ func TestRunReviewProviderDiagnosticsDryRunSkipsReadability(t *testing.T) {
 
 	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
 		Config: DefaultReviewProviderConfig(),
-		URL:    "https://forge.adrianpk.com/adrianpk/chc/pulls/275",
+		URL:    "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 		DryRun: true,
 		Runner: runner,
 	})

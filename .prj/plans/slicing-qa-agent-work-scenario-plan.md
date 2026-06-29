@@ -4,13 +4,13 @@ Status: active
 
 ## Purpose
 
-Implement the first reproducible QA scenario for exercising ChrysoCoord's
+Implement the first reproducible QA scenario for exercising Chryso's
 agent-work flow end to end: reset a seeded project, run a single bug ticket,
 generate a comments spec, generate a plan, materialize tracking and tickets,
 and run the agent loop over the generated work.
 
 The scenario should be easy to reset and inspect manually. It must not turn into
-a large product sample before the CHC workflow itself is proven.
+a large product sample before the CHR workflow itself is proven.
 
 ## Source
 
@@ -26,7 +26,7 @@ Primary sources:
 
 Conversation decisions:
 
-- The QA workspace lives under `qa/` inside the `chc` repository.
+- The QA workspace lives under `qa/` inside the `chr` repository.
 - Only the reference project is versioned.
 - Active and temporary QA project copies are ignored.
 - Reset is intentionally destructive for the active project copy.
@@ -39,7 +39,7 @@ Conversation decisions:
   quizzes, and ADRs.
 - ADRs live as reusable project documentation under `docs/explanation/adr/`.
 - Test-based development and table-driven tests are baseline engineering
-  preferences for both CHC and the QA reference project.
+  preferences for both CHR and the QA reference project.
 
 ## Current State
 
@@ -50,14 +50,14 @@ Delivered on `dev`:
 - Ticket execution and loop execution.
 - Dash agent-work controls and progress display.
 - CLI work commands for one ticket and all selected work.
-- Project-local `.chc/user/...` artifact layout.
+- Project-local `.chr/user/...` artifact layout.
 
 Remaining gaps:
 
 - No versioned QA reference project exists for end-to-end manual testing.
 - No reset/test Make targets exist for QA scenarios.
 - No ignored `qa/project` or `qa/tmp` active workspace convention exists.
-- No seeded blog project exists with `.chc` context, ADRs, bug ticket, and
+- No seeded blog project exists with `.chr` context, ADRs, bug ticket, and
   failing test.
 - The repo agent conventions do not yet explicitly state the test-first
   preference for bug fixes.
@@ -75,9 +75,9 @@ The first QA scenario provides:
 - reset scripts that copy the reference and initialize an independent Git repo;
 - a realistic small Go HTTP service using standard library routing;
 - a known failing test for the seeded bug ticket;
-- seeded `.chc` context for comments spec generation;
+- seeded `.chr` context for comments spec generation;
 - project documentation including ADRs under Diataxis explanation docs;
-- CHC and project agent conventions that prefer reproducing bugs with tests and
+- CHR and project agent conventions that prefer reproducing bugs with tests and
   table-driven tests for input/output behavior.
 
 ## Slice Map
@@ -104,7 +104,7 @@ Prerequisite PRs or delivered work:
 | --- | --- | --- | --- | --- |
 | Slice 1 | qa workspace reset scaffold | `feat/slice-1-qa-workspace-reset-scaffold` | `feat(slice-1): qa workspace reset scaffold` | `.prj/reports/slices/qa-agent-work-scenario/slice-1-qa-workspace-reset-scaffold.md` |
 | Slice 2 | blog reference project | `feat/slice-2-blog-reference-project` | `feat(slice-2): blog reference project` | `.prj/reports/slices/qa-agent-work-scenario/slice-2-blog-reference-project.md` |
-| Slice 3 | seeded chc context and adr docs | `feat/slice-3-seeded-chc-context-adr-docs` | `feat(slice-3): seeded chc context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chc-context-adr-docs.md` |
+| Slice 3 | seeded chr context and adr docs | `feat/slice-3-seeded-chr-context-adr-docs` | `feat(slice-3): seeded chr context adr docs` | `.prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chr-context-adr-docs.md` |
 | Slice 4 | test based agent guidance | `feat/slice-4-test-based-agent-guidance` | `feat(slice-4): test based agent guidance` | `.prj/reports/slices/qa-agent-work-scenario/slice-4-test-based-agent-guidance.md` |
 | Slice 5 | qa runbook and smoke validation | `feat/slice-5-qa-runbook-smoke-validation` | `feat(slice-5): qa runbook smoke validation` | `.prj/reports/slices/qa-agent-work-scenario/slice-5-qa-runbook-smoke-validation.md` |
 
@@ -138,8 +138,8 @@ Candidate tasks:
 Out of scope:
 
 - Full blog app implementation.
-- Seeded `.chc` artifacts.
-- CHC prompt changes.
+- Seeded `.chr` artifacts.
+- CHR prompt changes.
 
 ## Slice 2: Blog Reference Project
 
@@ -168,18 +168,18 @@ Candidate tasks:
 Out of scope:
 
 - Comments implementation.
-- CHC seeded context.
+- CHR seeded context.
 - Bug fix.
 
-## Slice 3: Seeded CHC Context And ADR Docs
+## Slice 3: Seeded CHR Context And ADR Docs
 
-Seed the blog reference project with the context required for CHC to generate
+Seed the blog reference project with the context required for CHR to generate
 the comments spec, plan, tracking, and tickets.
 
 Expected behavior:
 
-- The reference project contains `.chc` root files only where required.
-- User-owned CHC artifacts live under `.chc/user/...`.
+- The reference project contains `.chr` root files only where required.
+- User-owned CHR artifacts live under `.chr/user/...`.
 - The project has metadata and a `comments` use case.
 - Dumps and curated quiz notes describe the comments feature.
 - No comments spec, plan, tracking, or generated tickets are present.
@@ -189,22 +189,22 @@ Expected behavior:
 Candidate tasks:
 
 - T3.1 Add project and use-case metadata for `comments`.
-- T3.2 Add comments dumps and curated quiz notes under `.chc/user/...`.
+- T3.2 Add comments dumps and curated quiz notes under `.chr/user/...`.
 - T3.3 Add a ready bug ticket for the unknown-slug behavior.
 - T3.4 Add ADR documentation under `docs/explanation/adr/`.
 - T3.5 Ensure no generated comments spec/plan/tracking/tickets are seeded.
-- T3.6 Validate CHC can open the active project after reset.
+- T3.6 Validate CHR can open the active project after reset.
 - T3.7 Add slice implementation report and run quality gates.
 
 Out of scope:
 
 - Implementing comments.
 - Running Codex generation.
-- Changing CHC prompt policy.
+- Changing CHR prompt policy.
 
 ## Slice 4: Test Based Agent Guidance
 
-Make the test-based development preference explicit in CHC and in generated work
+Make the test-based development preference explicit in CHR and in generated work
 units.
 
 Expected behavior:
@@ -220,7 +220,7 @@ Expected behavior:
 
 Candidate tasks:
 
-- T4.1 Update CHC agent conventions with test-based guidance.
+- T4.1 Update CHR agent conventions with test-based guidance.
 - T4.2 Update generated tracking/ticket prompt instructions with the same
       preference.
 - T4.3 Add tests that assert prompt guidance is present where relevant.
@@ -239,7 +239,7 @@ Document and verify the manual QA flow.
 
 Expected behavior:
 
-- Documentation explains how to reset, run tests, open CHC, resolve the manual
+- Documentation explains how to reset, run tests, open CHR, resolve the manual
   bug ticket, generate comments artifacts, and run the generated ticket loop.
 - The runbook is concise and operational.
 - Smoke validation proves reset creates an independent Git repo and expected
@@ -269,8 +269,8 @@ The slicing is complete when:
 - `make qa-test-blog` runs `go test ./...` in the active project;
 - the reset baseline has the expected failing bug test;
 - the active project is an independent Git repo ignored by the parent repo;
-- the active project contains seeded CHC context for comments generation;
+- the active project contains seeded CHR context for comments generation;
 - the active project contains ADRs under `docs/explanation/adr/`;
-- CHC conventions and generated ticket guidance express the test-based
+- CHR conventions and generated ticket guidance express the test-based
   preference;
 - docs explain the manual QA flow.

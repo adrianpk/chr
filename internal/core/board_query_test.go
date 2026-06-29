@@ -8,9 +8,9 @@ import (
 
 func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicket(t, index, "CHC-3", TicketStatusDone)
-	upsertBoardQueryTicket(t, index, "CHC-1", TicketStatusBacklog)
-	upsertBoardQueryTicket(t, index, "CHC-2", TicketStatusReadyForDev)
+	upsertBoardQueryTicket(t, index, "CHR-3", TicketStatusDone)
+	upsertBoardQueryTicket(t, index, "CHR-1", TicketStatusBacklog)
+	upsertBoardQueryTicket(t, index, "CHR-2", TicketStatusReadyForDev)
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -27,15 +27,15 @@ func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 		t.Fatalf("columns = %d, want %d", len(board.Columns), len(NormalBoardColumns))
 	}
 
-	assertBoardColumn(t, board, TicketStatusBacklog, "Backlog", []string{"CHC-1"})
-	assertBoardColumn(t, board, TicketStatusReadyForDev, "Ready For Dev", []string{"CHC-2"})
-	assertBoardColumn(t, board, TicketStatusDone, "Done", []string{"CHC-3"})
+	assertBoardColumn(t, board, TicketStatusBacklog, "Backlog", []string{"CHR-1"})
+	assertBoardColumn(t, board, TicketStatusReadyForDev, "Ready For Dev", []string{"CHR-2"})
+	assertBoardColumn(t, board, TicketStatusDone, "Done", []string{"CHR-3"})
 }
 
 func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:    "CHC-1",
+		Key:    "CHR-1",
 		Status: TicketStatusReadyLegacy,
 	})
 
@@ -46,13 +46,13 @@ func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
 		t.Fatalf("ProjectBoard returned error: %v", err)
 	}
 
-	assertBoardColumn(t, board, TicketStatusReadyForDev, "Ready For Dev", []string{"CHC-1"})
+	assertBoardColumn(t, board, TicketStatusReadyForDev, "Ready For Dev", []string{"CHR-1"})
 }
 
 func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicket(t, index, "CHC-1", TicketStatusBacklog)
-	upsertBoardQueryTicket(t, index, "CHC-2", TicketStatusBlockedLegacy)
+	upsertBoardQueryTicket(t, index, "CHR-1", TicketStatusBacklog)
+	upsertBoardQueryTicket(t, index, "CHR-2", TicketStatusBlockedLegacy)
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -65,8 +65,8 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 		t.Fatalf("board counts = %#v, want one normal and one attention ticket", board)
 	}
 
-	if len(board.Attention) != 1 || board.Attention[0].Ticket.Key != "CHC-2" {
-		t.Fatalf("attention tickets = %#v, want CHC-2", board.Attention)
+	if len(board.Attention) != 1 || board.Attention[0].Ticket.Key != "CHR-2" {
+		t.Fatalf("attention tickets = %#v, want CHR-2", board.Attention)
 	}
 
 	wantReasons := []string{
@@ -78,7 +78,7 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 		t.Fatalf("attention reasons = %#v, want blocked status reasons", board.Attention[0].Reasons)
 	}
 
-	if got := indexedTicketKeys(board.Tickets); !slices.Equal(got, []string{"CHC-1", "CHC-2"}) {
+	if got := indexedTicketKeys(board.Tickets); !slices.Equal(got, []string{"CHR-1", "CHR-2"}) {
 		t.Fatalf("board tickets = %#v, want normal tickets followed by attention tickets", got)
 	}
 }
@@ -86,7 +86,7 @@ func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 func TestBoardQueryFlagsReviewStateAttention(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertBoardQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:         "CHC-1",
+		Key:         "CHR-1",
 		Status:      TicketStatusReadyForDev,
 		ReviewState: "changes_requested",
 	})

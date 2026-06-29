@@ -32,7 +32,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | --- | --- | --- | --- | --- |
 | T2.1 | Add feature generation request, result, and model contract. | done | `648644c`, corrected by `f8573a3`, `5ed3d64` | Added feature action, statuses, schema, decoder, and provider routing. |
 | T2.2 | Build feature-generation context from spec, quiz, dump, project, and use-case artifacts. | done | `50436c1`, corrected by `ef35761`, `5ed3d64` | Added service request construction and context sections including specs. |
-| T2.3 | Write checked features to `.chc/user/acceptance/<case>.feature`. | done | `adec408`, corrected by `5ed3d64` | Generated features write only after static checks pass. |
+| T2.3 | Write checked features to `.chr/user/acceptance/<case>.feature`. | done | `adec408`, corrected by `5ed3d64` | Generated features write only after static checks pass. |
 | T2.4 | Add service tests for generated, rejected, needs-more-info, and not-applicable flows. | done | `336d472`, corrected by `6c298de` | Added dedicated service tests for all feature generation outcomes. |
 | T2.5 | Add slice report and tracker updates. | done | this commit | Added Slice 2 report, tracker status, and validation log. |
 
@@ -51,7 +51,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
 | T4.1 | Add feature readiness/default prompt model. | done | `ee9c2c4`, corrected by `4df227e` | Added structured clarification prompts for feature `needs_more_info` responses. |
-| T4.2 | Persist feature-round notes under a stable acceptance artifact path. | done | `0748c73`, corrected by `a0a31d0`, `4df227e` | Added `.chc/user/acceptance/<case>-feature-round.md`. |
+| T4.2 | Persist feature-round notes under a stable acceptance artifact path. | done | `0748c73`, corrected by `a0a31d0`, `4df227e` | Added `.chr/user/acceptance/<case>-feature-round.md`. |
 | T4.3 | Use feature-round notes as input for subsequent feature generation. | done | `eddad16`, corrected by `a0a31d0`, `4df227e` | Existing feature-round notes are appended as acceptance context. |
 | T4.4 | Add tests for default confirmation and missing-info persistence. | done | `8576d62` | Added payload, round note, and service context coverage. |
 | T4.5 | Add slice report and tracker updates. | done | this commit | Added Slice 4 report, tracker status, and validation log. |
@@ -79,30 +79,30 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 ## Validation Log
 
 - Slice 1:
-  - `go test ./internal/chc ./internal/chcapp -run 'Spec|Feature|Gherkin'` (pass)
-  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `go test ./internal/chr ./internal/chrapp -run 'Spec|Feature|Gherkin'` (pass)
+  - `go test ./internal/chr ./internal/chrapp` (pass)
   - `make verify` (pass)
 - Slice 2:
-  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `go test ./internal/chr ./internal/chrapp` (pass)
   - `make verify` (pass)
 - Slice 3:
-  - `go test ./internal/chcapp -run 'RootCommand|AcceptanceFeatureGenerate'` (pass)
-  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `go test ./internal/chrapp -run 'RootCommand|AcceptanceFeatureGenerate'` (pass)
+  - `go test ./internal/chr ./internal/chrapp` (pass)
   - `make verify` (pass)
 - Slice 4:
-  - `go test ./internal/chc -run 'AcceptanceFeature|QuizModelFeature'` (pass)
-  - `go test ./internal/chcapp -run 'ServiceGenerateAcceptanceFeature'` (pass)
-  - `go test ./internal/chc ./internal/chcapp` (pass)
+  - `go test ./internal/chr -run 'AcceptanceFeature|QuizModelFeature'` (pass)
+  - `go test ./internal/chrapp -run 'ServiceGenerateAcceptanceFeature'` (pass)
+  - `go test ./internal/chr ./internal/chrapp` (pass)
   - `make verify` (pass)
 - Slice 5:
-  - `go test ./internal/chctui -run 'SpecGenerationCommands|GeneratesSpecFromSpecsKey|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
-  - `go test ./internal/chcapp -run 'TUISpecAdapterGeneratesAcceptanceFeature'` (pass)
-  - `go test ./internal/chcapp -run 'TUISpecAdapterGeneratesAcceptanceFeature' && go test ./internal/chctui -run 'SpecGenerationCommands|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
+  - `go test ./internal/chrtui -run 'SpecGenerationCommands|GeneratesSpecFromSpecsKey|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
+  - `go test ./internal/chrapp -run 'TUISpecAdapterGeneratesAcceptanceFeature'` (pass)
+  - `go test ./internal/chrapp -run 'TUISpecAdapterGeneratesAcceptanceFeature' && go test ./internal/chrtui -run 'SpecGenerationCommands|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
   - `make verify` (pass)
 - Slice 6:
   - `make qa-reset QA_CASE=dialer QA_REF=002` (pass)
-  - `go run ./cmd/chc spec list --dir qa/project/dialer` (pass)
-  - `go run ./cmd/chc acceptance feature generate --dir qa/project/dialer --use-case call-outcome-capture` (expected failure: generated spec is required)
+  - `go run ./cmd/chr spec list --dir qa/project/dialer` (pass)
+  - `go run ./cmd/chr acceptance feature generate --dir qa/project/dialer --use-case call-outcome-capture` (expected failure: generated spec is required)
   - `go -C qa/project/dialer test ./...` (pass)
   - `make verify` (pass)
 

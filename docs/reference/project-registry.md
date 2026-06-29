@@ -4,17 +4,17 @@
 
 The project registry stores local projects known by the user daemon.
 
-It is user-level state. It does not replace the project-local `.chc/` directory and does not make project ticket files non-portable.
+It is user-level state. It does not replace the project-local `.chr/` directory and does not make project ticket files non-portable.
 
 ## Database
 
 The registry uses the global user SQLite database:
 
 ```text
-<user-data-dir>/chc.db
+<user-data-dir>/chr.db
 ```
 
-The user data directory comes from `chc.UserEnvironment`.
+The user data directory comes from `chr.UserEnvironment`.
 
 ## Schema
 
@@ -35,7 +35,7 @@ The schema is created through embedded SQLite migrations before registry operati
 
 ## Core API
 
-The core registry API is exposed through `chc.ProjectRegistry`.
+The core registry API is exposed through `chr.ProjectRegistry`.
 
 Initial operations:
 

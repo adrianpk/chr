@@ -20,7 +20,7 @@ referenced by execution records before any destructive cleanup command exists.
 - Added runtime artifact cleanup preview diagnostics.
 - Compared runtime artifact leaf directories against execution record
   `artifact_run_dir` values for the resolved project.
-- Added `chc maintenance execution cleanup-preview`.
+- Added `chr maintenance execution cleanup-preview`.
 - Kept cleanup preview read-only.
 - Added focused domain and CLI tests.
 - Documented cleanup preview behavior and safety boundaries.
@@ -36,22 +36,22 @@ directories are not reported directly.
 ## Contracts Added or Changed
 
 - Added `RuntimeArtifactCleanupPreviewService`.
-- Added `chc maintenance execution cleanup-preview`.
+- Added `chr maintenance execution cleanup-preview`.
 - Updated `docs/reference/maintenance.md`.
 
 ## Files of Interest
 
-- `internal/chc/runtime_artifact_cleanup_preview.go`
-- `internal/chc/runtime_artifact_cleanup_preview_test.go`
-- `internal/chcapp/maintenance.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/runtime_artifact_cleanup_preview.go`
+- `internal/chr/runtime_artifact_cleanup_preview_test.go`
+- `internal/chrapp/maintenance.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/maintenance.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'TestRuntimeArtifactCleanupPreview'
-go test ./internal/chcapp -run 'TestMaintenanceExecutionCleanupPreview'
+go test ./internal/chr -run 'TestRuntimeArtifactCleanupPreview'
+go test ./internal/chrapp -run 'TestMaintenanceExecutionCleanupPreview'
 make verify
 ```
 

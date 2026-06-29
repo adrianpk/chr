@@ -19,7 +19,7 @@ reset workspace.
 
 ## Delivered
 
-- Added a runbook for resetting the blog QA scenario, opening CHC, running the
+- Added a runbook for resetting the blog QA scenario, opening CHR, running the
   seeded bug ticket, generating comments artifacts, and running generated work.
 - Documented the generic and blog-specific QA Make targets.
 - Added `qa-smoke` and `qa-smoke-blog` targets.

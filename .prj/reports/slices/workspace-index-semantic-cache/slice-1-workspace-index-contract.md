@@ -38,7 +38,7 @@ contract.
 
 ## Contracts Added or Changed
 
-- `internal/chc` owns the workspace index model.
+- `internal/chr` owns the workspace index model.
 - Structural indexing is deterministic, local, and rebuildable from files.
 - Semantic indexing is optional, cache-backed, and separate from structural
   indexing.

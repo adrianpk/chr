@@ -64,15 +64,15 @@ New migration:
 
 ## Files of Interest
 
-- `internal/chc/loop_run.go`
-- `internal/chc/loop_run_repository.go`
-- `internal/chc/loop_run_repository_test.go`
-- `cmd/chc/assets/migration/sqlite/20260520000004-create_loop_runs.sql`
+- `internal/chr/loop_run.go`
+- `internal/chr/loop_run_repository.go`
+- `internal/chr/loop_run_repository_test.go`
+- `cmd/chr/assets/migration/sqlite/20260520000004-create_loop_runs.sql`
 - `docs/reference/ticket-loop.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoopRun|TestNewLoopRun|TestMigrator'`:
+- `go test ./internal/chr -run 'TestLoopRun|TestNewLoopRun|TestMigrator'`:
   pass
 - `make verify`: pass
 

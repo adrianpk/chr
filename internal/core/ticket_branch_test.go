@@ -4,7 +4,7 @@ import "testing"
 
 func TestSelectTicketBranchUsesExistingMetadata(t *testing.T) {
 	selection, err := SelectTicketBranch(IndexedTicket{
-		Key:    "CHC-1",
+		Key:    "CHR-1",
 		Title:  "Build CLI game",
 		Branch: "feat/slice-1-cli-game",
 	})
@@ -23,14 +23,14 @@ func TestSelectTicketBranchUsesExistingMetadata(t *testing.T) {
 
 func TestSelectTicketBranchDerivesStableBranch(t *testing.T) {
 	selection, err := SelectTicketBranch(IndexedTicket{
-		Key:   "CHC-42",
+		Key:   "CHR-42",
 		Title: "Add CLI tic-tac-toe!",
 	})
 	if err != nil {
 		t.Fatalf("SelectTicketBranch returned error: %v", err)
 	}
 
-	if selection.Branch != "chc/chc-42-add-cli-tic-tac-toe" {
+	if selection.Branch != "chr/chr-42-add-cli-tic-tac-toe" {
 		t.Fatalf("Branch = %q, want derived branch", selection.Branch)
 	}
 

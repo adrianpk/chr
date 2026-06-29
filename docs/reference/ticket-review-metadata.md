@@ -91,10 +91,10 @@ specified in [Ticket merge workflow](ticket-merge-workflow.md).
 Use `ticket review-ref` to attach branch and pull request metadata to a ticket:
 
 ```text
-chc ticket review-ref CHC-1 \
+chr ticket review-ref CHR-1 \
   --branch feat/slice-2-pr-reference-workflow \
   --provider forgejo \
-  --url https://forge.example.com/adrianpk/chc/pulls/274 \
+  --url https://forge.example.com/adrianpk/chr/pulls/274 \
   --id 274
 ```
 
@@ -105,7 +105,7 @@ new review reference.
 The command may also set only the branch:
 
 ```text
-chc ticket review-ref CHC-1 --branch feat/slice-2-pr-reference-workflow
+chr ticket review-ref CHR-1 --branch feat/slice-2-pr-reference-workflow
 ```
 
 ## Board Behavior

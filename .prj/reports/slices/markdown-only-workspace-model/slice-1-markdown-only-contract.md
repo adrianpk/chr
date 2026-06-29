@@ -22,8 +22,8 @@ No runtime behavior changes are delivered in this slice.
 
 The documented behavior is:
 
-- `.chc/project.md` is the source of truth for Project.
-- `.chc/cases/*.md` are the source of truth for Cases.
+- `.chr/project.md` is the source of truth for Project.
+- `.chr/cases/*.md` are the source of truth for Cases.
 - SQLite is not authoritative for Project or Cases.
 - Runtime navigation may use an ephemeral `WorkspaceGraph`.
 - The graph stores lightweight metadata and relationships, not document bodies.

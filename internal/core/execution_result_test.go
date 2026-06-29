@@ -9,7 +9,7 @@ import (
 func TestLoadExecutionResultParsesEnvelope(t *testing.T) {
 	path := writeExecutionResultFile(t, `{
 		"execution_id": "exec-1",
-		"ticket_key": "CHC-1",
+		"ticket_key": "CHR-1",
 		"status": "succeeded",
 		"summary": "done",
 		"evidence_summary": {
@@ -65,7 +65,7 @@ func TestLoadExecutionResultRejectsMalformedJSON(t *testing.T) {
 func TestLoadExecutionResultRejectsInvalidEnvelope(t *testing.T) {
 	path := writeExecutionResultFile(t, `{
 		"execution_id": "exec-1",
-		"ticket_key": "CHC-1",
+		"ticket_key": "CHR-1",
 		"status": "unknown",
 		"evidence_summary": {
 			"strategy": "planned",
@@ -83,7 +83,7 @@ func TestLoadExecutionResultRejectsInvalidEnvelope(t *testing.T) {
 func TestLoadExecutionResultRejectsInvalidChangedFilePath(t *testing.T) {
 	path := writeExecutionResultFile(t, `{
 		"execution_id": "exec-1",
-		"ticket_key": "CHC-1",
+		"ticket_key": "CHR-1",
 		"status": "succeeded",
 		"evidence_summary": {
 			"strategy": "planned",
@@ -106,7 +106,7 @@ func TestLoadExecutionResultRejectsInvalidChangedFilePath(t *testing.T) {
 func TestLoadExecutionResultRejectsMissingEvidenceSummary(t *testing.T) {
 	path := writeExecutionResultFile(t, `{
 		"execution_id": "exec-1",
-		"ticket_key": "CHC-1",
+		"ticket_key": "CHR-1",
 		"status": "succeeded",
 		"summary": "done"
 	}`)
@@ -127,7 +127,7 @@ func TestLoadExecutionResultAcceptsEvidenceSummaryForChangeKinds(t *testing.T) {
 			name: "docs only",
 			content: `{
 				"execution_id": "exec-1",
-				"ticket_key": "CHC-1",
+				"ticket_key": "CHR-1",
 				"status": "succeeded",
 				"summary": "updated docs",
 				"evidence_summary": {
@@ -142,7 +142,7 @@ func TestLoadExecutionResultAcceptsEvidenceSummaryForChangeKinds(t *testing.T) {
 			name: "behavior change",
 			content: `{
 				"execution_id": "exec-1",
-				"ticket_key": "CHC-1",
+				"ticket_key": "CHR-1",
 				"status": "succeeded",
 				"summary": "updated behavior",
 				"evidence_summary": {

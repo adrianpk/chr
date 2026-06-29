@@ -11,7 +11,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 var notifyTelegramSender = core.NewTelegramSender(http.DefaultClient)
@@ -333,7 +333,7 @@ func printNotifyTelegramTestPlan(
 		"project_dir: " + projectContext.ProjectDir,
 		"bot_token_env: " + telegram.BotTokenEnv,
 		"chat_id: " + telegram.ChatID,
-		"message: ChrysoCoord Telegram notification test for " + projectContext.ProjectID,
+		"message: Chryso Telegram notification test for " + projectContext.ProjectID,
 	})
 }
 
@@ -408,7 +408,7 @@ func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time
 		Status:    core.NotificationStatusPending,
 		Source:    core.NotificationSourceManual,
 		Payload: core.NotificationPayload{
-			Summary: "ChrysoCoord Telegram notification test for " + projectContext.ProjectID,
+			Summary: "Chryso Telegram notification test for " + projectContext.ProjectID,
 			Detail:  "Project directory: " + projectContext.ProjectDir,
 		},
 		CreatedAt: now,

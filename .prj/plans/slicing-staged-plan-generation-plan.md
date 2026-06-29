@@ -21,8 +21,8 @@ Primary sources:
 - `.agents/playbooks/slice-reporting.md`
 - `.prj/specs/drafts/staged-plan-generation-draft.md`
 - `.prj/plans/slicing-plan-generation-safety-plan.md`
-- Existing `internal/chc` quiz model and plan generation contracts
-- Existing `internal/chcapp` plan generation service flow
+- Existing `internal/chr` quiz model and plan generation contracts
+- Existing `internal/chrapp` plan generation service flow
 
 Conversation decisions:
 

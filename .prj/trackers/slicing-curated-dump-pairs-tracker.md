@@ -52,7 +52,7 @@ Tasks:
       operation.
 - [x] T1.5 Preserve title, use-case scope, slug collision handling, and service
       error behavior.
-- [x] T1.6 Update CLI coverage for `chc dump new`.
+- [x] T1.6 Update CLI coverage for `chr dump new`.
 - [x] T1.7 Add service tests for successful curation, fallback curation, raw
       sibling creation, frontmatter relationship fields, and filename collision
       handling.
@@ -71,8 +71,8 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp` pass.
-- `go test ./internal/chc ./internal/chcapp` pass.
+- `go test ./internal/chrapp` pass.
+- `go test ./internal/chr ./internal/chrapp` pass.
 - `make verify` fail on pre-existing strict lint issues outside this slice's
   files.
 
@@ -107,4 +107,4 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui` pass.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui` pass.

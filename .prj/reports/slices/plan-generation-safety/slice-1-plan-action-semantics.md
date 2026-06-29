@@ -46,12 +46,12 @@ behavior.
 
 ## Files of Interest
 
-- `internal/chctui/plan_actions.go`
-- `internal/chctui/plans.go`
-- `internal/chctui/model.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model_test.go`
-- `internal/chcapp/tui_adapters.go`
+- `internal/chrtui/plan_actions.go`
+- `internal/chrtui/plans.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrapp/tui_adapters.go`
 
 ## Validation
 

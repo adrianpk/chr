@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // WorkOperationResult is the TUI-facing result for agent work operations.
@@ -703,7 +703,7 @@ func writeAgenticReviewNonBlockingComments(ctx context.Context, ticketPath strin
 	for index, note := range limitedAgenticReviewNotes(notes, limit) {
 		err := core.NewTicketCommenter().AddComment(ctx, core.AddTicketCommentOptions{
 			Path:      ticketPath,
-			Author:    "chc-reviewer",
+			Author:    "chr-reviewer",
 			Body:      renderAgenticReviewNonBlockingComment(note),
 			CreatedAt: createdAt.Add(time.Duration(index) * time.Nanosecond),
 		})

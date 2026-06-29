@@ -55,16 +55,16 @@ missing, the action reports that the daemon is already stopped.
 
 ## Files of Interest
 
-- `internal/chctui/work_actions.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
-- `internal/chcapp/app.go`
+- `internal/chrtui/work_actions.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrapp/app.go`
 
 ## Validation
 
 ```sh
-go test ./internal/chctui ./internal/chcapp
+go test ./internal/chrtui ./internal/chrapp
 make verify
 ```
 

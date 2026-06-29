@@ -8,14 +8,14 @@ Plan the `Daemon Coordination` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> A single user-level `chc` process coordinates multiple registered projects and
+> A single user-level `chr` process coordinates multiple registered projects and
 > long-running work.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related documents:
 
@@ -103,7 +103,7 @@ yet.
 
 Candidate scope:
 
-- add `chc daemon` command group;
+- add `chr daemon` command group;
 - add `daemon status`, `daemon start --dry-run`, and `daemon stop --dry-run`;
 - resolve user environment for daemon commands;
 - keep daemon commands side-effect free in this slice;
@@ -172,7 +172,7 @@ Expected report: `.prj/reports/slices/daemon-coordination/slice-4-daemon-status-
 
 Goal:
 
-Expose daemon lifecycle state through `chc daemon status`.
+Expose daemon lifecycle state through `chr daemon status`.
 
 Candidate scope:
 
@@ -291,6 +291,6 @@ Expected outcome:
 
 ## Notes
 
-- This slicing keeps daemon coordination inside the `chc` binary.
+- This slicing keeps daemon coordination inside the `chr` binary.
 - Notification and remote command surfaces remain post-daemon work.
 - Slice numbers are local to this slicing and start at `Slice 1`.

@@ -33,27 +33,27 @@ curated notes, tags, or context retrieval.
 
 ## Contracts Added or Changed
 
-- `internal/chc.QuizRuntimeState`
-- `internal/chc.QuizScope`
-- `internal/chc.QuizQuestion`
-- `internal/chc.QuizEntry`
-- `internal/chc.QuizCoverageTopic`
-- `internal/chc.QuizTrailNode`
-- `internal/chc.QuizCandidate`
-- `internal/chc.ValidateQuizRuntimeState`
-- `internal/chc.ValidateQuizScope`
-- `internal/chc.ValidateQuizQuestion`
-- `internal/chc.ValidateQuizEntry`
-- `internal/chc.ValidateQuizCoverageTopic`
-- `internal/chc.ValidateQuizTrailNode`
-- `internal/chc.ValidateQuizCandidate`
+- `internal/chr.QuizRuntimeState`
+- `internal/chr.QuizScope`
+- `internal/chr.QuizQuestion`
+- `internal/chr.QuizEntry`
+- `internal/chr.QuizCoverageTopic`
+- `internal/chr.QuizTrailNode`
+- `internal/chr.QuizCandidate`
+- `internal/chr.ValidateQuizRuntimeState`
+- `internal/chr.ValidateQuizScope`
+- `internal/chr.ValidateQuizQuestion`
+- `internal/chr.ValidateQuizEntry`
+- `internal/chr.ValidateQuizCoverageTopic`
+- `internal/chr.ValidateQuizTrailNode`
+- `internal/chr.ValidateQuizCandidate`
 - `DefaultQuizQuestionBudget`
 - `MaxQuizFollowUpDepth`
 
 ## Files of Interest
 
-- `internal/chc/quiz_runtime.go`
-- `internal/chc/quiz_runtime_test.go`
+- `internal/chr/quiz_runtime.go`
+- `internal/chr/quiz_runtime_test.go`
 - `.prj/specs/specs/tui-interactive-quiz-workflow.md`
 - `.prj/specs/specs/tui-interactive-quiz-workflow-model.md`
 - `.prj/plans/slicing-tui-interactive-quiz-workflows-plan.md`
@@ -61,7 +61,7 @@ curated notes, tags, or context retrieval.
 
 ## Validation
 
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `make verify`
 
 ## Risks and Follow-ups

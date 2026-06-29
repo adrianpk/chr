@@ -6,7 +6,7 @@ Date: 2026-06-06
 
 ## Summary
 
-ChrysoCoord should separate acceptance feature generation from general
+Chryso should separate acceptance feature generation from general
 requirements discovery and specification generation.
 
 The current workflow can bias quiz questions toward Gherkin-oriented slots and
@@ -34,7 +34,7 @@ dump, quiz, and spec material.
 - Write Gherkin feature files to a conventional path:
 
   ```text
-  .chc/user/acceptance/<case>.feature
+  .chr/user/acceptance/<case>.feature
   ```
 
 - Let the feature-generation workflow ask follow-up questions only when the
@@ -104,7 +104,7 @@ Gherkin concepts.
 Generated feature files live under:
 
 ```text
-.chc/user/acceptance/<case>.feature
+.chr/user/acceptance/<case>.feature
 ```
 
 The feature must pass deterministic static checks before it is written.
@@ -117,7 +117,7 @@ embed the full feature body.
 - `spec generate` no longer writes `.feature` files.
 - `spec generate` no longer requests or returns a structured feature payload.
 - A dedicated acceptance feature command can generate
-  `.chc/user/acceptance/<case>.feature`.
+  `.chr/user/acceptance/<case>.feature`.
 - Feature generation uses spec, quiz, dump, project, and use-case context.
 - Feature generation reports `generated`, `needs_more_info`, or
   `not_applicable`.
@@ -129,9 +129,9 @@ embed the full feature body.
 
 ## Open Questions
 
-- Whether the command namespace should be `chc acceptance feature generate` or
-  `chc feature generate`.
+- Whether the command namespace should be `chr acceptance feature generate` or
+  `chr feature generate`.
 - Whether feature-round notes should live at
-  `.chc/user/acceptance/<case>-feature-notes.md` or under the quiz artifact
+  `.chr/user/acceptance/<case>-feature-notes.md` or under the quiz artifact
   directory.
 - Whether generated specs should later link to generated feature artifacts.

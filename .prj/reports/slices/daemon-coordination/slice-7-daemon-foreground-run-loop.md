@@ -14,7 +14,7 @@ integration exists.
 
 ## Delivered Behavior
 
-`chc daemon start` now runs a bounded foreground loop.
+`chr daemon start` now runs a bounded foreground loop.
 
 The command:
 
@@ -45,13 +45,13 @@ Changed CLI behavior:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestDaemonStart'`: pass
+- `go test ./cmd/chr -run 'TestDaemonStart'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

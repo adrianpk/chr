@@ -13,14 +13,14 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 ## Purpose
 
 Add an optional local Web UI for the same managed-project operations currently
-available through ChrysoCoord's TUI and CLI.
+available through Chryso's TUI and CLI.
 
 The Web UI is an additional operator surface. It must not become a separate
 workflow, separate persistence model, hosted service, or replacement for the
 TUI. It starts only when explicitly enabled or explicitly invoked.
 
 The delivery keeps the visual and operational shape close to the selected
-reference application during implementation, while using ChrysoCoord identity,
+reference application during implementation, while using Chryso identity,
 palette, commands, state, and domain language.
 
 ## Delivery Rules
@@ -34,7 +34,7 @@ palette, commands, state, and domain language.
 - Plan and tracker must be committed before runtime code changes begin.
 - Start the next slice only after the previous slice is merged into `dev`.
 - Keep the Web UI disabled by default throughout the rollout.
-- Do not start a background server from `chc`, `chc tui`, or normal work
+- Do not start a background server from `chr`, `chr tui`, or normal work
   commands.
 - Do not introduce a second source of truth for project state.
 - Do not add new lifecycle concepts that are unavailable from the existing TUI
@@ -44,7 +44,7 @@ palette, commands, state, and domain language.
 
 ## Architecture Decisions
 
-- Runtime shape: a single ChrysoCoord process serves the Web UI through an
+- Runtime shape: a single Chryso process serves the Web UI through an
   explicit command.
 - Default bind: `127.0.0.1`.
 - Non-loopback bind: allowed only through explicit config or command flags and
@@ -55,7 +55,7 @@ palette, commands, state, and domain language.
   `html/template` pages, htmx partial updates, and embedded templates/static
   assets.
 - Helper strategy: copy and adapt only the needed HTML/htmx/UI primitives into
-  ChrysoCoord-owned internal Web UI packages such as `internal/webui/htmx`,
+  Chryso-owned internal Web UI packages such as `internal/webui/htmx`,
   `internal/webui/render`, and `internal/webui/ui`. Do not add a module
   dependency on the source helper library.
 - Package boundary: business, core, app, persistence, and TUI packages must not
@@ -69,7 +69,7 @@ palette, commands, state, and domain language.
   protection, no remote-control exposure by accident.
 - Visual identity: keep the selected reference application's layout density,
   navigation rhythm, board/document surfaces, and command ergonomics. Replace
-  only identity tokens needed for ChrysoCoord: chrysocolla/Go-adjacent palette
+  only identity tokens needed for Chryso: chrysocolla/Go-adjacent palette
   and a simple rounded bot/agent avatar.
 
 ## Slice Map
@@ -94,8 +94,8 @@ server command without delivering the full UI.
 
 Behavior:
 
-- `chc`, `chc tui`, and current work commands do not start a web server.
-- `chc web serve` resolves the current project and web config.
+- `chr`, `chr tui`, and current work commands do not start a web server.
+- `chr web serve` resolves the current project and web config.
 - The default host is `127.0.0.1`.
 - The default port is stable and documented.
 - `--host`, `--port`, and config values use the same resolution path.
@@ -111,7 +111,7 @@ Tasks:
   defaults.
 - T1.2 Add config validation for host, port, refresh interval, token mode, and
   allowed origins.
-- T1.3 Add CLI parsing for `chc web serve`.
+- T1.3 Add CLI parsing for `chr web serve`.
 - T1.4 Add `--host`, `--port`, `--open-browser`, `--dry-run`, and
   `--require-token` command flags.
 - T1.5 Add resolved-config output for normal startup and dry-run mode.
@@ -129,8 +129,8 @@ exposing project mutation.
 
 Behavior:
 
-- `chc web serve` serves a real server-rendered HTML shell.
-- Templates and static assets are embedded in the ChrysoCoord binary.
+- `chr web serve` serves a real server-rendered HTML shell.
+- Templates and static assets are embedded in the Chryso binary.
 - Asset routes are stable and cacheable.
 - htmx is available for partial updates.
 - The first copied/adapted helper primitives live under `internal/webui`.
@@ -218,7 +218,7 @@ Tasks:
 
 - T4.1 Add read view models for case, dump, quiz, spec, plan, and generic document
   previews.
-- T4.2 Add service queries for artifact catalogs using existing ChrysoCoord
+- T4.2 Add service queries for artifact catalogs using existing Chryso
   discovery/index behavior.
 - T4.3 Add Cases, Dumps, Quizzes, Specs, and Plans list routes with full-page
   and htmx fragment responses.
@@ -246,7 +246,7 @@ Behavior:
 - Successful writes refresh the affected read models.
 - Failed writes return stable error envelopes.
 - The Web UI can create or update dumps and edit supported artifact metadata
-  when those operations already exist in ChrysoCoord.
+  when those operations already exist in Chryso.
 - The Web UI still does not start agent work or generation flows in this slice.
 
 Tasks:
@@ -279,7 +279,7 @@ Behavior:
 - Generated specs, plans, quiz outcomes, and work reports are visible after the
   operation completes.
 - The server never accepts arbitrary shell commands from the browser.
-- Command surfaces mirror ChrysoCoord's existing command palette behavior and
+- Command surfaces mirror Chryso's existing command palette behavior and
   labels.
 
 Tasks:
@@ -361,7 +361,7 @@ Tasks:
 ## Slice 9: Visual Identity And Layout Parity
 
 Goal: finish the visual layer after the functional surfaces are known, keeping
-layout parity with the selected reference application and ChrysoCoord identity.
+layout parity with the selected reference application and Chryso identity.
 
 Behavior:
 
@@ -370,7 +370,7 @@ Behavior:
 - The color system uses a chrysocolla/Go-adjacent palette without becoming a
   one-hue interface.
 - The central avatar is a simple rounded bot/agent mark with egg-like
-  proportions and ChrysoCoord colors.
+  proportions and Chryso colors.
 - The avatar does not copy another project's mascot.
 - Controls are compact, stable, and usable on desktop and mobile widths.
 - Text does not overflow buttons, cards, sidebars, columns, or panels.
@@ -381,7 +381,7 @@ Tasks:
 
 - T9.1 Define CSS tokens for color, type, spacing, borders, shadows, and
   status colors.
-- T9.2 Implement the ChrysoCoord avatar asset in the repo-native asset format
+- T9.2 Implement the Chryso avatar asset in the repo-native asset format
   chosen by the implementation.
 - T9.3 Apply reference-layout parity to Board and Dash.
 - T9.4 Apply reference-layout parity to Dumps, Quizzes, Specs, and Plans.
@@ -413,7 +413,7 @@ Behavior:
 
 Tasks:
 
-- T10.1 Update `docs/reference/commands.md` for `chc web serve`.
+- T10.1 Update `docs/reference/commands.md` for `chr web serve`.
 - T10.2 Update `docs/reference/project-workspace.md` for `web` config.
 - T10.3 Update `docs/reference/cli-tui-action-matrix.md` or add the Web UI
   equivalent matrix if the existing matrix cannot represent a third surface.
@@ -432,7 +432,7 @@ Tasks:
   stale-write handling, token policy, and origin policy.
 - Service tests proving web endpoints call existing application services rather
   than duplicating state mutation.
-- CLI tests for `chc web serve --dry-run`, startup output, host/port override,
+- CLI tests for `chr web serve --dry-run`, startup output, host/port override,
   invalid config, and non-loopback warnings.
 - HTTP tests for route behavior, content types, HTML fragments, htmx response
   headers, static assets, cache headers, authentication, and authorization
@@ -465,7 +465,7 @@ Tasks:
 ## Notes
 
 - The Web UI should be boring operational software: fast to start, local by
-  default, clear about exposure, and faithful to existing ChrysoCoord state.
+  default, clear about exposure, and faithful to existing Chryso state.
 - The selected reference application is a design and ergonomics source, not a
   runtime dependency.
 - Visual identity is intentionally late in the slicing because functional

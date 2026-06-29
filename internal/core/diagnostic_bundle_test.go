@@ -29,8 +29,8 @@ func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) 
 			Status: ProjectRegistryDiagnosticOK,
 		}},
 		RuntimeCleanupPreview: RuntimeArtifactCleanupPreview{
-			ArtifactDir: "/tmp/project/.chc/user/runtime/runs",
-			Candidates:  []RuntimeArtifactCleanupCandidate{{Path: "/tmp/project/.chc/user/runtime/runs/old"}},
+			ArtifactDir: "/tmp/project/.chr/user/runtime/runs",
+			Candidates:  []RuntimeArtifactCleanupCandidate{{Path: "/tmp/project/.chr/user/runtime/runs/old"}},
 		},
 	}
 
@@ -41,7 +41,7 @@ func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) 
 		"project_id: project-1",
 		"database_exists: true",
 		"example path=/tmp/project enabled=true active=true status=ok",
-		"candidate: /tmp/project/.chc/user/runtime/runs/old",
+		"candidate: /tmp/project/.chr/user/runtime/runs/old",
 		"workspace config contents omitted",
 		"environment values omitted",
 	} {
@@ -64,7 +64,7 @@ func TestWriteDiagnosticBundleWritesMaintenanceFile(t *testing.T) {
 		t.Fatalf("WriteDiagnosticBundle returned error: %v", err)
 	}
 
-	wantPath := filepath.Join(projectDir, ".chc", "maintenance", "diagnostic-bundle.md")
+	wantPath := filepath.Join(projectDir, ".chr", "maintenance", "diagnostic-bundle.md")
 	if path != wantPath {
 		t.Fatalf("path = %q, want %q", path, wantPath)
 	}

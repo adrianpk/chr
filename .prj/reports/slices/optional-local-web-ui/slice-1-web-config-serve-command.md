@@ -17,7 +17,7 @@ Expected PR Title: `feat(slice-1): web config and serve command`
 - Added the disabled-by-default Web UI config contract with localhost defaults.
 - Added validation for web host, port, token mode, token env, refresh interval,
   and allowed origins.
-- Added `chc web serve` with dry-run output, host/port overrides, token-mode
+- Added `chr web serve` with dry-run output, host/port overrides, token-mode
   override, open-browser flag parsing, non-loopback warning, and a minimal
   `/healthz` HTTP endpoint.
 
@@ -55,7 +55,7 @@ Expected PR Title: `feat(slice-1): web config and serve command`
 ## Notes
 
 - The Web UI remains disabled by default.
-- Plain `chc` and `chc tui` continue to use the TUI path.
+- Plain `chr` and `chr tui` continue to use the TUI path.
 - `--open-browser` is parsed and reported in Slice 1, but browser opening is
   not executed yet.
 - Remote verification and PR creation are currently blocked by SSH access to

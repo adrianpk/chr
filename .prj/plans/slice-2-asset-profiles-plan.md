@@ -12,8 +12,8 @@ This slice covers:
 
 - embedded workspace profile assets,
 - `standard`, `personal`, and `minimal` init profiles,
-- `chc init --profile`,
-- recursive profile file materialization into `.chc/`,
+- `chr init --profile`,
+- recursive profile file materialization into `.chr/`,
 - validation for unknown profiles,
 - documentation for profile usage.
 
@@ -49,7 +49,7 @@ make verify
 Manual behavior checks:
 
 ```sh
-go run ./cmd/chc init --dir "$tmpdir" --dry-run
-go run ./cmd/chc init --dir "$tmpdir" --profile minimal
-go run ./cmd/chc init --dir "$tmpdir" --profile invalid
+go run ./cmd/chr init --dir "$tmpdir" --dry-run
+go run ./cmd/chr init --dir "$tmpdir" --profile minimal
+go run ./cmd/chr init --dir "$tmpdir" --profile invalid
 ```

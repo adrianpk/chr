@@ -8,14 +8,14 @@ Plan the `Codex Runtime Worker` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> `chc` runs Codex inside the project runtime container so one ticket can
+> `chr` runs Codex inside the project runtime container so one ticket can
 > produce workspace edits, validation output, and a structured execution result.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related documents:
 

@@ -15,11 +15,11 @@ This slice lets the user select a registered project once and inspect the active
 
 This slice covers:
 
-- `chc project select <name-or-path>`;
+- `chr project select <name-or-path>`;
 - resolving registered projects by name;
 - resolving registered projects by path when unambiguous;
 - persisting the selected project id through `ActiveProjectStore`;
-- `chc project current`;
+- `chr project current`;
 - stable, parseable command output;
 - focused CLI tests.
 
@@ -62,7 +62,7 @@ Expected behavior:
 
 ### T1.2 Project Select Command
 
-Add `chc project select <name-or-path>`.
+Add `chr project select <name-or-path>`.
 
 Expected behavior:
 
@@ -75,7 +75,7 @@ Expected behavior:
 
 ### T1.3 Project Current Command
 
-Add `chc project current`.
+Add `chr project current`.
 
 Expected behavior:
 

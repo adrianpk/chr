@@ -24,9 +24,9 @@ Primary sources:
 - `.prj/specs/specs/tui-interactive-quiz-workflow-model.md`
 - `.prj/specs/specs/context-composition-pipeline.md`
 - `docs/reference/authoring-sessions.md`
-- `internal/chc` assisted authoring and contextual quiz packages
-- `internal/chcapp` operation service boundary
-- `internal/chctui` Quizzes, Authoring, command palette, and action surfaces
+- `internal/chr` assisted authoring and contextual quiz packages
+- `internal/chrapp` operation service boundary
+- `internal/chrtui` Quizzes, Authoring, command palette, and action surfaces
 
 Conversation decisions:
 
@@ -71,11 +71,11 @@ Important limitations:
 
 The target model is service-centered:
 
-- `internal/chcapp.service` owns quiz operations.
-- `internal/chc` owns quiz runtime types, validation, file-backed state, raw
+- `internal/chrapp.service` owns quiz operations.
+- `internal/chr` owns quiz runtime types, validation, file-backed state, raw
   capture rendering, curated artifact rendering, and candidate lifecycle.
 - The service resolves project-wide versus use-case-scoped quiz requests.
-- The service owns canonical `.chc/quizzes` and `.chc/tmp/quiz-runtime` paths.
+- The service owns canonical `.chr/quizzes` and `.chr/tmp/quiz-runtime` paths.
 - The service returns quiz read models and operation results to adapters.
 - TUI adapters translate keyboard and command-palette input into service calls.
 - The TUI renders service-provided quiz state and emits user intent only.
@@ -156,8 +156,8 @@ Add file-backed raw, curated, and runtime-state artifact handling.
 
 Expected behavior:
 
-- Project and use-case scopes resolve to canonical `.chc/quizzes` paths.
-- Runtime state resolves to canonical `.chc/tmp/quiz-runtime` paths.
+- Project and use-case scopes resolve to canonical `.chr/quizzes` paths.
+- Runtime state resolves to canonical `.chr/tmp/quiz-runtime` paths.
 - Raw capture can be created, appended, and loaded.
 - Curated quiz notes can be written from distilled quiz entries.
 - Runtime JSON state can be saved and loaded.

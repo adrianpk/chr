@@ -50,7 +50,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add a log lookup command or extend an existing report/runtime command. | done | `b97391c` | Adds `chc work logs <execution-id>`. |
+| T4.1 | Add a log lookup command or extend an existing report/runtime command. | done | `b97391c` | Adds `chr work logs <execution-id>`. |
 | T4.2 | Connect event refs to lookup output or hint text. | done | `e5a56bf` | TUI event details show the lookup command. |
 | T4.3 | Add command tests for successful and missing-log lookup. | done | `f25e14c` | Covers successful, missing artifact, and missing execution paths. |
 | T4.4 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
@@ -60,7 +60,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
 | T5.1 | Add event stream summary/readback behavior. | done | `6f25c78` | Latest known loop/ticket/execution state. |
-| T5.2 | Surface latest known work state in CLI or Dash diagnostics. | done | `d68d75a` | Adds `chc work events <event-stream-path>`. |
+| T5.2 | Surface latest known work state in CLI or Dash diagnostics. | done | `d68d75a` | Adds `chr work events <event-stream-path>`. |
 | T5.3 | Document recovery inspection for interrupted runs. | done | `4be7a5f` | Updates how-to, command reference, and specs. |
 | T5.4 | Add the slice implementation report and validation evidence. | done | this commit | Report created with reviewing status. |
 

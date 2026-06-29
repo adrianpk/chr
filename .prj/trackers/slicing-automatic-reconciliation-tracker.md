@@ -3,8 +3,8 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-automatic-reconciliation-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
-Priority draft: `.prj/drafts/chc-command-surfaces-and-priority.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
+Priority draft: `.prj/drafts/chr-command-surfaces-and-priority.md`
 Specs:
 
 - `.prj/specs/specs/user-daemon-and-global-index.md`
@@ -12,7 +12,7 @@ Specs:
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm `Ticket Foundation` is completed.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -130,7 +130,7 @@ Pre-flight:
 Candidate tasks:
 
 - [x] Add index command group.
-- [x] Add `chc index rebuild`.
+- [x] Add `chr index rebuild`.
 - [x] Resolve project context through the existing resolver.
 - [x] Print rebuild results.
 - [x] Add focused CLI tests.
@@ -157,7 +157,7 @@ Pre-flight:
 
 Candidate tasks:
 
-- [x] Add `chc index status`.
+- [x] Add `chr index status`.
 - [x] Resolve project context through the existing resolver.
 - [x] Print index health summary.
 - [x] Return non-zero for stale or invalid state.
@@ -236,7 +236,7 @@ Task commits:
 ## Validation Record
 
 - Planning validation: documentation diff reviewed.
-- Slice 1 validation: `go test ./internal/chc` pass.
+- Slice 1 validation: `go test ./internal/chr` pass.
 - Slice 1 validation: `make verify` pass.
 - Slice 1 merged into `dev` as PR #22.
 - Slice 2 validation: initial `make verify` failed on lint whitespace.
@@ -245,20 +245,20 @@ Task commits:
 - Slice 3 validation: initial `make verify` failed on formatting and staticcheck.
 - Slice 3 validation: `make verify` pass after lint-focused refactor.
 - Slice 3 merged into `dev` as PR #24.
-- Slice 4 validation: `go test ./cmd/chc` pass.
+- Slice 4 validation: `go test ./cmd/chr` pass.
 - Slice 4 validation: `make verify` pass.
 - Slice 4 merged into `dev` as PR #25.
 - Slice 5 validation: initial `make verify` failed on output helper complexity.
 - Slice 5 validation: `make verify` pass after lint-focused refactor.
 - Slice 5 merged into `dev` as PR #26.
-- Slice 6 validation: `go test ./cmd/chc` pass.
+- Slice 6 validation: `go test ./cmd/chr` pass.
 - Slice 6 validation: `make verify` pass.
 - Slice 6 merged into `dev` as PR #27.
-- Slice 7 validation: `go test ./internal/chc` pass.
+- Slice 7 validation: `go test ./internal/chr` pass.
 - Slice 7 validation: `make verify` pass.
 - Slice 7 merged into `dev` as PR #28.
 - Completed slicing validation: `make verify` pass.
-- Completed slicing smoke validation: `make install`, `chc init`, `chc ticket new`, direct Markdown edit, `chc ticket show`, `chc index status`, and `chc index rebuild` pass.
+- Completed slicing smoke validation: `make install`, `chr init`, `chr ticket new`, direct Markdown edit, `chr ticket show`, `chr index status`, and `chr index rebuild` pass.
 
 ## Notes
 

@@ -10,8 +10,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/tui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/tui"
 )
 
 type appDependencies struct {
@@ -34,20 +34,20 @@ func appDependenciesFromCommand(cmd *cli.Command) (appDependencies, error) {
 	return deps, nil
 }
 
-// Run executes the chc application with explicit process IO and embedded
+// Run executes the chr application with explicit process IO and embedded
 // command assets.
 func Run(ctx context.Context, args []string, stdin io.Reader, stdout, stderr io.Writer, commandAssetsFS fs.FS) error {
 	deps := appDependencies{assetsFS: commandAssetsFS}
 	cmd := newRootCommand(stdin, stdout, stderr, deps)
 
-	osArgs := append([]string{"chc"}, args...)
+	osArgs := append([]string{"chr"}, args...)
 
 	return cmd.Run(ctx, osArgs)
 }
 
 func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
-		Name:      "chc",
+		Name:      "chr",
 		Usage:     "Coordinate agent development workflows from the current project",
 		Reader:    stdin,
 		Writer:    stdout,
@@ -86,7 +86,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 func newTUICommand(stdin io.Reader, stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:   "tui",
-		Usage:  "Open the local ChrysoCoord operational console",
+		Usage:  "Open the local Chryso operational console",
 		Flags:  tuiFlags(),
 		Action: runTUICommandAction(stdin, stdout, deps),
 	}

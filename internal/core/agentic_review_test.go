@@ -67,7 +67,7 @@ func TestParseAgenticReviewResultRejectsUnknownFindingCategory(t *testing.T) {
 func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	projectDir := t.TempDir()
 
-	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1.md")
+	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md")
 	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
 		t.Fatalf("MkdirAll returned error: %v", err)
 	}
@@ -104,7 +104,7 @@ func testAgenticReviewContext(projectDir, ticketPath string, now time.Time) Agen
 
 func testAgenticReviewIndexedTicket(ticketPath string) IndexedTicket {
 	return IndexedTicket{
-		Key:    "CHC-1",
+		Key:    "CHR-1",
 		Title:  "Implement feature",
 		Status: TicketStatusReadyForReview,
 		Path:   ticketPath,
@@ -115,7 +115,7 @@ func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) Ex
 	return ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
-		TicketKey:  "CHC-1",
+		TicketKey:  "CHR-1",
 		TicketPath: ticketPath,
 		Status:     ExecutionStatusSucceeded,
 		CreatedAt:  now,
@@ -127,7 +127,7 @@ func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) Ex
 			ValidationCommand: "go test ./...",
 		},
 		Artifacts: ExecutionArtifacts{
-			RunDir:         filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1"),
+			RunDir:         filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1"),
 			ResultPath:     "result.json",
 			LogPath:        "runtime.log",
 			ValidationPath: "validation.log",
@@ -137,7 +137,7 @@ func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) Ex
 
 func testAgenticReviewApplication() ResultApplication {
 	return ResultApplication{
-		TicketKey: "CHC-1",
+		TicketKey: "CHR-1",
 		Evidence: ResultApplicationEvidence{
 			ResultPath:        "result.json",
 			LogPath:           "runtime.log",
@@ -149,18 +149,18 @@ func testAgenticReviewApplication() ResultApplication {
 
 func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
 	ticketPath := writeAgenticReviewTicket(t, Ticket{
-		Key:    "CHC-1",
+		Key:    "CHR-1",
 		Title:  "Ready",
 		Status: TicketStatusReadyForReview,
-		Branch: "feat/chc-1",
+		Branch: "feat/chr-1",
 	})
 
 	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
-			Key:    "CHC-1",
+			Key:    "CHR-1",
 			Path:   ticketPath,
 			Status: TicketStatusReadyForReview,
-			Branch: "feat/chc-1",
+			Branch: "feat/chr-1",
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionPass,
@@ -181,19 +181,19 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 		Status:   "open",
 	}
 	ticketPath := writeAgenticReviewTicket(t, Ticket{
-		Key:        "CHC-1",
+		Key:        "CHR-1",
 		Title:      "Ready",
 		Status:     TicketStatusReadyForReview,
-		Branch:     "feat/chc-1",
+		Branch:     "feat/chr-1",
 		ReviewRefs: []TicketReviewRef{ref},
 	})
 
 	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
-			Key:        "CHC-1",
+			Key:        "CHR-1",
 			Path:       ticketPath,
 			Status:     TicketStatusReadyForReview,
-			Branch:     "feat/chc-1",
+			Branch:     "feat/chr-1",
 			ReviewRefs: []TicketReviewRef{ref},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
@@ -220,18 +220,18 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 
 func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing.T) {
 	ticketPath := writeAgenticReviewTicket(t, Ticket{
-		Key:    "CHC-1",
+		Key:    "CHR-1",
 		Title:  "Ready",
 		Status: TicketStatusReadyForReview,
-		Branch: "feat/chc-1",
+		Branch: "feat/chr-1",
 	})
 
 	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
-			Key:    "CHC-1",
+			Key:    "CHR-1",
 			Path:   ticketPath,
 			Status: TicketStatusReadyForReview,
-			Branch: "feat/chc-1",
+			Branch: "feat/chr-1",
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionNeedsChanges,
@@ -294,7 +294,7 @@ func writeAgenticReviewTicket(t *testing.T, ticket Ticket) string {
 	t.Helper()
 
 	dir := t.TempDir()
-	path := filepath.Join(dir, "CHC-1.md")
+	path := filepath.Join(dir, "CHR-1.md")
 
 	content, err := NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
@@ -321,7 +321,7 @@ func readAgenticReviewTicket(t *testing.T, path string) string {
 
 func agenticReviewArtifactForTest(result AgenticReviewResult) AgenticReviewArtifact {
 	return AgenticReviewArtifact{
-		SummaryPath: "/tmp/chc-agentic-review-summary.md",
+		SummaryPath: "/tmp/chr-agentic-review-summary.md",
 		Run: AgentRunResult{
 			ID: "review-1",
 		},

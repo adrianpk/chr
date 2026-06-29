@@ -26,7 +26,7 @@ PR: `#352`
 ## Changes
 
 - `docs/reference/commands.md`
-  - Documents `chc web serve`, dry-run mode, local bind overrides, token policy
+  - Documents `chr web serve`, dry-run mode, local bind overrides, token policy
     overrides, and Web UI reference links.
 - `docs/reference/project-workspace.md`
   - Documents the `web:` config section, defaults, local-only example, and
@@ -49,19 +49,19 @@ PR: `#352`
 
 ## Validation
 
-- `CHC_WEB_SMOKE_PORT=7340 scripts/qa/web-ui-smoke.sh` (pass)
+- `CHR_WEB_SMOKE_PORT=7340 scripts/qa/web-ui-smoke.sh` (pass)
   - Pages, htmx fragments, and `dump.create` action passed.
   - Browser screenshots passed.
-  - Screenshot directory: `/tmp/chc-web-ui-smoke-326889`.
+  - Screenshot directory: `/tmp/chr-web-ui-smoke-326889`.
 - `make verify` (pass)
   - `0 issues.`
-  - `go test` passed for `cmd/chc`, `internal/app`, `internal/core`,
+  - `go test` passed for `cmd/chr`, `internal/app`, `internal/core`,
     `internal/tui`, `internal/webui`, `internal/webui/htmx`,
     `internal/webui/render`, and `internal/webui/ui`.
 
 ## Notes
 
 - The Web UI remains explicit and disabled as a background behavior. It starts
-  only through `chc web serve`.
+  only through `chr web serve`.
 - Screenshot files are not committed; the report records the capture path and
   validation result to avoid storing local-path UI captures in the repo.

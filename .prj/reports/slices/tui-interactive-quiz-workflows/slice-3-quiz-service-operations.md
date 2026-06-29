@@ -32,7 +32,7 @@ owning persistence, scope resolution, or model request assembly.
 ## Implementation Notes
 
 The service remains the orchestration boundary. TUI and future adapters should
-send quiz intent to `internal/chcapp.service` and render the returned state.
+send quiz intent to `internal/chrapp.service` and render the returned state.
 They should not write quiz artifacts, parse dump context, or construct model
 requests directly.
 
@@ -42,32 +42,32 @@ to a concrete provider.
 
 ## Contracts Added or Changed
 
-- `internal/chc.QuizModelRequest`
-- `internal/chc.QuizModelResponse`
-- `internal/chc.QuizModelAdapter`
-- `internal/chc.InvokeQuizModel`
-- `internal/chcapp.QuizListResult`
-- `internal/chcapp.QuizOperationResult`
-- `internal/chcapp.QuizStartRequest`
-- `internal/chcapp.QuizResumeRequest`
-- `internal/chcapp.QuizAnswerRequest`
-- `internal/chcapp.QuizSkipRequest`
-- `internal/chcapp.QuizCompleteRequest`
-- `internal/chcapp.QuizCancelRequest`
-- `internal/chcapp.QuizModeRequest`
+- `internal/chr.QuizModelRequest`
+- `internal/chr.QuizModelResponse`
+- `internal/chr.QuizModelAdapter`
+- `internal/chr.InvokeQuizModel`
+- `internal/chrapp.QuizListResult`
+- `internal/chrapp.QuizOperationResult`
+- `internal/chrapp.QuizStartRequest`
+- `internal/chrapp.QuizResumeRequest`
+- `internal/chrapp.QuizAnswerRequest`
+- `internal/chrapp.QuizSkipRequest`
+- `internal/chrapp.QuizCompleteRequest`
+- `internal/chrapp.QuizCancelRequest`
+- `internal/chrapp.QuizModeRequest`
 
 ## Files of Interest
 
-- `internal/chc/quiz_model.go`
-- `internal/chc/quiz_model_test.go`
-- `internal/chcapp/service.go`
-- `internal/chcapp/service_quiz.go`
-- `internal/chcapp/service_quiz_test.go`
+- `internal/chr/quiz_model.go`
+- `internal/chr/quiz_model_test.go`
+- `internal/chrapp/service.go`
+- `internal/chrapp/service_quiz.go`
+- `internal/chrapp/service_quiz_test.go`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
 - `make verify`
 
 ## Risks and Follow-ups

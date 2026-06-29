@@ -1,6 +1,6 @@
 package app
 
-import "forge.adrianpk.com/chc/internal/core"
+import "forge.adrianpk.com/chr/internal/core"
 
 // WorkspaceRefreshResult reports the outcome of rebuilding workspace indexes.
 type WorkspaceRefreshResult struct {

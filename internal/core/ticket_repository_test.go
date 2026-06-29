@@ -26,14 +26,14 @@ func TestTicketRepositoryCreatesProjectWiseTicket(t *testing.T) {
 		t.Fatalf("CreateTicket returned error: %v", err)
 	}
 
-	wantPath := filepath.Join(dir, ".chc", "user", "tickets", "CHC-1-Do-something.md")
+	wantPath := filepath.Join(dir, ".chr", "user", "tickets", "CHR-1-Do-something.md")
 	if result.Path != wantPath {
 		t.Fatalf("Path = %q, want %q", result.Path, wantPath)
 	}
 
 	content := readFile(t, wantPath)
 	for _, want := range []string{
-		`key: "CHC-1"`,
+		`key: "CHR-1"`,
 		`title: "Do something"`,
 		`synopsis: "Do the implementation work."`,
 		`status: "backlog"`,
@@ -60,7 +60,7 @@ func TestTicketRepositoryCreatesUseCaseTicket(t *testing.T) {
 		t.Fatalf("CreateTicket returned error: %v", err)
 	}
 
-	wantPath := filepath.Join(dir, ".chc", "user", "tickets", "User-Onboarding", "CHC-1-Add-setup-flow.md")
+	wantPath := filepath.Join(dir, ".chr", "user", "tickets", "User-Onboarding", "CHR-1-Add-setup-flow.md")
 	if result.Path != wantPath {
 		t.Fatalf("Path = %q, want %q", result.Path, wantPath)
 	}
@@ -68,8 +68,8 @@ func TestTicketRepositoryCreatesUseCaseTicket(t *testing.T) {
 
 func TestTicketRepositoryDerivesNextKeyFromExistingTickets(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, ".chc", "user", "tickets", "CHC-3-Old.md"), "# Old\n")
-	writeFile(t, filepath.Join(dir, ".chc", "user", "tickets", "nested", "ticket.md"), "---\nkey: \"CHC-9\"\n---\n")
+	writeFile(t, filepath.Join(dir, ".chr", "user", "tickets", "CHR-3-Old.md"), "# Old\n")
+	writeFile(t, filepath.Join(dir, ".chr", "user", "tickets", "nested", "ticket.md"), "---\nkey: \"CHR-9\"\n---\n")
 
 	repository := NewTicketRepository(dir, WithTicketRepositoryClock(fixedTicketTime))
 
@@ -81,14 +81,14 @@ func TestTicketRepositoryDerivesNextKeyFromExistingTickets(t *testing.T) {
 		t.Fatalf("CreateTicket returned error: %v", err)
 	}
 
-	if result.Key != "CHC-10" {
-		t.Fatalf("Key = %q, want CHC-10", result.Key)
+	if result.Key != "CHR-10" {
+		t.Fatalf("Key = %q, want CHR-10", result.Key)
 	}
 }
 
 func TestTicketRepositoryUsesCustomKeyPrefix(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, ".chc", "user", "tickets", "PRJ-4-Old.md"), "# Old\n")
+	writeFile(t, filepath.Join(dir, ".chr", "user", "tickets", "PRJ-4-Old.md"), "# Old\n")
 
 	repository := NewTicketRepository(
 		dir,

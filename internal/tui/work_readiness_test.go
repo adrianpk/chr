@@ -3,7 +3,7 @@ package tui
 import (
 	"testing"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
@@ -18,16 +18,16 @@ func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
 			Mode: core.WorkWorkspaceModeWorktree,
 		},
 		CurrentBranch: "feature/user-work",
-		TicketKey:     "CHC-1",
-		TicketBranch:  "feat/chc-1",
+		TicketKey:     "CHR-1",
+		TicketBranch:  "feat/chr-1",
 		UserCheckout: core.WorkReadinessWorkspaceState{
 			Path:  "/repo",
 			State: core.WorktreeStateDirty,
 		},
 		TicketWorktree: core.WorkReadinessWorkspaceState{
-			Path:    "/repo/.chc/user/runtime/worktrees/chc-1",
+			Path:    "/repo/.chr/user/runtime/worktrees/chr-1",
 			State:   core.WorktreeStateClean,
-			Branch:  "feat/chc-1",
+			Branch:  "feat/chr-1",
 			BaseRef: "origin/dev",
 			BaseSHA: "base-sha",
 		},
@@ -43,7 +43,7 @@ func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
 		t.Fatalf("view = %#v, want projected workspace states", view)
 	}
 
-	if view.TicketKey != "CHC-1" || view.TicketWorktree.BaseRef != "origin/dev" {
+	if view.TicketKey != "CHR-1" || view.TicketWorktree.BaseRef != "origin/dev" {
 		t.Fatalf("view = %#v, want ticket and base metadata", view)
 	}
 }

@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"forge.adrianpk.com/chc/internal/webui/htmx"
-	"forge.adrianpk.com/chc/internal/webui/ui"
+	"forge.adrianpk.com/chr/internal/webui/htmx"
+	"forge.adrianpk.com/chr/internal/webui/ui"
 )
 
 // Renderer executes parsed Web UI templates.

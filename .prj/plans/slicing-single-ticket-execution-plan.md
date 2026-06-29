@@ -8,18 +8,18 @@ Plan the `Single Ticket Execution` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> A user starts one specific ticket and `chc` records what happened.
+> A user starts one specific ticket and `chr` records what happened.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related documents:
 
-- `.prj/drafts/chc-command-surfaces-and-priority.md`
-- `.prj/drafts/chc-capability-map.md`
+- `.prj/drafts/chr-command-surfaces-and-priority.md`
+- `.prj/drafts/chr-capability-map.md`
 - `.prj/specs/specs/ticket-template.md`
 - `.prj/specs/specs/user-daemon-and-global-index.md`
 - `docs/reference/project-workspace.md`
@@ -46,7 +46,7 @@ Delivered in this slicing:
 
 - durable execution record model;
 - execution persistence;
-- a `chc ticket start` entrypoint;
+- a `chr ticket start` entrypoint;
 - execution preflight that combines ticket, project, reconciliation, and runtime checks;
 - an invocation boundary for the first agent harness;
 - structured execution result capture;
@@ -59,7 +59,7 @@ This slicing includes:
 
 - execution record schema and storage;
 - execution repository APIs;
-- `chc ticket start` command surface;
+- `chr ticket start` command surface;
 - single-ticket selection and preflight gating;
 - runtime plan reuse before execution;
 - first agent harness invocation contract;
@@ -141,7 +141,7 @@ Candidate scope:
 
 Expected outcome:
 
-- `chc` can durably record execution attempts before invoking any harness.
+- `chr` can durably record execution attempts before invoking any harness.
 
 ### Slice 3: Ticket Start Preflight
 
@@ -153,7 +153,7 @@ Expected report: `.prj/reports/slices/single-ticket-execution/slice-3-ticket-sta
 
 Goal:
 
-Add a safe `chc ticket start <ticket-key>` preflight command without invoking
+Add a safe `chr ticket start <ticket-key>` preflight command without invoking
 an agent.
 
 Candidate scope:
@@ -170,7 +170,7 @@ Candidate scope:
 
 Expected outcome:
 
-- a user can ask `chc` to prepare one ticket execution and see blockers before
+- a user can ask `chr` to prepare one ticket execution and see blockers before
   any agent work starts.
 
 ### Slice 4: Harness Invocation Contract
@@ -224,7 +224,7 @@ Candidate scope:
 
 Expected outcome:
 
-- `chc ticket start <ticket-key>` can run one bounded execution attempt and
+- `chr ticket start <ticket-key>` can run one bounded execution attempt and
   record the attempt outcome.
 
 ### Slice 6: Execution Result Capture
@@ -283,7 +283,7 @@ Expected outcome:
 The slicing is complete when:
 
 - execution records can be modeled and persisted;
-- `chc ticket start <ticket-key>` exists;
+- `chr ticket start <ticket-key>` exists;
 - execution preflight reconciles tickets and validates runtime readiness;
 - one execution attempt can be invoked through the runtime boundary;
 - execution output and result artifacts are captured durably;
@@ -304,10 +304,10 @@ Manual smoke checks for the completed slicing:
 ```sh
 make install
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir"
-chc ticket new --dir "$tmpdir" "Smoke ticket"
-chc runtime validate --dir "$tmpdir" --dry-run
-chc ticket start --dir "$tmpdir" CHC-1 --dry-run
+chr init --dir "$tmpdir"
+chr ticket new --dir "$tmpdir" "Smoke ticket"
+chr runtime validate --dir "$tmpdir" --dry-run
+chr ticket start --dir "$tmpdir" CHR-1 --dry-run
 ```
 
 Additional smoke checks depend on the harness execution behavior delivered by

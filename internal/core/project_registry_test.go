@@ -19,8 +19,8 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 
 	err := registry.AddProject(context.Background(), Project{
 		ID:            "project-1",
-		Name:          "chrysocoord",
-		Path:          "/home/adrian/Projects/chrysocoord",
+		Name:          "chryso",
+		Path:          "/home/adrian/Projects/chryso",
 		Enabled:       true,
 		RegisteredAt:  registeredAt,
 		LastIndexedAt: &lastIndexedAt,
@@ -40,14 +40,14 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 
 	assertProject(t, projects[0], Project{
 		ID:            "project-1",
-		Name:          "chrysocoord",
-		Path:          "/home/adrian/Projects/chrysocoord",
+		Name:          "chryso",
+		Path:          "/home/adrian/Projects/chryso",
 		Enabled:       true,
 		RegisteredAt:  registeredAt,
 		LastIndexedAt: &lastIndexedAt,
 	})
 
-	project, err := registry.GetProjectByName(context.Background(), "chrysocoord")
+	project, err := registry.GetProjectByName(context.Background(), "chryso")
 	if err != nil {
 		t.Fatalf("GetProjectByName returned error: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
 
 	assertProject(t, project, projects[0])
 
-	project, err = registry.GetProjectByPath(context.Background(), "/home/adrian/Projects/chrysocoord")
+	project, err = registry.GetProjectByPath(context.Background(), "/home/adrian/Projects/chryso")
 	if err != nil {
 		t.Fatalf("GetProjectByPath returned error: %v", err)
 	}
@@ -102,8 +102,8 @@ func TestProjectRegistryRejectsDuplicateName(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 	project := Project{
 		ID:           "project-1",
-		Name:         "chrysocoord",
-		Path:         "/tmp/chrysocoord",
+		Name:         "chryso",
+		Path:         "/tmp/chryso",
 		Enabled:      true,
 		RegisteredAt: time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC),
 	}
@@ -201,7 +201,7 @@ func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(root, "data", "chc", "core.db"))
+	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
 func newTestProjectRegistry(t *testing.T) ProjectRegistry {

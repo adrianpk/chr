@@ -40,13 +40,13 @@ larger copy of the compact single-column list.
 
 ## Files of Interest
 
-- `internal/chctui/model.go`
-- `internal/chctui/shell.go`
-- `internal/chctui/model_test.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/shell.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chctui`
+- `go test ./internal/chrtui`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

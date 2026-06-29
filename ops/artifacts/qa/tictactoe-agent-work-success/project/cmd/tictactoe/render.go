@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"example.com/chc-qa-tictactoe/internal/game"
+	"example.com/chr-qa-tictactoe/internal/game"
 )
 
 func renderBoard(board game.Board) string {

@@ -17,7 +17,7 @@ adding TUI wiring.
 The CLI now registers:
 
 ```sh
-chc acceptance feature generate --use-case <case>
+chr acceptance feature generate --use-case <case>
 ```
 
 The command calls `GenerateAcceptanceFeature` for the selected scope. It prints
@@ -39,15 +39,15 @@ as quiz, spec, and plan generation.
 
 ## Files of Interest
 
-- `internal/chcapp/acceptance_cli.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/acceptance_cli.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/commands.md`
 
 ## Validation
 
-- `go test ./internal/chcapp -run 'RootCommand|AcceptanceFeatureGenerate'` (pass)
-- `go test ./internal/chc ./internal/chcapp` (pass)
+- `go test ./internal/chrapp -run 'RootCommand|AcceptanceFeatureGenerate'` (pass)
+- `go test ./internal/chr ./internal/chrapp` (pass)
 - `make verify` (pass)
 
 ## Risks and Follow-ups

@@ -18,8 +18,8 @@ The user guide now describes the Specs view `f` action and the CLI command for
 acceptance feature generation. Reference docs now identify both generated
 feature artifacts and feature-round notes:
 
-- `.chc/user/acceptance/<case>.feature`
-- `.chc/user/acceptance/<case>-feature-round.md`
+- `.chr/user/acceptance/<case>.feature`
+- `.chr/user/acceptance/<case>-feature-round.md`
 
 The dialer fixture still resets cleanly and contains the `call-outcome-capture`
 use case with metadata and dump context ready for quiz/spec generation.
@@ -50,8 +50,8 @@ and the pre-spec guard for acceptance feature generation.
 ## Validation
 
 - `make qa-reset QA_CASE=dialer QA_REF=002` (pass)
-- `go run ./cmd/chc spec list --dir qa/project/dialer` (pass)
-- `go run ./cmd/chc acceptance feature generate --dir qa/project/dialer --use-case call-outcome-capture` (expected failure: generated spec is required)
+- `go run ./cmd/chr spec list --dir qa/project/dialer` (pass)
+- `go run ./cmd/chr acceptance feature generate --dir qa/project/dialer --use-case call-outcome-capture` (expected failure: generated spec is required)
 - `go -C qa/project/dialer test ./...` (pass)
 - `make verify` (pass)
 

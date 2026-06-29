@@ -45,22 +45,22 @@ attachment, provider diagnostics, or review execution behavior.
 
 ## Files of Interest
 
-- `internal/chc/ticket.go`
-- `internal/chc/ticket_parser.go`
-- `internal/chc/ticket_validation.go`
-- `internal/chc/ticket_index.go`
-- `internal/chc/board_query.go`
-- `internal/chcapp/ticket.go`
-- `internal/chctui/model.go`
-- `cmd/chc/assets/migration/sqlite/20260601000009-add_ticket_review_metadata.sql`
+- `internal/chr/ticket.go`
+- `internal/chr/ticket_parser.go`
+- `internal/chr/ticket_validation.go`
+- `internal/chr/ticket_index.go`
+- `internal/chr/board_query.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrtui/model.go`
+- `cmd/chr/assets/migration/sqlite/20260601000009-add_ticket_review_metadata.sql`
 - `docs/reference/ticket-review-metadata.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'Ticket|Board|Migrat'` - pass
-- `go test ./internal/chcapp -run 'Ticket(List|Show|Board)|Migration'` - pass
-- `go test ./internal/chctui -run 'Ticket|Board'` - pass
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui` - pass
+- `go test ./internal/chr -run 'Ticket|Board|Migrat'` - pass
+- `go test ./internal/chrapp -run 'Ticket(List|Show|Board)|Migration'` - pass
+- `go test ./internal/chrtui -run 'Ticket|Board'` - pass
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui` - pass
 - `make verify` - pass
 
 ## Risks and Follow-ups

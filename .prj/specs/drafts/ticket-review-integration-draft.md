@@ -1,22 +1,22 @@
 ---
 title: "Ticket Review Integration"
-project_id: "chrysocoord"
+project_id: "chryso"
 case_slug: "ticket-execution-loop"
 status: "draft"
 source_request_id: "chat-2026-06-01-ticket-review-integration"
 source_response_id: "codex-capture"
 created_at: "2026-06-01T00:00:00Z"
-mirror: ".chc/user/specs/ticket-review-integration-draft.md"
+mirror: ".chr/user/specs/ticket-review-integration-draft.md"
 ---
 
 # Ticket Review Integration
 
-ChrysoCoord should support review of tickets that reached `ready_for_review`
+Chryso should support review of tickets that reached `ready_for_review`
 after agent execution. This flow focuses on the review surface for a single
 ticket or pull request.
 
-This draft is mirrored in `.chc/user/specs/ticket-review-integration-draft.md`
-while the project evaluates self-hosted ChrysoCoord workflow adoption.
+This draft is mirrored in `.chr/user/specs/ticket-review-integration-draft.md`
+while the project evaluates self-hosted Chryso workflow adoption.
 
 ## Problem
 
@@ -25,7 +25,7 @@ surface: the ticket, the implementation diff, validation evidence, and the pull
 request where review comments live.
 
 Remote review comments are forge-specific. Forgejo, Codeberg, and GitHub expose
-pull requests and comments through different APIs and tooling. ChrysoCoord
+pull requests and comments through different APIs and tooling. Chryso
 should not hard-code the ticket model to one forge, but the first useful target
 is Forgejo/Codeberg.
 
@@ -44,7 +44,7 @@ is Forgejo/Codeberg.
 - In `agentic_review` mode, the reviewer must be able to read the remote pull
   request. Missing remote access is an evidence failure, not a reason to perform
   a local-only review.
-- ChrysoCoord must not invent remote review state when credentials, tooling, or
+- Chryso must not invent remote review state when credentials, tooling, or
   provider support are unavailable.
 
 ## Review Reference
@@ -55,7 +55,7 @@ metadata. The pull request is the review surface.
 Recommended shape:
 
 ```yaml
-branch: "feat/ticket-CHC-123-review-integrations"
+branch: "feat/ticket-CHR-123-review-integrations"
 review_refs:
   - type: "pull_request"
     provider: "forgejo"
@@ -71,7 +71,7 @@ pull request work must leave a durable URL on the ticket.
 
 ## Workflow Consistency
 
-ChrysoCoord should treat branch and pull request metadata as part of the ticket
+Chryso should treat branch and pull request metadata as part of the ticket
 execution contract, not as optional notes.
 
 Expected state rules:
@@ -113,7 +113,7 @@ PAT-based API access is the default credential model for review data. SSH can
 prove Git transport access, but it is not enough for pull request metadata,
 review comments, or checks.
 
-When a provider integration is active, ChrysoCoord should verify the required
+When a provider integration is active, Chryso should verify the required
 local tooling and authentication state:
 
 - Forgejo/Codeberg:
@@ -257,7 +257,7 @@ unresolved_repeat_result: needs_human_decision
 
 ## Review Rejection And Work Scheduling
 
-When the reviewer leaves blocking findings, ChrysoCoord must signal that the
+When the reviewer leaves blocking findings, Chryso must signal that the
 ticket needs more implementation work. Remote comments alone are not enough.
 
 A blocking review result should update local ticket state and review metadata
@@ -301,7 +301,7 @@ blocking_findings:
 
 ## Serialized Slice Execution
 
-ChrysoCoord should not assume a swarm model where many agents work on dependent
+Chryso should not assume a swarm model where many agents work on dependent
 branches at the same time. The default rule for planned slice execution is
 serialized delivery.
 
@@ -355,14 +355,14 @@ The preflight should:
 Example scheduler result:
 
 ```text
-next_work: CHC-102
+next_work: CHR-102
 reason: unresolved_review_repair
 series: onboarding-flow
-blocks: CHC-103
+blocks: CHR-103
 branch_policy: use_existing_branch
 ```
 
-Only after this preflight succeeds should ChrysoCoord materialize the worker
+Only after this preflight succeeds should Chryso materialize the worker
 context. The prompt can explain the decision, but it must not be the primary
 enforcement mechanism.
 
@@ -401,11 +401,11 @@ different tradeoffs between speed, risk, and human involvement.
 
 Supported policy modes should include:
 
-- `agentic_review`: ChrysoCoord runs the ticket reviewer on `ready_for_review`
+- `agentic_review`: Chryso runs the ticket reviewer on `ready_for_review`
   tickets before the work can advance.
-- `human_review`: ChrysoCoord stops after creating the pull request and waits
+- `human_review`: Chryso stops after creating the pull request and waits
   for a human to inspect the diff and approve or merge.
-- `trusted_auto_merge`: ChrysoCoord trusts the execution evidence and configured
+- `trusted_auto_merge`: Chryso trusts the execution evidence and configured
   checks enough to merge ticket or slice pull requests into `dev` automatically.
 
 These modes should be project configuration, eventually editable through CLI,
@@ -426,7 +426,7 @@ If a ticket has no review reference, remote review should return
 `insufficient_evidence` or `missing_review_ref` for PR-backed work.
 
 If the provider is unsupported or credentials are missing in `agentic_review`
-mode, ChrysoCoord should not perform a local-only substitute review. It should
+mode, Chryso should not perform a local-only substitute review. It should
 mark the review as `insufficient_evidence` or `remote_review_unavailable` so
 the integration problem is visible.
 

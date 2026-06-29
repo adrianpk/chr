@@ -22,7 +22,7 @@ This is a technical product spec, not a package design finalization.
 The expected user command is:
 
 ```sh
-chc tui
+chr tui
 ```
 
 The command should resolve the active project the same way normal user-facing
@@ -102,7 +102,7 @@ Test the TUI in layers:
 - pure model update tests for selection, routing, filtering, and action state;
 - rendering snapshot/string tests only for stable compact outputs;
 - service adapter tests with fakes;
-- command wiring smoke test for `chc tui`;
+- command wiring smoke test for `chr tui`;
 - no fragile terminal-size golden tests unless the output is intentionally
   stable.
 
@@ -115,7 +115,7 @@ The first TUI implementation should be read-only.
 
 Minimum useful scope:
 
-- `chc tui` starts inside a managed project;
+- `chr tui` starts inside a managed project;
 - overview screen loads;
 - navigation rail works;
 - ticket list/detail works;
@@ -146,7 +146,7 @@ the confirmation and operation record model is in place.
 
 ## Acceptance Criteria
 
-- `chc tui` is the only required user entry point for local TUI operation.
+- `chr tui` is the only required user entry point for local TUI operation.
 - The TUI uses domain services rather than scraping CLI output.
 - Display models do not leak into persistence contracts.
 - The first TUI can be useful without mutating files.

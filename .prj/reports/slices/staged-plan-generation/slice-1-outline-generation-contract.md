@@ -43,21 +43,21 @@ request ID, strategy, and runtime path remain unchanged.
 
 ## Files of Interest
 
-- `internal/chc/plan_outline.go`
-- `internal/chc/quiz_model.go`
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chc/quiz_model_test.go`
-- `internal/chcapp/service_plan_test.go`
+- `internal/chr/plan_outline.go`
+- `internal/chr/quiz_model.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chr/quiz_model_test.go`
+- `internal/chrapp/service_plan_test.go`
 
 ## Validation
 
-- `gofmt -w internal/chc/quiz_model.go internal/chc/quiz_model_payload.go internal/chc/quiz_openai_model.go internal/chc/plan_outline.go internal/chc/quiz_model_test.go internal/chcapp/service_plan.go internal/chcapp/service_plan_test.go` - pass
-- `go test ./internal/chc ./internal/chcapp` - pass
+- `gofmt -w internal/chr/quiz_model.go internal/chr/quiz_model_payload.go internal/chr/quiz_openai_model.go internal/chr/plan_outline.go internal/chr/quiz_model_test.go internal/chrapp/service_plan.go internal/chrapp/service_plan_test.go` - pass
+- `go test ./internal/chr ./internal/chrapp` - pass
 - `go test ./...` - pass
 - `git diff --check` - pass
-- `make verify` - fail: `lint-strict` reports pre-existing lint debt in `internal/chc/authoring_contextual_quiz_test.go`, `internal/chc/llm_trace.go`, `internal/chc/quiz_model_test.go`, `internal/chc/workspace_context_test.go`, `internal/chcapp/service_spec_test.go`, `internal/chcapp/service_test.go`, `internal/chctui/model.go`, and `internal/chctui/shell.go`.
+- `make verify` - fail: `lint-strict` reports pre-existing lint debt in `internal/chr/authoring_contextual_quiz_test.go`, `internal/chr/llm_trace.go`, `internal/chr/quiz_model_test.go`, `internal/chr/workspace_context_test.go`, `internal/chrapp/service_spec_test.go`, `internal/chrapp/service_test.go`, `internal/chrtui/model.go`, and `internal/chrtui/shell.go`.
 
 ## Risks and Follow-ups
 

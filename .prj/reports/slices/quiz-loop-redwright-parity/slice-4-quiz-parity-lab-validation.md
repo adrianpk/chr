@@ -23,12 +23,12 @@ new behavior.
 
 ## Implementation Notes
 
-The current `chc-blog-work` lab project contained interactive quiz runtime files
+The current `chr-blog-work` lab project contained interactive quiz runtime files
 generated before this parity slicing:
 
-- `.chc/tmp/quiz-runtime/project.json`
-- `.chc/tmp/quiz-runtime/article-authoring.json`
-- `.chc/tmp/quiz-runtime/content-import.json`
+- `.chr/tmp/quiz-runtime/project.json`
+- `.chr/tmp/quiz-runtime/article-authoring.json`
+- `.chr/tmp/quiz-runtime/content-import.json`
 
 The active questions in those files still show the pre-fix symptom: verbose
 questions that ask for many details at once. Those files are useful evidence,
@@ -41,7 +41,7 @@ use-case metadata, dumps, tickets, specs, and authoring-session quizzes.
 ## Contracts Added or Changed
 
 - Manual TUI quiz parity validation starts from clean quiz runtime state.
-- Old `.chc/tmp/quiz-runtime/*.json` files are not valid evidence for current
+- Old `.chr/tmp/quiz-runtime/*.json` files are not valid evidence for current
   question-generation behavior after prompt and routing fixes.
 - The default TUI flow must produce one active question per scope, not a visible
   pre-generated batch.
@@ -56,7 +56,7 @@ use-case metadata, dumps, tickets, specs, and authoring-session quizzes.
 
 ## Validation
 
-- `go run ./cmd/chc --help`
+- `go run ./cmd/chr --help`
 - `git diff --check`
 - `make verify`
 

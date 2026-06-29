@@ -41,11 +41,11 @@ Primary sources:
 - `.agents/SLICES.md`
 - `.agents/playbooks/slice-delivery.md`
 - `.agents/playbooks/dump.md`
-- `internal/chcapp/service_dump.go`
-- `internal/chcapp/dump_cli.go`
-- `internal/chcapp/tui_adapters_dump_quiz.go`
+- `internal/chrapp/service_dump.go`
+- `internal/chrapp/dump_cli.go`
+- `internal/chrapp/tui_adapters_dump_quiz.go`
 - Current LLM tracing behavior for non-ticket-generation LLM calls
-- Existing `.chc/dumps` canonical layout
+- Existing `.chr/dumps` canonical layout
 
 Conversation decisions:
 
@@ -61,7 +61,7 @@ Conversation decisions:
 
 ## Current State
 
-`CreateDump` currently renders one Markdown file under `.chc/dumps`.
+`CreateDump` currently renders one Markdown file under `.chr/dumps`.
 
 The generated file:
 
@@ -88,8 +88,8 @@ Limitations:
 Dump creation should generate a sibling pair:
 
 ```text
-.chc/dumps/<slug>.md
-.chc/dumps/<slug>-raw.md
+.chr/dumps/<slug>.md
+.chr/dumps/<slug>-raw.md
 ```
 
 The curated dump is the primary artifact and keeps the stable path currently
@@ -106,7 +106,7 @@ The curated file frontmatter should include:
 title: "..."
 status: "curated"
 type: "dump"
-source: ".chc/dumps/<slug>-raw.md"
+source: ".chr/dumps/<slug>-raw.md"
 case: "..." # only when use-case scoped
 ```
 
@@ -116,7 +116,7 @@ The raw file frontmatter should include:
 title: "..."
 status: "raw"
 type: "dump_raw"
-curated: ".chc/dumps/<slug>.md"
+curated: ".chr/dumps/<slug>.md"
 case: "..." # only when use-case scoped
 ```
 
@@ -228,15 +228,15 @@ Tasks:
   operation.
 - Preserve existing title, use-case scope, slug collision handling, and service
   error behavior.
-- Update CLI tests for `chc dump new`.
+- Update CLI tests for `chr dump new`.
 - Add service tests for successful curation, fallback curation, raw sibling
   creation, frontmatter relationship fields, and filename collision handling.
 - Add the slice implementation report and validation evidence.
 
 Acceptance criteria:
 
-- `chc dump new` creates both `.chc/dumps/<slug>.md` and
-  `.chc/dumps/<slug>-raw.md`.
+- `chr dump new` creates both `.chr/dumps/<slug>.md` and
+  `.chr/dumps/<slug>-raw.md`.
 - The curated file is the primary path reported by the operation.
 - The raw file preserves the original input.
 - The raw file includes a highlights section.

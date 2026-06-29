@@ -47,13 +47,13 @@ Runtime result paths:
 
 ## Files of Interest
 
-- `internal/chc/runtime_plan.go`
-- `internal/chc/runtime_plan_test.go`
+- `internal/chr/runtime_plan.go`
+- `internal/chr/runtime_plan_test.go`
 - `docs/reference/project-workspace.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

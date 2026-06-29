@@ -21,7 +21,7 @@ execution records for one project ticket.
 ## Implementation Notes
 
 The repository follows the existing project registry and ticket index patterns:
-it uses the shared migrator, opens the user-level `chc.db`, and provides a
+it uses the shared migrator, opens the user-level `chr.db`, and provides a
 `FromDB` constructor for focused tests.
 
 ## Contracts Added or Changed
@@ -43,18 +43,18 @@ Lookup errors use `ErrExecutionNotFound`.
 
 ## Files of Interest
 
-- `cmd/chc/assets/migration/sqlite/20260519000003-create_execution_records.sql`
-- `internal/chc/execution_repository.go`
-- `internal/chc/execution_repository_test.go`
-- `internal/chc/migration_test.go`
+- `cmd/chr/assets/migration/sqlite/20260519000003-create_execution_records.sql`
+- `internal/chr/execution_repository.go`
+- `internal/chr/execution_repository_test.go`
+- `internal/chr/migration_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups
 
 No CLI uses the repository yet. Slice 3 is planned to create pending execution
-records from `chc ticket start` preflight.
+records from `chr ticket start` preflight.

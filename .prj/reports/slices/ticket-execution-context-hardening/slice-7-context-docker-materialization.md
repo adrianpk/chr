@@ -21,7 +21,7 @@ The repository now has a context package materializer that can:
 - write `agent.md`, `project.md`, `protocols.md`, `documents.md`,
   `code-context.md`, `previous-attempt.md`, and `source-inventory.md`;
 - render Docker-visible `/workspace/...` paths in the main context;
-- keep `CHC_WORKER_CONTEXT_PATH` as the main Codex input;
+- keep `CHR_WORKER_CONTEXT_PATH` as the main Codex input;
 - render included/skipped source visibility for dry-run and review.
 
 ## Implementation Notes
@@ -46,13 +46,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/context_materializer.go`
-- `internal/chc/context_materializer_test.go`
+- `internal/chr/context_materializer.go`
+- `internal/chr/context_materializer_test.go`
 - `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestContextPackageMaterializer|TestRenderMainContextPackage|TestRenderContextPackageDryRun'`: pass
+- `go test ./internal/chr -run 'TestContextPackageMaterializer|TestRenderMainContextPackage|TestRenderContextPackageDryRun'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

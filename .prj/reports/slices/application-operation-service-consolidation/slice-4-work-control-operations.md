@@ -28,12 +28,12 @@ run through reusable service operations.
 
 ## Implementation Notes
 
-Work operation result types live in `internal/chcapp` and do not depend on
-`internal/chctui`.
+Work operation result types live in `internal/chrapp` and do not depend on
+`internal/chrtui`.
 
 The service continues to use the existing execution preflight, harness
 invocation, loop execution, daemon state repository, and ticket index helpers.
-The TUI wrapper maps the service result into `chctui.WorkActionResult` and
+The TUI wrapper maps the service result into `chrtui.WorkActionResult` and
 reloads the TUI observability view.
 
 ## Contracts Added or Changed
@@ -47,13 +47,13 @@ reloads the TUI observability view.
 
 ## Files of Interest
 
-- `internal/chcapp/service_work.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/service_test.go`
+- `internal/chrapp/service_work.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/service_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui` passed on 2026-05-23.
+- `go test ./internal/chrapp ./internal/chrtui` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

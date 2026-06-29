@@ -7,7 +7,7 @@ Status: delivered
 Plan the `Agent-Assisted Authoring Sessions` slicing.
 
 This slicing adds a model-backed authoring loop on top of the Markdown-first
-session backend. The goal is to let `chc` conduct bounded discovery sessions
+session backend. The goal is to let `chr` conduct bounded discovery sessions
 for quizzes, dumps, drafts, specs, plans, slice sets, and tickets while
 persisting transcript, curated answers, generated artifacts, and provenance.
 
@@ -19,8 +19,8 @@ and writes Markdown artifacts that the user can review and edit.
 
 Primary sources:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
-- `.prj/drafts/chc-command-surfaces-and-priority.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
+- `.prj/drafts/chr-command-surfaces-and-priority.md`
 - `.prj/plans/slicing-markdown-first-authoring-sessions-plan.md`
 - `docs/reference/authoring-sessions.md`
 - `docs/reference/ticket-execution.md`
@@ -65,7 +65,7 @@ authoring, but this slicing keeps the first implementation CLI-driven.
 
 The assisted authoring runner is host-side coordination.
 
-`chc` owns:
+`chr` owns:
 
 - session state and transcript storage;
 - authoring target and topic;
@@ -194,7 +194,7 @@ Candidate scope:
 
 - include agent identity for authoring analyst behavior;
 - include project and authoring session metadata;
-- include relevant `.chc/` artifacts and selected docs;
+- include relevant `.chr/` artifacts and selected docs;
 - include transcript summary and unanswered gaps;
 - keep context deterministic and materialized as Markdown.
 
@@ -249,7 +249,7 @@ Candidate scope:
 
 Expected outcome:
 
-- `chc` can conduct a durable assisted quiz rather than generating all
+- `chr` can conduct a durable assisted quiz rather than generating all
   questions upfront.
 
 ### Slice 6: Answer Curation

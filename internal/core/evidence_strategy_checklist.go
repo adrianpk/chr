@@ -7,9 +7,9 @@ import (
 
 const (
 	// EvidenceStrategyChecklistStartAnchor defines the v1 machine start anchor.
-	EvidenceStrategyChecklistStartAnchor = "<!-- chc:evidence-strategy:v1 -->"
+	EvidenceStrategyChecklistStartAnchor = "<!-- chr:evidence-strategy:v1 -->"
 	// EvidenceStrategyChecklistEndAnchor defines the v1 machine end anchor.
-	EvidenceStrategyChecklistEndAnchor = "<!-- /chc:evidence-strategy -->"
+	EvidenceStrategyChecklistEndAnchor = "<!-- /chr:evidence-strategy -->"
 )
 
 const (

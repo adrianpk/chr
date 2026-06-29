@@ -1,14 +1,14 @@
 # Run the Local Web UI
 
-The Web UI is an explicit local process. It does not start from `chc`,
-`chc tui`, ticket loops, agent work, or other normal commands.
+The Web UI is an explicit local process. It does not start from `chr`,
+`chr tui`, ticket loops, agent work, or other normal commands.
 
 ## Preview Configuration
 
 From a managed project:
 
 ```sh
-chc web serve --dry-run
+chr web serve --dry-run
 ```
 
 Expected default boundary:
@@ -22,7 +22,7 @@ Expected default boundary:
 ## Start The Server
 
 ```sh
-chc web serve
+chr web serve
 ```
 
 Open:
@@ -34,13 +34,13 @@ http://127.0.0.1:7331
 Use a different project directory:
 
 ```sh
-chc web serve --dir /path/to/project
+chr web serve --dir /path/to/project
 ```
 
 Use a different local port:
 
 ```sh
-chc web serve --port 7340
+chr web serve --port 7340
 ```
 
 Stop the server with `ctrl+c` in the terminal that started it.
@@ -66,6 +66,6 @@ Run the repeatable Web UI smoke script from the repository root:
 scripts/qa/web-ui-smoke.sh
 ```
 
-The script creates a temporary managed project, starts `chc web serve`, checks
+The script creates a temporary managed project, starts `chr web serve`, checks
 the main pages and fragments, posts a dump creation action, and captures
 browser screenshots when Chromium or Chrome is available.

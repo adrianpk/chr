@@ -1,8 +1,8 @@
 # Full-System Lab Runbook
 
-This runbook defines a repeatable lab for exercising ChrysoCoord end to end.
+This runbook defines a repeatable lab for exercising Chryso end to end.
 It is intentionally broader than a quick smoke test. The goal is to create a
-moderately realistic Go project, initialize it with ChrysoCoord, drive the
+moderately realistic Go project, initialize it with Chryso, drive the
 available workflows, record failures, and use those failures to decide what
 needs to be fixed next.
 
@@ -11,38 +11,38 @@ when it is captured with the command, output, artifact path, and next action.
 
 ## Lab Shape
 
-Use a dedicated lab root outside the ChrysoCoord repository:
+Use a dedicated lab root outside the Chryso repository:
 
 ```sh
-export CHC_LAB_ROOT="$HOME/Projects/labs/ghc"
-export CHC_PROJECTS="$CHC_LAB_ROOT/projects"
-export CHC_REF_PROJECT="$CHC_PROJECTS/chc-blog-ref"
-export CHC_WORK_PROJECT="$CHC_PROJECTS/chc-blog-work"
-export CHC_LOG_DIR="$CHC_LAB_ROOT/logs"
-export CHC_ARTIFACT_DIR="$CHC_LAB_ROOT/artifacts"
-export CHC_SCRIPTS="$CHC_LAB_ROOT/scripts"
+export CHR_LAB_ROOT="$HOME/Projects/labs/ghc"
+export CHR_PROJECTS="$CHR_LAB_ROOT/projects"
+export CHR_REF_PROJECT="$CHR_PROJECTS/chr-blog-ref"
+export CHR_WORK_PROJECT="$CHR_PROJECTS/chr-blog-work"
+export CHR_LOG_DIR="$CHR_LAB_ROOT/logs"
+export CHR_ARTIFACT_DIR="$CHR_LAB_ROOT/artifacts"
+export CHR_SCRIPTS="$CHR_LAB_ROOT/scripts"
 ```
 
 Create the base directories:
 
 ```sh
-mkdir -p "$CHC_PROJECTS" "$CHC_LOG_DIR" "$CHC_ARTIFACT_DIR" "$CHC_SCRIPTS"
+mkdir -p "$CHR_PROJECTS" "$CHR_LOG_DIR" "$CHR_ARTIFACT_DIR" "$CHR_SCRIPTS"
 ```
 
 The reference project is treated as immutable after it is created:
 
-- `chc-blog-ref` is the clean reset source.
-- `chc-blog-work` is the project ChrysoCoord operates on.
+- `chr-blog-ref` is the clean reset source.
+- `chr-blog-work` is the project Chryso operates on.
 - `logs` stores copied command output for later diagnosis.
 - `artifacts` stores snapshots, bundles, and exported evidence.
 - `scripts` may later contain reset helpers.
 
-Do not run destructive reset commands outside `$CHC_LAB_ROOT`.
+Do not run destructive reset commands outside `$CHR_LAB_ROOT`.
 
 The command path below is written like a final user would run it from inside the
 managed project. It does not include developer-only flags such as `--dev-root`.
 Use a separate shell environment when you need to isolate user-level state while
-developing ChrysoCoord itself.
+developing Chryso itself.
 
 ## Reference Project
 
@@ -50,12 +50,12 @@ Use a small but non-trivial Go CLI blog project as the fixture. A blog is useful
 because it exercises file IO, Markdown content, metadata, indexing, searching,
 commands, tests, and validation without requiring a web server.
 
-The reference project should be named `chc-blog-ref`.
+The reference project should be named `chr-blog-ref`.
 
 Recommended package shape:
 
 ```text
-chc-blog-ref/
+chr-blog-ref/
   go.mod
   Makefile
   cmd/blog/main.go
@@ -125,17 +125,17 @@ Reset the work project by deleting only the work copy and copying the reference
 project again:
 
 ```sh
-rm -rf "$CHC_WORK_PROJECT"
-cp -a "$CHC_REF_PROJECT" "$CHC_WORK_PROJECT"
+rm -rf "$CHR_WORK_PROJECT"
+cp -a "$CHR_REF_PROJECT" "$CHR_WORK_PROJECT"
 ```
 
-Useful helper scripts under `$CHC_SCRIPTS`:
+Useful helper scripts under `$CHR_SCRIPTS`:
 
-- `reset-project.sh`: recreates `chc-blog-work` from `chc-blog-ref`.
-- `snapshot-project.sh`: copies the current work project to `$CHC_ARTIFACT_DIR`.
+- `reset-project.sh`: recreates `chr-blog-work` from `chr-blog-ref`.
+- `snapshot-project.sh`: copies the current work project to `$CHR_ARTIFACT_DIR`.
 - `run-step.sh`: runs one command, captures stdout, stderr, exit code, and time.
 
-Keep those scripts constrained to `$CHC_LAB_ROOT`.
+Keep those scripts constrained to `$CHR_LAB_ROOT`.
 
 ## TUI Quiz Parity Reset
 
@@ -145,9 +145,9 @@ It does not remove project metadata, use-case metadata, dumps, tickets, specs,
 or authoring-session quizzes.
 
 ```sh
-rm -rf "$CHC_WORK_PROJECT/.chc/user/tmp/quiz-runtime"
+rm -rf "$CHR_WORK_PROJECT/.chr/user/tmp/quiz-runtime"
 
-find "$CHC_WORK_PROJECT/.chc/user/quizzes" -maxdepth 1 -type f \
+find "$CHR_WORK_PROJECT/.chr/user/quizzes" -maxdepth 1 -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -158,8 +158,8 @@ find "$CHC_WORK_PROJECT/.chc/user/quizzes" -maxdepth 1 -type f \
 Confirm the reset:
 
 ```sh
-find "$CHC_WORK_PROJECT/.chc/user/tmp/quiz-runtime" -maxdepth 1 -type f 2>/dev/null
-find "$CHC_WORK_PROJECT/.chc/user/quizzes" -maxdepth 1 -type f \
+find "$CHR_WORK_PROJECT/.chr/user/tmp/quiz-runtime" -maxdepth 1 -type f 2>/dev/null
+find "$CHR_WORK_PROJECT/.chr/user/quizzes" -maxdepth 1 -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -171,7 +171,7 @@ artifacts.
 
 ## TUI Quiz Parity Validation
 
-Run this validation from the ChrysoCoord repository after building the current
+Run this validation from the Chryso repository after building the current
 branch:
 
 ```sh
@@ -181,8 +181,8 @@ make install
 Open the TUI against the reset work project:
 
 ```sh
-cd "$CHC_WORK_PROJECT"
-chc tui
+cd "$CHR_WORK_PROJECT"
+chr tui
 ```
 
 Project-level validation:
@@ -210,8 +210,8 @@ Use-case-level validation:
 After validation, inspect the artifacts:
 
 ```sh
-find "$CHC_WORK_PROJECT/.chc/user/tmp/quiz-runtime" -maxdepth 1 -type f -print
-find "$CHC_WORK_PROJECT/.chc/user/quizzes" -maxdepth 1 -type f -print
+find "$CHR_WORK_PROJECT/.chr/user/tmp/quiz-runtime" -maxdepth 1 -type f -print
+find "$CHR_WORK_PROJECT/.chr/user/quizzes" -maxdepth 1 -type f -print
 ```
 
 Expected evidence:
@@ -223,9 +223,9 @@ Expected evidence:
 - skipped follow-up branches do not force the next question to stay on the same
   branch.
 
-## Install ChrysoCoord
+## Install Chryso
 
-From the ChrysoCoord repository:
+From the Chryso repository:
 
 ```sh
 make install
@@ -234,29 +234,29 @@ make install
 Confirm the installed binary is the one being tested:
 
 ```sh
-command -v chc
-chc --help
-chc ticket --help
-chc author --help
-chc runtime --help
+command -v chr
+chr --help
+chr ticket --help
+chr author --help
+chr runtime --help
 ```
 
-Do not rely on a stale `./bin/chc` from a previous build. Use `make install` or
+Do not rely on a stale `./bin/chr` from a previous build. Use `make install` or
 run `make build` immediately before testing a repository-local binary.
 
 ## Initialize the Work Project
 
-Initialize ChrysoCoord inside the resettable work project:
+Initialize Chryso inside the resettable work project:
 
 ```sh
-cd "$CHC_WORK_PROJECT"
-chc init
+cd "$CHR_WORK_PROJECT"
+chr init
 ```
 
 Validate the runtime boundary without running Docker:
 
 ```sh
-chc runtime validate --dry-run
+chr runtime validate --dry-run
 ```
 
 Expected output uses project-relative paths for files inside the managed
@@ -265,17 +265,17 @@ project and groups runtime checks under `checks:`.
 Register and select the project:
 
 ```sh
-chc project add --name chc-blog-lab .
-chc project list
-chc project select chc-blog-lab
-chc project current
+chr project add --name chr-blog-lab .
+chr project list
+chr project select chr-blog-lab
+chr project current
 ```
 
 Expected result:
 
-- `.chc/` exists inside `chc-blog-work`.
-- `.chc/user/config.yml` exists.
-- `.chc/user/runtime/agent/Dockerfile` exists.
+- `.chr/` exists inside `chr-blog-work`.
+- `.chr/user/config.yml` exists.
+- `.chr/user/runtime/agent/Dockerfile` exists.
 - The lab project is registered in the local user-level project registry.
 
 ## Authoring Workflow
@@ -283,7 +283,7 @@ Expected result:
 Create an authoring session for the lab project:
 
 ```sh
-chc author session new \
+chr author session new \
   --target spec \
   --topic "CLI blog project validation"
 ```
@@ -291,18 +291,18 @@ chc author session new \
 List and inspect sessions:
 
 ```sh
-chc author session list
-chc author session show <session-handle>
+chr author session list
+chr author session show <session-handle>
 ```
 
-`chc author session list` prints headers so `status`, `target`, `updated_at`,
+`chr author session list` prints headers so `status`, `target`, `updated_at`,
 and `topic` are distinguishable. Use the session id, exact topic, or a unique
 topic slug when a later command requires `<session-handle>`.
 
 Generate a context-aware quiz:
 
 ```sh
-chc author quiz new \
+chr author quiz new \
   --target spec \
   --topic "CLI blog project validation" \
   --question-count 8
@@ -310,7 +310,7 @@ chc author quiz new \
 
 The command sends structured project context to the quiz provider and prints the
 generated quiz path relative to the project, for example
-`.chc/user/quizzes/<quiz-file>.md`.
+`.chr/user/quizzes/<quiz-file>.md`.
 
 Edit the generated quiz answers in Markdown, then generate or edit the
 corresponding spec from the Specs surface. Specs that still need review should
@@ -320,15 +320,15 @@ sessions.
 Exercise assisted authoring with deterministic fake adapter inputs:
 
 ```sh
-chc author assisted start \
+chr author assisted start \
   --target spec \
   --topic "CLI blog project validation"
 
-chc author assisted resume \
+chr author assisted resume \
   --session <session-handle> \
   --fake-question "What behavior should the CLI blog prove first?"
 
-chc author assisted answer \
+chr author assisted answer \
   --session <session-handle> \
   --turn turn-001 \
   --turn-index 1 \
@@ -336,17 +336,17 @@ chc author assisted answer \
   --question "What behavior should the CLI blog prove first?" \
   --answer "Publishing a draft should update the persistent index and tests should pass."
 
-chc author assisted status \
+chr author assisted status \
   --session <session-handle>
 
-chc author assisted finalize \
+chr author assisted finalize \
   --session <session-handle> \
   --fake-summary "The lab should prove initialization, authoring, ticket execution, validation, reporting, maintenance, and remote command intake against the CLI blog project." \
   --target-kind spec \
   --target-name "cli blog validation spec"
 ```
 
-Current boundary: there is no standalone `chc dump` command. For dump-style
+Current boundary: there is no standalone `chr dump` command. For dump-style
 context, create a Markdown file manually under the project workspace and use it
 as source material for drafts, specs, plans, or tickets.
 
@@ -358,7 +358,7 @@ interactive use, when the shell is already inside the managed project, the
 ticket can be created with much less input:
 
 ```sh
-chc ticket new "Fix publish index update" \
+chr ticket new "Fix publish index update" \
   --synopsis "Fix the publish index update path."
 ```
 
@@ -370,7 +370,7 @@ artifact.
 Create tickets from the seeded project issues:
 
 ```sh
-chc ticket new \
+chr ticket new \
   "Fix publish index update" \
   --synopsis "Fix the publish index update path." \
   --type bug \
@@ -380,7 +380,7 @@ chc ticket new \
   --project-area indexing \
   --tag runtime
 
-chc ticket new \
+chr ticket new \
   "Search posts by tags" \
   --synopsis "Add tag-aware post search." \
   --type feature \
@@ -394,18 +394,18 @@ chc ticket new \
 Inspect and prepare tickets:
 
 ```sh
-chc ticket list
-chc ticket show CHC-1
-chc ticket comment CHC-1 "Lab ticket created from the seeded publish/index bug."
-chc ticket status CHC-1 ready
-chc ticket status CHC-2 ready
+chr ticket list
+chr ticket show CHR-1
+chr ticket comment CHR-1 "Lab ticket created from the seeded publish/index bug."
+chr ticket status CHR-1 ready
+chr ticket status CHR-2 ready
 ```
 
 Rebuild and inspect the ticket index:
 
 ```sh
-chc index rebuild
-chc index status
+chr index rebuild
+chr index status
 ```
 
 ## Runtime and Single-Ticket Execution
@@ -413,40 +413,40 @@ chc index status
 Preview one ticket execution:
 
 ```sh
-chc ticket start CHC-1 --dry-run
+chr ticket start CHR-1 --dry-run
 ```
 
 Run it:
 
 ```sh
-chc ticket start CHC-1
+chr ticket start CHR-1
 ```
 
 Capture the execution id from stdout or from reports:
 
 ```sh
-chc report list --ticket CHC-1
+chr report list --ticket CHR-1
 ```
 
 Preview and apply the result:
 
 ```sh
-chc ticket apply-result <execution-id> --dry-run
-chc ticket apply-result <execution-id>
+chr ticket apply-result <execution-id> --dry-run
+chr ticket apply-result <execution-id>
 ```
 
 Inspect evidence:
 
 ```sh
-chc report show --execution <execution-id>
-chc work logs <execution-id>
+chr report show --execution <execution-id>
+chr work logs <execution-id>
 make verify
 git diff
 ```
 
 Expected result:
 
-- the runtime writes execution artifacts under `.chc/user/runtime/runs/`;
+- the runtime writes execution artifacts under `.chr/user/runtime/runs/`;
 - the ticket records progress, blockers, or completion evidence;
 - validation output is inspectable;
 - runtime logs and event streams are discoverable;
@@ -457,7 +457,7 @@ Expected result:
 Preview the ready queue through the agent-work facade:
 
 ```sh
-chc work run-all \
+chr work run-all \
   --order priority_severity \
   --dry-run
 ```
@@ -465,21 +465,21 @@ chc work run-all \
 Run the ready queue:
 
 ```sh
-chc work run-all \
+chr work run-all \
   --order priority_severity
 ```
 
 Observe the run from Dash with `F8`, or inspect evidence after it finishes:
 
 ```sh
-chc report list --kind loop
-chc report list --kind execution
-chc report show --loop <loop-id>
-chc work events .chc/user/runtime/runs/<loop-id>/events.jsonl
+chr report list --kind loop
+chr report list --kind execution
+chr report show --loop <loop-id>
+chr work events .chr/user/runtime/runs/<loop-id>/events.jsonl
 ```
 
 The run should stop on a blocked or failed ticket instead of spinning forever.
-Use `chc work doctor` or Dash readiness diagnostics when work is blocked before
+Use `chr work doctor` or Dash readiness diagnostics when work is blocked before
 execution starts.
 
 ## Foreground Ticket Loop
@@ -487,7 +487,7 @@ execution starts.
 Preview eligible work:
 
 ```sh
-chc ticket loop \
+chr ticket loop \
   --status ready \
   --order priority_severity \
   --max-iterations 2 \
@@ -497,7 +497,7 @@ chc ticket loop \
 Run a bounded loop:
 
 ```sh
-chc ticket loop \
+chr ticket loop \
   --status ready \
   --order priority_severity \
   --max-iterations 2
@@ -506,8 +506,8 @@ chc ticket loop \
 Inspect loop evidence:
 
 ```sh
-chc report list --kind loop
-chc report show --loop <loop-id>
+chr report list --kind loop
+chr report show --loop <loop-id>
 ```
 
 The loop should stop on a blocked or failed ticket instead of spinning forever.
@@ -517,10 +517,10 @@ The loop should stop on a blocked or failed ticket instead of spinning forever.
 Exercise local daemon state:
 
 ```sh
-chc daemon status
-chc daemon start --max-iterations 1
-chc daemon status
-chc daemon stop
+chr daemon status
+chr daemon start --max-iterations 1
+chr daemon status
+chr daemon stop
 ```
 
 This validates local coordinator state. It does not create a hosted service.
@@ -530,25 +530,25 @@ This validates local coordinator state. It does not create a hosted service.
 Inspect notification configuration:
 
 ```sh
-chc notify status
+chr notify status
 ```
 
 Preview a Telegram payload without contacting Telegram:
 
 ```sh
-chc notify telegram test --dry-run
+chr notify telegram test --dry-run
 ```
 
-Create a fixture file under `$CHC_ARTIFACT_DIR/telegram-updates.json` with test
+Create a fixture file under `$CHR_ARTIFACT_DIR/telegram-updates.json` with test
 Telegram updates, then parse it:
 
 ```sh
-chc notify telegram poll \
-  --fixture "$CHC_ARTIFACT_DIR/telegram-updates.json" \
+chr notify telegram poll \
+  --fixture "$CHR_ARTIFACT_DIR/telegram-updates.json" \
   --dry-run
 
-chc notify telegram poll \
-  --fixture "$CHC_ARTIFACT_DIR/telegram-updates.json"
+chr notify telegram poll \
+  --fixture "$CHR_ARTIFACT_DIR/telegram-updates.json"
 ```
 
 The expected result is a stored accepted or rejected remote command handoff
@@ -559,26 +559,26 @@ record. This stage validates intake, not live Telegram operation.
 Write a diagnostic bundle:
 
 ```sh
-chc maintenance bundle
+chr maintenance bundle
 ```
 
 Inspect local state:
 
 ```sh
-chc maintenance db status
-chc maintenance registry status
-chc maintenance execution artifacts
-chc maintenance execution cleanup-preview
+chr maintenance db status
+chr maintenance registry status
+chr maintenance execution artifacts
+chr maintenance execution cleanup-preview
 ```
 
 Preview registry repair commands before using the write variants:
 
 ```sh
-chc maintenance registry disable --dry-run chc-blog-lab
-chc maintenance registry set-path --dry-run chc-blog-lab "$CHC_WORK_PROJECT"
+chr maintenance registry disable --dry-run chr-blog-lab
+chr maintenance registry set-path --dry-run chr-blog-lab "$CHR_WORK_PROJECT"
 ```
 
-Copy the diagnostic bundle into `$CHC_ARTIFACT_DIR` after each run that exposes
+Copy the diagnostic bundle into `$CHR_ARTIFACT_DIR` after each run that exposes
 a failure.
 
 ## Proving-Ground Check
@@ -587,15 +587,15 @@ If the work project includes a proving objective, run the proving commands
 against it:
 
 ```sh
-chc proving validate \
-  --objective .chc/proving/objectives/CLI-BLOG-1-fix-publish-index.md
+chr proving validate \
+  --objective .chr/proving/objectives/CLI-BLOG-1-fix-publish-index.md
 
-chc proving run \
-  --objective .chc/proving/objectives/CLI-BLOG-1-fix-publish-index.md \
+chr proving run \
+  --objective .chr/proving/objectives/CLI-BLOG-1-fix-publish-index.md \
   --dry-run
 
-chc proving ralph \
-  --objective .chc/proving/objectives/CLI-BLOG-1-fix-publish-index.md \
+chr proving ralph \
+  --objective .chr/proving/objectives/CLI-BLOG-1-fix-publish-index.md \
   --max-attempts 3
 ```
 
@@ -607,7 +607,7 @@ Create a run-specific ledger:
 
 ```sh
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
-LEDGER="$CHC_LOG_DIR/$RUN_ID-failures.md"
+LEDGER="$CHR_LOG_DIR/$RUN_ID-failures.md"
 touch "$LEDGER"
 ```
 
@@ -627,7 +627,7 @@ For every unexpected failure, record:
 - Follow-up ticket:
 ```
 
-If the failure is in ChrysoCoord, create a ChrysoCoord ticket after the run. If
+If the failure is in Chryso, create a Chryso ticket after the run. If
 the failure is only in the lab fixture, fix the fixture or reset it from the
 reference project.
 
@@ -635,9 +635,9 @@ reference project.
 
 A useful full-system lab run produces:
 
-- a resettable `chc-blog-work` project;
-- a clean way to restore it from `chc-blog-ref`;
-- initialized `.chc/` project-local state;
+- a resettable `chr-blog-work` project;
+- a clean way to restore it from `chr-blog-ref`;
+- initialized `.chr/` project-local state;
 - authoring session, quiz, legacy quiz-to-draft, and assisted authoring artifacts;
 - at least two Markdown tickets;
 - ticket index rebuild and status output;

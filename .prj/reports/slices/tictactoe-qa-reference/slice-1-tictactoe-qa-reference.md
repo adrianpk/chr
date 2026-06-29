@@ -9,7 +9,7 @@ PR: #306
 
 ## Purpose
 
-Add a resettable tic-tac-toe QA reference project for validating ChrysoCoord's
+Add a resettable tic-tac-toe QA reference project for validating Chryso's
 generation and Codex-backed agent-work loop against a small CLI application.
 
 ## Delivered Behavior
@@ -19,7 +19,7 @@ seed project. The seed is intentionally incomplete but compilable: it exposes a
 placeholder command, a small `internal/game` package, and baseline tests for
 move parsing and placement.
 
-The reference includes project-local ChrysoCoord context under `.chc/user`:
+The reference includes project-local Chryso context under `.chr/user`:
 project metadata, one `cli-gameplay` use case, raw and curated project dumps,
 raw and curated use-case dumps, and raw and curated quiz notes. It does not
 include generated specs, plans, tracking documents, or tickets for the primary
@@ -36,13 +36,13 @@ The fixture is designed for manual TUI or CLI exercise:
 ```sh
 make qa-reset-tictactoe
 cd qa/project/tictactoe
-chc spec generate --use-case cli-gameplay
-chc plan generate --use-case cli-gameplay
-chc plan tracking create --use-case cli-gameplay
-chc work run-all --use-case cli-gameplay --order key
+chr spec generate --use-case cli-gameplay
+chr plan generate --use-case cli-gameplay
+chr plan tracking create --use-case cli-gameplay
+chr work run-all --use-case cli-gameplay --order key
 ```
 
-An empty non-Markdown `.chc/user/tickets/.gitkeep` preserves the tickets
+An empty non-Markdown `.chr/user/tickets/.gitkeep` preserves the tickets
 directory without creating artificial tickets.
 
 ## Contracts Added or Changed
@@ -67,9 +67,9 @@ directory without creating artificial tickets.
 - `go -C qa/ref/003/tictactoe test ./...` (pass)
 - `make qa-smoke-tictactoe` (pass)
 - `make qa-smoke-blog` (pass)
-- `go run ./cmd/chc spec list --dir qa/project/tictactoe` (pass)
-- `go run ./cmd/chc plan list --dir qa/project/tictactoe` (pass)
-- `go run ./cmd/chc ticket list --dir qa/project/tictactoe` (pass)
+- `go run ./cmd/chr spec list --dir qa/project/tictactoe` (pass)
+- `go run ./cmd/chr plan list --dir qa/project/tictactoe` (pass)
+- `go run ./cmd/chr ticket list --dir qa/project/tictactoe` (pass)
 - `make verify` (pass)
 
 ## Risks and Follow-ups

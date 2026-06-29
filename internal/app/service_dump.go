@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // DumpScope narrows a dump operation to an optional use-case scope.

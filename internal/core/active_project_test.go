@@ -124,18 +124,18 @@ func TestActiveProjectStoreUsesDevelopmentConfigPath(t *testing.T) {
 		t.Fatalf("SetActiveProject returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(root, "config", "chc", "active-project"))
-	assertPathNotExists(t, filepath.Join(root, "chc", "active-project"))
+	assertPathExists(t, filepath.Join(root, "config", "chr", "active-project"))
+	assertPathNotExists(t, filepath.Join(root, "chr", "active-project"))
 }
 
 func newTestUserEnvironment(t *testing.T) UserEnvironment {
 	t.Helper()
 
 	env, err := NewUserEnvironment(UserEnvironmentOptions{
-		ConfigDir: filepath.Join(t.TempDir(), "config", "chc"),
-		DataDir:   filepath.Join(t.TempDir(), "data", "chc"),
-		CacheDir:  filepath.Join(t.TempDir(), "cache", "chc"),
-		StateDir:  filepath.Join(t.TempDir(), "state", "chc"),
+		ConfigDir: filepath.Join(t.TempDir(), "config", "chr"),
+		DataDir:   filepath.Join(t.TempDir(), "data", "chr"),
+		CacheDir:  filepath.Join(t.TempDir(), "cache", "chr"),
+		StateDir:  filepath.Join(t.TempDir(), "state", "chr"),
 	})
 	if err != nil {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)

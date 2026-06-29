@@ -7,19 +7,19 @@ import (
 
 func TestNewUserEnvironmentUsesExplicitPaths(t *testing.T) {
 	env, err := NewUserEnvironment(UserEnvironmentOptions{
-		ConfigDir: "/tmp/config/chc",
-		DataDir:   "/tmp/data/chc",
-		CacheDir:  "/tmp/cache/chc",
-		StateDir:  "/tmp/state/chc",
+		ConfigDir: "/tmp/config/chr",
+		DataDir:   "/tmp/data/chr",
+		CacheDir:  "/tmp/cache/chr",
+		StateDir:  "/tmp/state/chr",
 	})
 	if err != nil {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	assertUserEnvironmentPath(t, env.ConfigDir(), "/tmp/config/chc")
-	assertUserEnvironmentPath(t, env.DataDir(), "/tmp/data/chc")
-	assertUserEnvironmentPath(t, env.CacheDir(), "/tmp/cache/chc")
-	assertUserEnvironmentPath(t, env.StateDir(), "/tmp/state/chc")
+	assertUserEnvironmentPath(t, env.ConfigDir(), "/tmp/config/chr")
+	assertUserEnvironmentPath(t, env.DataDir(), "/tmp/data/chr")
+	assertUserEnvironmentPath(t, env.CacheDir(), "/tmp/cache/chr")
+	assertUserEnvironmentPath(t, env.StateDir(), "/tmp/state/chr")
 
 	if env.DevMode() {
 		t.Fatal("DevMode = true, want false")
@@ -37,10 +37,10 @@ func TestNewUserEnvironmentUsesDevRoot(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(root, "config", "chc"))
-	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(root, "data", "chc"))
-	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(root, "cache", "chc"))
-	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(root, "state", "chc"))
+	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(root, "config", "chr"))
+	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(root, "data", "chr"))
+	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(root, "cache", "chr"))
+	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(root, "state", "chr"))
 
 	if !env.DevMode() {
 		t.Fatal("DevMode = false, want true")
@@ -61,10 +61,10 @@ func TestNewUserEnvironmentUsesXDGPaths(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(root, "xdg-config", "chc"))
-	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(root, "xdg-data", "chc"))
-	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(root, "xdg-cache", "chc"))
-	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(root, "xdg-state", "chc"))
+	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(root, "xdg-config", "chr"))
+	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(root, "xdg-data", "chr"))
+	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(root, "xdg-cache", "chr"))
+	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(root, "xdg-state", "chr"))
 }
 
 func TestNewUserEnvironmentUsesHomeFallbacks(t *testing.T) {
@@ -75,10 +75,10 @@ func TestNewUserEnvironmentUsesHomeFallbacks(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(home, ".config", "chc"))
-	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(home, ".local", "share", "chc"))
-	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(home, ".cache", "chc"))
-	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(home, ".local", "state", "chc"))
+	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(home, ".config", "chr"))
+	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(home, ".local", "share", "chr"))
+	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(home, ".cache", "chr"))
+	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(home, ".local", "state", "chr"))
 }
 
 func TestNewUserEnvironmentDevModeIgnoresXDGPaths(t *testing.T) {
@@ -97,10 +97,10 @@ func TestNewUserEnvironmentDevModeIgnoresXDGPaths(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(root, "dev", "config", "chc"))
-	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(root, "dev", "data", "chc"))
-	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(root, "dev", "cache", "chc"))
-	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(root, "dev", "state", "chc"))
+	assertUserEnvironmentPath(t, env.ConfigDir(), filepath.Join(root, "dev", "config", "chr"))
+	assertUserEnvironmentPath(t, env.DataDir(), filepath.Join(root, "dev", "data", "chr"))
+	assertUserEnvironmentPath(t, env.CacheDir(), filepath.Join(root, "dev", "cache", "chr"))
+	assertUserEnvironmentPath(t, env.StateDir(), filepath.Join(root, "dev", "state", "chr"))
 }
 
 func TestNewUserEnvironmentRejectsMissingDevRoot(t *testing.T) {

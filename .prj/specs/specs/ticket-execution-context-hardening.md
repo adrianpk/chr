@@ -5,15 +5,15 @@ Status: initial
 Sources:
 
 - `/home/adrian/Downloads/context_composition_and_document_transitions.md`
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Purpose
 
 Define the post-cutoff hardening block that strengthens autonomous ticket
 execution before notification and remote command surfaces.
 
-The operational cutoff is already reached: `chc` can resolve projects, select
+The operational cutoff is already reached: `chr` can resolve projects, select
 tickets, run Codex through the runtime container path, capture results, apply
 ticket updates, execute foreground loops, and coordinate daemon state.
 

@@ -47,19 +47,19 @@ existing ticket metadata style and keep parser/index changes small.
 
 ## Files of Interest
 
-- `internal/chc/ticket.go`
-- `internal/chc/indexed_ticket.go`
-- `internal/chc/ticket_parser.go`
-- `internal/chc/ticket_index.go`
-- `internal/chc/ticket_status.go`
-- `internal/chc/ticket_merge_handoff.go`
-- `cmd/chc/assets/migration/sqlite/20260602000010-add_ticket_merge_metadata.sql`
+- `internal/chr/ticket.go`
+- `internal/chr/indexed_ticket.go`
+- `internal/chr/ticket_parser.go`
+- `internal/chr/ticket_index.go`
+- `internal/chr/ticket_status.go`
+- `internal/chr/ticket_merge_handoff.go`
+- `cmd/chr/assets/migration/sqlite/20260602000010-add_ticket_merge_metadata.sql`
 - `docs/reference/ticket-review-metadata.md`
 
 ## Validation
 
-- `go test ./internal/chc`
-- `go test ./internal/chcapp`
+- `go test ./internal/chr`
+- `go test ./internal/chrapp`
 - `git diff --check`
 - `make verify`
 

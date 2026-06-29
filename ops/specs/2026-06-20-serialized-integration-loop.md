@@ -18,7 +18,7 @@ Related:
 
 ## Summary
 
-ChrysoCoord's ready-ticket loop must become a serialized integration loop.
+Chryso's ready-ticket loop must become a serialized integration loop.
 
 The loop must not treat development as the whole unit of progress. It must treat
 one ticket integration cycle as the unit:
@@ -359,9 +359,9 @@ cycle. Later tickets were intentionally not started.
 
 ## CLI Behavior
 
-`chc work run-all` should use serialized integration cycles.
+`chr work run-all` should use serialized integration cycles.
 
-`chc work run-all --dry-run` should show:
+`chr work run-all --dry-run` should show:
 
 - review mode;
 - integration unit: `ticket`;
@@ -370,7 +370,7 @@ cycle. Later tickets were intentionally not started.
 - remaining eligible ticket count;
 - whether the loop will stop for human review.
 
-`chc work ticket <ticket-key>` remains explicit single-ticket development. It
+`chr work ticket <ticket-key>` remains explicit single-ticket development. It
 does not silently redefine loop ordering. It may still be subject to repair
 precedence and branch readiness preflight.
 
@@ -410,9 +410,9 @@ under `human_review` mode and should not present it as an execution failure.
 
 - Should `run-all` always use serialized integration cycles immediately, or
   should a temporary compatibility flag preserve dev-only behavior?
-- Should `chc work ticket <ticket-key>` remain development-only, or should a new
+- Should `chr work ticket <ticket-key>` remain development-only, or should a new
   command run exactly one full integration cycle?
-- Should review artifacts live under `.chc/user/reviews/`, under the execution
+- Should review artifacts live under `.chr/user/reviews/`, under the execution
   run directory, or both?
 - Should project templates switch default review mode from `human_review` to
   `trusted_auto_merge` or `agentic_review` after this workflow is proven?

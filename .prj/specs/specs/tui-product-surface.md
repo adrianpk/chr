@@ -4,7 +4,7 @@ Status: initial
 
 Sources:
 
-- `.prj/drafts/chc-cli-output-polish-notes.md`
+- `.prj/drafts/chr-cli-output-polish-notes.md`
 - `.prj/plans/slicing-ux-operation-surface-plan.md`
 - `.prj/tickets/open/20260522071859-align-cli-authoring-and-tui-operation-surface.md`
 - `docs/how-to/full-system-lab-runbook.md`
@@ -12,7 +12,7 @@ Sources:
 
 ## Purpose
 
-Define the role of the Bubble Tea TUI in ChrysoCoord.
+Define the role of the Bubble Tea TUI in Chryso.
 
 The TUI is the primary local human operation surface over the existing CLI and
 domain services. It is not a replacement for command-line capabilities. Every
@@ -29,7 +29,7 @@ The primary user is one local operator working on one managed project at a time.
 
 The operator may be:
 
-- bootstrapping a new Go project into ChrysoCoord;
+- bootstrapping a new Go project into Chryso;
 - reviewing project-local tickets, documents, reports, and runtime evidence;
 - creating or refining authoring artifacts;
 - running a ticket directly;
@@ -38,7 +38,7 @@ The operator may be:
 - preparing the next implementation slice.
 
 The TUI should assume technical literacy, but it should not assume that the user
-remembers ChrysoCoord's internal path layout or every command option.
+remembers Chryso's internal path layout or every command option.
 
 ## Product Role
 
@@ -53,7 +53,7 @@ The TUI should make common work visible and selectable:
 
 The TUI should preserve the same source of truth as the CLI:
 
-- `.chc/` remains the project-local workspace;
+- `.chr/` remains the project-local workspace;
 - Markdown remains the durable record for tickets, authoring artifacts, plans,
   specs, trackers, reports, quizzes, dumps, and handoff notes;
 - runtime evidence remains under the runtime artifact paths;
@@ -144,7 +144,7 @@ unless implemented.
 ## Fit With CLI
 
 The TUI should call internal domain services directly where practical, not
-shell out to `chc` commands as its primary architecture.
+shell out to `chr` commands as its primary architecture.
 
 The command surface remains the behavioral contract for users. The TUI should
 match command behavior and output semantics, and tests should keep both paths

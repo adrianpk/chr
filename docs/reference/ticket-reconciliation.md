@@ -23,7 +23,7 @@ type TicketReconciler interface {
 Create a reconciler from an opened `TicketIndex`:
 
 ```go
-reconciler := chc.NewTicketReconciler(index)
+reconciler := chr.NewTicketReconciler(index)
 ```
 
 ## Options
@@ -44,7 +44,7 @@ type ReconcileProjectTicketOptions struct {
 ```
 
 - `ProjectID` identifies the registered project in the user-level index.
-- `ProjectDir` points to the project root that owns `.chc/user/tickets`.
+- `ProjectDir` points to the project root that owns `.chr/user/tickets`.
 - `TicketPath` points to one affected Markdown ticket file.
 - `ReconciledAt` records the refresh time used for indexed rows.
 
@@ -103,7 +103,7 @@ Execution code must reconcile before selecting work from the index.
 If reconciliation returns blockers, execution should stop and surface the
 blocker details to the user or notification channel.
 
-Manual `chc index rebuild` and `chc index status` remain maintenance and
+Manual `chr index rebuild` and `chr index status` remain maintenance and
 diagnostic commands. They are not the execution precondition.
 
 ## Result Application Consistency
@@ -113,7 +113,7 @@ writes complete, callers should reconcile the affected ticket before reading the
 derived SQLite index again:
 
 ```go
-result, err := reconciler.ReconcileProjectTicket(ctx, chc.ReconcileProjectTicketOptions{
+result, err := reconciler.ReconcileProjectTicket(ctx, chr.ReconcileProjectTicketOptions{
     ProjectID:    application.ProjectID,
     ProjectDir:   projectDir,
     TicketPath:   application.TicketPath,

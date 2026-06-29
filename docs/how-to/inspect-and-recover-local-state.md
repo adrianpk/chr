@@ -1,6 +1,6 @@
 # Inspect and Recover Local State
 
-Use this guide when local `chc` state looks inconsistent or when you need a
+Use this guide when local `chr` state looks inconsistent or when you need a
 single bundle for handoff.
 
 Maintenance commands are conservative. Status and preview commands are
@@ -11,19 +11,19 @@ read-only. Repair commands require explicit project names or paths.
 Start with a bundle when you need a compact local snapshot:
 
 ```sh
-chc maintenance bundle
+chr maintenance bundle
 ```
 
 For a specific project:
 
 ```sh
-chc maintenance bundle --dir /path/to/project
+chr maintenance bundle --dir /path/to/project
 ```
 
 The bundle is written to:
 
 ```text
-.chc/maintenance/diagnostic-bundle.md
+.chr/maintenance/diagnostic-bundle.md
 ```
 
 It includes database status, registry diagnostics, execution artifact drift,
@@ -35,7 +35,7 @@ contents, environment values, credential files, and token values.
 Check the local SQLite migration state:
 
 ```sh
-chc maintenance db status
+chr maintenance db status
 ```
 
 Use this when a command fails while opening local user state or when the local
@@ -55,7 +55,7 @@ Unknown migrations usually mean the database was migrated by a newer binary.
 List registered projects and their local path state:
 
 ```sh
-chc maintenance registry status
+chr maintenance registry status
 ```
 
 Use this when project selection fails, a project moved, or a registered path was
@@ -66,32 +66,32 @@ Important statuses:
 - `ok`: the project is usable;
 - `disabled`: the registry row is disabled;
 - `missing_path`: the registered directory is gone;
-- `missing_workspace`: the directory exists but `.chc/` is missing.
+- `missing_workspace`: the directory exists but `.chr/` is missing.
 
 ## Repair Registry Entries
 
 Disable a stale project registration:
 
 ```sh
-chc maintenance registry disable example
+chr maintenance registry disable example
 ```
 
 Preview the same action:
 
 ```sh
-chc maintenance registry disable --dry-run example
+chr maintenance registry disable --dry-run example
 ```
 
 Update a moved project path:
 
 ```sh
-chc maintenance registry set-path example /new/project/path
+chr maintenance registry set-path example /new/project/path
 ```
 
 Preview the path update:
 
 ```sh
-chc maintenance registry set-path --dry-run example /new/project/path
+chr maintenance registry set-path --dry-run example /new/project/path
 ```
 
 Registry repair commands update only the registry row. They do not edit tickets,
@@ -102,7 +102,7 @@ execution records, runtime artifacts, or active project selection.
 Check whether execution records still point to existing runtime evidence:
 
 ```sh
-chc maintenance execution artifacts --dir /path/to/project
+chr maintenance execution artifacts --dir /path/to/project
 ```
 
 The command reports missing run directories, result artifacts, runtime logs,
@@ -116,7 +116,7 @@ handoff for a damaged core.
 Preview unreferenced runtime artifact directories:
 
 ```sh
-chc maintenance execution cleanup-preview --dir /path/to/project
+chr maintenance execution cleanup-preview --dir /path/to/project
 ```
 
 This command does not delete anything. It reports leaf directories under the
@@ -129,33 +129,33 @@ Review the output before any future destructive cleanup workflow.
 List execution and loop reports:
 
 ```sh
-chc report list --dir /path/to/project
+chr report list --dir /path/to/project
 ```
 
 Filter by kind when needed:
 
 ```sh
-chc report list --dir /path/to/project --kind execution
-chc report list --dir /path/to/project --kind loop
+chr report list --dir /path/to/project --kind execution
+chr report list --dir /path/to/project --kind loop
 ```
 
 Show a specific report:
 
 ```sh
-chc report show --dir /path/to/project --execution <execution-id>
-chc report show --dir /path/to/project --loop <loop-id>
+chr report show --dir /path/to/project --execution <execution-id>
+chr report show --dir /path/to/project --loop <loop-id>
 ```
 
 ## Suggested Order
 
 For general local recovery:
 
-1. Run `chc maintenance bundle`.
-2. Run `chc maintenance registry status`.
+1. Run `chr maintenance bundle`.
+2. Run `chr maintenance registry status`.
 3. Repair missing or moved registry entries if needed.
-4. Run `chc maintenance execution artifacts`.
-5. Run `chc maintenance execution cleanup-preview`.
-6. Inspect reports with `chc report list` and `chc report show`.
+4. Run `chr maintenance execution artifacts`.
+5. Run `chr maintenance execution cleanup-preview`.
+6. Inspect reports with `chr report list` and `chr report show`.
 
 Use `--dev-root` with maintenance commands when inspecting isolated development
 state.

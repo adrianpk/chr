@@ -24,7 +24,7 @@ func TestTicketResultChangedFilesWriterWritesSummaryComment(t *testing.T) {
 	content := readResultChangedFilesTicket(t, path)
 	for _, want := range []string{
 		`updated_at: "2026-05-19T16:00:00Z"`,
-		"## 2026-05-19T16:00:00Z chc",
+		"## 2026-05-19T16:00:00Z chr",
 		"Execution exec-1 changed files:",
 		"- internal/core/result_application.go: Added changed-file inputs.",
 		"- docs/reference/ticket-result-application.md",
@@ -73,7 +73,7 @@ func writeResultChangedFilesTicket(t *testing.T) string {
 
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	ticket := Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "reviewing",
 		CreatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
@@ -111,7 +111,7 @@ func testResultChangedFilesApplication(path string) ResultApplication {
 		ExecutionID: "exec-1",
 		TicketPath:  path,
 		Comment: ResultApplicationComment{
-			Author: "chc",
+			Author: "chr",
 		},
 		ChangedFiles: []ResultApplicationChangedFile{
 			{

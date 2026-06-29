@@ -17,7 +17,7 @@ The core package now supports:
 
 - assisted authoring context package options and result models;
 - loading default authoring analyst agent identity through the existing protocol context loader;
-- loading applicable `AGENTS.md` files and selected `.chc/` protocol artifacts;
+- loading applicable `AGENTS.md` files and selected `.chr/` protocol artifacts;
 - loading selected session input and output documents;
 - recording missing selected documents in the context source inventory;
 - summarizing transcript event counts;
@@ -56,13 +56,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/assisted_context.go`
-- `internal/chc/assisted_context_test.go`
+- `internal/chr/assisted_context.go`
+- `internal/chr/assisted_context_test.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoadAssistedAuthoringContextPackage|TestRenderAssistedAuthoringContextPackage'`: pass
+- `go test ./internal/chr -run 'TestLoadAssistedAuthoringContextPackage|TestRenderAssistedAuthoringContextPackage'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

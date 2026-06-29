@@ -12,17 +12,17 @@ PR: #151
 Introduce the first runtime `WorkspaceGraph` builder for Markdown-only
 workspace navigation.
 
-The graph is an ephemeral in-memory view reconstructed from `.chc/` files. It
+The graph is an ephemeral in-memory view reconstructed from `.chr/` files. It
 does not persist a second source of truth and does not read full document bodies
 as durable application state.
 
 ## Delivered Behavior
 
-- Builds a graph from Markdown files under `.chc/`.
-- Loads `.chc/project.md` as the project node when present.
-- Loads `.chc/cases/*.md` as canonical case nodes.
-- Classifies `.chc/dumps`, `.chc/quizzes`, `.chc/specs`, `.chc/plans`,
-  `.chc/tickets`, and `.chc/reports` Markdown files.
+- Builds a graph from Markdown files under `.chr/`.
+- Loads `.chr/project.md` as the project node when present.
+- Loads `.chr/cases/*.md` as canonical case nodes.
+- Classifies `.chr/dumps`, `.chr/quizzes`, `.chr/specs`, `.chr/plans`,
+  `.chr/tickets`, and `.chr/reports` Markdown files.
 - Separates project-wide documents from case-scoped documents.
 - Groups case-scoped documents by canonical case slug.
 - Records unresolved case references without implicitly creating cases.
@@ -32,7 +32,7 @@ as durable application state.
 
 ## Implementation Notes
 
-The builder lives in `internal/chc` as a pure service:
+The builder lives in `internal/chr` as a pure service:
 
 - `WorkspaceGraphBuilder`
 - `WorkspaceGraph`
@@ -57,12 +57,12 @@ planned TUI Project/Cases rewire slice.
 
 ## Files of Interest
 
-- `internal/chc/workspace_graph.go`
-- `internal/chc/workspace_graph_test.go`
+- `internal/chr/workspace_graph.go`
+- `internal/chr/workspace_graph_test.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui ./cmd/chc` passed
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui ./cmd/chr` passed
   on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 

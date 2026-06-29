@@ -47,39 +47,39 @@ func authoringArtifactKindPathTests(projectDir string) []struct {
 	}{
 		{
 			kind:             AuthoringArtifactKindDump,
-			wantRelativePath: ".chc/user/dumps/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/dumps/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindQuiz,
-			wantRelativePath: ".chc/user/quizzes/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/quizzes/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindDraft,
-			wantRelativePath: ".chc/user/drafts/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/drafts/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSpec,
-			wantRelativePath: ".chc/user/specs/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/specs/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindPlan,
-			wantRelativePath: ".chc/user/plans/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/plans/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSliceSet,
-			wantRelativePath: ".chc/user/slice-sets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/slice-sets/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSlice,
-			wantRelativePath: ".chc/user/slices/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/slices/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTracker,
-			wantRelativePath: ".chc/user/trackers/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/trackers/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTicket,
-			wantRelativePath: ".chc/user/tickets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/user/tickets/auth-20260521-120000-billing-sync.md",
 		},
 	}
 }

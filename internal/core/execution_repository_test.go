@@ -108,7 +108,7 @@ func TestNewExecutionRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(root, "data", "chc", "core.db"))
+	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
 func newTestExecutionRepository(t *testing.T) ExecutionRepository {
@@ -145,27 +145,27 @@ func testExecutionRecord(now time.Time) ExecutionRecord {
 	return ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
-		TicketKey:  "CHC-1",
-		TicketPath: "/tmp/project/.chc/user/tickets/CHC-1.md",
+		TicketKey:  "CHR-1",
+		TicketPath: "/tmp/project/.chr/user/tickets/CHR-1.md",
 		Status:     ExecutionStatusPending,
 		Runtime: ExecutionRuntimeRef{
-			Image:             "chc-agent-runtime:local",
-			DockerfilePath:    "/tmp/project/.chc/user/runtime/agent/Dockerfile",
+			Image:             "chr-agent-runtime:local",
+			DockerfilePath:    "/tmp/project/.chr/user/runtime/agent/Dockerfile",
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
 		Workspace: ExecutionWorkspaceRef{
 			Mode:                  WorkWorkspaceModeWorktree,
 			ProjectCheckoutDir:    "/tmp/project",
-			ExecutionWorkspaceDir: "/tmp/project/.chc/user/worktrees/CHC-1",
+			ExecutionWorkspaceDir: "/tmp/project/.chr/user/worktrees/CHR-1",
 			BaseRef:               "origin/dev",
 			BaseSHA:               "abc123",
-			TicketBranch:          "chc/CHC-1",
+			TicketBranch:          "chr/CHR-1",
 		},
 		Artifacts: ExecutionArtifacts{
-			RunDir:     "/tmp/project/.chc/user/runtime/runs/exec-1",
-			ResultPath: "/tmp/project/.chc/user/runtime/runs/exec-1/result.json",
-			LogPath:    "/tmp/project/.chc/user/runtime/runs/exec-1/runtime.log",
+			RunDir:     "/tmp/project/.chr/user/runtime/runs/exec-1",
+			ResultPath: "/tmp/project/.chr/user/runtime/runs/exec-1/result.json",
+			LogPath:    "/tmp/project/.chr/user/runtime/runs/exec-1/runtime.log",
 		},
 		CreatedAt: now,
 		UpdatedAt: now,

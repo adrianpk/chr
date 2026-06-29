@@ -109,7 +109,7 @@ func TestNewNotificationEventRepositoryUsesUserEnvironmentDataDir(t *testing.T) 
 		}
 	})
 
-	assertPathExists(t, filepath.Join(root, "data", "chc", "core.db"))
+	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
 func newTestNotificationEventRepository(t *testing.T) NotificationEventRepository {
@@ -152,11 +152,11 @@ func testNotificationAuditRecord(now time.Time) NotificationAuditRecord {
 			Status:    NotificationStatusPending,
 			Source:    NotificationSourceTicketExecution,
 			References: NotificationReferences{
-				TicketKey:   "CHC-1",
+				TicketKey:   "CHR-1",
 				ExecutionID: "exec-1",
 			},
 			Payload: NotificationPayload{
-				Summary: "Ticket CHC-1 is blocked",
+				Summary: "Ticket CHR-1 is blocked",
 				Detail:  "Validation failed after repeated attempts.",
 			},
 			CreatedAt: now,

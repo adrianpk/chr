@@ -9,13 +9,13 @@ PR: #217
 
 ## Purpose
 
-Harden ChrysoCoord-created tickets so manual and generated creation paths produce
+Harden Chryso-created tickets so manual and generated creation paths produce
 Board-ready metadata and immediately refresh the SQLite ticket index.
 
 ## Delivered Behavior
 
 - `CreateTicketRequest` and the CLI `ticket new` command accept `synopsis`.
-- ChrysoCoord-created tickets require non-empty title and synopsis before key
+- Chryso-created tickets require non-empty title and synopsis before key
   allocation.
 - Tickets created without an explicit status default to `backlog`.
 - Ticket key allocation uses the SQLite `ticket_key_sequences` table with the
@@ -50,16 +50,16 @@ Board-ready metadata and immediately refresh the SQLite ticket index.
 
 ## Files of Interest
 
-- `internal/chc/ticket_repository.go`
-- `internal/chc/ticket_key_sequence.go`
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chctui/artifact_actions.go`
+- `internal/chr/ticket_repository.go`
+- `internal/chr/ticket_key_sequence.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chrtui/artifact_actions.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

@@ -24,7 +24,7 @@ The core package now includes:
 The CLI now supports non-dry-run:
 
 ```sh
-chc notify telegram test
+chr notify telegram test
 ```
 
 The command:
@@ -51,22 +51,22 @@ in the sender and in the audit record channel field.
 - Added `TelegramSendResult`.
 - Added `TelegramHTTPClient`.
 - Added `RenderTelegramNotificationMessage`.
-- Added non-dry-run `chc notify telegram test`.
+- Added non-dry-run `chr notify telegram test`.
 - Updated notification command documentation.
 
 ## Files of Interest
 
-- `internal/chc/telegram_notification.go`
-- `internal/chc/telegram_notification_test.go`
-- `internal/chcapp/notify.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/telegram_notification.go`
+- `internal/chr/telegram_notification_test.go`
+- `internal/chrapp/notify.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/notifications.md`
 - `docs/reference/commands.md`
 
 ## Validation
 
-- `go test ./internal/chc -run TestTelegram`: pass
-- `go test ./internal/chcapp -run TestNotify`: pass
+- `go test ./internal/chr -run TestTelegram`: pass
+- `go test ./internal/chrapp -run TestNotify`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

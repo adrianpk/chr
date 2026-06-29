@@ -8,18 +8,18 @@ Plan the `Ticket Result Application` slicing from the feature slicing set map.
 
 This slicing covers the use case:
 
-> After an execution attempt, `chc` updates durable project state with status,
+> After an execution attempt, `chr` updates durable project state with status,
 > evidence, and comments.
 
 ## Source
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related documents:
 
-- `.prj/drafts/chc-command-surfaces-and-priority.md`
+- `.prj/drafts/chr-command-surfaces-and-priority.md`
 - `.prj/plans/slicing-single-ticket-execution-plan.md`
 - `.prj/trackers/slicing-single-ticket-execution-tracker.md`
 - `docs/reference/ticket-execution.md`
@@ -268,7 +268,7 @@ Expose result application through a CLI command.
 
 Candidate scope:
 
-- add `chc ticket apply-result <execution-id>`;
+- add `chr ticket apply-result <execution-id>`;
 - resolve project context;
 - load one execution record;
 - apply ticket status, comments, evidence, and diagnostics;

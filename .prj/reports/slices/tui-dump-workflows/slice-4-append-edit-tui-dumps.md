@@ -22,7 +22,7 @@ add a service boundary for resolving the selected dump path.
 - Open resolves the selected dump path through the service and reports the
   project-relative path.
 - The TUI refreshes dump state after append/open actions.
-- The service rejects dump paths outside `.chc/dumps`.
+- The service rejects dump paths outside `.chr/dumps`.
 
 ## Implementation Notes
 
@@ -33,7 +33,7 @@ add a service boundary for resolving the selected dump path.
   codebase yet.
 - `SaveDump` was added at the service level for direct content replacement, but
   no TUI text editing surface uses it in this slice.
-- Path validation is project-relative and constrained to `.chc/dumps`.
+- Path validation is project-relative and constrained to `.chr/dumps`.
 
 ## Contracts Added or Changed
 
@@ -45,16 +45,16 @@ add a service boundary for resolving the selected dump path.
 
 ## Files of Interest
 
-- `internal/chcapp/service_dump.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chcapp/service_test.go`
-- `internal/chctui/dump_actions.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model_test.go`
+- `internal/chrapp/service_dump.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrapp/service_test.go`
+- `internal/chrtui/dump_actions.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

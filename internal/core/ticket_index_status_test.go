@@ -9,8 +9,8 @@ import (
 func TestTicketIndexStatusCheckerReportsCleanIndex(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHC-1-Good.md", Ticket{
-		Key:       "CHC-1",
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
 		CreatedAt: rebuildTestCreatedAt(),
@@ -26,8 +26,8 @@ func TestTicketIndexStatusCheckerReportsCleanIndex(t *testing.T) {
 func TestTicketIndexStatusCheckerReportsMissingTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHC-1-Good.md", Ticket{
-		Key:       "CHC-1",
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
 		CreatedAt: rebuildTestCreatedAt(),
@@ -38,24 +38,24 @@ func TestTicketIndexStatusCheckerReportsMissingTicket(t *testing.T) {
 
 	assertTicketIndexStatusCounts(t, status, 1, 0, 0, 0)
 
-	if status.Missing[0].RelativePath != "CHC-1-Good.md" {
-		t.Fatalf("Missing[0] = %#v, want CHC-1-Good.md", status.Missing[0])
+	if status.Missing[0].RelativePath != "CHR-1-Good.md" {
+		t.Fatalf("Missing[0] = %#v, want CHR-1-Good.md", status.Missing[0])
 	}
 }
 
 func TestTicketIndexStatusCheckerReportsStaleTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHC-1-Good.md", Ticket{
-		Key:       "CHC-1",
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
 		CreatedAt: rebuildTestCreatedAt(),
 		UpdatedAt: rebuildTestUpdatedAt(),
 	})
 	rebuildProjectTicketsForStatusTest(t, index, projectDir)
-	writeRebuildTestTicket(t, projectDir, "CHC-1-Good.md", Ticket{
-		Key:       "CHC-1",
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+		Key:       "CHR-1",
 		Title:     "Changed",
 		Status:    "open",
 		CreatedAt: rebuildTestCreatedAt(),
@@ -75,13 +75,13 @@ func TestTicketIndexStatusCheckerReportsOrphanedTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
 
-	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHC-1", nil))
+	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHR-1", nil))
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
-	writeRebuildTestTicket(t, projectDir, "CHC-2-Good.md", Ticket{
-		Key:       "CHC-2",
+	writeRebuildTestTicket(t, projectDir, "CHR-2-Good.md", Ticket{
+		Key:       "CHR-2",
 		Title:     "Good",
 		Status:    "open",
 		CreatedAt: rebuildTestCreatedAt(),
@@ -96,14 +96,14 @@ func TestTicketIndexStatusCheckerReportsOrphanedTicket(t *testing.T) {
 func TestTicketIndexStatusCheckerReportsInvalidTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chc", "user", "tickets", "CHC-1-Bad.md"))
+	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chr", "user", "tickets", "CHR-1-Bad.md"))
 
 	status := checkProjectTicketIndexForStatusTest(t, index, projectDir)
 
 	assertTicketIndexStatusCounts(t, status, 0, 0, 0, 1)
 
-	if status.Invalid[0].RelativePath != "CHC-1-Bad.md" {
-		t.Fatalf("Invalid[0] = %#v, want CHC-1-Bad.md", status.Invalid[0])
+	if status.Invalid[0].RelativePath != "CHR-1-Bad.md" {
+		t.Fatalf("Invalid[0] = %#v, want CHR-1-Bad.md", status.Invalid[0])
 	}
 }
 

@@ -21,11 +21,11 @@ The completed behavior supports the target use case:
 
 | Slice | PR | Delivered behavior |
 | --- | --- | --- |
-| Slice 1: Ticket File Discovery | `#22` | Deterministic Markdown ticket discovery under `.chc/tickets`. |
+| Slice 1: Ticket File Discovery | `#22` | Deterministic Markdown ticket discovery under `.chr/tickets`. |
 | Slice 2: Ticket Index Rebuild | `#23` | Rebuild one project's derived ticket index from Markdown files. |
 | Slice 3: Index Status | `#24` | Report missing, stale, orphaned, and invalid index state. |
-| Slice 4: Index Rebuild CLI | `#25` | Expose `chc index rebuild` for recovery and rehydration. |
-| Slice 5: Index Status CLI | `#26` | Expose `chc index status` for diagnostics. |
+| Slice 4: Index Rebuild CLI | `#25` | Expose `chr index rebuild` for recovery and rehydration. |
+| Slice 5: Index Status CLI | `#26` | Expose `chr index status` for diagnostics. |
 | Slice 6: Refresh Before Ticket Reads | `#27` | Refresh before `ticket list`, `show`, `comment`, and `status`. |
 | Slice 7: Reconciliation Boundary for Execution | `#28` | Add `TicketReconciler` with structured blocker semantics. |
 
@@ -33,15 +33,15 @@ The completed behavior supports the target use case:
 
 Delivered recovery and diagnostic commands:
 
-- `chc index rebuild`
-- `chc index status`
+- `chr index rebuild`
+- `chr index status`
 
 Ticket read commands now refresh the resolved project index before reading:
 
-- `chc ticket list`
-- `chc ticket show`
-- `chc ticket comment`
-- `chc ticket status`
+- `chr ticket list`
+- `chr ticket show`
+- `chr ticket comment`
+- `chr ticket status`
 
 ## Core Contracts
 
@@ -60,19 +60,19 @@ work from stale or invalid index state.
 
 Automated validation:
 
-- `go test ./internal/chc`: pass
-- `go test ./cmd/chc`: pass
+- `go test ./internal/chr`: pass
+- `go test ./cmd/chr`: pass
 - `make verify`: pass
 
 Completed slicing smoke validation:
 
 - `make install`: pass
-- `chc init`: pass
-- `chc ticket new`: pass
+- `chr init`: pass
+- `chr ticket new`: pass
 - direct Markdown title edit: pass
-- `chc ticket show`: pass, reflected edited Markdown title
-- `chc index status`: pass, clean status
-- `chc index rebuild`: pass, indexed one ticket with zero parse errors
+- `chr ticket show`: pass, reflected edited Markdown title
+- `chr index status`: pass, clean status
+- `chr index rebuild`: pass, indexed one ticket with zero parse errors
 
 ## Remaining Scope
 

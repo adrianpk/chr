@@ -12,7 +12,7 @@ The parser expects a Markdown file with YAML frontmatter delimiters:
 
 ```md
 ---
-key: "CHC-1"
+key: "CHR-1"
 title: "Do something"
 synopsis: "Implement one focused change."
 status: "backlog"
@@ -29,7 +29,7 @@ Ticket metadata is validated before the parser returns an indexable model. See
 
 ## Output
 
-The parser returns `chc.IndexedTicket`.
+The parser returns `chr.IndexedTicket`.
 
 The model includes:
 

@@ -8,7 +8,7 @@ Model: `ops/specs/2026-06-18-agent-work-observability-model.md`
 
 ## Summary
 
-ChrysoCoord should show useful live feedback while long-running agent work is
+Chryso should show useful live feedback while long-running agent work is
 executing.
 
 Today, when a user starts `Run all ready tickets` from the TUI Dash, the UI
@@ -76,20 +76,20 @@ Work Action Running
 Navigation is locked until this action finishes.
 
 11:32:01 loop started: 5 ready tickets
-11:32:04 CHC-1 started: Game outcome rules
-11:32:07 CHC-1 branch prepared
-11:32:11 CHC-1 Codex worker started
-11:34:22 CHC-1 worker finished
-11:34:33 CHC-1 validation passed: go test ./...
-11:34:34 CHC-1 moved to reviewing
-11:34:36 CHC-2 started: Move state transitions
+11:32:04 CHR-1 started: Game outcome rules
+11:32:07 CHR-1 branch prepared
+11:32:11 CHR-1 Codex worker started
+11:34:22 CHR-1 worker finished
+11:34:33 CHR-1 validation passed: go test ./...
+11:34:34 CHR-1 moved to reviewing
+11:34:36 CHR-2 started: Move state transitions
 ```
 
 The screen should keep updating while the foreground work action runs.
 
 ### Event Stream
 
-Events should be emitted by ChrysoCoord-owned runtime boundaries at lifecycle
+Events should be emitted by Chryso-owned runtime boundaries at lifecycle
 points such as:
 
 - loop started;
@@ -129,8 +129,8 @@ The expanded/debug path should expose execution details:
 The first implementation exposes deeper paths through CLI commands:
 
 ```text
-chc work logs <execution-id>
-chc work events <event-stream-path>
+chr work logs <execution-id>
+chr work events <event-stream-path>
 ```
 
 The TUI does not need to embed a full log viewer in the first slice set.
@@ -172,7 +172,7 @@ Recovery does not need to resume work automatically in this iteration.
 - The static "Please wait" screen is replaced by a live event stream and lock
   explanation.
 - Navigation remains locked during active foreground work.
-- Existing `chc work run-all` and TUI Dash work actions still execute tickets in
+- Existing `chr work run-all` and TUI Dash work actions still execute tickets in
   the same order and with the same result application semantics.
 - The TUI or CLI exposes a stable way to locate detailed runtime logs for the
   active or recent execution.
@@ -181,8 +181,8 @@ Recovery does not need to resume work automatically in this iteration.
 
 ## Open Questions
 
-- Whether the command for detailed logs should be `chc work logs`,
-  `chc runtime logs`, or report-based lookup.
+- Whether the command for detailed logs should be `chr work logs`,
+  `chr runtime logs`, or report-based lookup.
 - Whether event files should be grouped only by loop/execution id or also have a
   project-level latest stream index.
 - Whether container identifiers are always available from every runtime backend.

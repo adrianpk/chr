@@ -9,7 +9,7 @@ PR: #131
 
 ## Purpose
 
-Write a deterministic local diagnostic bundle under `.chc/maintenance/`.
+Write a deterministic local diagnostic bundle under `.chr/maintenance/`.
 
 This slice gives users one project-local Markdown artifact that collects current
 maintenance diagnostics without copying secrets or requiring manual SQLite and
@@ -18,7 +18,7 @@ filesystem inspection.
 ## Delivered Behavior
 
 - Added diagnostic bundle rendering and writing.
-- Added `chc maintenance bundle`.
+- Added `chr maintenance bundle`.
 - Included database migration status.
 - Included project registry diagnostics.
 - Included execution artifact drift diagnostics.
@@ -33,7 +33,7 @@ filesystem inspection.
 The bundle path is fixed:
 
 ```text
-.chc/maintenance/diagnostic-bundle.md
+.chr/maintenance/diagnostic-bundle.md
 ```
 
 The bundle is deterministic for a given local state. It does not include a
@@ -44,22 +44,22 @@ generation timestamp.
 - Added `DiagnosticBundle`.
 - Added `RenderDiagnosticBundle`.
 - Added `WriteDiagnosticBundle`.
-- Added `chc maintenance bundle`.
+- Added `chr maintenance bundle`.
 - Updated `docs/reference/maintenance.md`.
 
 ## Files of Interest
 
-- `internal/chc/diagnostic_bundle.go`
-- `internal/chc/diagnostic_bundle_test.go`
-- `internal/chcapp/maintenance.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/diagnostic_bundle.go`
+- `internal/chr/diagnostic_bundle_test.go`
+- `internal/chrapp/maintenance.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/maintenance.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'Test.*DiagnosticBundle'
-go test ./internal/chcapp -run 'TestMaintenanceBundle'
+go test ./internal/chr -run 'Test.*DiagnosticBundle'
+go test ./internal/chrapp -run 'TestMaintenanceBundle'
 make verify
 ```
 

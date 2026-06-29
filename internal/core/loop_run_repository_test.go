@@ -110,7 +110,7 @@ func TestNewLoopRunRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(root, "data", "chc", "core.db"))
+	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
 func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
@@ -130,8 +130,8 @@ func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
 
 	addTestProject(t, registry, Project{
 		ID:           "project-1",
-		Name:         "chrysocoord",
-		Path:         "/tmp/chrysocoord",
+		Name:         "chryso",
+		Path:         "/tmp/chryso",
 		Enabled:      true,
 		RegisteredAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})

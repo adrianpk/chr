@@ -62,7 +62,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp` - pass.
+- `go test ./internal/chr ./internal/chrapp` - pass.
 - `make verify` - pass.
 
 ## Slice 2: Ticket Payload Boundary
@@ -83,7 +83,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp` - pass.
+- `go test ./internal/chr ./internal/chrapp` - pass.
 - `make verify` - pass.
 
 ## Slice 3: Artifact Backend Defaults
@@ -105,7 +105,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp` - pass.
+- `go test ./internal/chr ./internal/chrapp` - pass.
 - `make verify` - pass.
 
 ## Slice 4: Artifact Run Bundle Audit

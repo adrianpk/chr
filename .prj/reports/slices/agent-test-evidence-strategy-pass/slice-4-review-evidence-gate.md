@@ -28,7 +28,7 @@ Projects can opt out through the existing evidence strategy configuration.
   `reviewing`.
 - Successful execution with missing or failing evidence now leaves the ticket
   `blocked` and writes a blocker reason.
-- Direct `chc ticket status <key> ready_for_review` now uses the same evidence
+- Direct `chr ticket status <key> ready_for_review` now uses the same evidence
   gate.
 - Direct status changes rejected by the evidence gate leave the ticket
   unchanged.

@@ -8,7 +8,7 @@ Plan the `UX Operation Surface` slicing created from full-system lab feedback.
 
 This slicing covers the use case:
 
-> A user can operate ChrysoCoord efficiently from a readable CLI and a local TUI
+> A user can operate Chryso efficiently from a readable CLI and a local TUI
 > without memorizing opaque IDs, copying absolute paths, or configuring internal
 > invariants.
 
@@ -16,7 +16,7 @@ This slicing covers the use case:
 
 Primary sources:
 
-- `.prj/drafts/chc-cli-output-polish-notes.md`
+- `.prj/drafts/chr-cli-output-polish-notes.md`
 - `.prj/tickets/open/20260522071859-align-cli-authoring-and-tui-operation-surface.md`
 - `docs/how-to/full-system-lab-runbook.md`
 
@@ -33,7 +33,7 @@ Reference context:
 
 Delivered foundations:
 
-- project-local `.chc/` workspace initialization;
+- project-local `.chr/` workspace initialization;
 - Markdown-first authoring sessions, quiz promotion, and assisted
   authoring artifacts;
 - ticket creation, listing, status changes, execution, loop, result
@@ -87,7 +87,7 @@ This slicing does not include:
 - replacing the CLI;
 - implementing every possible TUI action in the first pass;
 - live Telegram or email changes;
-- changing the `.chc/` canonical root;
+- changing the `.chr/` canonical root;
 - broad runtime worker redesign beyond UX-facing contracts.
 
 ## Design Direction
@@ -101,10 +101,10 @@ The TUI becomes the normal human workflow surface:
 - lists are navigated, not memorized;
 - actions run against selected entities;
 - details and evidence are visible without chasing paths;
-- all state remains project-local and auditable under `.chc/`.
+- all state remains project-local and auditable under `.chr/`.
 
 Configuration should expose only meaningful user decisions. Invariants such as
-`.chc/`, Markdown as canonical artifact format, runtime artifact layout, and
+`.chr/`, Markdown as canonical artifact format, runtime artifact layout, and
 internal workspace paths should be owned by the binary.
 
 ## Numbering Rule
@@ -161,11 +161,11 @@ surfaces.
 
 Candidate scope:
 
-- review `.chc/config.yml` generated fields;
+- review `.chr/config.yml` generated fields;
 - keep only meaningful user decisions in config;
-- treat `.chc/`, Markdown canonical artifacts, runtime workdir, and runtime
+- treat `.chr/`, Markdown canonical artifacts, runtime workdir, and runtime
   artifact layout as binary-owned invariants unless a real user choice exists;
-- rewrite or remove `.chc/manifest.md` as an authoritative-looking config
+- rewrite or remove `.chr/manifest.md` as an authoritative-looking config
   surface;
 - move workspace orientation into a human guide if it remains useful;
 - add migration/compatibility handling for existing generated config fields;
@@ -186,15 +186,15 @@ Expected report: `.prj/reports/slices/ux-operation-surface/slice-3-protocol-doc-
 
 Goal:
 
-Separate project documentation guidance from ChrysoCoord operational artifact
+Separate project documentation guidance from Chryso operational artifact
 contracts.
 
 Candidate scope:
 
-- review generated `.chc/agents/*.md` files;
+- review generated `.chr/agents/*.md` files;
 - keep `DOCUMENTING.md` focused on project durable documentation;
-- remove `.chc/` operational layout rules from project documentation guidance;
-- move ChrysoCoord artifact layout explanation into docs/reference or a clear
+- remove `.chr/` operational layout rules from project documentation guidance;
+- move Chryso artifact layout explanation into docs/reference or a clear
   workspace guide;
 - ensure operational artifact layout is enforced by code, not convention text;
 - update context composition if manifest/protocol sources change;
@@ -203,7 +203,7 @@ Candidate scope:
 Expected outcome:
 
 - generated protocol docs guide project work without implying that the project
-  can redefine ChrysoCoord's internal artifact contracts.
+  can redefine Chryso's internal artifact contracts.
 
 ### Slice 4: Authoring Session Ergonomics
 
@@ -245,7 +245,7 @@ Expected report: `.prj/reports/slices/ux-operation-surface/slice-5-context-aware
 
 Goal:
 
-Add a ChrysoCoord-native question generation path that can produce useful
+Add a Chryso-native question generation path that can produce useful
 questions for a target artifact.
 
 Candidate scope:
@@ -263,7 +263,7 @@ Candidate scope:
 
 Expected outcome:
 
-- `chc` has a clear internal boundary for useful quiz generation, even before
+- `chr` has a clear internal boundary for useful quiz generation, even before
   every provider integration is complete.
 
 ### Slice 6: TUI Specification Set
@@ -309,7 +309,7 @@ Extract the first Bubble Tea TUI implementation work into the dedicated
 
 Candidate scope:
 
-- add `chc tui` command;
+- add `chr tui` command;
 - add project resolution and current project display;
 - add navigation frame/sidebar or equivalent;
 - list tickets, authoring sessions, reports, and runtime status;

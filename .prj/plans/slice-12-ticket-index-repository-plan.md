@@ -63,7 +63,7 @@ Expected behavior:
 
 This slice does not cover:
 
-- `chc ticket index rebuild`,
+- `chr ticket index rebuild`,
 - daemon watcher,
 - Telegram integration,
 - ticket search CLI,

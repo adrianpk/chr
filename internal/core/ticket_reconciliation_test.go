@@ -10,8 +10,8 @@ import (
 func TestTicketReconcilerRefreshesCleanProject(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHC-1-Good.md", Ticket{
-		Key:       "CHC-1",
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
 		CreatedAt: rebuildTestCreatedAt(),
@@ -38,20 +38,20 @@ func TestTicketReconcilerRefreshesCleanProject(t *testing.T) {
 		t.Fatalf("Blockers = %#v, want none", result.Blockers)
 	}
 
-	ticket, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	ticket, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
 	if err != nil {
 		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
 	}
 
-	if ticket.RelativePath != "CHC-1-Good.md" {
-		t.Fatalf("RelativePath = %q, want CHC-1-Good.md", ticket.RelativePath)
+	if ticket.RelativePath != "CHR-1-Good.md" {
+		t.Fatalf("RelativePath = %q, want CHR-1-Good.md", ticket.RelativePath)
 	}
 }
 
 func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chc", "user", "tickets", "CHC-1-Bad.md"))
+	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chr", "user", "tickets", "CHR-1-Bad.md"))
 
 	result, err := NewTicketReconciler(index).ReconcileProjectTickets(
 		context.Background(),
@@ -82,8 +82,8 @@ func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 		t.Fatalf("Kind = %q, want %q", blocker.Kind, TicketReconciliationBlockerParseError)
 	}
 
-	if blocker.RelativePath != "CHC-1-Bad.md" {
-		t.Fatalf("RelativePath = %q, want CHC-1-Bad.md", blocker.RelativePath)
+	if blocker.RelativePath != "CHR-1-Bad.md" {
+		t.Fatalf("RelativePath = %q, want CHR-1-Bad.md", blocker.RelativePath)
 	}
 
 	if blocker.Err == nil {
@@ -94,8 +94,8 @@ func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	writeRebuildTestTicket(t, projectDir, "CHC-1-Good.md", Ticket{
-		Key:       "CHC-1",
+	writeRebuildTestTicket(t, projectDir, "CHR-1-Good.md", Ticket{
+		Key:       "CHR-1",
 		Title:     "Good",
 		Status:    "open",
 		CreatedAt: rebuildTestCreatedAt(),
@@ -104,7 +104,7 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 
 	reconcileAllProjectTickets(t, index, projectDir)
 
-	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Good.md")
+	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Good.md")
 
 	err := NewTicketResultStateWriter().WriteResultState(context.Background(), WriteResultStateOptions{
 		Application: ResultApplication{
@@ -138,7 +138,7 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 		t.Fatalf("Blockers = %#v, want none", result.Blockers)
 	}
 
-	ticket, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHC-1")
+	ticket, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
 	if err != nil {
 		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
-	ticketPath := filepath.Join(projectDir, ".chc", "user", "tickets", "CHC-1-Bad.md")
+	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Bad.md")
 	writeFile(t, ticketPath, "missing frontmatter")
 
 	result, err := NewTicketReconciler(index).ReconcileProjectTicket(
@@ -184,8 +184,8 @@ func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 		t.Fatal("FirstBlocker returned false")
 	}
 
-	if blocker.RelativePath != "CHC-1-Bad.md" {
-		t.Fatalf("RelativePath = %q, want CHC-1-Bad.md", blocker.RelativePath)
+	if blocker.RelativePath != "CHR-1-Bad.md" {
+		t.Fatalf("RelativePath = %q, want CHR-1-Bad.md", blocker.RelativePath)
 	}
 }
 

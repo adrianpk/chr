@@ -97,7 +97,7 @@ Agentic review should persist a local review artifact.
 Suggested path:
 
 ```text
-.chc/user/reviews/<ticket-key>/<cycle-id>.md
+.chr/user/reviews/<ticket-key>/<cycle-id>.md
 ```
 
 The artifact should include:
@@ -115,7 +115,7 @@ The artifact should include:
 - created timestamp.
 
 Review artifacts may be versioned according to project policy, but operational
-state must remain under `.chc/`.
+state must remain under `.chr/`.
 
 ## Review Decision
 

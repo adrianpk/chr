@@ -49,13 +49,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/context_readiness_handoff.go`
-- `internal/chc/context_readiness_handoff_test.go`
+- `internal/chr/context_readiness_handoff.go`
+- `internal/chr/context_readiness_handoff_test.go`
 - `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestEvaluateContextReadinessHandoff'`: pass
+- `go test ./internal/chr -run 'TestEvaluateContextReadinessHandoff'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

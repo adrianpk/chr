@@ -53,7 +53,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 | T3.3 | Make user checkout dirtiness informational in worktree mode. | done | `b02ce7b` | Work selection no longer blocks on the user's dirty or stale checkout in worktree mode. |
 | T3.4 | Make ticket worktree dirtiness blocking in worktree mode. | done | `df57f9b` | Dirty, mismatched, branch-in-use, and orphaned ticket worktrees block. |
 | T3.5 | Add remote-base diagnostics for failed fetch and missing `<remote>/<integration_branch>`. | done | `c0286ba` | Worktree mode validates the fetched remote base instead of local branch containment. |
-| T3.6 | Update `chc work doctor` output and service models to expose both workspace states. | done | `c28b9e4` | Doctor and Dash expose workspace mode, user checkout state, and ticket worktree state. |
+| T3.6 | Update `chr work doctor` output and service models to expose both workspace states. | done | `c28b9e4` | Doctor and Dash expose workspace mode, user checkout state, and ticket worktree state. |
 | T3.7 | Add safe repair coverage for fetch, root creation, and non-destructive worktree metadata pruning. | done | `88c4cdb` | Safe repair can create roots and remove stale metadata without deleting worktrees. |
 | T3.8 | Add CLI/service/TUI tests for legacy mode and worktree mode readiness. | done | `ec8cc69` | Added CLI, service, TUI, and core coverage for the new readiness surfaces. |
 | T3.9 | Add the slice implementation report and validation evidence. | done | this commit | Report status is `reviewing` before PR. |

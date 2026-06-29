@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // QuizViewStatusNotStarted marks a quiz scope that has no active session yet.

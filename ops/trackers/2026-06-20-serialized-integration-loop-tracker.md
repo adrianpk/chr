@@ -42,7 +42,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | T2.4 | Stop `human_review` mode after `ready_for_review` handoff. | done | `1ee364c` | Development success now records a loop barrier when review or merge is still required. |
 | T2.5 | Update dry-run output to describe first selected cycle and remaining eligible tickets. | done | `1ee364c` | Dry-run prints `cycle_ticket` and `remaining_eligible`. |
 | T2.6 | Replace tests that expect two development-only processed tickets with tests that expect a barrier after the first unfinished integration cycle. | done | `1ee364c`, `57a06e7` | Updated service and CLI expectations for one processed ticket plus blocked loop status. |
-| T2.7 | Add tests proving no second ticket starts until the first reaches a terminal cycle state. | done | `1ee364c`, `57a06e7` | Tests assert CHC-2 has no execution record when CHC-1 is still waiting for integration. |
+| T2.7 | Add tests proving no second ticket starts until the first reaches a terminal cycle state. | done | `1ee364c`, `57a06e7` | Tests assert CHR-2 has no execution record when CHR-1 is still waiting for integration. |
 | T2.8 | Add the slice implementation report and validation evidence. | done | this commit | Report added with final validation evidence. |
 
 ## Slice 3 Tasks
@@ -51,7 +51,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | --- | --- | --- | --- | --- |
 | T3.1 | Define the reviewer context artifact and prompt contract. | done | `4ccb3fb` | Added local review context rendering and Codex reviewer prompt. |
 | T3.2 | Add structured review result parsing and validation. | done | `4ccb3fb` | Added strict JSON parsing, schema, decision validation, and finding validation. |
-| T3.3 | Persist local review artifacts under `.chc/`. | done | `4ccb3fb` | Reviews write context, structured result, summary, and Codex run artifacts under runtime review directories. |
+| T3.3 | Persist local review artifacts under `.chr/`. | done | `4ccb3fb` | Reviews write context, structured result, summary, and Codex run artifacts under runtime review directories. |
 | T3.4 | Apply `pass`, `needs_changes`, `insufficient_evidence`, and `human_required` outcomes to ticket state. | done | `f838c0e`, `7a4fa6b` | Core maps review decisions to ticket review metadata; app applies them during `work run-all`. |
 | T3.5 | Add non-blocking note handling with existing comment limits. | done | `7a4fa6b` | Agentic review non-blocking notes become limited local ticket comments. |
 | T3.6 | Add fake-reviewer tests for clean pass and high-level blocking findings. | done | `7a4fa6b` | Service tests cover pass and `needs_changes` decisions through a fake reviewer. |
@@ -90,7 +90,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | T6.2 | Update Dash rendering for active cycle phase and stop reason. | done | `8862c4e` | Dash now shows latest persisted phase and event message. |
 | T6.3 | Update loop and execution reports with cycle details. | done | `8862c4e` | Loop reports now include a derived stop reason. |
 | T6.4 | Update user guide, ticket loop reference, review workflow reference, and changelog. | done | `c3faa66` | Updated user guide, reference docs, how-to docs, and changelog. |
-| T6.5 | Add or update resettable QA fixture with two dependent tickets. | done | `c3faa66` | Added a two-ticket tic-tac-toe fixture under `.chc/user/fixtures/serialized-loop-tickets/`. |
+| T6.5 | Add or update resettable QA fixture with two dependent tickets. | done | `c3faa66` | Added a two-ticket tic-tac-toe fixture under `.chr/user/fixtures/serialized-loop-tickets/`. |
 | T6.6 | Add smoke or manual runbook proving ticket 2 does not start until ticket 1 is merged. | done | `c3faa66` | QA runbook documents the serialized barrier fixture and expected observations. |
 | T6.7 | Run `make verify` and relevant QA smoke commands. | done | this commit | `make verify` and non-resetting `make qa-test-tictactoe` passed. |
 | T6.8 | Add the slice implementation report and final cycle report. | done | this commit | Report added with final validation evidence. |
@@ -136,7 +136,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 - Slice 1 defers a dedicated `integration_cycles` table and relies on existing
   ticket, execution, review, merge, and loop state until the runner needs a
   persistence table.
-- Whether `chc work ticket <ticket>` should remain development-only or gain a
+- Whether `chr work ticket <ticket>` should remain development-only or gain a
   separate full-cycle single-ticket command.
 - Whether project templates should eventually default to `agentic_review`,
   `trusted_auto_merge`, or remain `human_review`.

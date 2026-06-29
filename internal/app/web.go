@@ -14,9 +14,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/webui"
-	"forge.adrianpk.com/chc/internal/webui/ui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/webui"
+	"forge.adrianpk.com/chr/internal/webui/ui"
 )
 
 func newWebCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -275,7 +275,7 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 		Access:      access,
 		LogRequests: config.LogRequests,
 		Data: webui.ShellData{
-			Title:          "ChrysoCoord",
+			Title:          "Chryso",
 			ProjectDir:     config.ProjectDir,
 			ProjectID:      projectID(config.ProjectDir),
 			URL:            config.URL,

@@ -23,9 +23,9 @@ import "testing"
 func TestGateQA(t *testing.T) {}
 EOF
 
-mkdir -p "$project_dir/.chc/user/config"
+mkdir -p "$project_dir/.chr/user/config"
 
-cat >"$project_dir/.chc/user/config/gates.yml" <<'EOF'
+cat >"$project_dir/.chr/user/config/gates.yml" <<'EOF'
 gates:
   dev_main:
     validation_command: go test ./...
@@ -35,8 +35,8 @@ gates:
 EOF
 
 git -C "$project_dir" init >/dev/null
-git -C "$project_dir" -c user.name="ChrysoCoord QA" -c user.email="qa@example.test" add .
-git -C "$project_dir" -c user.name="ChrysoCoord QA" -c user.email="qa@example.test" commit -m "base" >/dev/null
+git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" add .
+git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" commit -m "base" >/dev/null
 
 base_ref="$(git -C "$project_dir" rev-parse HEAD)"
 
@@ -46,13 +46,13 @@ cat >"$project_dir/README.md" <<'EOF'
 This file gives the gate a concrete Git change to report.
 EOF
 
-git -C "$project_dir" -c user.name="ChrysoCoord QA" -c user.email="qa@example.test" add README.md
-git -C "$project_dir" -c user.name="ChrysoCoord QA" -c user.email="qa@example.test" commit -m "change" >/dev/null
+git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" add README.md
+git -C "$project_dir" -c user.name="Chryso QA" -c user.email="qa@example.test" commit -m "change" >/dev/null
 
 output_file="$project_dir/gate-output.txt"
 go_cache="$project_dir/go-build-cache"
 
-GOCACHE="$go_cache" go run "$repo_root/cmd/chc" gate dev-main --dir "$project_dir" --base "$base_ref" --head HEAD >"$output_file"
+GOCACHE="$go_cache" go run "$repo_root/cmd/chr" gate dev-main --dir "$project_dir" --base "$base_ref" --head HEAD >"$output_file"
 
 if ! grep -q "status: passed" "$output_file"; then
 	echo "qa gate failed: expected passed status" >&2
@@ -60,8 +60,8 @@ if ! grep -q "status: passed" "$output_file"; then
 	exit 1
 fi
 
-json_count="$(find "$project_dir/.chc/user/reports/gates" -maxdepth 1 -type f -name '*.json' | wc -l | tr -d ' ')"
-markdown_count="$(find "$project_dir/.chc/user/reports/gates" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
+json_count="$(find "$project_dir/.chr/user/reports/gates" -maxdepth 1 -type f -name '*.json' | wc -l | tr -d ' ')"
+markdown_count="$(find "$project_dir/.chr/user/reports/gates" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
 
 if [ "$json_count" != "1" ] || [ "$markdown_count" != "1" ]; then
 	echo "qa gate failed: expected one JSON report and one Markdown report" >&2

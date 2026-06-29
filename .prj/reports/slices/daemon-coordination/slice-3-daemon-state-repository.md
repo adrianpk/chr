@@ -45,15 +45,15 @@ Added core repository:
 
 ## Files of Interest
 
-- `cmd/chc/assets/migration/sqlite/20260520000005-create_daemon_state.sql`
-- `internal/chc/daemon_state_repository.go`
-- `internal/chc/daemon_state_repository_test.go`
-- `internal/chc/migration_test.go`
+- `cmd/chr/assets/migration/sqlite/20260520000005-create_daemon_state.sql`
+- `internal/chr/daemon_state_repository.go`
+- `internal/chr/daemon_state_repository_test.go`
+- `internal/chr/migration_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestDaemonStateRepository|TestMigrator'`: pass
+- `go test ./internal/chr -run 'TestDaemonStateRepository|TestMigrator'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

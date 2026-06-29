@@ -7,7 +7,7 @@ Status: delivered
 Plan the transition from duplicated relational persistence toward a
 Markdown-only workspace model.
 
-Markdown files under `.chc/` are the source of truth. Runtime code may build an
+Markdown files under `.chr/` are the source of truth. Runtime code may build an
 ephemeral in-memory workspace graph for navigation, diagnostics, and context
 assembly, but it must not persist a second authoritative representation in
 SQLite for `Project` or `Cases`.
@@ -36,8 +36,8 @@ Conversation decisions:
 
 The current implementation includes:
 
-- `.chc/project.md` as Markdown project metadata;
-- `.chc/cases/*.md` as Markdown case metadata;
+- `.chr/project.md` as Markdown project metadata;
+- `.chr/cases/*.md` as Markdown case metadata;
 - SQLite-backed indexed project metadata;
 - SQLite-backed indexed case metadata;
 - TUI executors that write Markdown and then update relational indexes;
@@ -52,7 +52,7 @@ The target model is:
 
 - Markdown files are the durable source of truth.
 - SQLite is not used for `Project` or `Cases`.
-- The app scans `.chc/` into an ephemeral `WorkspaceGraph`.
+- The app scans `.chr/` into an ephemeral `WorkspaceGraph`.
 - The graph stores only lightweight metadata:
   - path;
   - kind;
@@ -95,7 +95,7 @@ Project
 A case is defined by a canonical case document:
 
 ```text
-.chc/cases/<slug>.md
+.chr/cases/<slug>.md
 ```
 
 Other artifact documents may reference the case by slug in frontmatter.
@@ -107,7 +107,7 @@ It should appear as an unresolved case reference in the workspace graph and TUI.
 
 This slicing does not include:
 
-- changing the physical `.chc/` directory layout;
+- changing the physical `.chr/` directory layout;
 - introducing a daemon or mandatory filesystem watcher;
 - adding embeddings or semantic search;
 - implementing a full text editor in the TUI;
@@ -196,7 +196,7 @@ Introduce the in-memory graph used for navigation and context selection.
 Candidate scope:
 
 - add a graph package or cohesive internal service;
-- scan `.chc/` Markdown files;
+- scan `.chr/` Markdown files;
 - parse frontmatter without loading bodies as primary graph state;
 - classify project, case, dump, quiz, spec, plan, ticket, and report where
   supported;

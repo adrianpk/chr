@@ -20,7 +20,7 @@ keeping write behavior inside the application service.
   scope.
 - When invoked outside `Cases`, the dump is project-wide.
 - Confirming the action calls the dump service through a TUI adapter.
-- The service writes Markdown under `.chc/dumps`.
+- The service writes Markdown under `.chr/dumps`.
 - Created dumps use `status: "raw"`.
 - Case-scoped dumps include `case: "<slug>"`; project-wide dumps omit `case`.
 - The TUI refreshes its dump read model from the service result.
@@ -40,25 +40,25 @@ keeping write behavior inside the application service.
 
 - Added `service.CreateDump`.
 - Added `DumpActionExecutor`, `DumpActionRequest`, `DumpActionResult`, and
-  `DumpActionState` in `internal/chctui`.
+  `DumpActionState` in `internal/chrtui`.
 - Added `CommandActionPlanDump` and the `create-dump` command.
 - Added TUI adapter mapping from dump action requests to service
   `DumpCreateRequest`.
 
 ## Files of Interest
 
-- `internal/chcapp/service_dump.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chcapp/service_test.go`
-- `internal/chctui/dump_actions.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
-- `internal/chctui/shell.go`
+- `internal/chrapp/service_dump.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrapp/service_test.go`
+- `internal/chrtui/dump_actions.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrtui/shell.go`
 
 ## Validation
 
-- `go test ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

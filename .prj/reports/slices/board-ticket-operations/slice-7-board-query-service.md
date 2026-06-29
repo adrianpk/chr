@@ -47,15 +47,15 @@ query boundary before compact Board navigation is implemented.
 
 ## Files of Interest
 
-- `internal/chc/board_query.go`
-- `internal/chc/board_query_test.go`
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/app.go`
+- `internal/chr/board_query.go`
+- `internal/chr/board_query_test.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/app.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

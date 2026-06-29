@@ -16,11 +16,11 @@ knowing their paths.
 
 ## Delivered Behavior
 
-- Added core report artifact discovery under `.chc/runtime/runs/`.
+- Added core report artifact discovery under `.chr/runtime/runs/`.
 - Added report metadata extraction from Markdown list fields.
 - Added filters for kind, ticket key, execution id, loop id, and status.
-- Added `chc report` command group.
-- Added `chc report list`.
+- Added `chr report` command group.
+- Added `chr report list`.
 - Added stable line-oriented output for report entries.
 
 ## Implementation Notes
@@ -37,23 +37,23 @@ body rendering remains deferred to `report show`.
 - Added `ReportListFilter`.
 - Added `ReportListEntry`.
 - Added `ReportLister`.
-- Added `chc report list`.
+- Added `chr report list`.
 - Added `docs/reference/reports.md`.
 
 ## Files of Interest
 
-- `internal/chc/report_listing.go`
-- `internal/chc/report_listing_test.go`
-- `internal/chcapp/report.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/report_listing.go`
+- `internal/chr/report_listing_test.go`
+- `internal/chrapp/report.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/reports.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'TestReportLister'
-go test ./internal/chcapp -run 'TestReportList'
+go test ./internal/chr -run 'TestReportLister'
+go test ./internal/chrapp -run 'TestReportList'
 make verify
 ```
 

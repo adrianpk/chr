@@ -1,4 +1,4 @@
-module forge.adrianpk.com/chc
+module forge.adrianpk.com/chr
 
 go 1.25.1
 

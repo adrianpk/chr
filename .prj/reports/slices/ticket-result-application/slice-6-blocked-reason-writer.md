@@ -47,13 +47,13 @@ New function:
 
 ## Files of Interest
 
-- `internal/chc/result_blocked_reason_writer.go`
-- `internal/chc/result_blocked_reason_writer_test.go`
+- `internal/chr/result_blocked_reason_writer.go`
+- `internal/chr/result_blocked_reason_writer_test.go`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

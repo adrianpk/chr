@@ -34,10 +34,10 @@ Spec: `.prj/specs/specs/tui-operational-console.md`
 Candidate tasks:
 
 - [x] Add Bubble Tea dependencies.
-- [x] Add `internal/chctui` package boundary.
-- [x] Add `chc tui` command.
-- [x] Dispatch `chc` without subcommands to the TUI.
-- [x] Preserve `chc --help`.
+- [x] Add `internal/chrtui` package boundary.
+- [x] Add `chr tui` command.
+- [x] Dispatch `chr` without subcommands to the TUI.
+- [x] Preserve `chr --help`.
 - [x] Implement base model/update/view.
 - [x] Render project-aware navigation shell.
 - [x] Add tests for model/update behavior.
@@ -47,7 +47,7 @@ Candidate tasks:
 Task commits:
 
 - T1.1: Bubble Tea dependency and TUI package boundary.
-- T1.2: `chc tui` and default `chc` routing.
+- T1.2: `chr tui` and default `chr` routing.
 - T1.3: base TUI model, navigation, and project shell.
 - T1.4: tests, validation, and slice report.
 

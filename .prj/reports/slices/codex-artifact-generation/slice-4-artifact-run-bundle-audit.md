@@ -23,39 +23,39 @@ Script:
 Default source workspace:
 
 ```text
-/home/adrian/Projects/labs/chc/projects/chc-blog-work
+/home/adrian/Projects/labs/chr/projects/chr-blog-work
 ```
 
 The script copies the source workspace to a temporary directory, seeds the
 `artifact-backend-audit` use case in the copy, clears trace and agent run
 bundles in the copy, and runs:
 
-- `chc dump new`
-- `chc spec generate`
-- `chc plan generate`
-- `chc plan tracking create`
+- `chr dump new`
+- `chr spec generate`
+- `chr plan generate`
+- `chr plan tracking create`
 
 ## Run Result
 
 Successful run workspace:
 
 ```text
-/tmp/chc-codex-artifacts-93G0Fu/chc-blog-work
+/tmp/chr-codex-artifacts-93G0Fu/chr-blog-work
 ```
 
 Generated artifacts:
 
-- `.chc/user/dumps/artifact-backend-audit-notes.md`
-- `.chc/user/dumps/artifact-backend-audit-notes-raw.md`
-- `.chc/user/specs/artifact-backend-audit-spec.md`
-- `.chc/user/plans/artifact-backend-audit-plan.md`
-- `.chc/user/plans/artifact-backend-audit-tracking.md`
-- `.chc/user/tickets/artifact-backend-audit/CHC-21-Copied-workspace-safety-guard.md`
-- `.chc/user/tickets/artifact-backend-audit/CHC-22-Default-Codex-artifact-generation-path.md`
-- `.chc/user/tickets/artifact-backend-audit/CHC-23-Go-owned-artifact-materialization.md`
-- `.chc/user/tickets/artifact-backend-audit/CHC-24-Ticket-and-tracking-materialization-boundary.md`
-- `.chc/user/tickets/artifact-backend-audit/CHC-25-Trace-and-run-bundle-evidence.md`
-- `.chc/user/tickets/artifact-backend-audit/CHC-26-Audit-validation-and-reporting.md`
+- `.chr/user/dumps/artifact-backend-audit-notes.md`
+- `.chr/user/dumps/artifact-backend-audit-notes-raw.md`
+- `.chr/user/specs/artifact-backend-audit-spec.md`
+- `.chr/user/plans/artifact-backend-audit-plan.md`
+- `.chr/user/plans/artifact-backend-audit-tracking.md`
+- `.chr/user/tickets/artifact-backend-audit/CHR-21-Copied-workspace-safety-guard.md`
+- `.chr/user/tickets/artifact-backend-audit/CHR-22-Default-Codex-artifact-generation-path.md`
+- `.chr/user/tickets/artifact-backend-audit/CHR-23-Go-owned-artifact-materialization.md`
+- `.chr/user/tickets/artifact-backend-audit/CHR-24-Ticket-and-tracking-materialization-boundary.md`
+- `.chr/user/tickets/artifact-backend-audit/CHR-25-Trace-and-run-bundle-evidence.md`
+- `.chr/user/tickets/artifact-backend-audit/CHR-26-Audit-validation-and-reporting.md`
 
 Command output summary:
 
@@ -71,7 +71,7 @@ Command output summary:
 Trace file:
 
 ```text
-/tmp/chc-codex-artifacts-93G0Fu/chc-blog-work/.chc/user/log/llm/llm.ndjson
+/tmp/chr-codex-artifacts-93G0Fu/chr-blog-work/.chr/user/log/llm/llm.ndjson
 ```
 
 Observed events:
@@ -92,7 +92,7 @@ Observed events:
 Agent run directory:
 
 ```text
-/tmp/chc-codex-artifacts-93G0Fu/chc-blog-work/.chc/user/tmp/agent-runs
+/tmp/chr-codex-artifacts-93G0Fu/chr-blog-work/.chr/user/tmp/agent-runs
 ```
 
 Observed bundles:
@@ -119,7 +119,7 @@ after the probe. Generated artifacts were present only in the temporary copy.
 ## Initial Failed Probe
 
 The first probe run failed during spec validation because the generated spec
-referenced `.chc/user/user/log/llm/llm.ndjson`. The probe fixture was adjusted
+referenced `.chr/user/user/log/llm/llm.ndjson`. The probe fixture was adjusted
 to avoid feeding concrete trace paths into generated spec content. The
 successful run above completed after that adjustment.
 

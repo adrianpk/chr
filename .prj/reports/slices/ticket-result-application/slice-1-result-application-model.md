@@ -48,13 +48,13 @@ New function:
 
 ## Files of Interest
 
-- `internal/chc/result_application.go`
-- `internal/chc/result_application_test.go`
+- `internal/chr/result_application.go`
+- `internal/chr/result_application_test.go`
 - `docs/reference/ticket-result-application.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

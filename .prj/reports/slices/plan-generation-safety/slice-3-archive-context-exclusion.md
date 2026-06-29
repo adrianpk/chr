@@ -15,8 +15,8 @@ provenance.
 
 ## Delivered Behavior
 
-- `.chc/plans/archive/**` is ignored by the workspace graph builder.
-- `.chc/specs/archive/**` is ignored by the workspace graph builder.
+- `.chr/plans/archive/**` is ignored by the workspace graph builder.
+- `.chr/specs/archive/**` is ignored by the workspace graph builder.
 - Archived generated documents are not included in workspace index lookups.
 - Plan and spec generation context assembled from the workspace index excludes
   archived generated documents.
@@ -35,23 +35,23 @@ provenance.
 ## Contracts Added or Changed
 
 - Added active-context exclusion for generated archive directories:
-  `.chc/plans/archive/**` and `.chc/specs/archive/**`.
+  `.chr/plans/archive/**` and `.chr/specs/archive/**`.
 - Added TUI document-list exclusion for the same generated archive directories.
 
 ## Files of Interest
 
-- `internal/chc/workspace_graph.go`
-- `internal/chc/workspace_index_test.go`
-- `internal/chcapp/service_plan_test.go`
-- `internal/chcapp/service_spec_test.go`
-- `internal/chctui/documents.go`
-- `internal/chctui/model_test.go`
+- `internal/chr/workspace_graph.go`
+- `internal/chr/workspace_index_test.go`
+- `internal/chrapp/service_plan_test.go`
+- `internal/chrapp/service_spec_test.go`
+- `internal/chrtui/documents.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
-- `go test ./internal/chcapp`: pass
-- `go test ./internal/chctui`: pass
+- `go test ./internal/chr`: pass
+- `go test ./internal/chrapp`: pass
+- `go test ./internal/chrtui`: pass
 - `go test ./...`: pass
 - `make verify`: fail
 

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chc/internal/webui/htmx"
+	"forge.adrianpk.com/chr/internal/webui/htmx"
 )
 
 func TestButtonRenderEscapesTextAndIncludesHTMX(t *testing.T) {

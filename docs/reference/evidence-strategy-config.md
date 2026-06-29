@@ -1,6 +1,6 @@
 # Evidence Strategy Configuration
 
-Evidence strategy configuration controls how ChrysoCoord prepares ticket
+Evidence strategy configuration controls how Chryso prepares ticket
 workers to decide and record testing, validation, Gherkin, and runtime evidence.
 
 The configuration controls ticket checklist writing, worker context, execution
@@ -9,7 +9,7 @@ inspected from ticket and runtime surfaces.
 
 ## Location
 
-Evidence strategy settings live in `.chc/user/config.yml` under
+Evidence strategy settings live in `.chr/user/config.yml` under
 `evidence.strategy`.
 
 Generated config may omit these fields. Omitted fields use the defaults listed
@@ -61,7 +61,7 @@ evidence:
 
 Gherkin is considered active when `gherkin_policy` is `active_when_applicable`
 and the project already has `.feature` artifacts under
-`.chc/user/acceptance/`. Active Gherkin applies to tickets that change
+`.chr/user/acceptance/`. Active Gherkin applies to tickets that change
 observable CLI, TUI, API, domain, acceptance workflow, or user-visible bugfix
 behavior.
 
@@ -88,13 +88,13 @@ still allowing projects to relax or redirect the behavior through config.
 
 ## Visibility Surfaces
 
-The ticket checklist is the primary operational source. ChrysoCoord derives
+The ticket checklist is the primary operational source. Chryso derives
 short evidence summaries from that checklist for user-facing views.
 
 - Board ticket detail shows the overall evidence state and each checklist item.
-- `chc ticket show <key>` prints detailed evidence fields when a checklist is
+- `chr ticket show <key>` prints detailed evidence fields when a checklist is
   present or malformed.
-- `chc ticket list` and `chc ticket board` include a compact evidence status
+- `chr ticket list` and `chr ticket board` include a compact evidence status
   cell.
 - Dash work events can include the ticket path, execution report path, runtime
   log path, and validation log path after execution starts or completes.
@@ -111,17 +111,17 @@ The summary statuses are:
 ## Review Transition Gate
 
 When `enabled: true`, `ticket_checklist: required`, and
-`strict_ready_for_review: true`, ChrysoCoord blocks `ready_for_review` until the
+`strict_ready_for_review: true`, Chryso blocks `ready_for_review` until the
 ticket evidence is ready.
 
 The gate runs when:
 
-- `chc ticket apply-result <execution-id>` applies a successful worker result;
-- `chc ticket status <key> ready_for_review` is used directly.
+- `chr ticket apply-result <execution-id>` applies a successful worker result;
+- `chr ticket status <key> ready_for_review` is used directly.
 
 Required ticket evidence:
 
-- an anchored `chc:evidence-strategy:v1` checklist exists and parses;
+- an anchored `chr:evidence-strategy:v1` checklist exists and parses;
 - `Evidence strategy` is checked and `complete`;
 - `Gherkin` is checked when its status is `required`;
 - active/applicable Gherkin cannot be marked `not_applicable`;

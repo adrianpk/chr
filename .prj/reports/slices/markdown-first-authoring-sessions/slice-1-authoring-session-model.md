@@ -51,13 +51,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/authoring_session.go`
-- `internal/chc/authoring_session_test.go`
+- `internal/chr/authoring_session.go`
+- `internal/chr/authoring_session_test.go`
 - `.prj/trackers/slicing-markdown-first-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestValidateAuthoringSession'`: pass
+- `go test ./internal/chr -run 'TestValidateAuthoringSession'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

@@ -18,11 +18,11 @@ path without editing SQLite directly.
 
 - Added project disable support to the registry.
 - Added project path update support to the registry.
-- Added `chc maintenance registry disable`.
-- Added `chc maintenance registry set-path`.
+- Added `chr maintenance registry disable`.
+- Added `chr maintenance registry set-path`.
 - Added `--dry-run` support for both repair commands.
 - Required project names for repair operations.
-- Required `set-path` targets to be initialized workspaces with `.chc/`.
+- Required `set-path` targets to be initialized workspaces with `.chr/`.
 - Documented registry repair behavior.
 
 ## Implementation Notes
@@ -36,23 +36,23 @@ files, runtime artifacts, execution records, or active project selection.
 
 - Extended `ProjectRegistry` with `DisableProject`.
 - Extended `ProjectRegistry` with `UpdateProjectPath`.
-- Added `chc maintenance registry disable`.
-- Added `chc maintenance registry set-path`.
+- Added `chr maintenance registry disable`.
+- Added `chr maintenance registry set-path`.
 - Updated `docs/reference/maintenance.md`.
 
 ## Files of Interest
 
-- `internal/chc/project_registry.go`
-- `internal/chc/project_registry_test.go`
-- `internal/chcapp/maintenance.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/project_registry.go`
+- `internal/chr/project_registry_test.go`
+- `internal/chrapp/maintenance.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/maintenance.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc -run 'TestProjectRegistry'
-go test ./internal/chcapp -run 'TestMaintenanceRegistry'
+go test ./internal/chr -run 'TestProjectRegistry'
+go test ./internal/chrapp -run 'TestMaintenanceRegistry'
 make verify
 ```
 

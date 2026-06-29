@@ -10,9 +10,9 @@ import (
 
 func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing.T) {
 	projectDir := t.TempDir()
-	writeGateEvidenceExecutionArtifacts(t, projectDir, "CHC-1", "exec-1", ExecutionResult{
+	writeGateEvidenceExecutionArtifacts(t, projectDir, "CHR-1", "exec-1", ExecutionResult{
 		ExecutionID: "exec-1",
-		TicketKey:   "CHC-1",
+		TicketKey:   "CHR-1",
 		Status:      ExecutionResultStatusSucceeded,
 		Summary:     "implemented",
 		EvidenceSummary: ExecutionResultEvidenceSummary{
@@ -41,8 +41,8 @@ func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing
 	}
 
 	managed := classification.AgentManagedWork[0]
-	if managed.Path != "internal/core/gate.go" || managed.TicketKey != "CHC-1" || managed.ExecutionID != "exec-1" {
-		t.Fatalf("managed = %#v, want CHC-1 exec-1 gate.go", managed)
+	if managed.Path != "internal/core/gate.go" || managed.TicketKey != "CHR-1" || managed.ExecutionID != "exec-1" {
+		t.Fatalf("managed = %#v, want CHR-1 exec-1 gate.go", managed)
 	}
 
 	if len(classification.ManualOrExternalChanges) != 1 {
@@ -86,7 +86,7 @@ func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.
 		UserDirectoryName,
 		"runtime",
 		"runs",
-		"CHC-1",
+		"CHR-1",
 		"exec-1",
 		"execution-report.md",
 	)
@@ -95,12 +95,12 @@ func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.
 ## Summary
 
 - execution: exec-1
-- ticket: CHC-1
+- ticket: CHR-1
 - status: succeeded
 
 ## Artifacts
 
-- result: .chc/user/runtime/runs/CHC-1/exec-1/result.json
+- result: .chr/user/runtime/runs/CHR-1/exec-1/result.json
 `)
 
 	classification, err := NewGateEvidenceClassifier().Classify(context.Background(), GateEvidenceClassificationRequest{
@@ -155,7 +155,7 @@ func writeGateEvidenceExecutionArtifacts(
 
 ## Artifacts
 
-- result: .chc/user/runtime/runs/`+ticketKey+`/`+executionID+`/result.json
+- result: .chr/user/runtime/runs/`+ticketKey+`/`+executionID+`/result.json
 `)
 }
 

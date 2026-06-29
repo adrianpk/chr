@@ -24,7 +24,7 @@ func TestValidateRuntimeFailsWhenDockerfileIsMissing(t *testing.T) {
 	dir := t.TempDir()
 	createWorkspaceRoot(t, dir)
 
-	err := os.MkdirAll(filepath.Join(dir, ".chc", "user", "runtime", "runs"), 0o755)
+	err := os.MkdirAll(filepath.Join(dir, ".chr", "user", "runtime", "runs"), 0o755)
 	if err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestValidateRuntimeUsesCustomConfig(t *testing.T) {
 		t.Fatalf("write Dockerfile: %v", err)
 	}
 
-	artifactDir := filepath.Join(dir, "var", "chc", "runs")
+	artifactDir := filepath.Join(dir, "var", "chr", "runs")
 
 	err = os.MkdirAll(artifactDir, 0o755)
 	if err != nil {
@@ -66,7 +66,7 @@ func TestValidateRuntimeUsesCustomConfig(t *testing.T) {
 		ProjectDir: dir,
 		Config: RuntimeConfig{
 			DockerfilePath: "ops/runtime.Dockerfile",
-			ArtifactDir:    "var/chc/runs",
+			ArtifactDir:    "var/chr/runs",
 		},
 	})
 	if err != nil {
@@ -86,7 +86,7 @@ func TestValidateRuntimeChecksExecutionWorkspace(t *testing.T) {
 	projectDir := t.TempDir()
 	createRuntimeValidationWorkspace(t, projectDir)
 
-	executionWorkspaceDir := filepath.Join(projectDir, ".chc", "user", "worktrees", "CHC-1")
+	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "user", "worktrees", "CHR-1")
 	if err := os.MkdirAll(executionWorkspaceDir, 0o755); err != nil {
 		t.Fatalf("create execution workspace dir: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestValidateRuntimeChecksExecutionWorkspace(t *testing.T) {
 			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
-		TicketKey:             "CHC-1",
+		TicketKey:             "CHR-1",
 		RunID:                 "exec-1",
 	})
 	if err != nil {
@@ -118,8 +118,8 @@ func TestValidateRuntimeChecksExecutionWorkspace(t *testing.T) {
 	}
 
 	assertRuntimeValidationCheck(t, result.Checks, "execution_workspace", executionWorkspaceDir)
-	assertRuntimeValidationCheck(t, result.Checks, "workspace", filepath.Join(executionWorkspaceDir, ".chc"))
-	assertRuntimeValidationCheck(t, result.Checks, "artifact_dir", filepath.Join(executionWorkspaceDir, ".chc", "user", "runtime", "runs"))
+	assertRuntimeValidationCheck(t, result.Checks, "workspace", filepath.Join(executionWorkspaceDir, ".chr"))
+	assertRuntimeValidationCheck(t, result.Checks, "artifact_dir", filepath.Join(executionWorkspaceDir, ".chr", "user", "runtime", "runs"))
 }
 
 func createRuntimeValidationWorkspace(t *testing.T, dir string) {
@@ -127,7 +127,7 @@ func createRuntimeValidationWorkspace(t *testing.T, dir string) {
 
 	createWorkspaceRoot(t, dir)
 
-	dockerfilePath := filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -139,7 +139,7 @@ func createRuntimeValidationWorkspace(t *testing.T, dir string) {
 		t.Fatalf("write Dockerfile: %v", err)
 	}
 
-	err = os.MkdirAll(filepath.Join(dir, ".chc", "user", "runtime", "runs"), 0o755)
+	err = os.MkdirAll(filepath.Join(dir, ".chr", "user", "runtime", "runs"), 0o755)
 	if err != nil {
 		t.Fatalf("create artifact dir: %v", err)
 	}

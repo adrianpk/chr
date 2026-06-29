@@ -44,11 +44,11 @@ func TestRenderGeneratedSpecKeepsDifferentBodyHeading(t *testing.T) {
 	}
 }
 
-func TestValidateGeneratedSpecRejectsUnsupportedChrysoCoordPathReference(t *testing.T) {
+func TestValidateGeneratedSpecRejectsUnsupportedChrysoPathReference(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope:     QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:     "Newsletter Distribution",
-		Body:      "Store newsletter drafts in .chc/newsletters/drafts.",
+		Body:      "Store newsletter drafts in .chr/newsletters/drafts.",
 		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
 	}
 
@@ -57,7 +57,7 @@ func TestValidateGeneratedSpecRejectsUnsupportedChrysoCoordPathReference(t *test
 		t.Fatal("ValidateGeneratedSpec returned nil error")
 	}
 
-	if !strings.Contains(err.Error(), `.chc/newsletters/drafts`) {
+	if !strings.Contains(err.Error(), `.chr/newsletters/drafts`) {
 		t.Fatalf("error = %q, want unsupported path reference", err)
 	}
 }
@@ -76,13 +76,13 @@ func TestValidateGeneratedSpecAllowsGherkinExample(t *testing.T) {
 	}
 }
 
-func TestValidateGeneratedSpecAllowsKnownChrysoCoordPathReferences(t *testing.T) {
+func TestValidateGeneratedSpecAllowsKnownChrysoPathReferences(t *testing.T) {
 	spec := GeneratedSpec{
 		Scope: QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title: "Newsletter Distribution",
 		Body: strings.Join([]string{
-			"See .chc/user/project.md.",
-			"See .chc/user/cases/newsletter.md, .chc/user/dumps/newsletter.md, and .chc/user/quizzes/newsletter.md.",
+			"See .chr/user/project.md.",
+			"See .chr/user/cases/newsletter.md, .chr/user/dumps/newsletter.md, and .chr/user/quizzes/newsletter.md.",
 		}, "\n"),
 		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
 	}
@@ -92,23 +92,23 @@ func TestValidateGeneratedSpecAllowsKnownChrysoCoordPathReferences(t *testing.T)
 	}
 }
 
-func TestNormalizeGeneratedSpecChrysoCoordPathReferencesKeepsKnownPaths(t *testing.T) {
-	body := "See .chc/user/project.md and .chc/user/dumps/newsletter.md."
+func TestNormalizeGeneratedSpecChrysoPathReferencesKeepsKnownPaths(t *testing.T) {
+	body := "See .chr/user/project.md and .chr/user/dumps/newsletter.md."
 
-	got := NormalizeGeneratedSpecChrysoCoordPathReferences(body)
+	got := NormalizeGeneratedSpecChrysoPathReferences(body)
 
 	if got != body {
 		t.Fatalf("normalized body = %q, want %q", got, body)
 	}
 }
 
-func TestNormalizeGeneratedSpecChrysoCoordPathReferencesMovesUnknownPathsOutOfChrysoCoord(t *testing.T) {
-	body := "Store drafts in .chc/newsletters/drafts/<post-slug>.md, then export them."
+func TestNormalizeGeneratedSpecChrysoPathReferencesMovesUnknownPathsOutOfChryso(t *testing.T) {
+	body := "Store drafts in .chr/newsletters/drafts/<post-slug>.md, then export them."
 
-	got := NormalizeGeneratedSpecChrysoCoordPathReferences(body)
+	got := NormalizeGeneratedSpecChrysoPathReferences(body)
 
-	if strings.Contains(got, ".chc/newsletters") {
-		t.Fatalf("normalized body still contains unsupported .chc path: %q", got)
+	if strings.Contains(got, ".chr/newsletters") {
+		t.Fatalf("normalized body still contains unsupported .chr path: %q", got)
 	}
 
 	if !strings.Contains(got, "newsletters/drafts/<post-slug>.md") {

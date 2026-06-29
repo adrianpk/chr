@@ -18,11 +18,11 @@ generation behavior.
 
 ## Delivered Behavior
 
-- Added environment-controlled LLM tracing through `CHC_LLM_TRACE`.
-- Added explicit payload capture gating through `CHC_LLM_TRACE_PAYLOADS`.
-- Added rotation controls through `CHC_LLM_TRACE_MAX_BYTES` and
-  `CHC_LLM_TRACE_KEEP_FILES`.
-- Resolved trace output under `.chc/user/log/llm/llm.ndjson`.
+- Added environment-controlled LLM tracing through `CHR_LLM_TRACE`.
+- Added explicit payload capture gating through `CHR_LLM_TRACE_PAYLOADS`.
+- Added rotation controls through `CHR_LLM_TRACE_MAX_BYTES` and
+  `CHR_LLM_TRACE_KEEP_FILES`.
+- Resolved trace output under `.chr/user/log/llm/llm.ndjson`.
 - Added JSONL event writing with automatic timestamp injection.
 - Added best-effort event recording that ignores tracing failures.
 - Added secret redaction for secret-like fields, bearer tokens, and known secret
@@ -47,21 +47,21 @@ generation behavior.
 - Added `WriteLLMTraceEvent`.
 - Added `RecordLLMTraceEvent`.
 - Added environment variables:
-  - `CHC_LLM_TRACE`
-  - `CHC_LLM_TRACE_PAYLOADS`
-  - `CHC_LLM_TRACE_MAX_BYTES`
-  - `CHC_LLM_TRACE_KEEP_FILES`
+  - `CHR_LLM_TRACE`
+  - `CHR_LLM_TRACE_PAYLOADS`
+  - `CHR_LLM_TRACE_MAX_BYTES`
+  - `CHR_LLM_TRACE_KEEP_FILES`
 
 ## Files of Interest
 
-- `internal/chc/llm_trace.go`
-- `internal/chc/llm_trace_test.go`
+- `internal/chr/llm_trace.go`
+- `internal/chr/llm_trace_test.go`
 - `.prj/trackers/slicing-llm-file-tracing-tracker.md`
 - `.prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'Test(LoadLLMTraceConfig|WriteLLMTraceEvent|RecordLLMTraceEvent)'` - pass.
+- `go test ./internal/chr -run 'Test(LoadLLMTraceConfig|WriteLLMTraceEvent|RecordLLMTraceEvent)'` - pass.
 - `go test ./...` - pass.
 
 ## Risks and Follow-ups

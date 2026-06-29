@@ -28,7 +28,7 @@ Expected PR title: `feat(slice-6): project validation recovery`
 
 ## Validation
 
-- `go test ./cmd/chc`: pass
+- `go test ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Notes

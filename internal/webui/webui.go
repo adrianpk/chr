@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/webui/htmx"
-	"forge.adrianpk.com/chc/internal/webui/render"
-	"forge.adrianpk.com/chc/internal/webui/ui"
+	"forge.adrianpk.com/chr/internal/webui/htmx"
+	"forge.adrianpk.com/chr/internal/webui/render"
+	"forge.adrianpk.com/chr/internal/webui/ui"
 )
 
 //go:embed assets
@@ -435,7 +435,7 @@ func (h handler) allowOrigin(w http.ResponseWriter, r *http.Request) bool {
 
 	w.Header().Set("Access-Control-Allow-Origin", origin)
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, HX-Request, X-CHC-Web-Token")
+	w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, HX-Request, X-CHR-Web-Token")
 	w.Header().Add("Vary", "Origin")
 
 	return true
@@ -491,7 +491,7 @@ func tokenExemptPath(path string) bool {
 }
 
 func (h handler) requestToken(r *http.Request) string {
-	if token := strings.TrimSpace(r.Header.Get("X-CHC-Web-Token")); token != "" {
+	if token := strings.TrimSpace(r.Header.Get("X-CHR-Web-Token")); token != "" {
 		return token
 	}
 

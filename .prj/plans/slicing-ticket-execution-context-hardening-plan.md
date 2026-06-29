@@ -44,7 +44,7 @@ Remaining gap:
 
 - context composition is still minimal and not source-aware enough for larger
   repositories;
-- project protocol, `.chc/`, project docs, ticket references, tree/search
+- project protocol, `.chr/`, project docs, ticket references, tree/search
   context, semantic Go context, and previous attempts are not yet composed into
   one durable execution context package;
 - invariant context and fresh per-execution context are not yet separated;
@@ -54,7 +54,7 @@ Remaining gap:
 
 The Context Composer runs outside Docker.
 
-`chc` owns:
+`chr` owns:
 
 - selecting context sources;
 - pruning and summarizing;
@@ -91,7 +91,7 @@ Each execution or Ralph Loop attempt receives its own context package:
 ```
 
 `context.md` is the main Codex input referenced by
-`CHC_WORKER_CONTEXT_PATH`. Sibling context files are referenced from
+`CHR_WORKER_CONTEXT_PATH`. Sibling context files are referenced from
 `context.md` and are visible inside Docker through the existing workspace
 mount.
 
@@ -105,7 +105,7 @@ Later slices may introduce cacheable partials for stable context:
 - project identity;
 - project conventions;
 - applicable `AGENTS.md` hierarchy;
-- stable `.chc/` workflow descriptions;
+- stable `.chr/` workflow descriptions;
 - default validation policy.
 
 Fresh context should be rebuilt per execution:
@@ -127,7 +127,7 @@ This slicing includes:
 - source inventory and provenance;
 - agent identity context;
 - applicable `AGENTS.md` loading;
-- selected `.chc/` workflow and runtime context;
+- selected `.chr/` workflow and runtime context;
 - project and use-case document context;
 - filesystem tree and text-search context;
 - `gograph` CLI context provider for Go projects;
@@ -204,7 +204,7 @@ Candidate scope:
 
 - define default Go/software/infrastructure agent identity;
 - load root and nested `AGENTS.md` files that apply to the execution path;
-- load selected `.chc/` workflow and runtime context;
+- load selected `.chr/` workflow and runtime context;
 - render `agent.md`;
 - render `protocols.md`;
 - record source provenance.
@@ -256,7 +256,7 @@ Candidate scope:
 
 - capture bounded filesystem tree output;
 - derive text-search terms from ticket and validation context;
-- run targeted searches over source, tests, docs, and `.chc/`;
+- run targeted searches over source, tests, docs, and `.chr/`;
 - render tree and search sections into `code-context.md`;
 - keep output deterministic enough for tests.
 
@@ -333,7 +333,7 @@ Candidate scope:
 - write `context.md` under `run_artifact_dir`;
 - write sibling context artifacts under `run_artifact_dir/context/`;
 - ensure paths are visible through the runtime mount;
-- keep `CHC_WORKER_CONTEXT_PATH` as the main Codex input;
+- keep `CHR_WORKER_CONTEXT_PATH` as the main Codex input;
 - add dry-run visibility for included sources;
 - add tests for path rendering and artifact layout.
 
@@ -371,9 +371,9 @@ Expected outcome:
 
 The slicing is complete when:
 
-- `chc` can compose a deterministic context package before Docker starts;
+- `chr` can compose a deterministic context package before Docker starts;
 - `context.md` remains the main Codex input;
-- AGENTS, `.chc/`, project docs, ticket docs, tree/search, `gograph`, and
+- AGENTS, `.chr/`, project docs, ticket docs, tree/search, `gograph`, and
   previous attempts are represented as bounded artifacts;
 - the Docker runtime contract consumes richer artifacts without becoming the
   context composer;

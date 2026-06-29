@@ -1,6 +1,6 @@
 # Artifact Generation Backends
 
-ChrysoCoord routes long artifact generation through Codex by default.
+Chryso routes long artifact generation through Codex by default.
 
 This applies to:
 
@@ -16,10 +16,10 @@ interactive and one question at a time.
 
 When no backend override is set, these artifact operations use Codex:
 
-- `CHC_DUMP_GENERATION_BACKEND`
-- `CHC_SPEC_GENERATION_BACKEND`
-- `CHC_PLAN_GENERATION_BACKEND`
-- `CHC_PLAN_TRACKING_GENERATION_BACKEND`
+- `CHR_DUMP_GENERATION_BACKEND`
+- `CHR_SPEC_GENERATION_BACKEND`
+- `CHR_PLAN_GENERATION_BACKEND`
+- `CHR_PLAN_TRACKING_GENERATION_BACKEND`
 
 Set one variable to `openai` to use the direct OpenAI-backed path for that
 artifact kind.
@@ -27,7 +27,7 @@ artifact kind.
 Example:
 
 ```sh
-CHC_PLAN_GENERATION_BACKEND=openai chc plan generate --use-case blog
+CHR_PLAN_GENERATION_BACKEND=openai chr plan generate --use-case blog
 ```
 
 Any value other than `openai`, including an empty value, uses Codex.
@@ -36,9 +36,9 @@ Any value other than `openai`, including an empty value, uses Codex.
 
 Codex-backed artifact generation also reads:
 
-- `CHC_CODEX_COMMAND`: command used to invoke Codex; default is `codex`.
-- `CHC_CODEX_MODEL`: optional model passed to Codex.
-- `CHC_CODEX_TIMEOUT_SECONDS`: optional per-run timeout in seconds.
+- `CHR_CODEX_COMMAND`: command used to invoke Codex; default is `codex`.
+- `CHR_CODEX_MODEL`: optional model passed to Codex.
+- `CHR_CODEX_TIMEOUT_SECONDS`: optional per-run timeout in seconds.
 
 Codex runs are read-only against the project checkout. The Go service owns file
 writes, ticket keys, ticket paths, tracking materialization, and validation.

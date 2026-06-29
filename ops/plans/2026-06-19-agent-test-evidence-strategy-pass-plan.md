@@ -60,7 +60,7 @@ Behavior:
 Tasks:
 
 - T1.1 Add evidence strategy config structs, defaults, and parser support under
-  `.chc/user/config.yml`.
+  `.chr/user/config.yml`.
 - T1.2 Add enum validation for strategy mode, checklist policy, Gherkin policy,
   strict gating, user edits, and report copy behavior.
 - T1.3 Add core strategy status and diagnostic value types used by later slices.
@@ -76,7 +76,7 @@ blocks in ticket Markdown.
 
 Behavior:
 
-- Core can parse an anchored `chc:evidence-strategy:v1` checklist block.
+- Core can parse an anchored `chr:evidence-strategy:v1` checklist block.
 - Core can insert a missing strategy block into a ticket without damaging
   frontmatter, comments, blockers, or existing body content.
 - Core can update known checklist labels while preserving user-authored values

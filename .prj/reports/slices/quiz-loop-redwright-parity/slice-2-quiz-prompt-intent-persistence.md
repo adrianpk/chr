@@ -56,21 +56,21 @@ Prompt intent:
 
 ## Files of Interest
 
-- `internal/chc/quiz_runtime.go`
+- `internal/chr/quiz_runtime.go`
   - adds prompt intent to quiz entries
-- `internal/chc/quiz_artifact_repository.go`
+- `internal/chr/quiz_artifact_repository.go`
   - writes prompt intent into raw capture
-- `internal/chc/quiz_curation.go`
+- `internal/chr/quiz_curation.go`
   - parses prompt intent from raw capture
-- `internal/chcapp/service_quiz.go`
+- `internal/chrapp/service_quiz.go`
   - rehydrates prompt intent into next model requests
-- `internal/chcapp/service_quiz_test.go`
+- `internal/chrapp/service_quiz_test.go`
   - covers active-question and raw-entry rehydration
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp`
-- `go test ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
+- `go test ./internal/chrapp`
 - `git diff --check`
 - `make verify`
 

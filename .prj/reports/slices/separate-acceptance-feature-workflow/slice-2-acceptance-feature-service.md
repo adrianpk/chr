@@ -22,7 +22,7 @@ spec context. It requires an existing spec before feature generation can run.
 
 The feature model contract returns `generated`, `needs_more_info`, `rejected`,
 or `not_applicable`. Generated feature bodies are written to
-`.chc/user/acceptance/<case>.feature` only after deterministic static checks
+`.chr/user/acceptance/<case>.feature` only after deterministic static checks
 pass. Non-generated statuses return service results without writing a feature
 file.
 
@@ -46,16 +46,16 @@ a hard service error. Contract failures and missing spec context remain errors.
 
 ## Files of Interest
 
-- `internal/chc/acceptance_feature.go`
-- `internal/chc/quiz_model.go`
-- `internal/chc/quiz_model_payload.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chcapp/service_acceptance_feature.go`
-- `internal/chcapp/service_acceptance_feature_test.go`
+- `internal/chr/acceptance_feature.go`
+- `internal/chr/quiz_model.go`
+- `internal/chr/quiz_model_payload.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chrapp/service_acceptance_feature.go`
+- `internal/chrapp/service_acceptance_feature_test.go`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp` (pass)
+- `go test ./internal/chr ./internal/chrapp` (pass)
 - `make verify` (pass)
 
 ## Risks and Follow-ups

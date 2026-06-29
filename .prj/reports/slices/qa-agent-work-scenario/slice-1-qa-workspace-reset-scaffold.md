@@ -28,7 +28,7 @@ full blog reference project is added.
 
 The reset script uses explicit repository-relative paths and `git -C` for all
 Git operations inside the generated active project. This keeps the nested
-project repository separate from the parent `chc` repository.
+project repository separate from the parent `chr` repository.
 
 `qa-test-blog` currently exits successfully with a clear message when the active
 project has no Go module. Slice 2 replaces the placeholder reference with the

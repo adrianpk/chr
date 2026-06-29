@@ -4,7 +4,7 @@ Status: delivered-with-extraction
 
 Plan: `.prj/plans/slicing-ux-operation-surface-plan.md`
 Ticket: `.prj/tickets/open/20260522071859-align-cli-authoring-and-tui-operation-surface.md`
-Feedback draft: `.prj/drafts/chc-cli-output-polish-notes.md`
+Feedback draft: `.prj/drafts/chr-cli-output-polish-notes.md`
 
 ## Slicing Checklist
 
@@ -72,7 +72,7 @@ Task commits:
 
 Candidate tasks:
 
-- [x] Inventory generated `.chc/config.yml` fields.
+- [x] Inventory generated `.chr/config.yml` fields.
 - [x] Decide invariant versus real user decision for each field.
 - [x] Simplify generated config output.
 - [x] Rewrite or remove `manifest.md` as config-like surface.
@@ -96,8 +96,8 @@ Task commits:
 
 Candidate tasks:
 
-- [x] Review generated `.chc/agents/*.md` assets.
-- [x] Keep project documentation guidance separate from `.chc/` operational
+- [x] Review generated `.chr/agents/*.md` assets.
+- [x] Keep project documentation guidance separate from `.chr/` operational
   contracts.
 - [x] Move artifact layout explanation into proper reference/workspace docs.
 - [x] Adjust context composition if protocol candidates change.
@@ -147,7 +147,7 @@ Candidate tasks:
 - [x] Define provider interface, Codex provider, and deterministic fake provider.
 - [x] Remove static quiz generation from the executable flow.
 - [x] Add spec-target question coverage for useful spec generation.
-- [x] Add context inputs from `.chc/`, docs, tree, tickets, and Go inventory.
+- [x] Add context inputs from `.chr/`, docs, tree, tickets, and Go inventory.
 - [x] Add output contract validation.
 - [x] Update docs and tests.
 - [x] Add slice implementation report.
@@ -159,7 +159,7 @@ Task commits:
 - T5.2: `13fe19f` added provider interface, Codex provider, and fake provider.
 - T5.3: `13fe19f` removed static quiz generation from executable code.
 - T5.4: `3a4f88e` added spec-target coverage guidance to provider prompt.
-- T5.5: `13fe19f` added context sections from `.chc/`, docs, tree, and Go inventory.
+- T5.5: `13fe19f` added context sections from `.chr/`, docs, tree, and Go inventory.
 - T5.6: `13fe19f` added structured output validation.
 - T5.7: `1a0241a` updated docs and tests.
 - T5.8: report added in `.prj/reports/slices/ux-operation-surface/slice-5-context-aware-quiz-generation.md`.

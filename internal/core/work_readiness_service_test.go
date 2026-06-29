@@ -73,7 +73,7 @@ func TestCheckWorkReadinessReportsRuntimeArtifactsSeparately(t *testing.T) {
 		Policy:     DefaultWorkBranchPolicy(),
 		Git: fakeWorkReadinessGit{
 			branch:            "dev",
-			cleanStatus:       []string{"?? .chc/user/runtime/", " M main.go"},
+			cleanStatus:       []string{"?? .chr/user/runtime/", " M main.go"},
 			branchExists:      true,
 			remoteRefExists:   true,
 			branchContainsRef: true,
@@ -126,8 +126,8 @@ func TestCheckWorkReadinessBlocksDirtyTicketWorktree(t *testing.T) {
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
 		ProjectDir:   projectDir,
-		TicketKey:    "CHC-1",
-		Branch:       "feat/chc-1",
+		TicketKey:    "CHR-1",
+		Branch:       "feat/chr-1",
 		BranchPolicy: DefaultWorkBranchPolicy(),
 		Workspace:    workspace,
 	})
@@ -143,8 +143,8 @@ func TestCheckWorkReadinessBlocksDirtyTicketWorktree(t *testing.T) {
 		ProjectDir:   projectDir,
 		Policy:       DefaultWorkBranchPolicy(),
 		Workspace:    workspace,
-		TicketKey:    "CHC-1",
-		TicketBranch: "feat/chc-1",
+		TicketKey:    "CHR-1",
+		TicketBranch: "feat/chr-1",
 		WorktreeGit:  worktreeGit,
 		Git: fakeWorkReadinessGit{
 			branch:            "dev",
@@ -260,7 +260,7 @@ func TestCheckWorkReadinessNoGitEnforcementSkipsGit(t *testing.T) {
 func TestRepairWorkReadinessIgnoresRuntimeArtifacts(t *testing.T) {
 	git := &fakeWorkReadinessRepairGit{
 		branch:            "dev",
-		cleanStatus:       []string{"?? .chc/user/runtime/runs/"},
+		cleanStatus:       []string{"?? .chr/user/runtime/runs/"},
 		branchExists:      true,
 		remoteRefExists:   true,
 		branchContainsRef: true,
@@ -375,8 +375,8 @@ func TestRepairWorkReadinessPrunesStaleWorktreeMetadata(t *testing.T) {
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
 		ProjectDir:   projectDir,
-		TicketKey:    "CHC-1",
-		Branch:       "feat/chc-1",
+		TicketKey:    "CHR-1",
+		Branch:       "feat/chr-1",
 		BranchPolicy: DefaultWorkBranchPolicy(),
 		Workspace:    workspace,
 	})
@@ -397,8 +397,8 @@ func TestRepairWorkReadinessPrunesStaleWorktreeMetadata(t *testing.T) {
 		ProjectDir:   projectDir,
 		Policy:       DefaultWorkBranchPolicy(),
 		Workspace:    workspace,
-		TicketKey:    "CHC-1",
-		TicketBranch: "feat/chc-1",
+		TicketKey:    "CHR-1",
+		TicketBranch: "feat/chr-1",
 		WorktreeGit:  newFakeWorktreeGit(),
 		Git: &fakeWorkReadinessRepairGit{
 			branch: "dev",
@@ -426,8 +426,8 @@ func TestRepairWorkReadinessRemovesEmptyOrphanedTicketWorktree(t *testing.T) {
 		ProjectDir:   projectDir,
 		Policy:       DefaultWorkBranchPolicy(),
 		Workspace:    workspace,
-		TicketKey:    "CHC-1",
-		TicketBranch: "feat/chc-1",
+		TicketKey:    "CHR-1",
+		TicketBranch: "feat/chr-1",
 		WorktreeGit:  newFakeWorktreeGit(),
 		Git: &fakeWorkReadinessRepairGit{
 			branch: "dev",
@@ -459,8 +459,8 @@ func TestRepairWorkReadinessDoesNotRemoveNonEmptyOrphanedTicketWorktree(t *testi
 		ProjectDir:   projectDir,
 		Policy:       DefaultWorkBranchPolicy(),
 		Workspace:    workspace,
-		TicketKey:    "CHC-1",
-		TicketBranch: "feat/chc-1",
+		TicketKey:    "CHR-1",
+		TicketBranch: "feat/chr-1",
 		WorktreeGit:  newFakeWorktreeGit(),
 		Git: &fakeWorkReadinessRepairGit{
 			branch: "dev",
@@ -507,7 +507,7 @@ func TestOSWorkReadinessGitExcludeLocalPatternIsIdempotent(t *testing.T) {
 
 	git := OSWorkReadinessGit{}
 	for range 2 {
-		_, err := git.ExcludeLocalPattern(context.Background(), projectDir, ".chc/user/runtime/")
+		_, err := git.ExcludeLocalPattern(context.Background(), projectDir, ".chr/user/runtime/")
 		if err != nil {
 			t.Fatalf("ExcludeLocalPattern returned error: %v", err)
 		}
@@ -518,7 +518,7 @@ func TestOSWorkReadinessGitExcludeLocalPatternIsIdempotent(t *testing.T) {
 		t.Fatalf("read local exclude: %v", err)
 	}
 
-	if count := strings.Count(string(content), ".chc/user/runtime/"); count != 1 {
+	if count := strings.Count(string(content), ".chr/user/runtime/"); count != 1 {
 		t.Fatalf("exclude content = %q, want one runtime pattern", string(content))
 	}
 }
@@ -597,8 +597,8 @@ func testWorkReadinessPlan(t *testing.T, projectDir string, workspace WorkWorksp
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
 		ProjectDir:   projectDir,
-		TicketKey:    "CHC-1",
-		Branch:       "feat/chc-1",
+		TicketKey:    "CHR-1",
+		Branch:       "feat/chr-1",
 		BranchPolicy: DefaultWorkBranchPolicy(),
 		Workspace:    workspace,
 	})
@@ -635,8 +635,8 @@ func runWorkReadinessTestGit(t *testing.T, projectDir string, args ...string) {
 
 	commandArgs := append([]string{
 		"-C", projectDir,
-		"-c", "user.name=ChrysoCoord Test",
-		"-c", "user.email=chc@example.test",
+		"-c", "user.name=Chryso Test",
+		"-c", "user.email=chr@example.test",
 	}, args...)
 	cmd := exec.Command("git", commandArgs...)
 

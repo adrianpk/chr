@@ -1,6 +1,6 @@
 package app
 
-import "forge.adrianpk.com/chc/internal/core"
+import "forge.adrianpk.com/chr/internal/core"
 
 func workSelectionWorkConfig(projectDir string) (core.WorkConfig, error) {
 	config, err := core.LoadWorkspaceConfig(projectDir)

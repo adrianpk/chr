@@ -49,13 +49,13 @@ func NewCodexWorkerCommand(opts CodexWorkerCommandOptions) (CodexWorkerCommand, 
 			"--dangerously-bypass-approvals-and-sandbox",
 		},
 		Env: []CodexWorkerEnv{
-			{Name: "CHC_EXECUTION_ID", Value: opts.ExecutionID},
-			{Name: "CHC_TICKET_KEY", Value: opts.TicketKey},
-			{Name: "CHC_TICKET_PATH", Value: opts.TicketPath},
-			{Name: "CHC_WORKER_CONTEXT_PATH", Value: opts.ContextPath},
-			{Name: "CHC_RESULT_PATH", Value: opts.ResultPath},
-			{Name: "CHC_LOG_PATH", Value: opts.LogPath},
-			{Name: "CHC_VALIDATION_PATH", Value: opts.ValidationPath},
+			{Name: "CHR_EXECUTION_ID", Value: opts.ExecutionID},
+			{Name: "CHR_TICKET_KEY", Value: opts.TicketKey},
+			{Name: "CHR_TICKET_PATH", Value: opts.TicketPath},
+			{Name: "CHR_WORKER_CONTEXT_PATH", Value: opts.ContextPath},
+			{Name: "CHR_RESULT_PATH", Value: opts.ResultPath},
+			{Name: "CHR_LOG_PATH", Value: opts.LogPath},
+			{Name: "CHR_VALIDATION_PATH", Value: opts.ValidationPath},
 		},
 	}, nil
 }
@@ -73,7 +73,7 @@ func RenderCodexWorkerShellScript(command CodexWorkerCommand) string {
 		parts = append(parts, shellQuote(arg))
 	}
 
-	parts = append(parts, "<", "\"$CHC_WORKER_CONTEXT_PATH\"")
+	parts = append(parts, "<", "\"$CHR_WORKER_CONTEXT_PATH\"")
 
 	return strings.Join(parts, " ")
 }

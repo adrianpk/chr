@@ -4,15 +4,15 @@ Status: active
 
 ## Purpose
 
-Add opt-in LLM request and response tracing for ChrysoCoord model-backed
+Add opt-in LLM request and response tracing for Chryso model-backed
 operations.
 
 The tracing surface must make expensive model calls debuggable without changing
-normal runtime behavior. When enabled, ChrysoCoord writes structured rolling
+normal runtime behavior. When enabled, Chryso writes structured rolling
 JSONL trace events under the active project userspace:
 
 ```text
-.chc/user/log/llm/
+.chr/user/log/llm/
 ```
 
 This first implementation uses environment variables as the configuration
@@ -26,12 +26,12 @@ Primary sources:
 - `.agents/SLICES.md`
 - `.agents/playbooks/slice-delivery.md`
 - `.agents/playbooks/slice-reporting.md`
-- `internal/chc/project_userspace.go`
-- `internal/chc/quiz_model.go`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chcapp/service_quiz.go`
-- `internal/chcapp/service_spec.go`
-- `internal/chcapp/service_plan.go`
+- `internal/chr/project_userspace.go`
+- `internal/chr/quiz_model.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chrapp/service_quiz.go`
+- `internal/chrapp/service_spec.go`
+- `internal/chrapp/service_plan.go`
 - Existing model-backed quiz, spec, plan, and plan-tracking generation flows.
 
 External implementation reference:
@@ -39,12 +39,12 @@ External implementation reference:
 - A sibling project has an LLM trace writer and request/response recorder that
   use opt-in tracing, JSONL records, redaction, and rolling files. This plan
   captures the transferable pattern without naming or documenting that project
-  in ChrysoCoord artifacts.
+  in Chryso artifacts.
 
 Conversation decisions:
 
 - Tracing must live inside active userspace, not at repository root.
-- Initial path should be `.chc/user/log/llm/`.
+- Initial path should be `.chr/user/log/llm/`.
 - The output should include request payload and response payload when payload
   capture is explicitly enabled.
 - A trace-level identifier is desirable but may be absent until full flow
@@ -59,7 +59,7 @@ Conversation decisions:
 
 ## Current State
 
-Model-backed generation currently flows through `chc.QuizModelAdapter` and the
+Model-backed generation currently flows through `chr.QuizModelAdapter` and the
 OpenAI responses adapter.
 
 Important limitations:
@@ -71,7 +71,7 @@ Important limitations:
   provider response is not recorded outside existing generated artifacts.
 - Plan/spec/quiz generation failures can be hard to debug without reproducing
   the exact payload.
-- Userspace exists as `.chc/user/`, but no LLM log directory exists beneath it.
+- Userspace exists as `.chr/user/`, but no LLM log directory exists beneath it.
 - Configuration is not yet per-user beyond the active operator environment.
 
 ## Target Model
@@ -91,10 +91,10 @@ normalized output payload.
 
 Environment variables for the first version:
 
-- `CHC_LLM_TRACE=1`: enable LLM file tracing.
-- `CHC_LLM_TRACE_PAYLOADS=1`: include request and response payloads.
-- `CHC_LLM_TRACE_MAX_BYTES=<bytes>`: override rotation size.
-- `CHC_LLM_TRACE_KEEP_FILES=<count>`: override rotated file count.
+- `CHR_LLM_TRACE=1`: enable LLM file tracing.
+- `CHR_LLM_TRACE_PAYLOADS=1`: include request and response payloads.
+- `CHR_LLM_TRACE_MAX_BYTES=<bytes>`: override rotation size.
+- `CHR_LLM_TRACE_KEEP_FILES=<count>`: override rotated file count.
 
 Default behavior:
 
@@ -154,7 +154,7 @@ Add the reusable tracing foundation without wiring it into provider calls.
 Expected behavior:
 
 - Resolve trace output beneath the active project userspace.
-- Create `.chc/user/log/llm/` only when tracing is enabled and the first event
+- Create `.chr/user/log/llm/` only when tracing is enabled and the first event
   is written.
 - Write JSONL records.
 - Rotate the active file when it exceeds the configured size.

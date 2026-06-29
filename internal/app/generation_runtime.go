@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 const longGenerationTimeout = 5 * time.Minute

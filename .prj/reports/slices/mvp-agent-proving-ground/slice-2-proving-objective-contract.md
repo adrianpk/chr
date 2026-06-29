@@ -17,7 +17,7 @@ workflow is generalized.
 The todolist fixture now includes a direct proving objective contract under:
 
 ```text
-.chc/proving/objective-contract.md
+.chr/proving/objective-contract.md
 ```
 
 It also includes two concrete objectives:
@@ -49,8 +49,8 @@ ticket execution input.
 
 New fixture contract:
 
-- direct proving objectives live under `.chc/proving/objectives/`;
-- each objective owns an artifact root under `.chc/runtime/runs/proving/`;
+- direct proving objectives live under `.chr/proving/objectives/`;
+- each objective owns an artifact root under `.chr/runtime/runs/proving/`;
 - `make compile`, `make lint`, `make test`, and `make verify` are the expected
   validation commands;
 - outcomes are `succeeded`, `failed`, and `blocked`;
@@ -65,9 +65,9 @@ New validation helper:
 ## Files of Interest
 
 - `.prj/fixtures/mvp-agent-proving-ground/validate-objectives.sh`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chc/proving/objective-contract.md`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chc/proving/objectives/TODO-1-fix-task-id-reuse.md`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chc/proving/objectives/TODO-2-complete-task.md`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/proving/objective-contract.md`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/proving/objectives/TODO-1-fix-task-id-reuse.md`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/proving/objectives/TODO-2-complete-task.md`
 
 ## Validation
 

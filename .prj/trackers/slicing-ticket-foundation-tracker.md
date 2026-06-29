@@ -3,7 +3,7 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-ticket-foundation-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 Specs:
 
 - `.prj/specs/specs/ticket-template.md`
@@ -13,7 +13,7 @@ Specs:
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Review existing ticket creation, parsing, index, and project context implementation.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -73,7 +73,7 @@ Pre-flight:
 Candidate tasks:
 
 - [x] Add indexed ticket lookup by key.
-- [x] Add `chc ticket show`.
+- [x] Add `chr ticket show`.
 - [x] Add focused CLI tests.
 - [x] Run `make verify`.
 
@@ -98,7 +98,7 @@ Pre-flight:
 Candidate tasks:
 
 - [x] Add ticket Markdown comment writer.
-- [x] Add `chc ticket comment`.
+- [x] Add `chr ticket comment`.
 - [x] Add focused CLI tests.
 - [x] Document ticket comment behavior.
 - [x] Run `make verify`.
@@ -116,23 +116,23 @@ Task commits:
 
 - Planning validation: documentation diff reviewed.
 - Planning validation: `make verify` pass.
-- Slice 1 validation: `go test ./cmd/chc` pass.
-- Slice 1 validation: `go test ./internal/chc` pass.
+- Slice 1 validation: `go test ./cmd/chr` pass.
+- Slice 1 validation: `go test ./internal/chr` pass.
 - Slice 1 validation: `make verify` pass.
 - Slice 1 merged into `dev` as PR #17.
-- Slice 2 validation: `go test ./cmd/chc` pass.
-- Slice 2 validation: `go test ./internal/chc` pass.
+- Slice 2 validation: `go test ./cmd/chr` pass.
+- Slice 2 validation: `go test ./internal/chr` pass.
 - Slice 2 validation: `make verify` pass.
 - Slice 2 merged into `dev` as PR #18.
-- Slice 3 validation: `go test ./cmd/chc` pass.
-- Slice 3 validation: `go test ./internal/chc` pass.
+- Slice 3 validation: `go test ./cmd/chr` pass.
+- Slice 3 validation: `go test ./internal/chr` pass.
 - Slice 3 validation: `make verify` pass.
 - Slice 3 merged into `dev` as PR #19.
-- Slice 4 validation: `go test ./cmd/chc` pass.
-- Slice 4 validation: `go test ./internal/chc` pass.
+- Slice 4 validation: `go test ./cmd/chr` pass.
+- Slice 4 validation: `go test ./internal/chr` pass.
 - Slice 4 validation: `make verify` pass.
 - Slice 4 merged into `dev` as PR #20.
-- Slice 5 validation: `go test ./internal/chc` pass.
+- Slice 5 validation: `go test ./internal/chr` pass.
 - Slice 5 validation: initial `make verify` failed on lint complexity and test length.
 - Slice 5 validation: `make verify` pass after lint-focused refactor.
 - Slice 5 merged into `dev` as PR #21.
@@ -153,7 +153,7 @@ Candidate tasks:
 
 - [x] Share ticket metadata update helpers.
 - [x] Add ticket status writer with allowed values.
-- [x] Add `chc ticket status`.
+- [x] Add `chr ticket status`.
 - [x] Add focused CLI tests.
 - [x] Document ticket status behavior.
 - [x] Run `make verify`.

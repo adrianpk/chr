@@ -14,7 +14,7 @@ execution lifecycle state.
 
 ## Delivered Behavior
 
-`chc ticket start <ticket-key>` now invokes the rendered harness in non-dry-run
+`chr ticket start <ticket-key>` now invokes the rendered harness in non-dry-run
 mode after preflight creates the pending execution record.
 
 The execution runner:
@@ -56,15 +56,15 @@ attempt.
 
 ## Files of Interest
 
-- `internal/chc/execution_runner.go`
-- `internal/chc/execution_runner_test.go`
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/execution_runner.go`
+- `internal/chr/execution_runner_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

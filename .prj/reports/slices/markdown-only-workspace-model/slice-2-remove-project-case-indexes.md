@@ -12,13 +12,13 @@ PR: #150
 Remove duplicated SQLite persistence for Project and Cases.
 
 After this slice, Project and Case metadata are persisted only as Markdown files
-under `.chc/`. SQLite remains available for unrelated runtime domains such as
+under `.chr/`. SQLite remains available for unrelated runtime domains such as
 tickets, executions, loops, daemon state, notifications, and remote commands.
 
 ## Delivered Behavior
 
-- Project metadata saves write `.chc/project.md` only.
-- Case metadata saves write `.chc/cases/*.md` only.
+- Project metadata saves write `.chr/project.md` only.
+- Case metadata saves write `.chr/cases/*.md` only.
 - Project and Case refresh actions reload Markdown files instead of updating a
   relational index.
 - The project/case indexed tables are no longer created by migrations.
@@ -48,14 +48,14 @@ seven.
 
 ## Files of Interest
 
-- `internal/chc/project_metadata.go`
-- `internal/chc/case_metadata.go`
-- `internal/chcapp/app.go`
-- `internal/chctui/project_metadata_actions.go`
-- `internal/chctui/case_metadata_actions.go`
-- `cmd/chc/assets/migration/sqlite/`
-- `internal/chc/migration_test.go`
-- `internal/chc/migration_status_test.go`
+- `internal/chr/project_metadata.go`
+- `internal/chr/case_metadata.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/project_metadata_actions.go`
+- `internal/chrtui/case_metadata_actions.go`
+- `cmd/chr/assets/migration/sqlite/`
+- `internal/chr/migration_test.go`
+- `internal/chr/migration_status_test.go`
 
 ## Validation
 

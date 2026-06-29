@@ -13,7 +13,7 @@ Spec: `ops/specs/2026-06-19-agent-test-evidence-strategy-pass.md`
 
 ## Summary
 
-ChrysoCoord should add a mandatory Test/Evidence Strategy stage to the
+Chryso should add a mandatory Test/Evidence Strategy stage to the
 development worker lifecycle. The stage should happen before code changes, be
 persisted in the ticket tasklist/checklist, and be enforced by the worker prompt
 so the agent treats it as an operational contract.
@@ -31,7 +31,7 @@ strategy manually.
 - The primary persisted strategy belongs in the ticket tasklist/checklist.
 - Execution reports may duplicate details as trace evidence, but they are not
   the primary operational source.
-- Free-form comments are acceptable only when ChrysoCoord can recognize their
+- Free-form comments are acceptable only when Chryso can recognize their
   semantics later.
 - The worker prompt must explicitly instruct the agent to read, obey, update,
   and reconcile the strategy.
@@ -85,6 +85,6 @@ The strategy is not advisory prose. It is part of the worker contract.
 - Exact config keys for strategy mode, Gherkin policy, and validation strictness.
 - Exact execution report location and whether the report should link back to the
   checklist task IDs.
-- How ChrysoCoord detects that Gherkin is active for a project.
+- How Chryso detects that Gherkin is active for a project.
 - Whether the first implementation should only support inline strategy or also
   include a disabled separate-pass mode for future use.

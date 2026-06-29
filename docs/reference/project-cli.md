@@ -4,22 +4,22 @@
 
 Project commands manage the user-level registry of local projects.
 
-The registry is used by future daemon, indexing, and messaging workflows. It does not replace project-local `.chc/` files.
+The registry is used by future daemon, indexing, and messaging workflows. It does not replace project-local `.chr/` files.
 
 ## Add
 
 Register a project:
 
 ```sh
-chc project add /path/to/project
+chr project add /path/to/project
 ```
 
-The project must already contain a `.chc/` directory.
+The project must already contain a `.chr/` directory.
 
 By default, the registered project name is the basename of the project path. Override it with:
 
 ```sh
-chc project add --name my-project /path/to/project
+chr project add --name my-project /path/to/project
 ```
 
 ## List
@@ -27,7 +27,7 @@ chc project add --name my-project /path/to/project
 List registered projects:
 
 ```sh
-chc project list
+chr project list
 ```
 
 Rows are tab-separated:
@@ -41,8 +41,8 @@ name	path	enabled	id
 Project commands support a development root:
 
 ```sh
-chc project add --dev-root ._workspace /path/to/project
-chc project list --dev-root ._workspace
+chr project add --dev-root ._workspace /path/to/project
+chr project list --dev-root ._workspace
 ```
 
 The development root redirects user-level config, data, cache, and state paths away from real user directories.

@@ -49,14 +49,14 @@ Reference validation is tied to event type where the relationship is required:
 
 ## Files of Interest
 
-- `internal/chc/notification_event.go`
-- `internal/chc/notification_event_test.go`
+- `internal/chr/notification_event.go`
+- `internal/chr/notification_event_test.go`
 - `docs/reference/notifications.md`
 - `docs/index.md`
 
 ## Validation
 
-- `go test ./internal/chc -run TestNotification`: pass
+- `go test ./internal/chr -run TestNotification`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

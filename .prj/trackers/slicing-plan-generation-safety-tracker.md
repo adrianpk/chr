@@ -99,8 +99,8 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc`: pass.
-- `go test ./internal/chcapp`: pass.
+- `go test ./internal/chr`: pass.
+- `go test ./internal/chrapp`: pass.
 - `go test ./...`: pass.
 - `make verify`: fail in `lint-strict` because of existing lint debt across
   plan, spec, and TUI code.
@@ -109,8 +109,8 @@ Validation:
 
 Candidate tasks:
 
-- [x] T3.1 Exclude `.chc/plans/archive/**` from active plan context.
-- [x] T3.2 Exclude `.chc/specs/archive/**` from active generation context when
+- [x] T3.1 Exclude `.chr/plans/archive/**` from active plan context.
+- [x] T3.2 Exclude `.chr/specs/archive/**` from active generation context when
       present.
 - [x] T3.3 Ensure TUI plan lists ignore archived plans.
 - [x] T3.4 Ensure generated plan provenance does not include archived paths.
@@ -127,9 +127,9 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc`: pass.
-- `go test ./internal/chcapp`: pass.
-- `go test ./internal/chctui`: pass.
+- `go test ./internal/chr`: pass.
+- `go test ./internal/chrapp`: pass.
+- `go test ./internal/chrtui`: pass.
 - `go test ./...`: pass.
 - `make verify`: fail in `lint-strict` because of existing lint debt across
   plan, spec, and TUI code.
@@ -180,9 +180,9 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc`: pass.
-- `go test ./internal/chcapp`: pass.
-- `go test ./internal/chctui`: pass.
+- `go test ./internal/chr`: pass.
+- `go test ./internal/chrapp`: pass.
+- `go test ./internal/chrtui`: pass.
 - `go test ./...`: pass.
 - `make verify`: fail in `lint-strict` because of existing lint debt across
   plan, spec, and TUI code.

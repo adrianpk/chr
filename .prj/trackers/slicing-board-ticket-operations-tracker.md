@@ -46,7 +46,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Ticket Metadata Contract | Delivered | `feat/slice-1-ticket-metadata-contract` | `feat(slice-1): ticket metadata contract` | `.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md` | PR `#213`; metadata, synopsis, source fields, Board statuses, legacy aliases; `make verify` passed. |
-| Slice 2: Userspace Resolver | Delivered | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | PR `#214`; active `.chc/user/` resolver and env contract; `make verify` passed. |
+| Slice 2: Userspace Resolver | Delivered | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | PR `#214`; active `.chr/user/` resolver and env contract; `make verify` passed. |
 | Slice 3: Board SQLite Schema | Delivered | `feat/slice-3-board-sqlite-schema` | `feat(slice-3): board sqlite schema` | `.prj/reports/slices/board-ticket-operations/slice-3-board-sqlite-schema.md` | PR `#215`; migration/index shape for Board metadata and key allocation foundation; `make verify` passed. |
 | Slice 4: Indexed Ticket Enrichment | Delivered | `feat/slice-4-indexed-ticket-enrichment` | `feat(slice-4): indexed ticket enrichment` | `.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md` | PR `#216`; parser/reconciler/repository through enriched metadata; `make verify` passed. |
 | Slice 5: Ticket Creation Service | Delivered | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | PR `#217`; manual creation with synopsis, backlog default, SQLite key allocation, index refresh; `make verify` passed. |
@@ -83,10 +83,10 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc -run 'TestTicketStatus|TestTicketRenderer|TestTicketParser'`: pass.
-- `go test ./internal/chc -run 'TestTicketRenderer'`: pass.
-- `go test ./internal/chc -run 'TestTicketParser'`: pass.
-- `go test ./internal/chc -run 'TestValidateIndexedTicket|TestTicketStatus'`: pass.
+- `go test ./internal/chr -run 'TestTicketStatus|TestTicketRenderer|TestTicketParser'`: pass.
+- `go test ./internal/chr -run 'TestTicketRenderer'`: pass.
+- `go test ./internal/chr -run 'TestTicketParser'`: pass.
+- `go test ./internal/chr -run 'TestValidateIndexedTicket|TestTicketStatus'`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -95,9 +95,9 @@ Validation:
 
 Candidate tasks:
 
-- [x] T2.1 Add project-local userspace resolver for `.chc/user/`.
+- [x] T2.1 Add project-local userspace resolver for `.chr/user/`.
 - [x] T2.2 Add active-operator environment resolution and validation.
-- [x] T2.3 Ensure workspace initialization or repair can create `.chc/user/`.
+- [x] T2.3 Ensure workspace initialization or repair can create `.chr/user/`.
 - [x] T2.4 Document `.envrc` usage and non-direnv setup.
 - [x] T2.5 Add resolver tests.
 - [x] T2.6 Create slice implementation report.
@@ -111,7 +111,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc -run 'TestResolveProjectUserspace|TestEnsureProjectUserspace|TestIsValidOperatorID|TestInitCreatesProjectWorkspace'`: pass.
+- `go test ./internal/chr -run 'TestResolveProjectUserspace|TestEnsureProjectUserspace|TestIsValidOperatorID|TestInitCreatesProjectWorkspace'`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -141,7 +141,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc -run 'TestMigratorAppliesPendingMigrations|TestReadSQLiteMigrations'`: pass.
+- `go test ./internal/chr -run 'TestMigratorAppliesPendingMigrations|TestReadSQLiteMigrations'`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -167,8 +167,8 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc -run 'TestTicketIndex|TestTicketParser|TestTicketIndexRebuild|TestTicketReconciliation'`: pass.
-- `go test ./internal/chc -run 'TestTicketIndex'`: pass.
+- `go test ./internal/chr -run 'TestTicketIndex|TestTicketParser|TestTicketIndexRebuild|TestTicketReconciliation'`: pass.
+- `go test ./internal/chr -run 'TestTicketIndex'`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -179,7 +179,7 @@ Candidate tasks:
 
 - [x] T5.1 Add synopsis to `CreateTicketRequest` and CLI flags.
 - [x] T5.2 Default Board/TUI-created tickets to `backlog`.
-- [x] T5.3 Validate required metadata for ChrysoCoord-created tickets.
+- [x] T5.3 Validate required metadata for Chryso-created tickets.
 - [x] T5.4 Use SQLite-backed key allocation or the Slice 3 allocation boundary.
 - [x] T5.5 Refresh affected ticket index after creation.
 - [x] T5.6 Add CLI/service tests.
@@ -192,7 +192,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -215,8 +215,8 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
-- `go test ./internal/chcapp -run TestServiceMaterializePlanTrackingCreatesTrackingAndTickets`: pass.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`: pass.
+- `go test ./internal/chrapp -run TestServiceMaterializePlanTrackingCreatesTrackingAndTickets`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -240,7 +240,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -264,7 +264,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chctui`: pass.
+- `go test ./internal/chrtui`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -287,7 +287,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chctui`: pass.
+- `go test ./internal/chr ./internal/chrtui`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -311,7 +311,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chctui`: pass.
+- `go test ./internal/chrtui`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -334,7 +334,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chctui`: pass.
+- `go test ./internal/chrtui`: pass.
 - `git diff --check`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
@@ -360,7 +360,7 @@ Task commits:
 Validation:
 
 - `git diff --check`: pass.
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
 
@@ -372,7 +372,7 @@ review/merge.
 Final validation:
 
 - `git diff --check`: pass.
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`: pass.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`: pass.
 - `go test ./...`: pass.
 - `make verify`: pass.
 
@@ -382,7 +382,7 @@ Post-slice tuning needed:
 
 Known deferred work:
 
-- Full `.chc/operators/<operator-id>/...` multi-operator layout.
+- Full `.chr/operators/<operator-id>/...` multi-operator layout.
 - Manual Markdown sync with LLM-assisted empty synopsis generation.
 - Daemon-based watching, retained only as an evaluated non-preferred option.
 - Done-ticket archival heuristics.

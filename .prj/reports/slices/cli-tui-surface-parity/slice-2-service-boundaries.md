@@ -42,11 +42,11 @@ and TUI defaults while sharing the session repository write.
 
 ## Files of Interest
 
-- `internal/chcapp/daemon_stop.go`
-- `internal/chcapp/daemon.go`
-- `internal/chcapp/service_work.go`
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/author.go`
+- `internal/chrapp/daemon_stop.go`
+- `internal/chrapp/daemon.go`
+- `internal/chrapp/service_work.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/author.go`
 - `docs/reference/cli-tui-action-matrix.md`
 
 ## Validation

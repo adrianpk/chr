@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 const projectWidePlanningMaxFiles = 80
@@ -214,10 +214,10 @@ func planningBaselineFiles(projectDir string) ([]string, error) {
 
 func skipPlanningBaselineDir(path string) bool {
 	switch path {
-	case ".git", ".chc", "vendor", "node_modules", "dist", "build", "tmp":
+	case ".git", ".chr", "vendor", "node_modules", "dist", "build", "tmp":
 		return true
 	default:
-		return strings.HasPrefix(path, ".chc/") ||
+		return strings.HasPrefix(path, ".chr/") ||
 			strings.HasPrefix(path, ".git/") ||
 			strings.HasPrefix(path, "vendor/") ||
 			strings.HasPrefix(path, "node_modules/")
@@ -227,7 +227,7 @@ func skipPlanningBaselineDir(path string) bool {
 func nonWorkspaceFileCount(files []string) int {
 	count := 0
 	for _, file := range files {
-		if strings.HasPrefix(file, ".chc/") || strings.HasPrefix(file, ".git/") {
+		if strings.HasPrefix(file, ".chr/") || strings.HasPrefix(file, ".git/") {
 			continue
 		}
 

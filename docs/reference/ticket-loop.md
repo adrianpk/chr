@@ -115,7 +115,7 @@ reporting are implemented by later slices.
 Preview the foreground loop selection:
 
 ```sh
-chc ticket loop --dry-run
+chr ticket loop --dry-run
 ```
 
 The command resolves the project, refreshes the ticket index, queries eligible
@@ -223,6 +223,6 @@ loop iterations to existing per-ticket execution records.
 Loop reporting is documented in:
 
 - `docs/reference/loop-reports.md` for the loop report format;
-- `docs/reference/reports.md` for `chc report list` and `chc report show`;
+- `docs/reference/reports.md` for `chr report list` and `chr report show`;
 - `docs/how-to/find-execution-and-loop-evidence.md` for practical evidence
   lookup.

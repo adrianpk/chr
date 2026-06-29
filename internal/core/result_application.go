@@ -149,7 +149,7 @@ func ticketStatusForResultApplication(opts ResultApplicationOptions) string {
 
 func resultApplicationComment(author string, application ResultApplication) ResultApplicationComment {
 	if author == "" {
-		author = "chc"
+		author = "chr"
 	}
 
 	return ResultApplicationComment{

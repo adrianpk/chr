@@ -17,10 +17,10 @@ context, and Docker-compatible materialization.
 
 The repository now has a project/document context loader that can:
 
-- summarize project directory, `.chc` workspace directory, selected ticket, and
+- summarize project directory, `.chr` workspace directory, selected ticket, and
   validation command;
 - parse the selected ticket as the primary fresh document;
-- follow explicit ticket references to `.prj/`, `docs/`, and `.chc/` files;
+- follow explicit ticket references to `.prj/`, `docs/`, and `.chr/` files;
 - render `project.md`;
 - render `documents.md`;
 - render source inventory rows for project, ticket, included documents, and
@@ -53,13 +53,13 @@ additional context sources are added.
 
 ## Files of Interest
 
-- `internal/chc/context_project_documents.go`
-- `internal/chc/context_project_documents_test.go`
+- `internal/chr/context_project_documents.go`
+- `internal/chr/context_project_documents_test.go`
 - `.prj/trackers/slicing-ticket-execution-context-hardening-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoadProjectDocumentContext|TestRenderSourceInventory'`: pass
+- `go test ./internal/chr -run 'TestLoadProjectDocumentContext|TestRenderSourceInventory'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

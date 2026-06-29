@@ -10,22 +10,22 @@ import (
 func TestTicketLoopQuerySelectsDefaultReadyForDevTicketsOldestFirst(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:       "CHC-3",
+		Key:       "CHR-3",
 		Status:    TicketStatusReadyForDev,
 		CreatedAt: testLoopQueryTime("2026-05-18T13:00:00Z"),
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Status:    TicketStatusBacklog,
 		CreatedAt: testLoopQueryTime("2026-05-18T10:00:00Z"),
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:       "CHC-2",
+		Key:       "CHR-2",
 		Status:    TicketStatusReadyForDev,
 		CreatedAt: testLoopQueryTime("2026-05-18T12:00:00Z"),
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:       "CHC-4",
+		Key:       "CHR-4",
 		Status:    TicketStatusReadyForReview,
 		CreatedAt: testLoopQueryTime("2026-05-18T09:00:00Z"),
 	})
@@ -38,17 +38,17 @@ func TestTicketLoopQuerySelectsDefaultReadyForDevTicketsOldestFirst(t *testing.T
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-2", "CHR-3"}) {
 		t.Fatalf("keys = %#v, want ready_for_dev tickets sorted by created_at", gotKeys)
 	}
 }
 
 func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicket(t, index, "CHC-1", "open")
-	upsertLoopQueryTicket(t, index, "CHC-2", "ready")
-	upsertLoopQueryTicket(t, index, "CHC-3", "reviewing")
-	upsertLoopQueryTicket(t, index, "CHC-4", "blocked")
+	upsertLoopQueryTicket(t, index, "CHR-1", "open")
+	upsertLoopQueryTicket(t, index, "CHR-2", "ready")
+	upsertLoopQueryTicket(t, index, "CHR-3", "reviewing")
+	upsertLoopQueryTicket(t, index, "CHR-4", "blocked")
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
@@ -60,14 +60,14 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-1", "CHC-2"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-1", "CHR-2"}) {
 		t.Fatalf("keys = %#v, want open and ready tickets", gotKeys)
 	}
 }
 
 func TestTicketLoopQueryScopesToProject(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicket(t, index, "CHC-1", TicketStatusReadyForDev)
+	upsertLoopQueryTicket(t, index, "CHR-1", TicketStatusReadyForDev)
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "other-project",
@@ -84,7 +84,7 @@ func TestTicketLoopQueryScopesToProject(t *testing.T) {
 func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:         "CHC-1",
+		Key:         "CHR-1",
 		Status:      TicketStatusReadyForDev,
 		Priority:    "high",
 		Severity:    "critical",
@@ -94,7 +94,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 		Tags:        []string{"uxui", "quick"},
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:         "CHC-2",
+		Key:         "CHR-2",
 		Status:      TicketStatusReadyForDev,
 		Priority:    "normal",
 		Severity:    "normal",
@@ -104,7 +104,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 		Tags:        []string{"api"},
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:         "CHC-3",
+		Key:         "CHR-3",
 		Status:      TicketStatusReadyForDev,
 		Priority:    "high",
 		Severity:    "critical",
@@ -130,7 +130,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-1"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-1"}) {
 		t.Fatalf("keys = %#v, want filtered ticket", gotKeys)
 	}
 }
@@ -138,14 +138,14 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-1",
+		Key:      "CHR-1",
 		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "critical",
 		Type:     "feature",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-2",
+		Key:      "CHR-2",
 		Status:   TicketStatusReadyForDev,
 		Priority: "normal",
 		Severity: "normal",
@@ -163,7 +163,7 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-2"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-2"}) {
 		t.Fatalf("keys = %#v, want priority-filtered ticket", gotKeys)
 	}
 }
@@ -171,17 +171,17 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-1",
+		Key:      "CHR-1",
 		Status:   TicketStatusReadyForDev,
 		Priority: "low",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-2",
+		Key:      "CHR-2",
 		Status:   TicketStatusReadyForDev,
 		Priority: "critical",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-3",
+		Key:      "CHR-3",
 		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 	})
@@ -195,7 +195,7 @@ func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-2", "CHR-3", "CHR-1"}) {
 		t.Fatalf("keys = %#v, want priority order", gotKeys)
 	}
 }
@@ -203,17 +203,17 @@ func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-1",
+		Key:      "CHR-1",
 		Status:   TicketStatusReadyForDev,
 		Severity: "normal",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-2",
+		Key:      "CHR-2",
 		Status:   TicketStatusReadyForDev,
 		Severity: "critical",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-3",
+		Key:      "CHR-3",
 		Status:   TicketStatusReadyForDev,
 		Severity: "high",
 	})
@@ -227,7 +227,7 @@ func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-3", "CHC-1"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-2", "CHR-3", "CHR-1"}) {
 		t.Fatalf("keys = %#v, want severity order", gotKeys)
 	}
 }
@@ -235,19 +235,19 @@ func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
 	index := newTestTicketIndex(t)
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-3",
+		Key:      "CHR-3",
 		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "normal",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-1",
+		Key:      "CHR-1",
 		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "critical",
 	})
 	upsertLoopQueryTicketWithMetadata(t, index, IndexedTicket{
-		Key:      "CHC-2",
+		Key:      "CHR-2",
 		Status:   TicketStatusReadyForDev,
 		Priority: "high",
 		Severity: "critical",
@@ -262,16 +262,16 @@ func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-1", "CHC-2", "CHC-3"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-1", "CHR-2", "CHR-3"}) {
 		t.Fatalf("keys = %#v, want priority, severity, and key order", gotKeys)
 	}
 }
 
 func TestTicketLoopQueryOrdersByCreatedAt(t *testing.T) {
 	index := newTestTicketIndex(t)
-	older := testLoopQueryTicketWithCreatedAt("CHC-1", "2026-05-18T12:00:00Z")
-	newer := testLoopQueryTicketWithCreatedAt("CHC-2", "2026-05-18T14:00:00Z")
-	middle := testLoopQueryTicketWithCreatedAt("CHC-3", "2026-05-18T13:00:00Z")
+	older := testLoopQueryTicketWithCreatedAt("CHR-1", "2026-05-18T12:00:00Z")
+	newer := testLoopQueryTicketWithCreatedAt("CHR-2", "2026-05-18T14:00:00Z")
+	middle := testLoopQueryTicketWithCreatedAt("CHR-3", "2026-05-18T13:00:00Z")
 
 	upsertLoopQueryTicketWithMetadata(t, index, newer)
 	upsertLoopQueryTicketWithMetadata(t, index, middle)
@@ -286,7 +286,7 @@ func TestTicketLoopQueryOrdersByCreatedAt(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-1", "CHC-3", "CHC-2"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-1", "CHR-3", "CHR-2"}) {
 		t.Fatalf("keys = %#v, want created_at order", gotKeys)
 	}
 }
@@ -295,9 +295,9 @@ func TestTicketLoopQueryOrdersByCreatedAtThenKey(t *testing.T) {
 	index := newTestTicketIndex(t)
 	createdAt := "2026-05-18T12:00:00Z"
 
-	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHC-6", createdAt))
-	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHC-2", createdAt))
-	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHC-10", createdAt))
+	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHR-6", createdAt))
+	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHR-2", createdAt))
+	upsertLoopQueryTicketWithMetadata(t, index, testLoopQueryTicketWithCreatedAt("CHR-10", createdAt))
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
@@ -308,7 +308,7 @@ func TestTicketLoopQueryOrdersByCreatedAtThenKey(t *testing.T) {
 	}
 
 	gotKeys := indexedTicketKeys(got)
-	if !slices.Equal(gotKeys, []string{"CHC-2", "CHC-6", "CHC-10"}) {
+	if !slices.Equal(gotKeys, []string{"CHR-2", "CHR-6", "CHR-10"}) {
 		t.Fatalf("keys = %#v, want created_at ties ordered by key", gotKeys)
 	}
 }

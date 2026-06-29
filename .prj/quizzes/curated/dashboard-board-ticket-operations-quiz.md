@@ -99,7 +99,7 @@ body, acceptance criteria, slice identifier, dependencies, and source
 references.
 
 For manually created tickets, the TUI should ask for synopsis. For assisted
-manual creation, ChrysoCoord may help generate a synopsis.
+manual creation, Chryso may help generate a synopsis.
 
 External Markdown without synopsis should display poorly but should not
 necessarily become attention. A later sync workflow may generate missing
@@ -118,7 +118,7 @@ inform the new design, even if it should not be copied mechanically.
 The Board index can store:
 
 - internal row id;
-- user-facing key such as `CHC-123`;
+- user-facing key such as `CHR-123`;
 - title;
 - synopsis;
 - status or board column;
@@ -155,23 +155,23 @@ operation is enough.
 
 ## Multi-Operator Insight
 
-The Board discussion exposed a broader `.chc` collision issue. In a
+The Board discussion exposed a broader `.chr` collision issue. In a
 multi-user repository, collisions can happen for tickets and for generated
 dumps, quizzes, specs, plans, tracking files, and context artifacts.
 
 MVP can assume a monouser repository/operator workflow, but the implementation
 should still prepare the userspace shape so the later multi-operator model is
 not blocked. The initial shape can be a single active user directory under
-`.chc/user/`, selected by a required environment variable. A `.envrc` can set
+`.chr/user/`, selected by a required environment variable. A `.envrc` can set
 that variable for users who use direnv, while users without direnv must set it
 another way.
 
 The spec must also record the future direction:
 
-- generated ChrysoCoord artifacts should eventually live under an operator
+- generated Chryso artifacts should eventually live under an operator
   namespace;
-- a likely future shape is `.chc/operators/<operator-id>/...`;
-- MVP may start with `.chc/user/` and a single configured operator id;
+- a likely future shape is `.chr/operators/<operator-id>/...`;
+- MVP may start with `.chr/user/` and a single configured operator id;
 - operator id can be resolved from local config, an environment variable, or
   `.envrc`;
 - this approach avoids collisions without requiring a daemon or a shared
@@ -185,7 +185,7 @@ MVP should include:
 - compact Board column navigation;
 - maximized Board view concept;
 - manual ticket creation from Board;
-- mandatory synopsis for ChrysoCoord-created tickets;
+- mandatory synopsis for Chryso-created tickets;
 - generated ticket contract with synopsis;
 - conservative attention signals;
 - right-pane ticket detail inspection;
@@ -199,7 +199,7 @@ Post-MVP should include:
 - LLM-generated synopsis for empty external Markdown synopsis;
 - archive/retention heuristics for old done tickets;
 - richer attention signals;
-- full multi-operator userspace under `.chc/operators/<operator-id>/...`.
+- full multi-operator userspace under `.chr/operators/<operator-id>/...`.
 
 ## Open Questions
 
@@ -207,5 +207,5 @@ Post-MVP should include:
 - How should the right pane evolve if plain-text attention reasons become too
   noisy?
 - Which existing status values need migration or aliases?
-- How much of the current `.chc` layout should be redesigned before Board
+- How much of the current `.chr` layout should be redesigned before Board
   writes new artifacts?

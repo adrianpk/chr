@@ -15,7 +15,7 @@ prompt intent shape that later slices can reuse.
 
 ## Delivered Behavior
 
-ChrysoCoord now has package-level types for acceptance readiness decisions:
+Chryso now has package-level types for acceptance readiness decisions:
 `generate`, `needs_more_info`, and `not_applicable`.
 
 Readiness validation now normalizes reasons, inferred elements, missing slots,
@@ -30,7 +30,7 @@ focused questions without hardcoded user-facing wording.
 
 ## Implementation Notes
 
-The contract lives in `internal/chc` because readiness is shared domain behavior
+The contract lives in `internal/chr` because readiness is shared domain behavior
 for quiz and spec generation. No CLI, TUI, model-provider, workspace persistence,
 or feature-file generation behavior was added in this slice.
 
@@ -51,13 +51,13 @@ required for every generated happy-path scenario.
 
 ## Files of Interest
 
-- `internal/chc/acceptance_readiness.go`
-- `internal/chc/acceptance_readiness_test.go`
+- `internal/chr/acceptance_readiness.go`
+- `internal/chr/acceptance_readiness_test.go`
 
 ## Validation
 
-- `go test ./internal/chc -run AcceptanceReadiness` (pass)
-- `go test ./internal/chc` (pass)
+- `go test ./internal/chr -run AcceptanceReadiness` (pass)
+- `go test ./internal/chr` (pass)
 
 ## Risks and Follow-ups
 

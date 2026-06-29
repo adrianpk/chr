@@ -16,7 +16,7 @@ documentation.
 ## Delivered Behavior
 
 - Updated the Forgejo review how-to to include reviewed ticket merge execution.
-- Added reference documentation for `chc ticket merge`, preflight, provider
+- Added reference documentation for `chr ticket merge`, preflight, provider
   execution, successful merge metadata, blocked merge metadata, and operation
   serialization.
 - Linked ticket review workflow and metadata docs to the merge workflow

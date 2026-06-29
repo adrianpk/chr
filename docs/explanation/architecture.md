@@ -1,11 +1,11 @@
 # Architecture
 
-ChrysoCoord separates project-local workflow files from user-level coordination
+Chryso separates project-local workflow files from user-level coordination
 state.
 
 ## Project-Local State
 
-Every managed project has a `.chc/` directory. It stores source workflow assets:
+Every managed project has a `.chr/` directory. It stores source workflow assets:
 
 - tickets;
 - comments;
@@ -35,13 +35,13 @@ user's coordination view, not the project's portable source of truth.
 Project and case metadata are not duplicated into SQLite as authoritative
 records. They remain Markdown in the managed project. Runtime code may build a
 structural workspace index in memory, and may cache discardable index files
-under `.chc/user/tmp/`, but those caches are derived from project files.
+under `.chr/user/tmp/`, but those caches are derived from project files.
 
 ## Runtime Boundary
 
 Ticket execution uses Docker as the sandbox boundary.
 
-The host-side `chc` process resolves the project, selects the ticket, plans the
+The host-side `chr` process resolves the project, selects the ticket, plans the
 runtime, composes context, writes artifacts, and invokes Docker. The container
 runs Codex against the mounted core.
 

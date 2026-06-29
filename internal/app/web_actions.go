@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"forge.adrianpk.com/chc/internal/core"
-	"forge.adrianpk.com/chc/internal/webui"
+	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/webui"
 )
 
 const (

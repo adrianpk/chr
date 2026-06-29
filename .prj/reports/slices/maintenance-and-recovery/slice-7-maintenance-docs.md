@@ -9,7 +9,7 @@ PR: #132
 
 ## Purpose
 
-Add task-oriented documentation for inspecting and recovering local `chc` state.
+Add task-oriented documentation for inspecting and recovering local `chr` state.
 
 This slice closes the Maintenance and Recovery slicing with user-facing
 documentation that connects the maintenance commands delivered in earlier

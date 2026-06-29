@@ -50,16 +50,16 @@ structural search results.
 
 ## Files of Interest
 
-- `internal/chc/workspace_index_queries.go`
-- `internal/chc/workspace_index_test.go`
-- `internal/chcapp/service_workspace_queries.go`
-- `internal/chcapp/service_test.go`
+- `internal/chr/workspace_index_queries.go`
+- `internal/chr/workspace_index_test.go`
+- `internal/chrapp/service_workspace_queries.go`
+- `internal/chrapp/service_test.go`
 - `.prj/reports/slices/workspace-index-semantic-cache/slice-7-index-service-queries.md`
 - `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp` passed on 2026-05-23.
+- `go test ./internal/chr ./internal/chrapp` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

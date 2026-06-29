@@ -24,7 +24,7 @@ The loader:
 
 ## Implementation Notes
 
-Ready projects must have an existing project directory and a `.chc/` workspace
+Ready projects must have an existing project directory and a `.chr/` workspace
 directory.
 
 Missing or invalid projects are returned as classified rows instead of failing
@@ -41,13 +41,13 @@ Added core loader:
 
 ## Files of Interest
 
-- `internal/chc/daemon_project_loader.go`
-- `internal/chc/daemon_project_loader_test.go`
+- `internal/chr/daemon_project_loader.go`
+- `internal/chr/daemon_project_loader_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestLoadDaemonProjects'`: pass
+- `go test ./internal/chr -run 'TestLoadDaemonProjects'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

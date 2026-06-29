@@ -96,7 +96,7 @@ Deferred Web UI actions:
   - Adds operation-state fields to write responses.
 - `internal/webui/assets/templates/shell.html`
   - Adds command forms for Specs, Plans, Quizzes, work preview, and daemon stop.
-- `internal/webui/assets/static/chc.css`
+- `internal/webui/assets/static/chr.css`
   - Adds command-strip and select styling.
 - `internal/webui/webui_test.go`
   - Covers command form rendering on Specs, Plans, Quizzes, and Dash.
@@ -108,7 +108,7 @@ Deferred Web UI actions:
 
 - `go test ./internal/webui ./internal/app -run 'WebServe|Handler|WriteAction|Generation|WorkAction'` (pass)
 - `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- Temporary-project smoke with `go run ./cmd/chc web serve --dir /tmp/tmp.IJQmMJO7zb --port 7336` plus:
+- Temporary-project smoke with `go run ./cmd/chr web serve --dir /tmp/tmp.IJQmMJO7zb --port 7336` plus:
   - `curl -fsS http://127.0.0.1:7336/specs` found `spec.generate` (pass)
   - `curl -fsS http://127.0.0.1:7336/plans` found `plan.tracking.create` (pass)
   - `curl -fsS http://127.0.0.1:7336/quizzes` found `quiz.start` (pass)

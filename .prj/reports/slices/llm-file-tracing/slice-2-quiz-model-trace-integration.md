@@ -9,7 +9,7 @@ PR: #230
 
 ## Purpose
 
-Wire the reusable LLM trace sink into ChrysoCoord-owned LLM calls so quiz,
+Wire the reusable LLM trace sink into Chryso-owned LLM calls so quiz,
 spec, plan, plan-tracking, and local authoring quiz generation calls can be
 inspected from the active project userspace when tracing is enabled.
 
@@ -22,9 +22,9 @@ inspected from the active project userspace when tracing is enabled.
 - Includes request id, action, provider, model, status, HTTP status, latency,
   payload byte counts, response id, and error details.
 - Includes request, response, and output payloads only when
-  `CHC_LLM_TRACE_PAYLOADS=1`.
+  `CHR_LLM_TRACE_PAYLOADS=1`.
 - Routes the default application OpenAI adapter with the active project
-  directory so trace files resolve under `.chc/user/log/llm/`.
+  directory so trace files resolve under `.chr/user/log/llm/`.
 - Records local Codex authoring quiz generation calls outside the ticket
   execution container.
 
@@ -54,20 +54,20 @@ inspected from the active project userspace when tracing is enabled.
 
 ## Files of Interest
 
-- `internal/chc/quiz_openai_model.go`
-- `internal/chc/quiz_model_test.go`
-- `internal/chc/authoring_contextual_quiz.go`
-- `internal/chc/authoring_contextual_quiz_test.go`
-- `internal/chc/llm_trace.go`
-- `internal/chcapp/service.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chr/quiz_model_test.go`
+- `internal/chr/authoring_contextual_quiz.go`
+- `internal/chr/authoring_contextual_quiz_test.go`
+- `internal/chr/llm_trace.go`
+- `internal/chrapp/service.go`
 - `.prj/trackers/slicing-llm-file-tracing-tracker.md`
 - `.prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestOpenAIQuizModel(AdapterRecords|RequestBody|Timeout)|TestWriteLLMTraceEvent'` - pass.
-- `go test ./internal/chc -run 'Test(CodexAuthoringQuizQuestionProviderRecords|OpenAIQuizModelAdapterRecords|WriteLLMTraceEvent)'` - pass.
-- `go test ./internal/chcapp` - pass.
+- `go test ./internal/chr -run 'TestOpenAIQuizModel(AdapterRecords|RequestBody|Timeout)|TestWriteLLMTraceEvent'` - pass.
+- `go test ./internal/chr -run 'Test(CodexAuthoringQuizQuestionProviderRecords|OpenAIQuizModelAdapterRecords|WriteLLMTraceEvent)'` - pass.
+- `go test ./internal/chrapp` - pass.
 - `go test ./...` - pass.
 
 ## Risks and Follow-ups

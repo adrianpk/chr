@@ -34,7 +34,7 @@ type AgentProtocolContext struct {
 	TargetPath    string
 	AgentIdentity AgentIdentity
 	AgentFiles    []ContextDocument
-	ChcFiles      []ContextDocument
+	ChrFiles      []ContextDocument
 	Sources       []ContextSourceInventoryEntry
 }
 
@@ -94,7 +94,7 @@ func LoadAgentProtocolContext(opts AgentProtocolContextOptions) (AgentProtocolCo
 		return AgentProtocolContext{}, err
 	}
 
-	chcFiles, chcSources, err := loadChcProtocolFiles(projectDir)
+	chrFiles, chrSources, err := loadChrProtocolFiles(projectDir)
 	if err != nil {
 		return AgentProtocolContext{}, err
 	}
@@ -110,14 +110,14 @@ func LoadAgentProtocolContext(opts AgentProtocolContextOptions) (AgentProtocolCo
 		},
 	}
 	sources = append(sources, agentSources...)
-	sources = append(sources, chcSources...)
+	sources = append(sources, chrSources...)
 
 	return AgentProtocolContext{
 		ProjectDir:    projectDir,
 		TargetPath:    targetPath,
 		AgentIdentity: DefaultAgentIdentity(),
 		AgentFiles:    agentFiles,
-		ChcFiles:      chcFiles,
+		ChrFiles:      chrFiles,
 		Sources:       sources,
 	}, nil
 }
@@ -149,8 +149,8 @@ func RenderProtocolsContext(ctx AgentProtocolContext) string {
 	output.WriteString("## Applicable AGENTS.md Files\n\n")
 	writeContextDocuments(&output, ctx.AgentFiles, "No applicable AGENTS.md files were found.")
 
-	output.WriteString("## Selected .chc Context\n\n")
-	writeContextDocuments(&output, ctx.ChcFiles, "No selected .chc protocol files were found.")
+	output.WriteString("## Selected .chr Context\n\n")
+	writeContextDocuments(&output, ctx.ChrFiles, "No selected .chr protocol files were found.")
 
 	return output.String()
 }
@@ -307,8 +307,8 @@ func dirsFromProjectToTarget(projectDir, targetDir string) ([]string, error) {
 	return dirs, nil
 }
 
-func loadChcProtocolFiles(projectDir string) ([]ContextDocument, []ContextSourceInventoryEntry, error) {
-	candidates, err := chcProtocolCandidates(projectDir)
+func loadChrProtocolFiles(projectDir string) ([]ContextDocument, []ContextSourceInventoryEntry, error) {
+	candidates, err := chrProtocolCandidates(projectDir)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -316,9 +316,9 @@ func loadChcProtocolFiles(projectDir string) ([]ContextDocument, []ContextSource
 	return loadProtocolCandidateFiles(projectDir, candidates)
 }
 
-func chcProtocolCandidates(projectDir string) ([]string, error) {
+func chrProtocolCandidates(projectDir string) ([]string, error) {
 	userDir := UserPath(projectDir)
-	candidates := stableChcProtocolCandidates(userDir)
+	candidates := stableChrProtocolCandidates(userDir)
 	agentsDir := filepath.Join(userDir, "agents")
 
 	if !directoryExists(agentsDir) {
@@ -343,7 +343,7 @@ func chcProtocolCandidates(projectDir string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("walk .chc user agents: %w", err)
+		return nil, fmt.Errorf("walk .chr user agents: %w", err)
 	}
 
 	sort.Strings(candidates)
@@ -351,7 +351,7 @@ func chcProtocolCandidates(projectDir string) ([]string, error) {
 	return candidates, nil
 }
 
-func stableChcProtocolCandidates(userDir string) []string {
+func stableChrProtocolCandidates(userDir string) []string {
 	return []string{
 		filepath.Join(userDir, "manifest.md"),
 		filepath.Join(userDir, "config.yml"),
@@ -378,11 +378,11 @@ func loadProtocolCandidateFiles(
 	for _, path := range candidates {
 		relPath, err := filepath.Rel(projectDir, path)
 		if err != nil {
-			return nil, nil, fmt.Errorf("resolve .chc relative path: %w", err)
+			return nil, nil, fmt.Errorf("resolve .chr relative path: %w", err)
 		}
 
 		relPath = filepath.ToSlash(relPath)
-		id := "chc:" + relPath
+		id := "chr:" + relPath
 
 		content, err := os.ReadFile(path)
 		if err != nil {
@@ -392,7 +392,7 @@ func loadProtocolCandidateFiles(
 					Kind:        ContextSourceKindProtocol,
 					Class:       ContextSourceClassInvariant,
 					Path:        relPath,
-					Description: "Selected .chc protocol or runtime file.",
+					Description: "Selected .chr protocol or runtime file.",
 					Required:    false,
 					Included:    false,
 					Reason:      "file was not found",
@@ -401,7 +401,7 @@ func loadProtocolCandidateFiles(
 				continue
 			}
 
-			return nil, nil, fmt.Errorf("read .chc protocol file: %w", err)
+			return nil, nil, fmt.Errorf("read .chr protocol file: %w", err)
 		}
 
 		documents = append(documents, ContextDocument{
@@ -415,7 +415,7 @@ func loadProtocolCandidateFiles(
 			Kind:        ContextSourceKindProtocol,
 			Class:       ContextSourceClassInvariant,
 			Path:        relPath,
-			Description: "Selected .chc protocol or runtime file.",
+			Description: "Selected .chr protocol or runtime file.",
 			Required:    false,
 			Included:    true,
 		})

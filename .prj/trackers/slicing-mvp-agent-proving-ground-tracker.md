@@ -3,7 +3,7 @@
 Status: delivered
 
 Plan: `.prj/plans/slicing-mvp-agent-proving-ground-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
@@ -43,7 +43,7 @@ Candidate tasks:
 - [x] Add fixture source files.
 - [x] Include a deliberate backend bug.
 - [x] Include a missing "mark task completed" feature.
-- [x] Include `.chc/` runtime config and hand-authored sandbox Dockerfile.
+- [x] Include `.chr/` runtime config and hand-authored sandbox Dockerfile.
 - [x] Include compile, lint, and test validation commands.
 - [x] Include fixture materialization documentation or helper.
 - [x] Add slice implementation report.

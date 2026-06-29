@@ -25,7 +25,7 @@ needed for automation, tests, and runbooks.
 
 ## Implementation Notes
 
-- Added small CLI output helpers in `internal/chcapp/output.go`.
+- Added small CLI output helpers in `internal/chrapp/output.go`.
 - Kept structured key/value output compatible with existing command parsing
   where practical.
 - Preserved absolute paths when a path is outside the managed project.
@@ -35,17 +35,17 @@ needed for automation, tests, and runbooks.
 
 - Human runtime validation output prefers project-relative paths.
 - Runtime validation path checks use a compact `checks:` section.
-- `chc author session list` starts with `id`, `status`, `target`, and `topic`
+- `chr author session list` starts with `id`, `status`, `target`, and `topic`
   headers.
-- `chc author quiz new` reports `quiz: created <path>` for non-dry-run output
+- `chr author quiz new` reports `quiz: created <path>` for non-dry-run output
   and keeps `dry_run: true` for previews.
 
 ## Files of Interest
 
-- `internal/chcapp/output.go`
-- `internal/chcapp/runtime_proving.go`
-- `internal/chcapp/author.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/output.go`
+- `internal/chrapp/runtime_proving.go`
+- `internal/chrapp/author.go`
+- `internal/chrapp/cli_test.go`
 - `docs/how-to/full-system-lab-runbook.md`
 - `docs/reference/authoring-sessions.md`
 - `docs/reference/project-workspace.md`
@@ -53,7 +53,7 @@ needed for automation, tests, and runbooks.
 
 ## Validation
 
-- `go test ./internal/chcapp` - pass
+- `go test ./internal/chrapp` - pass
 - `make verify` - pass
 
 ## Risks and Follow-ups

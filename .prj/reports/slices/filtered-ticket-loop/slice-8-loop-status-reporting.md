@@ -14,7 +14,7 @@ output.
 
 ## Delivered Behavior
 
-`chc ticket loop` now prints a complete loop execution summary for successful,
+`chr ticket loop` now prints a complete loop execution summary for successful,
 blocked, and failed loop runs.
 
 The summary includes:
@@ -48,13 +48,13 @@ Changed CLI output:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-loop.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestTicketLoop'`: pass
+- `go test ./cmd/chr -run 'TestTicketLoop'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

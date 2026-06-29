@@ -28,7 +28,7 @@ maintenance behavior.
 
 ## Implementation Notes
 
-- `internal/chcapp` no longer declares a package-level `assetsFS`.
+- `internal/chrapp` no longer declares a package-level `assetsFS`.
 - Commands that need repository or migration-backed state resolve application
   dependencies from the root command metadata.
 - Non-command service and notification paths carry the asset filesystem through
@@ -46,18 +46,18 @@ maintenance behavior.
 
 ## Files of Interest
 
-- `internal/chcapp/app.go`
-- `internal/chcapp/project_context.go`
-- `internal/chcapp/service.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/daemon.go`
-- `internal/chcapp/maintenance.go`
-- `internal/chcapp/notify.go`
-- `internal/chcapp/notification_emit.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/project_context.go`
+- `internal/chrapp/service.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/daemon.go`
+- `internal/chrapp/maintenance.go`
+- `internal/chrapp/notify.go`
+- `internal/chrapp/notification_emit.go`
 
 ## Validation
 
-- `go test ./internal/chcapp`
+- `go test ./internal/chrapp`
 - `go test ./...`
 - `make verify`
 

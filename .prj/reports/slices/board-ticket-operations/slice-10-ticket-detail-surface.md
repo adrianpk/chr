@@ -44,12 +44,12 @@ Make the Board detail pane useful for selected tickets without leaving the TUI.
 
 ## Files of Interest
 
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chctui`
+- `go test ./internal/chrtui`
 - `git diff --check`
 - `go test ./...`
 - `make verify`

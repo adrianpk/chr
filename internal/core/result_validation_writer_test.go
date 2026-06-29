@@ -74,7 +74,7 @@ func writeResultValidationTicket(t *testing.T, validationHistory string) string 
 
 	path := filepath.Join(t.TempDir(), "ticket.md")
 	ticket := Ticket{
-		Key:       "CHC-1",
+		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "reviewing",
 		CreatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),

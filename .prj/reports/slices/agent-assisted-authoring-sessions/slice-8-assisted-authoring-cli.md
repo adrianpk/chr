@@ -15,11 +15,11 @@ Expose assisted authoring through terminal commands.
 
 The CLI now supports:
 
-- `chc author assisted start`;
-- `chc author assisted resume`;
-- `chc author assisted answer`;
-- `chc author assisted status`;
-- `chc author assisted finalize`.
+- `chr author assisted start`;
+- `chr author assisted resume`;
+- `chr author assisted answer`;
+- `chr author assisted status`;
+- `chr author assisted finalize`.
 
 The first implementation uses explicit fake-adapter inputs for deterministic
 operation and tests:
@@ -33,20 +33,20 @@ This slice wires the previously delivered core contracts into the existing
 `author` command surface. It does not introduce a real provider adapter. The
 commands remain project-local and Markdown-first:
 
-- started sessions are stored under `.chc/authoring/sessions/`;
+- started sessions are stored under `.chr/authoring/sessions/`;
 - resume persists transcript events and model request/response artifacts;
 - answer appends answer transcript events;
 - finalize writes `curated-summary.md` and a synthesized target artifact.
 
 ## Files of Interest
 
-- `internal/chcapp/author.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/author.go`
+- `internal/chrapp/cli_test.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chcapp -run 'TestAuthorAssisted'`: pass
+- `go test ./internal/chrapp -run 'TestAuthorAssisted'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

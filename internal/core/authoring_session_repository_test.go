@@ -26,7 +26,7 @@ func TestAuthoringSessionRepositoryCreatesSessionFiles(t *testing.T) {
 		}
 	}
 
-	wantDir := filepath.Join(projectDir, ".chc", "authoring", "sessions", session.ID)
+	wantDir := filepath.Join(projectDir, ".chr", "authoring", "sessions", session.ID)
 	if paths.SessionDir != wantDir {
 		t.Fatalf("SessionDir = %q, want %q", paths.SessionDir, wantDir)
 	}

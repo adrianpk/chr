@@ -9,7 +9,7 @@ The ticket review instance has been resolved. A possible next role is an
 `@merger` instance, analogous to the existing `@reviewer` role.
 
 The role is not meant to add another model, another quality review, or a large
-amount of extra ceremony. In practice, ChrysoCoord works serially and the same
+amount of extra ceremony. In practice, Chryso works serially and the same
 agentic system may operate under different responsibilities. The repository
 could also be configured for automerge, so the immediate technical need is not
 strong.

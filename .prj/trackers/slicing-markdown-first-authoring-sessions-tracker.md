@@ -3,7 +3,7 @@
 Status: delivered
 
 Plan: `.prj/plans/slicing-markdown-first-authoring-sessions-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
@@ -178,7 +178,7 @@ Candidate tasks:
 - [x] Add `author session list`.
 - [x] Add `author session show`.
 - [x] Add `author quiz new` or equivalent target-specific entrypoint.
-- [x] Wire commands through the existing `internal/chcapp` command package.
+- [x] Wire commands through the existing `internal/chrapp` command package.
 - [x] Add CLI tests.
 - [x] Add slice implementation report.
 - [x] Run `make verify`.

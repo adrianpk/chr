@@ -34,8 +34,8 @@ func TestNewLoopReportBuildsSummaryFromLoopRun(t *testing.T) {
 func TestNewLoopReportIncludesRelatedExecutions(t *testing.T) {
 	record := testLoopReportRecord()
 	executions := []ExecutionRecord{
-		testLoopReportExecution("exec-1", "CHC-1", ExecutionStatusSucceeded),
-		testLoopReportExecution("exec-2", "CHC-2", ExecutionStatusBlocked),
+		testLoopReportExecution("exec-1", "CHR-1", ExecutionStatusSucceeded),
+		testLoopReportExecution("exec-2", "CHR-2", ExecutionStatusBlocked),
 	}
 
 	report, err := NewLoopReport(LoopReportOptions{
@@ -62,7 +62,7 @@ func TestNewLoopReportBoundsExecutions(t *testing.T) {
 	for index := 0; index < 30; index++ {
 		executions = append(executions, testLoopReportExecution(
 			"exec-"+string(rune('a'+index%26)),
-			"CHC-1",
+			"CHR-1",
 			ExecutionStatusSucceeded,
 		))
 	}
@@ -91,8 +91,8 @@ func TestNewLoopReportBoundsExecutions(t *testing.T) {
 func TestRenderLoopReportMarkdownIncludesLoopEvidence(t *testing.T) {
 	record := testLoopReportRecord()
 	executions := []ExecutionRecord{
-		testLoopReportExecution("exec-1", "CHC-1", ExecutionStatusSucceeded),
-		testLoopReportExecution("exec-2", "CHC-2", ExecutionStatusBlocked),
+		testLoopReportExecution("exec-1", "CHR-1", ExecutionStatusSucceeded),
+		testLoopReportExecution("exec-2", "CHR-2", ExecutionStatusBlocked),
 	}
 
 	report, err := NewLoopReport(LoopReportOptions{
@@ -119,8 +119,8 @@ func TestRenderLoopReportMarkdownIncludesLoopEvidence(t *testing.T) {
 		"- reason: loop stopped because the current ticket integration cycle blocked",
 		"## Executions",
 		"- total: 2",
-		"- exec-1 CHC-1 succeeded",
-		"- exec-2 CHC-2 blocked",
+		"- exec-1 CHR-1 succeeded",
+		"- exec-2 CHR-2 blocked",
 		"## Failure",
 		"- reason: ticket blocked",
 	} {

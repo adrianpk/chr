@@ -44,22 +44,22 @@ rendering and fallback projection paths.
 
 ## Files of Interest
 
-- `internal/chctui/model.go`
-- `internal/chctui/workspace_refresh.go`
-- `internal/chctui/workspace_graph_projection.go`
-- `internal/chctui/shell.go`
-- `internal/chctui/observability.go`
-- `internal/chctui/artifact_actions.go`
-- `internal/chctui/model_test.go`
-- `internal/chcapp/app.go`
-- `internal/chcapp/service_workspace.go`
-- `internal/chcapp/tui_adapters.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/workspace_refresh.go`
+- `internal/chrtui/workspace_graph_projection.go`
+- `internal/chrtui/shell.go`
+- `internal/chrtui/observability.go`
+- `internal/chrtui/artifact_actions.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrapp/service_workspace.go`
+- `internal/chrapp/tui_adapters.go`
 - `.prj/reports/slices/workspace-index-semantic-cache/slice-8-tui-index-consumers.md`
 - `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp` passed on 2026-05-23.
+- `go test ./internal/chrtui ./internal/chrapp` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

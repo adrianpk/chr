@@ -14,7 +14,7 @@ instead of relying on direct ticket frontmatter edits.
 
 ## Delivered Behavior
 
-- `chc ticket review-ref` can attach a ticket implementation branch and a pull
+- `chr ticket review-ref` can attach a ticket implementation branch and a pull
   request review reference.
 - Existing pull request references are updated when the URL matches, or when
   provider, type, and provider ID match.
@@ -36,27 +36,27 @@ instead of relying on direct ticket frontmatter edits.
 ## Contracts Added or Changed
 
 - New CLI command:
-  `chc ticket review-ref <ticket-key> --branch <branch> --provider <provider> --url <url> [--id <id>]`.
+  `chr ticket review-ref <ticket-key> --branch <branch> --provider <provider> --url <url> [--id <id>]`.
 - `ready_for_review` status transitions now require:
   `branch` plus one `review_refs` entry with `type: "pull_request"` and a URL.
 - TUI ticket actions now include an `attach_review_ref` operation request shape.
 
 ## Files of Interest
 
-- `internal/chc/ticket_review_metadata.go`
-- `internal/chc/ticket_status.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/tui_adapters_spec_plan_ticket.go`
-- `internal/chctui/ticket_actions.go`
+- `internal/chr/ticket_review_metadata.go`
+- `internal/chr/ticket_status.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/tui_adapters_spec_plan_ticket.go`
+- `internal/chrtui/ticket_actions.go`
 - `docs/reference/ticket-review-metadata.md`
 - `docs/reference/ticket-validation.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'Ticket(Review|Status)|ReviewMetadata'`
-- `go test ./internal/chcapp -run 'Ticket(ReviewRef|Status|ApplyResult)'`
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chr -run 'Ticket(Review|Status)|ReviewMetadata'`
+- `go test ./internal/chrapp -run 'Ticket(ReviewRef|Status|ApplyResult)'`
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui`
 - `make verify`
 
 ## Risks and Follow-ups

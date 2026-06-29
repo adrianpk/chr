@@ -14,11 +14,11 @@ This slicing covers the use case:
 
 Primary source:
 
-- `.prj/drafts/chc-feature-slicing-set-map.md`
+- `.prj/drafts/chr-feature-slicing-set-map.md`
 
 Related documents:
 
-- `.prj/drafts/chc-command-surfaces-and-priority.md`
+- `.prj/drafts/chr-command-surfaces-and-priority.md`
 - `.prj/specs/specs/user-daemon-and-global-index.md`
 - `.prj/specs/specs/user-daemon-and-global-index-model.md`
 - `docs/reference/ticket-index.md`
@@ -48,7 +48,7 @@ Still missing:
 - refreshing the index before user-facing ticket reads;
 - maintenance commands for index status and rebuild;
 - parse-error reporting for malformed ticket files;
-- rehydration after cloning a project with `.chc/` files.
+- rehydration after cloning a project with `.chr/` files.
 
 ## Slicing Scope
 
@@ -135,7 +135,7 @@ Candidate scope:
 
 Expected outcome:
 
-- a project can rehydrate its derived ticket index from `.chc/tickets/*.md`.
+- a project can rehydrate its derived ticket index from `.chr/tickets/*.md`.
 
 Delivery:
 
@@ -184,7 +184,7 @@ Expose manual project index rebuild as a recovery command.
 Candidate scope:
 
 - add an index command group if needed;
-- add `chc index rebuild`;
+- add `chr index rebuild`;
 - resolve project context through the existing resolver;
 - print concise rebuild results;
 - document command behavior.
@@ -211,7 +211,7 @@ Expose index health inspection as a user-facing command.
 
 Candidate scope:
 
-- add `chc index status`;
+- add `chr index status`;
 - resolve project context through the existing resolver;
 - print clean status rows or a summary;
 - return non-zero when the index is stale or invalid;
@@ -307,12 +307,12 @@ Manual smoke checks for the completed slicing:
 ```sh
 make install
 tmpdir="$(mktemp -d)"
-chc init --dir "$tmpdir"
-chc ticket new --dir "$tmpdir" "Do something"
-sed -i 's/title: "Do something"/title: "Do something edited"/' "$tmpdir/.chc/tickets/CHC-1-Do-something.md"
-chc ticket show --dir "$tmpdir" CHC-1
-chc index status --dir "$tmpdir"
-chc index rebuild --dir "$tmpdir"
+chr init --dir "$tmpdir"
+chr ticket new --dir "$tmpdir" "Do something"
+sed -i 's/title: "Do something"/title: "Do something edited"/' "$tmpdir/.chr/tickets/CHR-1-Do-something.md"
+chr ticket show --dir "$tmpdir" CHR-1
+chr index status --dir "$tmpdir"
+chr index rebuild --dir "$tmpdir"
 ```
 
 ## Risks

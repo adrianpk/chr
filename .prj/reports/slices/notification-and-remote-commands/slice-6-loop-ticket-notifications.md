@@ -50,15 +50,15 @@ not replace the ticket or loop result.
 
 ## Files of Interest
 
-- `internal/chcapp/notification_emit.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chrapp/notification_emit.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/notifications.md`
 - `.prj/trackers/slicing-notification-and-remote-commands-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chcapp -run 'TestTicketLoop(DispatchesConfiguredFinishedNotification|StopsOnExecutionFailure|RecordsFailedNotification|RecordsBlockedNotifications)|TestTicketApplyResultRecordsBlockedNotification'`: pass
+- `go test ./internal/chrapp -run 'TestTicketLoop(DispatchesConfiguredFinishedNotification|StopsOnExecutionFailure|RecordsFailedNotification|RecordsBlockedNotifications)|TestTicketApplyResultRecordsBlockedNotification'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

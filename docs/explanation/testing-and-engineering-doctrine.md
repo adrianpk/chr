@@ -1,11 +1,11 @@
 # Testing and Engineering Doctrine
 
-ChrysoCoord should help projects move toward stronger engineering practice
+Chryso should help projects move toward stronger engineering practice
 without assuming that every project shares the same stack, risk profile, or
 operating discipline.
 
 This document is a direction of travel. It describes the testing and engineering
-approach ChrysoCoord should recommend, preserve, and eventually help enforce
+approach Chryso should recommend, preserve, and eventually help enforce
 where a project opts into that level of structure.
 
 ## Core Idea
@@ -68,7 +68,7 @@ CRAP(m) = CC^2 * (1 - coverage)^3 + CC
 Where `CC` is cyclomatic complexity and `coverage` is a fraction between `0`
 and `1`.
 
-ChrysoCoord should treat this kind of signal as a risk radar, not as a
+Chryso should treat this kind of signal as a risk radar, not as a
 management target. The useful output is not a global score. The useful output
 is a short list of complex, under-tested areas that deserve tests, refactoring,
 or explicit acceptance of risk.
@@ -91,7 +91,7 @@ Property-based tests and mutation testing complement each other:
 
 ## Agent Guidance
 
-When ChrysoCoord generates specs, plans, tickets, or review evidence, it should
+When Chryso generates specs, plans, tickets, or review evidence, it should
 prefer work that improves the project's ability to verify itself.
 
 That means encouraging tickets and acceptance criteria that ask:
@@ -107,7 +107,7 @@ That means encouraging tickets and acceptance criteria that ask:
 The agent should not blindly add heavyweight testing. It should choose the
 smallest testing strategy that addresses the actual risk.
 
-ChrysoCoord now models that choice as an evidence strategy pass inside normal
+Chryso now models that choice as an evidence strategy pass inside normal
 ticket execution. Before editing project files, the worker is expected to decide
 and record:
 
@@ -134,7 +134,7 @@ to unit, table-driven, fuzz, property, or integration tests.
 
 ## Enforcement Direction
 
-ChrysoCoord can start by recommending this doctrine and preserving it as project
+Chryso can start by recommending this doctrine and preserving it as project
 context.
 
 Future enforcement can be opt-in:

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"example.com/chc-qa-tictactoe/internal/game"
+	"example.com/chr-qa-tictactoe/internal/game"
 )
 
 func TestRenderBoard(t *testing.T) {

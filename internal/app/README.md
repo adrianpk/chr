@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`internal/app` is the application assembly layer for Chrysocoord commands
+`internal/app` is the application assembly layer for Chryso commands
 and the local TUI.
 
 ## Boundary

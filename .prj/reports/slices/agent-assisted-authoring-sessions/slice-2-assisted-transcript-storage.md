@@ -30,7 +30,7 @@ The repository now supports:
 Transcript storage uses the existing authoring session layout:
 
 ```text
-.chc/authoring/sessions/<session-id>/transcript.md
+.chr/authoring/sessions/<session-id>/transcript.md
 ```
 
 Events are appended as Markdown blocks with YAML frontmatter and readable
@@ -55,14 +55,14 @@ Repository contract update:
 
 ## Files of Interest
 
-- `internal/chc/assisted_transcript.go`
-- `internal/chc/assisted_transcript_test.go`
-- `internal/chc/authoring_session_repository.go`
+- `internal/chr/assisted_transcript.go`
+- `internal/chr/assisted_transcript_test.go`
+- `internal/chr/authoring_session_repository.go`
 - `.prj/trackers/slicing-agent-assisted-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestAssistedTranscript|TestRenderAssistedTranscript|TestParseAssistedTranscript|TestAuthoringSessionRepository.*Transcript'`: pass
+- `go test ./internal/chr -run 'TestAssistedTranscript|TestRenderAssistedTranscript|TestParseAssistedTranscript|TestAuthoringSessionRepository.*Transcript'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

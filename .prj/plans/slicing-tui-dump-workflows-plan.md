@@ -22,8 +22,8 @@ Primary sources:
 - `docs/explanation/document-generation-model.md`
 - `docs/reference/project-workspace.md`
 - `docs/reference/authoring-sessions.md`
-- `internal/chcapp` operation service boundary
-- `internal/chctui` Dumps, Project, Cases, command palette, and artifact action
+- `internal/chrapp` operation service boundary
+- `internal/chrtui` Dumps, Project, Cases, command palette, and artifact action
   surfaces
 
 Conversation decisions:
@@ -54,7 +54,7 @@ Important limitations:
 - Append and edit flows are not available from the Dumps screen.
 - The TUI document loader still contains layout knowledge and currently scans
   `.prj/dumps` for dumps, while product documentation and authoring artifact
-  layout describe `.chc/dumps` as the project-local generated artifact path.
+  layout describe `.chr/dumps` as the project-local generated artifact path.
 - The existing artifact action executor is generic and does not expose
   dump-specific requests.
 - Reload behavior after dump operations is not centralized around a dump service
@@ -64,7 +64,7 @@ Important limitations:
 
 The target model is service-centered:
 
-- `internal/chcapp.service` owns dump operations.
+- `internal/chrapp.service` owns dump operations.
 - The service resolves project-wide vs use-case-scoped dump requests.
 - The service owns canonical dump paths, frontmatter, filename generation,
   appends, saves, opens, and reload/index refresh behavior.
@@ -107,7 +107,7 @@ type DumpOperationRequest struct {
 type DumpOperationResult struct {
     Message string
     Dumps   []DumpView
-    Index   chc.WorkspaceIndex
+    Index   chr.WorkspaceIndex
 }
 ```
 
@@ -117,10 +117,10 @@ must not: service owns operational logic; TUI owns presentation and input state.
 ## Canonical Layout Decision
 
 The active product model describes generated authoring artifacts under
-`.chc/`, including:
+`.chr/`, including:
 
 ```text
-.chc/dumps/
+.chr/dumps/
 ```
 
 This slicing should align dump operations with that product contract. Any
@@ -306,7 +306,7 @@ opening its PR unless a documented blocker prevents it.
 Expected recurring checks:
 
 ```sh
-go test ./internal/chc ./internal/chcapp ./internal/chctui
+go test ./internal/chr ./internal/chrapp ./internal/chrtui
 make verify
 ```
 
@@ -320,4 +320,4 @@ This slicing does not include:
 - adding Telegram or Email adapters;
 - changing unrelated quiz/spec/plan workflows;
 - changing the Markdown-first durable source-of-truth model;
-- making `.chc/tmp/` cache files authoritative.
+- making `.chr/tmp/` cache files authoritative.

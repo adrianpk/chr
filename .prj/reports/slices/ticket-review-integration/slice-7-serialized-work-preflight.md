@@ -26,11 +26,11 @@ concurrent development and review operations in the same workspace.
 
 ## Implementation Notes
 
-- The reusable preflight contract lives in `internal/chc` so CLI, TUI, and
+- The reusable preflight contract lives in `internal/chr` so CLI, TUI, and
   future adapters share one rule set.
 - Non-git workspaces are allowed through the git freshness check to preserve
   existing test and scratch workspace behavior.
-- The lock is file-based under `.chc/user/runtime/agent-operation.lock`.
+- The lock is file-based under `.chr/user/runtime/agent-operation.lock`.
 - Dry-run review paths do not take the operation lock.
 
 ## Contracts Added or Changed
@@ -44,20 +44,20 @@ concurrent development and review operations in the same workspace.
 
 ## Files of Interest
 
-- `internal/chc/work_selection_preflight.go`
-- `internal/chc/work_selection_preflight_test.go`
-- `internal/chcapp/ticket.go`
-- `internal/chcapp/service_work.go`
+- `internal/chr/work_selection_preflight.go`
+- `internal/chr/work_selection_preflight_test.go`
+- `internal/chrapp/ticket.go`
+- `internal/chrapp/service_work.go`
 - `scripts/check-go-func-signatures.sh`
 - `Makefile`
 
 ## Validation
 
 - `scripts/check-go-func-signatures.sh`
-- `go test ./internal/chc -run 'WorkSelection|AgentOperationLock'`
-- `go test ./internal/chcapp -run 'AgentWork|TicketLoop|TicketReview'`
-- `go test ./internal/chc ./internal/chcapp`
-- `golangci-lint run ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr -run 'WorkSelection|AgentOperationLock'`
+- `go test ./internal/chrapp -run 'AgentWork|TicketLoop|TicketReview'`
+- `go test ./internal/chr ./internal/chrapp`
+- `golangci-lint run ./internal/chr ./internal/chrapp`
 
 ## Risks and Follow-ups
 

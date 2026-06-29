@@ -10,7 +10,7 @@ Spec: `ops/specs/2026-06-19-isolated-ticket-worktrees.md`
 
 ## Purpose
 
-Move ticket execution from the user's active checkout into a ChrysoCoord-owned
+Move ticket execution from the user's active checkout into a Chryso-owned
 Git worktree while preserving the current sequential agent model.
 
 This delivery must keep one active ticket and one active runtime worker at a
@@ -27,7 +27,7 @@ origin/<integration_branch>
   fetched published base for agent work
 
 ticket worktree
-  ChrysoCoord-owned execution workspace
+  Chryso-owned execution workspace
   mounted into Docker as /workspace
   kept until the ticket branch / PR lifecycle completes
 ```
@@ -154,7 +154,7 @@ Tasks:
 - T3.4 Make ticket worktree dirtiness blocking in worktree mode.
 - T3.5 Add remote-base diagnostics for failed fetch and missing
   `<remote>/<integration_branch>`.
-- T3.6 Update `chc work doctor` output and service models to expose both
+- T3.6 Update `chr work doctor` output and service models to expose both
   workspace states.
 - T3.7 Add safe repair coverage for fetch, root creation, and non-destructive
   worktree metadata pruning.
@@ -241,7 +241,7 @@ Behavior:
 - Existing branch metadata in the ticket is authoritative when present and
   valid.
 - Branch conflicts block instead of forcing reset or overwriting history.
-- Commit, push, and PR creation continue to happen through host-side CHC
+- Commit, push, and PR creation continue to happen through host-side CHR
   orchestration, not from inside the worker container.
 - `run-all` still executes one ticket at a time and prepares one worktree at a
   time.
@@ -367,7 +367,7 @@ QA proving should add project-level smoke commands once the fixtures exist.
 
 ## Backlog Candidates
 
-- Dedicated `chc work worktree list/show/clean` commands.
+- Dedicated `chr work worktree list/show/clean` commands.
 - Configurable worktree path templates beyond ticket key.
 - Per-execution clone mode for highly isolated or remote-only workflows.
 - Container-side commit/push support with explicit credentials.

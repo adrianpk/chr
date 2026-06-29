@@ -4,7 +4,7 @@ Status: completed
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Review existing delivered plans and implementation state.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -16,7 +16,7 @@ Status: completed
 | Slice | Status | Notes |
 | --- | --- | --- |
 | CLI Bootstrap | Delivered | Root CLI command and command family structure exist. |
-| Project-Local Initialization | Delivered | `chc init` creates `.chc/` in current directory or `--dir`. |
+| Project-Local Initialization | Delivered | `chr init` creates `.chr/` in current directory or `--dir`. |
 | Asset Profiles | Delivered | Embedded `standard`, `personal`, and `minimal` profiles exist. |
 | Root Agents File | Delivered | Root `AGENTS.md` is materialized and existing root file is preserved. |
 | Protocol Defaults | Delivered | Standard profile includes protocol files and playbooks. |
@@ -26,7 +26,7 @@ Status: completed
 
 Candidate tasks:
 
-- [x] Review current `chc init` CLI behavior against the acceptance criteria.
+- [x] Review current `chr init` CLI behavior against the acceptance criteria.
 - [x] Add CLI-boundary tests for dry-run, existing files, and invalid targets if missing.
 - [x] Improve invalid target or permission errors if current messages are unclear.
 - [x] Verify real embedded profile assets, not only synthetic test assets.
@@ -35,7 +35,7 @@ Candidate tasks:
 
 ## Validation Record
 
-- `go test ./internal/chcapp -run 'TestInit'`: pass.
+- `go test ./internal/chrapp -run 'TestInit'`: pass.
 - `make verify`: pass.
 
 ## Notes

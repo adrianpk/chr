@@ -24,7 +24,7 @@ func testRenderedTicket() Ticket {
 	updatedAt := time.Date(2026, 5, 18, 13, 45, 0, 0, time.UTC)
 
 	return Ticket{
-		Key:         "CHC-1",
+		Key:         "CHR-1",
 		Title:       "Do something",
 		Synopsis:    "Implement the onboarding flow.",
 		Priority:    "high",
@@ -34,7 +34,7 @@ func testRenderedTicket() Ticket {
 		UseCase:     "onboarding",
 		ProjectArea: "frontend",
 		SourceKind:  "plan_tracking",
-		SourceRef:   ".chc/user/plans/onboarding-plan.md",
+		SourceRef:   ".chr/user/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
 		Branch:      "feat/slice-1-onboarding",
 		ReviewRefs: []TicketReviewRef{
@@ -63,7 +63,7 @@ func testRenderedTicket() Ticket {
 }
 
 const wantRenderedTicket = `---
-key: "CHC-1"
+key: "CHR-1"
 title: "Do something"
 synopsis: "Implement the onboarding flow."
 status: "open"
@@ -74,7 +74,7 @@ tags: ["uxui", "onboarding"]
 use_case: "onboarding"
 project_area: "frontend"
 source_kind: "plan_tracking"
-source_ref: ".chc/user/plans/onboarding-plan.md"
+source_ref: ".chr/user/plans/onboarding-plan.md"
 slice: "Slice 1"
 branch: "feat/slice-1-onboarding"
 review_refs:
@@ -114,7 +114,7 @@ updated_at: "2026-05-18T13:45:00Z"
 func TestTicketRendererKeepsOptionalFieldsEmpty(t *testing.T) {
 	renderer := NewTicketRenderer()
 
-	content, err := renderer.RenderTicket(Ticket{Key: "CHC-1", Title: "Do something"})
+	content, err := renderer.RenderTicket(Ticket{Key: "CHR-1", Title: "Do something"})
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

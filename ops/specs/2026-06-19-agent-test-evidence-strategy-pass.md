@@ -21,7 +21,7 @@ Related:
 
 ## Summary
 
-ChrysoCoord should add a mandatory Test/Evidence Strategy pass to development
+Chryso should add a mandatory Test/Evidence Strategy pass to development
 worker execution.
 
 The pass happens after a ticket is selected and before the development worker
@@ -41,7 +41,7 @@ strategy before the ticket can move to `ready_for_review`.
   strategy before code changes.
 - Persist the strategy in the ticket checklist/tasklist as the primary
   operational source.
-- Keep the checklist parseable enough for ChrysoCoord and future workers to
+- Keep the checklist parseable enough for Chryso and future workers to
   recognize and validate.
 - Keep the checklist readable enough for humans to inspect and edit.
 - Allow user-authored checklist edits without making user-authored strategy the
@@ -85,7 +85,7 @@ strategy before the ticket can move to `ready_for_review`.
 
 `Primary operational source`
 
-: The artifact ChrysoCoord should inspect to determine whether the ticket has an
+: The artifact Chryso should inspect to determine whether the ticket has an
   evidence strategy. For this feature, the primary source is the ticket
   checklist/tasklist.
 
@@ -132,13 +132,13 @@ The strategy should be stored in a clearly bounded checklist block in the ticket
 Preferred shape:
 
 ```md
-<!-- chc:evidence-strategy:v1 -->
+<!-- chr:evidence-strategy:v1 -->
 - [ ] Evidence strategy: planned; change_kind=<kind>; risk=<risk>; test_timing=<timing>; note=<reason>
 - [ ] Gherkin: <required|not_applicable|disabled|blocked>; path=<path|none>; reason=<reason>
 - [ ] Tests: <none|existing|unit|table|integration|fuzz|property|mutation|runtime|mixed>; reason=<reason>
 - [ ] Validation: <pending|passed|failed|blocked>; commands=<commands>; evidence=<path|summary|none>
 - [ ] Evidence summary: pending
-<!-- /chc:evidence-strategy -->
+<!-- /chr:evidence-strategy -->
 ```
 
 The HTML comments are machine anchors. The checklist items remain normal
@@ -146,7 +146,7 @@ Markdown so humans can read and edit them.
 
 ### Required Labels
 
-ChrysoCoord must recognize these labels inside the strategy block:
+Chryso must recognize these labels inside the strategy block:
 
 - `Evidence strategy`
 - `Gherkin`
@@ -441,11 +441,11 @@ The runtime execution report should include:
 The report must not be the only place where strategy exists.
 
 If the report and ticket checklist disagree, the ticket checklist is the
-operational source and ChrysoCoord should surface a diagnostic.
+operational source and Chryso should surface a diagnostic.
 
 ## Configuration
 
-Configuration should live in `.chc/user/config.yml` under a new top-level
+Configuration should live in `.chr/user/config.yml` under a new top-level
 `evidence:` key.
 
 Generated config may omit defaults. Omitted fields use sane defaults.
@@ -517,7 +517,7 @@ Existing tickets without evidence-strategy checklists should remain readable.
 When a worker picks such a ticket, it should insert the strategy block during the
 initial strategy pass.
 
-ChrysoCoord should not require bulk migration of existing tickets before the
+Chryso should not require bulk migration of existing tickets before the
 feature is used.
 
 If a project disables the feature through config, existing checklist blocks
@@ -525,7 +525,7 @@ should be preserved but not enforced.
 
 ## Diagnostics
 
-ChrysoCoord should provide clear diagnostics for blocked outcomes.
+Chryso should provide clear diagnostics for blocked outcomes.
 
 Initial diagnostic reasons:
 

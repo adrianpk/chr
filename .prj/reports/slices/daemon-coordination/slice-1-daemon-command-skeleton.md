@@ -16,9 +16,9 @@ persistence or process ownership yet.
 
 The CLI now includes:
 
-- `chc daemon status`;
-- `chc daemon start --dry-run`;
-- `chc daemon stop --dry-run`.
+- `chr daemon status`;
+- `chr daemon start --dry-run`;
+- `chr daemon stop --dry-run`.
 
 `daemon status` resolves the user environment and reports the skeleton daemon as
 stopped.
@@ -45,13 +45,13 @@ Added CLI commands:
 
 ## Files of Interest
 
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/daemon-coordination.md`
 
 ## Validation
 
-- `go test ./cmd/chc -run 'TestDaemon'`: pass
+- `go test ./cmd/chr -run 'TestDaemon'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

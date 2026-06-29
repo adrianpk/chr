@@ -138,7 +138,7 @@ func (m *Model) confirmDumpAction() tea.Cmd {
 	}
 
 	if result.EditorCommand != nil {
-		m.statusMessage = "External editor opened. chc will resume when the editor process exits."
+		m.statusMessage = "External editor opened. chr will resume when the editor process exits."
 
 		return tea.ExecProcess(result.EditorCommand, func(err error) tea.Msg {
 			return dumpEditorFinishedMsg{

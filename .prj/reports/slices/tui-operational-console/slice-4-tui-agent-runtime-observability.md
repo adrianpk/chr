@@ -29,11 +29,11 @@ This slice keeps the Agent and Runtime views read-only.
 
 ## Implementation Notes
 
-`internal/chcapp` remains the TUI startup data-loading boundary. It opens the
+`internal/chrapp` remains the TUI startup data-loading boundary. It opens the
 existing user-database-backed repositories and closes them immediately after
 building the read-only TUI view data.
 
-`internal/chctui` owns the presentation model. It selects the latest execution
+`internal/chrtui` owns the presentation model. It selects the latest execution
 and loop by `UpdatedAt` and renders project-relative runtime paths when
 possible.
 
@@ -42,21 +42,21 @@ slice.
 
 ## Contracts Added or Changed
 
-- `chctui.Options` now accepts `ObservabilityView`.
+- `chrtui.Options` now accepts `ObservabilityView`.
 - The TUI Agent view now renders daemon, loop, and execution state.
 - The TUI Runtime view now renders runtime plan and validation readiness.
 
 ## Files of Interest
 
-- `internal/chcapp/app.go`
-- `internal/chctui/observability.go`
-- `internal/chctui/model.go`
-- `internal/chctui/model_test.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/observability.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
 ```sh
-go test ./internal/chctui ./internal/chcapp
+go test ./internal/chrtui ./internal/chrapp
 make verify
 ```
 

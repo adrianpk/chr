@@ -16,7 +16,7 @@ can ask project-specific questions from structured project context.
 
 - Added contextual quiz request and result models.
 - Added context sections for project identity, authoring session, `AGENTS.md`,
-  `.chc/` artifacts, docs, project tree, and Go inventory.
+  `.chr/` artifacts, docs, project tree, and Go inventory.
 - Added an output contract for structured quiz questions.
 - Added strict response validation before writing quiz artifacts.
 - Added a Codex-backed question provider for the CLI path.
@@ -52,17 +52,17 @@ question set, not a local template.
 
 ## Files of Interest
 
-- `internal/chc/authoring_contextual_quiz.go`
-- `internal/chc/authoring_contextual_quiz_test.go`
-- `internal/chcapp/author.go`
-- `internal/chcapp/cli_test.go`
+- `internal/chr/authoring_contextual_quiz.go`
+- `internal/chr/authoring_contextual_quiz_test.go`
+- `internal/chrapp/author.go`
+- `internal/chrapp/cli_test.go`
 - `docs/reference/authoring-sessions.md`
 - `docs/explanation/document-generation-model.md`
 
 ## Validation
 
 ```sh
-go test ./internal/chc ./internal/chcapp
+go test ./internal/chr ./internal/chrapp
 make verify
 ```
 

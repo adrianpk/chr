@@ -55,9 +55,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   setup checks, notification audit records, loop/ticket notifications, and
   fixture-based remote command handoff parsing.
 - Added a first usable iteration of the optional local Web UI served by
-  `chc web serve`, including localhost-only defaults, token and origin
+  `chr web serve`, including localhost-only defaults, token and origin
   controls, server-rendered pages, htmx refresh behavior, document and work
-  actions, ChrysoCoord visual identity, documentation, and browser smoke
+  actions, Chryso visual identity, documentation, and browser smoke
   tooling.
 - Added Markdown-first authoring sessions and assisted authoring flows for
   generating and promoting project documentation artifacts.
@@ -93,7 +93,7 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   satisfy Codex feature schema expectations.
 - Fixed spec generation context so generated specs stay neutral and do not
   accidentally produce feature artifacts.
-- Fixed work readiness so ChrysoCoord-owned runtime artifacts can be repaired
+- Fixed work readiness so Chryso-owned runtime artifacts can be repaired
   safely without treating them as user-owned dirty state.
 - Fixed work readiness diagnostics so missing branches, missing remote refs,
   behind-remote branches, invalid policy, dirty worktrees, and Git in-progress

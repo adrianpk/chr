@@ -38,7 +38,7 @@ Expected behavior:
 
 ### T8.2 Migrator Core Primitive
 
-Implement the core migrator in `internal/chc`.
+Implement the core migrator in `internal/chr`.
 
 Expected behavior:
 

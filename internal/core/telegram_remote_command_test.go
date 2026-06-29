@@ -57,7 +57,7 @@ func TestRemoteCommandRecordFromTelegramUpdateRejectsUnsupportedText(t *testing.
 func telegramUpdateFixture() string {
 	return `{"ok":true,"result":[
 {"update_id":1,"message":{"message_id":10,"from":{"id":100,"username":"ops"},"chat":{"id":200},"date":1768000000,"text":"@example loop start --status ready --max-iterations 1"}},
-{"update_id":2,"message":{"message_id":11,"from":{"id":101,"first_name":"Ada"},"chat":{"id":201},"date":1768000001,"text":"ticket start CHC-1"}}
+{"update_id":2,"message":{"message_id":11,"from":{"id":101,"first_name":"Ada"},"chat":{"id":201},"date":1768000001,"text":"ticket start CHR-1"}}
 ]}`
 }
 

@@ -4,13 +4,13 @@ Status: initial
 
 Sources:
 
-- `/home/adrian/Downloads/chc_ticket_execution_context_and_ralph_loop.md`
+- `/home/adrian/Downloads/chr_ticket_execution_context_and_ralph_loop.md`
 - `docs/reference/ticket-execution.md`
 - `docs/reference/ticket-result-application.md`
 
 ## Purpose
 
-Define what it means for `chc` to resolve a ticket end to end.
+Define what it means for `chr` to resolve a ticket end to end.
 
 Resolving a ticket is not only code generation. It is the full operational
 cycle of selecting work, building context, running an agent, validating changes,
@@ -81,7 +81,7 @@ For this repository, PRs target `dev`.
 
 ## Tool Readiness
 
-Before invoking an agent, `chc` should know whether required tools are
+Before invoking an agent, `chr` should know whether required tools are
 available.
 
 Tool readiness may include:

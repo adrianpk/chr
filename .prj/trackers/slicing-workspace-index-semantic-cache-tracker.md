@@ -93,7 +93,7 @@ Task commits:
 Candidate tasks:
 
 - [x] Define cache manifest schema.
-- [x] Write `structural-index.json` under `.chc/tmp/cache/workspace-index/`.
+- [x] Write `structural-index.json` under `.chr/tmp/cache/workspace-index/`.
 - [x] Load cache when schema and source hashes remain valid.
 - [x] Fall back to filesystem rebuild when cache is missing or stale.
 - [x] Add maintenance or debug visibility for cache state where practical.
@@ -224,7 +224,7 @@ Task commits:
 
 - 2026-05-23: `make verify` passed for plan and tracker creation.
 - 2026-05-23: `make verify` passed for Slice 1.
-- 2026-05-23: `go test ./internal/chc` passed for Slice 2.
+- 2026-05-23: `go test ./internal/chr` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 2.
 - 2026-05-23: `make verify` passed for Slice 3.
 - 2026-05-23: `make verify` passed for Slice 8.

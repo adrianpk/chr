@@ -18,7 +18,7 @@ workflow logic.
 
 ## Delivered Behavior
 
-- Documented `internal/chcapp` as the owner of the application operation
+- Documented `internal/chrapp` as the owner of the application operation
   service boundary.
 - Documented that adapters translate inputs, handle interaction or transport
   concerns, and map operation results.
@@ -33,7 +33,7 @@ workflow logic.
 ## Implementation Notes
 
 The documentation follows the architecture implemented by the previous slices:
-one central `internal/chcapp` service type, split across operation files for
+one central `internal/chrapp` service type, split across operation files for
 readability, with TUI-specific mappings isolated in adapter files.
 
 The guidance keeps narrow interfaces available for adapter contracts while

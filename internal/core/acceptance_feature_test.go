@@ -21,11 +21,11 @@ func TestAcceptanceFeatureLayoutUsesCanonicalPath(t *testing.T) {
 		t.Fatalf("scope id = %q, want article-authoring", paths.ScopeID)
 	}
 
-	if paths.RelativePath != ".chc/user/acceptance/article-authoring.feature" {
+	if paths.RelativePath != ".chr/user/acceptance/article-authoring.feature" {
 		t.Fatalf("relative path = %q", paths.RelativePath)
 	}
 
-	if paths.Path != filepath.Join(projectDir, ".chc", "user", "acceptance", "article-authoring.feature") {
+	if paths.Path != filepath.Join(projectDir, ".chr", "user", "acceptance", "article-authoring.feature") {
 		t.Fatalf("path = %q", paths.Path)
 	}
 }
@@ -45,11 +45,11 @@ func TestAcceptanceFeatureRoundLayoutUsesCanonicalPath(t *testing.T) {
 		t.Fatalf("AcceptanceFeatureRoundLayout returned error: %v", err)
 	}
 
-	if paths.RelativePath != ".chc/user/acceptance/article-authoring-feature-round.md" {
+	if paths.RelativePath != ".chr/user/acceptance/article-authoring-feature-round.md" {
 		t.Fatalf("relative path = %q", paths.RelativePath)
 	}
 
-	if paths.Path != filepath.Join(projectDir, ".chc", "user", "acceptance", "article-authoring-feature-round.md") {
+	if paths.Path != filepath.Join(projectDir, ".chr", "user", "acceptance", "article-authoring-feature-round.md") {
 		t.Fatalf("path = %q", paths.Path)
 	}
 }
@@ -305,7 +305,7 @@ func TestWriteAcceptanceFeatureWritesCheckedArtifact(t *testing.T) {
 		t.Fatalf("valid = false, findings = %#v", result.Findings)
 	}
 
-	if paths.RelativePath != ".chc/user/acceptance/article-authoring.feature" {
+	if paths.RelativePath != ".chr/user/acceptance/article-authoring.feature" {
 		t.Fatalf("relative path = %q", paths.RelativePath)
 	}
 
@@ -449,7 +449,7 @@ func validAcceptanceFeatureArtifact() AcceptanceFeatureArtifact {
 	return AcceptanceFeatureArtifact{
 		Scope:       QuizScope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		SpecSlug:    "article-authoring-spec",
-		SpecPath:    ".chc/user/specs/article-authoring-spec.md",
+		SpecPath:    ".chr/user/specs/article-authoring-spec.md",
 		UseCaseSlug: "article-authoring",
 		Body:        "Feature: Article authoring\n",
 		CreatedAt:   quizRuntimeTestTime(),

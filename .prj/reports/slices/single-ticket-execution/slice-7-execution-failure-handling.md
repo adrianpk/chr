@@ -10,7 +10,7 @@ PR: `#40`
 ## Purpose
 
 Classify execution failures consistently and print concise diagnostic output
-from `chc ticket start`.
+from `chr ticket start`.
 
 ## Delivered Behavior
 
@@ -25,7 +25,7 @@ Execution failures are classified with stable failure kinds:
 The execution runner records classified failure reasons for harness,
 validation, and result-capture failures.
 
-`chc ticket start` now prints failure diagnostics when available:
+`chr ticket start` now prints failure diagnostics when available:
 
 - failure kind;
 - failure reason;
@@ -66,17 +66,17 @@ New functions:
 
 ## Files of Interest
 
-- `internal/chc/execution_failure.go`
-- `internal/chc/execution_failure_test.go`
-- `internal/chc/execution_runner.go`
-- `internal/chc/execution_runner_test.go`
-- `cmd/chc/main.go`
-- `cmd/chc/main_test.go`
+- `internal/chr/execution_failure.go`
+- `internal/chr/execution_failure_test.go`
+- `internal/chr/execution_runner.go`
+- `internal/chr/execution_runner_test.go`
+- `cmd/chr/main.go`
+- `cmd/chr/main_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc ./cmd/chc`: pass
+- `go test ./internal/chr ./cmd/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

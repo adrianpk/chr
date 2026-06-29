@@ -12,8 +12,8 @@ func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
-		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:   "CHR-1",
+		TicketPath:  filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -23,9 +23,9 @@ func TestNewHarnessInvocationRendersDockerBuildCommand(t *testing.T) {
 	wantArgs := []string{
 		"build",
 		"--file",
-		filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+		filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 		"--tag",
-		"chc-agent-runtime:local",
+		"chr-agent-runtime:local",
 		dir,
 	}
 
@@ -44,8 +44,8 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
-		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:   "CHR-1",
+		TicketPath:  filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -56,31 +56,31 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 		"run",
 		"--rm",
 		"--name",
-		"chc-exec-123",
+		"chr-exec-123",
 		"--volume",
 		dir + ":/workspace",
 		"--workdir",
 		"/workspace",
 		"--env",
-		"CHC_EXECUTION_ID=exec-123",
+		"CHR_EXECUTION_ID=exec-123",
 		"--env",
-		"CHC_TICKET_KEY=CHC-1",
+		"CHR_TICKET_KEY=CHR-1",
 		"--env",
-		"CHC_TICKET_PATH=/workspace/.chc/user/tickets/CHC-1.md",
+		"CHR_TICKET_PATH=/workspace/.chr/user/tickets/CHR-1.md",
 		"--env",
-		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/context.md",
+		"CHR_WORKER_CONTEXT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/context.md",
 		"--env",
-		"CHC_RESULT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/result.json",
+		"CHR_RESULT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/result.json",
 		"--env",
-		"CHC_LOG_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/runtime.log",
+		"CHR_LOG_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/runtime.log",
 		"--env",
-		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
+		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
 		"--env",
 		"OPENAI_API_KEY",
-		"chc-agent-runtime:local",
+		"chr-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
-		"CHC_EXECUTION_ID='exec-123' CHC_TICKET_KEY='CHC-1' CHC_TICKET_PATH='/workspace/.chc/user/tickets/CHC-1.md' CHC_WORKER_CONTEXT_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/context.md' CHC_RESULT_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/result.json' CHC_LOG_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/runtime.log' CHC_VALIDATION_PATH='/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHC_WORKER_CONTEXT_PATH\"",
+		"CHR_EXECUTION_ID='exec-123' CHR_TICKET_KEY='CHR-1' CHR_TICKET_PATH='/workspace/.chr/user/tickets/CHR-1.md' CHR_WORKER_CONTEXT_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/context.md' CHR_RESULT_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/result.json' CHR_LOG_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/runtime.log' CHR_VALIDATION_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHR_WORKER_CONTEXT_PATH\"",
 	}
 
 	if invocation.Run.Program != "docker" {
@@ -98,8 +98,8 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
-		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:   "CHR-1",
+		TicketPath:  filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -110,16 +110,16 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 		"run",
 		"--rm",
 		"--name",
-		"chc-exec-123-validation",
+		"chr-exec-123-validation",
 		"--volume",
 		dir + ":/workspace",
 		"--workdir",
 		"/workspace",
 		"--env",
-		"CHC_EXECUTION_ID=exec-123",
+		"CHR_EXECUTION_ID=exec-123",
 		"--env",
-		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
-		"chc-agent-runtime:local",
+		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
+		"chr-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
 		"make verify",
@@ -136,7 +136,7 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 
 func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 	projectDir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(projectDir, ".chc", "user", "worktrees", "CHC-1")
+	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "user", "worktrees", "CHR-1")
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: projectDir,
@@ -147,7 +147,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
-		TicketKey:             "CHC-1",
+		TicketKey:             "CHR-1",
 		RunID:                 "exec-123",
 	})
 	if err != nil {
@@ -156,8 +156,8 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
-		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(executionWorkspaceDir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:   "CHR-1",
+		TicketPath:  filepath.Join(executionWorkspaceDir, ".chr", "user", "tickets", "CHR-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -170,11 +170,11 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		"CHC_TICKET_PATH=/workspace/.chc/user/tickets/CHC-1.md",
-		"CHC_WORKER_CONTEXT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/context.md",
-		"CHC_RESULT_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/result.json",
-		"CHC_LOG_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/runtime.log",
-		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
+		"CHR_TICKET_PATH=/workspace/.chr/user/tickets/CHR-1.md",
+		"CHR_WORKER_CONTEXT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/context.md",
+		"CHR_RESULT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/result.json",
+		"CHR_LOG_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/runtime.log",
+		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
 	} {
 		if !slices.Contains(invocation.Run.Args, want) {
 			t.Fatalf("Run.Args missing %q: %#v", want, invocation.Run.Args)
@@ -184,7 +184,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 
 func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T) {
 	projectDir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(projectDir, ".chc", "user", "worktrees", "CHC-1")
+	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "user", "worktrees", "CHR-1")
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: projectDir,
@@ -198,7 +198,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
-		TicketKey:             "CHC-1",
+		TicketKey:             "CHR-1",
 		RunID:                 "exec-123",
 	})
 	if err != nil {
@@ -207,8 +207,8 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 
 	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
 		ExecutionID: "exec-123",
-		TicketKey:   "CHC-1",
-		TicketPath:  filepath.Join(executionWorkspaceDir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:   "CHR-1",
+		TicketPath:  filepath.Join(executionWorkspaceDir, ".chr", "user", "tickets", "CHR-1.md"),
 		Plan:        plan,
 	})
 	if err != nil {
@@ -218,9 +218,9 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 	for _, want := range []string{
 		executionWorkspaceDir + ":/workspace",
 		"/workspace",
-		"CHC_EXECUTION_ID=exec-123",
-		"CHC_VALIDATION_PATH=/workspace/.chc/user/runtime/runs/CHC-1/exec-123/validation.log",
-		"chc-agent-runtime:local",
+		"CHR_EXECUTION_ID=exec-123",
+		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
+		"chr-agent-runtime:local",
 		"go test ./...",
 	} {
 		if !slices.Contains(invocation.Validation.Args, want) {
@@ -231,8 +231,8 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 
 func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 	_, err := NewHarnessInvocation(HarnessInvocationOptions{
-		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(t.TempDir(), ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:  "CHR-1",
+		TicketPath: filepath.Join(t.TempDir(), ".chr", "user", "tickets", "CHR-1.md"),
 		Plan:       testHarnessRuntimePlan(t.TempDir()),
 	})
 	if err == nil {
@@ -241,12 +241,12 @@ func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 }
 
 func testHarnessRuntimePlan(projectDir string) RuntimePlan {
-	runDir := filepath.Join(projectDir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-123")
+	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-123")
 
 	return RuntimePlan{
 		ProjectDir:       projectDir,
-		DockerfilePath:   filepath.Join(projectDir, ".chc", "user", "runtime", "agent", "Dockerfile"),
-		Image:            "chc-agent-runtime:local",
+		DockerfilePath:   filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+		Image:            "chr-agent-runtime:local",
 		ContainerWorkdir: "/workspace",
 		Mounts: []RuntimeMount{
 			{

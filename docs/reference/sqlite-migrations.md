@@ -2,7 +2,7 @@
 
 ## Purpose
 
-ChrysoCoord uses embedded SQLite migrations for user-level database schema setup.
+Chryso uses embedded SQLite migrations for user-level database schema setup.
 
 The global user database is derived local state. It supports project registration, ticket indexing, daemon queries, and messaging workflows.
 
@@ -11,7 +11,7 @@ The global user database is derived local state. It supports project registratio
 SQLite migrations live under the embedded asset tree:
 
 ```text
-cmd/chc/assets/migration/sqlite/
+cmd/chr/assets/migration/sqlite/
 ```
 
 Migration filenames must sort in application order:
@@ -81,7 +81,7 @@ The migration file is:
 
 The Board uses the existing `indexed_tickets` read model instead of a dedicated
 Board table. `ticket_key_sequences` stores monotonic ticket key allocation state
-for generated `CHC-<number>` keys.
+for generated `CHR-<number>` keys.
 
 ## Ticket Review Metadata
 

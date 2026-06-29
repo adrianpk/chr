@@ -16,7 +16,7 @@ func TestNewResultApplicationMapsSucceededExecutionToReviewing(t *testing.T) {
 	application, err := NewResultApplication(ResultApplicationOptions{
 		Execution:     record,
 		Result:        result,
-		CommentAuthor: "chc",
+		CommentAuthor: "chr",
 	})
 	if err != nil {
 		t.Fatalf("NewResultApplication returned error: %v", err)
@@ -26,8 +26,8 @@ func TestNewResultApplicationMapsSucceededExecutionToReviewing(t *testing.T) {
 		t.Fatalf("TicketStatus = %q, want reviewing", application.TicketStatus)
 	}
 
-	if application.Comment.Author != "chc" {
-		t.Fatalf("Comment.Author = %q, want chc", application.Comment.Author)
+	if application.Comment.Author != "chr" {
+		t.Fatalf("Comment.Author = %q, want chr", application.Comment.Author)
 	}
 
 	for _, want := range []string{
@@ -123,7 +123,7 @@ func TestNewResultApplicationBlocksEvidenceReadinessWithWorkspaceMetadata(t *tes
 		ExecutionWorkspaceDir: worktreeDir,
 		BaseRef:               "origin/dev",
 		BaseSHA:               "abc123",
-		TicketBranch:          "chc/CHC-1",
+		TicketBranch:          "chr/CHR-1",
 	}
 	result := testResultApplicationResult(record)
 	readiness := EvidenceReadinessResult{
@@ -229,18 +229,18 @@ func TestNewResultApplicationRejectsMismatchedExecutionID(t *testing.T) {
 }
 
 func testResultApplicationExecutionRecord(dir string) ExecutionRecord {
-	runDir := filepath.Join(dir, ".chc", "user", "runtime", "runs", "CHC-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
 	return ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
-		TicketKey:  "CHC-1",
-		TicketPath: filepath.Join(dir, ".chc", "user", "tickets", "CHC-1.md"),
+		TicketKey:  "CHR-1",
+		TicketPath: filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
 		Status:     ExecutionStatusSucceeded,
 		Runtime: ExecutionRuntimeRef{
-			Image:             "chc-agent-runtime:local",
-			DockerfilePath:    filepath.Join(dir, ".chc", "user", "runtime", "agent", "Dockerfile"),
+			Image:             "chr-agent-runtime:local",
+			DockerfilePath:    filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},

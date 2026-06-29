@@ -47,15 +47,15 @@ boundary; production generator wiring belongs outside this slice.
 
 ## Files of Interest
 
-- `internal/chc/workspace_semantic_digest.go`
-- `internal/chc/workspace_semantic_digest_test.go`
-- `internal/chc/workspace_index.go`
+- `internal/chr/workspace_semantic_digest.go`
+- `internal/chr/workspace_semantic_digest_test.go`
+- `internal/chr/workspace_index.go`
 - `.prj/reports/slices/workspace-index-semantic-cache/slice-6-semantic-index-worker.md`
 - `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc` passed on 2026-05-23.
+- `go test ./internal/chr` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

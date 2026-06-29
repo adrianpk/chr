@@ -18,7 +18,7 @@ query surfaces without introducing live LLM calls or blocking startup behavior.
 - Store digest cache entries with model id, prompt hash, source hash, path,
   node kind, digest text, and generation timestamp.
 - Read and write `semantic-digests.json` under
-  `.chc/tmp/cache/workspace-index/`.
+  `.chr/tmp/cache/workspace-index/`.
 - Treat missing, invalid, and schema-mismatched cache files as empty
   discardable caches.
 - Mark digest states as `ready`, `pending`, or `stale`.
@@ -47,14 +47,14 @@ contract from a worker boundary or service command.
 
 ## Files of Interest
 
-- `internal/chc/workspace_semantic_digest.go`
-- `internal/chc/workspace_semantic_digest_test.go`
+- `internal/chr/workspace_semantic_digest.go`
+- `internal/chr/workspace_semantic_digest_test.go`
 - `.prj/reports/slices/workspace-index-semantic-cache/slice-5-semantic-digest-cache.md`
 - `.prj/trackers/slicing-workspace-index-semantic-cache-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc` passed on 2026-05-23.
+- `go test ./internal/chr` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

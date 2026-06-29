@@ -24,10 +24,10 @@ Fields:
 | --- | --- | --- |
 | `schema_version` | yes | Event schema version. Initial value: `1`. |
 | `timestamp` | yes | UTC RFC3339 timestamp for when the event was emitted. |
-| `project_id` | yes | ChrysoCoord project id. |
+| `project_id` | yes | Chryso project id. |
 | `loop_id` | no | Loop/run id when the event belongs to a multi-ticket loop. |
 | `execution_id` | no | Execution id when the event belongs to one ticket execution. |
-| `ticket_key` | no | Ticket key such as `CHC-1`. |
+| `ticket_key` | no | Ticket key such as `CHR-1`. |
 | `phase` | yes | Machine-readable lifecycle phase. |
 | `level` | yes | `info`, `warn`, or `error`. |
 | `message` | yes | Human-readable concise event message. |
@@ -89,8 +89,8 @@ Event files should be append-only JSONL.
 Preferred paths:
 
 ```text
-.chc/user/runtime/runs/<loop-id>/events.jsonl
-.chc/user/runtime/runs/<ticket-key>/<execution-id>/events.jsonl
+.chr/user/runtime/runs/<loop-id>/events.jsonl
+.chr/user/runtime/runs/<ticket-key>/<execution-id>/events.jsonl
 ```
 
 When there is no loop id, execution-scoped events are still written under the

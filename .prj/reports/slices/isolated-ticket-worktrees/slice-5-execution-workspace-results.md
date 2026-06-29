@@ -62,7 +62,7 @@ from the ticket worktree rather than the user's checkout.
 - `internal/core/result_application_test.go`
 - `internal/app/ticket.go`
 - `internal/app/cli_test.go`
-- `cmd/chc/assets/migration/sqlite/20260619000011-add_execution_workspace_metadata.sql`
+- `cmd/chr/assets/migration/sqlite/20260619000011-add_execution_workspace_metadata.sql`
 
 ## Validation
 

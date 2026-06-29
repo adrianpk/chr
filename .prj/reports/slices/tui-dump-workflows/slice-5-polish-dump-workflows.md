@@ -37,11 +37,11 @@ polish before moving into follow-up tuning for full Markdown editing.
 
 ## Files of Interest
 
-- `internal/chctui/command_palette.go`
-- `internal/chctui/dump_actions.go`
-- `internal/chctui/dumps.go`
-- `internal/chctui/model_test.go`
-- `internal/chcapp/tui_adapters.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/dump_actions.go`
+- `internal/chrtui/dumps.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrapp/tui_adapters.go`
 
 ## Validation
 

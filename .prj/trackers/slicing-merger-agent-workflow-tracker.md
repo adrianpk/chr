@@ -5,7 +5,7 @@ Status: completed
 Plan: `.prj/plans/slicing-merger-agent-workflow-plan.md`
 Spec: `.prj/specs/specs/merger-agent-workflow.md`
 Dump: `.prj/dumps/curated/2026-06-02-merger-agent-role.md`
-Mirror: `.chc/user/trackers/merger-agent-workflow-tracker.md`
+Mirror: `.chr/user/trackers/merger-agent-workflow-tracker.md`
 
 ## Slicing Checklist
 
@@ -94,8 +94,8 @@ Tasks:
 Validation:
 
 - `scripts/check-go-func-signatures.sh`
-- `golangci-lint run --timeout=5m ./internal/chc/... ./internal/chcapp/...`
-- `go test ./internal/chc ./internal/chcapp`
+- `golangci-lint run --timeout=5m ./internal/chr/... ./internal/chrapp/...`
+- `go test ./internal/chr ./internal/chrapp`
 - `git diff --check`
 - `make verify`
 

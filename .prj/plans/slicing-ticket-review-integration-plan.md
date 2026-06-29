@@ -7,11 +7,11 @@ Active Slice: none
 Spec Draft: `.prj/specs/drafts/ticket-review-integration-draft.md`
 Quiz: `.prj/quizzes/curated/ticket-review-integration-quiz.md`
 Tracker: `.prj/trackers/slicing-ticket-review-integration-tracker.md`
-Mirror: `.chc/user/plans/ticket-review-integration-plan.md`
+Mirror: `.chr/user/plans/ticket-review-integration-plan.md`
 
 ## Purpose
 
-Implement ticket-level review integration for ChrysoCoord so agent-produced
+Implement ticket-level review integration for Chryso so agent-produced
 ticket work can move through branch, pull request, review, repair, and merge
 states without relying on informal chat memory or ad hoc remote inspection.
 

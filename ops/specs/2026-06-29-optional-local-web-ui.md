@@ -16,7 +16,7 @@ Related:
 
 ## Summary
 
-ChrysoCoord should provide an optional local Web UI for the same managed-project
+Chryso should provide an optional local Web UI for the same managed-project
 operations currently available through the TUI and CLI.
 
 The Web UI is an additional operator surface. It is not a replacement for the
@@ -32,7 +32,7 @@ The Web UI must:
 - use the same project-local Markdown files and user-level indexes as the TUI;
 - stay synchronized with TUI and CLI changes by reloading shared state;
 - preserve the existing TUI board model and operational views;
-- use a ChrysoCoord-specific visual palette and simple agent avatar;
+- use a Chryso-specific visual palette and simple agent avatar;
 - avoid introducing a separate product workflow.
 
 ## Motivation
@@ -61,8 +61,8 @@ No server starts unless the user explicitly asks for it.
 The TUI remains the default behavior for:
 
 ```sh
-chc
-chc tui
+chr
+chr tui
 ```
 
 The Web UI starts only through an explicit command or explicit configuration.
@@ -88,8 +88,8 @@ The implementation must not expose the Web UI on all interfaces by accident.
 
 The Web UI must use the same backing state as the TUI:
 
-- project-local Markdown artifacts under `.chc/`;
-- `.chc/user/` active userspace;
+- project-local Markdown artifacts under `.chr/`;
+- `.chr/user/` active userspace;
 - user-level SQLite indexes and records;
 - runtime artifact files;
 - execution and loop records;
@@ -118,8 +118,8 @@ composition should match the reference application selected during
 implementation, across Board, Dash, Dumps, Quizzes, Specs, Plans, Project,
 Cases, Help, and command surfaces. Use that reference for layout, spacing, pane
 structure, card density, navigation, editing surfaces, and operational
-ergonomics. Preserve the ChrysoCoord TUI operational model and change only the
-visual identity needed to make the UI belong to ChrysoCoord.
+ergonomics. Preserve the Chryso TUI operational model and change only the
+visual identity needed to make the UI belong to Chryso.
 
 ### No Workflow Expansion
 
@@ -137,7 +137,7 @@ the first implementation.
 The user runs:
 
 ```sh
-chc
+chr
 ```
 
 No Web UI starts.
@@ -151,10 +151,10 @@ No background web server is installed.
 The user runs:
 
 ```sh
-chc web serve
+chr web serve
 ```
 
-ChrysoCoord starts an HTTP server bound to `127.0.0.1` and prints:
+Chryso starts an HTTP server bound to `127.0.0.1` and prints:
 
 ```text
 web ui: http://127.0.0.1:7331
@@ -169,7 +169,7 @@ The user opens the local browser and operates the same project.
 The user runs:
 
 ```sh
-chc web serve --host 0.0.0.0
+chr web serve --host 0.0.0.0
 ```
 
 or configures:
@@ -181,7 +181,7 @@ web:
   port: 7331
 ```
 
-ChrysoCoord prints an explicit warning:
+Chryso prints an explicit warning:
 
 ```text
 warning: web ui is bound to a non-loopback interface
@@ -190,7 +190,7 @@ warning: web ui is bound to a non-loopback interface
 The user is responsible for private-network access, firewall rules, reverse
 proxy, private tunnel, or TLS termination.
 
-ChrysoCoord should remain useful behind private overlay networks and local
+Chryso should remain useful behind private overlay networks and local
 tunnels, but it should not require or manage those systems.
 
 ## Configuration
@@ -204,7 +204,7 @@ web:
   port: 7331
   open_browser: false
   require_token: auto
-  token_env: CHC_WEB_TOKEN
+  token_env: CHR_WEB_TOKEN
   allowed_origins: []
   refresh_interval_seconds: 2
 ```
@@ -224,7 +224,7 @@ Meaning:
 - `false`: no automatic web server behavior;
 - `true`: commands that start the web surface may use the configured defaults.
 
-This flag must not make plain `chc` start the Web UI. Plain `chc` remains TUI.
+This flag must not make plain `chr` start the Web UI. Plain `chr` remains TUI.
 
 ### `host`
 
@@ -272,7 +272,7 @@ Default:
 open_browser: false
 ```
 
-When true, `chc web serve` may open the local browser after the server is ready.
+When true, `chr web serve` may open the local browser after the server is ready.
 
 ### `require_token`
 
@@ -308,7 +308,7 @@ Type: string.
 Default:
 
 ```yml
-token_env: CHC_WEB_TOKEN
+token_env: CHR_WEB_TOKEN
 ```
 
 The token value is read from the environment. It is not written to project
@@ -346,11 +346,11 @@ another live update channel is unavailable.
 ### Serve
 
 ```sh
-chc web serve
-chc web serve --dir /path/to/project
-chc web serve --host 127.0.0.1 --port 7331
-chc web serve --host 0.0.0.0 --port 7331
-chc web serve --open
+chr web serve
+chr web serve --dir /path/to/project
+chr web serve --host 127.0.0.1 --port 7331
+chr web serve --host 0.0.0.0 --port 7331
+chr web serve --open
 ```
 
 Behavior:
@@ -368,7 +368,7 @@ The command should exit cleanly on `ctrl+c`.
 ### Preview
 
 ```sh
-chc web serve --dry-run
+chr web serve --dry-run
 ```
 
 Prints:
@@ -388,7 +388,7 @@ Does not start a server.
 Optional command:
 
 ```sh
-chc web open
+chr web open
 ```
 
 If a local server is already running and discoverable, open it.
@@ -414,7 +414,7 @@ Recommended implementation:
 - no database server;
 - no external frontend build service at runtime.
 
-The server runs in the foreground of `chc web serve`.
+The server runs in the foreground of `chr web serve`.
 
 No daemon is required for the first version.
 
@@ -447,7 +447,7 @@ HTTP route
 ## Internal Web UI Helpers
 
 The Web UI may copy and adapt small local helper primitives for HTML and htmx
-work into ChrysoCoord-owned internal packages.
+work into Chryso-owned internal packages.
 
 The copied helpers must live under an internal Web UI boundary, such as:
 
@@ -470,11 +470,11 @@ Allowed helper categories:
 Rules:
 
 - copy or adapt only the primitives needed by the current slice;
-- keep helper package names and APIs local to ChrysoCoord;
+- keep helper package names and APIs local to Chryso;
 - do not add a module dependency on the source helper library;
 - do not import Web UI helpers from business, core, app, persistence, or TUI
   packages;
-- do not put ChrysoCoord business behavior in helper packages;
+- do not put Chryso business behavior in helper packages;
 - add local tests for copied or adapted primitives;
 - preserve clear escaping boundaries by using `html/template` types only where
   the rendered HTML is intentionally trusted.
@@ -566,7 +566,7 @@ Required:
 Equivalent command:
 
 ```sh
-chc metadata project set
+chr metadata project set
 ```
 
 ### Cases
@@ -583,7 +583,7 @@ Required:
 Equivalent command:
 
 ```sh
-chc metadata case set
+chr metadata case set
 ```
 
 ### Dumps
@@ -601,11 +601,11 @@ Required:
 Equivalent commands:
 
 ```sh
-chc dump list
-chc dump new
-chc dump show
-chc dump save
-chc dump append
+chr dump list
+chr dump new
+chr dump show
+chr dump save
+chr dump append
 ```
 
 ### Quizzes
@@ -625,14 +625,14 @@ Required:
 Equivalent commands:
 
 ```sh
-chc quiz list
-chc quiz start
-chc quiz resume
-chc quiz answer
-chc quiz skip
-chc quiz complete
-chc quiz cancel
-chc quiz mode
+chr quiz list
+chr quiz start
+chr quiz resume
+chr quiz answer
+chr quiz skip
+chr quiz complete
+chr quiz cancel
+chr quiz mode
 ```
 
 ### Specs
@@ -648,8 +648,8 @@ Required:
 Equivalent commands:
 
 ```sh
-chc spec list
-chc spec generate
+chr spec list
+chr spec generate
 ```
 
 ### Plans
@@ -667,10 +667,10 @@ Required:
 Equivalent commands:
 
 ```sh
-chc plan list
-chc plan generate
-chc plan regenerate
-chc plan tracking create
+chr plan list
+chr plan generate
+chr plan regenerate
+chr plan tracking create
 ```
 
 ### Board
@@ -710,14 +710,14 @@ introduce a different kanban taxonomy.
 Equivalent commands:
 
 ```sh
-chc ticket board
-chc ticket list
-chc ticket show
-chc ticket status
-chc ticket start
-chc ticket loop
-chc work ticket
-chc work run-all
+chr ticket board
+chr ticket list
+chr ticket show
+chr ticket status
+chr ticket start
+chr ticket loop
+chr work ticket
+chr work run-all
 ```
 
 ### Dash
@@ -868,13 +868,13 @@ Minimum shape:
     }
   ],
   "attention": [],
-  "selected_key": "CHC-1",
+  "selected_key": "CHR-1",
   "detail": {
-    "key": "CHC-1",
+    "key": "CHR-1",
     "title": "Add runtime check",
     "status": "ready_for_dev",
     "synopsis": "Add runtime check.",
-    "source_path": ".chc/user/tickets/CHC-1.md",
+    "source_path": ".chr/user/tickets/CHR-1.md",
     "evidence": {
       "state": "complete",
       "summary": "complete"
@@ -912,11 +912,11 @@ Rules:
   dash, help, and command interaction patterns closely;
 - preserve dense operational panes;
 - preserve browser-first operational ergonomics while mapping actions to
-  ChrysoCoord semantics;
+  Chryso semantics;
 - avoid marketing-page composition;
 - avoid decorative hero sections;
 - avoid redesigning the information architecture;
-- change only the identity layer needed for ChrysoCoord.
+- change only the identity layer needed for Chryso.
 
 ### Palette
 
@@ -926,18 +926,18 @@ colors to feel natural for a Go software tool.
 Suggested tokens:
 
 ```css
---chc-bg: #0f1718;
---chc-surface: #162224;
---chc-surface-2: #1d2e31;
---chc-border: #2f4b4e;
---chc-text: #e6f1ef;
---chc-muted: #9db7b5;
---chc-cyan: #00add8;
---chc-turquoise: #2bb8a7;
---chc-green: #75b86b;
---chc-stone: #7f8f87;
---chc-warn: #d7b75f;
---chc-danger: #d86f5f;
+--chr-bg: #0f1718;
+--chr-surface: #162224;
+--chr-surface-2: #1d2e31;
+--chr-border: #2f4b4e;
+--chr-text: #e6f1ef;
+--chr-muted: #9db7b5;
+--chr-cyan: #00add8;
+--chr-turquoise: #2bb8a7;
+--chr-green: #75b86b;
+--chr-stone: #7f8f87;
+--chr-warn: #d7b75f;
+--chr-danger: #d86f5f;
 ```
 
 The final palette should be checked against:
@@ -950,7 +950,7 @@ The final palette should be checked against:
 
 ### Avatar
 
-The central avatar should be a simple ChrysoCoord agent mark.
+The central avatar should be a simple Chryso agent mark.
 
 Required traits:
 
@@ -963,7 +963,7 @@ Required traits:
 - usable at small sizes;
 - usable as favicon or app mark later.
 
-The avatar should use the ChrysoCoord palette, especially cyan, turquoise, and
+The avatar should use the Chryso palette, especially cyan, turquoise, and
 stone tones.
 
 It must not become the center of the product experience. The board and
@@ -1028,7 +1028,7 @@ The token is read from the configured environment variable.
 
 The token must not be written into:
 
-- `.chc/user/config.yml`;
+- `.chr/user/config.yml`;
 - logs;
 - browser-visible boot data;
 - static files.
@@ -1075,7 +1075,7 @@ Examples:
 
 ```text
 Could not start work: readiness is blocked.
-Run `chc work doctor --dir <project>` or open Dash for repair guidance.
+Run `chr work doctor --dir <project>` or open Dash for repair guidance.
 ```
 
 ```text
@@ -1172,19 +1172,19 @@ Docs must clearly state:
 
 | Slice | Name | Purpose |
 | --- | --- | --- |
-| Slice 1 | Web config and serve command | Add config parsing, `chc web serve`, bind validation, dry-run output, and a minimal health endpoint. |
+| Slice 1 | Web config and serve command | Add config parsing, `chr web serve`, bind validation, dry-run output, and a minimal health endpoint. |
 | Slice 2 | HTML, htmx, and helper foundation | Add server-rendered templates, embedded assets, htmx helpers, UI primitives, and a browser-loadable shell. |
 | Slice 3 | Read-only project and board views | Add project, board, and Dash read routes with page and fragment rendering without write actions. |
 | Slice 4 | View parity foundations | Add Cases, Dumps, Quizzes, Specs, and Plans read views with shared view models and refresh behavior. |
 | Slice 5 | Confirmed write actions | Add project metadata, case metadata, dump editing, status transitions, and confirmation flow. |
 | Slice 6 | Work actions and Dash parity | Add start-work, run-ready, repair, stop request, busy states, and event refresh. |
-| Slice 7 | Visual identity and reference layout pass | Apply the selected reference layout, ChrysoCoord palette, avatar, accessibility checks, and screenshot-based verification. |
+| Slice 7 | Visual identity and reference layout pass | Apply the selected reference layout, Chryso palette, avatar, accessibility checks, and screenshot-based verification. |
 | Slice 8 | Security and exposure hardening | Add token mode, CORS policy, CSRF or same-origin write guard, non-loopback warnings, and docs. |
 
 ## Open Questions
 
 - Should `web.enabled: true` allow an automatic web server in a future daemon,
-  or should it only provide defaults for `chc web serve`?
+  or should it only provide defaults for `chr web serve`?
 - Should token auth be required even on loopback for consistency?
 - Should the first implementation use server-sent events or polling?
 - Should the selected visual reference be copied structurally into native

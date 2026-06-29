@@ -24,8 +24,8 @@ AGENTS.md     # top-level agent operating contract
 
 - Command packages under `cmd/` should assemble dependencies, parse process-level configuration, start lifecycle components, and stay thin.
 - Application behavior should live in `internal/` by default.
-- ChrysoCoord core behavior should live under `internal/core`.
-- ChrysoCoord application operations should live under `internal/app` behind
+- Chryso core behavior should live under `internal/core`.
+- Chryso application operations should live under `internal/app` behind
   the central operation service boundary.
 - Use `pkg/` only for contracts, envelope types, or libraries that are intentionally shared outside the module.
 - Keep package boundaries aligned to behavior and ownership, not generic utility buckets.
@@ -99,7 +99,7 @@ Workspace cache files are discardable local acceleration artifacts. They may
 live under a project-local cache path such as:
 
 ```text
-.chc/user/tmp/cache/workspace-index/
+.chr/user/tmp/cache/workspace-index/
 ```
 
 Cache files must never be treated as authoritative. Missing, stale, corrupt, or

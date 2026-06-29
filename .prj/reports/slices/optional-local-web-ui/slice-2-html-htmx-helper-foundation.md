@@ -18,7 +18,7 @@ PR: `#344`
 
 - Added the internal `webui` package boundary for server-rendered Web UI
   presentation.
-- Added ChrysoCoord-owned htmx, render, and UI helper primitives without adding
+- Added Chryso-owned htmx, render, and UI helper primitives without adding
   an external module dependency.
 - Added embedded templates, CSS, htmx asset, root shell route, bootstrap
   fragment route, static asset serving, and shell smoke coverage.
@@ -39,7 +39,7 @@ PR: `#344`
   - Adds initial button, chip, and nav primitives with escaping tests.
   - Adds package boundary README documentation.
 - `internal/app/web.go`
-  - Connects `chc web serve` to the `internal/webui` handler and shell data.
+  - Connects `chr web serve` to the `internal/webui` handler and shell data.
 - `internal/app/cli_test.go`
   - Adds shell and static asset route coverage.
 - `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
@@ -51,9 +51,9 @@ PR: `#344`
 
 - `go test ./internal/webui/... ./internal/app -run 'WebServe|Handler|Attrs|Button|Chip|Nav|Renderer'` (pass)
 - `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
-- `go run ./cmd/chc web serve --dir . --port 7332` plus:
+- `go run ./cmd/chr web serve --dir . --port 7332` plus:
   - `curl -fsS http://127.0.0.1:7332/` (pass)
-  - `curl -fsS http://127.0.0.1:7332/assets/chc.css` (pass)
+  - `curl -fsS http://127.0.0.1:7332/assets/chr.css` (pass)
   - `curl -fsS http://127.0.0.1:7332/assets/htmx.min.js` (pass)
   - `curl -fsS http://127.0.0.1:7332/healthz` (pass)
 - `make verify` (pass)

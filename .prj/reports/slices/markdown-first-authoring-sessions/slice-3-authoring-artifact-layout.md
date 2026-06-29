@@ -16,7 +16,7 @@ promoted authoring artifacts.
 
 The repository now has an authoring artifact layout model that can:
 
-- resolve canonical `.chc/` paths for dumps, quizzes, drafts, specs, plans,
+- resolve canonical `.chr/` paths for dumps, quizzes, drafts, specs, plans,
   slice sets, slices, trackers, and tickets;
 - derive stable artifact IDs from kind, session ID, and topic or name;
 - return absolute filesystem paths and relative project paths;
@@ -47,13 +47,13 @@ New internal contracts:
 
 ## Files of Interest
 
-- `internal/chc/authoring_artifact_layout.go`
-- `internal/chc/authoring_artifact_layout_test.go`
+- `internal/chr/authoring_artifact_layout.go`
+- `internal/chr/authoring_artifact_layout_test.go`
 - `.prj/trackers/slicing-markdown-first-authoring-sessions-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc -run 'TestPlanAuthoringArtifactLayout|TestAuthoringArtifactInventory'`: pass
+- `go test ./internal/chr -run 'TestPlanAuthoringArtifactLayout|TestAuthoringArtifactInventory'`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

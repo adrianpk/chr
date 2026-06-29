@@ -3,11 +3,11 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-notification-and-remote-commands-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm daemon, loop, ticket result, and context prerequisites are delivered.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -143,9 +143,9 @@ Pre-flight:
 
 Candidate tasks:
 
-- [x] Add `chc notify` command group.
-- [x] Add `chc notify status`.
-- [x] Add `chc notify telegram test --dry-run`.
+- [x] Add `chr notify` command group.
+- [x] Add `chr notify status`.
+- [x] Add `chr notify telegram test --dry-run`.
 - [x] Render the planned Telegram test payload from config.
 - [x] Avoid network calls in dry-run mode.
 - [x] Add focused CLI tests.

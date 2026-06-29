@@ -25,9 +25,9 @@ Primary sources:
 
 Review findings:
 
-- `internal/chcapp/app.go` owns a package-level mutable `assetsFS` dependency.
-- `internal/chcapp/service.go` stores `context.Context` in the service object.
-- `internal/chcapp/metadata_cli.go` contains workflow logic that belongs behind
+- `internal/chrapp/app.go` owns a package-level mutable `assetsFS` dependency.
+- `internal/chrapp/service.go` stores `context.Context` in the service object.
+- `internal/chrapp/metadata_cli.go` contains workflow logic that belongs behind
   service operations.
 - TUI adapter functions were concentrated in one file across several unrelated
   domains.
@@ -35,7 +35,7 @@ Review findings:
 
 ## Current State
 
-Application startup builds CLI commands and TUI entrypoints through `chcapp`.
+Application startup builds CLI commands and TUI entrypoints through `chrapp`.
 The service layer already centralizes many workflows, but several dependencies
 and adapters still leak through older boundaries:
 
@@ -95,7 +95,7 @@ resolution.
 
 Expected behavior:
 
-- `internal/chcapp` no longer relies on package-level mutable asset filesystem
+- `internal/chrapp` no longer relies on package-level mutable asset filesystem
   state.
 - Project context resolution receives required dependencies explicitly.
 - CLI and TUI startup behavior remains unchanged.

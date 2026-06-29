@@ -9,14 +9,14 @@ PR: pending
 
 ## Purpose
 
-Make the test-based development preference explicit for CHC agents and for
+Make the test-based development preference explicit for CHR agents and for
 generated tracking/ticket work units.
 
 ## Delivered Behavior
 
-- CHC agent conventions now prefer reproducing bug fixes with a failing test
+- CHR agent conventions now prefer reproducing bug fixes with a failing test
   when feasible.
-- CHC agent conventions keep table-driven tests as the default for input/output
+- CHR agent conventions keep table-driven tests as the default for input/output
   behavior.
 - Advanced testing approaches are documented as use-case dependent rather than
   required ceremony.
@@ -42,15 +42,15 @@ tickets are the execution units that later agents will read directly.
 ## Files of Interest
 
 - `.agents/CONVENTIONS.md`
-- `internal/chc/quiz_openai_model.go`
-- `internal/chc/quiz_codex_model_test.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chr/quiz_codex_model_test.go`
 - `qa/ref/001/blog/AGENTS.md`
 - `qa/ref/001/blog/.agents/CONVENTIONS.md`
 - `.prj/trackers/slicing-qa-agent-work-scenario-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chc`
+- `go test ./internal/chr`
 - `make qa-reset-blog`
 - `make qa-test-blog` expected failure: unknown post returns `500`, test
   expects `404`

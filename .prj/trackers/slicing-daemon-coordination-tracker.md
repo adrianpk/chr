@@ -3,11 +3,11 @@
 Status: completed
 
 Plan: `.prj/plans/slicing-daemon-coordination-plan.md`
-Feature map: `.prj/drafts/chc-feature-slicing-set-map.md`
+Feature map: `.prj/drafts/chr-feature-slicing-set-map.md`
 
 ## Slicing Checklist
 
-- [x] Identify slicing from `.prj/drafts/chc-feature-slicing-set-map.md`.
+- [x] Identify slicing from `.prj/drafts/chr-feature-slicing-set-map.md`.
 - [x] Confirm prerequisite foreground loop slicing is completed.
 - [x] Create slicing plan.
 - [x] Create slicing tracker.
@@ -43,7 +43,7 @@ Pre-flight:
 
 Candidate tasks:
 
-- [x] Add `chc daemon` command group.
+- [x] Add `chr daemon` command group.
 - [x] Add `daemon status`, `daemon start --dry-run`, and `daemon stop --dry-run`.
 - [x] Resolve user environment for daemon commands.
 - [x] Keep daemon commands side-effect free in this slice.

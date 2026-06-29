@@ -15,7 +15,7 @@ Make curated dumps the primary consumption artifact while retaining raw dump sib
 ## Changes
 
 - Workspace nodes now preserve dump pair frontmatter metadata: `type`, `source`, and `curated`.
-- Raw dump siblings are classified with `chc.IsRawDumpNode` and curated dumps with `chc.IsCuratedDumpNode`.
+- Raw dump siblings are classified with `chr.IsRawDumpNode` and curated dumps with `chr.IsCuratedDumpNode`.
 - Workspace context, quiz supplemental context, and spec context skip raw dump siblings.
 - `ListDumps` returns curated primary dumps and exposes the raw sibling path as metadata.
 - F3 Dumps shows curated dumps and renders the raw source path in the selected dump detail when present.
@@ -24,7 +24,7 @@ Make curated dumps the primary consumption artifact while retaining raw dump sib
 
 ## Validation
 
-- `go test ./internal/chc ./internal/chcapp ./internal/chctui` passed.
+- `go test ./internal/chr ./internal/chrapp ./internal/chrtui` passed.
 
 ## Notes
 

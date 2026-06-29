@@ -11,14 +11,14 @@ Expected PR title: `feat(slice-6): project validation recovery`
 
 Make stale registered project paths understandable and recoverable at command boundaries.
 
-This slice closes the `User Project Context` slicing by making project context failures explicit when a registered or active project path is missing, no longer contains `.chc/`, or is disabled.
+This slice closes the `User Project Context` slicing by making project context failures explicit when a registered or active project path is missing, no longer contains `.chr/`, or is disabled.
 
 ## Scope
 
 This slice covers:
 
 - clear missing project path errors;
-- clear registered path without `.chc/` errors;
+- clear registered path without `.chr/` errors;
 - clear disabled project errors;
 - validation behavior for active project resolution;
 - validation behavior for `project select`;
@@ -45,7 +45,7 @@ Existing command behavior should remain conservative:
 The command boundary should distinguish:
 
 - registered project path no longer exists;
-- registered project path exists but lacks `.chc/`;
+- registered project path exists but lacks `.chr/`;
 - registered project is disabled;
 - no active project exists.
 
@@ -60,7 +60,7 @@ Add focused validation helpers for registered project paths.
 Expected behavior:
 
 - validate that a project path exists;
-- validate that the path has a `.chc/` directory;
+- validate that the path has a `.chr/` directory;
 - return contextual errors that include the project name or path.
 
 ### T1.2 Apply Validation to Selection and Active Context
@@ -70,9 +70,9 @@ Use the validation helpers in command paths that resolve registered projects.
 Expected behavior:
 
 - `project select` rejects missing registered paths clearly;
-- `project select` rejects registered paths without `.chc/` clearly;
+- `project select` rejects registered paths without `.chr/` clearly;
 - active project resolution rejects missing active project paths clearly;
-- active project resolution rejects active paths without `.chc/` clearly;
+- active project resolution rejects active paths without `.chr/` clearly;
 - disabled projects remain rejected distinctly.
 
 ### T1.3 Tests and Tracker
@@ -82,9 +82,9 @@ Add focused tests and update tracker state.
 Required cases:
 
 - select rejects registered project whose path was deleted;
-- select rejects registered project whose `.chc/` was removed;
+- select rejects registered project whose `.chr/` was removed;
 - active project command rejects deleted active project path;
-- active project command rejects active project path without `.chc/`;
+- active project command rejects active project path without `.chr/`;
 - disabled project rejection remains distinct where directly exercised;
 - tracker records task commits and validation.
 

@@ -21,7 +21,7 @@ The discoverer:
 - runs `git status --porcelain=v1 --untracked-files=all`;
 - scopes discovery to the project directory;
 - returns clean worktrees as an empty list;
-- ignores operational `.chc/runtime/` artifacts;
+- ignores operational `.chr/runtime/` artifacts;
 - does not stage, commit, revert, clean, or otherwise mutate files.
 
 ## Implementation Notes
@@ -43,13 +43,13 @@ New function:
 
 ## Files of Interest
 
-- `internal/chc/changed_file_discovery.go`
-- `internal/chc/changed_file_discovery_test.go`
+- `internal/chr/changed_file_discovery.go`
+- `internal/chr/changed_file_discovery_test.go`
 - `docs/reference/ticket-execution.md`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
+- `go test ./internal/chr`: pass
 - `make verify`: pass
 
 ## Risks and Follow-ups

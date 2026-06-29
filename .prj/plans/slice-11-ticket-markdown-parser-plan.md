@@ -16,7 +16,7 @@ The parser is required before building the SQLite ticket index and index rebuild
 
 This slice covers:
 
-- `chc.IndexedTicket` model,
+- `chr.IndexedTicket` model,
 - Markdown frontmatter parsing for ticket metadata,
 - file stat capture for path, relative path, size, mtime, and content hash,
 - parser tests with temporary ticket files,

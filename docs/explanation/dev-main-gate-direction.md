@@ -1,6 +1,6 @@
 # Dev to Main Gate Direction
 
-ChrysoCoord does not currently implement this gate.
+Chryso does not currently implement this gate.
 
 This document captures the need and direction for a future `dev` to `main`
 promotion gate. The goal is to make promotion evidence-driven without turning
@@ -16,7 +16,7 @@ Promotion should be based on facts produced by tools.
 The preferred model is:
 
 ```text
-Go tools + git + ChrysoCoord artifacts produce evidence.
+Go tools + git + Chryso artifacts produce evidence.
 Optional AI may summarize evidence.
 The human decides promotion.
 ```
@@ -31,7 +31,7 @@ A future gate can collect evidence from:
 
 - `git log` and `git diff` between `main` and `dev`;
 - changed files, packages, and public surfaces;
-- ticket, plan, and execution artifacts under `.chc/user/`;
+- ticket, plan, and execution artifacts under `.chr/user/`;
 - validation commands such as `go test ./...` and `golangci-lint`;
 - coverage profiles and package coverage summaries;
 - cyclomatic or cognitive complexity tooling;
@@ -48,8 +48,8 @@ Markdown.
 A future command could produce:
 
 ```text
-.chc/user/reports/gates/YYYYMMDD-dev-main.json
-.chc/user/reports/gates/YYYYMMDD-dev-main.md
+.chr/user/reports/gates/YYYYMMDD-dev-main.json
+.chr/user/reports/gates/YYYYMMDD-dev-main.md
 ```
 
 The report should record:

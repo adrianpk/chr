@@ -14,13 +14,13 @@ import (
 
 const (
 	// LLMTraceEnabledEnv defines a package boundary constant.
-	LLMTraceEnabledEnv = "CHC_LLM_TRACE"
+	LLMTraceEnabledEnv = "CHR_LLM_TRACE"
 	// LLMTracePayloadsEnv defines a package boundary constant.
-	LLMTracePayloadsEnv = "CHC_LLM_TRACE_PAYLOADS"
+	LLMTracePayloadsEnv = "CHR_LLM_TRACE_PAYLOADS"
 	// LLMTraceMaxBytesEnv defines a package boundary constant.
-	LLMTraceMaxBytesEnv = "CHC_LLM_TRACE_MAX_BYTES"
+	LLMTraceMaxBytesEnv = "CHR_LLM_TRACE_MAX_BYTES"
 	// LLMTraceKeepFilesEnv defines a package boundary constant.
-	LLMTraceKeepFilesEnv = "CHC_LLM_TRACE_KEEP_FILES"
+	LLMTraceKeepFilesEnv = "CHR_LLM_TRACE_KEEP_FILES"
 
 	defaultLLMTraceFileName  = "llm.ndjson"
 	defaultLLMTraceMaxBytes  = 10 * 1024 * 1024

@@ -159,13 +159,13 @@ The `notify` command group exposes setup and inspection surfaces.
 Report notification configuration readiness:
 
 ```sh
-chc notify status
+chr notify status
 ```
 
 Preview a Telegram setup-check payload:
 
 ```sh
-chc notify telegram test --dry-run
+chr notify telegram test --dry-run
 ```
 
 `notify telegram test --dry-run` renders the planned payload from project
@@ -176,7 +176,7 @@ Non-dry-run Telegram dispatch belongs to the Telegram dispatch boundary.
 Send a Telegram setup-check message:
 
 ```sh
-chc notify telegram test
+chr notify telegram test
 ```
 
 This command reads the bot token from the environment variable named by
@@ -189,7 +189,7 @@ If dispatch fails after the audit event is created, the event is updated to
 Parse Telegram update fixtures into remote command records:
 
 ```sh
-chc notify telegram poll --fixture updates.json --dry-run
+chr notify telegram poll --fixture updates.json --dry-run
 ```
 
 Without `--dry-run`, accepted and rejected remote command handoff records are

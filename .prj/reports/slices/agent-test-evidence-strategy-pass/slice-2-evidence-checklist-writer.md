@@ -18,7 +18,7 @@ normal Markdown checklist bounded by stable machine anchors.
 
 ## Delivered Behavior
 
-- Core can parse the anchored `chc:evidence-strategy:v1` block.
+- Core can parse the anchored `chr:evidence-strategy:v1` block.
 - Core validates required labels, checked state, primary status values, missing
   labels, duplicate labels, unknown labels, and malformed anchors.
 - Core can render a deterministic human-readable v1 checklist block.

@@ -62,7 +62,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chc ./internal/chcapp`
+- `go test ./internal/chr ./internal/chrapp`
 - `make verify`
 - `git diff --check`
 
@@ -84,7 +84,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp`
+- `go test ./internal/chrapp`
 - `make verify`
 - `git diff --check`
 - `make verify`
@@ -94,8 +94,8 @@ Validation:
 
 Candidate tasks:
 
-- [x] T3.1 Add `chc work ticket <ticket-key>` or equivalent command.
-- [x] T3.2 Add `chc work run-all` or equivalent command.
+- [x] T3.1 Add `chr work ticket <ticket-key>` or equivalent command.
+- [x] T3.2 Add `chr work run-all` or equivalent command.
 - [x] T3.3 Add dry-run preview for run-all.
 - [x] T3.4 Add CLI tests for selected ticket, run-all, dry-run, and no eligible
       tickets.
@@ -108,7 +108,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp`
+- `go test ./internal/chrapp`
 
 ## Slice 4: Dash Agent Work Panel
 
@@ -128,7 +128,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chctui ./internal/chcapp`
+- `go test ./internal/chrtui ./internal/chrapp`
 - `make verify`
 - `git diff --check`
 - `make verify`
@@ -151,7 +151,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chctui ./internal/chcapp`
+- `go test ./internal/chrtui ./internal/chrapp`
 - `make verify`
 - `git diff --check`
 
@@ -172,7 +172,7 @@ Task commits:
 
 Validation:
 
-- `go test ./internal/chcapp ./internal/chctui`
+- `go test ./internal/chrapp ./internal/chrtui`
 - `make verify`
 - `git diff --check`
 

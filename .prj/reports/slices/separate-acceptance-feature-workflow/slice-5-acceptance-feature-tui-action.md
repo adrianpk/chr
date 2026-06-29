@@ -40,18 +40,18 @@ state just like existing spec actions.
 
 ## Files of Interest
 
-- `internal/chctui/spec_actions.go`
-- `internal/chctui/specs.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model_test.go`
-- `internal/chcapp/tui_adapters_spec_plan_ticket.go`
-- `internal/chcapp/tui_adapter_parity_test.go`
+- `internal/chrtui/spec_actions.go`
+- `internal/chrtui/specs.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrapp/tui_adapters_spec_plan_ticket.go`
+- `internal/chrapp/tui_adapter_parity_test.go`
 
 ## Validation
 
-- `go test ./internal/chctui -run 'SpecGenerationCommands|GeneratesSpecFromSpecsKey|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
-- `go test ./internal/chcapp -run 'TUISpecAdapterGeneratesAcceptanceFeature'` (pass)
-- `go test ./internal/chcapp -run 'TUISpecAdapterGeneratesAcceptanceFeature' && go test ./internal/chctui -run 'SpecGenerationCommands|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
+- `go test ./internal/chrtui -run 'SpecGenerationCommands|GeneratesSpecFromSpecsKey|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
+- `go test ./internal/chrapp -run 'TUISpecAdapterGeneratesAcceptanceFeature'` (pass)
+- `go test ./internal/chrapp -run 'TUISpecAdapterGeneratesAcceptanceFeature' && go test ./internal/chrtui -run 'SpecGenerationCommands|GeneratesAcceptanceFeatureFromSpecsKey'` (pass)
 - `make verify` (pass)
 
 ## Risks and Follow-ups

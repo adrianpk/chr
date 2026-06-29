@@ -18,7 +18,7 @@ spec or authoring session that still needs review.
 - Remove the command palette action that planned `Create draft`.
 - Retarget TUI authoring session creation from draft artifacts to specs.
 - Keep authoring session status `draft` as lifecycle metadata.
-- Remove `.prj/drafts` and `.chc/drafts` from active TUI document discovery.
+- Remove `.prj/drafts` and `.chr/drafts` from active TUI document discovery.
 - Add tests that draft creation is not exposed by the default command registry.
 - Add tests that legacy draft directories are ignored by active document
   discovery.
@@ -44,13 +44,13 @@ document type.
 
 ## Files of Interest
 
-- `internal/chctui/command_palette.go`
-- `internal/chctui/artifact_actions.go`
-- `internal/chctui/documents.go`
-- `internal/chctui/model_test.go`
-- `internal/chcapp/service_artifact_ticket.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chcapp/service_test.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/artifact_actions.go`
+- `internal/chrtui/documents.go`
+- `internal/chrtui/model_test.go`
+- `internal/chrapp/service_artifact_ticket.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrapp/service_test.go`
 - `.prj/specs/specs/context-composition-pipeline.md`
 - `.prj/specs/specs/tui-authoring-and-quiz-workflow.md`
 - `.prj/specs/specs/tui-operational-console.md`
@@ -62,7 +62,7 @@ document type.
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp` passed on 2026-05-23.
+- `go test ./internal/chrtui ./internal/chrapp` passed on 2026-05-23.
 - `make verify` passed on 2026-05-23.
 
 ## Risks and Follow-ups

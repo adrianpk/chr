@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func emitTicketBlockedNotification(

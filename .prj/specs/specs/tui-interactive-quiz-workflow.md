@@ -10,11 +10,11 @@ Sources:
 - `.prj/specs/specs/context-composition-pipeline.md`
 - `.prj/specs/specs/tui-authoring-and-quiz-workflow.md`
 - `docs/reference/authoring-sessions.md`
-- `internal/chc/assisted_authoring.go`
-- `internal/chc/assisted_quiz_loop.go`
-- `internal/chc/authoring_contextual_quiz.go`
-- `internal/chcapp` operation service boundary
-- `internal/chctui` Quizzes, Authoring, command palette, and action surfaces
+- `internal/chr/assisted_authoring.go`
+- `internal/chr/assisted_quiz_loop.go`
+- `internal/chr/authoring_contextual_quiz.go`
+- `internal/chrapp` operation service boundary
+- `internal/chrtui` Quizzes, Authoring, command palette, and action surfaces
 
 ## Purpose
 
@@ -235,15 +235,15 @@ The runtime must prevent local overfitting. A branch must close when:
 
 ## Artifact Contract
 
-Quiz artifacts are project-local files under `.chc/`.
+Quiz artifacts are project-local files under `.chr/`.
 
 The canonical visible artifacts are:
 
 ```text
-.chc/quizzes/project-quiz-raw.md
-.chc/quizzes/project-quiz.md
-.chc/quizzes/<case-slug>-quiz-raw.md
-.chc/quizzes/<case-slug>-quiz.md
+.chr/quizzes/project-quiz-raw.md
+.chr/quizzes/project-quiz.md
+.chr/quizzes/<case-slug>-quiz-raw.md
+.chr/quizzes/<case-slug>-quiz.md
 ```
 
 The raw file is working memory.
@@ -254,24 +254,24 @@ planning, indexing, and context assembly workflows.
 The runtime state cache lives outside the curated artifact:
 
 ```text
-.chc/tmp/quiz-runtime/project.json
-.chc/tmp/quiz-runtime/<case-slug>.json
+.chr/tmp/quiz-runtime/project.json
+.chr/tmp/quiz-runtime/<case-slug>.json
 ```
 
 Completed quizzes can also produce draft specification artifacts in the spec
 artifact family:
 
 ```text
-.chc/specs/drafts/project-quiz-spec.md
-.chc/specs/drafts/<case-slug>-quiz-spec.md
+.chr/specs/drafts/project-quiz-spec.md
+.chr/specs/drafts/<case-slug>-quiz-spec.md
 ```
 
 Model request/response evidence should reuse the existing authoring model
 evidence layout when a model call is made:
 
 ```text
-.chc/authoring/sessions/<session-id>/model/<request-id>/request.md
-.chc/authoring/sessions/<session-id>/model/<request-id>/response.md
+.chr/authoring/sessions/<session-id>/model/<request-id>/request.md
+.chr/authoring/sessions/<session-id>/model/<request-id>/response.md
 ```
 
 The exact authoring session id is service-owned. The TUI must not construct it.

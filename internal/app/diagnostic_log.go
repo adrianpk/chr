@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func (s service) appendPlanGenerationLog(event string, fields map[string]string) {

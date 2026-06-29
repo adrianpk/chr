@@ -10,7 +10,7 @@ PR: #187
 ## Purpose
 
 Connect the TUI Quizzes screen to the service-owned quiz operations so users
-can drive the one-question-at-a-time deep quiz loop from inside CHC.
+can drive the one-question-at-a-time deep quiz loop from inside CHR.
 
 ## Delivered Behavior
 
@@ -28,7 +28,7 @@ can drive the one-question-at-a-time deep quiz loop from inside CHC.
 ## Implementation Notes
 
 The TUI still acts as an adapter. It owns transient confirmation and answer
-input state, then sends user intent to `internal/chcapp.service` through the
+input state, then sends user intent to `internal/chrapp.service` through the
 TUI executor adapter.
 
 Start uses deep mode explicitly. Fast candidate buffering remains a later
@@ -36,29 +36,29 @@ slice.
 
 ## Contracts Added or Changed
 
-- `internal/chctui.QuizActionID`
-- `internal/chctui.QuizActionRequest`
-- `internal/chctui.QuizActionResult`
-- `internal/chctui.QuizActionExecutor`
-- `internal/chctui.QuizActionState`
-- `internal/chctui.QuizAnswerState`
-- `chctui.Options.QuizExecutor`
+- `internal/chrtui.QuizActionID`
+- `internal/chrtui.QuizActionRequest`
+- `internal/chrtui.QuizActionResult`
+- `internal/chrtui.QuizActionExecutor`
+- `internal/chrtui.QuizActionState`
+- `internal/chrtui.QuizAnswerState`
+- `chrtui.Options.QuizExecutor`
 
 ## Files of Interest
 
-- `internal/chctui/quiz_actions.go`
-- `internal/chctui/quizzes.go`
-- `internal/chctui/command_palette.go`
-- `internal/chctui/model.go`
-- `internal/chctui/shell.go`
-- `internal/chcapp/tui_adapters.go`
-- `internal/chcapp/app.go`
-- `internal/chctui/model_test.go`
+- `internal/chrtui/quiz_actions.go`
+- `internal/chrtui/quizzes.go`
+- `internal/chrtui/command_palette.go`
+- `internal/chrtui/model.go`
+- `internal/chrtui/shell.go`
+- `internal/chrapp/tui_adapters.go`
+- `internal/chrapp/app.go`
+- `internal/chrtui/model_test.go`
 - `.prj/trackers/slicing-tui-interactive-quiz-workflows-tracker.md`
 
 ## Validation
 
-- `go test ./internal/chctui ./internal/chcapp`
+- `go test ./internal/chrtui ./internal/chrapp`
 - `make verify`
 
 ## Risks and Follow-ups

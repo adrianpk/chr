@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -15,7 +15,7 @@ func newInitCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 
 	return &cli.Command{
 		Name:  "init",
-		Usage: "Create a .chc workspace in the current project",
+		Usage: "Create a .chr workspace in the current project",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "dir",

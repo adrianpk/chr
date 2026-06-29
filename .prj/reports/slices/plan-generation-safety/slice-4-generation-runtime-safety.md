@@ -48,22 +48,22 @@ messages make clear that saved content remains visible.
 
 ## Files of Interest
 
-- `internal/chc/quiz_openai_model.go`
-- `internal/chc/quiz_model_test.go`
-- `internal/chcapp/generation_runtime.go`
-- `internal/chcapp/service_plan.go`
-- `internal/chcapp/service_spec.go`
-- `internal/chcapp/service_plan_test.go`
-- `internal/chcapp/service_spec_test.go`
-- `internal/chctui/plan_actions.go`
-- `internal/chctui/spec_actions.go`
-- `internal/chctui/model_test.go`
+- `internal/chr/quiz_openai_model.go`
+- `internal/chr/quiz_model_test.go`
+- `internal/chrapp/generation_runtime.go`
+- `internal/chrapp/service_plan.go`
+- `internal/chrapp/service_spec.go`
+- `internal/chrapp/service_plan_test.go`
+- `internal/chrapp/service_spec_test.go`
+- `internal/chrtui/plan_actions.go`
+- `internal/chrtui/spec_actions.go`
+- `internal/chrtui/model_test.go`
 
 ## Validation
 
-- `go test ./internal/chc`: pass
-- `go test ./internal/chcapp`: pass
-- `go test ./internal/chctui`: pass
+- `go test ./internal/chr`: pass
+- `go test ./internal/chrapp`: pass
+- `go test ./internal/chrtui`: pass
 - `go test ./...`: pass
 - `make verify`: fail
 

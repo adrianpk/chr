@@ -7,7 +7,7 @@ import (
 
 const (
 	// DefaultTicketBranchPrefix defines the branch namespace for derived ticket branches.
-	DefaultTicketBranchPrefix = "chc"
+	DefaultTicketBranchPrefix = "chr"
 )
 
 // TicketBranchSelection describes the branch selected for one ticket.
