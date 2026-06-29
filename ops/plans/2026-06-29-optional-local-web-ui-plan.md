@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 5: document and metadata actions
+Active Slice: Slice 6: work and generation actions
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 

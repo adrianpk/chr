@@ -1,6 +1,6 @@
 # Slice 5: Document And Metadata Actions
 
-Status: reviewing
+Status: delivered
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 
