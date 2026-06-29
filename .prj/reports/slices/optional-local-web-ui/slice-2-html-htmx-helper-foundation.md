@@ -1,6 +1,6 @@
 # Slice 2: HTML HTMX And Helper Foundation
 
-Status: ready for PR
+Status: reviewing
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 
@@ -11,6 +11,8 @@ Spec: `ops/specs/2026-06-29-optional-local-web-ui.md`
 Branch: `feat/slice-2-html-htmx-helper-foundation`
 
 Expected PR Title: `feat(slice-2): html htmx helper foundation`
+
+PR: `#344`
 
 ## Summary
 
