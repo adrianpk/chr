@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"net/url"
 
 	"forge.adrianpk.com/chc/internal/webui/htmx"
 	"forge.adrianpk.com/chc/internal/webui/render"
@@ -68,6 +69,14 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	mux.HandleFunc("/board/fragment", handler.boardFragment)
 	mux.HandleFunc("/dash", handler.dash)
 	mux.HandleFunc("/dash/fragment", handler.dashFragment)
+
+	for _, family := range []string{"cases", "dumps", "quizzes", "specs", "plans"} {
+		mux.HandleFunc("/"+family, handler.catalog(family))
+		mux.HandleFunc("/"+family+"/fragment", handler.catalogFragment(family))
+		mux.HandleFunc("/"+family+"/detail", handler.artifactDetail(family))
+		mux.HandleFunc("/"+family+"/detail/fragment", handler.artifactDetailFragment(family))
+	}
+
 	mux.HandleFunc("/bootstrap", handler.projectFragment)
 	mux.HandleFunc("/healthz", healthz)
 	mux.Handle("/assets/", http.StripPrefix("/assets/", handler.static))
@@ -179,6 +188,79 @@ func (h handler) dashFragment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h handler) catalog(family string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := h.catalogPageData(r, family)
+		if err != nil {
+			http.Error(w, "load catalog", http.StatusInternalServerError)
+
+			return
+		}
+
+		if err := h.renderer.Page(w, "shell.html", data); err != nil {
+			http.Error(w, "render catalog", http.StatusInternalServerError)
+		}
+	}
+}
+
+func (h handler) catalogFragment(family string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !htmx.IsRequest(r) {
+			http.Redirect(w, r, "/"+family, http.StatusSeeOther)
+
+			return
+		}
+
+		data, err := h.catalogPageData(r, family)
+		if err != nil {
+			http.Error(w, "load catalog", http.StatusInternalServerError)
+
+			return
+		}
+
+		if err := h.renderer.Fragment(w, "catalog_content.html", data); err != nil {
+			http.Error(w, "render catalog", http.StatusInternalServerError)
+		}
+	}
+}
+
+func (h handler) artifactDetail(family string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := h.artifactDetailPageData(r, family)
+		if err != nil {
+			http.Error(w, "load artifact", http.StatusInternalServerError)
+
+			return
+		}
+
+		if err := h.renderer.Page(w, "shell.html", data); err != nil {
+			http.Error(w, "render artifact", http.StatusInternalServerError)
+		}
+	}
+}
+
+func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !htmx.IsRequest(r) {
+			location := "/" + family + "/detail?id=" + url.QueryEscape(r.URL.Query().Get("id"))
+			http.Redirect(w, r, location, http.StatusSeeOther)
+
+			return
+		}
+
+		data, err := h.artifactDetailPageData(r, family)
+		if err != nil {
+			http.Error(w, "load artifact", http.StatusInternalServerError)
+
+			return
+		}
+
+		if err := h.renderer.Fragment(w, "artifact_detail_content.html", data); err != nil {
+			http.Error(w, "render artifact", http.StatusInternalServerError)
+		}
+	}
+}
+
 func (h handler) renderProject(w http.ResponseWriter, r *http.Request) {
 	data, err := h.projectPageData(r)
 	if err != nil {
@@ -243,6 +325,37 @@ func (h handler) dashPageData(r *http.Request) (PageData, error) {
 	}, nil
 }
 
+func (h handler) catalogPageData(r *http.Request, family string) (PageData, error) {
+	catalog, err := h.provider.CatalogView(r.Context(), family)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	return PageData{
+		Shell:   h.shellData(family),
+		View:    "catalog",
+		Title:   catalog.Title,
+		Catalog: catalog,
+	}, nil
+}
+
+func (h handler) artifactDetailPageData(r *http.Request, family string) (PageData, error) {
+	detail, err := h.provider.ArtifactDetailView(r.Context(), ArtifactDetailRequest{
+		Family: family,
+		ID:     r.URL.Query().Get("id"),
+	})
+	if err != nil {
+		return PageData{}, err
+	}
+
+	return PageData{
+		Shell:  h.shellData(family),
+		View:   "artifact_detail",
+		Title:  detail.Title,
+		Detail: detail,
+	}, nil
+}
+
 func (h handler) shellData(active string) ShellData {
 	data := h.data
 
@@ -264,6 +377,8 @@ func navLinkActive(active, href string) bool {
 		return href == "/board"
 	case "dash":
 		return href == "/dash"
+	case "cases", "dumps", "quizzes", "specs", "plans":
+		return href == "/"+active
 	default:
 		return false
 	}

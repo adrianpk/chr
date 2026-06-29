@@ -33,6 +33,10 @@
             {{template "board_content.html" .}}
           {{else if eq .View "dash"}}
             {{template "dash_content.html" .}}
+          {{else if eq .View "catalog"}}
+            {{template "catalog_content.html" .}}
+          {{else if eq .View "artifact_detail"}}
+            {{template "artifact_detail_content.html" .}}
           {{else}}
             {{template "project_content.html" .}}
           {{end}}
@@ -132,6 +136,71 @@
   </div>
   {{if .RelativePath}}<code>{{.RelativePath}}</code>{{end}}
 </article>
+{{end}}
+
+{{define "catalog_content.html"}}
+<div class="catalog-toolbar">
+  <div class="summary-item">
+    <span class="summary-label">Artifacts</span>
+    <strong>{{len .Catalog.Items}}</strong>
+  </div>
+</div>
+{{if .Catalog.Items}}
+  <div class="artifact-grid">
+    {{range .Catalog.Items}}
+      {{template "artifact_card.html" .}}
+    {{end}}
+  </div>
+{{else}}
+  <p class="empty-state">{{.Catalog.EmptyMessage}}</p>
+{{end}}
+{{end}}
+
+{{define "artifact_card.html"}}
+<article class="artifact-card">
+  <div class="ticket-card__meta">
+    {{(chip .Status).Muted.Render}}
+    {{if .ContentState}}{{(chip .ContentState).Muted.Render}}{{end}}
+  </div>
+  <h2><a href="{{.DetailURL}}">{{.Title}}</a></h2>
+  <dl class="kv-list">
+    {{if .Scope}}<div><dt>Scope</dt><dd>{{.Scope}}</dd></div>{{end}}
+    {{if .UpdatedAt}}<div><dt>Updated</dt><dd>{{.UpdatedAt}}</dd></div>{{end}}
+    {{if .Path}}<div><dt>Path</dt><dd><code>{{.Path}}</code></dd></div>{{end}}
+  </dl>
+  {{if .Preview}}<p>{{.Preview}}</p>{{end}}
+</article>
+{{end}}
+
+{{define "artifact_detail_content.html"}}
+<div class="detail-actions">
+  <a class="button" href="/{{.Detail.Family}}">Back</a>
+</div>
+{{if .Detail.Missing}}
+  <p class="empty-state">Artifact not found.</p>
+{{else}}
+  <div class="summary-grid">
+    <div class="summary-item">
+      <span class="summary-label">Status</span>
+      <strong>{{.Detail.Status}}</strong>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Scope</span>
+      <strong>{{.Detail.Scope}}</strong>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Updated</span>
+      <strong>{{.Detail.UpdatedAt}}</strong>
+    </div>
+  </div>
+  {{if .Detail.Path}}
+    <div class="detail-block">
+      <span class="summary-label">Path</span>
+      <code>{{.Detail.Path}}</code>
+    </div>
+  {{end}}
+  <pre class="artifact-content">{{.Detail.Content}}</pre>
+{{end}}
 {{end}}
 
 {{define "dash_content.html"}}

@@ -130,6 +130,7 @@ body {
 .attention-strip,
 .board-grid,
 .dash-grid,
+.artifact-grid,
 .stack,
 .event-list {
   margin-top: 14px;
@@ -164,7 +165,8 @@ body {
 }
 
 .board-column,
-.dash-panel {
+.dash-panel,
+.artifact-card {
   min-width: 0;
   background: #f7fbfb;
   border: 1px solid var(--line);
@@ -182,13 +184,15 @@ body {
 
 .board-column h2,
 .dash-panel h2,
+.artifact-card h2,
 .ticket-card h2,
 .ticket-card h3 {
   margin: 0;
 }
 
 .board-column h2,
-.dash-panel h2 {
+.dash-panel h2,
+.artifact-card h2 {
   font-size: 15px;
 }
 
@@ -238,6 +242,40 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap: 12px;
+}
+
+.artifact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.artifact-card {
+  display: grid;
+  gap: 8px;
+}
+
+.artifact-card a {
+  color: var(--ink);
+}
+
+.catalog-toolbar,
+.detail-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+
+.artifact-content {
+  margin: 14px 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  background: #f7fbfb;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+  font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 }
 
 .kv-list {
