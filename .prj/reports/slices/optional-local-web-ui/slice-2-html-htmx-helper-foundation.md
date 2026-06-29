@@ -26,12 +26,16 @@ Expected PR Title: `feat(slice-2): html htmx helper foundation`
 - `internal/webui/`
   - Adds the Web UI handler boundary, embedded assets, shell template, CSS, and
     route tests.
+  - Adds package boundary README documentation.
 - `internal/webui/htmx/`
   - Adds htmx attribute builders, request/response header helpers, and tests.
+  - Adds package boundary README documentation.
 - `internal/webui/render/`
   - Adds template rendering helpers, function-map composition, and tests.
+  - Adds package boundary README documentation.
 - `internal/webui/ui/`
   - Adds initial button, chip, and nav primitives with escaping tests.
+  - Adds package boundary README documentation.
 - `internal/app/web.go`
   - Connects `chc web serve` to the `internal/webui` handler and shell data.
 - `internal/app/cli_test.go`
@@ -50,6 +54,7 @@ Expected PR Title: `feat(slice-2): html htmx helper foundation`
   - `curl -fsS http://127.0.0.1:7332/assets/chc.css` (pass)
   - `curl -fsS http://127.0.0.1:7332/assets/htmx.min.js` (pass)
   - `curl -fsS http://127.0.0.1:7332/healthz` (pass)
+- `make verify` (pass)
 
 ## Notes
 

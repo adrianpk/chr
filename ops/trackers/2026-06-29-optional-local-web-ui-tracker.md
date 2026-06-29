@@ -42,17 +42,17 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T2.1 | Add an internal web package boundary for server construction. | done | `f85f4ba` | Added `internal/webui` handler boundary consumed by `internal/app`. |
-| T2.2 | Add `internal/webui/htmx` with the needed htmx attribute, request header, response header, and out-of-band swap helpers. | done | `f85f4ba` | Copied/adapted primitives, no external module dependency. |
-| T2.3 | Add `internal/webui/render` with template rendering and function-map helpers. | done | `f85f4ba` | Server-rendered HTML foundation. |
-| T2.4 | Add `internal/webui/ui` with the first needed UI primitives for nav, buttons, chips, links, and page layout. | done | `f85f4ba` | Presentation-only helpers. |
+| T2.1 | Add an internal web package boundary for server construction. | done | `f85f4ba`, `032ef29` | Added `internal/webui` handler boundary consumed by `internal/app`. |
+| T2.2 | Add `internal/webui/htmx` with the needed htmx attribute, request header, response header, and out-of-band swap helpers. | done | `f85f4ba`, `032ef29` | Copied/adapted primitives, no external module dependency. |
+| T2.3 | Add `internal/webui/render` with template rendering and function-map helpers. | done | `f85f4ba`, `032ef29` | Server-rendered HTML foundation. |
+| T2.4 | Add `internal/webui/ui` with the first needed UI primitives for nav, buttons, chips, links, and page layout. | done | `f85f4ba`, `032ef29` | Presentation-only helpers. |
 | T2.5 | Add embedded templates and static assets for HTML, CSS, htmx, and the application shell. | done | `f85f4ba` | Embedded `chc.css`, `htmx.min.js`, and shell templates. |
 | T2.6 | Add root route handling for the application shell. | done | `f85f4ba` | `/` renders the browser-loadable shell. |
 | T2.7 | Add a bootstrap view model with resolved project identity, config, feature flags, and navigation model. | done | `f85f4ba` | Shell data includes project, bind, token, refresh, and navigation state. |
 | T2.8 | Add consistent HTML error page and htmx fragment error helpers. | done | `f85f4ba` | Initial render errors return stable HTTP errors; htmx fragment route added for bootstrap. |
 | T2.9 | Add graceful shutdown handling for the web command. | done | `f85f4ba` | Reuses Slice 1 foreground server shutdown path. |
-| T2.10 | Add helper tests for escaping, htmx attributes, htmx headers, and rendering. | done | `f85f4ba` | Added tests under `internal/webui/...`. |
-| T2.11 | Add server tests for routes, content types, cache headers, and 404s. | done | `f85f4ba` | Added shell, asset, bootstrap, and health route tests. |
+| T2.10 | Add helper tests for escaping, htmx attributes, htmx headers, and rendering. | done | `f85f4ba`, `032ef29` | Added tests under `internal/webui/...`. |
+| T2.11 | Add server tests for routes, content types, cache headers, and 404s. | done | `f85f4ba`, `032ef29` | Added shell, asset, bootstrap, and health route tests. |
 | T2.12 | Add browser or documented manual smoke evidence for the shell. | done | `f85f4ba` | Manual HTTP smoke covered `/`, CSS, htmx asset, and `/healthz`. |
 | T2.13 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
@@ -179,6 +179,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 2 T2.1-T2.12: `go test ./internal/webui/... ./internal/app -run 'WebServe|Handler|Attrs|Button|Chip|Nav|Renderer'` (pass)
 - Slice 2: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
 - Slice 2 smoke: `go run ./cmd/chc web serve --dir . --port 7332`; `curl -fsS /`, `/assets/chc.css`, `/assets/htmx.min.js`, `/healthz` (pass)
+- Slice 2: `make verify` (pass)
 
 ## Open Decisions
 
