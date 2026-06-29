@@ -20,7 +20,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 6 | work and generation actions | delivered | `feat/slice-6-work-and-generation-actions` | `#348` | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | delivered | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
-| Slice 9 | visual identity and layout parity | ready | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
+| Slice 9 | visual identity and layout parity | reviewing | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
 | Slice 10 | docs qa and release readiness | planned | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
 ## Slice 1 Tasks
@@ -145,15 +145,15 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T9.1 | Define CSS tokens for color, type, spacing, borders, shadows, and status colors. | pending | pending | Chrysocolla/Go-adjacent identity. |
-| T9.2 | Implement the ChrysoCoord avatar asset in the repo-native asset format chosen by the implementation. | pending | pending | Simple rounded bot/agent mark. |
-| T9.3 | Apply reference-layout parity to Board and Dash. | pending | pending | Layout and density pass. |
-| T9.4 | Apply reference-layout parity to Dumps, Quizzes, Specs, and Plans. | pending | pending | Document surfaces. |
-| T9.5 | Apply reference-layout parity to Project, Cases, Help, and command surfaces. | pending | pending | Remaining app surfaces. |
-| T9.6 | Add responsive constraints for board columns, artifact cards, detail panes, navigation, and action bars. | pending | pending | Prevent text and layout overflow. |
-| T9.7 | Add accessibility checks for contrast, focus states, labels, and keyboard operation. | pending | pending | Usability gate. |
-| T9.8 | Add screenshot evidence for desktop and mobile widths across the major screens. | pending | pending | Visual QA evidence. |
-| T9.9 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T9.1 | Define CSS tokens for color, type, spacing, borders, shadows, and status colors. | done | `9920097` | Chrysocolla/Go-adjacent identity with amber and danger accents. |
+| T9.2 | Implement the ChrysoCoord avatar asset in the repo-native asset format chosen by the implementation. | done | `9920097` | Added a rounded bot/agent SVG mark. |
+| T9.3 | Apply reference-layout parity to Board and Dash. | done | `9920097` | Board and Dash use denser operational panels and responsive grid rules. |
+| T9.4 | Apply reference-layout parity to Dumps, Quizzes, Specs, and Plans. | done | `9920097` | Artifact catalogs and command forms share the refined card/action styling. |
+| T9.5 | Apply reference-layout parity to Project, Cases, Help, and command surfaces. | done | `9920097` | Project, Cases, detail panes, and command surfaces use the same tokens and density. |
+| T9.6 | Add responsive constraints for board columns, artifact cards, detail panes, navigation, and action bars. | done | `9920097` | Added mobile navigation, wrapping, stable grid, and action constraints. |
+| T9.7 | Add accessibility checks for contrast, focus states, labels, and keyboard operation. | done | `9920097` | Added focus-visible styling and inspected screenshots for readable contrast and non-overlap. |
+| T9.8 | Add screenshot evidence for desktop and mobile widths across the major screens. | done | pending | Chromium screenshots captured for desktop Board/Dash and mobile Project/Dumps. |
+| T9.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 10 Tasks
 
@@ -202,6 +202,9 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 8 T8.1-T8.7: `go test ./internal/webui && go test ./internal/app -run 'WebServe|RootCommand'` (pass)
 - Slice 8 smoke: temporary project served with `CHC_WEB_TOKEN=... go run ./cmd/chc web serve --dir /tmp/... --host 0.0.0.0 --port 7338`; `curl` covered token-required access, allowed-origin preflight, disallowed-origin rejection, wildcard-bind same-origin access, startup policy output, and sanitized logs (pass)
 - Slice 8: `make verify` (pass)
+- Slice 9 T9.1-T9.7: `go test ./internal/webui` (pass)
+- Slice 9 screenshot smoke: `go run ./cmd/chc web serve --dir . --port 7339 --require-token false`; Chromium captured desktop Board/Dash at `1440x1000` and mobile Project/Dumps at `390x900` under `/tmp/chc-slice9-screenshots` (pass)
+- Slice 9: `make verify` (pass)
 
 ## Open Decisions
 
