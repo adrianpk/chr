@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 3: read-only project board and dash
+Active Slice: Slice 4: read-only artifact catalogs
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 

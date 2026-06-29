@@ -1,6 +1,6 @@
 # Slice 3: Read-Only Project Board And Dash
 
-Status: reviewing
+Status: delivered
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 
