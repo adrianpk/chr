@@ -19,7 +19,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 5 | document and metadata actions | delivered | `feat/slice-5-document-and-metadata-actions` | `#347` | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | delivered | `feat/slice-6-work-and-generation-actions` | `#348` | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
-| Slice 8 | access control and exposure safety | ready | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
+| Slice 8 | access control and exposure safety | reviewing | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | planned | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
 | Slice 10 | docs qa and release readiness | planned | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
@@ -131,15 +131,15 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T8.1 | Implement `require_token` modes: `auto`, `true`, and `false`. | pending | pending | Match spec config. |
-| T8.2 | Read token values from the configured environment variable. | pending | pending | Default token env is defined by spec. |
-| T8.3 | Require token authentication when configured and for non-loopback auto-mode if that is the selected policy. | pending | pending | Final policy decision required. |
-| T8.4 | Add origin checks for write requests. | pending | pending | Same-origin protection. |
-| T8.5 | Add explicit allowed-origin handling. | pending | pending | Only configured origins allowed. |
-| T8.6 | Add safe startup and request logging. | pending | pending | Do not leak tokens. |
-| T8.7 | Add tests for loopback without token, non-loopback warning, token required, missing token, bad token, and allowed origins. | pending | pending | Security regression coverage. |
-| T8.8 | Add docs for private-network and tunnel exposure boundaries without managing those systems. | pending | pending | Operator-owned exposure. |
-| T8.9 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T8.1 | Implement `require_token` modes: `auto`, `true`, and `false`. | done | `dea4109` | `always` remains accepted for compatibility with existing validation. |
+| T8.2 | Read token values from the configured environment variable. | done | `dea4109` | Required tokens are read from `token_env` and missing values block startup. |
+| T8.3 | Require token authentication when configured and for non-loopback auto-mode if that is the selected policy. | done | `dea4109` | `auto` requires token on non-loopback and stays token-free on loopback. |
+| T8.4 | Add origin checks for write requests. | done | `dea4109` | Origin checks apply to browser requests before route handling. |
+| T8.5 | Add explicit allowed-origin handling. | done | `dea4109` | Exact configured origins are allowed and receive CORS preflight headers. |
+| T8.6 | Add safe startup and request logging. | done | `dea4109` | Startup prints token requirement and origins; request logs omit query strings and token values. |
+| T8.7 | Add tests for loopback without token, non-loopback warning, token required, missing token, bad token, and allowed origins. | done | `dea4109` | App and handler tests cover token/origin policies and sanitized logs. |
+| T8.8 | Add docs for private-network and tunnel exposure boundaries without managing those systems. | done | pending | Added deliberate exposure how-to. |
+| T8.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 9 Tasks
 
@@ -199,13 +199,14 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 7 T7.1-T7.7: `go test ./internal/webui && go test ./internal/app -run 'WebServe.*(Artifact|WriteAction|Revision|Handler|Board|Catalog)'` (pass)
 - Slice 7 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/... --port 7337`; `curl` covered healthz, detail revision marker, external file mutation changing htmx fragment revision, and Web UI `dump.save` redirect/write (pass)
 - Slice 7: `make verify` (pass)
+- Slice 8 T8.1-T8.7: `go test ./internal/webui && go test ./internal/app -run 'WebServe|RootCommand'` (pass)
+- Slice 8 smoke: temporary project served with `CHC_WEB_TOKEN=... go run ./cmd/chc web serve --dir /tmp/... --host 0.0.0.0 --port 7338`; `curl` covered token-required access, allowed-origin preflight, disallowed-origin rejection, wildcard-bind same-origin access, startup policy output, and sanitized logs (pass)
+- Slice 8: `make verify` (pass)
 
 ## Open Decisions
 
 - Whether the first live-sync transport is polling, server-sent events, or a
   hybrid.
-- Whether `require_token: auto` means token-required for all non-loopback binds
-  or only when a token environment variable is present.
 - Whether the web server supports only the resolved current project or later
   gains a multi-project launcher.
 - Which existing action-matrix document is the best durable location for
