@@ -159,6 +159,15 @@
 {{if eq .Catalog.Family "dumps"}}
   {{template "dump_create_form.html" .}}
 {{end}}
+{{if eq .Catalog.Family "specs"}}
+  {{template "spec_generate_form.html" .}}
+{{end}}
+{{if eq .Catalog.Family "plans"}}
+  {{template "plan_action_forms.html" .}}
+{{end}}
+{{if eq .Catalog.Family "quizzes"}}
+  {{template "quiz_action_forms.html" .}}
+{{end}}
 {{end}}
 
 {{define "artifact_card.html"}}
@@ -289,6 +298,14 @@
 <div class="write-result write-result--{{.Write.Status}}">
   <h2>{{.Write.Summary}}</h2>
   {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
+  {{if .Write.Operation.Kind}}
+    <dl class="kv-list">
+      <div><dt>Operation</dt><dd>{{.Write.Operation.Kind}}</dd></div>
+      <div><dt>Status</dt><dd>{{.Write.Operation.Status}}</dd></div>
+      {{if .Write.Operation.ID}}<div><dt>ID</dt><dd><code>{{.Write.Operation.ID}}</code></dd></div>{{end}}
+      {{if .Write.Operation.Detail}}<div><dt>Detail</dt><dd>{{.Write.Operation.Detail}}</dd></div>{{end}}
+    </dl>
+  {{end}}
   {{if .Write.Validation}}
     <ul>
       {{range .Write.Validation}}<li>{{.}}</li>{{end}}
@@ -300,6 +317,82 @@
     </dl>
   {{end}}
 </div>
+{{end}}
+
+{{define "spec_generate_form.html"}}
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Generate a spec for this scope?')">
+  <input type="hidden" name="action" value="spec.generate">
+  <input type="hidden" name="family" value="specs">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Case slug</span>
+    <input name="case_slug">
+  </label>
+  <button class="button button--primary" type="submit">Generate Spec</button>
+</form>
+{{end}}
+
+{{define "plan_action_forms.html"}}
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Generate a plan for this scope?')">
+  <input type="hidden" name="action" value="plan.generate">
+  <input type="hidden" name="family" value="plans">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Case slug</span>
+    <input name="case_slug">
+  </label>
+  <button class="button button--primary" type="submit">Generate Plan</button>
+</form>
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Regenerate and replace the plan for this scope?')">
+  <input type="hidden" name="action" value="plan.regenerate">
+  <input type="hidden" name="family" value="plans">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Case slug</span>
+    <input name="case_slug">
+  </label>
+  <button class="button" type="submit">Regenerate Plan</button>
+</form>
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Create tracking artifacts and tickets from this plan?')">
+  <input type="hidden" name="action" value="plan.tracking.create">
+  <input type="hidden" name="family" value="plans">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Case slug</span>
+    <input name="case_slug">
+  </label>
+  <button class="button" type="submit">Create Tracking</button>
+</form>
+{{end}}
+
+{{define "quiz_action_forms.html"}}
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Start a quiz for this scope?')">
+  <input type="hidden" name="action" value="quiz.start">
+  <input type="hidden" name="family" value="quizzes">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Case slug</span>
+    <input name="case_slug">
+  </label>
+  <label>
+    <span>Mode</span>
+    <select name="mode">
+      <option value="deep">Deep</option>
+      <option value="fast">Fast</option>
+    </select>
+  </label>
+  <button class="button button--primary" type="submit">Start Quiz</button>
+</form>
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Resume this quiz scope?')">
+  <input type="hidden" name="action" value="quiz.resume">
+  <input type="hidden" name="family" value="quizzes">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Case slug</span>
+    <input name="case_slug">
+  </label>
+  <button class="button" type="submit">Resume Quiz</button>
+</form>
 {{end}}
 
 {{define "dash_content.html"}}
@@ -366,5 +459,17 @@
       <p class="empty-state">No recent events.</p>
     {{end}}
   </section>
+</div>
+<div class="command-strip">
+  <form class="action-form" method="post" action="/actions" onsubmit="return confirm('Preview the ready work queue?')">
+    <input type="hidden" name="action" value="work.preview">
+    <input type="hidden" name="confirm" value="true">
+    <button class="button" type="submit">Preview Work</button>
+  </form>
+  <form class="action-form" method="post" action="/actions" onsubmit="return confirm('Request daemon stop?')">
+    <input type="hidden" name="action" value="work.daemon.stop">
+    <input type="hidden" name="confirm" value="true">
+    <button class="button button--danger" type="submit">Stop Daemon</button>
+  </form>
 </div>
 {{end}}

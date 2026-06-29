@@ -297,6 +297,7 @@ body {
 }
 
 .action-form input,
+.action-form select,
 .action-form textarea {
   width: 100%;
   border: 1px solid var(--line);
@@ -309,6 +310,13 @@ body {
 
 .action-form textarea {
   resize: vertical;
+}
+
+.command-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .write-result h2,
@@ -380,7 +388,8 @@ code {
   }
 
   .board-grid,
-  .dash-grid {
+  .dash-grid,
+  .command-strip {
     grid-template-columns: 1fr;
   }
 
