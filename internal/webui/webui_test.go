@@ -52,10 +52,10 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 	}
 
 	for path, want := range map[string]string{
-		"/assets/chc.css":        ".app-shell",
-		"/assets/chc-avatar.svg": "ChrysoCoord agent mark",
-		"/assets/htmx.min.js":    "htmx",
-		"/healthz":               "ok\n",
+		"/assets/chc.css":      ".app-shell",
+		"/assets/chc-logo.png": "",
+		"/assets/htmx.min.js":  "htmx",
+		"/healthz":             "ok\n",
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, path, nil))
@@ -64,7 +64,7 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 			t.Fatalf("%s status = %d, want %d", path, recorder.Code, http.StatusOK)
 		}
 
-		if !strings.Contains(recorder.Body.String(), want) {
+		if want != "" && !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("%s body does not contain %q", path, want)
 		}
 	}

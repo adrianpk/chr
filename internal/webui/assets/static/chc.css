@@ -69,8 +69,8 @@ a {
 }
 
 .brand-mark {
-  width: 52px;
-  height: 60px;
+  width: 58px;
+  height: 58px;
   flex: 0 0 auto;
   display: grid;
   place-items: center;
@@ -78,8 +78,9 @@ a {
 
 .brand-mark img {
   display: block;
-  width: 52px;
-  height: 60px;
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
 }
 
 .brand-title {
