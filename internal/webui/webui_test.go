@@ -53,7 +53,9 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 
 	for path, want := range map[string]string{
 		"/assets/chr.css":      ".app-shell",
+		"/assets/chr.js":       "setupTopChrome",
 		"/assets/chr-logo.png": "",
+		"/assets/favicon.svg":  "Chr",
 		"/assets/htmx.min.js":  "htmx",
 		"/healthz":             "ok\n",
 	} {
@@ -553,6 +555,7 @@ func testShellData() ShellData {
 		Title:          "Chryso",
 		ProjectDir:     "/tmp/project",
 		ProjectID:      "project-1",
+		ProjectName:    "Project One",
 		URL:            "http://127.0.0.1:7331",
 		Host:           "127.0.0.1",
 		Port:           7331,

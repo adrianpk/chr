@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -255,12 +256,20 @@ func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
 }
 
 func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
+	projectContext := config.ProjectContext
+	if projectContext.ProjectID == "" {
+		projectContext.ProjectID = projectID(config.ProjectDir)
+	}
+	if projectContext.ProjectName == "" {
+		projectContext.ProjectName = filepath.Base(config.ProjectDir)
+	}
+
 	provider := config.Provider
 	if provider == nil && config.Env != nil && config.AssetsFS != nil {
 		provider = webViewProvider{
 			env:            config.Env,
 			assetsFS:       config.AssetsFS,
-			projectContext: config.ProjectContext,
+			projectContext: projectContext,
 			config:         config,
 		}
 	}
@@ -277,7 +286,8 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 		Data: webui.ShellData{
 			Title:          "Chryso",
 			ProjectDir:     config.ProjectDir,
-			ProjectID:      projectID(config.ProjectDir),
+			ProjectID:      projectContext.ProjectID,
+			ProjectName:    projectContext.ProjectName,
 			URL:            config.URL,
 			Host:           config.Web.Host,
 			Port:           config.Web.Port,

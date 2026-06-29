@@ -5,30 +5,45 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{.Title}} - {{.Shell.Title}}</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/assets/chr.css">
     <script src="/assets/htmx.min.js" defer></script>
+    <script src="/assets/chr.js" defer></script>
   </head>
   <body>
     <div class="app-shell">
-      <aside class="app-sidebar">
-        <div class="brand">
-          <div class="brand-mark" aria-hidden="true">
-            <img src="/assets/chr-logo.png" alt="">
+      <div class="top-chrome" data-nav-state="expanded">
+        <header class="app-header">
+          <div class="header-spacer" aria-hidden="true"></div>
+          <a class="brand-lockup" href="/board" aria-label="Chryso board">
+            <span class="brand-mark" aria-hidden="true">
+              <img src="/assets/chr-logo.png" alt="">
+            </span>
+            <span class="brand-title">Chryso</span>
+          </a>
+          <div class="header-context" aria-label="Current context">
+            <a class="context-selector" href="/project">
+              <span>Project</span>
+              <strong>{{.Shell.ProjectName}}</strong>
+            </a>
+            <div class="context-selector context-selector--muted">
+              <span>Actor</span>
+              <strong>local</strong>
+            </div>
+            <input class="nav-pin" id="nav-pin" type="checkbox" checked>
+            <label class="nav-pin-toggle" for="nav-pin">Pin</label>
           </div>
-          <div>
-            <div class="brand-title">Chryso</div>
-            <div class="brand-subtitle">Local Web UI</div>
-          </div>
+        </header>
+        <div class="top-nav-rail">
+          {{(nav .Shell.Navigation).Render}}
         </div>
-        {{(nav .Shell.Navigation).Render}}
-      </aside>
+        <button class="top-chrome-handle" type="button" aria-label="Show navigation" aria-expanded="true"></button>
+      </div>
       <main class="app-main">
         <header class="page-header">
           <div>
-            <p class="eyebrow">{{.Shell.ProjectID}}</p>
-            <h1>{{.Title}}</h1>
+            <h1>{{.Shell.ProjectName}} {{.Title}}</h1>
           </div>
-          {{(chip .Shell.RequireToken).Muted.Render}}
         </header>
         <section id="workspace" class="workspace-panel" data-revision="{{.Revision}}"{{if .RefreshURL}} hx-get="{{.RefreshURL}}" hx-trigger="every {{.Shell.RefreshSeconds}}s [document.visibilityState == 'visible']" hx-target="#workspace" hx-swap="innerHTML"{{end}}>
           {{if eq .View "board"}}
@@ -83,20 +98,6 @@
 
 {{define "board_content.html"}}
 {{template "revision_marker.html" .}}
-<div class="summary-grid">
-  <div class="summary-item">
-    <span class="summary-label">Total</span>
-    <strong>{{.Board.TotalCount}}</strong>
-  </div>
-  <div class="summary-item">
-    <span class="summary-label">Normal</span>
-    <strong>{{.Board.NormalCount}}</strong>
-  </div>
-  <div class="summary-item">
-    <span class="summary-label">Attention</span>
-    <strong>{{.Board.AttentionCount}}</strong>
-  </div>
-</div>
 {{if .Board.Attention}}
 <section class="attention-strip" aria-label="Attention tickets">
   {{range .Board.Attention}}

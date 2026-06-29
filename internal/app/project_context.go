@@ -12,8 +12,9 @@ import (
 )
 
 type commandProjectContext struct {
-	ProjectDir string
-	ProjectID  string
+	ProjectDir  string
+	ProjectID   string
+	ProjectName string
 }
 
 type commandProjectContextOptions struct {
@@ -93,8 +94,9 @@ func resolveProjectDirectory(projectDir string) (commandProjectContext, error) {
 	}
 
 	return commandProjectContext{
-		ProjectDir: absProjectDir,
-		ProjectID:  projectID(absProjectDir),
+		ProjectDir:  absProjectDir,
+		ProjectID:   projectID(absProjectDir),
+		ProjectName: filepath.Base(absProjectDir),
 	}, nil
 }
 
@@ -124,7 +126,8 @@ func resolveRegisteredProjectDirectory(project core.Project) (commandProjectCont
 	}
 
 	return commandProjectContext{
-		ProjectDir: project.Path,
-		ProjectID:  project.ID,
+		ProjectDir:  project.Path,
+		ProjectID:   project.ID,
+		ProjectName: project.Name,
 	}, nil
 }

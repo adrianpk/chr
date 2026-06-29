@@ -25,6 +25,7 @@ type ShellData struct {
 	Title          string
 	ProjectDir     string
 	ProjectID      string
+	ProjectName    string
 	URL            string
 	Host           string
 	Port           int
@@ -640,6 +641,9 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 
 func (h handler) shellData(active string) ShellData {
 	data := h.data
+	if strings.TrimSpace(data.ProjectName) == "" {
+		data.ProjectName = data.ProjectID
+	}
 
 	data.Navigation = make([]ui.NavLink, 0, len(h.data.Navigation))
 

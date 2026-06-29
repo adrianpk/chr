@@ -298,7 +298,7 @@ func TestWebServeShell(t *testing.T) {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
 
-	for _, want := range []string{"Chryso", "Local Web UI", projectDir, "/assets/htmx.min.js"} {
+	for _, want := range []string{"Chryso", filepath.Base(projectDir), projectDir, "/assets/htmx.min.js"} {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
