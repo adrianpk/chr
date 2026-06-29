@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 6: work and generation actions
+Active Slice: Slice 7: live sync and conflict handling
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 
