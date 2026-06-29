@@ -15,6 +15,15 @@ type webViewProvider struct {
 	assetsFS       fs.FS
 	projectContext commandProjectContext
 	config         resolvedWebServeConfig
+	serviceFactory func(context.Context) service
+}
+
+func (p webViewProvider) service(ctx context.Context) service {
+	if p.serviceFactory != nil {
+		return p.serviceFactory(ctx)
+	}
+
+	return newService(ctx, p.env, p.projectContext, p.assetsFS)
 }
 
 func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error) {
@@ -36,7 +45,7 @@ func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error)
 }
 
 func (p webViewProvider) BoardView(ctx context.Context) (webui.BoardView, error) {
-	board, err := newService(ctx, p.env, p.projectContext, p.assetsFS).Board()
+	board, err := p.service(ctx).Board()
 	if err != nil {
 		return webui.BoardView{}, err
 	}
@@ -45,7 +54,7 @@ func (p webViewProvider) BoardView(ctx context.Context) (webui.BoardView, error)
 }
 
 func (p webViewProvider) DashView(ctx context.Context) (webui.DashView, error) {
-	operations := newService(ctx, p.env, p.projectContext, p.assetsFS)
+	operations := p.service(ctx)
 
 	board, err := operations.Board()
 	if err != nil {

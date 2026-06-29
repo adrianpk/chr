@@ -26,7 +26,7 @@ const (
 )
 
 func (p webViewProvider) CatalogView(ctx context.Context, family string) (webui.ArtifactCatalogView, error) {
-	operations := newService(ctx, p.env, p.projectContext, p.assetsFS)
+	operations := p.service(ctx)
 
 	switch family {
 	case webArtifactFamilyCases:

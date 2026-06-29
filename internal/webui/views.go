@@ -302,6 +302,15 @@ type WriteActionResponse struct {
 	Validation    []string
 	BlockedReason string
 	RedirectURL   string
+	Operation     OperationStateView
+}
+
+// OperationStateView summarizes a Web UI-triggered operation result.
+type OperationStateView struct {
+	ID     string
+	Kind   string
+	Status string
+	Detail string
 }
 
 // CatalogTitle returns the display title for an artifact family.
