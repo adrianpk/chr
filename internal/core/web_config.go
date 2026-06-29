@@ -8,6 +8,21 @@ import (
 
 // ValidateWebConfig validates the local Web UI configuration.
 func ValidateWebConfig(config WebConfig) error {
+	for _, check := range []func(WebConfig) error{
+		validateWebBindConfig,
+		validateWebTokenConfig,
+		validateWebRefreshConfig,
+		validateWebAllowedOrigins,
+	} {
+		if err := check(config); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validateWebBindConfig(config WebConfig) error {
 	if strings.TrimSpace(config.Host) == "" {
 		return fmt.Errorf("web host is required")
 	}
@@ -16,6 +31,10 @@ func ValidateWebConfig(config WebConfig) error {
 		return fmt.Errorf("web port must be between 1 and 65535")
 	}
 
+	return nil
+}
+
+func validateWebTokenConfig(config WebConfig) error {
 	switch config.RequireToken {
 	case WebTokenModeAuto, WebTokenModeTrue, WebTokenModeFalse, WebTokenModeAlways:
 	default:
@@ -26,10 +45,18 @@ func ValidateWebConfig(config WebConfig) error {
 		return fmt.Errorf("web token_env is required when token mode requires a token")
 	}
 
+	return nil
+}
+
+func validateWebRefreshConfig(config WebConfig) error {
 	if config.RefreshIntervalSeconds <= 0 {
 		return fmt.Errorf("web refresh_interval_seconds must be positive")
 	}
 
+	return nil
+}
+
+func validateWebAllowedOrigins(config WebConfig) error {
 	for _, origin := range config.AllowedOrigins {
 		if strings.TrimSpace(origin) == "" {
 			return fmt.Errorf("web allowed_origins cannot contain empty values")

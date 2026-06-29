@@ -408,15 +408,11 @@ func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
 }
 
 func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value string) {
+	if setWorkspaceConfigRootValue(config, section, key, value) {
+		return
+	}
+
 	switch section {
-	case "":
-		if key == "key_prefix" {
-			setString(&config.TicketKeyPrefix, value)
-		}
-	case "tickets":
-		if key == "key_prefix" {
-			setString(&config.TicketKeyPrefix, value)
-		}
 	case "runtime":
 		setRuntimeConfigValue(&config.Runtime, key, value)
 	case "notifications":
@@ -430,6 +426,20 @@ func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value stri
 	case "web":
 		setWebConfigValue(&config.Web, key, value)
 	}
+}
+
+func setWorkspaceConfigRootValue(config *WorkspaceConfig, section, key, value string) bool {
+	if section != "" && section != "tickets" {
+		return false
+	}
+
+	if key != "key_prefix" {
+		return true
+	}
+
+	setString(&config.TicketKeyPrefix, value)
+
+	return true
 }
 
 func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, bool) {
@@ -675,6 +685,7 @@ func configStringListValue(value string) []string {
 
 	value = strings.TrimPrefix(strings.TrimSuffix(value, "]"), "[")
 	parts := strings.Split(value, ",")
+
 	result := make([]string, 0, len(parts))
 	for _, part := range parts {
 		item := configStringValue(part)

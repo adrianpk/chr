@@ -114,6 +114,7 @@ func TestWebServeDryRunPrintsResolvedDefaults(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	var stdout bytes.Buffer
+
 	err := run(t.Context(), []string{"web", "serve", "--dir", projectDir, "--dry-run"}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("run returned error: %v", err)
@@ -141,6 +142,7 @@ func TestWebServeDryRunAppliesFlagOverridesAndWarnsForNonLoopback(t *testing.T) 
 	projectDir := newTestWorkspace(t)
 
 	var stdout bytes.Buffer
+
 	err := run(t.Context(), []string{
 		"web",
 		"serve",

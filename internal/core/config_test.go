@@ -345,8 +345,8 @@ func TestValidateWebConfigAcceptsDefaultConfig(t *testing.T) {
 	}
 }
 
-func TestValidateWebConfigRejectsInvalidConfig(t *testing.T) {
-	tests := []struct {
+func TestValidateWebConfigRejectsInvalidBindAndTokenConfig(t *testing.T) {
+	assertValidateWebConfigRejects(t, []struct {
 		name    string
 		config  WebConfig
 		wantErr string
@@ -393,6 +393,15 @@ func TestValidateWebConfigRejectsInvalidConfig(t *testing.T) {
 			},
 			wantErr: "web token_env is required when token mode requires a token",
 		},
+	})
+}
+
+func TestValidateWebConfigRejectsInvalidRefreshAndOriginConfig(t *testing.T) {
+	assertValidateWebConfigRejects(t, []struct {
+		name    string
+		config  WebConfig
+		wantErr string
+	}{
 		{
 			name: "refresh",
 			config: WebConfig{
@@ -415,7 +424,16 @@ func TestValidateWebConfigRejectsInvalidConfig(t *testing.T) {
 			},
 			wantErr: "web allowed_origins cannot contain empty values",
 		},
-	}
+	})
+}
+
+func assertValidateWebConfigRejects(t *testing.T, tests []struct {
+	name    string
+	config  WebConfig
+	wantErr string
+},
+) {
+	t.Helper()
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

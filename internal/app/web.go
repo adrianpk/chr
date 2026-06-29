@@ -186,6 +186,7 @@ func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
 	}
 
 	serverErr := make(chan error, 1)
+
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
@@ -199,8 +200,9 @@ func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
 
 	select {
 	case <-ctx.Done():
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		defer cancel()
+
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			return err
 		}
@@ -221,7 +223,10 @@ func newWebServeMux() http.Handler {
 func webHealthzHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("ok\n"))
+
+	if _, err := w.Write([]byte("ok\n")); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func webURL(host string, port int) string {
