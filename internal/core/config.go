@@ -17,6 +17,7 @@ type WorkspaceConfig struct {
 	Review          ReviewWorkflowConfig
 	Work            WorkConfig
 	Evidence        EvidenceConfig
+	Web             WebConfig
 }
 
 // RuntimeConfig describes a package boundary value.
@@ -32,6 +33,21 @@ type RuntimeConfig struct {
 type NotificationConfig struct {
 	Telegram TelegramNotificationConfig
 }
+
+// WebConfig describes local Web UI configuration.
+type WebConfig struct {
+	Enabled                bool
+	Host                   string
+	Port                   int
+	OpenBrowser            bool
+	RequireToken           WebTokenMode
+	TokenEnv               string
+	AllowedOrigins         []string
+	RefreshIntervalSeconds int
+}
+
+// WebTokenMode defines the local Web UI token requirement policy.
+type WebTokenMode string
 
 // ReviewWorkflowConfig describes a package boundary value.
 type ReviewWorkflowConfig struct {
@@ -158,6 +174,24 @@ const (
 	// DefaultReviewProviderGitHubTokenEnv defines a package boundary constant.
 	DefaultReviewProviderGitHubTokenEnv = "GITHUB_TOKEN"
 
+	// WebTokenModeAuto requires token behavior according to resolved exposure.
+	WebTokenModeAuto WebTokenMode = "auto"
+	// WebTokenModeTrue requires a token for local Web UI requests.
+	WebTokenModeTrue WebTokenMode = "true"
+	// WebTokenModeFalse disables token checks for local Web UI requests.
+	WebTokenModeFalse WebTokenMode = "false"
+	// WebTokenModeAlways requires a token for every non-static local Web UI request.
+	WebTokenModeAlways WebTokenMode = "always"
+
+	// DefaultWebHost defines a package boundary constant.
+	DefaultWebHost = "127.0.0.1"
+	// DefaultWebPort defines a package boundary constant.
+	DefaultWebPort = 7331
+	// DefaultWebTokenEnv defines a package boundary constant.
+	DefaultWebTokenEnv = "CHC_WEB_TOKEN"
+	// DefaultWebRefreshIntervalSeconds defines a package boundary constant.
+	DefaultWebRefreshIntervalSeconds = 2
+
 	// WorkBranchPolicyModeIntegrationBranch defines a package boundary constant.
 	WorkBranchPolicyModeIntegrationBranch WorkBranchPolicyMode = "integration_branch"
 	// WorkBranchPolicyModeCurrentBranch defines a package boundary constant.
@@ -223,6 +257,20 @@ func DefaultRuntimeConfig() RuntimeConfig {
 // DefaultNotificationConfig executes the corresponding package operation.
 func DefaultNotificationConfig() NotificationConfig {
 	return NotificationConfig{}
+}
+
+// DefaultWebConfig executes the corresponding package operation.
+func DefaultWebConfig() WebConfig {
+	return WebConfig{
+		Enabled:                false,
+		Host:                   DefaultWebHost,
+		Port:                   DefaultWebPort,
+		OpenBrowser:            false,
+		RequireToken:           WebTokenModeAuto,
+		TokenEnv:               DefaultWebTokenEnv,
+		AllowedOrigins:         nil,
+		RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+	}
 }
 
 // DefaultReviewWorkflowConfig executes the corresponding package operation.
@@ -310,6 +358,7 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 		Review:          DefaultReviewWorkflowConfig(),
 		Work:            DefaultWorkConfig(),
 		Evidence:        DefaultEvidenceConfig(),
+		Web:             DefaultWebConfig(),
 	}
 	path := UserPath(projectDir, "config.yml")
 
@@ -378,6 +427,8 @@ func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value stri
 		setWorkConfigValue(&config.Work, key, value)
 	case "evidence", "evidence.strategy":
 		setEvidenceConfigValue(&config.Evidence, key, value)
+	case "web":
+		setWebConfigValue(&config.Web, key, value)
 	}
 }
 
@@ -553,6 +604,29 @@ func setEvidenceStrategyEnumConfigValue(config *EvidenceStrategyConfig, key, val
 	}
 }
 
+func setWebConfigValue(config *WebConfig, key, value string) {
+	switch key {
+	case "enabled":
+		config.Enabled = configBoolValue(value)
+	case "host":
+		setString(&config.Host, value)
+	case "port":
+		setPositiveInt(&config.Port, value)
+	case "open_browser":
+		config.OpenBrowser = configBoolValue(value)
+	case "require_token":
+		if value != "" {
+			config.RequireToken = WebTokenMode(value)
+		}
+	case "token_env":
+		setString(&config.TokenEnv, value)
+	case "allowed_origins":
+		config.AllowedOrigins = configStringListValue(value)
+	case "refresh_interval_seconds":
+		setPositiveInt(&config.RefreshIntervalSeconds, value)
+	}
+}
+
 func setString(target *string, value string) {
 	if value != "" {
 		*target = value
@@ -591,4 +665,23 @@ func configPositiveIntValue(value string) (int, bool) {
 	}
 
 	return parsed, true
+}
+
+func configStringListValue(value string) []string {
+	value = strings.TrimSpace(value)
+	if value == "" || value == "[]" {
+		return nil
+	}
+
+	value = strings.TrimPrefix(strings.TrimSuffix(value, "]"), "[")
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		item := configStringValue(part)
+		if item != "" {
+			result = append(result, item)
+		}
+	}
+
+	return result
 }

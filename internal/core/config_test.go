@@ -3,6 +3,7 @@ package core
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -34,6 +35,10 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 
 	if config.Evidence != DefaultEvidenceConfig() {
 		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, DefaultEvidenceConfig())
+	}
+
+	if !reflect.DeepEqual(config.Web, DefaultWebConfig()) {
+		t.Fatalf("Web = %#v, want %#v", config.Web, DefaultWebConfig())
 	}
 }
 
@@ -278,6 +283,173 @@ func TestLoadWorkspaceConfigKeepsEvidenceDefaultsForMissingKeys(t *testing.T) {
 
 	if config.Evidence != want {
 		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, want)
+	}
+}
+
+func TestLoadWorkspaceConfigParsesWebConfig(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `web:
+  enabled: true
+  host: 0.0.0.0
+  port: 7444
+  open_browser: true
+  require_token: true
+  token_env: CUSTOM_CHC_WEB_TOKEN
+  allowed_origins: "https://example.test,https://ops.example.test"
+  refresh_interval_seconds: 5
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := WebConfig{
+		Enabled:                true,
+		Host:                   "0.0.0.0",
+		Port:                   7444,
+		OpenBrowser:            true,
+		RequireToken:           WebTokenModeTrue,
+		TokenEnv:               "CUSTOM_CHC_WEB_TOKEN",
+		AllowedOrigins:         []string{"https://example.test", "https://ops.example.test"},
+		RefreshIntervalSeconds: 5,
+	}
+	if !reflect.DeepEqual(config.Web, want) {
+		t.Fatalf("Web = %#v, want %#v", config.Web, want)
+	}
+}
+
+func TestLoadWorkspaceConfigKeepsWebDefaultsForMissingKeys(t *testing.T) {
+	dir := t.TempDir()
+	writeWorkspaceConfig(t, dir, `web:
+  enabled: true
+`)
+
+	config, err := LoadWorkspaceConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
+	}
+
+	want := DefaultWebConfig()
+	want.Enabled = true
+
+	if !reflect.DeepEqual(config.Web, want) {
+		t.Fatalf("Web = %#v, want %#v", config.Web, want)
+	}
+}
+
+func TestValidateWebConfigAcceptsDefaultConfig(t *testing.T) {
+	err := ValidateWebConfig(DefaultWebConfig())
+	if err != nil {
+		t.Fatalf("ValidateWebConfig returned error: %v", err)
+	}
+}
+
+func TestValidateWebConfigRejectsInvalidConfig(t *testing.T) {
+	tests := []struct {
+		name    string
+		config  WebConfig
+		wantErr string
+	}{
+		{
+			name: "host",
+			config: WebConfig{
+				Port:                   DefaultWebPort,
+				RequireToken:           WebTokenModeAuto,
+				TokenEnv:               DefaultWebTokenEnv,
+				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+			},
+			wantErr: "web host is required",
+		},
+		{
+			name: "port",
+			config: WebConfig{
+				Host:                   DefaultWebHost,
+				Port:                   0,
+				RequireToken:           WebTokenModeAuto,
+				TokenEnv:               DefaultWebTokenEnv,
+				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+			},
+			wantErr: "web port must be between 1 and 65535",
+		},
+		{
+			name: "token mode",
+			config: WebConfig{
+				Host:                   DefaultWebHost,
+				Port:                   DefaultWebPort,
+				RequireToken:           "sometimes",
+				TokenEnv:               DefaultWebTokenEnv,
+				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+			},
+			wantErr: "invalid web require_token mode: sometimes",
+		},
+		{
+			name: "token env",
+			config: WebConfig{
+				Host:                   DefaultWebHost,
+				Port:                   DefaultWebPort,
+				RequireToken:           WebTokenModeTrue,
+				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+			},
+			wantErr: "web token_env is required when token mode requires a token",
+		},
+		{
+			name: "refresh",
+			config: WebConfig{
+				Host:         DefaultWebHost,
+				Port:         DefaultWebPort,
+				RequireToken: WebTokenModeAuto,
+				TokenEnv:     DefaultWebTokenEnv,
+			},
+			wantErr: "web refresh_interval_seconds must be positive",
+		},
+		{
+			name: "origin",
+			config: WebConfig{
+				Host:                   DefaultWebHost,
+				Port:                   DefaultWebPort,
+				RequireToken:           WebTokenModeAuto,
+				TokenEnv:               DefaultWebTokenEnv,
+				AllowedOrigins:         []string{""},
+				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+			},
+			wantErr: "web allowed_origins cannot contain empty values",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := ValidateWebConfig(test.config)
+			if err == nil {
+				t.Fatal("ValidateWebConfig returned nil error")
+			}
+
+			if err.Error() != test.wantErr {
+				t.Fatalf("ValidateWebConfig error = %q, want %q", err.Error(), test.wantErr)
+			}
+		})
+	}
+}
+
+func TestWebHostIsLoopback(t *testing.T) {
+	tests := []struct {
+		host string
+		want bool
+	}{
+		{host: "127.0.0.1", want: true},
+		{host: "::1", want: true},
+		{host: "localhost", want: true},
+		{host: "0.0.0.0", want: false},
+		{host: "192.168.1.10", want: false},
+		{host: "example.test", want: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.host, func(t *testing.T) {
+			if got := WebHostIsLoopback(test.host); got != test.want {
+				t.Fatalf("WebHostIsLoopback(%q) = %v, want %v", test.host, got, test.want)
+			}
+		})
 	}
 }
 
