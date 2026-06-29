@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -194,6 +195,61 @@ func TestHandlerArtifactCatalogAndDetailFragments(t *testing.T) {
 	}
 }
 
+func TestHandlerWriteActionRedirectsAfterSuccess(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	form := url.Values{
+		"action":  {"dump.save"},
+		"id":      {".chc/user/dumps/project-notes.md"},
+		"confirm": {"true"},
+		"content": {"Updated content"},
+	}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/actions", strings.NewReader(form.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusSeeOther {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusSeeOther)
+	}
+
+	if got := recorder.Header().Get("Location"); got != "/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fproject-notes.md" {
+		t.Fatalf("Location = %q, want dump detail", got)
+	}
+}
+
+func TestHandlerWriteActionRendersBlockedEnvelope(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	form := url.Values{"action": {"dump.save"}}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/actions", strings.NewReader(form.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+
+	for _, want := range []string{"Write action blocked.", "Action confirmation is required."} {
+		if !strings.Contains(recorder.Body.String(), want) {
+			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
+		}
+	}
+}
+
 func testShellData() ShellData {
 	return ShellData{
 		Title:          "ChrysoCoord",
@@ -350,5 +406,22 @@ func (testDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDe
 		Scope:   "Project-wide",
 		Path:    request.ID,
 		Content: "Full dump content",
+	}, nil
+}
+
+func (testDataProvider) WriteAction(_ context.Context, request WriteActionRequest) (WriteActionResponse, error) {
+	if !request.Confirm {
+		return WriteActionResponse{
+			Status:        WriteStatusBlocked,
+			Summary:       "Write action blocked.",
+			BlockedReason: "Action confirmation is required.",
+		}, nil
+	}
+
+	return WriteActionResponse{
+		Status:       WriteStatusOK,
+		Summary:      "Saved dump.",
+		ChangedFiles: []string{request.ID},
+		RedirectURL:  "/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fproject-notes.md",
 	}, nil
 }

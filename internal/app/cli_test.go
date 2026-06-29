@@ -390,6 +390,152 @@ func TestWebServeArtifactDetailPathConfinement(t *testing.T) {
 	}
 }
 
+func TestWebServeWriteActionUpdatesCaseMetadata(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeWebServeArtifactFixture(t, projectDir)
+
+	provider := newWebServeBoardTestProvider(
+		projectDir,
+		newWebServeBoardTestEnv(t, t.TempDir()),
+		newWebServeBoardProjectContext(t, projectDir),
+	)
+
+	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
+		Family: "cases",
+		ID:     "blog",
+	})
+	if err != nil {
+		t.Fatalf("ArtifactDetailView returned error: %v", err)
+	}
+
+	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:   "case.update",
+		Family:   "cases",
+		ID:       "blog",
+		Revision: detail.Revision,
+		Confirm:  true,
+		Fields: map[string]string{
+			"name":        "Updated Blog",
+			"description": "Updated description.",
+			"context":     "Updated context.",
+		},
+	})
+	if err != nil {
+		t.Fatalf("WriteAction returned error: %v", err)
+	}
+
+	if result.Status != webui.WriteStatusOK {
+		t.Fatalf("Status = %q, want ok: %#v", result.Status, result)
+	}
+
+	metadata, err := core.NewCaseMetadataService(projectDir).LoadPath(core.CaseMetadataPath(projectDir, "blog"))
+	if err != nil {
+		t.Fatalf("LoadPath returned error: %v", err)
+	}
+
+	if metadata.Name != "Updated Blog" || metadata.Context != "Updated context." {
+		t.Fatalf("metadata = %#v, want updated case metadata", metadata)
+	}
+}
+
+func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeWebServeArtifactFixture(t, projectDir)
+
+	provider := newWebServeBoardTestProvider(
+		projectDir,
+		newWebServeBoardTestEnv(t, t.TempDir()),
+		newWebServeBoardProjectContext(t, projectDir),
+	)
+
+	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
+		Family: "dumps",
+		ID:     ".chc/user/dumps/blog-context.md",
+	})
+	if err != nil {
+		t.Fatalf("ArtifactDetailView returned error: %v", err)
+	}
+
+	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:   "dump.save",
+		Family:   "dumps",
+		ID:       ".chc/user/dumps/blog-context.md",
+		Revision: detail.Revision,
+		Confirm:  true,
+		Fields:   map[string]string{"content": "# Updated Dump"},
+	})
+	if err != nil {
+		t.Fatalf("WriteAction save returned error: %v", err)
+	}
+
+	if result.Status != webui.WriteStatusOK {
+		t.Fatalf("save status = %q, want ok", result.Status)
+	}
+
+	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:   "dump.save",
+		Family:   "dumps",
+		ID:       ".chc/user/dumps/blog-context.md",
+		Revision: detail.Revision,
+		Confirm:  true,
+		Fields:   map[string]string{"content": "# Stale Dump"},
+	})
+	if err != nil {
+		t.Fatalf("WriteAction stale returned error: %v", err)
+	}
+
+	if stale.Status != webui.WriteStatusStale {
+		t.Fatalf("stale status = %q, want stale", stale.Status)
+	}
+}
+
+func TestWebServeWriteActionCreatesDump(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeWebServeArtifactFixture(t, projectDir)
+
+	provider := newWebServeBoardTestProvider(
+		projectDir,
+		newWebServeBoardTestEnv(t, t.TempDir()),
+		newWebServeBoardProjectContext(t, projectDir),
+	)
+
+	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:  "dump.create",
+		Family:  "dumps",
+		Confirm: true,
+		Fields: map[string]string{
+			"title":   "New Web Dump",
+			"content": "Captured from web.",
+		},
+	})
+	if err != nil {
+		t.Fatalf("WriteAction create returned error: %v", err)
+	}
+
+	if result.Status != webui.WriteStatusOK {
+		t.Fatalf("create status = %q, want ok", result.Status)
+	}
+
+	catalog, err := provider.CatalogView(t.Context(), "dumps")
+	if err != nil {
+		t.Fatalf("CatalogView returned error: %v", err)
+	}
+
+	if !webCatalogContainsTitle(catalog, "New Web Dump") {
+		t.Fatalf("catalog = %#v, want New Web Dump", catalog.Items)
+	}
+}
+
+func webCatalogContainsTitle(catalog webui.ArtifactCatalogView, title string) bool {
+	for _, item := range catalog.Items {
+		if item.Title == title {
+			return true
+		}
+	}
+
+	return false
+}
+
 func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
 	t.Helper()
 
