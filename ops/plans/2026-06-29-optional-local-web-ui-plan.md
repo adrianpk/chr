@@ -1,8 +1,8 @@
 # Optional Local Web UI Plan
 
-Status: planned
+Status: in_progress
 
-Active Slice: none
+Active Slice: Slice 1: web config and serve command
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 

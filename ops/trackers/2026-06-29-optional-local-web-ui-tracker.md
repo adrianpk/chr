@@ -1,6 +1,6 @@
 # Optional Local Web UI Tracker
 
-Status: planned
+Status: in_progress
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 
@@ -12,7 +12,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
-| Slice 1 | web config and serve command | planned | `feat/slice-1-web-config-serve-command` | pending | `.prj/reports/slices/optional-local-web-ui/slice-1-web-config-serve-command.md` |
+| Slice 1 | web config and serve command | ready for PR | `feat/slice-1-web-config-serve-command` | pending | `.prj/reports/slices/optional-local-web-ui/slice-1-web-config-serve-command.md` |
 | Slice 2 | html htmx and helper foundation | planned | `feat/slice-2-html-htmx-helper-foundation` | pending | `.prj/reports/slices/optional-local-web-ui/slice-2-html-htmx-helper-foundation.md` |
 | Slice 3 | read-only project board and dash | planned | `feat/slice-3-readonly-project-board-dash` | pending | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
 | Slice 4 | read-only artifact catalogs | planned | `feat/slice-4-readonly-artifact-catalogs` | pending | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
@@ -27,16 +27,16 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T1.1 | Add the `web` config section to the project/user config model with defaults. | pending | pending | Disabled by default. |
-| T1.2 | Add config validation for host, port, refresh interval, token mode, and allowed origins. | pending | pending | Reject invalid runtime exposure config early. |
-| T1.3 | Add CLI parsing for `chc web serve`. | pending | pending | No server starts from existing default commands. |
-| T1.4 | Add `--host`, `--port`, `--open-browser`, `--dry-run`, and `--require-token` command flags. | pending | pending | Flags override config through the standard command path. |
-| T1.5 | Add resolved-config output for normal startup and dry-run mode. | pending | pending | Output must include project, bind, port, and token mode. |
-| T1.6 | Add non-loopback bind warning output. | pending | pending | Required for `0.0.0.0` and other non-loopback hosts. |
-| T1.7 | Add a minimal HTTP server boundary with `/healthz`. | pending | pending | Establishes integration point for later slices. |
-| T1.8 | Add unit tests for config defaults, overrides, invalid values, and warning decisions. | pending | pending | Focus on pure config behavior. |
-| T1.9 | Add CLI tests for dry-run and command output. | pending | pending | Proves no accidental listen in dry-run mode. |
-| T1.10 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T1.1 | Add the `web` config section to the project/user config model with defaults. | done | `d628644` | Disabled by default with localhost bind defaults. |
+| T1.2 | Add config validation for host, port, refresh interval, token mode, and allowed origins. | done | `d628644` | Added `ValidateWebConfig` and loopback host detection. |
+| T1.3 | Add CLI parsing for `chc web serve`. | done | `4ba5578` | Registered the `web serve` command without changing default TUI behavior. |
+| T1.4 | Add `--host`, `--port`, `--open-browser`, `--dry-run`, and `--require-token` command flags. | done | `4ba5578` | Flags override loaded web config. |
+| T1.5 | Add resolved-config output for normal startup and dry-run mode. | done | `4ba5578` | Dry-run prints project, bind, port, token mode, and healthz-only static mode. |
+| T1.6 | Add non-loopback bind warning output. | done | `4ba5578` | Warning prints for `0.0.0.0` and other non-loopback hosts. |
+| T1.7 | Add a minimal HTTP server boundary with `/healthz`. | done | `4ba5578` | Added foreground HTTP server with `/healthz`. |
+| T1.8 | Add unit tests for config defaults, overrides, invalid values, and warning decisions. | done | `d628644`, `4ba5578` | Covered config parsing/validation and loopback/non-loopback behavior. |
+| T1.9 | Add CLI tests for dry-run and command output. | done | `4ba5578` | Covered default dry-run, flag overrides, non-loopback warning, invalid config, and `/healthz`. |
+| T1.10 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 2 Tasks
 
@@ -172,7 +172,9 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 ## Validation Log
 
-- Planning: not started.
+- Slice 1 T1.1-T1.2: `go test ./internal/core -run 'WebConfig|WorkspaceConfig'` (pass)
+- Slice 1 T1.3-T1.9: `go test ./internal/core -run 'WebConfig|WorkspaceConfig' && go test ./internal/app -run 'RootCommand|WebServe'` (pass)
+- Slice 1: `go test ./internal/core ./internal/app` (pass)
 
 ## Open Decisions
 
