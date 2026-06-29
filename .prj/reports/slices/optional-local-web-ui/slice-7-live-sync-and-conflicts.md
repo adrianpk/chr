@@ -1,6 +1,6 @@
 # Slice 7: Live Sync And Conflict Handling
 
-Status: implementing
+Status: reviewing
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 
@@ -46,15 +46,55 @@ Deferred transport:
 
 ## Summary
 
-Pending implementation.
+- Added htmx polling to the Web UI shell for Project, Board, Dash, artifact
+  catalogs, and artifact detail views.
+- Added stable revision markers to full-page shells and htmx fragments.
+- Kept `/api/events` out of scope because the selected transport is polling.
+- Added stale-write conflict actions so rejected writes offer reload and
+  discard paths.
+- Covered external workspace mutation, stale rejection, and reload retry.
 
 ## Changes
 
-Pending implementation.
+- `internal/webui/views.go`
+  - Adds page-level `Revision` and `RefreshURL` fields.
+  - Adds revision fields to Project, Board, Dash, and catalog view models.
+  - Extends write responses with `ReloadURL` and `DiscardURL`.
+- `internal/app/web_revision.go`
+  - Adds stable JSON-backed revision hashing for aggregate read models.
+- `internal/app/web_views.go`
+  - Populates stable revisions for Project, Board, and Dash read views.
+- `internal/app/web_artifacts.go`
+  - Populates catalog and fallback detail revisions.
+  - Keeps content-hash revisions for editable artifact details.
+- `internal/webui/webui.go`
+  - Maps every major page to its matching refresh fragment URL.
+- `internal/webui/assets/templates/shell.html`
+  - Adds polling attributes to the workspace shell.
+  - Adds hidden revision markers to each fragment.
+  - Adds reload/discard actions for stale writes.
+- `internal/webui/assets/static/chc.css`
+  - Adds compact action-row styling for conflict actions.
+- `internal/webui/webui_test.go`
+  - Covers polling attributes, fragment revision markers, and stale conflict
+    action rendering.
+- `internal/app/cli_test.go`
+  - Covers external workspace mutations changing revisions.
+  - Covers stale write rejection and successful retry after reload.
 
 ## Validation
 
-Pending implementation.
+- `go test ./internal/webui` (pass)
+- `go test ./internal/app -run 'WebServe.*(Artifact|WriteAction|Revision|Handler|Board|Catalog)'` (pass)
+- Temporary-project smoke with `go run ./cmd/chc web serve --dir /tmp/... --port 7337` plus:
+  - `curl -fsS http://127.0.0.1:7337/healthz` (pass)
+  - Full dump detail page exposed a `data-revision` marker (pass)
+  - Direct workspace file mutation changed the dump detail fragment revision
+    returned with `HX-Request: true` (pass)
+  - `curl -X POST http://127.0.0.1:7337/actions` for `dump.save` with the
+    refreshed revision returned `303` to the dump detail page (pass)
+  - The saved dump file contained the Web UI update (pass)
+- `make verify` (pass)
 
 ## Notes
 

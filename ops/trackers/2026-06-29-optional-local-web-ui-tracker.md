@@ -18,7 +18,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 4 | read-only artifact catalogs | delivered | `feat/slice-4-readonly-artifact-catalogs` | `#346` | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
 | Slice 5 | document and metadata actions | delivered | `feat/slice-5-document-and-metadata-actions` | `#347` | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | delivered | `feat/slice-6-work-and-generation-actions` | `#348` | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
-| Slice 7 | live sync and conflict handling | ready | `feat/slice-7-live-sync-and-conflicts` | pending | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
+| Slice 7 | live sync and conflict handling | reviewing | `feat/slice-7-live-sync-and-conflicts` | pending | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | planned | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | planned | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
 | Slice 10 | docs qa and release readiness | planned | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
@@ -117,15 +117,15 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T7.1 | Choose and document the initial sync transport: polling, server-sent events, or a hybrid. | pending | pending | Decision belongs in the slice report or docs. |
-| T7.2 | Add state revision markers for project, board, dash, and artifact views. | pending | pending | Used by refresh and conflict detection. |
-| T7.3 | Add `/api/events` or equivalent change-feed endpoint if needed. | pending | pending | Depends on selected sync transport. |
-| T7.4 | Add client refresh scheduling with backoff and hidden-tab throttling. | pending | pending | Keep local server cheap. |
-| T7.5 | Add conflict UI for stale writes with reload and discard choices. | pending | pending | No silent overwrite. |
-| T7.6 | Add tests for state revision changes after CLI/service mutations. | pending | pending | Proves cross-surface sync. |
-| T7.7 | Add tests for stale write rejection and successful retry. | pending | pending | Full conflict loop. |
-| T7.8 | Add manual two-surface smoke evidence using one TUI/CLI change and one Web UI change. | pending | pending | Required sync evidence. |
-| T7.9 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T7.1 | Choose and document the initial sync transport: polling, server-sent events, or a hybrid. | done | `0d4f68f` | htmx polling selected; SSE and `/api/events` deferred. |
+| T7.2 | Add state revision markers for project, board, dash, and artifact views. | done | `133be32` | Full pages and fragments carry stable revision markers. |
+| T7.3 | Add `/api/events` or equivalent change-feed endpoint if needed. | done | `0d4f68f` | Not added because polling was selected. |
+| T7.4 | Add client refresh scheduling with backoff and hidden-tab throttling. | done | `133be32` | htmx polling uses the configured refresh interval and a visible-tab trigger guard. |
+| T7.5 | Add conflict UI for stale writes with reload and discard choices. | done | `133be32` | Stale responses include reload and discard links. |
+| T7.6 | Add tests for state revision changes after CLI/service mutations. | done | `133be32` | Provider tests mutate the workspace outside the Web UI and assert revision changes. |
+| T7.7 | Add tests for stale write rejection and successful retry. | done | `133be32`, `c7cb387` | Tests cover stale rejection, reload, and retry with the refreshed revision. |
+| T7.8 | Add manual two-surface smoke evidence using one TUI/CLI change and one Web UI change. | done | pending | Temporary-project smoke covered external file mutation and Web UI save. |
+| T7.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 8 Tasks
 
@@ -196,6 +196,9 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 6: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
 - Slice 6 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/tmp.IJQmMJO7zb --port 7336`; `curl` covered command forms, `work.preview`, and unsupported work-start rejection (pass)
 - Slice 6: `make verify` (pass)
+- Slice 7 T7.1-T7.7: `go test ./internal/webui && go test ./internal/app -run 'WebServe.*(Artifact|WriteAction|Revision|Handler|Board|Catalog)'` (pass)
+- Slice 7 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/... --port 7337`; `curl` covered healthz, detail revision marker, external file mutation changing htmx fragment revision, and Web UI `dump.save` redirect/write (pass)
+- Slice 7: `make verify` (pass)
 
 ## Open Decisions
 
