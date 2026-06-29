@@ -12,6 +12,8 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chc/internal/webui"
+	"forge.adrianpk.com/chc/internal/webui/ui"
 )
 
 func newWebCommand(stdout io.Writer, deps appDependencies) *cli.Command {
@@ -146,7 +148,7 @@ func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error 
 
 	_, err := fmt.Fprintf(
 		stdout,
-		"web ui dry-run: %s\nproject: %s\nbind: %s\nport: %d\nenabled: %t\nopen_browser: %t\nrequire_token: %s\ntoken_env: %s\nstatic_assets: healthz-only\n",
+		"web ui dry-run: %s\nproject: %s\nbind: %s\nport: %d\nenabled: %t\nopen_browser: %t\nrequire_token: %s\ntoken_env: %s\nstatic_assets: embedded\n",
 		config.URL,
 		config.ProjectDir,
 		config.Web.Host,
@@ -179,9 +181,14 @@ func printWebServeStart(stdout io.Writer, config resolvedWebServeConfig) error {
 }
 
 func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
+	handler, err := newWebServeMux(config)
+	if err != nil {
+		return err
+	}
+
 	server := &http.Server{
 		Addr:              net.JoinHostPort(config.Web.Host, strconv.Itoa(config.Web.Port)),
-		Handler:           newWebServeMux(),
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -213,20 +220,28 @@ func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
 	}
 }
 
-func newWebServeMux() http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", webHealthzHandler)
-
-	return mux
-}
-
-func webHealthzHandler(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-
-	if _, err := w.Write([]byte("ok\n")); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
+	return webui.NewHandler(webui.HandlerOptions{
+		Data: webui.ShellData{
+			Title:          "ChrysoCoord",
+			ProjectDir:     config.ProjectDir,
+			ProjectID:      projectID(config.ProjectDir),
+			URL:            config.URL,
+			Host:           config.Web.Host,
+			Port:           config.Web.Port,
+			RequireToken:   string(config.Web.RequireToken),
+			RefreshSeconds: config.Web.RefreshIntervalSeconds,
+			Navigation: []ui.NavLink{
+				{Label: "Project", Href: "/", Active: true},
+				{Label: "Board", Href: "/board"},
+				{Label: "Dash", Href: "/dash"},
+				{Label: "Dumps", Href: "/dumps"},
+				{Label: "Quizzes", Href: "/quizzes"},
+				{Label: "Specs", Href: "/specs"},
+				{Label: "Plans", Href: "/plans"},
+			},
+		},
+	})
 }
 
 func webURL(host string, port int) string {

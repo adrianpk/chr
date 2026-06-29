@@ -1,0 +1,59 @@
+{{define "shell.html"}}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/assets/chc.css">
+    <script src="/assets/htmx.min.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="app-sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">CHC</div>
+          <div>
+            <div class="brand-title">ChrysoCoord</div>
+            <div class="brand-subtitle">Local Web UI</div>
+          </div>
+        </div>
+        {{(nav .Navigation).Render}}
+      </aside>
+      <main class="app-main">
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Project</p>
+            <h1>{{.Title}}</h1>
+          </div>
+          {{(chip .RequireToken).Muted.Render}}
+        </header>
+        <section id="workspace" class="workspace-panel">
+          {{template "bootstrap.html" .}}
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
+{{end}}
+
+{{define "bootstrap.html"}}
+<div class="summary-grid">
+  <div class="summary-item">
+    <span class="summary-label">Project ID</span>
+    <strong>{{.ProjectID}}</strong>
+  </div>
+  <div class="summary-item">
+    <span class="summary-label">Bind</span>
+    <strong>{{.Host}}:{{.Port}}</strong>
+  </div>
+  <div class="summary-item">
+    <span class="summary-label">Refresh</span>
+    <strong>{{.RefreshSeconds}}s</strong>
+  </div>
+</div>
+<div class="detail-block">
+  <span class="summary-label">Project directory</span>
+  <code>{{.ProjectDir}}</code>
+</div>
+{{end}}

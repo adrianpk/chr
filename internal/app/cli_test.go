@@ -130,7 +130,7 @@ func TestWebServeDryRunPrintsResolvedDefaults(t *testing.T) {
 		"open_browser: false\n",
 		"require_token: auto\n",
 		"token_env: CHC_WEB_TOKEN\n",
-		"static_assets: healthz-only\n",
+		"static_assets: embedded\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, got)
@@ -201,7 +201,16 @@ func TestWebServeHealthz(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	recorder := httptest.NewRecorder()
 
-	newWebServeMux().ServeHTTP(recorder, request)
+	handler, err := newWebServeMux(resolvedWebServeConfig{
+		ProjectDir: t.TempDir(),
+		URL:        "http://127.0.0.1:7331",
+		Web:        core.DefaultWebConfig(),
+	})
+	if err != nil {
+		t.Fatalf("newWebServeMux returned error: %v", err)
+	}
+
+	handler.ServeHTTP(recorder, request)
 
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
@@ -209,6 +218,55 @@ func TestWebServeHealthz(t *testing.T) {
 
 	if got := recorder.Body.String(); got != "ok\n" {
 		t.Fatalf("body = %q, want ok", got)
+	}
+}
+
+func TestWebServeShell(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	handler, err := newWebServeMux(resolvedWebServeConfig{
+		ProjectDir: projectDir,
+		URL:        "http://127.0.0.1:7331",
+		Web:        core.DefaultWebConfig(),
+	})
+	if err != nil {
+		t.Fatalf("newWebServeMux returned error: %v", err)
+	}
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+
+	for _, want := range []string{"ChrysoCoord", "Local Web UI", projectDir, "/assets/htmx.min.js"} {
+		if !strings.Contains(recorder.Body.String(), want) {
+			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
+		}
+	}
+}
+
+func TestWebServeAssets(t *testing.T) {
+	handler, err := newWebServeMux(resolvedWebServeConfig{
+		ProjectDir: t.TempDir(),
+		URL:        "http://127.0.0.1:7331",
+		Web:        core.DefaultWebConfig(),
+	})
+	if err != nil {
+		t.Fatalf("newWebServeMux returned error: %v", err)
+	}
+
+	request := httptest.NewRequest(http.MethodGet, "/assets/chc.css", nil)
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+
+	if !strings.Contains(recorder.Body.String(), ".app-shell") {
+		t.Fatalf("body does not contain app-shell CSS:\n%s", recorder.Body.String())
 	}
 }
 
