@@ -12,7 +12,7 @@ Branch: `feat/slice-4-readonly-artifact-catalogs`
 
 Expected PR Title: `feat(slice-4): read-only artifact catalogs`
 
-PR: pending
+PR: `#346`
 
 ## Summary
 
