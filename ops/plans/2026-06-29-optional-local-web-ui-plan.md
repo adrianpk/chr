@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 4: read-only artifact catalogs
+Active Slice: Slice 5: document and metadata actions
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 
