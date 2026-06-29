@@ -50,6 +50,7 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	}
 
 	mux := http.NewServeMux()
+
 	handler := handler{
 		renderer: templates,
 		static:   http.FileServer(http.FS(staticFiles)),
@@ -244,7 +245,9 @@ func (h handler) dashPageData(r *http.Request) (PageData, error) {
 
 func (h handler) shellData(active string) ShellData {
 	data := h.data
+
 	data.Navigation = make([]ui.NavLink, 0, len(h.data.Navigation))
+
 	for _, link := range h.data.Navigation {
 		link.Active = navLinkActive(active, link.Href)
 		data.Navigation = append(data.Navigation, link)

@@ -275,45 +275,17 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", core.Ticket{
-		Key:       "CHC-1",
-		Title:     "Ready frontend",
-		Synopsis:  "Build the browser board.",
-		Status:    core.TicketStatusReadyForDev,
-		Priority:  "high",
-		Severity:  "critical",
-		Type:      "feature",
-		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
-		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
-	})
+	writeWebServeBoardTestTicket(t, projectDir)
 
-	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
-		DevMode: true,
-		DevRoot: devRoot,
-	})
-	if err != nil {
-		t.Fatalf("NewUserEnvironment returned error: %v", err)
-	}
+	env := newWebServeBoardTestEnv(t, devRoot)
+	projectContext := newWebServeBoardProjectContext(t, projectDir)
+	provider := newWebServeBoardTestProvider(projectDir, env, projectContext)
 
-	projectContext, err := resolveProjectDirectory(projectDir)
-	if err != nil {
-		t.Fatalf("resolveProjectDirectory returned error: %v", err)
-	}
-
-	provider := webViewProvider{
-		env:            env,
-		assetsFS:       testAssetsFS(),
-		projectContext: projectContext,
-		config: resolvedWebServeConfig{
-			ProjectDir: projectDir,
-			URL:        "http://127.0.0.1:7331",
-			Web:        core.DefaultWebConfig(),
-		},
-	}
 	board, err := provider.BoardView(t.Context())
 	if err != nil {
 		t.Fatalf("BoardView returned error: %v", err)
 	}
+
 	if board.TotalCount != 1 {
 		t.Fatalf("BoardView.TotalCount = %d, want 1", board.TotalCount)
 	}
@@ -341,6 +313,60 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 		if !strings.Contains(recorder.Body.String(), want) {
 			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
+	}
+}
+
+func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", core.Ticket{
+		Key:       "CHC-1",
+		Title:     "Ready frontend",
+		Synopsis:  "Build the browser board.",
+		Status:    core.TicketStatusReadyForDev,
+		Priority:  "high",
+		Severity:  "critical",
+		Type:      "feature",
+		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
+	})
+}
+
+func newWebServeBoardTestEnv(t *testing.T, devRoot string) core.UserEnvironment {
+	t.Helper()
+
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	return env
+}
+
+func newWebServeBoardProjectContext(t *testing.T, projectDir string) commandProjectContext {
+	t.Helper()
+
+	projectContext, err := resolveProjectDirectory(projectDir)
+	if err != nil {
+		t.Fatalf("resolveProjectDirectory returned error: %v", err)
+	}
+
+	return projectContext
+}
+
+func newWebServeBoardTestProvider(projectDir string, env core.UserEnvironment, projectContext commandProjectContext) webViewProvider {
+	return webViewProvider{
+		env:            env,
+		assetsFS:       testAssetsFS(),
+		projectContext: projectContext,
+		config: resolvedWebServeConfig{
+			ProjectDir: projectDir,
+			URL:        "http://127.0.0.1:7331",
+			Web:        core.DefaultWebConfig(),
+		},
 	}
 }
 

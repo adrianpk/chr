@@ -142,6 +142,7 @@ func webTicketView(ticket core.IndexedTicket) webui.BoardTicketView {
 
 func readyWebQueue(tickets []core.IndexedTicket) []webui.BoardTicketView {
 	queue := []webui.BoardTicketView{}
+
 	for _, ticket := range tickets {
 		if ticket.Status == core.TicketStatusReadyForDev {
 			queue = append(queue, webTicketView(ticket))
