@@ -50,6 +50,7 @@ Expected PR Title: `feat(slice-1): web config and serve command`
 - `go test ./internal/core -run 'WebConfig|WorkspaceConfig'` (pass)
 - `go test ./internal/core -run 'WebConfig|WorkspaceConfig' && go test ./internal/app -run 'RootCommand|WebServe'` (pass)
 - `go test ./internal/core ./internal/app` (pass)
+- `make verify` (pass)
 
 ## Notes
 
