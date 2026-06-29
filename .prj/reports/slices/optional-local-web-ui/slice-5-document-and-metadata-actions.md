@@ -12,7 +12,7 @@ Branch: `feat/slice-5-document-and-metadata-actions`
 
 Expected PR Title: `feat(slice-5): document and metadata actions`
 
-PR: pending
+PR: `#347`
 
 ## Summary
 
