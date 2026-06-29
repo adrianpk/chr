@@ -20,8 +20,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 6 | work and generation actions | delivered | `feat/slice-6-work-and-generation-actions` | `#348` | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | delivered | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
-| Slice 9 | visual identity and layout parity | reviewing | `feat/slice-9-web-visual-identity` | `#351` | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
-| Slice 10 | docs qa and release readiness | planned | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
+| Slice 9 | visual identity and layout parity | delivered | `feat/slice-9-web-visual-identity` | `#351` | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
+| Slice 10 | docs qa and release readiness | ready | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
 ## Slice 1 Tasks
 
@@ -152,8 +152,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | T9.5 | Apply reference-layout parity to Project, Cases, Help, and command surfaces. | done | `9920097` | Project, Cases, detail panes, and command surfaces use the same tokens and density. |
 | T9.6 | Add responsive constraints for board columns, artifact cards, detail panes, navigation, and action bars. | done | `9920097` | Added mobile navigation, wrapping, stable grid, and action constraints. |
 | T9.7 | Add accessibility checks for contrast, focus states, labels, and keyboard operation. | done | `9920097` | Added focus-visible styling and inspected screenshots for readable contrast and non-overlap. |
-| T9.8 | Add screenshot evidence for desktop and mobile widths across the major screens. | done | pending | Chromium screenshots captured for desktop Board/Dash and mobile Project/Dumps. |
-| T9.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
+| T9.8 | Add screenshot evidence for desktop and mobile widths across the major screens. | done | `09d224b` | Chromium screenshots captured for desktop Board/Dash and mobile Project/Dumps. |
+| T9.9 | Add the slice implementation report and validation evidence. | done | `09d224b`, `ec1f72e` | Report path is defined in the slice table. |
 
 ## Slice 10 Tasks
 

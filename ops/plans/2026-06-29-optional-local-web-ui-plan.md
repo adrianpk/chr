@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 9: visual identity and layout parity
+Active Slice: Slice 10: docs qa and release readiness
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 
