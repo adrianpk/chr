@@ -19,8 +19,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 5 | document and metadata actions | delivered | `feat/slice-5-document-and-metadata-actions` | `#347` | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | delivered | `feat/slice-6-work-and-generation-actions` | `#348` | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
-| Slice 8 | access control and exposure safety | reviewing | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
-| Slice 9 | visual identity and layout parity | planned | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
+| Slice 8 | access control and exposure safety | delivered | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
+| Slice 9 | visual identity and layout parity | ready | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
 | Slice 10 | docs qa and release readiness | planned | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
 ## Slice 1 Tasks
@@ -138,8 +138,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | T8.5 | Add explicit allowed-origin handling. | done | `dea4109` | Exact configured origins are allowed and receive CORS preflight headers. |
 | T8.6 | Add safe startup and request logging. | done | `dea4109` | Startup prints token requirement and origins; request logs omit query strings and token values. |
 | T8.7 | Add tests for loopback without token, non-loopback warning, token required, missing token, bad token, and allowed origins. | done | `dea4109` | App and handler tests cover token/origin policies and sanitized logs. |
-| T8.8 | Add docs for private-network and tunnel exposure boundaries without managing those systems. | done | pending | Added deliberate exposure how-to. |
-| T8.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
+| T8.8 | Add docs for private-network and tunnel exposure boundaries without managing those systems. | done | `f674ea2` | Added deliberate exposure how-to. |
+| T8.9 | Add the slice implementation report and validation evidence. | done | `f674ea2`, `18dbf97` | Report path is defined in the slice table. |
 
 ## Slice 9 Tasks
 
