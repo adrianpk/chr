@@ -17,7 +17,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 3 | read-only project board and dash | delivered | `feat/slice-3-readonly-project-board-dash` | `#345` | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
 | Slice 4 | read-only artifact catalogs | delivered | `feat/slice-4-readonly-artifact-catalogs` | `#346` | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
 | Slice 5 | document and metadata actions | delivered | `feat/slice-5-document-and-metadata-actions` | `#347` | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
-| Slice 6 | work and generation actions | ready | `feat/slice-6-work-and-generation-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
+| Slice 6 | work and generation actions | reviewing | `feat/slice-6-work-and-generation-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | planned | `feat/slice-7-live-sync-and-conflicts` | pending | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | planned | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | planned | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
@@ -102,16 +102,16 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T6.1 | Inventory existing TUI/CLI actions that are safe and in scope for the first Web UI action set. | pending | pending | Action inventory must be committed before endpoints expand. |
-| T6.2 | Add typed action request and response envelopes for form posts and htmx responses. | pending | pending | No arbitrary command execution. |
-| T6.3 | Add routes for approved spec, plan, quiz, and work actions. | pending | pending | Existing operations only. |
-| T6.4 | Add operation-state reads for active and recent actions. | pending | pending | Needed for long-running behavior. |
-| T6.5 | Add confirmation modals for work-starting and overwrite-prone actions. | pending | pending | Same confirmation discipline as TUI. |
-| T6.6 | Add client command palette or command surface using the same action model as the visible screens. | pending | pending | Browser command surface. |
-| T6.7 | Add tests proving unsupported actions are rejected. | pending | pending | Negative path first. |
-| T6.8 | Add tests proving actions call existing services and write expected evidence artifacts. | pending | pending | Evidence must match CLI/TUI behavior. |
-| T6.9 | Add smoke evidence for one generation flow and one work-control flow. | pending | pending | Browser operation smoke. |
-| T6.10 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T6.1 | Inventory existing TUI/CLI actions that are safe and in scope for the first Web UI action set. | done | `9cab5c4` | Inventory committed before endpoint expansion. |
+| T6.2 | Add typed action request and response envelopes for form posts and htmx responses. | done | `d6dd4ac` | Extended write response with operation state. |
+| T6.3 | Add routes for approved spec, plan, quiz, and work actions. | done | `d6dd4ac` | Added dispatch for spec, plan, quiz, work preview, and daemon stop actions through `/actions`. |
+| T6.4 | Add operation-state reads for active and recent actions. | done | `d6dd4ac` | Action results include operation kind, status, id, and detail. |
+| T6.5 | Add confirmation modals for work-starting and overwrite-prone actions. | done | `569e8b1` | All generation/work forms require browser confirmation before submit. |
+| T6.6 | Add client command palette or command surface using the same action model as the visible screens. | done | `569e8b1` | Added command forms to Specs, Plans, Quizzes, and Dash. |
+| T6.7 | Add tests proving unsupported actions are rejected. | done | `4424a37` | Unsupported work-start action returns blocked envelope. |
+| T6.8 | Add tests proving actions call existing services and write expected evidence artifacts. | done | `4424a37` | Spec generation test uses service fake model and verifies generated artifact; work preview verifies no executions. |
+| T6.9 | Add smoke evidence for one generation flow and one work-control flow. | done | `4424a37` | Targeted tests cover generation; HTTP smoke covers command surfaces, work preview, and unsupported action rejection. |
+| T6.10 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 7 Tasks
 
@@ -192,6 +192,10 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 5: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
 - Slice 5 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/tmp.I8grD0CG1y --port 7335`; `curl` covered dump create, case update, dump save, and stale dump rejection (pass)
 - Slice 5: `make verify` (pass)
+- Slice 6 T6.1-T6.9: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|WriteAction|Generation|WorkAction'` (pass)
+- Slice 6: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
+- Slice 6 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/tmp.IJQmMJO7zb --port 7336`; `curl` covered command forms, `work.preview`, and unsupported work-start rejection (pass)
+- Slice 6: `make verify` (pass)
 
 ## Open Decisions
 
