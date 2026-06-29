@@ -526,6 +526,104 @@ func TestWebServeWriteActionCreatesDump(t *testing.T) {
 	}
 }
 
+func TestWebServeWriteActionGeneratesSpecWithService(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeServiceQuizFixture(t, projectDir)
+	writeSpecGenerationUseCaseFixture(t, projectDir)
+
+	clock := serviceQuizClock()
+	model := &fakeServiceQuizModel{
+		responses: []core.QuizModelResponse{
+			serviceQuizDraftSpecResponse("response-spec", clock()),
+		},
+	}
+	provider := newWebServeServiceFactoryProvider(t, projectDir, func(ctx context.Context) service {
+		operations := newContextTestService(t, ctx, projectDir)
+		operations.quizModel = model
+		operations.now = clock
+
+		return operations
+	})
+
+	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:  "spec.generate",
+		Family:  "specs",
+		Confirm: true,
+		Fields:  map[string]string{"case_slug": "blog"},
+	})
+	if err != nil {
+		t.Fatalf("WriteAction spec.generate returned error: %v", err)
+	}
+
+	if result.Status != webui.WriteStatusOK || result.Operation.Kind != "spec.generate" {
+		t.Fatalf("result = %#v, want completed spec generation", result)
+	}
+
+	if len(model.requests) != 1 || model.requests[0].Action != core.QuizModelActionGenerateSpec {
+		t.Fatalf("model requests = %#v, want generate spec request", model.requests)
+	}
+
+	if _, err := os.Stat(filepath.Join(projectDir, ".chc", "user", "specs", "blog-spec.md")); err != nil {
+		t.Fatalf("generated spec missing: %v", err)
+	}
+}
+
+func TestWebServeWriteActionPreviewsWorkWithoutExecuting(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeTicketMarkdownOnly(t, projectDir, "CHC-1-Ready.md", testLoopTicket(
+		"CHC-1", "Ready frontend", "ready_for_dev", "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"},
+	))
+
+	provider := newWebServeServiceFactoryProvider(t, projectDir, func(ctx context.Context) service {
+		return newContextAgentWorkTestService(t, ctx, devRoot, projectDir)
+	})
+
+	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:  "work.preview",
+		Confirm: true,
+	})
+	if err != nil {
+		t.Fatalf("WriteAction work.preview returned error: %v", err)
+	}
+
+	if result.Status != webui.WriteStatusOK || result.Operation.Kind != "work.preview" {
+		t.Fatalf("result = %#v, want completed work preview", result)
+	}
+
+	records := listTicketExecutions(t, devRoot, projectID(projectDir), "CHC-1")
+	if len(records) != 0 {
+		t.Fatalf("execution records = %d, want 0", len(records))
+	}
+
+	loopRuns := listProjectLoopRuns(t, devRoot, projectID(projectDir))
+	if len(loopRuns) != 0 {
+		t.Fatalf("loop runs = %d, want 0", len(loopRuns))
+	}
+}
+
+func TestWebServeWriteActionRejectsUnsupportedGenerationAction(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	provider := newWebServeBoardTestProvider(
+		projectDir,
+		newWebServeBoardTestEnv(t, t.TempDir()),
+		newWebServeBoardProjectContext(t, projectDir),
+	)
+
+	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:  "work.start.ready",
+		Confirm: true,
+	})
+	if err != nil {
+		t.Fatalf("WriteAction returned error: %v", err)
+	}
+
+	if result.Status != webui.WriteStatusBlocked {
+		t.Fatalf("status = %q, want blocked", result.Status)
+	}
+}
+
 func webCatalogContainsTitle(catalog webui.ArtifactCatalogView, title string) bool {
 	for _, item := range catalog.Items {
 		if item.Title == title {
@@ -534,6 +632,53 @@ func webCatalogContainsTitle(catalog webui.ArtifactCatalogView, title string) bo
 	}
 
 	return false
+}
+
+func newWebServeServiceFactoryProvider(t *testing.T, projectDir string, factory func(context.Context) service) webViewProvider {
+	t.Helper()
+
+	provider := newWebServeBoardTestProvider(
+		projectDir,
+		newWebServeBoardTestEnv(t, t.TempDir()),
+		newWebServeBoardProjectContext(t, projectDir),
+	)
+	provider.serviceFactory = factory
+
+	return provider
+}
+
+func newContextTestService(t *testing.T, ctx context.Context, projectDir string) service {
+	t.Helper()
+
+	env, err := chcTestUserEnvironment(t)
+	if err != nil {
+		t.Fatalf("chcTestUserEnvironment returned error: %v", err)
+	}
+
+	operations := newService(ctx, env, commandProjectContext{
+		ProjectDir: projectDir,
+		ProjectID:  "service-project",
+	}, testAssetsFS())
+	operations.dumpCurator = fallbackDumpCurationProvider{Reason: "test fallback"}
+
+	return operations
+}
+
+func newContextAgentWorkTestService(t *testing.T, ctx context.Context, devRoot, projectDir string) service {
+	t.Helper()
+
+	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
+		DevMode: true,
+		DevRoot: devRoot,
+	})
+	if err != nil {
+		t.Fatalf("NewUserEnvironment returned error: %v", err)
+	}
+
+	return newService(ctx, env, commandProjectContext{
+		ProjectDir: projectDir,
+		ProjectID:  projectID(projectDir),
+	}, testAssetsFS())
 }
 
 func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {

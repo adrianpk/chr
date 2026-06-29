@@ -138,6 +138,39 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 	}
 }
 
+func TestHandlerRendersGenerationAndWorkActionForms(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, tt := range []struct {
+		path string
+		want []string
+	}{
+		{path: "/specs", want: []string{"spec.generate", "Generate Spec"}},
+		{path: "/plans", want: []string{"plan.generate", "plan.regenerate", "plan.tracking.create"}},
+		{path: "/quizzes", want: []string{"quiz.start", "quiz.resume", "Start Quiz"}},
+		{path: "/dash", want: []string{"work.preview", "work.daemon.stop", "Preview Work"}},
+	} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want %d", tt.path, recorder.Code, http.StatusOK)
+		}
+
+		for _, want := range tt.want {
+			if !strings.Contains(recorder.Body.String(), want) {
+				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, recorder.Body.String())
+			}
+		}
+	}
+}
+
 func TestHandlerBoardAndDashFragments(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data:     testShellData(),
