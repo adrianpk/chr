@@ -254,6 +254,9 @@ func (p webViewProvider) writeCaseUpdate(operations service, request webui.Write
 	}
 
 	if stale := webStaleWrite(current.SourceHash, request.Revision); stale.Status != "" {
+		stale.ReloadURL = "/cases/detail?id=" + url.QueryEscape(request.ID)
+		stale.DiscardURL = "/cases"
+
 		return stale, nil
 	}
 
@@ -345,6 +348,9 @@ func (p webViewProvider) validateDumpRevision(request webui.WriteActionRequest) 
 	}
 
 	if stale := webStaleWrite(webContentRevision(content), request.Revision); stale.Status != "" {
+		stale.ReloadURL = "/dumps/detail?id=" + url.QueryEscape(request.ID)
+		stale.DiscardURL = "/dumps"
+
 		return stale, true, nil
 	}
 

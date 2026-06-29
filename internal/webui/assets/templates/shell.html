@@ -28,7 +28,7 @@
           </div>
           {{(chip .Shell.RequireToken).Muted.Render}}
         </header>
-        <section id="workspace" class="workspace-panel">
+        <section id="workspace" class="workspace-panel" data-revision="{{.Revision}}"{{if .RefreshURL}} hx-get="{{.RefreshURL}}" hx-trigger="every {{.Shell.RefreshSeconds}}s [document.visibilityState == 'visible']" hx-target="#workspace" hx-swap="innerHTML"{{end}}>
           {{if eq .View "board"}}
             {{template "board_content.html" .}}
           {{else if eq .View "dash"}}
@@ -50,6 +50,7 @@
 {{end}}
 
 {{define "project_content.html"}}
+{{template "revision_marker.html" .}}
 <div class="summary-grid">
   <div class="summary-item">
     <span class="summary-label">Project ID</span>
@@ -79,6 +80,7 @@
 {{end}}
 
 {{define "board_content.html"}}
+{{template "revision_marker.html" .}}
 <div class="summary-grid">
   <div class="summary-item">
     <span class="summary-label">Total</span>
@@ -141,6 +143,7 @@
 {{end}}
 
 {{define "catalog_content.html"}}
+{{template "revision_marker.html" .}}
 <div class="catalog-toolbar">
   <div class="summary-item">
     <span class="summary-label">Artifacts</span>
@@ -187,6 +190,7 @@
 {{end}}
 
 {{define "artifact_detail_content.html"}}
+{{template "revision_marker.html" .}}
 <div class="detail-actions">
   <a class="button" href="/{{.Detail.Family}}">Back</a>
 </div>
@@ -298,6 +302,12 @@
 <div class="write-result write-result--{{.Write.Status}}">
   <h2>{{.Write.Summary}}</h2>
   {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
+  {{if eq .Write.Status "stale"}}
+    <div class="action-row">
+      {{if .Write.ReloadURL}}<a class="button button--primary" href="{{.Write.ReloadURL}}">Reload</a>{{end}}
+      {{if .Write.DiscardURL}}<a class="button" href="{{.Write.DiscardURL}}">Discard</a>{{end}}
+    </div>
+  {{end}}
   {{if .Write.Operation.Kind}}
     <dl class="kv-list">
       <div><dt>Operation</dt><dd>{{.Write.Operation.Kind}}</dd></div>
@@ -317,6 +327,10 @@
     </dl>
   {{end}}
 </div>
+{{end}}
+
+{{define "revision_marker.html"}}
+<div class="state-marker" data-revision="{{.Revision}}" hidden></div>
 {{end}}
 
 {{define "spec_generate_form.html"}}
@@ -396,6 +410,7 @@
 {{end}}
 
 {{define "dash_content.html"}}
+{{template "revision_marker.html" .}}
 <div class="dash-grid">
   <section class="dash-panel">
     <h2>Readiness</h2>

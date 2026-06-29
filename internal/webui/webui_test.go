@@ -228,6 +228,94 @@ func TestHandlerArtifactCatalogAndDetailFragments(t *testing.T) {
 	}
 }
 
+func TestHandlerFullPagesConfigurePolling(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, tt := range []struct {
+		path      string
+		refresh   string
+		revision  string
+		workspace string
+	}{
+		{path: "/", refresh: "/project/fragment", revision: "project-revision", workspace: `id="workspace"`},
+		{path: "/board", refresh: "/board/fragment", revision: "board-revision", workspace: `id="workspace"`},
+		{path: "/dash", refresh: "/dash/fragment", revision: "dash-revision", workspace: `id="workspace"`},
+		{path: "/dumps", refresh: "/dumps/fragment", revision: "dumps-revision", workspace: `id="workspace"`},
+		{
+			path:      "/dumps/detail?id=.chc/user/dumps/project-notes.md",
+			refresh:   "/dumps/detail/fragment?id=.chc%2Fuser%2Fdumps%2Fproject-notes.md",
+			revision:  "detail-revision",
+			workspace: `id="workspace"`,
+		},
+	} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want %d", tt.path, recorder.Code, http.StatusOK)
+		}
+
+		body := recorder.Body.String()
+		for _, want := range []string{
+			tt.workspace,
+			`data-revision="` + tt.revision + `"`,
+			`hx-get="` + tt.refresh + `"`,
+			`hx-target="#workspace"`,
+			`hx-swap="innerHTML"`,
+			"every 2s",
+			"document.visibilityState",
+			"visible",
+		} {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, body)
+			}
+		}
+	}
+}
+
+func TestHandlerFragmentsCarryRevisionMarkers(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, tt := range []struct {
+		path     string
+		revision string
+	}{
+		{path: "/project/fragment", revision: "project-revision"},
+		{path: "/board/fragment", revision: "board-revision"},
+		{path: "/dash/fragment", revision: "dash-revision"},
+		{path: "/dumps/fragment", revision: "dumps-revision"},
+		{path: "/dumps/detail/fragment?id=.chc/user/dumps/project-notes.md", revision: "detail-revision"},
+	} {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, tt.path, nil)
+		request.Header.Set(htmx.HeaderRequest, "true")
+		handler.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want %d", tt.path, recorder.Code, http.StatusOK)
+		}
+
+		body := recorder.Body.String()
+		for _, want := range []string{`class="state-marker"`, `data-revision="` + tt.revision + `"`} {
+			if !strings.Contains(body, want) {
+				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, body)
+			}
+		}
+	}
+}
+
 func TestHandlerWriteActionRedirectsAfterSuccess(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data:     testShellData(),
@@ -254,6 +342,42 @@ func TestHandlerWriteActionRedirectsAfterSuccess(t *testing.T) {
 
 	if got := recorder.Header().Get("Location"); got != "/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fproject-notes.md" {
 		t.Fatalf("Location = %q, want dump detail", got)
+	}
+}
+
+func TestHandlerWriteActionRendersStaleConflictActions(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	form := url.Values{
+		"action":  {"dump.stale"},
+		"id":      {".chc/user/dumps/project-notes.md"},
+		"confirm": {"true"},
+	}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/actions", strings.NewReader(form.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusBadRequest)
+	}
+
+	for _, want := range []string{
+		"Write action rejected stale data.",
+		`href="/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fproject-notes.md"`,
+		">Reload</a>",
+		`href="/dumps"`,
+		">Discard</a>",
+	} {
+		if !strings.Contains(recorder.Body.String(), want) {
+			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
+		}
 	}
 }
 
@@ -313,6 +437,7 @@ func (testDataProvider) ProjectView(context.Context) (ProjectView, error) {
 		Paths: []ProjectPathView{
 			{Label: "Tickets", Path: "/tmp/project/.chc/user/tickets"},
 		},
+		Revision: "project-revision",
 	}, nil
 }
 
@@ -332,6 +457,7 @@ func (testDataProvider) BoardView(context.Context) (BoardView, error) {
 				},
 			},
 		},
+		Revision: "board-revision",
 	}, nil
 }
 
@@ -348,6 +474,7 @@ func (testDataProvider) DashView(context.Context) (DashView, error) {
 		RecentEvents: []AgentEventView{
 			{Time: "12:00:00", Phase: "worker_started", Message: "worker started", TicketKey: "CHC-1"},
 		},
+		Revision: "dash-revision",
 	}, nil
 }
 
@@ -357,6 +484,7 @@ func (testDataProvider) CatalogView(_ context.Context, family string) (ArtifactC
 		Title:        CatalogTitle(family),
 		EmptyMessage: "No " + family + " found.",
 		Items:        testCatalogItems(family),
+		Revision:     family + "-revision",
 	}
 
 	return catalog, nil
@@ -425,20 +553,22 @@ func testCatalogItems(family string) []ArtifactCardView {
 func (testDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDetailRequest) (ArtifactDetailView, error) {
 	if request.ID != ".chc/user/dumps/project-notes.md" {
 		return ArtifactDetailView{
-			Family:  request.Family,
-			Title:   request.ID,
-			Path:    request.ID,
-			Missing: true,
+			Family:   request.Family,
+			Title:    request.ID,
+			Path:     request.ID,
+			Missing:  true,
+			Revision: "missing-revision",
 		}, nil
 	}
 
 	return ArtifactDetailView{
-		Family:  request.Family,
-		Title:   "Project Notes",
-		Status:  "curated",
-		Scope:   "Project-wide",
-		Path:    request.ID,
-		Content: "Full dump content",
+		Family:   request.Family,
+		Title:    "Project Notes",
+		Status:   "curated",
+		Scope:    "Project-wide",
+		Path:     request.ID,
+		Content:  "Full dump content",
+		Revision: "detail-revision",
 	}, nil
 }
 
@@ -448,6 +578,16 @@ func (testDataProvider) WriteAction(_ context.Context, request WriteActionReques
 			Status:        WriteStatusBlocked,
 			Summary:       "Write action blocked.",
 			BlockedReason: "Action confirmation is required.",
+		}, nil
+	}
+
+	if request.Action == "dump.stale" {
+		return WriteActionResponse{
+			Status:        WriteStatusStale,
+			Summary:       "Write action rejected stale data.",
+			BlockedReason: "The artifact changed after the page was loaded. Reload before saving.",
+			ReloadURL:     "/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fproject-notes.md",
+			DiscardURL:    "/dumps",
 		}, nil
 	}
 

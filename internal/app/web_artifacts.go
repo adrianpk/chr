@@ -97,13 +97,16 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 
 	card, ok := findWebArtifactCard(catalog.Items, request.ID)
 	if !ok {
-		return webui.ArtifactDetailView{
+		view := webui.ArtifactDetailView{
 			ID:      request.ID,
 			Family:  request.Family,
 			Title:   request.ID,
 			Path:    request.ID,
 			Missing: true,
-		}, nil
+		}
+		view.Revision = webStableRevision(view)
+
+		return view, nil
 	}
 
 	if request.Family == webArtifactFamilyCases {
@@ -123,7 +126,7 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 		}
 	}
 
-	return webui.ArtifactDetailView{
+	view := webui.ArtifactDetailView{
 		Family:     card.Family,
 		ID:         card.ID,
 		Title:      card.Title,
@@ -134,7 +137,12 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 		UpdatedAt:  card.UpdatedAt,
 		Content:    content,
 		Revision:   revision,
-	}, nil
+	}
+	if view.Revision == "" {
+		view.Revision = webStableRevision(view)
+	}
+
+	return view, nil
 }
 
 func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.ArtifactDetailView, error) {
@@ -150,7 +158,7 @@ func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.Arti
 		content = content + "\n\n" + metadata.Context
 	}
 
-	return webui.ArtifactDetailView{
+	view := webui.ArtifactDetailView{
 		Family:      card.Family,
 		ID:          card.ID,
 		Title:       metadata.Name,
@@ -163,16 +171,24 @@ func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.Arti
 		UpdatedAt:   card.UpdatedAt,
 		Content:     content,
 		Revision:    metadata.SourceHash,
-	}, nil
+	}
+	if view.Revision == "" {
+		view.Revision = webStableRevision(view)
+	}
+
+	return view, nil
 }
 
 func webArtifactCatalog(family string, items []webui.ArtifactCardView) webui.ArtifactCatalogView {
-	return webui.ArtifactCatalogView{
+	view := webui.ArtifactCatalogView{
 		Family:       family,
 		Title:        webui.CatalogTitle(family),
 		EmptyMessage: "No " + family + " found.",
 		Items:        items,
 	}
+	view.Revision = webStableRevision(view)
+
+	return view
 }
 
 func webCaseCards(projectDir string, cases []core.CaseMetadata) []webui.ArtifactCardView {

@@ -324,6 +324,12 @@ body {
   margin: 0;
 }
 
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .kv-list {
   display: grid;
   gap: 6px;

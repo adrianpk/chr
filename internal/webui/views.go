@@ -18,15 +18,17 @@ type staticDataProvider struct {
 
 // PageData contains one rendered page and the shared shell state.
 type PageData struct {
-	Shell   ShellData
-	View    string
-	Title   string
-	Project ProjectView
-	Board   BoardView
-	Dash    DashView
-	Catalog ArtifactCatalogView
-	Detail  ArtifactDetailView
-	Write   WriteActionResponse
+	Shell      ShellData
+	View       string
+	Title      string
+	Revision   string
+	RefreshURL string
+	Project    ProjectView
+	Board      BoardView
+	Dash       DashView
+	Catalog    ArtifactCatalogView
+	Detail     ArtifactDetailView
+	Write      WriteActionResponse
 }
 
 func newStaticDataProvider(shell ShellData) staticDataProvider {
@@ -45,30 +47,33 @@ func (p staticDataProvider) ProjectView(context.Context) (ProjectView, error) {
 		Paths: []ProjectPathView{
 			{Label: "Project directory", Path: p.shell.ProjectDir},
 		},
+		Revision: "static-project",
 	}, nil
 }
 
 func (p staticDataProvider) BoardView(context.Context) (BoardView, error) {
-	return BoardView{ProjectID: p.shell.ProjectID}, nil
+	return BoardView{ProjectID: p.shell.ProjectID, Revision: "static-board"}, nil
 }
 
 func (p staticDataProvider) DashView(context.Context) (DashView, error) {
-	return DashView{}, nil
+	return DashView{Revision: "static-dash"}, nil
 }
 
 func (staticDataProvider) CatalogView(_ context.Context, family string) (ArtifactCatalogView, error) {
 	return ArtifactCatalogView{
-		Family: family,
-		Title:  CatalogTitle(family),
+		Family:   family,
+		Title:    CatalogTitle(family),
+		Revision: "static-catalog",
 	}, nil
 }
 
 func (staticDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDetailRequest) (ArtifactDetailView, error) {
 	return ArtifactDetailView{
-		Family: request.Family,
-		ID:     request.ID,
-		Title:  request.ID,
-		Path:   request.ID,
+		Family:   request.Family,
+		ID:       request.ID,
+		Title:    request.ID,
+		Path:     request.ID,
+		Revision: "static-detail",
 	}, nil
 }
 
@@ -90,6 +95,7 @@ type ProjectView struct {
 	RequireToken   string
 	RefreshSeconds int
 	Paths          []ProjectPathView
+	Revision       string
 }
 
 // ProjectPathView describes one important project path.
@@ -107,6 +113,7 @@ type BoardView struct {
 	Columns         []BoardColumnView
 	Attention       []BoardAttentionView
 	NormalColumnIDs []string
+	Revision        string
 }
 
 // BoardColumnView is one board column.
@@ -157,6 +164,7 @@ type DashView struct {
 	RecentEvents    []AgentEventView
 	LatestLoop      LoopRunView
 	LatestExecution ExecutionView
+	Revision        string
 }
 
 // AgentQueueView summarizes currently eligible work.
@@ -238,6 +246,7 @@ type ArtifactCatalogView struct {
 	Title        string
 	EmptyMessage string
 	Items        []ArtifactCardView
+	Revision     string
 }
 
 // ArtifactCardView is one catalog item card.
@@ -302,6 +311,8 @@ type WriteActionResponse struct {
 	Validation    []string
 	BlockedReason string
 	RedirectURL   string
+	ReloadURL     string
+	DiscardURL    string
 	Operation     OperationStateView
 }
 

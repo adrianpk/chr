@@ -386,10 +386,12 @@ func (h handler) projectPageData(r *http.Request) (PageData, error) {
 	}
 
 	return PageData{
-		Shell:   h.shellData("project"),
-		View:    "project",
-		Title:   "Project",
-		Project: project,
+		Shell:      h.shellData("project"),
+		View:       "project",
+		Title:      "Project",
+		Revision:   project.Revision,
+		RefreshURL: "/project/fragment",
+		Project:    project,
 	}, nil
 }
 
@@ -400,10 +402,12 @@ func (h handler) boardPageData(r *http.Request) (PageData, error) {
 	}
 
 	return PageData{
-		Shell: h.shellData("board"),
-		View:  "board",
-		Title: "Board",
-		Board: board,
+		Shell:      h.shellData("board"),
+		View:       "board",
+		Title:      "Board",
+		Revision:   board.Revision,
+		RefreshURL: "/board/fragment",
+		Board:      board,
 	}, nil
 }
 
@@ -414,10 +418,12 @@ func (h handler) dashPageData(r *http.Request) (PageData, error) {
 	}
 
 	return PageData{
-		Shell: h.shellData("dash"),
-		View:  "dash",
-		Title: "Dash",
-		Dash:  dash,
+		Shell:      h.shellData("dash"),
+		View:       "dash",
+		Title:      "Dash",
+		Revision:   dash.Revision,
+		RefreshURL: "/dash/fragment",
+		Dash:       dash,
 	}, nil
 }
 
@@ -428,10 +434,12 @@ func (h handler) catalogPageData(r *http.Request, family string) (PageData, erro
 	}
 
 	return PageData{
-		Shell:   h.shellData(family),
-		View:    "catalog",
-		Title:   catalog.Title,
-		Catalog: catalog,
+		Shell:      h.shellData(family),
+		View:       "catalog",
+		Title:      catalog.Title,
+		Revision:   catalog.Revision,
+		RefreshURL: "/" + family + "/fragment",
+		Catalog:    catalog,
 	}, nil
 }
 
@@ -445,10 +453,12 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 	}
 
 	return PageData{
-		Shell:  h.shellData(family),
-		View:   "artifact_detail",
-		Title:  detail.Title,
-		Detail: detail,
+		Shell:      h.shellData(family),
+		View:       "artifact_detail",
+		Title:      detail.Title,
+		Revision:   detail.Revision,
+		RefreshURL: "/" + family + "/detail/fragment?id=" + url.QueryEscape(r.URL.Query().Get("id")),
+		Detail:     detail,
 	}, nil
 }
 

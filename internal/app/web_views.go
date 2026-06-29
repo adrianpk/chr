@@ -27,7 +27,7 @@ func (p webViewProvider) service(ctx context.Context) service {
 }
 
 func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error) {
-	return webui.ProjectView{
+	view := webui.ProjectView{
 		ProjectID:      p.projectContext.ProjectID,
 		ProjectDir:     p.projectContext.ProjectDir,
 		URL:            p.config.URL,
@@ -41,7 +41,10 @@ func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error)
 			{Label: "Tickets", Path: filepath.Join(p.projectContext.ProjectDir, core.DirectoryName, core.UserDirectoryName, "tickets")},
 			{Label: "Runtime", Path: filepath.Join(p.projectContext.ProjectDir, core.DirectoryName, core.UserDirectoryName, "runtime")},
 		},
-	}, nil
+	}
+	view.Revision = webStableRevision(view)
+
+	return view, nil
 }
 
 func (p webViewProvider) BoardView(ctx context.Context) (webui.BoardView, error) {
@@ -50,7 +53,10 @@ func (p webViewProvider) BoardView(ctx context.Context) (webui.BoardView, error)
 		return webui.BoardView{}, err
 	}
 
-	return webBoardView(board), nil
+	view := webBoardView(board)
+	view.Revision = webStableRevision(view)
+
+	return view, nil
 }
 
 func (p webViewProvider) DashView(ctx context.Context) (webui.DashView, error) {
@@ -73,14 +79,17 @@ func (p webViewProvider) DashView(ctx context.Context) (webui.DashView, error) {
 
 	queue := readyWebQueue(board.Tickets)
 
-	return webui.DashView{
+	view := webui.DashView{
 		Readiness:       webWorkReadinessView(readiness),
 		Queue:           webui.AgentQueueView{EligibleCount: len(queue), Tickets: queue},
 		Current:         webCurrentWorkView(observability.LatestEvent),
 		RecentEvents:    webAgentEventViews(observability.RecentEvents, 8),
 		LatestLoop:      webLoopRunView(observability.LatestLoop),
 		LatestExecution: webExecutionView(observability.LatestExecution),
-	}, nil
+	}
+	view.Revision = webStableRevision(view)
+
+	return view, nil
 }
 
 func webBoardView(board core.Board) webui.BoardView {
