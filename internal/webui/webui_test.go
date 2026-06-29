@@ -52,9 +52,10 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 	}
 
 	for path, want := range map[string]string{
-		"/assets/chc.css":     ".app-shell",
-		"/assets/htmx.min.js": "htmx",
-		"/healthz":            "ok\n",
+		"/assets/chc.css":        ".app-shell",
+		"/assets/chc-avatar.svg": "ChrysoCoord agent mark",
+		"/assets/htmx.min.js":    "htmx",
+		"/healthz":               "ok\n",
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, path, nil))
