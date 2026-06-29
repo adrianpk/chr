@@ -12,7 +12,7 @@ Branch: `feat/slice-9-web-visual-identity`
 
 Expected PR Title: `feat(slice-9): web visual identity`
 
-PR: pending
+PR: `#351`
 
 ## Summary
 
