@@ -14,7 +14,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | web config and serve command | delivered | `feat/slice-1-web-config-serve-command` | `#343` | `.prj/reports/slices/optional-local-web-ui/slice-1-web-config-serve-command.md` |
 | Slice 2 | html htmx and helper foundation | delivered | `feat/slice-2-html-htmx-helper-foundation` | `#344` | `.prj/reports/slices/optional-local-web-ui/slice-2-html-htmx-helper-foundation.md` |
-| Slice 3 | read-only project board and dash | ready | `feat/slice-3-readonly-project-board-dash` | pending | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
+| Slice 3 | read-only project board and dash | ready for PR | `feat/slice-3-readonly-project-board-dash` | pending | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
 | Slice 4 | read-only artifact catalogs | planned | `feat/slice-4-readonly-artifact-catalogs` | pending | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
 | Slice 5 | document and metadata actions | planned | `feat/slice-5-document-and-metadata-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | planned | `feat/slice-6-work-and-generation-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
@@ -60,15 +60,15 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Add read view models for project summary, board column, board card, board detail, dash summary, event summary, and report summary. | pending | pending | View models are web contracts, not persistence. |
-| T3.2 | Add app/service queries that reuse existing TUI or core read models. | pending | pending | Avoid reparsing state in the web layer. |
-| T3.3 | Add Project, Board, board item detail, and Dash routes with full-page and htmx fragment responses. | pending | pending | Read-only routes. |
-| T3.4 | Render Project, Board, and Dash screens through server templates. | pending | pending | Primary operational surfaces. |
-| T3.5 | Add board-column empty states and attention states. | pending | pending | Must match existing status semantics. |
-| T3.6 | Add detail panes or detail pages for board items. | pending | pending | No mutation in this slice. |
-| T3.7 | Add tests for view-model shape, status mapping, empty project state, and attention reasons. | pending | pending | Protect the read contract. |
-| T3.8 | Add screenshot or DOM smoke evidence for Project, Board, and Dash. | pending | pending | Evidence can be automated or manual for this slice. |
-| T3.9 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T3.1 | Add read view models for project summary, board column, board card, board detail, dash summary, event summary, and report summary. | done | `bf49824`, `93611f7` | Added Web UI read contracts for Project, Board, Dash, readiness, queue, events, loop, and execution summaries. |
+| T3.2 | Add app/service queries that reuse existing TUI or core read models. | done | `bf49824`, `93611f7` | Web provider reuses `service.Board()`, TUI readiness, and TUI observability projections. |
+| T3.3 | Add Project, Board, board item detail, and Dash routes with full-page and htmx fragment responses. | done | `4573193`, `93611f7` | Added `/project`, `/board`, `/dash`, and fragment routes. |
+| T3.4 | Render Project, Board, and Dash screens through server templates. | done | `4573193` | Shared shell renders read-only Project, Board, and Dash content. |
+| T3.5 | Add board-column empty states and attention states. | done | `4573193` | Board columns render empty states and attention cards. |
+| T3.6 | Add detail panes or detail pages for board items. | done | `4573193` | Ticket cards expose key metadata without mutation. |
+| T3.7 | Add tests for view-model shape, status mapping, empty project state, and attention reasons. | done | `896331b`, `93611f7` | Added route tests and provider-backed Board smoke test. |
+| T3.8 | Add screenshot or DOM smoke evidence for Project, Board, and Dash. | done | `896331b` | Manual DOM smoke covered full pages, fragments, and CSS. |
+| T3.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 4 Tasks
 
@@ -180,6 +180,10 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 2: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
 - Slice 2 smoke: `go run ./cmd/chc web serve --dir . --port 7332`; `curl -fsS /`, `/assets/chc.css`, `/assets/htmx.min.js`, `/healthz` (pass)
 - Slice 2: `make verify` (pass)
+- Slice 3 T3.1-T3.8: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Project|Board|Dash'` (pass)
+- Slice 3: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
+- Slice 3 smoke: `go run ./cmd/chc web serve --dir . --port 7333`; `curl -fsS /`, `/project`, `/board`, `/dash`, `/project/fragment`, `/board/fragment`, `/dash/fragment`, `/assets/chc.css` (pass)
+- Slice 3: `make verify` (pass)
 
 ## Open Decisions
 
