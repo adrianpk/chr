@@ -19,7 +19,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 5 | document and metadata actions | delivered | `feat/slice-5-document-and-metadata-actions` | `#347` | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | delivered | `feat/slice-6-work-and-generation-actions` | `#348` | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
-| Slice 8 | access control and exposure safety | reviewing | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
+| Slice 8 | access control and exposure safety | reviewing | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | planned | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
 | Slice 10 | docs qa and release readiness | planned | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 

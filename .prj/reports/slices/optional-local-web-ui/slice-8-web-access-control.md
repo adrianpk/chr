@@ -12,7 +12,7 @@ Branch: `feat/slice-8-web-access-control`
 
 Expected PR Title: `feat(slice-8): web access control`
 
-PR: pending
+PR: `#350`
 
 ## Summary
 
