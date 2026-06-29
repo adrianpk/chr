@@ -15,7 +15,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 1 | web config and serve command | delivered | `feat/slice-1-web-config-serve-command` | `#343` | `.prj/reports/slices/optional-local-web-ui/slice-1-web-config-serve-command.md` |
 | Slice 2 | html htmx and helper foundation | delivered | `feat/slice-2-html-htmx-helper-foundation` | `#344` | `.prj/reports/slices/optional-local-web-ui/slice-2-html-htmx-helper-foundation.md` |
 | Slice 3 | read-only project board and dash | delivered | `feat/slice-3-readonly-project-board-dash` | `#345` | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
-| Slice 4 | read-only artifact catalogs | ready | `feat/slice-4-readonly-artifact-catalogs` | pending | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
+| Slice 4 | read-only artifact catalogs | reviewing | `feat/slice-4-readonly-artifact-catalogs` | pending | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
 | Slice 5 | document and metadata actions | planned | `feat/slice-5-document-and-metadata-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | planned | `feat/slice-6-work-and-generation-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | planned | `feat/slice-7-live-sync-and-conflicts` | pending | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
@@ -74,15 +74,15 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add read view models for case, dump, quiz, spec, plan, and generic document previews. | pending | pending | Shared document-card model where useful. |
-| T4.2 | Add service queries for artifact catalogs using existing discovery/index behavior. | pending | pending | No browser-only artifact discovery. |
-| T4.3 | Add Cases, Dumps, Quizzes, Specs, and Plans list routes with full-page and htmx fragment responses. | pending | pending | Catalog routes. |
-| T4.4 | Add detail routes for each artifact family. | pending | pending | Path-confined document reads. |
-| T4.5 | Add safe Markdown rendering or pre-rendered HTML handling consistent with existing dependencies. | pending | pending | No unsafe raw HTML by accident. |
-| T4.6 | Add catalog and detail screens for Cases, Dumps, Quizzes, Specs, and Plans. | pending | pending | Whole operational app, not board only. |
-| T4.7 | Add tests for empty catalogs, malformed artifact metadata, missing files, and path confinement. | pending | pending | Error behavior is part of the contract. |
-| T4.8 | Add screenshot or DOM smoke evidence for all artifact catalog screens. | pending | pending | Capture layout coverage. |
-| T4.9 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T4.1 | Add read view models for case, dump, quiz, spec, plan, and generic document previews. | done | `90f6962` | Shared `ArtifactCatalogView`, `ArtifactCardView`, and `ArtifactDetailView`. |
+| T4.2 | Add service queries for artifact catalogs using existing discovery/index behavior. | done | `90f6962` | Reuses case metadata service and existing dump, quiz, spec, and plan loaders. |
+| T4.3 | Add Cases, Dumps, Quizzes, Specs, and Plans list routes with full-page and htmx fragment responses. | done | `087a454` | Added family catalog routes and htmx fragments. |
+| T4.4 | Add detail routes for each artifact family. | done | `087a454` | Detail routes use catalog IDs and path-confined reads. |
+| T4.5 | Add safe Markdown rendering or pre-rendered HTML handling consistent with existing dependencies. | done | `087a454` | Markdown is rendered as escaped text in `<pre>`, with no raw HTML rendering. |
+| T4.6 | Add catalog and detail screens for Cases, Dumps, Quizzes, Specs, and Plans. | done | `087a454` | Shared catalog cards and detail content templates. |
+| T4.7 | Add tests for empty catalogs, malformed artifact metadata, missing files, and path confinement. | done | `100f63a` | Handler and app-provider tests cover empty/missing states, malformed case metadata, and confinement. |
+| T4.8 | Add screenshot or DOM smoke evidence for all artifact catalog screens. | done | `100f63a` | DOM smoke covered all catalog screens, detail page, and htmx fragments. |
+| T4.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 5 Tasks
 
@@ -184,6 +184,10 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 3: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
 - Slice 3 smoke: `go run ./cmd/chc web serve --dir . --port 7333`; `curl -fsS /`, `/project`, `/board`, `/dash`, `/project/fragment`, `/board/fragment`, `/dash/fragment`, `/assets/chc.css` (pass)
 - Slice 3: `make verify` (pass)
+- Slice 4 T4.1-T4.7: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Catalog|Artifact'` (pass)
+- Slice 4: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
+- Slice 4 smoke: `go run ./cmd/chc web serve --dir . --port 7334`; `curl -fsS /cases`, `/dumps`, `/quizzes`, `/specs`, `/plans`, one `/dumps/detail`, catalog fragments, and one detail fragment (pass)
+- Slice 4: `make verify` (pass)
 
 ## Open Decisions
 
