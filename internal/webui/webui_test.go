@@ -1,6 +1,7 @@
 package webui
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -67,6 +68,64 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 	}
 }
 
+func TestHandlerProjectBoardDashRoutes(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, tt := range []struct {
+		path string
+		want []string
+	}{
+		{path: "/", want: []string{"Project", "Project directory", "/tmp/project"}},
+		{path: "/project", want: []string{"Project", "Tickets", ".chc/user/tickets"}},
+		{path: "/board", want: []string{"Board", "Ready For Dev", "CHC-1", "Ready work"}},
+		{path: "/dash", want: []string{"Dash", "Readiness", "Queue", "worker_started"}},
+	} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want %d", tt.path, recorder.Code, http.StatusOK)
+		}
+
+		for _, want := range tt.want {
+			if !strings.Contains(recorder.Body.String(), want) {
+				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, recorder.Body.String())
+			}
+		}
+	}
+}
+
+func TestHandlerBoardAndDashFragments(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, path := range []string{"/project/fragment", "/board/fragment", "/dash/fragment"} {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		request.Header.Set(htmx.HeaderRequest, "true")
+		handler.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want %d", path, recorder.Code, http.StatusOK)
+		}
+
+		if strings.Contains(recorder.Body.String(), "<html") {
+			t.Fatalf("%s fragment contains full html:\n%s", path, recorder.Body.String())
+		}
+	}
+}
+
 func testShellData() ShellData {
 	return ShellData{
 		Title:          "ChrysoCoord",
@@ -81,4 +140,56 @@ func testShellData() ShellData {
 			{Label: "Project", Href: "/", Active: true},
 		},
 	}
+}
+
+type testDataProvider struct{}
+
+func (testDataProvider) ProjectView(context.Context) (ProjectView, error) {
+	return ProjectView{
+		ProjectID:      "project-1",
+		ProjectDir:     "/tmp/project",
+		URL:            "http://127.0.0.1:7331",
+		Host:           "127.0.0.1",
+		Port:           7331,
+		RequireToken:   "auto",
+		RefreshSeconds: 2,
+		Paths: []ProjectPathView{
+			{Label: "Tickets", Path: "/tmp/project/.chc/user/tickets"},
+		},
+	}, nil
+}
+
+func (testDataProvider) BoardView(context.Context) (BoardView, error) {
+	return BoardView{
+		ProjectID:      "project-1",
+		TotalCount:     1,
+		NormalCount:    1,
+		AttentionCount: 0,
+		Columns: []BoardColumnView{
+			{
+				ID:    "ready_for_dev",
+				Title: "Ready For Dev",
+				Count: 1,
+				Tickets: []BoardTicketView{
+					{Key: "CHC-1", Title: "Ready work", Status: "ready_for_dev", Priority: "high", Type: "feature"},
+				},
+			},
+		},
+	}, nil
+}
+
+func (testDataProvider) DashView(context.Context) (DashView, error) {
+	return DashView{
+		Readiness: WorkReadinessView{Status: "ready", WorkspaceMode: "worktree", CurrentBranch: "dev"},
+		Queue: AgentQueueView{
+			EligibleCount: 1,
+			Tickets: []BoardTicketView{
+				{Key: "CHC-1", Title: "Ready work", Status: "ready_for_dev", Priority: "high", Type: "feature"},
+			},
+		},
+		Current: CurrentWorkView{Phase: "worker_started", Message: "worker started", TicketKey: "CHC-1"},
+		RecentEvents: []AgentEventView{
+			{Time: "12:00:00", Phase: "worker_started", Message: "worker started", TicketKey: "CHC-1"},
+		},
+	}, nil
 }
