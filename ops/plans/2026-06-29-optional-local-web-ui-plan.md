@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 2: html htmx and helper foundation
+Active Slice: Slice 3: read-only project board and dash
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 

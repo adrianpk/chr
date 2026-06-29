@@ -13,8 +13,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice | Short Name | Status | Branch | PR | Report |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1 | web config and serve command | delivered | `feat/slice-1-web-config-serve-command` | `#343` | `.prj/reports/slices/optional-local-web-ui/slice-1-web-config-serve-command.md` |
-| Slice 2 | html htmx and helper foundation | reviewing | `feat/slice-2-html-htmx-helper-foundation` | `#344` | `.prj/reports/slices/optional-local-web-ui/slice-2-html-htmx-helper-foundation.md` |
-| Slice 3 | read-only project board and dash | planned | `feat/slice-3-readonly-project-board-dash` | pending | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
+| Slice 2 | html htmx and helper foundation | delivered | `feat/slice-2-html-htmx-helper-foundation` | `#344` | `.prj/reports/slices/optional-local-web-ui/slice-2-html-htmx-helper-foundation.md` |
+| Slice 3 | read-only project board and dash | ready | `feat/slice-3-readonly-project-board-dash` | pending | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
 | Slice 4 | read-only artifact catalogs | planned | `feat/slice-4-readonly-artifact-catalogs` | pending | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
 | Slice 5 | document and metadata actions | planned | `feat/slice-5-document-and-metadata-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | planned | `feat/slice-6-work-and-generation-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
