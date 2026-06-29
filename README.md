@@ -35,15 +35,24 @@ while keeping execution explicit and inspectable.
 
 ## Control Surface
 
-ChrysoCoord is operated through a TUI and mirrored CLI commands. The TUI gives
-the user a project-manager view: specs, Gherkin feature files, plans, tickets,
-board state, runtime activity, and review evidence. The CLI exposes the same
-workflow as commands that users can script and agents can invoke when they need
-to interact with the project workflow directly.
+ChrysoCoord is operated through a TUI, mirrored CLI commands, and an optional
+local Web UI. The TUI gives the user a project-manager view: specs, Gherkin
+feature files, plans, tickets, board state, runtime activity, and review
+evidence. The CLI exposes the same workflow as commands that users can script
+and agents can invoke when they need to interact with the project workflow
+directly. The Web UI is an explicit local server for operators who want to
+manage the same board and project artifacts from a browser; it does not start
+unless the user runs `chc web serve`.
 
 Dumps and quizzes capture context. Specs and Gherkin feature files describe the
 expected behavior. Plans organize the work. Tickets are the executable unit. The
 board shows what is ready, running, blocked, or waiting for review.
+
+The Web UI can be enabled for local browser operation or deliberately exposed
+through operator-owned private networking. By default it binds to localhost and
+uses the same project-local files and service paths as the TUI and CLI.
+This first Web UI iteration is intended to be usable, not final; intensive
+visual and ergonomic refinement is expected from here.
 
 Once the queue is shaped, the agent can work autonomously through ready tickets.
 The user can still run one ticket, run the full queue, stop the loop, inspect
@@ -103,6 +112,8 @@ More documentation:
 - [Documentation index](docs/index.md)
 - [Getting started tutorial](docs/tutorials/getting-started.md)
 - [User guide](docs/how-to/user-guide/index.md)
+- [Run the local Web UI](docs/how-to/run-local-web-ui.md)
+- [Expose the local Web UI deliberately](docs/how-to/expose-local-web-ui.md)
 - [Observe agent work](docs/how-to/observe-agent-work.md)
 - [Inspect and recover local state](docs/how-to/inspect-and-recover-local-state.md)
 - [Find execution and loop evidence](docs/how-to/find-execution-and-loop-evidence.md)

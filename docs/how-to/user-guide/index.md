@@ -176,6 +176,50 @@ quizzes, specs, plans, tickets, and execution activity. It loads durable
 workspace files from disk and writes normal Markdown artifacts back to the
 core.
 
+## Open the Local Web UI
+
+The Web UI is an optional browser surface over the same project state. It does
+not start from `chc`, `chc tui`, ticket loops, agent work, or other normal
+commands.
+
+Start it explicitly from a managed project:
+
+```sh
+chc web serve
+```
+
+Open:
+
+```text
+http://127.0.0.1:7331
+```
+
+Preview the resolved server configuration without listening on a socket:
+
+```sh
+chc web serve --dry-run
+```
+
+Open a specific project directory:
+
+```sh
+chc web serve --dir /path/to/project
+```
+
+The browser UI can manage the Board and the same project artifact families used
+by the TUI and CLI: Cases, Dumps, Quizzes, Specs, Plans, Board, and Dash. It
+uses project-local files as the source of truth and reloads from shared state
+after CLI, TUI, or Web UI changes.
+
+This first Web UI iteration is intended to be usable, not final. Expect visual
+and ergonomic refinement to continue while the local server, shared state, and
+action boundaries remain explicit.
+
+Keep it local unless you deliberately expose it through operator-owned private
+networking or a tunnel. See [Run the local Web
+UI](../run-local-web-ui.md) and [Expose the local Web UI
+deliberately](../expose-local-web-ui.md).
+
 ## Navigate the TUI
 
 Use the function-key tabs:
