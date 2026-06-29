@@ -1,6 +1,6 @@
 # Slice 10: Docs QA And Release Readiness
 
-Status: reviewing
+Status: delivered
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 

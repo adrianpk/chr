@@ -1,6 +1,6 @@
 # Optional Local Web UI Tracker
 
-Status: in_progress
+Status: delivered
 
 Plan: `ops/plans/2026-06-29-optional-local-web-ui-plan.md`
 
@@ -21,7 +21,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | delivered | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | delivered | `feat/slice-9-web-visual-identity` | `#351` | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
-| Slice 10 | docs qa and release readiness | reviewing | `feat/slice-10-web-docs-qa` | `#352` | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
+| Slice 10 | docs qa and release readiness | delivered | `feat/slice-10-web-docs-qa` | `#352` | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
 ## Slice 1 Tasks
 
@@ -165,10 +165,10 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | T10.4 | Add a how-to for running the Web UI locally. | done | `ede1ebcc` | Local browser use. |
 | T10.5 | Add a how-to for explicit private-network or tunnel exposure. | done | `ede1ebcc` | Updated existing exposure how-to with dry-run preview and local how-to link. |
 | T10.6 | Add QA fixtures or smoke scripts for the main Web UI flows. | done | `a7e36f8b` | Added `scripts/qa/web-ui-smoke.sh`. |
-| T10.7 | Run full repository validation. | done | this commit | `make verify` passed. |
-| T10.8 | Run browser smoke validation and capture evidence. | done | `a7e36f8b`, this commit | Smoke script captured browser screenshots under `/tmp/chc-web-ui-smoke-326889`. |
+| T10.7 | Run full repository validation. | done | `99df926d` | `make verify` passed. |
+| T10.8 | Run browser smoke validation and capture evidence. | done | `a7e36f8b`, `99df926d` | Smoke script captured browser screenshots under `/tmp/chc-web-ui-smoke-326889`. |
 | T10.9 | Update changelog or release notes according to the repository's existing release documentation pattern. | done | `ede1ebcc` | Added optional Web UI changelog entry. |
-| T10.10 | Add the slice implementation report and final rollout evidence. | done | this commit | Final rollout closeout. |
+| T10.10 | Add the slice implementation report and final rollout evidence. | done | `99df926d`, `eed8b8b` | Final rollout closeout. |
 
 ## Validation Log
 

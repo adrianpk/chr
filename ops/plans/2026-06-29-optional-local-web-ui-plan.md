@@ -1,8 +1,8 @@
 # Optional Local Web UI Plan
 
-Status: in_progress
+Status: delivered
 
-Active Slice: Slice 10: docs qa and release readiness
+Active Slice: none
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 
