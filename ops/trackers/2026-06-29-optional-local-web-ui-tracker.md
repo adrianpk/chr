@@ -18,8 +18,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 4 | read-only artifact catalogs | delivered | `feat/slice-4-readonly-artifact-catalogs` | `#346` | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
 | Slice 5 | document and metadata actions | delivered | `feat/slice-5-document-and-metadata-actions` | `#347` | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | delivered | `feat/slice-6-work-and-generation-actions` | `#348` | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
-| Slice 7 | live sync and conflict handling | reviewing | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
-| Slice 8 | access control and exposure safety | planned | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
+| Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
+| Slice 8 | access control and exposure safety | ready | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | planned | `feat/slice-9-web-visual-identity` | pending | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
 | Slice 10 | docs qa and release readiness | planned | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
@@ -124,8 +124,8 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | T7.5 | Add conflict UI for stale writes with reload and discard choices. | done | `133be32` | Stale responses include reload and discard links. |
 | T7.6 | Add tests for state revision changes after CLI/service mutations. | done | `133be32` | Provider tests mutate the workspace outside the Web UI and assert revision changes. |
 | T7.7 | Add tests for stale write rejection and successful retry. | done | `133be32`, `c7cb387` | Tests cover stale rejection, reload, and retry with the refreshed revision. |
-| T7.8 | Add manual two-surface smoke evidence using one TUI/CLI change and one Web UI change. | done | pending | Temporary-project smoke covered external file mutation and Web UI save. |
-| T7.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
+| T7.8 | Add manual two-surface smoke evidence using one TUI/CLI change and one Web UI change. | done | `89c5997` | Temporary-project smoke covered external file mutation and Web UI save. |
+| T7.9 | Add the slice implementation report and validation evidence. | done | `89c5997`, `51fd872` | Report path is defined in the slice table. |
 
 ## Slice 8 Tasks
 
