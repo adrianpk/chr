@@ -12,7 +12,7 @@ Branch: `feat/slice-7-live-sync-and-conflicts`
 
 Expected PR Title: `feat(slice-7): live sync and conflicts`
 
-PR: pending
+PR: `#349`
 
 ## Sync Transport Decision
 
