@@ -21,6 +21,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chc/internal/core"
+	"forge.adrianpk.com/chc/internal/webui"
 )
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
@@ -316,6 +317,79 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 	}
 }
 
+func TestWebServeArtifactCatalogUsesProjectArtifacts(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	devRoot := t.TempDir()
+
+	writeWebServeArtifactFixture(t, projectDir)
+
+	env := newWebServeBoardTestEnv(t, devRoot)
+	projectContext := newWebServeBoardProjectContext(t, projectDir)
+	provider := newWebServeBoardTestProvider(projectDir, env, projectContext)
+
+	cases, err := provider.CatalogView(t.Context(), "cases")
+	if err != nil {
+		t.Fatalf("CatalogView(cases) returned error: %v", err)
+	}
+
+	if len(cases.Items) != 1 || cases.Items[0].Title != "Blog Publishing" {
+		t.Fatalf("cases catalog = %#v, want Blog Publishing", cases.Items)
+	}
+
+	dumps, err := provider.CatalogView(t.Context(), "dumps")
+	if err != nil {
+		t.Fatalf("CatalogView(dumps) returned error: %v", err)
+	}
+
+	if len(dumps.Items) != 1 || dumps.Items[0].Title != "Blog Context" {
+		t.Fatalf("dumps catalog = %#v, want Blog Context", dumps.Items)
+	}
+
+	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
+		Family: "dumps",
+		ID:     ".chc/user/dumps/blog-context.md",
+	})
+	if err != nil {
+		t.Fatalf("ArtifactDetailView returned error: %v", err)
+	}
+
+	if !strings.Contains(detail.Content, "# Blog Context") {
+		t.Fatalf("detail content = %q, want dump body", detail.Content)
+	}
+}
+
+func TestWebServeArtifactCatalogReportsMalformedCaseMetadata(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	provider := newWebServeBoardTestProvider(
+		projectDir,
+		newWebServeBoardTestEnv(t, t.TempDir()),
+		newWebServeBoardProjectContext(t, projectDir),
+	)
+
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "cases", "broken.md"), "# Missing frontmatter\n")
+
+	_, err := provider.CatalogView(t.Context(), "cases")
+	if err == nil {
+		t.Fatal("CatalogView(cases) returned nil error")
+	}
+
+	if !strings.Contains(err.Error(), "parse case metadata") {
+		t.Fatalf("error = %q, want malformed metadata error", err.Error())
+	}
+}
+
+func TestWebServeArtifactDetailPathConfinement(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	if _, err := confinedProjectPath(projectDir, "../outside.md"); err == nil {
+		t.Fatal("confinedProjectPath accepted parent traversal")
+	}
+
+	if _, err := confinedProjectPath(projectDir, "/tmp/outside.md"); err == nil {
+		t.Fatal("confinedProjectPath accepted absolute path")
+	}
+}
+
 func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
 	t.Helper()
 
@@ -330,6 +404,40 @@ func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
+}
+
+func writeWebServeArtifactFixture(t *testing.T, projectDir string) {
+	t.Helper()
+
+	writeServiceWorkspaceFile(t, core.CaseMetadataPath(projectDir, "blog"), core.RenderCaseMetadata(core.CaseMetadata{
+		SchemaVersion: core.CaseMetadataSchemaVersion,
+		Slug:          "blog",
+		Name:          "Blog Publishing",
+		Description:   "Publish articles.",
+		Context:       "Use-case context.",
+	}))
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context.md"), `---
+title: "Blog Context"
+status: "curated"
+type: "dump"
+source: ".chc/user/dumps/blog-context-raw.md"
+case: "blog"
+---
+
+# Blog Context
+
+Use-case dump body.
+`)
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context-raw.md"), `---
+title: "Blog Context Raw Capture"
+status: "raw"
+type: "dump_raw"
+curated: ".chc/user/dumps/blog-context.md"
+case: "blog"
+---
+
+# Blog Context Raw Capture
+`)
 }
 
 func newWebServeBoardTestEnv(t *testing.T, devRoot string) core.UserEnvironment {

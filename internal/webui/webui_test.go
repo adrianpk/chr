@@ -101,6 +101,42 @@ func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 	}
 }
 
+func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, tt := range []struct {
+		path string
+		want []string
+	}{
+		{path: "/cases", want: []string{"Cases", "Blog Authoring", "Case context"}},
+		{path: "/dumps", want: []string{"Dumps", "Project Notes", ".chc/user/dumps/project-notes.md"}},
+		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
+		{path: "/specs", want: []string{"Specs", "Project Spec"}},
+		{path: "/plans", want: []string{"Plans", "No plans found."}},
+		{path: "/dumps/detail?id=.chc/user/dumps/project-notes.md", want: []string{"Project Notes", "Full dump content"}},
+		{path: "/dumps/detail?id=missing.md", want: []string{"missing.md", "Artifact not found."}},
+	} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, tt.path, nil))
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want %d", tt.path, recorder.Code, http.StatusOK)
+		}
+
+		for _, want := range tt.want {
+			if !strings.Contains(recorder.Body.String(), want) {
+				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, recorder.Body.String())
+			}
+		}
+	}
+}
+
 func TestHandlerBoardAndDashFragments(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data:     testShellData(),
@@ -111,6 +147,38 @@ func TestHandlerBoardAndDashFragments(t *testing.T) {
 	}
 
 	for _, path := range []string{"/project/fragment", "/board/fragment", "/dash/fragment"} {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		request.Header.Set(htmx.HeaderRequest, "true")
+		handler.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s status = %d, want %d", path, recorder.Code, http.StatusOK)
+		}
+
+		if strings.Contains(recorder.Body.String(), "<html") {
+			t.Fatalf("%s fragment contains full html:\n%s", path, recorder.Body.String())
+		}
+	}
+}
+
+func TestHandlerArtifactCatalogAndDetailFragments(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	for _, path := range []string{
+		"/cases/fragment",
+		"/dumps/fragment",
+		"/quizzes/fragment",
+		"/specs/fragment",
+		"/plans/fragment",
+		"/dumps/detail/fragment?id=.chc/user/dumps/project-notes.md",
+	} {
 		recorder := httptest.NewRecorder()
 		request := httptest.NewRequest(http.MethodGet, path, nil)
 		request.Header.Set(htmx.HeaderRequest, "true")
@@ -191,5 +259,96 @@ func (testDataProvider) DashView(context.Context) (DashView, error) {
 		RecentEvents: []AgentEventView{
 			{Time: "12:00:00", Phase: "worker_started", Message: "worker started", TicketKey: "CHC-1"},
 		},
+	}, nil
+}
+
+func (testDataProvider) CatalogView(_ context.Context, family string) (ArtifactCatalogView, error) {
+	catalog := ArtifactCatalogView{
+		Family:       family,
+		Title:        CatalogTitle(family),
+		EmptyMessage: "No " + family + " found.",
+		Items:        testCatalogItems(family),
+	}
+
+	return catalog, nil
+}
+
+func testCatalogItems(family string) []ArtifactCardView {
+	switch family {
+	case "cases":
+		return []ArtifactCardView{
+			{
+				Family:       family,
+				ID:           "blog",
+				Title:        "Blog Authoring",
+				Status:       "available",
+				Scope:        "blog",
+				Path:         ".chc/user/cases/blog.md",
+				Preview:      "Case context",
+				DetailURL:    "/cases/detail?id=blog",
+				ContentState: "available",
+			},
+		}
+	case "dumps":
+		return []ArtifactCardView{
+			{
+				Family:       family,
+				ID:           ".chc/user/dumps/project-notes.md",
+				Title:        "Project Notes",
+				Status:       "curated",
+				Scope:        "Project-wide",
+				Path:         ".chc/user/dumps/project-notes.md",
+				Preview:      "Notes preview",
+				DetailURL:    "/dumps/detail?id=.chc/user/dumps/project-notes.md",
+				ContentState: "available",
+			},
+		}
+	case "quizzes":
+		return []ArtifactCardView{
+			{
+				Family:       family,
+				ID:           "project",
+				Title:        "Project Quiz",
+				Status:       "not_started",
+				Scope:        "Project-wide",
+				Preview:      "No quiz yet.",
+				DetailURL:    "/quizzes/detail?id=project",
+				ContentState: "missing",
+			},
+		}
+	case "specs":
+		return []ArtifactCardView{
+			{
+				Family:       family,
+				ID:           "project-spec",
+				Title:        "Project Spec",
+				Status:       "missing",
+				Scope:        "Project-wide",
+				DetailURL:    "/specs/detail?id=project-spec",
+				ContentState: "missing",
+			},
+		}
+	default:
+		return nil
+	}
+}
+
+func (testDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDetailRequest) (ArtifactDetailView, error) {
+	if request.ID != ".chc/user/dumps/project-notes.md" {
+		return ArtifactDetailView{
+			Family:  request.Family,
+			Title:   request.ID,
+			Path:    request.ID,
+			Missing: true,
+		}, nil
+	}
+
+	return ArtifactDetailView{
+		Family:  request.Family,
+		Title:   "Project Notes",
+		Status:  "curated",
+		Scope:   "Project-wide",
+		Path:    request.ID,
+		Content: "Full dump content",
 	}, nil
 }
