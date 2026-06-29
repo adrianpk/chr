@@ -126,6 +126,135 @@ body {
   margin-top: 12px;
 }
 
+.list-block,
+.attention-strip,
+.board-grid,
+.dash-grid,
+.stack,
+.event-list {
+  margin-top: 14px;
+}
+
+.list-block,
+.stack,
+.event-list {
+  display: grid;
+  gap: 8px;
+}
+
+.path-row,
+.event-row,
+.kv-list div {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.path-row,
+.event-row {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.board-column,
+.dash-panel {
+  min-width: 0;
+  background: #f7fbfb;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.board-column__header,
+.ticket-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-column h2,
+.dash-panel h2,
+.ticket-card h2,
+.ticket-card h3 {
+  margin: 0;
+}
+
+.board-column h2,
+.dash-panel h2 {
+  font-size: 15px;
+}
+
+.ticket-card {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.ticket-card--attention {
+  border-color: var(--danger);
+}
+
+.ticket-card__key {
+  font-weight: 700;
+}
+
+.ticket-card p,
+.event-row p,
+.empty-state,
+.diagnostic {
+  margin: 0;
+  color: var(--muted);
+}
+
+.ticket-card__reason {
+  color: var(--danger);
+}
+
+.ticket-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.attention-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.kv-list {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+}
+
+.kv-list dt {
+  color: var(--muted);
+}
+
+.kv-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -171,6 +300,17 @@ code {
   }
 
   .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .board-grid,
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .path-row,
+  .event-row,
+  .kv-list div {
     grid-template-columns: 1fr;
   }
 }

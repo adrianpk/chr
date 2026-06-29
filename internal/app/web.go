@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 	"net"
 	"net/http"
 	"strconv"
@@ -97,9 +98,12 @@ func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps a
 	}
 
 	resolved := resolvedWebServeConfig{
-		ProjectDir: projectContext.ProjectDir,
-		Web:        webConfig,
-		URL:        webURL(webConfig.Host, webConfig.Port),
+		ProjectDir:     projectContext.ProjectDir,
+		Web:            webConfig,
+		URL:            webURL(webConfig.Host, webConfig.Port),
+		Env:            env,
+		ProjectContext: projectContext,
+		AssetsFS:       deps.assetsFS,
 	}
 
 	if cmd.Bool("dry-run") {
@@ -134,9 +138,13 @@ func webConfigFromCommand(cmd *cli.Command, config core.WebConfig) core.WebConfi
 }
 
 type resolvedWebServeConfig struct {
-	ProjectDir string
-	Web        core.WebConfig
-	URL        string
+	ProjectDir     string
+	Web            core.WebConfig
+	URL            string
+	Env            core.UserEnvironment
+	ProjectContext commandProjectContext
+	AssetsFS       fs.FS
+	Provider       webui.DataProvider
 }
 
 func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error {
@@ -221,7 +229,18 @@ func serveWeb(ctx context.Context, config resolvedWebServeConfig) error {
 }
 
 func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
+	provider := config.Provider
+	if provider == nil && config.Env != nil && config.AssetsFS != nil {
+		provider = webViewProvider{
+			env:            config.Env,
+			assetsFS:       config.AssetsFS,
+			projectContext: config.ProjectContext,
+			config:         config,
+		}
+	}
+
 	return webui.NewHandler(webui.HandlerOptions{
+		Provider: provider,
 		Data: webui.ShellData{
 			Title:          "ChrysoCoord",
 			ProjectDir:     config.ProjectDir,

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{.Title}}</title>
+    <title>{{.Title}} - {{.Shell.Title}}</title>
     <link rel="stylesheet" href="/assets/chc.css">
     <script src="/assets/htmx.min.js" defer></script>
   </head>
@@ -18,18 +18,24 @@
             <div class="brand-subtitle">Local Web UI</div>
           </div>
         </div>
-        {{(nav .Navigation).Render}}
+        {{(nav .Shell.Navigation).Render}}
       </aside>
       <main class="app-main">
         <header class="page-header">
           <div>
-            <p class="eyebrow">Project</p>
+            <p class="eyebrow">{{.Shell.ProjectID}}</p>
             <h1>{{.Title}}</h1>
           </div>
-          {{(chip .RequireToken).Muted.Render}}
+          {{(chip .Shell.RequireToken).Muted.Render}}
         </header>
         <section id="workspace" class="workspace-panel">
-          {{template "bootstrap.html" .}}
+          {{if eq .View "board"}}
+            {{template "board_content.html" .}}
+          {{else if eq .View "dash"}}
+            {{template "dash_content.html" .}}
+          {{else}}
+            {{template "project_content.html" .}}
+          {{end}}
         </section>
       </main>
     </div>
@@ -37,23 +43,160 @@
 </html>
 {{end}}
 
-{{define "bootstrap.html"}}
+{{define "project_content.html"}}
 <div class="summary-grid">
   <div class="summary-item">
     <span class="summary-label">Project ID</span>
-    <strong>{{.ProjectID}}</strong>
+    <strong>{{.Project.ProjectID}}</strong>
   </div>
   <div class="summary-item">
     <span class="summary-label">Bind</span>
-    <strong>{{.Host}}:{{.Port}}</strong>
+    <strong>{{.Project.Host}}:{{.Project.Port}}</strong>
   </div>
   <div class="summary-item">
     <span class="summary-label">Refresh</span>
-    <strong>{{.RefreshSeconds}}s</strong>
+    <strong>{{.Project.RefreshSeconds}}s</strong>
   </div>
 </div>
 <div class="detail-block">
   <span class="summary-label">Project directory</span>
-  <code>{{.ProjectDir}}</code>
+  <code>{{.Project.ProjectDir}}</code>
+</div>
+<div class="list-block">
+  {{range .Project.Paths}}
+    <div class="path-row">
+      <span>{{.Label}}</span>
+      <code>{{.Path}}</code>
+    </div>
+  {{end}}
+</div>
+{{end}}
+
+{{define "board_content.html"}}
+<div class="summary-grid">
+  <div class="summary-item">
+    <span class="summary-label">Total</span>
+    <strong>{{.Board.TotalCount}}</strong>
+  </div>
+  <div class="summary-item">
+    <span class="summary-label">Normal</span>
+    <strong>{{.Board.NormalCount}}</strong>
+  </div>
+  <div class="summary-item">
+    <span class="summary-label">Attention</span>
+    <strong>{{.Board.AttentionCount}}</strong>
+  </div>
+</div>
+{{if .Board.Attention}}
+<section class="attention-strip" aria-label="Attention tickets">
+  {{range .Board.Attention}}
+    <article class="ticket-card ticket-card--attention">
+      <div class="ticket-card__key">{{.Ticket.Key}}</div>
+      <h2>{{.Ticket.Title}}</h2>
+      {{range .Reasons}}<p class="ticket-card__reason">{{.}}</p>{{end}}
+    </article>
+  {{end}}
+</section>
+{{end}}
+<div class="board-grid">
+  {{range .Board.Columns}}
+    <section class="board-column">
+      <header class="board-column__header">
+        <h2>{{.Title}}</h2>
+        {{(chip .Count).Muted.Render}}
+      </header>
+      {{if .Tickets}}
+        {{range .Tickets}}
+          {{template "ticket_card.html" .}}
+        {{end}}
+      {{else}}
+        <p class="empty-state">No tickets in this column.</p>
+      {{end}}
+    </section>
+  {{end}}
+</div>
+{{end}}
+
+{{define "ticket_card.html"}}
+<article class="ticket-card">
+  <div class="ticket-card__meta">
+    <span class="ticket-card__key">{{.Key}}</span>
+    <span>{{.Priority}}</span>
+  </div>
+  <h3>{{.Title}}</h3>
+  {{if .Synopsis}}<p>{{.Synopsis}}</p>{{end}}
+  <div class="ticket-card__tags">
+    {{(chip .Status).Muted.Render}}
+    {{if .Type}}{{(chip .Type).Muted.Render}}{{end}}
+    {{if .Slice}}{{(chip .Slice).Muted.Render}}{{end}}
+  </div>
+  {{if .RelativePath}}<code>{{.RelativePath}}</code>{{end}}
+</article>
+{{end}}
+
+{{define "dash_content.html"}}
+<div class="dash-grid">
+  <section class="dash-panel">
+    <h2>Readiness</h2>
+    <div class="summary-item">
+      <span class="summary-label">Status</span>
+      <strong>{{.Dash.Readiness.Status}}</strong>
+    </div>
+    <dl class="kv-list">
+      <div><dt>Workspace</dt><dd>{{.Dash.Readiness.WorkspaceMode}}</dd></div>
+      <div><dt>Current branch</dt><dd>{{.Dash.Readiness.CurrentBranch}}</dd></div>
+      <div><dt>Expected branch</dt><dd>{{.Dash.Readiness.IntegrationBranch}}</dd></div>
+    </dl>
+    {{if .Dash.Readiness.Diagnostics}}
+      <div class="stack">
+        {{range .Dash.Readiness.Diagnostics}}
+          <p class="diagnostic">{{.Severity}}: {{.Code}} {{.Detail}}</p>
+        {{end}}
+      </div>
+    {{else}}
+      <p class="empty-state">No readiness diagnostics.</p>
+    {{end}}
+  </section>
+  <section class="dash-panel">
+    <h2>Queue</h2>
+    <div class="summary-item">
+      <span class="summary-label">Eligible</span>
+      <strong>{{.Dash.Queue.EligibleCount}}</strong>
+    </div>
+    {{if .Dash.Queue.Tickets}}
+      {{range .Dash.Queue.Tickets}}{{template "ticket_card.html" .}}{{end}}
+    {{else}}
+      <p class="empty-state">No ready tickets queued.</p>
+    {{end}}
+  </section>
+  <section class="dash-panel">
+    <h2>Current</h2>
+    {{if .Dash.Current.Phase}}
+      <dl class="kv-list">
+        <div><dt>Phase</dt><dd>{{.Dash.Current.Phase}}</dd></div>
+        <div><dt>Ticket</dt><dd>{{.Dash.Current.TicketKey}}</dd></div>
+        <div><dt>Execution</dt><dd>{{.Dash.Current.ExecutionID}}</dd></div>
+      </dl>
+      <p>{{.Dash.Current.Message}}</p>
+    {{else}}
+      <p class="empty-state">No current work signal.</p>
+    {{end}}
+  </section>
+  <section class="dash-panel">
+    <h2>Recent</h2>
+    {{if .Dash.RecentEvents}}
+      <div class="event-list">
+        {{range .Dash.RecentEvents}}
+          <article class="event-row">
+            <span>{{.Time}}</span>
+            <strong>{{.Phase}}</strong>
+            <p>{{.Message}}</p>
+          </article>
+        {{end}}
+      </div>
+    {{else}}
+      <p class="empty-state">No recent events.</p>
+    {{end}}
+  </section>
 </div>
 {{end}}

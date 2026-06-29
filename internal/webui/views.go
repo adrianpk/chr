@@ -13,6 +13,16 @@ type staticDataProvider struct {
 	shell ShellData
 }
 
+// PageData contains one rendered page and the shared shell state.
+type PageData struct {
+	Shell   ShellData
+	View    string
+	Title   string
+	Project ProjectView
+	Board   BoardView
+	Dash    DashView
+}
+
 func newStaticDataProvider(shell ShellData) staticDataProvider {
 	return staticDataProvider{shell: shell}
 }

@@ -93,8 +93,8 @@ type Chip struct {
 }
 
 // NewChip creates a chip primitive.
-func NewChip(text string) *Chip {
-	return &Chip{text: text}
+func NewChip(text any) *Chip {
+	return &Chip{text: fmt.Sprint(text)}
 }
 
 // Muted applies the muted chip variant.
