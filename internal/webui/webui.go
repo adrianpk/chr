@@ -77,6 +77,7 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 		mux.HandleFunc("/"+family+"/detail/fragment", handler.artifactDetailFragment(family))
 	}
 
+	mux.HandleFunc("/actions", handler.writeAction)
 	mux.HandleFunc("/bootstrap", handler.projectFragment)
 	mux.HandleFunc("/healthz", healthz)
 	mux.Handle("/assets/", http.StripPrefix("/assets/", handler.static))
@@ -261,6 +262,67 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 	}
 }
 
+func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	result, err := h.provider.WriteAction(r.Context(), writeActionRequest(r))
+	if err != nil {
+		http.Error(w, "write action", http.StatusInternalServerError)
+
+		return
+	}
+
+	if result.Status == WriteStatusOK && result.RedirectURL != "" {
+		h.redirectAfterWrite(w, r, result.RedirectURL)
+
+		return
+	}
+
+	h.renderWriteResult(w, r, result)
+}
+
+func (h handler) redirectAfterWrite(w http.ResponseWriter, r *http.Request, location string) {
+	if htmx.IsRequest(r) {
+		w.Header().Set(htmx.HeaderRedirect, location)
+		w.WriteHeader(http.StatusNoContent)
+
+		return
+	}
+
+	http.Redirect(w, r, location, http.StatusSeeOther)
+}
+
+func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, result WriteActionResponse) {
+	status := http.StatusBadRequest
+	if result.Status == WriteStatusOK {
+		status = http.StatusOK
+	}
+
+	w.WriteHeader(status)
+
+	data := PageData{
+		Shell: h.shellData("project"),
+		View:  "write_result",
+		Title: "Write Result",
+		Write: result,
+	}
+	if htmx.IsRequest(r) {
+		if err := h.renderer.Fragment(w, "write_result.html", data); err != nil {
+			http.Error(w, "render write result", http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	if err := h.renderer.Page(w, "shell.html", data); err != nil {
+		http.Error(w, "render write result", http.StatusInternalServerError)
+	}
+}
+
 func (h handler) renderProject(w http.ResponseWriter, r *http.Request) {
 	data, err := h.projectPageData(r)
 	if err != nil {
@@ -271,6 +333,40 @@ func (h handler) renderProject(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.renderer.Page(w, "shell.html", data); err != nil {
 		http.Error(w, "render project", http.StatusInternalServerError)
+	}
+}
+
+func writeActionRequest(r *http.Request) WriteActionRequest {
+	if err := r.ParseForm(); err != nil {
+		return WriteActionRequest{Action: "invalid", Confirm: false}
+	}
+
+	fields := map[string]string{}
+
+	for key, values := range r.PostForm {
+		if writeActionReservedField(key) || len(values) == 0 {
+			continue
+		}
+
+		fields[key] = values[0]
+	}
+
+	return WriteActionRequest{
+		Action:   r.PostFormValue("action"),
+		Family:   r.PostFormValue("family"),
+		ID:       r.PostFormValue("id"),
+		Revision: r.PostFormValue("revision"),
+		Confirm:  r.PostFormValue("confirm") == "true",
+		Fields:   fields,
+	}
+}
+
+func writeActionReservedField(key string) bool {
+	switch key {
+	case "action", "family", "id", "revision", "confirm":
+		return true
+	default:
+		return false
 	}
 }
 

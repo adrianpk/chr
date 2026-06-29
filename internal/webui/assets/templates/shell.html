@@ -37,6 +37,8 @@
             {{template "catalog_content.html" .}}
           {{else if eq .View "artifact_detail"}}
             {{template "artifact_detail_content.html" .}}
+          {{else if eq .View "write_result"}}
+            {{template "write_result.html" .}}
           {{else}}
             {{template "project_content.html" .}}
           {{end}}
@@ -154,6 +156,9 @@
 {{else}}
   <p class="empty-state">{{.Catalog.EmptyMessage}}</p>
 {{end}}
+{{if eq .Catalog.Family "dumps"}}
+  {{template "dump_create_form.html" .}}
+{{end}}
 {{end}}
 
 {{define "artifact_card.html"}}
@@ -200,7 +205,101 @@
     </div>
   {{end}}
   <pre class="artifact-content">{{.Detail.Content}}</pre>
+  {{if eq .Detail.Family "cases"}}
+    {{template "case_edit_form.html" .}}
+  {{end}}
+  {{if eq .Detail.Family "dumps"}}
+    {{template "dump_edit_forms.html" .}}
+  {{end}}
 {{end}}
+{{end}}
+
+{{define "case_edit_form.html"}}
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Save case metadata changes?')">
+  <input type="hidden" name="action" value="case.update">
+  <input type="hidden" name="family" value="cases">
+  <input type="hidden" name="id" value="{{.Detail.ID}}">
+  <input type="hidden" name="revision" value="{{.Detail.Revision}}">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Name</span>
+    <input name="name" value="{{.Detail.Title}}">
+  </label>
+  <label>
+    <span>Description</span>
+    <textarea name="description" rows="3">{{.Detail.Description}}</textarea>
+  </label>
+  <label>
+    <span>Context</span>
+    <textarea name="context" rows="6">{{.Detail.Context}}</textarea>
+  </label>
+  <button class="button button--primary" type="submit">Save</button>
+</form>
+{{end}}
+
+{{define "dump_create_form.html"}}
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Create this dump?')">
+  <input type="hidden" name="action" value="dump.create">
+  <input type="hidden" name="family" value="dumps">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Title</span>
+    <input name="title" required>
+  </label>
+  <label>
+    <span>Case slug</span>
+    <input name="case_slug">
+  </label>
+  <label>
+    <span>Content</span>
+    <textarea name="content" rows="6" required></textarea>
+  </label>
+  <button class="button button--primary" type="submit">Create</button>
+</form>
+{{end}}
+
+{{define "dump_edit_forms.html"}}
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Replace this dump content?')">
+  <input type="hidden" name="action" value="dump.save">
+  <input type="hidden" name="family" value="dumps">
+  <input type="hidden" name="id" value="{{.Detail.ID}}">
+  <input type="hidden" name="revision" value="{{.Detail.Revision}}">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Content</span>
+    <textarea name="content" rows="12" required>{{.Detail.Content}}</textarea>
+  </label>
+  <button class="button button--primary" type="submit">Save</button>
+</form>
+<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Append this note to the dump?')">
+  <input type="hidden" name="action" value="dump.append">
+  <input type="hidden" name="family" value="dumps">
+  <input type="hidden" name="id" value="{{.Detail.ID}}">
+  <input type="hidden" name="revision" value="{{.Detail.Revision}}">
+  <input type="hidden" name="confirm" value="true">
+  <label>
+    <span>Append note</span>
+    <textarea name="content" rows="5" required></textarea>
+  </label>
+  <button class="button" type="submit">Append</button>
+</form>
+{{end}}
+
+{{define "write_result.html"}}
+<div class="write-result write-result--{{.Write.Status}}">
+  <h2>{{.Write.Summary}}</h2>
+  {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
+  {{if .Write.Validation}}
+    <ul>
+      {{range .Write.Validation}}<li>{{.}}</li>{{end}}
+    </ul>
+  {{end}}
+  {{if .Write.ChangedFiles}}
+    <dl class="kv-list">
+      {{range .Write.ChangedFiles}}<div><dt>Changed</dt><dd><code>{{.}}</code></dd></div>{{end}}
+    </dl>
+  {{end}}
+</div>
 {{end}}
 
 {{define "dash_content.html"}}
