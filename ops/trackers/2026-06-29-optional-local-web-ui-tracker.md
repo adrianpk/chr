@@ -21,7 +21,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | delivered | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | delivered | `feat/slice-9-web-visual-identity` | `#351` | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
-| Slice 10 | docs qa and release readiness | ready | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
+| Slice 10 | docs qa and release readiness | reviewing | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
 ## Slice 1 Tasks
 
@@ -159,16 +159,16 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T10.1 | Update `docs/reference/commands.md` for `chc web serve`. | pending | pending | Command contract. |
-| T10.2 | Update `docs/reference/project-workspace.md` for `web` config. | pending | pending | Config contract. |
-| T10.3 | Update `docs/reference/cli-tui-action-matrix.md` or add the Web UI equivalent matrix if the existing matrix cannot represent a third surface. | pending | pending | Parity tracking. |
-| T10.4 | Add a how-to for running the Web UI locally. | pending | pending | Local browser use. |
-| T10.5 | Add a how-to for explicit private-network or tunnel exposure. | pending | pending | Exposure is operator-owned. |
-| T10.6 | Add QA fixtures or smoke scripts for the main Web UI flows. | pending | pending | Repeatable verification. |
-| T10.7 | Run full repository validation. | pending | pending | Expected final validation gate. |
-| T10.8 | Run browser smoke validation and capture evidence. | pending | pending | Browser-level confidence. |
-| T10.9 | Update changelog or release notes according to the repository's existing release documentation pattern. | pending | pending | Optional Web UI release note. |
-| T10.10 | Add the slice implementation report and final rollout evidence. | pending | pending | Final rollout closeout. |
+| T10.1 | Update `docs/reference/commands.md` for `chc web serve`. | done | `ede1ebcc` | Command contract. |
+| T10.2 | Update `docs/reference/project-workspace.md` for `web` config. | done | `ede1ebcc` | Config contract. |
+| T10.3 | Update `docs/reference/cli-tui-action-matrix.md` or add the Web UI equivalent matrix if the existing matrix cannot represent a third surface. | done | `ede1ebcc` | Added Web UI equivalent matrix. |
+| T10.4 | Add a how-to for running the Web UI locally. | done | `ede1ebcc` | Local browser use. |
+| T10.5 | Add a how-to for explicit private-network or tunnel exposure. | done | `ede1ebcc` | Updated existing exposure how-to with dry-run preview and local how-to link. |
+| T10.6 | Add QA fixtures or smoke scripts for the main Web UI flows. | done | `a7e36f8b` | Added `scripts/qa/web-ui-smoke.sh`. |
+| T10.7 | Run full repository validation. | done | this commit | `make verify` passed. |
+| T10.8 | Run browser smoke validation and capture evidence. | done | `a7e36f8b`, this commit | Smoke script captured browser screenshots under `/tmp/chc-web-ui-smoke-326889`. |
+| T10.9 | Update changelog or release notes according to the repository's existing release documentation pattern. | done | `ede1ebcc` | Added optional Web UI changelog entry. |
+| T10.10 | Add the slice implementation report and final rollout evidence. | done | this commit | Final rollout closeout. |
 
 ## Validation Log
 
@@ -205,19 +205,12 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 9 T9.1-T9.7: `go test ./internal/webui` (pass)
 - Slice 9 screenshot smoke: `go run ./cmd/chc web serve --dir . --port 7339 --require-token false`; Chromium captured desktop Board/Dash at `1440x1000` and mobile Project/Dumps at `390x900` under `/tmp/chc-slice9-screenshots` (pass)
 - Slice 9: `make verify` (pass)
+- Slice 10 smoke: `CHC_WEB_SMOKE_PORT=7340 scripts/qa/web-ui-smoke.sh`; pages, htmx fragments, `dump.create`, and browser screenshots under `/tmp/chc-web-ui-smoke-326889` (pass)
+- Slice 10: `make verify` (pass)
 
 ## Open Decisions
 
-- Whether the first live-sync transport is polling, server-sent events, or a
-  hybrid.
-- Whether the web server supports only the resolved current project or later
-  gains a multi-project launcher.
-- Which existing action-matrix document is the best durable location for
-  Web/TUI/CLI parity.
-- Whether visual screenshot validation is implemented through an automated
-  browser runner or documented manual evidence in early slices.
-- Which copied helper primitives are included in Slice 2 versus deferred until
-  a later screen needs them.
+- No open decisions remain for this rollout.
 
 ## Notes
 
