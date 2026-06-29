@@ -7,6 +7,8 @@ type DataProvider interface {
 	ProjectView(context.Context) (ProjectView, error)
 	BoardView(context.Context) (BoardView, error)
 	DashView(context.Context) (DashView, error)
+	CatalogView(context.Context, string) (ArtifactCatalogView, error)
+	ArtifactDetailView(context.Context, ArtifactDetailRequest) (ArtifactDetailView, error)
 }
 
 type staticDataProvider struct {
@@ -21,6 +23,8 @@ type PageData struct {
 	Project ProjectView
 	Board   BoardView
 	Dash    DashView
+	Catalog ArtifactCatalogView
+	Detail  ArtifactDetailView
 }
 
 func newStaticDataProvider(shell ShellData) staticDataProvider {
@@ -48,6 +52,21 @@ func (p staticDataProvider) BoardView(context.Context) (BoardView, error) {
 
 func (p staticDataProvider) DashView(context.Context) (DashView, error) {
 	return DashView{}, nil
+}
+
+func (staticDataProvider) CatalogView(_ context.Context, family string) (ArtifactCatalogView, error) {
+	return ArtifactCatalogView{
+		Family: family,
+		Title:  CatalogTitle(family),
+	}, nil
+}
+
+func (staticDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDetailRequest) (ArtifactDetailView, error) {
+	return ArtifactDetailView{
+		Family: request.Family,
+		Title:  request.ID,
+		Path:   request.ID,
+	}, nil
 }
 
 // ProjectView is the read-only project summary rendered by the Web UI.
@@ -194,4 +213,64 @@ type ExecutionView struct {
 	Status        string
 	UpdatedAt     string
 	FailureReason string
+}
+
+// ArtifactDetailRequest identifies one read-only artifact detail request.
+type ArtifactDetailRequest struct {
+	Family string
+	ID     string
+}
+
+// ArtifactCatalogView is the Web UI projection for one artifact family.
+type ArtifactCatalogView struct {
+	Family       string
+	Title        string
+	EmptyMessage string
+	Items        []ArtifactCardView
+}
+
+// ArtifactCardView is one catalog item card.
+type ArtifactCardView struct {
+	Family       string
+	ID           string
+	Title        string
+	Status       string
+	Scope        string
+	Path         string
+	SourcePath   string
+	UpdatedAt    string
+	Preview      string
+	DetailURL    string
+	ContentState string
+}
+
+// ArtifactDetailView is the read-only detail projection for one artifact.
+type ArtifactDetailView struct {
+	Family     string
+	Title      string
+	Status     string
+	Scope      string
+	Path       string
+	SourcePath string
+	UpdatedAt  string
+	Content    string
+	Missing    bool
+}
+
+// CatalogTitle returns the display title for an artifact family.
+func CatalogTitle(family string) string {
+	switch family {
+	case "cases":
+		return "Cases"
+	case "dumps":
+		return "Dumps"
+	case "quizzes":
+		return "Quizzes"
+	case "specs":
+		return "Specs"
+	case "plans":
+		return "Plans"
+	default:
+		return "Artifacts"
+	}
 }
