@@ -130,7 +130,9 @@ func TestWebServeDryRunPrintsResolvedDefaults(t *testing.T) {
 		"enabled: false\n",
 		"open_browser: false\n",
 		"require_token: auto\n",
+		"token_required: false\n",
 		"token_env: CHC_WEB_TOKEN\n",
+		"allowed_origins: same-origin\n",
 		"static_assets: embedded\n",
 	} {
 		if !strings.Contains(got, want) {
@@ -165,11 +167,13 @@ func TestWebServeDryRunAppliesFlagOverridesAndWarnsForNonLoopback(t *testing.T) 
 	got := stdout.String()
 	for _, want := range []string{
 		"warning: web ui is bound to a non-loopback interface\n",
+		"warning: web ui token protection is disabled on a non-loopback interface\n",
 		"web ui dry-run: http://0.0.0.0:7444\n",
 		"bind: 0.0.0.0\n",
 		"port: 7444\n",
 		"open_browser: true\n",
 		"require_token: false\n",
+		"token_required: false\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, got)
@@ -195,6 +199,58 @@ func TestWebServeDryRunRejectsInvalidConfig(t *testing.T) {
 
 	if err.Error() != "web port must be between 1 and 65535" {
 		t.Fatalf("run error = %q, want web port validation", err.Error())
+	}
+}
+
+func TestWebServeAutoTokenPolicyRequiresTokenForNonLoopback(t *testing.T) {
+	t.Setenv(core.DefaultWebTokenEnv, "secret-token")
+
+	webConfig := core.DefaultWebConfig()
+	webConfig.Host = "0.0.0.0"
+
+	handler, err := newWebServeMux(resolvedWebServeConfig{
+		ProjectDir: t.TempDir(),
+		URL:        "http://0.0.0.0:7331",
+		Web:        webConfig,
+	})
+	if err != nil {
+		t.Fatalf("newWebServeMux returned error: %v", err)
+	}
+
+	unauthorized := httptest.NewRecorder()
+	handler.ServeHTTP(unauthorized, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	if unauthorized.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want unauthorized", unauthorized.Code)
+	}
+
+	authorized := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.Header.Set("X-CHC-Web-Token", "secret-token")
+	handler.ServeHTTP(authorized, request)
+
+	if authorized.Code != http.StatusOK {
+		t.Fatalf("status = %d, want ok", authorized.Code)
+	}
+}
+
+func TestWebServeTokenPolicyRejectsMissingRequiredToken(t *testing.T) {
+	t.Setenv(core.DefaultWebTokenEnv, "")
+
+	webConfig := core.DefaultWebConfig()
+	webConfig.Host = "0.0.0.0"
+
+	_, err := newWebServeMux(resolvedWebServeConfig{
+		ProjectDir: t.TempDir(),
+		URL:        "http://0.0.0.0:7331",
+		Web:        webConfig,
+	})
+	if err == nil {
+		t.Fatal("newWebServeMux returned nil error")
+	}
+
+	if err.Error() != "web token is required but CHC_WEB_TOKEN is not set" {
+		t.Fatalf("error = %q, want missing token env", err.Error())
 	}
 }
 

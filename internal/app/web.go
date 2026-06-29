@@ -7,7 +7,9 @@ import (
 	"io/fs"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/urfave/cli/v3"
@@ -104,6 +106,7 @@ func runWebServe(ctx context.Context, cmd *cli.Command, stdout io.Writer, deps a
 		Env:            env,
 		ProjectContext: projectContext,
 		AssetsFS:       deps.assetsFS,
+		LogRequests:    stdout,
 	}
 
 	if cmd.Bool("dry-run") {
@@ -145,18 +148,19 @@ type resolvedWebServeConfig struct {
 	ProjectContext commandProjectContext
 	AssetsFS       fs.FS
 	Provider       webui.DataProvider
+	LogRequests    io.Writer
 }
 
 func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error {
-	if !core.WebHostIsLoopback(config.Web.Host) {
-		if _, err := fmt.Fprintln(stdout, "warning: web ui is bound to a non-loopback interface"); err != nil {
-			return err
-		}
+	if err := printWebExposureWarnings(stdout, config.Web); err != nil {
+		return err
 	}
+
+	allowedOrigins := webAllowedOriginsSummary(config.Web.AllowedOrigins)
 
 	_, err := fmt.Fprintf(
 		stdout,
-		"web ui dry-run: %s\nproject: %s\nbind: %s\nport: %d\nenabled: %t\nopen_browser: %t\nrequire_token: %s\ntoken_env: %s\nstatic_assets: embedded\n",
+		"web ui dry-run: %s\nproject: %s\nbind: %s\nport: %d\nenabled: %t\nopen_browser: %t\nrequire_token: %s\ntoken_required: %t\ntoken_env: %s\nallowed_origins: %s\nstatic_assets: embedded\n",
 		config.URL,
 		config.ProjectDir,
 		config.Web.Host,
@@ -164,25 +168,47 @@ func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error 
 		config.Web.Enabled,
 		config.Web.OpenBrowser,
 		config.Web.RequireToken,
+		webTokenRequired(config.Web),
 		config.Web.TokenEnv,
+		allowedOrigins,
 	)
 
 	return err
 }
 
+func printWebExposureWarnings(stdout io.Writer, config core.WebConfig) error {
+	if core.WebHostIsLoopback(config.Host) {
+		return nil
+	}
+
+	if _, err := fmt.Fprintln(stdout, "warning: web ui is bound to a non-loopback interface"); err != nil {
+		return err
+	}
+
+	if webTokenRequired(config) {
+		return nil
+	}
+
+	if _, err := fmt.Fprintln(stdout, "warning: web ui token protection is disabled on a non-loopback interface"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func printWebServeStart(stdout io.Writer, config resolvedWebServeConfig) error {
-	if !core.WebHostIsLoopback(config.Web.Host) {
-		if _, err := fmt.Fprintln(stdout, "warning: web ui is bound to a non-loopback interface"); err != nil {
-			return err
-		}
+	if err := printWebExposureWarnings(stdout, config.Web); err != nil {
+		return err
 	}
 
 	_, err := fmt.Fprintf(
 		stdout,
-		"web ui: %s\nproject: %s\nbind: %s\n",
+		"web ui: %s\nproject: %s\nbind: %s\ntoken_required: %t\nallowed_origins: %s\n",
 		config.URL,
 		config.ProjectDir,
 		config.Web.Host,
+		webTokenRequired(config.Web),
+		webAllowedOriginsSummary(config.Web.AllowedOrigins),
 	)
 
 	return err
@@ -239,8 +265,15 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 		}
 	}
 
+	access, err := webAccessPolicy(config.Web)
+	if err != nil {
+		return nil, err
+	}
+
 	return webui.NewHandler(webui.HandlerOptions{
-		Provider: provider,
+		Provider:    provider,
+		Access:      access,
+		LogRequests: config.LogRequests,
 		Data: webui.ShellData{
 			Title:          "ChrysoCoord",
 			ProjectDir:     config.ProjectDir,
@@ -262,6 +295,46 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 			},
 		},
 	})
+}
+
+func webAccessPolicy(config core.WebConfig) (webui.AccessPolicy, error) {
+	policy := webui.AccessPolicy{
+		RequireToken:   webTokenRequired(config),
+		Origin:         webURL(config.Host, config.Port),
+		AllowedOrigins: append([]string(nil), config.AllowedOrigins...),
+	}
+
+	if !policy.RequireToken {
+		return policy, nil
+	}
+
+	policy.Token = strings.TrimSpace(os.Getenv(config.TokenEnv))
+	if policy.Token == "" {
+		return webui.AccessPolicy{}, fmt.Errorf("web token is required but %s is not set", config.TokenEnv)
+	}
+
+	return policy, nil
+}
+
+func webTokenRequired(config core.WebConfig) bool {
+	switch config.RequireToken {
+	case core.WebTokenModeTrue, core.WebTokenModeAlways:
+		return true
+	case core.WebTokenModeFalse:
+		return false
+	case core.WebTokenModeAuto:
+		return !core.WebHostIsLoopback(config.Host)
+	default:
+		return false
+	}
+}
+
+func webAllowedOriginsSummary(origins []string) string {
+	if len(origins) == 0 {
+		return "same-origin"
+	}
+
+	return strings.Join(origins, ",")
 }
 
 func webURL(host string, port int) string {

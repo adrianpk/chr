@@ -69,6 +69,146 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 	}
 }
 
+func TestHandlerTokenAccessPolicy(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data: testShellData(),
+		Access: AccessPolicy{
+			RequireToken: true,
+			Token:        "secret-token",
+			Origin:       "http://127.0.0.1:7331",
+		},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	unauthorized := httptest.NewRecorder()
+	handler.ServeHTTP(unauthorized, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	if unauthorized.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want unauthorized", unauthorized.Code)
+	}
+
+	asset := httptest.NewRecorder()
+	handler.ServeHTTP(asset, httptest.NewRequest(http.MethodGet, "/assets/chc.css", nil))
+
+	if asset.Code != http.StatusOK {
+		t.Fatalf("asset status = %d, want ok", asset.Code)
+	}
+
+	headerToken := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.Header.Set("Authorization", "Bearer secret-token")
+	handler.ServeHTTP(headerToken, request)
+
+	if headerToken.Code != http.StatusOK {
+		t.Fatalf("header token status = %d, want ok", headerToken.Code)
+	}
+
+	queryToken := httptest.NewRecorder()
+	handler.ServeHTTP(queryToken, httptest.NewRequest(http.MethodGet, "/?token=secret-token", nil))
+
+	if queryToken.Code != http.StatusOK {
+		t.Fatalf("query token status = %d, want ok", queryToken.Code)
+	}
+}
+
+func TestHandlerOriginAccessPolicy(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data: testShellData(),
+		Access: AccessPolicy{
+			Origin:         "http://127.0.0.1:7331",
+			AllowedOrigins: []string{"https://ops.example.test"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	blocked := httptest.NewRecorder()
+	blockedRequest := httptest.NewRequest(http.MethodGet, "/", nil)
+	blockedRequest.Header.Set("Origin", "https://evil.example.test")
+	handler.ServeHTTP(blocked, blockedRequest)
+
+	if blocked.Code != http.StatusForbidden {
+		t.Fatalf("blocked status = %d, want forbidden", blocked.Code)
+	}
+
+	sameOrigin := httptest.NewRecorder()
+	sameOriginRequest := httptest.NewRequest(http.MethodGet, "/", nil)
+	sameOriginRequest.Header.Set("Origin", "http://127.0.0.1:7331")
+	handler.ServeHTTP(sameOrigin, sameOriginRequest)
+
+	if sameOrigin.Code != http.StatusOK {
+		t.Fatalf("same-origin status = %d, want ok", sameOrigin.Code)
+	}
+
+	if got := sameOrigin.Header().Get("Access-Control-Allow-Origin"); got != "http://127.0.0.1:7331" {
+		t.Fatalf("Access-Control-Allow-Origin = %q, want same origin", got)
+	}
+
+	preflight := httptest.NewRecorder()
+	preflightRequest := httptest.NewRequest(http.MethodOptions, "/actions", nil)
+	preflightRequest.Header.Set("Origin", "https://ops.example.test")
+	handler.ServeHTTP(preflight, preflightRequest)
+
+	if preflight.Code != http.StatusNoContent {
+		t.Fatalf("preflight status = %d, want no content", preflight.Code)
+	}
+
+	if got := preflight.Header().Get("Access-Control-Allow-Origin"); got != "https://ops.example.test" {
+		t.Fatalf("preflight origin = %q, want allowed origin", got)
+	}
+}
+
+func TestHandlerAllowsRequestHostOriginForWildcardBind(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data: testShellData(),
+		Access: AccessPolicy{
+			Origin: "http://0.0.0.0:7331",
+		},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "http://127.0.0.1:7331/", nil)
+	request.Header.Set("Origin", "http://127.0.0.1:7331")
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want ok", recorder.Code)
+	}
+}
+
+func TestHandlerRequestLoggingUsesSanitizedPath(t *testing.T) {
+	var logs strings.Builder
+
+	handler, err := NewHandler(HandlerOptions{
+		Data:        testShellData(),
+		LogRequests: &logs,
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/?token=secret-token", nil))
+
+	got := logs.String()
+	for _, want := range []string{"web request:", "method=GET", "path=/", "status=200"} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("logs do not contain %q:\n%s", want, got)
+		}
+	}
+
+	for _, blocked := range []string{"secret-token", "token="} {
+		if strings.Contains(got, blocked) {
+			t.Fatalf("logs contain sensitive query data %q:\n%s", blocked, got)
+		}
+	}
+}
+
 func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data:     testShellData(),
