@@ -491,14 +491,53 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 	if stale.ReloadURL != "/dumps/detail?id=.chc%2Fuser%2Fdumps%2Fblog-context.md" || stale.DiscardURL != "/dumps" {
 		t.Fatalf("stale urls = reload %q discard %q, want dump conflict actions", stale.ReloadURL, stale.DiscardURL)
 	}
+}
 
-	reloaded, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
-		Family: "dumps",
-		ID:     ".chc/user/dumps/blog-context.md",
+func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+	writeWebServeArtifactFixture(t, projectDir)
+
+	provider := newWebServeBoardTestProvider(
+		projectDir,
+		newWebServeBoardTestEnv(t, t.TempDir()),
+		newWebServeBoardProjectContext(t, projectDir),
+	)
+
+	detail := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
+
+	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:   "dump.save",
+		Family:   "dumps",
+		ID:       ".chc/user/dumps/blog-context.md",
+		Revision: detail.Revision,
+		Confirm:  true,
+		Fields:   map[string]string{"content": "# Updated Dump"},
 	})
 	if err != nil {
-		t.Fatalf("ArtifactDetailView reload returned error: %v", err)
+		t.Fatalf("WriteAction save returned error: %v", err)
 	}
+
+	if result.Status != webui.WriteStatusOK {
+		t.Fatalf("save status = %q, want ok", result.Status)
+	}
+
+	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
+		Action:   "dump.save",
+		Family:   "dumps",
+		ID:       ".chc/user/dumps/blog-context.md",
+		Revision: detail.Revision,
+		Confirm:  true,
+		Fields:   map[string]string{"content": "# Stale Dump"},
+	})
+	if err != nil {
+		t.Fatalf("WriteAction stale returned error: %v", err)
+	}
+
+	if stale.Status != webui.WriteStatusStale {
+		t.Fatalf("stale status = %q, want stale", stale.Status)
+	}
+
+	reloaded := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
 
 	retry, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
@@ -527,18 +566,8 @@ func TestWebServeArtifactRevisionsChangeAfterWorkspaceMutation(t *testing.T) {
 		newWebServeBoardProjectContext(t, projectDir),
 	)
 
-	catalogBefore, err := provider.CatalogView(t.Context(), "dumps")
-	if err != nil {
-		t.Fatalf("CatalogView before returned error: %v", err)
-	}
-
-	detailBefore, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
-		Family: "dumps",
-		ID:     ".chc/user/dumps/blog-context.md",
-	})
-	if err != nil {
-		t.Fatalf("ArtifactDetailView before returned error: %v", err)
-	}
+	catalogBefore := mustWebArtifactCatalogView(t, provider, "dumps")
+	detailBefore := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
 
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chc", "user", "dumps", "blog-context.md"), `---
 title: "Blog Context"
@@ -553,33 +582,47 @@ case: "blog"
 Mutated outside the web view provider.
 `)
 
-	catalogAfter, err := provider.CatalogView(t.Context(), "dumps")
+	catalogAfter := mustWebArtifactCatalogView(t, provider, "dumps")
+	detailAfter := mustWebArtifactDetailView(t, provider, "dumps", ".chc/user/dumps/blog-context.md")
+
+	assertWebRevisionChanged(t, "catalog", catalogBefore.Revision, catalogAfter.Revision)
+	assertWebRevisionChanged(t, "detail", detailBefore.Revision, detailAfter.Revision)
+}
+
+func mustWebArtifactCatalogView(t *testing.T, provider webViewProvider, family string) webui.ArtifactCatalogView {
+	t.Helper()
+
+	catalog, err := provider.CatalogView(t.Context(), family)
 	if err != nil {
-		t.Fatalf("CatalogView after returned error: %v", err)
+		t.Fatalf("CatalogView returned error: %v", err)
 	}
 
-	detailAfter, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
-		Family: "dumps",
-		ID:     ".chc/user/dumps/blog-context.md",
+	return catalog
+}
+
+func mustWebArtifactDetailView(t *testing.T, provider webViewProvider, family, id string) webui.ArtifactDetailView {
+	t.Helper()
+
+	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
+		Family: family,
+		ID:     id,
 	})
 	if err != nil {
-		t.Fatalf("ArtifactDetailView after returned error: %v", err)
+		t.Fatalf("ArtifactDetailView returned error: %v", err)
 	}
 
-	if catalogBefore.Revision == "" || catalogAfter.Revision == "" {
-		t.Fatalf("catalog revisions must be non-empty: before %q after %q", catalogBefore.Revision, catalogAfter.Revision)
+	return detail
+}
+
+func assertWebRevisionChanged(t *testing.T, name, before, after string) {
+	t.Helper()
+
+	if before == "" || after == "" {
+		t.Fatalf("%s revisions must be non-empty: before %q after %q", name, before, after)
 	}
 
-	if detailBefore.Revision == "" || detailAfter.Revision == "" {
-		t.Fatalf("detail revisions must be non-empty: before %q after %q", detailBefore.Revision, detailAfter.Revision)
-	}
-
-	if catalogBefore.Revision == catalogAfter.Revision {
-		t.Fatalf("catalog revision did not change after workspace mutation: %q", catalogAfter.Revision)
-	}
-
-	if detailBefore.Revision == detailAfter.Revision {
-		t.Fatalf("detail revision did not change after workspace mutation: %q", detailAfter.Revision)
+	if before == after {
+		t.Fatalf("%s revision did not change after workspace mutation: %q", name, after)
 	}
 }
 
