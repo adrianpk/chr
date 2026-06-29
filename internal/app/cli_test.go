@@ -52,7 +52,7 @@ func TestRootCommandDefaultsToTUIAction(t *testing.T) {
 func TestRootCommandIncludesTUICommand(t *testing.T) {
 	cmd := newRootCommand(strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}, testAppDependencies())
 
-	for _, name := range []string{"acceptance", "dump", "metadata", "plan", "quiz", "spec", "tui", "work"} {
+	for _, name := range []string{"acceptance", "dump", "metadata", "plan", "quiz", "spec", "tui", "web", "work"} {
 		if rootCommandIncludesCommand(cmd, name) {
 			continue
 		}
@@ -107,6 +107,106 @@ func TestRootCommandRegistersParitySubcommands(t *testing.T) {
 		}
 
 		t.Fatalf("root command does not include %s", strings.Join(path, " "))
+	}
+}
+
+func TestWebServeDryRunPrintsResolvedDefaults(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	var stdout bytes.Buffer
+	err := run(t.Context(), []string{"web", "serve", "--dir", projectDir, "--dry-run"}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("run returned error: %v", err)
+	}
+
+	got := stdout.String()
+	for _, want := range []string{
+		"web ui dry-run: http://127.0.0.1:7331\n",
+		"project: " + projectDir + "\n",
+		"bind: 127.0.0.1\n",
+		"port: 7331\n",
+		"enabled: false\n",
+		"open_browser: false\n",
+		"require_token: auto\n",
+		"token_env: CHC_WEB_TOKEN\n",
+		"static_assets: healthz-only\n",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, got)
+		}
+	}
+}
+
+func TestWebServeDryRunAppliesFlagOverridesAndWarnsForNonLoopback(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	var stdout bytes.Buffer
+	err := run(t.Context(), []string{
+		"web",
+		"serve",
+		"--dir",
+		projectDir,
+		"--host",
+		"0.0.0.0",
+		"--port",
+		"7444",
+		"--open-browser",
+		"--require-token",
+		"false",
+		"--dry-run",
+	}, &stdout, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("run returned error: %v", err)
+	}
+
+	got := stdout.String()
+	for _, want := range []string{
+		"warning: web ui is bound to a non-loopback interface\n",
+		"web ui dry-run: http://0.0.0.0:7444\n",
+		"bind: 0.0.0.0\n",
+		"port: 7444\n",
+		"open_browser: true\n",
+		"require_token: false\n",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("stdout does not contain %q:\n%s", want, got)
+		}
+	}
+}
+
+func TestWebServeDryRunRejectsInvalidConfig(t *testing.T) {
+	projectDir := newTestWorkspace(t)
+
+	err := run(t.Context(), []string{
+		"web",
+		"serve",
+		"--dir",
+		projectDir,
+		"--port",
+		"70000",
+		"--dry-run",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("run returned nil error")
+	}
+
+	if err.Error() != "web port must be between 1 and 65535" {
+		t.Fatalf("run error = %q, want web port validation", err.Error())
+	}
+}
+
+func TestWebServeHealthz(t *testing.T) {
+	request := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	recorder := httptest.NewRecorder()
+
+	newWebServeMux().ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+
+	if got := recorder.Body.String(); got != "ok\n" {
+		t.Fatalf("body = %q, want ok", got)
 	}
 }
 

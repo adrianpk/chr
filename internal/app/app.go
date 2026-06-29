@@ -77,6 +77,7 @@ func newRootCommand(stdin io.Reader, stdout, stderr io.Writer, deps appDependenc
 			newRuntimeCommand(stdout, deps),
 			newTicketCommand(stdout, deps),
 			newTUICommand(stdin, stdout, deps),
+			newWebCommand(stdout, deps),
 			newWorkCommand(stdout, deps),
 		},
 	}
