@@ -2,7 +2,7 @@
 
 Status: in_progress
 
-Active Slice: Slice 1: web config and serve command
+Active Slice: Slice 2: html htmx and helper foundation
 
 Tracker: `ops/trackers/2026-06-29-optional-local-web-ui-tracker.md`
 
