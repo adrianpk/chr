@@ -28,6 +28,13 @@ export CHC_WEB_TOKEN='replace-with-a-long-random-value'
 chc web serve --host 0.0.0.0 --port 7331
 ```
 
+Preview the resolved exposure boundary first:
+
+```sh
+CHC_WEB_TOKEN='replace-with-a-long-random-value' \
+  chc web serve --host 0.0.0.0 --port 7331 --dry-run
+```
+
 In `auto` mode, non-loopback binds require the token. The token can be supplied
 with one of these request forms:
 
@@ -62,3 +69,5 @@ systems outside `chc` and expose the Web UI only through infrastructure you
 control.
 
 Startup and request logs do not print token values or query strings.
+
+See [Run the local Web UI](run-local-web-ui.md) for localhost-only operation.

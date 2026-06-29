@@ -35,6 +35,52 @@ and confirmation modes.
 See [CLI TUI action matrix](cli-tui-action-matrix.md) for current parity
 between command-line and interactive operations.
 
+## Web UI
+
+Serve the optional local browser UI for the resolved project:
+
+```sh
+chc web serve
+```
+
+Preview the resolved Web UI config without listening on a socket:
+
+```sh
+chc web serve --dry-run
+```
+
+Serve another managed project:
+
+```sh
+chc web serve --dir /path/to/project
+```
+
+Override the bind address and port for this process:
+
+```sh
+chc web serve --host 127.0.0.1 --port 7331
+```
+
+Override token policy for this process:
+
+```sh
+chc web serve --require-token auto
+chc web serve --require-token true
+chc web serve --require-token false
+```
+
+`auto` requires token protection for non-loopback binds and keeps localhost
+access token-free. `true` always requires a token. `false` disables token
+protection and prints an exposure warning when the server is bound to a
+non-loopback interface.
+
+The Web UI does not start from `chc`, `chc tui`, or normal work commands. It
+starts only from `chc web serve`.
+
+See [Run the local Web UI](../how-to/run-local-web-ui.md), [Expose the local Web
+UI deliberately](../how-to/expose-local-web-ui.md), and [Web UI action
+matrix](web-ui-action-matrix.md).
+
 ## Runtime
 
 Install missing runtime defaults:

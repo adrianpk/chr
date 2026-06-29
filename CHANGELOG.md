@@ -54,6 +54,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 - Added notification and remote command intake support for Telegram-backed
   setup checks, notification audit records, loop/ticket notifications, and
   fixture-based remote command handoff parsing.
+- Added an optional local Web UI served by `chc web serve`, including
+  localhost-only defaults, token and origin controls, server-rendered pages,
+  htmx refresh behavior, document and work actions, ChrysoCoord visual
+  identity, documentation, and browser smoke tooling.
 - Added Markdown-first authoring sessions and assisted authoring flows for
   generating and promoting project documentation artifacts.
 - Added workspace graph/index work, semantic digest support, cache boundaries,

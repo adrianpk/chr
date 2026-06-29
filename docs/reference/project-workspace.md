@@ -218,6 +218,65 @@ work:
 See [Work readiness](work-readiness.md) for diagnostics, repair behavior, and
 Dash integration.
 
+## Web Config
+
+`.chc/user/config.yml` may define the optional local Web UI contract under
+`web:`.
+
+The Web UI is disabled by default as a background behavior. Project commands,
+the default TUI, agent work, ticket loops, and normal CLI operations do not
+start a server. The server starts only through:
+
+```sh
+chc web serve
+```
+
+Supported web fields:
+
+- `enabled`: operator intent marker for project configuration. The server still
+  requires the explicit `chc web serve` command.
+- `host`: bind host. Defaults to `127.0.0.1`.
+- `port`: bind port. Defaults to `7331`.
+- `open_browser`: whether startup should request opening a browser.
+- `require_token`: one of `auto`, `true`, `false`, or `always`.
+- `token_env`: environment variable that contains the Web UI token when token
+  protection is required. Defaults to `CHC_WEB_TOKEN`.
+- `allowed_origins`: comma-separated exact origins allowed for cross-origin
+  browser requests. Empty means same-origin only.
+- `refresh_interval_seconds`: polling interval for browser refresh fragments.
+  Defaults to `2`.
+
+Example local-only config:
+
+```yml
+web:
+  enabled: true
+  host: 127.0.0.1
+  port: 7331
+  open_browser: false
+  require_token: auto
+  token_env: CHC_WEB_TOKEN
+  allowed_origins: ""
+  refresh_interval_seconds: 2
+```
+
+Example private-network or tunnel config:
+
+```yml
+web:
+  enabled: true
+  host: 0.0.0.0
+  port: 7331
+  open_browser: false
+  require_token: auto
+  token_env: CHC_WEB_TOKEN
+  allowed_origins: "https://chc.example.internal"
+  refresh_interval_seconds: 2
+```
+
+Non-loopback binds print an exposure warning. In `auto` mode, non-loopback binds
+also require the token value to be present in `token_env`.
+
 ## Notification Config
 
 `.chc/user/config.yml` may also define notification settings under
