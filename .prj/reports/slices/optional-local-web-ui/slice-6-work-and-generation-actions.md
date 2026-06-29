@@ -12,7 +12,7 @@ Branch: `feat/slice-6-work-and-generation-actions`
 
 Expected PR Title: `feat(slice-6): work and generation actions`
 
-PR: pending
+PR: `#348`
 
 ## Action Inventory
 
