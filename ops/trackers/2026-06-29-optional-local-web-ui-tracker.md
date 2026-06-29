@@ -16,7 +16,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 2 | html htmx and helper foundation | delivered | `feat/slice-2-html-htmx-helper-foundation` | `#344` | `.prj/reports/slices/optional-local-web-ui/slice-2-html-htmx-helper-foundation.md` |
 | Slice 3 | read-only project board and dash | delivered | `feat/slice-3-readonly-project-board-dash` | `#345` | `.prj/reports/slices/optional-local-web-ui/slice-3-readonly-project-board-dash.md` |
 | Slice 4 | read-only artifact catalogs | delivered | `feat/slice-4-readonly-artifact-catalogs` | `#346` | `.prj/reports/slices/optional-local-web-ui/slice-4-readonly-artifact-catalogs.md` |
-| Slice 5 | document and metadata actions | ready | `feat/slice-5-document-and-metadata-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
+| Slice 5 | document and metadata actions | reviewing | `feat/slice-5-document-and-metadata-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-5-document-and-metadata-actions.md` |
 | Slice 6 | work and generation actions | planned | `feat/slice-6-work-and-generation-actions` | pending | `.prj/reports/slices/optional-local-web-ui/slice-6-work-and-generation-actions.md` |
 | Slice 7 | live sync and conflict handling | planned | `feat/slice-7-live-sync-and-conflicts` | pending | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | planned | `feat/slice-8-web-access-control` | pending | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
@@ -88,15 +88,15 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T5.1 | Define the write-response envelope for success, validation failure, stale edit, and blocked operation. | pending | pending | Stable client/server contract. |
-| T5.2 | Add revision tokens to relevant read view models. | pending | pending | Required for stale-write rejection. |
-| T5.3 | Add same-service write endpoints for supported metadata updates. | pending | pending | Do not duplicate write logic in web handlers. |
-| T5.4 | Add dump create, append, and edit endpoints if matching CLI/TUI operations exist. | pending | pending | Keep action set limited to existing operations. |
-| T5.5 | Add browser confirmation flows for destructive or overwrite-prone actions. | pending | pending | Confirm before write. |
-| T5.6 | Add stale-write tests and path-confinement tests. | pending | pending | Protect shared-state integrity. |
-| T5.7 | Add client refresh behavior after successful writes. | pending | pending | UI must show persisted state. |
-| T5.8 | Add manual or automated smoke evidence for create, edit, stale edit, and validation failure. | pending | pending | Covers success and failure paths. |
-| T5.9 | Add the slice implementation report and validation evidence. | pending | pending | Report path is defined in the slice table. |
+| T5.1 | Define the write-response envelope for success, validation failure, stale edit, and blocked operation. | done | `b35c318` | Added `WriteActionRequest` and `WriteActionResponse` with stable status values. |
+| T5.2 | Add revision tokens to relevant read view models. | done | `b35c318` | Added revision fields for artifact cards/details; case metadata uses source hash and dump details use content hash. |
+| T5.3 | Add same-service write endpoints for supported metadata updates. | done | `b35c318` | Case metadata updates call `PatchCaseMetadata`. |
+| T5.4 | Add dump create, append, and edit endpoints if matching CLI/TUI operations exist. | done | `b35c318` | Dump actions call `CreateDump`, `SaveDump`, and `AppendDump`. |
+| T5.5 | Add browser confirmation flows for destructive or overwrite-prone actions. | done | `668dccc` | Forms require browser confirmation before submit. |
+| T5.6 | Add stale-write tests and path-confinement tests. | done | `44b9b30` | Provider tests cover stale dump saves and existing path confinement tests remain in place. |
+| T5.7 | Add client refresh behavior after successful writes. | done | `668dccc` | Successful writes redirect to refreshed catalog/detail pages; htmx uses `HX-Redirect`. |
+| T5.8 | Add manual or automated smoke evidence for create, edit, stale edit, and validation failure. | done | `44b9b30` | HTTP smoke covered dump create, case update, dump save, stale rejection, and blocked envelope tests. |
+| T5.9 | Add the slice implementation report and validation evidence. | done | this commit | Report path is defined in the slice table. |
 
 ## Slice 6 Tasks
 
@@ -188,6 +188,10 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 - Slice 4: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
 - Slice 4 smoke: `go run ./cmd/chc web serve --dir . --port 7334`; `curl -fsS /cases`, `/dumps`, `/quizzes`, `/specs`, `/plans`, one `/dumps/detail`, catalog fragments, and one detail fragment (pass)
 - Slice 4: `make verify` (pass)
+- Slice 5 T5.1-T5.8: `go test ./internal/webui ./internal/app -run 'WebServe|Handler|Catalog|Artifact|WriteAction'` (pass)
+- Slice 5: `go test ./internal/webui/... ./internal/app ./internal/core` (pass)
+- Slice 5 smoke: temporary project served with `go run ./cmd/chc web serve --dir /tmp/tmp.I8grD0CG1y --port 7335`; `curl` covered dump create, case update, dump save, and stale dump rejection (pass)
+- Slice 5: `make verify` (pass)
 
 ## Open Decisions
 
