@@ -21,7 +21,7 @@ Related Spec: `ops/specs/2026-06-29-execution-unit-runtime-refinements.md`
 | Slice 7 | live sync and conflict handling | delivered | `feat/slice-7-live-sync-and-conflicts` | `#349` | `.prj/reports/slices/optional-local-web-ui/slice-7-live-sync-and-conflicts.md` |
 | Slice 8 | access control and exposure safety | delivered | `feat/slice-8-web-access-control` | `#350` | `.prj/reports/slices/optional-local-web-ui/slice-8-web-access-control.md` |
 | Slice 9 | visual identity and layout parity | delivered | `feat/slice-9-web-visual-identity` | `#351` | `.prj/reports/slices/optional-local-web-ui/slice-9-web-visual-identity.md` |
-| Slice 10 | docs qa and release readiness | reviewing | `feat/slice-10-web-docs-qa` | pending | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
+| Slice 10 | docs qa and release readiness | reviewing | `feat/slice-10-web-docs-qa` | `#352` | `.prj/reports/slices/optional-local-web-ui/slice-10-web-docs-qa.md` |
 
 ## Slice 1 Tasks
 

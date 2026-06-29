@@ -12,7 +12,7 @@ Branch: `feat/slice-10-web-docs-qa`
 
 Expected PR Title: `feat(slice-10): web docs and qa`
 
-PR: pending
+PR: `#352`
 
 ## Summary
 
