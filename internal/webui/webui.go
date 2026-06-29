@@ -1,3 +1,4 @@
+// Package webui owns the optional local Web UI handler and embedded assets.
 package webui
 
 import (
@@ -14,6 +15,7 @@ import (
 //go:embed assets
 var assetsFS embed.FS
 
+// ShellData contains the presentation data needed by the shell template.
 type ShellData struct {
 	Title          string
 	ProjectDir     string
@@ -26,10 +28,12 @@ type ShellData struct {
 	Navigation     []ui.NavLink
 }
 
+// HandlerOptions configures the Web UI HTTP handler.
 type HandlerOptions struct {
 	Data ShellData
 }
 
+// NewHandler creates the Web UI HTTP handler.
 func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	templates, err := render.New(
 		assetsFS,

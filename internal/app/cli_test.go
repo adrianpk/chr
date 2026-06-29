@@ -223,6 +223,7 @@ func TestWebServeHealthz(t *testing.T) {
 
 func TestWebServeShell(t *testing.T) {
 	projectDir := newTestWorkspace(t)
+
 	handler, err := newWebServeMux(resolvedWebServeConfig{
 		ProjectDir: projectDir,
 		URL:        "http://127.0.0.1:7331",

@@ -1,3 +1,4 @@
+// Package ui provides small server-rendered UI primitives.
 package ui
 
 import (
@@ -8,15 +9,21 @@ import (
 	"forge.adrianpk.com/chc/internal/webui/htmx"
 )
 
+// Variant identifies a visual component variant.
 type Variant string
 
 const (
+	// VariantDefault uses the default visual style.
 	VariantDefault Variant = ""
+	// VariantPrimary uses the primary visual style.
 	VariantPrimary Variant = "primary"
-	VariantMuted   Variant = "muted"
-	VariantDanger  Variant = "danger"
+	// VariantMuted uses the muted visual style.
+	VariantMuted Variant = "muted"
+	// VariantDanger uses the danger visual style.
+	VariantDanger Variant = "danger"
 )
 
+// Button renders a simple HTML button.
 type Button struct {
 	text    string
 	variant Variant
@@ -24,34 +31,40 @@ type Button struct {
 	attrs   *htmx.Attrs
 }
 
+// NewButton creates a button primitive.
 func NewButton(text string) *Button {
 	return &Button{text: text, type_: "button"}
 }
 
+// Primary applies the primary button variant.
 func (b *Button) Primary() *Button {
 	b.variant = VariantPrimary
 
 	return b
 }
 
+// Danger applies the danger button variant.
 func (b *Button) Danger() *Button {
 	b.variant = VariantDanger
 
 	return b
 }
 
+// Type sets the button type attribute.
 func (b *Button) Type(value string) *Button {
 	b.type_ = value
 
 	return b
 }
 
+// WithAttrs attaches htmx attributes to the button.
 func (b *Button) WithAttrs(attrs *htmx.Attrs) *Button {
 	b.attrs = attrs
 
 	return b
 }
 
+// Render renders the button as escaped HTML.
 func (b *Button) Render() template.HTML {
 	classes := []string{"button"}
 	if b.variant != "" {
@@ -73,27 +86,32 @@ func (b *Button) Render() template.HTML {
 	))
 }
 
+// Chip renders a compact label.
 type Chip struct {
 	text    string
 	variant Variant
 }
 
+// NewChip creates a chip primitive.
 func NewChip(text string) *Chip {
 	return &Chip{text: text}
 }
 
+// Muted applies the muted chip variant.
 func (c *Chip) Muted() *Chip {
 	c.variant = VariantMuted
 
 	return c
 }
 
+// Primary applies the primary chip variant.
 func (c *Chip) Primary() *Chip {
 	c.variant = VariantPrimary
 
 	return c
 }
 
+// Render renders the chip as escaped HTML.
 func (c *Chip) Render() template.HTML {
 	classes := []string{"chip"}
 	if c.variant != "" {
@@ -107,23 +125,28 @@ func (c *Chip) Render() template.HTML {
 	))
 }
 
+// NavLink describes one navigation link.
 type NavLink struct {
 	Label  string
 	Href   string
 	Active bool
 }
 
+// Nav renders a primary navigation group.
 type Nav struct {
 	links []NavLink
 }
 
+// NewNav creates a navigation primitive.
 func NewNav(links ...NavLink) *Nav {
 	return &Nav{links: links}
 }
 
+// Render renders the navigation as escaped HTML.
 func (n *Nav) Render() template.HTML {
 	var html strings.Builder
 	html.WriteString(`<nav class="app-nav" aria-label="Primary">`)
+
 	for _, link := range n.links {
 		class := "app-nav__link"
 		if link.Active {
@@ -138,11 +161,13 @@ func (n *Nav) Render() template.HTML {
 			template.HTMLEscapeString(link.Label),
 		)
 	}
+
 	html.WriteString(`</nav>`)
 
 	return template.HTML(html.String())
 }
 
+// FuncMap returns UI helpers for templates.
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
 		"button": NewButton,

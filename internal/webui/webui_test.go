@@ -56,6 +56,7 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 	} {
 		recorder := httptest.NewRecorder()
 		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, path, nil))
+
 		if recorder.Code != http.StatusOK {
 			t.Fatalf("%s status = %d, want %d", path, recorder.Code, http.StatusOK)
 		}

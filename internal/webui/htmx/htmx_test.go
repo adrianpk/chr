@@ -57,6 +57,7 @@ func TestIsRequest(t *testing.T) {
 	}
 
 	request.Header.Set(HeaderRequest, "true")
+
 	if !IsRequest(request) {
 		t.Fatal("IsRequest() = false, want true with HX-Request")
 	}

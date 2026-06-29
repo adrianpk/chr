@@ -13,12 +13,14 @@ func TestRendererPage(t *testing.T) {
 			Data: []byte(`{{define "page.html"}}<h1>{{upper .Title}}</h1>{{end}}`),
 		},
 	}
+
 	renderer, err := New(files, "templates/*.html")
 	if err != nil {
 		t.Fatalf("New returned error: %v", err)
 	}
 
 	recorder := httptest.NewRecorder()
+
 	err = renderer.Page(recorder, "page.html", map[string]string{"Title": "project"})
 	if err != nil {
 		t.Fatalf("Page returned error: %v", err)
