@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/url"
@@ -96,6 +98,7 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 	card, ok := findWebArtifactCard(catalog.Items, request.ID)
 	if !ok {
 		return webui.ArtifactDetailView{
+			ID:      request.ID,
 			Family:  request.Family,
 			Title:   request.ID,
 			Path:    request.ID,
@@ -103,11 +106,18 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 		}, nil
 	}
 
+	if request.Family == webArtifactFamilyCases {
+		return p.caseDetailView(card)
+	}
+
 	content := card.Preview
+	revision := card.Revision
+
 	if card.Path != "" {
 		readContent, err := p.readProjectArtifact(card.Path)
 		if err == nil {
 			content = readContent
+			revision = webContentRevision(readContent)
 		} else if !errors.Is(err, os.ErrNotExist) {
 			return webui.ArtifactDetailView{}, err
 		}
@@ -115,6 +125,7 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 
 	return webui.ArtifactDetailView{
 		Family:     card.Family,
+		ID:         card.ID,
 		Title:      card.Title,
 		Status:     card.Status,
 		Scope:      card.Scope,
@@ -122,6 +133,36 @@ func (p webViewProvider) ArtifactDetailView(ctx context.Context, request webui.A
 		SourcePath: card.SourcePath,
 		UpdatedAt:  card.UpdatedAt,
 		Content:    content,
+		Revision:   revision,
+	}, nil
+}
+
+func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.ArtifactDetailView, error) {
+	metadata, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadPath(
+		core.CaseMetadataPath(p.projectContext.ProjectDir, card.ID),
+	)
+	if err != nil {
+		return webui.ArtifactDetailView{}, err
+	}
+
+	content := metadata.Description
+	if strings.TrimSpace(metadata.Context) != "" {
+		content = content + "\n\n" + metadata.Context
+	}
+
+	return webui.ArtifactDetailView{
+		Family:      card.Family,
+		ID:          card.ID,
+		Title:       metadata.Name,
+		Description: metadata.Description,
+		Context:     metadata.Context,
+		Status:      card.Status,
+		Scope:       card.Scope,
+		Path:        card.Path,
+		SourcePath:  card.SourcePath,
+		UpdatedAt:   card.UpdatedAt,
+		Content:     content,
+		Revision:    metadata.SourceHash,
 	}, nil
 }
 
@@ -147,6 +188,7 @@ func webCaseCards(projectDir string, cases []core.CaseMetadata) []webui.Artifact
 			SourcePath:   metadata.SourcePath,
 			Preview:      firstNonEmptyString(metadata.Description, metadata.Context),
 			ContentState: webContentState(metadata.Exists),
+			Revision:     metadata.SourceHash,
 		}
 		card.DetailURL = webArtifactDetailURL(card)
 		cards = append(cards, card)
@@ -169,6 +211,7 @@ func webDumpCards(dumps []tui.DumpView) []webui.ArtifactCardView {
 			UpdatedAt:    webArtifactTime(dump.UpdatedAt),
 			Preview:      dump.Preview,
 			ContentState: webContentState(dump.RelativePath != ""),
+			Revision:     webFileRevision(dump.SourcePath),
 		}
 		card.DetailURL = webArtifactDetailURL(card)
 		cards = append(cards, card)
@@ -191,6 +234,7 @@ func webQuizCards(quizzes []tui.QuizView) []webui.ArtifactCardView {
 			UpdatedAt:    webArtifactTime(quiz.UpdatedAt),
 			Preview:      firstNonEmptyString(quiz.CuratedPreview, quiz.ActiveQuestionSummary, quiz.TrailSummary),
 			ContentState: webContentState(path != ""),
+			Revision:     webFileRevision(filepath.Join(".", filepath.FromSlash(path))),
 		}
 		card.DetailURL = webArtifactDetailURL(card)
 		cards = append(cards, card)
@@ -230,6 +274,7 @@ func webDocumentCard(family, title, status, scope, relativePath string, updatedA
 		UpdatedAt:    webArtifactTime(updatedAt),
 		Preview:      content,
 		ContentState: webContentState(relativePath != ""),
+		Revision:     webContentRevision(content),
 	}
 	card.DetailURL = webArtifactDetailURL(card)
 
@@ -349,4 +394,23 @@ func firstNonEmptyString(values ...string) string {
 	}
 
 	return ""
+}
+
+func webFileRevision(path string) string {
+	if strings.TrimSpace(path) == "" {
+		return ""
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+
+	return webContentRevision(string(content))
+}
+
+func webContentRevision(content string) string {
+	sum := sha256.Sum256([]byte(content))
+
+	return hex.EncodeToString(sum[:])
 }

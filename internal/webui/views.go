@@ -9,6 +9,7 @@ type DataProvider interface {
 	DashView(context.Context) (DashView, error)
 	CatalogView(context.Context, string) (ArtifactCatalogView, error)
 	ArtifactDetailView(context.Context, ArtifactDetailRequest) (ArtifactDetailView, error)
+	WriteAction(context.Context, WriteActionRequest) (WriteActionResponse, error)
 }
 
 type staticDataProvider struct {
@@ -25,6 +26,7 @@ type PageData struct {
 	Dash    DashView
 	Catalog ArtifactCatalogView
 	Detail  ArtifactDetailView
+	Write   WriteActionResponse
 }
 
 func newStaticDataProvider(shell ShellData) staticDataProvider {
@@ -64,8 +66,17 @@ func (staticDataProvider) CatalogView(_ context.Context, family string) (Artifac
 func (staticDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDetailRequest) (ArtifactDetailView, error) {
 	return ArtifactDetailView{
 		Family: request.Family,
+		ID:     request.ID,
 		Title:  request.ID,
 		Path:   request.ID,
+	}, nil
+}
+
+func (staticDataProvider) WriteAction(_ context.Context, request WriteActionRequest) (WriteActionResponse, error) {
+	return WriteActionResponse{
+		Status:        WriteStatusBlocked,
+		Summary:       "Write action is unavailable.",
+		BlockedReason: request.Action + " is not supported by this provider.",
 	}, nil
 }
 
@@ -242,19 +253,55 @@ type ArtifactCardView struct {
 	Preview      string
 	DetailURL    string
 	ContentState string
+	Revision     string
 }
 
 // ArtifactDetailView is the read-only detail projection for one artifact.
 type ArtifactDetailView struct {
-	Family     string
-	Title      string
-	Status     string
-	Scope      string
-	Path       string
-	SourcePath string
-	UpdatedAt  string
-	Content    string
-	Missing    bool
+	Family      string
+	ID          string
+	Title       string
+	Description string
+	Context     string
+	Status      string
+	Scope       string
+	Path        string
+	SourcePath  string
+	UpdatedAt   string
+	Content     string
+	Missing     bool
+	Revision    string
+}
+
+// WriteActionRequest describes one confirmed Web UI write action.
+type WriteActionRequest struct {
+	Action   string
+	Family   string
+	ID       string
+	Revision string
+	Confirm  bool
+	Fields   map[string]string
+}
+
+const (
+	// WriteStatusOK marks a completed write action.
+	WriteStatusOK = "ok"
+	// WriteStatusValidation marks a user-correctable validation failure.
+	WriteStatusValidation = "validation_failed"
+	// WriteStatusStale marks a rejected stale write.
+	WriteStatusStale = "stale"
+	// WriteStatusBlocked marks an unsupported or unconfirmed operation.
+	WriteStatusBlocked = "blocked"
+)
+
+// WriteActionResponse is the stable write result envelope returned by Web UI actions.
+type WriteActionResponse struct {
+	Status        string
+	Summary       string
+	ChangedFiles  []string
+	Validation    []string
+	BlockedReason string
+	RedirectURL   string
 }
 
 // CatalogTitle returns the display title for an artifact family.
