@@ -88,6 +88,7 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	mux.HandleFunc("/project/fragment", handler.projectFragment)
 	mux.HandleFunc("/board", handler.board)
 	mux.HandleFunc("/board/fragment", handler.boardFragment)
+	mux.HandleFunc("/board/ticket", handler.ticketDetail)
 	mux.HandleFunc("/dash", handler.dash)
 	mux.HandleFunc("/dash/fragment", handler.dashFragment)
 
@@ -177,6 +178,19 @@ func (h handler) boardFragment(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.renderer.Fragment(w, "board_content.html", data); err != nil {
 		http.Error(w, "render board", http.StatusInternalServerError)
+	}
+}
+
+func (h handler) ticketDetail(w http.ResponseWriter, r *http.Request) {
+	data, err := h.ticketDetailPageData(r)
+	if err != nil {
+		http.Error(w, "load ticket", http.StatusInternalServerError)
+
+		return
+	}
+
+	if err := h.renderer.Fragment(w, "ticket_modal.html", data); err != nil {
+		http.Error(w, "render ticket", http.StatusInternalServerError)
 	}
 }
 
@@ -585,6 +599,23 @@ func (h handler) boardPageData(r *http.Request) (PageData, error) {
 		Revision:   board.Revision,
 		RefreshURL: "/board/fragment",
 		Board:      board,
+	}, nil
+}
+
+func (h handler) ticketDetailPageData(r *http.Request) (PageData, error) {
+	ticket, err := h.provider.TicketDetailView(r.Context(), TicketDetailRequest{
+		Key: strings.TrimSpace(r.URL.Query().Get("key")),
+	})
+	if err != nil {
+		return PageData{}, err
+	}
+
+	return PageData{
+		Shell:    h.shellData("board"),
+		View:     "ticket_detail",
+		Title:    ticket.Title,
+		Revision: ticket.Revision,
+		Ticket:   ticket,
 	}, nil
 }
 

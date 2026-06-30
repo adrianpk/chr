@@ -61,6 +61,7 @@
           {{end}}
         </section>
       </main>
+      <div id="modal-root"></div>
     </div>
   </body>
 </html>
@@ -129,7 +130,7 @@
 {{end}}
 
 {{define "ticket_card.html"}}
-<article class="ticket-card">
+<a class="ticket-card" href="/board/ticket?key={{.Key}}" hx-get="/board/ticket?key={{.Key}}" hx-target="#modal-root" hx-swap="innerHTML">
   <div class="ticket-card__meta">
     <span class="ticket-card__key">{{.Key}}</span>
     {{if .Priority}}<span class="ticket-card__priority">{{.Priority}}</span>{{end}}
@@ -141,7 +142,79 @@
   {{else if .UseCase}}
     <div class="ticket-card__footer">{{(chip .UseCase).Primary.Render}}</div>
   {{end}}
-</article>
+</a>
+{{end}}
+
+{{define "ticket_modal.html"}}
+<div class="modal-backdrop" data-modal-backdrop>
+  <section class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
+    <header class="ticket-modal__header">
+      <h2 id="ticket-modal-title">Ticket</h2>
+      <button class="icon-button" type="button" data-modal-close aria-label="Close ticket detail">x</button>
+    </header>
+    <div class="ticket-modal__body">
+      <form class="ticket-edit-form" method="post" action="/actions">
+        <input type="hidden" name="action" value="ticket.update">
+        <input type="hidden" name="id" value="{{.Ticket.Key}}">
+        <input type="hidden" name="revision" value="{{.Ticket.Revision}}">
+        <input type="hidden" name="confirm" value="true">
+        <label class="readonly-field">
+          <span>Key</span>
+          <strong>{{.Ticket.Key}}</strong>
+        </label>
+        <label class="readonly-field">
+          <span>Title</span>
+          <input name="title" required value="{{.Ticket.Title}}">
+        </label>
+        <label class="readonly-field readonly-field--multi">
+          <span>Description</span>
+          <textarea name="synopsis" required>{{.Ticket.Synopsis}}</textarea>
+        </label>
+        <div class="ticket-comments__actions">
+          <button class="button" type="submit">Save</button>
+        </div>
+      </form>
+      <section class="ticket-comments" aria-label="Ticket comments">
+        <header class="ticket-comments__header">
+          <h3>Comments</h3>
+          <span>{{len .Ticket.Comments}} comments</span>
+        </header>
+        {{if .Ticket.Comments}}
+          <div class="ticket-comments__list">
+            {{range .Ticket.Comments}}
+              <article class="ticket-comment">
+                <header>{{.Header}}</header>
+                <p>{{.Body}}</p>
+              </article>
+            {{end}}
+          </div>
+        {{else}}
+          <p class="ticket-comments__empty">No comments yet.</p>
+        {{end}}
+        <form class="ticket-comments__form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML">
+          <input type="hidden" name="action" value="ticket.comment">
+          <input type="hidden" name="id" value="{{.Ticket.Key}}">
+          <input type="hidden" name="revision" value="{{.Ticket.Revision}}">
+          <input type="hidden" name="confirm" value="true">
+          <label class="readonly-field readonly-field--multi ticket-comments__composer">
+            <span>Add comment</span>
+            <textarea name="content" required placeholder="Leave a Markdown comment."></textarea>
+          </label>
+          <div class="ticket-comments__actions">
+            <button class="button" type="submit">Add comment</button>
+          </div>
+        </form>
+      </section>
+      <div class="ticket-modal__meta">
+        {{if .Ticket.Priority}}<span>{{.Ticket.Priority}}</span>{{end}}
+        {{if .Ticket.ProjectArea}}<span>{{.Ticket.ProjectArea}}</span>{{end}}
+        {{if .Ticket.Status}}<span>{{.Ticket.Status}}</span>{{end}}
+        {{if .Ticket.Type}}<span>{{.Ticket.Type}}</span>{{end}}
+        {{if .Ticket.Slice}}<span>{{.Ticket.Slice}}</span>{{end}}
+      </div>
+    </div>
+  </section>
+</div>
 {{end}}
 
 {{define "catalog_content.html"}}

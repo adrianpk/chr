@@ -6,6 +6,7 @@ import "context"
 type DataProvider interface {
 	ProjectView(context.Context) (ProjectView, error)
 	BoardView(context.Context) (BoardView, error)
+	TicketDetailView(context.Context, TicketDetailRequest) (TicketDetailView, error)
 	DashView(context.Context) (DashView, error)
 	CatalogView(context.Context, string) (ArtifactCatalogView, error)
 	ArtifactDetailView(context.Context, ArtifactDetailRequest) (ArtifactDetailView, error)
@@ -25,6 +26,7 @@ type PageData struct {
 	RefreshURL string
 	Project    ProjectView
 	Board      BoardView
+	Ticket     TicketDetailView
 	Dash       DashView
 	Catalog    ArtifactCatalogView
 	Detail     ArtifactDetailView
@@ -53,6 +55,14 @@ func (p staticDataProvider) ProjectView(context.Context) (ProjectView, error) {
 
 func (p staticDataProvider) BoardView(context.Context) (BoardView, error) {
 	return BoardView{ProjectID: p.shell.ProjectID, Revision: "static-board"}, nil
+}
+
+func (staticDataProvider) TicketDetailView(_ context.Context, request TicketDetailRequest) (TicketDetailView, error) {
+	return TicketDetailView{
+		Key:      request.Key,
+		Title:    request.Key,
+		Revision: "static-ticket-detail",
+	}, nil
 }
 
 func (p staticDataProvider) DashView(context.Context) (DashView, error) {
@@ -154,6 +164,34 @@ type BoardTicketView struct {
 	RelativePath      string
 	SourceKind        string
 	SourceRef         string
+}
+
+// TicketDetailRequest identifies one ticket detail request.
+type TicketDetailRequest struct {
+	Key string
+}
+
+// TicketDetailView is the modal projection for one ticket.
+type TicketDetailView struct {
+	Key          string
+	Title        string
+	Synopsis     string
+	Priority     string
+	Status       string
+	Type         string
+	ProjectArea  string
+	UseCase      string
+	Slice        string
+	RelativePath string
+	Comments     []TicketCommentView
+	Missing      bool
+	Revision     string
+}
+
+// TicketCommentView is one rendered ticket comment.
+type TicketCommentView struct {
+	Header string
+	Body   string
 }
 
 // DashView is the read-only dashboard projection rendered by the Web UI.

@@ -18,6 +18,8 @@ const (
 	webActionDumpSave   = "dump.save"
 	webActionDumpAppend = "dump.append"
 
+	webActionTicketUpdate       = "ticket.update"
+	webActionTicketComment      = "ticket.comment"
 	webActionSpecGenerate       = "spec.generate"
 	webActionPlanGenerate       = "plan.generate"
 	webActionPlanRegenerate     = "plan.regenerate"
@@ -40,6 +42,10 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 	}
 
 	if response, handled, err := p.writeGenerationAction(ctx, operations, request); handled || err != nil {
+		return response, err
+	}
+
+	if response, handled, err := p.writeTicketAction(operations, request); handled || err != nil {
 		return response, err
 	}
 
@@ -104,6 +110,21 @@ func (p webViewProvider) writeGenerationAction(ctx context.Context, operations s
 	}
 }
 
+func (p webViewProvider) writeTicketAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+	switch request.Action {
+	case webActionTicketUpdate:
+		response, err := p.writeTicketUpdate(operations, request)
+
+		return response, true, err
+	case webActionTicketComment:
+		response, err := p.writeTicketComment(operations, request)
+
+		return response, true, err
+	default:
+		return webui.WriteActionResponse{}, false, nil
+	}
+}
+
 func (p webViewProvider) writeWorkAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
 	switch request.Action {
 	case webActionWorkPreview:
@@ -117,6 +138,54 @@ func (p webViewProvider) writeWorkAction(operations service, request webui.Write
 	default:
 		return webui.WriteActionResponse{}, false, nil
 	}
+}
+
+func (p webViewProvider) writeTicketUpdate(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	ticket, err := operations.ticketByKey(request.ID)
+	if err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	result, err := operations.UpdateTicketMetadata(TicketMetadataUpdateRequest{
+		Key:      request.ID,
+		Title:    request.Fields["title"],
+		Synopsis: request.Fields["synopsis"],
+	})
+	if err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	return webui.WriteActionResponse{
+		Status:       webui.WriteStatusOK,
+		Summary:      result.Message,
+		ChangedFiles: compactChangedFiles(ticket.RelativePath),
+		RedirectURL:  "/board",
+		Operation:    webOperation("ticket.update", "completed", ticket.Key, ticket.Status),
+	}, nil
+}
+
+func (p webViewProvider) writeTicketComment(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {
+	ticket, err := operations.ticketByKey(request.ID)
+	if err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	result, err := operations.AddTicketComment(TicketCommentRequest{
+		Key:    request.ID,
+		Author: "web",
+		Body:   request.Fields["content"],
+	})
+	if err != nil {
+		return webValidationWrite(err), nil
+	}
+
+	return webui.WriteActionResponse{
+		Status:       webui.WriteStatusOK,
+		Summary:      result.Message,
+		ChangedFiles: compactChangedFiles(ticket.RelativePath),
+		RedirectURL:  "/board",
+		Operation:    webOperation("ticket.comment", "completed", ticket.Key, ticket.Status),
+	}, nil
 }
 
 func (p webViewProvider) writeSpecGenerate(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, error) {

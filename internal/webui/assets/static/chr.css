@@ -445,7 +445,13 @@ a {
   margin-top: 10px;
   padding: 10px;
   background: var(--surface);
+  color: inherit;
+  text-decoration: none;
   box-shadow: none;
+}
+
+.ticket-card:hover {
+  border-color: var(--accent-bright);
 }
 
 .ticket-card--attention {
@@ -493,6 +499,221 @@ a {
   border-color: transparent;
   background: var(--accent);
   color: var(--surface);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding: 38px 26px;
+  background: rgb(8 40 46 / 0.28);
+}
+
+.ticket-modal {
+  width: min(1180px, calc(100vw - 96px));
+  max-height: calc(100vh - 76px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: 0 18px 50px rgb(8 40 46 / 0.22);
+}
+
+.ticket-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 28px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ticket-modal__header h2 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--surface);
+  font: 700 16px/1 var(--mono);
+  cursor: pointer;
+}
+
+.ticket-modal__body {
+  display: grid;
+  gap: 14px;
+  padding: 16px 28px 28px;
+}
+
+.readonly-field {
+  display: grid;
+  gap: 6px;
+}
+
+.readonly-field span,
+.ticket-modal__source span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.readonly-field strong,
+.readonly-field p,
+.readonly-field input,
+.readonly-field textarea {
+  min-height: 42px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.readonly-field input,
+.readonly-field textarea {
+  width: 100%;
+  font: inherit;
+}
+
+.readonly-field textarea {
+  resize: vertical;
+}
+
+.readonly-field--multi p,
+.readonly-field--multi textarea {
+  min-height: 72px;
+}
+
+.ticket-modal__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ticket-modal__meta span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  color: var(--muted);
+  background: var(--surface-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ticket-modal__source {
+  display: grid;
+  gap: 6px;
+}
+
+.ticket-comments {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.ticket-comments__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ticket-comments__header h3 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.ticket-comments__header span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ticket-comments__empty {
+  margin: 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  color: var(--muted);
+  background: rgb(255 255 255 / 0.42);
+  font-size: 14px;
+  text-align: center;
+}
+
+.ticket-comments__list {
+  display: grid;
+  gap: 8px;
+}
+
+.ticket-comment {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: var(--surface);
+}
+
+.ticket-comment header {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ticket-comment p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.ticket-comments__form {
+  display: grid;
+  gap: 10px;
+}
+
+.ticket-edit-form {
+  display: grid;
+  gap: 14px;
+}
+
+.ticket-comments__composer textarea {
+  min-height: 90px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  line-height: 1.35;
+}
+
+.ticket-comments__actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .attention-strip {

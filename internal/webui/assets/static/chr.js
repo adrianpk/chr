@@ -37,6 +37,32 @@
     syncPinned();
   }
 
+  function closeModal() {
+    const root = document.querySelector("#modal-root");
+    if (root) root.innerHTML = "";
+  }
+
+  function setupModalEvents() {
+    if (document.body.dataset.modalEventsBound === "1") return;
+    document.body.dataset.modalEventsBound = "1";
+
+    document.body.addEventListener("click", function (event) {
+      if (event.target.closest("[data-modal-close]")) {
+        closeModal();
+        return;
+      }
+
+      const backdrop = event.target.closest("[data-modal-backdrop]");
+      if (backdrop && event.target === backdrop) closeModal();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeModal();
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", setupTopChrome);
+  document.addEventListener("DOMContentLoaded", setupModalEvents);
   document.addEventListener("htmx:afterSwap", setupTopChrome);
+  document.addEventListener("htmx:afterSwap", setupModalEvents);
 })();

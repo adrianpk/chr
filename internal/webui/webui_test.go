@@ -72,6 +72,52 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 	}
 }
 
+func TestHandlerTicketModal(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	board := httptest.NewRecorder()
+	handler.ServeHTTP(board, httptest.NewRequest(http.MethodGet, "/board", nil))
+
+	if board.Code != http.StatusOK {
+		t.Fatalf("board status = %d, want %d", board.Code, http.StatusOK)
+	}
+
+	if !strings.Contains(board.Body.String(), `hx-get="/board/ticket?key=CHR-1"`) {
+		t.Fatalf("board does not contain ticket modal trigger:\n%s", board.Body.String())
+	}
+
+	detail := httptest.NewRecorder()
+	handler.ServeHTTP(detail, httptest.NewRequest(http.MethodGet, "/board/ticket?key=CHR-1", nil))
+
+	if detail.Code != http.StatusOK {
+		t.Fatalf("detail status = %d, want %d", detail.Code, http.StatusOK)
+	}
+
+	for _, want := range []string{
+		"ticket-modal",
+		"Ready work",
+		"Ready work synopsis.",
+		"backend",
+		"Comments",
+		"Existing comment.",
+		`name="action" value="ticket.update"`,
+		`input name="title" required value="Ready work"`,
+		`textarea name="synopsis" required`,
+		`name="action" value="ticket.comment"`,
+		`textarea name="content" required`,
+	} {
+		if !strings.Contains(detail.Body.String(), want) {
+			t.Fatalf("detail body does not contain %q:\n%s", want, detail.Body.String())
+		}
+	}
+}
+
 func TestHandlerTokenAccessPolicy(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data: testShellData(),
@@ -602,6 +648,23 @@ func (testDataProvider) BoardView(context.Context) (BoardView, error) {
 			},
 		},
 		Revision: "board-revision",
+	}, nil
+}
+
+func (testDataProvider) TicketDetailView(_ context.Context, request TicketDetailRequest) (TicketDetailView, error) {
+	return TicketDetailView{
+		Key:          request.Key,
+		Title:        "Ready work",
+		Synopsis:     "Ready work synopsis.",
+		Priority:     "high",
+		Status:       "ready_for_dev",
+		Type:         "feature",
+		ProjectArea:  "backend",
+		RelativePath: "CHR-1-ready-work.md",
+		Comments: []TicketCommentView{
+			{Header: "2026-05-18T13:00:00Z web", Body: "Existing comment."},
+		},
+		Revision: "ticket-detail-revision",
 	}, nil
 }
 

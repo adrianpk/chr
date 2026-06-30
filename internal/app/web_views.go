@@ -3,7 +3,9 @@ package app
 import (
 	"context"
 	"io/fs"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -57,6 +59,91 @@ func (p webViewProvider) BoardView(ctx context.Context) (webui.BoardView, error)
 	view.Revision = webStableRevision(view)
 
 	return view, nil
+}
+
+func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.TicketDetailRequest) (webui.TicketDetailView, error) {
+	ticket, err := p.service(ctx).ticketByKey(request.Key)
+	if err != nil {
+		return webui.TicketDetailView{}, err
+	}
+
+	view := webui.TicketDetailView{
+		Key:          ticket.Key,
+		Title:        ticket.Title,
+		Synopsis:     ticket.Synopsis,
+		Priority:     ticket.Priority,
+		Status:       ticket.Status,
+		Type:         ticket.Type,
+		ProjectArea:  ticket.ProjectArea,
+		UseCase:      ticket.UseCase,
+		Slice:        ticket.Slice,
+		RelativePath: ticket.RelativePath,
+		Comments:     webTicketComments(ticket.Path),
+	}
+	view.Revision = webStableRevision(view)
+
+	return view, nil
+}
+
+func webTicketComments(path string) []webui.TicketCommentView {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+
+	return parseWebTicketComments(string(content))
+}
+
+func parseWebTicketComments(content string) []webui.TicketCommentView {
+	var comments []webui.TicketCommentView
+	var current *webui.TicketCommentView
+	inComments := false
+
+	for _, line := range strings.Split(content, "\n") {
+		trimmed := strings.TrimSpace(line)
+
+		if trimmed == "# Comments" {
+			inComments = true
+			continue
+		}
+
+		if !inComments {
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "# ") {
+			break
+		}
+
+		if strings.HasPrefix(trimmed, "## ") {
+			if current != nil {
+				comments = append(comments, trimWebTicketComment(*current))
+			}
+			current = &webui.TicketCommentView{Header: strings.TrimSpace(strings.TrimPrefix(trimmed, "## "))}
+			continue
+		}
+
+		if current == nil {
+			continue
+		}
+
+		if current.Body != "" || trimmed != "" {
+			current.Body += line + "\n"
+		}
+	}
+
+	if current != nil {
+		comments = append(comments, trimWebTicketComment(*current))
+	}
+
+	return comments
+}
+
+func trimWebTicketComment(comment webui.TicketCommentView) webui.TicketCommentView {
+	comment.Header = strings.TrimSpace(comment.Header)
+	comment.Body = strings.TrimSpace(comment.Body)
+
+	return comment
 }
 
 func (p webViewProvider) DashView(ctx context.Context) (webui.DashView, error) {

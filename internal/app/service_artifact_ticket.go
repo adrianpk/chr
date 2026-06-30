@@ -252,6 +252,13 @@ type TicketCommentRequest struct {
 	Body   string
 }
 
+// TicketMetadataUpdateRequest describes editable ticket metadata.
+type TicketMetadataUpdateRequest struct {
+	Key      string
+	Title    string
+	Synopsis string
+}
+
 // TicketReviewReferenceRequest describes review metadata to attach to a ticket.
 type TicketReviewReferenceRequest struct {
 	Key    string
@@ -296,6 +303,33 @@ func (s service) AddTicketComment(request TicketCommentRequest) (TicketOperation
 
 	return TicketOperationResult{
 		Message: "Added comment to ticket " + ticket.Key + ".",
+		Tickets: tickets,
+	}, nil
+}
+
+func (s service) UpdateTicketMetadata(request TicketMetadataUpdateRequest) (TicketOperationResult, error) {
+	ticket, err := s.ticketByKey(request.Key)
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	err = core.NewTicketMetadataUpdater().UpdateMetadata(s.ctx, core.UpdateTicketMetadataOptions{
+		Path:      ticket.Path,
+		Title:     request.Title,
+		Synopsis:  request.Synopsis,
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	tickets, err := s.listProjectTickets()
+	if err != nil {
+		return TicketOperationResult{}, err
+	}
+
+	return TicketOperationResult{
+		Message: "Updated ticket " + ticket.Key + ".",
 		Tickets: tickets,
 	}, nil
 }
