@@ -44,6 +44,11 @@ The board exposes ticket state as the implementation queue changes.
 Generated tickets appear on the board once planning has produced implementable
 work.
 
+![Web UI board preview](../../assets/img/gallery/chr-agent-work-22-web-ui-board-wip.png)
+
+The optional Web UI mirrors the board workflow. This first pass is usable while
+the interaction details continue to be refined.
+
 ## Dash
 
 ![Dash ready queue](../../assets/img/gallery/chr-agent-work-02-dash-ready-queue.png)
