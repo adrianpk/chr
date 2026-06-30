@@ -132,16 +132,15 @@
 <article class="ticket-card">
   <div class="ticket-card__meta">
     <span class="ticket-card__key">{{.Key}}</span>
-    <span>{{.Priority}}</span>
+    {{if .Priority}}<span class="ticket-card__priority">{{.Priority}}</span>{{end}}
   </div>
   <h3>{{.Title}}</h3>
   {{if .Synopsis}}<p>{{.Synopsis}}</p>{{end}}
-  <div class="ticket-card__tags">
-    {{(chip .Status).Muted.Render}}
-    {{if .Type}}{{(chip .Type).Muted.Render}}{{end}}
-    {{if .Slice}}{{(chip .Slice).Muted.Render}}{{end}}
-  </div>
-  {{if .RelativePath}}<code>{{.RelativePath}}</code>{{end}}
+  {{if .ProjectArea}}
+    <div class="ticket-card__footer">{{(chip .ProjectArea).Primary.Render}}</div>
+  {{else if .UseCase}}
+    <div class="ticket-card__footer">{{(chip .UseCase).Primary.Render}}</div>
+  {{end}}
 </article>
 {{end}}
 
