@@ -75,7 +75,7 @@ func TestHandlerAssetsAndHealthz(t *testing.T) {
 
 	for path, want := range map[string]string{
 		"/assets/chr.css":      ".app-shell",
-		"/assets/chr.js":       "setupTopChrome",
+		"/assets/chr.js":       "openTemplateModal",
 		"/assets/chr-logo.png": "",
 		"/assets/favicon.svg":  "Chr",
 		"/assets/htmx.min.js":  "htmx",
@@ -364,7 +364,7 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		want []string
 	}{
 		{path: "/cases", want: []string{"Cases", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
-		{path: "/dumps", want: []string{"Dumps", "New Dump", "For Use Case", "dump-card", "Project Notes", "Project-wide", "Notes preview"}},
+		{path: "/dumps", want: []string{"Dumps", "New Dump", "For Use Case", `data-modal-template="dump-create-modal"`, `id="dump-create-modal"`, "dump-card", "Project Notes", "Project-wide", "Notes preview"}},
 		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
 		{path: "/specs", want: []string{"Specs", "Project Spec"}},
 		{path: "/plans", want: []string{"Plans", "No plans found."}},
@@ -404,6 +404,28 @@ func TestHandlerCasesCatalogHidesSourcePath(t *testing.T) {
 
 	if strings.Contains(recorder.Body.String(), ".chr/user/cases/blog.md") {
 		t.Fatalf("cases catalog exposes source path:\n%s", recorder.Body.String())
+	}
+}
+
+func TestHandlerDumpsCreateUsesModalTemplates(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/dumps", nil))
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	for _, unwanted := range []string{`href="#dump-create"`, `href="#dump-create-case"`} {
+		if strings.Contains(recorder.Body.String(), unwanted) {
+			t.Fatalf("dumps catalog contains inline create trigger %q:\n%s", unwanted, recorder.Body.String())
+		}
 	}
 }
 

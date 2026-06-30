@@ -846,12 +846,35 @@ a {
 }
 
 .dump-create-panel {
-  display: none;
   width: min(560px, 100%);
+  max-height: calc(100vh - 76px);
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 22px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  scrollbar-gutter: stable;
 }
 
-.dump-create-panel:target {
-  display: block;
+.dump-create-panel__header {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+
+.dump-create-panel__header h2 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.dump-create-panel__close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 1;
 }
 
 .case-table {

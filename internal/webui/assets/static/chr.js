@@ -42,11 +42,28 @@
     if (root) root.innerHTML = "";
   }
 
+  function openTemplateModal(templateID) {
+    const root = document.querySelector("#modal-root");
+    const template = document.getElementById(templateID);
+    if (!root || !template) return;
+
+    root.innerHTML = "";
+    root.appendChild(template.content.cloneNode(true));
+    if (window.htmx) window.htmx.process(root);
+  }
+
   function setupModalEvents() {
     if (document.body.dataset.modalEventsBound === "1") return;
     document.body.dataset.modalEventsBound = "1";
 
     document.body.addEventListener("click", function (event) {
+      const modalTrigger = event.target.closest("[data-modal-template]");
+      if (modalTrigger) {
+        event.preventDefault();
+        openTemplateModal(modalTrigger.dataset.modalTemplate);
+        return;
+      }
+
       if (event.target.closest("[data-modal-close]")) {
         closeModal();
         return;
