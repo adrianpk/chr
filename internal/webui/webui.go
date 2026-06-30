@@ -1,4 +1,4 @@
-// Package webui owns the optional local Web UI handler and embedded assets.
+// Package webui owns the local Web UI handler and embedded assets.
 package webui
 
 import (

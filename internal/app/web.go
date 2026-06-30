@@ -23,7 +23,7 @@ import (
 func newWebCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:  "web",
-		Usage: "Run the optional local Web UI",
+		Usage: "Run the local Web UI",
 		Commands: []*cli.Command{
 			newWebServeCommand(stdout, deps),
 		},
@@ -33,7 +33,7 @@ func newWebCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 func newWebServeCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 	return &cli.Command{
 		Name:   "serve",
-		Usage:  "Serve the optional local Web UI for the resolved project",
+		Usage:  "Serve the local Web UI for the resolved project",
 		Flags:  webServeFlags(),
 		Action: webServeAction(stdout, deps),
 	}

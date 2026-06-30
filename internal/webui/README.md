@@ -3,7 +3,7 @@
 Purpose: server-rendered local Web UI presentation boundary.
 
 This package owns embedded templates, static assets, and HTTP handlers for the
-optional local Web UI. It receives already-resolved project/config view data
+local Web UI. It receives already-resolved project/config view data
 from `internal/app`.
 
 Boundary:

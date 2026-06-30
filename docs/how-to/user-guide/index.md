@@ -178,7 +178,7 @@ core.
 
 ## Open the Local Web UI
 
-The Web UI is an optional browser surface over the same project state. It does
+The Web UI is a browser surface over the same project state. It does
 not start from `chr`, `chr tui`, ticket loops, agent work, or other normal
 commands.
 
