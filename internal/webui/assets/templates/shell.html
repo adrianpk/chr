@@ -215,18 +215,24 @@
 
 {{define "catalog_content.html"}}
 {{template "revision_marker.html" .}}
+{{if ne .Catalog.Family "cases"}}
 <div class="catalog-toolbar">
   <div class="summary-item">
     <span class="summary-label">Artifacts</span>
     <strong>{{len .Catalog.Items}}</strong>
   </div>
 </div>
+{{end}}
 {{if .Catalog.Items}}
+  {{if eq .Catalog.Family "cases"}}
+    {{template "case_table.html" .}}
+  {{else}}
   <div class="artifact-grid">
     {{range .Catalog.Items}}
       {{template "artifact_card.html" .}}
     {{end}}
   </div>
+  {{end}}
 {{else}}
   <p class="empty-state">{{.Catalog.EmptyMessage}}</p>
 {{end}}
@@ -242,6 +248,31 @@
 {{if eq .Catalog.Family "quizzes"}}
   {{template "quiz_action_forms.html" .}}
 {{end}}
+{{end}}
+
+{{define "case_table.html"}}
+<div class="case-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Slug</th>
+        <th><span class="sr-only">Action</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Catalog.Items}}
+      <tr>
+        <td><a href="{{.DetailURL}}">{{.Title}}</a></td>
+        <td>{{.Preview}}</td>
+        <td><code>{{.Scope}}</code></td>
+        <td><a class="button" href="{{.DetailURL}}" hx-get="/cases/detail/fragment?id={{.ID}}" hx-target="#modal-root" hx-swap="innerHTML">Edit</a></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
 {{end}}
 
 {{define "artifact_card.html"}}
@@ -262,6 +293,9 @@
 
 {{define "artifact_detail_content.html"}}
 {{template "revision_marker.html" .}}
+{{if eq .Detail.Family "cases"}}
+  {{template "case_edit_page.html" .}}
+{{else}}
 <div class="detail-actions">
   <a class="button" href="/{{.Detail.Family}}">Back</a>
 </div>
@@ -289,35 +323,56 @@
     </div>
   {{end}}
   <pre class="artifact-content">{{.Detail.Content}}</pre>
-  {{if eq .Detail.Family "cases"}}
-    {{template "case_edit_form.html" .}}
-  {{end}}
   {{if eq .Detail.Family "dumps"}}
     {{template "dump_edit_forms.html" .}}
   {{end}}
 {{end}}
 {{end}}
+{{end}}
 
-{{define "case_edit_form.html"}}
-<form class="action-form" method="post" action="/actions" onsubmit="return confirm('Save case metadata changes?')">
+{{define "case_modal.html"}}
+<div class="modal-backdrop" data-modal-backdrop>
+  <section class="case-edit-panel case-edit-panel--modal" role="dialog" aria-modal="true" aria-labelledby="case-edit-title">
+    <button class="icon-button case-edit-panel__close" type="button" data-modal-close aria-label="Close case editor">x</button>
+    {{template "case_edit_panel.html" .}}
+  </section>
+</div>
+{{end}}
+
+{{define "case_edit_page.html"}}
+<div class="case-edit-page">
+  <section class="case-edit-panel">
+    {{template "case_edit_panel.html" .}}
+  </section>
+</div>
+{{end}}
+
+{{define "case_edit_panel.html"}}
+<header class="case-edit-panel__header">
+  <h2 id="case-edit-title">Edit Case</h2>
+</header>
+<form class="case-edit-form" method="post" action="/actions"{{if .CaseModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}}>
   <input type="hidden" name="action" value="case.update">
   <input type="hidden" name="family" value="cases">
   <input type="hidden" name="id" value="{{.Detail.ID}}">
   <input type="hidden" name="revision" value="{{.Detail.Revision}}">
   <input type="hidden" name="confirm" value="true">
-  <label>
+  {{if .CaseModal}}<input type="hidden" name="surface" value="modal">{{end}}
+  <label class="readonly-field">
     <span>Name</span>
     <input name="name" value="{{.Detail.Title}}">
   </label>
-  <label>
+  <label class="readonly-field readonly-field--multi">
     <span>Description</span>
-    <textarea name="description" rows="3">{{.Detail.Description}}</textarea>
+    <textarea name="description" rows="6">{{.Detail.Description}}</textarea>
   </label>
-  <label>
+  <label class="readonly-field readonly-field--multi">
     <span>Context</span>
     <textarea name="context" rows="6">{{.Detail.Context}}</textarea>
   </label>
-  <button class="button button--primary" type="submit">Save</button>
+  <div class="case-edit-form__actions">
+    <button class="button" type="submit">Save</button>
+  </div>
 </form>
 {{end}}
 

@@ -50,6 +50,15 @@ html {
   min-width: 320px;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -346,6 +355,7 @@ a {
 
 .summary-item,
 .detail-block,
+.case-table,
 .board-column,
 .dash-panel,
 .artifact-card,
@@ -767,6 +777,125 @@ a {
   color: var(--ink-strong);
   text-decoration-color: var(--accent-bright);
   text-underline-offset: 3px;
+}
+
+.case-table {
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+}
+
+.case-table table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.case-table th,
+.case-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.case-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.case-table th:nth-child(1),
+.case-table td:nth-child(1) {
+  width: 22%;
+}
+
+.case-table th:nth-child(3),
+.case-table td:nth-child(3) {
+  width: 18%;
+}
+
+.case-table th:nth-child(4),
+.case-table td:nth-child(4) {
+  width: 110px;
+  text-align: right;
+}
+
+.case-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.case-table a:not(.button) {
+  color: var(--ink-strong);
+  text-decoration: none;
+}
+
+.case-table a:not(.button):hover {
+  color: var(--accent);
+}
+
+.case-table code {
+  color: var(--ink);
+  font: 13px/1.4 var(--mono);
+}
+
+.case-edit-page {
+  display: grid;
+  justify-items: center;
+}
+
+.case-edit-panel {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  width: min(1120px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px 28px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.case-edit-panel--modal {
+  width: min(1120px, calc(100vw - 96px));
+  max-height: calc(100vh - 76px);
+  overflow-y: auto;
+  padding-right: calc(28px + var(--scrollbar-content-gap));
+  scrollbar-gutter: stable;
+}
+
+.case-edit-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+
+.case-edit-panel__header h2 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.case-edit-panel__close {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 1;
+}
+
+.case-edit-form {
+  display: grid;
+  gap: 14px;
+}
+
+.case-edit-form__actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .catalog-toolbar,

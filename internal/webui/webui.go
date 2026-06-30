@@ -320,6 +320,22 @@ func (h handler) artifactDetailFragment(family string) http.HandlerFunc {
 			return
 		}
 
+		if family == "cases" {
+			data, err := h.artifactDetailPageData(r, family)
+			if err != nil {
+				http.Error(w, "load artifact", http.StatusInternalServerError)
+
+				return
+			}
+			data.CaseModal = true
+
+			if err := h.renderer.Fragment(w, "case_modal.html", data); err != nil {
+				http.Error(w, "render artifact", http.StatusInternalServerError)
+			}
+
+			return
+		}
+
 		data, err := h.artifactDetailPageData(r, family)
 		if err != nil {
 			http.Error(w, "load artifact", http.StatusInternalServerError)
@@ -340,9 +356,18 @@ func (h handler) writeAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := h.provider.WriteAction(r.Context(), writeActionRequest(r))
+	request := writeActionRequest(r)
+	result, err := h.provider.WriteAction(r.Context(), request)
 	if err != nil {
 		http.Error(w, "write action", http.StatusInternalServerError)
+
+		return
+	}
+
+	if shouldCloseModalAfterWrite(r, request, result) {
+		htmx.Retarget(w, "#modal-root")
+		htmx.Reswap(w, htmx.SwapInner)
+		w.WriteHeader(http.StatusOK)
 
 		return
 	}
@@ -428,17 +453,25 @@ func writeActionRequest(r *http.Request) WriteActionRequest {
 		ID:       r.PostFormValue("id"),
 		Revision: r.PostFormValue("revision"),
 		Confirm:  r.PostFormValue("confirm") == "true",
+		Surface:  r.PostFormValue("surface"),
 		Fields:   fields,
 	}
 }
 
 func writeActionReservedField(key string) bool {
 	switch key {
-	case "action", "family", "id", "revision", "confirm":
+	case "action", "family", "id", "revision", "confirm", "surface":
 		return true
 	default:
 		return false
 	}
+}
+
+func shouldCloseModalAfterWrite(r *http.Request, request WriteActionRequest, result WriteActionResponse) bool {
+	return htmx.IsRequest(r) &&
+		result.Status == WriteStatusOK &&
+		request.Action == "case.update" &&
+		request.Surface == "modal"
 }
 
 func healthz(w http.ResponseWriter, _ *http.Request) {
@@ -708,9 +741,17 @@ func (h handler) artifactDetailPageData(r *http.Request, family string) (PageDat
 		View:       "artifact_detail",
 		Title:      detail.Title,
 		Revision:   detail.Revision,
-		RefreshURL: "/" + family + "/detail/fragment?id=" + url.QueryEscape(r.URL.Query().Get("id")),
+		RefreshURL: artifactDetailRefreshURL(family, r.URL.Query().Get("id")),
 		Detail:     detail,
 	}, nil
+}
+
+func artifactDetailRefreshURL(family, id string) string {
+	if family == "cases" {
+		return ""
+	}
+
+	return "/" + family + "/detail/fragment?id=" + url.QueryEscape(id)
 }
 
 func (h handler) shellData(active string) ShellData {
@@ -718,6 +759,7 @@ func (h handler) shellData(active string) ShellData {
 	if strings.TrimSpace(data.ProjectName) == "" {
 		data.ProjectName = data.ProjectID
 	}
+	data.ProjectName = displayProjectName(data.ProjectName)
 
 	data.Navigation = make([]ui.NavLink, 0, len(h.data.Navigation))
 
@@ -727,6 +769,20 @@ func (h handler) shellData(active string) ShellData {
 	}
 
 	return data
+}
+
+func displayProjectName(name string) string {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return ""
+	}
+
+	first := name[0]
+	if first >= 'a' && first <= 'z' {
+		return string(first-'a'+'A') + name[1:]
+	}
+
+	return name
 }
 
 func navLinkActive(active, href string) bool {

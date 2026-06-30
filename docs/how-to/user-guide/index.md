@@ -304,6 +304,11 @@ The system is use-case based. The list represents use cases. Use-case metadata
 and context become part of the material used by dumps, quizzes, specs, plans,
 and tickets.
 
+Use the description as the short human-facing summary for lists, selectors, and
+previews. Use the context field for longer use-case material that should be
+included when Chryso builds the total agent context: constraints, decisions,
+intent, edge cases, and notes that do not belong in a one-line summary.
+
 | Key | Behavior |
 | --- | --- |
 | `up` / `down` or `k` / `j` in the list pane | Select a use case. |
@@ -325,9 +330,11 @@ Refresh is blocked while use-case edits are active or unsaved.
 Open the Dumps view with `F3`.
 
 Dumps are free-form Markdown context. They can be project-wide or tied to a use
-case. Creating a dump writes a curated primary document plus a raw capture
-sibling. The TUI lists curated dumps by use case, shows the selected curated
-content in the detail pane, and shows the raw sibling path when one exists.
+case. A dump is a document type for material the user already knows or
+remembers; quizzes complement dumps by prompting for missing or latent context.
+Creating a dump writes a curated primary document plus a raw capture sibling.
+The TUI lists curated dumps by use case, shows the selected curated content in
+the detail pane, and shows the raw sibling path when one exists.
 
 | Key | Behavior |
 | --- | --- |

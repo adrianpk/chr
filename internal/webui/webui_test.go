@@ -45,6 +45,28 @@ func TestHandlerShellAndBootstrap(t *testing.T) {
 	}
 }
 
+func TestHandlerShellCapitalizesProjectNameForDisplay(t *testing.T) {
+	data := testShellData()
+	data.ProjectName = "tictactoe"
+	handler, err := NewHandler(HandlerOptions{Data: data})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if !strings.Contains(recorder.Body.String(), "Tictactoe") {
+		t.Fatalf("body does not contain capitalized project name:\n%s", recorder.Body.String())
+	}
+	if strings.Contains(recorder.Body.String(), ">tictactoe<") {
+		t.Fatalf("body contains raw lowercase project name:\n%s", recorder.Body.String())
+	}
+}
+
 func TestHandlerAssetsAndHealthz(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{Data: testShellData()})
 	if err != nil {
@@ -341,7 +363,7 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		path string
 		want []string
 	}{
-		{path: "/cases", want: []string{"Cases", "Blog Authoring", "Case context"}},
+		{path: "/cases", want: []string{"Cases", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
 		{path: "/dumps", want: []string{"Dumps", "Project Notes", ".chr/default/dumps/project-notes.md"}},
 		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
 		{path: "/specs", want: []string{"Specs", "Project Spec"}},
@@ -361,6 +383,125 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 				t.Fatalf("%s body does not contain %q:\n%s", tt.path, want, recorder.Body.String())
 			}
 		}
+	}
+}
+
+func TestHandlerCasesCatalogHidesSourcePath(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/cases", nil))
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+
+	if strings.Contains(recorder.Body.String(), ".chr/user/cases/blog.md") {
+		t.Fatalf("cases catalog exposes source path:\n%s", recorder.Body.String())
+	}
+}
+
+func TestHandlerCaseEditUsesSharedPanel(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	page := httptest.NewRecorder()
+	handler.ServeHTTP(page, httptest.NewRequest(http.MethodGet, "/cases/detail?id=blog", nil))
+
+	if page.Code != http.StatusOK {
+		t.Fatalf("page status = %d, want %d", page.Code, http.StatusOK)
+	}
+
+	for _, want := range []string{"case-edit-panel", "Edit Case", "Blog Authoring", "Case context", "case.update"} {
+		if !strings.Contains(page.Body.String(), want) {
+			t.Fatalf("page body does not contain %q:\n%s", want, page.Body.String())
+		}
+	}
+
+	for _, unwanted := range []string{".chr/user/cases/blog.md", "artifact-content"} {
+		if strings.Contains(page.Body.String(), unwanted) {
+			t.Fatalf("page body contains %q:\n%s", unwanted, page.Body.String())
+		}
+	}
+	if strings.Contains(page.Body.String(), `name="surface" value="modal"`) {
+		t.Fatalf("page body contains modal surface field:\n%s", page.Body.String())
+	}
+
+	modal := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/cases/detail/fragment?id=blog", nil)
+	request.Header.Set(htmx.HeaderRequest, "true")
+	handler.ServeHTTP(modal, request)
+
+	if modal.Code != http.StatusOK {
+		t.Fatalf("modal status = %d, want %d", modal.Code, http.StatusOK)
+	}
+
+	for _, want := range []string{
+		"modal-backdrop",
+		"case-edit-panel",
+		"Edit Case",
+		"Blog Authoring",
+		"Case context",
+		"case.update",
+		`hx-post="/actions"`,
+		`name="surface" value="modal"`,
+	} {
+		if !strings.Contains(modal.Body.String(), want) {
+			t.Fatalf("modal body does not contain %q:\n%s", want, modal.Body.String())
+		}
+	}
+}
+
+func TestHandlerCaseModalSaveClosesModal(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	form := url.Values{
+		"action":      {"case.update"},
+		"family":      {"cases"},
+		"id":          {"blog"},
+		"confirm":     {"true"},
+		"surface":     {"modal"},
+		"name":        {"Updated Blog"},
+		"description": {"Updated description."},
+		"context":     {"Updated context."},
+	}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/actions", strings.NewReader(form.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	request.Header.Set(htmx.HeaderRequest, "true")
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if got := recorder.Header().Get(htmx.HeaderRetarget); got != "#modal-root" {
+		t.Fatalf("HX-Retarget = %q, want #modal-root", got)
+	}
+	if got := recorder.Header().Get(htmx.HeaderReswap); got != string(htmx.SwapInner) {
+		t.Fatalf("HX-Reswap = %q, want %q", got, htmx.SwapInner)
+	}
+	if got := recorder.Header().Get(htmx.HeaderRedirect); got != "" {
+		t.Fatalf("HX-Redirect = %q, want empty", got)
+	}
+	if recorder.Body.String() != "" {
+		t.Fatalf("body = %q, want empty", recorder.Body.String())
 	}
 }
 
@@ -795,6 +936,20 @@ func testCatalogItems(family string) []ArtifactCardView {
 }
 
 func (testDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDetailRequest) (ArtifactDetailView, error) {
+	if request.Family == "cases" && request.ID == "blog" {
+		return ArtifactDetailView{
+			Family:      request.Family,
+			ID:          request.ID,
+			Title:       "Blog Authoring",
+			Description: "Case context",
+			Context:     "Draft blog posts with review.",
+			Status:      "available",
+			Scope:       "blog",
+			Path:        ".chr/default/cases/blog.md",
+			Revision:    "case-detail-revision",
+		}, nil
+	}
+
 	if request.ID != ".chr/default/dumps/project-notes.md" {
 		return ArtifactDetailView{
 			Family:   request.Family,

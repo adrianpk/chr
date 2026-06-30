@@ -31,6 +31,7 @@ type PageData struct {
 	Catalog    ArtifactCatalogView
 	Detail     ArtifactDetailView
 	Write      WriteActionResponse
+	CaseModal  bool
 }
 
 func newStaticDataProvider(shell ShellData) staticDataProvider {
@@ -328,6 +329,7 @@ type WriteActionRequest struct {
 	ID       string
 	Revision string
 	Confirm  bool
+	Surface  string
 	Fields   map[string]string
 }
 
