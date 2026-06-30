@@ -364,7 +364,7 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		want []string
 	}{
 		{path: "/cases", want: []string{"Cases", "case-table", "Blog Authoring", "Case context", "blog", "Edit", `hx-get="/cases/detail/fragment?id=blog"`}},
-		{path: "/dumps", want: []string{"Dumps", "Project Notes", ".chr/default/dumps/project-notes.md"}},
+		{path: "/dumps", want: []string{"Dumps", "New Dump", "For Use Case", "dump-card", "Project Notes", "Project-wide", "Notes preview"}},
 		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
 		{path: "/specs", want: []string{"Specs", "Project Spec"}},
 		{path: "/plans", want: []string{"Plans", "No plans found."}},
@@ -897,8 +897,10 @@ func testCatalogItems(family string) []ArtifactCardView {
 				Family:       family,
 				ID:           ".chr/default/dumps/project-notes.md",
 				Title:        "Project Notes",
+				DisplayTitle: "Project Notes",
 				Status:       "curated",
 				Scope:        "Project-wide",
+				Meta:         "Project-wide",
 				Path:         ".chr/default/dumps/project-notes.md",
 				Preview:      "Notes preview",
 				DetailURL:    "/dumps/detail?id=.chr/default/dumps/project-notes.md",

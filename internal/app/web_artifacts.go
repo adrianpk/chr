@@ -216,16 +216,20 @@ func webCaseCards(projectDir string, cases []core.CaseMetadata) []webui.Artifact
 func webDumpCards(dumps []tui.DumpView) []webui.ArtifactCardView {
 	cards := make([]webui.ArtifactCardView, 0, len(dumps))
 	for _, dump := range dumps {
+		displayTitle := webDumpDisplayTitle(dump.Title)
+		scope := webScopeLabel(dump.Scope.CaseSlug, dump.UseCaseTitle)
 		card := webui.ArtifactCardView{
 			Family:       webArtifactFamilyDumps,
 			ID:           dump.RelativePath,
 			Title:        dump.Title,
+			DisplayTitle: displayTitle,
 			Status:       dump.Status,
-			Scope:        webScopeLabel(dump.Scope.CaseSlug, dump.UseCaseTitle),
+			Scope:        scope,
+			Meta:         webDumpMeta(displayTitle, scope, dump.Status),
 			Path:         dump.RelativePath,
 			SourcePath:   dump.SourcePath,
 			UpdatedAt:    webArtifactTime(dump.UpdatedAt),
-			Preview:      dump.Preview,
+			Preview:      webDumpPreview(dump.Title, dump.Preview),
 			ContentState: webContentState(dump.RelativePath != ""),
 			Revision:     webFileRevision(dump.SourcePath),
 		}
@@ -234,6 +238,88 @@ func webDumpCards(dumps []tui.DumpView) []webui.ArtifactCardView {
 	}
 
 	return cards
+}
+
+func webDumpDisplayTitle(title string) string {
+	title = strings.TrimSpace(title)
+	for _, suffix := range []string{" Context", " context"} {
+		if strings.HasSuffix(title, suffix) {
+			return strings.TrimSpace(strings.TrimSuffix(title, suffix))
+		}
+	}
+
+	return title
+}
+
+func webDumpMeta(displayTitle, scope, status string) string {
+	parts := []string{}
+	if strings.TrimSpace(scope) != "" && !strings.EqualFold(strings.TrimSpace(displayTitle), strings.TrimSpace(scope)) {
+		parts = append(parts, strings.TrimSpace(scope))
+	}
+	if strings.TrimSpace(status) != "" && !strings.EqualFold(strings.TrimSpace(status), "curated") {
+		parts = append(parts, strings.TrimSpace(status))
+	}
+
+	return strings.Join(parts, " / ")
+}
+
+func webDumpPreview(title, content string) string {
+	content = stripMarkdownFrontmatter(strings.TrimSpace(content))
+	lines := strings.Split(content, "\n")
+	previewLines := make([]string, 0, len(lines))
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		line = strings.TrimSpace(strings.TrimLeft(line, "#"))
+		if line == "" || strings.EqualFold(line, strings.TrimSpace(title)) || webDumpPreviewHeading(line) {
+			continue
+		}
+
+		previewLines = append(previewLines, line)
+	}
+
+	preview := strings.Join(previewLines, " ")
+	preview = strings.Join(strings.Fields(preview), " ")
+	if preview == "" {
+		return "No entries yet"
+	}
+
+	const maxPreviewRunes = 220
+	runes := []rune(preview)
+	if len(runes) > maxPreviewRunes {
+		return strings.TrimSpace(string(runes[:maxPreviewRunes])) + "..."
+	}
+
+	return preview
+}
+
+func webDumpPreviewHeading(line string) bool {
+	normalized := strings.Trim(strings.ToLower(strings.TrimSpace(line)), ":")
+	switch normalized {
+	case "summary", "context", "highlights", "notes", "details", "required behavior", "acceptance criteria":
+		return true
+	default:
+		return false
+	}
+}
+
+func stripMarkdownFrontmatter(content string) string {
+	lines := strings.Split(content, "\n")
+	if len(lines) == 0 || strings.TrimSpace(lines[0]) != "---" {
+		return content
+	}
+
+	for index := 1; index < len(lines); index++ {
+		if strings.TrimSpace(lines[index]) == "---" {
+			return strings.TrimSpace(strings.Join(lines[index+1:], "\n"))
+		}
+	}
+
+	return content
 }
 
 func webQuizCards(quizzes []tui.QuizView) []webui.ArtifactCardView {

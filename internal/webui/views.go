@@ -294,8 +294,10 @@ type ArtifactCardView struct {
 	Family       string
 	ID           string
 	Title        string
+	DisplayTitle string
 	Status       string
 	Scope        string
+	Meta         string
 	Path         string
 	SourcePath   string
 	UpdatedAt    string

@@ -400,6 +400,12 @@ func TestWebServeArtifactCatalogUsesProjectArtifacts(t *testing.T) {
 	if len(dumps.Items) != 1 || dumps.Items[0].Title != "Blog Context" {
 		t.Fatalf("dumps catalog = %#v, want Blog Context", dumps.Items)
 	}
+	if dumps.Items[0].DisplayTitle != "Blog" || dumps.Items[0].Meta != "Blog Publishing" {
+		t.Fatalf("dump display = title %q meta %q, want Blog / Blog Publishing", dumps.Items[0].DisplayTitle, dumps.Items[0].Meta)
+	}
+	if dumps.Items[0].Preview != "Use-case dump body." {
+		t.Fatalf("dump preview = %q, want body without frontmatter or title", dumps.Items[0].Preview)
+	}
 
 	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
 		Family: "dumps",
