@@ -295,13 +295,13 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 			RefreshSeconds: config.Web.RefreshIntervalSeconds,
 			Navigation: []ui.NavLink{
 				{Label: "Project", Href: "/", Active: true},
-				{Label: "Board", Href: "/board"},
-				{Label: "Dash", Href: "/dash"},
 				{Label: "Cases", Href: "/cases"},
 				{Label: "Dumps", Href: "/dumps"},
 				{Label: "Quizzes", Href: "/quizzes"},
 				{Label: "Specs", Href: "/specs"},
 				{Label: "Plans", Href: "/plans"},
+				{Label: "Board", Href: "/board"},
+				{Label: "Dash", Href: "/dash"},
 			},
 		},
 	})
