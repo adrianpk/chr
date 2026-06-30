@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -119,7 +120,7 @@ func parseWebTicketComments(content string) []webui.TicketCommentView {
 			if current != nil {
 				comments = append(comments, trimWebTicketComment(*current))
 			}
-			current = &webui.TicketCommentView{Header: strings.TrimSpace(strings.TrimPrefix(trimmed, "## "))}
+			current = webTicketCommentHeader(strings.TrimSpace(strings.TrimPrefix(trimmed, "## ")))
 			continue
 		}
 
@@ -140,10 +141,29 @@ func parseWebTicketComments(content string) []webui.TicketCommentView {
 }
 
 func trimWebTicketComment(comment webui.TicketCommentView) webui.TicketCommentView {
-	comment.Header = strings.TrimSpace(comment.Header)
+	comment.Author = strings.TrimSpace(comment.Author)
+	comment.CreatedAt = strings.TrimSpace(comment.CreatedAt)
 	comment.Body = strings.TrimSpace(comment.Body)
 
 	return comment
+}
+
+func webTicketCommentHeader(header string) *webui.TicketCommentView {
+	header = strings.TrimSpace(header)
+
+	parts := strings.Fields(header)
+	if len(parts) < 2 {
+		return &webui.TicketCommentView{Author: header}
+	}
+
+	if createdAt, err := time.Parse(time.RFC3339, parts[0]); err == nil {
+		return &webui.TicketCommentView{
+			Author:    strings.Join(parts[1:], " "),
+			CreatedAt: createdAt.Format("02 Jan 15:04"),
+		}
+	}
+
+	return &webui.TicketCommentView{Author: header}
 }
 
 func (p webViewProvider) DashView(ctx context.Context) (webui.DashView, error) {

@@ -89,6 +89,7 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	mux.HandleFunc("/board", handler.board)
 	mux.HandleFunc("/board/fragment", handler.boardFragment)
 	mux.HandleFunc("/board/ticket", handler.ticketDetail)
+	mux.HandleFunc("/board/ticket/comment", handler.ticketComment)
 	mux.HandleFunc("/dash", handler.dash)
 	mux.HandleFunc("/dash/fragment", handler.dashFragment)
 
@@ -183,6 +184,39 @@ func (h handler) boardFragment(w http.ResponseWriter, r *http.Request) {
 
 func (h handler) ticketDetail(w http.ResponseWriter, r *http.Request) {
 	data, err := h.ticketDetailPageData(r)
+	if err != nil {
+		http.Error(w, "load ticket", http.StatusInternalServerError)
+
+		return
+	}
+
+	if err := h.renderer.Fragment(w, "ticket_modal.html", data); err != nil {
+		http.Error(w, "render ticket", http.StatusInternalServerError)
+	}
+}
+
+func (h handler) ticketComment(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+
+		return
+	}
+
+	request := writeActionRequest(r)
+	result, err := h.provider.WriteAction(r.Context(), request)
+	if err != nil {
+		http.Error(w, "write ticket comment", http.StatusInternalServerError)
+
+		return
+	}
+
+	if result.Status != WriteStatusOK {
+		h.renderWriteResult(w, r, result)
+
+		return
+	}
+
+	data, err := h.ticketDetailPageData(ticketDetailRequest(r, request.ID))
 	if err != nil {
 		http.Error(w, "load ticket", http.StatusInternalServerError)
 
@@ -617,6 +651,15 @@ func (h handler) ticketDetailPageData(r *http.Request) (PageData, error) {
 		Revision: ticket.Revision,
 		Ticket:   ticket,
 	}, nil
+}
+
+func ticketDetailRequest(r *http.Request, key string) *http.Request {
+	clone := r.Clone(r.Context())
+	query := clone.URL.Query()
+	query.Set("key", key)
+	clone.URL.RawQuery = query.Encode()
+
+	return clone
 }
 
 func (h handler) dashPageData(r *http.Request) (PageData, error) {

@@ -190,8 +190,9 @@ type TicketDetailView struct {
 
 // TicketCommentView is one rendered ticket comment.
 type TicketCommentView struct {
-	Header string
-	Body   string
+	Author    string
+	CreatedAt string
+	Body      string
 }
 
 // DashView is the read-only dashboard projection rendered by the Web UI.

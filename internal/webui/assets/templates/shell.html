@@ -183,7 +183,10 @@
           <div class="ticket-comments__list">
             {{range .Ticket.Comments}}
               <article class="ticket-comment">
-                <header>{{.Header}}</header>
+                <header>
+                  <strong>{{.Author}}</strong>
+                  {{if .CreatedAt}}<time>{{.CreatedAt}}</time>{{end}}
+                </header>
                 <p>{{.Body}}</p>
               </article>
             {{end}}
@@ -191,7 +194,7 @@
         {{else}}
           <p class="ticket-comments__empty">No comments yet.</p>
         {{end}}
-        <form class="ticket-comments__form" method="post" action="/actions" hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML">
+        <form class="ticket-comments__form" method="post" action="/board/ticket/comment" hx-post="/board/ticket/comment" hx-target="#modal-root" hx-swap="innerHTML">
           <input type="hidden" name="action" value="ticket.comment">
           <input type="hidden" name="id" value="{{.Ticket.Key}}">
           <input type="hidden" name="revision" value="{{.Ticket.Revision}}">
@@ -205,13 +208,6 @@
           </div>
         </form>
       </section>
-      <div class="ticket-modal__meta">
-        {{if .Ticket.Priority}}<span>{{.Ticket.Priority}}</span>{{end}}
-        {{if .Ticket.ProjectArea}}<span>{{.Ticket.ProjectArea}}</span>{{end}}
-        {{if .Ticket.Status}}<span>{{.Ticket.Status}}</span>{{end}}
-        {{if .Ticket.Type}}<span>{{.Ticket.Type}}</span>{{end}}
-        {{if .Ticket.Slice}}<span>{{.Ticket.Slice}}</span>{{end}}
-      </div>
     </div>
   </section>
 </div>

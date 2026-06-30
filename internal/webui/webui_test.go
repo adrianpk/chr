@@ -103,17 +103,54 @@ func TestHandlerTicketModal(t *testing.T) {
 		"ticket-modal",
 		"Ready work",
 		"Ready work synopsis.",
-		"backend",
 		"Comments",
 		"Existing comment.",
 		`name="action" value="ticket.update"`,
 		`input name="title" required value="Ready work"`,
 		`textarea name="synopsis" required`,
 		`name="action" value="ticket.comment"`,
+		`hx-post="/board/ticket/comment"`,
 		`textarea name="content" required`,
 	} {
 		if !strings.Contains(detail.Body.String(), want) {
 			t.Fatalf("detail body does not contain %q:\n%s", want, detail.Body.String())
+		}
+	}
+}
+
+func TestHandlerTicketCommentRefreshesModal(t *testing.T) {
+	handler, err := NewHandler(HandlerOptions{
+		Data:     testShellData(),
+		Provider: testDataProvider{},
+	})
+	if err != nil {
+		t.Fatalf("NewHandler returned error: %v", err)
+	}
+
+	form := url.Values{
+		"action":  {"ticket.comment"},
+		"id":      {"CHR-1"},
+		"confirm": {"true"},
+		"content": {"Fresh modal comment."},
+	}
+	request := httptest.NewRequest(http.MethodPost, "/board/ticket/comment", strings.NewReader(form.Encode()))
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	request.Header.Set(htmx.HeaderRequest, "true")
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d:\n%s", recorder.Code, http.StatusOK, recorder.Body.String())
+	}
+
+	if redirect := recorder.Header().Get(htmx.HeaderRedirect); redirect != "" {
+		t.Fatalf("HX-Redirect = %q, want empty", redirect)
+	}
+
+	for _, want := range []string{"ticket-modal", "Ready work", "Existing comment.", `hx-post="/board/ticket/comment"`} {
+		if !strings.Contains(recorder.Body.String(), want) {
+			t.Fatalf("body does not contain %q:\n%s", want, recorder.Body.String())
 		}
 	}
 }
@@ -662,7 +699,7 @@ func (testDataProvider) TicketDetailView(_ context.Context, request TicketDetail
 		ProjectArea:  "backend",
 		RelativePath: "CHR-1-ready-work.md",
 		Comments: []TicketCommentView{
-			{Header: "2026-05-18T13:00:00Z web", Body: "Existing comment."},
+			{Author: "web", CreatedAt: "18 May 13:00", Body: "Existing comment."},
 		},
 		Revision: "ticket-detail-revision",
 	}, nil
