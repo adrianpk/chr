@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 )
 
@@ -61,6 +62,9 @@ func ValidateWorkWorkspaceConfig(config WorkWorkspaceConfig) error {
 
 	if strings.TrimSpace(config.WorktreeRoot) == "" {
 		return fmt.Errorf("work worktree_root is required")
+	}
+	if filepath.ToSlash(filepath.Clean(config.WorktreeRoot)) != DefaultWorktreeRoot {
+		return fmt.Errorf("work worktree_root must be %s", DefaultWorktreeRoot)
 	}
 
 	if !IsValidWorktreeBasePolicy(config.WorktreeBase) {

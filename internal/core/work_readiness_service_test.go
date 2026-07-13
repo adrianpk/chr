@@ -348,7 +348,7 @@ func TestRepairWorkReadinessCreatesAllowedMissingBranch(t *testing.T) {
 func TestRepairWorkReadinessCreatesMissingWorktreeRoot(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = "isolated-worktrees"
+	workspace.WorktreeRoot = DefaultWorktreeRoot
 	root := filepath.Join(projectDir, workspace.WorktreeRoot)
 
 	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
@@ -371,7 +371,7 @@ func TestRepairWorkReadinessCreatesMissingWorktreeRoot(t *testing.T) {
 func TestRepairWorkReadinessPrunesStaleWorktreeMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = "isolated-worktrees"
+	workspace.WorktreeRoot = DefaultWorktreeRoot
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
 		ProjectDir:   projectDir,
@@ -415,7 +415,7 @@ func TestRepairWorkReadinessPrunesStaleWorktreeMetadata(t *testing.T) {
 func TestRepairWorkReadinessRemovesEmptyOrphanedTicketWorktree(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = "isolated-worktrees"
+	workspace.WorktreeRoot = DefaultWorktreeRoot
 	plan := testWorkReadinessPlan(t, projectDir, workspace)
 
 	if err := os.MkdirAll(plan.WorktreePath, 0o755); err != nil {
@@ -444,7 +444,7 @@ func TestRepairWorkReadinessRemovesEmptyOrphanedTicketWorktree(t *testing.T) {
 func TestRepairWorkReadinessDoesNotRemoveNonEmptyOrphanedTicketWorktree(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = "isolated-worktrees"
+	workspace.WorktreeRoot = DefaultWorktreeRoot
 	plan := testWorkReadinessPlan(t, projectDir, workspace)
 
 	if err := os.MkdirAll(plan.WorktreePath, 0o755); err != nil {

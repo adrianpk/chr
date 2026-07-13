@@ -181,7 +181,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
   allow_safe_repair: false
   allow_branch_creation: true
   workspace_mode: worktree
-  worktree_root: .chr/user/runtime/custom-worktrees
+  worktree_root: ops/default/worktree
   worktree_base: local_integration_branch
   worktree_cleanup: manual
 `)
@@ -203,7 +203,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 		},
 		Workspace: WorkWorkspaceConfig{
 			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    ".chr/user/runtime/custom-worktrees",
+			WorktreeRoot:    DefaultWorktreeRoot,
 			WorktreeBase:    WorktreeBasePolicyLocalIntegrationBranch,
 			WorktreeCleanup: WorktreeCleanupPolicyManual,
 		},
@@ -605,6 +605,19 @@ func TestValidateWorkConfigRejectsInvalidWorkspaceConfig(t *testing.T) {
 				},
 			},
 			wantErr: "work worktree_root is required",
+		},
+		{
+			name: "legacy worktree root",
+			config: WorkConfig{
+				BranchPolicy: DefaultWorkBranchPolicy(),
+				Workspace: WorkWorkspaceConfig{
+					Mode:            WorkWorkspaceModeWorktree,
+					WorktreeRoot:    ".chr/user/runtime/worktrees",
+					WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+					WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+				},
+			},
+			wantErr: "work worktree_root must be " + DefaultWorktreeRoot,
 		},
 		{
 			name: "worktree base",

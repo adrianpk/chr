@@ -23,13 +23,18 @@ work:
   allow_safe_repair: true
   allow_branch_creation: false
   workspace_mode: project
-  worktree_root: .chr/user/runtime/worktrees
+  worktree_root: ops/default/worktree
   worktree_base: remote_integration_branch
   worktree_cleanup: after_merge
 ```
 
 Generated config may omit these fields. Omitted fields use the default work
 policy.
+
+When `workspace_mode` is `worktree`, `worktree_root` must be
+`ops/default/worktree`. CHR resolves the active `OPS_USER` namespace at
+runtime, so configuration never needs a user-specific path. Legacy or custom
+worktree roots are rejected.
 
 ## Defaults
 
@@ -45,7 +50,7 @@ Default work policy:
 | `allow_safe_repair` | `true` |
 | `allow_branch_creation` | `false` |
 | `workspace_mode` | `project` |
-| `worktree_root` | `.chr/user/runtime/worktrees` |
+| `worktree_root` | `ops/default/worktree` |
 | `worktree_base` | `remote_integration_branch` |
 | `worktree_cleanup` | `after_merge` |
 
@@ -70,7 +75,7 @@ prepared before the Docker runtime starts.
 | Field | Values | Behavior |
 | --- | --- | --- |
 | `workspace_mode` | `project`, `worktree` | `project` runs ticket work in the user-visible project checkout. `worktree` prepares a ticket-specific Git worktree and runs the agent against that isolated workspace. |
-| `worktree_root` | project-relative or absolute path | Directory used for ticket worktrees when `workspace_mode` is `worktree`. |
+| `worktree_root` | `ops/default/worktree` | Required canonical root for ticket worktrees; the active namespace replaces `default` at runtime. |
 | `worktree_base` | `remote_integration_branch`, `local_integration_branch`, `current_branch` | Base selection policy for ticket worktree creation. |
 | `worktree_cleanup` | `after_merge`, `manual`, `never` | Cleanup policy for clean merged ticket worktrees. |
 
