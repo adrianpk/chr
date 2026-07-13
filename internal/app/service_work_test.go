@@ -661,15 +661,7 @@ func TestServiceStartAllReadyAgentWorkEmitsLifecycleEvents(t *testing.T) {
 func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result AgentWorkResult) {
 	t.Helper()
 
-	loopStream := readAgentEventStream(t, filepath.Join(
-		projectDir,
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		result.LoopRun.ID,
-		core.AgentEventStreamFileName,
-	))
+	loopStream := readAgentEventStream(t, core.LoopRunEventStreamPath(*result.LoopRun))
 	assertAgentEventPhases(t, loopStream.Events, []core.AgentEventPhase{
 		core.AgentEventPhaseLoopStarted,
 		core.AgentEventPhaseTicketSelected,
@@ -708,15 +700,7 @@ func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result Agent
 func assertAgentWorkRepairEventPhases(t *testing.T, projectDir string, result AgentWorkResult) {
 	t.Helper()
 
-	loopStream := readAgentEventStream(t, filepath.Join(
-		projectDir,
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		result.LoopRun.ID,
-		core.AgentEventStreamFileName,
-	))
+	loopStream := readAgentEventStream(t, core.LoopRunEventStreamPath(*result.LoopRun))
 	assertAgentEventPhaseSubsequence(t, loopStream.Events, []core.AgentEventPhase{
 		core.AgentEventPhaseReviewStarted,
 		core.AgentEventPhaseReviewFinished,

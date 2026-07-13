@@ -163,6 +163,9 @@ func testMigrationFS() fstest.MapFS {
 		"assets/migration/sqlite/20260713000012-add_execution_artifact_id.sql": {
 			Data: []byte(testAddExecutionArtifactIDMigration()),
 		},
+		"assets/migration/sqlite/20260713000013-add_loop_run_artifact.sql": {
+			Data: []byte(testAddLoopRunArtifactMigration()),
+		},
 	}
 }
 
@@ -530,6 +533,22 @@ ON execution_records (artifact_id);
 
 -- +migrate Down
 DROP INDEX IF EXISTS execution_records_artifact_id_idx;
+`
+}
+
+func testAddLoopRunArtifactMigration() string {
+	return `-- +migrate Up
+ALTER TABLE loop_runs
+ADD COLUMN artifact_id text NOT NULL DEFAULT '';
+
+ALTER TABLE loop_runs
+ADD COLUMN artifact_dir text NOT NULL DEFAULT '';
+
+CREATE INDEX loop_runs_artifact_id_idx
+ON loop_runs (artifact_id);
+
+-- +migrate Down
+DROP INDEX IF EXISTS loop_runs_artifact_id_idx;
 `
 }
 

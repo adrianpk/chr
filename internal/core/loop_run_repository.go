@@ -75,6 +75,8 @@ func (r *sqliteLoopRunRepository) CreateLoopRun(ctx context.Context, record Loop
 
 	_, err = r.db.ExecContext(ctx, insertLoopRunSQL(),
 		record.ID,
+		record.ArtifactID,
+		record.ArtifactDir,
 		record.ProjectID,
 		string(record.Status),
 		record.EligibleCount,
@@ -102,6 +104,8 @@ func (r *sqliteLoopRunRepository) UpdateLoopRun(ctx context.Context, record Loop
 	}
 
 	result, err := r.db.ExecContext(ctx, updateLoopRunSQL(),
+		record.ArtifactID,
+		record.ArtifactDir,
 		record.ProjectID,
 		string(record.Status),
 		record.EligibleCount,
@@ -207,6 +211,8 @@ func scanLoopRun(scanner loopRunScanner) (LoopRunRecord, error) {
 
 	err := scanner.Scan(
 		&record.ID,
+		&record.ArtifactID,
+		&record.ArtifactDir,
 		&record.ProjectID,
 		&status,
 		&record.EligibleCount,
@@ -252,21 +258,21 @@ func scanLoopRun(scanner loopRunScanner) (LoopRunRecord, error) {
 
 func insertLoopRunSQL() string {
 	return `INSERT INTO loop_runs (
-    id, project_id, status, eligible_count, processed_count, blocked_count,
+    id, artifact_id, artifact_dir, project_id, status, eligible_count, processed_count, blocked_count,
     failed_count, failure_reason, created_at, started_at, finished_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 }
 
 func updateLoopRunSQL() string {
 	return `UPDATE loop_runs
-SET project_id = ?, status = ?, eligible_count = ?, processed_count = ?,
+SET artifact_id = ?, artifact_dir = ?, project_id = ?, status = ?, eligible_count = ?, processed_count = ?,
     blocked_count = ?, failed_count = ?, failure_reason = ?, created_at = ?,
     started_at = ?, finished_at = ?, updated_at = ?
 WHERE id = ?`
 }
 
 func selectLoopRunSQL() string {
-	return `SELECT id, project_id, status, eligible_count, processed_count,
+	return `SELECT id, artifact_id, artifact_dir, project_id, status, eligible_count, processed_count,
     blocked_count, failed_count, failure_reason, created_at, started_at,
     finished_at, updated_at
 FROM loop_runs`

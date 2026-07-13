@@ -10,6 +10,9 @@ import (
 )
 
 func agentWorkLoopEventSink(projectDir string, record core.LoopRunRecord) core.AgentEventSink {
+	if record.ArtifactID != "" {
+		return core.NewFileAgentEventSink(core.LoopRunEventStreamPath(record))
+	}
 	config, err := core.LoadWorkspaceConfig(projectDir)
 	if err != nil {
 		return nil

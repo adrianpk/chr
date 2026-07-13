@@ -24,6 +24,8 @@ const (
 // LoopRunRecord describes a package boundary value.
 type LoopRunRecord struct {
 	ID             string
+	ArtifactID     string
+	ArtifactDir    string
 	ProjectID      string
 	Status         LoopRunStatus
 	EligibleCount  int

@@ -61,6 +61,18 @@ func ExecutionAgentEventStreamPath(record ExecutionRecord) string {
 	return AgentEventStreamPath(record.Artifacts.RunDir)
 }
 
+// LoopRunEventStreamPath returns the event stream path for one loop run.
+func LoopRunEventStreamPath(record LoopRunRecord) string {
+	if strings.TrimSpace(record.ArtifactDir) == "" {
+		return ""
+	}
+	if strings.TrimSpace(record.ArtifactID) != "" {
+		return filepath.Join(record.ArtifactDir, "evidence", AgentEventStreamFileName)
+	}
+
+	return AgentEventStreamPath(record.ArtifactDir)
+}
+
 // EmitAgentEvent appends the requested event to the configured stream.
 func (s FileAgentEventSink) EmitAgentEvent(ctx context.Context, event AgentEvent) error {
 	return AppendAgentEvent(ctx, s.Path, event)

@@ -941,6 +941,10 @@ func runTicketLoopExecution(
 	}()
 
 	record := newRunningLoopRunRecord(projectContext.ProjectID, eligibleCount)
+	record, err = allocateLoopRunArtifact(projectContext.ProjectDir, record)
+	if err != nil {
+		return ticketLoopExecutionResult{}, err
+	}
 
 	err = repository.CreateLoopRun(ctx, record)
 	if err != nil {
@@ -998,6 +1002,11 @@ func failTicketLoopExecution(
 
 	result.Record = record
 	emitLoopFailedAgentEvents(ctx, eventSink, record, cause)
+	if record.ArtifactID != "" {
+		if err := core.RefreshOpsArtifactMetadata(record.ArtifactDir, string(record.Status), time.Now().UTC()); err != nil {
+			return ticketLoopExecutionResult{}, err
+		}
+	}
 
 	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
 	if err != nil {
@@ -1026,6 +1035,11 @@ func finishTicketLoopExecution(
 
 	result.Record = record
 	emitLoopFinishedAgentEvent(ctx, eventSink, record)
+	if record.ArtifactID != "" {
+		if err := core.RefreshOpsArtifactMetadata(record.ArtifactDir, string(record.Status), time.Now().UTC()); err != nil {
+			return ticketLoopExecutionResult{}, err
+		}
+	}
 
 	err = emitLoopRunNotification(ctx, env, projectContext, record, assetsFS)
 	if err != nil {
@@ -1080,6 +1094,26 @@ func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRe
 		StartedAt:     &now,
 		UpdatedAt:     now,
 	}
+}
+
+func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core.LoopRunRecord, error) {
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	if err != nil {
+		return core.LoopRunRecord{}, err
+	}
+	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
+		Layout:      layout,
+		Type:        "run",
+		Title:       "Agent work loop",
+		Producer:    "chr",
+		ExternalIDs: []string{record.ID},
+	})
+	if err != nil {
+		return core.LoopRunRecord{}, err
+	}
+	record.ArtifactID = artifact.ID
+	record.ArtifactDir = artifact.Dir
+	return record, nil
 }
 
 func finishLoopRunRecord(record core.LoopRunRecord) core.LoopRunRecord {
