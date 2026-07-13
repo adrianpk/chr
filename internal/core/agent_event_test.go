@@ -115,6 +115,17 @@ func TestFileAgentEventSinkAppendsAndReadsEventsInOrder(t *testing.T) {
 	assertAgentEventStreamOrder(t, stream)
 }
 
+func TestExecutionAgentEventStreamPathUsesCanonicalEvidenceDirectory(t *testing.T) {
+	record := ExecutionRecord{Artifacts: ExecutionArtifacts{
+		ArtifactID: "00001-ticket-run",
+		RunDir:     filepath.Join(t.TempDir(), "ops", "default", "run", "00001-ticket-run"),
+	}}
+
+	if got, want := ExecutionAgentEventStreamPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "events.jsonl"); got != want {
+		t.Fatalf("ExecutionAgentEventStreamPath = %q, want %q", got, want)
+	}
+}
+
 func assertAgentEventStreamPath(t *testing.T, stream AgentEventStream, path string) {
 	t.Helper()
 

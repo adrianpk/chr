@@ -191,6 +191,7 @@ func TestValidateExecutionRecordRejectsFinishedBeforeStarted(t *testing.T) {
 func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 	dir := t.TempDir()
 	plan := RuntimePlan{
+		ArtifactID:            "00001-ticket-run",
 		Image:                 "chr-agent-runtime:local",
 		DockerfilePath:        filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
 		ContainerWorkdir:      "/workspace",
@@ -216,6 +217,9 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 
 	if record.Artifacts.RunDir != plan.RunArtifactDir {
 		t.Fatalf("Artifacts.RunDir = %q, want %q", record.Artifacts.RunDir, plan.RunArtifactDir)
+	}
+	if record.Artifacts.ArtifactID != plan.ArtifactID {
+		t.Fatalf("Artifacts.ArtifactID = %q, want %q", record.Artifacts.ArtifactID, plan.ArtifactID)
 	}
 
 	if record.Artifacts.ResultPath != plan.ResultPath {

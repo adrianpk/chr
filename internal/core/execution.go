@@ -82,6 +82,7 @@ func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan RuntimePlan) Ex
 		TicketBranch:          plan.TicketBranch,
 	}
 	record.Artifacts = ExecutionArtifacts{
+		ArtifactID:     plan.ArtifactID,
 		RunDir:         plan.RunArtifactDir,
 		ResultPath:     plan.ResultPath,
 		LogPath:        plan.LogPath,

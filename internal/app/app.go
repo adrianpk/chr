@@ -452,7 +452,7 @@ func loadTUIAgentEvents(ctx context.Context, projectDir string, config core.Runt
 
 	execution := latestTUIExecution(executions)
 	if execution.ID != "" {
-		events = append(events, readTUIAgentEvents(ctx, core.AgentEventStreamPath(execution.Artifacts.RunDir))...)
+		events = append(events, readTUIAgentEvents(ctx, core.ExecutionAgentEventStreamPath(execution))...)
 	}
 
 	return recentTUIAgentEvents(events, 50)

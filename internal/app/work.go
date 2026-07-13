@@ -481,7 +481,7 @@ func printWorkExecutionLogs(stdout io.Writer, projectDir string, record core.Exe
 		{label: "validation_log", path: record.Artifacts.ValidationPath},
 		{label: "result", path: record.Artifacts.ResultPath},
 		{label: "execution_report", path: core.ExecutionReportPath(record)},
-		{label: "events", path: core.AgentEventStreamPath(record.Artifacts.RunDir)},
+		{label: "events", path: core.ExecutionAgentEventStreamPath(record)},
 	}
 
 	lines := []string{

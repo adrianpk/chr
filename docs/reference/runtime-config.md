@@ -72,9 +72,28 @@ and groups path checks under `checks:`.
 
 ## Runtime Artifacts
 
-Ticket execution writes artifacts under the configured runtime artifact
-directory. Execution-scoped paths include the worker context, result envelope,
-runtime log, and validation log.
+`chr ticket start` creates a shared operational artifact envelope in the
+project checkout. It does not use `runtime.artifact_dir` for ticket execution
+outputs:
+
+```text
+ops/<namespace>/run/<artifact-id>/
+  artifact.md
+  metadata.json
+  files/context.md
+  evidence/result.json
+  evidence/runtime.log
+  evidence/validation.log
+  evidence/events.jsonl
+  evidence/execution-report.md
+```
+
+`<namespace>` is `default` when `OPS_USER` is unset. Set `OPS_USER` to a
+lowercase, hyphen-separated namespace to isolate one user's committed
+operational artifacts without changing the rest of the runtime behavior.
+
+`runtime.artifact_dir` remains the default location for runtime routines that
+have not yet been migrated to a shared operational artifact envelope.
 
 For the detailed execution contract, see
 [Ticket execution](ticket-execution.md).

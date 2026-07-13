@@ -686,7 +686,7 @@ func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result Agent
 	})
 
 	execution := result.Executions[0]
-	executionStream := readAgentEventStream(t, core.AgentEventStreamPath(execution.Artifacts.RunDir))
+	executionStream := readAgentEventStream(t, core.ExecutionAgentEventStreamPath(execution))
 	assertAgentEventPhases(t, executionStream.Events, []core.AgentEventPhase{
 		core.AgentEventPhaseExecutionCreated,
 		core.AgentEventPhaseRuntimePrepared,
@@ -1003,7 +1003,7 @@ func assertTicketContains(t *testing.T, ticketPath, want string) {
 func assertRepairExecutionContextContains(t *testing.T, execution core.ExecutionRecord, want string) {
 	t.Helper()
 
-	contextPath := filepath.Join(execution.Artifacts.RunDir, "context.md")
+	contextPath := filepath.Join(execution.Artifacts.RunDir, "files", "context.md")
 	content := readFile(t, contextPath)
 
 	for _, expected := range []string{

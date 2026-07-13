@@ -34,6 +34,15 @@ func TestNewExecutionReportBuildsSummaryFromRecord(t *testing.T) {
 	}
 }
 
+func TestExecutionReportPathUsesCanonicalEvidenceDirectory(t *testing.T) {
+	record := testExecutionReportRecord(t.TempDir())
+	record.Artifacts.ArtifactID = "00001-ticket-run"
+
+	if got, want := ExecutionReportPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "execution-report.md"); got != want {
+		t.Fatalf("ExecutionReportPath = %q, want %q", got, want)
+	}
+}
+
 func TestNewExecutionReportIncludesResultEvidence(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
 	result := ExecutionResult{

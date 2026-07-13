@@ -49,6 +49,18 @@ func AgentEventStreamPath(runDir string) string {
 	return filepath.Join(runDir, AgentEventStreamFileName)
 }
 
+// ExecutionAgentEventStreamPath returns the event stream path for one execution.
+func ExecutionAgentEventStreamPath(record ExecutionRecord) string {
+	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
+		return ""
+	}
+	if strings.TrimSpace(record.Artifacts.ArtifactID) != "" {
+		return filepath.Join(record.Artifacts.RunDir, "evidence", AgentEventStreamFileName)
+	}
+
+	return AgentEventStreamPath(record.Artifacts.RunDir)
+}
+
 // EmitAgentEvent appends the requested event to the configured stream.
 func (s FileAgentEventSink) EmitAgentEvent(ctx context.Context, event AgentEvent) error {
 	return AppendAgentEvent(ctx, s.Path, event)

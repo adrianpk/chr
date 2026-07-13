@@ -16,6 +16,8 @@ type RuntimeValidationOptions struct {
 	WorkspaceBaseRef      string
 	WorkspaceBaseSHA      string
 	RunID                 string
+	OpsLayout             *OpsLayout
+	ArtifactID            string
 }
 
 // RuntimeValidationResult describes a package boundary value.

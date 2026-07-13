@@ -25,6 +25,7 @@ to update tickets, comments, status, or validation evidence.
 - result artifact path.
 - runtime log path.
 - validation artifact path.
+- shared operational artifact ID.
 - execution report path.
 - failure reason.
 
@@ -57,7 +58,27 @@ Execution records also store workspace execution metadata:
 - `workspace_mode`: `project` or `worktree`.
 - `workspace_project_checkout_dir`: the user-visible project checkout.
 - `workspace_execution_dir`: the workspace mounted into Docker for this
-  execution.
+execution.
+
+## Shared Operational Artifact
+
+Every ticket-start attempt allocates one shared artifact under the project
+checkout:
+
+```text
+ops/<namespace>/run/<artifact-id>/
+```
+
+The namespace is `default` unless `OPS_USER` is set. The artifact ID is a
+namespace-global, zero-padded sequence with a stable title slug. CHR keeps its
+execution ID in `metadata.json.external_ids` and persists the shared artifact
+ID with the execution record.
+
+The shared envelope uses `artifact.md`, `metadata.json`, `files/`,
+`evidence/`, and `extension/chr/`. CHR writes the worker context to
+`files/context.md`; execution result, logs, events, and generated reports are
+written under `evidence/`. The metadata file indexes shared files and excludes
+the private `extension/chr/` directory.
 
 In `project` mode, the project checkout and execution workspace are the same
 directory. In `worktree` mode, Chryso prepares a ticket-specific Git
@@ -81,15 +102,15 @@ On success, the command creates a `pending` execution record with:
 - execution-scoped run, result, log, and validation artifact paths;
 - required lifecycle timestamps.
 
-The execution ID is used as the runtime run ID, so artifact paths are scoped
-under the configured runtime run directory.
+The execution ID remains CHR's internal attempt identity. The shared artifact
+ID identifies the interoperable operation directory.
 
-The run directory can later contain:
+The run envelope can later contain:
 
-- `events.jsonl`: append-only agent event stream.
-- `execution-report.md`: execution summary and copied evidence strategy when
+- `evidence/events.jsonl`: append-only agent event stream.
+- `evidence/execution-report.md`: execution summary and copied evidence strategy when
   enabled.
-- `result-application.md`: result application report.
+- `evidence/result-application.md`: result application report.
 - runtime and validation logs from the configured harness.
 
 `--dry-run` prints the same preflight output and runtime validation checks but
@@ -154,10 +175,10 @@ The run environment includes:
 - `CHR_VALIDATION_PATH`.
 - `OPENAI_API_KEY`, inherited by name when present.
 
-Runtime artifact paths are scoped by ticket key and execution ID when both are
-available:
+Runtime artifact paths for ticket execution are scoped by the shared artifact
+ID:
 
-`<artifact_dir>/<ticket_key>/<execution_id>/`
+`ops/<namespace>/run/<artifact-id>/`
 
 The command renderer does not execute Docker, create directories, or write
 artifacts. Later execution slices are responsible for invoking the rendered

@@ -4466,8 +4466,9 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 		"ticket_path: " + filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md"),
 		"status: pending",
 		"dry_run: true",
-		"run_artifact_dir: .chr/user/runtime/runs/CHR-1/exec-",
-		"result_path: .chr/user/runtime/runs/CHR-1/exec-",
+		"artifact_dir: ops/default/run",
+		"run_artifact_dir: ops/default/run/00001-chr-1-do-something",
+		"result_path: ops/default/run/00001-chr-1-do-something/evidence/result.json",
 		"ok    dockerfile   .chr/user/runtime/agent/Dockerfile",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -4559,8 +4560,8 @@ func TestTicketStartPrintsHarnessFailure(t *testing.T) {
 		"status: failed",
 		"failure_kind: harness",
 		"failure_reason: harness: docker unavailable",
-		"diagnostic_log_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
-		"diagnostic_result_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
+		"diagnostic_log_path: " + filepath.Join(projectDir, "ops", "default", "run", "00001-chr-1-do-something", "evidence", "runtime.log"),
+		"diagnostic_result_path: " + filepath.Join(projectDir, "ops", "default", "run", "00001-chr-1-do-something", "evidence", "result.json"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -4597,9 +4598,9 @@ func TestTicketStartPrintsWorkerFailure(t *testing.T) {
 		"status: failed",
 		"failure_kind: worker",
 		"failure_reason: worker: codex failed",
-		"diagnostic_log_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
-		"diagnostic_result_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
-		"diagnostic_validation_path: " + filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1"),
+		"diagnostic_log_path: " + filepath.Join(projectDir, "ops", "default", "run", "00001-chr-1-do-something", "evidence", "runtime.log"),
+		"diagnostic_result_path: " + filepath.Join(projectDir, "ops", "default", "run", "00001-chr-1-do-something", "evidence", "result.json"),
+		"diagnostic_validation_path: " + filepath.Join(projectDir, "ops", "default", "run", "00001-chr-1-do-something", "evidence", "validation.log"),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -4622,15 +4623,19 @@ func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionReco
 		t.Fatalf("ID = %q, want exec prefix", record.ID)
 	}
 
-	if record.Artifacts.RunDir != filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", record.ID) {
+	if record.Artifacts.ArtifactID != "00001-chr-1-do-something" {
+		t.Fatalf("Artifacts.ArtifactID = %q", record.Artifacts.ArtifactID)
+	}
+
+	if record.Artifacts.RunDir != filepath.Join(projectDir, "ops", "default", "run", record.Artifacts.ArtifactID) {
 		t.Fatalf("Artifacts.RunDir = %q, want execution run dir", record.Artifacts.RunDir)
 	}
 
-	if record.Artifacts.ValidationPath != filepath.Join(record.Artifacts.RunDir, "validation.log") {
+	if record.Artifacts.ValidationPath != filepath.Join(record.Artifacts.RunDir, "evidence", "validation.log") {
 		t.Fatalf("Artifacts.ValidationPath = %q, want validation log path", record.Artifacts.ValidationPath)
 	}
 
-	contextPath := filepath.Join(record.Artifacts.RunDir, "context.md")
+	contextPath := filepath.Join(record.Artifacts.RunDir, "files", "context.md")
 
 	contextContent, err := os.ReadFile(contextPath)
 	if err != nil {
@@ -6561,12 +6566,13 @@ func TestMaintenanceDBStatusReportsPendingMigrationsWhenDatabaseIsMissing(t *tes
 		"database_exists: false",
 		"schema_migrations_exists: false",
 		"applied: 0",
-		"pending: 11",
+		"pending: 12",
 		"unknown: 0",
 		"pending_migration: 20260518000001 create_projects",
 		"pending_migration: 20260601000009 add_ticket_review_metadata",
 		"pending_migration: 20260602000010 add_ticket_merge_metadata",
 		"pending_migration: 20260619000011 add_execution_workspace_metadata",
+		"pending_migration: 20260713000012 add_execution_artifact_id",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -6605,14 +6611,15 @@ func TestMaintenanceDBStatusReportsAppliedMigrations(t *testing.T) {
 	for _, want := range []string{
 		"database_exists: true",
 		"schema_migrations_exists: true",
-		"available: 11",
-		"applied: 11",
+		"available: 12",
+		"applied: 12",
 		"pending: 0",
 		"unknown: 0",
 		"applied_migration: 20260518000001 create_projects",
 		"applied_migration: 20260601000009 add_ticket_review_metadata",
 		"applied_migration: 20260602000010 add_ticket_merge_metadata",
 		"applied_migration: 20260619000011 add_execution_workspace_metadata",
+		"applied_migration: 20260713000012 add_execution_artifact_id",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)

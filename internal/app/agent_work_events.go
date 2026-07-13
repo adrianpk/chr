@@ -28,7 +28,7 @@ func agentWorkLoopEventSink(projectDir string, record core.LoopRunRecord) core.A
 }
 
 func agentWorkExecutionEventSink(record core.ExecutionRecord) core.AgentEventSink {
-	return core.NewFileAgentEventSink(core.AgentEventStreamPath(record.Artifacts.RunDir))
+	return core.NewFileAgentEventSink(core.ExecutionAgentEventStreamPath(record))
 }
 
 func emitAgentWorkEvent(ctx context.Context, sink core.AgentEventSink, event core.AgentEvent) {

@@ -18,6 +18,8 @@ type RuntimePlanOptions struct {
 	WorkspaceBaseRef      string
 	WorkspaceBaseSHA      string
 	RunID                 string
+	OpsLayout             *OpsLayout
+	ArtifactID            string
 }
 
 // RuntimePlan describes a package boundary value.
@@ -30,6 +32,7 @@ type RuntimePlan struct {
 	TicketBranch          string
 	WorkspaceBaseRef      string
 	WorkspaceBaseSHA      string
+	ArtifactID            string
 	WorkspaceDir          string
 	DockerfilePath        string
 	Image                 string
@@ -83,11 +86,41 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	dockerfilePath := resolveProjectPath(projectDir, config.DockerfilePath)
 	artifactDir := resolveProjectPath(executionWorkspaceDir, config.ArtifactDir)
 	runArtifactDir := artifactDir
+	workerContextPath := filepath.Join(runArtifactDir, "context.md")
+	resultPath := filepath.Join(runArtifactDir, "result.json")
+	logPath := filepath.Join(runArtifactDir, "runtime.log")
+	validationPath := filepath.Join(runArtifactDir, "validation.log")
 
-	if opts.TicketKey != "" && opts.RunID != "" {
+	if opts.OpsLayout != nil || opts.ArtifactID != "" {
+		if opts.OpsLayout == nil || strings.TrimSpace(opts.ArtifactID) == "" {
+			return RuntimePlan{}, fmt.Errorf("canonical ops layout and artifact id are required together")
+		}
+		artifactDir, err = opts.OpsLayout.ArtifactRoot("run")
+		if err != nil {
+			return RuntimePlan{}, err
+		}
+		runArtifactDir, err = opts.OpsLayout.ArtifactDirectory("run", opts.ArtifactID)
+		if err != nil {
+			return RuntimePlan{}, err
+		}
+		workerContextPath = filepath.Join(runArtifactDir, "files", "context.md")
+		resultPath = filepath.Join(runArtifactDir, "evidence", "result.json")
+		logPath = filepath.Join(runArtifactDir, "evidence", "runtime.log")
+		validationPath = filepath.Join(runArtifactDir, "evidence", "validation.log")
+	}
+
+	if opts.OpsLayout == nil && opts.TicketKey != "" && opts.RunID != "" {
 		runArtifactDir = filepath.Join(artifactDir, opts.TicketKey, opts.RunID)
-	} else if opts.RunID != "" {
+		workerContextPath = filepath.Join(runArtifactDir, "context.md")
+		resultPath = filepath.Join(runArtifactDir, "result.json")
+		logPath = filepath.Join(runArtifactDir, "runtime.log")
+		validationPath = filepath.Join(runArtifactDir, "validation.log")
+	} else if opts.OpsLayout == nil && opts.RunID != "" {
 		runArtifactDir = filepath.Join(artifactDir, opts.RunID)
+		workerContextPath = filepath.Join(runArtifactDir, "context.md")
+		resultPath = filepath.Join(runArtifactDir, "result.json")
+		logPath = filepath.Join(runArtifactDir, "runtime.log")
+		validationPath = filepath.Join(runArtifactDir, "validation.log")
 	}
 
 	return RuntimePlan{
@@ -99,6 +132,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		TicketBranch:          strings.TrimSpace(opts.TicketBranch),
 		WorkspaceBaseRef:      strings.TrimSpace(opts.WorkspaceBaseRef),
 		WorkspaceBaseSHA:      strings.TrimSpace(opts.WorkspaceBaseSHA),
+		ArtifactID:            strings.TrimSpace(opts.ArtifactID),
 		WorkspaceDir:          workspaceDir,
 		DockerfilePath:        dockerfilePath,
 		Image:                 config.Image,
@@ -106,10 +140,10 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		Mounts:                runtimeMounts(projectDir, executionWorkspaceDir, workspace.Mode, config.Workdir),
 		ArtifactDir:           artifactDir,
 		RunArtifactDir:        runArtifactDir,
-		WorkerContextPath:     filepath.Join(runArtifactDir, "context.md"),
-		ResultPath:            filepath.Join(runArtifactDir, "result.json"),
-		LogPath:               filepath.Join(runArtifactDir, "runtime.log"),
-		ValidationPath:        filepath.Join(runArtifactDir, "validation.log"),
+		WorkerContextPath:     workerContextPath,
+		ResultPath:            resultPath,
+		LogPath:               logPath,
+		ValidationPath:        validationPath,
 		ValidationCommand:     config.ValidationCommand,
 	}, nil
 }

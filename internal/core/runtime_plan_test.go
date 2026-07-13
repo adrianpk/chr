@@ -144,6 +144,36 @@ func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 	}
 }
 
+func TestPlanRuntimeUsesCanonicalOpsArtifactPaths(t *testing.T) {
+	dir := t.TempDir()
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	plan, err := PlanRuntime(RuntimePlanOptions{
+		ProjectDir: dir,
+		OpsLayout:  &layout,
+		ArtifactID: "00001-ticket-run",
+		RunID:      "exec-1",
+		TicketKey:  "CHR-1",
+	})
+	if err != nil {
+		t.Fatalf("PlanRuntime returned error: %v", err)
+	}
+
+	wantRunDir := filepath.Join(dir, "ops", "default", "run", "00001-ticket-run")
+	if plan.ArtifactID != "00001-ticket-run" || plan.RunArtifactDir != wantRunDir {
+		t.Fatalf("canonical run = (%q, %q)", plan.ArtifactID, plan.RunArtifactDir)
+	}
+	if plan.WorkerContextPath != filepath.Join(wantRunDir, "files", "context.md") {
+		t.Fatalf("WorkerContextPath = %q", plan.WorkerContextPath)
+	}
+	if plan.ResultPath != filepath.Join(wantRunDir, "evidence", "result.json") {
+		t.Fatalf("ResultPath = %q", plan.ResultPath)
+	}
+}
+
 func TestPlanRuntimeUsesTicketScopedRunArtifactPaths(t *testing.T) {
 	dir := t.TempDir()
 

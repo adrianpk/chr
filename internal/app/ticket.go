@@ -1257,7 +1257,7 @@ func buildTicketApplyResultPlanForRecord(
 		Record:         record,
 		Result:         result,
 		Application:    application,
-		ReportPath:     filepath.Join(record.Artifacts.RunDir, "result-application.md"),
+		ReportPath:     ticketResultApplicationPath(record),
 	}, nil
 }
 
@@ -1280,6 +1280,14 @@ func discoverTicketApplyResultChangedFiles(ctx context.Context, record core.Exec
 	}
 
 	return result, nil
+}
+
+func ticketResultApplicationPath(record core.ExecutionRecord) string {
+	if record.Artifacts.ArtifactID != "" {
+		return filepath.Join(record.Artifacts.RunDir, "evidence", "result-application.md")
+	}
+
+	return filepath.Join(record.Artifacts.RunDir, "result-application.md")
 }
 
 func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, events ticketExecutionEvents, assetsFS fs.FS) error {
@@ -1341,6 +1349,11 @@ func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticke
 	}
 
 	emitTicketApplicationAgentEvents(ctx, events, plan)
+	if plan.Record.Artifacts.ArtifactID != "" {
+		if err := core.RefreshOpsArtifactMetadata(plan.Record.Artifacts.RunDir, string(plan.Record.Status), time.Now().UTC()); err != nil {
+			return err
+		}
+	}
 
 	return emitTicketBlockedNotification(ctx, env, plan, assetsFS)
 }
@@ -1561,6 +1574,21 @@ func buildTicketStartPreflightForTicketWithOptions(ctx context.Context, env core
 	if workspace.TicketPath != "" {
 		record.TicketPath = workspace.TicketPath
 	}
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: projectContext.ProjectDir})
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
+		Layout:      layout,
+		Type:        "run",
+		Title:       ticketStartArtifactTitle(workspace.Ticket),
+		Producer:    "chr",
+		ExternalIDs: []string{record.ID},
+	})
+	if err != nil {
+		return ticketStartPreflight{}, err
+	}
+	record.Artifacts.ArtifactID = artifact.ID
 
 	result, err := core.ValidateRuntime(core.RuntimeValidationOptions{
 		ProjectDir:            projectContext.ProjectDir,
@@ -1572,6 +1600,8 @@ func buildTicketStartPreflightForTicketWithOptions(ctx context.Context, env core
 		WorkspaceBaseRef:      workspace.WorkspaceBaseRef,
 		WorkspaceBaseSHA:      workspace.WorkspaceBaseSHA,
 		RunID:                 record.ID,
+		OpsLayout:             &layout,
+		ArtifactID:            artifact.ID,
 	})
 	if err != nil {
 		return ticketStartPreflight{}, err
@@ -1652,10 +1682,6 @@ func prepareTicketStartWorktree(ctx context.Context, projectDir string, ticket c
 		return ticketStartWorkspace{}, err
 	}
 
-	if err := ensureTicketStartRuntimeArtifactDir(projectDir, config, workspace); err != nil {
-		return ticketStartWorkspace{}, err
-	}
-
 	return workspace, nil
 }
 
@@ -1697,29 +1723,6 @@ func writeTicketStartWorktreeMetadata(plan core.WorktreePlan) error {
 	}
 
 	return core.WriteWorktreeMetadata(path, core.NewWorktreeMetadata(plan, time.Now().UTC()))
-}
-
-func ensureTicketStartRuntimeArtifactDir(projectDir string, config core.WorkspaceConfig, workspace ticketStartWorkspace) error {
-	plan, err := core.PlanRuntime(core.RuntimePlanOptions{
-		ProjectDir:            projectDir,
-		Config:                config.Runtime,
-		Workspace:             config.Work.Workspace,
-		ExecutionWorkspaceDir: workspace.ExecutionWorkspaceDir,
-		TicketKey:             workspace.Ticket.Key,
-		TicketBranch:          workspace.TicketBranch,
-		WorkspaceBaseRef:      workspace.WorkspaceBaseRef,
-		WorkspaceBaseSHA:      workspace.WorkspaceBaseSHA,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = os.MkdirAll(plan.ArtifactDir, 0o755)
-	if err != nil {
-		return fmt.Errorf("create execution workspace artifact directory: %w", err)
-	}
-
-	return nil
 }
 
 func equivalentProjectPath(sourceRoot, targetRoot, path string) (string, error) {
@@ -1796,6 +1799,14 @@ func newPendingExecutionRecord(projectID string, ticket core.IndexedTicket) core
 	}
 }
 
+func ticketStartArtifactTitle(ticket core.IndexedTicket) string {
+	if strings.TrimSpace(ticket.Title) == "" {
+		return ticket.Key
+	}
+
+	return ticket.Key + " " + ticket.Title
+}
+
 func runTicketStartExecution(
 	ctx context.Context,
 	env core.UserEnvironment,
@@ -1840,11 +1851,21 @@ func runTicketStartExecution(
 	runner := core.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
 	runner.EventSink = events.Sink
 
-	return runner.Run(ctx, core.RunExecutionOptions{
+	executed, runErr := runner.Run(ctx, core.RunExecutionOptions{
 		Record:     record,
 		Invocation: invocation,
 		LoopID:     events.LoopID,
 	})
+	if executed.Artifacts.ArtifactID != "" {
+		if err := core.RefreshOpsArtifactMetadata(executed.Artifacts.RunDir, string(executed.Status), time.Now().UTC()); err != nil {
+			if runErr != nil {
+				return executed, fmt.Errorf("%w; refresh shared artifact metadata: %v", runErr, err)
+			}
+			return executed, err
+		}
+	}
+
+	return executed, runErr
 }
 
 func executionID(projectID, ticketKey string, createdAt time.Time) string {
