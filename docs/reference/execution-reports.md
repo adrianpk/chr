@@ -119,8 +119,10 @@ recorded.
 Execution reports are written to the execution run artifact directory:
 
 ```text
-<run_dir>/execution-report.md
+ops/<namespace>/run/<artifact-id>/evidence/execution-report.md
 ```
+
+`<namespace>` is `default` unless `OPS_USER` is configured.
 
 For ticket result application, `chr ticket apply-result <execution-id>` writes
 this report after applying the result to ticket state. Dry-run result

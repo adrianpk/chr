@@ -60,7 +60,15 @@ func (l ReportLister) ListProjectReports(
 		return nil, err
 	}
 
-	root := UserPath(projectDir, "runtime", "runs")
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	if err != nil {
+		return nil, err
+	}
+
+	root, err := layout.ArtifactRoot("run")
+	if err != nil {
+		return nil, err
+	}
 	entries := []ReportListEntry{}
 
 	err = filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {

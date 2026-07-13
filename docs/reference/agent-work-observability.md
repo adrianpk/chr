@@ -6,9 +6,9 @@ Agent work observability is the contract for seeing what Chryso is doing
 while ticket execution or a ready-ticket queue is running.
 
 Observability is file-first. Runtime work writes durable reports, logs, result
-artifacts, and append-only event streams under the project runtime artifact
-tree. The TUI renders a human-readable live view from those records, and the CLI
-can inspect the same evidence after the fact.
+artifacts, and append-only event streams under the active shared operational
+namespace. The TUI renders a human-readable live view from those records, and
+the CLI can inspect the same evidence after the fact.
 
 ## Event Streams
 
@@ -17,9 +17,11 @@ Agent events are JSONL records written under runtime run directories.
 Preferred paths:
 
 ```text
-.chr/user/runtime/runs/<loop-id>/events.jsonl
-.chr/user/runtime/runs/<ticket-key>/<execution-id>/events.jsonl
+ops/<namespace>/run/<loop-artifact-id>/evidence/events.jsonl
+ops/<namespace>/run/<execution-artifact-id>/evidence/events.jsonl
 ```
+
+`<namespace>` is `default` unless `OPS_USER` is configured.
 
 Loop-level streams describe queue progress. Execution-level streams describe
 one ticket execution. Implementations may mirror execution events into a loop
@@ -122,8 +124,8 @@ or mutate ticket files.
 Summarize an event stream:
 
 ```sh
-chr work events .chr/user/runtime/runs/CHR-1/exec-1/events.jsonl
-chr work events .chr/user/runtime/runs/loop-1/events.jsonl
+chr work events ops/default/run/<execution-artifact-id>/evidence/events.jsonl
+chr work events ops/default/run/<loop-artifact-id>/evidence/events.jsonl
 ```
 
 The readback summary includes event counts, malformed line counts, latest known

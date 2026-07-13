@@ -82,7 +82,7 @@ chr report show --loop loop-1
 Show a report by project-relative path:
 
 ```sh
-chr report show .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md
+chr report show ops/default/run/00001-ticket-run/evidence/execution-report.md
 ```
 
 If a lookup matches more than one report, the command fails with an ambiguity
@@ -130,8 +130,8 @@ field so missing files are visible without hiding the execution identity.
 Summarize an event stream from either an execution or a loop:
 
 ```sh
-chr work events .chr/user/runtime/runs/CHR-1/exec-1/events.jsonl
-chr work events .chr/user/runtime/runs/loop-1/events.jsonl
+chr work events ops/default/run/00001-ticket-run/evidence/events.jsonl
+chr work events ops/default/run/00002-agent-work-loop/evidence/events.jsonl
 ```
 
 Use this after an interrupted run when the report is incomplete or absent. The

@@ -122,18 +122,16 @@ log records the configured validation command output.
 Summarize an event stream:
 
 ```sh
-chr work events .chr/user/runtime/runs/CHR-1/<execution-id>/events.jsonl
+chr work events ops/default/run/<artifact-id>/evidence/events.jsonl
 ```
 
-In `worktree` execution mode, runtime artifacts live under the ticket
-worktree's `.chr/user/runtime/runs/...` directory. Prefer the paths printed by
-`chr work logs <execution-id>` when following an active run from outside that
-worktree.
+Runtime artifacts live in the active shared namespace. Prefer the paths
+printed by `chr work logs <execution-id>` when following an active run.
 
 For run-all, summarize the loop stream when one is present:
 
 ```sh
-chr work events .chr/user/runtime/runs/<loop-id>/events.jsonl
+chr work events ops/default/run/<loop-artifact-id>/evidence/events.jsonl
 ```
 
 The event summary is useful when a stream is partially corrupted because it

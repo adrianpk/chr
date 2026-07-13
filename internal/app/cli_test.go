@@ -1211,7 +1211,7 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHR-1", "exec-1", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.OpsDirectoryName, core.DefaultOpsNamespace, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -1221,7 +1221,7 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 
 ## Artifacts
 
-- result: .chr/user/runtime/runs/CHR-1/exec-1/result.json
+- result: ops/default/run/00001-ticket-run/evidence/result.json
 `)
 	runGateCLIGit(t, projectDir, "add", ".")
 	runGateCLIGit(t, projectDir, "commit", "-m", "change")
@@ -1273,7 +1273,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, core.UserDirectoryName, "runtime", "runs", "CHR-1", "exec-1", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.OpsDirectoryName, core.DefaultOpsNamespace, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -1283,7 +1283,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 
 ## Artifacts
 
-- result: .chr/user/runtime/runs/CHR-1/exec-1/result.json
+- result: ops/default/run/00001-ticket-run/evidence/result.json
 `)
 	runGateCLIGit(t, projectDir, "add", ".")
 	runGateCLIGit(t, projectDir, "commit", "-m", "change")
@@ -5150,20 +5150,19 @@ func TestReportListListsProjectReports(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"loop-1",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00002-agent-work-loop",
+		"evidence",
 		"loop-report.md",
 	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
 
@@ -5180,8 +5179,8 @@ func TestReportListListsProjectReports(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		"kind: execution path: .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md ticket: CHR-1 execution: exec-1 loop: none status: succeeded",
-		"kind: loop path: .chr/user/runtime/runs/loop-1/loop-report.md ticket: none execution: none loop: loop-1 status: blocked",
+		"kind: execution path: ops/default/run/00001-ticket-run/evidence/execution-report.md ticket: CHR-1 execution: exec-1 loop: none status: succeeded",
+		"kind: loop path: ops/default/run/00002-agent-work-loop/evidence/loop-report.md ticket: none execution: none loop: loop-1 status: blocked",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -5193,21 +5192,19 @@ func TestReportListFiltersReports(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"CHR-2",
-		"exec-2",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00002-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-2\n- status: blocked\n")
 
@@ -5242,12 +5239,11 @@ func TestReportShowPrintsReportBody(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 
@@ -5274,11 +5270,11 @@ func TestReportShowPrintsReportMetadata(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"loop-1",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00001-agent-work-loop",
+		"evidence",
 		"loop-report.md",
 	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
 
@@ -5297,7 +5293,7 @@ func TestReportShowPrintsReportMetadata(t *testing.T) {
 		t.Fatalf("report show returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), "kind: loop path: .chr/user/runtime/runs/loop-1/loop-report.md") {
+	if !strings.Contains(stdout.String(), "kind: loop path: ops/default/run/00001-agent-work-loop/evidence/loop-report.md") {
 		t.Fatalf("stdout does not contain report metadata:\n%s", stdout.String())
 	}
 }
@@ -5306,21 +5302,19 @@ func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeCLIReport(t, projectDir, filepath.Join(
-		".chr",
-		"user",
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-2",
+		core.OpsDirectoryName,
+		core.DefaultOpsNamespace,
+		"run",
+		"00002-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-1\n")
 

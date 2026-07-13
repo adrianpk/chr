@@ -10,29 +10,27 @@ import (
 func TestReportListerListsProjectReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"loop-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00002-agent-work-loop",
+		"evidence",
 		"loop-report.md",
 	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"runtime.log",
 	), "log")
 
@@ -57,21 +55,19 @@ func TestReportListerListsProjectReports(t *testing.T) {
 func TestReportListerFiltersReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-2",
-		"exec-2",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00002-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-2\n- status: blocked\n")
 
@@ -103,6 +99,48 @@ func TestReportListerReturnsEmptyWhenRunDirectoryIsMissing(t *testing.T) {
 
 	if len(reports) != 0 {
 		t.Fatalf("reports len = %d, want 0", len(reports))
+	}
+}
+
+func TestReportListerUsesActiveOpsNamespace(t *testing.T) {
+	projectDir := t.TempDir()
+	t.Setenv(OpsUserEnv, "adrian")
+
+	writeReportListingFile(t, projectDir, filepath.Join(
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-default-run",
+		"evidence",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: default-exec\n")
+	writeReportListingFile(t, projectDir, filepath.Join(
+		OpsDirectoryName,
+		"adrian",
+		"run",
+		"00002-adrian-run",
+		"evidence",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: adrian-exec\n")
+	writeReportListingFile(t, projectDir, filepath.Join(
+		DirectoryName,
+		UserDirectoryName,
+		"runtime",
+		"runs",
+		"legacy-exec",
+		"execution-report.md",
+	), "# Execution Report\n\n## Summary\n\n- execution: legacy-exec\n")
+
+	reports, err := NewReportLister().ListProjectReports(context.Background(), projectDir, ReportListFilter{})
+	if err != nil {
+		t.Fatalf("ListProjectReports returned error: %v", err)
+	}
+
+	if len(reports) != 1 {
+		t.Fatalf("reports len = %d, want 1: %#v", len(reports), reports)
+	}
+	if reports[0].ExecutionID != "adrian-exec" {
+		t.Fatalf("ExecutionID = %q, want adrian-exec", reports[0].ExecutionID)
 	}
 }
 

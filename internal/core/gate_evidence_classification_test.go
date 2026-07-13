@@ -82,12 +82,11 @@ func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.
 	projectDir := t.TempDir()
 	reportPath := filepath.Join(
 		projectDir,
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	)
 	writeGateEvidenceFile(t, reportPath, `# Execution Report
@@ -100,7 +99,7 @@ func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.
 
 ## Artifacts
 
-- result: .chr/user/runtime/runs/CHR-1/exec-1/result.json
+- result: ops/default/run/00001-ticket-run/evidence/result.json
 `)
 
 	classification, err := NewGateEvidenceClassifier().Classify(context.Background(), GateEvidenceClassificationRequest{
@@ -131,9 +130,9 @@ func writeGateEvidenceExecutionArtifacts(
 ) {
 	t.Helper()
 
-	runDir := filepath.Join(projectDir, DirectoryName, UserDirectoryName, "runtime", "runs", ticketKey, executionID)
-	resultPath := filepath.Join(runDir, "result.json")
-	reportPath := filepath.Join(runDir, "execution-report.md")
+	runDir := filepath.Join(projectDir, OpsDirectoryName, DefaultOpsNamespace, "run", "00001-ticket-run")
+	resultPath := filepath.Join(runDir, "evidence", "result.json")
+	reportPath := filepath.Join(runDir, "evidence", "execution-report.md")
 	resultContent := `{"execution_id":"` + result.ExecutionID +
 		`","ticket_key":"` + result.TicketKey +
 		`","status":"` + string(result.Status) +
@@ -155,7 +154,7 @@ func writeGateEvidenceExecutionArtifacts(
 
 ## Artifacts
 
-- result: .chr/user/runtime/runs/`+ticketKey+`/`+executionID+`/result.json
+- result: ops/default/run/00001-ticket-run/evidence/result.json
 `)
 }
 

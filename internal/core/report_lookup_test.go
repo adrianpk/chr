@@ -10,12 +10,11 @@ import (
 func TestReportLookupFindsReportByExecutionID(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 
@@ -38,11 +37,11 @@ func TestReportLookupFindsReportByExecutionID(t *testing.T) {
 func TestReportLookupFindsReportByRelativePath(t *testing.T) {
 	projectDir := t.TempDir()
 	relativePath := filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"loop-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-agent-work-loop",
+		"evidence",
 		"loop-report.md",
 	)
 	writeReportListingFile(t, projectDir, relativePath, "# Loop Report\n\n## Summary\n\n- loop: loop-1\n")
@@ -77,21 +76,19 @@ func TestReportLookupRejectsMissingReport(t *testing.T) {
 func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-1",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00001-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		"runtime",
-		"runs",
-		"CHR-1",
-		"exec-2",
+		OpsDirectoryName,
+		DefaultOpsNamespace,
+		"run",
+		"00002-ticket-run",
+		"evidence",
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-2\n- ticket: CHR-1\n")
 

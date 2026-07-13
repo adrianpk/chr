@@ -33,7 +33,7 @@ chr report list --dir /path/to/project
 Each report is printed as one line:
 
 ```text
-kind: execution path: .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md ticket: CHR-1 execution: exec-1 loop: none status: succeeded
+kind: execution path: ops/default/run/00001-ticket-run/evidence/execution-report.md ticket: CHR-1 execution: exec-1 loop: none status: succeeded
 ```
 
 Fields:
@@ -67,7 +67,7 @@ Filters can be combined. All provided filters must match.
 Show a report body by report id or lookup filter:
 
 ```sh
-chr report show .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md
+chr report show ops/default/run/00001-ticket-run/evidence/execution-report.md
 chr report show --execution exec-1
 chr report show --loop loop-1
 chr report show --ticket CHR-1 --kind execution
@@ -94,8 +94,10 @@ Metadata output uses the same stable line format as `chr report list`.
 Report listing discovers Markdown report artifacts under:
 
 ```text
-.chr/user/runtime/runs/
+ops/<namespace>/run/*/evidence/
 ```
+
+`<namespace>` is `default` unless `OPS_USER` is configured.
 
 Current discovered report filenames:
 
