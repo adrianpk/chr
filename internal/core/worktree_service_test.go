@@ -22,7 +22,7 @@ func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
 		t.Fatalf("NewWorktreePlan returned error: %v", err)
 	}
 
-	wantRoot := filepath.Join(dir, ".chr", "user", "runtime", "worktrees")
+	wantRoot := filepath.Join(dir, "ops", "default", "worktree")
 
 	if plan.BaseRef != "origin/dev" {
 		t.Fatalf("BaseRef = %q, want origin/dev", plan.BaseRef)
@@ -34,6 +34,23 @@ func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
 
 	if plan.WorktreePath != filepath.Join(wantRoot, "chr-1-add-cli") {
 		t.Fatalf("WorktreePath = %q, want deterministic ticket path", plan.WorktreePath)
+	}
+}
+
+func TestNewWorktreePlanUsesConfiguredOpsNamespace(t *testing.T) {
+	t.Setenv(OpsUserEnv, "adrian")
+	dir := t.TempDir()
+
+	plan, err := NewWorktreePlan(WorktreePlanOptions{
+		ProjectDir: dir,
+		TicketKey:  "CHR-1",
+		Branch:     "feat/chr-1",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := plan.WorktreeRoot, filepath.Join(dir, "ops", "adrian", "worktree"); got != want {
+		t.Fatalf("WorktreeRoot = %q, want %q", got, want)
 	}
 }
 

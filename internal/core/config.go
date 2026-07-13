@@ -223,7 +223,7 @@ const (
 	// DefaultWorkCanonicalRemote defines a package boundary constant.
 	DefaultWorkCanonicalRemote = "origin"
 	// DefaultWorktreeRoot defines a package boundary constant.
-	DefaultWorktreeRoot = ".chr/user/runtime/worktrees"
+	DefaultWorktreeRoot = "ops/default/worktree"
 
 	// EvidenceStrategyModeInline defines a package boundary constant.
 	EvidenceStrategyModeInline EvidenceStrategyMode = "inline"

@@ -55,7 +55,10 @@ func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
 		return WorktreePlan{}, err
 	}
 
-	worktreeRoot := resolveProjectPath(projectDir, workspace.WorktreeRoot)
+	worktreeRoot, err := resolvedWorktreeRoot(projectDir, workspace.WorktreeRoot)
+	if err != nil {
+		return WorktreePlan{}, err
+	}
 
 	worktreePath, err := worktreeTargetPath(worktreeRoot, ticketKey, opts.WorktreePath)
 	if err != nil {
@@ -71,6 +74,17 @@ func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
 		WorktreeRoot: worktreeRoot,
 		WorktreePath: worktreePath,
 	}, nil
+}
+
+func resolvedWorktreeRoot(projectDir, configuredRoot string) (string, error) {
+	if filepath.ToSlash(filepath.Clean(configuredRoot)) != DefaultWorktreeRoot {
+		return resolveProjectPath(projectDir, configuredRoot), nil
+	}
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	if err != nil {
+		return "", err
+	}
+	return layout.WorktreeRoot(), nil
 }
 
 func normalizedWorktreePlanConfig(opts WorktreePlanOptions) (WorkBranchPolicy, WorkWorkspaceConfig, error) {
