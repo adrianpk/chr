@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -17,6 +18,9 @@ func TestAgentOperationLockBlocksConcurrentOperation(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatalf("AcquireAgentOperationLock returned error: %v", err)
+	}
+	if want := filepath.Join(projectDir, OpsDirectoryName, DefaultOpsNamespace, "lock", "agent-operation.lock"); lock.path != want {
+		t.Fatalf("lock path = %q, want %q", lock.path, want)
 	}
 
 	defer func() {

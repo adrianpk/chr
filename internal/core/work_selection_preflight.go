@@ -94,7 +94,10 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 		return nil, err
 	}
 
-	lockPath := agentOperationLockPath(projectDir)
+	lockPath, err := agentOperationLockPath(projectDir)
+	if err != nil {
+		return nil, err
+	}
 
 	file, err := createAgentOperationLockFile(lockPath)
 	if err != nil {
@@ -277,8 +280,13 @@ func (OSWorkSelectionGit) BranchContainsRef(ctx context.Context, projectDir, bra
 	return false, normalizeGitPreflightError(err)
 }
 
-func agentOperationLockPath(projectDir string) string {
-	return filepath.Join(projectDir, DirectoryName, UserDirectoryName, "runtime", "agent-operation.lock")
+func agentOperationLockPath(projectDir string) (string, error) {
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(layout.Root(), "lock", "agent-operation.lock"), nil
 }
 
 func reviewRepairTickets(tickets []IndexedTicket) []IndexedTicket {
