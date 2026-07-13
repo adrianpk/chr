@@ -90,6 +90,7 @@ func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record 
 		record.Workspace.BaseRef,
 		record.Workspace.BaseSHA,
 		record.Workspace.TicketBranch,
+		record.Artifacts.ArtifactID,
 		record.Artifacts.RunDir,
 		record.Artifacts.ResultPath,
 		record.Artifacts.LogPath,
@@ -129,6 +130,7 @@ func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record 
 		record.Workspace.BaseRef,
 		record.Workspace.BaseSHA,
 		record.Workspace.TicketBranch,
+		record.Artifacts.ArtifactID,
 		record.Artifacts.RunDir,
 		record.Artifacts.ResultPath,
 		record.Artifacts.LogPath,
@@ -293,6 +295,7 @@ func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
 		&record.Workspace.BaseRef,
 		&record.Workspace.BaseSHA,
 		&record.Workspace.TicketBranch,
+		&record.Artifacts.ArtifactID,
 		&record.Artifacts.RunDir,
 		&record.Artifacts.ResultPath,
 		&record.Artifacts.LogPath,
@@ -357,10 +360,10 @@ func insertExecutionSQL() string {
     runtime_image, runtime_dockerfile_path, runtime_container_workdir,
     runtime_validation_command, workspace_mode, workspace_project_checkout_dir,
     workspace_execution_dir, workspace_base_ref, workspace_base_sha,
-    workspace_ticket_branch, artifact_run_dir, artifact_result_path,
+    workspace_ticket_branch, artifact_id, artifact_run_dir, artifact_result_path,
     artifact_log_path, artifact_validation_path, failure_reason,
     created_at, started_at, finished_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 }
 
 func updateExecutionSQL() string {
@@ -369,7 +372,7 @@ SET project_id = ?, ticket_key = ?, ticket_path = ?, status = ?,
     runtime_image = ?, runtime_dockerfile_path = ?, runtime_container_workdir = ?,
     runtime_validation_command = ?, workspace_mode = ?, workspace_project_checkout_dir = ?,
     workspace_execution_dir = ?, workspace_base_ref = ?, workspace_base_sha = ?,
-    workspace_ticket_branch = ?, artifact_run_dir = ?, artifact_result_path = ?,
+    workspace_ticket_branch = ?, artifact_id = ?, artifact_run_dir = ?, artifact_result_path = ?,
     artifact_log_path = ?, artifact_validation_path = ?, failure_reason = ?,
     created_at = ?, started_at = ?, finished_at = ?, updated_at = ?
 WHERE id = ?`
@@ -380,7 +383,7 @@ func selectExecutionSQL() string {
     runtime_image, runtime_dockerfile_path, runtime_container_workdir,
     runtime_validation_command, workspace_mode, workspace_project_checkout_dir,
     workspace_execution_dir, workspace_base_ref, workspace_base_sha,
-    workspace_ticket_branch, artifact_run_dir, artifact_result_path,
+    workspace_ticket_branch, artifact_id, artifact_run_dir, artifact_result_path,
     artifact_log_path, artifact_validation_path, failure_reason,
     created_at, started_at, finished_at, updated_at
 FROM execution_records`

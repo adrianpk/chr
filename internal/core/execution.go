@@ -58,6 +58,7 @@ type ExecutionWorkspaceRef struct {
 
 // ExecutionArtifacts describes a package boundary value.
 type ExecutionArtifacts struct {
+	ArtifactID     string
 	RunDir         string
 	ResultPath     string
 	LogPath        string

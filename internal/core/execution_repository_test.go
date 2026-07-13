@@ -163,6 +163,7 @@ func testExecutionRecord(now time.Time) ExecutionRecord {
 			TicketBranch:          "chr/CHR-1",
 		},
 		Artifacts: ExecutionArtifacts{
+			ArtifactID: "00001-parser-validation",
 			RunDir:     "/tmp/project/.chr/user/runtime/runs/exec-1",
 			ResultPath: "/tmp/project/.chr/user/runtime/runs/exec-1/result.json",
 			LogPath:    "/tmp/project/.chr/user/runtime/runs/exec-1/runtime.log",

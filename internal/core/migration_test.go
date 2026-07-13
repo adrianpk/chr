@@ -160,6 +160,9 @@ func testMigrationFS() fstest.MapFS {
 		"assets/migration/sqlite/20260619000011-add_execution_workspace_metadata.sql": {
 			Data: []byte(testAddExecutionWorkspaceMetadataMigration()),
 		},
+		"assets/migration/sqlite/20260713000012-add_execution_artifact_id.sql": {
+			Data: []byte(testAddExecutionArtifactIDMigration()),
+		},
 	}
 }
 
@@ -514,6 +517,19 @@ ADD COLUMN workspace_ticket_branch text NOT NULL DEFAULT '';
 
 -- +migrate Down
 SELECT 1;
+`
+}
+
+func testAddExecutionArtifactIDMigration() string {
+	return `-- +migrate Up
+ALTER TABLE execution_records
+ADD COLUMN artifact_id text NOT NULL DEFAULT '';
+
+CREATE INDEX execution_records_artifact_id_idx
+ON execution_records (artifact_id);
+
+-- +migrate Down
+DROP INDEX IF EXISTS execution_records_artifact_id_idx;
 `
 }
 
