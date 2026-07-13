@@ -24,15 +24,12 @@ func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 	}
 
 	assertFile(t, dir, ".chr/user/runtime/agent/Dockerfile")
-	assertDir(t, dir, ".chr/user/runtime/runs")
+	assertNotExists(t, dir, ".chr/user/runtime/runs")
 
 	if !contains(result.Created, ".chr/user/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 
-	if !contains(result.Created, ".chr/user/runtime/runs") {
-		t.Fatalf("Created = %#v, want runtime runs directory", result.Created)
-	}
 }
 
 func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
@@ -56,9 +53,6 @@ func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 
-	if !contains(result.Created, ".chr/user/runtime/runs") {
-		t.Fatalf("Created = %#v, want runtime runs directory", result.Created)
-	}
 }
 
 func TestRuntimeInitSkipsExistingRuntimeTemplate(t *testing.T) {

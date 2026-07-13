@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -76,15 +75,6 @@ func (r *runtimeAssets) Init(ctx context.Context, opts RuntimeInitOptions) (Runt
 		recordRuntimePath(&result, rel, created)
 	}
 
-	runsPath := filepath.Join(DirectoryName, UserDirectoryName, "runtime", "runs")
-
-	created, err := createDirectory(filepath.Join(absProjectDir, runsPath), opts.DryRun)
-	if err != nil {
-		return RuntimeInitResult{}, fmt.Errorf("init runtime runs directory: %w", err)
-	}
-
-	recordRuntimePath(&result, runsPath, created)
-
 	return result, nil
 }
 
@@ -103,26 +93,4 @@ func recordRuntimePath(result *RuntimeInitResult, rel string, created bool) {
 	}
 
 	result.Skipped = append(result.Skipped, path)
-}
-
-func createDirectory(path string, dryRun bool) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return false, nil
-	}
-
-	if !os.IsNotExist(err) {
-		return false, err
-	}
-
-	if dryRun {
-		return true, nil
-	}
-
-	err = os.MkdirAll(path, 0o755)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }

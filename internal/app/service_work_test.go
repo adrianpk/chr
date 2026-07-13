@@ -68,13 +68,16 @@ func TestServiceStartAgentWorkTicketInitializesRuntime(t *testing.T) {
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	_, err := operations.StartAgentWorkTicket("CHR-1")
+	result, err := operations.StartAgentWorkTicket("CHR-1")
 	if err != nil {
 		t.Fatalf("StartAgentWorkTicket returned error: %v", err)
 	}
 
 	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "runs"))
+	if result.Execution == nil {
+		t.Fatal("Execution is nil")
+	}
+	assertPathExists(t, filepath.Join(result.Execution.Artifacts.RunDir, "artifact.md"))
 }
 
 func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
