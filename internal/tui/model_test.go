@@ -2785,9 +2785,9 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 				ExecutionID:     "exec-2",
 				Message:         "worker started",
 				TicketPath:      ".chr/user/tickets/CHR-2.md",
-				RuntimeLog:      ".chr/user/runtime/runs/CHR-2/exec-2/runtime.log",
-				ValidationLog:   ".chr/user/runtime/runs/CHR-2/exec-2/validation.log",
-				ExecutionReport: ".chr/user/runtime/runs/CHR-2/exec-2/execution-report.md",
+				RuntimeLog:      "ops/default/run/00002-ticket-run/evidence/runtime.log",
+				ValidationLog:   "ops/default/run/00002-ticket-run/evidence/validation.log",
+				ExecutionReport: "ops/default/run/00002-ticket-run/evidence/execution-report.md",
 			},
 			{Time: "11:31:03", Level: "error", TicketKey: "CHR-2", Message: "validation failed"},
 		},
@@ -2803,9 +2803,9 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 		"11:31:02 CHR-2 worker started",
 		"11:31:03 CHR-2 error: validation failed",
 		"Ticket: .chr/user/tickets/CHR-2.md",
-		"Execution report: .chr/user/runtime/runs/CHR-2/exec-2/execution-report.md",
-		"Runtime log: .chr/user/runtime/runs/CHR-2/exec-2/runtime.log",
-		"Validation log: .chr/user/runtime/runs/CHR-2/exec-2/validation.log",
+		"Execution report: ops/default/run/00002-ticket-run/evidence/execution-report.md",
+		"Runtime log: ops/default/run/00002-ticket-run/evidence/runtime.log",
+		"Validation log: ops/default/run/00002-ticket-run/evidence/validation.log",
 		"Lookup: chr work logs exec-2",
 	} {
 		if !strings.Contains(action, want) {
@@ -3535,10 +3535,10 @@ func TestModelRendersAgentObservability(t *testing.T) {
 				Status:         "failed",
 				UpdatedAt:      "2026-05-22T10:02:00Z",
 				FailureReason:  "validation failed",
-				RunDir:         ".chr/user/runtime/runs/CHR-1/exec-1",
-				ResultPath:     ".chr/user/runtime/runs/CHR-1/exec-1/result.json",
-				LogPath:        ".chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
-				ValidationPath: ".chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+				RunDir:         "ops/default/run/00001-ticket-run",
+				ResultPath:     "ops/default/run/00001-ticket-run/evidence/result.json",
+				LogPath:        "ops/default/run/00001-ticket-run/evidence/runtime.log",
+				ValidationPath: "ops/default/run/00001-ticket-run/evidence/validation.log",
 			},
 		},
 	})
@@ -3556,7 +3556,7 @@ func TestModelRendersAgentObservability(t *testing.T) {
 		"Counts: 3 eligible / 1 processed / 1 blocked / 0 failed",
 		"Latest Execution",
 		"Ticket: CHR-1",
-		"Validation: .chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+		"Validation: ops/default/run/00001-ticket-run/evidence/validation.log",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -3639,7 +3639,7 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 		t.Fatalf("RecentEvents[0].Message = %q, want CHR-2 worker started", view.RecentEvents[0].Message)
 	}
 
-	if view.RecentEvents[0].RuntimeLog != ".chr/user/runtime/runs/CHR-2/exec-new/runtime.log" {
+	if view.RecentEvents[0].RuntimeLog != "ops/default/run/00002-ticket-run/evidence/runtime.log" {
 		t.Fatalf("RecentEvents[0].RuntimeLog = %q, want relative runtime log path", view.RecentEvents[0].RuntimeLog)
 	}
 
@@ -3674,7 +3674,7 @@ func testObservabilityAgentEvents(projectDir string, timestamp time.Time) []core
 			Level:         core.AgentEventLevelInfo,
 			Message:       "CHR-2 worker started",
 			Refs: core.AgentEventRefs{
-				"runtime_log_path": filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-2", "exec-new", "runtime.log"),
+				"runtime_log_path": filepath.Join(projectDir, "ops", "default", "run", "00002-ticket-run", "evidence", "runtime.log"),
 			},
 		},
 	}
