@@ -815,7 +815,7 @@ Inspect the evidence:
 chr report list --kind loop
 chr report list --kind execution
 chr work logs <execution-id>
-chr work events .chr/user/runtime/runs/<loop-id>/events.jsonl
+chr work events ops/default/run/<loop-artifact-id>/evidence/events.jsonl
 ```
 
 ## Capture Authoring Context
@@ -1026,7 +1026,7 @@ Sibling context files live under:
 ```
 
 Docker receives the same files through the project mount, usually under
-`/workspace/.chr/user/runtime/runs/...`.
+`/workspace/ops/default/run/...`.
 
 ## Current Boundaries
 

@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -97,6 +98,78 @@ func CreateOpsArtifact(opts CreateOpsArtifactOptions) (OpsArtifact, error) {
 		if err := os.MkdirAll(filepath.Join(dir, path), 0o755); err != nil {
 			return OpsArtifact{}, fmt.Errorf("create ops artifact envelope: %w", err)
 		}
+	}
+
+	return OpsArtifact{ID: id, Type: opts.Type, Dir: dir}, nil
+}
+
+// EnsureOpsArtifactEnvelope creates or refreshes a known shared artifact envelope.
+func EnsureOpsArtifactEnvelope(opts CreateOpsArtifactOptions, id string) (OpsArtifact, error) {
+	if _, err := opts.Layout.ArtifactRoot(opts.Type); err != nil {
+		return OpsArtifact{}, err
+	}
+	if strings.TrimSpace(id) == "" || filepath.Base(id) != id {
+		return OpsArtifact{}, fmt.Errorf("invalid ops artifact id: %s", id)
+	}
+	if strings.TrimSpace(opts.Title) == "" {
+		return OpsArtifact{}, fmt.Errorf("ops artifact title is required")
+	}
+	if strings.TrimSpace(opts.Producer) == "" {
+		return OpsArtifact{}, fmt.Errorf("ops artifact producer is required")
+	}
+
+	now := time.Now
+	if opts.Now != nil {
+		now = opts.Now
+	}
+
+	dir, err := opts.Layout.ArtifactDirectory(opts.Type, id)
+	if err != nil {
+		return OpsArtifact{}, err
+	}
+	for _, path := range []string{"", "files", "evidence", filepath.Join("extension", strings.TrimSpace(opts.Producer))} {
+		if err := os.MkdirAll(filepath.Join(dir, path), 0o755); err != nil {
+			return OpsArtifact{}, fmt.Errorf("create ops artifact envelope: %w", err)
+		}
+	}
+
+	artifactPath := filepath.Join(dir, "artifact.md")
+	if _, err := os.Stat(artifactPath); errors.Is(err, os.ErrNotExist) {
+		if err := os.WriteFile(artifactPath, []byte("# "+strings.TrimSpace(opts.Title)+"\n"), 0o644); err != nil {
+			return OpsArtifact{}, fmt.Errorf("write ops artifact body: %w", err)
+		}
+	} else if err != nil {
+		return OpsArtifact{}, fmt.Errorf("stat ops artifact body: %w", err)
+	}
+
+	metadataPath := filepath.Join(dir, "metadata.json")
+	if _, err := os.Stat(metadataPath); errors.Is(err, os.ErrNotExist) {
+		timestamp := now().UTC().Format(time.RFC3339)
+		metadata := map[string]any{
+			"schema_version": "ops-layout/v1",
+			"id":             id,
+			"type":           opts.Type,
+			"namespace":      opts.Layout.Namespace(),
+			"title":          strings.TrimSpace(opts.Title),
+			"status":         "created",
+			"revision":       1,
+			"created_at":     timestamp,
+			"updated_at":     timestamp,
+			"producer":       map[string]string{"name": strings.TrimSpace(opts.Producer), "version": "0.0.0"},
+			"external_ids":   append([]string(nil), opts.ExternalIDs...),
+			"sources":        []any{},
+			"continuations":  []any{},
+			"files":          []string{"artifact.md"},
+		}
+		encoded, err := json.MarshalIndent(metadata, "", "  ")
+		if err != nil {
+			return OpsArtifact{}, fmt.Errorf("encode ops artifact metadata: %w", err)
+		}
+		if err := os.WriteFile(metadataPath, append(encoded, '\n'), 0o644); err != nil {
+			return OpsArtifact{}, fmt.Errorf("write ops artifact metadata: %w", err)
+		}
+	} else if err != nil {
+		return OpsArtifact{}, fmt.Errorf("stat ops artifact metadata: %w", err)
 	}
 
 	return OpsArtifact{ID: id, Type: opts.Type, Dir: dir}, nil

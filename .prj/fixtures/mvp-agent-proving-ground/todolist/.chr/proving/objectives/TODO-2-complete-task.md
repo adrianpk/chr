@@ -2,11 +2,11 @@
 objective_id: proving-TODO-2
 ticket_key: TODO-2
 kind: feature
-artifact_root: .chr/runtime/runs/proving/TODO-2
-context_path: .chr/runtime/runs/proving/TODO-2/context.md
-result_path: .chr/runtime/runs/proving/TODO-2/result.json
-log_path: .chr/runtime/runs/proving/TODO-2/agent.log
-validation_path: .chr/runtime/runs/proving/TODO-2/validation.log
+artifact_root: ops/default/run/00002-proving-todo-2
+context_path: ops/default/run/00002-proving-todo-2/files/context.md
+result_path: ops/default/run/00002-proving-todo-2/evidence/result.json
+log_path: ops/default/run/00002-proving-todo-2/evidence/agent.log
+validation_path: ops/default/run/00002-proving-todo-2/evidence/validation.log
 max_attempts: 3
 ---
 

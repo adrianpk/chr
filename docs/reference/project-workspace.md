@@ -167,7 +167,7 @@ runtime:
   image: chr-agent-runtime:local
   dockerfile: .chr/user/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chr/user/runtime/runs
+  artifact_dir: ops/default/run
   validation_command: make verify
 ```
 

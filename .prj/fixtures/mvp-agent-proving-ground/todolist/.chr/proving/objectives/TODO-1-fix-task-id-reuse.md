@@ -2,11 +2,11 @@
 objective_id: proving-TODO-1
 ticket_key: TODO-1
 kind: bugfix
-artifact_root: .chr/runtime/runs/proving/TODO-1
-context_path: .chr/runtime/runs/proving/TODO-1/context.md
-result_path: .chr/runtime/runs/proving/TODO-1/result.json
-log_path: .chr/runtime/runs/proving/TODO-1/agent.log
-validation_path: .chr/runtime/runs/proving/TODO-1/validation.log
+artifact_root: ops/default/run/00001-proving-todo-1
+context_path: ops/default/run/00001-proving-todo-1/files/context.md
+result_path: ops/default/run/00001-proving-todo-1/evidence/result.json
+log_path: ops/default/run/00001-proving-todo-1/evidence/agent.log
+validation_path: ops/default/run/00001-proving-todo-1/evidence/validation.log
 max_attempts: 3
 ---
 

@@ -7,7 +7,7 @@ runtime:
   image: chr-todolist-agent:local
   dockerfile: .chr/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chr/runtime/runs
+  artifact_dir: ops/default/run
   validation_command: make verify
 indexes:
   sqlite:

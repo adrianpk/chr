@@ -446,7 +446,7 @@ git diff
 
 Expected result:
 
-- the runtime writes execution artifacts under `.chr/user/runtime/runs/`;
+- the runtime writes execution artifacts under `ops/default/run`;
 - the ticket records progress, blockers, or completion evidence;
 - validation output is inspectable;
 - runtime logs and event streams are discoverable;
@@ -475,7 +475,7 @@ Observe the run from Dash with `F8`, or inspect evidence after it finishes:
 chr report list --kind loop
 chr report list --kind execution
 chr report show --loop <loop-id>
-chr work events .chr/user/runtime/runs/<loop-id>/events.jsonl
+chr work events ops/default/run/<loop-artifact-id>/evidence/events.jsonl
 ```
 
 The run should stop on a blocked or failed ticket instead of spinning forever.

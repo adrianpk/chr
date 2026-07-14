@@ -86,6 +86,10 @@ func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 		t.Fatalf("Decision = %q, want pass", artifact.Result.Decision)
 	}
 
+	wantRunDir := filepath.Join(projectDir, "ops", "default", "run", "00001-ticket-run", "extension", "chr", "agentic-review")
+	if filepath.Dir(artifact.ContextPath) != wantRunDir {
+		t.Fatalf("ContextPath dir = %q, want %q", filepath.Dir(artifact.ContextPath), wantRunDir)
+	}
 	assertAgenticReviewArtifactExists(t, artifact.ContextPath)
 	assertAgenticReviewArtifactExists(t, artifact.ResultPath)
 	assertAgenticReviewArtifactExists(t, artifact.SummaryPath)
@@ -127,7 +131,8 @@ func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) Ex
 			ValidationCommand: "go test ./...",
 		},
 		Artifacts: ExecutionArtifacts{
-			RunDir:         filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1"),
+			ArtifactID:     "00001-ticket-run",
+			RunDir:         filepath.Join(projectDir, "ops", "default", "run", "00001-ticket-run"),
 			ResultPath:     "result.json",
 			LogPath:        "runtime.log",
 			ValidationPath: "validation.log",

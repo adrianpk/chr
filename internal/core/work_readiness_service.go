@@ -340,14 +340,18 @@ func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadines
 }
 
 func applyRuntimeArtifactsRepair(ctx context.Context, run repairRun) (WorkReadinessAppliedRepair, bool, error) {
-	changed, err := run.git.ExcludeLocalPattern(ctx, run.projectDir, ".chr/user/runtime/")
-	if err != nil {
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
+	changed := false
+	for _, pattern := range runtimeArtifactIgnorePatterns() {
+		patternChanged, err := run.git.ExcludeLocalPattern(ctx, run.projectDir, pattern)
+		if err != nil {
+			return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
+		}
+		changed = changed || patternChanged
 	}
 
 	return WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairIgnoreRuntimeArtifacts,
-		Detail: "excluded .chr/user/runtime/ in local Git info exclude",
+		Detail: "excluded runtime artifact roots in local Git info exclude",
 	}, changed, nil
 }
 
@@ -942,7 +946,11 @@ func splitWorktreeStatus(lines []string) ([]string, []string) {
 }
 
 func worktreeStatusLineIsRuntimeArtifact(line string) bool {
-	return strings.Contains(line, ".chr/user/runtime/")
+	return strings.Contains(line, ".chr/user/runtime/") || strings.Contains(line, "ops/default/run/")
+}
+
+func runtimeArtifactIgnorePatterns() []string {
+	return []string{".chr/user/runtime/", "ops/*/run/"}
 }
 
 func policyInvalidDiagnostic(err error) WorkReadinessDiagnostic {

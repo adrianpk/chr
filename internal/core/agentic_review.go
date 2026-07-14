@@ -85,7 +85,7 @@ func (r CodexAgenticReviewRunner) Review(ctx context.Context, review AgenticRevi
 		return AgenticReviewArtifact{}, err
 	}
 
-	runDir := AgenticReviewRunDir(review.ProjectDir, review.Ticket.Key, review.Execution.ID)
+	runDir := AgenticReviewRunDirForContext(review)
 	if err := os.MkdirAll(runDir, 0o755); err != nil {
 		return AgenticReviewArtifact{}, fmt.Errorf("create agentic review directory: %w", err)
 	}
@@ -130,7 +130,16 @@ func (r CodexAgenticReviewRunner) Review(ctx context.Context, review AgenticRevi
 	return artifact, nil
 }
 
-// AgenticReviewRunDir returns the local artifact directory for one review.
+// AgenticReviewRunDirForContext returns the artifact directory for one review.
+func AgenticReviewRunDirForContext(review AgenticReviewContext) string {
+	if review.Execution.Artifacts.ArtifactID != "" && review.Execution.Artifacts.RunDir != "" {
+		return filepath.Join(review.Execution.Artifacts.RunDir, "extension", "chr", "agentic-review")
+	}
+
+	return AgenticReviewRunDir(review.ProjectDir, review.Ticket.Key, review.Execution.ID)
+}
+
+// AgenticReviewRunDir returns the compatibility local artifact directory for one review.
 func AgenticReviewRunDir(projectDir, ticketKey, executionID string) string {
 	return UserPath(projectDir, "runtime", "reviews", safeAgenticReviewPathPart(ticketKey), safeAgenticReviewPathPart(executionID))
 }

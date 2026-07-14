@@ -434,8 +434,8 @@ Dash and agent event streams may also point directly to `ticket_path`,
 Summarize an event stream for recovery or diagnostics:
 
 ```sh
-chr work events .chr/user/runtime/runs/CHR-1/exec-1/events.jsonl
-chr work events .chr/user/runtime/runs/loop-1/events.jsonl
+chr work events ops/default/run/<execution-artifact-id>/evidence/events.jsonl
+chr work events ops/default/run/<loop-artifact-id>/evidence/events.jsonl
 ```
 
 Event streams, runtime logs, reports, and Dash rendering are documented in

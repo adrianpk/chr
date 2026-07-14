@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // ProvingObjective describes a package boundary value.
@@ -244,6 +245,10 @@ func RunProvingValidationForObjective(
 	if err != nil {
 		return ProvingValidationResult{}, err
 	}
+	artifact, err := ensureProvingOpsArtifact(projectDir, planned.Objective)
+	if err != nil {
+		return ProvingValidationResult{}, err
+	}
 
 	err = os.MkdirAll(filepath.Dir(planned.Plan.ValidationPath), 0o755)
 	if err != nil {
@@ -269,6 +274,9 @@ func RunProvingValidationForObjective(
 	err = os.WriteFile(result.LogPath, []byte(RenderProvingValidationResult(result)), 0o644)
 	if err != nil {
 		return ProvingValidationResult{}, fmt.Errorf("write proving validation log: %w", err)
+	}
+	if err := RefreshOpsArtifactMetadata(artifact.Dir, provingValidationArtifactStatus(result), time.Now()); err != nil {
+		return ProvingValidationResult{}, err
 	}
 
 	return result, nil
@@ -322,7 +330,7 @@ func RunProvingRalphLoop(ctx context.Context, opts ProvingRalphLoopOptions) (Pro
 		previousValidation = validation
 	}
 
-	err = writeProvingRalphLoopSummary(result)
+	err = writeProvingRalphLoopSummary(projectDir, result)
 	if err != nil {
 		return ProvingRalphLoopResult{}, err
 	}
@@ -352,7 +360,7 @@ func provingRalphLoopValidationRunner(opts ProvingRalphLoopOptions) ProvingValid
 }
 
 func newProvingRalphLoopResult(projectDir string, objective ProvingObjective) ProvingRalphLoopResult {
-	summaryPath := filepath.ToSlash(filepath.Join(objective.ArtifactRoot, "ralph-loop.md"))
+	summaryPath := filepath.ToSlash(filepath.Join(objective.ArtifactRoot, "evidence", "ralph-loop.md"))
 
 	return ProvingRalphLoopResult{
 		Objective:   objective,
@@ -417,9 +425,16 @@ func ProvingValidationCommands() []string {
 }
 
 func prepareProvingArtifacts(result ProvingSandboxRunResult) (*os.File, error) {
-	err := os.MkdirAll(filepath.Dir(result.Plan.WorkerContextPath), 0o755)
+	artifact, err := ensureProvingOpsArtifact(result.Plan.ProjectDir, result.Objective)
 	if err != nil {
-		return nil, fmt.Errorf("create proving artifact directory: %w", err)
+		return nil, err
+	}
+
+	for _, path := range []string{result.Plan.WorkerContextPath, result.Plan.ResultPath, result.Plan.LogPath, result.Plan.ValidationPath} {
+		err = os.MkdirAll(filepath.Dir(path), 0o755)
+		if err != nil {
+			return nil, fmt.Errorf("create proving artifact directory: %w", err)
+		}
 	}
 
 	err = os.WriteFile(result.Plan.WorkerContextPath, []byte(RenderProvingWorkerContext(result)), 0o644)
@@ -430,6 +445,10 @@ func prepareProvingArtifacts(result ProvingSandboxRunResult) (*os.File, error) {
 	logFile, err := os.OpenFile(result.Plan.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("open proving runtime log: %w", err)
+	}
+	if err := RefreshOpsArtifactMetadata(artifact.Dir, "running", time.Now()); err != nil {
+		_ = logFile.Close()
+		return nil, err
 	}
 
 	return logFile, nil
@@ -742,6 +761,30 @@ func loadProvingObjectiveForProject(projectDir, objectivePath string) (string, P
 	return projectDir, objective, nil
 }
 
+func ensureProvingOpsArtifact(projectDir string, objective ProvingObjective) (OpsArtifact, error) {
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	if err != nil {
+		return OpsArtifact{}, err
+	}
+
+	id := filepath.Base(filepath.Clean(filepath.FromSlash(objective.ArtifactRoot)))
+	return EnsureOpsArtifactEnvelope(CreateOpsArtifactOptions{
+		Layout:      layout,
+		Type:        "run",
+		Title:       "Proving " + objective.ID,
+		Producer:    "chr",
+		ExternalIDs: []string{objective.ID},
+	}, id)
+}
+
+func provingValidationArtifactStatus(result ProvingValidationResult) string {
+	if result.Passed {
+		return "passed"
+	}
+
+	return "failed"
+}
+
 func provingAttemptObjective(
 	objective ProvingObjective,
 	attemptNumber int,
@@ -749,11 +792,10 @@ func provingAttemptObjective(
 ) ProvingObjective {
 	attempt := objective
 	attempt.ID = fmt.Sprintf("%s-attempt-%d", objective.ID, attemptNumber)
-	attempt.ArtifactRoot = filepath.ToSlash(filepath.Join(objective.ArtifactRoot, fmt.Sprintf("attempt-%d", attemptNumber)))
-	attempt.ContextPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "context.md"))
-	attempt.ResultPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "result.json"))
-	attempt.LogPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "agent.log"))
-	attempt.ValidationPath = filepath.ToSlash(filepath.Join(attempt.ArtifactRoot, "validation.log"))
+	attempt.ContextPath = filepath.ToSlash(filepath.Join(objective.ArtifactRoot, "files", fmt.Sprintf("attempt-%d-context.md", attemptNumber)))
+	attempt.ResultPath = filepath.ToSlash(filepath.Join(objective.ArtifactRoot, "evidence", fmt.Sprintf("attempt-%d-result.json", attemptNumber)))
+	attempt.LogPath = filepath.ToSlash(filepath.Join(objective.ArtifactRoot, "evidence", fmt.Sprintf("attempt-%d-agent.log", attemptNumber)))
+	attempt.ValidationPath = filepath.ToSlash(filepath.Join(objective.ArtifactRoot, "evidence", fmt.Sprintf("attempt-%d-validation.log", attemptNumber)))
 
 	if previousValidation != nil {
 		attempt.Body = strings.TrimSpace(objective.Body) + "\n\n## Previous Validation Failure\n\n" +
@@ -775,8 +817,13 @@ func provingRalphLoopAttempt(attemptNumber int, objective ProvingObjective) Prov
 	}
 }
 
-func writeProvingRalphLoopSummary(result ProvingRalphLoopResult) error {
-	err := os.MkdirAll(filepath.Dir(result.SummaryPath), 0o755)
+func writeProvingRalphLoopSummary(projectDir string, result ProvingRalphLoopResult) error {
+	artifact, err := ensureProvingOpsArtifact(projectDir, result.Objective)
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(filepath.Dir(result.SummaryPath), 0o755)
 	if err != nil {
 		return fmt.Errorf("create proving ralph loop summary directory: %w", err)
 	}
@@ -784,6 +831,9 @@ func writeProvingRalphLoopSummary(result ProvingRalphLoopResult) error {
 	err = os.WriteFile(result.SummaryPath, []byte(RenderProvingRalphLoopResult(result)), 0o644)
 	if err != nil {
 		return fmt.Errorf("write proving ralph loop summary: %w", err)
+	}
+	if err := RefreshOpsArtifactMetadata(artifact.Dir, result.Status, time.Now()); err != nil {
+		return err
 	}
 
 	return nil

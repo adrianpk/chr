@@ -68,19 +68,19 @@ func TestNewHarnessInvocationRendersDockerRunCommand(t *testing.T) {
 		"--env",
 		"CHR_TICKET_PATH=/workspace/.chr/user/tickets/CHR-1.md",
 		"--env",
-		"CHR_WORKER_CONTEXT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/context.md",
+		"CHR_WORKER_CONTEXT_PATH=/workspace/ops/default/run/CHR-1/exec-123/context.md",
 		"--env",
-		"CHR_RESULT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/result.json",
+		"CHR_RESULT_PATH=/workspace/ops/default/run/CHR-1/exec-123/result.json",
 		"--env",
-		"CHR_LOG_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/runtime.log",
+		"CHR_LOG_PATH=/workspace/ops/default/run/CHR-1/exec-123/runtime.log",
 		"--env",
-		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
+		"CHR_VALIDATION_PATH=/workspace/ops/default/run/CHR-1/exec-123/validation.log",
 		"--env",
 		"OPENAI_API_KEY",
 		"chr-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
-		"CHR_EXECUTION_ID='exec-123' CHR_TICKET_KEY='CHR-1' CHR_TICKET_PATH='/workspace/.chr/user/tickets/CHR-1.md' CHR_WORKER_CONTEXT_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/context.md' CHR_RESULT_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/result.json' CHR_LOG_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/runtime.log' CHR_VALIDATION_PATH='/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHR_WORKER_CONTEXT_PATH\"",
+		"CHR_EXECUTION_ID='exec-123' CHR_TICKET_KEY='CHR-1' CHR_TICKET_PATH='/workspace/.chr/user/tickets/CHR-1.md' CHR_WORKER_CONTEXT_PATH='/workspace/ops/default/run/CHR-1/exec-123/context.md' CHR_RESULT_PATH='/workspace/ops/default/run/CHR-1/exec-123/result.json' CHR_LOG_PATH='/workspace/ops/default/run/CHR-1/exec-123/runtime.log' CHR_VALIDATION_PATH='/workspace/ops/default/run/CHR-1/exec-123/validation.log' 'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox' < \"$CHR_WORKER_CONTEXT_PATH\"",
 	}
 
 	if invocation.Run.Program != "docker" {
@@ -118,7 +118,7 @@ func TestNewHarnessInvocationRendersDockerValidationCommand(t *testing.T) {
 		"--env",
 		"CHR_EXECUTION_ID=exec-123",
 		"--env",
-		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
+		"CHR_VALIDATION_PATH=/workspace/ops/default/run/CHR-1/exec-123/validation.log",
 		"chr-agent-runtime:local",
 		"/bin/sh",
 		"-lc",
@@ -171,10 +171,10 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 
 	for _, want := range []string{
 		"CHR_TICKET_PATH=/workspace/.chr/user/tickets/CHR-1.md",
-		"CHR_WORKER_CONTEXT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/context.md",
-		"CHR_RESULT_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/result.json",
-		"CHR_LOG_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/runtime.log",
-		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
+		"CHR_WORKER_CONTEXT_PATH=/workspace/ops/default/run/CHR-1/exec-123/context.md",
+		"CHR_RESULT_PATH=/workspace/ops/default/run/CHR-1/exec-123/result.json",
+		"CHR_LOG_PATH=/workspace/ops/default/run/CHR-1/exec-123/runtime.log",
+		"CHR_VALIDATION_PATH=/workspace/ops/default/run/CHR-1/exec-123/validation.log",
 	} {
 		if !slices.Contains(invocation.Run.Args, want) {
 			t.Fatalf("Run.Args missing %q: %#v", want, invocation.Run.Args)
@@ -219,7 +219,7 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 		executionWorkspaceDir + ":/workspace",
 		"/workspace",
 		"CHR_EXECUTION_ID=exec-123",
-		"CHR_VALIDATION_PATH=/workspace/.chr/user/runtime/runs/CHR-1/exec-123/validation.log",
+		"CHR_VALIDATION_PATH=/workspace/ops/default/run/CHR-1/exec-123/validation.log",
 		"chr-agent-runtime:local",
 		"go test ./...",
 	} {
@@ -241,7 +241,7 @@ func TestNewHarnessInvocationRejectsMissingIdentity(t *testing.T) {
 }
 
 func testHarnessRuntimePlan(projectDir string) RuntimePlan {
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-123")
+	runDir := filepath.Join(projectDir, "ops", "default", "run", "CHR-1", "exec-123")
 
 	return RuntimePlan{
 		ProjectDir:       projectDir,

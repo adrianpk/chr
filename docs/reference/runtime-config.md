@@ -22,7 +22,7 @@ runtime values when they are making a real project decision.
 - `image`: `chr-agent-runtime:local`
 - `dockerfile`: `.chr/user/runtime/agent/Dockerfile`
 - `workdir`: `/workspace`
-- `artifact_dir`: `.chr/user/runtime/runs`
+- `artifact_dir`: `ops/default/run`
 - `validation_command`: `make verify`
 
 Example override:
@@ -92,8 +92,10 @@ ops/<namespace>/run/<artifact-id>/
 lowercase, hyphen-separated namespace to isolate one user's committed
 operational artifacts without changing the rest of the runtime behavior.
 
-`runtime.artifact_dir` remains the default location for runtime routines that
-have not yet been migrated to a shared operational artifact envelope.
+`runtime.artifact_dir` defaults to `ops/default/run` for runtime routines that
+have not yet been allocated a shared operational artifact envelope. Older
+`.chr/user/runtime/runs` configuration is treated as a migration input and
+planned through the active `ops/<namespace>/run` root.
 
 For the detailed execution contract, see
 [Ticket execution](ticket-execution.md).

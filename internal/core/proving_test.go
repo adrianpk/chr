@@ -14,11 +14,11 @@ func TestParseProvingObjective(t *testing.T) {
 objective_id: proving-TODO-1
 ticket_key: TODO-1
 kind: bugfix
-artifact_root: .chr/user/runtime/runs/proving/TODO-1
-context_path: .chr/user/runtime/runs/proving/TODO-1/context.md
-result_path: .chr/user/runtime/runs/proving/TODO-1/result.json
-log_path: .chr/user/runtime/runs/proving/TODO-1/agent.log
-validation_path: .chr/user/runtime/runs/proving/TODO-1/validation.log
+artifact_root: ops/default/run/00001-proving-todo-1
+context_path: ops/default/run/00001-proving-todo-1/files/context.md
+result_path: ops/default/run/00001-proving-todo-1/evidence/result.json
+log_path: ops/default/run/00001-proving-todo-1/evidence/agent.log
+validation_path: ops/default/run/00001-proving-todo-1/evidence/validation.log
 max_attempts: 3
 ---
 
@@ -57,7 +57,7 @@ func TestPlanProvingSandboxRunRendersDockerCommands(t *testing.T) {
 	for _, want := range []string{
 		"CHR_EXECUTION_ID=proving-TODO-1",
 		"CHR_TICKET_KEY=TODO-1",
-		"CHR_WORKER_CONTEXT_PATH=/workspace/.chr/user/runtime/runs/proving/TODO-1/context.md",
+		"CHR_WORKER_CONTEXT_PATH=/workspace/ops/default/run/00001-proving-todo-1/files/context.md",
 	} {
 		if !harnessArgsContain(result.Run.Args, want) {
 			t.Fatalf("run args do not contain %q:\n%#v", want, result.Run.Args)
@@ -314,7 +314,7 @@ runtime:
   image: chr-todolist-agent:local
   dockerfile: .chr/user/runtime/agent/Dockerfile
   workdir: /workspace
-  artifact_dir: .chr/user/runtime/runs
+  artifact_dir: ops/default/run
   validation_command: make verify
 `)
 	writeTestFile(t, filepath.Join(dir, DirectoryName, UserDirectoryName, "runtime", "agent", "Dockerfile"), "FROM golang:1.22-bookworm\n")
@@ -323,11 +323,11 @@ runtime:
 objective_id: proving-TODO-1
 ticket_key: TODO-1
 kind: bugfix
-artifact_root: .chr/user/runtime/runs/proving/TODO-1
-context_path: .chr/user/runtime/runs/proving/TODO-1/context.md
-result_path: .chr/user/runtime/runs/proving/TODO-1/result.json
-log_path: .chr/user/runtime/runs/proving/TODO-1/agent.log
-validation_path: .chr/user/runtime/runs/proving/TODO-1/validation.log
+artifact_root: ops/default/run/00001-proving-todo-1
+context_path: ops/default/run/00001-proving-todo-1/files/context.md
+result_path: ops/default/run/00001-proving-todo-1/evidence/result.json
+log_path: ops/default/run/00001-proving-todo-1/evidence/agent.log
+validation_path: ops/default/run/00001-proving-todo-1/evidence/validation.log
 max_attempts: 3
 ---
 

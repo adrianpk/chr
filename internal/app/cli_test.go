@@ -2762,13 +2762,13 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 		"image: chr-agent-runtime:local",
 		"dockerfile: .chr/user/runtime/agent/Dockerfile",
 		"workdir: /workspace",
-		"artifact_dir: .chr/user/runtime/runs",
+		"artifact_dir: ops/default/run",
 		"mount: . -> /workspace read_only=false",
 		"checks:",
 		"ok    execution_workspace .",
 		"ok    workspace    .chr",
 		"ok    dockerfile   .chr/user/runtime/agent/Dockerfile",
-		"ok    artifact_dir .chr/user/runtime/runs",
+		"ok    artifact_dir ops/default/run",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -2779,7 +2779,7 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 func TestRuntimeValidateFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "runtime", "runs"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, "ops", "default", "run"), 0o755)
 	if err != nil {
 		t.Fatalf("create runtime runs dir: %v", err)
 	}
@@ -3709,7 +3709,10 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 `)
 	runGateCLIGit(t, projectDir, "add", ".chr/user/config.yml")
 	runGateCLIGit(t, projectDir, "commit", "-m", "work config")
-	writeGateCLIFile(t, projectDir, ".chr/user/runtime/runs/run-1/events.jsonl", "{}\n")
+	writeGateCLIFile(t, projectDir, "ops/default/.keep", "")
+	runGateCLIGit(t, projectDir, "add", "ops/default/.keep")
+	runGateCLIGit(t, projectDir, "commit", "-m", "ops root")
+	writeGateCLIFile(t, projectDir, "ops/default/run/run-1/events.jsonl", "{}\n")
 	addProject(t, devRoot, "example", projectDir)
 
 	var stdout bytes.Buffer
@@ -3731,7 +3734,7 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 		"work: doctor",
 		"fix_safe: true",
 		"repairs_applied: 1",
-		"repair_applied: ignore_runtime_artifacts\texcluded .chr/user/runtime/ in local Git info exclude",
+		"repair_applied: ignore_runtime_artifacts\texcluded runtime artifact roots in local Git info exclude",
 		"status: ready",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -3740,15 +3743,17 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 	}
 
 	exclude := readFile(t, filepath.Join(projectDir, ".git", "info", "exclude"))
-	if !strings.Contains(exclude, ".chr/user/runtime/") {
-		t.Fatalf("exclude = %q, want runtime ignore", exclude)
+	for _, want := range []string{".chr/user/runtime/", "ops/*/run/"} {
+		if !strings.Contains(exclude, want) {
+			t.Fatalf("exclude = %q, want runtime ignore %q", exclude, want)
+		}
 	}
 }
 
 func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(projectDir, "ops", "default", "run", "CHR-1", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 
 	addProject(t, devRoot, "example", projectDir)
@@ -3781,15 +3786,15 @@ func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 		"ticket: CHR-1",
 		"status: succeeded",
 		"validation_command: make verify",
-		"run_dir_path: .chr/user/runtime/runs/CHR-1/exec-1",
+		"run_dir_path: ops/default/run/CHR-1/exec-1",
 		"run_dir_exists: true",
-		"runtime_log_path: .chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
+		"runtime_log_path: ops/default/run/CHR-1/exec-1/runtime.log",
 		"runtime_log_exists: true",
-		"validation_log_path: .chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+		"validation_log_path: ops/default/run/CHR-1/exec-1/validation.log",
 		"validation_log_exists: true",
-		"execution_report_path: .chr/user/runtime/runs/CHR-1/exec-1/execution-report.md",
+		"execution_report_path: ops/default/run/CHR-1/exec-1/execution-report.md",
 		"execution_report_exists: true",
-		"events_path: .chr/user/runtime/runs/CHR-1/exec-1/events.jsonl",
+		"events_path: ops/default/run/CHR-1/exec-1/events.jsonl",
 		"events_exists: true",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -3801,7 +3806,7 @@ func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 func TestWorkLogsReportsMissingArtifacts(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(projectDir, "ops", "default", "run", "CHR-1", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 
 	addProject(t, devRoot, "example", projectDir)
@@ -3867,7 +3872,7 @@ func TestWorkLogsRejectsMissingExecution(t *testing.T) {
 
 func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
 	projectDir := newTestWorkspace(t)
-	streamPath := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "loop-1", "events.jsonl")
+	streamPath := filepath.Join(projectDir, "ops", "default", "run", "loop-1", "events.jsonl")
 	event := core.AgentEvent{
 		SchemaVersion: core.AgentEventSchemaVersion,
 		Timestamp:     time.Date(2026, 6, 18, 12, 30, 0, 0, time.UTC),
@@ -3889,7 +3894,7 @@ func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
 		"events",
 		"--dir",
 		projectDir,
-		".chr/user/runtime/runs/loop-1/events.jsonl",
+		"ops/default/run/loop-1/events.jsonl",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("work events returned error: %v", err)
@@ -3897,7 +3902,7 @@ func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
 
 	for _, want := range []string{
 		"work: events",
-		"path: .chr/user/runtime/runs/loop-1/events.jsonl",
+		"path: ops/default/run/loop-1/events.jsonl",
 		"events: 1",
 		"malformed: 1",
 		"degraded: true",
@@ -3926,14 +3931,14 @@ func TestWorkEventsSummarizesMissingEventStream(t *testing.T) {
 		"events",
 		"--dir",
 		projectDir,
-		".chr/user/runtime/runs/missing/events.jsonl",
+		"ops/default/run/missing/events.jsonl",
 	}, &stdout, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("work events returned error: %v", err)
 	}
 
 	for _, want := range []string{
-		"path: .chr/user/runtime/runs/missing/events.jsonl",
+		"path: ops/default/run/missing/events.jsonl",
 		"events: 0",
 		"malformed: 0",
 		"degraded: false",
@@ -4651,7 +4656,7 @@ func TestTicketStartFailsWhenRuntimeTemplateIsMissing(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "runtime", "runs"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, "ops", "default", "run"), 0o755)
 	if err != nil {
 		t.Fatalf("create runtime runs dir: %v", err)
 	}
@@ -6956,7 +6961,7 @@ func TestMaintenanceExecutionArtifactsReportsCompleteArtifacts(t *testing.T) {
 func TestMaintenanceExecutionCleanupPreviewReportsUnreferencedArtifactDirs(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	artifactDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs")
+	artifactDir := filepath.Join(projectDir, "ops", "default", "run")
 	referencedDir := filepath.Join(artifactDir, "CHR-1", "exec-1")
 	unreferencedDir := filepath.Join(artifactDir, "CHR-2", "exec-2")
 	record := cliExecutionRecord(projectDir, referencedDir)
@@ -7001,7 +7006,7 @@ func TestMaintenanceExecutionCleanupPreviewReportsUnreferencedArtifactDirs(t *te
 func TestMaintenanceExecutionCleanupPreviewDoesNotDeleteCandidates(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	unreferencedDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-2", "exec-2")
+	unreferencedDir := filepath.Join(projectDir, "ops", "default", "run", "CHR-2", "exec-2")
 
 	err := os.MkdirAll(unreferencedDir, 0o755)
 	if err != nil {
@@ -8407,7 +8412,7 @@ func writeRuntimeTemplate(t *testing.T, projectDir string) {
 		t.Fatalf("write runtime template: %v", err)
 	}
 
-	err = os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "runtime", "runs"), 0o755)
+	err = os.MkdirAll(filepath.Join(projectDir, "ops", "default", "run"), 0o755)
 	if err != nil {
 		t.Fatalf("create runtime runs directory: %v", err)
 	}
