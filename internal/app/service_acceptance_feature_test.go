@@ -37,7 +37,7 @@ func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
 		t.Fatalf("Status = %q, want generated", result.Status)
 	}
 
-	if result.Feature != ".chr/default/acceptance/blog.feature" {
+	if result.Feature != "ops/default/spec/00000-blog-acceptance-feature/artifact.md" {
 		t.Fatalf("Feature = %q, want canonical feature path", result.Feature)
 	}
 
@@ -145,7 +145,7 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 		t.Fatalf("RejectionReason = %q", result.RejectionReason)
 	}
 
-	if result.FeatureRound != ".chr/default/acceptance/blog-feature-round.md" {
+	if result.FeatureRound != "ops/default/spec/00000-blog-acceptance-feature-round/artifact.md" {
 		t.Fatalf("FeatureRound = %q, want feature round path", result.FeatureRound)
 	}
 

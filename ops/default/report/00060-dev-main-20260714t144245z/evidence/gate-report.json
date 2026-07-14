@@ -1,0 +1,3536 @@
+{
+  "created_at": "2026-07-14T14:42:45.328042107Z",
+  "status": "failed",
+  "base": {
+    "ref": "origin/main",
+    "sha": "b5e6ae7a678ecfb0c58784bec519b7ad999b8af2"
+  },
+  "head": {
+    "ref": "origin/dev",
+    "sha": "2ab51a301378212849918457a44d22f976021a37"
+  },
+  "merge_base": "b5e6ae7a678ecfb0c58784bec519b7ad999b8af2",
+  "commits": [
+    {
+      "sha": "2ab51a301378212849918457a44d22f976021a37",
+      "subject": "refactor(paths): retire legacy chr user workspace"
+    },
+    {
+      "sha": "e1abf82be376d0496c06a342004bc2319f34af0e",
+      "subject": "refactor(paths): retire legacy chr user workspace"
+    }
+  ],
+  "changed_files": [
+    {
+      "status": "M",
+      "path": ".agents/ARCHITECTURE.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/ARCHITECTURE.md",
+      "old": ".chr/user/agents/ARCHITECTURE.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/CONVENTIONS.md",
+      "old": ".chr/user/agents/CONVENTIONS.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/DOCUMENTING.md",
+      "old": ".chr/user/agents/DOCUMENTING.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/INVARIANTS.md",
+      "old": ".chr/user/agents/INVARIANTS.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/LIFECYCLE.md",
+      "old": ".chr/user/agents/LIFECYCLE.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/LINTING.md",
+      "old": ".chr/user/agents/LINTING.md"
+    },
+    {
+      "status": "R083",
+      "path": ".chr/default/agents/PLAYBOOKS.md",
+      "old": ".chr/user/agents/PLAYBOOKS.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/ROUTING.md",
+      "old": ".chr/user/agents/ROUTING.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/SLICES.md",
+      "old": ".chr/user/agents/SLICES.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/VERSIONING.md",
+      "old": ".chr/user/agents/VERSIONING.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/dump.md",
+      "old": ".chr/user/agents/playbooks/dump.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/planned-delivery-workflow.md",
+      "old": ".chr/user/agents/playbooks/planned-delivery-workflow.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/quiz.md",
+      "old": ".chr/user/agents/playbooks/quiz.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/release-alignment.md",
+      "old": ".chr/user/agents/playbooks/release-alignment.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/slice-delivery.md",
+      "old": ".chr/user/agents/playbooks/slice-delivery.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/specification-workflow.md",
+      "old": ".chr/user/agents/playbooks/specification-workflow.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/ticket-workflow.md",
+      "old": ".chr/user/agents/playbooks/ticket-workflow.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/agents/playbooks/version-control-workflow.md",
+      "old": ".chr/user/agents/playbooks/version-control-workflow.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/cases/context-capture.md",
+      "old": ".chr/user/cases/context-capture.md"
+    },
+    {
+      "status": "R095",
+      "path": ".chr/default/cases/dev-main-gate.md",
+      "old": ".chr/user/cases/dev-main-gate.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/cases/qa-scenarios.md",
+      "old": ".chr/user/cases/qa-scenarios.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/cases/spec-to-tickets.md",
+      "old": ".chr/user/cases/spec-to-tickets.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/cases/ticket-execution-loop.md",
+      "old": ".chr/user/cases/ticket-execution-loop.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/cases/tui-operations.md",
+      "old": ".chr/user/cases/tui-operations.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/config.yml",
+      "old": ".chr/user/config.yml"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/config/gates.yml",
+      "old": ".chr/user/config/gates.yml"
+    },
+    {
+      "status": "R085",
+      "path": ".chr/default/docs/adoption-baseline.md",
+      "old": ".chr/user/docs/adoption-baseline.md"
+    },
+    {
+      "status": "R069",
+      "path": ".chr/default/docs/legacy-material-map.md",
+      "old": ".chr/user/docs/legacy-material-map.md"
+    },
+    {
+      "status": "R098",
+      "path": ".chr/default/dumps/curated/2026-06-02-merger-agent-role.md",
+      "old": ".chr/user/dumps/curated/2026-06-02-merger-agent-role.md"
+    },
+    {
+      "status": "R097",
+      "path": ".chr/default/dumps/curated/dev-main-gate-context.md",
+      "old": ".chr/user/dumps/curated/dev-main-gate-context.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/dumps/curated/document-generation-context.md",
+      "old": ".chr/user/dumps/curated/document-generation-context.md"
+    },
+    {
+      "status": "R087",
+      "path": ".chr/default/dumps/curated/project-context.md",
+      "old": ".chr/user/dumps/curated/project-context.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/dumps/curated/runtime-execution-context.md",
+      "old": ".chr/user/dumps/curated/runtime-execution-context.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/dumps/raw/2026-06-02-merger-agent-role-raw.md",
+      "old": ".chr/user/dumps/raw/2026-06-02-merger-agent-role-raw.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/manifest.md",
+      "old": ".chr/user/manifest.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/plans/dev-main-gate-plan.md",
+      "old": ".chr/user/plans/dev-main-gate-plan.md"
+    },
+    {
+      "status": "R090",
+      "path": ".chr/default/plans/merger-agent-workflow-plan.md",
+      "old": ".chr/user/plans/merger-agent-workflow-plan.md"
+    },
+    {
+      "status": "R092",
+      "path": ".chr/default/plans/ticket-review-integration-plan.md",
+      "old": ".chr/user/plans/ticket-review-integration-plan.md"
+    },
+    {
+      "status": "R085",
+      "path": ".chr/default/project.md",
+      "old": ".chr/user/project.md"
+    },
+    {
+      "status": "R095",
+      "path": ".chr/default/quizzes/curated/ticket-review-integration-quiz.md",
+      "old": ".chr/user/quizzes/curated/ticket-review-integration-quiz.md"
+    },
+    {
+      "status": "R098",
+      "path": ".chr/default/quizzes/raw/ticket-review-integration-quiz-raw.md",
+      "old": ".chr/user/quizzes/raw/ticket-review-integration-quiz-raw.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/runtime/agent/Dockerfile",
+      "old": ".chr/user/runtime/agent/Dockerfile"
+    },
+    {
+      "status": "R092",
+      "path": ".chr/default/specs/dev-main-gate-spec.md",
+      "old": ".chr/user/specs/dev-main-gate-spec.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/specs/merger-agent-workflow.md",
+      "old": ".chr/user/specs/merger-agent-workflow.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/specs/ticket-review-integration-draft.md",
+      "old": ".chr/user/specs/ticket-review-integration-draft.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/trackers/merger-agent-workflow-tracker.md",
+      "old": ".chr/user/trackers/merger-agent-workflow-tracker.md"
+    },
+    {
+      "status": "R100",
+      "path": ".chr/default/trackers/ticket-review-integration-tracker.md",
+      "old": ".chr/user/trackers/ticket-review-integration-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": ".gitignore"
+    },
+    {
+      "status": "M",
+      "path": ".prj/fixtures/mvp-agent-proving-ground/todolist/.chr/config.yml"
+    },
+    {
+      "status": "R100",
+      "path": ".prj/fixtures/mvp-agent-proving-ground/todolist/.chr/default/runtime/agent/Dockerfile",
+      "old": ".prj/fixtures/mvp-agent-proving-ground/todolist/.chr/runtime/agent/Dockerfile"
+    },
+    {
+      "status": "M",
+      "path": ".prj/fixtures/mvp-agent-proving-ground/todolist/README.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/plans/slicing-board-ticket-operations-plan.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/plans/slicing-codex-artifact-generation-plan.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/plans/slicing-llm-file-tracing-plan.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/plans/slicing-merger-agent-workflow-plan.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/plans/slicing-qa-agent-work-scenario-plan.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/plans/slicing-ticket-review-integration-plan.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/quizzes/curated/dashboard-board-ticket-operations-quiz.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/quizzes/curated/ticket-review-integration-quiz.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/quizzes/raw/dashboard-board-ticket-operations-quiz-raw.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/quizzes/raw/ticket-review-integration-quiz-raw.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/llm-trace-payloads-2026-05-27.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/agent-test-evidence-strategy-pass/slice-5-gherkin-test-policy.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-investigation.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chr-context-adr-docs.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/reports/slices/tictactoe-qa-reference/slice-1-tictactoe-qa-reference.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/scripts/probe-codex-artifact-generation.sh"
+    },
+    {
+      "status": "M",
+      "path": ".prj/specs/drafts/ticket-review-integration-draft.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/specs/specs/board-ticket-operations-model.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/specs/specs/board-ticket-operations.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/specs/specs/merger-agent-workflow.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/specs/specs/qa-agent-work-scenario.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/trackers/slicing-board-ticket-operations-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/trackers/slicing-merger-agent-workflow-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/trackers/slicing-qa-agent-work-scenario-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": ".prj/trackers/slicing-ticket-review-integration-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": "CHANGELOG.md"
+    },
+    {
+      "status": "M",
+      "path": "cmd/chr/assets/workspace/profiles/standard/agents/PLAYBOOKS.md"
+    },
+    {
+      "status": "M",
+      "path": "cmd/chr/assets/workspace/profiles/standard/root/AGENTS.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/explanation/architecture.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/explanation/dev-main-gate-direction.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/explanation/dev-main-gate-model.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/explanation/dev-main-tooling-gate-spec-draft.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/explanation/old-gallery.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/explanation/tui-interactive-design-notes.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/how-to/adopt-dev-main-gate-in-existing-project.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/how-to/full-system-lab-runbook.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/how-to/qa-tictactoe-agent-work-scenario.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/how-to/use-dev-main-gate-with-woodpecker.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/how-to/use-forgejo-ticket-review.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/how-to/user-guide/index.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/acceptance-feature-generation.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/authoring-sessions.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/commands.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/dev-main-gate.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/evidence-strategy-config.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/index-rebuild-cli.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/index-status-cli.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/notification-config.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/project-workspace.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/review-workflow-config.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/runtime-config.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/ticket-execution.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/ticket-file-discovery.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/ticket-index-rebuild.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/ticket-index-refresh.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/ticket-index-status.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/ticket-reconciliation.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/ticket-review-workflow.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/tui.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/user-environment.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/reference/work-readiness.md"
+    },
+    {
+      "status": "M",
+      "path": "docs/tutorials/getting-started.md"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/cli_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/planning_baseline_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/service_acceptance_feature_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/service_dump_curation_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/service_plan_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/service_quiz_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/service_spec_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/service_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/service_work_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/app/tui_adapter_parity_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/acceptance_feature_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/agent_event_readback_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/agent_event_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/agent_run_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/agentic_review_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/assisted_artifact_synthesis_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/assisted_context_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/authoring_artifact_layout_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/authoring_contextual_quiz_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/authoring_session_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/changed_file_discovery_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/codex_worker_context_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/codex_worker_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/config.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/config_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/context_agent_protocols_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/context_composer_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/context_materializer_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/context_previous_attempt_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/context_project_documents_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/context_readiness_handoff_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/context_tree_search_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/diagnostic_bundle_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/evidence_policy.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/evidence_policy_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/evidence_readiness_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/evidence_strategy_checklist_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/evidence_strategy_summary_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/execution_artifact_drift_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/execution_report_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/execution_repository_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/execution_runner_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/execution_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/gate_report_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/harness_invocation_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/llm_trace_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/plan_generation_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/project_userspace_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/proving_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/quiz_artifact_repository_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/quiz_model_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/quiz_runtime_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/result_application_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/runtime_init_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/runtime_plan.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/runtime_plan_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/runtime_validate_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/spec_generation.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/spec_generation_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_discovery_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_index_rebuild_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_index_status_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_index_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_merge_preflight_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_parser_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_reconciliation_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_repository_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/ticket_validation_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/work_readiness_service.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/work_readiness_service_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/workspace_context_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/workspace_graph_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/workspace_index_cache_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/workspace_index_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/workspace_init.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/workspace_init_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/core/worktree_service_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/tui/documents.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/tui/model_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/tui/source_actions.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/tui/work_readiness_test.go"
+    },
+    {
+      "status": "M",
+      "path": "internal/webui/webui_test.go"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/dump/00001-curated/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/dump/00001-curated/files/legacy/2026-06-02-merger-agent-role.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/dump/00001-curated/files/legacy/dev-main-gate-context.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/dump/00001-curated/files/legacy/project-context.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/dump/00001-curated/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/dump/00002-raw/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/dump/00002-raw/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00008-dev-main-gate-plan-md/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00008-dev-main-gate-plan-md/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00009-merger-agent-workflow-plan-md/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00009-merger-agent-workflow-plan-md/files/legacy/merger-agent-workflow-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00009-merger-agent-workflow-plan-md/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00010-ticket-review-integration-plan-md/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00010-ticket-review-integration-plan-md/files/legacy/ticket-review-integration-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00010-ticket-review-integration-plan-md/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00026-2026-06-01-dev-main-agent-evidence-gate-plan-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00028-2026-06-06-separate-acceptance-feature-workflow-plan-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00031-2026-06-18-tictactoe-qa-reference-plan-md/files/legacy/2026-06-18-tictactoe-qa-reference-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/plan/00032-2026-06-19-agent-test-evidence-strategy-pass-plan-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/quiz/00003-curated/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/quiz/00003-curated/files/legacy/ticket-review-integration-quiz.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/quiz/00003-curated/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/quiz/00004-raw/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/quiz/00004-raw/files/legacy/ticket-review-integration-quiz-raw.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/quiz/00004-raw/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/report/00036-ops-layout-migration/files/manifest.json"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/cases/cli-gameplay.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/cases/cli-gameplay.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/config.yml",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/config.yml"
+    },
+    {
+      "status": "R095",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context-raw.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/dumps/cli-gameplay-context-raw.md"
+    },
+    {
+      "status": "R095",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/dumps/cli-gameplay-context.md"
+    },
+    {
+      "status": "R094",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context-raw.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/project-context-raw.md"
+    },
+    {
+      "status": "R094",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/dumps/project-context.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/manifest.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/manifest.md"
+    },
+    {
+      "status": "R098",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md"
+    },
+    {
+      "status": "R098",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-plan.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/plans/cli-gameplay-plan.md"
+    },
+    {
+      "status": "R082",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-tracking.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/plans/cli-gameplay-tracking.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/project.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/project.md"
+    },
+    {
+      "status": "R096",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz-raw.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/quizzes/cli-gameplay-quiz-raw.md"
+    },
+    {
+      "status": "R091",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/quizzes/cli-gameplay-quiz.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/agent/Dockerfile",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/agent/Dockerfile"
+    },
+    {
+      "status": "R074",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/plan-generation.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/plan-generation.log"
+    },
+    {
+      "status": "R055",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/context.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/context.md"
+    },
+    {
+      "status": "R069",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md"
+    },
+    {
+      "status": "A",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json"
+    },
+    {
+      "status": "R098",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log"
+    },
+    {
+      "status": "R055",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/context.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/context.md"
+    },
+    {
+      "status": "R070",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/execution-report.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/execution-report.md"
+    },
+    {
+      "status": "A",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result.json",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/result.json"
+    },
+    {
+      "status": "R087",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/runtime.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/runtime.log"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/validation.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/validation.log"
+    },
+    {
+      "status": "R055",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/context.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/context.md"
+    },
+    {
+      "status": "R070",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/execution-report.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/execution-report.md"
+    },
+    {
+      "status": "A",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json"
+    },
+    {
+      "status": "R083",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/runtime.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/runtime.log"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/validation.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/validation.log"
+    },
+    {
+      "status": "R054",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/context.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/context.md"
+    },
+    {
+      "status": "R071",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/execution-report.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/execution-report.md"
+    },
+    {
+      "status": "A",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result.json",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/result.json"
+    },
+    {
+      "status": "R096",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/runtime.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/runtime.log"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/validation.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/validation.log"
+    },
+    {
+      "status": "R055",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/context.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/context.md"
+    },
+    {
+      "status": "R070",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md"
+    },
+    {
+      "status": "A",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json"
+    },
+    {
+      "status": "R095",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log"
+    },
+    {
+      "status": "R098",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/specs/project-spec.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/specs/project-spec.md"
+    },
+    {
+      "status": "R100",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/.gitkeep",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/.gitkeep"
+    },
+    {
+      "status": "R085",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md"
+    },
+    {
+      "status": "R087",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-2-Move-state-transitions.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-2-Move-state-transitions.md"
+    },
+    {
+      "status": "R087",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md"
+    },
+    {
+      "status": "R088",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-4-Interactive-gameplay-loop.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-4-Interactive-gameplay-loop.md"
+    },
+    {
+      "status": "R088",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md"
+    },
+    {
+      "status": "D",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md"
+    },
+    {
+      "status": "D",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md"
+    },
+    {
+      "status": "D",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md"
+    },
+    {
+      "status": "D",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md"
+    },
+    {
+      "status": "D",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00005-dev-main-gate-spec-md/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00005-dev-main-gate-spec-md/files/legacy/dev-main-gate-spec.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00005-dev-main-gate-spec-md/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00006-merger-agent-workflow-md/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00006-merger-agent-workflow-md/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00007-ticket-review-integration-draft-md/artifact.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00007-ticket-review-integration-draft-md/metadata.json"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00011-2026-06-01-dev-main-agent-evidence-gate-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00012-2026-06-06-gherkin-acceptance-generation-md/files/legacy/2026-06-06-gherkin-acceptance-generation.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00013-2026-06-06-separate-acceptance-feature-workflow-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00014-2026-06-18-agent-work-observability-model-md/files/legacy/2026-06-18-agent-work-observability-model.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00018-2026-06-18-configurable-work-readiness-md/files/legacy/2026-06-18-configurable-work-readiness.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00019-2026-06-19-agent-test-evidence-strategy-pass-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00020-2026-06-19-isolated-ticket-worktrees-md/files/legacy/2026-06-19-isolated-ticket-worktrees.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00021-2026-06-20-serialized-integration-loop-model-md/files/legacy/2026-06-20-serialized-integration-loop-model.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00022-2026-06-20-serialized-integration-loop-md/files/legacy/2026-06-20-serialized-integration-loop.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00023-2026-06-29-execution-unit-runtime-refinements-md/files/legacy/2026-06-29-execution-unit-runtime-refinements.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00024-2026-06-29-optional-local-web-ui-md/files/legacy/2026-06-29-optional-local-web-ui.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00025-drafts/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/default/spec/00025-drafts/files/legacy/2026-06-06-gherkin-acceptance-generation.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/plans/2026-06-18-tictactoe-qa-reference-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-01-dev-main-agent-evidence-gate.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-06-gherkin-acceptance-generation.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-06-separate-acceptance-feature-workflow.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-18-agent-work-observability-model.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-18-configurable-work-readiness.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-19-agent-test-evidence-strategy-pass.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-19-isolated-ticket-worktrees.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-20-serialized-integration-loop-model.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-20-serialized-integration-loop.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-29-execution-unit-runtime-refinements.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/specs/2026-06-29-optional-local-web-ui.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md"
+    },
+    {
+      "status": "M",
+      "path": "ops/trackers/2026-06-20-serialized-integration-loop-tracker.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/001/blog/.chr/default/cases/comments.md",
+      "old": "qa/ref/001/blog/.chr/user/cases/comments.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/001/blog/.chr/default/config.yml",
+      "old": "qa/ref/001/blog/.chr/user/config.yml"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/001/blog/.chr/default/dumps/comments-context.md",
+      "old": "qa/ref/001/blog/.chr/user/dumps/comments-context.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/001/blog/.chr/default/manifest.md",
+      "old": "qa/ref/001/blog/.chr/user/manifest.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/001/blog/.chr/default/project.md",
+      "old": "qa/ref/001/blog/.chr/user/project.md"
+    },
+    {
+      "status": "R094",
+      "path": "qa/ref/001/blog/.chr/default/quizzes/comments-quiz-raw.md",
+      "old": "qa/ref/001/blog/.chr/user/quizzes/comments-quiz-raw.md"
+    },
+    {
+      "status": "R091",
+      "path": "qa/ref/001/blog/.chr/default/quizzes/comments-quiz.md",
+      "old": "qa/ref/001/blog/.chr/user/quizzes/comments-quiz.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/001/blog/.chr/default/tickets/CHR-1-fix-unknown-post-status.md",
+      "old": "qa/ref/001/blog/.chr/user/tickets/CHR-1-fix-unknown-post-status.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/cases/call-outcome-capture.md",
+      "old": "qa/ref/002/dialer/.chr/user/cases/call-outcome-capture.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/cases/conversion.md",
+      "old": "qa/ref/002/dialer/.chr/user/cases/conversion.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/cases/followups.md",
+      "old": "qa/ref/002/dialer/.chr/user/cases/followups.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/cases/lead-queue.md",
+      "old": "qa/ref/002/dialer/.chr/user/cases/lead-queue.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/config.yml",
+      "old": "qa/ref/002/dialer/.chr/user/config.yml"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/dumps/call-outcome-capture-context.md",
+      "old": "qa/ref/002/dialer/.chr/user/dumps/call-outcome-capture-context.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/dumps/conversion-context.md",
+      "old": "qa/ref/002/dialer/.chr/user/dumps/conversion-context.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/dumps/followups-context.md",
+      "old": "qa/ref/002/dialer/.chr/user/dumps/followups-context.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/dumps/lead-queue-context.md",
+      "old": "qa/ref/002/dialer/.chr/user/dumps/lead-queue-context.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/dumps/project-context.md",
+      "old": "qa/ref/002/dialer/.chr/user/dumps/project-context.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/manifest.md",
+      "old": "qa/ref/002/dialer/.chr/user/manifest.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/plans/conversion-plan.md",
+      "old": "qa/ref/002/dialer/.chr/user/plans/conversion-plan.md"
+    },
+    {
+      "status": "R090",
+      "path": "qa/ref/002/dialer/.chr/default/plans/conversion-tracking.md",
+      "old": "qa/ref/002/dialer/.chr/user/plans/conversion-tracking.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/plans/followups-plan.md",
+      "old": "qa/ref/002/dialer/.chr/user/plans/followups-plan.md"
+    },
+    {
+      "status": "R091",
+      "path": "qa/ref/002/dialer/.chr/default/plans/followups-tracking.md",
+      "old": "qa/ref/002/dialer/.chr/user/plans/followups-tracking.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/plans/lead-queue-plan.md",
+      "old": "qa/ref/002/dialer/.chr/user/plans/lead-queue-plan.md"
+    },
+    {
+      "status": "R090",
+      "path": "qa/ref/002/dialer/.chr/default/plans/lead-queue-tracking.md",
+      "old": "qa/ref/002/dialer/.chr/user/plans/lead-queue-tracking.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/project.md",
+      "old": "qa/ref/002/dialer/.chr/user/project.md"
+    },
+    {
+      "status": "R084",
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz-raw.md",
+      "old": "qa/ref/002/dialer/.chr/user/quizzes/conversion-quiz-raw.md"
+    },
+    {
+      "status": "R090",
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz.md",
+      "old": "qa/ref/002/dialer/.chr/user/quizzes/conversion-quiz.md"
+    },
+    {
+      "status": "R082",
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/followups-quiz-raw.md",
+      "old": "qa/ref/002/dialer/.chr/user/quizzes/followups-quiz-raw.md"
+    },
+    {
+      "status": "R088",
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/followups-quiz.md",
+      "old": "qa/ref/002/dialer/.chr/user/quizzes/followups-quiz.md"
+    },
+    {
+      "status": "R085",
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz-raw.md",
+      "old": "qa/ref/002/dialer/.chr/user/quizzes/lead-queue-quiz-raw.md"
+    },
+    {
+      "status": "R090",
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz.md",
+      "old": "qa/ref/002/dialer/.chr/user/quizzes/lead-queue-quiz.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/specs/conversion-spec.md",
+      "old": "qa/ref/002/dialer/.chr/user/specs/conversion-spec.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/specs/followups-spec.md",
+      "old": "qa/ref/002/dialer/.chr/user/specs/followups-spec.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/002/dialer/.chr/default/specs/lead-queue-spec.md",
+      "old": "qa/ref/002/dialer/.chr/user/specs/lead-queue-spec.md"
+    },
+    {
+      "status": "R094",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-104-add-prospect-domain.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-104-add-prospect-domain.md"
+    },
+    {
+      "status": "R093",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-105-conversion-endpoint.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-105-conversion-endpoint.md"
+    },
+    {
+      "status": "R092",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-106-conversion-funnel-metrics.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-106-conversion-funnel-metrics.md"
+    },
+    {
+      "status": "R093",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-107-reject-invalid-conversions.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-107-reject-invalid-conversions.md"
+    },
+    {
+      "status": "R094",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-108-follow-up-domain.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/followups/CHR-108-follow-up-domain.md"
+    },
+    {
+      "status": "R095",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-109-queue-time-source-decision.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/followups/CHR-109-queue-time-source-decision.md"
+    },
+    {
+      "status": "R093",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-110-due-followups-return-to-queue.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/followups/CHR-110-due-followups-return-to-queue.md"
+    },
+    {
+      "status": "R094",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-111-gallery-sample-data.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/followups/CHR-111-gallery-sample-data.md"
+    },
+    {
+      "status": "R093",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-112-calendar-export-spike.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/followups/CHR-112-calendar-export-spike.md"
+    },
+    {
+      "status": "R095",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/queue/CHR-101-filter-do-not-call-leads.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/queue/CHR-101-filter-do-not-call-leads.md"
+    },
+    {
+      "status": "R094",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/queue/CHR-102-add-callback-visibility-tests.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/queue/CHR-102-add-callback-visibility-tests.md"
+    },
+    {
+      "status": "R093",
+      "path": "qa/ref/002/dialer/.chr/default/tickets/queue/CHR-103-queue-summary-metadata.md",
+      "old": "qa/ref/002/dialer/.chr/user/tickets/queue/CHR-103-queue-summary-metadata.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/003/tictactoe/.chr/default/acceptance/cli-gameplay.feature",
+      "old": "qa/ref/003/tictactoe/.chr/user/acceptance/cli-gameplay.feature"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/003/tictactoe/.chr/default/cases/cli-gameplay.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/cases/cli-gameplay.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/003/tictactoe/.chr/default/config.yml",
+      "old": "qa/ref/003/tictactoe/.chr/user/config.yml"
+    },
+    {
+      "status": "R095",
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context-raw.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/cli-gameplay-context-raw.md"
+    },
+    {
+      "status": "R095",
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/cli-gameplay-context.md"
+    },
+    {
+      "status": "R094",
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/project-context-raw.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/dumps/project-context-raw.md"
+    },
+    {
+      "status": "R094",
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/project-context.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/project-context.md"
+    },
+    {
+      "status": "R087",
+      "path": "qa/ref/003/tictactoe/.chr/default/evidence-examples/behavior-gherkin.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/evidence-examples/behavior-gherkin.md"
+    },
+    {
+      "status": "R087",
+      "path": "qa/ref/003/tictactoe/.chr/default/evidence-examples/blocked-validation.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/evidence-examples/blocked-validation.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/003/tictactoe/.chr/default/evidence-examples/docs-no-tests.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/evidence-examples/docs-no-tests.md"
+    },
+    {
+      "status": "R095",
+      "path": "qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-1-board-model.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/fixtures/serialized-loop-tickets/CHR-1-board-model.md"
+    },
+    {
+      "status": "R095",
+      "path": "qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-2-cli-game-loop.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/fixtures/serialized-loop-tickets/CHR-2-cli-game-loop.md"
+    },
+    {
+      "status": "R075",
+      "path": "qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/README.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/fixtures/serialized-loop-tickets/README.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/003/tictactoe/.chr/default/manifest.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/manifest.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/003/tictactoe/.chr/default/project.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/project.md"
+    },
+    {
+      "status": "R096",
+      "path": "qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz-raw.md",
+      "old": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/quizzes/cli-gameplay-quiz-raw.md"
+    },
+    {
+      "status": "R091",
+      "path": "qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz.md",
+      "old": "qa/ref/003/tictactoe/.chr/user/quizzes/cli-gameplay-quiz.md"
+    },
+    {
+      "status": "R100",
+      "path": "qa/ref/003/tictactoe/.chr/default/tickets/.gitkeep",
+      "old": "qa/ref/003/tictactoe/.chr/user/tickets/.gitkeep"
+    },
+    {
+      "status": "M",
+      "path": "qa/ref/003/tictactoe/README.md"
+    },
+    {
+      "status": "M",
+      "path": "scripts/qa/gate.sh"
+    },
+    {
+      "status": "M",
+      "path": "scripts/qa/smoke.sh"
+    }
+  ],
+  "diff_stat": "416 files changed, 1871 insertions(+), 1869 deletions(-)",
+  "agent_managed_work": [],
+  "manual_or_external_changes": [
+    {
+      "path": ".agents/ARCHITECTURE.md",
+      "status": "M"
+    },
+    {
+      "path": ".chr/default/agents/ARCHITECTURE.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/CONVENTIONS.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/DOCUMENTING.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/INVARIANTS.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/LIFECYCLE.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/LINTING.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/PLAYBOOKS.md",
+      "status": "R083"
+    },
+    {
+      "path": ".chr/default/agents/ROUTING.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/SLICES.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/VERSIONING.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/dump.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/planned-delivery-workflow.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/quiz.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/release-alignment.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/slice-delivery.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/specification-workflow.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/ticket-workflow.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/agents/playbooks/version-control-workflow.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/cases/context-capture.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/cases/dev-main-gate.md",
+      "status": "R095"
+    },
+    {
+      "path": ".chr/default/cases/qa-scenarios.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/cases/spec-to-tickets.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/cases/ticket-execution-loop.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/cases/tui-operations.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/config.yml",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/config/gates.yml",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/docs/adoption-baseline.md",
+      "status": "R085"
+    },
+    {
+      "path": ".chr/default/docs/legacy-material-map.md",
+      "status": "R069"
+    },
+    {
+      "path": ".chr/default/dumps/curated/2026-06-02-merger-agent-role.md",
+      "status": "R098"
+    },
+    {
+      "path": ".chr/default/dumps/curated/dev-main-gate-context.md",
+      "status": "R097"
+    },
+    {
+      "path": ".chr/default/dumps/curated/document-generation-context.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/dumps/curated/project-context.md",
+      "status": "R087"
+    },
+    {
+      "path": ".chr/default/dumps/curated/runtime-execution-context.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/dumps/raw/2026-06-02-merger-agent-role-raw.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/manifest.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/plans/dev-main-gate-plan.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/plans/merger-agent-workflow-plan.md",
+      "status": "R090"
+    },
+    {
+      "path": ".chr/default/plans/ticket-review-integration-plan.md",
+      "status": "R092"
+    },
+    {
+      "path": ".chr/default/project.md",
+      "status": "R085"
+    },
+    {
+      "path": ".chr/default/quizzes/curated/ticket-review-integration-quiz.md",
+      "status": "R095"
+    },
+    {
+      "path": ".chr/default/quizzes/raw/ticket-review-integration-quiz-raw.md",
+      "status": "R098"
+    },
+    {
+      "path": ".chr/default/runtime/agent/Dockerfile",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/specs/dev-main-gate-spec.md",
+      "status": "R092"
+    },
+    {
+      "path": ".chr/default/specs/merger-agent-workflow.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/specs/ticket-review-integration-draft.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/trackers/merger-agent-workflow-tracker.md",
+      "status": "R100"
+    },
+    {
+      "path": ".chr/default/trackers/ticket-review-integration-tracker.md",
+      "status": "R100"
+    },
+    {
+      "path": ".gitignore",
+      "status": "M"
+    },
+    {
+      "path": ".prj/fixtures/mvp-agent-proving-ground/todolist/.chr/config.yml",
+      "status": "M"
+    },
+    {
+      "path": ".prj/fixtures/mvp-agent-proving-ground/todolist/.chr/default/runtime/agent/Dockerfile",
+      "status": "R100"
+    },
+    {
+      "path": ".prj/fixtures/mvp-agent-proving-ground/todolist/README.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/plans/slicing-board-ticket-operations-plan.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/plans/slicing-codex-artifact-generation-plan.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/plans/slicing-llm-file-tracing-plan.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/plans/slicing-merger-agent-workflow-plan.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/plans/slicing-qa-agent-work-scenario-plan.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/plans/slicing-ticket-review-integration-plan.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/quizzes/curated/dashboard-board-ticket-operations-quiz.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/quizzes/curated/ticket-review-integration-quiz.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/quizzes/raw/dashboard-board-ticket-operations-quiz-raw.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/quizzes/raw/ticket-review-integration-quiz-raw.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/llm-trace-payloads-2026-05-27.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/agent-test-evidence-strategy-pass/slice-5-gherkin-test-policy.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-investigation.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chr-context-adr-docs.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/reports/slices/tictactoe-qa-reference/slice-1-tictactoe-qa-reference.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/scripts/probe-codex-artifact-generation.sh",
+      "status": "M"
+    },
+    {
+      "path": ".prj/specs/drafts/ticket-review-integration-draft.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/specs/specs/board-ticket-operations-model.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/specs/specs/board-ticket-operations.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/specs/specs/merger-agent-workflow.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/specs/specs/qa-agent-work-scenario.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/trackers/slicing-board-ticket-operations-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/trackers/slicing-merger-agent-workflow-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/trackers/slicing-qa-agent-work-scenario-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": ".prj/trackers/slicing-ticket-review-integration-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "status": "M"
+    },
+    {
+      "path": "cmd/chr/assets/workspace/profiles/standard/agents/PLAYBOOKS.md",
+      "status": "M"
+    },
+    {
+      "path": "cmd/chr/assets/workspace/profiles/standard/root/AGENTS.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/explanation/architecture.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/explanation/dev-main-gate-direction.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/explanation/dev-main-gate-model.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/explanation/dev-main-tooling-gate-spec-draft.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/explanation/old-gallery.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/explanation/tui-interactive-design-notes.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/how-to/adopt-dev-main-gate-in-existing-project.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/how-to/full-system-lab-runbook.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/how-to/qa-tictactoe-agent-work-scenario.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/how-to/use-dev-main-gate-with-woodpecker.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/how-to/use-forgejo-ticket-review.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/how-to/user-guide/index.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/acceptance-feature-generation.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/authoring-sessions.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/commands.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/dev-main-gate.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/evidence-strategy-config.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/index-rebuild-cli.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/index-status-cli.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/notification-config.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/project-workspace.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/review-workflow-config.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/runtime-config.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/ticket-execution.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/ticket-file-discovery.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/ticket-index-rebuild.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/ticket-index-refresh.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/ticket-index-status.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/ticket-reconciliation.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/ticket-review-workflow.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/tui.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/user-environment.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/reference/work-readiness.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/tutorials/getting-started.md",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/cli_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/planning_baseline_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/service_acceptance_feature_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/service_dump_curation_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/service_plan_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/service_quiz_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/service_spec_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/service_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/service_work_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/app/tui_adapter_parity_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/acceptance_feature_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/agent_event_readback_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/agent_event_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/agent_run_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/agentic_review_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/assisted_artifact_synthesis_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/assisted_context_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/authoring_artifact_layout_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/authoring_contextual_quiz_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/authoring_session_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/changed_file_discovery_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/codex_worker_context_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/codex_worker_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/config.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/config_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/context_agent_protocols_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/context_composer_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/context_materializer_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/context_previous_attempt_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/context_project_documents_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/context_readiness_handoff_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/context_tree_search_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/diagnostic_bundle_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/evidence_policy.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/evidence_policy_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/evidence_readiness_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/evidence_strategy_checklist_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/evidence_strategy_summary_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/execution_artifact_drift_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/execution_report_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/execution_repository_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/execution_runner_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/execution_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/gate_report_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/harness_invocation_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/llm_trace_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/plan_generation_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/project_userspace_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/proving_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/quiz_artifact_repository_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/quiz_model_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/quiz_runtime_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/result_application_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/runtime_init_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/runtime_plan.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/runtime_plan_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/runtime_validate_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/spec_generation.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/spec_generation_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_discovery_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_index_rebuild_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_index_status_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_index_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_merge_preflight_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_parser_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_reconciliation_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_repository_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/ticket_validation_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/work_readiness_service.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/work_readiness_service_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/workspace_context_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/workspace_graph_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/workspace_index_cache_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/workspace_index_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/workspace_init.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/workspace_init_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/core/worktree_service_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/tui/documents.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/tui/model_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/tui/source_actions.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/tui/work_readiness_test.go",
+      "status": "M"
+    },
+    {
+      "path": "internal/webui/webui_test.go",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/dump/00001-curated/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/dump/00001-curated/files/legacy/2026-06-02-merger-agent-role.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/dump/00001-curated/files/legacy/dev-main-gate-context.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/dump/00001-curated/files/legacy/project-context.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/dump/00001-curated/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/dump/00002-raw/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/dump/00002-raw/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00008-dev-main-gate-plan-md/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00008-dev-main-gate-plan-md/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00009-merger-agent-workflow-plan-md/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00009-merger-agent-workflow-plan-md/files/legacy/merger-agent-workflow-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00009-merger-agent-workflow-plan-md/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00010-ticket-review-integration-plan-md/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00010-ticket-review-integration-plan-md/files/legacy/ticket-review-integration-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00010-ticket-review-integration-plan-md/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00026-2026-06-01-dev-main-agent-evidence-gate-plan-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00028-2026-06-06-separate-acceptance-feature-workflow-plan-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00031-2026-06-18-tictactoe-qa-reference-plan-md/files/legacy/2026-06-18-tictactoe-qa-reference-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/plan/00032-2026-06-19-agent-test-evidence-strategy-pass-plan-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/quiz/00003-curated/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/quiz/00003-curated/files/legacy/ticket-review-integration-quiz.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/quiz/00003-curated/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/quiz/00004-raw/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/quiz/00004-raw/files/legacy/ticket-review-integration-quiz-raw.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/quiz/00004-raw/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/report/00036-ops-layout-migration/files/manifest.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/cases/cli-gameplay.md",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/config.yml",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context-raw.md",
+      "status": "R095"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context.md",
+      "status": "R095"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context-raw.md",
+      "status": "R094"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context.md",
+      "status": "R094"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/manifest.md",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md",
+      "status": "R098"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-plan.md",
+      "status": "R098"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-tracking.md",
+      "status": "R082"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/project.md",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz-raw.md",
+      "status": "R096"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz.md",
+      "status": "R091"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/agent/Dockerfile",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/plan-generation.log",
+      "status": "R074"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/context.md",
+      "status": "R055"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md",
+      "status": "R069"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md",
+      "status": "A"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log",
+      "status": "R098"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/context.md",
+      "status": "R055"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/execution-report.md",
+      "status": "R070"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md",
+      "status": "A"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result.json",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/runtime.log",
+      "status": "R087"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/validation.log",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/context.md",
+      "status": "R055"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/execution-report.md",
+      "status": "R070"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md",
+      "status": "A"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/runtime.log",
+      "status": "R083"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/validation.log",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/context.md",
+      "status": "R054"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/execution-report.md",
+      "status": "R071"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md",
+      "status": "A"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result.json",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/runtime.log",
+      "status": "R096"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/validation.log",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/context.md",
+      "status": "R055"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md",
+      "status": "R070"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md",
+      "status": "A"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log",
+      "status": "R095"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/specs/project-spec.md",
+      "status": "R098"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/.gitkeep",
+      "status": "R100"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md",
+      "status": "R085"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-2-Move-state-transitions.md",
+      "status": "R087"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md",
+      "status": "R087"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-4-Interactive-gameplay-loop.md",
+      "status": "R088"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md",
+      "status": "R088"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md",
+      "status": "D"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md",
+      "status": "D"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md",
+      "status": "D"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md",
+      "status": "D"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md",
+      "status": "D"
+    },
+    {
+      "path": "ops/default/report/00037-tictactoe-agent-work-success/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00005-dev-main-gate-spec-md/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00005-dev-main-gate-spec-md/files/legacy/dev-main-gate-spec.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00005-dev-main-gate-spec-md/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00006-merger-agent-workflow-md/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00006-merger-agent-workflow-md/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00007-ticket-review-integration-draft-md/artifact.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00007-ticket-review-integration-draft-md/metadata.json",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00011-2026-06-01-dev-main-agent-evidence-gate-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00012-2026-06-06-gherkin-acceptance-generation-md/files/legacy/2026-06-06-gherkin-acceptance-generation.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00013-2026-06-06-separate-acceptance-feature-workflow-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00014-2026-06-18-agent-work-observability-model-md/files/legacy/2026-06-18-agent-work-observability-model.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00018-2026-06-18-configurable-work-readiness-md/files/legacy/2026-06-18-configurable-work-readiness.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00019-2026-06-19-agent-test-evidence-strategy-pass-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00020-2026-06-19-isolated-ticket-worktrees-md/files/legacy/2026-06-19-isolated-ticket-worktrees.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00021-2026-06-20-serialized-integration-loop-model-md/files/legacy/2026-06-20-serialized-integration-loop-model.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00022-2026-06-20-serialized-integration-loop-md/files/legacy/2026-06-20-serialized-integration-loop.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00023-2026-06-29-execution-unit-runtime-refinements-md/files/legacy/2026-06-29-execution-unit-runtime-refinements.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00024-2026-06-29-optional-local-web-ui-md/files/legacy/2026-06-29-optional-local-web-ui.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00025-drafts/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/default/spec/00025-drafts/files/legacy/2026-06-06-gherkin-acceptance-generation.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/plans/2026-06-18-tictactoe-qa-reference-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-01-dev-main-agent-evidence-gate.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-06-gherkin-acceptance-generation.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-06-separate-acceptance-feature-workflow.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-18-agent-work-observability-model.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-18-configurable-work-readiness.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-19-agent-test-evidence-strategy-pass.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-19-isolated-ticket-worktrees.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-20-serialized-integration-loop-model.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-20-serialized-integration-loop.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-29-execution-unit-runtime-refinements.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/specs/2026-06-29-optional-local-web-ui.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": "ops/trackers/2026-06-20-serialized-integration-loop-tracker.md",
+      "status": "M"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/cases/comments.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/config.yml",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/dumps/comments-context.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/manifest.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/project.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/quizzes/comments-quiz-raw.md",
+      "status": "R094"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/quizzes/comments-quiz.md",
+      "status": "R091"
+    },
+    {
+      "path": "qa/ref/001/blog/.chr/default/tickets/CHR-1-fix-unknown-post-status.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/cases/call-outcome-capture.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/cases/conversion.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/cases/followups.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/cases/lead-queue.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/config.yml",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/dumps/call-outcome-capture-context.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/dumps/conversion-context.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/dumps/followups-context.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/dumps/lead-queue-context.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/dumps/project-context.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/manifest.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/plans/conversion-plan.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/plans/conversion-tracking.md",
+      "status": "R090"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/plans/followups-plan.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/plans/followups-tracking.md",
+      "status": "R091"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/plans/lead-queue-plan.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/plans/lead-queue-tracking.md",
+      "status": "R090"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/project.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz-raw.md",
+      "status": "R084"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz.md",
+      "status": "R090"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/followups-quiz-raw.md",
+      "status": "R082"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/followups-quiz.md",
+      "status": "R088"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz-raw.md",
+      "status": "R085"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz.md",
+      "status": "R090"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/specs/conversion-spec.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/specs/followups-spec.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/specs/lead-queue-spec.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-104-add-prospect-domain.md",
+      "status": "R094"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-105-conversion-endpoint.md",
+      "status": "R093"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-106-conversion-funnel-metrics.md",
+      "status": "R092"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-107-reject-invalid-conversions.md",
+      "status": "R093"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-108-follow-up-domain.md",
+      "status": "R094"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-109-queue-time-source-decision.md",
+      "status": "R095"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-110-due-followups-return-to-queue.md",
+      "status": "R093"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-111-gallery-sample-data.md",
+      "status": "R094"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/followups/CHR-112-calendar-export-spike.md",
+      "status": "R093"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/queue/CHR-101-filter-do-not-call-leads.md",
+      "status": "R095"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/queue/CHR-102-add-callback-visibility-tests.md",
+      "status": "R094"
+    },
+    {
+      "path": "qa/ref/002/dialer/.chr/default/tickets/queue/CHR-103-queue-summary-metadata.md",
+      "status": "R093"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/acceptance/cli-gameplay.feature",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/cases/cli-gameplay.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/config.yml",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context-raw.md",
+      "status": "R095"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context.md",
+      "status": "R095"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/project-context-raw.md",
+      "status": "R094"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/dumps/project-context.md",
+      "status": "R094"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/evidence-examples/behavior-gherkin.md",
+      "status": "R087"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/evidence-examples/blocked-validation.md",
+      "status": "R087"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/evidence-examples/docs-no-tests.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-1-board-model.md",
+      "status": "R095"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-2-cli-game-loop.md",
+      "status": "R095"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/README.md",
+      "status": "R075"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/manifest.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/project.md",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz-raw.md",
+      "status": "R096"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz.md",
+      "status": "R091"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/.chr/default/tickets/.gitkeep",
+      "status": "R100"
+    },
+    {
+      "path": "qa/ref/003/tictactoe/README.md",
+      "status": "M"
+    },
+    {
+      "path": "scripts/qa/gate.sh",
+      "status": "M"
+    },
+    {
+      "path": "scripts/qa/smoke.sh",
+      "status": "M"
+    }
+  ],
+  "missing_agent_evidence": [],
+  "high_risk_manual_changes": [],
+  "validation": {
+    "command": "make verify",
+    "exit_code": 2,
+    "output": "make[1]: Entering directory '/home/adrian/Projects/chr-operational-layout'\ninternal/app/ticket.go:1327:1: calculated cyclomatic complexity for function applyTicketResult is 11, max is 10 (cyclop)\nfunc applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, events ticketExecutionEvents, assetsFS fs.FS) error {\n^\ninternal/core/ops_artifact.go:35:1: calculated cyclomatic complexity for function CreateOpsArtifact is 14, max is 10 (cyclop)\nfunc CreateOpsArtifact(opts CreateOpsArtifactOptions) (OpsArtifact, error) {\n^\ninternal/core/ops_artifact_test.go:11:1: calculated cyclomatic complexity for function TestCreateOpsArtifactAllocatesGlobalIDAndEnvelope is 11, max is 10 (cyclop)\nfunc TestCreateOpsArtifactAllocatesGlobalIDAndEnvelope(t *testing.T) {\n^\ninternal/core/ops_artifact_test.go:73:1: calculated cyclomatic complexity for function TestRefreshOpsArtifactMetadataIndexesSharedFiles is 11, max is 10 (cyclop)\nfunc TestRefreshOpsArtifactMetadataIndexesSharedFiles(t *testing.T) {\n^\ninternal/core/ops_artifact.go:55:17: Error return value of `os.Remove` is not checked (errcheck)\n\tdefer func() { _ = os.Remove(lockPath) }()\n\t               ^\ninternal/core/ops_artifact.go:202:8: Error return value of `fmt.Sscanf` is not checked (errcheck)\n\t\t\t\t_, _ = fmt.Sscanf(match[1], \"%d\", \u0026number)\n\t\t\t\t   ^\ninternal/core/proving.go:450:3: Error return value of `logFile.Close` is not checked (errcheck)\n\t\t_ = logFile.Close()\n\t\t^\ninternal/app/ticket.go:1896:85: non-wrapping format verb for fmt.Errorf. Use `%w` to format errors (errorlint)\n\t\t\t\treturn executed, fmt.Errorf(\"%w; refresh shared artifact metadata: %v\", runErr, err)\n\t\t\t\t                                                                                ^\ninternal/core/config_test.go:583:6: Function 'TestValidateWorkConfigRejectsInvalidWorkspaceConfig' is too long (71 \u003e 60) (funlen)\nfunc TestValidateWorkConfigRejectsInvalidWorkspaceConfig(t *testing.T) {\n     ^\ninternal/core/ops_artifact.go:107:1: cognitive complexity 20 of func `EnsureOpsArtifactEnvelope` is high (\u003e 15) (gocognit)\nfunc EnsureOpsArtifactEnvelope(opts CreateOpsArtifactOptions, id string) (OpsArtifact, error) {\n^\ninternal/core/report_listing.go:53:1: cognitive complexity 17 of func `(ReportLister).ListProjectReports` is high (\u003e 15) (gocognit)\nfunc (l ReportLister) ListProjectReports(\n^\ninternal/core/runtime_plan.go:182:1: cognitive complexity 21 of func `runtimeArtifactPaths` is high (\u003e 15) (gocognit)\nfunc runtimeArtifactPaths(\n^\ninternal/core/ops_artifact.go:241:1: File is not properly formatted (gofumpt)\nfunc RefreshOpsArtifactMetadata(dir string, status string, now time.Time) error {\n^\ninternal/core/runtime_init_test.go:32:1: File is not properly formatted (gofumpt)\n\n^\ninternal/core/runtime_plan.go:243:1: File is not properly formatted (gofumpt)\nfunc runtimeOpsLayout(projectDir string, configuredArtifactDir string, opts RuntimePlanOptions) (OpsLayout, string, bool, error) {\n^\ninternal/app/ticket.go:1893:1: `if executed.Artifacts.ArtifactID != \"\"` has complex nested blocks (complexity: 3) (nestif)\n\tif executed.Artifacts.ArtifactID != \"\" {\n^\ninternal/core/ops_artifact.go:146:1: `if errors.Is(err, os.ErrNotExist)` has complex nested blocks (complexity: 3) (nestif)\n\tif _, err := os.Stat(metadataPath); errors.Is(err, os.ErrNotExist) {\n^\ninternal/core/runtime_plan.go:193:1: `if canonical` has complex nested blocks (complexity: 10) (nestif)\n\tif canonical {\n^\ninternal/app/ticket.go:1116:2: return with no blank line before (nlreturn)\n\treturn record, nil\n\t^\ninternal/app/ticket.go:1898:4: return with no blank line before (nlreturn)\n\t\t\treturn executed, err\n\t\t\t^\ninternal/core/ops_artifact.go:189:2: return with no blank line before (nlreturn)\n\treturn file.Close()\n\t^\ninternal/core/ops_artifact.go:207:2: return with no blank line before (nlreturn)\n\treturn maximum + 1\n\t^\ninternal/core/ops_artifact.go:213:2: return with no blank line before (nlreturn)\n\treturn strings.Trim(value, \"-\")\n\t^\ninternal/core/ops_artifact.go:231:3: return with no blank line before (nlreturn)\n\t\treturn nil\n\t\t^\ninternal/core/ops_artifact.go:237:2: return with no blank line before (nlreturn)\n\treturn files, nil\n\t^\ninternal/core/ops_artifact_test.go:123:2: return with no blank line before (nlreturn)\n\treturn true\n\t^\ninternal/core/ops_layout_test.go:49:4: return with no blank line before (nlreturn)\n\t\t\treturn \"\"\n\t\t\t^\ninternal/core/proving.go:451:3: return with no blank line before (nlreturn)\n\t\treturn nil, err\n\t\t^\ninternal/core/proving.go:771:2: return with no blank line before (nlreturn)\n\treturn EnsureOpsArtifactEnvelope(CreateOpsArtifactOptions{\n\t^\ninternal/core/worktree_plan.go:84:2: return with no blank line before (nlreturn)\n\treturn layout.WorktreeRoot(), nil\n\t^\ninternal/core/runtime_init_test.go:33:1: unnecessary trailing newline (whitespace)\n}\n^\ninternal/core/runtime_init_test.go:56:1: unnecessary trailing newline (whitespace)\n}\n^\ninternal/app/agent_work_events.go:16:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tconfig, err := core.LoadWorkspaceConfig(projectDir)\n\t^\ninternal/app/service_work.go:318:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\trecord, err = allocateLoopRunArtifact(s.projectContext.ProjectDir, record)\n\t^\ninternal/app/service_work.go:322:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := repository.CreateLoopRun(s.ctx, record); err != nil {\n\t^\ninternal/app/service_work_test.go:77:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif result.Execution == nil {\n\t^\ninternal/app/service_work_test.go:80:2: missing whitespace above this line (invalid statement above expr) (wsl_v5)\n\tassertPathExists(t, filepath.Join(result.Execution.Artifacts.RunDir, \"artifact.md\"))\n\t^\ninternal/app/ticket.go:944:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\trecord, err = allocateLoopRunArtifact(projectContext.ProjectDir, record)\n\t^\ninternal/app/ticket.go:1005:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif record.ArtifactID != \"\" {\n\t^\ninternal/app/ticket.go:1038:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif record.ArtifactID != \"\" {\n\t^\ninternal/app/ticket.go:1104:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tartifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{\n\t^\ninternal/app/ticket.go:1114:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\trecord.ArtifactID = artifact.ID\n\t^\ninternal/app/ticket.go:1386:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif plan.Record.Artifacts.ArtifactID != \"\" {\n\t^\ninternal/app/ticket.go:1611:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tlayout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: projectContext.ProjectDir})\n\t^\ninternal/app/ticket.go:1615:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tartifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{\n\t^\ninternal/app/ticket.go:1625:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\trecord.Artifacts.ArtifactID = artifact.ID\n\t^\ninternal/core/agent_event_stream.go:57:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(record.Artifacts.ArtifactID) != \"\" {\n\t^\ninternal/core/agent_event_stream.go:69:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(record.ArtifactID) != \"\" {\n\t^\ninternal/core/agentic_review_test.go:93:2: missing whitespace above this line (invalid statement above expr) (wsl_v5)\n\tassertAgenticReviewArtifactExists(t, artifact.ContextPath)\n\t^\ninternal/core/execution_report.go:353:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(record.Artifacts.ArtifactID) != \"\" {\n\t^\ninternal/core/execution_test.go:221:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif record.Artifacts.ArtifactID != plan.ArtifactID {\n\t^\ninternal/core/ops_artifact.go:39:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(opts.Title) == \"\" {\n\t^\ninternal/core/ops_artifact.go:42:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(opts.Producer) == \"\" {\n\t^\ninternal/core/ops_artifact.go:61:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tid := fmt.Sprintf(\"%05d-%s\", nextOpsArtifactNumber(opts.Layout.Root()), slug)\n\t^\ninternal/core/ops_artifact.go:62:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\tdir, err := opts.Layout.ArtifactDirectory(opts.Type, id)\n\t^\ninternal/core/ops_artifact.go:66:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.MkdirAll(dir, 0o755); err != nil {\n\t^\ninternal/core/ops_artifact.go:87:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\tencoded, err := json.MarshalIndent(metadata, \"\", \"  \")\n\t^\ninternal/core/ops_artifact.go:91:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.WriteFile(filepath.Join(dir, \"artifact.md\"), []byte(\"# \"+strings.TrimSpace(opts.Title)+\"\\n\"), 0o644); err != nil {\n\t^\ninternal/core/ops_artifact.go:94:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.WriteFile(filepath.Join(dir, \"metadata.json\"), append(encoded, '\\n'), 0o644); err != nil {\n\t^\ninternal/core/ops_artifact.go:97:2: missing whitespace above this line (invalid statement above range) (wsl_v5)\n\tfor _, path := range []string{\"files\", \"evidence\", filepath.Join(\"extension\", strings.TrimSpace(opts.Producer))} {\n\t^\ninternal/core/ops_artifact.go:111:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(id) == \"\" || filepath.Base(id) != id {\n\t^\ninternal/core/ops_artifact.go:114:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(opts.Title) == \"\" {\n\t^\ninternal/core/ops_artifact.go:117:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(opts.Producer) == \"\" {\n\t^\ninternal/core/ops_artifact.go:130:2: missing whitespace above this line (invalid statement above range) (wsl_v5)\n\tfor _, path := range []string{\"\", \"files\", \"evidence\", filepath.Join(\"extension\", strings.TrimSpace(opts.Producer))} {\n\t^\ninternal/core/ops_artifact.go:164:3: missing whitespace above this line (too many statements above if) (wsl_v5)\n\t\tencoded, err := json.MarshalIndent(metadata, \"\", \"  \")\n\t\t^\ninternal/core/ops_artifact.go:168:3: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\t\tif err := os.WriteFile(metadataPath, append(encoded, '\\n'), 0o644); err != nil {\n\t\t^\ninternal/core/ops_artifact.go:182:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tfile, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)\n\t^\ninternal/core/ops_artifact.go:186:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err != nil {\n\t^\ninternal/core/ops_artifact.go:194:2: missing whitespace above this line (no shared variables above range) (wsl_v5)\n\tfor artifactType := range opsArtifactTypes {\n\t^\ninternal/core/ops_artifact.go:199:3: missing whitespace above this line (invalid statement above range) (wsl_v5)\n\t\tfor _, entry := range entries {\n\t\t^\ninternal/core/ops_artifact.go:219:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\terr := filepath.WalkDir(dir, func(path string, entry os.DirEntry, walkErr error) error {\n\t^\ninternal/core/ops_artifact.go:223:3: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\t\tif entry.IsDir() || path == filepath.Join(dir, \"metadata.json\") || strings.HasPrefix(path, filepath.Join(dir, \"extension\")+string(filepath.Separator)) {\n\t\t^\ninternal/core/ops_artifact.go:226:3: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\t\trelative, err := filepath.Rel(dir, path)\n\t\t^\ninternal/core/ops_artifact.go:230:3: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\t\tfiles = append(files, filepath.ToSlash(relative))\n\t\t^\ninternal/core/ops_artifact.go:236:2: missing whitespace above this line (invalid statement above expr) (wsl_v5)\n\tsort.Strings(files)\n\t^\ninternal/core/ops_artifact.go:247:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\tcontent, err := os.ReadFile(path)\n\t^\ninternal/core/ops_artifact.go:261:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tmetadata[\"files\"] = files\n\t^\ninternal/core/ops_artifact.go:269:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.WriteFile(path, append(encoded, '\\n'), 0o644); err != nil {\n\t^\ninternal/core/ops_artifact_test.go:13:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\tlayout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})\n\t^\ninternal/core/ops_artifact_test.go:17:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.MkdirAll(filepath.Join(layout.Root(), \"plan\", \"00001-existing\"), 0o755); err != nil {\n\t^\ninternal/core/ops_artifact_test.go:32:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif artifact.ID != \"00002-parser-validation\" {\n\t^\ninternal/core/ops_artifact_test.go:35:2: missing whitespace above this line (invalid statement above range) (wsl_v5)\n\tfor _, path := range []string{\"artifact.md\", \"metadata.json\", \"files\", \"evidence\", filepath.Join(\"extension\", \"chr\")} {\n\t^\ninternal/core/ops_artifact_test.go:45:2: missing whitespace above this line (never cuddle decl) (wsl_v5)\n\tvar metadata struct {\n\t^\ninternal/core/ops_artifact_test.go:51:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif len(metadata.ExternalIDs) != 1 || metadata.ExternalIDs[0] != \"exec-1\" {\n\t^\ninternal/core/ops_artifact_test.go:61:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tlockPath := filepath.Join(layout.Root(), \"lock\", \"id.lock\")\n\t^\ninternal/core/ops_artifact_test.go:65:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.WriteFile(lockPath, []byte(\"busy\\n\"), 0o644); err != nil {\n\t^\ninternal/core/ops_artifact_test.go:68:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif _, err := CreateOpsArtifact(CreateOpsArtifactOptions{Layout: layout, Type: \"run\", Title: \"Parser\", Producer: \"chr\"}); err == nil {\n\t^\ninternal/core/ops_artifact_test.go:78:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tartifact, err := CreateOpsArtifact(CreateOpsArtifactOptions{Layout: layout, Type: \"run\", Title: \"Parser\", Producer: \"chr\"})\n\t^\ninternal/core/ops_artifact_test.go:82:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.WriteFile(filepath.Join(artifact.Dir, \"files\", \"context.md\"), []byte(\"context\\n\"), 0o644); err != nil {\n\t^\ninternal/core/ops_artifact_test.go:85:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.WriteFile(filepath.Join(artifact.Dir, \"evidence\", \"result.json\"), []byte(\"{}\\n\"), 0o644); err != nil {\n\t^\ninternal/core/ops_artifact_test.go:88:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := os.WriteFile(filepath.Join(artifact.Dir, \"extension\", \"chr\", \"state.json\"), []byte(\"{}\\n\"), 0o644); err != nil {\n\t^\ninternal/core/ops_artifact_test.go:91:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := RefreshOpsArtifactMetadata(artifact.Dir, \"succeeded\", time.Date(2026, 7, 13, 10, 0, 0, 0, time.UTC)); err != nil {\n\t^\ninternal/core/ops_artifact_test.go:99:2: missing whitespace above this line (never cuddle decl) (wsl_v5)\n\tvar metadata struct {\n\t^\ninternal/core/ops_artifact_test.go:106:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif metadata.Status != \"succeeded\" {\n\t^\ninternal/core/ops_artifact_test.go:109:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif got, want := metadata.Files, []string{\"artifact.md\", \"evidence/result.json\", \"files/context.md\"}; !equalStringSlices(got, want) {\n\t^\ninternal/core/ops_artifact_test.go:118:2: missing whitespace above this line (invalid statement above range) (wsl_v5)\n\tfor index := range got {\n\t^\ninternal/core/ops_layout.go:57:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif namespace == \"\" {\n\t^\ninternal/core/ops_layout.go:60:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif !IsValidOpsNamespace(namespace) {\n\t^\ninternal/core/ops_layout.go:103:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif strings.TrimSpace(id) == \"\" || filepath.Base(id) != id {\n\t^\ninternal/core/ops_layout_test.go:22:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif layout.Root() != filepath.Join(projectDir, \"ops\", \"default\") {\n\t^\ninternal/core/ops_layout_test.go:73:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\tlayout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: \"adrian\"})\n\t^\ninternal/core/ops_layout_test.go:82:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif want := filepath.Join(projectDir, \"ops\", \"adrian\", \"run\", \"00001-parser-validation\"); runDir != want {\n\t^\ninternal/core/ops_layout_test.go:90:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif want := filepath.Join(projectDir, \"ops\", \"adrian\", \"worktree\", \"00001-parser-validation\"); worktreeDir != want {\n\t^\ninternal/core/ops_layout_test.go:104:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif _, err := layout.ArtifactDirectory(\"run\", \"../outside\"); err == nil {\n\t^\ninternal/core/proving.go:248:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tartifact, err := ensureProvingOpsArtifact(projectDir, planned.Objective)\n\t^\ninternal/core/proving.go:278:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := RefreshOpsArtifactMetadata(artifact.Dir, provingValidationArtifactStatus(result), time.Now()); err != nil {\n\t^\ninternal/core/proving.go:449:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := RefreshOpsArtifactMetadata(artifact.Dir, \"running\", time.Now()); err != nil {\n\t^\ninternal/core/proving.go:835:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif err := RefreshOpsArtifactMetadata(artifact.Dir, result.Status, time.Now()); err != nil {\n\t^\ninternal/core/report_listing.go:72:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tentries := []ReportListEntry{}\n\t^\ninternal/core/report_listing_test.go:142:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif reports[0].ExecutionID != \"adrian-exec\" {\n\t^\ninternal/core/runtime_plan.go:87:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\tartifactDir, runArtifactDir, workerContextPath, resultPath, logPath, validationPath, err := runtimeArtifactPaths(projectDir, executionWorkspaceDir, config.ArtifactDir, opts)\n\t^\ninternal/core/runtime_plan.go:227:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\trunArtifactDir := artifactDir\n\t^\ninternal/core/runtime_plan_test.go:149:2: missing whitespace above this line (too many statements above if) (wsl_v5)\n\tlayout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})\n\t^\ninternal/core/runtime_plan_test.go:169:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif plan.WorkerContextPath != filepath.Join(wantRunDir, \"files\", \"context.md\") {\n\t^\ninternal/core/runtime_plan_test.go:172:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif plan.ResultPath != filepath.Join(wantRunDir, \"evidence\", \"result.json\") {\n\t^\ninternal/core/work_config.go:66:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif filepath.ToSlash(filepath.Clean(config.WorktreeRoot)) != DefaultWorktreeRoot {\n\t^\ninternal/core/work_readiness_service.go:344:2: missing whitespace above this line (no shared variables above range) (wsl_v5)\n\tfor _, pattern := range runtimeArtifactIgnorePatterns() {\n\t^\ninternal/core/work_readiness_service.go:349:3: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\t\tchanged = changed || patternChanged\n\t\t^\ninternal/core/work_selection_preflight_test.go:22:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif want := filepath.Join(projectDir, OpsDirectoryName, DefaultOpsNamespace, \"lock\", \"agent-operation.lock\"); lock.path != want {\n\t^\ninternal/core/worktree_service_test.go:42:2: missing whitespace above this line (invalid statement above assign) (wsl_v5)\n\tdir := t.TempDir()\n\t^\ninternal/core/worktree_service_test.go:52:2: missing whitespace above this line (invalid statement above if) (wsl_v5)\n\tif got, want := plan.WorktreeRoot, filepath.Join(dir, \"ops\", \"adrian\", \"worktree\"); got != want {\n\t^\n121 issues:\n* cyclop: 4\n* errcheck: 3\n* errorlint: 1\n* funlen: 1\n* gocognit: 3\n* gofumpt: 3\n* nestif: 3\n* nlreturn: 12\n* whitespace: 2\n* wsl_v5: 89\nmake[1]: *** [Makefile:36: lint-strict] Error 1\nmake[1]: Leaving directory '/home/adrian/Projects/chr-operational-layout'",
+    "passed": false
+  },
+  "artifacts": {
+    "json_path": "/home/adrian/Projects/chr-operational-layout/.chr/default/reports/gates/dev-main-20260714T144245Z.json",
+    "markdown_path": "/home/adrian/Projects/chr-operational-layout/.chr/default/reports/gates/dev-main-20260714T144245Z.md"
+  },
+  "failures": [
+    "validation failed"
+  ],
+  "warnings": [
+    "manual or external changes present"
+  ],
+  "info": null
+}

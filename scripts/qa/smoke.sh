@@ -71,10 +71,10 @@ fi
 
 if [ "$case_name" = "tictactoe" ]; then
 	for fixture in \
-		".chr/default/acceptance/cli-gameplay.feature" \
-		".chr/default/evidence-examples/docs-no-tests.md" \
-		".chr/default/evidence-examples/behavior-gherkin.md" \
-		".chr/default/evidence-examples/blocked-validation.md"
+		"ops/default/spec/00000-cli-gameplay-acceptance-feature/artifact.md" \
+		"ops/default/report/00000-docs-no-tests-evidence-example/artifact.md" \
+		"ops/default/report/00000-behavior-gherkin-evidence-example/artifact.md" \
+		"ops/default/report/00000-blocked-validation-evidence-example/artifact.md"
 	do
 		if [ ! -f "$active_dir/$fixture" ]; then
 			echo "qa smoke failed: missing tictactoe evidence fixture $fixture" >&2
@@ -82,7 +82,7 @@ if [ "$case_name" = "tictactoe" ]; then
 		fi
 	done
 
-	if ! grep -q 'Validation: blocked' "$active_dir/.chr/default/evidence-examples/blocked-validation.md"; then
+	if ! grep -q 'Validation: blocked' "$active_dir/ops/default/report/00000-blocked-validation-evidence-example/artifact.md"; then
 		echo "qa smoke failed: blocked validation fixture is missing blocked evidence" >&2
 		exit 1
 	fi

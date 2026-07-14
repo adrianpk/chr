@@ -348,10 +348,10 @@ Equivalent CLI commands:
 chr dump list
 chr dump new --title "Billing notes" --content "Initial context."
 chr dump new --title "Billing notes" --content "Use-case context." --use-case billing
-chr dump show .chr/default/dumps/billing-notes.md
-chr dump save .chr/default/dumps/billing-notes.md --content "# Billing notes"
-chr dump append .chr/default/dumps/billing-notes.md --content "Additional context."
-chr dump open .chr/default/dumps/billing-notes.md
+chr dump show ops/default/dump/00000-billing-notes/artifact.md
+chr dump save ops/default/dump/00000-billing-notes/artifact.md --content "# Billing notes"
+chr dump append ops/default/dump/00000-billing-notes/artifact.md --content "Additional context."
+chr dump open ops/default/dump/00000-billing-notes/artifact.md
 ```
 
 ## Run Quizzes in the TUI
@@ -422,8 +422,8 @@ running, the TUI shows a working state and ignores other spec actions until the
 request finishes.
 
 If acceptance feature generation succeeds, the status line shows the generated
-`.chr/default/acceptance/<case>.feature` path. If more scenario detail is needed,
-the status line shows the `.chr/default/acceptance/<case>-feature-round.md` path
+`ops/default/spec/00000-<case>-acceptance-feature/artifact.md` path. If more scenario detail is needed,
+the status line shows the `ops/default/spec/00000-<case>-acceptance-feature-round/artifact.md` path
 so you can review the default-oriented prompts before trying again.
 
 Current limitation: those feature-round prompts are persisted, but the TUI does

@@ -56,12 +56,15 @@ func GeneratedPlanTrackingLayout(projectDir string, scope QuizScope) (GeneratedP
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	relativePath := UserRelativePath(PlanDirectory, scopeID+"-tracking.md")
+	relativePath, path, err := NamedOpsArtifactBody(projectDir, "tracker", scopeID+"-tracking")
+	if err != nil {
+		return GeneratedPlanTrackingPaths{}, err
+	}
 
 	return GeneratedPlanTrackingPaths{
 		ScopeID:      scopeID,
 		RelativePath: relativePath,
-		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+		Path:         path,
 	}, nil
 }
 
@@ -83,6 +86,15 @@ func WriteGeneratedPlanTracking(
 
 	paths, err := GeneratedPlanTrackingLayout(projectDir, tracking.Scope)
 	if err != nil {
+		return GeneratedPlanTrackingPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(tracking.Scope)
+	if err != nil {
+		return GeneratedPlanTrackingPaths{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(projectDir, "tracker", scopeID+"-tracking"); err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
 

@@ -169,7 +169,11 @@ func printGateWoodpeckerInitResult(stdout io.Writer, result core.GateWoodpeckerI
 
 func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir, baseRef, headRef string) error {
 	createdAt := time.Now().UTC()
-	artifacts := core.NewGateReportArtifacts(projectDir, createdAt)
+
+	artifacts, err := core.NewGateReportArtifacts(projectDir, createdAt)
+	if err != nil {
+		return err
+	}
 
 	config, err := core.LoadGateConfig(projectDir)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -60,6 +61,11 @@ func PlanQuizToDraftPromotion(opts QuizToDraftPromotionOptions) (QuizToDraftProm
 func WriteQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
 	if plan.Layout.Collision.Exists && !plan.Layout.Collision.Allowed {
 		return fmt.Errorf("authoring draft artifact already exists: %s", plan.Layout.FullPath)
+	}
+
+	projectDir := strings.TrimSuffix(plan.Layout.FullPath, string(os.PathSeparator)+filepath.FromSlash(plan.Layout.Ref.Path))
+	if err := EnsureAuthoringArtifactMetadata(projectDir, plan.Layout.Ref); err != nil {
+		return err
 	}
 
 	err := os.MkdirAll(plan.Layout.Dir, 0o755)

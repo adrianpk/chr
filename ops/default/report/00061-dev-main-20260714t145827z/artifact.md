@@ -1,0 +1,940 @@
+# Dev to Main Gate Report
+
+## Summary
+
+- status: passed
+- created_at: 2026-07-14T14:58:27Z
+
+## Git Evidence
+
+- base: origin/main b5e6ae7a678ecfb0c58784bec519b7ad999b8af2
+- head: origin/dev ffef6083f9b23356c7b0ada4330c09703a4640cd
+- merge_base: b5e6ae7a678ecfb0c58784bec519b7ad999b8af2
+- diff_stat: 431 files changed, 2344 insertions(+), 2148 deletions(-)
+- commits: 4
+- changed_files: 431
+
+### Commits
+
+- `ffef6083f9b23356c7b0ada4330c09703a4640cd` fix(lint): clear pre-release gate blockers
+- `c6e35ddd0d64113af72e2b2d24a395c5f9e42702` fix(lint): clear pre-release gate blockers
+- `2ab51a301378212849918457a44d22f976021a37` refactor(paths): retire legacy chr user workspace
+- `e1abf82be376d0496c06a342004bc2319f34af0e` refactor(paths): retire legacy chr user workspace
+
+### Changed Files
+
+- M .agents/ARCHITECTURE.md
+- R100 .chr/user/agents/ARCHITECTURE.md -> .chr/default/agents/ARCHITECTURE.md
+- R100 .chr/user/agents/CONVENTIONS.md -> .chr/default/agents/CONVENTIONS.md
+- R100 .chr/user/agents/DOCUMENTING.md -> .chr/default/agents/DOCUMENTING.md
+- R100 .chr/user/agents/INVARIANTS.md -> .chr/default/agents/INVARIANTS.md
+- R100 .chr/user/agents/LIFECYCLE.md -> .chr/default/agents/LIFECYCLE.md
+- R100 .chr/user/agents/LINTING.md -> .chr/default/agents/LINTING.md
+- R083 .chr/user/agents/PLAYBOOKS.md -> .chr/default/agents/PLAYBOOKS.md
+- R100 .chr/user/agents/ROUTING.md -> .chr/default/agents/ROUTING.md
+- R100 .chr/user/agents/SLICES.md -> .chr/default/agents/SLICES.md
+- R100 .chr/user/agents/VERSIONING.md -> .chr/default/agents/VERSIONING.md
+- R100 .chr/user/agents/playbooks/dump.md -> .chr/default/agents/playbooks/dump.md
+- R100 .chr/user/agents/playbooks/planned-delivery-workflow.md -> .chr/default/agents/playbooks/planned-delivery-workflow.md
+- R100 .chr/user/agents/playbooks/quiz.md -> .chr/default/agents/playbooks/quiz.md
+- R100 .chr/user/agents/playbooks/release-alignment.md -> .chr/default/agents/playbooks/release-alignment.md
+- R100 .chr/user/agents/playbooks/slice-delivery.md -> .chr/default/agents/playbooks/slice-delivery.md
+- R100 .chr/user/agents/playbooks/specification-workflow.md -> .chr/default/agents/playbooks/specification-workflow.md
+- R100 .chr/user/agents/playbooks/ticket-workflow.md -> .chr/default/agents/playbooks/ticket-workflow.md
+- R100 .chr/user/agents/playbooks/version-control-workflow.md -> .chr/default/agents/playbooks/version-control-workflow.md
+- R100 .chr/user/cases/context-capture.md -> .chr/default/cases/context-capture.md
+- R095 .chr/user/cases/dev-main-gate.md -> .chr/default/cases/dev-main-gate.md
+- R100 .chr/user/cases/qa-scenarios.md -> .chr/default/cases/qa-scenarios.md
+- R100 .chr/user/cases/spec-to-tickets.md -> .chr/default/cases/spec-to-tickets.md
+- R100 .chr/user/cases/ticket-execution-loop.md -> .chr/default/cases/ticket-execution-loop.md
+- R100 .chr/user/cases/tui-operations.md -> .chr/default/cases/tui-operations.md
+- R100 .chr/user/config.yml -> .chr/default/config.yml
+- R100 .chr/user/config/gates.yml -> .chr/default/config/gates.yml
+- R085 .chr/user/docs/adoption-baseline.md -> .chr/default/docs/adoption-baseline.md
+- R069 .chr/user/docs/legacy-material-map.md -> .chr/default/docs/legacy-material-map.md
+- R098 .chr/user/dumps/curated/2026-06-02-merger-agent-role.md -> .chr/default/dumps/curated/2026-06-02-merger-agent-role.md
+- R097 .chr/user/dumps/curated/dev-main-gate-context.md -> .chr/default/dumps/curated/dev-main-gate-context.md
+- R100 .chr/user/dumps/curated/document-generation-context.md -> .chr/default/dumps/curated/document-generation-context.md
+- R087 .chr/user/dumps/curated/project-context.md -> .chr/default/dumps/curated/project-context.md
+- R100 .chr/user/dumps/curated/runtime-execution-context.md -> .chr/default/dumps/curated/runtime-execution-context.md
+- R100 .chr/user/dumps/raw/2026-06-02-merger-agent-role-raw.md -> .chr/default/dumps/raw/2026-06-02-merger-agent-role-raw.md
+- R100 .chr/user/manifest.md -> .chr/default/manifest.md
+- R100 .chr/user/plans/dev-main-gate-plan.md -> .chr/default/plans/dev-main-gate-plan.md
+- R090 .chr/user/plans/merger-agent-workflow-plan.md -> .chr/default/plans/merger-agent-workflow-plan.md
+- R092 .chr/user/plans/ticket-review-integration-plan.md -> .chr/default/plans/ticket-review-integration-plan.md
+- R085 .chr/user/project.md -> .chr/default/project.md
+- R095 .chr/user/quizzes/curated/ticket-review-integration-quiz.md -> .chr/default/quizzes/curated/ticket-review-integration-quiz.md
+- R098 .chr/user/quizzes/raw/ticket-review-integration-quiz-raw.md -> .chr/default/quizzes/raw/ticket-review-integration-quiz-raw.md
+- R100 .chr/user/runtime/agent/Dockerfile -> .chr/default/runtime/agent/Dockerfile
+- R092 .chr/user/specs/dev-main-gate-spec.md -> .chr/default/specs/dev-main-gate-spec.md
+- R100 .chr/user/specs/merger-agent-workflow.md -> .chr/default/specs/merger-agent-workflow.md
+- R100 .chr/user/specs/ticket-review-integration-draft.md -> .chr/default/specs/ticket-review-integration-draft.md
+- R100 .chr/user/trackers/merger-agent-workflow-tracker.md -> .chr/default/trackers/merger-agent-workflow-tracker.md
+- R100 .chr/user/trackers/ticket-review-integration-tracker.md -> .chr/default/trackers/ticket-review-integration-tracker.md
+- M .gitignore
+- M .prj/fixtures/mvp-agent-proving-ground/todolist/.chr/config.yml
+- R100 .prj/fixtures/mvp-agent-proving-ground/todolist/.chr/runtime/agent/Dockerfile -> .prj/fixtures/mvp-agent-proving-ground/todolist/.chr/default/runtime/agent/Dockerfile
+- M .prj/fixtures/mvp-agent-proving-ground/todolist/README.md
+- M .prj/plans/slicing-board-ticket-operations-plan.md
+- M .prj/plans/slicing-codex-artifact-generation-plan.md
+- M .prj/plans/slicing-llm-file-tracing-plan.md
+- M .prj/plans/slicing-merger-agent-workflow-plan.md
+- M .prj/plans/slicing-qa-agent-work-scenario-plan.md
+- M .prj/plans/slicing-ticket-review-integration-plan.md
+- M .prj/quizzes/curated/dashboard-board-ticket-operations-quiz.md
+- M .prj/quizzes/curated/ticket-review-integration-quiz.md
+- M .prj/quizzes/raw/dashboard-board-ticket-operations-quiz-raw.md
+- M .prj/quizzes/raw/ticket-review-integration-quiz-raw.md
+- M .prj/reports/llm-trace-payloads-2026-05-27.md
+- M .prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md
+- M .prj/reports/slices/agent-test-evidence-strategy-pass/slice-5-gherkin-test-policy.md
+- M .prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md
+- M .prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md
+- M .prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md
+- M .prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md
+- M .prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md
+- M .prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-investigation.md
+- M .prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md
+- M .prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md
+- M .prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md
+- M .prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md
+- M .prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md
+- M .prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md
+- M .prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md
+- M .prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chr-context-adr-docs.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md
+- M .prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md
+- M .prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md
+- M .prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md
+- M .prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md
+- M .prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md
+- M .prj/reports/slices/tictactoe-qa-reference/slice-1-tictactoe-qa-reference.md
+- M .prj/scripts/probe-codex-artifact-generation.sh
+- M .prj/specs/drafts/ticket-review-integration-draft.md
+- M .prj/specs/specs/board-ticket-operations-model.md
+- M .prj/specs/specs/board-ticket-operations.md
+- M .prj/specs/specs/merger-agent-workflow.md
+- M .prj/specs/specs/qa-agent-work-scenario.md
+- M .prj/trackers/slicing-board-ticket-operations-tracker.md
+- M .prj/trackers/slicing-merger-agent-workflow-tracker.md
+- M .prj/trackers/slicing-qa-agent-work-scenario-tracker.md
+- M .prj/trackers/slicing-ticket-review-integration-tracker.md
+- M CHANGELOG.md
+- M cmd/chr/assets/workspace/profiles/standard/agents/PLAYBOOKS.md
+- M cmd/chr/assets/workspace/profiles/standard/root/AGENTS.md
+- M docs/explanation/architecture.md
+- M docs/explanation/dev-main-gate-direction.md
+- M docs/explanation/dev-main-gate-model.md
+- M docs/explanation/dev-main-tooling-gate-spec-draft.md
+- M docs/explanation/old-gallery.md
+- M docs/explanation/tui-interactive-design-notes.md
+- M docs/how-to/adopt-dev-main-gate-in-existing-project.md
+- M docs/how-to/full-system-lab-runbook.md
+- M docs/how-to/qa-tictactoe-agent-work-scenario.md
+- M docs/how-to/use-dev-main-gate-with-woodpecker.md
+- M docs/how-to/use-forgejo-ticket-review.md
+- M docs/how-to/user-guide/index.md
+- M docs/reference/acceptance-feature-generation.md
+- M docs/reference/authoring-sessions.md
+- M docs/reference/commands.md
+- M docs/reference/dev-main-gate.md
+- M docs/reference/evidence-strategy-config.md
+- M docs/reference/index-rebuild-cli.md
+- M docs/reference/index-status-cli.md
+- M docs/reference/notification-config.md
+- M docs/reference/project-workspace.md
+- M docs/reference/review-workflow-config.md
+- M docs/reference/runtime-config.md
+- M docs/reference/ticket-execution.md
+- M docs/reference/ticket-file-discovery.md
+- M docs/reference/ticket-index-rebuild.md
+- M docs/reference/ticket-index-refresh.md
+- M docs/reference/ticket-index-status.md
+- M docs/reference/ticket-reconciliation.md
+- M docs/reference/ticket-review-workflow.md
+- M docs/reference/tui.md
+- M docs/reference/user-environment.md
+- M docs/reference/work-readiness.md
+- M docs/tutorials/getting-started.md
+- M internal/app/agent_work_events.go
+- M internal/app/cli_test.go
+- M internal/app/planning_baseline_test.go
+- M internal/app/service_acceptance_feature_test.go
+- M internal/app/service_dump_curation_test.go
+- M internal/app/service_plan_test.go
+- M internal/app/service_quiz_test.go
+- M internal/app/service_spec_test.go
+- M internal/app/service_test.go
+- M internal/app/service_work.go
+- M internal/app/service_work_test.go
+- M internal/app/ticket.go
+- M internal/app/tui_adapter_parity_test.go
+- M internal/core/acceptance_feature_test.go
+- M internal/core/agent_event_readback_test.go
+- M internal/core/agent_event_stream.go
+- M internal/core/agent_event_test.go
+- M internal/core/agent_run_test.go
+- M internal/core/agentic_review_test.go
+- M internal/core/assisted_artifact_synthesis_test.go
+- M internal/core/assisted_context_test.go
+- M internal/core/authoring_artifact_layout_test.go
+- M internal/core/authoring_contextual_quiz_test.go
+- M internal/core/authoring_session_test.go
+- M internal/core/changed_file_discovery_test.go
+- M internal/core/codex_worker_context_test.go
+- M internal/core/codex_worker_test.go
+- M internal/core/config.go
+- M internal/core/config_test.go
+- M internal/core/context_agent_protocols_test.go
+- M internal/core/context_composer_test.go
+- M internal/core/context_materializer_test.go
+- M internal/core/context_previous_attempt_test.go
+- M internal/core/context_project_documents_test.go
+- M internal/core/context_readiness_handoff_test.go
+- M internal/core/context_tree_search_test.go
+- M internal/core/diagnostic_bundle_test.go
+- M internal/core/evidence_policy.go
+- M internal/core/evidence_policy_test.go
+- M internal/core/evidence_readiness_test.go
+- M internal/core/evidence_strategy_checklist_test.go
+- M internal/core/evidence_strategy_summary_test.go
+- M internal/core/execution_artifact_drift_test.go
+- M internal/core/execution_report.go
+- M internal/core/execution_report_test.go
+- M internal/core/execution_repository_test.go
+- M internal/core/execution_runner_test.go
+- M internal/core/execution_test.go
+- M internal/core/gate_report_test.go
+- M internal/core/harness_invocation_test.go
+- M internal/core/llm_trace_test.go
+- M internal/core/ops_artifact.go
+- M internal/core/ops_artifact_test.go
+- M internal/core/ops_layout.go
+- M internal/core/ops_layout_test.go
+- M internal/core/plan_generation_test.go
+- M internal/core/project_userspace_test.go
+- M internal/core/proving.go
+- M internal/core/proving_test.go
+- M internal/core/quiz_artifact_repository_test.go
+- M internal/core/quiz_model_test.go
+- M internal/core/quiz_runtime_test.go
+- M internal/core/report_listing.go
+- M internal/core/report_listing_test.go
+- M internal/core/result_application_test.go
+- M internal/core/runtime_init_test.go
+- M internal/core/runtime_plan.go
+- M internal/core/runtime_plan_test.go
+- M internal/core/runtime_validate_test.go
+- M internal/core/spec_generation.go
+- M internal/core/spec_generation_test.go
+- M internal/core/ticket_discovery_test.go
+- M internal/core/ticket_index_rebuild_test.go
+- M internal/core/ticket_index_status_test.go
+- M internal/core/ticket_index_test.go
+- M internal/core/ticket_merge_preflight_test.go
+- M internal/core/ticket_parser_test.go
+- M internal/core/ticket_reconciliation_test.go
+- M internal/core/ticket_repository_test.go
+- M internal/core/ticket_test.go
+- M internal/core/ticket_validation_test.go
+- M internal/core/work_config.go
+- M internal/core/work_readiness_service.go
+- M internal/core/work_readiness_service_test.go
+- M internal/core/work_selection_preflight_test.go
+- M internal/core/workspace_context_test.go
+- M internal/core/workspace_graph_test.go
+- M internal/core/workspace_index_cache_test.go
+- M internal/core/workspace_index_test.go
+- M internal/core/workspace_init.go
+- M internal/core/workspace_init_test.go
+- M internal/core/worktree_plan.go
+- M internal/core/worktree_service_test.go
+- M internal/tui/documents.go
+- M internal/tui/model_test.go
+- M internal/tui/source_actions.go
+- M internal/tui/work_readiness_test.go
+- M internal/webui/webui_test.go
+- M ops/default/dump/00001-curated/artifact.md
+- M ops/default/dump/00001-curated/files/legacy/2026-06-02-merger-agent-role.md
+- M ops/default/dump/00001-curated/files/legacy/dev-main-gate-context.md
+- M ops/default/dump/00001-curated/files/legacy/project-context.md
+- M ops/default/dump/00001-curated/metadata.json
+- M ops/default/dump/00002-raw/artifact.md
+- M ops/default/dump/00002-raw/metadata.json
+- M ops/default/plan/00008-dev-main-gate-plan-md/artifact.md
+- M ops/default/plan/00008-dev-main-gate-plan-md/metadata.json
+- M ops/default/plan/00009-merger-agent-workflow-plan-md/artifact.md
+- M ops/default/plan/00009-merger-agent-workflow-plan-md/files/legacy/merger-agent-workflow-plan.md
+- M ops/default/plan/00009-merger-agent-workflow-plan-md/metadata.json
+- M ops/default/plan/00010-ticket-review-integration-plan-md/artifact.md
+- M ops/default/plan/00010-ticket-review-integration-plan-md/files/legacy/ticket-review-integration-plan.md
+- M ops/default/plan/00010-ticket-review-integration-plan-md/metadata.json
+- M ops/default/plan/00026-2026-06-01-dev-main-agent-evidence-gate-plan-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate-plan.md
+- M ops/default/plan/00028-2026-06-06-separate-acceptance-feature-workflow-plan-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow-plan.md
+- M ops/default/plan/00031-2026-06-18-tictactoe-qa-reference-plan-md/files/legacy/2026-06-18-tictactoe-qa-reference-plan.md
+- M ops/default/plan/00032-2026-06-19-agent-test-evidence-strategy-pass-plan-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass-plan.md
+- M ops/default/quiz/00003-curated/artifact.md
+- M ops/default/quiz/00003-curated/files/legacy/ticket-review-integration-quiz.md
+- M ops/default/quiz/00003-curated/metadata.json
+- M ops/default/quiz/00004-raw/artifact.md
+- M ops/default/quiz/00004-raw/files/legacy/ticket-review-integration-quiz-raw.md
+- M ops/default/quiz/00004-raw/metadata.json
+- M ops/default/report/00036-ops-layout-migration/files/manifest.json
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/cases/cli-gameplay.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/cases/cli-gameplay.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/config.yml -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/config.yml
+- R095 qa/ref/003/tictactoe/.chr/user/dumps/cli-gameplay-context-raw.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context-raw.md
+- R095 qa/ref/003/tictactoe/.chr/user/dumps/cli-gameplay-context.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context.md
+- R094 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/project-context-raw.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context-raw.md
+- R094 qa/ref/003/tictactoe/.chr/user/dumps/project-context.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/manifest.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/manifest.md
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/plans/archive/cli-gameplay-plan-20260618-084729438415104.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/plans/cli-gameplay-plan.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-plan.md
+- R082 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/plans/cli-gameplay-tracking.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-tracking.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/project.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/project.md
+- R096 qa/ref/003/tictactoe/.chr/user/quizzes/cli-gameplay-quiz-raw.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz-raw.md
+- R091 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/quizzes/cli-gameplay-quiz.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/agent/Dockerfile -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/agent/Dockerfile
+- R074 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/plan-generation.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/plan-generation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/context.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/context.md
+- R069 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/context.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/context.md
+- R070 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/execution-report.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/result.json -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result.json
+- R087 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/runtime.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/validation.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/validation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/context.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/context.md
+- R070 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/execution-report.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+- R083 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/runtime.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/validation.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/validation.log
+- R054 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/context.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/context.md
+- R071 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/execution-report.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/result.json -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result.json
+- R096 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/runtime.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/validation.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/validation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/context.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/context.md
+- R070 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json
+- R095 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/specs/project-spec.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/specs/project-spec.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/.gitkeep -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/.gitkeep
+- R085 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md
+- R087 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-2-Move-state-transitions.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-2-Move-state-transitions.md
+- R087 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md
+- R088 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-4-Interactive-gameplay-loop.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-4-Interactive-gameplay-loop.md
+- R088 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md -> ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md
+- M ops/default/report/00037-tictactoe-agent-work-success/metadata.json
+- M ops/default/spec/00005-dev-main-gate-spec-md/artifact.md
+- M ops/default/spec/00005-dev-main-gate-spec-md/files/legacy/dev-main-gate-spec.md
+- M ops/default/spec/00005-dev-main-gate-spec-md/metadata.json
+- M ops/default/spec/00006-merger-agent-workflow-md/artifact.md
+- M ops/default/spec/00006-merger-agent-workflow-md/metadata.json
+- M ops/default/spec/00007-ticket-review-integration-draft-md/artifact.md
+- M ops/default/spec/00007-ticket-review-integration-draft-md/metadata.json
+- M ops/default/spec/00011-2026-06-01-dev-main-agent-evidence-gate-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md
+- M ops/default/spec/00012-2026-06-06-gherkin-acceptance-generation-md/files/legacy/2026-06-06-gherkin-acceptance-generation.md
+- M ops/default/spec/00013-2026-06-06-separate-acceptance-feature-workflow-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow.md
+- M ops/default/spec/00014-2026-06-18-agent-work-observability-model-md/files/legacy/2026-06-18-agent-work-observability-model.md
+- M ops/default/spec/00018-2026-06-18-configurable-work-readiness-md/files/legacy/2026-06-18-configurable-work-readiness.md
+- M ops/default/spec/00019-2026-06-19-agent-test-evidence-strategy-pass-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass.md
+- M ops/default/spec/00020-2026-06-19-isolated-ticket-worktrees-md/files/legacy/2026-06-19-isolated-ticket-worktrees.md
+- M ops/default/spec/00021-2026-06-20-serialized-integration-loop-model-md/files/legacy/2026-06-20-serialized-integration-loop-model.md
+- M ops/default/spec/00022-2026-06-20-serialized-integration-loop-md/files/legacy/2026-06-20-serialized-integration-loop.md
+- M ops/default/spec/00023-2026-06-29-execution-unit-runtime-refinements-md/files/legacy/2026-06-29-execution-unit-runtime-refinements.md
+- M ops/default/spec/00024-2026-06-29-optional-local-web-ui-md/files/legacy/2026-06-29-optional-local-web-ui.md
+- M ops/default/spec/00025-drafts/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md
+- M ops/default/spec/00025-drafts/files/legacy/2026-06-06-gherkin-acceptance-generation.md
+- M ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md
+- M ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md
+- M ops/plans/2026-06-18-tictactoe-qa-reference-plan.md
+- M ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md
+- M ops/specs/2026-06-01-dev-main-agent-evidence-gate.md
+- M ops/specs/2026-06-06-gherkin-acceptance-generation.md
+- M ops/specs/2026-06-06-separate-acceptance-feature-workflow.md
+- M ops/specs/2026-06-18-agent-work-observability-model.md
+- M ops/specs/2026-06-18-configurable-work-readiness.md
+- M ops/specs/2026-06-19-agent-test-evidence-strategy-pass.md
+- M ops/specs/2026-06-19-isolated-ticket-worktrees.md
+- M ops/specs/2026-06-20-serialized-integration-loop-model.md
+- M ops/specs/2026-06-20-serialized-integration-loop.md
+- M ops/specs/2026-06-29-execution-unit-runtime-refinements.md
+- M ops/specs/2026-06-29-optional-local-web-ui.md
+- M ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md
+- M ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md
+- M ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md
+- M ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md
+- M ops/trackers/2026-06-20-serialized-integration-loop-tracker.md
+- R100 qa/ref/001/blog/.chr/user/cases/comments.md -> qa/ref/001/blog/.chr/default/cases/comments.md
+- R100 qa/ref/001/blog/.chr/user/config.yml -> qa/ref/001/blog/.chr/default/config.yml
+- R100 qa/ref/001/blog/.chr/user/dumps/comments-context.md -> qa/ref/001/blog/.chr/default/dumps/comments-context.md
+- R100 qa/ref/001/blog/.chr/user/manifest.md -> qa/ref/001/blog/.chr/default/manifest.md
+- R100 qa/ref/001/blog/.chr/user/project.md -> qa/ref/001/blog/.chr/default/project.md
+- R094 qa/ref/001/blog/.chr/user/quizzes/comments-quiz-raw.md -> qa/ref/001/blog/.chr/default/quizzes/comments-quiz-raw.md
+- R091 qa/ref/001/blog/.chr/user/quizzes/comments-quiz.md -> qa/ref/001/blog/.chr/default/quizzes/comments-quiz.md
+- R100 qa/ref/001/blog/.chr/user/tickets/CHR-1-fix-unknown-post-status.md -> qa/ref/001/blog/.chr/default/tickets/CHR-1-fix-unknown-post-status.md
+- R100 qa/ref/002/dialer/.chr/user/cases/call-outcome-capture.md -> qa/ref/002/dialer/.chr/default/cases/call-outcome-capture.md
+- R100 qa/ref/002/dialer/.chr/user/cases/conversion.md -> qa/ref/002/dialer/.chr/default/cases/conversion.md
+- R100 qa/ref/002/dialer/.chr/user/cases/followups.md -> qa/ref/002/dialer/.chr/default/cases/followups.md
+- R100 qa/ref/002/dialer/.chr/user/cases/lead-queue.md -> qa/ref/002/dialer/.chr/default/cases/lead-queue.md
+- R100 qa/ref/002/dialer/.chr/user/config.yml -> qa/ref/002/dialer/.chr/default/config.yml
+- R100 qa/ref/002/dialer/.chr/user/dumps/call-outcome-capture-context.md -> qa/ref/002/dialer/.chr/default/dumps/call-outcome-capture-context.md
+- R100 qa/ref/002/dialer/.chr/user/dumps/conversion-context.md -> qa/ref/002/dialer/.chr/default/dumps/conversion-context.md
+- R100 qa/ref/002/dialer/.chr/user/dumps/followups-context.md -> qa/ref/002/dialer/.chr/default/dumps/followups-context.md
+- R100 qa/ref/002/dialer/.chr/user/dumps/lead-queue-context.md -> qa/ref/002/dialer/.chr/default/dumps/lead-queue-context.md
+- R100 qa/ref/002/dialer/.chr/user/dumps/project-context.md -> qa/ref/002/dialer/.chr/default/dumps/project-context.md
+- R100 qa/ref/002/dialer/.chr/user/manifest.md -> qa/ref/002/dialer/.chr/default/manifest.md
+- R100 qa/ref/002/dialer/.chr/user/plans/conversion-plan.md -> qa/ref/002/dialer/.chr/default/plans/conversion-plan.md
+- R090 qa/ref/002/dialer/.chr/user/plans/conversion-tracking.md -> qa/ref/002/dialer/.chr/default/plans/conversion-tracking.md
+- R100 qa/ref/002/dialer/.chr/user/plans/followups-plan.md -> qa/ref/002/dialer/.chr/default/plans/followups-plan.md
+- R091 qa/ref/002/dialer/.chr/user/plans/followups-tracking.md -> qa/ref/002/dialer/.chr/default/plans/followups-tracking.md
+- R100 qa/ref/002/dialer/.chr/user/plans/lead-queue-plan.md -> qa/ref/002/dialer/.chr/default/plans/lead-queue-plan.md
+- R090 qa/ref/002/dialer/.chr/user/plans/lead-queue-tracking.md -> qa/ref/002/dialer/.chr/default/plans/lead-queue-tracking.md
+- R100 qa/ref/002/dialer/.chr/user/project.md -> qa/ref/002/dialer/.chr/default/project.md
+- R084 qa/ref/002/dialer/.chr/user/quizzes/conversion-quiz-raw.md -> qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz-raw.md
+- R090 qa/ref/002/dialer/.chr/user/quizzes/conversion-quiz.md -> qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz.md
+- R082 qa/ref/002/dialer/.chr/user/quizzes/followups-quiz-raw.md -> qa/ref/002/dialer/.chr/default/quizzes/followups-quiz-raw.md
+- R088 qa/ref/002/dialer/.chr/user/quizzes/followups-quiz.md -> qa/ref/002/dialer/.chr/default/quizzes/followups-quiz.md
+- R085 qa/ref/002/dialer/.chr/user/quizzes/lead-queue-quiz-raw.md -> qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz-raw.md
+- R090 qa/ref/002/dialer/.chr/user/quizzes/lead-queue-quiz.md -> qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz.md
+- R100 qa/ref/002/dialer/.chr/user/specs/conversion-spec.md -> qa/ref/002/dialer/.chr/default/specs/conversion-spec.md
+- R100 qa/ref/002/dialer/.chr/user/specs/followups-spec.md -> qa/ref/002/dialer/.chr/default/specs/followups-spec.md
+- R100 qa/ref/002/dialer/.chr/user/specs/lead-queue-spec.md -> qa/ref/002/dialer/.chr/default/specs/lead-queue-spec.md
+- R094 qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-104-add-prospect-domain.md -> qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-104-add-prospect-domain.md
+- R093 qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-105-conversion-endpoint.md -> qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-105-conversion-endpoint.md
+- R092 qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-106-conversion-funnel-metrics.md -> qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-106-conversion-funnel-metrics.md
+- R093 qa/ref/002/dialer/.chr/user/tickets/conversion/CHR-107-reject-invalid-conversions.md -> qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-107-reject-invalid-conversions.md
+- R094 qa/ref/002/dialer/.chr/user/tickets/followups/CHR-108-follow-up-domain.md -> qa/ref/002/dialer/.chr/default/tickets/followups/CHR-108-follow-up-domain.md
+- R095 qa/ref/002/dialer/.chr/user/tickets/followups/CHR-109-queue-time-source-decision.md -> qa/ref/002/dialer/.chr/default/tickets/followups/CHR-109-queue-time-source-decision.md
+- R093 qa/ref/002/dialer/.chr/user/tickets/followups/CHR-110-due-followups-return-to-queue.md -> qa/ref/002/dialer/.chr/default/tickets/followups/CHR-110-due-followups-return-to-queue.md
+- R094 qa/ref/002/dialer/.chr/user/tickets/followups/CHR-111-gallery-sample-data.md -> qa/ref/002/dialer/.chr/default/tickets/followups/CHR-111-gallery-sample-data.md
+- R093 qa/ref/002/dialer/.chr/user/tickets/followups/CHR-112-calendar-export-spike.md -> qa/ref/002/dialer/.chr/default/tickets/followups/CHR-112-calendar-export-spike.md
+- R095 qa/ref/002/dialer/.chr/user/tickets/queue/CHR-101-filter-do-not-call-leads.md -> qa/ref/002/dialer/.chr/default/tickets/queue/CHR-101-filter-do-not-call-leads.md
+- R094 qa/ref/002/dialer/.chr/user/tickets/queue/CHR-102-add-callback-visibility-tests.md -> qa/ref/002/dialer/.chr/default/tickets/queue/CHR-102-add-callback-visibility-tests.md
+- R093 qa/ref/002/dialer/.chr/user/tickets/queue/CHR-103-queue-summary-metadata.md -> qa/ref/002/dialer/.chr/default/tickets/queue/CHR-103-queue-summary-metadata.md
+- R100 qa/ref/003/tictactoe/.chr/user/acceptance/cli-gameplay.feature -> qa/ref/003/tictactoe/.chr/default/acceptance/cli-gameplay.feature
+- R100 qa/ref/003/tictactoe/.chr/user/cases/cli-gameplay.md -> qa/ref/003/tictactoe/.chr/default/cases/cli-gameplay.md
+- R100 qa/ref/003/tictactoe/.chr/user/config.yml -> qa/ref/003/tictactoe/.chr/default/config.yml
+- R095 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/cli-gameplay-context-raw.md -> qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context-raw.md
+- R095 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/cli-gameplay-context.md -> qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context.md
+- R094 qa/ref/003/tictactoe/.chr/user/dumps/project-context-raw.md -> qa/ref/003/tictactoe/.chr/default/dumps/project-context-raw.md
+- R094 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/dumps/project-context.md -> qa/ref/003/tictactoe/.chr/default/dumps/project-context.md
+- R087 qa/ref/003/tictactoe/.chr/user/evidence-examples/behavior-gherkin.md -> qa/ref/003/tictactoe/.chr/default/evidence-examples/behavior-gherkin.md
+- R087 qa/ref/003/tictactoe/.chr/user/evidence-examples/blocked-validation.md -> qa/ref/003/tictactoe/.chr/default/evidence-examples/blocked-validation.md
+- R100 qa/ref/003/tictactoe/.chr/user/evidence-examples/docs-no-tests.md -> qa/ref/003/tictactoe/.chr/default/evidence-examples/docs-no-tests.md
+- R095 qa/ref/003/tictactoe/.chr/user/fixtures/serialized-loop-tickets/CHR-1-board-model.md -> qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-1-board-model.md
+- R095 qa/ref/003/tictactoe/.chr/user/fixtures/serialized-loop-tickets/CHR-2-cli-game-loop.md -> qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-2-cli-game-loop.md
+- R075 qa/ref/003/tictactoe/.chr/user/fixtures/serialized-loop-tickets/README.md -> qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/README.md
+- R100 qa/ref/003/tictactoe/.chr/user/manifest.md -> qa/ref/003/tictactoe/.chr/default/manifest.md
+- R100 qa/ref/003/tictactoe/.chr/user/project.md -> qa/ref/003/tictactoe/.chr/default/project.md
+- R096 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/quizzes/cli-gameplay-quiz-raw.md -> qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz-raw.md
+- R091 qa/ref/003/tictactoe/.chr/user/quizzes/cli-gameplay-quiz.md -> qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz.md
+- R100 qa/ref/003/tictactoe/.chr/user/tickets/.gitkeep -> qa/ref/003/tictactoe/.chr/default/tickets/.gitkeep
+- M qa/ref/003/tictactoe/README.md
+- M scripts/qa/gate.sh
+- M scripts/qa/smoke.sh
+
+## Agent-Managed Work
+
+- none
+
+## Manual or External Changes
+
+- M .agents/ARCHITECTURE.md
+- R100 .chr/default/agents/ARCHITECTURE.md
+- R100 .chr/default/agents/CONVENTIONS.md
+- R100 .chr/default/agents/DOCUMENTING.md
+- R100 .chr/default/agents/INVARIANTS.md
+- R100 .chr/default/agents/LIFECYCLE.md
+- R100 .chr/default/agents/LINTING.md
+- R083 .chr/default/agents/PLAYBOOKS.md
+- R100 .chr/default/agents/ROUTING.md
+- R100 .chr/default/agents/SLICES.md
+- R100 .chr/default/agents/VERSIONING.md
+- R100 .chr/default/agents/playbooks/dump.md
+- R100 .chr/default/agents/playbooks/planned-delivery-workflow.md
+- R100 .chr/default/agents/playbooks/quiz.md
+- R100 .chr/default/agents/playbooks/release-alignment.md
+- R100 .chr/default/agents/playbooks/slice-delivery.md
+- R100 .chr/default/agents/playbooks/specification-workflow.md
+- R100 .chr/default/agents/playbooks/ticket-workflow.md
+- R100 .chr/default/agents/playbooks/version-control-workflow.md
+- R100 .chr/default/cases/context-capture.md
+- R095 .chr/default/cases/dev-main-gate.md
+- R100 .chr/default/cases/qa-scenarios.md
+- R100 .chr/default/cases/spec-to-tickets.md
+- R100 .chr/default/cases/ticket-execution-loop.md
+- R100 .chr/default/cases/tui-operations.md
+- R100 .chr/default/config.yml
+- R100 .chr/default/config/gates.yml
+- R085 .chr/default/docs/adoption-baseline.md
+- R069 .chr/default/docs/legacy-material-map.md
+- R098 .chr/default/dumps/curated/2026-06-02-merger-agent-role.md
+- R097 .chr/default/dumps/curated/dev-main-gate-context.md
+- R100 .chr/default/dumps/curated/document-generation-context.md
+- R087 .chr/default/dumps/curated/project-context.md
+- R100 .chr/default/dumps/curated/runtime-execution-context.md
+- R100 .chr/default/dumps/raw/2026-06-02-merger-agent-role-raw.md
+- R100 .chr/default/manifest.md
+- R100 .chr/default/plans/dev-main-gate-plan.md
+- R090 .chr/default/plans/merger-agent-workflow-plan.md
+- R092 .chr/default/plans/ticket-review-integration-plan.md
+- R085 .chr/default/project.md
+- R095 .chr/default/quizzes/curated/ticket-review-integration-quiz.md
+- R098 .chr/default/quizzes/raw/ticket-review-integration-quiz-raw.md
+- R100 .chr/default/runtime/agent/Dockerfile
+- R092 .chr/default/specs/dev-main-gate-spec.md
+- R100 .chr/default/specs/merger-agent-workflow.md
+- R100 .chr/default/specs/ticket-review-integration-draft.md
+- R100 .chr/default/trackers/merger-agent-workflow-tracker.md
+- R100 .chr/default/trackers/ticket-review-integration-tracker.md
+- M .gitignore
+- M .prj/fixtures/mvp-agent-proving-ground/todolist/.chr/config.yml
+- R100 .prj/fixtures/mvp-agent-proving-ground/todolist/.chr/default/runtime/agent/Dockerfile
+- M .prj/fixtures/mvp-agent-proving-ground/todolist/README.md
+- M .prj/plans/slicing-board-ticket-operations-plan.md
+- M .prj/plans/slicing-codex-artifact-generation-plan.md
+- M .prj/plans/slicing-llm-file-tracing-plan.md
+- M .prj/plans/slicing-merger-agent-workflow-plan.md
+- M .prj/plans/slicing-qa-agent-work-scenario-plan.md
+- M .prj/plans/slicing-ticket-review-integration-plan.md
+- M .prj/quizzes/curated/dashboard-board-ticket-operations-quiz.md
+- M .prj/quizzes/curated/ticket-review-integration-quiz.md
+- M .prj/quizzes/raw/dashboard-board-ticket-operations-quiz-raw.md
+- M .prj/quizzes/raw/ticket-review-integration-quiz-raw.md
+- M .prj/reports/llm-trace-payloads-2026-05-27.md
+- M .prj/reports/slices/agent-test-evidence-strategy-pass/slice-1-evidence-strategy-config.md
+- M .prj/reports/slices/agent-test-evidence-strategy-pass/slice-5-gherkin-test-policy.md
+- M .prj/reports/slices/agent-test-evidence-strategy-pass/slice-6-evidence-visibility-docs.md
+- M .prj/reports/slices/agent-work-observability/slice-2-work-lifecycle-events.md
+- M .prj/reports/slices/board-ticket-operations/slice-12-board-docs-validation.md
+- M .prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md
+- M .prj/reports/slices/codex-artifact-generation/slice-1-plan-tracking-codex-backend.md
+- M .prj/reports/slices/codex-artifact-generation/slice-4-artifact-run-bundle-audit.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-1-gate-command-git-evidence.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-2-validation-report-output.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-4-gate-policy-configuration.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-integration.md
+- M .prj/reports/slices/dev-main-agent-evidence-gate/slice-5-forgejo-woodpecker-investigation.md
+- M .prj/reports/slices/gherkin-acceptance-generation/slice-3-feature-artifact-checks.md
+- M .prj/reports/slices/gherkin-acceptance-generation/slice-4-spec-feature-generation.md
+- M .prj/reports/slices/gherkin-acceptance-generation/slice-5-acceptance-workflow-docs.md
+- M .prj/reports/slices/isolated-ticket-worktrees/slice-1-workspace-execution-config.md
+- M .prj/reports/slices/llm-file-tracing/slice-1-llm-trace-sink.md
+- M .prj/reports/slices/llm-file-tracing/slice-2-quiz-model-trace-integration.md
+- M .prj/reports/slices/mvp-agent-proving-ground/slice-1-proving-ground-fixture.md
+- M .prj/reports/slices/qa-agent-work-scenario/slice-3-seeded-chr-context-adr-docs.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-1-spec-feature-decoupling.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-2-acceptance-feature-service.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-4-feature-round-defaults.md
+- M .prj/reports/slices/separate-acceptance-feature-workflow/slice-6-acceptance-workflow-docs-and-fixture.md
+- M .prj/reports/slices/serialized-integration-loop/slice-3-high-level-agentic-review.md
+- M .prj/reports/slices/serialized-integration-loop/slice-6-observability-docs-and-qa.md
+- M .prj/reports/slices/ticket-review-integration/slice-3-review-mode-configuration.md
+- M .prj/reports/slices/ticket-review-integration/slice-4-forge-provider-diagnostics.md
+- M .prj/reports/slices/ticket-review-integration/slice-7-serialized-work-preflight.md
+- M .prj/reports/slices/tictactoe-qa-reference/slice-1-tictactoe-qa-reference.md
+- M .prj/scripts/probe-codex-artifact-generation.sh
+- M .prj/specs/drafts/ticket-review-integration-draft.md
+- M .prj/specs/specs/board-ticket-operations-model.md
+- M .prj/specs/specs/board-ticket-operations.md
+- M .prj/specs/specs/merger-agent-workflow.md
+- M .prj/specs/specs/qa-agent-work-scenario.md
+- M .prj/trackers/slicing-board-ticket-operations-tracker.md
+- M .prj/trackers/slicing-merger-agent-workflow-tracker.md
+- M .prj/trackers/slicing-qa-agent-work-scenario-tracker.md
+- M .prj/trackers/slicing-ticket-review-integration-tracker.md
+- M CHANGELOG.md
+- M cmd/chr/assets/workspace/profiles/standard/agents/PLAYBOOKS.md
+- M cmd/chr/assets/workspace/profiles/standard/root/AGENTS.md
+- M docs/explanation/architecture.md
+- M docs/explanation/dev-main-gate-direction.md
+- M docs/explanation/dev-main-gate-model.md
+- M docs/explanation/dev-main-tooling-gate-spec-draft.md
+- M docs/explanation/old-gallery.md
+- M docs/explanation/tui-interactive-design-notes.md
+- M docs/how-to/adopt-dev-main-gate-in-existing-project.md
+- M docs/how-to/full-system-lab-runbook.md
+- M docs/how-to/qa-tictactoe-agent-work-scenario.md
+- M docs/how-to/use-dev-main-gate-with-woodpecker.md
+- M docs/how-to/use-forgejo-ticket-review.md
+- M docs/how-to/user-guide/index.md
+- M docs/reference/acceptance-feature-generation.md
+- M docs/reference/authoring-sessions.md
+- M docs/reference/commands.md
+- M docs/reference/dev-main-gate.md
+- M docs/reference/evidence-strategy-config.md
+- M docs/reference/index-rebuild-cli.md
+- M docs/reference/index-status-cli.md
+- M docs/reference/notification-config.md
+- M docs/reference/project-workspace.md
+- M docs/reference/review-workflow-config.md
+- M docs/reference/runtime-config.md
+- M docs/reference/ticket-execution.md
+- M docs/reference/ticket-file-discovery.md
+- M docs/reference/ticket-index-rebuild.md
+- M docs/reference/ticket-index-refresh.md
+- M docs/reference/ticket-index-status.md
+- M docs/reference/ticket-reconciliation.md
+- M docs/reference/ticket-review-workflow.md
+- M docs/reference/tui.md
+- M docs/reference/user-environment.md
+- M docs/reference/work-readiness.md
+- M docs/tutorials/getting-started.md
+- M internal/app/agent_work_events.go
+- M internal/app/cli_test.go
+- M internal/app/planning_baseline_test.go
+- M internal/app/service_acceptance_feature_test.go
+- M internal/app/service_dump_curation_test.go
+- M internal/app/service_plan_test.go
+- M internal/app/service_quiz_test.go
+- M internal/app/service_spec_test.go
+- M internal/app/service_test.go
+- M internal/app/service_work.go
+- M internal/app/service_work_test.go
+- M internal/app/ticket.go
+- M internal/app/tui_adapter_parity_test.go
+- M internal/core/acceptance_feature_test.go
+- M internal/core/agent_event_readback_test.go
+- M internal/core/agent_event_stream.go
+- M internal/core/agent_event_test.go
+- M internal/core/agent_run_test.go
+- M internal/core/agentic_review_test.go
+- M internal/core/assisted_artifact_synthesis_test.go
+- M internal/core/assisted_context_test.go
+- M internal/core/authoring_artifact_layout_test.go
+- M internal/core/authoring_contextual_quiz_test.go
+- M internal/core/authoring_session_test.go
+- M internal/core/changed_file_discovery_test.go
+- M internal/core/codex_worker_context_test.go
+- M internal/core/codex_worker_test.go
+- M internal/core/config.go
+- M internal/core/config_test.go
+- M internal/core/context_agent_protocols_test.go
+- M internal/core/context_composer_test.go
+- M internal/core/context_materializer_test.go
+- M internal/core/context_previous_attempt_test.go
+- M internal/core/context_project_documents_test.go
+- M internal/core/context_readiness_handoff_test.go
+- M internal/core/context_tree_search_test.go
+- M internal/core/diagnostic_bundle_test.go
+- M internal/core/evidence_policy.go
+- M internal/core/evidence_policy_test.go
+- M internal/core/evidence_readiness_test.go
+- M internal/core/evidence_strategy_checklist_test.go
+- M internal/core/evidence_strategy_summary_test.go
+- M internal/core/execution_artifact_drift_test.go
+- M internal/core/execution_report.go
+- M internal/core/execution_report_test.go
+- M internal/core/execution_repository_test.go
+- M internal/core/execution_runner_test.go
+- M internal/core/execution_test.go
+- M internal/core/gate_report_test.go
+- M internal/core/harness_invocation_test.go
+- M internal/core/llm_trace_test.go
+- M internal/core/ops_artifact.go
+- M internal/core/ops_artifact_test.go
+- M internal/core/ops_layout.go
+- M internal/core/ops_layout_test.go
+- M internal/core/plan_generation_test.go
+- M internal/core/project_userspace_test.go
+- M internal/core/proving.go
+- M internal/core/proving_test.go
+- M internal/core/quiz_artifact_repository_test.go
+- M internal/core/quiz_model_test.go
+- M internal/core/quiz_runtime_test.go
+- M internal/core/report_listing.go
+- M internal/core/report_listing_test.go
+- M internal/core/result_application_test.go
+- M internal/core/runtime_init_test.go
+- M internal/core/runtime_plan.go
+- M internal/core/runtime_plan_test.go
+- M internal/core/runtime_validate_test.go
+- M internal/core/spec_generation.go
+- M internal/core/spec_generation_test.go
+- M internal/core/ticket_discovery_test.go
+- M internal/core/ticket_index_rebuild_test.go
+- M internal/core/ticket_index_status_test.go
+- M internal/core/ticket_index_test.go
+- M internal/core/ticket_merge_preflight_test.go
+- M internal/core/ticket_parser_test.go
+- M internal/core/ticket_reconciliation_test.go
+- M internal/core/ticket_repository_test.go
+- M internal/core/ticket_test.go
+- M internal/core/ticket_validation_test.go
+- M internal/core/work_config.go
+- M internal/core/work_readiness_service.go
+- M internal/core/work_readiness_service_test.go
+- M internal/core/work_selection_preflight_test.go
+- M internal/core/workspace_context_test.go
+- M internal/core/workspace_graph_test.go
+- M internal/core/workspace_index_cache_test.go
+- M internal/core/workspace_index_test.go
+- M internal/core/workspace_init.go
+- M internal/core/workspace_init_test.go
+- M internal/core/worktree_plan.go
+- M internal/core/worktree_service_test.go
+- M internal/tui/documents.go
+- M internal/tui/model_test.go
+- M internal/tui/source_actions.go
+- M internal/tui/work_readiness_test.go
+- M internal/webui/webui_test.go
+- M ops/default/dump/00001-curated/artifact.md
+- M ops/default/dump/00001-curated/files/legacy/2026-06-02-merger-agent-role.md
+- M ops/default/dump/00001-curated/files/legacy/dev-main-gate-context.md
+- M ops/default/dump/00001-curated/files/legacy/project-context.md
+- M ops/default/dump/00001-curated/metadata.json
+- M ops/default/dump/00002-raw/artifact.md
+- M ops/default/dump/00002-raw/metadata.json
+- M ops/default/plan/00008-dev-main-gate-plan-md/artifact.md
+- M ops/default/plan/00008-dev-main-gate-plan-md/metadata.json
+- M ops/default/plan/00009-merger-agent-workflow-plan-md/artifact.md
+- M ops/default/plan/00009-merger-agent-workflow-plan-md/files/legacy/merger-agent-workflow-plan.md
+- M ops/default/plan/00009-merger-agent-workflow-plan-md/metadata.json
+- M ops/default/plan/00010-ticket-review-integration-plan-md/artifact.md
+- M ops/default/plan/00010-ticket-review-integration-plan-md/files/legacy/ticket-review-integration-plan.md
+- M ops/default/plan/00010-ticket-review-integration-plan-md/metadata.json
+- M ops/default/plan/00026-2026-06-01-dev-main-agent-evidence-gate-plan-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate-plan.md
+- M ops/default/plan/00028-2026-06-06-separate-acceptance-feature-workflow-plan-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow-plan.md
+- M ops/default/plan/00031-2026-06-18-tictactoe-qa-reference-plan-md/files/legacy/2026-06-18-tictactoe-qa-reference-plan.md
+- M ops/default/plan/00032-2026-06-19-agent-test-evidence-strategy-pass-plan-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass-plan.md
+- M ops/default/quiz/00003-curated/artifact.md
+- M ops/default/quiz/00003-curated/files/legacy/ticket-review-integration-quiz.md
+- M ops/default/quiz/00003-curated/metadata.json
+- M ops/default/quiz/00004-raw/artifact.md
+- M ops/default/quiz/00004-raw/files/legacy/ticket-review-integration-quiz-raw.md
+- M ops/default/quiz/00004-raw/metadata.json
+- M ops/default/report/00036-ops-layout-migration/files/manifest.json
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/cases/cli-gameplay.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/config.yml
+- R095 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context-raw.md
+- R095 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/cli-gameplay-context.md
+- R094 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context-raw.md
+- R094 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/dumps/project-context.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/manifest.md
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/archive/cli-gameplay-plan-20260618-084729438415104.md
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-plan.md
+- R082 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/plans/cli-gameplay-tracking.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/project.md
+- R096 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz-raw.md
+- R091 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/quizzes/cli-gameplay-quiz.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/agent/Dockerfile
+- R074 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/plan-generation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/context.md
+- R069 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/result.json
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-1/exec-648ea4e465b090f7/validation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/context.md
+- R070 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/result.json
+- R087 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-2/exec-409755cd38adfe67/validation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/context.md
+- R070 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result.json
+- R083 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/validation.log
+- R054 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/context.md
+- R071 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/result.json
+- R096 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-4/exec-6326a1544f559788/validation.log
+- R055 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/context.md
+- R070 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/execution-report.md
+- A ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result.json
+- R095 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/runtime.log
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/validation.log
+- R098 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/specs/project-spec.md
+- R100 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/.gitkeep
+- R085 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-1-Game-outcome-rules.md
+- R087 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-2-Move-state-transitions.md
+- R087 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-3-CLI-board-rendering.md
+- R088 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-4-Interactive-gameplay-loop.md
+- R088 ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/default/tickets/cli-gameplay/CHR-5-Test-coverage-hardening.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-1/exec-648ea4e465b090f7/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-2/exec-409755cd38adfe67/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-3/exec-c4b72e7ae4e31f4d/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-4/exec-6326a1544f559788/result-application.md
+- D ops/default/report/00037-tictactoe-agent-work-success/files/legacy/tictactoe-agent-work-success/project/.chr/user/runtime/runs/CHR-5/exec-7fe25b30b4955e1e/result-application.md
+- M ops/default/report/00037-tictactoe-agent-work-success/metadata.json
+- M ops/default/spec/00005-dev-main-gate-spec-md/artifact.md
+- M ops/default/spec/00005-dev-main-gate-spec-md/files/legacy/dev-main-gate-spec.md
+- M ops/default/spec/00005-dev-main-gate-spec-md/metadata.json
+- M ops/default/spec/00006-merger-agent-workflow-md/artifact.md
+- M ops/default/spec/00006-merger-agent-workflow-md/metadata.json
+- M ops/default/spec/00007-ticket-review-integration-draft-md/artifact.md
+- M ops/default/spec/00007-ticket-review-integration-draft-md/metadata.json
+- M ops/default/spec/00011-2026-06-01-dev-main-agent-evidence-gate-md/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md
+- M ops/default/spec/00012-2026-06-06-gherkin-acceptance-generation-md/files/legacy/2026-06-06-gherkin-acceptance-generation.md
+- M ops/default/spec/00013-2026-06-06-separate-acceptance-feature-workflow-md/files/legacy/2026-06-06-separate-acceptance-feature-workflow.md
+- M ops/default/spec/00014-2026-06-18-agent-work-observability-model-md/files/legacy/2026-06-18-agent-work-observability-model.md
+- M ops/default/spec/00018-2026-06-18-configurable-work-readiness-md/files/legacy/2026-06-18-configurable-work-readiness.md
+- M ops/default/spec/00019-2026-06-19-agent-test-evidence-strategy-pass-md/files/legacy/2026-06-19-agent-test-evidence-strategy-pass.md
+- M ops/default/spec/00020-2026-06-19-isolated-ticket-worktrees-md/files/legacy/2026-06-19-isolated-ticket-worktrees.md
+- M ops/default/spec/00021-2026-06-20-serialized-integration-loop-model-md/files/legacy/2026-06-20-serialized-integration-loop-model.md
+- M ops/default/spec/00022-2026-06-20-serialized-integration-loop-md/files/legacy/2026-06-20-serialized-integration-loop.md
+- M ops/default/spec/00023-2026-06-29-execution-unit-runtime-refinements-md/files/legacy/2026-06-29-execution-unit-runtime-refinements.md
+- M ops/default/spec/00024-2026-06-29-optional-local-web-ui-md/files/legacy/2026-06-29-optional-local-web-ui.md
+- M ops/default/spec/00025-drafts/files/legacy/2026-06-01-dev-main-agent-evidence-gate.md
+- M ops/default/spec/00025-drafts/files/legacy/2026-06-06-gherkin-acceptance-generation.md
+- M ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md
+- M ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md
+- M ops/plans/2026-06-18-tictactoe-qa-reference-plan.md
+- M ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md
+- M ops/specs/2026-06-01-dev-main-agent-evidence-gate.md
+- M ops/specs/2026-06-06-gherkin-acceptance-generation.md
+- M ops/specs/2026-06-06-separate-acceptance-feature-workflow.md
+- M ops/specs/2026-06-18-agent-work-observability-model.md
+- M ops/specs/2026-06-18-configurable-work-readiness.md
+- M ops/specs/2026-06-19-agent-test-evidence-strategy-pass.md
+- M ops/specs/2026-06-19-isolated-ticket-worktrees.md
+- M ops/specs/2026-06-20-serialized-integration-loop-model.md
+- M ops/specs/2026-06-20-serialized-integration-loop.md
+- M ops/specs/2026-06-29-execution-unit-runtime-refinements.md
+- M ops/specs/2026-06-29-optional-local-web-ui.md
+- M ops/trackers/2026-06-01-dev-main-agent-evidence-gate-tracker.md
+- M ops/trackers/2026-06-06-gherkin-acceptance-generation-tracker.md
+- M ops/trackers/2026-06-06-separate-acceptance-feature-workflow-tracker.md
+- M ops/trackers/2026-06-19-agent-test-evidence-strategy-pass-tracker.md
+- M ops/trackers/2026-06-20-serialized-integration-loop-tracker.md
+- R100 qa/ref/001/blog/.chr/default/cases/comments.md
+- R100 qa/ref/001/blog/.chr/default/config.yml
+- R100 qa/ref/001/blog/.chr/default/dumps/comments-context.md
+- R100 qa/ref/001/blog/.chr/default/manifest.md
+- R100 qa/ref/001/blog/.chr/default/project.md
+- R094 qa/ref/001/blog/.chr/default/quizzes/comments-quiz-raw.md
+- R091 qa/ref/001/blog/.chr/default/quizzes/comments-quiz.md
+- R100 qa/ref/001/blog/.chr/default/tickets/CHR-1-fix-unknown-post-status.md
+- R100 qa/ref/002/dialer/.chr/default/cases/call-outcome-capture.md
+- R100 qa/ref/002/dialer/.chr/default/cases/conversion.md
+- R100 qa/ref/002/dialer/.chr/default/cases/followups.md
+- R100 qa/ref/002/dialer/.chr/default/cases/lead-queue.md
+- R100 qa/ref/002/dialer/.chr/default/config.yml
+- R100 qa/ref/002/dialer/.chr/default/dumps/call-outcome-capture-context.md
+- R100 qa/ref/002/dialer/.chr/default/dumps/conversion-context.md
+- R100 qa/ref/002/dialer/.chr/default/dumps/followups-context.md
+- R100 qa/ref/002/dialer/.chr/default/dumps/lead-queue-context.md
+- R100 qa/ref/002/dialer/.chr/default/dumps/project-context.md
+- R100 qa/ref/002/dialer/.chr/default/manifest.md
+- R100 qa/ref/002/dialer/.chr/default/plans/conversion-plan.md
+- R090 qa/ref/002/dialer/.chr/default/plans/conversion-tracking.md
+- R100 qa/ref/002/dialer/.chr/default/plans/followups-plan.md
+- R091 qa/ref/002/dialer/.chr/default/plans/followups-tracking.md
+- R100 qa/ref/002/dialer/.chr/default/plans/lead-queue-plan.md
+- R090 qa/ref/002/dialer/.chr/default/plans/lead-queue-tracking.md
+- R100 qa/ref/002/dialer/.chr/default/project.md
+- R084 qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz-raw.md
+- R090 qa/ref/002/dialer/.chr/default/quizzes/conversion-quiz.md
+- R082 qa/ref/002/dialer/.chr/default/quizzes/followups-quiz-raw.md
+- R088 qa/ref/002/dialer/.chr/default/quizzes/followups-quiz.md
+- R085 qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz-raw.md
+- R090 qa/ref/002/dialer/.chr/default/quizzes/lead-queue-quiz.md
+- R100 qa/ref/002/dialer/.chr/default/specs/conversion-spec.md
+- R100 qa/ref/002/dialer/.chr/default/specs/followups-spec.md
+- R100 qa/ref/002/dialer/.chr/default/specs/lead-queue-spec.md
+- R094 qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-104-add-prospect-domain.md
+- R093 qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-105-conversion-endpoint.md
+- R092 qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-106-conversion-funnel-metrics.md
+- R093 qa/ref/002/dialer/.chr/default/tickets/conversion/CHR-107-reject-invalid-conversions.md
+- R094 qa/ref/002/dialer/.chr/default/tickets/followups/CHR-108-follow-up-domain.md
+- R095 qa/ref/002/dialer/.chr/default/tickets/followups/CHR-109-queue-time-source-decision.md
+- R093 qa/ref/002/dialer/.chr/default/tickets/followups/CHR-110-due-followups-return-to-queue.md
+- R094 qa/ref/002/dialer/.chr/default/tickets/followups/CHR-111-gallery-sample-data.md
+- R093 qa/ref/002/dialer/.chr/default/tickets/followups/CHR-112-calendar-export-spike.md
+- R095 qa/ref/002/dialer/.chr/default/tickets/queue/CHR-101-filter-do-not-call-leads.md
+- R094 qa/ref/002/dialer/.chr/default/tickets/queue/CHR-102-add-callback-visibility-tests.md
+- R093 qa/ref/002/dialer/.chr/default/tickets/queue/CHR-103-queue-summary-metadata.md
+- R100 qa/ref/003/tictactoe/.chr/default/acceptance/cli-gameplay.feature
+- R100 qa/ref/003/tictactoe/.chr/default/cases/cli-gameplay.md
+- R100 qa/ref/003/tictactoe/.chr/default/config.yml
+- R095 qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context-raw.md
+- R095 qa/ref/003/tictactoe/.chr/default/dumps/cli-gameplay-context.md
+- R094 qa/ref/003/tictactoe/.chr/default/dumps/project-context-raw.md
+- R094 qa/ref/003/tictactoe/.chr/default/dumps/project-context.md
+- R087 qa/ref/003/tictactoe/.chr/default/evidence-examples/behavior-gherkin.md
+- R087 qa/ref/003/tictactoe/.chr/default/evidence-examples/blocked-validation.md
+- R100 qa/ref/003/tictactoe/.chr/default/evidence-examples/docs-no-tests.md
+- R095 qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-1-board-model.md
+- R095 qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/CHR-2-cli-game-loop.md
+- R075 qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/README.md
+- R100 qa/ref/003/tictactoe/.chr/default/manifest.md
+- R100 qa/ref/003/tictactoe/.chr/default/project.md
+- R096 qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz-raw.md
+- R091 qa/ref/003/tictactoe/.chr/default/quizzes/cli-gameplay-quiz.md
+- R100 qa/ref/003/tictactoe/.chr/default/tickets/.gitkeep
+- M qa/ref/003/tictactoe/README.md
+- M scripts/qa/gate.sh
+- M scripts/qa/smoke.sh
+
+## High-Risk Manual Changes
+
+- none
+
+## Missing Agent Evidence
+
+- none
+
+## Validation
+
+- command: make verify
+- passed: true
+- exit_code: 0
+
+```text
+make[1]: Entering directory '/home/adrian/Projects/chr-operational-layout'
+0 issues.
+?   	forge.adrianpk.com/chr/cmd/chr	[no test files]
+ok  	forge.adrianpk.com/chr/internal/app	22.602s
+ok  	forge.adrianpk.com/chr/internal/core	4.200s
+ok  	forge.adrianpk.com/chr/internal/tui	0.223s
+ok  	forge.adrianpk.com/chr/internal/webui	0.154s
+ok  	forge.adrianpk.com/chr/internal/webui/htmx	0.014s
+ok  	forge.adrianpk.com/chr/internal/webui/render	0.016s
+ok  	forge.adrianpk.com/chr/internal/webui/ui	0.018s
+make[1]: Leaving directory '/home/adrian/Projects/chr-operational-layout'
+```
+
+## Failures
+
+- none
+
+## Warnings
+
+- manual or external changes present
+
+## Info
+
+- none
+
+## Artifacts
+
+- json: /home/adrian/Projects/chr-operational-layout/.chr/default/reports/gates/dev-main-20260714T145827Z.json
+- markdown: /home/adrian/Projects/chr-operational-layout/.chr/default/reports/gates/dev-main-20260714T145827Z.md
+

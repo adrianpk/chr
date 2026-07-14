@@ -523,7 +523,7 @@ func TestServiceGenerateQuizDraftSpecUsesCuratedNotes(t *testing.T) {
 		`case_slug: "blog"`,
 		"# Quiz Generated Spec",
 		"Generated behavior from dump and quiz context.",
-		"- curated quiz: .chr/default/quizzes/blog-quiz.md",
+		"- curated quiz: ops/default/quiz/00000-blog-quiz/artifact.md",
 	})
 
 	draftRequest := model.model.requests[len(model.model.requests)-1]
@@ -955,8 +955,8 @@ func serviceQuizReadModelRuntimeState(updated time.Time) core.QuizRuntimeState {
 		Trail: []core.QuizTrailNode{
 			{QuestionID: "question-1", Prompt: "What should be clarified?", Topic: "clarity", Depth: 1},
 		},
-		RawPath:     ".chr/default/quizzes/blog-quiz-raw.md",
-		CuratedPath: ".chr/default/quizzes/blog-quiz.md",
+		RawPath:     "ops/default/quiz/00000-blog-quiz-raw/artifact.md",
+		CuratedPath: "ops/default/quiz/00000-blog-quiz/artifact.md",
 		UpdatedAt:   updated,
 	}
 }
@@ -1078,8 +1078,8 @@ func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) core.Q
 			Scope:          core.QuizScope{ProjectID: "service-project"},
 			Title:          "Quiz Generated Spec",
 			Body:           "Generated behavior from dump and quiz context.",
-			SourceQuizPath: ".chr/default/quizzes/project-quiz.md",
-			SourceRawPath:  ".chr/default/quizzes/project-quiz-raw.md",
+			SourceQuizPath: "ops/default/quiz/00000-project-quiz/artifact.md",
+			SourceRawPath:  "ops/default/quiz/00000-project-quiz-raw/artifact.md",
 			CreatedAt:      createdAt,
 		},
 		RawText:   "raw draft spec",

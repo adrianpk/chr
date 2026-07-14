@@ -1,7 +1,6 @@
 package app
 
 import (
-	"path/filepath"
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -43,11 +42,11 @@ func createDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor) s
 		t.Fatalf("ExecuteDumpAction create returned error: %v", err)
 	}
 
-	if createResult.Message != "Created dump .chr/default/dumps/adapter-notes.md." {
+	if createResult.Message != "Created dump ops/default/dump/00000-adapter-notes/artifact.md." {
 		t.Fatalf("create message = %q, want created dump message", createResult.Message)
 	}
 
-	return filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "dumps", "adapter-notes.md"))
+	return "ops/default/dump/00000-adapter-notes/artifact.md"
 }
 
 func editDumpThroughTUIAdapter(t *testing.T, executor tuiDumpActionExecutor, dumpPath string) {
@@ -190,7 +189,7 @@ Feature: Blog publishing
 		t.Fatalf("AcceptanceFeatureStatus = %q, want generated", result.AcceptanceFeatureStatus)
 	}
 
-	if result.AcceptanceFeaturePath != ".chr/default/acceptance/blog.feature" {
+	if result.AcceptanceFeaturePath != "ops/default/spec/00000-blog-acceptance-feature/artifact.md" {
 		t.Fatalf("AcceptanceFeaturePath = %q, want feature path", result.AcceptanceFeaturePath)
 	}
 

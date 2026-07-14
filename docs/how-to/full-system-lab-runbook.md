@@ -147,7 +147,7 @@ or authoring-session quizzes.
 ```sh
 rm -rf "$CHR_WORK_PROJECT/.chr/default/tmp/quiz-runtime"
 
-find "$CHR_WORK_PROJECT/.chr/default/quizzes" -maxdepth 1 -type f \
+find "$CHR_WORK_PROJECT/ops/default/quiz" -name artifact.md -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -159,7 +159,7 @@ Confirm the reset:
 
 ```sh
 find "$CHR_WORK_PROJECT/.chr/default/tmp/quiz-runtime" -maxdepth 1 -type f 2>/dev/null
-find "$CHR_WORK_PROJECT/.chr/default/quizzes" -maxdepth 1 -type f \
+find "$CHR_WORK_PROJECT/ops/default/quiz" -name artifact.md -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -211,7 +211,7 @@ After validation, inspect the artifacts:
 
 ```sh
 find "$CHR_WORK_PROJECT/.chr/default/tmp/quiz-runtime" -maxdepth 1 -type f -print
-find "$CHR_WORK_PROJECT/.chr/default/quizzes" -maxdepth 1 -type f -print
+find "$CHR_WORK_PROJECT/ops/default/quiz" -name artifact.md -type f -print
 ```
 
 Expected evidence:
@@ -310,7 +310,7 @@ chr author quiz new \
 
 The command sends structured project context to the quiz provider and prints the
 generated quiz path relative to the project, for example
-`.chr/default/quizzes/<quiz-file>.md`.
+`ops/default/quiz/<id>/artifact.md`.
 
 Edit the generated quiz answers in Markdown, then generate or edit the
 corresponding spec from the Specs surface. Specs that still need review should

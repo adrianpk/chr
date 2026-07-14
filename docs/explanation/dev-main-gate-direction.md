@@ -48,8 +48,8 @@ Markdown.
 A future command could produce:
 
 ```text
-.chr/default/reports/gates/YYYYMMDD-dev-main.json
-.chr/default/reports/gates/YYYYMMDD-dev-main.md
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)YYYYMMDD-dev-main.json
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)YYYYMMDD-dev-main.md
 ```
 
 The report should record:

@@ -94,7 +94,7 @@ func TestAssembleWorkspaceContextReportsMissingFileAfterGraphBuild(t *testing.T)
 		t.Fatalf("Build returned error: %v", err)
 	}
 
-	missingPath := filepath.Join(projectDir, ".chr", "default", "plans", "blog-plan.md")
+	missingPath := filepath.Join(projectDir, filepath.FromSlash("ops/default/plan/00000-blog-plan/artifact.md"))
 
 	err = os.Remove(missingPath)
 	if err != nil {
@@ -109,7 +109,7 @@ func TestAssembleWorkspaceContextReportsMissingFileAfterGraphBuild(t *testing.T)
 	var found bool
 
 	for _, source := range assembly.Sources {
-		if source.Path == ".chr/default/plans/blog-plan.md" {
+		if source.Path == "ops/default/plan/00000-blog-plan/artifact.md" {
 			found = true
 
 			if source.Included {
@@ -151,6 +151,12 @@ func TestAssembleWorkspaceContextReportsMissingSelectedCase(t *testing.T) {
 	}
 }
 
+func writeWorkspaceContextFile(t *testing.T, path, content string) {
+	t.Helper()
+
+	writeTestFile(t, canonicalWorkspaceGraphFixturePath(path), content)
+}
+
 func writeWorkspaceContextFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
@@ -189,7 +195,7 @@ func writeWorkspaceContextCaseDocumentsFixture(t *testing.T, projectDir string) 
 func writeWorkspaceContextCaseSpecAndPlanFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md"), `---
 title: Case Spec
 case: blog
 ---
@@ -198,7 +204,7 @@ case: blog
 
 Case specification body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "blog-plan.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, filepath.FromSlash("ops/default/plan/00000-blog-plan/artifact.md")), `---
 title: Case Plan
 case: blog
 ---
@@ -212,7 +218,7 @@ Case plan body.
 func writeWorkspaceContextCaseDumpFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-dump.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-dump.md"), `---
 title: Case Dump
 status: curated
 type: dump
@@ -224,7 +230,7 @@ case: blog
 
 Curated case dump body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-dump-raw.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-dump-raw.md"), `---
 title: Case Dump Raw Capture
 status: raw
 type: dump_raw
@@ -241,10 +247,10 @@ Raw case dump body.
 func writeWorkspaceContextCaseQuizFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz.md"), `---
 title: Case Quiz
 status: curated
-raw_path: .chr/default/quizzes/blog-quiz-raw.md
+raw_path: ops/default/quiz/00000-blog-quiz-raw/artifact.md
 case: blog
 ---
 
@@ -252,10 +258,10 @@ case: blog
 
 Curated case quiz body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz-raw.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz-raw.md"), `---
 title: Case Quiz Raw Capture
 status: raw
-curated_path: .chr/default/quizzes/blog-quiz.md
+curated_path: ops/default/quiz/00000-blog-quiz/artifact.md
 case: blog
 ---
 
@@ -268,7 +274,7 @@ Raw case quiz body.
 func writeWorkspaceContextCaseTicketFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-board.md"), renderProjectDocumentTestTicket(t, Ticket{
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-board.md"), renderProjectDocumentTestTicket(t, Ticket{
 		Key:      "CHR-1",
 		Title:    "Board Ticket",
 		Status:   "ready",
@@ -282,7 +288,7 @@ func writeWorkspaceContextCaseTicketFixture(t *testing.T, projectDir string) {
 func writeWorkspaceContextProjectDocumentsFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "project-plan.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "project-plan.md"), `---
 title: Project Plan
 ---
 
@@ -290,7 +296,7 @@ title: Project Plan
 
 Project plan body.
 `)
-	writeTestFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "missing-case.md"), `---
+	writeWorkspaceContextFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "missing-case.md"), `---
 title: Missing Case Dump
 case: missing
 ---

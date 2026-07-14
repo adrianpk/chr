@@ -3433,7 +3433,7 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 
 func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 	projectDir := t.TempDir()
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "default", "dumps"), "context.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
+	writeTicketViewFile(t, filepath.Join(projectDir, "ops", "default", "dump", "00000-context"), "artifact.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "specs", "specs"), "feature.md", "# Feature Spec\n\nStatus: accepted\n\nDetails.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "trackers"), "feature-tracker.md", "# Feature Tracker\n\nStatus: planned\n")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "archive"), "blog-plan-20260525.md", "# Archived Blog Plan\n\nStatus: planned\n")

@@ -163,13 +163,28 @@ func NewFailedGateReport(
 }
 
 // NewGateReportArtifacts constructs the corresponding package service or value.
-func NewGateReportArtifacts(projectDir string, createdAt time.Time) GateReportArtifacts {
-	fileBase := "dev-main-" + createdAt.UTC().Format("20060102T150405Z")
+func NewGateReportArtifacts(projectDir string, createdAt time.Time) (GateReportArtifacts, error) {
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	if err != nil {
+		return GateReportArtifacts{}, err
+	}
+
+	artifact, err := CreateOpsArtifact(CreateOpsArtifactOptions{
+		Layout:      layout,
+		Type:        "report",
+		Title:       "Dev main gate " + createdAt.UTC().Format("2006-01-02 15:04:05Z"),
+		Producer:    "chr",
+		ExternalIDs: []string{"dev-main-gate"},
+		Now:         func() time.Time { return createdAt },
+	})
+	if err != nil {
+		return GateReportArtifacts{}, err
+	}
 
 	return GateReportArtifacts{
-		JSONPath:     UserPath(projectDir, "reports", "gates", fileBase+".json"),
-		MarkdownPath: UserPath(projectDir, "reports", "gates", fileBase+".md"),
-	}
+		JSONPath:     filepath.Join(artifact.Dir, "evidence", "gate-report.json"),
+		MarkdownPath: filepath.Join(artifact.Dir, OpsArtifactBodyFile()),
+	}, nil
 }
 
 // WriteJSON writes the requested output.
@@ -204,6 +219,10 @@ func (w GateReportWriter) WriteJSON(ctx context.Context, report GateReport) (str
 		return "", fmt.Errorf("write gate JSON report: %w", err)
 	}
 
+	if err := refreshGateReportArtifactMetadata(path); err != nil {
+		return "", err
+	}
+
 	return path, nil
 }
 
@@ -236,10 +255,32 @@ func (w GateReportWriter) WriteMarkdown(ctx context.Context, report GateReport) 
 		return "", fmt.Errorf("write gate Markdown report: %w", err)
 	}
 
+	if err := refreshGateReportArtifactMetadata(path); err != nil {
+		return "", err
+	}
+
 	return path, nil
 }
 
 // RenderGateReportMarkdown renders the corresponding package data.
+func refreshGateReportArtifactMetadata(path string) error {
+	artifactDir := filepath.Dir(path)
+	if filepath.Base(artifactDir) == "evidence" {
+		artifactDir = filepath.Dir(artifactDir)
+	}
+
+	if _, err := os.Stat(filepath.Join(artifactDir, "metadata.json")); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+
+		return err
+	}
+
+	return RefreshOpsArtifactMetadata(artifactDir, "created", time.Now().UTC())
+}
+
+// RenderGateReportMarkdown renders a human-readable gate report.
 func RenderGateReportMarkdown(report GateReport) string {
 	var output strings.Builder
 

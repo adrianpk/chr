@@ -38,7 +38,7 @@ The gate is a Chryso product feature. It uses:
 The current paths are:
 
 - `.chr/default/config/gates.yml`;
-- `.chr/default/reports/gates/`;
+- `ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)`;
 - execution and loop evidence under `.chr/default/` when agent work runs.
 
 Project notes, issue trackers, or planning directories outside `.chr/default/` can
@@ -93,7 +93,7 @@ without requiring API comments or tokens.
 The detailed evidence remains local to the project under:
 
 ```text
-.chr/default/reports/gates/
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)
 ```
 
 Future Forgejo-specific enrichment can add comments, artifact links, or status

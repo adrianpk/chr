@@ -10,7 +10,7 @@ tags: ["follow-up", "future"]
 use_case: "followups"
 project_area: "integration"
 source_kind: "plan_tracking"
-source_ref: ".chr/default/plans/followups-plan.md"
+source_ref: "ops/default/plan/<id>/artifact.mdfollowups-plan.md"
 slice: "FU-05"
 created_at: "2026-05-30T15:56:00Z"
 updated_at: "2026-05-30T15:56:00Z"

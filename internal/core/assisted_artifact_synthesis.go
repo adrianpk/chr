@@ -58,6 +58,10 @@ func SynthesizeAssistedArtifact(
 
 	content := RenderAssistedSynthesizedArtifact(opts.Session, opts.CuratedSummary, opts.SourceRef, layout.Ref)
 
+	if err := EnsureAuthoringArtifactMetadata(opts.ProjectDir, layout.Ref); err != nil {
+		return AssistedArtifactSynthesisResult{}, err
+	}
+
 	err = os.MkdirAll(layout.Dir, 0o755)
 	if err != nil {
 		return AssistedArtifactSynthesisResult{}, fmt.Errorf("create assisted artifact directory: %w", err)

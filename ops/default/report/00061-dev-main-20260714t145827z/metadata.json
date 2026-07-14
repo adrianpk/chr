@@ -1,0 +1,22 @@
+{
+  "schema_version": "ops-layout/v1",
+  "id": "00061-dev-main-20260714t145827z",
+  "type": "report",
+  "namespace": "default",
+  "title": "Dev Main 20260714T145827Z",
+  "status": "migrated",
+  "revision": 1,
+  "created_at": "2026-07-14T15:10:04Z",
+  "updated_at": "2026-07-14T15:10:04Z",
+  "producer": {
+    "name": "chr",
+    "version": "1"
+  },
+  "external_ids": [],
+  "sources": [],
+  "continuations": [],
+  "files": [
+    "artifact.md",
+    "evidence/gate-report.json"
+  ]
+}

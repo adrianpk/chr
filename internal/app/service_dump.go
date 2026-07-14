@@ -228,7 +228,7 @@ func (s service) OpenDump(request DumpOpenRequest) (DumpOperationResult, error) 
 }
 
 func (s service) dumpDirectory() string {
-	return core.DumpDirectory(s.projectContext.ProjectDir)
+	return core.DefaultOpsArtifactRoot(s.projectContext.ProjectDir, "dump")
 }
 
 func (s service) resolveDumpPath(relativePath string) (string, error) {
@@ -242,11 +242,10 @@ func (s service) resolveDumpPath(relativePath string) (string, error) {
 		return "", fmt.Errorf("dump path must be project-relative")
 	}
 
-	if filepath.ToSlash(filepath.Dir(cleanPath)) != core.UserRelativePath("dumps") {
-		return "", fmt.Errorf("dump path must be under %s", core.UserRelativePath("dumps"))
-	}
-
 	path := filepath.Join(s.projectContext.ProjectDir, cleanPath)
+	if artifactType, ok := core.OpsArtifactTypeForBodyPath(s.projectContext.ProjectDir, path); !ok || artifactType != "dump" {
+		return "", fmt.Errorf("dump path must be a canonical %s artifact body", core.DefaultOpsArtifactRoot(".", "dump"))
+	}
 
 	info, err := os.Stat(path)
 	if err != nil {
@@ -307,24 +306,39 @@ func (s service) relativeDumpPath(path string) string {
 	return filepath.ToSlash(relativePath)
 }
 
-func candidateDumpPathPairs(directory, title string) []dumpPathPair {
+func candidateDumpPathPairs(projectDir, title string) ([]dumpPathPair, error) {
 	slug := dumpSlug(title)
 	if slug == "" {
 		slug = "dump"
 	}
 
-	pairs := []dumpPathPair{{
-		CuratedPath: filepath.Join(directory, slug+".md"),
-		RawPath:     filepath.Join(directory, slug+"-raw.md"),
-	}}
-	for index := 2; index <= 100; index++ {
-		pairs = append(pairs, dumpPathPair{
-			CuratedPath: filepath.Join(directory, fmt.Sprintf("%s-%d.md", slug, index)),
-			RawPath:     filepath.Join(directory, fmt.Sprintf("%s-%d-raw.md", slug, index)),
-		})
+	pairs, err := appendDumpPathPair(nil, projectDir, slug)
+	if err != nil {
+		return nil, err
 	}
 
-	return pairs
+	for index := 2; index <= 100; index++ {
+		pairs, err = appendDumpPathPair(pairs, projectDir, fmt.Sprintf("%s-%d", slug, index))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return pairs, nil
+}
+
+func appendDumpPathPair(pairs []dumpPathPair, projectDir, slug string) ([]dumpPathPair, error) {
+	_, curatedPath, err := core.NamedOpsArtifactBody(projectDir, "dump", slug)
+	if err != nil {
+		return nil, err
+	}
+
+	_, rawPath, err := core.NamedOpsArtifactBody(projectDir, "dump", slug+"-raw")
+	if err != nil {
+		return nil, err
+	}
+
+	return append(pairs, dumpPathPair{CuratedPath: curatedPath, RawPath: rawPath}), nil
 }
 
 func dumpPairPathExists(path string) bool {
@@ -353,6 +367,10 @@ func writeDumpPair(pair dumpPathPair, curatedContent, rawContent string) error {
 }
 
 func writeNewDumpFile(path, content string) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return fmt.Errorf("create dump directory: %w", err)
+	}
+
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		return fmt.Errorf("create dump file: %w", err)
@@ -383,7 +401,12 @@ func (s service) createDumpPairFiles(
 		return "", fmt.Errorf("create dump directory: %w", err)
 	}
 
-	for _, pair := range candidateDumpPathPairs(s.dumpDirectory(), title) {
+	pairs, err := candidateDumpPathPairs(s.projectContext.ProjectDir, title)
+	if err != nil {
+		return "", err
+	}
+
+	for _, pair := range pairs {
 		if dumpPairPathExists(pair.CuratedPath) || dumpPairPathExists(pair.RawPath) {
 			continue
 		}
@@ -395,6 +418,14 @@ func (s service) createDumpPairFiles(
 
 		err = writeDumpPair(pair, curatedContent, rawCaptureContent)
 		if err != nil {
+			return "", err
+		}
+
+		if err := core.EnsureOpsArtifactBodyMetadata(s.projectContext.ProjectDir, curatedRelativePath); err != nil {
+			return "", err
+		}
+
+		if err := core.EnsureOpsArtifactBodyMetadata(s.projectContext.ProjectDir, rawRelativePath); err != nil {
 			return "", err
 		}
 

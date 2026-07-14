@@ -10,7 +10,7 @@ tags: ["gallery", "fixture"]
 use_case: "followups"
 project_area: "qa"
 source_kind: "plan_tracking"
-source_ref: ".chr/default/plans/followups-plan.md"
+source_ref: "ops/default/plan/<id>/artifact.mdfollowups-plan.md"
 slice: "FU-04"
 created_at: "2026-05-30T15:55:00Z"
 updated_at: "2026-05-30T16:09:00Z"

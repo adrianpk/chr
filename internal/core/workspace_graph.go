@@ -203,49 +203,76 @@ func (b WorkspaceGraphBuilder) loadCases(ctx context.Context, graph *WorkspaceGr
 }
 
 func (b WorkspaceGraphBuilder) loadDocuments(ctx context.Context, graph *WorkspaceGraph) error {
-	root := UserPath(b.projectDir)
+	roots := workspaceDocumentRoots(b.projectDir)
 
-	err := walkMarkdownFiles(ctx, root, func(path string) error {
-		if path == ProjectMetadataPath(b.projectDir) || isCaseMetadataPath(b.projectDir, path) {
-			return nil
-		}
-
-		if isArchivedGenerationPath(b.projectDir, path) {
-			return nil
-		}
-
-		node, err := b.documentNode(path)
+	for _, root := range roots {
+		err := walkMarkdownFiles(ctx, root, func(path string) error {
+			return b.loadDocument(graph, path)
+		})
 		if err != nil {
-			graph.addDiagnostic(path, WorkspaceNodeUnknown, err)
-
-			return nil
+			return fmt.Errorf("load workspace documents: %w", err)
 		}
-
-		if node.Kind == WorkspaceNodeUnknown {
-			return nil
-		}
-
-		if node.CaseSlug == "" {
-			graph.ProjectWide = append(graph.ProjectWide, node)
-
-			return nil
-		}
-
-		if graph.hasCase(node.CaseSlug) {
-			graph.CaseDocuments[node.CaseSlug] = append(graph.CaseDocuments[node.CaseSlug], node)
-
-			return nil
-		}
-
-		graph.addUnresolvedCaseReference(node.CaseSlug, node)
-
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf("load workspace documents: %w", err)
 	}
 
 	return nil
+}
+
+func (b WorkspaceGraphBuilder) loadDocument(graph *WorkspaceGraph, path string) error {
+	if b.shouldSkipDocument(path) {
+		return nil
+	}
+
+	node, err := b.documentNode(path)
+	if err != nil {
+		graph.addDiagnostic(path, WorkspaceNodeUnknown, err)
+
+		return nil
+	}
+
+	if node.Kind == WorkspaceNodeUnknown {
+		return nil
+	}
+
+	if node.CaseSlug == "" {
+		graph.ProjectWide = append(graph.ProjectWide, node)
+
+		return nil
+	}
+
+	if graph.hasCase(node.CaseSlug) {
+		graph.CaseDocuments[node.CaseSlug] = append(graph.CaseDocuments[node.CaseSlug], node)
+
+		return nil
+	}
+
+	graph.addUnresolvedCaseReference(node.CaseSlug, node)
+
+	return nil
+}
+
+func (b WorkspaceGraphBuilder) shouldSkipDocument(path string) bool {
+	opsPrefix := filepath.ToSlash(filepath.Join(b.projectDir, OpsDirectoryName)) + "/"
+	if strings.HasPrefix(filepath.ToSlash(path), opsPrefix) && !IsOpsArtifactBodyPath(b.projectDir, path) {
+		return true
+	}
+
+	if path == ProjectMetadataPath(b.projectDir) || isCaseMetadataPath(b.projectDir, path) {
+		return true
+	}
+
+	return isArchivedGenerationPath(b.projectDir, path)
+}
+
+func workspaceDocumentRoots(projectDir string) []string {
+	return []string{
+		DefaultOpsArtifactRoot(projectDir, "dump"),
+		DefaultOpsArtifactRoot(projectDir, "quiz"),
+		DefaultOpsArtifactRoot(projectDir, "spec"),
+		DefaultOpsArtifactRoot(projectDir, "plan"),
+		DefaultOpsArtifactRoot(projectDir, "tracker"),
+		DefaultOpsArtifactRoot(projectDir, "ticket"),
+		DefaultOpsArtifactRoot(projectDir, "report"),
+	}
 }
 
 func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) {
@@ -442,6 +469,10 @@ func isCaseMetadataPath(projectDir, path string) bool {
 }
 
 func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
+	if artifactType, ok := OpsArtifactTypeForBodyPath(projectDir, path); ok {
+		return workspaceKindForOpsArtifactType(artifactType)
+	}
+
 	relativePath, err := filepath.Rel(UserPath(projectDir), path)
 	if err != nil {
 		return WorkspaceNodeUnknown
@@ -452,7 +483,30 @@ func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
 		return WorkspaceNodeUnknown
 	}
 
-	switch parts[0] {
+	return workspaceKindForLegacyDirectory(parts[0])
+}
+
+func workspaceKindForOpsArtifactType(artifactType string) WorkspaceNodeKind {
+	switch artifactType {
+	case "dump":
+		return WorkspaceNodeDump
+	case "quiz":
+		return WorkspaceNodeQuiz
+	case "spec":
+		return WorkspaceNodeSpec
+	case "plan", "tracker":
+		return WorkspaceNodePlan
+	case "ticket":
+		return WorkspaceNodeTicket
+	case "report", "run":
+		return WorkspaceNodeReport
+	default:
+		return WorkspaceNodeUnknown
+	}
+}
+
+func workspaceKindForLegacyDirectory(directory string) WorkspaceNodeKind {
+	switch directory {
 	case "dumps":
 		return WorkspaceNodeDump
 	case "quizzes":

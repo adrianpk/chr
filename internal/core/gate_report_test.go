@@ -12,8 +12,14 @@ import (
 
 func TestGateReportWriterWritesJSON(t *testing.T) {
 	projectDir := t.TempDir()
+
 	createdAt := time.Date(2026, 6, 1, 12, 30, 45, 0, time.UTC)
-	artifacts := NewGateReportArtifacts(projectDir, createdAt)
+
+	artifacts, err := NewGateReportArtifacts(projectDir, createdAt)
+	if err != nil {
+		t.Fatalf("NewGateReportArtifacts returned error: %v", err)
+	}
+
 	report := NewGateReport(createdAt, GateGitEvidence{
 		Base:      GateGitRef{Ref: "main", SHA: "base-sha"},
 		Head:      GateGitRef{Ref: "dev", SHA: "head-sha"},
@@ -35,8 +41,9 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 		t.Fatalf("WriteJSON returned error: %v", err)
 	}
 
-	if path != filepath.Join(projectDir, ".chr", "default", "reports", "gates", "dev-main-20260601T123045Z.json") {
-		t.Fatalf("path = %q, want timestamped JSON report path", path)
+	wantPath := filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-2026-06-01-12-30-45z", "evidence", "gate-report.json")
+	if path != wantPath {
+		t.Fatalf("path = %q, want canonical JSON report path", path)
 	}
 
 	content, err := os.ReadFile(path)
@@ -62,8 +69,14 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 
 func TestGateReportWriterWritesMarkdown(t *testing.T) {
 	projectDir := t.TempDir()
+
 	createdAt := time.Date(2026, 6, 1, 12, 30, 45, 0, time.UTC)
-	artifacts := NewGateReportArtifacts(projectDir, createdAt)
+
+	artifacts, err := NewGateReportArtifacts(projectDir, createdAt)
+	if err != nil {
+		t.Fatalf("NewGateReportArtifacts returned error: %v", err)
+	}
+
 	report := gateReportMarkdownFixture(createdAt, artifacts)
 	report.Failures = []string{"validation failed"}
 
@@ -72,8 +85,9 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 		t.Fatalf("WriteMarkdown returned error: %v", err)
 	}
 
-	if path != filepath.Join(projectDir, ".chr", "default", "reports", "gates", "dev-main-20260601T123045Z.md") {
-		t.Fatalf("path = %q, want timestamped Markdown report path", path)
+	wantPath := filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-2026-06-01-12-30-45z", "artifact.md")
+	if path != wantPath {
+		t.Fatalf("path = %q, want canonical Markdown report path", path)
 	}
 
 	content, err := os.ReadFile(path)

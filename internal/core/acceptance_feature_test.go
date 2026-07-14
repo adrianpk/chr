@@ -21,11 +21,12 @@ func TestAcceptanceFeatureLayoutUsesCanonicalPath(t *testing.T) {
 		t.Fatalf("scope id = %q, want article-authoring", paths.ScopeID)
 	}
 
-	if paths.RelativePath != ".chr/default/acceptance/article-authoring.feature" {
+	wantRelativePath := "ops/default/spec/00000-article-authoring-acceptance-feature/artifact.md"
+	if paths.RelativePath != wantRelativePath {
 		t.Fatalf("relative path = %q", paths.RelativePath)
 	}
 
-	if paths.Path != filepath.Join(projectDir, ".chr", "default", "acceptance", "article-authoring.feature") {
+	if paths.Path != filepath.Join(projectDir, filepath.FromSlash(wantRelativePath)) {
 		t.Fatalf("path = %q", paths.Path)
 	}
 }
@@ -45,11 +46,12 @@ func TestAcceptanceFeatureRoundLayoutUsesCanonicalPath(t *testing.T) {
 		t.Fatalf("AcceptanceFeatureRoundLayout returned error: %v", err)
 	}
 
-	if paths.RelativePath != ".chr/default/acceptance/article-authoring-feature-round.md" {
+	wantRelativePath := "ops/default/spec/00000-article-authoring-acceptance-feature-round/artifact.md"
+	if paths.RelativePath != wantRelativePath {
 		t.Fatalf("relative path = %q", paths.RelativePath)
 	}
 
-	if paths.Path != filepath.Join(projectDir, ".chr", "default", "acceptance", "article-authoring-feature-round.md") {
+	if paths.Path != filepath.Join(projectDir, filepath.FromSlash(wantRelativePath)) {
 		t.Fatalf("path = %q", paths.Path)
 	}
 }
@@ -305,7 +307,7 @@ func TestWriteAcceptanceFeatureWritesCheckedArtifact(t *testing.T) {
 		t.Fatalf("valid = false, findings = %#v", result.Findings)
 	}
 
-	if paths.RelativePath != ".chr/default/acceptance/article-authoring.feature" {
+	if paths.RelativePath != "ops/default/spec/00000-article-authoring-acceptance-feature/artifact.md" {
 		t.Fatalf("relative path = %q", paths.RelativePath)
 	}
 

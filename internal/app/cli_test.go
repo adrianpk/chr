@@ -403,7 +403,7 @@ func TestWebServeArtifactCatalogUsesProjectArtifacts(t *testing.T) {
 
 	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
 		Family: "dumps",
-		ID:     ".chr/default/dumps/blog-context.md",
+		ID:     "ops/default/dump/00000-blog-context/artifact.md",
 	})
 	if err != nil {
 		t.Fatalf("ArtifactDetailView returned error: %v", err)
@@ -506,7 +506,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 
 	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
 		Family: "dumps",
-		ID:     ".chr/default/dumps/blog-context.md",
+		ID:     "ops/default/dump/00000-blog-context/artifact.md",
 	})
 	if err != nil {
 		t.Fatalf("ArtifactDetailView returned error: %v", err)
@@ -515,7 +515,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/default/dumps/blog-context.md",
+		ID:       "ops/default/dump/00000-blog-context/artifact.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Updated Dump"},
@@ -531,7 +531,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/default/dumps/blog-context.md",
+		ID:       "ops/default/dump/00000-blog-context/artifact.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Stale Dump"},
@@ -544,7 +544,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 		t.Fatalf("stale status = %q, want stale", stale.Status)
 	}
 
-	if stale.ReloadURL != "/dumps/detail?id=.chr%2Fdefault%2Fdumps%2Fblog-context.md" || stale.DiscardURL != "/dumps" {
+	if stale.ReloadURL != "/dumps/detail?id=ops%2Fdefault%2Fdump%2F00000-blog-context%2Fartifact.md" || stale.DiscardURL != "/dumps" {
 		t.Fatalf("stale urls = reload %q discard %q, want dump conflict actions", stale.ReloadURL, stale.DiscardURL)
 	}
 }
@@ -559,12 +559,12 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 		newWebServeBoardProjectContext(t, projectDir),
 	)
 
-	detail := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
+	detail := mustWebArtifactDetailView(t, provider, "dumps", "ops/default/dump/00000-blog-context/artifact.md")
 
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/default/dumps/blog-context.md",
+		ID:       "ops/default/dump/00000-blog-context/artifact.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Updated Dump"},
@@ -580,7 +580,7 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/default/dumps/blog-context.md",
+		ID:       "ops/default/dump/00000-blog-context/artifact.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Stale Dump"},
@@ -593,12 +593,12 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 		t.Fatalf("stale status = %q, want stale", stale.Status)
 	}
 
-	reloaded := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
+	reloaded := mustWebArtifactDetailView(t, provider, "dumps", "ops/default/dump/00000-blog-context/artifact.md")
 
 	retry, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/default/dumps/blog-context.md",
+		ID:       "ops/default/dump/00000-blog-context/artifact.md",
 		Revision: reloaded.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Retry Dump"},
@@ -623,13 +623,13 @@ func TestWebServeArtifactRevisionsChangeAfterWorkspaceMutation(t *testing.T) {
 	)
 
 	catalogBefore := mustWebArtifactCatalogView(t, provider, "dumps")
-	detailBefore := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
+	detailBefore := mustWebArtifactDetailView(t, provider, "dumps", "ops/default/dump/00000-blog-context/artifact.md")
 
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-context.md"), `---
 title: "Blog Context"
 status: "curated"
 type: "dump"
-source: ".chr/default/dumps/blog-context-raw.md"
+source: "ops/default/dump/00000-blog-context-raw/artifact.md"
 case: "blog"
 ---
 
@@ -639,7 +639,7 @@ Mutated outside the web view provider.
 `)
 
 	catalogAfter := mustWebArtifactCatalogView(t, provider, "dumps")
-	detailAfter := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
+	detailAfter := mustWebArtifactDetailView(t, provider, "dumps", "ops/default/dump/00000-blog-context/artifact.md")
 
 	assertWebRevisionChanged(t, "catalog", catalogBefore.Revision, catalogAfter.Revision)
 	assertWebRevisionChanged(t, "detail", detailBefore.Revision, detailAfter.Revision)
@@ -756,7 +756,7 @@ func TestWebServeWriteActionGeneratesSpecWithService(t *testing.T) {
 		t.Fatalf("model requests = %#v, want generate spec request", model.requests)
 	}
 
-	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectDir, filepath.FromSlash("ops/default/spec/00000-blog-spec/artifact.md"))); err != nil {
 		t.Fatalf("generated spec missing: %v", err)
 	}
 }
@@ -904,7 +904,7 @@ func writeWebServeArtifactFixture(t *testing.T, projectDir string) {
 title: "Blog Context"
 status: "curated"
 type: "dump"
-source: ".chr/default/dumps/blog-context-raw.md"
+source: "ops/default/dump/00000-blog-context-raw/artifact.md"
 case: "blog"
 ---
 
@@ -916,7 +916,7 @@ Use-case dump body.
 title: "Blog Context Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chr/default/dumps/blog-context.md"
+curated: "ops/default/dump/00000-blog-context/artifact.md"
 case: "blog"
 ---
 
@@ -968,7 +968,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message: "Acceptance feature generated.",
 		Status:  core.AcceptanceFeatureStatusGenerated,
-		Feature: ".chr/default/acceptance/blog.feature",
+		Feature: "ops/default/spec/00000-blog-acceptance-feature/artifact.md",
 	})
 	if err != nil {
 		t.Fatalf("writeAcceptanceFeatureGenerateResult returned error: %v", err)
@@ -978,7 +978,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 	for _, want := range []string{
 		"Acceptance feature generated.\n",
 		"status: generated\n",
-		"feature: .chr/default/acceptance/blog.feature\n",
+		"feature: ops/default/spec/00000-blog-acceptance-feature/artifact.md\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in:\n%s", want, got)
@@ -1584,8 +1584,8 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 		t.Fatalf("dump new returned error: %v", err)
 	}
 
-	dumpPath := filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "dumps", "cli-dump.md"))
-	rawDumpPath := filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "dumps", "cli-dump-raw.md"))
+	dumpPath := "ops/default/dump/00000-cli-dump/artifact.md"
+	rawDumpPath := "ops/default/dump/00000-cli-dump-raw/artifact.md"
 
 	if !strings.Contains(stdout.String(), "Created dump "+dumpPath+".") {
 		t.Fatalf("dump new stdout = %q, want curated dump path", stdout.String())
@@ -1679,7 +1679,7 @@ func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
 		t.Fatalf("spec list returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), ".chr/default/specs/blog-spec.md") {
+	if !strings.Contains(stdout.String(), "ops/default/spec/00000-blog-spec/artifact.md") {
 		t.Fatalf("spec list stdout = %q, want blog spec path", stdout.String())
 	}
 
@@ -1695,7 +1695,7 @@ func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
 		t.Fatalf("plan list returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), ".chr/default/plans/project-plan.md") {
+	if !strings.Contains(stdout.String(), "ops/default/plan/00000-project-plan/artifact.md") {
 		t.Fatalf("plan list stdout = %q, want project plan path", stdout.String())
 	}
 }
@@ -2110,7 +2110,7 @@ func TestAuthorQuizNewWritesSessionAndQuiz(t *testing.T) {
 
 	sessionID := authorSessionIDFromOutput(t, stdout.String())
 	sessionPath := filepath.Join(projectDir, ".chr", "authoring", "sessions", sessionID, "session.md")
-	quizPath := filepath.Join(projectDir, ".chr", "default", "quizzes", sessionID+"-billing-sync.md")
+	quizPath := filepath.Join(projectDir, filepath.FromSlash("ops/default/quiz/00000-"+sessionID+"-billing-sync/artifact.md"))
 
 	for _, path := range []string{sessionPath, quizPath} {
 		_, err = os.Stat(path)
@@ -2139,7 +2139,7 @@ func TestAuthorPromoteQuizToDraftWritesDraftAndUpdatesSession(t *testing.T) {
 		t.Fatalf("author promote quiz-to-draft returned error: %v", err)
 	}
 
-	draftPath := filepath.Join(projectDir, ".chr", "default", "drafts", sessionID+"-billing-sync.md")
+	draftPath := filepath.Join(projectDir, filepath.FromSlash("ops/default/spec/00000-"+sessionID+"-billing-sync/artifact.md"))
 
 	_, err = os.Stat(draftPath)
 	if err != nil {
@@ -2253,7 +2253,7 @@ func TestAuthorAssistedStartResumeAnswerStatusAndFinalize(t *testing.T) {
 		t.Fatalf("author assisted finalize returned error: %v", err)
 	}
 
-	for _, want := range []string{"assisted: finalized", "curated-summary.md", ".chr/default/specs/"} {
+	for _, want := range []string{"assisted: finalized", "curated-summary.md", "ops/default/spec/"} {
 		if !strings.Contains(finalizeOut.String(), want) {
 			t.Fatalf("finalize output missing %q:\n%s", want, finalizeOut.String())
 		}
@@ -8383,7 +8383,7 @@ func authorQuizPathFromOutput(t *testing.T, output string) string {
 
 	for _, line := range strings.Split(output, "\n") {
 		value, ok := strings.CutPrefix(line, "path: ")
-		if ok && strings.Contains(value, ".chr/default/quizzes/") {
+		if ok && strings.Contains(value, "ops/default/quiz/") {
 			path = value
 		}
 	}
@@ -8601,7 +8601,7 @@ func gateCLIGitOutput(t *testing.T, projectDir string, args ...string) string {
 func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) core.GateReport {
 	t.Helper()
 
-	matches, err := filepath.Glob(filepath.Join(projectDir, ".chr", "default", "reports", "gates", "*.json"))
+	matches, err := filepath.Glob(filepath.Join(projectDir, "ops", "default", "report", "*", "evidence", "gate-report.json"))
 	if err != nil {
 		t.Fatalf("glob gate reports: %v", err)
 	}

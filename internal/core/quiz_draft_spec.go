@@ -46,12 +46,15 @@ func QuizDraftSpecLayout(projectDir string, scope QuizScope) (QuizDraftSpecPaths
 		return QuizDraftSpecPaths{}, err
 	}
 
-	relativePath := UserRelativePath(filepath.FromSlash(QuizSpecDirectory), scopeID+"-quiz-spec.md")
+	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-quiz-spec")
+	if err != nil {
+		return QuizDraftSpecPaths{}, err
+	}
 
 	return QuizDraftSpecPaths{
 		ScopeID:      scopeID,
 		RelativePath: relativePath,
-		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+		Path:         path,
 	}, nil
 }
 
@@ -69,6 +72,15 @@ func WriteQuizDraftSpec(ctx context.Context, projectDir string, spec QuizDraftSp
 
 	paths, err := QuizDraftSpecLayout(projectDir, spec.Scope)
 	if err != nil {
+		return QuizDraftSpecPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(spec.Scope)
+	if err != nil {
+		return QuizDraftSpecPaths{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-quiz-spec"); err != nil {
 		return QuizDraftSpecPaths{}, err
 	}
 

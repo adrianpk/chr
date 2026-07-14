@@ -79,7 +79,7 @@ Woodpecker marks the pipeline failed when the gate exits non-zero.
 Detailed local evidence is written under:
 
 ```text
-.chr/default/reports/gates/
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)
 ```
 
 Read the Markdown report for human review and the JSON report for automated

@@ -111,7 +111,7 @@ func writeSpecGenerationQuizFixture(t *testing.T, projectDir string) {
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz.md"), `---
 status: "curated"
 case_slug: "blog"
-raw_path: ".chr/default/quizzes/blog-quiz-raw.md"
+raw_path: "ops/default/quiz/00000-blog-quiz-raw/artifact.md"
 ---
 
 # Quiz Notes
@@ -122,7 +122,7 @@ raw_path: ".chr/default/quizzes/blog-quiz-raw.md"
 `)
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "project-wide-quiz.md"), `---
 status: "curated"
-raw_path: ".chr/default/quizzes/project-wide-quiz-raw.md"
+raw_path: "ops/default/quiz/project-wide-quiz-raw.md"
 ---
 
 # Project-wide Quiz Notes
@@ -132,7 +132,7 @@ Project-wide quiz context that must not feed scoped spec generation.
 	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz-raw.md"), `---
 status: "raw"
 case_slug: "blog"
-curated_path: ".chr/default/quizzes/blog-quiz.md"
+curated_path: "ops/default/quiz/00000-blog-quiz/artifact.md"
 ---
 
 # Raw Quiz Notes
@@ -166,7 +166,7 @@ Prior spec content that must not feed initial spec generation.
 title: "Blog Context Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chr/default/dumps/blog-context.md"
+curated: "ops/default/dump/00000-blog-context/artifact.md"
 case: "blog"
 ---
 
@@ -212,7 +212,7 @@ func assertSpecGenerationContext(t *testing.T, request core.QuizModelRequest) {
 			t.Fatalf("spec context included project-wide quiz in scoped generation section %#v", section)
 		}
 
-		if strings.Contains(section.Authority, ".chr/default/plans/blog-plan.md") {
+		if strings.Contains(section.Authority, "ops/default/plan/00000-blog-plan/artifact.md") {
 			t.Fatalf("spec context included plan section: %#v", section)
 		}
 

@@ -313,31 +313,31 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 				Kind: WorkspaceNodeCase,
 				Slug: "blog",
 			},
-			"spec:.chr/default/specs/blog.md": {
+			"spec:ops/default/spec/00000-blog/artifact.md": {
 				Kind:         WorkspaceNodeSpec,
-				RelativePath: ".chr/default/specs/blog.md",
+				RelativePath: "ops/default/spec/00000-blog/artifact.md",
 				Title:        "Blog Spec",
 				CaseSlug:     "blog",
 			},
-			"ticket:.chr/default/tickets/CHR-1.md": {
+			"ticket:ops/default/ticket/00000-chr-1/artifact.md": {
 				Kind:         WorkspaceNodeTicket,
-				RelativePath: ".chr/default/tickets/CHR-1.md",
+				RelativePath: "ops/default/ticket/00000-chr-1/artifact.md",
 				Title:        "Blog Ticket",
 				CaseSlug:     "blog",
 			},
 		},
 		NodesByPath: map[string]string{
-			".chr/default/specs/blog.md": "spec:.chr/default/specs/blog.md",
+			"ops/default/spec/00000-blog/artifact.md": "spec:ops/default/spec/00000-blog/artifact.md",
 		},
 		ByCaseSlug: map[string][]string{
 			"blog": {
-				"spec:.chr/default/specs/blog.md",
-				"ticket:.chr/default/tickets/CHR-1.md",
+				"spec:ops/default/spec/00000-blog/artifact.md",
+				"ticket:ops/default/ticket/00000-chr-1/artifact.md",
 			},
 		},
 	}
 
-	node, ok := index.ResolvePath(".chr/default/specs/blog.md")
+	node, ok := index.ResolvePath("ops/default/spec/00000-blog/artifact.md")
 	if !ok {
 		t.Fatal("ResolvePath returned ok=false, want true")
 	}
@@ -346,7 +346,7 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 		t.Fatalf("node.Title = %q, want Blog Spec", node.Title)
 	}
 
-	related := index.RelatedDocuments("spec:.chr/default/specs/blog.md")
+	related := index.RelatedDocuments("spec:ops/default/spec/00000-blog/artifact.md")
 	if !related.Resolved {
 		t.Fatal("RelatedDocuments returned Resolved=false, want true")
 	}

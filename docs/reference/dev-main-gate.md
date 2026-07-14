@@ -42,7 +42,7 @@ The gate records:
 Reports are written under:
 
 ```text
-.chr/default/reports/gates/
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)
 ```
 
 Each run writes:
@@ -170,4 +170,4 @@ chr gate dev-main --dir . --base ${CHR_GATE_BASE:-origin/main} --head ${CHR_GATE
 
 Woodpecker status is the first supported Forgejo feedback path. The pipeline
 fails when the gate exits non-zero. Detailed evidence remains in
-`.chr/default/reports/gates/`.
+`ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)`.

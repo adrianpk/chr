@@ -51,12 +51,15 @@ func GeneratedPlanLayout(projectDir string, scope QuizScope) (GeneratedPlanPaths
 		return GeneratedPlanPaths{}, err
 	}
 
-	relativePath := UserRelativePath(PlanDirectory, scopeID+"-plan.md")
+	relativePath, path, err := NamedOpsArtifactBody(projectDir, "plan", scopeID+"-plan")
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
 
 	return GeneratedPlanPaths{
 		ScopeID:      scopeID,
 		RelativePath: relativePath,
-		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+		Path:         path,
 	}, nil
 }
 
@@ -78,18 +81,16 @@ func ArchivedPlanLayout(projectDir string, scope QuizScope, archivedAt time.Time
 
 	archivedAt = archivedAt.UTC()
 	timestamp := archivedAt.Format("20060102-150405") + fmt.Sprintf("%09d", archivedAt.Nanosecond())
-	relativePath := filepath.ToSlash(filepath.Join(
-		DirectoryName,
-		UserDirectoryName,
-		PlanDirectory,
-		"archive",
-		scopeID+"-plan-"+timestamp+".md",
-	))
+
+	relativePath, path, err := NamedOpsArtifactBody(projectDir, "plan", scopeID+"-plan-"+timestamp)
+	if err != nil {
+		return ArchivedPlanPaths{}, err
+	}
 
 	return ArchivedPlanPaths{
 		ScopeID:      scopeID,
 		RelativePath: relativePath,
-		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+		Path:         path,
 	}, nil
 }
 
@@ -107,6 +108,15 @@ func WriteGeneratedPlan(ctx context.Context, projectDir string, plan GeneratedPl
 
 	paths, err := GeneratedPlanLayout(projectDir, plan.Scope)
 	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(plan.Scope)
+	if err != nil {
+		return GeneratedPlanPaths{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(projectDir, "plan", scopeID+"-plan"); err != nil {
 		return GeneratedPlanPaths{}, err
 	}
 
@@ -151,6 +161,16 @@ func ArchiveGeneratedPlan(
 
 	archivePaths, err := ArchivedPlanLayout(projectDir, scope, archivedAt)
 	if err != nil {
+		return ArchivedPlanPaths{}, false, err
+	}
+
+	scopeID, err := quizScopeID(scope)
+	if err != nil {
+		return ArchivedPlanPaths{}, false, err
+	}
+
+	timestamp := archivedAt.UTC().Format("20060102-150405") + fmt.Sprintf("%09d", archivedAt.UTC().Nanosecond())
+	if err := EnsureNamedOpsArtifactMetadata(projectDir, "plan", scopeID+"-plan-"+timestamp); err != nil {
 		return ArchivedPlanPaths{}, false, err
 	}
 

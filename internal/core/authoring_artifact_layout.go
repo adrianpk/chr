@@ -52,8 +52,10 @@ func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (Authoring
 		return AuthoringArtifactLayout{}, err
 	}
 
-	relativePath := authoringArtifactRelativePath(opts)
-	fullPath := filepath.Join(opts.ProjectDir, filepath.FromSlash(relativePath))
+	relativePath, fullPath, err := authoringArtifactPath(opts)
+	if err != nil {
+		return AuthoringArtifactLayout{}, err
+	}
 
 	collision, err := authoringArtifactCollision(fullPath, opts.AllowReplace)
 	if err != nil {
@@ -121,39 +123,42 @@ func validateAuthoringArtifactLayoutOptions(opts AuthoringArtifactLayoutOptions)
 	return nil
 }
 
-func authoringArtifactRelativePath(opts AuthoringArtifactLayoutOptions) string {
+// EnsureAuthoringArtifactMetadata ensures metadata for an authoring artifact body.
+func EnsureAuthoringArtifactMetadata(projectDir string, ref AuthoringArtifactRef) error {
+	return EnsureOpsArtifactBodyMetadata(projectDir, ref.Path)
+}
+
+func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string, error) {
 	name := strings.TrimSpace(opts.Name)
 	if name == "" {
 		name = opts.Topic
 	}
 
 	fileName := authoringArtifactFileName(opts.SessionID, name)
-	parts := []string{DirectoryName, UserDirectoryName}
-	parts = append(parts, authoringArtifactDirectory(opts.Kind))
-	parts = append(parts, fileName)
+	artifactType := authoringArtifactType(opts.Kind)
 
-	return filepath.ToSlash(filepath.Join(parts...))
+	return NamedOpsArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
 }
 
-func authoringArtifactDirectory(kind AuthoringArtifactKind) string {
-	directories := map[AuthoringArtifactKind]string{
-		AuthoringArtifactKindDump:     "dumps",
-		AuthoringArtifactKindQuiz:     "quizzes",
-		AuthoringArtifactKindDraft:    "drafts",
-		AuthoringArtifactKindSpec:     "specs",
-		AuthoringArtifactKindPlan:     "plans",
-		AuthoringArtifactKindSliceSet: "slice-sets",
-		AuthoringArtifactKindSlice:    "slices",
-		AuthoringArtifactKindTracker:  "trackers",
-		AuthoringArtifactKindTicket:   "tickets",
+func authoringArtifactType(kind AuthoringArtifactKind) string {
+	types := map[AuthoringArtifactKind]string{
+		AuthoringArtifactKindDump:     "dump",
+		AuthoringArtifactKindQuiz:     "quiz",
+		AuthoringArtifactKindDraft:    "spec",
+		AuthoringArtifactKindSpec:     "spec",
+		AuthoringArtifactKindPlan:     "plan",
+		AuthoringArtifactKindSliceSet: "plan",
+		AuthoringArtifactKindSlice:    "plan",
+		AuthoringArtifactKindTracker:  "tracker",
+		AuthoringArtifactKindTicket:   "ticket",
 	}
 
-	directory, ok := directories[kind]
+	artifactType, ok := types[kind]
 	if !ok {
-		return "artifacts"
+		return "report"
 	}
 
-	return directory
+	return artifactType
 }
 
 func authoringArtifactFileName(sessionID, name string) string {
@@ -180,8 +185,12 @@ func authoringArtifactID(opts AuthoringArtifactLayoutOptions) string {
 }
 
 func authoringArtifactCollision(path string, allowReplace bool) (AuthoringArtifactCollision, error) {
-	_, err := os.Stat(path)
+	info, err := os.Stat(path)
 	if err == nil {
+		if info.Size() == 0 {
+			return AuthoringArtifactCollision{Path: path, Allowed: true}, nil
+		}
+
 		return AuthoringArtifactCollision{
 			Exists:  true,
 			Path:    path,

@@ -61,7 +61,7 @@ evidence:
 
 Gherkin is considered active when `gherkin_policy` is `active_when_applicable`
 and the project already has `.feature` artifacts under
-`.chr/default/acceptance/`. Active Gherkin applies to tickets that change
+`ops/default/spec/*-acceptance-feature/artifact.md`. Active Gherkin applies to tickets that change
 observable CLI, TUI, API, domain, acceptance workflow, or user-visible bugfix
 behavior.
 

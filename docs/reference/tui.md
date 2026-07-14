@@ -147,10 +147,10 @@ CLI equivalents:
 ```sh
 chr dump list
 chr dump new --title "Notes" --content "Context." --use-case billing
-chr dump show .chr/default/dumps/notes.md
-chr dump save .chr/default/dumps/notes.md --content "# Notes"
-chr dump append .chr/default/dumps/notes.md --content "More context."
-chr dump open .chr/default/dumps/notes.md
+chr dump show ops/default/dump/00000-notes/artifact.md
+chr dump save ops/default/dump/00000-notes/artifact.md --content "# Notes"
+chr dump append ops/default/dump/00000-notes/artifact.md --content "More context."
+chr dump open ops/default/dump/00000-notes/artifact.md
 ```
 
 ## Quizzes View

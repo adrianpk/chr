@@ -73,16 +73,24 @@ func QuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactPaths, 
 		return QuizArtifactPaths{}, err
 	}
 
-	rawRelativePath := UserRelativePath(QuizArtifactsDirectory, scopeID+"-quiz-raw.md")
-	curatedRelativePath := UserRelativePath(QuizArtifactsDirectory, scopeID+"-quiz.md")
+	rawRelativePath, rawPath, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz-raw")
+	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	curatedRelativePath, curatedPath, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz")
+	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
 	runtimeRelativePath := UserRelativePath(filepath.FromSlash(QuizRuntimeDirectory), scopeID+".json")
 
 	return QuizArtifactPaths{
 		ScopeID:             scopeID,
 		RawRelativePath:     rawRelativePath,
-		RawPath:             filepath.Join(projectDir, filepath.FromSlash(rawRelativePath)),
+		RawPath:             rawPath,
 		CuratedRelativePath: curatedRelativePath,
-		CuratedPath:         filepath.Join(projectDir, filepath.FromSlash(curatedRelativePath)),
+		CuratedPath:         curatedPath,
 		RuntimeRelativePath: runtimeRelativePath,
 		RuntimePath:         filepath.Join(projectDir, filepath.FromSlash(runtimeRelativePath)),
 	}, nil
@@ -114,7 +122,7 @@ func (r *fileQuizArtifactRepository) AppendRawCapture(
 		return QuizArtifactPaths{}, err
 	}
 
-	paths, err := r.Paths(quizScopeFromRuntime(state))
+	paths, err := r.prepareRawCaptureArtifact(state)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -145,6 +153,26 @@ func (r *fileQuizArtifactRepository) AppendRawCapture(
 	return paths, nil
 }
 
+func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state QuizRuntimeState) (QuizArtifactPaths, error) {
+	scope := quizScopeFromRuntime(state)
+
+	paths, err := r.Paths(scope)
+	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(scope)
+	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(r.projectDir, "quiz", scopeID+"-quiz-raw"); err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	return paths, nil
+}
+
 // WriteCuratedNotes writes the requested output.
 func (r *fileQuizArtifactRepository) WriteCuratedNotes(
 	ctx context.Context,
@@ -169,6 +197,15 @@ func (r *fileQuizArtifactRepository) WriteCuratedNotes(
 
 	paths, err := r.Paths(notes.Scope)
 	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(notes.Scope)
+	if err != nil {
+		return QuizArtifactPaths{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(r.projectDir, "quiz", scopeID+"-quiz"); err != nil {
 		return QuizArtifactPaths{}, err
 	}
 

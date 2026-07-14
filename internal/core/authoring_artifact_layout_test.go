@@ -47,39 +47,39 @@ func authoringArtifactKindPathTests(projectDir string) []struct {
 	}{
 		{
 			kind:             AuthoringArtifactKindDump,
-			wantRelativePath: ".chr/default/dumps/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/dump/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindQuiz,
-			wantRelativePath: ".chr/default/quizzes/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/quiz/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindDraft,
-			wantRelativePath: ".chr/default/drafts/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/spec/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSpec,
-			wantRelativePath: ".chr/default/specs/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/spec/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindPlan,
-			wantRelativePath: ".chr/default/plans/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/plan/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSliceSet,
-			wantRelativePath: ".chr/default/slice-sets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/plan/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSlice,
-			wantRelativePath: ".chr/default/slices/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/plan/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTracker,
-			wantRelativePath: ".chr/default/trackers/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/tracker/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTicket,
-			wantRelativePath: ".chr/default/tickets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: "ops/default/ticket/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 	}
 }

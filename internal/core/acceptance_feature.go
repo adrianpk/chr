@@ -193,12 +193,15 @@ func AcceptanceFeatureLayout(projectDir string, scope QuizScope) (AcceptanceFeat
 		return AcceptanceFeaturePaths{}, err
 	}
 
-	relativePath := UserRelativePath(AcceptanceFeatureDirectory, scopeID+".feature")
+	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
+	if err != nil {
+		return AcceptanceFeaturePaths{}, err
+	}
 
 	return AcceptanceFeaturePaths{
 		ScopeID:      scopeID,
 		RelativePath: relativePath,
-		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+		Path:         path,
 	}, nil
 }
 
@@ -214,12 +217,15 @@ func AcceptanceFeatureRoundLayout(projectDir string, scope QuizScope) (Acceptanc
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	relativePath := UserRelativePath(AcceptanceFeatureDirectory, scopeID+"-feature-round.md")
+	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
 
 	return AcceptanceFeatureRoundPaths{
 		ScopeID:      scopeID,
 		RelativePath: relativePath,
-		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+		Path:         path,
 	}, nil
 }
 
@@ -245,6 +251,15 @@ func WriteAcceptanceFeature(
 
 	paths, err := AcceptanceFeatureLayout(projectDir, feature.Scope)
 	if err != nil {
+		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+	}
+
+	scopeID, err := quizScopeID(feature.Scope)
+	if err != nil {
+		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature"); err != nil {
 		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
 	}
 
@@ -275,6 +290,15 @@ func WriteAcceptanceFeatureRoundNotes(ctx context.Context, projectDir string, no
 
 	paths, err := AcceptanceFeatureRoundLayout(projectDir, notes.Scope)
 	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(notes.Scope)
+	if err != nil {
+		return AcceptanceFeatureRoundPaths{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature-round"); err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 

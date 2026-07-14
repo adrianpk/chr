@@ -73,7 +73,7 @@ Git repository and a Chryso core.
 Reports are written under:
 
 ```text
-.chr/default/reports/gates/
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)
 ```
 
 Read the Markdown report first. It shows:

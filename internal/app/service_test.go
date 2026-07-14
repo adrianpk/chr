@@ -213,7 +213,7 @@ status: "raw"
 title: "Blog Context"
 status: "curated"
 type: "dump"
-source: ".chr/default/dumps/blog-context-raw.md"
+source: "ops/default/dump/00000-blog-context-raw/artifact.md"
 case: "blog"
 ---
 
@@ -223,7 +223,7 @@ case: "blog"
 title: "Blog Context Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chr/default/dumps/blog-context.md"
+curated: "ops/default/dump/00000-blog-context/artifact.md"
 case: "blog"
 ---
 
@@ -256,16 +256,16 @@ func assertServiceDumpListResult(t *testing.T, operations service, result DumpLi
 		t.Fatalf("case dump scope = %#v, want blog", caseDump.Scope)
 	}
 
-	if caseDump.RelativePath != ".chr/default/dumps/blog-context.md" {
-		t.Fatalf("case dump path = %q, want .chr/default/dumps/blog-context.md", caseDump.RelativePath)
+	if caseDump.RelativePath != "ops/default/dump/00000-blog-context/artifact.md" {
+		t.Fatalf("case dump path = %q, want ops/default/dump/00000-blog-context/artifact.md", caseDump.RelativePath)
 	}
 
-	if caseDump.SourcePath != ".chr/default/dumps/blog-context-raw.md" {
+	if caseDump.SourcePath != "ops/default/dump/00000-blog-context-raw/artifact.md" {
 		t.Fatalf("case dump source path = %q, want raw sibling path", caseDump.SourcePath)
 	}
 
-	if operations.dumpDirectory() != filepath.Join(operations.projectContext.ProjectDir, ".chr", "default", "dumps") {
-		t.Fatalf("dumpDirectory = %q, want .chr/default/dumps", operations.dumpDirectory())
+	if operations.dumpDirectory() != filepath.Join(operations.projectContext.ProjectDir, "ops", "default", "dump") {
+		t.Fatalf("dumpDirectory = %q, want ops/default/dump", operations.dumpDirectory())
 	}
 }
 
@@ -331,19 +331,19 @@ func TestServiceCreateDumpPreservesUniqueSlugBehaviorForPairs(t *testing.T) {
 		t.Fatalf("CreateDump second returned error: %v", err)
 	}
 
-	if first.Message != "Created dump .chr/default/dumps/collision-notes.md." {
+	if first.Message != "Created dump ops/default/dump/00000-collision-notes/artifact.md." {
 		t.Fatalf("first message = %q", first.Message)
 	}
 
-	if second.Message != "Created dump .chr/default/dumps/collision-notes-2.md." {
+	if second.Message != "Created dump ops/default/dump/00000-collision-notes-2/artifact.md." {
 		t.Fatalf("second message = %q", second.Message)
 	}
 
 	for _, path := range []string{
-		".chr/default/dumps/collision-notes.md",
-		".chr/default/dumps/collision-notes-raw.md",
-		".chr/default/dumps/collision-notes-2.md",
-		".chr/default/dumps/collision-notes-2-raw.md",
+		"ops/default/dump/00000-collision-notes/artifact.md",
+		"ops/default/dump/00000-collision-notes-raw/artifact.md",
+		"ops/default/dump/00000-collision-notes-2/artifact.md",
+		"ops/default/dump/00000-collision-notes-2-raw/artifact.md",
 	} {
 		if _, err := os.Stat(filepath.Join(projectDir, filepath.FromSlash(path))); err != nil {
 			t.Fatalf("stat %s: %v", path, err)
@@ -375,7 +375,7 @@ Original body.
 	operations.dumpEditor = editor
 
 	appendResult, err := operations.AppendDump(DumpAppendRequest{
-		RelativePath: ".chr/default/dumps/project-notes.md",
+		RelativePath: "ops/default/dump/00000-project-notes/artifact.md",
 		Content:      "Appended body.",
 	})
 	if err != nil {
@@ -398,7 +398,7 @@ Original body.
 	}
 
 	readResult, err := operations.ReadDump(DumpReadRequest{
-		RelativePath: ".chr/default/dumps/project-notes.md",
+		RelativePath: "ops/default/dump/00000-project-notes/artifact.md",
 	})
 	if err != nil {
 		t.Fatalf("ReadDump returned error: %v", err)
@@ -420,17 +420,17 @@ func assertServiceOpenDumpEditorCommand(
 	t.Helper()
 
 	openResult, err := operations.OpenDump(DumpOpenRequest{
-		RelativePath: ".chr/default/dumps/project-notes.md",
+		RelativePath: "ops/default/dump/00000-project-notes/artifact.md",
 	})
 	if err != nil {
 		t.Fatalf("OpenDump returned error: %v", err)
 	}
 
-	if editor.path != filepath.Join(projectDir, ".chr", "default", "dumps", "project-notes.md") {
+	if editor.path != filepath.Join(projectDir, filepath.FromSlash("ops/default/dump/00000-project-notes/artifact.md")) {
 		t.Fatalf("editor path = %q", editor.path)
 	}
 
-	if openResult.Message != "Editing dump .chr/default/dumps/project-notes.md." {
+	if openResult.Message != "Editing dump ops/default/dump/00000-project-notes/artifact.md." {
 		t.Fatalf("open message = %q", openResult.Message)
 	}
 
@@ -494,7 +494,7 @@ func assertProjectDumpContent(t *testing.T, projectDir string) {
 		`title: "Project Notes"`,
 		`status: "curated"`,
 		`type: "dump"`,
-		`source: ".chr/default/dumps/project-notes-raw.md"`,
+		`source: "ops/default/dump/00000-project-notes-raw/artifact.md"`,
 		"# Project Notes",
 		"Project-wide dump body.",
 	} {
@@ -511,7 +511,7 @@ func assertProjectDumpContent(t *testing.T, projectDir string) {
 	for _, want := range []string{
 		`status: "raw"`,
 		`type: "dump_raw"`,
-		`curated: ".chr/default/dumps/project-notes.md"`,
+		`curated: "ops/default/dump/00000-project-notes/artifact.md"`,
 		"## Highlights",
 		"## Raw Capture",
 		"Project-wide dump body.",
@@ -530,7 +530,7 @@ func assertCaseDumpContent(t *testing.T, projectDir string) {
 		`title: "Blog Notes"`,
 		`status: "curated"`,
 		`type: "dump"`,
-		`source: ".chr/default/dumps/blog-notes-raw.md"`,
+		`source: "ops/default/dump/00000-blog-notes-raw/artifact.md"`,
 		`case: "blog"`,
 		"# Blog Notes",
 		"Case-scoped dump body.",
@@ -544,7 +544,7 @@ func assertCaseDumpContent(t *testing.T, projectDir string) {
 	for _, want := range []string{
 		`status: "raw"`,
 		`type: "dump_raw"`,
-		`curated: ".chr/default/dumps/blog-notes.md"`,
+		`curated: "ops/default/dump/00000-blog-notes/artifact.md"`,
 		`case: "blog"`,
 		"Case-scoped dump body.",
 	} {
@@ -570,6 +570,8 @@ func findDumpViewByTitle(t *testing.T, dumps []DumpView, title string) DumpView 
 
 func readServiceWorkspaceFile(t *testing.T, path string) string {
 	t.Helper()
+
+	path = canonicalServiceWorkspaceFixturePath(path)
 
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -610,7 +612,7 @@ func assertServiceSuggestsWorkspaceCases(t *testing.T, operations service) {
 func assertServiceResolvesWorkspaceRelatedDocuments(t *testing.T, operations service) {
 	t.Helper()
 
-	resolved, err := operations.ResolveWorkspacePath(filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "specs", "blog-spec.md")))
+	resolved, err := operations.ResolveWorkspacePath("ops/default/spec/00000-blog-spec/artifact.md")
 	if err != nil {
 		t.Fatalf("ResolveWorkspacePath returned error: %v", err)
 	}
@@ -1066,7 +1068,8 @@ status: "ready"
 
 # Project Plan
 `)
-	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Write.md", core.Ticket{
+
+	ticket := core.Ticket{
 		Key:         "CHR-1",
 		Title:       "Write article",
 		Status:      "ready",
@@ -1077,11 +1080,21 @@ status: "ready"
 		ProjectArea: "content",
 		CreatedAt:   testTime(),
 		UpdatedAt:   testTime(),
-	})
+	}
+	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Write.md", ticket)
+
+	content, err := core.NewTicketRenderer().RenderTicket(ticket)
+	if err != nil {
+		t.Fatalf("RenderTicket returned error: %v", err)
+	}
+
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, "ops", "default", "ticket", "00000-chr-1-write", "artifact.md"), content)
 }
 
 func writeServiceWorkspaceFile(t *testing.T, path, content string) {
 	t.Helper()
+
+	path = canonicalServiceWorkspaceFixturePath(path)
 
 	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {
@@ -1092,6 +1105,57 @@ func writeServiceWorkspaceFile(t *testing.T, path, content string) {
 	if err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
+}
+
+func canonicalServiceWorkspaceFixturePath(path string) string {
+	marker := filepath.Join(core.DirectoryName, core.UserDirectoryName)
+
+	parts := strings.Split(filepath.ToSlash(path), filepath.ToSlash(marker)+"/")
+	if len(parts) != 2 {
+		return path
+	}
+
+	artifactTypes := map[string]string{
+		"acceptance": "spec",
+		"dumps":      "dump",
+		"quizzes":    "quiz",
+		"specs":      "spec",
+		"plans":      "plan",
+		"trackers":   "tracker",
+	}
+
+	legacyParts := strings.Split(parts[1], "/")
+	if len(legacyParts) > 1 && legacyParts[1] == "archive" {
+		return path
+	}
+
+	artifactType, ok := artifactTypes[legacyParts[0]]
+	if !ok || len(legacyParts) == 1 {
+		return path
+	}
+
+	projectDir := strings.TrimSuffix(parts[0], "/")
+
+	slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+	if legacyParts[0] == "acceptance" {
+		slug = strings.TrimSuffix(slug, "-feature-round") + "-acceptance-feature-round"
+		if filepath.Ext(path) == ".feature" {
+			slug = strings.TrimSuffix(strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)), "-feature") + "-acceptance-feature"
+		}
+	}
+
+	artifactID := "00000-" + opsArtifactSlugForServiceFixture(slug)
+
+	return filepath.Join(projectDir, core.OpsDirectoryName, core.DefaultOpsNamespace, artifactType, artifactID, core.OpsArtifactBodyFile())
+}
+
+func opsArtifactSlugForServiceFixture(value string) string {
+	slug := dumpSlug(value)
+	if slug == "" {
+		return "artifact"
+	}
+
+	return slug
 }
 
 func testTime() time.Time {

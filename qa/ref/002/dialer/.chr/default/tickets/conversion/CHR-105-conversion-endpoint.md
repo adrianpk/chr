@@ -10,7 +10,7 @@ tags: ["conversion", "api"]
 use_case: "conversion"
 project_area: "api"
 source_kind: "plan_tracking"
-source_ref: ".chr/default/plans/conversion-plan.md"
+source_ref: "ops/default/plan/<id>/artifact.mdconversion-plan.md"
 slice: "CV-02"
 created_at: "2026-05-30T15:49:00Z"
 updated_at: "2026-05-30T16:02:00Z"

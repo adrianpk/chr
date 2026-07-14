@@ -346,11 +346,11 @@ Manual edits that must remain recoverable.
 		t.Fatalf("Message = %q, want Plan regenerated.", result.Message)
 	}
 
-	archivePath := filepath.Join(projectDir, ".chr", "default", "plans", "archive", "blog-plan-20260525-111213000000014.md")
+	archivePath := filepath.Join(projectDir, filepath.FromSlash("ops/default/plan/00000-blog-plan-20260525-111213000000014/artifact.md"))
 	archivedPlan := readServiceWorkspaceFile(t, archivePath)
 	for _, want := range []string{
 		`title: "Existing Blog Plan"`,
-		`archived_from: ".chr/default/plans/blog-plan.md"`,
+		`archived_from: "ops/default/plan/00000-blog-plan/artifact.md"`,
 		`archived_at: "2026-05-25T11:12:13.000000014Z"`,
 		"Manual edits that must remain recoverable.",
 	} {
@@ -472,13 +472,13 @@ Implement planning foundation.
 		t.Fatalf("Message = %q, want created tracking message", result.Message)
 	}
 
-	if result.TrackingPath != ".chr/default/plans/blog-tracking.md" {
+	if result.TrackingPath != "ops/default/tracker/00000-blog-tracking/artifact.md" {
 		t.Fatalf("TrackingPath = %q, want blog tracking path", result.TrackingPath)
 	}
 
-	tracking := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "blog-tracking.md"))
+	tracking := readServiceWorkspaceFile(t, filepath.Join(projectDir, filepath.FromSlash("ops/default/tracker/00000-blog-tracking/artifact.md")))
 	for _, want := range []string{
-		`plan_path: ".chr/default/plans/blog-plan.md"`,
+		`plan_path: "ops/default/plan/00000-blog-plan/artifact.md"`,
 		"Track the generated plan slices through tickets.",
 		"Slice 1: CHR-1 - Implement planning foundation",
 	} {
@@ -542,7 +542,7 @@ case_slug: "blog"
 		t.Fatal("MaterializePlanTracking returned nil error")
 	}
 
-	assertServiceWorkspacePathMissing(t, projectDir, ".chr/default/plans/blog-tracking.md")
+	assertServiceWorkspacePathMissing(t, projectDir, "ops/default/tracker/00000-blog-tracking/artifact.md")
 	assertServiceWorkspacePathMissing(t, projectDir, ".chr/default/tickets/blog")
 }
 
@@ -566,8 +566,8 @@ func TestServiceCreatePlanTrackingTicketsValidatesBatchBeforeWrites(t *testing.T
 
 	_, err := operations.createPlanTrackingTickets(
 		core.QuizScope{CaseSlug: "blog"},
-		".chr/default/plans/blog-plan.md",
-		".chr/default/plans/blog-tracking.md",
+		"ops/default/plan/00000-blog-plan/artifact.md",
+		"ops/default/tracker/00000-blog-tracking/artifact.md",
 		payloads,
 	)
 	if err == nil || !strings.Contains(err.Error(), "ticket summary is required") {
@@ -588,8 +588,8 @@ func TestServiceCreatePlanTrackingTicketsRejectsGeneratedKeyAndPath(t *testing.T
 
 	_, err := operations.createPlanTrackingTickets(
 		core.QuizScope{CaseSlug: "blog"},
-		".chr/default/plans/blog-plan.md",
-		".chr/default/plans/blog-tracking.md",
+		"ops/default/plan/00000-blog-plan/artifact.md",
+		"ops/default/tracker/00000-blog-tracking/artifact.md",
 		[]core.GeneratedPlanTrackingTicket{payload},
 	)
 	if err == nil || !strings.Contains(err.Error(), "generated ticket key must be empty") {
@@ -620,10 +620,10 @@ func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
 		`status: "ready_for_dev"`,
 		`synopsis: "Build the planning foundation slice."`,
 		`source_kind: "plan_tracking"`,
-		`source_ref: ".chr/default/plans/blog-plan.md"`,
+		`source_ref: "ops/default/plan/00000-blog-plan/artifact.md"`,
 		`slice: "Slice 1"`,
-		"Source plan: `.chr/default/plans/blog-plan.md`",
-		"Tracking: `.chr/default/plans/blog-tracking.md`",
+		"Source plan: `ops/default/plan/00000-blog-plan/artifact.md`",
+		"Tracking: `ops/default/tracker/00000-blog-tracking/artifact.md`",
 		"Slice: Slice 1",
 	} {
 		if !strings.Contains(ticket, want) {
@@ -644,7 +644,7 @@ func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket core.Inde
 	}
 
 	sourceMetadataMatches := ticket.SourceKind == "plan_tracking" &&
-		ticket.SourceRef == ".chr/default/plans/blog-plan.md" &&
+		ticket.SourceRef == "ops/default/plan/00000-blog-plan/artifact.md" &&
 		ticket.Slice == "Slice 1"
 
 	if !sourceMetadataMatches {
@@ -682,7 +682,7 @@ case_slug: "blog"
 
 # Blog Plan
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "blog-tracking.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, "ops", "default", "tracker", "00000-blog-tracking", "artifact.md"), `---
 title: "Blog Tracking"
 status: "tracking"
 case_slug: "blog"
@@ -723,7 +723,13 @@ case_slug: "blog"
 
 Manual edits that must remain recoverable.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "archive"), "not a directory\n")
+	archiveBlocker := filepath.Join(projectDir, filepath.FromSlash("ops/default/plan/00000-blog-plan-20260525-111213000000014"))
+	if err := os.MkdirAll(filepath.Dir(archiveBlocker), 0o755); err != nil {
+		t.Fatalf("MkdirAll archive blocker returned error: %v", err)
+	}
+	if err := os.WriteFile(archiveBlocker, []byte("not a directory\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile archive blocker returned error: %v", err)
+	}
 
 	clock := fixedServiceClock(time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC))
 	model := &fakeServiceQuizModel{
@@ -865,7 +871,7 @@ Manual plan content.
 		t.Fatalf("Message = %q, want existing plan refusal", result.Message)
 	}
 
-	if result.Plan.RelativePath != ".chr/default/plans/blog-plan.md" {
+	if result.Plan.RelativePath != "ops/default/plan/00000-blog-plan/artifact.md" {
 		t.Fatalf("Plan.RelativePath = %q, want existing canonical path", result.Plan.RelativePath)
 	}
 
@@ -906,7 +912,7 @@ func TestTUIPlanGenerateReturnsExistingPlanForGeneratedScope(t *testing.T) {
 		}
 	}
 
-	if generated.RelativePath != ".chr/default/plans/blog-plan.md" {
+	if generated.RelativePath != "ops/default/plan/00000-blog-plan/artifact.md" {
 		t.Fatalf("generated RelativePath = %q, want canonical plan path in TUI result: %#v", generated.RelativePath, result.Plans)
 	}
 

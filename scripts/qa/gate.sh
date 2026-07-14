@@ -60,8 +60,8 @@ if ! grep -q "status: passed" "$output_file"; then
 	exit 1
 fi
 
-json_count="$(find "$project_dir/.chr/default/reports/gates" -maxdepth 1 -type f -name '*.json' | wc -l | tr -d ' ')"
-markdown_count="$(find "$project_dir/.chr/default/reports/gates" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
+json_count="$(find "$project_dir/ops/default/report" -path '*/evidence/gate-report.json' -type f 2>/dev/null | wc -l | tr -d ' ')"
+markdown_count="$(find "$project_dir/ops/default/report" -name artifact.md -type f 2>/dev/null | wc -l | tr -d ' ')"
 
 if [ "$json_count" != "1" ] || [ "$markdown_count" != "1" ]; then
 	echo "qa gate failed: expected one JSON report and one Markdown report" >&2

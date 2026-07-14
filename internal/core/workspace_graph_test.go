@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -322,6 +323,8 @@ func ticketFixture(t *testing.T, ticket Ticket) string {
 func writeWorkspaceGraphFile(t *testing.T, path, content string) {
 	t.Helper()
 
+	path = canonicalWorkspaceGraphFixturePath(path)
+
 	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {
 		t.Fatalf("MkdirAll returned error: %v", err)
@@ -331,4 +334,38 @@ func writeWorkspaceGraphFile(t *testing.T, path, content string) {
 	if err != nil {
 		t.Fatalf("WriteFile returned error: %v", err)
 	}
+}
+
+func canonicalWorkspaceGraphFixturePath(path string) string {
+	marker := filepath.Join(DirectoryName, UserDirectoryName)
+
+	parts := strings.Split(filepath.ToSlash(path), filepath.ToSlash(marker)+"/")
+	if len(parts) != 2 {
+		return path
+	}
+
+	artifactTypes := map[string]string{
+		"dumps":    "dump",
+		"quizzes":  "quiz",
+		"specs":    "spec",
+		"plans":    "plan",
+		"tickets":  "ticket",
+		"trackers": "tracker",
+	}
+
+	legacyParts := strings.Split(parts[1], "/")
+	if len(legacyParts) > 1 && legacyParts[1] == "archive" {
+		return path
+	}
+
+	artifactType, ok := artifactTypes[legacyParts[0]]
+	if !ok || len(legacyParts) == 1 {
+		return path
+	}
+
+	projectDir := strings.TrimSuffix(parts[0], "/")
+	slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+	artifactID := "00000-" + opsArtifactSlugOrDefault(slug)
+
+	return filepath.Join(projectDir, OpsDirectoryName, DefaultOpsNamespace, artifactType, artifactID, OpsArtifactBodyFile())
 }

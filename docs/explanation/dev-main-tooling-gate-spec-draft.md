@@ -126,8 +126,8 @@ The final command name is open. `gate dev-main` is direct and CI-friendly.
 The command produces:
 
 ```text
-.chr/default/reports/gates/YYYYMMDD-HHMMSS-dev-main.json
-.chr/default/reports/gates/YYYYMMDD-HHMMSS-dev-main.md
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)YYYYMMDD-HHMMSS-dev-main.json
+ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)YYYYMMDD-HHMMSS-dev-main.md
 ```
 
 The Markdown report is for humans. The JSON report is for automation and CI.
@@ -144,7 +144,7 @@ The `dev` to `main` PR should reference the gate report:
 
 ## Gate
 
-- `.chr/default/reports/gates/20260601-090000-dev-main.md`
+- `ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)20260601-090000-dev-main.md`
 ```
 
 ### CI Enforcement
@@ -472,7 +472,7 @@ Possible broader namespace:
 
 ```sh
 chr review collect --base main --head dev
-chr review gate --report .chr/default/reports/gates/...
+chr review gate --report ops/default/report/<id>/ (Markdown in artifact.md, JSON in evidence/gate-report.json)...
 ```
 
 The `gate` namespace is clearer for CI. The `review` namespace is clearer for

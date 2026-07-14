@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 // DocumentView is the terminal projection of a workspace document.
@@ -87,6 +89,10 @@ func appendDocumentView(
 	}
 
 	if entry.IsDir() || !isMarkdownPath(path) {
+		return nil
+	}
+
+	if strings.HasPrefix(filepath.ToSlash(path), filepath.ToSlash(filepath.Join(projectDir, core.OpsDirectoryName))+"/") && !core.IsOpsArtifactBodyPath(projectDir, path) {
 		return nil
 	}
 
@@ -288,7 +294,12 @@ func documentRoots(projectDir string) []struct {
 		family string
 		path   string
 	}{
-		{family: "dump", path: filepath.Join(projectDir, ".chr", "default", "dumps")},
+		{family: "dump", path: core.DefaultOpsArtifactRoot(projectDir, "dump")},
+		{family: "quiz", path: core.DefaultOpsArtifactRoot(projectDir, "quiz")},
+		{family: "spec", path: core.DefaultOpsArtifactRoot(projectDir, "spec")},
+		{family: "plan", path: core.DefaultOpsArtifactRoot(projectDir, "plan")},
+		{family: "tracker", path: core.DefaultOpsArtifactRoot(projectDir, "tracker")},
+		{family: "report", path: core.DefaultOpsArtifactRoot(projectDir, "report")},
 		{family: "dump", path: filepath.Join(projectDir, ".prj", "dumps")},
 		{family: "quiz", path: filepath.Join(projectDir, ".prj", "quizzes")},
 		{family: "spec", path: filepath.Join(projectDir, ".prj", "specs")},
@@ -296,10 +307,6 @@ func documentRoots(projectDir string) []struct {
 		{family: "tracker", path: filepath.Join(projectDir, ".prj", "trackers")},
 		{family: "report", path: filepath.Join(projectDir, ".prj", "reports")},
 		{family: "handoff", path: filepath.Join(projectDir, ".prj", "handovers")},
-		{family: "quiz", path: filepath.Join(projectDir, ".chr", "default", "quizzes")},
-		{family: "spec", path: filepath.Join(projectDir, ".chr", "default", "specs")},
-		{family: "plan", path: filepath.Join(projectDir, ".chr", "default", "plans")},
-		{family: "tracker", path: filepath.Join(projectDir, ".chr", "default", "trackers")},
 	}
 }
 

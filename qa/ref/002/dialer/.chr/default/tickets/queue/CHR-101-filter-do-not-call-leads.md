@@ -10,7 +10,7 @@ tags: ["queue", "compliance"]
 use_case: "lead-queue"
 project_area: "dialer"
 source_kind: "plan_tracking"
-source_ref: ".chr/default/plans/lead-queue-plan.md"
+source_ref: "ops/default/plan/<id>/artifact.mdlead-queue-plan.md"
 slice: "LQ-01"
 created_at: "2026-05-30T15:45:00Z"
 updated_at: "2026-05-30T16:05:00Z"

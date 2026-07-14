@@ -46,12 +46,15 @@ func GeneratedSpecLayout(projectDir string, scope QuizScope) (GeneratedSpecPaths
 		return GeneratedSpecPaths{}, err
 	}
 
-	relativePath := UserRelativePath(SpecDirectory, scopeID+"-spec.md")
+	relativePath, path, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-spec")
+	if err != nil {
+		return GeneratedSpecPaths{}, err
+	}
 
 	return GeneratedSpecPaths{
 		ScopeID:      scopeID,
 		RelativePath: relativePath,
-		Path:         filepath.Join(projectDir, filepath.FromSlash(relativePath)),
+		Path:         path,
 	}, nil
 }
 
@@ -71,6 +74,15 @@ func WriteGeneratedSpec(ctx context.Context, projectDir string, spec GeneratedSp
 
 	paths, err := GeneratedSpecLayout(projectDir, spec.Scope)
 	if err != nil {
+		return GeneratedSpecPaths{}, err
+	}
+
+	scopeID, err := quizScopeID(spec.Scope)
+	if err != nil {
+		return GeneratedSpecPaths{}, err
+	}
+
+	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-spec"); err != nil {
 		return GeneratedSpecPaths{}, err
 	}
 

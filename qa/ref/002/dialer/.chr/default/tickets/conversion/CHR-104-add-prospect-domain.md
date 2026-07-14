@@ -10,7 +10,7 @@ tags: ["conversion", "domain"]
 use_case: "conversion"
 project_area: "dialer"
 source_kind: "plan_tracking"
-source_ref: ".chr/default/plans/conversion-plan.md"
+source_ref: "ops/default/plan/<id>/artifact.mdconversion-plan.md"
 slice: "CV-01"
 created_at: "2026-05-30T15:48:00Z"
 updated_at: "2026-05-30T16:08:00Z"

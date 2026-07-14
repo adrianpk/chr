@@ -10,7 +10,7 @@ tags: ["queue", "metadata"]
 use_case: "lead-queue"
 project_area: "api"
 source_kind: "plan_tracking"
-source_ref: ".chr/default/plans/lead-queue-plan.md"
+source_ref: "ops/default/plan/<id>/artifact.mdlead-queue-plan.md"
 slice: "LQ-03"
 created_at: "2026-05-30T15:47:00Z"
 updated_at: "2026-05-30T15:47:00Z"

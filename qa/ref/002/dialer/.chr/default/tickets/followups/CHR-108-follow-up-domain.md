@@ -10,7 +10,7 @@ tags: ["follow-up", "domain"]
 use_case: "followups"
 project_area: "dialer"
 source_kind: "plan_tracking"
-source_ref: ".chr/default/plans/followups-plan.md"
+source_ref: "ops/default/plan/<id>/artifact.mdfollowups-plan.md"
 slice: "FU-01"
 created_at: "2026-05-30T15:52:00Z"
 updated_at: "2026-05-30T16:06:00Z"
