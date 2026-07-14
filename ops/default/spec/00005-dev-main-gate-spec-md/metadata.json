@@ -1,0 +1,24 @@
+{
+  "schema_version": "ops-layout/v1",
+  "id": "00005-dev-main-gate-spec-md",
+  "type": "spec",
+  "namespace": "default",
+  "title": "Dev Main Gate Spec Md",
+  "status": "migrated",
+  "revision": 1,
+  "created_at": "2026-07-14T13:51:39Z",
+  "updated_at": "2026-07-14T13:51:39Z",
+  "producer": {
+    "name": "pi",
+    "version": "1"
+  },
+  "external_ids": [
+    ".chr/user/specs/dev-main-gate-spec.md"
+  ],
+  "sources": [],
+  "continuations": [],
+  "files": [
+    "artifact.md",
+    "files/legacy/dev-main-gate-spec.md"
+  ]
+}

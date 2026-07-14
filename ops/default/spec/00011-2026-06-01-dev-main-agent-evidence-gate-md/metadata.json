@@ -1,0 +1,24 @@
+{
+  "schema_version": "ops-layout/v1",
+  "id": "00011-2026-06-01-dev-main-agent-evidence-gate-md",
+  "type": "spec",
+  "namespace": "default",
+  "title": "2026 06 01 Dev Main Agent Evidence Gate Md",
+  "status": "migrated",
+  "revision": 1,
+  "created_at": "2026-07-14T13:51:39Z",
+  "updated_at": "2026-07-14T13:51:39Z",
+  "producer": {
+    "name": "pi",
+    "version": "1"
+  },
+  "external_ids": [
+    "ops/specs/2026-06-01-dev-main-agent-evidence-gate.md"
+  ],
+  "sources": [],
+  "continuations": [],
+  "files": [
+    "artifact.md",
+    "files/legacy/2026-06-01-dev-main-agent-evidence-gate.md"
+  ]
+}

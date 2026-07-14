@@ -1,0 +1,24 @@
+{
+  "schema_version": "ops-layout/v1",
+  "id": "00033-2026-06-19-isolated-ticket-worktrees-plan-md",
+  "type": "plan",
+  "namespace": "default",
+  "title": "2026 06 19 Isolated Ticket Worktrees Plan Md",
+  "status": "migrated",
+  "revision": 1,
+  "created_at": "2026-07-14T13:51:39Z",
+  "updated_at": "2026-07-14T13:51:39Z",
+  "producer": {
+    "name": "pi",
+    "version": "1"
+  },
+  "external_ids": [
+    "ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md"
+  ],
+  "sources": [],
+  "continuations": [],
+  "files": [
+    "artifact.md",
+    "files/legacy/2026-06-19-isolated-ticket-worktrees-plan.md"
+  ]
+}

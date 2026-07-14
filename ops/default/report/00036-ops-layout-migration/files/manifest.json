@@ -1,0 +1,256 @@
+{
+  "schema_version": "ops-layout/migration-v1",
+  "root": "/home/adrian/Projects/chr-operational-layout",
+  "namespace": "default",
+  "producer": "pi",
+  "mode": "apply",
+  "artifacts": [
+    {
+      "source": ".chr/user/dumps/curated",
+      "type": "dump",
+      "slug": "curated",
+      "id": "00001-curated",
+      "destination": "ops/default/dump/00001-curated"
+    },
+    {
+      "source": ".chr/user/dumps/raw",
+      "type": "dump",
+      "slug": "raw",
+      "id": "00002-raw",
+      "destination": "ops/default/dump/00002-raw"
+    },
+    {
+      "source": ".chr/user/quizzes/curated",
+      "type": "quiz",
+      "slug": "curated",
+      "id": "00003-curated",
+      "destination": "ops/default/quiz/00003-curated"
+    },
+    {
+      "source": ".chr/user/quizzes/raw",
+      "type": "quiz",
+      "slug": "raw",
+      "id": "00004-raw",
+      "destination": "ops/default/quiz/00004-raw"
+    },
+    {
+      "source": ".chr/user/specs/dev-main-gate-spec.md",
+      "type": "spec",
+      "slug": "dev-main-gate-spec-md",
+      "id": "00005-dev-main-gate-spec-md",
+      "destination": "ops/default/spec/00005-dev-main-gate-spec-md"
+    },
+    {
+      "source": ".chr/user/specs/merger-agent-workflow.md",
+      "type": "spec",
+      "slug": "merger-agent-workflow-md",
+      "id": "00006-merger-agent-workflow-md",
+      "destination": "ops/default/spec/00006-merger-agent-workflow-md"
+    },
+    {
+      "source": ".chr/user/specs/ticket-review-integration-draft.md",
+      "type": "spec",
+      "slug": "ticket-review-integration-draft-md",
+      "id": "00007-ticket-review-integration-draft-md",
+      "destination": "ops/default/spec/00007-ticket-review-integration-draft-md"
+    },
+    {
+      "source": ".chr/user/plans/dev-main-gate-plan.md",
+      "type": "plan",
+      "slug": "dev-main-gate-plan-md",
+      "id": "00008-dev-main-gate-plan-md",
+      "destination": "ops/default/plan/00008-dev-main-gate-plan-md"
+    },
+    {
+      "source": ".chr/user/plans/merger-agent-workflow-plan.md",
+      "type": "plan",
+      "slug": "merger-agent-workflow-plan-md",
+      "id": "00009-merger-agent-workflow-plan-md",
+      "destination": "ops/default/plan/00009-merger-agent-workflow-plan-md"
+    },
+    {
+      "source": ".chr/user/plans/ticket-review-integration-plan.md",
+      "type": "plan",
+      "slug": "ticket-review-integration-plan-md",
+      "id": "00010-ticket-review-integration-plan-md",
+      "destination": "ops/default/plan/00010-ticket-review-integration-plan-md"
+    },
+    {
+      "source": "ops/specs/2026-06-01-dev-main-agent-evidence-gate.md",
+      "type": "spec",
+      "slug": "2026-06-01-dev-main-agent-evidence-gate-md",
+      "id": "00011-2026-06-01-dev-main-agent-evidence-gate-md",
+      "destination": "ops/default/spec/00011-2026-06-01-dev-main-agent-evidence-gate-md"
+    },
+    {
+      "source": "ops/specs/2026-06-06-gherkin-acceptance-generation.md",
+      "type": "spec",
+      "slug": "2026-06-06-gherkin-acceptance-generation-md",
+      "id": "00012-2026-06-06-gherkin-acceptance-generation-md",
+      "destination": "ops/default/spec/00012-2026-06-06-gherkin-acceptance-generation-md"
+    },
+    {
+      "source": "ops/specs/2026-06-06-separate-acceptance-feature-workflow.md",
+      "type": "spec",
+      "slug": "2026-06-06-separate-acceptance-feature-workflow-md",
+      "id": "00013-2026-06-06-separate-acceptance-feature-workflow-md",
+      "destination": "ops/default/spec/00013-2026-06-06-separate-acceptance-feature-workflow-md"
+    },
+    {
+      "source": "ops/specs/2026-06-18-agent-work-observability-model.md",
+      "type": "spec",
+      "slug": "2026-06-18-agent-work-observability-model-md",
+      "id": "00014-2026-06-18-agent-work-observability-model-md",
+      "destination": "ops/default/spec/00014-2026-06-18-agent-work-observability-model-md"
+    },
+    {
+      "source": "ops/specs/2026-06-18-agent-work-observability.md",
+      "type": "spec",
+      "slug": "2026-06-18-agent-work-observability-md",
+      "id": "00015-2026-06-18-agent-work-observability-md",
+      "destination": "ops/default/spec/00015-2026-06-18-agent-work-observability-md"
+    },
+    {
+      "source": "ops/specs/2026-06-18-agentic-loop-review-merge.md",
+      "type": "spec",
+      "slug": "2026-06-18-agentic-loop-review-merge-md",
+      "id": "00016-2026-06-18-agentic-loop-review-merge-md",
+      "destination": "ops/default/spec/00016-2026-06-18-agentic-loop-review-merge-md"
+    },
+    {
+      "source": "ops/specs/2026-06-18-configurable-work-readiness-model.md",
+      "type": "spec",
+      "slug": "2026-06-18-configurable-work-readiness-model-md",
+      "id": "00017-2026-06-18-configurable-work-readiness-model-md",
+      "destination": "ops/default/spec/00017-2026-06-18-configurable-work-readiness-model-md"
+    },
+    {
+      "source": "ops/specs/2026-06-18-configurable-work-readiness.md",
+      "type": "spec",
+      "slug": "2026-06-18-configurable-work-readiness-md",
+      "id": "00018-2026-06-18-configurable-work-readiness-md",
+      "destination": "ops/default/spec/00018-2026-06-18-configurable-work-readiness-md"
+    },
+    {
+      "source": "ops/specs/2026-06-19-agent-test-evidence-strategy-pass.md",
+      "type": "spec",
+      "slug": "2026-06-19-agent-test-evidence-strategy-pass-md",
+      "id": "00019-2026-06-19-agent-test-evidence-strategy-pass-md",
+      "destination": "ops/default/spec/00019-2026-06-19-agent-test-evidence-strategy-pass-md"
+    },
+    {
+      "source": "ops/specs/2026-06-19-isolated-ticket-worktrees.md",
+      "type": "spec",
+      "slug": "2026-06-19-isolated-ticket-worktrees-md",
+      "id": "00020-2026-06-19-isolated-ticket-worktrees-md",
+      "destination": "ops/default/spec/00020-2026-06-19-isolated-ticket-worktrees-md"
+    },
+    {
+      "source": "ops/specs/2026-06-20-serialized-integration-loop-model.md",
+      "type": "spec",
+      "slug": "2026-06-20-serialized-integration-loop-model-md",
+      "id": "00021-2026-06-20-serialized-integration-loop-model-md",
+      "destination": "ops/default/spec/00021-2026-06-20-serialized-integration-loop-model-md"
+    },
+    {
+      "source": "ops/specs/2026-06-20-serialized-integration-loop.md",
+      "type": "spec",
+      "slug": "2026-06-20-serialized-integration-loop-md",
+      "id": "00022-2026-06-20-serialized-integration-loop-md",
+      "destination": "ops/default/spec/00022-2026-06-20-serialized-integration-loop-md"
+    },
+    {
+      "source": "ops/specs/2026-06-29-execution-unit-runtime-refinements.md",
+      "type": "spec",
+      "slug": "2026-06-29-execution-unit-runtime-refinements-md",
+      "id": "00023-2026-06-29-execution-unit-runtime-refinements-md",
+      "destination": "ops/default/spec/00023-2026-06-29-execution-unit-runtime-refinements-md"
+    },
+    {
+      "source": "ops/specs/2026-06-29-optional-local-web-ui.md",
+      "type": "spec",
+      "slug": "2026-06-29-optional-local-web-ui-md",
+      "id": "00024-2026-06-29-optional-local-web-ui-md",
+      "destination": "ops/default/spec/00024-2026-06-29-optional-local-web-ui-md"
+    },
+    {
+      "source": "ops/specs/drafts",
+      "type": "spec",
+      "slug": "drafts",
+      "id": "00025-drafts",
+      "destination": "ops/default/spec/00025-drafts"
+    },
+    {
+      "source": "ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md",
+      "type": "plan",
+      "slug": "2026-06-01-dev-main-agent-evidence-gate-plan-md",
+      "id": "00026-2026-06-01-dev-main-agent-evidence-gate-plan-md",
+      "destination": "ops/default/plan/00026-2026-06-01-dev-main-agent-evidence-gate-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md",
+      "type": "plan",
+      "slug": "2026-06-06-gherkin-acceptance-generation-plan-md",
+      "id": "00027-2026-06-06-gherkin-acceptance-generation-plan-md",
+      "destination": "ops/default/plan/00027-2026-06-06-gherkin-acceptance-generation-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md",
+      "type": "plan",
+      "slug": "2026-06-06-separate-acceptance-feature-workflow-plan-md",
+      "id": "00028-2026-06-06-separate-acceptance-feature-workflow-plan-md",
+      "destination": "ops/default/plan/00028-2026-06-06-separate-acceptance-feature-workflow-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-18-agent-work-observability-plan.md",
+      "type": "plan",
+      "slug": "2026-06-18-agent-work-observability-plan-md",
+      "id": "00029-2026-06-18-agent-work-observability-plan-md",
+      "destination": "ops/default/plan/00029-2026-06-18-agent-work-observability-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-18-configurable-work-readiness-plan.md",
+      "type": "plan",
+      "slug": "2026-06-18-configurable-work-readiness-plan-md",
+      "id": "00030-2026-06-18-configurable-work-readiness-plan-md",
+      "destination": "ops/default/plan/00030-2026-06-18-configurable-work-readiness-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-18-tictactoe-qa-reference-plan.md",
+      "type": "plan",
+      "slug": "2026-06-18-tictactoe-qa-reference-plan-md",
+      "id": "00031-2026-06-18-tictactoe-qa-reference-plan-md",
+      "destination": "ops/default/plan/00031-2026-06-18-tictactoe-qa-reference-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-19-agent-test-evidence-strategy-pass-plan.md",
+      "type": "plan",
+      "slug": "2026-06-19-agent-test-evidence-strategy-pass-plan-md",
+      "id": "00032-2026-06-19-agent-test-evidence-strategy-pass-plan-md",
+      "destination": "ops/default/plan/00032-2026-06-19-agent-test-evidence-strategy-pass-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-19-isolated-ticket-worktrees-plan.md",
+      "type": "plan",
+      "slug": "2026-06-19-isolated-ticket-worktrees-plan-md",
+      "id": "00033-2026-06-19-isolated-ticket-worktrees-plan-md",
+      "destination": "ops/default/plan/00033-2026-06-19-isolated-ticket-worktrees-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-20-serialized-integration-loop-plan.md",
+      "type": "plan",
+      "slug": "2026-06-20-serialized-integration-loop-plan-md",
+      "id": "00034-2026-06-20-serialized-integration-loop-plan-md",
+      "destination": "ops/default/plan/00034-2026-06-20-serialized-integration-loop-plan-md"
+    },
+    {
+      "source": "ops/plans/2026-06-29-optional-local-web-ui-plan.md",
+      "type": "plan",
+      "slug": "2026-06-29-optional-local-web-ui-plan-md",
+      "id": "00035-2026-06-29-optional-local-web-ui-plan-md",
+      "destination": "ops/default/plan/00035-2026-06-29-optional-local-web-ui-plan-md"
+    }
+  ],
+  "already_migrated": [],
+  "skipped_worktrees": []
+}

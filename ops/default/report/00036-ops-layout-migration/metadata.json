@@ -1,0 +1,24 @@
+{
+  "schema_version": "ops-layout/v1",
+  "id": "00036-ops-layout-migration",
+  "type": "report",
+  "namespace": "default",
+  "title": "Operational Layout Migration",
+  "status": "migrated",
+  "revision": 1,
+  "created_at": "2026-07-14T13:51:39Z",
+  "updated_at": "2026-07-14T13:51:39Z",
+  "producer": {
+    "name": "pi",
+    "version": "1"
+  },
+  "external_ids": [
+    "migration"
+  ],
+  "sources": [],
+  "continuations": [],
+  "files": [
+    "artifact.md",
+    "files/manifest.json"
+  ]
+}
