@@ -350,6 +350,7 @@ func ExecutionReportPath(record ExecutionRecord) string {
 	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
 		return ""
 	}
+
 	if strings.TrimSpace(record.Artifacts.ArtifactID) != "" {
 		return filepath.Join(record.Artifacts.RunDir, "evidence", "execution-report.md")
 	}

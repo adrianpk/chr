@@ -69,15 +69,32 @@ func (l ReportLister) ListProjectReports(
 	if err != nil {
 		return nil, err
 	}
+
+	entries, err := walkReportListEntries(ctx, projectDir, root, filter)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []ReportListEntry{}, nil
+		}
+
+		return nil, fmt.Errorf("list project reports: %w", err)
+	}
+
+	sort.SliceStable(entries, func(i, j int) bool {
+		return entries[i].RelativePath < entries[j].RelativePath
+	})
+
+	return entries, nil
+}
+
+func walkReportListEntries(ctx context.Context, projectDir, root string, filter ReportListFilter) ([]ReportListEntry, error) {
 	entries := []ReportListEntry{}
 
-	err = filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
+	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
 
-		err = ctx.Err()
-		if err != nil {
+		if err := ctx.Err(); err != nil {
 			return err
 		}
 
@@ -99,16 +116,8 @@ func (l ReportLister) ListProjectReports(
 		return nil
 	})
 	if err != nil {
-		if os.IsNotExist(err) {
-			return []ReportListEntry{}, nil
-		}
-
-		return nil, fmt.Errorf("list project reports: %w", err)
+		return nil, err
 	}
-
-	sort.SliceStable(entries, func(i, j int) bool {
-		return entries[i].RelativePath < entries[j].RelativePath
-	})
 
 	return entries, nil
 }

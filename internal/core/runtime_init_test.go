@@ -29,7 +29,6 @@ func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 	if !contains(result.Created, ".chr/default/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
-
 }
 
 func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
@@ -52,7 +51,6 @@ func TestRuntimeInitDryRunDoesNotCreateRuntimeTemplate(t *testing.T) {
 	if !contains(result.Created, ".chr/default/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
-
 }
 
 func TestRuntimeInitSkipsExistingRuntimeTemplate(t *testing.T) {

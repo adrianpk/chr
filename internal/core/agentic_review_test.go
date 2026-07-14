@@ -90,6 +90,7 @@ func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	if filepath.Dir(artifact.ContextPath) != wantRunDir {
 		t.Fatalf("ContextPath dir = %q, want %q", filepath.Dir(artifact.ContextPath), wantRunDir)
 	}
+
 	assertAgenticReviewArtifactExists(t, artifact.ContextPath)
 	assertAgenticReviewArtifactExists(t, artifact.ResultPath)
 	assertAgenticReviewArtifactExists(t, artifact.SummaryPath)

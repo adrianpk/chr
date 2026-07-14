@@ -146,6 +146,7 @@ func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 
 func TestPlanRuntimeUsesCanonicalOpsArtifactPaths(t *testing.T) {
 	dir := t.TempDir()
+
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
@@ -166,9 +167,11 @@ func TestPlanRuntimeUsesCanonicalOpsArtifactPaths(t *testing.T) {
 	if plan.ArtifactID != "00001-ticket-run" || plan.RunArtifactDir != wantRunDir {
 		t.Fatalf("canonical run = (%q, %q)", plan.ArtifactID, plan.RunArtifactDir)
 	}
+
 	if plan.WorkerContextPath != filepath.Join(wantRunDir, "files", "context.md") {
 		t.Fatalf("WorkerContextPath = %q", plan.WorkerContextPath)
 	}
+
 	if plan.ResultPath != filepath.Join(wantRunDir, "evidence", "result.json") {
 		t.Fatalf("ResultPath = %q", plan.ResultPath)
 	}

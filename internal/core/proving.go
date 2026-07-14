@@ -245,6 +245,7 @@ func RunProvingValidationForObjective(
 	if err != nil {
 		return ProvingValidationResult{}, err
 	}
+
 	artifact, err := ensureProvingOpsArtifact(projectDir, planned.Objective)
 	if err != nil {
 		return ProvingValidationResult{}, err
@@ -275,6 +276,7 @@ func RunProvingValidationForObjective(
 	if err != nil {
 		return ProvingValidationResult{}, fmt.Errorf("write proving validation log: %w", err)
 	}
+
 	if err := RefreshOpsArtifactMetadata(artifact.Dir, provingValidationArtifactStatus(result), time.Now()); err != nil {
 		return ProvingValidationResult{}, err
 	}
@@ -446,8 +448,12 @@ func prepareProvingArtifacts(result ProvingSandboxRunResult) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open proving runtime log: %w", err)
 	}
+
 	if err := RefreshOpsArtifactMetadata(artifact.Dir, "running", time.Now()); err != nil {
-		_ = logFile.Close()
+		if closeErr := logFile.Close(); closeErr != nil {
+			return nil, fmt.Errorf("%w; close proving runtime log: %w", err, closeErr)
+		}
+
 		return nil, err
 	}
 
@@ -768,6 +774,7 @@ func ensureProvingOpsArtifact(projectDir string, objective ProvingObjective) (Op
 	}
 
 	id := filepath.Base(filepath.Clean(filepath.FromSlash(objective.ArtifactRoot)))
+
 	return EnsureOpsArtifactEnvelope(CreateOpsArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
@@ -832,6 +839,7 @@ func writeProvingRalphLoopSummary(projectDir string, result ProvingRalphLoopResu
 	if err != nil {
 		return fmt.Errorf("write proving ralph loop summary: %w", err)
 	}
+
 	if err := RefreshOpsArtifactMetadata(artifact.Dir, result.Status, time.Now()); err != nil {
 		return err
 	}

@@ -218,6 +218,7 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 	if record.Artifacts.RunDir != plan.RunArtifactDir {
 		t.Fatalf("Artifacts.RunDir = %q, want %q", record.Artifacts.RunDir, plan.RunArtifactDir)
 	}
+
 	if record.Artifacts.ArtifactID != plan.ArtifactID {
 		t.Fatalf("Artifacts.ArtifactID = %q, want %q", record.Artifacts.ArtifactID, plan.ArtifactID)
 	}

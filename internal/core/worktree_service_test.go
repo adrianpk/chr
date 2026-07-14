@@ -39,6 +39,7 @@ func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
 
 func TestNewWorktreePlanUsesConfiguredOpsNamespace(t *testing.T) {
 	t.Setenv(OpsUserEnv, "adrian")
+
 	dir := t.TempDir()
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
@@ -49,6 +50,7 @@ func TestNewWorktreePlanUsesConfiguredOpsNamespace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if got, want := plan.WorktreeRoot, filepath.Join(dir, "ops", "adrian", "worktree"); got != want {
 		t.Fatalf("WorktreeRoot = %q, want %q", got, want)
 	}

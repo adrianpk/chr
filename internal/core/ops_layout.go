@@ -54,9 +54,11 @@ func ResolveOpsLayout(opts ResolveOpsLayoutOptions) (OpsLayout, error) {
 	if namespace == "" {
 		namespace = strings.TrimSpace(lookupEnv(OpsUserEnv))
 	}
+
 	if namespace == "" {
 		namespace = DefaultOpsNamespace
 	}
+
 	if !IsValidOpsNamespace(namespace) {
 		return OpsLayout{}, fmt.Errorf("invalid ops namespace: %s", namespace)
 	}
@@ -100,6 +102,7 @@ func (l OpsLayout) ArtifactDirectory(artifactType, id string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	if strings.TrimSpace(id) == "" || filepath.Base(id) != id {
 		return "", fmt.Errorf("invalid ops artifact id: %s", id)
 	}

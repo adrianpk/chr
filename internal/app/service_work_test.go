@@ -74,9 +74,11 @@ func TestServiceStartAgentWorkTicketInitializesRuntime(t *testing.T) {
 	}
 
 	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"))
+
 	if result.Execution == nil {
 		t.Fatal("Execution is nil")
 	}
+
 	assertPathExists(t, filepath.Join(result.Execution.Artifacts.RunDir, "artifact.md"))
 }
 

@@ -341,11 +341,13 @@ func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadines
 
 func applyRuntimeArtifactsRepair(ctx context.Context, run repairRun) (WorkReadinessAppliedRepair, bool, error) {
 	changed := false
+
 	for _, pattern := range runtimeArtifactIgnorePatterns() {
 		patternChanged, err := run.git.ExcludeLocalPattern(ctx, run.projectDir, pattern)
 		if err != nil {
 			return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
 		}
+
 		changed = changed || patternChanged
 	}
 

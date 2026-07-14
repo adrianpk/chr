@@ -19,6 +19,7 @@ func TestResolveOpsLayoutDefaultsToDefaultNamespace(t *testing.T) {
 	if layout.Namespace() != DefaultOpsNamespace {
 		t.Fatalf("Namespace = %q, want %q", layout.Namespace(), DefaultOpsNamespace)
 	}
+
 	if layout.Root() != filepath.Join(projectDir, "ops", "default") {
 		t.Fatalf("Root = %q", layout.Root())
 	}
@@ -46,6 +47,7 @@ func TestResolveOpsLayoutUsesOpsUser(t *testing.T) {
 			if name == OpsUserEnv {
 				return "adrian"
 			}
+
 			return ""
 		},
 	})
@@ -70,6 +72,7 @@ func TestResolveOpsLayoutRejectsInvalidNamespace(t *testing.T) {
 
 func TestOpsLayoutBuildsCanonicalArtifactAndWorktreePaths(t *testing.T) {
 	projectDir := t.TempDir()
+
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: "adrian"})
 	if err != nil {
 		t.Fatalf("ResolveOpsLayout returned error: %v", err)
@@ -79,6 +82,7 @@ func TestOpsLayoutBuildsCanonicalArtifactAndWorktreePaths(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ArtifactDirectory returned error: %v", err)
 	}
+
 	if want := filepath.Join(projectDir, "ops", "adrian", "run", "00001-parser-validation"); runDir != want {
 		t.Fatalf("ArtifactDirectory = %q, want %q", runDir, want)
 	}
@@ -87,6 +91,7 @@ func TestOpsLayoutBuildsCanonicalArtifactAndWorktreePaths(t *testing.T) {
 	if err != nil {
 		t.Fatalf("WorktreeDirectory returned error: %v", err)
 	}
+
 	if want := filepath.Join(projectDir, "ops", "adrian", "worktree", "00001-parser-validation"); worktreeDir != want {
 		t.Fatalf("WorktreeDirectory = %q, want %q", worktreeDir, want)
 	}
@@ -101,6 +106,7 @@ func TestOpsLayoutRejectsUnknownArtifactTypeAndUnsafeID(t *testing.T) {
 	if _, err := layout.ArtifactDirectory("runs", "00001-parser-validation"); err == nil {
 		t.Fatal("ArtifactDirectory accepted plural type")
 	}
+
 	if _, err := layout.ArtifactDirectory("run", "../outside"); err == nil {
 		t.Fatal("ArtifactDirectory accepted unsafe ID")
 	}

@@ -54,6 +54,7 @@ func ExecutionAgentEventStreamPath(record ExecutionRecord) string {
 	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
 		return ""
 	}
+
 	if strings.TrimSpace(record.Artifacts.ArtifactID) != "" {
 		return filepath.Join(record.Artifacts.RunDir, "evidence", AgentEventStreamFileName)
 	}
@@ -66,6 +67,7 @@ func LoopRunEventStreamPath(record LoopRunRecord) string {
 	if strings.TrimSpace(record.ArtifactDir) == "" {
 		return ""
 	}
+
 	if strings.TrimSpace(record.ArtifactID) != "" {
 		return filepath.Join(record.ArtifactDir, "evidence", AgentEventStreamFileName)
 	}
