@@ -60,7 +60,7 @@ Tasks:
 ## Slice 2: Validation and Report Output
 
 Goal: run validation and write Markdown/JSON reports under
-`.chr/user/reports/gates/`.
+`.chr/default/reports/gates/`.
 
 Behavior:
 
@@ -94,7 +94,7 @@ Behavior:
 
 Tasks:
 
-- T3.1 Discover gate-relevant reports under `.chr/user/reports`.
+- T3.1 Discover gate-relevant reports under `.chr/default/reports`.
 - T3.2 Classify agent-managed evidence from available run reports.
 - T3.3 Classify unmatched changed files as manual or external info.
 - T3.4 Add failure checks for missing Chryso-owned run evidence.
@@ -103,12 +103,12 @@ Tasks:
 
 ## Slice 4: Gate Policy Configuration
 
-Goal: support `.chr/user/config/gates.yml` for project-specific validation and
+Goal: support `.chr/default/config/gates.yml` for project-specific validation and
 stricter traceability options while preserving safe defaults.
 
 Behavior:
 
-- The gate reads `.chr/user/config/gates.yml` when present.
+- The gate reads `.chr/default/config/gates.yml` when present.
 - Projects can override validation command.
 - Manual/external changes remain `info` by default.
 - Warnings and stricter behavior only appear when policy enables them.

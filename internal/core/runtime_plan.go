@@ -250,7 +250,7 @@ func runtimeOpsLayout(projectDir string, configuredArtifactDir string, opts Runt
 	}
 
 	artifactDir := filepath.ToSlash(filepath.Clean(filepath.FromSlash(strings.TrimSpace(configuredArtifactDir))))
-	if artifactDir == LegacyRuntimeArtifactDir {
+	if artifactDir == PrivateRuntimeArtifactDir {
 		layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
 		if err != nil {
 			return OpsLayout{}, "", false, err

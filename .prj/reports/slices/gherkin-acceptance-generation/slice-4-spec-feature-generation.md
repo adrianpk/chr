@@ -18,7 +18,7 @@ Spec generation model output now supports an optional `feature` object with
 `generated`, `rejected`, or `not_applicable` status.
 
 When the model returns a generated feature, the service writes
-`.chr/user/acceptance/<scope>.feature` only after deterministic static checks
+`.chr/default/acceptance/<scope>.feature` only after deterministic static checks
 pass. Invalid generated features do not fail spec generation and are reported
 as rejected.
 

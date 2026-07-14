@@ -27,7 +27,7 @@ The command:
 
 - resolves the project through `--dir`, active project, or current directory;
 - opens the user-level SQLite ticket index;
-- discovers Markdown ticket files under `.chr/user/tickets`;
+- discovers Markdown ticket files under `.chr/default/tickets`;
 - deletes existing indexed ticket rows for the resolved project;
 - indexes successfully parsed tickets;
 - reports parse errors without failing the whole rebuild.

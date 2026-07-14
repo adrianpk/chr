@@ -11,7 +11,7 @@ configurable, so projects do not need to follow Chryso's own branch names.
 
 ## Configuration
 
-Work readiness configuration lives in `.chr/user/config.yml` under `work:`.
+Work readiness configuration lives in `.chr/default/config.yml` under `work:`.
 
 ```yml
 work:

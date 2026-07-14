@@ -50,9 +50,9 @@ tickets:
   key_prefix: PRJ
 runtime:
   image: custom-agent:latest
-  dockerfile: .chr/user/runtime/custom.Dockerfile
+  dockerfile: .chr/default/runtime/custom.Dockerfile
   workdir: /repo
-  artifact_dir: .chr/user/runtime/custom-runs
+  artifact_dir: .chr/default/runtime/custom-runs
   validation_command: go test ./...
 `)
 
@@ -67,9 +67,9 @@ runtime:
 
 	want := RuntimeConfig{
 		Image:             "custom-agent:latest",
-		DockerfilePath:    ".chr/user/runtime/custom.Dockerfile",
+		DockerfilePath:    ".chr/default/runtime/custom.Dockerfile",
 		Workdir:           "/repo",
-		ArtifactDir:       ".chr/user/runtime/custom-runs",
+		ArtifactDir:       ".chr/default/runtime/custom-runs",
 		ValidationCommand: "go test ./...",
 	}
 	if config.Runtime != want {
@@ -612,7 +612,7 @@ func TestValidateWorkConfigRejectsInvalidWorkspaceConfig(t *testing.T) {
 				BranchPolicy: DefaultWorkBranchPolicy(),
 				Workspace: WorkWorkspaceConfig{
 					Mode:            WorkWorkspaceModeWorktree,
-					WorktreeRoot:    ".chr/user/runtime/worktrees",
+					WorktreeRoot:    ".chr/default/runtime/worktrees",
 					WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
 					WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 				},

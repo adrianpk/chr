@@ -1,7 +1,7 @@
 # Merger Agent Role
 
 Date: 2026-06-02
-Raw source: `.chr/user/dumps/raw/2026-06-02-merger-agent-role-raw.md`
+Raw source: `.chr/default/dumps/raw/2026-06-02-merger-agent-role-raw.md`
 
 ## Central Topic
 

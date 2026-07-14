@@ -1,4 +1,4 @@
 # Migrated Dump Artifact
 
-- Legacy source: `.chr/user/dumps/curated`
+- Legacy source: `.chr/default/dumps/curated`
 - Migration producer: `pi`

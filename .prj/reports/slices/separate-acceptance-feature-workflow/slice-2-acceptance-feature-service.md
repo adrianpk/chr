@@ -22,7 +22,7 @@ spec context. It requires an existing spec before feature generation can run.
 
 The feature model contract returns `generated`, `needs_more_info`, `rejected`,
 or `not_applicable`. Generated feature bodies are written to
-`.chr/user/acceptance/<case>.feature` only after deterministic static checks
+`.chr/default/acceptance/<case>.feature` only after deterministic static checks
 pass. Non-generated statuses return service results without writing a feature
 file.
 

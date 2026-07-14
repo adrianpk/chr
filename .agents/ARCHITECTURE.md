@@ -99,7 +99,7 @@ Workspace cache files are discardable local acceleration artifacts. They may
 live under a project-local cache path such as:
 
 ```text
-.chr/user/tmp/cache/workspace-index/
+.chr/default/tmp/cache/workspace-index/
 ```
 
 Cache files must never be treated as authoritative. Missing, stale, corrupt, or

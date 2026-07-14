@@ -5,7 +5,7 @@ Status: delivered
 Plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 Spec Draft: `.prj/specs/drafts/ticket-review-integration-draft.md`
 Quiz: `.prj/quizzes/curated/ticket-review-integration-quiz.md`
-Mirror: `.chr/user/trackers/ticket-review-integration-tracker.md`
+Mirror: `.chr/default/trackers/ticket-review-integration-tracker.md`
 
 ## Slicing Checklist
 

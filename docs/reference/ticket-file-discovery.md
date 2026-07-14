@@ -15,7 +15,7 @@ Discovery receives a project directory.
 The ticket directory is:
 
 ```text
-<project>/.chr/user/tickets
+<project>/.chr/default/tickets
 ```
 
 ## Output
@@ -25,20 +25,20 @@ Discovery returns `chr.DiscoveredTicketFile` values.
 Each discovered file includes:
 
 - `Path`: absolute or caller-provided filesystem path to the Markdown file;
-- `RelativePath`: slash-separated path relative to `.chr/user/tickets`.
+- `RelativePath`: slash-separated path relative to `.chr/default/tickets`.
 
 Results are sorted by `RelativePath`.
 
 ## Included Files
 
-Discovery includes files with the `.md` extension below `.chr/user/tickets`,
+Discovery includes files with the `.md` extension below `.chr/default/tickets`,
 including nested use-case directories.
 
 Discovery ignores directories and non-Markdown files.
 
 ## Missing Directory
 
-Missing `.chr/user/tickets` is an error.
+Missing `.chr/default/tickets` is an error.
 
 Managed projects are expected to contain the ticket directory created by
 `chr init`.

@@ -224,7 +224,7 @@ func TestHandlerProjectBoardDashRoutes(t *testing.T) {
 		want []string
 	}{
 		{path: "/", want: []string{"Project", "Project directory", "/tmp/project"}},
-		{path: "/project", want: []string{"Project", "Tickets", ".chr/user/tickets"}},
+		{path: "/project", want: []string{"Project", "Tickets", ".chr/default/tickets"}},
 		{path: "/board", want: []string{"Board", "Ready For Dev", "CHR-1", "Ready work"}},
 		{path: "/dash", want: []string{"Dash", "Readiness", "Queue", "worker_started"}},
 	} {
@@ -257,11 +257,11 @@ func TestHandlerArtifactCatalogAndDetailRoutes(t *testing.T) {
 		want []string
 	}{
 		{path: "/cases", want: []string{"Cases", "Blog Authoring", "Case context"}},
-		{path: "/dumps", want: []string{"Dumps", "Project Notes", ".chr/user/dumps/project-notes.md"}},
+		{path: "/dumps", want: []string{"Dumps", "Project Notes", ".chr/default/dumps/project-notes.md"}},
 		{path: "/quizzes", want: []string{"Quizzes", "Project Quiz", "not_started"}},
 		{path: "/specs", want: []string{"Specs", "Project Spec"}},
 		{path: "/plans", want: []string{"Plans", "No plans found."}},
-		{path: "/dumps/detail?id=.chr/user/dumps/project-notes.md", want: []string{"Project Notes", "Full dump content"}},
+		{path: "/dumps/detail?id=.chr/default/dumps/project-notes.md", want: []string{"Project Notes", "Full dump content"}},
 		{path: "/dumps/detail?id=missing.md", want: []string{"missing.md", "Artifact not found."}},
 	} {
 		recorder := httptest.NewRecorder()
@@ -352,7 +352,7 @@ func TestHandlerArtifactCatalogAndDetailFragments(t *testing.T) {
 		"/quizzes/fragment",
 		"/specs/fragment",
 		"/plans/fragment",
-		"/dumps/detail/fragment?id=.chr/user/dumps/project-notes.md",
+		"/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md",
 	} {
 		recorder := httptest.NewRecorder()
 		request := httptest.NewRequest(http.MethodGet, path, nil)
@@ -389,8 +389,8 @@ func TestHandlerFullPagesConfigurePolling(t *testing.T) {
 		{path: "/dash", refresh: "/dash/fragment", revision: "dash-revision", workspace: `id="workspace"`},
 		{path: "/dumps", refresh: "/dumps/fragment", revision: "dumps-revision", workspace: `id="workspace"`},
 		{
-			path:      "/dumps/detail?id=.chr/user/dumps/project-notes.md",
-			refresh:   "/dumps/detail/fragment?id=.chr%2Fuser%2Fdumps%2Fproject-notes.md",
+			path:      "/dumps/detail?id=.chr/default/dumps/project-notes.md",
+			refresh:   "/dumps/detail/fragment?id=.chr%2Fdefault%2Fdumps%2Fproject-notes.md",
 			revision:  "detail-revision",
 			workspace: `id="workspace"`,
 		},
@@ -437,7 +437,7 @@ func TestHandlerFragmentsCarryRevisionMarkers(t *testing.T) {
 		{path: "/board/fragment", revision: "board-revision"},
 		{path: "/dash/fragment", revision: "dash-revision"},
 		{path: "/dumps/fragment", revision: "dumps-revision"},
-		{path: "/dumps/detail/fragment?id=.chr/user/dumps/project-notes.md", revision: "detail-revision"},
+		{path: "/dumps/detail/fragment?id=.chr/default/dumps/project-notes.md", revision: "detail-revision"},
 	} {
 		recorder := httptest.NewRecorder()
 		request := httptest.NewRequest(http.MethodGet, tt.path, nil)
@@ -468,7 +468,7 @@ func TestHandlerWriteActionRedirectsAfterSuccess(t *testing.T) {
 
 	form := url.Values{
 		"action":  {"dump.save"},
-		"id":      {".chr/user/dumps/project-notes.md"},
+		"id":      {".chr/default/dumps/project-notes.md"},
 		"confirm": {"true"},
 		"content": {"Updated content"},
 	}
@@ -481,7 +481,7 @@ func TestHandlerWriteActionRedirectsAfterSuccess(t *testing.T) {
 		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusSeeOther)
 	}
 
-	if got := recorder.Header().Get("Location"); got != "/dumps/detail?id=.chr%2Fuser%2Fdumps%2Fproject-notes.md" {
+	if got := recorder.Header().Get("Location"); got != "/dumps/detail?id=.chr%2Fdefault%2Fdumps%2Fproject-notes.md" {
 		t.Fatalf("Location = %q, want dump detail", got)
 	}
 }
@@ -497,7 +497,7 @@ func TestHandlerWriteActionRendersStaleConflictActions(t *testing.T) {
 
 	form := url.Values{
 		"action":  {"dump.stale"},
-		"id":      {".chr/user/dumps/project-notes.md"},
+		"id":      {".chr/default/dumps/project-notes.md"},
 		"confirm": {"true"},
 	}
 	recorder := httptest.NewRecorder()
@@ -511,7 +511,7 @@ func TestHandlerWriteActionRendersStaleConflictActions(t *testing.T) {
 
 	for _, want := range []string{
 		"Write action rejected stale data.",
-		`href="/dumps/detail?id=.chr%2Fuser%2Fdumps%2Fproject-notes.md"`,
+		`href="/dumps/detail?id=.chr%2Fdefault%2Fdumps%2Fproject-notes.md"`,
 		">Reload</a>",
 		`href="/dumps"`,
 		">Discard</a>",
@@ -576,7 +576,7 @@ func (testDataProvider) ProjectView(context.Context) (ProjectView, error) {
 		RequireToken:   "auto",
 		RefreshSeconds: 2,
 		Paths: []ProjectPathView{
-			{Label: "Tickets", Path: "/tmp/project/.chr/user/tickets"},
+			{Label: "Tickets", Path: "/tmp/project/.chr/default/tickets"},
 		},
 		Revision: "project-revision",
 	}, nil
@@ -641,7 +641,7 @@ func testCatalogItems(family string) []ArtifactCardView {
 				Title:        "Blog Authoring",
 				Status:       "available",
 				Scope:        "blog",
-				Path:         ".chr/user/cases/blog.md",
+				Path:         ".chr/default/cases/blog.md",
 				Preview:      "Case context",
 				DetailURL:    "/cases/detail?id=blog",
 				ContentState: "available",
@@ -651,13 +651,13 @@ func testCatalogItems(family string) []ArtifactCardView {
 		return []ArtifactCardView{
 			{
 				Family:       family,
-				ID:           ".chr/user/dumps/project-notes.md",
+				ID:           ".chr/default/dumps/project-notes.md",
 				Title:        "Project Notes",
 				Status:       "curated",
 				Scope:        "Project-wide",
-				Path:         ".chr/user/dumps/project-notes.md",
+				Path:         ".chr/default/dumps/project-notes.md",
 				Preview:      "Notes preview",
-				DetailURL:    "/dumps/detail?id=.chr/user/dumps/project-notes.md",
+				DetailURL:    "/dumps/detail?id=.chr/default/dumps/project-notes.md",
 				ContentState: "available",
 			},
 		}
@@ -692,7 +692,7 @@ func testCatalogItems(family string) []ArtifactCardView {
 }
 
 func (testDataProvider) ArtifactDetailView(_ context.Context, request ArtifactDetailRequest) (ArtifactDetailView, error) {
-	if request.ID != ".chr/user/dumps/project-notes.md" {
+	if request.ID != ".chr/default/dumps/project-notes.md" {
 		return ArtifactDetailView{
 			Family:   request.Family,
 			Title:    request.ID,
@@ -727,7 +727,7 @@ func (testDataProvider) WriteAction(_ context.Context, request WriteActionReques
 			Status:        WriteStatusStale,
 			Summary:       "Write action rejected stale data.",
 			BlockedReason: "The artifact changed after the page was loaded. Reload before saving.",
-			ReloadURL:     "/dumps/detail?id=.chr%2Fuser%2Fdumps%2Fproject-notes.md",
+			ReloadURL:     "/dumps/detail?id=.chr%2Fdefault%2Fdumps%2Fproject-notes.md",
 			DiscardURL:    "/dumps",
 		}, nil
 	}
@@ -736,6 +736,6 @@ func (testDataProvider) WriteAction(_ context.Context, request WriteActionReques
 		Status:       WriteStatusOK,
 		Summary:      "Saved dump.",
 		ChangedFiles: []string{request.ID},
-		RedirectURL:  "/dumps/detail?id=.chr%2Fuser%2Fdumps%2Fproject-notes.md",
+		RedirectURL:  "/dumps/detail?id=.chr%2Fdefault%2Fdumps%2Fproject-notes.md",
 	}, nil
 }

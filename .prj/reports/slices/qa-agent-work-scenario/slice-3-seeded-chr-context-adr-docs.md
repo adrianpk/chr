@@ -15,7 +15,7 @@ manual bug ticket for single-ticket execution.
 
 ## Delivered Behavior
 
-- The blog reference includes `.chr/user/config.yml` and `.chr/user/manifest.md`.
+- The blog reference includes `.chr/default/config.yml` and `.chr/default/manifest.md`.
 - Project metadata describes the blog QA scenario.
 - Use-case metadata defines `comments`.
 - Comments context is seeded through a curated dump and quiz notes.
@@ -27,7 +27,7 @@ manual bug ticket for single-ticket execution.
 
 ## Implementation Notes
 
-All Chryso-owned project artifacts live under `.chr/user/...`. ADRs are
+All Chryso-owned project artifacts live under `.chr/default/...`. ADRs are
 normal project documentation under the Diataxis explanation quadrant instead of
 hidden CHR-only context.
 
@@ -37,22 +37,22 @@ agent to observe the failure before changing code.
 ## Contracts Added or Changed
 
 - Active project after reset contains:
-  - `.chr/user/project.md`
-  - `.chr/user/cases/comments.md`
-  - `.chr/user/dumps/comments-context.md`
-  - `.chr/user/quizzes/comments-quiz.md`
-  - `.chr/user/tickets/CHR-1-fix-unknown-post-status.md`
+  - `.chr/default/project.md`
+  - `.chr/default/cases/comments.md`
+  - `.chr/default/dumps/comments-context.md`
+  - `.chr/default/quizzes/comments-quiz.md`
+  - `.chr/default/tickets/CHR-1-fix-unknown-post-status.md`
   - `docs/explanation/adr/0001-api-boundaries.md`
 - `chr ticket list --dir qa/project/blog` shows the seeded manual bug ticket.
 - `chr spec list --dir qa/project/blog` shows `comments` as missing.
 
 ## Files of Interest
 
-- `qa/ref/001/blog/.chr/user/project.md`
-- `qa/ref/001/blog/.chr/user/cases/comments.md`
-- `qa/ref/001/blog/.chr/user/dumps/comments-context.md`
-- `qa/ref/001/blog/.chr/user/quizzes/comments-quiz.md`
-- `qa/ref/001/blog/.chr/user/tickets/CHR-1-fix-unknown-post-status.md`
+- `qa/ref/001/blog/.chr/default/project.md`
+- `qa/ref/001/blog/.chr/default/cases/comments.md`
+- `qa/ref/001/blog/.chr/default/dumps/comments-context.md`
+- `qa/ref/001/blog/.chr/default/quizzes/comments-quiz.md`
+- `qa/ref/001/blog/.chr/default/tickets/CHR-1-fix-unknown-post-status.md`
 - `qa/ref/001/blog/docs/explanation/adr/0001-api-boundaries.md`
 - `.prj/trackers/slicing-qa-agent-work-scenario-tracker.md`
 
@@ -61,7 +61,7 @@ agent to observe the failure before changing code.
 - `make qa-reset-blog`
 - `go run ./cmd/chr ticket list --dir qa/project/blog`
 - `go run ./cmd/chr spec list --dir qa/project/blog`
-- `find qa/project/blog/.chr/user/specs qa/project/blog/.chr/user/plans -maxdepth 2 -type f 2>/dev/null | sort`
+- `find qa/project/blog/.chr/default/specs qa/project/blog/.chr/default/plans -maxdepth 2 -type f 2>/dev/null | sort`
 - `make qa-test-blog` expected failure: unknown post returns `500`, test
   expects `404`
 - `make verify`

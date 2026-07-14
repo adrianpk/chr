@@ -12,10 +12,10 @@ Chryso may also keep user-level state outside the project for daemon operation, 
 
 Board and ticket operations use both layers:
 
-- Markdown tickets under `.chr/user/tickets/` are the durable ticket records.
+- Markdown tickets under `.chr/default/tickets/` are the durable ticket records.
 - The user-level SQLite index stores derived ticket metadata for fast listing,
   Board columns, attention detection, and ticket key allocation.
-- `.chr/user/` is the project-local active userspace boundary for workflows
+- `.chr/default/` is the project-local active userspace boundary for workflows
   that need an operator-owned location.
 
 Managed projects also receive a root-level `AGENTS.md` for compatibility with agent tooling that looks for this file at the repository root.
@@ -99,7 +99,7 @@ AGENTS.md
 
 ## Active Userspace
 
-`.chr/user/` is the current project-local active userspace.
+`.chr/default/` is the current project-local active userspace.
 
 The MVP layout is intentionally single-active-operator. Workflows that need to
 bind a write to an operator resolve the operator id from:
@@ -119,7 +119,7 @@ automation environment before running workflows that require operator
 ownership.
 
 The future multi-operator shape is expected to use an operator namespace such
-as `.chr/operators/<operator-id>/...`. The current `.chr/user/` path prepares
+as `.chr/operators/<operator-id>/...`. The current `.chr/default/` path prepares
 the boundary without relocating existing artifacts.
 
 ## Source of Truth
@@ -135,20 +135,20 @@ state are supporting artifacts. They may be rebuilt or regenerated when their
 source assets allow it.
 
 The workspace index is an in-memory structural model that may be cached under
-`.chr/user/tmp/`. That cache is discardable and must not become the durable source of
+`.chr/default/tmp/`. That cache is discardable and must not become the durable source of
 truth.
 
 The `.chr/` directory and Markdown-first artifact model are Chryso
 invariants. They are not configured by generated workspace files.
 
-The generated files under `.chr/user/agents/` guide how an agent should work inside
+The generated files under `.chr/default/agents/` guide how an agent should work inside
 the managed project. They do not define or override Chryso's operational
 artifact layout. Directory placement for tickets, runtime evidence, reports,
 indexes, and authoring artifacts is a product contract owned by `chr`.
 
 ## Runtime Config
 
-`.chr/user/config.yml` may define the project-local agent runtime contract under
+`.chr/default/config.yml` may define the project-local agent runtime contract under
 `runtime:`.
 
 Supported runtime fields:
@@ -165,7 +165,7 @@ uses safe local defaults:
 ```yml
 runtime:
   image: chr-agent-runtime:local
-  dockerfile: .chr/user/runtime/agent/Dockerfile
+  dockerfile: .chr/default/runtime/agent/Dockerfile
   workdir: /workspace
   artifact_dir: ops/default/run
   validation_command: make verify
@@ -173,7 +173,7 @@ runtime:
 
 ## Work Config
 
-`.chr/user/config.yml` may define the project-local work readiness policy under
+`.chr/default/config.yml` may define the project-local work readiness policy under
 `work:`.
 
 Supported work fields:
@@ -220,7 +220,7 @@ Dash integration.
 
 ## Web Config
 
-`.chr/user/config.yml` may define the optional local Web UI contract under
+`.chr/default/config.yml` may define the optional local Web UI contract under
 `web:`.
 
 The Web UI is disabled by default as a background behavior. Project commands,
@@ -279,7 +279,7 @@ also require the token value to be present in `token_env`.
 
 ## Notification Config
 
-`.chr/user/config.yml` may also define notification settings under
+`.chr/default/config.yml` may also define notification settings under
 `notifications:`.
 
 Notifications are disabled by default. Telegram can be enabled with:
@@ -296,7 +296,7 @@ code. It is not stored in project configuration.
 
 ## Runtime Template
 
-`chr init` creates `.chr/user/runtime/agent/Dockerfile` for new managed projects.
+`chr init` creates `.chr/default/runtime/agent/Dockerfile` for new managed projects.
 This file is the project-local agent runtime template. It is owned by the
 managed project after initialization and may be edited to install project
 dependencies, agent tooling, or validation prerequisites.
@@ -325,7 +325,7 @@ chr runtime init --dir /path/to/project
 ## Runtime Plan
 
 The runtime planner computes a side-effect-free Docker boundary plan from the
-project directory and `.chr/user/config.yml` runtime fields.
+project directory and `.chr/default/config.yml` runtime fields.
 
 Path semantics:
 
@@ -377,7 +377,7 @@ Validate another managed project:
 chr runtime validate --dir /path/to/project --dry-run
 ```
 
-Runtime validation loads `.chr/user/config.yml`, computes the runtime plan, prints
+Runtime validation loads `.chr/default/config.yml`, computes the runtime plan, prints
 the Docker build/run inputs, and checks required local paths:
 
 - `.chr/` workspace directory;

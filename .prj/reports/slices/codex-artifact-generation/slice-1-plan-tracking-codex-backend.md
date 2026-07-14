@@ -35,7 +35,7 @@ The service routing remains opt-in for this slice. Setting
 their configured adapters.
 
 Codex is still limited to synthesis. It returns structured tracking JSON. Go
-validates the response, writes `.chr/user/plans/*-tracking.md`, and creates
+validates the response, writes `.chr/default/plans/*-tracking.md`, and creates
 ticket files.
 
 ## Contracts Added or Changed

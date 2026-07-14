@@ -28,7 +28,7 @@ The command:
 
 - resolves the project through `--dir`, active project, or current directory;
 - opens the user-level SQLite ticket index;
-- discovers Markdown ticket files under `.chr/user/tickets`;
+- discovers Markdown ticket files under `.chr/default/tickets`;
 - compares discovered files against indexed ticket rows;
 - reports missing, stale, orphaned, and invalid ticket state;
 - exits with a non-zero status when any index drift exists.

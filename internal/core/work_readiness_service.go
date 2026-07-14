@@ -946,11 +946,11 @@ func splitWorktreeStatus(lines []string) ([]string, []string) {
 }
 
 func worktreeStatusLineIsRuntimeArtifact(line string) bool {
-	return strings.Contains(line, ".chr/user/runtime/") || strings.Contains(line, "ops/default/run/")
+	return strings.Contains(line, ".chr/default/runtime/") || strings.Contains(line, "ops/default/run/")
 }
 
 func runtimeArtifactIgnorePatterns() []string {
-	return []string{".chr/user/runtime/", "ops/*/run/"}
+	return []string{".chr/default/runtime/", "ops/*/run/"}
 }
 
 func policyInvalidDiagnostic(err error) WorkReadinessDiagnostic {

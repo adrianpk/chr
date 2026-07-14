@@ -31,7 +31,7 @@ The MVP includes:
 - a SQLite operational metadata index;
 - conservative attention detection;
 - right-pane ticket detail inspection;
-- a single active project userspace under `.chr/user/`;
+- a single active project userspace under `.chr/default/`;
 - CLI and TUI routing through shared services.
 
 The MVP excludes:
@@ -251,7 +251,7 @@ scriptable.
 ## Open Questions
 
 - Which exact environment variable name should select the active operator for
-  `.chr/user/`?
+  `.chr/default/`?
 - Should legacy statuses be migrated on write, mapped only for display, or both?
 - Should monotonic ticket allocation use a new SQLite sequence table or derive
   from existing indexed rows with a transaction lock?

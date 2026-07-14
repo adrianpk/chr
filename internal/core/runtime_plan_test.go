@@ -23,7 +23,7 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 		"ProjectCheckoutDir":    dir,
 		"ExecutionWorkspaceDir": dir,
 		"WorkspaceDir":          filepath.Join(dir, ".chr"),
-		"DockerfilePath":        filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+		"DockerfilePath":        filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 		"ArtifactDir":           filepath.Join(dir, "ops", "default", "run"),
 		"ResultPath":            filepath.Join(dir, "ops", "default", "run", "result.json"),
 	}
@@ -228,7 +228,7 @@ func TestPlanRuntimeNormalizesRelativeContainerWorkdirMount(t *testing.T) {
 
 func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 	dir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(dir, ".chr", "user", "runtime", "worktrees", "CHR-1")
+	executionWorkspaceDir := filepath.Join(dir, ".chr", "default", "runtime", "worktrees", "CHR-1")
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: dir,
@@ -287,7 +287,7 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 
 func TestPlanRuntimePreservesProjectModeWorkspaceMount(t *testing.T) {
 	dir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(dir, ".chr", "user", "runtime", "worktrees", "CHR-1")
+	executionWorkspaceDir := filepath.Join(dir, ".chr", "default", "runtime", "worktrees", "CHR-1")
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: dir,

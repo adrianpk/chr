@@ -312,7 +312,7 @@ tickets:
   key_prefix: TODO
 runtime:
   image: chr-todolist-agent:local
-  dockerfile: .chr/user/runtime/agent/Dockerfile
+  dockerfile: .chr/default/runtime/agent/Dockerfile
   workdir: /workspace
   artifact_dir: ops/default/run
   validation_command: make verify

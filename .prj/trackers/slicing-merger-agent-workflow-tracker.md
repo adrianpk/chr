@@ -5,7 +5,7 @@ Status: completed
 Plan: `.prj/plans/slicing-merger-agent-workflow-plan.md`
 Spec: `.prj/specs/specs/merger-agent-workflow.md`
 Dump: `.prj/dumps/curated/2026-06-02-merger-agent-role.md`
-Mirror: `.chr/user/trackers/merger-agent-workflow-tracker.md`
+Mirror: `.chr/default/trackers/merger-agent-workflow-tracker.md`
 
 ## Slicing Checklist
 

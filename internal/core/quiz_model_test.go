@@ -88,8 +88,8 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 				Scope:          QuizScope{ProjectID: "project-1"},
 				Title:          "Generated Spec",
 				Body:           "Generated behavior.",
-				SourceQuizPath: ".chr/user/quizzes/project-quiz.md",
-				SourceRawPath:  ".chr/user/quizzes/project-quiz-raw.md",
+				SourceQuizPath: ".chr/default/quizzes/project-quiz.md",
+				SourceRawPath:  ".chr/default/quizzes/project-quiz-raw.md",
 				CreatedAt:      quizRuntimeTestTime(),
 			},
 			CreatedAt: quizRuntimeTestTime(),
@@ -202,7 +202,7 @@ func TestQuizModelProviderPayloadIncludesNextQuestionContext(t *testing.T) {
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chr/user/dumps/project-context.md",
+		Authority: ".chr/default/dumps/project-context.md",
 		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
@@ -253,7 +253,7 @@ func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *te
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chr/user/dumps/project-context.md",
+		Authority: ".chr/default/dumps/project-context.md",
 		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
@@ -300,7 +300,7 @@ func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chr/user/dumps/project-context.md",
+		Authority: ".chr/default/dumps/project-context.md",
 		Content:   "Detailed project dump for draft spec synthesis.",
 	})
 
@@ -320,7 +320,7 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "project_dump",
 		Layer:     "dump",
-		Authority: ".chr/user/dumps/project-context.md",
+		Authority: ".chr/default/dumps/project-context.md",
 		Content:   "Detailed project dump for draft spec synthesis.",
 		Metadata:  map[string]string{"source": "dump"},
 	})
@@ -387,7 +387,7 @@ func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testin
 	request.ContextSections = append(request.ContextSections, QuizModelContextSection{
 		Name:      "spec",
 		Layer:     "spec",
-		Authority: ".chr/user/specs/blog.md",
+		Authority: ".chr/default/specs/blog.md",
 		Content:   "Spec context for outline generation.",
 	})
 
@@ -1535,7 +1535,7 @@ func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (openAIResponsesRequ
 func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {
 	t.Helper()
 
-	path := filepath.Join(projectDir, DirectoryName, "user", "log", "llm", defaultLLMTraceFileName)
+	path := filepath.Join(projectDir, DirectoryName, UserDirectoryName, "log", "llm", defaultLLMTraceFileName)
 
 	content, err := os.ReadFile(path)
 	if err != nil {

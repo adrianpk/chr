@@ -47,39 +47,39 @@ func authoringArtifactKindPathTests(projectDir string) []struct {
 	}{
 		{
 			kind:             AuthoringArtifactKindDump,
-			wantRelativePath: ".chr/user/dumps/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/dumps/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindQuiz,
-			wantRelativePath: ".chr/user/quizzes/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/quizzes/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindDraft,
-			wantRelativePath: ".chr/user/drafts/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/drafts/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSpec,
-			wantRelativePath: ".chr/user/specs/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/specs/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindPlan,
-			wantRelativePath: ".chr/user/plans/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/plans/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSliceSet,
-			wantRelativePath: ".chr/user/slice-sets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/slice-sets/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindSlice,
-			wantRelativePath: ".chr/user/slices/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/slices/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTracker,
-			wantRelativePath: ".chr/user/trackers/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/trackers/auth-20260521-120000-billing-sync.md",
 		},
 		{
 			kind:             AuthoringArtifactKindTicket,
-			wantRelativePath: ".chr/user/tickets/auth-20260521-120000-billing-sync.md",
+			wantRelativePath: ".chr/default/tickets/auth-20260521-120000-billing-sync.md",
 		},
 	}
 }

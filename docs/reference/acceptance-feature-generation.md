@@ -44,7 +44,7 @@ language, while preserving the selected scenario gap.
 Feature generation writes:
 
 ```text
-.chr/user/acceptance/<scope>.feature
+.chr/default/acceptance/<scope>.feature
 ```
 
 Spec generation does not write this file. It generates only the Markdown spec.
@@ -52,7 +52,7 @@ Spec generation does not write this file. It generates only the Markdown spec.
 When generation needs more information, Chryso writes feature-round notes:
 
 ```text
-.chr/user/acceptance/<scope>-feature-round.md
+.chr/default/acceptance/<scope>-feature-round.md
 ```
 
 Those notes contain focused prompts with inferred defaults and empty answer
@@ -106,7 +106,7 @@ The Test/Evidence Strategy pass treats Gherkin as active when the project has
 existing acceptance feature artifacts under:
 
 ```text
-.chr/user/acceptance/*.feature
+.chr/default/acceptance/*.feature
 ```
 
 With the default `evidence.strategy.gherkin_policy: active_when_applicable`,

@@ -25,7 +25,7 @@ func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
 			State: core.WorktreeStateDirty,
 		},
 		TicketWorktree: core.WorkReadinessWorkspaceState{
-			Path:    "/repo/.chr/user/runtime/worktrees/chr-1",
+			Path:    "/repo/.chr/default/runtime/worktrees/chr-1",
 			State:   core.WorktreeStateClean,
 			Branch:  "feat/chr-1",
 			BaseRef: "origin/dev",

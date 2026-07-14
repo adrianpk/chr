@@ -390,14 +390,14 @@ func validAuthoringSession() AuthoringSession {
 		ID:          "dump-1",
 		Kind:        AuthoringArtifactKindDump,
 		Role:        AuthoringArtifactRoleInput,
-		Path:        ".chr/user/dumps/auth-context.md",
+		Path:        ".chr/default/dumps/auth-context.md",
 		Description: "Initial operator context dump.",
 	}
 	output := AuthoringArtifactRef{
 		ID:          "quiz-1",
 		Kind:        AuthoringArtifactKindQuiz,
 		Role:        AuthoringArtifactRoleOutput,
-		Path:        ".chr/user/quizzes/auth-context-quiz.md",
+		Path:        ".chr/default/quizzes/auth-context-quiz.md",
 		Description: "Questionnaire generated from project context.",
 	}
 

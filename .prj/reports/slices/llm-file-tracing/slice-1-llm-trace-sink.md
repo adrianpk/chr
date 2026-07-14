@@ -22,7 +22,7 @@ generation behavior.
 - Added explicit payload capture gating through `CHR_LLM_TRACE_PAYLOADS`.
 - Added rotation controls through `CHR_LLM_TRACE_MAX_BYTES` and
   `CHR_LLM_TRACE_KEEP_FILES`.
-- Resolved trace output under `.chr/user/log/llm/llm.ndjson`.
+- Resolved trace output under `.chr/default/log/llm/llm.ndjson`.
 - Added JSONL event writing with automatic timestamp injection.
 - Added best-effort event recording that ignores tracing failures.
 - Added secret redaction for secret-like fields, bearer tokens, and known secret

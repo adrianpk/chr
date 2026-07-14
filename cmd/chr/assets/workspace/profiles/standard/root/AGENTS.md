@@ -10,8 +10,8 @@ Chryso project state lives under `.chr/`.
 
 Start with:
 
-- `.chr/user/manifest.md`
-- `.chr/user/config.yml`
+- `.chr/default/manifest.md`
+- `.chr/default/config.yml`
 
 ## Rules
 

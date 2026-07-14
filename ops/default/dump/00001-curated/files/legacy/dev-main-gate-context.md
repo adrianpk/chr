@@ -9,7 +9,7 @@ case_slug: "dev-main-gate"
 
 The dev-to-main gate collects objective promotion evidence before aligning `dev` into `main`.
 
-It records Git evidence, validation evidence, Chryso execution evidence, manual or external changes, missing evidence, warnings, and failures. Reports are written as JSON and Markdown under `.chr/user/reports/gates/`.
+It records Git evidence, validation evidence, Chryso execution evidence, manual or external changes, missing evidence, warnings, and failures. Reports are written as JSON and Markdown under `.chr/default/reports/gates/`.
 
 The default adoption posture for existing projects is permissive:
 

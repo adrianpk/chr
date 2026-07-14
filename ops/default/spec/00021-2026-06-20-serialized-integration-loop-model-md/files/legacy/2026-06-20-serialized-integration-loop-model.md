@@ -97,7 +97,7 @@ Agentic review should persist a local review artifact.
 Suggested path:
 
 ```text
-.chr/user/reviews/<ticket-key>/<cycle-id>.md
+.chr/default/reviews/<ticket-key>/<cycle-id>.md
 ```
 
 The artifact should include:

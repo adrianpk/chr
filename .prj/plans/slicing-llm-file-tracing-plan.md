@@ -12,7 +12,7 @@ normal runtime behavior. When enabled, Chryso writes structured rolling
 JSONL trace events under the active project userspace:
 
 ```text
-.chr/user/log/llm/
+.chr/default/log/llm/
 ```
 
 This first implementation uses environment variables as the configuration
@@ -44,7 +44,7 @@ External implementation reference:
 Conversation decisions:
 
 - Tracing must live inside active userspace, not at repository root.
-- Initial path should be `.chr/user/log/llm/`.
+- Initial path should be `.chr/default/log/llm/`.
 - The output should include request payload and response payload when payload
   capture is explicitly enabled.
 - A trace-level identifier is desirable but may be absent until full flow
@@ -71,7 +71,7 @@ Important limitations:
   provider response is not recorded outside existing generated artifacts.
 - Plan/spec/quiz generation failures can be hard to debug without reproducing
   the exact payload.
-- Userspace exists as `.chr/user/`, but no LLM log directory exists beneath it.
+- Userspace exists as `.chr/default/`, but no LLM log directory exists beneath it.
 - Configuration is not yet per-user beyond the active operator environment.
 
 ## Target Model
@@ -154,7 +154,7 @@ Add the reusable tracing foundation without wiring it into provider calls.
 Expected behavior:
 
 - Resolve trace output beneath the active project userspace.
-- Create `.chr/user/log/llm/` only when tracing is enabled and the first event
+- Create `.chr/default/log/llm/` only when tracing is enabled and the first event
   is written.
 - Write JSONL records.
 - Rotate the active file when it exceeds the configured size.

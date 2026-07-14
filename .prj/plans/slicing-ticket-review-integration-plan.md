@@ -7,7 +7,7 @@ Active Slice: none
 Spec Draft: `.prj/specs/drafts/ticket-review-integration-draft.md`
 Quiz: `.prj/quizzes/curated/ticket-review-integration-quiz.md`
 Tracker: `.prj/trackers/slicing-ticket-review-integration-tracker.md`
-Mirror: `.chr/user/plans/ticket-review-integration-plan.md`
+Mirror: `.chr/default/plans/ticket-review-integration-plan.md`
 
 ## Purpose
 

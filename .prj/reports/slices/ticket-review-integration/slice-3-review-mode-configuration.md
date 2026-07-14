@@ -17,7 +17,7 @@ diagnostics or remote review execution.
 - Workspace config supports `review.mode` with `human_review`,
   `agentic_review`, and `trusted_auto_merge`.
 - Workspace config supports `review.non_blocking_comment_limit`.
-- New workspaces include explicit review defaults in `.chr/user/config.yml`.
+- New workspaces include explicit review defaults in `.chr/default/config.yml`.
 - `chr ticket review-mode status` prints the active mode, validation status,
   mode implications, clean-pass remote comment policy, and non-blocking comment
   limit.
@@ -34,7 +34,7 @@ diagnostics or remote review execution.
 
 ## Contracts Added or Changed
 
-- `.chr/user/config.yml` may include:
+- `.chr/default/config.yml` may include:
   `review.mode` and `review.non_blocking_comment_limit`.
 - Valid review modes are `human_review`, `agentic_review`, and
   `trusted_auto_merge`.

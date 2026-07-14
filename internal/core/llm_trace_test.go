@@ -29,7 +29,7 @@ func TestLoadLLMTraceConfigDisabledDoesNotRequireUserspace(t *testing.T) {
 		t.Fatalf("FilePath = %q, want empty", config.FilePath)
 	}
 
-	if _, err := os.Stat(filepath.Join(dir, DirectoryName, "user", "log", "llm")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, DirectoryName, UserDirectoryName, "log", "llm")); !os.IsNotExist(err) {
 		t.Fatalf("trace directory exists while tracing is disabled: %v", err)
 	}
 }
@@ -48,7 +48,7 @@ func TestLoadLLMTraceConfigEnabledResolvesUserspaceLogPath(t *testing.T) {
 		t.Fatalf("LoadLLMTraceConfig returned error: %v", err)
 	}
 
-	wantDir := filepath.Join(dir, DirectoryName, "user", "log", "llm")
+	wantDir := filepath.Join(dir, DirectoryName, UserDirectoryName, "log", "llm")
 	if config.Dir != wantDir {
 		t.Fatalf("Dir = %q, want %q", config.Dir, wantDir)
 	}

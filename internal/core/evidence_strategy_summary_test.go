@@ -87,7 +87,7 @@ func completeEvidenceStrategySummaryMarkdown() string {
 
 <!-- chr:evidence-strategy:v1 -->
 - [x] Evidence strategy: complete; change_kind=behavior; risk=medium
-- [x] Gherkin: required; path=.chr/user/acceptance/flow.feature
+- [x] Gherkin: required; path=.chr/default/acceptance/flow.feature
 - [x] Tests: mixed; unit and CLI coverage
 - [x] Validation: passed; make verify
 - [x] Evidence summary: complete; ready for review

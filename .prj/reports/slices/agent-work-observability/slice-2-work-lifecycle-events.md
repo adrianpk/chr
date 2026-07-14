@@ -49,8 +49,8 @@ complete.
 - `core.ExecutionRunner.EventSink`
 - `core.RunExecutionOptions.LoopID`
 - agent-work events are written to:
-  - `.chr/user/runtime/runs/<loop-id>/events.jsonl`
-  - `.chr/user/runtime/runs/<ticket-key>/<execution-id>/events.jsonl`
+  - `.chr/default/runtime/runs/<loop-id>/events.jsonl`
+  - `.chr/default/runtime/runs/<ticket-key>/<execution-id>/events.jsonl`
 
 ## Files of Interest
 

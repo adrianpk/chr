@@ -34,7 +34,7 @@ dump, quiz, and spec material.
 - Write Gherkin feature files to a conventional path:
 
   ```text
-  .chr/user/acceptance/<case>.feature
+  .chr/default/acceptance/<case>.feature
   ```
 
 - Let the feature-generation workflow ask follow-up questions only when the
@@ -104,7 +104,7 @@ Gherkin concepts.
 Generated feature files live under:
 
 ```text
-.chr/user/acceptance/<case>.feature
+.chr/default/acceptance/<case>.feature
 ```
 
 The feature must pass deterministic static checks before it is written.
@@ -117,7 +117,7 @@ embed the full feature body.
 - `spec generate` no longer writes `.feature` files.
 - `spec generate` no longer requests or returns a structured feature payload.
 - A dedicated acceptance feature command can generate
-  `.chr/user/acceptance/<case>.feature`.
+  `.chr/default/acceptance/<case>.feature`.
 - Feature generation uses spec, quiz, dump, project, and use-case context.
 - Feature generation reports `generated`, `needs_more_info`, or
   `not_applicable`.
@@ -132,6 +132,6 @@ embed the full feature body.
 - Whether the command namespace should be `chr acceptance feature generate` or
   `chr feature generate`.
 - Whether feature-round notes should live at
-  `.chr/user/acceptance/<case>-feature-notes.md` or under the quiz artifact
+  `.chr/default/acceptance/<case>-feature-notes.md` or under the quiz artifact
   directory.
 - Whether generated specs should later link to generated feature artifacts.

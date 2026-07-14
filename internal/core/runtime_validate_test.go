@@ -86,7 +86,7 @@ func TestValidateRuntimeChecksExecutionWorkspace(t *testing.T) {
 	projectDir := t.TempDir()
 	createRuntimeValidationWorkspace(t, projectDir)
 
-	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "user", "worktrees", "CHR-1")
+	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "default", "worktrees", "CHR-1")
 	if err := os.MkdirAll(executionWorkspaceDir, 0o755); err != nil {
 		t.Fatalf("create execution workspace dir: %v", err)
 	}
@@ -127,7 +127,7 @@ func createRuntimeValidationWorkspace(t *testing.T, dir string) {
 
 	createWorkspaceRoot(t, dir)
 
-	dockerfilePath := filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {

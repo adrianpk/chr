@@ -27,16 +27,16 @@ func TestNewCodexWorkerCommandDefinesCodexInvocation(t *testing.T) {
 
 	assertCodexWorkerEnv(t, command, "CHR_EXECUTION_ID", "exec-1")
 	assertCodexWorkerEnv(t, command, "CHR_TICKET_KEY", "CHR-1")
-	assertCodexWorkerEnv(t, command, "CHR_TICKET_PATH", "/workspace/.chr/user/tickets/CHR-1.md")
-	assertCodexWorkerEnv(t, command, "CHR_WORKER_CONTEXT_PATH", "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/context.md")
-	assertCodexWorkerEnv(t, command, "CHR_RESULT_PATH", "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json")
-	assertCodexWorkerEnv(t, command, "CHR_LOG_PATH", "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/runtime.log")
-	assertCodexWorkerEnv(t, command, "CHR_VALIDATION_PATH", "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/validation.log")
+	assertCodexWorkerEnv(t, command, "CHR_TICKET_PATH", "/workspace/.chr/default/tickets/CHR-1.md")
+	assertCodexWorkerEnv(t, command, "CHR_WORKER_CONTEXT_PATH", "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/context.md")
+	assertCodexWorkerEnv(t, command, "CHR_RESULT_PATH", "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json")
+	assertCodexWorkerEnv(t, command, "CHR_LOG_PATH", "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/runtime.log")
+	assertCodexWorkerEnv(t, command, "CHR_VALIDATION_PATH", "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/validation.log")
 }
 
 func TestRenderCodexWorkerShellScriptQuotesInputs(t *testing.T) {
 	opts := testCodexWorkerCommandOptions()
-	opts.TicketPath = "/workspace/.chr/user/tickets/CHR-1 Bob's fix.md"
+	opts.TicketPath = "/workspace/.chr/default/tickets/CHR-1 Bob's fix.md"
 
 	command, err := NewCodexWorkerCommand(opts)
 	if err != nil {
@@ -46,7 +46,7 @@ func TestRenderCodexWorkerShellScriptQuotesInputs(t *testing.T) {
 	script := RenderCodexWorkerShellScript(command)
 	for _, want := range []string{
 		"CHR_EXECUTION_ID='exec-1'",
-		"CHR_TICKET_PATH='/workspace/.chr/user/tickets/CHR-1 Bob'\"'\"'s fix.md'",
+		"CHR_TICKET_PATH='/workspace/.chr/default/tickets/CHR-1 Bob'\"'\"'s fix.md'",
 		"'codex' 'exec' '--skip-git-repo-check' '--dangerously-bypass-approvals-and-sandbox'",
 		`< "$CHR_WORKER_CONTEXT_PATH"`,
 	} {
@@ -86,10 +86,10 @@ func testCodexWorkerCommandOptions() CodexWorkerCommandOptions {
 	return CodexWorkerCommandOptions{
 		ExecutionID:    "exec-1",
 		TicketKey:      "CHR-1",
-		TicketPath:     "/workspace/.chr/user/tickets/CHR-1.md",
-		ContextPath:    "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/context.md",
-		ResultPath:     "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json",
-		LogPath:        "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
-		ValidationPath: "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+		TicketPath:     "/workspace/.chr/default/tickets/CHR-1.md",
+		ContextPath:    "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/context.md",
+		ResultPath:     "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
+		LogPath:        "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/runtime.log",
+		ValidationPath: "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/validation.log",
 	}
 }

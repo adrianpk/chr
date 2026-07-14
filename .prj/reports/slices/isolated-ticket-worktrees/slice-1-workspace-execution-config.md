@@ -50,7 +50,7 @@ managed projects on project-mounted execution by default.
 - Added default workspace execution config under `DefaultWorkConfig`.
 - Extended `core.RuntimePlanOptions`, `core.RuntimePlan`, and
   `core.RuntimeValidationOptions` with workspace execution metadata.
-- Extended `.chr/user/config.yml` `work:` reference fields.
+- Extended `.chr/default/config.yml` `work:` reference fields.
 
 ## Files of Interest
 

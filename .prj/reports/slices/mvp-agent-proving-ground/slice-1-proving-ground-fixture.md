@@ -56,7 +56,7 @@ New fixture convention:
 - generated proving projects live under `_workspace/testing/projects/`;
 - fixture validation is `make verify`;
 - fixture runtime image is `chr-todolist-agent:local`;
-- fixture runtime Dockerfile is `.chr/runtime/agent/Dockerfile`.
+- fixture runtime Dockerfile is `.chr/default/runtime/agent/Dockerfile`.
 
 ## Files of Interest
 
@@ -64,7 +64,7 @@ New fixture convention:
 - `.prj/fixtures/mvp-agent-proving-ground/todolist/internal/todo/store.go`
 - `.prj/fixtures/mvp-agent-proving-ground/todolist/internal/todo/store_test.go`
 - `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/config.yml`
-- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/runtime/agent/Dockerfile`
+- `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/default/runtime/agent/Dockerfile`
 - `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/tickets/TODO-1-fix-task-id-reuse.md`
 - `.prj/fixtures/mvp-agent-proving-ground/todolist/.chr/tickets/TODO-2-complete-task.md`
 

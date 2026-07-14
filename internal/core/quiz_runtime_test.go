@@ -19,8 +19,8 @@ func TestValidateQuizRuntimeStateAcceptsUseCaseScopedState(t *testing.T) {
 	state := validQuizRuntimeState()
 	state.ID = "quiz-blog"
 	state.CaseSlug = "blog"
-	state.RawPath = ".chr/user/quizzes/blog-quiz-raw.md"
-	state.CuratedPath = ".chr/user/quizzes/blog-quiz.md"
+	state.RawPath = ".chr/default/quizzes/blog-quiz-raw.md"
+	state.CuratedPath = ".chr/default/quizzes/blog-quiz.md"
 
 	err := ValidateQuizRuntimeState(state)
 	if err != nil {
@@ -160,8 +160,8 @@ func validQuizRuntimeState() QuizRuntimeState {
 		Candidates: []QuizCandidate{
 			validQuizCandidate(),
 		},
-		RawPath:     ".chr/user/quizzes/project-quiz-raw.md",
-		CuratedPath: ".chr/user/quizzes/project-quiz.md",
+		RawPath:     ".chr/default/quizzes/project-quiz-raw.md",
+		CuratedPath: ".chr/default/quizzes/project-quiz.md",
 		UpdatedAt:   now,
 	}
 }

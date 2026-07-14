@@ -24,7 +24,7 @@ inspected from the active project userspace when tracing is enabled.
 - Includes request, response, and output payloads only when
   `CHR_LLM_TRACE_PAYLOADS=1`.
 - Routes the default application OpenAI adapter with the active project
-  directory so trace files resolve under `.chr/user/log/llm/`.
+  directory so trace files resolve under `.chr/default/log/llm/`.
 - Records local Codex authoring quiz generation calls outside the ticket
   execution container.
 

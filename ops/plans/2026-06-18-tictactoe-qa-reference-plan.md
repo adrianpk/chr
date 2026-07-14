@@ -43,7 +43,7 @@ Behavior:
   `qa/project/tictactoe` as an ignored active project with its own Git repo.
 - The reference project is a small Go module using only the standard library.
 - The active project can run `go test ./...` before generated work starts.
-- The project includes enough `.chr/user` context for spec and plan generation
+- The project includes enough `.chr/default` context for spec and plan generation
   without requiring repeated manual quiz answers.
 - The primary use case does not include prewritten generated specs, plans,
   tracking, or tickets, so Chryso can create them during the exercise.

@@ -61,7 +61,7 @@ func TestWorkspaceGraphBuilderBuildCachedIndexPreservesDumpPairMetadata(t *testi
 title: "Blog Notes"
 status: "curated"
 type: "dump"
-source: ".chr/user/dumps/blog-notes-raw.md"
+source: ".chr/default/dumps/blog-notes-raw.md"
 case: "blog"
 ---
 
@@ -71,7 +71,7 @@ case: "blog"
 title: "Blog Notes Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chr/user/dumps/blog-notes.md"
+curated: ".chr/default/dumps/blog-notes.md"
 case: "blog"
 ---
 
@@ -92,10 +92,10 @@ case: "blog"
 		t.Fatalf("Cache.Status = %q, want %q", second.Cache.Status, WorkspaceIndexCacheHit)
 	}
 
-	rawID := second.Index.NodesByPath[".chr/user/dumps/blog-notes-raw.md"]
+	rawID := second.Index.NodesByPath[".chr/default/dumps/blog-notes-raw.md"]
 
 	raw := second.Index.NodesByID[rawID]
-	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chr/user/dumps/blog-notes.md" {
+	if raw.DocumentType != "dump_raw" || raw.CuratedPath != ".chr/default/dumps/blog-notes.md" {
 		t.Fatalf("cached raw dump metadata = %#v", raw)
 	}
 }
@@ -109,7 +109,7 @@ func TestWorkspaceGraphBuilderBuildCachedIndexPreservesQuizPairMetadata(t *testi
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz.md"), `---
 title: "Blog Quiz"
 status: "curated"
-raw_path: ".chr/user/quizzes/blog-quiz-raw.md"
+raw_path: ".chr/default/quizzes/blog-quiz-raw.md"
 case: "blog"
 ---
 
@@ -118,7 +118,7 @@ case: "blog"
 	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz-raw.md"), `---
 title: "Blog Quiz Raw Capture"
 status: "raw"
-curated_path: ".chr/user/quizzes/blog-quiz.md"
+curated_path: ".chr/default/quizzes/blog-quiz.md"
 case: "blog"
 ---
 
@@ -139,10 +139,10 @@ case: "blog"
 		t.Fatalf("Cache.Status = %q, want %q", second.Cache.Status, WorkspaceIndexCacheHit)
 	}
 
-	rawID := second.Index.NodesByPath[".chr/user/quizzes/blog-quiz-raw.md"]
+	rawID := second.Index.NodesByPath[".chr/default/quizzes/blog-quiz-raw.md"]
 
 	raw := second.Index.NodesByID[rawID]
-	if raw.CuratedPath != ".chr/user/quizzes/blog-quiz.md" {
+	if raw.CuratedPath != ".chr/default/quizzes/blog-quiz.md" {
 		t.Fatalf("cached raw quiz metadata = %#v", raw)
 	}
 }

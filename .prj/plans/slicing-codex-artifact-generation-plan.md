@@ -19,7 +19,7 @@ Primary sources:
 - `.agents/playbooks/slice-delivery.md`
 - Existing `internal/chr` `AgentRunner` and `CodexAgentRunner`
 - Existing `internal/chrapp` dump, spec, plan, plan tracking, and ticket flows
-- Existing `.chr/user/tmp/agent-runs` bundle behavior
+- Existing `.chr/default/tmp/agent-runs` bundle behavior
 
 Conversation decisions:
 
@@ -76,7 +76,7 @@ Interactive quiz turns stay direct:
 - no requirement for run bundles.
 
 Codex must not directly write workspace artifacts. Codex returns structured
-JSON. Go validates the response, writes canonical files under `.chr/user/...`,
+JSON. Go validates the response, writes canonical files under `.chr/default/...`,
 and records trace/bundle evidence.
 
 ## Slice Map
@@ -124,7 +124,7 @@ Expected behavior:
 - Failed Codex execution, parse errors, and validation failures do not create
   partial tracking or ticket artifacts.
 - Trace records `provider: codex` for the model synthesis step.
-- Run bundles are written under `.chr/user/tmp/agent-runs/...`.
+- Run bundles are written under `.chr/default/tmp/agent-runs/...`.
 
 Candidate tasks:
 
@@ -215,9 +215,9 @@ Expected behavior:
 
 - A reference workspace run exercises dump, spec, plan, and plan tracking.
 - Each generated artifact has a corresponding Codex run bundle under
-  `.chr/user/tmp/agent-runs/...`.
+  `.chr/default/tmp/agent-runs/...`.
 - LLM trace records `provider: codex` for long-form artifact generation.
-- Generated artifacts live under `.chr/user/...`.
+- Generated artifacts live under `.chr/default/...`.
 - The audit records latency, output quality notes, avoidable errors, and any
   remaining trace visibility gaps.
 - No reference workspace artifacts outside the intended test scope are

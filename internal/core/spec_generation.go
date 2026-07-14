@@ -176,7 +176,7 @@ func NormalizeGeneratedSpecChrysoPathReferences(body string) string {
 		}
 
 		if strings.HasPrefix(path, ".chr/") {
-			return ".chr/user/" + strings.TrimPrefix(path, ".chr/") + suffix
+			return ".chr/default/" + strings.TrimPrefix(path, ".chr/") + suffix
 		}
 
 		return path + suffix
@@ -184,12 +184,12 @@ func NormalizeGeneratedSpecChrysoPathReferences(body string) string {
 }
 
 func generatedSpecChrysoPathReferenceAllowed(path string) bool {
-	if path == ".chr" || path == ".chr/" || path == ".chr/user" || path == ".chr/user/" {
+	if path == ".chr" || path == ".chr/" || path == ".chr/default" || path == ".chr/default/" {
 		return true
 	}
 
 	switch path {
-	case ".chr/user/config.yml", ".chr/user/manifest.md", ".chr/user/project.md":
+	case ".chr/default/config.yml", ".chr/default/manifest.md", ".chr/default/project.md":
 		return true
 	}
 
@@ -204,7 +204,7 @@ func generatedSpecChrysoPathReferenceAllowed(path string) bool {
 		"runtime",
 		"tmp",
 	} {
-		prefix := ".chr/user/" + directory
+		prefix := ".chr/default/" + directory
 		if path == prefix || strings.HasPrefix(path, prefix+"/") {
 			return true
 		}

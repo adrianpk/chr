@@ -6,7 +6,7 @@ status: "draft"
 source_request_id: "chat-2026-06-01-ticket-review-integration"
 source_response_id: "codex-capture"
 created_at: "2026-06-01T00:00:00Z"
-mirror: ".chr/user/specs/ticket-review-integration-draft.md"
+mirror: ".chr/default/specs/ticket-review-integration-draft.md"
 ---
 
 # Ticket Review Integration
@@ -15,7 +15,7 @@ Chryso should support review of tickets that reached `ready_for_review`
 after agent execution. This flow focuses on the review surface for a single
 ticket or pull request.
 
-This draft is mirrored in `.chr/user/specs/ticket-review-integration-draft.md`
+This draft is mirrored in `.chr/default/specs/ticket-review-integration-draft.md`
 while the project evaluates self-hosted Chryso workflow adoption.
 
 ## Problem

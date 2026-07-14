@@ -30,7 +30,7 @@ concurrent development and review operations in the same workspace.
   future adapters share one rule set.
 - Non-git workspaces are allowed through the git freshness check to preserve
   existing test and scratch workspace behavior.
-- The lock is file-based under `.chr/user/runtime/agent-operation.lock`.
+- The lock is file-based under `.chr/default/runtime/agent-operation.lock`.
 - Dry-run review paths do not take the operation lock.
 
 ## Contracts Added or Changed

@@ -151,7 +151,7 @@ func testMergePreflightTicket() IndexedTicket {
 
 	return IndexedTicket{
 		ProjectID:    "project-1",
-		Path:         "/tmp/project/.chr/user/tickets/CHR-2-Test.md",
+		Path:         "/tmp/project/.chr/default/tickets/CHR-2-Test.md",
 		RelativePath: "CHR-2-Test.md",
 		Key:          "CHR-2",
 		Title:        "Test ticket",

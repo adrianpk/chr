@@ -44,7 +44,7 @@ type ReconcileProjectTicketOptions struct {
 ```
 
 - `ProjectID` identifies the registered project in the user-level index.
-- `ProjectDir` points to the project root that owns `.chr/user/tickets`.
+- `ProjectDir` points to the project root that owns `.chr/default/tickets`.
 - `TicketPath` points to one affected Markdown ticket file.
 - `ReconciledAt` records the refresh time used for indexed rows.
 

@@ -177,7 +177,7 @@ func TestRenderEvidenceStrategyChecklistRendersCanonicalBlock(t *testing.T) {
 			EvidenceStrategyChecklistLabelGherkin: {
 				Label:  EvidenceStrategyChecklistLabelGherkin,
 				Status: "required",
-				Detail: "path=.chr/user/acceptance/bug.feature; reason=user-visible",
+				Detail: "path=.chr/default/acceptance/bug.feature; reason=user-visible",
 			},
 			EvidenceStrategyChecklistLabelTests: {
 				Label:  EvidenceStrategyChecklistLabelTests,
@@ -203,7 +203,7 @@ func TestRenderEvidenceStrategyChecklistRendersCanonicalBlock(t *testing.T) {
 
 	want := `<!-- chr:evidence-strategy:v1 -->
 - [x] Evidence strategy: planned; change_kind=bugfix; risk=medium
-- [ ] Gherkin: required; path=.chr/user/acceptance/bug.feature; reason=user-visible
+- [ ] Gherkin: required; path=.chr/default/acceptance/bug.feature; reason=user-visible
 - [ ] Tests: mixed; reason=unit and fuzz coverage
 - [ ] Validation: pending; commands=make verify; evidence=none
 - [ ] Evidence summary: pending
@@ -273,7 +273,7 @@ func TestUpsertEvidenceStrategyChecklistUpdatesOnlyProvidedItems(t *testing.T) {
 				Label:   EvidenceStrategyChecklistLabelValidation,
 				Checked: true,
 				Status:  "passed",
-				Detail:  "commands=make verify; evidence=.chr/user/runtime/runs/1/report.md",
+				Detail:  "commands=make verify; evidence=.chr/default/runtime/runs/1/report.md",
 			},
 		},
 	}
@@ -358,7 +358,7 @@ func testEvidenceStrategyChecklistModel() EvidenceStrategyChecklist {
 			EvidenceStrategyChecklistLabelGherkin: {
 				Label:  EvidenceStrategyChecklistLabelGherkin,
 				Status: "required",
-				Detail: "path=.chr/user/acceptance/bug.feature; reason=user-visible",
+				Detail: "path=.chr/default/acceptance/bug.feature; reason=user-visible",
 			},
 			EvidenceStrategyChecklistLabelTests: {
 				Label:  EvidenceStrategyChecklistLabelTests,
@@ -387,7 +387,7 @@ key: "CHR-1"
 
 <!-- chr:evidence-strategy:v1 -->
   - [x] Evidence strategy: planned; change_kind=bugfix; risk=medium; test_timing=before; note=regression
-- [ ] Gherkin: required; path=.chr/user/acceptance/bug.feature; reason=user-visible
+- [ ] Gherkin: required; path=.chr/default/acceptance/bug.feature; reason=user-visible
 - [ ] Tests: mixed; reason=unit and fuzz coverage
 - [ ] Validation: pending; commands=make verify; evidence=none
 - [ ] Evidence summary: pending

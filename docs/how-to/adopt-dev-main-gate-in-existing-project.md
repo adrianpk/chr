@@ -18,7 +18,7 @@ chr init
 This creates the project-local Chryso workspace under:
 
 ```text
-.chr/user/
+.chr/default/
 ```
 
 The dev-to-main gate reads and writes under that core. It does not read
@@ -29,7 +29,7 @@ unrelated project planning directories.
 Create:
 
 ```text
-.chr/user/config/gates.yml
+.chr/default/config/gates.yml
 ```
 
 Use a permissive policy for the first adoption pass:
@@ -73,7 +73,7 @@ Git repository and a Chryso core.
 Reports are written under:
 
 ```text
-.chr/user/reports/gates/
+.chr/default/reports/gates/
 ```
 
 Read the Markdown report first. It shows:
@@ -92,7 +92,7 @@ gate.
 ## Add Agent-Managed Work Over Time
 
 After adoption, create or generate tickets and let Chryso execute new work.
-Those executions create evidence under `.chr/user/` that later gate runs can
+Those executions create evidence under `.chr/default/` that later gate runs can
 classify as Chryso-managed.
 
 Manual work can continue to exist. The default recommendation is to list it as

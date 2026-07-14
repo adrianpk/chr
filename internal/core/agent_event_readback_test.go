@@ -25,7 +25,7 @@ func TestSummarizeAgentEventStreamKeepsLatestKnownState(t *testing.T) {
 	blocked.Message = "CHR-1 blocked"
 
 	summary := SummarizeAgentEventStream(AgentEventStream{
-		Path:   ".chr/user/runtime/runs/loop-1/events.jsonl",
+		Path:   ".chr/default/runtime/runs/loop-1/events.jsonl",
 		Events: []AgentEvent{started, blocked},
 	})
 

@@ -288,7 +288,7 @@ func documentRoots(projectDir string) []struct {
 		family string
 		path   string
 	}{
-		{family: "dump", path: filepath.Join(projectDir, ".chr", "user", "dumps")},
+		{family: "dump", path: filepath.Join(projectDir, ".chr", "default", "dumps")},
 		{family: "dump", path: filepath.Join(projectDir, ".prj", "dumps")},
 		{family: "quiz", path: filepath.Join(projectDir, ".prj", "quizzes")},
 		{family: "spec", path: filepath.Join(projectDir, ".prj", "specs")},
@@ -296,15 +296,15 @@ func documentRoots(projectDir string) []struct {
 		{family: "tracker", path: filepath.Join(projectDir, ".prj", "trackers")},
 		{family: "report", path: filepath.Join(projectDir, ".prj", "reports")},
 		{family: "handoff", path: filepath.Join(projectDir, ".prj", "handovers")},
-		{family: "quiz", path: filepath.Join(projectDir, ".chr", "user", "quizzes")},
-		{family: "spec", path: filepath.Join(projectDir, ".chr", "user", "specs")},
-		{family: "plan", path: filepath.Join(projectDir, ".chr", "user", "plans")},
-		{family: "tracker", path: filepath.Join(projectDir, ".chr", "user", "trackers")},
+		{family: "quiz", path: filepath.Join(projectDir, ".chr", "default", "quizzes")},
+		{family: "spec", path: filepath.Join(projectDir, ".chr", "default", "specs")},
+		{family: "plan", path: filepath.Join(projectDir, ".chr", "default", "plans")},
+		{family: "tracker", path: filepath.Join(projectDir, ".chr", "default", "trackers")},
 	}
 }
 
 func isArchivedGeneratedDocumentPath(projectDir, path string) bool {
-	relativePath, err := filepath.Rel(filepath.Join(projectDir, ".chr", "user"), path)
+	relativePath, err := filepath.Rel(filepath.Join(projectDir, ".chr", "default"), path)
 	if err != nil {
 		return false
 	}

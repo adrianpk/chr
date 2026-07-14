@@ -32,12 +32,12 @@ func TestServiceCreateDumpUsesSuccessfulCurationProvider(t *testing.T) {
 		t.Fatalf("CreateDump returned error: %v", err)
 	}
 
-	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "curated-notes.md"))
+	curated := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "curated-notes.md"))
 	if !strings.Contains(curated, "Polished dump body.") {
 		t.Fatalf("curated dump = %q, want polished body", curated)
 	}
 
-	raw := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "curated-notes-raw.md"))
+	raw := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "curated-notes-raw.md"))
 	hasHighlight := strings.Contains(raw, "Important source point.")
 	hasRawBody := strings.Contains(raw, "rough dump body")
 
@@ -78,7 +78,7 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 		t.Fatalf("PolishedBody = %q", result.PolishedBody)
 	}
 
-	tracePath := filepath.Join(projectDir, core.DirectoryName, "user", "log", "llm", "llm.ndjson")
+	tracePath := filepath.Join(projectDir, core.DirectoryName, core.UserDirectoryName, "log", "llm", "llm.ndjson")
 
 	trace, err := os.ReadFile(tracePath)
 	if err != nil {

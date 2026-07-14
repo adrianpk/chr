@@ -1,4 +1,4 @@
 # Migrated Quiz Artifact
 
-- Legacy source: `.chr/user/quizzes/curated`
+- Legacy source: `.chr/default/quizzes/curated`
 - Migration producer: `pi`

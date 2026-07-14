@@ -49,7 +49,7 @@ acceptance feature output.
 
 Behavior:
 
-- `spec generate` writes only `.chr/user/specs/<case>-spec.md`.
+- `spec generate` writes only `.chr/default/specs/<case>-spec.md`.
 - The spec model output no longer treats feature output as part of normal spec
   generation.
 - Spec body content remains governed by normal spec quality rules, not
@@ -75,7 +75,7 @@ Behavior:
 - A service operation generates acceptance features independently from specs.
 - The operation loads project, use-case, dump, quiz, and spec context.
 - The operation returns `generated`, `needs_more_info`, or `not_applicable`.
-- Generated features are written to `.chr/user/acceptance/<case>.feature` only
+- Generated features are written to `.chr/default/acceptance/<case>.feature` only
   after static checks pass.
 - The spec is not rewritten as part of feature generation.
 
@@ -84,7 +84,7 @@ Tasks:
 - T2.1 Add feature generation request, result, and model contract.
 - T2.2 Build feature-generation context from spec, quiz, dump, project, and
   use-case artifacts.
-- T2.3 Write checked features to `.chr/user/acceptance/<case>.feature`.
+- T2.3 Write checked features to `.chr/default/acceptance/<case>.feature`.
 - T2.4 Add service tests for generated, rejected, needs-more-info, and
   not-applicable flows.
 - T2.5 Add slice report and tracker updates.

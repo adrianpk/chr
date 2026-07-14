@@ -127,7 +127,7 @@ rediscover the issue later.
 For MVP, assume a monouser repository/operator workflow, while documenting
 that multi-operator support should use namespaced operator artifacts soon.
 Even in MVP, it may be useful to prepare a single-user userspace shape such as
-`.chr/user/`, with the active user selected through a required environment
+`.chr/default/`, with the active user selected through a required environment
 variable. Users can set that through `.envrc` when using direnv, or by any
 other environment mechanism. Full `.chr/operators/<operator-id>/...`
 multi-operator behavior remains outside MVP.

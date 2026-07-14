@@ -6,7 +6,7 @@ Active Slice: none
 
 Spec: `.prj/specs/specs/merger-agent-workflow.md`
 Tracker: `.prj/trackers/slicing-merger-agent-workflow-tracker.md`
-Mirror: `.chr/user/plans/merger-agent-workflow-plan.md`
+Mirror: `.chr/default/plans/merger-agent-workflow-plan.md`
 
 ## Purpose
 

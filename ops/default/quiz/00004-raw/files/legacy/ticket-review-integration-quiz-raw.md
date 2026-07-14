@@ -2,7 +2,7 @@
 
 Status: active
 
-Spec Draft: `.chr/user/specs/ticket-review-integration-draft.md`
+Spec Draft: `.chr/default/specs/ticket-review-integration-draft.md`
 Mirror: `.prj/quizzes/raw/ticket-review-integration-quiz-raw.md`
 
 ## Q1: Repair After Changes Requested

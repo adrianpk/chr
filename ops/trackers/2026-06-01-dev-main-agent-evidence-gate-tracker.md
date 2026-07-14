@@ -40,7 +40,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Discover gate-relevant reports under `.chr/user/reports`. | done | `9fccea6` | Reused project report discovery and resolved execution result paths from report metadata. |
+| T3.1 | Discover gate-relevant reports under `.chr/default/reports`. | done | `9fccea6` | Reused project report discovery and resolved execution result paths from report metadata. |
 | T3.2 | Classify agent-managed evidence from available run reports. | done | `ba4342f` | Added report fields and command integration for agent-managed work. |
 | T3.3 | Classify unmatched changed files as manual or external info. | done | `ba4342f` | Unmatched Git changes are reported as manual or external context. |
 | T3.4 | Add failure checks for missing Chryso-owned run evidence. | done | `e2a9299` | Missing execution evidence now fails the gate. |
@@ -51,7 +51,7 @@ Plan: `ops/plans/2026-06-01-dev-main-agent-evidence-gate-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T4.1 | Add gate config parser. | done | `1f0521c` | Added `.chr/user/config/gates.yml` parser and defaults. |
+| T4.1 | Add gate config parser. | done | `1f0521c` | Added `.chr/default/config/gates.yml` parser and defaults. |
 | T4.2 | Support validation command override. | done | `28e1a4d` | Gate validation now reads configured command. |
 | T4.3 | Support traceability mode and manual/external warning settings. | done | `16a739e` | Added policy behavior for missing evidence, manual warnings, and manual listing. |
 | T4.4 | Support high-risk path configuration as warning-only when enabled. | done | `5066087` | Added high-risk manual change matching and report output. |

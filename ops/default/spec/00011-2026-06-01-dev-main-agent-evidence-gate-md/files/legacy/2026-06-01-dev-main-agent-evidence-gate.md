@@ -147,8 +147,8 @@ Optional output flags:
 chr gate dev-main \
   --base origin/main \
   --head origin/dev \
-  --json .chr/user/reports/gates/dev-main.json \
-  --markdown .chr/user/reports/gates/dev-main.md
+  --json .chr/default/reports/gates/dev-main.json \
+  --markdown .chr/default/reports/gates/dev-main.md
 ```
 
 ## Outputs
@@ -156,8 +156,8 @@ chr gate dev-main \
 The gate writes reports under the user workspace:
 
 ```text
-.chr/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.json
-.chr/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.md
+.chr/default/reports/gates/YYYYMMDD-HHMMSS-dev-main.json
+.chr/default/reports/gates/YYYYMMDD-HHMMSS-dev-main.md
 ```
 
 The JSON report is for automation. The Markdown report is for humans.
@@ -263,7 +263,7 @@ Run configured validation.
 
 Initial default:
 
-- use `.chr/user/config/gates.yml` when it configures a validation command;
+- use `.chr/default/config/gates.yml` when it configures a validation command;
 - otherwise use `go test ./...` for Go projects.
 
 The gate may detect common stronger validation targets, such as `make verify`,
@@ -299,7 +299,7 @@ Future project policy can opt into stricter behavior.
 Policy lives under:
 
 ```text
-.chr/user/config/gates.yml
+.chr/default/config/gates.yml
 ```
 
 Example:
@@ -355,7 +355,7 @@ steps:
 
 The gate should exit non-zero on default failure conditions.
 
-The Markdown and JSON reports should be stored under `.chr/user/reports/gates/`
+The Markdown and JSON reports should be stored under `.chr/default/reports/gates/`
 so Woodpecker can preserve them as artifacts when configured.
 
 ### Woodpecker Setup Helper
@@ -424,7 +424,7 @@ The first implementation should include:
 2. Git base/head/merge-base resolution.
 3. Commit and changed-file collection.
 4. Validation command execution.
-5. Basic Chryso report discovery under `.chr/user/reports`.
+5. Basic Chryso report discovery under `.chr/default/reports`.
 6. Classification into agent-managed vs manual/external when evidence is clear.
 7. JSON and Markdown report generation.
 8. Default failure conditions.
@@ -461,7 +461,7 @@ Draft model:
 - Forgejo is supported as the first-class forge target.
 - The command can run in Woodpecker CI.
 - The implementation provides `chr gate woodpecker init`.
-- The command writes Markdown and JSON reports under `.chr/user/reports/gates/`.
+- The command writes Markdown and JSON reports under `.chr/default/reports/gates/`.
 - The report records base/head SHAs.
 - The report lists validation results.
 - The report lists agent-managed work when Chryso evidence exists.

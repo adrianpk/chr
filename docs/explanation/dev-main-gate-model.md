@@ -18,7 +18,7 @@ The gate provides:
 - Chryso execution evidence classification;
 - manual or external change listing;
 - missing agent evidence failures;
-- `.chr/user/config/gates.yml` policy configuration;
+- `.chr/default/config/gates.yml` policy configuration;
 - high-risk manual change warnings;
 - `chr gate woodpecker init`;
 - Woodpecker status as the first Forgejo feedback path;
@@ -32,16 +32,16 @@ inside the managed project core.
 The gate is a Chryso product feature. It uses:
 
 ```text
-.chr/user/
+.chr/default/
 ```
 
 The current paths are:
 
-- `.chr/user/config/gates.yml`;
-- `.chr/user/reports/gates/`;
-- execution and loop evidence under `.chr/user/` when agent work runs.
+- `.chr/default/config/gates.yml`;
+- `.chr/default/reports/gates/`;
+- execution and loop evidence under `.chr/default/` when agent work runs.
 
-Project notes, issue trackers, or planning directories outside `.chr/user/` can
+Project notes, issue trackers, or planning directories outside `.chr/default/` can
 remain useful to the team, but gate commands do not read them as runtime state.
 
 ## Evidence Model
@@ -73,7 +73,7 @@ evidence checks would produce noise.
 
 The recommended adoption path is:
 
-1. initialize `.chr/user/`;
+1. initialize `.chr/default/`;
 2. use a permissive gate policy;
 3. run the gate to capture baseline evidence;
 4. process new work through Chryso tickets;
@@ -93,7 +93,7 @@ without requiring API comments or tokens.
 The detailed evidence remains local to the project under:
 
 ```text
-.chr/user/reports/gates/
+.chr/default/reports/gates/
 ```
 
 Future Forgejo-specific enrichment can add comments, artifact links, or status
@@ -107,7 +107,7 @@ dedicated command. Baseline adoption is a documented workflow using the gate
 report and permissive policy.
 
 Projects that want Chryso-managed execution evidence need a real
-`.chr/user/` workspace created by `chr init`.
+`.chr/default/` workspace created by `chr init`.
 
 The current Woodpecker integration does not write Forgejo comments or call
 Forgejo APIs. It relies on Woodpecker status and local reports.

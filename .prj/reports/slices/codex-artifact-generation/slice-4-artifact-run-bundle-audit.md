@@ -45,17 +45,17 @@ Successful run workspace:
 
 Generated artifacts:
 
-- `.chr/user/dumps/artifact-backend-audit-notes.md`
-- `.chr/user/dumps/artifact-backend-audit-notes-raw.md`
-- `.chr/user/specs/artifact-backend-audit-spec.md`
-- `.chr/user/plans/artifact-backend-audit-plan.md`
-- `.chr/user/plans/artifact-backend-audit-tracking.md`
-- `.chr/user/tickets/artifact-backend-audit/CHR-21-Copied-workspace-safety-guard.md`
-- `.chr/user/tickets/artifact-backend-audit/CHR-22-Default-Codex-artifact-generation-path.md`
-- `.chr/user/tickets/artifact-backend-audit/CHR-23-Go-owned-artifact-materialization.md`
-- `.chr/user/tickets/artifact-backend-audit/CHR-24-Ticket-and-tracking-materialization-boundary.md`
-- `.chr/user/tickets/artifact-backend-audit/CHR-25-Trace-and-run-bundle-evidence.md`
-- `.chr/user/tickets/artifact-backend-audit/CHR-26-Audit-validation-and-reporting.md`
+- `.chr/default/dumps/artifact-backend-audit-notes.md`
+- `.chr/default/dumps/artifact-backend-audit-notes-raw.md`
+- `.chr/default/specs/artifact-backend-audit-spec.md`
+- `.chr/default/plans/artifact-backend-audit-plan.md`
+- `.chr/default/plans/artifact-backend-audit-tracking.md`
+- `.chr/default/tickets/artifact-backend-audit/CHR-21-Copied-workspace-safety-guard.md`
+- `.chr/default/tickets/artifact-backend-audit/CHR-22-Default-Codex-artifact-generation-path.md`
+- `.chr/default/tickets/artifact-backend-audit/CHR-23-Go-owned-artifact-materialization.md`
+- `.chr/default/tickets/artifact-backend-audit/CHR-24-Ticket-and-tracking-materialization-boundary.md`
+- `.chr/default/tickets/artifact-backend-audit/CHR-25-Trace-and-run-bundle-evidence.md`
+- `.chr/default/tickets/artifact-backend-audit/CHR-26-Audit-validation-and-reporting.md`
 
 Command output summary:
 
@@ -71,7 +71,7 @@ Command output summary:
 Trace file:
 
 ```text
-/tmp/chr-codex-artifacts-93G0Fu/chr-blog-work/.chr/user/log/llm/llm.ndjson
+/tmp/chr-codex-artifacts-93G0Fu/chr-blog-work/.chr/default/log/llm/llm.ndjson
 ```
 
 Observed events:
@@ -92,7 +92,7 @@ Observed events:
 Agent run directory:
 
 ```text
-/tmp/chr-codex-artifacts-93G0Fu/chr-blog-work/.chr/user/tmp/agent-runs
+/tmp/chr-codex-artifacts-93G0Fu/chr-blog-work/.chr/default/tmp/agent-runs
 ```
 
 Observed bundles:
@@ -119,7 +119,7 @@ after the probe. Generated artifacts were present only in the temporary copy.
 ## Initial Failed Probe
 
 The first probe run failed during spec validation because the generated spec
-referenced `.chr/user/user/log/llm/llm.ndjson`. The probe fixture was adjusted
+referenced `.chr/default/user/log/llm/llm.ndjson`. The probe fixture was adjusted
 to avoid feeding concrete trace paths into generated spec content. The
 successful run above completed after that adjustment.
 

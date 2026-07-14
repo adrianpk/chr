@@ -66,7 +66,7 @@ func TestTicketIndexRebuilderPreservesParseErrors(t *testing.T) {
 		CreatedAt: rebuildTestCreatedAt(),
 		UpdatedAt: rebuildTestUpdatedAt(),
 	})
-	writeDiscoveryTestFile(t, projectDir, ".chr/user/tickets/CHR-2-Bad.md")
+	writeDiscoveryTestFile(t, projectDir, ".chr/default/tickets/CHR-2-Bad.md")
 
 	result, err := NewTicketIndexRebuilder(
 		index,
@@ -100,9 +100,9 @@ func writeRebuildTestTicket(t *testing.T, projectDir, relativePath string, ticke
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
 
-	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chr", "user", "tickets", relativePath))
+	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chr", "default", "tickets", relativePath))
 
-	path := filepath.Join(projectDir, ".chr", "user", "tickets", filepath.FromSlash(relativePath))
+	path := filepath.Join(projectDir, ".chr", "default", "tickets", filepath.FromSlash(relativePath))
 	writeFile(t, path, content)
 }
 

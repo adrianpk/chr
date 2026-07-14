@@ -24,7 +24,7 @@ relative path.
 indexed file size or content hash no longer matches the parsed file.
 
 `Orphaned` means an indexed row exists but the Markdown file no longer exists
-under `.chr/user/tickets`.
+under `.chr/default/tickets`.
 
 `Invalid` means a Markdown ticket file exists but cannot be parsed or validated.
 

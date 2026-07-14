@@ -34,7 +34,7 @@ func testRenderedTicket() Ticket {
 		UseCase:     "onboarding",
 		ProjectArea: "frontend",
 		SourceKind:  "plan_tracking",
-		SourceRef:   ".chr/user/plans/onboarding-plan.md",
+		SourceRef:   ".chr/default/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
 		Branch:      "feat/slice-1-onboarding",
 		ReviewRefs: []TicketReviewRef{
@@ -74,7 +74,7 @@ tags: ["uxui", "onboarding"]
 use_case: "onboarding"
 project_area: "frontend"
 source_kind: "plan_tracking"
-source_ref: ".chr/user/plans/onboarding-plan.md"
+source_ref: ".chr/default/plans/onboarding-plan.md"
 slice: "Slice 1"
 branch: "feat/slice-1-onboarding"
 review_refs:

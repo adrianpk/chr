@@ -80,7 +80,7 @@ func TestParseWorktreeGitListReadsPorcelainEntries(t *testing.T) {
 HEAD abc123
 branch refs/heads/dev
 
-worktree /repo/.chr/user/runtime/worktrees/chr-1
+worktree /repo/.chr/default/runtime/worktrees/chr-1
 HEAD def456
 branch refs/heads/feat/chr-1
 
@@ -94,7 +94,7 @@ prunable gitdir file points to non-existent location
 		t.Fatalf("len(entries) = %d, want 3", len(entries))
 	}
 
-	if entries[1].Path != "/repo/.chr/user/runtime/worktrees/chr-1" || entries[1].Branch != "feat/chr-1" {
+	if entries[1].Path != "/repo/.chr/default/runtime/worktrees/chr-1" || entries[1].Branch != "feat/chr-1" {
 		t.Fatalf("entry[1] = %#v, want worktree branch entry", entries[1])
 	}
 

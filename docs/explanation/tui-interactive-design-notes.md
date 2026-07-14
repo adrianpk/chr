@@ -122,7 +122,7 @@ spec, ticket, or implementation plan.
   - `name`
   - `description`
 - No additional fields are assumed for now.
-- Use cases are Markdown documents under `.chr/user/cases/`.
+- Use cases are Markdown documents under `.chr/default/cases/`.
 - Useful persistence metadata can exist below the UI surface:
   - stable `slug` or ID derived from the name;
   - `doc_path` for the Markdown representation.

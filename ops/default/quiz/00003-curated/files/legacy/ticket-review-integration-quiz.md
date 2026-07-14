@@ -2,8 +2,8 @@
 
 Status: active
 
-Raw Capture: `.chr/user/quizzes/raw/ticket-review-integration-quiz-raw.md`
-Spec Draft: `.chr/user/specs/ticket-review-integration-draft.md`
+Raw Capture: `.chr/default/quizzes/raw/ticket-review-integration-quiz-raw.md`
+Spec Draft: `.chr/default/specs/ticket-review-integration-draft.md`
 Mirror: `.prj/quizzes/curated/ticket-review-integration-quiz.md`
 
 ## Purpose

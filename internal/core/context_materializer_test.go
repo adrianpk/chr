@@ -10,7 +10,7 @@ import (
 
 func TestContextPackageMaterializerWritesArtifactLayout(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testContextPackageRuntimePlan(dir, runDir)
 	composition := testContextPackageComposition(t, plan)
 
@@ -40,7 +40,7 @@ func TestContextPackageMaterializerWritesArtifactLayout(t *testing.T) {
 
 func TestRenderMainContextPackageUsesDockerVisiblePaths(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testContextPackageRuntimePlan(dir, runDir)
 	composition := testContextPackageComposition(t, plan)
 
@@ -50,9 +50,9 @@ func TestRenderMainContextPackageUsesDockerVisiblePaths(t *testing.T) {
 	})
 
 	for _, want := range []string{
-		"/workspace/.chr/user/runtime/runs/CHR-1/exec-1/context/agent.md",
-		"/workspace/.chr/user/runtime/runs/CHR-1/exec-1/context/code-context.md",
-		"/workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json",
+		"/workspace/.chr/default/runtime/runs/CHR-1/exec-1/context/agent.md",
+		"/workspace/.chr/default/runtime/runs/CHR-1/exec-1/context/code-context.md",
+		"/workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
 		"agent-default",
 	} {
 		if !strings.Contains(rendered, want) {
@@ -63,8 +63,8 @@ func TestRenderMainContextPackageUsesDockerVisiblePaths(t *testing.T) {
 
 func TestRenderMainContextPackageUsesWorktreeDockerVisiblePaths(t *testing.T) {
 	projectDir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "user", "worktrees", "CHR-1")
-	runDir := filepath.Join(executionWorkspaceDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "default", "worktrees", "CHR-1")
+	runDir := filepath.Join(executionWorkspaceDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testContextPackageRuntimePlan(projectDir, runDir)
 	plan.ProjectCheckoutDir = projectDir
 	plan.ExecutionWorkspaceDir = executionWorkspaceDir
@@ -77,10 +77,10 @@ func TestRenderMainContextPackageUsesWorktreeDockerVisiblePaths(t *testing.T) {
 	})
 
 	for _, want := range []string{
-		"/workspace/.chr/user/runtime/runs/CHR-1/exec-1/context/agent.md",
-		"/workspace/.chr/user/runtime/runs/CHR-1/exec-1/context/code-context.md",
-		"/workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json",
-		"host: `" + filepath.Join(executionWorkspaceDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1", "result.json") + "`",
+		"/workspace/.chr/default/runtime/runs/CHR-1/exec-1/context/agent.md",
+		"/workspace/.chr/default/runtime/runs/CHR-1/exec-1/context/code-context.md",
+		"/workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
+		"host: `" + filepath.Join(executionWorkspaceDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1", "result.json") + "`",
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("main context missing %q:\n%s", want, rendered)
@@ -90,7 +90,7 @@ func TestRenderMainContextPackageUsesWorktreeDockerVisiblePaths(t *testing.T) {
 
 func TestRenderContextPackageDryRunShowsIncludedAndSkippedSources(t *testing.T) {
 	dir := t.TempDir()
-	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testContextPackageRuntimePlan(dir, runDir)
 	composition := testContextPackageComposition(t, plan)
 
@@ -133,7 +133,7 @@ func testContextPackageComposition(t *testing.T, plan RuntimePlan) ContextCompos
 
 	composition, err := PlanContextComposition(ContextComposerOptions{
 		TicketKey:   "CHR-1",
-		TicketPath:  filepath.Join(plan.ProjectDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath:  filepath.Join(plan.ProjectDir, ".chr", "default", "tickets", "CHR-1.md"),
 		ExecutionID: "exec-1",
 		Plan:        plan,
 		Sources: []ContextSourceInventoryEntry{

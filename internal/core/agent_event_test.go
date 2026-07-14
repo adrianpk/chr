@@ -86,7 +86,7 @@ func TestFileAgentEventSinkAppendsAndReadsEventsInOrder(t *testing.T) {
 	second.Phase = AgentEventPhaseTicketSelected
 	second.Message = "CHR-1 selected"
 	second.Refs = AgentEventRefs{
-		"ticket_path": ".chr/user/tickets/CHR-1.md",
+		"ticket_path": ".chr/default/tickets/CHR-1.md",
 	}
 
 	if err := sink.EmitAgentEvent(context.Background(), first); err != nil {
@@ -153,7 +153,7 @@ func assertAgentEventStreamOrder(t *testing.T, stream AgentEventStream) {
 		t.Fatalf("second ticket = %q, want CHR-1", stream.Events[1].TicketKey)
 	}
 
-	if stream.Events[1].Refs["ticket_path"] != ".chr/user/tickets/CHR-1.md" {
+	if stream.Events[1].Refs["ticket_path"] != ".chr/default/tickets/CHR-1.md" {
 		t.Fatalf("second refs = %#v, want ticket path", stream.Events[1].Refs)
 	}
 }

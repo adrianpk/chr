@@ -191,7 +191,7 @@ func TestValidateIndexedTicketRejectsInvalidMergeMetadata(t *testing.T) {
 func validIndexedTicket(now time.Time) IndexedTicket {
 	return IndexedTicket{
 		ProjectID:    "project-1",
-		Path:         "/tmp/project/.chr/user/tickets/CHR-1-Test.md",
+		Path:         "/tmp/project/.chr/default/tickets/CHR-1-Test.md",
 		RelativePath: "CHR-1-Test.md",
 		Key:          "CHR-1",
 		Title:        "Test ticket",

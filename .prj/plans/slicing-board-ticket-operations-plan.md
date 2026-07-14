@@ -9,7 +9,7 @@ Markdown tickets and SQLite metadata.
 
 This slicing covers the Board view, manual ticket creation, generated ticket
 synopsis, Board status flow, conservative attention signals, shared CLI/TUI
-service boundaries, and the first active userspace shape under `.chr/user/`.
+service boundaries, and the first active userspace shape under `.chr/default/`.
 
 ## Source
 
@@ -66,7 +66,7 @@ The current foundation still uses older assumptions:
 - attention does not exist as a virtual view;
 - key allocation is filesystem-scan based;
 - SQLite index lacks Board-specific fields and source metadata;
-- `.chr/user/` active userspace is not modeled;
+- `.chr/default/` active userspace is not modeled;
 - compact vs maximized Board behavior is not explicit.
 
 ## Target Model
@@ -87,7 +87,7 @@ New Chryso-created tickets use Board statuses:
 Legacy statuses are mapped or surfaced explicitly. Unknown statuses are visible
 through attention.
 
-The first userspace implementation prepares `.chr/user/` for the active
+The first userspace implementation prepares `.chr/default/` for the active
 operator. Full `.chr/operators/<operator-id>/...` remains outside this slicing
 but is documented in the spec/model so the insight is not lost.
 
@@ -158,7 +158,7 @@ Out of scope:
 
 ## Slice 2: Userspace Resolver
 
-Introduce the active `.chr/user/` userspace resolver without migrating all
+Introduce the active `.chr/default/` userspace resolver without migrating all
 artifact directories.
 
 Expected behavior:
@@ -166,7 +166,7 @@ Expected behavior:
 - Core code can resolve the project-local active userspace path.
 - The resolver reads a required active-operator environment value for workflows
   that need userspace ownership.
-- `.chr/user/` can be created by workspace initialization or a targeted
+- `.chr/default/` can be created by workspace initialization or a targeted
   workspace repair path.
 - Documentation explains `.envrc` as a convenience, not as a hard dependency.
 - Full `.chr/operators/<operator-id>/...` remains documented as future work.
@@ -346,7 +346,7 @@ Expected behavior:
 - Command reference documents Board/ticket changes.
 - TUI reference documents compact Board, attention, manual ticket creation, and
   maximized Board behavior.
-- Project workspace/runtime docs describe `.chr/user/` MVP and future
+- Project workspace/runtime docs describe `.chr/default/` MVP and future
   multi-operator direction.
 - SQLite migration reference documents Board metadata changes.
 - CLI/TUI action matrix reflects new shared operations.

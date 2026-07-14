@@ -16,7 +16,7 @@ and pull request, then merge the reviewed ticket.
 
 ## Configure Review
 
-Set review configuration in `.chr/user/config.yml`:
+Set review configuration in `.chr/default/config.yml`:
 
 ```yml
 review:

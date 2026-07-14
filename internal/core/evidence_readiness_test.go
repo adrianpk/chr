@@ -162,7 +162,7 @@ func TestEvaluateEvidenceReadinessRejectsNotApplicableGherkinWhenActiveApplies(t
 			Policy:       EvidenceGherkinPolicyActiveWhenApplicable,
 			Active:       true,
 			Applies:      true,
-			RequiredPath: ".chr/user/acceptance/checkout.feature",
+			RequiredPath: ".chr/default/acceptance/checkout.feature",
 		},
 	})
 
@@ -192,7 +192,7 @@ func testCompleteEvidenceReadinessChecklistWith(edit func(*EvidenceStrategyCheck
 				Label:   EvidenceStrategyChecklistLabelGherkin,
 				Checked: true,
 				Status:  "required",
-				Detail:  "path=.chr/user/acceptance/flow.feature",
+				Detail:  "path=.chr/default/acceptance/flow.feature",
 			},
 			EvidenceStrategyChecklistLabelTests: {
 				Label:   EvidenceStrategyChecklistLabelTests,

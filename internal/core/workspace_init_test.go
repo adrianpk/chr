@@ -22,15 +22,15 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 		t.Fatalf("Root = %q, want %q", result.Root, filepath.Join(dir, DirectoryName))
 	}
 
-	assertDir(t, dir, ".chr/user/tickets/open")
-	assertDir(t, dir, ".chr/user/context")
-	assertDir(t, dir, ".chr/user/runtime/traces")
-	assertDir(t, dir, ".chr/user")
-	assertFile(t, dir, ".chr/user/manifest.md")
-	assertFile(t, dir, ".chr/user/config.yml")
-	assertFile(t, dir, ".chr/user/agents/CONVENTIONS.md")
-	assertFile(t, dir, ".chr/user/agents/playbooks/ticket-workflow.md")
-	assertFile(t, dir, ".chr/user/runtime/agent/Dockerfile")
+	assertDir(t, dir, ".chr/default/tickets/open")
+	assertDir(t, dir, ".chr/default/context")
+	assertDir(t, dir, ".chr/default/runtime/traces")
+	assertDir(t, dir, ".chr/default")
+	assertFile(t, dir, ".chr/default/manifest.md")
+	assertFile(t, dir, ".chr/default/config.yml")
+	assertFile(t, dir, ".chr/default/agents/CONVENTIONS.md")
+	assertFile(t, dir, ".chr/default/agents/playbooks/ticket-workflow.md")
+	assertFile(t, dir, ".chr/default/runtime/agent/Dockerfile")
 	assertFile(t, dir, "AGENTS.md")
 	assertNotExists(t, dir, ".chr/root/AGENTS.md")
 }
@@ -44,7 +44,7 @@ func TestInitWritesUserOwnedWorkspaceConfig(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chr", "user", "config.yml"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chr", "default", "config.yml"))
 	if err != nil {
 		t.Fatalf("read config: %v", err)
 	}
@@ -86,7 +86,7 @@ func TestInitWritesWorkspaceManifestAsOrientation(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chr", "user", "manifest.md"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chr", "default", "manifest.md"))
 	if err != nil {
 		t.Fatalf("read manifest: %v", err)
 	}
@@ -118,7 +118,7 @@ func TestInitDoesNotOverwriteExistingFiles(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	configPath := filepath.Join(dir, ".chr", "user", "config.yml")
+	configPath := filepath.Join(dir, ".chr", "default", "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
 	if err != nil {
@@ -175,7 +175,7 @@ func TestInitDoesNotOverwriteExistingRuntimeTemplate(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	dockerfilePath := filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -220,7 +220,7 @@ func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 		t.Fatalf("dry run created workspace or returned unexpected stat error: %v", err)
 	}
 
-	if !contains(result.Created, ".chr/user/runtime/agent/Dockerfile") {
+	if !contains(result.Created, ".chr/default/runtime/agent/Dockerfile") {
 		t.Fatalf("Created = %#v, want runtime Dockerfile", result.Created)
 	}
 }
@@ -229,7 +229,7 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 	dir := t.TempDir()
 	initializer := newTestInitializer()
 
-	err := os.MkdirAll(filepath.Join(dir, ".chr", "user", "agents"), 0o755)
+	err := os.MkdirAll(filepath.Join(dir, ".chr", "default", "agents"), 0o755)
 	if err != nil {
 		t.Fatalf("create existing dir: %v", err)
 	}
@@ -239,8 +239,8 @@ func TestInitDryRunReportsExistingPaths(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	if !contains(result.Skipped, ".chr/user/agents") {
-		t.Fatalf("Skipped = %#v, want .chr/user/agents", result.Skipped)
+	if !contains(result.Skipped, ".chr/default/agents") {
+		t.Fatalf("Skipped = %#v, want .chr/default/agents", result.Skipped)
 	}
 }
 
@@ -270,7 +270,7 @@ func TestInitUsesRequestedProfile(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	content, err := os.ReadFile(filepath.Join(dir, ".chr", "user", "manifest.md"))
+	content, err := os.ReadFile(filepath.Join(dir, ".chr", "default", "manifest.md"))
 	if err != nil {
 		t.Fatalf("read manifest: %v", err)
 	}

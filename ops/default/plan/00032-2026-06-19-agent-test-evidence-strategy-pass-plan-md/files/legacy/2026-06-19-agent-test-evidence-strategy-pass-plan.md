@@ -60,7 +60,7 @@ Behavior:
 Tasks:
 
 - T1.1 Add evidence strategy config structs, defaults, and parser support under
-  `.chr/user/config.yml`.
+  `.chr/default/config.yml`.
 - T1.2 Add enum validation for strategy mode, checklist policy, Gherkin policy,
   strict gating, user edits, and report copy behavior.
 - T1.3 Add core strategy status and diagnostic value types used by later slices.

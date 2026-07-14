@@ -17,8 +17,8 @@ acceptance feature workflow.
 ## Delivered Behavior
 
 `GenerateSpec` now writes only the Markdown spec artifact under
-`.chr/user/specs/`. It no longer returns feature status or writes
-`.chr/user/acceptance/<case>.feature`.
+`.chr/default/specs/`. It no longer returns feature status or writes
+`.chr/default/acceptance/<case>.feature`.
 
 The spec model output contract no longer accepts a `feature` field. Spec
 generation remains neutral about the spec body's subject matter.

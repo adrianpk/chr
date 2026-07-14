@@ -27,7 +27,7 @@ The desired behavior is a work readiness layer that:
 
 ## Goals
 
-- Move branch and remote assumptions into `.chr/user/config.yml`.
+- Move branch and remote assumptions into `.chr/default/config.yml`.
 - Preserve the existing default policy: integration branch `dev`, canonical
   remote `origin`, clean worktree, and remote tracking.
 - Support projects that prefer a different integration branch, current-branch
@@ -119,7 +119,7 @@ work readiness: blocked
 issue: wrong_branch
 current_branch: main
 expected_branch: dev
-configured_by: .chr/user/config.yml
+configured_by: .chr/default/config.yml
 repair: switch_to_branch
 ```
 
@@ -180,7 +180,7 @@ states.
 
 ## Acceptance Criteria
 
-- Work branch policy is loaded from `.chr/user/config.yml` with default values
+- Work branch policy is loaded from `.chr/default/config.yml` with default values
   matching the current `dev`/`origin` behavior.
 - Work-selection preflight uses the configured policy instead of hardcoded
   `dev` and `origin/dev` names.
