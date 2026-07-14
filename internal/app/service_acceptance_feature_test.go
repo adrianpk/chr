@@ -37,11 +37,11 @@ func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
 		t.Fatalf("Status = %q, want generated", result.Status)
 	}
 
-	if result.Feature != ".chr/user/acceptance/blog.feature" {
+	if result.Feature != ".chr/default/acceptance/blog.feature" {
 		t.Fatalf("Feature = %q, want canonical feature path", result.Feature)
 	}
 
-	feature := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "acceptance", "blog.feature"))
+	feature := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "acceptance", "blog.feature"))
 	if !strings.Contains(feature, "Feature: Blog publishing") {
 		t.Fatalf("feature missing body:\n%s", feature)
 	}
@@ -100,7 +100,7 @@ Feature: Blog publishing
 		t.Fatalf("Status = %q, want rejected", result.Status)
 	}
 
-	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "user", "acceptance", "blog.feature")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "default", "acceptance", "blog.feature")); !os.IsNotExist(err) {
 		t.Fatalf("feature file exists or stat failed with unexpected error: %v", err)
 	}
 }
@@ -145,11 +145,11 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 		t.Fatalf("RejectionReason = %q", result.RejectionReason)
 	}
 
-	if result.FeatureRound != ".chr/user/acceptance/blog-feature-round.md" {
+	if result.FeatureRound != ".chr/default/acceptance/blog-feature-round.md" {
 		t.Fatalf("FeatureRound = %q, want feature round path", result.FeatureRound)
 	}
 
-	round := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "acceptance", "blog-feature-round.md"))
+	round := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "acceptance", "blog-feature-round.md"))
 	for _, want := range []string{
 		"### failure-path",
 		"- Default: The article remains unpublished and the user sees a failure message.",
@@ -164,7 +164,7 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 func TestServiceGenerateAcceptanceFeaturePreservesExistingFeatureRoundAnswers(t *testing.T) {
 	projectDir := t.TempDir()
 	writeAcceptanceFeatureServiceFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "acceptance", "blog-feature-round.md"), existingBlogFeatureRoundAnswer())
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "acceptance", "blog-feature-round.md"), existingBlogFeatureRoundAnswer())
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
@@ -198,7 +198,7 @@ func TestServiceGenerateAcceptanceFeaturePreservesExistingFeatureRoundAnswers(t 
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
 	}
 
-	round := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "acceptance", "blog-feature-round.md"))
+	round := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "acceptance", "blog-feature-round.md"))
 	for _, want := range []string{
 		"- Answer: The article remains unpublished and the command reports the failed dependency.",
 		"### retry-path",
@@ -262,7 +262,7 @@ func TestServiceGenerateAcceptanceFeatureReportsNotApplicable(t *testing.T) {
 func TestServiceGenerateAcceptanceFeatureUsesFeatureRoundNotesAsContext(t *testing.T) {
 	projectDir := t.TempDir()
 	writeAcceptanceFeatureServiceFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "acceptance", "blog-feature-round.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "acceptance", "blog-feature-round.md"), `---
 title: "Acceptance Feature Round"
 status: "needs_more_info"
 type: "acceptance_feature_round"
@@ -323,7 +323,7 @@ func writeAcceptanceFeatureServiceFixture(t *testing.T, projectDir string) {
 
 	writeServiceQuizFixture(t, projectDir)
 	writeSpecGenerationUseCaseFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case_slug: "blog"

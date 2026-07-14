@@ -320,7 +320,7 @@ It returns workspace-relative changed paths as execution result changed-file
 entries. The discoverer does not mutate the worktree, stage files, commit,
 revert, or clean files.
 
-Operational runtime artifacts under `.chr/user/runtime/` are ignored so worker
+Operational runtime artifacts under `.chr/default/runtime/` are ignored so worker
 context, logs, result envelopes, and validation artifacts are not reported as
 workspace edits.
 

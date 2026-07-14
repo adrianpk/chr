@@ -2,9 +2,9 @@
 /bin/
 /qa/project/
 /qa/tmp/
-/.chr/user/indexes/
-/.chr/user/runtime/runs/
-/.chr/user/runtime/locks/
-/.chr/user/runtime/traces/
-/.chr/user/tmp/
-/.chr/user/reports/gates/
+/.chr/default/indexes/
+/.chr/default/runtime/runs/
+/.chr/default/runtime/locks/
+/.chr/default/runtime/traces/
+/.chr/default/tmp/
+/.chr/default/reports/gates/

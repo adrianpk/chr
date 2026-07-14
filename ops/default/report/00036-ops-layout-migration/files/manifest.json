@@ -6,70 +6,70 @@
   "mode": "apply",
   "artifacts": [
     {
-      "source": ".chr/user/dumps/curated",
+      "source": ".chr/default/dumps/curated",
       "type": "dump",
       "slug": "curated",
       "id": "00001-curated",
       "destination": "ops/default/dump/00001-curated"
     },
     {
-      "source": ".chr/user/dumps/raw",
+      "source": ".chr/default/dumps/raw",
       "type": "dump",
       "slug": "raw",
       "id": "00002-raw",
       "destination": "ops/default/dump/00002-raw"
     },
     {
-      "source": ".chr/user/quizzes/curated",
+      "source": ".chr/default/quizzes/curated",
       "type": "quiz",
       "slug": "curated",
       "id": "00003-curated",
       "destination": "ops/default/quiz/00003-curated"
     },
     {
-      "source": ".chr/user/quizzes/raw",
+      "source": ".chr/default/quizzes/raw",
       "type": "quiz",
       "slug": "raw",
       "id": "00004-raw",
       "destination": "ops/default/quiz/00004-raw"
     },
     {
-      "source": ".chr/user/specs/dev-main-gate-spec.md",
+      "source": ".chr/default/specs/dev-main-gate-spec.md",
       "type": "spec",
       "slug": "dev-main-gate-spec-md",
       "id": "00005-dev-main-gate-spec-md",
       "destination": "ops/default/spec/00005-dev-main-gate-spec-md"
     },
     {
-      "source": ".chr/user/specs/merger-agent-workflow.md",
+      "source": ".chr/default/specs/merger-agent-workflow.md",
       "type": "spec",
       "slug": "merger-agent-workflow-md",
       "id": "00006-merger-agent-workflow-md",
       "destination": "ops/default/spec/00006-merger-agent-workflow-md"
     },
     {
-      "source": ".chr/user/specs/ticket-review-integration-draft.md",
+      "source": ".chr/default/specs/ticket-review-integration-draft.md",
       "type": "spec",
       "slug": "ticket-review-integration-draft-md",
       "id": "00007-ticket-review-integration-draft-md",
       "destination": "ops/default/spec/00007-ticket-review-integration-draft-md"
     },
     {
-      "source": ".chr/user/plans/dev-main-gate-plan.md",
+      "source": ".chr/default/plans/dev-main-gate-plan.md",
       "type": "plan",
       "slug": "dev-main-gate-plan-md",
       "id": "00008-dev-main-gate-plan-md",
       "destination": "ops/default/plan/00008-dev-main-gate-plan-md"
     },
     {
-      "source": ".chr/user/plans/merger-agent-workflow-plan.md",
+      "source": ".chr/default/plans/merger-agent-workflow-plan.md",
       "type": "plan",
       "slug": "merger-agent-workflow-plan-md",
       "id": "00009-merger-agent-workflow-plan-md",
       "destination": "ops/default/plan/00009-merger-agent-workflow-plan-md"
     },
     {
-      "source": ".chr/user/plans/ticket-review-integration-plan.md",
+      "source": ".chr/default/plans/ticket-review-integration-plan.md",
       "type": "plan",
       "slug": "ticket-review-integration-plan-md",
       "id": "00010-ticket-review-integration-plan-md",

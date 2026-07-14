@@ -9,7 +9,7 @@ inspected from ticket and runtime surfaces.
 
 ## Location
 
-Evidence strategy settings live in `.chr/user/config.yml` under
+Evidence strategy settings live in `.chr/default/config.yml` under
 `evidence.strategy`.
 
 Generated config may omit these fields. Omitted fields use the defaults listed
@@ -61,7 +61,7 @@ evidence:
 
 Gherkin is considered active when `gherkin_policy` is `active_when_applicable`
 and the project already has `.feature` artifacts under
-`.chr/user/acceptance/`. Active Gherkin applies to tickets that change
+`.chr/default/acceptance/`. Active Gherkin applies to tickets that change
 observable CLI, TUI, API, domain, acceptance workflow, or user-visible bugfix
 behavior.
 

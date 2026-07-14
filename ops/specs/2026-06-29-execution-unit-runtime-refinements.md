@@ -91,7 +91,7 @@ The effective default for new generated project config should be:
 ```yml
 work:
   workspace_mode: worktree
-  worktree_root: .chr/user/runtime/worktrees
+  worktree_root: .chr/default/runtime/worktrees
   worktree_base: remote_integration_branch
   worktree_cleanup: after_merge
 ```

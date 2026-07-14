@@ -7,7 +7,7 @@ workspace_root="${CHR_PROBE_WORKSPACE_ROOT:-$(mktemp -d -t chr-codex-artifacts-X
 workspace="${workspace_root}/chr-blog-work"
 case_slug="artifact-backend-audit"
 
-if [[ ! -d "${source_workspace}/.chr/user" ]]; then
+if [[ ! -d "${source_workspace}/.chr/default" ]]; then
   echo "source workspace does not look like a Chryso workspace: ${source_workspace}" >&2
   exit 1
 fi
@@ -16,19 +16,19 @@ mkdir -p "${workspace_root}"
 cp -a "${source_workspace}" "${workspace}"
 
 rm -rf \
-  "${workspace}/.chr/user/log/llm" \
-  "${workspace}/.chr/user/tmp/agent-runs" \
-  "${workspace}/.chr/user/specs/${case_slug}-spec.md" \
-  "${workspace}/.chr/user/plans/${case_slug}-plan.md" \
-  "${workspace}/.chr/user/plans/${case_slug}-tracking.md" \
-  "${workspace}/.chr/user/tickets/${case_slug}"
+  "${workspace}/.chr/default/log/llm" \
+  "${workspace}/.chr/default/tmp/agent-runs" \
+  "${workspace}/.chr/default/specs/${case_slug}-spec.md" \
+  "${workspace}/.chr/default/plans/${case_slug}-plan.md" \
+  "${workspace}/.chr/default/plans/${case_slug}-tracking.md" \
+  "${workspace}/.chr/default/tickets/${case_slug}"
 
 mkdir -p \
-  "${workspace}/.chr/user/cases" \
-  "${workspace}/.chr/user/quizzes" \
-  "${workspace}/.chr/user/dumps"
+  "${workspace}/.chr/default/cases" \
+  "${workspace}/.chr/default/quizzes" \
+  "${workspace}/.chr/default/dumps"
 
-cat >"${workspace}/.chr/user/cases/${case_slug}.md" <<'CASE'
+cat >"${workspace}/.chr/default/cases/${case_slug}.md" <<'CASE'
 ---
 schema_version: 1
 name: "Artifact Backend Audit"
@@ -40,7 +40,7 @@ workspace. The generated artifacts should prove that Codex owns synthesis while
 Go owns file writes, ticket keys, ticket paths, and traceable materialization.
 CASE
 
-cat >"${workspace}/.chr/user/quizzes/${case_slug}-quiz.md" <<'QUIZ'
+cat >"${workspace}/.chr/default/quizzes/${case_slug}-quiz.md" <<'QUIZ'
 ---
 project_id: "project-a2274745ed8d848a"
 case_slug: "artifact-backend-audit"
@@ -55,7 +55,7 @@ updated_at: "2026-05-29T12:00:00Z"
 
 - The audit must run against a copied reference workspace.
 - Codex should be the default backend for long artifact generation.
-- Generated outputs must remain under `.chr/user`.
+- Generated outputs must remain under `.chr/default`.
 - Go must own artifact paths, ticket keys, and ticket file creation.
 - The trace should show Codex request and response events.
 
@@ -97,8 +97,8 @@ run_chr spec generate --dir "${workspace}" --use-case "${case_slug}"
 run_chr plan generate --dir "${workspace}" --use-case "${case_slug}"
 run_chr plan tracking create --dir "${workspace}" --use-case "${case_slug}"
 
-trace_path="${workspace}/.chr/user/log/llm/llm.ndjson"
-agent_runs_dir="${workspace}/.chr/user/tmp/agent-runs"
+trace_path="${workspace}/.chr/default/log/llm/llm.ndjson"
+agent_runs_dir="${workspace}/.chr/default/tmp/agent-runs"
 
 echo "workspace=${workspace}"
 echo "trace=${trace_path}"
@@ -106,7 +106,7 @@ echo "agent_runs=${agent_runs_dir}"
 echo "trace_events=$(wc -l <"${trace_path}")"
 echo "agent_run_dirs=$(find "${agent_runs_dir}" -mindepth 1 -maxdepth 1 -type d | wc -l)"
 echo "generated_files:"
-find "${workspace}/.chr/user" \
+find "${workspace}/.chr/default" \
   \( -path "*/${case_slug}*" -o -path "*/tickets/${case_slug}/*" \) \
   -type f \
   | sort

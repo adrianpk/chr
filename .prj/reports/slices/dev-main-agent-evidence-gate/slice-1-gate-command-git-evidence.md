@@ -38,7 +38,7 @@ service/reporting slices. The CLI adapter in `internal/chrapp` resolves the
 project context and delegates to that package.
 
 The command currently prints evidence directly. Later slices will add JSON and
-Markdown report writing under `.chr/user/reports/gates/`.
+Markdown report writing under `.chr/default/reports/gates/`.
 
 ## Contracts Added or Changed
 

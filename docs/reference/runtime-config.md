@@ -1,6 +1,6 @@
 # Runtime Configuration
 
-Runtime configuration may live in the managed project's `.chr/user/config.yml` file
+Runtime configuration may live in the managed project's `.chr/default/config.yml` file
 under the `runtime:` key.
 
 When fields are omitted, Chryso uses local defaults suitable for the
@@ -20,7 +20,7 @@ runtime values when they are making a real project decision.
 ## Default Values
 
 - `image`: `chr-agent-runtime:local`
-- `dockerfile`: `.chr/user/runtime/agent/Dockerfile`
+- `dockerfile`: `.chr/default/runtime/agent/Dockerfile`
 - `workdir`: `/workspace`
 - `artifact_dir`: `ops/default/run`
 - `validation_command`: `make verify`
@@ -30,7 +30,7 @@ Example override:
 ```yml
 runtime:
   image: chr-agent-runtime:local
-  dockerfile: .chr/user/runtime/agent/Dockerfile
+  dockerfile: .chr/default/runtime/agent/Dockerfile
   validation_command: make verify
 ```
 
@@ -94,7 +94,7 @@ operational artifacts without changing the rest of the runtime behavior.
 
 `runtime.artifact_dir` defaults to `ops/default/run` for runtime routines that
 have not yet been allocated a shared operational artifact envelope. Older
-`.chr/user/runtime/runs` configuration is treated as a migration input and
+`.chr/default/runtime/runs` configuration is treated as a migration input and
 planned through the active `ops/<namespace>/run` root.
 
 For the detailed execution contract, see

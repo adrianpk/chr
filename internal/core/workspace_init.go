@@ -13,8 +13,8 @@ import (
 const (
 	// DirectoryName defines a package boundary constant.
 	DirectoryName = ".chr"
-	// UserDirectoryName defines a package boundary constant.
-	UserDirectoryName = "user"
+	// UserDirectoryName is the default pseudo-user workspace directory name.
+	UserDirectoryName = "default"
 )
 
 // DefaultProfile defines a package boundary constant.
@@ -59,32 +59,31 @@ type entry struct {
 }
 
 var directories = []string{
-	"user/agents",
-	"user/docs",
-	"user/specs/drafts",
-	"user/specs/accepted",
-	"user/specs/archived",
-	"user/tickets/open",
-	"user/tickets/ready",
-	"user/tickets/in_progress",
-	"user/tickets/reviewing",
-	"user/tickets/blocked",
-	"user/tickets/solved",
-	"user/tickets/closed",
-	"user/comments/tickets",
-	"user/context",
-	"user/dumps/raw",
-	"user/dumps/curated",
-	"user/quizzes/raw",
-	"user/quizzes/curated",
-	"user/playbooks",
-	"user/reports/runs",
-	"user/reports/audits",
-	"user/indexes",
-	"user/runtime/runs",
-	"user/runtime/locks",
-	"user/runtime/traces",
-	"user/notifications",
+	UserDirectoryName + "/agents",
+	UserDirectoryName + "/docs",
+	UserDirectoryName + "/specs/drafts",
+	UserDirectoryName + "/specs/accepted",
+	UserDirectoryName + "/specs/archived",
+	UserDirectoryName + "/tickets/open",
+	UserDirectoryName + "/tickets/ready",
+	UserDirectoryName + "/tickets/in_progress",
+	UserDirectoryName + "/tickets/reviewing",
+	UserDirectoryName + "/tickets/blocked",
+	UserDirectoryName + "/tickets/solved",
+	UserDirectoryName + "/tickets/closed",
+	UserDirectoryName + "/comments/tickets",
+	UserDirectoryName + "/context",
+	UserDirectoryName + "/dumps/raw",
+	UserDirectoryName + "/dumps/curated",
+	UserDirectoryName + "/quizzes/raw",
+	UserDirectoryName + "/quizzes/curated",
+	UserDirectoryName + "/playbooks",
+	UserDirectoryName + "/reports/runs",
+	UserDirectoryName + "/reports/audits",
+	UserDirectoryName + "/indexes",
+	UserDirectoryName + "/runtime/locks",
+	UserDirectoryName + "/runtime/traces",
+	UserDirectoryName + "/notifications",
 }
 
 // UserRelativePath executes the corresponding package operation.

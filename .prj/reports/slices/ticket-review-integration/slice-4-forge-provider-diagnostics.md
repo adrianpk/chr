@@ -36,7 +36,7 @@ or writes remote review state.
 
 ## Contracts Added or Changed
 
-- `.chr/user/config.yml` review settings may define provider fields:
+- `.chr/default/config.yml` review settings may define provider fields:
   `forgejo_enabled`, `forgejo_cli`, `forgejo_token_env`, `github_enabled`,
   `github_cli`, and `github_token_env`.
 - Default provider config enables Forgejo-compatible providers with `tea` and

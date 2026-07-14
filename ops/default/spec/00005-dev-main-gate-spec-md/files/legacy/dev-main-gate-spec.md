@@ -18,12 +18,12 @@ The gate must be tooling-first and agent-aware. It should not behave like a gene
 
 - Collect Git range evidence for a base/head pair.
 - Run the configured validation command.
-- Write Markdown and JSON reports under `.chr/user/reports/gates/`.
+- Write Markdown and JSON reports under `.chr/default/reports/gates/`.
 - Classify Chryso-managed work separately from manual or external changes.
 - Fail when validation fails.
 - Fail when Chryso-managed work lacks required evidence under strict policy.
 - Keep manual or external changes informational by default.
-- Support `.chr/user/config/gates.yml`.
+- Support `.chr/default/config/gates.yml`.
 - Provide a Woodpecker setup helper.
 
 ## Adoption Policy

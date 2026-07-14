@@ -114,7 +114,7 @@ func TestRenderAssistedSynthesizedArtifactIsDeterministic(t *testing.T) {
 		ID:          "spec:session-1:assisted-spec",
 		Kind:        AuthoringArtifactKindSpec,
 		Role:        AuthoringArtifactRoleOutput,
-		Path:        ".chr/user/specs/session-1-assisted-spec.md",
+		Path:        ".chr/default/specs/session-1-assisted-spec.md",
 		Description: "Synthesized assisted authoring artifact.",
 	}
 

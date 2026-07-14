@@ -11,7 +11,7 @@ import (
 
 func TestTicketParserParsesRenderedTicket(t *testing.T) {
 	dir := t.TempDir()
-	ticketsDir := filepath.Join(dir, ".chr", "user", "tickets")
+	ticketsDir := filepath.Join(dir, ".chr", "default", "tickets")
 	path := filepath.Join(ticketsDir, "onboarding", "CHR-1-Do-something.md")
 	createdAt := time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
 	updatedAt := time.Date(2026, 5, 18, 13, 30, 0, 0, time.UTC)
@@ -54,7 +54,7 @@ func testParserRenderedTicket(createdAt, updatedAt time.Time) Ticket {
 		UseCase:     "onboarding",
 		ProjectArea: "frontend",
 		SourceKind:  "plan_tracking",
-		SourceRef:   ".chr/user/plans/onboarding-plan.md",
+		SourceRef:   ".chr/default/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
 		Branch:      "feat/slice-1-onboarding",
 		ReviewRefs: []TicketReviewRef{
@@ -299,7 +299,7 @@ func assertParsedTicketSourceMetadata(t *testing.T, ticket IndexedTicket) {
 	t.Helper()
 
 	sourceMetadataMatches := ticket.SourceKind == "plan_tracking" &&
-		ticket.SourceRef == ".chr/user/plans/onboarding-plan.md" &&
+		ticket.SourceRef == ".chr/default/plans/onboarding-plan.md" &&
 		ticket.Slice == "Slice 1"
 
 	if !sourceMetadataMatches {

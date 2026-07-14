@@ -111,7 +111,7 @@ chr gate dev-main --base origin/main --head HEAD
 
 The gate collects Git range evidence, runs the configured validation command,
 classifies Chryso-managed work versus manual or external changes, and
-writes Markdown and JSON reports under `.chr/user/reports/gates/`.
+writes Markdown and JSON reports under `.chr/default/reports/gates/`.
 
 Initialize a Woodpecker gate workflow:
 
@@ -178,13 +178,13 @@ List, create, inspect, and edit dumps:
 chr dump list
 chr dump new --title "Billing notes" --content "Initial context."
 chr dump new --title "Billing notes" --content "Use-case context." --use-case billing
-chr dump show .chr/user/dumps/billing-notes.md
-chr dump save .chr/user/dumps/billing-notes.md --content "# Billing notes"
-chr dump append .chr/user/dumps/billing-notes.md --content "Additional context."
-chr dump open .chr/user/dumps/billing-notes.md
+chr dump show .chr/default/dumps/billing-notes.md
+chr dump save .chr/default/dumps/billing-notes.md --content "# Billing notes"
+chr dump append .chr/default/dumps/billing-notes.md --content "Additional context."
+chr dump open .chr/default/dumps/billing-notes.md
 ```
 
-Dump paths are project-relative and must stay under `.chr/user/dumps/`.
+Dump paths are project-relative and must stay under `.chr/default/dumps/`.
 `chr dump new` writes a curated primary dump and a `-raw.md` sibling. Listing
 dumps returns the curated primary documents; raw siblings are retained as source
 captures and are not selected as regular dump context.
@@ -232,14 +232,14 @@ chr acceptance feature generate --use-case billing
 Generated features are written under:
 
 ```text
-.chr/user/acceptance/<scope>.feature
+.chr/default/acceptance/<scope>.feature
 ```
 
 If generation needs more scenario detail, Chryso writes feature-round notes
 under:
 
 ```text
-.chr/user/acceptance/<scope>-feature-round.md
+.chr/default/acceptance/<scope>-feature-round.md
 ```
 
 Feature artifacts are written only when the generated Gherkin passes static

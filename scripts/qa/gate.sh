@@ -23,9 +23,9 @@ import "testing"
 func TestGateQA(t *testing.T) {}
 EOF
 
-mkdir -p "$project_dir/.chr/user/config"
+mkdir -p "$project_dir/.chr/default/config"
 
-cat >"$project_dir/.chr/user/config/gates.yml" <<'EOF'
+cat >"$project_dir/.chr/default/config/gates.yml" <<'EOF'
 gates:
   dev_main:
     validation_command: go test ./...
@@ -60,8 +60,8 @@ if ! grep -q "status: passed" "$output_file"; then
 	exit 1
 fi
 
-json_count="$(find "$project_dir/.chr/user/reports/gates" -maxdepth 1 -type f -name '*.json' | wc -l | tr -d ' ')"
-markdown_count="$(find "$project_dir/.chr/user/reports/gates" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
+json_count="$(find "$project_dir/.chr/default/reports/gates" -maxdepth 1 -type f -name '*.json' | wc -l | tr -d ' ')"
+markdown_count="$(find "$project_dir/.chr/default/reports/gates" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
 
 if [ "$json_count" != "1" ] || [ "$markdown_count" != "1" ]; then
 	echo "qa gate failed: expected one JSON report and one Markdown report" >&2

@@ -55,7 +55,7 @@ chr ticket review-ref CHR-1 \
   --id 123
 ```
 
-The evidence gate is configured under `.chr/user/config.yml` at
+The evidence gate is configured under `.chr/default/config.yml` at
 `evidence.strategy`. See
 [Evidence strategy configuration](evidence-strategy-config.md).
 
@@ -141,7 +141,7 @@ still requests changes, the loop blocks and later normal tickets do not start.
 
 Development, review, and merge operations are serialized per core.
 
-Execution paths acquire `.chr/user/runtime/agent-operation.lock` before
+Execution paths acquire `.chr/default/runtime/agent-operation.lock` before
 mutating ticket, review, or merge state. A second development, review, or merge
 operation in the same workspace is blocked while the lock is held.
 

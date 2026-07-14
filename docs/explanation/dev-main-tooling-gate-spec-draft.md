@@ -82,7 +82,7 @@ AI can summarize the report later, but the gate must be useful without AI.
 
 The gate must work for a generic Go project managed by Chryso. It should
 not assume a particular repository shape beyond a Git repository and a
-`.chr/user/` workspace when Chryso is initialized.
+`.chr/default/` workspace when Chryso is initialized.
 
 ### Forgejo First
 
@@ -126,8 +126,8 @@ The final command name is open. `gate dev-main` is direct and CI-friendly.
 The command produces:
 
 ```text
-.chr/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.json
-.chr/user/reports/gates/YYYYMMDD-HHMMSS-dev-main.md
+.chr/default/reports/gates/YYYYMMDD-HHMMSS-dev-main.json
+.chr/default/reports/gates/YYYYMMDD-HHMMSS-dev-main.md
 ```
 
 The Markdown report is for humans. The JSON report is for automation and CI.
@@ -144,7 +144,7 @@ The `dev` to `main` PR should reference the gate report:
 
 ## Gate
 
-- `.chr/user/reports/gates/20260601-090000-dev-main.md`
+- `.chr/default/reports/gates/20260601-090000-dev-main.md`
 ```
 
 ### CI Enforcement
@@ -195,7 +195,7 @@ git diff --numstat <base>..<head>
 
 ### Chryso Evidence
 
-Collect from `.chr/user/`:
+Collect from `.chr/default/`:
 
 - tickets included in the promoted range if they can be mapped;
 - ticket status;
@@ -374,13 +374,13 @@ The gate needs configurable policy.
 Possible location:
 
 ```text
-.chr/user/config/gates.yml
+.chr/default/config/gates.yml
 ```
 
 or project config:
 
 ```text
-.chr/user/config.yml
+.chr/default/config.yml
 ```
 
 Open design point: Chryso recently moved project data under user
@@ -464,7 +464,7 @@ Candidate commands:
 ```sh
 chr gate dev-main --base main --head dev
 chr gate dev-main --base origin/main --head origin/dev --ci
-chr gate dev-main --base main --head dev --policy .chr/user/config/gates.yml
+chr gate dev-main --base main --head dev --policy .chr/default/config/gates.yml
 chr gate show latest
 ```
 
@@ -472,7 +472,7 @@ Possible broader namespace:
 
 ```sh
 chr review collect --base main --head dev
-chr review gate --report .chr/user/reports/gates/...
+chr review gate --report .chr/default/reports/gates/...
 ```
 
 The `gate` namespace is clearer for CI. The `review` namespace is clearer for
@@ -500,7 +500,7 @@ A minimal useful version could:
 3. Collect commits and changed files.
 4. Run `go test ./...`.
 5. Run configured lint command if available.
-6. Detect `.chr/user/` reports/tickets presence.
+6. Detect `.chr/default/` reports/tickets presence.
 7. Write JSON and Markdown reports.
 8. Fail if validation fails.
 9. Fail if report cannot resolve base/head.
@@ -543,7 +543,7 @@ These questions should be answered before turning this draft into a formal spec:
    `chr review`?
 2. Should the gate always write reports, even when it fails early?
 3. Which checks are hard failures in the first version?
-4. Should the first version require `.chr/user/` ticket evidence, or only report
+4. Should the first version require `.chr/default/` ticket evidence, or only report
    its absence?
 5. How should commits map to tickets?
 6. Should gate reports be committed, kept as local artifacts, or uploaded only

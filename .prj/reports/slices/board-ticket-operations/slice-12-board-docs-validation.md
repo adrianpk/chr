@@ -28,7 +28,7 @@ Board ticket operations slice set.
 - Updated SQLite migration reference with the Board metadata migration file and
   `ticket_key_sequences` role.
 - Updated project workspace reference with Markdown ticket, user-level SQLite,
-  and `.chr/user/` responsibilities.
+  and `.chr/default/` responsibilities.
 - Updated CLI/TUI parity matrix with Board navigation, attention, maximized
   Board, selected-ticket detail, and Board query service parity.
 - Updated tutorial and lab ticket creation examples to include required

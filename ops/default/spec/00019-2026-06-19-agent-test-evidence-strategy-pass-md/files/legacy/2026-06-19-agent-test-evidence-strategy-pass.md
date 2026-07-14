@@ -445,7 +445,7 @@ operational source and Chryso should surface a diagnostic.
 
 ## Configuration
 
-Configuration should live in `.chr/user/config.yml` under a new top-level
+Configuration should live in `.chr/default/config.yml` under a new top-level
 `evidence:` key.
 
 Generated config may omit defaults. Omitted fields use sane defaults.

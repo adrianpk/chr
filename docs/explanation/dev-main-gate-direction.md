@@ -31,7 +31,7 @@ A future gate can collect evidence from:
 
 - `git log` and `git diff` between `main` and `dev`;
 - changed files, packages, and public surfaces;
-- ticket, plan, and execution artifacts under `.chr/user/`;
+- ticket, plan, and execution artifacts under `.chr/default/`;
 - validation commands such as `go test ./...` and `golangci-lint`;
 - coverage profiles and package coverage summaries;
 - cyclomatic or cognitive complexity tooling;
@@ -48,8 +48,8 @@ Markdown.
 A future command could produce:
 
 ```text
-.chr/user/reports/gates/YYYYMMDD-dev-main.json
-.chr/user/reports/gates/YYYYMMDD-dev-main.md
+.chr/default/reports/gates/YYYYMMDD-dev-main.json
+.chr/default/reports/gates/YYYYMMDD-dev-main.md
 ```
 
 The report should record:

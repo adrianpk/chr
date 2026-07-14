@@ -145,13 +145,13 @@ const (
 	// DefaultRuntimeImage defines a package boundary constant.
 	DefaultRuntimeImage = "chr-agent-runtime:local"
 	// DefaultRuntimeDockerfilePath defines a package boundary constant.
-	DefaultRuntimeDockerfilePath = ".chr/user/runtime/agent/Dockerfile"
+	DefaultRuntimeDockerfilePath = ".chr/default/runtime/agent/Dockerfile"
 	// DefaultRuntimeWorkdir defines a package boundary constant.
 	DefaultRuntimeWorkdir = "/workspace"
 	// DefaultRuntimeArtifactDir defines the zero-configuration shared run artifact root.
 	DefaultRuntimeArtifactDir = "ops/default/run"
-	// LegacyRuntimeArtifactDir is the retired private run artifact root accepted only for migration to ops layout.
-	LegacyRuntimeArtifactDir = ".chr/user/runtime/runs"
+	// PrivateRuntimeArtifactDir is the retired private run artifact root accepted only for migration to ops layout.
+	PrivateRuntimeArtifactDir = ".chr/default/runtime/runs"
 	// DefaultRuntimeValidationCommand defines a package boundary constant.
 	DefaultRuntimeValidationCommand = "make verify"
 

@@ -89,8 +89,8 @@ Event files should be append-only JSONL.
 Preferred paths:
 
 ```text
-.chr/user/runtime/runs/<loop-id>/events.jsonl
-.chr/user/runtime/runs/<ticket-key>/<execution-id>/events.jsonl
+.chr/default/runtime/runs/<loop-id>/events.jsonl
+.chr/default/runtime/runs/<ticket-key>/<execution-id>/events.jsonl
 ```
 
 When there is no loop id, execution-scoped events are still written under the

@@ -73,7 +73,7 @@ func TestCheckWorkReadinessReportsRuntimeArtifactsSeparately(t *testing.T) {
 		Policy:     DefaultWorkBranchPolicy(),
 		Git: fakeWorkReadinessGit{
 			branch:            "dev",
-			cleanStatus:       []string{"?? .chr/user/runtime/", " M main.go"},
+			cleanStatus:       []string{"?? .chr/default/runtime/", " M main.go"},
 			branchExists:      true,
 			remoteRefExists:   true,
 			branchContainsRef: true,
@@ -260,7 +260,7 @@ func TestCheckWorkReadinessNoGitEnforcementSkipsGit(t *testing.T) {
 func TestRepairWorkReadinessIgnoresRuntimeArtifacts(t *testing.T) {
 	git := &fakeWorkReadinessRepairGit{
 		branch:            "dev",
-		cleanStatus:       []string{"?? .chr/user/runtime/runs/"},
+		cleanStatus:       []string{"?? .chr/default/runtime/runs/"},
 		branchExists:      true,
 		remoteRefExists:   true,
 		branchContainsRef: true,
@@ -507,7 +507,7 @@ func TestOSWorkReadinessGitExcludeLocalPatternIsIdempotent(t *testing.T) {
 
 	git := OSWorkReadinessGit{}
 	for range 2 {
-		_, err := git.ExcludeLocalPattern(context.Background(), projectDir, ".chr/user/runtime/")
+		_, err := git.ExcludeLocalPattern(context.Background(), projectDir, ".chr/default/runtime/")
 		if err != nil {
 			t.Fatalf("ExcludeLocalPattern returned error: %v", err)
 		}
@@ -518,7 +518,7 @@ func TestOSWorkReadinessGitExcludeLocalPatternIsIdempotent(t *testing.T) {
 		t.Fatalf("read local exclude: %v", err)
 	}
 
-	if count := strings.Count(string(content), ".chr/user/runtime/"); count != 1 {
+	if count := strings.Count(string(content), ".chr/default/runtime/"); count != 1 {
 		t.Fatalf("exclude content = %q, want one runtime pattern", string(content))
 	}
 }

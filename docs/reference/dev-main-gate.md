@@ -42,7 +42,7 @@ The gate records:
 Reports are written under:
 
 ```text
-.chr/user/reports/gates/
+.chr/default/reports/gates/
 ```
 
 Each run writes:
@@ -79,7 +79,7 @@ Top-level JSON fields:
 Project-local gate config lives at:
 
 ```text
-.chr/user/config/gates.yml
+.chr/default/config/gates.yml
 ```
 
 Supported shape:
@@ -170,4 +170,4 @@ chr gate dev-main --dir . --base ${CHR_GATE_BASE:-origin/main} --head ${CHR_GATE
 
 Woodpecker status is the first supported Forgejo feedback path. The pipeline
 fails when the gate exits non-zero. Detailed evidence remains in
-`.chr/user/reports/gates/`.
+`.chr/default/reports/gates/`.

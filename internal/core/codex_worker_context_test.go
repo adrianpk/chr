@@ -10,7 +10,7 @@ import (
 )
 
 func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
-	path := filepath.Join(t.TempDir(), ".chr", "user", "runtime", "runs", "CHR-1", "exec-1", "context.md")
+	path := filepath.Join(t.TempDir(), ".chr", "default", "runtime", "runs", "CHR-1", "exec-1", "context.md")
 	opts := testCodexWorkerContextOptions(path)
 
 	err := NewCodexWorkerContextMaterializer().MaterializeContext(context.Background(), opts)
@@ -27,7 +27,7 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 		"# Codex Worker Context",
 		"- execution_id: exec-1",
 		"- ticket_key: CHR-1",
-		"- ticket_path: /workspace/.chr/user/tickets/CHR-1.md",
+		"- ticket_path: /workspace/.chr/default/tickets/CHR-1.md",
 		"## Workspace",
 		"- workspace_mode: project",
 		"- project_checkout_dir: /project",
@@ -35,9 +35,9 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 		"- ticket_branch: chr/CHR-1",
 		"- workspace_base_ref: origin/dev",
 		"- workspace_base_sha: abc123",
-		"- result_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json",
-		"- log_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
-		"- validation_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+		"- result_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
+		"- log_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/runtime.log",
+		"- validation_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/validation.log",
 		"## Evidence Strategy",
 		"Before modifying project files:",
 		"Write or update the ticket evidence-strategy checklist.",
@@ -55,7 +55,7 @@ func TestCodexWorkerContextMaterializerWritesContext(t *testing.T) {
 
 func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
 	projectDir := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := RuntimePlan{
 		ProjectDir:            projectDir,
 		ContainerWorkdir:      "/workspace",
@@ -64,9 +64,9 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 		LogPath:               filepath.Join(runDir, "runtime.log"),
 		ValidationPath:        filepath.Join(runDir, "validation.log"),
 		ValidationCommand:     "go test ./...",
-		DockerfilePath:        filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+		DockerfilePath:        filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 		RunArtifactDir:        runDir,
-		ArtifactDir:           filepath.Join(projectDir, ".chr", "user", "runtime", "runs"),
+		ArtifactDir:           filepath.Join(projectDir, ".chr", "default", "runtime", "runs"),
 		Image:                 "chr-agent-runtime:local",
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: projectDir,
@@ -78,7 +78,7 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
 	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:       "CHR-1",
@@ -102,10 +102,10 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 	}
 
 	for _, want := range []string{
-		"- ticket_path: /workspace/.chr/user/tickets/CHR-1.md",
-		"- result_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json",
-		"- log_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
-		"- validation_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+		"- ticket_path: /workspace/.chr/default/tickets/CHR-1.md",
+		"- result_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
+		"- log_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/runtime.log",
+		"- validation_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/validation.log",
 	} {
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("content does not contain %q:\n%s", want, string(content))
@@ -115,7 +115,7 @@ func TestMaterializeCodexWorkerContextForExecutionUsesContainerPaths(t *testing.
 
 func TestMaterializeCodexWorkerContextForExecutionUsesWorktreeContainerPaths(t *testing.T) {
 	projectDir := t.TempDir()
-	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "user", "worktrees", "CHR-1")
+	executionWorkspaceDir := filepath.Join(projectDir, ".chr", "default", "worktrees", "CHR-1")
 	plan := testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir)
 	record := testCodexWorkerContextWorktreeRecord(t, executionWorkspaceDir)
 
@@ -130,16 +130,16 @@ func TestMaterializeCodexWorkerContextForExecutionUsesWorktreeContainerPaths(t *
 	}
 
 	for _, want := range []string{
-		"- ticket_path: /workspace/.chr/user/tickets/CHR-1.md",
+		"- ticket_path: /workspace/.chr/default/tickets/CHR-1.md",
 		"- workspace_mode: worktree",
 		"- project_checkout_dir: " + projectDir,
 		"- execution_workspace_dir: " + executionWorkspaceDir,
 		"- ticket_branch: chr/CHR-1",
 		"- workspace_base_ref: origin/dev",
 		"- workspace_base_sha: abc123",
-		"- result_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json",
-		"- log_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
-		"- validation_path: /workspace/.chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+		"- result_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
+		"- log_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/runtime.log",
+		"- validation_path: /workspace/.chr/default/runtime/runs/CHR-1/exec-1/validation.log",
 	} {
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("content does not contain %q:\n%s", want, string(content))
@@ -149,12 +149,12 @@ func TestMaterializeCodexWorkerContextForExecutionUsesWorktreeContainerPaths(t *
 
 func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testing.T) {
 	projectDir := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
 	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:               "CHR-1",
@@ -207,12 +207,12 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesRepairHandoff(t *testi
 
 func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *testing.T) {
 	projectDir := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
 
 	checklist, err := RenderEvidenceStrategyChecklist(testEvidenceStrategyChecklistModel())
@@ -251,7 +251,7 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *te
 		"### Existing Checklist",
 		"- status: present",
 		"- Evidence strategy: checked=false; status=planned; change_kind=bugfix",
-		"- Gherkin: checked=false; status=required; path=.chr/user/acceptance/bug.feature",
+		"- Gherkin: checked=false; status=required; path=.chr/default/acceptance/bug.feature",
 	} {
 		if !strings.Contains(string(content), want) {
 			t.Fatalf("content does not contain %q:\n%s", want, string(content))
@@ -261,14 +261,14 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesEvidenceStrategy(t *te
 
 func TestMaterializeCodexWorkerContextForExecutionIncludesGherkinPolicyGuidance(t *testing.T) {
 	projectDir := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
-	writeEvidencePolicyFeature(t, projectDir, ".chr/user/acceptance/checkout.feature")
+	writeEvidencePolicyFeature(t, projectDir, ".chr/default/acceptance/checkout.feature")
 	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:         "CHR-1",
 		Title:       "Add CLI checkout command",
@@ -296,7 +296,7 @@ func TestMaterializeCodexWorkerContextForExecutionIncludesGherkinPolicyGuidance(
 		"### Project Gherkin",
 		"- active: true",
 		"- applies_to_ticket: true",
-		"- required_path: .chr/user/acceptance/checkout.feature",
+		"- required_path: .chr/default/acceptance/checkout.feature",
 		"### Gherkin Evidence Quality",
 		"Do not treat an existing feature path as sufficient evidence by itself.",
 		"trivial hardcoded happy path",
@@ -375,7 +375,7 @@ func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testi
 			EvidenceStrategyChecklistLabelGherkin: {
 				Label:  EvidenceStrategyChecklistLabelGherkin,
 				Status: "required",
-				Detail: "path=.chr/user/acceptance/checkout.feature",
+				Detail: "path=.chr/default/acceptance/checkout.feature",
 			},
 			EvidenceStrategyChecklistLabelTests: {
 				Label:  EvidenceStrategyChecklistLabelTests,
@@ -404,7 +404,7 @@ func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testi
 
 	for _, want := range []string{
 		"- Evidence strategy: checked=false; status=planned; change_kind=behavior",
-		"- Gherkin: checked=false; status=required; path=.chr/user/acceptance/checkout.feature",
+		"- Gherkin: checked=false; status=required; path=.chr/default/acceptance/checkout.feature",
 		"- Tests: checked=false; status=mixed; reason=unit table and fuzz coverage",
 		"- `evidence_summary.deviations`: optional list of deviations from the planned strategy.",
 	} {
@@ -416,12 +416,12 @@ func TestRenderCodexWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testi
 
 func TestMaterializeCodexWorkerContextForExecutionBlocksRepairWithoutReviewComments(t *testing.T) {
 	projectDir := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testCodexWorkerContextRuntimePlan(projectDir, runDir)
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
 	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:          "CHR-1",
@@ -476,10 +476,10 @@ func testCodexWorkerContextOptions(path string) MaterializeCodexWorkerContextOpt
 		Path:                  path,
 		ExecutionID:           "exec-1",
 		TicketKey:             "CHR-1",
-		TicketPath:            "/workspace/.chr/user/tickets/CHR-1.md",
-		ResultPath:            "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/result.json",
-		LogPath:               "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/runtime.log",
-		ValidationPath:        "/workspace/.chr/user/runtime/runs/CHR-1/exec-1/validation.log",
+		TicketPath:            "/workspace/.chr/default/tickets/CHR-1.md",
+		ResultPath:            "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
+		LogPath:               "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/runtime.log",
+		ValidationPath:        "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/validation.log",
 		WorkspaceMode:         WorkWorkspaceModeProject,
 		ProjectCheckoutDir:    "/project",
 		ExecutionWorkspaceDir: "/project",
@@ -504,15 +504,15 @@ func testCodexWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
 		LogPath:               filepath.Join(runDir, "runtime.log"),
 		ValidationPath:        filepath.Join(runDir, "validation.log"),
 		ValidationCommand:     "go test ./...",
-		DockerfilePath:        filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+		DockerfilePath:        filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 		RunArtifactDir:        runDir,
-		ArtifactDir:           filepath.Join(projectDir, ".chr", "user", "runtime", "runs"),
+		ArtifactDir:           filepath.Join(projectDir, ".chr", "default", "runtime", "runs"),
 		Image:                 "chr-agent-runtime:local",
 	}
 }
 
 func testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir string) RuntimePlan {
-	runDir := filepath.Join(executionWorkspaceDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(executionWorkspaceDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 
 	return RuntimePlan{
 		ProjectDir:            projectDir,
@@ -528,9 +528,9 @@ func testCodexWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir
 		LogPath:               filepath.Join(runDir, "runtime.log"),
 		ValidationPath:        filepath.Join(runDir, "validation.log"),
 		ValidationCommand:     "go test ./...",
-		DockerfilePath:        filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+		DockerfilePath:        filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 		RunArtifactDir:        runDir,
-		ArtifactDir:           filepath.Join(executionWorkspaceDir, ".chr", "user", "runtime", "runs"),
+		ArtifactDir:           filepath.Join(executionWorkspaceDir, ".chr", "default", "runtime", "runs"),
 		Image:                 "chr-agent-runtime:local",
 	}
 }
@@ -541,7 +541,7 @@ func testCodexWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir st
 	record := ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(executionWorkspaceDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(executionWorkspaceDir, ".chr", "default", "tickets", "CHR-1.md"),
 	}
 	writeCodexWorkerContextTicket(t, record.TicketPath, Ticket{
 		Key:       "CHR-1",

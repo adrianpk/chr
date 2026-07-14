@@ -104,7 +104,7 @@ Validation:
 Candidate tasks:
 
 - [x] T3.1 Add project and use-case metadata for `comments`.
-- [x] T3.2 Add comments dumps and curated quiz notes under `.chr/user/...`.
+- [x] T3.2 Add comments dumps and curated quiz notes under `.chr/default/...`.
 - [x] T3.3 Add a ready bug ticket for the unknown-slug behavior.
 - [x] T3.4 Add ADR documentation under `docs/explanation/adr/`.
 - [x] T3.5 Ensure no generated comments spec/plan/tracking/tickets are seeded.
@@ -123,7 +123,7 @@ Validation:
 - `make qa-reset-blog`
 - `go run ./cmd/chr ticket list --dir qa/project/blog`
 - `go run ./cmd/chr spec list --dir qa/project/blog`
-- `find qa/project/blog/.chr/user/specs qa/project/blog/.chr/user/plans -maxdepth 2 -type f 2>/dev/null | sort`
+- `find qa/project/blog/.chr/default/specs qa/project/blog/.chr/default/plans -maxdepth 2 -type f 2>/dev/null | sort`
 - `make qa-test-blog` expected failure: unknown post returns `500`, test expects `404`
 - `make verify`
 - `git diff --check`

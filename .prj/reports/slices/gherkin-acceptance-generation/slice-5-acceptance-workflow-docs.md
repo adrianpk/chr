@@ -20,7 +20,7 @@ readiness slots, generated `.feature` artifact location, static checks, and the
 deferred `godog` execution path.
 
 The command reference and user guide now tell users that `chr spec generate`
-can write `.chr/user/acceptance/<scope>.feature` when context is suitable and
+can write `.chr/default/acceptance/<scope>.feature` when context is suitable and
 static checks pass.
 
 The document generation model now records that feature files are supporting

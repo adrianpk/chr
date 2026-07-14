@@ -32,7 +32,7 @@ fails when `chr gate dev-main` exits non-zero, which gives Forgejo a promotion
 signal without requiring Forgejo API comments or status writes in the first
 implementation.
 
-Gate evidence remains local to `.chr/user/reports/gates/`.
+Gate evidence remains local to `.chr/default/reports/gates/`.
 
 ## Validation
 

@@ -38,7 +38,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| T3.1 | Add acceptance feature artifact types and layout helpers. | done | `2f8f245` | Added feature artifact contract, canonical `.chr/user/acceptance/<scope>.feature` layout, and layout validation. |
+| T3.1 | Add acceptance feature artifact types and layout helpers. | done | `2f8f245` | Added feature artifact contract, canonical `.chr/default/acceptance/<scope>.feature` layout, and layout validation. |
 | T3.2 | Add deterministic static feature checks. | done | `ffa196e` | Added line-oriented feature structure, step, traceability, open-question, vague-step, and implementation-detail checks. |
 | T3.3 | Add tests for valid features, missing Given/When/Then, vague steps, missing traceability, and open-question scenarios. | done | `298a671` | Added focused coverage for valid and rejected feature bodies. |
 | T3.4 | Add slice report and tracker updates. | done | this commit | Added Slice 3 report, tracker status, and validation log. |
@@ -48,7 +48,7 @@ Plan: `ops/plans/2026-06-06-gherkin-acceptance-generation-plan.md`
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
 | T4.1 | Extend spec generation model contracts for optional feature output. | done | `348c80a` | Added optional model `feature` output, validation, schema, response transport, and prompt guidance. |
-| T4.2 | Write accepted feature artifacts to the project workspace. | done | `e100a1e` | Added checked feature writing and connected spec generation to `.chr/user/acceptance/<scope>.feature`. |
+| T4.2 | Write accepted feature artifacts to the project workspace. | done | `e100a1e` | Added checked feature writing and connected spec generation to `.chr/default/acceptance/<scope>.feature`. |
 | T4.3 | Report feature generation status in spec generation results and logs. | done | `ff19c25` | Added explicit final feature status logging for spec generation. |
 | T4.4 | Add tests for generated, rejected, and not-applicable feature output. | done | `9bafb1d` | Covered generated feature writes, invalid feature rejection, and not-applicable status. |
 | T4.5 | Add slice report and tracker updates. | done | this commit | Added Slice 4 report, tracker status, and validation log. |

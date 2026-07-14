@@ -34,8 +34,8 @@ chr init --dir /path/to/project
 ```
 
 The initialized workspace includes ticket directories, project protocol files,
-minimal user-owned config, `.chr/user/`, and
-`.chr/user/runtime/agent/Dockerfile`.
+minimal user-owned config, `.chr/default/`, and
+`.chr/default/runtime/agent/Dockerfile`.
 
 Set an active operator id for workflows that need project-local userspace
 ownership:
@@ -49,14 +49,14 @@ With direnv, the same export may live in `.envrc`.
 ## Configure Runtime Execution
 
 Runtime defaults are owned by `chr`. A new project does not need to repeat
-default runtime paths in `.chr/user/config.yml`.
+default runtime paths in `.chr/default/config.yml`.
 
 Override runtime settings only when the project has a real reason to do so:
 
 ```yml
 runtime:
   image: chr-agent-runtime:local
-  dockerfile: .chr/user/runtime/agent/Dockerfile
+  dockerfile: .chr/default/runtime/agent/Dockerfile
   validation_command: make verify
 ```
 
@@ -89,7 +89,7 @@ chr runtime validate --dry-run
 Work readiness protects the project before Chryso starts agent work. The
 default policy expects a clean `dev` branch with `origin` as the canonical
 remote, but projects can configure their own branch posture in
-`.chr/user/config.yml`.
+`.chr/default/config.yml`.
 
 Example:
 
@@ -348,10 +348,10 @@ Equivalent CLI commands:
 chr dump list
 chr dump new --title "Billing notes" --content "Initial context."
 chr dump new --title "Billing notes" --content "Use-case context." --use-case billing
-chr dump show .chr/user/dumps/billing-notes.md
-chr dump save .chr/user/dumps/billing-notes.md --content "# Billing notes"
-chr dump append .chr/user/dumps/billing-notes.md --content "Additional context."
-chr dump open .chr/user/dumps/billing-notes.md
+chr dump show .chr/default/dumps/billing-notes.md
+chr dump save .chr/default/dumps/billing-notes.md --content "# Billing notes"
+chr dump append .chr/default/dumps/billing-notes.md --content "Additional context."
+chr dump open .chr/default/dumps/billing-notes.md
 ```
 
 ## Run Quizzes in the TUI
@@ -422,8 +422,8 @@ running, the TUI shows a working state and ignores other spec actions until the
 request finishes.
 
 If acceptance feature generation succeeds, the status line shows the generated
-`.chr/user/acceptance/<case>.feature` path. If more scenario detail is needed,
-the status line shows the `.chr/user/acceptance/<case>-feature-round.md` path
+`.chr/default/acceptance/<case>.feature` path. If more scenario detail is needed,
+the status line shows the `.chr/default/acceptance/<case>-feature-round.md` path
 so you can review the default-oriented prompts before trying again.
 
 Current limitation: those feature-round prompts are persisted, but the TUI does
@@ -638,7 +638,7 @@ Update status:
 chr ticket status CHR-1 ready
 ```
 
-Ticket files remain Markdown under `.chr/user/tickets/`.
+Ticket files remain Markdown under `.chr/default/tickets/`.
 
 ## Keep the Ticket Index Current
 

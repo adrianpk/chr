@@ -63,7 +63,7 @@ runtime evidence.
 - `docs/reference/evidence-strategy-config.md`
 - `docs/reference/commands.md`
 - `docs/how-to/user-guide/index.md`
-- `qa/ref/003/tictactoe/.chr/user/evidence-examples/`
+- `qa/ref/003/tictactoe/.chr/default/evidence-examples/`
 - `scripts/qa/smoke.sh`
 
 ## Validation

@@ -26,7 +26,7 @@ loop-stop evidence.
 - The changelog includes the serialized-loop observability and finite repair
   behavior.
 - The tic-tac-toe QA reference includes a resettable two-ticket fixture under
-  `.chr/user/fixtures/serialized-loop-tickets/`.
+  `.chr/default/fixtures/serialized-loop-tickets/`.
 
 ## Implementation Notes
 
@@ -36,7 +36,7 @@ loop-stop evidence.
   depend on in-memory worker state.
 - Loop report stop reasons are derived from existing loop status, counts, and
   failure reason fields.
-- The tic-tac-toe serialized-loop fixture is not placed in `.chr/user/tickets`
+- The tic-tac-toe serialized-loop fixture is not placed in `.chr/default/tickets`
   by default, so the normal reset remains a pre-ticket exercise.
 
 ## Contracts Added or Changed
@@ -61,7 +61,7 @@ loop-stop evidence.
 - `docs/reference/agent-work-observability.md`
 - `docs/how-to/observe-agent-work.md`
 - `docs/how-to/qa-tictactoe-agent-work-scenario.md`
-- `qa/ref/003/tictactoe/.chr/user/fixtures/serialized-loop-tickets/`
+- `qa/ref/003/tictactoe/.chr/default/fixtures/serialized-loop-tickets/`
 
 ## Validation
 

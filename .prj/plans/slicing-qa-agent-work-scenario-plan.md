@@ -50,7 +50,7 @@ Delivered on `dev`:
 - Ticket execution and loop execution.
 - Dash agent-work controls and progress display.
 - CLI work commands for one ticket and all selected work.
-- Project-local `.chr/user/...` artifact layout.
+- Project-local `.chr/default/...` artifact layout.
 
 Remaining gaps:
 
@@ -179,7 +179,7 @@ the comments spec, plan, tracking, and tickets.
 Expected behavior:
 
 - The reference project contains `.chr` root files only where required.
-- User-owned CHR artifacts live under `.chr/user/...`.
+- User-owned CHR artifacts live under `.chr/default/...`.
 - The project has metadata and a `comments` use case.
 - Dumps and curated quiz notes describe the comments feature.
 - No comments spec, plan, tracking, or generated tickets are present.
@@ -189,7 +189,7 @@ Expected behavior:
 Candidate tasks:
 
 - T3.1 Add project and use-case metadata for `comments`.
-- T3.2 Add comments dumps and curated quiz notes under `.chr/user/...`.
+- T3.2 Add comments dumps and curated quiz notes under `.chr/default/...`.
 - T3.3 Add a ready bug ticket for the unknown-slug behavior.
 - T3.4 Add ADR documentation under `docs/explanation/adr/`.
 - T3.5 Ensure no generated comments spec/plan/tracking/tickets are seeded.

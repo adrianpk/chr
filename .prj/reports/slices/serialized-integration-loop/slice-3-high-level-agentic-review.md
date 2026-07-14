@@ -17,7 +17,7 @@ before the loop allows merge or repair handling.
 
 - Agentic review now has a structured context artifact, prompt contract, JSON
   output schema, parser, and validator.
-- Review artifacts are persisted under `.chr/user/runtime/reviews/<ticket>/<execution>/`.
+- Review artifacts are persisted under `.chr/default/runtime/reviews/<ticket>/<execution>/`.
 - Review decisions map to ticket review metadata:
   `pass`, `needs_changes`, `insufficient_evidence`, and
   `needs_human_decision`.

@@ -29,8 +29,8 @@ func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) 
 			Status: ProjectRegistryDiagnosticOK,
 		}},
 		RuntimeCleanupPreview: RuntimeArtifactCleanupPreview{
-			ArtifactDir: "/tmp/project/.chr/user/runtime/runs",
-			Candidates:  []RuntimeArtifactCleanupCandidate{{Path: "/tmp/project/.chr/user/runtime/runs/old"}},
+			ArtifactDir: "/tmp/project/.chr/default/runtime/runs",
+			Candidates:  []RuntimeArtifactCleanupCandidate{{Path: "/tmp/project/.chr/default/runtime/runs/old"}},
 		},
 	}
 
@@ -41,7 +41,7 @@ func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) 
 		"project_id: project-1",
 		"database_exists: true",
 		"example path=/tmp/project enabled=true active=true status=ok",
-		"candidate: /tmp/project/.chr/user/runtime/runs/old",
+		"candidate: /tmp/project/.chr/default/runtime/runs/old",
 		"workspace config contents omitted",
 		"environment values omitted",
 	} {

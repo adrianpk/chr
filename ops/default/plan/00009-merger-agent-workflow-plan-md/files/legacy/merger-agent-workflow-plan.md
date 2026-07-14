@@ -26,9 +26,9 @@ slice branch names, PR titles, and implementation report paths.
 
 ## Source Material
 
-- Spec: `.chr/user/specs/merger-agent-workflow.md`
-- Dump: `.chr/user/dumps/curated/2026-06-02-merger-agent-role.md`
-- Tracker mirror: `.chr/user/trackers/merger-agent-workflow-tracker.md`
+- Spec: `.chr/default/specs/merger-agent-workflow.md`
+- Dump: `.chr/default/dumps/curated/2026-06-02-merger-agent-role.md`
+- Tracker mirror: `.chr/default/trackers/merger-agent-workflow-tracker.md`
 - Operational plan: `.prj/plans/slicing-merger-agent-workflow-plan.md`
 - Operational tracker: `.prj/trackers/slicing-merger-agent-workflow-tracker.md`
 

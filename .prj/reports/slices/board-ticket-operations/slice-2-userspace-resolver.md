@@ -14,18 +14,18 @@ work without relocating existing Chryso artifacts.
 
 ## Delivered Behavior
 
-- Core code can resolve `.chr/user/` as the active project userspace.
+- Core code can resolve `.chr/default/` as the active project userspace.
 - `CHR_OPERATOR_ID` identifies the active local operator for userspace-bound
   workflows.
 - Operator ids are validated before use.
-- `chr init` creates `.chr/user/`.
+- `chr init` creates `.chr/default/`.
 - `EnsureProjectUserspace` can create the userspace directory for repair or
   future targeted setup paths.
 - Documentation covers `.envrc` usage and non-direnv shell setup.
 
 ## Implementation Notes
 
-- The active userspace path is `.chr/user/`, not
+- The active userspace path is `.chr/default/`, not
   `.chr/operators/<operator-id>/...`.
 - The operator id is still required even though the MVP path is single active
   userspace. This preserves the operator ownership boundary for later
@@ -40,7 +40,7 @@ work without relocating existing Chryso artifacts.
 - Added `ResolveProjectUserspace`.
 - Added `EnsureProjectUserspace`.
 - Added `IsValidOperatorID`.
-- Added `.chr/user/` to initialized workspace directories.
+- Added `.chr/default/` to initialized workspace directories.
 
 ## Files of Interest
 

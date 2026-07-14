@@ -337,7 +337,7 @@ func TestRenderExecutionReportMarkdownHandlesMissingResult(t *testing.T) {
 }
 
 func testExecutionReportRecord(dir string) ExecutionRecord {
-	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 21, 10, 0, 0, 0, time.UTC)
 	startedAt := now.Add(time.Minute)
 	finishedAt := now.Add(2 * time.Minute)
@@ -346,18 +346,18 @@ func testExecutionReportRecord(dir string) ExecutionRecord {
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
 		Status:     ExecutionStatusSucceeded,
 		Runtime: ExecutionRuntimeRef{
 			Image:             "chr-agent-runtime:local",
-			DockerfilePath:    filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+			DockerfilePath:    filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
 		Workspace: ExecutionWorkspaceRef{
 			Mode:                  WorkWorkspaceModeWorktree,
 			ProjectCheckoutDir:    dir,
-			ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "user", "worktrees", "CHR-1"),
+			ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "default", "worktrees", "CHR-1"),
 			BaseRef:               "origin/dev",
 			BaseSHA:               "abc123",
 			TicketBranch:          "chr/CHR-1",

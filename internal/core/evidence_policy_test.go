@@ -8,7 +8,7 @@ import (
 
 func TestDetectEvidenceGherkinContextUsesAcceptanceFeatureArtifacts(t *testing.T) {
 	projectDir := t.TempDir()
-	writeEvidencePolicyFeature(t, projectDir, ".chr/user/acceptance/checkout.feature")
+	writeEvidencePolicyFeature(t, projectDir, ".chr/default/acceptance/checkout.feature")
 
 	ticket := testEvidencePolicyTicket(func(ticket *IndexedTicket) {
 		ticket.Type = "feature"
@@ -25,14 +25,14 @@ func TestDetectEvidenceGherkinContextUsesAcceptanceFeatureArtifacts(t *testing.T
 		t.Fatalf("context = %#v, want active applicable Gherkin", context)
 	}
 
-	if context.RequiredPath != ".chr/user/acceptance/checkout.feature" {
+	if context.RequiredPath != ".chr/default/acceptance/checkout.feature" {
 		t.Fatalf("RequiredPath = %q, want checkout feature", context.RequiredPath)
 	}
 }
 
 func TestDetectEvidenceGherkinContextHonorsDisabledPolicy(t *testing.T) {
 	projectDir := t.TempDir()
-	writeEvidencePolicyFeature(t, projectDir, ".chr/user/acceptance/checkout.feature")
+	writeEvidencePolicyFeature(t, projectDir, ".chr/default/acceptance/checkout.feature")
 
 	config := DefaultEvidenceStrategyConfig()
 	config.GherkinPolicy = EvidenceGherkinPolicyDisabled
@@ -71,7 +71,7 @@ func TestEvidenceGuidanceForTicketRequiresBehaviorGherkinWhenActive(t *testing.T
 		Policy:       EvidenceGherkinPolicyActiveWhenApplicable,
 		Active:       true,
 		Applies:      true,
-		RequiredPath: ".chr/user/acceptance/checkout.feature",
+		RequiredPath: ".chr/default/acceptance/checkout.feature",
 	}
 
 	guidance := EvidenceGuidanceForTicket(ticket, gherkin)

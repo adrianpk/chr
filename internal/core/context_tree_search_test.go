@@ -11,8 +11,8 @@ func TestLoadTreeSearchContextCapturesBoundedTree(t *testing.T) {
 	writeTestFile(t, filepath.Join(dir, "internal", "todo", "store.go"), "package todo\n")
 	writeTestFile(t, filepath.Join(dir, "internal", "todo", "store_test.go"), "package todo\n")
 	writeTestFile(t, filepath.Join(dir, "docs", "reference", "todo.md"), "# Todo\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "config.yml"), "version: 1\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "config.yml"), "version: 1\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
 	writeTestFile(t, filepath.Join(dir, ".git", "config"), "skip\n")
 
 	ctx, err := LoadTreeSearchContext(TreeSearchContextOptions{
@@ -29,7 +29,7 @@ func TestLoadTreeSearchContextCapturesBoundedTree(t *testing.T) {
 		"internal/todo/store.go",
 		"internal/todo/store_test.go",
 		"docs/reference/todo.md",
-		".chr/user/config.yml",
+		".chr/default/config.yml",
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("rendered code context missing %q:\n%s", want, rendered)

@@ -51,7 +51,7 @@ are not rewritten accidentally.
 Optional project policy lives at:
 
 ```text
-.chr/user/config/gates.yml
+.chr/default/config/gates.yml
 ```
 
 Example:
@@ -79,7 +79,7 @@ Woodpecker marks the pipeline failed when the gate exits non-zero.
 Detailed local evidence is written under:
 
 ```text
-.chr/user/reports/gates/
+.chr/default/reports/gates/
 ```
 
 Read the Markdown report for human review and the JSON report for automated

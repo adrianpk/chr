@@ -145,9 +145,9 @@ It does not remove project metadata, use-case metadata, dumps, tickets, specs,
 or authoring-session quizzes.
 
 ```sh
-rm -rf "$CHR_WORK_PROJECT/.chr/user/tmp/quiz-runtime"
+rm -rf "$CHR_WORK_PROJECT/.chr/default/tmp/quiz-runtime"
 
-find "$CHR_WORK_PROJECT/.chr/user/quizzes" -maxdepth 1 -type f \
+find "$CHR_WORK_PROJECT/.chr/default/quizzes" -maxdepth 1 -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -158,8 +158,8 @@ find "$CHR_WORK_PROJECT/.chr/user/quizzes" -maxdepth 1 -type f \
 Confirm the reset:
 
 ```sh
-find "$CHR_WORK_PROJECT/.chr/user/tmp/quiz-runtime" -maxdepth 1 -type f 2>/dev/null
-find "$CHR_WORK_PROJECT/.chr/user/quizzes" -maxdepth 1 -type f \
+find "$CHR_WORK_PROJECT/.chr/default/tmp/quiz-runtime" -maxdepth 1 -type f 2>/dev/null
+find "$CHR_WORK_PROJECT/.chr/default/quizzes" -maxdepth 1 -type f \
   \( -name "project-quiz.md" \
      -o -name "project-quiz-raw.md" \
      -o -name "*-quiz.md" \
@@ -210,8 +210,8 @@ Use-case-level validation:
 After validation, inspect the artifacts:
 
 ```sh
-find "$CHR_WORK_PROJECT/.chr/user/tmp/quiz-runtime" -maxdepth 1 -type f -print
-find "$CHR_WORK_PROJECT/.chr/user/quizzes" -maxdepth 1 -type f -print
+find "$CHR_WORK_PROJECT/.chr/default/tmp/quiz-runtime" -maxdepth 1 -type f -print
+find "$CHR_WORK_PROJECT/.chr/default/quizzes" -maxdepth 1 -type f -print
 ```
 
 Expected evidence:
@@ -274,8 +274,8 @@ chr project current
 Expected result:
 
 - `.chr/` exists inside `chr-blog-work`.
-- `.chr/user/config.yml` exists.
-- `.chr/user/runtime/agent/Dockerfile` exists.
+- `.chr/default/config.yml` exists.
+- `.chr/default/runtime/agent/Dockerfile` exists.
 - The lab project is registered in the local user-level project registry.
 
 ## Authoring Workflow
@@ -310,7 +310,7 @@ chr author quiz new \
 
 The command sends structured project context to the quiz provider and prints the
 generated quiz path relative to the project, for example
-`.chr/user/quizzes/<quiz-file>.md`.
+`.chr/default/quizzes/<quiz-file>.md`.
 
 Edit the generated quiz answers in Markdown, then generate or edit the
 corresponding spec from the Specs surface. Specs that still need review should

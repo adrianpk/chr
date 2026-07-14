@@ -19,7 +19,7 @@ seed project. The seed is intentionally incomplete but compilable: it exposes a
 placeholder command, a small `internal/game` package, and baseline tests for
 move parsing and placement.
 
-The reference includes project-local Chryso context under `.chr/user`:
+The reference includes project-local Chryso context under `.chr/default`:
 project metadata, one `cli-gameplay` use case, raw and curated project dumps,
 raw and curated use-case dumps, and raw and curated quiz notes. It does not
 include generated specs, plans, tracking documents, or tickets for the primary
@@ -42,7 +42,7 @@ chr plan tracking create --use-case cli-gameplay
 chr work run-all --use-case cli-gameplay --order key
 ```
 
-An empty non-Markdown `.chr/user/tickets/.gitkeep` preserves the tickets
+An empty non-Markdown `.chr/default/tickets/.gitkeep` preserves the tickets
 directory without creating artificial tickets.
 
 ## Contracts Added or Changed

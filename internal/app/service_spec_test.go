@@ -91,7 +91,7 @@ Feature: Blog publishing
 		t.Fatalf("GenerateSpec returned error: %v", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "user", "acceptance", "blog.feature")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "default", "acceptance", "blog.feature")); !os.IsNotExist(err) {
 		t.Fatalf("feature file exists or stat failed with unexpected error: %v", err)
 	}
 
@@ -108,10 +108,10 @@ func writeSpecGenerationUseCaseFixture(t *testing.T, projectDir string) {
 func writeSpecGenerationQuizFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "quizzes", "blog-quiz.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz.md"), `---
 status: "curated"
 case_slug: "blog"
-raw_path: ".chr/user/quizzes/blog-quiz-raw.md"
+raw_path: ".chr/default/quizzes/blog-quiz-raw.md"
 ---
 
 # Quiz Notes
@@ -120,19 +120,19 @@ raw_path: ".chr/user/quizzes/blog-quiz-raw.md"
 
 - Preserve editorial review.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "quizzes", "project-wide-quiz.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "project-wide-quiz.md"), `---
 status: "curated"
-raw_path: ".chr/user/quizzes/project-wide-quiz-raw.md"
+raw_path: ".chr/default/quizzes/project-wide-quiz-raw.md"
 ---
 
 # Project-wide Quiz Notes
 
 Project-wide quiz context that must not feed scoped spec generation.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "quizzes", "blog-quiz-raw.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "quizzes", "blog-quiz-raw.md"), `---
 status: "raw"
 case_slug: "blog"
-curated_path: ".chr/user/quizzes/blog-quiz.md"
+curated_path: ".chr/default/quizzes/blog-quiz.md"
 ---
 
 # Raw Quiz Notes
@@ -144,7 +144,7 @@ Raw quiz turn that must not feed spec context.
 func writeSpecGenerationExcludedDocumentFixture(t *testing.T, projectDir string) {
 	t.Helper()
 
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case: "blog"
@@ -152,7 +152,7 @@ case: "blog"
 
 # Blog Plan
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-prior-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "blog-prior-spec.md"), `---
 title: "Prior Blog Spec"
 status: "draft"
 case: "blog"
@@ -162,11 +162,11 @@ case: "blog"
 
 Prior spec content that must not feed initial spec generation.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-context-raw.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-context-raw.md"), `---
 title: "Blog Context Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chr/user/dumps/blog-context.md"
+curated: ".chr/default/dumps/blog-context.md"
 case: "blog"
 ---
 
@@ -183,7 +183,7 @@ func assertGeneratedSpecResult(t *testing.T, projectDir string, result SpecOpera
 		t.Fatalf("Message = %q, want Spec generated.", result.Message)
 	}
 
-	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"))
+	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md"))
 	for _, want := range []string{
 		`status: "draft"`,
 		`case_slug: "blog"`,
@@ -212,7 +212,7 @@ func assertSpecGenerationContext(t *testing.T, request core.QuizModelRequest) {
 			t.Fatalf("spec context included project-wide quiz in scoped generation section %#v", section)
 		}
 
-		if strings.Contains(section.Authority, ".chr/user/plans/blog-plan.md") {
+		if strings.Contains(section.Authority, ".chr/default/plans/blog-plan.md") {
 			t.Fatalf("spec context included plan section: %#v", section)
 		}
 
@@ -225,7 +225,7 @@ func assertSpecGenerationContext(t *testing.T, request core.QuizModelRequest) {
 func TestServiceGenerateSpecExcludesArchivedDocumentsFromContextAndProvenance(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "archive", "blog-spec-20260525.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "archive", "blog-spec-20260525.md"), `---
 title: "Archived Blog Spec"
 status: "draft"
 case: "blog"
@@ -233,7 +233,7 @@ case: "blog"
 
 # Archived Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "blog-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case: "blog"
@@ -241,7 +241,7 @@ case: "blog"
 
 # Blog Plan
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "archive", "blog-plan-20260525.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "archive", "blog-plan-20260525.md"), `---
 title: "Archived Blog Plan"
 status: "planned"
 case: "blog"
@@ -274,7 +274,7 @@ case: "blog"
 		}
 	}
 
-	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"))
+	spec := readServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md"))
 	if strings.Contains(spec, "/archive/") {
 		t.Fatalf("generated provenance includes archived path:\n%s", spec)
 	}
@@ -307,7 +307,7 @@ func TestServiceGenerateSpecUsesLongGenerationDeadline(t *testing.T) {
 func TestServiceListSpecsReturnsScopes(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceQuizFixture(t, projectDir)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"

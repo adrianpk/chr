@@ -53,7 +53,7 @@ chr runtime validate --dry-run
 
 The command prints the effective Dockerfile, image, container workdir, mount,
 artifact paths, and local path checks. Runtime defaults come from `chr` unless
-the project overrides them in `.chr/user/config.yml`.
+the project overrides them in `.chr/default/config.yml`.
 
 ## Create a Ticket
 

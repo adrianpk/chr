@@ -80,14 +80,14 @@ tickets, run project validation, and move tickets to `reviewing` or `blocked`.
 The resettable reference also includes a two-ticket fixture under:
 
 ```text
-.chr/user/fixtures/serialized-loop-tickets/
+.chr/default/fixtures/serialized-loop-tickets/
 ```
 
 Use it when you want to exercise the loop barrier without regenerating tickets:
 
 ```sh
 cd qa/project/tictactoe
-cp .chr/user/fixtures/serialized-loop-tickets/CHR-*.md .chr/user/tickets/
+cp .chr/default/fixtures/serialized-loop-tickets/CHR-*.md .chr/default/tickets/
 chr ticket board
 chr work run-all --use-case cli-gameplay --order key
 ```

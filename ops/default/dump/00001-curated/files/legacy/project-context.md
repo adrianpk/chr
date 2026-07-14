@@ -20,7 +20,7 @@ Its core workflow is:
 
 The product is operated through a TUI and mirrored CLI commands. The TUI is the primary interactive console. The CLI exists for scripting, automation, and agent self-service.
 
-The project favors Markdown-first artifacts under `.chr/user/`. SQLite, indexes, runtime logs, and traces are derived operational state.
+The project favors Markdown-first artifacts under `.chr/default/`. SQLite, indexes, runtime logs, and traces are derived operational state.
 
 Important source documents:
 

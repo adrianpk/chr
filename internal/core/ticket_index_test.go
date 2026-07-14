@@ -187,7 +187,7 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 
 	return IndexedTicket{
 		ProjectID:    "project-1",
-		Path:         "/tmp/chryso/.chr/user/tickets/" + key + ".md",
+		Path:         "/tmp/chryso/.chr/default/tickets/" + key + ".md",
 		RelativePath: key + ".md",
 		Key:          key,
 		Title:        "Do something",
@@ -201,7 +201,7 @@ func testIndexedTicket(key string, tags []string) IndexedTicket {
 		UseCase:      "onboarding",
 		ProjectArea:  "frontend",
 		SourceKind:   "plan_tracking",
-		SourceRef:    ".chr/user/plans/onboarding-plan.md",
+		SourceRef:    ".chr/default/plans/onboarding-plan.md",
 		Slice:        "Slice 4",
 		CreatedAt:    timePtr(createdAt),
 		UpdatedAt:    timePtr(updatedAt),

@@ -32,7 +32,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | --- | --- | --- | --- | --- |
 | T2.1 | Add feature generation request, result, and model contract. | done | `648644c`, corrected by `f8573a3`, `5ed3d64` | Added feature action, statuses, schema, decoder, and provider routing. |
 | T2.2 | Build feature-generation context from spec, quiz, dump, project, and use-case artifacts. | done | `50436c1`, corrected by `ef35761`, `5ed3d64` | Added service request construction and context sections including specs. |
-| T2.3 | Write checked features to `.chr/user/acceptance/<case>.feature`. | done | `adec408`, corrected by `5ed3d64` | Generated features write only after static checks pass. |
+| T2.3 | Write checked features to `.chr/default/acceptance/<case>.feature`. | done | `adec408`, corrected by `5ed3d64` | Generated features write only after static checks pass. |
 | T2.4 | Add service tests for generated, rejected, needs-more-info, and not-applicable flows. | done | `336d472`, corrected by `6c298de` | Added dedicated service tests for all feature generation outcomes. |
 | T2.5 | Add slice report and tracker updates. | done | this commit | Added Slice 2 report, tracker status, and validation log. |
 
@@ -51,7 +51,7 @@ Plan: `ops/plans/2026-06-06-separate-acceptance-feature-workflow-plan.md`
 | Task | Description | Status | Commit | Notes |
 | --- | --- | --- | --- | --- |
 | T4.1 | Add feature readiness/default prompt model. | done | `ee9c2c4`, corrected by `4df227e` | Added structured clarification prompts for feature `needs_more_info` responses. |
-| T4.2 | Persist feature-round notes under a stable acceptance artifact path. | done | `0748c73`, corrected by `a0a31d0`, `4df227e` | Added `.chr/user/acceptance/<case>-feature-round.md`. |
+| T4.2 | Persist feature-round notes under a stable acceptance artifact path. | done | `0748c73`, corrected by `a0a31d0`, `4df227e` | Added `.chr/default/acceptance/<case>-feature-round.md`. |
 | T4.3 | Use feature-round notes as input for subsequent feature generation. | done | `eddad16`, corrected by `a0a31d0`, `4df227e` | Existing feature-round notes are appended as acceptance context. |
 | T4.4 | Add tests for default confirmation and missing-info persistence. | done | `8576d62` | Added payload, round note, and service context coverage. |
 | T4.5 | Add slice report and tracker updates. | done | this commit | Added Slice 4 report, tracker status, and validation log. |

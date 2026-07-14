@@ -23,7 +23,7 @@ read from the index:
 For the resolved project, each command:
 
 - opens the user-level SQLite ticket index;
-- discovers Markdown tickets under `.chr/user/tickets`;
+- discovers Markdown tickets under `.chr/default/tickets`;
 - rebuilds indexed rows for that project from canonical files;
 - stops before reading ticket rows when reconciliation blockers exist.
 

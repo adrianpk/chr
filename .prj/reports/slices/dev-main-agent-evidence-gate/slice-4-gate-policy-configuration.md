@@ -10,7 +10,7 @@ PR: #267
 ## Purpose
 
 Add project-local policy configuration for `chr gate dev-main` under
-`.chr/user/config/gates.yml`.
+`.chr/default/config/gates.yml`.
 
 ## Delivered Behavior
 
@@ -25,7 +25,7 @@ Add project-local policy configuration for `chr gate dev-main` under
 
 ## Implementation Notes
 
-The config file is intentionally separate from `.chr/user/config.yml` so gate
+The config file is intentionally separate from `.chr/default/config.yml` so gate
 policy can evolve without overloading the existing workspace/runtime config.
 
 High-risk path matching supports exact paths, shell-style path matches, and
@@ -33,7 +33,7 @@ directory prefix patterns ending in `/**`.
 
 ## Contracts Added or Changed
 
-- New config path: `.chr/user/config/gates.yml`.
+- New config path: `.chr/default/config/gates.yml`.
 - New default gate policy:
   - validation command: `go test ./...`
   - traceability mode: `agent_only`

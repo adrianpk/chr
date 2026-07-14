@@ -152,7 +152,7 @@ The existing configurable key prefix should remain supported.
 MVP active userspace:
 
 ```text
-.chr/user/
+.chr/default/
 ```
 
 The active operator id is resolved from configuration or environment, but
@@ -177,7 +177,7 @@ to treat SQLite as operational project state, not only disposable user cache.
 The implementation should resolve this deliberately:
 
 - preserve existing user-level DB behavior where required by existing commands;
-- add or adapt a project-local DB under `.chr/user/` if needed for Board state;
+- add or adapt a project-local DB under `.chr/default/` if needed for Board state;
 - keep Markdown as the authoritative body source;
 - ensure index rebuild can recover Board metadata from Markdown when possible.
 

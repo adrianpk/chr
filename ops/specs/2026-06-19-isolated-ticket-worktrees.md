@@ -93,9 +93,9 @@ the user's local checkout state as the starting point for managed work.
 The current runtime plan resolves:
 
 - `ProjectDir`: the managed project directory.
-- `DockerfilePath`: usually `.chr/user/runtime/agent/Dockerfile`.
+- `DockerfilePath`: usually `.chr/default/runtime/agent/Dockerfile`.
 - `ContainerWorkdir`: usually `/workspace`.
-- `ArtifactDir`: usually `.chr/user/runtime/runs`.
+- `ArtifactDir`: usually `.chr/default/runtime/runs`.
 - `WorkerContextPath`, `ResultPath`, `LogPath`, and `ValidationPath`.
 
 The Docker harness mounts the project directory as a writable volume:
@@ -138,7 +138,7 @@ The Docker harness should mount:
 host ExecutionWorkspaceDir -> container /workspace
 ```
 
-Runtime artifacts may remain under the user's `.chr/user/runtime/runs`
+Runtime artifacts may remain under the user's `.chr/default/runtime/runs`
 directory or move to a workspace-owned runtime directory, but the first version
 should preserve existing artifact paths when practical to avoid breaking event
 views and reports.
@@ -166,7 +166,7 @@ Proposed shape:
 ```yml
 work:
   workspace_mode: worktree
-  worktree_root: .chr/user/runtime/worktrees
+  worktree_root: .chr/default/runtime/worktrees
   worktree_base: remote_integration_branch
   worktree_cleanup: after_merge
 ```
@@ -190,7 +190,7 @@ Possible values:
 `worktree_root`
 
 : Project-relative directory where Chryso stores ticket worktrees.
-  Default: `.chr/user/runtime/worktrees`.
+  Default: `.chr/default/runtime/worktrees`.
 
 `worktree_base`
 
@@ -261,7 +261,7 @@ Each ticket worktree should have a deterministic identity.
 Recommended path shape:
 
 ```text
-.chr/user/runtime/worktrees/<ticket-key>/
+.chr/default/runtime/worktrees/<ticket-key>/
 ```
 
 For repeated attempts against the same ticket branch, reuse the ticket worktree
@@ -274,7 +274,7 @@ attempts are attempts within that line.
 Execution-specific artifacts still live under:
 
 ```text
-.chr/user/runtime/runs/<ticket-key>/<execution-id>/
+.chr/default/runtime/runs/<ticket-key>/<execution-id>/
 ```
 
 This separates:
@@ -472,7 +472,7 @@ The first implementation should keep runtime artifacts in the managed project
 artifact directory:
 
 ```text
-.chr/user/runtime/runs/<ticket-key>/<execution-id>/
+.chr/default/runtime/runs/<ticket-key>/<execution-id>/
 ```
 
 Reasons:
@@ -486,7 +486,7 @@ The ticket worktree should not be the only place where execution evidence lives.
 Worktree-specific metadata may be stored under:
 
 ```text
-.chr/user/runtime/worktrees/<ticket-key>/.chr-worktree.json
+.chr/default/runtime/worktrees/<ticket-key>/.chr-worktree.json
 ```
 
 or in the central runtime record. Prefer central records if a durable execution
@@ -588,7 +588,7 @@ Useful fields:
 workspace: worktree
 base: origin/dev @ <sha>
 ticket branch: <branch>
-worktree: .chr/user/runtime/worktrees/CHR-123
+worktree: .chr/default/runtime/worktrees/CHR-123
 user checkout: ignored / dirty / clean
 ```
 
@@ -695,7 +695,7 @@ CHR should avoid surprising the user by:
 
 - not writing implementation changes into the active checkout;
 - reporting where work is actually happening;
-- keeping runtime evidence in the main `.chr/user/runtime/runs` tree;
+- keeping runtime evidence in the main `.chr/default/runtime/runs` tree;
 - making worktree cleanup explicit and recoverable.
 
 ## Failure Modes
@@ -864,7 +864,7 @@ QA scenarios should include:
 ## Open Questions
 
 - Should `workspace_mode: worktree` live under `work:` or `runtime:`?
-- Should runtime artifacts remain in the main project `.chr/user/runtime/runs`
+- Should runtime artifacts remain in the main project `.chr/default/runtime/runs`
   directory forever, or should each worktree also receive local attempt
   artifacts?
 - Should a ticket worktree be keyed by ticket key, branch name, or execution ID?
@@ -874,7 +874,7 @@ QA scenarios should include:
 - Should cleanup run immediately after merge or as an explicit periodic doctor
   repair?
 - How much worktree metadata belongs in SQLite execution records versus
-  file-based metadata under `.chr/user/runtime/worktrees`?
+  file-based metadata under `.chr/default/runtime/worktrees`?
 - Should old `project` mode remain permanently supported, or become an escape
   hatch after worktree mode is proven?
 - Should `run-all` pre-create worktrees for the full queue or create one

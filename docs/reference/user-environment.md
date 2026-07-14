@@ -7,7 +7,7 @@ The user environment resolves user-level `chr` paths.
 These paths are separate from project-local `.chr/` directories. Project workspaces contain canonical project files such as Markdown tickets. User-level paths contain local tool state such as future project registry data, global indexes, caches, and daemon state.
 
 Project-local active userspace is separate from these user-level paths. It
-lives at `.chr/user/` in a managed project and uses `CHR_OPERATOR_ID` to bind
+lives at `.chr/default/` in a managed project and uses `CHR_OPERATOR_ID` to bind
 operator-owned workflows to a local operator id.
 
 ## Normal Mode

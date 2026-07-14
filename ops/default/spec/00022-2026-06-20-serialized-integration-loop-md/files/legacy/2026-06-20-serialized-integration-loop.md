@@ -412,7 +412,7 @@ under `human_review` mode and should not present it as an execution failure.
   should a temporary compatibility flag preserve dev-only behavior?
 - Should `chr work ticket <ticket-key>` remain development-only, or should a new
   command run exactly one full integration cycle?
-- Should review artifacts live under `.chr/user/reviews/`, under the execution
+- Should review artifacts live under `.chr/default/reviews/`, under the execution
   run directory, or both?
 - Should project templates switch default review mode from `human_review` to
   `trusted_auto_merge` or `agentic_review` after this workflow is proven?

@@ -10,7 +10,7 @@ PR: #265
 ## Purpose
 
 Run the default promotion validation and persist gate evidence as local project
-artifacts under `.chr/user/reports/gates/`.
+artifacts under `.chr/default/reports/gates/`.
 
 This slice turns `chr gate dev-main` from evidence-only output into a command
 that records JSON and Markdown reports and returns failure when validation does
@@ -28,7 +28,7 @@ not pass.
 
 ## Implementation Notes
 
-Gate reports use `.chr/user/reports/gates/dev-main-<timestamp>.json` and the
+Gate reports use `.chr/default/reports/gates/dev-main-<timestamp>.json` and the
 matching `.md` file. The report model records Git evidence, validation result,
 failures, warnings, informational messages, and artifact paths.
 
@@ -39,8 +39,8 @@ validation commands remain part of Slice 4.
 
 - New default gate validation command: `go test ./...`.
 - New report artifacts:
-  - `.chr/user/reports/gates/dev-main-<timestamp>.json`
-  - `.chr/user/reports/gates/dev-main-<timestamp>.md`
+  - `.chr/default/reports/gates/dev-main-<timestamp>.json`
+  - `.chr/default/reports/gates/dev-main-<timestamp>.md`
 - `chr gate dev-main` now fails when validation fails.
 
 ## Files of Interest

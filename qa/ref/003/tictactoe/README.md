@@ -27,7 +27,7 @@ tracking, then run the generated ready tickets through the agent-work loop.
 The reference also includes evidence strategy examples under:
 
 ```text
-.chr/user/evidence-examples/
+.chr/default/evidence-examples/
 ```
 
 Those examples cover:
@@ -36,5 +36,5 @@ Those examples cover:
 - CLI behavior work where active Gherkin is required;
 - blocked validation that should prevent review handoff.
 
-The acceptance feature at `.chr/user/acceptance/cli-gameplay.feature` makes
+The acceptance feature at `.chr/default/acceptance/cli-gameplay.feature` makes
 Gherkin active for observable CLI behavior during evidence strategy decisions.

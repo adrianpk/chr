@@ -249,7 +249,7 @@ func TestWorkspaceIndexHealthReportsDiagnosticsAndUnresolvedReferences(t *testin
 			"known": "case:known",
 		},
 		Diagnostics: []WorkspaceGraphDiagnostic{
-			{Path: ".chr/user/cases/broken.md", Kind: WorkspaceNodeCase, Message: "invalid"},
+			{Path: ".chr/default/cases/broken.md", Kind: WorkspaceNodeCase, Message: "invalid"},
 		},
 		BuiltAt: time.Date(2026, 5, 23, 11, 0, 0, 0, time.UTC),
 	}
@@ -313,31 +313,31 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 				Kind: WorkspaceNodeCase,
 				Slug: "blog",
 			},
-			"spec:.chr/user/specs/blog.md": {
+			"spec:.chr/default/specs/blog.md": {
 				Kind:         WorkspaceNodeSpec,
-				RelativePath: ".chr/user/specs/blog.md",
+				RelativePath: ".chr/default/specs/blog.md",
 				Title:        "Blog Spec",
 				CaseSlug:     "blog",
 			},
-			"ticket:.chr/user/tickets/CHR-1.md": {
+			"ticket:.chr/default/tickets/CHR-1.md": {
 				Kind:         WorkspaceNodeTicket,
-				RelativePath: ".chr/user/tickets/CHR-1.md",
+				RelativePath: ".chr/default/tickets/CHR-1.md",
 				Title:        "Blog Ticket",
 				CaseSlug:     "blog",
 			},
 		},
 		NodesByPath: map[string]string{
-			".chr/user/specs/blog.md": "spec:.chr/user/specs/blog.md",
+			".chr/default/specs/blog.md": "spec:.chr/default/specs/blog.md",
 		},
 		ByCaseSlug: map[string][]string{
 			"blog": {
-				"spec:.chr/user/specs/blog.md",
-				"ticket:.chr/user/tickets/CHR-1.md",
+				"spec:.chr/default/specs/blog.md",
+				"ticket:.chr/default/tickets/CHR-1.md",
 			},
 		},
 	}
 
-	node, ok := index.ResolvePath(".chr/user/specs/blog.md")
+	node, ok := index.ResolvePath(".chr/default/specs/blog.md")
 	if !ok {
 		t.Fatal("ResolvePath returned ok=false, want true")
 	}
@@ -346,7 +346,7 @@ func TestWorkspaceIndexResolvesPathsAndRelatedDocuments(t *testing.T) {
 		t.Fatalf("node.Title = %q, want Blog Spec", node.Title)
 	}
 
-	related := index.RelatedDocuments("spec:.chr/user/specs/blog.md")
+	related := index.RelatedDocuments("spec:.chr/default/specs/blog.md")
 	if !related.Resolved {
 		t.Fatal("RelatedDocuments returned Resolved=false, want true")
 	}

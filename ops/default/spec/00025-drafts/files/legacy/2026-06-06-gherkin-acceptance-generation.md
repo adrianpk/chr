@@ -168,7 +168,7 @@ to be executable by Gherkin tooling.
 Suggested project-local path:
 
 ```text
-.chr/user/acceptance/<topic>.feature
+.chr/default/acceptance/<topic>.feature
 ```
 
 The feature should include tags that connect it to its source material:
@@ -251,7 +251,7 @@ files against project-specific step definitions.
 
 ## Open Questions
 
-- Should `.chr/user/acceptance/` become the canonical feature artifact location,
+- Should `.chr/default/acceptance/` become the canonical feature artifact location,
   or should acceptance artifacts live beside specs?
 - Should suitability output be stored as a separate JSON artifact, embedded in
   spec generation metadata, or both?

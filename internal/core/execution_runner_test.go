@@ -434,18 +434,18 @@ func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
 }
 
 func testRunnerExecutionRecord(dir string) ExecutionRecord {
-	runDir := filepath.Join(dir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-1")
+	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
 	return ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
 		Status:     ExecutionStatusPending,
 		Runtime: ExecutionRuntimeRef{
 			Image:             "chr-agent-runtime:local",
-			DockerfilePath:    filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+			DockerfilePath:    filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},

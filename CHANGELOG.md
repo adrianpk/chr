@@ -86,6 +86,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   service paths where both surfaces exist.
 - Updated workspace initialization profiles, protocol assets, runtime
   Dockerfiles, and generated project files to match the current workflow.
+- Renamed the project-local pseudo-user workspace from `.chr/user/` to
+  `.chr/default/`; shared operational runtime artifacts continue to default to
+  `ops/default/run`.
 
 ### Fixed
 

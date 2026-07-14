@@ -9,7 +9,7 @@ The setting is independent from the separate `dev` to `main` promotion gate.
 
 ## Location
 
-Review workflow settings live in `.chr/user/config.yml` under `review:`.
+Review workflow settings live in `.chr/default/config.yml` under `review:`.
 The same provider settings are used by ticket review diagnostics, remote review
 comments, and reviewed ticket merge execution.
 

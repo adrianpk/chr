@@ -22,7 +22,7 @@ artifacts. API comments/status enrichment can be added later if required.
 
 - Generate a Woodpecker gate step.
 - Let Woodpecker fail the pipeline when `chr gate dev-main` exits non-zero.
-- Keep detailed evidence in `.chr/user/reports/gates/`.
+- Keep detailed evidence in `.chr/default/reports/gates/`.
 - Do not require Forgejo API tokens for the first integration.
 
 ## Sources

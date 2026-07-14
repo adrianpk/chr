@@ -67,7 +67,7 @@ func TestParseAgenticReviewResultRejectsUnknownFindingCategory(t *testing.T) {
 func TestCodexAgenticReviewRunnerWritesArtifacts(t *testing.T) {
 	projectDir := t.TempDir()
 
-	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md")
+	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md")
 	if err := os.MkdirAll(filepath.Dir(ticketPath), 0o755); err != nil {
 		t.Fatalf("MkdirAll returned error: %v", err)
 	}

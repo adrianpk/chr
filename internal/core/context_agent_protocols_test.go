@@ -43,12 +43,12 @@ func TestLoadAgentProtocolContextLoadsApplicableAgentsFiles(t *testing.T) {
 func TestLoadAgentProtocolContextLoadsSelectedChrProtocolFiles(t *testing.T) {
 	dir := t.TempDir()
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Root Protocol\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "manifest.md"), "# Manifest\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "config.yml"), "version: 1\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "agents", "CONVENTIONS.md"), "# Conventions\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "runtime", "agent", "Dockerfile"), "FROM golang:1.22\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
-	writeTestFile(t, filepath.Join(dir, ".chr", "user", "tickets", "CHR-1.md"), "# Ticket\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "manifest.md"), "# Manifest\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "config.yml"), "version: 1\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "agents", "CONVENTIONS.md"), "# Conventions\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"), "FROM golang:1.22\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "runtime", "runs", "exec-1", "runtime.log"), "skip\n")
+	writeTestFile(t, filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"), "# Ticket\n")
 
 	ctx, err := LoadAgentProtocolContext(AgentProtocolContextOptions{ProjectDir: dir})
 	if err != nil {
@@ -57,10 +57,10 @@ func TestLoadAgentProtocolContextLoadsSelectedChrProtocolFiles(t *testing.T) {
 
 	rendered := RenderProtocolsContext(ctx)
 	for _, want := range []string{
-		".chr/user/agents/CONVENTIONS.md",
-		".chr/user/config.yml",
-		".chr/user/manifest.md",
-		".chr/user/runtime/agent/Dockerfile",
+		".chr/default/agents/CONVENTIONS.md",
+		".chr/default/config.yml",
+		".chr/default/manifest.md",
+		".chr/default/runtime/agent/Dockerfile",
 	} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("rendered protocols missing %q:\n%s", want, rendered)

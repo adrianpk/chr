@@ -162,7 +162,7 @@ dumps, quizzes, specs, plans, tracking files, and context artifacts.
 MVP can assume a monouser repository/operator workflow, but the implementation
 should still prepare the userspace shape so the later multi-operator model is
 not blocked. The initial shape can be a single active user directory under
-`.chr/user/`, selected by a required environment variable. A `.envrc` can set
+`.chr/default/`, selected by a required environment variable. A `.envrc` can set
 that variable for users who use direnv, while users without direnv must set it
 another way.
 
@@ -171,7 +171,7 @@ The spec must also record the future direction:
 - generated Chryso artifacts should eventually live under an operator
   namespace;
 - a likely future shape is `.chr/operators/<operator-id>/...`;
-- MVP may start with `.chr/user/` and a single configured operator id;
+- MVP may start with `.chr/default/` and a single configured operator id;
 - operator id can be resolved from local config, an environment variable, or
   `.envrc`;
 - this approach avoids collisions without requiring a daemon or a shared

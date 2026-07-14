@@ -46,7 +46,7 @@ Prerequisite PRs or delivered work:
 | Slice | Status | Expected Branch | Expected PR Title | Expected Report | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Slice 1: Ticket Metadata Contract | Delivered | `feat/slice-1-ticket-metadata-contract` | `feat(slice-1): ticket metadata contract` | `.prj/reports/slices/board-ticket-operations/slice-1-ticket-metadata-contract.md` | PR `#213`; metadata, synopsis, source fields, Board statuses, legacy aliases; `make verify` passed. |
-| Slice 2: Userspace Resolver | Delivered | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | PR `#214`; active `.chr/user/` resolver and env contract; `make verify` passed. |
+| Slice 2: Userspace Resolver | Delivered | `feat/slice-2-userspace-resolver` | `feat(slice-2): userspace resolver` | `.prj/reports/slices/board-ticket-operations/slice-2-userspace-resolver.md` | PR `#214`; active `.chr/default/` resolver and env contract; `make verify` passed. |
 | Slice 3: Board SQLite Schema | Delivered | `feat/slice-3-board-sqlite-schema` | `feat(slice-3): board sqlite schema` | `.prj/reports/slices/board-ticket-operations/slice-3-board-sqlite-schema.md` | PR `#215`; migration/index shape for Board metadata and key allocation foundation; `make verify` passed. |
 | Slice 4: Indexed Ticket Enrichment | Delivered | `feat/slice-4-indexed-ticket-enrichment` | `feat(slice-4): indexed ticket enrichment` | `.prj/reports/slices/board-ticket-operations/slice-4-indexed-ticket-enrichment.md` | PR `#216`; parser/reconciler/repository through enriched metadata; `make verify` passed. |
 | Slice 5: Ticket Creation Service | Delivered | `feat/slice-5-ticket-creation-service` | `feat(slice-5): ticket creation service` | `.prj/reports/slices/board-ticket-operations/slice-5-ticket-creation-service.md` | PR `#217`; manual creation with synopsis, backlog default, SQLite key allocation, index refresh; `make verify` passed. |
@@ -95,9 +95,9 @@ Validation:
 
 Candidate tasks:
 
-- [x] T2.1 Add project-local userspace resolver for `.chr/user/`.
+- [x] T2.1 Add project-local userspace resolver for `.chr/default/`.
 - [x] T2.2 Add active-operator environment resolution and validation.
-- [x] T2.3 Ensure workspace initialization or repair can create `.chr/user/`.
+- [x] T2.3 Ensure workspace initialization or repair can create `.chr/default/`.
 - [x] T2.4 Document `.envrc` usage and non-direnv setup.
 - [x] T2.5 Add resolver tests.
 - [x] T2.6 Create slice implementation report.

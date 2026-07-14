@@ -47,7 +47,7 @@ chr author quiz new --target spec --topic "Billing sync"
 Successful creation prints the quiz path relative to the managed project:
 
 ```text
-quiz: created .chr/user/quizzes/author-20260522-073505-billing-sync.md
+quiz: created .chr/default/quizzes/author-20260522-073505-billing-sync.md
 session: author-20260522-073505
 ```
 
@@ -131,14 +131,14 @@ authoring step.
 Generated authoring artifacts use project-local `.chr/` paths:
 
 ```text
-.chr/user/dumps/
-.chr/user/quizzes/
-.chr/user/specs/
-.chr/user/plans/
-.chr/user/slice-sets/
-.chr/user/slices/
-.chr/user/trackers/
-.chr/user/tickets/
+.chr/default/dumps/
+.chr/default/quizzes/
+.chr/default/specs/
+.chr/default/plans/
+.chr/default/slice-sets/
+.chr/default/slices/
+.chr/default/trackers/
+.chr/default/tickets/
 ```
 
 The current generated filename shape is:

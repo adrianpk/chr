@@ -90,7 +90,7 @@ Model: `ops/specs/2026-06-20-serialized-integration-loop-model.md`
 | T6.2 | Update Dash rendering for active cycle phase and stop reason. | done | `8862c4e` | Dash now shows latest persisted phase and event message. |
 | T6.3 | Update loop and execution reports with cycle details. | done | `8862c4e` | Loop reports now include a derived stop reason. |
 | T6.4 | Update user guide, ticket loop reference, review workflow reference, and changelog. | done | `c3faa66` | Updated user guide, reference docs, how-to docs, and changelog. |
-| T6.5 | Add or update resettable QA fixture with two dependent tickets. | done | `c3faa66` | Added a two-ticket tic-tac-toe fixture under `.chr/user/fixtures/serialized-loop-tickets/`. |
+| T6.5 | Add or update resettable QA fixture with two dependent tickets. | done | `c3faa66` | Added a two-ticket tic-tac-toe fixture under `.chr/default/fixtures/serialized-loop-tickets/`. |
 | T6.6 | Add smoke or manual runbook proving ticket 2 does not start until ticket 1 is merged. | done | `c3faa66` | QA runbook documents the serialized barrier fixture and expected observations. |
 | T6.7 | Run `make verify` and relevant QA smoke commands. | done | this commit | `make verify` and non-resetting `make qa-test-tictactoe` passed. |
 | T6.8 | Add the slice implementation report and final cycle report. | done | this commit | Report added with final validation evidence. |

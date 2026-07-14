@@ -104,7 +104,7 @@ that expected failure.
 
 The reference project must include a `.chr` tree that respects the current
 project artifact layout. Generated or user-facing Chryso artifacts must
-live under `.chr/user/...` except for root files that CHR requires for project
+live under `.chr/default/...` except for root files that CHR requires for project
 configuration or manifest compatibility.
 
 Seeded context must include:

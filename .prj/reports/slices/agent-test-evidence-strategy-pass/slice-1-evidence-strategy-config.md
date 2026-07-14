@@ -19,7 +19,7 @@ transition enforcement, and user-facing visibility.
 ## Delivered Behavior
 
 - Workspace config now exposes an `Evidence` section loaded from
-  `.chr/user/config.yml`.
+  `.chr/default/config.yml`.
 - `evidence.strategy` defaults are available without requiring generated config
   to include every field.
 - Evidence strategy mode, ticket checklist policy, and Gherkin policy values are

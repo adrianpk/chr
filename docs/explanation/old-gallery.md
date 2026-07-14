@@ -9,7 +9,7 @@ without requiring a live agent run.
 
 ![Project window](../../assets/img/old-gallery/01-project-window.png)
 
-The project view summarizes the selected workspace, local `.chr/user/` files,
+The project view summarizes the selected workspace, local `.chr/default/` files,
 and generated artifact counts.
 
 ![Project](../../assets/img/old-gallery/02-project.png)

@@ -89,7 +89,7 @@ The implementation must not expose the Web UI on all interfaces by accident.
 The Web UI must use the same backing state as the TUI:
 
 - project-local Markdown artifacts under `.chr/`;
-- `.chr/user/` active userspace;
+- `.chr/default/` active userspace;
 - user-level SQLite indexes and records;
 - runtime artifact files;
 - execution and loop records;
@@ -874,7 +874,7 @@ Minimum shape:
     "title": "Add runtime check",
     "status": "ready_for_dev",
     "synopsis": "Add runtime check.",
-    "source_path": ".chr/user/tickets/CHR-1.md",
+    "source_path": ".chr/default/tickets/CHR-1.md",
     "evidence": {
       "state": "complete",
       "summary": "complete"
@@ -1028,7 +1028,7 @@ The token is read from the configured environment variable.
 
 The token must not be written into:
 
-- `.chr/user/config.yml`;
+- `.chr/default/config.yml`;
 - logs;
 - browser-visible boot data;
 - static files.

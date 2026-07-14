@@ -18,8 +18,8 @@ The user guide now describes the Specs view `f` action and the CLI command for
 acceptance feature generation. Reference docs now identify both generated
 feature artifacts and feature-round notes:
 
-- `.chr/user/acceptance/<case>.feature`
-- `.chr/user/acceptance/<case>-feature-round.md`
+- `.chr/default/acceptance/<case>.feature`
+- `.chr/default/acceptance/<case>-feature-round.md`
 
 The dialer fixture still resets cleanly and contains the `call-outcome-capture`
 use case with metadata and dump context ready for quiz/spec generation.

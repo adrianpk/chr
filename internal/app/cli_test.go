@@ -403,7 +403,7 @@ func TestWebServeArtifactCatalogUsesProjectArtifacts(t *testing.T) {
 
 	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
 		Family: "dumps",
-		ID:     ".chr/user/dumps/blog-context.md",
+		ID:     ".chr/default/dumps/blog-context.md",
 	})
 	if err != nil {
 		t.Fatalf("ArtifactDetailView returned error: %v", err)
@@ -422,7 +422,7 @@ func TestWebServeArtifactCatalogReportsMalformedCaseMetadata(t *testing.T) {
 		newWebServeBoardProjectContext(t, projectDir),
 	)
 
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "cases", "broken.md"), "# Missing frontmatter\n")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "cases", "broken.md"), "# Missing frontmatter\n")
 
 	_, err := provider.CatalogView(t.Context(), "cases")
 	if err == nil {
@@ -506,7 +506,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 
 	detail, err := provider.ArtifactDetailView(t.Context(), webui.ArtifactDetailRequest{
 		Family: "dumps",
-		ID:     ".chr/user/dumps/blog-context.md",
+		ID:     ".chr/default/dumps/blog-context.md",
 	})
 	if err != nil {
 		t.Fatalf("ArtifactDetailView returned error: %v", err)
@@ -515,7 +515,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/user/dumps/blog-context.md",
+		ID:       ".chr/default/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Updated Dump"},
@@ -531,7 +531,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/user/dumps/blog-context.md",
+		ID:       ".chr/default/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Stale Dump"},
@@ -544,7 +544,7 @@ func TestWebServeWriteActionSavesDumpAndRejectsStaleRevision(t *testing.T) {
 		t.Fatalf("stale status = %q, want stale", stale.Status)
 	}
 
-	if stale.ReloadURL != "/dumps/detail?id=.chr%2Fuser%2Fdumps%2Fblog-context.md" || stale.DiscardURL != "/dumps" {
+	if stale.ReloadURL != "/dumps/detail?id=.chr%2Fdefault%2Fdumps%2Fblog-context.md" || stale.DiscardURL != "/dumps" {
 		t.Fatalf("stale urls = reload %q discard %q, want dump conflict actions", stale.ReloadURL, stale.DiscardURL)
 	}
 }
@@ -559,12 +559,12 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 		newWebServeBoardProjectContext(t, projectDir),
 	)
 
-	detail := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
+	detail := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
 
 	result, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/user/dumps/blog-context.md",
+		ID:       ".chr/default/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Updated Dump"},
@@ -580,7 +580,7 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 	stale, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/user/dumps/blog-context.md",
+		ID:       ".chr/default/dumps/blog-context.md",
 		Revision: detail.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Stale Dump"},
@@ -593,12 +593,12 @@ func TestWebServeWriteActionRetriesAfterStaleReload(t *testing.T) {
 		t.Fatalf("stale status = %q, want stale", stale.Status)
 	}
 
-	reloaded := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
+	reloaded := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
 
 	retry, err := provider.WriteAction(t.Context(), webui.WriteActionRequest{
 		Action:   "dump.save",
 		Family:   "dumps",
-		ID:       ".chr/user/dumps/blog-context.md",
+		ID:       ".chr/default/dumps/blog-context.md",
 		Revision: reloaded.Revision,
 		Confirm:  true,
 		Fields:   map[string]string{"content": "# Retry Dump"},
@@ -623,13 +623,13 @@ func TestWebServeArtifactRevisionsChangeAfterWorkspaceMutation(t *testing.T) {
 	)
 
 	catalogBefore := mustWebArtifactCatalogView(t, provider, "dumps")
-	detailBefore := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
+	detailBefore := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
 
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-context.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-context.md"), `---
 title: "Blog Context"
 status: "curated"
 type: "dump"
-source: ".chr/user/dumps/blog-context-raw.md"
+source: ".chr/default/dumps/blog-context-raw.md"
 case: "blog"
 ---
 
@@ -639,7 +639,7 @@ Mutated outside the web view provider.
 `)
 
 	catalogAfter := mustWebArtifactCatalogView(t, provider, "dumps")
-	detailAfter := mustWebArtifactDetailView(t, provider, "dumps", ".chr/user/dumps/blog-context.md")
+	detailAfter := mustWebArtifactDetailView(t, provider, "dumps", ".chr/default/dumps/blog-context.md")
 
 	assertWebRevisionChanged(t, "catalog", catalogBefore.Revision, catalogAfter.Revision)
 	assertWebRevisionChanged(t, "detail", detailBefore.Revision, detailAfter.Revision)
@@ -756,7 +756,7 @@ func TestWebServeWriteActionGeneratesSpecWithService(t *testing.T) {
 		t.Fatalf("model requests = %#v, want generate spec request", model.requests)
 	}
 
-	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "user", "specs", "blog-spec.md")); err != nil {
+	if _, err := os.Stat(filepath.Join(projectDir, ".chr", "default", "specs", "blog-spec.md")); err != nil {
 		t.Fatalf("generated spec missing: %v", err)
 	}
 }
@@ -900,11 +900,11 @@ func writeWebServeArtifactFixture(t *testing.T, projectDir string) {
 		Description:   "Publish articles.",
 		Context:       "Use-case context.",
 	}))
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-context.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-context.md"), `---
 title: "Blog Context"
 status: "curated"
 type: "dump"
-source: ".chr/user/dumps/blog-context-raw.md"
+source: ".chr/default/dumps/blog-context-raw.md"
 case: "blog"
 ---
 
@@ -912,11 +912,11 @@ case: "blog"
 
 Use-case dump body.
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "user", "dumps", "blog-context-raw.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, ".chr", "default", "dumps", "blog-context-raw.md"), `---
 title: "Blog Context Raw Capture"
 status: "raw"
 type: "dump_raw"
-curated: ".chr/user/dumps/blog-context.md"
+curated: ".chr/default/dumps/blog-context.md"
 case: "blog"
 ---
 
@@ -968,7 +968,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 	err := writeAcceptanceFeatureGenerateResult(&stdout, AcceptanceFeatureOperationResult{
 		Message: "Acceptance feature generated.",
 		Status:  core.AcceptanceFeatureStatusGenerated,
-		Feature: ".chr/user/acceptance/blog.feature",
+		Feature: ".chr/default/acceptance/blog.feature",
 	})
 	if err != nil {
 		t.Fatalf("writeAcceptanceFeatureGenerateResult returned error: %v", err)
@@ -978,7 +978,7 @@ func TestAcceptanceFeatureGenerateOutputGenerated(t *testing.T) {
 	for _, want := range []string{
 		"Acceptance feature generated.\n",
 		"status: generated\n",
-		"feature: .chr/user/acceptance/blog.feature\n",
+		"feature: .chr/default/acceptance/blog.feature\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("output missing %q in:\n%s", want, got)
@@ -1262,7 +1262,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	projectDir := newGateCLIGitProject(t)
 	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
-	writeGateCLIFile(t, projectDir, ".chr/user/config/gates.yml", `gates:
+	writeGateCLIFile(t, projectDir, ".chr/default/config/gates.yml", `gates:
   dev_main:
     traceability:
       fail_on_missing_agent_evidence: false
@@ -1312,7 +1312,7 @@ func TestGateDevMainWarnsOnManualChangesWhenConfigured(t *testing.T) {
 	projectDir := newGateCLIGitProject(t)
 	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
-	writeGateCLIFile(t, projectDir, ".chr/user/config/gates.yml", `gates:
+	writeGateCLIFile(t, projectDir, ".chr/default/config/gates.yml", `gates:
   dev_main:
     traceability:
       warn_on_manual_changes: true
@@ -1356,7 +1356,7 @@ func TestGateDevMainWarnsOnHighRiskManualChangesWhenConfigured(t *testing.T) {
 	projectDir := newGateCLIGitProject(t)
 	writeGateCLIFile(t, projectDir, "go.mod", "module gatecli.test\n\ngo 1.25\n")
 	writeGateCLIFile(t, projectDir, "gatecli_test.go", "package gatecli\n")
-	writeGateCLIFile(t, projectDir, ".chr/user/config/gates.yml", `gates:
+	writeGateCLIFile(t, projectDir, ".chr/default/config/gates.yml", `gates:
   dev_main:
     manual_changes:
       warn_on_high_risk_paths: true
@@ -1435,7 +1435,7 @@ func TestInitDryRunDoesNotWriteWorkspace(t *testing.T) {
 		t.Fatalf("init dry-run returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), "create .chr/user/agents") {
+	if !strings.Contains(stdout.String(), "create .chr/default/agents") {
 		t.Fatalf("stdout = %q, want planned .chr paths", stdout.String())
 	}
 
@@ -1482,11 +1482,11 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 		t.Fatalf("init standard returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "agents", "CONVENTIONS.md"))
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "agents", "playbooks", "ticket-workflow.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "agents", "CONVENTIONS.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "agents", "playbooks", "ticket-workflow.md"))
 	assertPathExists(t, filepath.Join(projectDir, "AGENTS.md"))
 
-	documenting := readTestFile(t, filepath.Join(projectDir, ".chr", "user", "agents", "DOCUMENTING.md"))
+	documenting := readTestFile(t, filepath.Join(projectDir, ".chr", "default", "agents", "DOCUMENTING.md"))
 	for _, unwanted := range []string{
 		"Chryso Artifacts",
 		"Use `.chr/` for project-local operational artifacts",
@@ -1497,12 +1497,12 @@ func TestInitStandardProfileInstallsProtocolAssets(t *testing.T) {
 		}
 	}
 
-	architecture := readTestFile(t, filepath.Join(projectDir, ".chr", "user", "agents", "ARCHITECTURE.md"))
+	architecture := readTestFile(t, filepath.Join(projectDir, ".chr", "default", "agents", "ARCHITECTURE.md"))
 	if strings.Contains(architecture, ".chr/         Chryso project-local state") {
 		t.Fatalf("ARCHITECTURE.md exposes .chr as application layout:\n%s", architecture)
 	}
 
-	invariants := readTestFile(t, filepath.Join(projectDir, ".chr", "user", "agents", "INVARIANTS.md"))
+	invariants := readTestFile(t, filepath.Join(projectDir, ".chr", "default", "agents", "INVARIANTS.md"))
 	if strings.Contains(invariants, "Treat `.chr/` as project-local operational state") {
 		t.Fatalf("INVARIANTS.md contains old .chr operational rule:\n%s", invariants)
 	}
@@ -1679,7 +1679,7 @@ func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
 		t.Fatalf("spec list returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), ".chr/user/specs/blog-spec.md") {
+	if !strings.Contains(stdout.String(), ".chr/default/specs/blog-spec.md") {
 		t.Fatalf("spec list stdout = %q, want blog spec path", stdout.String())
 	}
 
@@ -1695,7 +1695,7 @@ func TestSpecAndPlanListCommandsUseServiceViews(t *testing.T) {
 		t.Fatalf("plan list returned error: %v", err)
 	}
 
-	if !strings.Contains(stdout.String(), ".chr/user/plans/project-plan.md") {
+	if !strings.Contains(stdout.String(), ".chr/default/plans/project-plan.md") {
 		t.Fatalf("plan list stdout = %q, want project plan path", stdout.String())
 	}
 }
@@ -2110,7 +2110,7 @@ func TestAuthorQuizNewWritesSessionAndQuiz(t *testing.T) {
 
 	sessionID := authorSessionIDFromOutput(t, stdout.String())
 	sessionPath := filepath.Join(projectDir, ".chr", "authoring", "sessions", sessionID, "session.md")
-	quizPath := filepath.Join(projectDir, ".chr", "user", "quizzes", sessionID+"-billing-sync.md")
+	quizPath := filepath.Join(projectDir, ".chr", "default", "quizzes", sessionID+"-billing-sync.md")
 
 	for _, path := range []string{sessionPath, quizPath} {
 		_, err = os.Stat(path)
@@ -2139,7 +2139,7 @@ func TestAuthorPromoteQuizToDraftWritesDraftAndUpdatesSession(t *testing.T) {
 		t.Fatalf("author promote quiz-to-draft returned error: %v", err)
 	}
 
-	draftPath := filepath.Join(projectDir, ".chr", "user", "drafts", sessionID+"-billing-sync.md")
+	draftPath := filepath.Join(projectDir, ".chr", "default", "drafts", sessionID+"-billing-sync.md")
 
 	_, err = os.Stat(draftPath)
 	if err != nil {
@@ -2253,7 +2253,7 @@ func TestAuthorAssistedStartResumeAnswerStatusAndFinalize(t *testing.T) {
 		t.Fatalf("author assisted finalize returned error: %v", err)
 	}
 
-	for _, want := range []string{"assisted: finalized", "curated-summary.md", ".chr/user/specs/"} {
+	for _, want := range []string{"assisted: finalized", "curated-summary.md", ".chr/default/specs/"} {
 		if !strings.Contains(finalizeOut.String(), want) {
 			t.Fatalf("finalize output missing %q:\n%s", want, finalizeOut.String())
 		}
@@ -2334,7 +2334,7 @@ func TestDaemonStartRunsForegroundLoop(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	err := os.MkdirAll(filepath.Join(projectDir, ".chr", "user", "tickets"), 0o755)
+	err := os.MkdirAll(filepath.Join(projectDir, ".chr", "default", "tickets"), 0o755)
 	if err != nil {
 		t.Fatalf("create tickets directory: %v", err)
 	}
@@ -2525,7 +2525,7 @@ func TestTicketNewCreatesTicket(t *testing.T) {
 		t.Fatalf("run returned error: %v", err)
 	}
 
-	wantPath := filepath.Join(dir, ".chr", "user", "tickets", "CHR-1-Do-something.md")
+	wantPath := filepath.Join(dir, ".chr", "default", "tickets", "CHR-1-Do-something.md")
 	if !strings.Contains(stdout.String(), "ticket: "+wantPath) {
 		t.Fatalf("stdout = %q, want ticket path %q", stdout.String(), wantPath)
 	}
@@ -2552,7 +2552,7 @@ func TestTicketNewCreatesTicket(t *testing.T) {
 func TestTicketNewUsesConfigKeyPrefix(t *testing.T) {
 	dir := t.TempDir()
 
-	configPath := filepath.Join(dir, ".chr", "user", "config.yml")
+	configPath := filepath.Join(dir, ".chr", "default", "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
 	if err != nil {
@@ -2577,7 +2577,7 @@ func TestTicketNewUsesConfigKeyPrefix(t *testing.T) {
 		t.Fatalf("run returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(dir, ".chr", "user", "tickets", "PRJ-1-Do-something.md"))
+	assertPathExists(t, filepath.Join(dir, ".chr", "default", "tickets", "PRJ-1-Do-something.md"))
 }
 
 func TestTicketNewUsesActiveProject(t *testing.T) {
@@ -2610,7 +2610,7 @@ func TestTicketNewUsesActiveProject(t *testing.T) {
 		t.Fatalf("ticket new returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Active-project-ticket.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Active-project-ticket.md"))
 }
 
 func TestRuntimeInitCreatesTemplateWithExplicitDir(t *testing.T) {
@@ -2628,9 +2628,9 @@ func TestRuntimeInitCreatesTemplateWithExplicitDir(t *testing.T) {
 		t.Fatalf("runtime init returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"))
 
-	if !strings.Contains(stdout.String(), "create .chr/user/runtime/agent/Dockerfile") {
+	if !strings.Contains(stdout.String(), "create .chr/default/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
 	}
 }
@@ -2651,9 +2651,9 @@ func TestRuntimeInitDryRunDoesNotCreateTemplate(t *testing.T) {
 		t.Fatalf("runtime init returned error: %v", err)
 	}
 
-	assertPathNotExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
+	assertPathNotExists(t, filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"))
 
-	if !strings.Contains(stdout.String(), "create .chr/user/runtime/agent/Dockerfile") {
+	if !strings.Contains(stdout.String(), "create .chr/default/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile create", stdout.String())
 	}
 }
@@ -2661,7 +2661,7 @@ func TestRuntimeInitDryRunDoesNotCreateTemplate(t *testing.T) {
 func TestRuntimeInitSkipsExistingTemplate(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
-	dockerfilePath := filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -2694,7 +2694,7 @@ func TestRuntimeInitSkipsExistingTemplate(t *testing.T) {
 		t.Fatalf("runtime template content = %q, want custom content unchanged", string(content))
 	}
 
-	if !strings.Contains(stdout.String(), "skip existing .chr/user/runtime/agent/Dockerfile") {
+	if !strings.Contains(stdout.String(), "skip existing .chr/default/runtime/agent/Dockerfile") {
 		t.Fatalf("stdout = %q, want runtime Dockerfile skip", stdout.String())
 	}
 }
@@ -2716,7 +2716,7 @@ func TestRuntimeInitUsesActiveProject(t *testing.T) {
 		t.Fatalf("runtime init returned error: %v", err)
 	}
 
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"))
 }
 
 func TestRuntimeInitFallsBackToCurrentDirectory(t *testing.T) {
@@ -2734,7 +2734,7 @@ func TestRuntimeInitFallsBackToCurrentDirectory(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"))
 }
 
 func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
@@ -2760,14 +2760,14 @@ func TestRuntimeValidatePrintsRuntimePlan(t *testing.T) {
 		"project_checkout_dir: .",
 		"execution_workspace_dir: .",
 		"image: chr-agent-runtime:local",
-		"dockerfile: .chr/user/runtime/agent/Dockerfile",
+		"dockerfile: .chr/default/runtime/agent/Dockerfile",
 		"workdir: /workspace",
 		"artifact_dir: ops/default/run",
 		"mount: . -> /workspace read_only=false",
 		"checks:",
 		"ok    execution_workspace .",
 		"ok    workspace    .chr",
-		"ok    dockerfile   .chr/user/runtime/agent/Dockerfile",
+		"ok    dockerfile   .chr/default/runtime/agent/Dockerfile",
 		"ok    artifact_dir ops/default/run",
 	} {
 		if !strings.Contains(stdout.String(), want) {
@@ -3145,7 +3145,7 @@ func TestTicketNewFallsBackToCurrentDirectory(t *testing.T) {
 		}
 	})
 
-	assertPathExists(t, filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Current-project-ticket.md"))
+	assertPathExists(t, filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Current-project-ticket.md"))
 }
 
 func TestProjectContextResolverRejectsMissingContext(t *testing.T) {
@@ -3707,7 +3707,7 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 	writeCLIWorkspaceConfig(t, projectDir, `work:
   require_remote_tracking: false
 `)
-	runGateCLIGit(t, projectDir, "add", ".chr/user/config.yml")
+	runGateCLIGit(t, projectDir, "add", ".chr/default/config.yml")
 	runGateCLIGit(t, projectDir, "commit", "-m", "work config")
 	writeGateCLIFile(t, projectDir, "ops/default/.keep", "")
 	runGateCLIGit(t, projectDir, "add", "ops/default/.keep")
@@ -3743,7 +3743,7 @@ func TestWorkDoctorFixSafeIgnoresRuntimeArtifacts(t *testing.T) {
 	}
 
 	exclude := readFile(t, filepath.Join(projectDir, ".git", "info", "exclude"))
-	for _, want := range []string{".chr/user/runtime/", "ops/*/run/"} {
+	for _, want := range []string{".chr/default/runtime/", "ops/*/run/"} {
 		if !strings.Contains(exclude, want) {
 			t.Fatalf("exclude = %q, want runtime ignore %q", exclude, want)
 		}
@@ -4468,13 +4468,13 @@ func TestTicketStartDryRunPrintsPreflight(t *testing.T) {
 	for _, want := range []string{
 		"execution: exec-",
 		"ticket: CHR-1",
-		"ticket_path: " + filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md"),
+		"ticket_path: " + filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Do-something.md"),
 		"status: pending",
 		"dry_run: true",
 		"artifact_dir: ops/default/run",
 		"run_artifact_dir: ops/default/run/00001-chr-1-do-something",
 		"result_path: ops/default/run/00001-chr-1-do-something/evidence/result.json",
-		"ok    dockerfile   .chr/user/runtime/agent/Dockerfile",
+		"ok    dockerfile   .chr/default/runtime/agent/Dockerfile",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
@@ -4620,7 +4620,7 @@ func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionReco
 		t.Fatalf("Status = %q, want succeeded", record.Status)
 	}
 
-	if record.TicketPath != filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md") {
+	if record.TicketPath != filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Do-something.md") {
 		t.Fatalf("TicketPath = %q, want ticket path", record.TicketPath)
 	}
 
@@ -4647,7 +4647,7 @@ func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionReco
 		t.Fatalf("read worker context: %v", err)
 	}
 
-	if !strings.Contains(string(contextContent), "- ticket_path: /workspace/.chr/user/tickets/CHR-1-Do-something.md") {
+	if !strings.Contains(string(contextContent), "- ticket_path: /workspace/.chr/default/tickets/CHR-1-Do-something.md") {
 		t.Fatalf("worker context = %q, want container ticket path", string(contextContent))
 	}
 }
@@ -4756,7 +4756,7 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 		BaseSHA:               "abc123",
 		TicketBranch:          "chr/CHR-1",
 	}
-	runDir := filepath.Join(worktreeDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-apply")
+	runDir := filepath.Join(worktreeDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-apply")
 	record.Artifacts = core.ExecutionArtifacts{
 		RunDir:         runDir,
 		ResultPath:     filepath.Join(runDir, "result.json"),
@@ -4866,7 +4866,7 @@ func TestTicketApplyResultAllowsMissingOptionalEvidenceStrategy(t *testing.T) {
 func TestTicketApplyResultBlocksActiveApplicableGherkinNotApplicable(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	writeCLIAcceptanceFeature(t, projectDir, ".chr/user/acceptance/onboarding.feature")
+	writeCLIAcceptanceFeature(t, projectDir, ".chr/default/acceptance/onboarding.feature")
 
 	ticket := testTicketWithReviewRef()
 	ticket.Body = testApplyResultTicketBody(t)
@@ -5414,7 +5414,7 @@ func TestTicketCommentAppendsComment(t *testing.T) {
 func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 	t.Helper()
 
-	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md")
+	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Do-something.md")
 
 	content, err := core.NewTicketRenderer().RenderTicket(core.Ticket{
 		Key:       "CHR-1",
@@ -5441,7 +5441,7 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 		Key:          "CHR-1",
 		Title:        "Do something",
 		Status:       "open",
-		RelativePath: filepath.Join(".chr", "user", "tickets", "CHR-1-Do-something.md"),
+		RelativePath: filepath.Join(".chr", "default", "tickets", "CHR-1-Do-something.md"),
 		Path:         ticketPath,
 	})
 
@@ -6289,7 +6289,7 @@ func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 		Title:        "Old",
 		Status:       "open",
 		RelativePath: "CHR-9-Old.md",
-		Path:         filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-9-Old.md"),
+		Path:         filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-9-Old.md"),
 	})
 
 	var stdout bytes.Buffer
@@ -6329,7 +6329,7 @@ func TestIndexRebuildReportsParseErrors(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	badTicketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Bad.md")
+	badTicketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Bad.md")
 
 	err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755)
 	if err != nil {
@@ -6509,7 +6509,7 @@ func TestIndexStatusReportsInvalidTickets(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
-	badTicketPath := filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Bad.md")
+	badTicketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Bad.md")
 
 	err := os.MkdirAll(filepath.Dir(badTicketPath), 0o755)
 	if err != nil {
@@ -6882,7 +6882,7 @@ func TestMaintenanceRegistrySetPathDryRunDoesNotMutateProject(t *testing.T) {
 func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 
 	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
@@ -6925,7 +6925,7 @@ func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
 func TestMaintenanceExecutionArtifactsReportsCompleteArtifacts(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "exec-1")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "exec-1")
 	record := cliExecutionRecord(projectDir, runDir)
 	writeCLIExecutionArtifacts(t, record)
 	createCLIExecutionRecord(t, devRoot, record)
@@ -7426,11 +7426,11 @@ func cliExecutionRecord(projectDir, runDir string) core.ExecutionRecord {
 		ID:         "exec-1",
 		ProjectID:  projectID(projectDir),
 		TicketKey:  "CHR-1",
-		TicketPath: filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1.md"),
+		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
 		Status:     core.ExecutionStatusSucceeded,
 		Runtime: core.ExecutionRuntimeRef{
 			Image:             "chr-agent-runtime:local",
-			DockerfilePath:    filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+			DockerfilePath:    filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
@@ -7723,19 +7723,19 @@ func testApplyResultExecutionRecord(
 	status core.ExecutionStatus,
 	failureReason string,
 ) core.ExecutionRecord {
-	runDir := filepath.Join(projectDir, ".chr", "user", "runtime", "runs", "CHR-1", "exec-apply")
+	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-apply")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
 	return core.ExecutionRecord{
 		ID:            "exec-apply",
 		ProjectID:     projectID(projectDir),
 		TicketKey:     "CHR-1",
-		TicketPath:    filepath.Join(projectDir, ".chr", "user", "tickets", "CHR-1-Do-something.md"),
+		TicketPath:    filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Do-something.md"),
 		Status:        status,
 		FailureReason: failureReason,
 		Runtime: core.ExecutionRuntimeRef{
 			Image:             "chr-runtime:latest",
-			DockerfilePath:    filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
+			DockerfilePath:    filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
@@ -7960,7 +7960,7 @@ func copyTicketStartWorktreeFixture(projectDir, worktreeDir string) error {
 		return fmt.Errorf("git init worktree fixture: %w: %s", err, strings.TrimSpace(string(output)))
 	}
 
-	ticketDir := filepath.Join(projectDir, ".chr", "user", "tickets")
+	ticketDir := filepath.Join(projectDir, ".chr", "default", "tickets")
 
 	err := filepath.WalkDir(ticketDir, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -7985,7 +7985,7 @@ func copyTicketStartWorktreeFixture(projectDir, worktreeDir string) error {
 	return copyTicketStartWorktreeFixtureFile(
 		projectDir,
 		worktreeDir,
-		filepath.Join(".chr", "user", "runtime", "agent", "Dockerfile"),
+		filepath.Join(".chr", "default", "runtime", "agent", "Dockerfile"),
 	)
 }
 
@@ -8024,7 +8024,7 @@ func installFakeTicketStartWorktreePreparer(t *testing.T) *fakeTicketStartWorktr
 func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, ticket core.Ticket) string {
 	t.Helper()
 
-	ticketPath := filepath.Join(projectDir, ".chr", "user", "tickets", filepath.FromSlash(relativePath))
+	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", filepath.FromSlash(relativePath))
 
 	content, err := core.NewTicketRenderer().RenderTicket(ticket)
 	if err != nil {
@@ -8064,7 +8064,7 @@ func testTicketEvidenceStrategyBlock() string {
 	return `
 <!-- chr:evidence-strategy:v1 -->
 - [x] Evidence strategy: complete; change_kind=cli_behavior; risk=medium
-- [x] Gherkin: required; path=.chr/user/acceptance/cli.feature
+- [x] Gherkin: required; path=.chr/default/acceptance/cli.feature
 - [x] Tests: mixed; unit and CLI coverage
 - [x] Validation: passed; make verify
 - [x] Evidence summary: complete; ready for review
@@ -8088,7 +8088,7 @@ func newTestWorkspace(t *testing.T) string {
 func writeCLIWorkspaceConfig(t *testing.T, projectDir, content string) {
 	t.Helper()
 
-	configPath := filepath.Join(projectDir, ".chr", "user", "config.yml")
+	configPath := filepath.Join(projectDir, ".chr", "default", "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(configPath), 0o755)
 	if err != nil {
@@ -8383,7 +8383,7 @@ func authorQuizPathFromOutput(t *testing.T, output string) string {
 
 	for _, line := range strings.Split(output, "\n") {
 		value, ok := strings.CutPrefix(line, "path: ")
-		if ok && strings.Contains(value, ".chr/user/quizzes/") {
+		if ok && strings.Contains(value, ".chr/default/quizzes/") {
 			path = value
 		}
 	}
@@ -8400,7 +8400,7 @@ func authorQuizPathFromOutput(t *testing.T, output string) string {
 func writeRuntimeTemplate(t *testing.T, projectDir string) {
 	t.Helper()
 
-	dockerfilePath := filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile")
+	dockerfilePath := filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile")
 
 	err := os.MkdirAll(filepath.Dir(dockerfilePath), 0o755)
 	if err != nil {
@@ -8601,7 +8601,7 @@ func gateCLIGitOutput(t *testing.T, projectDir string, args ...string) string {
 func readOnlyGateCLIJSONReport(t *testing.T, projectDir string) core.GateReport {
 	t.Helper()
 
-	matches, err := filepath.Glob(filepath.Join(projectDir, ".chr", "user", "reports", "gates", "*.json"))
+	matches, err := filepath.Glob(filepath.Join(projectDir, ".chr", "default", "reports", "gates", "*.json"))
 	if err != nil {
 		t.Fatalf("glob gate reports: %v", err)
 	}

@@ -30,9 +30,9 @@ slice branch names, PR titles, and implementation report paths.
 
 ## Source Material
 
-- Spec draft: `.chr/user/specs/ticket-review-integration-draft.md`
-- Quiz: `.chr/user/quizzes/curated/ticket-review-integration-quiz.md`
-- Tracker mirror: `.chr/user/trackers/ticket-review-integration-tracker.md`
+- Spec draft: `.chr/default/specs/ticket-review-integration-draft.md`
+- Quiz: `.chr/default/quizzes/curated/ticket-review-integration-quiz.md`
+- Tracker mirror: `.chr/default/trackers/ticket-review-integration-tracker.md`
 - Operational plan: `.prj/plans/slicing-ticket-review-integration-plan.md`
 - Operational tracker: `.prj/trackers/slicing-ticket-review-integration-tracker.md`
 

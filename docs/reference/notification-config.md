@@ -1,6 +1,6 @@
 # Notification Configuration
 
-Notification configuration lives in the managed project's `.chr/user/config.yml`
+Notification configuration lives in the managed project's `.chr/default/config.yml`
 file under the `notifications:` key.
 
 Notifications are disabled by default. A project must explicitly enable a
@@ -25,7 +25,7 @@ notifications:
   telegram_chat_id: "123456"
 ```
 
-The bot token value is not stored in `.chr/user/config.yml`. The config stores the
+The bot token value is not stored in `.chr/default/config.yml`. The config stores the
 environment variable name that later dispatch code can resolve.
 
 ## Validation

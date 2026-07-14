@@ -194,7 +194,7 @@ func TestMouseClickSelectsShellTab(t *testing.T) {
 func TestMouseClickSelectsDumpTextPane(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project Context", RelativePath: ".chr/user/dumps/project-context.md", Preview: "# Project Context"},
+			{Title: "Project Context", RelativePath: ".chr/default/dumps/project-context.md", Preview: "# Project Context"},
 		},
 	})
 	model.selected = 2
@@ -323,7 +323,7 @@ func TestModelRefreshesWorkspaceGraphAfterProjectSave(t *testing.T) {
 				Project: &core.WorkspaceNode{
 					Name:        "Graph Project",
 					Description: "Graph description.",
-					Path:        ".chr/user/project.md",
+					Path:        ".chr/default/project.md",
 					SourceHash:  "hash-project",
 				},
 			},
@@ -488,7 +488,7 @@ func TestModelRefreshesWorkspaceGraphAfterCaseSave(t *testing.T) {
 						Slug:        "blog-publishing",
 						Name:        "Graph Case",
 						Description: "Graph case description.",
-						Path:        ".chr/user/cases/blog-publishing.md",
+						Path:        ".chr/default/cases/blog-publishing.md",
 						SourceHash:  "hash-case",
 					},
 				},
@@ -694,7 +694,7 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 			Project: &core.WorkspaceNode{
 				Name:        "Graph Project",
 				Description: "Graph description.",
-				Path:        ".chr/user/project.md",
+				Path:        ".chr/default/project.md",
 				SourceHash:  "hash-project",
 			},
 			Cases: []core.WorkspaceNode{
@@ -702,7 +702,7 @@ func TestModelInitializesProjectAndCasesFromWorkspaceGraph(t *testing.T) {
 					Slug:        "fallback",
 					Name:        "Graph Case",
 					Description: "Graph case description.",
-					Path:        ".chr/user/cases/fallback.md",
+					Path:        ".chr/default/cases/fallback.md",
 					SourceHash:  "hash-case",
 				},
 			},
@@ -732,7 +732,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 		ProjectWide: []core.WorkspaceNode{
 			{
 				Kind:         core.WorkspaceNodeSpec,
-				RelativePath: ".chr/user/specs/old.md",
+				RelativePath: ".chr/default/specs/old.md",
 				Title:        "Old",
 				SourceHash:   "old",
 			},
@@ -743,7 +743,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 		ProjectWide: []core.WorkspaceNode{
 			{
 				Kind:         core.WorkspaceNodeSpec,
-				RelativePath: ".chr/user/specs/new.md",
+				RelativePath: ".chr/default/specs/new.md",
 				Title:        "New",
 				SourceHash:   "new",
 			},
@@ -755,7 +755,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 			Graph: refreshedGraph,
 			Index: core.NewWorkspaceIndexFromGraph(refreshedGraph),
 			SemanticDigestStates: []core.WorkspaceSemanticDigestState{
-				{NodeID: "spec:.chr/user/specs/new.md", Status: core.WorkspaceSemanticDigestPending},
+				{NodeID: "spec:.chr/default/specs/new.md", Status: core.WorkspaceSemanticDigestPending},
 			},
 		},
 	}
@@ -766,7 +766,7 @@ func TestModelRefreshUpdatesWorkspaceIndex(t *testing.T) {
 
 	model.refreshWorkspace()
 
-	if _, ok := model.workspaceIndex.NodesByID["spec:.chr/user/specs/new.md"]; !ok {
+	if _, ok := model.workspaceIndex.NodesByID["spec:.chr/default/specs/new.md"]; !ok {
 		t.Fatalf("workspaceIndex.NodesByID = %#v, want refreshed spec", model.workspaceIndex.NodesByID)
 	}
 
@@ -783,9 +783,9 @@ func TestModelCountsCaseArtifactsFromWorkspaceGraph(t *testing.T) {
 			},
 			CaseDocuments: map[string][]core.WorkspaceNode{
 				"blog": {
-					{Kind: core.WorkspaceNodeDump, RelativePath: ".chr/user/dumps/blog.md", CaseSlug: "blog"},
-					{Kind: core.WorkspaceNodeSpec, RelativePath: ".chr/user/specs/blog.md", CaseSlug: "blog"},
-					{Kind: core.WorkspaceNodeTicket, RelativePath: ".chr/user/tickets/CHR-1.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeDump, RelativePath: ".chr/default/dumps/blog.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeSpec, RelativePath: ".chr/default/specs/blog.md", CaseSlug: "blog"},
+					{Kind: core.WorkspaceNodeTicket, RelativePath: ".chr/default/tickets/CHR-1.md", CaseSlug: "blog"},
 				},
 			},
 			UnresolvedCaseReferences: []core.WorkspaceCaseReference{
@@ -876,12 +876,12 @@ func TestModelShowsWorkspaceIndexHealthInDash(t *testing.T) {
 	model := NewModel(Options{
 		WorkspaceGraph: core.WorkspaceGraph{
 			ProjectWide: []core.WorkspaceNode{
-				{Kind: core.WorkspaceNodeSpec, RelativePath: ".chr/user/specs/one.md"},
+				{Kind: core.WorkspaceNodeSpec, RelativePath: ".chr/default/specs/one.md"},
 			},
 			CaseDocuments: map[string][]core.WorkspaceNode{},
 		},
 		SemanticDigestStates: []core.WorkspaceSemanticDigestState{
-			{NodeID: "spec:.chr/user/specs/one.md", Status: core.WorkspaceSemanticDigestPending},
+			{NodeID: "spec:.chr/default/specs/one.md", Status: core.WorkspaceSemanticDigestPending},
 		},
 	})
 
@@ -903,7 +903,7 @@ func TestModelRefreshReportsWorkspaceDiagnostics(t *testing.T) {
 		result: WorkspaceRefreshResult{
 			Graph: core.WorkspaceGraph{
 				Diagnostics: []core.WorkspaceGraphDiagnostic{
-					{Path: ".chr/user/cases/broken.md", Kind: core.WorkspaceNodeCase, Message: "invalid"},
+					{Path: ".chr/default/cases/broken.md", Kind: core.WorkspaceNodeCase, Message: "invalid"},
 				},
 			},
 		},
@@ -1008,7 +1008,7 @@ func TestModelExecutesNavigationCommand(t *testing.T) {
 func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 	model := NewModel(Options{
 		Specs: []SpecView{
-			{Index: 0, Title: "Spec", RelativePath: ".chr/user/specs/tui.md"},
+			{Index: 0, Title: "Spec", RelativePath: ".chr/default/specs/tui.md"},
 		},
 	})
 	model.selected = 4
@@ -1022,7 +1022,7 @@ func TestModelReportsSelectedSourcePathCommand(t *testing.T) {
 		t.Fatalf("Update returned %T, want Model", updated)
 	}
 
-	if navigated.statusMessage != "Selected source path: .chr/user/specs/tui.md" {
+	if navigated.statusMessage != "Selected source path: .chr/default/specs/tui.md" {
 		t.Fatalf("statusMessage = %q, want selected source path", navigated.statusMessage)
 	}
 }
@@ -1166,16 +1166,16 @@ func TestModelRefreshesDumpsFromDumpsKey(t *testing.T) {
 		result: DumpActionResult{
 			Message: "Dumps refreshed.",
 			Dumps: []DumpView{
-				{Title: "First", RelativePath: ".chr/user/dumps/first.md"},
-				{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
+				{Title: "First", RelativePath: ".chr/default/dumps/first.md"},
+				{Title: "Second", RelativePath: ".chr/default/dumps/second.md"},
 			},
-			SelectedPath: ".chr/user/dumps/second.md",
+			SelectedPath: ".chr/default/dumps/second.md",
 		},
 	}
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
+			{Title: "Second", RelativePath: ".chr/default/dumps/second.md"},
 		},
 	})
 	model.selected = 2
@@ -1200,7 +1200,7 @@ func TestModelRefreshesDumpsFromDumpsKey(t *testing.T) {
 		t.Fatal("selectedDumpView returned no dump")
 	}
 
-	if dump.RelativePath != ".chr/user/dumps/second.md" {
+	if dump.RelativePath != ".chr/default/dumps/second.md" {
 		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
@@ -1317,9 +1317,9 @@ func TestModelPlansCreateDumpCommandWithCaseScope(t *testing.T) {
 func TestModelConfirmsDumpAction(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Created dump .chr/user/dumps/project-dump.md.",
+			Message: "Created dump .chr/default/dumps/project-dump.md.",
 			Dumps: []DumpView{
-				{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
+				{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 			},
 		},
 	}
@@ -1380,7 +1380,7 @@ func TestModelRendersEmptyDumpState(t *testing.T) {
 func TestModelPlansEditDumpCommand(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
 	model.selected = 2
@@ -1402,7 +1402,7 @@ func TestModelPlansEditDumpCommand(t *testing.T) {
 		t.Fatalf("dump action = %q, want %q", planned.dumpAction.Request.Action, DumpActionEdit)
 	}
 
-	if planned.dumpAction.Request.Path != ".chr/user/dumps/project-dump.md" {
+	if planned.dumpAction.Request.Path != ".chr/default/dumps/project-dump.md" {
 		t.Fatalf("dump path = %q", planned.dumpAction.Request.Path)
 	}
 }
@@ -1410,15 +1410,15 @@ func TestModelPlansEditDumpCommand(t *testing.T) {
 func TestModelEditsSelectedDumpDirectlyWithEnter(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:      "Editing dump .chr/user/dumps/project-dump.md.",
+			Message:      "Editing dump .chr/default/dumps/project-dump.md.",
 			Content:      "# Project dump\n\nExisting Markdown.",
-			SelectedPath: ".chr/user/dumps/project-dump.md",
+			SelectedPath: ".chr/default/dumps/project-dump.md",
 		},
 	}
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
 	model.selected = 2
@@ -1451,9 +1451,9 @@ func TestModelEditsSelectedDumpDirectlyWithEnter(t *testing.T) {
 func TestModelConfirmsAppendDumpAction(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Appended dump .chr/user/dumps/project-dump.md.",
+			Message: "Appended dump .chr/default/dumps/project-dump.md.",
 			Dumps: []DumpView{
-				{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
+				{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 			},
 		},
 	}
@@ -1462,7 +1462,7 @@ func TestModelConfirmsAppendDumpAction(t *testing.T) {
 		Pending: true,
 		Request: DumpActionRequest{
 			Action:  DumpActionAppend,
-			Path:    ".chr/user/dumps/project-dump.md",
+			Path:    ".chr/default/dumps/project-dump.md",
 			Content: "Appended dump note from the TUI.",
 		},
 	}
@@ -1486,9 +1486,9 @@ func TestModelConfirmsAppendDumpAction(t *testing.T) {
 func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:      "Editing dump .chr/user/dumps/project-dump.md.",
+			Message:      "Editing dump .chr/default/dumps/project-dump.md.",
 			Content:      "# Project dump\n\nExisting Markdown.",
-			SelectedPath: ".chr/user/dumps/project-dump.md",
+			SelectedPath: ".chr/default/dumps/project-dump.md",
 		},
 	}
 	model := NewModel(Options{DumpExecutor: executor})
@@ -1496,7 +1496,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		Pending: true,
 		Request: DumpActionRequest{
 			Action: DumpActionEdit,
-			Path:   ".chr/user/dumps/project-dump.md",
+			Path:   ".chr/default/dumps/project-dump.md",
 		},
 	}
 
@@ -1515,7 +1515,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		t.Fatal("dumpEdit.Active = false, want active edit")
 	}
 
-	if confirmed.dumpEdit.Path != ".chr/user/dumps/project-dump.md" {
+	if confirmed.dumpEdit.Path != ".chr/default/dumps/project-dump.md" {
 		t.Fatalf("dumpEdit.Path = %q", confirmed.dumpEdit.Path)
 	}
 
@@ -1523,7 +1523,7 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 		t.Fatalf("dumpEdit value = %q", confirmed.dumpEdit.Input.Value())
 	}
 
-	if confirmed.statusMessage != "Editing .chr/user/dumps/project-dump.md" {
+	if confirmed.statusMessage != "Editing .chr/default/dumps/project-dump.md" {
 		t.Fatalf("statusMessage = %q", confirmed.statusMessage)
 	}
 }
@@ -1531,15 +1531,15 @@ func TestModelConfirmsEditDumpActionStartsInternalEditor(t *testing.T) {
 func TestModelSavesInternalDumpEdit(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Saved dump .chr/user/dumps/project-dump.md.",
+			Message: "Saved dump .chr/default/dumps/project-dump.md.",
 			Dumps: []DumpView{
-				{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
+				{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 			},
-			SelectedPath: ".chr/user/dumps/project-dump.md",
+			SelectedPath: ".chr/default/dumps/project-dump.md",
 		},
 	}
 	model := NewModel(Options{DumpExecutor: executor})
-	model.startDumpEdit(".chr/user/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyCtrlS})
 
@@ -1567,7 +1567,7 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 			{
 				Title:        "Project dump",
 				Status:       "raw",
-				RelativePath: ".chr/user/dumps/project-dump.md",
+				RelativePath: ".chr/default/dumps/project-dump.md",
 			},
 		},
 	})
@@ -1575,7 +1575,7 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 	model.selectedPane = 1
 	model.width = 100
 	model.height = 24
-	model.startDumpEdit(".chr/user/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
+	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump\n\nChanged Markdown.")
 
 	view := model.View()
 
@@ -1594,10 +1594,10 @@ func TestModelRendersDumpEditPanelWithMinimalHint(t *testing.T) {
 func TestModelCancelsInternalDumpEdit(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
-	model.startDumpEdit(".chr/user/dumps/project-dump.md", "# Project dump")
+	model.startDumpEdit(".chr/default/dumps/project-dump.md", "# Project dump")
 
 	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
@@ -1615,7 +1615,7 @@ func TestModelCancelsInternalDumpEdit(t *testing.T) {
 		t.Fatal("selectedDumpView returned no dump")
 	}
 
-	if dump.RelativePath != ".chr/user/dumps/project-dump.md" {
+	if dump.RelativePath != ".chr/default/dumps/project-dump.md" {
 		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
@@ -1623,7 +1623,7 @@ func TestModelCancelsInternalDumpEdit(t *testing.T) {
 func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message:                  "Editing dump .chr/user/dumps/project-dump.md.",
+			Message:                  "Editing dump .chr/default/dumps/project-dump.md.",
 			EditorCommand:            exec.Command("true"),
 			EditorCommandDescription: "nvim project-dump.md",
 		},
@@ -1631,7 +1631,7 @@ func TestModelAltELaunchesExternalDumpEditor(t *testing.T) {
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Project dump", RelativePath: ".chr/user/dumps/project-dump.md"},
+			{Title: "Project dump", RelativePath: ".chr/default/dumps/project-dump.md"},
 		},
 	})
 	model.selected = 2
@@ -1688,7 +1688,7 @@ func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
 		t.Fatal("cmd = nil, want external editor command")
 	}
 
-	if executor.path != ".chr/user/tickets/local-preview/CHR-1-preview-command.md" {
+	if executor.path != ".chr/default/tickets/local-preview/CHR-1-preview-command.md" {
 		t.Fatalf("source path = %q", executor.path)
 	}
 
@@ -1724,7 +1724,7 @@ func TestModelCtrlEOpensSelectedTicketSource(t *testing.T) {
 		t.Fatal("cmd = nil, want external editor command")
 	}
 
-	if executor.path != ".chr/user/tickets/local-preview/CHR-1-preview-command.md" {
+	if executor.path != ".chr/default/tickets/local-preview/CHR-1-preview-command.md" {
 		t.Fatalf("source path = %q", executor.path)
 	}
 }
@@ -1756,7 +1756,7 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 		t.Fatal("cmd = nil, want external editor command")
 	}
 
-	if executor.path != ".chr/user/tickets/CHR-1-preview-command.md" {
+	if executor.path != ".chr/default/tickets/CHR-1-preview-command.md" {
 		t.Fatalf("source path = %q", executor.path)
 	}
 }
@@ -1879,9 +1879,9 @@ func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 
 	updated, _ := model.Update(dumpEditorFinishedMsg{
 		err:        errors.New("exit status 135"),
-		path:       ".chr/user/dumps/project-dump.md",
+		path:       ".chr/default/dumps/project-dump.md",
 		command:    "nvim project-dump.md",
-		workingDir: "/workspace/.chr/user/dumps",
+		workingDir: "/workspace/.chr/default/dumps",
 	})
 
 	failed, ok := updated.(Model)
@@ -1892,7 +1892,7 @@ func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 	for _, want := range []string{
 		"Edit failed:",
 		"command=nvim project-dump.md",
-		"dir=/workspace/.chr/user/dumps",
+		"dir=/workspace/.chr/default/dumps",
 		"exit status 135",
 	} {
 		if !strings.Contains(failed.statusMessage, want) {
@@ -1904,22 +1904,22 @@ func TestModelReportsExternalEditorFailureContext(t *testing.T) {
 func TestModelRefreshesDumpsAfterEditorFinishes(t *testing.T) {
 	executor := &fakeDumpActionExecutor{
 		result: DumpActionResult{
-			Message: "Edited dump .chr/user/dumps/second.md.",
+			Message: "Edited dump .chr/default/dumps/second.md.",
 			Dumps: []DumpView{
-				{Title: "First", RelativePath: ".chr/user/dumps/first.md"},
-				{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
+				{Title: "First", RelativePath: ".chr/default/dumps/first.md"},
+				{Title: "Second", RelativePath: ".chr/default/dumps/second.md"},
 			},
-			SelectedPath: ".chr/user/dumps/second.md",
+			SelectedPath: ".chr/default/dumps/second.md",
 		},
 	}
 	model := NewModel(Options{
 		DumpExecutor: executor,
 		Dumps: []DumpView{
-			{Title: "Second", RelativePath: ".chr/user/dumps/second.md"},
+			{Title: "Second", RelativePath: ".chr/default/dumps/second.md"},
 		},
 	})
 
-	updated, _ := model.Update(dumpEditorFinishedMsg{path: ".chr/user/dumps/second.md"})
+	updated, _ := model.Update(dumpEditorFinishedMsg{path: ".chr/default/dumps/second.md"})
 
 	refreshed, ok := updated.(Model)
 	if !ok {
@@ -1935,7 +1935,7 @@ func TestModelRefreshesDumpsAfterEditorFinishes(t *testing.T) {
 		t.Fatal("selectedDumpView returned no dump")
 	}
 
-	if dump.RelativePath != ".chr/user/dumps/second.md" {
+	if dump.RelativePath != ".chr/default/dumps/second.md" {
 		t.Fatalf("selected dump path = %q", dump.RelativePath)
 	}
 }
@@ -1963,7 +1963,7 @@ func TestModelCancelsArtifactAction(t *testing.T) {
 func TestModelConfirmsArtifactAction(t *testing.T) {
 	executor := &fakeArtifactActionExecutor{
 		result: ArtifactActionResult{
-			Message: "Created ticket CHR-1 at .chr/user/tickets/CHR-1-tui-created-ticket.md",
+			Message: "Created ticket CHR-1 at .chr/default/tickets/CHR-1-tui-created-ticket.md",
 			Tickets: []core.IndexedTicket{
 				{Key: "CHR-1", Title: "TUI created ticket", Status: "open"},
 			},
@@ -2784,7 +2784,7 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 				TicketKey:       "CHR-2",
 				ExecutionID:     "exec-2",
 				Message:         "worker started",
-				TicketPath:      ".chr/user/tickets/CHR-2.md",
+				TicketPath:      ".chr/default/tickets/CHR-2.md",
 				RuntimeLog:      "ops/default/run/00002-ticket-run/evidence/runtime.log",
 				ValidationLog:   "ops/default/run/00002-ticket-run/evidence/validation.log",
 				ExecutionReport: "ops/default/run/00002-ticket-run/evidence/execution-report.md",
@@ -2802,7 +2802,7 @@ func TestModelRendersWorkActionEventStream(t *testing.T) {
 		"11:31:00 loop started",
 		"11:31:02 CHR-2 worker started",
 		"11:31:03 CHR-2 error: validation failed",
-		"Ticket: .chr/user/tickets/CHR-2.md",
+		"Ticket: .chr/default/tickets/CHR-2.md",
 		"Execution report: ops/default/run/00002-ticket-run/evidence/execution-report.md",
 		"Runtime log: ops/default/run/00002-ticket-run/evidence/runtime.log",
 		"Validation log: ops/default/run/00002-ticket-run/evidence/validation.log",
@@ -2933,11 +2933,11 @@ func TestModelRendersTicketBoardAndDetail(t *testing.T) {
 		"Selected Ticket",
 		"Synopsis: Fix the publishing workflow.",
 		"Source: plan_tracking",
-		"Source Ref: .chr/user/plans/blog-plan.md",
+		"Source Ref: .chr/default/plans/blog-plan.md",
 		"Slice: Slice 1",
 		"Checklist: 1 done / 2 total",
 		"Comments: 1",
-		"Path: .chr/user/tickets/open.md",
+		"Path: .chr/default/tickets/open.md",
 		"Body:",
 		"Investigate publishing failure.",
 		"- [x] Done",
@@ -3051,7 +3051,7 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []core.IndexedTicke
 			UseCase:      "cli-blog",
 			ProjectArea:  "indexing",
 			SourceKind:   "plan_tracking",
-			SourceRef:    ".chr/user/plans/blog-plan.md",
+			SourceRef:    ".chr/default/plans/blog-plan.md",
 			Slice:        "Slice 1",
 		},
 		{
@@ -3074,7 +3074,7 @@ func testTicketEvidenceDetailBody() string {
 
 <!-- chr:evidence-strategy:v1 -->
 - [x] Evidence strategy: complete; change_kind=cli_behavior; risk=medium
-- [x] Gherkin: required; path=.chr/user/acceptance/cli.feature
+- [x] Gherkin: required; path=.chr/default/acceptance/cli.feature
 - [x] Tests: mixed; unit and CLI coverage
 - [x] Validation: passed; make verify
 - [x] Evidence summary: complete; ready for review
@@ -3408,7 +3408,7 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 				UseCaseTitle: "Blog Publishing",
 				Status:       "accepted",
 				Title:        "TUI Navigation",
-				RelativePath: ".chr/user/specs/tui-navigation.md",
+				RelativePath: ".chr/default/specs/tui-navigation.md",
 				Content:      "# TUI Navigation\n\nStatus: accepted\n\nNavigation details.",
 			},
 		},
@@ -3422,7 +3422,7 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 		"accepted",
 		"Blog Publishing",
 		"TUI Navigation",
-		".chr/user/specs/tui-navigation.md",
+		".chr/default/specs/tui-navigation.md",
 		"Navigation details.",
 	} {
 		if !strings.Contains(view, want) {
@@ -3433,13 +3433,13 @@ func TestModelRendersDocumentsAndDetail(t *testing.T) {
 
 func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 	projectDir := t.TempDir()
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "dumps"), "context.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "default", "dumps"), "context.md", "# Project Context Dump\n\nStatus: raw\n\nNotes.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "specs", "specs"), "feature.md", "# Feature Spec\n\nStatus: accepted\n\nDetails.")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "trackers"), "feature-tracker.md", "# Feature Tracker\n\nStatus: planned\n")
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "plans", "archive"), "blog-plan-20260525.md", "# Archived Blog Plan\n\nStatus: planned\n")
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "specs", "archive"), "blog-spec-20260525.md", "# Archived Blog Spec\n\nStatus: draft\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "default", "plans", "archive"), "blog-plan-20260525.md", "# Archived Blog Plan\n\nStatus: planned\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "default", "specs", "archive"), "blog-spec-20260525.md", "# Archived Blog Spec\n\nStatus: draft\n")
 	writeTicketViewFile(t, filepath.Join(projectDir, ".prj", "drafts"), "legacy-draft.md", "# Legacy Draft\n\nStatus: draft\n")
-	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "user", "drafts"), "runtime-draft.md", "# Runtime Draft\n\nStatus: draft\n")
+	writeTicketViewFile(t, filepath.Join(projectDir, ".chr", "default", "drafts"), "runtime-draft.md", "# Runtime Draft\n\nStatus: draft\n")
 
 	documents, err := LoadDocumentViews(t.Context(), projectDir)
 	if err != nil {
@@ -3485,7 +3485,7 @@ func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 					{Path: ".prj/dumps/billing.md"},
 				},
 				Outputs: []core.AuthoringArtifactRef{
-					{Path: ".chr/user/specs/auth-1-billing-sync.md"},
+					{Path: ".chr/default/specs/auth-1-billing-sync.md"},
 				},
 			},
 		},
@@ -3504,7 +3504,7 @@ func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 		"ID: auth-1",
 		"Transcript: .chr/authoring/sessions/auth-1/transcript.md",
 		"Inputs: .prj/dumps/billing.md",
-		"Outputs: .chr/user/specs/auth-1-billing-sync.md",
+		"Outputs: .chr/default/specs/auth-1-billing-sync.md",
 	} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
@@ -3568,12 +3568,12 @@ func TestModelRendersRuntimeObservability(t *testing.T) {
 	model := NewModel(Options{
 		Observability: ObservabilityView{
 			RuntimeImage:             "chr-agent-runtime:local",
-			RuntimeDockerfile:        ".chr/user/runtime/agent/Dockerfile",
-			RuntimeArtifactDir:       ".chr/user/runtime/runs",
+			RuntimeDockerfile:        ".chr/default/runtime/agent/Dockerfile",
+			RuntimeArtifactDir:       ".chr/default/runtime/runs",
 			RuntimeValidationCommand: "make verify",
 			RuntimeChecks: []RuntimeCheckView{
 				{Name: "workspace", Status: "ok", Path: ".chr", Message: "ok"},
-				{Name: "dockerfile", Status: "fail", Path: ".chr/user/runtime/agent/Dockerfile", Message: "missing"},
+				{Name: "dockerfile", Status: "fail", Path: ".chr/default/runtime/agent/Dockerfile", Message: "missing"},
 			},
 		},
 	})
@@ -3585,8 +3585,8 @@ func TestModelRendersRuntimeObservability(t *testing.T) {
 	for _, want := range []string{
 		"Runtime",
 		"Image: chr-agent-runtime:local",
-		"Dockerfile: .chr/user/runtime/agent/Dockerfile",
-		"Artifact Dir: .chr/user/runtime/runs",
+		"Dockerfile: .chr/default/runtime/agent/Dockerfile",
+		"Artifact Dir: .chr/default/runtime/runs",
 		"Validation: make verify",
 		"workspace",
 		"dockerfile",
@@ -3627,7 +3627,7 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 		t.Fatalf("LatestLoop.ID = %q, want loop-new", view.LatestLoop.ID)
 	}
 
-	if view.RuntimeDockerfile != ".chr/user/runtime/agent/Dockerfile" {
+	if view.RuntimeDockerfile != ".chr/default/runtime/agent/Dockerfile" {
 		t.Fatalf("RuntimeDockerfile = %q, want relative runtime path", view.RuntimeDockerfile)
 	}
 
@@ -3652,12 +3652,12 @@ func testObservabilityRuntimeResult(projectDir string) core.RuntimeValidationRes
 	return core.RuntimeValidationResult{
 		Plan: core.RuntimePlan{
 			Image:             "image",
-			DockerfilePath:    filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"),
-			ArtifactDir:       filepath.Join(projectDir, ".chr", "user", "runtime", "runs"),
+			DockerfilePath:    filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
+			ArtifactDir:       filepath.Join(projectDir, ".chr", "default", "runtime", "runs"),
 			ValidationCommand: "make verify",
 		},
 		Checks: []core.RuntimeValidationCheck{
-			{Name: "dockerfile", Path: filepath.Join(projectDir, ".chr", "user", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
+			{Name: "dockerfile", Path: filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
 		},
 	}
 }
@@ -3715,8 +3715,8 @@ func TestModelRendersScopedDumps(t *testing.T) {
 				UseCaseTitle: "Project-wide",
 				Status:       "raw",
 				Scope:        DumpScope{},
-				RelativePath: ".chr/user/dumps/project-context.md",
-				SourcePath:   ".chr/user/dumps/project-context-raw.md",
+				RelativePath: ".chr/default/dumps/project-context.md",
+				SourcePath:   ".chr/default/dumps/project-context-raw.md",
 				UpdatedAt:    updated,
 				Preview:      "Project-wide notes.",
 			},
@@ -3725,7 +3725,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 				UseCaseTitle: "Blog Publishing",
 				Status:       "curated",
 				Scope:        DumpScope{CaseSlug: "blog"},
-				RelativePath: ".chr/user/dumps/blog-context.md",
+				RelativePath: ".chr/default/dumps/blog-context.md",
 				UpdatedAt:    updated,
 				Preview:      "Use-case notes.",
 			},
@@ -3738,7 +3738,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 		"Dumps",
 		"Project-wide",
 		"Blog Publishing",
-		"Raw: .chr/user/dumps/project-context-raw.md",
+		"Raw: .chr/default/dumps/project-context-raw.md",
 		"Project-wide notes.",
 		"enter edit  alt+e external  c create  r refresh",
 	} {
@@ -3750,7 +3750,7 @@ func TestModelRendersScopedDumps(t *testing.T) {
 	for _, unwanted := range []string{
 		"Use Case     Status      Title",
 		"Selected Dump",
-		"Path: .chr/user/dumps/project-context.md",
+		"Path: .chr/default/dumps/project-context.md",
 		"Updated:",
 		"Status:",
 	} {
@@ -3788,7 +3788,7 @@ func TestModelRendersDumpContentWithMarkdownLineBreaks(t *testing.T) {
 		Dumps: []DumpView{
 			{
 				Title:        "Project Context",
-				RelativePath: ".chr/user/dumps/project-context.md",
+				RelativePath: ".chr/default/dumps/project-context.md",
 				Preview:      "---\ntitle: \"Project Context\"\n---\n\n# Project Context\n\nNotes.",
 			},
 		},
@@ -3809,11 +3809,11 @@ func TestModelRendersDumpContentWithMarkdownLineBreaks(t *testing.T) {
 func TestModelSelectsDumpsIndependentlyFromDocuments(t *testing.T) {
 	model := NewModel(Options{
 		Dumps: []DumpView{
-			{Title: "Project Context", RelativePath: ".chr/user/dumps/project-context.md"},
-			{Title: "Blog Context", Scope: DumpScope{CaseSlug: "blog"}, RelativePath: ".chr/user/dumps/blog-context.md"},
+			{Title: "Project Context", RelativePath: ".chr/default/dumps/project-context.md"},
+			{Title: "Blog Context", Scope: DumpScope{CaseSlug: "blog"}, RelativePath: ".chr/default/dumps/blog-context.md"},
 		},
 		Documents: []DocumentView{
-			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/user/specs/spec.md"},
+			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/default/specs/spec.md"},
 		},
 	})
 	model.selected = 2
@@ -3848,9 +3848,9 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 				Status:         "not_started",
 				Mode:           "deep",
 				Scope:          QuizScope{},
-				RawPath:        ".chr/user/quizzes/project-quiz-raw.md",
-				CuratedPath:    ".chr/user/quizzes/project-quiz.md",
-				RuntimePath:    ".chr/user/tmp/quiz-runtime/project.json",
+				RawPath:        ".chr/default/quizzes/project-quiz-raw.md",
+				CuratedPath:    ".chr/default/quizzes/project-quiz.md",
+				RuntimePath:    ".chr/default/tmp/quiz-runtime/project.json",
 				QuestionBudget: 50,
 			},
 			{
@@ -3858,9 +3858,9 @@ func TestModelRendersScopedQuizzes(t *testing.T) {
 				Status:                "active",
 				Mode:                  "fast",
 				Scope:                 QuizScope{CaseSlug: "blog"},
-				RawPath:               ".chr/user/quizzes/blog-quiz-raw.md",
-				CuratedPath:           ".chr/user/quizzes/blog-quiz.md",
-				RuntimePath:           ".chr/user/tmp/quiz-runtime/blog.json",
+				RawPath:               ".chr/default/quizzes/blog-quiz-raw.md",
+				CuratedPath:           ".chr/default/quizzes/blog-quiz.md",
+				RuntimePath:           ".chr/default/tmp/quiz-runtime/blog.json",
 				QuestionBudget:        50,
 				QuestionsAsked:        2,
 				AnswersRecorded:       1,
@@ -3898,9 +3898,9 @@ func TestModelHidesTechnicalQuizDetails(t *testing.T) {
 				Status:                "active",
 				Mode:                  "fast",
 				Scope:                 QuizScope{CaseSlug: "blog"},
-				RawPath:               ".chr/user/quizzes/blog-quiz-raw.md",
-				CuratedPath:           ".chr/user/quizzes/blog-quiz.md",
-				RuntimePath:           ".chr/user/tmp/quiz-runtime/blog.json",
+				RawPath:               ".chr/default/quizzes/blog-quiz-raw.md",
+				CuratedPath:           ".chr/default/quizzes/blog-quiz.md",
+				RuntimePath:           ".chr/default/tmp/quiz-runtime/blog.json",
 				QuestionBudget:        50,
 				QuestionsAsked:        2,
 				CandidateCount:        2,
@@ -3967,7 +3967,7 @@ func TestModelSelectsQuizzesIndependentlyFromDocuments(t *testing.T) {
 			{Title: "Blog", Scope: QuizScope{CaseSlug: "blog"}},
 		},
 		Documents: []DocumentView{
-			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/user/specs/spec.md"},
+			{Index: 0, Family: "spec", Title: "Spec", RelativePath: ".chr/default/specs/spec.md"},
 		},
 	})
 	model.selected = 3
@@ -4112,7 +4112,7 @@ func TestModelGeneratesSpecFromSpecsKey(t *testing.T) {
 		result: SpecActionResult{
 			Message: "Spec generated.",
 			Documents: []DocumentView{
-				{Family: "spec", Status: "draft", Title: "Generated Spec", RelativePath: ".chr/user/specs/drafts/blog-quiz-spec.md"},
+				{Family: "spec", Status: "draft", Title: "Generated Spec", RelativePath: ".chr/default/specs/drafts/blog-quiz-spec.md"},
 			},
 		},
 	}
@@ -4166,7 +4166,7 @@ func TestModelGeneratesAcceptanceFeatureFromSpecsKey(t *testing.T) {
 		result: SpecActionResult{
 			Message:                 "Acceptance feature needs more information.",
 			AcceptanceFeatureStatus: "needs_more_info",
-			AcceptanceFeatureRound:  ".chr/user/acceptance/blog-feature-round.md",
+			AcceptanceFeatureRound:  ".chr/default/acceptance/blog-feature-round.md",
 			AcceptanceFeatureReason: "Missing observable failure path.",
 		},
 	}
@@ -4199,7 +4199,7 @@ func TestModelGeneratesAcceptanceFeatureFromSpecsKey(t *testing.T) {
 	for _, want := range []string{
 		"Acceptance feature needs more information.",
 		"status: needs_more_info",
-		"feature round: .chr/user/acceptance/blog-feature-round.md",
+		"feature round: .chr/default/acceptance/blog-feature-round.md",
 		"reason: Missing observable failure path.",
 	} {
 		if !strings.Contains(confirmed.statusMessage, want) {
@@ -4256,7 +4256,7 @@ func TestModelGeneratesPlanFromPlansKey(t *testing.T) {
 		result: PlanActionResult{
 			Message: "Plan generated.",
 			Documents: []DocumentView{
-				{Family: "plan", Status: "planned", Title: "Generated Plan", RelativePath: ".chr/user/plans/blog-plan.md"},
+				{Family: "plan", Status: "planned", Title: "Generated Plan", RelativePath: ".chr/default/plans/blog-plan.md"},
 			},
 			Plans: []PlanView{
 				{UseCaseTitle: "Project", Title: "Project", Scope: QuizScope{}, Status: "missing"},
@@ -4332,7 +4332,7 @@ func TestModelReportsPlanGenerationFailureShowsLastSavedPlan(t *testing.T) {
 				Title:        "Blog Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chr/user/plans/blog-plan.md",
+				RelativePath: ".chr/default/plans/blog-plan.md",
 				Content:      "# Blog Plan",
 			},
 		},
@@ -4362,7 +4362,7 @@ func TestModelRefusesGeneratePlanWhenPlanExists(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chr/user/plans/blog-plan.md",
+				RelativePath: ".chr/default/plans/blog-plan.md",
 				Content:      "# Generated Plan\n\nExisting.",
 			},
 		},
@@ -4399,7 +4399,7 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 					Title:        "Regenerated Plan",
 					Scope:        QuizScope{CaseSlug: "blog"},
 					Status:       "planned",
-					RelativePath: ".chr/user/plans/blog-plan.md",
+					RelativePath: ".chr/default/plans/blog-plan.md",
 				},
 			},
 			Scope: QuizScope{CaseSlug: "blog"},
@@ -4412,7 +4412,7 @@ func TestModelRegeneratesPlanWithConfirmation(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chr/user/plans/blog-plan.md",
+				RelativePath: ".chr/default/plans/blog-plan.md",
 				Content:      "# Generated Plan\n\nExisting.",
 			},
 		},
@@ -4511,7 +4511,7 @@ func TestModelShowsPlanTrackingOnlyWhenPlanExists(t *testing.T) {
 			Title:        "Generated Plan",
 			Scope:        QuizScope{CaseSlug: "blog"},
 			Status:       "planned",
-			RelativePath: ".chr/user/plans/blog-plan.md",
+			RelativePath: ".chr/default/plans/blog-plan.md",
 			Content:      "# Generated Plan\n",
 		},
 	})
@@ -4530,7 +4530,7 @@ func TestModelPlansPlanTrackingWithAltT(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chr/user/plans/blog-plan.md",
+				RelativePath: ".chr/default/plans/blog-plan.md",
 				Content:      "# Generated Plan\n",
 			},
 		},
@@ -4583,7 +4583,7 @@ func TestModelBlocksPlanTrackingWhileBusy(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chr/user/plans/blog-plan.md",
+				RelativePath: ".chr/default/plans/blog-plan.md",
 				Content:      "# Generated Plan\n",
 			},
 		},
@@ -4614,7 +4614,7 @@ func TestModelBlocksRegenerateWhileBusy(t *testing.T) {
 				Title:        "Generated Plan",
 				Scope:        QuizScope{CaseSlug: "blog"},
 				Status:       "planned",
-				RelativePath: ".chr/user/plans/blog-plan.md",
+				RelativePath: ".chr/default/plans/blog-plan.md",
 				Content:      "# Generated Plan\n",
 			},
 		},
@@ -4681,7 +4681,7 @@ func TestPlanTrackingCommandOnlyAppearsWhenPlanExists(t *testing.T) {
 		{
 			Title:        "Generated Plan",
 			Status:       "planned",
-			RelativePath: ".chr/user/plans/project-plan.md",
+			RelativePath: ".chr/default/plans/project-plan.md",
 			Content:      "# Generated Plan\n",
 		},
 	})

@@ -187,7 +187,7 @@ When readiness is `generate`, spec generation should emit:
 Suggested path:
 
 ```text
-.chr/user/acceptance/<topic>.feature
+.chr/default/acceptance/<topic>.feature
 ```
 
 The feature should include traceability tags:
@@ -259,7 +259,7 @@ Implementation validation should include:
 
 ## Open Questions
 
-- Should `.chr/user/acceptance/` be the canonical artifact directory?
+- Should `.chr/default/acceptance/` be the canonical artifact directory?
 - Should readiness output be stored as a JSON artifact, embedded in generation
   metadata, or both?
 - Should failed feature generation block spec generation or produce a warning?

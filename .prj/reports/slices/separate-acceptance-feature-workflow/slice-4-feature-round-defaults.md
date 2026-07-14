@@ -17,7 +17,7 @@ general quiz toward Gherkin concepts.
 
 Acceptance feature generation can now return default-oriented clarification
 prompts when it needs more information. The service writes those prompts to an
-editable feature-round note under `.chr/user/acceptance/<case>-feature-round.md`.
+editable feature-round note under `.chr/default/acceptance/<case>-feature-round.md`.
 Future feature generation requests include that note as acceptance context.
 
 ## Implementation Notes
@@ -33,7 +33,7 @@ dump, quiz, and spec material already exist.
 ## Contracts Added or Changed
 
 - Added `clarification_prompts` to the acceptance feature model payload.
-- Added `.chr/user/acceptance/<case>-feature-round.md` as the feature-round
+- Added `.chr/default/acceptance/<case>-feature-round.md` as the feature-round
   note path.
 - Added service behavior that writes feature-round notes on `needs_more_info`.
 - Added service behavior that includes existing feature-round notes in later
