@@ -105,6 +105,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   configured work policy.
 - Fixed multiple TUI and acceptance workflow lint issues while keeping local
   strict lint rules intact.
+- Fixed pre-release lint gate blockers in ops artifact allocation, runtime
+  planning, report listing, proving logs, and ticket result application paths.
 
 ## v0.1.0 - 2026-05-23
 

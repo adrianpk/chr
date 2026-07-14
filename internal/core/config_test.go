@@ -580,68 +580,57 @@ func TestValidateWorkConfigRejectsInvalidBranchPolicyConfig(t *testing.T) {
 	}
 }
 
-func TestValidateWorkConfigRejectsInvalidWorkspaceConfig(t *testing.T) {
+func TestValidateWorkConfigRejectsInvalidWorkspaceMode(t *testing.T) {
+	config := WorkConfig{
+		BranchPolicy: DefaultWorkBranchPolicy(),
+		Workspace:    WorkWorkspaceConfig{Mode: "unknown"},
+	}
+
+	assertValidateWorkConfigError(t, config, "invalid work workspace_mode: unknown")
+}
+
+func TestValidateWorkConfigRejectsInvalidWorktreeConfig(t *testing.T) {
 	tests := []struct {
 		name    string
-		config  WorkConfig
+		config  WorkWorkspaceConfig
 		wantErr string
 	}{
 		{
-			name: "workspace mode",
-			config: WorkConfig{
-				BranchPolicy: DefaultWorkBranchPolicy(),
-				Workspace:    WorkWorkspaceConfig{Mode: "unknown"},
-			},
-			wantErr: "invalid work workspace_mode: unknown",
-		},
-		{
 			name: "worktree root",
-			config: WorkConfig{
-				BranchPolicy: DefaultWorkBranchPolicy(),
-				Workspace: WorkWorkspaceConfig{
-					Mode:            WorkWorkspaceModeWorktree,
-					WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-					WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
-				},
+			config: WorkWorkspaceConfig{
+				Mode:            WorkWorkspaceModeWorktree,
+				WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+				WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 			},
 			wantErr: "work worktree_root is required",
 		},
 		{
 			name: "legacy worktree root",
-			config: WorkConfig{
-				BranchPolicy: DefaultWorkBranchPolicy(),
-				Workspace: WorkWorkspaceConfig{
-					Mode:            WorkWorkspaceModeWorktree,
-					WorktreeRoot:    ".chr/default/runtime/worktrees",
-					WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-					WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
-				},
+			config: WorkWorkspaceConfig{
+				Mode:            WorkWorkspaceModeWorktree,
+				WorktreeRoot:    ".chr/default/runtime/worktrees",
+				WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+				WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 			},
 			wantErr: "work worktree_root must be " + DefaultWorktreeRoot,
 		},
 		{
 			name: "worktree base",
-			config: WorkConfig{
-				BranchPolicy: DefaultWorkBranchPolicy(),
-				Workspace: WorkWorkspaceConfig{
-					Mode:            WorkWorkspaceModeWorktree,
-					WorktreeRoot:    DefaultWorktreeRoot,
-					WorktreeBase:    "unknown",
-					WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
-				},
+			config: WorkWorkspaceConfig{
+				Mode:            WorkWorkspaceModeWorktree,
+				WorktreeRoot:    DefaultWorktreeRoot,
+				WorktreeBase:    "unknown",
+				WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
 			},
 			wantErr: "invalid work worktree_base: unknown",
 		},
 		{
 			name: "worktree cleanup",
-			config: WorkConfig{
-				BranchPolicy: DefaultWorkBranchPolicy(),
-				Workspace: WorkWorkspaceConfig{
-					Mode:            WorkWorkspaceModeWorktree,
-					WorktreeRoot:    DefaultWorktreeRoot,
-					WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-					WorktreeCleanup: "unknown",
-				},
+			config: WorkWorkspaceConfig{
+				Mode:            WorkWorkspaceModeWorktree,
+				WorktreeRoot:    DefaultWorktreeRoot,
+				WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
+				WorktreeCleanup: "unknown",
 			},
 			wantErr: "invalid work worktree_cleanup: unknown",
 		},
@@ -649,7 +638,9 @@ func TestValidateWorkConfigRejectsInvalidWorkspaceConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			assertValidateWorkConfigError(t, test.config, test.wantErr)
+			config := WorkConfig{BranchPolicy: DefaultWorkBranchPolicy(), Workspace: test.config}
+
+			assertValidateWorkConfigError(t, config, test.wantErr)
 		})
 	}
 }

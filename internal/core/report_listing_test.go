@@ -139,6 +139,7 @@ func TestReportListerUsesActiveOpsNamespace(t *testing.T) {
 	if len(reports) != 1 {
 		t.Fatalf("reports len = %d, want 1: %#v", len(reports), reports)
 	}
+
 	if reports[0].ExecutionID != "adrian-exec" {
 		t.Fatalf("ExecutionID = %q, want adrian-exec", reports[0].ExecutionID)
 	}

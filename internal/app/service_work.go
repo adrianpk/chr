@@ -315,10 +315,12 @@ func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (
 	}
 
 	record := newRunningLoopRunRecord(s.projectContext.ProjectID, selection.EligibleCount)
+
 	record, err = allocateLoopRunArtifact(s.projectContext.ProjectDir, record)
 	if err != nil {
 		return ticketLoopExecutionResult{}, nil, 0, err
 	}
+
 	if err := repository.CreateLoopRun(s.ctx, record); err != nil {
 		return ticketLoopExecutionResult{}, nil, 0, err
 	}

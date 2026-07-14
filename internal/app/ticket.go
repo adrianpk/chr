@@ -941,6 +941,7 @@ func runTicketLoopExecution(
 	}()
 
 	record := newRunningLoopRunRecord(projectContext.ProjectID, eligibleCount)
+
 	record, err = allocateLoopRunArtifact(projectContext.ProjectDir, record)
 	if err != nil {
 		return ticketLoopExecutionResult{}, err
@@ -1002,6 +1003,7 @@ func failTicketLoopExecution(
 
 	result.Record = record
 	emitLoopFailedAgentEvents(ctx, eventSink, record, cause)
+
 	if record.ArtifactID != "" {
 		if err := core.RefreshOpsArtifactMetadata(record.ArtifactDir, string(record.Status), time.Now().UTC()); err != nil {
 			return ticketLoopExecutionResult{}, err
@@ -1035,6 +1037,7 @@ func finishTicketLoopExecution(
 
 	result.Record = record
 	emitLoopFinishedAgentEvent(ctx, eventSink, record)
+
 	if record.ArtifactID != "" {
 		if err := core.RefreshOpsArtifactMetadata(record.ArtifactDir, string(record.Status), time.Now().UTC()); err != nil {
 			return ticketLoopExecutionResult{}, err
@@ -1101,6 +1104,7 @@ func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core
 	if err != nil {
 		return core.LoopRunRecord{}, err
 	}
+
 	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
@@ -1111,8 +1115,10 @@ func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core
 	if err != nil {
 		return core.LoopRunRecord{}, err
 	}
+
 	record.ArtifactID = artifact.ID
 	record.ArtifactDir = artifact.Dir
+
 	return record, nil
 }
 
@@ -1327,42 +1333,7 @@ func ticketResultApplicationPath(record core.ExecutionRecord) string {
 func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, events ticketExecutionEvents, assetsFS fs.FS) error {
 	appliedAt := time.Now().UTC()
 
-	err := core.NewTicketResultStateWriter().WriteResultState(ctx, core.WriteResultStateOptions{
-		Application: plan.Application,
-		UpdatedAt:   appliedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = core.NewTicketResultCommentWriter().WriteResultComment(ctx, core.WriteResultCommentOptions{
-		Application: plan.Application,
-		CreatedAt:   appliedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = core.NewTicketResultValidationWriter().WriteResultValidation(ctx, core.WriteResultValidationOptions{
-		Application: plan.Application,
-		CreatedAt:   appliedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = core.NewTicketResultChangedFilesWriter().WriteChangedFiles(ctx, core.WriteChangedFilesOptions{
-		Application: plan.Application,
-		CreatedAt:   appliedAt,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = core.NewTicketResultBlockedReasonWriter().WriteBlockedReason(ctx, core.WriteBlockedReasonOptions{
-		Application: plan.Application,
-		CreatedAt:   appliedAt,
-	})
+	err := writeTicketResultState(ctx, plan, appliedAt)
 	if err != nil {
 		return err
 	}
@@ -1383,13 +1354,55 @@ func applyTicketResult(ctx context.Context, env core.UserEnvironment, plan ticke
 	}
 
 	emitTicketApplicationAgentEvents(ctx, events, plan)
-	if plan.Record.Artifacts.ArtifactID != "" {
-		if err := core.RefreshOpsArtifactMetadata(plan.Record.Artifacts.RunDir, string(plan.Record.Status), time.Now().UTC()); err != nil {
-			return err
-		}
+
+	if err := refreshTicketArtifactMetadata(plan.Record); err != nil {
+		return err
 	}
 
 	return emitTicketBlockedNotification(ctx, env, plan, assetsFS)
+}
+
+func writeTicketResultState(ctx context.Context, plan ticketApplyResultPlan, appliedAt time.Time) error {
+	if err := core.NewTicketResultStateWriter().WriteResultState(ctx, core.WriteResultStateOptions{
+		Application: plan.Application,
+		UpdatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := core.NewTicketResultCommentWriter().WriteResultComment(ctx, core.WriteResultCommentOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := core.NewTicketResultValidationWriter().WriteResultValidation(ctx, core.WriteResultValidationOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	if err := core.NewTicketResultChangedFilesWriter().WriteChangedFiles(ctx, core.WriteChangedFilesOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	}); err != nil {
+		return err
+	}
+
+	return core.NewTicketResultBlockedReasonWriter().WriteBlockedReason(ctx, core.WriteBlockedReasonOptions{
+		Application: plan.Application,
+		CreatedAt:   appliedAt,
+	})
+}
+
+func refreshTicketArtifactMetadata(record core.ExecutionRecord) error {
+	if record.Artifacts.ArtifactID == "" {
+		return nil
+	}
+
+	return core.RefreshOpsArtifactMetadata(record.Artifacts.RunDir, string(record.Status), time.Now().UTC())
 }
 
 func refreshAppliedTicketIndex(
@@ -1608,10 +1621,12 @@ func buildTicketStartPreflightForTicketWithOptions(ctx context.Context, env core
 	if workspace.TicketPath != "" {
 		record.TicketPath = workspace.TicketPath
 	}
+
 	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: projectContext.ProjectDir})
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
+
 	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
@@ -1622,6 +1637,7 @@ func buildTicketStartPreflightForTicketWithOptions(ctx context.Context, env core
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
+
 	record.Artifacts.ArtifactID = artifact.ID
 
 	result, err := core.ValidateRuntime(core.RuntimeValidationOptions{
@@ -1890,16 +1906,24 @@ func runTicketStartExecution(
 		Invocation: invocation,
 		LoopID:     events.LoopID,
 	})
-	if executed.Artifacts.ArtifactID != "" {
-		if err := core.RefreshOpsArtifactMetadata(executed.Artifacts.RunDir, string(executed.Status), time.Now().UTC()); err != nil {
-			if runErr != nil {
-				return executed, fmt.Errorf("%w; refresh shared artifact metadata: %v", runErr, err)
-			}
-			return executed, err
-		}
+	if err := refreshExecutedTicketArtifactMetadata(executed, runErr); err != nil {
+		return executed, err
 	}
 
 	return executed, runErr
+}
+
+func refreshExecutedTicketArtifactMetadata(executed core.ExecutionRecord, runErr error) error {
+	err := refreshTicketArtifactMetadata(executed)
+	if err == nil {
+		return nil
+	}
+
+	if runErr != nil {
+		return fmt.Errorf("%w; refresh shared artifact metadata: %w", runErr, err)
+	}
+
+	return err
 }
 
 func executionID(projectID, ticketKey string, createdAt time.Time) string {
