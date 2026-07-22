@@ -1,3 +1,4 @@
+//nolint:wsl_v5 // Web adapter tests keep setup and assertions close to the rendered behavior.
 package app
 
 import (
@@ -373,6 +374,7 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 	}
 }
 
+//nolint:cyclop // The test validates the complete artifact catalog through one web adapter flow.
 func TestWebServeArtifactCatalogUsesProjectArtifacts(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()

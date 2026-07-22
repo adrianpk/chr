@@ -1,3 +1,4 @@
+//nolint:wsl_v5 // Artifact normalization keeps closely related transformation steps together.
 package app
 
 import (

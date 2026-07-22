@@ -1,3 +1,4 @@
+//nolint:wsl_v5 // UI tests keep request setup and response assertions adjacent.
 package webui
 
 import (
@@ -429,6 +430,7 @@ func TestHandlerDumpsCreateUsesModalTemplates(t *testing.T) {
 	}
 }
 
+//nolint:cyclop // The test verifies the complete page and modal editing behavior together.
 func TestHandlerCaseEditUsesSharedPanel(t *testing.T) {
 	handler, err := NewHandler(HandlerOptions{
 		Data:     testShellData(),

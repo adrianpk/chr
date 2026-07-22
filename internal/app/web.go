@@ -1,3 +1,4 @@
+//nolint:wsl_v5 // Web runtime assembly keeps adjacent guarded setup steps together.
 package app
 
 import (

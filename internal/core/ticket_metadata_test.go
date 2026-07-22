@@ -1,3 +1,4 @@
+//nolint:wsl_v5 // The metadata round-trip test keeps setup and assertions adjacent.
 package core
 
 import (

@@ -1,4 +1,6 @@
 // Package webui owns the local Web UI handler and embedded assets.
+//
+//nolint:wsl_v5 // Handler methods keep request decoding and guarded rendering steps together.
 package webui
 
 import (
