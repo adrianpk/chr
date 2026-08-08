@@ -1,11 +1,19 @@
 # Version Control Workflow
 
-1. Create a branch from `dev`.
-2. For slice execution, use `fix/slice-<n>-<slug>`.
-3. Never work on `main` directly.
-4. Before opening a PR from `dev` to `main`, run the configured release-alignment gate.
-5. Merge into `main` only via release-alignment PR from `dev`, using rebase + fast-forward. This is mandatory for every `dev -> main` alignment, including docs-only changes.
-6. Docs-only gate exception: when the `dev -> main` diff contains only Markdown repository documentation, skip runtime tests and run whitespace/diff validation instead.
-7. If release metadata, badges, or generated status files become stale during the gate, commit refreshed outputs before PR.
-8. Avoid force push unless explicitly approved.
-9. Exception: `ops/plans/*` and `ops/trackers/*` updates may be committed directly to `dev` when they only formalize planning/tracking state.
+1. Verify the branch, working tree, canonical remote, and active operational
+   artifacts.
+2. Use `dev` for approved ad hoc maintenance, unsliced implementation, and
+   planning-only commits.
+3. Create a branch and pull request only when the user requests that delivery
+   mode or an approved plan and tracker record it.
+4. For formal slices, create the exact recorded branch from current `dev`.
+5. Never work directly on `main`.
+6. Push active branches to `origin`. Do not push feature or `dev` branches to a
+   publication mirror.
+7. Before `dev -> main`, run the release-alignment gate.
+8. Align `dev -> main` only through an explicitly requested pull request.
+9. After `main` changes, publish it to `mirror` only when that remote exists and
+   local policy requires it.
+10. Avoid force pushes and history rewrites unless explicitly approved.
+11. For docs-only changes, validate paths, links, and `git diff --check` instead
+    of unrelated runtime tests.

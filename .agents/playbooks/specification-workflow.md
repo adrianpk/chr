@@ -1,111 +1,81 @@
 # Specification Workflow
 
-Use this playbook when a topic is in active design/brainstorming, ready for stable specification, or needs model/SQL alignment before implementation.
+Use this playbook when a topic is in active design, ready for stable
+specification, or needs model and persistence alignment before implementation.
 
 ## Intent
 
 - Preserve design context across sessions.
-- Keep brainstorming material in curated, editable form.
-- Avoid losing decisions, tensions, and open questions.
+- Keep brainstorming material curated and editable.
+- Preserve decisions, tensions, assumptions, and open questions.
 
-## Artifact Pairing
+## Artifact Inputs
 
-For each draft in `ops/specs/drafts/`, maintain a paired quiz file in `ops/conv/quiz/`.
+A specification draft can exist without a dump or quiz when the available
+context is sufficient. A real quiz or dump can be used as input and linked from
+the specification. Do not create synthetic artifacts to satisfy ceremony.
 
-- Draft: `ops/specs/drafts/...-draft.md`
-- Quiz notes: `ops/conv/quiz/...-quiz.md`
+Typical paths are:
 
-Both files are living artifacts until promoted.
+- Draft: `ops/<namespace>/spec/drafts/<slug>-draft.md`
+- Stable specification: `ops/<namespace>/spec/stable/<slug>.md`
+- Quiz input: `ops/<namespace>/quiz/<slug>-quiz.md`
+- Dump input: `ops/<namespace>/dump/<slug>-dump.md`
 
-Stable specifications may also be created directly under `ops/specs/specs/` when the behavior is already clear enough and no draft cycle is useful.
+A stable specification can be created directly when no draft cycle is useful.
 
-When a specification introduces business models, persistence, or durable data contracts, create a sibling model file with the same basename and `-model.md` suffix.
+## Model Companions
 
-Examples:
+When a specification introduces business models, persistence, or durable data
+contracts, create a sibling file with the same basename and a `-model.md`
+suffix.
 
-- Spec: `ops/specs/specs/auth-service.md`
-- Model: `ops/specs/specs/auth-service-model.md`
-- Draft spec: `ops/specs/drafts/auth-service-draft.md`
-- Draft model: `ops/specs/drafts/auth-service-model.md`
+Use a model companion for:
+
+- business entities and value objects;
+- lifecycle or status fields;
+- roles and permissions;
+- tables, documents, indexes, and uniqueness rules;
+- queries, migrations, and event mappings;
+- durable API or message payloads that mirror stored data.
+
+Keep behavioral or workflow-only specifications model-free when no durable
+model changes.
 
 ## Rules
 
-1. Keep both files in English.
-2. `...-draft.md` captures structured behavior/proposal.
-3. `...-quiz.md` captures curated discussion, not raw transcript.
-4. Include `Open Questions` explicitly in both artifacts.
-5. Mark provisional decisions clearly (for example: `keep`, `unsure`, `discard`).
-6. Remove noise, typos, and irrelevant detours from quiz notes.
-7. Keep the quiz file editable for future expansion.
-8. Do not use title or heading suffixes in parentheses such as `(Draft)`.
-9. Use semantic fields for state metadata (for example `Status`) only when they add operational value.
-10. Add explicit cross-references: each draft must reference its quiz counterpart and vice versa.
-11. Before commit, run a full consistency pass across playbook, templates, and concrete artifacts.
-12. For each iteration, prefer one cohesive commit over corrective micro-commits.
-13. Review newly introduced business models with their database shape in the same spec cycle.
-14. Do not approve a newly introduced business model without its SQL/table/query/migration counterpart when persistence is involved.
-15. Cross-reference spec and model files in both directions.
+1. Keep every artifact in English.
+2. Preserve explicit decisions, assumptions, constraints, and open questions.
+3. Mark provisional decisions clearly.
+4. Create quiz and dump artifacts only when those workflows occurred.
+5. Do not infer that ordinary discussion was a quiz session.
+6. Add cross-references only between artifacts that exist and have a direct
+   relationship.
+7. Do not use title or heading suffixes in parentheses such as `(Draft)`.
+8. Use semantic status metadata when it adds operational value.
+9. Review business models together with their persistence shape, indexes,
+   queries, migrations, rules, and external-event mappings.
+10. Keep model fields and stored fields in an order that supports direct review
+    when practical.
+11. Run a full consistency pass before promotion or commit.
+12. Prefer one cohesive specification update over corrective micro-commits.
 
-## Model Files
+## Promotion
 
-Use a `-model.md` file when the spec introduces:
+- Iterate under `ops/<namespace>/spec/drafts/` while important questions remain.
+- Promote to `ops/<namespace>/spec/stable/` when behavior and boundaries are
+  sufficiently decided.
+- Promote the model companion with the specification when it is part of the
+  stable contract.
+- Create a plan and tracker only after implementation scope is approved.
 
-- business entities
-- value objects
-- status/lifecycle fields
-- role or permission concepts
-- persistence tables
-- SQL queries
-- migrations
-- durable API payloads that mirror stored data
+## Quiz-Driven Direct Specification
 
-Model files should include only the models involved in that spec.
+A completed quiz can provide:
 
-For easy review, keep attribute and column order aligned:
+- raw capture: `ops/<namespace>/quiz/<slug>-quiz-raw.md`;
+- curated notes: `ops/<namespace>/quiz/<slug>-quiz.md`.
 
-- list business model attributes in the same order used by the Go model when known
-- list database columns in the same order used by the SQL table/migration
-- when both are present, keep model attributes and table columns parallel enough to compare quickly
-
-Model files should include, as applicable:
-
-- business model definitions
-- field list and semantics
-- lifecycle/status rules
-- invariants and validation rules
-- SQL table shape
-- indexes and uniqueness rules
-- query/migration notes
-- relationship to existing reference implementations
-
-Keep purely behavioral or workflow-only specs model-free when no durable model is involved.
-
-## Template Locations
-
-- `ops/templates/spec-draft-template.md`
-- `ops/templates/spec-quiz-template.md`
-- `ops/templates/spec-model-template.md`
-
-## Promotion Path
-
-- Iterate with drafts in `ops/specs/drafts/` and quiz notes in `ops/conv/quiz/` until stable.
-- Promote to `ops/specs/specs/*` once behavior and decisions are sufficiently converged.
-- Promote paired `-model.md` files with the spec when the model is part of the stable contract.
-
-## Quiz-Driven Direct Spec Path
-
-When a topic is explored through the quiz playbook, the pre-spec artifacts may be:
-
-- Raw capture: `ops/conv/quiz/...-quiz-raw.md`
-- Curated quiz notes: `ops/conv/quiz/...-quiz.md`
-
-In that path, a separate `ops/specs/drafts/...-draft.md` artifact is optional. A sufficiently complete curated quiz file can replace the draft and serve as the direct source for a formal spec under `ops/specs/specs/`.
-
-Use this path when:
-
-- the quiz was bounded and completed
-- the raw capture preserves the question/answer flow
-- the curated quiz notes preserve decisions, tensions, and open questions
-- the user explicitly agrees that no separate spec draft is needed
-
-Do not create a draft merely to satisfy ceremony when `...-quiz-raw.md` and `...-quiz.md` already provide stronger alignment context.
+When these artifacts preserve decisions and open questions, the curated quiz
+can be the direct source for a stable specification. A separate draft is
+optional. Do not create a draft only to satisfy ceremony.

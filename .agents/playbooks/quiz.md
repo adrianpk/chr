@@ -132,25 +132,25 @@ The quiz session does not produce a transcript.
 
 It produces curated insights extracted from the interaction and structured according to the canonical format defined by the relevant curation playbook.
 
-Quiz artifacts live under `ops/conv/quiz/`.
+Quiz artifacts live under `ops/<namespace>/quiz/`.
 
 Use these filename patterns:
 
-- Curated quiz notes: `ops/conv/quiz/YYYY-MM-DD-<topic>-quiz.md`
-- Raw quiz capture: `ops/conv/quiz/YYYY-MM-DD-<topic>-quiz-raw.md`
+- Curated quiz notes: `ops/<namespace>/quiz/YYYY-MM-DD-<topic>-quiz.md`
+- Raw quiz capture: `ops/<namespace>/quiz/YYYY-MM-DD-<topic>-quiz-raw.md`
 
-When the quiz has enough coverage and a curated `ops/conv/quiz/...-quiz.md` exists, that quiz artifact may be sufficient pre-spec alignment. In that case, a separate spec draft is optional rather than mandatory, and the next artifact may be a formal spec under `ops/specs/specs/`.
+When the quiz has enough coverage and a curated `ops/<namespace>/quiz/...-quiz.md` exists, that quiz artifact may be sufficient pre-spec alignment. In that case, a separate spec draft is optional rather than mandatory, and the next artifact may be a formal spec under `ops/<namespace>/spec/stable/`.
 
 ## Raw Capture During Execution
 
 For long quiz sessions, maintain a sibling raw capture file while the session progresses.
 
-- Use the filename pattern `ops/conv/quiz/YYYY-MM-DD-<topic>-quiz-raw.md`.
+- Use the filename pattern `ops/<namespace>/quiz/YYYY-MM-DD-<topic>-quiz-raw.md`.
 - Update this file incrementally after each answer or small group of related turns.
 - Preserve enough question and answer context to prevent information loss during long sessions.
 - Record user answers in English with polished style and fully corrected spelling and grammar while preserving the user's intent.
 - Treat the raw capture as temporary working memory, not as the final curated artifact.
-- After the quiz ends, curate the raw capture into the canonical `ops/conv/quiz/YYYY-MM-DD-<topic>-quiz.md` quiz notes.
+- After the quiz ends, curate the raw capture into the canonical `ops/<namespace>/quiz/YYYY-MM-DD-<topic>-quiz.md` quiz notes.
 - Do not map the raw file one-to-one into the curated file; retain only distilled, decision-relevant content.
 - Raw capture files may be versioned when they preserve useful alignment context, but they remain working-memory artifacts rather than curated final notes.
 

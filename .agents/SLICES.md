@@ -1,119 +1,93 @@
 # Slice-Based Development Strategy
 
-This document defines delivery strategy for non-trivial work.
-Use the Slice Delivery playbook for the step-by-step execution procedure.
+Use formal slices for non-trivial coordinated work. Slices form a defined,
+maintainer-visible delivery loop. Small independent maintenance can use a
+ticket or direct `dev` delivery.
 
-## 1. Definitions
+This document owns slice definitions, strategy, planning gates, and
+traceability. Use `.agents/playbooks/slice-delivery.md` for the execution
+procedure. Use `.agents/playbooks/layered-slicing.md` when substantial package
+work benefits from review by layer.
 
-- Task: high-level requested work unit
-- Slice: smallest meaningful, testable behavior increment
-- Commit: atomic versioning unit
+## Definitions and Naming
 
-## 1.1 Naming Convention (Mandatory)
+- A delivery set is one approved plan with an ordered local slice map.
+- A slice is the smallest meaningful, testable behavior increment or reviewable
+  implementation layer.
+- Slice labels use `Slice 1`, `Slice 2`, and so on.
+- Every delivery set restarts at `Slice 1`.
+- Task labels use `T1.1`, `T1.2`, `T2.1`, and so on.
+- Completion reporting uses `Slice N of M completed`.
+- Reports use
+  `ops/<namespace>/report/slices/<delivery-slug>/slice-<n>-<slice-slug>.md`.
+- Slice numbers are not repository-global, PR numbers, or continuations of a
+  prior delivery set.
 
-Use one naming scheme consistently across plans, trackers, tickets, PR notes, and reports.
+Do not use alphabetic or Roman-numeral slice and task labels.
 
-- Slice labels: `Slice 1`, `Slice 2`, `Slice 3`, ...
-- Task labels: `T1.1`, `T1.2`, `T2.1`, ...
-- Completion reporting: `Slice N of M completed`
-- Slice implementation reports: `.prj/reports/slices/<slicing-slug>/slice-<n>-<slice-slug>.md`
+## Planning Gate
 
-Slice numbers are scoped to one slicing plan. They are not repository-global,
-they are not PR numbers, and they are not inferred from previously merged PRs.
+Before implementing a formal slice, an approved, committed plan and tracker
+must define:
 
-Each slicing plan must define its own ordered slice table beginning at
-`Slice 1`. A later slicing starts again at `Slice 1`.
-
-For example:
-
-- Slicing A: `Slice 1`, `Slice 2`, ..., `Slice N`
-- Slicing B: `Slice 1`, `Slice 2`, ..., `Slice N`
-
-Do not mix alternative numbering styles for these entities:
-
-- no alphabetic slice/task labels (`Slice A`, `Task B2`)
-- no Roman numerals (`Slice IV`, `Task II.3`)
-- no repository-global continuation (`Slice 9` after another slicing ended at `Slice 8`)
-
-## 2. Decomposition rules
-
-Use a single slice only when scope and integration risk are low.
-Otherwise decompose into multiple behavior-first vertical slices.
-
-Slices are not created conversationally or invented on the fly during implementation.
-A proposed next slice becomes executable only after its plan and tracker exist in the repository and are committed to `dev`.
-
-Before executing a slice, the slicing plan must explicitly identify:
-
-- the slicing name;
-- the full ordered slice list for that slicing;
+- the delivery-set name and purpose;
+- the selected slicing strategy and reason when it is not behavior-first;
+- the full ordered slice list;
 - the active slice number and short name;
-- the expected branch name;
-- the expected PR title;
-- whether any older PRs are prerequisites rather than part of the slicing.
+- the exact branch name and expected PR title;
+- the expected report path;
+- task IDs and validation expectations;
+- prerequisites that are already delivered or externally blocked.
 
-If the plan and tracker do not agree on this mapping, stop and fix the planning
-artifacts before opening or editing a branch or PR.
+If the plan and tracker disagree, correct them before creating a branch or
+changing runtime code.
 
-The normal discovery-to-delivery chain is:
+## Strategy Selection
 
-1. dump and/or quiz when useful
-2. draft and/or spec when useful
-3. plan
-4. tracker
-5. one branch and one PR per slice
-6. one conventional commit per tracker task
-7. one persistent implementation report per slice
-8. user review and merge
-9. return to `dev` before the next slice
+- Prefer behavior-first vertical slices for user-visible or end-to-end
+  increments that can remain independently valid.
+- Prefer layered slices for substantial package work when contracts, tests,
+  mappings, implementation, and integration are easier to review separately.
+- State the selected strategy in the plan. Do not select it implicitly or
+  switch strategies during implementation without updating and approving the
+  plan.
 
-Any early phase may be skipped when the work is already sufficiently specified, but plan and tracker are mandatory before implementation.
-
-## 3. Slice rules
+## Slice Rules
 
 Each slice must:
-- deliver a functional increment
-- be testable in isolation
-- integrate without breaking existing behavior
-- have a versioned plan before code changes begin
-- have a versioned tracker before code changes begin
 
-## 4. Commit strategy
+- deliver a meaningful behavior, contract, or reviewable layer;
+- be testable and independently reviewable;
+- keep the repository in a valid state;
+- stay within its recorded task list;
+- produce one durable implementation report;
+- use one Conventional Commit per tracker task when practical;
+- use one branch and one pull request targeting `dev`.
 
-- Keep commits cohesive and scoped.
-- Do not mix unrelated slice concerns in one commit.
-- Keep commit subjects aligned with slice task intent.
-- Use conventional commits.
-- For approved slice execution, use one commit per tracker task.
+## Execution Sequence
 
-## 5. Integration
+1. Commit the approved plan and tracker to `dev`.
+2. Create the recorded branch from current `dev`.
+3. Implement tasks in order.
+4. Run focused checks, then the broadest relevant available gate.
+5. Update the tracker with tasks, commits, and validation.
+6. Create or update the slice report and set it to `reviewing`.
+7. Open the recorded pull request targeting `dev`.
+8. Complete review and wait for the maintainer-controlled merge.
+9. Return to `dev`, verify the merge, and close tracker and report state.
+10. If the same approved delivery set has a next slice, start it without a new
+    confirmation.
 
-- Integrate slices in safe order through PRs targeting `dev`.
-- Keep repository passing checks after each integrated slice.
+## Integration and Traceability
+
+- Keep a one-to-one mapping between tracker tasks and commits when practical.
+- Open one pull request per slice. Do not open one per task or commit.
+- Keep the repository passing its required checks after each integrated slice.
 - Do not integrate slices directly into `main`.
 - Align `dev -> main` only through the release-alignment playbook.
 
-## 6. Traceable execution
+## Scope Control
 
-For approved multi-slice work:
-1. Commit the slice plan and tracker to `dev`.
-2. Create a dedicated branch from `dev`: `feat/slice-<n>-<slug>` or another approved type prefix, where `<n>` comes from the active slicing plan.
-3. Implement only that slice's tracker tasks.
-4. Keep a one-to-one mapping between task IDs and commits.
-5. Open one PR scoped to that slice.
-6. Never open PRs per task or per commit.
-7. Create or update the slice implementation report before opening the PR.
-8. Update trackers with tasks, commits, report path, and validation outcomes.
-9. Complete user review before merge.
-10. Merge the approved slice PR into `dev`.
-11. Return to `dev`, sync, and validate before the next slice.
-
-## 7. Execution gate
-
-For non-trivial work:
-- approve slice plan first
-- execute only approved slices
-- capture extra ideas as backlog candidates
-- do not implement a slice that exists only as a suggestion in conversation
-- do not assign or rewrite slice numbers from the PR list
-- do not open or rename a PR until the expected PR title is present in the plan or tracker
+- Do not derive slice numbers from PR numbers or another delivery set.
+- Do not add a tuning or integration slice automatically. Record the need and
+  update the approved plan first.

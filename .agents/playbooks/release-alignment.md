@@ -1,36 +1,32 @@
 # Dev-to-Main Release Alignment
 
-Canonical release-alignment PR from `dev` to `main`.
+Use this playbook only after an explicit request to publish `dev` to `main`.
 
-1. Open a PR for every `dev -> main` alignment. The PR is mandatory, including docs-only changes.
-2. Run the configured release-alignment gate.
-3. Docs-only gate exception: if the diff contains only Markdown repository documentation files, skip runtime tests and validate the docs-only diff plus whitespace.
-4. Open PR with title: `chore(release): align dev with main`.
-5. Use this PR body:
+1. Verify the working tree, `dev`, `origin/dev`, `main`, `origin/main`, and open
+   release pull-request state.
+2. Verify that included delivery artifacts are closed.
+3. Run the broad relevant release gate from `.agents/LINTING.md`.
+4. For a Markdown-only diff, validate paths, links, and `git diff --check`
+   instead of unrelated runtime tests.
+5. Open a pull request from `dev` to `main` titled
+   `chore(release): align dev with main`.
+6. Use this body shape:
 
 ```md
 ## Summary
 
 - align `main` with the latest merged state from `dev`
-- include all previously reviewed and merged slice/ticket work
+- include all previously reviewed and merged delivery work
 
 ## Validation
 
-- <release-alignment gate command> (pass)
+- <command and result>
 ```
 
-For docs-only alignment PRs, use this validation section instead:
-
-```md
-## Validation
-
-- docs-only diff verified
-- whitespace/diff validation (pass)
-- release-alignment gate skipped by docs-only exception
-```
-
-6. Stop after the PR is open and the gate result has been reported.
-7. The user owns the final `dev -> main` PR merge unless they explicitly ask
-   the agent to merge it.
-8. When explicitly asked to merge, merge `dev -> main` only through PR, using
-   rebase + fast-forward.
+7. Report the gate result and stop for maintainer review.
+8. The maintainer owns the final merge unless explicit merge authorization is
+   given.
+9. When authorized, merge through the pull request using the repository's
+   approved rebase and fast-forward method. Verify the resulting refs.
+10. When `mirror` exists and local policy requires publication, push updated
+    `main` to it and verify its allowed refs.

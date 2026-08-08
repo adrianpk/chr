@@ -1,165 +1,97 @@
 # Slice Delivery
 
-## Slice Workflow
+Use this playbook only for formal delivery work. Exploration and design
+discussion use the work-modes playbook and do not create delivery artifacts.
 
-1. Evaluate single-slice vs multi-slice execution.
-2. Define behavior-first slice boundaries.
-3. Create and commit the slicing plan and tracker on `dev`.
-4. Create the slice branch from `dev`.
-5. Implement and validate per slice.
-6. Create or update the slice implementation report.
-7. Integrate incrementally while keeping repository healthy.
+## Creation Gate
 
-## Slicing Map Requirement
-
-Before starting any implementation slice, the repository must contain a
-committed slicing plan and tracker that define the complete local slice map for
-that slicing.
+A formal slice is executable only when an approved, committed plan and tracker
+contain the complete delivery-set map.
 
 The map must include:
 
-- slicing name;
-- ordered slice list starting at `Slice 1`;
-- active slice number;
-- active slice short name;
-- expected branch name;
-- expected PR title;
-- expected report path;
-- prerequisite PRs or delivered work that are not part of this slicing.
+- the delivery-set name;
+- the selected slicing strategy;
+- ordered slices beginning at `Slice 1`;
+- the active slice and task IDs;
+- the exact branch and expected pull-request title;
+- the expected report path;
+- validation expectations and external prerequisites.
 
-The slice number in `feat(slice-<n>): ...` must come from this local map. It
-must not be inferred from the PR number, from the previous repository PR title,
-or from a different slicing.
+If the map is missing or the plan and tracker disagree, correct them before
+creating a branch or changing runtime code.
 
-If the local map is missing, ambiguous, or inconsistent with the tracker, stop
-and correct the plan/tracker before creating or editing a branch or PR.
+## Naming and Traceability
 
-## Slice Creation Gate
+- Use `Slice 1`, `Slice 2`, and so on within one delivery set.
+- Restart at `Slice 1` for each delivery set.
+- Use `T1.1`, `T1.2`, `T2.1`, and so on for task IDs.
+- Do not derive slice numbers from pull-request history or another plan.
+- Keep the plan, tracker, branch, expected pull-request title, report path, task
+  IDs, commits, and validation results correlated.
 
-1. A slice suggested in conversation is only a proposal.
-2. A slice becomes executable only when the repository contains a committed plan and tracker for that slice.
-3. Do not write runtime code for a proposed slice before the plan and tracker are committed to `dev`.
-4. If there is no plan/tracker for the next slice, stop at planning and create those artifacts first.
-5. Do not present an unplanned suggestion as if it were already part of the delivery plan.
+## Workflow
 
-## Naming Convention
+1. Verify current `dev`, `origin/dev`, working tree, plan, tracker, and relevant
+   pull-request state.
+2. Create the recorded branch from current `dev`.
+3. Implement only the active slice tasks in order.
+4. Use one Conventional Commit per tracker task when practical.
+5. Run focused checks, then the broadest relevant available gate.
+6. Update tracker tasks, commits, and validation results.
+7. Create the report required by `.agents/playbooks/slice-reporting.md`.
+8. Set the report to `reviewing` and open one pull request targeting `dev`.
+9. Use the exact title recorded in the plan and tracker.
+10. Complete review and wait for the maintainer-controlled merge.
+11. After merge confirmation, return to `dev`, verify the merge, and close the
+    report and tracker.
+12. If the same approved delivery set has a next slice, activate and execute it
+    without requesting another confirmation.
 
-1. Use `Slice 1`, `Slice 2`, `Slice 3`, ... for slice identifiers.
-2. Use `T1.1`, `T1.2`, `T2.1`, ... for task identifiers.
-3. Do not use letter-based or Roman numeral variants for slices/tasks.
-4. Restart slice numbering at `Slice 1` for each slicing plan.
-5. Never continue slice numbering across unrelated slicing plans.
-
-## PR Title
-
-- Required: `feat(slice-<n>): <short slice name>`
-- `<n>` must match the active slice number in the committed slicing plan.
-- `<short slice name>` must match the active slice short name in the plan/tracker.
-- Do not open or rename a PR when the expected PR title is not written in the plan or tracker.
-
-## PR Body
+## Pull Request Body
 
 ```md
 ## Summary
 
-- <functional increment 1>
-- <functional increment 2>
+- <functional outcome>
 
 ## Changes
 
-- <path/to/file>
-  - <change detail>
-- <path/to/other_file>
-  - <change detail>
+- <high-signal path and change>
+- <slice report path>
 
 ## Validation
 
-- <command and result>
+- <command> (pass|fail)
 ```
 
-## Slice Report
+Order validation from focused to broad. Do not describe a focused subset as the
+full suite.
 
-Before opening the PR, create or update the slice implementation report using
-the Slice Reporting playbook.
+## Blockers
 
-The report path must follow:
-
-```text
-.prj/reports/slices/<slicing-slug>/slice-<n>-<slice-slug>.md
-```
-
-Set report status to `reviewing` before opening the PR.
-
-After merge, set report status to `delivered` and record the PR number during
-slice closure on `dev`.
-
-## Ordering Rules
-
-1. `Summary`: primary behavior change first.
-2. `Changes`: runtime/library code, tests, docs, report, ops artifacts.
-3. `Validation`: targeted to broad.
-4. Report validation outcomes as `pass`/`fail`.
-
-## Traceability Contract
-
-- Keep explicit correlation across:
-  - slicing plan artifact
-  - slicing tracker artifact
-  - branch name and PR title
-  - report path
-  - commit list mapped to slice tasks
-
-Before opening or editing a PR, verify and record:
-
-- plan path;
-- tracker path;
-- active slice number;
-- expected PR title;
-- expected report path;
-- actual PR title after creation or edit.
-
-## Blocker Handling
-
-1. Capture failing command and exact error.
-2. Attempt least-invasive compliant alternative.
-3. Report blocker and stop risky changes.
+- Capture the failing command and exact error.
+- Attempt the least-invasive in-scope alternative.
+- Record unresolved blockers in the tracker and report.
+- Stop before risky or out-of-scope changes.
 
 ## Completion Checklist
 
-1. Scope implemented.
-2. Relevant checks run.
-3. Slice implementation report created or updated.
-4. Tracker/plan status updated.
-5. Final status reported with concrete outcomes.
-
-## Post-Slice Tuning
-
-1. After planned slices and automated checks pass, decide whether tuning is needed.
-2. Tuning slices are recommended, not mandatory.
-3. If needed, run one or more short tuning slices (UX polish, manual verification findings, integration adjustments).
-4. Keep the same delivery discipline: one branch + one PR per tuning slice, base `dev`.
-5. Record the decision (`tuning needed: yes/no`) and evidence in the tracker.
+- Scope is implemented.
+- Relevant checks ran or their blockers are recorded.
+- Tracker tasks and commits are current.
+- The slice report is current.
+- Pull-request state and final handoff are explicit.
 
 ## Main Alignment
 
-1. Slice PRs target `dev`, not `main`.
-2. Never work on `main` directly.
-3. Align `dev -> main` only through the release-alignment playbook.
-4. The `main` update is a PR merge using rebase + fast-forward from `dev`.
+- Slice pull requests target `dev`, not `main`.
+- Never work directly on `main`.
+- Align `dev -> main` only through the release-alignment playbook after an
+  explicit request.
 
-## Mandatory Execution Rules
+## Technical Pauses
 
-1. Execute one slice at a time.
-2. Commit plan and tracker before implementation.
-3. Implement tasks in order.
-4. Create one conventional commit per task.
-5. Create or update one implementation report per slice.
-6. Open one PR per slice.
-7. Do not open PRs per task or per commit.
-8. Complete user review.
-9. Merge the approved slice PR into `dev`.
-10. Return to `dev` before continuing.
-11. Report implementation and validation status.
-12. Start next slice only after previous slice is fully closed.
-13. Never derive slice numbers from PR history.
-14. Never mix numbering from two slicing plans in one PR title.
+Technical status reports are allowed during an authorized slice. State the
+completed work, active delivery set, `Slice N of M`, validation, and blockers.
+A status report does not request permission and does not expand scope.

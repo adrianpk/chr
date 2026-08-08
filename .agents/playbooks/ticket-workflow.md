@@ -2,20 +2,20 @@
 
 Use tickets for concrete development work that does not need a full spec, plan, or tracker.
 
-This playbook defines a repository-local Markdown ticket model under `ops/tickets/`.
+This playbook defines a repository-local Markdown ticket model under `ops/<namespace>/ticket/`.
 
 ## Scope
 
-- `ops/tickets/` contains repository-development tickets.
+- `ops/<namespace>/ticket/` contains repository-development tickets.
 - It does not store application runtime tickets unless the project explicitly chooses to share the same representation.
 - Ticket capture must preserve useful work without requiring full classification upfront.
 
 ## Directory Layout
 
-`ops/tickets/` represents ticket columns with status directories:
+`ops/<namespace>/ticket/` represents ticket columns with status directories:
 
 ```text
-ops/tickets/
+ops/<namespace>/ticket/
   TEMPLATE.md
   open/
   ready/
@@ -30,9 +30,9 @@ The directory is the operational column. The `status` frontmatter must match the
 
 ## File Rules
 
-1. Create ticket files under `ops/tickets/open/`.
+1. Create ticket files under `ops/<namespace>/ticket/open/`.
 2. Use sortable filename format: `YYYYMMDDHHMMSS-<slug>.md` with a UTC timestamp.
-3. Use frontmatter fields from `ops/tickets/TEMPLATE.md` when that template exists.
+3. Use frontmatter fields from `ops/<namespace>/ticket/TEMPLATE.md` when that template exists.
 4. Keep code and repository docs in English.
 5. Move ticket files between status directories when status changes.
 6. Keep the filename stable after creation unless correcting a timestamp/id mismatch.
@@ -42,7 +42,10 @@ The directory is the operational column. The `status` frontmatter must match the
 
 A ticket is expected to be one focused delivery unit.
 
-- Default: one ticket -> one branch -> one PR -> `solved` or `closed`.
+- Default: one ticket -> one focused delivery unit -> `solved` or `closed`.
+- Small ticket work may be committed directly to `dev`.
+- Use one branch and one pull request when the user requests review delivery or
+  when the ticket explicitly records that mode.
 - If a ticket cannot be delivered in one focused branch/PR, split it into related tickets or promote it to the formal spec/plan/tracker workflow.
 - Use slicing for long specs, plans, or coordinated series of tickets, not as the default shape for a single ticket.
 - A ticket series may act as a lightweight roadmap, but each ticket should remain independently reviewable.
@@ -85,17 +88,17 @@ Run the repository's ticket validation command before committing ticket workflow
 
 ## Status Transitions
 
-- `ops/tickets/open/ -> ops/tickets/ready/`
-- `ops/tickets/ready/ -> ops/tickets/in_progress/`
-- `ops/tickets/in_progress/ -> ops/tickets/reviewing/`
-- `ops/tickets/reviewing/ -> ops/tickets/solved/`
-- `ops/tickets/reviewing/ -> ops/tickets/closed/`
-- `ops/tickets/open/ -> ops/tickets/closed/`
-- `ops/tickets/ready/ -> ops/tickets/closed/`
-- `any active directory -> ops/tickets/blocked/`
-- `ops/tickets/blocked/ -> ops/tickets/open/`
-- `ops/tickets/blocked/ -> ops/tickets/ready/`
-- `ops/tickets/blocked/ -> ops/tickets/in_progress/`
+- `ops/<namespace>/ticket/open/ -> ops/<namespace>/ticket/ready/`
+- `ops/<namespace>/ticket/ready/ -> ops/<namespace>/ticket/in_progress/`
+- `ops/<namespace>/ticket/in_progress/ -> ops/<namespace>/ticket/reviewing/`
+- `ops/<namespace>/ticket/reviewing/ -> ops/<namespace>/ticket/solved/`
+- `ops/<namespace>/ticket/reviewing/ -> ops/<namespace>/ticket/closed/`
+- `ops/<namespace>/ticket/open/ -> ops/<namespace>/ticket/closed/`
+- `ops/<namespace>/ticket/ready/ -> ops/<namespace>/ticket/closed/`
+- `any active directory -> ops/<namespace>/ticket/blocked/`
+- `ops/<namespace>/ticket/blocked/ -> ops/<namespace>/ticket/open/`
+- `ops/<namespace>/ticket/blocked/ -> ops/<namespace>/ticket/ready/`
+- `ops/<namespace>/ticket/blocked/ -> ops/<namespace>/ticket/in_progress/`
 
 When moving a ticket, update the `status` frontmatter in the same change.
 
@@ -203,7 +206,7 @@ Use `capture` for one quick ticket.
 1. Accept a raw description as sufficient input.
 2. Do not ask classification questions by default.
 3. Ask only when the description is impossible to understand or appears to contain multiple unrelated tickets.
-4. Create the ticket under `ops/tickets/open/`.
+4. Create the ticket under `ops/<namespace>/ticket/open/`.
 5. Default uncertain classification fields to `unclassified`.
 
 Default capture frontmatter:
@@ -227,7 +230,7 @@ Use `capture_round` when the user wants to dump multiple informal items.
 3. Merge obvious duplicates.
 4. Ask questions only when an item is impossible to preserve as a ticket.
 5. Do not spend user energy on classification during capture.
-6. Create all preserved items under `ops/tickets/open/`.
+6. Create all preserved items under `ops/<namespace>/ticket/open/`.
 7. Report created ticket ids and any deferred candidates.
 
 ## Assisted Capture
@@ -270,16 +273,22 @@ Automatic triage criteria:
 
 ## Ticket-Driven Implementation Workflow
 
-1. Capture the ticket in `ops/tickets/open/` with `status: open`.
+1. Capture the ticket in `ops/<namespace>/ticket/open/` with `status: open`.
 2. Refine it to `status: ready` when the expected outcome is clear enough to execute.
-3. Create a branch from `dev` when implementation starts.
-4. Set `status: in_progress`, `started_at`, and `branch`.
+3. Set `status: in_progress` and `started_at` when implementation starts.
+4. Create a branch from `dev` and record it only when review delivery is
+   requested.
 5. Implement the change.
-6. Set `status: reviewing`, `pr`, and `commits` when the PR is ready.
-7. Merge into `dev`.
-8. Set `status: solved`, `resolution: fixed`, and `closed_at` after merge.
-9. Push ticket metadata updates directly to `dev`; do not open dedicated PRs only for post-merge ticket status metadata.
+6. For direct `dev` delivery, record the commits and validation, then set
+   `status: solved`, `resolution: fixed`, and `closed_at` in the delivery commit
+   or a focused closure commit.
+7. For branch-and-PR delivery, set `status: reviewing`, `pr`, and `commits` when
+   the pull request is ready.
+8. After the pull request is merged, set `status: solved`,
+   `resolution: fixed`, and `closed_at` on `dev`.
+9. Push post-merge ticket metadata directly to `dev`. Do not open a dedicated
+   pull request only for closure metadata.
 
 ## Capture Rule
 
-If the user mentions a small or informal task that should not be solved immediately, create an `open` ticket under `ops/tickets/open/` instead of leaving the work buried in chat.
+If the user mentions a small or informal task that should not be solved immediately, create an `open` ticket under `ops/<namespace>/ticket/open/` instead of leaving the work buried in chat.
