@@ -43,6 +43,7 @@ func TestWorkflowRoundTrip(t *testing.T) {
 
 	old := r
 	r.Metadata["custom"] = json.RawMessage(`{"native":true}`)
+	r.Metadata["title"] = json.RawMessage(`"Renamed ticket"`)
 	r.Domain["extra"] = json.RawMessage(`"preserved"`)
 	r.Task.Status = TicketStatusBacklog
 
@@ -109,6 +110,8 @@ func TestWorkflowAdoption(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	workflowTestLegacyRace(t, ctx, path, []byte(content))
+
 	r.Task.AttemptID = "old-attempt"
 	r = workflowTestWrite(t, s, r)
 	r.Task.AttemptID = ""
@@ -142,5 +145,38 @@ func workflowTestLegacyGuard(t *testing.T, ctx context.Context, path string) {
 
 	if err := NewTicketStatusUpdater().UpdateStatus(ctx, UpdateTicketStatusOptions{Path: path, Status: TicketStatusBacklog}); err == nil {
 		t.Fatal("legacy writer bypassed workflow guards")
+	}
+}
+
+func workflowTestLegacyRace(t *testing.T, ctx context.Context, path string, observed []byte) {
+	t.Helper()
+
+	if err := writeLegacyTicketFile(ctx, path, observed, []byte("stale replacement")); err == nil {
+		t.Fatal("pre-adoption reader overwrote an adopted record")
+	}
+}
+
+// TestWorkflowRelocation proves checkout paths do not participate in identity.
+func TestWorkflowRelocation(t *testing.T) {
+	store := workflowTestStore(t)
+	r := workflowTestCreate(t, store, "CHR-1")
+
+	destination := filepath.Join(t.TempDir(), "moved")
+	if err := os.Rename(store.layout.ProjectDir(), destination); err != nil {
+		t.Fatal(err)
+	}
+
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := NewWorkflowStore(layout, "project-1").Read(context.Background(), r.Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got.ID != r.ID || got.Task.Key != r.Task.Key || got.SourceHash != r.SourceHash || !got.CreatedAt.Equal(r.CreatedAt) {
+		t.Fatal("relocation changed durable identity or content")
 	}
 }

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ type ApplyTrustedAutoMergeReviewOptions struct {
 }
 
 // ApplyTrustedAutoMergeReview writes pass metadata for trusted auto-merge.
-func ApplyTrustedAutoMergeReview(opts ApplyTrustedAutoMergeReviewOptions) (TicketReviewCommandResult, error) {
+func ApplyTrustedAutoMergeReview(ctx context.Context, opts ApplyTrustedAutoMergeReviewOptions) (TicketReviewCommandResult, error) {
 	if strings.TrimSpace(opts.Ticket.Path) == "" {
 		return TicketReviewCommandResult{}, fmt.Errorf("trusted auto-merge ticket path is required")
 	}
@@ -41,7 +42,7 @@ func ApplyTrustedAutoMergeReview(opts ApplyTrustedAutoMergeReviewOptions) (Ticke
 		return TicketReviewCommandResult{}, err
 	}
 
-	if err := applyTicketReviewCommandResult(opts.Ticket.Path, result, opts.ReviewedAt); err != nil {
+	if err := applyTicketReviewCommandResult(ctx, opts.Ticket.Path, result, opts.ReviewedAt); err != nil {
 		return TicketReviewCommandResult{}, err
 	}
 

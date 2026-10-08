@@ -90,6 +90,10 @@ func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTick
 		return rollbackWithError(tx, err)
 	}
 
+	if _, err := tx.ExecContext(ctx, "DELETE FROM workflow_snapshots WHERE project_id = ?", ticket.ProjectID); err != nil {
+		return rollbackWithError(tx, err)
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		return fmt.Errorf("commit ticket index transaction: %w", err)
@@ -102,7 +106,7 @@ func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTick
 func (i *sqliteTicketIndex) ListProjectTickets(ctx context.Context, projectID string) ([]IndexedTicket, error) {
 	rows, err := i.db.QueryContext(
 		ctx,
-		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
+		`SELECT project_id, namespace, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
     branch, review_refs, review_state, review_round, review_result, review_comments_url,
     blocking_findings, merge_state, merge_result, merge_actor, merge_commit, merged_at,
@@ -153,7 +157,7 @@ ORDER BY key`,
 func (i *sqliteTicketIndex) GetProjectTicketByKey(ctx context.Context, projectID, key string) (IndexedTicket, error) {
 	row := i.db.QueryRowContext(
 		ctx,
-		`SELECT project_id, path, relative_path, key, title, synopsis, status, board_column,
+		`SELECT project_id, namespace, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
     branch, review_refs, review_state, review_round, review_result, review_comments_url,
     blocking_findings, merge_state, merge_result, merge_actor, merge_commit, merged_at,
@@ -185,6 +189,10 @@ WHERE project_id = ? AND key = ?`,
 
 // DeleteProjectTickets executes the corresponding package operation.
 func (i *sqliteTicketIndex) DeleteProjectTickets(ctx context.Context, projectID string) error {
+	if _, err := i.db.ExecContext(ctx, "DELETE FROM workflow_snapshots WHERE project_id = ?", projectID); err != nil {
+		return err
+	}
+
 	_, err := i.db.ExecContext(ctx, "DELETE FROM indexed_tickets WHERE project_id = ?", projectID)
 	if err != nil {
 		return fmt.Errorf("delete indexed project tickets: %w", err)
@@ -204,13 +212,14 @@ func (i *sqliteTicketIndex) Close() error {
 }
 
 const upsertIndexedTicketSQL = `INSERT INTO indexed_tickets (
-    project_id, path, relative_path, key, title, synopsis, status, board_column,
+    project_id, namespace, path, relative_path, key, title, synopsis, status, board_column,
     priority, severity, type, use_case, project_area, source_kind, source_ref, slice,
     branch, review_refs, review_state, review_round, review_result, review_comments_url,
     blocking_findings, merge_state, merge_result, merge_actor, merge_commit, merged_at,
     merge_blocker, created_at, updated_at, file_mtime, file_size, content_hash, indexed_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(project_id, path) DO UPDATE SET
+    namespace = excluded.namespace,
     relative_path = excluded.relative_path,
     key = excluded.key,
     title = excluded.title,
@@ -257,6 +266,7 @@ func upsertIndexedTicket(ctx context.Context, tx *sql.Tx, ticket IndexedTicket) 
 func indexedTicketUpsertArgs(ticket IndexedTicket) []any {
 	return []any{
 		ticket.ProjectID,
+		indexedTicketNamespace(ticket),
 		ticket.Path,
 		ticket.RelativePath,
 		ticket.Key,
@@ -408,6 +418,7 @@ func (f *indexedTicketScanFields) args() []any {
 
 	return []any{
 		&ticket.ProjectID,
+		&ticket.Namespace,
 		&ticket.Path,
 		&ticket.RelativePath,
 		&ticket.Key,
@@ -553,4 +564,12 @@ func validateIndexedTicket(ticket IndexedTicket) error {
 
 func timePtr(value time.Time) *time.Time {
 	return &value
+}
+
+func indexedTicketNamespace(ticket IndexedTicket) string {
+	if ticket.Namespace == "" {
+		return DefaultOpsNamespace
+	}
+
+	return ticket.Namespace
 }

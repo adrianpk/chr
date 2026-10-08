@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 )
@@ -110,7 +109,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 		return err
 	}
 
-	err = os.WriteFile(opts.Path, []byte(updated), 0o644)
+	err = writeLegacyTicketFile(ctx, opts.Path, content, []byte(updated))
 	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}

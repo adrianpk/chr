@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 )
 
@@ -57,7 +56,7 @@ func (w *ticketEvidenceStrategyChecklistWriter) UpsertEvidenceStrategyChecklist(
 		return err
 	}
 
-	err = os.WriteFile(opts.Path, []byte(updatedContent), 0o644)
+	err = writeLegacyTicketFile(ctx, opts.Path, content, []byte(updatedContent))
 	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}

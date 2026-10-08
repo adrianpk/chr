@@ -161,7 +161,7 @@ func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
 		Branch: "feat/chr-1",
 	})
 
-	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
+	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
 			Key:    "CHR-1",
 			Path:   ticketPath,
@@ -194,7 +194,7 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 		ReviewRefs: []TicketReviewRef{ref},
 	})
 
-	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
+	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
 			Key:        "CHR-1",
 			Path:       ticketPath,
@@ -232,7 +232,7 @@ func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing
 		Branch: "feat/chr-1",
 	})
 
-	_, err := ApplyAgenticReviewResult(ApplyAgenticReviewResultOptions{
+	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
 		Ticket: IndexedTicket{
 			Key:    "CHR-1",
 			Path:   ticketPath,

@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 )
@@ -87,7 +86,7 @@ func RunTicketReviewCommand(ctx context.Context, opts TicketReviewCommandOptions
 
 	plan.RemoteComments = comments
 
-	err = applyTicketReviewCommandResult(opts.Ticket.Path, plan, opts.ReviewedAt)
+	err = applyTicketReviewCommandResult(ctx, opts.Ticket.Path, plan, opts.ReviewedAt)
 	if err != nil {
 		return TicketReviewCommandResult{}, err
 	}
@@ -203,7 +202,7 @@ func writeTicketReviewCommandFindings(
 	return result.Comments, nil
 }
 
-func applyTicketReviewCommandResult(path string, result TicketReviewCommandResult, reviewedAt time.Time) error {
+func applyTicketReviewCommandResult(ctx context.Context, path string, result TicketReviewCommandResult, reviewedAt time.Time) error {
 	content, err := readLegacyTicketFile(path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
@@ -234,7 +233,7 @@ func applyTicketReviewCommandResult(path string, result TicketReviewCommandResul
 		}
 	}
 
-	err = os.WriteFile(path, []byte(updated), 0o644)
+	err = writeLegacyTicketFile(ctx, path, content, []byte(updated))
 	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}

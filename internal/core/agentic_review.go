@@ -339,7 +339,7 @@ func ValidateAgenticReviewResult(result AgenticReviewResult) error {
 }
 
 // ApplyAgenticReviewResult writes local review metadata to the ticket.
-func ApplyAgenticReviewResult(opts ApplyAgenticReviewResultOptions) (TicketReviewCommandResult, error) {
+func ApplyAgenticReviewResult(ctx context.Context, opts ApplyAgenticReviewResultOptions) (TicketReviewCommandResult, error) {
 	if strings.TrimSpace(opts.Ticket.Path) == "" {
 		return TicketReviewCommandResult{}, fmt.Errorf("agentic review ticket path is required")
 	}
@@ -367,7 +367,7 @@ func ApplyAgenticReviewResult(opts ApplyAgenticReviewResultOptions) (TicketRevie
 		}
 	}
 
-	if err := applyTicketReviewCommandResult(opts.Ticket.Path, result, opts.ReviewedAt); err != nil {
+	if err := applyTicketReviewCommandResult(ctx, opts.Ticket.Path, result, opts.ReviewedAt); err != nil {
 		return TicketReviewCommandResult{}, err
 	}
 

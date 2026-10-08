@@ -1,19 +1,17 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 )
 
 // Validate rejects partial or inconsistent workflow records before persistence.
 func (r WorkflowRecord) Validate() error {
-	if r.ID == "" || r.ProjectID == "" || !IsValidOpsNamespace(r.Namespace) || r.Revision == 0 {
-		return fmt.Errorf("workflow identity, scope and positive revision are required")
-	}
-
-	if r.CreatedAt.IsZero() || r.UpdatedAt.Before(r.CreatedAt) {
-		return fmt.Errorf("workflow creation and update times are invalid")
+	if err := r.validateIdentity(); err != nil {
+		return err
 	}
 
 	domains := 0
@@ -28,7 +26,40 @@ func (r WorkflowRecord) Validate() error {
 		return fmt.Errorf("workflow record requires exactly one domain")
 	}
 
+	if err := validateWorkflowRecordBounds(r); err != nil {
+		return err
+	}
+
 	return r.validateDomain()
+}
+
+func (r WorkflowRecord) validateIdentity() error {
+	if r.ID == "" || r.ProjectID == "" || !IsValidOpsNamespace(r.Namespace) || r.Revision == 0 {
+		return fmt.Errorf("workflow identity, scope and positive revision are required")
+	}
+
+	if r.CreatedAt.IsZero() || r.UpdatedAt.Before(r.CreatedAt) {
+		return fmt.Errorf("workflow creation and update times are invalid")
+	}
+
+	return nil
+}
+
+func validateWorkflowRecordBounds(r WorkflowRecord) error {
+	if len(r.Body) > WorkflowFileLimit || r.Revision > math.MaxInt64 {
+		return fmt.Errorf("workflow record size or revision bound exceeded")
+	}
+
+	data, err := json.Marshal(workflowDomainValue(r))
+	if err != nil {
+		return err
+	}
+
+	if len(data) > WorkflowFileLimit {
+		return fmt.Errorf("workflow record exceeds 1 MiB")
+	}
+
+	return nil
 }
 
 func (r WorkflowRecord) validateDomain() error {

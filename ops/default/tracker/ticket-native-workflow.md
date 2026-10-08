@@ -32,20 +32,15 @@ Progress: 0 of 12 slices integrated; 0 of 48 tasks done.
 
 ## Current Checkpoint
 
-The maintainer authorized implementation of the approved delivery set through
-slice-loop on 2026-10-08. The specification/model, approved plan/tracker and all
-48 bootstrap repository task tickets are versioned together. Slice 1 is active;
-its tasks are ready and no implementation is claimed by this bootstrap.
-
-The clean controller checkout starts from canonical `dev` at
-`d36dee206c3e4ad3ab6a6230365fd0812b5923a9`; no open PR was observed before
-bootstrap. Unrelated dirty work and the original unpushed local `dev` commit
-are preserved in their existing checkouts. The controller rechecks live state
-before creating the named slice worktree and PR.
+Slice 1 implements guarded workflow record contracts, canonical and adopted
+Markdown storage, process-safe journal replay and the rebuildable SQLite
+projection. All four task implementations passed local validation. The slice is
+reviewing; canonical PR and final clean-head controller evidence are recorded
+below before handoff. No slice integration is claimed.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
-Fast-forward into `dev`. The implementation worker prepares and validates each
-candidate, updates task/report evidence, and returns the PR to the controller.
+Fast-forward into `dev`. Slice 2 remains inactive until that integration is
+verified.
 
 ## State and Evidence Rules
 
@@ -68,7 +63,7 @@ candidate, updates task/report evidence, and returns the PR to the controller.
 
 | Slice | Name | Exact branch | Expected PR title | Report | State | Tasks done | PR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | active | 0/4 | pending |
+| Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | reviewing | 0/4 | pending |
 | Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | not_started | 0/4 | pending |
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | not_started | 0/4 | pending |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
@@ -83,7 +78,7 @@ candidate, updates task/report evidence, and returns the PR to the controller.
 
 ## Slice 1: Guarded workflow records
 
-Status: active
+Status: reviewing
 
 Prerequisite: satisfied by the approved bootstrap commit, 48 ticket bindings and explicit activation.
 
@@ -97,14 +92,14 @@ Plan contract: [Slice 1](../plan/ticket-native-workflow.md#slice-1-guarded-workf
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T1.1 | [TKT-20261008141345](../ticket/in_progress/20261008141345-ticket-native-t1-1.md) | validated | 7fa91666a7c3b473dc1651994863413d53217f38 | Define versioned task/set/slice/receipt identities, fields and lifecycle validation in native core types. |
-| T1.2 | [TKT-20261008141346](../ticket/in_progress/20261008141346-ticket-native-t1-2.md) | validated | c28ecb7ddf5f595b6f631db9665ce524b8a5a117 | Implement revision-guarded canonical and adopted-Markdown read/write with unknown-field preservation. |
-| T1.3 | [TKT-20261008141347](../ticket/in_progress/20261008141347-ticket-native-t1-3.md) | in_progress | pending | Implement process-safe mutation locking and journaled multi-file transitions with guarded replay. |
-| T1.4 | [TKT-20261008141348](../ticket/ready/20261008141348-ticket-native-t1-4.md) | ready | pending | Extend rebuildable SQLite queries/migrations and record/file bounds. |
+| T1.1 | [TKT-20261008141345](../ticket/reviewing/20261008141345-ticket-native-t1-1.md) | validated | 7fa91666a7c3b473dc1651994863413d53217f38 | Define versioned task/set/slice/receipt identities, fields and lifecycle validation in native core types. |
+| T1.2 | [TKT-20261008141346](../ticket/reviewing/20261008141346-ticket-native-t1-2.md) | validated | c28ecb7ddf5f595b6f631db9665ce524b8a5a117 | Implement revision-guarded canonical and adopted-Markdown read/write with unknown-field preservation. |
+| T1.3 | [TKT-20261008141347](../ticket/reviewing/20261008141347-ticket-native-t1-3.md) | validated | 2f51be25a0afe1231cffe74ddeccdb8af89a685e | Implement process-safe mutation locking and journaled multi-file transitions with guarded replay. |
+| T1.4 | [TKT-20261008141348](../ticket/reviewing/20261008141348-ticket-native-t1-4.md) | validated | pending | Extend rebuildable SQLite queries/migrations and record/file bounds. |
 
 ### Validation
 
-Status: not run.
+Status: local task checks passed. Final clean-head evidence is recorded through the controller before PR handoff.
 
 Expected focused checks: `go test ./internal/core -count=1` and
 `go test -race ./internal/core -count=1`.
@@ -117,10 +112,10 @@ Acceptance: A02, A22; foundations for A24.
 
 - PR: pending.
 - Merge commit: pending.
-- Report status: not created.
-- Task commits and ticket lifecycle evidence: pending.
-- Validation evidence: pending.
-- Blockers: none observed; controller startup is authorized.
+- Report status: reviewing; [Slice 1 report](../report/slices/ticket-native-workflow/slice-1-workflow-records.md).
+- Task commits: T1.1 `7fa91666a7c3b473dc1651994863413d53217f38`; T1.2 `c28ecb7ddf5f595b6f631db9665ce524b8a5a117`; T1.3 `2f51be25a0afe1231cffe74ddeccdb8af89a685e`; T1.4 recorded in the PR-reference follow-up. All four tickets are reviewing.
+- Validation evidence: `make verify`, `go test ./internal/core -count=1`, focused workflow race/subprocess tests and `git diff --check` passed. Final required checks bind the clean PR-reference follow-up HEAD through `slice-loop validate`.
+- Blockers: none observed.
 
 ## Slice 2: Task-ticket materialization
 

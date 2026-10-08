@@ -44,6 +44,10 @@ func (s WorkflowSnapshot) Validate() error {
 		return err
 	}
 
+	if err := validateWorkflowDeliveryBindings(s.Records); err != nil {
+		return err
+	}
+
 	return validateWorkflowGraph(graph)
 }
 
@@ -187,6 +191,46 @@ func validateWorkflowGraph(graph map[WorkflowRef][]WorkflowRef) error {
 		if err := visit(ref); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func validateWorkflowDeliveryBindings(records []WorkflowRecord) error {
+	bindings := map[string]bool{}
+
+	for _, r := range records {
+		if r.Receipt != nil {
+			key := "receipt:" + r.Receipt.CandidateID + "\x00" + r.Receipt.SubmissionID
+			if bindings[key] {
+				return fmt.Errorf("duplicate confirmed workflow receipt")
+			}
+
+			bindings[key] = true
+		}
+
+		if r.Set != nil {
+			if err := validateWorkflowPRBindings(r.Set.Slices, bindings); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func validateWorkflowPRBindings(slices []WorkflowSlice, bindings map[string]bool) error {
+	for _, descriptor := range slices {
+		if descriptor.PullRequest == "" {
+			continue
+		}
+
+		key := "pr:" + descriptor.PullRequest
+		if bindings[key] {
+			return fmt.Errorf("canonical workflow PR belongs to multiple slices")
+		}
+
+		bindings[key] = true
 	}
 
 	return nil

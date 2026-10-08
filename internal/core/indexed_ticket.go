@@ -5,6 +5,7 @@ import "time"
 // IndexedTicket describes a package boundary value.
 type IndexedTicket struct {
 	ProjectID         string
+	Namespace         string
 	Path              string
 	RelativePath      string
 	Key               string

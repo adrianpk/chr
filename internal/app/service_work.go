@@ -563,7 +563,7 @@ func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution co
 		return core.IndexedTicket{}, err
 	}
 
-	result, err := core.ApplyAgenticReviewResult(core.ApplyAgenticReviewResultOptions{
+	result, err := core.ApplyAgenticReviewResult(s.ctx, core.ApplyAgenticReviewResultOptions{
 		Ticket:     ticket,
 		Artifact:   artifact,
 		ReviewedAt: reviewedAt,
@@ -600,7 +600,7 @@ func (s service) runTrustedAutoMergeReviewCycle(selected core.IndexedTicket, exe
 
 	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
 
-	result, err := core.ApplyTrustedAutoMergeReview(core.ApplyTrustedAutoMergeReviewOptions{
+	result, err := core.ApplyTrustedAutoMergeReview(s.ctx, core.ApplyTrustedAutoMergeReviewOptions{
 		Ticket:     ticket,
 		ReviewedAt: reviewedAt,
 	})

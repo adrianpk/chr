@@ -3,7 +3,6 @@ package core
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 )
@@ -68,7 +67,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 	}
 
 	if !preflight.Allowed {
-		return result, applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+		return result, applyTicketMergeCommandResult(ctx, opts.Ticket.Path, result, opts.MergedAt)
 	}
 
 	merge, err := opts.Remote.Merge(ctx, MergeRequest{URL: preflight.ReviewRef.URL, Strategy: preflight.MergeStrategy})
@@ -83,7 +82,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 		result.MergeResult = TicketMergeResultBlocked
 		result.MergeBlocker = err.Error()
 
-		return result, applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+		return result, applyTicketMergeCommandResult(ctx, opts.Ticket.Path, result, opts.MergedAt)
 	}
 
 	result.Merge = merge
@@ -92,7 +91,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 	result.MergeResult = TicketMergeResultMerged
 	result.MergeCommit = merge.SHA
 
-	err = applyTicketMergeCommandResult(opts.Ticket.Path, result, opts.MergedAt)
+	err = applyTicketMergeCommandResult(ctx, opts.Ticket.Path, result, opts.MergedAt)
 	if err != nil {
 		return result, err
 	}
@@ -154,7 +153,7 @@ func ticketMergeCommandBlockerSummary(blockers []TicketMergePreflightBlocker) st
 	return strings.Join(parts, ",")
 }
 
-func applyTicketMergeCommandResult(path string, result TicketMergeCommandResult, mergedAt time.Time) error {
+func applyTicketMergeCommandResult(ctx context.Context, path string, result TicketMergeCommandResult, mergedAt time.Time) error {
 	content, err := readLegacyTicketFile(path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
@@ -191,7 +190,7 @@ func applyTicketMergeCommandResult(path string, result TicketMergeCommandResult,
 		}
 	}
 
-	err = os.WriteFile(path, []byte(updated), 0o644)
+	err = writeLegacyTicketFile(ctx, path, content, []byte(updated))
 	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}

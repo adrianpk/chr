@@ -153,6 +153,7 @@ func workflowTestConflict(t *testing.T, s *WorkflowStore, r WorkflowRecord) {
 func TestWorkflowProcessLock(t *testing.T) {
 	s := workflowTestStore(t)
 	r := workflowTestCreate(t, s, "CHR-1")
+	linked := workflowTestLinkedStore(t, s)
 	cmd := workflowProcess(t, s, "hold", nil)
 
 	stdin, err := cmd.StdinPipe()
@@ -187,13 +188,37 @@ func TestWorkflowProcessLock(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
 
-	if _, err := s.Read(ctx, r.Path); !errors.Is(err, context.DeadlineExceeded) {
+	if _, err := linked.Read(ctx, r.Path); !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("process-held lock failed exclusion: %v", err)
 	}
 
 	if _, err := stdin.Write([]byte("x")); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func workflowTestLinkedStore(t *testing.T, store *WorkflowStore) *WorkflowStore {
+	t.Helper()
+
+	root := store.layout.ProjectDir()
+	destination := filepath.Join(t.TempDir(), "linked")
+
+	commands := [][]string{
+		{"-C", root, "-c", "user.name=Example", "-c", "user.email=example@example.org", "commit", "--allow-empty", "-qm", "Fixture"},
+		{"-C", root, "worktree", "add", "-qb", "linked", destination},
+	}
+	for _, argv := range commands {
+		if output, err := exec.Command("git", argv...).CombinedOutput(); err != nil {
+			t.Fatalf("fixture git command: %v: %s", err, output)
+		}
+	}
+
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return NewWorkflowStore(layout, "project-1")
 }
 
 // TestWorkflowCompetingWriters admits one exact observed revision across goroutines.

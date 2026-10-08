@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,7 +27,7 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 		UpdatedAt:  testTrustedAutoMergeTime(),
 	})
 
-	result, err := ApplyTrustedAutoMergeReview(ApplyTrustedAutoMergeReviewOptions{
+	result, err := ApplyTrustedAutoMergeReview(context.Background(), ApplyTrustedAutoMergeReviewOptions{
 		Ticket: IndexedTicket{
 			Key:        "CHR-1",
 			Path:       path,
@@ -67,7 +68,7 @@ func TestApplyTrustedAutoMergeReviewRequiresPullRequestRef(t *testing.T) {
 		UpdatedAt: testTrustedAutoMergeTime(),
 	})
 
-	_, err := ApplyTrustedAutoMergeReview(ApplyTrustedAutoMergeReviewOptions{
+	_, err := ApplyTrustedAutoMergeReview(context.Background(), ApplyTrustedAutoMergeReviewOptions{
 		Ticket: IndexedTicket{
 			Key:    "CHR-1",
 			Path:   path,

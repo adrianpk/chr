@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"database/sql"
+	"os"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -126,7 +127,13 @@ func openTestSQLite(t *testing.T) *sql.DB {
 }
 
 func testMigrationFS() fstest.MapFS {
+	workflowMigration, err := os.ReadFile("../../cmd/chr/assets/migration/sqlite/20261008000014-add_workflow_records.sql")
+	if err != nil {
+		panic(err)
+	}
+
 	return fstest.MapFS{
+		"assets/migration/sqlite/20261008000014-add_workflow_records.sql": {Data: workflowMigration},
 		"assets/migration/sqlite/20260518000001-create_projects.sql": {
 			Data: []byte(testCreateProjectsMigration()),
 		},
