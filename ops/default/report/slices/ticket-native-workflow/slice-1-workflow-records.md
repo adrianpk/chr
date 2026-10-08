@@ -1,6 +1,6 @@
 # Slice 1: Guarded Workflow Records
 
-Status: reviewing
+Status: delivered
 Delivery set: ticket-native-workflow
 Plan: [Ticket-Native Work Delivery](../../../plan/ticket-native-workflow.md)
 Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md)
@@ -75,18 +75,17 @@ cache deletion, manual conflicts and admission bounds.
 
 ## Validation
 
-Successful local task checks:
+The controller recorded successful checks against integrated commit
+`b041521e94d46ee46aa35a9133e8746f31a27328`:
 
 - `make verify`
 - `go test ./internal/core -count=1`
-- `go test -race ./internal/core -run '^TestWorkflow' -count=1`
+- `go test -race ./internal/core -count=1`
 - `git diff --check`
 
-The required final sequence is `make verify`,
-`go test ./internal/core -count=1`, `go test -race ./internal/core -count=1`
-and `git diff --check`. The controller records that sequence against the exact
-clean PR-reference follow-up HEAD before handoff. These checks cover Slice 1;
-the composed delivery-set gate belongs to the approved final validation phase.
+Canonical PR #364 merged by Rebase + Fast-forward on 2026-10-08.
+These checks cover Slice 1; the composed delivery-set gate belongs to the
+approved final validation phase.
 
 Acceptance: A02 and A22; record, file and pagination foundations for A24.
 

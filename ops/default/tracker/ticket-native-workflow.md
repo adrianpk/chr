@@ -22,25 +22,23 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 1 — Guarded workflow records
+Active slice: Slice 2 — Task-ticket materialization
 
-Next slice: Slice 2 — Task-ticket materialization
+Next slice: Slice 3 — Deterministic work selection
 
 Slice strategy: behavior-first
 
-Progress: 0 of 12 slices integrated; 0 of 48 tasks done.
+Progress: 1 of 12 slices integrated; 4 of 48 tasks done.
 
 ## Current Checkpoint
 
-Slice 1 implements guarded workflow record contracts, canonical and adopted
-Markdown storage, process-safe journal replay and the rebuildable SQLite
-projection. All four task implementations passed local validation. The slice is
-reviewing; canonical PR and final clean-head controller evidence are recorded
-below before handoff. No slice integration is claimed.
+Slice 1 is verified integrated through canonical PR #364 at
+`b041521e94d46ee46aa35a9133e8746f31a27328`. Its report is delivered and
+four tickets are solved. Exact-head controller validation passed all recorded
+commands. Slice 2 is active for ordered task-ticket materialization.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
-Fast-forward into `dev`. Slice 2 remains inactive until that integration is
-verified.
+Fast-forward into `dev`.
 
 ## State and Evidence Rules
 
@@ -63,8 +61,8 @@ verified.
 
 | Slice | Name | Exact branch | Expected PR title | Report | State | Tasks done | PR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | reviewing | 0/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
-| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | not_started | 0/4 | pending |
+| Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | integrated | 4/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
+| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | active | 0/4 | pending |
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | not_started | 0/4 | pending |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | not_started | 0/4 | pending |
@@ -78,7 +76,7 @@ verified.
 
 ## Slice 1: Guarded workflow records
 
-Status: reviewing
+Status: integrated
 
 Prerequisite: satisfied by the approved bootstrap commit, 48 ticket bindings and explicit activation.
 
@@ -92,14 +90,14 @@ Plan contract: [Slice 1](../plan/ticket-native-workflow.md#slice-1-guarded-workf
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T1.1 | [TKT-20261008141345](../ticket/reviewing/20261008141345-ticket-native-t1-1.md) | validated | 7fa91666a7c3b473dc1651994863413d53217f38 | Define versioned task/set/slice/receipt identities, fields and lifecycle validation in native core types. |
-| T1.2 | [TKT-20261008141346](../ticket/reviewing/20261008141346-ticket-native-t1-2.md) | validated | c28ecb7ddf5f595b6f631db9665ce524b8a5a117 | Implement revision-guarded canonical and adopted-Markdown read/write with unknown-field preservation. |
-| T1.3 | [TKT-20261008141347](../ticket/reviewing/20261008141347-ticket-native-t1-3.md) | validated | 2f51be25a0afe1231cffe74ddeccdb8af89a685e | Implement process-safe mutation locking and journaled multi-file transitions with guarded replay. |
-| T1.4 | [TKT-20261008141348](../ticket/reviewing/20261008141348-ticket-native-t1-4.md) | validated | 9db5940c692003107398db9489c9a263fb6b7144 | Extend rebuildable SQLite queries/migrations and record/file bounds. |
+| T1.1 | [TKT-20261008141345](../ticket/solved/20261008141345-ticket-native-t1-1.md) | done | 7fa91666a7c3b473dc1651994863413d53217f38 | Define versioned task/set/slice/receipt identities, fields and lifecycle validation in native core types. |
+| T1.2 | [TKT-20261008141346](../ticket/solved/20261008141346-ticket-native-t1-2.md) | done | c28ecb7ddf5f595b6f631db9665ce524b8a5a117 | Implement revision-guarded canonical and adopted-Markdown read/write with unknown-field preservation. |
+| T1.3 | [TKT-20261008141347](../ticket/solved/20261008141347-ticket-native-t1-3.md) | done | 2f51be25a0afe1231cffe74ddeccdb8af89a685e | Implement process-safe mutation locking and journaled multi-file transitions with guarded replay. |
+| T1.4 | [TKT-20261008141348](../ticket/solved/20261008141348-ticket-native-t1-4.md) | done | 9db5940c692003107398db9489c9a263fb6b7144 | Extend rebuildable SQLite queries/migrations and record/file bounds. |
 
 ### Validation
 
-Status: local task checks passed. Final clean-head evidence is recorded through the controller before PR handoff.
+Status: all required controller checks passed against the verified integrated head.
 
 Expected focused checks: `go test ./internal/core -count=1` and
 `go test -race ./internal/core -count=1`.
@@ -110,18 +108,18 @@ Acceptance: A02, A22; foundations for A24.
 
 ### Delivery Evidence
 
-- PR: [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364); open against `dev`.
-- Merge commit: pending.
-- Report status: reviewing; [Slice 1 report](../report/slices/ticket-native-workflow/slice-1-workflow-records.md).
-- Task commits: T1.1 `7fa91666a7c3b473dc1651994863413d53217f38`; T1.2 `c28ecb7ddf5f595b6f631db9665ce524b8a5a117`; T1.3 `2f51be25a0afe1231cffe74ddeccdb8af89a685e`; T1.4 `9db5940c692003107398db9489c9a263fb6b7144`. All four tickets are reviewing.
-- Validation evidence: `make verify`, `go test ./internal/core -count=1`, focused workflow race/subprocess tests and `git diff --check` passed. Final required checks bind the clean PR-reference follow-up HEAD through `slice-loop validate`.
+- PR: [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364); verified merged into `dev`.
+- Merge commit: `b041521e94d46ee46aa35a9133e8746f31a27328`.
+- Report status: delivered; [Slice 1 report](../report/slices/ticket-native-workflow/slice-1-workflow-records.md).
+- Task commits: T1.1 `7fa91666a7c3b473dc1651994863413d53217f38`; T1.2 `c28ecb7ddf5f595b6f631db9665ce524b8a5a117`; T1.3 `2f51be25a0afe1231cffe74ddeccdb8af89a685e`; T1.4 `9db5940c692003107398db9489c9a263fb6b7144`. All four tickets are solved with resolution fixed.
+- Validation evidence: controller checks for `b041521e94d46ee46aa35a9133e8746f31a27328` passed `make verify`, `go test ./internal/core -count=1`, `go test -race ./internal/core -count=1` and `git diff --check` in that order.
 - Blockers: none observed.
 
 ## Slice 2: Task-ticket materialization
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 1 verified integrated into dev.
+Prerequisite: satisfied by verified PR #364 integration into dev.
 
 Expected branch: `feat/slice-2-workflow-materialization`
 
