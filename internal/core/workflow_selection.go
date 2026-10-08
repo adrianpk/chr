@@ -136,6 +136,13 @@ func (selection workflowSelection) preview(request WorkflowPreviewRequest) (Work
 		members = append(members, workflowPreviewMember(record))
 	}
 
+	var orderErr error
+
+	preview.SetOrderRule, orderErr = selection.orderMembers(members, request.Selector)
+	if orderErr != nil {
+		return WorkflowPreview{}, orderErr
+	}
+
 	preview.Total = len(members)
 	start := min(request.Offset, len(members))
 	end := min(start+request.Limit, len(members))
