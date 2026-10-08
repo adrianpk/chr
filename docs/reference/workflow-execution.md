@@ -131,6 +131,46 @@ file bound; at most 128 distinct observations are retained per binding, with
 identical repeats reusing their observation. Titles allow at most 256 bytes,
 bodies 16 KiB and branch names 256 bytes.
 
+## External integration proof
+
+`VerifyWorkflowSliceIntegration` reads the bound canonical PR and fetches its
+exact target branch through a trusted host Git port. It accepts only a merged
+PR with matching repository, head repository, branches and validated source
+commit. Worker success, manually written task status and a structurally valid
+receipt cannot establish delivery. The application service uses the canonical
+HTTPS repository as its Git transport; explicit repository/transport mappings
+belong to trusted host wiring, outside task inputs.
+
+The observer imports the retained source into an owned temporary bare repository
+and fetches the canonical target there. It requires the provider result to be
+reachable from that actual target and its integration base to contain the
+frozen target. The provider's current PR base SHA is not an immutable base:
+verification derives the base from the actual method-specific result history.
+
+| Method | Required Git proof |
+| --- | --- |
+| `merge` | Exactly two result parents: target base, then the validated source. Its tree equals the clean combined source/base tree. |
+| `rebase` | Linear source history and an equally sized ordered linear result on the target base. Each result tree equals that source commit's change replayed onto the preceding result. Original source ancestry alone is insufficient. |
+| `squash` | Exactly one result commit on its target base. Its tree equals the combined source change applied to that base. |
+
+The host rechecks candidate, membership, contracts and retained input/evidence
+images after provider and Git IO. Successful verification journals immutable
+`chr-slice-delivery-proof/v1` evidence and invocation `delivery_proof_ref` /
+`delivery_proof_hash`. It retains the canonical PR observation, original
+candidate, source/base/result trees, ordered history fingerprint and observed
+target. Local temporary paths and transport details are excluded from evidence.
+Repeated verification rechecks actual Git and reuses matching immutable proof;
+later target commits preserve delivery when the verified result remains
+reachable. Mismatched or edited proof fails closed. Tasks remain at the shared
+finalization barrier until receipt finalization completes.
+
+Verification holds repository mutation exclusion, has a three-minute shared
+deadline, permits at most 4096 source/history commits and bounds Git stdout and
+proof files to 1 MiB. Git replacement objects are disabled. Cancellation stops
+the owned Git process group; the temporary repository is removed only after
+the observer finishes. Conflicts, missing target history and unsupported method
+proof do not trigger a method fallback or a target write.
+
 ## Manual protocol
 
 | Operation | Contract |
