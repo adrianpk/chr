@@ -64,7 +64,7 @@ Fast-forward into `dev`.
 | Slice | Name | Exact branch | Expected PR title | Report | State | Tasks done | PR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | integrated | 4/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
-| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | reviewing | 0/4 | pending |
+| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | reviewing | 0/4 | [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365) |
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | not_started | 0/4 | pending |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | not_started | 0/4 | pending |
@@ -151,7 +151,7 @@ Acceptance: A01, A02.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365); open against `dev`.
 - Merge commit: pending.
 - Report status: reviewing; [Slice 2 report](../report/slices/ticket-native-workflow/slice-2-workflow-materialization.md).
 - Task commits: T2.1 `8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1`; T2.2 `93a19da5472e6ca323d671ea1e0ffbd54cd6be59`; T2.3 `ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4`; T2.4 `1585ee89b21a51c565fee54c4f87d05fddab4dac`. All four tickets are reviewing.
