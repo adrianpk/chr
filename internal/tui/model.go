@@ -378,8 +378,8 @@ func (m Model) View() string {
 	var output strings.Builder
 
 	output.WriteString("Project\n")
-	output.WriteString(fmt.Sprintf("  Name: %s\n", projectDisplayName(m.projectDir)))
-	output.WriteString(fmt.Sprintf("  Dir:  %s\n\n", m.projectDir))
+	fmt.Fprintf(&output, "  Name: %s\n", projectDisplayName(m.projectDir))
+	fmt.Fprintf(&output, "  Dir:  %s\n\n", m.projectDir)
 	output.WriteString("Navigation\n")
 
 	for index, view := range m.views {
@@ -1115,10 +1115,10 @@ func (m Model) renderTicketBoard() string {
 
 	output.WriteString("Board\n")
 	output.WriteString(m.renderBoardHeaderColumnLine())
-	output.WriteString(fmt.Sprintf("  Tickets: %d", len(filteredTickets)))
+	fmt.Fprintf(&output, "  Tickets: %d", len(filteredTickets))
 
 	if m.ticketFilter != "" {
-		output.WriteString(fmt.Sprintf("  Filter: %q", m.ticketFilter))
+		fmt.Fprintf(&output, "  Filter: %q", m.ticketFilter)
 	}
 
 	output.WriteString("\n\n")
@@ -1222,32 +1222,32 @@ func (m Model) renderSelectedTicketDetail() string {
 	var output strings.Builder
 
 	output.WriteString("Selected Ticket\n")
-	output.WriteString(fmt.Sprintf("  Key: %s\n", ticket.Key))
-	output.WriteString(fmt.Sprintf("  Title: %s\n", ticket.Title))
+	fmt.Fprintf(&output, "  Key: %s\n", ticket.Key)
+	fmt.Fprintf(&output, "  Title: %s\n", ticket.Title)
 
 	if ticket.Synopsis != "" {
-		output.WriteString(fmt.Sprintf("  Synopsis: %s\n", ticket.Synopsis))
+		fmt.Fprintf(&output, "  Synopsis: %s\n", ticket.Synopsis)
 	}
 
-	output.WriteString(fmt.Sprintf("  Status: %s\n", ticket.Status))
-	output.WriteString(fmt.Sprintf("  Priority: %s\n", ticket.Priority))
-	output.WriteString(fmt.Sprintf("  Severity: %s\n", ticket.Severity))
-	output.WriteString(fmt.Sprintf("  Type: %s\n", ticket.Type))
-	output.WriteString(fmt.Sprintf("  Use Case: %s\n", ticket.UseCase))
-	output.WriteString(fmt.Sprintf("  Project Area: %s\n", ticket.ProjectArea))
+	fmt.Fprintf(&output, "  Status: %s\n", ticket.Status)
+	fmt.Fprintf(&output, "  Priority: %s\n", ticket.Priority)
+	fmt.Fprintf(&output, "  Severity: %s\n", ticket.Severity)
+	fmt.Fprintf(&output, "  Type: %s\n", ticket.Type)
+	fmt.Fprintf(&output, "  Use Case: %s\n", ticket.UseCase)
+	fmt.Fprintf(&output, "  Project Area: %s\n", ticket.ProjectArea)
 	renderTicketSourceDetail(&output, ticket)
 	renderTicketReviewDetail(&output, ticket)
 	renderTicketEvidenceDetail(&output, ticket)
-	output.WriteString(fmt.Sprintf("  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal))
-	output.WriteString(fmt.Sprintf("  Comments: %d\n", ticket.CommentCount))
-	output.WriteString(fmt.Sprintf("  Path: %s\n", ticketDisplayPath(ticket.RelativePath)))
+	fmt.Fprintf(&output, "  Checklist: %d done / %d total\n", ticket.ChecklistDone, ticket.ChecklistTotal)
+	fmt.Fprintf(&output, "  Comments: %d\n", ticket.CommentCount)
+	fmt.Fprintf(&output, "  Path: %s\n", ticketDisplayPath(ticket.RelativePath))
 	renderTicketBodySection(&output, ticket.BodyLines)
 
 	if len(ticket.AttentionReasons) > 0 {
 		output.WriteString("  Attention:\n")
 
 		for _, reason := range ticket.AttentionReasons {
-			output.WriteString(fmt.Sprintf("    - %s\n", reason))
+			fmt.Fprintf(&output, "    - %s\n", reason)
 		}
 	}
 

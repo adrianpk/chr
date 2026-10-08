@@ -495,6 +495,20 @@
 </form>
 {{end}}
 
+{{define "write_result_modal.html"}}
+<div class="modal-backdrop" data-modal-backdrop>
+  <section class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="write-result-title">
+    <header class="ticket-modal__header">
+      <h2 id="write-result-title">Write Result</h2>
+      <button class="icon-button" type="button" data-modal-close aria-label="Close write result">x</button>
+    </header>
+    <div class="ticket-modal__body">
+      {{template "write_result.html" .}}
+    </div>
+  </section>
+</div>
+{{end}}
+
 {{define "write_result.html"}}
 <div class="write-result write-result--{{.Write.Status}}">
   <h2>{{.Write.Summary}}</h2>

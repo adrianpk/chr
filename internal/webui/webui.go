@@ -396,7 +396,8 @@ func (h handler) redirectAfterWrite(w http.ResponseWriter, r *http.Request, loca
 
 func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, result WriteActionResponse) {
 	status := http.StatusBadRequest
-	if result.Status == WriteStatusOK {
+	// Expected write failures need a successful fragment response for htmx to display them.
+	if result.Status == WriteStatusOK || htmx.IsRequest(r) {
 		status = http.StatusOK
 	}
 
@@ -409,7 +410,12 @@ func (h handler) renderWriteResult(w http.ResponseWriter, r *http.Request, resul
 		Write: result,
 	}
 	if htmx.IsRequest(r) {
-		if err := h.renderer.Fragment(w, "write_result.html", data); err != nil {
+		template := "write_result.html"
+		if r.PostFormValue("surface") == "modal" || r.URL.Path == "/board/ticket/comment" {
+			template = "write_result_modal.html"
+		}
+
+		if err := h.renderer.Fragment(w, template, data); err != nil {
 			http.Error(w, "render write result", http.StatusInternalServerError)
 		}
 

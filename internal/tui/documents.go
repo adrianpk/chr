@@ -201,11 +201,11 @@ func (m Model) renderSelectedDocumentDetailFor(documents []DocumentView) string 
 	var output strings.Builder
 
 	output.WriteString("Selected Document\n")
-	output.WriteString(fmt.Sprintf("  Type: %s\n", document.Family))
-	output.WriteString(fmt.Sprintf("  Status: %s\n", document.Status))
-	output.WriteString(fmt.Sprintf("  Title: %s\n", document.Title))
-	output.WriteString(fmt.Sprintf("  Updated: %s\n", renderTime(document.UpdatedAt)))
-	output.WriteString(fmt.Sprintf("  Path: %s\n", document.RelativePath))
+	fmt.Fprintf(&output, "  Type: %s\n", document.Family)
+	fmt.Fprintf(&output, "  Status: %s\n", document.Status)
+	fmt.Fprintf(&output, "  Title: %s\n", document.Title)
+	fmt.Fprintf(&output, "  Updated: %s\n", renderTime(document.UpdatedAt))
+	fmt.Fprintf(&output, "  Path: %s\n", document.RelativePath)
 	output.WriteString("  Preview:\n")
 	output.WriteString(indentText(document.Preview, "    "))
 

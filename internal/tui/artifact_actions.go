@@ -92,7 +92,7 @@ func (m Model) renderArtifactAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nConfirm Action\n")
-	output.WriteString(fmt.Sprintf("  %s\n", m.artifactAction.Title))
+	fmt.Fprintf(&output, "  %s\n", m.artifactAction.Title)
 
 	for _, detail := range m.artifactAction.Details {
 		output.WriteString("  ")

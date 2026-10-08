@@ -69,6 +69,8 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Changed
 
+- Updated the Web UI with editable ticket details and comments, shared case
+  editing panels, and dump creation dialogs.
 - Moved the application code into clearer `internal/app`, `internal/core`, and
   `internal/tui` package boundaries.
 - Reworked generated specs so spec generation remains behavior-focused and no
@@ -92,6 +94,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Fixed
 
+- Prevented outdated ticket forms and comments from changing a ticket after
+  another edit. Reload the board before submitting again.
+- Made failed Web UI form submissions display their error and reload actions
+  inside the current dialog.
 - Fixed acceptance feature generation to preserve feature-round answers and
   satisfy Codex feature schema expectations.
 - Fixed spec generation context so generated specs stay neutral and do not

@@ -95,17 +95,17 @@ func (m Model) renderSelectedAuthoringSessionDetail() string {
 	var output strings.Builder
 
 	output.WriteString("Selected Authoring Session\n")
-	output.WriteString(fmt.Sprintf("  Topic: %s\n", session.Topic))
-	output.WriteString(fmt.Sprintf("  ID: %s\n", session.ID))
-	output.WriteString(fmt.Sprintf("  Status: %s\n", session.Status))
-	output.WriteString(fmt.Sprintf("  Mode: %s\n", session.Mode))
-	output.WriteString(fmt.Sprintf("  Target: %s\n", session.Target))
-	output.WriteString(fmt.Sprintf("  Updated: %s\n", renderTime(session.UpdatedAt)))
-	output.WriteString(fmt.Sprintf("  Session: %s\n", session.SessionPath))
-	output.WriteString(fmt.Sprintf("  Transcript: %s\n", session.TranscriptPath))
-	output.WriteString(fmt.Sprintf("  Artifacts: %s\n", session.ArtifactsPath))
-	output.WriteString(fmt.Sprintf("  Inputs: %s\n", renderStringList(session.Inputs)))
-	output.WriteString(fmt.Sprintf("  Outputs: %s", renderStringList(session.Outputs)))
+	fmt.Fprintf(&output, "  Topic: %s\n", session.Topic)
+	fmt.Fprintf(&output, "  ID: %s\n", session.ID)
+	fmt.Fprintf(&output, "  Status: %s\n", session.Status)
+	fmt.Fprintf(&output, "  Mode: %s\n", session.Mode)
+	fmt.Fprintf(&output, "  Target: %s\n", session.Target)
+	fmt.Fprintf(&output, "  Updated: %s\n", renderTime(session.UpdatedAt))
+	fmt.Fprintf(&output, "  Session: %s\n", session.SessionPath)
+	fmt.Fprintf(&output, "  Transcript: %s\n", session.TranscriptPath)
+	fmt.Fprintf(&output, "  Artifacts: %s\n", session.ArtifactsPath)
+	fmt.Fprintf(&output, "  Inputs: %s\n", renderStringList(session.Inputs))
+	fmt.Fprintf(&output, "  Outputs: %s", renderStringList(session.Outputs))
 
 	return output.String()
 }

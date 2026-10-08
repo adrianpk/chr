@@ -130,7 +130,7 @@ func (m Model) renderWorkAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nConfirm Work Action\n")
-	output.WriteString(fmt.Sprintf("  %s\n", m.workAction.Title))
+	fmt.Fprintf(&output, "  %s\n", m.workAction.Title)
 
 	for _, detail := range m.workAction.Details {
 		output.WriteString("  ")

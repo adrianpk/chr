@@ -120,7 +120,7 @@ func (m Model) renderCommandPalette() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nCommand Palette\n")
-	output.WriteString(fmt.Sprintf("  Filter: %s\n", m.commandPalette.Filter))
+	fmt.Fprintf(&output, "  Filter: %s\n", m.commandPalette.Filter)
 
 	commands := m.filteredCommands()
 	if len(commands) == 0 {

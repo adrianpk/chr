@@ -66,7 +66,7 @@ func (m Model) renderPlanAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nConfirm Plan Action\n")
-	output.WriteString(fmt.Sprintf("  %s\n", m.planAction.Title))
+	fmt.Fprintf(&output, "  %s\n", m.planAction.Title)
 
 	for _, detail := range m.planAction.Details {
 		output.WriteString("  ")

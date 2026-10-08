@@ -159,11 +159,11 @@ func (m Model) renderAgent() string {
 	var output strings.Builder
 
 	output.WriteString("Agent\n")
-	output.WriteString(fmt.Sprintf("  Daemon: %s\n", m.observability.DaemonStatus))
-	output.WriteString(fmt.Sprintf("  PID: %s\n", renderPID(m.observability.DaemonPID)))
-	output.WriteString(fmt.Sprintf("  Updated: %s\n", m.observability.DaemonUpdatedAt))
-	output.WriteString(fmt.Sprintf("  Heartbeat: %s\n", emptyAsUnknown(m.observability.DaemonHeartbeat)))
-	output.WriteString(fmt.Sprintf("  Failure: %s\n\n", emptyAsNone(m.observability.DaemonFailure)))
+	fmt.Fprintf(&output, "  Daemon: %s\n", m.observability.DaemonStatus)
+	fmt.Fprintf(&output, "  PID: %s\n", renderPID(m.observability.DaemonPID))
+	fmt.Fprintf(&output, "  Updated: %s\n", m.observability.DaemonUpdatedAt)
+	fmt.Fprintf(&output, "  Heartbeat: %s\n", emptyAsUnknown(m.observability.DaemonHeartbeat))
+	fmt.Fprintf(&output, "  Failure: %s\n\n", emptyAsNone(m.observability.DaemonFailure))
 	output.WriteString("Latest Loop\n")
 	output.WriteString(renderLoopRunDetail(m.observability.LatestLoop))
 	output.WriteString("\n\n")
@@ -177,10 +177,10 @@ func (m Model) renderRuntime() string {
 	var output strings.Builder
 
 	output.WriteString("Runtime\n")
-	output.WriteString(fmt.Sprintf("  Image: %s\n", m.observability.RuntimeImage))
-	output.WriteString(fmt.Sprintf("  Dockerfile: %s\n", m.observability.RuntimeDockerfile))
-	output.WriteString(fmt.Sprintf("  Artifact Dir: %s\n", m.observability.RuntimeArtifactDir))
-	output.WriteString(fmt.Sprintf("  Validation: %s\n\n", m.observability.RuntimeValidationCommand))
+	fmt.Fprintf(&output, "  Image: %s\n", m.observability.RuntimeImage)
+	fmt.Fprintf(&output, "  Dockerfile: %s\n", m.observability.RuntimeDockerfile)
+	fmt.Fprintf(&output, "  Artifact Dir: %s\n", m.observability.RuntimeArtifactDir)
+	fmt.Fprintf(&output, "  Validation: %s\n\n", m.observability.RuntimeValidationCommand)
 	output.WriteString("Checks\n")
 
 	if len(m.observability.RuntimeChecks) == 0 {
@@ -190,10 +190,10 @@ func (m Model) renderRuntime() string {
 	}
 
 	for _, check := range m.observability.RuntimeChecks {
-		output.WriteString(fmt.Sprintf("  %-12s %-4s %s", check.Name, check.Status, check.Path))
+		fmt.Fprintf(&output, "  %-12s %-4s %s", check.Name, check.Status, check.Path)
 
 		if check.Message != "" && check.Message != "ok" {
-			output.WriteString(fmt.Sprintf(" (%s)", check.Message))
+			fmt.Fprintf(&output, " (%s)", check.Message)
 		}
 
 		output.WriteString("\n")
@@ -208,12 +208,12 @@ func (m Model) renderWorkspaceIndexHealth() string {
 	var output strings.Builder
 
 	output.WriteString("Workspace Index\n")
-	output.WriteString(fmt.Sprintf("  Nodes: %d\n", health.NodeCount))
-	output.WriteString(fmt.Sprintf("  Edges: %d\n", health.EdgeCount))
-	output.WriteString(fmt.Sprintf("  Diagnostics: %d\n", health.DiagnosticCount))
-	output.WriteString(fmt.Sprintf("  Unresolved refs: %d\n", health.UnresolvedReferenceCount))
-	output.WriteString(fmt.Sprintf("  Semantic pending: %d\n", health.SemanticDigestPendingCount))
-	output.WriteString(fmt.Sprintf("  Semantic stale: %d", health.SemanticDigestStaleCount))
+	fmt.Fprintf(&output, "  Nodes: %d\n", health.NodeCount)
+	fmt.Fprintf(&output, "  Edges: %d\n", health.EdgeCount)
+	fmt.Fprintf(&output, "  Diagnostics: %d\n", health.DiagnosticCount)
+	fmt.Fprintf(&output, "  Unresolved refs: %d\n", health.UnresolvedReferenceCount)
+	fmt.Fprintf(&output, "  Semantic pending: %d\n", health.SemanticDigestPendingCount)
+	fmt.Fprintf(&output, "  Semantic stale: %d", health.SemanticDigestStaleCount)
 
 	return output.String()
 }
@@ -225,16 +225,15 @@ func renderLoopRunDetail(loop LoopRunView) string {
 
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("  ID: %s\n", loop.ID))
-	output.WriteString(fmt.Sprintf("  Status: %s\n", loop.Status))
-	output.WriteString(fmt.Sprintf("  Updated: %s\n", loop.UpdatedAt))
-	output.WriteString(fmt.Sprintf("  Counts: %d eligible / %d processed / %d blocked / %d failed\n",
+	fmt.Fprintf(&output, "  ID: %s\n", loop.ID)
+	fmt.Fprintf(&output, "  Status: %s\n", loop.Status)
+	fmt.Fprintf(&output, "  Updated: %s\n", loop.UpdatedAt)
+	fmt.Fprintf(&output, "  Counts: %d eligible / %d processed / %d blocked / %d failed\n",
 		loop.EligibleCount,
 		loop.ProcessedCount,
 		loop.BlockedCount,
-		loop.FailedCount,
-	))
-	output.WriteString(fmt.Sprintf("  Failure: %s", emptyAsNone(loop.FailureReason)))
+		loop.FailedCount)
+	fmt.Fprintf(&output, "  Failure: %s", emptyAsNone(loop.FailureReason))
 
 	return output.String()
 }
@@ -246,15 +245,15 @@ func renderExecutionDetail(execution ExecutionView) string {
 
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("  ID: %s\n", execution.ID))
-	output.WriteString(fmt.Sprintf("  Ticket: %s\n", execution.TicketKey))
-	output.WriteString(fmt.Sprintf("  Status: %s\n", execution.Status))
-	output.WriteString(fmt.Sprintf("  Updated: %s\n", execution.UpdatedAt))
-	output.WriteString(fmt.Sprintf("  Failure: %s\n", emptyAsNone(execution.FailureReason)))
-	output.WriteString(fmt.Sprintf("  Run Dir: %s\n", execution.RunDir))
-	output.WriteString(fmt.Sprintf("  Result: %s\n", execution.ResultPath))
-	output.WriteString(fmt.Sprintf("  Log: %s\n", execution.LogPath))
-	output.WriteString(fmt.Sprintf("  Validation: %s", execution.ValidationPath))
+	fmt.Fprintf(&output, "  ID: %s\n", execution.ID)
+	fmt.Fprintf(&output, "  Ticket: %s\n", execution.TicketKey)
+	fmt.Fprintf(&output, "  Status: %s\n", execution.Status)
+	fmt.Fprintf(&output, "  Updated: %s\n", execution.UpdatedAt)
+	fmt.Fprintf(&output, "  Failure: %s\n", emptyAsNone(execution.FailureReason))
+	fmt.Fprintf(&output, "  Run Dir: %s\n", execution.RunDir)
+	fmt.Fprintf(&output, "  Result: %s\n", execution.ResultPath)
+	fmt.Fprintf(&output, "  Log: %s\n", execution.LogPath)
+	fmt.Fprintf(&output, "  Validation: %s", execution.ValidationPath)
 
 	return output.String()
 }

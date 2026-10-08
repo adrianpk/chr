@@ -62,7 +62,7 @@ func (m Model) renderSpecAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nConfirm Spec Action\n")
-	output.WriteString(fmt.Sprintf("  %s\n", m.specAction.Title))
+	fmt.Fprintf(&output, "  %s\n", m.specAction.Title)
 
 	for _, detail := range m.specAction.Details {
 		output.WriteString("  ")

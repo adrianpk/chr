@@ -111,6 +111,14 @@ func (p webViewProvider) writeGenerationAction(ctx context.Context, operations s
 }
 
 func (p webViewProvider) writeTicketAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+	if request.Action != webActionTicketUpdate && request.Action != webActionTicketComment {
+		return webui.WriteActionResponse{}, false, nil
+	}
+
+	if response := p.validateTicketRevision(operations.ctx, request); response.Status != "" {
+		return response, true, nil
+	}
+
 	switch request.Action {
 	case webActionTicketUpdate:
 		response, err := p.writeTicketUpdate(operations, request)
@@ -123,6 +131,26 @@ func (p webViewProvider) writeTicketAction(operations service, request webui.Wri
 	default:
 		return webui.WriteActionResponse{}, false, nil
 	}
+}
+
+func (p webViewProvider) validateTicketRevision(ctx context.Context, request webui.WriteActionRequest) webui.WriteActionResponse {
+	if strings.TrimSpace(request.Revision) == "" {
+		return webValidationWrite(errors.New("ticket revision is required; reload before saving"))
+	}
+
+	current, err := p.TicketDetailView(ctx, webui.TicketDetailRequest{Key: request.ID})
+	if err != nil {
+		return webValidationWrite(err)
+	}
+
+	if stale := webStaleWrite(current.Revision, request.Revision); stale.Status != "" {
+		stale.ReloadURL = "/board"
+		stale.DiscardURL = "/board"
+
+		return stale
+	}
+
+	return webui.WriteActionResponse{}
 }
 
 func (p webViewProvider) writeWorkAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {

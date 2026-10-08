@@ -113,7 +113,7 @@ func (m Model) renderTicketAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nConfirm Ticket Action\n")
-	output.WriteString(fmt.Sprintf("  %s\n", m.ticketAction.Title))
+	fmt.Fprintf(&output, "  %s\n", m.ticketAction.Title)
 
 	for _, detail := range m.ticketAction.Details {
 		output.WriteString("  ")

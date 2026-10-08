@@ -58,6 +58,11 @@ Use the Web UI as another view over the same project-local state:
 - Pages and fragments refresh from project state; browser state is presentation
   cache only.
 
+The Board opens ticket details in a dialog where you can edit the title and
+description or add a comment. Ticket writes require the revision loaded by
+that dialog. If another edit changes the ticket, reload the board and reopen
+the ticket before submitting again.
+
 ## Smoke Validation
 
 Run the repeatable Web UI smoke script from the repository root:

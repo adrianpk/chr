@@ -69,7 +69,7 @@ func (m Model) renderDumpAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nConfirm Action\n")
-	output.WriteString(fmt.Sprintf("  %s\n", m.dumpAction.Title))
+	fmt.Fprintf(&output, "  %s\n", m.dumpAction.Title)
 
 	for _, detail := range m.dumpAction.Details {
 		output.WriteString("  ")

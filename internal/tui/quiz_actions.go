@@ -73,7 +73,7 @@ func (m Model) renderQuizAction() string {
 	var output strings.Builder
 
 	output.WriteString("\n\nConfirm Action\n")
-	output.WriteString(fmt.Sprintf("  %s\n", m.quizAction.Title))
+	fmt.Fprintf(&output, "  %s\n", m.quizAction.Title)
 
 	for _, detail := range m.quizAction.Details {
 		output.WriteString("  ")
