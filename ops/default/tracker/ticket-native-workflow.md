@@ -66,7 +66,7 @@ Fast-forward into `dev`.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | integrated | 4/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
 | Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | integrated | 4/4 | [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365) |
-| Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | reviewing | 0/4 | pending |
+| Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | reviewing | 0/4 | [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366) |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | not_started | 0/4 | pending |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | not_started | 0/4 | pending |
@@ -192,7 +192,7 @@ Acceptance: A04, A05, A07; query bounds in A24.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366); open against `dev`.
 - Merge commit: pending.
 - Report status: reviewing; [Slice 3 report](../report/slices/ticket-native-workflow/slice-3-workflow-selection.md).
 - Task commits: T3.1 `559000591223cdc0ce5df4c3ffd6dc0f367124f6`; T3.2 `785a1d90fae0f62ea6a20f14d8efbf8a34257cfa`; T3.3 `2404d19149774e675e3c161ae2da8020d186e033`; T3.4 `7d4a35032ad432ebf307140ec692038031665262`. All four tickets are reviewing.

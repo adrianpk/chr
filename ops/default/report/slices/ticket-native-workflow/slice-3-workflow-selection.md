@@ -5,7 +5,7 @@ Delivery set: ticket-native-workflow
 Plan: [Ticket-Native Work Delivery](../../../plan/ticket-native-workflow.md)
 Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md)
 Branch: `feat/slice-3-workflow-selection`
-PR: pending
+PR: [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366)
 Implementation candidate: `7d4a35032ad432ebf307140ec692038031665262`
 
 ## Purpose
