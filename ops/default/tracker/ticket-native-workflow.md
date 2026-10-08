@@ -39,7 +39,7 @@ canonical ordered checks passed on that head with the documented owned
 CLI curation fixture. Slice 4 is active for guarded serial task claims,
 isolated execution, process-aware recovery and manual reconciliation.
 T4.1 is locally validated on the dedicated `feat/slice-4-workflow-execution`
-branch. T4.2 is next; Slice 4 has no canonical PR yet.
+branch. T4.1 commit is `33e4cbbfb32ab9dd27592ba5a7fe03276848e2b2`. T4.2 is in progress; Slice 4 has no canonical PR yet.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -216,8 +216,8 @@ Plan contract: [Slice 4](../plan/ticket-native-workflow.md#slice-4-owned-isolate
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T4.1 | [TKT-20261008141357](../ticket/reviewing/20261008141357-ticket-native-t4-1.md) | validated | included in this commit | Implement guarded invocation/attempt identity, exclusive claims and fencing generations under the existing serial lock. |
-| T4.2 | [TKT-20261008141358](../ticket/ready/20261008141358-ticket-native-t4-2.md) | ready | pending | Execute against a retained isolated cumulative lane branch with frozen inputs and host validation. |
+| T4.1 | [TKT-20261008141357](../ticket/reviewing/20261008141357-ticket-native-t4-1.md) | validated | 33e4cbbfb32ab9dd27592ba5a7fe03276848e2b2 | Implement guarded invocation/attempt identity, exclusive claims and fencing generations under the existing serial lock. |
+| T4.2 | [TKT-20261008141358](../ticket/in_progress/20261008141358-ticket-native-t4-2.md) | in_progress | pending | Execute against a retained isolated cumulative lane branch with frozen inputs and host validation. |
 | T4.3 | [TKT-20261008141359](../ticket/ready/20261008141359-ticket-native-t4-3.md) | ready | pending | Persist stop intent, lease/process ownership, attempt budgets and safe replacement. |
 | T4.4 | [TKT-20261008141400](../ticket/ready/20261008141400-ticket-native-t4-4.md) | ready | pending | Expose the shared manual claim/checkpoint/evidence-reconciliation protocol. |
 
@@ -238,9 +238,9 @@ Acceptance: A06, A09, A12, A17, A21; execution budgets in A24.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commits and ticket lifecycle evidence: T4.1 is validated with its ticket in reviewing; commit is introduced by this task change. T4.2–T4.4 remain ready.
+- Task commits and ticket lifecycle evidence: T4.1 is validated with its ticket in reviewing; commit `33e4cbbfb32ab9dd27592ba5a7fe03276848e2b2`. T4.2 is in progress; T4.3–T4.4 remain ready.
 - Validation evidence: T4.1 passed `make verify`, `go test ./internal/core ./internal/app -run '^(TestWorkflowInvocation|TestWorkflowClaim|TestWorkflowOperationRelease|TestWorkflowStartBounds|TestServiceWorkflowClaim|TestAgentOperationLock|TestWorkflowAdoption)' -count=1` and the same focused command with `-race`. The repository gate uses the retained CLI curation fixture recorded in the Slice 2 report. Final Slice 4 ordered controller evidence remains pending.
-- Blockers: none observed. T4.2 is the next implementation task.
+- Blockers: none observed. T4.2 is active for retained isolated execution and host validation; runtime implementation has not started.
 
 T4.1 stores authoritative invocation state in the existing run extension, freezes
 selection/target/policy/task/set images, retains equivalent request keys and
@@ -252,7 +252,7 @@ and linked-worktree fixtures passed for a single claim winner, partial replay,
 changed inputs, lease expiry, retained budgets, stale releases and active
 ownership outside the registered coordinator. Isolated workers, child-aware
 replacement, stop intent and manual result reconciliation remain T4.2–T4.4.
-The canonical report will be introduced after those tasks are ready.
+The canonical report will be introduced after those tasks are ready. T4.1 activity is recorded by Acta commit event `01M4E972DPE5DM4Q7ATJEBCRAK`.
 
 ## Slice 5: Slice candidates and delivery receipts
 
