@@ -37,8 +37,9 @@ Slice 4 merged head `517fdbb3322b4e02b951e5301b8f6c8e04740f57` passed the contro
 ordered checks with the retained CLI curation fixture. Its canonical report is
 delivered and all four task tickets are solved. Slice 5 is active for cumulative
 aggregate candidates, one canonical PR, verified external delivery and journaled
-shared-receipt finalization. T5.1 is validated in `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; T5.2 is validated in `2c6c9081403013bad4916a1a2734059274ccda22` for canonical PR bindings. T5.3 is in progress
-for canonical receipt and Git delivery proof; T5.4 remains ready.
+shared-receipt finalization. T5.1 is validated in `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; T5.2 is validated in `2c6c9081403013bad4916a1a2734059274ccda22` for canonical PR bindings. T5.3 is validated in `fb9ed4247ca27e18b3cb365590ad6033b464d166`
+for canonical receipt and Git delivery proof; T5.4 is in progress for shared
+receipt creation and journaled task finalization.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -263,12 +264,12 @@ Plan contract: [Slice 5](../plan/ticket-native-workflow.md#slice-5-slice-candida
 | --- | --- | --- | --- | --- |
 | T5.1 | [TKT-20261008141401](../ticket/reviewing/20261008141401-ticket-native-t5-1.md) | validated | 0bbbd64e691ee6832d495a2b8d4de3b920895e47 | Run remaining tasks cumulatively and host-validate aggregate slice acceptance on an immutable tree. |
 | T5.2 | [TKT-20261008141402](../ticket/reviewing/20261008141402-ticket-native-t5-2.md) | validated | 2c6c9081403013bad4916a1a2734059274ccda22 | Create/reuse one canonical PR and retain branch/candidate/PR bindings. |
-| T5.3 | [TKT-20261008141403](../ticket/in_progress/20261008141403-ticket-native-t5-3.md) | in_progress | pending | Verify external integration through canonical receipts and method-specific target/tree/history proof. |
-| T5.4 | [TKT-20261008141404](../ticket/ready/20261008141404-ticket-native-t5-4.md) | ready | pending | Journal shared receipt creation and task-status finalization. |
+| T5.3 | [TKT-20261008141403](../ticket/reviewing/20261008141403-ticket-native-t5-3.md) | validated | fb9ed4247ca27e18b3cb365590ad6033b464d166 | Verify external integration through canonical receipts and method-specific target/tree/history proof. |
+| T5.4 | [TKT-20261008141404](../ticket/in_progress/20261008141404-ticket-native-t5-4.md) | in_progress | pending | Journal shared receipt creation and task-status finalization. |
 
 ### Validation
 
-Status: T5.1 and T5.2 task checks passed; final Slice 5 candidate checks remain pending.
+Status: T5.1 through T5.3 task checks passed; final Slice 5 candidate checks remain pending.
 
 Successful T5.1 checks: `make verify` with the retained Slice 2 CLI curation
 fixture; `go test -race ./internal/core ./internal/app -run '^(TestWorkflowSlice|TestServiceWorkflowSlice)' -count=1`;
@@ -282,6 +283,13 @@ Successful T5.2 checks: `make verify` with the retained CLI curation fixture;
 creation and between review journal writes, concurrent callers, closed/mismatched
 PRs, same-PR repair and bounded configured provider IO. Read-only Forgejo API
 checks confirmed canonical routing and its branch commit field.
+
+Successful T5.3 checks: `make verify` with the retained CLI curation fixture;
+`go test -race ./internal/core ./internal/app -run '^(TestWorkflowIntegration|TestServiceWorkflowIntegration)' -count=1`;
+`git diff --check`. Real bare remotes verify explicit merge/rebase/squash trees,
+parents and ordered history, including moved bases and later target commits.
+Wrong identities, wrong target history, worker claims, forged intermediate trees,
+changed candidates and edited immutable proof are rejected.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`.
