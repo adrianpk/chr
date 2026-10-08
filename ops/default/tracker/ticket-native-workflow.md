@@ -38,10 +38,10 @@ its report is delivered and all four tickets are solved. The controller's
 canonical ordered checks passed on that head with the documented owned
 CLI curation fixture. Slice 4 is active for guarded serial task claims,
 isolated execution, process-aware recovery and manual reconciliation.
-T4.1 and T4.2 are locally validated on the dedicated
+T4.1 through T4.3 are locally validated on the dedicated
 `feat/slice-4-workflow-execution` branch. T4.2 commit is
-`a4d454df0264d7bedce0452296243a5324a027c0`. T4.3 is active for durable stop/process
-ownership and safe replacement; Slice 4 has no canonical PR yet.
+`a4d454df0264d7bedce0452296243a5324a027c0`. T4.3 commit is `8a3a0fbf75abc200fdff27b4419aa32bcff22d67`. T4.4 is active for the shared manual evidence
+protocol; Slice 4 has no canonical PR yet.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -220,12 +220,12 @@ Plan contract: [Slice 4](../plan/ticket-native-workflow.md#slice-4-owned-isolate
 | --- | --- | --- | --- | --- |
 | T4.1 | [TKT-20261008141357](../ticket/reviewing/20261008141357-ticket-native-t4-1.md) | validated | 33e4cbbfb32ab9dd27592ba5a7fe03276848e2b2 | Implement guarded invocation/attempt identity, exclusive claims and fencing generations under the existing serial lock. |
 | T4.2 | [TKT-20261008141358](../ticket/reviewing/20261008141358-ticket-native-t4-2.md) | validated | a4d454df0264d7bedce0452296243a5324a027c0 | Execute against a retained isolated cumulative lane branch with frozen inputs and host validation. |
-| T4.3 | [TKT-20261008141359](../ticket/in_progress/20261008141359-ticket-native-t4-3.md) | in_progress | pending | Persist stop intent, lease/process ownership, attempt budgets and safe replacement. |
-| T4.4 | [TKT-20261008141400](../ticket/ready/20261008141400-ticket-native-t4-4.md) | ready | pending | Expose the shared manual claim/checkpoint/evidence-reconciliation protocol. |
+| T4.3 | [TKT-20261008141359](../ticket/reviewing/20261008141359-ticket-native-t4-3.md) | validated | 8a3a0fbf75abc200fdff27b4419aa32bcff22d67 | Persist stop intent, lease/process ownership, attempt budgets and safe replacement. |
+| T4.4 | [TKT-20261008141400](../ticket/in_progress/20261008141400-ticket-native-t4-4.md) | in_progress | pending | Expose the shared manual claim/checkpoint/evidence-reconciliation protocol. |
 
 ### Validation
 
-Status: T4.1–T4.2 task repository and focused race checks passed; final Slice 4 controller checks remain pending.
+Status: T4.1–T4.3 task repository and focused race checks passed; final Slice 4 controller checks remain pending.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`; real worker subprocess
@@ -240,9 +240,9 @@ Acceptance: A06, A09, A12, A17, A21; execution budgets in A24.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commits and ticket lifecycle evidence: T4.1 is validated with its ticket in reviewing; commit `33e4cbbfb32ab9dd27592ba5a7fe03276848e2b2`. T4.2 is validated with its ticket in reviewing; commit `a4d454df0264d7bedce0452296243a5324a027c0`. T4.3 is in progress; T4.4 remains ready.
+- Task commits and ticket lifecycle evidence: T4.1 is validated with its ticket in reviewing; commit `33e4cbbfb32ab9dd27592ba5a7fe03276848e2b2`. T4.2 is validated with its ticket in reviewing; commit `a4d454df0264d7bedce0452296243a5324a027c0`. T4.3 is validated with its ticket in reviewing; commit `8a3a0fbf75abc200fdff27b4419aa32bcff22d67`. T4.4 is in progress.
 - Validation evidence: T4.1 passed `make verify`, `go test ./internal/core ./internal/app -run '^(TestWorkflowInvocation|TestWorkflowClaim|TestWorkflowOperationRelease|TestWorkflowStartBounds|TestServiceWorkflowClaim|TestAgentOperationLock|TestWorkflowAdoption)' -count=1` and the same focused command with `-race`. The repository gate uses the retained CLI curation fixture recorded in the Slice 2 report. Final Slice 4 ordered controller evidence remains pending.
-- Blockers: none observed. T4.3 is active for durable stop/process ownership and safe replacement; runtime implementation has not started.
+- Blockers: none observed. T4.4 is active for the shared manual evidence protocol; runtime implementation has not started.
 
 T4.1 stores authoritative invocation state in the existing run extension, freezes
 selection/target/policy/task/set images, retains equivalent request keys and
@@ -252,8 +252,8 @@ identity. Existing operation locks remain effective while native and legacy
 starts share a process-held Git common-directory reservation. Real subprocess
 and linked-worktree fixtures passed for a single claim winner, partial replay,
 changed inputs, lease expiry, retained budgets, stale releases and active
-ownership outside the registered coordinator. Durable stop/process ownership,
-child-aware replacement and manual result reconciliation remain T4.3–T4.4.
+ownership outside the registered coordinator. Durable stop/process ownership and child-aware replacement are locally validated
+by T4.3. Manual result reconciliation remains T4.4.
 The canonical report will be introduced after those tasks are ready. T4.1 activity is recorded by Acta commit event `01M4E972DPE5DM4Q7ATJEBCRAK`.
 
 T4.2 retains an isolated cumulative branch/worktree and immutable task input with
@@ -269,6 +269,19 @@ uses the retained CLI curation fixture documented by Slice 2. Real subprocess an
 Git fixtures covered cumulative reuse, independent delivery barriers, linked
 aliases, ordered gates, waivers, bounded output, failures/timeouts, edits and
 partial result replay. Acta commit event: `01M4ECD42K1X3N30FQXME60JCV`.
+
+T4.3 retains pause/cancel intent, synced bounded command output, Linux
+boot/PID/birth identities and immutable stop checkpoints. A gated surviving
+supervisor and shared durable process-group ledger keep live children counted
+across host/supervisor loss, linked aliases and legacy starts. Dead-owner
+reconciliation verifies every owned lock before task mutation; replacement
+records retain fencing generations and consumed budgets. Resume restores a
+paused integration barrier and cancellation remains terminal. Passed checks:
+`make verify`, `go test -race ./internal/core ./internal/app -run '^(TestWorkflowTask|TestWorkflowInvocation|TestWorkflowClaim|TestWorkflowOperationRelease|TestWorkflowStartBounds|TestWorkflowStop|TestWorkflowOwnerExpiry|TestWorkflowRecovery|TestWorkflowProcess|TestServiceWorkflowTask|TestServiceWorkflowClaim|TestAgentOperationLock|TestWorkflowAdoption)' -count=1` and `git diff --check`.
+The repository gate uses the retained CLI curation fixture. T4.3 activity is
+recorded by Acta commit event `01M4EESF2QHEVH0KPD8GHN6SB0`. The complete canonical
+report will be introduced after T4.4. Final ordered controller checks remain
+pending.
 
 ## Slice 5: Slice candidates and delivery receipts
 
