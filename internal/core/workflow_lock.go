@@ -38,6 +38,10 @@ func (s *WorkflowStore) withLock(ctx context.Context, action func() error) (err 
 
 	defer func() { err = errors.Join(err, syscall.Flock(int(file.Fd()), syscall.LOCK_UN)) }()
 
+	if err := s.recoverTransition(); err != nil {
+		return err
+	}
+
 	return action()
 }
 

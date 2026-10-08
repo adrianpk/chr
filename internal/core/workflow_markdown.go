@@ -61,6 +61,10 @@ func (s *WorkflowStore) readMarkdown(relative, path string) (WorkflowRecord, err
 		return WorkflowRecord{}, err
 	}
 
+	if !strings.Contains("\n"+front, "\nworkflow_schema:") {
+		return WorkflowRecord{}, ErrNotWorkflow
+	}
+
 	fields, err := workflowMarkdownFields(front)
 	if err != nil {
 		return WorkflowRecord{}, err

@@ -42,7 +42,7 @@ func (u *ticketReviewMetadataUpdater) UpdateReviewMetadata(
 		return fmt.Errorf("ticket review metadata update requires branch or review ref")
 	}
 
-	content, err := os.ReadFile(opts.Path)
+	content, err := readLegacyTicketFile(opts.Path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}

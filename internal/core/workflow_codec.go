@@ -20,6 +20,10 @@ func readWorkflowEnvelope(path string) (WorkflowRecord, error) {
 		return WorkflowRecord{}, err
 	}
 
+	if _, ok := r.Metadata["type"]; !ok {
+		return WorkflowRecord{}, ErrNotWorkflow
+	}
+
 	if err := json.Unmarshal(data, &r.WorkflowIdentity); err != nil {
 		return WorkflowRecord{}, err
 	}

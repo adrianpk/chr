@@ -37,7 +37,7 @@ func (w *ticketEvidenceStrategyChecklistWriter) UpsertEvidenceStrategyChecklist(
 		return fmt.Errorf("ticket path is required")
 	}
 
-	content, err := os.ReadFile(opts.Path)
+	content, err := readLegacyTicketFile(opts.Path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}

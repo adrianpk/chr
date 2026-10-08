@@ -112,7 +112,9 @@ func TestWorkflowAdoption(t *testing.T) {
 	r.Task.AttemptID = "old-attempt"
 	r = workflowTestWrite(t, s, r)
 	r.Task.AttemptID = ""
+
 	r = workflowTestWrite(t, s, r)
+	workflowTestLegacyGuard(t, ctx, path)
 
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -133,4 +135,12 @@ func workflowTestWrite(t *testing.T, s *WorkflowStore, r WorkflowRecord) Workflo
 	}
 
 	return written
+}
+
+func workflowTestLegacyGuard(t *testing.T, ctx context.Context, path string) {
+	t.Helper()
+
+	if err := NewTicketStatusUpdater().UpdateStatus(ctx, UpdateTicketStatusOptions{Path: path, Status: TicketStatusBacklog}); err == nil {
+		t.Fatal("legacy writer bypassed workflow guards")
+	}
 }

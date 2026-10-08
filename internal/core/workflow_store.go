@@ -18,8 +18,9 @@ var ErrNotWorkflow = errors.New("document is not an adopted workflow record")
 
 // WorkflowStore owns guarded filesystem records; SQLite is never its authority.
 type WorkflowStore struct {
-	layout    OpsLayout
-	projectID string
+	afterReplace func(int) error
+	layout       OpsLayout
+	projectID    string
 }
 
 // NewWorkflowStore stores dependencies without performing IO.

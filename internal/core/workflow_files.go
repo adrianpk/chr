@@ -114,21 +114,6 @@ func syncWorkflowDirectory(path string) error {
 	return errors.Join(dir.Sync(), dir.Close())
 }
 
-func (s *WorkflowStore) commitFiles(changes []workflowFileChange) error {
-	for _, change := range changes {
-		path, err := s.safePath(change.Path)
-		if err != nil {
-			return err
-		}
-
-		if err := atomicWorkflowFile(path, change.After); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (s *WorkflowStore) encodeChanges(r WorkflowRecord) ([]workflowFileChange, error) {
 	content, err := encodeWorkflowRecord(r)
 	if err != nil {

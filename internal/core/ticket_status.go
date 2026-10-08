@@ -87,7 +87,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 		return fmt.Errorf("invalid ticket status: %s", opts.Status)
 	}
 
-	content, err := os.ReadFile(opts.Path)
+	content, err := readLegacyTicketFile(opts.Path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}

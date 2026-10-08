@@ -155,7 +155,7 @@ func ticketMergeCommandBlockerSummary(blockers []TicketMergePreflightBlocker) st
 }
 
 func applyTicketMergeCommandResult(path string, result TicketMergeCommandResult, mergedAt time.Time) error {
-	content, err := os.ReadFile(path)
+	content, err := readLegacyTicketFile(path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}

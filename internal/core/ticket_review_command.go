@@ -204,7 +204,7 @@ func writeTicketReviewCommandFindings(
 }
 
 func applyTicketReviewCommandResult(path string, result TicketReviewCommandResult, reviewedAt time.Time) error {
-	content, err := os.ReadFile(path)
+	content, err := readLegacyTicketFile(path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}
