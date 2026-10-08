@@ -155,6 +155,10 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 		return parsed, err
 	}
 
+	if strings.HasPrefix(string(r.Body), "---\n") {
+		return workflowCanonicalTicket(ctx, store, r)
+	}
+
 	body := filepath.Join(filepath.Dir(r.Path), "artifact.md")
 
 	title := ""
@@ -165,6 +169,20 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 	}
 
 	return IndexedTicket{ProjectID: r.ProjectID, Namespace: r.Namespace, Key: r.Task.Key, Title: title, Status: r.Task.Status, UseCase: r.Task.UseCase, Path: filepath.Join(store.layout.Root(), body), RelativePath: body, CreatedAt: &r.CreatedAt, UpdatedAt: &r.UpdatedAt, FileMTime: r.UpdatedAt, FileSize: int64(len(r.Body)), ContentHash: r.SourceHash, IndexedAt: time.Now().UTC()}, nil
+}
+
+func workflowCanonicalTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (IndexedTicket, error) {
+	relative := filepath.Join(filepath.Dir(r.Path), "artifact.md")
+
+	parsed, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), relative), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
+	if err != nil {
+		return IndexedTicket{}, err
+	}
+
+	parsed.Namespace, parsed.Key, parsed.Status = r.Namespace, r.Task.Key, r.Task.Status
+	parsed.UseCase, parsed.ContentHash = r.Task.UseCase, r.SourceHash
+
+	return parsed, nil
 }
 
 func workflowSnapshotHash(snapshot WorkflowSnapshot) string {
