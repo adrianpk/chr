@@ -112,9 +112,9 @@ func TestWorkflowAdoption(t *testing.T) {
 
 	workflowTestLegacyRace(t, ctx, path, []byte(content))
 
-	r.Task.AttemptID = "old-attempt"
+	r.Task.Evidence = []string{"old-evidence"}
 	r = workflowTestWrite(t, s, r)
-	r.Task.AttemptID = ""
+	r.Task.Evidence = nil
 
 	r = workflowTestWrite(t, s, r)
 	workflowTestLegacyGuard(t, ctx, path)
@@ -124,7 +124,7 @@ func TestWorkflowAdoption(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !strings.Contains(string(data), "custom: |\n  Preserve this block\nreview_refs:") || strings.Contains(string(data), "active_attempt_id:") || string(r.Body) != "\nBody  with spaces.\n" || r.ID != "CHR-1" {
+	if !strings.Contains(string(data), "custom: |\n  Preserve this block\nreview_refs:") || strings.Contains(string(data), "task_evidence:") || string(r.Body) != "\nBody  with spaces.\n" || r.ID != "CHR-1" {
 		t.Fatal("adoption changed native content, identity or cleared-field semantics")
 	}
 }

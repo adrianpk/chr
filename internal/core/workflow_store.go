@@ -202,6 +202,10 @@ func guardWorkflowDomain(old, next WorkflowRecord) error {
 	}
 
 	if old.Task != nil && next.Task != nil {
+		if old.Task.AttemptID != "" {
+			return fmt.Errorf("%w: owned task requires a fenced operation", ErrWorkflowOwned)
+		}
+
 		return guardWorkflowTaskChange(old.Task, next.Task)
 	}
 
@@ -209,7 +213,7 @@ func guardWorkflowDomain(old, next WorkflowRecord) error {
 }
 
 func guardWorkflowTaskChange(oldTask, nextTask *WorkflowTask) error {
-	if oldTask.Key != nextTask.Key || oldTask.ClaimGeneration != nextTask.ClaimGeneration {
+	if oldTask.Key != nextTask.Key || oldTask.ClaimGeneration != nextTask.ClaimGeneration || oldTask.AttemptID != nextTask.AttemptID {
 		return ErrWorkflowConflict
 	}
 

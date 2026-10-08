@@ -37,7 +37,9 @@ type AgentOperationLockOptions struct {
 
 // AgentOperationLock describes a package boundary value.
 type AgentOperationLock struct {
-	path string
+	path        string
+	guard       string
+	reservation *os.File
 }
 
 type agentOperationLockRecord struct {
@@ -99,6 +101,26 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 		return nil, err
 	}
 
+	reservation, err := acquireAgentRepositoryCapacity(ctx, projectDir)
+	if err != nil {
+		return nil, err
+	}
+
+	lock, err := acquireAgentOperationFile(lockPath, operation, opts.Owner, createdAt)
+	if err != nil {
+		if reservation != nil {
+			err = errors.Join(err, reservation.Close())
+		}
+
+		return nil, err
+	}
+
+	lock.reservation = reservation
+
+	return lock, nil
+}
+
+func acquireAgentOperationFile(lockPath, operation, owner string, createdAt time.Time) (*AgentOperationLock, error) {
 	file, err := createAgentOperationLockFile(lockPath)
 	if err != nil {
 		return nil, err
@@ -106,7 +128,7 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 
 	record := agentOperationLockRecord{
 		Operation: operation,
-		Owner:     strings.TrimSpace(opts.Owner),
+		Owner:     strings.TrimSpace(owner),
 		PID:       os.Getpid(),
 		CreatedAt: createdAt.Format(time.RFC3339),
 	}
@@ -116,7 +138,12 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 		return nil, err
 	}
 
-	return &AgentOperationLock{path: lockPath}, nil
+	data, err := readWorkflowFile(lockPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AgentOperationLock{path: lockPath, guard: workflowHash(data)}, nil
 }
 
 func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (string, string, time.Time, error) {
@@ -190,12 +217,16 @@ func (lock *AgentOperationLock) Release() error {
 		return nil
 	}
 
-	err := os.Remove(lock.path)
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("release agent operation lock: %w", err)
+	if err := guardedAgentOperationRelease(lock); err != nil {
+		return err
 	}
 
-	lock.path = ""
+	if lock.reservation != nil {
+		err := lock.reservation.Close()
+		lock.reservation = nil
+
+		return err
+	}
 
 	return nil
 }
