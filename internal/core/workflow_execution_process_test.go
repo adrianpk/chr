@@ -84,7 +84,11 @@ func workflowProcessEdit(t *testing.T, input WorkflowTaskInput, mode string) {
 		t.Fatal(err)
 	}
 
-	run.Lane.Worktree = filepath.Join(input.Lane.Worktree, "different")
+	if mode == "edit process" {
+		run.Attempts[0].Processes[0].Identity.StartTicks += "0"
+	} else {
+		run.Lane.Worktree = filepath.Join(input.Lane.Worktree, "different")
+	}
 
 	data, err = json.Marshal(run)
 	if err != nil {

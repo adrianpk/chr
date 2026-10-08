@@ -1,0 +1,128 @@
+package core
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"slices"
+	"time"
+)
+
+// ErrWorkflowStop reports a durable pause or cancellation request.
+var ErrWorkflowStop = errors.New("workflow stop requested")
+
+// StopWorkflow records intent. A running attempt releases ownership only after
+// its process group is quiescent and its retained checkpoint is journaled.
+func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string) (result WorkflowInvocation, err error) {
+	if !slices.Contains([]string{"pause", "cancel"}, intent) {
+		return result, fmt.Errorf("workflow stop intent must be pause or cancel")
+	}
+
+	err = s.withLock(ctx, func() error {
+		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		if readErr != nil {
+			return readErr
+		}
+
+		intent = workflowRetainedStopIntent(run, intent)
+		if workflowInvocationTerminal(run.Status) || run.StopIntent == intent {
+			result = run.WorkflowInvocation
+
+			return nil
+		}
+
+		run.StopIntent = intent
+		if run.Status != "running" {
+			if run.Status != "paused" {
+				run.ResumeStatus = run.Status
+			}
+
+			run.Status = workflowStopStatus(intent)
+		}
+
+		if readErr = owner.commitWorkflowState(&run); readErr != nil {
+			return readErr
+		}
+
+		result = run.WorkflowInvocation
+
+		return nil
+	})
+
+	return result, err
+}
+
+// ResumeWorkflow clears a completed pause without resetting attempts or evidence.
+func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string) (result WorkflowInvocation, err error) {
+	err = s.withLock(ctx, func() error {
+		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		if readErr != nil {
+			return readErr
+		}
+
+		if run.Status != "paused" || run.StopIntent == "cancel" {
+			return ErrWorkflowOwned
+		}
+
+		if readErr = owner.checkWorkflowInputs(ctx, run); readErr != nil {
+			return readErr
+		}
+
+		run.Status = "pending"
+		if run.ResumeStatus != "" {
+			run.Status = run.ResumeStatus
+		}
+
+		run.StopIntent, run.ResumeStatus = "", ""
+		if readErr = owner.commitWorkflowState(&run); readErr != nil {
+			return readErr
+		}
+
+		result = run.WorkflowInvocation
+
+		return nil
+	})
+
+	return result, err
+}
+
+func workflowStopStatus(intent string) string {
+	if intent == "cancel" {
+		return "cancelled"
+	}
+
+	return "paused"
+}
+
+func (s *WorkflowStore) watchWorkflowStop(ctx context.Context, claim *WorkflowClaim) (context.Context, context.CancelFunc) {
+	watched, cancel := context.WithCancel(ctx)
+
+	go func() {
+		ticker := time.NewTicker(50 * time.Millisecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-watched.Done():
+				return
+			case <-ticker.C:
+				run, err := s.ReadWorkflow(watched, claim.InvocationID)
+				if err != nil || run.StopIntent != "" {
+					cancel()
+
+					return
+				}
+			}
+		}
+	}()
+
+	return watched, cancel
+}
+
+func workflowRetainedStopIntent(run workflowInvocationFile, intent string) string {
+	if run.StopIntent == "cancel" {
+		return "cancel"
+	}
+
+	return intent
+}

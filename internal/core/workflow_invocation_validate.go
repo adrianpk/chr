@@ -45,6 +45,10 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return fmt.Errorf("workflow request attachment keys are incomplete or oversized")
 	}
 
+	if err := validateWorkflowStopState(run); err != nil {
+		return err
+	}
+
 	if run.Lane != nil && !validWorkflowLane(*run.Lane) {
 		return fmt.Errorf("invalid workflow invocation lane")
 	}
@@ -78,14 +82,22 @@ func validWorkflowInvocationMember(member WorkflowMember) bool {
 
 func validateWorkflowInvocationAttempts(run workflowInvocationFile, keys map[string]bool) error {
 	ids := map[string]bool{}
+	previous := map[string]WorkflowAttempt{}
+
 	for _, attempt := range run.Attempts {
 		if ids[attempt.ID] || !keys[attempt.TaskKey] || !validWorkflowAttemptIdentity(attempt, run.Owners[attempt.ID]) {
 			return fmt.Errorf("invalid workflow attempt identity or fence")
 		}
 
+		if !validWorkflowReplacement(attempt, previous) {
+			return fmt.Errorf("invalid workflow replacement history")
+		}
+
+		previous[attempt.ID] = attempt
+
 		ids[attempt.ID] = true
-		if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed"}, attempt.Outcome) {
-			return fmt.Errorf("invalid workflow attempt lease or outcome")
+		if err := validateWorkflowAttemptState(attempt); err != nil {
+			return err
 		}
 
 		if err := validateWorkflowAttemptExecution(run.ID, attempt); err != nil {
@@ -113,6 +125,10 @@ func validateWorkflowAttemptExecution(invocationID string, attempt WorkflowAttem
 
 	if attempt.Lane != nil && !validWorkflowLane(*attempt.Lane) {
 		return fmt.Errorf("invalid workflow attempt lane")
+	}
+
+	if err := validateWorkflowAttemptProcesses(invocationID, attempt); err != nil {
+		return err
 	}
 
 	return validateWorkflowAttemptResult(invocationID, attempt)
@@ -172,4 +188,34 @@ func workflowClaimResources(run workflowInvocationFile) map[string]bool {
 	}
 
 	return resources
+}
+
+func validateWorkflowStopState(run workflowInvocationFile) error {
+	if !slices.Contains([]string{"", "pause", "cancel"}, run.StopIntent) {
+		return fmt.Errorf("invalid workflow stop intent")
+	}
+
+	if !slices.Contains([]string{"", "pending", "waiting_capacity", "waiting_review", "waiting_integration", "blocked", "paused"}, run.ResumeStatus) {
+		return fmt.Errorf("invalid workflow resume status")
+	}
+
+	return nil
+}
+
+func validWorkflowReplacement(attempt WorkflowAttempt, previous map[string]WorkflowAttempt) bool {
+	if attempt.Replaces == "" {
+		return true
+	}
+
+	replaced, exists := previous[attempt.Replaces]
+
+	return exists && replaced.TaskKey == attempt.TaskKey && replaced.Generation < attempt.Generation && replaced.Outcome != "validated"
+}
+
+func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
+	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed", "paused", "cancelled", "interrupted", "recovered"}, attempt.Outcome) {
+		return fmt.Errorf("invalid workflow attempt lease or outcome")
+	}
+
+	return nil
 }

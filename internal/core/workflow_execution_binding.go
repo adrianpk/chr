@@ -27,6 +27,10 @@ func (s *WorkflowStore) checkWorkflowPreparedClaim(ctx context.Context, claim *W
 			return err
 		}
 
+		if run.StopIntent != "" {
+			return ErrWorkflowStop
+		}
+
 		return checkWorkflowExecutionBinding(run, record, prepared)
 	})
 }

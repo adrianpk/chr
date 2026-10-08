@@ -41,20 +41,25 @@ type WorkflowInputImage struct {
 
 // WorkflowAttempt exposes stable ownership facts without private credentials.
 type WorkflowAttempt struct {
-	ID            string        `json:"id"`
-	TaskKey       string        `json:"task_key"`
-	Generation    uint64        `json:"generation"`
-	InputRevision uint64        `json:"input_revision"`
-	ContractHash  string        `json:"contract_hash"`
-	LeaseUntil    time.Time     `json:"lease_until"`
-	StartedAt     time.Time     `json:"started_at"`
-	FinishedAt    time.Time     `json:"finished_at,omitempty"`
-	Outcome       string        `json:"outcome"`
-	Lane          *WorkflowLane `json:"lane,omitempty"`
-	InputRef      string        `json:"input_ref,omitempty"`
-	InputHash     string        `json:"input_hash,omitempty"`
-	ResultRef     string        `json:"result_ref,omitempty"`
-	ResultHash    string        `json:"result_hash,omitempty"`
+	ID             string                   `json:"id"`
+	TaskKey        string                   `json:"task_key"`
+	Generation     uint64                   `json:"generation"`
+	InputRevision  uint64                   `json:"input_revision"`
+	ContractHash   string                   `json:"contract_hash"`
+	LeaseUntil     time.Time                `json:"lease_until"`
+	StartedAt      time.Time                `json:"started_at"`
+	FinishedAt     time.Time                `json:"finished_at,omitempty"`
+	Outcome        string                   `json:"outcome"`
+	Lane           *WorkflowLane            `json:"lane,omitempty"`
+	InputRef       string                   `json:"input_ref,omitempty"`
+	InputHash      string                   `json:"input_hash,omitempty"`
+	ResultRef      string                   `json:"result_ref,omitempty"`
+	ResultHash     string                   `json:"result_hash,omitempty"`
+	OwnerProcess   *WorkflowProcessIdentity `json:"owner_process,omitempty"`
+	Processes      []WorkflowProcess        `json:"processes"`
+	Replaces       string                   `json:"replaces"`
+	CheckpointRef  string                   `json:"checkpoint_ref"`
+	CheckpointHash string                   `json:"checkpoint_hash"`
 }
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
@@ -76,6 +81,8 @@ type WorkflowInvocation struct {
 	Attempts     []WorkflowAttempt       `json:"attempts"`
 	Blocker      *WorkflowBlocker        `json:"blocker,omitempty"`
 	Lane         *WorkflowLane           `json:"lane,omitempty"`
+	StopIntent   string                  `json:"stop_intent"`
+	ResumeStatus string                  `json:"resume_status"`
 }
 
 type workflowInvocationFile struct {

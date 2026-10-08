@@ -43,10 +43,12 @@ type AgentOperationLock struct {
 }
 
 type agentOperationLockRecord struct {
-	Operation string `json:"operation"`
-	Owner     string `json:"owner"`
-	PID       int    `json:"pid"`
-	CreatedAt string `json:"created_at"`
+	Operation string                   `json:"operation"`
+	Owner     string                   `json:"owner"`
+	PID       int                      `json:"pid"`
+	CreatedAt string                   `json:"created_at"`
+	AttemptID string                   `json:"attempt_id,omitempty"`
+	Process   *WorkflowProcessIdentity `json:"process,omitempty"`
 }
 
 // WorkSelectionPreflightOptions describes a package boundary value.

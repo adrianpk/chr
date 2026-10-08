@@ -74,3 +74,33 @@ func (s service) ExecuteWorkflowTask(ctx context.Context, claim *core.WorkflowCl
 
 	return store.ExecuteWorkflowTask(ctx, claim, worker)
 }
+
+// StopWorkflow persists pause or cancel intent through the shared domain owner.
+func (s service) StopWorkflow(ctx context.Context, id, intent string) (core.WorkflowInvocation, error) {
+	store, err := s.workflowStore()
+	if err != nil {
+		return core.WorkflowInvocation{}, err
+	}
+
+	return store.StopWorkflow(ctx, id, intent)
+}
+
+// ResumeWorkflow continues a completed pause with its consumed budget retained.
+func (s service) ResumeWorkflow(ctx context.Context, id string) (core.WorkflowInvocation, error) {
+	store, err := s.workflowStore()
+	if err != nil {
+		return core.WorkflowInvocation{}, err
+	}
+
+	return store.ResumeWorkflow(ctx, id)
+}
+
+// ReconcileWorkflow recovers dead or expired ownership after process exclusion.
+func (s service) ReconcileWorkflow(ctx context.Context, id string) (core.WorkflowInvocation, error) {
+	store, err := s.workflowStore()
+	if err != nil {
+		return core.WorkflowInvocation{}, err
+	}
+
+	return store.ReconcileWorkflow(ctx, id)
+}

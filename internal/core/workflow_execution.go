@@ -34,12 +34,18 @@ func (s *WorkflowStore) ExecuteWorkflowTask(ctx context.Context, claim *Workflow
 		return WorkflowTaskResult{}, err
 	}
 
-	result, executionErr := s.runWorkflowTask(ctx, claim, prepared)
+	watched, stop := s.watchWorkflowStop(ctx, claim)
+	defer stop()
+
+	result, executionErr := s.runWorkflowTask(watched, claim, prepared)
 	if errors.Is(executionErr, ErrWorkflowOwned) {
 		return result, executionErr
 	}
 
-	err = s.finishWorkflowTask(ctx, claim, prepared, &result)
+	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+	defer cancel()
+
+	err = s.finishWorkflowTask(cleanup, claim, prepared, &result, watched.Err() != nil)
 
 	return result, errors.Join(executionErr, err)
 }

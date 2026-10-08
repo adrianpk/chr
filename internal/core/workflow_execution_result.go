@@ -3,13 +3,14 @@ package core
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
 
-func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, result *WorkflowTaskResult) error {
+func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, result *WorkflowTaskResult, interrupted bool) error {
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowClaim(ctx, claim)
+		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
 		if err != nil {
 			return err
 		}
@@ -20,6 +21,10 @@ func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowC
 
 		if err := checkWorkflowExecutionBinding(run, record, prepared); err != nil {
 			return err
+		}
+
+		if workflowExecutionStopped(run, interrupted) {
+			return claim.store.finishStoppedWorkflowTask(run, record, claim, result)
 		}
 
 		if err := claim.store.checkWorkflowTaskCandidate(ctx, &run, prepared, result); err != nil {
@@ -86,4 +91,21 @@ func applyWorkflowTaskResult(run *workflowInvocationFile, record *WorkflowRecord
 
 	run.Status = "pending"
 	workflowTaskBoundary(run, *record)
+}
+
+func workflowExecutionStopped(run workflowInvocationFile, interrupted bool) bool {
+	return run.StopIntent != "" || interrupted || !time.Now().Before(run.Attempts[len(run.Attempts)-1].LeaseUntil)
+}
+
+func (s *WorkflowStore) finishStoppedWorkflowTask(run workflowInvocationFile, record WorkflowRecord, claim *WorkflowClaim, result *WorkflowTaskResult) error {
+	result.Successful, result.Outcome = false, "interrupted"
+	if run.StopIntent != "" {
+		result.Outcome = workflowStopStatus(run.StopIntent)
+	}
+
+	if err := s.checkpointWorkflowAttempt(run, record, result.Outcome, result); err != nil {
+		return err
+	}
+
+	return errors.Join(ErrWorkflowStop, claim.releaseReservation())
 }

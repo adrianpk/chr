@@ -47,11 +47,15 @@ func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *Wo
 }
 
 func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
+	if run.StopIntent != "" {
+		return nil, ErrWorkflowOwned
+	}
+
 	if err := s.reuseWorkflowValidatedTasks(ctx, &run); err != nil {
 		return nil, err
 	}
 
-	if !slices.Contains([]string{"pending", "paused", "waiting_capacity"}, run.Status) || run.Cursor == len(run.Members) {
+	if !workflowInvocationClaimable(run) {
 		return nil, fmt.Errorf("%w: invocation %s is %s", ErrWorkflowOwned, run.ID, run.Status)
 	}
 
@@ -60,7 +64,7 @@ func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocatio
 		return nil, err
 	}
 
-	claim, err = s.reserveWorkflowClaim(ctx, run.ID)
+	claim, err = s.reserveWorkflowClaim(ctx, run)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +166,13 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 	now := time.Now().UTC()
 	claim.AttemptID = fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1)
 	claim.Generation = record.Task.ClaimGeneration + 1
-	attempt := WorkflowAttempt{ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
+
+	owner, err := workflowProcessIdentity(os.Getpid())
+	if err != nil {
+		return err
+	}
+
+	attempt := WorkflowAttempt{OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
 	run.Attempts = append(run.Attempts, attempt)
 	run.Owners[claim.AttemptID] = workflowHash([]byte(claim.Token))
 	run.Status = "running"
@@ -232,6 +242,10 @@ func (s *WorkflowStore) CheckWorkflowClaim(ctx context.Context, claim *WorkflowC
 }
 
 func (s *WorkflowStore) checkWorkflowClaim(ctx context.Context, claim *WorkflowClaim) (workflowInvocationFile, WorkflowRecord, error) {
+	return s.checkWorkflowCredential(ctx, claim, true)
+}
+
+func (s *WorkflowStore) checkWorkflowCredential(ctx context.Context, claim *WorkflowClaim, lease bool) (workflowInvocationFile, WorkflowRecord, error) {
 	run, owner, err := s.locateWorkflowInvocation(ctx, claim.InvocationID)
 	if err != nil {
 		return run, WorkflowRecord{}, err
@@ -246,7 +260,7 @@ func (s *WorkflowStore) checkWorkflowClaim(ctx context.Context, claim *WorkflowC
 	}
 
 	attempt := run.Attempts[len(run.Attempts)-1]
-	if !workflowAttemptOwnerMatches(run, claim, attempt) {
+	if !workflowCredentialValid(run, claim, attempt, lease) {
 		return run, WorkflowRecord{}, ErrWorkflowOwned
 	}
 
@@ -268,10 +282,6 @@ func (s *WorkflowStore) checkWorkflowClaim(ctx context.Context, claim *WorkflowC
 	return run, record, nil
 }
 
-func workflowAttemptOwnerMatches(run workflowInvocationFile, claim *WorkflowClaim, attempt WorkflowAttempt) bool {
-	return run.Status == "running" && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == workflowHash([]byte(claim.Token)) && time.Now().Before(attempt.LeaseUntil)
-}
-
 // CheckpointWorkflow yields at a quiescent task boundary without claiming success.
 func (s *WorkflowStore) CheckpointWorkflow(ctx context.Context, claim *WorkflowClaim) error {
 	if claim == nil || claim.store == nil || claim.execution == nil {
@@ -291,15 +301,32 @@ func (s *WorkflowStore) CheckpointWorkflow(ctx context.Context, claim *WorkflowC
 			return err
 		}
 
-		record.Task.AttemptID, record.Task.Phase, record.Task.Status = "", "pending", TicketStatusReadyForDev
-		attempt := &run.Attempts[len(run.Attempts)-1]
-		attempt.Outcome, attempt.FinishedAt = "checkpointed", time.Now().UTC()
-
-		run.Status = "paused"
-		if err := claim.store.commitWorkflowClaim(run, record); err != nil {
+		if err := claim.store.checkpointWorkflowAttempt(run, record, "checkpointed", nil); err != nil {
 			return err
 		}
 
 		return claim.releaseReservation()
 	})
+}
+
+func workflowAttemptCredentialMatches(run workflowInvocationFile, claim *WorkflowClaim, attempt WorkflowAttempt) bool {
+	return run.Status == "running" && attempt.Outcome == "running" && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == workflowHash([]byte(claim.Token))
+}
+
+func workflowReplacedAttempt(run workflowInvocationFile, key string) string {
+	for _, attempt := range slices.Backward(run.Attempts) {
+		if attempt.TaskKey == key && attempt.Outcome != "validated" {
+			return attempt.ID
+		}
+	}
+
+	return ""
+}
+
+func workflowInvocationClaimable(run workflowInvocationFile) bool {
+	return run.StopIntent == "" && slices.Contains([]string{"pending", "paused", "waiting_capacity"}, run.Status) && run.Cursor < len(run.Members)
+}
+
+func workflowCredentialValid(run workflowInvocationFile, claim *WorkflowClaim, attempt WorkflowAttempt, lease bool) bool {
+	return workflowAttemptCredentialMatches(run, claim, attempt) && (!lease || time.Now().Before(attempt.LeaseUntil))
 }

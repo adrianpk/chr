@@ -43,16 +43,20 @@ func acquireWorkflowCapacity(ctx context.Context, projectDir string) (*os.File, 
 		return nil, errors.Join(err, closeErr)
 	}
 
+	if err := guardWorkflowProcessCapacity(common); err != nil {
+		return nil, errors.Join(err, file.Close())
+	}
+
 	return file, nil
 }
 
-func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, id string) (claim *WorkflowClaim, err error) {
+func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
 	file, err := acquireWorkflowCapacity(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return nil, err
 	}
 
-	claim = &WorkflowClaim{InvocationID: id, store: s, reservation: file, execution: &workflowClaimExecution{}}
+	claim = &WorkflowClaim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: file, execution: &workflowClaimExecution{}}
 	owned := claim
 
 	defer func() {
@@ -67,7 +71,7 @@ func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, id string) (cl
 	}
 
 	for _, layout := range layouts {
-		lock, err := acquireWorkflowOperationLock(layout, id)
+		lock, err := acquireWorkflowOperationLock(layout, claim)
 		if err != nil {
 			return nil, err
 		}
@@ -110,7 +114,7 @@ func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayo
 	return result, nil
 }
 
-func acquireWorkflowOperationLock(layout OpsLayout, id string) (*AgentOperationLock, error) {
+func acquireWorkflowOperationLock(layout OpsLayout, claim *WorkflowClaim) (*AgentOperationLock, error) {
 	path := filepath.Join(layout.Root(), "lock", "agent-operation.lock")
 
 	file, err := createAgentOperationLockFile(path)
@@ -118,7 +122,12 @@ func acquireWorkflowOperationLock(layout OpsLayout, id string) (*AgentOperationL
 		return nil, err
 	}
 
-	record := agentOperationLockRecord{Operation: "workflow_execution", Owner: id, PID: os.Getpid(), CreatedAt: time.Now().UTC().Format(time.RFC3339Nano)}
+	identity, err := workflowProcessIdentity(os.Getpid())
+	if err != nil {
+		return nil, errors.Join(err, file.Close(), os.Remove(path))
+	}
+
+	record := agentOperationLockRecord{Operation: "workflow_execution", Owner: claim.InvocationID, AttemptID: claim.AttemptID, Process: &identity, PID: os.Getpid(), CreatedAt: time.Now().UTC().Format(time.RFC3339Nano)}
 	if err := writeAgentOperationLockFile(file, path, record); err != nil {
 		return nil, err
 	}
