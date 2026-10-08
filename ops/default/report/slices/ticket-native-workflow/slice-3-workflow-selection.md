@@ -1,6 +1,6 @@
 # Slice 3: Deterministic Work Selection
 
-Status: reviewing
+Status: delivered
 Delivery set: ticket-native-workflow
 Plan: [Ticket-Native Work Delivery](../../../plan/ticket-native-workflow.md)
 Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md)
@@ -81,11 +81,12 @@ Successful implementation checks:
 - `go test -race ./internal/core ./internal/app -run '^(TestWorkflowSelection|TestServiceWorkflowPreview|TestTicketLoopQuery)' -count=1`
 - `git diff --check`
 
-The controller records `make verify`,
+The controller passed `make verify`,
 `go test ./internal/core ./internal/app -count=1` and `git diff --check` in that
-order on the clean PR-reference follow-up head. Its immutable-head JSON and log
-retain the final evidence. These are Slice 3 checks; the composed final gate is
-recorded separately in the approved plan.
+order on clean head `b39a0051818b1fa9c08b88cf2e79658b173cf16f`. Its immutable-head
+JSON and log retain the evidence. Canonical PR #366 merged that head into `dev`
+on 2026-10-08 at 16:42:08 UTC; all four task tickets are solved. These are
+Slice 3 checks; the composed final gate remains in the approved plan.
 
 Repository checks use the retained owned `fixtures/slice-2/dump-curation`
 executable through PATH, as documented in the [Slice 2 report](slice-2-workflow-materialization.md).

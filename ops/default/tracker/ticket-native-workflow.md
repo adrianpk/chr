@@ -22,23 +22,22 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 3 — Deterministic work selection
+Active slice: Slice 4 — Owned isolated task execution
 
-Next slice: Slice 4 — Owned isolated task execution
+Next slice: Slice 5 — Slice candidates and delivery receipts
 
 Slice strategy: behavior-first
 
-Progress: 2 of 12 slices integrated; 8 of 48 tasks done.
+Progress: 3 of 12 slices integrated; 12 of 48 tasks done.
 
 ## Current Checkpoint
 
-Slices 1 and 2 are verified integrated through canonical PRs #364 and #365.
-Slice 2's merged head is `7d4008d32eccefcd3abad5e80955fb7f19110b6a`;
-its report is delivered and four tickets are solved. The controller's ordered
-checks passed on that head with the documented owned dump-curation fixture.
-Slice 3 implements exact bounded previews, hierarchy ordering, prerequisites
-and native loose-ticket filters. Its four task commits passed local checks and
-are reviewing; PR references and final clean-head evidence precede handoff.
+Slices 1 through 3 are verified integrated through canonical PRs #364–#366.
+Slice 3's merged head is `b39a0051818b1fa9c08b88cf2e79658b173cf16f`;
+its report is delivered and all four tickets are solved. The controller's
+canonical ordered checks passed on that head with the documented owned
+CLI curation fixture. Slice 4 is active for guarded serial task claims,
+isolated execution, process-aware recovery and manual reconciliation.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -66,8 +65,8 @@ Fast-forward into `dev`.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | integrated | 4/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
 | Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | integrated | 4/4 | [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365) |
-| Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | reviewing | 0/4 | [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366) |
-| Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
+| Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | integrated | 4/4 | [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366) |
+| Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | active | 0/4 | pending |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | not_started | 0/4 | pending |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | not_started | 0/4 | pending |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | not_started | 0/4 | pending |
@@ -161,7 +160,7 @@ Acceptance: A01, A02.
 
 ## Slice 3: Deterministic work selection
 
-Status: reviewing
+Status: integrated
 
 Prerequisite: satisfied by verified PR #365 integration into dev.
 
@@ -175,14 +174,14 @@ Plan contract: [Slice 3](../plan/ticket-native-workflow.md#slice-3-deterministic
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T3.1 | [TKT-20261008141353](../ticket/reviewing/20261008141353-ticket-native-t3-1.md) | validated | 559000591223cdc0ce5df4c3ffd6dc0f367124f6 | Add exact ticket/slice/set/use-case/loose selectors and bounded preview results. |
-| T3.2 | [TKT-20261008141354](../ticket/reviewing/20261008141354-ticket-native-t3-2.md) | validated | 785a1d90fae0f62ea6a20f14d8efbf8a34257cfa | Resolve set-local/task-local order and homogeneous use-case set order. |
-| T3.3 | [TKT-20261008141355](../ticket/reviewing/20261008141355-ticket-native-t3-3.md) | validated | 2404d19149774e675e3c161ae2da8020d186e033 | Validate implicit and explicit prerequisites, including target delivery proof. |
-| T3.4 | [TKT-20261008141356](../ticket/reviewing/20261008141356-ticket-native-t3-4.md) | validated | 7d4a35032ad432ebf307140ec692038031665262 | Preserve native classification/rank rules and implement loose ownership exclusion and thresholds. |
+| T3.1 | [TKT-20261008141353](../ticket/solved/20261008141353-ticket-native-t3-1.md) | done | 559000591223cdc0ce5df4c3ffd6dc0f367124f6 | Add exact ticket/slice/set/use-case/loose selectors and bounded preview results. |
+| T3.2 | [TKT-20261008141354](../ticket/solved/20261008141354-ticket-native-t3-2.md) | done | 785a1d90fae0f62ea6a20f14d8efbf8a34257cfa | Resolve set-local/task-local order and homogeneous use-case set order. |
+| T3.3 | [TKT-20261008141355](../ticket/solved/20261008141355-ticket-native-t3-3.md) | done | 2404d19149774e675e3c161ae2da8020d186e033 | Validate implicit and explicit prerequisites, including target delivery proof. |
+| T3.4 | [TKT-20261008141356](../ticket/solved/20261008141356-ticket-native-t3-4.md) | done | 7d4a35032ad432ebf307140ec692038031665262 | Preserve native classification/rank rules and implement loose ownership exclusion and thresholds. |
 
 ### Validation
 
-Status: repository checks and focused selection race checks passed. Exact clean-head controller validation follows the PR-reference commit.
+Status: all required controller checks passed against the verified integrated head.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1`.
 
@@ -192,18 +191,18 @@ Acceptance: A04, A05, A07; query bounds in A24.
 
 ### Delivery Evidence
 
-- PR: [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366); open against `dev`.
-- Merge commit: pending.
-- Report status: reviewing; [Slice 3 report](../report/slices/ticket-native-workflow/slice-3-workflow-selection.md).
-- Task commits: T3.1 `559000591223cdc0ce5df4c3ffd6dc0f367124f6`; T3.2 `785a1d90fae0f62ea6a20f14d8efbf8a34257cfa`; T3.3 `2404d19149774e675e3c161ae2da8020d186e033`; T3.4 `7d4a35032ad432ebf307140ec692038031665262`. All four tickets are reviewing.
-- Validation evidence: `make verify` and focused real-files/Git/concurrency selection race checks passed. The retained owned CLI curation fixture is documented in the report. Final controller evidence binds the clean PR-reference head.
+- PR: [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366); verified merged into `dev`.
+- Merge commit: `b39a0051818b1fa9c08b88cf2e79658b173cf16f`.
+- Report status: delivered; [Slice 3 report](../report/slices/ticket-native-workflow/slice-3-workflow-selection.md).
+- Task commits: T3.1 `559000591223cdc0ce5df4c3ffd6dc0f367124f6`; T3.2 `785a1d90fae0f62ea6a20f14d8efbf8a34257cfa`; T3.3 `2404d19149774e675e3c161ae2da8020d186e033`; T3.4 `7d4a35032ad432ebf307140ec692038031665262`. All four tickets are solved with resolution fixed.
+- Validation evidence: `make verify` and focused real-files/Git/concurrency selection race checks passed. The retained owned CLI curation fixture is documented in the report. Controller evidence at `b39a0051818b1fa9c08b88cf2e79658b173cf16f` passed `make verify`, `go test ./internal/core ./internal/app -count=1` and `git diff --check` in that order.
 - Blockers: none observed.
 
 ## Slice 4: Owned isolated task execution
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 3 verified integrated into dev.
+Prerequisite: satisfied by verified PR #366 integration into dev.
 
 Expected branch: `feat/slice-4-workflow-execution`
 
@@ -239,7 +238,7 @@ Acceptance: A06, A09, A12, A17, A21; execution budgets in A24.
 - Report status: not created.
 - Task commits and ticket lifecycle evidence: pending.
 - Validation evidence: pending.
-- Blockers: none observed; implementation has not started.
+- Blockers: none observed; Slice 4 is activated.
 
 ## Slice 5: Slice candidates and delivery receipts
 
