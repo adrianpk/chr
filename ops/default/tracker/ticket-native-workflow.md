@@ -37,7 +37,8 @@ Slice 4 merged head `517fdbb3322b4e02b951e5301b8f6c8e04740f57` passed the contro
 ordered checks with the retained CLI curation fixture. Its canonical report is
 delivered and all four task tickets are solved. Slice 5 is active for cumulative
 aggregate candidates, one canonical PR, verified external delivery and journaled
-shared-receipt finalization. T5.1 is in progress; later tasks remain ready.
+shared-receipt finalization. T5.1 is validated in `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; T5.2 is in progress
+for canonical PR bindings. T5.3 and T5.4 remain ready.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -260,14 +261,20 @@ Plan contract: [Slice 5](../plan/ticket-native-workflow.md#slice-5-slice-candida
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T5.1 | [TKT-20261008141401](../ticket/in_progress/20261008141401-ticket-native-t5-1.md) | in_progress | pending | Run remaining tasks cumulatively and host-validate aggregate slice acceptance on an immutable tree. |
-| T5.2 | [TKT-20261008141402](../ticket/ready/20261008141402-ticket-native-t5-2.md) | ready | pending | Create/reuse one canonical PR and retain branch/candidate/PR bindings. |
+| T5.1 | [TKT-20261008141401](../ticket/reviewing/20261008141401-ticket-native-t5-1.md) | validated | 0bbbd64e691ee6832d495a2b8d4de3b920895e47 | Run remaining tasks cumulatively and host-validate aggregate slice acceptance on an immutable tree. |
+| T5.2 | [TKT-20261008141402](../ticket/in_progress/20261008141402-ticket-native-t5-2.md) | in_progress | pending | Create/reuse one canonical PR and retain branch/candidate/PR bindings. |
 | T5.3 | [TKT-20261008141403](../ticket/ready/20261008141403-ticket-native-t5-3.md) | ready | pending | Verify external integration through canonical receipts and method-specific target/tree/history proof. |
 | T5.4 | [TKT-20261008141404](../ticket/ready/20261008141404-ticket-native-t5-4.md) | ready | pending | Journal shared receipt creation and task-status finalization. |
 
 ### Validation
 
-Status: not run.
+Status: T5.1 task checks passed; final Slice 5 candidate checks remain pending.
+
+Successful T5.1 checks: `make verify` with the retained Slice 2 CLI curation
+fixture; `go test -race ./internal/core ./internal/app -run '^(TestWorkflowSlice|TestServiceWorkflowSlice)' -count=1`;
+`git diff --check`. Real fixtures cover aggregate retries, proof/contract/Git
+mutation, pause/cancel, fenced replacement, budgets, complete membership and
+aggregate/repair journal replay after host death.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`.
@@ -281,9 +288,9 @@ Acceptance: A01, A08, A13, A22.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commits and ticket lifecycle evidence: pending.
-- Validation evidence: pending.
-- Blockers: none observed. T5.1 is active for cumulative execution and immutable aggregate validation.
+- T5.1 implementation commit: `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; its ticket is reviewing and task row validated. T5.2 is in progress; T5.3 and T5.4 remain ready.
+- Final clean-head controller validation evidence: pending.
+- Blockers: none observed. T5.2 is active for canonical PR creation/reuse and retained bindings.
 
 ## Slice 6: Guarded automatic publication
 
