@@ -16,7 +16,7 @@ func (s *WorkflowStore) readWorkflowSelection(ctx context.Context) (workflowSele
 		return workflowSelection{}, err
 	}
 
-	selection := workflowSelection{snapshot: snapshot, records: map[string]WorkflowRecord{}, sets: map[string]WorkflowRecord{}, slices: map[string]WorkflowSlice{}}
+	selection := workflowSelection{snapshot: snapshot, records: map[string]WorkflowRecord{}, sets: map[string]WorkflowRecord{}, slices: map[string]WorkflowSlice{}, evidenceHashes: map[string]string{}}
 	paths := map[string]bool{}
 
 	for _, record := range snapshot.Records {
@@ -42,11 +42,19 @@ func (s *WorkflowStore) readWorkflowSelection(ctx context.Context) (workflowSele
 		paths[ticket.RelativePath] = true
 	}
 
+	if len(selection.slices) > WorkflowRecordLimit {
+		return workflowSelection{}, fmt.Errorf("workflow slice observation bound exceeded")
+	}
+
 	if err := s.readUnpreparedTickets(ctx, &selection, paths); err != nil {
 		return workflowSelection{}, err
 	}
 
 	sort.Slice(selection.tickets, func(i, j int) bool { return compareIndexedTicketsByKey(selection.tickets[i], selection.tickets[j]) < 0 })
+
+	if err := s.hashWorkflowEvidence(ctx, &selection); err != nil {
+		return workflowSelection{}, err
+	}
 
 	return selection, nil
 }
@@ -85,6 +93,10 @@ func (selection workflowSelection) hash() string {
 	images := []string{workflowSnapshotHash(selection.snapshot)}
 	for _, ticket := range selection.tickets {
 		images = append(images, ticket.RelativePath+"\x00"+ticket.ContentHash)
+	}
+
+	for path, hash := range selection.evidenceHashes {
+		images = append(images, path+"\x00"+hash)
 	}
 
 	sort.Strings(images)
@@ -160,4 +172,49 @@ func workflowUnpreparedTicket(content []byte) (IndexedTicket, error) {
 	}
 
 	return IndexedTicket{Key: unquoteMetadataString(metadata["key"]), Status: unquoteMetadataString(metadata["status"]), UseCase: unquoteMetadataString(metadata["use_case"]), Priority: unquoteMetadataString(metadata["priority"]), Severity: unquoteMetadataString(metadata["severity"]), Type: unquoteMetadataString(metadata["type"]), ProjectArea: unquoteMetadataString(metadata["project_area"]), Tags: parseMetadataStringList(metadata["tags"]), CreatedAt: created, ContentHash: workflowHash(content)}, nil
+}
+
+func (s *WorkflowStore) hashWorkflowEvidence(ctx context.Context, selection *workflowSelection) error {
+	for _, record := range selection.records {
+		for _, relative := range record.Task.Evidence {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+
+			if _, found := selection.evidenceHashes[relative]; found {
+				continue
+			}
+
+			if len(selection.evidenceHashes) >= WorkflowRecordLimit {
+				return fmt.Errorf("workflow evidence observation bound exceeded")
+			}
+
+			hash, err := s.workflowEvidenceHash(relative)
+			if err != nil {
+				return err
+			}
+
+			selection.evidenceHashes[relative] = hash
+		}
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) workflowEvidenceHash(relative string) (string, error) {
+	path, err := s.safePath(relative)
+	if err != nil {
+		return "", err
+	}
+
+	data, err := readWorkflowFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return "missing", nil
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	return workflowHash(data), nil
 }

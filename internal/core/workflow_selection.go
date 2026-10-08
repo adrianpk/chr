@@ -2,8 +2,10 @@ package core
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // WorkflowSelector names an exact extent. Only loose work omits Identity.
@@ -14,10 +16,13 @@ type WorkflowSelector struct {
 
 // WorkflowPreviewRequest bounds a read-only selection of authoritative records.
 type WorkflowPreviewRequest struct {
-	Selector     WorkflowSelector
-	Offset       int
-	Limit        int
-	SnapshotHash string
+	Selector         WorkflowSelector
+	Offset           int
+	Limit            int
+	SnapshotHash     string
+	Target           WorkflowPreviewTarget
+	CumulativeBranch string
+	CumulativeCommit string
 }
 
 // WorkflowPreviewMember freezes the identity, revision and contract of one task.
@@ -32,6 +37,8 @@ type WorkflowPreviewMember struct {
 	TaskOrder    int
 	Status       string
 	Phase        string
+	Readiness    string
+	Blocker      *WorkflowBlocker
 }
 
 // WorkflowPreview returns one bounded page and counts for the whole extent.
@@ -45,14 +52,16 @@ type WorkflowPreview struct {
 	SnapshotHash string
 	NextOffset   int
 	SetOrderRule string
+	admitted     map[WorkflowRef]bool
 }
 
 type workflowSelection struct {
-	snapshot WorkflowSnapshot
-	tickets  []IndexedTicket
-	records  map[string]WorkflowRecord
-	sets     map[string]WorkflowRecord
-	slices   map[string]WorkflowSlice
+	snapshot       WorkflowSnapshot
+	tickets        []IndexedTicket
+	records        map[string]WorkflowRecord
+	sets           map[string]WorkflowRecord
+	slices         map[string]WorkflowSlice
+	evidenceHashes map[string]string
 }
 
 // Preview resolves exact scope under the same exclusion used by domain writes.
@@ -62,6 +71,9 @@ func (s *WorkflowStore) Preview(ctx context.Context, request WorkflowPreviewRequ
 		return WorkflowPreview{}, err
 	}
 
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
 	err = s.withLock(ctx, func() error {
 		selection, readErr := s.readWorkflowSelection(ctx)
 		if readErr != nil {
@@ -69,9 +81,16 @@ func (s *WorkflowStore) Preview(ctx context.Context, request WorkflowPreviewRequ
 		}
 
 		preview, readErr = selection.preview(request)
+		if readErr != nil {
+			return readErr
+		}
 
-		return readErr
+		return s.observePrerequisites(ctx, selection, request, &preview)
 	})
+
+	if err == nil && request.SnapshotHash != "" && request.SnapshotHash != preview.SnapshotHash {
+		return WorkflowPreview{}, fmt.Errorf("%w: restart workflow preview pagination", ErrWorkflowConflict)
+	}
 
 	return preview, err
 }
@@ -84,6 +103,10 @@ func validateWorkflowPreviewRequest(request WorkflowPreviewRequest) error {
 	selector := request.Selector
 	if strings.TrimSpace(selector.Identity) != selector.Identity || len(selector.Identity) > 128 {
 		return fmt.Errorf("invalid workflow selector identity")
+	}
+
+	if err := validateWorkflowPreviewContext(request); err != nil {
+		return err
 	}
 
 	return validateWorkflowSelector(selector)
@@ -113,10 +136,12 @@ func (selection workflowSelection) preview(request WorkflowPreviewRequest) (Work
 
 	preview := WorkflowPreview{Selector: request.Selector, Authority: "tickets", Excluded: map[string]int{}, NextOffset: -1}
 
-	preview.SnapshotHash = selection.hash()
-	if request.SnapshotHash != "" && request.SnapshotHash != preview.SnapshotHash {
-		return WorkflowPreview{}, fmt.Errorf("%w: restart workflow preview pagination", ErrWorkflowConflict)
+	requestHash, err := workflowPreviewRequestHash(request)
+	if err != nil {
+		return WorkflowPreview{}, err
 	}
+
+	preview.SnapshotHash = workflowHash([]byte(selection.hash() + requestHash))
 
 	members := []WorkflowPreviewMember{}
 
@@ -143,6 +168,7 @@ func (selection workflowSelection) preview(request WorkflowPreviewRequest) (Work
 		return WorkflowPreview{}, orderErr
 	}
 
+	preview.admitted = workflowAdmittedRefs(members, request.Selector)
 	preview.Total = len(members)
 	start := min(request.Offset, len(members))
 	end := min(start+request.Limit, len(members))
@@ -226,4 +252,46 @@ func workflowPreviewMember(record WorkflowRecord) WorkflowPreviewMember {
 	task := record.Task
 
 	return WorkflowPreviewMember{Key: task.Key, Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, ContractHash: task.ContractHash, SetID: task.SetID, SliceID: task.SliceID, TaskOrder: task.Order, Status: task.Status, Phase: task.Phase}
+}
+
+func workflowAdmittedRefs(members []WorkflowPreviewMember, selector WorkflowSelector) map[WorkflowRef]bool {
+	admitted := map[WorkflowRef]bool{}
+	for _, member := range members {
+		admitted[WorkflowRef{Kind: "ticket", ID: member.Key}] = true
+		if selector.Extent != "ticket" && member.SliceID != "" {
+			admitted[WorkflowRef{Kind: "slice", ID: member.SliceID}] = true
+		}
+	}
+
+	return admitted
+}
+
+func workflowPreviewRequestHash(request WorkflowPreviewRequest) (string, error) {
+	request.Offset, request.Limit, request.SnapshotHash = 0, 0, ""
+
+	encoded, err := json.Marshal(request)
+	if err != nil {
+		return "", err
+	}
+
+	return workflowHash(encoded), nil
+}
+
+func validateWorkflowPreviewContext(request WorkflowPreviewRequest) error {
+	if len(request.Target.Repository) > 2048 || strings.ContainsAny(request.Target.Repository, "\x00\n\r") {
+		return fmt.Errorf("invalid workflow target repository")
+	}
+
+	for _, commit := range []string{request.Target.Commit, request.CumulativeCommit} {
+		if commit != "" && !workflowCommitID(commit) {
+			return fmt.Errorf("workflow preview requires full immutable commit IDs")
+		}
+	}
+
+	branch := request.CumulativeBranch
+	if branch != "" && (len(branch) > 256 || !strings.HasPrefix(branch, "refs/heads/") || strings.ContainsAny(branch, "\x00\n\r ~^:?*[\\")) {
+		return fmt.Errorf("invalid cumulative branch ref")
+	}
+
+	return nil
 }
