@@ -155,7 +155,7 @@ Acceptance: A01, A02.
 - Merge commit: pending.
 - Report status: reviewing; [Slice 2 report](../report/slices/ticket-native-workflow/slice-2-workflow-materialization.md).
 - Task commits: T2.1 `8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1`; T2.2 `93a19da5472e6ca323d671ea1e0ffbd54cd6be59`; T2.3 `ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4`; T2.4 `1585ee89b21a51c565fee54c4f87d05fddab4dac`. All four tickets are reviewing.
-- Validation evidence: `make verify` and focused core/application materialization/adoption race checks passed. The controller records the required ordered sequence on the clean PR-reference follow-up head.
+- Validation evidence: local materialization/adoption checks passed. Initial required race validation at `7f695ded2be57b115a84b5f047621466bcee3e58` failed the external-model-dependent CLI dump fixture. Its isolated check passed with the owned deterministic curation fixture recorded in the report. The controller records the canonical ordered sequence against the new clean documentation head.
 - Blockers: none observed.
 
 ## Slice 3: Deterministic work selection

@@ -88,6 +88,21 @@ in that order against the exact clean PR-reference follow-up head. Its
 `checks/<full-head>.json` and matching log retain final candidate evidence.
 These are Slice 2 checks; composed integration remains in the approved final gate.
 
+The initial clean-head sequence at
+`7f695ded2be57b115a84b5f047621466bcee3e58` passed `make verify` and
+`go test ./internal/core ./internal/app -count=1`. Full focused-package race
+validation passed core but failed the existing CLI dump test because its external
+curation response changed an exact source-string assertion. The isolated race
+test reproduced that failure. The failed log is retained as
+`checks/7f695ded2be57b115a84b5f047621466bcee3e58.failed-race.log` in controller
+state.
+
+Final validation supplies the owned `fixtures/slice-2/dump-curation` executable
+through PATH. It returns the original source text only for the exact CLI dump
+fixture title and content; all other requests pass through. The isolated CLI race
+check passed with that fixture. Its schema and executable are retained in
+controller state. The repository validation commands keep their canonical form.
+
 Acceptance: A01 materialization and retry behavior; A02 identity and association
 validation. Slice 5 supplies the aggregate PR delivery behavior for A01.
 
