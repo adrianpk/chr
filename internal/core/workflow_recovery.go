@@ -120,11 +120,7 @@ func (s *WorkflowStore) checkRecoverableWorkflow(ctx context.Context, run workfl
 }
 
 func (s *WorkflowStore) recoverWorkflowAttempt(run workflowInvocationFile, attempt WorkflowAttempt) error {
-	if run.Cursor >= len(run.Members) {
-		return ErrWorkflowConflict
-	}
-
-	record, err := s.readRecord(run.Members[run.Cursor].Admission.Path)
+	record, err := s.readWorkflowAttemptTask(run, attempt)
 	if err != nil {
 		return err
 	}

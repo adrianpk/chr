@@ -28,6 +28,7 @@ type WorkflowClaim struct {
 	reservation  *os.File
 	locks        []*AgentOperationLock
 	execution    *workflowClaimExecution
+	purpose      string
 }
 
 // ClaimWorkflow acquires one task and its existing serial operation exclusion.
@@ -77,12 +78,11 @@ func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocatio
 		}
 	}()
 
-	token := make([]byte, 32)
-	if _, err := rand.Read(token); err != nil {
+	claim.Token, err = newWorkflowClaimToken()
+	if err != nil {
 		return nil, err
 	}
 
-	claim.Token = hex.EncodeToString(token)
 	if err := s.beginWorkflowAttempt(&run, &record, claim); err != nil {
 		return nil, err
 	}
@@ -146,6 +146,15 @@ func validateWorkflowClaimableContract(record WorkflowRecord) error {
 	return validateWorkflowClaimContract(record)
 }
 
+func newWorkflowClaimToken() (string, error) {
+	token := make([]byte, 32)
+	if _, err := rand.Read(token); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(token), nil
+}
+
 func workflowTaskClaimable(task *WorkflowTask) bool {
 	return task.AttemptID == "" && task.ClaimGeneration != math.MaxUint64
 }
@@ -154,7 +163,7 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 	count := 0
 
 	for _, attempt := range run.Attempts {
-		if attempt.TaskKey == record.Task.Key {
+		if attempt.TaskKey == record.Task.Key && attempt.Purpose == claim.purpose {
 			count++
 		}
 	}
@@ -172,34 +181,23 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 		return err
 	}
 
-	attempt := WorkflowAttempt{OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
+	attempt := WorkflowAttempt{Purpose: claim.purpose, OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key, claim.purpose), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
 	run.Attempts = append(run.Attempts, attempt)
 	run.Owners[claim.AttemptID] = workflowHash([]byte(claim.Token))
 	run.Status = "running"
+
 	record.Task.AttemptID, record.Task.ClaimGeneration = claim.AttemptID, claim.Generation
-	record.Task.Phase, record.Task.Status = "running", TicketStatusInProgress
+	if claim.purpose == "" {
+		record.Task.Phase, record.Task.Status = "running", TicketStatusInProgress
+	}
 
 	return nil
 }
 
 func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record WorkflowRecord, extra ...workflowFileChange) error {
-	record.Revision++
-	record.UpdatedAt = time.Now().UTC()
-
-	files, err := s.encodeChanges(record)
+	files, err := s.workflowClaimRecordChanges(&run, &record)
 	if err != nil {
 		return err
-	}
-
-	if err := guardWorkflowClaimImages(record, files); err != nil {
-		return err
-	}
-
-	for i := range run.Members {
-		if run.Members[i].Admission.Key == record.Task.Key {
-			run.Members[i].ExpectedRevision = record.Revision
-			run.Members[i].ExpectedSourceHash = workflowClaimRecordHash(record, files)
-		}
 	}
 
 	run.Revision++
@@ -210,13 +208,38 @@ func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record W
 		return err
 	}
 
-	if err := record.Validate(); err != nil {
-		return err
-	}
-
 	files = append(files, extra...)
 
 	return s.commitFiles(append(files, state))
+}
+
+func (s *WorkflowStore) workflowClaimRecordChanges(run *workflowInvocationFile, record *WorkflowRecord) ([]workflowFileChange, error) {
+	record.Revision++
+	record.UpdatedAt = time.Now().UTC()
+
+	files, err := s.encodeChanges(*record)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := guardWorkflowClaimImages(*record, files); err != nil {
+		return nil, err
+	}
+
+	record.SourceHash = workflowClaimRecordHash(*record, files)
+
+	for i := range run.Members {
+		if run.Members[i].Admission.Key == record.Task.Key {
+			run.Members[i].ExpectedRevision = record.Revision
+			run.Members[i].ExpectedSourceHash = record.SourceHash
+		}
+	}
+
+	if err := record.Validate(); err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
 
 func workflowClaimRecordHash(record WorkflowRecord, files []workflowFileChange) string {
@@ -264,13 +287,7 @@ func (s *WorkflowStore) checkWorkflowCredential(ctx context.Context, claim *Work
 		return run, WorkflowRecord{}, ErrWorkflowOwned
 	}
 
-	if run.Cursor >= len(run.Members) {
-		return run, WorkflowRecord{}, ErrWorkflowConflict
-	}
-
-	member := run.Members[run.Cursor]
-
-	record, err := owner.readRecord(member.Admission.Path)
+	record, err := owner.readWorkflowAttemptTask(run, attempt)
 	if err != nil {
 		return run, record, err
 	}
@@ -310,17 +327,30 @@ func (s *WorkflowStore) CheckpointWorkflow(ctx context.Context, claim *WorkflowC
 }
 
 func workflowAttemptCredentialMatches(run workflowInvocationFile, claim *WorkflowClaim, attempt WorkflowAttempt) bool {
-	return run.Status == "running" && attempt.Outcome == "running" && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == workflowHash([]byte(claim.Token))
+	return run.Status == "running" && attempt.Outcome == "running" && attempt.Purpose == claim.purpose && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == workflowHash([]byte(claim.Token))
 }
 
-func workflowReplacedAttempt(run workflowInvocationFile, key string) string {
+func workflowReplacedAttempt(run workflowInvocationFile, key, purpose string) string {
 	for _, attempt := range slices.Backward(run.Attempts) {
-		if attempt.TaskKey == key && attempt.Outcome != "validated" {
+		if attempt.TaskKey == key && attempt.Purpose == purpose && attempt.Outcome != "validated" {
 			return attempt.ID
 		}
 	}
 
 	return ""
+}
+
+func (s *WorkflowStore) readWorkflowAttemptTask(run workflowInvocationFile, attempt WorkflowAttempt) (WorkflowRecord, error) {
+	cursor := run.Cursor
+	if attempt.Purpose == workflowSliceValidationPurpose {
+		cursor--
+	}
+
+	if cursor < 0 || cursor >= len(run.Members) || run.Members[cursor].Admission.Key != attempt.TaskKey {
+		return WorkflowRecord{}, ErrWorkflowConflict
+	}
+
+	return s.readRecord(run.Members[cursor].Admission.Path)
 }
 
 func workflowInvocationClaimable(run workflowInvocationFile) bool {

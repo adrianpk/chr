@@ -33,6 +33,7 @@ type WorkflowTaskInput struct {
 	Prerequisites  []WorkflowInputImage  `json:"prerequisites"`
 	EvidenceHashes map[string]string     `json:"prerequisite_evidence_hashes"`
 	Worker         []string              `json:"worker"`
+	Slice          *WorkflowSliceInput   `json:"slice,omitempty"`
 }
 
 // WorkflowCommandResult records host-observed command output with explicit bounds.

@@ -53,7 +53,21 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return fmt.Errorf("invalid workflow invocation lane")
 	}
 
-	return nil
+	return validateWorkflowCandidateRef(run)
+}
+
+func validateWorkflowCandidateRef(run workflowInvocationFile) error {
+	if run.CandidateRef == "" && run.CandidateHash == "" {
+		return nil
+	}
+
+	for _, attempt := range run.Attempts {
+		if attempt.Purpose == workflowSliceValidationPurpose && attempt.Outcome == "validated" && attempt.ResultRef == run.CandidateRef && attempt.ResultHash == run.CandidateHash && len(run.CandidateHash) == 64 {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("invalid workflow slice candidate binding")
 }
 
 func validWorkflowInvocationBounds(run workflowInvocationFile) bool {
@@ -209,12 +223,28 @@ func validWorkflowReplacement(attempt WorkflowAttempt, previous map[string]Workf
 
 	replaced, exists := previous[attempt.Replaces]
 
-	return exists && replaced.TaskKey == attempt.TaskKey && replaced.Generation < attempt.Generation && replaced.Outcome != "validated"
+	return exists && replaced.TaskKey == attempt.TaskKey && replaced.Purpose == attempt.Purpose && replaced.Generation < attempt.Generation && replaced.Outcome != "validated"
 }
 
 func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
+	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose}, attempt.Purpose) {
+		return fmt.Errorf("invalid workflow attempt purpose")
+	}
+
+	if attempt.Purpose == workflowSliceRepairPurpose {
+		return validateWorkflowRepairAttempt(attempt)
+	}
+
 	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed", "paused", "cancelled", "interrupted", "recovered"}, attempt.Outcome) {
 		return fmt.Errorf("invalid workflow attempt lease or outcome")
+	}
+
+	return nil
+}
+
+func validateWorkflowRepairAttempt(attempt WorkflowAttempt) error {
+	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || attempt.Outcome != "repaired" || attempt.FinishedAt.IsZero() || attempt.InputRef != "" || len(attempt.Processes) != 0 {
+		return fmt.Errorf("invalid workflow repair attempt")
 	}
 
 	return nil

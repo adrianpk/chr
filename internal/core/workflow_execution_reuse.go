@@ -114,7 +114,7 @@ func (s *WorkflowStore) checkWorkflowReusableTask(ctx context.Context, run workf
 }
 
 func workflowAttemptValidatesTask(attempt WorkflowAttempt, record WorkflowRecord) bool {
-	return attempt.TaskKey == record.Task.Key && attempt.ContractHash == record.Task.ContractHash && attempt.Outcome == "validated" && slices.Contains(record.Task.Evidence, attempt.ResultRef)
+	return attempt.Purpose == "" && attempt.TaskKey == record.Task.Key && attempt.ContractHash == record.Task.ContractHash && attempt.Outcome == "validated" && slices.Contains(record.Task.Evidence, attempt.ResultRef)
 }
 
 func (s *WorkflowStore) workflowRetainedResultMatches(ctx context.Context, run workflowInvocationFile, attempt WorkflowAttempt, record WorkflowRecord, reader *workflowProofReader) bool {

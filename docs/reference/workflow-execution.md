@@ -32,8 +32,8 @@ branch and isolated worktree. Each next task descends from the accepted lane
 head. Dirty, moved or unregistered lanes require reconciliation.
 
 `WorkflowTaskInput` uses schema `chr-task-input/v1`. Its `execution_mode` is
-`automatic` or `manual`. It binds invocation/attempt IDs, generation, task
-revision, source and contract hashes, body, execution contract, target, scope,
+`automatic`, `manual` or host-only `aggregate`. It binds invocation/attempt IDs,
+generation, task revision, source and contract hashes, body, execution contract, target, scope,
 lane, worker argv and prerequisite record/evidence images. Workers receive this
 JSON on stdin, their input-file location through `CHR_WORKFLOW_INPUT`, and the
 lane as cwd. They do not receive the owner token.
@@ -45,6 +45,51 @@ reference/hash, attempt/generation, bounded worker/gate output and finish time.
 Task evidence, expected images and cursor advance in one replayable journal.
 Unchanged validated task prefixes reuse their lane and proof rather than rerun
 workers. Changed inputs or incompatible journal images reject.
+
+## Aggregate slice candidates
+
+| Operation | Contract |
+| --- | --- |
+| `ExecuteWorkflowSlice` | Run remaining tasks in order on their retained cumulative lane, then host-validate one complete slice and stop at its integration barrier. |
+| `ValidateWorkflowSlice` | Run only the aggregate acceptance commands or approved waiver. Reuse an unchanged accepted candidate without another attempt or gate. |
+| `ReadWorkflowSliceCandidate` | Recheck retained candidate, input, contract, ordered task proof and actual clean Git image. |
+| `RepairWorkflowSlice` | Explicitly invalidate the affected task and its ordered successors, clear aggregate acceptance and resume from that task on the same branch. |
+
+Aggregate validation requires every actual task in the slice to be present in
+the frozen extent and host-validated. Exact grouped-ticket and loose-ticket
+requests cannot produce partial-slice candidates. Ordered slice execution stops
+before starting another slice, pending integration of the current slice.
+
+An aggregate input retains the set and slice identity, immutable contract
+reference/hash, ordered task evidence references/hashes, current task images,
+prerequisite proofs and accepted target/lane. The host freezes the full clean
+commit and tree before the first command and verifies them before and after
+each command and before journaling success. A gate that commits or dirties the
+lane cannot establish acceptance.
+
+`chr-slice-candidate/v1` retains these bindings and host observations in the
+aggregate attempt's immutable `result.json`. Its result uses
+`chr-slice-validation/v1`, which cannot serve as task-validation proof.
+Invocation `candidate_ref` and `candidate_hash` point only to an accepted host
+candidate; explicit empty values clear the binding during repair. Aggregate
+success leaves task phase `validated`, status `in_progress` and integration
+pending. It does not create delivery proof or mark tasks `done`.
+
+Aggregate failure preserves validated task results and the cumulative lane.
+An unchanged retry runs only the aggregate gate. Repair clears affected evidence
+references without deleting historical result files. Ordered successor tasks
+are affected because their inputs depend on earlier task results; unchanged
+prefix evidence remains reusable. Changed input, proof, membership or branch
+images require reconciliation rather than silent reuse.
+
+Attempts with purpose `slice_validation` share task leases, fenced ownership,
+supervised processes, stop intent and recovery. Pausing or recovering an
+aggregate attempt preserves validated tasks and resumes at
+`waiting_integration`. Journaled repairs retain a separate `slice_repair`
+attempt with outcome `repaired`, allowing lock recovery after host loss. Task,
+aggregate and repair attempts consume separate per-anchor budgets under the
+same configured attempt limit and total invocation bound. None resets earlier
+worker attempts.
 
 ## Manual protocol
 

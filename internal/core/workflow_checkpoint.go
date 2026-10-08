@@ -39,8 +39,16 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 	ref := workflowAttemptFile(run.ID, attempt.ID, "checkpoint.json")
 	attempt.CheckpointRef, attempt.CheckpointHash = ref, workflowHash(data)
 	attempt.Outcome, attempt.FinishedAt = reason, now
-	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "", "pending", TicketStatusReadyForDev
-	run.Status, run.ResumeStatus = workflowStopStatus(run.StopIntent), "pending"
+	record.Task.AttemptID = ""
+
+	if attempt.Purpose == workflowSliceValidationPurpose {
+		run.ResumeStatus = "waiting_integration"
+	} else {
+		record.Task.Phase, record.Task.Status = "pending", TicketStatusReadyForDev
+		run.ResumeStatus = "pending"
+	}
+
+	run.Status = workflowStopStatus(run.StopIntent)
 	run.Outcome = reason
 
 	return s.commitWorkflowClaim(run, record, workflowFileChange{Path: ref, After: data})

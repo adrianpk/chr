@@ -44,9 +44,18 @@ func TestWorkflowTaskProcess(t *testing.T) {
 		return
 	}
 
+	workflowProcessWorker(t, input, path, mode)
+}
+
+func workflowProcessWorker(t *testing.T, input WorkflowTaskInput, path, mode string) {
+	t.Helper()
+
 	switch mode {
 	case "worker":
 		workflowProcessWrite(t, path, input.TaskKey+"\n")
+		workflowProcessCommit(t, input.Lane.Worktree)
+	case "repair worker":
+		workflowProcessWrite(t, path+".repair", "Repaired\n")
 		workflowProcessCommit(t, input.Lane.Worktree)
 	case "dirty":
 		workflowProcessWrite(t, path, "Uncommitted\n")
@@ -117,6 +126,8 @@ func workflowProcessGate(t *testing.T, input WorkflowTaskInput, path, mode strin
 		if err != nil || string(data) != input.TaskKey+"\n" {
 			t.Fatalf("worker output missing: %v", err)
 		}
+	case "gate aggregate":
+		workflowProcessAggregateGate(t, input)
 	case "gate dirty":
 		workflowProcessWrite(t, filepath.Join(input.Lane.Worktree, "gate.tmp"), "Gate mutation\n")
 	case "gate commit":
@@ -126,6 +137,21 @@ func workflowProcessGate(t *testing.T, input WorkflowTaskInput, path, mode strin
 		time.Sleep(3 * time.Second)
 	default:
 		t.Fatal("unknown process mode")
+	}
+}
+
+func workflowProcessAggregateGate(t *testing.T, input WorkflowTaskInput) {
+	t.Helper()
+
+	if input.ExecutionMode != "aggregate" || input.Slice == nil || len(input.Slice.Tasks) != 3 {
+		t.Fatal("aggregate gate received partial task input")
+	}
+
+	for _, proof := range input.Slice.Tasks {
+		data, err := os.ReadFile(filepath.Join(input.Lane.Worktree, proof.Key+".txt"))
+		if err != nil || string(data) != proof.Key+"\n" {
+			t.Fatal("aggregate output missing")
+		}
 	}
 }
 

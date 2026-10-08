@@ -14,6 +14,10 @@ func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *Workflow
 }
 
 func (s *WorkflowStore) prepareWorkflowTaskMode(ctx context.Context, claim *WorkflowClaim, worker []string, mode string) (prepared workflowPreparedTask, err error) {
+	if claim == nil || claim.purpose != "" {
+		return prepared, ErrWorkflowOwned
+	}
+
 	if err := validateWorkflowInputWorker(mode, worker); err != nil {
 		return prepared, fmt.Errorf("workflow worker: %w", err)
 	}
@@ -83,22 +87,11 @@ func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvoc
 }
 
 func (s *WorkflowStore) saveWorkflowTaskInput(run workflowInvocationFile, input WorkflowTaskInput) (workflowPreparedTask, error) {
-	var err error
-
-	input.ScopeHash, err = workflowExecutionScopeHash(run)
+	prepared, file, err := encodeWorkflowTaskInput(&run, input)
 	if err != nil {
 		return workflowPreparedTask{}, err
 	}
 
-	data, err := json.MarshalIndent(input, "", "  ")
-	if err != nil || len(data) >= WorkflowFileLimit {
-		return workflowPreparedTask{}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
-	}
-
-	data = append(data, '\n')
-	ref := workflowAttemptFile(run.ID, input.AttemptID, "input.json")
-	attempt := &run.Attempts[len(run.Attempts)-1]
-	attempt.Lane, attempt.InputRef, attempt.InputHash = run.Lane, ref, workflowHash(data)
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()
 
@@ -107,11 +100,32 @@ func (s *WorkflowStore) saveWorkflowTaskInput(run workflowInvocationFile, input 
 		return workflowPreparedTask{}, err
 	}
 
-	if err := s.commitFiles([]workflowFileChange{{Path: ref, After: data}, state}); err != nil {
+	if err := s.commitFiles([]workflowFileChange{file, state}); err != nil {
 		return workflowPreparedTask{}, err
 	}
 
-	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, nil
+	return prepared, nil
+}
+
+func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInput) (workflowPreparedTask, workflowFileChange, error) {
+	var err error
+
+	input.ScopeHash, err = workflowExecutionScopeHash(*run)
+	if err != nil {
+		return workflowPreparedTask{}, workflowFileChange{}, err
+	}
+
+	data, err := json.MarshalIndent(input, "", "  ")
+	if err != nil || len(data) >= WorkflowFileLimit {
+		return workflowPreparedTask{}, workflowFileChange{}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
+	}
+
+	data = append(data, '\n')
+	ref := workflowAttemptFile(run.ID, input.AttemptID, "input.json")
+	attempt := &run.Attempts[len(run.Attempts)-1]
+	attempt.Lane, attempt.InputRef, attempt.InputHash = run.Lane, ref, workflowHash(data)
+
+	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, workflowFileChange{Path: ref, After: data}, nil
 }
 
 func workflowAttemptFile(invocationID, attemptID, name string) string {
