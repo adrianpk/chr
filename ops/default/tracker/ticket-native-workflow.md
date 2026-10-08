@@ -22,26 +22,23 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 5 — Slice candidates and delivery receipts
+Active slice: Slice 6 — Guarded automatic publication
 
-Next slice: Slice 6 — Guarded automatic publication
+Next slice: Slice 7 — Ordered set and use-case continuation
 
 Slice strategy: behavior-first
 
-Progress: 4 of 12 slices integrated; 16 of 48 tasks done.
+Progress: 5 of 12 slices integrated; 20 of 48 tasks done.
 
 ## Current Checkpoint
 
-Slices 1 through 4 are verified integrated through canonical PRs #364–#367.
-Slice 4 merged head `517fdbb3322b4e02b951e5301b8f6c8e04740f57` passed the controller's four
-ordered checks with the retained CLI curation fixture. Its canonical report is
-delivered and all four task tickets are solved. Slice 5 is active for cumulative
-aggregate candidates, one canonical PR, verified external delivery and journaled
-shared-receipt finalization. T5.1 is validated in `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; T5.2 is validated in `2c6c9081403013bad4916a1a2734059274ccda22` for canonical PR bindings. T5.3 is validated in `fb9ed4247ca27e18b3cb365590ad6033b464d166`
-for canonical receipt and Git delivery proof; T5.4 is validated in `3c09f32119bc0eb9b376663b0d03709f0f948628` for shared receipt creation and
-journaled task finalization. All four tasks are bound to canonical Slice 5 PR [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368).
-The controller verifies its final clean HEAD before integration; integration
-remains pending.
+Slices 1 through 5 are verified integrated through canonical PRs #364–#368.
+Slice 5 merged head `6cfaedd9c12f7a6dcfc562804917c32c5f6daaca` passed the controller's
+ordered `make verify`, core/app checks, focused race gate and `git diff --check`
+with the retained CLI curation fixture. Its report is delivered and all four task
+tickets are solved. Acta records the canonical merge in `01M4ESBJ8W5EGFTJR23A3CCXN3`.
+Slice 6 is active for review-bound approval, guarded method preparation,
+recoverable submission and reconciliation. T6.1 is in progress; T6.2–T6.4 remain ready.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -250,7 +247,7 @@ Acceptance: A06, A09, A12, A17, A21; execution budgets in A24.
 
 ## Slice 5: Slice candidates and delivery receipts
 
-Status: reviewing
+Status: integrated
 
 Prerequisite: satisfied by verified PR #367 integration into dev.
 
@@ -264,14 +261,15 @@ Plan contract: [Slice 5](../plan/ticket-native-workflow.md#slice-5-slice-candida
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T5.1 | [TKT-20261008141401](../ticket/reviewing/20261008141401-ticket-native-t5-1.md) | validated | 0bbbd64e691ee6832d495a2b8d4de3b920895e47 | Run remaining tasks cumulatively and host-validate aggregate slice acceptance on an immutable tree. |
-| T5.2 | [TKT-20261008141402](../ticket/reviewing/20261008141402-ticket-native-t5-2.md) | validated | 2c6c9081403013bad4916a1a2734059274ccda22 | Create/reuse one canonical PR and retain branch/candidate/PR bindings. |
-| T5.3 | [TKT-20261008141403](../ticket/reviewing/20261008141403-ticket-native-t5-3.md) | validated | fb9ed4247ca27e18b3cb365590ad6033b464d166 | Verify external integration through canonical receipts and method-specific target/tree/history proof. |
-| T5.4 | [TKT-20261008141404](../ticket/reviewing/20261008141404-ticket-native-t5-4.md) | validated | 3c09f32119bc0eb9b376663b0d03709f0f948628 | Journal shared receipt creation and task-status finalization. |
+| T5.1 | [TKT-20261008141401](../ticket/solved/20261008141401-ticket-native-t5-1.md) | done | 0bbbd64e691ee6832d495a2b8d4de3b920895e47 | Run remaining tasks cumulatively and host-validate aggregate slice acceptance on an immutable tree. |
+| T5.2 | [TKT-20261008141402](../ticket/solved/20261008141402-ticket-native-t5-2.md) | done | 2c6c9081403013bad4916a1a2734059274ccda22 | Create/reuse one canonical PR and retain branch/candidate/PR bindings. |
+| T5.3 | [TKT-20261008141403](../ticket/solved/20261008141403-ticket-native-t5-3.md) | done | fb9ed4247ca27e18b3cb365590ad6033b464d166 | Verify external integration through canonical receipts and method-specific target/tree/history proof. |
+| T5.4 | [TKT-20261008141404](../ticket/solved/20261008141404-ticket-native-t5-4.md) | done | 3c09f32119bc0eb9b376663b0d03709f0f948628 | Journal shared receipt creation and task-status finalization. |
 
 ### Validation
 
-Status: all four task checks passed; final Slice 5 candidate checks remain pending.
+Status: all task checks and the final four ordered controller checks passed on
+`6cfaedd9c12f7a6dcfc562804917c32c5f6daaca`.
 
 Successful T5.1 checks: `make verify` with the retained Slice 2 CLI curation
 fixture; `go test -race ./internal/core ./internal/app -run '^(TestWorkflowSlice|TestServiceWorkflowSlice)' -count=1`;
@@ -308,21 +306,20 @@ Acceptance: A01, A08, A13, A22.
 
 ### Delivery Evidence
 
-- PR: [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368); reviewing.
-- Merge commit: pending.
+- PR: [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368); merged through Rebase + Fast-forward into dev.
+- Merge commit: `6cfaedd9c12f7a6dcfc562804917c32c5f6daaca`; canonical dev and local dev match.
 - Report introduction: `c5ed935a203f041c1da30761768b8466cf93a955`; full immutable report link recorded in the PR.
-- Report status: reviewing; [Slice 5 report](../report/slices/ticket-native-workflow/slice-5-workflow-delivery.md).
-- T5.1 implementation commit: `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; its ticket is reviewing and task row validated.
-- T5.2 implementation commit: `2c6c9081403013bad4916a1a2734059274ccda22`; its ticket is reviewing and task row validated. T5.3 is in progress; T5.4 remains ready.
-- Acta task events: T5.1 `01M4EK4NY26MJJBRXCHJ9TVKEH`; T5.2 `01M4ENPPKK7SX34FBZJN9PNBY8`.
-- Final clean-head controller validation evidence: pending.
-- Blockers: none observed. T5.2 is active for canonical PR creation/reuse and retained bindings.
+- Report status: delivered; [Slice 5 report](../report/slices/ticket-native-workflow/slice-5-workflow-delivery.md).
+- All four task implementation commits remain recorded in their done rows and solved tickets.
+- Acta canonical merge event: `01M4ESBJ8W5EGFTJR23A3CCXN3`.
+- Final clean-head controller evidence: `checks/6cfaedd9c12f7a6dcfc562804917c32c5f6daaca.json` and matching log in the controller state directory; the exact four ordered commands passed.
+- Blockers: none observed.
 
 ## Slice 6: Guarded automatic publication
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 5 verified integrated into dev.
+Prerequisite: satisfied by verified PR #368 integration into dev.
 
 Expected branch: `feat/slice-6-workflow-publication`
 
@@ -334,7 +331,7 @@ Plan contract: [Slice 6](../plan/ticket-native-workflow.md#slice-6-guarded-autom
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T6.1 | [TKT-20261008141405](../ticket/ready/20261008141405-ticket-native-t6-1.md) | ready | pending | Bind review decisions, bounded repairs and exact-candidate manual approval to current policy and immutable inputs. |
+| T6.1 | [TKT-20261008141405](../ticket/in_progress/20261008141405-ticket-native-t6-1.md) | in_progress | pending | Bind review decisions, bounded repairs and exact-candidate manual approval to current policy and immutable inputs. |
 | T6.2 | [TKT-20261008141406](../ticket/ready/20261008141406-ticket-native-t6-2.md) | ready | pending | Prepare and validate configured merge/rebase/squash results and enforce atomic source/base publication guards. |
 | T6.3 | [TKT-20261008141407](../ticket/ready/20261008141407-ticket-native-t6-3.md) | ready | pending | Journal submission before provider IO and retain target exclusion for uncertain responses. |
 | T6.4 | [TKT-20261008141408](../ticket/ready/20261008141408-ticket-native-t6-4.md) | ready | pending | Reconcile target movement, external delivery and stale candidate evidence through the shared operation. |
@@ -359,7 +356,7 @@ Acceptance: A11, A13, A14, A15, A21; publication budgets in A24.
 - Report status: not created.
 - Task commits and ticket lifecycle evidence: pending.
 - Validation evidence: pending.
-- Blockers: none observed; implementation has not started.
+- Blockers: none observed; T6.1 is active.
 
 ## Slice 7: Ordered set and use-case continuation
 

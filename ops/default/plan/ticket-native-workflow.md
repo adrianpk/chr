@@ -20,9 +20,9 @@ Plan approval: approved on 2026-10-08
 
 Implementation authorization: granted on 2026-10-08 for the approved delivery set through slice-loop
 
-Active slice: Slice 5 — Slice candidates and delivery receipts
+Active slice: Slice 6 — Guarded automatic publication
 
-Next slice: Slice 2 — Task-ticket materialization
+Next slice: Slice 7 — Ordered set and use-case continuation
 
 Slice strategy: behavior-first
 

@@ -1,6 +1,6 @@
 # Slice 5: Slice candidates and delivery receipts
 
-Status: reviewing
+Status: delivered
 
 Delivery set: ticket-native-workflow
 
@@ -98,9 +98,12 @@ Final PR-head evidence is recorded through the controller for this ordered list:
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-The evidence belongs to the exact clean PR HEAD; integration is confirmed by the
-external controller before report/tracker closure. These candidate checks are
-distinct from the delivery set's later full gate.
+All four commands passed on clean head `6cfaedd9c12f7a6dcfc562804917c32c5f6daaca`,
+recorded in the controller state directory as the matching `checks/<HEAD>.json`
+and log. Canonical PR #368 merged that exact head through Rebase + Fast-forward
+into dev; canonical and local dev match. Acta merge event:
+`01M4ESBJ8W5EGFTJR23A3CCXN3`. The four task tickets are solved. These candidate
+checks are distinct from the delivery set's later full gate.
 
 ## Risks and Follow-ups
 
