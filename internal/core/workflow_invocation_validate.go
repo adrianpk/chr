@@ -15,7 +15,7 @@ func validateWorkflowInvocation(run workflowInvocationFile) error {
 		return err
 	}
 
-	request, err := normalizeWorkflowStart(WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy})
+	request, err := normalizeWorkflowStart(WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction})
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,11 @@ func validateWorkflowInvocationBindings(run workflowInvocationFile) error {
 		return err
 	}
 
-	return validateWorkflowFinalizationRef(run)
+	if err := validateWorkflowFinalizationRef(run); err != nil {
+		return err
+	}
+
+	return validateWorkflowReviewBinding(run)
 }
 
 func validateWorkflowCandidateRef(run workflowInvocationFile) error {
@@ -169,7 +173,7 @@ func validateWorkflowAttemptResult(invocationID string, attempt WorkflowAttempt)
 		return fmt.Errorf("invalid workflow attempt result binding")
 	}
 
-	if slices.Contains([]string{"validated", "failed"}, attempt.Outcome) && attempt.ResultRef == "" {
+	if slices.Contains([]string{"validated", "failed", "reviewed"}, attempt.Outcome) && attempt.ResultRef == "" {
 		return fmt.Errorf("workflow attempt outcome requires a retained result")
 	}
 
@@ -243,7 +247,7 @@ func validWorkflowReplacement(attempt WorkflowAttempt, previous map[string]Workf
 }
 
 func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
-	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose}, attempt.Purpose) {
+	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose, workflowSliceReviewPurpose}, attempt.Purpose) {
 		return fmt.Errorf("invalid workflow attempt purpose")
 	}
 
@@ -251,7 +255,11 @@ func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
 		return validateWorkflowRepairAttempt(attempt)
 	}
 
-	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed", "paused", "cancelled", "interrupted", "recovered"}, attempt.Outcome) {
+	if attempt.Outcome == "reviewed" && attempt.Purpose != workflowSliceReviewPurpose {
+		return ErrWorkflowConflict
+	}
+
+	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed", "paused", "cancelled", "interrupted", "recovered", "reviewed"}, attempt.Outcome) {
 		return fmt.Errorf("invalid workflow attempt lease or outcome")
 	}
 

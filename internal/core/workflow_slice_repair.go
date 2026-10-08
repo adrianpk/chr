@@ -33,6 +33,13 @@ func (s *WorkflowStore) RepairWorkflowSlice(ctx context.Context, id, taskKey str
 		}
 
 		readErr = owner.repairWorkflowSlice(ctx, &run, observation, taskKey)
+		if errors.Is(readErr, ErrWorkflowReviewRepairBudget) {
+			run.Review.State = "repair_limit_exceeded"
+			run.Status, run.Outcome = "waiting_review", "review_repair_limit_exceeded"
+			run.Blocker = &WorkflowBlocker{Dependency: run.Review.Unit, Reason: run.Outcome, NextActionOwner: "workflow_operator"}
+			readErr = errors.Join(readErr, owner.commitWorkflowState(&run))
+		}
+
 		result = run.WorkflowInvocation
 
 		return readErr
@@ -66,6 +73,10 @@ func (s *WorkflowStore) repairWorkflowSlice(ctx context.Context, run *workflowIn
 		return fmt.Errorf("repair task is outside the retained slice")
 	}
 
+	if err := s.prepareWorkflowReviewRepair(run, taskKey); err != nil {
+		return err
+	}
+
 	for _, record := range observation.tasks {
 		if !workflowTaskClaimable(record.Task) {
 			return ErrWorkflowOwned
@@ -92,7 +103,11 @@ func (s *WorkflowStore) repairWorkflowSlice(ctx context.Context, run *workflowIn
 	run.Lane = &lane
 	run.Cursor -= len(observation.tasks) - index
 	run.Status, run.Outcome, run.ResumeStatus = "pending", "slice_repair_requested", ""
+
 	run.CandidateRef, run.CandidateHash = "", ""
+	if run.Review != nil {
+		run.Review.State = "stale"
+	}
 
 	return s.commitWorkflowSliceRepair(run, observation, index)
 }

@@ -16,6 +16,8 @@ type WorkflowLane struct {
 
 // WorkflowTaskInput is the immutable, credential-free input supplied to a worker.
 type WorkflowTaskInput struct {
+	Review         *WorkflowReviewInput  `json:"review,omitempty"`
+	ReviewHash     string                `json:"review_hash,omitempty"`
 	Schema         string                `json:"schema"`
 	ExecutionMode  string                `json:"execution_mode"`
 	InvocationID   string                `json:"invocation_id"`

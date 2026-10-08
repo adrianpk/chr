@@ -114,6 +114,12 @@ func workflowPRFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationRes
 func workflowPRFixtureFor(t *testing.T, extent string) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
 	t.Helper()
 
+	return workflowPRPolicyFixture(t, extent, WorkflowExecutionPolicy{})
+}
+
+func workflowPRPolicyFixture(t *testing.T, extent string, policy WorkflowExecutionPolicy) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowPRProviderFixture) {
+	t.Helper()
+
 	store, opts := workflowMaterializationFixture(t)
 	waiver := WorkflowValidation{WaiverReason: "PR lifecycle fixture uses retained immutable host waiver"}
 
@@ -129,6 +135,7 @@ func workflowPRFixtureFor(t *testing.T, extent string) (*WorkflowStore, Workflow
 
 	commit, _ := workflowSelectionCommit(t, store)
 	request := WorkflowStartRequest{RequestKey: "slice-pr", Selection: WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request.Policy = policy
 	run := workflowTestStart(t, store, request)
 
 	candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowPRWorker())

@@ -1,0 +1,87 @@
+package app
+
+import (
+	"context"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+type serviceWorkflowReviewFixture struct{ *serviceWorkflowPRFixture }
+
+func (p *serviceWorkflowReviewFixture) ReadWorkflowBranch(_ context.Context, _, branch string) (string, error) {
+	if branch == p.pr.BaseBranch {
+		return p.pr.BaseCommit, nil
+	}
+
+	return p.pr.HeadCommit, nil
+}
+
+// TestServiceWorkflowReview exercises current policy, explicit approval and
+// revalidation through the same central service used by future adapter controls.
+func TestServiceWorkflowReview(t *testing.T) {
+	operations, id, provider := serviceWorkflowReviewReady(t)
+
+	binding, err := operations.ReviewWorkflowSlice(t.Context(), id, nil)
+	if err != nil || binding.State != "waiting_approval" {
+		t.Fatalf("service review: %+v, %v", binding, err)
+	}
+
+	if _, err := operations.ApproveWorkflowSlice(t.Context(), id, binding.InputHash); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := operations.CheckWorkflowReviewGrant(t.Context(), id); err != nil {
+		t.Fatal(err)
+	}
+
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(layout.Root(), "config.yml"), []byte("review:\n  mode: agentic_review\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := operations.CheckWorkflowReviewGrant(t.Context(), id); err == nil {
+		t.Fatal("shared service reused approval after policy change")
+	}
+
+	if provider.creates != 1 {
+		t.Fatal("service review created another PR")
+	}
+}
+
+func serviceWorkflowReviewReady(t *testing.T) (service, string, *serviceWorkflowReviewFixture) {
+	t.Helper()
+
+	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
+	request := core.WorkflowStartRequest{RequestKey: "slice-review", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+
+	run, err := operations.StartWorkflow(t.Context(), request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	worker := []string{"sh", "-c", "printf 'Task\\n' >> result.txt && git add result.txt && git -c user.name=Test -c user.email=test@example.com commit -qm 'Task'"}
+
+	candidate, err := operations.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, worker)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repo := request.Selection.Target.Repository
+	provider := &serviceWorkflowReviewFixture{serviceWorkflowPRFixture: &serviceWorkflowPRFixture{pr: core.WorkflowPullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}}
+	operations.workflowPullRequests = provider
+
+	content := core.WorkflowSlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
+	if _, err := operations.EnsureWorkflowSlicePullRequest(t.Context(), run.Invocation.ID, content); err != nil {
+		t.Fatal(err)
+	}
+
+	return operations, run.Invocation.ID, provider
+}

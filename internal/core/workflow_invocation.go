@@ -19,9 +19,10 @@ type WorkflowExecutionPolicy struct {
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
 type WorkflowStartRequest struct {
-	RequestKey string
-	Selection  WorkflowPreviewRequest
-	Policy     WorkflowExecutionPolicy
+	RequestKey        string
+	Selection         WorkflowPreviewRequest
+	Policy            WorkflowExecutionPolicy
+	ReviewRestriction ReviewWorkflowMode `json:"review_restriction,omitempty"`
 }
 
 // WorkflowMember retains admission facts and the latest accepted owned image.
@@ -66,31 +67,35 @@ type WorkflowAttempt struct {
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
 	WorkflowIdentity
-	Schema            string                      `json:"schema"`
-	RequestKey        string                      `json:"request_key"`
-	RequestHash       string                      `json:"request_hash"`
-	Authority         string                      `json:"authority"`
-	Selection         WorkflowPreviewRequest      `json:"selection"`
-	Policy            WorkflowExecutionPolicy     `json:"policy"`
-	SetOrderRule      string                      `json:"set_order_rule"`
-	Members           []WorkflowMember            `json:"members"`
-	SetImages         []WorkflowInputImage        `json:"set_images"`
-	Excluded          map[string]int              `json:"excluded"`
-	Cursor            int                         `json:"cursor"`
-	Status            string                      `json:"status"`
-	Outcome           string                      `json:"outcome"`
-	Attempts          []WorkflowAttempt           `json:"attempts"`
-	Blocker           *WorkflowBlocker            `json:"blocker,omitempty"`
-	Lane              *WorkflowLane               `json:"lane,omitempty"`
-	StopIntent        string                      `json:"stop_intent"`
-	ResumeStatus      string                      `json:"resume_status"`
-	CandidateRef      string                      `json:"candidate_ref"`
-	CandidateHash     string                      `json:"candidate_hash"`
-	PullRequest       *WorkflowPullRequestBinding `json:"pull_request_binding,omitempty"`
-	DeliveryProofRef  string                      `json:"delivery_proof_ref"`
-	DeliveryProofHash string                      `json:"delivery_proof_hash"`
-	DeliveryRef       string                      `json:"delivery_ref"`
-	DeliveryHash      string                      `json:"delivery_hash"`
+	Schema            string                       `json:"schema"`
+	RequestKey        string                       `json:"request_key"`
+	RequestHash       string                       `json:"request_hash"`
+	Authority         string                       `json:"authority"`
+	Selection         WorkflowPreviewRequest       `json:"selection"`
+	Policy            WorkflowExecutionPolicy      `json:"policy"`
+	SetOrderRule      string                       `json:"set_order_rule"`
+	Members           []WorkflowMember             `json:"members"`
+	SetImages         []WorkflowInputImage         `json:"set_images"`
+	Excluded          map[string]int               `json:"excluded"`
+	Cursor            int                          `json:"cursor"`
+	Status            string                       `json:"status"`
+	Outcome           string                       `json:"outcome"`
+	Attempts          []WorkflowAttempt            `json:"attempts"`
+	Blocker           *WorkflowBlocker             `json:"blocker,omitempty"`
+	Lane              *WorkflowLane                `json:"lane,omitempty"`
+	StopIntent        string                       `json:"stop_intent"`
+	ResumeStatus      string                       `json:"resume_status"`
+	CandidateRef      string                       `json:"candidate_ref"`
+	CandidateHash     string                       `json:"candidate_hash"`
+	PullRequest       *WorkflowPullRequestBinding  `json:"pull_request_binding,omitempty"`
+	DeliveryProofRef  string                       `json:"delivery_proof_ref"`
+	DeliveryProofHash string                       `json:"delivery_proof_hash"`
+	DeliveryRef       string                       `json:"delivery_ref"`
+	DeliveryHash      string                       `json:"delivery_hash"`
+	ReviewRestriction ReviewWorkflowMode           `json:"review_restriction,omitempty"`
+	Review            *WorkflowReviewBinding       `json:"review_binding,omitempty"`
+	ReviewCount       int                          `json:"review_count,omitempty"`
+	ReviewRepairs     []WorkflowReviewRepairBudget `json:"review_repairs,omitempty"`
 }
 
 type workflowInvocationFile struct {
@@ -127,6 +132,10 @@ func (s *WorkflowStore) StartWorkflow(ctx context.Context, request WorkflowStart
 }
 
 func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest, error) {
+	if request.ReviewRestriction != "" && request.ReviewRestriction != ReviewWorkflowModeHumanReview {
+		return request, fmt.Errorf("an invocation may restrict review to human_review only")
+	}
+
 	if !validWorkflowRequestKey(request.RequestKey) {
 		return request, fmt.Errorf("workflow request key must contain 1..128 plain bytes")
 	}
@@ -307,6 +316,7 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 
 func newWorkflowInvocation(root string, identity WorkflowIdentity, request WorkflowStartRequest, hash string, preview WorkflowPreview) workflowInvocationFile {
 	invocation := WorkflowInvocation{WorkflowIdentity: identity, Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded, Status: "pending"}
+	invocation.ReviewRestriction = request.ReviewRestriction
 
 	invocation.Selection.SnapshotHash = ""
 	for _, member := range preview.Members {

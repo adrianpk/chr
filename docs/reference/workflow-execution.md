@@ -131,6 +131,67 @@ file bound; at most 128 distinct observations are retained per binding, with
 identical repeats reusing their observation. Titles allow at most 256 bytes,
 bodies 16 KiB and branch names 256 bytes.
 
+## Candidate review and approval
+
+| Operation | Contract |
+| --- | --- |
+| `ReviewWorkflowSlice` | Re-resolve current review policy and bind it to the validated candidate, canonical PR and observed target. Human mode waits; trusted mode accepts host evidence; agentic mode supervises a separate review argv. |
+| `ApproveWorkflowSlice` | Accept the displayed review input hash and recheck every bound input before recording explicit human approval. |
+| `CheckWorkflowReviewGrant` | Recheck current policy, immutable evidence, actual clean lane, canonical PR and target against the authorized input hash. |
+
+The owning namespace's `config.yml` supplies `review.mode` and
+`work.merge_strategy`. Absence retains `human_review` and `rebase`. Invalid
+values reject review. An invocation's optional `review_restriction` can require
+`human_review`; it cannot relax project policy. The restriction is retained in
+request identity, so an equivalent start or resume preserves it. Policy evidence
+records the effective mode, method, source and configuration image hash.
+
+`chr-workflow-review-input/v1` retains invocation/slice identity, aggregate
+candidate reference/hash, ordered task proof, canonical PR repository/URL,
+head/base branches and commits, observed target and current policy. Review inputs
+and decisions are immutable files beneath the run's `extension/chr/review/`.
+`review_binding` retains their paths and byte hashes. Historical rounds remain
+available when changed inputs replace a current grant.
+
+Human mode returns `waiting_approval`. It holds no worker reservation. Explicit
+approval names the exact input hash and re-observes policy, provider facts and
+host proof. A changed candidate, task/set image, policy, PR or target rejects
+the old approval. Trusted mode records acceptance of required host validation
+and enters `waiting_integration` with the review binding `authorized`.
+
+Agentic mode requires a distinct bounded argv. It runs as purpose `slice_review`
+through the shared fenced claim, repository capacity and subprocess supervisor.
+Its stdin is `WorkflowTaskInput` with `review` and `review_hash` fields. The role
+returns exactly one JSON `WorkflowReviewDecision`: `binding_hash`, structured
+`result` using the existing agentic review contract, and an optional
+`repair_task_key`. A pass with blocking findings, another input hash, a cosmetic
+blocking finding or a repair key outside the slice rejects the decision.
+The host rechecks all bound inputs after the role exits.
+
+An agentic pass enters `authorized`. `insufficient_evidence` retains a review
+stop and operator blocker. `human_required` retains the role decision and
+permits exact-bound explicit approval; that approval extends the immutable
+decision chain. `needs_changes` enters repair for its named task and ordered
+successors, preserving the validated prefix and canonical PR. Three automatic
+review repairs are permitted per slice within an invocation. Consumption is
+journaled with the repair and survives candidate changes, restart and resume.
+Exhaustion retains `repair_limit_exceeded` and returns
+`ErrWorkflowReviewRepairBudget`.
+
+Decision acceptance journals task `waiting_slice` / `ready_for_merge` and
+set-owned slice `ready_for_merge` together with evidence and invocation state.
+Review alone leaves integration pending. Review grant checks establish the
+review boundary; guarded publication also requires prepared combined-result
+validation and source/base protection.
+
+At most 128 review rounds are retained per invocation, with at most two
+decisions per round for an agentic human-required stop followed by approval.
+The review role shares worker lease, argv, output and file bounds. Truncated or
+malformed output fails; a failed or interrupted review retains a paused
+`waiting_review` checkpoint and the original task/candidate evidence. Durable
+cancel is terminal. Host death during input, claim, decision or approval writes
+replays the guarded journal; accepted decisions are reused without another role.
+
 ## External integration proof
 
 `VerifyWorkflowSliceIntegration` reads the bound canonical PR and fetches its

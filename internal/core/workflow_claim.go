@@ -168,7 +168,12 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 		}
 	}
 
-	if count >= run.Policy.MaxWorkerAttempts || len(run.Attempts) >= WorkflowRecordLimit {
+	limit := run.Policy.MaxWorkerAttempts
+	if claim.purpose == workflowSliceReviewPurpose {
+		limit = WorkflowPageLimit
+	}
+
+	if count >= limit || len(run.Attempts) >= WorkflowRecordLimit {
 		return fmt.Errorf("workflow worker attempt budget exhausted")
 	}
 
@@ -342,7 +347,7 @@ func workflowReplacedAttempt(run workflowInvocationFile, key, purpose string) st
 
 func (s *WorkflowStore) readWorkflowAttemptTask(run workflowInvocationFile, attempt WorkflowAttempt) (WorkflowRecord, error) {
 	cursor := run.Cursor
-	if attempt.Purpose == workflowSliceValidationPurpose {
+	if attempt.Purpose == workflowSliceValidationPurpose || attempt.Purpose == workflowSliceReviewPurpose {
 		cursor--
 	}
 

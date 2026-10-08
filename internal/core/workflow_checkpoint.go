@@ -41,9 +41,13 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 	attempt.Outcome, attempt.FinishedAt = reason, now
 	record.Task.AttemptID = ""
 
-	if attempt.Purpose == workflowSliceValidationPurpose {
+	switch attempt.Purpose {
+	case workflowSliceReviewPurpose:
+		run.ResumeStatus = "waiting_review"
+		run.Review.State = "stale"
+	case workflowSliceValidationPurpose:
 		run.ResumeStatus = "waiting_integration"
-	} else {
+	default:
 		record.Task.Phase, record.Task.Status = "pending", TicketStatusReadyForDev
 		run.ResumeStatus = "pending"
 	}
