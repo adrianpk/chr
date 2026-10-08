@@ -40,8 +40,9 @@ CLI curation fixture. Slice 4 is active for guarded serial task claims,
 isolated execution, process-aware recovery and manual reconciliation.
 T4.1 through T4.4 are locally validated on the dedicated
 `feat/slice-4-workflow-execution` branch. The final task commit is `df517f43250d1f7e52e7599984c9e33d0b920850`.
-All four tickets and the canonical report are reviewing; the canonical PR and
-final ordered controller evidence are being prepared. Slice 5 remains inactive.
+All four tickets and the canonical report are reviewing in [PR #367](https://forge.adrianpk.com/adrianpk/chr/pulls/367).
+PR references are recorded before final ordered controller evidence.
+Slice 5 remains inactive until verified integration.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -70,7 +71,7 @@ Fast-forward into `dev`.
 | Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | integrated | 4/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
 | Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | integrated | 4/4 | [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365) |
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | integrated | 4/4 | [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366) |
-| Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | reviewing | 0/4 | pending |
+| Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | reviewing | 0/4 | [#367](https://forge.adrianpk.com/adrianpk/chr/pulls/367) |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | not_started | 0/4 | pending |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | not_started | 0/4 | pending |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | not_started | 0/4 | pending |
@@ -238,12 +239,14 @@ Acceptance: A06, A09, A12, A17, A21; execution budgets in A24.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#367](https://forge.adrianpk.com/adrianpk/chr/pulls/367); open against `dev` with the exact approved title.
 - Merge commit: pending.
+- Report introduction: `17733105712a59a758a33d25ff13631e31ee40e9`; canonical full immutable introduction link recorded in the PR.
 - Report status: reviewing; [Slice 4 report](../report/slices/ticket-native-workflow/slice-4-workflow-execution.md).
 - Task lifecycle: all four tickets are reviewing with local task state validated; integration is pending.
 - Validation evidence: task `make verify`, focused real-files/Git/process/manual tests, focused core/app race checks and `git diff --check` passed. Exact successful commands and the corrected Linux process-observation race are recorded in the report and task tickets.
 - Acta task events: T4.1 `01M4E972DPE5DM4Q7ATJEBCRAK`; T4.2 `01M4ECD42K1X3N30FQXME60JCV`; T4.3 `01M4EESF2QHEVH0KPD8GHN6SB0`; T4.4 `01M4EG734Q2TMJWEH6N6V5GX2M`.
+- PR activity: Acta opened event `01M4EGDF7ME9BN2PS22735YBVH`.
 - Blockers: none observed.
 
 ## Slice 5: Slice candidates and delivery receipts

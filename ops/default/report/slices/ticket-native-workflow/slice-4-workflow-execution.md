@@ -5,7 +5,7 @@ Delivery set: ticket-native-workflow
 Plan: [Ticket-Native Work Delivery](../../../plan/ticket-native-workflow.md)
 Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md)
 Branch: `feat/slice-4-workflow-execution`
-PR: pending
+PR: [#367](https://forge.adrianpk.com/adrianpk/chr/pulls/367)
 Implementation candidate: `df517f43250d1f7e52e7599984c9e33d0b920850`
 
 ## Purpose
@@ -114,7 +114,9 @@ Repository gates use the retained owned CLI dump-curation executable documented
 in the [Slice 2 report](slice-2-workflow-materialization.md). It intercepts that
 fixed fixture input, delegates all other calls and has no service to stop.
 
-The final clean PR head requires controller evidence in this order:
+Canonical PR #367 retains the approved title and full report-introduction link.
+All task tickets are reviewing; final integration is pending. The clean PR head
+requires controller evidence in this order:
 `make verify`, `go test ./internal/core ./internal/app -count=1`,
 `go test -race ./internal/core ./internal/app -count=1`, `git diff --check`.
 Its immutable-head JSON/log retain those results after PR-reference commits.
