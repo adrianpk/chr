@@ -11,14 +11,15 @@ import (
 )
 
 type service struct {
-	ctx            context.Context
-	env            core.UserEnvironment
-	assetsFS       fs.FS
-	projectContext commandProjectContext
-	dumpEditor     DumpEditorLauncher
-	dumpCurator    DumpCurationProvider
-	quizModel      core.QuizModelAdapter
-	now            func() time.Time
+	ctx                  context.Context
+	env                  core.UserEnvironment
+	assetsFS             fs.FS
+	projectContext       commandProjectContext
+	dumpEditor           DumpEditorLauncher
+	dumpCurator          DumpCurationProvider
+	quizModel            core.QuizModelAdapter
+	workflowPullRequests core.WorkflowPullRequestProvider
+	now                  func() time.Time
 }
 
 func newService(

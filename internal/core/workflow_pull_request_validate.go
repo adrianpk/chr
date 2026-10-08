@@ -1,0 +1,88 @@
+package core
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+)
+
+func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
+	binding := run.PullRequest
+	if binding == nil {
+		return nil
+	}
+
+	if !validWorkflowPullRequestIdentity(run, *binding) {
+		return fmt.Errorf("invalid workflow canonical PR identity")
+	}
+
+	repository, err := workflowCanonicalRepository(run.Selection.Target.Repository)
+	if err != nil || repository != binding.Request.Repository || !validWorkflowPullRequestContent(WorkflowSlicePullRequestRequest{BaseBranch: binding.Request.BaseBranch, Title: binding.Request.Title, Body: binding.Request.Body}) {
+		return ErrWorkflowConflict
+	}
+
+	if err := validateWorkflowPullRequestState(*binding); err != nil {
+		return err
+	}
+
+	if !validWorkflowPullRequestCandidate(run, *binding) {
+		return ErrWorkflowConflict
+	}
+
+	return validateWorkflowPullRequestObservationRef(run.ID, *binding)
+}
+
+func validWorkflowPullRequestIdentity(run workflowInvocationFile, binding WorkflowPullRequestBinding) bool {
+	if run.Lane == nil {
+		return false
+	}
+
+	return binding.Schema == "chr-slice-pr/v1" && binding.ID == workflowPullRequestBindingID(run, binding.Request.Repository) && binding.Unit.Kind == "slice" && binding.Unit == run.Lane.Unit && binding.TargetCommit == run.Selection.Target.Commit && binding.Request.HeadBranch == strings.TrimPrefix(run.Lane.Branch, "refs/heads/")
+}
+
+func validateWorkflowPullRequestState(binding WorkflowPullRequestBinding) error {
+	if !slices.Contains([]string{"prepared", "creating", "awaiting_observation", "bound", "blocked"}, binding.State) {
+		return ErrWorkflowConflict
+	}
+
+	if binding.State == "bound" && binding.URL == "" {
+		return ErrWorkflowConflict
+	}
+
+	if binding.URL == "" {
+		return nil
+	}
+
+	repository, err := workflowPullRequestRepository(binding.URL)
+	if err != nil || repository != binding.Request.Repository {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func validWorkflowPullRequestCandidate(run workflowInvocationFile, binding WorkflowPullRequestBinding) bool {
+	if !workflowCommitID(binding.SourceCommit) || !workflowCommitID(binding.SourceTree) {
+		return false
+	}
+
+	for _, attempt := range run.Attempts {
+		if attempt.Purpose == workflowSliceValidationPurpose && attempt.ID == binding.CandidateID && attempt.Outcome == "validated" && attempt.ResultRef == binding.CandidateRef && attempt.ResultHash == binding.CandidateHash {
+			return true
+		}
+	}
+
+	return false
+}
+
+func validateWorkflowPullRequestObservationRef(id string, binding WorkflowPullRequestBinding) error {
+	if binding.ObservationCount == 0 && binding.ObservationRef == "" && binding.ObservationHash == "" {
+		return nil
+	}
+
+	if binding.ObservationCount < 1 || binding.ObservationCount > WorkflowPageLimit || binding.ObservationRef != workflowPullRequestObservationPath(id, binding.ObservationCount) || len(binding.ObservationHash) != 64 {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}

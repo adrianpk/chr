@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 )
 
 type workflowSliceObservation struct {
@@ -67,7 +68,7 @@ func checkWorkflowSliceMembership(run workflowInvocationFile, observation workfl
 
 	for i, record := range observation.tasks {
 		member := run.Members[start+i].Admission
-		if member.Key != record.Task.Key || member.SliceID != run.Lane.Unit.ID || record.Task.Phase != "validated" {
+		if member.Key != record.Task.Key || member.SliceID != run.Lane.Unit.ID || !slices.Contains([]string{"validated", "waiting_slice"}, record.Task.Phase) {
 			return fmt.Errorf("%w: aggregate requires every ordered task", ErrWorkflowConflict)
 		}
 	}

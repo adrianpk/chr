@@ -131,7 +131,7 @@ func closeWorkflowSliceCapacity(claim *WorkflowClaim) error {
 }
 
 func workflowSliceValidationReady(run WorkflowInvocation) bool {
-	return run.Status == "waiting_integration" || run.Status == "paused" && run.StopIntent == "" && run.Outcome == "slice_validation_failed"
+	return run.Status == "waiting_integration" || run.Status == "waiting_review" && run.CandidateRef != "" || run.Status == "paused" && run.StopIntent == "" && run.Outcome == "slice_validation_failed"
 }
 
 func (s *WorkflowStore) runWorkflowSliceValidation(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask) (WorkflowSliceCandidate, error) {

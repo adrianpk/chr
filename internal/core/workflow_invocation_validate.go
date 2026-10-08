@@ -49,11 +49,19 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return err
 	}
 
+	return validateWorkflowInvocationBindings(run)
+}
+
+func validateWorkflowInvocationBindings(run workflowInvocationFile) error {
 	if run.Lane != nil && !validWorkflowLane(*run.Lane) {
 		return fmt.Errorf("invalid workflow invocation lane")
 	}
 
-	return validateWorkflowCandidateRef(run)
+	if err := validateWorkflowCandidateRef(run); err != nil {
+		return err
+	}
+
+	return validateWorkflowPullRequestBinding(run)
 }
 
 func validateWorkflowCandidateRef(run workflowInvocationFile) error {

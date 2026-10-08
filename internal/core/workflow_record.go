@@ -68,7 +68,7 @@ type WorkflowSlice struct {
 	DependsOn     []WorkflowRef `json:"depends_on,omitempty"`
 	Phase         string        `json:"phase"`
 	Branch        string        `json:"branch,omitempty"`
-	CandidateRef  string        `json:"candidate_ref,omitempty"`
+	CandidateRef  string        `json:"candidate_ref"`
 	PullRequest   string        `json:"pull_request,omitempty"`
 	DeliveryRef   string        `json:"delivery_ref,omitempty"`
 }

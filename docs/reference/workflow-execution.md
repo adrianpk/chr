@@ -91,6 +91,46 @@ aggregate and repair attempts consume separate per-anchor budgets under the
 same configured attempt limit and total invocation bound. None resets earlier
 worker attempts.
 
+## Canonical slice pull requests
+
+`EnsureWorkflowSlicePullRequest` accepts a retained invocation, target branch
+and bounded initial title/body. The shared service uses its configured Forgejo
+or GitHub adapter. The provider must observe the validated source commit on the
+same canonical repository branch before creation; an unpublished or different
+source blocks creation.
+
+The host records `chr-slice-pr/v1` intent before provider IO and records
+`creating` before the create call. It searches all PR states for the source
+branch and adopts only one matching repository, source branch/commit and target
+branch. Once bound, retries read that same PR URL. A closed unmerged PR,
+ambiguous identity, fork head or changed candidate blocks the invocation and
+retains its immutable provider observation for explicit reconciliation.
+
+A timeout, malformed create response or host crash retains uncertain creation.
+Retries observe the original source branch without issuing another create. If
+no PR can yet be observed, `ErrWorkflowAwaitingObservation` preserves the
+uncertain intent. Worker expiry, restart and ordinary retries cannot clear it.
+
+The set-owned slice stores one branch, candidate reference and PR URL. All its
+tasks enter `waiting_slice` / `ready_for_review` in the same replayable journal;
+their task evidence remains valid and they share the set-owned PR. A provider
+merge observation enters `waiting_integration` for host verification and never
+marks a task `done`.
+
+Explicit repair retains the branch and PR identity, clears aggregate review
+readiness, preserves unchanged prefix evidence and invalidates the affected
+suffix. A newly validated candidate rebinds only that same open PR after its
+source commit is observed. Uncertain or blocked PR creation requires
+reconciliation before repair.
+
+Provider IO has a one-minute deadline and holds repository mutation exclusion
+without a worker capacity reservation. Discovery stops only after an empty
+page, or after proving ambiguity; it rejects incomplete pagination, more than
+4096 PR records or 128 pages. Immutable observations remain within the 1 MiB
+file bound; at most 128 distinct observations are retained per binding, with
+identical repeats reusing their observation. Titles allow at most 256 bytes,
+bodies 16 KiB and branch names 256 bytes.
+
 ## Manual protocol
 
 | Operation | Contract |

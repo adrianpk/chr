@@ -66,26 +66,27 @@ type WorkflowAttempt struct {
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
 	WorkflowIdentity
-	Schema        string                  `json:"schema"`
-	RequestKey    string                  `json:"request_key"`
-	RequestHash   string                  `json:"request_hash"`
-	Authority     string                  `json:"authority"`
-	Selection     WorkflowPreviewRequest  `json:"selection"`
-	Policy        WorkflowExecutionPolicy `json:"policy"`
-	SetOrderRule  string                  `json:"set_order_rule"`
-	Members       []WorkflowMember        `json:"members"`
-	SetImages     []WorkflowInputImage    `json:"set_images"`
-	Excluded      map[string]int          `json:"excluded"`
-	Cursor        int                     `json:"cursor"`
-	Status        string                  `json:"status"`
-	Outcome       string                  `json:"outcome"`
-	Attempts      []WorkflowAttempt       `json:"attempts"`
-	Blocker       *WorkflowBlocker        `json:"blocker,omitempty"`
-	Lane          *WorkflowLane           `json:"lane,omitempty"`
-	StopIntent    string                  `json:"stop_intent"`
-	ResumeStatus  string                  `json:"resume_status"`
-	CandidateRef  string                  `json:"candidate_ref"`
-	CandidateHash string                  `json:"candidate_hash"`
+	Schema        string                      `json:"schema"`
+	RequestKey    string                      `json:"request_key"`
+	RequestHash   string                      `json:"request_hash"`
+	Authority     string                      `json:"authority"`
+	Selection     WorkflowPreviewRequest      `json:"selection"`
+	Policy        WorkflowExecutionPolicy     `json:"policy"`
+	SetOrderRule  string                      `json:"set_order_rule"`
+	Members       []WorkflowMember            `json:"members"`
+	SetImages     []WorkflowInputImage        `json:"set_images"`
+	Excluded      map[string]int              `json:"excluded"`
+	Cursor        int                         `json:"cursor"`
+	Status        string                      `json:"status"`
+	Outcome       string                      `json:"outcome"`
+	Attempts      []WorkflowAttempt           `json:"attempts"`
+	Blocker       *WorkflowBlocker            `json:"blocker,omitempty"`
+	Lane          *WorkflowLane               `json:"lane,omitempty"`
+	StopIntent    string                      `json:"stop_intent"`
+	ResumeStatus  string                      `json:"resume_status"`
+	CandidateRef  string                      `json:"candidate_ref"`
+	CandidateHash string                      `json:"candidate_hash"`
+	PullRequest   *WorkflowPullRequestBinding `json:"pull_request_binding,omitempty"`
 }
 
 type workflowInvocationFile struct {

@@ -19,8 +19,12 @@ func (s *WorkflowStore) RepairWorkflowSlice(ctx context.Context, id, taskKey str
 			return readErr
 		}
 
-		if !workflowSliceValidationReady(run.WorkflowInvocation) || run.StopIntent != "" {
+		if !workflowSliceRepairReady(run.WorkflowInvocation) || run.StopIntent != "" {
 			return ErrWorkflowOwned
+		}
+
+		if readErr := owner.checkWorkflowSliceRepairPR(run); readErr != nil {
+			return readErr
 		}
 
 		observation, readErr := owner.readWorkflowSliceMembership(ctx, run)
@@ -35,6 +39,25 @@ func (s *WorkflowStore) RepairWorkflowSlice(ctx context.Context, id, taskKey str
 	})
 
 	return result, err
+}
+
+func (s *WorkflowStore) checkWorkflowSliceRepairPR(run workflowInvocationFile) error {
+	if run.PullRequest == nil || run.PullRequest.ObservationRef == "" {
+		return nil
+	}
+
+	observation, err := s.readWorkflowPullRequestObservation(*run.PullRequest)
+	if err != nil {
+		return err
+	}
+
+	for _, pr := range observation.Snapshots {
+		if pr.Merged {
+			return fmt.Errorf("%w: observed delivery requires verification before repair", ErrWorkflowOwned)
+		}
+	}
+
+	return nil
 }
 
 func (s *WorkflowStore) repairWorkflowSlice(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, taskKey string) (err error) {
@@ -71,14 +94,30 @@ func (s *WorkflowStore) repairWorkflowSlice(ctx context.Context, run *workflowIn
 	run.Status, run.Outcome, run.ResumeStatus = "pending", "slice_repair_requested", ""
 	run.CandidateRef, run.CandidateHash = "", ""
 
-	return s.commitWorkflowSliceRepair(run, observation.tasks[index:])
+	return s.commitWorkflowSliceRepair(run, observation, index)
 }
 
-func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, records []WorkflowRecord) error {
+func workflowSliceRepairReady(run WorkflowInvocation) bool {
+	if run.PullRequest != nil && !slices.Contains([]string{"prepared", "bound"}, run.PullRequest.State) {
+		return false
+	}
+
+	return workflowSliceValidationReady(run) || run.Status == "waiting_review"
+}
+
+func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, observation workflowSliceObservation, index int) error {
 	files := []workflowFileChange{}
 
-	for _, record := range records {
-		record.Task.Phase, record.Task.Status, record.Task.Evidence, record.Task.AttemptID = "pending", TicketStatusReadyForDev, nil, ""
+	for i, record := range observation.tasks {
+		if i < index {
+			if record.Task.Phase == "validated" {
+				continue
+			}
+
+			record.Task.Phase, record.Task.Status = "validated", TicketStatusInProgress
+		} else {
+			record.Task.Phase, record.Task.Status, record.Task.Evidence, record.Task.AttemptID = "pending", TicketStatusReadyForDev, nil, ""
+		}
 
 		changes, err := s.workflowClaimRecordChanges(run, &record)
 		if err != nil {
@@ -87,6 +126,13 @@ func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, r
 
 		files = append(files, changes...)
 	}
+
+	changes, err := s.workflowRepairSetChanges(run, observation.set)
+	if err != nil {
+		return err
+	}
+
+	files = append(files, changes...)
 
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()
@@ -97,6 +143,21 @@ func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, r
 	}
 
 	return s.commitFiles(append(files, state))
+}
+
+func (s *WorkflowStore) workflowRepairSetChanges(run *workflowInvocationFile, set WorkflowRecord) ([]workflowFileChange, error) {
+	for i := range set.Set.Slices {
+		descriptor := &set.Set.Slices[i]
+		if descriptor.ID != run.Lane.Unit.ID || (descriptor.CandidateRef == "" && descriptor.PullRequest == "") {
+			continue
+		}
+
+		descriptor.CandidateRef, descriptor.Phase = "", "developing"
+
+		return s.workflowSetRecordChanges(run, &set)
+	}
+
+	return nil, nil
 }
 
 func (s *WorkflowStore) beginWorkflowSliceRepair(run *workflowInvocationFile, observation workflowSliceObservation, claim *WorkflowClaim) error {
