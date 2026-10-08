@@ -33,9 +33,11 @@ Progress: 1 of 12 slices integrated; 4 of 48 tasks done.
 ## Current Checkpoint
 
 Slice 1 is verified integrated through canonical PR #364 at
-`b041521e94d46ee46aa35a9133e8746f31a27328`. Its report is delivered and
-four tickets are solved. Exact-head controller validation passed all recorded
-commands. Slice 2 is active for ordered task-ticket materialization.
+`b041521e94d46ee46aa35a9133e8746f31a27328`; its report is delivered and
+four tickets are solved. Slice 2 implements explicit ordered task materialization,
+immutable retry receipts and selected quiescent legacy adoption. All four task
+implementations passed local checks and are reviewing. PR references and final
+clean-head controller validation are completed before handoff.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -134,7 +136,7 @@ Plan contract: [Slice 2](../plan/ticket-native-workflow.md#slice-2-task-ticket-m
 | T2.1 | [TKT-20261008141349](../ticket/reviewing/20261008141349-ticket-native-t2-1.md) | validated | 8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1 | Extend plan-generation contracts to distinguish set, slice and task identity/order. |
 | T2.2 | [TKT-20261008141350](../ticket/reviewing/20261008141350-ticket-native-t2-2.md) | validated | 93a19da5472e6ca323d671ea1e0ffbd54cd6be59 | Persist one ticket per task and bind task-owned membership to set-owned slice contracts. |
 | T2.3 | [TKT-20261008141351](../ticket/reviewing/20261008141351-ticket-native-t2-3.md) | validated | ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4 | Add materialization receipts and idempotent recovery after partial generation. |
-| T2.4 | [TKT-20261008141352](../ticket/reviewing/20261008141352-ticket-native-t2-4.md) | validated | pending | Add explicit quiescent adoption for selected active legacy plans/tickets and update generation guidance. |
+| T2.4 | [TKT-20261008141352](../ticket/reviewing/20261008141352-ticket-native-t2-4.md) | validated | 1585ee89b21a51c565fee54c4f87d05fddab4dac | Add explicit quiescent adoption for selected active legacy plans/tickets and update generation guidance. |
 
 ### Validation
 
@@ -151,9 +153,9 @@ Acceptance: A01, A02.
 
 - PR: pending.
 - Merge commit: pending.
-- Report status: not created.
-- Task commits and ticket lifecycle evidence: pending.
-- Validation evidence: pending.
+- Report status: reviewing; [Slice 2 report](../report/slices/ticket-native-workflow/slice-2-workflow-materialization.md).
+- Task commits: T2.1 `8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1`; T2.2 `93a19da5472e6ca323d671ea1e0ffbd54cd6be59`; T2.3 `ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4`; T2.4 `1585ee89b21a51c565fee54c4f87d05fddab4dac`. All four tickets are reviewing.
+- Validation evidence: `make verify` and focused core/application materialization/adoption race checks passed. The controller records the required ordered sequence on the clean PR-reference follow-up head.
 - Blockers: none observed.
 
 ## Slice 3: Deterministic work selection
