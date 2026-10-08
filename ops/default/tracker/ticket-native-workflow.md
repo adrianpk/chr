@@ -132,8 +132,8 @@ Plan contract: [Slice 2](../plan/ticket-native-workflow.md#slice-2-task-ticket-m
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T2.1 | [TKT-20261008141349](../ticket/in_progress/20261008141349-ticket-native-t2-1.md) | validated | 8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1 | Extend plan-generation contracts to distinguish set, slice and task identity/order. |
-| T2.2 | [TKT-20261008141350](../ticket/in_progress/20261008141350-ticket-native-t2-2.md) | in_progress | pending | Persist one ticket per task and bind task-owned membership to set-owned slice contracts. |
-| T2.3 | [TKT-20261008141351](../ticket/ready/20261008141351-ticket-native-t2-3.md) | ready | pending | Add materialization receipts and idempotent recovery after partial generation. |
+| T2.2 | [TKT-20261008141350](../ticket/in_progress/20261008141350-ticket-native-t2-2.md) | validated | 93a19da5472e6ca323d671ea1e0ffbd54cd6be59 | Persist one ticket per task and bind task-owned membership to set-owned slice contracts. |
+| T2.3 | [TKT-20261008141351](../ticket/in_progress/20261008141351-ticket-native-t2-3.md) | in_progress | pending | Add materialization receipts and idempotent recovery after partial generation. |
 | T2.4 | [TKT-20261008141352](../ticket/ready/20261008141352-ticket-native-t2-4.md) | ready | pending | Add explicit quiescent adoption for selected active legacy plans/tickets and update generation guidance. |
 
 ### Validation

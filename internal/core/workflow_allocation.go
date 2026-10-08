@@ -1,0 +1,90 @@
+package core
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"syscall"
+	"time"
+)
+
+const workflowAllocationSchema = "chr-materialization-lock/v1"
+
+type workflowAllocationOwner struct {
+	Schema string `json:"schema"`
+	PID    int    `json:"pid"`
+	Nonce  int64  `json:"nonce"`
+}
+
+func (s *WorkflowStore) acquireWorkflowAllocation() (string, error) {
+	path := filepath.Join(s.layout.Root(), "lock", "id.lock")
+	if err := s.reclaimWorkflowAllocation(path); err != nil {
+		return "", err
+	}
+
+	if err := acquireOpsArtifactLock(path); err != nil {
+		return "", err
+	}
+
+	data, err := json.Marshal(workflowAllocationOwner{Schema: workflowAllocationSchema, PID: os.Getpid(), Nonce: time.Now().UnixNano()})
+	if err != nil {
+		return "", err
+	}
+
+	if err := atomicWorkflowFile(path, data); err != nil {
+		return "", err
+	}
+
+	return workflowHash(data), nil
+}
+
+func (s *WorkflowStore) reclaimWorkflowAllocation(path string) error {
+	data, err := readWorkflowFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	var owner workflowAllocationOwner
+	if err := json.Unmarshal(data, &owner); err != nil || owner.Schema != workflowAllocationSchema || owner.PID < 1 {
+		return fmt.Errorf("existing artifact allocation lock has no materialization ownership proof")
+	}
+	// An existing live PID, including a reused PID, conservatively blocks reclaim.
+	if err := syscall.Kill(owner.PID, 0); !errors.Is(err, syscall.ESRCH) {
+		return fmt.Errorf("materialization allocator is still owned")
+	}
+
+	return s.releaseWorkflowAllocation(workflowHash(data))
+}
+
+func (s *WorkflowStore) releaseWorkflowAllocation(guard string) error {
+	if guard == "" {
+		return nil
+	}
+
+	path := filepath.Join(s.layout.Root(), "lock", "id.lock")
+
+	data, err := readWorkflowFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if workflowHash(data) != guard {
+		return fmt.Errorf("%w: allocation lock owner changed", ErrWorkflowConflict)
+	}
+
+	if err := os.Remove(path); err != nil {
+		return err
+	}
+
+	return syncWorkflowDirectory(filepath.Dir(path))
+}

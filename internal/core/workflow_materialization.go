@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 )
 
@@ -18,8 +17,9 @@ type WorkflowMaterializationOptions struct {
 
 // WorkflowMaterializationResult returns authoritative set and task records.
 type WorkflowMaterializationResult struct {
-	Set   WorkflowRecord
-	Tasks []WorkflowRecord
+	ReceiptRef string
+	Set        WorkflowRecord
+	Tasks      []WorkflowRecord
 }
 
 // MaterializePlan creates one set and one ticket per task, with one descriptor
@@ -45,21 +45,25 @@ func (s *WorkflowStore) MaterializePlan(ctx context.Context, opts WorkflowMateri
 }
 
 func (s *WorkflowStore) materializePlan(ctx context.Context, opts WorkflowMaterializationOptions) (result WorkflowMaterializationResult, err error) {
-	body, err := s.readApprovedPlan(opts.Plan)
-	if err != nil {
-		return result, err
-	}
-
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
 		return result, err
 	}
 
-	lock := filepath.Join(s.layout.Root(), "lock", "id.lock")
-	if err := acquireOpsArtifactLock(lock); err != nil {
+	if previous, found, err := s.resumeMaterialization(snapshot, opts.Plan); found || err != nil {
+		return previous, err
+	}
+
+	body, err := s.readApprovedPlan(opts.Plan)
+	if err != nil {
 		return result, err
 	}
-	defer func() { err = errors.Join(err, os.Remove(lock)) }()
+
+	guard, err := s.acquireWorkflowAllocation()
+	if err != nil {
+		return result, err
+	}
+	defer func() { err = errors.Join(err, s.releaseWorkflowAllocation(guard)) }()
 
 	result, err = s.buildMaterialization(ctx, opts, body, nextOpsArtifactNumber(s.layout.Root()))
 	if err != nil {
@@ -78,11 +82,11 @@ func (s *WorkflowStore) materializePlan(ctx context.Context, opts WorkflowMateri
 		return result, err
 	}
 
-	if err := s.commitFiles(files); err != nil {
+	if err := s.commitAllocatedFiles(files, guard); err != nil {
 		return result, err
 	}
 
-	return s.readMaterialization(result)
+	return s.readMaterializationReceipt(result.Set, opts.Plan, snapshot)
 }
 
 func (s *WorkflowStore) readApprovedPlan(plan GeneratedWorkflowPlan) ([]byte, error) {
@@ -134,24 +138,12 @@ func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResul
 		files = append(files, workflowFileChange{Path: path, After: data})
 	}
 
-	return files, nil
-}
-
-func (s *WorkflowStore) readMaterialization(result WorkflowMaterializationResult) (WorkflowMaterializationResult, error) {
-	set, err := s.readRecord(result.Set.Path)
+	receipt, err := materializationReceiptFile(plan, result)
 	if err != nil {
-		return WorkflowMaterializationResult{}, err
+		return nil, err
 	}
 
-	tasks := make([]WorkflowRecord, 0, len(result.Tasks))
-	for _, task := range result.Tasks {
-		record, err := s.readRecord(task.Path)
-		if err != nil {
-			return WorkflowMaterializationResult{}, err
-		}
+	files = append(files, receipt)
 
-		tasks = append(tasks, record)
-	}
-
-	return WorkflowMaterializationResult{Set: set, Tasks: tasks}, nil
+	return files, nil
 }

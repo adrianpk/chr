@@ -17,9 +17,10 @@ type WorkflowChange struct {
 }
 
 type workflowJournal struct {
-	Schema  string               `json:"workflow_schema"`
-	ID      string               `json:"id"`
-	Changes []workflowFileChange `json:"changes"`
+	AllocationGuard string               `json:"allocation_guard,omitempty"`
+	Schema          string               `json:"workflow_schema"`
+	ID              string               `json:"id"`
+	Changes         []workflowFileChange `json:"changes"`
 }
 
 // Transition validates a complete namespace update before journaling its images.
@@ -81,12 +82,16 @@ func (s *WorkflowStore) prepareTransition(snapshot *WorkflowSnapshot, changes []
 }
 
 func (s *WorkflowStore) commitFiles(changes []workflowFileChange) error {
+	return s.commitAllocatedFiles(changes, "")
+}
+
+func (s *WorkflowStore) commitAllocatedFiles(changes []workflowFileChange, guard string) error {
 	data, err := json.Marshal(changes)
 	if err != nil {
 		return err
 	}
 
-	journal := workflowJournal{Schema: WorkflowSchema, ID: workflowHash(data), Changes: changes}
+	journal := workflowJournal{Schema: WorkflowSchema, ID: workflowHash(append([]byte(guard), data...)), Changes: changes, AllocationGuard: guard}
 
 	encoded, err := json.Marshal(journal)
 	if err != nil {
@@ -142,7 +147,7 @@ func (s *WorkflowStore) checkJournalImages(journal workflowJournal) error {
 		return err
 	}
 
-	if journal.Schema != WorkflowSchema || workflowHash(data) != journal.ID || len(journal.Changes) == 0 {
+	if journal.Schema != WorkflowSchema || workflowHash(append([]byte(journal.AllocationGuard), data...)) != journal.ID || len(journal.Changes) == 0 {
 		return fmt.Errorf("invalid workflow transition journal")
 	}
 
@@ -209,6 +214,10 @@ func (s *WorkflowStore) replayJournal(journal workflowJournal) error {
 	}
 
 	if err := s.confirmJournalImages(journal); err != nil {
+		return err
+	}
+
+	if err := s.releaseWorkflowAllocation(journal.AllocationGuard); err != nil {
 		return err
 	}
 

@@ -31,6 +31,7 @@ func (s *WorkflowStore) buildMaterialization(ctx context.Context, opts WorkflowM
 		return WorkflowMaterializationResult{}, err
 	}
 
+	set.Metadata["materialization_id"] = json.RawMessage(fmt.Sprintf("%q", plan.MaterializationID))
 	set.Body = body
 	set.Set = &WorkflowSet{Schema: WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
 
