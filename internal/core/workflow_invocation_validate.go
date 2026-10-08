@@ -73,7 +73,11 @@ func validateWorkflowInvocationBindings(run workflowInvocationFile) error {
 		return err
 	}
 
-	return validateWorkflowReviewBinding(run)
+	if err := validateWorkflowReviewBinding(run); err != nil {
+		return err
+	}
+
+	return validateWorkflowPreparationBinding(run)
 }
 
 func validateWorkflowCandidateRef(run workflowInvocationFile) error {
@@ -173,7 +177,7 @@ func validateWorkflowAttemptResult(invocationID string, attempt WorkflowAttempt)
 		return fmt.Errorf("invalid workflow attempt result binding")
 	}
 
-	if slices.Contains([]string{"validated", "failed", "reviewed"}, attempt.Outcome) && attempt.ResultRef == "" {
+	if slices.Contains([]string{"validated", "failed", "reviewed", "prepared"}, attempt.Outcome) && attempt.ResultRef == "" {
 		return fmt.Errorf("workflow attempt outcome requires a retained result")
 	}
 
@@ -247,7 +251,7 @@ func validWorkflowReplacement(attempt WorkflowAttempt, previous map[string]Workf
 }
 
 func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
-	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose, workflowSliceReviewPurpose}, attempt.Purpose) {
+	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose, workflowSliceReviewPurpose, workflowIntegrationValidationPurpose}, attempt.Purpose) {
 		return fmt.Errorf("invalid workflow attempt purpose")
 	}
 
@@ -259,7 +263,11 @@ func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
 		return ErrWorkflowConflict
 	}
 
-	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed", "paused", "cancelled", "interrupted", "recovered", "reviewed"}, attempt.Outcome) {
+	if attempt.Outcome == "prepared" && attempt.Purpose != workflowIntegrationValidationPurpose {
+		return ErrWorkflowConflict
+	}
+
+	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed", "paused", "cancelled", "interrupted", "recovered", "reviewed", "prepared"}, attempt.Outcome) {
 		return fmt.Errorf("invalid workflow attempt lease or outcome")
 	}
 

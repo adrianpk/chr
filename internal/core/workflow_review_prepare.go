@@ -31,6 +31,13 @@ func (s *WorkflowStore) prepareWorkflowReview(ctx context.Context, id string, pr
 			return readErr
 		}
 
+		// Replacing review input can change task and slice wait images. A policy
+		// decision must use those current images rather than the pre-journal read.
+		observation, readErr = owner.observeWorkflowSlice(ctx, run)
+		if readErr != nil {
+			return readErr
+		}
+
 		binding = *run.Review
 		if binding.State == "repair_limit_exceeded" {
 			return ErrWorkflowReviewRepairBudget

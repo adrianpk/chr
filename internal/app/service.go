@@ -20,6 +20,7 @@ type service struct {
 	quizModel              core.QuizModelAdapter
 	workflowPullRequests   core.WorkflowPullRequestProvider
 	workflowIntegrationGit core.WorkflowIntegrationGit
+	workflowPreparationGit core.WorkflowPreparationGit
 	now                    func() time.Time
 }
 

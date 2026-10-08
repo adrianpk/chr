@@ -96,6 +96,8 @@ type WorkflowInvocation struct {
 	Review            *WorkflowReviewBinding       `json:"review_binding,omitempty"`
 	ReviewCount       int                          `json:"review_count,omitempty"`
 	ReviewRepairs     []WorkflowReviewRepairBudget `json:"review_repairs,omitempty"`
+	Preparation       *WorkflowPreparationBinding  `json:"preparation_binding,omitempty"`
+	PreparationCount  int                          `json:"preparation_count,omitempty"`
 }
 
 type workflowInvocationFile struct {

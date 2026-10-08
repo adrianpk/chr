@@ -8,6 +8,23 @@ import (
 )
 
 func (s *WorkflowStore) workflowReviewInputs(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider) (workflowSliceObservation, WorkflowReviewInput, error) {
+	observation, input, err := s.workflowReviewSourceInputs(ctx, run, provider)
+	if err != nil || run.Preparation == nil {
+		return observation, input, err
+	}
+
+	candidate, err := s.currentWorkflowPreparation(ctx, run, input)
+	if err != nil {
+		return observation, input, err
+	}
+
+	input.PreparationRef, input.PreparationHash = run.Preparation.ResultRef, run.Preparation.ResultHash
+	input.PreparedGit = &candidate.Input.Git
+
+	return observation, input, nil
+}
+
+func (s *WorkflowStore) workflowReviewSourceInputs(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider) (workflowSliceObservation, WorkflowReviewInput, error) {
 	if err := checkWorkflowReviewReady(run, provider); err != nil {
 		return workflowSliceObservation{}, WorkflowReviewInput{}, err
 	}

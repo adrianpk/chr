@@ -105,6 +105,10 @@ func (s *WorkflowStore) repairWorkflowSlice(ctx context.Context, run *workflowIn
 	run.Status, run.Outcome, run.ResumeStatus = "pending", "slice_repair_requested", ""
 
 	run.CandidateRef, run.CandidateHash = "", ""
+	if run.Preparation != nil {
+		run.Preparation.State = "stale"
+	}
+
 	if run.Review != nil {
 		run.Review.State = "stale"
 	}

@@ -1,0 +1,187 @@
+package core
+
+import (
+	"encoding/json"
+	"fmt"
+	"path/filepath"
+	"slices"
+	"time"
+)
+
+func workflowPreparationPath(id string, round int) string {
+	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", fmt.Sprintf("%03d.json", round)))
+}
+
+func (s *WorkflowStore) readWorkflowPreparation(run workflowInvocationFile) (WorkflowIntegrationCandidate, error) {
+	var candidate WorkflowIntegrationCandidate
+	if run.Preparation == nil || run.Preparation.ResultRef == "" {
+		return candidate, ErrWorkflowConflict
+	}
+
+	data, err := s.readWorkflowReviewImage(run.Preparation.ResultRef, run.Preparation.ResultHash)
+	if err != nil {
+		return candidate, err
+	}
+
+	if err := json.Unmarshal(data, &candidate); err != nil {
+		return candidate, err
+	}
+
+	if err := validateWorkflowPreparationCandidate(run, candidate); err != nil {
+		return candidate, err
+	}
+
+	if err := s.checkWorkflowRetainedPreparationInput(run, candidate); err != nil {
+		return candidate, err
+	}
+
+	return candidate, nil
+}
+
+func (s *WorkflowStore) checkWorkflowRetainedPreparationInput(run workflowInvocationFile, candidate WorkflowIntegrationCandidate) error {
+	result := candidate.Validation
+
+	data, err := s.readWorkflowReviewImage(result.InputRef, result.InputHash)
+	if err != nil {
+		return err
+	}
+
+	var input WorkflowTaskInput
+	if err := json.Unmarshal(data, &input); err != nil {
+		return err
+	}
+
+	if !workflowPreparationInputMatches(input, candidate) {
+		return ErrWorkflowConflict
+	}
+
+	expected, err := json.Marshal(candidate.Input)
+	if err != nil {
+		return err
+	}
+
+	actual, err := json.Marshal(input.Preparation)
+	if err != nil || workflowHash(actual) != workflowHash(expected) {
+		return ErrWorkflowConflict
+	}
+
+	return validateWorkflowPreparationGate(input, result)
+}
+
+func workflowPreparationInputMatches(input WorkflowTaskInput, candidate WorkflowIntegrationCandidate) bool {
+	result := candidate.Validation
+
+	return input.Preparation != nil && input.Lane == candidate.Lane && input.AttemptID == result.AttemptID && input.Generation == result.Generation && input.ContractHash == candidate.Input.Source.Slice.ContractHash
+}
+
+func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate WorkflowIntegrationCandidate) error {
+	b := run.Preparation
+	if candidate.Schema != "chr-integration-candidate/v1" || candidate.InvocationID != run.ID || candidate.Round != b.Round || candidate.Input.Source.Unit != b.Unit || !validWorkflowLane(candidate.Lane) {
+		return ErrWorkflowConflict
+	}
+
+	hash, err := workflowReviewInputHash(candidate.Input.Source)
+	if err != nil || hash != b.SourceHash {
+		return ErrWorkflowConflict
+	}
+
+	if err := validateWorkflowPublicationCapability(candidate.Input.Source, candidate.Input.Capability); err != nil {
+		return err
+	}
+
+	if err := validateWorkflowPreparationProofBinding(candidate); err != nil {
+		return err
+	}
+
+	return validateWorkflowPreparationResult(run, candidate)
+}
+
+func validateWorkflowPreparationProofBinding(candidate WorkflowIntegrationCandidate) error {
+	proof, source := candidate.Input.Git, candidate.Input.Source
+	if proof.SourceCommit != source.PullRequest.HeadCommit || proof.BaseCommit != source.TargetCommit || proof.Method != source.Policy.Method || proof.Repository != source.PullRequest.Repository || proof.TargetBranch != source.PullRequest.BaseBranch {
+		return ErrWorkflowConflict
+	}
+
+	return validateWorkflowPreparationLaneProof(candidate)
+}
+
+func validateWorkflowPreparationLaneProof(candidate WorkflowIntegrationCandidate) error {
+	proof := candidate.Input.Git
+	if proof.SourceDirectory != "" || proof.ObservedTarget != proof.BaseCommit || candidate.Lane.HeadCommit != proof.ResultCommit || candidate.Lane.BaseCommit != proof.BaseCommit {
+		return ErrWorkflowConflict
+	}
+
+	return validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof)
+}
+
+func validateWorkflowPreparationResult(run workflowInvocationFile, candidate WorkflowIntegrationCandidate) error {
+	result := candidate.Validation
+	if !result.Successful || result.Schema != "chr-integration-validation/v1" || result.Outcome != "integration_validated" || result.Commit != candidate.Input.Git.ResultCommit || result.Tree != candidate.Input.Git.PreparedTree || result.FinishedAt.IsZero() {
+		return ErrWorkflowConflict
+	}
+
+	for _, attempt := range run.Attempts {
+		if workflowPreparationAttemptMatches(attempt, result, run.Preparation.ResultHash) {
+			return nil
+		}
+	}
+
+	return ErrWorkflowConflict
+}
+
+func workflowPreparationAttemptMatches(attempt WorkflowAttempt, result WorkflowTaskResult, hash string) bool {
+	return attempt.ID == result.AttemptID && attempt.Purpose == workflowIntegrationValidationPurpose && attempt.Outcome == "prepared" && attempt.ResultHash == hash && attempt.InputRef == result.InputRef && attempt.InputHash == result.InputHash
+}
+
+func (s *WorkflowStore) persistWorkflowPreparation(run *workflowInvocationFile, record WorkflowRecord, candidate WorkflowIntegrationCandidate) error {
+	data, err := json.MarshalIndent(candidate, "", "  ")
+	if err != nil || len(data) >= WorkflowFileLimit {
+		return fmt.Errorf("prepared candidate exceeds file bounds")
+	}
+
+	data = append(data, '\n')
+	ref := workflowPreparationPath(run.ID, candidate.Round)
+	run.Preparation.State, run.Preparation.ResultRef, run.Preparation.ResultHash = "validated", ref, workflowHash(data)
+	attempt := &run.Attempts[len(run.Attempts)-1]
+	attempt.Outcome, attempt.FinishedAt = "prepared", time.Now().UTC()
+	attempt.ResultRef, attempt.ResultHash = workflowAttemptFile(run.ID, attempt.ID, "result.json"), workflowHash(data)
+	record.Task.AttemptID = ""
+
+	run.Status, run.Outcome, run.Blocker = "waiting_review", "integration_validated", nil
+	if run.Review != nil {
+		run.Review.State = "stale"
+	}
+
+	files, err := s.workflowClaimRecordChanges(run, &record)
+	if err != nil {
+		return err
+	}
+
+	files = append(files, workflowFileChange{Path: attempt.ResultRef, After: data})
+
+	return s.commitWorkflowPullRequestFiles(run, files, workflowFileChange{Path: ref, After: data})
+}
+
+func validateWorkflowPreparationGate(input WorkflowTaskInput, result WorkflowTaskResult) error {
+	gate := input.Contract.Validation
+	if !gate.Required {
+		if result.WaiverReason != gate.WaiverReason || len(result.Validation) != 0 {
+			return ErrWorkflowConflict
+		}
+
+		return nil
+	}
+
+	if len(result.Validation) != len(gate.Commands) {
+		return ErrWorkflowConflict
+	}
+
+	for i, command := range gate.Commands {
+		observed := result.Validation[i]
+		if !slices.Equal(command, observed.Command) || observed.ExitCode != 0 || observed.Truncated {
+			return ErrWorkflowConflict
+		}
+	}
+
+	return nil
+}

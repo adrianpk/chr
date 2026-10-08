@@ -131,6 +131,58 @@ file bound; at most 128 distinct observations are retained per binding, with
 identical repeats reusing their observation. Titles allow at most 256 bytes,
 bodies 16 KiB and branch names 256 bytes.
 
+## Combined-result preparation
+
+| Operation | Contract |
+| --- | --- |
+| `PrepareWorkflowSliceIntegration` | Resolve the current method and atomic provider capability, prepare an isolated combined result, and run the frozen slice gate against that exact clean lane. |
+| `CheckWorkflowPublicationGuard` | Recheck combined validation, exact review, policy, canonical PR/source/base and current protection; return the immutable guard required by a publisher. |
+
+`WorkflowPublicationGuardProvider` extends canonical PR observation with a trusted
+capability for the exact repository, PR and configured method. The capability
+must guarantee both `atomic_source_base` and `exact_result` in the publication
+transaction. A source-only merge API, an earlier target observation or a local
+operation lock cannot establish that guarantee. The existing Forgejo and GitHub
+merge adapter paths report their source-only capability and return
+`ErrWorkflowAtomicGuard` through native preparation. They produce a durable
+`publication_guard_unsupported` blocker without invoking the legacy merge API or
+changing the method. Provider contract fixtures are local evidence; they do not
+establish live publication support.
+
+The trusted `WorkflowPreparationGit` port prepares one configured `merge`,
+`rebase` or `squash` result. `OSWorkflowPreparationGit` fetches the retained source
+and actual canonical target into an owned temporary object store. A moved base,
+conflicting tree or non-linear rebase source blocks preparation. Merge retains
+source and base parents; squash has one combined commit on the base; rebase
+retains every ordered source change as a linear commit on the base. Each result
+is checked against the same method-specific tree and history verifier used for
+delivery proof.
+
+The prepared commits enter a separate registered validation worktree. Source
+lane, canonical PR and remote target remain unchanged. Before Git IO, a fenced
+`integration_validation` attempt journals ownership and the preparation round.
+Host commands then use the shared supervisor, lease and repository capacity.
+The frozen slice gate runs against the prepared lane, with its exact commands
+or explicit waiver. Failed, mutating or truncated gates retain a stale
+preparation and resumable checkpoint without rewinding task validation.
+
+An accepted `chr-integration-candidate/v1` binds source/task/contract proof,
+observed base, policy, protection revision, result tree/history, validation input
+and host command evidence. Its immutable bytes live at
+`run/<id>/extension/chr/preparation/<round>.json`, with an identical retained
+attempt result. The invocation's `preparation_binding` guards these bytes and
+`preparation_count` limits retained rounds to 128. Candidate replacement, host
+death and resume do not reset that count. Git IO has a three-minute deadline;
+history and workflow files retain the existing 4096-record and 1 MiB limits.
+
+Preparation invalidates an earlier source-only review grant. The next review
+input additionally binds `preparation_ref`, `preparation_hash` and `prepared_git`;
+manual approval must name that new exact input. A changed base, method, policy,
+provider protection, prepared lane or evidence requires fresh validation and
+review. Unchanged retries recheck actual Git and retained evidence and reuse the
+accepted preparation without another gate. Neither operation submits a merge
+or creates a delivery receipt.
+
 ## Candidate review and approval
 
 | Operation | Contract |

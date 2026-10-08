@@ -42,6 +42,9 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 	record.Task.AttemptID = ""
 
 	switch attempt.Purpose {
+	case workflowIntegrationValidationPurpose:
+		run.ResumeStatus = "waiting_integration"
+		run.Preparation.State = "stale"
 	case workflowSliceReviewPurpose:
 		run.ResumeStatus = "waiting_review"
 		run.Review.State = "stale"

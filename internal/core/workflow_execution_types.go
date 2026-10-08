@@ -16,26 +16,27 @@ type WorkflowLane struct {
 
 // WorkflowTaskInput is the immutable, credential-free input supplied to a worker.
 type WorkflowTaskInput struct {
-	Review         *WorkflowReviewInput  `json:"review,omitempty"`
-	ReviewHash     string                `json:"review_hash,omitempty"`
-	Schema         string                `json:"schema"`
-	ExecutionMode  string                `json:"execution_mode"`
-	InvocationID   string                `json:"invocation_id"`
-	AttemptID      string                `json:"attempt_id"`
-	Generation     uint64                `json:"generation"`
-	TaskKey        string                `json:"ticket_key"`
-	InputRevision  uint64                `json:"input_revision"`
-	SourceHash     string                `json:"source_hash"`
-	ContractHash   string                `json:"execution_contract_hash"`
-	ScopeHash      string                `json:"scope_hash"`
-	Contract       GeneratedWorkflowTask `json:"execution_contract"`
-	Body           string                `json:"body"`
-	Target         WorkflowPreviewTarget `json:"target"`
-	Lane           WorkflowLane          `json:"lane"`
-	Prerequisites  []WorkflowInputImage  `json:"prerequisites"`
-	EvidenceHashes map[string]string     `json:"prerequisite_evidence_hashes"`
-	Worker         []string              `json:"worker"`
-	Slice          *WorkflowSliceInput   `json:"slice,omitempty"`
+	Preparation    *WorkflowPreparationInput `json:"preparation,omitempty"`
+	Review         *WorkflowReviewInput      `json:"review,omitempty"`
+	ReviewHash     string                    `json:"review_hash,omitempty"`
+	Schema         string                    `json:"schema"`
+	ExecutionMode  string                    `json:"execution_mode"`
+	InvocationID   string                    `json:"invocation_id"`
+	AttemptID      string                    `json:"attempt_id"`
+	Generation     uint64                    `json:"generation"`
+	TaskKey        string                    `json:"ticket_key"`
+	InputRevision  uint64                    `json:"input_revision"`
+	SourceHash     string                    `json:"source_hash"`
+	ContractHash   string                    `json:"execution_contract_hash"`
+	ScopeHash      string                    `json:"scope_hash"`
+	Contract       GeneratedWorkflowTask     `json:"execution_contract"`
+	Body           string                    `json:"body"`
+	Target         WorkflowPreviewTarget     `json:"target"`
+	Lane           WorkflowLane              `json:"lane"`
+	Prerequisites  []WorkflowInputImage      `json:"prerequisites"`
+	EvidenceHashes map[string]string         `json:"prerequisite_evidence_hashes"`
+	Worker         []string                  `json:"worker"`
+	Slice          *WorkflowSliceInput       `json:"slice,omitempty"`
 }
 
 // WorkflowCommandResult records host-observed command output with explicit bounds.

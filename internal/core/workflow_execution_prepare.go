@@ -123,7 +123,8 @@ func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInpu
 	data = append(data, '\n')
 	ref := workflowAttemptFile(run.ID, input.AttemptID, "input.json")
 	attempt := &run.Attempts[len(run.Attempts)-1]
-	attempt.Lane, attempt.InputRef, attempt.InputHash = run.Lane, ref, workflowHash(data)
+	lane := input.Lane
+	attempt.Lane, attempt.InputRef, attempt.InputHash = &lane, ref, workflowHash(data)
 
 	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, workflowFileChange{Path: ref, After: data}, nil
 }

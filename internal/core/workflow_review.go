@@ -24,16 +24,19 @@ type WorkflowReviewPolicy struct {
 
 // WorkflowReviewInput binds a decision to host validation and canonical inputs.
 type WorkflowReviewInput struct {
-	Schema        string                      `json:"schema"`
-	InvocationID  string                      `json:"invocation_id"`
-	Unit          WorkflowRef                 `json:"unit"`
-	CandidateID   string                      `json:"candidate_id"`
-	CandidateRef  string                      `json:"candidate_ref"`
-	CandidateHash string                      `json:"candidate_hash"`
-	Slice         WorkflowSliceInput          `json:"slice"`
-	PullRequest   WorkflowPullRequestSnapshot `json:"pull_request"`
-	TargetCommit  string                      `json:"target_commit"`
-	Policy        WorkflowReviewPolicy        `json:"policy"`
+	Schema          string                      `json:"schema"`
+	InvocationID    string                      `json:"invocation_id"`
+	Unit            WorkflowRef                 `json:"unit"`
+	CandidateID     string                      `json:"candidate_id"`
+	CandidateRef    string                      `json:"candidate_ref"`
+	CandidateHash   string                      `json:"candidate_hash"`
+	Slice           WorkflowSliceInput          `json:"slice"`
+	PullRequest     WorkflowPullRequestSnapshot `json:"pull_request"`
+	TargetCommit    string                      `json:"target_commit"`
+	Policy          WorkflowReviewPolicy        `json:"policy"`
+	PreparationRef  string                      `json:"preparation_ref,omitempty"`
+	PreparationHash string                      `json:"preparation_hash,omitempty"`
+	PreparedGit     *WorkflowIntegrationProof   `json:"prepared_git,omitempty"`
 }
 
 // WorkflowReviewDecision is returned by the distinct supervised review role.

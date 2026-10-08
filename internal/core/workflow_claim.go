@@ -169,7 +169,7 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 	}
 
 	limit := run.Policy.MaxWorkerAttempts
-	if claim.purpose == workflowSliceReviewPurpose {
+	if claim.purpose == workflowSliceReviewPurpose || claim.purpose == workflowIntegrationValidationPurpose {
 		limit = WorkflowPageLimit
 	}
 
@@ -347,7 +347,7 @@ func workflowReplacedAttempt(run workflowInvocationFile, key, purpose string) st
 
 func (s *WorkflowStore) readWorkflowAttemptTask(run workflowInvocationFile, attempt WorkflowAttempt) (WorkflowRecord, error) {
 	cursor := run.Cursor
-	if attempt.Purpose == workflowSliceValidationPurpose || attempt.Purpose == workflowSliceReviewPurpose {
+	if attempt.Purpose == workflowSliceValidationPurpose || attempt.Purpose == workflowSliceReviewPurpose || attempt.Purpose == workflowIntegrationValidationPurpose {
 		cursor--
 	}
 
