@@ -39,7 +39,8 @@ with the retained CLI curation fixture. Its report is delivered and all four tas
 tickets are solved. Acta records the canonical merge in `01M4ESBJ8W5EGFTJR23A3CCXN3`.
 Slice 6 is active for review-bound approval, guarded method preparation,
 recoverable submission and reconciliation. T6.1 is validated with task commit `085747eb4bc083318d6673b80ec7d9e437e45f8f`;
-T6.2 is in progress and T6.3–T6.4 remain ready.
+T6.2 is validated with task commit `497af614315fe80ce69c0f43c216f1a81d15200d`;
+T6.3 is in progress and T6.4 remains ready.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -333,19 +334,26 @@ Plan contract: [Slice 6](../plan/ticket-native-workflow.md#slice-6-guarded-autom
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T6.1 | [TKT-20261008141405](../ticket/reviewing/20261008141405-ticket-native-t6-1.md) | validated | 085747eb4bc083318d6673b80ec7d9e437e45f8f | Bind review decisions, bounded repairs and exact-candidate manual approval to current policy and immutable inputs. |
-| T6.2 | [TKT-20261008141406](../ticket/in_progress/20261008141406-ticket-native-t6-2.md) | in_progress | pending | Prepare and validate configured merge/rebase/squash results and enforce atomic source/base publication guards. |
-| T6.3 | [TKT-20261008141407](../ticket/ready/20261008141407-ticket-native-t6-3.md) | ready | pending | Journal submission before provider IO and retain target exclusion for uncertain responses. |
+| T6.2 | [TKT-20261008141406](../ticket/reviewing/20261008141406-ticket-native-t6-2.md) | validated | 497af614315fe80ce69c0f43c216f1a81d15200d | Prepare and validate configured merge/rebase/squash results and enforce atomic source/base publication guards. |
+| T6.3 | [TKT-20261008141407](../ticket/in_progress/20261008141407-ticket-native-t6-3.md) | in_progress | pending | Journal submission before provider IO and retain target exclusion for uncertain responses. |
 | T6.4 | [TKT-20261008141408](../ticket/ready/20261008141408-ticket-native-t6-4.md) | ready | pending | Reconcile target movement, external delivery and stale candidate evidence through the shared operation. |
 
 ### Validation
 
-Status: T6.1 passed its task checks; T6.2–T6.4 and final clean-head checks are pending.
+Status: T6.1–T6.2 passed their task checks; T6.3–T6.4 and final clean-head checks are pending.
 
 Successful T6.1 checks: `make verify` with the retained CLI curation fixture;
 `go test -race ./internal/core ./internal/app -run '^(TestWorkflowReview|TestServiceWorkflowReview)' -count=1`;
 `git diff --check`. Real fixtures cover policy/candidate/target revocation, exact
 manual approval, mode stops, three persistent repairs, role cancellation,
 concurrent decisions and process-death recovery.
+
+Successful T6.2 checks: `make verify` with the retained CLI curation fixture;
+`go test -race ./internal/core ./internal/app -run '^(TestWorkflowPreparation|TestWorkflowReview|TestServiceWorkflowPreparation|TestServiceWorkflowReview)' -count=1`;
+`git diff --check`. Real fixtures cover combined merge/rebase/squash gates,
+exact approval, moved target, immutable evidence, conflicts, stop intent,
+concurrent callers and journal recovery. Current source-only native provider
+paths report the required guard blocker without fallback.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`. Exercise real target
@@ -361,10 +369,10 @@ Acceptance: A11, A13, A14, A15, A21; publication budgets in A24.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commit: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; its ticket is reviewing. T6.2 is in progress; T6.3–T6.4 remain ready.
-- Acta task event: T6.1 `01M4EVSNQG6RK6XRXA0YAKW199`.
-- Validation evidence: T6.1 task checks passed; complete slice and final clean-head controller evidence are pending.
-- Blockers: none observed; T6.2 is active.
+- Task commits: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; T6.2 `497af614315fe80ce69c0f43c216f1a81d15200d`. Both tickets are reviewing; T6.3 is in progress and T6.4 remains ready.
+- Acta task events: T6.1 `01M4EVSNQG6RK6XRXA0YAKW199`; T6.2 `01M4EXHWH60EG9YSZ35DF9TFQ2`.
+- Validation evidence: T6.1–T6.2 task checks passed; complete slice and final clean-head controller evidence are pending.
+- Blockers: none observed; T6.3 is active.
 
 ## Slice 7: Ordered set and use-case continuation
 
