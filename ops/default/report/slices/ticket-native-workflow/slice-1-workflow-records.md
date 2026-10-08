@@ -5,7 +5,7 @@ Delivery set: ticket-native-workflow
 Plan: [Ticket-Native Work Delivery](../../../plan/ticket-native-workflow.md)
 Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md)
 Branch: `feat/slice-1-workflow-records`
-PR: pending
+PR: [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364)
 
 ## Purpose
 

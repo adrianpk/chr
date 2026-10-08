@@ -63,7 +63,7 @@ verified.
 
 | Slice | Name | Exact branch | Expected PR title | Report | State | Tasks done | PR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | reviewing | 0/4 | pending |
+| Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | reviewing | 0/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
 | Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | not_started | 0/4 | pending |
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | not_started | 0/4 | pending |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
@@ -95,7 +95,7 @@ Plan contract: [Slice 1](../plan/ticket-native-workflow.md#slice-1-guarded-workf
 | T1.1 | [TKT-20261008141345](../ticket/reviewing/20261008141345-ticket-native-t1-1.md) | validated | 7fa91666a7c3b473dc1651994863413d53217f38 | Define versioned task/set/slice/receipt identities, fields and lifecycle validation in native core types. |
 | T1.2 | [TKT-20261008141346](../ticket/reviewing/20261008141346-ticket-native-t1-2.md) | validated | c28ecb7ddf5f595b6f631db9665ce524b8a5a117 | Implement revision-guarded canonical and adopted-Markdown read/write with unknown-field preservation. |
 | T1.3 | [TKT-20261008141347](../ticket/reviewing/20261008141347-ticket-native-t1-3.md) | validated | 2f51be25a0afe1231cffe74ddeccdb8af89a685e | Implement process-safe mutation locking and journaled multi-file transitions with guarded replay. |
-| T1.4 | [TKT-20261008141348](../ticket/reviewing/20261008141348-ticket-native-t1-4.md) | validated | pending | Extend rebuildable SQLite queries/migrations and record/file bounds. |
+| T1.4 | [TKT-20261008141348](../ticket/reviewing/20261008141348-ticket-native-t1-4.md) | validated | 9db5940c692003107398db9489c9a263fb6b7144 | Extend rebuildable SQLite queries/migrations and record/file bounds. |
 
 ### Validation
 
@@ -110,10 +110,10 @@ Acceptance: A02, A22; foundations for A24.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364); open against `dev`.
 - Merge commit: pending.
 - Report status: reviewing; [Slice 1 report](../report/slices/ticket-native-workflow/slice-1-workflow-records.md).
-- Task commits: T1.1 `7fa91666a7c3b473dc1651994863413d53217f38`; T1.2 `c28ecb7ddf5f595b6f631db9665ce524b8a5a117`; T1.3 `2f51be25a0afe1231cffe74ddeccdb8af89a685e`; T1.4 recorded in the PR-reference follow-up. All four tickets are reviewing.
+- Task commits: T1.1 `7fa91666a7c3b473dc1651994863413d53217f38`; T1.2 `c28ecb7ddf5f595b6f631db9665ce524b8a5a117`; T1.3 `2f51be25a0afe1231cffe74ddeccdb8af89a685e`; T1.4 `9db5940c692003107398db9489c9a263fb6b7144`. All four tickets are reviewing.
 - Validation evidence: `make verify`, `go test ./internal/core -count=1`, focused workflow race/subprocess tests and `git diff --check` passed. Final required checks bind the clean PR-reference follow-up HEAD through `slice-loop validate`.
 - Blockers: none observed.
 
