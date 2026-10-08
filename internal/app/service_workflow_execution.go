@@ -104,3 +104,33 @@ func (s service) ReconcileWorkflow(ctx context.Context, id string) (core.Workflo
 
 	return store.ReconcileWorkflow(ctx, id)
 }
+
+// PrepareWorkflowManualTask freezes an owned handoff for manual execution.
+func (s service) PrepareWorkflowManualTask(ctx context.Context, claim *core.WorkflowClaim, worker []string) (core.WorkflowManualTask, error) {
+	store, err := s.workflowStore()
+	if err != nil {
+		return core.WorkflowManualTask{}, err
+	}
+
+	return store.PrepareWorkflowManualTask(ctx, claim, worker)
+}
+
+// ExecuteWorkflowManualTask supervises the frozen harness without completing work.
+func (s service) ExecuteWorkflowManualTask(ctx context.Context, claim *core.WorkflowClaim) (core.WorkflowCommandResult, error) {
+	store, err := s.workflowStore()
+	if err != nil {
+		return core.WorkflowCommandResult{}, err
+	}
+
+	return store.ExecuteWorkflowManualTask(ctx, claim)
+}
+
+// ReconcileWorkflowTask host-validates an explicit manual candidate before status.
+func (s service) ReconcileWorkflowTask(ctx context.Context, claim *core.WorkflowClaim, candidate core.WorkflowManualCandidate) (core.WorkflowTaskResult, error) {
+	store, err := s.workflowStore()
+	if err != nil {
+		return core.WorkflowTaskResult{}, err
+	}
+
+	return store.ReconcileWorkflowTask(ctx, claim, candidate)
+}

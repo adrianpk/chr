@@ -10,7 +10,11 @@ import (
 )
 
 func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *WorkflowClaim, worker []string) (prepared workflowPreparedTask, err error) {
-	if err := validateWorkflowCommand(worker); err != nil {
+	return s.prepareWorkflowTaskMode(ctx, claim, worker, "automatic")
+}
+
+func (s *WorkflowStore) prepareWorkflowTaskMode(ctx context.Context, claim *WorkflowClaim, worker []string, mode string) (prepared workflowPreparedTask, err error) {
+	if err := validateWorkflowInputWorker(mode, worker); err != nil {
 		return prepared, fmt.Errorf("workflow worker: %w", err)
 	}
 
@@ -20,7 +24,7 @@ func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *Workflow
 			return readErr
 		}
 
-		prepared, readErr = claim.store.prepareWorkflowAttempt(ctx, run, record, worker)
+		prepared, readErr = claim.store.prepareWorkflowAttempt(ctx, run, record, worker, mode)
 
 		return readErr
 	})
@@ -28,7 +32,7 @@ func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *Workflow
 	return prepared, err
 }
 
-func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string) (workflowPreparedTask, error) {
+func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string, mode string) (workflowPreparedTask, error) {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	if attempt.InputRef != "" {
 		return workflowPreparedTask{}, fmt.Errorf("%w: attempt input is already prepared", ErrWorkflowOwned)
@@ -57,6 +61,8 @@ func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflow
 	if err != nil {
 		return workflowPreparedTask{}, err
 	}
+
+	input.ExecutionMode = mode
 
 	return s.saveWorkflowTaskInput(run, input)
 }
@@ -128,4 +134,16 @@ func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile) error {
 	run.sourceHash = workflowHash(state.After)
 
 	return nil
+}
+
+func validateWorkflowInputWorker(mode string, worker []string) error {
+	if mode == "manual" && len(worker) == 0 {
+		return nil
+	}
+
+	if mode != "manual" && mode != "automatic" {
+		return ErrWorkflowConflict
+	}
+
+	return validateWorkflowCommand(worker)
 }

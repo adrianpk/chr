@@ -17,6 +17,7 @@ type WorkflowLane struct {
 // WorkflowTaskInput is the immutable, credential-free input supplied to a worker.
 type WorkflowTaskInput struct {
 	Schema         string                `json:"schema"`
+	ExecutionMode  string                `json:"execution_mode"`
 	InvocationID   string                `json:"invocation_id"`
 	AttemptID      string                `json:"attempt_id"`
 	Generation     uint64                `json:"generation"`
@@ -47,6 +48,7 @@ type WorkflowCommandResult struct {
 type WorkflowTaskResult struct {
 	WorkflowTaskValidation
 	Outcome            string                  `json:"outcome"`
+	ExecutionMode      string                  `json:"execution_mode"`
 	IntegrationPending bool                    `json:"integration_pending"`
 	AttemptID          string                  `json:"attempt_id"`
 	Generation         uint64                  `json:"generation"`

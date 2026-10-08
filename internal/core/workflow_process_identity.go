@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 // WorkflowProcessIdentity binds a PID to one Linux boot and process birth.
@@ -70,7 +71,7 @@ func workflowReadProcStat(pid int) (workflowProcStat, error) {
 
 func workflowProcessAlive(identity WorkflowProcessIdentity) (bool, error) {
 	observed, err := workflowProcessIdentity(identity.PID)
-	if errors.Is(err, os.ErrNotExist) {
+	if workflowProcessMissing(err) {
 		return false, nil
 	}
 
@@ -83,7 +84,7 @@ func workflowProcessAlive(identity WorkflowProcessIdentity) (bool, error) {
 	}
 
 	stat, err := workflowReadProcStat(identity.PID)
-	if errors.Is(err, os.ErrNotExist) {
+	if workflowProcessMissing(err) {
 		return false, nil
 	}
 
@@ -116,7 +117,7 @@ func workflowGroupMembersAlive(groupID int) (bool, error) {
 		}
 
 		stat, readErr := workflowReadProcStat(pid)
-		if errors.Is(readErr, os.ErrNotExist) {
+		if workflowProcessMissing(readErr) {
 			continue
 		}
 
@@ -130,6 +131,12 @@ func workflowGroupMembersAlive(groupID int) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// A process can disappear after its proc entry is opened. Linux then reports
+// ESRCH instead of ENOENT; other observation failures must still block recovery.
+func workflowProcessMissing(err error) bool {
+	return errors.Is(err, os.ErrNotExist) || errors.Is(err, syscall.ESRCH)
 }
 
 func workflowAttemptQuiescent(attempt WorkflowAttempt) error {

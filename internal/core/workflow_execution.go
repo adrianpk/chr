@@ -9,25 +9,10 @@ import (
 // ExecuteWorkflowTask runs one owned task, then applies host validation evidence.
 // Workers receive frozen JSON on stdin and an isolated cwd; they do not own status.
 func (s *WorkflowStore) ExecuteWorkflowTask(ctx context.Context, claim *WorkflowClaim, worker []string) (WorkflowTaskResult, error) {
-	if claim == nil || claim.store == nil || claim.execution == nil {
-		return WorkflowTaskResult{}, ErrWorkflowOwned
+	if err := beginWorkflowClaimExecution(claim); err != nil {
+		return WorkflowTaskResult{}, err
 	}
-
-	claim.execution.Lock()
-	if !workflowClaimQuiescent(claim) {
-		claim.execution.Unlock()
-
-		return WorkflowTaskResult{}, ErrWorkflowOwned
-	}
-
-	claim.execution.running = true
-
-	claim.execution.Unlock()
-	defer func() {
-		claim.execution.Lock()
-		claim.execution.running = false
-		claim.execution.Unlock()
-	}()
+	defer endWorkflowClaimExecution(claim)
 
 	prepared, err := s.prepareWorkflowTask(ctx, claim, worker)
 	if err != nil {
@@ -59,7 +44,7 @@ func (s *WorkflowStore) runWorkflowTask(ctx context.Context, claim *WorkflowClai
 	defer cancel()
 
 	input := prepared.input
-	result := WorkflowTaskResult{WorkflowTaskValidation: WorkflowTaskValidation{Schema: "chr-task-validation/v1", Key: input.TaskKey, ContractHash: input.ContractHash, Branch: input.Lane.Branch}, AttemptID: input.AttemptID, Generation: input.Generation, InputRef: prepared.inputRef, InputHash: prepared.inputHash}
+	result := newWorkflowTaskResult(prepared)
 	worker, err := workflowRunCommand(workerContext, claim, prepared, input.Worker)
 
 	result.Worker = worker
@@ -87,4 +72,33 @@ func workflowFailureText(err error) string {
 	}
 
 	return text
+}
+
+func beginWorkflowClaimExecution(claim *WorkflowClaim) error {
+	if claim == nil || claim.store == nil || claim.execution == nil {
+		return ErrWorkflowOwned
+	}
+
+	claim.execution.Lock()
+	defer claim.execution.Unlock()
+
+	if !workflowClaimQuiescent(claim) {
+		return ErrWorkflowOwned
+	}
+
+	claim.execution.running = true
+
+	return nil
+}
+
+func endWorkflowClaimExecution(claim *WorkflowClaim) {
+	claim.execution.Lock()
+	claim.execution.running = false
+	claim.execution.Unlock()
+}
+
+func newWorkflowTaskResult(prepared workflowPreparedTask) WorkflowTaskResult {
+	input := prepared.input
+
+	return WorkflowTaskResult{WorkflowTaskValidation: WorkflowTaskValidation{Schema: "chr-task-validation/v1", Key: input.TaskKey, ContractHash: input.ContractHash, Branch: input.Lane.Branch}, ExecutionMode: input.ExecutionMode, AttemptID: input.AttemptID, Generation: input.Generation, InputRef: prepared.inputRef, InputHash: prepared.inputHash}
 }
