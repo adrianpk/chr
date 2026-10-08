@@ -12,6 +12,8 @@ import (
 
 // GeneratedPlanTracking describes a package boundary value.
 type GeneratedPlanTracking struct {
+	Workflow *GeneratedWorkflowPlan
+
 	Scope       QuizScope
 	PlanPath    string
 	Title       string
