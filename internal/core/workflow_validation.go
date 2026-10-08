@@ -120,7 +120,7 @@ func validateWorkflowTaskEvidence(t WorkflowTask) error {
 		return fmt.Errorf("integrated task requires receipt")
 	}
 
-	return nil
+	return validateWorkflowTaskDelivery(t)
 }
 
 func validateWorkflowSet(s WorkflowSet) error {

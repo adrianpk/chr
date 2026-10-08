@@ -65,7 +65,11 @@ func validateWorkflowInvocationBindings(run workflowInvocationFile) error {
 		return err
 	}
 
-	return validateWorkflowDeliveryRef(run)
+	if err := validateWorkflowDeliveryRef(run); err != nil {
+		return err
+	}
+
+	return validateWorkflowFinalizationRef(run)
 }
 
 func validateWorkflowCandidateRef(run workflowInvocationFile) error {

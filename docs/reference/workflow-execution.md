@@ -171,6 +171,40 @@ the owned Git process group; the temporary repository is removed only after
 the observer finishes. Conflicts, missing target history and unsupported method
 proof do not trigger a method fallback or a target write.
 
+## Shared receipt finalization
+
+`FinalizeWorkflowSlice` requires the invocation's retained host delivery proof.
+It accepts no caller-supplied receipt. Before the first finalization, it rechecks
+the canonical merged PR, actual target reachability and method-specific proof,
+then rechecks frozen member, set and candidate images under repository mutation
+exclusion.
+
+One `chr-workflow/v1` receipt beneath the owning run's `evidence/` binds the
+integration unit, candidate/submission identity, canonical provider/repository/PR,
+source/base/result, prepared and verified tree, history fingerprint, host proof
+reference, aggregate/task validation references and confirmation time. Its
+stable identity is derived from the run, candidate and retained PR binding.
+
+Receipt creation and all task/set/invocation images form one guarded transition
+journal. Every task enters `integrated` / `done` with the same
+`slice_delivery_ref`; its `slice_delivery` projects the common PR, branch,
+method, result commit and confirmation time while preserving task evidence.
+The set-owned slice enters `integrated` with that same receipt. Invocation
+`delivery_ref` / `delivery_hash` bind its exact immutable receipt bytes.
+
+Host death at any replacement leaves the journal for replay before another
+operation can read or admit successors. Retries after completed replay check
+the receipt hash, host proof, frozen images and every finalization projection;
+they return the same receipt without another write, worker or provider call.
+Concurrent callers serialize and share that same result. An edited proof or
+receipt, changed target proof or member image blocks finalization.
+
+The invocation completes when its selected members end at this slice. A broader
+set/use-case invocation retains its current slice receipt barrier and leaves
+later members untouched. Slice finalization does not close the owning set.
+The complete multi-image journal remains subject to the 1 MiB transition bound;
+an oversized fan-out fails before any task completion write.
+
 ## Manual protocol
 
 | Operation | Contract |

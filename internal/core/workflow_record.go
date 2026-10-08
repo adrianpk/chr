@@ -33,20 +33,31 @@ type WorkflowRef struct {
 
 // WorkflowTask extends a native ticket without replacing its display fields.
 type WorkflowTask struct {
-	Schema          string        `json:"workflow_schema"`
-	Key             string        `json:"key"`
-	Status          string        `json:"status"`
-	UseCase         string        `json:"use_case,omitempty"`
-	SetID           string        `json:"slice_set_id,omitempty"`
-	SliceID         string        `json:"slice_id,omitempty"`
-	Order           int           `json:"task_order,omitempty"`
-	DependsOn       []WorkflowRef `json:"depends_on,omitempty"`
-	Phase           string        `json:"task_phase"`
-	ContractHash    string        `json:"execution_contract_hash"`
-	AttemptID       string        `json:"active_attempt_id,omitempty"`
-	ClaimGeneration uint64        `json:"claim_generation,omitempty"`
-	Evidence        []string      `json:"task_evidence,omitempty"`
-	DeliveryRef     string        `json:"slice_delivery_ref,omitempty"`
+	Schema          string                `json:"workflow_schema"`
+	Key             string                `json:"key"`
+	Status          string                `json:"status"`
+	UseCase         string                `json:"use_case,omitempty"`
+	SetID           string                `json:"slice_set_id,omitempty"`
+	SliceID         string                `json:"slice_id,omitempty"`
+	Order           int                   `json:"task_order,omitempty"`
+	DependsOn       []WorkflowRef         `json:"depends_on,omitempty"`
+	Phase           string                `json:"task_phase"`
+	ContractHash    string                `json:"execution_contract_hash"`
+	AttemptID       string                `json:"active_attempt_id,omitempty"`
+	ClaimGeneration uint64                `json:"claim_generation,omitempty"`
+	Evidence        []string              `json:"task_evidence,omitempty"`
+	DeliveryRef     string                `json:"slice_delivery_ref,omitempty"`
+	Delivery        *WorkflowTaskDelivery `json:"slice_delivery,omitempty"`
+}
+
+// WorkflowTaskDelivery projects the common receipt's immutable delivery facts.
+// The set-owned PR and shared receipt remain authoritative.
+type WorkflowTaskDelivery struct {
+	PullRequest  string    `json:"pull_request"`
+	Branch       string    `json:"branch"`
+	Method       string    `json:"method"`
+	ResultCommit string    `json:"result_commit"`
+	ConfirmedAt  time.Time `json:"confirmed_at"`
 }
 
 // WorkflowValidation is an ordered argv gate with one shared deadline.

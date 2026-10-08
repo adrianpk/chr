@@ -89,6 +89,8 @@ type WorkflowInvocation struct {
 	PullRequest       *WorkflowPullRequestBinding `json:"pull_request_binding,omitempty"`
 	DeliveryProofRef  string                      `json:"delivery_proof_ref"`
 	DeliveryProofHash string                      `json:"delivery_proof_hash"`
+	DeliveryRef       string                      `json:"delivery_ref"`
+	DeliveryHash      string                      `json:"delivery_hash"`
 }
 
 type workflowInvocationFile struct {

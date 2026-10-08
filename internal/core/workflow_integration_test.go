@@ -31,7 +31,13 @@ func workflowTestRead(t *testing.T, store *WorkflowStore, id string) WorkflowInv
 func workflowDeliveryFixture(t *testing.T, method string) workflowIntegrationFixture {
 	t.Helper()
 
-	store, hierarchy, run, provider := workflowPRFixture(t)
+	return workflowDeliveryExtentFixture(t, method, "slice")
+}
+
+func workflowDeliveryExtentFixture(t *testing.T, method, extent string) workflowIntegrationFixture {
+	t.Helper()
+
+	store, hierarchy, run, provider := workflowPRFixtureFor(t, extent)
 	workflowPREnsure(t, store, run.ID, provider)
 
 	run = workflowTestRead(t, store, run.ID)
