@@ -97,8 +97,8 @@ Plan contract: [Slice 1](../plan/ticket-native-workflow.md#slice-1-guarded-workf
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T1.1 | [TKT-20261008141345](../ticket/in_progress/20261008141345-ticket-native-t1-1.md) | in_progress | pending | Define versioned task/set/slice/receipt identities, fields and lifecycle validation in native core types. |
-| T1.2 | [TKT-20261008141346](../ticket/ready/20261008141346-ticket-native-t1-2.md) | ready | pending | Implement revision-guarded canonical and adopted-Markdown read/write with unknown-field preservation. |
+| T1.1 | [TKT-20261008141345](../ticket/in_progress/20261008141345-ticket-native-t1-1.md) | validated | 7fa91666a7c3b473dc1651994863413d53217f38 | Define versioned task/set/slice/receipt identities, fields and lifecycle validation in native core types. |
+| T1.2 | [TKT-20261008141346](../ticket/in_progress/20261008141346-ticket-native-t1-2.md) | in_progress | pending | Implement revision-guarded canonical and adopted-Markdown read/write with unknown-field preservation. |
 | T1.3 | [TKT-20261008141347](../ticket/ready/20261008141347-ticket-native-t1-3.md) | ready | pending | Implement process-safe mutation locking and journaled multi-file transitions with guarded replay. |
 | T1.4 | [TKT-20261008141348](../ticket/ready/20261008141348-ticket-native-t1-4.md) | ready | pending | Extend rebuildable SQLite queries/migrations and record/file bounds. |
 
