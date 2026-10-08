@@ -1,36 +1,55 @@
 # Delivery Lifecycle Contract
 
-This document defines lifecycle rules for executing work in this repository.
+This document defines work-state transitions, completion, and blocked-state
+handling.
 
-## 1. Work phases
+## Work Phases
 
 1. Alignment
-2. Planning (only when requested)
-3. Implementation
+2. Planning when requested
+3. Implementation after approval
 4. Validation
-5. Report and handoff
+5. Versioning and push within the authorized workflow
+6. Report and handoff
 
-## 2. Entry gates
+Use `.agents/ROUTING.md` to determine whether a request authorizes planning or
+implementation. Use `.agents/VERSIONING.md` and applicable playbooks for
+versioning and publication procedures.
 
-- Alignment starts when task context is provided.
-- Planning starts only when explicitly requested.
-- Implementation starts only after task/plan approval.
+## State Alignment
 
-## 3. Exit gates
+- For a status question, confusion, or state challenge, verify and report state
+  without changing files, branches, tickets, trackers, or pull requests.
+- Before starting or continuing a defined workflow, verify its required branch,
+  remote, operational artifacts, and review or merge state.
+- Continue in the same turn after routine verification succeeds.
+- Stop for a mismatch, destructive action, missing authority, material user
+  decision, or blocker.
+- After a reported merge, verify it and close the delivered work on `dev`.
+  Follow `.agents/SLICES.md` when another slice remains in the same delivery
+  set.
 
-A work cycle is complete only when:
-- requested scope is implemented
-- relevant checks are reported
-- current status and remaining risks are explicit
+## Exit Gates
 
-## 4. Blocked state handling
+A work unit is complete only when:
 
-If blocked:
-- report blocker precisely
-- include command/error context
-- stop without speculative side changes
+- the requested scope is implemented;
+- relevant checks and exact failures are reported;
+- versioned artifacts reflect the actual state;
+- the working tree and branch state are explicit;
+- remaining risks and external prerequisites are recorded.
 
-## 5. Handoff artifact policy
+After completing the requested scope, report the outcome and stop unless the
+same authorized workflow defines another unit.
 
-- `ops/handovers/` is runtime scratch space and is not versioned.
-- Durable delivery records live in `ops/plans/*`, `ops/trackers/*`, and `ops/artifacts/*` when the project uses the ops structure.
+## Blocked State
+
+When blocked:
+
+- capture the failing command and concise error context;
+- exhaust safe in-scope alternatives;
+- record the blocker in the active tracker or ticket when one exists;
+- stop before speculative, destructive, or out-of-scope changes.
+
+Store lifecycle artifacts in the locations defined by
+`.agents/DOCUMENTING.md` and `.agents/REPORTING.md`.

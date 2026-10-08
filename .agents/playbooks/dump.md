@@ -23,12 +23,12 @@ agent preserves, lightly corrects, groups, and curates it.
 
 ## Artifact Locations
 
-Dump artifacts live under `ops/conv/dump/`.
+Dump artifacts live under `ops/<namespace>/dump/`.
 
 Use these filename patterns:
 
-- Raw dump capture: `ops/conv/dump/YYYY-MM-DD-<topic>-dump-raw.md`
-- Curated dump notes: `ops/conv/dump/YYYY-MM-DD-<topic>-dump.md`
+- Raw dump capture: `ops/<namespace>/dump/YYYY-MM-DD-<topic>-dump-raw.md`
+- Curated dump notes: `ops/<namespace>/dump/YYYY-MM-DD-<topic>-dump.md`
 
 ## Raw Capture
 

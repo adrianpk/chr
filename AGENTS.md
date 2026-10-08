@@ -2,68 +2,38 @@
 
 Read this document before starting work in this workspace.
 
-This contract defines agent execution, planning, communication, workspace safety, and documentation boundaries.
-It is not a product or runtime specification.
+This file routes agent work to the normative documents under `.agents/`. It is
+not a product specification, implementation guide, or duplicate policy source.
 
-## 1) Execution
+## Required Loading
 
-- Execute only after a clear implementation request.
-- Treat questions and discussion as alignment, not authorization to change files.
-- For high-impact changes, present the approach and wait for explicit approval.
-- Complete the requested scope, report the outcome, and stop.
-- Do not add unsolicited follow-up work.
+- Before changing workspace or external state, read `.agents/INVARIANTS.md`
+  and `.agents/ROUTING.md`.
+- Before performing an action, read the document that owns that concern.
+- Use `.agents/PLAYBOOKS.md` to select an applicable procedure.
 
-## 2) Planning Protocol
+## Concern Routing
 
-- Before creating a plan, ask whether the user wants a plan.
-- If requested, make the plan concrete and execution-oriented.
-- Do not implement while a plan is pending confirmation.
-- Keep implementation inside the approved scope.
+- User collaboration and responses: `.agents/COMMUNICATION.md`
+- Repository language and locale boundaries: `.agents/LANGUAGE.md`
+- Request classification and authorization: `.agents/ROUTING.md`
+- Work-state transitions and completion: `.agents/LIFECYCLE.md`
+- Safety and scope boundaries: `.agents/INVARIANTS.md`
+- Branches, commits, remotes, pushes, and pull requests:
+  `.agents/VERSIONING.md`
+- Documentation and operational artifacts: `.agents/DOCUMENTING.md`
+- Architecture and ownership: `.agents/ARCHITECTURE.md`
+- Code and stack conventions: `.agents/CONVENTIONS.md`
+- Validation and quality gates: `.agents/LINTING.md`
+- Formal delivery sets and slices: `.agents/SLICES.md`
+- Persistent implementation reports: `.agents/REPORTING.md`
+- Operational procedures: `.agents/PLAYBOOKS.md`
+- Repository activity recording: `.agents/ACTIVITY.md`
 
-## 3) Communication Protocol
+## Ownership
 
-- Use direct, neutral language.
-- Keep updates factual and concise.
-- Explain reasoning before proposing significant changes.
-- Report validation results explicitly.
-- Trust user-provided facts unless technical evidence proves otherwise.
+Each rule has one normative owner. Other documents may reference that owner but
+must not restate or paraphrase the rule.
 
-## 4) State Alignment Before Action
-
-- When the user asks a status question, expresses confusion, challenges the
-  current state, or asks what comes next, answer with the verified state first
-  and do not change files, branches, tickets, trackers, or PRs in that response.
-- Only execute changes after the user gives a clear follow-up instruction such
-  as "continue", "do it", "close it", "activate it", or "start the next slice".
-- Before closing, activating, or starting a slice, verify the current branch,
-  remote `dev`, tracker active slice, and PR or merge state. Report mismatches
-  before making changes.
-
-## 5) Workspace and Git Safety
-
-- When this workspace uses git, `origin` is the default canonical remote unless local instructions say otherwise.
-- Never perform destructive Git operations without explicit approval.
-
-## 6) Language and Documentation Rules
-
-- All code and workspace documentation must be written in English.
-- Keep naming, comments, and workspace text in English.
-
-## 7) Scope Boundary
-
-- Keep this file focused on working rules.
-- Product and runtime specifications belong in `docs/`.
-
-## 8) Referenced Agent Docs
-
-- `.agents/DOCUMENTING.md` — documentation model and placement rules.
-- `.agents/CONVENTIONS.md` — coding standards and codebase boundaries.
-- `.agents/ARCHITECTURE.md` — workspace structure map.
-- `.agents/LIFECYCLE.md` — delivery lifecycle and handoff rules.
-- `.agents/VERSIONING.md` — commit, branch, and merge rules.
-- `.agents/SLICES.md` — task decomposition and delivery strategy.
-- `.agents/ROUTING.md` — request classification for execution workflow.
-- `.agents/PLAYBOOKS.md` — operational procedures.
-- `.agents/REPORTING.md` — persistent implementation reporting rules.
-- `.agents/LINTING.md` — linting policy and quality-gate setup.
-- `.agents/INVARIANTS.md` — non-negotiable collaboration invariants.
+Keep product behavior and project-specific technical decisions outside this
+file.

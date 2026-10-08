@@ -2,53 +2,45 @@
 
 Use this playbook when implementing or reviewing behavior changes.
 
-## Objective
-
-Choose and record the test strategy for each implementation without repeating
-the full testing policy in every slice report.
-
 ## Baseline
 
-- Use Go's standard `testing` package by default.
-- Use table-driven tests as the baseline for deterministic input/output
-  behavior, especially business rules, policy decisions, state transitions, and
-  scoring/classification logic.
-- Cover expected failures, edge cases, package boundary contracts, and input
+- Use the repository-native test framework and commands defined in
+  `.agents/LINTING.md`.
+- Use table-driven or parameterized tests for deterministic rules, state
+  transitions, policy decisions, mappings, parsers, and calculations.
+- Cover expected failures, edge cases, boundary contracts, and input
   immutability when relevant.
+- For bug fixes, reproduce the defect with a failing test first when practical.
 - Do not skip tests for behavior changes.
 
-## Desirable Techniques
+## Risk-Based Techniques
 
-The following techniques are desirable tools, not mandatory ceremony:
+These techniques are tools, not mandatory ceremony:
 
-- property-based tests;
-- fuzz tests;
-- mutation testing;
-- CRAP-style risk review;
-- race tests;
-- benchmark tests.
+- property-based tests for broad invariants over generated inputs;
+- fuzz tests for parsers, decoders, tokenizers, and untrusted input;
+- mutation testing when branch confidence is weak and tooling exists;
+- complexity or CRAP-style review for branching and high-impact decisions;
+- concurrency or race tests for shared mutable state and transactions;
+- benchmarks for code on a measured performance path;
+- focused integration tests for persistence, transport, provider, browser, or
+  external-service boundaries;
+- test-mode or read-only smoke checks for external integrations.
 
-For business logic, explicitly decide whether each technique is useful for the
-slice. Omitted techniques must be defensible from the behavior, risk, and
-available repository tooling.
+Select techniques from the changed behavior, risk, and available tooling. Do
+not add unrelated test ceremony.
 
-## When To Use
+## Validation Order
 
-- Use property-based tests when the behavior has broad invariants over many
-  generated inputs.
-- Use fuzz tests when parsing, decoding, tokenizing, or handling untrusted
-  external input.
-- Use mutation testing when repository tooling exists and branch/condition
-  confidence is otherwise weak.
-- Use CRAP-style risk review for complex business logic, branching,
-  calculations, or high-impact decisions.
-- Use race tests when concurrency or shared mutable state changes.
-- Use benchmarks when the changed code is on a measured performance path.
+1. Run the smallest focused checks that give fast feedback.
+2. Run the broadest relevant available repository gate.
+3. Run external or deployment checks only with the required authority and
+   safe credentials or test mode.
 
 ## Reporting
 
-Slice reports should record the concrete commands run and outcomes in
-`Validation`.
-
-Do not paste this whole policy into each implementation report. Instead, include
-a concise note only when a non-obvious testing decision affects review risk.
+- Record exact commands and outcomes in the tracker and slice report.
+- Distinguish focused checks from the full suite.
+- Distinguish local, emulator, staging, and production verification.
+- Record omitted high-value techniques only when the decision affects review
+  risk.
