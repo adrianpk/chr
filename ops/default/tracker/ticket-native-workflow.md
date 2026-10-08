@@ -39,8 +39,9 @@ delivered and all four task tickets are solved. Slice 5 is active for cumulative
 aggregate candidates, one canonical PR, verified external delivery and journaled
 shared-receipt finalization. T5.1 is validated in `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; T5.2 is validated in `2c6c9081403013bad4916a1a2734059274ccda22` for canonical PR bindings. T5.3 is validated in `fb9ed4247ca27e18b3cb365590ad6033b464d166`
 for canonical receipt and Git delivery proof; T5.4 is validated in `3c09f32119bc0eb9b376663b0d03709f0f948628` for shared receipt creation and
-journaled task finalization. All four tasks await the canonical Slice 5 PR and
-controller verification of its final clean HEAD; integration remains pending.
+journaled task finalization. All four tasks are bound to canonical Slice 5 PR [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368).
+The controller verifies its final clean HEAD before integration; integration
+remains pending.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -70,7 +71,7 @@ Fast-forward into `dev`.
 | Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | integrated | 4/4 | [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365) |
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | integrated | 4/4 | [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366) |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | integrated | 4/4 | [#367](https://forge.adrianpk.com/adrianpk/chr/pulls/367) |
-| Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | reviewing | 0/4 | pending |
+| Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | reviewing | 0/4 | [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368) |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | not_started | 0/4 | pending |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | not_started | 0/4 | pending |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | not_started | 0/4 | pending |
@@ -307,8 +308,9 @@ Acceptance: A01, A08, A13, A22.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368); reviewing.
 - Merge commit: pending.
+- Report introduction: `c5ed935a203f041c1da30761768b8466cf93a955`; full immutable report link recorded in the PR.
 - Report status: reviewing; [Slice 5 report](../report/slices/ticket-native-workflow/slice-5-workflow-delivery.md).
 - T5.1 implementation commit: `0bbbd64e691ee6832d495a2b8d4de3b920895e47`; its ticket is reviewing and task row validated.
 - T5.2 implementation commit: `2c6c9081403013bad4916a1a2734059274ccda22`; its ticket is reviewing and task row validated. T5.3 is in progress; T5.4 remains ready.
