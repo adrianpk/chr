@@ -102,6 +102,10 @@ func (s *WorkflowStore) readMaterializationReceipt(set WorkflowRecord, plan Gene
 		return WorkflowMaterializationResult{}, err
 	}
 
+	if string(set.Metadata["materialization_receipt_hash"]) != fmt.Sprintf("%q", workflowHash(data)) {
+		return WorkflowMaterializationResult{}, ErrWorkflowConflict
+	}
+
 	var receipt workflowMaterializationReceipt
 	if err := json.Unmarshal(data, &receipt); err != nil {
 		return WorkflowMaterializationResult{}, err

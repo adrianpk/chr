@@ -31,11 +31,15 @@ func (s *WorkflowStore) buildMaterialization(ctx context.Context, opts WorkflowM
 		return WorkflowMaterializationResult{}, err
 	}
 
+	return s.buildMaterializationForSet(ctx, opts, plan, body, number+1, now, set)
+}
+
+func (s *WorkflowStore) buildMaterializationForSet(ctx context.Context, opts WorkflowMaterializationOptions, plan GeneratedWorkflowPlan, body []byte, number int, now time.Time, set WorkflowRecord) (WorkflowMaterializationResult, error) {
 	set.Metadata["materialization_id"] = json.RawMessage(fmt.Sprintf("%q", plan.MaterializationID))
 	set.Body = body
 	set.Set = &WorkflowSet{Schema: WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
 
-	tasks, keys, err := s.buildMaterializationTasks(ctx, opts, set, plan, number+1, now)
+	tasks, keys, err := s.buildMaterializationTasks(ctx, opts, set, plan, number, now)
 	if err != nil {
 		return WorkflowMaterializationResult{}, err
 	}

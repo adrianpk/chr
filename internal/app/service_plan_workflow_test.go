@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -23,13 +24,13 @@ func TestServiceWorkflowMaterialization(t *testing.T) {
 	service := newTestService(t, project)
 	plan := serviceWorkflowPlanFixture()
 
-	result, err := service.MaterializeWorkflowPlan(t.Context(), plan)
+	operation, err := service.MaterializePlanTracking(t.Context(), PlanTrackingRequest{Workflow: &plan})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(result.Tasks) != 6 {
-		t.Fatalf("task tickets = %d", len(result.Tasks))
+	if operation.Workflow == nil || len(operation.Workflow.Tasks) != 6 {
+		t.Fatal("missing task workflow result")
 	}
 
 	checkServiceWorkflowProjection(t, service, project)
@@ -82,5 +83,45 @@ func checkServiceWorkflowProjection(t *testing.T, service service, project strin
 
 	if page.Records[0].Task.Key == page.Records[0].ID {
 		t.Fatal("native key replaced by artifact ID")
+	}
+}
+
+// TestServiceWorkflowAdoptionOwnership uses the real legacy execution database
+// to distinguish unfinished ownership from completed historical attempts.
+func TestServiceWorkflowAdoptionOwnership(t *testing.T) {
+	cases := []struct {
+		name    string
+		status  core.ExecutionStatus
+		blocked bool
+	}{
+		{"pending", core.ExecutionStatusPending, true},
+		{"running", core.ExecutionStatusRunning, true},
+		{"failed history", core.ExecutionStatusFailed, false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			service := newTestService(t, newTestWorkspace(t))
+
+			repository, err := core.NewExecutionRepository(t.Context(), service.env, service.assetsFS)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			now := time.Now().UTC()
+
+			record := core.ExecutionRecord{ID: "legacy-attempt", ProjectID: service.projectContext.ProjectID, TicketKey: "PRJ-1", Status: tc.status, CreatedAt: now, UpdatedAt: now}
+			if err := repository.CreateExecution(t.Context(), record); err != nil {
+				t.Fatal(err)
+			}
+
+			if err := repository.Close(); err != nil {
+				t.Fatal(err)
+			}
+
+			err = service.checkWorkflowAdoptionExecutions(t.Context(), []string{"PRJ-1"})
+			if (err != nil) != tc.blocked {
+				t.Fatalf("ownership observation = %v, blocked = %v", err, tc.blocked)
+			}
+		})
 	}
 }

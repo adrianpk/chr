@@ -45,7 +45,8 @@ type PlanRegenerateRequest struct {
 // PlanTrackingRequest selects the plan scope used to materialize tracking
 // artifacts.
 type PlanTrackingRequest struct {
-	Scope core.QuizScope
+	Workflow *core.GeneratedWorkflowPlan
+	Scope    core.QuizScope
 }
 
 // PlanOperationResult is the TUI-facing result for plan generation operations.
@@ -56,6 +57,7 @@ type PlanOperationResult struct {
 
 // PlanTrackingResult reports generated tracking artifacts for a plan.
 type PlanTrackingResult struct {
+	Workflow     *core.WorkflowMaterializationResult
 	Message      string
 	Plan         PlanView
 	TrackingPath string
@@ -411,6 +413,10 @@ func (s service) regeneratePlan(ctx context.Context, scope core.QuizScope) (Plan
 }
 
 func (s service) MaterializePlanTracking(ctx context.Context, request PlanTrackingRequest) (PlanTrackingResult, error) {
+	if request.Workflow != nil {
+		return s.materializeApprovedWorkflow(ctx, request)
+	}
+
 	scope := s.quizScope(request.Scope)
 
 	plan, exists, err := s.existingGeneratedPlan(scope)

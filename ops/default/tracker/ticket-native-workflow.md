@@ -62,7 +62,7 @@ Fast-forward into `dev`.
 | Slice | Name | Exact branch | Expected PR title | Report | State | Tasks done | PR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | integrated | 4/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
-| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | active | 0/4 | pending |
+| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | reviewing | 0/4 | pending |
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | not_started | 0/4 | pending |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | not_started | 0/4 | pending |
@@ -117,7 +117,7 @@ Acceptance: A02, A22; foundations for A24.
 
 ## Slice 2: Task-ticket materialization
 
-Status: active
+Status: reviewing
 
 Prerequisite: satisfied by verified PR #364 integration into dev.
 
@@ -131,14 +131,14 @@ Plan contract: [Slice 2](../plan/ticket-native-workflow.md#slice-2-task-ticket-m
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T2.1 | [TKT-20261008141349](../ticket/in_progress/20261008141349-ticket-native-t2-1.md) | validated | 8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1 | Extend plan-generation contracts to distinguish set, slice and task identity/order. |
-| T2.2 | [TKT-20261008141350](../ticket/in_progress/20261008141350-ticket-native-t2-2.md) | validated | 93a19da5472e6ca323d671ea1e0ffbd54cd6be59 | Persist one ticket per task and bind task-owned membership to set-owned slice contracts. |
-| T2.3 | [TKT-20261008141351](../ticket/in_progress/20261008141351-ticket-native-t2-3.md) | in_progress | pending | Add materialization receipts and idempotent recovery after partial generation. |
-| T2.4 | [TKT-20261008141352](../ticket/ready/20261008141352-ticket-native-t2-4.md) | ready | pending | Add explicit quiescent adoption for selected active legacy plans/tickets and update generation guidance. |
+| T2.1 | [TKT-20261008141349](../ticket/reviewing/20261008141349-ticket-native-t2-1.md) | validated | 8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1 | Extend plan-generation contracts to distinguish set, slice and task identity/order. |
+| T2.2 | [TKT-20261008141350](../ticket/reviewing/20261008141350-ticket-native-t2-2.md) | validated | 93a19da5472e6ca323d671ea1e0ffbd54cd6be59 | Persist one ticket per task and bind task-owned membership to set-owned slice contracts. |
+| T2.3 | [TKT-20261008141351](../ticket/reviewing/20261008141351-ticket-native-t2-3.md) | validated | ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4 | Add materialization receipts and idempotent recovery after partial generation. |
+| T2.4 | [TKT-20261008141352](../ticket/reviewing/20261008141352-ticket-native-t2-4.md) | validated | pending | Add explicit quiescent adoption for selected active legacy plans/tickets and update generation guidance. |
 
 ### Validation
 
-Status: not run.
+Status: local repository and focused materialization/adoption race checks passed. Exact clean-head controller validation follows the PR-reference commit.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`.
@@ -154,7 +154,7 @@ Acceptance: A01, A02.
 - Report status: not created.
 - Task commits and ticket lifecycle evidence: pending.
 - Validation evidence: pending.
-- Blockers: none observed; implementation has not started.
+- Blockers: none observed.
 
 ## Slice 3: Deterministic work selection
 

@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -54,4 +56,71 @@ func (s service) refreshWorkflowProjection(ctx context.Context, store *core.Work
 	}
 
 	return workflow.RebuildWorkflowIndex(ctx, store)
+}
+
+// AdoptWorkflowPlan observes legacy runtime state and adopts only the explicit
+// selections in the request. It never converts records while listing plans.
+func (s service) AdoptWorkflowPlan(ctx context.Context, opts core.WorkflowPlanAdoptionOptions) (core.WorkflowMaterializationResult, error) {
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	if err != nil {
+		return core.WorkflowMaterializationResult{}, err
+	}
+
+	store := core.NewWorkflowStore(layout, s.projectContext.ProjectID)
+	opts.CheckQuiescent = s.checkWorkflowAdoptionExecutions
+
+	result, err := store.AdoptPlanWorkflow(ctx, opts)
+	if err != nil {
+		return result, err
+	}
+
+	return result, s.refreshWorkflowProjection(ctx, store)
+}
+
+func (s service) checkWorkflowAdoptionExecutions(ctx context.Context, keys []string) (err error) {
+	repository, err := core.NewExecutionRepository(ctx, s.env, s.assetsFS)
+	if err != nil {
+		return err
+	}
+	defer func() { err = errors.Join(err, repository.Close()) }()
+
+	for _, key := range keys {
+		records, err := repository.ListTicketExecutions(ctx, s.projectContext.ProjectID, key)
+		if err != nil {
+			return err
+		}
+
+		if len(records) > core.WorkflowRecordLimit {
+			return fmt.Errorf("legacy execution observation bound exceeded")
+		}
+
+		for _, record := range records {
+			if record.Status == core.ExecutionStatusRunning || record.Status == core.ExecutionStatusPending {
+				return fmt.Errorf("legacy task %s has unfinished execution ownership", key)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s service) materializeApprovedWorkflow(ctx context.Context, request PlanTrackingRequest) (PlanTrackingResult, error) {
+	scope := s.quizScope(request.Scope)
+	if request.Workflow.UseCase != scope.CaseSlug {
+		return PlanTrackingResult{}, fmt.Errorf("approved workflow use-case association differs from selected scope")
+	}
+
+	result, err := s.MaterializeWorkflowPlan(ctx, *request.Workflow)
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	if err != nil {
+		return PlanTrackingResult{}, err
+	}
+
+	relative := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), result.Set.Set.PlanRef))
+
+	return PlanTrackingResult{Message: fmt.Sprintf("Materialized %d task tickets in %d ordered slices.", len(result.Tasks), len(result.Set.Set.Slices)), Plan: s.planViewFromPath(scope, relative, filepath.Join(s.projectContext.ProjectDir, relative)), Workflow: &result}, nil
 }

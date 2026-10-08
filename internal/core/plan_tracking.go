@@ -157,6 +157,10 @@ func RenderGeneratedPlanTracking(tracking GeneratedPlanTracking) string {
 
 // ValidateGeneratedPlanTracking validates the corresponding package boundary value.
 func ValidateGeneratedPlanTracking(tracking GeneratedPlanTracking) error {
+	if tracking.Workflow != nil {
+		return ValidateGeneratedWorkflowPlan(*tracking.Workflow)
+	}
+
 	if strings.TrimSpace(tracking.Title) == "" {
 		return fmt.Errorf("plan tracking title is required")
 	}
@@ -215,6 +219,10 @@ func ValidateGeneratedPlanTrackingTicket(ticket GeneratedPlanTrackingTicket) err
 
 // ValidateGeneratedPlanTrackingModelContent validates the corresponding package boundary value.
 func ValidateGeneratedPlanTrackingModelContent(tracking GeneratedPlanTracking) error {
+	if tracking.Workflow != nil {
+		return ValidateGeneratedWorkflowPlan(*tracking.Workflow)
+	}
+
 	if strings.TrimSpace(tracking.Title) == "" {
 		return fmt.Errorf("plan tracking title is required")
 	}

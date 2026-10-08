@@ -108,6 +108,12 @@ func (s *WorkflowStore) readApprovedPlan(plan GeneratedWorkflowPlan) ([]byte, er
 }
 
 func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResult, plan GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+	receipt, err := materializationReceiptFile(plan, result)
+	if err != nil {
+		return nil, err
+	}
+
+	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", workflowHash(receipt.After)))
 	files := []workflowFileChange{}
 
 	for _, record := range append([]WorkflowRecord{result.Set}, result.Tasks...) {
@@ -125,6 +131,21 @@ func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResul
 		files = append(files, encoded...)
 	}
 
+	contracts, err := s.materializationContractFiles(result, plan)
+	if err != nil {
+		return nil, err
+	}
+
+	files = append(files, contracts...)
+
+	files = append(files, receipt)
+
+	return files, nil
+}
+
+func (s *WorkflowStore) materializationContractFiles(result WorkflowMaterializationResult, plan GeneratedWorkflowPlan) ([]workflowFileChange, error) {
+	files := []workflowFileChange{}
+
 	for _, slice := range plan.Slices {
 		data, err := json.Marshal(struct {
 			Contract   string
@@ -138,12 +159,21 @@ func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResul
 		files = append(files, workflowFileChange{Path: path, After: data})
 	}
 
-	receipt, err := materializationReceiptFile(plan, result)
-	if err != nil {
-		return nil, err
-	}
+	next := 0
 
-	files = append(files, receipt)
+	for _, slice := range orderedWorkflowPlan(plan).Slices {
+		for _, task := range slice.Tasks {
+			next++
+
+			data, err := json.Marshal(task)
+			if err != nil {
+				return nil, err
+			}
+
+			path := filepath.ToSlash(filepath.Join("plan", result.Set.ID, "extension", "chr", fmt.Sprintf("task-%d.json", next)))
+			files = append(files, workflowFileChange{Path: path, After: data})
+		}
+	}
 
 	return files, nil
 }

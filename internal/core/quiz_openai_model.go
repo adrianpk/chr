@@ -987,12 +987,15 @@ func quizModelPlanTrackingInstructions() string {
 You materialize execution tracking artifacts from an existing implementation plan.
 Use the structured request payload and context sections as the sole source of truth.
 Do not execute work, do not create branches, do not open pull requests, and do not claim implementation progress.
-Transform the plan into a tracking Markdown body and one ticket payload per implementation slice.
+Transform the plan into a tracking Markdown body and one ticket payload per task. A slice with three tasks needs three tickets and remains one integration unit.
 The tracking body is an execution index: ordered slice list, dependencies, recommended ticket order, expected branch/PR references, and initial status.
 Tickets are the detailed execution units and must be ready for later implementation work.
-Each ticket must correspond to exactly one slice from the plan.
+Each ticket must correspond to exactly one task in exactly one owning slice from the plan. Never collapse several tasks into one slice ticket.
+Slice N and TN.M are display labels. Preserve supplied stable set, slice and task identities and their positive local orders; never derive identity from a title, display label or checkout path.
+Ticket-native materialization requires explicit approved GeneratedWorkflowPlan input with aggregate slice contracts, individual outcome/scope/acceptance/validation contracts and a stable materialization request ID. Ordinary plan reads do not adopt legacy state.
+Adoption must select original plan and ticket images, preserve content and history, and reject ambiguous identities or live ownership. A tracking body is a projection and cannot assign task ownership.
 Each ticket synopsis must be one short sentence that lets the Board identify the ticket without opening the full body.
-Each ticket body must include: objective, tasks, dependencies, acceptance criteria, validation expectations, and references to the source plan/tracking.
+Each ticket body must include: task objective, scope, dependencies, acceptance criteria, validation expectations, and references to the source plan/tracking.
 When a ticket fixes a bug, include a task to reproduce or observe the defect with a failing test before changing code when feasible.
 Prefer table-driven tests for input/output behavior in validation expectations.
 Mention property-based, fuzz, race, or benchmark tests only when the slice's use case justifies them.
@@ -1048,7 +1051,7 @@ Each slice must include:
 - PR expectations
 
 Tasks must be implementation-oriented and should generally map to one Conventional Commit.
-Each slice must map to one ticket, one branch, one pull request, one review cycle, and one merge cycle.
+Each task must map to one ticket. Its owning slice keeps one branch, one pull request, one review cycle, and one merge cycle for all its tasks.
 Default to sequential slices unless isolated slices are truly parallelizable.
 Use the integration branch from project configuration or provided context; only fall back to the default integration branch when no explicit policy is available.
 Use deterministic branch names shaped like feature/<use-case>/<slice-id>-<short-name>.
