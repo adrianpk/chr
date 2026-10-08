@@ -41,15 +41,20 @@ type WorkflowInputImage struct {
 
 // WorkflowAttempt exposes stable ownership facts without private credentials.
 type WorkflowAttempt struct {
-	ID            string    `json:"id"`
-	TaskKey       string    `json:"task_key"`
-	Generation    uint64    `json:"generation"`
-	InputRevision uint64    `json:"input_revision"`
-	ContractHash  string    `json:"contract_hash"`
-	LeaseUntil    time.Time `json:"lease_until"`
-	StartedAt     time.Time `json:"started_at"`
-	FinishedAt    time.Time `json:"finished_at,omitempty"`
-	Outcome       string    `json:"outcome"`
+	ID            string        `json:"id"`
+	TaskKey       string        `json:"task_key"`
+	Generation    uint64        `json:"generation"`
+	InputRevision uint64        `json:"input_revision"`
+	ContractHash  string        `json:"contract_hash"`
+	LeaseUntil    time.Time     `json:"lease_until"`
+	StartedAt     time.Time     `json:"started_at"`
+	FinishedAt    time.Time     `json:"finished_at,omitempty"`
+	Outcome       string        `json:"outcome"`
+	Lane          *WorkflowLane `json:"lane,omitempty"`
+	InputRef      string        `json:"input_ref,omitempty"`
+	InputHash     string        `json:"input_hash,omitempty"`
+	ResultRef     string        `json:"result_ref,omitempty"`
+	ResultHash    string        `json:"result_hash,omitempty"`
 }
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
@@ -67,8 +72,10 @@ type WorkflowInvocation struct {
 	Excluded     map[string]int          `json:"excluded"`
 	Cursor       int                     `json:"cursor"`
 	Status       string                  `json:"status"`
+	Outcome      string                  `json:"outcome"`
 	Attempts     []WorkflowAttempt       `json:"attempts"`
 	Blocker      *WorkflowBlocker        `json:"blocker,omitempty"`
+	Lane         *WorkflowLane           `json:"lane,omitempty"`
 }
 
 type workflowInvocationFile struct {

@@ -64,3 +64,13 @@ func (s service) CheckpointWorkflow(ctx context.Context, claim *core.WorkflowCla
 
 	return store.CheckpointWorkflow(ctx, claim)
 }
+
+// ExecuteWorkflowTask runs an owned isolated task and the frozen host gate.
+func (s service) ExecuteWorkflowTask(ctx context.Context, claim *core.WorkflowClaim, worker []string) (core.WorkflowTaskResult, error) {
+	store, err := s.workflowStore()
+	if err != nil {
+		return core.WorkflowTaskResult{}, err
+	}
+
+	return store.ExecuteWorkflowTask(ctx, claim, worker)
+}

@@ -52,7 +52,7 @@ func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, id string) (cl
 		return nil, err
 	}
 
-	claim = &WorkflowClaim{InvocationID: id, store: s, reservation: file}
+	claim = &WorkflowClaim{InvocationID: id, store: s, reservation: file, execution: &workflowClaimExecution{}}
 	owned := claim
 
 	defer func() {
@@ -61,7 +61,7 @@ func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, id string) (cl
 		}
 	}()
 
-	layouts, err := s.workflowRepositoryLayouts(ctx)
+	layouts, err := s.workflowOperationLayouts(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +76,38 @@ func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, id string) (cl
 	}
 
 	return claim, nil
+}
+
+func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayout, error) {
+	runs, err := s.repositoryWorkflowInvocations(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	lanes := map[string]bool{}
+
+	for _, run := range runs {
+		if run.Lane != nil {
+			lanes[run.Lane.Worktree] = true
+		}
+	}
+
+	layouts, err := s.workflowRepositoryLayouts(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []OpsLayout{}
+
+	for _, layout := range layouts {
+		// The inherited common-directory reservation also excludes legacy starts
+		// in native lanes. Do not dirty their immutable candidate with copied locks.
+		if !lanes[layout.ProjectDir()] {
+			result = append(result, layout)
+		}
+	}
+
+	return result, nil
 }
 
 func acquireWorkflowOperationLock(layout OpsLayout, id string) (*AgentOperationLock, error) {

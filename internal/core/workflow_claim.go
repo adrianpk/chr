@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"time"
 )
 
@@ -26,6 +27,7 @@ type WorkflowClaim struct {
 	store        *WorkflowStore
 	reservation  *os.File
 	locks        []*AgentOperationLock
+	execution    *workflowClaimExecution
 }
 
 // ClaimWorkflow acquires one task and its existing serial operation exclusion.
@@ -45,7 +47,11 @@ func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *Wo
 }
 
 func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
-	if workflowInvocationTerminal(run.Status) || run.Status == "running" || run.Cursor == len(run.Members) {
+	if err := s.reuseWorkflowValidatedTasks(ctx, &run); err != nil {
+		return nil, err
+	}
+
+	if !slices.Contains([]string{"pending", "paused", "waiting_capacity"}, run.Status) || run.Cursor == len(run.Members) {
 		return nil, fmt.Errorf("%w: invocation %s is %s", ErrWorkflowOwned, run.ID, run.Status)
 	}
 
@@ -102,6 +108,11 @@ func (s *WorkflowStore) observeWorkflowClaim(ctx context.Context, run workflowIn
 	request := run.Selection
 	request.Selector = WorkflowSelector{Extent: "ticket", Identity: member.Admission.Key}
 
+	request, err = s.workflowLaneSelection(ctx, run, selection.records[member.Admission.Key], request)
+	if err != nil {
+		return WorkflowRecord{}, err
+	}
+
 	preview, err := selection.preview(request)
 	if err != nil {
 		return WorkflowRecord{}, err
@@ -116,15 +127,19 @@ func (s *WorkflowStore) observeWorkflowClaim(ctx context.Context, run workflowIn
 	}
 
 	record := selection.records[member.Admission.Key]
-	if !workflowTaskClaimable(record.Task) {
-		return WorkflowRecord{}, ErrWorkflowOwned
-	}
-
-	if err := validateWorkflowClaimContract(record); err != nil {
+	if err := validateWorkflowClaimableContract(record); err != nil {
 		return WorkflowRecord{}, err
 	}
 
 	return record, nil
+}
+
+func validateWorkflowClaimableContract(record WorkflowRecord) error {
+	if !workflowTaskClaimable(record.Task) {
+		return ErrWorkflowOwned
+	}
+
+	return validateWorkflowClaimContract(record)
 }
 
 func workflowTaskClaimable(task *WorkflowTask) bool {
@@ -157,7 +172,7 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 	return nil
 }
 
-func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record WorkflowRecord) error {
+func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record WorkflowRecord, extra ...workflowFileChange) error {
 	record.Revision++
 	record.UpdatedAt = time.Now().UTC()
 
@@ -170,8 +185,13 @@ func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record W
 		return err
 	}
 
-	run.Members[run.Cursor].ExpectedRevision = record.Revision
-	run.Members[run.Cursor].ExpectedSourceHash = workflowClaimRecordHash(record, files)
+	for i := range run.Members {
+		if run.Members[i].Admission.Key == record.Task.Key {
+			run.Members[i].ExpectedRevision = record.Revision
+			run.Members[i].ExpectedSourceHash = workflowClaimRecordHash(record, files)
+		}
+	}
+
 	run.Revision++
 	run.UpdatedAt = record.UpdatedAt
 
@@ -183,6 +203,8 @@ func (s *WorkflowStore) commitWorkflowClaim(run workflowInvocationFile, record W
 	if err := record.Validate(); err != nil {
 		return err
 	}
+
+	files = append(files, extra...)
 
 	return s.commitFiles(append(files, state))
 }
@@ -198,7 +220,7 @@ func workflowClaimRecordHash(record WorkflowRecord, files []workflowFileChange) 
 
 // CheckWorkflowClaim rejects expired credentials and any unaccepted file image.
 func (s *WorkflowStore) CheckWorkflowClaim(ctx context.Context, claim *WorkflowClaim) error {
-	if claim == nil || claim.store == nil {
+	if claim == nil || claim.store == nil || claim.execution == nil {
 		return ErrWorkflowOwned
 	}
 
@@ -228,6 +250,10 @@ func (s *WorkflowStore) checkWorkflowClaim(ctx context.Context, claim *WorkflowC
 		return run, WorkflowRecord{}, ErrWorkflowOwned
 	}
 
+	if run.Cursor >= len(run.Members) {
+		return run, WorkflowRecord{}, ErrWorkflowConflict
+	}
+
 	member := run.Members[run.Cursor]
 
 	record, err := owner.readRecord(member.Admission.Path)
@@ -248,7 +274,14 @@ func workflowAttemptOwnerMatches(run workflowInvocationFile, claim *WorkflowClai
 
 // CheckpointWorkflow yields at a quiescent task boundary without claiming success.
 func (s *WorkflowStore) CheckpointWorkflow(ctx context.Context, claim *WorkflowClaim) error {
-	if claim == nil || claim.store == nil {
+	if claim == nil || claim.store == nil || claim.execution == nil {
+		return ErrWorkflowOwned
+	}
+
+	claim.execution.Lock()
+	defer claim.execution.Unlock()
+
+	if !workflowClaimQuiescent(claim) {
 		return ErrWorkflowOwned
 	}
 

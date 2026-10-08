@@ -1,0 +1,131 @@
+package core
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"path/filepath"
+	"slices"
+	"time"
+)
+
+func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *WorkflowClaim, worker []string) (prepared workflowPreparedTask, err error) {
+	if err := validateWorkflowCommand(worker); err != nil {
+		return prepared, fmt.Errorf("workflow worker: %w", err)
+	}
+
+	err = s.withLock(ctx, func() error {
+		run, record, readErr := s.checkWorkflowClaim(ctx, claim)
+		if readErr != nil {
+			return readErr
+		}
+
+		prepared, readErr = claim.store.prepareWorkflowAttempt(ctx, run, record, worker)
+
+		return readErr
+	})
+
+	return prepared, err
+}
+
+func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string) (workflowPreparedTask, error) {
+	attempt := &run.Attempts[len(run.Attempts)-1]
+	if attempt.InputRef != "" {
+		return workflowPreparedTask{}, fmt.Errorf("%w: attempt input is already prepared", ErrWorkflowOwned)
+	}
+
+	lane, err := s.retainedWorkflowLane(ctx, run, record)
+	if err != nil {
+		return workflowPreparedTask{}, err
+	}
+
+	if lane == nil {
+		value := s.newWorkflowLane(run, record)
+		lane = &value
+	}
+
+	run.Lane = lane
+	if err := s.commitWorkflowState(&run); err != nil {
+		return workflowPreparedTask{}, err
+	}
+
+	if err := s.ensureWorkflowLane(ctx, *lane); err != nil {
+		return workflowPreparedTask{}, err
+	}
+
+	input, err := s.workflowTaskInput(ctx, run, record, worker)
+	if err != nil {
+		return workflowPreparedTask{}, err
+	}
+
+	return s.saveWorkflowTaskInput(run, input)
+}
+
+func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string) (WorkflowTaskInput, error) {
+	attempt := run.Attempts[len(run.Attempts)-1]
+
+	input := WorkflowTaskInput{Schema: "chr-task-input/v1", InvocationID: run.ID, AttemptID: attempt.ID, Generation: attempt.Generation, TaskKey: record.Task.Key, InputRevision: attempt.InputRevision, SourceHash: record.SourceHash, ContractHash: record.Task.ContractHash, Body: string(record.Body), Target: run.Selection.Target, Lane: *run.Lane, Worker: slices.Clone(worker)}
+	if err := json.Unmarshal(record.Domain["execution_contract"], &input.Contract); err != nil {
+		return input, err
+	}
+
+	var err error
+
+	input.Prerequisites, input.EvidenceHashes, err = s.workflowPrerequisiteImages(ctx, run, record)
+
+	return input, err
+}
+
+func (s *WorkflowStore) saveWorkflowTaskInput(run workflowInvocationFile, input WorkflowTaskInput) (workflowPreparedTask, error) {
+	var err error
+
+	input.ScopeHash, err = workflowExecutionScopeHash(run)
+	if err != nil {
+		return workflowPreparedTask{}, err
+	}
+
+	data, err := json.MarshalIndent(input, "", "  ")
+	if err != nil || len(data) >= WorkflowFileLimit {
+		return workflowPreparedTask{}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
+	}
+
+	data = append(data, '\n')
+	ref := workflowAttemptFile(run.ID, input.AttemptID, "input.json")
+	attempt := &run.Attempts[len(run.Attempts)-1]
+	attempt.Lane, attempt.InputRef, attempt.InputHash = run.Lane, ref, workflowHash(data)
+	run.Revision++
+	run.UpdatedAt = time.Now().UTC()
+
+	state, err := workflowInvocationChange(run)
+	if err != nil {
+		return workflowPreparedTask{}, err
+	}
+
+	if err := s.commitFiles([]workflowFileChange{{Path: ref, After: data}, state}); err != nil {
+		return workflowPreparedTask{}, err
+	}
+
+	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, nil
+}
+
+func workflowAttemptFile(invocationID, attemptID, name string) string {
+	return filepath.ToSlash(filepath.Join("run", invocationID, "extension", "chr", "attempts", attemptID, name))
+}
+
+func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile) error {
+	run.Revision++
+	run.UpdatedAt = time.Now().UTC()
+
+	state, err := workflowInvocationChange(*run)
+	if err != nil {
+		return err
+	}
+
+	if err := s.commitFiles([]workflowFileChange{state}); err != nil {
+		return err
+	}
+
+	run.sourceHash = workflowHash(state.After)
+
+	return nil
+}

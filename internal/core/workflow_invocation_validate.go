@@ -45,6 +45,10 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return fmt.Errorf("workflow request attachment keys are incomplete or oversized")
 	}
 
+	if run.Lane != nil && !validWorkflowLane(*run.Lane) {
+		return fmt.Errorf("invalid workflow invocation lane")
+	}
+
 	return nil
 }
 
@@ -80,13 +84,47 @@ func validateWorkflowInvocationAttempts(run workflowInvocationFile, keys map[str
 		}
 
 		ids[attempt.ID] = true
-		if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed"}, attempt.Outcome) {
+		if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed"}, attempt.Outcome) {
 			return fmt.Errorf("invalid workflow attempt lease or outcome")
+		}
+
+		if err := validateWorkflowAttemptExecution(run.ID, attempt); err != nil {
+			return err
 		}
 	}
 
 	if len(ids) != len(run.Owners) {
 		return fmt.Errorf("workflow attempt credential bindings differ")
+	}
+
+	return nil
+}
+
+func validateWorkflowAttemptExecution(invocationID string, attempt WorkflowAttempt) error {
+	if filepath.Base(attempt.ID) != attempt.ID {
+		return fmt.Errorf("invalid workflow attempt path identity")
+	}
+
+	if attempt.InputRef != "" {
+		if attempt.InputRef != workflowAttemptFile(invocationID, attempt.ID, "input.json") || len(attempt.InputHash) != 64 || attempt.Lane == nil {
+			return fmt.Errorf("invalid workflow attempt input binding")
+		}
+	}
+
+	if attempt.Lane != nil && !validWorkflowLane(*attempt.Lane) {
+		return fmt.Errorf("invalid workflow attempt lane")
+	}
+
+	return validateWorkflowAttemptResult(invocationID, attempt)
+}
+
+func validateWorkflowAttemptResult(invocationID string, attempt WorkflowAttempt) error {
+	if attempt.ResultRef != "" && (attempt.ResultRef != workflowAttemptFile(invocationID, attempt.ID, "result.json") || len(attempt.ResultHash) != 64 || attempt.InputRef == "" || attempt.FinishedAt.IsZero()) {
+		return fmt.Errorf("invalid workflow attempt result binding")
+	}
+
+	if slices.Contains([]string{"validated", "failed"}, attempt.Outcome) && attempt.ResultRef == "" {
+		return fmt.Errorf("workflow attempt outcome requires a retained result")
 	}
 
 	return nil
