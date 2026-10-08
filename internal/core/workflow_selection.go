@@ -23,6 +23,11 @@ type WorkflowPreviewRequest struct {
 	Target           WorkflowPreviewTarget
 	CumulativeBranch string
 	CumulativeCommit string
+	Filters          TicketLoopFilters
+	Statuses         []string
+	Order            TicketLoopOrder
+	MinPriority      string
+	MinSeverity      string
 }
 
 // WorkflowPreviewMember freezes the identity, revision and contract of one task.
@@ -67,6 +72,11 @@ type workflowSelection struct {
 // Preview resolves exact scope under the same exclusion used by domain writes.
 // It does not claim work, create invocations, refresh SQL or edit a tracker.
 func (s *WorkflowStore) Preview(ctx context.Context, request WorkflowPreviewRequest) (preview WorkflowPreview, err error) {
+	request, err = normalizeWorkflowPreviewRequest(request)
+	if err != nil {
+		return WorkflowPreview{}, err
+	}
+
 	if err := validateWorkflowPreviewRequest(request); err != nil {
 		return WorkflowPreview{}, err
 	}
@@ -74,7 +84,7 @@ func (s *WorkflowStore) Preview(ctx context.Context, request WorkflowPreviewRequ
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	err = s.withLock(ctx, func() error {
+	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
 		selection, readErr := s.readWorkflowSelection(ctx)
 		if readErr != nil {
 			return readErr
@@ -151,7 +161,8 @@ func (selection workflowSelection) preview(request WorkflowPreviewRequest) (Work
 			continue
 		}
 
-		reason := workflowSelectionExclusion(request.Selector, record, prepared)
+		reason := workflowPreviewExclusion(request, ticket, record, prepared)
+
 		if reason != "" {
 			preview.Excluded[reason]++
 
@@ -163,7 +174,7 @@ func (selection workflowSelection) preview(request WorkflowPreviewRequest) (Work
 
 	var orderErr error
 
-	preview.SetOrderRule, orderErr = selection.orderMembers(members, request.Selector)
+	preview.SetOrderRule, orderErr = selection.resolveOrder(members, request)
 	if orderErr != nil {
 		return WorkflowPreview{}, orderErr
 	}
@@ -294,4 +305,23 @@ func validateWorkflowPreviewContext(request WorkflowPreviewRequest) error {
 	}
 
 	return nil
+}
+
+func workflowPreviewExclusion(request WorkflowPreviewRequest, ticket IndexedTicket, record WorkflowRecord, prepared bool) string {
+	reason := workflowSelectionExclusion(request.Selector, record, prepared)
+	if reason == "" && request.Selector.Extent == "loose" {
+		return workflowLooseExclusion(request, ticket)
+	}
+
+	return reason
+}
+
+func (selection workflowSelection) resolveOrder(members []WorkflowPreviewMember, request WorkflowPreviewRequest) (string, error) {
+	if request.Selector.Extent == "loose" {
+		selection.orderLooseMembers(members, request.Order)
+
+		return string(request.Order), nil
+	}
+
+	return selection.orderMembers(members, request.Selector)
 }

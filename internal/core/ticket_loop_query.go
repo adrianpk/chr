@@ -200,9 +200,9 @@ func (order TicketLoopOrder) compare(left, right IndexedTicket) int {
 		return compareIndexedTicketsBySeverity(left, right)
 	case TicketLoopOrderPrioritySeverity:
 		return firstNonZero(
-			compareIndexedTicketsByPriority(left, right),
-			compareIndexedTicketsBySeverity(left, right),
-			compareIndexedTicketsByKey(left, right),
+			compareRank(priorityRank(left.Priority), priorityRank(right.Priority)),
+			compareRank(severityRank(left.Severity), severityRank(right.Severity)),
+			compareIndexedTicketsByCreatedAt(left, right),
 		)
 	default:
 		return compareIndexedTicketsByKey(left, right)

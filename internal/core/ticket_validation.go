@@ -86,7 +86,7 @@ func validateTicketTimes(ticket IndexedTicket) error {
 
 func isValidTicketPriority(priority string) bool {
 	switch strings.TrimSpace(priority) {
-	case "", "low", "normal", "high", "critical":
+	case "", "unclassified", "low", "normal", "high", "critical":
 		return true
 	default:
 		return false
@@ -95,7 +95,7 @@ func isValidTicketPriority(priority string) bool {
 
 func isValidTicketSeverity(severity string) bool {
 	switch strings.TrimSpace(severity) {
-	case "", "low", "normal", "high", "critical":
+	case "", "unclassified", "low", "normal", "high", "critical":
 		return true
 	default:
 		return false

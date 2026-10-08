@@ -13,6 +13,10 @@ import (
 )
 
 func (s *WorkflowStore) withLock(ctx context.Context, action func() error) (err error) {
+	return s.withRepositoryLock(ctx, s.recoverTransition, action)
+}
+
+func (s *WorkflowStore) withRepositoryLock(ctx context.Context, prepare, action func() error) (err error) {
 	command := exec.CommandContext(ctx, "git", "-C", s.layout.ProjectDir(), "rev-parse", "--path-format=absolute", "--git-common-dir")
 
 	output, err := command.Output()
@@ -38,7 +42,7 @@ func (s *WorkflowStore) withLock(ctx context.Context, action func() error) (err 
 
 	defer func() { err = errors.Join(err, syscall.Flock(int(file.Fd()), syscall.LOCK_UN)) }()
 
-	if err := s.recoverTransition(); err != nil {
+	if err := prepare(); err != nil {
 		return err
 	}
 
@@ -66,4 +70,19 @@ func acquireWorkflowLock(ctx context.Context, file *os.File) error {
 		case <-time.After(10 * time.Millisecond):
 		}
 	}
+}
+
+func (s *WorkflowStore) requireNoWorkflowTransition() error {
+	path, err := s.safePath(workflowJournalPath)
+	if err != nil {
+		return err
+	}
+
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("%w: reconcile pending transition before preview", ErrWorkflowConflict)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	return nil
 }

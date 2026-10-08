@@ -73,9 +73,9 @@ func (dependencies workflowDependencies) taskPrerequisites(record WorkflowRecord
 	refs := slices.Clone(task.DependsOn)
 
 	tasks := dependencies.tasks[task.SliceID]
-	for i, sibling := range tasks {
-		if sibling.Task.Key == task.Key && i > 0 {
-			refs = append(refs, WorkflowRef{Kind: "ticket", ID: tasks[i-1].Task.Key})
+	for _, sibling := range tasks {
+		if sibling.Task.Order < task.Order {
+			refs = append(refs, WorkflowRef{Kind: "ticket", ID: sibling.Task.Key})
 		}
 	}
 
@@ -85,8 +85,8 @@ func (dependencies workflowDependencies) taskPrerequisites(record WorkflowRecord
 		}
 
 		refs = append(refs, descriptor.DependsOn...)
-		if i > 0 {
-			refs = append(refs, WorkflowRef{Kind: "slice", ID: dependencies.orderedSlices[task.SetID][i-1].ID})
+		for _, earlier := range dependencies.orderedSlices[task.SetID][:i] {
+			refs = append(refs, WorkflowRef{Kind: "slice", ID: earlier.ID})
 		}
 	}
 

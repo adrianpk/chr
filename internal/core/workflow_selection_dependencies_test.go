@@ -155,6 +155,15 @@ func TestWorkflowSelectionTargetProof(t *testing.T) {
 		t.Fatalf("delivered prerequisite blocked: %+v, %v", confirmed, err)
 	}
 
+	unrelated := workflowSelectionGit(t, store, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit-tree", tree, "-m", "Unrelated lineage")
+	request.Target.Commit = unrelated
+
+	unreachable, err := store.Preview(t.Context(), request)
+	if err != nil || unreachable.Members[0].Blocker == nil {
+		t.Fatal("unreachable target delivery accepted")
+	}
+
+	request.Target.Commit = commit
 	request.Target.Repository = "https://forge.example/foreign/repo"
 
 	foreign, err := store.Preview(t.Context(), request)
@@ -222,5 +231,22 @@ func TestWorkflowSelectionEvidencePages(t *testing.T) {
 
 	if _, err := store.Preview(t.Context(), request); err == nil {
 		t.Fatal("changed proof bytes kept preview snapshot")
+	}
+}
+
+// TestWorkflowSelectionEarlierTasks prevents validation of the immediate predecessor from hiding an earlier missing proof.
+func TestWorkflowSelectionEarlierTasks(t *testing.T) {
+	store, result := workflowSelectionFixture(t)
+	commit, tree := workflowSelectionCommit(t, store)
+	branch := workflowSelectionGit(t, store, "symbolic-ref", "HEAD")
+	task := result.Tasks[1]
+	proof := WorkflowTaskValidation{Schema: "chr-task-validation/v1", Key: task.Task.Key, ContractHash: task.Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
+	writeSelectionProof(t, store, task, proof)
+
+	request := WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "ticket", Identity: result.Tasks[2].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
+
+	preview, err := store.Preview(t.Context(), request)
+	if err != nil || preview.Members[0].Blocker == nil || preview.Members[0].Blocker.Dependency.ID != result.Tasks[0].Task.Key {
+		t.Fatalf("earlier task proof bypassed: %+v, %v", preview, err)
 	}
 }

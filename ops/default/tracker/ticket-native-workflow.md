@@ -176,8 +176,8 @@ Plan contract: [Slice 3](../plan/ticket-native-workflow.md#slice-3-deterministic
 | --- | --- | --- | --- | --- |
 | T3.1 | [TKT-20261008141353](../ticket/in_progress/20261008141353-ticket-native-t3-1.md) | validated | 559000591223cdc0ce5df4c3ffd6dc0f367124f6 | Add exact ticket/slice/set/use-case/loose selectors and bounded preview results. |
 | T3.2 | [TKT-20261008141354](../ticket/in_progress/20261008141354-ticket-native-t3-2.md) | validated | 785a1d90fae0f62ea6a20f14d8efbf8a34257cfa | Resolve set-local/task-local order and homogeneous use-case set order. |
-| T3.3 | [TKT-20261008141355](../ticket/in_progress/20261008141355-ticket-native-t3-3.md) | in_progress | pending | Validate implicit and explicit prerequisites, including target delivery proof. |
-| T3.4 | [TKT-20261008141356](../ticket/ready/20261008141356-ticket-native-t3-4.md) | ready | pending | Preserve native classification/rank rules and implement loose ownership exclusion and thresholds. |
+| T3.3 | [TKT-20261008141355](../ticket/in_progress/20261008141355-ticket-native-t3-3.md) | validated | 2404d19149774e675e3c161ae2da8020d186e033 | Validate implicit and explicit prerequisites, including target delivery proof. |
+| T3.4 | [TKT-20261008141356](../ticket/in_progress/20261008141356-ticket-native-t3-4.md) | in_progress | pending | Preserve native classification/rank rules and implement loose ownership exclusion and thresholds. |
 
 ### Validation
 

@@ -7,15 +7,12 @@ import (
 )
 
 func (selection workflowSelection) orderMembers(members []WorkflowPreviewMember, selector WorkflowSelector) (string, error) {
-	if selector.Extent == "loose" || selector.Extent == "ticket" {
-		return "not_applicable", nil
+	if err := selection.validateMemberInputs(members); err != nil {
+		return "", err
 	}
 
-	for _, member := range members {
-		descriptor := selection.slices[member.SliceID]
-		if descriptor.TaskInputHash != WorkflowTaskInputHash(selection.snapshot.Records, member.SliceID) {
-			return "", fmt.Errorf("%w: slice %s membership fingerprint changed", ErrWorkflowConflict, member.SliceID)
-		}
+	if selector.Extent == "ticket" {
+		return "not_applicable", nil
 	}
 
 	rule := selection.setOrderRule(selector)
@@ -64,4 +61,22 @@ func (selection workflowSelection) setOrderRule(selector WorkflowSelector) strin
 	}
 
 	return "created_at_id"
+}
+
+func (selection workflowSelection) validateMemberInputs(members []WorkflowPreviewMember) error {
+	checked := map[string]bool{}
+	for _, member := range members {
+		if member.SliceID == "" || checked[member.SliceID] {
+			continue
+		}
+
+		descriptor := selection.slices[member.SliceID]
+		if descriptor.TaskInputHash != WorkflowTaskInputHash(selection.snapshot.Records, member.SliceID) {
+			return fmt.Errorf("%w: slice %s membership fingerprint changed", ErrWorkflowConflict, member.SliceID)
+		}
+
+		checked[member.SliceID] = true
+	}
+
+	return nil
 }

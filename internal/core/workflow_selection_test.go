@@ -127,3 +127,39 @@ func TestWorkflowSelectionExclusions(t *testing.T) {
 		t.Fatal("preview changed legacy content")
 	}
 }
+
+// TestWorkflowSelectionPendingJournal proves read-only preview cannot repair or overwrite an interrupted transition.
+func TestWorkflowSelectionPendingJournal(t *testing.T) {
+	store := workflowTestStore(t)
+	record := workflowTestCreate(t, store, "PRJ-1")
+	store.afterReplace = func(int) error { return errors.New("interrupted replacement") }
+
+	record.Task.Status = TicketStatusBacklog
+	if _, err := store.Write(t.Context(), record, record.Revision); err == nil {
+		t.Fatal("interruption not injected")
+	}
+
+	path := filepath.Join(store.layout.Root(), workflowJournalPath)
+
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "ticket", Identity: "PRJ-1"}, Limit: 1}
+	if _, err := store.Preview(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+		t.Fatalf("pending journal preview = %v", err)
+	}
+
+	after, err := os.ReadFile(path)
+	if err != nil || string(after) != string(before) {
+		t.Fatal("preview changed recovery journal")
+	}
+
+	store.afterReplace = nil
+	if _, err := store.Snapshot(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+
+	workflowTestPreview(t, store, "ticket", "PRJ-1")
+}
