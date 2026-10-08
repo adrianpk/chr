@@ -20,7 +20,7 @@ Plan approval: approved on 2026-10-08
 
 Implementation authorization: granted on 2026-10-08 for the approved delivery set through slice-loop
 
-Active slice: Slice 1 — Guarded workflow records
+Active slice: Slice 5 — Slice candidates and delivery receipts
 
 Next slice: Slice 2 — Task-ticket materialization
 

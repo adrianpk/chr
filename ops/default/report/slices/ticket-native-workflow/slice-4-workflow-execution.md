@@ -1,6 +1,6 @@
 # Slice 4: Owned Isolated Task Execution
 
-Status: reviewing
+Status: delivered
 Delivery set: ticket-native-workflow
 Plan: [Ticket-Native Work Delivery](../../../plan/ticket-native-workflow.md)
 Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md)
@@ -114,14 +114,12 @@ Repository gates use the retained owned CLI dump-curation executable documented
 in the [Slice 2 report](slice-2-workflow-materialization.md). It intercepts that
 fixed fixture input, delegates all other calls and has no service to stop.
 
-Canonical PR #367 retains the approved title and full report-introduction link.
-All task tickets are reviewing; final integration is pending. The clean PR head
-requires controller evidence in this order:
+Canonical PR #367 merged into `dev` at `517fdbb3322b4e02b951e5301b8f6c8e04740f57` on 2026-10-08
+at 19:45:19 UTC. All four task tickets are solved. Controller evidence passed
 `make verify`, `go test ./internal/core ./internal/app -count=1`,
-`go test -race ./internal/core ./internal/app -count=1`, `git diff --check`.
-Its immutable-head JSON/log retain those results after PR-reference commits.
-This report records completed task checks; controller validation is recorded
-against that later exact head before readiness.
+`go test -race ./internal/core ./internal/app -count=1` and `git diff --check`
+in that order on the clean integrated head. Its immutable-head JSON/log retain
+those results. Acta merged event: `01M4EGRYV77Q7CJ4ZJ00TE0JS0`.
 
 Acceptance: A06 exact grouped task; A09 retained serial ownership; A12 lease,
 process capacity and fencing; A17 shared manual validation; A21 execution-stop
