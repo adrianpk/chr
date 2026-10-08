@@ -22,22 +22,22 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 2 — Task-ticket materialization
+Active slice: Slice 3 — Deterministic work selection
 
-Next slice: Slice 3 — Deterministic work selection
+Next slice: Slice 4 — Owned isolated task execution
 
 Slice strategy: behavior-first
 
-Progress: 1 of 12 slices integrated; 4 of 48 tasks done.
+Progress: 2 of 12 slices integrated; 8 of 48 tasks done.
 
 ## Current Checkpoint
 
-Slice 1 is verified integrated through canonical PR #364 at
-`b041521e94d46ee46aa35a9133e8746f31a27328`; its report is delivered and
-four tickets are solved. Slice 2 implements explicit ordered task materialization,
-immutable retry receipts and selected quiescent legacy adoption. All four task
-implementations passed local checks and are reviewing. PR references and final
-clean-head controller validation are completed before handoff.
+Slices 1 and 2 are verified integrated through canonical PRs #364 and #365.
+Slice 2's merged head is `7d4008d32eccefcd3abad5e80955fb7f19110b6a`;
+its report is delivered and four tickets are solved. The controller's ordered
+checks passed on that head with the documented owned dump-curation fixture.
+Slice 3 is active for exact bounded previews, hierarchy ordering, prerequisites
+and native loose-ticket filters. Its four tasks are ready.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -64,8 +64,8 @@ Fast-forward into `dev`.
 | Slice | Name | Exact branch | Expected PR title | Report | State | Tasks done | PR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Guarded workflow records | `feat/slice-1-workflow-records` | `feat(slice-1): persist guarded workflow records` | `ops/default/report/slices/ticket-native-workflow/slice-1-workflow-records.md` | integrated | 4/4 | [#364](https://forge.adrianpk.com/adrianpk/chr/pulls/364) |
-| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | reviewing | 0/4 | [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365) |
-| Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | not_started | 0/4 | pending |
+| Slice 2 | Task-ticket materialization | `feat/slice-2-workflow-materialization` | `feat(slice-2): materialize ordered task tickets` | `ops/default/report/slices/ticket-native-workflow/slice-2-workflow-materialization.md` | integrated | 4/4 | [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365) |
+| Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | active | 0/4 | pending |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | not_started | 0/4 | pending |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | not_started | 0/4 | pending |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | not_started | 0/4 | pending |
@@ -119,7 +119,7 @@ Acceptance: A02, A22; foundations for A24.
 
 ## Slice 2: Task-ticket materialization
 
-Status: reviewing
+Status: integrated
 
 Prerequisite: satisfied by verified PR #364 integration into dev.
 
@@ -133,14 +133,14 @@ Plan contract: [Slice 2](../plan/ticket-native-workflow.md#slice-2-task-ticket-m
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T2.1 | [TKT-20261008141349](../ticket/reviewing/20261008141349-ticket-native-t2-1.md) | validated | 8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1 | Extend plan-generation contracts to distinguish set, slice and task identity/order. |
-| T2.2 | [TKT-20261008141350](../ticket/reviewing/20261008141350-ticket-native-t2-2.md) | validated | 93a19da5472e6ca323d671ea1e0ffbd54cd6be59 | Persist one ticket per task and bind task-owned membership to set-owned slice contracts. |
-| T2.3 | [TKT-20261008141351](../ticket/reviewing/20261008141351-ticket-native-t2-3.md) | validated | ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4 | Add materialization receipts and idempotent recovery after partial generation. |
-| T2.4 | [TKT-20261008141352](../ticket/reviewing/20261008141352-ticket-native-t2-4.md) | validated | 1585ee89b21a51c565fee54c4f87d05fddab4dac | Add explicit quiescent adoption for selected active legacy plans/tickets and update generation guidance. |
+| T2.1 | [TKT-20261008141349](../ticket/solved/20261008141349-ticket-native-t2-1.md) | done | 8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1 | Extend plan-generation contracts to distinguish set, slice and task identity/order. |
+| T2.2 | [TKT-20261008141350](../ticket/solved/20261008141350-ticket-native-t2-2.md) | done | 93a19da5472e6ca323d671ea1e0ffbd54cd6be59 | Persist one ticket per task and bind task-owned membership to set-owned slice contracts. |
+| T2.3 | [TKT-20261008141351](../ticket/solved/20261008141351-ticket-native-t2-3.md) | done | ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4 | Add materialization receipts and idempotent recovery after partial generation. |
+| T2.4 | [TKT-20261008141352](../ticket/solved/20261008141352-ticket-native-t2-4.md) | done | 1585ee89b21a51c565fee54c4f87d05fddab4dac | Add explicit quiescent adoption for selected active legacy plans/tickets and update generation guidance. |
 
 ### Validation
 
-Status: local repository and focused materialization/adoption race checks passed. Exact clean-head controller validation follows the PR-reference commit.
+Status: all four required controller checks passed against the verified integrated head.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`.
@@ -151,18 +151,18 @@ Acceptance: A01, A02.
 
 ### Delivery Evidence
 
-- PR: [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365); open against `dev`.
-- Merge commit: pending.
-- Report status: reviewing; [Slice 2 report](../report/slices/ticket-native-workflow/slice-2-workflow-materialization.md).
-- Task commits: T2.1 `8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1`; T2.2 `93a19da5472e6ca323d671ea1e0ffbd54cd6be59`; T2.3 `ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4`; T2.4 `1585ee89b21a51c565fee54c4f87d05fddab4dac`. All four tickets are reviewing.
-- Validation evidence: local materialization/adoption checks passed. Initial required race validation at `7f695ded2be57b115a84b5f047621466bcee3e58` failed the external-model-dependent CLI dump fixture. Its isolated check passed with the owned deterministic curation fixture recorded in the report. The controller records the canonical ordered sequence against the new clean documentation head.
+- PR: [#365](https://forge.adrianpk.com/adrianpk/chr/pulls/365); verified merged into `dev`.
+- Merge commit: `7d4008d32eccefcd3abad5e80955fb7f19110b6a`.
+- Report status: delivered; [Slice 2 report](../report/slices/ticket-native-workflow/slice-2-workflow-materialization.md).
+- Task commits: T2.1 `8add9b52a3154dd48b4b1b881b1c2a1d9c8deba1`; T2.2 `93a19da5472e6ca323d671ea1e0ffbd54cd6be59`; T2.3 `ae26d0e520ef011c466cd0aae5e49e56b3c4c1e4`; T2.4 `1585ee89b21a51c565fee54c4f87d05fddab4dac`. All four tickets are solved with resolution fixed.
+- Validation evidence: local materialization/adoption checks passed. Initial required race validation at `7f695ded2be57b115a84b5f047621466bcee3e58` failed the external-model-dependent CLI dump fixture. Its isolated check passed with the owned deterministic curation fixture recorded in the report. Controller evidence at `7d4008d32eccefcd3abad5e80955fb7f19110b6a` passed `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1` and `git diff --check` in that order with the documented owned curation fixture.
 - Blockers: none observed.
 
 ## Slice 3: Deterministic work selection
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 2 verified integrated into dev.
+Prerequisite: satisfied by verified PR #365 integration into dev.
 
 Expected branch: `feat/slice-3-workflow-selection`
 
@@ -196,7 +196,7 @@ Acceptance: A04, A05, A07; query bounds in A24.
 - Report status: not created.
 - Task commits and ticket lifecycle evidence: pending.
 - Validation evidence: pending.
-- Blockers: none observed; implementation has not started.
+- Blockers: none observed; Slice 3 is activated.
 
 ## Slice 4: Owned isolated task execution
 

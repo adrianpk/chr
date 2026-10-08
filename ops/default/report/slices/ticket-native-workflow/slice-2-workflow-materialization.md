@@ -1,6 +1,6 @@
 # Slice 2: Task-Ticket Materialization
 
-Status: reviewing
+Status: delivered
 Delivery set: ticket-native-workflow
 Plan: [Ticket-Native Work Delivery](../../../plan/ticket-native-workflow.md)
 Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md)
@@ -81,12 +81,14 @@ Successful local implementation checks:
 - `go test -race ./internal/core ./internal/app -run '^(TestWorkflowPlanAdoption|TestWorkflowMaterialization|TestServiceWorkflow)' -count=1`
 - `git diff --check`
 
-The controller records `make verify`,
+The controller passed `make verify`,
 `go test ./internal/core ./internal/app -count=1`,
 `go test -race ./internal/core ./internal/app -count=1` and `git diff --check`
-in that order against the exact clean PR-reference follow-up head. Its
-`checks/<full-head>.json` and matching log retain final candidate evidence.
-These are Slice 2 checks; composed integration remains in the approved final gate.
+in that order on clean head `7d4008d32eccefcd3abad5e80955fb7f19110b6a`.
+Its immutable-head JSON and log retain the evidence. Canonical PR #365 merged
+that head into `dev` on 2026-10-08 at 16:07:15 UTC. All four task tickets are
+solved. These are Slice 2 checks; composed integration remains in the approved
+final gate.
 
 The initial clean-head sequence at
 `7f695ded2be57b115a84b5f047621466bcee3e58` passed `make verify` and
