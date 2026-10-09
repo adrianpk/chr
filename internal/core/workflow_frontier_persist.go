@@ -68,6 +68,10 @@ func workflowFrontierEvidencePath(id string, cursor int) string {
 // Known optional fields must disappear when their authoritative typed value is
 // cleared. Unknown fields survive; stale serialized PR/owner bindings must not.
 func workflowOptionalInvocationField(key string) bool {
+	if key == "capacity_resume_status" {
+		return true
+	}
+
 	switch key {
 	case "blocker", "lane", "pull_request_binding", "review_binding", "preparation_binding", "submission_binding", "review_restriction", "review_count", "review_repairs", "preparation_count", "execution_target", "confirmed_cursor", "integrated_units", "continuation_checkpoint", "set_closures", "closing_set", "loose_queue", "dependency_targets":
 		return true

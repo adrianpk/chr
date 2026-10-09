@@ -62,24 +62,16 @@ func TestWorkflowRecoveryForeignLock(t *testing.T) {
 
 	path := filepath.Join(store.layout.Root(), "lock", "agent-operation.lock")
 
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var lock agentOperationLockRecord
-	if err := json.Unmarshal(data, &lock); err != nil {
-		t.Fatal(err)
-	}
-
-	lock.AttemptID = "replacement"
+	// This historical coarse file is retained compatibility evidence. New native
+	// claims no longer create it; a replacement must still survive recovery.
+	lock := agentOperationLockRecord{Operation: "workflow_execution", Owner: retained.ID, AttemptID: "replacement", Process: retained.Attempts[0].OwnerProcess}
 
 	replacement, err := json.Marshal(lock)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := os.WriteFile(path, replacement, 0o600); err != nil {
+	if err := atomicWorkflowFile(path, replacement); err != nil {
 		t.Fatal(err)
 	}
 

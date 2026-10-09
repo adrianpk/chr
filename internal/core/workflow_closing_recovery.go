@@ -45,11 +45,11 @@ func (s *WorkflowStore) reconcileWorkflowClosing(ctx context.Context, set Workfl
 		return set, err
 	}
 
-	reservation, err := acquireWorkflowCapacity(ctx, s.layout.ProjectDir())
+	reservation, err := acquireWorkflowRecoveryGuard(ctx, s.layout.ProjectDir(), state.CapacitySlot)
 	if err != nil {
 		return set, err
 	}
-	defer func() { err = errors.Join(err, reservation.Close()) }()
+	defer func() { err = errors.Join(err, reservation.releaseReservation()) }()
 
 	run := workflowInvocationFile{WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: workflowClosingOwnerID(set)}, Attempts: []WorkflowAttempt{attempt}}}
 

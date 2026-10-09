@@ -1,6 +1,9 @@
 package core
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 func (s *WorkflowStore) continueWorkflowSteps(ctx context.Context, id string, request WorkflowContinuationRequest, ports WorkflowContinuationPorts, limit int) (int, string, error) {
 	for steps := 0; steps < limit; steps++ {
@@ -18,7 +21,7 @@ func (s *WorkflowStore) continueWorkflowSteps(ctx context.Context, id string, re
 		}
 
 		if err := s.advanceWorkflowContinuation(ctx, run, request, ports); err != nil {
-			return steps, "blocked", err
+			return steps, workflowContinuationFailureReason(err), err
 		}
 
 		after, err := s.ReadWorkflow(ctx, id)
@@ -33,6 +36,14 @@ func (s *WorkflowStore) continueWorkflowSteps(ctx context.Context, id string, re
 	}
 
 	return limit, "step_limit", nil
+}
+
+func workflowContinuationFailureReason(err error) string {
+	if errors.Is(err, ErrWorkflowCapacity) {
+		return "waiting_capacity"
+	}
+
+	return "blocked"
 }
 
 func (s *WorkflowStore) readWorkflowContinuation(ctx context.Context, id string) (WorkflowInvocation, bool, error) {
@@ -79,6 +90,11 @@ func workflowContinuationBarrier(run WorkflowInvocation) string {
 }
 
 func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run WorkflowInvocation, request WorkflowContinuationRequest, ports WorkflowContinuationPorts) error {
+	state := workflowInvocationFile{WorkflowInvocation: run}
+	restoreWorkflowCapacityWait(&state)
+
+	run = state.WorkflowInvocation
+
 	if workflowContinuationClosing(run) {
 		_, err := s.CloseWorkflowInvocationSet(ctx, run.ID, request.PullRequest.BaseBranch, WorkflowFrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
 
@@ -133,6 +149,10 @@ func workflowContinuationClosing(run WorkflowInvocation) bool {
 }
 
 func workflowContinuationBefore(run WorkflowInvocation) string {
+	if run.Status == "waiting_capacity" && run.StopIntent == "" {
+		return ""
+	}
+
 	if workflowContinuationClosing(run) {
 		return ""
 	}

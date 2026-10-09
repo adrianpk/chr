@@ -263,6 +263,10 @@ func validateWorkflowStopState(run workflowInvocationFile) error {
 		return fmt.Errorf("invalid workflow resume status")
 	}
 
+	if !slices.Contains([]string{"", "pending", "waiting_review", "waiting_integration", "blocked", "paused"}, run.CapacityResumeStatus) {
+		return fmt.Errorf("invalid workflow capacity resume status")
+	}
+
 	return nil
 }
 

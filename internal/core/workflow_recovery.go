@@ -100,11 +100,11 @@ func (s *WorkflowStore) reconcileWorkflowOwner(ctx context.Context, run workflow
 		return err
 	}
 
-	reservation, err := acquireWorkflowCapacity(ctx, s.layout.ProjectDir())
+	reservation, err := acquireWorkflowRecoveryGuard(ctx, s.layout.ProjectDir(), attempt.CapacitySlot)
 	if err != nil {
 		return err
 	}
-	defer func() { err = errors.Join(err, reservation.Close()) }()
+	defer func() { err = errors.Join(err, reservation.releaseReservation()) }()
 
 	locks, err := s.recoveredWorkflowLocks(ctx, run)
 	if err != nil {

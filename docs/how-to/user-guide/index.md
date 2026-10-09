@@ -664,6 +664,33 @@ chr index status
 Ticket commands refresh the index where they need indexed ticket data, but the
 index commands are useful when inspecting drift explicitly.
 
+## Run Independent Ticket Work
+
+Ticket-native work defaults to one active worker. To run independent lanes in
+parallel, set the capacity in `.chr/default/config.yml`:
+
+```yaml
+work:
+  max_active_workers: 2
+  ready_queue_capacity: 64
+```
+
+The worker limit accepts 1–8. The ready queue accepts 1–1024 unfinished
+integration lanes and defaults to 64. Use the same values in every linked host
+checkout; ops namespaces share the pool. Each worker edits its own isolated
+checkout. Task order within a slice and ordered set/use-case progress stay
+serial, and competing publications wait for the canonical target.
+
+If an invocation reports `waiting_capacity`, retry its claim or continuation
+after capacity is available. Its selection, evidence and attempt budget remain
+intact. A failed independent lane does not stop another lane. A surviving child
+still occupies capacity after its lease expires. Legacy execution and adoption
+remain exclusive across the pool.
+
+This applies to explicitly enabled ticket-native authority on the registered
+local coordinator. See [Workflow execution](../../reference/workflow-execution.md)
+for ownership, recovery and manual-runner operations.
+
 ## Run One Ticket
 
 Preview execution:

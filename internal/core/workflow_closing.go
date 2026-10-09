@@ -93,6 +93,7 @@ type workflowClosingAttempt struct {
 	Schema       string                  `json:"schema"`
 	SetID        string                  `json:"set_id"`
 	Generation   int                     `json:"generation"`
+	CapacitySlot int                     `json:"capacity_slot,omitempty"`
 	BudgetID     string                  `json:"budget_id"`
 	OwnerRoot    string                  `json:"owner_root"`
 	InvocationID string                  `json:"invocation_id,omitempty"`

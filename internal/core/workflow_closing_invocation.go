@@ -88,6 +88,8 @@ func (s *WorkflowStore) workflowClosingInvocationFiles(ctx context.Context, clai
 
 	projectWorkflowClosing(&run, claim)
 
+	run.CapacityResumeStatus = ""
+
 	if run.StopIntent != "" && claim.state.Outcome != "running" {
 		run.Status = workflowStopStatus(run.StopIntent)
 	}

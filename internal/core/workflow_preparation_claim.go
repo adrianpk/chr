@@ -23,6 +23,8 @@ func (s *WorkflowStore) prepareWorkflowIntegrationValidation(ctx context.Context
 			return readErr
 		}
 
+		restoreWorkflowCapacityWait(&run)
+
 		observation, source, capability, readErr := owner.workflowPreparationPreflight(ctx, &run, provider)
 		if readErr != nil {
 			return readErr

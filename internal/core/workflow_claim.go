@@ -15,7 +15,7 @@ import (
 // ErrWorkflowOwned identifies overlap with retained task or hierarchy ownership.
 var ErrWorkflowOwned = errors.New("workflow work is already owned")
 
-// ErrWorkflowCapacity reports a live serial reservation, independently of a lease.
+// ErrWorkflowCapacity reports occupied repository capacity, independently of a lease.
 var ErrWorkflowCapacity = errors.New("workflow waiting for repository capacity")
 
 // WorkflowClaim is an owner credential. It cannot be reconstructed from status.
@@ -32,7 +32,7 @@ type WorkflowClaim struct {
 	purpose       string
 }
 
-// ClaimWorkflow acquires one task and its existing serial operation exclusion.
+// ClaimWorkflow acquires one task and a repository-wide worker reservation.
 func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *WorkflowClaim, err error) {
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
@@ -54,6 +54,8 @@ func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *Wo
 }
 
 func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
+	restoreWorkflowCapacityWait(&run)
+
 	if run.StopIntent != "" {
 		return nil, ErrWorkflowOwned
 	}

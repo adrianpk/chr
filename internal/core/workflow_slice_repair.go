@@ -19,6 +19,8 @@ func (s *WorkflowStore) RepairWorkflowSlice(ctx context.Context, id, taskKey str
 			return readErr
 		}
 
+		restoreWorkflowCapacityWait(&run)
+
 		if !workflowSliceRepairReady(run.WorkflowInvocation) || run.StopIntent != "" {
 			return ErrWorkflowOwned
 		}

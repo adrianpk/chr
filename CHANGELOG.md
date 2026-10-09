@@ -12,6 +12,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
+- Ticket-native work can run up to eight independent lanes in parallel when
+  configured, with one worker by default. Ordered work and target publication
+  remain serialized, and capacity waits retain progress for retry.
 - Added a Docker-backed ticket execution path with execution records, runtime
   context artifacts, result envelopes, validation output, changed-file
   detection, result application, and execution reports.

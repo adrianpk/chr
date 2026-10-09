@@ -11,7 +11,7 @@ edits and SQLite projections do not authorize execution or certify success.
 | --- | --- |
 | `StartWorkflow` | Freeze an explicit selection, target and execution policy. Equivalent requests attach to the retained invocation. Overlapping retained task/hierarchy ownership rejects. |
 | `ReadWorkflow` | Return invocation status, cursor, attempts, lane, process identities and retained evidence without private credentials. |
-| `ClaimWorkflow` | Claim the next eligible task under repository serial capacity and existing operation locks; journal a new fenced attempt. |
+| `ClaimWorkflow` | Claim the next eligible task under repository worker capacity and exclusive task/hierarchy ownership; journal a new fenced attempt. |
 | `CheckWorkflowClaim` | Check the current private credential, generation, lease and frozen record images. |
 | `CheckpointWorkflow` | Yield an unexpired, quiescent claim without validating the task; retain its input, lane, attempt and checkpoint. |
 | `ExecuteWorkflowTask` | Freeze worker inputs, supervise its argv in the isolated lane, run the frozen host gate and journal the guarded task result. |
@@ -20,11 +20,45 @@ edits and SQLite projections do not authorize execution or certify success.
 The caller retains the returned `*WorkflowClaim`; status cannot reconstruct it.
 The token is excluded from JSON and only its hash is persisted. One claim covers
 the task and its owning hierarchy. Native and legacy starts share the Git common
-directory's process-held serial reservation across registered linked checkouts.
+directory's process-held reservations across registered linked checkouts.
 Successful task validation leaves task status `in_progress` and phase
 `validated`, with integration pending. An exact grouped-ticket invocation
 completes only that task. A whole slice or independent ticket stops at
 `waiting_integration`; local validation does not mark work `done`.
+
+## Worker capacity
+
+The default is one active worker. Opt in to independent parallel lanes in
+`.chr/default/config.yml`:
+
+```yaml
+work:
+  max_active_workers: 2
+  ready_queue_capacity: 64
+```
+
+`max_active_workers` accepts 1–8; `ready_queue_capacity` accepts 1–1024 and
+defaults to 64 unfinished integration lanes. Invalid values reject admission.
+Namespaces and registered linked host checkouts share one Git-common-directory
+pool and must resolve the same configuration. Retained worker-lane snapshots
+cannot change its limits. Reducing capacity counts all existing reservations;
+it does not stop live work or omit slots above the new limit.
+
+Independent native workers use distinct process-held slots and isolated lanes.
+Tasks within a slice, and the frontier of the same ordered set or use case,
+remain serial. Publication has separate exclusion for each canonical remote
+target, including uncertain submissions. A review or publication wait holds no
+worker slot. `waiting_capacity` retains `capacity_resume_status`, task evidence
+and consumed budgets. An explicit claim, role retry or continuation rechecks
+capacity; repeating an unchanged wait does not create an attempt or checkpoint.
+Pause/resume retains the prior phase, and cancellation remains terminal.
+
+Native claims do not create `agent-operation.lock`. Legacy runners and adoption
+retain exclusive access across the whole pool. A retained legacy or historical
+coarse file also blocks new native claims until its own release or matching
+fenced recovery. Native admission never removes an unknown or replaced file.
+This coordination requires the registered local host and Git common directory;
+separate clones or hosts cannot form another pool from copied records.
 
 ## Coordinator registration
 
@@ -45,7 +79,9 @@ unbound authority, a missing host registration or conflicting markers require
 explicit reconciliation; work starts cannot silently create another owner.
 
 Task and hierarchy ownership are rechecked before each reservation and fenced
-result application. Legacy Git runners validate the same repository capacity
+result application. Worker-owned lane copies do not redefine the host
+coordinator; their committed marker is checked when accepting their own result.
+Legacy Git runners validate the same repository capacity
 policy and reject copied registered authority. Their conservative exclusion
 continues to apply across all native slots. Web and daemon code without native
 work-start controls cannot create execution ownership; shared controls use the
@@ -263,7 +299,7 @@ equivalent work. The explicit invocation API retains its exact retry-key rules.
 
 The native path uses the host-supervised JSON worker in the owned lane and the
 frozen task gate. It does not initialize the legacy runtime. Both modes retain
-the shared serial operation exclusion. Legacy selection partitions actual source
+the shared repository reservations. Legacy selection partitions actual source
 images before preflight; a second guard under the operation lock prevents an
 adoption between preview and worker start from granting two owners.
 
@@ -702,7 +738,7 @@ cannot change a completed set. Amendment and closure histories retain the
 | --- | --- |
 | `CloseWorkflowSet` | Require the observed set revision/hash and canonical repository/branch. Validate all actual members and the exact target, then retain the set-owned result. An optional invocation ID identifies its unfinished owner. |
 | `CloseWorkflowInvocationSet` | Close only the next frozen set after its selected work finalizes, without changing admission or earlier delivery images. |
-| `ReconcileWorkflowClosing` | Recover an expired or dead set-closing owner after group quiescence and capacity acquisition. Retain the interrupted attempt without confirming its gate. |
+| `ReconcileWorkflowClosing` | Recover an expired or dead set-closing owner after group quiescence and acquisition of the appropriate legacy guard. Retain the interrupted attempt without confirming its gate. |
 
 Closure checks every actual task and slice in the set, including later tickets
 excluded from frozen invocation membership. Every task must be receipt-finalized
@@ -726,8 +762,8 @@ consume the same counter. Set history is bounded to 4096 attempts across explici
 reopened cycles. Each attempt owns its fence, PID birth, lease, immutable input, bounded
 logs and result under `plan/<set-id>/extension/chr/closing/<generation>/`.
 Required gates use the contract's finite timeout; waivers retain their reason
-and a one-minute observation lifetime. Closing shares repository serial capacity,
-operation locks, descendant supervision and durable pause/cancel controls.
+and a one-minute observation lifetime. Closing uses the same repository worker
+slots, descendant supervision and durable pause/cancel controls.
 A live owner or descendant blocks recovery. `ReconcileWorkflow` also dispatches
 to an invocation's active set-closing role.
 
@@ -783,8 +819,11 @@ killing another process. Linux `ENOENT` and `ESRCH` observations mean a process
 vanished; other read failures block ownership recovery.
 
 `ReconcileWorkflow(id)` explicitly replays matching journals and recovers a dead
-or expired owner only after process-group quiescence, capacity acquisition and
-verification of every owned operation lock. It preserves lane, input, logs,
+or expired owner only after process-group quiescence and verification of every
+retained owned operation lock. A counted native attempt reacquires its exact slot
+and a shared legacy guard for metadata recovery. A held or reused assigned slot
+blocks that recovery while unrelated slots can continue. Historical
+attempts without a slot binding retain exclusive recovery. It preserves lane, input, logs,
 checkpoint, consumed budget and replacement history. A live child or held
 reservation blocks replacement; expired/replaced credentials cannot finalize or
 release a newer claim.

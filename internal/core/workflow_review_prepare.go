@@ -18,6 +18,8 @@ func (s *WorkflowStore) prepareWorkflowReview(ctx context.Context, id string, pr
 			return readErr
 		}
 
+		restoreWorkflowCapacityWait(&run)
+
 		if readErr := owner.checkWorkflowReviewAdmission(ctx, run); readErr != nil {
 			return readErr
 		}

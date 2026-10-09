@@ -51,7 +51,11 @@ func validateWorkflowClosingAttempt(set WorkflowRecord, index int, state workflo
 }
 
 func workflowClosingAttemptIdentity(set WorkflowRecord, index int, state workflowClosingAttempt) bool {
-	return state.Schema == "chr-set-closing-attempt/v1" && state.SetID == set.ID && state.Generation == index+1 && filepath.IsAbs(state.OwnerRoot) && validWorkflowProcessIdentity(state.Owner) && len(state.TokenHash) == 64 && !state.LeaseUntil.IsZero() && len(state.Processes) <= 16 && len(state.BudgetID) >= 1 && len(state.BudgetID) <= 128
+	return state.Schema == "chr-set-closing-attempt/v1" && state.SetID == set.ID && state.Generation == index+1 && validWorkflowClosingOwner(state)
+}
+
+func validWorkflowClosingOwner(state workflowClosingAttempt) bool {
+	return validWorkflowClosingSlot(state.CapacitySlot) && filepath.IsAbs(state.OwnerRoot) && validWorkflowProcessIdentity(state.Owner) && len(state.TokenHash) == 64 && !state.LeaseUntil.IsZero() && len(state.Processes) <= 16 && len(state.BudgetID) >= 1 && len(state.BudgetID) <= 128
 }
 
 func validateWorkflowClosingOutcome(state workflowClosingAttempt, historical bool) error {
@@ -84,7 +88,7 @@ func validateWorkflowClosingOutcome(state workflowClosingAttempt, historical boo
 }
 
 func validateWorkflowClosingProcess(id string, state workflowClosingAttempt, i int, process WorkflowProcess) error {
-	if !validWorkflowProcessIdentity(process.Identity) || process.GroupID != process.Identity.PID || !slices.Contains([]string{"running", "stopped"}, process.State) {
+	if !validWorkflowClosingProcess(state, process) {
 		return ErrWorkflowConflict
 	}
 
@@ -102,6 +106,18 @@ func validateWorkflowClosingProcess(id string, state workflowClosingAttempt, i i
 	}
 
 	return nil
+}
+
+func validWorkflowClosingSlot(slot int) bool {
+	return slot >= 0 && slot <= workflowWorkerSlotLimit
+}
+
+func validWorkflowClosingProcess(state workflowClosingAttempt, process WorkflowProcess) bool {
+	if !validWorkflowClosingSlot(process.CapacitySlot) || state.CapacitySlot != 0 && process.CapacitySlot != state.CapacitySlot {
+		return false
+	}
+
+	return validWorkflowProcessIdentity(process.Identity) && process.GroupID == process.Identity.PID && slices.Contains([]string{"running", "stopped"}, process.State)
 }
 
 func (s *WorkflowStore) checkWorkflowClosingEvidence(set WorkflowRecord) error {

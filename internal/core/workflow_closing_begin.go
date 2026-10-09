@@ -33,7 +33,7 @@ func (s *WorkflowStore) beginWorkflowClosing(ctx context.Context, request Workfl
 		return nil, result, err
 	}
 
-	worker, err := s.reserveWorkflowClaim(ctx, workflowClosingReservation(set))
+	worker, err := s.reserveWorkflowClosing(ctx, set, request.InvocationID)
 	if err != nil {
 		return nil, result, err
 	}
@@ -51,6 +51,20 @@ func (s *WorkflowStore) beginWorkflowClosing(ctx context.Context, request Workfl
 	err = s.commitWorkflowClosingStart(ctx, claim)
 
 	return claim, result, err
+}
+
+func (s *WorkflowStore) reserveWorkflowClosing(ctx context.Context, set WorkflowRecord, id string) (*WorkflowClaim, error) {
+	worker, err := s.reserveWorkflowClaim(ctx, workflowClosingReservation(set))
+	if !errors.Is(err, ErrWorkflowCapacity) || id == "" {
+		return worker, err
+	}
+
+	run, readErr := s.readWorkflowInvocation(id)
+	if readErr != nil {
+		return nil, errors.Join(err, readErr)
+	}
+
+	return nil, s.retainWorkflowCapacityWait(run, err)
 }
 
 func (s *WorkflowStore) workflowClosingSetMatches(set WorkflowRecord, request WorkflowSetClosureRequest) bool {
@@ -96,6 +110,7 @@ func (s *WorkflowStore) prepareWorkflowClosing(ctx context.Context, set Workflow
 
 	data = append(data, '\n')
 	state := workflowClosingAttempt{Schema: "chr-set-closing-attempt/v1", SetID: set.ID, Generation: generation, BudgetID: workflowClosingBudgetID(set, request.InvocationID), OwnerRoot: s.layout.Root(), Owner: owner, InvocationID: request.InvocationID, TokenHash: workflowHash([]byte(worker.Token)), Outcome: "running", LeaseUntil: time.Now().UTC().Add(workflowClosingLeaseSeconds(input.Validation)), Input: WorkflowClosingEvidence{Ref: workflowClosingFile(set.ID, generation, "input.json"), Hash: workflowHash(data)}}
+	state.CapacitySlot = workflowWorkerSlotNumber(worker.reservation.Name())
 
 	return &workflowClosingClaim{worker: worker, set: set, state: state, input: input, data: data}, nil
 }

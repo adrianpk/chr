@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-	"time"
 )
 
 func workflowRepositoryDirectory(ctx context.Context, projectDir string) (string, error) {
@@ -59,9 +58,13 @@ func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowIn
 		return nil, err
 	}
 
+	if err := s.guardWorkflowOperationLocks(ctx); err != nil {
+		return nil, s.retainWorkflowCapacityWait(run, err)
+	}
+
 	file, guard, err := s.acquireWorkflowWorkerSlot(ctx)
 	if err != nil {
-		return nil, err
+		return nil, s.retainWorkflowCapacityWait(run, err)
 	}
 
 	claim = &WorkflowClaim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: file, capacityGuard: guard, execution: &workflowClaimExecution{}}
@@ -73,21 +76,31 @@ func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowIn
 		}
 	}()
 
+	return claim, nil
+}
+
+// Retained coarse files have no safe capacity binding. Keep them exclusive
+// until their own legacy release or fenced native recovery removes them.
+func (s *WorkflowStore) guardWorkflowOperationLocks(ctx context.Context) error {
 	layouts, err := s.workflowOperationLayouts(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, layout := range layouts {
-		lock, err := acquireWorkflowOperationLock(layout, claim)
-		if err != nil {
-			return nil, err
+		_, err := readWorkflowFile(filepath.Join(layout.Root(), "lock", "agent-operation.lock"))
+		if errors.Is(err, os.ErrNotExist) {
+			continue
 		}
 
-		claim.locks = append(claim.locks, lock)
+		if err != nil {
+			return err
+		}
+
+		return ErrWorkflowCapacity
 	}
 
-	return claim, nil
+	return nil
 }
 
 func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayout, error) {
@@ -114,32 +127,6 @@ func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayo
 	}
 
 	return result, nil
-}
-
-func acquireWorkflowOperationLock(layout OpsLayout, claim *WorkflowClaim) (*AgentOperationLock, error) {
-	path := filepath.Join(layout.Root(), "lock", "agent-operation.lock")
-
-	file, err := createAgentOperationLockFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	identity, err := workflowProcessIdentity(os.Getpid())
-	if err != nil {
-		return nil, errors.Join(err, file.Close(), os.Remove(path))
-	}
-
-	record := agentOperationLockRecord{Operation: "workflow_execution", Owner: claim.InvocationID, AttemptID: claim.AttemptID, Process: &identity, PID: os.Getpid(), CreatedAt: time.Now().UTC().Format(time.RFC3339Nano)}
-	if err := writeAgentOperationLockFile(file, path, record); err != nil {
-		return nil, err
-	}
-
-	data, err := readWorkflowFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	return &AgentOperationLock{path: path, guard: workflowHash(data)}, nil
 }
 
 func (claim *WorkflowClaim) releaseReservation() error {

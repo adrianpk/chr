@@ -120,7 +120,9 @@ func (s *WorkflowStore) registerWorkflowCoordinator(ctx context.Context, common,
 }
 
 func (s *WorkflowStore) workflowCoordinatorMarkers(ctx context.Context) ([]workflowCoordinator, error) {
-	layouts, err := s.workflowRepositoryLayouts(ctx)
+	// Worker-owned lane copies do not redefine the host coordinator. Their
+	// committed registration is checked separately before accepting a result.
+	layouts, err := s.workflowOperationLayouts(ctx)
 	if err != nil {
 		return nil, err
 	}
