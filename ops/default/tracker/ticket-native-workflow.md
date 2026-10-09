@@ -22,26 +22,24 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 6 — Guarded automatic publication
+Active slice: Slice 7 — Ordered set and use-case continuation
 
-Next slice: Slice 7 — Ordered set and use-case continuation
+Next slice: Slice 8 — Loose-ticket integration loop
 
 Slice strategy: behavior-first
 
-Progress: 5 of 12 slices integrated; 20 of 48 tasks done.
+Progress: 6 of 12 slices integrated; 24 of 48 tasks done.
 
 ## Current Checkpoint
 
-Slices 1 through 5 are verified integrated through canonical PRs #364–#368.
-Slice 5 merged head `6cfaedd9c12f7a6dcfc562804917c32c5f6daaca` passed the controller's
-ordered `make verify`, core/app checks, focused race gate and `git diff --check`
-with the retained CLI curation fixture. Its report is delivered and all four task
-tickets are solved. Acta records the canonical merge in `01M4ESBJ8W5EGFTJR23A3CCXN3`.
-Slice 6 implementation is validated for review-bound approval, guarded method preparation,
-recoverable submission and reconciliation. T6.1 is validated with task commit `085747eb4bc083318d6673b80ec7d9e437e45f8f`;
-T6.2 is validated with task commit `497af614315fe80ce69c0f43c216f1a81d15200d`;
-T6.3 is validated with task commit `b9e728a265668bac4f94fe92580f71eafaa3e6e1`;
-T6.4 is validated with task commit `84875e1775a89efd2bdfd0eeb782eda1c2bee8a6`. All four tickets are reviewing in canonical PR [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369).
+Slices 1 through 6 are verified integrated through canonical PRs #364–#369.
+Slice 6 merged head `22050846d7373395ae776b37bb98df76208dbdf7` passed the controller's
+ordered `make verify`, uncached core/app tests, core/app race tests and
+`git diff --check` with the retained CLI curation fixture and scoped test timeout.
+Its report is delivered and all four task tickets are solved. Acta records the
+canonical merge in `01M4F3YG8WEZMVZYGE4EZ7XM80`.
+Slice 7 is active for ordered slice/set/use-case traversal, durable continuation,
+membership amendments and closing validation. T7.1 is the next recorded task.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -72,8 +70,8 @@ Fast-forward into `dev`.
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | integrated | 4/4 | [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366) |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | integrated | 4/4 | [#367](https://forge.adrianpk.com/adrianpk/chr/pulls/367) |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | integrated | 4/4 | [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368) |
-| Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | reviewing | 0/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
-| Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | not_started | 0/4 | pending |
+| Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | integrated | 4/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
+| Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | active | 0/4 | pending |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | not_started | 0/4 | pending |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | not_started | 0/4 | pending |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | not_started | 0/4 | pending |
@@ -320,7 +318,7 @@ Acceptance: A01, A08, A13, A22.
 
 ## Slice 6: Guarded automatic publication
 
-Status: reviewing
+Status: integrated
 
 Prerequisite: satisfied by verified PR #368 integration into dev.
 
@@ -334,14 +332,14 @@ Plan contract: [Slice 6](../plan/ticket-native-workflow.md#slice-6-guarded-autom
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T6.1 | [TKT-20261008141405](../ticket/reviewing/20261008141405-ticket-native-t6-1.md) | validated | 085747eb4bc083318d6673b80ec7d9e437e45f8f | Bind review decisions, bounded repairs and exact-candidate manual approval to current policy and immutable inputs. |
-| T6.2 | [TKT-20261008141406](../ticket/reviewing/20261008141406-ticket-native-t6-2.md) | validated | 497af614315fe80ce69c0f43c216f1a81d15200d | Prepare and validate configured merge/rebase/squash results and enforce atomic source/base publication guards. |
-| T6.3 | [TKT-20261008141407](../ticket/reviewing/20261008141407-ticket-native-t6-3.md) | validated | b9e728a265668bac4f94fe92580f71eafaa3e6e1 | Journal submission before provider IO and retain target exclusion for uncertain responses. |
-| T6.4 | [TKT-20261008141408](../ticket/reviewing/20261008141408-ticket-native-t6-4.md) | validated | 84875e1775a89efd2bdfd0eeb782eda1c2bee8a6 | Reconcile target movement, external delivery and stale candidate evidence through the shared operation. |
+| T6.1 | [TKT-20261008141405](../ticket/solved/20261008141405-ticket-native-t6-1.md) | done | 085747eb4bc083318d6673b80ec7d9e437e45f8f | Bind review decisions, bounded repairs and exact-candidate manual approval to current policy and immutable inputs. |
+| T6.2 | [TKT-20261008141406](../ticket/solved/20261008141406-ticket-native-t6-2.md) | done | 497af614315fe80ce69c0f43c216f1a81d15200d | Prepare and validate configured merge/rebase/squash results and enforce atomic source/base publication guards. |
+| T6.3 | [TKT-20261008141407](../ticket/solved/20261008141407-ticket-native-t6-3.md) | done | b9e728a265668bac4f94fe92580f71eafaa3e6e1 | Journal submission before provider IO and retain target exclusion for uncertain responses. |
+| T6.4 | [TKT-20261008141408](../ticket/solved/20261008141408-ticket-native-t6-4.md) | done | 84875e1775a89efd2bdfd0eeb782eda1c2bee8a6 | Reconcile target movement, external delivery and stale candidate evidence through the shared operation. |
 
 ### Validation
 
-Status: all four tasks passed their task checks. PR readiness requires the controller’s exact clean-head evidence.
+Status: all four task checks and all four ordered controller checks passed on clean head `22050846d7373395ae776b37bb98df76208dbdf7`.
 
 Successful T6.1 checks: `make verify` with the retained CLI curation fixture;
 `go test -race ./internal/core ./internal/app -run '^(TestWorkflowReview|TestServiceWorkflowReview)' -count=1`;
@@ -381,19 +379,20 @@ Acceptance: A11, A13, A14, A15, A21; publication budgets in A24.
 
 ### Delivery Evidence
 
-- PR: [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369); open against `dev`.
-- Merge commit: pending.
-- Report status: reviewing; [complete Slice 6 report](../report/slices/ticket-native-workflow/slice-6-workflow-publication.md).
-- Task commits: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; T6.2 `497af614315fe80ce69c0f43c216f1a81d15200d`; T6.3 `b9e728a265668bac4f94fe92580f71eafaa3e6e1`; T6.4 `84875e1775a89efd2bdfd0eeb782eda1c2bee8a6`. All four tickets are reviewing.
+- PR: [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369); merged into `dev` through Rebase + Fast-forward.
+- Merge commit: `22050846d7373395ae776b37bb98df76208dbdf7`.
+- Report status: delivered; [complete Slice 6 report](../report/slices/ticket-native-workflow/slice-6-workflow-publication.md).
+- Task commits: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; T6.2 `497af614315fe80ce69c0f43c216f1a81d15200d`; T6.3 `b9e728a265668bac4f94fe92580f71eafaa3e6e1`; T6.4 `84875e1775a89efd2bdfd0eeb782eda1c2bee8a6`. All four tickets are solved.
 - Acta task events: T6.1 `01M4EVSNQG6RK6XRXA0YAKW199`; T6.2 `01M4EXHWH60EG9YSZ35DF9TFQ2`; T6.3 `01M4EZMN5MW4KQC7ANKETSBPFV`; T6.4 `01M4F1W257AMYZHJ46X250RD7J`.
-- Validation evidence: all four task checks passed. PR readiness requires the exact ordered controller checks; evidence is retained as `checks/<HEAD>.json` and the matching log.
-- Blockers: none observed. Integration is controlled by slice-loop after exact clean-head validation.
+- Final clean-head controller evidence: `checks/22050846d7373395ae776b37bb98df76208dbdf7.json` and matching log in the controller state directory; the exact four ordered commands passed.
+- Acta canonical merge event: `01M4F3YG8WEZMVZYGE4EZ7XM80`.
+- Blockers: none observed.
 
 ## Slice 7: Ordered set and use-case continuation
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 6 verified integrated into dev.
+Prerequisite: satisfied by verified PR #369 integration into dev.
 
 Expected branch: `feat/slice-7-workflow-continuation`
 

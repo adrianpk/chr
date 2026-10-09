@@ -1,6 +1,6 @@
 # Slice 6: Guarded automatic publication
 
-Status: reviewing
+Status: delivered
 
 Delivery set: ticket-native-workflow
 
@@ -116,9 +116,12 @@ Final PR-head evidence is recorded through the controller for this ordered list:
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-The controller retains the exact clean HEAD, ordered command list and matching
-`checks/<HEAD>.json` and log. These candidate checks are distinct from the
-delivery set's later full gate.
+All four commands passed on clean head `22050846d7373395ae776b37bb98df76208dbdf7`,
+recorded in the controller state directory as the matching `checks/<HEAD>.json`
+and log. Canonical PR #369 merged that exact head through Rebase + Fast-forward
+into dev; canonical and local dev match. Acta merge event:
+`01M4F3YG8WEZMVZYGE4EZ7XM80`. The four task tickets are solved. These candidate
+checks are distinct from the delivery set's later full gate.
 
 ## Risks and Follow-ups
 
