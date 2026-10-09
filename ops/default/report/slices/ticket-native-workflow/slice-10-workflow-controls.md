@@ -40,6 +40,13 @@ shows bounded retained pages, waits, blocker/next-action owner, member order and
 revision, candidate/PR/approval, continuation and delivery evidence. Status and
 stop controls remain available during execution; a second execution is not queued.
 
+T10.3 adds native ticket/case Web previews, exact snapshot/revision
+confirmations and shared lifecycle controls. The Board exposes native tickets
+without requiring the legacy ticket directory. Retained views show bounded
+progress, ordered members, policy, waits, evidence and approval bindings. Failed
+writes render current status with a visible failure. Actual browser forms execute
+a task checkpoint, continue its candidate and enforce ownership and review waits.
+
 ## Implementation Notes
 
 The application service owns explicit extent admission, status projection and
@@ -54,6 +61,12 @@ revisions under that same exclusion; continuation retains acceptance evidence
 before executing a checkpoint. Asynchronous reads cannot replace a newer TUI
 revision. Inspection checks all linked namespaces/worktrees before discovery,
 preventing journal replay during status or dashboard reads.
+
+Web mappings remain in adapter files and use the same bound admission/control
+service. Read-only previews retain their confirmation inputs; revision-guarded
+member pages reject stale reads. The smoke script uses an owned executable/server
+PID and real browser actions; screenshots supplement those actions. Temporary
+HTTP, Git, worker and browser fixtures are cleaned after their checks.
 
 ## Contracts Added or Changed
 
@@ -75,6 +88,14 @@ preventing journal replay during status or dashboard reads.
 - Guarded continuation acceptance is a durable checkpoint; terminal continuation
   remains observational and does not add attempts or acceptance evidence.
 
+- `GET /workflows` and `/workflows/fragment` observe previews or retained status;
+  `POST /workflows/actions` confirms a snapshot or invocation revision.
+- Native Web forms reject duplicate fields and exceedance of 32 KiB bodies,
+  8 KiB confirmation bindings, or bounded control fields.
+- Retained Web status remains observable under tracker compatibility; new native
+  admission requires tickets authority. Current views use 16 invocation choices,
+  eight members/evidence rows and at most one shared checkpoint per activation.
+
 ## Files of Interest
 
 - `internal/app/service_workflow_controls.go`, `service_workflow_status.go` and
@@ -91,6 +112,11 @@ preventing journal replay during status or dashboard reads.
   locked revision checks, acceptance evidence and real race/failure checks.
 - `docs/reference/workflow-controls.md`, the User Guide and `CHANGELOG.md`:
   delivered command behavior and operational guidance.
+
+- `internal/app/web_workflow*.go`, `internal/webui/workflow.go` and the embedded
+  workflow template: native projection, guarded actions and owned browser tests.
+- `scripts/qa/web-ui-smoke.sh`: actual activation/conflict/review/continuation
+  browser assertions alongside existing page, fragment and screenshot checks.
 
 ## Validation
 
@@ -126,7 +152,27 @@ failures, execute one actual task/continuation checkpoint, reject a moved PR hea
 and keep readonly previews/journals byte-identical. Local documentation links and
 whitespace passed. Final PR-head controller evidence remains pending.
 
+T10.3 passed:
+
+- `make verify`
+- `go test ./internal/app ./internal/webui -run '^TestWebWorkflow' -count=1`
+- `go test -race ./internal/app ./internal/webui -run '^TestWebWorkflow' -count=1`
+- `scripts/qa/web-ui-smoke.sh`
+- `git diff --check`
+
+Go 1.27.1 and the retained curation fixture were used. The repository gate used
+the scoped uncached 30-minute test timeout; strict lint reported zero issues and
+all packages passed. App tests took 89.521 seconds and core tests 826.869 seconds.
+The 18 gate inputs stayed unchanged. Focused race checks used the installed
+browser and passed for app in 29.978 seconds; the smoke script passed real browser
+activation, stale ownership/revisions, review wait, moved-head rejection, exact
+approval and continuation. Handler checks also cover pause/resume/cancel, input
+bounds, native ticket/case controls, byte-identical previews and retained status
+under compatibility mode. Owned browser/server fixtures finished and stopped.
+Documentation links and whitespace passed. Final PR-head controller evidence
+remains pending.
+
 ## Risks and Follow-ups
 
-T10.3–T10.4 remain pending: Web/browser and daemon controls must exercise the
-same service operations before this slice is ready for its canonical PR.
+T10.4 remains pending: daemon lifecycle, manual status parity and the notification
+boundary must be delivered before this slice is ready for its canonical PR.

@@ -39,8 +39,8 @@ Slice 9 merged head `fe2e8dc5ac91c8d54ff865fa2c1b7f965116ab7c` passed the contro
 with Go 1.27.1, the retained CLI curation fixture and scoped uncached 30-minute
 test timeout. Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4GG393N2TJ9FCXZVHBFG0GY`.
-Slice 10 is active; T10.1 and T10.2 are validated and reviewing. T10.3 is active
-for guarded Web controls and browser activation evidence.
+Slice 10 is active; T10.1, T10.2 and T10.3 are validated and reviewing. T10.4
+is active for daemon lifecycle and manual status parity.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -657,12 +657,12 @@ Plan contract: [Slice 10](../plan/ticket-native-workflow.md#slice-10-shared-oper
 | --- | --- | --- | --- | --- |
 | T10.1 | [TKT-20261008141421](../ticket/reviewing/20261008141421-ticket-native-t10-1.md) | reviewing | `872fba664db5f8a2cde99a4135264631a482062b` | Expose proposed CLI extents, preview/status/continue and exact-bound approval/reconciliation controls. |
 | T10.2 | [TKT-20261008141422](../ticket/reviewing/20261008141422-ticket-native-t10-2.md) | reviewing | `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` | Add TUI controls and progress/wait/blocker rendering over shared operations. |
-| T10.3 | [TKT-20261008141423](../ticket/in_progress/20261008141423-ticket-native-t10-3.md) | in_progress | pending | Add Web operation controls, guarded writes and resumable progress with visible failure envelopes. |
-| T10.4 | [TKT-20261008141424](../ticket/ready/20261008141424-ticket-native-t10-4.md) | ready | pending | Wire daemon resume, pause/cancel and manual status parity; document Telegram's notification-only boundary. |
+| T10.3 | [TKT-20261008141423](../ticket/reviewing/20261008141423-ticket-native-t10-3.md) | reviewing | `d378057aac57e206982d86710d1f03d982dae81c` | Add Web operation controls, guarded writes and resumable progress with visible failure envelopes. |
+| T10.4 | [TKT-20261008141424](../ticket/in_progress/20261008141424-ticket-native-t10-4.md) | in_progress | pending | Wire daemon resume, pause/cancel and manual status parity; document Telegram's notification-only boundary. |
 
 ### Validation
 
-Status: T10.1 and T10.2 task checks passed; T10.3 active. Final candidate checks pending.
+Status: T10.1–T10.3 task checks passed; T10.4 active. Final candidate checks pending.
 
 Expected focused checks: `go test ./internal/app ./internal/tui ./internal/webui -count=1`
 and `go test -race ./internal/app ./internal/tui ./internal/webui -count=1`;
@@ -676,11 +676,12 @@ Acceptance: A09, A17, A21, A23.
 
 - PR: pending.
 - Merge commit: pending.
-- Report status: drafting; CLI/TUI behavior and task evidence recorded.
-- Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket reviewing. T10.2 `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` is reviewing; T10.3 active.
+- Report status: drafting; CLI/TUI/Web behavior and task evidence recorded.
+- Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket reviewing. T10.2 `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` is reviewing; T10.3 `d378057aac57e206982d86710d1f03d982dae81c` is reviewing; T10.4 active.
 - T10.1: `make verify`, focused CLI admission checks, focused CLI/core race checks and `git diff --check` passed. The final ordered controller checks remain pending.
 - T10.2: `make verify`, adapter race checks, focused domain control/inspection race checks and `git diff --check` passed. Domain and real adapter/model checks cover preserved identities, stale conflicts, actual checkpoints, exact approval and nonmutating linked-worktree inspection. Acta commit event: `01M4GPNPTK1PE002KAMC8HQY0H`.
-- Blockers: none observed; T10.3 is active.
+- T10.3: `make verify`, focused Web workflow/race checks, `scripts/qa/web-ui-smoke.sh` and `git diff --check` passed. Real handler/browser checks cover native selection, worker/continuation checkpoints, ownership and revision failures, human review and exact approval. All 18 gate input files stayed unchanged. Acta commit event: `01M4GSPSDZY5M3DZ0WN7J5Y4QA`.
+- Blockers: none observed; T10.4 is active.
 
 ## Slice 11: Defaults and authority transition
 
