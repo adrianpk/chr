@@ -1,6 +1,6 @@
 # Slice 9: Independent parallel runners
 
-Status: reviewing
+Status: delivered
 
 Delivery set: ticket-native-workflow
 
@@ -120,15 +120,19 @@ retained capacity and rejected results. Recovery preserved generations and
 budgets beside unrelated native work. Capacity retries passed for all worker
 roles and repeated continuation retained its existing wait checkpoint.
 
-Required final clean PR-head checks, recorded through the controller, use this
-order:
+The controller recorded these successful ordered checks for canonical merged
+head `fe2e8dc5ac91c8d54ff865fa2c1b7f965116ab7c`:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -count=1`
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-These candidate checks are distinct from the delivery set's later full gate.
+Canonical PR #372 is verified merged into `dev`; Acta merge event
+`01M4GG393N2TJ9FCXZVHBFG0GY` records the transition. Go 1.27.1, the retained
+CLI curation fixture and the scoped uncached 30-minute test timeout were used.
+Strict lint reported zero issues. These candidate checks are distinct from the
+delivery set's later full gate.
 
 ## Risks and Follow-ups
 

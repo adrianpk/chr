@@ -20,9 +20,9 @@ Plan approval: approved on 2026-10-08
 
 Implementation authorization: granted on 2026-10-08 for the approved delivery set through slice-loop
 
-Active slice: Slice 9 — Independent parallel runners
+Active slice: Slice 10 — Shared operation controls
 
-Next slice: Slice 10 — Shared operation controls
+Next slice: Slice 11 — Defaults and authority transition
 
 Slice strategy: behavior-first
 
