@@ -10,7 +10,7 @@ Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md
 
 Branch: `feat/slice-8-workflow-loose-tickets`
 
-PR: pending canonical creation.
+PR: [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371).
 
 ## Purpose
 

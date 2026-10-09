@@ -48,8 +48,10 @@ real Git, host-death, focused race and repository checks. T8.3 is validated in
 `5371010ab32eda6c035cee220369719491c47370` after bounded selection, prerequisite stop/resume,
 service, journal-crash, expanded race and repository checks. T8.4 is validated in
 `7e1341e2fb4b95104d005a4ad70d5cac73dd92ac` after native/legacy entrypoint, source-publication,
-real Git, expanded race and repository checks. All four tickets are reviewing;
-the slice report is introduced with this checkpoint and its canonical PR is pending.
+real Git, expanded race and repository checks. All four tickets are reviewing.
+The slice report is introduced in `fead9e4246f83dfa6335f96ea52646eb08d12f86`;
+canonical [PR #371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) is open into dev.
+Final clean-head controller checks follow the PR-reference commit.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -82,7 +84,7 @@ Fast-forward into `dev`.
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | integrated | 4/4 | [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368) |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | integrated | 4/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
-| Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | reviewing | 4/4 | pending |
+| Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | reviewing | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | not_started | 0/4 | pending |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | not_started | 0/4 | pending |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
@@ -549,13 +551,14 @@ Acceptance: A05, A07, A13, A19.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371), open into dev.
 - Merge commit: pending.
 - Report status: reviewing; [complete Slice 8 report](../report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md).
 - Task commits: T8.1 `249e5d1b771702cb8e332cbb9447f71452a7e86a`, T8.2 `bc35a963b3eaec06fcfd93a57811ab0cbbd75389`, T8.3 `5371010ab32eda6c035cee220369719491c47370`, T8.4 `7e1341e2fb4b95104d005a4ad70d5cac73dd92ac`. All four tasks are validated and their tickets are reviewing. Tickets remain unfinished until slice integration.
 - Validation evidence: all four task checks passed; complete ordered PR-head evidence remains pending.
 - Acta task events: T8.1 `01M4FHF9EDFRYB4N11C57RSVD4`, T8.2 `01M4FKQMCBZ2VWXTEP5FXFJCVW`, T8.3 `01M4FQ48XQPQHT31XWXY3ZY5EE`, T8.4 `01M4FSRRM8918YRYFKWA86Q1R5`.
-- Blockers: none observed; canonical PR preparation is active.
+- Acta PR event: `01M4FT3YHE14ZZH33A20E2TFDR`.
+- Blockers: none observed; final clean-head controller validation remains pending.
 
 ## Slice 9: Independent parallel runners
 
