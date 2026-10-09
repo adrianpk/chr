@@ -37,11 +37,11 @@ Slice 5 merged head `6cfaedd9c12f7a6dcfc562804917c32c5f6daaca` passed the contro
 ordered `make verify`, core/app checks, focused race gate and `git diff --check`
 with the retained CLI curation fixture. Its report is delivered and all four task
 tickets are solved. Acta records the canonical merge in `01M4ESBJ8W5EGFTJR23A3CCXN3`.
-Slice 6 is active for review-bound approval, guarded method preparation,
+Slice 6 implementation is validated for review-bound approval, guarded method preparation,
 recoverable submission and reconciliation. T6.1 is validated with task commit `085747eb4bc083318d6673b80ec7d9e437e45f8f`;
 T6.2 is validated with task commit `497af614315fe80ce69c0f43c216f1a81d15200d`;
 T6.3 is validated with task commit `b9e728a265668bac4f94fe92580f71eafaa3e6e1`;
-T6.4 is in progress.
+T6.4 is validated with task commit `84875e1775a89efd2bdfd0eeb782eda1c2bee8a6`. All four tickets are reviewing.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -72,7 +72,7 @@ Fast-forward into `dev`.
 | Slice 3 | Deterministic work selection | `feat/slice-3-workflow-selection` | `feat(slice-3): select ordered workflow extents` | `ops/default/report/slices/ticket-native-workflow/slice-3-workflow-selection.md` | integrated | 4/4 | [#366](https://forge.adrianpk.com/adrianpk/chr/pulls/366) |
 | Slice 4 | Owned isolated task execution | `feat/slice-4-workflow-execution` | `feat(slice-4): execute owned isolated tasks` | `ops/default/report/slices/ticket-native-workflow/slice-4-workflow-execution.md` | integrated | 4/4 | [#367](https://forge.adrianpk.com/adrianpk/chr/pulls/367) |
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | integrated | 4/4 | [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368) |
-| Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | active | 0/4 | pending |
+| Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | reviewing | 0/4 | pending |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | not_started | 0/4 | pending |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | not_started | 0/4 | pending |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | not_started | 0/4 | pending |
@@ -320,7 +320,7 @@ Acceptance: A01, A08, A13, A22.
 
 ## Slice 6: Guarded automatic publication
 
-Status: active
+Status: reviewing
 
 Prerequisite: satisfied by verified PR #368 integration into dev.
 
@@ -337,11 +337,11 @@ Plan contract: [Slice 6](../plan/ticket-native-workflow.md#slice-6-guarded-autom
 | T6.1 | [TKT-20261008141405](../ticket/reviewing/20261008141405-ticket-native-t6-1.md) | validated | 085747eb4bc083318d6673b80ec7d9e437e45f8f | Bind review decisions, bounded repairs and exact-candidate manual approval to current policy and immutable inputs. |
 | T6.2 | [TKT-20261008141406](../ticket/reviewing/20261008141406-ticket-native-t6-2.md) | validated | 497af614315fe80ce69c0f43c216f1a81d15200d | Prepare and validate configured merge/rebase/squash results and enforce atomic source/base publication guards. |
 | T6.3 | [TKT-20261008141407](../ticket/reviewing/20261008141407-ticket-native-t6-3.md) | validated | b9e728a265668bac4f94fe92580f71eafaa3e6e1 | Journal submission before provider IO and retain target exclusion for uncertain responses. |
-| T6.4 | [TKT-20261008141408](../ticket/in_progress/20261008141408-ticket-native-t6-4.md) | in_progress | pending | Reconcile target movement, external delivery and stale candidate evidence through the shared operation. |
+| T6.4 | [TKT-20261008141408](../ticket/reviewing/20261008141408-ticket-native-t6-4.md) | validated | 84875e1775a89efd2bdfd0eeb782eda1c2bee8a6 | Reconcile target movement, external delivery and stale candidate evidence through the shared operation. |
 
 ### Validation
 
-Status: T6.1–T6.3 passed their task checks; T6.4 and final clean-head checks are pending.
+Status: all four tasks passed their task checks; final clean-head controller checks are pending.
 
 Successful T6.1 checks: `make verify` with the retained CLI curation fixture;
 `go test -race ./internal/core ./internal/app -run '^(TestWorkflowReview|TestServiceWorkflowReview)' -count=1`;
@@ -363,6 +363,13 @@ three methods. Fixtures cover lost responses, host death at intent/projection/
 provider/response/confirmation boundaries, cancellation, concurrent callers,
 linked namespace aliases, consumed budgets and corrupt or missing journals.
 
+Successful T6.4 checks: `make verify` with the retained CLI curation fixture
+and scoped Go test timeout of 30 minutes;
+`go test -race ./internal/core ./internal/app -run '^(TestWorkflowPublication|TestServiceWorkflowPublication)' -count=1`;
+`git diff --check`. Real fixtures cover policy publication, moved bases, external
+merge/rebase/squash, paused/cancelled delivery, late responses, corrupt evidence,
+repaired candidates, receipt fan-out death and restart reuse.
+
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`. Exercise real target
 movement and controlled provider responses; live-provider claims require Slice 12
@@ -376,11 +383,11 @@ Acceptance: A11, A13, A14, A15, A21; publication budgets in A24.
 
 - PR: pending.
 - Merge commit: pending.
-- Report status: not created.
-- Task commits: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; T6.2 `497af614315fe80ce69c0f43c216f1a81d15200d`; T6.3 `b9e728a265668bac4f94fe92580f71eafaa3e6e1`. All three tickets are reviewing; T6.4 is in progress.
-- Acta task events: T6.1 `01M4EVSNQG6RK6XRXA0YAKW199`; T6.2 `01M4EXHWH60EG9YSZ35DF9TFQ2`; T6.3 `01M4EZMN5MW4KQC7ANKETSBPFV`.
-- Validation evidence: T6.1–T6.3 task checks passed; complete slice and final clean-head controller evidence are pending.
-- Blockers: none observed; T6.4 is active.
+- Report status: reviewing; [complete Slice 6 report](../report/slices/ticket-native-workflow/slice-6-workflow-publication.md).
+- Task commits: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; T6.2 `497af614315fe80ce69c0f43c216f1a81d15200d`; T6.3 `b9e728a265668bac4f94fe92580f71eafaa3e6e1`; T6.4 `84875e1775a89efd2bdfd0eeb782eda1c2bee8a6`. All four tickets are reviewing.
+- Acta task events: T6.1 `01M4EVSNQG6RK6XRXA0YAKW199`; T6.2 `01M4EXHWH60EG9YSZ35DF9TFQ2`; T6.3 `01M4EZMN5MW4KQC7ANKETSBPFV`; T6.4 `01M4F1W257AMYZHJ46X250RD7J`.
+- Validation evidence: all four task checks passed; final clean-head controller evidence is pending.
+- Blockers: none observed; canonical PR preparation and final clean-head checks remain.
 
 ## Slice 7: Ordered set and use-case continuation
 
