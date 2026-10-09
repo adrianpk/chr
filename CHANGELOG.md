@@ -17,7 +17,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   executions. TUI and Web confirmations retain the selected revision and show stale
   conflicts, capacity waits and validated versus integrated progress. Approval
   uses the displayed candidate binding; supervised CLI manual handoffs require
-  host validation before progress advances.
+  host validation before progress advances. The daemon continues retained
+  authorization with the same lifecycle and status; startup preserves operator
+  stops and human approval waits without admitting the ready backlog.
 - Ticket-native work can run up to eight independent lanes in parallel when
   configured, with one worker by default. Ordered work and target publication
   remain serialized, and capacity waits retain progress for retry.

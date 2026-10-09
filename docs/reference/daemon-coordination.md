@@ -1,187 +1,96 @@
 # Daemon Coordination
 
-## Purpose
+The local foreground daemon coordinates enabled registered projects. Its
+user-level SQLite state records coordinator status and heartbeats. Ticket-native
+invocations remain authoritative in their shared project-local workflow records.
 
-Daemon coordination is the user-level process boundary for long-running local
-work across registered projects.
-
-The daemon lives in the `chr` binary. It is a local coordinator, not a hosted
-service and not a notification transport.
-
-## Command Boundary
-
-The daemon command group is:
+## Commands
 
 ```sh
-chr daemon
+chr daemon status
+chr daemon start --dry-run
+chr daemon start --max-iterations 1
+chr daemon stop --dry-run
+chr daemon stop
+chr daemon workflow status --dir /path/to/project --json execution-id
+chr daemon workflow pause --dir /path/to/project execution-id
+chr daemon workflow cancel --dir /path/to/project execution-id
+chr daemon workflow resume --dir /path/to/project execution-id
 ```
 
-Supported skeleton commands:
+`--max-iterations` must be positive and defaults to one. Start runs in the
+foreground and finishes after that many coordination iterations. Dry-run start
+reports the single-instance guard without writing daemon or invocation state.
+Dry-run stop prints the stop plan without applying it.
 
-- `chr daemon status`;
-- `chr daemon start --dry-run`;
-- `chr daemon stop --dry-run`.
+`daemon workflow` also supports `continue`, `approve` and `reconcile`. These
+commands use the same arguments, read-only previews, revision checks, frozen
+limits and exact approval bindings as [Workflow controls](workflow-controls.md).
+They address one retained invocation; they do not start a new extent.
 
-The skeleton resolves the user environment and prints the user-level data and
-state directories that later lifecycle slices will use.
+## Retained ticket-native work
 
-`daemon status` is read-only. It reports `stopped` when no daemon state exists,
-or prints the stored daemon status, process ID, lifecycle timestamps, failure
-reason, and user-level state paths.
+For registered projects with `work.state_authority: tickets`, each iteration
+observes retained invocations in stable ID order through shared read-only pages.
+Startup never creates an invocation or selects a new backlog extent. A user must
+first authorize an extent through a work command or a confirmed TUI/Web action. Configuration changes to tracker compatibility disable
+automatic native continuation; explicit retained status remains observable.
 
-`daemon start` and `daemon stop` require `--dry-run` until lifecycle state and
-process ownership are delivered. Without `--dry-run`, they return an explicit
-error instead of writing partial daemon state.
+An iteration attempts at most 16 runnable invocations per ready project, with at
+most one shared checkpoint per invocation. It retains each invocation's selector,
+membership policy, target, consumed attempts and limits. Explicit later-ticket
+admission follows that already authorized policy within the same retained
+extent; see [Workflow selection](workflow-selection.md). Later passes can
+continue from those checkpoints. Independent invocations use the same repository
+capacity and frontier claims as other adapters; the daemon has no execution queue.
 
-`daemon start --dry-run` evaluates the single-instance guard and reports whether
-a future start would be allowed.
+A live owner remains exclusive. Recovery fences a dead owner through common
+reconciliation and resumes only the resulting recovery pause with no operator
+stop intent. An explicit operator pause, cancellation, blocker or human approval
+wait remains in place. Capacity waits use their retained phase when capacity is
+available. Publication and integration use the shared effective review policy;
+startup never grants human approval.
 
-## Out of Scope
+The output reports observed invocations, waits and checkpoint steps. An attempted
+activation prints the shared invocation identity, revision, extent, validation and
+integration counts, members, candidate/PR bindings and evidence. Ownership,
+capacity and stale-revision failures remain visible. A completed checkpoint or
+successful manual harness does not certify integrated delivery.
 
-The command skeleton does not:
+Projects using tracker compatibility retain ticket-index refresh behavior.
+Native-only projects do not require the legacy ticket directory or manufacture it.
+Disabled, missing and invalid projects do not execute workflow work.
 
-- write daemon state;
-- acquire process ownership;
-- start a background process;
-- stop a running process;
-- load registered projects;
-- execute ticket loops;
-- send notifications.
+## Stop and recovery
 
-Those behaviors are delivered by later daemon coordination slices.
+`daemon stop` persists a coordinator stop request. The foreground loop checks it
+between project/invocation checkpoints and exits after any current owned
+checkpoint finishes. This request preserves invocation authorization and does not
+cancel its work. Use `daemon workflow pause` or `cancel` to request the shared
+invocation stop watcher to terminate an owned group and retain its evidence.
+Ownership is released only after that group is quiescent. Resume must be explicit
+for an operator pause; terminal cancellation cannot restart.
 
-## Lifecycle State
+The daemon updates its heartbeat once per second during owned work and at each
+iteration boundary. The heartbeat watcher is stopped before its state repository
+closes. Normal completion writes stopped state; unexpected failures retain failed
+coordinator state and the existing workflow checkpoint.
 
-Daemon lifecycle state records the local coordinator status and process
-identity.
+A fresh active coordinator state prevents another start. The default stale
+threshold is five minutes. `daemon status` classifies stale active state and
+persists that classification. This coordinator recovery does not recover or
+replace a workflow owner; workflow reconciliation proves process exclusion
+separately.
 
-Supported statuses:
+## Coordinator state
 
-- `stopped`;
-- `starting`;
-- `running`;
-- `stopping`;
-- `stale`;
-- `failed`.
+The singleton user-level state supports `stopped`, `starting`, `running`,
+`stopping`, `stale` and `failed`. Active states require a positive PID and start
+time. Heartbeats cannot precede startup. Stop request timestamps are valid for
+stopping or stopped state.
 
-Lifecycle fields:
-
-- `status`;
-- `pid`;
-- `started_at`;
-- `heartbeat_at`;
-- `stop_requested_at`;
-- `failure_reason`;
-- `updated_at`.
-
-Running process states require a positive PID and a start time. Heartbeats
-cannot precede the start time. Stop requests are valid only for stopping or
-stopped daemon state.
-
-## State Persistence
-
-Daemon lifecycle state is persisted in the user-level SQLite database.
-
-The daemon state repository stores one singleton row for the local user
-environment. It supports:
-
-- read current daemon state;
-- upsert daemon state;
-- update heartbeat time;
-- clear daemon state.
-
-The repository does not start, stop, or signal processes. It only persists the
-lifecycle state that later daemon slices use for process ownership and status
-reporting.
-
-## Single-Instance Guard
-
-The daemon start guard prevents duplicate local daemon ownership.
-
-The guard allows start when:
-
-- daemon state is missing;
-- daemon state is `stopped`;
-- daemon state is `failed`;
-- daemon state is already classified as `stale`;
-- active daemon state has not heartbeated within the stale threshold.
-
-The guard rejects start when daemon state is freshly `starting`, `running`, or
-`stopping`.
-
-The default stale threshold is five minutes. Stale classification in this slice
-is a decision result only; persisted stale-state mutation is handled by a later
-recovery slice.
-
-## Project Loading
-
-Daemon project loading reads registered projects from the user-level project
-registry.
-
-Only enabled projects are returned for daemon work.
-
-Each enabled project is classified before work starts:
-
-- `ready`: project path exists, is a directory, and contains `.chr/`;
-- `missing`: project path does not exist;
-- `invalid`: project path is not usable for daemon work.
-
-Invalid classifications include non-directory project paths and missing
-workspace directories. Later daemon run-loop slices can skip or report these
-projects without failing the whole daemon process.
-
-## Foreground Run Loop
-
-`chr daemon start` runs daemon coordination in the foreground.
-
-The foreground run:
-
-- evaluates the single-instance guard;
-- writes running daemon state with the current process ID;
-- updates heartbeat state once per iteration;
-- loads enabled registered projects;
-- skips projects that are not ready;
-- refreshes ticket indexes for ready projects;
-- stops after `--max-iterations`;
-- writes stopped daemon state on normal completion.
-
-`--max-iterations` is required to be greater than zero and defaults to `1`.
-
-The foreground loop does not run as an OS service.
-
-## Stop and Recovery
-
-`chr daemon stop` persists a stop request when daemon state is active.
-
-The command changes `starting`, `running`, or `stopping` state to `stopping` and
-sets `stop_requested_at`. If state is missing, the command reports the daemon as
-already stopped.
-
-The foreground run loop checks for stop requests between iterations and exits
-cleanly when one is present. Normal exit writes stopped daemon state.
-
-`chr daemon status` also recovers stale active state. When stored `starting`,
-`running`, or `stopping` state has not heartbeated within the stale threshold,
-status rewrites it as `stale` with a stale failure reason and prints the
-recovered state.
-
-## Status Reporting
-
-`chr daemon status` reads the persisted daemon state.
-
-When state is missing, the output includes:
-
-- `daemon: stopped`;
-- `state: missing`.
-
-When state exists, the output includes:
-
-- daemon status;
-- `state: stored`;
-- PID;
-- start time;
-- heartbeat time;
-- stop request time;
-- failure reason;
-- update time;
-- data and state directories.
+`daemon status` reports missing state as stopped. Stored output includes status,
+PID, start/heartbeat/stop/update times, failure reason and user-level data/state
+paths. `daemon workflow status` instead reads the exact shared invocation,
+including bounded member pagination, without modifying coordinator or workflow
+state. Manual, CLI, TUI and Web status read that same evidence.

@@ -84,6 +84,9 @@ actual clean candidate and runs the frozen validation gate before accepting
 progress. Malformed or mismatched reports retain a checkpoint without task
 success. An unaccepted lane change remains fenced for explicit correction.
 `--preview` validates argv and reports status without launching the harness.
+CLI, TUI, Web and `daemon workflow status` expose the same accepted manual
+checkpoint, revision and evidence. Status reads cannot advance task or integration
+progress.
 
 ## TUI controls
 
@@ -162,3 +165,28 @@ binding or invocation revision, and the existing origin/token access policy.
 Forms are limited to 32 KiB with no duplicate fields; admission bindings are
 limited to 8 KiB and reject unknown JSON fields. Expected failures render as
 HTTP 200 fragments for htmx so that the browser can show them.
+
+## Daemon and notification boundary
+
+`chr daemon start` continues retained ticket-native authorization in enabled
+registered projects. It never admits the ready backlog. Each project iteration
+attempts at most 16 runnable invocations and one shared checkpoint per invocation.
+Live owners, operator stops, blockers and human review waits retain their meaning;
+dead-owner recovery uses shared process exclusion without resetting budgets.
+See [Daemon coordination](daemon-coordination.md) for foreground lifecycle and
+coordinator stop behavior.
+
+`chr daemon workflow` reuses the retained `status`, `continue`, `pause`, `cancel`,
+`resume`, `approve` and `reconcile` controls above. For example:
+
+```sh
+chr daemon workflow status --dir /path/to/project --json execution-id
+chr daemon workflow continue --dir /path/to/project --max-steps 1 execution-id
+chr daemon workflow pause --dir /path/to/project execution-id
+```
+
+Existing Telegram notifications are informational. Remote command intake stores
+bounded handoff records; it does not execute ticket-native admission,
+continuation, stop, approval or reconciliation. Use the delivered CLI, TUI, Web or
+daemon controls for those actions. A notification does not certify execution or
+integration evidence.

@@ -22,6 +22,7 @@ func newDaemonCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newDaemonStartCommand(stdout),
 			newDaemonStatusCommand(stdout),
 			newDaemonStopCommand(stdout),
+			newDaemonWorkflowCommand(stdout, deps),
 		},
 	}
 }
@@ -235,6 +236,9 @@ type daemonForegroundLoopResult struct {
 	ProjectsSkipped   int
 	ProjectsRefreshed int
 	StopRequested     bool
+	WorkflowsObserved int
+	WorkflowsWaiting  int
+	WorkflowSteps     int
 }
 
 func runDaemonForegroundLoop(
@@ -274,7 +278,7 @@ func runDaemonForegroundLoop(
 		return err
 	}
 
-	result, err := runDaemonForegroundIterations(ctx, env, assetsFS, stateRepository, maxIterations)
+	result, err := runDaemonForegroundIterations(ctx, stdout, env, assetsFS, stateRepository, maxIterations)
 	if err != nil {
 		failDaemonForegroundState(ctx, stateRepository, err)
 
@@ -293,11 +297,12 @@ func runDaemonForegroundLoop(
 
 func runDaemonForegroundIterations(
 	ctx context.Context,
+	stdout io.Writer,
 	env core.UserEnvironment,
 	assetsFS fs.FS,
 	stateRepository core.DaemonStateRepository,
 	maxIterations int,
-) (daemonForegroundLoopResult, error) {
+) (result daemonForegroundLoopResult, err error) {
 	registry, err := core.NewProjectRegistry(ctx, env, assetsFS)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
@@ -318,38 +323,18 @@ func runDaemonForegroundIterations(
 		_ = index.Close()
 	}()
 
-	result := daemonForegroundLoopResult{}
+	ctx, finish := watchDaemonHeartbeat(ctx, stateRepository)
+	defer func() { err = errors.Join(err, finish()) }()
+
+	runner := daemonWorkflowRunner{stdout: stdout, env: env, assets: assetsFS, repository: stateRepository}
 
 	for range maxIterations {
-		heartbeatAt := time.Now().UTC()
-
-		err = stateRepository.UpdateDaemonHeartbeat(ctx, heartbeatAt)
-		if err != nil {
-			return daemonForegroundLoopResult{}, err
+		if err := runner.iteration(ctx, registry, index, &result); err != nil {
+			return result, err
 		}
 
-		stopRequested, err := daemonStopRequested(ctx, stateRepository)
-		if err != nil {
-			return daemonForegroundLoopResult{}, err
-		}
-
-		if stopRequested {
-			result.StopRequested = true
-
+		if result.StopRequested {
 			break
-		}
-
-		projects, err := core.LoadDaemonProjects(ctx, registry)
-		if err != nil {
-			return daemonForegroundLoopResult{}, err
-		}
-
-		result.Iterations++
-		result.ProjectsLoaded += len(projects)
-
-		err = refreshDaemonProjects(ctx, index, projects, &result)
-		if err != nil {
-			return daemonForegroundLoopResult{}, err
 		}
 	}
 
@@ -374,12 +359,21 @@ func refreshDaemonProjects(
 			ProjectID:  project.Project.ID,
 		}
 
-		err := refreshProjectTicketIndex(ctx, index, projectContext)
+		config, err := core.LoadWorkspaceConfig(project.Project.Path)
 		if err != nil {
 			return err
 		}
 
 		result.ProjectsReady++
+
+		if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+			continue
+		}
+
+		if err := refreshProjectTicketIndex(ctx, index, projectContext); err != nil {
+			return err
+		}
+
 		result.ProjectsRefreshed++
 	}
 
@@ -411,6 +405,9 @@ func printDaemonForegroundLoopResult(stdout io.Writer, result daemonForegroundLo
 		fmt.Sprintf("projects_ready: %d", result.ProjectsReady),
 		fmt.Sprintf("projects_skipped: %d", result.ProjectsSkipped),
 		fmt.Sprintf("projects_refreshed: %d", result.ProjectsRefreshed),
+		fmt.Sprintf("workflows_observed: %d", result.WorkflowsObserved),
+		fmt.Sprintf("workflows_waiting: %d", result.WorkflowsWaiting),
+		fmt.Sprintf("workflow_checkpoint_steps: %d", result.WorkflowSteps),
 	}
 
 	return printDaemonLines(stdout, lines)

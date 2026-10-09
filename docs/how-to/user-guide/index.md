@@ -1012,7 +1012,28 @@ Request stop:
 chr daemon stop
 ```
 
-The daemon is a local foreground coordinator. It is not a hosted service.
+The daemon continues retained ticket-native invocations in enabled registered
+projects. First authorize the exact extent through `chr work` or a confirmed
+TUI/Web preview. Startup does not admit the ready backlog. Each project iteration
+attempts at most 16 runnable invocations and one checkpoint per invocation.
+
+Inspect or stop one retained invocation:
+
+```sh
+chr daemon workflow status --dir /path/to/project --json execution-id
+chr daemon workflow pause --dir /path/to/project execution-id
+chr daemon workflow cancel --dir /path/to/project execution-id
+chr daemon workflow resume --dir /path/to/project execution-id
+```
+
+These controls use the same lifecycle and evidence as `chr work`. Operator pauses,
+terminal cancellations and human review waits remain in place across daemon
+startup. Manual execution appears in the same status views after host validation.
+
+`daemon stop` yields between checkpoints and preserves invocation authorization.
+Use the invocation's pause/cancel control to stop its owned worker. Read
+[Daemon coordination](../../reference/daemon-coordination.md) for limits, recovery
+and coordinator state.
 
 ## Configure Notifications and Remote Command Intake
 
@@ -1044,6 +1065,11 @@ chr notify telegram poll --fixture updates.json
 Remote command intake is bounded. It stores accepted or rejected handoff records
 for supported intents such as status, loop start, ticket start, and ticket
 comment. It does not expose arbitrary shell command execution.
+
+Telegram notifications remain informational. Intake handoffs do not execute
+ticket-native work controls or grant approval. Invoke admission, continuation,
+pause/cancel and reconciliation through the CLI, TUI, Web or daemon controls;
+inspect their retained evidence to establish progress.
 
 ## Inspect and Recover Local State
 
