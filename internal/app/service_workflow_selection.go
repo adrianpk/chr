@@ -95,7 +95,7 @@ func (s service) StartBoundWorkExtent(ctx context.Context, request core.Workflow
 		return AgentWorkResult{}, err
 	}
 
-	return s.startNativeAgentWork(config, request, steps, selected)
+	return s.startNativeAgentWork(config, request, steps, "", selected)
 }
 
 // WorkflowPage is a bounded read-only dashboard projection of retained work.

@@ -51,14 +51,14 @@ func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, ident
 	return observer.ObserveWorkflowTarget(s.ctx, core.WorkflowTargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
 }
 
-func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, selected ...*core.WorkflowSelectionGuard) (core.WorkflowStartResult, error) {
+func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, restriction core.ReviewWorkflowMode, selected ...*core.WorkflowSelectionGuard) (core.WorkflowStartResult, error) {
 	target, err := s.nativeAgentWorkTarget(config)
 	if err != nil {
 		return core.WorkflowStartResult{}, err
 	}
 
 	selection.Target = target
-	request := core.WorkflowStartRequest{RequestKey: "work-entry-" + strconv.FormatInt(time.Now().UnixNano(), 10), Selection: selection}
+	request := core.WorkflowStartRequest{RequestKey: "work-entry-" + strconv.FormatInt(time.Now().UnixNano(), 10), Selection: selection, ReviewRestriction: restriction}
 
 	if len(selected) == 1 {
 		request.Selected = selected[0]
@@ -82,24 +82,35 @@ func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection cor
 	}
 
 	if found {
-		request.RequestKey, request.Selection = previous.RequestKey, previous.Selection
-		request.Policy, request.ReviewRestriction = previous.Policy, previous.ReviewRestriction
+		request, err = retainedNativeAgentWorkRequest(request, previous)
 	} else {
 		request.Selection.Target, err = s.observeNativeAgentWorkTarget(config, target)
-		if err != nil {
-			return core.WorkflowStartResult{}, err
-		}
+	}
+
+	if err != nil {
+		return core.WorkflowStartResult{}, err
 	}
 
 	return s.StartWorkflow(s.ctx, request)
 }
 
-func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, limit int, selected ...*core.WorkflowSelectionGuard) (AgentWorkResult, error) {
+func retainedNativeAgentWorkRequest(request core.WorkflowStartRequest, previous core.WorkflowInvocation) (core.WorkflowStartRequest, error) {
+	if request.ReviewRestriction != "" && request.ReviewRestriction != previous.ReviewRestriction {
+		return request, fmt.Errorf("%w: retained invocation has a different review restriction", core.ErrWorkflowConflict)
+	}
+
+	request.RequestKey, request.Selection = previous.RequestKey, previous.Selection
+	request.Policy, request.ReviewRestriction = previous.Policy, previous.ReviewRestriction
+
+	return request, nil
+}
+
+func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, limit int, restriction core.ReviewWorkflowMode, selected ...*core.WorkflowSelectionGuard) (AgentWorkResult, error) {
 	if limit < 0 || limit > core.WorkflowPageLimit {
 		return AgentWorkResult{}, fmt.Errorf("ticket authority max-iterations must contain 0..128 checkpoint steps")
 	}
 
-	started, err := s.nativeAgentWorkStart(config, selection, selected...)
+	started, err := s.nativeAgentWorkStart(config, selection, restriction, selected...)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}

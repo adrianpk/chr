@@ -56,7 +56,8 @@ skips the separate reviewer role.
 
 Defaults:
 
-- `mode`: `human_review`
+- `mode`: `human_review` when `workflow.version` is absent;
+  `trusted_auto_merge` for version one. Explicit project modes override either default.
 - `non_blocking_comment_limit`: `3`
 - `forgejo_enabled`: `true`
 - `forgejo_cli`: `tea`
@@ -64,6 +65,10 @@ Defaults:
 - `github_enabled`: `true`
 - `github_cli`: `gh`
 - `github_token_env`: `GITHUB_TOKEN`
+
+Human invocation restrictions override project modes. Publication rechecks the
+current project policy before integration. See [Workflow configuration](workflow-configuration.md)
+for version selection, precedence and effective-value reporting.
 
 Clean agentic review passes do not write ceremonial remote comments.
 
@@ -126,3 +131,6 @@ chr ticket review-mode status --dry-run
 
 The command prints the active mode, validation status, mode implications, clean
 pass remote comment policy, and non-blocking comment limit.
+
+Invalid project configuration returns a command error before review status can
+select a mode. Correct the reported key; it cannot fall back to automatic policy.

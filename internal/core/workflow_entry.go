@@ -11,11 +11,14 @@ import (
 // StartWorkflow still verifies the full frozen request and owns all mutations.
 func (s *WorkflowStore) FindWorkflowEntry(ctx context.Context, request WorkflowStartRequest) (result WorkflowInvocation, found bool, err error) {
 	request.Selection.Target.Commit = strings.Repeat("0", 40)
+	policy := request.Policy
 
 	request, err = normalizeWorkflowStart(request)
 	if err != nil {
 		return result, false, err
 	}
+
+	request.Policy = policy
 
 	err = s.withLock(ctx, func() error {
 		runs, readErr := s.repositoryWorkflowInvocations(ctx)
@@ -68,9 +71,9 @@ func (s *WorkflowStore) matchWorkflowEntry(runs []workflowInvocationFile, reques
 			continue
 		}
 
-		request.Selection.Target = run.Selection.Target
+		candidate := workflowRetainedEntryRequest(request, run.WorkflowInvocation)
 
-		hash, hashErr := workflowStartHash(request)
+		hash, hashErr := workflowStartHash(candidate)
 		if hashErr != nil {
 			return result, found, hashErr
 		}
@@ -85,4 +88,43 @@ func (s *WorkflowStore) matchWorkflowEntry(runs []workflowInvocationFile, reques
 	}
 
 	return result, found, nil
+}
+
+func workflowRetainedEntryRequest(request WorkflowStartRequest, run WorkflowInvocation) WorkflowStartRequest {
+	request.Selection.Target = run.Selection.Target
+	request.Policy = workflowRequestedRetainedPolicy(request.Policy, run.Policy, request.IncludeLaterTickets)
+
+	if request.ReviewRestriction == "" {
+		request.ReviewRestriction = run.ReviewRestriction
+	}
+
+	return request
+}
+
+func workflowRequestedRetainedPolicy(requested, policy WorkflowExecutionPolicy, later *bool) WorkflowExecutionPolicy {
+	for _, field := range []struct {
+		requested int
+		retained  *int
+	}{
+		{requested.WorkerTimeoutSeconds, &policy.WorkerTimeoutSeconds},
+		{requested.ValidationTimeoutSeconds, &policy.ValidationTimeoutSeconds},
+		{requested.MaxWorkerAttempts, &policy.MaxWorkerAttempts},
+		{requested.MaxIntegrationAttempts, &policy.MaxIntegrationAttempts},
+		{requested.CheckpointStepLimit, &policy.CheckpointStepLimit},
+	} {
+		if field.requested != 0 {
+			*field.retained = field.requested
+		}
+	}
+
+	if requested.ConfigRevision != "" {
+		policy.ConfigRevision = requested.ConfigRevision
+	}
+
+	policy.IncludeLaterTickets = requested.IncludeLaterTickets || policy.IncludeLaterTickets
+	if later != nil {
+		policy.IncludeLaterTickets = *later
+	}
+
+	return normalizeWorkflowExecutionPolicy(policy)
 }

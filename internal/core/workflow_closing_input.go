@@ -31,21 +31,22 @@ type WorkflowClosingSlice struct {
 
 // WorkflowClosingInput is the immutable member/plan/contract/target snapshot.
 type WorkflowClosingInput struct {
-	Schema         string                  `json:"schema"`
-	SetID          string                  `json:"set_id"`
-	SetRevision    uint64                  `json:"set_revision"`
-	SetSourceHash  string                  `json:"set_source_hash"`
-	ProjectID      string                  `json:"project_id"`
-	Namespace      string                  `json:"namespace"`
-	Plan           WorkflowClosingEvidence `json:"plan"`
-	ContractHash   string                  `json:"closing_contract_hash"`
-	Validation     WorkflowValidation      `json:"closing_validation"`
-	Members        []WorkflowClosingMember `json:"members"`
-	Slices         []WorkflowClosingSlice  `json:"slices"`
-	Target         WorkflowPreviewTarget   `json:"target"`
-	Branch         string                  `json:"branch"`
-	Tree           string                  `json:"tree"`
-	EvidenceHashes map[string]string       `json:"evidence_hashes"`
+	ValidationTimeoutSeconds int                     `json:"validation_timeout_seconds,omitempty"`
+	Schema                   string                  `json:"schema"`
+	SetID                    string                  `json:"set_id"`
+	SetRevision              uint64                  `json:"set_revision"`
+	SetSourceHash            string                  `json:"set_source_hash"`
+	ProjectID                string                  `json:"project_id"`
+	Namespace                string                  `json:"namespace"`
+	Plan                     WorkflowClosingEvidence `json:"plan"`
+	ContractHash             string                  `json:"closing_contract_hash"`
+	Validation               WorkflowValidation      `json:"closing_validation"`
+	Members                  []WorkflowClosingMember `json:"members"`
+	Slices                   []WorkflowClosingSlice  `json:"slices"`
+	Target                   WorkflowPreviewTarget   `json:"target"`
+	Branch                   string                  `json:"branch"`
+	Tree                     string                  `json:"tree"`
+	EvidenceHashes           map[string]string       `json:"evidence_hashes"`
 }
 
 // WorkflowClosingReceipt retains exact inputs and host results, including an
@@ -60,6 +61,11 @@ type WorkflowClosingReceipt struct {
 }
 
 func (s *WorkflowStore) workflowClosingInput(ctx context.Context, set WorkflowRecord, request WorkflowSetClosureRequest, ports WorkflowFrontierPorts) (WorkflowClosingInput, error) {
+	seconds, err := s.workflowClosingValidationTimeout(ctx, request.InvocationID, set.Set.ClosingValidation.TimeoutSeconds)
+	if err != nil {
+		return WorkflowClosingInput{}, err
+	}
+
 	target, err := s.observeWorkflowClosingTarget(ctx, request, ports)
 	if err != nil {
 		return WorkflowClosingInput{}, err
@@ -71,6 +77,7 @@ func (s *WorkflowStore) workflowClosingInput(ctx context.Context, set WorkflowRe
 	}
 
 	input := WorkflowClosingInput{Schema: "chr-set-closing-input/v1", SetID: set.ID, SetRevision: set.Revision, SetSourceHash: set.SourceHash, ProjectID: set.ProjectID, Namespace: set.Namespace, Plan: WorkflowClosingEvidence{Ref: set.Set.PlanRef, Hash: set.Set.PlanHash}, Validation: set.Set.ClosingValidation, ContractHash: workflowHash(contract), Target: target, Branch: request.Branch, EvidenceHashes: map[string]string{set.Set.PlanRef: set.Set.PlanHash}}
+	input.ValidationTimeoutSeconds = seconds
 	reader := workflowProofReader{store: s}
 
 	input.Tree, err = reader.gitOutput(ctx, "rev-parse", "--verify", target.Commit+"^{tree}")

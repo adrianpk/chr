@@ -19,7 +19,7 @@ func TestWorkflowReviewChangedInputs(t *testing.T) {
 			workflowReviewConfig(t, s, ReviewWorkflowModeTrustedAutoMerge)
 		}},
 		{"method", func(t *testing.T, s *WorkflowStore, _ WorkflowInvocation, _ *workflowReviewProviderFixture) {
-			workflowReviewWrite(t, filepath.Join(s.layout.Root(), "config.yml"), []byte("review:\n  mode: human_review\nwork:\n  merge_strategy: squash\n"))
+			workflowReviewWrite(t, UserPath(s.layout.ProjectDir(), "config.yml"), []byte("review:\n  mode: human_review\nwork:\n  merge_strategy: squash\n"))
 		}},
 		{"target", func(_ *testing.T, _ *WorkflowStore, _ WorkflowInvocation, p *workflowReviewProviderFixture) {
 			p.target = strings.Repeat("b", 40)

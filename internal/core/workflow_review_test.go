@@ -2,8 +2,6 @@ package core
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -41,10 +39,8 @@ func workflowReviewFixture(t *testing.T, mode ReviewWorkflowMode) (*WorkflowStor
 func workflowReviewConfig(t *testing.T, store *WorkflowStore, mode ReviewWorkflowMode) {
 	t.Helper()
 
-	body := "review:\n  mode: " + string(mode) + "\nwork:\n  merge_strategy: rebase\n"
-	if err := os.WriteFile(filepath.Join(store.layout.Root(), "config.yml"), []byte(body), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "review", "mode", string(mode))
+	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "merge_strategy", "rebase")
 }
 
 func workflowReviewWorker(decision, key, before string) []string {

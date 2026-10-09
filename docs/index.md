@@ -70,6 +70,7 @@ Exact contracts and command behavior:
 - [Ticket execution](reference/ticket-execution.md)
 - [Workflow execution](reference/workflow-execution.md)
 - [Workflow controls](reference/workflow-controls.md)
+- [Workflow configuration](reference/workflow-configuration.md)
 - [Ticket loop](reference/ticket-loop.md)
 - [Ticket result application](reference/ticket-result-application.md)
 - [Ticket status](reference/ticket-status.md)

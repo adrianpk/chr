@@ -20,6 +20,10 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   host validation before progress advances. The daemon continues retained
   authorization with the same lifecycle and status; startup preserves operator
   stops and human approval waits without admitting the ready backlog.
+- Workflow configuration can select versioned defaults, report effective values
+  and their sources, and retain human approval restrictions for native work.
+  Invalid policy blocks execution; admission freezes execution limits while
+  publication rechecks current project policy.
 - Ticket-native work can run up to eight independent lanes in parallel when
   configured, with one worker by default. Ordered work and target publication
   remain serialized, and capacity waits retain progress for retry.

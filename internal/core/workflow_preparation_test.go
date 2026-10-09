@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -52,9 +51,7 @@ func newWorkflowPreparationFixture(t *testing.T, method string, gate WorkflowVal
 	}
 
 	config := "review:\n  mode: trusted_auto_merge\nwork:\n  merge_strategy: " + method + "\n"
-	if err := os.WriteFile(filepath.Join(store.layout.Root(), "config.yml"), []byte(config), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	writeWorkspaceConfig(t, store.layout.ProjectDir(), config)
 
 	repo := request.Selection.Target.Repository
 	pr := WorkflowPullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: commit, State: "open"}

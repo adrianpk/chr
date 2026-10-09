@@ -4,7 +4,9 @@
 shared workflow service. Explicit extents require `work.state_authority: tickets`
 in `.chr/default/config.yml`. The configured integration branch and canonical
 remote identify the target; the remote must have a public HTTPS repository URL.
-The compatibility default remains `tracker_compat` until explicitly changed.
+Projects without `workflow.version` retain `tracker_compat`; version one selects
+`tickets`. See [Workflow configuration](workflow-configuration.md) for policy
+sources and `chr work config`.
 
 ## Explicit extents
 
@@ -28,6 +30,10 @@ chr work slice-set --preview --offset 2 --limit 2 --snapshot <hash> 00001-delive
 chr work slice --max-steps 1 slice-1
 chr work loose --preview --priority high --tag backend --order priority_severity
 ```
+
+Add `--human-review` when admitting an extent to retain a human approval
+restriction. It cannot enable automatic review or change the restriction of an
+existing invocation.
 
 Execution requires offset zero. `--max-steps` accepts 0–128; zero uses the
 retained continuation limit. The requested step bound cannot exceed that frozen

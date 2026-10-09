@@ -1,17 +1,14 @@
 package core
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"slices"
 )
 
 func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (WorkflowReviewPolicy, error) {
-	data, err := readWorkflowFile(filepath.Join(s.layout.Root(), "config.yml"))
+	data, err := readWorkflowFile(UserPath(s.layout.ProjectDir(), "config.yml"))
 	if errors.Is(err, os.ErrNotExist) {
 		data, err = nil, nil
 	}
@@ -33,36 +30,19 @@ func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (Workfl
 }
 
 func parseWorkflowReviewPolicy(data []byte) (WorkflowReviewPolicy, error) {
-	policy := WorkflowReviewPolicy{Mode: DefaultReviewWorkflowMode, Method: TicketMergeStrategyRebase, Source: "legacy_default", Revision: workflowHash(data)}
-	scanner := bufio.NewScanner(bytes.NewReader(data))
-
-	section := ""
-	for scanner.Scan() {
-		key, value, next, ok := parseWorkspaceConfigLine(scanner.Text(), section)
-		section = next
-
-		if !ok {
-			continue
-		}
-
-		if section == "review" && key == "mode" {
-			policy.Mode, policy.Source = ReviewWorkflowMode(value), "project"
-		}
-
-		if section == "work" && key == "merge_strategy" {
-			policy.Method = value
-		}
+	config, err := parseWorkflowConfig(data)
+	if err != nil {
+		return WorkflowReviewPolicy{}, err
 	}
 
-	if err := scanner.Err(); err != nil {
-		return policy, fmt.Errorf("read current workflow policy: %w", err)
-	}
+	value := workflowConfigurationValue(config, "review.mode", string(config.Review.Mode))
+	policy := WorkflowReviewPolicy{Mode: config.Review.Mode, Method: config.Work.MergeStrategy, Source: value.Source, Revision: config.workflowRevision}
 
 	return policy, validateWorkflowReviewPolicy(policy)
 }
 
 func validateWorkflowReviewPolicy(policy WorkflowReviewPolicy) error {
-	if !IntegrationCycleMode(policy.Mode).Valid() || !slices.Contains([]string{"merge", "rebase", "squash"}, policy.Method) || !slices.Contains([]string{"legacy_default", "project", "invocation_restriction"}, policy.Source) || len(policy.Revision) != 64 {
+	if !IntegrationCycleMode(policy.Mode).Valid() || !slices.Contains([]string{"merge", "rebase", "squash"}, policy.Method) || !slices.Contains([]string{"legacy_default", "version_default", "project", "invocation_restriction"}, policy.Source) || len(policy.Revision) != 64 {
 		return fmt.Errorf("invalid current workflow review policy")
 	}
 

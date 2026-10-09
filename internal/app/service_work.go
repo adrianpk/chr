@@ -100,7 +100,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 	}
 
 	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
-		return s.startNativeAgentWork(config, core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: ticketKey}}, 0)
+		return s.startNativeAgentWork(config, core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: ticketKey}}, 0, "")
 	}
 
 	result, err := s.startLegacyAgentWorkTicket(ticketKey)
@@ -204,7 +204,7 @@ func (s service) StartAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkRe
 	}
 
 	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
-		return s.startNativeAgentWork(config, nativeAgentWorkSelection(opts), opts.MaxIterations)
+		return s.startNativeAgentWork(config, nativeAgentWorkSelection(opts), opts.MaxIterations, "")
 	}
 
 	if err := s.ensureAgentWorkRuntime(); err != nil {

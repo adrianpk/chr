@@ -110,6 +110,8 @@ func (s *WorkflowStore) saveWorkflowTaskInput(run workflowInvocationFile, input 
 func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInput) (workflowPreparedTask, workflowFileChange, error) {
 	var err error
 
+	input.ValidationTimeoutSeconds = run.Policy.ValidationTimeoutSeconds
+
 	input.ScopeHash, err = workflowExecutionScopeHash(*run)
 	if err != nil {
 		return workflowPreparedTask{}, workflowFileChange{}, err

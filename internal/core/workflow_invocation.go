@@ -13,20 +13,23 @@ import (
 
 // WorkflowExecutionPolicy freezes finite execution limits at admission.
 type WorkflowExecutionPolicy struct {
-	IncludeLaterTickets    bool `json:"include_later_tickets,omitempty"`
-	WorkerTimeoutSeconds   int  `json:"worker_timeout_seconds"`
-	MaxWorkerAttempts      int  `json:"max_worker_attempts"`
-	MaxIntegrationAttempts int  `json:"max_integration_attempts,omitempty"`
-	CheckpointStepLimit    int  `json:"checkpoint_step_limit,omitempty"`
+	ConfigRevision           string `json:"config_revision,omitempty"`
+	ValidationTimeoutSeconds int    `json:"validation_timeout_seconds,omitempty"`
+	IncludeLaterTickets      bool   `json:"include_later_tickets,omitempty"`
+	WorkerTimeoutSeconds     int    `json:"worker_timeout_seconds"`
+	MaxWorkerAttempts        int    `json:"max_worker_attempts"`
+	MaxIntegrationAttempts   int    `json:"max_integration_attempts,omitempty"`
+	CheckpointStepLimit      int    `json:"checkpoint_step_limit,omitempty"`
 }
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
 type WorkflowStartRequest struct {
-	Selected          *WorkflowSelectionGuard `json:"-"`
-	RequestKey        string
-	Selection         WorkflowPreviewRequest
-	Policy            WorkflowExecutionPolicy
-	ReviewRestriction ReviewWorkflowMode `json:"review_restriction,omitempty"`
+	IncludeLaterTickets *bool                   `json:"include_later_tickets_override,omitempty"`
+	Selected            *WorkflowSelectionGuard `json:"-"`
+	RequestKey          string
+	Selection           WorkflowPreviewRequest
+	Policy              WorkflowExecutionPolicy
+	ReviewRestriction   ReviewWorkflowMode `json:"review_restriction,omitempty"`
 }
 
 // WorkflowMember retains admission facts and the latest accepted owned image.
@@ -132,12 +135,21 @@ type WorkflowStartResult struct {
 
 // StartWorkflow freezes membership once; retries attach without launching work.
 func (s *WorkflowStore) StartWorkflow(ctx context.Context, request WorkflowStartRequest) (result WorkflowStartResult, err error) {
+	requestedPolicy := request.Policy
+
 	request, err = normalizeWorkflowStart(request)
 	if err != nil {
 		return result, err
 	}
 
 	err = s.withLock(ctx, func() error {
+		policy, resolveErr := s.resolveWorkflowExecutionPolicy(ctx, request.RequestKey, requestedPolicy, request.IncludeLaterTickets)
+		if resolveErr != nil {
+			return resolveErr
+		}
+
+		request.Policy = policy
+
 		if err := s.checkWorkflowSelectionGuard(ctx, request); err != nil {
 			return err
 		}
@@ -204,10 +216,17 @@ func validWorkflowRequestKey(key string) bool {
 }
 
 func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {
-	return policy.WorkerTimeoutSeconds >= 1 && policy.WorkerTimeoutSeconds <= 86400 && policy.MaxWorkerAttempts >= 1 && policy.MaxWorkerAttempts <= 128 && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit
+	return validWorkflowWorkerPolicy(policy) && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit && (policy.ConfigRevision == "" || len(policy.ConfigRevision) == 64)
+}
+
+func validWorkflowWorkerPolicy(policy WorkflowExecutionPolicy) bool {
+	return policy.WorkerTimeoutSeconds >= 1 && policy.WorkerTimeoutSeconds <= 86400 && policy.MaxWorkerAttempts >= 1 && policy.MaxWorkerAttempts <= 128 && policy.ValidationTimeoutSeconds >= 0 && policy.ValidationTimeoutSeconds <= 86400
 }
 
 func workflowStartHash(request WorkflowStartRequest) (string, error) {
+	// The resolved policy retains the override's value, so retries and durable
+	// reconstruction bind that value rather than a transport-only pointer.
+	request.IncludeLaterTickets = nil
 	request.RequestKey = ""
 	request.Selection.SnapshotHash = ""
 	data, err := json.Marshal(request)

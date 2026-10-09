@@ -116,6 +116,32 @@ Apply safe repair when Chryso reports one:
 chr work doctor --fix-safe
 ```
 
+## Inspect Workflow Policy
+
+Inspect project workflow defaults and explicit values before starting work:
+
+```sh
+chr work config
+chr work config --json
+```
+
+The nested `workflow.version: 1` marker selects tickets authority, isolated
+worktrees and trusted automatic review, with one active worker. Projects without
+that marker retain legacy defaults and explicit policy. Reading the config does
+not upgrade a project. See [Workflow configuration](../../reference/workflow-configuration.md)
+for accepted keys, bounds and value sources.
+
+To require human approval for a native invocation under automatic project policy,
+start its extent with `--human-review`:
+
+```sh
+chr work slice --human-review slice-1
+```
+
+That restriction stays with the retained invocation. Execution limits freeze at
+admission; publication rechecks the current project policy and exact approval
+binding.
+
 ## Register and Select Projects
 
 Register a managed project:

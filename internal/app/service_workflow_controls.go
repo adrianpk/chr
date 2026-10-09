@@ -78,8 +78,13 @@ func (s service) workflowExtentConfig() (core.WorkspaceConfig, error) {
 }
 
 // StartWorkExtent delegates admission and bounded execution to the common owner.
-func (s service) StartWorkExtent(ctx context.Context, request core.WorkflowPreviewRequest, steps int) (AgentWorkResult, error) {
+func (s service) StartWorkExtent(ctx context.Context, request core.WorkflowPreviewRequest, steps int, restrictions ...core.ReviewWorkflowMode) (AgentWorkResult, error) {
 	s.ctx = ctx
+
+	restriction, err := workflowInvocationRestriction(restrictions)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
 
 	config, err := s.workflowExtentConfig()
 	if err != nil {
@@ -98,7 +103,7 @@ func (s service) StartWorkExtent(ctx context.Context, request core.WorkflowPrevi
 		return AgentWorkResult{}, err
 	}
 
-	return s.startNativeAgentWork(config, request, steps)
+	return s.startNativeAgentWork(config, request, steps, restriction)
 }
 
 // ContinueWorkExtent retains the invocation's selector, target and budgets.
@@ -124,4 +129,16 @@ func (s service) ContinueWorkExtent(ctx context.Context, id string, steps int, e
 	}
 
 	return s.ContinueWorkflow(ctx, id, request, worker)
+}
+
+func workflowInvocationRestriction(restrictions []core.ReviewWorkflowMode) (core.ReviewWorkflowMode, error) {
+	if len(restrictions) == 0 {
+		return "", nil
+	}
+
+	if len(restrictions) != 1 || restrictions[0] != "" && restrictions[0] != core.ReviewWorkflowModeHumanReview {
+		return "", fmt.Errorf("an invocation may restrict review to human_review only")
+	}
+
+	return restrictions[0], nil
 }

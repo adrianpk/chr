@@ -45,6 +45,7 @@ func workWorkflowExtentFlags(loose bool) []cli.Flag {
 		&cli.IntFlag{Name: "limit", Value: core.WorkflowPageLimit, Usage: "preview page size, 1..128"},
 		&cli.StringFlag{Name: "snapshot", Usage: "exact preview snapshot for pagination or admission"},
 		&cli.IntFlag{Name: "max-steps", Usage: "bounded continuation steps, 0 uses the retained limit"},
+		&cli.BoolFlag{Name: "human-review", Usage: "require exact human approval for this invocation"},
 	)
 	if !loose {
 		return flags
@@ -95,7 +96,12 @@ func (adapter workWorkflowCLI) extent(ctx context.Context, cmd *cli.Command, ope
 		return adapter.preview(cmd, preview)
 	}
 
-	result, err := operations.StartWorkExtent(ctx, request, cmd.Int("max-steps"))
+	restriction := core.ReviewWorkflowMode("")
+	if cmd.Bool("human-review") {
+		restriction = core.ReviewWorkflowModeHumanReview
+	}
+
+	result, err := operations.StartWorkExtent(ctx, request, cmd.Int("max-steps"), restriction)
 	if result.Workflow != nil {
 		err = errors.Join(err, adapter.status(ctx, cmd, operations, result.Workflow.ID, cmd.Name))
 	}

@@ -5731,7 +5731,9 @@ func TestTicketReviewModeStatusPrintsConfiguredModes(t *testing.T) {
 	}
 }
 
-func TestTicketReviewModeStatusPrintsInvalidMode(t *testing.T) {
+// TestTicketReviewModeInvalid keeps malformed project policy from falling back
+// to a valid review mode during command configuration loading.
+func TestTicketReviewModeInvalid(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	devRoot := t.TempDir()
 
@@ -5751,18 +5753,8 @@ func TestTicketReviewModeStatusPrintsInvalidMode(t *testing.T) {
 		"--dir",
 		projectDir,
 	}, &stdout, &bytes.Buffer{})
-	if err != nil {
-		t.Fatalf("ticket review-mode status returned error: %v", err)
-	}
-
-	for _, want := range []string{
-		"mode: unknown",
-		"mode_status: invalid",
-		"error: invalid review workflow mode: unknown",
-	} {
-		if !strings.Contains(stdout.String(), want) {
-			t.Fatalf("stdout does not contain %q:\n%s", want, stdout.String())
-		}
+	if err == nil || !strings.Contains(err.Error(), "unsupported review.mode") {
+		t.Fatalf("invalid review configuration was accepted: %v", err)
 	}
 }
 

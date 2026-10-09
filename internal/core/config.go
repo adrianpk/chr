@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 // WorkspaceConfig describes a package boundary value.
 type WorkspaceConfig struct {
+	Workflow        WorkflowConfig
 	TicketKeyPrefix string
 	Runtime         RuntimeConfig
 	Notifications   NotificationConfig
@@ -18,6 +20,9 @@ type WorkspaceConfig struct {
 	Work            WorkConfig
 	Evidence        EvidenceConfig
 	Web             WebConfig
+
+	workflowExplicit map[string]bool
+	workflowRevision string
 }
 
 // RuntimeConfig describes a package boundary value.
@@ -74,11 +79,18 @@ type ReviewProviderTargetConfig struct {
 
 // WorkConfig describes a package boundary value.
 type WorkConfig struct {
-	MaxActiveWorkers   int
-	ReadyQueueCapacity int
-	StateAuthority     WorkStateAuthority
-	BranchPolicy       WorkBranchPolicy
-	Workspace          WorkWorkspaceConfig
+	MergeStrategy            string
+	WorkerTimeoutSeconds     int
+	ValidationTimeoutSeconds int
+	CheckpointStepLimit      int
+	IncludeLaterTickets      bool
+	MaxWorkerAttempts        int
+	MaxIntegrationAttempts   int
+	MaxActiveWorkers         int
+	ReadyQueueCapacity       int
+	StateAuthority           WorkStateAuthority
+	BranchPolicy             WorkBranchPolicy
+	Workspace                WorkWorkspaceConfig
 }
 
 // EvidenceConfig describes a package boundary value.
@@ -306,10 +318,15 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 // DefaultWorkConfig executes the corresponding package operation.
 func DefaultWorkConfig() WorkConfig {
 	return WorkConfig{
-		MaxActiveWorkers:   1,
-		ReadyQueueCapacity: 64,
-		BranchPolicy:       DefaultWorkBranchPolicy(),
-		Workspace:          DefaultWorkWorkspaceConfig(),
+		MergeStrategy:          TicketMergeStrategyRebase,
+		WorkerTimeoutSeconds:   3600,
+		CheckpointStepLimit:    WorkflowPageLimit,
+		MaxWorkerAttempts:      3,
+		MaxIntegrationAttempts: 3,
+		MaxActiveWorkers:       1,
+		ReadyQueueCapacity:     64,
+		BranchPolicy:           DefaultWorkBranchPolicy(),
+		Workspace:              DefaultWorkWorkspaceConfig(),
 	}
 }
 
@@ -357,8 +374,8 @@ func DefaultWorkWorkspaceConfig() WorkWorkspaceConfig {
 }
 
 // LoadWorkspaceConfig loads the corresponding package data.
-func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
-	config := WorkspaceConfig{
+func defaultWorkspaceConfig() WorkspaceConfig {
+	return WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,
 		Runtime:         DefaultRuntimeConfig(),
 		Notifications:   DefaultNotificationConfig(),
@@ -367,6 +384,11 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 		Evidence:        DefaultEvidenceConfig(),
 		Web:             DefaultWebConfig(),
 	}
+}
+
+// LoadWorkspaceConfig resolves explicit values over versioned defaults.
+func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
+	config := defaultWorkspaceConfig()
 	path := UserPath(projectDir, "config.yml")
 
 	file, err := os.Open(path)
@@ -392,7 +414,23 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 }
 
 func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
-	scanner := bufio.NewScanner(file)
+	data, err := io.ReadAll(io.LimitReader(file, WorkflowFileLimit+1))
+	if err != nil {
+		return fmt.Errorf("read workspace config: %w", err)
+	}
+
+	resolved, err := parseWorkflowConfig(data)
+	if err != nil {
+		return err
+	}
+
+	*config = resolved
+
+	return nil
+}
+
+func applyWorkspaceConfig(data []byte, config *WorkspaceConfig) error {
+	scanner := bufio.NewScanner(strings.NewReader(string(data)))
 	section := ""
 
 	for scanner.Scan() {

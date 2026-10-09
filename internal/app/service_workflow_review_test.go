@@ -2,8 +2,6 @@ package app
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -38,14 +36,7 @@ func TestServiceWorkflowReview(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := os.WriteFile(filepath.Join(layout.Root(), "config.yml"), []byte("review:\n  mode: agentic_review\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "review:\n  mode: agentic_review\n")
 
 	if _, err := operations.CheckWorkflowReviewGrant(t.Context(), id); err == nil {
 		t.Fatal("shared service reused approval after policy change")

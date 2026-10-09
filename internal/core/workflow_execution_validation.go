@@ -21,7 +21,9 @@ func (s *WorkflowStore) validateWorkflowTask(ctx context.Context, claim *Workflo
 		return s.checkWorkflowValidationImage(ctx, claim, prepared, *result)
 	}
 
-	validationContext, cancel := context.WithTimeout(ctx, time.Duration(gate.TimeoutSeconds)*time.Second)
+	seconds := workflowValidationTimeout(gate.TimeoutSeconds, prepared.input.ValidationTimeoutSeconds)
+
+	validationContext, cancel := context.WithTimeout(ctx, time.Duration(seconds)*time.Second)
 	defer cancel()
 
 	for _, command := range gate.Commands {

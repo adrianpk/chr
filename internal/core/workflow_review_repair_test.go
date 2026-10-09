@@ -126,7 +126,7 @@ func testWorkflowReviewDuringIO(t *testing.T, name, before string) {
 
 	worker := workflowReviewWorker("pass", "", before)
 	if name == "policy" {
-		worker = append(worker, filepath.Join(store.layout.Root(), "config.yml"))
+		worker = append(worker, UserPath(store.layout.ProjectDir(), "config.yml"))
 	}
 
 	if name == "invalid pass" {

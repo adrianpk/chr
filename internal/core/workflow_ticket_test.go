@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -133,10 +132,7 @@ func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup 
 		t.Fatal(err)
 	}
 
-	config := "review:\n  mode: trusted_auto_merge\nwork:\n  merge_strategy: " + method + "\n"
-	if err := os.WriteFile(filepath.Join(store.layout.Root(), "config.yml"), []byte(config), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	workflowTicketReviewConfig(t, store, method, ReviewWorkflowModeTrustedAutoMerge)
 
 	pr := WorkflowPullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
 	provider := &workflowPreparationProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}, target: pr.BaseCommit}, guarded: true, revision: "guard-v1"}
@@ -252,10 +248,8 @@ func checkWorkflowTicketCombinedGate(t *testing.T, store *WorkflowStore, f workf
 func workflowTicketReviewConfig(t *testing.T, store *WorkflowStore, method string, mode ReviewWorkflowMode) {
 	t.Helper()
 
-	config := "review:\n  mode: " + string(mode) + "\nwork:\n  merge_strategy: " + method + "\n"
-	if err := os.WriteFile(filepath.Join(store.layout.Root(), "config.yml"), []byte(config), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "review", "mode", string(mode))
+	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "merge_strategy", method)
 }
 
 func workflowTicketReceiptMatches(record *WorkflowRecord, unit WorkflowRef, method string) bool {

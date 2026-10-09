@@ -109,7 +109,9 @@ func (s *WorkflowStore) prepareWorkflowClosing(ctx context.Context, set Workflow
 	worker.AttemptID = fmt.Sprintf("%s-attempt-%d", worker.InvocationID, generation)
 
 	data = append(data, '\n')
-	state := workflowClosingAttempt{Schema: "chr-set-closing-attempt/v1", SetID: set.ID, Generation: generation, BudgetID: workflowClosingBudgetID(set, request.InvocationID), OwnerRoot: s.layout.Root(), Owner: owner, InvocationID: request.InvocationID, TokenHash: workflowHash([]byte(worker.Token)), Outcome: "running", LeaseUntil: time.Now().UTC().Add(workflowClosingLeaseSeconds(input.Validation)), Input: WorkflowClosingEvidence{Ref: workflowClosingFile(set.ID, generation, "input.json"), Hash: workflowHash(data)}}
+	lease := input.Validation
+	lease.TimeoutSeconds = input.ValidationTimeoutSeconds
+	state := workflowClosingAttempt{Schema: "chr-set-closing-attempt/v1", SetID: set.ID, Generation: generation, BudgetID: workflowClosingBudgetID(set, request.InvocationID), OwnerRoot: s.layout.Root(), Owner: owner, InvocationID: request.InvocationID, TokenHash: workflowHash([]byte(worker.Token)), Outcome: "running", LeaseUntil: time.Now().UTC().Add(workflowClosingLeaseSeconds(lease)), Input: WorkflowClosingEvidence{Ref: workflowClosingFile(set.ID, generation, "input.json"), Hash: workflowHash(data)}}
 	state.CapacitySlot = workflowWorkerSlotNumber(worker.reservation.Name())
 
 	return &workflowClosingClaim{worker: worker, set: set, state: state, input: input, data: data}, nil
