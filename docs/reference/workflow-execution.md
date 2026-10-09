@@ -403,11 +403,45 @@ they return the same receipt without another write, worker or provider call.
 Concurrent callers serialize and share that same result. An edited proof or
 receipt, changed target proof or member image blocks finalization.
 
-The invocation completes when its selected members end at this slice. A broader
+An exact slice invocation completes at receipt finalization. A broader
 set/use-case invocation retains its current slice receipt barrier and leaves
-later members untouched. Slice finalization does not close the owning set.
+later members untouched, including when its last slice is integrated.
+Slice finalization does not close the owning set.
 The complete multi-image journal remains subject to the 1 MiB transition bound;
 an oversized fan-out fails before any task completion write.
+
+## Ordered integration frontier
+
+`AdvanceWorkflowFrontier` releases one finalized slice of a retained set or
+use-case invocation. A task-validation result, merged PR or host delivery proof
+without completed receipt finalization cannot release this barrier. Unsliced
+use-case tickets remain excluded from the original selection.
+
+The host observes the exact canonical repository and target branch, imports
+its commit objects into the host repository without moving the checkout or
+branch, and verifies the retained PR result against that current target. It
+rechecks canonical branch, method-specific history, receipt, candidate and
+frozen task/set images before journaling the release. Changed target history,
+missing proof or stopped invocation blocks continuation. The operation has a
+three-minute shared deadline and retains repository mutation exclusion.
+
+An immutable `chr-unit-frontier/v1` image retains the unit's lane, candidate,
+PR, delivery proof, receipt and fresh canonical target proof. The invocation's
+`integrated_units` binds each image by reference and hash; `confirmed_cursor`
+records receipt-finalized work. The original selection, request identity and
+policy stay frozen. `execution_target` supplies the fresh base for later lanes.
+Active slice bindings clear atomically with the retained image and cursor.
+Restart reuses that checkpoint without restoring the previous active PR or
+repeating workers. Task, aggregate and provider observation evidence remains
+immutable and is checked before later work.
+
+Each later slice owns a distinct cumulative lane and canonical PR binding.
+PR observation files are scoped by binding, with the existing 128-observation
+bound per binding; prior observation paths remain readable. The next slice in
+the same set becomes `pending` after release. A set boundary, including the
+last selected set, enters `waiting_integration` with outcome
+`set_closure_required`. Claiming another task remains blocked until closing
+validation releases that separate barrier.
 
 ## Manual protocol
 

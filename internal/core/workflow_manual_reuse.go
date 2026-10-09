@@ -61,7 +61,7 @@ func (s *WorkflowStore) checkWorkflowManualProof(ctx context.Context, run workfl
 		return result, err
 	}
 
-	request := run.Selection
+	request := run.ExecutionSelection()
 	request.CumulativeBranch, request.CumulativeCommit = candidate.Branch, candidate.Commit
 
 	reader := workflowProofReader{store: s, request: request}

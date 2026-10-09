@@ -21,7 +21,7 @@ func (s *WorkflowStore) workflowPrerequisiteImages(ctx context.Context, run work
 		return nil, nil, fmt.Errorf("workflow prerequisite bounds exceeded")
 	}
 
-	request := run.Selection
+	request := run.ExecutionSelection()
 	request.CumulativeBranch, request.CumulativeCommit = run.Lane.Branch, run.Lane.HeadCommit
 	reader := workflowProofReader{store: s, selection: selection, request: request, observations: map[workflowProofKey]string{}}
 	images := []WorkflowInputImage{}

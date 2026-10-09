@@ -133,7 +133,7 @@ func checkWorkflowSliceCandidateBinding(run workflowInvocationFile, observation 
 }
 
 func workflowSliceCandidateMatchesRun(run workflowInvocationFile, candidate WorkflowSliceCandidate) bool {
-	return candidate.Schema == "chr-slice-candidate/v1" && candidate.InvocationID == run.ID && candidate.Target == run.Selection.Target && candidate.Lane == *run.Lane && candidate.Slice.Unit == run.Lane.Unit
+	return candidate.Schema == "chr-slice-candidate/v1" && candidate.InvocationID == run.ID && candidate.Target == run.ExecutionSelection().Target && candidate.Lane == *run.Lane && candidate.Slice.Unit == run.Lane.Unit
 }
 
 func workflowSliceCandidateMatchesContract(observation workflowSliceObservation, input WorkflowSliceInput) bool {

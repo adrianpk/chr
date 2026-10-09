@@ -74,7 +74,7 @@ func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflow
 func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string) (WorkflowTaskInput, error) {
 	attempt := run.Attempts[len(run.Attempts)-1]
 
-	input := WorkflowTaskInput{Schema: "chr-task-input/v1", InvocationID: run.ID, AttemptID: attempt.ID, Generation: attempt.Generation, TaskKey: record.Task.Key, InputRevision: attempt.InputRevision, SourceHash: record.SourceHash, ContractHash: record.Task.ContractHash, Body: string(record.Body), Target: run.Selection.Target, Lane: *run.Lane, Worker: slices.Clone(worker)}
+	input := WorkflowTaskInput{Schema: "chr-task-input/v1", InvocationID: run.ID, AttemptID: attempt.ID, Generation: attempt.Generation, TaskKey: record.Task.Key, InputRevision: attempt.InputRevision, SourceHash: record.SourceHash, ContractHash: record.Task.ContractHash, Body: string(record.Body), Target: run.ExecutionSelection().Target, Lane: *run.Lane, Worker: slices.Clone(worker)}
 	if err := json.Unmarshal(record.Domain["execution_contract"], &input.Contract); err != nil {
 		return input, err
 	}

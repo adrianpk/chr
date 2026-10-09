@@ -1,0 +1,75 @@
+package core
+
+import (
+	"encoding/json"
+	"fmt"
+	"path/filepath"
+)
+
+func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, target WorkflowPreviewTarget, proof WorkflowIntegrationProof) error {
+	delivery := workflowUnitDelivery(*run, target, proof)
+
+	data, err := encodeWorkflowUnitDelivery(delivery)
+	if err != nil {
+		return err
+	}
+
+	delivery.EvidenceRef = workflowFrontierEvidencePath(run.ID, delivery.Cursor)
+	delivery.EvidenceHash = workflowHash(data)
+	run.Deliveries = append(run.Deliveries, delivery)
+	run.ExecutionTarget = &target
+	run.ConfirmedCursor = run.Cursor
+	clearWorkflowSliceBindings(run)
+
+	run.Status, run.Outcome, run.ResumeStatus, run.Blocker = "pending", "slice_integrated", "", nil
+	if run.Cursor == len(run.Members) || run.Members[run.Cursor].Admission.SetID != delivery.SetID {
+		run.Status, run.Outcome = "waiting_integration", "set_closure_required"
+	}
+
+	return s.commitWorkflowPullRequestFiles(run, nil, workflowFileChange{Path: delivery.EvidenceRef, After: data})
+}
+
+func workflowUnitDelivery(run workflowInvocationFile, target WorkflowPreviewTarget, proof WorkflowIntegrationProof) WorkflowUnitDelivery {
+	return WorkflowUnitDelivery{
+		Schema: "chr-unit-frontier/v1", InvocationID: run.ID, Unit: run.Lane.Unit,
+		SetID: run.Members[run.Cursor-1].Admission.SetID, Cursor: run.Cursor,
+		Target: run.ExecutionSelection().Target, NextTarget: target, Lane: *run.Lane,
+		CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest,
+		DeliveryProofRef: run.DeliveryProofRef, DeliveryProofHash: run.DeliveryProofHash,
+		DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash,
+		Preparation: run.Preparation, Review: run.Review, Submission: run.Submission, Proof: proof,
+	}
+}
+
+func clearWorkflowSliceBindings(run *workflowInvocationFile) {
+	run.Lane, run.PullRequest, run.Preparation, run.Review, run.Submission = nil, nil, nil, nil, nil
+	run.CandidateRef, run.CandidateHash = "", ""
+	run.DeliveryProofRef, run.DeliveryProofHash = "", ""
+	run.DeliveryRef, run.DeliveryHash = "", ""
+}
+
+func encodeWorkflowUnitDelivery(delivery WorkflowUnitDelivery) ([]byte, error) {
+	delivery.EvidenceRef, delivery.EvidenceHash = "", ""
+
+	data, err := json.MarshalIndent(delivery, "", "  ")
+	if err != nil || len(data) >= WorkflowFileLimit {
+		return nil, fmt.Errorf("workflow frontier evidence exceeds file bounds: %w", errorsOrConflict(err))
+	}
+
+	return append(data, '\n'), nil
+}
+
+func workflowFrontierEvidencePath(id string, cursor int) string {
+	return filepath.ToSlash(filepath.Join("run", id, "evidence", fmt.Sprintf("frontier-%04d.json", cursor)))
+}
+
+// Known optional fields must disappear when their authoritative typed value is
+// cleared. Unknown fields survive; stale serialized PR/owner bindings must not.
+func workflowOptionalInvocationField(key string) bool {
+	switch key {
+	case "blocker", "lane", "pull_request_binding", "review_binding", "preparation_binding", "submission_binding", "review_restriction", "review_count", "review_repairs", "preparation_count", "execution_target", "confirmed_cursor", "integrated_units":
+		return true
+	default:
+		return false
+	}
+}

@@ -36,7 +36,7 @@ func (s *WorkflowStore) retainedWorkflowLane(ctx context.Context, run workflowIn
 			continue
 		}
 
-		if previous.Selection.Target.Repository != run.Selection.Target.Repository {
+		if previous.Selection.Target.Repository != run.ExecutionSelection().Target.Repository {
 			return nil, ErrWorkflowConflict
 		}
 
@@ -77,7 +77,7 @@ func (s *WorkflowStore) newWorkflowLane(run workflowInvocationFile, record Workf
 	unit := workflowTaskUnit(record)
 	id := workflowHash([]byte(run.Namespace + "\x00" + unit.Kind + "\x00" + unit.ID))[:24]
 
-	return WorkflowLane{Unit: unit, Branch: "refs/heads/chr/workflow/" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "workflow-"+id), BaseCommit: run.Selection.Target.Commit, HeadCommit: run.Selection.Target.Commit}
+	return WorkflowLane{Unit: unit, Branch: "refs/heads/chr/workflow/" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "workflow-"+id), BaseCommit: run.ExecutionSelection().Target.Commit, HeadCommit: run.ExecutionSelection().Target.Commit}
 }
 
 func (s *WorkflowStore) ensureWorkflowLane(ctx context.Context, lane WorkflowLane) error {

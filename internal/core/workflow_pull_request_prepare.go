@@ -49,7 +49,7 @@ func (s *WorkflowStore) checkWorkflowPullRequestReady(run workflowInvocationFile
 }
 
 func prepareWorkflowPullRequestBinding(run *workflowInvocationFile, observation workflowSliceObservation, candidate WorkflowSliceCandidate, request WorkflowSlicePullRequestRequest) error {
-	repository, err := workflowCanonicalRepository(run.Selection.Target.Repository)
+	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func workflowPullRequestCandidateMayAdvance(binding WorkflowPullRequestBinding, 
 
 func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descriptor WorkflowSlice, request WorkflowPullRequestRequest) error {
 	if run.PullRequest != nil {
-		if run.PullRequest.Request != request || run.PullRequest.Unit != run.Lane.Unit || run.PullRequest.TargetCommit != run.Selection.Target.Commit {
+		if run.PullRequest.Request != request || run.PullRequest.Unit != run.Lane.Unit || run.PullRequest.TargetCommit != run.ExecutionSelection().Target.Commit {
 			return fmt.Errorf("%w: retained PR request changed", ErrWorkflowConflict)
 		}
 
@@ -95,7 +95,7 @@ func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descripto
 		return ErrWorkflowConflict
 	}
 
-	run.PullRequest = &WorkflowPullRequestBinding{Schema: "chr-slice-pr/v1", ID: workflowPullRequestBindingID(*run, request.Repository), Unit: run.Lane.Unit, Request: request, TargetCommit: run.Selection.Target.Commit, State: "prepared", URL: descriptor.PullRequest}
+	run.PullRequest = &WorkflowPullRequestBinding{Schema: "chr-slice-pr/v1", ID: workflowPullRequestBindingID(*run, request.Repository), Unit: run.Lane.Unit, Request: request, TargetCommit: run.ExecutionSelection().Target.Commit, State: "prepared", URL: descriptor.PullRequest}
 	if run.PullRequest.URL != "" {
 		run.PullRequest.State = "bound"
 	}

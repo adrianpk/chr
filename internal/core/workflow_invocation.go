@@ -67,6 +67,9 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
+	ExecutionTarget *WorkflowPreviewTarget `json:"execution_target,omitempty"`
+	ConfirmedCursor int                    `json:"confirmed_cursor,omitempty"`
+	Deliveries      []WorkflowUnitDelivery `json:"integrated_units,omitempty"`
 	WorkflowIdentity
 	Schema            string                       `json:"schema"`
 	RequestKey        string                       `json:"request_key"`
@@ -394,7 +397,7 @@ func workflowInvocationChange(run workflowInvocationFile) (workflowFileChange, e
 	}
 
 	for key, raw := range run.fields {
-		if _, known := fields[key]; !known && key != "blocker" {
+		if _, known := fields[key]; !known && !workflowOptionalInvocationField(key) {
 			fields[key] = raw
 		}
 	}

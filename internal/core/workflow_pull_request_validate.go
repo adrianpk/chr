@@ -16,7 +16,7 @@ func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
 		return fmt.Errorf("invalid workflow canonical PR identity")
 	}
 
-	repository, err := workflowCanonicalRepository(run.Selection.Target.Repository)
+	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil || repository != binding.Request.Repository || !validWorkflowPullRequestContent(WorkflowSlicePullRequestRequest{BaseBranch: binding.Request.BaseBranch, Title: binding.Request.Title, Body: binding.Request.Body}) {
 		return ErrWorkflowConflict
 	}
@@ -37,7 +37,7 @@ func validWorkflowPullRequestIdentity(run workflowInvocationFile, binding Workfl
 		return false
 	}
 
-	return binding.Schema == "chr-slice-pr/v1" && binding.ID == workflowPullRequestBindingID(run, binding.Request.Repository) && binding.Unit.Kind == "slice" && binding.Unit == run.Lane.Unit && binding.TargetCommit == run.Selection.Target.Commit && binding.Request.HeadBranch == strings.TrimPrefix(run.Lane.Branch, "refs/heads/")
+	return binding.Schema == "chr-slice-pr/v1" && binding.ID == workflowPullRequestBindingID(run, binding.Request.Repository) && binding.Unit.Kind == "slice" && binding.Unit == run.Lane.Unit && binding.TargetCommit == run.ExecutionSelection().Target.Commit && binding.Request.HeadBranch == strings.TrimPrefix(run.Lane.Branch, "refs/heads/")
 }
 
 func validateWorkflowPullRequestState(binding WorkflowPullRequestBinding) error {
@@ -80,7 +80,10 @@ func validateWorkflowPullRequestObservationRef(id string, binding WorkflowPullRe
 		return nil
 	}
 
-	if binding.ObservationCount < 1 || binding.ObservationCount > WorkflowPageLimit || binding.ObservationRef != workflowPullRequestObservationPath(id, binding.ObservationCount) || len(binding.ObservationHash) != 64 {
+	legacy := workflowPullRequestObservationPath(id, binding.ObservationCount)
+
+	scoped := workflowUnitPullRequestObservationPath(id, binding.ID, binding.ObservationCount)
+	if binding.ObservationCount < 1 || binding.ObservationCount > WorkflowPageLimit || !slices.Contains([]string{legacy, scoped}, binding.ObservationRef) || len(binding.ObservationHash) != 64 {
 		return ErrWorkflowConflict
 	}
 

@@ -49,6 +49,10 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return err
 	}
 
+	if err := validateWorkflowFrontier(run); err != nil {
+		return err
+	}
+
 	return validateWorkflowInvocationBindings(run)
 }
 

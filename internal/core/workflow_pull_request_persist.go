@@ -47,7 +47,7 @@ func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFi
 
 	data = append(data, '\n')
 	binding.ObservationCount++
-	binding.ObservationRef = workflowPullRequestObservationPath(run.ID, binding.ObservationCount)
+	binding.ObservationRef = workflowUnitPullRequestObservationPath(run.ID, binding.ID, binding.ObservationCount)
 	binding.ObservationHash = workflowHash(data)
 
 	return workflowFileChange{Path: binding.ObservationRef, After: data}, nil
@@ -55,6 +55,10 @@ func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFi
 
 func workflowPullRequestObservationPath(id string, count int) string {
 	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "pull-request", "observations", fmt.Sprintf("%03d.json", count)))
+}
+
+func workflowUnitPullRequestObservationPath(id, bindingID string, count int) string {
+	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "pull-request", "observations", bindingID, fmt.Sprintf("%03d.json", count)))
 }
 
 func (s *WorkflowStore) readWorkflowPullRequestObservation(binding WorkflowPullRequestBinding) (workflowPullRequestObservation, error) {

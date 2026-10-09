@@ -76,7 +76,7 @@ func (s *WorkflowStore) readWorkflowDeliveryProof(run workflowInvocationFile) (W
 		return proof, ErrWorkflowConflict
 	}
 
-	query := WorkflowIntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: proof.Git.Method, SourceCommit: run.PullRequest.SourceCommit, SourceTree: run.PullRequest.SourceTree, OriginCommit: run.Selection.Target.Commit, ResultCommit: proof.PullRequest.ResultCommit}
+	query := WorkflowIntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: proof.Git.Method, SourceCommit: run.PullRequest.SourceCommit, SourceTree: run.PullRequest.SourceTree, OriginCommit: run.ExecutionSelection().Target.Commit, ResultCommit: proof.PullRequest.ResultCommit}
 
 	return proof, validateWorkflowIntegrationProof(query, proof.Git)
 }

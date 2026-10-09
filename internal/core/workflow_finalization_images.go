@@ -38,7 +38,8 @@ func (s *WorkflowStore) commitWorkflowSliceFinalization(ctx context.Context, run
 		return err
 	}
 
-	workflowRetainDeliveryStatus(run, "slice_integrated", run.Cursor == len(run.Members))
+	run.ConfirmedCursor = run.Cursor
+	workflowRetainDeliveryStatus(run, "slice_integrated", run.Cursor == len(run.Members) && run.Selection.Selector.Extent == "slice")
 
 	return s.commitWorkflowPullRequestFiles(run, append(files, changes...), workflowFileChange{})
 }

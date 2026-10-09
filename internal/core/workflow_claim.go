@@ -99,7 +99,7 @@ func (s *WorkflowStore) observeWorkflowClaim(ctx context.Context, run workflowIn
 		return WorkflowRecord{}, err
 	}
 
-	if err := s.checkWorkflowTarget(ctx, run.Selection.Target); err != nil {
+	if err := s.checkWorkflowTarget(ctx, run.ExecutionSelection().Target); err != nil {
 		return WorkflowRecord{}, err
 	}
 
@@ -109,7 +109,7 @@ func (s *WorkflowStore) observeWorkflowClaim(ctx context.Context, run workflowIn
 	}
 
 	member := run.Members[run.Cursor]
-	request := run.Selection
+	request := run.ExecutionSelection()
 	request.Selector = WorkflowSelector{Extent: "ticket", Identity: member.Admission.Key}
 
 	request, err = s.workflowLaneSelection(ctx, run, selection.records[member.Admission.Key], request)

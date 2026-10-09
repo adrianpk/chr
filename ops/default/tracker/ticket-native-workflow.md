@@ -39,7 +39,7 @@ ordered `make verify`, uncached core/app tests, core/app race tests and
 Its report is delivered and all four task tickets are solved. Acta records the
 canonical merge in `01M4F3YG8WEZMVZYGE4EZ7XM80`.
 Slice 7 is active for ordered slice/set/use-case traversal, durable continuation,
-membership amendments and closing validation. T7.1 is the next recorded task.
+membership amendments and closing validation. T7.1 is in progress on the dedicated Slice 7 branch.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -404,7 +404,7 @@ Plan contract: [Slice 7](../plan/ticket-native-workflow.md#slice-7-ordered-set-a
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T7.1 | [TKT-20261008141409](../ticket/ready/20261008141409-ticket-native-t7-1.md) | ready | pending | Traverse slice/set/use-case extents through the verified integration barrier. |
+| T7.1 | [TKT-20261008141409](../ticket/in_progress/20261008141409-ticket-native-t7-1.md) | in_progress | pending | Traverse slice/set/use-case extents through the verified integration barrier. |
 | T7.2 | [TKT-20261008141410](../ticket/ready/20261008141410-ticket-native-t7-2.md) | ready | pending | Persist equivalent-request identity, confirmed cursor and bounded continuation checkpoints. |
 | T7.3 | [TKT-20261008141411](../ticket/ready/20261008141411-ticket-native-t7-3.md) | ready | pending | Implement frozen/default and explicit later-admission rules, quiescent amendments and set reopening. |
 | T7.4 | [TKT-20261008141412](../ticket/ready/20261008141412-ticket-native-t7-4.md) | ready | pending | Confirm closing validation against all actual members and exact target/plan snapshots. |

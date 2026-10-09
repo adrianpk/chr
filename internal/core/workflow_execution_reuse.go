@@ -45,7 +45,7 @@ func (s *WorkflowStore) reuseWorkflowValidatedTasks(ctx context.Context, run *wo
 }
 
 func (s *WorkflowStore) reuseWorkflowTask(ctx context.Context, run *workflowInvocationFile, record WorkflowRecord) error {
-	if err := s.checkWorkflowTarget(ctx, run.Selection.Target); err != nil {
+	if err := s.checkWorkflowTarget(ctx, run.ExecutionSelection().Target); err != nil {
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (s *WorkflowStore) checkWorkflowReusableTask(ctx context.Context, run workf
 		return err
 	}
 
-	request := run.Selection
+	request := run.ExecutionSelection()
 	request.CumulativeBranch, request.CumulativeCommit = lane.Branch, lane.HeadCommit
 	reader := workflowProofReader{store: s, request: request}
 

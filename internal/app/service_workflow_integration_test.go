@@ -12,9 +12,21 @@ import (
 func serviceWorkflowDeliveryFixture(t *testing.T) (service, string, *serviceWorkflowPRFixture) {
 	t.Helper()
 
+	return serviceWorkflowDeliveryExtentFixture(t, "slice")
+}
+
+func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service, string, *serviceWorkflowPRFixture) {
+	t.Helper()
+
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
 	repository := "https://forge.example/test/repo"
-	request := core.WorkflowStartRequest{RequestKey: "external-delivery", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: core.WorkflowPreviewTarget{Repository: repository, Commit: target}}}
+
+	identity := hierarchy.Set.Set.Slices[0].ID
+	if extent == "slice_set" {
+		identity = hierarchy.Set.ID
+	}
+
+	request := core.WorkflowStartRequest{RequestKey: "external-delivery", Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: extent, Identity: identity}, Target: core.WorkflowPreviewTarget{Repository: repository, Commit: target}}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

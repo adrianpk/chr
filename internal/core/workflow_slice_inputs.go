@@ -138,7 +138,7 @@ func (s *WorkflowStore) workflowSliceTaskProof(ctx context.Context, run workflow
 		return WorkflowSliceTaskProof{}, err
 	}
 
-	request := run.Selection
+	request := run.ExecutionSelection()
 	request.CumulativeBranch, request.CumulativeCommit = run.Lane.Branch, run.Lane.HeadCommit
 	reader := workflowProofReader{store: s, request: request}
 

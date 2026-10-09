@@ -123,14 +123,29 @@ func workflowPRPolicyFixture(t *testing.T, extent string, policy WorkflowExecuti
 	store, opts := workflowMaterializationFixture(t)
 	waiver := WorkflowValidation{WaiverReason: "PR lifecycle fixture uses retained immutable host waiver"}
 
-	opts.Plan.Slices[0].Validation = waiver
-	for i := range opts.Plan.Slices[0].Tasks {
-		opts.Plan.Slices[0].Tasks[i].Validation = waiver
+	for i := range opts.Plan.Slices {
+		opts.Plan.Slices[i].Validation = waiver
+		for j := range opts.Plan.Slices[i].Tasks {
+			opts.Plan.Slices[i].Tasks[j].Validation = waiver
+		}
+	}
+
+	if extent == "use_case" {
+		opts.Plan.UseCase = "ordered-case"
 	}
 
 	hierarchy, err := store.MaterializePlan(t.Context(), opts)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if extent == "use_case" {
+		independent := workflowTestTask("PRJ-99")
+		independent.Task.UseCase = opts.Plan.UseCase
+
+		if _, err := store.Create(t.Context(), "Excluded unsliced work", independent); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
