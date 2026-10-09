@@ -45,6 +45,7 @@ type WorkflowInputImage struct {
 
 // WorkflowAttempt exposes stable ownership facts without private credentials.
 type WorkflowAttempt struct {
+	CapacitySlot   int                      `json:"capacity_slot,omitempty"`
 	ID             string                   `json:"id"`
 	Purpose        string                   `json:"purpose,omitempty"`
 	TaskKey        string                   `json:"task_key"`
@@ -227,12 +228,17 @@ func (s *WorkflowStore) startWorkflow(ctx context.Context, request WorkflowStart
 		return WorkflowStartResult{Invocation: previous.WorkflowInvocation, Attached: found}, err
 	}
 
+	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+	if err != nil {
+		return WorkflowStartResult{}, err
+	}
+
 	preview, err := s.freezeWorkflowSelection(ctx, request.Selection)
 	if err != nil {
 		return WorkflowStartResult{}, err
 	}
 
-	run, err := s.createWorkflowInvocation(ctx, request, hash, preview, runs)
+	run, err := s.createWorkflowInvocation(ctx, request, hash, preview, runs, limits)
 
 	return WorkflowStartResult{Invocation: run.WorkflowInvocation}, err
 }
@@ -296,7 +302,7 @@ func workflowInvocationTerminal(status string) bool {
 	return status == "completed" || status == "cancelled"
 }
 
-func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request WorkflowStartRequest, hash string, preview WorkflowPreview, runs []workflowInvocationFile) (run workflowInvocationFile, err error) {
+func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request WorkflowStartRequest, hash string, preview WorkflowPreview, runs []workflowInvocationFile, limits workflowCapacityLimits) (run workflowInvocationFile, err error) {
 	guard, err := s.acquireWorkflowAllocation()
 	if err != nil {
 		return run, err
@@ -319,6 +325,10 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 	}
 
 	if err := s.guardWorkflowAdmission(runs, run); err != nil {
+		return run, err
+	}
+
+	if err := guardWorkflowReadyQueue(runs, run, limits); err != nil {
 		return run, err
 	}
 

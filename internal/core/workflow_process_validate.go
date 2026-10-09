@@ -7,8 +7,8 @@ import (
 )
 
 func validateWorkflowAttemptProcesses(invocationID string, attempt WorkflowAttempt) error {
-	if attempt.OwnerProcess != nil && !validWorkflowProcessIdentity(*attempt.OwnerProcess) {
-		return fmt.Errorf("invalid workflow owner process identity")
+	if err := validateWorkflowAttemptOwner(attempt); err != nil {
+		return err
 	}
 
 	if len(attempt.Processes) > 17 {
@@ -16,6 +16,10 @@ func validateWorkflowAttemptProcesses(invocationID string, attempt WorkflowAttem
 	}
 
 	for index, process := range attempt.Processes {
+		if process.CapacitySlot != attempt.CapacitySlot {
+			return ErrWorkflowConflict
+		}
+
 		if err := validateWorkflowProcess(invocationID, attempt.ID, index, process); err != nil {
 			return err
 		}
@@ -28,6 +32,18 @@ func validateWorkflowAttemptProcesses(invocationID string, attempt WorkflowAttem
 	return nil
 }
 
+func validateWorkflowAttemptOwner(attempt WorkflowAttempt) error {
+	if attempt.CapacitySlot < 0 || attempt.CapacitySlot > workflowWorkerSlotLimit {
+		return ErrWorkflowConflict
+	}
+
+	if attempt.OwnerProcess != nil && !validWorkflowProcessIdentity(*attempt.OwnerProcess) {
+		return fmt.Errorf("invalid workflow owner process identity")
+	}
+
+	return nil
+}
+
 func validWorkflowProcessIdentity(identity WorkflowProcessIdentity) bool {
 	birth, err := strconv.ParseUint(identity.StartTicks, 10, 64)
 
@@ -35,7 +51,7 @@ func validWorkflowProcessIdentity(identity WorkflowProcessIdentity) bool {
 }
 
 func validateWorkflowProcess(invocationID, attemptID string, index int, process WorkflowProcess) error {
-	if !validWorkflowProcessIdentity(process.Identity) || process.GroupID != process.Identity.PID || !slices.Contains([]string{"running", "stopped"}, process.State) {
+	if !validWorkflowCapacityProcess(process) || !slices.Contains([]string{"running", "stopped"}, process.State) {
 		return fmt.Errorf("invalid workflow command process identity or state")
 	}
 

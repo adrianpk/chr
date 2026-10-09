@@ -89,7 +89,7 @@ func (s *WorkflowStore) registerWorkflowClosingProcess(ctx context.Context, clai
 			return ErrWorkflowConflict
 		}
 
-		registered = WorkflowProcess{Identity: identity, GroupID: pid, Command: slices.Clone(command), State: "running", StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
+		registered = WorkflowProcess{CapacitySlot: workflowWorkerSlotNumber(claim.worker.reservation.Name()), Identity: identity, GroupID: pid, Command: slices.Clone(command), State: "running", StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
 
 		claim.state.Processes = append(claim.state.Processes, registered)
 		if err := s.commitWorkflowClosingState(ctx, claim); err != nil {

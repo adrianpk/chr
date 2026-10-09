@@ -18,15 +18,16 @@ type WorkflowProcessIdentity struct {
 
 // WorkflowProcess retains each supervised worker or validation command.
 type WorkflowProcess struct {
-	Identity   WorkflowProcessIdentity `json:"identity"`
-	GroupID    int                     `json:"group_id"`
-	Command    []string                `json:"command"`
-	State      string                  `json:"state"`
-	StdoutRef  string                  `json:"stdout_ref"`
-	StderrRef  string                  `json:"stderr_ref"`
-	StdoutHash string                  `json:"stdout_hash"`
-	StderrHash string                  `json:"stderr_hash"`
-	Result     *WorkflowCommandResult  `json:"result"`
+	CapacitySlot int                     `json:"capacity_slot,omitempty"`
+	Identity     WorkflowProcessIdentity `json:"identity"`
+	GroupID      int                     `json:"group_id"`
+	Command      []string                `json:"command"`
+	State        string                  `json:"state"`
+	StdoutRef    string                  `json:"stdout_ref"`
+	StderrRef    string                  `json:"stderr_ref"`
+	StdoutHash   string                  `json:"stdout_hash"`
+	StderrHash   string                  `json:"stderr_hash"`
+	Result       *WorkflowCommandResult  `json:"result"`
 }
 
 type workflowProcStat struct {

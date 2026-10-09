@@ -74,9 +74,11 @@ type ReviewProviderTargetConfig struct {
 
 // WorkConfig describes a package boundary value.
 type WorkConfig struct {
-	StateAuthority WorkStateAuthority
-	BranchPolicy   WorkBranchPolicy
-	Workspace      WorkWorkspaceConfig
+	MaxActiveWorkers   int
+	ReadyQueueCapacity int
+	StateAuthority     WorkStateAuthority
+	BranchPolicy       WorkBranchPolicy
+	Workspace          WorkWorkspaceConfig
 }
 
 // EvidenceConfig describes a package boundary value.
@@ -304,8 +306,10 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 // DefaultWorkConfig executes the corresponding package operation.
 func DefaultWorkConfig() WorkConfig {
 	return WorkConfig{
-		BranchPolicy: DefaultWorkBranchPolicy(),
-		Workspace:    DefaultWorkWorkspaceConfig(),
+		MaxActiveWorkers:   1,
+		ReadyQueueCapacity: 64,
+		BranchPolicy:       DefaultWorkBranchPolicy(),
+		Workspace:          DefaultWorkWorkspaceConfig(),
 	}
 }
 
@@ -522,6 +526,10 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 }
 
 func setWorkConfigValue(config *WorkConfig, key, value string) {
+	if setWorkCapacityConfigValue(config, key, value) {
+		return
+	}
+
 	if key == "state_authority" {
 		config.StateAuthority = WorkStateAuthority(value)
 

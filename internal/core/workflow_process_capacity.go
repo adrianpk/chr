@@ -62,26 +62,7 @@ func guardWorkflowProcessCapacity(common string) error {
 }
 
 func guardWorkflowCapacityProcess(path string) error {
-	data, err := readWorkflowFile(path)
-	if err != nil {
-		return err
-	}
-
-	var process WorkflowProcess
-	if err := json.Unmarshal(data, &process); err != nil {
-		return err
-	}
-
-	name, err := workflowCapacityProcessName(process)
-	if err != nil {
-		return err
-	}
-
-	if name != filepath.Base(path) || !validWorkflowProcessIdentity(process.Identity) || process.GroupID != process.Identity.PID {
-		return ErrWorkflowConflict
-	}
-
-	alive, err := workflowProcessGroupAlive(process)
+	_, alive, err := workflowCapacityProcess(path)
 	if err != nil {
 		return err
 	}
@@ -90,5 +71,5 @@ func guardWorkflowCapacityProcess(path string) error {
 		return ErrWorkflowCapacity
 	}
 
-	return os.Remove(path)
+	return nil
 }

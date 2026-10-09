@@ -51,12 +51,12 @@ func acquireWorkflowCapacity(ctx context.Context, projectDir string) (*os.File, 
 }
 
 func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
-	file, err := acquireWorkflowCapacity(ctx, s.layout.ProjectDir())
+	file, guard, err := s.acquireWorkflowWorkerSlot(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	claim = &WorkflowClaim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: file, execution: &workflowClaimExecution{}}
+	claim = &WorkflowClaim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: file, capacityGuard: guard, execution: &workflowClaimExecution{}}
 	owned := claim
 
 	defer func() {
@@ -144,6 +144,11 @@ func (claim *WorkflowClaim) releaseReservation() error {
 		// Close, never LOCK_UN: an inherited descriptor keeps a live child counted.
 		result = errors.Join(result, claim.reservation.Close())
 		claim.reservation = nil
+	}
+
+	if claim.capacityGuard != nil {
+		result = errors.Join(result, claim.capacityGuard.Close())
+		claim.capacityGuard = nil
 	}
 
 	return result

@@ -192,6 +192,8 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 	}
 
 	want := WorkConfig{
+		MaxActiveWorkers:   1,
+		ReadyQueueCapacity: 64,
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                  WorkBranchPolicyModeCurrentBranch,
 			IntegrationBranch:     "develop",

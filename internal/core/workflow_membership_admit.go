@@ -129,5 +129,14 @@ func (s *WorkflowStore) checkWorkflowLaterOwnership(ctx context.Context, run wor
 
 	run.Members = append(run.Members, workflowNewMembers(later)...)
 
-	return s.guardWorkflowAdmission(others, run)
+	if err := s.guardWorkflowAdmission(others, run); err != nil {
+		return err
+	}
+
+	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+	if err != nil {
+		return err
+	}
+
+	return guardWorkflowReadyQueue(others, run, limits)
 }

@@ -70,13 +70,12 @@ func expireWorkflowClosingTest(t *testing.T, store *WorkflowStore, claim *workfl
 		t.Fatal(err)
 	}
 
-	// A lost host closes capacity but leaves its operation locks for adoption.
-	if err := claim.worker.reservation.Close(); err != nil {
+	// Simulate host loss: close both inherited capacity descriptors while leaving
+	// durable operation locks for the next fenced closing generation to adopt.
+	claim.worker.locks = nil
+	if err := claim.worker.releaseReservation(); err != nil {
 		t.Fatal(err)
 	}
-
-	claim.worker.reservation = nil
-	claim.worker.locks = nil
 }
 
 // TestWorkflowClosingRecovery exercises two expired generations, including their

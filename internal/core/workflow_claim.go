@@ -20,15 +20,16 @@ var ErrWorkflowCapacity = errors.New("workflow waiting for repository capacity")
 
 // WorkflowClaim is an owner credential. It cannot be reconstructed from status.
 type WorkflowClaim struct {
-	InvocationID string
-	AttemptID    string
-	Generation   uint64
-	Token        string `json:"-"`
-	store        *WorkflowStore
-	reservation  *os.File
-	locks        []*AgentOperationLock
-	execution    *workflowClaimExecution
-	purpose      string
+	InvocationID  string
+	AttemptID     string
+	Generation    uint64
+	Token         string `json:"-"`
+	store         *WorkflowStore
+	reservation   *os.File
+	capacityGuard *os.File
+	locks         []*AgentOperationLock
+	execution     *workflowClaimExecution
+	purpose       string
 }
 
 // ClaimWorkflow acquires one task and its existing serial operation exclusion.
@@ -203,7 +204,7 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 		return err
 	}
 
-	attempt := WorkflowAttempt{Purpose: claim.purpose, OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key, claim.purpose), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
+	attempt := WorkflowAttempt{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Purpose: claim.purpose, OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key, claim.purpose), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
 	run.Attempts = append(run.Attempts, attempt)
 	run.Owners[claim.AttemptID] = workflowHash([]byte(claim.Token))
 	run.Status = "running"

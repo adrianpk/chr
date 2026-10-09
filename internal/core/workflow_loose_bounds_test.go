@@ -81,6 +81,8 @@ func checkWorkflowLooseFailure(t *testing.T, store *WorkflowStore, id string, at
 // publication. Equivalent requests attach; changed inputs cannot reset scope.
 func TestWorkflowLooseBounded(t *testing.T) {
 	store, first, request := workflowTicketFixture(t, "loose", workflowPreparationGate("test -f result.txt"))
+	writeWorkspaceConfig(t, store.layout.ProjectDir(), "work:\n  ready_queue_capacity: 1024\n")
+
 	for i := 0; i < WorkflowPageLimit; i++ {
 		workflowLooseCreate(t, store, first, fmt.Sprintf("PRJ-%d", 91+i), "normal", nil)
 	}
