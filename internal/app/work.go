@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -376,6 +377,7 @@ func printAgentWorkTicket(stdout io.Writer, result AgentWorkResult) error {
 		fmt.Sprintf("message: %s", result.Message),
 	}
 
+	lines = append(lines, agentWorkAuthorityLines(result)...)
 	if result.Execution != nil {
 		lines = append(lines,
 			fmt.Sprintf("ticket: %s", result.Execution.TicketKey),
@@ -403,6 +405,7 @@ func printAgentWorkRunAllPreview(
 		fmt.Sprintf("remaining_eligible: %d", agentWorkPreviewRemainingEligible(result)),
 	}
 
+	lines = append(lines, agentWorkAuthorityLines(result)...)
 	if err := printAgentWorkLines(stdout, lines); err != nil {
 		return err
 	}
@@ -433,6 +436,7 @@ func printAgentWorkRunAllExecution(stdout io.Writer, result AgentWorkResult) err
 		fmt.Sprintf("message: %s", result.Message),
 	}
 
+	lines = append(lines, agentWorkAuthorityLines(result)...)
 	if result.LoopRun != nil {
 		skippedCount := result.LoopRun.EligibleCount - result.LoopRun.ProcessedCount - result.LoopRun.FailedCount
 		if skippedCount < 0 {
@@ -704,4 +708,40 @@ func printAgentWorkLines(stdout io.Writer, lines []string) error {
 	}
 
 	return nil
+}
+
+func agentWorkAuthorityLines(result AgentWorkResult) []string {
+	if result.Authority == "" {
+		return nil
+	}
+
+	scope := "unadopted_legacy"
+	if result.Authority == core.WorkStateAuthorityTickets {
+		scope = "loose"
+	}
+
+	if result.Scope != "" {
+		scope = result.Scope
+	}
+
+	lines := []string{fmt.Sprintf("authority: %s", result.Authority)}
+	if result.Workflow != nil {
+		scope = result.Workflow.Selection.Selector.Extent
+		lines = append(lines, fmt.Sprintf("invocation: %s", result.Workflow.ID), fmt.Sprintf("status: %s", result.Workflow.Status), fmt.Sprintf("confirmed: %d", result.Workflow.ConfirmedCursor))
+	}
+
+	lines = append(lines, "scope: "+scope)
+
+	keys := make([]string, 0, len(result.Excluded))
+	for key := range result.Excluded {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		lines = append(lines, fmt.Sprintf("excluded_%s: %d", key, result.Excluded[key]))
+	}
+
+	return lines
 }

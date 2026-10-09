@@ -17,6 +17,10 @@ type WorkOperationResult struct {
 
 // AgentWorkResult summarizes runnable agent work for the dashboard.
 type AgentWorkResult struct {
+	Scope         string
+	Authority     core.WorkStateAuthority
+	Excluded      map[string]int
+	Workflow      *core.WorkflowInvocation
 	Message       string
 	Tickets       []core.IndexedTicket
 	Execution     *core.ExecutionRecord
@@ -36,10 +40,11 @@ type AgentWorkSelectionOptions struct {
 }
 
 type agentWorkLoopSelection struct {
-	Tickets       []core.IndexedTicket
-	EligibleCount int
-	ReviewConfig  core.ReviewWorkflowConfig
-	WorkConfig    core.WorkConfig
+	ExcludedAdopted int
+	Tickets         []core.IndexedTicket
+	EligibleCount   int
+	ReviewConfig    core.ReviewWorkflowConfig
+	WorkConfig      core.WorkConfig
 }
 
 type agentWorkIntegrationCycleState struct {
@@ -89,6 +94,21 @@ func (s service) StartReadyTicketLoop() (WorkOperationResult, error) {
 }
 
 func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error) {
+	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+		return s.startNativeAgentWork(config, core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "ticket", Identity: ticketKey}}, 0)
+	}
+
+	result, err := s.startLegacyAgentWorkTicket(ticketKey)
+
+	return legacyAgentWorkResult(result), err
+}
+
+func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, error) {
 	ticket, preflight, release, err := s.prepareAgentWorkTicket(ticketKey)
 	if err != nil {
 		return AgentWorkResult{}, err
@@ -142,22 +162,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 }
 
 func (s service) prepareAgentWorkTicket(ticketKey string) (core.IndexedTicket, ticketStartPreflight, func(), error) {
-	err := s.ensureAgentWorkRuntime()
-	if err != nil {
-		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
-	}
-
-	ticket, err := s.ticketByKey(ticketKey)
-	if err != nil {
-		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
-	}
-
-	tickets, err := s.listProjectTickets()
-	if err != nil {
-		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
-	}
-
-	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
+	ticket, err := s.legacyAgentWorkTicket(ticketKey)
 	if err != nil {
 		return core.IndexedTicket{}, ticketStartPreflight{}, noopRelease, err
 	}
@@ -181,12 +186,7 @@ func (s service) prepareAgentWorkTicket(ticketKey string) (core.IndexedTicket, t
 }
 
 func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
-	err := s.ensureAgentWorkRuntime()
-	if err != nil {
-		return AgentWorkResult{}, err
-	}
-
-	return s.startAgentWorkLoop(defaultAgentWorkSelectionOptions(1))
+	return s.StartAgentWorkLoop(defaultAgentWorkSelectionOptions(1))
 }
 
 func (s service) StartAllReadyAgentWork() (AgentWorkResult, error) {
@@ -194,16 +194,26 @@ func (s service) StartAllReadyAgentWork() (AgentWorkResult, error) {
 }
 
 func (s service) StartAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
-	err := s.ensureAgentWorkRuntime()
-	if err != nil {
-		return AgentWorkResult{}, err
-	}
-
 	if err := validateAgentWorkSelectionOptions(opts); err != nil {
 		return AgentWorkResult{}, err
 	}
 
-	return s.startAgentWorkLoop(opts)
+	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+		return s.startNativeAgentWork(config, nativeAgentWorkSelection(opts), opts.MaxIterations)
+	}
+
+	if err := s.ensureAgentWorkRuntime(); err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	result, err := s.startAgentWorkLoop(opts)
+
+	return legacyAgentWorkResult(result), err
 }
 
 func (s service) PreviewAllReadyAgentWork() (AgentWorkResult, error) {
@@ -211,6 +221,15 @@ func (s service) PreviewAllReadyAgentWork() (AgentWorkResult, error) {
 }
 
 func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
+	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		return AgentWorkResult{}, err
+	}
+
+	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+		return s.previewNativeAgentWork(config, opts)
+	}
+
 	if err := validateAgentWorkSelectionOptions(opts); err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -226,7 +245,9 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 	}
 
 	return AgentWorkResult{
-		Message:       fmt.Sprintf("Ready agent-work queue contains %d eligible tickets.", selection.EligibleCount),
+		Message:       fmt.Sprintf("Authority tracker_compat; scope unadopted legacy tickets; %d adopted tickets excluded. Ready queue contains %d eligible tickets.", selection.ExcludedAdopted, selection.EligibleCount),
+		Authority:     core.WorkStateAuthorityTrackerCompat,
+		Excluded:      map[string]int{"ticket_native": selection.ExcludedAdopted},
 		Tickets:       reloaded.Tickets,
 		SelectedQueue: selection.Tickets,
 		EligibleCount: selection.EligibleCount,
@@ -262,6 +283,7 @@ func (s service) startAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkRe
 		Message:       reloaded.Message,
 		Tickets:       reloaded.Tickets,
 		LoopRun:       &result.Record,
+		Excluded:      map[string]int{"ticket_native": result.AuthorityExcluded},
 		Executions:    result.Executions,
 		Merges:        result.Merges,
 		SelectedQueue: selectedQueue,
@@ -329,7 +351,7 @@ func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (
 	emitLoopStartedAgentEvent(s.ctx, loopSink, record)
 
 	state := agentWorkIntegrationCycleState{
-		Result:        ticketLoopExecutionResult{Record: record},
+		Result:        ticketLoopExecutionResult{Record: record, AuthorityExcluded: selection.ExcludedAdopted},
 		Record:        record,
 		SelectedQueue: make([]core.IndexedTicket, 0),
 	}
@@ -356,9 +378,7 @@ func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (
 		}
 	}
 
-	finished, err := finishTicketLoopExecution(s.ctx, s.env, repository, s.projectContext, state.Result, state.Record, loopSink, s.assetsFS)
-
-	return finished, state.SelectedQueue, initialEligibleCount, err
+	return s.finishAgentWorkIntegrationCycles(repository, state, loopSink, initialEligibleCount)
 }
 
 func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink) (agentWorkIntegrationCycleState, bool, error) {
@@ -799,6 +819,11 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 		return agentWorkLoopSelection{}, err
 	}
 
+	tickets, excluded, err := core.FilterLegacyWorkTickets(s.ctx, tickets)
+	if err != nil {
+		return agentWorkLoopSelection{}, err
+	}
+
 	tickets, err = s.applyAgentWorkSelectionPreflight(index, tickets, config.Work)
 	if err != nil {
 		return agentWorkLoopSelection{}, err
@@ -808,15 +833,21 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 	tickets = ticketsForTicketLoopRun(eligibleTickets, ticketLoopRunOptions{MaxIterations: 1})
 
 	return agentWorkLoopSelection{
-		Tickets:       tickets,
-		EligibleCount: len(eligibleTickets),
-		ReviewConfig:  config.Review,
-		WorkConfig:    config.Work,
+		Tickets:         tickets,
+		EligibleCount:   len(eligibleTickets),
+		ExcludedAdopted: excluded,
+		ReviewConfig:    config.Review,
+		WorkConfig:      config.Work,
 	}, nil
 }
 
 func (s service) applyAgentWorkSelectionPreflight(index core.TicketIndex, tickets []core.IndexedTicket, workConfig core.WorkConfig) ([]core.IndexedTicket, error) {
 	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+
+	allTickets, _, err = core.FilterLegacyWorkTickets(s.ctx, allTickets)
 	if err != nil {
 		return nil, err
 	}
@@ -958,4 +989,49 @@ func (s service) ensureAgentWorkRuntime() error {
 	}
 
 	return nil
+}
+
+func (s service) legacyAgentWorkTicket(ticketKey string) (core.IndexedTicket, error) {
+	if err := s.checkLegacyAgentWorkKey(ticketKey); err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	err := s.ensureAgentWorkRuntime()
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	ticket, err := s.ticketByKey(ticketKey)
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	tickets, err := s.listProjectTickets()
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	tickets, _, err = core.FilterLegacyWorkTickets(s.ctx, tickets)
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
+	if err != nil {
+		return core.IndexedTicket{}, err
+	}
+
+	return ticket, nil
+}
+
+func (s service) finishAgentWorkIntegrationCycles(repository core.LoopRunRepository, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink, initialEligibleCount int) (ticketLoopExecutionResult, []core.IndexedTicket, int, error) {
+	finished, err := finishTicketLoopExecution(s.ctx, s.env, repository, s.projectContext, state.Result, state.Record, loopSink, s.assetsFS)
+
+	finished.AuthorityExcluded = state.Result.AuthorityExcluded
+
+	return finished, state.SelectedQueue, initialEligibleCount, err
 }

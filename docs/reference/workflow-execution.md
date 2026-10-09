@@ -15,7 +15,7 @@ edits and SQLite projections do not authorize execution or certify success.
 | `CheckWorkflowClaim` | Check the current private credential, generation, lease and frozen record images. |
 | `CheckpointWorkflow` | Yield an unexpired, quiescent claim without validating the task; retain its input, lane, attempt and checkpoint. |
 | `ExecuteWorkflowTask` | Freeze worker inputs, supervise its argv in the isolated lane, run the frozen host gate and journal the guarded task result. |
-| `ContinueWorkflow` | Run a bounded number of transitions on an existing slice-owned invocation; preserve its frozen selection, policy, task proof, PR and delivery checkpoints. |
+| `ContinueWorkflow` | Run bounded transitions on an existing invocation; preserve its frozen selection, policy, task proof, PR and delivery checkpoints. |
 
 The caller retains the returned `*WorkflowClaim`; status cannot reconstruct it.
 The token is excluded from JSON and only its hash is persisted. One claim covers
@@ -204,6 +204,50 @@ members. Each continuation call still obeys its frozen step limit. Equivalent
 unfinished requests attach; a reused key with different policy conflicts.
 Completed and cancelled invocations remain terminal on retry, including with
 accepted later-ticket policy. Exhaustion never subscribes to later arrivals.
+
+## Compatibility entrypoint authority
+
+`work.state_authority` accepts `tickets` and `tracker_compat`. Absence retains
+the existing transitional behavior. Versioned default activation is separate
+from selecting explicit authority for these entrypoints.
+
+| Entrypoint | `tickets` | `tracker_compat` |
+| --- | --- | --- |
+| `work run-all`, ready-work service operations | Start or attach to a finite loose invocation with the requested status, AND filters and order. Report excluded slice-owned work. | Select the existing unadopted legacy queue and report its authority and scope. |
+| `work ticket`, `ticket start`, selected-ticket service operations | Select one exact adopted task. A grouped task validates without starting its parent extent; an independent task follows the common candidate/PR lifecycle. | Retain legacy single-ticket execution; refuse adopted keys and projections before a worker starts. |
+| `work run-all --dry-run`, `ticket start --dry-run` | Read the common selection and display authority, extent and exclusions without allocating a run, worker or PR. | Retain the existing legacy preview and display transitional scope. |
+
+Ticket-mode `--max-iterations` supplies a per-call checkpoint-step limit of
+`1..128`; zero uses the retained invocation's limit. It counts accepted task,
+candidate and delivery transitions rather than promising completed tickets in
+one call. The ready-work service uses one step. Waiting review, failed gates and
+stop intent retain the same checkpoint and prevent successor execution.
+
+The entrypoint reads `work.canonical_remote` as a credential-free public HTTPS
+repository identity and observes `work.integration_branch` through the trusted
+target port. SSH aliases and local transports must use a configured public HTTPS canonical
+remote for this entrypoint; no persistent repository URL is guessed. Object hydration leaves checkout
+branches and files unchanged. An equivalent unfinished entrypoint reuses its
+original target and request; a newly observed target does not replace frozen
+inputs or create a second worker. Policy or selector changes do not attach as
+equivalent work. The explicit invocation API retains its exact retry-key rules.
+
+The native path uses the host-supervised JSON worker in the owned lane and the
+frozen task gate. It does not initialize the legacy runtime. Both modes retain
+the shared serial operation exclusion. Legacy selection partitions actual source
+images before preflight; a second guard under the operation lock prevents an
+adoption between preview and worker start from granting two owners.
+
+`PublishWorkflowSource` is the common continuation boundary before PR binding.
+It checks the immutable candidate before and after trusted host IO and publishes
+only its owned `refs/heads/chr/workflow/...` source. A new source uses an empty
+lease; a repaired bound candidate uses its retained previous source head. A
+different remote head requires reconciliation. Retrying an already published
+exact source performs observation only, including recovery after a lost push
+response. Uncertain PR creation continues by observation without a source
+rewrite. Source publication neither creates a delivery receipt nor moves the
+integration target. The central service supplies this source port to the shared
+continuation operation; adapters do not schedule a separate PR lifecycle.
 
 ## Canonical slice pull requests
 

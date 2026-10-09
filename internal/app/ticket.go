@@ -501,10 +501,11 @@ type ticketApplyResultPlan struct {
 }
 
 type ticketLoopExecutionResult struct {
-	Record       core.LoopRunRecord
-	Executions   []core.ExecutionRecord
-	Applications []core.ResultApplication
-	Merges       []core.TicketMergeCommandResult
+	AuthorityExcluded int
+	Record            core.LoopRunRecord
+	Executions        []core.ExecutionRecord
+	Applications      []core.ResultApplication
+	Merges            []core.TicketMergeCommandResult
 }
 
 type ticketExecutionEvents struct {
@@ -589,6 +590,10 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 		return fmt.Errorf("ticket start requires exactly one ticket key argument")
 	}
 
+	if handled, err := runTicketStartAuthority(ctx, cmd, stdout); handled || err != nil {
+		return err
+	}
+
 	preflight, err := buildTicketStartPreflight(ctx, cmd)
 	if err != nil {
 		return core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
@@ -610,14 +615,7 @@ func runTicketStart(ctx context.Context, cmd *cli.Command, stdout io.Writer) err
 	}
 
 	if !cmd.Bool("dry-run") {
-		lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, core.AgentOperationDevelopment)
-		if err != nil {
-			return err
-		}
-
-		defer releaseAgentOperationLock(lock)()
-
-		record, err := runAndPrintTicketStartExecution(ctx, stdout, preflight)
+		record, err := runOwnedTicketStart(ctx, stdout, preflight)
 		if err != nil {
 			return err
 		}
@@ -1607,6 +1605,14 @@ func buildTicketStartPreflightForTicket(
 }
 
 func buildTicketStartPreflightForTicketWithOptions(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, ticket core.IndexedTicket, assetsFS fs.FS, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
+	if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
+		return ticketStartPreflight{}, err
+	}
+
+	return buildLegacyTicketStartPreflight(ctx, env, projectContext, ticket, assetsFS, opts)
+}
+
+func buildLegacyTicketStartPreflight(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, ticket core.IndexedTicket, assetsFS fs.FS, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
 	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
 	if err != nil {
 		return ticketStartPreflight{}, err
@@ -2932,4 +2938,23 @@ func runTicketNew(ctx context.Context, cmd *cli.Command, stdout io.Writer) error
 	}
 
 	return nil
+}
+
+func runOwnedTicketStart(ctx context.Context, stdout io.Writer, preflight ticketStartPreflight) (core.ExecutionRecord, error) {
+	lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, core.AgentOperationDevelopment)
+	if err != nil {
+		return core.ExecutionRecord{}, err
+	}
+
+	defer releaseAgentOperationLock(lock)()
+
+	if err := core.CheckLegacyWorkTicket(preflight.Ticket.Path); err != nil {
+		return core.ExecutionRecord{}, err
+	}
+
+	if err := newService(ctx, preflight.Env, preflight.ProjectContext, preflight.AssetsFS).checkLegacyAgentWorkKey(preflight.Ticket.Key); err != nil {
+		return core.ExecutionRecord{}, err
+	}
+
+	return runAndPrintTicketStartExecution(ctx, stdout, preflight)
 }

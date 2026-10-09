@@ -92,10 +92,8 @@ func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run Wor
 	}
 
 	if run.CandidateRef != "" {
-		if run.PullRequest == nil || run.PullRequest.State != "bound" {
-			_, err := s.EnsureWorkflowSlicePullRequest(ctx, run.ID, request.PullRequest, ports.Publication.Provider)
-
-			return err
+		if workflowCandidateNeedsPR(run) {
+			return s.ensureWorkflowContinuationPR(ctx, run, request, ports)
 		}
 
 		_, err := s.AdvanceWorkflowSliceIntegration(ctx, run.ID, ports.Publication)
@@ -118,6 +116,18 @@ func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run Wor
 	return s.executeWorkflowSliceTask(ctx, run.ID, request.Worker)
 }
 
+func (s *WorkflowStore) ensureWorkflowContinuationPR(ctx context.Context, run WorkflowInvocation, request WorkflowContinuationRequest, ports WorkflowContinuationPorts) error {
+	if ports.Source != nil && (run.PullRequest == nil || run.PullRequest.State == "prepared" || run.PullRequest.State == "bound") {
+		if err := s.PublishWorkflowSource(ctx, run.ID, ports.Source); err != nil {
+			return err
+		}
+	}
+
+	_, err := s.EnsureWorkflowSlicePullRequest(ctx, run.ID, request.PullRequest, ports.Publication.Provider)
+
+	return err
+}
+
 func workflowContinuationClosing(run WorkflowInvocation) bool {
 	return !workflowInvocationTerminal(run.Status) && run.StopIntent == "" && run.Status != "paused" && (run.Outcome == "set_closure_required" || run.Outcome == "closing_validation_failed" || run.Outcome == "interrupted" || run.ClosingSet != "")
 }
@@ -128,4 +138,8 @@ func workflowContinuationBefore(run WorkflowInvocation) string {
 	}
 
 	return workflowContinuationBarrier(run)
+}
+
+func workflowCandidateNeedsPR(run WorkflowInvocation) bool {
+	return run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.CandidateHash != run.CandidateHash
 }

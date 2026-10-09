@@ -8,6 +8,10 @@ import (
 
 // ValidateWorkConfig validates the corresponding package boundary value.
 func ValidateWorkConfig(config WorkConfig) error {
+	if err := ValidateWorkStateAuthority(config.StateAuthority); err != nil {
+		return err
+	}
+
 	if err := ValidateWorkBranchPolicy(config.BranchPolicy); err != nil {
 		return err
 	}

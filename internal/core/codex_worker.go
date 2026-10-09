@@ -43,11 +43,7 @@ func NewCodexWorkerCommand(opts CodexWorkerCommandOptions) (CodexWorkerCommand, 
 
 	return CodexWorkerCommand{
 		Program: CodexWorkerProgram,
-		Args: []string{
-			"exec",
-			"--skip-git-repo-check",
-			"--dangerously-bypass-approvals-and-sandbox",
-		},
+		Args:    codexWorkerArguments(),
 		Env: []CodexWorkerEnv{
 			{Name: "CHR_EXECUTION_ID", Value: opts.ExecutionID},
 			{Name: "CHR_TICKET_KEY", Value: opts.TicketKey},
@@ -58,6 +54,16 @@ func NewCodexWorkerCommand(opts CodexWorkerCommandOptions) (CodexWorkerCommand, 
 			{Name: "CHR_VALIDATION_PATH", Value: opts.ValidationPath},
 		},
 	}, nil
+}
+
+func codexWorkerArguments() []string {
+	return []string{"exec", "--skip-git-repo-check", "--dangerously-bypass-approvals-and-sandbox"}
+}
+
+// CodexWorkflowWorker consumes the host-frozen JSON input on standard input.
+// The native executor owns its process, isolated lane and validation evidence.
+func CodexWorkflowWorker() []string {
+	return append(append([]string{CodexWorkerProgram}, codexWorkerArguments()...), "-")
 }
 
 // RenderCodexWorkerShellScript renders the corresponding package data.

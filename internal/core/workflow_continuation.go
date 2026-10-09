@@ -20,6 +20,7 @@ type WorkflowContinuationRequest struct {
 type WorkflowContinuationPorts struct {
 	Publication WorkflowPublicationPorts
 	Target      WorkflowTargetGit
+	Source      WorkflowSourceGit
 }
 
 // WorkflowContinuationProgress reports accepted steps and the retained barrier.

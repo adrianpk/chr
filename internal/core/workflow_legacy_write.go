@@ -3,12 +3,79 @@ package core
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+// ErrWorkflowAuthority prevents legacy execution of an adopted task or projection.
+var ErrWorkflowAuthority = errors.New("adopted workflow ticket requires ticket authority")
+
+// CheckLegacyWorkTicket refuses adopted Markdown and JSON-backed ticket views
+// before a legacy worker starts. The operation lock also fences concurrent adoption.
+func CheckLegacyWorkTicket(path string) error {
+	if _, err := readLegacyTicketFile(path); err != nil {
+		return err
+	}
+
+	if filepath.Base(path) != "artifact.md" {
+		return nil
+	}
+
+	data, err := readWorkflowFile(filepath.Join(filepath.Dir(path), "metadata.json"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	fields := map[string]json.RawMessage{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+
+	if _, adopted := fields["workflow"]; adopted {
+		return ErrWorkflowAuthority
+	}
+
+	return nil
+}
+
+// FilterLegacyWorkTickets partitions a derived queue by its actual source images.
+// It never treats an adopted projection as legacy execution authority.
+func FilterLegacyWorkTickets(ctx context.Context, tickets []IndexedTicket) ([]IndexedTicket, int, error) {
+	if len(tickets) > WorkflowRecordLimit {
+		return nil, 0, fmt.Errorf("legacy authority selection bound exceeded")
+	}
+
+	selected, excluded := []IndexedTicket{}, 0
+
+	for _, ticket := range tickets {
+		if err := ctx.Err(); err != nil {
+			return nil, excluded, err
+		}
+
+		err := CheckLegacyWorkTicket(ticket.Path)
+		if errors.Is(err, ErrWorkflowAuthority) {
+			excluded++
+
+			continue
+		}
+
+		if err != nil {
+			return nil, excluded, err
+		}
+
+		selected = append(selected, ticket)
+	}
+
+	return selected, excluded, nil
+}
 
 // Legacy writers remain available for unadopted tickets. Adopted records must
 // pass the repository lock, image and revision guards through WorkflowStore.
@@ -20,7 +87,7 @@ func readLegacyTicketFile(path string) ([]byte, error) {
 
 	front, _, err := splitWorkflowMarkdown(content)
 	if err == nil && strings.Contains("\n"+front, "\nworkflow_schema:") {
-		return nil, fmt.Errorf("adopted workflow ticket requires a guarded record write")
+		return nil, ErrWorkflowAuthority
 	}
 
 	return content, nil

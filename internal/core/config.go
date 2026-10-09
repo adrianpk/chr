@@ -74,8 +74,9 @@ type ReviewProviderTargetConfig struct {
 
 // WorkConfig describes a package boundary value.
 type WorkConfig struct {
-	BranchPolicy WorkBranchPolicy
-	Workspace    WorkWorkspaceConfig
+	StateAuthority WorkStateAuthority
+	BranchPolicy   WorkBranchPolicy
+	Workspace      WorkWorkspaceConfig
 }
 
 // EvidenceConfig describes a package boundary value.
@@ -521,6 +522,12 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 }
 
 func setWorkConfigValue(config *WorkConfig, key, value string) {
+	if key == "state_authority" {
+		config.StateAuthority = WorkStateAuthority(value)
+
+		return
+	}
+
 	if setWorkBranchPolicyConfigValue(&config.BranchPolicy, key, value) {
 		return
 	}

@@ -18,6 +18,7 @@ type service struct {
 	dumpEditor             DumpEditorLauncher
 	dumpCurator            DumpCurationProvider
 	quizModel              core.QuizModelAdapter
+	workflowWorker         []string
 	workflowPullRequests   core.WorkflowPullRequestProvider
 	workflowIntegrationGit core.WorkflowIntegrationGit
 	workflowPreparationGit core.WorkflowPreparationGit

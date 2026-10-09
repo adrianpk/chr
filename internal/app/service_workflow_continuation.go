@@ -33,6 +33,9 @@ func (s service) ContinueWorkflow(ctx context.Context, id string, request core.W
 	}
 
 	ports := core.WorkflowContinuationPorts{Publication: core.WorkflowPublicationPorts{Provider: provider, Preparer: preparer, Observer: observer, Reviewer: reviewer}, Target: target}
+	if source, ok := observer.(core.WorkflowSourceGit); ok {
+		ports.Source = source
+	}
 
 	return store.ContinueWorkflow(ctx, id, request, ports)
 }
