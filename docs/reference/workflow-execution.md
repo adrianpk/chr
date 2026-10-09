@@ -455,9 +455,10 @@ through an existing request key reject.
 The frozen execution policy permits a checkpoint step limit from 1 through 128.
 An absent value uses 128, including earlier invocation files. A call may use a
 smaller limit; it cannot increase the frozen bound. Each accepted task,
-aggregate, PR, integration or frontier operation consumes one step. Exhaustion
+aggregate, PR, integration, frontier or set-closing operation consumes one step. Exhaustion
 returns reason `step_limit` with resumable state. Awaiting authority, paused or
-blocked work and the set-closure barrier return without executing successors.
+blocked work returns without executing successors. A set boundary returns a
+closure checkpoint; the next continuation executes only that set's gate.
 Cancelled and completed invocations stay terminal.
 
 `chr-continuation-checkpoint/v1` records request identity, source revision,
@@ -508,6 +509,55 @@ current closure reference to `closure_history`, preserving its hashed bytes,
 prior task/slice receipts and terminal invocation files. Ordinary record writes
 cannot change a completed set. Amendment and closure histories retain the
 4096-entry and 1 MiB record bounds.
+
+## Set closing validation
+
+| Operation | Contract |
+| --- | --- |
+| `CloseWorkflowSet` | Require the observed set revision/hash and canonical repository/branch. Validate all actual members and the exact target, then retain the set-owned result. An optional invocation ID identifies its unfinished owner. |
+| `CloseWorkflowInvocationSet` | Close only the next frozen set after its selected work finalizes, without changing admission or earlier delivery images. |
+| `ReconcileWorkflowClosing` | Recover an expired or dead set-closing owner after group quiescence and capacity acquisition. Retain the interrupted attempt without confirming its gate. |
+
+Closure checks every actual task and slice in the set, including later tickets
+excluded from frozen invocation membership. Every task must be receipt-finalized
+and every slice must retain its integration receipt and method-specific proof.
+Fresh canonical PR and Git observations must agree with those receipts and the
+current target. Pending actual members block closing before another attempt.
+Empty sets still require an explicit approved gate or waiver.
+
+`chr-set-closing-input/v1` freezes actual ticket IDs, revisions and source hashes,
+ordered slice receipts and fresh proofs, the approved plan reference/hash,
+closing contract/hash, canonical target commit/tree and prerequisite evidence
+hashes. Commands run on a clean isolated checkout of that exact target, with the
+input JSON on stdin and its reference in `CHR_WORKFLOW_INPUT`. The checkout stays
+outside the operational namespace. The host checks member and evidence images,
+stop intent, lease and freshly observed target again before confirmation.
+Target movement, changed members or a gate that dirties its checkout cannot
+establish completion.
+
+Each set invocation retains a budget of 128 closing attempts; retries and restart
+consume the same counter. Set history is bounded to 4096 attempts across explicitly
+reopened cycles. Each attempt owns its fence, PID birth, lease, immutable input, bounded
+logs and result under `plan/<set-id>/extension/chr/closing/<generation>/`.
+Required gates use the contract's finite timeout; waivers retain their reason
+and a one-minute observation lifetime. Closing shares repository serial capacity,
+operation locks, descendant supervision and durable pause/cancel controls.
+A live owner or descendant blocks recovery. `ReconcileWorkflow` also dispatches
+to an invocation's active set-closing role.
+
+Failure retains `closing_validation_failed`, leaves the set blocked and releases
+its closing role after process quiescence. Retry executes closure alone; validated
+and integrated task evidence, worker budgets and prior deliveries stay intact.
+Interrupted owner recovery retains `interrupted` without a success receipt.
+Changed frozen inputs require reconciliation before retry.
+
+A successful `chr-set-closure/v1` receipt retains the input reference/hash, exact
+snapshot, host command results or explicit waiver, and confirmation time. Receipt,
+set `completed` projection and owning invocation's `set_closures` frontier share
+one replayable transition. The next associated set starts from the confirmed
+canonical target. The final selected set makes its invocation terminal. Historical
+closure receipts and earlier terminal invocations remain immutable; explicit
+approved reopening preserves the receipt in `closure_history`.
 
 ## Manual protocol
 

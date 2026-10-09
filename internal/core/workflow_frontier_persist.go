@@ -67,7 +67,7 @@ func workflowFrontierEvidencePath(id string, cursor int) string {
 // cleared. Unknown fields survive; stale serialized PR/owner bindings must not.
 func workflowOptionalInvocationField(key string) bool {
 	switch key {
-	case "blocker", "lane", "pull_request_binding", "review_binding", "preparation_binding", "submission_binding", "review_restriction", "review_count", "review_repairs", "preparation_count", "execution_target", "confirmed_cursor", "integrated_units", "continuation_checkpoint":
+	case "blocker", "lane", "pull_request_binding", "review_binding", "preparation_binding", "submission_binding", "review_restriction", "review_count", "review_repairs", "preparation_count", "execution_target", "confirmed_cursor", "integrated_units", "continuation_checkpoint", "set_closures", "closing_set":
 		return true
 	default:
 		return false

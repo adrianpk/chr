@@ -124,6 +124,10 @@ func validateWorkflowTaskEvidence(t WorkflowTask) error {
 }
 
 func validateWorkflowSet(s WorkflowSet) error {
+	if err := validateWorkflowClosingBinding(s); err != nil {
+		return err
+	}
+
 	if err := validateWorkflowClosureRefs(s.ClosureRef, s.ClosureHistory); err != nil {
 		return err
 	}

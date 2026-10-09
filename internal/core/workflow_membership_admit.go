@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"slices"
 )
 
 func (s *WorkflowStore) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvocationFile, selection workflowSelection, later []WorkflowPreviewMember) error {
@@ -35,6 +36,7 @@ func (s *WorkflowStore) admitWorkflowLaterMembers(ctx context.Context, run *work
 	}
 
 	appendWorkflowLaterSetImages(run, selection)
+	sortWorkflowLaterSetImages(run, selection)
 
 	delete(run.Excluded, "later")
 	workflowContinueAmendedSet(run)
@@ -42,8 +44,14 @@ func (s *WorkflowStore) admitWorkflowLaterMembers(ctx context.Context, run *work
 	return nil
 }
 
+func sortWorkflowLaterSetImages(run *workflowInvocationFile, selection workflowSelection) {
+	slices.SortFunc(run.SetImages, func(a, b WorkflowInputImage) int {
+		return selection.compareSets(workflowInvocationSetID(a), workflowInvocationSetID(b), run.SetOrderRule)
+	})
+}
+
 func workflowContinueAmendedSet(run *workflowInvocationFile) {
-	if run.Outcome == "set_closure_required" && run.Cursor < len(run.Members) && run.Cursor > 0 && run.Members[run.Cursor].Admission.SetID == run.Members[run.Cursor-1].Admission.SetID {
+	if run.Outcome == "set_closure_required" && run.Cursor < len(run.Members) && run.Members[run.Cursor].Admission.SetID == workflowNextClosingSet(run.WorkflowInvocation) {
 		run.Status, run.Outcome = "pending", "later_work_admitted"
 	}
 }

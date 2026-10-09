@@ -13,7 +13,7 @@ func (s *WorkflowStore) continueWorkflowSteps(ctx context.Context, id string, re
 			continue
 		}
 
-		if reason := workflowContinuationBarrier(run); reason != "" {
+		if reason := workflowContinuationBefore(run); reason != "" {
 			return steps, reason, nil
 		}
 
@@ -67,6 +67,10 @@ func workflowContinuationBarrier(run WorkflowInvocation) string {
 		return "set_closure_required"
 	}
 
+	if run.Outcome == "closing_validation_failed" || run.Outcome == "interrupted" {
+		return run.Outcome
+	}
+
 	if run.Status == "blocked" || run.Status == "waiting_capacity" {
 		return run.Status
 	}
@@ -75,6 +79,12 @@ func workflowContinuationBarrier(run WorkflowInvocation) string {
 }
 
 func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run WorkflowInvocation, request WorkflowContinuationRequest, ports WorkflowContinuationPorts) error {
+	if workflowContinuationClosing(run) {
+		_, err := s.CloseWorkflowInvocationSet(ctx, run.ID, request.PullRequest.BaseBranch, WorkflowFrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
+
+		return err
+	}
+
 	if run.DeliveryRef != "" {
 		_, err := s.AdvanceWorkflowFrontier(ctx, run.ID, WorkflowFrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
 
@@ -100,4 +110,16 @@ func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run Wor
 	}
 
 	return s.executeWorkflowSliceTask(ctx, run.ID, request.Worker)
+}
+
+func workflowContinuationClosing(run WorkflowInvocation) bool {
+	return !workflowInvocationTerminal(run.Status) && run.StopIntent == "" && run.Status != "paused" && (run.Outcome == "set_closure_required" || run.Outcome == "closing_validation_failed" || run.Outcome == "interrupted" || run.ClosingSet != "")
+}
+
+func workflowContinuationBefore(run WorkflowInvocation) string {
+	if workflowContinuationClosing(run) {
+		return ""
+	}
+
+	return workflowContinuationBarrier(run)
 }

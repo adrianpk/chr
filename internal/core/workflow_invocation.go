@@ -69,6 +69,8 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
+	Closures        []WorkflowInvocationClosure     `json:"set_closures,omitempty"`
+	ClosingSet      string                          `json:"closing_set,omitempty"`
 	ExecutionTarget *WorkflowPreviewTarget          `json:"execution_target,omitempty"`
 	ConfirmedCursor int                             `json:"confirmed_cursor,omitempty"`
 	Deliveries      []WorkflowUnitDelivery          `json:"integrated_units,omitempty"`
@@ -298,10 +300,6 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 		return run, err
 	}
 	defer func() { err = errors.Join(err, s.releaseWorkflowAllocation(guard)) }()
-
-	if len(preview.Members) == 0 {
-		return run, fmt.Errorf("selected workflow has no prepared unfinished tasks: %v", preview.Excluded)
-	}
 
 	number, err := s.nextWorkflowInvocationNumber(ctx)
 	if err != nil {

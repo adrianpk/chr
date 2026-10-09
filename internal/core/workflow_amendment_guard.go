@@ -43,6 +43,10 @@ func (s *WorkflowStore) workflowAmendmentImageMatches(set WorkflowRecord, reques
 }
 
 func (s *WorkflowStore) checkWorkflowAmendmentPlan(set WorkflowRecord, request WorkflowSetAmendmentRequest) error {
+	if set.Set.Status == "closing" {
+		return ErrWorkflowOwned
+	}
+
 	plan := request.Plan
 	if set.Set.PlanHash == plan.PlanHash || set.Set.UseCase != plan.UseCase || set.Set.UseCaseOrder != plan.UseCaseOrder {
 		return fmt.Errorf("%w: changed plan must preserve set association and order", ErrWorkflowConflict)
@@ -95,6 +99,10 @@ func (s *WorkflowStore) checkWorkflowAmendmentOwner(ctx context.Context, run wor
 }
 
 func (s *WorkflowStore) checkWorkflowSetAmendmentEvidence(set WorkflowRecord) error {
+	if err := s.checkWorkflowClosingEvidence(set); err != nil {
+		return err
+	}
+
 	for _, binding := range set.Set.Amendments {
 		if err := s.checkWorkflowAmendmentEvidence(set, binding); err != nil {
 			return err

@@ -23,7 +23,7 @@ func validateWorkflowContinuation(run workflowInvocationFile) error {
 }
 
 func validWorkflowContinuationPosition(checkpoint WorkflowContinuationCheckpoint, run workflowInvocationFile) bool {
-	return checkpoint.SourceRevision > 0 && checkpoint.SourceRevision < run.Revision && checkpoint.MemberCount >= 1 && checkpoint.MemberCount <= len(run.Members) && checkpoint.Cursor >= 0 && checkpoint.Cursor <= checkpoint.MemberCount && checkpoint.ConfirmedCursor >= 0 && checkpoint.ConfirmedCursor <= checkpoint.Cursor && checkpoint.AttemptCount >= 0 && checkpoint.AttemptCount <= len(run.Attempts)
+	return checkpoint.SourceRevision > 0 && checkpoint.SourceRevision < run.Revision && checkpoint.MemberCount >= 0 && checkpoint.MemberCount <= len(run.Members) && checkpoint.Cursor >= 0 && checkpoint.Cursor <= checkpoint.MemberCount && checkpoint.ConfirmedCursor >= 0 && checkpoint.ConfirmedCursor <= checkpoint.Cursor && checkpoint.AttemptCount >= 0 && checkpoint.AttemptCount <= len(run.Attempts)
 }
 
 func validWorkflowContinuationEvidence(checkpoint WorkflowContinuationCheckpoint) bool {
@@ -31,7 +31,7 @@ func validWorkflowContinuationEvidence(checkpoint WorkflowContinuationCheckpoint
 		return false
 	}
 
-	if checkpoint.Steps < 0 || checkpoint.Steps > WorkflowPageLimit || !slices.Contains([]string{"step_limit", "awaiting_authority", "stopped", "set_closure_required", "blocked", "waiting_capacity"}, checkpoint.Reason) {
+	if checkpoint.Steps < 0 || checkpoint.Steps > WorkflowPageLimit || !slices.Contains([]string{"step_limit", "awaiting_authority", "stopped", "set_closure_required", "blocked", "waiting_capacity", "closing_validation_failed", "interrupted"}, checkpoint.Reason) {
 		return false
 	}
 

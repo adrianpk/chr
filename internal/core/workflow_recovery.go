@@ -18,13 +18,7 @@ func (s *WorkflowStore) ReconcileWorkflow(ctx context.Context, id string) (resul
 			return readErr
 		}
 
-		if len(run.Attempts) == 0 {
-			result = run.WorkflowInvocation
-
-			return nil
-		}
-
-		if readErr = owner.reconcileWorkflowOwner(ctx, run); readErr != nil {
+		if readErr = owner.reconcileWorkflowInvocation(ctx, run); readErr != nil {
 			return readErr
 		}
 
@@ -35,6 +29,25 @@ func (s *WorkflowStore) ReconcileWorkflow(ctx context.Context, id string) (resul
 	})
 
 	return result, err
+}
+
+func (s *WorkflowStore) reconcileWorkflowInvocation(ctx context.Context, run workflowInvocationFile) error {
+	if run.ClosingSet != "" {
+		set, err := s.readRecord(run.SetImages[len(run.Closures)].Path)
+		if err != nil {
+			return err
+		}
+
+		_, err = s.reconcileWorkflowClosing(ctx, set)
+
+		return err
+	}
+
+	if len(run.Attempts) == 0 {
+		return nil
+	}
+
+	return s.reconcileWorkflowOwner(ctx, run)
 }
 
 func workflowRecoverableOwner(attempt WorkflowAttempt) error {

@@ -107,7 +107,11 @@ func validateWorkflowCandidateRef(run workflowInvocationFile) error {
 }
 
 func validWorkflowInvocationBounds(run workflowInvocationFile) bool {
-	return len(run.Members) >= 1 && len(run.Members) <= WorkflowRecordLimit && run.Cursor >= 0 && run.Cursor <= len(run.Members) && len(run.Attempts) <= WorkflowRecordLimit && len(run.SetImages) <= WorkflowRecordLimit
+	return validWorkflowInvocationExtent(run) && len(run.Members) <= WorkflowRecordLimit && run.Cursor >= 0 && run.Cursor <= len(run.Members) && len(run.Attempts) <= WorkflowRecordLimit && len(run.SetImages) <= WorkflowRecordLimit
+}
+
+func validWorkflowInvocationExtent(run workflowInvocationFile) bool {
+	return len(run.Members) > 0 || len(run.SetImages) > 0 && (run.Selection.Selector.Extent == "slice_set" || run.Selection.Selector.Extent == "use_case")
 }
 
 func validateWorkflowInvocationMembers(run workflowInvocationFile) error {
@@ -232,6 +236,8 @@ func workflowClaimResources(run workflowInvocationFile) map[string]bool {
 	}
 
 	for _, image := range run.SetImages {
+		resources["set:"+workflowInvocationSetID(image)] = true
+
 		if image.UseCase != "" {
 			resources["use_case:"+image.UseCase] = true
 		}

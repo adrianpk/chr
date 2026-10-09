@@ -28,11 +28,31 @@ func validateWorkflowFrontier(run workflowInvocationFile) error {
 }
 
 func validateWorkflowExecutionTarget(run workflowInvocationFile) error {
+	if err := validateWorkflowInvocationClosures(run); err != nil {
+		return err
+	}
+
+	var target *WorkflowPreviewTarget
+
+	cursor := -1
+
+	if len(run.Deliveries) != 0 {
+		last := run.Deliveries[len(run.Deliveries)-1]
+		target, cursor = &last.NextTarget, last.Cursor
+	}
+
+	if len(run.Closures) != 0 {
+		last := run.Closures[len(run.Closures)-1]
+		if last.Cursor >= cursor {
+			target = &last.Target
+		}
+	}
+
 	if run.ExecutionTarget != nil {
-		if len(run.Deliveries) == 0 || *run.ExecutionTarget != run.Deliveries[len(run.Deliveries)-1].NextTarget {
+		if target == nil || *run.ExecutionTarget != *target {
 			return ErrWorkflowConflict
 		}
-	} else if len(run.Deliveries) != 0 {
+	} else if target != nil {
 		return ErrWorkflowConflict
 	}
 
@@ -99,6 +119,10 @@ func workflowDeliveredUnitView(run workflowInvocationFile, delivery WorkflowUnit
 }
 
 func (s *WorkflowStore) checkWorkflowContinuationEvidence(ctx context.Context, run workflowInvocationFile) error {
+	if err := s.checkWorkflowInvocationClosureEvidence(run); err != nil {
+		return err
+	}
+
 	for _, delivery := range run.Deliveries {
 		if err := ctx.Err(); err != nil {
 			return err

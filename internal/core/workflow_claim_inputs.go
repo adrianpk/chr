@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -22,7 +23,7 @@ func (s *WorkflowStore) nextWorkflowInvocationNumber(ctx context.Context) (int, 
 }
 
 func (s *WorkflowStore) freezeWorkflowSets(ctx context.Context, run *workflowInvocationFile) error {
-	snapshot, err := s.readSnapshot(ctx)
+	selection, err := s.readWorkflowSelection(ctx)
 	if err != nil {
 		return err
 	}
@@ -32,13 +33,47 @@ func (s *WorkflowStore) freezeWorkflowSets(ctx context.Context, run *workflowInv
 		ids[member.Admission.SetID] = true
 	}
 
-	for _, record := range snapshot.Records {
-		if record.Set != nil && ids[record.ID] {
+	for _, record := range selection.sets {
+		if workflowFrozenSetMatches(record, run.Selection.Selector, ids) {
 			run.SetImages = append(run.SetImages, WorkflowInputImage{Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, UseCase: record.Set.UseCase})
 		}
 	}
 
+	slices.SortFunc(run.SetImages, func(a, b WorkflowInputImage) int {
+		return selection.compareSets(workflowInvocationSetID(a), workflowInvocationSetID(b), run.SetOrderRule)
+	})
+
+	if len(run.Members) == 0 && len(run.SetImages) == 0 {
+		return fmt.Errorf("selected workflow has no prepared unfinished tasks or sets")
+	}
+
+	if workflowInvocationNeedsClosing(run.WorkflowInvocation) {
+		run.Status, run.Outcome = "waiting_integration", "set_closure_required"
+	}
+
 	return nil
+}
+
+func workflowFrozenSetMatches(set WorkflowRecord, selector WorkflowSelector, memberSets map[string]bool) bool {
+	if selector.Extent == "slice_set" {
+		return set.ID == selector.Identity && set.Set.Status != "completed"
+	}
+
+	if selector.Extent == "use_case" {
+		return set.Set.UseCase == selector.Identity && set.Set.Status != "completed"
+	}
+
+	return memberSets[set.ID]
+}
+
+func workflowInvocationNeedsClosing(run WorkflowInvocation) bool {
+	if run.Selection.Selector.Extent != "slice_set" && run.Selection.Selector.Extent != "use_case" {
+		return false
+	}
+
+	next := workflowNextClosingSet(run)
+
+	return next != "" && (run.Cursor == len(run.Members) || run.Members[run.Cursor].Admission.SetID != next)
 }
 
 func (s *WorkflowStore) checkWorkflowInputs(ctx context.Context, run workflowInvocationFile) error {

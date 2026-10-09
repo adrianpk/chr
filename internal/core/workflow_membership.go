@@ -36,7 +36,7 @@ func (s *WorkflowStore) reconcileWorkflowMembership(ctx context.Context, run wor
 		return run, err
 	}
 
-	if run.Lane != nil {
+	if run.Lane != nil || run.ClosingSet != "" {
 		return run, nil
 	}
 
