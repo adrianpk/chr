@@ -40,7 +40,7 @@ with Go 1.27.1, the retained CLI curation fixture and scoped uncached 30-minute
 test timeout. Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4GG393N2TJ9FCXZVHBFG0GY`.
 Slice 10 implementation is validated; T10.1–T10.4 are reviewing. The report is
-reviewing, with canonical PR preparation in progress. PR-head validation uses
+reviewing, with canonical PR [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373). PR-head validation uses
 the controller's ordered evidence ledger.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
@@ -76,7 +76,7 @@ Fast-forward into `dev`.
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | integrated | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | integrated | 4/4 | [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) |
-| Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | reviewing | 0/4 | pending |
+| Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | reviewing | 0/4 | [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373) |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
 | Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | not_started | 0/4 | pending |
 
@@ -675,15 +675,16 @@ Acceptance: A09, A17, A21, A23.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373); opened in Acta `01M4GW12A6HSE9VSHD2C13WRZM`.
 - Merge commit: pending.
+- Report introduction: `e0e26eb99a2e01f3d891d9f0a58ea874103af585`; full immutable introduction link recorded in the PR.
 - Report status: reviewing; CLI/TUI/Web/daemon behavior and all four task checks recorded.
 - Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket reviewing. T10.2 `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` is reviewing; T10.3 `d378057aac57e206982d86710d1f03d982dae81c` is reviewing; T10.4 `cd76e965c5ab6ddffe0c95ed4c3b4b0753ec742e` is reviewing.
 - T10.1: `make verify`, focused CLI admission checks, focused CLI/core race checks and `git diff --check` passed. The final ordered controller checks remain pending.
 - T10.2: `make verify`, adapter race checks, focused domain control/inspection race checks and `git diff --check` passed. Domain and real adapter/model checks cover preserved identities, stale conflicts, actual checkpoints, exact approval and nonmutating linked-worktree inspection. Acta commit event: `01M4GPNPTK1PE002KAMC8HQY0H`.
 - T10.3: `make verify`, focused Web workflow/race checks, `scripts/qa/web-ui-smoke.sh` and `git diff --check` passed. Real handler/browser checks cover native selection, worker/continuation checkpoints, ownership and revision failures, human review and exact approval. All 18 gate input files stayed unchanged. Acta commit event: `01M4GSPSDZY5M3DZ0WN7J5Y4QA`.
 - T10.4: `make verify`, `go test -race ./internal/app -run '^(TestDaemonWorkflow.*|TestWorkflowManualSurfaces)$' -count=1`, documentation links and `git diff --check` passed. Real daemon startup, owner exclusion/recovery, worker stops, heartbeat/coordinator stop and manual adapter status checks preserve authorization and evidence. Acta commit event: `01M4GVVH5AWFTCX1Q25THNS2JF`.
-- Blockers: none observed. Canonical PR preparation is in progress.
+- Blockers: none observed. Canonical PR-head validation uses the ordered controller ledger.
 
 ## Slice 11: Defaults and authority transition
 
