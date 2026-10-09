@@ -40,7 +40,7 @@ with the retained CLI curation fixture and scoped uncached 30-minute test timeou
 Its report is delivered and all four task tickets are solved. Acta records the
 canonical merge in `01M4FZER759JJQFE97B3MJW8GN`. Slice 9 is active in its dedicated recorded branch. T9.1 is validated in
 `14a19870f53626152768c5848e03f3241d984584` after subprocess, expanded race and repository checks.
-T9.2 is validated in `70d0706d571484e6846770b5d2c200881f8d3d59` after expanded race, clone/adoption and repository checks. T9.3 is active for independent target publication; T9.4 remains ready.
+T9.2 is validated in `70d0706d571484e6846770b5d2c200881f8d3d59` after expanded race, clone/adoption and repository checks. T9.3 is validated in `bf4e92cc3b10a92736a712c198d0a5bf4f781516` after real publisher, target-movement, race and repository checks. T9.4 is active for replacing native coarse exclusion and proving independent recovery.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -74,7 +74,7 @@ Fast-forward into `dev`.
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | integrated | 4/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | integrated | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
-| Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | active | 2/4 | pending |
+| Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | active | 3/4 | pending |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | not_started | 0/4 | pending |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
 | Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | not_started | 0/4 | pending |
@@ -568,12 +568,12 @@ Plan contract: [Slice 9](../plan/ticket-native-workflow.md#slice-9-independent-p
 | --- | --- | --- | --- | --- |
 | T9.1 | [TKT-20261008141417](../ticket/reviewing/20261008141417-ticket-native-t9-1.md) | validated | 14a19870f53626152768c5848e03f3241d984584 | Introduce repository-wide process reservations and validated capacity/queue admission across worktrees/namespaces. |
 | T9.2 | [TKT-20261008141418](../ticket/reviewing/20261008141418-ticket-native-t9-2.md) | validated | 70d0706d571484e6846770b5d2c200881f8d3d59 | Enforce exclusive task/slice/set/use-case frontier claims and fenced result application on every start path. |
-| T9.3 | [TKT-20261008141419](../ticket/in_progress/20261008141419-ticket-native-t9-3.md) | in_progress | pending | Serialize publication per canonical remote target, including uncertain outcomes and external target movement. |
-| T9.4 | [TKT-20261008141420](../ticket/ready/20261008141420-ticket-native-t9-4.md) | ready | pending | Replace the coarse lock only after subprocess/crash/race acceptance passes and document the ownership boundary. |
+| T9.3 | [TKT-20261008141419](../ticket/reviewing/20261008141419-ticket-native-t9-3.md) | validated | bf4e92cc3b10a92736a712c198d0a5bf4f781516 | Serialize publication per canonical remote target, including uncertain outcomes and external target movement. |
+| T9.4 | [TKT-20261008141420](../ticket/in_progress/20261008141420-ticket-native-t9-4.md) | in_progress | pending | Replace the coarse lock only after subprocess/crash/race acceptance passes and document the ownership boundary. |
 
 ### Validation
 
-Status: T9.1–T9.2 passed their task checks; T9.3 is active.
+Status: T9.1–T9.3 passed their task checks; T9.4 is active.
 
 Successful T9.1 checks: `make verify`; `go test -race ./internal/core ./internal/app -run '^(TestWorkflowCapacity|TestWorkflowClaim|TestWorkflowInvocation|TestWorkflowRecovery|TestWorkflowTask|TestWorkflowManual|TestWorkflowStop|TestWorkflowLoose|TestWorkflowMembership|TestWorkflowClosing|TestServiceWorkflow|TestWorkAuthority|TestLoadWorkspaceConfig)' -count=1`;
 `git diff --check`. The retained CLI curation fixture and scoped uncached
@@ -598,6 +598,17 @@ and candidate boundaries. Subprocesses retain one task/hierarchy owner at
 capacity two. The corrected admission and adoption fixtures passed the full
 repository gate. Acta: `01M4G62NGCRDVEKA0QENG09XJG`.
 
+Successful T9.3 checks: `make verify`; independent publication, submission
+exclusion/atomic guards/journal recovery and concurrent observation race checks;
+ten traced provider-crash repetitions; `git diff --check`. Exact commands are
+recorded in its reviewing ticket. Real publisher processes in separate namespaces
+and linked aliases serialize one Git target. Uncertain outcomes retain ownership
+through cancellation; stale combined validation/review must be replaced after
+target movement. Human waits free worker capacity, and conflicts preserve the
+other integrated receipt. One full-gate canonical fetch failure did not reproduce
+in ten targeted repetitions; the complete traced retry passed on unchanged
+source. Its cause remains unresolved. Acta: `01M4G8CABF3ESM4NS0H8V1149W`.
+
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`; subprocess barriers must
 prove actual overlap/exclusion, not infer it from a race-detector pass.
@@ -611,9 +622,9 @@ Acceptance: A09, A10, A11, A12; capacity/admission bounds in A24.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commits and ticket lifecycle evidence: T9.1 `14a19870f53626152768c5848e03f3241d984584` validated, ticket reviewing; T9.2 `70d0706d571484e6846770b5d2c200881f8d3d59` validated, ticket reviewing; T9.3 in progress; T9.4 ready.
-- Validation evidence: T9.1–T9.2 task checks passed; the complete ordered clean PR-head controller checks remain pending.
-- Blockers: none observed; T9.3 is active.
+- Task commits and ticket lifecycle evidence: T9.1 `14a19870f53626152768c5848e03f3241d984584` validated, ticket reviewing; T9.2 `70d0706d571484e6846770b5d2c200881f8d3d59` validated, ticket reviewing; T9.3 `bf4e92cc3b10a92736a712c198d0a5bf4f781516` validated, ticket reviewing; T9.4 in progress.
+- Validation evidence: T9.1–T9.3 task checks passed; the complete ordered clean PR-head controller checks remain pending.
+- Blockers: no persistent blocker observed after retry; T9.4 is active. The one earlier canonical fetch failure is recorded above.
 
 ## Slice 10: Shared operation controls
 
