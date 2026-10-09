@@ -244,6 +244,57 @@ malformed output fails; a failed or interrupted review retains a paused
 cancel is terminal. Host death during input, claim, decision or approval writes
 replays the guarded journal; accepted decisions are reused without another role.
 
+## Durable submission and target exclusion
+
+| Operation | Contract |
+| --- | --- |
+| `SubmitWorkflowSliceIntegration` | Recheck the exact publication guard, persist intent and exclusion, then call the guarded provider once. Existing uncertain intent enters observation. |
+| `ReconcileWorkflowSubmission` | Verify actual canonical PR/Git delivery or a definitively unpublished operation without consuming a submission attempt. |
+| `ReadWorkflowSubmission` | Read the authoritative repository journal, including intent retained before an interrupted invocation projection. |
+
+`WorkflowPublicationProvider` extends the guarded capability with submission and
+stable-ID observation. Submission must protect source, validated base and exact
+prepared result in the same server transaction. The current source-only native
+Forgejo/GitHub adapter paths reject submission without calling legacy merge.
+
+One `chr-integration-journal/v1` file per integration unit/invocation lives in
+`chr-workflow-publications/<key>.json` under the canonical Git common directory.
+Its atomic image retains the stable submission ID, candidate identity/hash,
+canonical PR, source/base/method/result proof, prepared lane, exact validation and
+review bindings, current policy, attempt number, timestamps and target exclusion.
+The invocation's `submission_binding` is a projection written after that image.
+Host death between the two writes leaves authoritative intent and exclusion;
+recovery never infers permission to submit from a missing projection.
+
+Publication exclusion uses normalized canonical repository and target branch,
+independent of namespace or project aliases. All linked worktrees share the same
+coordinator. The durable common-directory journal continues to exclude the target
+after cancellation, process death, worker lease expiry or loss of an invocation
+projection. Preparation and review do not reserve target publication.
+
+A provider response retains `awaiting_observation`, even when accepted with a
+result commit. An open PR or missing result cannot prove failure. The provider's
+unpublished observation must name this exact submission and guarantee it cannot
+publish later; canonical PR and target observations are rechecked before sealing
+it. Confirmed delivery requires the matching merged canonical PR and fetched,
+reachable, method-specific Git proof for the exact prepared result. Observation
+does not clear stop intent, create a receipt or mark any task done.
+
+Submission IO and reconciliation have three-minute deadlines. Durable pause or
+cancel cancels a live provider call while preserving uncertain exclusion. Each
+integration unit/invocation permits three submissions by default; an explicit
+execution-policy limit permits 1 through 10. An omitted policy field retains its
+legacy request identity and uses the same effective limit. Sealed unpublished
+attempts require fresh canonical observation before a guarded submission within
+the remaining budget. Changed
+candidates and repeated starts do not reset consumption. Exhaustion retains
+`integration_submission_budget_exhausted` with an operator action owner.
+
+Each journal remains within 1 MiB, holds at most ten attempts, and the repository
+coordinator bounds retained journals to 4096. Invalid images, unknown schemas,
+symlink traversal or exceeded bounds fail closed. Accepted responses and later
+observation update the guarded journal; earlier sealed attempts remain retained.
+
 ## External integration proof
 
 `VerifyWorkflowSliceIntegration` reads the bound canonical PR and fetches its

@@ -13,8 +13,9 @@ import (
 
 // WorkflowExecutionPolicy freezes finite execution limits at admission.
 type WorkflowExecutionPolicy struct {
-	WorkerTimeoutSeconds int `json:"worker_timeout_seconds"`
-	MaxWorkerAttempts    int `json:"max_worker_attempts"`
+	WorkerTimeoutSeconds   int `json:"worker_timeout_seconds"`
+	MaxWorkerAttempts      int `json:"max_worker_attempts"`
+	MaxIntegrationAttempts int `json:"max_integration_attempts,omitempty"`
 }
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
@@ -98,6 +99,7 @@ type WorkflowInvocation struct {
 	ReviewRepairs     []WorkflowReviewRepairBudget `json:"review_repairs,omitempty"`
 	Preparation       *WorkflowPreparationBinding  `json:"preparation_binding,omitempty"`
 	PreparationCount  int                          `json:"preparation_count,omitempty"`
+	Submission        *WorkflowSubmissionBinding   `json:"submission_binding,omitempty"`
 }
 
 type workflowInvocationFile struct {
@@ -175,7 +177,7 @@ func validWorkflowRequestKey(key string) bool {
 }
 
 func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {
-	return policy.WorkerTimeoutSeconds >= 1 && policy.WorkerTimeoutSeconds <= 86400 && policy.MaxWorkerAttempts >= 1 && policy.MaxWorkerAttempts <= 128
+	return policy.WorkerTimeoutSeconds >= 1 && policy.WorkerTimeoutSeconds <= 86400 && policy.MaxWorkerAttempts >= 1 && policy.MaxWorkerAttempts <= 128 && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10
 }
 
 func workflowStartHash(request WorkflowStartRequest) (string, error) {
