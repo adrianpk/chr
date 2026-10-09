@@ -40,14 +40,16 @@ Its report is delivered and all four task tickets are solved. Acta records the
 canonical merge in `01M4FFP43DWAEPQST2XZHKY622`. Its integrated summary row was
 aligned on dev in `19eb1c8ec126ecb9cce65f4fb9fb0eb5c7a6104d`
 (Acta `01M4FKYPDXBQXW7R0VRCBXF3GE`).
-Slice 8 is active for independent-ticket integration, fresh filtered selection,
+Slice 8 is reviewing for independent-ticket integration, fresh filtered selection,
 bounded recovery and explicit legacy authority mapping. T8.1 is validated in
 `249e5d1b771702cb8e332cbb9447f71452a7e86a` after focused race and repository
 checks. T8.2 is validated in `bc35a963b3eaec06fcfd93a57811ab0cbbd75389` after fresh queue,
 real Git, host-death, focused race and repository checks. T8.3 is validated in
 `5371010ab32eda6c035cee220369719491c47370` after bounded selection, prerequisite stop/resume,
-service, journal-crash, expanded race and repository checks. T8.4 is active in the
-dedicated slice branch.
+service, journal-crash, expanded race and repository checks. T8.4 is validated in
+`7e1341e2fb4b95104d005a4ad70d5cac73dd92ac` after native/legacy entrypoint, source-publication,
+real Git, expanded race and repository checks. All four tickets are reviewing;
+the slice report is introduced with this checkpoint and its canonical PR is pending.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -80,7 +82,7 @@ Fast-forward into `dev`.
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | integrated | 4/4 | [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368) |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | integrated | 4/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
-| Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | active | 3/4 | pending |
+| Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | reviewing | 4/4 | pending |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | not_started | 0/4 | pending |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | not_started | 0/4 | pending |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
@@ -474,7 +476,7 @@ Acceptance: A03, A04, A07, A13, A19, A20; checkpoint bounds in A24.
 
 ## Slice 8: Loose-ticket integration loop
 
-Status: active
+Status: reviewing
 
 Prerequisite: satisfied by verified PR #370 integration into dev.
 
@@ -488,14 +490,14 @@ Plan contract: [Slice 8](../plan/ticket-native-workflow.md#slice-8-loose-ticket-
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T8.1 | [TKT-20261008141413](../ticket/in_progress/20261008141413-ticket-native-t8-1.md) | validated | 249e5d1b771702cb8e332cbb9447f71452a7e86a | Compose exact independent-ticket and loose extents with the common candidate/integration lifecycle. |
-| T8.2 | [TKT-20261008141414](../ticket/in_progress/20261008141414-ticket-native-t8-2.md) | validated | bc35a963b3eaec06fcfd93a57811ab0cbbd75389 | Reselect eligible loose work after each integration without claiming slice-owned tickets. |
-| T8.3 | [TKT-20261008141415](../ticket/in_progress/20261008141415-ticket-native-t8-3.md) | validated | 5371010ab32eda6c035cee220369719491c47370 | Preserve bounded selection, blocker-stop, duplicate-request and resume behavior. |
-| T8.4 | [TKT-20261008141416](../ticket/in_progress/20261008141416-ticket-native-t8-4.md) | in_progress | pending | Map legacy `run-all` and single-ticket entrypoints according to explicit authority mode. |
+| T8.1 | [TKT-20261008141413](../ticket/reviewing/20261008141413-ticket-native-t8-1.md) | validated | 249e5d1b771702cb8e332cbb9447f71452a7e86a | Compose exact independent-ticket and loose extents with the common candidate/integration lifecycle. |
+| T8.2 | [TKT-20261008141414](../ticket/reviewing/20261008141414-ticket-native-t8-2.md) | validated | bc35a963b3eaec06fcfd93a57811ab0cbbd75389 | Reselect eligible loose work after each integration without claiming slice-owned tickets. |
+| T8.3 | [TKT-20261008141415](../ticket/reviewing/20261008141415-ticket-native-t8-3.md) | validated | 5371010ab32eda6c035cee220369719491c47370 | Preserve bounded selection, blocker-stop, duplicate-request and resume behavior. |
+| T8.4 | [TKT-20261008141416](../ticket/reviewing/20261008141416-ticket-native-t8-4.md) | validated | 7e1341e2fb4b95104d005a4ad70d5cac73dd92ac | Map legacy `run-all` and single-ticket entrypoints according to explicit authority mode. |
 
 ### Validation
 
-Status: T8.1 through T8.3 passed their task checks; T8.4 and complete candidate checks remain pending.
+Status: all four tasks passed their checks; complete ordered PR-head evidence remains pending.
 
 Successful T8.1 checks: `make verify`;
 `go test -race ./internal/core ./internal/app -run '^(TestWorkflowTicket|TestServiceWorkflowTicket|TestWorkflowSliceRepair|TestWorkflowReviewRepair)' -count=1`;
@@ -528,6 +530,16 @@ An exact-ticket manual-retry regression found by the first repository gate was
 corrected before the expanded race checks and complete gate passed. Acta:
 `01M4FQ48XQPQHT31XWXY3ZY5EE`.
 
+Successful T8.4 checks: `make verify`; `go test -race ./internal/core ./internal/app -run '^(TestWorkAuthority|TestWorkflowEntry|TestWorkflowLegacyEntry|TestWorkflowSource|TestServiceWork|TestServiceStartAgentWork|TestServiceStartAllReadyAgentWork|TestServicePreviewAgentWork|TestTicketStart|TestWorkRunAll|TestWorkflowTicket|TestWorkflowLoose|TestWorkflowContinuation|TestWorkflowReviewRepair)' -count=1`;
+`git diff --check`. The same scoped fixture and timeout were used. Native and
+legacy entrypoint fixtures confirm explicit authority/scope, loose grouped-work
+exclusion, exact independent/grouped execution, unchanged transitional behavior,
+read-only previews and frozen-target attachment. Actual bare Git confirms exact
+source publication, leases, idempotent retry, collision/stop/evidence guards and
+repaired sources on one retained PR before fresh approval. Legacy key/source
+checks reject adopted work before worker start. Strict lint reported zero issues.
+Acta: `01M4FSRRM8918YRYFKWA86Q1R5`.
+
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`.
 
@@ -539,10 +551,11 @@ Acceptance: A05, A07, A13, A19.
 
 - PR: pending.
 - Merge commit: pending.
-- Report status: not created.
-- Task commits: T8.1 `249e5d1b771702cb8e332cbb9447f71452a7e86a`, T8.2 `bc35a963b3eaec06fcfd93a57811ab0cbbd75389`, T8.3 `5371010ab32eda6c035cee220369719491c47370`; T8.4 pending. T8.1 through T8.3 are validated; T8.4 is in progress. Tickets remain unfinished until slice integration.
-- Validation evidence: T8.1 through T8.3 task checks passed; complete ordered candidate evidence remains pending.
-- Blockers: none observed; T8.4 is active.
+- Report status: reviewing; [complete Slice 8 report](../report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md).
+- Task commits: T8.1 `249e5d1b771702cb8e332cbb9447f71452a7e86a`, T8.2 `bc35a963b3eaec06fcfd93a57811ab0cbbd75389`, T8.3 `5371010ab32eda6c035cee220369719491c47370`, T8.4 `7e1341e2fb4b95104d005a4ad70d5cac73dd92ac`. All four tasks are validated and their tickets are reviewing. Tickets remain unfinished until slice integration.
+- Validation evidence: all four task checks passed; complete ordered PR-head evidence remains pending.
+- Acta task events: T8.1 `01M4FHF9EDFRYB4N11C57RSVD4`, T8.2 `01M4FKQMCBZ2VWXTEP5FXFJCVW`, T8.3 `01M4FQ48XQPQHT31XWXY3ZY5EE`, T8.4 `01M4FSRRM8918YRYFKWA86Q1R5`.
+- Blockers: none observed; canonical PR preparation is active.
 
 ## Slice 9: Independent parallel runners
 
