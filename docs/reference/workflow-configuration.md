@@ -36,10 +36,9 @@ work:
 ```
 
 The explicit human-review mode in this example overrides the version-one
-trusted-auto-merge default. Adding the marker to an existing project changes
-absent defaults; preserve its effective review and authority choices explicitly
-when making that policy decision. Reading configuration never writes the marker
-or converts historical records.
+trusted-auto-merge default. Use the explicit upgrade operation below for an
+existing project so its prior policy is recorded before the marker is written.
+Reading configuration never writes the marker or converts historical records.
 
 | Key | Version-one default | Accepted values |
 | --- | --- | --- |
@@ -91,6 +90,56 @@ on native extent admission retains that restriction for the invocation. The
 configuration command can show its effect without admitting work. Invocation
 restrictions cannot enable automatic review or relax a project review mode.
 A conflicting restriction on an existing entry rejects reuse of that invocation.
+
+## Selected legacy project upgrade
+
+Observe the selected project's revision, then supply that exact hash and an
+explicit authority choice:
+
+```sh
+chr work config --dir /path/to/project --json
+chr work upgrade --dir /path/to/project --config-revision <revision> --state-authority tickets --json
+```
+
+`--state-authority` accepts `tickets` or `tracker_compat` and is required. Ticket
+authority selects isolated worktrees. Tracker compatibility retains the previous
+workspace mode. Other explicit configuration and unrelated sections remain in
+place. Missing version-one execution keys resolve to their version defaults.
+
+Omitting `--review-mode` preserves the prior effective review mode, including
+legacy absent human review and explicit agentic or trusted modes. An explicit
+new `--review-mode human_review|agentic_review|trusted_auto_merge` is required
+to change that choice. The version marker cannot silently enable automatic
+integration during this operation.
+
+The credential-free snapshot at
+`.chr/default/workflow-upgrades/<request-hash>.json` records prior effective
+values, their sources and the observed revision before publishing the marker.
+The operation requires unchanged legacy policy, repository-wide quiescence,
+exclusive worker capacity and legacy operation locks across linked worktrees
+and namespaces. Unfinished native invocations or pending/running legacy
+executions block it. Existing version-one projects are not reconfigured by
+upgrade; an exact completed request can be retried without a new snapshot.
+
+By default, upgrade changes only configuration and leaves legacy records intact.
+To adopt selected active work in the same transition, supply `--adopt-file` with
+one bounded JSON `WorkflowPlanAdoptionOptions` envelope. Its `Plan` is the full
+approved generated plan contract, `PlanPath` is its namespace-relative metadata
+path, `SourceHash` binds the observed metadata and body, and `Tasks` is the exact
+map of `task_id`, namespace-relative `path` and `source_hash` for every approved
+task. This requires ticket authority. Unknown JSON fields, multiple objects,
+stale images, duplicate identities, ambiguous ownership and active attempts
+block adoption before the pending policy transition is written. Original keys,
+creation times, compatible metadata, bodies and history are preserved; unrelated
+historical tickets are not converted.
+
+An interrupted upgrade retains a checksummed pending record at
+`.chr/default/tmp/workflow-upgrade.json`. Config inspection, execution policy,
+publication, ordinary materialization and ordinary adoption report the pending
+transition. Retry the original command with the original observed revision,
+choices and selection envelope to resume it. Changed config, snapshots or a
+foreign request block recovery and preserve the conflicting images for explicit
+reconciliation. Reading a project never finishes an upgrade automatically.
 
 ## Frozen execution and current publication
 

@@ -22,12 +22,30 @@ type ExecutionRepository interface {
 	UpdateExecution(ctx context.Context, record ExecutionRecord) error
 	GetExecution(ctx context.Context, id string) (ExecutionRecord, error)
 	ListProjectExecutions(ctx context.Context, projectID string) ([]ExecutionRecord, error)
+	RequireProjectQuiescent(ctx context.Context, projectID string) error
 	ListTicketExecutions(ctx context.Context, projectID, ticketKey string) ([]ExecutionRecord, error)
 	Close() error
 }
 
 type sqliteExecutionRepository struct {
 	db *sql.DB
+}
+
+// RequireProjectQuiescent observes at most one unfinished legacy owner without
+// allocating a project's historical executions during a policy transition.
+func (r *sqliteExecutionRepository) RequireProjectQuiescent(ctx context.Context, projectID string) error {
+	var id string
+
+	err := r.db.QueryRowContext(ctx, "SELECT id FROM execution_records WHERE project_id = ? AND status IN (?, ?) LIMIT 1", projectID, ExecutionStatusPending, ExecutionStatusRunning).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+
+	if err != nil {
+		return fmt.Errorf("observe legacy project ownership: %w", err)
+	}
+
+	return fmt.Errorf("unfinished legacy execution %s blocks project upgrade", id)
 }
 
 // NewExecutionRepository constructs the corresponding package service or value.

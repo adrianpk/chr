@@ -21,6 +21,7 @@ func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Usage: "Run agent work for tickets",
 		Commands: []*cli.Command{
 			newWorkConfigCommand(stdout, deps),
+			newWorkUpgradeCommand(stdout, deps),
 			newWorkDoctorCommand(stdout, deps),
 			newWorkEventsCommand(stdout, deps),
 			newWorkLogsCommand(stdout, deps),

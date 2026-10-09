@@ -8,6 +8,10 @@ import (
 )
 
 func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (WorkflowReviewPolicy, error) {
+	if err := requireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
+		return WorkflowReviewPolicy{}, err
+	}
+
 	data, err := readWorkflowFile(UserPath(s.layout.ProjectDir(), "config.yml"))
 	if errors.Is(err, os.ErrNotExist) {
 		data, err = nil, nil

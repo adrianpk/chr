@@ -30,6 +30,10 @@ type WorkflowPlanAdoptionOptions struct {
 // AdoptPlanWorkflow explicitly adopts selected active records. Ordinary reads
 // never invoke adoption, and inferred historical status creates no receipt.
 func (s *WorkflowStore) AdoptPlanWorkflow(ctx context.Context, opts WorkflowPlanAdoptionOptions) (result WorkflowMaterializationResult, err error) {
+	if err := requireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
+		return result, err
+	}
+
 	if err := ValidateGeneratedWorkflowPlan(opts.Plan); err != nil {
 		return result, err
 	}

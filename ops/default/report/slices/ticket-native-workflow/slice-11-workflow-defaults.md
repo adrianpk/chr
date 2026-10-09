@@ -41,6 +41,13 @@ Dry-run and repeated initialization preserve existing configuration bytes,
 including invalid policy, and preserve config absence in an existing workspace.
 Runtime bootstrap leaves both new and legacy project policy unchanged.
 
+T11.3 adds explicit selected-project upgrade with an observed config revision,
+required authority choice and optional new review choice. Absent and explicit
+legacy review policy is preserved by default. A credential-free prior-policy
+snapshot is durable before the version marker. Optional selected plan adoption
+preserves keys, creation times, metadata and history without converting unrelated
+records. Active native or legacy ownership and ambiguous selections block it.
+
 ## Implementation Notes
 
 The project config loader and publication-policy resolver share strict bounded
@@ -63,6 +70,15 @@ file creation prevents initialization from replacing a file created by another
 writer between inspection and creation. The bundled profiles rely on the
 versioned resolver for their missing policy fields.
 
+Upgrade acquires exclusive repository capacity and namespace operation locks
+before replaying workflow journals. The project configuration owner keeps its
+own bounded checksummed pending record and snapshot paths under `.chr/default`;
+workflow record paths retain their original namespace boundary. Pending upgrades
+block policy reads, publication and ordinary materialization/adoption until the
+original explicit request resumes. Torn domain writes and lost responses replay
+under the original selection; manual config or snapshot changes are preserved
+for reconciliation.
+
 ## Contracts Added or Changed
 
 - `workflow.version: 1` selects prospective defaults; the old root version does
@@ -79,6 +95,10 @@ versioned resolver for their missing policy fields.
   `chr runtime init` installs assets without writing project policy.
 - Frozen execution limits cannot be refilled by project edits; current
   publication policy remains a separate decision boundary.
+- `chr work upgrade --config-revision <revision> --state-authority
+  tickets|tracker_compat [--review-mode MODE] [--adopt-file PATH] [--json]`
+  upgrades one quiescent legacy project and preserves review unless explicitly
+  changed. No read, initialization or upgrade converts historical work in bulk.
 
 ## Files of Interest
 
@@ -94,6 +114,9 @@ versioned resolver for their missing policy fields.
 - [Workflow configuration](../../../../../docs/reference/workflow-configuration.md)
   and the [User Guide](../../../../../docs/how-to/user-guide/index.md): delivered
   configuration, command, timeout and precedence guidance.
+- `internal/core/workflow_upgrade*.go` and
+  `internal/app/service_workflow_upgrade.go`: guarded selected transition,
+  prior-policy snapshots and restart recovery shared across adapters.
 
 ## Validation
 
@@ -124,6 +147,26 @@ fixture and scoped uncached 30-minute timeout. Its successful log is
 effective-value/source observation, runtime initialization and absent/explicit/
 invalid existing policies passed the new/existing/reinitialization matrix.
 Initialization guidance passed 27 local documentation-link checks.
+
+T11.3 development checks passed:
+
+- `make verify` (pre-commit repository gate; passed)
+- `go test ./internal/core ./internal/app -run '^(TestWorkflowUpgrade|TestWorkflowPlanAdoption|TestWorkflowConfig|TestInit|TestRuntimeInit)' -count=1`
+- `go test -race ./internal/core ./internal/app -run '^(TestWorkflowUpgrade|TestWorkflowPlanAdoption|TestWorkflowConfig|TestInit|TestRuntimeInit)' -count=1`
+- `python3 /tmp/chr-slice-11-docs-check.py`
+- `git diff --check`
+
+The successful repository log is `/tmp/chr-slice-11-t11-3-verify-final.log`,
+using Go 1.27.1, the retained curation fixture and scoped uncached 30-minute
+tests. Strict lint reported zero issues and every package passed. Initial lint
+spacing findings were corrected before the full successful gate. The focused
+matrix covers absent/explicit review preservation, deliberate review changes,
+authority choices, unselected history, stale and ambiguous adoption, live native
+capacity and namespace locks, retained invocations, actual legacy execution
+rows, torn domain writes, all policy write boundaries, manual-edit preservation,
+symlink/size rejection and a real owned subprocess crash/restart. Actual CLI
+upgrade/config/retry commands and 27 guidance links passed. Final slice-head
+controller evidence remains pending.
 
 Real Git and owned subprocess checks cover readonly CLI observation, strict
 bounds, configured admission, unchanged retry budgets, target-preserving entry

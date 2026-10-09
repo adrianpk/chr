@@ -142,6 +142,20 @@ that marker retain legacy defaults and explicit policy. Reading the config does
 not upgrade a project. See [Workflow configuration](../../reference/workflow-configuration.md)
 for accepted keys, bounds and value sources.
 
+To upgrade an existing project, retain the revision from `work config --json`
+and choose its authority explicitly:
+
+```sh
+chr work upgrade --config-revision <revision> --state-authority tickets --json
+```
+
+The operation requires quiescent work, saves the previous effective policy and
+preserves its review mode. Supply `--review-mode` only when deliberately changing
+that choice. Legacy records remain intact unless `--adopt-file` selects one
+approved plan and its exact task map. Retry an interrupted upgrade with the same
+revision, choices and file; see the configuration reference for the envelope and
+reconciliation rules.
+
 To require human approval for a native invocation under automatic project policy,
 start its extent with `--human-review`:
 

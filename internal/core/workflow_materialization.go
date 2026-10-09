@@ -25,6 +25,10 @@ type WorkflowMaterializationResult struct {
 // MaterializePlan creates one set and one ticket per task, with one descriptor
 // per integration unit. All shared images are validated before the first write.
 func (s *WorkflowStore) MaterializePlan(ctx context.Context, opts WorkflowMaterializationOptions) (result WorkflowMaterializationResult, err error) {
+	if err := requireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
+		return result, err
+	}
+
 	if err := ValidateGeneratedWorkflowPlan(opts.Plan); err != nil {
 		return result, err
 	}

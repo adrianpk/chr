@@ -388,6 +388,10 @@ func defaultWorkspaceConfig() WorkspaceConfig {
 
 // LoadWorkspaceConfig resolves explicit values over versioned defaults.
 func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
+	if err := requireNoWorkflowUpgrade(projectDir); err != nil {
+		return WorkspaceConfig{}, err
+	}
+
 	config := defaultWorkspaceConfig()
 	path := UserPath(projectDir, "config.yml")
 
