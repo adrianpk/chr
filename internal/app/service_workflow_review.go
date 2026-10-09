@@ -17,13 +17,13 @@ func (s service) ReviewWorkflowSlice(ctx context.Context, id string, reviewer []
 }
 
 // ApproveWorkflowSlice binds explicit approval to the current displayed hash.
-func (s service) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string) (core.WorkflowReviewBinding, error) {
+func (s service) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, expected ...uint64) (core.WorkflowReviewBinding, error) {
 	store, provider, err := s.workflowReviewDependencies()
 	if err != nil {
 		return core.WorkflowReviewBinding{}, err
 	}
 
-	return store.ApproveWorkflowSlice(ctx, id, bindingHash, provider)
+	return store.ApproveWorkflowSlice(ctx, id, bindingHash, provider, expected...)
 }
 
 // CheckWorkflowReviewGrant rechecks authorization for a guarded publication.

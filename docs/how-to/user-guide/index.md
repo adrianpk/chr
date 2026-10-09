@@ -699,6 +699,18 @@ Every operation accepts `--preview` to observe its retained inputs without
 execution or state changes. See [Workflow controls](../../reference/workflow-controls.md)
 for pagination, JSON output, reconciliation and manual harness commands.
 
+In the TUI command palette, select native work for a ticket, its slice or slice
+set, the selected use case, or independent tickets. Press Enter to inspect the
+preview, then Enter again to confirm its exact snapshot and selected revision.
+The Dash distinguishes validated tasks from confirmed integration and shows
+retained evidence, waits and blockers. Inspect retained workflow status and use
+the next-workflow or next-page commands to select an invocation. Continue,
+pause/cancel, resume, exact-binding approval and ownership reconciliation use
+that invocation's displayed revision. A stale action shows its failure with
+current status; inspect again before retrying. Status and stop controls remain
+available during native execution.
+
+
 Ticket-native work defaults to one active worker. To run independent lanes in
 parallel, set the capacity in `.chr/default/config.yml`:
 

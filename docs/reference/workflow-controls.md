@@ -84,3 +84,43 @@ actual clean candidate and runs the frozen validation gate before accepting
 progress. Malformed or mismatched reports retain a checkpoint without task
 success. An unaccepted lane change remains fenced for explicit correction.
 `--preview` validates argv and reports status without launching the harness.
+
+## TUI controls
+
+With tickets authority enabled, the command palette offers native work for the
+selected ticket, its slice, its slice set, the selected use case, or independent
+tickets. In the Cases view, use-case work uses the selected case slug. In ticket
+views, hierarchy commands resolve the selected native ticket's owning IDs.
+Independent work uses the Dash priority filter and order and excludes grouped
+work. The existing selected-ticket and ready-work shortcuts use these native
+controls under tickets authority.
+
+Press Enter to load the read-only preview. It shows the exact extent, selected
+ticket revision, snapshot, target, policy, exclusions and ordered members. Press
+Enter again to confirm that displayed input; Esc cancels the confirmation.
+Admission checks the snapshot and selected revision under repository exclusion.
+A changed record or competing owner produces a visible failure.
+
+The Dash shows retained authorization in pages of 16 invocations, with eight
+member and recent evidence rows per detail view. Use `Inspect retained workflow
+status`, `Select next retained workflow`, and `Load next retained workflow page`
+to choose an invocation. The next page command returns to the first page after
+the last page. Member details include a bounded CLI pagination command when more
+rows remain.
+
+The selected invocation supports continue, pause, cancel, resume, exact-binding
+approval and ownership reconciliation. Each mutating control first displays a
+read-only confirmation and then sends the displayed invocation ID and revision
+unchanged. Continue accepts at most one shared checkpoint per activation.
+Dashboard refresh observes current progress; an older asynchronous read cannot
+replace a newer control revision. Status and stop controls remain available
+while a native execution action runs. A second execution action is rejected
+locally rather than queued.
+
+The display separates host-validated tasks, confirmed tickets and integrated
+units. It includes target, policy source, frozen limits, selected task/slice,
+capacity resume phase, blocker and next-action owner, candidate/PR/approval
+bindings, continuation evidence and delivery receipts. A rejected control keeps
+current status visible alongside its failure. Inspect again to obtain a fresh
+binding before retrying. Observation rejects pending journals across linked
+worktrees and namespaces without recovery writes.

@@ -5230,7 +5230,7 @@ func testBlockedWorkReadinessView() WorkReadinessView {
 	}
 }
 
-func (e *fakeAgentWorkRefreshExecutor) RefreshAgentWork() (AgentWorkRefreshResult, error) {
+func (e *fakeAgentWorkRefreshExecutor) RefreshAgentWork(AgentWorkRefreshRequest) (AgentWorkRefreshResult, error) {
 	e.called = true
 
 	return e.result, e.err

@@ -102,7 +102,7 @@ func (s service) StartWorkExtent(ctx context.Context, request core.WorkflowPrevi
 }
 
 // ContinueWorkExtent retains the invocation's selector, target and budgets.
-func (s service) ContinueWorkExtent(ctx context.Context, id string, steps int) (core.WorkflowContinuationProgress, error) {
+func (s service) ContinueWorkExtent(ctx context.Context, id string, steps int, expected ...uint64) (core.WorkflowContinuationProgress, error) {
 	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowContinuationProgress{}, err
@@ -114,6 +114,14 @@ func (s service) ContinueWorkExtent(ctx context.Context, id string, steps int) (
 	}
 
 	request := core.WorkflowContinuationRequest{Worker: worker, StepLimit: steps, PullRequest: core.WorkflowSlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
+
+	if len(expected) > 1 || len(expected) == 1 && expected[0] == 0 {
+		return core.WorkflowContinuationProgress{}, core.ErrWorkflowConflict
+	}
+
+	if len(expected) == 1 {
+		request.ExpectedRevision = expected[0]
+	}
 
 	return s.ContinueWorkflow(ctx, id, request, worker)
 }

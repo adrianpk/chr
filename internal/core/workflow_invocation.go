@@ -22,6 +22,7 @@ type WorkflowExecutionPolicy struct {
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
 type WorkflowStartRequest struct {
+	Selected          *WorkflowSelectionGuard `json:"-"`
 	RequestKey        string
 	Selection         WorkflowPreviewRequest
 	Policy            WorkflowExecutionPolicy
@@ -137,6 +138,10 @@ func (s *WorkflowStore) StartWorkflow(ctx context.Context, request WorkflowStart
 	}
 
 	err = s.withLock(ctx, func() error {
+		if err := s.checkWorkflowSelectionGuard(ctx, request); err != nil {
+			return err
+		}
+
 		var startErr error
 
 		result, startErr = s.startWorkflow(ctx, request)

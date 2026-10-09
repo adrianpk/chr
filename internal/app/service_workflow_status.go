@@ -28,6 +28,12 @@ type WorkflowWorkEvidence struct {
 
 // WorkflowWorkStatus distinguishes host task validation from confirmed delivery.
 type WorkflowWorkStatus struct {
+	FrozenPolicy         core.WorkflowExecutionPolicy         `json:"execution_policy"`
+	Continuation         *core.WorkflowContinuationCheckpoint `json:"continuation,omitempty"`
+	NextActionOwner      string                               `json:"next_action_owner"`
+	CapacityResumeStatus string                               `json:"capacity_resume_status,omitempty"`
+	SelectedTicket       string                               `json:"selected_ticket,omitempty"`
+	SelectedSlice        string                               `json:"selected_slice,omitempty"`
 	core.WorkflowIdentity
 	Selector         core.WorkflowSelector            `json:"selector"`
 	Authority        string                           `json:"authority"`
@@ -88,6 +94,8 @@ func workflowWorkStatus(inspection core.WorkflowInspection, request WorkflowStat
 		result.ApprovalHash, result.ReviewState = run.Review.InputHash, run.Review.State
 	}
 
+	workflowWorkProgress(&result, run)
+
 	workflowWorkMembers(&result, inspection, request)
 
 	for _, attempt := range run.Attempts[max(0, len(run.Attempts)-core.WorkflowPageLimit):] {
@@ -126,5 +134,39 @@ func workflowWorkMembers(result *WorkflowWorkStatus, inspection core.WorkflowIns
 
 	if end < result.Total {
 		result.NextOffset = end
+	}
+}
+
+func workflowWorkProgress(result *WorkflowWorkStatus, run core.WorkflowInvocation) {
+	if run.ExecutionTarget != nil {
+		result.Target = *run.ExecutionTarget
+	}
+
+	result.FrozenPolicy, result.Continuation = run.Policy, run.Continuation
+	result.CapacityResumeStatus = run.CapacityResumeStatus
+
+	result.NextActionOwner = "host"
+	if run.Cursor < len(run.Members) {
+		result.SelectedTicket = run.Members[run.Cursor].Admission.Key
+		result.SelectedSlice = run.Members[run.Cursor].Admission.SliceID
+	}
+
+	if result.SelectedSlice == "" && run.Lane != nil && run.Lane.Unit.Kind == "slice" {
+		result.SelectedSlice = run.Lane.Unit.ID
+	}
+
+	if run.Blocker != nil {
+		result.NextActionOwner = run.Blocker.NextActionOwner
+
+		return
+	}
+
+	switch run.Status {
+	case "waiting_capacity", "running":
+		result.NextActionOwner = "current_owner"
+	case "waiting_review", "paused", "blocked":
+		result.NextActionOwner = "operator"
+	case "completed", "cancelled":
+		result.NextActionOwner = "none"
 	}
 }

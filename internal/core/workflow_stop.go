@@ -13,7 +13,7 @@ var ErrWorkflowStop = errors.New("workflow stop requested")
 
 // StopWorkflow records intent. A running attempt releases ownership only after
 // its process group is quiescent and its retained checkpoint is journaled.
-func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string) (result WorkflowInvocation, err error) {
+func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string, expected ...uint64) (result WorkflowInvocation, err error) {
 	if !slices.Contains([]string{"pause", "cancel"}, intent) {
 		return result, fmt.Errorf("workflow stop intent must be pause or cancel")
 	}
@@ -22,6 +22,10 @@ func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string) (re
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
+		}
+
+		if err := checkWorkflowRevision(run.WorkflowInvocation, expected); err != nil {
+			return err
 		}
 
 		intent = workflowRetainedStopIntent(run, intent)
@@ -67,32 +71,9 @@ func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string, ports ...
 			return readErr
 		}
 
-		if run.Status != "paused" || run.StopIntent == "cancel" {
-			return ErrWorkflowOwned
-		}
+		result, readErr = owner.resumeGuardedWorkflow(ctx, run, ports)
 
-		if readErr = owner.checkWorkflowInputs(ctx, run); readErr != nil {
-			return readErr
-		}
-
-		changes, readErr := owner.resumeWorkflowPrerequisite(ctx, &run, ports)
-		if readErr != nil {
-			return readErr
-		}
-
-		run.Status = "pending"
-		if run.ResumeStatus != "" {
-			run.Status = run.ResumeStatus
-		}
-
-		run.StopIntent, run.ResumeStatus = "", ""
-		if readErr = owner.commitWorkflowResume(&run, changes); readErr != nil {
-			return readErr
-		}
-
-		result = run.WorkflowInvocation
-
-		return nil
+		return readErr
 	})
 
 	return result, err
@@ -137,4 +118,35 @@ func workflowRetainedStopIntent(run workflowInvocationFile, intent string) strin
 	}
 
 	return intent
+}
+
+func (s *WorkflowStore) resumeGuardedWorkflow(ctx context.Context, run workflowInvocationFile, ports []WorkflowResumePorts) (WorkflowInvocation, error) {
+	if err := checkWorkflowResumeRevision(run.WorkflowInvocation, ports); err != nil {
+		return WorkflowInvocation{}, err
+	}
+
+	if run.Status != "paused" || run.StopIntent == "cancel" {
+		return WorkflowInvocation{}, ErrWorkflowOwned
+	}
+
+	if err := s.checkWorkflowInputs(ctx, run); err != nil {
+		return WorkflowInvocation{}, err
+	}
+
+	changes, err := s.resumeWorkflowPrerequisite(ctx, &run, ports)
+	if err != nil {
+		return WorkflowInvocation{}, err
+	}
+
+	run.Status = "pending"
+	if run.ResumeStatus != "" {
+		run.Status = run.ResumeStatus
+	}
+
+	run.StopIntent, run.ResumeStatus = "", ""
+	if err := s.commitWorkflowResume(&run, changes); err != nil {
+		return WorkflowInvocation{}, err
+	}
+
+	return run.WorkflowInvocation, nil
 }

@@ -28,6 +28,7 @@ type WorkActionExecutor interface {
 
 // WorkActionRequest carries selected agent work action input.
 type WorkActionRequest struct {
+	Workflow       *WorkflowActionRequest
 	Action         WorkActionID
 	TicketKey      string
 	PriorityFilter string
@@ -36,6 +37,9 @@ type WorkActionRequest struct {
 
 // WorkActionResult contains refreshed agent work state after an action.
 type WorkActionResult struct {
+	Workflow      *WorkflowView
+	WorkflowPage  *WorkflowPageView
+	Confirmation  *WorkActionState
 	Message       string
 	Tickets       []core.IndexedTicket
 	Observability ObservabilityView
@@ -308,6 +312,10 @@ func (m Model) updateWorkActionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) planWorkAction(action WorkActionID) {
+	if m.planNativeWorkAction(action) {
+		return
+	}
+
 	if action == WorkActionStartTicket {
 		ticket, ok := m.selectedTicketView()
 		if !ok {
@@ -371,6 +379,10 @@ func (m Model) executeWorkActionCommand(request WorkActionRequest) tea.Cmd {
 }
 
 func (m *Model) startWorkAction(request WorkActionRequest) tea.Cmd {
+	if request.Workflow != nil {
+		return m.startNativeWorkAction(request)
+	}
+
 	if m.workBusy {
 		m.statusMessage = "Work action already running."
 
@@ -396,6 +408,12 @@ func (m *Model) startWorkAction(request WorkActionRequest) tea.Cmd {
 }
 
 func (m *Model) completeWorkAction(message workActionFinishedMsg) {
+	if message.Request.Workflow != nil {
+		m.completeNativeWorkAction(message)
+
+		return
+	}
+
 	m.workBusy = false
 
 	if message.Err != nil {

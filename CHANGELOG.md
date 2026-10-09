@@ -12,10 +12,12 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
-- Ticket-native CLI controls can preview and run exact tickets, slices, slice
-  sets, use cases and loose work, then inspect or continue retained executions.
-  Approval uses the displayed candidate binding; supervised manual handoffs
-  require host validation before progress advances.
+- Ticket-native CLI and TUI controls can preview and run exact tickets, slices,
+  slice sets, use cases and loose work, then inspect or continue retained
+  executions. TUI confirmations retain the selected revision and show stale
+  conflicts, capacity waits and validated versus integrated progress. Approval
+  uses the displayed candidate binding; supervised CLI manual handoffs require
+  host validation before progress advances.
 - Ticket-native work can run up to eight independent lanes in parallel when
   configured, with one worker by default. Ordered work and target publication
   remain serialized, and capacity waits retain progress for retry.

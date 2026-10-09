@@ -77,17 +77,22 @@ func (s service) ExecuteWorkflowTask(ctx context.Context, claim *core.WorkflowCl
 }
 
 // StopWorkflow persists pause or cancel intent through the shared domain owner.
-func (s service) StopWorkflow(ctx context.Context, id, intent string) (core.WorkflowInvocation, error) {
+func (s service) StopWorkflow(ctx context.Context, id, intent string, expected ...uint64) (core.WorkflowInvocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
 		return core.WorkflowInvocation{}, err
 	}
 
-	return store.StopWorkflow(ctx, id, intent)
+	return store.StopWorkflow(ctx, id, intent, expected...)
 }
 
 // ResumeWorkflow continues a completed pause with its consumed budget retained.
-func (s service) ResumeWorkflow(ctx context.Context, id string) (core.WorkflowInvocation, error) {
+func (s service) ResumeWorkflow(ctx context.Context, id string, expected ...uint64) (core.WorkflowInvocation, error) {
+	revision, err := workflowControlRevision(expected)
+	if err != nil {
+		return core.WorkflowInvocation{}, err
+	}
+
 	store, err := s.workflowStore()
 	if err != nil {
 		return core.WorkflowInvocation{}, err
@@ -98,16 +103,29 @@ func (s service) ResumeWorkflow(ctx context.Context, id string) (core.WorkflowIn
 		return core.WorkflowInvocation{}, err
 	}
 
-	if run.Blocker == nil || run.Blocker.NextActionOwner != "prerequisite_owner" {
-		return store.ResumeWorkflow(ctx, id)
-	}
+	ports := core.WorkflowResumePorts{ExpectedRevision: revision}
+	if run.Blocker != nil && run.Blocker.NextActionOwner == "prerequisite_owner" {
+		ports, err = s.workflowResumePorts(run)
+		if err != nil {
+			return core.WorkflowInvocation{}, err
+		}
 
-	ports, err := s.workflowResumePorts(run)
-	if err != nil {
-		return core.WorkflowInvocation{}, err
+		ports.ExpectedRevision = revision
 	}
 
 	return store.ResumeWorkflow(ctx, id, ports)
+}
+
+func workflowControlRevision(expected []uint64) (uint64, error) {
+	if len(expected) == 0 {
+		return 0, nil
+	}
+
+	if len(expected) != 1 || expected[0] == 0 {
+		return 0, core.ErrWorkflowConflict
+	}
+
+	return expected[0], nil
 }
 
 func (s service) workflowResumePorts(run core.WorkflowInvocation) (core.WorkflowResumePorts, error) {
@@ -127,13 +145,13 @@ func (s service) workflowResumePorts(run core.WorkflowInvocation) (core.Workflow
 }
 
 // ReconcileWorkflow recovers dead or expired ownership after process exclusion.
-func (s service) ReconcileWorkflow(ctx context.Context, id string) (core.WorkflowInvocation, error) {
+func (s service) ReconcileWorkflow(ctx context.Context, id string, expected ...uint64) (core.WorkflowInvocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
 		return core.WorkflowInvocation{}, err
 	}
 
-	return store.ReconcileWorkflow(ctx, id)
+	return store.ReconcileWorkflow(ctx, id, expected...)
 }
 
 // PrepareWorkflowManualTask freezes an owned handoff for manual execution.

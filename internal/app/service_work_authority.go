@@ -51,7 +51,7 @@ func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, ident
 	return observer.ObserveWorkflowTarget(s.ctx, core.WorkflowTargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
 }
 
-func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest) (core.WorkflowStartResult, error) {
+func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, selected ...*core.WorkflowSelectionGuard) (core.WorkflowStartResult, error) {
 	target, err := s.nativeAgentWorkTarget(config)
 	if err != nil {
 		return core.WorkflowStartResult{}, err
@@ -59,6 +59,17 @@ func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection cor
 
 	selection.Target = target
 	request := core.WorkflowStartRequest{RequestKey: "work-entry-" + strconv.FormatInt(time.Now().UnixNano(), 10), Selection: selection}
+
+	if len(selected) == 1 {
+		request.Selected = selected[0]
+
+		request.Selection.Target, err = s.observeNativeAgentWorkTarget(config, target)
+		if err != nil {
+			return core.WorkflowStartResult{}, err
+		}
+
+		return s.StartWorkflow(s.ctx, request)
+	}
 
 	store, err := s.workflowStore()
 	if err != nil {
@@ -83,12 +94,12 @@ func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection cor
 	return s.StartWorkflow(s.ctx, request)
 }
 
-func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, limit int) (AgentWorkResult, error) {
+func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest, limit int, selected ...*core.WorkflowSelectionGuard) (AgentWorkResult, error) {
 	if limit < 0 || limit > core.WorkflowPageLimit {
 		return AgentWorkResult{}, fmt.Errorf("ticket authority max-iterations must contain 0..128 checkpoint steps")
 	}
 
-	started, err := s.nativeAgentWorkStart(config, selection)
+	started, err := s.nativeAgentWorkStart(config, selection, selected...)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}

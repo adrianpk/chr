@@ -22,6 +22,10 @@ func newTUIWorkActionExecutor(
 func (e tuiWorkActionExecutor) ExecuteWorkAction(
 	request tui.WorkActionRequest,
 ) (tui.WorkActionResult, error) {
+	if request.Workflow != nil {
+		return e.executeNativeWorkAction(request)
+	}
+
 	switch request.Action {
 	case tui.WorkActionStartTicket:
 		return e.startSelectedTicketResult(request)

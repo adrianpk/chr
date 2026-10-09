@@ -11,6 +11,8 @@ import (
 
 // ObservabilityView summarizes execution, loop, and runtime observability.
 type ObservabilityView struct {
+	Authority                core.WorkStateAuthority
+	WorkflowPage             WorkflowPageView
 	DaemonStatus             string
 	DaemonPID                int
 	DaemonUpdatedAt          string

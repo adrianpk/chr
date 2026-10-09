@@ -12,11 +12,18 @@ const agentWorkRefreshInterval = 2 * time.Second
 
 // AgentWorkRefreshExecutor reloads dashboard agent work state.
 type AgentWorkRefreshExecutor interface {
-	RefreshAgentWork() (AgentWorkRefreshResult, error)
+	RefreshAgentWork(AgentWorkRefreshRequest) (AgentWorkRefreshResult, error)
+}
+
+// AgentWorkRefreshRequest identifies the displayed retained page and invocation.
+type AgentWorkRefreshRequest struct {
+	WorkflowID     string
+	WorkflowOffset int
 }
 
 // AgentWorkRefreshResult contains refreshed agent work rows for the dashboard.
 type AgentWorkRefreshResult struct {
+	Workflow      *WorkflowView
 	Tickets       []core.IndexedTicket
 	Observability ObservabilityView
 	Readiness     WorkReadinessView
@@ -40,8 +47,13 @@ func (m Model) startAgentWorkRefresh() tea.Cmd {
 		return nil
 	}
 
+	request := AgentWorkRefreshRequest{WorkflowID: m.workflow.ID, WorkflowOffset: m.workflowPage.Offset}
+	if request.WorkflowID == "" && len(m.observability.WorkflowPage.Items) > 0 {
+		request.WorkflowID = m.observability.WorkflowPage.Items[0].ID
+	}
+
 	return func() tea.Msg {
-		result, err := m.agentWorkRefreshExecutor.RefreshAgentWork()
+		result, err := m.agentWorkRefreshExecutor.RefreshAgentWork(request)
 
 		return agentWorkRefreshFinishedMsg{result: result, err: err}
 	}
@@ -59,6 +71,12 @@ func (m *Model) completeAgentWorkRefresh(msg agentWorkRefreshFinishedMsg) tea.Cm
 	if msg.result.Tickets != nil {
 		m.tickets = NewTicketViews(msg.result.Tickets)
 		m.selectFirstFilteredTicket()
+	}
+
+	m.applyWorkflowPage(msg.result.Observability.WorkflowPage)
+
+	if view := msg.result.Workflow; view != nil && view.ID == m.workflow.ID && view.Revision >= m.workflow.Revision {
+		m.workflow = *view
 	}
 
 	m.observability = msg.result.Observability

@@ -172,6 +172,9 @@ type Model struct {
 	planExecutor             PlanActionExecutor
 	ticketAction             TicketActionState
 	ticketExecutor           TicketActionExecutor
+	workflow                 WorkflowView
+	workflowPage             WorkflowPageView
+	workflowExecutionBusy    bool
 	workAction               WorkActionState
 	workBusy                 bool
 	workExecutor             WorkActionExecutor

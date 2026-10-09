@@ -37,9 +37,10 @@ func (s *WorkflowStore) retainWorkflowPrerequisiteStop(run *workflowInvocationFi
 // WorkflowResumePorts can hydrate a descendant canonical target after an
 // outside prerequisite integrates. It never supplies members or execution input.
 type WorkflowResumePorts struct {
-	Provider     WorkflowPullRequestProvider
-	Target       WorkflowTargetGit
-	TargetBranch string
+	ExpectedRevision uint64
+	Provider         WorkflowPullRequestProvider
+	Target           WorkflowTargetGit
+	TargetBranch     string
 }
 
 func (s *WorkflowStore) resumeWorkflowPrerequisite(ctx context.Context, run *workflowInvocationFile, ports []WorkflowResumePorts) ([]workflowFileChange, error) {

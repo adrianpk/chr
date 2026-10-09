@@ -11,9 +11,10 @@ import (
 // It has no selector, filters, target or membership override. A zero StepLimit
 // uses the invocation's frozen limit, whose compatibility default is 128.
 type WorkflowContinuationRequest struct {
-	Worker      []string
-	PullRequest WorkflowSlicePullRequestRequest
-	StepLimit   int
+	ExpectedRevision uint64
+	Worker           []string
+	PullRequest      WorkflowSlicePullRequestRequest
+	StepLimit        int
 }
 
 // WorkflowContinuationPorts supplies the same trusted publication/frontier IO.
@@ -42,6 +43,12 @@ func (s *WorkflowStore) ContinueWorkflow(ctx context.Context, id string, request
 	limit, err := workflowContinuationLimit(run, request.StepLimit)
 	if err != nil {
 		return WorkflowContinuationProgress{Invocation: run}, err
+	}
+
+	if request.ExpectedRevision != 0 {
+		if _, err := s.acceptWorkflowContinuation(ctx, id, request.ExpectedRevision); err != nil {
+			return WorkflowContinuationProgress{Invocation: run}, err
+		}
 	}
 
 	steps, reason, err := s.continueWorkflowSteps(ctx, id, request, ports, limit)

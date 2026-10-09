@@ -116,7 +116,7 @@ func (s *WorkflowStore) ReviewWorkflowSlice(ctx context.Context, id string, prov
 
 // ApproveWorkflowSlice authorizes only the displayed immutable binding. The
 // current policy, validated candidate, canonical PR and target are read again.
-func (s *WorkflowStore) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, provider WorkflowPullRequestProvider) (result WorkflowReviewBinding, err error) {
+func (s *WorkflowStore) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, provider WorkflowPullRequestProvider, expected ...uint64) (result WorkflowReviewBinding, err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
@@ -124,6 +124,10 @@ func (s *WorkflowStore) ApproveWorkflowSlice(ctx context.Context, id, bindingHas
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
+		}
+
+		if err := checkWorkflowRevision(run.WorkflowInvocation, expected); err != nil {
+			return err
 		}
 
 		result, readErr = owner.approveWorkflowSlice(ctx, run, bindingHash, provider)

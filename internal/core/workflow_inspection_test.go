@@ -75,3 +75,50 @@ func checkWorkflowClaimClosed(t *testing.T, store *WorkflowStore, claim *Workflo
 		t.Fatal("close changed authority or retained owned descriptors", err)
 	}
 }
+
+// TestWorkflowInspectionLinked blocks a journal in another namespace/worktree
+// before repository discovery can replay it during a status or dashboard read.
+func TestWorkflowInspectionLinked(t *testing.T) {
+	store, _, request := workflowClaimFixture(t)
+	run := workflowTestStart(t, store, request)
+	linked := filepath.Join(t.TempDir(), "linked")
+	workflowSelectionGit(t, store, "worktree", "add", "-qb", "inspection-linked", linked, "HEAD")
+
+	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: linked, Namespace: "other"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(layout.Root(), "lock"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	journal := filepath.Join(layout.Root(), workflowJournalPath)
+
+	before := []byte("interrupted linked transition\n")
+	if err := os.WriteFile(journal, before, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	checks := []struct {
+		name string
+		read func() error
+	}{
+		{"invocation", func() error { _, err := store.InspectWorkflow(t.Context(), run.Invocation.ID); return err }},
+		{"page", func() error { _, _, err := store.InspectWorkflowPage(t.Context(), 0, 8); return err }},
+		{"records", func() error { _, err := store.InspectWorkflowRecords(t.Context()); return err }},
+		{"policy", func() error { _, err := store.InspectWorkflowPolicy(t.Context()); return err }},
+	}
+	for _, check := range checks {
+		t.Run(check.name, func(t *testing.T) {
+			if err := check.read(); !errors.Is(err, ErrWorkflowConflict) {
+				t.Fatal("linked journal was recovered by inspection", err)
+			}
+
+			after, err := os.ReadFile(journal)
+			if err != nil || string(before) != string(after) {
+				t.Fatal("inspection changed the linked journal", err)
+			}
+		})
+	}
+}

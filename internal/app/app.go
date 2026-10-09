@@ -414,7 +414,14 @@ func loadTUIObservability(
 
 	events := loadTUIAgentEvents(ctx, projectContext.ProjectDir, config.Runtime, executions, loops)
 
-	return tui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime, events), nil
+	view := tui.NewObservabilityView(projectContext.ProjectDir, daemonState, executions, loops, runtime, events)
+
+	view.Authority = core.WorkAuthority(config.Work)
+	if view.Authority == core.WorkStateAuthorityTickets {
+		view.WorkflowPage, err = loadTUIWorkflowPage(ctx, projectContext)
+	}
+
+	return view, err
 }
 
 func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectContext) (tui.WorkReadinessView, error) {

@@ -43,6 +43,7 @@ func (m Model) renderDash() string {
 		}
 	}
 
+	output.WriteString(m.renderNativeWorkflow())
 	output.WriteString("\nCurrent\n")
 
 	for _, line := range m.renderAgentWorkCurrentLines() {
@@ -80,6 +81,7 @@ func (m Model) renderDashWorkspace(width, height int) string {
 	}, m.renderAgentWorkQueueLines(maxInt(height-5, 1))...)
 
 	currentLines := append(m.renderDashReadinessLines(maxInt(height/3, 3)), "")
+	currentLines = append(currentLines, m.nativeWorkflowLines()...)
 	currentLines = append(currentLines, m.renderAgentWorkCurrentLines()...)
 
 	recentLines := append([]string{

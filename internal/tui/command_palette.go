@@ -99,6 +99,8 @@ func DefaultCommandRegistry() []Command {
 		{ID: "work-request-stop", Title: "Request agent stop", Description: "Request daemon stop after confirmation.", Action: CommandActionPlanWork, Work: WorkActionRequestStop},
 	}
 
+	commands = append(commands, nativeWorkflowCommands()...)
+
 	for _, view := range defaultViews {
 		commands = append(commands, Command{
 			ID:          "view:" + strings.ToLower(string(view)),

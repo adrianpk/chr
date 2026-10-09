@@ -31,7 +31,7 @@ func validWorkflowContinuationEvidence(checkpoint WorkflowContinuationCheckpoint
 		return false
 	}
 
-	if checkpoint.Steps < 0 || checkpoint.Steps > WorkflowPageLimit || !slices.Contains([]string{"step_limit", "awaiting_authority", "stopped", "set_closure_required", "blocked", "waiting_capacity", "closing_validation_failed", "interrupted"}, checkpoint.Reason) {
+	if checkpoint.Steps < 0 || checkpoint.Steps > WorkflowPageLimit || !slices.Contains([]string{"accepted", "step_limit", "awaiting_authority", "stopped", "set_closure_required", "blocked", "waiting_capacity", "closing_validation_failed", "interrupted"}, checkpoint.Reason) {
 		return false
 	}
 
