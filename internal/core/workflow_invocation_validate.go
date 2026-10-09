@@ -119,6 +119,10 @@ func validWorkflowInvocationExtent(run workflowInvocationFile) bool {
 }
 
 func validateWorkflowInvocationMembers(run workflowInvocationFile) error {
+	if err := validateWorkflowLooseQueue(run); err != nil {
+		return err
+	}
+
 	keys := map[string]bool{}
 
 	for _, member := range run.Members {

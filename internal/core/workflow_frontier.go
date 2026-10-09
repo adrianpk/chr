@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-// WorkflowUnitDelivery retains a completed slice before its active bindings move.
+// WorkflowUnitDelivery retains a delivered unit before its active bindings move.
 // EvidenceRef binds the exact frontier, target and receipt to an immutable image.
 type WorkflowUnitDelivery struct {
 	Schema            string                      `json:"schema"`
 	InvocationID      string                      `json:"invocation_id"`
 	Unit              WorkflowRef                 `json:"unit"`
-	SetID             string                      `json:"set_id"`
+	SetID             string                      `json:"set_id,omitempty"`
 	Cursor            int                         `json:"cursor"`
 	Target            WorkflowPreviewTarget       `json:"target"`
 	NextTarget        WorkflowPreviewTarget       `json:"next_target"`
@@ -49,9 +49,10 @@ func (run WorkflowInvocation) ExecutionSelection() WorkflowPreviewRequest {
 	return selection
 }
 
-// AdvanceWorkflowFrontier releases one finalized slice's barrier without work.
+// AdvanceWorkflowFrontier releases one finalized integration unit without work.
 // It verifies canonical delivery, journals retained proof, and hydrates the next
-// base. Set boundaries wait for closing validation, including the last set.
+// base. Grouped set boundaries wait for closing validation, including the last
+// set; loose units return to their frozen queue for fresh selection.
 func (s *WorkflowStore) AdvanceWorkflowFrontier(ctx context.Context, id string, ports WorkflowFrontierPorts) (result WorkflowInvocation, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
@@ -108,7 +109,7 @@ func (s *WorkflowStore) workflowFrontierReady(ctx context.Context, run workflowI
 		return false, err
 	}
 
-	if run.Selection.Selector.Extent != "slice_set" && run.Selection.Selector.Extent != "use_case" {
+	if run.Selection.Selector.Extent != "slice_set" && run.Selection.Selector.Extent != "use_case" && run.Selection.Selector.Extent != "loose" {
 		return false, nil
 	}
 
@@ -124,6 +125,15 @@ func (s *WorkflowStore) workflowFrontierReady(ctx context.Context, run workflowI
 }
 
 func (s *WorkflowStore) readWorkflowFrontierCandidate(ctx context.Context, run workflowInvocationFile) (WorkflowSliceCandidate, error) {
+	if run.Lane.Unit.Kind == "ticket" {
+		observation, err := s.readWorkflowTicketMembership(run)
+		if err != nil {
+			return WorkflowSliceCandidate{}, err
+		}
+
+		return s.readWorkflowSliceCandidate(ctx, run, observation)
+	}
+
 	selection, err := s.readWorkflowSelection(ctx)
 	if err != nil {
 		return WorkflowSliceCandidate{}, err

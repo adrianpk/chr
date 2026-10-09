@@ -129,6 +129,42 @@ a partial slice.
 candidate in separate bounded steps. Its selector, filters, policy and original
 request identity remain frozen. Accepted task results are reused on restart.
 
+## Loose queue reselection
+
+Independent loose tickets share the candidate and canonical delivery lifecycle.
+`AdvanceWorkflowFrontier` retains each actual ticket unit in an immutable
+`chr-unit-frontier/v1` image, clears its active bindings and hydrates the next
+execution target from canonical Git. The original selection target and request
+hash remain unchanged. Loose work creates no set or set-closing gate.
+
+`ReconcileWorkflowMembership` selects again when the current lane has cleared.
+The receipt-confirmed prefix stays in place. Pending admissions are filtered and
+ordered using their current native classification, the frozen AND filters and
+rank thresholds, and the requested rank/time/key order. A live ticket cannot be
+preempted. Prerequisite readiness is observed against the hydrated target before
+claiming its successor; dependencies do not expand the selection.
+
+The invocation's `loose_queue` retains admission-order keys separately from the
+current pending order. Its `cursor`, `eligible` count and per-key `excluded`
+reasons describe the last quiescent selection. Excluded admissions remain in
+`members`; they do not advance the validated or receipt-confirmed cursors. When
+no eligible pending members remain, the invocation completes with
+`loose_exhausted`, preserving its actual deliveries and excluded admissions.
+
+A revision/source-guarded `WorkflowStore.Write` can update an inactive loose
+member's classification or pending status and its expected invocation image in
+one journal. It proves that the execution fields, contract and description are
+unchanged, including native Markdown fields and bodies. Changes to a live ticket,
+execution-owned fields, descriptions or raw unguarded files still conflict with
+the frozen image. Admission revisions and source hashes remain retained.
+
+Later matching ready independent tickets are counted under `excluded.later` by
+default. The explicitly frozen `IncludeLaterTickets` policy can instead append
+their admissions and order them after the confirmed prefix. Slice-owned work,
+nonmatching or unready arrivals and terminal invocations cannot extend that
+queue. Record/member bounds remain 4096; journal and evidence images retain the
+1 MiB bound.
+
 ## Canonical slice pull requests
 
 `EnsureWorkflowSlicePullRequest` accepts a retained invocation, target branch

@@ -10,6 +10,7 @@ import (
 // ReconcileWorkflowMembership reports later ready work under the frozen selector.
 // Only the policy accepted at StartWorkflow can admit it. Reconciliation cannot
 // reopen a terminal invocation or a completed set, or change an active unit.
+// In loose scope it also reselects inactive admissions using current metadata.
 func (s *WorkflowStore) ReconcileWorkflowMembership(ctx context.Context, id string) (result WorkflowInvocation, err error) {
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
@@ -28,6 +29,10 @@ func (s *WorkflowStore) ReconcileWorkflowMembership(ctx context.Context, id stri
 }
 
 func (s *WorkflowStore) reconcileWorkflowMembership(ctx context.Context, run workflowInvocationFile) (workflowInvocationFile, error) {
+	if run.Selection.Selector.Extent == "loose" {
+		return s.reconcileWorkflowLooseQueue(ctx, run)
+	}
+
 	if workflowMembershipDormant(run) {
 		return run, nil
 	}

@@ -69,6 +69,7 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
+	LooseQueue      *WorkflowLooseQueue             `json:"loose_queue,omitempty"`
 	Closures        []WorkflowInvocationClosure     `json:"set_closures,omitempty"`
 	ClosingSet      string                          `json:"closing_set,omitempty"`
 	ExecutionTarget *WorkflowPreviewTarget          `json:"execution_target,omitempty"`
@@ -339,6 +340,10 @@ func newWorkflowInvocation(root string, identity WorkflowIdentity, request Workf
 	invocation.Selection.SnapshotHash = ""
 	for _, member := range preview.Members {
 		invocation.Members = append(invocation.Members, WorkflowMember{Admission: member, ExpectedRevision: member.Revision, ExpectedSourceHash: member.SourceHash})
+	}
+
+	if request.Selection.Selector.Extent == "loose" {
+		invocation.LooseQueue = newWorkflowLooseQueue(invocation.Members)
 	}
 
 	return workflowInvocationFile{WorkflowInvocation: invocation, OwnerRoot: root, Owners: map[string]string{}, RequestKeys: []string{request.RequestKey}}

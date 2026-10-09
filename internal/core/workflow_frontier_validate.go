@@ -73,7 +73,7 @@ func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery WorkflowU
 	}
 
 	for _, member := range run.Members[previous:delivery.Cursor] {
-		if member.Admission.SliceID != delivery.Unit.ID || member.Admission.SetID != delivery.SetID {
+		if !workflowMemberOwnsUnit(member, delivery.Unit) || member.Admission.SetID != delivery.SetID {
 			return ErrWorkflowConflict
 		}
 	}
@@ -89,7 +89,7 @@ func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery WorkflowU
 }
 
 func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery WorkflowUnitDelivery, previous int) error {
-	if delivery.Schema != "chr-unit-frontier/v1" || delivery.InvocationID != run.ID || delivery.Unit.Kind != "slice" || delivery.Cursor <= previous || delivery.Cursor > run.Cursor || delivery.Cursor > len(run.Members) {
+	if delivery.Schema != "chr-unit-frontier/v1" || delivery.InvocationID != run.ID || !validWorkflowFrontierUnit(run, delivery, previous) || delivery.Cursor <= previous || delivery.Cursor > run.Cursor || delivery.Cursor > len(run.Members) {
 		return ErrWorkflowConflict
 	}
 
@@ -98,6 +98,14 @@ func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery W
 	}
 
 	return nil
+}
+
+func validWorkflowFrontierUnit(run workflowInvocationFile, delivery WorkflowUnitDelivery, previous int) bool {
+	if delivery.Unit.Kind == "ticket" {
+		return run.Selection.Selector.Extent == "loose" && delivery.SetID == "" && delivery.Cursor == previous+1
+	}
+
+	return delivery.Unit.Kind == "slice"
 }
 
 func validateWorkflowUnitDeliveryTarget(run workflowInvocationFile, delivery WorkflowUnitDelivery) error {

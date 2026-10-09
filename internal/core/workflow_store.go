@@ -155,6 +155,11 @@ func (s *WorkflowStore) writeRecord(ctx context.Context, r WorkflowRecord, expec
 		return WorkflowRecord{}, err
 	}
 
+	changes, err = s.workflowLooseWriteChanges(ctx, r, expected, changes)
+	if err != nil {
+		return WorkflowRecord{}, err
+	}
+
 	if err := s.commitFiles(changes); err != nil {
 		return WorkflowRecord{}, err
 	}

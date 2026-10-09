@@ -22,7 +22,9 @@ func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, targ
 	clearWorkflowSliceBindings(run)
 
 	run.Status, run.Outcome, run.ResumeStatus, run.Blocker = "pending", "slice_integrated", "", nil
-	if run.Cursor == len(run.Members) || run.Members[run.Cursor].Admission.SetID != delivery.SetID {
+	if run.Selection.Selector.Extent == "loose" {
+		run.Outcome = "ticket_integrated"
+	} else if run.Cursor == len(run.Members) || run.Members[run.Cursor].Admission.SetID != delivery.SetID {
 		run.Status, run.Outcome = "waiting_integration", "set_closure_required"
 	}
 
@@ -67,7 +69,7 @@ func workflowFrontierEvidencePath(id string, cursor int) string {
 // cleared. Unknown fields survive; stale serialized PR/owner bindings must not.
 func workflowOptionalInvocationField(key string) bool {
 	switch key {
-	case "blocker", "lane", "pull_request_binding", "review_binding", "preparation_binding", "submission_binding", "review_restriction", "review_count", "review_repairs", "preparation_count", "execution_target", "confirmed_cursor", "integrated_units", "continuation_checkpoint", "set_closures", "closing_set":
+	case "blocker", "lane", "pull_request_binding", "review_binding", "preparation_binding", "submission_binding", "review_restriction", "review_count", "review_repairs", "preparation_count", "execution_target", "confirmed_cursor", "integrated_units", "continuation_checkpoint", "set_closures", "closing_set", "loose_queue":
 		return true
 	default:
 		return false

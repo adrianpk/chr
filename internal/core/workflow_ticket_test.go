@@ -108,10 +108,19 @@ func checkWorkflowTicketNoHierarchy(t *testing.T, store *WorkflowStore) {
 }
 
 func workflowTicketPreparationFixture(t *testing.T, method, extent string) (workflowPreparationFixture, WorkflowStartRequest) {
+	return workflowTicketConfiguredFixture(t, method, extent, nil)
+}
+
+func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup func(*WorkflowStore, WorkflowRecord, *WorkflowStartRequest)) (workflowPreparationFixture, WorkflowStartRequest) {
 	t.Helper()
 
 	gate := workflowPreparationGate("test -f result.txt && if test -f target.txt; then printf combined; else printf source; fi")
+
 	store, record, request := workflowTicketFixture(t, extent, gate)
+	if setup != nil {
+		setup(store, record, &request)
+	}
+
 	run := workflowTestStart(t, store, request).Invocation
 
 	claim := workflowTestClaim(t, store, run.ID)
