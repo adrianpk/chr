@@ -129,6 +129,27 @@ func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayo
 	return result, nil
 }
 
+// Close releases only this host's descriptors after its worker group stops.
+// It never records success, reconstructs credentials or unlocks inherited FDs.
+func (claim *WorkflowClaim) Close() error {
+	if claim == nil {
+		return nil
+	}
+
+	if claim.execution == nil {
+		return ErrWorkflowOwned
+	}
+
+	claim.execution.Lock()
+	defer claim.execution.Unlock()
+
+	if !workflowClaimQuiescent(claim) {
+		return ErrWorkflowOwned
+	}
+
+	return claim.releaseReservation()
+}
+
 func (claim *WorkflowClaim) releaseReservation() error {
 	if claim == nil {
 		return nil

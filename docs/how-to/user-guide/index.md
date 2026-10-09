@@ -666,6 +666,39 @@ index commands are useful when inspecting drift explicitly.
 
 ## Run Independent Ticket Work
 
+For a project with `work.state_authority: tickets`, preview an exact extent
+before starting it:
+
+```sh
+chr work ticket --preview CHR-1
+chr work slice --preview slice-1
+chr work slice-set --preview 00001-delivery
+chr work use-case --preview delivery
+chr work loose --preview --priority high
+```
+
+Run the selected extent by omitting `--preview`. Save its printed execution ID
+to inspect progress and operate on that retained selection:
+
+```sh
+chr work status execution-id
+chr work continue --max-steps 1 execution-id
+chr work pause execution-id
+chr work resume execution-id
+chr work cancel execution-id
+```
+
+`status` distinguishes task validation from confirmed ticket integration. When
+human review is required, read the displayed approval binding and pass that
+exact hash to `chr work approve --binding <hash> execution-id`. Approval grants
+the current candidate; subsequent continuation handles publication through the
+configured policy. A changed candidate, PR head, target or policy rejects stale
+approval. Cancellation is terminal.
+
+Every operation accepts `--preview` to observe its retained inputs without
+execution or state changes. See [Workflow controls](../../reference/workflow-controls.md)
+for pagination, JSON output, reconciliation and manual harness commands.
+
 Ticket-native work defaults to one active worker. To run independent lanes in
 parallel, set the capacity in `.chr/default/config.yml`:
 

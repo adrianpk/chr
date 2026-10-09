@@ -25,6 +25,17 @@ func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 			newWorkLogsCommand(stdout, deps),
 			newWorkTicketCommand(stdout, deps),
 			newWorkRunAllCommand(stdout, deps),
+			newWorkExtentCommand(stdout, deps, "slice", "slice"),
+			newWorkExtentCommand(stdout, deps, "slice-set", "slice_set"),
+			newWorkExtentCommand(stdout, deps, "use-case", "use_case"),
+			newWorkExtentCommand(stdout, deps, "loose", "loose"),
+			newWorkControlCommand(stdout, deps, "status"),
+			newWorkControlCommand(stdout, deps, "continue"),
+			newWorkControlCommand(stdout, deps, "pause"),
+			newWorkControlCommand(stdout, deps, "cancel"),
+			newWorkControlCommand(stdout, deps, "resume"),
+			newWorkControlCommand(stdout, deps, "approve"),
+			newWorkControlCommand(stdout, deps, "reconcile"),
 		},
 	}
 }
@@ -63,7 +74,7 @@ func newWorkTicketCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Name:      "ticket",
 		Usage:     "Run agent work for one ticket",
 		ArgsUsage: "<ticket-key>",
-		Flags:     workProjectFlags(),
+		Flags:     workWorkflowExtentFlags(false),
 		Action:    workTicketAction(stdout, deps),
 	}
 }
@@ -107,8 +118,9 @@ func workDoctorFlags() []cli.Flag {
 func workRunAllFlags() []cli.Flag {
 	return append(workProjectFlags(),
 		&cli.BoolFlag{
-			Name:  "dry-run",
-			Usage: "print the ready-ticket queue without executing agent work",
+			Name:    "dry-run",
+			Aliases: []string{"preview"},
+			Usage:   "print the ready-ticket queue without executing agent work",
 		},
 		&cli.StringSliceFlag{
 			Name:  "status",
@@ -222,13 +234,26 @@ func workDoctorTicketContext(cmd *cli.Command, operations service) (string, stri
 
 func workTicketAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
-		if cmd.NArg() != 1 {
-			return fmt.Errorf("work ticket requires exactly one ticket key argument")
+		if err := workWorkflowArguments(cmd, false); err != nil {
+			return err
 		}
 
 		operations, _, err := workServiceFromCommand(ctx, cmd, deps)
 		if err != nil {
 			return err
+		}
+
+		config, err := agentWorkLoopWorkspaceConfig(operations.projectContext.ProjectDir)
+		if err != nil {
+			return err
+		}
+
+		if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+			return (workWorkflowCLI{stdout: stdout}).extent(ctx, cmd, operations, "ticket")
+		}
+
+		if usesWorkflowTicketFlags(cmd) {
+			return fmt.Errorf("workflow ticket controls require tickets authority; current authority is tracker_compat")
 		}
 
 		result, err := operations.StartAgentWorkTicket(cmd.Args().Get(0))
@@ -240,8 +265,22 @@ func workTicketAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	}
 }
 
+func usesWorkflowTicketFlags(cmd *cli.Command) bool {
+	for _, name := range []string{"preview", "json", "max-steps", "offset", "limit", "snapshot"} {
+		if cmd.IsSet(name) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func workRunAllAction(stdout io.Writer, deps appDependencies) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
+		if cmd.NArg() != 0 {
+			return fmt.Errorf("work run-all does not accept positional arguments")
+		}
+
 		operations, projectContext, err := workServiceFromCommand(ctx, cmd, deps)
 		if err != nil {
 			return err

@@ -21,6 +21,26 @@ type WorkflowTargetGit interface {
 	ObserveWorkflowTarget(context.Context, WorkflowTargetQuery) (WorkflowPreviewTarget, error)
 }
 
+// WorkflowTargetReader observes a remote target without hydrating local objects.
+type WorkflowTargetReader interface {
+	ReadWorkflowTarget(context.Context, WorkflowTargetQuery) (WorkflowPreviewTarget, error)
+}
+
+// ReadWorkflowTarget leaves local refs, objects and working files unchanged.
+func (git OSWorkflowIntegrationGit) ReadWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (WorkflowPreviewTarget, error) {
+	if err := git.checkWorkflowTargetQuery(query); err != nil {
+		return WorkflowPreviewTarget{}, err
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
+	defer cancel()
+
+	reader := workflowIntegrationReader{dir: query.Directory}
+	commit, err := reader.remoteTarget(ctx, git.transport, query.Branch)
+
+	return WorkflowPreviewTarget{Repository: query.Repository, Commit: commit}, err
+}
+
 // ObserveWorkflowTarget fetches objects while preserving checkout refs and files.
 // It observes the exact branch again after IO and rejects a moved observation.
 func (git OSWorkflowIntegrationGit) ObserveWorkflowTarget(ctx context.Context, query WorkflowTargetQuery) (WorkflowPreviewTarget, error) {

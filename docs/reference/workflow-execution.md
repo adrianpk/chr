@@ -11,6 +11,7 @@ edits and SQLite projections do not authorize execution or certify success.
 | --- | --- |
 | `StartWorkflow` | Freeze an explicit selection, target and execution policy. Equivalent requests attach to the retained invocation. Overlapping retained task/hierarchy ownership rejects. |
 | `ReadWorkflow` | Return invocation status, cursor, attempts, lane, process identities and retained evidence without private credentials. |
+| `InspectWorkflow` | Read current invocation, publication policy and task records without replaying pending transitions or reconciling ownership. |
 | `ClaimWorkflow` | Claim the next eligible task under repository worker capacity and exclusive task/hierarchy ownership; journal a new fenced attempt. |
 | `CheckWorkflowClaim` | Check the current private credential, generation, lease and frozen record images. |
 | `CheckpointWorkflow` | Yield an unexpired, quiescent claim without validating the task; retain its input, lane, attempt and checkpoint. |
@@ -18,6 +19,9 @@ edits and SQLite projections do not authorize execution or certify success.
 | `ContinueWorkflow` | Run bounded transitions on an existing invocation; preserve its frozen selection, policy, task proof, PR and delivery checkpoints. |
 
 The caller retains the returned `*WorkflowClaim`; status cannot reconstruct it.
+`WorkflowClaim.Close` releases only that host's capacity descriptors after its
+worker group becomes quiescent. It does not record a result or checkpoint and
+cannot release an inherited descriptor held by a live descendant.
 The token is excluded from JSON and only its hash is persisted. One claim covers
 the task and its owning hierarchy. Native and legacy starts share the Git common
 directory's process-held reservations across registered linked checkouts.

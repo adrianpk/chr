@@ -26,7 +26,7 @@ func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, se
 		return AgentWorkResult{}, err
 	}
 
-	selection.Target, err = s.observeNativeAgentWorkTarget(config, target)
+	selection.Target, err = s.previewWorkTarget(config, target)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}

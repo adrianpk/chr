@@ -374,6 +374,11 @@ chr ticket loop --dry-run
 
 ## Agent Work
 
+Explicit ticket-native extents and retained execution controls are documented in
+[Workflow controls](workflow-controls.md). They include `work slice`,
+`work slice-set`, `work use-case`, `work loose`, and `work status`, `continue`,
+`pause`, `cancel`, `resume`, `approve` and `reconcile`.
+
 Inspect readiness before starting agent work:
 
 ```sh
