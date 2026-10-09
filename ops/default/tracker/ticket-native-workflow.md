@@ -40,8 +40,8 @@ Slice 10 merged head `e08f8b18030d65a3901e3d03ef4ad5fbb7ce9a28` passed the contr
 the retained curation fixture and scoped uncached 30-minute test timeout.
 Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4GXAE485Y2CN8PN9CJQFY3P`.
-Slice 11 is active. All four task tickets are bound and ready; implementation
-starts in the dedicated recorded slice worktree.
+Slice 11 is active. All four task tickets are bound. T11.1 is in progress in the dedicated
+recorded slice worktree; T11.2–T11.4 remain ready.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -704,7 +704,7 @@ Plan contract: [Slice 11](../plan/ticket-native-workflow.md#slice-11-defaults-an
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T11.1 | [TKT-20261008141425](../ticket/ready/20261008141425-ticket-native-t11-1.md) | ready | pending | Deliver version marker, approved configuration keys, bounds and effective-value/source reporting. |
+| T11.1 | [TKT-20261008141425](../ticket/in_progress/20261008141425-ticket-native-t11-1.md) | in_progress | pending | Deliver version marker, approved configuration keys, bounds and effective-value/source reporting. |
 | T11.2 | [TKT-20261008141426](../ticket/ready/20261008141426-ticket-native-t11-2.md) | ready | pending | Align standard/minimal profiles, bootstrap and fallback defaults for new projects. |
 | T11.3 | [TKT-20261008141427](../ticket/ready/20261008141427-ticket-native-t11-3.md) | ready | pending | Upgrade selected projects with prior-policy snapshots and explicit authority transition. |
 | T11.4 | [TKT-20261008141428](../ticket/ready/20261008141428-ticket-native-t11-4.md) | ready | pending | Export/repair trackers one way and publish the complete operation/configuration/manual guidance. |
