@@ -43,8 +43,10 @@ Acta records the canonical merge in `01M4GXAE485Y2CN8PN9CJQFY3P`.
 Slice 11 is active. T11.1 is validated at `d081c3daa795065cf8c635c3270aa6d26a7dabe8` after its pre-commit
 repository gate and expanded focused Go/race checks. Its ticket is reviewing,
 its report is drafting, and Acta records the task in `01M4H1KP8V3MM1RVM5KSDQRSQN`.
-T11.2 is in progress on the recorded defaults branch in the dedicated slice
-worktree; T11.3–T11.4 remain ready. The slice PR and final candidate checks are
+T11.2 is validated at `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`; its ticket is reviewing after
+`make verify`, focused initialization Go/race checks, metadata, links and whitespace
+passed. Acta: `01M4H34ACREHJNR3NZBY5ZDHG5`. T11.3 is in progress on the recorded
+defaults branch in the dedicated slice worktree; T11.4 remains ready. The slice PR and final candidate checks are
 pending.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
@@ -709,8 +711,8 @@ Plan contract: [Slice 11](../plan/ticket-native-workflow.md#slice-11-defaults-an
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T11.1 | [TKT-20261008141425](../ticket/reviewing/20261008141425-ticket-native-t11-1.md) | validated | `d081c3daa795065cf8c635c3270aa6d26a7dabe8` | Deliver version marker, approved configuration keys, bounds and effective-value/source reporting. |
-| T11.2 | [TKT-20261008141426](../ticket/in_progress/20261008141426-ticket-native-t11-2.md) | in_progress | pending | Align standard/minimal profiles, bootstrap and fallback defaults for new projects. |
-| T11.3 | [TKT-20261008141427](../ticket/ready/20261008141427-ticket-native-t11-3.md) | ready | pending | Upgrade selected projects with prior-policy snapshots and explicit authority transition. |
+| T11.2 | [TKT-20261008141426](../ticket/reviewing/20261008141426-ticket-native-t11-2.md) | validated | `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52` | Align standard/minimal profiles, bootstrap and fallback defaults for new projects. |
+| T11.3 | [TKT-20261008141427](../ticket/in_progress/20261008141427-ticket-native-t11-3.md) | in_progress | pending | Upgrade selected projects with prior-policy snapshots and explicit authority transition. |
 | T11.4 | [TKT-20261008141428](../ticket/ready/20261008141428-ticket-native-t11-4.md) | ready | pending | Export/repair trackers one way and publish the complete operation/configuration/manual guidance. |
 
 ### Validation
@@ -720,7 +722,15 @@ checks covering configuration, legacy authority, queue capacity, submission
 limits, ticket delivery, entry attachment and invocation retries. Evidence and
 exact commands are in the [draft report](../report/slices/ticket-native-workflow/slice-11-workflow-defaults.md).
 The gate used Go 1.27.1, the retained curation fixture and scoped uncached
-30-minute tests. Final slice validation remains pending.
+30-minute tests.
+
+T11.2 passed pre-commit `make verify`, strict lint, focused initialization
+Go/race checks, operational metadata, guidance links and whitespace. The same
+toolchain, fixture and timeout were used. The new/existing/reinitialization
+matrix covers all bundled profiles, root CLI, runtime bootstrap and absent,
+explicit and invalid existing policies. See the draft report for exact commands
+and `/tmp/chr-slice-11-t11-2-verify.log` for the successful repository gate.
+Final slice validation remains pending.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`; cover every generator
@@ -735,8 +745,8 @@ Acceptance: A16, A18; explicit adoption and configuration bounds in A24.
 - PR: pending.
 - Merge commit: pending.
 - Report status: drafting; [immutable introduction](https://forge.adrianpk.com/adrianpk/chr/src/commit/d081c3daa795065cf8c635c3270aa6d26a7dabe8/ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md).
-- Task commits: T11.1 `d081c3daa795065cf8c635c3270aa6d26a7dabe8`; ticket reviewing. T11.2 in progress; T11.3–T11.4 ready.
-- Validation evidence: T11.1 local task checks passed; final PR-head controller evidence pending.
+- Task commits: T11.1 `d081c3daa795065cf8c635c3270aa6d26a7dabe8`; ticket reviewing. T11.2 `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`; ticket reviewing. T11.3 in progress; T11.4 ready.
+- Validation evidence: T11.1–T11.2 local task checks passed; final PR-head controller evidence pending.
 - Blockers: none outstanding. Remaining approved task work is pending.
 
 ## Slice 12: End-to-end workflow assurance

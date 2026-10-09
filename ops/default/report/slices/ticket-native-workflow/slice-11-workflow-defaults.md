@@ -33,6 +33,8 @@ and entry attachment preserve those inputs across configuration changes.
 Publication rechecks current project review policy and merge strategy, retaining
 any human restriction and invalidating changed approval bindings.
 
+T11.2 task commit: `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`. Acta: `01M4H34ACREHJNR3NZBY5ZDHG5`.
+
 T11.2 initializes every bundled profile with version-one defaults: ticket
 authority, isolated worktrees, trusted automatic integration and one worker.
 Dry-run and repeated initialization preserve existing configuration bytes,
@@ -130,6 +132,6 @@ Fixtures stop through their owning validation supervisors.
 
 ## Risks and Follow-ups
 
-T11.3–T11.4 remain pending for explicit selected upgrade with prior-policy
-snapshots, and tracker export/repair with complete guidance. Final Slice 11
+T11.3 is active for explicit selected upgrade with prior-policy snapshots.
+T11.4 remains ready for tracker export/repair and complete guidance. Final Slice 11
 PR-head controller validation remains pending.
