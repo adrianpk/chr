@@ -377,8 +377,7 @@ Acceptance: A11, A13, A14, A15, A21; publication budgets in A24.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commits: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; T6.2 `497af614315fe80ce69c0f43c216f1a81d15200d`. Both tickets are reviewing; T6.3 is validated with task commit `b9e728a265668bac4f94fe92580f71eafaa3e6e1`;
-T6.4 is in progress.
+- Task commits: T6.1 `085747eb4bc083318d6673b80ec7d9e437e45f8f`; T6.2 `497af614315fe80ce69c0f43c216f1a81d15200d`; T6.3 `b9e728a265668bac4f94fe92580f71eafaa3e6e1`. All three tickets are reviewing; T6.4 is in progress.
 - Acta task events: T6.1 `01M4EVSNQG6RK6XRXA0YAKW199`; T6.2 `01M4EXHWH60EG9YSZ35DF9TFQ2`; T6.3 `01M4EZMN5MW4KQC7ANKETSBPFV`.
 - Validation evidence: T6.1–T6.3 task checks passed; complete slice and final clean-head controller evidence are pending.
 - Blockers: none observed; T6.4 is active.
