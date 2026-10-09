@@ -42,6 +42,7 @@ func serviceWorkflowDeliveryFixture(t *testing.T) (service, string, *serviceWork
 
 	operations.workflowIntegrationGit = core.NewWorkflowIntegrationGit(repository, remote)
 	provider.pr.State, provider.pr.Merged, provider.pr.ResultCommit = "closed", true, candidate.Result.Commit
+	provider.pr.BaseCommit = candidate.Result.Commit
 
 	return operations, run.Invocation.ID, provider
 }

@@ -277,8 +277,13 @@ result commit. An open PR or missing result cannot prove failure. The provider's
 unpublished observation must name this exact submission and guarantee it cannot
 publish later; canonical PR and target observations are rechecked before sealing
 it. Confirmed delivery requires the matching merged canonical PR and fetched,
-reachable, method-specific Git proof for the exact prepared result. Observation
-does not clear stop intent, create a receipt or mark any task done.
+reachable, method-specific Git proof. The exact prepared result confirms native
+publication intent. A different result or base can confirm separately verified
+external delivery; `external_delivery: true` retains that distinction in the
+journal and its invocation projection. That observation proves the configured
+method's actual combined tree and complete ordered history, without attributing
+external execution to the guarded command. Submission observation does not clear
+stop intent, create a receipt or mark any task done.
 
 Submission IO and reconciliation have three-minute deadlines. Durable pause or
 cancel cancels a live provider call while preserving uncertain exclusion. Each
@@ -294,6 +299,41 @@ Each journal remains within 1 MiB, holds at most ten attempts, and the repositor
 coordinator bounds retained journals to 4096. Invalid images, unknown schemas,
 symlink traversal or exceeded bounds fail closed. Accepted responses and later
 observation update the guarded journal; earlier sealed attempts remain retained.
+
+## Shared publication operation
+
+`AdvanceWorkflowSliceIntegration` is the central application operation over the
+retained slice PR. It returns the current invocation and, after verified shared
+finalization, its receipt. Each call observes canonical PR/Git facts before
+running another phase. It performs at most one combined gate, one separate
+review role and one guarded submission; it never starts task work or a later
+slice. Human approval uses the displayed `review_binding.input_hash` through
+`ApproveWorkflowSlice`.
+
+- An actual merged PR enters method-specific verification and shared receipt
+  finalization, including when automatic provider guards are unsupported or the
+  invocation is paused or cancelled. Stop intent remains intact. A paused run's
+  resume checkpoint remains at the integration barrier.
+- An uncertain submission requires canonical confirmation or the provider's
+  stable-ID unpublished seal before any new preparation, review, repair or
+  publication. Cancellation and lease expiry cannot release it.
+- A moved base or changed policy/protection requires a fresh isolated prepared
+  result, host combined gate and exact review binding. Old approval cannot
+  authorize that new result. Unchanged original task and aggregate proofs remain
+  reusable; corrupt evidence fails closed.
+- Current native provider APIs retain the atomic-guard blocker. The operation
+  never substitutes a method or invokes their legacy merge endpoints.
+
+The host rereads canonical PR identity, merged result and current target after
+Git verification. A native receipt names the confirmed stable submission ID;
+a verified external result uses the retained canonical PR binding identity.
+Both use the same journaled task/set/receipt finalization. Completed retries
+validate the retained receipt and publication projection without allocating new
+work. Sealed attempts remain consumed history after a repaired candidate; the
+new candidate requires fresh preparation/review and a new guarded attempt, or
+separately verified external delivery. Prepared lanes retained in prior attempt
+records share repository process
+exclusion without copying operational locks into their validated trees.
 
 ## External integration proof
 

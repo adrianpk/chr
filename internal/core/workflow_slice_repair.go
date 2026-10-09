@@ -23,6 +23,10 @@ func (s *WorkflowStore) RepairWorkflowSlice(ctx context.Context, id, taskKey str
 			return ErrWorkflowOwned
 		}
 
+		if readErr := owner.guardWorkflowPublicationWork(ctx, run); readErr != nil {
+			return readErr
+		}
+
 		if readErr := owner.checkWorkflowSliceRepairPR(run); readErr != nil {
 			return readErr
 		}

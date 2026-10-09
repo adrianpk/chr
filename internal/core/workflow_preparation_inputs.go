@@ -101,8 +101,13 @@ func (s *WorkflowStore) checkWorkflowPreparationGit(ctx context.Context, candida
 	commit, tree, err := s.workflowLaneCandidate(ctx, candidate.Lane)
 
 	proof := candidate.Input.Git
-	if err != nil || commit != proof.ResultCommit || tree != proof.PreparedTree {
-		return fmt.Errorf("%w: prepared lane changed", ErrWorkflowConflict)
+
+	if err != nil {
+		return fmt.Errorf("%w: prepared lane changed: %w", ErrWorkflowConflict, err)
+	}
+
+	if commit != proof.ResultCommit || tree != proof.PreparedTree {
+		return fmt.Errorf("%w: prepared lane commit or tree changed", ErrWorkflowConflict)
 	}
 
 	reader := workflowIntegrationReader{dir: candidate.Lane.Worktree}

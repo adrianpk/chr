@@ -20,7 +20,7 @@ func validateWorkflowSubmissionBinding(run workflowInvocationFile) error {
 }
 
 func validWorkflowSubmissionProjection(b WorkflowSubmissionBinding) bool {
-	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && validWorkflowSubmissionState(b.State)
+	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && validWorkflowSubmissionState(b.State) && (!b.ExternalDelivery || b.State == "confirmed")
 }
 
 func validWorkflowSubmissionState(state string) bool {
@@ -102,7 +102,7 @@ func validateWorkflowSubmissionGuard(guard WorkflowPublicationGuard) error {
 
 func validateWorkflowSubmissionProof(submission WorkflowSubmission) error {
 	if submission.State != "confirmed" {
-		if submission.Proof != nil || submission.ObservedPR != nil {
+		if submission.Proof != nil || submission.ObservedPR != nil || submission.ExternalDelivery {
 			return ErrWorkflowConflict
 		}
 
@@ -114,11 +114,16 @@ func validateWorkflowSubmissionProof(submission WorkflowSubmission) error {
 	}
 
 	proof := *submission.Proof
-	if proof.ResultCommit != submission.Guard.Git.ResultCommit || proof.BaseCommit != submission.Guard.Git.BaseCommit || proof.HistoryHash != submission.Guard.Git.HistoryHash || submission.ObservedPR.ResultCommit != proof.ResultCommit {
+
+	external := proof.ResultCommit != submission.Guard.Git.ResultCommit || proof.BaseCommit != submission.Guard.Git.BaseCommit || proof.HistoryHash != submission.Guard.Git.HistoryHash
+	if external != submission.ExternalDelivery || submission.ObservedPR.ResultCommit != proof.ResultCommit {
 		return ErrWorkflowConflict
 	}
 
-	return validateWorkflowIntegrationProof(submission.Guard.Git.WorkflowIntegrationQuery, proof)
+	query := submission.Guard.Git.WorkflowIntegrationQuery
+	query.ResultCommit = proof.ResultCommit
+
+	return validateWorkflowIntegrationProof(query, proof)
 }
 
 func validWorkflowConfirmedSubmissionHeader(submission WorkflowSubmission) bool {

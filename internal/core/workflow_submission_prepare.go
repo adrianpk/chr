@@ -85,9 +85,23 @@ func (s *WorkflowStore) checkWorkflowSubmissionRetry(ctx context.Context, run *w
 		return last, false, s.projectWorkflowSubmission(run, *journal)
 	}
 
+	if !workflowSubmissionMatchesCandidate(*run, last) {
+		if err := checkWorkflowSupersededSubmission(ctx, *run, last, provider); err != nil {
+			return last, false, err
+		}
+
+		return last, true, s.projectWorkflowSubmission(run, *journal)
+	}
+
 	if last.State == "confirmed" && run.Submission != nil && *run.Submission == workflowSubmissionProjection(*journal) {
 		return last, false, nil
 	}
+
+	return s.observeWorkflowSubmissionRetry(ctx, run, journal, provider, git)
+}
+
+func (s *WorkflowStore) observeWorkflowSubmissionRetry(ctx context.Context, run *workflowInvocationFile, journal *workflowSubmissionJournal, provider WorkflowPublicationProvider, git WorkflowIntegrationGit) (WorkflowSubmission, bool, error) {
+	last := journal.Attempts[len(journal.Attempts)-1]
 
 	observed, err := observeWorkflowSubmission(ctx, last, provider, git)
 	if err != nil {
@@ -187,5 +201,5 @@ func (s *WorkflowStore) blockWorkflowSubmissionBudget(run *workflowInvocationFil
 func workflowSubmissionProjection(journal workflowSubmissionJournal) WorkflowSubmissionBinding {
 	last := journal.Attempts[len(journal.Attempts)-1]
 
-	return WorkflowSubmissionBinding{JournalKey: journal.Key, JournalHash: journal.sourceHash, TargetKey: journal.TargetKey, ID: last.ID, Unit: journal.Unit, Attempt: last.Attempt, State: last.State}
+	return WorkflowSubmissionBinding{JournalKey: journal.Key, JournalHash: journal.sourceHash, TargetKey: journal.TargetKey, ID: last.ID, Unit: journal.Unit, Attempt: last.Attempt, State: last.State, ExternalDelivery: last.ExternalDelivery}
 }

@@ -49,6 +49,10 @@ func (s *WorkflowStore) workflowPreparationPreflight(ctx context.Context, run *w
 		return workflowSliceObservation{}, WorkflowReviewInput{}, WorkflowPublicationCapability{}, ErrWorkflowOwned
 	}
 
+	if err := s.guardWorkflowPublicationWork(ctx, *run); err != nil {
+		return workflowSliceObservation{}, WorkflowReviewInput{}, WorkflowPublicationCapability{}, err
+	}
+
 	observation, source, err := s.workflowReviewSourceInputs(ctx, *run, provider)
 	if err != nil {
 		return observation, source, WorkflowPublicationCapability{}, err

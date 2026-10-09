@@ -9,7 +9,7 @@ import (
 )
 
 func workflowSliceReceiptID(run workflowInvocationFile) string {
-	return "delivery-" + workflowHash([]byte(run.ID+"\x00"+run.PullRequest.CandidateID+"\x00"+run.PullRequest.ID))
+	return "delivery-" + workflowHash([]byte(run.ID+"\x00"+run.PullRequest.CandidateID+"\x00"+workflowDeliverySubmissionID(run)))
 }
 
 func workflowSliceReceiptPath(run workflowInvocationFile) string {
@@ -50,6 +50,12 @@ func workflowSliceReceipt(run workflowInvocationFile, proof WorkflowSliceDeliver
 func (s *WorkflowStore) readWorkflowSliceReceipt(ctx context.Context, run workflowInvocationFile) (WorkflowRecord, error) {
 	if err := validateWorkflowFinalizationRef(run); err != nil || run.DeliveryRef == "" {
 		return WorkflowRecord{}, ErrWorkflowConflict
+	}
+
+	if run.Submission != nil {
+		if err := s.checkWorkflowSubmissionProjection(ctx, run); err != nil {
+			return WorkflowRecord{}, err
+		}
 	}
 
 	proof, err := s.readWorkflowDeliveryProof(run)

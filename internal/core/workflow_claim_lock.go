@@ -88,13 +88,7 @@ func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayo
 		return nil, err
 	}
 
-	lanes := map[string]bool{}
-
-	for _, run := range runs {
-		if run.Lane != nil {
-			lanes[run.Lane.Worktree] = true
-		}
-	}
+	lanes := workflowRetainedLanePaths(runs)
 
 	layouts, err := s.workflowRepositoryLayouts(ctx)
 	if err != nil {
@@ -190,4 +184,22 @@ func acquireAgentRepositoryCapacity(ctx context.Context, projectDir string) (*os
 	}
 
 	return acquireWorkflowCapacity(ctx, projectDir)
+}
+
+func workflowRetainedLanePaths(runs []workflowInvocationFile) map[string]bool {
+	lanes := map[string]bool{}
+
+	for _, run := range runs {
+		if run.Lane != nil {
+			lanes[run.Lane.Worktree] = true
+		}
+
+		for _, attempt := range run.Attempts {
+			if attempt.Lane != nil {
+				lanes[attempt.Lane.Worktree] = true
+			}
+		}
+	}
+
+	return lanes
 }

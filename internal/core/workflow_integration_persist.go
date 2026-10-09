@@ -33,7 +33,7 @@ func (s *WorkflowStore) persistWorkflowDeliveryProof(run *workflowInvocationFile
 			return proof, ErrWorkflowConflict
 		}
 
-		run.Status, run.Outcome = "waiting_integration", "slice_delivery_verified"
+		workflowRetainDeliveryStatus(run, "slice_delivery_verified", false)
 
 		return previous, s.commitWorkflowState(run)
 	}
@@ -45,7 +45,8 @@ func (s *WorkflowStore) persistWorkflowDeliveryProof(run *workflowInvocationFile
 
 	data = append(data, '\n')
 	run.DeliveryProofRef, run.DeliveryProofHash = workflowDeliveryProofPath(*run), workflowHash(data)
-	run.Status, run.Outcome = "waiting_integration", "slice_delivery_verified"
+	workflowRetainDeliveryStatus(run, "slice_delivery_verified", false)
+
 	change := workflowFileChange{Path: run.DeliveryProofRef, After: data}
 
 	return proof, s.commitWorkflowPullRequestFiles(run, nil, change)
@@ -85,5 +86,5 @@ func workflowDeliveryProofMatchesRun(run workflowInvocationFile, proof WorkflowS
 		return false
 	}
 
-	return proof.CandidateID == run.PullRequest.CandidateID && proof.CandidateRef == run.CandidateRef && proof.CandidateHash == run.CandidateHash && proof.SubmissionID == run.PullRequest.ID
+	return proof.CandidateID == run.PullRequest.CandidateID && proof.CandidateRef == run.CandidateRef && proof.CandidateHash == run.CandidateHash && proof.SubmissionID == workflowDeliverySubmissionID(run)
 }

@@ -93,9 +93,12 @@ func (s *WorkflowStore) acceptWorkflowPullRequest(ctx context.Context, run *work
 	pr := snapshots[0]
 	run.PullRequest.URL, run.PullRequest.State, run.PullRequest.Reason = pr.URL, "bound", ""
 
-	run.Status, run.Outcome = "waiting_review", "slice_pr_bound"
+	if run.StopIntent == "" && run.Status != "paused" && !workflowInvocationTerminal(run.Status) {
+		run.Status, run.Outcome = "waiting_review", "slice_pr_bound"
+	}
+
 	if pr.Merged {
-		run.Status, run.Outcome = "waiting_integration", "slice_pr_merged_unverified"
+		workflowRetainDeliveryStatus(run, "slice_pr_merged_unverified", false)
 	}
 
 	change, err := s.workflowPullRequestObservation(run, snapshots)

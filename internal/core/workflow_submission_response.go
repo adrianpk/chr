@@ -67,16 +67,11 @@ func (s *WorkflowStore) finishWorkflowSubmissionObservation(ctx context.Context,
 			return ErrWorkflowConflict
 		}
 
-		if submission.State == "awaiting_observation" {
-			submission.State, submission.ObservedPR, submission.Proof = observed.State, observed.ObservedPR, observed.Proof
-			submission.Unpublished = observed.Unpublished
-			submission.UpdatedAt = time.Now().UTC()
-
-			journal.Attempts[len(journal.Attempts)-1] = submission
-			if readErr := owner.writeWorkflowSubmissionJournal(ctx, &journal); readErr != nil {
-				return readErr
-			}
+		if readErr := owner.retainWorkflowSubmissionObservation(ctx, &journal, observed); readErr != nil {
+			return readErr
 		}
+
+		submission = journal.Attempts[len(journal.Attempts)-1]
 
 		return owner.projectWorkflowSubmission(&run, journal)
 	})

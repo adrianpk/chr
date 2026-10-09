@@ -55,7 +55,7 @@ func workflowSubmissionPRMatches(submission WorkflowSubmission, pr WorkflowPullR
 	return pr.State == "open" || pr.State == "closed"
 }
 
-func checkWorkflowUnpublishedObservation(ctx context.Context, submission WorkflowSubmission, provider WorkflowPublicationProvider) error {
+func checkWorkflowUnpublishedObservation(ctx context.Context, submission WorkflowSubmission, provider WorkflowPullRequestProvider) error {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, submission.Guard.PullRequest.URL)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func checkWorkflowUnpublishedObservation(ctx context.Context, submission Workflo
 	return nil
 }
 
-func observeWorkflowSubmittedDelivery(ctx context.Context, submission WorkflowSubmission, pr WorkflowPullRequestSnapshot, provider WorkflowPublicationProvider, git WorkflowIntegrationGit) (WorkflowSubmission, error) {
+func observeWorkflowSubmittedDelivery(ctx context.Context, submission WorkflowSubmission, pr WorkflowPullRequestSnapshot, provider WorkflowPullRequestProvider, git WorkflowIntegrationGit) (WorkflowSubmission, error) {
 	query := submission.Guard.Git.WorkflowIntegrationQuery
 	query.ResultCommit, query.SourceDirectory = pr.ResultCommit, submission.PreparedLane.Worktree
 
@@ -93,6 +93,8 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission WorkflowSu
 	submission.State, submission.Proof, submission.ObservedPR = "confirmed", &proof, &pr
 
 	submission.Unpublished = nil
+
+	submission.ExternalDelivery = proof.ResultCommit != submission.Guard.Git.ResultCommit || proof.BaseCommit != submission.Guard.Git.BaseCommit || proof.HistoryHash != submission.Guard.Git.HistoryHash
 	if err := validateWorkflowSubmissionProof(submission); err != nil {
 		return submission, err
 	}
@@ -104,7 +106,7 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission WorkflowSu
 	return submission, nil
 }
 
-func checkWorkflowSubmittedObservation(ctx context.Context, submission WorkflowSubmission, provider WorkflowPublicationProvider) error {
+func checkWorkflowSubmittedObservation(ctx context.Context, submission WorkflowSubmission, provider WorkflowPullRequestProvider) error {
 	pr, err := provider.ReadWorkflowPullRequest(ctx, submission.Guard.PullRequest.URL)
 	if err != nil {
 		return err

@@ -18,8 +18,8 @@ func (s *WorkflowStore) prepareWorkflowReview(ctx context.Context, id string, pr
 			return readErr
 		}
 
-		if !slices.Contains([]string{"waiting_review", "waiting_integration", "blocked"}, run.Status) {
-			return ErrWorkflowOwned
+		if readErr := owner.checkWorkflowReviewAdmission(ctx, run); readErr != nil {
+			return readErr
 		}
 
 		observation, input, readErr := owner.workflowReviewInputs(ctx, run, provider)
@@ -166,4 +166,12 @@ func (s *WorkflowStore) claimWorkflowReview(ctx context.Context, run *workflowIn
 	err = s.commitWorkflowPullRequestFiles(run, files, file)
 
 	return claim, prepared, err
+}
+
+func (s *WorkflowStore) checkWorkflowReviewAdmission(ctx context.Context, run workflowInvocationFile) error {
+	if !slices.Contains([]string{"waiting_review", "waiting_integration", "blocked"}, run.Status) {
+		return ErrWorkflowOwned
+	}
+
+	return s.guardWorkflowPublicationWork(ctx, run)
 }
