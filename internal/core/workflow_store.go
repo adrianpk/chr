@@ -61,6 +61,10 @@ func (s *WorkflowStore) Create(ctx context.Context, title string, record Workflo
 			return err
 		}
 
+		if _, err := s.workflowCoordinatorFiles(ctx); err != nil {
+			return err
+		}
+
 		artifact, createErr := CreateOpsArtifact(CreateOpsArtifactOptions{Layout: s.layout, Type: record.Kind, Title: title, Producer: "chr"})
 		if createErr != nil {
 			return createErr
@@ -159,6 +163,13 @@ func (s *WorkflowStore) writeRecord(ctx context.Context, r WorkflowRecord, expec
 	if err != nil {
 		return WorkflowRecord{}, err
 	}
+
+	coordinator, err := s.workflowCoordinatorFiles(ctx)
+	if err != nil {
+		return WorkflowRecord{}, err
+	}
+
+	changes = append(changes, coordinator...)
 
 	if err := s.commitFiles(changes); err != nil {
 		return WorkflowRecord{}, err

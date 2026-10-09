@@ -27,6 +27,11 @@ and receipt; a changed approved input or membership requires reconciliation.
 Recovery releases only an allocation lock matching its recorded ownership.
 Record and journal limits also apply to materialization.
 
+Initial native authoring also journals the repository's coordinator marker.
+The canonical target must retain that registration before execution begins.
+Copied authority cannot register another local execution pool. See
+[Coordinator registration](workflow-execution.md#coordinator-registration).
+
 `AdoptWorkflowPlan` accepts a selected legacy plan envelope, its observed
 metadata/body hash, and an exact mapping from approved tasks to observed legacy
 Markdown tickets. The plan retains its envelope ID and creation time. Tickets

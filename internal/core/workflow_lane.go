@@ -147,6 +147,10 @@ func (s *WorkflowStore) workflowLaneCandidate(ctx context.Context, lane Workflow
 		return "", "", fmt.Errorf("%w: lane history does not descend from its accepted head", ErrWorkflowConflict)
 	}
 
+	if err := s.checkWorkflowCoordinatorTarget(ctx, WorkflowPreviewTarget{Commit: commit}); err != nil {
+		return "", "", err
+	}
+
 	tree, err := (OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{tree}")
 
 	return commit, tree, err

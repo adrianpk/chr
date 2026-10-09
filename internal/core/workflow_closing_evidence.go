@@ -39,6 +39,10 @@ func (s *WorkflowStore) workflowClosingEvidenceHashes(hashes map[string]string, 
 }
 
 func (s *WorkflowStore) checkWorkflowClosingInputs(ctx context.Context, claim *workflowClosingClaim) error {
+	if err := s.checkWorkflowCoordinatorTarget(ctx, claim.input.Target); err != nil {
+		return err
+	}
+
 	set, err := s.readRecord(claim.set.Path)
 	if err != nil {
 		return err

@@ -77,6 +77,14 @@ func workflowInvocationNeedsClosing(run WorkflowInvocation) bool {
 }
 
 func (s *WorkflowStore) checkWorkflowInputs(ctx context.Context, run workflowInvocationFile) error {
+	if _, err := s.checkWorkflowCoordinator(ctx); err != nil {
+		return err
+	}
+
+	if err := s.checkWorkflowFrontierOwnership(ctx, run); err != nil {
+		return err
+	}
+
 	if err := s.checkWorkflowContinuationCheckpoint(run); err != nil {
 		return err
 	}
@@ -161,7 +169,7 @@ func (s *WorkflowStore) checkWorkflowTarget(ctx context.Context, target Workflow
 		return fmt.Errorf("workflow target commit is unavailable: %s", target.Commit)
 	}
 
-	return nil
+	return s.checkWorkflowCoordinatorTarget(ctx, target)
 }
 
 func guardWorkflowClaimImages(record WorkflowRecord, files []workflowFileChange) error {

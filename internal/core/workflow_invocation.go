@@ -233,6 +233,10 @@ func (s *WorkflowStore) startWorkflow(ctx context.Context, request WorkflowStart
 		return WorkflowStartResult{}, err
 	}
 
+	if _, err := s.checkWorkflowCoordinator(ctx); err != nil {
+		return WorkflowStartResult{}, err
+	}
+
 	preview, err := s.freezeWorkflowSelection(ctx, request.Selection)
 	if err != nil {
 		return WorkflowStartResult{}, err

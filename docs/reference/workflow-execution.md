@@ -26,6 +26,35 @@ Successful task validation leaves task status `in_progress` and phase
 completes only that task. A whole slice or independent ticket stops at
 `waiting_integration`; local validation does not mark work `done`.
 
+## Coordinator registration
+
+Explicit native creation, materialization or adoption journals
+`ops/<namespace>/coordinator.json` with the first authority records. The marker
+contains a `chr-coordinator/v1` schema and an opaque ID. The matching registration
+in the Git common directory is host-owned. It binds that ID to the machine and
+the actual common directory, without publishing private paths or host identity.
+Linked worktrees and namespaces share this registration. Moving the original
+directory preserves its identity; cloning or copying it does not grant ownership.
+
+Before initial execution, commit the coordinator marker to the configured
+canonical target. Native execution and candidate acceptance require that target
+to retain the registered ID. Markers for other namespaces must agree. A work lane
+cannot bootstrap a missing target registration by executing or publishing itself.
+Unsupported separate clones or hosts return `ErrWorkflowCoordinator`. Existing
+unbound authority, a missing host registration or conflicting markers require
+explicit reconciliation; work starts cannot silently create another owner.
+
+Task and hierarchy ownership are rechecked before each reservation and fenced
+result application. Legacy Git runners validate the same repository capacity
+policy and reject copied registered authority. Their conservative exclusion
+continues to apply across all native slots. Web and daemon code without native
+work-start controls cannot create execution ownership; shared controls use the
+application operation service.
+
+Invocation admission can retain an immutable target before its objects are
+hydrated. It verifies the local registered owner and grants no worker authority.
+The execution and closure boundaries verify the available canonical target.
+
 ## Frozen inputs and evidence
 
 The retained lane uses a deterministic `refs/heads/chr/workflow/<identity>`

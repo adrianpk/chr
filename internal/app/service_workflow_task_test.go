@@ -61,6 +61,8 @@ func serviceWorkflowTaskFixture(t *testing.T) (service, core.WorkflowMaterializa
 		t.Fatal(err)
 	}
 
+	serviceWorkflowPublishCoordinator(t, project)
+
 	if output, err := exec.Command("git", "-C", project, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "--allow-empty", "-qm", "Fixture").CombinedOutput(); err != nil {
 		t.Fatalf("git commit: %v: %s", err, output)
 	}

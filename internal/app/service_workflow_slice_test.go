@@ -33,6 +33,8 @@ func serviceWorkflowSliceFixture(t *testing.T) (service, core.WorkflowMaterializ
 		t.Fatal(err)
 	}
 
+	serviceWorkflowPublishCoordinator(t, project)
+
 	if output, err := exec.CommandContext(t.Context(), "git", "-C", project, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "--allow-empty", "-qm", "Fixture").CombinedOutput(); err != nil {
 		t.Fatalf("git commit: %v: %s", err, output)
 	}

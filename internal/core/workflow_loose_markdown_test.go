@@ -68,10 +68,7 @@ func workflowLooseMarkdown(t *testing.T, store *WorkflowStore) WorkflowRecord {
 
 	record.Metadata, record.Body, record.Path = map[string]json.RawMessage{"frontmatter": raw}, body, "ticket/backlog/PRJ-1.md"
 
-	data, err := encodeWorkflowMarkdown(record)
-	if err != nil {
-		t.Fatal(err)
-	}
+	data := []byte("---\n" + front + "\n---\n" + string(body))
 
 	path := filepath.Join(store.layout.Root(), record.Path)
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -82,7 +79,7 @@ func workflowLooseMarkdown(t *testing.T, store *WorkflowStore) WorkflowRecord {
 		t.Fatal(err)
 	}
 
-	observed, err := store.Read(t.Context(), record.Path)
+	observed, err := store.Adopt(t.Context(), record.Path, *record.Task, workflowHash(data))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -84,12 +84,17 @@ func (s *WorkflowStore) adoptPlanWorkflow(ctx context.Context, opts WorkflowPlan
 		return WorkflowMaterializationResult{}, err
 	}
 
+	coordinator, err := s.workflowCoordinatorFiles(ctx)
+	if err != nil {
+		return WorkflowMaterializationResult{}, err
+	}
+
 	files, err := s.planAdoptionFiles(result, opts.Plan)
 	if err != nil {
 		return WorkflowMaterializationResult{}, err
 	}
 
-	if err := s.commitFiles(files); err != nil {
+	if err := s.commitFiles(append(files, coordinator...)); err != nil {
 		return WorkflowMaterializationResult{}, err
 	}
 

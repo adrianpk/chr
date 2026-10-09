@@ -59,6 +59,15 @@ func (s *WorkflowStore) materializePlan(ctx context.Context, opts WorkflowMateri
 		return result, err
 	}
 
+	coordinator, err := s.workflowCoordinatorFiles(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	return s.materializeNewPlan(ctx, opts, snapshot, body, coordinator)
+}
+
+func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMaterializationOptions, snapshot WorkflowSnapshot, body []byte, coordinator []workflowFileChange) (result WorkflowMaterializationResult, err error) {
 	guard, err := s.acquireWorkflowAllocation()
 	if err != nil {
 		return result, err
@@ -82,7 +91,7 @@ func (s *WorkflowStore) materializePlan(ctx context.Context, opts WorkflowMateri
 		return result, err
 	}
 
-	if err := s.commitAllocatedFiles(files, guard); err != nil {
+	if err := s.commitAllocatedFiles(append(files, coordinator...), guard); err != nil {
 		return result, err
 	}
 

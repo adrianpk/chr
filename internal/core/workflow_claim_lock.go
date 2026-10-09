@@ -51,6 +51,14 @@ func acquireWorkflowCapacity(ctx context.Context, projectDir string) (*os.File, 
 }
 
 func (s *WorkflowStore) reserveWorkflowClaim(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
+	if _, err := s.checkWorkflowCoordinator(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := s.checkWorkflowFrontierOwnership(ctx, run); err != nil {
+		return nil, err
+	}
+
 	file, guard, err := s.acquireWorkflowWorkerSlot(ctx)
 	if err != nil {
 		return nil, err
@@ -188,7 +196,7 @@ func acquireAgentRepositoryCapacity(ctx context.Context, projectDir string) (*os
 		return nil, err
 	}
 
-	return acquireWorkflowCapacity(ctx, projectDir)
+	return acquireLegacyWorkflowCapacity(ctx, projectDir)
 }
 
 func workflowRetainedLanePaths(runs []workflowInvocationFile) map[string]bool {
