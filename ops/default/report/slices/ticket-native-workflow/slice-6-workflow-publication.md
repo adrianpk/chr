@@ -10,7 +10,7 @@ Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md
 
 Branch: `feat/slice-6-workflow-publication`
 
-PR: pending
+PR: [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369)
 
 ## Purpose
 
