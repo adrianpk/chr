@@ -1,6 +1,6 @@
 # Slice 8: Loose-ticket integration loop
 
-Status: reviewing
+Status: delivered
 
 Delivery set: ticket-native-workflow
 
@@ -117,14 +117,15 @@ race checks and the complete gate passed. T8.4's initial routing fixtures were
 corrected to expose the required publication interface and actual generated
 ticket keys before its full task checks passed.
 
-The controller records final clean PR-head evidence after the PR-reference
-follow-up commit, for this exact ordered candidate command list:
+The controller passed the final clean-head checks on `f9995446e72fa0e2e53972d280001cfdccd070db`,
+the exact source and merged dev head of canonical PR #371, in this order:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -count=1`
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
+Canonical PR #371 merged on 2026-10-09; Acta merge event `01M4FZER759JJQFE97B3MJW8GN`.
 These candidate checks are distinct from the delivery set's later full gate.
 
 ## Risks and Follow-ups
