@@ -1,6 +1,6 @@
 # Slice 7: Ordered set and use-case continuation
 
-Status: reviewing
+Status: delivered
 
 Delivery set: ticket-native-workflow
 
@@ -11,6 +11,10 @@ Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md
 Branch: `feat/slice-7-workflow-continuation`
 
 PR: [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370)
+
+Merged into `dev` through canonical PR #370 at
+`6413d0fd436b7f0df51ddb9648ddcf88416fcd64`. Acta merge event:
+`01M4FFP43DWAEPQST2XZHKY622`.
 
 ## Purpose
 
@@ -108,7 +112,10 @@ empty decisions. Journal interruption, expired owners, descendant stops, budget
 exhaustion, corrupted evidence and prior-plan/closure/terminal immutability are
 covered through native operations. Shared service tests use the same contracts.
 
-The controller records final clean-head PR evidence for this ordered list:
+The controller confirmed the exact clean merged head
+`6413d0fd436b7f0df51ddb9648ddcf88416fcd64` with all commands successful.
+Evidence is retained in `checks/6413d0fd436b7f0df51ddb9648ddcf88416fcd64.json`
+and the matching controller log for this ordered list:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -count=1`
