@@ -1,0 +1,62 @@
+{{define "workflow_content.html"}}
+<div class="detail-actions"><a class="button" href="/board">Board</a><a class="button" href="/cases">Cases</a><a class="button" href="/workflows">Retained workflows</a></div>
+{{if .Workflow.Failure}}<div class="write-result write-result--validation_failed" role="alert" data-workflow-failure>{{.Workflow.Failure}}</div>{{end}}
+{{if .Workflow.Preview}}
+  <section data-workflow-preview>
+    <h2>Confirm workflow extent</h2>
+    {{template "workflow_fields.html" .Workflow.Preview.Fields}}
+    <h3>Selected members</h3>
+    {{template "workflow_fields.html" .Workflow.Preview.Members}}
+    <form class="action-form" method="post" action="/workflows/actions" hx-post="/workflows/actions" hx-target="#workspace" hx-swap="innerHTML">
+      <input type="hidden" name="action" value="workflow.start">
+      <input type="hidden" name="binding" value="{{.Workflow.Preview.Binding}}">
+      <input type="hidden" name="confirm" value="true">
+      <button class="button button--primary" data-workflow-start type="submit">Confirm and start one checkpoint</button>
+    </form>
+  </section>
+{{end}}
+{{if .Workflow.Current}}{{template "workflow_run.html" .Workflow.Current}}{{end}}
+{{range .Workflow.Items}}
+  <article class="detail-block"><a href="/workflows?id={{.ID}}">{{.ID}}</a> revision {{.Revision}} — {{.Status}}</article>
+{{end}}
+{{if .Workflow.NextURL}}<a class="button" href="{{.Workflow.NextURL}}">Next workflows</a>{{end}}
+{{if and .Workflow.Enabled (not .Workflow.Preview) (not .Workflow.Current)}}
+  <form class="action-form" method="get" action="/workflows">
+    <h2>Preview loose work</h2>
+    <input type="hidden" name="extent" value="loose">
+    <label>Project area <input name="project_area" maxlength="128"></label>
+    <label>Severity <select name="severity"><option value="">Any</option><option>critical</option><option>high</option><option>medium</option><option>low</option></select></label>
+    <label>Priority <select name="priority"><option value="">Any</option><option>urgent</option><option>high</option><option>normal</option><option>low</option></select></label>
+    <label>Order <select name="order"><option>priority</option><option>severity</option></select></label>
+    <button class="button" type="submit">Preview loose work</button>
+  </form>
+{{end}}
+{{end}}
+
+{{define "workflow_fields.html"}}
+<dl class="kv-list">{{range .}}<div><dt>{{.Label}}</dt><dd>{{.Value}}</dd></div>{{end}}</dl>
+{{end}}
+
+{{define "workflow_run.html"}}
+<section data-workflow-id="{{.ID}}" data-workflow-revision="{{.Revision}}" data-workflow-status="{{.Status}}">
+  <h2>Workflow {{.ID}}</h2>
+  <p>Revision {{.Revision}} <a class="button" href="/workflows?id={{.ID}}">Refresh status</a></p>
+  {{template "workflow_fields.html" .Fields}}
+  <h3>Members</h3>{{template "workflow_fields.html" .Members}}
+  {{if .NextURL}}<a class="button" href="{{.NextURL}}">Next members at this revision</a>{{end}}
+  <h3>Recent evidence</h3>{{template "workflow_fields.html" .Evidence}}
+  {{$run := .}}
+  <div class="detail-actions" aria-label="Workflow controls">
+    {{range .Actions}}
+      <form class="action-form" method="post" action="/workflows/actions" hx-post="/workflows/actions" hx-target="#workspace" hx-swap="innerHTML">
+        <input type="hidden" name="action" value="workflow.{{.}}">
+        <input type="hidden" name="id" value="{{$run.ID}}">
+        <input type="hidden" name="revision" value="{{$run.Revision}}">
+        <input type="hidden" name="binding_hash" value="{{$run.ApprovalHash}}">
+        <input type="hidden" name="confirm" value="true">
+        <button class="button" data-workflow-action="{{.}}" type="submit">Confirm {{.}}</button>
+      </form>
+    {{end}}
+  </div>
+</section>
+{{end}}

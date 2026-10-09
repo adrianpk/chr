@@ -59,6 +59,8 @@
             {{template "catalog_content.html" .}}
           {{else if eq .View "artifact_detail"}}
             {{template "artifact_detail_content.html" .}}
+          {{else if eq .View "workflows"}}
+            {{template "workflow_content.html" .}}
           {{else if eq .View "write_result"}}
             {{template "write_result.html" .}}
           {{else}}
@@ -103,6 +105,12 @@
 {{end}}
 
 {{define "board_content.html"}}
+{{if .Board.WorkflowTickets}}
+<section aria-label="Native workflow tickets"><h2>Native workflow tickets</h2>
+  {{range .Board.WorkflowTickets}}{{template "ticket_card.html" .}}{{end}}
+  {{if .Board.WorkflowMore}}<p>Showing the first 128 native tickets. Use an explicit extent or retained workflow to continue.</p>{{end}}
+</section>
+{{end}}
 {{template "revision_marker.html" .}}
 {{if .Board.Attention}}
 <section class="attention-strip" aria-label="Attention tickets">
@@ -158,6 +166,7 @@
       <button class="icon-button" type="button" data-modal-close aria-label="Close ticket detail">x</button>
     </header>
     <div class="ticket-modal__body">
+      {{if .Ticket.NativeWorkflow}}<h3>{{.Ticket.Key}} — {{.Ticket.Title}}</h3><pre class="artifact-content">{{.Ticket.Synopsis}}</pre><p>{{.Ticket.Status}} / {{.Ticket.Slice}}</p>{{else}}
       <form class="ticket-edit-form" method="post" action="/actions">
         <input type="hidden" name="action" value="ticket.update">
         <input type="hidden" name="id" value="{{.Ticket.Key}}">
@@ -179,6 +188,17 @@
           <button class="button" type="submit">Save</button>
         </div>
       </form>
+      {{end}}
+      {{if .Ticket.WorkflowEnabled}}
+        <div class="detail-actions" aria-label="Ticket workflow controls">
+          <a class="button" data-workflow-ticket href="/workflows?extent=ticket&amp;key={{.Ticket.Key}}">Preview ticket work</a>
+          <a class="button" href="/workflows?extent=slice&amp;key={{.Ticket.Key}}">Preview owning slice</a>
+          <a class="button" href="/workflows?extent=slice_set&amp;key={{.Ticket.Key}}">Preview owning set</a>
+          <a class="button" href="/workflows?extent=use_case&amp;key={{.Ticket.Key}}">Preview owning use case</a>
+          <a class="button" href="/workflows">Retained workflows</a>
+        </div>
+      {{end}}
+      {{if not .Ticket.NativeWorkflow}}
       <section class="ticket-comments" aria-label="Ticket comments">
         <header class="ticket-comments__header">
           <h3>Comments</h3>
@@ -213,6 +233,7 @@
           </div>
         </form>
       </section>
+      {{end}}
     </div>
   </section>
 </div>
@@ -387,6 +408,10 @@
 {{define "case_edit_panel.html"}}
 <header class="case-edit-panel__header">
   <h2 id="case-edit-title">Edit Case</h2>
+  {{if .Detail.WorkflowEnabled}}
+    <a class="button" data-workflow-case href="/workflows?extent=use_case&amp;identity={{.Detail.ID}}">Preview use-case work</a>
+    <a class="button" href="/workflows">Retained workflows</a>
+  {{end}}
 </header>
 <form class="case-edit-form" method="post" action="/actions"{{if .CaseModal}} hx-post="/actions" hx-target="#modal-root" hx-swap="innerHTML"{{end}}>
   <input type="hidden" name="action" value="case.update">
@@ -510,7 +535,7 @@
 {{end}}
 
 {{define "write_result.html"}}
-<div class="write-result write-result--{{.Write.Status}}">
+<div class="write-result write-result--{{.Write.Status}}" data-write-status="{{.Write.Status}}">
   <h2>{{.Write.Summary}}</h2>
   {{if .Write.BlockedReason}}<p>{{.Write.BlockedReason}}</p>{{end}}
   {{if eq .Write.Status "stale"}}
@@ -538,6 +563,7 @@
     </dl>
   {{end}}
 </div>
+{{if .Write.Workflow}}{{template "workflow_run.html" .Write.Workflow}}{{end}}
 {{end}}
 
 {{define "revision_marker.html"}}
@@ -621,6 +647,7 @@
 {{end}}
 
 {{define "dash_content.html"}}
+<div class="detail-actions"><a class="button" href="/workflows">Native workflows</a></div>
 {{template "revision_marker.html" .}}
 <div class="dash-grid">
   <section class="dash-panel">

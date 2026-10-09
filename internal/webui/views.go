@@ -32,6 +32,7 @@ type PageData struct {
 	Detail     ArtifactDetailView
 	Write      WriteActionResponse
 	CaseModal  bool
+	Workflow   WorkflowView
 }
 
 func newStaticDataProvider(shell ShellData) staticDataProvider {
@@ -117,6 +118,8 @@ type ProjectPathView struct {
 
 // BoardView is the read-only board projection rendered by the Web UI.
 type BoardView struct {
+	WorkflowTickets []BoardTicketView
+	WorkflowMore    bool
 	ProjectID       string
 	TotalCount      int
 	NormalCount     int
@@ -174,19 +177,21 @@ type TicketDetailRequest struct {
 
 // TicketDetailView is the modal projection for one ticket.
 type TicketDetailView struct {
-	Key          string
-	Title        string
-	Synopsis     string
-	Priority     string
-	Status       string
-	Type         string
-	ProjectArea  string
-	UseCase      string
-	Slice        string
-	RelativePath string
-	Comments     []TicketCommentView
-	Missing      bool
-	Revision     string
+	NativeWorkflow  bool
+	WorkflowEnabled bool
+	Key             string
+	Title           string
+	Synopsis        string
+	Priority        string
+	Status          string
+	Type            string
+	ProjectArea     string
+	UseCase         string
+	Slice           string
+	RelativePath    string
+	Comments        []TicketCommentView
+	Missing         bool
+	Revision        string
 }
 
 // TicketCommentView is one rendered ticket comment.
@@ -309,19 +314,20 @@ type ArtifactCardView struct {
 
 // ArtifactDetailView is the read-only detail projection for one artifact.
 type ArtifactDetailView struct {
-	Family      string
-	ID          string
-	Title       string
-	Description string
-	Context     string
-	Status      string
-	Scope       string
-	Path        string
-	SourcePath  string
-	UpdatedAt   string
-	Content     string
-	Missing     bool
-	Revision    string
+	WorkflowEnabled bool
+	Family          string
+	ID              string
+	Title           string
+	Description     string
+	Context         string
+	Status          string
+	Scope           string
+	Path            string
+	SourcePath      string
+	UpdatedAt       string
+	Content         string
+	Missing         bool
+	Revision        string
 }
 
 // WriteActionRequest describes one confirmed Web UI write action.
@@ -348,6 +354,7 @@ const (
 
 // WriteActionResponse is the stable write result envelope returned by Web UI actions.
 type WriteActionResponse struct {
+	Workflow      *WorkflowRunView
 	Status        string
 	Summary       string
 	ChangedFiles  []string

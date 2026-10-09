@@ -11,6 +11,7 @@ if [ -z "$project_dir" ]; then
 	created_project="yes"
 fi
 
+server_binary="$(mktemp)"
 server_log="$(mktemp)"
 body_file="$(mktemp)"
 screenshot_dir="${CHR_WEB_SMOKE_SCREENSHOTS:-/tmp/chr-web-ui-smoke-$$}"
@@ -21,7 +22,7 @@ cleanup() {
 		kill "$server_pid" 2>/dev/null || true
 		wait "$server_pid" 2>/dev/null || true
 	fi
-	rm -f "$server_log" "$body_file"
+	rm -f "$server_binary" "$server_log" "$body_file"
 	if [ -n "$created_project" ]; then
 		rm -rf "$project_dir"
 	fi
@@ -88,7 +89,8 @@ mkdir -p "$screenshot_dir"
 	--type task \
 	--priority normal >/dev/null)
 
-(cd "$repo_root" && go run ./cmd/chr web serve --dir "$project_dir" --port "$port" --require-token false >"$server_log" 2>&1) &
+(cd "$repo_root" && go build -o "$server_binary" ./cmd/chr)
+"$server_binary" web serve --dir "$project_dir" --port "$port" --require-token false >"$server_log" 2>&1 &
 server_pid="$!"
 
 ready=""
@@ -141,6 +143,7 @@ for candidate in chromium google-chrome google-chrome-stable; do
 done
 
 if [ -n "$browser" ]; then
+	(cd "$repo_root" && CHR_WEB_BROWSER="$(command -v "$browser")" go test ./internal/app -run '^TestWebWorkflowBrowser$' -count=1)
 	"$browser" --headless=new --disable-gpu --no-sandbox --window-size=1280,900 \
 		--screenshot="$screenshot_dir/board.png" "http://127.0.0.1:$port/board" >/dev/null 2>&1
 	"$browser" --headless=new --disable-gpu --no-sandbox --window-size=390,900 \
@@ -151,7 +154,7 @@ if [ -n "$browser" ]; then
 		exit 1
 	fi
 
-	echo "web ui smoke ok: pages, fragments, write action, and browser screenshots passed"
+	echo "web ui smoke ok: pages, fragments, write action, native workflow browser actions, and screenshots passed"
 	echo "screenshots: $screenshot_dir"
 else
 	echo "web ui smoke ok: pages, fragments, and write action passed"

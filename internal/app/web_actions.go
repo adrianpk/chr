@@ -49,7 +49,7 @@ func (p webViewProvider) WriteAction(ctx context.Context, request webui.WriteAct
 		return response, err
 	}
 
-	if response, handled, err := p.writeWorkAction(operations, request); handled || err != nil {
+	if response, handled, err := p.writeWorkAction(ctx, operations, request); handled || err != nil {
 		return response, err
 	}
 
@@ -153,7 +153,7 @@ func (p webViewProvider) validateTicketRevision(ctx context.Context, request web
 	return webui.WriteActionResponse{}
 }
 
-func (p webViewProvider) writeWorkAction(operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
+func (p webViewProvider) writeWorkAction(ctx context.Context, operations service, request webui.WriteActionRequest) (webui.WriteActionResponse, bool, error) {
 	switch request.Action {
 	case webActionWorkPreview:
 		response, err := p.writeWorkPreview(operations)
@@ -164,6 +164,10 @@ func (p webViewProvider) writeWorkAction(operations service, request webui.Write
 
 		return response, true, err
 	default:
+		if strings.HasPrefix(request.Action, "workflow.") {
+			return p.writeWorkflowAction(ctx, operations, request), true, nil
+		}
+
 		return webui.WriteActionResponse{}, false, nil
 	}
 }

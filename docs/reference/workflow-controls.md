@@ -124,3 +124,41 @@ bindings, continuation evidence and delivery receipts. A rejected control keeps
 current status visible alongside its failure. Inspect again to obtain a fresh
 binding before retrying. Observation rejects pending journals across linked
 worktrees and namespaces without recovery writes.
+
+## Web controls
+
+With tickets authority enabled, the Board lists native workflow tickets and their
+current phases. Open a ticket to preview its exact ticket, owning slice, slice set
+or use case. Case details offer a use-case preview using that case's identity.
+The Dash links to `/workflows`, which lists retained invocations in pages of 16
+and offers loose-work filters for project area, priority, severity and order.
+
+A preview is read-only. It displays selection, exclusions, ordered members,
+target, policy source, the selected ticket revision and a complete extent
+snapshot. **Confirm and start one checkpoint** sends that binding unchanged.
+Changing a selected record or admitting a competing owner rejects confirmation.
+Native ticket details show workflow records; their status is changed through
+workflow operations. The existing legacy ticket editor remains available for
+legacy tickets.
+
+Retained status displays eight members and eight recent evidence rows. Member
+pagination binds the displayed invocation revision; reload after a revision
+conflict. Visible status pages refresh while the document is visible. Admission
+previews and write results retain their displayed bindings until the user acts
+or explicitly refreshes them. Status remains observable if configuration changes
+to tracker compatibility; new native admission still requires tickets authority.
+
+The invocation view offers confirmed continue, pause, cancel, resume and ownership
+reconciliation controls, plus exact-binding approval during a human review wait.
+Each action sends the displayed invocation revision. Start and continue execute
+at most one shared checkpoint; the Web adapter has no scheduler or execution
+queue. An accepted action returns its retained status. A rejected action renders
+a visible failure with current status when the invocation is known. Host task
+validation, confirmed integration and remaining work remain separate counts.
+
+`GET /workflows` and `/workflows/fragment` are read-only.
+`POST /workflows/actions` requires explicit confirmation, a frozen admission
+binding or invocation revision, and the existing origin/token access policy.
+Forms are limited to 32 KiB with no duplicate fields; admission bindings are
+limited to 8 KiB and reject unknown JSON fields. Expected failures render as
+HTTP 200 fragments for htmx so that the browser can show them.

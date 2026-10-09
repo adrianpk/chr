@@ -52,35 +52,49 @@ func (p webViewProvider) ProjectView(context.Context) (webui.ProjectView, error)
 }
 
 func (p webViewProvider) BoardView(ctx context.Context) (webui.BoardView, error) {
-	board, err := p.service(ctx).Board()
+	board, err := p.workflowBoardBase(ctx)
 	if err != nil {
 		return webui.BoardView{}, err
 	}
 
 	view := webBoardView(board)
+	if p.workflowEnabled() {
+		view.WorkflowTickets, view.WorkflowMore, err = p.workflowTicketCards(ctx)
+		if err != nil {
+			return webui.BoardView{}, err
+		}
+	}
 	view.Revision = webStableRevision(view)
 
 	return view, nil
 }
 
 func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.TicketDetailRequest) (webui.TicketDetailView, error) {
+	if p.workflowEnabled() {
+		view, found, err := p.workflowTicketDetail(ctx, request.Key)
+		if found || err != nil {
+			return view, err
+		}
+	}
+
 	ticket, err := p.service(ctx).ticketByKey(request.Key)
 	if err != nil {
 		return webui.TicketDetailView{}, err
 	}
 
 	view := webui.TicketDetailView{
-		Key:          ticket.Key,
-		Title:        ticket.Title,
-		Synopsis:     ticket.Synopsis,
-		Priority:     ticket.Priority,
-		Status:       ticket.Status,
-		Type:         ticket.Type,
-		ProjectArea:  ticket.ProjectArea,
-		UseCase:      ticket.UseCase,
-		Slice:        ticket.Slice,
-		RelativePath: ticket.RelativePath,
-		Comments:     webTicketComments(ticket.Path),
+		WorkflowEnabled: p.workflowEnabled(),
+		Key:             ticket.Key,
+		Title:           ticket.Title,
+		Synopsis:        ticket.Synopsis,
+		Priority:        ticket.Priority,
+		Status:          ticket.Status,
+		Type:            ticket.Type,
+		ProjectArea:     ticket.ProjectArea,
+		UseCase:         ticket.UseCase,
+		Slice:           ticket.Slice,
+		RelativePath:    ticket.RelativePath,
+		Comments:        webTicketComments(ticket.Path),
 	}
 	view.Revision = webStableRevision(view)
 

@@ -160,18 +160,19 @@ func (p webViewProvider) caseDetailView(card webui.ArtifactCardView) (webui.Arti
 	}
 
 	view := webui.ArtifactDetailView{
-		Family:      card.Family,
-		ID:          card.ID,
-		Title:       metadata.Name,
-		Description: metadata.Description,
-		Context:     metadata.Context,
-		Status:      card.Status,
-		Scope:       card.Scope,
-		Path:        card.Path,
-		SourcePath:  card.SourcePath,
-		UpdatedAt:   card.UpdatedAt,
-		Content:     content,
-		Revision:    metadata.SourceHash,
+		Family:          card.Family,
+		ID:              card.ID,
+		Title:           metadata.Name,
+		WorkflowEnabled: p.workflowEnabled(),
+		Description:     metadata.Description,
+		Context:         metadata.Context,
+		Status:          card.Status,
+		Scope:           card.Scope,
+		Path:            card.Path,
+		SourcePath:      card.SourcePath,
+		UpdatedAt:       card.UpdatedAt,
+		Content:         content,
+		Revision:        metadata.SourceHash,
 	}
 	if view.Revision == "" {
 		view.Revision = webStableRevision(view)

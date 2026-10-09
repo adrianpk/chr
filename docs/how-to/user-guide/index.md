@@ -710,6 +710,14 @@ that invocation's displayed revision. A stale action shows its failure with
 current status; inspect again before retrying. Status and stop controls remain
 available during native execution.
 
+In the Web UI, open a native ticket on the Board to preview its ticket, slice,
+set or use-case extent. Case details offer a use-case preview. Confirm the
+displayed snapshot to start one checkpoint, then use its retained workflow view
+to continue, pause/cancel, resume, approve the exact binding or reconcile
+ownership. The Dash links to retained workflows and loose-work filters. A stale
+action shows current progress alongside its failure. Refresh status before
+retrying; host validation and confirmed integration remain separate counts.
+
 
 Ticket-native work defaults to one active worker. To run independent lanes in
 parallel, set the capacity in `.chr/default/config.yml`:

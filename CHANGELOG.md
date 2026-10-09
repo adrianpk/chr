@@ -12,9 +12,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
 
 ### Added
 
-- Ticket-native CLI and TUI controls can preview and run exact tickets, slices,
+- Ticket-native CLI, TUI and Web controls can preview and run exact tickets, slices,
   slice sets, use cases and loose work, then inspect or continue retained
-  executions. TUI confirmations retain the selected revision and show stale
+  executions. TUI and Web confirmations retain the selected revision and show stale
   conflicts, capacity waits and validated versus integrated progress. Approval
   uses the displayed candidate binding; supervised CLI manual handoffs require
   host validation before progress advances.

@@ -103,6 +103,9 @@ func NewHandler(opts HandlerOptions) (http.Handler, error) {
 	}
 
 	mux.HandleFunc("/actions", handler.writeAction)
+	mux.HandleFunc("/workflows", handler.workflows)
+	mux.HandleFunc("/workflows/fragment", handler.workflows)
+	mux.HandleFunc("/workflows/actions", handler.workflowAction)
 	mux.HandleFunc("/bootstrap", handler.projectFragment)
 	mux.HandleFunc("/healthz", healthz)
 	mux.Handle("/assets/", http.StripPrefix("/assets/", handler.static))
