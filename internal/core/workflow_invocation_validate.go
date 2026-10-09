@@ -53,6 +53,10 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return err
 	}
 
+	if err := validateWorkflowContinuation(run); err != nil {
+		return err
+	}
+
 	return validateWorkflowInvocationBindings(run)
 }
 

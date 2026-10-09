@@ -16,6 +16,7 @@ type WorkflowExecutionPolicy struct {
 	WorkerTimeoutSeconds   int `json:"worker_timeout_seconds"`
 	MaxWorkerAttempts      int `json:"max_worker_attempts"`
 	MaxIntegrationAttempts int `json:"max_integration_attempts,omitempty"`
+	CheckpointStepLimit    int `json:"checkpoint_step_limit,omitempty"`
 }
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.
@@ -67,9 +68,10 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
-	ExecutionTarget *WorkflowPreviewTarget `json:"execution_target,omitempty"`
-	ConfirmedCursor int                    `json:"confirmed_cursor,omitempty"`
-	Deliveries      []WorkflowUnitDelivery `json:"integrated_units,omitempty"`
+	ExecutionTarget *WorkflowPreviewTarget          `json:"execution_target,omitempty"`
+	ConfirmedCursor int                             `json:"confirmed_cursor,omitempty"`
+	Deliveries      []WorkflowUnitDelivery          `json:"integrated_units,omitempty"`
+	Continuation    *WorkflowContinuationCheckpoint `json:"continuation_checkpoint,omitempty"`
 	WorkflowIdentity
 	Schema            string                       `json:"schema"`
 	RequestKey        string                       `json:"request_key"`
@@ -156,13 +158,7 @@ func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest,
 
 	request.Selection = selection
 
-	if request.Policy.WorkerTimeoutSeconds == 0 {
-		request.Policy.WorkerTimeoutSeconds = 3600
-	}
-
-	if request.Policy.MaxWorkerAttempts == 0 {
-		request.Policy.MaxWorkerAttempts = 3
-	}
+	request.Policy = normalizeWorkflowExecutionPolicy(request.Policy)
 
 	if !validWorkflowExecutionPolicy(request.Policy) {
 		return request, fmt.Errorf("workflow worker policy bounds exceeded")
@@ -175,12 +171,28 @@ func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest,
 	return request, validateWorkflowPreviewRequest(request.Selection)
 }
 
+func normalizeWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) WorkflowExecutionPolicy {
+	if policy.WorkerTimeoutSeconds == 0 {
+		policy.WorkerTimeoutSeconds = 3600
+	}
+
+	if policy.MaxWorkerAttempts == 0 {
+		policy.MaxWorkerAttempts = 3
+	}
+
+	if policy.CheckpointStepLimit == WorkflowPageLimit {
+		policy.CheckpointStepLimit = 0
+	}
+
+	return policy
+}
+
 func validWorkflowRequestKey(key string) bool {
 	return strings.TrimSpace(key) == key && key != "" && len(key) <= 128 && !strings.ContainsAny(key, "\x00\n\r")
 }
 
 func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {
-	return policy.WorkerTimeoutSeconds >= 1 && policy.WorkerTimeoutSeconds <= 86400 && policy.MaxWorkerAttempts >= 1 && policy.MaxWorkerAttempts <= 128 && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10
+	return policy.WorkerTimeoutSeconds >= 1 && policy.WorkerTimeoutSeconds <= 86400 && policy.MaxWorkerAttempts >= 1 && policy.MaxWorkerAttempts <= 128 && policy.MaxIntegrationAttempts >= 0 && policy.MaxIntegrationAttempts <= 10 && policy.CheckpointStepLimit >= 0 && policy.CheckpointStepLimit <= WorkflowPageLimit
 }
 
 func workflowStartHash(request WorkflowStartRequest) (string, error) {

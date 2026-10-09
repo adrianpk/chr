@@ -1,0 +1,42 @@
+package app
+
+import (
+	"testing"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
+
+// TestServiceWorkflowContinuation runs one actual task through the shared bounded
+// operation and preserves that checkpoint on equivalent invocation attachment.
+func TestServiceWorkflowContinuation(t *testing.T) {
+	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
+	request := core.WorkflowStartRequest{RequestKey: "bounded-service", Policy: core.WorkflowExecutionPolicy{CheckpointStepLimit: 1}, Selection: core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: core.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+
+	run, err := operations.StartWorkflow(t.Context(), request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	operations.workflowPullRequests = &serviceWorkflowPRFixture{}
+	worker := []string{"sh", "-c", "printf 'Task\\n' >> result.txt && git add result.txt && git -c user.name=Test -c user.email=test@example.com commit -qm 'Task'"}
+
+	progress, err := operations.ContinueWorkflow(t.Context(), run.Invocation.ID, core.WorkflowContinuationRequest{Worker: worker}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	checkServiceWorkflowContinuation(t, progress)
+
+	attached, err := operations.StartWorkflow(t.Context(), request)
+	if err != nil || !attached.Attached || attached.Invocation.ID != run.Invocation.ID || attached.Invocation.Continuation.EvidenceHash != progress.Invocation.Continuation.EvidenceHash {
+		t.Fatal("service attachment lost accepted task continuation", err)
+	}
+}
+
+func checkServiceWorkflowContinuation(t *testing.T, progress core.WorkflowContinuationProgress) {
+	t.Helper()
+
+	if progress.Steps != 1 || progress.Reason != "step_limit" || progress.Invocation.Cursor != 1 || len(progress.Invocation.Attempts) != 1 || progress.Invocation.Continuation.Sequence != 1 {
+		t.Fatalf("service failed to retain one bounded task: %+v", progress)
+	}
+}

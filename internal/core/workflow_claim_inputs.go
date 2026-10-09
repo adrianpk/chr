@@ -42,6 +42,10 @@ func (s *WorkflowStore) freezeWorkflowSets(ctx context.Context, run *workflowInv
 }
 
 func (s *WorkflowStore) checkWorkflowInputs(ctx context.Context, run workflowInvocationFile) error {
+	if err := s.checkWorkflowContinuationCheckpoint(run); err != nil {
+		return err
+	}
+
 	if err := s.checkWorkflowContinuationEvidence(ctx, run); err != nil {
 		return err
 	}

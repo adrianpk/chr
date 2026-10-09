@@ -15,6 +15,7 @@ edits and SQLite projections do not authorize execution or certify success.
 | `CheckWorkflowClaim` | Check the current private credential, generation, lease and frozen record images. |
 | `CheckpointWorkflow` | Yield an unexpired, quiescent claim without validating the task; retain its input, lane, attempt and checkpoint. |
 | `ExecuteWorkflowTask` | Freeze worker inputs, supervise its argv in the isolated lane, run the frozen host gate and journal the guarded task result. |
+| `ContinueWorkflow` | Run a bounded number of transitions on an existing slice-owned invocation; preserve its frozen selection, policy, task proof, PR and delivery checkpoints. |
 
 The caller retains the returned `*WorkflowClaim`; status cannot reconstruct it.
 The token is excluded from JSON and only its hash is persisted. One claim covers
@@ -442,6 +443,32 @@ the same set becomes `pending` after release. A set boundary, including the
 last selected set, enters `waiting_integration` with outcome
 `set_closure_required`. Claiming another task remains blocked until closing
 validation releases that separate barrier.
+
+## Bounded continuation checkpoints
+
+`WorkflowContinuationRequest` supplies worker argv, initial PR content and an
+optional step limit. It accepts no selector, filters, target or membership
+override. Equivalent unfinished starts retain one invocation ID; continuation
+uses that ID and its original request hash. Explicit scope or policy changes
+through an existing request key reject.
+
+The frozen execution policy permits a checkpoint step limit from 1 through 128.
+An absent value uses 128, including earlier invocation files. A call may use a
+smaller limit; it cannot increase the frozen bound. Each accepted task,
+aggregate, PR, integration or frontier operation consumes one step. Exhaustion
+returns reason `step_limit` with resumable state. Awaiting authority, paused or
+blocked work and the set-closure barrier return without executing successors.
+Cancelled and completed invocations stay terminal.
+
+`chr-continuation-checkpoint/v1` records request identity, source revision,
+validated and receipt-confirmed cursors, member/attempt counts, accepted steps,
+reason and parent reference/hash. Immutable checkpoint creation and the
+invocation's `continuation_checkpoint` binding share one replayable journal.
+Restart retains consumed attempts, accepted task results, the canonical PR and
+finalized receipts. Identical waits reuse their checkpoint without another
+event. Checkpoint corruption blocks further claims. Checkpoint history is
+bounded to 4096 images per invocation and rejects exhaustion before another
+transition; every image retains the 1 MiB file bound.
 
 ## Manual protocol
 
