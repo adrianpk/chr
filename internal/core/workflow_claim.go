@@ -67,7 +67,7 @@ func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocatio
 
 	record, err := s.observeWorkflowClaim(ctx, run)
 	if err != nil {
-		return nil, err
+		return nil, s.retainWorkflowPrerequisiteStop(&run, err)
 	}
 
 	claim, err = s.reserveWorkflowClaim(ctx, run)
@@ -131,8 +131,8 @@ func (s *WorkflowStore) observeWorkflowClaim(ctx context.Context, run workflowIn
 		return WorkflowRecord{}, err
 	}
 
-	if len(preview.Members) != 1 || preview.Members[0].Readiness != "ready" {
-		return WorkflowRecord{}, fmt.Errorf("workflow task is not ready: %s", member.Admission.Key)
+	if err := workflowClaimReadiness(preview, member.Admission.Key); err != nil {
+		return WorkflowRecord{}, err
 	}
 
 	record := selection.records[member.Admission.Key]
@@ -149,6 +149,18 @@ func validateWorkflowClaimableContract(record WorkflowRecord) error {
 	}
 
 	return validateWorkflowClaimContract(record)
+}
+
+func workflowClaimReadiness(preview WorkflowPreview, key string) error {
+	if len(preview.Members) == 1 && preview.Members[0].Readiness == "ready" {
+		return nil
+	}
+
+	if len(preview.Members) == 1 && preview.Members[0].Blocker != nil {
+		return workflowPrerequisiteError{blocker: *preview.Members[0].Blocker}
+	}
+
+	return fmt.Errorf("workflow task is not ready: %s", key)
 }
 
 func newWorkflowClaimToken() (string, error) {
@@ -364,7 +376,7 @@ func (s *WorkflowStore) readWorkflowAttemptTask(run workflowInvocationFile, atte
 }
 
 func workflowInvocationClaimable(run workflowInvocationFile) bool {
-	return run.StopIntent == "" && slices.Contains([]string{"pending", "paused", "waiting_capacity"}, run.Status) && run.Cursor < len(run.Members)
+	return run.StopIntent == "" && !workflowPrerequisitePaused(run) && !workflowFailedTaskPaused(run) && slices.Contains([]string{"pending", "paused", "waiting_capacity"}, run.Status) && run.Cursor < len(run.Members)
 }
 
 func workflowCredentialValid(run workflowInvocationFile, claim *WorkflowClaim, attempt WorkflowAttempt, lease bool) bool {

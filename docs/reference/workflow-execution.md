@@ -165,6 +165,46 @@ nonmatching or unready arrivals and terminal invocations cannot extend that
 queue. Record/member bounds remain 4096; journal and evidence images retain the
 1 MiB bound.
 
+## Loose invocation stops and resume
+
+A failed worker or task gate leaves its invocation paused, with the same lane,
+cursor and retained attempt evidence. Direct claims and bounded continuation
+cannot execute another task. `ResumeWorkflow` permits another attempt on that
+ticket without resetting its finite worker budget. Cooperative checkpoints
+retain their established fenced replacement behavior.
+Existing exact-ticket manual claims can retry their own failed task with its
+retained lane and consumed attempt budget.
+
+A prerequisite refusal persists a paused invocation with outcome
+`prerequisite_blocked` and the typed dependency, reason and next-action owner.
+Queue reselection stays dormant while paused, so a pending rank change cannot
+bypass the blocked cursor. Neither a retry nor resume adds the prerequisite to
+the invocation. Resume observes readiness and integration proof again; status
+text alone cannot clear the stop.
+
+When an outside prerequisite integrated after the retained target, an inactive
+independent cursor can resume with trusted `WorkflowResumePorts`. The central
+service supplies its canonical provider, Git observer and configured integration
+branch. Hydration must agree with the provider's current branch and prove that
+the previous execution target is an ancestor. The exact ticket's prerequisites
+must be proven on that target before the invocation changes. A retained lane or
+a changed target branch cannot use this refresh.
+
+`dependency_targets` retains at most 128 `chr-dependency-target/v1` checkpoints.
+Each binds the invocation, ticket, cursor, previous and observed target, branch,
+original blocker and immutable receipt hashes. Its image at
+`run/<execution-id>/extension/chr/dependency-target/<sequence>.json` and the
+resumed invocation share one journal. Later claims verify those images and
+history. Resume preserves the original selection target, filters, admitted
+members, confirmed cursor and policy; subsequent delivery advances its usual
+frontier from the refreshed execution base.
+
+Initial admission reads all bounded pages rather than truncating at 128 query
+members. Each continuation call still obeys its frozen step limit. Equivalent
+unfinished requests attach; a reused key with different policy conflicts.
+Completed and cancelled invocations remain terminal on retry, including with
+accepted later-ticket policy. Exhaustion never subscribes to later arrivals.
+
 ## Canonical slice pull requests
 
 `EnsureWorkflowSlicePullRequest` accepts a retained invocation, target branch

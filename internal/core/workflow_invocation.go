@@ -69,13 +69,14 @@ type WorkflowAttempt struct {
 
 // WorkflowInvocation is the public durable checkpoint, not an execution token.
 type WorkflowInvocation struct {
-	LooseQueue      *WorkflowLooseQueue             `json:"loose_queue,omitempty"`
-	Closures        []WorkflowInvocationClosure     `json:"set_closures,omitempty"`
-	ClosingSet      string                          `json:"closing_set,omitempty"`
-	ExecutionTarget *WorkflowPreviewTarget          `json:"execution_target,omitempty"`
-	ConfirmedCursor int                             `json:"confirmed_cursor,omitempty"`
-	Deliveries      []WorkflowUnitDelivery          `json:"integrated_units,omitempty"`
-	Continuation    *WorkflowContinuationCheckpoint `json:"continuation_checkpoint,omitempty"`
+	DependencyTargets []WorkflowDependencyTarget      `json:"dependency_targets,omitempty"`
+	LooseQueue        *WorkflowLooseQueue             `json:"loose_queue,omitempty"`
+	Closures          []WorkflowInvocationClosure     `json:"set_closures,omitempty"`
+	ClosingSet        string                          `json:"closing_set,omitempty"`
+	ExecutionTarget   *WorkflowPreviewTarget          `json:"execution_target,omitempty"`
+	ConfirmedCursor   int                             `json:"confirmed_cursor,omitempty"`
+	Deliveries        []WorkflowUnitDelivery          `json:"integrated_units,omitempty"`
+	Continuation      *WorkflowContinuationCheckpoint `json:"continuation_checkpoint,omitempty"`
 	WorkflowIdentity
 	Schema            string                       `json:"schema"`
 	RequestKey        string                       `json:"request_key"`

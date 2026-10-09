@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
 )
@@ -92,7 +93,37 @@ func (s service) ResumeWorkflow(ctx context.Context, id string) (core.WorkflowIn
 		return core.WorkflowInvocation{}, err
 	}
 
-	return store.ResumeWorkflow(ctx, id)
+	run, err := store.ReadWorkflow(ctx, id)
+	if err != nil {
+		return core.WorkflowInvocation{}, err
+	}
+
+	if run.Blocker == nil || run.Blocker.NextActionOwner != "prerequisite_owner" {
+		return store.ResumeWorkflow(ctx, id)
+	}
+
+	ports, err := s.workflowResumePorts(run)
+	if err != nil {
+		return core.WorkflowInvocation{}, err
+	}
+
+	return store.ResumeWorkflow(ctx, id, ports)
+}
+
+func (s service) workflowResumePorts(run core.WorkflowInvocation) (core.WorkflowResumePorts, error) {
+	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	if err != nil {
+		return core.WorkflowResumePorts{}, err
+	}
+
+	provider, err := s.workflowIntegrationProvider()
+
+	target, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetGit)
+	if !ok {
+		return core.WorkflowResumePorts{}, fmt.Errorf("configured observer cannot hydrate dependency targets")
+	}
+
+	return core.WorkflowResumePorts{Provider: provider, Target: target, TargetBranch: config.Work.BranchPolicy.IntegrationBranch}, err
 }
 
 // ReconcileWorkflow recovers dead or expired ownership after process exclusion.

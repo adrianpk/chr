@@ -61,6 +61,12 @@ func workflowLooseDeliverNext(t *testing.T, fixture *workflowIntegrationFixture,
 		t.Fatal(err)
 	}
 
+	workflowLoosePublishValidated(t, fixture, key)
+}
+
+func workflowLoosePublishValidated(t *testing.T, fixture *workflowIntegrationFixture, key string) {
+	t.Helper()
+
 	candidate, err := fixture.store.PrepareWorkflowTicketCandidate(t.Context(), fixture.run.ID)
 	if err != nil || candidate.Ticket.Unit.ID != key || candidate.Lane.BaseCommit != fixture.target {
 		t.Fatal("next independent unit was not selected from its confirmed target", err)

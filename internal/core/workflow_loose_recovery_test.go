@@ -42,24 +42,97 @@ func TestWorkflowLooseCrashProcess(t *testing.T) {
 		workflowLooseClassify(t, store, workflowLooseRecord(t, store, "PRJ-91"), "critical", TicketStatusReadyForDev)
 	case "select":
 		_, err = store.ReconcileWorkflowMembership(t.Context(), id)
-	case "frontier":
-		run, readErr := store.readWorkflowInvocation(id)
-		if readErr != nil {
-			t.Fatal(readErr)
-		}
-
-		proof, readErr := store.readWorkflowDeliveryProof(run)
-		if readErr != nil {
-			t.Fatal(readErr)
-		}
-
+	case "block":
+		_, err = store.ClaimWorkflow(t.Context(), id)
+	case "resume":
+		run := workflowTestRead(t, store, id)
 		remote := os.Getenv("CHR_LOOSE_CRASH_REMOTE")
-		git := NewWorkflowIntegrationGit(proof.Git.Repository, remote)
-		provider := workflowFrontierProvider{&workflowPRProviderFixture{pr: proof.PullRequest}, remote}
-		_, err = store.AdvanceWorkflowFrontier(t.Context(), id, WorkflowFrontierPorts{Provider: provider, Observer: git, Target: git})
+		git := NewWorkflowIntegrationGit(run.Selection.Target.Repository, remote)
+		provider := workflowFrontierProvider{&workflowPRProviderFixture{pr: WorkflowPullRequestSnapshot{Repository: run.Selection.Target.Repository}}, remote}
+		_, err = store.ResumeWorkflow(t.Context(), id, WorkflowResumePorts{Provider: provider, Target: git, TargetBranch: "dev"})
+	case "frontier":
+		err = workflowLooseCrashFrontier(t, store, id)
 	}
 
 	t.Fatalf("owned queue writer did not exit: %v", err)
+}
+
+func workflowLooseCrashFrontier(t *testing.T, store *WorkflowStore, id string) error {
+	t.Helper()
+
+	run, err := store.readWorkflowInvocation(id)
+	if err != nil {
+		return err
+	}
+
+	proof, err := store.readWorkflowDeliveryProof(run)
+	if err != nil {
+		return err
+	}
+
+	remote := os.Getenv("CHR_LOOSE_CRASH_REMOTE")
+	git := NewWorkflowIntegrationGit(proof.Git.Repository, remote)
+	provider := workflowFrontierProvider{&workflowPRProviderFixture{pr: proof.PullRequest}, remote}
+	_, err = store.AdvanceWorkflowFrontier(t.Context(), id, WorkflowFrontierPorts{Provider: provider, Observer: git, Target: git})
+
+	return err
+}
+
+// TestWorkflowLooseStopRecovery kills only the owned journal writer. Replay
+// retains a dependency stop, or both its verified resume image and target,
+// without acquiring a worker or repeating the already integrated prefix.
+func TestWorkflowLooseStopRecovery(t *testing.T) {
+	for _, tc := range []struct {
+		action string
+		index  int
+	}{{"block", 0}, {"resume", 0}, {"resume", 1}} {
+		t.Run(tc.action+strconv.Itoa(tc.index), func(t *testing.T) {
+			f := workflowLooseBlockedFixture(t)
+
+			target := f.target
+			if tc.action == "resume" {
+				workflowLoosePauseDependency(t, f)
+
+				target = workflowIntegrationCommit(t, f.actor, "dependency.txt", "Verified outside prerequisite")
+				workflowIntegrationCommand(t, f.actor, "push", "origin", "dev")
+				workflowLooseConfirmDependency(t, f, target)
+			} else if _, err := f.store.ReconcileWorkflowMembership(t.Context(), f.run.ID); err != nil {
+				t.Fatal(err)
+			}
+
+			crashWorkflowLoose(t, f, tc.action, tc.index)
+
+			restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
+			run := workflowTestRead(t, restarted, f.run.ID)
+			checkWorkflowLooseStopRecovery(t, run, tc.action, target)
+		})
+	}
+}
+
+func checkWorkflowLooseStopRecovery(t *testing.T, run WorkflowInvocation, action, target string) {
+	t.Helper()
+
+	if len(run.Attempts) != 1 || run.Cursor != 1 || run.ConfirmedCursor != 1 || run.Lane != nil || len(run.Deliveries) != 1 {
+		t.Fatal("recovery duplicated or lost accepted work")
+	}
+
+	checkWorkflowLooseStopState(t, run, action, target)
+}
+
+func checkWorkflowLooseStopState(t *testing.T, run WorkflowInvocation, action, target string) {
+	t.Helper()
+
+	if action == "block" {
+		if run.Status != "paused" || run.Blocker == nil || run.Blocker.Dependency.ID != "PRJ-89" {
+			t.Fatal("recovery lost the dependency stop")
+		}
+
+		return
+	}
+
+	if run.Status != "pending" || run.Blocker != nil || len(run.DependencyTargets) != 1 || run.ExecutionSelection().Target.Commit != target {
+		t.Fatal("recovery lost verified resume evidence or its target")
+	}
 }
 
 // TestWorkflowLooseRecovery proves a real host death cannot expose a pending

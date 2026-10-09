@@ -53,7 +53,14 @@ func (s *WorkflowStore) StopWorkflow(ctx context.Context, id, intent string) (re
 }
 
 // ResumeWorkflow clears a completed pause without resetting attempts or evidence.
-func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string) (result WorkflowInvocation, err error) {
+func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string, ports ...WorkflowResumePorts) (result WorkflowInvocation, err error) {
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
+	defer cancel()
+
+	if len(ports) > 1 {
+		return result, ErrWorkflowConflict
+	}
+
 	err = s.withLock(ctx, func() error {
 		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -68,13 +75,18 @@ func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string) (result W
 			return readErr
 		}
 
+		changes, readErr := owner.resumeWorkflowPrerequisite(ctx, &run, ports)
+		if readErr != nil {
+			return readErr
+		}
+
 		run.Status = "pending"
 		if run.ResumeStatus != "" {
 			run.Status = run.ResumeStatus
 		}
 
 		run.StopIntent, run.ResumeStatus = "", ""
-		if readErr = owner.commitWorkflowState(&run); readErr != nil {
+		if readErr = owner.commitWorkflowResume(&run, changes); readErr != nil {
 			return readErr
 		}
 

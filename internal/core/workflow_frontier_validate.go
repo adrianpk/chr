@@ -32,6 +32,19 @@ func validateWorkflowExecutionTarget(run workflowInvocationFile) error {
 		return err
 	}
 
+	target := workflowRetainedExecutionTarget(run)
+	if run.ExecutionTarget != nil {
+		if target == nil || *run.ExecutionTarget != *target {
+			return ErrWorkflowConflict
+		}
+	} else if target != nil {
+		return ErrWorkflowConflict
+	}
+
+	return validateWorkflowDependencyTargets(run)
+}
+
+func workflowRetainedExecutionTarget(run workflowInvocationFile) *WorkflowPreviewTarget {
 	var target *WorkflowPreviewTarget
 
 	cursor := -1
@@ -48,15 +61,14 @@ func validateWorkflowExecutionTarget(run workflowInvocationFile) error {
 		}
 	}
 
-	if run.ExecutionTarget != nil {
-		if target == nil || *run.ExecutionTarget != *target {
-			return ErrWorkflowConflict
+	if len(run.DependencyTargets) != 0 {
+		last := run.DependencyTargets[len(run.DependencyTargets)-1]
+		if last.Cursor >= cursor {
+			target = &last.Target
 		}
-	} else if target != nil {
-		return ErrWorkflowConflict
 	}
 
-	return nil
+	return target
 }
 
 func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery WorkflowUnitDelivery, previous int) error {
@@ -126,8 +138,16 @@ func workflowDeliveredUnitView(run workflowInvocationFile, delivery WorkflowUnit
 	return run
 }
 
+func (s *WorkflowStore) checkWorkflowRetainedBoundaries(ctx context.Context, run workflowInvocationFile) error {
+	if err := s.checkWorkflowDependencyTargets(ctx, run); err != nil {
+		return err
+	}
+
+	return s.checkWorkflowInvocationClosureEvidence(run)
+}
+
 func (s *WorkflowStore) checkWorkflowContinuationEvidence(ctx context.Context, run workflowInvocationFile) error {
-	if err := s.checkWorkflowInvocationClosureEvidence(run); err != nil {
+	if err := s.checkWorkflowRetainedBoundaries(ctx, run); err != nil {
 		return err
 	}
 
