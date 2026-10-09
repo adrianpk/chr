@@ -44,8 +44,10 @@ Slice 8 is active for independent-ticket integration, fresh filtered selection,
 bounded recovery and explicit legacy authority mapping. T8.1 is validated in
 `249e5d1b771702cb8e332cbb9447f71452a7e86a` after focused race and repository
 checks. T8.2 is validated in `bc35a963b3eaec06fcfd93a57811ab0cbbd75389` after fresh queue,
-real Git, host-death, focused race and repository checks. T8.3 is active in the
-dedicated slice branch; T8.4 remains ready.
+real Git, host-death, focused race and repository checks. T8.3 is validated in
+`5371010ab32eda6c035cee220369719491c47370` after bounded selection, prerequisite stop/resume,
+service, journal-crash, expanded race and repository checks. T8.4 is active in the
+dedicated slice branch.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -78,7 +80,7 @@ Fast-forward into `dev`.
 | Slice 5 | Slice candidates and delivery receipts | `feat/slice-5-workflow-delivery` | `feat(slice-5): verify aggregate slice delivery` | `ops/default/report/slices/ticket-native-workflow/slice-5-workflow-delivery.md` | integrated | 4/4 | [#368](https://forge.adrianpk.com/adrianpk/chr/pulls/368) |
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | integrated | 4/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
-| Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | active | 2/4 | pending |
+| Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | active | 3/4 | pending |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | not_started | 0/4 | pending |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | not_started | 0/4 | pending |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
@@ -488,12 +490,12 @@ Plan contract: [Slice 8](../plan/ticket-native-workflow.md#slice-8-loose-ticket-
 | --- | --- | --- | --- | --- |
 | T8.1 | [TKT-20261008141413](../ticket/in_progress/20261008141413-ticket-native-t8-1.md) | validated | 249e5d1b771702cb8e332cbb9447f71452a7e86a | Compose exact independent-ticket and loose extents with the common candidate/integration lifecycle. |
 | T8.2 | [TKT-20261008141414](../ticket/in_progress/20261008141414-ticket-native-t8-2.md) | validated | bc35a963b3eaec06fcfd93a57811ab0cbbd75389 | Reselect eligible loose work after each integration without claiming slice-owned tickets. |
-| T8.3 | [TKT-20261008141415](../ticket/in_progress/20261008141415-ticket-native-t8-3.md) | in_progress | pending | Preserve bounded selection, blocker-stop, duplicate-request and resume behavior. |
-| T8.4 | [TKT-20261008141416](../ticket/ready/20261008141416-ticket-native-t8-4.md) | ready | pending | Map legacy `run-all` and single-ticket entrypoints according to explicit authority mode. |
+| T8.3 | [TKT-20261008141415](../ticket/in_progress/20261008141415-ticket-native-t8-3.md) | validated | 5371010ab32eda6c035cee220369719491c47370 | Preserve bounded selection, blocker-stop, duplicate-request and resume behavior. |
+| T8.4 | [TKT-20261008141416](../ticket/in_progress/20261008141416-ticket-native-t8-4.md) | in_progress | pending | Map legacy `run-all` and single-ticket entrypoints according to explicit authority mode. |
 
 ### Validation
 
-Status: T8.1 and T8.2 passed their task checks; T8.3, T8.4 and complete candidate checks remain pending.
+Status: T8.1 through T8.3 passed their task checks; T8.4 and complete candidate checks remain pending.
 
 Successful T8.1 checks: `make verify`;
 `go test -race ./internal/core ./internal/app -run '^(TestWorkflowTicket|TestServiceWorkflowTicket|TestWorkflowSliceRepair|TestWorkflowReviewRepair)' -count=1`;
@@ -515,6 +517,17 @@ and display-write, frontier and selection journal process death. A missing
 approved-plan fixture image in the first race run was corrected before the
 complete task checks passed. Acta: `01M4FKQMCBZ2VWXTEP5FXFJCVW`.
 
+Successful T8.3 checks: `make verify`; `go test -race ./internal/core ./internal/app -run '^(TestWorkflowLoose|TestWorkflowTask|TestWorkflowClaim|TestWorkflowStop|TestWorkflowContinuation|TestWorkflowFrontier|TestServiceWorkflow)' -count=1`;
+`git diff --check`. The same scoped fixture and timeout were used. Loose failed
+tickets retain their budgets and stop successor work. Prerequisite blockers pause
+without admitting outside work; immutable target/receipt evidence permits explicit
+verified resume without changing original selection or confirmed progress. Real
+Git, service, corruption and journal process-death fixtures confirm resume and stop
+recovery, bounded 129-member selection, duplicate requests and terminal retries.
+An exact-ticket manual-retry regression found by the first repository gate was
+corrected before the expanded race checks and complete gate passed. Acta:
+`01M4FQ48XQPQHT31XWXY3ZY5EE`.
+
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`.
 
@@ -527,9 +540,9 @@ Acceptance: A05, A07, A13, A19.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commits: T8.1 `249e5d1b771702cb8e332cbb9447f71452a7e86a`, T8.2 `bc35a963b3eaec06fcfd93a57811ab0cbbd75389`; T8.3 and T8.4 pending. T8.1 and T8.2 are validated; T8.3 is in progress. Tickets remain unfinished until slice integration.
-- Validation evidence: T8.1 and T8.2 task checks passed; complete ordered candidate evidence remains pending.
-- Blockers: none observed; T8.3 is active.
+- Task commits: T8.1 `249e5d1b771702cb8e332cbb9447f71452a7e86a`, T8.2 `bc35a963b3eaec06fcfd93a57811ab0cbbd75389`, T8.3 `5371010ab32eda6c035cee220369719491c47370`; T8.4 pending. T8.1 through T8.3 are validated; T8.4 is in progress. Tickets remain unfinished until slice integration.
+- Validation evidence: T8.1 through T8.3 task checks passed; complete ordered candidate evidence remains pending.
+- Blockers: none observed; T8.4 is active.
 
 ## Slice 9: Independent parallel runners
 
