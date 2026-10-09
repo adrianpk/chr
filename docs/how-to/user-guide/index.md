@@ -2,6 +2,10 @@
 
 This guide covers the Chryso workflow that exists today.
 
+For native plan execution, retained controls, supervised manual handoffs and
+optional tracker export/repair, follow
+[Run ticket-native workflows](../run-ticket-workflows.md).
+
 Chryso is local-first. A managed project has a `.chr/` directory, while
 user-level state stores project registration, indexes, execution records, loop
 records, and daemon state.

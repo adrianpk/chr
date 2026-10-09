@@ -115,7 +115,13 @@ func (s *WorkflowStore) commitAllocatedFiles(changes []workflowFileChange, guard
 		return err
 	}
 
-	return s.replayJournal(journal)
+	if err := s.replayJournal(journal); err != nil {
+		return err
+	}
+
+	s.markWorkflowTrackersStale(changes)
+
+	return nil
 }
 
 func (s *WorkflowStore) recoverTransition() error {

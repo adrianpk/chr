@@ -50,6 +50,14 @@ snapshot is durable before the version marker. Optional selected plan adoption
 preserves keys, creation times, metadata and history without converting unrelated
 records. Active native or legacy ownership and ambiguous selections block it.
 
+T11.4 adds shared tracker export, read-only status and explicit repair. Generated
+views retain source revisions/hashes, output hash, generation time and shared
+delivery/closure receipts. Relevant committed domain writes mark registered
+views stale. Failed export preserves native progress and operator edits; only
+known generated images or exact observed-hash permission allow replacement.
+Operation/configuration guidance and manual harness instructions distinguish
+delivered CLI/TUI/Web/daemon controls from deferred execution surfaces.
+
 ## Implementation Notes
 
 The project config loader and publication-policy resolver share strict bounded
@@ -81,6 +89,12 @@ original explicit request resumes. Torn domain writes and lost responses replay
 under the original selection; manual config or snapshot changes are preserved
 for reconciliation.
 
+Tracker pending/current provenance is separate from the domain transition
+journal. Source and output observation detects staleness even when a marker
+cannot persist. Restart recognizes the pending generated image after process
+loss. Export/repair never imports edits, claims work or contacts a forge. Regular
+file and namespace path guards, 1 MiB files and 128 registered-view bounds apply.
+
 ## Contracts Added or Changed
 
 - `workflow.version: 1` selects prospective defaults; the old root version does
@@ -100,7 +114,11 @@ for reconciliation.
 - `chr work upgrade --config-revision <revision> --state-authority
   tickets|tracker_compat [--review-mode MODE] [--adopt-file PATH] [--json]`
   upgrades one quiescent legacy project and preserves review unless explicitly
-  changed. No read, initialization or upgrade converts historical work in bulk.
+changed. No read, initialization or upgrade converts historical work in bulk.
+- `chr work tracker export|status|repair [--dir PATH] [--json] SET_ID` manages
+  an optional view; export/repair accepts `--replace-hash` for explicit permission
+  tied to current operator-edited bytes. `projection_stale` never rolls back a
+  successful authoritative transition or becomes native execution authority.
 
 ## Files of Interest
 
@@ -119,6 +137,11 @@ for reconciliation.
 - `internal/core/workflow_upgrade*.go` and
   `internal/app/service_workflow_upgrade.go`: guarded selected transition,
   prior-policy snapshots and restart recovery shared across adapters.
+- `internal/core/workflow_tracker*.go` and the shared service/CLI tracker
+  adapters: guarded one-way export, provenance and stale-image repair.
+- [Tracker projections](../../../../../docs/reference/workflow-trackers.md) and
+  [Run ticket-native workflows](../../../../../docs/how-to/run-ticket-workflows.md):
+  delivered operations, manual reconciliation and explicit adapter boundaries.
 
 ## Validation
 
@@ -175,8 +198,26 @@ bounds, configured admission, unchanged retry budgets, target-preserving entry
 attachment, human restrictions and task/slice/closing deadline failures.
 Fixtures stop through their owning validation supervisors.
 
+T11.4 development checks passed:
+
+- `make verify` (pre-commit repository gate; passed)
+- `go test ./internal/core ./internal/app -run '^(TestWorkflowTracker|TestWorkflowUpgrade|TestWorkflowConfig|TestInit|TestRuntimeInit)' -count=1`
+- `go test -race ./internal/core ./internal/app -run '^(TestWorkflowTracker|TestWorkflowUpgrade|TestWorkflowConfig|TestInit|TestRuntimeInit)' -count=1`
+- `python3 /tmp/chr-slice-11-docs-check.py`
+- `git diff --check`
+
+The successful repository log is `/tmp/chr-slice-11-t11-4-verify-final.log`,
+using Go 1.27.1, the retained curation fixture and scoped uncached 30-minute
+tests. Strict lint reported zero issues; core passed in 846.591 seconds and app
+in 92.696 seconds. Initial complexity/error-checking findings and a test path
+assertion were corrected before the successful final development checks. The
+new tracker cases cover actual CLI/service agreement, read-only status,
+source/output changes, edited-file permission, torn exports, a real owned child
+crash/restart, shared finalized receipt provenance and continued native progress
+through derived failures. Five guidance documents passed 41 local link checks;
+12 operational documents passed 102 local link checks.
+
 ## Risks and Follow-ups
 
-T11.1 through T11.3 are validated locally. T11.4 is active for tracker
-export/repair and complete guidance. Final Slice 11
-PR-head controller validation remains pending.
+All four tasks are validated locally. Canonical PR creation, PR-reference
+follow-up and final clean-head controller validation remain pending.

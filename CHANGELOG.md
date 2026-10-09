@@ -29,6 +29,9 @@ Compared with `v0.1.0` (`c9008cb`, tagged 2026-05-23) through `741271f` on
   Existing projects can upgrade explicitly with a prior-policy snapshot and a
   deliberate authority choice. Upgrade preserves review policy, rejects active
   ownership and adopts only selected legacy work while retaining its history.
+  Optional trackers export native progress with source and receipt provenance.
+  Failed or stale views preserve progress; repair keeps operator edits unless
+  replacement is explicitly authorized for their observed bytes.
 - Ticket-native work can run up to eight independent lanes in parallel when
   configured, with one worker by default. Ordered work and target publication
   remain serialized, and capacity waits retain progress for retry.

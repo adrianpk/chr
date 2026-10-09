@@ -22,6 +22,7 @@ func newWorkCommand(stdout io.Writer, deps appDependencies) *cli.Command {
 		Commands: []*cli.Command{
 			newWorkConfigCommand(stdout, deps),
 			newWorkUpgradeCommand(stdout, deps),
+			newWorkTrackerCommand(stdout, deps),
 			newWorkDoctorCommand(stdout, deps),
 			newWorkEventsCommand(stdout, deps),
 			newWorkLogsCommand(stdout, deps),

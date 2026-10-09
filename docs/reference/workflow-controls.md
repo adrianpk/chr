@@ -8,6 +8,11 @@ Projects without `workflow.version` retain `tracker_compat`; version one selects
 `tickets`. See [Workflow configuration](workflow-configuration.md) for policy
 sources and `chr work config`.
 
+For the operating sequence and manual harness protocol, see
+[Run ticket-native workflows](../how-to/run-ticket-workflows.md). Optional
+`chr work tracker export|status|repair` commands manage
+[tracker projections](workflow-trackers.md) without execution authority.
+
 ## Explicit extents
 
 | Command | Selection |
