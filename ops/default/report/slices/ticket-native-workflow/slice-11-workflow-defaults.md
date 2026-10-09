@@ -1,6 +1,6 @@
 # Slice 11: Defaults and authority transition
 
-Status: reviewing
+Status: delivered
 
 Delivery set: ticket-native-workflow
 
@@ -240,5 +240,7 @@ commands; workflow execution policy and source code are unchanged.
 
 ## Risks and Follow-ups
 
-All four tasks are validated locally. Integration through canonical PR #374
-is pending. Exact clean-head candidate checks are owned by the controller.
+All four tasks are integrated through canonical PR #374 at `750378ec9b7ee05399395184def0954ab47cf1d7`.
+The controller passed the four ordered checks above on that exact clean head
+using the scoped 60-minute Go runner timeout. Acta merge: `01M4HEH83Y7RY0GGS6C10NBRNF`.
+All four task tickets are solved. None recorded.

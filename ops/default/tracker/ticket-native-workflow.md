@@ -22,43 +22,28 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 11 — Defaults and authority transition
+Active slice: Slice 12 — End-to-end workflow assurance
 
-Next slice: Slice 12 — End-to-end workflow assurance
+Next slice: none; final delivery-set gate follows the last verified integration.
 
 Slice strategy: behavior-first
 
-Progress: 10 of 12 slices integrated; 40 of 48 tasks done.
+Progress: 11 of 12 slices integrated; 44 of 48 tasks done.
 
 ## Current Checkpoint
 
-Slices 1 through 10 are verified integrated through canonical PRs #364–#373.
-Slice 10 merged head `e08f8b18030d65a3901e3d03ef4ad5fbb7ce9a28` passed the controller's ordered
-`make verify`, `go test ./internal/app ./internal/tui ./internal/webui -count=1`,
-`go test -race ./internal/app ./internal/tui ./internal/webui -count=1`,
-`scripts/qa/web-ui-smoke.sh` and `git diff --check` with Go 1.27.1,
-the retained curation fixture and scoped uncached 30-minute test timeout.
+Slices 1 through 11 are verified integrated through canonical PRs #364–#374.
+Slice 11 merged head `750378ec9b7ee05399395184def0954ab47cf1d7` passed the controller's ordered
+`make verify`, `go test ./internal/core ./internal/app -count=1`,
+`go test -race ./internal/core ./internal/app -count=1` and `git diff --check`
+with Go 1.27.1, the retained curation fixture and a scoped 60-minute test timeout.
 Its report is delivered and all four task tickets are solved.
-Acta records the canonical merge in `01M4GXAE485Y2CN8PN9CJQFY3P`.
-Slice 11 is active. T11.1 is validated at `d081c3daa795065cf8c635c3270aa6d26a7dabe8` after its pre-commit
-repository gate and expanded focused Go/race checks. Its ticket is reviewing,
-its report is reviewing, and Acta records the task in `01M4H1KP8V3MM1RVM5KSDQRSQN`.
-T11.2 is validated at `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`; its ticket is reviewing after
-`make verify`, focused initialization Go/race checks, metadata, links and whitespace
-passed. Acta: `01M4H34ACREHJNR3NZBY5ZDHG5`. T11.3 is validated at `7783c4e0ac08a64e27d680cc1861123f3f429244`
-after its pre-commit repository gate, focused upgrade/adoption/config/init Go and
-race checks, metadata, guidance links and whitespace passed. Its ticket is
-reviewing. Acta: `01M4H59ZFMXVFDYYZ0RTC5TM3W`. T11.4 is validated at `408a622d1074edfbeefe9c54c2f13e85c41747f9`
-after `make verify`, focused tracker/upgrade/config/init Go and race checks,
-metadata, 41 guidance links and whitespace passed. Acta: `01M4H7DGCVJ662A7ATXFFG5NPC`.
-All four task tickets and the canonical report are reviewing. Canonical
-PR [#374](https://forge.adrianpk.com/adrianpk/chr/pulls/374) is open. PR-open Acta: `01M4H7GG3DTK7PYP382R6RD9H3`.
-Exact clean-head candidate results are recorded by the configured controller.
-Integration remains pending.
+Acta records the canonical merge in `01M4HEH83Y7RY0GGS6C10NBRNF`.
+Slice 12 is active; T12.1 is in progress. Live-provider fixture designation for
+T12.3 remains an external prerequisite; no live-provider success is claimed.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
-
 
 ## State and Evidence Rules
 
@@ -90,9 +75,9 @@ Fast-forward into `dev`.
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | integrated | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | integrated | 4/4 | [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) |
-| Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | reviewing | 0/4 | [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373) |
-| Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | reviewing | 0/4 | #374 |
-| Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | not_started | 0/4 | pending |
+| Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | integrated | 4/4 | [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373) |
+| Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | integrated | 4/4 | #374 |
+| Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | active | 0/4 | pending |
 
 ## Slice 1: Guarded workflow records
 
@@ -703,7 +688,7 @@ Acceptance: A09, A17, A21, A23.
 
 ## Slice 11: Defaults and authority transition
 
-Status: reviewing
+Status: integrated
 
 Prerequisite: satisfied by verified PR #373 integration into dev.
 
@@ -717,10 +702,10 @@ Plan contract: [Slice 11](../plan/ticket-native-workflow.md#slice-11-defaults-an
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T11.1 | [TKT-20261008141425](../ticket/reviewing/20261008141425-ticket-native-t11-1.md) | validated | `d081c3daa795065cf8c635c3270aa6d26a7dabe8` | Deliver version marker, approved configuration keys, bounds and effective-value/source reporting. |
-| T11.2 | [TKT-20261008141426](../ticket/reviewing/20261008141426-ticket-native-t11-2.md) | validated | `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52` | Align standard/minimal profiles, bootstrap and fallback defaults for new projects. |
-| T11.3 | [TKT-20261008141427](../ticket/reviewing/20261008141427-ticket-native-t11-3.md) | validated | `7783c4e0ac08a64e27d680cc1861123f3f429244` | Upgrade selected projects with prior-policy snapshots and explicit authority transition. |
-| T11.4 | [TKT-20261008141428](../ticket/reviewing/20261008141428-ticket-native-t11-4.md) | validated | `408a622d1074edfbeefe9c54c2f13e85c41747f9` | Export/repair trackers one way and publish the complete operation/configuration/manual guidance. |
+| T11.1 | [TKT-20261008141425](../ticket/solved/20261008141425-ticket-native-t11-1.md) | done | `d081c3daa795065cf8c635c3270aa6d26a7dabe8` | Deliver version marker, approved configuration keys, bounds and effective-value/source reporting. |
+| T11.2 | [TKT-20261008141426](../ticket/solved/20261008141426-ticket-native-t11-2.md) | done | `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52` | Align standard/minimal profiles, bootstrap and fallback defaults for new projects. |
+| T11.3 | [TKT-20261008141427](../ticket/solved/20261008141427-ticket-native-t11-3.md) | done | `7783c4e0ac08a64e27d680cc1861123f3f429244` | Upgrade selected projects with prior-policy snapshots and explicit authority transition. |
+| T11.4 | [TKT-20261008141428](../ticket/solved/20261008141428-ticket-native-t11-4.md) | done | `408a622d1074edfbeefe9c54c2f13e85c41747f9` | Export/repair trackers one way and publish the complete operation/configuration/manual guidance. |
 
 ### Validation
 
@@ -754,8 +739,7 @@ Candidate `181dd85835a7f55224e1d4ea42ddb2d39e402d6c` passed the first two ordere
 checks but its full core race suite exhausted the scoped 30-minute Go deadline.
 There were no test-case failures or data-race reports; app race passed. Acta
 `01M4HAYM69MX5HQWHXSKN77MQ5` records the diagnosis. The identical ordered
-command list is retried with a scoped 60-minute runner timeout on the new clean
-PR-reference/report head. Source and workflow execution policy are unchanged.
+command list passed with a scoped 60-minute runner timeout on `750378ec9b7ee05399395184def0954ab47cf1d7`. Source and workflow execution policy are unchanged.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`; cover every generator
@@ -767,18 +751,18 @@ Acceptance: A16, A18; explicit adoption and configuration bounds in A24.
 
 ### Delivery Evidence
 
-- PR: [#374](https://forge.adrianpk.com/adrianpk/chr/pulls/374); opened, not merged. Acta: `01M4H7GG3DTK7PYP382R6RD9H3`.
-- Merge commit: pending.
-- Report status: reviewing; [immutable introduction](https://forge.adrianpk.com/adrianpk/chr/src/commit/d081c3daa795065cf8c635c3270aa6d26a7dabe8/ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md).
-- Task commits: T11.1 `d081c3daa795065cf8c635c3270aa6d26a7dabe8`; ticket reviewing. T11.2 `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`; ticket reviewing. T11.3 `7783c4e0ac08a64e27d680cc1861123f3f429244`; ticket reviewing. T11.4 `408a622d1074edfbeefe9c54c2f13e85c41747f9`; ticket reviewing.
-- Validation evidence: T11.1–T11.4 local task checks passed; exact PR-head candidate results are recorded by the controller.
-- Blockers: final candidate evidence awaits the scoped timeout retry through the controller.
+- PR: [#374](https://forge.adrianpk.com/adrianpk/chr/pulls/374); verified merged into dev. Acta: `01M4H7GG3DTK7PYP382R6RD9H3`.
+- Merge commit: `750378ec9b7ee05399395184def0954ab47cf1d7`; canonical dev verified. Acta: `01M4HEH83Y7RY0GGS6C10NBRNF`.
+- Report status: delivered; [immutable introduction](https://forge.adrianpk.com/adrianpk/chr/src/commit/d081c3daa795065cf8c635c3270aa6d26a7dabe8/ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md).
+- Task commits: T11.1 `d081c3daa795065cf8c635c3270aa6d26a7dabe8`; ticket solved. T11.2 `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`; ticket solved. T11.3 `7783c4e0ac08a64e27d680cc1861123f3f429244`; ticket solved. T11.4 `408a622d1074edfbeefe9c54c2f13e85c41747f9`; ticket solved.
+- Validation evidence: T11.1–T11.4 local checks and all four ordered controller checks passed on the merged head.
+- Blockers: none observed.
 
 ## Slice 12: End-to-end workflow assurance
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 11 verified integrated into dev.
+Prerequisite: satisfied by verified canonical PR #374 integration into dev.
 
 Expected branch: `test/slice-12-workflow-assurance`
 
@@ -790,7 +774,7 @@ Plan contract: [Slice 12](../plan/ticket-native-workflow.md#slice-12-end-to-end-
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T12.1 | [TKT-20261008141429](../ticket/ready/20261008141429-ticket-native-t12-1.md) | ready | pending | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
+| T12.1 | [TKT-20261008141429](../ticket/in_progress/20261008141429-ticket-native-t12-1.md) | in_progress | pending | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
 | T12.2 | [TKT-20261008141430](../ticket/ready/20261008141430-ticket-native-t12-2.md) | ready | pending | Add restart/crash/lost-response/manual-edit fault scenarios and a bounded repository QA entrypoint. |
 | T12.3 | [TKT-20261008141431](../ticket/ready/20261008141431-ticket-native-t12-3.md) | ready | pending | Verify supported existing provider/method paths in designated disposable live repositories. |
 | T12.4 | [TKT-20261008141432](../ticket/ready/20261008141432-ticket-native-t12-4.md) | ready | pending | Run final exact-candidate gates, reconcile the acceptance matrix and publish the cycle evidence/report. |
@@ -815,7 +799,7 @@ Acceptance: composed confirmation of A01-A24 and live-provider limitations.
 - Report status: not created.
 - Task commits and ticket lifecycle evidence: pending.
 - Validation evidence: pending.
-- Blockers: none observed; implementation has not started.
+- External prerequisite: designated disposable live repositories and access for T12.3 are pending.
 
 ## Acceptance Evidence
 
