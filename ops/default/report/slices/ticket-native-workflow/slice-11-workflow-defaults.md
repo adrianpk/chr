@@ -1,6 +1,6 @@
 # Slice 11: Defaults and authority transition
 
-Status: drafting
+Status: reviewing
 
 Delivery set: ticket-native-workflow
 
@@ -49,6 +49,8 @@ legacy review policy is preserved by default. A credential-free prior-policy
 snapshot is durable before the version marker. Optional selected plan adoption
 preserves keys, creation times, metadata and history without converting unrelated
 records. Active native or legacy ownership and ambiguous selections block it.
+
+T11.4 task commit: `408a622d1074edfbeefe9c54c2f13e85c41747f9`. Acta: `01M4H7DGCVJ662A7ATXFFG5NPC`.
 
 T11.4 adds shared tracker export, read-only status and explicit repair. Generated
 views retain source revisions/hashes, output hash, generation time and shared
