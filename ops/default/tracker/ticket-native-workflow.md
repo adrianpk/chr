@@ -39,8 +39,8 @@ ordered `make verify`, uncached core/app tests, core/app race tests and
 Its report is delivered and all four task tickets are solved. Acta records the
 canonical merge in `01M4F3YG8WEZMVZYGE4EZ7XM80`.
 Slice 7 is active for ordered slice/set/use-case traversal, durable continuation,
-membership amendments and closing validation. T7.1 is locally validated on the dedicated Slice 7 branch. T7.2 is in progress;
-T7.3 and T7.4 remain ready. The slice PR has not been opened.
+membership amendments and closing validation. T7.1 and T7.2 are locally validated on the dedicated Slice 7 branch. T7.3 is
+in progress and T7.4 remains ready. The slice PR has not been opened.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -406,13 +406,13 @@ Plan contract: [Slice 7](../plan/ticket-native-workflow.md#slice-7-ordered-set-a
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T7.1 | [TKT-20261008141409](../ticket/in_progress/20261008141409-ticket-native-t7-1.md) | validated | 96576db5caf4b9ecf115f4a9b3490e53e151b1de | Traverse slice/set/use-case extents through the verified integration barrier. |
-| T7.2 | [TKT-20261008141410](../ticket/in_progress/20261008141410-ticket-native-t7-2.md) | in_progress | pending | Persist equivalent-request identity, confirmed cursor and bounded continuation checkpoints. |
-| T7.3 | [TKT-20261008141411](../ticket/ready/20261008141411-ticket-native-t7-3.md) | ready | pending | Implement frozen/default and explicit later-admission rules, quiescent amendments and set reopening. |
+| T7.2 | [TKT-20261008141410](../ticket/in_progress/20261008141410-ticket-native-t7-2.md) | validated | 90c0d183cd4a5a35d363c99249658386db87afe3 | Persist equivalent-request identity, confirmed cursor and bounded continuation checkpoints. |
+| T7.3 | [TKT-20261008141411](../ticket/in_progress/20261008141411-ticket-native-t7-3.md) | in_progress | pending | Implement frozen/default and explicit later-admission rules, quiescent amendments and set reopening. |
 | T7.4 | [TKT-20261008141412](../ticket/ready/20261008141412-ticket-native-t7-4.md) | ready | pending | Confirm closing validation against all actual members and exact target/plan snapshots. |
 
 ### Validation
 
-Status: T7.1 pre-commit checks passed; whole-slice final validation is pending.
+Status: T7.1 and T7.2 pre-commit checks passed; whole-slice final validation is pending.
 
 Successful T7.1 checks: `make verify`;
 `go test -race ./internal/core ./internal/app -run '^(TestWorkflowFrontier|TestServiceWorkflowFrontier)' -count=1`;
@@ -420,6 +420,14 @@ Successful T7.1 checks: `make verify`;
 and a scoped uncached 30-minute Go test timeout. Real two-PR Git fixtures,
 receipt/set barriers, unsliced exclusions, stopped/corrupt frontiers and both
 journal replacements passed. Acta: `01M4F5ND4089A1DT2QV8QKMWGF`.
+
+Successful T7.2 checks: `make verify`;
+`go test -race ./internal/core ./internal/app -run '^(TestWorkflowContinuation|TestServiceWorkflowContinuation)' -count=1`;
+`git diff --check`. The repository gate used the same retained fixture and
+scoped timeout. Actual worker/Git fixtures prove bounded task and aggregate
+calls, equivalent attachment, frozen policy/scope, PR/integration restart reuse,
+checkpoint replay/corruption, identical waits and terminal immutability.
+Acta: `01M4F6MW3GZ5S6J62CR4FPBH6V`.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`; a multi-slice real-Git
