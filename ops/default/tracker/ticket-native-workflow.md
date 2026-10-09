@@ -22,29 +22,30 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 10 — Shared operation controls
+Active slice: Slice 11 — Defaults and authority transition
 
-Next slice: Slice 11 — Defaults and authority transition
+Next slice: Slice 12 — End-to-end workflow assurance
 
 Slice strategy: behavior-first
 
-Progress: 9 of 12 slices integrated; 36 of 48 tasks done.
+Progress: 10 of 12 slices integrated; 40 of 48 tasks done.
 
 ## Current Checkpoint
 
-Slices 1 through 9 are verified integrated through canonical PRs #364–#372.
-Slice 9 merged head `fe2e8dc5ac91c8d54ff865fa2c1b7f965116ab7c` passed the controller's ordered
-`make verify`, `go test ./internal/core ./internal/app -count=1`,
-`go test -race ./internal/core ./internal/app -count=1` and `git diff --check`
-with Go 1.27.1, the retained CLI curation fixture and scoped uncached 30-minute
-test timeout. Its report is delivered and all four task tickets are solved.
-Acta records the canonical merge in `01M4GG393N2TJ9FCXZVHBFG0GY`.
-Slice 10 implementation is validated; T10.1–T10.4 are reviewing. The report is
-reviewing, with canonical PR [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373). PR-head validation uses
-the controller's ordered evidence ledger.
+Slices 1 through 10 are verified integrated through canonical PRs #364–#373.
+Slice 10 merged head `e08f8b18030d65a3901e3d03ef4ad5fbb7ce9a28` passed the controller's ordered
+`make verify`, `go test ./internal/app ./internal/tui ./internal/webui -count=1`,
+`go test -race ./internal/app ./internal/tui ./internal/webui -count=1`,
+`scripts/qa/web-ui-smoke.sh` and `git diff --check` with Go 1.27.1,
+the retained curation fixture and scoped uncached 30-minute test timeout.
+Its report is delivered and all four task tickets are solved.
+Acta records the canonical merge in `01M4GXAE485Y2CN8PN9CJQFY3P`.
+Slice 11 is active. All four task tickets are bound and ready; implementation
+starts in the dedicated recorded slice worktree.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
+
 
 ## State and Evidence Rules
 
@@ -642,7 +643,7 @@ Acceptance: A09, A10, A11, A12; capacity/admission bounds in A24.
 
 ## Slice 10: Shared operation controls
 
-Status: reviewing
+Status: integrated
 
 Prerequisite: satisfied by verified PR #372 integration into dev.
 
@@ -656,14 +657,14 @@ Plan contract: [Slice 10](../plan/ticket-native-workflow.md#slice-10-shared-oper
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T10.1 | [TKT-20261008141421](../ticket/reviewing/20261008141421-ticket-native-t10-1.md) | reviewing | `872fba664db5f8a2cde99a4135264631a482062b` | Expose proposed CLI extents, preview/status/continue and exact-bound approval/reconciliation controls. |
-| T10.2 | [TKT-20261008141422](../ticket/reviewing/20261008141422-ticket-native-t10-2.md) | reviewing | `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` | Add TUI controls and progress/wait/blocker rendering over shared operations. |
-| T10.3 | [TKT-20261008141423](../ticket/reviewing/20261008141423-ticket-native-t10-3.md) | reviewing | `d378057aac57e206982d86710d1f03d982dae81c` | Add Web operation controls, guarded writes and resumable progress with visible failure envelopes. |
-| T10.4 | [TKT-20261008141424](../ticket/reviewing/20261008141424-ticket-native-t10-4.md) | reviewing | `cd76e965c5ab6ddffe0c95ed4c3b4b0753ec742e` | Wire daemon resume, pause/cancel and manual status parity; document Telegram's notification-only boundary. |
+| T10.1 | [TKT-20261008141421](../ticket/solved/20261008141421-ticket-native-t10-1.md) | done | `872fba664db5f8a2cde99a4135264631a482062b` | Expose proposed CLI extents, preview/status/continue and exact-bound approval/reconciliation controls. |
+| T10.2 | [TKT-20261008141422](../ticket/solved/20261008141422-ticket-native-t10-2.md) | done | `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` | Add TUI controls and progress/wait/blocker rendering over shared operations. |
+| T10.3 | [TKT-20261008141423](../ticket/solved/20261008141423-ticket-native-t10-3.md) | done | `d378057aac57e206982d86710d1f03d982dae81c` | Add Web operation controls, guarded writes and resumable progress with visible failure envelopes. |
+| T10.4 | [TKT-20261008141424](../ticket/solved/20261008141424-ticket-native-t10-4.md) | done | `cd76e965c5ab6ddffe0c95ed4c3b4b0753ec742e` | Wire daemon resume, pause/cancel and manual status parity; document Telegram's notification-only boundary. |
 
 ### Validation
 
-Status: all four task checks passed. Canonical PR-head validation uses the ordered controller ledger.
+Status: all four task checks and all five ordered controller checks passed on `e08f8b18030d65a3901e3d03ef4ad5fbb7ce9a28`.
 
 Expected focused checks: `go test ./internal/app ./internal/tui ./internal/webui -count=1`
 and `go test -race ./internal/app ./internal/tui ./internal/webui -count=1`;
@@ -676,21 +677,22 @@ Acceptance: A09, A17, A21, A23.
 ### Delivery Evidence
 
 - PR: [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373); opened in Acta `01M4GW12A6HSE9VSHD2C13WRZM`.
-- Merge commit: pending.
+- Merge commit: `e08f8b18030d65a3901e3d03ef4ad5fbb7ce9a28`; verified canonical PR #373 and `origin/dev`. Acta merge event: `01M4GXAE485Y2CN8PN9CJQFY3P`.
 - Report introduction: `e0e26eb99a2e01f3d891d9f0a58ea874103af585`; full immutable introduction link recorded in the PR.
-- Report status: reviewing; CLI/TUI/Web/daemon behavior and all four task checks recorded.
-- Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket reviewing. T10.2 `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` is reviewing; T10.3 `d378057aac57e206982d86710d1f03d982dae81c` is reviewing; T10.4 `cd76e965c5ab6ddffe0c95ed4c3b4b0753ec742e` is reviewing.
-- T10.1: `make verify`, focused CLI admission checks, focused CLI/core race checks and `git diff --check` passed. The final ordered controller checks remain pending.
+- Report status: delivered; CLI/TUI/Web/daemon behavior and all four task checks recorded.
+- Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket solved. T10.2 `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` is solved; T10.3 `d378057aac57e206982d86710d1f03d982dae81c` is solved; T10.4 `cd76e965c5ab6ddffe0c95ed4c3b4b0753ec742e` is solved.
+- T10.1: `make verify`, focused CLI admission checks, focused CLI/core race checks and `git diff --check` passed. All five final ordered controller checks passed on the merged head.
 - T10.2: `make verify`, adapter race checks, focused domain control/inspection race checks and `git diff --check` passed. Domain and real adapter/model checks cover preserved identities, stale conflicts, actual checkpoints, exact approval and nonmutating linked-worktree inspection. Acta commit event: `01M4GPNPTK1PE002KAMC8HQY0H`.
 - T10.3: `make verify`, focused Web workflow/race checks, `scripts/qa/web-ui-smoke.sh` and `git diff --check` passed. Real handler/browser checks cover native selection, worker/continuation checkpoints, ownership and revision failures, human review and exact approval. All 18 gate input files stayed unchanged. Acta commit event: `01M4GSPSDZY5M3DZ0WN7J5Y4QA`.
 - T10.4: `make verify`, `go test -race ./internal/app -run '^(TestDaemonWorkflow.*|TestWorkflowManualSurfaces)$' -count=1`, documentation links and `git diff --check` passed. Real daemon startup, owner exclusion/recovery, worker stops, heartbeat/coordinator stop and manual adapter status checks preserve authorization and evidence. Acta commit event: `01M4GVVH5AWFTCX1Q25THNS2JF`.
-- Blockers: none observed. Canonical PR-head validation uses the ordered controller ledger.
+- Final ordered checks: `make verify`; `go test ./internal/app ./internal/tui ./internal/webui -count=1`; `go test -race ./internal/app ./internal/tui ./internal/webui -count=1`; `scripts/qa/web-ui-smoke.sh`; `git diff --check`. The controller ledger retains exact-head evidence.
+- Blockers: none observed.
 
 ## Slice 11: Defaults and authority transition
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 10 verified integrated into dev.
+Prerequisite: satisfied by verified PR #373 integration into dev.
 
 Expected branch: `feat/slice-11-workflow-defaults`
 
@@ -726,7 +728,7 @@ Acceptance: A16, A18; explicit adoption and configuration bounds in A24.
 - Report status: not created.
 - Task commits and ticket lifecycle evidence: pending.
 - Validation evidence: pending.
-- Blockers: none observed; implementation has not started.
+- Blockers: none observed; Slice 11 is activated after verified predecessor closure.
 
 ## Slice 12: End-to-end workflow assurance
 

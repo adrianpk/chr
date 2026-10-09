@@ -20,9 +20,9 @@ Plan approval: approved on 2026-10-08
 
 Implementation authorization: granted on 2026-10-08 for the approved delivery set through slice-loop
 
-Active slice: Slice 10 — Shared operation controls
+Active slice: Slice 11 — Defaults and authority transition
 
-Next slice: Slice 11 — Defaults and authority transition
+Next slice: Slice 12 — End-to-end workflow assurance
 
 Slice strategy: behavior-first
 

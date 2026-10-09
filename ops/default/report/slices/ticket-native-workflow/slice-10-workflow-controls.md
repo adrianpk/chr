@@ -1,6 +1,6 @@
 # Slice 10: Shared operation controls
 
-Status: reviewing
+Status: delivered
 
 Delivery set: ticket-native-workflow
 
@@ -148,6 +148,18 @@ projects retain ticket-index refresh behavior.
   authorization, heartbeat/coordinator stop and invocation lifecycle.
 
 ## Validation
+
+Final canonical PR head and verified `dev` integration: `e08f8b18030d65a3901e3d03ef4ad5fbb7ce9a28`.
+Controller checks passed in this exact order:
+
+- `make verify`
+- `go test ./internal/app ./internal/tui ./internal/webui -count=1`
+- `go test -race ./internal/app ./internal/tui ./internal/webui -count=1`
+- `scripts/qa/web-ui-smoke.sh`
+- `git diff --check`
+
+The controller evidence ledger is keyed by that full commit. Canonical PR #373
+was merged on 2026-10-09; Acta merge event `01M4GXAE485Y2CN8PN9CJQFY3P`.
 
 T10.1 passed:
 
