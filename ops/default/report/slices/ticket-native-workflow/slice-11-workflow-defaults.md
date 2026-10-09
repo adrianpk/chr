@@ -10,7 +10,7 @@ Tracker: [Ticket-Native Work Tracker](../../../tracker/ticket-native-workflow.md
 
 Branch: `feat/slice-11-workflow-defaults`
 
-PR: pending
+PR: [#374](https://forge.adrianpk.com/adrianpk/chr/pulls/374)
 
 ## Purpose
 
@@ -157,8 +157,8 @@ T11.1 development checks passed:
 
 The repository gate used Go 1.27.1, the retained curation fixture on `PATH`,
 and scoped uncached verbose tests with a 30-minute timeout. Its successful log
-is `/tmp/chr-slice-11-t11-1-verify-final.log`. Final Slice 11 candidate validation
-remains pending until all four tasks and PR references are complete.
+is `/tmp/chr-slice-11-t11-1-verify-final.log`. Canonical Slice 11 candidate validation is recorded by the configured
+controller against the exact clean PR head after PR references are committed.
 
 T11.2 development checks passed:
 
@@ -193,7 +193,7 @@ capacity and namespace locks, retained invocations, actual legacy execution
 rows, torn domain writes, all policy write boundaries, manual-edit preservation,
 symlink/size rejection and a real owned subprocess crash/restart. Actual CLI
 upgrade/config/retry commands and 27 guidance links passed. Final slice-head
-controller evidence remains pending.
+controller evidence is stored separately from these development checks.
 
 Real Git and owned subprocess checks cover readonly CLI observation, strict
 bounds, configured admission, unchanged retry budgets, target-preserving entry
@@ -219,7 +219,14 @@ crash/restart, shared finalized receipt provenance and continued native progress
 through derived failures. Five guidance documents passed 41 local link checks;
 12 operational documents passed 102 local link checks.
 
+Canonical PR #374 was opened and recorded in Acta `01M4H7GG3DTK7PYP382R6RD9H3`. The configured
+controller records the exact clean PR head and ordered candidate commands:
+`make verify`, `go test ./internal/core ./internal/app -count=1`,
+`go test -race ./internal/core ./internal/app -count=1`, then `git diff --check`.
+The controller's checks ledger and canonical PR validation list carry candidate
+results separately from the local development evidence above.
+
 ## Risks and Follow-ups
 
-All four tasks are validated locally. Canonical PR creation, PR-reference
-follow-up and final clean-head controller validation remain pending.
+All four tasks are validated locally. Integration through canonical PR #374
+is pending. Exact clean-head candidate checks are owned by the controller.

@@ -51,8 +51,10 @@ race checks, metadata, guidance links and whitespace passed. Its ticket is
 reviewing. Acta: `01M4H59ZFMXVFDYYZ0RTC5TM3W`. T11.4 is validated at `408a622d1074edfbeefe9c54c2f13e85c41747f9`
 after `make verify`, focused tracker/upgrade/config/init Go and race checks,
 metadata, 41 guidance links and whitespace passed. Acta: `01M4H7DGCVJ662A7ATXFFG5NPC`.
-All four task tickets and the canonical report are reviewing. The slice PR and
-final clean-head controller checks are pending.
+All four task tickets and the canonical report are reviewing. Canonical
+PR [#374](https://forge.adrianpk.com/adrianpk/chr/pulls/374) is open. PR-open Acta: `01M4H7GG3DTK7PYP382R6RD9H3`.
+Exact clean-head candidate results are recorded by the configured controller.
+Integration remains pending.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -89,7 +91,7 @@ Fast-forward into `dev`.
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | integrated | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | integrated | 4/4 | [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | reviewing | 0/4 | [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373) |
-| Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | active | 0/4 | pending |
+| Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | reviewing | 0/4 | #374 |
 | Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | not_started | 0/4 | pending |
 
 ## Slice 1: Guarded workflow records
@@ -701,7 +703,7 @@ Acceptance: A09, A17, A21, A23.
 
 ## Slice 11: Defaults and authority transition
 
-Status: active
+Status: reviewing
 
 Prerequisite: satisfied by verified PR #373 integration into dev.
 
@@ -746,8 +748,8 @@ race checks, operational metadata, 41 guidance links and whitespace. Core passed
 in 846.591 seconds with zero lint issues; the successful repository log is
 `/tmp/chr-slice-11-t11-4-verify-final.log`. Actual export/status/repair, edit
 preservation, source/receipt provenance, torn exports, owned crash/restart and
-native progress through derived failures passed. Final slice validation remains
-pending.
+native progress through derived failures passed. Exact clean-head candidate
+validation is recorded by the configured controller.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`; cover every generator
@@ -759,12 +761,12 @@ Acceptance: A16, A18; explicit adoption and configuration bounds in A24.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#374](https://forge.adrianpk.com/adrianpk/chr/pulls/374); opened, not merged. Acta: `01M4H7GG3DTK7PYP382R6RD9H3`.
 - Merge commit: pending.
 - Report status: reviewing; [immutable introduction](https://forge.adrianpk.com/adrianpk/chr/src/commit/d081c3daa795065cf8c635c3270aa6d26a7dabe8/ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md).
 - Task commits: T11.1 `d081c3daa795065cf8c635c3270aa6d26a7dabe8`; ticket reviewing. T11.2 `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`; ticket reviewing. T11.3 `7783c4e0ac08a64e27d680cc1861123f3f429244`; ticket reviewing. T11.4 `408a622d1074edfbeefe9c54c2f13e85c41747f9`; ticket reviewing.
-- Validation evidence: T11.1–T11.4 local task checks passed; final PR-head controller evidence pending.
-- Blockers: none outstanding. Canonical PR and final controller checks are pending.
+- Validation evidence: T11.1–T11.4 local task checks passed; exact PR-head candidate results are recorded by the controller.
+- Blockers: none outstanding. Required candidate checks use the controller before integration.
 
 ## Slice 12: End-to-end workflow assurance
 
