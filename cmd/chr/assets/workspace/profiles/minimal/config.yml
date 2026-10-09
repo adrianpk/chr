@@ -1,4 +1,6 @@
 version: 1
+workflow:
+  version: 1
 tickets:
   key_prefix: CHR
 notifications:

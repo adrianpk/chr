@@ -10,6 +10,12 @@ An absent marker retains legacy defaults. The older root `version` field and
 artifact filenames do not select workflow defaults. Explicit project values
 apply after defaults, independent of their order in the file.
 
+`chr init` writes this marker for new workspaces in the default, standard,
+minimal and personal profiles. The profiles omit the policy keys that use the
+version defaults. Runtime bootstrap loads the same project policy and does not
+rewrite it. Reinitialization preserves existing config bytes and leaves a missing
+config absent when `.chr/` already exists; it does not upgrade that workspace.
+
 ```yaml
 workflow:
   version: 1

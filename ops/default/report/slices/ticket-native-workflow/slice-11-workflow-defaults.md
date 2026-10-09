@@ -33,6 +33,12 @@ and entry attachment preserve those inputs across configuration changes.
 Publication rechecks current project review policy and merge strategy, retaining
 any human restriction and invalidating changed approval bindings.
 
+T11.2 initializes every bundled profile with version-one defaults: ticket
+authority, isolated worktrees, trusted automatic integration and one worker.
+Dry-run and repeated initialization preserve existing configuration bytes,
+including invalid policy, and preserve config absence in an existing workspace.
+Runtime bootstrap leaves both new and legacy project policy unchanged.
+
 ## Implementation Notes
 
 The project config loader and publication-policy resolver share strict bounded
@@ -49,6 +55,12 @@ omitted integration limits retain their zero representation while the finite
 default remains three. Review fixtures preserve unrelated project limits in the
 shared policy file.
 
+Initialization observes whether `.chr/` existed before creating directories.
+Existing config absence is reported separately as preserved policy. Exclusive
+file creation prevents initialization from replacing a file created by another
+writer between inspection and creation. The bundled profiles rely on the
+versioned resolver for their missing policy fields.
+
 ## Contracts Added or Changed
 
 - `workflow.version: 1` selects prospective defaults; the old root version does
@@ -60,6 +72,9 @@ shared policy file.
   automatic review or replace a retained invocation's restriction.
 - Workers, queues, execution timeouts, checkpoint limits and attempt budgets
   enforce their approved finite bounds before admission.
+- `chr init` selects version one only for a new workspace; existing config
+  bytes and absent legacy configuration survive every profile and dry-run.
+  `chr runtime init` installs assets without writing project policy.
 - Frozen execution limits cannot be refilled by project edits; current
   publication policy remains a separate decision boundary.
 
@@ -72,6 +87,8 @@ shared policy file.
 - `internal/core/workflow_review_policy.go`: current owned project policy.
 - `internal/app/work_workflow_config.go` and `service_workflow_controls.go`:
   shared configuration inspection and human restriction admission.
+- `internal/core/workspace_init.go`, `internal/app/init.go` and bundled profile
+  configs: prospective defaults and explicit preservation of absent policy.
 - [Workflow configuration](../../../../../docs/reference/workflow-configuration.md)
   and the [User Guide](../../../../../docs/how-to/user-guide/index.md): delivered
   configuration, command, timeout and precedence guidance.
@@ -91,6 +108,21 @@ and scoped uncached verbose tests with a 30-minute timeout. Its successful log
 is `/tmp/chr-slice-11-t11-1-verify-final.log`. Final Slice 11 candidate validation
 remains pending until all four tasks and PR references are complete.
 
+T11.2 development checks passed:
+
+- `make verify` (pre-commit repository gate; passed)
+- `go test ./internal/core ./internal/app -run '^(TestInit|TestRuntimeInit|TestWorkflowConfigDefaults)' -count=1`
+- `go test -race ./internal/core ./internal/app -run '^(TestInit|TestRuntimeInit|TestWorkflowConfigDefaults)' -count=1`
+- `python3 /tmp/chr-slice-11-docs-check.py`
+- `git diff --check`
+
+The T11.2 repository gate used the same Go 1.27.1 toolchain, retained curation
+fixture and scoped uncached 30-minute timeout. Its successful log is
+`/tmp/chr-slice-11-t11-2-verify.log`. The actual bundled profiles, root CLI,
+effective-value/source observation, runtime initialization and absent/explicit/
+invalid existing policies passed the new/existing/reinitialization matrix.
+Initialization guidance passed 27 local documentation-link checks.
+
 Real Git and owned subprocess checks cover readonly CLI observation, strict
 bounds, configured admission, unchanged retry budgets, target-preserving entry
 attachment, human restrictions and task/slice/closing deadline failures.
@@ -98,6 +130,6 @@ Fixtures stop through their owning validation supervisors.
 
 ## Risks and Follow-ups
 
-T11.2 is active for new-project initialization. T11.3–T11.4 remain ready for
-explicit selected upgrade
-with prior-policy snapshots, and tracker export/repair with complete guidance.
+T11.3–T11.4 remain pending for explicit selected upgrade with prior-policy
+snapshots, and tracker export/repair with complete guidance. Final Slice 11
+PR-head controller validation remains pending.

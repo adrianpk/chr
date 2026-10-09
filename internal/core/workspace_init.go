@@ -48,9 +48,10 @@ type InitOptions struct {
 
 // InitResult describes a package boundary value.
 type InitResult struct {
-	Root    string
-	Created []string
-	Skipped []string
+	Root      string
+	Created   []string
+	Skipped   []string
+	Preserved []string
 }
 
 type entry struct {
@@ -112,6 +113,13 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 
 	result := InitResult{Root: filepath.Join(absProjectDir, DirectoryName)}
 
+	_, err = os.Stat(result.Root)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return InitResult{}, fmt.Errorf("inspect workspace: %w", err)
+	}
+
+	newProject := errors.Is(err, os.ErrNotExist)
+
 	err = initDirectories(ctx, absProjectDir, opts.DryRun, &result)
 	if err != nil {
 		return InitResult{}, err
@@ -122,7 +130,7 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 		profile = DefaultProfile
 	}
 
-	err = w.initWorkspaceFiles(ctx, absProjectDir, profile, opts.DryRun, &result)
+	err = w.initWorkspaceFiles(ctx, absProjectDir, profile, newProject, opts.DryRun, &result)
 	if err != nil {
 		return InitResult{}, err
 	}
@@ -178,7 +186,7 @@ func initDirectories(ctx context.Context, projectDir string, dryRun bool, result
 	return nil
 }
 
-func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile string, dryRun bool, result *InitResult) error {
+func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile string, newProject, dryRun bool, result *InitResult) error {
 	files, err := w.profileFiles(profile, workspaceFile)
 	if err != nil {
 		return err
@@ -192,6 +200,15 @@ func (w *workspace) initWorkspaceFiles(ctx context.Context, projectDir, profile 
 
 		rel := filepath.Join(DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
 		target := filepath.Join(projectDir, rel)
+		// Absence is an existing policy choice, not permission to enable version one.
+		if file.path == "config.yml" && !newProject {
+			_, err = os.Stat(target)
+			if errors.Is(err, os.ErrNotExist) {
+				result.Preserved = append(result.Preserved, filepath.ToSlash(rel))
+
+				continue
+			}
+		}
 
 		created, err := createFile(target, file.content, dryRun)
 		if err != nil {
@@ -390,9 +407,20 @@ func createFile(path, content string, dryRun bool) (bool, error) {
 		return false, fmt.Errorf("create parent directory: %w", err)
 	}
 
-	err = os.WriteFile(path, []byte(content), 0o644)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if errors.Is(err, os.ErrExist) {
+		return false, nil
+	}
+
 	if err != nil {
 		return false, fmt.Errorf("create file: %w", err)
+	}
+
+	_, writeErr := file.WriteString(content)
+
+	closeErr := file.Close()
+	if err := errors.Join(writeErr, closeErr); err != nil {
+		return false, fmt.Errorf("write created file: %w", err)
 	}
 
 	return true, nil

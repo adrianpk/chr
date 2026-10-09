@@ -71,6 +71,13 @@ func printInitResult(stdout io.Writer, result core.InitResult) error {
 		}
 	}
 
+	for _, preserved := range result.Preserved {
+		_, err = fmt.Fprintf(stdout, "preserve absent %s\n", preserved)
+		if err != nil {
+			return fmt.Errorf("write preserved path: %w", err)
+		}
+	}
+
 	_, err = fmt.Fprintln(stdout, "done")
 	if err != nil {
 		return fmt.Errorf("write completion result: %w", err)

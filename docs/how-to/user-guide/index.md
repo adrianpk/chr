@@ -37,6 +37,17 @@ The initialized workspace includes ticket directories, project protocol files,
 minimal user-owned config, `.chr/default/`, and
 `.chr/default/runtime/agent/Dockerfile`.
 
+All three profiles initialize new projects with `workflow.version: 1`. Its
+defaults select ticket authority, isolated worktrees, trusted automatic integration
+and one worker. Use an explicit `review.mode: human_review` when the project
+requires human approval. See [Workflow configuration](../../reference/workflow-configuration.md)
+for effective values, sources and limits.
+
+Repeated initialization preserves existing configuration. In an existing `.chr/`
+workspace with no config file, it reports `preserve absent .chr/default/config.yml`
+and leaves legacy policy in effect. Runtime initialization installs runtime assets
+without changing project policy.
+
 Set an active operator id for workflows that need project-local userspace
 ownership:
 
