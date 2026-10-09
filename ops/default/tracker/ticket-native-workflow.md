@@ -750,6 +750,12 @@ in 846.591 seconds with zero lint issues; the successful repository log is
 preservation, source/receipt provenance, torn exports, owned crash/restart and
 native progress through derived failures passed. Exact clean-head candidate
 validation is recorded by the configured controller.
+Candidate `181dd85835a7f55224e1d4ea42ddb2d39e402d6c` passed the first two ordered
+checks but its full core race suite exhausted the scoped 30-minute Go deadline.
+There were no test-case failures or data-race reports; app race passed. Acta
+`01M4HAYM69MX5HQWHXSKN77MQ5` records the diagnosis. The identical ordered
+command list is retried with a scoped 60-minute runner timeout on the new clean
+PR-reference/report head. Source and workflow execution policy are unchanged.
 
 Expected focused checks: `go test ./internal/core ./internal/app -count=1` and
 `go test -race ./internal/core ./internal/app -count=1`; cover every generator
@@ -766,7 +772,7 @@ Acceptance: A16, A18; explicit adoption and configuration bounds in A24.
 - Report status: reviewing; [immutable introduction](https://forge.adrianpk.com/adrianpk/chr/src/commit/d081c3daa795065cf8c635c3270aa6d26a7dabe8/ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md).
 - Task commits: T11.1 `d081c3daa795065cf8c635c3270aa6d26a7dabe8`; ticket reviewing. T11.2 `6a4b3f019fe3910b5c93662cb947ee4d2b7caf52`; ticket reviewing. T11.3 `7783c4e0ac08a64e27d680cc1861123f3f429244`; ticket reviewing. T11.4 `408a622d1074edfbeefe9c54c2f13e85c41747f9`; ticket reviewing.
 - Validation evidence: T11.1–T11.4 local task checks passed; exact PR-head candidate results are recorded by the controller.
-- Blockers: none outstanding. Required candidate checks use the controller before integration.
+- Blockers: final candidate evidence awaits the scoped timeout retry through the controller.
 
 ## Slice 12: End-to-end workflow assurance
 

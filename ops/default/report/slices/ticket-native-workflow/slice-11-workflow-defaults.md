@@ -226,6 +226,18 @@ controller records the exact clean PR head and ordered candidate commands:
 The controller's checks ledger and canonical PR validation list carry candidate
 results separately from the local development evidence above.
 
+Candidate attempt `181dd85835a7f55224e1d4ea42ddb2d39e402d6c` passed controller
+`make verify` and `go test ./internal/core ./internal/app -count=1`. The exact
+`go test -race ./internal/core ./internal/app -count=1` command failed because
+the core suite exhausted the scoped 30-minute Go runner deadline near its end;
+`TestWorkflowTrackerReceipt` had been running for one second. No test-case
+failure or data-race report appeared; app race passed in 290.770 seconds.
+Diagnostics are retained in the controller's checks ledger directory under
+`181dd85835a7f55224e1d4ea42ddb2d39e402d6c.log`. Failure diagnosis Acta:
+`01M4HAYM69MX5HQWHXSKN77MQ5`. No receipt fixture process remained afterward.
+The retry uses a scoped 60-minute Go runner timeout with the same ordered
+commands; workflow execution policy and source code are unchanged.
+
 ## Risks and Follow-ups
 
 All four tasks are validated locally. Integration through canonical PR #374
