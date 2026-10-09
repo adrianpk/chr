@@ -38,8 +38,8 @@ Slice 8 merged head `f9995446e72fa0e2e53972d280001cfdccd070db` passed the contro
 `go test -race ./internal/core ./internal/app -count=1` and `git diff --check`
 with the retained CLI curation fixture and scoped uncached 30-minute test timeout.
 Its report is delivered and all four task tickets are solved. Acta records the
-canonical merge in `01M4FZER759JJQFE97B3MJW8GN`. Slice 9 is the next authorized
-slice; its first task will activate in the dedicated recorded branch.
+canonical merge in `01M4FZER759JJQFE97B3MJW8GN`. Slice 9 is active in its dedicated recorded branch. T9.1 owns process
+reservations and bounded capacity/queue admission; T9.2–T9.4 remain ready.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -73,7 +73,7 @@ Fast-forward into `dev`.
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | integrated | 4/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | integrated | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
-| Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | not_started | 0/4 | pending |
+| Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | active | 0/4 | pending |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | not_started | 0/4 | pending |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
 | Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | not_started | 0/4 | pending |
@@ -551,9 +551,9 @@ Acceptance: A05, A07, A13, A19.
 
 ## Slice 9: Independent parallel runners
 
-Status: not_started
+Status: active
 
-Prerequisite: Slice 8 verified integrated into dev.
+Prerequisite: satisfied by verified PR #371 integration into dev.
 
 Expected branch: `feat/slice-9-workflow-concurrency`
 
@@ -565,7 +565,7 @@ Plan contract: [Slice 9](../plan/ticket-native-workflow.md#slice-9-independent-p
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T9.1 | [TKT-20261008141417](../ticket/ready/20261008141417-ticket-native-t9-1.md) | ready | pending | Introduce repository-wide process reservations and validated capacity/queue admission across worktrees/namespaces. |
+| T9.1 | [TKT-20261008141417](../ticket/in_progress/20261008141417-ticket-native-t9-1.md) | in_progress | pending | Introduce repository-wide process reservations and validated capacity/queue admission across worktrees/namespaces. |
 | T9.2 | [TKT-20261008141418](../ticket/ready/20261008141418-ticket-native-t9-2.md) | ready | pending | Enforce exclusive task/slice/set/use-case frontier claims and fenced result application on every start path. |
 | T9.3 | [TKT-20261008141419](../ticket/ready/20261008141419-ticket-native-t9-3.md) | ready | pending | Serialize publication per canonical remote target, including uncertain outcomes and external target movement. |
 | T9.4 | [TKT-20261008141420](../ticket/ready/20261008141420-ticket-native-t9-4.md) | ready | pending | Replace the coarse lock only after subprocess/crash/race acceptance passes and document the ownership boundary. |
@@ -589,7 +589,7 @@ Acceptance: A09, A10, A11, A12; capacity/admission bounds in A24.
 - Report status: not created.
 - Task commits and ticket lifecycle evidence: pending.
 - Validation evidence: pending.
-- Blockers: none observed; implementation has not started.
+- Blockers: none observed; T9.1 is active.
 
 ## Slice 10: Shared operation controls
 
