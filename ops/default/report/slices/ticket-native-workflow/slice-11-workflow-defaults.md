@@ -41,6 +41,8 @@ Dry-run and repeated initialization preserve existing configuration bytes,
 including invalid policy, and preserve config absence in an existing workspace.
 Runtime bootstrap leaves both new and legacy project policy unchanged.
 
+T11.3 task commit: `7783c4e0ac08a64e27d680cc1861123f3f429244`. Acta: `01M4H59ZFMXVFDYYZ0RTC5TM3W`.
+
 T11.3 adds explicit selected-project upgrade with an observed config revision,
 required authority choice and optional new review choice. Absent and explicit
 legacy review policy is preserved by default. A credential-free prior-policy
@@ -175,6 +177,6 @@ Fixtures stop through their owning validation supervisors.
 
 ## Risks and Follow-ups
 
-T11.3 is active for explicit selected upgrade with prior-policy snapshots.
-T11.4 remains ready for tracker export/repair and complete guidance. Final Slice 11
+T11.1 through T11.3 are validated locally. T11.4 is active for tracker
+export/repair and complete guidance. Final Slice 11
 PR-head controller validation remains pending.
