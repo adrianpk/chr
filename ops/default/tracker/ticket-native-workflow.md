@@ -40,7 +40,7 @@ with the retained CLI curation fixture and scoped uncached 30-minute test timeou
 Its report is delivered and all four task tickets are solved. Acta records the
 canonical merge in `01M4FZER759JJQFE97B3MJW8GN`. Slice 9 is active in its dedicated recorded branch. T9.1 is validated in
 `14a19870f53626152768c5848e03f3241d984584` after subprocess, expanded race and repository checks.
-T9.2 is validated in `70d0706d571484e6846770b5d2c200881f8d3d59` after expanded race, clone/adoption and repository checks. T9.3 is validated in `bf4e92cc3b10a92736a712c198d0a5bf4f781516` after real publisher, target-movement, race and repository checks. T9.4 is validated in `c41b79643ee01525d456d32cfbe440fc435bcad7` after actual overlapping source workers, recovery and resumable-wait race checks, and a complete repository retry. All four Slice 9 tasks are validated; its report is reviewing and canonical PR preparation is pending.
+T9.2 is validated in `70d0706d571484e6846770b5d2c200881f8d3d59` after expanded race, clone/adoption and repository checks. T9.3 is validated in `bf4e92cc3b10a92736a712c198d0a5bf4f781516` after real publisher, target-movement, race and repository checks. T9.4 is validated in `c41b79643ee01525d456d32cfbe440fc435bcad7` after actual overlapping source workers, recovery and resumable-wait race checks, and a complete repository retry. All four Slice 9 tasks are validated; its report is reviewing and canonical PR [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) is open. Its final clean-head controller checks remain pending.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -74,7 +74,7 @@ Fast-forward into `dev`.
 | Slice 6 | Guarded automatic publication | `feat/slice-6-workflow-publication` | `feat(slice-6): publish guarded integration candidates` | `ops/default/report/slices/ticket-native-workflow/slice-6-workflow-publication.md` | integrated | 4/4 | [#369](https://forge.adrianpk.com/adrianpk/chr/pulls/369) |
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | integrated | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
-| Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | reviewing | 4/4 | pending |
+| Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | reviewing | 4/4 | [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | not_started | 0/4 | pending |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
 | Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | not_started | 0/4 | pending |
@@ -631,8 +631,9 @@ Acceptance: A09, A10, A11, A12; capacity/admission bounds in A24.
 
 ### Delivery Evidence
 
-- PR: pending.
+- PR: [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372); opened in Acta `01M4GCTWRG3TQZCNYRX778GMAA`.
 - Merge commit: pending.
+- Report introduction: `49c7f83591125028820d835a755f363743c0a800`; full immutable introduction link recorded in the PR.
 - Report status: reviewing; [Slice 9 report](../report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md).
 - Task commits and ticket lifecycle evidence: T9.1 `14a19870f53626152768c5848e03f3241d984584` validated, ticket reviewing; T9.2 `70d0706d571484e6846770b5d2c200881f8d3d59` validated, ticket reviewing; T9.3 `bf4e92cc3b10a92736a712c198d0a5bf4f781516` validated, ticket reviewing; T9.4 `c41b79643ee01525d456d32cfbe440fc435bcad7` validated, ticket reviewing.
 - Validation evidence: T9.1–T9.4 task checks passed; the complete ordered clean PR-head controller checks remain pending.
