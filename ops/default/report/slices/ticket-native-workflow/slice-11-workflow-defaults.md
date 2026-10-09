@@ -19,6 +19,8 @@ through deliberate adoption, and keep exported trackers repairable projections.
 
 ## Delivered Behavior
 
+Task commit: `d081c3daa795065cf8c635c3270aa6d26a7dabe8`. Acta: `01M4H1KP8V3MM1RVM5KSDQRSQN`.
+
 T11.1 resolves the nested workflow version marker and thirteen effective policy
 keys with their sources. Missing markers retain legacy defaults; explicit values
 override version defaults. Invalid bounds, unsupported values, duplicate keys
@@ -96,5 +98,6 @@ Fixtures stop through their owning validation supervisors.
 
 ## Risks and Follow-ups
 
-T11.2–T11.4 remain pending: new-project initialization, explicit selected upgrade
+T11.2 is active for new-project initialization. T11.3–T11.4 remain ready for
+explicit selected upgrade
 with prior-policy snapshots, and tracker export/repair with complete guidance.
