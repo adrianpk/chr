@@ -26,7 +26,7 @@ func (s service) ValidateWorkflowSlice(ctx context.Context, id string) (core.Wor
 	return store.ValidateWorkflowSlice(ctx, id)
 }
 
-// ReadWorkflowSliceCandidate checks retained aggregate evidence and its lane.
+// ReadWorkflowSliceCandidate checks retained slice or ticket evidence and its lane.
 func (s service) ReadWorkflowSliceCandidate(ctx context.Context, id string) (core.WorkflowSliceCandidate, error) {
 	store, err := s.workflowStore()
 	if err != nil {

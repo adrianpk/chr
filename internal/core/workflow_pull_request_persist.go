@@ -117,6 +117,10 @@ func (s *WorkflowStore) workflowPullRequestTaskChanges(run *workflowInvocationFi
 }
 
 func (s *WorkflowStore) workflowPullRequestSetChanges(run *workflowInvocationFile, set WorkflowRecord) ([]workflowFileChange, error) {
+	if set.Set == nil {
+		return nil, nil
+	}
+
 	for i := range set.Set.Slices {
 		descriptor := &set.Set.Slices[i]
 		if descriptor.ID != run.Lane.Unit.ID {

@@ -103,6 +103,10 @@ func (s *WorkflowStore) readWorkflowSliceCandidate(ctx context.Context, run work
 		return candidate, err
 	}
 
+	if run.Lane.Unit.Kind == "ticket" {
+		return candidate, s.checkWorkflowTicketCandidate(ctx, run, observation, candidate)
+	}
+
 	if err := checkWorkflowSliceCandidateBinding(run, observation, candidate); err != nil {
 		return candidate, err
 	}
@@ -119,7 +123,7 @@ func checkWorkflowSliceCandidateBinding(run workflowInvocationFile, observation 
 		return ErrWorkflowConflict
 	}
 
-	if !workflowSliceCandidateMatchesContract(observation, candidate.Slice) {
+	if !workflowSliceCandidateMatchesContract(observation, candidate.UnitInput()) {
 		return ErrWorkflowConflict
 	}
 
@@ -133,7 +137,7 @@ func checkWorkflowSliceCandidateBinding(run workflowInvocationFile, observation 
 }
 
 func workflowSliceCandidateMatchesRun(run workflowInvocationFile, candidate WorkflowSliceCandidate) bool {
-	return candidate.Schema == "chr-slice-candidate/v1" && candidate.InvocationID == run.ID && candidate.Target == run.ExecutionSelection().Target && candidate.Lane == *run.Lane && candidate.Slice.Unit == run.Lane.Unit
+	return candidate.Ticket == nil && candidate.Schema == "chr-slice-candidate/v1" && candidate.InvocationID == run.ID && candidate.Target == run.ExecutionSelection().Target && candidate.Lane == *run.Lane && candidate.UnitInput().Unit == run.Lane.Unit
 }
 
 func workflowSliceCandidateMatchesContract(observation workflowSliceObservation, input WorkflowSliceInput) bool {
@@ -146,7 +150,7 @@ func workflowSliceCandidateMatchesAttempt(run workflowInvocationFile, candidate 
 
 func (s *WorkflowStore) checkWorkflowSliceCandidateProofs(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, candidate WorkflowSliceCandidate) error {
 	result := candidate.Result
-	if !workflowSliceResultMatchesLane(result, *run.Lane) || len(candidate.Slice.Tasks) != len(observation.tasks) {
+	if !workflowSliceResultMatchesLane(result, *run.Lane) || len(candidate.UnitInput().Tasks) != len(observation.tasks) {
 		return ErrWorkflowConflict
 	}
 
@@ -155,13 +159,13 @@ func (s *WorkflowStore) checkWorkflowSliceCandidateProofs(ctx context.Context, r
 		return ErrWorkflowConflict
 	}
 
-	if err := s.checkWorkflowPrerequisiteEvidence(map[string]string{result.InputRef: result.InputHash, candidate.Slice.ContractRef: candidate.Slice.ContractHash}); err != nil {
+	if err := s.checkWorkflowPrerequisiteEvidence(map[string]string{result.InputRef: result.InputHash, candidate.UnitInput().ContractRef: candidate.UnitInput().ContractHash}); err != nil {
 		return err
 	}
 
 	for i, record := range observation.tasks {
 		proof, err := s.workflowSliceTaskProof(ctx, run, record)
-		if err != nil || proof != candidate.Slice.Tasks[i] {
+		if err != nil || proof != candidate.UnitInput().Tasks[i] {
 			return ErrWorkflowConflict
 		}
 	}

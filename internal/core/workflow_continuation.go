@@ -53,10 +53,6 @@ func workflowContinuationLimit(run WorkflowInvocation, requested int) (int, erro
 		return 0, fmt.Errorf("continuation checkpoint history exhausted")
 	}
 
-	if run.Selection.Selector.Extent == "ticket" || run.Selection.Selector.Extent == "loose" {
-		return 0, fmt.Errorf("ordered continuation requires a slice-owned extent")
-	}
-
 	limit := run.Policy.CheckpointStepLimit
 	if limit == 0 {
 		limit = WorkflowPageLimit

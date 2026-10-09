@@ -103,6 +103,12 @@ func (s *WorkflowStore) advanceWorkflowContinuation(ctx context.Context, run Wor
 		return err
 	}
 
+	if run.Lane != nil && run.Lane.Unit.Kind == "ticket" && workflowSliceValidationReady(run) {
+		_, err := s.PrepareWorkflowTicketCandidate(ctx, run.ID)
+
+		return err
+	}
+
 	if workflowSliceValidationReady(run) {
 		_, err := s.ValidateWorkflowSlice(ctx, run.ID)
 

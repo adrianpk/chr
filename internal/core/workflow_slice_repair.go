@@ -169,6 +169,10 @@ func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, o
 }
 
 func (s *WorkflowStore) workflowRepairSetChanges(run *workflowInvocationFile, set WorkflowRecord) ([]workflowFileChange, error) {
+	if set.Set == nil {
+		return nil, nil
+	}
+
 	for i := range set.Set.Slices {
 		descriptor := &set.Set.Slices[i]
 		if descriptor.ID != run.Lane.Unit.ID || (descriptor.CandidateRef == "" && descriptor.PullRequest == "") {
@@ -199,7 +203,7 @@ func (s *WorkflowStore) beginWorkflowSliceRepair(run *workflowInvocationFile, ob
 	}
 
 	attempt := &run.Attempts[len(run.Attempts)-1]
-	attempt.ContractHash = observation.descriptor.ContractHash
+	attempt.ContractHash = workflowUnitContractHash(observation)
 	attempt.Outcome, attempt.FinishedAt = "repaired", time.Now().UTC()
 
 	return nil

@@ -97,8 +97,12 @@ func validateWorkflowCandidateRef(run workflowInvocationFile) error {
 		return nil
 	}
 
+	if run.Lane != nil && run.Lane.Unit.Kind == "ticket" && validWorkflowTicketCandidateRef(run) {
+		return nil
+	}
+
 	for _, attempt := range run.Attempts {
-		if attempt.Purpose == workflowSliceValidationPurpose && attempt.Outcome == "validated" && attempt.ResultRef == run.CandidateRef && attempt.ResultHash == run.CandidateHash && len(run.CandidateHash) == 64 {
+		if workflowAttemptOwnsCandidate(run, attempt) {
 			return nil
 		}
 	}

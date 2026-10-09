@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-// FinalizeWorkflowSlice journals one verified receipt and all task/set/run images.
+// FinalizeWorkflowSlice journals a verified receipt and task/run images, plus
+// the set descriptor only when the integration unit is a slice.
 // It accepts no worker-supplied receipt and never creates or integrates a PR.
 func (s *WorkflowStore) FinalizeWorkflowSlice(ctx context.Context, id string, provider WorkflowPullRequestProvider, git WorkflowIntegrationGit) (receipt WorkflowRecord, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)

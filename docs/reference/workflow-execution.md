@@ -92,6 +92,43 @@ aggregate and repair attempts consume separate per-anchor budgets under the
 same configured attempt limit and total invocation bound. None resets earlier
 worker attempts.
 
+## Independent ticket candidates
+
+`PrepareWorkflowTicketCandidate` binds one independent ticket's accepted host
+task result to its own integration candidate. The central application service
+exposes the same operation. It requires a validated clean lane and unchanged
+task/input/result images. It executes no additional source gate or worker.
+
+`chr-ticket-candidate/v1` stores a `ticket` input with `unit.kind: ticket`, the
+exact key, execution-contract hash and one task proof. The candidate has no
+`slice` input, set ID, aggregate contract reference or fabricated hierarchy.
+Its immutable path is
+`run/<execution-id>/extension/chr/ticket-candidate/<candidate-id>.json`; the ID
+binds the invocation and accepted evidence hashes. Candidate and invocation
+bindings share one journal. An unchanged retry reuses them without another
+attempt, including after interruption of either replacement.
+
+The existing PR, preparation, review, repair, publication and finalization
+operations accept this actual ticket unit. Their established evidence envelopes
+retain the actual `ticket` unit reference. Combined-result validation runs the
+ticket's frozen validation contract against the method-specific prepared target.
+Human, agentic and trusted policies apply with the same exact candidate/base
+guards, bounded repair budgets, uncertainty handling and canonical observation.
+Repair affects only this ticket and retains its branch and canonical PR.
+
+Source validation and PR creation leave integration pending. Only verified
+canonical method/history proof and journaled receipt finalization move the
+independent task to `done` with phase `integrated`. Finalization writes its task
+and invocation images without a set descriptor. An exact ticket invocation then
+completes with outcome `ticket_integrated`; loose work retains its frontier for
+subsequent queue advancement. Closed/unmerged PRs require explicit reconciliation.
+Grouped exact-ticket requests still finish at task validation and cannot publish
+a partial slice.
+
+`ContinueWorkflow` can execute an exact ticket or prepare an independent ticket
+candidate in separate bounded steps. Its selector, filters, policy and original
+request identity remain frozen. Accepted task results are reused on restart.
+
 ## Canonical slice pull requests
 
 `EnsureWorkflowSlicePullRequest` accepts a retained invocation, target branch

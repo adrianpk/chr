@@ -125,6 +125,10 @@ func (s *WorkflowStore) workflowReviewDomainChanges(run *workflowInvocationFile,
 	}
 
 	set := observation.set
+	if set.Set == nil {
+		return files, nil
+	}
+
 	for i := range set.Set.Slices {
 		if set.Set.Slices[i].ID != run.Lane.Unit.ID || set.Set.Slices[i].Phase == phase {
 			continue

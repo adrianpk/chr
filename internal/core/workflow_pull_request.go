@@ -76,7 +76,7 @@ type WorkflowPullRequestBinding struct {
 	ObservationHash  string                     `json:"observation_hash"`
 }
 
-// EnsureWorkflowSlicePullRequest creates or reuses one slice-owned canonical PR.
+// EnsureWorkflowSlicePullRequest creates or reuses one unit-owned canonical PR.
 // Provider IO is bounded and serialized by the common repository mutation lock;
 // it holds no worker capacity reservation. Uncertain creation never resubmits.
 func (s *WorkflowStore) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, request WorkflowSlicePullRequestRequest, provider WorkflowPullRequestProvider) (result WorkflowPullRequestSnapshot, err error) {

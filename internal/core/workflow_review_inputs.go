@@ -57,7 +57,7 @@ func (s *WorkflowStore) workflowReviewSourceInputs(ctx context.Context, run work
 		return observation, WorkflowReviewInput{}, err
 	}
 
-	input := WorkflowReviewInput{Schema: "chr-workflow-review-input/v1", InvocationID: run.ID, Unit: candidate.Slice.Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, Slice: candidate.Slice, PullRequest: pr, TargetCommit: target, Policy: policy}
+	input := WorkflowReviewInput{Schema: "chr-workflow-review-input/v1", InvocationID: run.ID, Unit: candidate.UnitInput().Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, Slice: candidate.UnitInput(), PullRequest: pr, TargetCommit: target, Policy: policy}
 
 	return observation, input, nil
 }
@@ -169,7 +169,7 @@ func checkWorkflowReviewReady(run workflowInvocationFile, provider WorkflowPullR
 	}
 
 	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" {
-		return fmt.Errorf("review requires a bound canonical slice PR")
+		return fmt.Errorf("review requires a bound canonical integration-unit PR")
 	}
 
 	return nil

@@ -196,7 +196,7 @@ func (s *WorkflowStore) reconcileWorkflowUnmergedSubmission(ctx context.Context,
 
 func (s *WorkflowStore) readWorkflowPublicationCheckpoint(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider) (workflowSubmissionJournal, WorkflowPullRequestSnapshot, error) {
 	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" {
-		return workflowSubmissionJournal{}, WorkflowPullRequestSnapshot{}, fmt.Errorf("publication requires a bound canonical slice PR")
+		return workflowSubmissionJournal{}, WorkflowPullRequestSnapshot{}, fmt.Errorf("publication requires a bound canonical integration-unit PR")
 	}
 
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, run)

@@ -19,21 +19,24 @@ type WorkflowSliceTaskProof struct {
 	InputHash    string `json:"input_hash"`
 }
 
-// WorkflowSliceInput freezes the full aggregate contract and its task proofs.
+// WorkflowSliceInput binds an integration contract and its task proofs.
+// Independent ticket inputs omit set and aggregate-contract references.
 type WorkflowSliceInput struct {
 	Unit         WorkflowRef              `json:"unit"`
-	SetID        string                   `json:"set_id"`
-	ContractRef  string                   `json:"contract_ref"`
+	SetID        string                   `json:"set_id,omitempty"`
+	ContractRef  string                   `json:"contract_ref,omitempty"`
 	ContractHash string                   `json:"contract_hash"`
 	Tasks        []WorkflowSliceTaskProof `json:"tasks"`
 }
 
-// WorkflowSliceCandidate is immutable host evidence, not a delivery receipt.
+// WorkflowSliceCandidate retains immutable host evidence for a slice or an
+// independent ticket; the ticket field preserves its actual integration unit.
 type WorkflowSliceCandidate struct {
 	Schema       string                `json:"schema"`
 	ID           string                `json:"id"`
 	InvocationID string                `json:"invocation_id"`
-	Slice        WorkflowSliceInput    `json:"slice"`
+	Slice        WorkflowSliceInput    `json:"slice,omitzero"`
+	Ticket       *WorkflowSliceInput   `json:"ticket,omitempty"`
 	Target       WorkflowPreviewTarget `json:"target"`
 	Lane         WorkflowLane          `json:"lane"`
 	Result       WorkflowTaskResult    `json:"result"`

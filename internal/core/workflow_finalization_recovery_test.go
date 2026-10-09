@@ -76,7 +76,7 @@ func workflowFinalizationJournal(t *testing.T, store *WorkflowStore) bool {
 		return false
 	}
 
-	return run.Outcome == "slice_integrated" && run.DeliveryRef != ""
+	return (run.Outcome == "slice_integrated" || run.Outcome == "ticket_integrated") && run.DeliveryRef != ""
 }
 
 // TestWorkflowFinalizationCrash proves replay once after real host death at

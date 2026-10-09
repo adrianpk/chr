@@ -6,7 +6,7 @@ import (
 )
 
 func (s *WorkflowStore) commitWorkflowPreparationInput(ctx context.Context, run *workflowInvocationFile, record WorkflowRecord, observation workflowSliceObservation, input WorkflowPreparationInput, lane WorkflowLane) (workflowPreparedTask, error) {
-	run.Attempts[len(run.Attempts)-1].ContractHash = observation.descriptor.ContractHash
+	run.Attempts[len(run.Attempts)-1].ContractHash = workflowUnitContractHash(observation)
 
 	taskInput, err := s.workflowSliceInput(ctx, *run, record, observation)
 	if err != nil {

@@ -14,7 +14,7 @@ func (s *WorkflowStore) prepareWorkflowSliceValidation(ctx context.Context, id s
 			return readErr
 		}
 
-		if !workflowSliceValidationReady(run.WorkflowInvocation) || run.StopIntent != "" {
+		if !workflowSliceValidationReady(run.WorkflowInvocation) || run.StopIntent != "" || run.Lane == nil || run.Lane.Unit.Kind != "slice" {
 			return ErrWorkflowOwned
 		}
 

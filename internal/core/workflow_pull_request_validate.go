@@ -37,7 +37,7 @@ func validWorkflowPullRequestIdentity(run workflowInvocationFile, binding Workfl
 		return false
 	}
 
-	return binding.Schema == "chr-slice-pr/v1" && binding.ID == workflowPullRequestBindingID(run, binding.Request.Repository) && binding.Unit.Kind == "slice" && binding.Unit == run.Lane.Unit && binding.TargetCommit == run.ExecutionSelection().Target.Commit && binding.Request.HeadBranch == strings.TrimPrefix(run.Lane.Branch, "refs/heads/")
+	return binding.Schema == "chr-slice-pr/v1" && binding.ID == workflowPullRequestBindingID(run, binding.Request.Repository) && (binding.Unit.Kind == "slice" || binding.Unit.Kind == "ticket") && binding.Unit == run.Lane.Unit && binding.TargetCommit == run.ExecutionSelection().Target.Commit && binding.Request.HeadBranch == strings.TrimPrefix(run.Lane.Branch, "refs/heads/")
 }
 
 func validateWorkflowPullRequestState(binding WorkflowPullRequestBinding) error {
@@ -66,8 +66,13 @@ func validWorkflowPullRequestCandidate(run workflowInvocationFile, binding Workf
 		return false
 	}
 
+	if binding.Unit.Kind == "ticket" {
+		return validWorkflowTicketPullRequestCandidate(run, binding)
+	}
+
+	run.CandidateRef, run.CandidateHash = binding.CandidateRef, binding.CandidateHash
 	for _, attempt := range run.Attempts {
-		if attempt.Purpose == workflowSliceValidationPurpose && attempt.ID == binding.CandidateID && attempt.Outcome == "validated" && attempt.ResultRef == binding.CandidateRef && attempt.ResultHash == binding.CandidateHash {
+		if attempt.ID == binding.CandidateID && workflowAttemptOwnsCandidate(run, attempt) {
 			return true
 		}
 	}
@@ -88,4 +93,10 @@ func validateWorkflowPullRequestObservationRef(id string, binding WorkflowPullRe
 	}
 
 	return nil
+}
+
+func validWorkflowTicketPullRequestCandidate(run workflowInvocationFile, binding WorkflowPullRequestBinding) bool {
+	run.CandidateRef, run.CandidateHash = binding.CandidateRef, binding.CandidateHash
+
+	return validWorkflowTicketCandidateRef(run) && binding.CandidateRef == workflowTicketCandidatePath(run.ID, binding.CandidateID)
 }

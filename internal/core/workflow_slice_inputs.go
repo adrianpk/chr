@@ -29,7 +29,7 @@ func (s *WorkflowStore) observeWorkflowSlice(ctx context.Context, run workflowIn
 }
 
 func (s *WorkflowStore) readWorkflowSliceMembership(ctx context.Context, run workflowInvocationFile) (workflowSliceObservation, error) {
-	if run.Lane == nil || run.Lane.Unit.Kind != "slice" || run.Selection.Selector.Extent == "ticket" || run.Cursor < 1 {
+	if run.Lane == nil || run.Cursor < 1 {
 		return workflowSliceObservation{}, ErrWorkflowOwned
 	}
 
@@ -37,6 +37,18 @@ func (s *WorkflowStore) readWorkflowSliceMembership(ctx context.Context, run wor
 		return workflowSliceObservation{}, err
 	}
 
+	if run.Lane.Unit.Kind == "ticket" {
+		return s.readWorkflowTicketMembership(run)
+	}
+
+	if run.Lane.Unit.Kind != "slice" || run.Selection.Selector.Extent == "ticket" {
+		return workflowSliceObservation{}, ErrWorkflowOwned
+	}
+
+	return s.readWorkflowAggregateMembership(ctx, run)
+}
+
+func (s *WorkflowStore) readWorkflowAggregateMembership(ctx context.Context, run workflowInvocationFile) (workflowSliceObservation, error) {
 	selection, err := s.readWorkflowSelection(ctx)
 	if err != nil {
 		return workflowSliceObservation{}, err
@@ -80,6 +92,10 @@ func (s *WorkflowStore) workflowSliceInput(ctx context.Context, run workflowInvo
 	input, err := s.workflowTaskInput(ctx, run, record, nil)
 	if err != nil {
 		return input, err
+	}
+
+	if run.Lane.Unit.Kind == "ticket" {
+		return s.workflowTicketValidationInput(ctx, run, observation, input)
 	}
 
 	contract, err := s.readWorkflowSliceContract(observation.descriptor)

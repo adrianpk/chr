@@ -37,7 +37,7 @@ func workflowSliceReceipt(run workflowInvocationFile, proof WorkflowSliceDeliver
 	git := proof.Git
 
 	facts := &WorkflowReceipt{Schema: WorkflowSchema, Unit: proof.Unit, CandidateID: proof.CandidateID, SubmissionID: proof.SubmissionID, Provider: string(reference.Provider), Repository: git.Repository, PullRequest: proof.PullRequest.URL, Method: git.Method, SourceCommit: git.SourceCommit, BaseCommit: git.BaseCommit, PreparedTree: git.PreparedTree, HistoryProof: git.HistoryHash, ResultCommit: git.ResultCommit, VerifiedTree: git.VerifiedTree, ObservedTarget: git.ObservedTarget, VerificationRef: run.DeliveryProofRef, ValidationRefs: []string{proof.CandidateRef}, ConfirmedAt: proof.ConfirmedAt}
-	for _, task := range candidate.Slice.Tasks {
+	for _, task := range candidate.UnitInput().Tasks {
 		facts.ValidationRefs = append(facts.ValidationRefs, task.EvidenceRef)
 	}
 

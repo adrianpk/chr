@@ -39,7 +39,13 @@ func (s *WorkflowStore) commitWorkflowSliceFinalization(ctx context.Context, run
 	}
 
 	run.ConfirmedCursor = run.Cursor
-	workflowRetainDeliveryStatus(run, "slice_integrated", run.Cursor == len(run.Members) && run.Selection.Selector.Extent == "slice")
+
+	outcome := "slice_integrated"
+	if run.Lane.Unit.Kind == "ticket" {
+		outcome = "ticket_integrated"
+	}
+
+	workflowRetainDeliveryStatus(run, outcome, run.Cursor == len(run.Members) && (run.Selection.Selector.Extent == "slice" || run.Selection.Selector.Extent == "ticket"))
 
 	return s.commitWorkflowPullRequestFiles(run, append(files, changes...), workflowFileChange{})
 }
@@ -69,6 +75,10 @@ func workflowTaskDelivery(branch string, receipt WorkflowReceipt) *WorkflowTaskD
 }
 
 func (s *WorkflowStore) workflowFinalizationSetImages(run *workflowInvocationFile, snapshot *WorkflowSnapshot, set WorkflowRecord) ([]workflowFileChange, error) {
+	if set.Set == nil {
+		return nil, nil
+	}
+
 	for i := range set.Set.Slices {
 		descriptor := &set.Set.Slices[i]
 		if descriptor.ID == run.Lane.Unit.ID {
@@ -98,7 +108,7 @@ func replaceWorkflowFinalizationRecord(snapshot *WorkflowSnapshot, record Workfl
 
 func (s *WorkflowStore) checkWorkflowFinalizationImages(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord) error {
 	for _, member := range run.Members {
-		if member.Admission.SliceID != receipt.Receipt.Unit.ID {
+		if !workflowMemberOwnsUnit(member, receipt.Receipt.Unit) {
 			continue
 		}
 
@@ -106,6 +116,10 @@ func (s *WorkflowStore) checkWorkflowFinalizationImages(ctx context.Context, run
 		if err != nil || !workflowFinalizedTaskMatches(record, run.Lane.Branch, receipt) {
 			return ErrWorkflowConflict
 		}
+	}
+
+	if receipt.Receipt.Unit.Kind == "ticket" {
+		return nil
 	}
 
 	selection, err := s.readWorkflowSelection(ctx)

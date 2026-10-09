@@ -122,7 +122,7 @@ func (s *WorkflowStore) verifyWorkflowSliceIntegration(ctx context.Context, run 
 		return WorkflowSliceDeliveryProof{}, err
 	}
 
-	proof := WorkflowSliceDeliveryProof{Schema: "chr-slice-delivery-proof/v1", InvocationID: run.ID, Unit: candidate.Slice.Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, SubmissionID: workflowDeliverySubmissionID(run), PullRequest: pr, Git: gitProof, ConfirmedAt: time.Now().UTC()}
+	proof := WorkflowSliceDeliveryProof{Schema: "chr-slice-delivery-proof/v1", InvocationID: run.ID, Unit: candidate.UnitInput().Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, SubmissionID: workflowDeliverySubmissionID(run), PullRequest: pr, Git: gitProof, ConfirmedAt: time.Now().UTC()}
 
 	return s.persistWorkflowDeliveryProof(&run, proof)
 }
