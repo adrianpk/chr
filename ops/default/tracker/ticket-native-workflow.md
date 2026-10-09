@@ -39,7 +39,7 @@ Slice 9 merged head `fe2e8dc5ac91c8d54ff865fa2c1b7f965116ab7c` passed the contro
 with Go 1.27.1, the retained CLI curation fixture and scoped uncached 30-minute
 test timeout. Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4GG393N2TJ9FCXZVHBFG0GY`.
-Slice 10 is active; T10.1 is active for CLI controls over the shared service.
+Slice 10 is active; T10.1 is validated and T10.2 is active for TUI controls.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -654,14 +654,14 @@ Plan contract: [Slice 10](../plan/ticket-native-workflow.md#slice-10-shared-oper
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T10.1 | [TKT-20261008141421](../ticket/in_progress/20261008141421-ticket-native-t10-1.md) | in_progress | pending | Expose proposed CLI extents, preview/status/continue and exact-bound approval/reconciliation controls. |
-| T10.2 | [TKT-20261008141422](../ticket/ready/20261008141422-ticket-native-t10-2.md) | ready | pending | Add TUI controls and progress/wait/blocker rendering over shared operations. |
+| T10.1 | [TKT-20261008141421](../ticket/reviewing/20261008141421-ticket-native-t10-1.md) | reviewing | `872fba664db5f8a2cde99a4135264631a482062b` | Expose proposed CLI extents, preview/status/continue and exact-bound approval/reconciliation controls. |
+| T10.2 | [TKT-20261008141422](../ticket/in_progress/20261008141422-ticket-native-t10-2.md) | in_progress | pending | Add TUI controls and progress/wait/blocker rendering over shared operations. |
 | T10.3 | [TKT-20261008141423](../ticket/ready/20261008141423-ticket-native-t10-3.md) | ready | pending | Add Web operation controls, guarded writes and resumable progress with visible failure envelopes. |
 | T10.4 | [TKT-20261008141424](../ticket/ready/20261008141424-ticket-native-t10-4.md) | ready | pending | Wire daemon resume, pause/cancel and manual status parity; document Telegram's notification-only boundary. |
 
 ### Validation
 
-Status: T10.1 active; checks pending.
+Status: T10.1 task checks passed; T10.2 active. Final candidate checks pending.
 
 Expected focused checks: `go test ./internal/app ./internal/tui ./internal/webui -count=1`
 and `go test -race ./internal/app ./internal/tui ./internal/webui -count=1`;
@@ -675,10 +675,10 @@ Acceptance: A09, A17, A21, A23.
 
 - PR: pending.
 - Merge commit: pending.
-- Report status: not created.
-- Task commits and ticket lifecycle evidence: pending.
-- Validation evidence: pending.
-- Blockers: none observed; T10.1 is active.
+- Report status: drafting; CLI behavior and task evidence recorded.
+- Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket reviewing. T10.2 active.
+- T10.1: `make verify`, focused CLI admission checks, focused CLI/core race checks and `git diff --check` passed. The final ordered controller checks remain pending.
+- Blockers: none observed; T10.2 is active.
 
 ## Slice 11: Defaults and authority transition
 
