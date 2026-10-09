@@ -73,7 +73,7 @@ func workflowMemberImageMatches(record WorkflowRecord, input WorkflowMember, ide
 		return false
 	}
 
-	return record.Task.Key == input.Admission.Key && record.Task.ContractHash == input.Admission.ContractHash && record.Revision == input.ExpectedRevision && record.SourceHash == input.ExpectedSourceHash
+	return record.Task.Key == input.Admission.Key && record.Task.ContractHash == input.Admission.ContractHash && record.Task.SetID == input.Admission.SetID && record.Task.SliceID == input.Admission.SliceID && record.Task.Order == input.Admission.TaskOrder && record.Revision == input.ExpectedRevision && record.SourceHash == input.ExpectedSourceHash
 }
 
 func (s *WorkflowStore) checkWorkflowSetImages(run workflowInvocationFile) error {
@@ -85,6 +85,10 @@ func (s *WorkflowStore) checkWorkflowSetImages(run workflowInvocationFile) error
 
 		if record.Set == nil || record.Revision != image.Revision || record.SourceHash != image.SourceHash || record.ProjectID != run.ProjectID || record.Namespace != run.Namespace {
 			return fmt.Errorf("%w: frozen set image changed", ErrWorkflowConflict)
+		}
+
+		if err := s.checkWorkflowSetAmendmentEvidence(record); err != nil {
+			return err
 		}
 	}
 

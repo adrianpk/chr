@@ -86,16 +86,17 @@ type WorkflowSlice struct {
 
 // WorkflowSet owns ordered slices and its closing contract.
 type WorkflowSet struct {
-	Schema            string             `json:"workflow_schema"`
-	UseCase           string             `json:"use_case,omitempty"`
-	UseCaseOrder      int                `json:"use_case_order,omitempty"`
-	Status            string             `json:"status"`
-	PlanRef           string             `json:"plan_ref"`
-	PlanHash          string             `json:"plan_hash"`
-	Slices            []WorkflowSlice    `json:"slices"`
-	ClosingValidation WorkflowValidation `json:"closing_validation"`
-	ClosureRef        string             `json:"closure_ref,omitempty"`
-	ClosureHistory    []string           `json:"closure_history,omitempty"`
+	Amendments        []WorkflowAmendmentRef `json:"amendments,omitempty"`
+	Schema            string                 `json:"workflow_schema"`
+	UseCase           string                 `json:"use_case,omitempty"`
+	UseCaseOrder      int                    `json:"use_case_order,omitempty"`
+	Status            string                 `json:"status"`
+	PlanRef           string                 `json:"plan_ref"`
+	PlanHash          string                 `json:"plan_hash"`
+	Slices            []WorkflowSlice        `json:"slices"`
+	ClosingValidation WorkflowValidation     `json:"closing_validation"`
+	ClosureRef        string                 `json:"closure_ref,omitempty"`
+	ClosureHistory    []string               `json:"closure_history,omitempty"`
 }
 
 // WorkflowReceipt retains immutable integration facts, separate from projections.

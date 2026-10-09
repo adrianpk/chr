@@ -13,10 +13,11 @@ import (
 
 // WorkflowExecutionPolicy freezes finite execution limits at admission.
 type WorkflowExecutionPolicy struct {
-	WorkerTimeoutSeconds   int `json:"worker_timeout_seconds"`
-	MaxWorkerAttempts      int `json:"max_worker_attempts"`
-	MaxIntegrationAttempts int `json:"max_integration_attempts,omitempty"`
-	CheckpointStepLimit    int `json:"checkpoint_step_limit,omitempty"`
+	IncludeLaterTickets    bool `json:"include_later_tickets,omitempty"`
+	WorkerTimeoutSeconds   int  `json:"worker_timeout_seconds"`
+	MaxWorkerAttempts      int  `json:"max_worker_attempts"`
+	MaxIntegrationAttempts int  `json:"max_integration_attempts,omitempty"`
+	CheckpointStepLimit    int  `json:"checkpoint_step_limit,omitempty"`
 }
 
 // WorkflowStartRequest admits an explicit finite selection with a retry key.

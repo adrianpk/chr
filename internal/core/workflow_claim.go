@@ -39,6 +39,11 @@ func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *Wo
 			return readErr
 		}
 
+		run, readErr = owner.reconcileWorkflowMembership(ctx, run)
+		if readErr != nil {
+			return readErr
+		}
+
 		claim, readErr = owner.claimWorkflow(ctx, run)
 
 		return readErr

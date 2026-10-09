@@ -470,6 +470,45 @@ event. Checkpoint corruption blocks further claims. Checkpoint history is
 bounded to 4096 images per invocation and rejects exhaustion before another
 transition; every image retains the 1 MiB file bound.
 
+## Membership and approved amendments
+
+`WorkflowExecutionPolicy.IncludeLaterTickets` is false unless explicitly accepted
+at admission. `ReconcileWorkflowMembership` reports matching later ready tasks in
+`Excluded["later"]` under the default policy. With the accepted policy enabled,
+it admits matching ready tasks within the original selector, retaining every
+initial member image, request hash, budget and ordering rule. New work cannot
+precede validated or receipt-confirmed progress. Loose filters belong to the
+loose extent; ordered selectors retain their exact ticket, slice, set or use-case
+identity. Completed sets and terminal invocations never reopen through admission.
+
+Membership changes wait for the current unit's lane to clear. Continuation checks
+membership at these quiescent boundaries, and each accepted membership change
+consumes one bounded step. Direct task claims use the same reconciliation. A
+changed ordering rule, external task reassociation or incompatible source image
+blocks reconciliation. An unchanged discovery result does not write another
+checkpoint. Appending a slice to the current set releases its closure barrier;
+adding another use-case set keeps the current set's closure barrier intact.
+
+`AmendWorkflowSet` requires the observed set revision and source hash, a changed
+approved plan, and the native ticket-key allocator. It preserves existing task
+identities, order and execution contracts, existing slice order and contracts,
+and all delivered projections. It can append tasks to an unstarted slice or add
+future slices. Live reservations, unresolved claims, retained active lanes and
+publication bindings block amendment. An unfinished owner must use its owning
+checkout. Set association and use-case order cannot change.
+
+The changed plan and `chr-set-amendment/v1` receipt are immutable files. The
+current set's `plan_ref` points to the new approved plan; the original plan
+artifact keeps its bytes for prior task and closure references. New
+tickets, descriptors, set revision and unfinished owner images share one
+replayable journal. The set retains revision/reference/hash amendment bindings;
+approval or copied-plan corruption blocks further work. Explicit `Reopen` is
+required for a completed set and requires a changed plan. Reopening moves the
+current closure reference to `closure_history`, preserving its hashed bytes,
+prior task/slice receipts and terminal invocation files. Ordinary record writes
+cannot change a completed set. Amendment and closure histories retain the
+4096-entry and 1 MiB record bounds.
+
 ## Manual protocol
 
 | Operation | Contract |

@@ -4,9 +4,13 @@ import "context"
 
 func (s *WorkflowStore) continueWorkflowSteps(ctx context.Context, id string, request WorkflowContinuationRequest, ports WorkflowContinuationPorts, limit int) (int, string, error) {
 	for steps := 0; steps < limit; steps++ {
-		run, err := s.ReadWorkflow(ctx, id)
+		run, membershipChanged, err := s.readWorkflowContinuation(ctx, id)
 		if err != nil {
 			return steps, "blocked", err
+		}
+
+		if membershipChanged {
+			continue
 		}
 
 		if reason := workflowContinuationBarrier(run); reason != "" {
@@ -22,16 +26,32 @@ func (s *WorkflowStore) continueWorkflowSteps(ctx context.Context, id string, re
 			return steps, "blocked", err
 		}
 
-		if after.Revision == run.Revision {
-			return steps, "awaiting_authority", nil
-		}
-
-		if reason := workflowContinuationBarrier(after); reason != "" {
-			return steps + 1, reason, nil
+		accepted, reason := workflowContinuationAfter(run, after)
+		if reason != "" {
+			return steps + accepted, reason, nil
 		}
 	}
 
 	return limit, "step_limit", nil
+}
+
+func (s *WorkflowStore) readWorkflowContinuation(ctx context.Context, id string) (WorkflowInvocation, bool, error) {
+	run, err := s.ReadWorkflow(ctx, id)
+	if err != nil {
+		return run, false, err
+	}
+
+	refreshed, err := s.ReconcileWorkflowMembership(ctx, id)
+
+	return run, refreshed.Revision != run.Revision, err
+}
+
+func workflowContinuationAfter(before, after WorkflowInvocation) (int, string) {
+	if after.Revision == before.Revision {
+		return 0, "awaiting_authority"
+	}
+
+	return 1, workflowContinuationBarrier(after)
 }
 
 func workflowContinuationBarrier(run WorkflowInvocation) string {

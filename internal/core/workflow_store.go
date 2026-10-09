@@ -201,6 +201,10 @@ func guardWorkflowDomain(old, next WorkflowRecord) error {
 		return fmt.Errorf("workflow domain kind and receipts are immutable")
 	}
 
+	if old.Set != nil && next.Set != nil {
+		return guardWorkflowSetChange(*old.Set, *next.Set)
+	}
+
 	if old.Task != nil && next.Task != nil {
 		if old.Task.AttemptID != "" {
 			return fmt.Errorf("%w: owned task requires a fenced operation", ErrWorkflowOwned)
