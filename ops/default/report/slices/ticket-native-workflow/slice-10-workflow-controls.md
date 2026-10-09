@@ -1,6 +1,6 @@
 # Slice 10: Shared operation controls
 
-Status: drafting
+Status: reviewing
 
 Delivery set: ticket-native-workflow
 
@@ -47,6 +47,14 @@ progress, ordered members, policy, waits, evidence and approval bindings. Failed
 writes render current status with a visible failure. Actual browser forms execute
 a task checkpoint, continue its candidate and enforce ownership and review waits.
 
+T10.4 continues retained daemon invocations through shared guarded operations,
+with one checkpoint per invocation and at most 16 activations per project
+iteration. Startup never authorizes a new backlog extent. Live owners remain
+exclusive; dead-owner recovery retains attempts and operator stops. Native
+projects do not depend on legacy ticket directories. Daemon workflow commands
+reuse the CLI lifecycle controls; actual manual results appear in all status
+adapters with validation and integration counts kept separate.
+
 ## Implementation Notes
 
 The application service owns explicit extent admission, status projection and
@@ -67,6 +75,13 @@ service. Read-only previews retain their confirmation inputs; revision-guarded
 member pages reject stale reads. The smoke script uses an owned executable/server
 PID and real browser actions; screenshots supplement those actions. Temporary
 HTTP, Git, worker and browser fixtures are cleaned after their checks.
+
+The daemon maps stable retained pages into the adapter-neutral service. It
+reconciles a running owner before continuation and resumes a recovery pause only
+when no operator stop exists. Coordinator stop yields between checkpoints;
+invocation pause/cancel uses the common owned-process watcher. Continuous daemon
+heartbeats end before the state repository closes. Existing compatibility
+projects retain ticket-index refresh behavior.
 
 ## Contracts Added or Changed
 
@@ -96,6 +111,14 @@ HTTP, Git, worker and browser fixtures are cleaned after their checks.
   admission requires tickets authority. Current views use 16 invocation choices,
   eight members/evidence rows and at most one shared checkpoint per activation.
 
+- `daemon workflow` exposes retained status, continuation, stop, resume, approval
+  and reconciliation using the shared arguments, bounds and guards.
+- Daemon startup uses stable retained pages, at most 16 runnable activations per
+  project iteration and one checkpoint per activation. It preserves frozen
+  membership policy, target and consumed budgets.
+- Telegram notifications and intake handoffs remain informational; they do not
+  execute native controls or grant workflow approval.
+
 ## Files of Interest
 
 - `internal/app/service_workflow_controls.go`, `service_workflow_status.go` and
@@ -118,6 +141,12 @@ HTTP, Git, worker and browser fixtures are cleaned after their checks.
 - `scripts/qa/web-ui-smoke.sh`: actual activation/conflict/review/continuation
   browser assertions alongside existing page, fragment and screenshot checks.
 
+- `internal/app/daemon_workflow.go`, `service_workflow_retained.go` and the daemon
+  execution tests: bounded retained orchestration, guarded recovery, owned worker
+  lifecycle and shared manual status evidence.
+- `docs/reference/daemon-coordination.md`: current foreground commands, retained
+  authorization, heartbeat/coordinator stop and invocation lifecycle.
+
 ## Validation
 
 T10.1 passed:
@@ -133,7 +162,7 @@ all packages passed; core tests took 781.229 seconds and app tests 68.590 second
 Focused race checks passed in 24.465 seconds for app and 1.393 seconds for core.
 Real root parsing and byte snapshots prove nonmutating previews; moved targets
 and PR heads reject stale bindings; actual manual harnesses require host proof.
-The final ordered controller checks for the canonical PR head remain pending.
+Canonical PR-head validation uses the controller's ordered evidence ledger.
 
 T10.2 passed:
 
@@ -150,7 +179,7 @@ focused domain race checks passed in 1.882 seconds. The 37 gate input files stay
 unchanged. Real adapter/model checks preserve selected bindings, show stale
 failures, execute one actual task/continuation checkpoint, reject a moved PR head,
 and keep readonly previews/journals byte-identical. Local documentation links and
-whitespace passed. Final PR-head controller evidence remains pending.
+whitespace passed. Canonical PR-head validation uses the controller's ordered evidence ledger.
 
 T10.3 passed:
 
@@ -169,10 +198,27 @@ activation, stale ownership/revisions, review wait, moved-head rejection, exact
 approval and continuation. Handler checks also cover pause/resume/cancel, input
 bounds, native ticket/case controls, byte-identical previews and retained status
 under compatibility mode. Owned browser/server fixtures finished and stopped.
-Documentation links and whitespace passed. Final PR-head controller evidence
-remains pending.
+Documentation links and whitespace passed. Canonical PR-head validation uses the controller's ordered evidence ledger.
+
+T10.4 passed:
+
+- `make verify`
+- `go test -race ./internal/app -run '^(TestDaemonWorkflow.*|TestWorkflowManualSurfaces)$' -count=1`
+- `git diff --check`
+
+Go 1.27.1, the retained curation fixture and scoped uncached 30-minute timeout
+were used. Strict lint reported zero issues; all packages passed. App tests took
+81.477 seconds, core tests 780.943 seconds and focused race checks 32.916 seconds.
+All nine gate inputs stayed unchanged during the check. A later wording
+clarification about retained membership policy changed documentation only;
+all Go inputs matched the passing gate and 26 documentation targets passed.
+Real foreground startup executes only retained authorization; actual owner crash
+and live descriptor checks prove recovery/exclusion. Pause/cancel preserves owned
+worker checkpoints, heartbeat/coordinator stop preserves accepted progress, and
+manual CLI/daemon/TUI/Web reads share exact evidence without mutation. Owned
+fixtures finished and stopped. Canonical PR-head checks use the ordered controller
+ledger, including the extended real browser smoke.
 
 ## Risks and Follow-ups
 
-T10.4 remains pending: daemon lifecycle, manual status parity and the notification
-boundary must be delivered before this slice is ready for its canonical PR.
+None recorded.

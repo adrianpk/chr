@@ -39,8 +39,9 @@ Slice 9 merged head `fe2e8dc5ac91c8d54ff865fa2c1b7f965116ab7c` passed the contro
 with Go 1.27.1, the retained CLI curation fixture and scoped uncached 30-minute
 test timeout. Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4GG393N2TJ9FCXZVHBFG0GY`.
-Slice 10 is active; T10.1, T10.2 and T10.3 are validated and reviewing. T10.4
-is active for daemon lifecycle and manual status parity.
+Slice 10 implementation is validated; T10.1–T10.4 are reviewing. The report is
+reviewing, with canonical PR preparation in progress. PR-head validation uses
+the controller's ordered evidence ledger.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
 Fast-forward into `dev`.
@@ -75,7 +76,7 @@ Fast-forward into `dev`.
 | Slice 7 | Ordered set and use-case continuation | `feat/slice-7-workflow-continuation` | `feat(slice-7): continue ordered sets and use cases` | `ops/default/report/slices/ticket-native-workflow/slice-7-workflow-continuation.md` | integrated | 4/4 | [#370](https://forge.adrianpk.com/adrianpk/chr/pulls/370) |
 | Slice 8 | Loose-ticket integration loop | `feat/slice-8-workflow-loose-tickets` | `feat(slice-8): integrate filtered loose tickets` | `ops/default/report/slices/ticket-native-workflow/slice-8-workflow-loose-tickets.md` | integrated | 4/4 | [#371](https://forge.adrianpk.com/adrianpk/chr/pulls/371) |
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | integrated | 4/4 | [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) |
-| Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | active | 0/4 | pending |
+| Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | reviewing | 0/4 | pending |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | not_started | 0/4 | pending |
 | Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | not_started | 0/4 | pending |
 
@@ -641,7 +642,7 @@ Acceptance: A09, A10, A11, A12; capacity/admission bounds in A24.
 
 ## Slice 10: Shared operation controls
 
-Status: active
+Status: reviewing
 
 Prerequisite: satisfied by verified PR #372 integration into dev.
 
@@ -658,11 +659,11 @@ Plan contract: [Slice 10](../plan/ticket-native-workflow.md#slice-10-shared-oper
 | T10.1 | [TKT-20261008141421](../ticket/reviewing/20261008141421-ticket-native-t10-1.md) | reviewing | `872fba664db5f8a2cde99a4135264631a482062b` | Expose proposed CLI extents, preview/status/continue and exact-bound approval/reconciliation controls. |
 | T10.2 | [TKT-20261008141422](../ticket/reviewing/20261008141422-ticket-native-t10-2.md) | reviewing | `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` | Add TUI controls and progress/wait/blocker rendering over shared operations. |
 | T10.3 | [TKT-20261008141423](../ticket/reviewing/20261008141423-ticket-native-t10-3.md) | reviewing | `d378057aac57e206982d86710d1f03d982dae81c` | Add Web operation controls, guarded writes and resumable progress with visible failure envelopes. |
-| T10.4 | [TKT-20261008141424](../ticket/in_progress/20261008141424-ticket-native-t10-4.md) | in_progress | pending | Wire daemon resume, pause/cancel and manual status parity; document Telegram's notification-only boundary. |
+| T10.4 | [TKT-20261008141424](../ticket/reviewing/20261008141424-ticket-native-t10-4.md) | reviewing | `cd76e965c5ab6ddffe0c95ed4c3b4b0753ec742e` | Wire daemon resume, pause/cancel and manual status parity; document Telegram's notification-only boundary. |
 
 ### Validation
 
-Status: T10.1–T10.3 task checks passed; T10.4 active. Final candidate checks pending.
+Status: all four task checks passed. Canonical PR-head validation uses the ordered controller ledger.
 
 Expected focused checks: `go test ./internal/app ./internal/tui ./internal/webui -count=1`
 and `go test -race ./internal/app ./internal/tui ./internal/webui -count=1`;
@@ -676,12 +677,13 @@ Acceptance: A09, A17, A21, A23.
 
 - PR: pending.
 - Merge commit: pending.
-- Report status: drafting; CLI/TUI/Web behavior and task evidence recorded.
-- Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket reviewing. T10.2 `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` is reviewing; T10.3 `d378057aac57e206982d86710d1f03d982dae81c` is reviewing; T10.4 active.
+- Report status: reviewing; CLI/TUI/Web/daemon behavior and all four task checks recorded.
+- Task commit: T10.1 `872fba664db5f8a2cde99a4135264631a482062b`; ticket reviewing. T10.2 `6cd2c81bde627775f0fe22dc8e1a6e6b447d1a38` is reviewing; T10.3 `d378057aac57e206982d86710d1f03d982dae81c` is reviewing; T10.4 `cd76e965c5ab6ddffe0c95ed4c3b4b0753ec742e` is reviewing.
 - T10.1: `make verify`, focused CLI admission checks, focused CLI/core race checks and `git diff --check` passed. The final ordered controller checks remain pending.
 - T10.2: `make verify`, adapter race checks, focused domain control/inspection race checks and `git diff --check` passed. Domain and real adapter/model checks cover preserved identities, stale conflicts, actual checkpoints, exact approval and nonmutating linked-worktree inspection. Acta commit event: `01M4GPNPTK1PE002KAMC8HQY0H`.
 - T10.3: `make verify`, focused Web workflow/race checks, `scripts/qa/web-ui-smoke.sh` and `git diff --check` passed. Real handler/browser checks cover native selection, worker/continuation checkpoints, ownership and revision failures, human review and exact approval. All 18 gate input files stayed unchanged. Acta commit event: `01M4GSPSDZY5M3DZ0WN7J5Y4QA`.
-- Blockers: none observed; T10.4 is active.
+- T10.4: `make verify`, `go test -race ./internal/app -run '^(TestDaemonWorkflow.*|TestWorkflowManualSurfaces)$' -count=1`, documentation links and `git diff --check` passed. Real daemon startup, owner exclusion/recovery, worker stops, heartbeat/coordinator stop and manual adapter status checks preserve authorization and evidence. Acta commit event: `01M4GVVH5AWFTCX1Q25THNS2JF`.
+- Blockers: none observed. Canonical PR preparation is in progress.
 
 ## Slice 11: Defaults and authority transition
 
