@@ -13,21 +13,29 @@ import (
 // WorkflowGitPublication supplies immutable object identities and full refs to
 // the trusted transport. It does not confer forge or receipt authority.
 type WorkflowGitPublication struct {
-	Repository string
-	Directory  string
-	SourceRef  string
-	TargetRef  string
-	Git        WorkflowIntegrationProof
+	Repository              string
+	SourceRepository        string
+	Directory               string
+	SourceRef               string
+	TargetRef               string
+	SourceRewriteAuthorized bool
+	OwnershipRevision       string
+	CandidateRevision       string
+	Git                     WorkflowIntegrationProof
 }
 
 // WorkflowGitPublicationResult distinguishes transport application from delivery.
 // Unknown means commands may have reached the server and must not be retried.
 type WorkflowGitPublicationResult struct {
-	State        string `json:"state"`
-	CommandsSent bool   `json:"commands_sent"`
-	SourceCommit string `json:"source_commit"`
-	TargetCommit string `json:"target_commit"`
-	ResultCommit string `json:"result_commit"`
+	Schema                 string `json:"schema"`
+	State                  string `json:"state"`
+	CommandsSent           bool   `json:"commands_sent"`
+	OriginalSourceCommit   string `json:"original_source_commit"`
+	AdvertisedSourceCommit string `json:"advertised_source_commit"`
+	AdvertisedTargetCommit string `json:"advertised_target_commit"`
+	PublishedSourceCommit  string `json:"published_source_commit,omitempty"`
+	ResultCommit           string `json:"result_commit"`
+	CandidateRevision      string `json:"candidate_revision"`
 }
 
 // WorkflowGitPublisher owns the advertisement and atomic two-ref exchange.
@@ -74,7 +82,7 @@ type workflowReceivePack interface {
 // PublishWorkflowGit sends both old/new commands only after checking the actual
 // receive-pack advertisement. No CLI push or non-atomic fallback is used.
 func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, request WorkflowGitPublication) (result WorkflowGitPublicationResult, err error) {
-	result = WorkflowGitPublicationResult{State: "not_sent", ResultCommit: request.Git.ResultCommit}
+	result = WorkflowGitPublicationResult{Schema: "chr-git-publication-result/v1", State: "not_sent", OriginalSourceCommit: request.Git.SourceCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
@@ -99,7 +107,7 @@ func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, reques
 		return result, err
 	}
 
-	result.SourceCommit, result.TargetCommit = advertisement.refs[request.SourceRef], advertisement.refs[request.TargetRef]
+	result.AdvertisedSourceCommit, result.AdvertisedTargetCommit = advertisement.refs[request.SourceRef], advertisement.refs[request.TargetRef]
 	if err := advertisement.check(request); err != nil {
 		return result, err
 	}
@@ -122,7 +130,7 @@ func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, reque
 		return fmt.Errorf("%w: prepared target is not fast-forward", ErrWorkflowConflict)
 	}
 
-	return nil
+	return git.validatePublicationProof(ctx, request)
 }
 
 func validateWorkflowPublicationRefs(request WorkflowGitPublication) error {
@@ -169,6 +177,8 @@ func exchangeWorkflowPublication(session workflowReceivePack, request WorkflowGi
 	if state == "rejected" {
 		return result, ErrWorkflowConflict
 	}
+
+	result.PublishedSourceCommit = request.Git.ResultCommit
 
 	return result, nil
 }

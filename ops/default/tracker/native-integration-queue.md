@@ -76,8 +76,8 @@ Prerequisite: committed approved bootstrap on canonical `dev`.
 | --- | --- | --- | --- | --- |
 | T1.1 | [TKT-20261011133051](../ticket/reviewing/20261011133051-native-integration-t1-1.md) | validated | `3f61d28d74337f7efa25d77917e435f723a68430` | Execute an explicit atomic receive-pack transaction |
 | T1.2 | [TKT-20261011133052](../ticket/reviewing/20261011133052-native-integration-t1-2.md) | validated | `6df8a1f73dbc0f54d80ee15c7697ecd61068ced2` | Support host-authenticated SSH publication |
-| T1.3 | [TKT-20261011133053](../ticket/reviewing/20261011133053-native-integration-t1-3.md) | validated | pending | Support host-authenticated HTTPS publication |
-| T1.4 | [TKT-20261011133054](../ticket/ready/20261011133054-native-integration-t1-4.md) | ready | pending | Seal exact source/base/result publication proof |
+| T1.3 | [TKT-20261011133053](../ticket/reviewing/20261011133053-native-integration-t1-3.md) | validated | `d24aa00a42e5bb7ffb45315a2cbab6886f2aa9c8` | Support host-authenticated HTTPS publication |
+| T1.4 | [TKT-20261011133054](../ticket/reviewing/20261011133054-native-integration-t1-4.md) | validated | pending | Seal exact source/base/result publication proof |
 | T1.5 | [TKT-20261011133055](../ticket/ready/20261011133055-native-integration-t1-5.md) | ready | pending | Verify protocol races and review the transport boundary |
 
 Required checks:

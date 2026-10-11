@@ -48,9 +48,21 @@ func newWorkflowGitFixture(t *testing.T, method string) workflowGitFixture {
 		t.Fatal(err)
 	}
 
-	request := WorkflowGitPublication{Repository: query.Repository, Directory: actor, SourceRef: "refs/heads/chr/workflow/fixture", TargetRef: "refs/heads/dev", Git: proof}
+	request := WorkflowGitPublication{Repository: query.Repository, SourceRepository: query.Repository, Directory: actor, SourceRef: "refs/heads/chr/workflow/fixture", TargetRef: "refs/heads/dev", SourceRewriteAuthorized: true, OwnershipRevision: "fixture-ownership/v1", Git: proof}
+	sealWorkflowGitFixture(t, &request)
 
 	return workflowGitFixture{request: request, remote: remote}
+}
+
+func sealWorkflowGitFixture(t *testing.T, request *WorkflowGitPublication) {
+	t.Helper()
+
+	var err error
+
+	request.CandidateRevision, err = WorkflowGitPublicationRevision(*request)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func checkWorkflowGitRefs(t *testing.T, fixture workflowGitFixture, source, target string) {

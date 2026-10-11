@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133054
 title: "T1.4: Seal exact source/base/result publication proof"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-1
 source: chat
 reported_at: 2026-10-11T13:30:54Z
 ready_at: 2026-10-11T13:31:37Z
+reviewed_at: 2026-10-11T14:02:50Z
+started_at: 2026-10-11T14:00:01Z
+branch: feat/slice-1-native-git-transport
 commits: []
 ---
 
@@ -58,4 +61,6 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+feat(workflow): bind publication to exact ownership and history proof
+Focused check passed: `go test ./internal/core -run 'TestWorkflowGit(Atomic|Candidate|AlreadyPrepared|FastForward)$' -count=1`.
+The package linter passed with zero issues. PR and integration remain pending.

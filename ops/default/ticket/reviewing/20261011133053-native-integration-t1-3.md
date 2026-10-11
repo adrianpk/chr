@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T13:58:41Z
 started_at: 2026-10-11T13:54:15Z
 branch: feat/slice-1-native-git-transport
-commits: []
+commits: [d24aa00a42e5bb7ffb45315a2cbab6886f2aa9c8]
 ---
 
 # T1.3: Support host-authenticated HTTPS publication
