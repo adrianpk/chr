@@ -206,12 +206,30 @@ func workflowPublicationRefStatuses(reader *bytes.Reader, request WorkflowGitPub
 		}
 	}
 
-	flush, err := readWorkflowPublicationPacket(reader)
-	if err != nil || flush != nil || reader.Len() != 0 {
-		return statuses, fmt.Errorf("incomplete or trailing ref status")
+	if err := workflowPublicationReportEnd(reader); err != nil {
+		return statuses, err
 	}
 
 	return statuses, nil
+}
+
+func workflowPublicationReportEnd(reader *bytes.Reader) error {
+	flush, err := readWorkflowPublicationPacket(reader)
+	if err != nil || flush != nil {
+		return fmt.Errorf("incomplete or trailing ref status")
+	}
+
+	// GitHub's receive-pack appends one empty transport flush to the report
+	// flush. Both refs still require exactly one explicit status; no payload,
+	// partial packet or further terminator is accepted after those statuses.
+	if reader.Len() != 0 {
+		flush, err = readWorkflowPublicationPacket(reader)
+		if err != nil || flush != nil || reader.Len() != 0 {
+			return fmt.Errorf("trailing publication report data")
+		}
+	}
+
+	return nil
 }
 
 func workflowPublicationRefStatus(packet string, refs []string, statuses *[2]string) error {

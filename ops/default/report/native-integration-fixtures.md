@@ -1,6 +1,6 @@
 # Native Integration Certification Fixtures
 
-Status: designated; access verified; publisher certification pending
+Status: designated; default rebase certified in Slice 2 worktree; final exact-HEAD checks pending
 
 Date: 2026-10-11
 
@@ -61,8 +61,19 @@ fixture descriptor, not a product configuration schema.
   authenticated HTTPS and SSH ref reads return the initial target above.
 
 This satisfies the Slice 2 repository designation and setup-access prerequisite.
-It does not certify guarded atomic publication or canonical PR merged-state
-observation. Slice 2 must prove default rebase behavior on each forge, and Slice
-12 must produce the complete method and denial matrix. Recheck current roles,
+The live Slice 2 default rebase evidence below proves guarded atomic publication and same-original-PR merged-state observation in the evolving slice worktree. Slice 12 must produce the complete method and denial matrix. Recheck current roles,
 refs and policy before each live case. Stop on access drift or unsupported
 behavior rather than substituting mocks or weakening the accepted specification.
+
+## Slice 2 Default Rebase Evidence
+
+Forgejo automatic Git-merge detection was enabled only for this designated repository. Current repository methods, access, privacy, default branch and source-retention policy were preserved. No protection, approval, signature, account or production policy was changed. GitHub requires no native merge queue.
+
+`CHR_NATIVE_INTEGRATION_QA=1 go test ./internal/core -run '^TestWorkflowNativeRebase$' -count=1 -v` passed for both existing adapters, the real read-only receive-pack capability inspection, final capability recheck, actual atomic two-ref publisher and independent target history proof. Both original PRs were observed merged with the exact prepared result.
+
+| Forge | Original canonical PR | Original S | Expected B | Exact P |
+| --- | --- | --- | --- | --- |
+| forgejo | [Fixture PR](https://forge.adrianpk.com/adrianpk/chr-integration-qa/pulls/5) | `82067e2c536a2dbd7625de05a3bb1e01c6bc5c70` | `8bdbe30c8a44418b7208a1b6e1f17698d5ad4937` | `6647bd965f819403d9e8cf88a73d4b618dde7cf8` |
+| github | [Fixture PR](https://github.com/adrianpk/chr-integration-qa/pull/9) | `a5456ae7af376bcc874cee9858375f1a11f1a790` | `9a10f0740792b042d3ed50a2b47415d1427ad551` | `cbc3d631d8866119f5a69dbfd40b3c5fe4106f0a` |
+
+Full host-owned JSON evidence is retained under `${XDG_STATE_HOME:-$HOME/.local/state}/chr/qa/native-integration-slice-2/`. It includes original/published-source binding, role and policy fingerprints, exact method/history/tree proof, actual target and original PR observations. The retained synthetic refs are preserved.
