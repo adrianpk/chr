@@ -50,6 +50,8 @@ Passed during task implementation with Go 1.27.1:
 - `go test ./internal/core -run 'TestWorkflowGit(Atomic|Candidate|AlreadyPrepared|FastForward)$' -count=1`
 - `go test ./internal/core -run 'TestWorkflowGit' -count=1`
 
+Initial candidate `c97c94c567a83317caf30497bfc54af9c2e10a22`: `make verify` passed lint but failed in `TestWorkflowIntegrationChangedInput/during_IO` because the host had no default Git commit identity. The same core-suite run reached the default ten-minute timeout. The identity-dependent case passes with an owned temporary Git configuration. Final candidate validation supplies that default identity and forces uncached tests with `GOFLAGS=-count=1`; the required commands and timeout remain unchanged.
+
 The configured final candidate commands are `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1`, and `git diff --check`, in that order. Looper records their results against the exact clean PR HEAD after the PR-reference commit. Task checks are local transport evidence; live provider certification is not claimed here.
 
 ## Risks and Follow-ups
