@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133058
 title: "T2.3: Certify GitHub default rebase observation"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -12,6 +12,10 @@ reported_at: 2026-10-11T13:30:58Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T19:01:24Z
 reviewed_at: 2026-10-11T19:39:13Z
+resolution: fixed
+closed_at: 2026-10-11T21:42:36Z
+branch: feat/slice-2-native-forge-profiles
+pr: 376
 commits: [a7e90f2ee18ba5d09e46677c101b38f981916b1b]
 ---
 
@@ -66,4 +70,4 @@ Focused configuration/upgrade/native checks, real default rebase on both designa
 
 Report: [Slice 2](../../report/slices/native-integration-queue/slice-2-forge-profiles.md).
 
-Canonical PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376). Final ordered checks are recorded against the clean PR head by Looper; verified integration is pending.
+Canonical PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376). All five ordered Looper checks passed on `3129b5ce312df22287a4e7b78e08bf41f5958377`; canonical merge into `dev` was verified on 2026-10-11.

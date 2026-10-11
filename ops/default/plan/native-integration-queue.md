@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 2 — Forge publication profiles
+Active slice: Slice 3 — Durable integration records
 
-Next slice: Slice 3 — Durable integration records
+Next slice: Slice 4 — Canonical queue scheduling
 
 Slice strategy: behavior-first
 
@@ -139,7 +139,7 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-14, INV-15
 
 ## Slice 2: Forge publication profiles
 
-Status: reviewing
+Status: delivered
 
 Expected branch: `feat/slice-2-native-forge-profiles`
 
@@ -148,6 +148,8 @@ Expected PR title: `feat(slice-2): observe native publication through existing f
 Expected report: `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md`
 
 Canonical PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376)
+
+Verified merge: `3129b5ce312df22287a4e7b78e08bf41f5958377` on `dev`
 
 Prerequisite: verified Slice 1 integration and closed task fanout.
 
@@ -161,9 +163,9 @@ Invariants: INV-08, INV-11, INV-14, INV-15, INV-23
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T2.1 | [TKT-20261011133056](../ticket/reviewing/20261011133056-native-integration-t2-1.md) | Add opt-in profile configuration, current capability/ownership/policy fingerprints, unsupported reasons and original/published source-aware binding. | Upgrade preserves policy and keeps the profile disabled; incompatible protections, native approval and fork ownership block before publication. |
-| T2.2 | [TKT-20261011133057](../ticket/reviewing/20261011133057-native-integration-t2-2.md) | Implement same-canonical-PR Git application observation for Forgejo and prove one default rebase in a designated disposable repository. | The actual prepared result is reachable and the original PR is observed merged; metadata lag and close/retarget races remain explicit. |
-| T2.3 | [TKT-20261011133058](../ticket/reviewing/20261011133058-native-integration-t2-3.md) | Implement the equivalent existing GitHub adapter contract and prove one default rebase in a designated disposable repository. | The same source/base/result and canonical merged-PR proof holds without depending on a provider merge queue. |
+| T2.1 | [TKT-20261011133056](../ticket/solved/20261011133056-native-integration-t2-1.md) | Add opt-in profile configuration, current capability/ownership/policy fingerprints, unsupported reasons and original/published source-aware binding. | Upgrade preserves policy and keeps the profile disabled; incompatible protections, native approval and fork ownership block before publication. |
+| T2.2 | [TKT-20261011133057](../ticket/solved/20261011133057-native-integration-t2-2.md) | Implement same-canonical-PR Git application observation for Forgejo and prove one default rebase in a designated disposable repository. | The actual prepared result is reachable and the original PR is observed merged; metadata lag and close/retarget races remain explicit. |
+| T2.3 | [TKT-20261011133058](../ticket/solved/20261011133058-native-integration-t2-3.md) | Implement the equivalent existing GitHub adapter contract and prove one default rebase in a designated disposable repository. | The same source/base/result and canonical merged-PR proof holds without depending on a provider merge queue. |
 
 ### Required Candidate Checks
 
@@ -174,7 +176,7 @@ Invariants: INV-08, INV-11, INV-14, INV-15, INV-23
 
 ## Slice 3: Durable integration records
 
-Status: not_started
+Status: active
 
 Expected branch: `feat/slice-3-native-integration-records`
 

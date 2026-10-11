@@ -1,11 +1,12 @@
 # Slice 2: Forge publication profiles
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-2-native-forge-profiles`
 PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376)
+Verified merge: `3129b5ce312df22287a4e7b78e08bf41f5958377` on `dev`, 2026-10-11T21:37:41Z
 
 ## Purpose
 
@@ -59,13 +60,15 @@ Development checks passed:
 
 The first pre-commit `make verify` failed an initialization assertion that still expected thirteen effective configuration fields. It now expects fourteen and explicitly checks the profile remains disabled; the repeated complete gate passed. Strict lint uses the repository-pinned golangci-lint v2.14.0. Execution uses Go 1.27.1, an isolated Git configuration retaining host settings with a neutral fixture identity, a thirty-minute Go test timeout and the supported absent default-agent command fixture. Positive provider/executor fixtures remain explicit. These execution settings do not alter repository assertions or policy.
 
-Final candidate outcomes belong to Looper's ledger for the exact clean PR head. The ordered command list is:
+All five final commands passed through Looper on exact clean HEAD `3129b5ce312df22287a4e7b78e08bf41f5958377`, which includes the independently recorded Conventional Commit fixture update. Canonical PR #376 merged that tested commit through Rebase + Fast-forward. Acta recorded the merged transition as `01M4PECVJD284TD2C9KRZ6QQ4J`. The ordered command list is:
 
 - `make verify`
 - `go test ./internal/core ./internal/app -count=1`
 - `go test -race ./internal/core ./internal/app -count=1`
 - `CHR_NATIVE_INTEGRATION_QA=1 go test ./internal/core -run '^TestWorkflowNativeRebase$' -count=1 -v`
 - `git diff --check`
+
+The final live command verified original Forgejo QA PR #8 and GitHub QA PR #12 at that HEAD. The earlier development proof below remains immutable.
 
 The [fixture report](../../native-integration-fixtures.md) binds both designated private repositories, server/API profile, credential roles and branch policy. Development certification passed through the actual publisher and existing adapters; full S/B/P and ordered-history proof is retained below and in host-owned JSON evidence. The original canonical PRs were observed merged at exact P without a native merge API or provider merge queue.
 
