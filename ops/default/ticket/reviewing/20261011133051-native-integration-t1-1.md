@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133051
 title: "T1.1: Execute an explicit atomic receive-pack transaction"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-1
 source: chat
 reported_at: 2026-10-11T13:30:51Z
 ready_at: 2026-10-11T13:31:37Z
+reviewed_at: 2026-10-11T13:47:31Z
+started_at: 2026-10-11T13:44:35Z
+branch: feat/slice-1-native-git-transport
 commits: []
 ---
 
@@ -58,4 +61,6 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented explicit two-ref atomic commands, bounded advertisement/report/pack processing and owned local receive-pack.
+Focused check passed: `go test ./internal/core -run 'TestWorkflowGit(Atomic|Advertisement)$' -count=1`.
+The package linter passed with zero issues. PR and integration remain pending.
