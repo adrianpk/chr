@@ -185,7 +185,7 @@ func checkWorkflowConfigDefaultSource(t *testing.T, project string, test workflo
 	t.Helper()
 
 	resolved, err := ResolveWorkflowConfiguration(project, "")
-	if err != nil || len(resolved.Values) != 13 || len(resolved.Revision) != 64 {
+	if err != nil || len(resolved.Values) != 14 || len(resolved.Revision) != 64 {
 		t.Fatal("effective configuration is incomplete", resolved, err)
 	}
 

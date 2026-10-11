@@ -79,6 +79,7 @@ type ReviewProviderTargetConfig struct {
 
 // WorkConfig describes a package boundary value.
 type WorkConfig struct {
+	Integration              WorkIntegrationConfig
 	MergeStrategy            string
 	WorkerTimeoutSeconds     int
 	ValidationTimeoutSeconds int
@@ -318,6 +319,7 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 // DefaultWorkConfig executes the corresponding package operation.
 func DefaultWorkConfig() WorkConfig {
 	return WorkConfig{
+		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled},
 		MergeStrategy:          TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
 		CheckpointStepLimit:    WorkflowPageLimit,
@@ -498,6 +500,8 @@ func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, 
 	}
 
 	indent := len(rawLine) - len(strings.TrimLeft(rawLine, " "))
+	section = workspaceConfigSiblingSection(section, indent)
+
 	if indent == 0 && strings.HasSuffix(line, ":") {
 		return "", "", strings.TrimSuffix(line, ":"), false
 	}
@@ -516,6 +520,14 @@ func parseWorkspaceConfigLine(rawLine, section string) (string, string, string, 
 	}
 
 	return strings.TrimSpace(key), configStringValue(value), section, true
+}
+
+func workspaceConfigSiblingSection(section string, indent int) string {
+	if indent == 2 && section == "work.integration" {
+		return "work"
+	}
+
+	return section
 }
 
 func setRuntimeConfigValue(config *RuntimeConfig, key, value string) {

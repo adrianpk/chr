@@ -192,6 +192,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 	}
 
 	want := WorkConfig{
+		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled},
 		MergeStrategy:          TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
 		CheckpointStepLimit:    WorkflowPageLimit,

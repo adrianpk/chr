@@ -74,14 +74,14 @@ func checkInitializedWorkflow(t *testing.T, project string) {
 	t.Helper()
 
 	config, err := LoadWorkspaceConfig(project)
-	if err != nil || config.Work.MaxActiveWorkers != 1 {
+	if err != nil || config.Work.MaxActiveWorkers != 1 || config.Work.Integration.PublicationProfile != WorkflowPublicationDisabled {
 		t.Fatal("initialized workflow differs from approved defaults", config, err)
 	}
 
 	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, ReviewWorkflowModeTrustedAutoMerge, WorkStateAuthorityTickets, WorkWorkspaceModeWorktree})
 
 	effective, err := ResolveWorkflowConfiguration(project, "")
-	if err != nil || len(effective.Values) != 13 {
+	if err != nil || len(effective.Values) != 14 {
 		t.Fatal("initialized configuration is incomplete", effective, err)
 	}
 

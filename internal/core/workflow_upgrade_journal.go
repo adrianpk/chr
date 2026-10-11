@@ -199,11 +199,38 @@ func (s *WorkflowStore) validateWorkflowUpgradeJournal(journal workflowUpgradeJo
 }
 
 func validateWorkflowUpgradePolicyPair(journal workflowUpgradeJournal) error {
-	if len(journal.Prior.Values) != 13 || len(journal.Current.Values) != 13 || journal.Prior.Version != 0 || journal.Current.Version != 1 {
+	if journal.Prior.Version != 0 || journal.Current.Version != 1 || !validWorkflowUpgradeConfiguration(journal.Prior) || !validWorkflowUpgradeConfiguration(journal.Current) {
 		return fmt.Errorf("invalid workflow upgrade policy snapshot")
 	}
 
 	return nil
+}
+
+func validWorkflowUpgradeConfiguration(config WorkflowConfiguration) bool {
+	if len(config.Values) != 13 && len(config.Values) != 14 {
+		return false
+	}
+
+	seen := map[string]bool{}
+	for _, value := range config.Values {
+		if seen[value.Key] {
+			return false
+		}
+
+		seen[value.Key] = true
+	}
+
+	for _, value := range effectiveWorkflowConfiguration(defaultWorkspaceConfig(), "").Values {
+		if value.Key == "work.integration.publication_profile" && len(config.Values) == 13 {
+			continue
+		}
+
+		if !seen[value.Key] {
+			return false
+		}
+	}
+
+	return true
 }
 
 func workflowUpgradeJournalHash(journal workflowUpgradeJournal) (string, error) {
@@ -219,7 +246,16 @@ func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) err
 		return err
 	}
 
-	actual, err := json.Marshal(effectiveWorkflowConfiguration(config, ""))
+	configuration := effectiveWorkflowConfiguration(config, "")
+	if len(expected.Values) == 13 {
+		if config.Work.Integration.PublicationProfile != WorkflowPublicationDisabled {
+			return ErrWorkflowConflict
+		}
+
+		configuration.Values = withoutWorkflowPublicationProfile(configuration.Values)
+	}
+
+	actual, err := json.Marshal(configuration)
 	if err != nil {
 		return err
 	}
@@ -230,6 +266,17 @@ func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) err
 	}
 
 	return err
+}
+
+func withoutWorkflowPublicationProfile(values []WorkflowConfigurationValue) []WorkflowConfigurationValue {
+	result := make([]WorkflowConfigurationValue, 0, len(values))
+	for _, value := range values {
+		if value.Key != "work.integration.publication_profile" {
+			result = append(result, value)
+		}
+	}
+
+	return result
 }
 
 func (s *WorkflowStore) writeWorkflowUpgradeSnapshot(journal workflowUpgradeJournal) error {

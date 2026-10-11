@@ -103,6 +103,14 @@ func applyWorkflowConfigValues(config *WorkspaceConfig, values map[string]string
 		config.Work.MergeStrategy = value
 	}
 
+	if value, present := values["work.integration.publication_profile"]; present {
+		config.Work.Integration.PublicationProfile = value
+	}
+
+	return applyWorkflowTicketSelection(config, values)
+}
+
+func applyWorkflowTicketSelection(config *WorkspaceConfig, values map[string]string) error {
 	if value, present := values["work.include_later_tickets"]; present {
 		if value != "true" && value != "false" {
 			return fmt.Errorf("work.include_later_tickets must be true or false")
@@ -123,6 +131,7 @@ func validateWorkflowConfigValues(config WorkspaceConfig, values map[string]stri
 		{"review.mode", []string{"human_review", "agentic_review", "trusted_auto_merge"}},
 		{"work.workspace_mode", []string{"project", "worktree"}},
 		{"work.merge_strategy", []string{"merge", "rebase", "squash"}},
+		{"work.integration.publication_profile", []string{WorkflowPublicationDisabled, WorkflowPublicationGitAtomicDualRef}},
 	}
 	for _, choice := range choices {
 		if value, present := values[choice.key]; present && !workflowConfigChoice(value, choice.allowed) {
@@ -206,6 +215,7 @@ func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction ReviewWo
 		{"review.mode", string(config.Review.Mode)},
 		{"work.workspace_mode", string(config.Work.Workspace.Mode)},
 		{"work.merge_strategy", config.Work.MergeStrategy},
+		{"work.integration.publication_profile", config.Work.Integration.PublicationProfile},
 		{"work.include_later_tickets", strconv.FormatBool(config.Work.IncludeLaterTickets)},
 	} {
 		value := workflowConfigurationValue(config, field.key, field.value)

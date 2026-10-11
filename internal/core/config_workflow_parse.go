@@ -29,6 +29,9 @@ func readWorkflowConfigValues(data []byte) (map[string]string, error) {
 		}
 
 		section = next
+		if err := guardWorkflowNativeSection(line, section, ok, sections); err != nil {
+			return nil, err
+		}
 
 		if err := guardWorkflowConfigLine(line, section, key, ok, sections); err != nil {
 			return nil, err
@@ -43,8 +46,8 @@ func readWorkflowConfigValues(data []byte) (map[string]string, error) {
 			return nil, fmt.Errorf("duplicate workspace config key: %s", qualified)
 		}
 
-		if !knownWorkflowConfigKey(qualified) || len(value) > 4096 {
-			return nil, fmt.Errorf("unsupported workspace config key or value: %s", qualified)
+		if err := guardWorkflowConfigValue(qualified, value); err != nil {
+			return nil, err
 		}
 
 		values[qualified] = value
@@ -53,8 +56,16 @@ func readWorkflowConfigValues(data []byte) (map[string]string, error) {
 	return values, scanner.Err()
 }
 
+func guardWorkflowConfigValue(key, value string) error {
+	if !knownWorkflowConfigKey(key) || len(value) > 4096 {
+		return fmt.Errorf("unsupported workspace config key or value: %s", key)
+	}
+
+	return nil
+}
+
 func workflowConfigSection(section string) bool {
-	return section == "workflow" || section == "work" || section == "review"
+	return section == "workflow" || section == "work" || section == "review" || section == "work.integration"
 }
 
 func guardWorkflowConfigIndent(raw, previous, key string, parsed bool) error {
@@ -110,8 +121,38 @@ func guardWorkflowConfigRoot(line, root, key string, parsed bool, sections map[s
 }
 
 func guardWorkflowConfigScalar(raw, section, root string, indent int, parsed bool) error {
+	if section == "work.integration" {
+		return guardWorkflowNativeScalar(raw, indent, parsed)
+	}
+
 	if !parsed || indent != 2 || section != root || strings.Contains(raw, "\t") {
 		return fmt.Errorf("%s configuration requires scalar keys indented by two spaces", root)
+	}
+
+	return nil
+}
+
+func guardWorkflowNativeSection(raw, section string, parsed bool, sections map[string]bool) error {
+	if parsed || strings.TrimSpace(raw) != "integration:" || section != "work.integration" {
+		return nil
+	}
+
+	if sections[section] {
+		return fmt.Errorf("duplicate workspace config section: %s", section)
+	}
+
+	sections[section] = true
+
+	return nil
+}
+
+func guardWorkflowNativeScalar(raw string, indent int, parsed bool) error {
+	if !parsed && indent == 2 && strings.TrimSpace(raw) == "integration:" {
+		return nil
+	}
+
+	if !parsed || indent != 4 || strings.Contains(raw, "\t") {
+		return fmt.Errorf("work.integration requires scalar keys indented by four spaces")
 	}
 
 	return nil
@@ -126,6 +167,7 @@ func knownWorkflowConfigKey(key string) bool {
 	}
 
 	return slices.Contains([]string{
+		"work.integration.publication_profile",
 		"work.state_authority", "work.workspace_mode", "work.merge_strategy", "work.include_later_tickets",
 		"work.mode", "work.integration_branch", "work.canonical_remote", "work.require_clean_worktree",
 		"work.require_remote_tracking", "work.allow_safe_repair", "work.allow_branch_creation",

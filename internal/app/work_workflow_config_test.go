@@ -67,7 +67,7 @@ func checkWorkflowConfigCLIOutput(t *testing.T, name string, output []byte) {
 	}
 
 	var result core.WorkflowConfiguration
-	if err := json.Unmarshal(output, &result); err != nil || result.Version != 1 || len(result.Values) != 13 {
+	if err := json.Unmarshal(output, &result); err != nil || result.Version != 1 || len(result.Values) != 14 {
 		t.Fatal("JSON configuration is incomplete", result, err)
 	}
 }
