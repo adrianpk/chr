@@ -37,6 +37,12 @@ func workflowSSHFile(t *testing.T, path, contents string) {
 func workflowSSHFixture(t *testing.T) (string, string) {
 	t.Helper()
 
+	return workflowSSHFixtureCommand(t, "")
+}
+
+func workflowSSHFixtureCommand(t *testing.T, force string) (string, string) {
+	t.Helper()
+
 	root := t.TempDir()
 	hostKey, clientKey := filepath.Join(root, "host"), filepath.Join(root, "client")
 	workflowSSHCommand(t, "ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", hostKey)
@@ -65,7 +71,7 @@ func workflowSSHFixture(t *testing.T) (string, string) {
 		t.Fatal(err)
 	}
 
-	workflowSSHServer(t, root, hostKey, port, account.Username)
+	workflowSSHServer(t, root, hostKey, port, account.Username, force)
 
 	hostPublic := workflowSSHCommand(t, "ssh-keygen", "-y", "-f", hostKey)
 	workflowSSHFile(t, filepath.Join(root, "known_hosts"), "[127.0.0.1]:"+port+" "+hostPublic+"\n")
@@ -76,11 +82,17 @@ func workflowSSHFixture(t *testing.T) (string, string) {
 	return "ssh://" + account.Username + "@" + address, config
 }
 
-func workflowSSHServer(t *testing.T, root, hostKey, port, account string) {
+func workflowSSHServer(t *testing.T, root, hostKey, port, account, force string) {
 	t.Helper()
 
 	config := filepath.Join(root, "sshd_config")
-	workflowSSHFile(t, config, fmt.Sprintf("Port %s\nListenAddress 127.0.0.1\nHostKey %s\nPidFile %s\nAuthorizedKeysFile %s\nStrictModes no\nUsePAM no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nPubkeyAuthentication yes\nAllowUsers %s\nLogLevel ERROR\n", port, hostKey, filepath.Join(root, "pid"), filepath.Join(root, "authorized_keys"), account))
+
+	contents := fmt.Sprintf("Port %s\nListenAddress 127.0.0.1\nHostKey %s\nPidFile %s\nAuthorizedKeysFile %s\nStrictModes no\nUsePAM no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nPubkeyAuthentication yes\nAllowUsers %s\nLogLevel ERROR\n", port, hostKey, filepath.Join(root, "pid"), filepath.Join(root, "authorized_keys"), account)
+	if force != "" {
+		contents += "ForceCommand " + force + "\n"
+	}
+
+	workflowSSHFile(t, config, contents)
 
 	binary, err := exec.LookPath("sshd")
 	if err != nil {

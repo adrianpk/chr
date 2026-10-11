@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T14:02:50Z
 started_at: 2026-10-11T14:00:01Z
 branch: feat/slice-1-native-git-transport
-commits: []
+commits: [85e5420245b68a2596361b72a6893ce221ae1876]
 ---
 
 # T1.4: Seal exact source/base/result publication proof

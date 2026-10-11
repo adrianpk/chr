@@ -29,6 +29,12 @@ func readWorkflowPublicationPacket(reader io.Reader) ([]byte, error) {
 		return nil, fmt.Errorf("incomplete packet header: %w", err)
 	}
 
+	for _, digit := range header {
+		if !bytes.ContainsRune([]byte("0123456789abcdef"), rune(digit)) {
+			return nil, fmt.Errorf("invalid publication packet header")
+		}
+	}
+
 	length, err := strconv.ParseUint(string(header[:]), 16, 16)
 	if err != nil || length > workflowPublicationPacketLimit || length > 0 && length < 4 {
 		return nil, fmt.Errorf("invalid publication packet length")
@@ -75,8 +81,12 @@ func (advertisement workflowAdvertisement) add(packet []byte, first bool) error 
 	}
 
 	fields := strings.Split(ref, " ")
-	if len(fields) != 2 || !workflowCommitID(fields[0]) || fields[1] == "" {
+	if len(fields) != 2 || !workflowCommitID(fields[0]) || !validWorkflowAdvertisedRef(fields[1]) {
 		return fmt.Errorf("invalid advertised ref")
+	}
+
+	if fields[1] == ".have" {
+		return nil
 	}
 
 	if _, exists := advertisement.refs[fields[1]]; exists {
@@ -84,8 +94,25 @@ func (advertisement workflowAdvertisement) add(packet []byte, first bool) error 
 	}
 
 	advertisement.refs[fields[1]] = fields[0]
-	for _, capability := range strings.Fields(capabilities) {
-		if advertisement.capabilities[capability] {
+
+	if !first {
+		return nil
+	}
+
+	return advertisement.addCapabilities(capabilities)
+}
+
+func validWorkflowAdvertisedRef(ref string) bool {
+	if ref == "HEAD" || ref == ".have" || ref == "capabilities^{}" {
+		return true
+	}
+
+	return strings.HasPrefix(ref, "refs/") && validWorkflowPRBranch(strings.TrimPrefix(ref, "refs/"))
+}
+
+func (advertisement workflowAdvertisement) addCapabilities(capabilities string) error {
+	for _, capability := range strings.Split(capabilities, " ") {
+		if !validWorkflowPublicationCapability(capability) || advertisement.capabilities[capability] {
 			return fmt.Errorf("duplicate advertisement capability")
 		}
 
@@ -93,6 +120,20 @@ func (advertisement workflowAdvertisement) add(packet []byte, first bool) error 
 	}
 
 	return nil
+}
+
+func validWorkflowPublicationCapability(capability string) bool {
+	if capability == "" || len(capability) > 256 {
+		return false
+	}
+
+	for _, character := range capability {
+		if character < 33 || character > 126 {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (advertisement workflowAdvertisement) check(request WorkflowGitPublication) error {
@@ -142,7 +183,7 @@ func classifyWorkflowPublicationReport(unpack string, statuses [2]string) (strin
 		return "rejected", nil
 	}
 
-	if unpack != "unpack ok\n" || statuses[0] != "ok" || statuses[1] != "ok" {
+	if strings.TrimSuffix(unpack, "\n") != "unpack ok" || statuses[0] != "ok" || statuses[1] != "ok" {
 		return "unknown", fmt.Errorf("inconsistent atomic publication report")
 	}
 

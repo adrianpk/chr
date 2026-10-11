@@ -34,8 +34,8 @@ Task accounting: 47 new tickets and 4 reused original assurance tickets. Retaine
 
 ## Current Checkpoint
 
-Both specifications are accepted. Slice 1 is active after the preparation commit reaches canonical `dev`.
-The original controller is inactive and blocked, with eleven integrated slices and no pending merge. Its checkpoint and budgets remain untouched.
+Slice 1 implements all five approved transport tasks on its dedicated branch. Tasks become done only after verified canonical integration and ticket fanout. Final candidate validation uses Looper's exact clean-HEAD evidence after PR references are committed.
+The original controller remains inactive and blocked, with eleven integrated slices and no pending merge. Its checkpoint and budgets remain untouched.
 The old assurance execution path is transferred to Slice 13 under the approved plan; its four tickets retain their original IDs and evidence.
 Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Setup access is verified and the Slice 2 designation prerequisite is supplied. Actual publisher and PR-observation certification remains pending in Slice 2 and Slice 12.
 
@@ -46,7 +46,7 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 
 | Slice | Name | Exact branch | Expected PR title | Report | State | PR |
 | --- | --- | --- | --- | --- | --- | --- |
-| Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | active | pending |
+| Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | reviewing | pending |
 | Slice 2 | Forge publication profiles | `feat/slice-2-native-forge-profiles` | `feat(slice-2): observe native publication through existing forge adapters` | `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md` | not_started | pending |
 | Slice 3 | Durable integration records | `feat/slice-3-native-integration-records` | `feat(slice-3): persist native integration queue records` | `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md` | not_started | pending |
 | Slice 4 | Canonical queue scheduling | `feat/slice-4-native-queue-scheduling` | `feat(slice-4): schedule integration across canonical target queues` | `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md` | not_started | pending |
@@ -62,7 +62,7 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 
 ## Slice 1: Guarded Git transport
 
-Status: active
+Status: reviewing
 
 Expected branch: `feat/slice-1-native-git-transport`
 
@@ -77,8 +77,8 @@ Prerequisite: committed approved bootstrap on canonical `dev`.
 | T1.1 | [TKT-20261011133051](../ticket/reviewing/20261011133051-native-integration-t1-1.md) | validated | `3f61d28d74337f7efa25d77917e435f723a68430` | Execute an explicit atomic receive-pack transaction |
 | T1.2 | [TKT-20261011133052](../ticket/reviewing/20261011133052-native-integration-t1-2.md) | validated | `6df8a1f73dbc0f54d80ee15c7697ecd61068ced2` | Support host-authenticated SSH publication |
 | T1.3 | [TKT-20261011133053](../ticket/reviewing/20261011133053-native-integration-t1-3.md) | validated | `d24aa00a42e5bb7ffb45315a2cbab6886f2aa9c8` | Support host-authenticated HTTPS publication |
-| T1.4 | [TKT-20261011133054](../ticket/reviewing/20261011133054-native-integration-t1-4.md) | validated | pending | Seal exact source/base/result publication proof |
-| T1.5 | [TKT-20261011133055](../ticket/ready/20261011133055-native-integration-t1-5.md) | ready | pending | Verify protocol races and review the transport boundary |
+| T1.4 | [TKT-20261011133054](../ticket/reviewing/20261011133054-native-integration-t1-4.md) | validated | `85e5420245b68a2596361b72a6893ce221ae1876` | Seal exact source/base/result publication proof |
+| T1.5 | [TKT-20261011133055](../ticket/reviewing/20261011133055-native-integration-t1-5.md) | validated | pending | Verify protocol races and review the transport boundary |
 
 Required checks:
 
@@ -91,7 +91,7 @@ PR: pending
 
 Verified merge: pending
 
-Report/evidence: pending
+Report/evidence: [Slice 1 report](../report/slices/native-integration-queue/slice-1-git-transport.md)
 
 ## Slice 2: Forge publication profiles
 

@@ -15,6 +15,7 @@ import (
 
 type workflowHTTPFixture struct {
 	remote string
+	result string
 	mode   string
 	posts  atomic.Int64
 }
@@ -48,6 +49,20 @@ func (fixture *workflowHTTPFixture) advertise(writer http.ResponseWriter, reques
 		http.Redirect(writer, request, "/other.git/info/refs", http.StatusTemporaryRedirect)
 
 		return
+	}
+
+	if strings.HasPrefix(fixture.mode, "already_") {
+		ref := "refs/heads/dev"
+		if fixture.mode == "already_source" {
+			ref = "refs/heads/chr/workflow/fixture"
+		}
+
+		command := workflowPublicationCommand(request.Context(), "git", "-C", fixture.remote, "update-ref", ref, fixture.result)
+		if err := command.Run(); err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
 	}
 
 	command := workflowPublicationCommand(request.Context(), "git", "receive-pack", "--stateless-rpc", "--advertise-refs", fixture.remote)
@@ -99,7 +114,7 @@ func (fixture *workflowHTTPFixture) receive(writer http.ResponseWriter, request 
 func workflowHTTPServer(t *testing.T, fixture workflowGitFixture, mode string) (*httptest.Server, *workflowHTTPFixture) {
 	t.Helper()
 
-	handler := &workflowHTTPFixture{remote: fixture.remote, mode: mode}
+	handler := &workflowHTTPFixture{remote: fixture.remote, result: fixture.request.Git.ResultCommit, mode: mode}
 	server := httptest.NewTLSServer(handler)
 	t.Cleanup(server.Close)
 
@@ -124,7 +139,7 @@ func workflowHTTPServer(t *testing.T, fixture workflowGitFixture, mode string) (
 // TestWorkflowGitHTTPS proves smart TLS publication through real receive-pack
 // and Git credential lookup; redirects and truncated reports cannot yield success.
 func TestWorkflowGitHTTPS(t *testing.T) {
-	for _, mode := range []string{"positive", "source", "target", "redirect", "partial"} {
+	for _, mode := range []string{"positive", "source", "target", "redirect", "partial", "already_source", "already_target"} {
 		t.Run(mode, func(t *testing.T) { checkWorkflowGitHTTPS(t, mode) })
 	}
 }
@@ -145,6 +160,10 @@ func checkWorkflowGitHTTPS(t *testing.T, mode string) {
 		workflowIntegrationCommand(t, fixture.remote, "update-ref", fixture.request.TargetRef, target)
 	}
 
+	if strings.HasPrefix(mode, "already_") {
+		workflowIntegrationCommand(t, fixture.request.Directory, "push", fixture.remote, fixture.request.Git.ResultCommit+":refs/heads/objects-only")
+	}
+
 	server, handler := workflowHTTPServer(t, fixture, mode)
 	publisher := NewWorkflowGitPublisher(fixture.request.Repository, server.URL+"/project.git").WithHTTPClient(server.Client())
 	result, err := publisher.PublishWorkflowGit(t.Context(), fixture.request)
@@ -152,6 +171,14 @@ func checkWorkflowGitHTTPS(t *testing.T, mode string) {
 
 	if mode == "positive" || mode == "partial" {
 		source, target = fixture.request.Git.ResultCommit, fixture.request.Git.ResultCommit
+	}
+
+	if mode == "already_source" {
+		source = fixture.request.Git.ResultCommit
+	}
+
+	if mode == "already_target" {
+		target = fixture.request.Git.ResultCommit
 	}
 
 	checkWorkflowGitRefs(t, fixture, source, target)

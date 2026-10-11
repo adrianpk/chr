@@ -104,7 +104,7 @@ No worker may bypass a failed check, claim live evidence from mocks, substitute 
 
 ## Slice 1: Guarded Git transport
 
-Status: active
+Status: reviewing
 
 Expected branch: `feat/slice-1-native-git-transport`
 
@@ -126,7 +126,7 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-14, INV-15
 | T1.2 | [TKT-20261011133052](../ticket/reviewing/20261011133052-native-integration-t1-2.md) | Connect the guarded exchange through SSH using host-owned authentication and argument vectors, with subprocess ownership and bounded IO. | The same positive and stale-ref cases pass over a real SSH fixture without credentials entering evidence. |
 | T1.3 | [TKT-20261011133053](../ticket/reviewing/20261011133053-native-integration-t1-3.md) | Connect the same exchange through smart HTTPS with host credential integration, canonical identity checks and bounded packet/object processing. | The positive and stale-ref cases pass over a real HTTP receive-pack fixture; redirects and partial responses cannot become success. |
 | T1.4 | [TKT-20261011133054](../ticket/reviewing/20261011133054-native-integration-t1-4.md) | Bind the port to immutable prepared candidate identity, fast-forward ancestry, explicit expected refs, original/published source distinction and no-op defenses. | P equal to S, an already-P advertisement, fork sources, invalid refs and non-fast-forward target updates cannot be partially published. |
-| T1.5 | [TKT-20261011133055](../ticket/ready/20261011133055-native-integration-t1-5.md) | Add meaningful real-process fault fixtures for advertisement/receive races, atomic rejection, malformed packets and lost response; record protocol/security review. | Both refs participate; external source/target writers are preserved and SSH/HTTPS behavior agrees without an unguarded fallback. |
+| T1.5 | [TKT-20261011133055](../ticket/reviewing/20261011133055-native-integration-t1-5.md) | Add meaningful real-process fault fixtures for advertisement/receive races, atomic rejection, malformed packets and lost response; record protocol/security review. | Both refs participate; external source/target writers are preserved and SSH/HTTPS behavior agrees without an unguarded fallback. |
 
 ### Required Candidate Checks
 
