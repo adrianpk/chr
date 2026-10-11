@@ -146,6 +146,12 @@ func (s *WorkflowStore) writeRecord(ctx context.Context, r WorkflowRecord, expec
 		return WorkflowRecord{}, err
 	}
 
+	if r.Receipt != nil {
+		if err := s.checkWorkflowNativeReceipt(r); err != nil {
+			return WorkflowRecord{}, err
+		}
+	}
+
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
 		return WorkflowRecord{}, err

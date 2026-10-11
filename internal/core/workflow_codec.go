@@ -76,7 +76,7 @@ func (s *WorkflowStore) readRecord(relative string) (WorkflowRecord, error) {
 
 	r.Path = relative
 
-	return r, r.Validate()
+	return r, s.validateWorkflowReadRecord(r)
 }
 
 func decodeWorkflowDomain(r *WorkflowRecord, data []byte) error {
@@ -240,4 +240,14 @@ func preserveWorkflowSliceFields(domain map[string]json.RawMessage, r WorkflowRe
 	domain["slices"] = data
 
 	return err
+}
+
+func (s *WorkflowStore) validateWorkflowReadRecord(r WorkflowRecord) error {
+	if r.Receipt != nil {
+		if err := s.checkWorkflowNativeReceipt(r); err != nil {
+			return err
+		}
+	}
+
+	return r.Validate()
 }

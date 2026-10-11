@@ -257,7 +257,11 @@ func validateWorkflowDependencies(refs []WorkflowRef) error {
 }
 
 func validateWorkflowReceipt(r WorkflowReceipt) error {
-	if r.Schema != WorkflowSchema || r.Unit.ID == "" || !slices.Contains([]string{"ticket", "slice"}, r.Unit.Kind) {
+	if err := validateWorkflowReceiptSchema(r); err != nil {
+		return err
+	}
+
+	if r.Unit.ID == "" || !slices.Contains([]string{"ticket", "slice"}, r.Unit.Kind) {
 		return fmt.Errorf("unsupported workflow receipt schema or unit")
 	}
 

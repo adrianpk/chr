@@ -102,24 +102,25 @@ type WorkflowSet struct {
 
 // WorkflowReceipt retains immutable integration facts, separate from projections.
 type WorkflowReceipt struct {
-	Schema          string      `json:"workflow_schema"`
-	Unit            WorkflowRef `json:"unit"`
-	CandidateID     string      `json:"candidate_id"`
-	SubmissionID    string      `json:"submission_id"`
-	Provider        string      `json:"provider"`
-	Repository      string      `json:"repository"`
-	PullRequest     string      `json:"pull_request"`
-	Method          string      `json:"method"`
-	SourceCommit    string      `json:"source_commit"`
-	BaseCommit      string      `json:"base_commit"`
-	PreparedTree    string      `json:"prepared_tree"`
-	HistoryProof    string      `json:"history_proof"`
-	ResultCommit    string      `json:"result_commit"`
-	VerifiedTree    string      `json:"verified_tree"`
-	ObservedTarget  string      `json:"observed_target"`
-	VerificationRef string      `json:"verification_ref"`
-	ValidationRefs  []string    `json:"validation_refs"`
-	ConfirmedAt     time.Time   `json:"confirmed_at"`
+	Native          *WorkflowNativeReceipt `json:"native,omitempty"`
+	Schema          string                 `json:"workflow_schema"`
+	Unit            WorkflowRef            `json:"unit"`
+	CandidateID     string                 `json:"candidate_id"`
+	SubmissionID    string                 `json:"submission_id"`
+	Provider        string                 `json:"provider"`
+	Repository      string                 `json:"repository"`
+	PullRequest     string                 `json:"pull_request"`
+	Method          string                 `json:"method"`
+	SourceCommit    string                 `json:"source_commit"`
+	BaseCommit      string                 `json:"base_commit"`
+	PreparedTree    string                 `json:"prepared_tree"`
+	HistoryProof    string                 `json:"history_proof"`
+	ResultCommit    string                 `json:"result_commit"`
+	VerifiedTree    string                 `json:"verified_tree"`
+	ObservedTarget  string                 `json:"observed_target"`
+	VerificationRef string                 `json:"verification_ref"`
+	ValidationRefs  []string               `json:"validation_refs"`
+	ConfirmedAt     time.Time              `json:"confirmed_at"`
 }
 
 // WorkflowRecord separates envelope identity, native content and workflow domain.

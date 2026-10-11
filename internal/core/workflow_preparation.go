@@ -54,6 +54,7 @@ type WorkflowPreparationInput struct {
 // WorkflowIntegrationCandidate is retained host validation of combined content.
 // It is neither a provider response nor proof of delivery to the target.
 type WorkflowIntegrationCandidate struct {
+	Native       *WorkflowNativeCandidate `json:"native,omitempty"`
 	Schema       string                   `json:"schema"`
 	InvocationID string                   `json:"invocation_id"`
 	Round        int                      `json:"round"`

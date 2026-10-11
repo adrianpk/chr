@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133059
 title: "T3.1: Extend candidate and receipt schemas"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-3
 source: chat
 reported_at: 2026-10-11T13:30:59Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-11T21:44:33Z
+branch: feat/slice-3-native-integration-records
+reviewed_at: 2026-10-11T22:10:52Z
 commits: []
 ---
 
@@ -58,4 +61,8 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented versioned native candidate/receipt bindings, owned hashed source/history/capability/validation and transaction/observation references. Historical receipt reads preserve their exact bytes. Unsupported or incomplete native proof blocks creation and reads.
+
+The focused preparation/integration/finalization/submission regressions, native record/receipt race checks, pinned strict lint and pre-commit `make verify` passed. Final slice exact-HEAD checks and canonical PR integration remain pending.
+
+Report: [Slice 3](../../report/slices/native-integration-queue/slice-3-integration-records.md).

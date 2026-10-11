@@ -139,7 +139,7 @@ Prerequisite: verified Slice 2 integration and closed task fanout.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T3.1 | [TKT-20261011133059](../ticket/ready/20261011133059-native-integration-t3-1.md) | ready | pending | Extend candidate and receipt schemas |
+| T3.1 | [TKT-20261011133059](../ticket/reviewing/20261011133059-native-integration-t3-1.md) | validated | pending | Extend candidate and receipt schemas |
 | T3.2 | [TKT-20261011133100](../ticket/ready/20261011133100-native-integration-t3-2.md) | ready | pending | Persist integration entries through WorkflowStore |
 | T3.3 | [TKT-20261011133101](../ticket/ready/20261011133101-native-integration-t3-3.md) | ready | pending | Extend attempt and budget journals |
 | T3.4 | [TKT-20261011133102](../ticket/ready/20261011133102-native-integration-t3-4.md) | ready | pending | Rebuild indexes and validate migrations |

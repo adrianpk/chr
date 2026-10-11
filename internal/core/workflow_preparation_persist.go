@@ -31,6 +31,10 @@ func (s *WorkflowStore) readWorkflowPreparation(run workflowInvocationFile) (Wor
 		return candidate, err
 	}
 
+	if err := s.checkWorkflowNativeCandidate(candidate); err != nil {
+		return candidate, err
+	}
+
 	if err := s.checkWorkflowRetainedPreparationInput(run, candidate); err != nil {
 		return candidate, err
 	}
@@ -76,7 +80,12 @@ func workflowPreparationInputMatches(input WorkflowTaskInput, candidate Workflow
 
 func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate WorkflowIntegrationCandidate) error {
 	b := run.Preparation
-	if candidate.Schema != "chr-integration-candidate/v1" || candidate.InvocationID != run.ID || candidate.Round != b.Round || candidate.Input.Source.Unit != b.Unit || !validWorkflowLane(candidate.Lane) {
+
+	if err := validateWorkflowCandidateSchema(candidate); err != nil {
+		return err
+	}
+
+	if candidate.InvocationID != run.ID || candidate.Round != b.Round || candidate.Input.Source.Unit != b.Unit || !validWorkflowLane(candidate.Lane) {
 		return ErrWorkflowConflict
 	}
 
@@ -134,6 +143,10 @@ func workflowPreparationAttemptMatches(attempt WorkflowAttempt, result WorkflowT
 }
 
 func (s *WorkflowStore) persistWorkflowPreparation(run *workflowInvocationFile, record WorkflowRecord, candidate WorkflowIntegrationCandidate) error {
+	if err := s.checkWorkflowNativeCandidate(candidate); err != nil {
+		return err
+	}
+
 	data, err := json.MarshalIndent(candidate, "", "  ")
 	if err != nil || len(data) >= WorkflowFileLimit {
 		return fmt.Errorf("prepared candidate exceeds file bounds")
