@@ -67,7 +67,7 @@ func createNativeLivePR(t *testing.T, adapter RemoteReviewAdapter, profile nativ
 
 	pr, err := adapter.CreateWorkflowPullRequest(t.Context(), WorkflowPullRequestRequest{
 		WorkflowPullRequestQuery: WorkflowPullRequestQuery{Repository: profile.URL, HeadBranch: strings.TrimPrefix(request.SourceRef, "refs/heads/"), BaseBranch: request.Git.TargetBranch},
-		Title:                    "Native atomic rebase certification", Body: "Synthetic owned-source rebase fixture for exact-result publication and same-original-PR observation.",
+		Title:                    "test(integration): certify native atomic rebase", Body: "Synthetic owned-source rebase fixture for exact-result publication and same-original-PR observation.",
 	})
 	if err != nil || pr.HeadCommit != request.Git.SourceCommit || pr.BaseCommit != request.Git.BaseCommit || pr.State != "open" {
 		t.Fatalf("canonical fixture PR creation: %+v, %v", pr, err)

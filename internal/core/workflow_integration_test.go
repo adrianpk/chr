@@ -76,7 +76,7 @@ func workflowFixtureIntegrate(t *testing.T, actor, method string) {
 
 	switch method {
 	case "merge":
-		workflowIntegrationCommand(t, actor, "merge", "--no-ff", "-m", "Integrate slice", "source")
+		workflowIntegrationCommand(t, actor, "merge", "--no-ff", "-m", "test(integration): integrate slice fixture", "source")
 	case "rebase":
 		workflowIntegrationCommand(t, actor, "checkout", "-b", "rebased", "source")
 		workflowIntegrationCommand(t, actor, "rebase", "dev")
@@ -84,7 +84,7 @@ func workflowFixtureIntegrate(t *testing.T, actor, method string) {
 		workflowIntegrationCommand(t, actor, "merge", "--ff-only", "rebased")
 	case "squash":
 		workflowIntegrationCommand(t, actor, "merge", "--squash", "source")
-		workflowIntegrationCommand(t, actor, "commit", "-m", "Integrate slice")
+		workflowIntegrationCommand(t, actor, "commit", "-m", "test(integration): integrate slice fixture")
 	}
 }
 
@@ -107,7 +107,7 @@ func workflowIntegrationCommit(t *testing.T, dir, file, text string) string {
 	}
 
 	workflowIntegrationCommand(t, dir, "add", file)
-	workflowIntegrationCommand(t, dir, "commit", "-m", text)
+	workflowIntegrationCommand(t, dir, "commit", "-m", "test(integration): "+text)
 
 	return workflowIntegrationCommand(t, dir, "rev-parse", "HEAD")
 }
