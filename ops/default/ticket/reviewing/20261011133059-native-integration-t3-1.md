@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T21:44:33Z
 branch: feat/slice-3-native-integration-records
 reviewed_at: 2026-10-11T22:10:52Z
-commits: []
+commits: [64369b81579c8b4136609383568731067bc7bdfd]
 ---
 
 # T3.1: Extend candidate and receipt schemas
@@ -60,6 +60,8 @@ Keep one task commit and one canonical slice PR; only Looper submits development
 Use the existing Markdown ticket lifecycle; this file does not create a product runtime invocation.
 
 ## Evidence
+
+Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/64369b81579c8b4136609383568731067bc7bdfd).
 
 Implemented versioned native candidate/receipt bindings, owned hashed source/history/capability/validation and transaction/observation references. Historical receipt reads preserve their exact bytes. Unsupported or incomplete native proof blocks creation and reads.
 
