@@ -36,7 +36,7 @@ Task accounting: 47 new tickets and 4 reused original assurance tickets. Retaine
 
 Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is active and must certify the approved default rebase profile in both designated disposable repositories.
 The original controller remains inactive and blocked; its checkpoint and consumed budgets are preserved. Its assurance execution is transferred to Slice 13 under the approved plan.
-Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Current setup access is verified; publisher and same-PR observation certification are pending.
+Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Current access and real default rebase through both existing adapters are certified in the slice worktree; final ordered checks belong to the exact clean canonical PR head.
 
 States: `ready`, `in_progress`, `validated`, `blocked`, `done`. Validated work becomes done only after verified slice integration and corresponding ticket finalization.
 Only Looper may merge this set's canonical PRs. Read-only status must not mutate work.
@@ -108,9 +108,9 @@ External prerequisite: explicit disposable repository and policy/access profile 
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T2.1 | [TKT-20261011133056](../ticket/ready/20261011133056-native-integration-t2-1.md) | ready | pending | Admit an explicit owned-source publication profile |
-| T2.2 | [TKT-20261011133057](../ticket/ready/20261011133057-native-integration-t2-2.md) | ready | pending | Certify Forgejo default rebase observation |
-| T2.3 | [TKT-20261011133058](../ticket/ready/20261011133058-native-integration-t2-3.md) | ready | pending | Certify GitHub default rebase observation |
+| T2.1 | [TKT-20261011133056](../ticket/reviewing/20261011133056-native-integration-t2-1.md) | validated | `131dd1733a087585add492b68ba5fa3177ef3ec7` | Admit an explicit owned-source publication profile |
+| T2.2 | [TKT-20261011133057](../ticket/reviewing/20261011133057-native-integration-t2-2.md) | validated | `17a308198809683a0bd8adff965379bbd6dd90a6` | Certify Forgejo default rebase observation |
+| T2.3 | [TKT-20261011133058](../ticket/reviewing/20261011133058-native-integration-t2-3.md) | validated | `a7e90f2ee18ba5d09e46677c101b38f981916b1b` | Certify GitHub default rebase observation |
 
 Required checks:
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133056
 title: "T2.1: Admit an explicit owned-source publication profile"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,7 +10,9 @@ tags: native-integration, slice-2
 source: chat
 reported_at: 2026-10-11T13:30:56Z
 ready_at: 2026-10-11T13:31:37Z
-commits: []
+started_at: 2026-10-11T19:01:24Z
+reviewed_at: 2026-10-11T19:39:13Z
+commits: [131dd1733a087585add492b68ba5fa3177ef3ec7]
 ---
 
 # T2.1: Admit an explicit owned-source publication profile
@@ -58,4 +60,10 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/131dd1733a087585add492b68ba5fa3177ef3ec7).
+
+Focused configuration/upgrade/native checks, real default rebase on both designated forges and the complete pre-commit `make verify` passed.
+
+Report: [Slice 2](../../report/slices/native-integration-queue/slice-2-forge-profiles.md).
+
+Canonical PR: pending. Final ordered checks are recorded against the clean PR head by Looper; verified integration is pending.

@@ -159,9 +159,9 @@ Invariants: INV-08, INV-11, INV-14, INV-15, INV-23
 
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
-| T2.1 | [TKT-20261011133056](../ticket/ready/20261011133056-native-integration-t2-1.md) | Add opt-in profile configuration, current capability/ownership/policy fingerprints, unsupported reasons and original/published source-aware binding. | Upgrade preserves policy and keeps the profile disabled; incompatible protections, native approval and fork ownership block before publication. |
-| T2.2 | [TKT-20261011133057](../ticket/ready/20261011133057-native-integration-t2-2.md) | Implement same-canonical-PR Git application observation for Forgejo and prove one default rebase in a designated disposable repository. | The actual prepared result is reachable and the original PR is observed merged; metadata lag and close/retarget races remain explicit. |
-| T2.3 | [TKT-20261011133058](../ticket/ready/20261011133058-native-integration-t2-3.md) | Implement the equivalent existing GitHub adapter contract and prove one default rebase in a designated disposable repository. | The same source/base/result and canonical merged-PR proof holds without depending on a provider merge queue. |
+| T2.1 | [TKT-20261011133056](../ticket/reviewing/20261011133056-native-integration-t2-1.md) | Add opt-in profile configuration, current capability/ownership/policy fingerprints, unsupported reasons and original/published source-aware binding. | Upgrade preserves policy and keeps the profile disabled; incompatible protections, native approval and fork ownership block before publication. |
+| T2.2 | [TKT-20261011133057](../ticket/reviewing/20261011133057-native-integration-t2-2.md) | Implement same-canonical-PR Git application observation for Forgejo and prove one default rebase in a designated disposable repository. | The actual prepared result is reachable and the original PR is observed merged; metadata lag and close/retarget races remain explicit. |
+| T2.3 | [TKT-20261011133058](../ticket/reviewing/20261011133058-native-integration-t2-3.md) | Implement the equivalent existing GitHub adapter contract and prove one default rebase in a designated disposable repository. | The same source/base/result and canonical merged-PR proof holds without depending on a provider merge queue. |
 
 ### Required Candidate Checks
 
