@@ -39,6 +39,8 @@ T3.1 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 
 T3.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/9a004ba55c6b72ac69aa0322fba531eebcc257d7). Acta recorded the completed task as `01M4PJDG8Q7TEC5W7ZCGJ576RH`.
 
+T3.3 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/dce7077f632e9d1d93dcdde5d35ba958f4695e0f). Acta recorded the completed task as `01M4PN8W5K2TA9P691MVGK08Y9`.
+
 ## Contracts Added or Changed
 
 - `chr-integration-candidate/v2` and `chr-workflow-receipt/v2` distinguish native proof from historical schemas.

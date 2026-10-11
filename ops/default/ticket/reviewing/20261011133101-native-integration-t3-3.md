@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T22:53:10Z
 branch: feat/slice-3-native-integration-records
 reviewed_at: 2026-10-11T23:36:41Z
-commits: []
+commits: [dce7077f632e9d1d93dcdde5d35ba958f4695e0f]
 ---
 
 # T3.3: Extend attempt and budget journals
