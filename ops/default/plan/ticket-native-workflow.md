@@ -1,6 +1,6 @@
 # Ticket-Native Work Delivery
 
-Status: active
+Status: blocked
 
 Date: 2026-10-08
 
@@ -20,7 +20,7 @@ Plan approval: approved on 2026-10-08
 
 Implementation authorization: granted on 2026-10-08 for the approved delivery set through slice-loop
 
-Active slice: Slice 11 — Defaults and authority transition
+Active slice: Slice 12 — End-to-end workflow assurance; execution transferred to corrective Slice 13.
 
 Next slice: Slice 12 — End-to-end workflow assurance
 
@@ -32,6 +32,21 @@ can use them. Vertical increments let each slice pass real boundary tests and
 keep the existing workflow usable. Contracts, mappings, logic and focused tests
 are delivered together; preparatory interfaces without working behavior are not
 separate slices.
+
+## Approved Corrective Execution Transfer
+
+Approved: 2026-10-11; maintainer approved the native integration specification and requested Looper execution.
+
+The [corrective plan](../plan/native-integration-queue.md#original-assurance-execution-transfer)
+and [tracker](../tracker/native-integration-queue.md) own the remaining assurance execution.
+Original task keys T12.1..T12.4 are reused as corrective T13.1..T13.4 aliases.
+Retained implementations are `4f10f1c60de1f164f727d37b4df5c02343ab6e11` and
+`44e8145aa618edfc51d5efb08330c641b02f7e58`; neither is integrated into current dev.
+The eleven completed slices and 44 completed task tickets remain unchanged.
+The old controller and its reserved assurance branch are retained as history,
+not resumed or reset. Do not claim the old reserved PR merged.
+Close the original remaining outcomes only after the replacement assurance unit,
+current live certification and full gate are verified through the corrective set.
 
 ## Purpose and Delivery Boundary
 

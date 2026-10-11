@@ -1,6 +1,6 @@
 # Ticket-Native Work Tracker
 
-Status: active
+Status: blocked
 
 Date: 2026-10-08
 
@@ -22,13 +22,28 @@ Implementation authorization: granted on 2026-10-08 for the approved delivery se
 
 Planning commit on dev: the bootstrap commit introducing this tracker; resolve with `git log --diff-filter=A --format=%H -- ops/default/tracker/ticket-native-workflow.md`
 
-Active slice: Slice 12 — End-to-end workflow assurance
+Active slice: Slice 12 — End-to-end workflow assurance; execution transferred to corrective Slice 13.
 
 Next slice: none; final delivery-set gate follows the last verified integration.
 
 Slice strategy: behavior-first
 
 Progress: 11 of 12 slices integrated; 44 of 48 tasks done.
+
+## Approved Corrective Execution Transfer
+
+Approved: 2026-10-11; maintainer approved the native integration specification and requested Looper execution.
+
+The [corrective plan](../plan/native-integration-queue.md#original-assurance-execution-transfer)
+and [tracker](../tracker/native-integration-queue.md) own the remaining assurance execution.
+Original task keys T12.1..T12.4 are reused as corrective T13.1..T13.4 aliases.
+Retained implementations are `4f10f1c60de1f164f727d37b4df5c02343ab6e11` and
+`44e8145aa618edfc51d5efb08330c641b02f7e58`; neither is integrated into current dev.
+The eleven completed slices and 44 completed task tickets remain unchanged.
+The old controller and its reserved assurance branch are retained as history,
+not resumed or reset. Do not claim the old reserved PR merged.
+Close the original remaining outcomes only after the replacement assurance unit,
+current live certification and full gate are verified through the corrective set.
 
 ## Current Checkpoint
 
@@ -39,7 +54,8 @@ Slice 11 merged head `750378ec9b7ee05399395184def0954ab47cf1d7` passed the contr
 with Go 1.27.1, the retained curation fixture and a scoped 60-minute test timeout.
 Its report is delivered and all four task tickets are solved.
 Acta records the canonical merge in `01M4HEH83Y7RY0GGS6C10NBRNF`.
-Slice 12 is active; T12.1 is in progress. Live-provider fixture designation for
+Slice 12 execution is blocked and transferred to corrective Slice 13. T12.1 and
+T12.2 have retained validated commits; their task tickets await adapted integration. Live-provider fixture designation for
 T12.3 remains an external prerequisite; no live-provider success is claimed.
 
 Only slice-loop may merge this set's canonical slice PRs using Rebase +
@@ -77,7 +93,7 @@ Fast-forward into `dev`.
 | Slice 9 | Independent parallel runners | `feat/slice-9-workflow-concurrency` | `feat(slice-9): coordinate independent parallel runners` | `ops/default/report/slices/ticket-native-workflow/slice-9-workflow-concurrency.md` | integrated | 4/4 | [#372](https://forge.adrianpk.com/adrianpk/chr/pulls/372) |
 | Slice 10 | Shared operation controls | `feat/slice-10-workflow-controls` | `feat(slice-10): expose shared workflow controls` | `ops/default/report/slices/ticket-native-workflow/slice-10-workflow-controls.md` | integrated | 4/4 | [#373](https://forge.adrianpk.com/adrianpk/chr/pulls/373) |
 | Slice 11 | Defaults and authority transition | `feat/slice-11-workflow-defaults` | `feat(slice-11): enable versioned ticket workflow defaults` | `ops/default/report/slices/ticket-native-workflow/slice-11-workflow-defaults.md` | integrated | 4/4 | #374 |
-| Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | active | 0/4 | pending |
+| Slice 12 | End-to-end workflow assurance | `test/slice-12-workflow-assurance` | `test(slice-12): verify ticket workflow end to end` | `ops/default/report/slices/ticket-native-workflow/slice-12-workflow-assurance.md` | blocked | 0/4 | pending |
 
 ## Slice 1: Guarded workflow records
 
@@ -760,7 +776,7 @@ Acceptance: A16, A18; explicit adoption and configuration bounds in A24.
 
 ## Slice 12: End-to-end workflow assurance
 
-Status: active
+Status: blocked
 
 Prerequisite: satisfied by verified canonical PR #374 integration into dev.
 
@@ -774,10 +790,10 @@ Plan contract: [Slice 12](../plan/ticket-native-workflow.md#slice-12-end-to-end-
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T12.1 | [TKT-20261008141429](../ticket/in_progress/20261008141429-ticket-native-t12-1.md) | in_progress | pending | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
-| T12.2 | [TKT-20261008141430](../ticket/ready/20261008141430-ticket-native-t12-2.md) | ready | pending | Add restart/crash/lost-response/manual-edit fault scenarios and a bounded repository QA entrypoint. |
-| T12.3 | [TKT-20261008141431](../ticket/ready/20261008141431-ticket-native-t12-3.md) | ready | pending | Verify supported existing provider/method paths in designated disposable live repositories. |
-| T12.4 | [TKT-20261008141432](../ticket/ready/20261008141432-ticket-native-t12-4.md) | ready | pending | Run final exact-candidate gates, reconcile the acceptance matrix and publish the cycle evidence/report. |
+| T12.1 | [TKT-20261008141429](../ticket/blocked/20261008141429-ticket-native-t12-1.md) | validated | 4f10f1c60de1f164f727d37b4df5c02343ab6e11 | Compose real-files/subprocess/Git scenarios for ordered slices, loose queues and parallel independent work. |
+| T12.2 | [TKT-20261008141430](../ticket/blocked/20261008141430-ticket-native-t12-2.md) | validated | 44e8145aa618edfc51d5efb08330c641b02f7e58 | Add restart/crash/lost-response/manual-edit fault scenarios and a bounded repository QA entrypoint. |
+| T12.3 | [TKT-20261008141431](../ticket/blocked/20261008141431-ticket-native-t12-3.md) | blocked | pending | Verify supported existing provider/method paths in designated disposable live repositories. |
+| T12.4 | [TKT-20261008141432](../ticket/blocked/20261008141432-ticket-native-t12-4.md) | blocked | pending | Run final exact-candidate gates, reconcile the acceptance matrix and publish the cycle evidence/report. |
 
 ### Validation
 
@@ -797,7 +813,7 @@ Acceptance: composed confirmation of A01-A24 and live-provider limitations.
 - PR: pending.
 - Merge commit: pending.
 - Report status: not created.
-- Task commits and ticket lifecycle evidence: pending.
+- Retained task implementations: original T12.1/T12.2 references above; tickets blocked until corrective Slice 13.
 - Validation evidence: pending.
 - External prerequisite: designated disposable live repositories and access for T12.3 are pending.
 
