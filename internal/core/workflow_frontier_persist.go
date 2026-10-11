@@ -48,6 +48,7 @@ func clearWorkflowSliceBindings(run *workflowInvocationFile) {
 	run.CandidateRef, run.CandidateHash = "", ""
 	run.DeliveryProofRef, run.DeliveryProofHash = "", ""
 	run.DeliveryRef, run.DeliveryHash = "", ""
+	run.Integration = nil
 }
 
 func encodeWorkflowUnitDelivery(delivery WorkflowUnitDelivery) ([]byte, error) {
@@ -68,7 +69,7 @@ func workflowFrontierEvidencePath(id string, cursor int) string {
 // Known optional fields must disappear when their authoritative typed value is
 // cleared. Unknown fields survive; stale serialized PR/owner bindings must not.
 func workflowOptionalInvocationField(key string) bool {
-	if key == "capacity_resume_status" {
+	if key == "capacity_resume_status" || key == "integration_binding" || key == "integration_entries" {
 		return true
 	}
 

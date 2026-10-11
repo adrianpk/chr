@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133100
 title: "T3.2: Persist integration entries through WorkflowStore"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-3
 source: chat
 reported_at: 2026-10-11T13:31:00Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-11T22:17:47Z
+branch: feat/slice-3-native-integration-records
+reviewed_at: 2026-10-11T22:47:37Z
 commits: []
 ---
 
@@ -58,4 +61,12 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented guarded queue admission and phase transitions through the existing workflow transaction. Concurrent retry, cross-namespace ordering, capacity and arithmetic bounds, interrupted replacement/replay, stale callback, candidate ownership, malformed bytes, stop/resume and uncertain publication checks pass.
+
+Successful task checks:
+
+- `make verify`
+- `go test -race ./internal/core -run '^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt' -count=1`
+- `git diff --check`
+
+[Slice 3 report](../../report/slices/native-integration-queue/slice-3-integration-records.md) records the gate and focused evidence. The canonical Slice 3 PR, complete exact-HEAD checks and verified integration remain pending until T3.3 and T3.4 are complete.

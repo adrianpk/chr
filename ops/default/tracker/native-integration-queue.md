@@ -34,7 +34,7 @@ Task accounting: 47 new tickets and 4 reused original assurance tickets. Retaine
 
 ## Current Checkpoint
 
-Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is active for durable integration records. T3.1 schemas and proof readers are validated; T3.2 queue persistence is the next recorded task. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) records development evidence; the canonical PR and final exact-HEAD checks are pending.
+Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is canonically integrated through [PR #376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) at `3129b5ce312df22287a4e7b78e08bf41f5958377`. All five ordered Looper checks passed for that exact clean HEAD; its three task tickets are solved. Slice 3 is active for durable integration records. T3.1 schemas and proof readers are validated. T3.2 queue persistence is validated with focused race checks and the required pre-commit gate. T3.3 attempt and budget journals are next. The [Slice 3 report](../report/slices/native-integration-queue/slice-3-integration-records.md) records development evidence; the canonical PR and final exact-HEAD checks are pending.
 The original controller remains inactive and blocked; its checkpoint and consumed budgets are preserved. Its assurance execution is transferred to Slice 13 under the approved plan.
 Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Real default rebase through both existing adapters is certified; the Slice 2 report retains the exact-head validation boundary.
 
@@ -140,7 +140,7 @@ Prerequisite: verified Slice 2 integration and closed task fanout.
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T3.1 | [TKT-20261011133059](../ticket/reviewing/20261011133059-native-integration-t3-1.md) | validated | `64369b81579c8b4136609383568731067bc7bdfd` | Extend candidate and receipt schemas |
-| T3.2 | [TKT-20261011133100](../ticket/ready/20261011133100-native-integration-t3-2.md) | ready | pending | Persist integration entries through WorkflowStore |
+| T3.2 | [TKT-20261011133100](../ticket/reviewing/20261011133100-native-integration-t3-2.md) | validated | pending | Persist integration entries through WorkflowStore |
 | T3.3 | [TKT-20261011133101](../ticket/ready/20261011133101-native-integration-t3-3.md) | ready | pending | Extend attempt and budget journals |
 | T3.4 | [TKT-20261011133102](../ticket/ready/20261011133102-native-integration-t3-4.md) | ready | pending | Rebuild indexes and validate migrations |
 
