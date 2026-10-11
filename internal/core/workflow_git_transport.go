@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -67,7 +68,11 @@ type workflowReceivePackProcess struct {
 	waited  bool
 }
 
-func (git OSWorkflowGitPublisher) openReceivePack(ctx context.Context) (workflowReceivePack, error) {
+func (git OSWorkflowGitPublisher) openReceivePack(ctx context.Context, directory string) (workflowReceivePack, error) {
+	if strings.HasPrefix(git.transport, "https://") {
+		return git.openHTTPReceivePack(ctx, directory)
+	}
+
 	if !filepath.IsAbs(git.transport) {
 		return git.openSSHReceivePack(ctx)
 	}

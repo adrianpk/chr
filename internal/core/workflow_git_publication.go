@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -39,6 +40,7 @@ type OSWorkflowGitPublisher struct {
 	repository string
 	transport  string
 	sshConfig  string
+	httpClient *http.Client
 }
 
 // NewWorkflowGitPublisher stores trusted transport configuration without IO.
@@ -50,6 +52,14 @@ func NewWorkflowGitPublisher(repository, transport string) OSWorkflowGitPublishe
 // in SSH's agent, keys and configuration rather than publication evidence.
 func (git OSWorkflowGitPublisher) WithSSHConfig(path string) OSWorkflowGitPublisher {
 	git.sshConfig = path
+
+	return git
+}
+
+// WithHTTPClient selects host-owned TLS/proxy configuration. Publication always
+// disables redirects, including redirects allowed by the supplied client.
+func (git OSWorkflowGitPublisher) WithHTTPClient(client *http.Client) OSWorkflowGitPublisher {
+	git.httpClient = client
 
 	return git
 }
@@ -78,7 +88,7 @@ func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, reques
 		return result, err
 	}
 
-	session, err := git.openReceivePack(ctx)
+	session, err := git.openReceivePack(ctx, request.Directory)
 	if err != nil {
 		return result, err
 	}

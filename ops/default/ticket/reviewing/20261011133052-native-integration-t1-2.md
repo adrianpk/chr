@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T13:52:59Z
 started_at: 2026-10-11T13:49:06Z
 branch: feat/slice-1-native-git-transport
-commits: []
+commits: [6df8a1f73dbc0f54d80ee15c7697ecd61068ced2]
 ---
 
 # T1.2: Support host-authenticated SSH publication
