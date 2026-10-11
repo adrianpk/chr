@@ -6,7 +6,7 @@ Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-
 Tracker: [Native Integration Corrective Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-1-native-git-transport`
 PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375)
-Implementation checkpoint: `43ffd7f0b07224a7b67385df7a10fd8b953c87f5`
+Implementation checkpoint: `b7790de38a5473f3f0f3c6e5187ececb7f11089d`
 
 ## Purpose
 
@@ -52,8 +52,10 @@ Passed during task implementation with Go 1.27.1:
 
 Initial candidate `c97c94c567a83317caf30497bfc54af9c2e10a22`: `make verify` passed lint but failed in `TestWorkflowIntegrationChangedInput/during_IO` because the host had no default Git commit identity. The same core-suite run reached the default ten-minute timeout. The identity-dependent case passes with an owned temporary Git configuration. Candidate `774a4cfa22da800168c4bd116814396e22ce348f` passed lint and the identity-dependent case but again exhausted the core suite's ten-minute runner timeout while executing existing review-journal cases. Final validation supplies the temporary default identity and uses `GOFLAGS="-count=1 -timeout=30m"` for uncached tests with a thirty-minute package budget. All required commands, tests, assertions and product deadlines remain unchanged.
 
+Canonical `dev` subsequently received the approved fixture designation. The Slice 1 tracker conflict was resolved locally while preserving that designation, and obsolete validation was interrupted before publication. Final validation is regenerated for the clean rebased candidate.
+
 The configured final candidate commands are `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1`, and `git diff --check`, in that order. Looper records their results against the exact clean PR HEAD after the PR-reference commit. Task checks are local transport evidence; live provider certification is not claimed here.
 
 ## Risks and Follow-ups
 
-The owned SSH fixture requires OpenSSH client/server tools. Repositories exceeding the explicit transfer bounds are rejected before commands. The publisher exposes uncertain outcome; durable reconciliation and retry admission are delivered by the later approved recovery slices. Slice 2 still requires designated disposable Forgejo and GitHub repositories and policy/access profiles.
+The owned SSH fixture requires OpenSSH client/server tools. Repositories exceeding the explicit transfer bounds are rejected before commands. The publisher exposes uncertain outcome; durable reconciliation and retry admission are delivered by the later approved recovery slices. Slice 2 uses the separately designated disposable Forgejo and GitHub repositories and policy/access profiles from [Certification Fixtures](../../native-integration-fixtures.md); their live publisher certification remains pending.

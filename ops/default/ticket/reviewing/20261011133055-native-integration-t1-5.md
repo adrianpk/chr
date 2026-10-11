@@ -14,7 +14,7 @@ reviewed_at: 2026-10-11T14:09:27Z
 started_at: 2026-10-11T14:05:06Z
 branch: feat/slice-1-native-git-transport
 pr: 375
-commits: [43ffd7f0b07224a7b67385df7a10fd8b953c87f5]
+commits: [b7790de38a5473f3f0f3c6e5187ececb7f11089d]
 ---
 
 # T1.5: Verify protocol races and review the transport boundary
