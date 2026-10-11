@@ -48,8 +48,8 @@ The approved profile explicitly permits rewriting the exact CHR-owned source bra
 - Preserve primary checkout changes and retained worktrees. Use the clean development controller checkout and isolated implementation worktrees.
 - Slices 1 through 12 use 47 new task tickets. Slice 13 reuses the four original assurance tickets, giving 51 execution tasks without duplicate tickets.
 - Slice 1 uses owned temporary Git/SSH/HTTPS fixtures only. Do not require a live production repository for its transport proof.
-- Slice 2 requires designated disposable Forgejo and GitHub repositories, host-owned access roles, full target/source refs and explicit branch-policy profiles. These inputs have been requested and are not yet supplied.
-- Do not create remote repositories, alter account permissions, disable protections or use production test PRs to fill missing certification authority.
+- Slice 2's disposable Forgejo and GitHub repositories, host-owned access roles, full target/source refs and explicit branch-policy profiles are supplied in [Certification Fixtures](../report/native-integration-fixtures.md). The maintainer authorized their creation/configuration and synthetic test pushes, PRs and merges on 2026-10-11. Setup access is verified; publisher certification remains Slice 2 and Slice 12 work.
+- Use only the two designated private test repositories. Do not create additional remote repositories, alter account permissions, disable production protections or use production test PRs to fill missing certification authority.
 - Stop at Slice 2 if the designation/access gate remains unmet. If either forge cannot support the approved mechanism, stop dependent work and request an approved specification revision.
 
 ## Original Assurance Execution Transfer
@@ -147,7 +147,7 @@ Expected report: `ops/default/report/slices/native-integration-queue/slice-2-for
 
 Prerequisite: verified Slice 1 integration and closed task fanout.
 
-External prerequisite: explicit disposable repository and policy/access profile designation for both existing forges.
+External prerequisite: explicit disposable repository and policy/access profile designation for both existing forges, supplied in [Certification Fixtures](../report/native-integration-fixtures.md); recheck current access before live probes.
 
 Acceptance evidence owner: Slice 2 report and its linked retained command/provider evidence.
 

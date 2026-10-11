@@ -37,7 +37,7 @@ Task accounting: 47 new tickets and 4 reused original assurance tickets. Retaine
 Both specifications are accepted. Slice 1 is active after the preparation commit reaches canonical `dev`.
 The original controller is inactive and blocked, with eleven integrated slices and no pending merge. Its checkpoint and budgets remain untouched.
 The old assurance execution path is transferred to Slice 13 under the approved plan; its four tickets retain their original IDs and evidence.
-Live repository/profile designation is pending and gates Slice 2; local Slice 1 transport work may proceed.
+Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Setup access is verified and the Slice 2 designation prerequisite is supplied. Actual publisher and PR-observation certification remains pending in Slice 2 and Slice 12.
 
 States: `ready`, `in_progress`, `validated`, `blocked`, `done`. Validated work becomes done only after verified slice integration and corresponding ticket finalization.
 Only Looper may merge this set's canonical PRs. Read-only status must not mutate work.
@@ -105,7 +105,7 @@ Expected report: `ops/default/report/slices/native-integration-queue/slice-2-for
 
 Prerequisite: verified Slice 1 integration and closed task fanout.
 
-External prerequisite: explicit disposable repository and policy/access profile designation for both existing forges.
+External prerequisite: explicit disposable repository and policy/access profile designation for both existing forges, supplied in [Certification Fixtures](../report/native-integration-fixtures.md); recheck current access before live probes.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
