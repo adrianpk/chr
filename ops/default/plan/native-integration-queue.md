@@ -106,6 +106,8 @@ No worker may bypass a failed check, claim live evidence from mocks, substitute 
 
 Status: reviewing
 
+PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375)
+
 Expected branch: `feat/slice-1-native-git-transport`
 
 Expected PR title: `feat(slice-1): publish exact results through atomic Git transport`

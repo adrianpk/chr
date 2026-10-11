@@ -5,7 +5,8 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Corrective Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-1-native-git-transport`
-PR: pending
+PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375)
+Implementation checkpoint: `43ffd7f0b07224a7b67385df7a10fd8b953c87f5`
 
 ## Purpose
 

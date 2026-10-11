@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T14:02:50Z
 started_at: 2026-10-11T14:00:01Z
 branch: feat/slice-1-native-git-transport
+pr: 375
 commits: [85e5420245b68a2596361b72a6893ce221ae1876]
 ---
 
@@ -63,4 +64,4 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 feat(workflow): bind publication to exact ownership and history proof
 Focused check passed: `go test ./internal/core -run 'TestWorkflowGit(Atomic|Candidate|AlreadyPrepared|FastForward)$' -count=1`.
-The package linter passed with zero issues. PR and integration remain pending.
+The package linter passed with zero issues. Canonical PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375). Verified integration remains pending the controller.

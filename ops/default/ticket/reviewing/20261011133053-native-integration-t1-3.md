@@ -13,6 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T13:58:41Z
 started_at: 2026-10-11T13:54:15Z
 branch: feat/slice-1-native-git-transport
+pr: 375
 commits: [d24aa00a42e5bb7ffb45315a2cbab6886f2aa9c8]
 ---
 
@@ -63,4 +64,4 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 feat(workflow): publish guarded refs through smart HTTPS
 Focused check passed: `go test ./internal/core -run 'TestWorkflow(GitHTTPS|HTTPIdentity)$' -count=1`.
-The package linter passed with zero issues. PR and integration remain pending.
+The package linter passed with zero issues. Canonical PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375). Verified integration remains pending the controller.

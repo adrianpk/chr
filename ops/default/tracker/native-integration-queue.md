@@ -46,7 +46,7 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 
 | Slice | Name | Exact branch | Expected PR title | Report | State | PR |
 | --- | --- | --- | --- | --- | --- | --- |
-| Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | reviewing | pending |
+| Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | reviewing | [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) |
 | Slice 2 | Forge publication profiles | `feat/slice-2-native-forge-profiles` | `feat(slice-2): observe native publication through existing forge adapters` | `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md` | not_started | pending |
 | Slice 3 | Durable integration records | `feat/slice-3-native-integration-records` | `feat(slice-3): persist native integration queue records` | `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md` | not_started | pending |
 | Slice 4 | Canonical queue scheduling | `feat/slice-4-native-queue-scheduling` | `feat(slice-4): schedule integration across canonical target queues` | `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md` | not_started | pending |
@@ -78,7 +78,7 @@ Prerequisite: committed approved bootstrap on canonical `dev`.
 | T1.2 | [TKT-20261011133052](../ticket/reviewing/20261011133052-native-integration-t1-2.md) | validated | `6df8a1f73dbc0f54d80ee15c7697ecd61068ced2` | Support host-authenticated SSH publication |
 | T1.3 | [TKT-20261011133053](../ticket/reviewing/20261011133053-native-integration-t1-3.md) | validated | `d24aa00a42e5bb7ffb45315a2cbab6886f2aa9c8` | Support host-authenticated HTTPS publication |
 | T1.4 | [TKT-20261011133054](../ticket/reviewing/20261011133054-native-integration-t1-4.md) | validated | `85e5420245b68a2596361b72a6893ce221ae1876` | Seal exact source/base/result publication proof |
-| T1.5 | [TKT-20261011133055](../ticket/reviewing/20261011133055-native-integration-t1-5.md) | validated | pending | Verify protocol races and review the transport boundary |
+| T1.5 | [TKT-20261011133055](../ticket/reviewing/20261011133055-native-integration-t1-5.md) | validated | `43ffd7f0b07224a7b67385df7a10fd8b953c87f5` | Verify protocol races and review the transport boundary |
 
 Required checks:
 
@@ -87,7 +87,7 @@ Required checks:
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-PR: pending
+PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375)
 
 Verified merge: pending
 

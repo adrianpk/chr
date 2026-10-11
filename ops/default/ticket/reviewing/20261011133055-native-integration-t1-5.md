@@ -13,7 +13,8 @@ ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T14:09:27Z
 started_at: 2026-10-11T14:05:06Z
 branch: feat/slice-1-native-git-transport
-commits: []
+pr: 375
+commits: [43ffd7f0b07224a7b67385df7a10fd8b953c87f5]
 ---
 
 # T1.5: Verify protocol races and review the transport boundary
@@ -63,4 +64,4 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 test(workflow): certify guarded transport contention and lost responses
 Focused check passed: `go test ./internal/core -run 'TestWorkflowGit' -count=1`.
-The package linter passed with zero issues. PR and integration remain pending.
+The package linter passed with zero issues. Canonical PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375). Verified integration remains pending the controller.
