@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T13:47:31Z
 started_at: 2026-10-11T13:44:35Z
 branch: feat/slice-1-native-git-transport
-commits: []
+commits: [3f61d28d74337f7efa25d77917e435f723a68430]
 ---
 
 # T1.1: Execute an explicit atomic receive-pack transaction

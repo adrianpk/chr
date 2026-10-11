@@ -38,11 +38,20 @@ type WorkflowGitPublisher interface {
 type OSWorkflowGitPublisher struct {
 	repository string
 	transport  string
+	sshConfig  string
 }
 
 // NewWorkflowGitPublisher stores trusted transport configuration without IO.
 func NewWorkflowGitPublisher(repository, transport string) OSWorkflowGitPublisher {
 	return OSWorkflowGitPublisher{repository: repository, transport: transport}
+}
+
+// WithSSHConfig selects a host-owned SSH configuration file; credentials remain
+// in SSH's agent, keys and configuration rather than publication evidence.
+func (git OSWorkflowGitPublisher) WithSSHConfig(path string) OSWorkflowGitPublisher {
+	git.sshConfig = path
+
+	return git
 }
 
 type workflowReceivePack interface {

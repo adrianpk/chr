@@ -74,8 +74,8 @@ Prerequisite: committed approved bootstrap on canonical `dev`.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T1.1 | [TKT-20261011133051](../ticket/reviewing/20261011133051-native-integration-t1-1.md) | validated | pending | Execute an explicit atomic receive-pack transaction |
-| T1.2 | [TKT-20261011133052](../ticket/ready/20261011133052-native-integration-t1-2.md) | ready | pending | Support host-authenticated SSH publication |
+| T1.1 | [TKT-20261011133051](../ticket/reviewing/20261011133051-native-integration-t1-1.md) | validated | `3f61d28d74337f7efa25d77917e435f723a68430` | Execute an explicit atomic receive-pack transaction |
+| T1.2 | [TKT-20261011133052](../ticket/reviewing/20261011133052-native-integration-t1-2.md) | validated | pending | Support host-authenticated SSH publication |
 | T1.3 | [TKT-20261011133053](../ticket/ready/20261011133053-native-integration-t1-3.md) | ready | pending | Support host-authenticated HTTPS publication |
 | T1.4 | [TKT-20261011133054](../ticket/ready/20261011133054-native-integration-t1-4.md) | ready | pending | Seal exact source/base/result publication proof |
 | T1.5 | [TKT-20261011133055](../ticket/ready/20261011133055-native-integration-t1-5.md) | ready | pending | Verify protocol races and review the transport boundary |

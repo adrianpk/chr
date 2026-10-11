@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133052
 title: "T1.2: Support host-authenticated SSH publication"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-1
 source: chat
 reported_at: 2026-10-11T13:30:52Z
 ready_at: 2026-10-11T13:31:37Z
+reviewed_at: 2026-10-11T13:52:59Z
+started_at: 2026-10-11T13:49:06Z
+branch: feat/slice-1-native-git-transport
 commits: []
 ---
 
@@ -58,4 +61,6 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+feat(workflow): publish guarded refs through host-authenticated SSH
+Focused check passed: `go test ./internal/core -run 'TestWorkflow(GitSSH|SSHArguments)$' -count=1`.
+The package linter passed with zero issues. PR and integration remain pending.

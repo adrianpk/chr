@@ -69,7 +69,7 @@ type workflowReceivePackProcess struct {
 
 func (git OSWorkflowGitPublisher) openReceivePack(ctx context.Context) (workflowReceivePack, error) {
 	if !filepath.IsAbs(git.transport) {
-		return nil, fmt.Errorf("unsupported publication transport")
+		return git.openSSHReceivePack(ctx)
 	}
 
 	owned, cancel := context.WithCancel(ctx)
