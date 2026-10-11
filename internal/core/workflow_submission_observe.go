@@ -43,8 +43,11 @@ func observeWorkflowSubmission(ctx context.Context, submission WorkflowSubmissio
 }
 
 func workflowSubmissionPRMatches(submission WorkflowSubmission, pr WorkflowPullRequestSnapshot) bool {
-	expected := submission.Guard.PullRequest
-	if pr.URL != expected.URL || pr.Repository != expected.Repository || pr.HeadRepository != expected.HeadRepository || pr.HeadBranch != expected.HeadBranch || pr.BaseBranch != expected.BaseBranch || pr.HeadCommit != expected.HeadCommit {
+	if submission.Native != nil {
+		return workflowNativeSubmissionPRMatches(submission, pr)
+	}
+
+	if !workflowLegacySubmissionPRIdentityMatches(submission, pr) {
 		return false
 	}
 
@@ -126,4 +129,18 @@ func checkWorkflowSubmittedObservation(ctx context.Context, submission WorkflowS
 	}
 
 	return nil
+}
+
+func workflowNativeSubmissionPRMatches(submission WorkflowSubmission, pr WorkflowPullRequestSnapshot) bool {
+	native := submission.Native
+	expected := [6]string{native.CanonicalPR, native.SourceRepository, native.SourceRepository, native.SourceRef, native.TargetRef, native.PublishedSource}
+	actual := [6]string{pr.URL, pr.Repository, pr.HeadRepository, "refs/heads/" + pr.HeadBranch, "refs/heads/" + pr.BaseBranch, pr.HeadCommit}
+
+	return expected == actual && pr.Merged && pr.State == "closed" && pr.ResultCommit == native.PreparedResult
+}
+
+func workflowLegacySubmissionPRIdentityMatches(submission WorkflowSubmission, pr WorkflowPullRequestSnapshot) bool {
+	expected := submission.Guard.PullRequest
+
+	return pr.URL == expected.URL && pr.Repository == expected.Repository && pr.HeadRepository == expected.HeadRepository && pr.HeadBranch == expected.HeadBranch && pr.BaseBranch == expected.BaseBranch && pr.HeadCommit == expected.HeadCommit
 }

@@ -1,0 +1,196 @@
+package core
+
+import (
+	"reflect"
+	"slices"
+)
+
+func validateWorkflowNativeSubmission(submission WorkflowSubmission, schema string) error {
+	native := submission.Native
+	if native == nil {
+		return validateWorkflowLegacySubmissionSchema(submission, schema)
+	}
+
+	if schema != "chr-integration-journal/v2" || !validWorkflowNativeSubmissionOwner(submission) {
+		return ErrWorkflowConflict
+	}
+
+	if err := validateWorkflowNativeRecordBinding(native.WorkflowNativeRecordBinding); err != nil {
+		return err
+	}
+
+	if native.IntentTime != submission.SubmittedAt || !native.ObservationDeadline.After(native.IntentTime) || len(native.ObservationRefs) > WorkflowPageLimit || len(native.TransportResponseHistory) > WorkflowPageLimit {
+		return ErrWorkflowConflict
+	}
+
+	if err := validateWorkflowNativeSubmissionRefs(*native); err != nil {
+		return err
+	}
+
+	return validateWorkflowNativeApplication(submission)
+}
+
+func validateWorkflowLegacySubmissionSchema(submission WorkflowSubmission, schema string) error {
+	if schema == "chr-integration-journal/v2" && submission.State != "unpublished" {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func validWorkflowNativeSubmissionOwner(submission WorkflowSubmission) bool {
+	native := submission.Native
+
+	return native.InvocationID == submission.InvocationID && native.Unit == submission.Unit && native.ClaimGeneration > 0 && native.Mechanism == WorkflowPublicationGitAtomicDualRef && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, submission.Guard.Git) && native.CanonicalPR == submission.Guard.PullRequest.URL && native.CapabilityHash == submission.Guard.Capability.Revision
+}
+
+func validateWorkflowNativeSubmissionRefs(native WorkflowNativeSubmission) error {
+	refs := append([]WorkflowEvidenceRef{native.CandidateRef, native.ReviewGrantRef, native.FastForwardProofRef}, native.ObservationRefs...)
+
+	refs = append(refs, native.TransportResponseHistory...)
+	for _, ref := range []*WorkflowEvidenceRef{native.AdvertisementRef, native.CommandManifestRef, native.TransportResponseRef, native.ReceiptRef, native.NonApplicationRef} {
+		if ref != nil {
+			refs = append(refs, *ref)
+		}
+	}
+
+	for _, ref := range refs {
+		if err := validateWorkflowEvidenceRef(native.InvocationID, ref); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validateWorkflowNativeApplication(submission WorkflowSubmission) error {
+	native := submission.Native
+	if !validWorkflowNativeDispatch(*native) {
+		return ErrWorkflowConflict
+	}
+
+	switch native.ApplicationState {
+	case "not_started", "unknown":
+		if submission.State != "awaiting_observation" || native.ReceiptRef != nil || native.NonApplicationRef != nil {
+			return ErrWorkflowConflict
+		}
+	case "not_applied":
+		if !validWorkflowNativeUnpublished(submission) {
+			return ErrWorkflowConflict
+		}
+	case "git_applied":
+		return validateWorkflowNativeApplied(submission)
+	default:
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func validWorkflowNativeDispatch(native WorkflowNativeSubmission) bool {
+	if native.DispatchState == "not_started" {
+		return native.DispatchIdentity == nil && native.ApplicationState == "not_started"
+	}
+
+	return slices.Contains([]string{"dispatching", "quiescent"}, native.DispatchState) && native.DispatchIdentity != nil && validWorkflowProcessIdentity(*native.DispatchIdentity)
+}
+
+func validWorkflowNativeUnpublished(submission WorkflowSubmission) bool {
+	native := submission.Native
+
+	return submission.State == "unpublished" && native.DispatchState == "quiescent" && native.NonApplicationRef != nil && native.ReceiptRef == nil
+}
+
+func validateWorkflowNativeApplied(submission WorkflowSubmission) error {
+	native := submission.Native
+	if native.TransportResponseRef == nil || native.CommandManifestRef == nil || native.AdvertisementRef == nil || native.NonApplicationRef != nil || submission.State == "unpublished" {
+		return ErrWorkflowConflict
+	}
+
+	if (submission.State == "confirmed") != (native.ReceiptRef != nil) {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func guardWorkflowNativeSubmissionUpdate(old, next WorkflowNativeSubmission) error {
+	if !sameWorkflowNativeSubmissionIntent(old, next) || !workflowNativeDispatchProgresses(old, next) || !workflowNativeApplicationProgresses(old, next) {
+		return ErrWorkflowConflict
+	}
+
+	if len(next.ObservationRefs) < len(old.ObservationRefs) || !slices.Equal(old.ObservationRefs, next.ObservationRefs[:len(old.ObservationRefs)]) {
+		return ErrWorkflowConflict
+	}
+
+	if err := guardWorkflowNativeResponseHistory(old, next); err != nil {
+		return err
+	}
+
+	return guardWorkflowNativeRetainedRefs(old, next)
+}
+
+func workflowNativeDispatchProgresses(old, next WorkflowNativeSubmission) bool {
+	if old.DispatchIdentity != nil && !reflect.DeepEqual(old.DispatchIdentity, next.DispatchIdentity) {
+		return false
+	}
+
+	return old.DispatchState != "quiescent" || next.DispatchState == "quiescent"
+}
+
+func workflowNativeApplicationProgresses(old, next WorkflowNativeSubmission) bool {
+	switch old.ApplicationState {
+	case "git_applied", "not_applied":
+		return next.ApplicationState == old.ApplicationState
+	case "unknown":
+		return next.ApplicationState != "not_started"
+	default:
+		return true
+	}
+}
+
+func guardWorkflowNativeRetainedRefs(old, next WorkflowNativeSubmission) error {
+	for _, pair := range [][2]*WorkflowEvidenceRef{{old.AdvertisementRef, next.AdvertisementRef}, {old.CommandManifestRef, next.CommandManifestRef}, {old.ReceiptRef, next.ReceiptRef}, {old.NonApplicationRef, next.NonApplicationRef}} {
+		if pair[0] != nil && !reflect.DeepEqual(pair[0], pair[1]) {
+			return ErrWorkflowConflict
+		}
+	}
+
+	return nil
+}
+
+func sameWorkflowNativeSubmissionIntent(old, next WorkflowNativeSubmission) bool {
+	clearWorkflowNativeSubmissionProgress(&old)
+	clearWorkflowNativeSubmissionProgress(&next)
+
+	return workflowNativeJSONEqual(old, next)
+}
+
+func clearWorkflowNativeSubmissionProgress(native *WorkflowNativeSubmission) {
+	native.DispatchState, native.ApplicationState = "", ""
+	native.DispatchIdentity = nil
+	native.AdvertisementRef, native.CommandManifestRef, native.TransportResponseRef = nil, nil, nil
+	native.ObservationRefs = nil
+	native.TransportResponseHistory = nil
+	native.ReceiptRef, native.NonApplicationRef = nil, nil
+}
+
+func guardWorkflowNativeResponseHistory(old, next WorkflowNativeSubmission) error {
+	if len(next.TransportResponseHistory) < len(old.TransportResponseHistory) || !slices.Equal(old.TransportResponseHistory, next.TransportResponseHistory[:len(old.TransportResponseHistory)]) {
+		return ErrWorkflowConflict
+	}
+
+	if old.TransportResponseRef == nil || reflect.DeepEqual(old.TransportResponseRef, next.TransportResponseRef) {
+		if len(next.TransportResponseHistory) != len(old.TransportResponseHistory) {
+			return ErrWorkflowConflict
+		}
+
+		return nil
+	}
+
+	if next.TransportResponseRef == nil || len(next.TransportResponseHistory) != len(old.TransportResponseHistory)+1 || next.TransportResponseHistory[len(old.TransportResponseHistory)] != *old.TransportResponseRef {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}

@@ -63,6 +63,12 @@ func workflowIntegrationPublicationStop(entry WorkflowIntegrationEntry, request 
 }
 
 func (s *WorkflowStore) checkWorkflowIntegrationTransition(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, request WorkflowIntegrationTransition) error {
+	if run.IntegrationBudget != nil {
+		if _, err := s.readWorkflowIntegrationBudget(run); err != nil {
+			return err
+		}
+	}
+
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {
 		return err
 	}
@@ -158,6 +164,10 @@ func (s *WorkflowStore) checkWorkflowIntegrationPublication(ctx context.Context,
 	}
 
 	latest := journal.Attempts[len(journal.Attempts)-1]
+	if workflowIntegrationCandidateExcluded(next, latest) {
+		return ErrWorkflowObservationRequired
+	}
+
 	if err := guardWorkflowIntegrationSubmissionPhase(next, latest); err != nil {
 		return err
 	}
@@ -194,9 +204,15 @@ func checkWorkflowIntegrationSubmissionBinding(run workflowInvocationFile, entry
 }
 
 func (s *WorkflowStore) checkWorkflowIntegrationFinalization(ctx context.Context, run workflowInvocationFile, old, next WorkflowIntegrationEntry, submission WorkflowSubmission) error {
+	if workflowIntegrationNeedsRequeueProof(next, submission) {
+		if submission.State != "unpublished" {
+			return ErrWorkflowObservationRequired
+		}
+
+		return s.checkWorkflowNativeNonApplication(ctx, submission)
+	}
+
 	if old.State == "publishing" && next.State == "queued" {
-		// Unpublished proof alone does not establish changed input and a dead
-		// dispatch. Native journal reconciliation owns that composite transition.
 		return workflowIntegrationConflict("requires native dispatch reconciliation before requeue")
 	}
 
@@ -213,7 +229,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationFinalization(ctx context.Context
 		return err
 	}
 
-	if receipt.Receipt.Native == nil || receipt.Receipt.Native.EntryID != next.ID || receipt.Receipt.Native.InvocationID != run.ID {
+	if !workflowIntegrationReceiptOwnerMatches(receipt.Receipt, run, next) {
 		return workflowIntegrationConflict("requires native verified receipt")
 	}
 
@@ -283,4 +299,20 @@ func retainWorkflowIntegrationStop(entry *WorkflowIntegrationEntry, run workflow
 	} else if entry.StopIntent == "" {
 		entry.StopIntent = run.StopIntent
 	}
+}
+
+func workflowIntegrationCandidateExcluded(entry WorkflowIntegrationEntry, submission WorkflowSubmission) bool {
+	if submission.Native == nil || submission.State == "unpublished" {
+		return false
+	}
+
+	return !workflowNativeSubmissionEntryMatches(submission, entry)
+}
+
+func workflowIntegrationReceiptOwnerMatches(receipt *WorkflowReceipt, run workflowInvocationFile, entry WorkflowIntegrationEntry) bool {
+	return receipt.Native != nil && receipt.Native.EntryID == entry.ID && receipt.Native.InvocationID == run.ID
+}
+
+func workflowIntegrationNeedsRequeueProof(entry WorkflowIntegrationEntry, submission WorkflowSubmission) bool {
+	return entry.State == "queued" && submission.Native != nil
 }

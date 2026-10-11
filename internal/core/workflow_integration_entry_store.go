@@ -128,7 +128,12 @@ func (s *WorkflowStore) admitWorkflowIntegrationUnit(ctx context.Context, run wo
 		return entry, err
 	}
 
-	return entry, s.commitWorkflowIntegrationEntry(&run, entry, "")
+	budget, err := s.workflowIntegrationBudgetAdmission(ctx, run, entry, request.TokenLimit)
+	if err != nil {
+		return entry, err
+	}
+
+	return entry, s.commitWorkflowIntegrationAdmission(ctx, &run, entry, &budget)
 }
 
 func (s *WorkflowStore) guardWorkflowIntegrationAdmission(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationAdmission) error {
@@ -240,4 +245,32 @@ func updateWorkflowIntegrationBinding(run *workflowInvocationFile, binding Workf
 
 	run.IntegrationEntries = append(run.IntegrationEntries, binding)
 	run.Integration = &binding
+}
+
+func (s *WorkflowStore) commitWorkflowIntegrationAdmission(ctx context.Context, run *workflowInvocationFile, entry WorkflowIntegrationEntry, budget *WorkflowIntegrationBudget) error {
+	if run.Revision == math.MaxUint64 {
+		return ErrWorkflowConflict
+	}
+
+	budgetFile, err := s.workflowIntegrationBudgetChange(ctx, run, budget)
+	if err != nil {
+		return err
+	}
+
+	file, err := workflowIntegrationEntryChange(entry, "")
+	if err != nil {
+		return err
+	}
+
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: workflowHash(file.After)}})
+
+	run.Revision++
+	run.UpdatedAt = time.Now().UTC()
+
+	invocation, err := workflowInvocationChange(*run)
+	if err != nil {
+		return err
+	}
+
+	return s.commitFiles([]workflowFileChange{budgetFile, file, invocation})
 }

@@ -55,7 +55,7 @@ func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error 
 }
 
 func validWorkflowSubmissionJournalHeader(journal workflowSubmissionJournal) bool {
-	return journal.Schema == "chr-integration-journal/v1" && filepath.IsAbs(journal.OwnerRoot) && IsValidOpsNamespace(journal.Namespace) && journal.InvocationID != "" && journal.Unit.ID != "" && len(journal.Attempts) >= 1 && len(journal.Attempts) <= 10
+	return slices.Contains([]string{"chr-integration-journal/v1", "chr-integration-journal/v2"}, journal.Schema) && filepath.IsAbs(journal.OwnerRoot) && IsValidOpsNamespace(journal.Namespace) && journal.InvocationID != "" && journal.Unit.ID != "" && len(journal.Attempts) >= 1 && len(journal.Attempts) <= 10
 }
 
 func validateWorkflowSubmission(submission WorkflowSubmission, journal workflowSubmissionJournal) error {
@@ -75,6 +75,10 @@ func validateWorkflowSubmission(submission WorkflowSubmission, journal workflowS
 
 	if !slices.Contains([]string{"", "accepted", "unaccepted", "error_unknown"}, submission.Response) || submission.ResponseCommit != "" && !workflowCommitID(submission.ResponseCommit) {
 		return ErrWorkflowConflict
+	}
+
+	if err := validateWorkflowNativeSubmission(submission, journal.Schema); err != nil {
+		return err
 	}
 
 	return validateWorkflowSubmissionProof(submission)

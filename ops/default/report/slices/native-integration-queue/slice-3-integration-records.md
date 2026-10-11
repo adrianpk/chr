@@ -19,7 +19,11 @@ Historical candidates retain their original reader. Historical receipt reads pre
 
 T3.2 adds idempotent ticket and slice entries with a coordinator-wide sequence across linked namespaces. Admission journals the entry and exact invocation pointer together. Guarded transitions reject stale invocation/entry revisions, claim generations and candidate hashes. A blocked entry resumes only to its recorded state; pause requires an explicit guarded resume. Unknown or confirmed publication cannot be cancelled or requeued.
 
-Persistent budgets, native journal extensions and cross-record migration/index validation remain the recorded T3.3 and T3.4 work.
+T3.3 adds an invocation-wide sealed budget with per-unit counters and stable reservations. Whole-call input/output allowances share an optional finite token ceiling across executor, merger, reviewer and closing roles. Unknown usage retains its full allowance until reliable settlement. Merger dispatch reservations and accepted replacement bases remain consumed across restart and candidate generations; observation consumes no new submission. Positive operator grants extend ceilings with retained attribution and revision history.
+
+The native common submission journal records the original S, expected B, exact P, capability/review binding, claim generation, dispatch identity, reconciliation deadline and sanitized advertisement, command and response evidence. Git-applied publication with the original PR still pending remains awaiting observation and keeps target exclusion. Confirmation requires the physically verified native receipt, fetched exact Git proof and original canonical merged PR. Unknown response evidence survives later reconciliation.
+
+Cross-record migration and derived index validation remain T3.4 work.
 
 ## Implementation Notes
 
@@ -28,6 +32,8 @@ The new candidate reader verifies versioned source/history manifests against the
 Positive fixtures prepare all three Git methods with the host combined gate. The receipt fixture executes a real local atomic receive-pack transaction, independently fetches the target history and verifies the original-PR observation binding. Additional checks cover unsupported evidence versions with freshly sealed content hashes, stale authorization, ownership mismatches, missing proof, changed file bytes and symlink traversal.
 
 T3.2 allocates sequences from retained authoritative entries under the existing repository lock, without another editable queue or database. The existing file transaction owns admission and phase replacement. Retained invocation bindings pin every entry revision and image; losing or changing an entry cannot manufacture another admission. Canonical repository aliases normalize before target binding.
+
+T3.3 admission journals the initial budget, entry and invocation seal together through the existing file transaction. Each budget update pins its exact image and revision; existing worker, preparation, review/repair, closing and legacy submission usage is retained rather than initialized to zero. Checked signed arithmetic and bounded histories protect reservations and grants. Common-journal intent follows durable reservation before transport IO; projection recovery cannot reserve or dispatch a second attempt. Candidate replacement is blocked while publication remains uncertain. Native publication facts cannot fall back to the legacy submission API.
 
 T3.1 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/64369b81579c8b4136609383568731067bc7bdfd). Acta recorded the completed task as `01M4PG9MKE8EF2DZJB2HJ024TH`.
 
@@ -41,6 +47,8 @@ T3.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 - Existing store and preparation readers enforce the new proof before accepting native evidence.
 - Versioned integration entries and additive invocation current/history bindings with joint journal replay and checked sequence/revision bounds.
 - Explicit blockers and retained stop intent; native publication/finalization phases require their existing journal and receipt owners.
+- Invocation-wide budget schema/version, sealed invocation binding, compatible whole-call allowance and immutable settlement/grant history.
+- `chr-integration-journal/v2` extends the existing common journal with exact native intent, dispatch, application, observation and receipt facts; uncertain legacy attempts remain retained.
 
 ## Files of Interest
 
@@ -49,6 +57,8 @@ T3.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commi
 - `internal/core/workflow_native_records_test.go` and `workflow_native_receipt_test.go`: real Git, unsupported proof, byte preservation and ownership checks.
 
 - `internal/core/workflow_integration_entry*.go`: queue admission, guarded transitions, durable ownership and fault/concurrency tests.
+- `internal/core/workflow_integration_budget*.go`: guarded shared ledger, counters, grants, settlement, legacy consumption and race/recovery tests.
+- `internal/core/workflow_submission_native*.go`: native common-journal extensions, transport/receipt proof checks and real Git pending/confirmed publication fixtures.
 
 ## Validation
 
@@ -70,8 +80,16 @@ The T3.2 required pre-commit `make verify` gate passed: strict lint reported zer
 
 Pinned strict lint reported zero issues; the full core suite passed in 878.901 seconds and app tests in 85.979 seconds. Final Slice 3 exact-HEAD evidence remains pending until all four tasks and PR-reference follow-up commits are complete.
 
+T3.3 checks passed:
+
+- `make verify`
+- `go test -race ./internal/core -run '^TestNativeBudget|^TestNativeSubmission|^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt|^TestWorkflowSubmission' -count=1`
+- `git diff --check`
+
+The focused race check passed in 202.917 seconds. The completed pre-commit gate reported zero strict-lint issues; core tests passed in 937.940 seconds and app tests in 78.072 seconds. Two earlier gate attempts stopped in strict lint before running tests; the conflicting whitespace condition was split before the successful gate. Tests cover concurrent finite-ceiling reservation, idempotent retry, unknown usage after restart, exactly-once settlement, counter/grant bounds, generation retention, interrupted budget/common-journal replacement, legacy byte/consumption preservation, actual Git application with pending PR metadata, exact receipt confirmation and response-history retention.
+
 Execution uses Go 1.27.1, the repository-pinned golangci-lint v2.14.0, the retained neutral Git fixture configuration, a thirty-minute Go test timeout and the supported absent default-agent command fixture. Host settings and positive explicit provider/executor fixtures are retained. These settings do not change repository assertions or publication policy.
 
 ## Risks and Follow-ups
 
-T3.2 queue persistence is validated with focused race checks and `make verify`. T3.3 owns persistent attempts, budgets and publication subphases. T3.4 owns additive migration, strict cross-record validation and rebuildable queue queries. T3.3 and T3.4 remain pending; no canonical Slice 3 PR has been opened.
+T3.1, T3.2 and T3.3 are validated with their recorded task checks. T3.4 owns additive migration, strict cross-record validation and rebuildable queue queries and remains pending. No canonical Slice 3 PR has been opened; its required ordered exact-HEAD checks follow T3.4 and the PR-reference follow-up commits.

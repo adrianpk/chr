@@ -1,0 +1,272 @@
+package core
+
+import (
+	"context"
+	"reflect"
+	"slices"
+	"time"
+)
+
+func (s *WorkflowStore) reserveWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationReserve) (WorkflowIntegrationBudget, error) {
+	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
+	if err != nil {
+		return budget, err
+	}
+
+	index := slices.IndexFunc(budget.Reservations, func(old WorkflowIntegrationReservation) bool { return old.ID == request.Reservation.ID })
+	if index >= 0 {
+		return budget, checkWorkflowIntegrationReservationRetry(budget.Reservations[index], request.Reservation)
+	}
+
+	if err := s.checkWorkflowIntegrationReservationAdmission(ctx, run, entry, budget, request); err != nil {
+		return budget, err
+	}
+
+	if err := checkWorkflowIntegrationRoleBudget(budget, request.Reservation); err != nil {
+		return budget, err
+	}
+
+	if err := chargeWorkflowIntegrationCounter(&budget, request.Reservation); err != nil {
+		return budget, err
+	}
+
+	budget.Reservations = append(budget.Reservations, request.Reservation)
+
+	return budget, s.commitWorkflowIntegrationBudget(ctx, &run, &budget)
+}
+
+func checkWorkflowIntegrationReservationRetry(old, next WorkflowIntegrationReservation) error {
+	if !sameWorkflowIntegrationReservation(old, next) {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) checkWorkflowIntegrationReservationAdmission(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, budget WorkflowIntegrationBudget, request WorkflowIntegrationReserve) error {
+	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.WorkflowIntegrationBudgetGuard); err != nil {
+		return err
+	}
+
+	if workflowIntegrationReservationStopped(run, entry) {
+		return ErrWorkflowStop
+	}
+
+	if err := s.checkWorkflowInputs(ctx, run); err != nil {
+		return err
+	}
+
+	r := request.Reservation
+	if !workflowIntegrationReservationMatches(r, entry) || len(budget.Reservations) >= WorkflowRecordLimit {
+		return ErrWorkflowConflict
+	}
+
+	if err := validateWorkflowIntegrationReservation(r); err != nil {
+		return err
+	}
+
+	if r.Kind == "agent_call" && !r.Allowance.Deadline.After(time.Now()) {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func workflowIntegrationReservationStopped(run workflowInvocationFile, entry WorkflowIntegrationEntry) bool {
+	return run.StopIntent != "" || entry.StopIntent != "" || workflowIntegrationTerminal(entry.State) || entry.State == "paused" || entry.State == "blocked"
+}
+
+func workflowIntegrationReservationMatches(r WorkflowIntegrationReservation, entry WorkflowIntegrationEntry) bool {
+	return r.EntryID == entry.ID && r.Unit == entry.Unit && r.ClaimGeneration == entry.ClaimGeneration && r.State == "reserved"
+}
+
+func chargeWorkflowIntegrationCounter(budget *WorkflowIntegrationBudget, r WorkflowIntegrationReservation) error {
+	kind := r.Kind
+	if kind == "agent_call" {
+		kind = r.Role
+	}
+
+	if !slices.Contains([]string{"merger", "drift", "submission"}, kind) {
+		return nil
+	}
+
+	if err := checkWorkflowIntegrationCounterCharge(*budget, r, kind); err != nil {
+		return err
+	}
+
+	index := slices.IndexFunc(budget.UnitCounters, func(c WorkflowIntegrationCounter) bool { return c.Unit == r.Unit })
+	if index < 0 {
+		return ErrWorkflowConflict
+	}
+
+	counter := &budget.UnitCounters[index]
+
+	switch kind {
+	case "merger":
+		counter.Merger++
+	case "drift":
+		counter.Drift++
+	case "submission":
+		counter.Submission++
+	}
+
+	return nil
+}
+
+func checkWorkflowIntegrationCounterCharge(budget WorkflowIntegrationBudget, r WorkflowIntegrationReservation, kind string) error {
+	if kind == "drift" && workflowIntegrationBaseCharged(budget.Reservations, r) {
+		return workflowIntegrationConflict("replacement base already charged under another identity")
+	}
+
+	total := int64(0)
+
+	for _, counter := range budget.UnitCounters {
+		var err error
+
+		total, err = workflowTokenSum(total, workflowIntegrationCounterValue(counter, kind))
+		if err != nil {
+			return err
+		}
+	}
+
+	if total >= workflowIntegrationLimitValue(budget.LimitsSnapshot, kind) {
+		return ErrWorkflowIntegrationBudget
+	}
+
+	return nil
+}
+
+func workflowIntegrationCounterValue(counter WorkflowIntegrationCounter, kind string) int64 {
+	switch kind {
+	case "merger":
+		return counter.Merger
+	case "drift":
+		return counter.Drift
+	case "submission":
+		return counter.Submission
+	default:
+		return 0
+	}
+}
+
+func workflowIntegrationLimitValue(limits WorkflowIntegrationLimits, kind string) int64 {
+	return workflowIntegrationCounterValue(WorkflowIntegrationCounter{Merger: limits.Merger, Drift: limits.Drift, Submission: limits.Submission}, kind)
+}
+
+// WorkflowIntegrationGrantRequest requires explicit operator identity and reason.
+// The budget owner supplies the prior revision and recording timestamp.
+type WorkflowIntegrationGrantRequest struct {
+	WorkflowIntegrationBudgetGuard
+	Grant WorkflowIntegrationGrant
+}
+
+// GrantWorkflowIntegration extends a ceiling without changing consumed history.
+func (s *WorkflowStore) GrantWorkflowIntegration(ctx context.Context, request WorkflowIntegrationGrantRequest) (budget WorkflowIntegrationBudget, err error) {
+	err = s.withLock(ctx, func() error {
+		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		if readErr != nil {
+			return readErr
+		}
+
+		budget, readErr = owner.grantWorkflowIntegration(ctx, run, request)
+
+		return readErr
+	})
+
+	return budget, err
+}
+
+func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationGrantRequest) (WorkflowIntegrationBudget, error) {
+	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.WorkflowIntegrationBudgetGuard)
+	if err != nil {
+		return budget, err
+	}
+
+	grant := request.Grant
+	for _, old := range budget.Grants {
+		if old.ID != grant.ID {
+			continue
+		}
+
+		grant.PriorRevision, grant.RecordedAt = old.PriorRevision, old.RecordedAt
+		if !reflect.DeepEqual(old, grant) {
+			return budget, ErrWorkflowConflict
+		}
+
+		return budget, nil
+	}
+
+	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.WorkflowIntegrationBudgetGuard); err != nil {
+		return budget, err
+	}
+
+	grant.PriorRevision, grant.RecordedAt = budget.Revision, time.Now().UTC()
+	if !validWorkflowIntegrationGrant(grant, budget.Revision+1) || len(budget.Grants) >= WorkflowPageLimit {
+		return budget, ErrWorkflowConflict
+	}
+
+	if err := applyWorkflowIntegrationGrant(&budget, grant); err != nil {
+		return budget, err
+	}
+
+	budget.Grants = append(budget.Grants, grant)
+
+	return budget, s.commitWorkflowIntegrationBudget(ctx, &run, &budget)
+}
+
+func applyWorkflowIntegrationGrant(budget *WorkflowIntegrationBudget, grant WorkflowIntegrationGrant) error {
+	if grant.Kind != "tokens" {
+		return addWorkflowIntegrationLimit(&budget.LimitsSnapshot, grant.Kind, grant.Amount)
+	}
+
+	if budget.TokenLimit == nil {
+		return ErrWorkflowConflict
+	}
+
+	limit, err := workflowTokenSum(*budget.TokenLimit, grant.Amount)
+	if err != nil {
+		return err
+	}
+
+	budget.TokenLimit = &limit
+
+	return nil
+}
+
+func checkWorkflowIntegrationRoleBudget(budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
+	if reservation.Kind != "agent_call" || reservation.Role == "merger" {
+		return nil
+	}
+
+	consumed, limit := workflowIntegrationRoleUsage(budget, reservation.Role)
+	for _, old := range budget.Reservations {
+		if old.Kind == "agent_call" && old.Role == reservation.Role {
+			consumed++
+		}
+	}
+
+	if consumed >= limit {
+		return ErrWorkflowIntegrationBudget
+	}
+
+	return nil
+}
+
+func workflowIntegrationRoleUsage(budget WorkflowIntegrationBudget, role string) (int64, int64) {
+	switch role {
+	case "executor":
+		return int64(len(budget.Usage.Attempts)), budget.LimitsSnapshot.Worker
+	case "reviewer":
+		return int64(budget.Usage.ReviewCount), budget.LimitsSnapshot.Review
+	case "closing":
+		return int64(len(budget.Usage.ClosingAttempts)), budget.LimitsSnapshot.Closing
+	default:
+		return 0, 0
+	}
+}
+
+func workflowIntegrationBaseCharged(reservations []WorkflowIntegrationReservation, reservation WorkflowIntegrationReservation) bool {
+	return slices.ContainsFunc(reservations, func(old WorkflowIntegrationReservation) bool {
+		return old.Kind == "drift" && old.Unit == reservation.Unit && old.BaseCommit == reservation.BaseCommit
+	})
+}

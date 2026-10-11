@@ -97,6 +97,10 @@ func validWorkflowIntegrationBlocker(blocker *WorkflowIntegrationBlocker) bool {
 }
 
 func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
+	if err := validateWorkflowIntegrationBudgetBinding(run); err != nil {
+		return err
+	}
+
 	if len(run.IntegrationEntries) > WorkflowRecordLimit {
 		return workflowIntegrationConflict("history exceeds bounds")
 	}
@@ -183,4 +187,17 @@ func workflowIntegrationPreparationSuccessors(state string) []string {
 	default:
 		return nil
 	}
+}
+
+func validateWorkflowIntegrationBudgetBinding(run workflowInvocationFile) error {
+	b := run.IntegrationBudget
+	if b == nil {
+		return nil
+	}
+
+	if b.Revision == 0 || b.Ref.Path != workflowIntegrationBudgetPath(run.ID) || !validWorkflowNativeFingerprint(b.Ref.Hash) {
+		return ErrWorkflowConflict
+	}
+
+	return nil
 }

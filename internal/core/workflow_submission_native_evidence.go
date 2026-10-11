@@ -1,0 +1,301 @@
+package core
+
+import (
+	"context"
+	"slices"
+)
+
+func (s *WorkflowStore) checkWorkflowNativeSubmissionEvidence(ctx context.Context, submission WorkflowSubmission) error {
+	native := submission.Native
+	if native == nil {
+		return ErrWorkflowConflict
+	}
+
+	var candidate WorkflowIntegrationCandidate
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, native.CandidateRef, &candidate); err != nil {
+		return err
+	}
+
+	if !workflowNativeSubmissionCandidateMatches(submission, candidate) {
+		return ErrWorkflowConflict
+	}
+
+	if err := s.checkWorkflowNativeCandidate(candidate); err != nil {
+		return err
+	}
+
+	if err := s.checkWorkflowNativeSubmissionReview(submission); err != nil {
+		return err
+	}
+
+	return s.checkWorkflowNativeTransportEvidence(ctx, submission)
+}
+
+func workflowNativeSubmissionCandidateMatches(submission WorkflowSubmission, candidate WorkflowIntegrationCandidate) bool {
+	native := submission.Native
+
+	return candidate.Native != nil && candidate.Native.CandidateHash == native.CandidateHash && workflowNativeJSONEqual(candidate.Native.WorkflowNativeRecordBinding, native.WorkflowNativeRecordBinding) && workflowNativeJSONEqual(candidate.Input.Git, submission.Guard.Git) && native.FastForwardProofRef == candidate.Native.HistoryManifestRef
+}
+
+func (s *WorkflowStore) checkWorkflowNativeSubmissionReview(submission WorkflowSubmission) error {
+	var review workflowReviewEvidence
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, submission.Native.ReviewGrantRef, &review); err != nil {
+		return err
+	}
+
+	if review.Decision.BindingHash != submission.Guard.ReviewHash || review.Decision.Result.Decision != IntegrationReviewDecisionPass {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) checkWorkflowNativeTransportEvidence(ctx context.Context, submission WorkflowSubmission) error {
+	if err := s.checkWorkflowNativeAdvertisement(submission); err != nil {
+		return err
+	}
+
+	if err := s.checkWorkflowNativeCommands(submission); err != nil {
+		return err
+	}
+
+	if err := s.checkWorkflowNativeResponse(submission); err != nil {
+		return err
+	}
+
+	if err := s.checkWorkflowNativeJournalObservations(submission); err != nil {
+		return err
+	}
+
+	switch submission.Native.ApplicationState {
+	case "git_applied":
+		return s.checkWorkflowNativeAppliedEvidence(submission)
+	case "not_applied":
+		return s.checkWorkflowNativeNonApplication(ctx, submission)
+	default:
+		return nil
+	}
+}
+
+func (s *WorkflowStore) checkWorkflowNativeAdvertisement(submission WorkflowSubmission) error {
+	native := submission.Native
+	if native.AdvertisementRef == nil {
+		return nil
+	}
+
+	var advertisement WorkflowGitPublicationAdvertisement
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.AdvertisementRef, &advertisement); err != nil {
+		return err
+	}
+
+	var capability WorkflowNativeCapability
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, native.CapabilityRef, &capability); err != nil {
+		return err
+	}
+
+	if advertisement.SourceCommit != native.OriginalSource || advertisement.TargetCommit != native.ValidatedBase || advertisement.Fingerprint != capability.ServerCapabilityFingerprint {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) checkWorkflowNativeCommands(submission WorkflowSubmission) error {
+	native := submission.Native
+	if native.CommandManifestRef == nil {
+		return nil
+	}
+
+	var manifest WorkflowNativeCommandManifest
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.CommandManifestRef, &manifest); err != nil {
+		return err
+	}
+
+	expected := WorkflowNativeCommandManifest{SchemaVersion: 1, SubmissionID: submission.ID, Atomic: true, SourceRef: native.SourceRef, ExpectedSource: native.OriginalSource, NewSource: native.PreparedResult, TargetRef: native.TargetRef, ExpectedTarget: native.ValidatedBase, NewTarget: native.PreparedResult}
+	if manifest != expected {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func (s *WorkflowStore) checkWorkflowNativeResponse(submission WorkflowSubmission) error {
+	native := submission.Native
+
+	refs := slices.Clone(native.TransportResponseHistory)
+	if native.TransportResponseRef != nil {
+		refs = append(refs, *native.TransportResponseRef)
+	}
+
+	for _, ref := range refs {
+		var response WorkflowGitPublicationResult
+		if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &response); err != nil {
+			return err
+		}
+
+		if !validWorkflowNativeResponse(*native, response) {
+			return ErrWorkflowConflict
+		}
+
+		if err := s.checkWorkflowNativeTransactionRevision(WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding}, response); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validWorkflowNativeResponse(native WorkflowNativeSubmission, response WorkflowGitPublicationResult) bool {
+	return response.Schema == "chr-git-publication-result/v1" && response.OriginalSourceCommit == native.OriginalSource && response.ResultCommit == native.PreparedResult && slices.Contains([]string{"not_sent", "unknown", "rejected", "applied"}, response.State)
+}
+
+func (s *WorkflowStore) checkWorkflowNativeJournalObservations(submission WorkflowSubmission) error {
+	native := submission.Native
+	for _, ref := range native.ObservationRefs {
+		var observation WorkflowNativePublicationObservation
+		if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &observation); err != nil {
+			return err
+		}
+
+		if !workflowNativeJournalObservationMatches(*native, observation) {
+			return ErrWorkflowConflict
+		}
+
+		if observation.Git == nil {
+			continue
+		}
+
+		if !workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, *observation.Git) {
+			return ErrWorkflowConflict
+		}
+
+		if err := validateWorkflowIntegrationProof(observation.Git.WorkflowIntegrationQuery, *observation.Git); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func workflowNativeJournalObservationMatches(native WorkflowNativeSubmission, observation WorkflowNativePublicationObservation) bool {
+	expected := [4]string{native.CanonicalPR, native.SourceRepository, native.OriginalSource, native.PublishedSource}
+	actual := [4]string{observation.PullRequest.URL, observation.PullRequest.Repository, observation.OriginalSourceCommit, observation.PublishedSourceCommit}
+
+	return expected == actual && slices.Contains([]string{"observing", "merged", "reconciliation_required"}, observation.State)
+}
+
+func (s *WorkflowStore) checkWorkflowNativeAppliedEvidence(submission WorkflowSubmission) error {
+	native := submission.Native
+	if native.TransportResponseRef == nil {
+		return ErrWorkflowConflict
+	}
+
+	var result WorkflowGitPublicationResult
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.TransportResponseRef, &result); err != nil {
+		return err
+	}
+
+	receipt := WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding}
+	if !validWorkflowNativeReceiptTransaction(receipt, result) {
+		return ErrWorkflowConflict
+	}
+
+	return s.checkWorkflowNativeTransactionRevision(receipt, result)
+}
+
+func (s *WorkflowStore) checkWorkflowNativeNonApplication(_ context.Context, submission WorkflowSubmission) error {
+	native := submission.Native
+	if native.NonApplicationRef == nil || native.DispatchState != "quiescent" || native.DispatchIdentity == nil {
+		return ErrWorkflowConflict
+	}
+
+	alive, err := workflowProcessAlive(*native.DispatchIdentity)
+	if err != nil {
+		return err
+	}
+
+	if alive {
+		return ErrWorkflowObservationRequired
+	}
+
+	var proof WorkflowNativeNonApplicationProof
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.NonApplicationRef, &proof); err != nil {
+		return err
+	}
+
+	if !validWorkflowNativeNonApplication(submission, proof) {
+		return ErrWorkflowConflict
+	}
+
+	return nil
+}
+
+func validWorkflowNativeNonApplication(submission WorkflowSubmission, proof WorkflowNativeNonApplicationProof) bool {
+	native := submission.Native
+
+	return proof.SchemaVersion == 1 && proof.SubmissionID == submission.ID && proof.CannotApply && proof.InputChanged && workflowCommitID(proof.ObservedSource) && workflowCommitID(proof.ObservedTarget) && (proof.ObservedSource != native.OriginalSource || proof.ObservedTarget != native.ValidatedBase)
+}
+
+func (s *WorkflowStore) applyWorkflowNativeSubmissionEvidence(ctx context.Context, submission *WorkflowSubmission) error {
+	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, *submission); err != nil {
+		return err
+	}
+
+	native := submission.Native
+	if native.ApplicationState == "not_applied" {
+		submission.State = "unpublished"
+		submission.Unpublished = &WorkflowSubmissionObservation{SubmissionID: submission.ID, Unpublished: true}
+	}
+
+	if native.ReceiptRef != nil {
+		if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil {
+			return ErrWorkflowConflict
+		}
+
+		return s.confirmWorkflowNativeSubmission(ctx, submission)
+	}
+
+	return validateWorkflowNativeSubmission(*submission, "chr-integration-journal/v2")
+}
+
+func (s *WorkflowStore) confirmWorkflowNativeSubmission(_ context.Context, submission *WorkflowSubmission) error {
+	native := submission.Native
+
+	record, err := s.readRecord(native.ReceiptRef.Path)
+	if err != nil {
+		return err
+	}
+
+	if _, err := s.readWorkflowReviewImage(native.ReceiptRef.Path, native.ReceiptRef.Hash); err != nil {
+		return err
+	}
+
+	if !workflowNativeSubmissionReceiptMatches(*submission, record) {
+		return ErrWorkflowConflict
+	}
+
+	if err := s.checkWorkflowNativeReceipt(record); err != nil {
+		return err
+	}
+
+	var observation WorkflowNativePublicationObservation
+
+	ref := record.Receipt.Native.ObservationRefs[len(record.Receipt.Native.ObservationRefs)-1]
+	if !slices.Contains(native.ObservationRefs, ref) {
+		return ErrWorkflowConflict
+	}
+
+	if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &observation); err != nil {
+		return err
+	}
+
+	submission.State, submission.ObservedPR, submission.Proof = "confirmed", &observation.PullRequest, observation.Git
+
+	return validateWorkflowSubmissionProof(*submission)
+}
+
+func workflowNativeSubmissionReceiptMatches(submission WorkflowSubmission, record WorkflowRecord) bool {
+	receipt, native := record.Receipt, submission.Native
+
+	return receipt != nil && receipt.Native != nil && receipt.SubmissionID == submission.ID && receipt.Native.CandidateRef == native.CandidateRef && receipt.Native.TransactionProofRef == *native.TransportResponseRef && receipt.Native.CandidateHash == native.CandidateHash
+}

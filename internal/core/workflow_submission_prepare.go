@@ -34,6 +34,10 @@ func (s *WorkflowStore) prepareWorkflowSubmission(ctx context.Context, run *work
 		return WorkflowSubmission{}, false, err
 	}
 
+	if journal.Schema == "chr-integration-journal/v2" {
+		return WorkflowSubmission{}, false, ErrWorkflowObservationRequired
+	}
+
 	previous, retry, err := s.checkWorkflowSubmissionRetry(ctx, run, &journal, provider, git)
 	if err != nil || !retry {
 		return previous, false, err
@@ -43,12 +47,8 @@ func (s *WorkflowStore) prepareWorkflowSubmission(ctx context.Context, run *work
 		return WorkflowSubmission{}, false, err
 	}
 
-	guard, err := s.checkWorkflowPublicationGuard(ctx, *run, provider)
+	guard, err := s.checkWorkflowLegacyPublicationGuard(ctx, run, provider)
 	if err != nil {
-		if errors.Is(err, ErrWorkflowAtomicGuard) {
-			err = s.blockWorkflowPublication(run, err)
-		}
-
 		return WorkflowSubmission{}, false, err
 	}
 
@@ -202,4 +202,21 @@ func workflowSubmissionProjection(journal workflowSubmissionJournal) WorkflowSub
 	last := journal.Attempts[len(journal.Attempts)-1]
 
 	return WorkflowSubmissionBinding{JournalKey: journal.Key, JournalHash: journal.sourceHash, TargetKey: journal.TargetKey, ID: last.ID, Unit: journal.Unit, Attempt: last.Attempt, State: last.State, ExternalDelivery: last.ExternalDelivery}
+}
+
+func (s *WorkflowStore) checkWorkflowLegacyPublicationGuard(ctx context.Context, run *workflowInvocationFile, provider WorkflowPublicationGuardProvider) (WorkflowPublicationGuard, error) {
+	guard, err := s.checkWorkflowPublicationGuard(ctx, *run, provider)
+	if err != nil {
+		if errors.Is(err, ErrWorkflowAtomicGuard) {
+			err = s.blockWorkflowPublication(run, err)
+		}
+
+		return guard, err
+	}
+
+	if guard.Capability.Mechanism == WorkflowPublicationGitAtomicDualRef {
+		return guard, ErrWorkflowObservationRequired
+	}
+
+	return guard, nil
 }

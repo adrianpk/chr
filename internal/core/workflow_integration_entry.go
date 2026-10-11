@@ -49,6 +49,7 @@ type WorkflowIntegrationEntry struct {
 
 // WorkflowIntegrationAdmission requires an explicit frozen unit and full target.
 type WorkflowIntegrationAdmission struct {
+	TokenLimit       *int64
 	InvocationID     string
 	ExpectedRevision uint64
 	Unit             WorkflowRef

@@ -18,6 +18,7 @@ var ErrWorkflowIntegrationBudget = errors.New("workflow integration submission b
 // State is awaiting_observation, unpublished or confirmed; responses alone never
 // release exclusion or complete tasks.
 type WorkflowSubmission struct {
+	Native           *WorkflowNativeSubmission      `json:"native,omitempty"`
 	ID               string                         `json:"id"`
 	InvocationID     string                         `json:"invocation_id"`
 	Unit             WorkflowRef                    `json:"unit"`
@@ -110,6 +111,10 @@ func (s *WorkflowStore) ReconcileWorkflowSubmission(ctx context.Context, id stri
 	submission, err := s.ReadWorkflowSubmission(ctx, id)
 	if err != nil {
 		return submission, err
+	}
+
+	if submission.Native != nil {
+		return submission, ErrWorkflowObservationRequired
 	}
 
 	observed, err := observeWorkflowSubmission(ctx, submission, provider, git)

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133101
 title: "T3.3: Extend attempt and budget journals"
-status: ready
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -10,6 +10,9 @@ tags: native-integration, slice-3
 source: chat
 reported_at: 2026-10-11T13:31:01Z
 ready_at: 2026-10-11T13:31:37Z
+started_at: 2026-10-11T22:53:10Z
+branch: feat/slice-3-native-integration-records
+reviewed_at: 2026-10-11T23:36:41Z
 commits: []
 ---
 
@@ -58,4 +61,12 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+Implemented an invocation-wide guarded budget with whole-call token reservations, retained worker/review/repair/closing usage, per-unit merger/drift/submission counters and explicit positive grants. Unknown reservations remain fully charged after restart. Native common-journal facts retain dispatch identity, S/B/P, sanitized transport evidence, append-only observations and response history. Git application with pending original-PR metadata retains target exclusion and consumes one attempt; exact verified receipt proof is required for confirmation.
+
+Successful task checks:
+
+- `make verify`
+- `go test -race ./internal/core -run '^TestNativeBudget|^TestNativeSubmission|^TestNativeEntry|^TestNativeRecord|^TestNativeReceipt|^TestWorkflowSubmission' -count=1`
+- `git diff --check`
+
+[Slice 3 report](../../report/slices/native-integration-queue/slice-3-integration-records.md) records the actual gate and focused evidence. Canonical PR, final exact-HEAD checks and verified integration remain pending until T3.4 is complete.
