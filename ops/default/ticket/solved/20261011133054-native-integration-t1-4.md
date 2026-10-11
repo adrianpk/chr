@@ -1,23 +1,25 @@
 ---
-id: TKT-20261011133052
-title: "T1.2: Support host-authenticated SSH publication"
-status: reviewing
+id: TKT-20261011133054
+title: "T1.4: Seal exact source/base/result publication proof"
+status: solved
 kind: task
 severity: unclassified
 priority: normal
 scope: infra
 tags: native-integration, slice-1
 source: chat
-reported_at: 2026-10-11T13:30:52Z
+reported_at: 2026-10-11T13:30:54Z
 ready_at: 2026-10-11T13:31:37Z
-reviewed_at: 2026-10-11T13:52:59Z
-started_at: 2026-10-11T13:49:06Z
+reviewed_at: 2026-10-11T14:02:50Z
+started_at: 2026-10-11T14:00:01Z
+resolution: fixed
+closed_at: 2026-10-11T18:20:54Z
 branch: feat/slice-1-native-git-transport
 pr: 375
-commits: [c1d02f6cadd5c84fd7f92feaeff11bac3ece1614]
+commits: [cbd4fb8a6e9ab0a1471cb09db7f4a78d9b3d304d]
 ---
 
-# T1.2: Support host-authenticated SSH publication
+# T1.4: Seal exact source/base/result publication proof
 
 ## Delivery Binding
 
@@ -25,7 +27,7 @@ Delivery set: native-integration-queue
 
 Slice: 1 — Guarded Git transport
 
-Task: T1.2
+Task: T1.4
 
 Plan: [Slice 1](../../plan/native-integration-queue.md#slice-1-guarded-git-transport)
 
@@ -37,11 +39,11 @@ Model: [Native Integration Queue Model](../../spec/stable/native-integration-que
 
 ## Work
 
-Connect the guarded exchange through SSH using host-owned authentication and argument vectors, with subprocess ownership and bounded IO.
+Bind the port to immutable prepared candidate identity, fast-forward ancestry, explicit expected refs, original/published source distinction and no-op defenses.
 
 ## Acceptance
 
-The same positive and stale-ref cases pass over a real SSH fixture without credentials entering evidence.
+P equal to S, an already-P advertisement, fork sources, invalid refs and non-fast-forward target updates cannot be partially published.
 
 Acceptance IDs and invariants: use the owning slice's explicit coverage map in the approved plan.
 
@@ -62,6 +64,6 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-feat(workflow): publish guarded refs through host-authenticated SSH
-Focused check passed: `go test ./internal/core -run 'TestWorkflow(GitSSH|SSHArguments)$' -count=1`.
-The package linter passed with zero issues. Canonical PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375). Verified integration remains pending the controller.
+feat(workflow): bind publication to exact ownership and history proof
+Focused check passed: `go test ./internal/core -run 'TestWorkflowGit(Atomic|Candidate|AlreadyPrepared|FastForward)$' -count=1`.
+The package linter passed with zero issues. Canonical PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375). Canonical integration verified at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d` on `dev`; the controller merged PR #375 on 2026-10-11.

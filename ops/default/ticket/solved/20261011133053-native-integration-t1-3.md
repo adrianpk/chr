@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133053
 title: "T1.3: Support host-authenticated HTTPS publication"
-status: reviewing
+status: solved
 kind: task
 severity: unclassified
 priority: normal
@@ -12,6 +12,8 @@ reported_at: 2026-10-11T13:30:53Z
 ready_at: 2026-10-11T13:31:37Z
 reviewed_at: 2026-10-11T13:58:41Z
 started_at: 2026-10-11T13:54:15Z
+resolution: fixed
+closed_at: 2026-10-11T18:20:54Z
 branch: feat/slice-1-native-git-transport
 pr: 375
 commits: [85719c14d17e956965f1f71aadb548ba12a645ca]
@@ -64,4 +66,4 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 feat(workflow): publish guarded refs through smart HTTPS
 Focused check passed: `go test ./internal/core -run 'TestWorkflow(GitHTTPS|HTTPIdentity)$' -count=1`.
-The package linter passed with zero issues. Canonical PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375). Verified integration remains pending the controller.
+The package linter passed with zero issues. Canonical PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375). Canonical integration verified at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d` on `dev`; the controller merged PR #375 on 2026-10-11.

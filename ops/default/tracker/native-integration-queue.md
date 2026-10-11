@@ -18,9 +18,9 @@ Plan approval: approved on 2026-10-11 under the explicit instruction to process 
 
 Implementation authorization: granted for the complete ordered corrective set and its defined task/PR map.
 
-Active slice: Slice 1 — Guarded Git transport
+Active slice: Slice 2 — Forge publication profiles
 
-Next slice: Slice 2 — Forge publication profiles
+Next slice: Slice 3 — Durable integration records
 
 Slice strategy: behavior-first
 
@@ -28,17 +28,15 @@ Reason: prove a positive remote transaction and real forge observation before bu
 
 Plan: [Native Integration Corrective Delivery](../plan/native-integration-queue.md)
 
-Progress: 0 of 13 slices integrated; 0 of 51 execution tasks delivered in this set.
+Progress: 1 of 13 slices integrated; 5 of 51 execution tasks delivered in this set.
 
 Task accounting: 47 new tickets and 4 reused original assurance tickets. Retained assurance commits are implemented evidence, not integrated task completion.
 
 ## Current Checkpoint
 
-Slice 1 implements all five approved transport tasks on its dedicated branch. Tasks become done only after verified canonical integration and ticket fanout. Final candidate validation uses Looper's exact clean-HEAD evidence after PR references are committed. The initial `make verify` exposed missing default Git identity and the core suite's ten-minute timeout; the uncached retry reproduced the suite timeout after the identity fix. Final validation uses an owned temporary Git identity and uncached tests with a thirty-minute package budget, preserving every required check.
-The integration-repair candidate exposed incidental live curation in an existing CLI regression case. Final validation supplies an owned unavailable default-agent command for deterministic fallback, preserving explicit provider fixtures and every assertion.
-The original controller remains inactive and blocked, with eleven integrated slices and no pending merge. Its checkpoint and budgets remain untouched.
-The old assurance execution path is transferred to Slice 13 under the approved plan; its four tickets retain their original IDs and evidence.
-Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Setup access is verified and the Slice 2 designation prerequisite is supplied. Actual publisher and PR-observation certification remains pending in Slice 2 and Slice 12.
+Slice 1 is canonically integrated through [PR #375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) at `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`. All four ordered Looper checks passed for that exact clean HEAD; its five task tickets are solved. Slice 2 is active and must certify the approved default rebase profile in both designated disposable repositories.
+The original controller remains inactive and blocked; its checkpoint and consumed budgets are preserved. Its assurance execution is transferred to Slice 13 under the approved plan.
+Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Current setup access is verified; publisher and same-PR observation certification are pending.
 
 States: `ready`, `in_progress`, `validated`, `blocked`, `done`. Validated work becomes done only after verified slice integration and corresponding ticket finalization.
 Only Looper may merge this set's canonical PRs. Read-only status must not mutate work.
@@ -47,8 +45,8 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 
 | Slice | Name | Exact branch | Expected PR title | Report | State | PR |
 | --- | --- | --- | --- | --- | --- | --- |
-| Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | reviewing | [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) |
-| Slice 2 | Forge publication profiles | `feat/slice-2-native-forge-profiles` | `feat(slice-2): observe native publication through existing forge adapters` | `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md` | not_started | pending |
+| Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | delivered | [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) |
+| Slice 2 | Forge publication profiles | `feat/slice-2-native-forge-profiles` | `feat(slice-2): observe native publication through existing forge adapters` | `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md` | in_progress | pending |
 | Slice 3 | Durable integration records | `feat/slice-3-native-integration-records` | `feat(slice-3): persist native integration queue records` | `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md` | not_started | pending |
 | Slice 4 | Canonical queue scheduling | `feat/slice-4-native-queue-scheduling` | `feat(slice-4): schedule integration across canonical target queues` | `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md` | not_started | pending |
 | Slice 5 | Method preparation and provenance | `feat/slice-5-native-method-preparation` | `feat(slice-5): preserve exact integration history and provenance` | `ops/default/report/slices/native-integration-queue/slice-5-method-preparation.md` | not_started | pending |
@@ -63,7 +61,7 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 
 ## Slice 1: Guarded Git transport
 
-Status: reviewing
+Status: delivered
 
 Expected branch: `feat/slice-1-native-git-transport`
 
@@ -75,11 +73,11 @@ Prerequisite: committed approved bootstrap on canonical `dev`.
 
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
-| T1.1 | [TKT-20261011133051](../ticket/reviewing/20261011133051-native-integration-t1-1.md) | validated | `7d3ced5eac982d86c86d5368b576663a16292cde` | Execute an explicit atomic receive-pack transaction |
-| T1.2 | [TKT-20261011133052](../ticket/reviewing/20261011133052-native-integration-t1-2.md) | validated | `c1d02f6cadd5c84fd7f92feaeff11bac3ece1614` | Support host-authenticated SSH publication |
-| T1.3 | [TKT-20261011133053](../ticket/reviewing/20261011133053-native-integration-t1-3.md) | validated | `85719c14d17e956965f1f71aadb548ba12a645ca` | Support host-authenticated HTTPS publication |
-| T1.4 | [TKT-20261011133054](../ticket/reviewing/20261011133054-native-integration-t1-4.md) | validated | `cbd4fb8a6e9ab0a1471cb09db7f4a78d9b3d304d` | Seal exact source/base/result publication proof |
-| T1.5 | [TKT-20261011133055](../ticket/reviewing/20261011133055-native-integration-t1-5.md) | validated | `b7790de38a5473f3f0f3c6e5187ececb7f11089d` | Verify protocol races and review the transport boundary |
+| T1.1 | [TKT-20261011133051](../ticket/solved/20261011133051-native-integration-t1-1.md) | done | `7d3ced5eac982d86c86d5368b576663a16292cde` | Execute an explicit atomic receive-pack transaction |
+| T1.2 | [TKT-20261011133052](../ticket/solved/20261011133052-native-integration-t1-2.md) | done | `c1d02f6cadd5c84fd7f92feaeff11bac3ece1614` | Support host-authenticated SSH publication |
+| T1.3 | [TKT-20261011133053](../ticket/solved/20261011133053-native-integration-t1-3.md) | done | `85719c14d17e956965f1f71aadb548ba12a645ca` | Support host-authenticated HTTPS publication |
+| T1.4 | [TKT-20261011133054](../ticket/solved/20261011133054-native-integration-t1-4.md) | done | `cbd4fb8a6e9ab0a1471cb09db7f4a78d9b3d304d` | Seal exact source/base/result publication proof |
+| T1.5 | [TKT-20261011133055](../ticket/solved/20261011133055-native-integration-t1-5.md) | done | `b7790de38a5473f3f0f3c6e5187ececb7f11089d` | Verify protocol races and review the transport boundary |
 
 Required checks:
 
@@ -90,13 +88,13 @@ Required checks:
 
 PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375)
 
-Verified merge: pending
+Verified merge: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375), `79dfe32380dae9058bde15ba50b8f30c30cbaf3d` on `dev`
 
 Report/evidence: [Slice 1 report](../report/slices/native-integration-queue/slice-1-git-transport.md)
 
 ## Slice 2: Forge publication profiles
 
-Status: not_started
+Status: in_progress
 
 Expected branch: `feat/slice-2-native-forge-profiles`
 

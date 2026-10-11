@@ -1,11 +1,12 @@
 # Slice 1: Guarded Git transport
 
-Status: reviewing
+Status: delivered
 Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Corrective Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-1-native-git-transport`
 PR: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375)
+Verified integration: [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375), `79dfe32380dae9058bde15ba50b8f30c30cbaf3d` on `dev`
 Implementation checkpoint: `b7790de38a5473f3f0f3c6e5187ececb7f11089d`
 
 ## Purpose
@@ -56,7 +57,7 @@ Canonical `dev` subsequently received the approved fixture designation. The Slic
 
 Integration-repair candidate `ddcd2851115451360116d00d460bdd00fd9f7b72`: `make verify` passed lint and the core suite but failed the existing `TestDumpNewAndShowUseServiceCommands` assertion because the host's default curation agent changed the raw sentence. `go test ./internal/app -run '^TestDumpNewAndShowUseServiceCommands$' -count=1` passed with an owned unavailable default-agent command supplied through `CHR_CODEX_COMMAND`. Final validation retains this execution-only isolation for deterministic fallback; provider tests keep their explicit runners and all assertions remain unchanged.
 
-The configured final candidate commands are `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1`, and `git diff --check`, in that order. Looper records their results against the exact clean PR HEAD after the PR-reference commit. Task checks are local transport evidence; live provider certification is not claimed here.
+Passed through Looper for clean integrated HEAD `79dfe32380dae9058bde15ba50b8f30c30cbaf3d`: the configured final candidate commands are `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1`, and `git diff --check`, in that order. Looper records their results against the exact clean PR HEAD after the PR-reference commit. Task checks are local transport evidence; live provider certification is not claimed here.
 
 ## Risks and Follow-ups
 
