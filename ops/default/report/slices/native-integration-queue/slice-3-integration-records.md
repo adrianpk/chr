@@ -31,6 +31,8 @@ T3.2 allocates sequences from retained authoritative entries under the existing 
 
 T3.1 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/64369b81579c8b4136609383568731067bc7bdfd). Acta recorded the completed task as `01M4PG9MKE8EF2DZJB2HJ024TH`.
 
+T3.2 implementation: [task commit](https://forge.adrianpk.com/adrianpk/chr/commit/9a004ba55c6b72ac69aa0322fba531eebcc257d7). Acta recorded the completed task as `01M4PJDG8Q7TEC5W7ZCGJ576RH`.
+
 ## Contracts Added or Changed
 
 - `chr-integration-candidate/v2` and `chr-workflow-receipt/v2` distinguish native proof from historical schemas.

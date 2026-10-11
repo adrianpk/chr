@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-11T22:17:47Z
 branch: feat/slice-3-native-integration-records
 reviewed_at: 2026-10-11T22:47:37Z
-commits: []
+commits: [9a004ba55c6b72ac69aa0322fba531eebcc257d7]
 ---
 
 # T3.2: Persist integration entries through WorkflowStore
