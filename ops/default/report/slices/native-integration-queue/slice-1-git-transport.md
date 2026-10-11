@@ -54,6 +54,8 @@ Initial candidate `c97c94c567a83317caf30497bfc54af9c2e10a22`: `make verify` pass
 
 Canonical `dev` subsequently received the approved fixture designation. The Slice 1 tracker conflict was resolved locally while preserving that designation, and obsolete validation was interrupted before publication. Final validation is regenerated for the clean rebased candidate.
 
+Integration-repair candidate `ddcd2851115451360116d00d460bdd00fd9f7b72`: `make verify` passed lint and the core suite but failed the existing `TestDumpNewAndShowUseServiceCommands` assertion because the host's default curation agent changed the raw sentence. `go test ./internal/app -run '^TestDumpNewAndShowUseServiceCommands$' -count=1` passed with an owned unavailable default-agent command supplied through `CHR_CODEX_COMMAND`. Final validation retains this execution-only isolation for deterministic fallback; provider tests keep their explicit runners and all assertions remain unchanged.
+
 The configured final candidate commands are `make verify`, `go test ./internal/core ./internal/app -count=1`, `go test -race ./internal/core ./internal/app -count=1`, and `git diff --check`, in that order. Looper records their results against the exact clean PR HEAD after the PR-reference commit. Task checks are local transport evidence; live provider certification is not claimed here.
 
 ## Risks and Follow-ups

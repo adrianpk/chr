@@ -35,6 +35,7 @@ Task accounting: 47 new tickets and 4 reused original assurance tickets. Retaine
 ## Current Checkpoint
 
 Slice 1 implements all five approved transport tasks on its dedicated branch. Tasks become done only after verified canonical integration and ticket fanout. Final candidate validation uses Looper's exact clean-HEAD evidence after PR references are committed. The initial `make verify` exposed missing default Git identity and the core suite's ten-minute timeout; the uncached retry reproduced the suite timeout after the identity fix. Final validation uses an owned temporary Git identity and uncached tests with a thirty-minute package budget, preserving every required check.
+The integration-repair candidate exposed incidental live curation in an existing CLI regression case. Final validation supplies an owned unavailable default-agent command for deterministic fallback, preserving explicit provider fixtures and every assertion.
 The original controller remains inactive and blocked, with eleven integrated slices and no pending merge. Its checkpoint and budgets remain untouched.
 The old assurance execution path is transferred to Slice 13 under the approved plan; its four tickets retain their original IDs and evidence.
 Both live repositories and their policy/access profiles are designated in [Certification Fixtures](../report/native-integration-fixtures.md). Setup access is verified and the Slice 2 designation prerequisite is supplied. Actual publisher and PR-observation certification remains pending in Slice 2 and Slice 12.
