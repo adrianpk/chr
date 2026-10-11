@@ -139,13 +139,15 @@ Invariants: INV-07, INV-08, INV-09, INV-10, INV-14, INV-15
 
 ## Slice 2: Forge publication profiles
 
-Status: in_progress
+Status: reviewing
 
 Expected branch: `feat/slice-2-native-forge-profiles`
 
 Expected PR title: `feat(slice-2): observe native publication through existing forge adapters`
 
 Expected report: `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md`
+
+Canonical PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376)
 
 Prerequisite: verified Slice 1 integration and closed task fanout.
 

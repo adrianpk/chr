@@ -5,7 +5,7 @@ Delivery set: native-integration-queue
 Plan: [Native Integration Corrective Delivery](../../../plan/native-integration-queue.md)
 Tracker: [Native Integration Tracker](../../../tracker/native-integration-queue.md)
 Branch: `feat/slice-2-native-forge-profiles`
-PR: pending
+PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376)
 
 ## Purpose
 

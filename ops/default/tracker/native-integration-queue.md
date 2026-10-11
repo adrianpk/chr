@@ -46,7 +46,7 @@ Only Looper may merge this set's canonical PRs. Read-only status must not mutate
 | Slice | Name | Exact branch | Expected PR title | Report | State | PR |
 | --- | --- | --- | --- | --- | --- | --- |
 | Slice 1 | Guarded Git transport | `feat/slice-1-native-git-transport` | `feat(slice-1): publish exact results through atomic Git transport` | `ops/default/report/slices/native-integration-queue/slice-1-git-transport.md` | delivered | [#375](https://forge.adrianpk.com/adrianpk/chr/pulls/375) |
-| Slice 2 | Forge publication profiles | `feat/slice-2-native-forge-profiles` | `feat(slice-2): observe native publication through existing forge adapters` | `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md` | in_progress | pending |
+| Slice 2 | Forge publication profiles | `feat/slice-2-native-forge-profiles` | `feat(slice-2): observe native publication through existing forge adapters` | `ops/default/report/slices/native-integration-queue/slice-2-forge-profiles.md` | reviewing | [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376) |
 | Slice 3 | Durable integration records | `feat/slice-3-native-integration-records` | `feat(slice-3): persist native integration queue records` | `ops/default/report/slices/native-integration-queue/slice-3-integration-records.md` | not_started | pending |
 | Slice 4 | Canonical queue scheduling | `feat/slice-4-native-queue-scheduling` | `feat(slice-4): schedule integration across canonical target queues` | `ops/default/report/slices/native-integration-queue/slice-4-queue-scheduling.md` | not_started | pending |
 | Slice 5 | Method preparation and provenance | `feat/slice-5-native-method-preparation` | `feat(slice-5): preserve exact integration history and provenance` | `ops/default/report/slices/native-integration-queue/slice-5-method-preparation.md` | not_started | pending |
@@ -94,7 +94,7 @@ Report/evidence: [Slice 1 report](../report/slices/native-integration-queue/slic
 
 ## Slice 2: Forge publication profiles
 
-Status: in_progress
+Status: reviewing
 
 Expected branch: `feat/slice-2-native-forge-profiles`
 
@@ -119,7 +119,7 @@ Required checks:
 - `go test -race ./internal/core ./internal/app -count=1`
 - `git diff --check`
 
-PR: pending
+PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376)
 
 Verified merge: pending
 

@@ -66,4 +66,4 @@ Focused configuration/upgrade/native checks, real default rebase on both designa
 
 Report: [Slice 2](../../report/slices/native-integration-queue/slice-2-forge-profiles.md).
 
-Canonical PR: pending. Final ordered checks are recorded against the clean PR head by Looper; verified integration is pending.
+Canonical PR: [#376](https://forge.adrianpk.com/adrianpk/chr/pulls/376). Final ordered checks are recorded against the clean PR head by Looper; verified integration is pending.
