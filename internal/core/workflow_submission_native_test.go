@@ -1,8 +1,6 @@
 package core
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
 	"os"
 	"reflect"
@@ -13,108 +11,32 @@ type nativeSubmissionFixture struct {
 	store     *WorkflowStore
 	entry     WorkflowIntegrationEntry
 	candidate WorkflowIntegrationCandidate
-	provider  *nativeSubmissionProviderFixture
-}
-
-type nativeSubmissionProviderFixture struct {
-	*workflowReviewProviderFixture
-	capability WorkflowPublicationCapability
-}
-
-func (p *nativeSubmissionProviderFixture) WorkflowIntegrationCapability(context.Context, WorkflowPullRequestSnapshot, string) (WorkflowPublicationCapability, error) {
-	return p.capability, nil
+	provider  *nativePreparationProviderFixture
 }
 
 func newNativeSubmissionFixture(t *testing.T) nativeSubmissionFixture {
 	t.Helper()
 
-	store, candidate := nativeRecordCandidate(t, "rebase")
-	run := workflowTestRead(t, store, candidate.InvocationID)
-	entry := nativeEntryAdmit(t, store, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: candidate.Native.Unit, AdmissionKey: run.RequestKey, TargetRef: candidate.Native.TargetRef})
-	candidate = nativeSubmissionInput(t, store, candidate)
-	candidate.Native.EntryID = entry.ID
+	fixture, candidate := nativeReviewFixture(t, ReviewWorkflowModeTrustedAutoMerge)
+	store, id := fixture.f.store, fixture.f.run.ID
 
-	var err error
+	if _, err := store.ReviewWorkflowSlice(t.Context(), id, fixture.provider, nil); err != nil {
+		t.Fatal(err)
+	}
 
-	candidate.Native.CandidateHash, err = WorkflowNativeCandidateHash(candidate)
+	run, err := store.readWorkflowInvocation(id)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ref := bindNativeSubmissionCandidate(t, store, candidate)
-	request := nativeEntryTransition(t, store, entry, "preparing")
-	request.CandidateRef = &ref
-
-	entry, err = store.TransitionWorkflowIntegration(t.Context(), request)
+	entry, err := store.readWorkflowIntegrationEntry(run, *run.Integration)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	pr := candidate.Input.Source.PullRequest
-	provider := &nativeSubmissionProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}, target: pr.BaseCommit}, capability: candidate.Input.Capability}
+	entry = nativeRoleTransition(t, store, entry, "ready_to_publish")
 
-	for _, state := range []string{"validating", "reviewing"} {
-		entry, err = store.TransitionWorkflowIntegration(t.Context(), nativeEntryTransition(t, store, entry, state))
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil); err != nil {
-		t.Fatal(err)
-	}
-
-	entry, err = store.TransitionWorkflowIntegration(t.Context(), nativeEntryTransition(t, store, entry, "ready_to_publish"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return nativeSubmissionFixture{store, entry, candidate, provider}
-}
-
-func bindNativeSubmissionCandidate(t *testing.T, store *WorkflowStore, candidate WorkflowIntegrationCandidate) WorkflowEvidenceRef {
-	t.Helper()
-
-	run, err := store.readWorkflowInvocation(candidate.InvocationID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	data, err := json.Marshal(candidate)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	before := run.Preparation.ResultHash
-	run.Preparation.ResultHash = workflowHash(data)
-
-	changes := []workflowFileChange{{Path: run.Preparation.ResultRef, Before: before, After: data}}
-	for i := range run.Attempts {
-		attempt := &run.Attempts[i]
-		if attempt.ID != candidate.Validation.AttemptID {
-			continue
-		}
-
-		result, err := json.Marshal(candidate)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		changes = append(changes, workflowFileChange{Path: attempt.ResultRef, Before: attempt.ResultHash, After: result})
-		attempt.ResultHash, attempt.InputRef, attempt.InputHash = run.Preparation.ResultHash, candidate.Validation.InputRef, candidate.Validation.InputHash
-	}
-
-	invocation, err := workflowInvocationChange(run)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	changes = append(changes, invocation)
-	if err := store.commitFiles(changes); err != nil {
-		t.Fatal(err)
-	}
-
-	return WorkflowEvidenceRef{Path: run.Preparation.ResultRef, Hash: run.Preparation.ResultHash}
+	return nativeSubmissionFixture{store, entry, candidate, fixture.provider}
 }
 
 func beginNativeSubmission(t *testing.T, f nativeSubmissionFixture) WorkflowSubmission {
@@ -213,37 +135,6 @@ func TestNativeSubmissionRecovery(t *testing.T) {
 	if err != nil || budget.UnitCounters[0].Submission != 1 {
 		t.Fatal("recovery changed consumed attempts", err)
 	}
-}
-
-func nativeSubmissionInput(t *testing.T, store *WorkflowStore, candidate WorkflowIntegrationCandidate) WorkflowIntegrationCandidate {
-	t.Helper()
-
-	run, err := store.readWorkflowInvocation(candidate.InvocationID)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	data, err := store.readWorkflowReviewImage(candidate.Validation.InputRef, candidate.Validation.InputHash)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, attempt := range run.Attempts {
-		if attempt.ID != candidate.Validation.AttemptID {
-			continue
-		}
-
-		file := workflowFileChange{Path: attempt.InputRef, Before: attempt.InputHash, After: data}
-		if err := store.commitFiles([]workflowFileChange{file}); err != nil {
-			t.Fatal(err)
-		}
-
-		candidate.Validation.InputRef, candidate.Validation.InputHash = file.Path, workflowHash(data)
-	}
-
-	candidate.Native.ValidationRefs = []WorkflowEvidenceRef{retainNativeRecordEvidence(t, store, candidate.InvocationID, "dispatch-validation", candidate.Validation)}
-
-	return candidate
 }
 
 func nativeSubmissionCandidateExcluded(t *testing.T, f nativeSubmissionFixture) {

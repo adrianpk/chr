@@ -37,6 +37,20 @@ observation cannot produce candidate authority. Failure checkpoints preserve
 observations and the original task evidence. A passing command exit alone does
 not grant review approval or publication.
 
+T7.2 extends the retained review input with the native candidate, queue claim
+generation and full capability. Original S and published P remain explicit;
+source and history manifests, validation references, ownership, required policy,
+server capability and publisher identity participate in the approval hash.
+Human, trusted and agentic modes share this binding through the central service.
+
+Every review, explicit approval, grant and publication check re-observes the
+current source, target, profile, method and trusted native capability. It also
+rechecks local policy after capability IO. Source-only native review and missing
+trusted observers fail before a wait, decision or role claim is retained. A new
+queue generation cannot inherit an older grant even with identical S/B/P.
+Restart and the transition to publication readiness preserve a current grant
+without repeating its host gate or decision.
+
 ## Implementation Notes
 
 The existing preparation and process owners execute validation. The native
@@ -49,7 +63,9 @@ pointer. Successful candidate and queue pointers are committed together.
 Queue phase and stop projection preserve the running host-validation credential
 until the existing owner retains completion or stopped observations. This allows
 a stale queue fence to fail with a retained checkpoint and keeps pause/cancel
-capacity tied to actual process-group quiescence.
+capacity tied to actual process-group quiescence. The same ownership rule now
+applies to reviewers, so queue movement retains a stale review checkpoint
+before capacity is released.
 
 ## Contracts Added or Changed
 
@@ -58,6 +74,9 @@ host-prepared Git proof. `WorkflowNativePreparationInput` freezes that capabilit
 and the queue binding before validation. It extends the existing preparation
 input with an optional native field. Retained native validation must match the
 complete preparation image, including method/history and policy evidence.
+`WorkflowNativeReviewInput` adds the complete native candidate, claim generation
+and capability to the existing optional review input. Publication observes the
+result-bound capability instead of the preliminary source-only guard.
 
 ## Files of Interest
 
@@ -69,6 +88,12 @@ complete preparation image, including method/history and policy evidence.
 - `internal/core/workflow_preparation_native_fence_test.go`: queue and policy movement during a host gate.
 - `internal/core/workflow_preparation_native_generation_test.go`: prior-generation evidence rejection after restart.
 - `internal/core/workflow_preparation_native_stop_test.go`: queue stops retain host observations and release stopped capacity.
+
+- `internal/core/workflow_review_native.go`: native review binding and queue fences.
+- `internal/core/workflow_review_native_capability_test.go`: fingerprint and source-rewrite revocation.
+- `internal/core/workflow_review_native_guard_test.go`: current policy, history and generation checks.
+- `internal/core/workflow_review_native_fence_test.go`: running reviewer checkpoints after queue or policy movement.
+- `internal/app/service_workflow_review_native_test.go`: shared service approval and guard behavior.
 
 ## Validation
 
@@ -87,8 +112,25 @@ The queue-generation regression was reproduced before correction. The final
 slice candidate has not been validated. All owned check processes exited
 naturally; no external fixture was started.
 
+T7.2 development checks passed before its implementation commit, using the
+same Go 1.27.1 fixture environment:
+
+- `make verify` — zero lint issues; all packages passed, including core in 1934.610 s and app in 157.802 s.
+- `go test ./internal/core ./internal/app -run '^(TestNativeReview|TestNativeSubmission|TestServiceNativeReview)' -count=1` — core passed in 288.133 s and app in 11.412 s.
+- `go test ./internal/core -run '^TestNativeReviewFence$' -count=1` — passed in 14.718 s.
+- `go test ./internal/core -run '^TestNativeReviewPolicyIO$' -count=1` — passed in 13.381 s.
+- `go test -race ./internal/core ./internal/app -run '^(TestNativeReview|TestNativeSubmission|TestNativePreparation|TestWorkflowReview|TestWorkflowPreparation|TestServiceNativeReview|TestServiceWorkflowReview|TestServiceWorkflowPreparation)' -count=1` — core passed in 1012.273 s and app in 47.812 s.
+- `git diff --check` — passed.
+
+Source-only native approval and stale policy reuse were reproduced before
+correction. Queue movement also reproduced loss of the running reviewer
+credential. The initial repository and race checks failed only because a capacity
+fixture passed a label instead of its marker path. The corrected-source checks
+passed; all owned check processes exited naturally. The final slice candidate
+has not been validated.
+
 ## Risks and Follow-ups
 
-T7.2 is active and T7.3–T7.4 remain ready in the approved tracker: candidate-bound grants, bounded
+T7.1–T7.2 are implemented and checked. T7.3–T7.4 remain ready for bounded
 merger repair routing and integration drift handling. Final slice candidate
 checks and canonical PR evidence remain pending.

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261011133116
 title: "T7.2: Bind review to the current candidate"
-status: in_progress
+status: reviewing
 kind: task
 severity: unclassified
 priority: normal
@@ -11,6 +11,7 @@ source: chat
 reported_at: 2026-10-11T13:31:16Z
 ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T20:15:16Z
+reviewed_at: 2026-10-12T21:10:46Z
 branch: feat/slice-7-native-candidate-review
 commits: []
 ---
@@ -60,4 +61,25 @@ Use the existing Markdown ticket lifecycle; this file does not create a product 
 
 ## Evidence
 
-Implementation, validation, PR and verified integration evidence are pending.
+T7.2 binds human, trusted and agentic review to the immutable native candidate,
+queue generation, exact original/published source, history manifest and full
+trusted capability. Review, approval, grant and publication checks re-observe
+current inputs through the shared core path and central application service.
+Changed policy, ownership, credential identity, transport capability, S/B/P,
+method, profile, contract or history cannot reuse the retained grant.
+
+Development checks passed with Go 1.27.1:
+
+- `make verify` — zero lint issues; all packages passed.
+- `go test ./internal/core ./internal/app -run '^(TestNativeReview|TestNativeSubmission|TestServiceNativeReview)' -count=1` — passed.
+- `go test ./internal/core -run '^TestNativeReviewFence$' -count=1` — passed.
+- `go test ./internal/core -run '^TestNativeReviewPolicyIO$' -count=1` — passed.
+- `go test -race ./internal/core ./internal/app -run '^(TestNativeReview|TestNativeSubmission|TestNativePreparation|TestWorkflowReview|TestWorkflowPreparation|TestServiceNativeReview|TestServiceWorkflowReview|TestServiceWorkflowPreparation)' -count=1` — passed.
+- `git diff --check` — passed.
+
+Source-only native approval, stale policy reuse and lost reviewer ownership on
+queue movement were reproduced before correction. A capacity-fixture argument
+error in the initial checks was corrected; the repository and focused normal/race
+checks then passed. All owned check processes exited naturally.
+
+Canonical slice PR and final exact-HEAD checks remain pending.

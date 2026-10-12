@@ -166,6 +166,10 @@ func (s *WorkflowStore) readWorkflowReview(run workflowInvocationFile) (Workflow
 		return input, WorkflowReviewDecision{}, err
 	}
 
+	if err := validateWorkflowNativeReviewInput(input); err != nil {
+		return input, WorkflowReviewDecision{}, err
+	}
+
 	decision, err := s.readWorkflowReviewDecisions(run, input)
 
 	return input, decision, err

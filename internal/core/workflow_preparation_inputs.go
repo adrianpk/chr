@@ -65,7 +65,7 @@ func (s *WorkflowStore) checkWorkflowPublicationGuard(ctx context.Context, run w
 		return WorkflowPublicationGuard{}, err
 	}
 
-	capability, err := observeWorkflowPublicationCapability(ctx, provider, source)
+	capability, err := observeWorkflowPreparedCapability(ctx, provider, candidate.Input)
 	if err != nil {
 		return WorkflowPublicationGuard{}, err
 	}
@@ -79,6 +79,7 @@ func (s *WorkflowStore) checkWorkflowPublicationGuard(ctx context.Context, run w
 
 func workflowPreparationSource(input WorkflowReviewInput) WorkflowReviewInput {
 	input.PreparationRef, input.PreparationHash, input.PreparedGit = "", "", nil
+	input.Native = nil
 
 	return input
 }

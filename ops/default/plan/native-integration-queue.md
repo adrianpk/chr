@@ -335,7 +335,7 @@ Invariants: INV-08, INV-11, INV-12, INV-13, INV-15, INV-19, INV-21
 | Task | Ticket | Work | Acceptance boundary |
 | --- | --- | --- | --- |
 | T7.1 | [TKT-20261011133115](../ticket/reviewing/20261011133115-native-integration-t7-1.md) | Execute repository-owned combined validation on clean P and retain result-tree/history-bound evidence independently of agent reports. | A textually clean semantic regression fails the combined gate instead of being published. |
-| T7.2 | [TKT-20261011133116](../ticket/in_progress/20261011133116-native-integration-t7-2.md) | Extend review grants with capability, source rewrite, history manifest and required policy fingerprints across every entrypoint. | Any relevant S/B/P/contract/method/policy change invalidates previous publication approval. |
+| T7.2 | [TKT-20261011133116](../ticket/reviewing/20261011133116-native-integration-t7-2.md) | Extend review grants with capability, source rewrite, history manifest and required policy fingerprints across every entrypoint. | Any relevant S/B/P/contract/method/policy change invalidates previous publication approval. |
 | T7.3 | [TKT-20261011133117](../ticket/ready/20261011133117-native-integration-t7-3.md) | Route bounded combined-gate/review repair through the merger while preserving task evidence and original replay attribution. | Clean passing candidates avoid extra merger calls; repaired candidates receive a new host gate and review. |
 | T7.4 | [TKT-20261011133118](../ticket/ready/20261011133118-native-integration-t7-4.md) | Reprepare on a changed target, verify changed source ownership/scope and release publication exclusion during repair. | Serial and parallel runs tolerate external writers without reusing stale combined evidence or silently expanding scope. |
 

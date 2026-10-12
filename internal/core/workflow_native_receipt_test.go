@@ -15,7 +15,12 @@ func nativeRecordReceipt(t *testing.T, store *WorkflowStore, candidate WorkflowI
 	workflowIntegrationCommand(t, candidate.Lane.Worktree, "init", "--bare", "--quiet", remote)
 	workflowIntegrationCommand(t, candidate.Lane.Worktree, "push", remote, b.OriginalSource+":"+b.SourceRef, b.ValidatedBase+":"+b.TargetRef)
 
-	request := WorkflowGitPublication{Repository: b.SourceRepository, SourceRepository: b.SourceRepository, Directory: candidate.Lane.Worktree, SourceRef: b.SourceRef, TargetRef: b.TargetRef, SourceRewriteAuthorized: true, OwnershipRevision: "native-fixture/v1", Git: candidate.Input.Git}
+	var capability WorkflowNativeCapability
+	if err := store.readWorkflowNativeEvidence(b.InvocationID, b.CapabilityRef, &capability); err != nil {
+		t.Fatal(err)
+	}
+
+	request := WorkflowGitPublication{Repository: b.SourceRepository, SourceRepository: b.SourceRepository, Directory: candidate.Lane.Worktree, SourceRef: b.SourceRef, TargetRef: b.TargetRef, SourceRewriteAuthorized: true, OwnershipRevision: capability.OwnershipRevision, Git: candidate.Input.Git}
 	sealWorkflowGitFixture(t, &request)
 
 	transaction, err := NewWorkflowGitPublisher(b.SourceRepository, remote).PublishWorkflowGit(t.Context(), request)

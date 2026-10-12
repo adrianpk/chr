@@ -9,8 +9,12 @@ import (
 
 func (s *WorkflowStore) workflowReviewInputs(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider) (workflowSliceObservation, WorkflowReviewInput, error) {
 	observation, input, err := s.workflowReviewSourceInputs(ctx, run, provider)
-	if err != nil || run.Preparation == nil {
+	if err != nil {
 		return observation, input, err
+	}
+
+	if run.Preparation == nil {
+		return observation, input, s.checkWorkflowSourceReviewProfile()
 	}
 
 	candidate, err := s.currentWorkflowPreparation(ctx, run, input)
@@ -21,7 +25,12 @@ func (s *WorkflowStore) workflowReviewInputs(ctx context.Context, run workflowIn
 	input.PreparationRef, input.PreparationHash = run.Preparation.ResultRef, run.Preparation.ResultHash
 	input.PreparedGit = &candidate.Input.Git
 
-	return observation, input, nil
+	err = s.bindWorkflowNativeReview(ctx, run, candidate, provider, &input)
+	if err == nil && input.Native != nil {
+		err = s.checkWorkflowReviewAfterIO(ctx, run, observation, input.Policy)
+	}
+
+	return observation, input, err
 }
 
 func (s *WorkflowStore) workflowReviewSourceInputs(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider) (workflowSliceObservation, WorkflowReviewInput, error) {
