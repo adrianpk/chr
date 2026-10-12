@@ -236,7 +236,7 @@ Prerequisite: verified Slice 5 integration and closed task fanout.
 | Task | Ticket | State | Commit | Work |
 | --- | --- | --- | --- | --- |
 | T6.1 | [TKT-20261011133111](../ticket/reviewing/20261011133111-native-integration-t6-1.md) | validated | `dd376916016bc85c9f20677e03997e0b7f6a2a58` | Define versioned merger input and result |
-| T6.2 | [TKT-20261011133112](../ticket/reviewing/20261011133112-native-integration-t6-2.md) | validated | pending | Execute the merger in an owned checkout |
+| T6.2 | [TKT-20261011133112](../ticket/reviewing/20261011133112-native-integration-t6-2.md) | validated | `78793f6ce58fc5fabedcece6e9338698713d8739` | Execute the merger in an owned checkout |
 | T6.3 | [TKT-20261011133113](../ticket/ready/20261011133113-native-integration-t6-3.md) | ready | pending | Preserve semantic intent during repair |
 | T6.4 | [TKT-20261011133114](../ticket/ready/20261011133114-native-integration-t6-4.md) | ready | pending | Verify host acceptance of merger changes |
 

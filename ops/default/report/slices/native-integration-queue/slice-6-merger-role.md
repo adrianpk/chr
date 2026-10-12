@@ -133,8 +133,10 @@ Required T6.2 pre-commit checks passed:
 - `make verify` — zero lint issues; core 1252.301 seconds, app 95.194 seconds and all other packages passed.
 - `git diff --check` — pass.
 
-Owned fixtures completed through the test lifecycle. Task commit and Acta
-references are bound in the follow-up evidence commit.
+Owned fixtures completed through the test lifecycle.
+
+T6.2 task commit: [78793f6ce58fc5fabedcece6e9338698713d8739](https://forge.adrianpk.com/adrianpk/chr/commit/78793f6ce58fc5fabedcece6e9338698713d8739).
+Acta task record: `01M4RBPR0K3FB8PTX766B0K7ZH`.
 
 ## Risks and Follow-ups
 

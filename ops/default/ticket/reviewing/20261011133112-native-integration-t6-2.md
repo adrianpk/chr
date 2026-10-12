@@ -13,7 +13,7 @@ ready_at: 2026-10-11T13:31:37Z
 started_at: 2026-10-12T13:55:30Z
 reviewed_at: 2026-10-12T15:28:14Z
 branch: feat/slice-6-native-merger-role
-commits: []
+commits: [78793f6ce58fc5fabedcece6e9338698713d8739]
 ---
 
 # T6.2: Execute the merger in an owned checkout
@@ -75,7 +75,8 @@ Focused subprocess/Git checks passed:
 
 Required pre-commit `make verify` passed: zero lint issues; core 1252.301 seconds,
 app 95.194 seconds and all other packages passed. `git diff --check` passed.
-Task commit and Acta references are bound in the follow-up evidence commit.
+Task commit: [78793f6ce58fc5fabedcece6e9338698713d8739](https://forge.adrianpk.com/adrianpk/chr/commit/78793f6ce58fc5fabedcece6e9338698713d8739).
+Acta task record: `01M4RBPR0K3FB8PTX766B0K7ZH`.
 Canonical PR and verified integration evidence remain pending.
 
 The driver is a trusted host component with built-in tools disabled, not an
